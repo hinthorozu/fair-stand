@@ -15,9 +15,8 @@ export const MODULE_CATALOG = Object.freeze({
   PANEL_150: { type: 'flat-panel', widthCm: 150, label: 'Düz Panel 150' },
   PANEL_200: { type: 'flat-panel', widthCm: 200, label: 'Düz Panel 200' },
 
-  // Sonraki milestone için katalogda şimdiden yer ayırıyoruz.
-  SHOWCASE_3_100: { type: 'showcase-3', widthCm: 100, label: '3 Raflı Vitrin 100' },
-  SHOWCASE_2_100: { type: 'showcase-2', widthCm: 100, label: '2 Raflı Vitrin 100' },
+  SHOWCASE_3_100: { type: 'showcase-3', widthCm: 100, label: '3 Gözlü Vitrin 100' },
+  SHOWCASE_2_100: { type: 'showcase-2', widthCm: 100, label: '2 Gözlü Vitrin 100' },
   DOOR_100: { type: 'door', widthCm: 100, label: 'Depo Kapısı 100' },
   SEPARATOR_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
   SEPARATOR_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
