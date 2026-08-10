@@ -1,4 +1,5 @@
 import './style.css';
+import './colorEditor.css';
 import { createStandScene } from './scene3d.js';
 import { composeStraightWall } from './wall.js';
 import {
@@ -10,6 +11,11 @@ import {
 import { loadImageAssets, saveImageAsset } from './assetStore.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu } from './moduleContextMenu.js';
+import {
+  colorValuesFromHex,
+  cmykToRgb,
+  rgbToHex,
+} from './colorUtils.js';
 
 const viewport = document.querySelector('#viewport');
 const wallLengthInput = document.querySelector('#wall-length');
@@ -20,6 +26,18 @@ const wallResult = document.querySelector('#wall-result');
 const selectionInfo = document.querySelector('#selection-info');
 const colorInput = document.querySelector('#surface-color');
 const applyColorButton = document.querySelector('#apply-color');
+const colorHexInput = document.querySelector('#color-hex');
+const colorRgbInputs = {
+  r: document.querySelector('#color-r'),
+  g: document.querySelector('#color-g'),
+  b: document.querySelector('#color-b'),
+};
+const colorCmykInputs = {
+  c: document.querySelector('#color-c'),
+  m: document.querySelector('#color-m'),
+  y: document.querySelector('#color-y'),
+  k: document.querySelector('#color-k'),
+};
 const imageInput = document.querySelector('#surface-image');
 const applyImageButton = document.querySelector('#apply-image');
 const clearTextureButton = document.querySelector('#clear-texture');
@@ -189,20 +207,89 @@ clearWallButton.addEventListener('click', () => {
   renderWallResult('Duvar boş.');
 });
 
-applyColorButton.addEventListener('click', () => {
+function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
   const selected = scene3d.getSelectedSurfaces();
   if (!selected.length) {
-    selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel veya panel bloğunu seç.';
-    return;
+    if (showMissingSelection) {
+      selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel veya panel bloğunu seç.';
+    }
+    return false;
   }
+
   scene3d.applyColor(selected, colorInput.value);
+  return true;
+}
+
+function syncColorEditorFromHex(hex, { apply = false } = {}) {
+  const values = colorValuesFromHex(hex);
+  if (!values) return false;
+
+  colorInput.value = values.hex;
+  colorHexInput.value = values.hex;
+  colorRgbInputs.r.value = String(values.rgb.r);
+  colorRgbInputs.g.value = String(values.rgb.g);
+  colorRgbInputs.b.value = String(values.rgb.b);
+  colorCmykInputs.c.value = String(values.cmyk.c);
+  colorCmykInputs.m.value = String(values.cmyk.m);
+  colorCmykInputs.y.value = String(values.cmyk.y);
+  colorCmykInputs.k.value = String(values.cmyk.k);
+
+  if (apply) applyActiveColorToSelection();
+  return true;
+}
+
+function readNumberGroup(inputs) {
+  const values = {};
+  for (const [key, input] of Object.entries(inputs)) {
+    if (input.value.trim() === '') return null;
+    const value = Number(input.value);
+    if (!Number.isFinite(value)) return null;
+    values[key] = value;
+  }
+  return values;
+}
+
+function syncFromRgbInputs() {
+  const rgb = readNumberGroup(colorRgbInputs);
+  if (!rgb) return;
+  syncColorEditorFromHex(rgbToHex(rgb.r, rgb.g, rgb.b), { apply: true });
+}
+
+function syncFromCmykInputs() {
+  const cmyk = readNumberGroup(colorCmykInputs);
+  if (!cmyk) return;
+  const rgb = cmykToRgb(cmyk.c, cmyk.m, cmyk.y, cmyk.k);
+  syncColorEditorFromHex(rgbToHex(rgb.r, rgb.g, rgb.b), { apply: true });
+}
+
+applyColorButton.addEventListener('click', () => {
+  applyActiveColorToSelection({ showMissingSelection: true });
 });
 
 // Renk seçici panel seçimine göre değişmez; kullanıcının son kullandığı renk araçta kalır.
 // Seçili hücrede görsel varsa renk o hücrede görselin yerini alır.
 colorInput.addEventListener('input', () => {
-  const selected = scene3d.getSelectedSurfaces();
-  if (selected.length) scene3d.applyColor(selected, colorInput.value);
+  syncColorEditorFromHex(colorInput.value, { apply: true });
+});
+
+colorHexInput.addEventListener('input', () => {
+  const raw = colorHexInput.value.trim();
+  if (!/^#?[0-9a-fA-F]{6}$/.test(raw)) return;
+  syncColorEditorFromHex(raw, { apply: true });
+});
+
+colorHexInput.addEventListener('change', () => {
+  if (!syncColorEditorFromHex(colorHexInput.value, { apply: true })) {
+    syncColorEditorFromHex(colorInput.value);
+  }
+});
+
+Object.values(colorRgbInputs).forEach((input) => {
+  input.addEventListener('input', syncFromRgbInputs);
+});
+
+Object.values(colorCmykInputs).forEach((input) => {
+  input.addEventListener('input', syncFromCmykInputs);
 });
 
 function registerAsset(asset) {
@@ -330,5 +417,6 @@ window.addEventListener('beforeunload', () => {
   });
 });
 
+syncColorEditorFromHex(colorInput.value);
 initializeAssetLibrary();
 buildAutomaticWall();
