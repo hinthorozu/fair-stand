@@ -1,0 +1,64 @@
+.color-editor {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid #e1e6ec;
+  border-radius: 11px;
+  background: #f8fafc;
+}
+
+.color-editor-row {
+  display: grid;
+  gap: 7px;
+}
+
+.color-editor-row.hex {
+  grid-template-columns: 1fr;
+}
+
+.color-editor-row.rgb {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.color-editor-row.cmyk {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.color-editor-field {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.color-editor-field > span {
+  color: #687386;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.color-editor input[type="text"],
+.color-editor input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  border: 1px solid #cbd2da;
+  border-radius: 8px;
+  padding: 7px 8px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 12px;
+}
+
+.color-editor input:focus {
+  border-color: #f97316;
+  outline: 0;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.12);
+}
+
+.color-editor-caption {
+  margin: 0;
+  color: #8a93a1;
+  font-size: 10px;
+  line-height: 1.4;
+}
