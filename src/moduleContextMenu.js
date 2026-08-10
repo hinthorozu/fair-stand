@@ -95,6 +95,22 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     pickerAddButton.disabled = !selectedModuleKey;
   }
 
+  function submitPickerSelection() {
+    if (!selectedModuleKey || !pickerRequest) return;
+
+    const module = MODULE_CATALOG[selectedModuleKey];
+    if (!module) return;
+
+    const request = {
+      ...pickerRequest,
+      moduleKey: selectedModuleKey,
+      module,
+    };
+
+    closePicker();
+    onAdd?.(request);
+  }
+
   function renderPickerCatalog() {
     pickerGrid.innerHTML = '';
 
@@ -117,6 +133,11 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
       card.addEventListener('click', () => {
         selectedModuleKey = moduleKey;
         syncPickerSelection();
+      });
+      card.addEventListener('dblclick', () => {
+        selectedModuleKey = moduleKey;
+        syncPickerSelection();
+        submitPickerSelection();
       });
 
       pickerGrid.appendChild(card);
@@ -204,21 +225,7 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     }
   });
 
-  pickerAddButton.addEventListener('click', () => {
-    if (!selectedModuleKey || !pickerRequest) return;
-
-    const module = MODULE_CATALOG[selectedModuleKey];
-    if (!module) return;
-
-    const request = {
-      ...pickerRequest,
-      moduleKey: selectedModuleKey,
-      module,
-    };
-
-    closePicker();
-    onAdd?.(request);
-  });
+  pickerAddButton.addEventListener('click', submitPickerSelection);
 
   pickerBackdrop.querySelector('.module-picker-close').addEventListener('click', closePicker);
   pickerBackdrop.querySelector('.module-picker-cancel').addEventListener('click', closePicker);
