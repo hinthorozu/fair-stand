@@ -19,7 +19,12 @@ const PICKER_MODULE_KEYS = [
   'SHOWCASE_2_100',
 ];
 
-export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
+export function createModuleContextMenu({
+  onDelete,
+  onDuplicate,
+  onAdd,
+  onGlassModeChange,
+}) {
   let activeContext = null;
   let pickerRequest = null;
   let selectedModuleKeys = [];
@@ -35,6 +40,7 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     <button type="button" data-module-action="duplicate-right">Çoğalt Sağ Tarafa</button>
     <button type="button" data-module-action="duplicate-left">Çoğalt Sol Tarafa</button>
     <div class="module-context-separator"></div>
+    <button type="button" data-module-action="toggle-glass" hidden>Cam panele çevir</button>
     <button type="button" data-module-action="add-right">Ekle Sağ Tarafa…</button>
     <button type="button" data-module-action="add-left">Ekle Sol Tarafa…</button>
   `;
@@ -71,6 +77,7 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
   document.body.appendChild(pickerBackdrop);
 
   const title = menu.querySelector('.module-context-title');
+  const glassModeButton = menu.querySelector('[data-module-action="toggle-glass"]');
   const pickerTitle = pickerBackdrop.querySelector('#module-picker-title');
   const pickerContext = pickerBackdrop.querySelector('.module-picker-context');
   const pickerGrid = pickerBackdrop.querySelector('.module-catalog-grid');
@@ -438,7 +445,14 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     }
 
     activeContext = context;
-    title.textContent = `Modül ${context.moduleIndex + 1} · ${describeModule(context)}`;
+    const panelSuffix = context.supportsGlass && Number.isInteger(context.stripNumber)
+      ? ` · Panel ${context.stripNumber}`
+      : '';
+    title.textContent = `Modül ${context.moduleIndex + 1} · ${describeModule(context)}${panelSuffix}`;
+    glassModeButton.hidden = !context.supportsGlass;
+    glassModeButton.textContent = context.isGlass
+      ? 'Normal panele çevir'
+      : 'Cam panele çevir';
     menu.hidden = false;
 
     const margin = 8;
@@ -466,6 +480,12 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     if (action === 'duplicate-right' || action === 'duplicate-left') {
       close();
       onDuplicate?.(context, action === 'duplicate-left' ? 'left' : 'right');
+      return;
+    }
+
+    if (action === 'toggle-glass' && context.supportsGlass) {
+      close();
+      onGlassModeChange?.(context, !context.isGlass);
       return;
     }
 
