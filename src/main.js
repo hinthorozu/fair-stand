@@ -1,5 +1,6 @@
 import './style.css';
 import './colorEditor.css';
+import './imageActions.css';
 import { createStandScene } from './scene3d.js';
 import { composeStraightWall } from './wall.js';
 import {
@@ -40,7 +41,8 @@ const colorCmykInputs = {
   k: document.querySelector('#color-k'),
 };
 const imageInput = document.querySelector('#surface-image');
-const applyImageButton = document.querySelector('#apply-image');
+const fillImageButton = document.querySelector('#fit-image-cover');
+const fitImageButton = document.querySelector('#fit-image-contain');
 const clearTextureButton = document.querySelector('#clear-texture');
 const assetLibraryElement = document.querySelector('#asset-library');
 const assetStatus = document.querySelector('#asset-status');
@@ -191,8 +193,6 @@ function buildAutomaticWall() {
   );
   if (!confirmed) return;
 
-  // Oluştur komutu onaylandıktan sonra mevcut state'i taşımadan sıfırdan yeni duvar kurar.
-  // Yeni bir sahne başlangıcı olduğu için kamera da Home / default görünüme döner.
   currentModules = result.modules.map((widthCm) => createFlatPanelModuleState(widthCm));
   moduleContextMenu.close();
   moduleContextMenu.closePicker();
@@ -303,8 +303,6 @@ applyColorButton.addEventListener('click', () => {
   applyActiveColorToSelection({ showMissingSelection: true });
 });
 
-// Renk seçici panel seçimine göre değişmez; kullanıcının son kullandığı renk araçta kalır.
-// Seçili hücrede görsel varsa renk o hücrede görselin yerini alır.
 colorInput.addEventListener('input', () => {
   syncColorEditorFromHex(colorInput.value, { apply: true });
 });
@@ -394,7 +392,7 @@ async function initializeAssetLibrary() {
   }
 }
 
-function applyActiveImageToSelection() {
+function applyActiveImageToSelection(fit = 'cover') {
   const selected = scene3d.getSelectedSurfaces();
   if (!selected.length) {
     selectionInfo.textContent = 'Görsel uygulamak için önce bir panel veya panel bloğu seç.';
@@ -405,16 +403,17 @@ function applyActiveImageToSelection() {
     return false;
   }
 
-  const result = scene3d.applyRectImageAsset(selected, activeAssetId);
+  const result = scene3d.applyRectImageAsset(selected, activeAssetId, fit);
   if (!result.ok) {
     selectionInfo.textContent = result.message;
     return false;
   }
 
+  const fitLabel = fit === 'cover' ? 'Doldur' : 'Sığdır';
   if (result.mode === 'rect-group') {
-    selectionInfo.textContent = `${result.columnCount} × ${result.rowCount} blokta ${result.panelCount} panele tek görsel yayıldı.`;
+    selectionInfo.textContent = `${result.columnCount} × ${result.rowCount} blokta ${result.panelCount} panele görsel · ${fitLabel}.`;
   } else {
-    selectionInfo.textContent = 'Görsel seçili panele uygulandı.';
+    selectionInfo.textContent = `Görsel seçili panele uygulandı · ${fitLabel}.`;
   }
   return true;
 }
@@ -430,14 +429,20 @@ imageInput.addEventListener('change', async () => {
     setActiveAsset(asset.id);
 
     const selected = scene3d.getSelectedSurfaces();
-    if (selected.length) applyActiveImageToSelection();
+    if (selected.length) applyActiveImageToSelection('cover');
   } catch (error) {
     console.warn('Görsel kaydedilemedi:', error);
     assetStatus.textContent = 'Görsel arşive kaydedilemedi.';
   }
 });
 
-applyImageButton.addEventListener('click', applyActiveImageToSelection);
+fillImageButton.addEventListener('click', () => {
+  applyActiveImageToSelection('cover');
+});
+
+fitImageButton.addEventListener('click', () => {
+  applyActiveImageToSelection('contain');
+});
 
 clearTextureButton.addEventListener('click', () => {
   const selected = scene3d.getSelectedSurfaces();
@@ -446,6 +451,7 @@ clearTextureButton.addEventListener('click', () => {
     return;
   }
   scene3d.clearImage(selected);
+  selectionInfo.textContent = 'Seçili panel veya panel bloğundaki görsel kaldırıldı.';
 });
 
 window.addEventListener('beforeunload', () => {
