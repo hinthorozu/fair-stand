@@ -5,6 +5,7 @@ on:
     branches: [ROG]
     paths:
       - scripts/apply-catalog-reflow-and-drag-badge.mjs
+      - .github/workflows/apply-catalog-reflow-badge.yml
 
 permissions:
   contents: write
