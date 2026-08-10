@@ -82,7 +82,8 @@ test('U stand pushes an occupied corner forward like one continuous straight wal
     modules: [target, back],
     insertedModules: [inserted],
     targetModuleId: target.id,
-    side: 'right',
+    // Sol yan duvarda UI/main teknik yönü bir kez çevirerek planner'a left gönderir.
+    side: 'left',
     standType: 'u-stand',
     standXCm: 500,
     standYCm: 500,
@@ -136,7 +137,7 @@ test('reflow crosses both U stand corners and keeps pushing modules', () => {
     modules: [leftTarget, backA, backB, rightA],
     insertedModules: [inserted],
     targetModuleId: leftTarget.id,
-    side: 'right',
+    side: 'left',
     standType: 'u-stand',
     standXCm: 500,
     standYCm: 500,
@@ -151,7 +152,7 @@ test('reflow crosses both U stand corners and keeps pushing modules', () => {
   assert.equal(result.placements.get('right-a').yCm, 200);
 });
 
-test('inserting on the left shifts target and following modules forward', () => {
+test('left insertion at the path boundary falls back to shifting target and following modules right', () => {
   const target = module('back-target', 200, {
     xCm: 0,
     yCm: 0,
@@ -205,7 +206,7 @@ test('right insertion keeps an existing gap instead of pulling a distant module 
     modules: [target, distantBack],
     insertedModules: [inserted],
     targetModuleId: target.id,
-    side: 'right',
+    side: 'left',
     standType: 'u-stand',
     standXCm: 500,
     standYCm: 500,
@@ -223,7 +224,7 @@ test('right insertion keeps an existing gap instead of pulling a distant module 
   assert.equal(result.placements.has('back-distant'), false);
 });
 
-test('left insertion shifts only the collision chain and preserves the next intentional gap', () => {
+test('left insertion uses the free gap before target and does not move target or distant next module', () => {
   const target = module('target', 100, {
     xCm: 200,
     yCm: 0,
@@ -251,8 +252,127 @@ test('left insertion shifts only the collision chain and preserves the next inte
   });
 
   assert.equal(result.ok, true);
+  assert.equal(result.placements.get('inserted').xCm, 100);
+  assert.equal(result.placements.has('target'), false);
+  assert.equal(result.placements.has('next'), false);
+});
+
+test('left insertion succeeds in a 50 cm gap even when the chain to the right is completely full', () => {
+  const previous = module('previous', 200, {
+    xCm: 0,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const target = module('target', 100, {
+    xCm: 300,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const next = module('next', 100, {
+    xCm: 400,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const inserted = module('inserted', 50, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [previous, target, next],
+    insertedModules: [inserted],
+    targetModuleId: target.id,
+    side: 'left',
+    standType: 'back-wall',
+    standXCm: 500,
+    standYCm: 500,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.placements.get('inserted').xCm, 250);
+  assert.equal(result.placements.has('target'), false);
+  assert.equal(result.placements.has('next'), false);
+});
+
+test('right wall visual-left add uses the gap before target even when the right end is full', () => {
+  const backEnd = module('back-end', 100, {
+    xCm: 400,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const target = module('right-target', 100, {
+    xCm: 500,
+    yCm: 100,
+    zCm: 0,
+    rotationZDeg: 90,
+    wallId: 'right',
+  });
+  const next = module('right-next', 300, {
+    xCm: 500,
+    yCm: 200,
+    zCm: 0,
+    rotationZDeg: 90,
+    wallId: 'right',
+  });
+  const inserted = module('inserted', 50, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [backEnd, target, next],
+    insertedModules: [inserted],
+    targetModuleId: target.id,
+    // Context menu sağ yan duvarda görsel solu teknik 'right' olarak gönderiyor.
+    side: 'right',
+    standType: 'u-stand',
+    standXCm: 500,
+    standYCm: 500,
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.placements.get('inserted'), {
+    xCm: 500,
+    yCm: 50,
+    zCm: 0,
+    rotationZDeg: 90,
+    wallId: 'right',
+  });
+  assert.equal(result.placements.has('right-target'), false);
+  assert.equal(result.placements.has('right-next'), false);
+});
+
+test('right insertion uses an available gap after target without moving a distant next module', () => {
+  const target = module('target', 100, {
+    xCm: 100,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const next = module('next', 100, {
+    xCm: 250,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const inserted = module('inserted', 50, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [target, next],
+    insertedModules: [inserted],
+    targetModuleId: target.id,
+    side: 'right',
+    standType: 'back-wall',
+    standXCm: 500,
+    standYCm: 500,
+  });
+
+  assert.equal(result.ok, true);
   assert.equal(result.placements.get('inserted').xCm, 200);
-  assert.equal(result.placements.get('target').xCm, 300);
   assert.equal(result.placements.has('next'), false);
 });
 
