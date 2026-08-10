@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   applyColorOverride,
   createFlatPanelModuleState,
+  duplicateModuleState,
   reconcileWallModules,
   totalWallWidthCm,
 } from '../src/designState.js';
@@ -57,4 +58,34 @@ test('color override removes the image only from the targeted panel state', () =
   assert.equal(module.strips[0].imageTransform.mode, 'single');
   assert.equal(module.strips[1].imageAssetId, 'group-image');
   assert.equal(module.strips[1].imageTransform.mode, 'rect-group');
+});
+
+test('duplicating a module preserves its design but creates independent identities', () => {
+  const original = createFlatPanelModuleState(150);
+  original.strips[1].color = '#ff5500';
+  original.strips[3].imageAssetId = 'asset-42';
+  original.strips[3].imageTransform = {
+    mode: 'rect-group',
+    groupAspect: 3,
+    regionStartX: 0.25,
+    regionStartY: 0,
+    regionWidth: 0.5,
+    regionHeight: 1,
+  };
+
+  const duplicate = duplicateModuleState(original);
+
+  assert.notEqual(duplicate, original);
+  assert.notEqual(duplicate.id, original.id);
+  assert.equal(duplicate.type, original.type);
+  assert.equal(duplicate.widthCm, 150);
+  assert.equal(duplicate.strips[1].color, '#ff5500');
+  assert.equal(duplicate.strips[3].imageAssetId, 'asset-42');
+  assert.deepEqual(duplicate.strips[3].imageTransform, original.strips[3].imageTransform);
+  duplicate.strips.forEach((strip, index) => {
+    assert.notEqual(strip.id, original.strips[index].id);
+  });
+
+  duplicate.strips[1].color = '#000000';
+  assert.equal(original.strips[1].color, '#ff5500');
 });
