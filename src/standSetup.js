@@ -3,7 +3,8 @@ export const STAND_SURROUND_M = 1;
 
 export const STAND_TYPE_LABELS = Object.freeze({
   'back-wall': 'Sırt Duvar',
-  'l-stand': 'L Stand',
+  'l-left': 'L Stand Sol',
+  'l-right': 'L Stand Sağ',
   'u-stand': 'U Stand',
   island: 'Ada Stand',
 });
