@@ -314,11 +314,23 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 251. Viewport yardım çubuğuna `Sağ sürükle: pan` bilgisi eklendi.
 252. Dinamik zemin boyutu, 1 metrelik grid hücresi ve uzun duvar büyümesi için otomatik testler eklendi.
 253. Dinamik zemin ve pan entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+254. Pan kontrolü kullanıcı tercihine göre sağ mouse tuşundan orta mouse / tekerlek tuşuna taşındı.
+255. Orta mouse basılı sürükleme `pan`, tekerlek çevirme `zoom`, sol mouse sürükleme `rotate` olarak sabitlendi.
+256. Sağ mouse tuşu kamera navigasyonundan çıkarıldı.
+257. Viewport yardım metni orta mouse pan davranışını gösterecek şekilde güncellendi.
+258. Orta mouse pan değişikliği GitHub Actions test + Vite build kontrolünden başarıyla geçti.
 
-## Orta mouse pan kontrolü
+## ViewCube / kamera yön küpü
 
-254. Pan kontrolü sağ mouse sürüklemeden orta mouse / tekerleğe basılı sürüklemeye taşındı.
-255. Sağ mouse tuşunun OrbitControls pan görevi kaldırıldı.
-256. Mouse tekerleğini çevirmeyle zoom davranışı korunurken, tekerleğe basılı sürükleme pan olarak ayarlandı.
-257. Panel seçimi yalnızca sol mouse tuşuyla çalışmaya devam edecek şekilde korundu.
-258. Viewport yardım çubuğu `Tekerleğe basılı sürükle: pan` olarak güncellendi.
+259. Fusion benzeri kamera yönlendirme aracı için `viewCube.js` eklendi.
+260. ViewCube sağ üstte sahneden bağımsız küçük bir Three.js renderer olarak oluşturuldu.
+261. ViewCube ana kameranın yönünü gerçek zamanlı takip eder hale getirildi.
+262. `FRONT`, `BACK`, `LEFT`, `RIGHT`, `TOP` ve `BOTTOM` yüz etiketları eklendi.
+263. Küp yüzüne tıklanınca kameranın ilgili ortografik yöne yakın perspektif görünüşe animasyonla geçmesi sağlandı.
+264. Küp kenar ve köşelerine tıklanınca iki veya üç eksenli izometrik / diyagonal görünüşler desteklenmeye başlandı.
+265. ViewCube üzerine basılı sürükleme ile ana kameranın döndürülebilmesi sağlandı.
+266. ViewCube üzerindeyken mouse tekerleği ile ana kameranın zoom yapması desteklendi.
+267. ViewCube altında izometrik görünüşe döndüren home butonu eklendi.
+268. ViewCube kamera geçişlerinde mevcut pan hedefini ve zoom mesafesini koruyacak şekilde bağlandı.
+269. ViewCube için responsive sağ üst overlay stili eklendi.
+270. ViewCube entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
