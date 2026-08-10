@@ -21,6 +21,13 @@ import {
 } from './colorUtils.js';
 import { STAND_TYPE_LABELS, validateStandSetup } from './standSetup.js';
 import { validateStandAxisCapacity } from './standCapacity.js';
+import {
+  createModulePlacement,
+  getWallAxis,
+  getWallExtentCm,
+  getWallUsedCm,
+  validatePlacementAgainstModules,
+} from './modulePlacement.js';
 
 const viewport = document.querySelector('#viewport');
 const viewportEmpty = document.querySelector('#viewport-empty');
@@ -57,6 +64,13 @@ const clearTextureButton = document.querySelector('#clear-texture');
 const resetModuleFeaturesButton = document.querySelector('#reset-module-features');
 const assetLibraryElement = document.querySelector('#asset-library');
 const assetStatus = document.querySelector('#asset-status');
+
+const WALL_LABELS = Object.freeze({
+  back: 'Sırt',
+  left: 'Sol',
+  right: 'Sağ',
+  free: 'Serbest',
+});
 
 let currentModules = [];
 let currentStand = null;
@@ -156,11 +170,24 @@ function updateStageCreateState() {
 function renderCurrentWallResult() {
   const total = totalWallWidthCm(currentModules);
   const widths = moduleWidths(currentModules);
-  renderWallResult(
-    currentModules.length
-      ? `${total} cm = ${widths.join(' + ')} · ${currentModules.length} modül`
-      : 'Duvar boş.',
-  );
+  const activeWalls = ['back', 'left', 'right', 'free']
+    .map((wallId) => ({ wallId, usedCm: getWallUsedCm(currentModules, wallId) }))
+    .filter((wall) => wall.usedCm > 0);
+
+  if (!currentModules.length) {
+    renderWallResult('Duvar boş.');
+    return;
+  }
+
+  if (activeWalls.length <= 1 && (activeWalls[0]?.wallId ?? 'back') === 'back') {
+    renderWallResult(`${total} cm = ${widths.join(' + ')} · ${currentModules.length} modül`);
+    return;
+  }
+
+  const wallSummary = activeWalls
+    .map(({ wallId, usedCm }) => `${WALL_LABELS[wallId] ?? wallId}: ${usedCm} cm`)
+    .join(' · ');
+  renderWallResult(`${currentModules.length} modül · ${wallSummary}`);
 }
 
 function formatCapacityPopup(result, title) {
@@ -173,10 +200,18 @@ function formatCapacityPopup(result, title) {
     + 'Aktif stand alanı aşılamaz.';
 }
 
+function defaultCurrentCapacityCm(axis) {
+  if (axis === 'x') return getWallUsedCm(currentModules, 'back');
+  return Math.max(
+    getWallUsedCm(currentModules, 'left'),
+    getWallUsedCm(currentModules, 'right'),
+  );
+}
+
 function validateCurrentAxisCapacity(
   axis,
   addedCm,
-  currentCm = totalWallWidthCm(currentModules),
+  currentCm = defaultCurrentCapacityCm(axis),
   { popupTitle = null } = {},
 ) {
   const result = validateStandAxisCapacity({
@@ -201,13 +236,6 @@ function rebuildWall({ resetView = true } = {}) {
     renderWallResult('Önce stand alanını oluştur.', true);
     return;
   }
-
-  const capacity = validateCurrentAxisCapacity(
-    'x',
-    totalWallWidthCm(currentModules),
-    0,
-  );
-  if (!capacity.ok) return;
 
   scene3d.buildWall(currentModules, { resetView });
   renderCurrentWallResult();
@@ -234,48 +262,188 @@ function deleteContextModule(context) {
   rebuildWall({ resetView: false });
 }
 
+function createAdjacentPlacement(sourceModule, addedWidthCm, side) {
+  const sourcePlacement = sourceModule?.placement;
+  if (!sourcePlacement || !currentStand) return null;
+
+  const wallId = sourcePlacement.wallId ?? 'back';
+  const axis = getWallAxis(wallId)
+    ?? (sourcePlacement.rotationZDeg === 90 ? 'y' : 'x');
+  const sourceStart = axis === 'y'
+    ? Number(sourcePlacement.yCm)
+    : Number(sourcePlacement.xCm);
+  const nextStart = side === 'left'
+    ? sourceStart - Number(addedWidthCm)
+    : sourceStart + Number(sourceModule.widthCm);
+
+  if (axis === 'y') {
+    return createModulePlacement({
+      xCm: wallId === 'right' ? currentStand.xCm : Number(sourcePlacement.xCm),
+      yCm: nextStart,
+      zCm: 0,
+      rotationZDeg: 90,
+      wallId,
+    });
+  }
+
+  return createModulePlacement({
+    xCm: nextStart,
+    yCm: Number(sourcePlacement.yCm) || 0,
+    zCm: 0,
+    rotationZDeg: sourcePlacement.rotationZDeg === 90 ? 90 : 0,
+    wallId,
+  });
+}
+
 function duplicateContextModule(context, side) {
   const index = findContextModuleIndex(context);
   if (index < 0 || index >= currentModules.length) return;
 
-  const duplicate = duplicateModuleState(currentModules[index]);
+  const sourceModule = currentModules[index];
+  const duplicate = duplicateModuleState(sourceModule);
   if (!duplicate) return;
 
-  const capacity = validateCurrentAxisCapacity(
-    'x',
-    duplicate.widthCm,
-    totalWallWidthCm(currentModules),
-    { popupTitle: 'Modül çoğaltılamadı' },
-  );
-  if (!capacity.ok) return;
+  if (sourceModule.placement) {
+    const placement = createAdjacentPlacement(sourceModule, duplicate.widthCm, side);
+    if (!placement) return;
+
+    const validation = validatePlacementAgainstModules({
+      placement,
+      widthCm: duplicate.widthCm,
+      moduleId: duplicate.id,
+      modules: currentModules,
+      standType: currentStand?.standType,
+      standXCm: currentStand?.xCm,
+      standYCm: currentStand?.yCm,
+    });
+    if (!validation.ok) {
+      renderWallResult(validation.message, true);
+      window.alert(`Modül çoğaltılamadı\n\n${validation.message}`);
+      return;
+    }
+    duplicate.placement = placement;
+  } else {
+    const capacity = validateCurrentAxisCapacity(
+      'x',
+      duplicate.widthCm,
+      getWallUsedCm(currentModules, 'back'),
+      { popupTitle: 'Modül çoğaltılamadı' },
+    );
+    if (!capacity.ok) return;
+  }
 
   const insertIndex = side === 'left' ? index : index + 1;
   currentModules.splice(insertIndex, 0, duplicate);
   rebuildWall({ resetView: false });
 }
 
-function createCatalogModuleState(module) {
+function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   if (!module) return null;
-  if (module.type === 'flat-panel') return createFlatPanelModuleState(module.widthCm);
-  if (module.type === 'separator') return createSeparatorModuleState(module.widthCm);
-  if (module.type === 'showcase-2' || module.type === 'showcase-3') {
-    return createShowcaseModuleState(module.type, module.widthCm);
+
+  let state = null;
+  if (module.type === 'flat-panel') state = createFlatPanelModuleState(module.widthCm);
+  else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm);
+  else if (module.type === 'showcase-2' || module.type === 'showcase-3') {
+    state = createShowcaseModuleState(module.type, module.widthCm);
   }
-  return null;
+
+  if (state && preservePlacement && module.placement) {
+    state.placement = { ...module.placement };
+  }
+  return state;
 }
 
-function validateCatalogAddBatch({ entries = [] } = {}) {
+function getRequestWallId({ context = null } = {}) {
+  return context?.placement?.wallId ?? 'back';
+}
+
+function validateCatalogAddBatch({ entries = [], context = null } = {}) {
   const addedCm = entries.reduce(
     (sum, entry) => sum + (Number(entry.module?.widthCm) || 0),
     0,
   );
+  const wallId = getRequestWallId({ context });
+  const axis = getWallAxis(wallId);
+
+  if (!axis) return { ok: true };
 
   return validateCurrentAxisCapacity(
-    'x',
+    axis,
     addedCm,
-    totalWallWidthCm(currentModules),
+    getWallUsedCm(currentModules, wallId),
     { popupTitle: 'Modüller eklenemedi' },
   );
+}
+
+function assignPlannedPlacements(moduleStates, { placementMode = 'append', context = null } = {}) {
+  if (!currentStand) return { ok: false, message: 'Önce stand alanını oluştur.' };
+
+  let wallId = context?.placement?.wallId ?? 'back';
+  let axis = getWallAxis(wallId) ?? 'x';
+  let startCm;
+
+  if (placementMode === 'append' || !context) {
+    wallId = 'back';
+    axis = 'x';
+    startCm = getWallExtentCm(currentModules, wallId);
+  } else {
+    const contextIndex = findContextModuleIndex(context);
+    if (contextIndex < 0) return { ok: false, message: 'Hedef modül bulunamadı.' };
+    const source = currentModules[contextIndex];
+    const sourcePlacement = source.placement;
+    if (!sourcePlacement) return { ok: false, message: 'Hedef modülün yerleşim bilgisi bulunamadı.' };
+
+    wallId = sourcePlacement.wallId ?? 'back';
+    axis = getWallAxis(wallId) ?? (sourcePlacement.rotationZDeg === 90 ? 'y' : 'x');
+    const sourceStart = axis === 'y'
+      ? Number(sourcePlacement.yCm)
+      : Number(sourcePlacement.xCm);
+    const newTotalCm = totalWallWidthCm(moduleStates);
+    startCm = placementMode === 'left'
+      ? sourceStart - newTotalCm
+      : sourceStart + Number(source.widthCm);
+  }
+
+  const planned = [];
+  let cursorCm = startCm;
+
+  for (const moduleState of moduleStates) {
+    let placement;
+    if (axis === 'y') {
+      placement = createModulePlacement({
+        xCm: wallId === 'right' ? currentStand.xCm : 0,
+        yCm: cursorCm,
+        zCm: 0,
+        rotationZDeg: 90,
+        wallId,
+      });
+    } else {
+      placement = createModulePlacement({
+        xCm: cursorCm,
+        yCm: 0,
+        zCm: 0,
+        rotationZDeg: 0,
+        wallId,
+      });
+    }
+
+    const validation = validatePlacementAgainstModules({
+      placement,
+      widthCm: moduleState.widthCm,
+      moduleId: moduleState.id,
+      modules: [...currentModules, ...planned],
+      standType: currentStand.standType,
+      standXCm: currentStand.xCm,
+      standYCm: currentStand.yCm,
+    });
+    if (!validation.ok) return validation;
+
+    moduleState.placement = placement;
+    planned.push(moduleState);
+    cursorCm += Number(moduleState.widthCm);
+  }
+
+  return { ok: true };
 }
 
 function flushCatalogModuleAdds() {
@@ -289,22 +457,28 @@ function flushCatalogModuleAdds() {
   let moduleStates = requests.map((request) => createCatalogModuleState(request.module));
   if (moduleStates.some((moduleState) => !moduleState)) return;
 
-  const addedCm = totalWallWidthCm(moduleStates);
-  const capacity = validateCurrentAxisCapacity('x', addedCm);
-  if (!capacity.ok) return;
-
   let insertIndex = currentModules.length;
-  const placement = firstRequest.placement ?? 'append';
+  const placementMode = firstRequest.placement ?? 'append';
   const context = firstRequest.context ?? null;
 
-  if (placement === 'left' || placement === 'right') {
+  if (placementMode === 'left' || placementMode === 'right') {
     const contextIndex = findContextModuleIndex(context);
     if (contextIndex < 0 || contextIndex >= currentModules.length) return;
-    insertIndex = placement === 'left' ? contextIndex : contextIndex + 1;
+    insertIndex = placementMode === 'left' ? contextIndex : contextIndex + 1;
 
     // Picker callbacks are sequential today. Reversing here preserves the same
     // visual order while allowing the complete package to be validated first.
     moduleStates = [...moduleStates].reverse();
+  }
+
+  const placementPlan = assignPlannedPlacements(moduleStates, {
+    placementMode,
+    context,
+  });
+  if (!placementPlan.ok) {
+    renderWallResult(placementPlan.message, true);
+    window.alert(`Modüller eklenemedi\n\n${placementPlan.message}`);
+    return;
   }
 
   currentModules.splice(insertIndex, 0, ...moduleStates);
@@ -488,11 +662,14 @@ resetModuleFeaturesButton.addEventListener('click', () => {
       + '• Atanan cam özellikleri\n'
       + '• Atanan renkler\n'
       + '• Diğer panel özelleştirmeleri\n\n'
-      + 'Modül türleri, genişlikleri ve sıraları korunacaktır.',
+      + 'Modül türleri, genişlikleri, sıraları ve FAZ 2 yerleşimleri korunacaktır.',
   );
   if (!confirmed) return;
 
-  const resetModules = currentModules.map((module) => createCatalogModuleState(module));
+  const resetModules = currentModules.map((module) => createCatalogModuleState(
+    module,
+    { preservePlacement: true },
+  ));
   if (resetModules.some((module) => !module)) {
     selectionInfo.textContent = 'Bazı modül türleri varsayılan ayarlarına döndürülemedi.';
     return;
@@ -503,7 +680,7 @@ resetModuleFeaturesButton.addEventListener('click', () => {
   moduleContextMenu.closePicker();
   rebuildWall({ resetView: false });
   syncColorEditorFromHex('#ffffff');
-  selectionInfo.textContent = 'Tüm modüller varsayılan ayarlarına döndürüldü. Modül dizilimi korundu.';
+  selectionInfo.textContent = 'Tüm modüller varsayılan ayarlarına döndürüldü. Modül dizilimi ve yerleşimi korundu.';
 });
 
 function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
