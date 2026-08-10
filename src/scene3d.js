@@ -5,7 +5,6 @@ import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
-import { createGroundLayout } from './groundLayout.js';
 import { createViewCube } from './viewCube.js';
 import { computeImageFit } from './imageFit.js';
 
@@ -16,10 +15,15 @@ const GLASS_BACK_COLOR = 0xc9dce1;
 const GLASS_SURFACE_OPACITY = 0.48;
 const GLASS_BACK_OPACITY = 0.18;
 const FLOOR_COLOR = 0xe9edf1;
+const OUTER_FLOOR_COLOR = 0xd2d8df;
+const GRID_COLOR = 0xb8c1cb;
+const STAND_BORDER_COLOR = 0x6f7a87;
+const STAGE_SURROUND_M = 1;
 const SELECTION_COLOR = 0x2563eb;
 const DEFAULT_VIEW_MIN_DISTANCE = 9;
 const DEFAULT_VIEW_DISTANCE_FACTOR = 1.32;
 const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
+const STAGE_HOME_DIRECTION = new THREE.Vector3(1, 1.05, 1).normalize();
 
 export function createStandScene(
   container,
@@ -62,50 +66,126 @@ export function createStandScene(
   keyLight.shadow.mapSize.set(2048, 2048);
   scene.add(keyLight);
 
-  const floor = new THREE.Mesh(
+  const outerFloor = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshStandardMaterial({ color: OUTER_FLOOR_COLOR, roughness: 0.94 }),
+  );
+  outerFloor.rotation.x = -Math.PI / 2;
+  outerFloor.receiveShadow = true;
+  outerFloor.visible = false;
+  scene.add(outerFloor);
+
+  const activeFloor = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     new THREE.MeshStandardMaterial({ color: FLOOR_COLOR, roughness: 0.92 }),
   );
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  scene.add(floor);
+  activeFloor.rotation.x = -Math.PI / 2;
+  activeFloor.receiveShadow = true;
+  activeFloor.visible = false;
+  scene.add(activeFloor);
 
   let grid = null;
-  let groundLayout = null;
+  let standOutline = null;
+  let stageLayout = null;
 
-  function disposeGrid() {
-    if (!grid) return;
-    scene.remove(grid);
-    grid.geometry?.dispose?.();
-    const materials = Array.isArray(grid.material) ? grid.material : [grid.material];
+  function disposeGroundObject(object) {
+    if (!object) return;
+    scene.remove(object);
+    object.geometry?.dispose?.();
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
     materials.forEach((material) => material?.dispose?.());
-    grid = null;
   }
 
-  function updateGround(totalWallWidthM = 0) {
-    const nextLayout = createGroundLayout(totalWallWidthM);
+  function disposeGroundGuides() {
+    disposeGroundObject(grid);
+    disposeGroundObject(standOutline);
+    grid = null;
+    standOutline = null;
+  }
 
-    floor.scale.set(nextLayout.sizeM, nextLayout.sizeM, 1);
-    floor.position.x = nextLayout.centerX;
+  function collectGridValues(lengthM) {
+    const values = [-STAGE_SURROUND_M, 0, lengthM, lengthM + STAGE_SURROUND_M];
+    for (let value = 1; value < lengthM; value += 1) values.push(value);
+    return [...new Set(values.map((value) => Number(value.toFixed(6))))]
+      .sort((a, b) => a - b);
+  }
 
-    if (!grid || groundLayout?.sizeM !== nextLayout.sizeM) {
-      disposeGrid();
-      grid = new THREE.GridHelper(
-        nextLayout.sizeM,
-        nextLayout.divisions,
-        0x7f8b99,
-        0xd0d6dc,
-      );
-      grid.position.set(nextLayout.centerX, 0.002, 0);
-      scene.add(grid);
-    } else {
-      grid.position.x = nextLayout.centerX;
+  function createRectangularGrid(widthM, depthM) {
+    const leftX = -STAGE_SURROUND_M;
+    const rightX = widthM + STAGE_SURROUND_M;
+    const backZ = -STAGE_SURROUND_M;
+    const frontZ = depthM + STAGE_SURROUND_M;
+    const positions = [];
+
+    collectGridValues(widthM).forEach((x) => {
+      positions.push(x, 0.004, backZ, x, 0.004, frontZ);
+    });
+    collectGridValues(depthM).forEach((z) => {
+      positions.push(leftX, 0.004, z, rightX, 0.004, z);
+    });
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    return new THREE.LineSegments(
+      geometry,
+      new THREE.LineBasicMaterial({ color: GRID_COLOR }),
+    );
+  }
+
+  function createStandOutline(widthM, depthM) {
+    const positions = [
+      0, 0.008, 0, widthM, 0.008, 0,
+      widthM, 0.008, 0, widthM, 0.008, depthM,
+      widthM, 0.008, depthM, 0, 0.008, depthM,
+      0, 0.008, depthM, 0, 0.008, 0,
+    ];
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    return new THREE.LineSegments(
+      geometry,
+      new THREE.LineBasicMaterial({ color: STAND_BORDER_COLOR }),
+    );
+  }
+
+  function createStage({ widthCm, depthCm, standType = null, resetView = true } = {}) {
+    const widthM = Number(widthCm) / 100;
+    const depthM = Number(depthCm) / 100;
+    if (!Number.isFinite(widthM) || !Number.isFinite(depthM) || widthM <= 0 || depthM <= 0) {
+      return { ok: false, message: 'Geçerli bir X ve Y ölçüsü gerekli.' };
     }
 
-    groundLayout = nextLayout;
-  }
+    disposeWall();
+    disposeGroundGuides();
 
-  updateGround(0);
+    const sceneWidthM = widthM + STAGE_SURROUND_M * 2;
+    const sceneDepthM = depthM + STAGE_SURROUND_M * 2;
+    const centerX = widthM / 2;
+    const centerZ = depthM / 2;
+
+    outerFloor.scale.set(sceneWidthM, sceneDepthM, 1);
+    outerFloor.position.set(centerX, 0, centerZ);
+    outerFloor.visible = true;
+
+    activeFloor.scale.set(widthM, depthM, 1);
+    activeFloor.position.set(centerX, 0.002, centerZ);
+    activeFloor.visible = true;
+
+    grid = createRectangularGrid(widthM, depthM);
+    standOutline = createStandOutline(widthM, depthM);
+    scene.add(grid, standOutline);
+
+    stageLayout = {
+      standType,
+      widthM,
+      depthM,
+      sceneWidthM,
+      sceneDepthM,
+      surroundM: STAGE_SURROUND_M,
+    };
+
+    if (resetView) resetStageView();
+    return { ok: true, ...stageLayout };
+  }
 
   const wallRoot = new THREE.Group();
   wallRoot.position.set(0, 0, 0);
@@ -206,8 +286,10 @@ export function createStandScene(
 
   function clearWall({ resetView = true } = {}) {
     disposeWall();
-    updateGround(0);
-    if (resetView) resetDefaultView(0);
+    if (resetView) {
+      if (stageLayout) resetStageView();
+      else resetDefaultView(0);
+    }
   }
 
   function buildWall(modules, { resetView = true } = {}) {
@@ -219,7 +301,6 @@ export function createStandScene(
     disposeWall({ notify: false, keepAnchor: true });
 
     const totalWidth = modules.reduce((sum, module) => sum + module.widthCm / 100, 0);
-    updateGround(totalWidth);
     let cursorX = 0;
 
     modules.forEach((moduleState, moduleIndex) => {
@@ -263,6 +344,22 @@ export function createStandScene(
     if (resetView) resetDefaultView(totalWidth);
     notifySelection();
     return { totalWidth, surfaceCount: surfaceMeshes.length };
+  }
+
+  function resetStageView() {
+    if (!stageLayout) return;
+    const target = new THREE.Vector3(
+      stageLayout.widthM / 2,
+      0.12,
+      stageLayout.depthM / 2,
+    );
+    const span = Math.hypot(stageLayout.sceneWidthM, stageLayout.sceneDepthM);
+    const distance = Math.max(7, span * 0.92);
+
+    controls.target.copy(target);
+    camera.position.copy(target).addScaledVector(STAGE_HOME_DIRECTION, distance);
+    camera.lookAt(target);
+    controls.update();
   }
 
   function resetDefaultView(totalWidthM = 0) {
@@ -762,9 +859,11 @@ export function createStandScene(
   });
 
   return {
+    createStage,
     buildWall,
     clearWall,
     clearSelection,
+    resetStageView,
     resetDefaultView,
     applyColor,
     applyGlassMode,
@@ -772,6 +871,7 @@ export function createStandScene(
     applyHorizontalImageAsset,
     applyRectImageAsset,
     clearImage,
+    getStageLayout: () => (stageLayout ? { ...stageLayout } : null),
     getSelectedSurface: () => [...selectedSurfaces][0] ?? null,
     getSelectedSurfaces: () => [...selectedSurfaces],
   };
