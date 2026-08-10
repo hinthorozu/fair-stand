@@ -244,3 +244,23 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 190. Düz panel slot'unu vitrin / separatör / kapı modülü ile değiştirme sistemi.
 191. Fiziksel Maxima kurallarına göre geçersiz yerleşimleri engelleyen rule engine.
 192. Daha sonra gerçek profil ölçülerine göre görsel model detayının iyileştirilmesi.
+
+## Dikdörtgen blok seçim
+
+193. Serbest Ctrl/Cmd panel toggle seçimi, dikdörtgen blok seçim modeline dönüştürüldü.
+194. Normal tıklanan panel seçim başlangıç / anchor noktası olarak kullanılmaya başlandı.
+195. Ctrl/Cmd + tıklanan ikinci panel seçim bloğunun karşı köşesi olarak kullanılmaya başlandı.
+196. İki köşe arasındaki tüm panel hücrelerinin otomatik seçilmesi sağlandı.
+197. `1 × N` yatay blok seçimleri desteklendi.
+198. `N × 1` dikey blok seçimleri desteklendi.
+199. `N × M` dikdörtgen blok seçimleri desteklendi.
+200. `10 × 7` gibi büyük blokların iki tıklama ile seçilebilmesi sağlandı.
+201. Farklı genişlikteki 50 / 100 / 150 / 200 cm modüller arasında dikdörtgen seçim desteklendi.
+202. L, zikzak, boşluklu veya eksik hücreli seçim state'lerinin oluşması engellendi.
+203. Seçim alanında eksik hücre varsa dikdörtgen seçim doğrulamasının reddetmesi sağlandı.
+204. Seçim ölçüsü arayüzde `kolon × sıra` ve toplam panel sayısı olarak gösterilmeye başlandı.
+205. Duvar rebuild sırasında seçim anchor kimliğinin mümkün olduğunda korunması sağlandı.
+206. Dikdörtgen seçim hesabı için `rectSelection.js` yardımcı modülü eklendi.
+207. `3 × 2`, `1 × 7` ve `10 × 7` senaryoları için otomatik testler eklendi.
+208. Eksik hücreli dikdörtgen seçim için negatif regresyon testi eklendi.
+209. Dikdörtgen seçim değişiklikleri GitHub Actions test + Vite build kontrolünden başarıyla geçti.
