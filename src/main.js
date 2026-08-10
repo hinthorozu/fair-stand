@@ -45,6 +45,7 @@ const imageInput = document.querySelector('#surface-image');
 const fillImageButton = document.querySelector('#fit-image-cover');
 const fitImageButton = document.querySelector('#fit-image-contain');
 const clearTextureButton = document.querySelector('#clear-texture');
+const resetModuleFeaturesButton = document.querySelector('#reset-module-features');
 const assetLibraryElement = document.querySelector('#asset-library');
 const assetStatus = document.querySelector('#asset-status');
 
@@ -246,6 +247,37 @@ clearWallButton.addEventListener('click', () => {
   moduleContextMenu.closePicker();
   scene3d.clearWall({ resetView: true });
   renderWallResult('Duvar boş.');
+});
+
+resetModuleFeaturesButton.addEventListener('click', () => {
+  if (!currentModules.length) {
+    renderWallResult('Sıfırlanacak modül yok.');
+    return;
+  }
+
+  const confirmed = window.confirm(
+    'Tüm modüller varsayılan ayarlarına dönecektir. Onaylıyor musunuz?\n\n'
+      + 'Kaldırılacak özellikler:\n'
+      + '• Atanan resimler\n'
+      + '• Atanan cam özellikleri\n'
+      + '• Atanan renkler\n'
+      + '• Diğer panel özelleştirmeleri\n\n'
+      + 'Modül türleri, genişlikleri ve sıraları korunacaktır.',
+  );
+  if (!confirmed) return;
+
+  const resetModules = currentModules.map((module) => createCatalogModuleState(module));
+  if (resetModules.some((module) => !module)) {
+    selectionInfo.textContent = 'Bazı modül türleri varsayılan ayarlarına döndürülemedi.';
+    return;
+  }
+
+  currentModules = resetModules;
+  moduleContextMenu.close();
+  moduleContextMenu.closePicker();
+  rebuildWall({ resetView: false });
+  syncColorEditorFromHex('#ffffff');
+  selectionInfo.textContent = 'Tüm modüller varsayılan ayarlarına döndürüldü. Modül dizilimi korundu.';
 });
 
 function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
