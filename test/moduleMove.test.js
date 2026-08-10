@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { planContinuousModuleMove } from '../src/moduleMove.js';
+import {
+  planContinuousModuleInsert,
+  planContinuousModuleMove,
+} from '../src/moduleMove.js';
 
 function module(id, widthCm, placement) {
   return { id, widthCm, placement };
@@ -17,6 +20,54 @@ function left(yCm) {
 function right(xCm, yCm) {
   return { xCm, yCm, zCm: 0, rotationZDeg: 90, wallId: 'right' };
 }
+
+test('catalog module dropped into a real gap is placed directly', () => {
+  const modules = [
+    module('a', 100, back(0)),
+    module('c', 100, back(200)),
+  ];
+  const inserted = module('new', 50, null);
+
+  const result = planContinuousModuleInsert({
+    modules,
+    insertedModule: inserted,
+    desiredPlacement: back(100),
+    standType: 'back-wall',
+    standXCm: 500,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.mode, 'direct');
+  assert.deepEqual(result.movingPlacement, back(100));
+  assert.equal(result.placements.size, 1);
+  assert.deepEqual(result.orderedModuleIds, ['a', 'new', 'c']);
+});
+
+test('catalog module dropped onto occupied space inserts and shifts the collision chain', () => {
+  const modules = [
+    module('a', 100, back(0)),
+    module('b', 100, back(100)),
+    module('c', 100, back(200)),
+  ];
+  const inserted = module('new', 50, null);
+
+  const result = planContinuousModuleInsert({
+    modules,
+    insertedModule: inserted,
+    desiredPlacement: back(100),
+    standType: 'back-wall',
+    standXCm: 500,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.mode, 'reflow');
+  assert.deepEqual(result.movingPlacement, back(100));
+  assert.deepEqual(result.placements.get('b'), back(150));
+  assert.deepEqual(result.placements.get('c'), back(250));
+  assert.deepEqual(result.orderedModuleIds, ['a', 'new', 'b', 'c']);
+});
 
 test('moving into a real gap keeps every other module in place', () => {
   const modules = [
