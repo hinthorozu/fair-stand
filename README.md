@@ -337,3 +337,17 @@ Bu veri olmadan 3D bir demo hazırlanabilir; ancak üretime ve gerçek montaja g
 6. Kullanılan gerçek parçaların listesini görebiliyorsa.
 
 Bu aşama tamamlandıktan sonra sistem düz duvardan L ve U standlara genişletilecektir.
+
+---
+
+## Faz 2 notları
+
+### Özel renk editörü / gelişmiş renk popup'ı
+
+- Tarayıcının native renk picker penceresinin içeriği özelleştirilemediği için HEX / RGB / CMYK alanlarını native picker içine eklemek mümkün değildir.
+- Faz 2'de native picker yerine uygulamaya ait özel bir renk editörü / popup geliştirilebilir.
+- Bu editörde renk alanı, hue kontrolü, HEX, RGB ve CMYK değerleri birlikte gösterilebilir ve düzenlenebilir olmalıdır.
+- Ancak mevcut en önemli UX avantajı korunmalıdır: kullanıcı seçili panel veya panel bloğunun rengini değiştirirken sonucu **3D sahnede canlı olarak görebilmelidir**.
+- Bu nedenle popup sahneyi kapatan büyük bir modal gibi davranmamalıdır. 3D stand görünümü ve özellikle düzenlenen panel görünür kalmalıdır.
+- Renk değişiklikleri editör açıkken anlık olarak sahneye uygulanmalıdır.
+- İleride özel renk editörü yapılırken mevcut canlı renk önizleme davranışı geriye gitmemesi gereken temel kabul kriteridir.
