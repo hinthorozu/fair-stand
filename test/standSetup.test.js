@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   MAX_STAND_DIMENSION_CM,
+  STAND_TYPES,
   validateStandSetup,
 } from '../src/standSetup.js';
 
@@ -11,9 +12,18 @@ test('requires a stand type and both dimensions', () => {
   assert.equal(validateStandSetup({ standType: 'back-wall', yCm: 500 }).ok, false);
 });
 
+test('supports left and right L stands as separate stand types', () => {
+  assert.equal(STAND_TYPES.includes('l-left'), true);
+  assert.equal(STAND_TYPES.includes('l-right'), true);
+  assert.equal(STAND_TYPES.includes('l-stand'), false);
+
+  assert.equal(validateStandSetup({ standType: 'l-left', xCm: 1000, yCm: 500 }).ok, true);
+  assert.equal(validateStandSetup({ standType: 'l-right', xCm: 1000, yCm: 500 }).ok, true);
+});
+
 test('converts centimetres to the active area and adds a 1 metre surround', () => {
   const result = validateStandSetup({
-    standType: 'l-stand',
+    standType: 'l-left',
     xCm: 1000,
     yCm: 500,
   });
