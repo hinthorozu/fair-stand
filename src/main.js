@@ -75,7 +75,7 @@ const scene3d = createStandScene(
 
       if (moduleType === 'showcase-3' || moduleType === 'showcase-2') {
         const eyeCount = moduleType === 'showcase-3' ? 3 : 2;
-        selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${eyeCount} Gözlü Vitrin ${widthCm} cm · yalnızca renk uygulanabilir.`;
+        selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${eyeCount} Gözlü Vitrin ${widthCm} cm · alttan ${stripNumber}. panel · renk + görsel uygulanabilir.`;
         return;
       }
 
