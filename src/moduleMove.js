@@ -100,6 +100,7 @@ function findInsertionTarget({
   desiredPathStartCm,
   insertedWidthCm,
   collisionModuleId,
+  chainCapacityCm,
 }) {
   const desiredCenterCm = desiredPathStartCm + insertedWidthCm / 2;
   const overlappingEntries = activeEntries.filter((entry) => {
@@ -121,10 +122,24 @@ function findInsertionTarget({
 
   if (!targetEntry) return null;
 
+  const targetIndex = activeEntries.findIndex(
+    (entry) => entry.module.id === targetEntry.module.id,
+  );
+  const desiredEndCm = desiredPathStartCm + insertedWidthCm;
+  const atChainStart = targetIndex === 0 && desiredPathStartCm <= EPSILON_CM;
+  const atChainEnd = targetIndex === activeEntries.length - 1
+    && desiredEndCm >= Number(chainCapacityCm) - EPSILON_CM;
   const targetCenterCm = targetEntry.pathStartCm + Number(targetEntry.module.widthCm) / 2;
+
+  let chainSide;
+  if (atChainStart) chainSide = 'left';
+  else if (atChainEnd) chainSide = 'right';
+  else chainSide = desiredCenterCm <= targetCenterCm ? 'left' : 'right';
+
   return {
     targetEntry,
-    chainSide: desiredCenterCm <= targetCenterCm ? 'left' : 'right',
+    chainSide,
+    edge: atChainStart ? 'start' : (atChainEnd ? 'end' : null),
   };
 }
 
@@ -147,6 +162,10 @@ export function planContinuousModuleInsert({
     return { ok: false, message: 'Bu stand tipinde sürekli duvar eklemesi kullanılamaz.' };
   }
 
+  const chainCapacityCm = segments.reduce(
+    (sum, segment) => sum + Number(segment.lengthCm),
+    0,
+  );
   const insertedWidthCm = Number(insertedModule.widthCm);
   const desiredPathStartCm = placementToPathStart(
     { ...insertedModule, placement: { ...desiredPlacement } },
@@ -195,6 +214,7 @@ export function planContinuousModuleInsert({
     desiredPathStartCm,
     insertedWidthCm,
     collisionModuleId: directValidation.collisionModuleId,
+    chainCapacityCm,
   });
   if (!target) return directValidation;
 
@@ -224,6 +244,7 @@ export function planContinuousModuleInsert({
     movingPlacement: { ...movingPlacement },
     targetModuleId: target.targetEntry.module.id,
     chainSide: target.chainSide,
+    edge: target.edge,
   };
 }
 
@@ -244,6 +265,10 @@ export function planContinuousModuleMove({
     return { ok: false, message: 'Bu stand tipinde sürekli duvar taşıması kullanılamaz.' };
   }
 
+  const chainCapacityCm = segments.reduce(
+    (sum, segment) => sum + Number(segment.lengthCm),
+    0,
+  );
   const movingWidthCm = Number(movingModule.widthCm);
   const remainingModules = modules.filter((module) => module?.id !== movingModuleId);
   const desiredPathStartCm = placementToPathStart(
@@ -288,6 +313,7 @@ export function planContinuousModuleMove({
     desiredPathStartCm,
     insertedWidthCm: movingWidthCm,
     collisionModuleId: directValidation.collisionModuleId,
+    chainCapacityCm,
   });
   if (!target) return directValidation;
 
@@ -317,5 +343,6 @@ export function planContinuousModuleMove({
     movingPlacement: { ...movingPlacement },
     targetModuleId: target.targetEntry.module.id,
     chainSide: target.chainSide,
+    edge: target.edge,
   };
 }
