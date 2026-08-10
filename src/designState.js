@@ -20,18 +20,25 @@ export function createDefaultImageTransform() {
   };
 }
 
+function createEditablePanelState(stripIndex, color) {
+  return {
+    id: createId('surface'),
+    stripIndex,
+    color,
+    imageAssetId: null,
+    imageTransform: createDefaultImageTransform(),
+  };
+}
+
 export function createFlatPanelModuleState(widthCm) {
   return {
     id: createId('module'),
     type: 'flat-panel',
     widthCm,
-    strips: Array.from({ length: STRIP_COUNT }, (_, stripIndex) => ({
-      id: createId('surface'),
-      stripIndex,
-      color: DEFAULT_PANEL_COLOR,
-      imageAssetId: null,
-      imageTransform: createDefaultImageTransform(),
-    })),
+    strips: Array.from(
+      { length: STRIP_COUNT },
+      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
+    ),
   };
 }
 
@@ -54,10 +61,10 @@ export function createShowcaseModuleState(type, widthCm = 100) {
     id: createId('module'),
     type,
     widthCm,
-    surface: {
-      id: createId('surface'),
-      color: DEFAULT_SHOWCASE_COLOR,
-    },
+    strips: Array.from(
+      { length: STRIP_COUNT },
+      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_SHOWCASE_COLOR),
+    ),
   };
 }
 
@@ -84,7 +91,7 @@ export function duplicateModuleState(moduleState) {
 
 /**
  * Bir panele renk uygulamak, o hücrede atanmış görselin yerini alır.
- * Renk-only modüllerde (ör. separatör / vitrin) görsel state'i oluşturulmaz.
+ * Renk-only modüllerde (ör. separatör) görsel state'i oluşturulmaz.
  */
 export function applyColorOverride(surfaceState, color) {
   if (!surfaceState) return null;
