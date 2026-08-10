@@ -360,3 +360,18 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 291. Düz panel, vitrin, separatör ve depo kapısının yerleşim sistemi açısından tek ve bölünmez bir `module` nesnesi olarak ele alınacağı mimari netleştirildi.
 292. Modül çoğaltma state'inin bağımsız kimlikler üretip tasarım verisini koruduğunu doğrulayan regresyon testi eklendi.
 293. Sağ tık modül menüsü ve çoğaltma değişiklikleri GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+
+## Görsel modül kataloğu
+
+294. Sol paneldeki ayrı 50 / 100 / 150 / 200 cm modül butonları tek `Modül Ekle` butonunda birleştirildi.
+295. `Modül Ekle` butonu ortak modül katalog popup'ını açar hale getirildi.
+296. Katalog ilk aşamada `Düz Panel 200`, `Düz Panel 150`, `Düz Panel 100` ve `Düz Panel 50` modülleriyle sınırlandı.
+297. Her katalog kartına başlık ve modül genişliğini temsil eden görsel panel önizlemesi eklendi.
+298. Tek tıklanan katalog kartının turuncu çerçeve ile aktif seçimi göstermesi sağlandı.
+299. Popup altına `Vazgeç` ve `Ekle` aksiyonları eklendi; seçim yapılmadan `Ekle` pasif tutuldu.
+300. Sol panelden açılan katalogda seçilen modülün doğrudan duvarın sonuna eklenmesi sağlandı.
+301. Sağ tık `Ekle Sağ Tarafa` ve `Ekle Sol Tarafa` komutları aynı ortak katalog popup'ına bağlandı.
+302. Sağ / sol yerleşim isteklerinde seçilen katalog modülünün hedef modülün ilgili tarafına eklenmesi sağlandı.
+303. Katalog üzerinden modül eklenirken mevcut kamera pan, zoom ve bakış açısının korunması sağlandı.
+304. Katalog kartına çift tıklanınca seçimin `Ekle` butonuna basmaya gerek kalmadan doğrudan eklenmesi sağlandı.
+305. Tek tıklama yalnızca seçili kartı değiştirmeye devam ederken çift tıklama mevcut append / sağ / sol yerleşim bağlamını kullanarak ekleme yapar hale getirildi.
