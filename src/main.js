@@ -2,7 +2,10 @@ import './style.css';
 import './colorEditor.css';
 import './imageActions.css';
 import { createStandScene } from './scene3d.js';
-import { composeStraightWall } from './wall.js';
+import {
+  composeAutomaticStandWall,
+  getAutomaticWallCapacityCm,
+} from './automaticWall.js';
 import {
   createFlatPanelModuleState,
   createSeparatorModuleState,
@@ -560,7 +563,12 @@ createStageButton.addEventListener('click', () => {
   }
 
   currentStand = setup;
-  wallLengthInput.max = String(setup.xCm);
+  const automaticWallCapacityCm = getAutomaticWallCapacityCm({
+    standType: setup.standType,
+    standXCm: setup.xCm,
+    standYCm: setup.yCm,
+  });
+  wallLengthInput.max = String(automaticWallCapacityCm || setup.xCm);
   viewportEmpty.hidden = true;
   viewportToolbar.hidden = false;
   setStandEditingEnabled(true);
@@ -589,28 +597,31 @@ function buildAutomaticWall() {
   }
 
   const lengthCm = Number(wallLengthInput.value);
-  const result = composeStraightWall(lengthCm);
+  const result = composeAutomaticStandWall({
+    lengthCm,
+    standType: currentStand.standType,
+    standXCm: currentStand.xCm,
+    standYCm: currentStand.yCm,
+  });
 
   if (!result.ok) {
     renderWallResult(result.message, true);
+    if (Number.isFinite(result.capacityCm)) {
+      window.alert(`Duvar oluşturulamadı\n\n${result.message}`);
+    }
     return;
   }
-
-  const requestedTotalCm = result.modules.reduce((sum, widthCm) => sum + widthCm, 0);
-  const capacity = validateCurrentAxisCapacity(
-    'x',
-    requestedTotalCm,
-    0,
-    { popupTitle: 'Duvar oluşturulamadı' },
-  );
-  if (!capacity.ok) return;
 
   const confirmed = confirmExistingScene(
     'Sahnede mevcut bir duvar var. Yeni duvar oluşturulursa mevcut panel renkleri, görselleri ve düzenlemeleri silinecek. Devam edilsin mi?',
   );
   if (!confirmed) return;
 
-  currentModules = result.modules.map((widthCm) => createFlatPanelModuleState(widthCm));
+  currentModules = result.widths.map((widthCm, index) => {
+    const moduleState = createFlatPanelModuleState(widthCm);
+    moduleState.placement = { ...result.placements[index] };
+    return moduleState;
+  });
   moduleContextMenu.close();
   moduleContextMenu.closePicker();
   rebuildWall({ resetView: true });
