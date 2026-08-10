@@ -46,7 +46,7 @@ const scene3d = createStandScene(
       return;
     }
 
-    selectionInfo.textContent = `${surfaces.length} panel seçili · Ctrl + tık ile seçime ekle/çıkar.`;
+    selectionInfo.textContent = `${surfaces.length} panel seçili · Aynı sıradaki bitişik panellere tek görsel yatay yayılır.`;
   },
   getAssetUrl,
 );
@@ -111,7 +111,7 @@ applyColorButton.addEventListener('click', () => {
   scene3d.applyColor(selected, colorInput.value);
 });
 
-// Renk seçici artık panel seçimine göre değişmez; kullanıcının son kullandığı renk araçta kalır.
+// Renk seçici panel seçimine göre değişmez; kullanıcının son kullandığı renk araçta kalır.
 colorInput.addEventListener('input', () => {
   const selected = scene3d.getSelectedSurfaces();
   if (selected.length) scene3d.applyColor(selected, colorInput.value);
@@ -182,6 +182,29 @@ async function initializeAssetLibrary() {
   }
 }
 
+function applyActiveImageToSelection() {
+  const selected = scene3d.getSelectedSurfaces();
+  if (!selected.length) {
+    selectionInfo.textContent = 'Görsel uygulamak için önce bir panel veya panel grubu seç.';
+    return false;
+  }
+  if (!activeAssetId) {
+    assetStatus.textContent = 'Önce arşivden bir görsel seç veya yeni görsel yükle.';
+    return false;
+  }
+
+  const result = scene3d.applyHorizontalImageAsset(selected, activeAssetId);
+  if (!result.ok) {
+    selectionInfo.textContent = result.message;
+    return false;
+  }
+
+  if (result.mode === 'horizontal-group') {
+    selectionInfo.textContent = `${result.panelCount} bitişik panele tek görsel yatay olarak ortalandı.`;
+  }
+  return true;
+}
+
 imageInput.addEventListener('change', async () => {
   const file = imageInput.files?.[0];
   imageInput.value = '';
@@ -193,25 +216,14 @@ imageInput.addEventListener('change', async () => {
     setActiveAsset(asset.id);
 
     const selected = scene3d.getSelectedSurfaces();
-    if (selected.length) scene3d.applyImageAsset(selected, asset.id);
+    if (selected.length) applyActiveImageToSelection();
   } catch (error) {
     console.warn('Görsel kaydedilemedi:', error);
     assetStatus.textContent = 'Görsel arşive kaydedilemedi.';
   }
 });
 
-applyImageButton.addEventListener('click', () => {
-  const selected = scene3d.getSelectedSurfaces();
-  if (!selected.length) {
-    selectionInfo.textContent = 'Görsel uygulamak için önce bir panel veya panel grubu seç.';
-    return;
-  }
-  if (!activeAssetId) {
-    assetStatus.textContent = 'Önce arşivden bir görsel seç veya yeni görsel yükle.';
-    return;
-  }
-  scene3d.applyImageAsset(selected, activeAssetId);
-});
+applyImageButton.addEventListener('click', applyActiveImageToSelection);
 
 clearTextureButton.addEventListener('click', () => {
   const selected = scene3d.getSelectedSurfaces();
