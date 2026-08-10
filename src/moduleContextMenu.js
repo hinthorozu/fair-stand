@@ -23,6 +23,8 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
   let activeContext = null;
   let pickerRequest = null;
   let selectedModuleKeys = [];
+  let draggedSelectionIndex = null;
+  let suppressChipClick = false;
 
   const menu = document.createElement('div');
   menu.className = 'module-context-menu';
@@ -201,6 +203,24 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     return counts;
   }
 
+  function reorderSelection(fromIndex, toIndex) {
+    if (
+      !Number.isInteger(fromIndex)
+      || !Number.isInteger(toIndex)
+      || fromIndex < 0
+      || toIndex < 0
+      || fromIndex >= selectedModuleKeys.length
+      || toIndex >= selectedModuleKeys.length
+      || fromIndex === toIndex
+    ) {
+      return;
+    }
+
+    const [movedModuleKey] = selectedModuleKeys.splice(fromIndex, 1);
+    selectedModuleKeys.splice(toIndex, 0, movedModuleKey);
+    syncPickerSelection();
+  }
+
   function renderSelectionQueue() {
     pickerSelectionList.innerHTML = '';
     pickerSelectionEmpty.hidden = selectedModuleKeys.length > 0;
@@ -212,7 +232,9 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
 
       const chip = document.createElement('button');
       chip.type = 'button';
-      chip.title = 'Bu modülü sıradan çıkar';
+      chip.draggable = true;
+      chip.dataset.selectionIndex = String(index);
+      chip.title = 'Sürükleyerek sırala · tıklayarak çıkar';
       chip.textContent = `${index + 1}. ${module.label} ×`;
       chip.style.minWidth = '0';
       chip.style.maxWidth = '210px';
@@ -225,7 +247,52 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
       chip.style.fontSize = '11px';
       chip.style.textOverflow = 'ellipsis';
       chip.style.whiteSpace = 'nowrap';
+      chip.style.cursor = 'grab';
+      chip.style.userSelect = 'none';
+
+      chip.addEventListener('dragstart', (event) => {
+        draggedSelectionIndex = index;
+        suppressChipClick = true;
+        chip.style.opacity = '0.45';
+        chip.style.cursor = 'grabbing';
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', String(index));
+      });
+
+      chip.addEventListener('dragover', (event) => {
+        if (draggedSelectionIndex === null) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+        chip.style.borderColor = '#f97316';
+        chip.style.boxShadow = '0 0 0 2px rgba(249, 115, 22, 0.16)';
+      });
+
+      chip.addEventListener('dragleave', () => {
+        chip.style.borderColor = '#d7dee7';
+        chip.style.boxShadow = 'none';
+      });
+
+      chip.addEventListener('drop', (event) => {
+        event.preventDefault();
+        const targetIndex = Number(chip.dataset.selectionIndex);
+        const fromIndex = draggedSelectionIndex;
+        draggedSelectionIndex = null;
+        reorderSelection(fromIndex, targetIndex);
+      });
+
+      chip.addEventListener('dragend', () => {
+        draggedSelectionIndex = null;
+        chip.style.opacity = '1';
+        chip.style.cursor = 'grab';
+        chip.style.borderColor = '#d7dee7';
+        chip.style.boxShadow = 'none';
+        window.setTimeout(() => {
+          suppressChipClick = false;
+        }, 0);
+      });
+
       chip.addEventListener('click', () => {
+        if (suppressChipClick) return;
         selectedModuleKeys.splice(index, 1);
         syncPickerSelection();
       });
@@ -336,12 +403,16 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     pickerBackdrop.hidden = true;
     pickerRequest = null;
     selectedModuleKeys = [];
+    draggedSelectionIndex = null;
+    suppressChipClick = false;
     syncPickerSelection();
   }
 
   function openPicker({ placement = 'append', context = null } = {}) {
     pickerRequest = { placement, context };
     selectedModuleKeys = [];
+    draggedSelectionIndex = null;
+    suppressChipClick = false;
 
     if (placement === 'left') {
       pickerTitle.textContent = 'Sol Tarafa Modül Ekle';
