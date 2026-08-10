@@ -39,14 +39,22 @@
         <section class="panel-card">
           <h2>Seçili yüzey</h2>
           <p id="selection-info" class="status">3D sahnede bir yatay panele tıkla. Ctrl + tık ile çoklu seçebilirsin.</p>
-          <label for="surface-color">Renk</label>
+          <label for="surface-color">Aktif renk</label>
           <div class="row">
             <input id="surface-color" type="color" value="#ffffff" />
             <button id="apply-color">Rengi uygula</button>
           </div>
-          <label for="surface-image">Görsel / logo</label>
+
+          <div class="section-divider"></div>
+
+          <label for="surface-image">Görsel arşivine ekle</label>
           <input id="surface-image" type="file" accept="image/*" />
-          <button id="clear-texture" class="ghost">Görseli kaldır</button>
+          <p id="asset-status" class="status">Görsel seçilmedi.</p>
+          <div id="asset-library" class="asset-library"></div>
+          <div class="row">
+            <button id="apply-image">Görseli uygula</button>
+            <button id="clear-texture" class="ghost">Görseli kaldır</button>
+          </div>
         </section>
 
         <section class="panel-card compact">
@@ -57,6 +65,7 @@
             <li>Düz panel: 7 × 50 cm yatay bölüm</li>
             <li>Genişlikler: 50 / 100 / 150 / 200 cm</li>
             <li>Zemin grid: 100 × 100 cm</li>
+            <li>Duvar başlangıcı: grid merkezi / 0 noktası</li>
           </ul>
         </section>
       </aside>
