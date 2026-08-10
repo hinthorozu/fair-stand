@@ -335,3 +335,8 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 269. ViewCube için responsive sağ üst overlay stili eklendi.
 270. ViewCube entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
 271. ViewCube masaüstünde yaklaşık üçte bir oranında küçültüldü; mobil görünüm, home butonu, padding ve gölge ölçüleri de yeni kompakt boyuta göre ayarlandı.
+272. Uygulamanın ilk sahne açılışı ViewCube `⌂` Home yönü ile aynı izometrik kamera açısına alındı.
+273. 350 cm gibi standart duvarlarda ilk kamera mesafesi minimum yaklaşık 9 metreye çekilerek sahnenin daha ferah görünmesi sağlandı.
+274. Uzun duvarlarda başlangıç kamera mesafesinin mevcut otomatik kadraja oranlı büyümesi sağlandı; sabit 9 metreye kilitlenmedi.
+275. Başlangıç Home kadrajının duvar kurulmadan önce değil, ilk gerçek animation frame'de duvar oluşturulduktan sonra uygulanması sağlandı.
+276. İlk Home kadrajı değişikliği GitHub Actions test + Vite build kontrolünden başarıyla geçti.
