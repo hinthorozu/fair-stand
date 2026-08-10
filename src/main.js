@@ -73,8 +73,8 @@ function renderCurrentWallResult() {
   );
 }
 
-function rebuildWall() {
-  scene3d.buildWall(currentModules);
+function rebuildWall({ resetView = true } = {}) {
+  scene3d.buildWall(currentModules, { resetView });
   renderCurrentWallResult();
 }
 
@@ -98,8 +98,9 @@ function buildAutomaticWall() {
   if (!confirmed) return;
 
   // Oluştur komutu onaylandıktan sonra mevcut state'i taşımadan sıfırdan yeni duvar kurar.
+  // Yeni bir sahne başlangıcı olduğu için kamera da Home / default görünüme döner.
   currentModules = result.modules.map((widthCm) => createFlatPanelModuleState(widthCm));
-  rebuildWall();
+  rebuildWall({ resetView: true });
 }
 
 buildWallButton.addEventListener('click', buildAutomaticWall);
@@ -110,7 +111,8 @@ wallLengthInput.addEventListener('keydown', (event) => {
 document.querySelectorAll('[data-add-module]').forEach((button) => {
   button.addEventListener('click', () => {
     currentModules.push(createFlatPanelModuleState(Number(button.dataset.addModule)));
-    rebuildWall();
+    // Modül eklerken kullanıcının mevcut pan / zoom / kamera açısını koru.
+    rebuildWall({ resetView: false });
   });
 });
 
@@ -126,7 +128,7 @@ clearWallButton.addEventListener('click', () => {
   if (!confirmed) return;
 
   currentModules = [];
-  scene3d.clearWall();
+  scene3d.clearWall({ resetView: true });
   renderWallResult('Duvar boş.');
 });
 
