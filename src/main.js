@@ -8,6 +8,7 @@ import {
   moduleWidths,
 } from './designState.js';
 import { loadImageAssets, saveImageAsset } from './assetStore.js';
+import { describeRectSelection } from './rectSelection.js';
 
 const viewport = document.querySelector('#viewport');
 const wallLengthInput = document.querySelector('#wall-length');
@@ -35,18 +36,25 @@ const scene3d = createStandScene(
   viewport,
   (surfaces) => {
     if (!surfaces?.length) {
-      selectionInfo.textContent = '3D sahnede bir yatay panele tıkla. Ctrl + tık ile çoklu seçebilirsin.';
+      selectionInfo.textContent = 'Bir panel seç; Ctrl/Cmd + tık ile karşı köşeyi seçip dikdörtgen blok oluştur.';
       return;
     }
 
     if (surfaces.length === 1) {
       const surface = surfaces[0];
       const { moduleIndex, widthCm, stripNumber } = surface.userData;
-      selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${widthCm} cm · alttan ${stripNumber}. panel`;
+      selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${widthCm} cm · alttan ${stripNumber}. panel · Ctrl/Cmd + tık ile blok seç.`;
       return;
     }
 
-    selectionInfo.textContent = `${surfaces.length} panel seçili · Aynı sıradaki bitişik panellere tek görsel yatay yayılır.`;
+    const shape = describeRectSelection(
+      surfaces.map((surface) => ({
+        moduleIndex: surface.userData.moduleIndex,
+        stripIndex: surface.userData.stripIndex,
+      })),
+    );
+
+    selectionInfo.textContent = `${shape.columnCount} × ${shape.rowCount} blok · ${shape.panelCount} panel seçili.`;
   },
   getAssetUrl,
 );
@@ -105,7 +113,7 @@ clearWallButton.addEventListener('click', () => {
 applyColorButton.addEventListener('click', () => {
   const selected = scene3d.getSelectedSurfaces();
   if (!selected.length) {
-    selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel veya panelleri seç.';
+    selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel veya panel bloğunu seç.';
     return;
   }
   scene3d.applyColor(selected, colorInput.value);
@@ -195,7 +203,7 @@ function applyActiveImageToSelection() {
 
   const result = scene3d.applyHorizontalImageAsset(selected, activeAssetId);
   if (!result.ok) {
-    selectionInfo.textContent = result.message;
+    selectionInfo.textContent = `${result.message} Dikey/2D blok görseli sonraki adım.`;
     return false;
   }
 
