@@ -22,7 +22,7 @@ const PICKER_MODULE_KEYS = [
 export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
   let activeContext = null;
   let pickerRequest = null;
-  let selectedModuleKey = null;
+  let selectedModuleKeys = [];
 
   const menu = document.createElement('div');
   menu.className = 'module-context-menu';
@@ -52,6 +52,14 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
         <button type="button" class="module-picker-close" aria-label="Kapat">×</button>
       </div>
       <div class="module-catalog-grid" role="listbox" aria-label="Modül kataloğu"></div>
+      <div class="module-picker-selection" style="margin-top:12px;padding:10px 12px;border:1px solid #e2e7ed;border-radius:12px;background:#f8fafc;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <strong style="font-size:12px;color:#374151;">Seçim sırası</strong>
+          <button type="button" class="module-picker-selection-clear" style="min-width:0;padding:5px 8px;border:0;background:transparent;color:#667085;font-size:11px;">Temizle</button>
+        </div>
+        <p class="module-picker-selection-empty" style="margin:6px 0 0;color:#8a94a3;font-size:11px;">Kartlara tıklayarak modülleri sıraya ekle.</p>
+        <div class="module-picker-selection-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;"></div>
+      </div>
       <div class="module-picker-footer">
         <button type="button" class="module-picker-cancel ghost">Vazgeç</button>
         <button type="button" class="module-picker-add primary" disabled>Ekle</button>
@@ -65,6 +73,9 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
   const pickerContext = pickerBackdrop.querySelector('.module-picker-context');
   const pickerGrid = pickerBackdrop.querySelector('.module-catalog-grid');
   const pickerAddButton = pickerBackdrop.querySelector('.module-picker-add');
+  const pickerSelectionList = pickerBackdrop.querySelector('.module-picker-selection-list');
+  const pickerSelectionEmpty = pickerBackdrop.querySelector('.module-picker-selection-empty');
+  const pickerSelectionClear = pickerBackdrop.querySelector('.module-picker-selection-clear');
 
   function describeModule(context) {
     const label = MODULE_LABELS[context?.type] ?? 'Modül';
@@ -182,29 +193,95 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     return createPanelPreview(module.widthCm);
   }
 
-  function syncPickerSelection() {
-    pickerGrid.querySelectorAll('[data-module-key]').forEach((card) => {
-      const selected = card.dataset.moduleKey === selectedModuleKey;
-      card.classList.toggle('selected', selected);
-      card.setAttribute('aria-selected', String(selected));
+  function getSelectionCounts() {
+    const counts = new Map();
+    selectedModuleKeys.forEach((moduleKey) => {
+      counts.set(moduleKey, (counts.get(moduleKey) ?? 0) + 1);
     });
-    pickerAddButton.disabled = !selectedModuleKey;
+    return counts;
+  }
+
+  function renderSelectionQueue() {
+    pickerSelectionList.innerHTML = '';
+    pickerSelectionEmpty.hidden = selectedModuleKeys.length > 0;
+    pickerSelectionClear.disabled = selectedModuleKeys.length === 0;
+
+    selectedModuleKeys.forEach((moduleKey, index) => {
+      const module = MODULE_CATALOG[moduleKey];
+      if (!module) return;
+
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.title = 'Bu modülü sıradan çıkar';
+      chip.textContent = `${index + 1}. ${module.label} ×`;
+      chip.style.minWidth = '0';
+      chip.style.maxWidth = '210px';
+      chip.style.overflow = 'hidden';
+      chip.style.padding = '6px 8px';
+      chip.style.border = '1px solid #d7dee7';
+      chip.style.borderRadius = '8px';
+      chip.style.background = '#ffffff';
+      chip.style.color = '#374151';
+      chip.style.fontSize = '11px';
+      chip.style.textOverflow = 'ellipsis';
+      chip.style.whiteSpace = 'nowrap';
+      chip.addEventListener('click', () => {
+        selectedModuleKeys.splice(index, 1);
+        syncPickerSelection();
+      });
+      pickerSelectionList.appendChild(chip);
+    });
+  }
+
+  function syncPickerSelection() {
+    const counts = getSelectionCounts();
+
+    pickerGrid.querySelectorAll('[data-module-key]').forEach((card) => {
+      const count = counts.get(card.dataset.moduleKey) ?? 0;
+      card.classList.toggle('selected', count > 0);
+      card.setAttribute('aria-selected', String(count > 0));
+
+      const badge = card.querySelector('.module-catalog-card-count');
+      if (badge) {
+        badge.hidden = count === 0;
+        badge.textContent = `×${count}`;
+      }
+    });
+
+    pickerAddButton.disabled = selectedModuleKeys.length === 0;
+    pickerAddButton.textContent = selectedModuleKeys.length
+      ? `Ekle (${selectedModuleKeys.length})`
+      : 'Ekle';
+    renderSelectionQueue();
+  }
+
+  function addModuleToSelection(moduleKey) {
+    if (!MODULE_CATALOG[moduleKey]) return;
+    selectedModuleKeys.push(moduleKey);
+    syncPickerSelection();
   }
 
   function submitPickerSelection() {
-    if (!selectedModuleKey || !pickerRequest) return;
+    if (!selectedModuleKeys.length || !pickerRequest) return;
 
-    const module = MODULE_CATALOG[selectedModuleKey];
-    if (!module) return;
+    const entries = selectedModuleKeys
+      .map((moduleKey) => ({ moduleKey, module: MODULE_CATALOG[moduleKey] }))
+      .filter((entry) => entry.module);
+    if (!entries.length) return;
 
-    const request = {
-      ...pickerRequest,
-      moduleKey: selectedModuleKey,
-      module,
-    };
+    const request = { ...pickerRequest };
+    const insertionEntries = request.placement === 'right'
+      ? [...entries].reverse()
+      : entries;
 
     closePicker();
-    onAdd?.(request);
+    insertionEntries.forEach((entry) => {
+      onAdd?.({
+        ...request,
+        moduleKey: entry.moduleKey,
+        module: entry.module,
+      });
+    });
   }
 
   function renderPickerCatalog() {
@@ -221,20 +298,30 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
       card.setAttribute('role', 'option');
       card.setAttribute('aria-selected', 'false');
 
+      const titleRow = document.createElement('span');
+      titleRow.style.display = 'flex';
+      titleRow.style.alignItems = 'center';
+      titleRow.style.justifyContent = 'space-between';
+      titleRow.style.gap = '8px';
+
       const cardTitle = document.createElement('strong');
       cardTitle.className = 'module-catalog-card-title';
       cardTitle.textContent = module.label;
 
-      card.append(cardTitle, createModulePreview(module));
-      card.addEventListener('click', () => {
-        selectedModuleKey = moduleKey;
-        syncPickerSelection();
-      });
-      card.addEventListener('dblclick', () => {
-        selectedModuleKey = moduleKey;
-        syncPickerSelection();
-        submitPickerSelection();
-      });
+      const countBadge = document.createElement('span');
+      countBadge.className = 'module-catalog-card-count';
+      countBadge.hidden = true;
+      countBadge.style.flex = '0 0 auto';
+      countBadge.style.padding = '2px 6px';
+      countBadge.style.borderRadius = '999px';
+      countBadge.style.background = '#f97316';
+      countBadge.style.color = '#ffffff';
+      countBadge.style.fontSize = '10px';
+      countBadge.style.fontWeight = '800';
+
+      titleRow.append(cardTitle, countBadge);
+      card.append(titleRow, createModulePreview(module));
+      card.addEventListener('click', () => addModuleToSelection(moduleKey));
 
       pickerGrid.appendChild(card);
     });
@@ -248,13 +335,13 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
   function closePicker() {
     pickerBackdrop.hidden = true;
     pickerRequest = null;
-    selectedModuleKey = null;
+    selectedModuleKeys = [];
     syncPickerSelection();
   }
 
   function openPicker({ placement = 'append', context = null } = {}) {
     pickerRequest = { placement, context };
-    selectedModuleKey = null;
+    selectedModuleKeys = [];
 
     if (placement === 'left') {
       pickerTitle.textContent = 'Sol Tarafa Modül Ekle';
@@ -266,7 +353,7 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
 
     pickerContext.textContent = context
       ? `Hedef: Modül ${context.moduleIndex + 1} · ${describeModule(context)}`
-      : 'Seçilen modül duvarın sonuna eklenecek.';
+      : 'Seçilen modüller sırayla duvarın sonuna eklenecek.';
 
     menu.hidden = true;
     pickerBackdrop.hidden = false;
@@ -322,6 +409,10 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
   });
 
   pickerAddButton.addEventListener('click', submitPickerSelection);
+  pickerSelectionClear.addEventListener('click', () => {
+    selectedModuleKeys = [];
+    syncPickerSelection();
+  });
 
   pickerBackdrop.querySelector('.module-picker-close').addEventListener('click', closePicker);
   pickerBackdrop.querySelector('.module-picker-cancel').addEventListener('click', closePicker);
@@ -342,6 +433,7 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
   window.addEventListener('blur', close);
 
   renderPickerCatalog();
+  syncPickerSelection();
 
   return {
     open,
