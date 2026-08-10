@@ -4,6 +4,7 @@ import {
   applyColorOverride,
   createFlatPanelModuleState,
   createSeparatorModuleState,
+  createShowcaseModuleState,
   duplicateModuleState,
   reconcileWallModules,
   totalWallWidthCm,
@@ -118,4 +119,30 @@ test('duplicating a separator preserves color with independent ids', () => {
   assert.equal(duplicate.type, 'separator');
   assert.equal(duplicate.widthCm, 100);
   assert.equal(duplicate.surface.color, '#654321');
+});
+
+test('showcase states are 100 cm color-only modules with 2 or 3 compartments', () => {
+  const showcase3 = createShowcaseModuleState('showcase-3', 100);
+  const showcase2 = createShowcaseModuleState('showcase-2', 100);
+
+  assert.equal(showcase3.type, 'showcase-3');
+  assert.equal(showcase2.type, 'showcase-2');
+  assert.equal(showcase3.widthCm, 100);
+  assert.equal(showcase2.widthCm, 100);
+  assert.equal('imageAssetId' in showcase3.surface, false);
+  assert.equal('imageAssetId' in showcase2.surface, false);
+  assert.equal(createShowcaseModuleState('unknown', 100), null);
+});
+
+test('duplicating a showcase preserves its type and color with independent ids', () => {
+  const original = createShowcaseModuleState('showcase-3', 100);
+  original.surface.color = '#334455';
+
+  const duplicate = duplicateModuleState(original);
+
+  assert.notEqual(duplicate.id, original.id);
+  assert.notEqual(duplicate.surface.id, original.surface.id);
+  assert.equal(duplicate.type, 'showcase-3');
+  assert.equal(duplicate.widthCm, 100);
+  assert.equal(duplicate.surface.color, '#334455');
 });
