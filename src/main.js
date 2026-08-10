@@ -3,7 +3,6 @@ import { createStandScene } from './scene3d.js';
 import { composeStraightWall } from './wall.js';
 import {
   createFlatPanelModuleState,
-  reconcileWallModules,
   totalWallWidthCm,
   moduleWidths,
 } from './designState.js';
@@ -79,6 +78,11 @@ function rebuildWall() {
   renderCurrentWallResult();
 }
 
+function confirmExistingScene(message) {
+  if (!currentModules.length) return true;
+  return window.confirm(message);
+}
+
 function buildAutomaticWall() {
   const lengthCm = Number(wallLengthInput.value);
   const result = composeStraightWall(lengthCm);
@@ -88,7 +92,13 @@ function buildAutomaticWall() {
     return;
   }
 
-  currentModules = reconcileWallModules(currentModules, result.modules);
+  const confirmed = confirmExistingScene(
+    'Sahnede mevcut bir duvar var. Yeni duvar oluşturulursa mevcut panel renkleri, görselleri ve düzenlemeleri silinecek. Devam edilsin mi?',
+  );
+  if (!confirmed) return;
+
+  // Oluştur komutu onaylandıktan sonra mevcut state'i taşımadan sıfırdan yeni duvar kurar.
+  currentModules = result.modules.map((widthCm) => createFlatPanelModuleState(widthCm));
   rebuildWall();
 }
 
@@ -105,6 +115,16 @@ document.querySelectorAll('[data-add-module]').forEach((button) => {
 });
 
 clearWallButton.addEventListener('click', () => {
+  if (!currentModules.length) {
+    renderWallResult('Duvar zaten boş.');
+    return;
+  }
+
+  const confirmed = window.confirm(
+    'Sahnedeki mevcut duvar, panel renkleri ve görseller silinecek. Duvar temizlensin mi?',
+  );
+  if (!confirmed) return;
+
   currentModules = [];
   scene3d.clearWall();
   renderWallResult('Duvar boş.');
