@@ -158,6 +158,105 @@ h2 {
   line-height: 1.7;
 }
 
+.stand-setup-card {
+  gap: 11px;
+}
+
+.stand-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.stand-type-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 7px 9px;
+  border: 2px solid #d9dee5;
+  border-radius: 11px;
+  background: #f8fafc;
+  color: #364152;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.stand-type-card:hover {
+  transform: none;
+  border-color: #aeb7c4;
+  background: #ffffff;
+}
+
+.stand-type-card[aria-pressed="true"] {
+  border-color: #f97316;
+  background: #fff8f2;
+  color: #9a3412;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+}
+
+.stand-type-thumb {
+  display: block;
+  width: 100%;
+  height: 56px;
+}
+
+.stand-thumb-floor {
+  fill: #eef2f5;
+  stroke: #cbd3dc;
+  stroke-width: 1.5;
+}
+
+.stand-thumb-wall {
+  fill: none;
+  stroke: #596477;
+  stroke-width: 5;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+.stand-type-card[aria-pressed="true"] .stand-thumb-wall {
+  stroke: #f97316;
+}
+
+.stand-thumb-island {
+  stroke-dasharray: 4 3;
+}
+
+.stand-thumb-island-core {
+  fill: #ffffff;
+  stroke: #7b8794;
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.stand-type-card[aria-pressed="true"] .stand-thumb-island-core {
+  stroke: #f97316;
+}
+
+.stand-size-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.stand-size-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.stand-limit-note {
+  margin: -2px 0 0;
+  color: #7a8494;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
 .row {
   display: flex;
   gap: 8px;
@@ -271,6 +370,43 @@ h2 {
   outline: none;
 }
 
+.viewport-empty {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f4f6f8;
+}
+
+.viewport-empty[hidden] {
+  display: none;
+}
+
+.viewport-empty-card {
+  display: flex;
+  width: min(420px, 100%);
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px;
+  border: 1px dashed #cbd3dc;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #667085;
+  text-align: center;
+}
+
+.viewport-empty-card strong {
+  color: #273142;
+  font-size: 16px;
+}
+
+.viewport-empty-card span {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .viewport-toolbar {
   position: absolute;
   z-index: 1;
@@ -286,6 +422,10 @@ h2 {
   font-size: 11px;
   backdrop-filter: blur(8px);
   pointer-events: none;
+}
+
+.viewport-toolbar[hidden] {
+  display: none;
 }
 
 .view-cube {
