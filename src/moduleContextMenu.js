@@ -124,23 +124,32 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     preview.className = 'module-card-preview';
 
     const frame = document.createElement('div');
-    frame.style.position = 'relative';
-    frame.style.width = '62px';
-    frame.style.height = '132px';
-    frame.style.border = '5px solid #6f767d';
-    frame.style.background = '#ffffff';
-    frame.style.boxShadow = '5px 7px 12px rgba(15, 23, 42, 0.12)';
-
-    const opening = document.createElement('div');
-    opening.style.position = 'absolute';
-    opening.style.left = '3px';
-    opening.style.right = '3px';
-    opening.style.top = module.type === 'showcase-3' ? '52px' : '57px';
-    opening.style.height = module.type === 'showcase-3' ? '55px' : '40px';
-    opening.style.border = '3px solid #8b9197';
-    opening.style.background = '#eef1f3';
+    frame.className = 'module-card-flat-panel';
+    frame.style.width = `${Math.round((100 / 200) * 118)}px`;
 
     const shelfCount = module.type === 'showcase-3' ? 2 : 1;
+    const openingSlotCount = module.type === 'showcase-3' ? 3 : 2;
+    const bottomPanelCount = module.type === 'showcase-3' ? 1 : 2;
+
+    const createPanelSlot = () => {
+      const strip = document.createElement('span');
+      strip.className = 'module-card-strip';
+      strip.style.flex = '1 1 0';
+      return strip;
+    };
+
+    for (let index = 0; index < 3; index += 1) {
+      frame.appendChild(createPanelSlot());
+    }
+
+    const opening = document.createElement('div');
+    opening.style.position = 'relative';
+    opening.style.flex = `${openingSlotCount} ${openingSlotCount} 0`;
+    opening.style.minHeight = '0';
+    opening.style.borderTop = '2px solid #747b82';
+    opening.style.borderBottom = '2px solid #747b82';
+    opening.style.background = '#eef1f3';
+
     for (let index = 1; index <= shelfCount; index += 1) {
       const shelf = document.createElement('span');
       shelf.style.position = 'absolute';
@@ -148,11 +157,19 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
       shelf.style.right = '0';
       shelf.style.top = `${(index / (shelfCount + 1)) * 100}%`;
       shelf.style.height = '3px';
+      shelf.style.transform = 'translateY(-1.5px)';
       shelf.style.background = 'rgba(151, 190, 153, 0.9)';
       opening.appendChild(shelf);
     }
 
     frame.appendChild(opening);
+
+    for (let index = 0; index < bottomPanelCount; index += 1) {
+      const strip = createPanelSlot();
+      if (index === bottomPanelCount - 1) strip.style.borderBottom = '0';
+      frame.appendChild(strip);
+    }
+
     preview.appendChild(frame);
     return preview;
   }
