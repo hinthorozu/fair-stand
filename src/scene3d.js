@@ -35,8 +35,8 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
   controls.maxDistance = 1000;
   controls.maxPolarAngle = Math.PI * 0.49;
   controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
-  controls.mouseButtons.MIDDLE = THREE.MOUSE.DOLLY;
-  controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+  controls.mouseButtons.MIDDLE = THREE.MOUSE.PAN;
+  controls.mouseButtons.RIGHT = null;
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x7f8790, 2.1));
 
@@ -543,7 +543,7 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
   }
 
   renderer.domElement.addEventListener('pointerdown', (event) => {
-    // Sağ tuş OrbitControls pan için ayrıldı; panel seçimi yalnızca sol tuşla yapılır.
+    // Orta tuş OrbitControls pan için ayrıldı; panel seçimi yalnızca sol tuşla yapılır.
     if (event.button !== 0) return;
 
     const rect = renderer.domElement.getBoundingClientRect();
