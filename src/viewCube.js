@@ -266,8 +266,8 @@ export function createViewCube(container, camera, controls) {
     animateToDirection(HOME_DIRECTION);
   });
 
-  function update() {
-    applyInitialHomeView();
+  function update({ applyInitial = true } = {}) {
+    if (applyInitial) applyInitialHomeView();
 
     const offset = camera.position.clone().sub(controls.target);
     if (offset.lengthSq() === 0) offset.copy(HOME_DIRECTION);
@@ -287,7 +287,9 @@ export function createViewCube(container, camera, controls) {
     root.remove();
   }
 
-  update();
+  // İlk senkron çizimde ana kameraya dokunma; main.js aynı çağrı akışında duvarı kuruyor.
+  // İlk animation frame'de update() Home kadrajını duvar oluştuktan sonra uygular.
+  update({ applyInitial: false });
 
   return {
     update,
