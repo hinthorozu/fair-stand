@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   MAX_STAND_DIMENSION_CM,
+  MIN_STAND_DIMENSION_CM,
+  STAND_DIMENSION_STEP_CM,
   STAND_TYPES,
   validateStandSetup,
 } from '../src/standSetup.js';
@@ -19,6 +21,18 @@ test('supports left and right L stands as separate stand types', () => {
 
   assert.equal(validateStandSetup({ standType: 'l-left', xCm: 1000, yCm: 500 }).ok, true);
   assert.equal(validateStandSetup({ standType: 'l-right', xCm: 1000, yCm: 500 }).ok, true);
+});
+
+test('accepts stand dimensions only in 50 cm increments', () => {
+  assert.equal(MIN_STAND_DIMENSION_CM, 50);
+  assert.equal(STAND_DIMENSION_STEP_CM, 50);
+
+  assert.equal(validateStandSetup({ standType: 'back-wall', xCm: 800, yCm: 450 }).ok, true);
+  assert.equal(validateStandSetup({ standType: 'back-wall', xCm: 350, yCm: 500 }).ok, true);
+
+  assert.equal(validateStandSetup({ standType: 'back-wall', xCm: 25, yCm: 75 }).ok, false);
+  assert.equal(validateStandSetup({ standType: 'back-wall', xCm: 825, yCm: 450 }).ok, false);
+  assert.equal(validateStandSetup({ standType: 'back-wall', xCm: 800, yCm: 475 }).ok, false);
 });
 
 test('converts centimetres to the active area and adds a 1 metre surround', () => {
@@ -48,7 +62,7 @@ test('allows up to 50 metres on each axis and rejects anything larger', () => {
   assert.equal(
     validateStandSetup({
       standType: 'island',
-      xCm: MAX_STAND_DIMENSION_CM + 1,
+      xCm: MAX_STAND_DIMENSION_CM + STAND_DIMENSION_STEP_CM,
       yCm: 1000,
     }).ok,
     false,
