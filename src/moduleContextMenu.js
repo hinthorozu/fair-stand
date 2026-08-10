@@ -19,6 +19,17 @@ const PICKER_MODULE_KEYS = [
   'SHOWCASE_2_100',
 ];
 
+// Sol / sağ komutları kameraya göre değil, modülün ön yüzüne göre yorumlanır.
+// Sırt duvarda ve sağ yan duvarda teknik eksen yönü kullanıcı yönüyle aynıdır.
+// Sol yan duvarın ön yüzü standın içine (+X) baktığı için kullanıcıdaki sol/sağ
+// teknik Y ekseninde ters yöndedir.
+export function resolveModuleSidePlacement(context, visualSide) {
+  if (visualSide !== 'left' && visualSide !== 'right') return visualSide;
+  const wallId = context?.placement?.wallId ?? 'back';
+  if (wallId !== 'left') return visualSide;
+  return visualSide === 'left' ? 'right' : 'left';
+}
+
 export function createModuleContextMenu({
   onDelete,
   onDuplicate,
@@ -422,15 +433,19 @@ export function createModuleContextMenu({
     syncPickerSelection();
   }
 
-  function openPicker({ placement = 'append', context = null } = {}) {
-    pickerRequest = { placement, context };
+  function openPicker({
+    placement = 'append',
+    context = null,
+    displayPlacement = placement,
+  } = {}) {
+    pickerRequest = { placement, context, displayPlacement };
     selectedModuleKeys = [];
     draggedSelectionIndex = null;
     suppressChipClick = false;
 
-    if (placement === 'left') {
+    if (displayPlacement === 'left') {
       pickerTitle.textContent = 'Sol Tarafa Modül Ekle';
-    } else if (placement === 'right') {
+    } else if (displayPlacement === 'right') {
       pickerTitle.textContent = 'Sağ Tarafa Modül Ekle';
     } else {
       pickerTitle.textContent = 'Modül Ekle';
@@ -485,8 +500,10 @@ export function createModuleContextMenu({
     }
 
     if (action === 'duplicate-right' || action === 'duplicate-left') {
+      const visualSide = action === 'duplicate-left' ? 'left' : 'right';
+      const placementSide = resolveModuleSidePlacement(context, visualSide);
       close();
-      onDuplicate?.(context, action === 'duplicate-left' ? 'left' : 'right');
+      onDuplicate?.(context, placementSide);
       return;
     }
 
@@ -497,12 +514,20 @@ export function createModuleContextMenu({
     }
 
     if (action === 'add-right') {
-      openPicker({ placement: 'right', context });
+      openPicker({
+        placement: resolveModuleSidePlacement(context, 'right'),
+        displayPlacement: 'right',
+        context,
+      });
       return;
     }
 
     if (action === 'add-left') {
-      openPicker({ placement: 'left', context });
+      openPicker({
+        placement: resolveModuleSidePlacement(context, 'left'),
+        displayPlacement: 'left',
+        context,
+      });
     }
   });
 
