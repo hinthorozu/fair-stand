@@ -4,7 +4,7 @@ export const STAND_DIMENSIONS = Object.freeze({
   stripCount: 7,
   stripHeight: 0.5,
   frameWidth: 0.055,
-  frameDepth: 0.11,
+  frameDepth: 0.1,
 });
 
 export const MODULE_WIDTHS_CM = Object.freeze([50, 100, 150, 200]);
