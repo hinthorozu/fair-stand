@@ -78,6 +78,155 @@ function buildOrderedIds(modules, placements, segments, standYCm) {
   ];
 }
 
+function getActiveEntries(modules, segments, standYCm) {
+  const activeWallIds = new Set(segments.map((segment) => segment.wallId));
+  const entries = modules
+    .filter((module) => activeWallIds.has(module?.placement?.wallId))
+    .map((module, originalIndex) => ({
+      module,
+      originalIndex,
+      pathStartCm: placementToPathStart(module, segments, standYCm),
+    }));
+
+  if (entries.some((entry) => entry.pathStartCm === null)) return null;
+  entries.sort((a, b) => (
+    a.pathStartCm - b.pathStartCm || a.originalIndex - b.originalIndex
+  ));
+  return entries;
+}
+
+function findInsertionTarget({
+  activeEntries,
+  desiredPathStartCm,
+  insertedWidthCm,
+  collisionModuleId,
+}) {
+  const desiredCenterCm = desiredPathStartCm + insertedWidthCm / 2;
+  const overlappingEntries = activeEntries.filter((entry) => {
+    const start = entry.pathStartCm;
+    const end = start + Number(entry.module.widthCm);
+    return desiredPathStartCm < end - EPSILON_CM
+      && start < desiredPathStartCm + insertedWidthCm - EPSILON_CM;
+  });
+
+  const targetEntry = overlappingEntries
+    .map((entry) => ({
+      ...entry,
+      centerDistanceCm: Math.abs(
+        (entry.pathStartCm + Number(entry.module.widthCm) / 2) - desiredCenterCm,
+      ),
+    }))
+    .sort((a, b) => a.centerDistanceCm - b.centerDistanceCm)[0]
+    ?? activeEntries.find((entry) => entry.module.id === collisionModuleId);
+
+  if (!targetEntry) return null;
+
+  const targetCenterCm = targetEntry.pathStartCm + Number(targetEntry.module.widthCm) / 2;
+  return {
+    targetEntry,
+    chainSide: desiredCenterCm <= targetCenterCm ? 'left' : 'right',
+  };
+}
+
+export function planContinuousModuleInsert({
+  modules = [],
+  insertedModule,
+  desiredPlacement,
+  standType,
+  standXCm,
+  standYCm,
+} = {}) {
+  if (!insertedModule?.id) return { ok: false, message: 'Eklenecek modül bulunamadı.' };
+  if (modules.some((module) => module?.id === insertedModule.id)) {
+    return { ok: false, message: 'Eklenecek modül kimliği zaten kullanılıyor.' };
+  }
+  if (!desiredPlacement) return { ok: false, message: 'Hedef yerleşim bulunamadı.' };
+
+  const segments = getContinuousWallSegments(standType, standXCm, standYCm);
+  if (!segments.length) {
+    return { ok: false, message: 'Bu stand tipinde sürekli duvar eklemesi kullanılamaz.' };
+  }
+
+  const insertedWidthCm = Number(insertedModule.widthCm);
+  const desiredPathStartCm = placementToPathStart(
+    { ...insertedModule, placement: { ...desiredPlacement } },
+    segments,
+    standYCm,
+  );
+  if (desiredPathStartCm === null) {
+    return { ok: false, message: 'Modül hedef duvar sınırına sığmıyor.' };
+  }
+
+  const directValidation = validatePlacementAgainstModules({
+    placement: desiredPlacement,
+    widthCm: insertedWidthCm,
+    moduleId: insertedModule.id,
+    modules,
+    standType,
+    standXCm,
+    standYCm,
+  });
+
+  if (directValidation.ok) {
+    const placements = new Map([[insertedModule.id, { ...desiredPlacement }]]);
+    return {
+      ok: true,
+      mode: 'direct',
+      movingPlacement: { ...desiredPlacement },
+      placements,
+      orderedModuleIds: buildOrderedIds(
+        [...modules, insertedModule],
+        placements,
+        segments,
+        standYCm,
+      ),
+    };
+  }
+
+  if (!directValidation.collisionModuleId) return directValidation;
+
+  const activeEntries = getActiveEntries(modules, segments, standYCm);
+  if (!activeEntries) {
+    return { ok: false, message: 'Mevcut modüllerden birinin duvar yerleşimi okunamadı.' };
+  }
+
+  const target = findInsertionTarget({
+    activeEntries,
+    desiredPathStartCm,
+    insertedWidthCm,
+    collisionModuleId: directValidation.collisionModuleId,
+  });
+  if (!target) return directValidation;
+
+  const plan = planContinuousWallInsertion({
+    modules,
+    insertedModules: [insertedModule],
+    targetModuleId: target.targetEntry.module.id,
+    side: chainSideToCallerSide(
+      target.chainSide,
+      target.targetEntry.module?.placement?.wallId,
+    ),
+    standType,
+    standXCm,
+    standYCm,
+  });
+  if (!plan.ok) return plan;
+
+  const movingPlacement = plan.placements?.get(insertedModule.id);
+  if (!movingPlacement) {
+    return { ok: false, message: 'Eklenen modül için yeni yerleşim üretilemedi.' };
+  }
+
+  return {
+    ...plan,
+    ok: true,
+    mode: 'reflow',
+    movingPlacement: { ...movingPlacement },
+    targetModuleId: target.targetEntry.module.id,
+    chainSide: target.chainSide,
+  };
+}
+
 export function planContinuousModuleMove({
   modules = [],
   movingModuleId,
@@ -97,8 +246,11 @@ export function planContinuousModuleMove({
 
   const movingWidthCm = Number(movingModule.widthCm);
   const remainingModules = modules.filter((module) => module?.id !== movingModuleId);
-  const desiredModule = { ...movingModule, placement: { ...desiredPlacement } };
-  const desiredPathStartCm = placementToPathStart(desiredModule, segments, standYCm);
+  const desiredPathStartCm = placementToPathStart(
+    { ...movingModule, placement: { ...desiredPlacement } },
+    segments,
+    standYCm,
+  );
   if (desiredPathStartCm === null) {
     return { ok: false, message: 'Modül hedef duvar sınırına sığmıyor.' };
   }
@@ -126,60 +278,31 @@ export function planContinuousModuleMove({
 
   if (!directValidation.collisionModuleId) return directValidation;
 
-  const activeWallIds = new Set(segments.map((segment) => segment.wallId));
-  const activeEntries = remainingModules
-    .filter((module) => activeWallIds.has(module?.placement?.wallId))
-    .map((module, originalIndex) => ({
-      module,
-      originalIndex,
-      pathStartCm: placementToPathStart(module, segments, standYCm),
-    }));
-
-  if (activeEntries.some((entry) => entry.pathStartCm === null)) {
+  const activeEntries = getActiveEntries(remainingModules, segments, standYCm);
+  if (!activeEntries) {
     return { ok: false, message: 'Mevcut modüllerden birinin duvar yerleşimi okunamadı.' };
   }
 
-  activeEntries.sort((a, b) => (
-    a.pathStartCm - b.pathStartCm || a.originalIndex - b.originalIndex
-  ));
-
-  const desiredCenterCm = desiredPathStartCm + movingWidthCm / 2;
-  const overlappingEntries = activeEntries.filter((entry) => {
-    const start = entry.pathStartCm;
-    const end = start + Number(entry.module.widthCm);
-    return desiredPathStartCm < end - EPSILON_CM
-      && start < desiredPathStartCm + movingWidthCm - EPSILON_CM;
+  const target = findInsertionTarget({
+    activeEntries,
+    desiredPathStartCm,
+    insertedWidthCm: movingWidthCm,
+    collisionModuleId: directValidation.collisionModuleId,
   });
-
-  const targetEntry = overlappingEntries
-    .map((entry) => ({
-      ...entry,
-      centerDistanceCm: Math.abs(
-        (entry.pathStartCm + Number(entry.module.widthCm) / 2) - desiredCenterCm,
-      ),
-    }))
-    .sort((a, b) => a.centerDistanceCm - b.centerDistanceCm)[0]
-    ?? activeEntries.find((entry) => entry.module.id === directValidation.collisionModuleId);
-
-  if (!targetEntry) return directValidation;
-
-  const targetCenterCm = targetEntry.pathStartCm + Number(targetEntry.module.widthCm) / 2;
-  const chainSide = desiredCenterCm <= targetCenterCm ? 'left' : 'right';
-  const callerSide = chainSideToCallerSide(
-    chainSide,
-    targetEntry.module?.placement?.wallId,
-  );
+  if (!target) return directValidation;
 
   const plan = planContinuousWallInsertion({
     modules: remainingModules,
     insertedModules: [movingModule],
-    targetModuleId: targetEntry.module.id,
-    side: callerSide,
+    targetModuleId: target.targetEntry.module.id,
+    side: chainSideToCallerSide(
+      target.chainSide,
+      target.targetEntry.module?.placement?.wallId,
+    ),
     standType,
     standXCm,
     standYCm,
   });
-
   if (!plan.ok) return plan;
 
   const movingPlacement = plan.placements?.get(movingModuleId);
@@ -192,7 +315,7 @@ export function planContinuousModuleMove({
     ok: true,
     mode: 'reflow',
     movingPlacement: { ...movingPlacement },
-    targetModuleId: targetEntry.module.id,
-    chainSide,
+    targetModuleId: target.targetEntry.module.id,
+    chainSide: target.chainSide,
   };
 }
