@@ -2,34 +2,48 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveModuleSidePlacement } from '../src/moduleContextMenu.js';
 
+function normalizeContinuousSide(context, side) {
+  if (side !== 'left' && side !== 'right') return side;
+  const wallId = context?.placement?.wallId ?? 'back';
+  if (wallId !== 'left') return side;
+  return side === 'left' ? 'right' : 'left';
+}
+
+function resolveFinalContinuousSide(context, visualSide) {
+  return normalizeContinuousSide(
+    context,
+    resolveModuleSidePlacement(context, visualSide),
+  );
+}
+
 test('back wall keeps visual left and right directions', () => {
   const context = { placement: { wallId: 'back' } };
-  assert.equal(resolveModuleSidePlacement(context, 'left'), 'left');
-  assert.equal(resolveModuleSidePlacement(context, 'right'), 'right');
+  assert.equal(resolveFinalContinuousSide(context, 'left'), 'left');
+  assert.equal(resolveFinalContinuousSide(context, 'right'), 'right');
 });
 
-test('left wall reverses technical axis so visual left and right stay correct', () => {
+test('left wall maps visual sides to the opposite continuous-chain directions', () => {
   const context = { placement: { wallId: 'left' } };
-  assert.equal(resolveModuleSidePlacement(context, 'left'), 'right');
-  assert.equal(resolveModuleSidePlacement(context, 'right'), 'left');
+  assert.equal(resolveFinalContinuousSide(context, 'left'), 'right');
+  assert.equal(resolveFinalContinuousSide(context, 'right'), 'left');
 });
 
-test('right wall keeps technical axis aligned with visual left and right', () => {
+test('right wall maps visual sides to the opposite continuous-chain directions', () => {
   const context = { placement: { wallId: 'right' } };
-  assert.equal(resolveModuleSidePlacement(context, 'left'), 'left');
-  assert.equal(resolveModuleSidePlacement(context, 'right'), 'right');
+  assert.equal(resolveFinalContinuousSide(context, 'left'), 'right');
+  assert.equal(resolveFinalContinuousSide(context, 'right'), 'left');
 });
 
 test('direction mapping is independent of camera data', () => {
   const contextA = {
-    placement: { wallId: 'left' },
+    placement: { wallId: 'right' },
     cameraSide: 'front',
   };
   const contextB = {
-    placement: { wallId: 'left' },
+    placement: { wallId: 'right' },
     cameraSide: 'back',
   };
 
-  assert.equal(resolveModuleSidePlacement(contextA, 'left'), 'right');
-  assert.equal(resolveModuleSidePlacement(contextB, 'left'), 'right');
+  assert.equal(resolveFinalContinuousSide(contextA, 'left'), 'right');
+  assert.equal(resolveFinalContinuousSide(contextB, 'left'), 'right');
 });
