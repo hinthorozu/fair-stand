@@ -16,7 +16,12 @@ const DEFAULT_VIEW_MIN_DISTANCE = 9;
 const DEFAULT_VIEW_DISTANCE_FACTOR = 1.32;
 const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
 
-export function createStandScene(container, onSurfaceSelected, getAssetUrl = () => null) {
+export function createStandScene(
+  container,
+  onSurfaceSelected,
+  getAssetUrl = () => null,
+  onModuleContextMenu = () => {},
+) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf4f6f8);
 
@@ -257,6 +262,41 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     camera.position.copy(target).addScaledVector(HOME_DIRECTION, distance);
     camera.lookAt(target);
     controls.update();
+  }
+
+  function setPointerFromClient(clientX, clientY) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+  }
+
+  function findModuleGroup(object) {
+    let current = object;
+    while (current && current !== wallRoot) {
+      if (current.userData?.kind === 'module') return current;
+      current = current.parent;
+    }
+    return null;
+  }
+
+  function pickModuleContext(event) {
+    setPointerFromClient(event.clientX, event.clientY);
+    raycaster.setFromCamera(pointer, camera);
+
+    const hits = raycaster.intersectObjects(wallRoot.children, true);
+    for (const hit of hits) {
+      const moduleGroup = findModuleGroup(hit.object);
+      if (!moduleGroup) continue;
+      return {
+        moduleIndex: moduleGroup.userData.moduleIndex,
+        moduleId: moduleGroup.userData.moduleId,
+        type: moduleGroup.userData.type,
+        widthCm: moduleGroup.userData.widthCm,
+        clientX: event.clientX,
+        clientY: event.clientY,
+      };
+    }
+    return null;
   }
 
   function normalizeMeshes(meshOrMeshes) {
@@ -559,6 +599,18 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     });
   }
 
+  renderer.domElement.addEventListener('contextmenu', (event) => {
+    const context = pickModuleContext(event);
+    if (!context) {
+      onModuleContextMenu?.(null);
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    onModuleContextMenu?.(context);
+  });
+
   renderer.domElement.addEventListener('pointerdown', (event) => {
     // Orta tuş OrbitControls pan için ayrıldı; panel seçimi yalnızca sol tuşla yapılır.
     if (event.button !== 0) return;
@@ -625,7 +677,13 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   const widthCm = moduleState.widthCm;
   const widthM = widthCm / 100;
   const group = new THREE.Group();
-  group.userData = { kind: 'module', moduleIndex, moduleId: moduleState.id, widthCm };
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: moduleState.type,
+    widthCm,
+  };
 
   const frameMaterial = new THREE.MeshStandardMaterial({
     color: FRAME_COLOR,
