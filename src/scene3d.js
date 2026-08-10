@@ -219,13 +219,19 @@ export function createStandScene(
     let cursorX = 0;
 
     modules.forEach((moduleState, moduleIndex) => {
-      const module = moduleState.type === 'separator'
-        ? createSeparatorModule(moduleState, moduleIndex)
-        : createFlatPanelModule(
+      let module;
+      if (moduleState.type === 'separator') {
+        module = createSeparatorModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'showcase-2' || moduleState.type === 'showcase-3') {
+        module = createShowcaseModule(moduleState, moduleIndex);
+      } else {
+        module = createFlatPanelModule(
           moduleState,
           moduleIndex,
           (surface) => applyStoredImage(surface),
         );
+      }
+
       const widthM = moduleState.widthCm / 100;
       module.group.position.x = cursorX + widthM / 2;
       cursorX += widthM;
@@ -520,7 +526,7 @@ export function createStandScene(
     const meshes = normalizeMeshes(meshOrMeshes);
     if (!assetId) return { ok: false, message: 'Önce bir görsel seç.' };
     if (meshes.some((mesh) => mesh.userData.acceptsImage === false)) {
-      return { ok: false, message: 'Separatöre görsel uygulanamaz; yalnızca renk uygulanabilir.' };
+      return { ok: false, message: 'Bu modüle görsel uygulanamaz; yalnızca renk uygulanabilir.' };
     }
 
     if (meshes.length === 1) {
@@ -563,7 +569,7 @@ export function createStandScene(
     const meshes = normalizeMeshes(meshOrMeshes);
     if (!assetId) return { ok: false, message: 'Önce bir görsel seç.' };
     if (meshes.some((mesh) => mesh.userData.acceptsImage === false)) {
-      return { ok: false, message: 'Separatöre görsel uygulanamaz; yalnızca renk uygulanabilir.' };
+      return { ok: false, message: 'Bu modüle görsel uygulanamaz; yalnızca renk uygulanabilir.' };
     }
 
     const normalizedFit = fit === 'cover' ? 'cover' : 'contain';
@@ -897,6 +903,205 @@ function createSeparatorModule(moduleState, moduleIndex) {
   selector.userData = {
     kind: 'surface',
     moduleType: 'separator',
+    selectionMode: 'module',
+    acceptsImage: false,
+    moduleIndex,
+    moduleId: moduleState.id,
+    widthCm,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceId: surfaceState.id,
+    surfaceState,
+    selectionFrame,
+    colorTargets,
+  };
+  group.add(selector);
+
+  return { group, surfaces: [selector] };
+}
+
+function createShowcaseModule(moduleState, moduleIndex) {
+  const {
+    height,
+    depth,
+    stripCount,
+    stripHeight,
+    frameWidth,
+    frameDepth,
+  } = STAND_DIMENSIONS;
+
+  const widthCm = moduleState.widthCm;
+  const widthM = widthCm / 100;
+  const eyeCount = moduleState.type === 'showcase-3' ? 3 : 2;
+  const openingStartStrip = eyeCount === 3 ? 1 : 2;
+  const openingStripCount = eyeCount;
+  const showcaseDepth = 0.36;
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: moduleState.type,
+    widthCm,
+  };
+
+  const frameMaterial = new THREE.MeshStandardMaterial({
+    color: FRAME_COLOR,
+    metalness: 0.68,
+    roughness: 0.28,
+  });
+
+  const profileGeometry = new THREE.BoxGeometry(frameWidth, height, frameDepth);
+  for (const side of [-1, 1]) {
+    const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
+    profile.position.set(side * (widthM / 2 - frameWidth / 2), height / 2, 0);
+    profile.castShadow = true;
+    group.add(profile);
+  }
+
+  const railHeight = 0.026;
+  const innerWidth = Math.max(widthM - frameWidth * 2 - 0.012, 0.02);
+  const railGeometry = new THREE.BoxGeometry(
+    Math.max(widthM - frameWidth * 2, 0.02),
+    railHeight,
+    frameDepth,
+  );
+
+  for (let index = 0; index <= stripCount; index += 1) {
+    const rail = new THREE.Mesh(railGeometry.clone(), frameMaterial.clone());
+    rail.position.set(0, index * stripHeight, 0);
+    rail.castShadow = true;
+    group.add(rail);
+  }
+
+  const surfaceState = moduleState.surface;
+  const panelHeight = stripHeight - railHeight - 0.012;
+  const panelDepth = Math.max(depth - 0.026, 0.035);
+  const panelMaterial = new THREE.MeshStandardMaterial({
+    color: surfaceState.color,
+    roughness: 0.7,
+    metalness: 0,
+  });
+  const colorTargets = [];
+
+  for (let stripIndex = 0; stripIndex < stripCount; stripIndex += 1) {
+    const isOpeningStrip = stripIndex >= openingStartStrip
+      && stripIndex < openingStartStrip + openingStripCount;
+    if (isOpeningStrip) continue;
+
+    const panel = new THREE.Mesh(
+      new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
+      panelMaterial.clone(),
+    );
+    panel.position.set(0, stripIndex * stripHeight + stripHeight / 2, 0);
+    panel.castShadow = true;
+    panel.receiveShadow = true;
+    group.add(panel);
+    colorTargets.push(panel);
+  }
+
+  const openingBottom = openingStartStrip * stripHeight + railHeight / 2;
+  const openingTop = (openingStartStrip + openingStripCount) * stripHeight - railHeight / 2;
+  const openingHeight = openingTop - openingBottom;
+  const openingCenterY = (openingBottom + openingTop) / 2;
+  const caseCenterZ = (showcaseDepth - depth) / 2;
+  const caseFrontZ = caseCenterZ + showcaseDepth / 2;
+
+  const backPanel = new THREE.Mesh(
+    new THREE.BoxGeometry(innerWidth, openingHeight, 0.018),
+    new THREE.MeshStandardMaterial({ color: 0xe9ecef, roughness: 0.82 }),
+  );
+  backPanel.position.set(0, openingCenterY, -depth / 2 + 0.009);
+  backPanel.receiveShadow = true;
+  group.add(backPanel);
+
+  const sideGlassMaterial = new THREE.MeshStandardMaterial({
+    color: 0xdfe8e8,
+    roughness: 0.18,
+    metalness: 0,
+    transparent: true,
+    opacity: 0.32,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
+  const sideGlassGeometry = new THREE.BoxGeometry(0.018, openingHeight, showcaseDepth);
+  for (const side of [-1, 1]) {
+    const sideGlass = new THREE.Mesh(sideGlassGeometry.clone(), sideGlassMaterial.clone());
+    sideGlass.position.set(
+      side * (innerWidth / 2 - 0.009),
+      openingCenterY,
+      caseCenterZ,
+    );
+    group.add(sideGlass);
+  }
+
+  const frontPostGeometry = new THREE.BoxGeometry(0.028, openingHeight, 0.028);
+  for (const side of [-1, 1]) {
+    const post = new THREE.Mesh(frontPostGeometry.clone(), frameMaterial.clone());
+    post.position.set(
+      side * (innerWidth / 2 - 0.014),
+      openingCenterY,
+      caseFrontZ - 0.014,
+    );
+    post.castShadow = true;
+    group.add(post);
+  }
+
+  const frontEdgeGeometry = new THREE.BoxGeometry(innerWidth, 0.028, 0.028);
+  for (const y of [openingBottom, openingTop]) {
+    const edge = new THREE.Mesh(frontEdgeGeometry.clone(), frameMaterial.clone());
+    edge.position.set(0, y, caseFrontZ - 0.014);
+    edge.castShadow = true;
+    group.add(edge);
+  }
+
+  const glassMaterial = new THREE.MeshStandardMaterial({
+    color: 0xb7d5b5,
+    roughness: 0.08,
+    metalness: 0,
+    transparent: true,
+    opacity: 0.48,
+    side: THREE.DoubleSide,
+  });
+  const shelfGeometry = new THREE.BoxGeometry(
+    Math.max(innerWidth - 0.035, 0.02),
+    0.018,
+    Math.max(showcaseDepth - 0.035, 0.04),
+  );
+  const shelfFrontGeometry = new THREE.BoxGeometry(innerWidth, 0.018, 0.024);
+
+  for (let index = 1; index < eyeCount; index += 1) {
+    const shelfY = openingBottom + (openingHeight * index) / eyeCount;
+    const shelf = new THREE.Mesh(shelfGeometry.clone(), glassMaterial.clone());
+    shelf.position.set(0, shelfY, caseCenterZ);
+    shelf.castShadow = true;
+    shelf.receiveShadow = true;
+    group.add(shelf);
+
+    const shelfFront = new THREE.Mesh(shelfFrontGeometry.clone(), frameMaterial.clone());
+    shelfFront.position.set(0, shelfY, caseFrontZ - 0.012);
+    shelfFront.castShadow = true;
+    group.add(shelfFront);
+  }
+
+  const selector = new THREE.Mesh(
+    new THREE.PlaneGeometry(innerWidth, height - frameWidth * 2),
+    new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+  selector.position.set(0, height / 2, caseFrontZ + 0.006);
+
+  const selectionFrame = createSelectionFrame(innerWidth, height - frameWidth * 2);
+  selectionFrame.visible = false;
+  selector.add(selectionFrame);
+
+  selector.userData = {
+    kind: 'surface',
+    moduleType: moduleState.type,
     selectionMode: 'module',
     acceptsImage: false,
     moduleIndex,
