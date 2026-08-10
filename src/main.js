@@ -536,8 +536,12 @@ moduleDragSidebar = createModuleDragSidebar({
       return;
     }
 
-    moduleState.placement = { ...result.placement };
-    currentModules.push(moduleState);
+    if (result.plan?.placements instanceof Map && result.plan?.orderedModuleIds?.length) {
+      applyContinuousInsertionPlan(result.plan, [moduleState]);
+    } else {
+      moduleState.placement = { ...result.placement };
+      currentModules.push(moduleState);
+    }
     rebuildWall({ resetView: false });
   },
   onCancel: () => scene3d.clearCatalogModuleDrag(),
