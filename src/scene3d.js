@@ -156,11 +156,13 @@ export function createStandScene(
     }
 
     const result = createRectSelection(
-      surfaceMeshes.map((surface) => ({
-        mesh: surface,
-        moduleIndex: surface.userData.moduleIndex,
-        stripIndex: surface.userData.stripIndex,
-      })),
+      surfaceMeshes
+        .filter((surface) => surface.userData.selectionMode !== 'module')
+        .map((surface) => ({
+          mesh: surface,
+          moduleIndex: surface.userData.moduleIndex,
+          stripIndex: surface.userData.stripIndex,
+        })),
       anchorMesh.userData,
       mesh.userData,
     );
@@ -216,11 +218,13 @@ export function createStandScene(
     let cursorX = 0;
 
     modules.forEach((moduleState, moduleIndex) => {
-      const module = createFlatPanelModule(
-        moduleState,
-        moduleIndex,
-        (surface) => applyStoredImage(surface),
-      );
+      const module = moduleState.type === 'separator'
+        ? createSeparatorModule(moduleState, moduleIndex)
+        : createFlatPanelModule(
+          moduleState,
+          moduleIndex,
+          (surface) => applyStoredImage(surface),
+        );
       const widthM = moduleState.widthCm / 100;
       module.group.position.x = cursorX + widthM / 2;
       cursorX += widthM;
@@ -317,11 +321,17 @@ export function createStandScene(
       const surfaceState = mesh.userData.surfaceState;
       applyColorOverride(surfaceState, hexColor);
 
-      // Renk, yalnızca seçili hücrede görselin yerini alır.
-      mesh.material.map?.dispose?.();
-      mesh.material.map = null;
-      mesh.material.color.set(hexColor);
-      mesh.material.needsUpdate = true;
+      const colorTargets = mesh.userData.colorTargets?.length
+        ? mesh.userData.colorTargets
+        : [mesh];
+
+      colorTargets.forEach((target) => {
+        if (!target?.material) return;
+        target.material.map?.dispose?.();
+        target.material.map = null;
+        target.material.color.set(hexColor);
+        target.material.needsUpdate = true;
+      });
     });
   }
 
@@ -392,7 +402,7 @@ export function createStandScene(
 
   function loadSingleImageOnSurface(mesh, assetId) {
     const assetUrl = getAssetUrl(assetId);
-    if (!mesh?.material || !assetUrl) return;
+    if (!mesh?.material || !assetUrl || mesh.userData.acceptsImage === false) return;
 
     textureLoader.load(
       assetUrl,
@@ -415,7 +425,7 @@ export function createStandScene(
 
   function loadGroupedImageOnSurface(mesh, assetId, expectedMode) {
     const assetUrl = getAssetUrl(assetId);
-    if (!mesh?.material || !assetUrl) return;
+    if (!mesh?.material || !assetUrl || mesh.userData.acceptsImage === false) return;
 
     textureLoader.load(
       assetUrl,
@@ -463,6 +473,7 @@ export function createStandScene(
   }
 
   function loadImageOnSurface(mesh, assetId) {
+    if (mesh.userData.acceptsImage === false) return;
     const mode = mesh.userData.surfaceState?.imageTransform?.mode;
     if (mode === 'rect-group') {
       loadGroupedImageOnSurface(mesh, assetId, 'rect-group');
@@ -476,6 +487,7 @@ export function createStandScene(
   }
 
   function applyStoredImage(mesh) {
+    if (mesh.userData.acceptsImage === false) return;
     const assetId = mesh.userData.surfaceState?.imageAssetId;
     if (assetId) loadImageOnSurface(mesh, assetId);
   }
@@ -483,7 +495,7 @@ export function createStandScene(
   function applyImageAsset(meshOrMeshes, assetId) {
     if (!assetId) return;
     normalizeMeshes(meshOrMeshes).forEach((mesh) => {
-      if (!mesh?.material) return;
+      if (!mesh?.material || mesh.userData.acceptsImage === false) return;
       const surfaceState = mesh.userData.surfaceState;
       if (surfaceState) {
         surfaceState.imageAssetId = assetId;
@@ -497,6 +509,9 @@ export function createStandScene(
   function applyHorizontalImageAsset(meshOrMeshes, assetId) {
     const meshes = normalizeMeshes(meshOrMeshes);
     if (!assetId) return { ok: false, message: 'Önce bir görsel seç.' };
+    if (meshes.some((mesh) => mesh.userData.acceptsImage === false)) {
+      return { ok: false, message: 'Separatöre görsel uygulanamaz; yalnızca renk uygulanabilir.' };
+    }
 
     if (meshes.length === 1) {
       applyImageAsset(meshes, assetId);
@@ -537,6 +552,9 @@ export function createStandScene(
   function applyRectImageAsset(meshOrMeshes, assetId) {
     const meshes = normalizeMeshes(meshOrMeshes);
     if (!assetId) return { ok: false, message: 'Önce bir görsel seç.' };
+    if (meshes.some((mesh) => mesh.userData.acceptsImage === false)) {
+      return { ok: false, message: 'Separatöre görsel uygulanamaz; yalnızca renk uygulanabilir.' };
+    }
 
     if (meshes.length === 1) {
       applyImageAsset(meshes, assetId);
@@ -586,7 +604,7 @@ export function createStandScene(
 
   function clearImage(meshOrMeshes) {
     normalizeMeshes(meshOrMeshes).forEach((mesh) => {
-      if (!mesh?.material) return;
+      if (!mesh?.material || mesh.userData.acceptsImage === false) return;
       const surfaceState = mesh.userData.surfaceState;
       if (surfaceState) {
         surfaceState.imageAssetId = null;
@@ -624,7 +642,14 @@ export function createStandScene(
     const rectangleSelect = event.ctrlKey || event.metaKey;
 
     if (hit) {
-      if (rectangleSelect) selectRectangleTo(hit.object);
+      const anchorMesh = surfaceMeshes.find(
+        (surface) => surface.userData.surfaceId === selectionAnchorSurfaceId,
+      );
+      const canRectangleSelect = rectangleSelect
+        && hit.object.userData.selectionMode !== 'module'
+        && anchorMesh?.userData.selectionMode !== 'module';
+
+      if (canRectangleSelect) selectRectangleTo(hit.object);
       else selectOnly(hit.object);
     } else if (!rectangleSelect) {
       clearSelection();
@@ -750,6 +775,9 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
 
     surface.userData = {
       kind: 'surface',
+      moduleType: 'flat-panel',
+      selectionMode: 'panel',
+      acceptsImage: true,
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -765,6 +793,112 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   }
 
   return { group, surfaces };
+}
+
+function createSeparatorModule(moduleState, moduleIndex) {
+  const {
+    height,
+    depth,
+    frameWidth,
+    frameDepth,
+  } = STAND_DIMENSIONS;
+
+  const widthCm = moduleState.widthCm;
+  const widthM = widthCm / 100;
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: moduleState.type,
+    widthCm,
+  };
+
+  const frameMaterial = new THREE.MeshStandardMaterial({
+    color: FRAME_COLOR,
+    metalness: 0.68,
+    roughness: 0.28,
+  });
+
+  const profileGeometry = new THREE.BoxGeometry(frameWidth, height, frameDepth);
+  for (const side of [-1, 1]) {
+    const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
+    profile.position.set(side * (widthM / 2 - frameWidth / 2), height / 2, 0);
+    profile.castShadow = true;
+    group.add(profile);
+  }
+
+  const crossRailGeometry = new THREE.BoxGeometry(
+    Math.max(widthM - frameWidth * 2, 0.02),
+    frameWidth,
+    frameDepth,
+  );
+  for (const y of [frameWidth / 2, height - frameWidth / 2]) {
+    const rail = new THREE.Mesh(crossRailGeometry.clone(), frameMaterial.clone());
+    rail.position.set(0, y, 0);
+    rail.castShadow = true;
+    group.add(rail);
+  }
+
+  const surfaceState = moduleState.surface;
+  const innerWidth = Math.max(widthM - frameWidth * 2 - 0.012, 0.02);
+  const innerHeight = height - frameWidth * 2;
+  const slatCount = 36;
+  const slatHeight = 0.035;
+  const slatGap = 0.06;
+  const usedHeight = slatCount * slatHeight + (slatCount - 1) * slatGap;
+  const freeHeight = Math.max(innerHeight - usedHeight, 0);
+  const firstSlatY = frameWidth + freeHeight / 2 + slatHeight / 2;
+  const slatGeometry = new THREE.BoxGeometry(innerWidth, slatHeight, depth);
+  const slatMaterial = new THREE.MeshStandardMaterial({
+    color: surfaceState.color,
+    roughness: 0.62,
+    metalness: 0,
+  });
+  const colorTargets = [];
+
+  for (let index = 0; index < slatCount; index += 1) {
+    const slat = new THREE.Mesh(slatGeometry.clone(), slatMaterial.clone());
+    slat.position.set(0, firstSlatY + index * (slatHeight + slatGap), 0);
+    slat.castShadow = true;
+    slat.receiveShadow = true;
+    group.add(slat);
+    colorTargets.push(slat);
+  }
+
+  const selector = new THREE.Mesh(
+    new THREE.PlaneGeometry(innerWidth, innerHeight),
+    new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+  selector.position.set(0, height / 2, depth / 2 + 0.0015);
+
+  const selectionFrame = createSelectionFrame(innerWidth, innerHeight);
+  selectionFrame.visible = false;
+  selector.add(selectionFrame);
+
+  selector.userData = {
+    kind: 'surface',
+    moduleType: 'separator',
+    selectionMode: 'module',
+    acceptsImage: false,
+    moduleIndex,
+    moduleId: moduleState.id,
+    widthCm,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceId: surfaceState.id,
+    surfaceState,
+    selectionFrame,
+    colorTargets,
+  };
+  group.add(selector);
+
+  return { group, surfaces: [selector] };
 }
 
 function createSelectionFrame(width, height) {
