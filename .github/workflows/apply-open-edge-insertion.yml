@@ -25,12 +25,12 @@ jobs:
 
       - name: Commit patch
         run: |
-          if git diff --quiet -- src/wallReflow.js; then
+          if git diff --quiet -- src/wallReflow.js src/main.js test/moduleMove.test.js; then
             echo "No patch needed"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/wallReflow.js
-          git commit -m "Allow insertion at continuous wall open end"
+          git add src/wallReflow.js src/main.js test/moduleMove.test.js
+          git commit -m "Support open edge insertion and auto wall length"
           git push origin HEAD:ROG
