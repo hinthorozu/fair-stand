@@ -375,3 +375,16 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 303. Katalog üzerinden modül eklenirken mevcut kamera pan, zoom ve bakış açısının korunması sağlandı.
 304. Katalog kartına çift tıklanınca seçimin `Ekle` butonuna basmaya gerek kalmadan doğrudan eklenmesi sağlandı.
 305. Tek tıklama yalnızca seçili kartı değiştirmeye devam ederken çift tıklama mevcut append / sağ / sol yerleşim bağlamını kullanarak ekleme yapar hale getirildi.
+
+## HEX / RGB / CMYK renk editörü
+
+306. Aktif renk alanının altına kalıcı ve düzenlenebilir HEX, RGB ve CMYK değer alanları eklendi.
+307. HEX / RGB / CMYK dönüşümleri için `colorUtils.js` yardımcı modülü eklendi.
+308. HEX alanından girilen rengin native renk picker, RGB ve CMYK alanlarına senkronize edilmesi sağlandı.
+309. RGB alanları 0–255 aralığında düzenlenebilir hale getirildi ve değişikliklerin HEX, CMYK ve renk picker'a yansıması sağlandı.
+310. CMYK alanları C / M / Y / K için %0–100 aralığında düzenlenebilir hale getirildi ve değişikliklerin RGB, HEX ve renk picker'a yansıması sağlandı.
+311. Native renk picker üzerinden yapılan değişikliklerin HEX, RGB ve CMYK alanlarına anlık aktarılması sağlandı.
+312. Renk editöründeki geçerli bir değer değişikliğinin seçili panel veya dikdörtgen panel bloğuna canlı uygulanması sağlandı.
+313. CMYK değerleri kullanıcı tarafından doğrudan düzenlendiğinde girilen C / M / Y / K oranlarının RGB dönüşümü sonrasında yeniden dağıtılmadan korunması sağlandı.
+314. HEX normalizasyonu, HEX↔RGB ve RGB↔CMYK dönüşümleri için otomatik testler eklendi.
+315. HEX / RGB / CMYK renk editörü entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
