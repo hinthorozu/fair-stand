@@ -1,6 +1,5 @@
 const DEFAULT_PANEL_COLOR = '#ffffff';
 const DEFAULT_SEPARATOR_COLOR = '#c79b63';
-const DEFAULT_SHOWCASE_COLOR = '#55585c';
 const STRIP_COUNT = 7;
 
 function createId(prefix) {
@@ -63,7 +62,7 @@ export function createShowcaseModuleState(type, widthCm = 100) {
     widthCm,
     strips: Array.from(
       { length: STRIP_COUNT },
-      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_SHOWCASE_COLOR),
+      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
     ),
   };
 }
