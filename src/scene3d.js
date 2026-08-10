@@ -7,6 +7,11 @@ import { createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
 import { createViewCube } from './viewCube.js';
 import { computeImageFit } from './imageFit.js';
+import {
+  createModulePlacement,
+  snapPlacementToStand,
+  validatePlacementAgainstModules,
+} from './modulePlacement.js';
 
 const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0xf4f4f4;
@@ -20,6 +25,10 @@ const GRID_COLOR = 0xb8c1cb;
 const STAND_BORDER_COLOR = 0x6f7a87;
 const STAGE_SURROUND_M = 1;
 const SELECTION_COLOR = 0x2563eb;
+const PLACEMENT_VALID_COLOR = 0x16a34a;
+const PLACEMENT_INVALID_COLOR = 0xdc2626;
+const PLACEMENT_GHOST_OPACITY = 0.3;
+const DRAG_THRESHOLD_PX = 5;
 const DEFAULT_VIEW_MIN_DISTANCE = 9;
 const DEFAULT_VIEW_DISTANCE_FACTOR = 1.32;
 const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
@@ -156,6 +165,7 @@ export function createStandScene(
 
     disposeWall();
     disposeGroundGuides();
+    clearPlacementDrag();
 
     const sceneWidthM = widthM + STAGE_SURROUND_M * 2;
     const sceneDepthM = depthM + STAGE_SURROUND_M * 2;
@@ -178,6 +188,8 @@ export function createStandScene(
       standType,
       widthM,
       depthM,
+      widthCm: Math.round(widthM * 100),
+      depthCm: Math.round(depthM * 100),
       sceneWidthM,
       sceneDepthM,
       surroundM: STAGE_SURROUND_M,
@@ -197,6 +209,8 @@ export function createStandScene(
   let surfaceMeshes = [];
   const selectedSurfaces = new Set();
   let selectionAnchorSurfaceId = null;
+  let placementGhost = null;
+  let dragSession = null;
 
   function setSelectionVisual(mesh, selected) {
     if (!mesh) return;
@@ -285,10 +299,30 @@ export function createStandScene(
   }
 
   function clearWall({ resetView = true } = {}) {
+    clearPlacementDrag();
     disposeWall();
     if (resetView) {
       if (stageLayout) resetStageView();
       else resetDefaultView(0);
+    }
+  }
+
+  function applyPlacementToGroup(group, placement, widthCm) {
+    if (!group || !placement) return;
+    const widthM = Number(widthCm) / 100;
+    const xM = Number(placement.xCm) / 100;
+    const logicalYM = Number(placement.yCm) / 100;
+    const logicalZM = Number(placement.zCm ?? 0) / 100;
+
+    group.rotation.set(0, 0, 0);
+
+    // Proje standardı X/Y zemin, Z yüksekliktir. Three.js sahnesinde mevcut
+    // geometriyi bozmamak için logical Y -> world Z, logical Z -> world Y map edilir.
+    if (placement.rotationZDeg === 90) {
+      group.rotation.y = placement.wallId === 'left' ? Math.PI / 2 : -Math.PI / 2;
+      group.position.set(xM, logicalZM, logicalYM + widthM / 2);
+    } else {
+      group.position.set(xM + widthM / 2, logicalZM, logicalYM);
     }
   }
 
@@ -298,10 +332,12 @@ export function createStandScene(
     );
     const previousAnchorSurfaceId = selectionAnchorSurfaceId;
 
+    clearPlacementDrag();
     disposeWall({ notify: false, keepAnchor: true });
 
     const totalWidth = modules.reduce((sum, module) => sum + module.widthCm / 100, 0);
     let cursorX = 0;
+    let hasMultiEdgePlacement = false;
 
     modules.forEach((moduleState, moduleIndex) => {
       let module;
@@ -321,9 +357,28 @@ export function createStandScene(
         );
       }
 
-      const widthM = moduleState.widthCm / 100;
-      module.group.position.x = cursorX + widthM / 2;
-      cursorX += widthM;
+      const widthCm = Number(moduleState.widthCm);
+      let placement = moduleState.placement;
+      if (!placement) {
+        placement = createModulePlacement({
+          xCm: Math.round(cursorX * 100),
+          yCm: 0,
+          zCm: 0,
+          rotationZDeg: 0,
+          wallId: 'back',
+        });
+        moduleState.placement = placement;
+      }
+
+      if (placement.wallId === 'back' && placement.rotationZDeg === 0) {
+        cursorX = Math.max(cursorX, (Number(placement.xCm) + widthCm) / 100);
+      } else {
+        hasMultiEdgePlacement = true;
+      }
+
+      module.group.userData.moduleState = moduleState;
+      module.group.userData.placement = { ...placement };
+      applyPlacementToGroup(module.group, placement, widthCm);
       wallRoot.add(module.group);
       surfaceMeshes.push(...module.surfaces);
     });
@@ -341,7 +396,10 @@ export function createStandScene(
       ? previousAnchorSurfaceId
       : ([...selectedSurfaces][0]?.userData.surfaceId ?? null);
 
-    if (resetView) resetDefaultView(totalWidth);
+    if (resetView) {
+      if (hasMultiEdgePlacement && stageLayout) resetStageView();
+      else resetDefaultView(totalWidth);
+    }
     notifySelection();
     return { totalWidth, surfaceCount: surfaceMeshes.length };
   }
@@ -395,31 +453,191 @@ export function createStandScene(
     return null;
   }
 
-  function pickModuleContext(event) {
-    setPointerFromClient(event.clientX, event.clientY);
+  function pickModuleAt(clientX, clientY) {
+    setPointerFromClient(clientX, clientY);
     raycaster.setFromCamera(pointer, camera);
-
     const hits = raycaster.intersectObjects(wallRoot.children, true);
     for (const hit of hits) {
       const moduleGroup = findModuleGroup(hit.object);
-      if (!moduleGroup) continue;
-      const surface = hit.object.userData?.kind === 'surface' ? hit.object : null;
-      const supportsGlass = surface?.userData.selectionMode === 'panel';
-      return {
-        moduleIndex: moduleGroup.userData.moduleIndex,
-        moduleId: moduleGroup.userData.moduleId,
-        type: moduleGroup.userData.type,
-        widthCm: moduleGroup.userData.widthCm,
-        surfaceId: supportsGlass ? surface.userData.surfaceId : null,
-        stripIndex: supportsGlass ? surface.userData.stripIndex : null,
-        stripNumber: supportsGlass ? surface.userData.stripNumber : null,
-        supportsGlass,
-        isGlass: supportsGlass ? Boolean(surface.userData.surfaceState?.isGlass) : false,
-        clientX: event.clientX,
-        clientY: event.clientY,
-      };
+      if (moduleGroup) return { moduleGroup, hit };
     }
     return null;
+  }
+
+  function getGroundPoint(clientX, clientY) {
+    if (!activeFloor.visible) return null;
+    setPointerFromClient(clientX, clientY);
+    raycaster.setFromCamera(pointer, camera);
+    const hit = raycaster.intersectObject(activeFloor, false)[0];
+    if (!hit) return null;
+    return {
+      xCm: hit.point.x * 100,
+      yCm: hit.point.z * 100,
+    };
+  }
+
+  function pickModuleContext(event) {
+    const picked = pickModuleAt(event.clientX, event.clientY);
+    if (!picked) return null;
+
+    const { moduleGroup, hit } = picked;
+    const surface = hit.object.userData?.kind === 'surface' ? hit.object : null;
+    const supportsGlass = surface?.userData.selectionMode === 'panel';
+    return {
+      moduleIndex: moduleGroup.userData.moduleIndex,
+      moduleId: moduleGroup.userData.moduleId,
+      type: moduleGroup.userData.type,
+      widthCm: moduleGroup.userData.widthCm,
+      placement: moduleGroup.userData.moduleState?.placement
+        ? { ...moduleGroup.userData.moduleState.placement }
+        : null,
+      surfaceId: supportsGlass ? surface.userData.surfaceId : null,
+      stripIndex: supportsGlass ? surface.userData.stripIndex : null,
+      stripNumber: supportsGlass ? surface.userData.stripNumber : null,
+      supportsGlass,
+      isGlass: supportsGlass ? Boolean(surface.userData.surfaceState?.isGlass) : false,
+      clientX: event.clientX,
+      clientY: event.clientY,
+    };
+  }
+
+  function disposePlacementGhost() {
+    if (!placementGhost) return;
+    scene.remove(placementGhost.root);
+    placementGhost.mesh.geometry?.dispose?.();
+    placementGhost.mesh.material?.dispose?.();
+    placementGhost = null;
+  }
+
+  function ensurePlacementGhost(widthCm) {
+    if (placementGhost?.widthCm === widthCm) return placementGhost;
+    disposePlacementGhost();
+
+    const root = new THREE.Group();
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(
+        Math.max(Number(widthCm) / 100, 0.02),
+        STAND_DIMENSIONS.height,
+        Math.max(STAND_DIMENSIONS.depth, 0.08),
+      ),
+      new THREE.MeshBasicMaterial({
+        color: PLACEMENT_VALID_COLOR,
+        transparent: true,
+        opacity: PLACEMENT_GHOST_OPACITY,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      }),
+    );
+    mesh.position.y = STAND_DIMENSIONS.height / 2;
+    root.add(mesh);
+    scene.add(root);
+    placementGhost = { root, mesh, widthCm };
+    return placementGhost;
+  }
+
+  function showPlacementGhost(widthCm, placement, valid) {
+    const ghost = ensurePlacementGhost(widthCm);
+    ghost.mesh.material.color.setHex(valid ? PLACEMENT_VALID_COLOR : PLACEMENT_INVALID_COLOR);
+    applyPlacementToGroup(ghost.root, placement, widthCm);
+    ghost.root.visible = true;
+  }
+
+  function clearPlacementDrag() {
+    if (dragSession?.moduleGroup) dragSession.moduleGroup.visible = true;
+    dragSession = null;
+    controls.enabled = true;
+    disposePlacementGhost();
+  }
+
+  function getRenderedModuleStates() {
+    return wallRoot.children
+      .map((group) => group.userData?.moduleState)
+      .filter(Boolean);
+  }
+
+  function updatePlacementDrag(event) {
+    if (!dragSession || !stageLayout) return;
+    const distance = Math.hypot(
+      event.clientX - dragSession.startClientX,
+      event.clientY - dragSession.startClientY,
+    );
+    if (!dragSession.dragging && distance < DRAG_THRESHOLD_PX) return;
+
+    dragSession.dragging = true;
+    dragSession.moduleGroup.visible = false;
+
+    const ground = getGroundPoint(event.clientX, event.clientY);
+    if (!ground) {
+      disposePlacementGhost();
+      dragSession.preview = null;
+      return;
+    }
+
+    const moduleState = dragSession.moduleState;
+    const snapped = snapPlacementToStand({
+      standType: stageLayout.standType,
+      widthCm: moduleState.widthCm,
+      pointerXCm: ground.xCm,
+      pointerYCm: ground.yCm,
+      standXCm: stageLayout.widthCm,
+      standYCm: stageLayout.depthCm,
+      preferredRotationZDeg: moduleState.placement?.rotationZDeg ?? 0,
+    });
+
+    if (!snapped.ok || !snapped.placement) {
+      dragSession.preview = null;
+      disposePlacementGhost();
+      return;
+    }
+
+    const validation = validatePlacementAgainstModules({
+      placement: snapped.placement,
+      widthCm: moduleState.widthCm,
+      moduleId: moduleState.id,
+      modules: getRenderedModuleStates(),
+      standType: stageLayout.standType,
+      standXCm: stageLayout.widthCm,
+      standYCm: stageLayout.depthCm,
+    });
+
+    dragSession.preview = {
+      placement: snapped.placement,
+      valid: validation.ok,
+      message: validation.message ?? null,
+    };
+    showPlacementGhost(moduleState.widthCm, snapped.placement, validation.ok);
+  }
+
+  function finishPlacementDrag(event) {
+    if (!dragSession) return false;
+
+    const session = dragSession;
+    const wasDragging = session.dragging;
+    const preview = session.preview;
+    session.moduleGroup.visible = true;
+
+    if (wasDragging && preview?.valid) {
+      session.moduleState.placement = { ...preview.placement };
+      session.moduleGroup.userData.placement = { ...preview.placement };
+      applyPlacementToGroup(
+        session.moduleGroup,
+        session.moduleState.placement,
+        session.moduleState.widthCm,
+      );
+      clearSelection();
+    }
+
+    dragSession = null;
+    controls.enabled = true;
+    disposePlacementGhost();
+
+    try {
+      renderer.domElement.releasePointerCapture(event.pointerId);
+    } catch {
+      // Pointer capture may already be released by the browser.
+    }
+
+    return wasDragging;
   }
 
   function normalizeMeshes(meshOrMeshes) {
@@ -771,7 +989,7 @@ export function createStandScene(
       fit: normalizedFit,
       columnCount: layout.columnCount,
       rowCount: layout.rowCount,
-      panelCount: layout.panelCount,
+      panelCount: layout.entries.length,
     };
   }
 
@@ -814,16 +1032,10 @@ export function createStandScene(
     onModuleContextMenu?.(context);
   });
 
-  renderer.domElement.addEventListener('pointerdown', (event) => {
-    if (event.button !== 0) return;
-
-    const rect = renderer.domElement.getBoundingClientRect();
-    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
+  function handleSurfaceSelectionAt(clientX, clientY, rectangleSelect) {
+    setPointerFromClient(clientX, clientY);
     raycaster.setFromCamera(pointer, camera);
     const hit = raycaster.intersectObjects(surfaceMeshes, false)[0];
-    const rectangleSelect = event.ctrlKey || event.metaKey;
 
     if (hit) {
       const anchorMesh = surfaceMeshes.find(
@@ -838,6 +1050,60 @@ export function createStandScene(
     } else if (!rectangleSelect) {
       clearSelection();
     }
+  }
+
+  renderer.domElement.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+
+    const rectangleSelect = event.ctrlKey || event.metaKey;
+    if (rectangleSelect) {
+      handleSurfaceSelectionAt(event.clientX, event.clientY, true);
+      return;
+    }
+
+    const picked = stageLayout ? pickModuleAt(event.clientX, event.clientY) : null;
+    if (!picked) {
+      handleSurfaceSelectionAt(event.clientX, event.clientY, false);
+      return;
+    }
+
+    const moduleState = picked.moduleGroup.userData.moduleState;
+    if (!moduleState) {
+      handleSurfaceSelectionAt(event.clientX, event.clientY, false);
+      return;
+    }
+
+    controls.enabled = false;
+    dragSession = {
+      pointerId: event.pointerId,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      moduleGroup: picked.moduleGroup,
+      moduleState,
+      dragging: false,
+      preview: null,
+    };
+
+    renderer.domElement.setPointerCapture?.(event.pointerId);
+    event.preventDefault();
+  });
+
+  renderer.domElement.addEventListener('pointermove', (event) => {
+    if (!dragSession || event.pointerId !== dragSession.pointerId) return;
+    updatePlacementDrag(event);
+  });
+
+  renderer.domElement.addEventListener('pointerup', (event) => {
+    if (!dragSession || event.pointerId !== dragSession.pointerId) return;
+    const startClientX = dragSession.startClientX;
+    const startClientY = dragSession.startClientY;
+    const wasDragging = finishPlacementDrag(event);
+    if (!wasDragging) handleSurfaceSelectionAt(startClientX, startClientY, false);
+  });
+
+  renderer.domElement.addEventListener('pointercancel', (event) => {
+    if (!dragSession || event.pointerId !== dragSession.pointerId) return;
+    clearPlacementDrag();
   });
 
   function resize() {
