@@ -291,3 +291,26 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 231. Sütunlar arasında boşluk bulunan görsel grubunun reddedildiğini doğrulayan test eklendi.
 232. Arayüzde `Görseli uygula` artık yatay-only fonksiyon yerine genel dikdörtgen görsel fonksiyonunu kullanıyor.
 233. Dikdörtgen görsel ve panel bazlı renk override değişiklikleri GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+
+## Sahne güvenliği, dinamik zemin ve kamera navigasyonu
+
+234. `Oluştur` komutu çalıştırılırken sahnede mevcut duvar varsa kullanıcıdan onay istenmeye başlandı.
+235. Yeni duvar oluşturma uyarısı iptal edilirse mevcut panel renkleri, görselleri ve düzenlemeleri korunur hale getirildi.
+236. Yeni duvar oluşturma onaylanırsa eski tasarım state'i taşınmadan sıfırdan yeni modül state'leri üretilmesi sağlandı.
+237. `Duvarı temizle` komutu sahne doluyken kullanıcıdan onay ister hale getirildi.
+238. Temizleme uyarısı iptal edilirse sahnenin değişmemesi sağlandı; sahne zaten boşsa gereksiz uyarı gösterilmemesi eklendi.
+239. Uzun duvarlarda sabit 30 metrelik zemin sınırını kaldırmak için `groundLayout.js` eklendi.
+240. Zemin başlangıç boyutu 30 metre olarak korundu.
+241. Duvar uzadıkça zemin ve grid'in 10 metrelik adımlarla otomatik genişlemesi sağlandı.
+242. Grid büyürken her karenin ölçüsünün sürekli 1 m × 1 m kalması sağlandı.
+243. Zemin plane'i ile GridHelper aynı dinamik ölçüye bağlı hale getirildi.
+244. Zemin, duvarın başlangıç tarafında çalışma payı bırakıp sağ tarafa doğru duvarla birlikte genişleyecek şekilde konumlandırıldı.
+245. Duvar temizlendiğinde zemin grid'inin varsayılan boyuta dönmesi sağlandı.
+246. Uzun duvarlarda uzak kamera kullanımını desteklemek için kamera far plane ve OrbitControls maksimum mesafesi artırıldı.
+247. OrbitControls pan özelliği açık ve aktif hale getirildi.
+248. Sağ mouse tuşuna basılı sürükleme `pan` olarak sabitlendi.
+249. Sol mouse sürükleme döndürme, tekerlek / orta mouse zoom davranışı olarak korundu.
+250. Sağ tuşla pan yapılırken panel seçim raycaster'ının yanlışlıkla seçim yapmaması için seçim yalnızca sol mouse tuşuna sınırlandı.
+251. Viewport yardım çubuğuna `Sağ sürükle: pan` bilgisi eklendi.
+252. Dinamik zemin boyutu, 1 metrelik grid hücresi ve uzun duvar büyümesi için otomatik testler eklendi.
+253. Dinamik zemin ve pan entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
