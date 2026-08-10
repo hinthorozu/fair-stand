@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+    <title>Fair Stand Configurator</title>
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar">
+        <div>
+          <p class="eyebrow">FAIR STAND / PROTOTİP</p>
+          <h1>Maxima Stand Konfigüratörü</h1>
+          <p class="muted">İlk hedef: standart modüllerle düz duvar oluşturmak ve panel yüzeylerini anlık düzenlemek.</p>
+        </div>
+
+        <section class="panel-card">
+          <h2>Düz duvar</h2>
+          <label for="wall-length">Toplam genişlik (cm)</label>
+          <div class="row">
+            <input id="wall-length" type="number" min="50" step="50" value="350" />
+            <button id="build-wall" class="primary">Oluştur</button>
+          </div>
+          <p id="wall-result" class="status"></p>
+        </section>
+
+        <section class="panel-card">
+          <h2>Modül ekle</h2>
+          <div class="button-grid">
+            <button data-add-module="50">50 cm</button>
+            <button data-add-module="100">100 cm</button>
+            <button data-add-module="150">150 cm</button>
+            <button data-add-module="200">200 cm</button>
+          </div>
+          <button id="clear-wall" class="danger ghost">Duvarı temizle</button>
+        </section>
+
+        <section class="panel-card">
+          <h2>Seçili yüzey</h2>
+          <p id="selection-info" class="status">3D sahnede bir yatay panele tıkla.</p>
+          <label for="surface-color">Renk</label>
+          <div class="row">
+            <input id="surface-color" type="color" value="#d9dde2" />
+            <button id="apply-color">Rengi uygula</button>
+          </div>
+          <label for="surface-image">Görsel / logo</label>
+          <input id="surface-image" type="file" accept="image/*" />
+          <button id="clear-texture" class="ghost">Görseli kaldır</button>
+        </section>
+
+        <section class="panel-card compact">
+          <h2>Standartlar</h2>
+          <ul>
+            <li>Yükseklik: 350 cm</li>
+            <li>Derinlik: 10 cm</li>
+            <li>Düz panel: 7 × 50 cm yatay bölüm</li>
+            <li>Genişlikler: 50 / 100 / 150 / 200 cm</li>
+          </ul>
+        </section>
+      </aside>
+
+      <main class="viewport-wrap">
+        <div class="viewport-toolbar">
+          <span>Sol tuş: seç</span>
+          <span>Sürükle: döndür</span>
+          <span>Tekerlek: zoom</span>
+        </div>
+        <div id="viewport"></div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
