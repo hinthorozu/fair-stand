@@ -7,6 +7,17 @@ function createId(prefix) {
   return `${prefix}-${suffix}`;
 }
 
+export function createDefaultImageTransform() {
+  return {
+    mode: 'single',
+    offsetX: 0,
+    offsetY: 0,
+    repeatX: 1,
+    repeatY: 1,
+    rotation: 0,
+  };
+}
+
 export function createFlatPanelModuleState(widthCm) {
   return {
     id: createId('module'),
@@ -17,15 +28,21 @@ export function createFlatPanelModuleState(widthCm) {
       stripIndex,
       color: DEFAULT_PANEL_COLOR,
       imageAssetId: null,
-      imageTransform: {
-        offsetX: 0,
-        offsetY: 0,
-        repeatX: 1,
-        repeatY: 1,
-        rotation: 0,
-      },
+      imageTransform: createDefaultImageTransform(),
     })),
   };
+}
+
+/**
+ * Bir panele renk uygulamak, o hücrede atanmış görselin yerini alır.
+ * Diğer panellerin image state'i değişmez.
+ */
+export function applyColorOverride(surfaceState, color) {
+  if (!surfaceState) return null;
+  surfaceState.color = color;
+  surfaceState.imageAssetId = null;
+  surfaceState.imageTransform = createDefaultImageTransform();
+  return surfaceState;
 }
 
 /**
