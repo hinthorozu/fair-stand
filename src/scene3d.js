@@ -3,8 +3,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STAND_DIMENSIONS } from './catalog.js';
 
 const FRAME_COLOR = 0x9aa0a6;
-const PANEL_COLOR = 0xd9dde2;
+const PANEL_COLOR = 0xffffff;
+const PANEL_BACK_COLOR = 0xf4f4f4;
 const FLOOR_COLOR = 0xe9edf1;
+const SELECTION_COLOR = 0x1d4ed8;
 
 export function createStandScene(container, onSurfaceSelected) {
   const scene = new THREE.Scene();
@@ -42,7 +44,8 @@ export function createStandScene(container, onSurfaceSelected) {
   floor.receiveShadow = true;
   scene.add(floor);
 
-  const grid = new THREE.GridHelper(30, 60, 0xbcc3ca, 0xd9dee3);
+  // 30 metre alan / 30 bölme = her kare 1 m × 1 m.
+  const grid = new THREE.GridHelper(30, 30, 0xb0b7bf, 0xd0d6dc);
   grid.position.y = 0.002;
   scene.add(grid);
 
@@ -52,24 +55,43 @@ export function createStandScene(container, onSurfaceSelected) {
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   let surfaceMeshes = [];
-  let selectedSurface = null;
+  const selectedSurfaces = new Set();
 
-  function clearSelection() {
-    if (selectedSurface?.material?.emissive) {
-      selectedSurface.material.emissive.setHex(0x000000);
-      selectedSurface.material.emissiveIntensity = 0;
-    }
-    selectedSurface = null;
+  function setSelectionVisual(mesh, selected) {
+    if (!mesh?.material?.emissive) return;
+    mesh.material.emissive.setHex(selected ? SELECTION_COLOR : 0x000000);
+    mesh.material.emissiveIntensity = selected ? 0.18 : 0;
   }
 
-  function selectSurface(mesh) {
-    clearSelection();
-    selectedSurface = mesh;
-    if (mesh?.material?.emissive) {
-      mesh.material.emissive.setHex(0x1d4ed8);
-      mesh.material.emissiveIntensity = 0.16;
+  function notifySelection() {
+    onSurfaceSelected?.([...selectedSurfaces]);
+  }
+
+  function clearSelection({ notify = true } = {}) {
+    selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
+    selectedSurfaces.clear();
+    if (notify) notifySelection();
+  }
+
+  function selectOnly(mesh) {
+    clearSelection({ notify: false });
+    if (mesh) {
+      selectedSurfaces.add(mesh);
+      setSelectionVisual(mesh, true);
     }
-    onSurfaceSelected?.(mesh);
+    notifySelection();
+  }
+
+  function toggleSurface(mesh) {
+    if (!mesh) return;
+    if (selectedSurfaces.has(mesh)) {
+      selectedSurfaces.delete(mesh);
+      setSelectionVisual(mesh, false);
+    } else {
+      selectedSurfaces.add(mesh);
+      setSelectionVisual(mesh, true);
+    }
+    notifySelection();
   }
 
   function disposeObject(object) {
@@ -85,13 +107,13 @@ export function createStandScene(container, onSurfaceSelected) {
   }
 
   function clearWall() {
-    clearSelection();
-    onSurfaceSelected?.(null);
+    clearSelection({ notify: false });
     surfaceMeshes = [];
     while (wallRoot.children.length) {
       const child = wallRoot.children.pop();
       disposeObject(child);
     }
+    notifySelection();
   }
 
   function buildWall(widthsCm) {
@@ -120,14 +142,24 @@ export function createStandScene(container, onSurfaceSelected) {
     controls.update();
   }
 
-  function applyColor(mesh, hexColor) {
-    if (!mesh?.material) return;
-    mesh.material.color.set(hexColor);
-    mesh.material.needsUpdate = true;
+  function normalizeMeshes(meshOrMeshes) {
+    if (!meshOrMeshes) return [];
+    if (Array.isArray(meshOrMeshes)) return meshOrMeshes;
+    if (meshOrMeshes instanceof Set) return [...meshOrMeshes];
+    return [meshOrMeshes];
   }
 
-  function applyImage(mesh, file) {
-    if (!mesh?.material || !file) return;
+  function applyColor(meshOrMeshes, hexColor) {
+    normalizeMeshes(meshOrMeshes).forEach((mesh) => {
+      if (!mesh?.material) return;
+      mesh.material.color.set(hexColor);
+      mesh.material.needsUpdate = true;
+    });
+  }
+
+  function applyImage(meshOrMeshes, file) {
+    const meshes = normalizeMeshes(meshOrMeshes);
+    if (!meshes.length || !file) return;
 
     const objectUrl = URL.createObjectURL(file);
     const loader = new THREE.TextureLoader();
@@ -138,10 +170,17 @@ export function createStandScene(container, onSurfaceSelected) {
         texture.wrapS = THREE.ClampToEdgeWrapping;
         texture.wrapT = THREE.ClampToEdgeWrapping;
         texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        mesh.material.map?.dispose?.();
-        mesh.material.map = texture;
-        mesh.material.color.set(0xffffff);
-        mesh.material.needsUpdate = true;
+
+        meshes.forEach((mesh, index) => {
+          if (!mesh?.material) return;
+          const appliedTexture = index === 0 ? texture : texture.clone();
+          appliedTexture.needsUpdate = true;
+          mesh.material.map?.dispose?.();
+          mesh.material.map = appliedTexture;
+          mesh.material.color.set(0xffffff);
+          mesh.material.needsUpdate = true;
+        });
+
         URL.revokeObjectURL(objectUrl);
       },
       undefined,
@@ -149,11 +188,13 @@ export function createStandScene(container, onSurfaceSelected) {
     );
   }
 
-  function clearImage(mesh) {
-    if (!mesh?.material) return;
-    mesh.material.map?.dispose?.();
-    mesh.material.map = null;
-    mesh.material.needsUpdate = true;
+  function clearImage(meshOrMeshes) {
+    normalizeMeshes(meshOrMeshes).forEach((mesh) => {
+      if (!mesh?.material) return;
+      mesh.material.map?.dispose?.();
+      mesh.material.map = null;
+      mesh.material.needsUpdate = true;
+    });
   }
 
   renderer.domElement.addEventListener('pointerdown', (event) => {
@@ -163,7 +204,14 @@ export function createStandScene(container, onSurfaceSelected) {
 
     raycaster.setFromCamera(pointer, camera);
     const hit = raycaster.intersectObjects(surfaceMeshes, false)[0];
-    if (hit) selectSurface(hit.object);
+    const multiSelect = event.ctrlKey || event.metaKey;
+
+    if (hit) {
+      if (multiSelect) toggleSurface(hit.object);
+      else selectOnly(hit.object);
+    } else if (!multiSelect) {
+      clearSelection();
+    }
   });
 
   function resize() {
@@ -186,10 +234,12 @@ export function createStandScene(container, onSurfaceSelected) {
   return {
     buildWall,
     clearWall,
+    clearSelection,
     applyColor,
     applyImage,
     clearImage,
-    getSelectedSurface: () => selectedSurface,
+    getSelectedSurface: () => [...selectedSurfaces][0] ?? null,
+    getSelectedSurfaces: () => [...selectedSurfaces],
   };
 }
 
@@ -245,7 +295,7 @@ function createFlatPanelModule(widthCm, moduleIndex) {
 
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
-      new THREE.MeshStandardMaterial({ color: 0xcfd4d9, roughness: 0.74 }),
+      new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74 }),
     );
     backing.position.set(0, centerY, 0);
     backing.castShadow = true;
