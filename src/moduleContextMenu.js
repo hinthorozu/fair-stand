@@ -19,14 +19,14 @@ const PICKER_MODULE_KEYS = [
   'SHOWCASE_2_100',
 ];
 
-// Sol / sağ komutları kameraya göre değil, modülün ön yüzüne göre yorumlanır.
-// Sırt duvarda ve sağ yan duvarda teknik eksen yönü kullanıcı yönüyle aynıdır.
-// Sol yan duvarın ön yüzü standın içine (+X) baktığı için kullanıcıdaki sol/sağ
-// teknik Y ekseninde ters yöndedir.
+// Kullanıcı komutları kameraya göre değil, modülün ön yüzündeki görsel
+// sol/sağa göre verilir. Sürekli duvar zincirinde sağ yan duvarın ilerleme
+// yönü görsel sol/sağın tersidir. Sol yan duvarın zincir terslemesi main.js
+// tarafındaki mevcut normalizasyonda bir kez uygulanır; burada tekrar edilmez.
 export function resolveModuleSidePlacement(context, visualSide) {
   if (visualSide !== 'left' && visualSide !== 'right') return visualSide;
   const wallId = context?.placement?.wallId ?? 'back';
-  if (wallId !== 'left') return visualSide;
+  if (wallId !== 'right') return visualSide;
   return visualSide === 'left' ? 'right' : 'left';
 }
 
