@@ -4,6 +4,7 @@ import { createStandScene } from './scene3d.js';
 import { composeStraightWall } from './wall.js';
 import {
   createFlatPanelModuleState,
+  createSeparatorModuleState,
   duplicateModuleState,
   totalWallWidthCm,
   moduleWidths,
@@ -62,7 +63,13 @@ const scene3d = createStandScene(
 
     if (surfaces.length === 1) {
       const surface = surfaces[0];
-      const { moduleIndex, widthCm, stripNumber } = surface.userData;
+      const { moduleIndex, widthCm, stripNumber, moduleType } = surface.userData;
+
+      if (moduleType === 'separator') {
+        selectionInfo.textContent = `Modül ${moduleIndex + 1} · Separatör ${widthCm} cm · yalnızca renk uygulanabilir.`;
+        return;
+      }
+
       selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${widthCm} cm · alttan ${stripNumber}. panel · Ctrl/Cmd + tık ile blok seç.`;
       return;
     }
@@ -133,8 +140,16 @@ function duplicateContextModule(context, side) {
   rebuildWall({ resetView: false });
 }
 
+function createCatalogModuleState(module) {
+  if (!module) return null;
+  if (module.type === 'flat-panel') return createFlatPanelModuleState(module.widthCm);
+  if (module.type === 'separator') return createSeparatorModuleState(module.widthCm);
+  return null;
+}
+
 function addCatalogModule({ module, placement = 'append', context = null }) {
-  if (!module || module.type !== 'flat-panel') return;
+  const moduleState = createCatalogModuleState(module);
+  if (!moduleState) return;
 
   let insertIndex = currentModules.length;
   if (placement === 'left' || placement === 'right') {
@@ -143,7 +158,7 @@ function addCatalogModule({ module, placement = 'append', context = null }) {
     insertIndex = placement === 'left' ? contextIndex : contextIndex + 1;
   }
 
-  currentModules.splice(insertIndex, 0, createFlatPanelModuleState(module.widthCm));
+  currentModules.splice(insertIndex, 0, moduleState);
   rebuildWall({ resetView: false });
 }
 
@@ -211,7 +226,7 @@ function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
   const selected = scene3d.getSelectedSurfaces();
   if (!selected.length) {
     if (showMissingSelection) {
-      selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel veya panel bloğunu seç.';
+      selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel, panel bloğu veya separatörü seç.';
     }
     return false;
   }
