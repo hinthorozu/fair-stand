@@ -258,8 +258,30 @@ function syncFromRgbInputs() {
 function syncFromCmykInputs() {
   const cmyk = readNumberGroup(colorCmykInputs);
   if (!cmyk) return;
-  const rgb = cmykToRgb(cmyk.c, cmyk.m, cmyk.y, cmyk.k);
-  syncColorEditorFromHex(rgbToHex(rgb.r, rgb.g, rgb.b), { apply: true });
+
+  const normalizedCmyk = Object.fromEntries(
+    Object.entries(cmyk).map(([key, value]) => [
+      key,
+      Math.min(100, Math.max(0, Math.round(value))),
+    ]),
+  );
+  Object.entries(normalizedCmyk).forEach(([key, value]) => {
+    colorCmykInputs[key].value = String(value);
+  });
+
+  const rgb = cmykToRgb(
+    normalizedCmyk.c,
+    normalizedCmyk.m,
+    normalizedCmyk.y,
+    normalizedCmyk.k,
+  );
+  const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+  colorInput.value = hex;
+  colorHexInput.value = hex;
+  colorRgbInputs.r.value = String(rgb.r);
+  colorRgbInputs.g.value = String(rgb.g);
+  colorRgbInputs.b.value = String(rgb.b);
+  applyActiveColorToSelection();
 }
 
 applyColorButton.addEventListener('click', () => {
