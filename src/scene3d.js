@@ -11,6 +11,10 @@ import { computeImageFit } from './imageFit.js';
 
 const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0xf4f4f4;
+const GLASS_SURFACE_COLOR = 0xd7e9ed;
+const GLASS_BACK_COLOR = 0xc9dce1;
+const GLASS_SURFACE_OPACITY = 0.48;
+const GLASS_BACK_OPACITY = 0.18;
 const FLOOR_COLOR = 0xe9edf1;
 const SELECTION_COLOR = 0x2563eb;
 const DEFAULT_VIEW_MIN_DISTANCE = 9;
@@ -302,11 +306,18 @@ export function createStandScene(
     for (const hit of hits) {
       const moduleGroup = findModuleGroup(hit.object);
       if (!moduleGroup) continue;
+      const surface = hit.object.userData?.kind === 'surface' ? hit.object : null;
+      const supportsGlass = surface?.userData.selectionMode === 'panel';
       return {
         moduleIndex: moduleGroup.userData.moduleIndex,
         moduleId: moduleGroup.userData.moduleId,
         type: moduleGroup.userData.type,
         widthCm: moduleGroup.userData.widthCm,
+        surfaceId: supportsGlass ? surface.userData.surfaceId : null,
+        stripIndex: supportsGlass ? surface.userData.stripIndex : null,
+        stripNumber: supportsGlass ? surface.userData.stripNumber : null,
+        supportsGlass,
+        isGlass: supportsGlass ? Boolean(surface.userData.surfaceState?.isGlass) : false,
         clientX: event.clientX,
         clientY: event.clientY,
       };
@@ -340,9 +351,44 @@ export function createStandScene(
         if (!target?.material) return;
         target.material.map?.dispose?.();
         target.material.map = null;
-        target.material.color.set(hexColor);
+        target.material.color.set(surfaceState?.isGlass ? GLASS_SURFACE_COLOR : hexColor);
         target.material.needsUpdate = true;
       });
+    });
+  }
+
+  function applyGlassMode(meshOrMeshes, isGlass) {
+    const glass = Boolean(isGlass);
+
+    normalizeMeshes(meshOrMeshes).forEach((mesh) => {
+      if (!mesh?.material || mesh.userData.selectionMode !== 'panel') return;
+      const surfaceState = mesh.userData.surfaceState;
+      if (!surfaceState) return;
+
+      surfaceState.isGlass = glass;
+      const hasImage = Boolean(mesh.material.map);
+      mesh.material.transparent = glass;
+      mesh.material.opacity = glass ? GLASS_SURFACE_OPACITY : 1;
+      mesh.material.depthWrite = !glass;
+      mesh.material.roughness = glass ? 0.16 : 0.72;
+      mesh.material.metalness = 0;
+      mesh.material.color.set(
+        glass
+          ? (hasImage ? 0xffffff : GLASS_SURFACE_COLOR)
+          : (hasImage ? 0xffffff : (surfaceState.color ?? '#ffffff')),
+      );
+      mesh.material.needsUpdate = true;
+
+      const backing = mesh.userData.backing;
+      if (backing?.material) {
+        backing.material.transparent = glass;
+        backing.material.opacity = glass ? GLASS_BACK_OPACITY : 1;
+        backing.material.depthWrite = !glass;
+        backing.material.roughness = glass ? 0.22 : 0.74;
+        backing.material.color.set(glass ? GLASS_BACK_COLOR : PANEL_BACK_COLOR);
+        backing.material.needsUpdate = true;
+        backing.castShadow = !glass;
+      }
     });
   }
 
@@ -435,7 +481,10 @@ export function createStandScene(
       },
       undefined,
       () => {
-        const stateColor = mesh.userData.surfaceState?.color ?? '#ffffff';
+        const surfaceState = mesh.userData.surfaceState;
+        const stateColor = surfaceState?.isGlass
+          ? GLASS_SURFACE_COLOR
+          : (surfaceState?.color ?? '#ffffff');
         if (mesh.material) mesh.material.color.set(stateColor);
       },
     );
@@ -484,7 +533,10 @@ export function createStandScene(
       },
       undefined,
       () => {
-        const stateColor = mesh.userData.surfaceState?.color ?? '#ffffff';
+        const surfaceState = mesh.userData.surfaceState;
+        const stateColor = surfaceState?.isGlass
+          ? GLASS_SURFACE_COLOR
+          : (surfaceState?.color ?? '#ffffff');
         if (mesh.material) mesh.material.color.set(stateColor);
       },
     );
@@ -636,7 +688,9 @@ export function createStandScene(
       }
       mesh.material.map?.dispose?.();
       mesh.material.map = null;
-      mesh.material.color.set(surfaceState?.color ?? '#ffffff');
+      mesh.material.color.set(
+        surfaceState?.isGlass ? GLASS_SURFACE_COLOR : (surfaceState?.color ?? '#ffffff'),
+      );
       mesh.material.needsUpdate = true;
     });
   }
@@ -650,6 +704,16 @@ export function createStandScene(
 
     event.preventDefault();
     event.stopPropagation();
+
+    if (context.surfaceId) {
+      const contextSurface = surfaceMeshes.find(
+        (surface) => surface.userData.surfaceId === context.surfaceId,
+      );
+      if (contextSurface && !selectedSurfaces.has(contextSurface)) {
+        selectOnly(contextSurface);
+      }
+    }
+
     onModuleContextMenu?.(context);
   });
 
@@ -703,6 +767,7 @@ export function createStandScene(
     clearSelection,
     resetDefaultView,
     applyColor,
+    applyGlassMode,
     applyImageAsset,
     applyHorizontalImageAsset,
     applyRectImageAsset,
@@ -769,22 +834,34 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   for (let stripIndex = 0; stripIndex < stripCount; stripIndex += 1) {
     const centerY = stripIndex * stripHeight + stripHeight / 2;
     const surfaceState = moduleState.strips[stripIndex];
+    const isGlass = Boolean(surfaceState.isGlass);
 
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
-      new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74 }),
+      new THREE.MeshStandardMaterial({
+        color: isGlass ? GLASS_BACK_COLOR : PANEL_BACK_COLOR,
+        roughness: isGlass ? 0.22 : 0.74,
+        transparent: isGlass,
+        opacity: isGlass ? GLASS_BACK_OPACITY : 1,
+        depthWrite: !isGlass,
+      }),
     );
     backing.position.set(0, centerY, 0);
-    backing.castShadow = true;
+    backing.castShadow = !isGlass;
     backing.receiveShadow = true;
     group.add(backing);
 
     const surface = new THREE.Mesh(
       new THREE.PlaneGeometry(innerWidth, panelHeight),
       new THREE.MeshStandardMaterial({
-        color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
-        roughness: 0.72,
+        color: surfaceState.imageAssetId
+          ? 0xffffff
+          : (isGlass ? GLASS_SURFACE_COLOR : surfaceState.color),
+        roughness: isGlass ? 0.16 : 0.72,
         metalness: 0,
+        transparent: isGlass,
+        opacity: isGlass ? GLASS_SURFACE_OPACITY : 1,
+        depthWrite: !isGlass,
         side: THREE.DoubleSide,
         emissive: 0x000000,
         emissiveIntensity: 0,
@@ -809,6 +886,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
       surfaceId: surfaceState.id,
       surfaceState,
       selectionFrame,
+      backing,
     };
     group.add(surface);
     surfaces.push(surface);
@@ -990,22 +1068,34 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     const centerY = stripIndex * stripHeight + stripHeight / 2;
     const surfaceState = moduleState.strips[stripIndex];
     if (!surfaceState) continue;
+    const isGlass = Boolean(surfaceState.isGlass);
 
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
-      new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74 }),
+      new THREE.MeshStandardMaterial({
+        color: isGlass ? GLASS_BACK_COLOR : PANEL_BACK_COLOR,
+        roughness: isGlass ? 0.22 : 0.74,
+        transparent: isGlass,
+        opacity: isGlass ? GLASS_BACK_OPACITY : 1,
+        depthWrite: !isGlass,
+      }),
     );
     backing.position.set(0, centerY, 0);
-    backing.castShadow = true;
+    backing.castShadow = !isGlass;
     backing.receiveShadow = true;
     group.add(backing);
 
     const surface = new THREE.Mesh(
       new THREE.PlaneGeometry(innerWidth, panelHeight),
       new THREE.MeshStandardMaterial({
-        color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
-        roughness: 0.72,
+        color: surfaceState.imageAssetId
+          ? 0xffffff
+          : (isGlass ? GLASS_SURFACE_COLOR : surfaceState.color),
+        roughness: isGlass ? 0.16 : 0.72,
         metalness: 0,
+        transparent: isGlass,
+        opacity: isGlass ? GLASS_SURFACE_OPACITY : 1,
+        depthWrite: !isGlass,
         side: THREE.DoubleSide,
         emissive: 0x000000,
         emissiveIntensity: 0,
@@ -1030,6 +1120,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
       surfaceId: surfaceState.id,
       surfaceState,
       selectionFrame,
+      backing,
     };
 
     group.add(surface);
