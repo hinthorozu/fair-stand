@@ -20,6 +20,15 @@ function getSegments(standType, standXCm, standYCm) {
   });
 }
 
+export function getContinuousWallSegments(standType, standXCm, standYCm) {
+  return getSegments(standType, standXCm, standYCm).map((segment) => ({ ...segment }));
+}
+
+export function getContinuousWallCapacityCm(standType, standXCm, standYCm) {
+  return getSegments(standType, standXCm, standYCm)
+    .reduce((sum, segment) => sum + Number(segment.lengthCm), 0);
+}
+
 function placementToPathStart(module, segments, standYCm) {
   const placement = module?.placement;
   const widthCm = Number(module?.widthCm);
@@ -93,6 +102,46 @@ function findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm) {
   }
 
   return null;
+}
+
+export function planContinuousWallLayout({
+  modules = [],
+  standType,
+  standXCm,
+  standYCm,
+} = {}) {
+  const segments = getSegments(standType, standXCm, standYCm);
+  if (!segments.length) {
+    return { ok: false, message: 'Bu stand tipinde sürekli duvar yerleşimi kullanılamaz.' };
+  }
+
+  const placements = new Map();
+  let cursorCm = 0;
+
+  for (const module of modules) {
+    const widthCm = Number(module?.widthCm);
+    if (!module?.id || !Number.isFinite(widthCm) || widthCm <= 0) {
+      return { ok: false, message: 'Geçersiz modül genişliği bulundu.' };
+    }
+
+    const next = findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm);
+    if (!next) {
+      return {
+        ok: false,
+        message: 'Aktif duvar zincirinde modüllerin tamamı için yeterli alan yok.',
+      };
+    }
+
+    placements.set(module.id, next.placement);
+    cursorCm = next.nextCursorCm;
+  }
+
+  return {
+    ok: true,
+    placements,
+    usedCm: cursorCm,
+    capacityCm: segments.reduce((sum, segment) => sum + segment.lengthCm, 0),
+  };
 }
 
 export function planContinuousWallInsertion({
