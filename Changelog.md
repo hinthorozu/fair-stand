@@ -314,3 +314,11 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 251. Viewport yardım çubuğuna `Sağ sürükle: pan` bilgisi eklendi.
 252. Dinamik zemin boyutu, 1 metrelik grid hücresi ve uzun duvar büyümesi için otomatik testler eklendi.
 253. Dinamik zemin ve pan entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+
+## Orta mouse pan kontrolü
+
+254. Pan kontrolü sağ mouse sürüklemeden orta mouse / tekerleğe basılı sürüklemeye taşındı.
+255. Sağ mouse tuşunun OrbitControls pan görevi kaldırıldı.
+256. Mouse tekerleğini çevirmeyle zoom davranışı korunurken, tekerleğe basılı sürükleme pan olarak ayarlandı.
+257. Panel seçimi yalnızca sol mouse tuşuyla çalışmaya devam edecek şekilde korundu.
+258. Viewport yardım çubuğu `Tekerleğe basılı sürükle: pan` olarak güncellendi.
