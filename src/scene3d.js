@@ -5,6 +5,7 @@ import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
+import { createGroundLayout } from './groundLayout.js';
 
 const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0xf4f4f4;
@@ -15,7 +16,7 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf4f6f8);
 
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 100);
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 2000);
   camera.position.set(4.8, 3.4, 6.2);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -26,10 +27,16 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
+  controls.enablePan = true;
+  controls.screenSpacePanning = true;
+  controls.panSpeed = 1.15;
   controls.target.set(0, 1.65, 0);
   controls.minDistance = 2;
-  controls.maxDistance = 30;
+  controls.maxDistance = 1000;
   controls.maxPolarAngle = Math.PI * 0.49;
+  controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+  controls.mouseButtons.MIDDLE = THREE.MOUSE.DOLLY;
+  controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x7f8790, 2.1));
 
@@ -40,17 +47,49 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
   scene.add(keyLight);
 
   const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(40, 40),
+    new THREE.PlaneGeometry(1, 1),
     new THREE.MeshStandardMaterial({ color: FLOOR_COLOR, roughness: 0.92 }),
   );
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   scene.add(floor);
 
-  // 30 metre alan / 30 bölme = her kare 1 m × 1 m.
-  const grid = new THREE.GridHelper(30, 30, 0x7f8b99, 0xd0d6dc);
-  grid.position.y = 0.002;
-  scene.add(grid);
+  let grid = null;
+  let groundLayout = null;
+
+  function disposeGrid() {
+    if (!grid) return;
+    scene.remove(grid);
+    grid.geometry?.dispose?.();
+    const materials = Array.isArray(grid.material) ? grid.material : [grid.material];
+    materials.forEach((material) => material?.dispose?.());
+    grid = null;
+  }
+
+  function updateGround(totalWallWidthM = 0) {
+    const nextLayout = createGroundLayout(totalWallWidthM);
+
+    floor.scale.set(nextLayout.sizeM, nextLayout.sizeM, 1);
+    floor.position.x = nextLayout.centerX;
+
+    if (!grid || groundLayout?.sizeM !== nextLayout.sizeM) {
+      disposeGrid();
+      grid = new THREE.GridHelper(
+        nextLayout.sizeM,
+        nextLayout.divisions,
+        0x7f8b99,
+        0xd0d6dc,
+      );
+      grid.position.set(nextLayout.centerX, 0.002, 0);
+      scene.add(grid);
+    } else {
+      grid.position.x = nextLayout.centerX;
+    }
+
+    groundLayout = nextLayout;
+  }
+
+  updateGround(0);
 
   const wallRoot = new THREE.Group();
   wallRoot.position.set(0, 0, 0);
@@ -149,6 +188,7 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
 
   function clearWall() {
     disposeWall();
+    updateGround(0);
   }
 
   function buildWall(modules) {
@@ -160,6 +200,7 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     disposeWall({ notify: false, keepAnchor: true });
 
     const totalWidth = modules.reduce((sum, module) => sum + module.widthCm / 100, 0);
+    updateGround(totalWidth);
     let cursorX = 0;
 
     modules.forEach((moduleState, moduleIndex) => {
@@ -502,6 +543,9 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
   }
 
   renderer.domElement.addEventListener('pointerdown', (event) => {
+    // Sağ tuş OrbitControls pan için ayrıldı; panel seçimi yalnızca sol tuşla yapılır.
+    if (event.button !== 0) return;
+
     const rect = renderer.domElement.getBoundingClientRect();
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
