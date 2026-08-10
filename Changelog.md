@@ -388,3 +388,42 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 313. CMYK değerleri kullanıcı tarafından doğrudan düzenlendiğinde girilen C / M / Y / K oranlarının RGB dönüşümü sonrasında yeniden dağıtılmadan korunması sağlandı.
 314. HEX normalizasyonu, HEX↔RGB ve RGB↔CMYK dönüşümleri için otomatik testler eklendi.
 315. HEX / RGB / CMYK renk editörü entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+
+## Separatör modülleri
+
+316. Maxima çerçeve derinliği belirsiz 10–11 cm ifadesinden çıkarılıp sabit `10 cm` olarak tanımlandı.
+317. `Separatör 50` ve `Separatör 100` için ayrı renk-only modül state'leri eklendi.
+318. İki separatörde de aynı düşey ritmi koruyan 36 adet yatay çıta kullanıldı.
+319. Separatör çıtalarının ön görünüş yüksekliği 3,5 cm, net aralığı yaklaşık 6 cm ve derinliği çerçeve ile aynı 10 cm yapıldı.
+320. 50 ve 100 cm separatörlerde çıta adedi aynı tutulup yalnızca çıta uzunluğu modül genişliğine göre değişir hale getirildi.
+321. Separatörlere görsel atanması engellendi; modül tek parça seçilip yalnızca çıta rengi değiştirilebilir hale getirildi.
+322. Separatör 50 / 100 katalog kartları ve görsel önizlemeleri ortak modül popup'ına eklendi.
+323. Separatörler sağ / sol ekleme, silme ve tasarım state'ini koruyarak çoğaltma akışına bağlandı.
+324. Separatör state ve çoğaltma davranışları otomatik testlerle doğrulandı.
+325. Separatör entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+
+## Görsel Doldur / Sığdır
+
+326. Büyük `Görseli uygula` ve `Görseli kaldır` butonları kaldırılıp kompakt `Doldur | Sığdır | Kaldır` aksiyonları eklendi.
+327. `Doldur` için gerçek `cover`, `Sığdır` için gerçek `contain` yerleşim hesabını yapan `imageFit.js` yardımcı modülü eklendi.
+328. `Doldur` modunda seçili baskı alanının tamamının kaplanması ve taşan görsel bölümünün merkezden kırpılması sağlandı.
+329. `Sığdır` modunda görselin tamamının en-boy oranı bozulmadan seçili baskı alanı içinde gösterilmesi sağlandı.
+330. Tek panel ve dikdörtgen birleşik görsel uygulamalarında `cover / contain` seçiminin aynı motoru kullanması sağlandı.
+331. Seçilen görsel yerleşim modunun panel state'ine yazılması ve rebuild sonrasında korunması sağlandı.
+332. `cover / contain` hesapları için otomatik testler eklendi.
+333. Görsel yerleşim değişiklikleri GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+
+## 2 ve 3 gözlü vitrin modülleri
+
+334. Katalogdaki vitrin isimleri kullanıcı terminolojisine göre `3 Gözlü Vitrin 100` ve `2 Gözlü Vitrin 100` olarak güncellendi.
+335. `showcase-3` ve `showcase-2` için bağımsız, 100 cm genişlikli ve renk-only modül state'leri eklendi.
+336. 3 gözlü vitrin 2 cam rafla üç hacim, 2 gözlü vitrin 1 cam rafla iki hacim oluşturacak şekilde modellendi.
+337. Vitrinler 350 cm Maxima dış çerçeve ve standart 50 cm yatay sistem ritmi içine yerleştirildi.
+338. Referans görsele uygun olarak vitrin dışındaki kapalı bölümlerde koyu dolgu panelleri bırakıldı.
+339. Vitrin hacmi öne doğru 36 cm derinlikte; arka panel, şeffaf yan yüzeyler, ön profil çerçevesi ve hacimli cam raflarla modellendi.
+340. Cam raflara hafif yeşil / şeffaf malzeme uygulanarak kamerayı çevirince vitrin derinliğinin okunması sağlandı.
+341. Vitrin modülü tek parça seçilir hale getirildi; kapalı dolgu panellerine renk uygulanabilirken görsel ataması kapatıldı.
+342. Vitrinler ortak katalog popup'ına görsel kartlarıyla eklendi ve append / sağ / sol ekleme akışına bağlandı.
+343. Vitrinler mevcut sağ tık silme ve sağa / sola çoğaltma davranışlarını destekler hale getirildi.
+344. Vitrin state'inin tip, renk ve bağımsız kimliklerini koruyan otomatik testler eklendi.
+345. 2 / 3 gözlü vitrin entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
