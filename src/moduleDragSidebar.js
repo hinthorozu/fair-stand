@@ -19,22 +19,28 @@ function ensureStyles() {
     .module-drag-catalog { display:flex; flex-direction:column; gap:8px; }
     .module-drag-hint { margin:0; color:#7a8494; font-size:10px; line-height:1.45; }
     .module-drag-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
-    .module-drag-card { display:flex; min-width:0; min-height:76px; flex-direction:column; align-items:stretch; justify-content:space-between; gap:6px; padding:8px; border:1px solid #d9dee5; border-radius:10px; background:#f8fafc; color:#364152; cursor:grab; user-select:none; }
+    .module-drag-card { display:flex; min-width:0; min-height:116px; flex-direction:column; align-items:stretch; justify-content:space-between; gap:7px; padding:8px; border:1px solid #d9dee5; border-radius:10px; background:#f8fafc; color:#364152; cursor:grab; user-select:none; }
     .module-drag-card:hover { border-color:#f97316; background:#fff8f2; }
     .module-drag-card.is-disabled { opacity:.45; cursor:not-allowed; }
     .module-drag-card.is-dragging { opacity:.55; border-color:#f97316; box-shadow:0 0 0 2px rgba(249,115,22,.14); }
     .module-drag-card strong { overflow:hidden; font-size:10px; line-height:1.25; text-overflow:ellipsis; white-space:nowrap; }
-    .module-drag-preview { display:flex; height:42px; align-items:center; justify-content:center; overflow:hidden; border-radius:7px; background:#fff; }
-    .module-drag-panel { display:flex; width:70%; height:36px; flex-direction:column; border:3px solid #8a929a; background:#f7f7f5; }
+    .module-drag-preview { display:flex; height:78px; align-items:center; justify-content:center; overflow:hidden; border-radius:7px; background:#fff; }
+    .module-drag-panel { display:flex; height:68px; flex-direction:column; border:3px solid #8a929a; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-panel span { flex:1; border-bottom:1px solid #c4c9ce; }
     .module-drag-panel span:last-child { border-bottom:0; }
-    .module-drag-separator { width:70%; height:36px; border:3px solid #747b82; background:repeating-linear-gradient(to bottom,#c79b63 0 2px,#eef2f6 2px 4px); }
-    .module-drag-showcase { position:relative; width:50%; height:36px; border:3px solid #8a929a; background:#f7f7f5; }
-    .module-drag-showcase::before { content:''; position:absolute; left:2px; right:2px; top:10px; bottom:6px; border:1px solid #9fbfa5; background:rgba(205,232,209,.5); }
-    .module-drag-showcase[data-eyes='3']::after { content:''; position:absolute; left:3px; right:3px; top:20px; height:1px; background:#9fbfa5; }
+    .module-drag-separator { height:68px; border:3px solid #747b82; background:repeating-linear-gradient(to bottom,#c79b63 0 2px,#eef2f6 2px 4px); box-shadow:0 2px 5px rgba(15,23,42,.08); }
+    .module-drag-showcase { position:relative; height:68px; border:3px solid #8a929a; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
+    .module-drag-showcase::before { content:''; position:absolute; left:3px; right:3px; top:21px; bottom:10px; border:1px solid #9fbfa5; background:rgba(205,232,209,.5); }
+    .module-drag-showcase[data-eyes='3']::after { content:''; position:absolute; left:4px; right:4px; top:42px; height:1px; background:#9fbfa5; }
     .viewport-wrap.catalog-drag-active { outline:2px solid rgba(249,115,22,.2); outline-offset:-2px; }
   `;
   document.head.appendChild(style);
+}
+
+function previewWidthPx(widthCm) {
+  const width = Number(widthCm);
+  if (!Number.isFinite(width) || width <= 0) return 24;
+  return Math.max(12, Math.round((width / 350) * 68));
 }
 
 function createPreview(module) {
@@ -44,7 +50,7 @@ function createPreview(module) {
   if (module.type === 'separator') {
     const body = document.createElement('div');
     body.className = 'module-drag-separator';
-    body.style.width = `${Math.max(38, Math.round((module.widthCm / 200) * 70))}%`;
+    body.style.width = `${previewWidthPx(module.widthCm)}px`;
     preview.appendChild(body);
     return preview;
   }
@@ -53,13 +59,14 @@ function createPreview(module) {
     const body = document.createElement('div');
     body.className = 'module-drag-showcase';
     body.dataset.eyes = module.type === 'showcase-3' ? '3' : '2';
+    body.style.width = `${previewWidthPx(module.widthCm)}px`;
     preview.appendChild(body);
     return preview;
   }
 
   const body = document.createElement('div');
   body.className = 'module-drag-panel';
-  body.style.width = `${Math.max(28, Math.round((module.widthCm / 200) * 70))}%`;
+  body.style.width = `${previewWidthPx(module.widthCm)}px`;
   for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
   preview.appendChild(body);
   return preview;
