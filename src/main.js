@@ -15,15 +15,21 @@ const clearTextureButton = document.querySelector('#clear-texture');
 
 let currentModules = [];
 
-const scene3d = createStandScene(viewport, (surface) => {
-  if (!surface) {
-    selectionInfo.textContent = '3D sahnede bir yatay panele tıkla.';
+const scene3d = createStandScene(viewport, (surfaces) => {
+  if (!surfaces?.length) {
+    selectionInfo.textContent = '3D sahnede bir yatay panele tıkla. Ctrl + tık ile çoklu seçebilirsin.';
     return;
   }
 
-  const { moduleIndex, widthCm, stripNumber } = surface.userData;
-  selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${widthCm} cm · alttan ${stripNumber}. panel`;
-  colorInput.value = `#${surface.material.color.getHexString()}`;
+  if (surfaces.length === 1) {
+    const surface = surfaces[0];
+    const { moduleIndex, widthCm, stripNumber } = surface.userData;
+    selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${widthCm} cm · alttan ${stripNumber}. panel`;
+    colorInput.value = `#${surface.material.color.getHexString()}`;
+    return;
+  }
+
+  selectionInfo.textContent = `${surfaces.length} panel seçili · Ctrl + tık ile seçime ekle/çıkar.`;
 });
 
 function renderWallResult(message, isError = false) {
@@ -73,25 +79,25 @@ clearWallButton.addEventListener('click', () => {
 });
 
 applyColorButton.addEventListener('click', () => {
-  const selected = scene3d.getSelectedSurface();
-  if (!selected) {
-    selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin paneli seç.';
+  const selected = scene3d.getSelectedSurfaces();
+  if (!selected.length) {
+    selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel veya panelleri seç.';
     return;
   }
   scene3d.applyColor(selected, colorInput.value);
 });
 
 colorInput.addEventListener('input', () => {
-  const selected = scene3d.getSelectedSurface();
-  if (selected) scene3d.applyColor(selected, colorInput.value);
+  const selected = scene3d.getSelectedSurfaces();
+  if (selected.length) scene3d.applyColor(selected, colorInput.value);
 });
 
 imageInput.addEventListener('change', () => {
-  const selected = scene3d.getSelectedSurface();
+  const selected = scene3d.getSelectedSurfaces();
   const file = imageInput.files?.[0];
 
-  if (!selected) {
-    selectionInfo.textContent = 'Görsel uygulamak için önce bir panel seç.';
+  if (!selected.length) {
+    selectionInfo.textContent = 'Görsel uygulamak için önce bir panel veya panel grubu seç.';
     imageInput.value = '';
     return;
   }
@@ -101,13 +107,12 @@ imageInput.addEventListener('change', () => {
 });
 
 clearTextureButton.addEventListener('click', () => {
-  const selected = scene3d.getSelectedSurface();
-  if (!selected) {
-    selectionInfo.textContent = 'Önce bir panel seç.';
+  const selected = scene3d.getSelectedSurfaces();
+  if (!selected.length) {
+    selectionInfo.textContent = 'Önce bir panel veya panel grubu seç.';
     return;
   }
   scene3d.clearImage(selected);
 });
 
-// Konuştuğumuz ilk demo: 350 cm => 200 + 150.
 buildAutomaticWall();
