@@ -3,11 +3,13 @@ import { createStandScene } from './scene3d.js';
 import { composeStraightWall } from './wall.js';
 import {
   createFlatPanelModuleState,
+  duplicateModuleState,
   totalWallWidthCm,
   moduleWidths,
 } from './designState.js';
 import { loadImageAssets, saveImageAsset } from './assetStore.js';
 import { describeRectSelection } from './rectSelection.js';
+import { createModuleContextMenu } from './moduleContextMenu.js';
 
 const viewport = document.querySelector('#viewport');
 const wallLengthInput = document.querySelector('#wall-length');
@@ -56,6 +58,7 @@ const scene3d = createStandScene(
     selectionInfo.textContent = `${shape.columnCount} × ${shape.rowCount} blok · ${shape.panelCount} panel seçili.`;
   },
   getAssetUrl,
+  (context) => moduleContextMenu.open(context),
 );
 
 function renderWallResult(message, isError = false) {
@@ -77,6 +80,37 @@ function rebuildWall({ resetView = true } = {}) {
   scene3d.buildWall(currentModules, { resetView });
   renderCurrentWallResult();
 }
+
+function findContextModuleIndex(context) {
+  if (!context) return -1;
+  const byId = currentModules.findIndex((module) => module.id === context.moduleId);
+  if (byId >= 0) return byId;
+  return Number.isInteger(context.moduleIndex) ? context.moduleIndex : -1;
+}
+
+function deleteContextModule(context) {
+  const index = findContextModuleIndex(context);
+  if (index < 0 || index >= currentModules.length) return;
+  currentModules.splice(index, 1);
+  rebuildWall({ resetView: false });
+}
+
+function duplicateContextModule(context, side) {
+  const index = findContextModuleIndex(context);
+  if (index < 0 || index >= currentModules.length) return;
+
+  const duplicate = duplicateModuleState(currentModules[index]);
+  if (!duplicate) return;
+
+  const insertIndex = side === 'left' ? index : index + 1;
+  currentModules.splice(insertIndex, 0, duplicate);
+  rebuildWall({ resetView: false });
+}
+
+const moduleContextMenu = createModuleContextMenu({
+  onDelete: deleteContextModule,
+  onDuplicate: duplicateContextModule,
+});
 
 function confirmExistingScene(message) {
   if (!currentModules.length) return true;
@@ -100,6 +134,7 @@ function buildAutomaticWall() {
   // Oluştur komutu onaylandıktan sonra mevcut state'i taşımadan sıfırdan yeni duvar kurar.
   // Yeni bir sahne başlangıcı olduğu için kamera da Home / default görünüme döner.
   currentModules = result.modules.map((widthCm) => createFlatPanelModuleState(widthCm));
+  moduleContextMenu.close();
   rebuildWall({ resetView: true });
 }
 
@@ -128,6 +163,8 @@ clearWallButton.addEventListener('click', () => {
   if (!confirmed) return;
 
   currentModules = [];
+  moduleContextMenu.close();
+  moduleContextMenu.closePicker();
   scene3d.clearWall({ resetView: true });
   renderWallResult('Duvar boş.');
 });
