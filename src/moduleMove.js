@@ -37,10 +37,6 @@ function placementToPathStart(module, segments, standYCm) {
 }
 
 function chainSideToCallerSide(chainSide, targetWallId) {
-  // planContinuousWallInsertion mevcut context-menu teknik yönünü kabul ediyor
-  // ve yan duvarlarda zincir yönünü kendi içinde tersliyor. Drag planlayıcısı ise
-  // doğrudan sürekli duvar zinciri sol->sağ yönüyle çalıştığı için çağrı yönünü
-  // yan duvarlarda bir kez ters çeviriyoruz.
   if (targetWallId === 'left' || targetWallId === 'right') {
     return chainSide === 'left' ? 'right' : 'left';
   }
@@ -168,7 +164,7 @@ export function planContinuousModuleMove({
   if (!targetEntry) return directValidation;
 
   const targetCenterCm = targetEntry.pathStartCm + Number(targetEntry.module.widthCm) / 2;
-  const chainSide = desiredCenterCm < targetCenterCm ? 'left' : 'right';
+  const chainSide = desiredCenterCm <= targetCenterCm ? 'left' : 'right';
   const callerSide = chainSideToCallerSide(
     chainSide,
     targetEntry.module?.placement?.wallId,
