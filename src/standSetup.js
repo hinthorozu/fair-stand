@@ -1,4 +1,6 @@
+export const MIN_STAND_DIMENSION_CM = 50;
 export const MAX_STAND_DIMENSION_CM = 5000;
+export const STAND_DIMENSION_STEP_CM = 50;
 export const STAND_SURROUND_M = 1;
 
 export const STAND_TYPE_LABELS = Object.freeze({
@@ -26,16 +28,29 @@ export function validateStandSetup({ standType, xCm, yCm } = {}) {
   if (
     !Number.isFinite(normalizedXCm)
     || !Number.isFinite(normalizedYCm)
-    || normalizedXCm <= 0
-    || normalizedYCm <= 0
+    || normalizedXCm < MIN_STAND_DIMENSION_CM
+    || normalizedYCm < MIN_STAND_DIMENSION_CM
   ) {
-    return { ok: false, message: 'X ve Y ölçüleri 0 cm’den büyük olmalı.' };
+    return {
+      ok: false,
+      message: `X ve Y ölçüleri en az ${MIN_STAND_DIMENSION_CM} cm olmalı.`,
+    };
   }
 
   if (normalizedXCm > MAX_STAND_DIMENSION_CM || normalizedYCm > MAX_STAND_DIMENSION_CM) {
     return {
       ok: false,
       message: `Maksimum stand alanı ${MAX_STAND_DIMENSION_CM} × ${MAX_STAND_DIMENSION_CM} cm olabilir.`,
+    };
+  }
+
+  if (
+    normalizedXCm % STAND_DIMENSION_STEP_CM !== 0
+    || normalizedYCm % STAND_DIMENSION_STEP_CM !== 0
+  ) {
+    return {
+      ok: false,
+      message: `X ve Y ölçüleri ${STAND_DIMENSION_STEP_CM} cm ve katları olmalı.`,
     };
   }
 
