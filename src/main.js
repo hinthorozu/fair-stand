@@ -163,10 +163,21 @@ function renderCurrentWallResult() {
   );
 }
 
+function formatCapacityPopup(result, title) {
+  const axis = result.axis?.toUpperCase() ?? '';
+  return `${title}\n\n`
+    + `${axis} stand sınırı: ${result.limitCm} cm\n`
+    + `Mevcut toplam: ${result.currentCm} cm\n`
+    + `Eklenmek istenen: ${result.addedCm} cm\n`
+    + `Oluşacak toplam: ${result.projectedCm} cm\n\n`
+    + 'Aktif stand alanı aşılamaz.';
+}
+
 function validateCurrentAxisCapacity(
   axis,
   addedCm,
   currentCm = totalWallWidthCm(currentModules),
+  { popupTitle = null } = {},
 ) {
   const result = validateStandAxisCapacity({
     axis,
@@ -176,7 +187,12 @@ function validateCurrentAxisCapacity(
     yCm: currentStand?.yCm,
   });
 
-  if (!result.ok) renderWallResult(result.message, true);
+  if (!result.ok) {
+    renderWallResult(result.message, true);
+    if (popupTitle && Number.isFinite(result.projectedCm)) {
+      window.alert(formatCapacityPopup(result, popupTitle));
+    }
+  }
   return result;
 }
 
@@ -225,7 +241,12 @@ function duplicateContextModule(context, side) {
   const duplicate = duplicateModuleState(currentModules[index]);
   if (!duplicate) return;
 
-  const capacity = validateCurrentAxisCapacity('x', duplicate.widthCm);
+  const capacity = validateCurrentAxisCapacity(
+    'x',
+    duplicate.widthCm,
+    totalWallWidthCm(currentModules),
+    { popupTitle: 'Modül çoğaltılamadı' },
+  );
   if (!capacity.ok) return;
 
   const insertIndex = side === 'left' ? index : index + 1;
@@ -241,6 +262,20 @@ function createCatalogModuleState(module) {
     return createShowcaseModuleState(module.type, module.widthCm);
   }
   return null;
+}
+
+function validateCatalogAddBatch({ entries = [] } = {}) {
+  const addedCm = entries.reduce(
+    (sum, entry) => sum + (Number(entry.module?.widthCm) || 0),
+    0,
+  );
+
+  return validateCurrentAxisCapacity(
+    'x',
+    addedCm,
+    totalWallWidthCm(currentModules),
+    { popupTitle: 'Modüller eklenemedi' },
+  );
 }
 
 function flushCatalogModuleAdds() {
@@ -305,6 +340,7 @@ const moduleContextMenu = createModuleContextMenu({
   onDelete: deleteContextModule,
   onDuplicate: duplicateContextModule,
   onAdd: addCatalogModule,
+  onValidateAddBatch: validateCatalogAddBatch,
   onGlassModeChange: changeContextPanelGlassMode,
 });
 
@@ -392,7 +428,12 @@ function buildAutomaticWall() {
   }
 
   const requestedTotalCm = result.modules.reduce((sum, widthCm) => sum + widthCm, 0);
-  const capacity = validateCurrentAxisCapacity('x', requestedTotalCm, 0);
+  const capacity = validateCurrentAxisCapacity(
+    'x',
+    requestedTotalCm,
+    0,
+    { popupTitle: 'Duvar oluşturulamadı' },
+  );
   if (!capacity.ok) return;
 
   const confirmed = confirmExistingScene(
