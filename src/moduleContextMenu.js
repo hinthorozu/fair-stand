@@ -128,7 +128,7 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     frame.style.width = '62px';
     frame.style.height = '132px';
     frame.style.border = '5px solid #6f767d';
-    frame.style.background = '#565a5e';
+    frame.style.background = '#ffffff';
     frame.style.boxShadow = '5px 7px 12px rgba(15, 23, 42, 0.12)';
 
     const opening = document.createElement('div');
