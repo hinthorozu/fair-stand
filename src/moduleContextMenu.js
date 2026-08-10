@@ -23,6 +23,7 @@ export function createModuleContextMenu({
   onDelete,
   onDuplicate,
   onAdd,
+  onValidateAddBatch,
   onGlassModeChange,
 }) {
   let activeContext = null;
@@ -347,6 +348,12 @@ export function createModuleContextMenu({
     const insertionEntries = request.placement === 'right'
       ? [...entries].reverse()
       : entries;
+
+    const validation = onValidateAddBatch?.({
+      ...request,
+      entries: insertionEntries,
+    });
+    if (validation === false || validation?.ok === false) return;
 
     closePicker();
     insertionEntries.forEach((entry) => {
