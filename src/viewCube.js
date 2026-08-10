@@ -6,6 +6,9 @@ const VIEW_SIZE = 126;
 const CLICK_DRAG_THRESHOLD = 5;
 const ROTATE_SPEED = 0.01;
 const VIEW_ANIMATION_MS = 280;
+const INITIAL_MIN_DISTANCE = 9;
+const INITIAL_DISTANCE_FACTOR = 1.22;
+const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
 
 const FACE_LABELS = [
   { label: 'RIGHT', accent: '#ef4444' },
@@ -72,17 +75,35 @@ export function createViewCube(container, camera, controls) {
   let lastPointerY = 0;
   let dragged = false;
   let animationId = 0;
+  let initialHomeApplied = false;
 
   function cancelAnimation() {
     animationId += 1;
     controls.enabled = true;
   }
 
+  function applyInitialHomeView() {
+    if (initialHomeApplied) return;
+    initialHomeApplied = true;
+
+    const target = controls.target.clone();
+    const currentDistance = camera.position.distanceTo(target);
+    const distance = THREE.MathUtils.clamp(
+      Math.max(INITIAL_MIN_DISTANCE, currentDistance * INITIAL_DISTANCE_FACTOR),
+      controls.minDistance,
+      controls.maxDistance,
+    );
+
+    camera.position.copy(target).addScaledVector(HOME_DIRECTION, distance);
+    camera.lookAt(target);
+    controls.update();
+  }
+
   function animateToDirection(direction) {
     cancelAnimation();
 
     const safeDirection = direction.clone();
-    if (safeDirection.lengthSq() === 0) safeDirection.set(1, 0.65, 1);
+    if (safeDirection.lengthSq() === 0) safeDirection.copy(HOME_DIRECTION);
 
     // Stand zemininin altına geçmeyi engelle.
     if (safeDirection.y < 0.04) safeDirection.y = 0.04;
@@ -162,7 +183,7 @@ export function createViewCube(container, camera, controls) {
       case 3: return new THREE.Vector3(0, -1, 0);
       case 4: return new THREE.Vector3(0, 0, 1);
       case 5: return new THREE.Vector3(0, 0, -1);
-      default: return new THREE.Vector3(1, 0.65, 1);
+      default: return HOME_DIRECTION.clone();
     }
   }
 
@@ -242,12 +263,14 @@ export function createViewCube(container, camera, controls) {
 
   homeButton.addEventListener('click', (event) => {
     event.stopPropagation();
-    animateToDirection(new THREE.Vector3(1, 0.72, 1));
+    animateToDirection(HOME_DIRECTION);
   });
 
   function update() {
+    applyInitialHomeView();
+
     const offset = camera.position.clone().sub(controls.target);
-    if (offset.lengthSq() === 0) offset.set(1, 0.7, 1);
+    if (offset.lengthSq() === 0) offset.copy(HOME_DIRECTION);
     miniCamera.position.copy(offset.normalize().multiplyScalar(4.2));
     miniCamera.quaternion.copy(camera.quaternion);
     renderer.render(scene, miniCamera);
