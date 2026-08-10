@@ -340,3 +340,23 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 274. Uzun duvarlarda başlangıç kamera mesafesinin mevcut otomatik kadraja oranlı büyümesi sağlandı; sabit 9 metreye kilitlenmedi.
 275. Başlangıç Home kadrajının duvar kurulmadan önce değil, ilk gerçek animation frame'de duvar oluşturulduktan sonra uygulanması sağlandı.
 276. İlk Home kadrajı değişikliği GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+
+## Kamera reset ayrımı ve modül sağ tık menüsü
+
+277. `Oluştur` komutu yeni duvar kurulduktan sonra kamerayı Home / default görünüme döndürecek şekilde sabitlendi.
+278. `Duvarı temizle` komutu boş sahneye geçerken kamerayı Home / default görünüme döndürecek şekilde sabitlendi.
+279. Sol panelden 50 / 100 / 150 / 200 cm modül eklenirken mevcut kamera pan, zoom ve bakış açısının korunması sağlandı.
+280. Modül düzenleme işlemleri için `moduleContextMenu.js` eklendi.
+281. Three.js sahnesinde herhangi bir modülün üzerine sağ tıklanınca özel işlem menüsü açılması sağlandı.
+282. Sağ tık raycast'i yalnızca panel yüzeyine değil modül grubunun tamamına bağlandı; profil ve ray üzerinden de ilgili modül bulunabilir hale getirildi.
+283. Sağ tık menüsüne `Sil` komutu eklendi ve aktif hale getirildi.
+284. `Sil` komutunun hedef modülü kaldırıp kamerayı mevcut konumunda tutarak sahneyi rebuild etmesi sağlandı.
+285. Sağ tık menüsüne `Çoğalt Sağ Tarafa` komutu eklendi ve aktif hale getirildi.
+286. Sağ tık menüsüne `Çoğalt Sol Tarafa` komutu eklendi ve aktif hale getirildi.
+287. Modül çoğaltılırken kaynak modülün renk, görsel ve diğer tasarım state'inin kopyalanması sağlandı.
+288. Çoğaltılan modül için yeni benzersiz module ID ve yeni benzersiz panel / surface ID'leri üretilmesi sağlandı.
+289. Sağ tık menüsüne `Ekle Sağ Tarafa` ve `Ekle Sol Tarafa` komutları eklendi.
+290. `Ekle Sağ Tarafa` ve `Ekle Sol Tarafa` tıklandığında gelecekte genel modül kataloğunu gösterecek popup kabuğu açılır hale getirildi; gerçek modül seçimi sonraki adıma bırakıldı.
+291. Düz panel, vitrin, separatör ve depo kapısının yerleşim sistemi açısından tek ve bölünmez bir `module` nesnesi olarak ele alınacağı mimari netleştirildi.
+292. Modül çoğaltma state'inin bağımsız kimlikler üretip tasarım verisini koruduğunu doğrulayan regresyon testi eklendi.
+293. Sağ tık modül menüsü ve çoğaltma değişiklikleri GitHub Actions test + Vite build kontrolünden başarıyla geçti.
