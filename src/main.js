@@ -120,6 +120,7 @@ applyColorButton.addEventListener('click', () => {
 });
 
 // Renk seçici panel seçimine göre değişmez; kullanıcının son kullandığı renk araçta kalır.
+// Seçili hücrede görsel varsa renk o hücrede görselin yerini alır.
 colorInput.addEventListener('input', () => {
   const selected = scene3d.getSelectedSurfaces();
   if (selected.length) scene3d.applyColor(selected, colorInput.value);
@@ -193,7 +194,7 @@ async function initializeAssetLibrary() {
 function applyActiveImageToSelection() {
   const selected = scene3d.getSelectedSurfaces();
   if (!selected.length) {
-    selectionInfo.textContent = 'Görsel uygulamak için önce bir panel veya panel grubu seç.';
+    selectionInfo.textContent = 'Görsel uygulamak için önce bir panel veya panel bloğu seç.';
     return false;
   }
   if (!activeAssetId) {
@@ -201,14 +202,16 @@ function applyActiveImageToSelection() {
     return false;
   }
 
-  const result = scene3d.applyHorizontalImageAsset(selected, activeAssetId);
+  const result = scene3d.applyRectImageAsset(selected, activeAssetId);
   if (!result.ok) {
-    selectionInfo.textContent = `${result.message} Dikey/2D blok görseli sonraki adım.`;
+    selectionInfo.textContent = result.message;
     return false;
   }
 
-  if (result.mode === 'horizontal-group') {
-    selectionInfo.textContent = `${result.panelCount} bitişik panele tek görsel yatay olarak ortalandı.`;
+  if (result.mode === 'rect-group') {
+    selectionInfo.textContent = `${result.columnCount} × ${result.rowCount} blokta ${result.panelCount} panele tek görsel yayıldı.`;
+  } else {
+    selectionInfo.textContent = 'Görsel seçili panele uygulandı.';
   }
   return true;
 }
@@ -236,7 +239,7 @@ applyImageButton.addEventListener('click', applyActiveImageToSelection);
 clearTextureButton.addEventListener('click', () => {
   const selected = scene3d.getSelectedSurfaces();
   if (!selected.length) {
-    selectionInfo.textContent = 'Önce bir panel veya panel grubu seç.';
+    selectionInfo.textContent = 'Önce bir panel veya panel bloğu seç.';
     return;
   }
   scene3d.clearImage(selected);
