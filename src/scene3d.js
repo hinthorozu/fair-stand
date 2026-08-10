@@ -7,6 +7,7 @@ import { createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
 import { createGroundLayout } from './groundLayout.js';
 import { createViewCube } from './viewCube.js';
+import { computeImageFit } from './imageFit.js';
 
 const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0xf4f4f4;
@@ -348,43 +349,38 @@ export function createStandScene(
     texture.needsUpdate = true;
   }
 
-  function createContainedGroupCanvas(image, groupAspect) {
+  function createFittedCanvas(image, targetAspect, fit = 'contain') {
     const maxSide = 2048;
     let width;
     let height;
 
-    if (groupAspect >= 1) {
+    if (targetAspect >= 1) {
       width = maxSide;
-      height = Math.max(128, Math.round(maxSide / groupAspect));
+      height = Math.max(128, Math.round(maxSide / targetAspect));
     } else {
       height = maxSide;
-      width = Math.max(128, Math.round(maxSide * groupAspect));
+      width = Math.max(128, Math.round(maxSide * targetAspect));
     }
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const context = canvas.getContext('2d');
-
     context.fillStyle = '#ffffff';
     context.fillRect(0, 0, width, height);
 
-    const imageAspect = image.naturalWidth / image.naturalHeight;
-    const canvasAspect = width / height;
-    let drawWidth;
-    let drawHeight;
+    const imageWidth = image.naturalWidth ?? image.width;
+    const imageHeight = image.naturalHeight ?? image.height;
+    const placement = computeImageFit(imageWidth, imageHeight, width, height, fit);
+    if (!placement) return canvas;
 
-    if (imageAspect > canvasAspect) {
-      drawWidth = width;
-      drawHeight = width / imageAspect;
-    } else {
-      drawHeight = height;
-      drawWidth = height * imageAspect;
-    }
-
-    const drawX = (width - drawWidth) / 2;
-    const drawY = (height - drawHeight) / 2;
-    context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+    context.drawImage(
+      image,
+      placement.drawX,
+      placement.drawY,
+      placement.drawWidth,
+      placement.drawHeight,
+    );
 
     return canvas;
   }
@@ -406,14 +402,26 @@ export function createStandScene(
 
     textureLoader.load(
       assetUrl,
-      (texture) => {
+      (sourceTexture) => {
         const surfaceState = mesh.userData.surfaceState;
         if (surfaceState?.imageAssetId !== assetId) {
-          texture.dispose();
+          sourceTexture.dispose();
           return;
         }
-        configureTexture(texture, surfaceState);
-        assignTexture(mesh, texture);
+
+        const fit = surfaceState.imageTransform?.fit;
+        if (fit === 'cover' || fit === 'contain') {
+          const targetAspect = mesh.geometry.parameters.width / mesh.geometry.parameters.height;
+          const canvas = createFittedCanvas(sourceTexture.image, targetAspect, fit);
+          sourceTexture.dispose();
+          const fittedTexture = new THREE.CanvasTexture(canvas);
+          configureTexture(fittedTexture, surfaceState);
+          assignTexture(mesh, fittedTexture);
+          return;
+        }
+
+        configureTexture(sourceTexture, surfaceState);
+        assignTexture(mesh, sourceTexture);
       },
       undefined,
       () => {
@@ -440,9 +448,10 @@ export function createStandScene(
           return;
         }
 
-        const canvas = createContainedGroupCanvas(
+        const canvas = createFittedCanvas(
           sourceTexture.image,
           transform.groupAspect,
+          transform.fit ?? 'contain',
         );
         sourceTexture.dispose();
 
@@ -456,7 +465,6 @@ export function createStandScene(
           texture.offset.set(transform.regionStartX, transform.regionStartY);
           texture.repeat.set(transform.regionWidth, transform.regionHeight);
         } else {
-          // Eski horizontal-group state'leri geriye dönük destekle.
           texture.offset.set(transform.regionStart, 0);
           texture.repeat.set(transform.regionWidth, 1);
         }
@@ -492,7 +500,7 @@ export function createStandScene(
     if (assetId) loadImageOnSurface(mesh, assetId);
   }
 
-  function applyImageAsset(meshOrMeshes, assetId) {
+  function applyImageAsset(meshOrMeshes, assetId, fit = null) {
     if (!assetId) return;
     normalizeMeshes(meshOrMeshes).forEach((mesh) => {
       if (!mesh?.material || mesh.userData.acceptsImage === false) return;
@@ -500,12 +508,14 @@ export function createStandScene(
       if (surfaceState) {
         surfaceState.imageAssetId = assetId;
         resetImageTransform(surfaceState);
+        if (fit === 'cover' || fit === 'contain') {
+          surfaceState.imageTransform.fit = fit;
+        }
       }
       loadSingleImageOnSurface(mesh, assetId);
     });
   }
 
-  // Eski yatay fonksiyon geriye dönük tutuluyor; yeni UI rect-group kullanıyor.
   function applyHorizontalImageAsset(meshOrMeshes, assetId) {
     const meshes = normalizeMeshes(meshOrMeshes);
     if (!assetId) return { ok: false, message: 'Önce bir görsel seç.' };
@@ -549,15 +559,17 @@ export function createStandScene(
     };
   }
 
-  function applyRectImageAsset(meshOrMeshes, assetId) {
+  function applyRectImageAsset(meshOrMeshes, assetId, fit = 'contain') {
     const meshes = normalizeMeshes(meshOrMeshes);
     if (!assetId) return { ok: false, message: 'Önce bir görsel seç.' };
     if (meshes.some((mesh) => mesh.userData.acceptsImage === false)) {
       return { ok: false, message: 'Separatöre görsel uygulanamaz; yalnızca renk uygulanabilir.' };
     }
 
+    const normalizedFit = fit === 'cover' ? 'cover' : 'contain';
+
     if (meshes.length === 1) {
-      applyImageAsset(meshes, assetId);
+      applyImageAsset(meshes, assetId, normalizedFit);
       return {
         ok: true,
         mode: 'single',
@@ -584,6 +596,7 @@ export function createStandScene(
       surfaceState.imageAssetId = assetId;
       surfaceState.imageTransform = {
         mode: 'rect-group',
+        fit: normalizedFit,
         groupAspect: layout.groupAspect,
         regionStartX: entry.regionStartX,
         regionStartY: entry.regionStartY,
@@ -596,6 +609,7 @@ export function createStandScene(
     return {
       ok: true,
       mode: 'rect-group',
+      fit: normalizedFit,
       columnCount: layout.columnCount,
       rowCount: layout.rowCount,
       panelCount: layout.panelCount,
@@ -630,7 +644,6 @@ export function createStandScene(
   });
 
   renderer.domElement.addEventListener('pointerdown', (event) => {
-    // Orta tuş OrbitControls pan için ayrıldı; panel seçimi yalnızca sol tuşla yapılır.
     if (event.button !== 0) return;
 
     const rect = renderer.domElement.getBoundingClientRect();
