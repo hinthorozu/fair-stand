@@ -223,7 +223,11 @@ export function createStandScene(
       if (moduleState.type === 'separator') {
         module = createSeparatorModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'showcase-2' || moduleState.type === 'showcase-3') {
-        module = createShowcaseModule(moduleState, moduleIndex);
+        module = createShowcaseModule(
+          moduleState,
+          moduleIndex,
+          (surface) => applyStoredImage(surface),
+        );
       } else {
         module = createFlatPanelModule(
           moduleState,
@@ -920,7 +924,7 @@ function createSeparatorModule(moduleState, moduleIndex) {
   return { group, surfaces: [selector] };
 }
 
-function createShowcaseModule(moduleState, moduleIndex) {
+function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const {
     height,
     depth,
@@ -974,30 +978,63 @@ function createShowcaseModule(moduleState, moduleIndex) {
     group.add(rail);
   }
 
-  const surfaceState = moduleState.surface;
+  const surfaces = [];
   const panelHeight = stripHeight - railHeight - 0.012;
   const panelDepth = Math.max(depth - 0.026, 0.035);
-  const panelMaterial = new THREE.MeshStandardMaterial({
-    color: surfaceState.color,
-    roughness: 0.7,
-    metalness: 0,
-  });
-  const colorTargets = [];
 
   for (let stripIndex = 0; stripIndex < stripCount; stripIndex += 1) {
     const isOpeningStrip = stripIndex >= openingStartStrip
       && stripIndex < openingStartStrip + openingStripCount;
     if (isOpeningStrip) continue;
 
-    const panel = new THREE.Mesh(
+    const centerY = stripIndex * stripHeight + stripHeight / 2;
+    const surfaceState = moduleState.strips[stripIndex];
+    if (!surfaceState) continue;
+
+    const backing = new THREE.Mesh(
       new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
-      panelMaterial.clone(),
+      new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74 }),
     );
-    panel.position.set(0, stripIndex * stripHeight + stripHeight / 2, 0);
-    panel.castShadow = true;
-    panel.receiveShadow = true;
-    group.add(panel);
-    colorTargets.push(panel);
+    backing.position.set(0, centerY, 0);
+    backing.castShadow = true;
+    backing.receiveShadow = true;
+    group.add(backing);
+
+    const surface = new THREE.Mesh(
+      new THREE.PlaneGeometry(innerWidth, panelHeight),
+      new THREE.MeshStandardMaterial({
+        color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
+        roughness: 0.72,
+        metalness: 0,
+        side: THREE.DoubleSide,
+        emissive: 0x000000,
+        emissiveIntensity: 0,
+      }),
+    );
+    surface.position.set(0, centerY, depth / 2 + 0.0015);
+
+    const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
+    selectionFrame.visible = false;
+    surface.add(selectionFrame);
+
+    surface.userData = {
+      kind: 'surface',
+      moduleType: moduleState.type,
+      selectionMode: 'panel',
+      acceptsImage: true,
+      moduleIndex,
+      moduleId: moduleState.id,
+      widthCm,
+      stripIndex,
+      stripNumber: stripIndex + 1,
+      surfaceId: surfaceState.id,
+      surfaceState,
+      selectionFrame,
+    };
+
+    group.add(surface);
+    surfaces.push(surface);
+    onSurfaceReady?.(surface);
   }
 
   const openingBottom = openingStartStrip * stripHeight + railHeight / 2;
@@ -1084,39 +1121,7 @@ function createShowcaseModule(moduleState, moduleIndex) {
     group.add(shelfFront);
   }
 
-  const selector = new THREE.Mesh(
-    new THREE.PlaneGeometry(innerWidth, height - frameWidth * 2),
-    new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-    }),
-  );
-  selector.position.set(0, height / 2, caseFrontZ + 0.006);
-
-  const selectionFrame = createSelectionFrame(innerWidth, height - frameWidth * 2);
-  selectionFrame.visible = false;
-  selector.add(selectionFrame);
-
-  selector.userData = {
-    kind: 'surface',
-    moduleType: moduleState.type,
-    selectionMode: 'module',
-    acceptsImage: false,
-    moduleIndex,
-    moduleId: moduleState.id,
-    widthCm,
-    stripIndex: null,
-    stripNumber: null,
-    surfaceId: surfaceState.id,
-    surfaceState,
-    selectionFrame,
-    colorTargets,
-  };
-  group.add(selector);
-
-  return { group, surfaces: [selector] };
+  return { group, surfaces };
 }
 
 function createSelectionFrame(width, height) {
