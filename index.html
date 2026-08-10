@@ -58,15 +58,15 @@
           <div class="stand-size-grid">
             <label class="stand-size-field" for="stand-size-x">
               <span>X (cm)</span>
-              <input id="stand-size-x" type="number" min="1" max="5000" step="1" placeholder="1000" inputmode="decimal" />
+              <input id="stand-size-x" type="number" min="50" max="5000" step="50" placeholder="1000" inputmode="decimal" />
             </label>
             <label class="stand-size-field" for="stand-size-y">
               <span>Y (cm)</span>
-              <input id="stand-size-y" type="number" min="1" max="5000" step="1" placeholder="500" inputmode="decimal" />
+              <input id="stand-size-y" type="number" min="50" max="5000" step="50" placeholder="500" inputmode="decimal" />
             </label>
           </div>
 
-          <p class="stand-limit-note">Maksimum: 5000 × 5000 cm (50 × 50 m)</p>
+          <p class="stand-limit-note">50 cm ve katları · Maksimum: 5000 × 5000 cm (50 × 50 m)</p>
           <button id="create-stage" type="button" class="primary" disabled>Sahneyi Oluştur</button>
           <p id="stage-result" class="status">Stand tipi ile X ve Y ölçülerinin üçü de tamamlanmadan sahne oluşmaz.</p>
         </section>
@@ -164,6 +164,7 @@
             <li>Düz panel: 7 × 50 cm yatay bölüm</li>
             <li>Genişlikler: 50 / 100 / 150 / 200 cm</li>
             <li>Zemin grid: 100 × 100 cm</li>
+            <li>Stand alanı ölçüleri: 50 cm ve katları</li>
             <li>Stand alanı çevresi: 100 cm pasif gri alan</li>
             <li>Maksimum stand alanı: 5000 × 5000 cm</li>
             <li>Çoklu seçim: yalnızca tam dikdörtgen blok</li>
