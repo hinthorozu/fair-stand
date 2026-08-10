@@ -28,7 +28,7 @@ import {
   getWallUsedCm,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
-import { resolveAdjacentPlacement } from './cornerPlacement.js';
+import { planContinuousWallInsertion } from './wallReflow.js';
 
 const viewport = document.querySelector('#viewport');
 const viewportEmpty = document.querySelector('#viewport-empty');
@@ -263,21 +263,49 @@ function deleteContextModule(context) {
   rebuildWall({ resetView: false });
 }
 
-function createAdjacentPlacement(sourceModule, addedWidthCm, side) {
-  const sourcePlacement = sourceModule?.placement;
-  if (!sourcePlacement || !currentStand) {
+function normalizeContinuousSide(context, side) {
+  if (side !== 'left' && side !== 'right') return side;
+  const wallId = context?.placement?.wallId ?? 'back';
+  if (wallId !== 'left') return side;
+  return side === 'left' ? 'right' : 'left';
+}
+
+function planContextContinuousInsertion(insertedModules, context, side) {
+  if (!currentStand) return { ok: false, message: 'Önce stand alanını oluştur.' };
+  const index = findContextModuleIndex(context);
+  if (index < 0 || index >= currentModules.length) {
+    return { ok: false, message: 'Hedef modül bulunamadı.' };
+  }
+
+  const sourceModule = currentModules[index];
+  if (!sourceModule?.placement) {
     return { ok: false, message: 'Hedef modülün yerleşim bilgisi bulunamadı.' };
   }
 
-  return resolveAdjacentPlacement({
-    sourcePlacement,
-    sourceWidthCm: sourceModule.widthCm,
-    addedWidthCm,
-    side,
+  return planContinuousWallInsertion({
+    modules: currentModules,
+    insertedModules,
+    targetModuleId: sourceModule.id,
+    side: normalizeContinuousSide(context, side),
     standType: currentStand.standType,
     standXCm: currentStand.xCm,
     standYCm: currentStand.yCm,
   });
+}
+
+function applyContinuousInsertionPlan(plan, insertedModules) {
+  const moduleMap = new Map(
+    [...currentModules, ...insertedModules].map((module) => [module.id, module]),
+  );
+
+  plan.placements?.forEach((placement, moduleId) => {
+    const module = moduleMap.get(moduleId);
+    if (module) module.placement = { ...placement };
+  });
+
+  currentModules = (plan.orderedModuleIds ?? [])
+    .map((moduleId) => moduleMap.get(moduleId))
+    .filter(Boolean);
 }
 
 function duplicateContextModule(context, side) {
@@ -288,39 +316,26 @@ function duplicateContextModule(context, side) {
   const duplicate = duplicateModuleState(sourceModule);
   if (!duplicate) return;
 
-  if (sourceModule.placement) {
-    const adjacent = createAdjacentPlacement(sourceModule, duplicate.widthCm, side);
-    if (!adjacent.ok || !adjacent.placement) {
-      renderWallResult(adjacent.message, true);
-      window.alert(`Modül çoğaltılamadı\n\n${adjacent.message}`);
+  if (sourceModule.placement && currentStand?.standType !== 'island') {
+    const plan = planContextContinuousInsertion([duplicate], context, side);
+    if (!plan.ok) {
+      renderWallResult(plan.message, true);
+      window.alert(`Modül çoğaltılamadı\n\n${plan.message}`);
       return;
     }
 
-    const placement = adjacent.placement;
-    const validation = validatePlacementAgainstModules({
-      placement,
-      widthCm: duplicate.widthCm,
-      moduleId: duplicate.id,
-      modules: currentModules,
-      standType: currentStand?.standType,
-      standXCm: currentStand?.xCm,
-      standYCm: currentStand?.yCm,
-    });
-    if (!validation.ok) {
-      renderWallResult(validation.message, true);
-      window.alert(`Modül çoğaltılamadı\n\n${validation.message}`);
-      return;
-    }
-    duplicate.placement = placement;
-  } else {
-    const capacity = validateCurrentAxisCapacity(
-      'x',
-      duplicate.widthCm,
-      getWallUsedCm(currentModules, 'back'),
-      { popupTitle: 'Modül çoğaltılamadı' },
-    );
-    if (!capacity.ok) return;
+    applyContinuousInsertionPlan(plan, [duplicate]);
+    rebuildWall({ resetView: false });
+    return;
   }
+
+  const capacity = validateCurrentAxisCapacity(
+    'x',
+    duplicate.widthCm,
+    getWallUsedCm(currentModules, 'back'),
+    { popupTitle: 'Modül çoğaltılamadı' },
+  );
+  if (!capacity.ok) return;
 
   const insertIndex = side === 'left' ? index : index + 1;
   currentModules.splice(insertIndex, 0, duplicate);
@@ -378,10 +393,7 @@ function validateCatalogAddBatch({
     moduleStates = [...moduleStates].reverse();
   }
 
-  const plan = assignPlannedPlacements(moduleStates, {
-    placementMode: placement,
-    context,
-  });
+  const plan = planContextContinuousInsertion(moduleStates, context, placement);
   if (!plan.ok) {
     renderWallResult(plan.message, true);
     window.alert(`Modüller eklenemedi\n\n${plan.message}`);
@@ -391,67 +403,24 @@ function validateCatalogAddBatch({
 
 function assignPlannedPlacements(moduleStates, { placementMode = 'append', context = null } = {}) {
   if (!currentStand) return { ok: false, message: 'Önce stand alanını oluştur.' };
+  if (placementMode !== 'append' || context) {
+    return { ok: false, message: 'Bağlamsal ekleme sürekli duvar motoru üzerinden yapılmalı.' };
+  }
 
   const planned = [];
+  let cursorCm = getWallExtentCm(currentModules, 'back');
 
-  if (placementMode === 'append' || !context) {
-    let cursorCm = getWallExtentCm(currentModules, 'back');
-
-    for (const moduleState of moduleStates) {
-      const placement = createModulePlacement({
-        xCm: cursorCm,
-        yCm: 0,
-        zCm: 0,
-        rotationZDeg: 0,
-        wallId: 'back',
-      });
-
-      const validation = validatePlacementAgainstModules({
-        placement,
-        widthCm: moduleState.widthCm,
-        moduleId: moduleState.id,
-        modules: [...currentModules, ...planned],
-        standType: currentStand.standType,
-        standXCm: currentStand.xCm,
-        standYCm: currentStand.yCm,
-      });
-      if (!validation.ok) return validation;
-
-      moduleState.placement = placement;
-      planned.push(moduleState);
-      cursorCm += Number(moduleState.widthCm);
-    }
-
-    return { ok: true };
-  }
-
-  const contextIndex = findContextModuleIndex(context);
-  if (contextIndex < 0) return { ok: false, message: 'Hedef modül bulunamadı.' };
-
-  let sourceModule = currentModules[contextIndex];
-  if (!sourceModule?.placement) {
-    return { ok: false, message: 'Hedef modülün yerleşim bilgisi bulunamadı.' };
-  }
-
-  let side = placementMode;
-  const planningStates = side === 'left'
-    ? [...moduleStates].reverse()
-    : moduleStates;
-
-  for (const moduleState of planningStates) {
-    const adjacent = resolveAdjacentPlacement({
-      sourcePlacement: sourceModule.placement,
-      sourceWidthCm: sourceModule.widthCm,
-      addedWidthCm: moduleState.widthCm,
-      side,
-      standType: currentStand.standType,
-      standXCm: currentStand.xCm,
-      standYCm: currentStand.yCm,
+  for (const moduleState of moduleStates) {
+    const placement = createModulePlacement({
+      xCm: cursorCm,
+      yCm: 0,
+      zCm: 0,
+      rotationZDeg: 0,
+      wallId: 'back',
     });
-    if (!adjacent.ok || !adjacent.placement) return adjacent;
 
     const validation = validatePlacementAgainstModules({
-      placement: adjacent.placement,
+      placement,
       widthCm: moduleState.widthCm,
       moduleId: moduleState.id,
       modules: [...currentModules, ...planned],
@@ -461,10 +430,9 @@ function assignPlannedPlacements(moduleStates, { placementMode = 'append', conte
     });
     if (!validation.ok) return validation;
 
-    moduleState.placement = adjacent.placement;
+    moduleState.placement = placement;
     planned.push(moduleState);
-    sourceModule = moduleState;
-    side = adjacent.nextSide ?? side;
+    cursorCm += Number(moduleState.widthCm);
   }
 
   return { ok: true };
@@ -481,18 +449,21 @@ function flushCatalogModuleAdds() {
   let moduleStates = requests.map((request) => createCatalogModuleState(request.module));
   if (moduleStates.some((moduleState) => !moduleState)) return;
 
-  let insertIndex = currentModules.length;
   const placementMode = firstRequest.placement ?? 'append';
   const context = firstRequest.context ?? null;
 
-  if (placementMode === 'left' || placementMode === 'right') {
-    const contextIndex = findContextModuleIndex(context);
-    if (contextIndex < 0 || contextIndex >= currentModules.length) return;
-    insertIndex = placementMode === 'left' ? contextIndex : contextIndex + 1;
-
-    // Picker callbacks are sequential today. Reversing here preserves the same
-    // visual order while allowing the complete package to be validated first.
+  if ((placementMode === 'left' || placementMode === 'right') && context) {
     moduleStates = [...moduleStates].reverse();
+    const plan = planContextContinuousInsertion(moduleStates, context, placementMode);
+    if (!plan.ok) {
+      renderWallResult(plan.message, true);
+      window.alert(`Modüller eklenemedi\n\n${plan.message}`);
+      return;
+    }
+
+    applyContinuousInsertionPlan(plan, moduleStates);
+    rebuildWall({ resetView: false });
+    return;
   }
 
   const placementPlan = assignPlannedPlacements(moduleStates, {
@@ -505,7 +476,7 @@ function flushCatalogModuleAdds() {
     return;
   }
 
-  currentModules.splice(insertIndex, 0, ...moduleStates);
+  currentModules.push(...moduleStates);
   rebuildWall({ resetView: false });
 }
 
