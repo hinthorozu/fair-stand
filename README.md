@@ -351,3 +351,17 @@ Bu aşama tamamlandıktan sonra sistem düz duvardan L ve U standlara genişleti
 - Bu nedenle popup sahneyi kapatan büyük bir modal gibi davranmamalıdır. 3D stand görünümü ve özellikle düzenlenen panel görünür kalmalıdır.
 - Renk değişiklikleri editör açıkken anlık olarak sahneye uygulanmalıdır.
 - İleride özel renk editörü yapılırken mevcut canlı renk önizleme davranışı geriye gitmemesi gereken temel kabul kriteridir.
+
+---
+
+## 15. Proje faz durumu
+
+**FAZ 1, 10 Ağustos 2026 itibarıyla kapatılmıştır.**
+
+FAZ 1; düz/sırt duvar motoru, gerçek ölçülü X/Y stand alanı, 50 cm ölçü adımı, maksimum 50 × 50 m alan, 1 m pasif çevre, modül kataloğu, panel seçimi, renk/görsel/cam işlemleri, vitrin/separatör modülleri, kapasite kontrolleri, ViewCube/kamera ve CI altyapısını referans taban olarak sabitler.
+
+`L Stand Sol`, `L Stand Sağ`, `U Stand` ve `Ada Stand` seçim altyapısı FAZ 1'de hazırlanmıştır; gerçek çok kenarlı yerleşim davranışı FAZ 2 kapsamındadır.
+
+FAZ 2'nin ana konusu **kontrollü drag & drop + magnetic snap + çakışma/sınır kontrolü ile L/U yerleşim motorudur**. Teknik eksen standardı X/Y = zemin düzlemi, Z = yükseklik olarak sabitlenmiştir.
+
+Detaylı faz kapsamı ve sonraki adımlar için [ROADMAP.md](./ROADMAP.md) belgesine bakın.
