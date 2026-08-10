@@ -13,6 +13,7 @@ import {
   snapPlacementToStand,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
+import { planContinuousModuleMove } from './moduleMove.js';
 
 const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0xf4f4f4;
@@ -695,22 +696,46 @@ export function createStandScene(
       return;
     }
 
-    const validation = validatePlacementAgainstModules({
-      placement: snapped.placement,
-      widthCm: moduleState.widthCm,
-      moduleId: moduleState.id,
-      modules: getRenderedModuleStates(),
-      standType: stageLayout.standType,
-      standXCm: stageLayout.widthCm,
-      standYCm: stageLayout.depthCm,
-    });
+    let plan;
+    if (stageLayout.standType === 'island') {
+      const validation = validatePlacementAgainstModules({
+        placement: snapped.placement,
+        widthCm: moduleState.widthCm,
+        moduleId: moduleState.id,
+        modules: getRenderedModuleStates(),
+        standType: stageLayout.standType,
+        standXCm: stageLayout.widthCm,
+        standYCm: stageLayout.depthCm,
+      });
+      plan = {
+        ok: validation.ok,
+        message: validation.message ?? null,
+        movingPlacement: { ...snapped.placement },
+        placements: validation.ok
+          ? new Map([[moduleState.id, { ...snapped.placement }]])
+          : new Map(),
+      };
+    } else {
+      plan = planContinuousModuleMove({
+        modules: getRenderedModuleStates(),
+        movingModuleId: moduleState.id,
+        desiredPlacement: snapped.placement,
+        standType: stageLayout.standType,
+        standXCm: stageLayout.widthCm,
+        standYCm: stageLayout.depthCm,
+      });
+    }
 
+    const previewPlacement = plan.ok && plan.movingPlacement
+      ? plan.movingPlacement
+      : snapped.placement;
     dragSession.preview = {
-      placement: snapped.placement,
-      valid: validation.ok,
-      message: validation.message ?? null,
+      placement: previewPlacement,
+      valid: plan.ok,
+      message: plan.message ?? null,
+      plan,
     };
-    showPlacementGhost(moduleState.widthCm, snapped.placement, validation.ok);
+    showPlacementGhost(moduleState.widthCm, previewPlacement, plan.ok);
   }
 
   function finishPlacementDrag(event) {
@@ -722,13 +747,22 @@ export function createStandScene(
     session.moduleGroup.visible = true;
 
     if (wasDragging && preview?.valid) {
-      session.moduleState.placement = { ...preview.placement };
-      session.moduleGroup.userData.placement = { ...preview.placement };
-      applyPlacementToGroup(
-        session.moduleGroup,
-        session.moduleState.placement,
-        session.moduleState.widthCm,
-      );
+      const plannedPlacements = preview.plan?.placements instanceof Map
+        ? preview.plan.placements
+        : new Map([[session.moduleState.id, { ...preview.placement }]]);
+
+      plannedPlacements.forEach((placement, moduleId) => {
+        const moduleGroup = wallRoot.children.find((group) => (
+          group.userData?.moduleState?.id === moduleId
+          || group.userData?.moduleId === moduleId
+        ));
+        const moduleState = moduleGroup?.userData?.moduleState;
+        if (!moduleGroup || !moduleState) return;
+
+        moduleState.placement = { ...placement };
+        moduleGroup.userData.placement = { ...placement };
+        applyPlacementToGroup(moduleGroup, placement, moduleState.widthCm);
+      });
       clearSelection();
     }
 
