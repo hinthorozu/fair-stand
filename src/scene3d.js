@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STAND_DIMENSIONS } from './catalog.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
+import { createRectSelection } from './rectSelection.js';
 
 const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0xf4f4f4;
@@ -58,6 +59,7 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
   const textureLoader = new THREE.TextureLoader();
   let surfaceMeshes = [];
   const selectedSurfaces = new Set();
+  let selectionAnchorSurfaceId = null;
 
   function setSelectionVisual(mesh, selected) {
     if (!mesh) return;
@@ -73,9 +75,10 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     onSurfaceSelected?.([...selectedSurfaces]);
   }
 
-  function clearSelection({ notify = true } = {}) {
+  function clearSelection({ notify = true, keepAnchor = false } = {}) {
     selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
     selectedSurfaces.clear();
+    if (!keepAnchor) selectionAnchorSurfaceId = null;
     if (notify) notifySelection();
   }
 
@@ -83,20 +86,40 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     clearSelection({ notify: false });
     if (mesh) {
       selectedSurfaces.add(mesh);
+      selectionAnchorSurfaceId = mesh.userData.surfaceId ?? null;
       setSelectionVisual(mesh, true);
     }
     notifySelection();
   }
 
-  function toggleSurface(mesh) {
+  function selectRectangleTo(mesh) {
     if (!mesh) return;
-    if (selectedSurfaces.has(mesh)) {
-      selectedSurfaces.delete(mesh);
-      setSelectionVisual(mesh, false);
-    } else {
-      selectedSurfaces.add(mesh);
-      setSelectionVisual(mesh, true);
+
+    const anchorMesh = surfaceMeshes.find(
+      (surface) => surface.userData.surfaceId === selectionAnchorSurfaceId,
+    ) ?? [...selectedSurfaces][0] ?? mesh;
+
+    if (!selectionAnchorSurfaceId) {
+      selectionAnchorSurfaceId = anchorMesh.userData.surfaceId ?? null;
     }
+
+    const result = createRectSelection(
+      surfaceMeshes.map((surface) => ({
+        mesh: surface,
+        moduleIndex: surface.userData.moduleIndex,
+        stripIndex: surface.userData.stripIndex,
+      })),
+      anchorMesh.userData,
+      mesh.userData,
+    );
+
+    if (!result.ok) return;
+
+    clearSelection({ notify: false, keepAnchor: true });
+    result.entries.forEach((entry) => {
+      selectedSurfaces.add(entry.mesh);
+      setSelectionVisual(entry.mesh, true);
+    });
     notifySelection();
   }
 
@@ -112,8 +135,8 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     });
   }
 
-  function disposeWall({ notify = true } = {}) {
-    clearSelection({ notify: false });
+  function disposeWall({ notify = true, keepAnchor = false } = {}) {
+    clearSelection({ notify: false, keepAnchor });
     surfaceMeshes = [];
     while (wallRoot.children.length) {
       const child = wallRoot.children.pop();
@@ -130,8 +153,9 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     const selectedSurfaceIds = new Set(
       [...selectedSurfaces].map((mesh) => mesh.userData.surfaceId).filter(Boolean),
     );
+    const previousAnchorSurfaceId = selectionAnchorSurfaceId;
 
-    disposeWall({ notify: false });
+    disposeWall({ notify: false, keepAnchor: true });
 
     const totalWidth = modules.reduce((sum, module) => sum + module.widthCm / 100, 0);
     let cursorX = 0;
@@ -155,6 +179,12 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
         setSelectionVisual(surface, true);
       }
     });
+
+    selectionAnchorSurfaceId = surfaceMeshes.some(
+      (surface) => surface.userData.surfaceId === previousAnchorSurfaceId,
+    )
+      ? previousAnchorSurfaceId
+      : ([...selectedSurfaces][0]?.userData.surfaceId ?? null);
 
     focusWall(totalWidth);
     notifySelection();
@@ -420,12 +450,12 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
 
     raycaster.setFromCamera(pointer, camera);
     const hit = raycaster.intersectObjects(surfaceMeshes, false)[0];
-    const multiSelect = event.ctrlKey || event.metaKey;
+    const rectangleSelect = event.ctrlKey || event.metaKey;
 
     if (hit) {
-      if (multiSelect) toggleSurface(hit.object);
+      if (rectangleSelect) selectRectangleTo(hit.object);
       else selectOnly(hit.object);
-    } else if (!multiSelect) {
+    } else if (!rectangleSelect) {
       clearSelection();
     }
   });
