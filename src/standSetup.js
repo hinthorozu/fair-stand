@@ -1,0 +1,54 @@
+export const MAX_STAND_DIMENSION_CM = 5000;
+export const STAND_SURROUND_M = 1;
+
+export const STAND_TYPE_LABELS = Object.freeze({
+  'back-wall': 'Sırt Duvar',
+  'l-stand': 'L Stand',
+  'u-stand': 'U Stand',
+  island: 'Ada Stand',
+});
+
+export const STAND_TYPES = Object.freeze(Object.keys(STAND_TYPE_LABELS));
+
+export function validateStandSetup({ standType, xCm, yCm } = {}) {
+  if (!STAND_TYPES.includes(standType)) {
+    return { ok: false, message: 'Önce stand tipini seç.' };
+  }
+
+  if (String(xCm ?? '').trim() === '' || String(yCm ?? '').trim() === '') {
+    return { ok: false, message: 'Sahne için X ve Y ölçülerinin ikisini de gir.' };
+  }
+
+  const normalizedXCm = Number(xCm);
+  const normalizedYCm = Number(yCm);
+
+  if (
+    !Number.isFinite(normalizedXCm)
+    || !Number.isFinite(normalizedYCm)
+    || normalizedXCm <= 0
+    || normalizedYCm <= 0
+  ) {
+    return { ok: false, message: 'X ve Y ölçüleri 0 cm’den büyük olmalı.' };
+  }
+
+  if (normalizedXCm > MAX_STAND_DIMENSION_CM || normalizedYCm > MAX_STAND_DIMENSION_CM) {
+    return {
+      ok: false,
+      message: `Maksimum stand alanı ${MAX_STAND_DIMENSION_CM} × ${MAX_STAND_DIMENSION_CM} cm olabilir.`,
+    };
+  }
+
+  const widthM = normalizedXCm / 100;
+  const depthM = normalizedYCm / 100;
+
+  return {
+    ok: true,
+    standType,
+    xCm: normalizedXCm,
+    yCm: normalizedYCm,
+    widthM,
+    depthM,
+    sceneWidthM: widthM + STAND_SURROUND_M * 2,
+    sceneDepthM: depthM + STAND_SURROUND_M * 2,
+  };
+}
