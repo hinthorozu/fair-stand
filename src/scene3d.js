@@ -12,6 +12,9 @@ const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0xf4f4f4;
 const FLOOR_COLOR = 0xe9edf1;
 const SELECTION_COLOR = 0x2563eb;
+const DEFAULT_VIEW_MIN_DISTANCE = 9;
+const DEFAULT_VIEW_DISTANCE_FACTOR = 1.32;
+const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
 
 export function createStandScene(container, onSurfaceSelected, getAssetUrl = () => null) {
   const scene = new THREE.Scene();
@@ -189,12 +192,13 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     if (notify) notifySelection();
   }
 
-  function clearWall() {
+  function clearWall({ resetView = true } = {}) {
     disposeWall();
     updateGround(0);
+    if (resetView) resetDefaultView(0);
   }
 
-  function buildWall(modules) {
+  function buildWall(modules, { resetView = true } = {}) {
     const selectedSurfaceIds = new Set(
       [...selectedSurfaces].map((mesh) => mesh.userData.surfaceId).filter(Boolean),
     );
@@ -232,16 +236,26 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
       ? previousAnchorSurfaceId
       : ([...selectedSurfaces][0]?.userData.surfaceId ?? null);
 
-    focusWall(totalWidth);
+    if (resetView) resetDefaultView(totalWidth);
     notifySelection();
     return { totalWidth, surfaceCount: surfaceMeshes.length };
   }
 
-  function focusWall(totalWidthM) {
+  function resetDefaultView(totalWidthM = 0) {
     const centerX = totalWidthM / 2;
-    const distance = Math.max(5.2, totalWidthM * 1.05);
-    camera.position.set(centerX + totalWidthM * 0.28, 3.1, distance);
-    controls.target.set(centerX, STAND_DIMENSIONS.height * 0.47, 0);
+    const target = new THREE.Vector3(
+      centerX,
+      STAND_DIMENSIONS.height * 0.47,
+      0,
+    );
+    const distance = Math.max(
+      DEFAULT_VIEW_MIN_DISTANCE,
+      totalWidthM * DEFAULT_VIEW_DISTANCE_FACTOR,
+    );
+
+    controls.target.copy(target);
+    camera.position.copy(target).addScaledVector(HOME_DIRECTION, distance);
+    camera.lookAt(target);
     controls.update();
   }
 
@@ -587,6 +601,7 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     buildWall,
     clearWall,
     clearSelection,
+    resetDefaultView,
     applyColor,
     applyImageAsset,
     applyHorizontalImageAsset,
