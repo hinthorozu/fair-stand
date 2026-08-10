@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   applyColorOverride,
   createFlatPanelModuleState,
+  createSeparatorModuleState,
   duplicateModuleState,
   reconcileWallModules,
   totalWallWidthCm,
@@ -88,4 +89,33 @@ test('duplicating a module preserves its design but creates independent identiti
 
   duplicate.strips[1].color = '#000000';
   assert.equal(original.strips[1].color, '#ff5500');
+});
+
+test('separator state is color-only and uses the requested module width', () => {
+  const separator50 = createSeparatorModuleState(50);
+  const separator100 = createSeparatorModuleState(100);
+
+  assert.equal(separator50.type, 'separator');
+  assert.equal(separator100.type, 'separator');
+  assert.equal(separator50.widthCm, 50);
+  assert.equal(separator100.widthCm, 100);
+  assert.equal(separator50.surface.color, separator100.surface.color);
+  assert.equal('imageAssetId' in separator50.surface, false);
+
+  applyColorOverride(separator50.surface, '#123456');
+  assert.equal(separator50.surface.color, '#123456');
+  assert.equal('imageAssetId' in separator50.surface, false);
+});
+
+test('duplicating a separator preserves color with independent ids', () => {
+  const original = createSeparatorModuleState(100);
+  original.surface.color = '#654321';
+
+  const duplicate = duplicateModuleState(original);
+
+  assert.notEqual(duplicate.id, original.id);
+  assert.notEqual(duplicate.surface.id, original.surface.id);
+  assert.equal(duplicate.type, 'separator');
+  assert.equal(duplicate.widthCm, 100);
+  assert.equal(duplicate.surface.color, '#654321');
 });
