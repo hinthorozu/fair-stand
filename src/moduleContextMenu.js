@@ -13,6 +13,8 @@ const PICKER_MODULE_KEYS = [
   'PANEL_150',
   'PANEL_100',
   'PANEL_50',
+  'SEPARATOR_100',
+  'SEPARATOR_50',
 ];
 
 export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
@@ -86,6 +88,40 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     return preview;
   }
 
+  function createSeparatorPreview(widthCm) {
+    const preview = document.createElement('div');
+    preview.className = 'module-card-preview';
+
+    const frame = document.createElement('div');
+    frame.style.display = 'flex';
+    frame.style.width = `${Math.max(30, Math.round((widthCm / 200) * 118))}px`;
+    frame.style.height = '132px';
+    frame.style.flexDirection = 'column';
+    frame.style.justifyContent = 'space-between';
+    frame.style.padding = '3px 2px';
+    frame.style.border = '5px solid #6f767d';
+    frame.style.background = '#eef2f6';
+    frame.style.boxShadow = '5px 7px 12px rgba(15, 23, 42, 0.12)';
+
+    for (let index = 0; index < 36; index += 1) {
+      const slat = document.createElement('span');
+      slat.style.display = 'block';
+      slat.style.width = '100%';
+      slat.style.height = '2px';
+      slat.style.flex = '0 0 2px';
+      slat.style.background = '#c79b63';
+      frame.appendChild(slat);
+    }
+
+    preview.appendChild(frame);
+    return preview;
+  }
+
+  function createModulePreview(module) {
+    if (module.type === 'separator') return createSeparatorPreview(module.widthCm);
+    return createPanelPreview(module.widthCm);
+  }
+
   function syncPickerSelection() {
     pickerGrid.querySelectorAll('[data-module-key]').forEach((card) => {
       const selected = card.dataset.moduleKey === selectedModuleKey;
@@ -129,7 +165,7 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
       cardTitle.className = 'module-catalog-card-title';
       cardTitle.textContent = module.label;
 
-      card.append(cardTitle, createPanelPreview(module.widthCm));
+      card.append(cardTitle, createModulePreview(module));
       card.addEventListener('click', () => {
         selectedModuleKey = moduleKey;
         syncPickerSelection();
