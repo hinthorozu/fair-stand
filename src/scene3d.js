@@ -572,9 +572,11 @@ export function createStandScene(
         transparent: true,
         opacity: PLACEMENT_GHOST_OPACITY,
         depthWrite: false,
+        depthTest: false,
         side: THREE.DoubleSide,
       }),
     );
+    mesh.renderOrder = 10000;
     mesh.position.y = STAND_DIMENSIONS.height / 2;
     root.add(mesh);
     scene.add(root);
