@@ -1,5 +1,6 @@
 const DEFAULT_PANEL_COLOR = '#ffffff';
 const DEFAULT_SEPARATOR_COLOR = '#c79b63';
+const DEFAULT_SHOWCASE_COLOR = '#55585c';
 const STRIP_COUNT = 7;
 
 function createId(prefix) {
@@ -46,6 +47,20 @@ export function createSeparatorModuleState(widthCm) {
   };
 }
 
+export function createShowcaseModuleState(type, widthCm = 100) {
+  if (type !== 'showcase-2' && type !== 'showcase-3') return null;
+
+  return {
+    id: createId('module'),
+    type,
+    widthCm,
+    surface: {
+      id: createId('surface'),
+      color: DEFAULT_SHOWCASE_COLOR,
+    },
+  };
+}
+
 export function duplicateModuleState(moduleState) {
   if (!moduleState) return null;
   const duplicate = JSON.parse(JSON.stringify(moduleState));
@@ -69,7 +84,7 @@ export function duplicateModuleState(moduleState) {
 
 /**
  * Bir panele renk uygulamak, o hücrede atanmış görselin yerini alır.
- * Renk-only modüllerde (ör. separatör) görsel state'i oluşturulmaz.
+ * Renk-only modüllerde (ör. separatör / vitrin) görsel state'i oluşturulmaz.
  */
 export function applyColorOverride(surfaceState, color) {
   if (!surfaceState) return null;
