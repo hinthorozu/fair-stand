@@ -133,7 +133,7 @@ test('showcase states expose seven editable Maxima panel slots', () => {
   assert.equal(showcase2.strips.length, 7);
   showcase3.strips.forEach((strip, stripIndex) => {
     assert.equal(strip.stripIndex, stripIndex);
-    assert.equal(strip.color, '#55585c');
+    assert.equal(strip.color, '#ffffff');
     assert.equal(strip.imageAssetId, null);
     assert.equal(strip.imageTransform.mode, 'single');
   });
