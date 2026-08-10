@@ -264,3 +264,30 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 207. `3 × 2`, `1 × 7` ve `10 × 7` senaryoları için otomatik testler eklendi.
 208. Eksik hücreli dikdörtgen seçim için negatif regresyon testi eklendi.
 209. Dikdörtgen seçim değişiklikleri GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+
+## Dikdörtgen birleşik görsel ve panel bazlı renk override
+
+210. Birleşik görsel uygulaması yatay tek sıra sınırından çıkarıldı.
+211. `rectImageLayout.js` yardımcı modülü eklendi.
+212. `N × M` dikdörtgen seçimlerin tek baskı yüzeyi olarak hesaplanması sağlandı.
+213. `3 × 2`, `3 × 3`, `1 × 7`, `10 × 7` gibi blokların görsel uygulaması desteklendi.
+214. Farklı genişlikteki modüllerin aynı baskı bloğu içinde fiziksel genişliklerine göre pay alması sağlandı.
+215. Dikdörtgen bloğun toplam fiziksel genişliği ve toplam fiziksel yüksekliği hesaplanır hale getirildi.
+216. Her seçili panel için görselin yatay kırpım başlangıcı ve genişlik oranı hesaplandı.
+217. Her seçili panel için görselin dikey kırpım başlangıcı ve yükseklik oranı hesaplandı.
+218. Görselin seçili dikdörtgen alanın tamamına en-boy oranı bozulmadan `contain` mantığıyla ortalanması sağlandı.
+219. Panel state'ine `rect-group` texture modu eklendi.
+220. `regionStartX`, `regionStartY`, `regionWidth` ve `regionHeight` değerleri panel bazında state'e yazılır hale getirildi.
+221. Duvar rebuild sonrasında `rect-group` görsel state'inin tekrar yüklenmesi sağlandı.
+222. Önceki `horizontal-group` state'leri geriye dönük okunmaya devam edecek şekilde korundu.
+223. Görselli bir panel seçilip renk uygulandığında artık kullanıcının ayrıca `Görseli kaldır` demesi gerekmiyor.
+224. Renk uygulaması seçili paneldeki image mapping'i otomatik kaldırıp panel rengini görünür hale getiriyor.
+225. Bir `3 × 3` görsel grubunda yalnızca sağ alt panel kırmızı yapılırsa diğer 8 panelin görsel mapping state'i korunuyor.
+226. Panel bazlı renk override davranışı için `applyColorOverride` state fonksiyonu eklendi.
+227. Renk override sonrası yalnızca hedef panelin `imageAssetId` değerinin temizlendiğini doğrulayan regresyon testi eklendi.
+228. Dikdörtgen görsel layout'u için karışık sütun genişlikli `3 × 2` otomatik testi eklendi.
+229. Tek sütunda `1 × 7` dikey görsel layout testi eklendi.
+230. L şeklinde / eksik hücreli görsel grubunun reddedildiğini doğrulayan test eklendi.
+231. Sütunlar arasında boşluk bulunan görsel grubunun reddedildiğini doğrulayan test eklendi.
+232. Arayüzde `Görseli uygula` artık yatay-only fonksiyon yerine genel dikdörtgen görsel fonksiyonunu kullanıyor.
+233. Dikdörtgen görsel ve panel bazlı renk override değişiklikleri GitHub Actions test + Vite build kontrolünden başarıyla geçti.
