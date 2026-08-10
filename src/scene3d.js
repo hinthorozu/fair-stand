@@ -6,6 +6,7 @@ import { createRectImageLayout } from './rectImageLayout.js';
 import { createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
 import { createGroundLayout } from './groundLayout.js';
+import { createViewCube } from './viewCube.js';
 
 const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0xf4f4f4;
@@ -37,6 +38,8 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
   controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
   controls.mouseButtons.MIDDLE = THREE.MOUSE.PAN;
   controls.mouseButtons.RIGHT = null;
+
+  const viewCube = createViewCube(container, camera, controls);
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x7f8790, 2.1));
 
@@ -576,6 +579,7 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
 
   renderer.setAnimationLoop(() => {
     controls.update();
+    viewCube.update();
     renderer.render(scene, camera);
   });
 
