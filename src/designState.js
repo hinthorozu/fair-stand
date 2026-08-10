@@ -1,4 +1,5 @@
 const DEFAULT_PANEL_COLOR = '#ffffff';
+const DEFAULT_SEPARATOR_COLOR = '#c79b63';
 const STRIP_COUNT = 7;
 
 function createId(prefix) {
@@ -33,6 +34,18 @@ export function createFlatPanelModuleState(widthCm) {
   };
 }
 
+export function createSeparatorModuleState(widthCm) {
+  return {
+    id: createId('module'),
+    type: 'separator',
+    widthCm,
+    surface: {
+      id: createId('surface'),
+      color: DEFAULT_SEPARATOR_COLOR,
+    },
+  };
+}
+
 export function duplicateModuleState(moduleState) {
   if (!moduleState) return null;
   const duplicate = JSON.parse(JSON.stringify(moduleState));
@@ -45,18 +58,26 @@ export function duplicateModuleState(moduleState) {
       imageTransform: strip.imageTransform ? { ...strip.imageTransform } : createDefaultImageTransform(),
     }));
   }
+  if (duplicate.surface) {
+    duplicate.surface = {
+      ...duplicate.surface,
+      id: createId('surface'),
+    };
+  }
   return duplicate;
 }
 
 /**
  * Bir panele renk uygulamak, o hücrede atanmış görselin yerini alır.
- * Diğer panellerin image state'i değişmez.
+ * Renk-only modüllerde (ör. separatör) görsel state'i oluşturulmaz.
  */
 export function applyColorOverride(surfaceState, color) {
   if (!surfaceState) return null;
   surfaceState.color = color;
-  surfaceState.imageAssetId = null;
-  surfaceState.imageTransform = createDefaultImageTransform();
+  if ('imageAssetId' in surfaceState) {
+    surfaceState.imageAssetId = null;
+    surfaceState.imageTransform = createDefaultImageTransform();
+  }
   return surfaceState;
 }
 
