@@ -111,6 +111,172 @@ function findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm) {
   return null;
 }
 
+function findPreviousPlacement(cursorEndCm, widthCm, segments, standXCm, standYCm) {
+  for (let index = segments.length - 1; index >= 0; index -= 1) {
+    const segment = segments[index];
+    const segmentStart = segment.offsetCm;
+    const segmentEnd = segment.offsetCm + segment.lengthCm;
+    if (cursorEndCm < segmentStart - EPSILON_CM) continue;
+
+    const pathEndCm = Math.min(cursorEndCm, segmentEnd);
+    const localEndCm = pathEndCm - segmentStart;
+    if (localEndCm + EPSILON_CM < widthCm) continue;
+
+    const localStartCm = localEndCm - widthCm;
+    if (localStartCm < -EPSILON_CM) continue;
+
+    const normalizedLocalStartCm = Math.max(0, localStartCm);
+    const pathStartCm = segmentStart + normalizedLocalStartCm;
+    return {
+      placement: createPlacement(
+        segment,
+        normalizedLocalStartCm,
+        widthCm,
+        standXCm,
+        standYCm,
+      ),
+      pathStartCm,
+      previousCursorCm: pathStartCm,
+    };
+  }
+
+  return null;
+}
+
+function oppositeSide(side) {
+  return side === 'left' ? 'right' : 'left';
+}
+
+function normalizeCallerSideForChain(side, targetWallId) {
+  // Context menü / main.js mevcut akışında yan duvarlarda teknik yön bir kez
+  // ters çevrilmiş olarak geliyor. Sürekli duvar zincirinin tek doğrusal
+  // sol -> sağ mantığını korumak için burada yan duvar dönüşünü geri alıyoruz.
+  if (targetWallId === 'left' || targetWallId === 'right') return oppositeSide(side);
+  return side;
+}
+
+function planForwardInsertion({
+  insertedModules,
+  activeModules,
+  firstExistingIndex,
+  cursorCm,
+  segments,
+  standXCm,
+  standYCm,
+}) {
+  const placements = new Map();
+  let currentCursorCm = cursorCm;
+
+  for (const module of insertedModules) {
+    const widthCm = Number(module?.widthCm);
+    if (!module?.id || !Number.isFinite(widthCm) || widthCm <= 0) {
+      return { ok: false, message: 'Geçersiz modül genişliği bulundu.' };
+    }
+
+    const next = findNextPlacement(
+      currentCursorCm,
+      widthCm,
+      segments,
+      standXCm,
+      standYCm,
+    );
+    if (!next) {
+      return {
+        ok: false,
+        message: 'Aktif duvar zincirinde modüllerin tamamı için yeterli alan yok.',
+      };
+    }
+
+    placements.set(module.id, next.placement);
+    currentCursorCm = next.nextCursorCm;
+  }
+
+  for (let index = firstExistingIndex; index < activeModules.length; index += 1) {
+    const entry = activeModules[index];
+    const widthCm = Number(entry.module.widthCm);
+
+    if (entry.pathStartCm + EPSILON_CM >= currentCursorCm) break;
+
+    const next = findNextPlacement(
+      currentCursorCm,
+      widthCm,
+      segments,
+      standXCm,
+      standYCm,
+    );
+    if (!next) {
+      return {
+        ok: false,
+        message: 'Aktif duvar zincirinde modüllerin tamamı için yeterli alan yok.',
+      };
+    }
+
+    placements.set(entry.module.id, next.placement);
+    currentCursorCm = next.nextCursorCm;
+  }
+
+  return { ok: true, placements };
+}
+
+function tryPlanBackwardInsertion({
+  insertedModules,
+  activeModules,
+  targetIndex,
+  cursorEndCm,
+  segments,
+  standXCm,
+  standYCm,
+}) {
+  const placements = new Map();
+  let currentCursorEndCm = cursorEndCm;
+
+  // Zincirdeki sıra soldan sağa korunur. Bu yüzden hedefin hemen solundaki
+  // son eklenecek modülden başlayarak geriye doğru yerleştiriyoruz.
+  for (let index = insertedModules.length - 1; index >= 0; index -= 1) {
+    const module = insertedModules[index];
+    const widthCm = Number(module?.widthCm);
+    if (!module?.id || !Number.isFinite(widthCm) || widthCm <= 0) {
+      return { ok: false, invalid: true, message: 'Geçersiz modül genişliği bulundu.' };
+    }
+
+    const previous = findPreviousPlacement(
+      currentCursorEndCm,
+      widthCm,
+      segments,
+      standXCm,
+      standYCm,
+    );
+    if (!previous) return { ok: false };
+
+    placements.set(module.id, previous.placement);
+    currentCursorEndCm = previous.previousCursorCm;
+  }
+
+  // Yeni modüller soldaki mevcut modüllere çarpıyorsa yalnızca çarpışma
+  // zincirini sola iteriz. Hedef ve sağındaki modüller yerinde kalır.
+  for (let index = targetIndex - 1; index >= 0; index -= 1) {
+    const entry = activeModules[index];
+    const widthCm = Number(entry.module.widthCm);
+    const entryEndCm = entry.pathStartCm + widthCm;
+
+    if (entryEndCm <= currentCursorEndCm + EPSILON_CM) break;
+
+    const previous = findPreviousPlacement(
+      currentCursorEndCm,
+      widthCm,
+      segments,
+      standXCm,
+      standYCm,
+    );
+    if (!previous) return { ok: false };
+
+    placements.set(entry.module.id, previous.placement);
+    currentCursorEndCm = previous.previousCursorCm;
+  }
+
+  return { ok: true, placements };
+}
+
 export function planContinuousWallLayout({
   modules = [],
   standType,
@@ -197,63 +363,56 @@ export function planContinuousWallInsertion({
 
   const targetEntry = activeModules[targetIndex];
   const targetWidthCm = Number(targetEntry.module.widthCm);
-  const insertionIndex = side === 'left' ? targetIndex : targetIndex + 1;
+  const normalizedSide = normalizeCallerSideForChain(
+    side,
+    targetEntry.module?.placement?.wallId,
+  );
+  const insertionIndex = normalizedSide === 'left' ? targetIndex : targetIndex + 1;
   const chain = activeModules.map((entry) => entry.module);
   chain.splice(insertionIndex, 0, ...insertedModules);
 
-  const placements = new Map();
-  let cursorCm;
-  let firstExistingIndex;
+  let insertionPlan;
 
-  if (side === 'right') {
-    // Sağ tarafa ekleme hedefin bitiminden başlar. Sonraki modüller arasında
-    // boşluk varsa yerleri korunur; yalnızca yeni modülle çakışanlar ileri itilir.
-    cursorCm = targetEntry.pathStartCm + targetWidthCm;
-    firstExistingIndex = targetIndex + 1;
+  if (normalizedSide === 'right') {
+    insertionPlan = planForwardInsertion({
+      insertedModules,
+      activeModules,
+      firstExistingIndex: targetIndex + 1,
+      cursorCm: targetEntry.pathStartCm + targetWidthCm,
+      segments,
+      standXCm,
+      standYCm,
+    });
   } else {
-    // Sol tarafa ekleme listede hedefin önüne girer. Yeni modül hedefin mevcut
-    // başlangıcını kullanır; hedef ve devamı sadece gerektiği kadar ileri itilir.
-    cursorCm = targetEntry.pathStartCm;
-    firstExistingIndex = targetIndex;
+    // Önce hedefin gerçekten solundaki mevcut boşluğu kullanmayı dene.
+    insertionPlan = tryPlanBackwardInsertion({
+      insertedModules,
+      activeModules,
+      targetIndex,
+      cursorEndCm: targetEntry.pathStartCm,
+      segments,
+      standXCm,
+      standYCm,
+    });
+
+    if (insertionPlan.invalid) return insertionPlan;
+
+    // Sol sınırda boşluk yoksa eski düz-duvar davranışını koru: yeni modülü
+    // hedefin başlangıcına koyup hedef ve yalnızca çakışan devam zincirini sağa it.
+    if (!insertionPlan.ok) {
+      insertionPlan = planForwardInsertion({
+        insertedModules,
+        activeModules,
+        firstExistingIndex: targetIndex,
+        cursorCm: targetEntry.pathStartCm,
+        segments,
+        standXCm,
+        standYCm,
+      });
+    }
   }
 
-  for (const module of insertedModules) {
-    const widthCm = Number(module?.widthCm);
-    if (!module?.id || !Number.isFinite(widthCm) || widthCm <= 0) {
-      return { ok: false, message: 'Geçersiz modül genişliği bulundu.' };
-    }
-
-    const next = findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm);
-    if (!next) {
-      return {
-        ok: false,
-        message: 'Aktif duvar zincirinde modüllerin tamamı için yeterli alan yok.',
-      };
-    }
-
-    placements.set(module.id, next.placement);
-    cursorCm = next.nextCursorCm;
-  }
-
-  for (let index = firstExistingIndex; index < activeModules.length; index += 1) {
-    const entry = activeModules[index];
-    const widthCm = Number(entry.module.widthCm);
-
-    // İlk dokunulmayan modülün başlangıcı cursor'un ilerisindeyse artık hiçbir
-    // modülü oynatmaya gerek yok. Böylece sahnedeki bilinçli boşluklar korunur.
-    if (entry.pathStartCm + EPSILON_CM >= cursorCm) break;
-
-    const next = findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm);
-    if (!next) {
-      return {
-        ok: false,
-        message: 'Aktif duvar zincirinde modüllerin tamamı için yeterli alan yok.',
-      };
-    }
-
-    placements.set(entry.module.id, next.placement);
-    cursorCm = next.nextCursorCm;
-  }
+  if (!insertionPlan.ok) return insertionPlan;
 
   const orderedModuleIds = chain.map((module) => module.id);
   const activeIdSet = new Set(orderedModuleIds);
@@ -264,6 +423,6 @@ export function planContinuousWallInsertion({
   return {
     ok: true,
     orderedModuleIds: [...orderedModuleIds, ...inactiveModuleIds],
-    placements,
+    placements: insertionPlan.placements,
   };
 }
