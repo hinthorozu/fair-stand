@@ -9,6 +9,7 @@ import { createViewCube } from './viewCube.js';
 import { computeImageFit } from './imageFit.js';
 import {
   createModulePlacement,
+  getAllowedWallIds,
   snapPlacementToStand,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
@@ -23,6 +24,9 @@ const FLOOR_COLOR = 0xe9edf1;
 const OUTER_FLOOR_COLOR = 0xd2d8df;
 const GRID_COLOR = 0xb8c1cb;
 const STAND_BORDER_COLOR = 0x6f7a87;
+const ACTIVE_WALL_GUIDE_COLOR = 0xf97316;
+const ACTIVE_WALL_GUIDE_THICKNESS_M = 0.045;
+const ACTIVE_WALL_GUIDE_HEIGHT_M = 0.018;
 const STAGE_SURROUND_M = 1;
 const SELECTION_COLOR = 0x2563eb;
 const PLACEMENT_VALID_COLOR = 0x16a34a;
@@ -95,6 +99,7 @@ export function createStandScene(
 
   let grid = null;
   let standOutline = null;
+  let activeWallGuides = [];
   let stageLayout = null;
 
   function disposeGroundObject(object) {
@@ -108,8 +113,10 @@ export function createStandScene(
   function disposeGroundGuides() {
     disposeGroundObject(grid);
     disposeGroundObject(standOutline);
+    activeWallGuides.forEach(disposeGroundObject);
     grid = null;
     standOutline = null;
+    activeWallGuides = [];
   }
 
   function collectGridValues(lengthM) {
@@ -156,6 +163,40 @@ export function createStandScene(
     );
   }
 
+  function createActiveWallGuides(standType, widthM, depthM) {
+    const wallIds = getAllowedWallIds(standType).filter(
+      (wallId) => wallId === 'back' || wallId === 'left' || wallId === 'right',
+    );
+
+    return wallIds.map((wallId) => {
+      const alongX = wallId === 'back';
+      const lengthM = alongX ? widthM : depthM;
+      const guide = new THREE.Mesh(
+        new THREE.BoxGeometry(
+          alongX ? lengthM : ACTIVE_WALL_GUIDE_THICKNESS_M,
+          ACTIVE_WALL_GUIDE_HEIGHT_M,
+          alongX ? ACTIVE_WALL_GUIDE_THICKNESS_M : lengthM,
+        ),
+        new THREE.MeshBasicMaterial({
+          color: ACTIVE_WALL_GUIDE_COLOR,
+          depthWrite: false,
+          toneMapped: false,
+        }),
+      );
+
+      if (wallId === 'back') {
+        guide.position.set(widthM / 2, 0.02, 0);
+      } else if (wallId === 'left') {
+        guide.position.set(0, 0.02, depthM / 2);
+      } else {
+        guide.position.set(widthM, 0.02, depthM / 2);
+      }
+
+      guide.renderOrder = 20;
+      return guide;
+    });
+  }
+
   function createStage({ widthCm, depthCm, standType = null, resetView = true } = {}) {
     const widthM = Number(widthCm) / 100;
     const depthM = Number(depthCm) / 100;
@@ -182,7 +223,8 @@ export function createStandScene(
 
     grid = createRectangularGrid(widthM, depthM);
     standOutline = createStandOutline(widthM, depthM);
-    scene.add(grid, standOutline);
+    activeWallGuides = createActiveWallGuides(standType, widthM, depthM);
+    scene.add(grid, standOutline, ...activeWallGuides);
 
     stageLayout = {
       standType,
