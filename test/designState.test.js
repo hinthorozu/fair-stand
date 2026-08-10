@@ -121,7 +121,7 @@ test('duplicating a separator preserves color with independent ids', () => {
   assert.equal(duplicate.surface.color, '#654321');
 });
 
-test('showcase states are 100 cm color-only modules with 2 or 3 compartments', () => {
+test('showcase states expose seven editable Maxima panel slots', () => {
   const showcase3 = createShowcaseModuleState('showcase-3', 100);
   const showcase2 = createShowcaseModuleState('showcase-2', 100);
 
@@ -129,20 +129,44 @@ test('showcase states are 100 cm color-only modules with 2 or 3 compartments', (
   assert.equal(showcase2.type, 'showcase-2');
   assert.equal(showcase3.widthCm, 100);
   assert.equal(showcase2.widthCm, 100);
-  assert.equal('imageAssetId' in showcase3.surface, false);
-  assert.equal('imageAssetId' in showcase2.surface, false);
+  assert.equal(showcase3.strips.length, 7);
+  assert.equal(showcase2.strips.length, 7);
+  showcase3.strips.forEach((strip, stripIndex) => {
+    assert.equal(strip.stripIndex, stripIndex);
+    assert.equal(strip.color, '#55585c');
+    assert.equal(strip.imageAssetId, null);
+    assert.equal(strip.imageTransform.mode, 'single');
+  });
   assert.equal(createShowcaseModuleState('unknown', 100), null);
 });
 
-test('duplicating a showcase preserves its type and color with independent ids', () => {
+test('showcase panel color and image state behaves like a flat panel', () => {
+  const showcase = createShowcaseModuleState('showcase-3', 100);
+  showcase.strips[5].imageAssetId = 'showcase-logo';
+  showcase.strips[5].imageTransform.fit = 'cover';
+
+  applyColorOverride(showcase.strips[5], '#334455');
+
+  assert.equal(showcase.strips[5].color, '#334455');
+  assert.equal(showcase.strips[5].imageAssetId, null);
+  assert.equal(showcase.strips[5].imageTransform.mode, 'single');
+});
+
+test('duplicating a showcase preserves panel design with independent ids', () => {
   const original = createShowcaseModuleState('showcase-3', 100);
-  original.surface.color = '#334455';
+  original.strips[6].color = '#334455';
+  original.strips[4].imageAssetId = 'asset-showcase';
+  original.strips[4].imageTransform.fit = 'contain';
 
   const duplicate = duplicateModuleState(original);
 
   assert.notEqual(duplicate.id, original.id);
-  assert.notEqual(duplicate.surface.id, original.surface.id);
   assert.equal(duplicate.type, 'showcase-3');
   assert.equal(duplicate.widthCm, 100);
-  assert.equal(duplicate.surface.color, '#334455');
+  assert.equal(duplicate.strips[6].color, '#334455');
+  assert.equal(duplicate.strips[4].imageAssetId, 'asset-showcase');
+  assert.equal(duplicate.strips[4].imageTransform.fit, 'contain');
+  duplicate.strips.forEach((strip, index) => {
+    assert.notEqual(strip.id, original.strips[index].id);
+  });
 });
