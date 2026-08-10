@@ -91,6 +91,13 @@ function findContextModuleIndex(context) {
 function deleteContextModule(context) {
   const index = findContextModuleIndex(context);
   if (index < 0 || index >= currentModules.length) return;
+
+  const module = currentModules[index];
+  const confirmed = window.confirm(
+    `Modül ${index + 1} · ${module.widthCm} cm silinecek. Bu modüldeki renk ve görsel düzenlemeleri de kaybolacak. Devam edilsin mi?`,
+  );
+  if (!confirmed) return;
+
   currentModules.splice(index, 1);
   rebuildWall({ resetView: false });
 }
