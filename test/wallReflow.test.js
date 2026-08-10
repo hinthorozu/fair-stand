@@ -184,6 +184,78 @@ test('inserting on the left shifts target and following modules forward', () => 
   assert.equal(result.placements.get('back-next').xCm, 300);
 });
 
+test('right insertion keeps an existing gap instead of pulling a distant module into the corner', () => {
+  const target = module('left-target', 100, {
+    xCm: 0,
+    yCm: 200,
+    zCm: 0,
+    rotationZDeg: 90,
+    wallId: 'left',
+  });
+  const distantBack = module('back-distant', 100, {
+    xCm: 100,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const inserted = module('inserted', 100, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [target, distantBack],
+    insertedModules: [inserted],
+    targetModuleId: target.id,
+    side: 'right',
+    standType: 'u-stand',
+    standXCm: 500,
+    standYCm: 500,
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.orderedModuleIds, ['left-target', 'inserted', 'back-distant']);
+  assert.deepEqual(result.placements.get('inserted'), {
+    xCm: 0,
+    yCm: 100,
+    zCm: 0,
+    rotationZDeg: 90,
+    wallId: 'left',
+  });
+  assert.equal(result.placements.has('back-distant'), false);
+});
+
+test('left insertion shifts only the collision chain and preserves the next intentional gap', () => {
+  const target = module('target', 100, {
+    xCm: 200,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const distantNext = module('next', 100, {
+    xCm: 500,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const inserted = module('inserted', 100, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [target, distantNext],
+    insertedModules: [inserted],
+    targetModuleId: target.id,
+    side: 'left',
+    standType: 'back-wall',
+    standXCm: 800,
+    standYCm: 500,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.placements.get('inserted').xCm, 200);
+  assert.equal(result.placements.get('target').xCm, 300);
+  assert.equal(result.placements.has('next'), false);
+});
+
 test('rejects only when the continuous active wall chain has no remaining capacity', () => {
   const target = module('back-target', 300, {
     xCm: 0,
