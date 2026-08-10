@@ -41,7 +41,7 @@ test('snaps a back wall module and keeps it inside X limit', () => {
   const result = snapPlacementToStand({
     standType: 'u-stand',
     widthCm: 200,
-    pointerXCm: 990,
+    pointerXCm: 920,
     pointerYCm: 20,
     standXCm: 1000,
     standYCm: 500,
