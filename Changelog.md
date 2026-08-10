@@ -334,3 +334,4 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 268. ViewCube kamera geçişlerinde mevcut pan hedefini ve zoom mesafesini koruyacak şekilde bağlandı.
 269. ViewCube için responsive sağ üst overlay stili eklendi.
 270. ViewCube entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+271. ViewCube masaüstünde yaklaşık üçte bir oranında küçültüldü; mobil görünüm, home butonu, padding ve gölge ölçüleri de yeni kompakt boyuta göre ayarlandı.
