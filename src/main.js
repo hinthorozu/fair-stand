@@ -14,6 +14,7 @@ import { createModuleContextMenu } from './moduleContextMenu.js';
 const viewport = document.querySelector('#viewport');
 const wallLengthInput = document.querySelector('#wall-length');
 const buildWallButton = document.querySelector('#build-wall');
+const openModuleCatalogButton = document.querySelector('#open-module-catalog');
 const clearWallButton = document.querySelector('#clear-wall');
 const wallResult = document.querySelector('#wall-result');
 const selectionInfo = document.querySelector('#selection-info');
@@ -114,9 +115,28 @@ function duplicateContextModule(context, side) {
   rebuildWall({ resetView: false });
 }
 
+function addCatalogModule({ module, placement = 'append', context = null }) {
+  if (!module || module.type !== 'flat-panel') return;
+
+  let insertIndex = currentModules.length;
+  if (placement === 'left' || placement === 'right') {
+    const contextIndex = findContextModuleIndex(context);
+    if (contextIndex < 0 || contextIndex >= currentModules.length) return;
+    insertIndex = placement === 'left' ? contextIndex : contextIndex + 1;
+  }
+
+  currentModules.splice(insertIndex, 0, createFlatPanelModuleState(module.widthCm));
+  rebuildWall({ resetView: false });
+}
+
 const moduleContextMenu = createModuleContextMenu({
   onDelete: deleteContextModule,
   onDuplicate: duplicateContextModule,
+  onAdd: addCatalogModule,
+});
+
+openModuleCatalogButton.addEventListener('click', () => {
+  moduleContextMenu.openPicker({ placement: 'append' });
 });
 
 function confirmExistingScene(message) {
@@ -142,20 +162,13 @@ function buildAutomaticWall() {
   // Yeni bir sahne başlangıcı olduğu için kamera da Home / default görünüme döner.
   currentModules = result.modules.map((widthCm) => createFlatPanelModuleState(widthCm));
   moduleContextMenu.close();
+  moduleContextMenu.closePicker();
   rebuildWall({ resetView: true });
 }
 
 buildWallButton.addEventListener('click', buildAutomaticWall);
 wallLengthInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') buildAutomaticWall();
-});
-
-document.querySelectorAll('[data-add-module]').forEach((button) => {
-  button.addEventListener('click', () => {
-    currentModules.push(createFlatPanelModuleState(Number(button.dataset.addModule)));
-    // Modül eklerken kullanıcının mevcut pan / zoom / kamera açısını koru.
-    rebuildWall({ resetView: false });
-  });
 });
 
 clearWallButton.addEventListener('click', () => {
