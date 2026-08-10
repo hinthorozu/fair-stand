@@ -597,6 +597,69 @@ export function createStandScene(
       .filter(Boolean);
   }
 
+  function previewCatalogModuleDrag(moduleState, clientX, clientY) {
+    if (!stageLayout || !moduleState) {
+      disposePlacementGhost();
+      return { ok: false, message: 'Önce stand alanını oluştur.' };
+    }
+
+    if (stageLayout.standType === 'island') {
+      disposePlacementGhost();
+      return { ok: false, message: 'Ada Stand serbest yerleşimi sonraki adımda eklenecek.' };
+    }
+
+    const ground = getGroundPoint(clientX, clientY);
+    if (!ground) {
+      disposePlacementGhost();
+      return { ok: false, message: 'Modülü aktif stand alanına bırak.' };
+    }
+
+    const snapped = snapPlacementToStand({
+      standType: stageLayout.standType,
+      widthCm: moduleState.widthCm,
+      pointerXCm: ground.xCm,
+      pointerYCm: ground.yCm,
+      standXCm: stageLayout.widthCm,
+      standYCm: stageLayout.depthCm,
+      preferredRotationZDeg: 0,
+    });
+
+    if (!snapped.ok || !snapped.placement) {
+      disposePlacementGhost();
+      return {
+        ok: false,
+        message: snapped.message ?? 'Bu konuma modül yerleştirilemedi.',
+      };
+    }
+
+    const validation = validatePlacementAgainstModules({
+      placement: snapped.placement,
+      widthCm: moduleState.widthCm,
+      moduleId: moduleState.id,
+      modules: getRenderedModuleStates(),
+      standType: stageLayout.standType,
+      standXCm: stageLayout.widthCm,
+      standYCm: stageLayout.depthCm,
+    });
+
+    showPlacementGhost(moduleState.widthCm, snapped.placement, validation.ok);
+    return {
+      ok: validation.ok,
+      placement: { ...snapped.placement },
+      message: validation.message ?? null,
+    };
+  }
+
+  function dropCatalogModuleDrag(moduleState, clientX, clientY) {
+    const result = previewCatalogModuleDrag(moduleState, clientX, clientY);
+    disposePlacementGhost();
+    return result;
+  }
+
+  function clearCatalogModuleDrag() {
+    disposePlacementGhost();
+  }
+
   function updatePlacementDrag(event) {
     if (!dragSession || !stageLayout) return;
     const distance = Math.hypot(
@@ -1179,6 +1242,9 @@ export function createStandScene(
     applyHorizontalImageAsset,
     applyRectImageAsset,
     clearImage,
+    previewCatalogModuleDrag,
+    dropCatalogModuleDrag,
+    clearCatalogModuleDrag,
     getStageLayout: () => (stageLayout ? { ...stageLayout } : null),
     getSelectedSurface: () => [...selectedSurfaces][0] ?? null,
     getSelectedSurfaces: () => [...selectedSurfaces],
