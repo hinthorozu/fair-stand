@@ -33,6 +33,21 @@ export function createFlatPanelModuleState(widthCm) {
   };
 }
 
+export function duplicateModuleState(moduleState) {
+  if (!moduleState) return null;
+  const duplicate = JSON.parse(JSON.stringify(moduleState));
+  duplicate.id = createId('module');
+  if (Array.isArray(duplicate.strips)) {
+    duplicate.strips = duplicate.strips.map((strip, stripIndex) => ({
+      ...strip,
+      id: createId('surface'),
+      stripIndex,
+      imageTransform: strip.imageTransform ? { ...strip.imageTransform } : createDefaultImageTransform(),
+    }));
+  }
+  return duplicate;
+}
+
 /**
  * Bir panele renk uygulamak, o hücrede atanmış görselin yerini alır.
  * Diğer panellerin image state'i değişmez.
