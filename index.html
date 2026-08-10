@@ -40,6 +40,50 @@
             <button id="apply-color">Rengi uygula</button>
           </div>
 
+          <div class="color-editor" aria-label="Renk değerleri">
+            <div class="color-editor-row hex">
+              <label class="color-editor-field" for="color-hex">
+                <span>HEX</span>
+                <input id="color-hex" type="text" value="#FFFFFF" maxlength="7" spellcheck="false" autocomplete="off" />
+              </label>
+            </div>
+
+            <div class="color-editor-row rgb">
+              <label class="color-editor-field" for="color-r">
+                <span>R</span>
+                <input id="color-r" type="number" min="0" max="255" step="1" value="255" />
+              </label>
+              <label class="color-editor-field" for="color-g">
+                <span>G</span>
+                <input id="color-g" type="number" min="0" max="255" step="1" value="255" />
+              </label>
+              <label class="color-editor-field" for="color-b">
+                <span>B</span>
+                <input id="color-b" type="number" min="0" max="255" step="1" value="255" />
+              </label>
+            </div>
+
+            <div class="color-editor-row cmyk">
+              <label class="color-editor-field" for="color-c">
+                <span>C</span>
+                <input id="color-c" type="number" min="0" max="100" step="1" value="0" />
+              </label>
+              <label class="color-editor-field" for="color-m">
+                <span>M</span>
+                <input id="color-m" type="number" min="0" max="100" step="1" value="0" />
+              </label>
+              <label class="color-editor-field" for="color-y">
+                <span>Y</span>
+                <input id="color-y" type="number" min="0" max="100" step="1" value="0" />
+              </label>
+              <label class="color-editor-field" for="color-k">
+                <span>K</span>
+                <input id="color-k" type="number" min="0" max="100" step="1" value="0" />
+              </label>
+            </div>
+            <p class="color-editor-caption">RGB: 0–255 · CMYK: %0–100</p>
+          </div>
+
           <div class="section-divider"></div>
 
           <label for="surface-image">Görsel arşivine ekle</label>
