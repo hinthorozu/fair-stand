@@ -20,6 +20,7 @@ import {
   rgbToHex,
 } from './colorUtils.js';
 import { STAND_TYPE_LABELS, validateStandSetup } from './standSetup.js';
+import { validateStandAxisCapacity } from './standCapacity.js';
 
 const viewport = document.querySelector('#viewport');
 const viewportEmpty = document.querySelector('#viewport-empty');
@@ -61,6 +62,8 @@ let currentModules = [];
 let currentStand = null;
 let selectedStandType = null;
 let activeAssetId = null;
+let pendingCatalogAdds = [];
+let catalogAddFlushScheduled = false;
 const imageAssets = new Map();
 
 function getAssetUrl(assetId) {
@@ -160,11 +163,36 @@ function renderCurrentWallResult() {
   );
 }
 
+function validateCurrentAxisCapacity(
+  axis,
+  addedCm,
+  currentCm = totalWallWidthCm(currentModules),
+) {
+  const result = validateStandAxisCapacity({
+    axis,
+    currentCm,
+    addedCm,
+    xCm: currentStand?.xCm,
+    yCm: currentStand?.yCm,
+  });
+
+  if (!result.ok) renderWallResult(result.message, true);
+  return result;
+}
+
 function rebuildWall({ resetView = true } = {}) {
   if (!currentStand) {
     renderWallResult('Önce stand alanını oluştur.', true);
     return;
   }
+
+  const capacity = validateCurrentAxisCapacity(
+    'x',
+    totalWallWidthCm(currentModules),
+    0,
+  );
+  if (!capacity.ok) return;
+
   scene3d.buildWall(currentModules, { resetView });
   renderCurrentWallResult();
 }
@@ -197,6 +225,9 @@ function duplicateContextModule(context, side) {
   const duplicate = duplicateModuleState(currentModules[index]);
   if (!duplicate) return;
 
+  const capacity = validateCurrentAxisCapacity('x', duplicate.widthCm);
+  if (!capacity.ok) return;
+
   const insertIndex = side === 'left' ? index : index + 1;
   currentModules.splice(insertIndex, 0, duplicate);
   rebuildWall({ resetView: false });
@@ -212,20 +243,47 @@ function createCatalogModuleState(module) {
   return null;
 }
 
-function addCatalogModule({ module, placement = 'append', context = null }) {
-  if (!currentStand) return;
-  const moduleState = createCatalogModuleState(module);
-  if (!moduleState) return;
+function flushCatalogModuleAdds() {
+  catalogAddFlushScheduled = false;
+  const requests = pendingCatalogAdds;
+  pendingCatalogAdds = [];
+
+  if (!currentStand || !requests.length) return;
+
+  const firstRequest = requests[0];
+  let moduleStates = requests.map((request) => createCatalogModuleState(request.module));
+  if (moduleStates.some((moduleState) => !moduleState)) return;
+
+  const addedCm = totalWallWidthCm(moduleStates);
+  const capacity = validateCurrentAxisCapacity('x', addedCm);
+  if (!capacity.ok) return;
 
   let insertIndex = currentModules.length;
+  const placement = firstRequest.placement ?? 'append';
+  const context = firstRequest.context ?? null;
+
   if (placement === 'left' || placement === 'right') {
     const contextIndex = findContextModuleIndex(context);
     if (contextIndex < 0 || contextIndex >= currentModules.length) return;
     insertIndex = placement === 'left' ? contextIndex : contextIndex + 1;
+
+    // Picker callbacks are sequential today. Reversing here preserves the same
+    // visual order while allowing the complete package to be validated first.
+    moduleStates = [...moduleStates].reverse();
   }
 
-  currentModules.splice(insertIndex, 0, moduleState);
+  currentModules.splice(insertIndex, 0, ...moduleStates);
   rebuildWall({ resetView: false });
+}
+
+function addCatalogModule(request) {
+  if (!currentStand || !request?.module) return;
+
+  pendingCatalogAdds.push(request);
+  if (catalogAddFlushScheduled) return;
+
+  catalogAddFlushScheduled = true;
+  queueMicrotask(flushCatalogModuleAdds);
 }
 
 function changeContextPanelGlassMode(context, isGlass) {
@@ -297,6 +355,7 @@ createStageButton.addEventListener('click', () => {
   }
 
   currentStand = setup;
+  wallLengthInput.max = String(setup.xCm);
   viewportEmpty.hidden = true;
   viewportToolbar.hidden = false;
   setStandEditingEnabled(true);
@@ -331,6 +390,10 @@ function buildAutomaticWall() {
     renderWallResult(result.message, true);
     return;
   }
+
+  const requestedTotalCm = result.modules.reduce((sum, widthCm) => sum + widthCm, 0);
+  const capacity = validateCurrentAxisCapacity('x', requestedTotalCm, 0);
+  if (!capacity.ok) return;
 
   const confirmed = confirmExistingScene(
     'Sahnede mevcut bir duvar var. Yeni duvar oluşturulursa mevcut panel renkleri, görselleri ve düzenlemeleri silinecek. Devam edilsin mi?',
