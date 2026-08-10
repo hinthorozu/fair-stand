@@ -174,10 +174,26 @@ function addCatalogModule({ module, placement = 'append', context = null }) {
   rebuildWall({ resetView: false });
 }
 
+function changeContextPanelGlassMode(context, isGlass) {
+  if (!context?.supportsGlass) return;
+
+  const selectedPanels = scene3d.getSelectedSurfaces().filter(
+    (surface) => surface.userData.selectionMode === 'panel',
+  );
+  if (!selectedPanels.length) return;
+
+  scene3d.applyGlassMode(selectedPanels, isGlass);
+  const panelCount = selectedPanels.length;
+  selectionInfo.textContent = isGlass
+    ? `${panelCount} panel cam panele çevrildi.`
+    : `${panelCount} panel normal panele çevrildi.`;
+}
+
 const moduleContextMenu = createModuleContextMenu({
   onDelete: deleteContextModule,
   onDuplicate: duplicateContextModule,
   onAdd: addCatalogModule,
+  onGlassModeChange: changeContextPanelGlassMode,
 });
 
 openModuleCatalogButton.addEventListener('click', () => {
