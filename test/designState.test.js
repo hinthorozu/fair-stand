@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  applyColorOverride,
   createFlatPanelModuleState,
   reconcileWallModules,
   totalWallWidthCm,
@@ -33,4 +34,27 @@ test('same automatic wall composition reuses existing module state', () => {
   assert.equal(reconciled[0], modules[0]);
   assert.equal(reconciled[1], modules[1]);
   assert.equal(reconciled[1].strips[5].color, '#112233');
+});
+
+test('color override removes the image only from the targeted panel state', () => {
+  const module = createFlatPanelModuleState(100);
+  module.strips.forEach((strip) => {
+    strip.imageAssetId = 'group-image';
+    strip.imageTransform = {
+      mode: 'rect-group',
+      groupAspect: 2,
+      regionStartX: 0,
+      regionStartY: 0,
+      regionWidth: 0.5,
+      regionHeight: 0.5,
+    };
+  });
+
+  applyColorOverride(module.strips[0], '#ff0000');
+
+  assert.equal(module.strips[0].color, '#ff0000');
+  assert.equal(module.strips[0].imageAssetId, null);
+  assert.equal(module.strips[0].imageTransform.mode, 'single');
+  assert.equal(module.strips[1].imageAssetId, 'group-image');
+  assert.equal(module.strips[1].imageTransform.mode, 'rect-group');
 });
