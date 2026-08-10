@@ -5,7 +5,8 @@ Bu belge, Fair Stand / Maxima Stand Konfigüratörü geliştirme fazlarını ve 
 ## Proje durumu
 
 - **FAZ 1: KAPANDI — 10 Ağustos 2026**
-- **FAZ 2: Sıradaki geliştirme fazı**
+- **FAZ 2: BAŞLADI — 10 Ağustos 2026**
+- **FAZ 2.1: Yerleşim state + kontrollü sürükleme + edge snap temeli aktif**
 - FAZ 1 bundan sonra yeni özellik eklenmeden referans taban olarak korunacaktır. Kritik bug düzeltmeleri yapılabilir; yeni yerleşim ve stand davranışları FAZ 2 kapsamında geliştirilecektir.
 
 ---
@@ -36,7 +37,7 @@ Projede bundan sonra kullanılan teknik eksen standardı:
 - **Y = zemin derinlik ekseni**
 - **Z = yükseklik**
 
-L ve U stand yerleşimleri FAZ 2'de bu eksen standardına göre geliştirilecektir.
+Three.js iç sahnesindeki eski geometri düzeni korunurken FAZ 2 yerleşim state'i bu proje standardını kullanır. Logical Y değeri renderer tarafında Three.js world-Z'ye, logical Z değeri world-Y'ye çevrilir.
 
 ## 3. Stand tipi seçim altyapısı
 
@@ -135,9 +136,52 @@ Katalogda birden fazla modül seçilebilir, seçim sırası değiştirilebilir v
 
 ---
 
-# FAZ 2 — YERLEŞİM MOTORU
+# FAZ 2 — YERLEŞİM MOTORU — BAŞLADI
 
 FAZ 2'nin ana hedefi, sıralı düz duvar mantığını gerçek stand alanında **kontrollü drag & drop + magnetic snap** sistemine dönüştürmektir.
+
+## FAZ 2.1 — tamamlanan temel
+
+- `modulePlacement.js` yerleşim motoru eklendi.
+- Her modül için `xCm`, `yCm`, `zCm`, `rotationZDeg` ve `wallId` yerleşim state'i tanımlandı.
+- Yerleşim koordinatları proje standardına göre **X/Y zemin, Z yükseklik** olarak tutulur.
+- Stand tipine göre izin verilen kenarlar tanımlandı:
+  - Sırt Duvar: `back`
+  - L Stand Sol: `back + left`
+  - L Stand Sağ: `back + right`
+  - U Stand: `back + left + right`
+- Modül konumu **50 cm snap** ile sınırlandırıldı.
+- Sırt kenarında modül X yönüne, yan kenarlarda Y yönüne 0°/90° kontrollü şekilde oturur.
+- Sahnede mevcut bir modül sol mouse ile tutulup sürüklenebilir hale getirildi.
+- Sürükleme sırasında yarı şeffaf **ghost preview** gösterilir.
+- Geçerli yerleşim ghost'u yeşil, geçersiz yerleşim ghost'u kırmızı gösterilir.
+- Aktif stand sınırı dışındaki drop engellenir.
+- Aynı kenardaki modüllerin üst üste binmesi engellenir.
+- Birbirine dik iki kenarın köşede birleşmesine izin verilir.
+- L Sol / L Sağ / U standlarda sürüklenen modül en yakın izin verilen stand kenarına otomatik yönlenir.
+- Rebuild artık modülün placement state'ini okuyarak modülü doğru kenar ve yönde yeniden çizer.
+- Sağ tık çoğaltma ve sağ/sol ekleme akışları modülün bulunduğu kenarı dikkate alacak şekilde placement-aware hale getirildi.
+- `Tüm Özellikleri Kaldır` işlemi renk/görsel/cam özelliklerini sıfırlarken FAZ 2 yerleşim state'ini korur.
+- FAZ 2.1 snap, izin verilen kenar, sınır ve collision davranışları otomatik testlerle güvenceye alındı.
+
+## FAZ 2.1 kullanım davranışı
+
+- **Modül üzerinde sol tuş + sürükle:** modülü yerleştir.
+- **Boş alanda sol sürükle:** kamerayı döndür.
+- **Ctrl/Cmd + tık:** mevcut dikdörtgen panel seçimini kullan.
+- **Orta mouse basılı sürükle:** pan.
+- **Tekerlek:** zoom.
+
+## FAZ 2.1'de henüz yapılmayanlar
+
+Bunlar temel yerleşim motorunun sonraki adımlarıdır ve tamamlanmış kabul edilmemelidir:
+
+- Modül katalog kartını doğrudan popup'tan 3D sahneye sürükleyip bırakma.
+- Mevcut modül uçlarına yaklaşınca gerçek **neighbor magnetic snap / kenetlenme**.
+- Kullanıcı kontrollü 0° / 90° döndürme komutu.
+- L/U standın ilk modül dizilimini otomatik oluşturma.
+- Çoklu panel dikdörtgen seçiminin farklı duvar köşelerini geçmemesi için multi-wall seçim kuralı.
+- Ada Stand için tam serbest alan yerleşim UX'i ve kuralları.
 
 ## FAZ 2 ana hedefleri
 
@@ -152,7 +196,8 @@ FAZ 2'nin ana hedefi, sıralı düz duvar mantığını gerçek stand alanında 
    - Her kenarın kapasitesinin ayrı takip edilmesi.
 
 3. **Kontrollü drag & drop**
-   - Modül katalogdan sahneye sürüklenebilir.
+   - Mevcut modüllerin sahne içinde kontrollü sürüklenmesi FAZ 2.1'de başladı.
+   - Sonraki adımda modül katalogdan doğrudan sahneye sürüklenebilir olacaktır.
    - Sürükleme sırasında yarı şeffaf ghost preview gösterilir.
    - Modül yalnızca geçerli yerleşime bırakılabilir.
 
@@ -188,6 +233,6 @@ Sistem serbest bir CAD programına dönüşmeyecektir. Kullanıcı modülleri s�
 
 # Faz sınırı kararı
 
-**FAZ 1, 10 Ağustos 2026 itibarıyla kapatılmıştır.**
+**FAZ 1, 10 Ağustos 2026 itibarıyla kapatılmıştır. FAZ 2 aynı tarih itibarıyla yerleşim motoru geliştirmeleriyle başlamıştır.**
 
-FAZ 2 başlamadan önce FAZ 1'e yeni yerleşim özelliği eklenmeyecektir. FAZ 1 tabanı; düz/sırt duvar, sahne ölçüsü, katalog, tasarım araçları, kapasite kontrolü, kamera ve CI altyapısı açısından referans sürüm olarak korunacaktır.
+FAZ 1 tabanı; düz/sırt duvar, sahne ölçüsü, katalog, tasarım araçları, kapasite kontrolü, kamera ve CI altyapısı açısından referans sürüm olarak korunacaktır.
