@@ -6,6 +6,7 @@ import { composeStraightWall } from './wall.js';
 import {
   createFlatPanelModuleState,
   createSeparatorModuleState,
+  createShowcaseModuleState,
   duplicateModuleState,
   totalWallWidthCm,
   moduleWidths,
@@ -69,6 +70,12 @@ const scene3d = createStandScene(
 
       if (moduleType === 'separator') {
         selectionInfo.textContent = `Modül ${moduleIndex + 1} · Separatör ${widthCm} cm · yalnızca renk uygulanabilir.`;
+        return;
+      }
+
+      if (moduleType === 'showcase-3' || moduleType === 'showcase-2') {
+        const eyeCount = moduleType === 'showcase-3' ? 3 : 2;
+        selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${eyeCount} Gözlü Vitrin ${widthCm} cm · yalnızca renk uygulanabilir.`;
         return;
       }
 
@@ -146,6 +153,9 @@ function createCatalogModuleState(module) {
   if (!module) return null;
   if (module.type === 'flat-panel') return createFlatPanelModuleState(module.widthCm);
   if (module.type === 'separator') return createSeparatorModuleState(module.widthCm);
+  if (module.type === 'showcase-2' || module.type === 'showcase-3') {
+    return createShowcaseModuleState(module.type, module.widthCm);
+  }
   return null;
 }
 
@@ -226,7 +236,7 @@ function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
   const selected = scene3d.getSelectedSurfaces();
   if (!selected.length) {
     if (showMissingSelection) {
-      selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel, panel bloğu veya separatörü seç.';
+      selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel, panel bloğu veya modülü seç.';
     }
     return false;
   }
