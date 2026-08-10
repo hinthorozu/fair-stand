@@ -1,5 +1,7 @@
 import { createModulePlacement } from './modulePlacement.js';
 
+const EPSILON_CM = 0.001;
+
 function getSegments(standType, standXCm, standYCm) {
   const x = Number(standXCm);
   const y = Number(standYCm);
@@ -49,7 +51,12 @@ function placementToPathStart(module, segments, standYCm) {
   }
 
   if (!Number.isFinite(localStartCm)) return null;
-  if (localStartCm < -0.001 || localStartCm + widthCm > segment.lengthCm + 0.001) return null;
+  if (
+    localStartCm < -EPSILON_CM
+    || localStartCm + widthCm > segment.lengthCm + EPSILON_CM
+  ) {
+    return null;
+  }
 
   return segment.offsetCm + Math.max(0, localStartCm);
 }
@@ -88,10 +95,10 @@ function findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm) {
   for (const segment of segments) {
     const segmentStart = segment.offsetCm;
     const segmentEnd = segment.offsetCm + segment.lengthCm;
-    if (cursorCm > segmentEnd + 0.001) continue;
+    if (cursorCm > segmentEnd + EPSILON_CM) continue;
 
     const localStartCm = Math.max(0, cursorCm - segmentStart);
-    if (localStartCm + widthCm <= segment.lengthCm + 0.001) {
+    if (localStartCm + widthCm <= segment.lengthCm + EPSILON_CM) {
       const pathStartCm = segmentStart + localStartCm;
       return {
         placement: createPlacement(segment, localStartCm, widthCm, standXCm, standYCm),
@@ -99,6 +106,29 @@ function findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm) {
         nextCursorCm: pathStartCm + widthCm,
       };
     }
+  }
+
+  return null;
+}
+
+function findPreviousPlacement(cursorEndCm, widthCm, segments, standXCm, standYCm) {
+  for (let index = segments.length - 1; index >= 0; index -= 1) {
+    const segment = segments[index];
+    const segmentStart = segment.offsetCm;
+    const segmentEnd = segment.offsetCm + segment.lengthCm;
+    if (cursorEndCm < segmentStart - EPSILON_CM) continue;
+
+    const pathEndCm = Math.min(cursorEndCm, segmentEnd);
+    const localEndCm = pathEndCm - segmentStart;
+    if (localEndCm + EPSILON_CM < widthCm) continue;
+
+    const localStartCm = localEndCm - widthCm;
+    const pathStartCm = segmentStart + localStartCm;
+    return {
+      placement: createPlacement(segment, localStartCm, widthCm, standXCm, standYCm),
+      pathStartCm,
+      previousCursorCm: pathStartCm,
+    };
   }
 
   return null;
@@ -162,6 +192,10 @@ export function planContinuousWallInsertion({
     return { ok: false, message: 'Bu stand tipinde sürekli duvar yerleşimi kullanılamaz.' };
   }
 
+  if (!insertedModules.length) {
+    return { ok: false, message: 'Eklenecek modül bulunamadı.' };
+  }
+
   const activeWallIds = new Set(segments.map((segment) => segment.wallId));
   const activeModules = modules
     .filter((module) => activeWallIds.has(module?.placement?.wallId))
@@ -184,34 +218,110 @@ export function planContinuousWallInsertion({
     return { ok: false, message: 'Hedef modül aktif duvar zincirinde bulunamadı.' };
   }
 
+  const targetEntry = activeModules[targetIndex];
+  const targetWidthCm = Number(targetEntry.module.widthCm);
   const insertionIndex = side === 'left' ? targetIndex : targetIndex + 1;
   const chain = activeModules.map((entry) => entry.module);
   chain.splice(insertionIndex, 0, ...insertedModules);
 
-  let cursorCm = 0;
-  if (insertionIndex > 0) {
-    const previous = activeModules[insertionIndex - 1];
-    cursorCm = previous.pathStartCm + Number(previous.module.widthCm);
-  }
-
   const placements = new Map();
-  for (let index = insertionIndex; index < chain.length; index += 1) {
-    const module = chain[index];
-    const widthCm = Number(module?.widthCm);
-    if (!Number.isFinite(widthCm) || widthCm <= 0) {
-      return { ok: false, message: 'Geçersiz modül genişliği bulundu.' };
+
+  if (side === 'right') {
+    let cursorCm = targetEntry.pathStartCm + targetWidthCm;
+
+    for (const module of insertedModules) {
+      const widthCm = Number(module?.widthCm);
+      if (!module?.id || !Number.isFinite(widthCm) || widthCm <= 0) {
+        return { ok: false, message: 'Geçersiz modül genişliği bulundu.' };
+      }
+
+      const next = findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm);
+      if (!next) {
+        return {
+          ok: false,
+          message: 'Aktif duvar zincirinde modüllerin tamamı için yeterli alan yok.',
+        };
+      }
+
+      placements.set(module.id, next.placement);
+      cursorCm = next.nextCursorCm;
     }
 
-    const next = findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm);
-    if (!next) {
-      return {
-        ok: false,
-        message: 'Aktif duvar zincirinde modüllerin tamamı için yeterli alan yok.',
-      };
+    for (let index = targetIndex + 1; index < activeModules.length; index += 1) {
+      const entry = activeModules[index];
+      const widthCm = Number(entry.module.widthCm);
+
+      // Boşluk varsa mevcut modülü yerinden oynatma. Yalnızca yeni eklenen
+      // modül gerçekten üzerine geliyorsa bu ve devamındaki modülleri ileri it.
+      if (entry.pathStartCm + EPSILON_CM >= cursorCm) break;
+
+      const next = findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm);
+      if (!next) {
+        return {
+          ok: false,
+          message: 'Aktif duvar zincirinde modüllerin tamamı için yeterli alan yok.',
+        };
+      }
+
+      placements.set(entry.module.id, next.placement);
+      cursorCm = next.nextCursorCm;
+    }
+  } else {
+    let cursorEndCm = targetEntry.pathStartCm;
+
+    // Sol tarafa birden fazla modül eklenirse seçim sırası duvar üzerindeki
+    // soldan-sağa sırasını korur; hedefe en yakın modül sondaki modüldür.
+    for (let index = insertedModules.length - 1; index >= 0; index -= 1) {
+      const module = insertedModules[index];
+      const widthCm = Number(module?.widthCm);
+      if (!module?.id || !Number.isFinite(widthCm) || widthCm <= 0) {
+        return { ok: false, message: 'Geçersiz modül genişliği bulundu.' };
+      }
+
+      const previous = findPreviousPlacement(
+        cursorEndCm,
+        widthCm,
+        segments,
+        standXCm,
+        standYCm,
+      );
+      if (!previous) {
+        return {
+          ok: false,
+          message: 'Aktif duvar zincirinde modüllerin tamamı için yeterli alan yok.',
+        };
+      }
+
+      placements.set(module.id, previous.placement);
+      cursorEndCm = previous.previousCursorCm;
     }
 
-    placements.set(module.id, next.placement);
-    cursorCm = next.nextCursorCm;
+    for (let index = targetIndex - 1; index >= 0; index -= 1) {
+      const entry = activeModules[index];
+      const widthCm = Number(entry.module.widthCm);
+      const originalEndCm = entry.pathStartCm + widthCm;
+
+      // Boşluk yeterliyse önceki modülleri de yerinde bırak. Sadece çakışan
+      // modülleri zincirin başlangıcına doğru it.
+      if (originalEndCm <= cursorEndCm + EPSILON_CM) break;
+
+      const previous = findPreviousPlacement(
+        cursorEndCm,
+        widthCm,
+        segments,
+        standXCm,
+        standYCm,
+      );
+      if (!previous) {
+        return {
+          ok: false,
+          message: 'Aktif duvar zincirinde modüllerin tamamı için yeterli alan yok.',
+        };
+      }
+
+      placements.set(entry.module.id, previous.placement);
+      cursorEndCm = previous.previousCursorCm;
+    }
   }
 
   const orderedModuleIds = chain.map((module) => module.id);
