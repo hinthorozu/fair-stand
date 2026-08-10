@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STAND_DIMENSIONS } from './catalog.js';
+import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 
 const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0xf4f4f4;
@@ -189,6 +190,18 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     });
   }
 
+  function resetImageTransform(surfaceState) {
+    if (!surfaceState) return;
+    surfaceState.imageTransform = {
+      mode: 'single',
+      offsetX: 0,
+      offsetY: 0,
+      repeatX: 1,
+      repeatY: 1,
+      rotation: 0,
+    };
+  }
+
   function configureTexture(texture, surfaceState) {
     const transform = surfaceState?.imageTransform ?? {};
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -202,22 +215,72 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     texture.needsUpdate = true;
   }
 
-  function loadImageOnSurface(mesh, assetId) {
+  function createContainedGroupCanvas(image, groupAspect) {
+    const maxSide = 2048;
+    let width;
+    let height;
+
+    if (groupAspect >= 1) {
+      width = maxSide;
+      height = Math.max(128, Math.round(maxSide / groupAspect));
+    } else {
+      height = maxSide;
+      width = Math.max(128, Math.round(maxSide * groupAspect));
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, width, height);
+
+    const imageAspect = image.naturalWidth / image.naturalHeight;
+    const canvasAspect = width / height;
+    let drawWidth;
+    let drawHeight;
+
+    if (imageAspect > canvasAspect) {
+      drawWidth = width;
+      drawHeight = width / imageAspect;
+    } else {
+      drawHeight = height;
+      drawWidth = height * imageAspect;
+    }
+
+    const drawX = (width - drawWidth) / 2;
+    const drawY = (height - drawHeight) / 2;
+    context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+
+    return canvas;
+  }
+
+  function assignTexture(mesh, texture) {
+    if (!mesh?.material) {
+      texture.dispose();
+      return;
+    }
+    mesh.material.map?.dispose?.();
+    mesh.material.map = texture;
+    mesh.material.color.set(0xffffff);
+    mesh.material.needsUpdate = true;
+  }
+
+  function loadSingleImageOnSurface(mesh, assetId) {
     const assetUrl = getAssetUrl(assetId);
     if (!mesh?.material || !assetUrl) return;
 
     textureLoader.load(
       assetUrl,
       (texture) => {
-        if (!mesh.material) {
+        const surfaceState = mesh.userData.surfaceState;
+        if (surfaceState?.imageAssetId !== assetId) {
           texture.dispose();
           return;
         }
-        configureTexture(texture, mesh.userData.surfaceState);
-        mesh.material.map?.dispose?.();
-        mesh.material.map = texture;
-        mesh.material.color.set(0xffffff);
-        mesh.material.needsUpdate = true;
+        configureTexture(texture, surfaceState);
+        assignTexture(mesh, texture);
       },
       undefined,
       () => {
@@ -225,6 +288,56 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
         if (mesh.material) mesh.material.color.set(stateColor);
       },
     );
+  }
+
+  function loadHorizontalImageOnSurface(mesh, assetId) {
+    const assetUrl = getAssetUrl(assetId);
+    if (!mesh?.material || !assetUrl) return;
+
+    textureLoader.load(
+      assetUrl,
+      (sourceTexture) => {
+        const surfaceState = mesh.userData.surfaceState;
+        const transform = surfaceState?.imageTransform;
+        if (
+          surfaceState?.imageAssetId !== assetId
+          || transform?.mode !== 'horizontal-group'
+        ) {
+          sourceTexture.dispose();
+          return;
+        }
+
+        const canvas = createContainedGroupCanvas(
+          sourceTexture.image,
+          transform.groupAspect,
+        );
+        sourceTexture.dispose();
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        texture.offset.set(transform.regionStart, 0);
+        texture.repeat.set(transform.regionWidth, 1);
+        texture.needsUpdate = true;
+        assignTexture(mesh, texture);
+      },
+      undefined,
+      () => {
+        const stateColor = mesh.userData.surfaceState?.color ?? '#ffffff';
+        if (mesh.material) mesh.material.color.set(stateColor);
+      },
+    );
+  }
+
+  function loadImageOnSurface(mesh, assetId) {
+    const mode = mesh.userData.surfaceState?.imageTransform?.mode;
+    if (mode === 'horizontal-group') {
+      loadHorizontalImageOnSurface(mesh, assetId);
+      return;
+    }
+    loadSingleImageOnSurface(mesh, assetId);
   }
 
   function applyStoredImage(mesh) {
@@ -237,16 +350,62 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     normalizeMeshes(meshOrMeshes).forEach((mesh) => {
       if (!mesh?.material) return;
       const surfaceState = mesh.userData.surfaceState;
-      if (surfaceState) surfaceState.imageAssetId = assetId;
-      loadImageOnSurface(mesh, assetId);
+      if (surfaceState) {
+        surfaceState.imageAssetId = assetId;
+        resetImageTransform(surfaceState);
+      }
+      loadSingleImageOnSurface(mesh, assetId);
     });
+  }
+
+  function applyHorizontalImageAsset(meshOrMeshes, assetId) {
+    const meshes = normalizeMeshes(meshOrMeshes);
+    if (!assetId) return { ok: false, message: 'Önce bir görsel seç.' };
+
+    if (meshes.length === 1) {
+      applyImageAsset(meshes, assetId);
+      return { ok: true, mode: 'single' };
+    }
+
+    const layout = createHorizontalImageLayout(
+      meshes.map((mesh) => ({
+        mesh,
+        moduleIndex: mesh.userData.moduleIndex,
+        stripIndex: mesh.userData.stripIndex,
+        width: mesh.geometry.parameters.width,
+        height: mesh.geometry.parameters.height,
+      })),
+    );
+
+    if (!layout.ok) return layout;
+
+    layout.entries.forEach((entry) => {
+      const surfaceState = entry.mesh.userData.surfaceState;
+      surfaceState.imageAssetId = assetId;
+      surfaceState.imageTransform = {
+        mode: 'horizontal-group',
+        groupAspect: layout.groupAspect,
+        regionStart: entry.regionStart,
+        regionWidth: entry.regionWidth,
+      };
+      loadHorizontalImageOnSurface(entry.mesh, assetId);
+    });
+
+    return {
+      ok: true,
+      mode: 'horizontal-group',
+      panelCount: layout.entries.length,
+    };
   }
 
   function clearImage(meshOrMeshes) {
     normalizeMeshes(meshOrMeshes).forEach((mesh) => {
       if (!mesh?.material) return;
       const surfaceState = mesh.userData.surfaceState;
-      if (surfaceState) surfaceState.imageAssetId = null;
+      if (surfaceState) {
+        surfaceState.imageAssetId = null;
+        resetImageTransform(surfaceState);
+      }
       mesh.material.map?.dispose?.();
       mesh.material.map = null;
       mesh.material.color.set(surfaceState?.color ?? '#ffffff');
@@ -294,6 +453,7 @@ export function createStandScene(container, onSurfaceSelected, getAssetUrl = () 
     clearSelection,
     applyColor,
     applyImageAsset,
+    applyHorizontalImageAsset,
     clearImage,
     getSelectedSurface: () => [...selectedSurfaces][0] ?? null,
     getSelectedSurfaces: () => [...selectedSurfaces],
