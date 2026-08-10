@@ -277,6 +277,63 @@ function tryPlanBackwardInsertion({
   return { ok: true, placements };
 }
 
+function tryPlanBackwardEdgeInsertion({
+  insertedModules,
+  activeModules,
+  targetIndex,
+  cursorEndCm,
+  segments,
+  standXCm,
+  standYCm,
+}) {
+  const placements = new Map();
+  let currentCursorEndCm = cursorEndCm;
+
+  // Açık zincir ucunda yeni modül fiziksel uçta kalır. Son modülden başlayarak
+  // yalnızca çarpışan mevcut zinciri içeri / geriye doğru iteriz.
+  for (let index = insertedModules.length - 1; index >= 0; index -= 1) {
+    const module = insertedModules[index];
+    const widthCm = Number(module?.widthCm);
+    if (!module?.id || !Number.isFinite(widthCm) || widthCm <= 0) {
+      return { ok: false, invalid: true, message: 'Geçersiz modül genişliği bulundu.' };
+    }
+
+    const previous = findPreviousPlacement(
+      currentCursorEndCm,
+      widthCm,
+      segments,
+      standXCm,
+      standYCm,
+    );
+    if (!previous) return { ok: false };
+
+    placements.set(module.id, previous.placement);
+    currentCursorEndCm = previous.previousCursorCm;
+  }
+
+  for (let index = targetIndex; index >= 0; index -= 1) {
+    const entry = activeModules[index];
+    const widthCm = Number(entry.module.widthCm);
+    const entryEndCm = entry.pathStartCm + widthCm;
+
+    if (entryEndCm <= currentCursorEndCm + EPSILON_CM) break;
+
+    const previous = findPreviousPlacement(
+      currentCursorEndCm,
+      widthCm,
+      segments,
+      standXCm,
+      standYCm,
+    );
+    if (!previous) return { ok: false };
+
+    placements.set(entry.module.id, previous.placement);
+    currentCursorEndCm = previous.previousCursorCm;
+  }
+
+  return { ok: true, placements };
+}
+
 export function planContinuousWallLayout({
   modules = [],
   standType,
@@ -383,6 +440,25 @@ export function planContinuousWallInsertion({
       standXCm,
       standYCm,
     });
+
+    // Hedef zincirin fiziksel sonundaysa dışarı taşmak yerine yeni modülü
+    // açık uçta sabit tutup hedef ve yalnızca çarpışan önceki zinciri içeri it.
+    const capacityCm = segments.reduce((sum, segment) => sum + segment.lengthCm, 0);
+    const targetEndCm = targetEntry.pathStartCm + targetWidthCm;
+    const isOpenChainEnd = targetIndex === activeModules.length - 1
+      && targetEndCm >= capacityCm - EPSILON_CM;
+
+    if (!insertionPlan.ok && isOpenChainEnd) {
+      insertionPlan = tryPlanBackwardEdgeInsertion({
+        insertedModules,
+        activeModules,
+        targetIndex,
+        cursorEndCm: targetEndCm,
+        segments,
+        standXCm,
+        standYCm,
+      });
+    }
   } else {
     // Önce hedefin gerçekten solundaki mevcut boşluğu kullanmayı dene.
     insertionPlan = tryPlanBackwardInsertion({

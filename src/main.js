@@ -158,11 +158,26 @@ function readStandSetup() {
   });
 }
 
+function syncWallLengthFromSetup(setup) {
+  if (!setup?.ok) return;
+
+  const capacityCm = getAutomaticWallCapacityCm({
+    standType: setup.standType,
+    standXCm: setup.xCm,
+    standYCm: setup.yCm,
+  });
+  if (!Number.isFinite(capacityCm)) return;
+
+  wallLengthInput.max = String(capacityCm);
+  wallLengthInput.value = String(capacityCm);
+}
+
 function updateStageCreateState() {
   const result = readStandSetup();
   createStageButton.disabled = !result.ok;
 
   if (result.ok) {
+    syncWallLengthFromSetup(result);
     if (!currentStand) renderStageResult('Stand alanı hazır. Sahneyi oluşturabilirsin.');
     return;
   }
@@ -594,12 +609,7 @@ createStageButton.addEventListener('click', () => {
   }
 
   currentStand = setup;
-  const automaticWallCapacityCm = getAutomaticWallCapacityCm({
-    standType: setup.standType,
-    standXCm: setup.xCm,
-    standYCm: setup.yCm,
-  });
-  wallLengthInput.max = String(automaticWallCapacityCm || setup.xCm);
+  syncWallLengthFromSetup(setup);
   viewportEmpty.hidden = true;
   viewportToolbar.hidden = false;
   setStandEditingEnabled(true);

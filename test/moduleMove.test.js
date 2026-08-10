@@ -164,3 +164,100 @@ test('drag insertion can cross a U corner and push the right-wall chain forward'
   assert.deepEqual(result.placements.get('right-existing'), right(400, 200));
   assert.deepEqual(result.orderedModuleIds, ['back-target', 'moving', 'right-existing']);
 });
+
+
+test('catalog insert at U start edge keeps new module on the edge and pushes chain inward', () => {
+  const modules = [
+    module('first', 100, left(300)),
+    module('second', 100, left(200)),
+  ];
+  const inserted = module('new', 50, null);
+
+  const result = planContinuousModuleInsert({
+    modules,
+    insertedModule: inserted,
+    desiredPlacement: left(350),
+    standType: 'u-stand',
+    standXCm: 400,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.mode, 'reflow');
+  assert.equal(result.edge, 'start');
+  assert.deepEqual(result.movingPlacement, left(350));
+  assert.deepEqual(result.placements.get('first'), left(250));
+  assert.deepEqual(result.placements.get('second'), left(150));
+  assert.deepEqual(result.orderedModuleIds, ['new', 'first', 'second']);
+});
+
+test('catalog insert at U end edge keeps new module on the edge and pushes chain inward', () => {
+  const modules = [
+    module('previous', 100, right(400, 200)),
+    module('last', 100, right(400, 300)),
+  ];
+  const inserted = module('new', 50, null);
+
+  const result = planContinuousModuleInsert({
+    modules,
+    insertedModule: inserted,
+    desiredPlacement: right(400, 350),
+    standType: 'u-stand',
+    standXCm: 400,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.mode, 'reflow');
+  assert.equal(result.edge, 'end');
+  assert.deepEqual(result.movingPlacement, right(400, 350));
+  assert.deepEqual(result.placements.get('last'), right(400, 250));
+  assert.deepEqual(result.placements.get('previous'), right(400, 150));
+  assert.deepEqual(result.orderedModuleIds, ['previous', 'last', 'new']);
+});
+
+test('catalog insert at L-left start edge shifts the first module inward', () => {
+  const modules = [
+    module('first', 100, left(150)),
+  ];
+  const inserted = module('new', 50, null);
+
+  const result = planContinuousModuleInsert({
+    modules,
+    insertedModule: inserted,
+    desiredPlacement: left(200),
+    standType: 'l-left',
+    standXCm: 400,
+    standYCm: 250,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.edge, 'start');
+  assert.deepEqual(result.movingPlacement, left(200));
+  assert.deepEqual(result.placements.get('first'), left(100));
+  assert.deepEqual(result.orderedModuleIds, ['new', 'first']);
+});
+
+test('catalog insert at L-right end edge shifts the last module inward', () => {
+  const modules = [
+    module('previous', 100, right(400, 50)),
+    module('last', 100, right(400, 150)),
+  ];
+  const inserted = module('new', 50, null);
+
+  const result = planContinuousModuleInsert({
+    modules,
+    insertedModule: inserted,
+    desiredPlacement: right(400, 200),
+    standType: 'l-right',
+    standXCm: 400,
+    standYCm: 250,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.edge, 'end');
+  assert.deepEqual(result.movingPlacement, right(400, 200));
+  assert.deepEqual(result.placements.get('last'), right(400, 100));
+  assert.deepEqual(result.placements.get('previous'), right(400, 0));
+  assert.deepEqual(result.orderedModuleIds, ['previous', 'last', 'new']);
+});
