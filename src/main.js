@@ -17,6 +17,7 @@ import {
 import { loadImageAssets, saveImageAsset } from './assetStore.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu } from './moduleContextMenu.js';
+import { createModuleDragSidebar } from './moduleDragSidebar.js';
 import {
   colorValuesFromHex,
   cmykToRgb,
@@ -82,6 +83,7 @@ let selectedStandType = null;
 let activeAssetId = null;
 let pendingCatalogAdds = [];
 let catalogAddFlushScheduled = false;
+let moduleDragSidebar = null;
 const imageAssets = new Map();
 
 function getAssetUrl(assetId) {
@@ -143,6 +145,9 @@ function setStandEditingEnabled(enabled) {
   buildWallButton.disabled = !enabled;
   openModuleCatalogButton.disabled = !enabled;
   clearWallButton.disabled = !enabled;
+  moduleDragSidebar?.setEnabled(
+    Boolean(enabled && currentStand && currentStand.standType !== 'island'),
+  );
 }
 
 function readStandSetup() {
@@ -514,6 +519,28 @@ const moduleContextMenu = createModuleContextMenu({
   onAdd: addCatalogModule,
   onValidateAddBatch: validateCatalogAddBatch,
   onGlassModeChange: changeContextPanelGlassMode,
+});
+
+moduleDragSidebar = createModuleDragSidebar({
+  anchorButton: openModuleCatalogButton,
+  viewport,
+  canDrag: () => Boolean(currentStand && currentStand.standType !== 'island'),
+  createModuleState: (module) => createCatalogModuleState(module),
+  onPreview: (moduleState, clientX, clientY) => (
+    scene3d.previewCatalogModuleDrag(moduleState, clientX, clientY)
+  ),
+  onDrop: (moduleState, clientX, clientY) => {
+    const result = scene3d.dropCatalogModuleDrag(moduleState, clientX, clientY);
+    if (!result.ok || !result.placement) {
+      renderWallResult(result.message ?? 'Modül bu konuma bırakılamadı.', true);
+      return;
+    }
+
+    moduleState.placement = { ...result.placement };
+    currentModules.push(moduleState);
+    rebuildWall({ resetView: false });
+  },
+  onCancel: () => scene3d.clearCatalogModuleDrag(),
 });
 
 standTypeButtons.forEach((button) => {
