@@ -2,8 +2,8 @@ import { MODULE_CATALOG } from './catalog.js';
 
 const MODULE_LABELS = {
   'flat-panel': 'Düz Panel',
-  'showcase-2': '2 Raflı Vitrin',
-  'showcase-3': '3 Raflı Vitrin',
+  'showcase-2': '2 Gözlü Vitrin',
+  'showcase-3': '3 Gözlü Vitrin',
   separator: 'Separatör',
   door: 'Depo Kapısı',
 };
@@ -15,6 +15,8 @@ const PICKER_MODULE_KEYS = [
   'PANEL_50',
   'SEPARATOR_100',
   'SEPARATOR_50',
+  'SHOWCASE_3_100',
+  'SHOWCASE_2_100',
 ];
 
 export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
@@ -117,8 +119,49 @@ export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
     return preview;
   }
 
+  function createShowcasePreview(module) {
+    const preview = document.createElement('div');
+    preview.className = 'module-card-preview';
+
+    const frame = document.createElement('div');
+    frame.style.position = 'relative';
+    frame.style.width = '62px';
+    frame.style.height = '132px';
+    frame.style.border = '5px solid #6f767d';
+    frame.style.background = '#565a5e';
+    frame.style.boxShadow = '5px 7px 12px rgba(15, 23, 42, 0.12)';
+
+    const opening = document.createElement('div');
+    opening.style.position = 'absolute';
+    opening.style.left = '3px';
+    opening.style.right = '3px';
+    opening.style.top = module.type === 'showcase-3' ? '52px' : '57px';
+    opening.style.height = module.type === 'showcase-3' ? '55px' : '40px';
+    opening.style.border = '3px solid #8b9197';
+    opening.style.background = '#eef1f3';
+
+    const shelfCount = module.type === 'showcase-3' ? 2 : 1;
+    for (let index = 1; index <= shelfCount; index += 1) {
+      const shelf = document.createElement('span');
+      shelf.style.position = 'absolute';
+      shelf.style.left = '0';
+      shelf.style.right = '0';
+      shelf.style.top = `${(index / (shelfCount + 1)) * 100}%`;
+      shelf.style.height = '3px';
+      shelf.style.background = 'rgba(151, 190, 153, 0.9)';
+      opening.appendChild(shelf);
+    }
+
+    frame.appendChild(opening);
+    preview.appendChild(frame);
+    return preview;
+  }
+
   function createModulePreview(module) {
     if (module.type === 'separator') return createSeparatorPreview(module.widthCm);
+    if (module.type === 'showcase-2' || module.type === 'showcase-3') {
+      return createShowcasePreview(module);
+    }
     return createPanelPreview(module.widthCm);
   }
 
