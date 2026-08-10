@@ -12,23 +12,72 @@
         <div>
           <p class="eyebrow">FAIR STAND / PROTOTİP</p>
           <h1>Maxima Stand Konfigüratörü</h1>
-          <p class="muted">İlk hedef: standart modüllerle düz duvar oluşturmak ve panel yüzeylerini anlık düzenlemek.</p>
+          <p class="muted">Önce stand tipini ve gerçek stand alanını belirle; sahne yalnızca bu bilgiler tamamlandığında oluşturulur.</p>
         </div>
+
+        <section class="panel-card stand-setup-card">
+          <h2>Stand Tipi</h2>
+          <div class="stand-type-grid" role="radiogroup" aria-label="Stand tipi">
+            <button class="stand-type-card" type="button" data-stand-type="back-wall" aria-pressed="false">
+              <svg class="stand-type-thumb" viewBox="0 0 96 64" aria-hidden="true">
+                <rect x="18" y="14" width="60" height="40" rx="4" class="stand-thumb-floor" />
+                <path d="M21 17 H75" class="stand-thumb-wall" />
+              </svg>
+              <span>Sırt Duvar</span>
+            </button>
+            <button class="stand-type-card" type="button" data-stand-type="l-stand" aria-pressed="false">
+              <svg class="stand-type-thumb" viewBox="0 0 96 64" aria-hidden="true">
+                <rect x="18" y="14" width="60" height="40" rx="4" class="stand-thumb-floor" />
+                <path d="M21 51 V17 H75" class="stand-thumb-wall" />
+              </svg>
+              <span>L Stand</span>
+            </button>
+            <button class="stand-type-card" type="button" data-stand-type="u-stand" aria-pressed="false">
+              <svg class="stand-type-thumb" viewBox="0 0 96 64" aria-hidden="true">
+                <rect x="18" y="14" width="60" height="40" rx="4" class="stand-thumb-floor" />
+                <path d="M21 51 V17 H75 V51" class="stand-thumb-wall" />
+              </svg>
+              <span>U Stand</span>
+            </button>
+            <button class="stand-type-card" type="button" data-stand-type="island" aria-pressed="false">
+              <svg class="stand-type-thumb" viewBox="0 0 96 64" aria-hidden="true">
+                <rect x="18" y="14" width="60" height="40" rx="4" class="stand-thumb-floor stand-thumb-island" />
+                <rect x="30" y="24" width="36" height="20" rx="3" class="stand-thumb-island-core" />
+              </svg>
+              <span>Ada Stand</span>
+            </button>
+          </div>
+
+          <div class="stand-size-grid">
+            <label class="stand-size-field" for="stand-size-x">
+              <span>X (cm)</span>
+              <input id="stand-size-x" type="number" min="1" max="5000" step="1" placeholder="1000" inputmode="decimal" />
+            </label>
+            <label class="stand-size-field" for="stand-size-y">
+              <span>Y (cm)</span>
+              <input id="stand-size-y" type="number" min="1" max="5000" step="1" placeholder="500" inputmode="decimal" />
+            </label>
+          </div>
+
+          <p class="stand-limit-note">Maksimum: 5000 × 5000 cm (50 × 50 m)</p>
+          <button id="create-stage" type="button" class="primary" disabled>Sahneyi Oluştur</button>
+          <p id="stage-result" class="status">Stand tipi ile X ve Y ölçülerinin üçü de tamamlanmadan sahne oluşmaz.</p>
+        </section>
 
         <section class="panel-card">
           <h2>Düz duvar</h2>
           <label for="wall-length">Toplam genişlik (cm)</label>
           <div class="row">
-            <input id="wall-length" type="number" min="50" step="50" value="350" />
-            <button id="build-wall" class="primary">Oluştur</button>
+            <input id="wall-length" type="number" min="50" step="50" value="350" disabled />
+            <button id="build-wall" class="primary" disabled>Oluştur</button>
           </div>
-          <p id="wall-result" class="status"></p>
+          <p id="wall-result" class="status">Önce stand alanını oluştur.</p>
         </section>
 
         <section class="panel-card">
           <h2>Modül ekle</h2>
-          <button id="open-module-catalog">Modül Ekle</button>
-          <button id="clear-wall" class="danger ghost">Duvarı temizle</button>
+          <button id="open-module-catalog" disabled>Modül Ekle</button>
+          <button id="clear-wall" class="danger ghost" disabled>Duvarı temizle</button>
         </section>
 
         <section class="panel-card">
@@ -108,14 +157,15 @@
             <li>Düz panel: 7 × 50 cm yatay bölüm</li>
             <li>Genişlikler: 50 / 100 / 150 / 200 cm</li>
             <li>Zemin grid: 100 × 100 cm</li>
-            <li>Duvar başlangıcı: grid merkezi / 0 noktası</li>
+            <li>Stand alanı çevresi: 100 cm pasif gri alan</li>
+            <li>Maksimum stand alanı: 5000 × 5000 cm</li>
             <li>Çoklu seçim: yalnızca tam dikdörtgen blok</li>
           </ul>
         </section>
       </aside>
 
       <main class="viewport-wrap">
-        <div class="viewport-toolbar">
+        <div id="viewport-toolbar" class="viewport-toolbar" hidden>
           <span>Sol tuş: başlangıç paneli</span>
           <span>Ctrl/Cmd + tık: dikdörtgen seç</span>
           <span>Sol sürükle: döndür</span>
@@ -123,6 +173,12 @@
           <span>Tekerlek: zoom</span>
         </div>
         <div id="viewport"></div>
+        <div id="viewport-empty" class="viewport-empty">
+          <div class="viewport-empty-card">
+            <strong>Sahne hazır değil</strong>
+            <span>Stand tipini seç, X ve Y ölçülerini cm olarak gir ve “Sahneyi Oluştur” butonuna bas.</span>
+          </div>
+        </div>
       </main>
     </div>
     <script type="module" src="/src/main.js"></script>
