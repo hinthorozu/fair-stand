@@ -427,3 +427,41 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 343. Vitrinler mevcut sağ tık silme ve sağa / sola çoğaltma davranışlarını destekler hale getirildi.
 344. Vitrin state'inin tip, renk ve bağımsız kimliklerini koruyan otomatik testler eklendi.
 345. 2 / 3 gözlü vitrin entegrasyonu GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+
+## Cam panel, toplu sıfırlama ve stand alanı altyapısı
+
+346. Panel sağ tık menüsüne `Cam panele çevir` / `Normal panele çevir` işlemi eklendi.
+347. Cam panel görünümü hafif mavi-cam tonunda, yarı şeffaf ve arka yüzeyi gösterecek şekilde düzenlendi.
+348. Aynı dikdörtgen seçim içindeki birden fazla panelin cam özelliği tek işlemle değiştirilebilir hale getirildi.
+349. Cam özelliği panel state'inde korunup rebuild ve modül çoğaltma sonrasında taşınır hale getirildi.
+350. Cam panel tekrar normal panele çevrildiğinde kayıtlı panel rengi ve varsa kayıtlı görselin geri yüklenmesi sağlandı.
+351. Sol panelde `Tüm Özellikleri Kaldır` komutu eklendi.
+352. Toplu sıfırlama; atanmış resimleri, cam özelliklerini, renkleri ve diğer panel özelleştirmelerini varsayılana döndürür hale getirildi.
+353. Toplu sıfırlamada modül türleri, genişlikleri ve sıralaması korunurken görsel arşivindeki dosyaların silinmemesi sağlandı.
+354. Stand tipi seçimi için `Sırt Duvar`, `L Stand`, `U Stand` ve `Ada Stand` görsel thumbnail kartları eklendi.
+355. Stand alanı ölçülerinin duvar ölçüsünden ayrılması ve kullanıcıdan bağımsız `X` ve `Y` değerleri olarak santimetre cinsinden alınması sağlandı.
+356. Stand tipi, X ve Y bilgilerinin üçü de tamamlanmadan sahnenin oluşturulmaması kuralı eklendi.
+357. Stand alanı için her eksende maksimum `5000 cm` yani `50 m` sınırı getirildi.
+358. Kullanıcının girdiği `X × Y` değerleri doğrudan işlenebilir aktif stand alanı olarak tanımlandı.
+359. Aktif alanın dört tarafına 100 cm pasif çevre eklenerek toplam sahne boyutu `(X + 200 cm) × (Y + 200 cm)` mantığına bağlandı.
+360. Pasif çevre, aktif stand alanından daha gri zemin tonu ile ayrıştırıldı.
+361. Grid hücreleri aktif ve pasif bölgelerde 100 × 100 cm gerçek ölçüyle devam edecek şekilde korundu.
+362. Sahne oluşturulmadan duvar ve modül düzenleme kontrollerinin pasif kalması sağlandı.
+363. Sahne yeniden oluşturulurken mevcut modül ve tasarım state'i varsa kullanıcıdan onay alınması sağlandı.
+
+## Stand sınırı ve modül kapasite kuralları
+
+364. Modüllerin aktif stand alanını aşmasını engellemek için `standCapacity.js` yardımcı modülü eklendi.
+365. Kapasite kontrolü X ve Y eksenlerinde ortak kullanılabilecek genel bir doğrulama fonksiyonu olarak tasarlandı.
+366. Mevcut düz duvar akışında modül toplam genişliği aktif standın X ölçüsünü geçemez hale getirildi.
+367. Modül çoğaltma işleminden önce oluşacak toplam genişliğin X sınırı içinde kalması zorunlu hale getirildi.
+368. Otomatik düz duvar oluştururken istenen toplam genişliğin aktif stand X sınırını geçmesi engellendi.
+369. Modül kataloğunda çoklu seçim paketi eklenirken paket içindeki tüm modüllerin toplam genişliği işlemden önce tek seferde hesaplanır hale getirildi.
+370. Örneğin X=600 cm, mevcut duvar=200 cm ve eklenmek istenen paket=3×200 cm ise oluşacak 800 cm toplam nedeniyle işlemin tamamının reddedilmesi sağlandı.
+371. Paket limit aşımında kısmi ekleme yapılmaması; ya paketin tamamının eklenmesi ya da hiçbir modülün eklenmemesi kuralı eklendi.
+372. Kapasite hatalarında küçük sol-panel status yazısına ek olarak kullanıcıya merkezi uyarı popup'ı gösterilmesi sağlandı.
+373. Kapasite popup'ında eksen sınırı, mevcut toplam, eklenmek istenen ölçü ve oluşacak toplam açıkça gösterilir hale getirildi.
+374. Modül kataloğunda `Ekle` tıklandığında paket sığmıyorsa katalog popup'ının kapanmaması ve kullanıcının seçimlerini azaltarak devam edebilmesi sağlandı.
+375. Modül çoğaltma ve otomatik duvar limit hataları da aynı görünür popup uyarı davranışına bağlandı.
+376. Stand X/Y doğrulama ve kapasite kuralı için otomatik testler eklendi.
+377. Stand alanı, kapasite kontrolü ve popup UX değişiklikleri GitHub Actions test + Vite build kontrolünden başarıyla geçti.
