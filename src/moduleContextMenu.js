@@ -1,3 +1,5 @@
+import { MODULE_CATALOG } from './catalog.js';
+
 const MODULE_LABELS = {
   'flat-panel': 'Düz Panel',
   'showcase-2': '2 Raflı Vitrin',
@@ -6,8 +8,17 @@ const MODULE_LABELS = {
   door: 'Depo Kapısı',
 };
 
-export function createModuleContextMenu({ onDelete, onDuplicate }) {
+const PICKER_MODULE_KEYS = [
+  'PANEL_200',
+  'PANEL_150',
+  'PANEL_100',
+  'PANEL_50',
+];
+
+export function createModuleContextMenu({ onDelete, onDuplicate, onAdd }) {
   let activeContext = null;
+  let pickerRequest = null;
+  let selectedModuleKey = null;
 
   const menu = document.createElement('div');
   menu.className = 'module-context-menu';
@@ -31,13 +42,15 @@ export function createModuleContextMenu({ onDelete, onDuplicate }) {
       <div class="module-picker-header">
         <div>
           <p class="module-picker-eyebrow">MODÜL KATALOĞU</p>
-          <h3 id="module-picker-title"></h3>
+          <h3 id="module-picker-title">Modül Ekle</h3>
+          <p class="module-picker-context"></p>
         </div>
         <button type="button" class="module-picker-close" aria-label="Kapat">×</button>
       </div>
-      <div class="module-picker-placeholder">
-        <strong>Modül seçimi sonraki adımda burada olacak.</strong>
-        <span>Düz panel, vitrin, separatör ve depo kapısı tek parça modül olarak listelenecek.</span>
+      <div class="module-catalog-grid" role="listbox" aria-label="Modül kataloğu"></div>
+      <div class="module-picker-footer">
+        <button type="button" class="module-picker-cancel ghost">Vazgeç</button>
+        <button type="button" class="module-picker-add primary" disabled>Ekle</button>
       </div>
     </div>
   `;
@@ -45,11 +58,69 @@ export function createModuleContextMenu({ onDelete, onDuplicate }) {
 
   const title = menu.querySelector('.module-context-title');
   const pickerTitle = pickerBackdrop.querySelector('#module-picker-title');
+  const pickerContext = pickerBackdrop.querySelector('.module-picker-context');
+  const pickerGrid = pickerBackdrop.querySelector('.module-catalog-grid');
+  const pickerAddButton = pickerBackdrop.querySelector('.module-picker-add');
 
   function describeModule(context) {
     const label = MODULE_LABELS[context?.type] ?? 'Modül';
     const width = Number.isFinite(context?.widthCm) ? ` · ${context.widthCm} cm` : '';
     return `${label}${width}`;
+  }
+
+  function createPanelPreview(widthCm) {
+    const preview = document.createElement('div');
+    preview.className = 'module-card-preview';
+
+    const panel = document.createElement('div');
+    panel.className = 'module-card-flat-panel';
+    panel.style.width = `${Math.max(30, Math.round((widthCm / 200) * 118))}px`;
+
+    for (let index = 0; index < 7; index += 1) {
+      const strip = document.createElement('span');
+      strip.className = 'module-card-strip';
+      panel.appendChild(strip);
+    }
+
+    preview.appendChild(panel);
+    return preview;
+  }
+
+  function syncPickerSelection() {
+    pickerGrid.querySelectorAll('[data-module-key]').forEach((card) => {
+      const selected = card.dataset.moduleKey === selectedModuleKey;
+      card.classList.toggle('selected', selected);
+      card.setAttribute('aria-selected', String(selected));
+    });
+    pickerAddButton.disabled = !selectedModuleKey;
+  }
+
+  function renderPickerCatalog() {
+    pickerGrid.innerHTML = '';
+
+    PICKER_MODULE_KEYS.forEach((moduleKey) => {
+      const module = MODULE_CATALOG[moduleKey];
+      if (!module) return;
+
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'module-catalog-card';
+      card.dataset.moduleKey = moduleKey;
+      card.setAttribute('role', 'option');
+      card.setAttribute('aria-selected', 'false');
+
+      const cardTitle = document.createElement('strong');
+      cardTitle.className = 'module-catalog-card-title';
+      cardTitle.textContent = module.label;
+
+      card.append(cardTitle, createPanelPreview(module.widthCm));
+      card.addEventListener('click', () => {
+        selectedModuleKey = moduleKey;
+        syncPickerSelection();
+      });
+
+      pickerGrid.appendChild(card);
+    });
   }
 
   function close() {
@@ -59,14 +130,30 @@ export function createModuleContextMenu({ onDelete, onDuplicate }) {
 
   function closePicker() {
     pickerBackdrop.hidden = true;
+    pickerRequest = null;
+    selectedModuleKey = null;
+    syncPickerSelection();
   }
 
-  function openPicker(side) {
-    if (!activeContext) return;
-    const sideLabel = side === 'left' ? 'Sol Tarafa Modül Ekle' : 'Sağ Tarafa Modül Ekle';
-    pickerTitle.textContent = `${sideLabel} · ${describeModule(activeContext)}`;
+  function openPicker({ placement = 'append', context = null } = {}) {
+    pickerRequest = { placement, context };
+    selectedModuleKey = null;
+
+    if (placement === 'left') {
+      pickerTitle.textContent = 'Sol Tarafa Modül Ekle';
+    } else if (placement === 'right') {
+      pickerTitle.textContent = 'Sağ Tarafa Modül Ekle';
+    } else {
+      pickerTitle.textContent = 'Modül Ekle';
+    }
+
+    pickerContext.textContent = context
+      ? `Hedef: Modül ${context.moduleIndex + 1} · ${describeModule(context)}`
+      : 'Seçilen modül duvarın sonuna eklenecek.';
+
     menu.hidden = true;
     pickerBackdrop.hidden = false;
+    syncPickerSelection();
   }
 
   function open(context) {
@@ -108,14 +195,33 @@ export function createModuleContextMenu({ onDelete, onDuplicate }) {
     }
 
     if (action === 'add-right') {
-      openPicker('right');
+      openPicker({ placement: 'right', context });
       return;
     }
 
-    if (action === 'add-left') openPicker('left');
+    if (action === 'add-left') {
+      openPicker({ placement: 'left', context });
+    }
+  });
+
+  pickerAddButton.addEventListener('click', () => {
+    if (!selectedModuleKey || !pickerRequest) return;
+
+    const module = MODULE_CATALOG[selectedModuleKey];
+    if (!module) return;
+
+    const request = {
+      ...pickerRequest,
+      moduleKey: selectedModuleKey,
+      module,
+    };
+
+    closePicker();
+    onAdd?.(request);
   });
 
   pickerBackdrop.querySelector('.module-picker-close').addEventListener('click', closePicker);
+  pickerBackdrop.querySelector('.module-picker-cancel').addEventListener('click', closePicker);
   pickerBackdrop.addEventListener('pointerdown', (event) => {
     if (event.target === pickerBackdrop) closePicker();
   });
@@ -132,9 +238,12 @@ export function createModuleContextMenu({ onDelete, onDuplicate }) {
 
   window.addEventListener('blur', close);
 
+  renderPickerCatalog();
+
   return {
     open,
     close,
+    openPicker,
     closePicker,
   };
 }
