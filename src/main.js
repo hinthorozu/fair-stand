@@ -19,8 +19,16 @@ import {
   cmykToRgb,
   rgbToHex,
 } from './colorUtils.js';
+import { STAND_TYPE_LABELS, validateStandSetup } from './standSetup.js';
 
 const viewport = document.querySelector('#viewport');
+const viewportEmpty = document.querySelector('#viewport-empty');
+const viewportToolbar = document.querySelector('#viewport-toolbar');
+const standTypeButtons = [...document.querySelectorAll('[data-stand-type]')];
+const standSizeXInput = document.querySelector('#stand-size-x');
+const standSizeYInput = document.querySelector('#stand-size-y');
+const createStageButton = document.querySelector('#create-stage');
+const stageResult = document.querySelector('#stage-result');
 const wallLengthInput = document.querySelector('#wall-length');
 const buildWallButton = document.querySelector('#build-wall');
 const openModuleCatalogButton = document.querySelector('#open-module-catalog');
@@ -50,6 +58,8 @@ const assetLibraryElement = document.querySelector('#asset-library');
 const assetStatus = document.querySelector('#asset-status');
 
 let currentModules = [];
+let currentStand = null;
+let selectedStandType = null;
 let activeAssetId = null;
 const imageAssets = new Map();
 
@@ -97,9 +107,47 @@ const scene3d = createStandScene(
   (context) => moduleContextMenu.open(context),
 );
 
+function renderStageResult(message, isError = false) {
+  stageResult.textContent = message;
+  stageResult.classList.toggle('error', isError);
+}
+
 function renderWallResult(message, isError = false) {
   wallResult.textContent = message;
   wallResult.classList.toggle('error', isError);
+}
+
+function setStandEditingEnabled(enabled) {
+  wallLengthInput.disabled = !enabled;
+  buildWallButton.disabled = !enabled;
+  openModuleCatalogButton.disabled = !enabled;
+  clearWallButton.disabled = !enabled;
+}
+
+function readStandSetup() {
+  return validateStandSetup({
+    standType: selectedStandType,
+    xCm: standSizeXInput.value,
+    yCm: standSizeYInput.value,
+  });
+}
+
+function updateStageCreateState() {
+  const result = readStandSetup();
+  createStageButton.disabled = !result.ok;
+
+  if (result.ok) {
+    if (!currentStand) renderStageResult('Stand alanı hazır. Sahneyi oluşturabilirsin.');
+    return;
+  }
+
+  const xHasValue = standSizeXInput.value.trim() !== '';
+  const yHasValue = standSizeYInput.value.trim() !== '';
+  if (selectedStandType && xHasValue && yHasValue) {
+    renderStageResult(result.message, true);
+  } else if (!currentStand) {
+    renderStageResult('Stand tipi ile X ve Y ölçülerinin üçü de tamamlanmadan sahne oluşmaz.');
+  }
 }
 
 function renderCurrentWallResult() {
@@ -113,6 +161,10 @@ function renderCurrentWallResult() {
 }
 
 function rebuildWall({ resetView = true } = {}) {
+  if (!currentStand) {
+    renderWallResult('Önce stand alanını oluştur.', true);
+    return;
+  }
   scene3d.buildWall(currentModules, { resetView });
   renderCurrentWallResult();
 }
@@ -161,6 +213,7 @@ function createCatalogModuleState(module) {
 }
 
 function addCatalogModule({ module, placement = 'append', context = null }) {
+  if (!currentStand) return;
   const moduleState = createCatalogModuleState(module);
   if (!moduleState) return;
 
@@ -197,7 +250,66 @@ const moduleContextMenu = createModuleContextMenu({
   onGlassModeChange: changeContextPanelGlassMode,
 });
 
+standTypeButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    selectedStandType = button.dataset.standType;
+    standTypeButtons.forEach((candidate) => {
+      candidate.setAttribute('aria-pressed', String(candidate === button));
+    });
+    updateStageCreateState();
+  });
+});
+
+[standSizeXInput, standSizeYInput].forEach((input) => {
+  input.addEventListener('input', updateStageCreateState);
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !createStageButton.disabled) createStageButton.click();
+  });
+});
+
+createStageButton.addEventListener('click', () => {
+  const setup = readStandSetup();
+  if (!setup.ok) {
+    renderStageResult(setup.message, true);
+    return;
+  }
+
+  if (currentModules.length) {
+    const confirmed = window.confirm(
+      'Stand alanı yeniden oluşturulursa mevcut duvar, panel renkleri, görselleri ve düzenlemeleri silinecek. Devam edilsin mi?',
+    );
+    if (!confirmed) return;
+  }
+
+  currentModules = [];
+  moduleContextMenu.close();
+  moduleContextMenu.closePicker();
+
+  const stage = scene3d.createStage({
+    widthCm: setup.xCm,
+    depthCm: setup.yCm,
+    standType: setup.standType,
+    resetView: true,
+  });
+  if (!stage.ok) {
+    renderStageResult(stage.message, true);
+    return;
+  }
+
+  currentStand = setup;
+  viewportEmpty.hidden = true;
+  viewportToolbar.hidden = false;
+  setStandEditingEnabled(true);
+  renderWallResult('Duvar boş.');
+
+  const label = STAND_TYPE_LABELS[setup.standType];
+  renderStageResult(
+    `${label} · ${setup.xCm} × ${setup.yCm} cm aktif alan · ${setup.sceneWidthM} × ${setup.sceneDepthM} m toplam sahne`,
+  );
+});
+
 openModuleCatalogButton.addEventListener('click', () => {
+  if (!currentStand) return;
   moduleContextMenu.openPicker({ placement: 'append' });
 });
 
@@ -207,6 +319,11 @@ function confirmExistingScene(message) {
 }
 
 function buildAutomaticWall() {
+  if (!currentStand) {
+    renderWallResult('Önce stand tipini ve X / Y ölçülerini girerek sahneyi oluştur.', true);
+    return;
+  }
+
   const lengthCm = Number(wallLengthInput.value);
   const result = composeStraightWall(lengthCm);
 
@@ -232,6 +349,11 @@ wallLengthInput.addEventListener('keydown', (event) => {
 });
 
 clearWallButton.addEventListener('click', () => {
+  if (!currentStand) {
+    renderWallResult('Önce stand alanını oluştur.', true);
+    return;
+  }
+
   if (!currentModules.length) {
     renderWallResult('Duvar zaten boş.');
     return;
@@ -518,6 +640,7 @@ window.addEventListener('beforeunload', () => {
   });
 });
 
+setStandEditingEnabled(false);
+updateStageCreateState();
 syncColorEditorFromHex(colorInput.value);
 initializeAssetLibrary();
-buildAutomaticWall();
