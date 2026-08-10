@@ -28,6 +28,7 @@ import {
   getWallUsedCm,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
+import { resolveAdjacentPlacement } from './cornerPlacement.js';
 
 const viewport = document.querySelector('#viewport');
 const viewportEmpty = document.querySelector('#viewport-empty');
@@ -264,34 +265,18 @@ function deleteContextModule(context) {
 
 function createAdjacentPlacement(sourceModule, addedWidthCm, side) {
   const sourcePlacement = sourceModule?.placement;
-  if (!sourcePlacement || !currentStand) return null;
-
-  const wallId = sourcePlacement.wallId ?? 'back';
-  const axis = getWallAxis(wallId)
-    ?? (sourcePlacement.rotationZDeg === 90 ? 'y' : 'x');
-  const sourceStart = axis === 'y'
-    ? Number(sourcePlacement.yCm)
-    : Number(sourcePlacement.xCm);
-  const nextStart = side === 'left'
-    ? sourceStart - Number(addedWidthCm)
-    : sourceStart + Number(sourceModule.widthCm);
-
-  if (axis === 'y') {
-    return createModulePlacement({
-      xCm: wallId === 'right' ? currentStand.xCm : Number(sourcePlacement.xCm),
-      yCm: nextStart,
-      zCm: 0,
-      rotationZDeg: 90,
-      wallId,
-    });
+  if (!sourcePlacement || !currentStand) {
+    return { ok: false, message: 'Hedef modülün yerleşim bilgisi bulunamadı.' };
   }
 
-  return createModulePlacement({
-    xCm: nextStart,
-    yCm: Number(sourcePlacement.yCm) || 0,
-    zCm: 0,
-    rotationZDeg: sourcePlacement.rotationZDeg === 90 ? 90 : 0,
-    wallId,
+  return resolveAdjacentPlacement({
+    sourcePlacement,
+    sourceWidthCm: sourceModule.widthCm,
+    addedWidthCm,
+    side,
+    standType: currentStand.standType,
+    standXCm: currentStand.xCm,
+    standYCm: currentStand.yCm,
   });
 }
 
@@ -304,9 +289,14 @@ function duplicateContextModule(context, side) {
   if (!duplicate) return;
 
   if (sourceModule.placement) {
-    const placement = createAdjacentPlacement(sourceModule, duplicate.widthCm, side);
-    if (!placement) return;
+    const adjacent = createAdjacentPlacement(sourceModule, duplicate.widthCm, side);
+    if (!adjacent.ok || !adjacent.placement) {
+      renderWallResult(adjacent.message, true);
+      window.alert(`Modül çoğaltılamadı\n\n${adjacent.message}`);
+      return;
+    }
 
+    const placement = adjacent.placement;
     const validation = validatePlacementAgainstModules({
       placement,
       widthCm: duplicate.widthCm,
@@ -357,78 +347,111 @@ function getRequestWallId({ context = null } = {}) {
   return context?.placement?.wallId ?? 'back';
 }
 
-function validateCatalogAddBatch({ entries = [], context = null } = {}) {
-  const addedCm = entries.reduce(
-    (sum, entry) => sum + (Number(entry.module?.widthCm) || 0),
-    0,
-  );
-  const wallId = getRequestWallId({ context });
-  const axis = getWallAxis(wallId);
+function validateCatalogAddBatch({
+  entries = [],
+  context = null,
+  placement = 'append',
+} = {}) {
+  if (placement === 'append' || !context) {
+    const addedCm = entries.reduce(
+      (sum, entry) => sum + (Number(entry.module?.widthCm) || 0),
+      0,
+    );
+    const wallId = getRequestWallId({ context });
+    const axis = getWallAxis(wallId);
+    if (!axis) return { ok: true };
 
-  if (!axis) return { ok: true };
+    return validateCurrentAxisCapacity(
+      axis,
+      addedCm,
+      getWallUsedCm(currentModules, wallId),
+      { popupTitle: 'Modüller eklenemedi' },
+    );
+  }
 
-  return validateCurrentAxisCapacity(
-    axis,
-    addedCm,
-    getWallUsedCm(currentModules, wallId),
-    { popupTitle: 'Modüller eklenemedi' },
-  );
+  let moduleStates = entries.map((entry) => createCatalogModuleState(entry.module));
+  if (moduleStates.some((moduleState) => !moduleState)) {
+    return { ok: false, message: 'Seçilen modüller hazırlanamadı.' };
+  }
+
+  if (placement === 'left' || placement === 'right') {
+    moduleStates = [...moduleStates].reverse();
+  }
+
+  const plan = assignPlannedPlacements(moduleStates, {
+    placementMode: placement,
+    context,
+  });
+  if (!plan.ok) {
+    renderWallResult(plan.message, true);
+    window.alert(`Modüller eklenemedi\n\n${plan.message}`);
+  }
+  return plan;
 }
 
 function assignPlannedPlacements(moduleStates, { placementMode = 'append', context = null } = {}) {
   if (!currentStand) return { ok: false, message: 'Önce stand alanını oluştur.' };
 
-  let wallId = context?.placement?.wallId ?? 'back';
-  let axis = getWallAxis(wallId) ?? 'x';
-  let startCm;
+  const planned = [];
 
   if (placementMode === 'append' || !context) {
-    wallId = 'back';
-    axis = 'x';
-    startCm = getWallExtentCm(currentModules, wallId);
-  } else {
-    const contextIndex = findContextModuleIndex(context);
-    if (contextIndex < 0) return { ok: false, message: 'Hedef modül bulunamadı.' };
-    const source = currentModules[contextIndex];
-    const sourcePlacement = source.placement;
-    if (!sourcePlacement) return { ok: false, message: 'Hedef modülün yerleşim bilgisi bulunamadı.' };
+    let cursorCm = getWallExtentCm(currentModules, 'back');
 
-    wallId = sourcePlacement.wallId ?? 'back';
-    axis = getWallAxis(wallId) ?? (sourcePlacement.rotationZDeg === 90 ? 'y' : 'x');
-    const sourceStart = axis === 'y'
-      ? Number(sourcePlacement.yCm)
-      : Number(sourcePlacement.xCm);
-    const newTotalCm = totalWallWidthCm(moduleStates);
-    startCm = placementMode === 'left'
-      ? sourceStart - newTotalCm
-      : sourceStart + Number(source.widthCm);
-  }
-
-  const planned = [];
-  let cursorCm = startCm;
-
-  for (const moduleState of moduleStates) {
-    let placement;
-    if (axis === 'y') {
-      placement = createModulePlacement({
-        xCm: wallId === 'right' ? currentStand.xCm : 0,
-        yCm: cursorCm,
-        zCm: 0,
-        rotationZDeg: 90,
-        wallId,
-      });
-    } else {
-      placement = createModulePlacement({
+    for (const moduleState of moduleStates) {
+      const placement = createModulePlacement({
         xCm: cursorCm,
         yCm: 0,
         zCm: 0,
         rotationZDeg: 0,
-        wallId,
+        wallId: 'back',
       });
+
+      const validation = validatePlacementAgainstModules({
+        placement,
+        widthCm: moduleState.widthCm,
+        moduleId: moduleState.id,
+        modules: [...currentModules, ...planned],
+        standType: currentStand.standType,
+        standXCm: currentStand.xCm,
+        standYCm: currentStand.yCm,
+      });
+      if (!validation.ok) return validation;
+
+      moduleState.placement = placement;
+      planned.push(moduleState);
+      cursorCm += Number(moduleState.widthCm);
     }
 
+    return { ok: true };
+  }
+
+  const contextIndex = findContextModuleIndex(context);
+  if (contextIndex < 0) return { ok: false, message: 'Hedef modül bulunamadı.' };
+
+  let sourceModule = currentModules[contextIndex];
+  if (!sourceModule?.placement) {
+    return { ok: false, message: 'Hedef modülün yerleşim bilgisi bulunamadı.' };
+  }
+
+  let side = placementMode;
+  const planningStates = side === 'left'
+    ? [...moduleStates].reverse()
+    : moduleStates;
+
+  for (const moduleState of planningStates) {
+    const adjacent = resolveAdjacentPlacement({
+      sourcePlacement: sourceModule.placement,
+      sourceWidthCm: sourceModule.widthCm,
+      addedWidthCm: moduleState.widthCm,
+      side,
+      standType: currentStand.standType,
+      standXCm: currentStand.xCm,
+      standYCm: currentStand.yCm,
+    });
+    if (!adjacent.ok || !adjacent.placement) return adjacent;
+
     const validation = validatePlacementAgainstModules({
-      placement,
+      placement: adjacent.placement,
       widthCm: moduleState.widthCm,
       moduleId: moduleState.id,
       modules: [...currentModules, ...planned],
@@ -438,9 +461,10 @@ function assignPlannedPlacements(moduleStates, { placementMode = 'append', conte
     });
     if (!validation.ok) return validation;
 
-    moduleState.placement = placement;
+    moduleState.placement = adjacent.placement;
     planned.push(moduleState);
-    cursorCm += Number(moduleState.widthCm);
+    sourceModule = moduleState;
+    side = adjacent.nextSide ?? side;
   }
 
   return { ok: true };
