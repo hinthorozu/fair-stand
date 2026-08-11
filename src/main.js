@@ -1213,6 +1213,10 @@ async function restoreProject(project) {
   moduleContextMenu.close();
   moduleContextMenu.closePicker();
 
+  // Project image URLs must exist before the scene is rebuilt.
+  // Otherwise stored imageAssetId values cannot resolve on the first open.
+  await loadAssetsForActiveProject();
+
   if (currentStand) {
     selectedStandType = currentStand.standType;
     standTypeButtons.forEach((button) => {
@@ -1246,7 +1250,6 @@ async function restoreProject(project) {
     updateStageCreateState();
   }
 
-  await loadAssetsForActiveProject();
   await refreshProjectList(activeProjectId);
   enableAutosaveFromCurrentState();
   projectStatus.textContent = 'Açıldı: ' + (project.name || 'Adsız Proje');
