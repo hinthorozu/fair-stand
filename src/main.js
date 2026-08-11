@@ -86,9 +86,9 @@ const projectSelect = document.querySelector('#project-select');
 const newProjectButton = document.querySelector('#new-project');
 const saveProjectButton = document.querySelector('#save-project');
 const openProjectButton = document.querySelector('#open-project');
-const reloadProjectImagesButton = document.querySelector('#reload-project-images');
 const deleteProjectButton = document.querySelector('#delete-project');
 const projectStatus = document.querySelector('#project-status');
+const projectLoadingOverlay = document.querySelector('#project-loading-overlay');
 
 const WALL_LABELS = Object.freeze({
   back: 'Sırt',
@@ -1403,11 +1403,21 @@ saveProjectButton.addEventListener('click', async () => {
 openProjectButton.addEventListener('click', async () => {
   const projectId = projectSelect.value;
   if (!projectId) { projectStatus.textContent = 'Açılacak kayıtlı proje yok.'; return; }
+
+  projectLoadingOverlay.hidden = false;
+  openProjectButton.disabled = true;
+  projectStatus.textContent = 'Proje yükleniyor…';
   try {
     const project = await loadProject(projectId);
     if (!project) { projectStatus.textContent = 'Proje bulunamadı.'; return; }
     await restoreProject(project);
-  } catch (error) { console.warn('Proje açılamadı:', error); projectStatus.textContent = 'Proje açılamadı.'; }
+  } catch (error) {
+    console.warn('Proje açılamadı:', error);
+    projectStatus.textContent = 'Proje açılamadı.';
+  } finally {
+    projectLoadingOverlay.hidden = true;
+    openProjectButton.disabled = false;
+  }
 });
 
 reloadProjectImagesButton.addEventListener('click', async () => {

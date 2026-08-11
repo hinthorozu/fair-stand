@@ -772,3 +772,47 @@ h2 {
 .project-actions button { width: 100%; }
 
 .viewport-render-button { margin-left: auto; white-space: nowrap; font-weight: 700; pointer-events: auto; }
+
+.project-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(3px);
+}
+
+.project-loading-overlay[hidden] {
+  display: none;
+}
+
+.project-loading-card {
+  min-width: 240px;
+  padding: 22px 26px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.24);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  color: #111827;
+}
+
+.project-loading-card span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.project-loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #dbe3ee;
+  border-top-color: #111827;
+  border-radius: 50%;
+  animation: project-loading-spin 0.8s linear infinite;
+}
+
+@keyframes project-loading-spin {
+  to { transform: rotate(360deg); }
+}

@@ -25,7 +25,6 @@
             <button id="new-project" type="button">Yeni</button>
             <button id="save-project" type="button" class="primary">Kaydet</button>
             <button id="open-project" type="button">Aç</button>
-            <button id="reload-project-images" type="button">Görselleri Yükle</button>
             <button id="delete-project" type="button" class="danger ghost">Sil</button>
           </div>
           <p id="project-status" class="status">Aktif proje henüz kaydedilmedi.</p>
@@ -217,6 +216,13 @@
           </div>
         </div>
       </main>
+    </div>
+    <div id="project-loading-overlay" class="project-loading-overlay" hidden aria-live="polite" aria-busy="true">
+      <div class="project-loading-card">
+        <div class="project-loading-spinner" aria-hidden="true"></div>
+        <strong>Proje yükleniyor…</strong>
+        <span>Görseller ve sahne hazırlanıyor.</span>
+      </div>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>
