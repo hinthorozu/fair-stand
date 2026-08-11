@@ -26,3 +26,5 @@ start = s.index('function confirmExistingScene(message) {')
 end = s.index("clearWallButton.addEventListener('click', () => {", start)
 s = s[:start] + s[end:]
 p.write_text(s)
+
+# trigger workflow
