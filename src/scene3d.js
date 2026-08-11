@@ -2800,7 +2800,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   railYs.forEach((y) => {
     addProfile(
       frontRailGeometry.clone(),
-      new THREE.Vector3(0, y, depthM / 2 - profileM / 2),
+      new THREE.Vector3(0, y, depthM / 2 - frameDepthM / 2),
     );
   });
 
@@ -2809,7 +2809,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     railYs.forEach((y) => {
       addProfile(
         sideRailGeometry.clone(),
-        new THREE.Vector3(xSide * (widthM / 2 - profileM / 2), y, 0),
+        new THREE.Vector3(xSide * (widthM / 2 - frameDepthM / 2), y, 0),
       );
     });
   });
@@ -2844,6 +2844,9 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     );
     backing.position.copy(position);
     backing.rotation.y = rotationY;
+    if (surfaceRole === 'front') backing.position.z -= 0.006;
+    else if (surfaceRole === 'left') backing.position.x += 0.006;
+    else backing.position.x -= 0.006;
     backing.castShadow = true;
     backing.receiveShadow = true;
     group.add(backing);
@@ -2861,9 +2864,9 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     );
     surface.position.copy(position);
     surface.rotation.y = rotationY;
-    if (surfaceRole === 'front') surface.position.z += 0.0065;
-    else if (surfaceRole === 'left') surface.position.x -= 0.0065;
-    else surface.position.x += 0.0065;
+    if (surfaceRole === 'front') surface.position.z += 0.006;
+    else if (surfaceRole === 'left') surface.position.x -= 0.006;
+    else surface.position.x += 0.006;
 
     const selectionFrame = createSelectionFrame(faceWidthM, panelHeightM);
     selectionFrame.visible = false;
@@ -2893,9 +2896,9 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
 
   const lowerY = stripHeightM / 2;
   const upperY = stripHeightM + stripHeightM / 2;
-  const frontZ = depthM / 2 - profileM - 0.006;
-  const leftX = -widthM / 2 + profileM + 0.006;
-  const rightX = widthM / 2 - profileM - 0.006;
+  const frontZ = depthM / 2 - 0.006;
+  const leftX = -widthM / 2 + 0.006;
+  const rightX = widthM / 2 - 0.006;
 
   addFace('front', 'lower', moduleState.faces?.frontLower, frontPanelWidthM, new THREE.Vector3(0, lowerY, frontZ));
   addFace('front', 'upper', moduleState.faces?.frontUpper, frontPanelWidthM, new THREE.Vector3(0, upperY, frontZ));
