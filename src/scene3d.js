@@ -1784,20 +1784,20 @@ function createSofaSetModule(moduleState, moduleIndex) {
     }
   };
 
-  addSofa({ x: 0, z: -depthM / 2 + 0.39, seatWidth: 1.50, seatDepth: 0.78, twoSeat: true, facing: 'front' });
-  addSofa({ x: -0.425, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
-  addSofa({ x: 0.425, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
+  addSofa({ x: 0, z: -depthM / 2 + 0.225, seatWidth: 1.50, seatDepth: 0.45, twoSeat: true, facing: 'front' });
+  addSofa({ x: -0.425, z: depthM / 2 - 0.225, seatWidth: 0.65, seatDepth: 0.45, facing: 'back' });
+  addSofa({ x: 0.425, z: depthM / 2 - 0.225, seatWidth: 0.65, seatDepth: 0.45, facing: 'back' });
 
   const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.30, 0.018, 48), new THREE.MeshPhysicalMaterial({ color: 0xd7e9ed, transparent: true, opacity: 0.42, roughness: 0.12, metalness: 0, transmission: 0.28, depthWrite: false }));
-  glass.position.set(0, 0.42, 0.10);
+  glass.position.set(0, 0.42, 0);
   glass.castShadow = false;
   glass.receiveShadow = true;
   group.add(glass);
   const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.40, 20), new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.28 }));
-  stem.position.set(0, 0.21, 0.10);
+  stem.position.set(0, 0.21, 0);
   group.add(stem);
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32), new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.3 }));
-  base.position.set(0, 0.018, 0.10);
+  base.position.set(0, 0.018, 0);
   group.add(base);
 
   const selectable = upholstery[0];
