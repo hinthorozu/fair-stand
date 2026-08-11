@@ -777,31 +777,55 @@ export function createStandScene(
     };
   }
 
-  function getTopFixtureDragPoint(clientX, clientY, wallId) {
+  function getTopFixtureDragPoint(clientX, clientY, preferredWallId = 'back') {
     if (!stageLayout) return null;
     setPointerFromClient(clientX, clientY);
     raycaster.setFromCamera(pointer, camera);
 
-    let plane;
-    if (wallId === 'left') {
-      plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
-    } else if (wallId === 'right') {
-      plane = new THREE.Plane(
-        new THREE.Vector3(1, 0, 0),
-        -Number(stageLayout.widthM),
-      );
-    } else {
-      // Back wall: world Z = 0. Projektör havadayken mouse ray'ini bu duvar düzlemine düşür.
-      plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-    }
+    const allowedWalls = getAllowedWallIds(stageLayout.standType)
+      .filter((wallId) => wallId !== 'free');
+    const wallOrder = [preferredWallId, ...allowedWalls.filter((wallId) => wallId !== preferredWallId)];
+    const candidates = [];
+    const epsilonCm = 4;
 
-    const point = new THREE.Vector3();
-    const hit = raycaster.ray.intersectPlane(plane, point);
-    if (!hit) return null;
-    return {
-      xCm: point.x * 100,
-      yCm: point.z * 100,
-    };
+    wallOrder.forEach((wallId, order) => {
+      let plane;
+      if (wallId === 'left') {
+        plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
+      } else if (wallId === 'right') {
+        plane = new THREE.Plane(
+          new THREE.Vector3(1, 0, 0),
+          -Number(stageLayout.widthM),
+        );
+      } else if (wallId === 'back') {
+        plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+      } else {
+        return;
+      }
+
+      const point = new THREE.Vector3();
+      const hit = raycaster.ray.intersectPlane(plane, point);
+      if (!hit) return;
+
+      const xCm = point.x * 100;
+      const yCm = point.z * 100;
+      const inBounds = wallId === 'back'
+        ? xCm >= -epsilonCm && xCm <= Number(stageLayout.widthCm) + epsilonCm
+        : yCm >= -epsilonCm && yCm <= Number(stageLayout.depthCm) + epsilonCm;
+      if (!inBounds) return;
+
+      candidates.push({
+        wallId,
+        xCm,
+        yCm,
+        distance: raycaster.ray.origin.distanceTo(point),
+        order,
+      });
+    });
+
+    if (!candidates.length) return null;
+    candidates.sort((a, b) => (a.distance - b.distance) || (a.order - b.order));
+    return candidates[0];
   }
 
   function pickModuleContext(event) {
@@ -1293,8 +1317,10 @@ export function createStandScene(
     const moduleState = dragSession.moduleState;
 
     if (isTopFixtureType(moduleState.type)) {
-      const wallId = moduleState.placement?.wallId ?? 'back';
-      const wallPoint = getTopFixtureDragPoint(event.clientX, event.clientY, wallId);
+      const currentWallId = dragSession.preview?.placement?.wallId
+        ?? moduleState.placement?.wallId
+        ?? 'back';
+      const wallPoint = getTopFixtureDragPoint(event.clientX, event.clientY, currentWallId);
       if (!wallPoint) {
         disposePlacementGhost();
         dragSession.preview = null;
@@ -1305,11 +1331,15 @@ export function createStandScene(
         return;
       }
 
+      const wallRotationZDeg = wallPoint.wallId === 'left'
+        ? 90
+        : (wallPoint.wallId === 'right' ? 270 : 0);
       const basePlacement = {
         ...(moduleState.placement ?? {}),
-        wallId,
-        rotationZDeg: dragSession.preferredRotationZDeg,
+        wallId: wallPoint.wallId,
+        rotationZDeg: wallRotationZDeg,
       };
+      dragSession.preferredRotationZDeg = wallRotationZDeg;
       const placement = snapTopFixturePlacement(
         basePlacement,
         wallPoint,
