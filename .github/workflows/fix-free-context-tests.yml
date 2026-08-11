@@ -1,0 +1,29 @@
+name: Fix Free Context Tests
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - scripts/fix-free-context-tests.mjs
+      - .github/workflows/fix-free-context-tests.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - name: Correct rotation regression data
+        run: node scripts/fix-free-context-tests.mjs
+      - name: Commit correction
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add test/modulePlacement.test.js
+          git diff --cached --quiet || git commit -m "Correct free context rotation regression expectations"
+          git push origin ROG
