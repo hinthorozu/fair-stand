@@ -7,6 +7,7 @@ import { getWallUsedCm, placementsOverlap } from '../src/modulePlacement.js';
 test('LED projektor katalogda 50 cm ust aksesuar olarak tanimlidir', () => {
   assert.equal(MODULE_CATALOG.LED_FLOODLIGHT.type, 'led-floodlight');
   assert.equal(LED_FLOODLIGHT_DIMENSIONS.widthCm, 50);
+  assert.equal(LED_FLOODLIGHT_DIMENSIONS.depthCm, 20);
   assert.equal(LED_FLOODLIGHT_DIMENSIONS.mountHeightCm, 350);
 });
 
