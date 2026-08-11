@@ -6,3 +6,4 @@ new='''.collapsible-panel {\n  display: flex;\n  flex-direction: column;\n  gap:
 if old not in s:
     raise SystemExit('target block not found')
 p.write_text(s.replace(old,new))
+# trigger
