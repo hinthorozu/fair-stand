@@ -124,6 +124,7 @@ export function createStandScene(
   let floorPattern = null;
   let stageLayout = null;
   let currentFloorType = 'karolaj';
+  let currentFloorColor = '#e9edf1';
 
   function disposeGroundObject(object) {
     if (!object) return;
@@ -205,7 +206,7 @@ export function createStandScene(
       material.roughness = 0.72;
       material.metalness = 0;
     } else {
-      material.color.set(FLOOR_COLOR);
+      material.color.set(currentFloorColor);
       material.roughness = 0.92;
       material.metalness = 0;
     }
@@ -217,7 +218,20 @@ export function createStandScene(
       floorPattern = createFloorPattern(stageLayout.widthM, stageLayout.depthM, resolved);
       if (floorPattern) scene.add(floorPattern);
     }
+    if (stageLayout) stageLayout.floorType = resolved;
     return resolved;
+  }
+
+  function setFloorColor(color) {
+    const normalized = String(color ?? '').trim();
+    if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) return currentFloorColor;
+    currentFloorColor = normalized.toLowerCase();
+    if (stageLayout) stageLayout.floorColor = currentFloorColor;
+    if (currentFloorType === 'karolaj') {
+      activeFloor.material.color.set(currentFloorColor);
+      activeFloor.material.needsUpdate = true;
+    }
+    return currentFloorColor;
   }
 
   function collectGridValues(lengthM) {
@@ -338,6 +352,7 @@ export function createStandScene(
       surroundM: STAGE_SURROUND_M,
       platformHeightM: ACTIVE_PLATFORM_HEIGHT_M,
       floorType: currentFloorType,
+      floorColor: currentFloorColor,
     };
 
     setFloorType(currentFloorType);
@@ -1821,6 +1836,7 @@ export function createStandScene(
   return {
     createStage,
     setFloorType,
+    setFloorColor,
     buildWall,
     clearWall,
     clearSelection,

@@ -270,3 +270,11 @@ FAZ 3'ün amacı, stand tasarımını yalnızca sahnede düzenlemekten çıkarı
 - [ ] 4. Render alınması
 - [ ] 5. Kendi modülünü oluşturma
 
+
+
+## FAZ 3 — Zemin teknik kararları
+
+- Aktif stand platformu **daima 5 cm yüksekliğinde** kalacaktır; zemin tipi, renk ve texture değişiklikleri bu kotu değiştirmeyecektir.
+- **Karolaj:** gerçek ölçekte 100 × 100 cm; aktif alan sonunda kalan ölçü otomatik kırpılır (ör. 450 cm = 100 + 100 + 100 + 100 + 50). Karolaj color picker ile boyanabilir, derz/grid çizgileri renk değişiminde görünür kalır.
+- **Parke:** serbest boyama yerine üç hazır doku seçeneği kullanılacaktır: Açık/Kirli Beyaz, Açık Naturel-Sarı ve Grimsi. Referans görsellerdeki yazı, ölçü, ok, logo veya watermark kullanılmayacaktır; yalnızca renk ve yüzey karakteri referans alınacaktır.
+- **Halı / Halıfleks:** rip halı/halıfleks karakterinde ince dokulu texture kullanılacaktır. Texture sabit kalırken color picker üzerinden renk değiştirilebilecek; renk değişimi doku detayını yok etmeyecektir.

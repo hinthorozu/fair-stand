@@ -50,6 +50,8 @@ const standSizeXInput = document.querySelector('#stand-size-x');
 const standSizeYInput = document.querySelector('#stand-size-y');
 const createStageButton = document.querySelector('#create-stage');
 const floorTypeSelect = document.querySelector('#floor-type');
+const floorColorField = document.querySelector('#floor-color-field');
+const floorColorInput = document.querySelector('#floor-color');
 const stageResult = document.querySelector('#stage-result');
 const wallLengthInput = document.querySelector('#wall-length');
 const buildWallButton = document.querySelector('#build-wall');
@@ -734,8 +736,9 @@ createStageButton.addEventListener('click', () => {
     return;
   }
 
-  currentStand = { ...setup, floorType: floorTypeSelect.value };
+  currentStand = { ...setup, floorType: floorTypeSelect.value, floorColor: floorColorInput.value };
   scene3d.setFloorType(floorTypeSelect.value);
+  if (floorTypeSelect.value === 'karolaj') scene3d.setFloorColor(floorColorInput.value);
   syncWallLengthFromSetup(setup);
   viewportEmpty.hidden = true;
   viewportToolbar.hidden = false;
@@ -748,10 +751,27 @@ createStageButton.addEventListener('click', () => {
   );
 });
 
+function syncFloorColorVisibility() {
+  floorColorField.hidden = floorTypeSelect.value !== 'karolaj';
+}
+
+syncFloorColorVisibility();
+
 floorTypeSelect.addEventListener('change', () => {
+  syncFloorColorVisibility();
   if (!currentStand) return;
   currentStand = { ...currentStand, floorType: floorTypeSelect.value };
   scene3d.setFloorType(floorTypeSelect.value);
+  if (floorTypeSelect.value === 'karolaj') {
+    scene3d.setFloorColor(floorColorInput.value);
+    currentStand = { ...currentStand, floorColor: floorColorInput.value };
+  }
+});
+
+floorColorInput.addEventListener('input', () => {
+  if (floorTypeSelect.value !== 'karolaj') return;
+  if (currentStand) currentStand = { ...currentStand, floorColor: floorColorInput.value };
+  scene3d.setFloorColor(floorColorInput.value);
 });
 
 openModuleCatalogButton.addEventListener('click', () => {
