@@ -1332,9 +1332,25 @@ function applyActiveImageToSelection(fit = 'cover') {
     (surface) => surface.userData.moduleType === 'counter',
   );
   if (allCounterPanels) {
-    scene3d.applyImageAsset(selected, activeAssetId, fit);
+    const panelsByFace = new Map();
+    selected.forEach((surface) => {
+      const face = surface.userData.surfaceRole ?? 'front';
+      if (!panelsByFace.has(face)) panelsByFace.set(face, []);
+      panelsByFace.get(face).push(surface);
+    });
+
+    let appliedPanelCount = 0;
+    for (const panels of panelsByFace.values()) {
+      const faceResult = scene3d.applyRectImageAsset(panels, activeAssetId, fit);
+      if (!faceResult.ok) {
+        selectionInfo.textContent = faceResult.message;
+        return false;
+      }
+      appliedPanelCount += faceResult.panelCount ?? panels.length;
+    }
+
     const fitLabel = fit === 'cover' ? 'Doldur' : 'Sığdır';
-    selectionInfo.textContent = `${selected.length} banko paneline görsel uygulandı · ${fitLabel}.`;
+    selectionInfo.textContent = `${panelsByFace.size} banko cephesinde ${appliedPanelCount} panele tek parça görsel · ${fitLabel}.`;
     return true;
   }
 
