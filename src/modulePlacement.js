@@ -284,6 +284,21 @@ export function placementsOverlap(moduleA, moduleB) {
     // modülün ucu bağlantı noktasındaysa bu birleşim kasıtlıdır.
     const horizontalEndpoint = pointIsSegmentEndpoint(horizontal, intersectionX);
     const verticalEndpoint = pointIsSegmentEndpoint(vertical, intersectionY);
+
+    const counterModule = horizontalModule?.type === 'counter'
+      ? horizontalModule
+      : (verticalModule?.type === 'counter' ? verticalModule : null);
+    if (counterModule) {
+      const counterIsHorizontal = counterModule === horizontalModule;
+      const counterSegment = counterIsHorizontal ? horizontal : vertical;
+      const thinModule = counterIsHorizontal ? verticalModule : horizontalModule;
+      const counterIntersectionCm = counterIsHorizontal ? intersectionX : intersectionY;
+      const thinDepthCm = getModuleCollisionDepthCm(thinModule);
+      const logicalCounterEndpointJoin = thinDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM
+        && pointIsSegmentEndpoint(counterSegment, counterIntersectionCm);
+      if (logicalCounterEndpointJoin) return false;
+    }
+
     const thinEndpointJoin = horizontalDepth <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM
       && verticalDepth <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
     if (!thinEndpointJoin) return true;
@@ -307,6 +322,7 @@ export function validatePlacementAgainstModules({
   widthCm,
   depthCm = null,
   moduleId = null,
+  moduleType = null,
   modules = [],
   standType,
   standXCm,
@@ -322,7 +338,7 @@ export function validatePlacementAgainstModules({
   });
   if (!boundary.ok) return boundary;
 
-  const candidate = { id: moduleId, widthCm, depthCm, placement };
+  const candidate = { id: moduleId, type: moduleType, widthCm, depthCm, placement };
   const collision = modules.find((module) => (
     module?.id !== moduleId && placementsOverlap(candidate, module)
   ));
@@ -467,6 +483,7 @@ export function snapPlacementToModules({
       widthCm: width,
       depthCm,
       moduleId,
+      moduleType,
       modules,
       standType,
       standXCm,
@@ -504,6 +521,9 @@ export function snapPlacementToModules({
 
       if (target.axis !== movingAxis) {
         const targetHalfDepthCm = targetDepthCm / 2;
+        const logicalEndpointContact = isCounter
+          && targetDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
+        const endpointOffsetCm = logicalEndpointContact ? 0 : targetHalfDepthCm;
         const crossCenterCm = movingAxis === 'x'
           ? Number(freePlacement.yCm)
           : Number(freePlacement.xCm);
@@ -514,8 +534,8 @@ export function snapPlacementToModules({
         if (!crossOverlap) return;
 
         [
-          target.fixedCm + targetHalfDepthCm,
-          target.fixedCm - targetHalfDepthCm - width,
+          target.fixedCm + endpointOffsetCm,
+          target.fixedCm - endpointOffsetCm - width,
         ].forEach((startCm) => {
           const placement = createModulePlacement({
             ...freePlacement,
@@ -650,12 +670,14 @@ export function snapPlacementToModules({
       const crossOverlap = crossMinCm < target.endCm - EPSILON_CM
         && target.startCm < crossMaxCm - EPSILON_CM;
       const targetHalfDepthCm = targetDepthCm / 2;
-      const faceA = target.fixedCm - targetHalfDepthCm;
-      const faceB = target.fixedCm + targetHalfDepthCm;
-      const endpointContact = nearlyEqual(moving.startCm, faceA)
-        || nearlyEqual(moving.startCm, faceB)
-        || nearlyEqual(moving.endCm, faceA)
-        || nearlyEqual(moving.endCm, faceB);
+      const logicalEndpointContact = isCounter
+        && targetDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
+      const targetFaces = logicalEndpointContact
+        ? [target.fixedCm]
+        : [target.fixedCm - targetHalfDepthCm, target.fixedCm + targetHalfDepthCm];
+      const endpointContact = targetFaces.some((faceCm) => (
+        nearlyEqual(moving.startCm, faceCm) || nearlyEqual(moving.endCm, faceCm)
+      ));
       return crossOverlap && endpointContact;
     };
 

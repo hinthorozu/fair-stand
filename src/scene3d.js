@@ -840,6 +840,7 @@ export function createStandScene(
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
       moduleId: moduleState.id,
+      moduleType: moduleState.type,
       modules: getRenderedModuleStates(),
       standType: stageLayout.standType,
       standXCm: stageLayout.widthCm,
@@ -918,9 +919,7 @@ export function createStandScene(
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       rotationZDeg: preferredRotationZDeg,
-      modules: moduleState.type === 'counter'
-        ? renderedModules
-        : renderedModules.filter((module) => module.type !== 'counter'),
+      modules: renderedModules,
       standType: stageLayout.standType,
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
@@ -934,6 +933,7 @@ export function createStandScene(
         widthCm: moduleState.widthCm,
         depthCm: moduleState.depthCm,
         moduleId: moduleState.id,
+        moduleType: moduleState.type,
         modules: renderedModules,
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
@@ -1065,9 +1065,7 @@ export function createStandScene(
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       rotationZDeg: dragSession.preferredRotationZDeg,
-      modules: moduleState.type === 'counter'
-        ? renderedModules
-        : renderedModules.filter((module) => module.type !== 'counter'),
+      modules: renderedModules,
       standType: stageLayout.standType,
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
@@ -1081,6 +1079,7 @@ export function createStandScene(
         widthCm: moduleState.widthCm,
         depthCm: moduleState.depthCm,
         moduleId: moduleState.id,
+        moduleType: moduleState.type,
         modules: renderedModules,
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,

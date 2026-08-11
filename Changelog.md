@@ -565,3 +565,12 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 441. Bankonun U/L stand dip köşelerinde iki duvar yüzüne aynı anda sıfır temasla oturabilmesi için bankoya özel iki-yüzey köşe snap adayı eklendi.
 442. Tek duvar snap adayının ikinci duvarla collision'a düşmesi halinde sistem artık iki temas koordinatını birleştirerek gerçek köşe yerleşimini dener; diğer modül tiplerinin snap/collision davranışı değiştirilmedi.
 443. Sol ve sağ dip köşelerde, 0/90/180/270 derece banko yönlerinde fiziksel temas serbest; gerçek iç içe geçme collision olarak kalır.
+
+
+## Banko nominal ölçü / mantıksal bağlantı çizgisi düzeltmesi
+
+444. Banko 100/150/200 fiziksel ve nominal X ölçüleri değiştirilmeden sırasıyla 100/150/200 cm olarak korunur.
+445. Bankonun sol/sağ uç yüzü 10 cm derinlikli ince duvar, panel, separatör ve benzeri modüllerde dış yüzeyden 5 cm kaçmak yerine modülün mantıksal merkez/bağlantı çizgisine oturabilir; böylece 100 cm grid aralığına Banko 100 gerçekten sığar.
+446. Bu mantıksal uç bağlantısı bankoya özeldir; banko-bankoya temas gerçek gövde yüzeyleri üzerinden hesaplanmaya devam eder.
+447. İnce modül -> banko ve banko -> ince modül yerleşimleri aynı endpoint bağlantısını kabul eder; snap hedefi olarak bankoların tek taraflı filtrelenmesi kaldırıldı.
+448. Banko 100/150/200 için tam nominal grid aralığı regresyon testleri ve ters yönde ince-modül -> banko endpoint snap testi eklendi.

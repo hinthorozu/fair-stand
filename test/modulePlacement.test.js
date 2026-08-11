@@ -389,6 +389,7 @@ test('counter snaps flush to a parallel module face without overlapping it', () 
 
   const snapped = snapPlacementToModules({
     moduleId: 'counter',
+    moduleType: 'counter',
     widthCm: 100,
     depthCm: 50,
     pointerXCm: 150,
@@ -406,6 +407,7 @@ test('counter snaps flush to a parallel module face without overlapping it', () 
 
   const validation = validatePlacementAgainstModules({
     moduleId: 'counter',
+    moduleType: 'counter',
     widthCm: 100,
     depthCm: 50,
     placement: snapped.placement,
@@ -426,6 +428,7 @@ test('counter face snap ignores longitudinal grid offset when measuring wall pro
 
   const snapped = snapPlacementToModules({
     moduleId: 'counter',
+    moduleType: 'counter',
     widthCm: 100,
     depthCm: 50,
     pointerXCm: 125,
@@ -443,6 +446,7 @@ test('counter face snap ignores longitudinal grid offset when measuring wall pro
 
   const validation = validatePlacementAgainstModules({
     moduleId: 'counter',
+    moduleType: 'counter',
     widthCm: 100,
     depthCm: 50,
     placement: snapped.placement,
@@ -460,14 +464,14 @@ test('counter side faces snap flush to perpendicular walls', () => {
     placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 90, wallId: 'left' },
   }];
   const left = snapPlacementToModules({
-    moduleId: 'counter', widthCm: 100, depthCm: 50,
+    moduleId: 'counter', moduleType: 'counter', widthCm: 100, depthCm: 50,
     pointerXCm: 55, pointerYCm: 125, rotationZDeg: 0, modules: leftWall,
     standType: 'u-stand', standXCm: 800, standYCm: 600,
   });
   assert.equal(left?.snapKind, 'face');
-  assert.equal(left?.placement.xCm, 5);
+  assert.equal(left?.placement.xCm, 0);
   assert.equal(validatePlacementAgainstModules({
-    moduleId: 'counter', widthCm: 100, depthCm: 50, placement: left.placement, modules: leftWall,
+    moduleId: 'counter', moduleType: 'counter', widthCm: 100, depthCm: 50, placement: left.placement, modules: leftWall,
     standType: 'u-stand', standXCm: 800, standYCm: 600,
   }).ok, true);
 
@@ -476,14 +480,14 @@ test('counter side faces snap flush to perpendicular walls', () => {
     placement: { xCm: 800, yCm: 0, zCm: 0, rotationZDeg: 270, wallId: 'right' },
   }];
   const right = snapPlacementToModules({
-    moduleId: 'counter', widthCm: 100, depthCm: 50,
+    moduleId: 'counter', moduleType: 'counter', widthCm: 100, depthCm: 50,
     pointerXCm: 745, pointerYCm: 125, rotationZDeg: 0, modules: rightWall,
     standType: 'u-stand', standXCm: 800, standYCm: 600,
   });
   assert.equal(right?.snapKind, 'face');
-  assert.equal(right?.placement.xCm, 695);
+  assert.equal(right?.placement.xCm, 700);
   assert.equal(validatePlacementAgainstModules({
-    moduleId: 'counter', widthCm: 100, depthCm: 50, placement: right.placement, modules: rightWall,
+    moduleId: 'counter', moduleType: 'counter', widthCm: 100, depthCm: 50, placement: right.placement, modules: rightWall,
     standType: 'u-stand', standXCm: 800, standYCm: 600,
   }).ok, true);
 });
@@ -494,14 +498,14 @@ test('rotated counter side face snaps flush to a perpendicular back wall', () =>
     placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
   }];
   const snapped = snapPlacementToModules({
-    moduleId: 'counter', widthCm: 100, depthCm: 50,
+    moduleId: 'counter', moduleType: 'counter', widthCm: 100, depthCm: 50,
     pointerXCm: 125, pointerYCm: 55, rotationZDeg: 90, modules: backWall,
     standType: 'u-stand', standXCm: 800, standYCm: 600,
   });
   assert.equal(snapped?.snapKind, 'face');
-  assert.equal(snapped?.placement.yCm, 5);
+  assert.equal(snapped?.placement.yCm, 0);
   assert.equal(validatePlacementAgainstModules({
-    moduleId: 'counter', widthCm: 100, depthCm: 50, placement: snapped.placement, modules: backWall,
+    moduleId: 'counter', moduleType: 'counter', widthCm: 100, depthCm: 50, placement: snapped.placement, modules: backWall,
     standType: 'u-stand', standXCm: 800, standYCm: 600,
   }).ok, true);
 });
@@ -515,7 +519,7 @@ test('counter snaps into U and L inner corners against two walls', () => {
         { id: 'back', widthCm: 800, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' } },
         { id: 'left', widthCm: 600, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 90, wallId: 'left' } },
       ],
-      pointerXCm: 55, pointerYCm: 30, rotationZDeg: 0, expectedX: 5, expectedY: 30,
+      pointerXCm: 50, pointerYCm: 30, rotationZDeg: 0, expectedX: 0, expectedY: 30,
     },
     {
       name: 'u-right',
@@ -524,7 +528,7 @@ test('counter snaps into U and L inner corners against two walls', () => {
         { id: 'back', widthCm: 800, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' } },
         { id: 'right', widthCm: 600, placement: { xCm: 800, yCm: 0, zCm: 0, rotationZDeg: 270, wallId: 'right' } },
       ],
-      pointerXCm: 745, pointerYCm: 30, rotationZDeg: 0, expectedX: 695, expectedY: 30,
+      pointerXCm: 750, pointerYCm: 30, rotationZDeg: 0, expectedX: 700, expectedY: 30,
     },
     {
       name: 'l-left-rotated',
@@ -533,7 +537,7 @@ test('counter snaps into U and L inner corners against two walls', () => {
         { id: 'back', widthCm: 800, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' } },
         { id: 'left', widthCm: 600, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 90, wallId: 'left' } },
       ],
-      pointerXCm: 30, pointerYCm: 55, rotationZDeg: 90, expectedX: 30, expectedY: 5,
+      pointerXCm: 30, pointerYCm: 50, rotationZDeg: 90, expectedX: 30, expectedY: 0,
     },
     {
       name: 'l-right-rotated',
@@ -542,7 +546,7 @@ test('counter snaps into U and L inner corners against two walls', () => {
         { id: 'back', widthCm: 800, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' } },
         { id: 'right', widthCm: 600, placement: { xCm: 800, yCm: 0, zCm: 0, rotationZDeg: 270, wallId: 'right' } },
       ],
-      pointerXCm: 770, pointerYCm: 55, rotationZDeg: 90, expectedX: 770, expectedY: 5,
+      pointerXCm: 770, pointerYCm: 50, rotationZDeg: 90, expectedX: 770, expectedY: 0,
     },
   ];
 
@@ -566,6 +570,7 @@ test('counter snaps into U and L inner corners against two walls', () => {
     assert.equal(snapped?.placement.yCm, scenario.expectedY, scenario.name);
     assert.equal(validatePlacementAgainstModules({
       moduleId: 'counter',
+      moduleType: 'counter',
       widthCm: 100,
       depthCm: 50,
       placement: snapped.placement,
@@ -575,6 +580,72 @@ test('counter snaps into U and L inner corners against two walls', () => {
       standYCm: 600,
     }).ok, true, scenario.name);
   });
+});
+
+test('all banko widths fit exact logical grid gaps next to thin modules', () => {
+  [100, 150, 200].forEach((widthCm) => {
+    const modules = [{
+      id: 'separator',
+      type: 'separator',
+      widthCm: 300,
+      placement: { xCm: widthCm, yCm: 0, zCm: 0, rotationZDeg: 90, wallId: 'right' },
+    }];
+
+    const snapped = snapPlacementToModules({
+      moduleId: 'counter',
+      moduleType: 'counter',
+      widthCm,
+      depthCm: 50,
+      pointerXCm: widthCm / 2,
+      pointerYCm: 125,
+      rotationZDeg: 0,
+      modules,
+      standType: 'u-stand',
+      standXCm: widthCm,
+      standYCm: 400,
+    });
+
+    assert.equal(snapped?.snapKind, 'face', String(widthCm));
+    assert.equal(snapped?.placement.xCm, 0, String(widthCm));
+    assert.equal(validatePlacementAgainstModules({
+      moduleId: 'counter',
+      moduleType: 'counter',
+      widthCm,
+      depthCm: 50,
+      placement: snapped.placement,
+      modules,
+      standType: 'u-stand',
+      standXCm: widthCm,
+      standYCm: 400,
+    }).ok, true, String(widthCm));
+  });
+});
+
+test('thin modules may snap to a banko endpoint symmetrically', () => {
+  const modules = [{
+    id: 'counter-target',
+    type: 'counter',
+    widthCm: 100,
+    depthCm: 50,
+    placement: { xCm: 100, yCm: 100, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  }];
+
+  const snapped = snapPlacementToModules({
+    moduleId: 'separator',
+    moduleType: 'separator',
+    widthCm: 50,
+    pointerXCm: 200,
+    pointerYCm: 125,
+    rotationZDeg: 90,
+    modules,
+    standType: 'island',
+    standXCm: 500,
+    standYCm: 500,
+  });
+
+  assert.equal(snapped?.snapKind, 'corner');
+  assert.equal(snapped?.placement.xCm, 200);
+  assert.equal(snapped?.placement.yCm, 100);
 });
 
 test('physical module depth rejects parallel bodies that are too close', () => {
