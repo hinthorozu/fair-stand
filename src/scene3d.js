@@ -43,7 +43,13 @@ const ACTIVE_WALL_GUIDE_HEIGHT_M = 0.018;
 const STAGE_SURROUND_M = 1;
 // Aktif stand zemini fuar salonu zemininden 5 cm yukarıda duran platformdur.
 const ACTIVE_PLATFORM_HEIGHT_M = 0.05;
-const FLOOR_TYPES = Object.freeze(['karolaj', 'hali', 'parke']);
+const FLOOR_TYPES = Object.freeze(['karolaj', 'hali', 'parke-acik', 'parke-sari', 'parke-beton']);
+const PARQUET_TYPES = new Set(['parke-acik', 'parke-sari', 'parke-beton']);
+const PARQUET_COLORS = Object.freeze({
+  'parke-acik': '#e8dfd1',
+  'parke-sari': '#d5ad79',
+  'parke-beton': '#9b9993',
+});
 const FLOOR_TOP_EPSILON_M = 0.006;
 const SELECTION_COLOR = 0x2563eb;
 const PLACEMENT_VALID_COLOR = 0x16a34a;
@@ -168,18 +174,21 @@ export function createStandScene(
       collectSurfaceCuts(depthM, 1).forEach((z) => {
         positions.push(0, topY, z, widthM, topY, z);
       });
-    } else if (floorType === 'parke') {
-      const plankDepthM = 0.20;
+    } else if (PARQUET_TYPES.has(floorType)) {
+      // Laminat/parke hissi: ince sıralar, uzun lameller ve 1/3 şaşırtma.
+      const plankDepthM = 0.16;
+      const plankLengthM = 1.40;
       collectSurfaceCuts(depthM, plankDepthM).forEach((z) => {
         positions.push(0, topY, z, widthM, topY, z);
       });
       let row = 0;
       for (let z = 0; z < depthM - 0.000001; z += plankDepthM, row += 1) {
         const rowEnd = Math.min(depthM, z + plankDepthM);
-        const offset = row % 2 === 0 ? 0 : 0.5;
-        for (let x = offset; x < widthM; x += 1) {
-          if (x <= 0.000001) continue;
-          positions.push(x, topY, z, x, topY, rowEnd);
+        const offset = (row % 3) * (plankLengthM / 3);
+        for (let x = -offset; x < widthM; x += plankLengthM) {
+          const seamX = x + plankLengthM;
+          if (seamX <= 0.000001 || seamX >= widthM - 0.000001) continue;
+          positions.push(seamX, topY, z, seamX, topY, rowEnd);
         }
       }
     }
@@ -188,9 +197,9 @@ export function createStandScene(
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     const material = new THREE.LineBasicMaterial({
-      color: floorType === 'parke' ? 0x6f4a2d : 0x9aa0a6,
+      color: PARQUET_TYPES.has(floorType) ? 0x746f68 : 0x9aa0a6,
       transparent: true,
-      opacity: floorType === 'parke' ? 0.55 : 0.68,
+      opacity: PARQUET_TYPES.has(floorType) ? 0.34 : 0.68,
     });
     const lines = new THREE.LineSegments(geometry, material);
     lines.renderOrder = 8;
@@ -206,9 +215,9 @@ export function createStandScene(
       material.color.set(floorColors.hali);
       material.roughness = 1;
       material.metalness = 0;
-    } else if (resolved === 'parke') {
-      material.color.set(0xb98252);
-      material.roughness = 0.72;
+    } else if (PARQUET_TYPES.has(resolved)) {
+      material.color.set(PARQUET_COLORS[resolved]);
+      material.roughness = 0.78;
       material.metalness = 0;
     } else {
       material.color.set(floorColors.karolaj);
