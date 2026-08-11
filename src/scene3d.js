@@ -263,6 +263,66 @@ export function createStandScene(
   let placementGhost = null;
   let dragSession = null;
   let dragBadge = null;
+  let placementFeedback = null;
+  let placementFeedbackTimer = null;
+
+  function clearPlacementFeedback() {
+    if (placementFeedbackTimer) {
+      window.clearTimeout(placementFeedbackTimer);
+      placementFeedbackTimer = null;
+    }
+    placementFeedback?.remove?.();
+    placementFeedback = null;
+  }
+
+  function showPlacementFeedback(message, { clientX = null, clientY = null, durationMs = 0 } = {}) {
+    const text = String(message ?? '').trim();
+    if (!text) {
+      clearPlacementFeedback();
+      return;
+    }
+
+    if (placementFeedbackTimer) {
+      window.clearTimeout(placementFeedbackTimer);
+      placementFeedbackTimer = null;
+    }
+
+    if (!placementFeedback) {
+      placementFeedback = document.createElement('div');
+      placementFeedback.style.cssText = [
+        'position:fixed',
+        'z-index:10002',
+        'max-width:320px',
+        'padding:8px 11px',
+        'border:1px solid rgba(220,38,38,.35)',
+        'border-radius:9px',
+        'background:rgba(127,29,29,.94)',
+        'box-shadow:0 8px 24px rgba(15,23,42,.2)',
+        'color:#fff',
+        'font:600 12px/1.35 system-ui,sans-serif',
+        'pointer-events:none',
+        'user-select:none',
+      ].join(';');
+      document.body.appendChild(placementFeedback);
+    }
+
+    placementFeedback.textContent = text;
+    const rect = renderer.domElement.getBoundingClientRect();
+    const hasPointer = Number.isFinite(Number(clientX)) && Number.isFinite(Number(clientY));
+    const rawX = hasPointer ? Number(clientX) + 18 : rect.left + rect.width / 2;
+    const rawY = hasPointer ? Number(clientY) + 18 : rect.top + 18;
+    const x = Math.min(window.innerWidth - 20, Math.max(20, rawX));
+    const y = Math.min(window.innerHeight - 52, Math.max(12, rawY));
+    placementFeedback.style.left = `${x}px`;
+    placementFeedback.style.top = `${y}px`;
+    placementFeedback.style.transform = hasPointer ? 'none' : 'translateX(-50%)';
+
+    if (durationMs > 0) {
+      placementFeedbackTimer = window.setTimeout(() => {
+        clearPlacementFeedback();
+      }, durationMs);
+    }
+  }
 
   function setSelectionVisual(mesh, selected) {
     if (!mesh) return;
@@ -679,6 +739,7 @@ export function createStandScene(
     controls.enabled = true;
     disposePlacementGhost();
     disposeDragBadge();
+    clearPlacementFeedback();
   }
 
   function getRenderedModuleStates() {
@@ -723,17 +784,17 @@ export function createStandScene(
   }
 
   function rotateSelectedModule(deltaDeg) {
-    if (!stageLayout || dragSession?.dragging) return false;
+    if (!stageLayout || dragSession?.dragging) return { handled: false, ok: false };
     const moduleGroup = getSingleSelectedModuleGroup();
     const moduleState = moduleGroup?.userData?.moduleState;
-    if (!moduleGroup || !moduleState?.placement) return false;
+    if (!moduleGroup || !moduleState?.placement) return { handled: false, ok: false };
 
     const nextPlacement = rotateModulePlacementAroundCenter(
       moduleState.placement,
       moduleState.widthCm,
       deltaDeg,
     );
-    if (!nextPlacement) return false;
+    if (!nextPlacement) return { handled: false, ok: false };
     nextPlacement.wallId = inferWallIdForRotation(
       nextPlacement,
       nextPlacement.rotationZDeg,
@@ -748,12 +809,22 @@ export function createStandScene(
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
     });
-    if (!validation.ok) return false;
+    if (!validation.ok) {
+      const message = validation.message ?? 'Modül bu yönde döndürülemez.';
+      showPlacementGhost(moduleState.widthCm, nextPlacement, false);
+      showPlacementFeedback(message, { durationMs: 1800 });
+      window.setTimeout(() => {
+        if (!dragSession?.dragging) disposePlacementGhost();
+      }, 850);
+      return { handled: true, ok: false, message };
+    }
 
+    clearPlacementFeedback();
+    disposePlacementGhost();
     moduleState.placement = { ...nextPlacement };
     moduleGroup.userData.placement = { ...nextPlacement };
     applyPlacementToGroup(moduleGroup, nextPlacement, moduleState.widthCm);
-    return true;
+    return { handled: true, ok: true };
   }
 
   function previewCatalogModuleDrag(
@@ -765,13 +836,17 @@ export function createStandScene(
   ) {
     if (!stageLayout || !moduleState) {
       disposePlacementGhost();
-      return { ok: false, message: 'Önce stand alanını oluştur.' };
+      const message = 'Önce stand alanını oluştur.';
+      showPlacementFeedback(message, { clientX, clientY });
+      return { ok: false, message };
     }
 
     const ground = getGroundPoint(clientX, clientY);
     if (!ground) {
       disposePlacementGhost();
-      return { ok: false, message: 'Modülü aktif stand alanına bırak.' };
+      const message = 'Modülü aktif stand alanına bırak.';
+      showPlacementFeedback(message, { clientX, clientY });
+      return { ok: false, message };
     }
 
     const snapped = snapPlacementToStand({
@@ -787,9 +862,11 @@ export function createStandScene(
 
     if (!snapped.ok || !snapped.placement) {
       disposePlacementGhost();
+      const message = snapped.message ?? 'Bu konuma modül yerleştirilemedi.';
+      showPlacementFeedback(message, { clientX, clientY });
       return {
         ok: false,
-        message: snapped.message ?? 'Bu konuma modül yerleştirilemedi.',
+        message,
       };
     }
 
@@ -841,6 +918,8 @@ export function createStandScene(
       ? plan.movingPlacement
       : desiredPlacement;
     showPlacementGhost(moduleState.widthCm, previewPlacement, plan.ok);
+    if (plan.ok) clearPlacementFeedback();
+    else showPlacementFeedback(plan.message ?? 'Bu konuma modül yerleştirilemez.', { clientX, clientY });
     return {
       ok: plan.ok,
       placement: { ...previewPlacement },
@@ -869,11 +948,18 @@ export function createStandScene(
       rotationLocked,
     );
     disposePlacementGhost();
+    if (result.ok) clearPlacementFeedback();
+    else showPlacementFeedback(result.message ?? 'Bu konuma modül yerleştirilemez.', {
+      clientX,
+      clientY,
+      durationMs: 1800,
+    });
     return result;
   }
 
   function clearCatalogModuleDrag() {
     disposePlacementGhost();
+    clearPlacementFeedback();
   }
 
   function updatePlacementDrag(event) {
@@ -894,6 +980,10 @@ export function createStandScene(
     if (!ground) {
       disposePlacementGhost();
       dragSession.preview = null;
+      showPlacementFeedback('Modülü aktif stand alanına bırak.', {
+        clientX: event.clientX,
+        clientY: event.clientY,
+      });
       return;
     }
 
@@ -912,6 +1002,10 @@ export function createStandScene(
     if (!snapped.ok || !snapped.placement) {
       dragSession.preview = null;
       disposePlacementGhost();
+      showPlacementFeedback(snapped.message ?? 'Bu konuma modül yerleştirilemez.', {
+        clientX: event.clientX,
+        clientY: event.clientY,
+      });
       return;
     }
 
@@ -974,6 +1068,11 @@ export function createStandScene(
       } : null,
     };
     showPlacementGhost(moduleState.widthCm, previewPlacement, plan.ok);
+    if (plan.ok) clearPlacementFeedback();
+    else showPlacementFeedback(plan.message ?? 'Bu konuma modül yerleştirilemez.', {
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
   }
 
   function finishPlacementDrag(event) {
@@ -985,6 +1084,7 @@ export function createStandScene(
     session.moduleGroup.visible = true;
 
     if (wasDragging && preview?.valid) {
+      clearPlacementFeedback();
       const plannedPlacements = preview.plan?.placements instanceof Map
         ? preview.plan.placements
         : new Map([[session.moduleState.id, { ...preview.placement }]]);
@@ -1002,6 +1102,12 @@ export function createStandScene(
         applyPlacementToGroup(moduleGroup, placement, moduleState.widthCm);
       });
       clearSelection();
+    } else if (wasDragging && preview && !preview.valid) {
+      showPlacementFeedback(preview.message ?? 'Bu konuma modül yerleştirilemez.', {
+        clientX: event.clientX,
+        clientY: event.clientY,
+        durationMs: 1800,
+      });
     }
 
     dragSession = null;
@@ -1502,7 +1608,8 @@ export function createStandScene(
       return;
     }
 
-    if (rotateSelectedModule(deltaDeg)) event.preventDefault();
+    const rotationResult = rotateSelectedModule(deltaDeg);
+    if (rotationResult.handled) event.preventDefault();
   });
 
   renderer.domElement.addEventListener('pointerup', (event) => {

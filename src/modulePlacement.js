@@ -262,7 +262,7 @@ export function validatePlacementAgainstModules({
   if (collision) {
     return {
       ok: false,
-      message: 'Bu konumda başka bir modül var.',
+      message: 'Başka bir modülle çakışıyor.',
       collisionModuleId: collision.id,
     };
   }
