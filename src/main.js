@@ -1420,28 +1420,6 @@ openProjectButton.addEventListener('click', async () => {
   }
 });
 
-reloadProjectImagesButton.addEventListener('click', async () => {
-  if (!currentStand) {
-    projectStatus.textContent = 'Önce projeyi aç.';
-    return;
-  }
-
-  reloadProjectImagesButton.disabled = true;
-  projectStatus.textContent = 'Görseller yükleniyor…';
-  try {
-    await loadAssetsForActiveProject();
-    rebuildWall({ resetView: false });
-    projectStatus.textContent = imageAssets.size
-      ? `Görseller yüklendi · ${imageAssets.size} dosya`
-      : 'Bu projede kayıtlı görsel yok.';
-  } catch (error) {
-    console.warn('Proje görselleri yüklenemedi:', error);
-    projectStatus.textContent = 'Görseller yüklenemedi.';
-  } finally {
-    reloadProjectImagesButton.disabled = false;
-  }
-});
-
 newProjectButton.addEventListener('click', () => {
   const confirmed = window.confirm('Yeni projeye geçilsin mi? Kaydedilmemiş değişiklikler kaybolabilir.');
   if (!confirmed) return;
