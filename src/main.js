@@ -86,6 +86,7 @@ const projectSelect = document.querySelector('#project-select');
 const newProjectButton = document.querySelector('#new-project');
 const saveProjectButton = document.querySelector('#save-project');
 const openProjectButton = document.querySelector('#open-project');
+const reloadProjectImagesButton = document.querySelector('#reload-project-images');
 const deleteProjectButton = document.querySelector('#delete-project');
 const projectStatus = document.querySelector('#project-status');
 
@@ -1407,6 +1408,28 @@ openProjectButton.addEventListener('click', async () => {
     if (!project) { projectStatus.textContent = 'Proje bulunamadı.'; return; }
     await restoreProject(project);
   } catch (error) { console.warn('Proje açılamadı:', error); projectStatus.textContent = 'Proje açılamadı.'; }
+});
+
+reloadProjectImagesButton.addEventListener('click', async () => {
+  if (!currentStand) {
+    projectStatus.textContent = 'Önce projeyi aç.';
+    return;
+  }
+
+  reloadProjectImagesButton.disabled = true;
+  projectStatus.textContent = 'Görseller yükleniyor…';
+  try {
+    await loadAssetsForActiveProject();
+    rebuildWall({ resetView: false });
+    projectStatus.textContent = imageAssets.size
+      ? `Görseller yüklendi · ${imageAssets.size} dosya`
+      : 'Bu projede kayıtlı görsel yok.';
+  } catch (error) {
+    console.warn('Proje görselleri yüklenemedi:', error);
+    projectStatus.textContent = 'Görseller yüklenemedi.';
+  } finally {
+    reloadProjectImagesButton.disabled = false;
+  }
 });
 
 newProjectButton.addEventListener('click', () => {
