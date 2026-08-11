@@ -17,3 +17,12 @@ export function formatPlacementFeedbackMessage(message) {
 
   return text;
 }
+
+export function hasPlacementFeedbackPointer(clientX, clientY) {
+  return clientX !== null
+    && clientX !== undefined
+    && clientY !== null
+    && clientY !== undefined
+    && Number.isFinite(Number(clientX))
+    && Number.isFinite(Number(clientY));
+}

@@ -7,7 +7,7 @@ import { createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
 import { createViewCube } from './viewCube.js';
 import { computeImageFit } from './imageFit.js';
-import { formatPlacementFeedbackMessage } from './placementFeedback.js';
+import { formatPlacementFeedbackMessage, hasPlacementFeedbackPointer } from './placementFeedback.js';
 import {
   createModulePlacement,
   getAllowedWallIds,
@@ -309,9 +309,9 @@ export function createStandScene(
 
     placementFeedback.textContent = text;
     const rect = renderer.domElement.getBoundingClientRect();
-    const hasPointer = Number.isFinite(Number(clientX)) && Number.isFinite(Number(clientY));
+    const hasPointer = hasPlacementFeedbackPointer(clientX, clientY);
     const rawX = hasPointer ? Number(clientX) + 18 : rect.left + rect.width / 2;
-    const rawY = hasPointer ? Number(clientY) + 18 : rect.top + 18;
+    const rawY = hasPointer ? Number(clientY) + 18 : rect.top + 72;
     const x = Math.min(window.innerWidth - 20, Math.max(20, rawX));
     const y = Math.min(window.innerHeight - 52, Math.max(12, rawY));
     placementFeedback.style.left = `${x}px`;
