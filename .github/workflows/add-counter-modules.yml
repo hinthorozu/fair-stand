@@ -19,7 +19,29 @@ jobs:
         with:
           ref: ROG
       - name: Apply banko module implementation
-        run: node scripts/add-counter-modules.mjs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/add-counter-modules.mjs')
+          text = path.read_text()
+          old = """    3,\n    'scene validation counter depth',\n  );"""
+          new = """    1,\n    'scene validation counter depth',\n  );"""
+          if old not in text:
+              raise SystemExit('scene validation counter depth marker not found')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          node scripts/add-counter-modules.mjs
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/scene3d.js')
+          text = path.read_text()
+          old = "        widthCm: moduleState.widthCm,\n        moduleId: moduleState.id,\n"
+          new = "        widthCm: moduleState.widthCm,\n        depthCm: moduleState.depthCm,\n        moduleId: moduleState.id,\n"
+          count = text.count(old)
+          if count != 2:
+              raise SystemExit(f'expected 2 inner validation blocks, found {count}')
+          path.write_text(text.replace(old, new))
+          PY
       - name: Run tests
         run: npm test
       - name: Build
