@@ -67,3 +67,12 @@ Bu dosyadaki maddeler, kullanıcı açıkça aksi bir davranış istemedikçe t�
 - Arka yüz panel ile kapatılmaz; yapı ön/sol/sağ panel ve görünür Maxima köşe profilleriyle oluşturulur.
 - Baza banko gibi serbest yerleşim modülüdür; aktif duvar zincirine otomatik katılmaz. 0/90/180/270 dönüş, R / Shift+R, 50 cm fiziksel derinlik, stand sınırı, collision ve magnetic snap kuralları geçerlidir.
 - İnce Maxima modüllerine uçtan bağlantıda bankoda kullanılan mantıksal merkez/bağlantı çizgisi davranışı uygulanır; nominal 100/150/200 cm ölçüler korunur.
+
+
+## Raf modülü standardı
+
+- Raf modülü hazır duvar modülüdür; genişlikler 100 / 150 / 200 cm, varyantlar 2 raflı ve 3 raflıdır.
+- Raf tablaları panel birleşim çizgilerine bağlanır: 2 raflı = Z 100 / 150 cm; 3 raflı = Z 100 / 150 / 200 cm.
+- Raf tablası 30 cm öne çıkar, 3 cm kalınlığında sabit beyazdır ve ön kenarında Maxima profil görünümü bulunur.
+- Raf modülünün yedi paneli normal panel davranışını korur; renk, görsel ve cam özellikleri uygulanabilir. Raf tablaları panel yüzeyi değildir ve sabit beyaz kalır.
+- Raf modülü düz panel/vitrin gibi normal duvar yerleşim sistemini kullanır; banko/baza tipi serbest zemin fixture olarak ele alınmaz.

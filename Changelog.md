@@ -585,3 +585,13 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 453. Bankoda kullanılan ince Maxima modülü mantıksal endpoint bağlantısı baza için de aktif edildi; 100/150/200 nominal grid aralıkları korunur.
 454. Baza katalog drag kartları, seçim bilgisi, sağ tık etiketi, reset/duplicate state desteği ve regresyon testleri eklendi.
 455. Sonraki modül geliştirme sırası Roadmap'e Baza → Raf → Koltuk → Masa Sandalye Takımı → Bar Taburesi olarak kaydedildi.
+
+
+## Raf modülü
+
+456. Raf modülleri vitrin benzeri hazır duvar modülü olarak eklendi: 100/150/200 cm genişliklerin her biri 2 raflı ve 3 raflı varyanta sahiptir.
+457. Raflar panel yüzeylerinin ortasına serbest yükseklikte konmak yerine Maxima 50 cm yatay panel birleşim hatlarına oturur; 2 raflı varyant 100/150 cm, 3 raflı varyant 100/150/200 cm yüksekliklerini kullanır.
+458. Raf tablası 30 cm öne çıkar, 3 cm kalınlığında sabit beyaz yüzeydir ve ön kenarında Maxima profil görünümü bulunur.
+459. Raf modülü alttaki yedi normal paneli korur; paneller renk/görsel/cam davranışlarını sürdürür ve raf tablaları sabit beyaz kalır.
+460. Raf modülü banko/baza gibi serbest zemin fixture değildir; düz panel/vitrin gibi normal duvar placement, sürekli zincir, 50 cm grid, 0/90/180/270 dönüş ve magnetic snap kurallarını kullanır.
+461. Raf 100/150/200 · 2/3 Raf kartları hem sürükle-bırak kataloğuna hem bağlamsal modül picker'a eklendi; state, duplicate ve placement regresyon testleri eklendi.

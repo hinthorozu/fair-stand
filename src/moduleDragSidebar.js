@@ -10,6 +10,12 @@ const DRAGGABLE_MODULE_KEYS = [
   'DOOR_100',
   'SHOWCASE_3_100',
   'SHOWCASE_2_100',
+  'SHELF_3_200',
+  'SHELF_2_200',
+  'SHELF_3_150',
+  'SHELF_2_150',
+  'SHELF_3_100',
+  'SHELF_2_100',
   'BASE_200',
   'BASE_150',
   'BASE_100',
@@ -39,6 +45,8 @@ function ensureStyles() {
     .module-drag-showcase { position:relative; height:68px; border:3px solid #8a929a; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-showcase::before { content:''; position:absolute; left:3px; right:3px; top:21px; bottom:10px; border:1px solid #9fbfa5; background:rgba(205,232,209,.5); }
     .module-drag-showcase[data-eyes='3']::after { content:''; position:absolute; left:4px; right:4px; top:42px; height:1px; background:#9fbfa5; }
+    .module-drag-shelf { position:relative; }
+    .module-drag-shelf i { position:absolute; left:-3px; right:-9px; height:4px; border:1px solid #9aa0a6; background:#fff; box-shadow:2px 2px 2px rgba(15,23,42,.14); pointer-events:none; }
     .module-drag-door { position:relative; height:68px; border:3px solid #8a929a; background:linear-gradient(to bottom,#f7f7f5 0 13%,#c4c9ce 13% 14%,#f7f7f5 14% 27%,#c4c9ce 27% 28%,#f7f7f5 28% 42%,#747b82 42% 45%,#e5e7eb 45% 100%); box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-door::after { content:''; position:absolute; right:3px; bottom:19px; width:3px; height:3px; border-radius:50%; background:#4b5563; }
     .module-drag-base { position:relative; height:24px; border:3px solid #7b838c; background:#ffffff; box-shadow:4px 4px 0 #d7dde4,0 2px 5px rgba(15,23,42,.08); }
@@ -60,6 +68,21 @@ function previewWidthPx(widthCm) {
 function createPreview(module) {
   const preview = document.createElement('div');
   preview.className = 'module-drag-preview';
+
+  if (module.type === 'shelf') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-panel module-drag-shelf';
+    body.style.width = previewWidthPx(module.widthCm) + 'px';
+    for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
+    const tops = Number(module.shelfCount) === 3 ? [47, 37, 27] : [47, 37];
+    tops.forEach((top) => {
+      const shelf = document.createElement('i');
+      shelf.style.top = top + 'px';
+      body.appendChild(shelf);
+    });
+    preview.appendChild(body);
+    return preview;
+  }
 
   if (module.type === 'base') {
     const body = document.createElement('div');

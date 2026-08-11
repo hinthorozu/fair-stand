@@ -21,6 +21,16 @@ export const BASE_DIMENSIONS = Object.freeze({
   widthsCm: Object.freeze([100, 150, 200]),
 });
 
+export const SHELF_DIMENSIONS = Object.freeze({
+  projectionCm: 30,
+  thicknessCm: 3,
+  widthsCm: Object.freeze([100, 150, 200]),
+  heightsByCountCm: Object.freeze({
+    2: Object.freeze([100, 150]),
+    3: Object.freeze([100, 150, 200]),
+  }),
+});
+
 export const MODULE_CATALOG = Object.freeze({
   PANEL_50: { type: 'flat-panel', widthCm: 50, label: 'Düz Panel 50' },
   PANEL_100: { type: 'flat-panel', widthCm: 100, label: 'Düz Panel 100' },
@@ -29,6 +39,12 @@ export const MODULE_CATALOG = Object.freeze({
 
   SHOWCASE_3_100: { type: 'showcase-3', widthCm: 100, label: '3 Gözlü Vitrin 100' },
   SHOWCASE_2_100: { type: 'showcase-2', widthCm: 100, label: '2 Gözlü Vitrin 100' },
+  SHELF_2_100: { type: 'shelf', widthCm: 100, shelfCount: 2, label: 'Raf 100 · 2 Raf' },
+  SHELF_3_100: { type: 'shelf', widthCm: 100, shelfCount: 3, label: 'Raf 100 · 3 Raf' },
+  SHELF_2_150: { type: 'shelf', widthCm: 150, shelfCount: 2, label: 'Raf 150 · 2 Raf' },
+  SHELF_3_150: { type: 'shelf', widthCm: 150, shelfCount: 3, label: 'Raf 150 · 3 Raf' },
+  SHELF_2_200: { type: 'shelf', widthCm: 200, shelfCount: 2, label: 'Raf 200 · 2 Raf' },
+  SHELF_3_200: { type: 'shelf', widthCm: 200, shelfCount: 3, label: 'Raf 200 · 3 Raf' },
   DOOR_100: { type: 'door', widthCm: 100, label: 'Depo Kapısı 100' },
 
   COUNTER_100: { type: 'counter', widthCm: 100, depthCm: 50, heightCm: 100, label: 'Banko 100' },

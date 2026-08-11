@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { STAND_DIMENSIONS } from './catalog.js';
+import { SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createRectSelection } from './rectSelection.js';
@@ -478,6 +478,12 @@ export function createStandScene(
           moduleIndex,
           (surface) => applyStoredImage(surface),
         );
+      } else if (moduleState.type === 'shelf') {
+        module = createShelfModule(
+          moduleState,
+          moduleIndex,
+          (surface) => applyStoredImage(surface),
+        );
       } else if (moduleState.type === 'door') {
         module = createDoorModule(
           moduleState,
@@ -704,6 +710,7 @@ export function createStandScene(
 
   function getDragModuleLabel(moduleState) {
     const widthCm = Number(moduleState?.widthCm) || 0;
+    if (moduleState?.type === 'shelf') return 'Raf ' + widthCm + ' · ' + (Number(moduleState.shelfCount) || 2) + ' Raf';
     if (moduleState?.type === 'base') return `Baza ${widthCm}`;
     if (moduleState?.type === 'counter') return `Banko ${widthCm}`;
     if (moduleState?.type === 'separator') return `Separatör ${widthCm}`;
@@ -759,7 +766,11 @@ export function createStandScene(
     if (label) label.textContent = getDragModuleLabel(moduleState);
     if (preview) {
       preview.style.height = moduleState?.type === 'base' ? '22px' : (moduleState?.type === 'counter' ? '28px' : '48px');
-      if (moduleState?.type === 'base') {
+      if (moduleState?.type === 'shelf') {
+        preview.style.background = moduleState.shelfCount === 3
+          ? 'linear-gradient(to bottom,#f7f7f5 0 40%,#ffffff 40% 45%,#c4c9ce 45% 46%,#f7f7f5 46% 55%,#ffffff 55% 60%,#c4c9ce 60% 61%,#f7f7f5 61% 70%,#ffffff 70% 75%,#c4c9ce 75% 76%,#f7f7f5 76% 100%)'
+          : 'linear-gradient(to bottom,#f7f7f5 0 55%,#ffffff 55% 60%,#c4c9ce 60% 61%,#f7f7f5 61% 70%,#ffffff 70% 75%,#c4c9ce 75% 76%,#f7f7f5 76% 100%)';
+      } else if (moduleState?.type === 'base') {
         preview.style.background = 'linear-gradient(to bottom,#ffffff 0 20%,#9aa0a6 20% 29%,#f8fafc 29% 86%,#9aa0a6 86% 100%)';
       } else if (moduleState?.type === 'counter') {
         preview.style.background = 'linear-gradient(to bottom,#eef2f6 0 16%,#d1d5db 16% 20%,#f8fafc 20% 100%)';
@@ -1993,6 +2004,65 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   );
 
   return { group, surfaces };
+}
+
+function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
+  const built = createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady);
+  const widthM = Number(moduleState.widthCm) / 100;
+  const shelfCount = Number(moduleState.shelfCount) === 3 ? 3 : 2;
+  const shelfDepthM = Number(SHELF_DIMENSIONS.projectionCm) / 100;
+  const shelfThicknessM = Number(SHELF_DIMENSIONS.thicknessCm) / 100;
+  const wallDepthM = Number(STAND_DIMENSIONS.depth);
+  const innerWidthM = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
+  const shelfHeightsCm = SHELF_DIMENSIONS.heightsByCountCm[shelfCount] ?? [];
+
+  built.group.userData.type = 'shelf';
+  built.group.userData.shelfCount = shelfCount;
+  built.surfaces.forEach((surface) => {
+    surface.userData.moduleType = 'shelf';
+    surface.userData.shelfCount = shelfCount;
+  });
+
+  const shelfMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 0.72,
+    metalness: 0,
+  });
+  const frameMaterial = new THREE.MeshStandardMaterial({
+    color: FRAME_COLOR,
+    metalness: 0.68,
+    roughness: 0.28,
+  });
+
+  shelfHeightsCm.forEach((heightCm) => {
+    const seamHeightM = Number(heightCm) / 100;
+    const shelf = new THREE.Mesh(
+      new THREE.BoxGeometry(innerWidthM, shelfThicknessM, shelfDepthM),
+      shelfMaterial.clone(),
+    );
+    shelf.position.set(
+      0,
+      seamHeightM + shelfThicknessM / 2,
+      wallDepthM / 2 + shelfDepthM / 2,
+    );
+    shelf.castShadow = true;
+    shelf.receiveShadow = true;
+    built.group.add(shelf);
+
+    const frontProfile = new THREE.Mesh(
+      new THREE.BoxGeometry(innerWidthM, 0.025, 0.025),
+      frameMaterial.clone(),
+    );
+    frontProfile.position.set(
+      0,
+      seamHeightM + 0.0125,
+      wallDepthM / 2 + shelfDepthM - 0.0125,
+    );
+    frontProfile.castShadow = true;
+    built.group.add(frontProfile);
+  });
+
+  return built;
 }
 
 function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {

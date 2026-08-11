@@ -250,8 +250,8 @@ FAZ 1 tabanı; düz/sırt duvar, sahne ölçüsü, katalog, tasarım araçları,
 
 ## Planlanan yeni modül geliştirme sırası
 
-1. Baza
-2. Raf
+1. Baza — tamamlandı
+2. Raf — tamamlandı
 3. Koltuk
 4. Masa Sandalye Takımı
 5. Bar Taburesi

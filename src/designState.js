@@ -67,6 +67,23 @@ export function createShowcaseModuleState(type, widthCm = 100) {
   };
 }
 
+export function createShelfModuleState(widthCm, shelfCount = 2) {
+  const width = Number(widthCm);
+  const count = Number(shelfCount);
+  if (![100, 150, 200].includes(width) || ![2, 3].includes(count)) return null;
+
+  return {
+    id: createId('module'),
+    type: 'shelf',
+    widthCm: width,
+    shelfCount: count,
+    strips: Array.from(
+      { length: STRIP_COUNT },
+      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
+    ),
+  };
+}
+
 export function createDoorModuleState(widthCm = 100) {
   if (Number(widthCm) !== 100) return null;
 

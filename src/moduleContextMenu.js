@@ -8,6 +8,7 @@ const MODULE_LABELS = {
   door: 'Depo Kapısı',
   counter: 'Banko',
   base: 'Baza',
+  shelf: 'Raf',
 };
 
 const PICKER_MODULE_KEYS = [
@@ -20,6 +21,12 @@ const PICKER_MODULE_KEYS = [
   'DOOR_100',
   'SHOWCASE_3_100',
   'SHOWCASE_2_100',
+  'SHELF_3_200',
+  'SHELF_2_200',
+  'SHELF_3_150',
+  'SHELF_2_150',
+  'SHELF_3_100',
+  'SHELF_2_100',
 ];
 
 // Kullanıcı komutları kameraya göre değil, modülün ön yüzündeki görsel
@@ -209,6 +216,27 @@ export function createModuleContextMenu({
     return preview;
   }
 
+  function createShelfPreview(module) {
+    const preview = createPanelPreview(module.widthCm);
+    const panel = preview.querySelector('.module-card-flat-panel');
+    if (!panel) return preview;
+    panel.style.position = 'relative';
+    const positions = Number(module.shelfCount) === 3 ? [71.5, 57.2, 42.9] : [71.5, 57.2];
+    positions.forEach((topPercent) => {
+      const shelf = document.createElement('span');
+      shelf.style.position = 'absolute';
+      shelf.style.left = '-3px';
+      shelf.style.right = '-10px';
+      shelf.style.top = topPercent + '%';
+      shelf.style.height = '4px';
+      shelf.style.border = '1px solid #9aa0a6';
+      shelf.style.background = '#ffffff';
+      shelf.style.boxShadow = '2px 2px 2px rgba(15,23,42,.14)';
+      panel.appendChild(shelf);
+    });
+    return preview;
+  }
+
   function createDoorPreview(widthCm) {
     const preview = document.createElement('div');
     preview.className = 'module-card-preview';
@@ -248,6 +276,7 @@ export function createModuleContextMenu({
   }
 
   function createModulePreview(module) {
+    if (module.type === 'shelf') return createShelfPreview(module);
     if (module.type === 'separator') return createSeparatorPreview(module.widthCm);
     if (module.type === 'door') return createDoorPreview(module.widthCm);
     if (module.type === 'showcase-2' || module.type === 'showcase-3') {
