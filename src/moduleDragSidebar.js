@@ -89,7 +89,7 @@ export function createModuleDragSidebar({
 
   const hint = document.createElement('p');
   hint.className = 'module-drag-hint';
-  hint.textContent = 'Kartı tutup 3D sahnedeki istediğin aktif duvara bırak.';
+  hint.textContent = 'Kartı sahneye sürükle · R: 0° / 90° yön değiştir · 50 cm grid';
 
   const grid = document.createElement('div');
   grid.className = 'module-drag-grid';
@@ -99,6 +99,21 @@ export function createModuleDragSidebar({
   let enabled = false;
   let activeCard = null;
   let activeModuleState = null;
+  let activeRotationZDeg = 0;
+  let rotationLocked = false;
+  let lastClientX = null;
+  let lastClientY = null;
+
+  function resetDragState() {
+    activeCard?.classList.remove('is-dragging');
+    viewport.closest('.viewport-wrap')?.classList.remove('catalog-drag-active');
+    activeCard = null;
+    activeModuleState = null;
+    activeRotationZDeg = 0;
+    rotationLocked = false;
+    lastClientX = null;
+    lastClientY = null;
+  }
 
   const cards = DRAGGABLE_MODULE_KEYS
     .map((moduleKey) => ({ moduleKey, module: MODULE_CATALOG[moduleKey] }))
@@ -130,6 +145,8 @@ export function createModuleDragSidebar({
 
         activeCard = card;
         activeModuleState = state;
+        activeRotationZDeg = 0;
+        rotationLocked = false;
         card.classList.add('is-dragging');
         viewport.closest('.viewport-wrap')?.classList.add('catalog-drag-active');
         event.dataTransfer.effectAllowed = 'copy';
@@ -137,10 +154,7 @@ export function createModuleDragSidebar({
       });
 
       card.addEventListener('dragend', () => {
-        activeCard?.classList.remove('is-dragging');
-        viewport.closest('.viewport-wrap')?.classList.remove('catalog-drag-active');
-        activeCard = null;
-        activeModuleState = null;
+        resetDragState();
         onCancel?.();
       });
 
@@ -152,24 +166,47 @@ export function createModuleDragSidebar({
     if (!activeModuleState) return;
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
-    onPreview?.(activeModuleState, event.clientX, event.clientY);
+    lastClientX = event.clientX;
+    lastClientY = event.clientY;
+    onPreview?.(
+      activeModuleState,
+      event.clientX,
+      event.clientY,
+      activeRotationZDeg,
+      rotationLocked,
+    );
   });
 
   viewport.addEventListener('drop', (event) => {
     if (!activeModuleState) return;
     event.preventDefault();
     const state = activeModuleState;
-    activeCard?.classList.remove('is-dragging');
-    viewport.closest('.viewport-wrap')?.classList.remove('catalog-drag-active');
-    activeCard = null;
-    activeModuleState = null;
-    onDrop?.(state, event.clientX, event.clientY);
+    const rotationZDeg = activeRotationZDeg;
+    const isRotationLocked = rotationLocked;
+    resetDragState();
+    onDrop?.(state, event.clientX, event.clientY, rotationZDeg, isRotationLocked);
   });
 
   viewport.addEventListener('dragleave', (event) => {
     if (!activeModuleState) return;
     if (event.relatedTarget && viewport.contains(event.relatedTarget)) return;
     onCancel?.();
+  });
+
+  window.addEventListener('keydown', (event) => {
+    if (!activeModuleState || String(event.key).toLowerCase() !== 'r') return;
+    event.preventDefault();
+    activeRotationZDeg = activeRotationZDeg === 90 ? 0 : 90;
+    rotationLocked = true;
+    if (Number.isFinite(lastClientX) && Number.isFinite(lastClientY)) {
+      onPreview?.(
+        activeModuleState,
+        lastClientX,
+        lastClientY,
+        activeRotationZDeg,
+        rotationLocked,
+      );
+    }
   });
 
   function setEnabled(nextEnabled) {
