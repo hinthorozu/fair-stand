@@ -2743,10 +2743,16 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
   const topThicknessM = 0.04;
   const topOverhangM = 0.02;
-  const frameHeightM = Math.max(heightM - topThicknessM, profileM * 5);
-  const panelHeightM = Math.max((frameHeightM - profileM * 3) / 2, 0.05);
-  const frontPanelWidthM = Math.max(widthM - profileM * 2, 0.05);
-  const sidePanelWidthM = Math.max(depthM - profileM * 2, 0.05);
+  const frameHeightM = Math.max(heightM - topThicknessM, profileM * 3);
+  // Banko panel aralıkları duvar panel sistemiyle birebir aynı mantığı kullanır.
+  const railHeightM = PANEL_RAIL_HEIGHT_M;
+  const stripHeightM = frameHeightM / 2;
+  const panelHeightM = Math.max(
+    stripHeightM - railHeightM - PANEL_VERTICAL_CLEARANCE_M,
+    0.05,
+  );
+  const frontPanelWidthM = Math.max(widthM - profileM * 2 - 0.012, 0.05);
+  const sidePanelWidthM = Math.max(depthM - profileM * 2 - 0.012, 0.05);
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -2787,9 +2793,10 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     });
   });
 
-  // Bottom, middle and top rails create two stacked panel openings.
-  const railYs = [profileM / 2, frameHeightM / 2, frameHeightM - profileM / 2];
-  const frontRailGeometry = new THREE.BoxGeometry(frontPanelWidthM, profileM, profileM);
+  // Duvar modülündeki gibi 4 mm yatay raylar: alt, orta ve üst.
+  const railYs = [0, stripHeightM, frameHeightM];
+  const frameDepthM = Number(STAND_DIMENSIONS.frameDepth);
+  const frontRailGeometry = new THREE.BoxGeometry(frontPanelWidthM, railHeightM, frameDepthM);
   railYs.forEach((y) => {
     addProfile(
       frontRailGeometry.clone(),
@@ -2797,7 +2804,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     );
   });
 
-  const sideRailGeometry = new THREE.BoxGeometry(profileM, profileM, sidePanelWidthM);
+  const sideRailGeometry = new THREE.BoxGeometry(frameDepthM, railHeightM, sidePanelWidthM);
   [-1, 1].forEach((xSide) => {
     railYs.forEach((y) => {
       addProfile(
@@ -2884,8 +2891,8 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     onSurfaceReady?.(surface);
   };
 
-  const lowerY = profileM + panelHeightM / 2;
-  const upperY = frameHeightM - profileM - panelHeightM / 2;
+  const lowerY = stripHeightM / 2;
+  const upperY = stripHeightM + stripHeightM / 2;
   const frontZ = depthM / 2 - profileM - 0.006;
   const leftX = -widthM / 2 + profileM + 0.006;
   const rightX = widthM / 2 - profileM - 0.006;
