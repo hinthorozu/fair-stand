@@ -1,0 +1,39 @@
+name: Add project image load button once
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/add-project-image-load-button-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: python scripts/add-project-image-load-button.py
+      - run: npm test
+      - run: npm run build
+
+      - name: Commit and push
+        run: |
+          rm .github/workflows/add-project-image-load-button-once.yml
+          rm scripts/add-project-image-load-button.py
+          git config user.name "OpenAI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html src/main.js .github/workflows/add-project-image-load-button-once.yml scripts/add-project-image-load-button.py
+          git commit -m "Add manual project image reload button"
+          git push origin ROG
