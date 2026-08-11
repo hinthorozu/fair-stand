@@ -67,6 +67,23 @@ export function createShowcaseModuleState(type, widthCm = 100) {
   };
 }
 
+export function createDoorModuleState(widthCm = 100) {
+  if (Number(widthCm) !== 100) return null;
+
+  return {
+    id: createId('module'),
+    type: 'door',
+    widthCm: 100,
+    // Kapı 2 m yüksekliğinde (alt 4 x 50 cm), üstte 3 x 50 cm panel kalır.
+    strips: Array.from(
+      { length: 3 },
+      (_, index) => createEditablePanelState(index + 4, DEFAULT_PANEL_COLOR),
+    ),
+    // Kapı kanadı tek başına renk ve görsel alabilen bağımsız bir yüzeydir.
+    surface: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+  };
+}
+
 export function duplicateModuleState(moduleState) {
   if (!moduleState) return null;
   const duplicate = JSON.parse(JSON.stringify(moduleState));
@@ -75,7 +92,7 @@ export function duplicateModuleState(moduleState) {
     duplicate.strips = duplicate.strips.map((strip, stripIndex) => ({
       ...strip,
       id: createId('surface'),
-      stripIndex,
+      stripIndex: Number.isInteger(strip.stripIndex) ? strip.stripIndex : stripIndex,
       imageTransform: strip.imageTransform ? { ...strip.imageTransform } : createDefaultImageTransform(),
     }));
   }
@@ -83,6 +100,15 @@ export function duplicateModuleState(moduleState) {
     duplicate.surface = {
       ...duplicate.surface,
       id: createId('surface'),
+      ...(
+        'imageAssetId' in duplicate.surface
+          ? {
+              imageTransform: duplicate.surface.imageTransform
+                ? { ...duplicate.surface.imageTransform }
+                : createDefaultImageTransform(),
+            }
+          : {}
+      ),
     };
   }
   return duplicate;

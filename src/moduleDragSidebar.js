@@ -7,6 +7,7 @@ const DRAGGABLE_MODULE_KEYS = [
   'PANEL_50',
   'SEPARATOR_100',
   'SEPARATOR_50',
+  'DOOR_100',
   'SHOWCASE_3_100',
   'SHOWCASE_2_100',
 ];
@@ -32,6 +33,8 @@ function ensureStyles() {
     .module-drag-showcase { position:relative; height:68px; border:3px solid #8a929a; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-showcase::before { content:''; position:absolute; left:3px; right:3px; top:21px; bottom:10px; border:1px solid #9fbfa5; background:rgba(205,232,209,.5); }
     .module-drag-showcase[data-eyes='3']::after { content:''; position:absolute; left:4px; right:4px; top:42px; height:1px; background:#9fbfa5; }
+    .module-drag-door { position:relative; height:68px; border:3px solid #8a929a; background:linear-gradient(to bottom,#f7f7f5 0 13%,#c4c9ce 13% 14%,#f7f7f5 14% 27%,#c4c9ce 27% 28%,#f7f7f5 28% 42%,#747b82 42% 45%,#e5e7eb 45% 100%); box-shadow:0 2px 5px rgba(15,23,42,.08); }
+    .module-drag-door::after { content:''; position:absolute; right:3px; bottom:19px; width:3px; height:3px; border-radius:50%; background:#4b5563; }
     .viewport-wrap.catalog-drag-active { outline:2px solid rgba(249,115,22,.2); outline-offset:-2px; }
   `;
   document.head.appendChild(style);
@@ -50,6 +53,14 @@ function createPreview(module) {
   if (module.type === 'separator') {
     const body = document.createElement('div');
     body.className = 'module-drag-separator';
+    body.style.width = `${previewWidthPx(module.widthCm)}px`;
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'door') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-door';
     body.style.width = `${previewWidthPx(module.widthCm)}px`;
     preview.appendChild(body);
     return preview;

@@ -390,6 +390,12 @@ export function createStandScene(
       let module;
       if (moduleState.type === 'separator') {
         module = createSeparatorModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'door') {
+        module = createDoorModule(
+          moduleState,
+          moduleIndex,
+          (surface) => applyStoredImage(surface),
+        );
       } else if (moduleState.type === 'showcase-2' || moduleState.type === 'showcase-3') {
         module = createShowcaseModule(
           moduleState,
@@ -594,6 +600,7 @@ export function createStandScene(
   function getDragModuleLabel(moduleState) {
     const widthCm = Number(moduleState?.widthCm) || 0;
     if (moduleState?.type === 'separator') return `Separatör ${widthCm}`;
+    if (moduleState?.type === 'door') return `Kapı ${widthCm}`;
     if (moduleState?.type === 'showcase-3') return `3 Gözlü Vitrin ${widthCm}`;
     if (moduleState?.type === 'showcase-2') return `2 Gözlü Vitrin ${widthCm}`;
     return `Düz Panel ${widthCm}`;
@@ -646,6 +653,8 @@ export function createStandScene(
     if (preview) {
       if (moduleState?.type === 'separator') {
         preview.style.background = 'repeating-linear-gradient(to bottom,#c79b63 0 2px,#eef2f6 2px 4px)';
+      } else if (moduleState?.type === 'door') {
+        preview.style.background = 'linear-gradient(to bottom,#f7f7f5 0 40%,#8a929a 40% 44%,#e5e7eb 44% 100%)';
       } else if (moduleState?.type === 'showcase-2' || moduleState?.type === 'showcase-3') {
         preview.style.background = 'linear-gradient(to bottom,#f7f7f5 0 32%,#d8eadb 32% 72%,#f7f7f5 72% 100%)';
       } else {
@@ -1522,6 +1531,193 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
       widthCm,
       stripIndex,
       stripNumber: stripIndex + 1,
+      surfaceId: surfaceState.id,
+      surfaceState,
+      selectionFrame,
+      backing,
+    };
+    group.add(surface);
+    surfaces.push(surface);
+    onSurfaceReady?.(surface);
+  }
+
+  return { group, surfaces };
+}
+
+
+function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
+  const {
+    height,
+    depth,
+    stripHeight,
+    frameWidth,
+    frameDepth,
+  } = STAND_DIMENSIONS;
+
+  const widthCm = Number(moduleState.widthCm) || 100;
+  const widthM = widthCm / 100;
+  const doorHeight = stripHeight * 4;
+  const upperPanelCount = 3;
+  const railHeight = 0.026;
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: moduleState.type,
+    widthCm,
+  };
+
+  const frameMaterial = new THREE.MeshStandardMaterial({
+    color: FRAME_COLOR,
+    metalness: 0.68,
+    roughness: 0.28,
+  });
+
+  const profileGeometry = new THREE.BoxGeometry(frameWidth, height, frameDepth);
+  for (const side of [-1, 1]) {
+    const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
+    profile.position.set(side * (widthM / 2 - frameWidth / 2), height / 2, 0);
+    profile.castShadow = true;
+    group.add(profile);
+  }
+
+  const railGeometry = new THREE.BoxGeometry(
+    Math.max(widthM - frameWidth * 2, 0.02),
+    railHeight,
+    frameDepth,
+  );
+  const railYs = [
+    0,
+    doorHeight,
+    doorHeight + stripHeight,
+    doorHeight + stripHeight * 2,
+    height,
+  ];
+  railYs.forEach((y) => {
+    const rail = new THREE.Mesh(railGeometry.clone(), frameMaterial.clone());
+    rail.position.set(0, y, 0);
+    rail.castShadow = true;
+    group.add(rail);
+  });
+
+  const surfaces = [];
+  const innerWidth = Math.max(widthM - frameWidth * 2 - 0.012, 0.02);
+  const panelDepth = Math.max(depth - 0.026, 0.035);
+
+  // Alt bölüm: kapalı kapı kanadı. Sahne düzleminden dışarı açılmaz.
+  const doorState = moduleState.surface;
+  const doorPanelHeight = Math.max(doorHeight - railHeight - 0.018, 0.1);
+  const doorBacking = new THREE.Mesh(
+    new THREE.BoxGeometry(innerWidth, doorPanelHeight, panelDepth),
+    new THREE.MeshStandardMaterial({
+      color: PANEL_BACK_COLOR,
+      roughness: 0.74,
+    }),
+  );
+  doorBacking.position.set(0, doorHeight / 2, 0);
+  doorBacking.castShadow = true;
+  doorBacking.receiveShadow = true;
+  group.add(doorBacking);
+
+  const doorSurface = new THREE.Mesh(
+    new THREE.PlaneGeometry(innerWidth, doorPanelHeight),
+    new THREE.MeshStandardMaterial({
+      color: doorState?.imageAssetId ? 0xffffff : (doorState?.color ?? '#ffffff'),
+      roughness: 0.72,
+      metalness: 0,
+      side: THREE.DoubleSide,
+      emissive: 0x000000,
+      emissiveIntensity: 0,
+    }),
+  );
+  doorSurface.position.set(0, doorHeight / 2, depth / 2 + 0.0015);
+  const doorSelectionFrame = createSelectionFrame(innerWidth, doorPanelHeight);
+  doorSelectionFrame.visible = false;
+  doorSurface.add(doorSelectionFrame);
+  doorSurface.userData = {
+    kind: 'surface',
+    moduleType: 'door',
+    selectionMode: 'module',
+    acceptsImage: true,
+    moduleIndex,
+    moduleId: moduleState.id,
+    widthCm,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceRole: 'door',
+    surfaceId: doorState.id,
+    surfaceState: doorState,
+    selectionFrame: doorSelectionFrame,
+    backing: doorBacking,
+  };
+  group.add(doorSurface);
+  surfaces.push(doorSurface);
+  onSurfaceReady?.(doorSurface);
+
+  const handle = new THREE.Mesh(
+    new THREE.BoxGeometry(0.13, 0.032, 0.032),
+    new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.55, roughness: 0.3 }),
+  );
+  handle.position.set(innerWidth / 2 - 0.13, doorHeight * 0.52, depth / 2 + 0.025);
+  handle.castShadow = true;
+  group.add(handle);
+
+  // Üst bölüm: fiziksel olarak 4., 5. ve 6. strip indexlerine denk gelen 3 panel.
+  for (let index = 0; index < upperPanelCount; index += 1) {
+    const surfaceState = moduleState.strips[index];
+    if (!surfaceState) continue;
+    const centerY = doorHeight + index * stripHeight + stripHeight / 2;
+    const panelHeight = stripHeight - railHeight - 0.012;
+
+    const backing = new THREE.Mesh(
+      new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
+      new THREE.MeshStandardMaterial({
+        color: surfaceState.isGlass ? GLASS_BACK_COLOR : PANEL_BACK_COLOR,
+        roughness: surfaceState.isGlass ? 0.22 : 0.74,
+        transparent: Boolean(surfaceState.isGlass),
+        opacity: surfaceState.isGlass ? GLASS_BACK_OPACITY : 1,
+        depthWrite: !surfaceState.isGlass,
+      }),
+    );
+    backing.position.set(0, centerY, 0);
+    backing.castShadow = !surfaceState.isGlass;
+    backing.receiveShadow = true;
+    group.add(backing);
+
+    const surface = new THREE.Mesh(
+      new THREE.PlaneGeometry(innerWidth, panelHeight),
+      new THREE.MeshStandardMaterial({
+        color: surfaceState.imageAssetId
+          ? 0xffffff
+          : (surfaceState.isGlass ? GLASS_SURFACE_COLOR : surfaceState.color),
+        roughness: surfaceState.isGlass ? 0.16 : 0.72,
+        metalness: 0,
+        transparent: Boolean(surfaceState.isGlass),
+        opacity: surfaceState.isGlass ? GLASS_SURFACE_OPACITY : 1,
+        depthWrite: !surfaceState.isGlass,
+        side: THREE.DoubleSide,
+        emissive: 0x000000,
+        emissiveIntensity: 0,
+      }),
+    );
+    surface.position.set(0, centerY, depth / 2 + 0.0015);
+
+    const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
+    selectionFrame.visible = false;
+    surface.add(selectionFrame);
+
+    surface.userData = {
+      kind: 'surface',
+      moduleType: 'door',
+      selectionMode: 'panel',
+      acceptsImage: true,
+      moduleIndex,
+      moduleId: moduleState.id,
+      widthCm,
+      stripIndex: surfaceState.stripIndex,
+      stripNumber: index + 1,
+      surfaceRole: 'upper-panel',
       surfaceId: surfaceState.id,
       surfaceState,
       selectionFrame,

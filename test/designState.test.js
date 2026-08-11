@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   applyColorOverride,
+  createDoorModuleState,
   createFlatPanelModuleState,
   createSeparatorModuleState,
   createShowcaseModuleState,
@@ -169,4 +170,39 @@ test('duplicating a showcase preserves panel design with independent ids', () =>
   duplicate.strips.forEach((strip, index) => {
     assert.notEqual(strip.id, original.strips[index].id);
   });
+});
+
+
+test('door state has three upper panels and one independent editable door surface', () => {
+  const door = createDoorModuleState(100);
+
+  assert.equal(door.type, 'door');
+  assert.equal(door.widthCm, 100);
+  assert.deepEqual(door.strips.map((strip) => strip.stripIndex), [4, 5, 6]);
+  assert.equal(door.strips.length, 3);
+  assert.equal(door.surface.color, '#ffffff');
+  assert.equal(door.surface.imageAssetId, null);
+  assert.equal(door.surface.imageTransform.mode, 'single');
+  assert.equal(createDoorModuleState(50), null);
+});
+
+test('door surface color and image state is independent from upper panels and survives duplication', () => {
+  const door = createDoorModuleState(100);
+  door.surface.imageAssetId = 'door-art';
+  door.surface.imageTransform.fit = 'cover';
+  door.strips[1].color = '#123456';
+
+  const duplicate = duplicateModuleState(door);
+
+  assert.notEqual(duplicate.id, door.id);
+  assert.notEqual(duplicate.surface.id, door.surface.id);
+  assert.equal(duplicate.surface.imageAssetId, 'door-art');
+  assert.equal(duplicate.surface.imageTransform.fit, 'cover');
+  assert.equal(duplicate.strips[1].color, '#123456');
+  assert.deepEqual(duplicate.strips.map((strip) => strip.stripIndex), [4, 5, 6]);
+
+  applyColorOverride(duplicate.surface, '#ff6600');
+  assert.equal(duplicate.surface.color, '#ff6600');
+  assert.equal(duplicate.surface.imageAssetId, null);
+  assert.equal(door.surface.imageAssetId, 'door-art');
 });

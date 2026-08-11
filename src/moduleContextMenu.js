@@ -15,6 +15,7 @@ const PICKER_MODULE_KEYS = [
   'PANEL_50',
   'SEPARATOR_100',
   'SEPARATOR_50',
+  'DOOR_100',
   'SHOWCASE_3_100',
   'SHOWCASE_2_100',
 ];
@@ -206,8 +207,47 @@ export function createModuleContextMenu({
     return preview;
   }
 
+  function createDoorPreview(widthCm) {
+    const preview = document.createElement('div');
+    preview.className = 'module-card-preview';
+
+    const frame = document.createElement('div');
+    frame.className = 'module-card-flat-panel';
+    frame.style.position = 'relative';
+    frame.style.width = `${Math.max(30, Math.round((widthCm / 200) * 118))}px`;
+
+    for (let index = 0; index < 3; index += 1) {
+      const strip = document.createElement('span');
+      strip.className = 'module-card-strip';
+      strip.style.flex = '1 1 0';
+      frame.appendChild(strip);
+    }
+
+    const door = document.createElement('div');
+    door.style.position = 'relative';
+    door.style.flex = '4 4 0';
+    door.style.minHeight = '0';
+    door.style.borderTop = '3px solid #747b82';
+    door.style.background = '#e5e7eb';
+
+    const handle = document.createElement('span');
+    handle.style.position = 'absolute';
+    handle.style.right = '6px';
+    handle.style.top = '50%';
+    handle.style.width = '4px';
+    handle.style.height = '4px';
+    handle.style.borderRadius = '50%';
+    handle.style.background = '#4b5563';
+    door.appendChild(handle);
+    frame.appendChild(door);
+
+    preview.appendChild(frame);
+    return preview;
+  }
+
   function createModulePreview(module) {
     if (module.type === 'separator') return createSeparatorPreview(module.widthCm);
+    if (module.type === 'door') return createDoorPreview(module.widthCm);
     if (module.type === 'showcase-2' || module.type === 'showcase-3') {
       return createShowcasePreview(module);
     }
