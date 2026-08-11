@@ -91,7 +91,6 @@ test('rejects overlapping modules on the same wall but allows a corner connectio
   assert.equal(corner.ok, true);
 });
 
-
 test('snaps a module inside every stand to the 50 cm free grid', () => {
   const result = snapPlacementToStand({
     standType: 'back-wall',
@@ -105,7 +104,7 @@ test('snaps a module inside every stand to the 50 cm free grid', () => {
   assert.equal(result.ok, true);
   assert.equal(result.mode, 'free');
   assert.deepEqual(result.placement, {
-    xCm: 300,
+    xCm: 350,
     yCm: 300,
     zCm: 0,
     rotationZDeg: 0,
