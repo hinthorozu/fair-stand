@@ -4,15 +4,16 @@ import { MODULE_CATALOG, TABLE_CHAIR_SET_DIMENSIONS } from '../src/catalog.js';
 import { createTableChairSetModuleState } from '../src/designState.js';
 import { snapPlacementToStand } from '../src/modulePlacement.js';
 
-test('masa sandalye takımı 150 x 150 cm sabit footprint kullanır', () => {
-  assert.equal(TABLE_CHAIR_SET_DIMENSIONS.widthCm, 150);
-  assert.equal(TABLE_CHAIR_SET_DIMENSIONS.depthCm, 150);
-  assert.equal(MODULE_CATALOG.TABLE_CHAIR_SET.widthCm, 150);
-  assert.equal(MODULE_CATALOG.TABLE_CHAIR_SET.depthCm, 150);
+test('masa sandalye takımı 120 x 120 cm sabit footprint ve 75 cm masa kullanır', () => {
+  assert.equal(TABLE_CHAIR_SET_DIMENSIONS.widthCm, 120);
+  assert.equal(TABLE_CHAIR_SET_DIMENSIONS.depthCm, 120);
+  assert.equal(TABLE_CHAIR_SET_DIMENSIONS.tableDiameterCm, 75);
+  assert.equal(MODULE_CATALOG.TABLE_CHAIR_SET.widthCm, 120);
+  assert.equal(MODULE_CATALOG.TABLE_CHAIR_SET.depthCm, 120);
   const state = createTableChairSetModuleState();
   assert.equal(state.type, 'table-chair-set');
-  assert.equal(state.widthCm, 150);
-  assert.equal(state.depthCm, 150);
+  assert.equal(state.widthCm, 120);
+  assert.equal(state.depthCm, 120);
 });
 
 test('masa sandalye takımı serbest gezer ve duvar iç yüzüne sıfır yanaşır', () => {
