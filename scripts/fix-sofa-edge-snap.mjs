@@ -14,6 +14,7 @@ s = s.replace(
   rotationZDeg,
 }) {`,
 `function createFreePlacement({
+  moduleType = null,
   widthCm,
   depthCm = null,
   pointerXCm,
@@ -23,6 +24,56 @@ s = s.replace(
   standType = null,
   rotationZDeg,
 }) {`,
+);
+
+s = s.replace(
+`function createFreePlacement({
+  widthCm,
+  depthCm = null,
+  pointerXCm,
+  pointerYCm,
+  standXCm,
+  standYCm,
+  standType = null,
+  rotationZDeg,
+}) {`,
+`function createFreePlacement({
+  moduleType = null,
+  widthCm,
+  depthCm = null,
+  pointerXCm,
+  pointerYCm,
+  standXCm,
+  standYCm,
+  standType = null,
+  rotationZDeg,
+}) {`,
+);
+
+s = s.replace(
+`  const freePlacement = strictMovingDepth ? createFreePlacement({
+    widthCm: width,`,
+`  const freePlacement = strictMovingDepth ? createFreePlacement({
+    moduleType,
+    widthCm: width,`,
+);
+
+s = s.replace(
+`export function snapPlacementToStand({
+  standType,
+  widthCm,`,
+`export function snapPlacementToStand({
+  standType,
+  moduleType = null,
+  widthCm,`,
+);
+
+s = s.replace(
+`  const freePlacement = createFreePlacement({
+    widthCm: width,`,
+`  const freePlacement = createFreePlacement({
+    moduleType,
+    widthCm: width,`,
 );
 
 s = s.replace(
@@ -60,7 +111,7 @@ const oldEdgeBlock = `  if (strictDepth) {
     }
   }`;
 
-const newEdgeBlock = `  if (strictDepth) {
+const globalWallEdgeBlock = `  if (strictDepth) {
     const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
     const wallFaceOffsetCm = MODULE_COLLISION_DEPTH_CM / 2;
     const activeWalls = getAllowedWallIds(standType);
@@ -81,17 +132,57 @@ const newEdgeBlock = `  if (strictDepth) {
     }
   }`;
 
-if (!s.includes(newEdgeBlock)) {
-  if (!s.includes(oldEdgeBlock)) throw new Error('edge snap block not found');
-  s = s.replace(oldEdgeBlock, newEdgeBlock);
+const sofaOnlyEdgeBlock = `  if (strictDepth) {
+    const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
+    const useWallInnerFaces = moduleType === 'sofa-set';
+    const wallFaceOffsetCm = MODULE_COLLISION_DEPTH_CM / 2;
+    const activeWalls = useWallInnerFaces ? getAllowedWallIds(standType) : [];
+    const leftEdgeCm = activeWalls.includes('left') ? wallFaceOffsetCm : 0;
+    const rightEdgeCm = activeWalls.includes('right') ? xLimit - wallFaceOffsetCm : xLimit;
+    const backEdgeCm = activeWalls.includes('back') ? wallFaceOffsetCm : 0;
+
+    if (!vertical) {
+      if (xCm - leftEdgeCm <= edgeSnap + EPSILON_CM) xCm = leftEdgeCm;
+      if (rightEdgeCm - (xCm + width) <= edgeSnap + EPSILON_CM) xCm = rightEdgeCm - width;
+      if ((yCm - halfDepth) - backEdgeCm <= edgeSnap + EPSILON_CM) yCm = backEdgeCm + halfDepth;
+      if (yLimit - (yCm + halfDepth) <= edgeSnap + EPSILON_CM) yCm = yLimit - halfDepth;
+    } else {
+      if ((xCm - halfDepth) - leftEdgeCm <= edgeSnap + EPSILON_CM) xCm = leftEdgeCm + halfDepth;
+      if (rightEdgeCm - (xCm + halfDepth) <= edgeSnap + EPSILON_CM) xCm = rightEdgeCm - halfDepth;
+      if (yCm - backEdgeCm <= edgeSnap + EPSILON_CM) yCm = backEdgeCm;
+      if (yLimit - (yCm + width) <= edgeSnap + EPSILON_CM) yCm = yLimit - width;
+    }
+  }`;
+
+if (!s.includes(sofaOnlyEdgeBlock)) {
+  if (s.includes(globalWallEdgeBlock)) s = s.replace(globalWallEdgeBlock, sofaOnlyEdgeBlock);
+  else if (s.includes(oldEdgeBlock)) s = s.replace(oldEdgeBlock, sofaOnlyEdgeBlock);
+  else throw new Error('edge snap block not found');
 }
 
 fs.writeFileSync(path, s);
+
+const scenePath = 'src/scene3d.js';
+let scene = fs.readFileSync(scenePath, 'utf8');
+scene = scene.replace(
+`    const snapped = snapPlacementToStand({
+      standType: stageLayout.standType,
+      widthCm: moduleState.widthCm,`,
+`    const snapped = snapPlacementToStand({
+      standType: stageLayout.standType,
+      moduleType: moduleState.type,
+      widthCm: moduleState.widthCm,`,
+);
+fs.writeFileSync(scenePath, scene);
 
 const testPath = 'test/sofaSet.test.js';
 let t = fs.readFileSync(testPath, 'utf8');
 const marker = 'koltuk takımı duvarın 5 cm iç yüzüne köşede tam oturur';
 if (!t.includes(marker)) {
-  t += `\n\ntest('${marker}', () => {\n  const left = snapPlacementToStand({ standType: 'l-left', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(left.ok, true);\n  assert.equal(left.placement.xCm, 5);\n  assert.equal(left.placement.yCm, 80);\n\n  const right = snapPlacementToStand({ standType: 'l-right', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 480, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(right.ok, true);\n  assert.equal(right.placement.xCm, 445);\n  assert.equal(right.placement.yCm, 80);\n\n  const island = snapPlacementToStand({ standType: 'island', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(island.ok, true);\n  assert.equal(island.placement.xCm, 0);\n  assert.equal(island.placement.yCm, 75);\n});\n`;
-  fs.writeFileSync(testPath, t);
+  t += `\n\ntest('${marker}', () => {\n  const left = snapPlacementToStand({ standType: 'l-left', moduleType: 'sofa-set', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(left.ok, true);\n  assert.equal(left.placement.xCm, 5);\n  assert.equal(left.placement.yCm, 80);\n\n  const right = snapPlacementToStand({ standType: 'l-right', moduleType: 'sofa-set', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 480, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(right.ok, true);\n  assert.equal(right.placement.xCm, 445);\n  assert.equal(right.placement.yCm, 80);\n\n  const island = snapPlacementToStand({ standType: 'island', moduleType: 'sofa-set', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(island.ok, true);\n  assert.equal(island.placement.xCm, 0);\n  assert.equal(island.placement.yCm, 75);\n});\n`;
+} else {
+  t = t.replaceAll("standType: 'l-left', widthCm: 150", "standType: 'l-left', moduleType: 'sofa-set', widthCm: 150");
+  t = t.replaceAll("standType: 'l-right', widthCm: 150", "standType: 'l-right', moduleType: 'sofa-set', widthCm: 150");
+  t = t.replaceAll("standType: 'island', widthCm: 150", "standType: 'island', moduleType: 'sofa-set', widthCm: 150");
 }
+fs.writeFileSync(testPath, t);
