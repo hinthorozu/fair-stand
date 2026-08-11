@@ -21,6 +21,15 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Fix patch template literal
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/apply-shelf-module.mjs')
+          s = p.read_text()
+          s = s.replace("    body.style.width = \\`${previewWidthPx(module.widthCm)}px\\`;", "    body.style.width = previewWidthPx(module.widthCm) + 'px';")
+          p.write_text(s)
+          PY
       - run: node scripts/apply-shelf-module.mjs
       - run: npm test
       - run: npm run build
