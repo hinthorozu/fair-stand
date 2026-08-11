@@ -52,7 +52,7 @@ const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
 const STAGE_HOME_DIRECTION = new THREE.Vector3(1, 1.05, 1).normalize();
 
 function isFloorFixtureType(type) {
-  return type === 'counter' || type === 'base';
+  return type === 'counter' || type === 'base' || type === 'sofa-set';
 }
 
 export function createStandScene(
@@ -478,6 +478,8 @@ export function createStandScene(
           moduleIndex,
           (surface) => applyStoredImage(surface),
         );
+      } else if (moduleState.type === 'sofa-set') {
+        module = createSofaSetModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'shelf') {
         module = createShelfModule(
           moduleState,
@@ -711,6 +713,7 @@ export function createStandScene(
   function getDragModuleLabel(moduleState) {
     const widthCm = Number(moduleState?.widthCm) || 0;
     if (moduleState?.type === 'shelf') return 'Raf ' + widthCm + ' · ' + (Number(moduleState.shelfCount) || 2) + ' Raf';
+    if (moduleState?.type === 'sofa-set') return 'Koltuk Takımı';
     if (moduleState?.type === 'base') return `Baza ${widthCm}`;
     if (moduleState?.type === 'counter') return `Banko ${widthCm}`;
     if (moduleState?.type === 'separator') return `Separatör ${widthCm}`;
@@ -765,8 +768,10 @@ export function createStandScene(
     const label = dragBadge.querySelector('[data-role="label"]');
     if (label) label.textContent = getDragModuleLabel(moduleState);
     if (preview) {
-      preview.style.height = moduleState?.type === 'base' ? '22px' : (moduleState?.type === 'counter' ? '28px' : '48px');
-      if (moduleState?.type === 'shelf') {
+      preview.style.height = moduleState?.type === 'sofa-set' ? '34px' : (moduleState?.type === 'base' ? '22px' : (moduleState?.type === 'counter' ? '28px' : '48px'));
+      if (moduleState?.type === 'sofa-set') {
+        preview.style.background = 'linear-gradient(to bottom,#f8fafc 0 45%,#9aa0a6 45% 52%,#f8fafc 52% 100%)';
+      } else if (moduleState?.type === 'shelf') {
         preview.style.background = moduleState.shelfCount === 3
           ? 'linear-gradient(to bottom,#f7f7f5 0 40%,#ffffff 40% 45%,#c4c9ce 45% 46%,#f7f7f5 46% 55%,#ffffff 55% 60%,#c4c9ce 60% 61%,#f7f7f5 61% 70%,#ffffff 70% 75%,#c4c9ce 75% 76%,#f7f7f5 76% 100%)'
           : 'linear-gradient(to bottom,#f7f7f5 0 55%,#ffffff 55% 60%,#c4c9ce 60% 61%,#f7f7f5 61% 70%,#ffffff 70% 75%,#c4c9ce 75% 76%,#f7f7f5 76% 100%)';
@@ -1738,6 +1743,73 @@ export function createStandScene(
     getSelectedSurface: () => [...selectedSurfaces][0] ?? null,
     getSelectedSurfaces: () => [...selectedSurfaces],
   };
+}
+
+function createSofaSetModule(moduleState, moduleIndex) {
+  const widthM = Number(moduleState.widthCm || 250) / 100;
+  const depthM = Number(moduleState.depthCm || 250) / 100;
+  const group = new THREE.Group();
+  group.userData = { kind: 'module', moduleIndex, moduleId: moduleState.id, type: 'sofa-set', widthCm: Number(moduleState.widthCm || 250), depthCm: Number(moduleState.depthCm || 250), heightCm: Number(moduleState.heightCm || 80) };
+
+  const upholstery = [];
+  const material = new THREE.MeshStandardMaterial({ color: moduleState.surface?.color ?? '#ffffff', roughness: 0.68, metalness: 0, emissive: 0x000000, emissiveIntensity: 0 });
+  const addUpholsteredBox = (w, h, d, x, y, z, radiusHint = false) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material.clone());
+    mesh.position.set(x, y, z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    if (radiusHint) mesh.scale.set(0.98, 1, 0.98);
+    group.add(mesh);
+    upholstery.push(mesh);
+    return mesh;
+  };
+
+  const addSofa = ({ x, z, seatWidth, seatDepth, twoSeat = false, facing = 'front' }) => {
+    const seatY = 0.29;
+    const seatH = 0.18;
+    const armW = 0.12;
+    const backH = 0.62;
+    const backT = 0.13;
+    const dir = facing === 'front' ? 1 : -1;
+    const backZ = z - dir * (seatDepth / 2 - backT / 2);
+    addUpholsteredBox(seatWidth - armW * 2, seatH, seatDepth - 0.16, x, seatY, z + dir * 0.04, true);
+    addUpholsteredBox(seatWidth, backH, backT, x, backH / 2, backZ, true);
+    addUpholsteredBox(armW, 0.52, seatDepth, x - seatWidth / 2 + armW / 2, 0.26, z, true);
+    addUpholsteredBox(armW, 0.52, seatDepth, x + seatWidth / 2 - armW / 2, 0.26, z, true);
+    if (twoSeat) {
+      const seam = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.185, seatDepth - 0.2), new THREE.MeshStandardMaterial({ color: 0xcfd4da, roughness: 0.7 }));
+      seam.position.set(x, seatY + 0.004, z + dir * 0.04);
+      group.add(seam);
+    }
+  };
+
+  addSofa({ x: 0, z: -depthM / 2 + 0.48, seatWidth: 1.60, seatDepth: 0.78, twoSeat: true, facing: 'front' });
+  addSofa({ x: -0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
+  addSofa({ x: 0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
+
+  const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.30, 0.018, 48), new THREE.MeshPhysicalMaterial({ color: 0xd7e9ed, transparent: true, opacity: 0.42, roughness: 0.12, metalness: 0, transmission: 0.28, depthWrite: false }));
+  glass.position.set(0, 0.42, 0.10);
+  glass.castShadow = false;
+  glass.receiveShadow = true;
+  group.add(glass);
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.40, 20), new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.28 }));
+  stem.position.set(0, 0.21, 0.10);
+  group.add(stem);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32), new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.3 }));
+  base.position.set(0, 0.018, 0.10);
+  group.add(base);
+
+  const selectable = upholstery[0];
+  const selectionFrame = createSelectionFrame(1.36, 0.18);
+  selectionFrame.visible = false;
+  selectable.add(selectionFrame);
+  selectable.userData = { kind: 'surface', moduleType: 'sofa-set', selectionMode: 'module', acceptsImage: false, moduleIndex, moduleId: moduleState.id, widthCm: Number(moduleState.widthCm || 250), stripIndex: null, stripNumber: null, surfaceRole: 'upholstery', surfaceId: moduleState.surface?.id, surfaceState: moduleState.surface, selectionFrame, colorTargets: upholstery };
+  upholstery.forEach((mesh, index) => {
+    if (index === 0) return;
+    mesh.userData = { ...selectable.userData, surfaceId: `${moduleState.surface?.id}-${index}`, selectionFrame: null };
+  });
+
+  return { group, surfaces: upholstery };
 }
 
 function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {

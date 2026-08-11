@@ -76,3 +76,10 @@ Bu dosyadaki maddeler, kullanıcı açıkça aksi bir davranış istemedikçe t�
 - Raf tablası 30 cm öne çıkar, 3 cm kalınlığında sabit beyazdır ve ön kenarında Maxima profil görünümü bulunur.
 - Raf modülünün yedi paneli normal panel davranışını korur; renk, görsel ve cam özellikleri uygulanabilir. Raf tablaları panel yüzeyi değildir ve sabit beyaz kalır.
 - Raf modülü düz panel/vitrin gibi normal duvar yerleşim sistemini kullanır; banko/baza tipi serbest zemin fixture olarak ele alınmaz.
+
+
+## Koltuk Takımı standardı
+
+- Tek modül olarak 1 adet yaklaşık 160 cm ikili koltuk, 2 adet yaklaşık 65 cm tekli koltuk ve ortada sabit cam sehpa içerir.
+- Koltuk döşemeleri tek ortak renk state'iyle değişir; cam sehpa sabittir ve renk/görsel almaz.
+- Modül serbest yerleşir; 250 x 250 cm collision footprint kullanır ve 0/90/180/270 dönüşleri destekler.

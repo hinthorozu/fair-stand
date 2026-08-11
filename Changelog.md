@@ -595,3 +595,10 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 459. Raf modülü alttaki yedi normal paneli korur; paneller renk/görsel/cam davranışlarını sürdürür ve raf tablaları sabit beyaz kalır.
 460. Raf modülü banko/baza gibi serbest zemin fixture değildir; düz panel/vitrin gibi normal duvar placement, sürekli zincir, 50 cm grid, 0/90/180/270 dönüş ve magnetic snap kurallarını kullanır.
 461. Raf 100/150/200 · 2/3 Raf kartları hem sürükle-bırak kataloğuna hem bağlamsal modül picker'a eklendi; state, duplicate ve placement regresyon testleri eklendi.
+
+
+## Koltuk Takımı modülü
+
+456. Tek parça Koltuk Takımı katalog modülü eklendi: yaklaşık 160 cm ikili koltuk, iki adet 65 cm tekli koltuk ve ortada 60 cm çapında cam sehpa.
+457. Koltuk döşemelerinin tamamı tek renk seçimiyle birlikte değişir; cam sehpa renk/görsel editöründen etkilenmez.
+458. Koltuk Takımı serbest yerleşim modülüdür; 250 x 250 cm footprint, R/Shift+R dönüş, stand sınırı ve collision kurallarını kullanır.

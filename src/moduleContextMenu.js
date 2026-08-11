@@ -9,6 +9,7 @@ const MODULE_LABELS = {
   counter: 'Banko',
   base: 'Baza',
   shelf: 'Raf',
+  'sofa-set': 'Koltuk Takımı',
 };
 
 const PICKER_MODULE_KEYS = [

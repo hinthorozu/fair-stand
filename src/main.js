@@ -13,6 +13,7 @@ import {
   createFlatPanelModuleState,
   createSeparatorModuleState,
   createShelfModuleState,
+  createSofaSetModuleState,
   createShowcaseModuleState,
   duplicateModuleState,
   totalWallWidthCm,
@@ -144,6 +145,11 @@ const scene3d = createStandScene(
       if (moduleType === 'shelf') {
         const shelfCount = Number(surface.userData.shelfCount) || 2;
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Raf ' + widthCm + ' cm · ' + shelfCount + ' raflı · alttan ' + stripNumber + '. panel · renk + görsel uygulanabilir.';
+        return;
+      }
+
+      if (moduleType === 'sofa-set') {
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Koltuk Takımı · koltuk döşeme rengi değiştirilebilir · cam sehpa sabittir.';
         return;
       }
 
@@ -442,6 +448,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'counter') state = createCounterModuleState(module.widthCm);
   else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm);
   else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);
+  else if (module.type === 'sofa-set') state = createSofaSetModuleState();
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);
   else if (module.type === 'showcase-2' || module.type === 'showcase-3') {
     state = createShowcaseModuleState(module.type, module.widthCm);

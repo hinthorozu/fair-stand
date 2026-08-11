@@ -137,6 +137,20 @@ export function createBaseModuleState(widthCm) {
   };
 }
 
+export function createSofaSetModuleState() {
+  return {
+    id: createId('module'),
+    type: 'sofa-set',
+    widthCm: 250,
+    depthCm: 250,
+    heightCm: 80,
+    surface: {
+      id: createId('surface'),
+      color: DEFAULT_PANEL_COLOR,
+    },
+  };
+}
+
 export function duplicateModuleState(moduleState) {
   if (!moduleState) return null;
   const duplicate = JSON.parse(JSON.stringify(moduleState));

@@ -16,6 +16,7 @@ const DRAGGABLE_MODULE_KEYS = [
   'SHELF_2_150',
   'SHELF_3_100',
   'SHELF_2_100',
+  'SOFA_SET',
   'BASE_200',
   'BASE_150',
   'BASE_100',
@@ -49,6 +50,9 @@ function ensureStyles() {
     .module-drag-shelf i { position:absolute; left:-3px; right:-9px; height:4px; border:1px solid #9aa0a6; background:#fff; box-shadow:2px 2px 2px rgba(15,23,42,.14); pointer-events:none; }
     .module-drag-door { position:relative; height:68px; border:3px solid #8a929a; background:linear-gradient(to bottom,#f7f7f5 0 13%,#c4c9ce 13% 14%,#f7f7f5 14% 27%,#c4c9ce 27% 28%,#f7f7f5 28% 42%,#747b82 42% 45%,#e5e7eb 45% 100%); box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-door::after { content:''; position:absolute; right:3px; bottom:19px; width:3px; height:3px; border-radius:50%; background:#4b5563; }
+    .module-drag-sofa { position:relative; width:58px; height:58px; }
+    .module-drag-sofa::before { content:''; position:absolute; left:6px; top:4px; width:46px; height:18px; border:2px solid #9aa0a6; border-radius:5px; background:#f8fafc; box-shadow:0 2px 4px rgba(15,23,42,.08); }
+    .module-drag-sofa::after { content:''; position:absolute; left:7px; bottom:4px; width:18px; height:25px; border:2px solid #9aa0a6; border-radius:5px; background:#f8fafc; box-shadow:28px 0 0 -2px #f8fafc,28px 0 0 0 #9aa0a6; }
     .module-drag-base { position:relative; height:24px; border:3px solid #7b838c; background:#ffffff; box-shadow:4px 4px 0 #d7dde4,0 2px 5px rgba(15,23,42,.08); }
     .module-drag-base::before { content:''; position:absolute; inset:3px; border:1px solid #cbd5e1; background:#f8fafc; }
     .module-drag-base::after { content:''; position:absolute; left:-5px; right:-5px; top:-7px; height:5px; border:1px solid #9aa0a6; background:#ffffff; }
@@ -80,6 +84,13 @@ function createPreview(module) {
       shelf.style.top = top + 'px';
       body.appendChild(shelf);
     });
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'sofa-set') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-sofa';
     preview.appendChild(body);
     return preview;
   }
