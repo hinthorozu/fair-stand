@@ -21,32 +21,82 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - name: Fix sofa patch anchors, template literals and chair alignment
+      - name: Normalize sofa patch to 160 x 160
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('scripts/apply-sofa-set.mjs')
           s = p.read_text()
-          s = s.replace("`      if (moduleState?.type === 'base') {`,\n`      if (moduleState?.type === 'sofa-set') {\\n        preview.style.background = 'linear-gradient(to bottom,#f8fafc 0 45%,#9aa0a6 45% 52%,#f8fafc 52% 100%)';\\n      } else if (moduleState?.type === 'base') {`, 'sofa badge style');",
-                        "`      if (moduleState?.type === 'shelf') {`,\n`      if (moduleState?.type === 'sofa-set') {\\n        preview.style.background = 'linear-gradient(to bottom,#f8fafc 0 45%,#9aa0a6 45% 52%,#f8fafc 52% 100%)';\\n      } else if (moduleState?.type === 'shelf') {`, 'sofa badge style');")
+          replacements = {
+            "widthCm: 250,\\n  depthCm: 250,\\n  heightCm: 80,": "widthCm: 160,\\n  depthCm: 160,\\n  heightCm: 80,",
+            "SOFA_SET: { type: 'sofa-set', widthCm: 250, depthCm: 250, heightCm: 80": "SOFA_SET: { type: 'sofa-set', widthCm: 160, depthCm: 160, heightCm: 80",
+            "widthCm: Number(moduleState.widthCm || 250), depthCm: Number(moduleState.depthCm || 250), heightCm: Number(moduleState.heightCm || 80)": "widthCm: Number(moduleState.widthCm || 160), depthCm: Number(moduleState.depthCm || 160), heightCm: Number(moduleState.heightCm || 80)",
+            "const widthM = Number(moduleState.widthCm || 250) / 100;": "const widthM = Number(moduleState.widthCm || 160) / 100;",
+            "const depthM = Number(moduleState.depthCm || 250) / 100;": "const depthM = Number(moduleState.depthCm || 160) / 100;",
+            "widthCm: Number(moduleState.widthCm || 250)": "widthCm: Number(moduleState.widthCm || 160)",
+            "addSofa({ x: 0, z: -depthM / 2 + 0.48, seatWidth: 1.60, seatDepth: 0.78, twoSeat: true, facing: 'front' });": "addSofa({ x: 0, z: -depthM / 2 + 0.39, seatWidth: 1.60, seatDepth: 0.78, twoSeat: true, facing: 'front' });",
+            "addSofa({ x: -0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });": "addSofa({ x: -0.475, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });",
+            "addSofa({ x: 0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });": "addSofa({ x: 0.475, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });",
+            "addSofa({ x: -0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });": "addSofa({ x: -0.475, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });",
+            "addSofa({ x: 0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });": "addSofa({ x: 0.475, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });",
+            "250 x 250": "160 x 160",
+            "widthCm, 250": "widthCm, 160",
+            "depthCm, 250": "depthCm, 160",
+          }
+          for old, new in replacements.items():
+            s = s.replace(old, new)
           s = s.replace("surfaceId: \\`${moduleState.surface?.id}-\\${index}\\`", "surfaceId: \\`\\${moduleState.surface?.id}-\\${index}\\`")
-          s = s.replace("addSofa({ x: -0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });", "addSofa({ x: -0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });")
-          s = s.replace("addSofa({ x: 0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });", "addSofa({ x: 0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });")
           p.write_text(s)
           PY
       - run: node scripts/apply-sofa-set.mjs
-      - name: Align single chairs with loveseat outer edges
+      - name: Apply 160 x 160 sofa footprint and exact geometry
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p = Path('src/scene3d.js')
-          s = p.read_text()
-          old_left = "  addSofa({ x: -0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"
-          old_right = "  addSofa({ x: 0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"
-          new_left = "  addSofa({ x: -0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"
-          new_right = "  addSofa({ x: 0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"
-          s = s.replace(old_left, new_left).replace(old_right, new_right)
-          p.write_text(s)
+
+          def patch(path, replacements):
+            p = Path(path)
+            s = p.read_text()
+            for old, new in replacements:
+              s = s.replace(old, new)
+            p.write_text(s)
+
+          patch('src/catalog.js', [
+            ("  widthCm: 250,\n  depthCm: 250,\n  heightCm: 80,\n  loveseatWidthCm: 160,", "  widthCm: 160,\n  depthCm: 160,\n  heightCm: 80,\n  loveseatWidthCm: 160,"),
+            ("SOFA_SET: { type: 'sofa-set', widthCm: 250, depthCm: 250, heightCm: 80", "SOFA_SET: { type: 'sofa-set', widthCm: 160, depthCm: 160, heightCm: 80"),
+          ])
+
+          patch('src/designState.js', [
+            ("    type: 'sofa-set',\n    widthCm: 250,\n    depthCm: 250,\n    heightCm: 80,", "    type: 'sofa-set',\n    widthCm: 160,\n    depthCm: 160,\n    heightCm: 80,"),
+          ])
+
+          patch('src/scene3d.js', [
+            ("const widthM = Number(moduleState.widthCm || 250) / 100;", "const widthM = Number(moduleState.widthCm || 160) / 100;"),
+            ("const depthM = Number(moduleState.depthCm || 250) / 100;", "const depthM = Number(moduleState.depthCm || 160) / 100;"),
+            ("widthCm: Number(moduleState.widthCm || 250), depthCm: Number(moduleState.depthCm || 250)", "widthCm: Number(moduleState.widthCm || 160), depthCm: Number(moduleState.depthCm || 160)"),
+            ("widthCm: Number(moduleState.widthCm || 250)", "widthCm: Number(moduleState.widthCm || 160)"),
+            ("addSofa({ x: 0, z: -depthM / 2 + 0.48, seatWidth: 1.60, seatDepth: 0.78, twoSeat: true, facing: 'front' });", "addSofa({ x: 0, z: -depthM / 2 + 0.39, seatWidth: 1.60, seatDepth: 0.78, twoSeat: true, facing: 'front' });"),
+            ("addSofa({ x: -0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });", "addSofa({ x: -0.475, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"),
+            ("addSofa({ x: 0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });", "addSofa({ x: 0.475, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"),
+          ])
+
+          test = Path('test/sofaSet.test.js')
+          s = test.read_text()
+          s = s.replace('250 x 250 cm footprint', '160 x 160 cm footprint')
+          s = s.replace('SOFA_SET_DIMENSIONS.widthCm, 250', 'SOFA_SET_DIMENSIONS.widthCm, 160')
+          s = s.replace('SOFA_SET_DIMENSIONS.depthCm, 250', 'SOFA_SET_DIMENSIONS.depthCm, 160')
+          s = s.replace('state.widthCm, 250', 'state.widthCm, 160')
+          s = s.replace('state.depthCm, 250', 'state.depthCm, 160')
+          s = s.replace('widthCm: 250, depthCm: 250', 'widthCm: 160, depthCm: 160')
+          s = s.replace('rotateModulePlacementAroundCenter(placed.placement, 250, 90, 250)', 'rotateModulePlacementAroundCenter(placed.placement, 160, 90, 160)')
+          if "koltuk takımı 50 cm grid" not in s:
+            s += """\n\ntest('koltuk takımı 50 cm grid üzerinde gider ve dört kenara sıfır yanaşır', () => {\n  const backLeft = snapPlacementToStand({ standType: 'island', widthCm: 160, depthCm: 160, forceFree: true, pointerXCm: 10, pointerYCm: 10, standXCm: 600, standYCm: 600 });\n  assert.equal(backLeft.ok, true);\n  assert.equal(backLeft.placement.xCm, 0);\n  assert.equal(backLeft.placement.yCm - 80, 0);\n\n  const grid = snapPlacementToStand({ standType: 'island', widthCm: 160, depthCm: 160, forceFree: true, pointerXCm: 235, pointerYCm: 235, standXCm: 600, standYCm: 600 });\n  assert.equal(grid.ok, true);\n  assert.equal(grid.placement.xCm % 50, 0);\n  assert.equal((grid.placement.yCm - 80) % 50, 0);\n\n  const frontRight = snapPlacementToStand({ standType: 'island', widthCm: 160, depthCm: 160, forceFree: true, pointerXCm: 590, pointerYCm: 590, standXCm: 600, standYCm: 600 });\n  assert.equal(frontRight.ok, true);\n  assert.equal(frontRight.placement.xCm + 160, 600);\n  assert.equal(frontRight.placement.yCm + 80, 600);\n});\n"""
+          test.write_text(s)
+
+          for name in ['Changelog.md', 'PROJECT_RULES.md']:
+            p = Path(name)
+            s = p.read_text().replace('250 x 250', '160 x 160')
+            p.write_text(s)
           PY
       - run: npm test
       - run: npm run build
@@ -54,5 +104,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src scripts test Changelog.md PROJECT_RULES.md ROADMAP.md
-          git diff --cached --quiet || git commit -m "Align sofa set chairs"
+          git diff --cached --quiet || git commit -m "Set sofa set to 160x160 footprint"
           git push origin ROG
