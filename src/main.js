@@ -31,6 +31,7 @@ import {
   getWallAxis,
   getWallExtentCm,
   getWallUsedCm,
+  planFreeSideInsertion,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
 import { planContinuousWallInsertion } from './wallReflow.js';
@@ -322,6 +323,44 @@ function planContextContinuousInsertion(insertedModules, context, side) {
   });
 }
 
+function planContextFreeInsertion(insertedModules, context, side) {
+  if (!currentStand) return { ok: false, message: 'Önce stand alanını oluştur.' };
+  const index = findContextModuleIndex(context);
+  if (index < 0 || index >= currentModules.length) {
+    return { ok: false, message: 'Hedef modül bulunamadı.' };
+  }
+
+  const sourceModule = currentModules[index];
+  return planFreeSideInsertion({
+    modules: currentModules,
+    insertedModules,
+    targetModuleId: sourceModule.id,
+    side,
+    standType: currentStand.standType,
+    standXCm: currentStand.xCm,
+    standYCm: currentStand.yCm,
+  });
+}
+
+function applyFreeInsertionPlan(plan, insertedModules, context, side) {
+  const index = findContextModuleIndex(context);
+  if (index < 0 || index >= currentModules.length) return false;
+
+  plan.placements?.forEach((nextPlacement, moduleId) => {
+    const module = insertedModules.find((candidate) => candidate.id === moduleId);
+    if (module) module.placement = { ...nextPlacement };
+  });
+
+  const insertIndex = side === 'left' ? index : index + 1;
+  currentModules.splice(insertIndex, 0, ...insertedModules);
+  return true;
+}
+
+function isFreeContextInsertion(context) {
+  const index = findContextModuleIndex(context);
+  return index >= 0 && currentModules[index]?.placement?.wallId === 'free';
+}
+
 function applyContinuousInsertionPlan(plan, insertedModules) {
   const moduleMap = new Map(
     [...currentModules, ...insertedModules].map((module) => [module.id, module]),
@@ -358,16 +397,14 @@ function duplicateContextModule(context, side) {
     return;
   }
 
-  const capacity = validateCurrentAxisCapacity(
-    'x',
-    duplicate.widthCm,
-    getWallUsedCm(currentModules, 'back'),
-    { popupTitle: 'Modül çoğaltılamadı' },
-  );
-  if (!capacity.ok) return;
+  const plan = planContextFreeInsertion([duplicate], context, side);
+  if (!plan.ok) {
+    renderWallResult(plan.message, true);
+    window.alert(`Modül çoğaltılamadı\n\n${plan.message}`);
+    return;
+  }
 
-  const insertIndex = side === 'left' ? index : index + 1;
-  currentModules.splice(insertIndex, 0, duplicate);
+  applyFreeInsertionPlan(plan, [duplicate], context, side);
   rebuildWall({ resetView: false });
 }
 
@@ -417,6 +454,20 @@ function validateCatalogAddBatch({
   let moduleStates = entries.map((entry) => createCatalogModuleState(entry.module));
   if (moduleStates.some((moduleState) => !moduleState)) {
     return { ok: false, message: 'Seçilen modüller hazırlanamadı.' };
+  }
+
+  if ((placement === 'left' || placement === 'right') && isFreeContextInsertion(context)) {
+    // Picker sağ eklemede gönderim sırasını ters çevirir; burada tekrar görsel
+    // seçim sırasına döndürüp serbest komşu planına veriyoruz.
+    const visualOrderedStates = placement === 'right'
+      ? [...moduleStates].reverse()
+      : moduleStates;
+    const plan = planContextFreeInsertion(visualOrderedStates, context, placement);
+    if (!plan.ok) {
+      renderWallResult(plan.message, true);
+      window.alert(`Modüller eklenemedi\n\n${plan.message}`);
+    }
+    return plan;
   }
 
   if (placement === 'left' || placement === 'right') {
@@ -483,6 +534,22 @@ function flushCatalogModuleAdds() {
   const context = firstRequest.context ?? null;
 
   if ((placementMode === 'left' || placementMode === 'right') && context) {
+    if (isFreeContextInsertion(context)) {
+      const visualOrderedStates = placementMode === 'right'
+        ? [...moduleStates].reverse()
+        : moduleStates;
+      const plan = planContextFreeInsertion(visualOrderedStates, context, placementMode);
+      if (!plan.ok) {
+        renderWallResult(plan.message, true);
+        window.alert(`Modüller eklenemedi\n\n${plan.message}`);
+        return;
+      }
+
+      applyFreeInsertionPlan(plan, visualOrderedStates, context, placementMode);
+      rebuildWall({ resetView: false });
+      return;
+    }
+
     moduleStates = [...moduleStates].reverse();
     const plan = planContextContinuousInsertion(moduleStates, context, placementMode);
     if (!plan.ok) {

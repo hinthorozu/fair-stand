@@ -4,6 +4,7 @@ import {
   getAllowedWallIds,
   isVerticalModuleRotation,
   normalizeModuleRotationZDeg,
+  planFreeSideInsertion,
   rotateModuleRotationZDeg,
   snapCm,
   snapPlacementToStand,
@@ -407,4 +408,134 @@ test('physical module depth rejects parallel bodies that are too close', () => {
     standYCm: 600,
   });
   assert.equal(justTouching.ok, true);
+});
+
+
+test('plans free context insertion without wall capacity', () => {
+  const source = {
+    id: 'source',
+    widthCm: 100,
+    placement: { xCm: 300, yCm: 300, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  };
+  const inserted = [{ id: 'new-1', widthCm: 200 }];
+  const result = planFreeSideInsertion({
+    modules: [source],
+    insertedModules: inserted,
+    targetModuleId: source.id,
+    side: 'right',
+    standType: 'u-stand',
+    standXCm: 1000,
+    standYCm: 1000,
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.placements.get('new-1'), {
+    xCm: 400,
+    yCm: 300,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'free',
+  });
+});
+
+test('free context visual right follows all four module rotations', () => {
+  const cases = [
+    [0, 300, 400],
+    [90, 300, 200],
+    [180, 200, 300],
+    [270, 300, 400],
+  ];
+
+  cases.forEach(([rotationZDeg, expectedAxisValue, expectedOtherValue]) => {
+    const source = {
+      id: 'source-' + rotationZDeg,
+      widthCm: 100,
+      placement: { xCm: 300, yCm: 300, zCm: 0, rotationZDeg, wallId: 'free' },
+    };
+    const inserted = [{ id: 'new-' + rotationZDeg, widthCm: 100 }];
+    const result = planFreeSideInsertion({
+      modules: [source],
+      insertedModules: inserted,
+      targetModuleId: source.id,
+      side: 'right',
+      standType: 'island',
+      standXCm: 1000,
+      standYCm: 1000,
+    });
+    assert.equal(result.ok, true);
+    const next = result.placements.get(inserted[0].id);
+    if (rotationZDeg === 0 || rotationZDeg === 180) {
+      assert.equal(next.xCm, expectedAxisValue);
+      assert.equal(next.yCm, expectedOtherValue);
+    } else {
+      assert.equal(next.yCm, expectedAxisValue);
+      assert.equal(next.xCm, expectedOtherValue);
+    }
+  });
+});
+
+test('free left batch keeps visual order while placing nearest module last in the selection', () => {
+  const source = {
+    id: 'source',
+    widthCm: 100,
+    placement: { xCm: 500, yCm: 300, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  };
+  const inserted = [
+    { id: 'a', widthCm: 50 },
+    { id: 'b', widthCm: 100 },
+  ];
+  const result = planFreeSideInsertion({
+    modules: [source],
+    insertedModules: inserted,
+    targetModuleId: source.id,
+    side: 'left',
+    standType: 'island',
+    standXCm: 1000,
+    standYCm: 1000,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.placements.get('a').xCm, 350);
+  assert.equal(result.placements.get('b').xCm, 400);
+});
+
+test('free context insertion rejects stand overflow and real collision', () => {
+  const edgeSource = {
+    id: 'edge-source',
+    widthCm: 100,
+    placement: { xCm: 0, yCm: 300, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  };
+  const overflow = planFreeSideInsertion({
+    modules: [edgeSource],
+    insertedModules: [{ id: 'outside', widthCm: 100 }],
+    targetModuleId: edgeSource.id,
+    side: 'left',
+    standType: 'island',
+    standXCm: 1000,
+    standYCm: 1000,
+  });
+  assert.equal(overflow.ok, false);
+  assert.match(overflow.message, /stand alanını aşıyor/i);
+
+  const source = {
+    id: 'source',
+    widthCm: 100,
+    placement: { xCm: 300, yCm: 300, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  };
+  const blocker = {
+    id: 'blocker',
+    widthCm: 100,
+    placement: { xCm: 400, yCm: 300, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  };
+  const collision = planFreeSideInsertion({
+    modules: [source, blocker],
+    insertedModules: [{ id: 'blocked', widthCm: 100 }],
+    targetModuleId: source.id,
+    side: 'right',
+    standType: 'island',
+    standXCm: 1000,
+    standYCm: 1000,
+  });
+  assert.equal(collision.ok, false);
+  assert.match(collision.message, /çakışıyor/i);
 });

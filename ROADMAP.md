@@ -190,8 +190,8 @@ Tamamlanan yerleşim özellikleri:
 
 FAZ 2 kapanış öncesi kalan:
 
-- **Issue #1 — EN SON:** serbest alandaki modül sıralarında Ekle/Çoğalt Sağ/Sol işlemlerinin yanlışlıkla duvar kapasitesi kontrolüne girmesi.
-- Issue #1 sonrası final regresyon ve FAZ 2 kapanış kararı.
+- ✅ **Issue #1:** serbest alandaki modül sıralarında Ekle/Çoğalt Sağ/Sol artık duvar kapasitesi yerine komşu konum + X/Y sınırı + collision ile doğrulanır.
+- Final regresyon ve FAZ 2 kapanış kararı.
 
 ## FAZ 2 ana hedefleri
 

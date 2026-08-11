@@ -613,3 +613,115 @@ export function snapPlacementToStand({
   if (!freePlacement) return { ok: false, message: 'Modül aktif stand alanına sığmıyor.' };
   return { ok: true, placement: freePlacement, mode: 'free' };
 }
+
+
+function getVisualRightAxisDirection(rotationZDeg) {
+  const rotation = normalizeModuleRotationZDeg(rotationZDeg);
+  if (rotation === 0) return { axis: 'x', sign: 1 };
+  if (rotation === 90) return { axis: 'y', sign: -1 };
+  if (rotation === 180) return { axis: 'x', sign: -1 };
+  return { axis: 'y', sign: 1 };
+}
+
+export function createFreeSidePlacement({
+  sourcePlacement,
+  sourceWidthCm,
+  insertedWidthCm,
+  side = 'right',
+} = {}) {
+  if (!sourcePlacement || (side !== 'left' && side !== 'right')) return null;
+  const sourceWidth = Number(sourceWidthCm);
+  const insertedWidth = Number(insertedWidthCm);
+  const sourceX = Number(sourcePlacement.xCm);
+  const sourceY = Number(sourcePlacement.yCm);
+  if (
+    ![sourceWidth, insertedWidth, sourceX, sourceY].every(Number.isFinite)
+    || sourceWidth <= 0
+    || insertedWidth <= 0
+  ) return null;
+
+  const rotationZDeg = normalizeModuleRotationZDeg(sourcePlacement.rotationZDeg);
+  const rightDirection = getVisualRightAxisDirection(rotationZDeg);
+  const direction = rightDirection.sign * (side === 'right' ? 1 : -1);
+  let xCm = sourceX;
+  let yCm = sourceY;
+
+  if (rightDirection.axis === 'x') {
+    xCm = direction > 0 ? sourceX + sourceWidth : sourceX - insertedWidth;
+  } else {
+    yCm = direction > 0 ? sourceY + sourceWidth : sourceY - insertedWidth;
+  }
+
+  return createModulePlacement({
+    xCm,
+    yCm,
+    zCm: sourcePlacement.zCm ?? 0,
+    rotationZDeg,
+    wallId: 'free',
+  });
+}
+
+export function planFreeSideInsertion({
+  modules = [],
+  insertedModules = [],
+  targetModuleId,
+  side = 'right',
+  standType,
+  standXCm,
+  standYCm,
+} = {}) {
+  if (side !== 'left' && side !== 'right') {
+    return { ok: false, message: 'Ekleme yönü geçersiz.' };
+  }
+  const sourceModule = modules.find((module) => module?.id === targetModuleId);
+  if (!sourceModule?.placement || sourceModule.placement.wallId !== 'free') {
+    return { ok: false, message: 'Hedef modül serbest yerleşimde değil.' };
+  }
+  if (!insertedModules.length) {
+    return { ok: false, message: 'Eklenecek modül bulunamadı.' };
+  }
+
+  // insertedModules görsel soldan sağa seçim sırasıdır. Sol tarafa eklerken
+  // hedefe en yakın modül listenin sonundaki olacağı için fiziksel planı tersten kurarız.
+  const physicalOrder = side === 'left'
+    ? [...insertedModules].reverse()
+    : [...insertedModules];
+  const placements = new Map();
+  const plannedModules = [];
+  let anchorPlacement = sourceModule.placement;
+  let anchorWidthCm = Number(sourceModule.widthCm);
+
+  for (const module of physicalOrder) {
+    const nextPlacement = createFreeSidePlacement({
+      sourcePlacement: anchorPlacement,
+      sourceWidthCm: anchorWidthCm,
+      insertedWidthCm: module.widthCm,
+      side,
+    });
+    if (!nextPlacement) {
+      return { ok: false, message: 'Serbest komşu yerleşimi hesaplanamadı.' };
+    }
+
+    const validation = validatePlacementAgainstModules({
+      placement: nextPlacement,
+      widthCm: module.widthCm,
+      moduleId: module.id,
+      modules: [...modules, ...plannedModules],
+      standType,
+      standXCm,
+      standYCm,
+    });
+    if (!validation.ok) return validation;
+
+    placements.set(module.id, nextPlacement);
+    plannedModules.push({ ...module, placement: nextPlacement });
+    anchorPlacement = nextPlacement;
+    anchorWidthCm = Number(module.widthCm);
+  }
+
+  return {
+    ok: true,
+    placements,
+    insertedModuleIds: insertedModules.map((module) => module.id),
+  };
+}
