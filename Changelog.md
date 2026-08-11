@@ -528,3 +528,4 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 423. Düz panel, Depo Kapısı ve 2/3 gözlü vitrin modüllerindeki dikey profiller yalnızca görsel geometride 55 mm'den 47 mm'ye inceltildi (yaklaşık %15); modül dış ölçüleri ve placement ölçüleri değişmedi.
 424. Dikey profillerin dış kenarı modül sınırında sabit tutuldu; incelme içe doğru panel alanını büyüttüğü için komşu modüller arasındaki koyu profil bandı daha hafif görünür hale geldi.
 425. 50/100/150/200 modül genişlikleri, 350 cm yükseklik, 50 cm strip ritmi, snap/collision/rotation ve separatör geometrisi korunmuştur.
+426. Düz panel, Depo Kapısı ve 2/3 gözlü vitrin modüllerindeki görsel dikey profil genişliği 47 mm’den 40 mm’ye indirildi; modül dış ölçüleri, panel yerleşimi, snap/collision/rotation ve separatör geometrisi değiştirilmedi.
