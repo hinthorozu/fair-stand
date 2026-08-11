@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+// Render quality integration trigger.
 // Fix Render button clickability without blocking scene interactions.
 {
   const path = 'src/style.css';
