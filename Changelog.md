@@ -516,3 +516,9 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 417. Aynı 6 mm panel açıklığı Düz Panel 50 / 100 / 150 / 200, Depo Kapısı üst panelleri ve 2/3 gözlü vitrinlerin panel kullanılan bölümlerinde ortaklaştırıldı; separatör geometrisine dokunulmadı.
 418. Değişiklik yalnızca görsel panel boşluğunu sıkılaştırır; 50 cm strip ritmi, ray kalınlığı, renk/görsel/cam state davranışı ve yerleşim motoru korunur.
 419. Tüm panel yüzeylerinde ortak ekstra düşey açıklık 6 mm’den 4 mm’ye indirildi; Düz Panel 50 / 100 / 150 / 200, Depo Kapısı üst panelleri ve 2/3 gözlü vitrin panel bölgeleri aynı 4 mm clearance değerini kullanır. Separatör geometrisi değişmedi.
+
+## Panel arası gerçek 4 mm düzeltmesi
+
+420. Kullanıcının kastettiği ölçünün panel iç payı değil, 7 panel arasındaki 6 adet görünen yatay aralığın toplam kalınlığı olduğu netleştirildi.
+421. Düz panel, Depo Kapısı üst panelleri ve 2/3 gözlü vitrin panel bölgelerinde yatay ray yüksekliği 26 mm'den 4 mm'ye indirildi ve ekstra düşey clearance sıfırlandı; böylece komşu iki panel yüzeyi arasındaki toplam görünen bant 4 mm oldu.
+422. 50 cm strip merkezleri ve 350 cm toplam modül yüksekliği korunurken panel yüzeyleri büyütüldü; separatör geometrisine dokunulmadı.

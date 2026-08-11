@@ -26,7 +26,8 @@ import {
 
 const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0x4b5563;
-const PANEL_VERTICAL_CLEARANCE_M = 0.004;
+const PANEL_RAIL_HEIGHT_M = 0.004;
+const PANEL_VERTICAL_CLEARANCE_M = 0;
 const GLASS_SURFACE_COLOR = 0xd7e9ed;
 const GLASS_BACK_COLOR = 0xc9dce1;
 const GLASS_SURFACE_OPACITY = 0.48;
@@ -1703,7 +1704,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(profile);
   }
 
-  const railHeight = 0.026;
+  const railHeight = PANEL_RAIL_HEIGHT_M;
   const railGeometry = new THREE.BoxGeometry(
     Math.max(widthM - frameWidth * 2, 0.02),
     railHeight,
@@ -1801,7 +1802,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
   const widthM = widthCm / 100;
   const doorHeight = stripHeight * 4;
   const upperPanelCount = 3;
-  const railHeight = 0.026;
+  const railHeight = PANEL_RAIL_HEIGHT_M;
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -2119,7 +2120,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(profile);
   }
 
-  const railHeight = 0.026;
+  const railHeight = PANEL_RAIL_HEIGHT_M;
   const innerWidth = Math.max(widthM - frameWidth * 2 - 0.012, 0.02);
   const railGeometry = new THREE.BoxGeometry(
     Math.max(widthM - frameWidth * 2, 0.02),
