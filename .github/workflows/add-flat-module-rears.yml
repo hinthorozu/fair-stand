@@ -1,0 +1,29 @@
+name: Add Flat Module Rears
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - scripts/add-flat-module-rears.mjs
+      - .github/workflows/add-flat-module-rears.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - name: Apply flat rear standard
+        run: node scripts/add-flat-module-rears.mjs
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/scene3d.js PROJECT_RULES.md Changelog.md
+          git diff --cached --quiet || git commit -m "Add flat rear faces to closed modules"
+          git push origin ROG
