@@ -529,3 +529,11 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 424. Dikey profillerin dış kenarı modül sınırında sabit tutuldu; incelme içe doğru panel alanını büyüttüğü için komşu modüller arasındaki koyu profil bandı daha hafif görünür hale geldi.
 425. 50/100/150/200 modül genişlikleri, 350 cm yükseklik, 50 cm strip ritmi, snap/collision/rotation ve separatör geometrisi korunmuştur.
 426. Düz panel, Depo Kapısı ve 2/3 gözlü vitrin modüllerindeki görsel dikey profil genişliği 47 mm’den 40 mm’ye indirildi; modül dış ölçüleri, panel yerleşimi, snap/collision/rotation ve separatör geometrisi değiştirilmedi.
+
+## Banko modülleri
+
+427. Banko 100, Banko 150 ve Banko 200 modülleri eklendi; sabit derinlik 50 cm ve yükseklik 100 cm olarak tanımlandı.
+428. Bankoların ön X cephesi ile sol ve sağ 50 cm Y cepheleri üç bağımsız yüzey olarak tanımlandı; her cephe mevcut yüzey editörü üzerinden ayrı renk veya görsel alabilir.
+429. Bankolar drag kataloguna eklendi ve serbest yerleşime zorlandı; 4 yön dönüş desteklenirken 50 cm derinlik gerçek collision ve aktif alan sınır hesabına dahil edildi.
+430. Banko footprint merkez çizgisi, 50 cm grid üzerinde kenarları hizalayacak 25 cm ofsetli çapraz eksen snap mantığına bağlandı; mevcut 10 cm duvar modülü davranışı değiştirilmedi.
+431. Banko state çoğaltma/sıfırlama desteği, seçili cephe açıklaması, gerçek ölçülü placement ghost ve regresyon testleri eklendi.

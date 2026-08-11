@@ -9,6 +9,12 @@ export const STAND_DIMENSIONS = Object.freeze({
 
 export const MODULE_WIDTHS_CM = Object.freeze([50, 100, 150, 200]);
 
+export const COUNTER_DIMENSIONS = Object.freeze({
+  depthCm: 50,
+  heightCm: 100,
+  widthsCm: Object.freeze([100, 150, 200]),
+});
+
 export const MODULE_CATALOG = Object.freeze({
   PANEL_50: { type: 'flat-panel', widthCm: 50, label: 'Düz Panel 50' },
   PANEL_100: { type: 'flat-panel', widthCm: 100, label: 'Düz Panel 100' },
@@ -18,6 +24,10 @@ export const MODULE_CATALOG = Object.freeze({
   SHOWCASE_3_100: { type: 'showcase-3', widthCm: 100, label: '3 Gözlü Vitrin 100' },
   SHOWCASE_2_100: { type: 'showcase-2', widthCm: 100, label: '2 Gözlü Vitrin 100' },
   DOOR_100: { type: 'door', widthCm: 100, label: 'Depo Kapısı 100' },
+
+  COUNTER_100: { type: 'counter', widthCm: 100, depthCm: 50, heightCm: 100, label: 'Banko 100' },
+  COUNTER_150: { type: 'counter', widthCm: 150, depthCm: 50, heightCm: 100, label: 'Banko 150' },
+  COUNTER_200: { type: 'counter', widthCm: 200, depthCm: 50, heightCm: 100, label: 'Banko 200' },
   SEPARATOR_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
   SEPARATOR_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
 });

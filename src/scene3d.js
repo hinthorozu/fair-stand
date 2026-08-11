@@ -462,6 +462,12 @@ export function createStandScene(
       let module;
       if (moduleState.type === 'separator') {
         module = createSeparatorModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'counter') {
+        module = createCounterModule(
+          moduleState,
+          moduleIndex,
+          (surface) => applyStoredImage(surface),
+        );
       } else if (moduleState.type === 'door') {
         module = createDoorModule(
           moduleState,
@@ -634,16 +640,33 @@ export function createStandScene(
     placementGhost = null;
   }
 
-  function ensurePlacementGhost(widthCm) {
-    if (placementGhost?.widthCm === widthCm) return placementGhost;
+  function getPlacementGhostDimensions(moduleOrWidthCm) {
+    if (typeof moduleOrWidthCm === 'object' && moduleOrWidthCm) {
+      return {
+        widthCm: Number(moduleOrWidthCm.widthCm),
+        depthM: Math.max(Number(moduleOrWidthCm.depthCm ?? (STAND_DIMENSIONS.depth * 100)) / 100, 0.02),
+        heightM: Math.max(Number(moduleOrWidthCm.heightCm ?? (STAND_DIMENSIONS.height * 100)) / 100, 0.02),
+      };
+    }
+    return {
+      widthCm: Number(moduleOrWidthCm),
+      depthM: Math.max(STAND_DIMENSIONS.depth, 0.08),
+      heightM: STAND_DIMENSIONS.height,
+    };
+  }
+
+  function ensurePlacementGhost(moduleOrWidthCm) {
+    const dimensions = getPlacementGhostDimensions(moduleOrWidthCm);
+    const key = [dimensions.widthCm, dimensions.depthM, dimensions.heightM].join(':');
+    if (placementGhost?.key === key) return placementGhost;
     disposePlacementGhost();
 
     const root = new THREE.Group();
     const mesh = new THREE.Mesh(
       new THREE.BoxGeometry(
-        Math.max(Number(widthCm) / 100, 0.02),
-        STAND_DIMENSIONS.height,
-        Math.max(STAND_DIMENSIONS.depth, 0.08),
+        Math.max(dimensions.widthCm / 100, 0.02),
+        dimensions.heightM,
+        dimensions.depthM,
       ),
       new THREE.MeshBasicMaterial({
         color: PLACEMENT_VALID_COLOR,
@@ -655,22 +678,23 @@ export function createStandScene(
       }),
     );
     mesh.renderOrder = 10000;
-    mesh.position.y = STAND_DIMENSIONS.height / 2;
+    mesh.position.y = dimensions.heightM / 2;
     root.add(mesh);
     scene.add(root);
-    placementGhost = { root, mesh, widthCm };
+    placementGhost = { root, mesh, key, widthCm: dimensions.widthCm };
     return placementGhost;
   }
 
-  function showPlacementGhost(widthCm, placement, valid) {
-    const ghost = ensurePlacementGhost(widthCm);
+  function showPlacementGhost(moduleOrWidthCm, placement, valid) {
+    const ghost = ensurePlacementGhost(moduleOrWidthCm);
     ghost.mesh.material.color.setHex(valid ? PLACEMENT_VALID_COLOR : PLACEMENT_INVALID_COLOR);
-    applyPlacementToGroup(ghost.root, placement, widthCm);
+    applyPlacementToGroup(ghost.root, placement, ghost.widthCm);
     ghost.root.visible = true;
   }
 
   function getDragModuleLabel(moduleState) {
     const widthCm = Number(moduleState?.widthCm) || 0;
+    if (moduleState?.type === 'counter') return `Banko ${widthCm}`;
     if (moduleState?.type === 'separator') return `Separatör ${widthCm}`;
     if (moduleState?.type === 'door') return `Kapı ${widthCm}`;
     if (moduleState?.type === 'showcase-3') return `3 Gözlü Vitrin ${widthCm}`;
@@ -723,7 +747,10 @@ export function createStandScene(
     const label = dragBadge.querySelector('[data-role="label"]');
     if (label) label.textContent = getDragModuleLabel(moduleState);
     if (preview) {
-      if (moduleState?.type === 'separator') {
+      preview.style.height = moduleState?.type === 'counter' ? '28px' : '48px';
+      if (moduleState?.type === 'counter') {
+        preview.style.background = 'linear-gradient(to bottom,#eef2f6 0 16%,#d1d5db 16% 20%,#f8fafc 20% 100%)';
+      } else if (moduleState?.type === 'separator') {
         preview.style.background = 'repeating-linear-gradient(to bottom,#c79b63 0 2px,#eef2f6 2px 4px)';
       } else if (moduleState?.type === 'door') {
         preview.style.background = 'linear-gradient(to bottom,#f7f7f5 0 40%,#8a929a 40% 44%,#e5e7eb 44% 100%)';
@@ -798,16 +825,20 @@ export function createStandScene(
       moduleState.placement,
       moduleState.widthCm,
       deltaDeg,
+      moduleState.depthCm,
     );
     if (!nextPlacement) return { handled: false, ok: false };
-    nextPlacement.wallId = inferWallIdForRotation(
-      nextPlacement,
-      nextPlacement.rotationZDeg,
-    );
+    nextPlacement.wallId = moduleState.type === 'counter'
+      ? 'free'
+      : inferWallIdForRotation(
+          nextPlacement,
+          nextPlacement.rotationZDeg,
+        );
 
     const validation = validatePlacementAgainstModules({
       placement: nextPlacement,
       widthCm: moduleState.widthCm,
+      depthCm: moduleState.depthCm,
       moduleId: moduleState.id,
       modules: getRenderedModuleStates(),
       standType: stageLayout.standType,
@@ -816,7 +847,7 @@ export function createStandScene(
     });
     if (!validation.ok) {
       const message = validation.message ?? 'Modül bu yönde döndürülemez.';
-      showPlacementGhost(moduleState.widthCm, nextPlacement, false);
+      showPlacementGhost(moduleState, nextPlacement, false);
       showPlacementFeedback(message, { durationMs: 1800 });
       window.setTimeout(() => {
         if (!dragSession?.dragging) disposePlacementGhost();
@@ -857,6 +888,8 @@ export function createStandScene(
     const snapped = snapPlacementToStand({
       standType: stageLayout.standType,
       widthCm: moduleState.widthCm,
+      depthCm: moduleState.depthCm,
+      forceFree: moduleState.type === 'counter',
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       standXCm: stageLayout.widthCm,
@@ -876,13 +909,15 @@ export function createStandScene(
     }
 
     const renderedModules = getRenderedModuleStates();
-    const magneticSnap = snapPlacementToModules({
+    const magneticSnap = moduleState.type === 'counter' ? null : snapPlacementToModules({
       moduleId: moduleState.id,
       widthCm: moduleState.widthCm,
+      depthCm: moduleState.depthCm,
+      forceFree: moduleState.type === 'counter',
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       rotationZDeg: preferredRotationZDeg,
-      modules: renderedModules,
+      modules: renderedModules.filter((module) => module.type !== 'counter'),
       standType: stageLayout.standType,
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
@@ -894,6 +929,7 @@ export function createStandScene(
       const validation = validatePlacementAgainstModules({
         placement: desiredPlacement,
         widthCm: moduleState.widthCm,
+        depthCm: moduleState.depthCm,
         moduleId: moduleState.id,
         modules: renderedModules,
         standType: stageLayout.standType,
@@ -922,7 +958,7 @@ export function createStandScene(
     const previewPlacement = plan.ok && plan.movingPlacement
       ? plan.movingPlacement
       : desiredPlacement;
-    showPlacementGhost(moduleState.widthCm, previewPlacement, plan.ok);
+    showPlacementGhost(moduleState, previewPlacement, plan.ok);
     if (plan.ok) clearPlacementFeedback();
     else showPlacementFeedback(plan.message ?? 'Bu konuma modül yerleştirilemez.', { clientX, clientY });
     return {
@@ -996,6 +1032,8 @@ export function createStandScene(
     const snapped = snapPlacementToStand({
       standType: stageLayout.standType,
       widthCm: moduleState.widthCm,
+      depthCm: moduleState.depthCm,
+      forceFree: moduleState.type === 'counter',
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       standXCm: stageLayout.widthCm,
@@ -1015,13 +1053,15 @@ export function createStandScene(
     }
 
     const renderedModules = getRenderedModuleStates();
-    const magneticSnap = snapPlacementToModules({
+    const magneticSnap = moduleState.type === 'counter' ? null : snapPlacementToModules({
       moduleId: moduleState.id,
       widthCm: moduleState.widthCm,
+      depthCm: moduleState.depthCm,
+      forceFree: moduleState.type === 'counter',
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       rotationZDeg: dragSession.preferredRotationZDeg,
-      modules: renderedModules,
+      modules: renderedModules.filter((module) => module.type !== 'counter'),
       standType: stageLayout.standType,
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
@@ -1033,6 +1073,7 @@ export function createStandScene(
       const validation = validatePlacementAgainstModules({
         placement: desiredPlacement,
         widthCm: moduleState.widthCm,
+        depthCm: moduleState.depthCm,
         moduleId: moduleState.id,
         modules: renderedModules,
         standType: stageLayout.standType,
@@ -1072,7 +1113,7 @@ export function createStandScene(
         snapKind: magneticSnap.snapKind,
       } : null,
     };
-    showPlacementGhost(moduleState.widthCm, previewPlacement, plan.ok);
+    showPlacementGhost(moduleState, previewPlacement, plan.ok);
     if (plan.ok) clearPlacementFeedback();
     else showPlacementFeedback(plan.message ?? 'Bu konuma modül yerleştirilemez.', {
       clientX: event.clientX,
@@ -1668,6 +1709,107 @@ export function createStandScene(
     getSelectedSurface: () => [...selectedSurfaces][0] ?? null,
     getSelectedSurfaces: () => [...selectedSurfaces],
   };
+}
+
+function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
+  const widthCm = Number(moduleState.widthCm);
+  const depthCm = Number(moduleState.depthCm) || 50;
+  const heightCm = Number(moduleState.heightCm) || 100;
+  const widthM = widthCm / 100;
+  const depthM = depthCm / 100;
+  const heightM = heightCm / 100;
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: moduleState.type,
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, heightM, depthM),
+    new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: 0.76, metalness: 0 }),
+  );
+  body.position.set(0, heightM / 2, 0);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
+
+  const top = new THREE.Mesh(
+    new THREE.PlaneGeometry(widthM, depthM),
+    new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.58, metalness: 0 }),
+  );
+  top.rotation.x = -Math.PI / 2;
+  top.position.set(0, heightM + 0.0015, 0);
+  top.receiveShadow = true;
+  group.add(top);
+
+  const surfaces = [];
+  const addFace = (surfaceRole, surfaceState, faceWidthM, position, rotationY = 0) => {
+    if (!surfaceState) return;
+    const surface = new THREE.Mesh(
+      new THREE.PlaneGeometry(faceWidthM, heightM),
+      new THREE.MeshStandardMaterial({
+        color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
+        roughness: 0.72,
+        metalness: 0,
+        side: THREE.DoubleSide,
+        emissive: 0x000000,
+        emissiveIntensity: 0,
+      }),
+    );
+    surface.position.copy(position);
+    surface.rotation.y = rotationY;
+
+    const selectionFrame = createSelectionFrame(faceWidthM, heightM);
+    selectionFrame.visible = false;
+    surface.add(selectionFrame);
+
+    surface.userData = {
+      kind: 'surface',
+      moduleType: 'counter',
+      selectionMode: 'module',
+      acceptsImage: true,
+      moduleIndex,
+      moduleId: moduleState.id,
+      widthCm,
+      stripIndex: null,
+      stripNumber: null,
+      surfaceRole,
+      surfaceId: surfaceState.id,
+      surfaceState,
+      selectionFrame,
+    };
+    group.add(surface);
+    surfaces.push(surface);
+    onSurfaceReady?.(surface);
+  };
+
+  addFace(
+    'front',
+    moduleState.faces?.front,
+    widthM,
+    new THREE.Vector3(0, heightM / 2, depthM / 2 + 0.0015),
+  );
+  addFace(
+    'left',
+    moduleState.faces?.left,
+    depthM,
+    new THREE.Vector3(-widthM / 2 - 0.0015, heightM / 2, 0),
+    -Math.PI / 2,
+  );
+  addFace(
+    'right',
+    moduleState.faces?.right,
+    depthM,
+    new THREE.Vector3(widthM / 2 + 0.0015, heightM / 2, 0),
+    Math.PI / 2,
+  );
+
+  return { group, surfaces };
 }
 
 function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {

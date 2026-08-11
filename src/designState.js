@@ -84,6 +84,24 @@ export function createDoorModuleState(widthCm = 100) {
   };
 }
 
+export function createCounterModuleState(widthCm) {
+  const width = Number(widthCm);
+  if (![100, 150, 200].includes(width)) return null;
+
+  return {
+    id: createId('module'),
+    type: 'counter',
+    widthCm: width,
+    depthCm: 50,
+    heightCm: 100,
+    faces: {
+      front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+    },
+  };
+}
+
 export function duplicateModuleState(moduleState) {
   if (!moduleState) return null;
   const duplicate = JSON.parse(JSON.stringify(moduleState));
@@ -95,6 +113,20 @@ export function duplicateModuleState(moduleState) {
       stripIndex: Number.isInteger(strip.stripIndex) ? strip.stripIndex : stripIndex,
       imageTransform: strip.imageTransform ? { ...strip.imageTransform } : createDefaultImageTransform(),
     }));
+  }
+  if (duplicate.faces) {
+    duplicate.faces = Object.fromEntries(
+      Object.entries(duplicate.faces).map(([faceKey, face]) => [
+        faceKey,
+        {
+          ...face,
+          id: createId('surface'),
+          imageTransform: face.imageTransform
+            ? { ...face.imageTransform }
+            : createDefaultImageTransform(),
+        },
+      ]),
+    );
   }
   if (duplicate.surface) {
     duplicate.surface = {

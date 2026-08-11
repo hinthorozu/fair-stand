@@ -51,3 +51,9 @@ Bu dosyadaki maddeler, kullanıcı açıkça aksi bir davranış istemedikçe t�
 - Ön taraftaki renk ve görsel arka yüz renginden etkilenmez.
 - **Separatör bu kuralın istisnasıdır**; açık çıtalı yapısı ön/arka olarak korunur.
 - Amaç 0° / 90° / 180° / 270° dönüşlerde modülün ön ve arka yönünün görsel olarak hemen ayırt edilmesidir.
+
+## Banko modülü standardı
+
+- Banko genişlikleri X = 100 / 150 / 200 cm; derinlik Y = 50 cm; yükseklik H = 100 cm.
+- Ön X cephesi ile sol ve sağ Y cepheleri birbirinden bağımsız seçilebilir; her cepheye ayrı renk veya görsel atanabilir.
+- Bankolar serbest yerleşim modülüdür; aktif duvar zincirine otomatik katılmaz. 0/90/180/270 dönüş, R / Shift+R ve stand sınırı/collision kontrolleri geçerlidir.

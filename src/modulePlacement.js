@@ -34,6 +34,17 @@ function nearlyEqual(a, b) {
   return Math.abs(Number(a) - Number(b)) <= EPSILON_CM;
 }
 
+function hasStrictDepthBounds(depthCm) {
+  const depth = Number(depthCm);
+  return Number.isFinite(depth) && depth > MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
+}
+
+function snapDepthCenterCm(value, depthCm) {
+  const depth = Number(depthCm);
+  const halfDepth = depth / 2;
+  return halfDepth + snapCm(Number(value) - halfDepth);
+}
+
 export function normalizeModuleRotationZDeg(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return 0;
@@ -47,7 +58,7 @@ export function rotateModuleRotationZDeg(value, deltaDeg = 90) {
   );
 }
 
-export function rotateModulePlacementAroundCenter(placement, widthCm, deltaDeg = 90) {
+export function rotateModulePlacementAroundCenter(placement, widthCm, deltaDeg = 90, depthCm = null) {
   if (!placement) return null;
   const width = Number(widthCm);
   const x = Number(placement.xCm);
@@ -62,10 +73,15 @@ export function rotateModulePlacementAroundCenter(placement, widthCm, deltaDeg =
   const centerX = x + (currentVertical ? 0 : width / 2);
   const centerY = y + (currentVertical ? width / 2 : 0);
 
+  const strictDepth = hasStrictDepthBounds(depthCm);
   return createModulePlacement({
     ...placement,
-    xCm: snapCm(nextVertical ? centerX : centerX - width / 2),
-    yCm: snapCm(nextVertical ? centerY - width / 2 : centerY),
+    xCm: nextVertical
+      ? (strictDepth ? snapDepthCenterCm(centerX, depthCm) : snapCm(centerX))
+      : snapCm(centerX - width / 2),
+    yCm: nextVertical
+      ? snapCm(centerY - width / 2)
+      : (strictDepth ? snapDepthCenterCm(centerY, depthCm) : snapCm(centerY)),
     rotationZDeg: nextRotation,
   });
 }
@@ -167,6 +183,7 @@ export function getWallExtentCm(modules = [], wallId = 'back') {
 export function validateModulePlacement({
   placement,
   widthCm,
+  depthCm = null,
   standType,
   standXCm,
   standYCm,
@@ -203,10 +220,22 @@ export function validateModulePlacement({
     if (!vertical || x !== xLimit) return { ok: false, message: 'Sağ duvar modülü Y yönünde olmalı.' };
     if (y < 0 || y + width > yLimit) return { ok: false, message: 'Modül Y stand sınırını aşıyor.' };
   } else {
-    const endX = x + (!vertical ? width : 0);
-    const endY = y + (vertical ? width : 0);
-    if (x < 0 || y < 0 || endX > xLimit || endY > yLimit) {
-      return { ok: false, message: 'Modül aktif stand alanını aşıyor.' };
+    const strictDepth = hasStrictDepthBounds(depthCm);
+    if (strictDepth) {
+      const halfDepth = Number(depthCm) / 2;
+      if (vertical) {
+        if (x - halfDepth < 0 || x + halfDepth > xLimit || y < 0 || y + width > yLimit) {
+          return { ok: false, message: 'Modül aktif stand alanını aşıyor.' };
+        }
+      } else if (x < 0 || x + width > xLimit || y - halfDepth < 0 || y + halfDepth > yLimit) {
+        return { ok: false, message: 'Modül aktif stand alanını aşıyor.' };
+      }
+    } else {
+      const endX = x + (!vertical ? width : 0);
+      const endY = y + (vertical ? width : 0);
+      if (x < 0 || y < 0 || endX > xLimit || endY > yLimit) {
+        return { ok: false, message: 'Modül aktif stand alanını aşıyor.' };
+      }
     }
   }
 
@@ -255,6 +284,9 @@ export function placementsOverlap(moduleA, moduleB) {
     // modülün ucu bağlantı noktasındaysa bu birleşim kasıtlıdır.
     const horizontalEndpoint = pointIsSegmentEndpoint(horizontal, intersectionX);
     const verticalEndpoint = pointIsSegmentEndpoint(vertical, intersectionY);
+    const thinEndpointJoin = horizontalDepth <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM
+      && verticalDepth <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
+    if (!thinEndpointJoin) return true;
     return !horizontalEndpoint && !verticalEndpoint;
   }
 
@@ -273,6 +305,7 @@ export function placementsOverlap(moduleA, moduleB) {
 export function validatePlacementAgainstModules({
   placement,
   widthCm,
+  depthCm = null,
   moduleId = null,
   modules = [],
   standType,
@@ -282,13 +315,14 @@ export function validatePlacementAgainstModules({
   const boundary = validateModulePlacement({
     placement,
     widthCm,
+    depthCm,
     standType,
     standXCm,
     standYCm,
   });
   if (!boundary.ok) return boundary;
 
-  const candidate = { id: moduleId, widthCm, placement };
+  const candidate = { id: moduleId, widthCm, depthCm, placement };
   const collision = modules.find((module) => (
     module?.id !== moduleId && placementsOverlap(candidate, module)
   ));
@@ -510,6 +544,7 @@ export function snapPlacementToModules({
 
 function createFreePlacement({
   widthCm,
+  depthCm = null,
   pointerXCm,
   pointerYCm,
   standXCm,
@@ -521,17 +556,29 @@ function createFreePlacement({
   const yLimit = Number(standYCm);
   const rotation = normalizeModuleRotationZDeg(rotationZDeg);
   const vertical = isVerticalModuleRotation(rotation);
-  const maxX = !vertical ? xLimit - width : xLimit;
-  const maxY = vertical ? yLimit - width : yLimit;
-  if (maxX < 0 || maxY < 0) return null;
+  const strictDepth = hasStrictDepthBounds(depthCm);
+  const halfDepth = strictDepth ? Number(depthCm) / 2 : 0;
+  const minX = vertical && strictDepth ? halfDepth : 0;
+  const maxX = !vertical ? xLimit - width : (strictDepth ? xLimit - halfDepth : xLimit);
+  const minY = !vertical && strictDepth ? halfDepth : 0;
+  const maxY = vertical ? yLimit - width : (strictDepth ? yLimit - halfDepth : yLimit);
+  if (maxX < minX || maxY < minY) return null;
 
   return createModulePlacement({
     xCm: !vertical
       ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
-      : clamp(snapCm(pointerXCm), 0, maxX),
+      : clamp(
+          strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm),
+          minX,
+          maxX,
+        ),
     yCm: vertical
       ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
-      : clamp(snapCm(pointerYCm), 0, maxY),
+      : clamp(
+          strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm),
+          minY,
+          maxY,
+        ),
     rotationZDeg: rotation,
     wallId: 'free',
   });
@@ -540,6 +587,8 @@ function createFreePlacement({
 export function snapPlacementToStand({
   standType,
   widthCm,
+  depthCm = null,
+  forceFree = false,
   pointerXCm,
   pointerYCm,
   standXCm,
@@ -565,6 +614,7 @@ export function snapPlacementToStand({
   const preferredRotation = normalizeModuleRotationZDeg(preferredRotationZDeg);
   const freePlacement = createFreePlacement({
     widthCm: width,
+    depthCm,
     pointerXCm: pointerX,
     pointerYCm: pointerY,
     standXCm: xLimit,
@@ -606,7 +656,7 @@ export function snapPlacementToStand({
   }).filter(Boolean).sort((a, b) => a.distanceCm - b.distanceCm);
 
   const nearestBoundary = boundaryCandidates[0];
-  if (nearestBoundary?.distanceCm <= MODULE_WALL_SNAP_DISTANCE_CM) {
+  if (!forceFree && nearestBoundary?.distanceCm <= MODULE_WALL_SNAP_DISTANCE_CM) {
     return { ok: true, placement: nearestBoundary.placement, mode: 'wall' };
   }
 
@@ -705,6 +755,7 @@ export function planFreeSideInsertion({
     const validation = validatePlacementAgainstModules({
       placement: nextPlacement,
       widthCm: module.widthCm,
+      depthCm: module.depthCm,
       moduleId: module.id,
       modules: [...modules, ...plannedModules],
       standType,

@@ -6,6 +6,7 @@ const MODULE_LABELS = {
   'showcase-3': '3 Gözlü Vitrin',
   separator: 'Separatör',
   door: 'Depo Kapısı',
+  counter: 'Banko',
 };
 
 const PICKER_MODULE_KEYS = [
