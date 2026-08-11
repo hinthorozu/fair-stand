@@ -50,29 +50,81 @@ jobs:
             ("addSofa({ x: -0.475, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });", "addSofa({ x: -0.425, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"),
             ("addSofa({ x: 0.475, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });", "addSofa({ x: 0.425, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"),
           ])
+          PY
+      - name: Fix free-fixture edge and corner snap
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/modulePlacement.js')
+          s = p.read_text()
+          old = '''  return createModulePlacement({
+    xCm: !vertical
+      ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
+      : clamp(
+          strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm),
+          minX,
+          maxX,
+        ),
+    yCm: vertical
+      ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
+      : clamp(
+          strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm),
+          minY,
+          maxY,
+        ),
+    rotationZDeg: rotation,
+    wallId: 'free',
+  });
+'''
+          new = '''  let xCm = !vertical
+    ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
+    : clamp(
+        strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm),
+        minX,
+        maxX,
+      );
+  let yCm = vertical
+    ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
+    : clamp(
+        strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm),
+        minY,
+        maxY,
+      );
 
-          test = Path('test/sofaSet.test.js')
-          s = test.read_text()
-          s = s.replace('160 x 160 cm footprint', '150 x 150 cm footprint')
-          s = s.replace('SOFA_SET_DIMENSIONS.loveseatWidthCm, 160', 'SOFA_SET_DIMENSIONS.loveseatWidthCm, 150')
-          s = s.replace('SOFA_SET_DIMENSIONS.widthCm, 160', 'SOFA_SET_DIMENSIONS.widthCm, 150')
-          s = s.replace('SOFA_SET_DIMENSIONS.depthCm, 160', 'SOFA_SET_DIMENSIONS.depthCm, 150')
-          s = s.replace('state.widthCm, 160', 'state.widthCm, 150')
-          s = s.replace('state.depthCm, 160', 'state.depthCm, 150')
-          s = s.replace('widthCm: 160, depthCm: 160', 'widthCm: 150, depthCm: 150')
-          s = s.replace('rotateModulePlacementAroundCenter(placed.placement, 160, 90, 160)', 'rotateModulePlacementAroundCenter(placed.placement, 150, 90, 150)')
-          s = s.replace("widthCm: 160, depthCm: 160, forceFree: true", "widthCm: 150, depthCm: 150, forceFree: true")
-          s = s.replace('backLeft.placement.yCm - 80, 0', 'backLeft.placement.yCm - 75, 0')
-          s = s.replace('(grid.placement.yCm - 80) % 50, 0', '(grid.placement.yCm - 75) % 50, 0')
-          s = s.replace('frontRight.placement.xCm + 160, 600', 'frontRight.placement.xCm + 150, 600')
-          s = s.replace('frontRight.placement.yCm + 80, 600', 'frontRight.placement.yCm + 75, 600')
-          test.write_text(s)
+  if (strictDepth) {
+    const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
+    if (!vertical) {
+      if (xCm <= edgeSnap + EPSILON_CM) xCm = 0;
+      if (xLimit - (xCm + width) <= edgeSnap + EPSILON_CM) xCm = xLimit - width;
+      if (yCm - halfDepth <= edgeSnap + EPSILON_CM) yCm = halfDepth;
+      if (yLimit - (yCm + halfDepth) <= edgeSnap + EPSILON_CM) yCm = yLimit - halfDepth;
+    } else {
+      if (xCm - halfDepth <= edgeSnap + EPSILON_CM) xCm = halfDepth;
+      if (xLimit - (xCm + halfDepth) <= edgeSnap + EPSILON_CM) xCm = xLimit - halfDepth;
+      if (yCm <= edgeSnap + EPSILON_CM) yCm = 0;
+      if (yLimit - (yCm + width) <= edgeSnap + EPSILON_CM) yCm = yLimit - width;
+    }
+  }
 
-          for name in ['Changelog.md', 'PROJECT_RULES.md', 'ROADMAP.md']:
-            p = Path(name)
-            if p.exists():
-              s = p.read_text().replace('160 x 160', '150 x 150').replace('160x160', '150x150')
-              p.write_text(s)
+  return createModulePlacement({
+    xCm,
+    yCm,
+    rotationZDeg: rotation,
+    wallId: 'free',
+  });
+'''
+          if old in s:
+            s = s.replace(old, new)
+          elif 'const edgeSnap = MODULE_PLACEMENT_SNAP_CM;' not in s:
+            raise SystemExit('createFreePlacement anchor not found')
+          p.write_text(s)
+
+          t = Path('test/sofaSet.test.js')
+          ts = t.read_text()
+          marker = "koltuk takımı köşelerde iki eksende de sıfıra oturur"
+          if marker not in ts:
+            ts += """\n\ntest('koltuk takımı köşelerde iki eksende de sıfıra oturur', () => {\n  const tl = snapPlacementToStand({ standType: 'island', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(tl.ok, true);\n  assert.equal(tl.placement.xCm, 0);\n  assert.equal(tl.placement.yCm, 75);\n  const br = snapPlacementToStand({ standType: 'island', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 480, pointerYCm: 480, standXCm: 600, standYCm: 600 });\n  assert.equal(br.ok, true);\n  assert.equal(br.placement.xCm, 450);\n  assert.equal(br.placement.yCm, 525);\n});\n"""
+            t.write_text(ts)
           PY
       - run: npm test
       - run: npm run build
@@ -80,5 +132,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src test Changelog.md PROJECT_RULES.md ROADMAP.md
-          git diff --cached --quiet || git commit -m "Set sofa set to 150x150 footprint"
+          git diff --cached --quiet || git commit -m "Fix sofa corner edge snapping"
           git push origin ROG
