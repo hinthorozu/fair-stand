@@ -1,0 +1,33 @@
+name: Add Counter Modules
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - scripts/add-counter-modules.mjs
+      - .github/workflows/add-counter-modules.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - name: Apply banko module implementation
+        run: node scripts/add-counter-modules.mjs
+      - name: Run tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src test Changelog.md PROJECT_RULES.md
+          git diff --cached --quiet || git commit -m "Add configurable banko modules"
+          git push origin ROG
