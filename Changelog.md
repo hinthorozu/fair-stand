@@ -602,3 +602,16 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 456. Tek parça Koltuk Takımı katalog modülü eklendi: yaklaşık 160 cm ikili koltuk, iki adet 65 cm tekli koltuk ve ortada 60 cm çapında cam sehpa.
 457. Koltuk döşemelerinin tamamı tek renk seçimiyle birlikte değişir; cam sehpa renk/görsel editöründen etkilenmez.
 458. Koltuk Takımı serbest yerleşim modülüdür; 150 x 150 cm footprint, R/Shift+R dönüş, stand sınırı ve collision kurallarını kullanır.
+
+## 11 Ağustos 2026 — Serbest mobilya modülleri ve FAZ 3 planlaması
+
+- Koltuk Takımı toplam footprint'i 150 × 150 cm olarak kesinleştirildi.
+- Tekli koltuklar 65 cm genişlikte korunarak iki tekin toplam dış hizası 150 cm olacak şekilde düzenlendi.
+- Koltuk Takımı serbest yerleşimde 50 cm grid ile hareket edecek ve duvarlı standlarda 10 cm duvarın 5 cm iç yüz referansına sıfır yanaşacak şekilde snap mantığı düzeltildi.
+- Koltuk Takımı iç geometrisinde tekli ve çiftli koltuk derinlikleri azaltılarak orta sehpa görünürlüğü artırıldı; 150 × 150 dış footprint korunmaya devam etti.
+- Masa Sandalye Takımı eklendi: 150 × 150 cm dış footprint, 4 sandalye ve ortada tek ayaklı yuvarlak masa.
+- Masa Sandalye Takımı serbest gezme, 50 cm grid ve duvar iç yüzüne sıfır yanaşma davranışlarını Koltuk Takımı ile aynı yerleşim altyapısı üzerinden kullanacak şekilde entegre edildi.
+- Bar Taburesi eklendi: 50 × 50 cm footprint, 80 cm yükseklik; sırtlıklı oturak, dört ayak ve ayak koyma halkası geometrisi oluşturuldu.
+- Bar Taburesi serbest gezme, 50 cm grid ve duvar iç yüzüne sıfır yanaşma davranışlarıyla entegre edildi.
+- FAZ 3 planlandı: zemin ayarlanması, proje kaydetme/yeniden düzenleme, üst lamba, render alma ve kullanıcının kendi modülünü oluşturması.
+

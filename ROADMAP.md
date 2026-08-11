@@ -255,3 +255,18 @@ FAZ 1 tabanı; düz/sırt duvar, sahne ölçüsü, katalog, tasarım araçları,
 3. Koltuk
 4. Masa Sandalye Takımı
 5. Bar Taburesi
+
+---
+
+# FAZ 3 — PROJELEME, SUNUM VE ÖZELLEŞTİRME
+
+FAZ 3'ün amacı, stand tasarımını yalnızca sahnede düzenlemekten çıkarıp proje olarak saklanabilir, yeniden açılıp düzenlenebilir, görsel olarak sunulabilir ve kullanıcı tarafından genişletilebilir hale getirmektir.
+
+## FAZ 3 yapılacaklar
+
+- [ ] 1. Zemin ayarlanması
+- [ ] 2. Projenin kaydedilmesi ve tekrar düzenlenebilmesi
+- [ ] 3. En üste lamba eklenmesi
+- [ ] 4. Render alınması
+- [ ] 5. Kendi modülünü oluşturma
+
