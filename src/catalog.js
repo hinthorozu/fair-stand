@@ -32,10 +32,10 @@ export const SHELF_DIMENSIONS = Object.freeze({
 });
 
 export const SOFA_SET_DIMENSIONS = Object.freeze({
-  widthCm: 160,
-  depthCm: 160,
+  widthCm: 150,
+  depthCm: 150,
   heightCm: 80,
-  loveseatWidthCm: 160,
+  loveseatWidthCm: 150,
   chairWidthCm: 65,
   tableDiameterCm: 60,
 });
@@ -54,7 +54,7 @@ export const MODULE_CATALOG = Object.freeze({
   SHELF_3_150: { type: 'shelf', widthCm: 150, shelfCount: 3, label: 'Raf 150 · 3 Raf' },
   SHELF_2_200: { type: 'shelf', widthCm: 200, shelfCount: 2, label: 'Raf 200 · 2 Raf' },
   SHELF_3_200: { type: 'shelf', widthCm: 200, shelfCount: 3, label: 'Raf 200 · 3 Raf' },
-  SOFA_SET: { type: 'sofa-set', widthCm: 160, depthCm: 160, heightCm: 80, label: 'Koltuk Takımı' },
+  SOFA_SET: { type: 'sofa-set', widthCm: 150, depthCm: 150, heightCm: 80, label: 'Koltuk Takımı' },
   DOOR_100: { type: 'door', widthCm: 100, label: 'Depo Kapısı 100' },
 
   COUNTER_100: { type: 'counter', widthCm: 100, depthCm: 50, heightCm: 100, label: 'Banko 100' },

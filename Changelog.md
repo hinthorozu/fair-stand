@@ -601,4 +601,4 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 
 456. Tek parça Koltuk Takımı katalog modülü eklendi: yaklaşık 160 cm ikili koltuk, iki adet 65 cm tekli koltuk ve ortada 60 cm çapında cam sehpa.
 457. Koltuk döşemelerinin tamamı tek renk seçimiyle birlikte değişir; cam sehpa renk/görsel editöründen etkilenmez.
-458. Koltuk Takımı serbest yerleşim modülüdür; 160 x 160 cm footprint, R/Shift+R dönüş, stand sınırı ve collision kurallarını kullanır.
+458. Koltuk Takımı serbest yerleşim modülüdür; 150 x 150 cm footprint, R/Shift+R dönüş, stand sınırı ve collision kurallarını kullanır.

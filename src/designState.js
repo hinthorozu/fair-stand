@@ -141,8 +141,8 @@ export function createSofaSetModuleState() {
   return {
     id: createId('module'),
     type: 'sofa-set',
-    widthCm: 160,
-    depthCm: 160,
+    widthCm: 150,
+    depthCm: 150,
     heightCm: 80,
     surface: {
       id: createId('surface'),

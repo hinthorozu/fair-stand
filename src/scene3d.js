@@ -1746,10 +1746,10 @@ export function createStandScene(
 }
 
 function createSofaSetModule(moduleState, moduleIndex) {
-  const widthM = Number(moduleState.widthCm || 160) / 100;
-  const depthM = Number(moduleState.depthCm || 160) / 100;
+  const widthM = Number(moduleState.widthCm || 150) / 100;
+  const depthM = Number(moduleState.depthCm || 150) / 100;
   const group = new THREE.Group();
-  group.userData = { kind: 'module', moduleIndex, moduleId: moduleState.id, type: 'sofa-set', widthCm: Number(moduleState.widthCm || 160), depthCm: Number(moduleState.depthCm || 160), heightCm: Number(moduleState.heightCm || 80) };
+  group.userData = { kind: 'module', moduleIndex, moduleId: moduleState.id, type: 'sofa-set', widthCm: Number(moduleState.widthCm || 150), depthCm: Number(moduleState.depthCm || 150), heightCm: Number(moduleState.heightCm || 80) };
 
   const upholstery = [];
   const material = new THREE.MeshStandardMaterial({ color: moduleState.surface?.color ?? '#ffffff', roughness: 0.68, metalness: 0, emissive: 0x000000, emissiveIntensity: 0 });
@@ -1783,9 +1783,9 @@ function createSofaSetModule(moduleState, moduleIndex) {
     }
   };
 
-  addSofa({ x: 0, z: -depthM / 2 + 0.39, seatWidth: 1.60, seatDepth: 0.78, twoSeat: true, facing: 'front' });
-  addSofa({ x: -0.475, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
-  addSofa({ x: 0.475, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
+  addSofa({ x: 0, z: -depthM / 2 + 0.39, seatWidth: 1.50, seatDepth: 0.78, twoSeat: true, facing: 'front' });
+  addSofa({ x: -0.425, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
+  addSofa({ x: 0.425, z: depthM / 2 - 0.375, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
 
   const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.30, 0.018, 48), new THREE.MeshPhysicalMaterial({ color: 0xd7e9ed, transparent: true, opacity: 0.42, roughness: 0.12, metalness: 0, transmission: 0.28, depthWrite: false }));
   glass.position.set(0, 0.42, 0.10);
@@ -1803,7 +1803,7 @@ function createSofaSetModule(moduleState, moduleIndex) {
   const selectionFrame = createSelectionFrame(1.36, 0.18);
   selectionFrame.visible = false;
   selectable.add(selectionFrame);
-  selectable.userData = { kind: 'surface', moduleType: 'sofa-set', selectionMode: 'module', acceptsImage: false, moduleIndex, moduleId: moduleState.id, widthCm: Number(moduleState.widthCm || 160), stripIndex: null, stripNumber: null, surfaceRole: 'upholstery', surfaceId: moduleState.surface?.id, surfaceState: moduleState.surface, selectionFrame, colorTargets: upholstery };
+  selectable.userData = { kind: 'surface', moduleType: 'sofa-set', selectionMode: 'module', acceptsImage: false, moduleIndex, moduleId: moduleState.id, widthCm: Number(moduleState.widthCm || 150), stripIndex: null, stripNumber: null, surfaceRole: 'upholstery', surfaceId: moduleState.surface?.id, surfaceState: moduleState.surface, selectionFrame, colorTargets: upholstery };
   upholstery.forEach((mesh, index) => {
     if (index === 0) return;
     mesh.userData = { ...selectable.userData, surfaceId: `${moduleState.surface?.id}-${index}`, selectionFrame: null };
