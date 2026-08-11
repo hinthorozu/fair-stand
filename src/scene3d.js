@@ -43,6 +43,8 @@ const ACTIVE_WALL_GUIDE_HEIGHT_M = 0.018;
 const STAGE_SURROUND_M = 1;
 // Aktif stand zemini fuar salonu zemininden 5 cm yukarıda duran platformdur.
 const ACTIVE_PLATFORM_HEIGHT_M = 0.05;
+const FLOOR_TYPES = Object.freeze(['karolaj', 'hali', 'parke']);
+const FLOOR_TOP_EPSILON_M = 0.006;
 const SELECTION_COLOR = 0x2563eb;
 const PLACEMENT_VALID_COLOR = 0x16a34a;
 const PLACEMENT_INVALID_COLOR = 0xdc2626;
@@ -119,7 +121,9 @@ export function createStandScene(
   let grid = null;
   let standOutline = null;
   let activeWallGuides = [];
+  let floorPattern = null;
   let stageLayout = null;
+  let currentFloorType = 'karolaj';
 
   function disposeGroundObject(object) {
     if (!object) return;
@@ -132,10 +136,88 @@ export function createStandScene(
   function disposeGroundGuides() {
     disposeGroundObject(grid);
     disposeGroundObject(standOutline);
+    disposeGroundObject(floorPattern);
     activeWallGuides.forEach(disposeGroundObject);
     grid = null;
     standOutline = null;
+    floorPattern = null;
     activeWallGuides = [];
+  }
+
+  function collectSurfaceCuts(lengthM, stepM) {
+    const cuts = [0];
+    for (let value = stepM; value < lengthM; value += stepM) cuts.push(value);
+    cuts.push(lengthM);
+    return [...new Set(cuts.map((value) => Number(value.toFixed(6))))];
+  }
+
+  function createFloorPattern(widthM, depthM, floorType) {
+    const positions = [];
+    const topY = ACTIVE_PLATFORM_HEIGHT_M + FLOOR_TOP_EPSILON_M;
+
+    if (floorType === 'karolaj') {
+      collectSurfaceCuts(widthM, 1).forEach((x) => {
+        positions.push(x, topY, 0, x, topY, depthM);
+      });
+      collectSurfaceCuts(depthM, 1).forEach((z) => {
+        positions.push(0, topY, z, widthM, topY, z);
+      });
+    } else if (floorType === 'parke') {
+      const plankDepthM = 0.20;
+      collectSurfaceCuts(depthM, plankDepthM).forEach((z) => {
+        positions.push(0, topY, z, widthM, topY, z);
+      });
+      let row = 0;
+      for (let z = 0; z < depthM - 0.000001; z += plankDepthM, row += 1) {
+        const rowEnd = Math.min(depthM, z + plankDepthM);
+        const offset = row % 2 === 0 ? 0 : 0.5;
+        for (let x = offset; x < widthM; x += 1) {
+          if (x <= 0.000001) continue;
+          positions.push(x, topY, z, x, topY, rowEnd);
+        }
+      }
+    }
+
+    if (!positions.length) return null;
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    const material = new THREE.LineBasicMaterial({
+      color: floorType === 'parke' ? 0x6f4a2d : 0x9aa0a6,
+      transparent: true,
+      opacity: floorType === 'parke' ? 0.55 : 0.68,
+    });
+    const lines = new THREE.LineSegments(geometry, material);
+    lines.renderOrder = 8;
+    return lines;
+  }
+
+  function setFloorType(floorType = 'karolaj') {
+    const resolved = FLOOR_TYPES.includes(floorType) ? floorType : 'karolaj';
+    currentFloorType = resolved;
+
+    const material = activeFloor.material;
+    if (resolved === 'hali') {
+      material.color.set(0x8b8f94);
+      material.roughness = 1;
+      material.metalness = 0;
+    } else if (resolved === 'parke') {
+      material.color.set(0xb98252);
+      material.roughness = 0.72;
+      material.metalness = 0;
+    } else {
+      material.color.set(FLOOR_COLOR);
+      material.roughness = 0.92;
+      material.metalness = 0;
+    }
+    material.needsUpdate = true;
+
+    disposeGroundObject(floorPattern);
+    floorPattern = null;
+    if (stageLayout) {
+      floorPattern = createFloorPattern(stageLayout.widthM, stageLayout.depthM, resolved);
+      if (floorPattern) scene.add(floorPattern);
+    }
+    return resolved;
   }
 
   function collectGridValues(lengthM) {
@@ -254,8 +336,11 @@ export function createStandScene(
       sceneWidthM,
       sceneDepthM,
       surroundM: STAGE_SURROUND_M,
+      platformHeightM: ACTIVE_PLATFORM_HEIGHT_M,
+      floorType: currentFloorType,
     };
 
+    setFloorType(currentFloorType);
     if (resetView) resetStageView();
     return { ok: true, ...stageLayout };
   }
@@ -1735,6 +1820,7 @@ export function createStandScene(
 
   return {
     createStage,
+    setFloorType,
     buildWall,
     clearWall,
     clearSelection,

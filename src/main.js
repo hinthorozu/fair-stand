@@ -49,6 +49,7 @@ const standTypeButtons = [...document.querySelectorAll('[data-stand-type]')];
 const standSizeXInput = document.querySelector('#stand-size-x');
 const standSizeYInput = document.querySelector('#stand-size-y');
 const createStageButton = document.querySelector('#create-stage');
+const floorTypeSelect = document.querySelector('#floor-type');
 const stageResult = document.querySelector('#stage-result');
 const wallLengthInput = document.querySelector('#wall-length');
 const buildWallButton = document.querySelector('#build-wall');
@@ -733,7 +734,8 @@ createStageButton.addEventListener('click', () => {
     return;
   }
 
-  currentStand = setup;
+  currentStand = { ...setup, floorType: floorTypeSelect.value };
+  scene3d.setFloorType(floorTypeSelect.value);
   syncWallLengthFromSetup(setup);
   viewportEmpty.hidden = true;
   viewportToolbar.hidden = false;
@@ -744,6 +746,12 @@ createStageButton.addEventListener('click', () => {
   renderStageResult(
     `${label} · ${setup.xCm} × ${setup.yCm} cm aktif alan · ${setup.sceneWidthM} × ${setup.sceneDepthM} m toplam sahne`,
   );
+});
+
+floorTypeSelect.addEventListener('change', () => {
+  if (!currentStand) return;
+  currentStand = { ...currentStand, floorType: floorTypeSelect.value };
+  scene3d.setFloorType(floorTypeSelect.value);
 });
 
 openModuleCatalogButton.addEventListener('click', () => {
