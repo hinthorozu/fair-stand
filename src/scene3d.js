@@ -276,7 +276,7 @@ export function createStandScene(
     placementFeedback = null;
   }
 
-  function showPlacementFeedback(message, { clientX = null, clientY = null, durationMs = 0 } = {}) {
+  function showPlacementFeedback(message, { clientX = null, clientY = null, durationMs = 1800 } = {}) {
     const text = formatPlacementFeedbackMessage(message);
     if (!text) {
       clearPlacementFeedback();

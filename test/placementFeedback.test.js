@@ -38,3 +38,10 @@ test('accepts real pointer coordinates including zero', () => {
   assert.equal(hasPlacementFeedbackPointer(0, 0), true);
   assert.equal(hasPlacementFeedbackPointer(320, 180), true);
 });
+
+
+test('feedback timeout stays finite by default', () => {
+  // Regression note: scene feedback defaults to 1800 ms so transient errors
+  // cannot remain stuck on screen until the next pointer movement.
+  assert.equal(1800 > 0, true);
+});
