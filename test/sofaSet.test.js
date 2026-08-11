@@ -55,3 +55,15 @@ test('koltuk takımı 50 cm grid üzerinde gider ve dört kenara sıfır yanaş�
   assert.equal(frontRight.placement.xCm + 150, 600);
   assert.equal(frontRight.placement.yCm + 75, 600);
 });
+
+
+test('koltuk takımı köşelerde iki eksende de sıfıra oturur', () => {
+  const tl = snapPlacementToStand({ standType: 'island', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });
+  assert.equal(tl.ok, true);
+  assert.equal(tl.placement.xCm, 0);
+  assert.equal(tl.placement.yCm, 75);
+  const br = snapPlacementToStand({ standType: 'island', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 480, pointerYCm: 480, standXCm: 600, standYCm: 600 });
+  assert.equal(br.ok, true);
+  assert.equal(br.placement.xCm, 450);
+  assert.equal(br.placement.yCm, 525);
+});

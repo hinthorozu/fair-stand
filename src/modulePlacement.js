@@ -752,21 +752,39 @@ function createFreePlacement({
   const maxY = vertical ? yLimit - width : (strictDepth ? yLimit - halfDepth : yLimit);
   if (maxX < minX || maxY < minY) return null;
 
+  let xCm = !vertical
+    ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
+    : clamp(
+        strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm),
+        minX,
+        maxX,
+      );
+  let yCm = vertical
+    ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
+    : clamp(
+        strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm),
+        minY,
+        maxY,
+      );
+
+  if (strictDepth) {
+    const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
+    if (!vertical) {
+      if (xCm <= edgeSnap + EPSILON_CM) xCm = 0;
+      if (xLimit - (xCm + width) <= edgeSnap + EPSILON_CM) xCm = xLimit - width;
+      if (yCm - halfDepth <= edgeSnap + EPSILON_CM) yCm = halfDepth;
+      if (yLimit - (yCm + halfDepth) <= edgeSnap + EPSILON_CM) yCm = yLimit - halfDepth;
+    } else {
+      if (xCm - halfDepth <= edgeSnap + EPSILON_CM) xCm = halfDepth;
+      if (xLimit - (xCm + halfDepth) <= edgeSnap + EPSILON_CM) xCm = xLimit - halfDepth;
+      if (yCm <= edgeSnap + EPSILON_CM) yCm = 0;
+      if (yLimit - (yCm + width) <= edgeSnap + EPSILON_CM) yCm = yLimit - width;
+    }
+  }
+
   return createModulePlacement({
-    xCm: !vertical
-      ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
-      : clamp(
-          strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm),
-          minX,
-          maxX,
-        ),
-    yCm: vertical
-      ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
-      : clamp(
-          strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm),
-          minY,
-          maxY,
-        ),
+    xCm,
+    yCm,
     rotationZDeg: rotation,
     wallId: 'free',
   });
