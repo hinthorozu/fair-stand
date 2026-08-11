@@ -50,8 +50,6 @@ const standSizeXInput = document.querySelector('#stand-size-x');
 const standSizeYInput = document.querySelector('#stand-size-y');
 const createStageButton = document.querySelector('#create-stage');
 const floorTypeSelect = document.querySelector('#floor-type');
-const floorColorField = document.querySelector('#floor-color-field');
-const floorColorInput = document.querySelector('#floor-color');
 const stageResult = document.querySelector('#stage-result');
 const wallLengthInput = document.querySelector('#wall-length');
 const buildWallButton = document.querySelector('#build-wall');
@@ -173,6 +171,13 @@ const scene3d = createStandScene(
   },
   getAssetUrl,
   (context) => moduleContextMenu.open(context),
+  ({ selected, floorType, paintable }) => {
+    if (!selected) return;
+    const label = floorType === 'karolaj' ? 'Karolaj' : (floorType === 'hali' ? 'Halı' : 'Parke');
+    selectionInfo.textContent = paintable
+      ? label + ' zemini seçili · mevcut Aktif renk ile boyanabilir.'
+      : label + ' zemini seçili · bu zemin tipi boyanamaz.';
+  },
 );
 
 function renderStageResult(message, isError = false) {
@@ -736,9 +741,8 @@ createStageButton.addEventListener('click', () => {
     return;
   }
 
-  currentStand = { ...setup, floorType: floorTypeSelect.value, floorColor: floorColorInput.value };
+  currentStand = { ...setup, floorType: floorTypeSelect.value };
   scene3d.setFloorType(floorTypeSelect.value);
-  if (floorTypeSelect.value === 'karolaj') scene3d.setFloorColor(floorColorInput.value);
   syncWallLengthFromSetup(setup);
   viewportEmpty.hidden = true;
   viewportToolbar.hidden = false;
@@ -751,27 +755,10 @@ createStageButton.addEventListener('click', () => {
   );
 });
 
-function syncFloorColorVisibility() {
-  floorColorField.hidden = floorTypeSelect.value !== 'karolaj';
-}
-
-syncFloorColorVisibility();
-
 floorTypeSelect.addEventListener('change', () => {
-  syncFloorColorVisibility();
   if (!currentStand) return;
   currentStand = { ...currentStand, floorType: floorTypeSelect.value };
   scene3d.setFloorType(floorTypeSelect.value);
-  if (floorTypeSelect.value === 'karolaj') {
-    scene3d.setFloorColor(floorColorInput.value);
-    currentStand = { ...currentStand, floorColor: floorColorInput.value };
-  }
-});
-
-floorColorInput.addEventListener('input', () => {
-  if (floorTypeSelect.value !== 'karolaj') return;
-  if (currentStand) currentStand = { ...currentStand, floorColor: floorColorInput.value };
-  scene3d.setFloorColor(floorColorInput.value);
 });
 
 openModuleCatalogButton.addEventListener('click', () => {
@@ -884,10 +871,25 @@ resetModuleFeaturesButton.addEventListener('click', () => {
 });
 
 function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
+  if (scene3d.isFloorSelected()) {
+    const floorType = scene3d.getSelectedFloorType();
+    if (floorType === 'parke') {
+      selectionInfo.textContent = 'Parke zemini boyanamaz; hazır parke seçeneklerinden biri kullanılacak.';
+      return false;
+    }
+    const applied = scene3d.setFloorColor(colorInput.value);
+    if (applied) {
+      const label = floorType === 'hali' ? 'Halı' : 'Karolaj';
+      if (currentStand) currentStand = { ...currentStand, floorColor: applied };
+      selectionInfo.textContent = label + ' zemini · renk ' + applied.toUpperCase() + ' uygulandı.';
+      return true;
+    }
+  }
+
   const selected = scene3d.getSelectedSurfaces();
   if (!selected.length) {
     if (showMissingSelection) {
-      selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel, panel bloğu veya modülü seç.';
+      selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel, panel bloğu, modül veya zemini seç.';
     }
     return false;
   }

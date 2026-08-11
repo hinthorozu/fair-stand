@@ -64,6 +64,7 @@ export function createStandScene(
   onSurfaceSelected,
   getAssetUrl = () => null,
   onModuleContextMenu = () => {},
+  onFloorSelected = () => {},
 ) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf4f6f8);
@@ -124,7 +125,11 @@ export function createStandScene(
   let floorPattern = null;
   let stageLayout = null;
   let currentFloorType = 'karolaj';
-  let currentFloorColor = '#e9edf1';
+  const floorColors = {
+    karolaj: '#e9edf1',
+    hali: '#8b8f94',
+  };
+  let floorSelected = false;
 
   function disposeGroundObject(object) {
     if (!object) return;
@@ -198,7 +203,7 @@ export function createStandScene(
 
     const material = activeFloor.material;
     if (resolved === 'hali') {
-      material.color.set(0x8b8f94);
+      material.color.set(floorColors.hali);
       material.roughness = 1;
       material.metalness = 0;
     } else if (resolved === 'parke') {
@@ -206,7 +211,7 @@ export function createStandScene(
       material.roughness = 0.72;
       material.metalness = 0;
     } else {
-      material.color.set(currentFloorColor);
+      material.color.set(floorColors.karolaj);
       material.roughness = 0.92;
       material.metalness = 0;
     }
@@ -223,15 +228,15 @@ export function createStandScene(
   }
 
   function setFloorColor(color) {
+    if (currentFloorType !== 'karolaj' && currentFloorType !== 'hali') return null;
     const normalized = String(color ?? '').trim();
-    if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) return currentFloorColor;
-    currentFloorColor = normalized.toLowerCase();
-    if (stageLayout) stageLayout.floorColor = currentFloorColor;
-    if (currentFloorType === 'karolaj') {
-      activeFloor.material.color.set(currentFloorColor);
-      activeFloor.material.needsUpdate = true;
-    }
-    return currentFloorColor;
+    if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) return floorColors[currentFloorType];
+    const resolved = normalized.toLowerCase();
+    floorColors[currentFloorType] = resolved;
+    if (stageLayout) stageLayout.floorColor = resolved;
+    activeFloor.material.color.set(resolved);
+    activeFloor.material.needsUpdate = true;
+    return resolved;
   }
 
   function collectGridValues(lengthM) {
@@ -449,9 +454,19 @@ export function createStandScene(
     onSurfaceSelected?.([...selectedSurfaces]);
   }
 
+  function notifyFloorSelection() {
+    onFloorSelected?.({
+      selected: floorSelected,
+      floorType: currentFloorType,
+      paintable: currentFloorType === 'karolaj' || currentFloorType === 'hali',
+      color: floorColors[currentFloorType] ?? null,
+    });
+  }
+
   function clearSelection({ notify = true, keepAnchor = false } = {}) {
     selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
     selectedSurfaces.clear();
+    floorSelected = false;
     if (!keepAnchor) selectionAnchorSurfaceId = null;
     if (notify) notifySelection();
   }
@@ -1721,9 +1736,20 @@ export function createStandScene(
 
       if (canRectangleSelect) selectRectangleTo(hit.object);
       else selectOnly(hit.object);
-    } else if (!rectangleSelect) {
-      clearSelection();
+      return;
     }
+
+    if (!rectangleSelect && activeFloor.visible) {
+      const floorHit = raycaster.intersectObject(activeFloor, false)[0];
+      if (floorHit) {
+        clearSelection({ notify: false });
+        floorSelected = true;
+        notifyFloorSelection();
+        return;
+      }
+    }
+
+    if (!rectangleSelect) clearSelection();
   }
 
   renderer.domElement.addEventListener('pointerdown', (event) => {
@@ -1854,6 +1880,8 @@ export function createStandScene(
     getStageLayout: () => (stageLayout ? { ...stageLayout } : null),
     getSelectedSurface: () => [...selectedSurfaces][0] ?? null,
     getSelectedSurfaces: () => [...selectedSurfaces],
+    isFloorSelected: () => floorSelected,
+    getSelectedFloorType: () => (floorSelected ? currentFloorType : null),
   };
 }
 
