@@ -508,6 +508,32 @@ export function createStandScene(
     notifySelection();
   }
 
+  function toggleCounterSurface(mesh) {
+    if (!mesh || mesh.userData?.moduleType !== 'counter') return false;
+
+    const moduleId = mesh.userData.moduleId ?? null;
+    const hasForeignSelection = [...selectedSurfaces].some(
+      (surface) => surface.userData?.moduleType !== 'counter'
+        || surface.userData?.moduleId !== moduleId,
+    );
+
+    if (hasForeignSelection) clearSelection({ notify: false });
+
+    if (selectedSurfaces.has(mesh)) {
+      selectedSurfaces.delete(mesh);
+      setSelectionVisual(mesh, false);
+    } else {
+      selectedSurfaces.add(mesh);
+      setSelectionVisual(mesh, true);
+    }
+
+    floorSelected = false;
+    selectedModuleId = selectedSurfaces.size ? moduleId : null;
+    selectionAnchorSurfaceId = [...selectedSurfaces][0]?.userData.surfaceId ?? null;
+    notifySelection();
+    return true;
+  }
+
   function selectRectangleTo(mesh) {
     if (!mesh) return;
 
@@ -1991,6 +2017,11 @@ export function createStandScene(
     const hit = raycaster.intersectObjects(surfaceMeshes, false)[0];
 
     if (hit) {
+      if (rectangleSelect && hit.object.userData.moduleType === 'counter') {
+        toggleCounterSurface(hit.object);
+        return;
+      }
+
       const anchorMesh = surfaceMeshes.find(
         (surface) => surface.userData.surfaceId === selectionAnchorSurfaceId,
       );

@@ -182,6 +182,15 @@ const scene3d = createStandScene(
       return;
     }
 
+    const allCounterPanels = surfaces.every(
+      (surface) => surface.userData.moduleType === 'counter',
+    );
+    if (allCounterPanels) {
+      const widthCm = surfaces[0]?.userData.widthCm ?? '';
+      selectionInfo.textContent = `Banko ${widthCm} cm · ${surfaces.length} panel seçili · renk + görsel toplu uygulanabilir.`;
+      return;
+    }
+
     const shape = describeRectSelection(
       surfaces.map((surface) => ({
         moduleIndex: surface.userData.moduleIndex,
@@ -1317,6 +1326,16 @@ function applyActiveImageToSelection(fit = 'cover') {
   if (!activeAssetId) {
     assetStatus.textContent = 'Önce arşivden bir görsel seç veya yeni görsel yükle.';
     return false;
+  }
+
+  const allCounterPanels = selected.every(
+    (surface) => surface.userData.moduleType === 'counter',
+  );
+  if (allCounterPanels) {
+    scene3d.applyImageAsset(selected, activeAssetId, fit);
+    const fitLabel = fit === 'cover' ? 'Doldur' : 'Sığdır';
+    selectionInfo.textContent = `${selected.length} banko paneline görsel uygulandı · ${fitLabel}.`;
+    return true;
   }
 
   const result = scene3d.applyRectImageAsset(selected, activeAssetId, fit);
