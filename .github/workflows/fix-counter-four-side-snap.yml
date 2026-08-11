@@ -1,0 +1,48 @@
+name: Fix Counter Four Side Snap
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - scripts/fix-counter-four-side-snap.mjs
+      - scripts/add-counter-four-side-tests.mjs
+      - .github/workflows/fix-counter-four-side-snap.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ROG
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Apply patch
+        run: |
+          node scripts/fix-counter-four-side-snap.mjs
+          node scripts/add-counter-four-side-tests.mjs
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src test Changelog.md
+          git diff --cached --quiet || git commit -m "Allow bankos to rest on all four sides"
+          git push origin ROG
