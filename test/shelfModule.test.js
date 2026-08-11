@@ -20,7 +20,7 @@ test('shelf catalog exposes 100 150 200 cm widths in 2 and 3 shelf variants', ()
 test('shelf heights sit on Maxima 50 cm panel seams', () => {
   assert.deepEqual(SHELF_DIMENSIONS.heightsByCountCm[2], [100, 150]);
   assert.deepEqual(SHELF_DIMENSIONS.heightsByCountCm[3], [100, 150, 200]);
-  assert.equal(SHELF_DIMENSIONS.projectionCm, 30);
+  assert.equal(SHELF_DIMENSIONS.projectionCm, 38);
 });
 
 test('shelf state keeps seven editable wall panels and its shelf count', () => {
