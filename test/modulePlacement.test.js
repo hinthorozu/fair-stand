@@ -7,6 +7,7 @@ import {
   rotateModuleRotationZDeg,
   snapCm,
   snapPlacementToStand,
+  snapPlacementToModules,
   rotateModulePlacementAroundCenter,
   validatePlacementAgainstModules,
 } from '../src/modulePlacement.js';
@@ -269,4 +270,110 @@ test('selected module center rotation stays on the 50 cm grid', () => {
   assert.equal(rotated.xCm % 50, 0);
   assert.equal(rotated.yCm % 50, 0);
   assert.equal(rotated.rotationZDeg, 90);
+});
+
+
+test('magnetic snap joins parallel modules end to end without changing rotation', () => {
+  const modules = [{
+    id: 'target',
+    widthCm: 100,
+    placement: { xCm: 100, yCm: 200, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  }];
+  const result = snapPlacementToModules({
+    moduleId: 'moving',
+    widthCm: 100,
+    pointerXCm: 247,
+    pointerYCm: 202,
+    rotationZDeg: 0,
+    modules,
+    standType: 'island',
+    standXCm: 800,
+    standYCm: 600,
+  });
+
+  assert.equal(result?.snapKind, 'end-to-end');
+  assert.deepEqual(result?.placement, {
+    xCm: 200, yCm: 200, zCm: 0, rotationZDeg: 0, wallId: 'free',
+  });
+});
+
+test('magnetic snap creates an L connection at a target endpoint', () => {
+  const modules = [{
+    id: 'target',
+    widthCm: 200,
+    placement: { xCm: 100, yCm: 200, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  }];
+  const result = snapPlacementToModules({
+    moduleId: 'moving',
+    widthCm: 100,
+    pointerXCm: 302,
+    pointerYCm: 248,
+    rotationZDeg: 90,
+    modules,
+    standType: 'island',
+    standXCm: 800,
+    standYCm: 600,
+  });
+
+  assert.equal(result?.snapKind, 'corner');
+  assert.deepEqual(result?.placement, {
+    xCm: 300, yCm: 200, zCm: 0, rotationZDeg: 90, wallId: 'free',
+  });
+});
+
+test('magnetic snap creates a T connection on a 50 cm point along target body', () => {
+  const modules = [{
+    id: 'target',
+    widthCm: 300,
+    placement: { xCm: 100, yCm: 200, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  }];
+  const result = snapPlacementToModules({
+    moduleId: 'moving',
+    widthCm: 100,
+    pointerXCm: 252,
+    pointerYCm: 251,
+    rotationZDeg: 90,
+    modules,
+    standType: 'island',
+    standXCm: 800,
+    standYCm: 600,
+  });
+
+  assert.equal(result?.snapKind, 'tee');
+  assert.deepEqual(result?.placement, {
+    xCm: 250, yCm: 200, zCm: 0, rotationZDeg: 90, wallId: 'free',
+  });
+});
+
+test('magnetic snap preserves 270 degree facing and ignores distant targets', () => {
+  const modules = [{
+    id: 'target',
+    widthCm: 200,
+    placement: { xCm: 100, yCm: 200, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  }];
+  const snapped = snapPlacementToModules({
+    moduleId: 'moving',
+    widthCm: 100,
+    pointerXCm: 300,
+    pointerYCm: 250,
+    rotationZDeg: 270,
+    modules,
+    standType: 'island',
+    standXCm: 800,
+    standYCm: 600,
+  });
+  assert.equal(snapped?.placement.rotationZDeg, 270);
+
+  const distant = snapPlacementToModules({
+    moduleId: 'moving',
+    widthCm: 100,
+    pointerXCm: 700,
+    pointerYCm: 500,
+    rotationZDeg: 270,
+    modules,
+    standType: 'island',
+    standXCm: 800,
+    standYCm: 600,
+  });
+  assert.equal(distant, null);
 });

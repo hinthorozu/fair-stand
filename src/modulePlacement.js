@@ -1,6 +1,7 @@
 export const MODULE_PLACEMENT_SNAP_CM = 50;
 export const MODULE_PLACEMENT_ROTATIONS = Object.freeze([0, 90, 180, 270]);
 export const MODULE_WALL_SNAP_DISTANCE_CM = 50;
+export const MODULE_NEIGHBOR_SNAP_DISTANCE_CM = 30;
 
 const EPSILON_CM = 0.001;
 
@@ -267,6 +268,210 @@ export function validatePlacementAgainstModules({
   }
 
   return { ok: true };
+}
+
+function getPlacementCenter(placement, widthCm) {
+  const width = Number(widthCm);
+  const x = Number(placement?.xCm);
+  const y = Number(placement?.yCm);
+  if (![width, x, y].every(Number.isFinite) || width <= 0) return null;
+  const vertical = isVerticalModuleRotation(placement.rotationZDeg);
+  return {
+    xCm: x + (vertical ? 0 : width / 2),
+    yCm: y + (vertical ? width / 2 : 0),
+  };
+}
+
+function inferPlacementWallId({ placement, standType, standXCm } = {}) {
+  if (!placement) return 'free';
+  const allowedWalls = getAllowedWallIds(standType);
+  const vertical = isVerticalModuleRotation(placement.rotationZDeg);
+  const xCm = Number(placement.xCm);
+  const yCm = Number(placement.yCm);
+  const xLimit = Number(standXCm);
+
+  if (!vertical && nearlyEqual(yCm, 0) && allowedWalls.includes('back')) return 'back';
+  if (vertical && nearlyEqual(xCm, 0) && allowedWalls.includes('left')) return 'left';
+  if (vertical && nearlyEqual(xCm, xLimit) && allowedWalls.includes('right')) return 'right';
+  return 'free';
+}
+
+function getSegmentSnapCoordinates(segment) {
+  const coordinates = [];
+  for (
+    let coordinate = segment.startCm;
+    coordinate <= segment.endCm + EPSILON_CM;
+    coordinate += MODULE_PLACEMENT_SNAP_CM
+  ) {
+    coordinates.push(Math.min(coordinate, segment.endCm));
+  }
+  if (!coordinates.some((coordinate) => nearlyEqual(coordinate, segment.endCm))) {
+    coordinates.push(segment.endCm);
+  }
+  return coordinates;
+}
+
+function createEndpointConnectionPlacement({
+  axis,
+  pointXCm,
+  pointYCm,
+  widthCm,
+  rotationZDeg,
+  movingEndpoint,
+  standType,
+  standXCm,
+}) {
+  const width = Number(widthCm);
+  const placement = createModulePlacement({
+    xCm: axis === 'x'
+      ? pointXCm - (movingEndpoint === 'end' ? width : 0)
+      : pointXCm,
+    yCm: axis === 'y'
+      ? pointYCm - (movingEndpoint === 'end' ? width : 0)
+      : pointYCm,
+    zCm: 0,
+    rotationZDeg,
+    wallId: 'free',
+  });
+  placement.wallId = inferPlacementWallId({ placement, standType, standXCm });
+  return placement;
+}
+
+export function snapPlacementToModules({
+  moduleId = null,
+  widthCm,
+  pointerXCm,
+  pointerYCm,
+  rotationZDeg = 0,
+  modules = [],
+  standType,
+  standXCm,
+  standYCm,
+  snapDistanceCm = MODULE_NEIGHBOR_SNAP_DISTANCE_CM,
+} = {}) {
+  const width = Number(widthCm);
+  const pointerX = Number(pointerXCm);
+  const pointerY = Number(pointerYCm);
+  const threshold = Number(snapDistanceCm);
+  if (
+    ![width, pointerX, pointerY, threshold].every(Number.isFinite)
+    || width <= 0
+    || threshold < 0
+  ) return null;
+
+  const resolvedRotation = normalizeModuleRotationZDeg(rotationZDeg);
+  const movingAxis = isVerticalModuleRotation(resolvedRotation) ? 'y' : 'x';
+  const candidates = [];
+
+  const addCandidate = (placement, targetModuleId, snapKind, priority = 0) => {
+    const center = getPlacementCenter(placement, width);
+    if (!center) return;
+    const distanceCm = Math.hypot(center.xCm - pointerX, center.yCm - pointerY);
+    if (distanceCm > threshold + EPSILON_CM) return;
+
+    const validation = validatePlacementAgainstModules({
+      placement,
+      widthCm: width,
+      moduleId,
+      modules,
+      standType,
+      standXCm,
+      standYCm,
+    });
+    if (!validation.ok) return;
+
+    candidates.push({
+      placement,
+      targetModuleId,
+      snapKind,
+      priority,
+      distanceCm,
+    });
+  };
+
+  modules.forEach((targetModule) => {
+    if (!targetModule?.placement || targetModule.id === moduleId) return;
+    const target = getGroundSegment(targetModule);
+    if (!target) return;
+
+    if (target.axis === movingAxis) {
+      // Aynı doğrultuda yalnızca gerçek uç-uca bağlantı üret.
+      if (movingAxis === 'x') {
+        addCandidate(createEndpointConnectionPlacement({
+          axis: 'x', pointXCm: target.endCm, pointYCm: target.fixedCm,
+          widthCm: width, rotationZDeg: resolvedRotation, movingEndpoint: 'start',
+          standType, standXCm,
+        }), targetModule.id, 'end-to-end', 0);
+        addCandidate(createEndpointConnectionPlacement({
+          axis: 'x', pointXCm: target.startCm, pointYCm: target.fixedCm,
+          widthCm: width, rotationZDeg: resolvedRotation, movingEndpoint: 'end',
+          standType, standXCm,
+        }), targetModule.id, 'end-to-end', 0);
+      } else {
+        addCandidate(createEndpointConnectionPlacement({
+          axis: 'y', pointXCm: target.fixedCm, pointYCm: target.endCm,
+          widthCm: width, rotationZDeg: resolvedRotation, movingEndpoint: 'start',
+          standType, standXCm,
+        }), targetModule.id, 'end-to-end', 0);
+        addCandidate(createEndpointConnectionPlacement({
+          axis: 'y', pointXCm: target.fixedCm, pointYCm: target.startCm,
+          widthCm: width, rotationZDeg: resolvedRotation, movingEndpoint: 'end',
+          standType, standXCm,
+        }), targetModule.id, 'end-to-end', 0);
+      }
+      return;
+    }
+
+    // Dik modül: hedef modül boyunca her 50 cm bağlantı noktasını aday yap.
+    // Hedefin ucundaki bağlantı L, gövde üzerindeki bağlantı T olur.
+    getSegmentSnapCoordinates(target).forEach((coordinateCm) => {
+      const pointXCm = target.axis === 'x' ? coordinateCm : target.fixedCm;
+      const pointYCm = target.axis === 'y' ? coordinateCm : target.fixedCm;
+      const targetEndpoint = nearlyEqual(coordinateCm, target.startCm)
+        || nearlyEqual(coordinateCm, target.endCm);
+      const snapKind = targetEndpoint ? 'corner' : 'tee';
+      const priority = targetEndpoint ? 1 : 2;
+
+      addCandidate(createEndpointConnectionPlacement({
+        axis: movingAxis,
+        pointXCm,
+        pointYCm,
+        widthCm: width,
+        rotationZDeg: resolvedRotation,
+        movingEndpoint: 'start',
+        standType,
+        standXCm,
+      }), targetModule.id, snapKind, priority);
+
+      addCandidate(createEndpointConnectionPlacement({
+        axis: movingAxis,
+        pointXCm,
+        pointYCm,
+        widthCm: width,
+        rotationZDeg: resolvedRotation,
+        movingEndpoint: 'end',
+        standType,
+        standXCm,
+      }), targetModule.id, snapKind, priority);
+    });
+  });
+
+  if (!candidates.length) return null;
+  candidates.sort((a, b) => (
+    a.distanceCm - b.distanceCm
+    || a.priority - b.priority
+    || String(a.targetModuleId).localeCompare(String(b.targetModuleId))
+  ));
+
+  const best = candidates[0];
+  return {
+    ok: true,
+    mode: 'module-snap',
+    placement: { ...best.placement },
+    targetModuleId: best.targetModuleId,
+    snapKind: best.snapKind,
+    distanceCm: best.distanceCm,
+  };
 }
 
 function createFreePlacement({

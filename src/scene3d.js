@@ -15,6 +15,7 @@ import {
   rotateModuleRotationZDeg,
   rotateModulePlacementAroundCenter,
   snapPlacementToStand,
+  snapPlacementToModules,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
 import {
@@ -792,13 +793,27 @@ export function createStandScene(
       };
     }
 
+    const renderedModules = getRenderedModuleStates();
+    const magneticSnap = snapPlacementToModules({
+      moduleId: moduleState.id,
+      widthCm: moduleState.widthCm,
+      pointerXCm: ground.xCm,
+      pointerYCm: ground.yCm,
+      rotationZDeg: preferredRotationZDeg,
+      modules: renderedModules,
+      standType: stageLayout.standType,
+      standXCm: stageLayout.widthCm,
+      standYCm: stageLayout.depthCm,
+    });
+    const desiredPlacement = magneticSnap?.placement ?? snapped.placement;
+
     let plan;
-    if (snapped.placement.wallId === 'free') {
+    if (desiredPlacement.wallId === 'free') {
       const validation = validatePlacementAgainstModules({
-        placement: snapped.placement,
+        placement: desiredPlacement,
         widthCm: moduleState.widthCm,
         moduleId: moduleState.id,
-        modules: getRenderedModuleStates(),
+        modules: renderedModules,
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
         standYCm: stageLayout.depthCm,
@@ -806,16 +821,16 @@ export function createStandScene(
       plan = {
         ok: validation.ok,
         message: validation.message ?? null,
-        movingPlacement: { ...snapped.placement },
+        movingPlacement: { ...desiredPlacement },
         placements: validation.ok
-          ? new Map([[moduleState.id, { ...snapped.placement }]])
+          ? new Map([[moduleState.id, { ...desiredPlacement }]])
           : new Map(),
       };
     } else {
       plan = planContinuousModuleInsert({
-        modules: getRenderedModuleStates(),
+        modules: renderedModules,
         insertedModule: moduleState,
-        desiredPlacement: snapped.placement,
+        desiredPlacement,
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
         standYCm: stageLayout.depthCm,
@@ -824,13 +839,18 @@ export function createStandScene(
 
     const previewPlacement = plan.ok && plan.movingPlacement
       ? plan.movingPlacement
-      : snapped.placement;
+      : desiredPlacement;
     showPlacementGhost(moduleState.widthCm, previewPlacement, plan.ok);
     return {
       ok: plan.ok,
       placement: { ...previewPlacement },
       message: plan.message ?? null,
       plan,
+      snap: magneticSnap ? {
+        mode: magneticSnap.mode,
+        targetModuleId: magneticSnap.targetModuleId,
+        snapKind: magneticSnap.snapKind,
+      } : null,
     };
   }
 
@@ -895,13 +915,27 @@ export function createStandScene(
       return;
     }
 
+    const renderedModules = getRenderedModuleStates();
+    const magneticSnap = snapPlacementToModules({
+      moduleId: moduleState.id,
+      widthCm: moduleState.widthCm,
+      pointerXCm: ground.xCm,
+      pointerYCm: ground.yCm,
+      rotationZDeg: dragSession.preferredRotationZDeg,
+      modules: renderedModules,
+      standType: stageLayout.standType,
+      standXCm: stageLayout.widthCm,
+      standYCm: stageLayout.depthCm,
+    });
+    const desiredPlacement = magneticSnap?.placement ?? snapped.placement;
+
     let plan;
-    if (snapped.placement.wallId === 'free') {
+    if (desiredPlacement.wallId === 'free') {
       const validation = validatePlacementAgainstModules({
-        placement: snapped.placement,
+        placement: desiredPlacement,
         widthCm: moduleState.widthCm,
         moduleId: moduleState.id,
-        modules: getRenderedModuleStates(),
+        modules: renderedModules,
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
         standYCm: stageLayout.depthCm,
@@ -909,16 +943,16 @@ export function createStandScene(
       plan = {
         ok: validation.ok,
         message: validation.message ?? null,
-        movingPlacement: { ...snapped.placement },
+        movingPlacement: { ...desiredPlacement },
         placements: validation.ok
-          ? new Map([[moduleState.id, { ...snapped.placement }]])
+          ? new Map([[moduleState.id, { ...desiredPlacement }]])
           : new Map(),
       };
     } else {
       plan = planContinuousModuleMove({
-        modules: getRenderedModuleStates(),
+        modules: renderedModules,
         movingModuleId: moduleState.id,
-        desiredPlacement: snapped.placement,
+        desiredPlacement,
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
         standYCm: stageLayout.depthCm,
@@ -927,12 +961,17 @@ export function createStandScene(
 
     const previewPlacement = plan.ok && plan.movingPlacement
       ? plan.movingPlacement
-      : snapped.placement;
+      : desiredPlacement;
     dragSession.preview = {
       placement: previewPlacement,
       valid: plan.ok,
       message: plan.message ?? null,
       plan,
+      snap: magneticSnap ? {
+        mode: magneticSnap.mode,
+        targetModuleId: magneticSnap.targetModuleId,
+        snapKind: magneticSnap.snapKind,
+      } : null,
     };
     showPlacementGhost(moduleState.widthCm, previewPlacement, plan.ok);
   }
