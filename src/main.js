@@ -1,6 +1,7 @@
 import './style.css';
 import './colorEditor.css';
 import './imageActions.css';
+import JSZip from 'jszip';
 import { createStandScene } from './scene3d.js';
 import {
   composeAutomaticStandWall,
@@ -22,7 +23,7 @@ import {
   totalWallWidthCm,
   moduleWidths,
 } from './designState.js';
-import { deleteProjectImageAssets, loadImageAssets, saveImageAsset } from './assetStore.js';
+import { deleteProjectImageAssets, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
 import { createProjectId, deleteProject, listProjects, loadProject, saveProject } from './projectStore.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu } from './moduleContextMenu.js';
@@ -86,6 +87,9 @@ const projectSelect = document.querySelector('#project-select');
 const newProjectButton = document.querySelector('#new-project');
 const saveProjectButton = document.querySelector('#save-project');
 const openProjectButton = document.querySelector('#open-project');
+const exportProjectButton = document.querySelector('#export-project');
+const importProjectButton = document.querySelector('#import-project');
+const importProjectFileInput = document.querySelector('#import-project-file');
 const deleteProjectButton = document.querySelector('#delete-project');
 const projectStatus = document.querySelector('#project-status');
 const projectLoadingOverlay = document.querySelector('#project-loading-overlay');
@@ -1398,6 +1402,134 @@ saveProjectButton.addEventListener('click', async () => {
     enableAutosaveFromCurrentState();
   }
   catch (error) { console.warn('Proje kaydedilemedi:', error); projectStatus.textContent = 'Proje kaydedilemedi.'; }
+});
+
+function safeArchiveName(name) {
+  return (name || 'fair-stand-project')
+    .replace(/[^a-zA-Z0-9ğüşöçıİĞÜŞÖÇ._-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'fair-stand-project';
+}
+
+function remapAssetIdsInValue(value, idMap) {
+  if (Array.isArray(value)) return value.map((item) => remapAssetIdsInValue(item, idMap));
+  if (!value || typeof value !== 'object') return value;
+  const output = {};
+  Object.entries(value).forEach(([key, item]) => {
+    if (key === 'imageAssetId' && typeof item === 'string' && idMap.has(item)) {
+      output[key] = idMap.get(item);
+    } else {
+      output[key] = remapAssetIdsInValue(item, idMap);
+    }
+  });
+  return output;
+}
+
+exportProjectButton.addEventListener('click', async () => {
+  const projectId = projectSelect.value || activeProjectId;
+  if (!projectId) return;
+  exportProjectButton.disabled = true;
+  projectStatus.textContent = 'Proje ZIP hazırlanıyor…';
+  try {
+    if (projectId === activeProjectId) await persistActiveProject({ quiet: true });
+    const project = await loadProject(projectId);
+    if (!project) throw new Error('Dışarı aktarılacak proje bulunamadı.');
+    const assets = await loadImageAssets(projectId);
+    const zip = new JSZip();
+    const manifestAssets = [];
+    for (const asset of assets) {
+      const ext = (asset.name?.match(/\.[a-zA-Z0-9]+$/)?.[0] || '') || '';
+      const path = `assets/${asset.id}${ext}`;
+      zip.file(path, asset.blob);
+      manifestAssets.push({
+        id: asset.id,
+        name: asset.name,
+        type: asset.type,
+        createdAt: asset.createdAt,
+        path,
+      });
+    }
+    zip.file('project.json', JSON.stringify({
+      archiveVersion: 1,
+      exportedAt: Date.now(),
+      project,
+      assets: manifestAssets,
+    }, null, 2));
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${safeArchiveName(project.name)}.zip`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    projectStatus.textContent = `Dışarı aktarıldı · ${assets.length} görsel`;
+  } catch (error) {
+    console.warn('Proje dışarı aktarılamadı:', error);
+    projectStatus.textContent = 'Proje dışarı aktarılamadı.';
+  } finally {
+    exportProjectButton.disabled = false;
+  }
+});
+
+importProjectButton.addEventListener('click', () => importProjectFileInput.click());
+
+importProjectFileInput.addEventListener('change', async () => {
+  const file = importProjectFileInput.files?.[0];
+  importProjectFileInput.value = '';
+  if (!file) return;
+  importProjectButton.disabled = true;
+  projectLoadingOverlay.hidden = false;
+  projectStatus.textContent = 'Proje içe aktarılıyor…';
+  try {
+    const zip = await JSZip.loadAsync(file);
+    const manifestEntry = zip.file('project.json');
+    if (!manifestEntry) throw new Error('ZIP içinde project.json bulunamadı.');
+    const manifest = JSON.parse(await manifestEntry.async('text'));
+    if (manifest.archiveVersion !== 1 || !manifest.project) throw new Error('Desteklenmeyen proje paketi.');
+
+    const existing = await listProjects();
+    const existingIds = new Set(existing.map((item) => item.id));
+    const importedProjectId = existingIds.has(manifest.project.id) ? createProjectId() : manifest.project.id;
+    const idMap = new Map();
+    for (const asset of manifest.assets || []) {
+      const newAssetId = crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+      idMap.set(asset.id, newAssetId);
+    }
+
+    const importedProject = remapAssetIdsInValue({
+      ...manifest.project,
+      id: importedProjectId,
+      name: manifest.project.name || 'İçe Aktarılan Proje',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }, idMap);
+    await saveProject(importedProject);
+
+    for (const asset of manifest.assets || []) {
+      const entry = zip.file(asset.path);
+      if (!entry) throw new Error(`Eksik asset: ${asset.path}`);
+      const blob = await entry.async('blob');
+      await saveImportedImageAsset(importedProjectId, {
+        id: idMap.get(asset.id),
+        name: asset.name,
+        type: asset.type,
+        createdAt: asset.createdAt,
+        blob: new Blob([blob], { type: asset.type || blob.type }),
+      });
+    }
+
+    await refreshProjectList(importedProjectId);
+    const project = await loadProject(importedProjectId);
+    await restoreProject(project);
+    projectStatus.textContent = `İçe aktarıldı · ${(manifest.assets || []).length} görsel`;
+  } catch (error) {
+    console.warn('Proje içe aktarılamadı:', error);
+    projectStatus.textContent = 'Proje ZIP içe aktarılamadı.';
+  } finally {
+    projectLoadingOverlay.hidden = true;
+    importProjectButton.disabled = false;
+  }
 });
 
 openProjectButton.addEventListener('click', async () => {

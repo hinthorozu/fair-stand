@@ -95,3 +95,25 @@ export async function deleteProjectImageAssets(projectId) {
   });
   db.close();
 }
+
+export async function saveImportedImageAsset(projectId, asset) {
+  if (!projectId) throw new Error('İçe aktarılan görsel için projectId gerekli.');
+  if (!asset?.id || !asset?.blob) throw new Error('İçe aktarılan görsel geçersiz.');
+  const db = await openDb();
+  const stored = {
+    id: asset.id,
+    projectId,
+    name: asset.name || 'asset',
+    type: asset.type || asset.blob.type || 'application/octet-stream',
+    blob: asset.blob,
+    createdAt: Number(asset.createdAt) || Date.now(),
+  };
+  await new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    transaction.objectStore(STORE_NAME).put(stored);
+    transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(transaction.error);
+  });
+  db.close();
+  return stored;
+}
