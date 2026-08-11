@@ -522,3 +522,9 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 420. Kullanıcının kastettiği ölçünün panel iç payı değil, 7 panel arasındaki 6 adet görünen yatay aralığın toplam kalınlığı olduğu netleştirildi.
 421. Düz panel, Depo Kapısı üst panelleri ve 2/3 gözlü vitrin panel bölgelerinde yatay ray yüksekliği 26 mm'den 4 mm'ye indirildi ve ekstra düşey clearance sıfırlandı; böylece komşu iki panel yüzeyi arasındaki toplam görünen bant 4 mm oldu.
 422. 50 cm strip merkezleri ve 350 cm toplam modül yüksekliği korunurken panel yüzeyleri büyütüldü; separatör geometrisine dokunulmadı.
+
+## Dikey profil görsel inceltme
+
+423. Düz panel, Depo Kapısı ve 2/3 gözlü vitrin modüllerindeki dikey profiller yalnızca görsel geometride 55 mm'den 47 mm'ye inceltildi (yaklaşık %15); modül dış ölçüleri ve placement ölçüleri değişmedi.
+424. Dikey profillerin dış kenarı modül sınırında sabit tutuldu; incelme içe doğru panel alanını büyüttüğü için komşu modüller arasındaki koyu profil bandı daha hafif görünür hale geldi.
+425. 50/100/150/200 modül genişlikleri, 350 cm yükseklik, 50 cm strip ritmi, snap/collision/rotation ve separatör geometrisi korunmuştur.

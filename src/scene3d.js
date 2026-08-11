@@ -28,6 +28,7 @@ const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0x4b5563;
 const PANEL_RAIL_HEIGHT_M = 0.004;
 const PANEL_VERTICAL_CLEARANCE_M = 0;
+const PANEL_VERTICAL_PROFILE_WIDTH_M = 0.047;
 const GLASS_SURFACE_COLOR = 0xd7e9ed;
 const GLASS_BACK_COLOR = 0xc9dce1;
 const GLASS_SURFACE_OPACITY = 0.48;
@@ -1696,17 +1697,17 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     roughness: 0.28,
   });
 
-  const profileGeometry = new THREE.BoxGeometry(frameWidth, height, frameDepth);
+  const profileGeometry = new THREE.BoxGeometry(PANEL_VERTICAL_PROFILE_WIDTH_M, height, frameDepth);
   for (const side of [-1, 1]) {
     const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
-    profile.position.set(side * (widthM / 2 - frameWidth / 2), height / 2, 0);
+    profile.position.set(side * (widthM / 2 - PANEL_VERTICAL_PROFILE_WIDTH_M / 2), height / 2, 0);
     profile.castShadow = true;
     group.add(profile);
   }
 
   const railHeight = PANEL_RAIL_HEIGHT_M;
   const railGeometry = new THREE.BoxGeometry(
-    Math.max(widthM - frameWidth * 2, 0.02),
+    Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2, 0.02),
     railHeight,
     frameDepth,
   );
@@ -1719,7 +1720,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   }
 
   const surfaces = [];
-  const innerWidth = Math.max(widthM - frameWidth * 2 - 0.012, 0.02);
+  const innerWidth = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
   const panelHeight = stripHeight - railHeight - PANEL_VERTICAL_CLEARANCE_M;
   const panelDepth = Math.max(depth - 0.026, 0.035);
 
@@ -1818,16 +1819,16 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     roughness: 0.28,
   });
 
-  const profileGeometry = new THREE.BoxGeometry(frameWidth, height, frameDepth);
+  const profileGeometry = new THREE.BoxGeometry(PANEL_VERTICAL_PROFILE_WIDTH_M, height, frameDepth);
   for (const side of [-1, 1]) {
     const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
-    profile.position.set(side * (widthM / 2 - frameWidth / 2), height / 2, 0);
+    profile.position.set(side * (widthM / 2 - PANEL_VERTICAL_PROFILE_WIDTH_M / 2), height / 2, 0);
     profile.castShadow = true;
     group.add(profile);
   }
 
   const railGeometry = new THREE.BoxGeometry(
-    Math.max(widthM - frameWidth * 2, 0.02),
+    Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2, 0.02),
     railHeight,
     frameDepth,
   );
@@ -1846,7 +1847,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
   });
 
   const surfaces = [];
-  const innerWidth = Math.max(widthM - frameWidth * 2 - 0.012, 0.02);
+  const innerWidth = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
   const panelDepth = Math.max(depth - 0.026, 0.035);
 
   // Alt bölüm: kapalı kapı kanadı. Sahne düzleminden dışarı açılmaz.
@@ -2112,18 +2113,18 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     roughness: 0.28,
   });
 
-  const profileGeometry = new THREE.BoxGeometry(frameWidth, height, frameDepth);
+  const profileGeometry = new THREE.BoxGeometry(PANEL_VERTICAL_PROFILE_WIDTH_M, height, frameDepth);
   for (const side of [-1, 1]) {
     const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
-    profile.position.set(side * (widthM / 2 - frameWidth / 2), height / 2, 0);
+    profile.position.set(side * (widthM / 2 - PANEL_VERTICAL_PROFILE_WIDTH_M / 2), height / 2, 0);
     profile.castShadow = true;
     group.add(profile);
   }
 
   const railHeight = PANEL_RAIL_HEIGHT_M;
-  const innerWidth = Math.max(widthM - frameWidth * 2 - 0.012, 0.02);
+  const innerWidth = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
   const railGeometry = new THREE.BoxGeometry(
-    Math.max(widthM - frameWidth * 2, 0.02),
+    Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2, 0.02),
     railHeight,
     frameDepth,
   );
