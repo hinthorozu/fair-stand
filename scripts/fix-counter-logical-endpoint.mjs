@@ -131,7 +131,9 @@ function replaceExact(source, from, to, label, expected = 1) {
   const path = 'test/modulePlacement.test.js';
   let s = read(path);
 
-  s = s.replaceAll(`moduleId: 'counter',\n    widthCm:`, `moduleId: 'counter',\n    moduleType: 'counter',\n    widthCm:`);
+  s = s.replace(/moduleId: 'counter',\n(\s+)widthCm:/g, (_match, indent) => (
+    `moduleId: 'counter',\n${indent}moduleType: 'counter',\n${indent}widthCm:`
+  ));
   s = s.replaceAll(`moduleId: 'counter', widthCm:`, `moduleId: 'counter', moduleType: 'counter', widthCm:`);
 
   s = replaceExact(s, `assert.equal(left?.placement.xCm, 5);`, `assert.equal(left?.placement.xCm, 0);`, 'left wall expected');
