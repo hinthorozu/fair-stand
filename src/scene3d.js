@@ -949,6 +949,40 @@ export function createStandScene(
       .filter(Boolean);
   }
 
+  function snapTopFixturePlacement(basePlacement, ground, widthCm) {
+    const placement = {
+      ...basePlacement,
+      zCm: Math.round(STAND_DIMENSIONS.height * 100),
+    };
+    if (!stageLayout || !ground) return placement;
+
+    const stepCm = 20;
+    const width = Math.max(0, Number(widthCm) || 0);
+    const snap20 = (value) => Math.round(Number(value) / stepCm) * stepCm;
+
+    if (placement.wallId === 'back') {
+      placement.xCm = Math.min(
+        Math.max(0, Number(stageLayout.widthCm) - width),
+        Math.max(0, snap20(ground.xCm)),
+      );
+      placement.yCm = 0;
+    } else if (placement.wallId === 'left') {
+      placement.xCm = 0;
+      placement.yCm = Math.min(
+        Math.max(0, Number(stageLayout.depthCm) - width),
+        Math.max(0, snap20(ground.yCm)),
+      );
+    } else if (placement.wallId === 'right') {
+      placement.xCm = Number(stageLayout.widthCm);
+      placement.yCm = Math.min(
+        Math.max(0, Number(stageLayout.depthCm) - width),
+        Math.max(0, snap20(ground.yCm)),
+      );
+    }
+
+    return placement;
+  }
+
   function inferWallIdForRotation(placement, rotationZDeg) {
     if (!stageLayout || !placement) return 'free';
     const allowedWalls = getAllowedWallIds(stageLayout.standType);
@@ -1080,10 +1114,11 @@ export function createStandScene(
     }
 
     if (isTopFixtureType(moduleState.type)) {
-      const placement = {
-        ...snapped.placement,
-        zCm: Math.round(STAND_DIMENSIONS.height * 100),
-      };
+      const placement = snapTopFixturePlacement(
+        snapped.placement,
+        ground,
+        moduleState.widthCm,
+      );
       showPlacementGhost(moduleState, placement, true);
       clearPlacementFeedback();
       return {
@@ -1246,10 +1281,11 @@ export function createStandScene(
     }
 
     if (isTopFixtureType(moduleState.type)) {
-      const placement = {
-        ...snapped.placement,
-        zCm: Math.round(STAND_DIMENSIONS.height * 100),
-      };
+      const placement = snapTopFixturePlacement(
+        snapped.placement,
+        ground,
+        moduleState.widthCm,
+      );
       dragSession.preview = {
         placement,
         valid: true,

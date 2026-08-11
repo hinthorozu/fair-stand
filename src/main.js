@@ -431,6 +431,32 @@ function duplicateContextModule(context, side) {
   const duplicate = duplicateModuleState(sourceModule);
   if (!duplicate) return;
 
+  if (sourceModule.type === 'led-floodlight' && sourceModule.placement) {
+    const sourcePlacement = sourceModule.placement;
+    const placement = { ...sourcePlacement, zCm: 350 };
+    const deltaCm = side === 'left' ? -20 : 20;
+    const widthCm = Number(duplicate.widthCm) || 50;
+
+    if (sourcePlacement.wallId === 'back') {
+      placement.xCm = Math.min(
+        Math.max(0, Number(currentStand?.xCm) - widthCm),
+        Math.max(0, Number(sourcePlacement.xCm) + deltaCm),
+      );
+      placement.yCm = 0;
+    } else if (sourcePlacement.wallId === 'left' || sourcePlacement.wallId === 'right') {
+      placement.yCm = Math.min(
+        Math.max(0, Number(currentStand?.yCm) - widthCm),
+        Math.max(0, Number(sourcePlacement.yCm) + deltaCm),
+      );
+      placement.xCm = sourcePlacement.wallId === 'right' ? Number(currentStand?.xCm) : 0;
+    }
+
+    duplicate.placement = placement;
+    currentModules.push(duplicate);
+    rebuildWall({ resetView: false });
+    return;
+  }
+
   if (sourceModule.placement && sourceModule.placement.wallId !== 'free') {
     const plan = planContextContinuousInsertion([duplicate], context, side);
     if (!plan.ok) {
