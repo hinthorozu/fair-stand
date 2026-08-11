@@ -5,6 +5,7 @@ on:
     branches: [ROG]
     paths:
       - 'scripts/add-current-view-render.mjs'
+      - '.github/workflows/add-current-view-render.yml'
 
 permissions:
   contents: write
