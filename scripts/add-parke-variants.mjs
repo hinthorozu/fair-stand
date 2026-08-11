@@ -27,3 +27,4 @@ replaceOnce('src/scene3d.js',
 `} else if (PARQUET_TYPES.has(resolved)) {\n      material.color.set(PARQUET_COLORS[resolved]);\n      material.roughness = 0.78;\n      material.metalness = 0;`);
 
 console.log('Parquet variants applied');
+// workflow trigger
