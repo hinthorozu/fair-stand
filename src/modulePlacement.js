@@ -486,9 +486,41 @@ export function snapPlacementToModules({
     if (!target) return;
 
     if (strictMovingDepth) {
-      if (!freePlacement || target.axis !== movingAxis) return;
+      if (!freePlacement) return;
 
       const targetDepthCm = getModuleCollisionDepthCm(targetModule);
+
+      if (target.axis !== movingAxis) {
+        const targetHalfDepthCm = targetDepthCm / 2;
+        const crossCenterCm = movingAxis === 'x'
+          ? Number(freePlacement.yCm)
+          : Number(freePlacement.xCm);
+        const sideMinCm = crossCenterCm - movingDepthCm / 2;
+        const sideMaxCm = crossCenterCm + movingDepthCm / 2;
+        const crossOverlap = sideMinCm < target.endCm - EPSILON_CM
+          && target.startCm < sideMaxCm - EPSILON_CM;
+        if (!crossOverlap) return;
+
+        [
+          target.fixedCm + targetHalfDepthCm,
+          target.fixedCm - targetHalfDepthCm - width,
+        ].forEach((startCm) => {
+          const placement = createModulePlacement({
+            ...freePlacement,
+            xCm: movingAxis === 'x' ? startCm : freePlacement.xCm,
+            yCm: movingAxis === 'y' ? startCm : freePlacement.yCm,
+            rotationZDeg: resolvedRotation,
+            wallId: 'free',
+          });
+          const center = getPlacementCenter(placement, width);
+          if (!center) return;
+          const alongAxisDistanceCm = movingAxis === 'x'
+            ? Math.abs(center.xCm - pointerX)
+            : Math.abs(center.yCm - pointerY);
+          addCandidate(placement, targetModule.id, 'face', -1, alongAxisDistanceCm);
+        });
+        return;
+      }
       const faceGapCm = (movingDepthCm + targetDepthCm) / 2;
 
       [-1, 1].forEach((direction) => {

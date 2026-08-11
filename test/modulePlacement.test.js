@@ -454,6 +454,58 @@ test('counter face snap ignores longitudinal grid offset when measuring wall pro
   assert.equal(validation.ok, true);
 });
 
+test('counter side faces snap flush to perpendicular walls', () => {
+  const leftWall = [{
+    id: 'left-wall', widthCm: 400,
+    placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 90, wallId: 'left' },
+  }];
+  const left = snapPlacementToModules({
+    moduleId: 'counter', widthCm: 100, depthCm: 50,
+    pointerXCm: 55, pointerYCm: 125, rotationZDeg: 0, modules: leftWall,
+    standType: 'u-stand', standXCm: 800, standYCm: 600,
+  });
+  assert.equal(left?.snapKind, 'face');
+  assert.equal(left?.placement.xCm, 5);
+  assert.equal(validatePlacementAgainstModules({
+    moduleId: 'counter', widthCm: 100, depthCm: 50, placement: left.placement, modules: leftWall,
+    standType: 'u-stand', standXCm: 800, standYCm: 600,
+  }).ok, true);
+
+  const rightWall = [{
+    id: 'right-wall', widthCm: 400,
+    placement: { xCm: 800, yCm: 0, zCm: 0, rotationZDeg: 270, wallId: 'right' },
+  }];
+  const right = snapPlacementToModules({
+    moduleId: 'counter', widthCm: 100, depthCm: 50,
+    pointerXCm: 745, pointerYCm: 125, rotationZDeg: 0, modules: rightWall,
+    standType: 'u-stand', standXCm: 800, standYCm: 600,
+  });
+  assert.equal(right?.snapKind, 'face');
+  assert.equal(right?.placement.xCm, 695);
+  assert.equal(validatePlacementAgainstModules({
+    moduleId: 'counter', widthCm: 100, depthCm: 50, placement: right.placement, modules: rightWall,
+    standType: 'u-stand', standXCm: 800, standYCm: 600,
+  }).ok, true);
+});
+
+test('rotated counter side face snaps flush to a perpendicular back wall', () => {
+  const backWall = [{
+    id: 'back-wall', widthCm: 500,
+    placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+  }];
+  const snapped = snapPlacementToModules({
+    moduleId: 'counter', widthCm: 100, depthCm: 50,
+    pointerXCm: 125, pointerYCm: 55, rotationZDeg: 90, modules: backWall,
+    standType: 'u-stand', standXCm: 800, standYCm: 600,
+  });
+  assert.equal(snapped?.snapKind, 'face');
+  assert.equal(snapped?.placement.yCm, 5);
+  assert.equal(validatePlacementAgainstModules({
+    moduleId: 'counter', widthCm: 100, depthCm: 50, placement: snapped.placement, modules: backWall,
+    standType: 'u-stand', standXCm: 800, standYCm: 600,
+  }).ok, true);
+});
+
 test('physical module depth rejects parallel bodies that are too close', () => {
   const modules = [{
     id: 'a',

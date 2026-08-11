@@ -551,3 +551,10 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 435. Banko yüzeye yaslama snap mesafesi artık 2B Öklid mesafesiyle değil, hedef yüzeye dik eksendeki gerçek mesafeyle ölçülür.
 436. X/Y boyunca 50 cm grid hizasından doğan en fazla 25 cm boyuna fark, bankonun duvara yaslanma adayını artık yanlışlıkla iptal etmez.
 437. Böylece banko duvara yaklaştırıldığında 50 cm gerçek derinlik korunarak 10 cm duvar kasasına 30 cm merkez çizgisi mesafesinde sıfır temasla snap olur; iç içe geçme hâlâ collision olarak reddedilir.
+
+
+## Banko dört taraf yaslama düzeltmesi
+
+438. Banko yaslama davranışındaki paralel eksen kısıtı kaldırıldı; fiziksel gövdenin ön, arka, sol ve sağ dört tarafı da uygun duvar/modül yüzüne temas ederek yaslanabilir.
+439. Ön/arka temasında gerçek derinlikler birlikte hesaplanır; sol/sağ uç yüz temasında bankonun gerçek uç yüzü hedef modülün kasa yüzüne oturtulur.
+440. 0/90/180/270 derece yönlerin tamamında temas serbest, fiziksel iç içe geçme collision olarak yasaktır.
