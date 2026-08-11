@@ -184,7 +184,7 @@ Tamamlanan yerleşim özellikleri:
 - Modül-modül magnetic snap: uç-uca, L ve T bağlantıları.
 - Serbest alan yerleşimi ile perimeter duvar yerleşiminin aynı modül sistemi içinde çalışması.
 - Geçersiz sürükleme/dönüşte kırmızı ghost ve kısa kullanıcı feedback'i.
-- Çoklu panel dikdörtgen seçiminin farklı duvar düzlemlerini/köşeleri geçmesinin engellenmesi.
+- Çoklu panel seçimi köşe boyunca devam edebilir; bağlı duvarlarda renk/görsel sürekliliği korunur.
 - Collision kontrolünün merkez çizgisine ek olarak gerçek modül kasa derinliğini hesaba katması.
 - Kullanıcıya gösterilen yerleşim hata mesajlarının sadeleştirilmesi.
 

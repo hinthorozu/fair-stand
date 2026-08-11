@@ -80,17 +80,18 @@ test('describes rectangle dimensions', () => {
 });
 
 
-test('rejects rectangle selection across different wall planes', () => {
+
+test('allows rectangle selection across wall-plane metadata', () => {
   const items = makeGrid(3, 2).map((item) => ({
     ...item,
-    selectionPlaneKey: item.moduleIndex === 1 ? 'back:0:x:0' : 'free:0:x:100',
+    selectionPlaneKey: item.moduleIndex === 1 ? 'left:90:y:0' : 'back:0:x:0',
   }));
   const result = createRectSelection(
     items,
-    { moduleIndex: 0, stripIndex: 0, selectionPlaneKey: 'free:0:x:100' },
-    { moduleIndex: 2, stripIndex: 1, selectionPlaneKey: 'free:0:x:100' },
+    { moduleIndex: 0, stripIndex: 0, selectionPlaneKey: 'back:0:x:0' },
+    { moduleIndex: 2, stripIndex: 1, selectionPlaneKey: 'right:270:y:1000' },
   );
 
-  assert.equal(result.ok, false);
-  assert.equal(result.message, 'Çoklu seçim yalnızca aynı duvar düzleminde yapılabilir.');
+  assert.equal(result.ok, true);
+  assert.equal(result.panelCount, 6);
 });

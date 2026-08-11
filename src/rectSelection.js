@@ -2,7 +2,6 @@ function normalizePoint(point) {
   return {
     moduleIndex: Number(point?.moduleIndex),
     stripIndex: Number(point?.stripIndex),
-    selectionPlaneKey: point?.selectionPlaneKey ?? null,
   };
 }
 
@@ -23,18 +22,6 @@ export function createRectSelection(items, anchorPoint, targetPoint) {
     return { ok: false, message: 'Seçim başlangıç veya bitiş noktası geçersiz.' };
   }
 
-  if (
-    anchor.selectionPlaneKey
-    && target.selectionPlaneKey
-    && anchor.selectionPlaneKey !== target.selectionPlaneKey
-  ) {
-    return {
-      ok: false,
-      message: 'Çoklu seçim yalnızca aynı duvar düzleminde yapılabilir.',
-    };
-  }
-
-  const requiredPlaneKey = anchor.selectionPlaneKey ?? target.selectionPlaneKey ?? null;
   const minModuleIndex = Math.min(anchor.moduleIndex, target.moduleIndex);
   const maxModuleIndex = Math.max(anchor.moduleIndex, target.moduleIndex);
   const minStripIndex = Math.min(anchor.stripIndex, target.stripIndex);
@@ -44,27 +31,13 @@ export function createRectSelection(items, anchorPoint, targetPoint) {
   const rowCount = maxStripIndex - minStripIndex + 1;
   const expectedCount = columnCount * rowCount;
 
-  const rectangleItems = items.filter((item) => (
-    item.moduleIndex >= minModuleIndex
-    && item.moduleIndex <= maxModuleIndex
-    && item.stripIndex >= minStripIndex
-    && item.stripIndex <= maxStripIndex
-  ));
-
-  if (
-    requiredPlaneKey
-    && rectangleItems.some((item) => (
-      item.selectionPlaneKey != null && item.selectionPlaneKey !== requiredPlaneKey
+  const entries = items
+    .filter((item) => (
+      item.moduleIndex >= minModuleIndex
+      && item.moduleIndex <= maxModuleIndex
+      && item.stripIndex >= minStripIndex
+      && item.stripIndex <= maxStripIndex
     ))
-  ) {
-    return {
-      ok: false,
-      message: 'Çoklu seçim yalnızca aynı duvar düzleminde yapılabilir.',
-    };
-  }
-
-  const entries = rectangleItems
-    .filter((item) => !requiredPlaneKey || item.selectionPlaneKey == null || item.selectionPlaneKey === requiredPlaneKey)
     .sort((a, b) => (
       a.stripIndex - b.stripIndex
       || a.moduleIndex - b.moduleIndex
