@@ -3,42 +3,49 @@ import fs from 'node:fs';
 const path = 'src/modulePlacement.js';
 let s = fs.readFileSync(path, 'utf8');
 
-const oldBlock = `  return createModulePlacement({
-    xCm: !vertical
-      ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
-      : clamp(
-          strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm),
-          minX,
-          maxX,
-        ),
-    yCm: vertical
-      ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
-      : clamp(
-          strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm),
-          minY,
-          maxY,
-        ),
-    rotationZDeg: rotation,
-    wallId: 'free',
-  });
-`;
+s = s.replace(
+`function createFreePlacement({
+  widthCm,
+  depthCm = null,
+  pointerXCm,
+  pointerYCm,
+  standXCm,
+  standYCm,
+  rotationZDeg,
+}) {`,
+`function createFreePlacement({
+  widthCm,
+  depthCm = null,
+  pointerXCm,
+  pointerYCm,
+  standXCm,
+  standYCm,
+  standType = null,
+  rotationZDeg,
+}) {`,
+);
 
-const newBlock = `  let xCm = !vertical
-    ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
-    : clamp(
-        strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm),
-        minX,
-        maxX,
-      );
-  let yCm = vertical
-    ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
-    : clamp(
-        strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm),
-        minY,
-        maxY,
-      );
+s = s.replace(
+`    standXCm,
+    standYCm,
+    rotationZDeg: resolvedRotation,`,
+`    standXCm,
+    standYCm,
+    standType,
+    rotationZDeg: resolvedRotation,`,
+);
 
-  if (strictDepth) {
+s = s.replace(
+`    standXCm: xLimit,
+    standYCm: yLimit,
+    rotationZDeg: preferredRotation,`,
+`    standXCm: xLimit,
+    standYCm: yLimit,
+    standType,
+    rotationZDeg: preferredRotation,`,
+);
+
+const oldEdgeBlock = `  if (strictDepth) {
     const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
     if (!vertical) {
       if (xCm <= edgeSnap + EPSILON_CM) xCm = 0;
@@ -51,26 +58,40 @@ const newBlock = `  let xCm = !vertical
       if (yCm <= edgeSnap + EPSILON_CM) yCm = 0;
       if (yLimit - (yCm + width) <= edgeSnap + EPSILON_CM) yCm = yLimit - width;
     }
-  }
+  }`;
 
-  return createModulePlacement({
-    xCm,
-    yCm,
-    rotationZDeg: rotation,
-    wallId: 'free',
-  });
-`;
+const newEdgeBlock = `  if (strictDepth) {
+    const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
+    const wallFaceOffsetCm = MODULE_COLLISION_DEPTH_CM / 2;
+    const activeWalls = getAllowedWallIds(standType);
+    const leftEdgeCm = activeWalls.includes('left') ? wallFaceOffsetCm : 0;
+    const rightEdgeCm = activeWalls.includes('right') ? xLimit - wallFaceOffsetCm : xLimit;
+    const backEdgeCm = activeWalls.includes('back') ? wallFaceOffsetCm : 0;
 
-if (s.includes(oldBlock)) {
-  s = s.replace(oldBlock, newBlock);
-} else if (!s.includes('const edgeSnap = MODULE_PLACEMENT_SNAP_CM;')) {
-  throw new Error('createFreePlacement anchor not found');
+    if (!vertical) {
+      if (xCm - leftEdgeCm <= edgeSnap + EPSILON_CM) xCm = leftEdgeCm;
+      if (rightEdgeCm - (xCm + width) <= edgeSnap + EPSILON_CM) xCm = rightEdgeCm - width;
+      if ((yCm - halfDepth) - backEdgeCm <= edgeSnap + EPSILON_CM) yCm = backEdgeCm + halfDepth;
+      if (yLimit - (yCm + halfDepth) <= edgeSnap + EPSILON_CM) yCm = yLimit - halfDepth;
+    } else {
+      if ((xCm - halfDepth) - leftEdgeCm <= edgeSnap + EPSILON_CM) xCm = leftEdgeCm + halfDepth;
+      if (rightEdgeCm - (xCm + halfDepth) <= edgeSnap + EPSILON_CM) xCm = rightEdgeCm - halfDepth;
+      if (yCm - backEdgeCm <= edgeSnap + EPSILON_CM) yCm = backEdgeCm;
+      if (yLimit - (yCm + width) <= edgeSnap + EPSILON_CM) yCm = yLimit - width;
+    }
+  }`;
+
+if (!s.includes(newEdgeBlock)) {
+  if (!s.includes(oldEdgeBlock)) throw new Error('edge snap block not found');
+  s = s.replace(oldEdgeBlock, newEdgeBlock);
 }
+
 fs.writeFileSync(path, s);
 
 const testPath = 'test/sofaSet.test.js';
 let t = fs.readFileSync(testPath, 'utf8');
-if (!t.includes('koltuk takımı köşelerde iki eksende de sıfıra oturur')) {
-  t += `\n\ntest('koltuk takımı köşelerde iki eksende de sıfıra oturur', () => {\n  const tl = snapPlacementToStand({ standType: 'island', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(tl.ok, true);\n  assert.equal(tl.placement.xCm, 0);\n  assert.equal(tl.placement.yCm, 75);\n  const br = snapPlacementToStand({ standType: 'island', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 480, pointerYCm: 480, standXCm: 600, standYCm: 600 });\n  assert.equal(br.ok, true);\n  assert.equal(br.placement.xCm, 450);\n  assert.equal(br.placement.yCm, 525);\n});\n`;
+const marker = 'koltuk takımı duvarın 5 cm iç yüzüne köşede tam oturur';
+if (!t.includes(marker)) {
+  t += `\n\ntest('${marker}', () => {\n  const left = snapPlacementToStand({ standType: 'l-left', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(left.ok, true);\n  assert.equal(left.placement.xCm, 5);\n  assert.equal(left.placement.yCm, 80);\n\n  const right = snapPlacementToStand({ standType: 'l-right', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 480, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(right.ok, true);\n  assert.equal(right.placement.xCm, 445);\n  assert.equal(right.placement.yCm, 80);\n\n  const island = snapPlacementToStand({ standType: 'island', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(island.ok, true);\n  assert.equal(island.placement.xCm, 0);\n  assert.equal(island.placement.yCm, 75);\n});\n`;
   fs.writeFileSync(testPath, t);
 }
