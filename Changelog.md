@@ -509,3 +509,9 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 413. Arka taraf tek parça kapakla örtülmek yerine mevcut panel/vitrin/kapı yapısı korunarak renklendirildi; ön taraftaki renk ve görseller etkilenmedi.
 414. Cam panel arka yüzleri cam/şeffaf davranışını korudu; koyu gri arka yüz standardı camı kapatmayacak şekilde uygulandı.
 415. Separatörler açık çıtalı ön/arka görünümünü korumak için bu standardın dışında bırakıldı; kural PROJECT_RULES.md içine işlendi.
+
+## Panel yüzeyi boşluk polish
+
+416. Düz panel yüzeylerinde yatay ray ile panel yüzeyi arasındaki ekstra düşey açıklık 12 mm'den 6 mm'ye düşürüldü; panel alanı bir tık büyütüldü.
+417. Aynı 6 mm panel açıklığı Düz Panel 50 / 100 / 150 / 200, Depo Kapısı üst panelleri ve 2/3 gözlü vitrinlerin panel kullanılan bölümlerinde ortaklaştırıldı; separatör geometrisine dokunulmadı.
+418. Değişiklik yalnızca görsel panel boşluğunu sıkılaştırır; 50 cm strip ritmi, ray kalınlığı, renk/görsel/cam state davranışı ve yerleşim motoru korunur.

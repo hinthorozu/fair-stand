@@ -26,6 +26,7 @@ import {
 
 const FRAME_COLOR = 0x9aa0a6;
 const PANEL_BACK_COLOR = 0x4b5563;
+const PANEL_VERTICAL_CLEARANCE_M = 0.006;
 const GLASS_SURFACE_COLOR = 0xd7e9ed;
 const GLASS_BACK_COLOR = 0xc9dce1;
 const GLASS_SURFACE_OPACITY = 0.48;
@@ -1718,7 +1719,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
 
   const surfaces = [];
   const innerWidth = Math.max(widthM - frameWidth * 2 - 0.012, 0.02);
-  const panelHeight = stripHeight - railHeight - 0.012;
+  const panelHeight = stripHeight - railHeight - PANEL_VERTICAL_CLEARANCE_M;
   const panelDepth = Math.max(depth - 0.026, 0.035);
 
   for (let stripIndex = 0; stripIndex < stripCount; stripIndex += 1) {
@@ -1910,7 +1911,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     const surfaceState = moduleState.strips[index];
     if (!surfaceState) continue;
     const centerY = doorHeight + index * stripHeight + stripHeight / 2;
-    const panelHeight = stripHeight - railHeight - 0.012;
+    const panelHeight = stripHeight - railHeight - PANEL_VERTICAL_CLEARANCE_M;
 
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
@@ -2134,7 +2135,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   }
 
   const surfaces = [];
-  const panelHeight = stripHeight - railHeight - 0.012;
+  const panelHeight = stripHeight - railHeight - PANEL_VERTICAL_CLEARANCE_M;
   const panelDepth = Math.max(depth - 0.026, 0.035);
 
   for (let stripIndex = 0; stripIndex < stripCount; stripIndex += 1) {
