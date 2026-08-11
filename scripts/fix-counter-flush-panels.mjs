@@ -32,8 +32,8 @@ block = block.replace(
   "    backing.position.copy(position);\n    backing.rotation.y = rotationY;\n    if (surfaceRole === 'front') backing.position.z -= 0.006;\n    else if (surfaceRole === 'left') backing.position.x += 0.006;\n    else backing.position.x -= 0.006;",
 );
 
-// Visible panel planes are already placed at the outer frame line; remove the previous
-// extra 6.5 mm push that caused the panels/rails to project beyond the corner posts.
+// Visible panel planes are placed flush with the corner-post outer face. The separators
+// remain only the thin 4 mm wall-style lines; no structural horizontal bars protrude.
 block = block.replace(
   "    if (surfaceRole === 'front') surface.position.z += 0.0065;\n    else if (surfaceRole === 'left') surface.position.x -= 0.0065;\n    else surface.position.x += 0.0065;",
   "    if (surfaceRole === 'front') surface.position.z += 0.006;\n    else if (surfaceRole === 'left') surface.position.x -= 0.006;\n    else surface.position.x += 0.006;",
