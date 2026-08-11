@@ -259,7 +259,7 @@ test('selected module quarter-turn keeps its center instead of rotating from the
   });
 });
 
-test('selected module center rotation stays on the 50 cm grid', () => {
+test('selected module rotation keeps its world center fixed without grid snapping', () => {
   const rotated = rotateModulePlacementAroundCenter({
     xCm: 100,
     yCm: 100,
@@ -268,8 +268,9 @@ test('selected module center rotation stays on the 50 cm grid', () => {
     wallId: 'free',
   }, 50, 90);
 
-  assert.equal(rotated.xCm % 50, 0);
-  assert.equal(rotated.yCm % 50, 0);
+  // Başlangıç merkezi (125, 100), dönüş sonrası da aynı kalmalı.
+  assert.equal(rotated.xCm, 125);
+  assert.equal(rotated.yCm, 75);
   assert.equal(rotated.rotationZDeg, 90);
 });
 

@@ -78,18 +78,14 @@ export function rotateModulePlacementAroundCenter(placement, widthCm, deltaDeg =
   const currentVertical = isVerticalModuleRotation(currentRotation);
   const nextVertical = isVerticalModuleRotation(nextRotation);
 
+  // R ile dönüşte modülün dünya merkezini sabit tut. Grid snap yalnız sürükleme/yerleştirmede uygulanır.
   const centerX = x + (currentVertical ? 0 : width / 2);
   const centerY = y + (currentVertical ? width / 2 : 0);
 
-  const strictDepth = hasStrictDepthBounds(depthCm);
   return createModulePlacement({
     ...placement,
-    xCm: nextVertical
-      ? (strictDepth ? snapDepthCenterCm(centerX, depthCm) : snapCm(centerX))
-      : snapCm(centerX - width / 2),
-    yCm: nextVertical
-      ? snapCm(centerY - width / 2)
-      : (strictDepth ? snapDepthCenterCm(centerY, depthCm) : snapCm(centerY)),
+    xCm: nextVertical ? centerX : centerX - width / 2,
+    yCm: nextVertical ? centerY - width / 2 : centerY,
     rotationZDeg: nextRotation,
   });
 }
