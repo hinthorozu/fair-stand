@@ -45,7 +45,9 @@ Bu dosyadaki maddeler, kullanıcı açıkça aksi bir davranış istemedikçe t�
 
 ## Modül arka yüz standardı
 
-- Aksi açıkça belirtilmedikçe düz panel, vitrin, kapı ve gelecekte eklenecek kapalı yüzeyli modüllerin arka yüzü **tek parça düz yüzey** olarak görünür.
-- Düz arka yüz yalnızca arkadan görünür; öndeki renk, görsel ve cam davranışını kapatmaz veya değiştirmez.
+- Aksi açıkça belirtilmedikçe düz panel, vitrin, kapı ve gelecekte eklenecek kapalı yüzeyli modüllerin **opak arka yüzleri koyu gri** görünür.
+- Arka yüz tek parça kapakla örtülmez; panel/vitrin/kapı yapısı korunur.
+- Cam panele çevrilen yüzeylerin arkası da cam/şeffaf kalır; koyu gri arka yüz camı kapatmaz.
+- Ön taraftaki renk ve görsel arka yüz renginden etkilenmez.
 - **Separatör bu kuralın istisnasıdır**; açık çıtalı yapısı ön/arka olarak korunur.
 - Amaç 0° / 90° / 180° / 270° dönüşlerde modülün ön ve arka yönünün görsel olarak hemen ayırt edilmesidir.

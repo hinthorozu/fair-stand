@@ -25,8 +25,7 @@ import {
 } from './moduleMove.js';
 
 const FRAME_COLOR = 0x9aa0a6;
-const PANEL_BACK_COLOR = 0xf4f4f4;
-const MODULE_REAR_COLOR = 0xe1e5e9;
+const PANEL_BACK_COLOR = 0x4b5563;
 const GLASS_SURFACE_COLOR = 0xd7e9ed;
 const GLASS_BACK_COLOR = 0xc9dce1;
 const GLASS_SURFACE_OPACITY = 0.48;
@@ -1668,26 +1667,6 @@ export function createStandScene(
   };
 }
 
-function addFlatModuleRear(group, widthM, height, depth) {
-  const rear = new THREE.Mesh(
-    new THREE.PlaneGeometry(Math.max(widthM, 0.02), Math.max(height, 0.02)),
-    new THREE.MeshStandardMaterial({
-      color: MODULE_REAR_COLOR,
-      roughness: 0.88,
-      metalness: 0,
-      side: THREE.BackSide,
-    }),
-  );
-
-  // Plane normal +Z yönündedir. BackSide sayesinde yalnızca modülün arka
-  // tarafından görünür; önden cam/renk/görsel davranışını kapatmaz.
-  rear.position.set(0, height / 2, -depth / 2 - 0.0015);
-  rear.receiveShadow = true;
-  rear.userData = { kind: 'module-rear' };
-  group.add(rear);
-  return rear;
-}
-
 function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   const {
     height,
@@ -1804,7 +1783,6 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     onSurfaceReady?.(surface);
   }
 
-  addFlatModuleRear(group, widthM, height, depth);
   return { group, surfaces };
 }
 
@@ -1992,7 +1970,6 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     onSurfaceReady?.(surface);
   }
 
-  addFlatModuleRear(group, widthM, height, depth);
   return { group, surfaces };
 }
 
@@ -2237,7 +2214,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
 
   const backPanel = new THREE.Mesh(
     new THREE.BoxGeometry(innerWidth, openingHeight, 0.018),
-    new THREE.MeshStandardMaterial({ color: 0xe9ecef, roughness: 0.82 }),
+    new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.82 }),
   );
   backPanel.position.set(0, openingCenterY, -depth / 2 + 0.009);
   backPanel.receiveShadow = true;
@@ -2312,7 +2289,6 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(shelfFront);
   }
 
-  addFlatModuleRear(group, widthM, height, depth);
   return { group, surfaces };
 }
 

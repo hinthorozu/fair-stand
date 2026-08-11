@@ -505,7 +505,7 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 
 ## Modül arka yüz ayrımı
 
-412. Düz panel, depo kapısı ve 2/3 gözlü vitrin modüllerine arkadan bakıldığında tek parça düz arka yüz gösterimi eklendi.
-413. Düz arka yüz yalnızca arka taraftan render edilir hale getirildi; öndeki panel renkleri, görselleri ve cam şeffaflığı etkilenmedi.
-414. Separatör modülleri açık çıtalı ön/arka görünümünü korumak için düz arka yüz standardının dışında bırakıldı.
-415. Modülün 4 yön dönüşünde ön/arka tarafın daha kolay ayırt edilmesi kalıcı görsel standart olarak PROJECT_RULES.md içine eklendi.
+412. Düz panel, depo kapısı ve 2/3 gözlü vitrin modüllerinin opak arka yüzleri koyu gri olacak şekilde ayrıştırıldı.
+413. Arka taraf tek parça kapakla örtülmek yerine mevcut panel/vitrin/kapı yapısı korunarak renklendirildi; ön taraftaki renk ve görseller etkilenmedi.
+414. Cam panel arka yüzleri cam/şeffaf davranışını korudu; koyu gri arka yüz standardı camı kapatmayacak şekilde uygulandı.
+415. Separatörler açık çıtalı ön/arka görünümünü korumak için bu standardın dışında bırakıldı; kural PROJECT_RULES.md içine işlendi.
