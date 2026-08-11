@@ -340,6 +340,12 @@ function deleteContextModule(context) {
   rebuildWall({ resetView: false });
 }
 
+window.addEventListener('fair-stand:delete-selected-module', (event) => {
+  const detail = event?.detail;
+  if (!detail?.moduleId && !Number.isInteger(detail?.moduleIndex)) return;
+  deleteContextModule(detail);
+});
+
 function normalizeContinuousSide(context, side) {
   if (side !== 'left' && side !== 'right') return side;
   const wallId = context?.placement?.wallId ?? 'back';

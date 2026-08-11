@@ -2069,7 +2069,29 @@ export function createStandScene(
   });
 
   window.addEventListener('keydown', (event) => {
-    if (String(event.key).toLowerCase() !== 'r') return;
+    const pressedKey = String(event.key).toLowerCase();
+    if (pressedKey === 'delete') {
+      const target = event.target;
+      const tagName = String(target?.tagName ?? '').toLowerCase();
+      const isEditing = tagName === 'input'
+        || tagName === 'textarea'
+        || tagName === 'select'
+        || Boolean(target?.isContentEditable);
+      if (isEditing) return;
+
+      const moduleGroup = getSingleSelectedModuleGroup();
+      if (!moduleGroup) return;
+      event.preventDefault();
+      window.dispatchEvent(new CustomEvent('fair-stand:delete-selected-module', {
+        detail: {
+          moduleId: moduleGroup.userData?.moduleId ?? null,
+          moduleIndex: moduleGroup.userData?.moduleIndex ?? null,
+        },
+      }));
+      return;
+    }
+
+    if (pressedKey !== 'r') return;
 
     const target = event.target;
     const tagName = String(target?.tagName ?? '').toLowerCase();
