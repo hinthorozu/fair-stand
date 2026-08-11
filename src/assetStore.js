@@ -1,6 +1,8 @@
 const DB_NAME = 'fair-stand-configurator';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'image-assets';
+const PROJECT_STORE_NAME = 'projects';
+const PROJECT_INDEX = 'projectId';
 
 function createId() {
   return globalThis.crypto?.randomUUID?.()
@@ -18,8 +20,17 @@ function openDb() {
 
     request.onupgradeneeded = () => {
       const db = request.result;
+      let assetStore;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        assetStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      } else {
+        assetStore = request.transaction.objectStore(STORE_NAME);
+      }
+      if (!assetStore.indexNames.contains(PROJECT_INDEX)) {
+        assetStore.createIndex(PROJECT_INDEX, PROJECT_INDEX, { unique: false });
+      }
+      if (!db.objectStoreNames.contains(PROJECT_STORE_NAME)) {
+        db.createObjectStore(PROJECT_STORE_NAME, { keyPath: 'id' });
       }
     };
 
@@ -28,10 +39,12 @@ function openDb() {
   });
 }
 
-export async function saveImageAsset(file) {
+export async function saveImageAsset(projectId, file) {
+  if (!projectId) throw new Error('Görsel kaydı için projectId gerekli.');
   const db = await openDb();
   const asset = {
     id: createId(),
+    projectId,
     name: file.name,
     type: file.type,
     blob: file,
@@ -49,15 +62,36 @@ export async function saveImageAsset(file) {
   return asset;
 }
 
-export async function loadImageAssets() {
+export async function loadImageAssets(projectId) {
+  if (!projectId) return [];
   const db = await openDb();
   const assets = await new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readonly');
-    const request = transaction.objectStore(STORE_NAME).getAll();
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.index(PROJECT_INDEX).getAll(projectId);
     request.onsuccess = () => resolve(request.result ?? []);
     request.onerror = () => reject(request.error);
   });
 
   db.close();
   return assets.sort((a, b) => a.createdAt - b.createdAt);
+}
+
+export async function deleteProjectImageAssets(projectId) {
+  if (!projectId) return;
+  const db = await openDb();
+  await new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const index = transaction.objectStore(STORE_NAME).index(PROJECT_INDEX);
+    const request = index.openCursor(IDBKeyRange.only(projectId));
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) return;
+      cursor.delete();
+      cursor.continue();
+    };
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+  db.close();
 }
