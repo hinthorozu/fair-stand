@@ -1,4 +1,4 @@
-# retry after updating table-chair tests
+# retry after updating table-chair state
 name: Patch table chair set once
 
 on:
