@@ -27,6 +27,6 @@ jobs:
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/modulePlacement.js test/sofaSet.test.js
-          git diff --cached --quiet || git commit -m "Fix sofa corner edge snapping"
+          git add src/modulePlacement.js src/scene3d.js test/sofaSet.test.js
+          git diff --cached --quiet || git commit -m "Fix sofa 5cm wall-face corner snap"
           git push origin ROG
