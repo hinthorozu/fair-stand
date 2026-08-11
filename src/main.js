@@ -760,7 +760,7 @@ renderCurrentViewButton?.addEventListener('click', async () => {
   renderCurrentViewButton.disabled = true;
   renderCurrentViewButton.textContent = 'Render alınıyor…';
   try {
-    const result = await scene3d.captureCurrentViewPng({ scale: 2 });
+    const result = await scene3d.captureCurrentViewPng({ scale: 3 });
     if (!result.ok || !result.blob) {
       renderWallResult(result.message || 'Render alınamadı.', true);
       return;

@@ -84,6 +84,9 @@ export function createStandScene(
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.appendChild(renderer.domElement);
@@ -108,7 +111,7 @@ export function createStandScene(
   const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
   keyLight.position.set(5, 8, 6);
   keyLight.castShadow = true;
-  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.mapSize.set(4096, 4096);
   scene.add(keyLight);
 
   const outerFloor = new THREE.Mesh(
@@ -2155,12 +2158,12 @@ export function createStandScene(
     renderer.render(scene, camera);
   });
 
-  async function captureCurrentViewPng({ scale = 2 } = {}) {
+  async function captureCurrentViewPng({ scale = 3 } = {}) {
     if (!stageLayout) return { ok: false, message: 'Önce stand sahnesini oluştur.' };
 
     const cssWidth = Math.max(1, renderer.domElement.clientWidth || container.clientWidth || 1);
     const cssHeight = Math.max(1, renderer.domElement.clientHeight || container.clientHeight || 1);
-    const safeScale = Math.min(3, Math.max(1, Number(scale) || 2));
+    const safeScale = Math.min(3, Math.max(1, Number(scale) || 3));
     const targetWidth = Math.round(cssWidth * safeScale);
     const targetHeight = Math.round(cssHeight * safeScale);
     const previousPixelRatio = renderer.getPixelRatio();
