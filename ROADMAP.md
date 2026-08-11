@@ -264,11 +264,12 @@ FAZ 3'ün amacı, stand tasarımını yalnızca sahnede düzenlemekten çıkarı
 
 ## FAZ 3 yapılacaklar
 
-- [ ] 1. Zemin ayarlanması
+- [x] 1. Zemin ayarlanması
 - [ ] 2. Projenin kaydedilmesi ve tekrar düzenlenebilmesi
 - [ ] 3. En üste lamba eklenmesi
 - [ ] 4. Render alınması
 - [ ] 5. Kendi modülünü oluşturma
+- [ ] 6. UI/UX düzenlemesi ve final polish
 
 
 
