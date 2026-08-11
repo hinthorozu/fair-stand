@@ -1058,6 +1058,7 @@ export function createStandScene(
     const renderedModules = getRenderedModuleStates();
     const magneticSnap = snapPlacementToModules({
       moduleId: moduleState.id,
+      moduleType: moduleState.type,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
       forceFree: moduleState.type === 'counter',
