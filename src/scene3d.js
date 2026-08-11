@@ -7,6 +7,7 @@ import { createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
 import { createViewCube } from './viewCube.js';
 import { computeImageFit } from './imageFit.js';
+import { formatPlacementFeedbackMessage } from './placementFeedback.js';
 import {
   createModulePlacement,
   getAllowedWallIds,
@@ -276,7 +277,7 @@ export function createStandScene(
   }
 
   function showPlacementFeedback(message, { clientX = null, clientY = null, durationMs = 0 } = {}) {
-    const text = String(message ?? '').trim();
+    const text = formatPlacementFeedbackMessage(message);
     if (!text) {
       clearPlacementFeedback();
       return;
@@ -373,6 +374,7 @@ export function createStandScene(
           mesh: surface,
           moduleIndex: surface.userData.moduleIndex,
           stripIndex: surface.userData.stripIndex,
+          selectionPlaneKey: surface.userData.selectionPlaneKey ?? null,
         })),
       anchorMesh.userData,
       mesh.userData,
@@ -419,6 +421,20 @@ export function createStandScene(
     }
   }
 
+  function createSelectionPlaneKey(placement) {
+    if (!placement) return null;
+    const rotation = normalizeModuleRotationZDeg(placement.rotationZDeg);
+    const vertical = isVerticalModuleRotation(rotation);
+    const fixedCm = vertical ? Number(placement.xCm) : Number(placement.yCm);
+    if (!Number.isFinite(fixedCm)) return null;
+    return [
+      placement.wallId ?? 'free',
+      rotation,
+      vertical ? 'y' : 'x',
+      fixedCm.toFixed(3),
+    ].join(':');
+  }
+
   function applyPlacementToGroup(group, placement, widthCm) {
     if (!group || !placement) return;
     const widthM = Number(widthCm) / 100;
@@ -438,6 +454,14 @@ export function createStandScene(
     } else {
       group.position.set(xM + widthM / 2, logicalZM, logicalYM);
     }
+
+    const selectionPlaneKey = createSelectionPlaneKey(placement);
+    group.userData.selectionPlaneKey = selectionPlaneKey;
+    group.traverse((child) => {
+      if (child.userData?.kind === 'surface') {
+        child.userData.selectionPlaneKey = selectionPlaneKey;
+      }
+    });
   }
 
   function buildWall(modules, { resetView = true } = {}) {

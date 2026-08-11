@@ -78,3 +78,19 @@ test('describes rectangle dimensions', () => {
     panelCount: 4,
   });
 });
+
+
+test('rejects rectangle selection across different wall planes', () => {
+  const items = makeGrid(3, 2).map((item) => ({
+    ...item,
+    selectionPlaneKey: item.moduleIndex === 1 ? 'back:0:x:0' : 'free:0:x:100',
+  }));
+  const result = createRectSelection(
+    items,
+    { moduleIndex: 0, stripIndex: 0, selectionPlaneKey: 'free:0:x:100' },
+    { moduleIndex: 2, stripIndex: 1, selectionPlaneKey: 'free:0:x:100' },
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(result.message, 'Çoklu seçim yalnızca aynı duvar düzleminde yapılabilir.');
+});

@@ -1,7 +1,13 @@
+import { STAND_DIMENSIONS } from './catalog.js';
+
 export const MODULE_PLACEMENT_SNAP_CM = 50;
 export const MODULE_PLACEMENT_ROTATIONS = Object.freeze([0, 90, 180, 270]);
 export const MODULE_WALL_SNAP_DISTANCE_CM = 50;
 export const MODULE_NEIGHBOR_SNAP_DISTANCE_CM = 30;
+export const MODULE_COLLISION_DEPTH_CM = Math.max(
+  0,
+  Number(STAND_DIMENSIONS.depth) * 100 || 0,
+);
 
 const EPSILON_CM = 0.001;
 
@@ -207,33 +213,61 @@ export function validateModulePlacement({
   return { ok: true };
 }
 
+function getModuleCollisionDepthCm(module) {
+  const explicitDepthCm = Number(module?.depthCm);
+  if (Number.isFinite(explicitDepthCm) && explicitDepthCm > 0) return explicitDepthCm;
+  return MODULE_COLLISION_DEPTH_CM;
+}
+
 export function placementsOverlap(moduleA, moduleB) {
   const a = getGroundSegment(moduleA);
   const b = getGroundSegment(moduleB);
   if (!a || !b) return false;
 
+  const depthA = getModuleCollisionDepthCm(moduleA);
+  const depthB = getModuleCollisionDepthCm(moduleB);
+
   if (a.axis === b.axis) {
-    if (!nearlyEqual(a.fixedCm, b.fixedCm)) return false;
-    return a.startCm < b.endCm - EPSILON_CM
+    const longitudinalOverlap = a.startCm < b.endCm - EPSILON_CM
       && b.startCm < a.endCm - EPSILON_CM;
+    if (!longitudinalOverlap) return false;
+
+    const centerLineGapCm = Math.abs(a.fixedCm - b.fixedCm);
+    const requiredGapCm = (depthA + depthB) / 2;
+    return centerLineGapCm < requiredGapCm - EPSILON_CM;
   }
 
   const horizontal = a.axis === 'x' ? a : b;
   const vertical = a.axis === 'y' ? a : b;
+  const horizontalModule = a.axis === 'x' ? moduleA : moduleB;
+  const verticalModule = a.axis === 'y' ? moduleA : moduleB;
+  const horizontalDepth = getModuleCollisionDepthCm(horizontalModule);
+  const verticalDepth = getModuleCollisionDepthCm(verticalModule);
   const intersectionX = vertical.fixedCm;
   const intersectionY = horizontal.fixedCm;
   const onHorizontal = intersectionX >= horizontal.startCm - EPSILON_CM
     && intersectionX <= horizontal.endCm + EPSILON_CM;
   const onVertical = intersectionY >= vertical.startCm - EPSILON_CM
     && intersectionY <= vertical.endCm + EPSILON_CM;
-  if (!onHorizontal || !onVertical) return false;
 
-  // L ve T bağlantıları fiziksel olarak geçerlidir: kesişim en az bir modülün
-  // ucundaysa birleşmeye izin verilir. İki modülün de gövdesinin ortasından
-  // geçen '+' tipi gerçek çakışma ise reddedilir.
-  const horizontalEndpoint = pointIsSegmentEndpoint(horizontal, intersectionX);
-  const verticalEndpoint = pointIsSegmentEndpoint(vertical, intersectionY);
-  return !horizontalEndpoint && !verticalEndpoint;
+  if (onHorizontal && onVertical) {
+    // Gerçek L/T bağlantılarında merkez çizgileri birleşebilir; en az bir
+    // modülün ucu bağlantı noktasındaysa bu birleşim kasıtlıdır.
+    const horizontalEndpoint = pointIsSegmentEndpoint(horizontal, intersectionX);
+    const verticalEndpoint = pointIsSegmentEndpoint(vertical, intersectionY);
+    return !horizontalEndpoint && !verticalEndpoint;
+  }
+
+  // Merkez çizgileri kesişmese bile 10 cm kasalar fiziksel olarak birbirine
+  // girebilir. Dik modülün yarı derinliğini X, yatay modülün yarı derinliğini
+  // Y doğrultusunda genişleterek gerçek footprint çakışmasını yakala.
+  const verticalHalfDepth = verticalDepth / 2;
+  const horizontalHalfDepth = horizontalDepth / 2;
+  const physicalXOverlap = intersectionX > horizontal.startCm - verticalHalfDepth + EPSILON_CM
+    && intersectionX < horizontal.endCm + verticalHalfDepth - EPSILON_CM;
+  const physicalYOverlap = intersectionY > vertical.startCm - horizontalHalfDepth + EPSILON_CM
+    && intersectionY < vertical.endCm + horizontalHalfDepth - EPSILON_CM;
+  return physicalXOverlap && physicalYOverlap;
 }
 
 export function validatePlacementAgainstModules({

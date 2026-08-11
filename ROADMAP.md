@@ -5,8 +5,8 @@ Bu belge, Fair Stand / Maxima Stand Konfigüratörü geliştirme fazlarını ve 
 ## Proje durumu
 
 - **FAZ 1: KAPANDI — 10 Ağustos 2026**
-- **FAZ 2: BAŞLADI — 10 Ağustos 2026**
-- **FAZ 2.1: Yerleşim state + kontrollü sürükleme + edge snap temeli aktif**
+- **FAZ 2: YERLEŞİM MOTORU KAPANIŞ / POLISH AŞAMASI — 11 Ağustos 2026**
+- **FAZ 2.1: temel tamamlandı; 4 yön rotasyon, magnetic snap, serbest yerleşim ve feedback aktif**
 - FAZ 1 bundan sonra yeni özellik eklenmeden referans taban olarak korunacaktır. Kritik bug düzeltmeleri yapılabilir; yeni yerleşim ve stand davranışları FAZ 2 kapsamında geliştirilecektir.
 
 ---
@@ -151,7 +151,7 @@ FAZ 2'nin ana hedefi, sıralı düz duvar mantığını gerçek stand alanında 
   - L Stand Sağ: `back + right`
   - U Stand: `back + left + right`
 - Modül konumu **50 cm snap** ile sınırlandırıldı.
-- Sırt kenarında modül X yönüne, yan kenarlarda Y yönüne 0°/90° kontrollü şekilde oturur.
+- Modüller yalnızca 0° / 90° / 180° / 270° plan rotasyonlarında çalışır; `R` +90°, `Shift+R` -90° döndürür.
 - Sahnede mevcut bir modül sol mouse ile tutulup sürüklenebilir hale getirildi.
 - Sürükleme sırasında yarı şeffaf **ghost preview** gösterilir.
 - Geçerli yerleşim ghost'u yeşil, geçersiz yerleşim ghost'u kırmızı gösterilir.
@@ -172,16 +172,26 @@ FAZ 2'nin ana hedefi, sıralı düz duvar mantığını gerçek stand alanında 
 - **Orta mouse basılı sürükle:** pan.
 - **Tekerlek:** zoom.
 
-## FAZ 2.1'de henüz yapılmayanlar
+## FAZ 2 — güncel durum (11 Ağustos 2026)
 
-Bunlar temel yerleşim motorunun sonraki adımlarıdır ve tamamlanmış kabul edilmemelidir:
+Tamamlanan yerleşim özellikleri:
 
-- Modül katalog kartını doğrudan popup'tan 3D sahneye sürükleyip bırakma.
-- Mevcut modül uçlarına yaklaşınca gerçek **neighbor magnetic snap / kenetlenme**.
-- Kullanıcı kontrollü 0° / 90° döndürme komutu.
-- L/U standın ilk modül dizilimini otomatik oluşturma.
-- Çoklu panel dikdörtgen seçiminin farklı duvar köşelerini geçmemesi için multi-wall seçim kuralı.
-- Ada Stand için tam serbest alan yerleşim UX'i ve kuralları.
+- Katalog kartından doğrudan 3D sahneye drag & drop.
+- Sırt, L Sol, L Sağ, U ve Ada standlarda ortak 50 cm grid yerleşim motoru.
+- Tüm modüllerde 0° / 90° / 180° / 270° gerçek ön-yüz rotasyonu.
+- Sürüklerken ve seçiliyken R / Shift+R ile dönüş.
+- Modül merkezinden dönüş ve 50 cm grid'e yeniden oturma.
+- Modül-modül magnetic snap: uç-uca, L ve T bağlantıları.
+- Serbest alan yerleşimi ile perimeter duvar yerleşiminin aynı modül sistemi içinde çalışması.
+- Geçersiz sürükleme/dönüşte kırmızı ghost ve kısa kullanıcı feedback'i.
+- Çoklu panel dikdörtgen seçiminin farklı duvar düzlemlerini/köşeleri geçmesinin engellenmesi.
+- Collision kontrolünün merkez çizgisine ek olarak gerçek modül kasa derinliğini hesaba katması.
+- Kullanıcıya gösterilen yerleşim hata mesajlarının sadeleştirilmesi.
+
+FAZ 2 kapanış öncesi kalan:
+
+- **Issue #1 — EN SON:** serbest alandaki modül sıralarında Ekle/Çoğalt Sağ/Sol işlemlerinin yanlışlıkla duvar kapasitesi kontrolüne girmesi.
+- Issue #1 sonrası final regresyon ve FAZ 2 kapanış kararı.
 
 ## FAZ 2 ana hedefleri
 
@@ -197,7 +207,7 @@ Bunlar temel yerleşim motorunun sonraki adımlarıdır ve tamamlanmış kabul e
 
 3. **Kontrollü drag & drop**
    - Mevcut modüllerin sahne içinde kontrollü sürüklenmesi FAZ 2.1'de başladı.
-   - Sonraki adımda modül katalogdan doğrudan sahneye sürüklenebilir olacaktır.
+   - Modül katalog kartından doğrudan sahneye sürüklenebilir.
    - Sürükleme sırasında yarı şeffaf ghost preview gösterilir.
    - Modül yalnızca geçerli yerleşime bırakılabilir.
 
@@ -215,11 +225,11 @@ Bunlar temel yerleşim motorunun sonraki adımlarıdır ve tamamlanmış kabul e
 
 6. **Yerleşim state'i**
    - Her modülün ait olduğu duvar/kenar kimliği tutulur.
-   - X/Y konumu ve Z ekseni etrafındaki 0°/90° yönü state'te saklanır.
+   - X/Y konumu ve Z ekseni etrafındaki 0°/90°/180°/270° yönü state'te saklanır.
    - L/U standlarda her duvarın modül kapasitesi bağımsız yönetilir.
 
 7. **Ada Stand**
-   - L ve U yerleşim motoru oturduktan sonra serbest ada yerleşimi aynı kontrollü snap altyapısı üzerinden ele alınacaktır.
+   - Ada Stand serbest yerleşimi aynı kontrollü 50 cm grid + snap altyapısı üzerinden aktif olarak çalışır.
 
 ## FAZ 2 UX ilkesi
 

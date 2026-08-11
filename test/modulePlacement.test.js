@@ -377,3 +377,34 @@ test('magnetic snap preserves 270 degree facing and ignores distant targets', ()
   });
   assert.equal(distant, null);
 });
+
+
+test('physical module depth rejects parallel bodies that are too close', () => {
+  const modules = [{
+    id: 'a',
+    widthCm: 200,
+    placement: { xCm: 100, yCm: 100, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  }];
+
+  const tooClose = validatePlacementAgainstModules({
+    moduleId: 'b',
+    widthCm: 200,
+    placement: { xCm: 100, yCm: 109, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+    modules,
+    standType: 'back-wall',
+    standXCm: 800,
+    standYCm: 600,
+  });
+  assert.equal(tooClose.ok, false);
+
+  const justTouching = validatePlacementAgainstModules({
+    moduleId: 'b',
+    widthCm: 200,
+    placement: { xCm: 100, yCm: 110, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+    modules,
+    standType: 'back-wall',
+    standXCm: 800,
+    standYCm: 600,
+  });
+  assert.equal(justTouching.ok, true);
+});
