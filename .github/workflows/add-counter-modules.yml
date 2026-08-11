@@ -27,7 +27,6 @@ jobs:
           replacements = [
               ("""    3,\n    'scene validation counter depth',\n  );""", """    1,\n    'scene validation counter depth',\n  );"""),
               ("""    2,\n    'scene snap counter footprint',\n  );""", """    4,\n    'scene snap counter footprint',\n  );"""),
-              ("""    2,\n    'scene ignore counters as magnetic targets',\n  );""", """    4,\n    'scene ignore counters as magnetic targets',\n  );"""),
           ]
           for old, new in replacements:
               if old not in text:
@@ -38,23 +37,14 @@ jobs:
           node scripts/add-counter-modules.mjs
           python - <<'PY'
           from pathlib import Path
-          import re
           path = Path('src/scene3d.js')
           text = path.read_text()
-
           old = "        widthCm: moduleState.widthCm,\n        moduleId: moduleState.id,\n"
           new = "        widthCm: moduleState.widthCm,\n        depthCm: moduleState.depthCm,\n        moduleId: moduleState.id,\n"
           count = text.count(old)
           if count != 2:
               raise SystemExit(f'expected 2 inner validation blocks, found {count}')
-          text = text.replace(old, new)
-
-          pattern = re.compile(r"(const validation = validatePlacementAgainstModules\(\{.*?)(modules: renderedModules\.filter\(\(module\) => module\.type !== 'counter'\),)(.*?\}\);)", re.S)
-          text, restored = pattern.subn(lambda m: m.group(1) + 'modules: renderedModules,' + m.group(3), text)
-          if restored != 2:
-              raise SystemExit(f'expected to restore 2 validation collision lists, restored {restored}')
-
-          path.write_text(text)
+          path.write_text(text.replace(old, new))
           PY
       - name: Run tests
         run: npm test
