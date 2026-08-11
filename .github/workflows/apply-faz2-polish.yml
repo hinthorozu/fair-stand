@@ -18,6 +18,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ROG
+      - name: Repair patch script markdown literals
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/apply-faz2-polish.mjs')
+          s = p.read_text()
+          s = s.replace('seçiliyken `R` / `Shift+R` ile dönüş.', 'seçiliyken R / Shift+R ile dönüş.')
+          s = s.replace('sıralarında `Ekle/Çoğalt Sağ/Sol` işlemlerinin', 'sıralarında Ekle/Çoğalt Sağ/Sol işlemlerinin')
+          p.write_text(s)
+          PY
       - name: Apply FAZ 2 polish patch
         run: node scripts/apply-faz2-polish.mjs
       - name: Commit patch
