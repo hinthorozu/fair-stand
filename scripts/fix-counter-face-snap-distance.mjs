@@ -16,7 +16,7 @@ function replaceOnce(source, from, to, label) {
   s = replaceOnce(
     s,
     `  const addCandidate = (placement, targetModuleId, snapKind, priority = 0) => {\n    const center = getPlacementCenter(placement, width);\n    if (!center) return;\n    const distanceCm = Math.hypot(center.xCm - pointerX, center.yCm - pointerY);\n    if (distanceCm > threshold + EPSILON_CM) return;`,
-    `  const addCandidate = (\n    placement,\n    targetModuleId,\n    snapKind,\n    priority = 0,\n    distanceOverrideCm = null,\n  ) => {\n    const center = getPlacementCenter(placement, width);\n    if (!center) return;\n    const overrideDistance = Number(distanceOverrideCm);\n    const distanceCm = Number.isFinite(overrideDistance)\n      ? overrideDistance\n      : Math.hypot(center.xCm - pointerX, center.yCm - pointerY);\n    if (distanceCm > threshold + EPSILON_CM) return;`,
+    `  const addCandidate = (\n    placement,\n    targetModuleId,\n    snapKind,\n    priority = 0,\n    distanceOverrideCm = null,\n  ) => {\n    const center = getPlacementCenter(placement, width);\n    if (!center) return;\n    const hasDistanceOverride = distanceOverrideCm !== null && distanceOverrideCm !== undefined;\n    const overrideDistance = hasDistanceOverride ? Number(distanceOverrideCm) : Number.NaN;\n    const distanceCm = Number.isFinite(overrideDistance)\n      ? overrideDistance\n      : Math.hypot(center.xCm - pointerX, center.yCm - pointerY);\n    if (distanceCm > threshold + EPSILON_CM) return;`,
     'candidate distance override',
   );
 
