@@ -104,6 +104,11 @@ let catalogAddFlushScheduled = false;
 let moduleDragSidebar = null;
 let activeProjectId = createProjectId();
 let activeProjectCreatedAt = Date.now();
+let autosaveEnabled = false;
+let autosaveTimer = null;
+let autosaveObservedSignature = null;
+const AUTOSAVE_DELAY_MS = 5000;
+const AUTOSAVE_WATCH_INTERVAL_MS = 1000;
 const imageAssets = new Map();
 
 function getAssetUrl(assetId) {
@@ -1062,6 +1067,59 @@ function buildProjectSnapshot() {
   };
 }
 
+function getProjectStateSignature() {
+  const snapshot = buildProjectSnapshot();
+  return JSON.stringify({
+    name: snapshot.name,
+    stand: snapshot.stand,
+    modules: snapshot.modules,
+  });
+}
+
+function clearAutosaveTimer() {
+  if (autosaveTimer) clearTimeout(autosaveTimer);
+  autosaveTimer = null;
+}
+
+function scheduleAutosave() {
+  if (!autosaveEnabled) return;
+  clearAutosaveTimer();
+  projectStatus.textContent = 'Değişiklik var · 5 sn içinde otomatik kaydedilecek…';
+  autosaveTimer = setTimeout(async () => {
+    autosaveTimer = null;
+    if (!autosaveEnabled) return;
+    projectStatus.textContent = 'Kaydediliyor…';
+    try {
+      await persistActiveProject({ quiet: true });
+      autosaveObservedSignature = getProjectStateSignature();
+      projectStatus.textContent = 'Kaydedildi · Otomatik';
+    } catch (error) {
+      console.warn('Otomatik kayıt başarısız:', error);
+      projectStatus.textContent = 'Otomatik kayıt başarısız.';
+    }
+  }, AUTOSAVE_DELAY_MS);
+}
+
+function enableAutosaveFromCurrentState() {
+  clearAutosaveTimer();
+  autosaveObservedSignature = getProjectStateSignature();
+  autosaveEnabled = true;
+}
+
+function disableAutosave() {
+  autosaveEnabled = false;
+  clearAutosaveTimer();
+  autosaveObservedSignature = null;
+}
+
+setInterval(() => {
+  if (!autosaveEnabled) return;
+  const signature = getProjectStateSignature();
+  if (signature === autosaveObservedSignature) return;
+  autosaveObservedSignature = signature;
+  scheduleAutosave();
+}, AUTOSAVE_WATCH_INTERVAL_MS);
+
 async function refreshProjectList(selectedId = activeProjectId) {
   const projects = await listProjects();
   projectSelect.innerHTML = '';
@@ -1100,6 +1158,7 @@ async function persistActiveProject({ quiet = false } = {}) {
 
 async function restoreProject(project) {
   if (!project) return;
+  disableAutosave();
   activeProjectId = project.id;
   activeProjectCreatedAt = Number(project.createdAt) || Date.now();
   projectNameInput.value = project.name || 'Adsız Proje';
@@ -1143,6 +1202,7 @@ async function restoreProject(project) {
 
   await loadAssetsForActiveProject();
   await refreshProjectList(activeProjectId);
+  enableAutosaveFromCurrentState();
   projectStatus.textContent = 'Açıldı: ' + (project.name || 'Adsız Proje');
 }
 
@@ -1256,7 +1316,11 @@ imageInput.addEventListener('change', async () => {
 });
 
 saveProjectButton.addEventListener('click', async () => {
-  try { await persistActiveProject(); }
+  try {
+    clearAutosaveTimer();
+    await persistActiveProject();
+    enableAutosaveFromCurrentState();
+  }
   catch (error) { console.warn('Proje kaydedilemedi:', error); projectStatus.textContent = 'Proje kaydedilemedi.'; }
 });
 
@@ -1315,6 +1379,7 @@ clearTextureButton.addEventListener('click', () => {
 });
 
 window.addEventListener('beforeunload', () => {
+  disableAutosave();
   imageAssets.forEach((asset) => {
     if (asset.url) URL.revokeObjectURL(asset.url);
   });
