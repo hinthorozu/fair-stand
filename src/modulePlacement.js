@@ -454,12 +454,14 @@ export function snapPlacementToModules({
   const strictMovingDepth = hasStrictDepthBounds(depthCm);
   const movingDepthCm = strictMovingDepth ? Number(depthCm) : MODULE_COLLISION_DEPTH_CM;
   const freePlacement = strictMovingDepth ? createFreePlacement({
+    moduleType,
     widthCm: width,
     depthCm,
     pointerXCm: pointerX,
     pointerYCm: pointerY,
     standXCm,
     standYCm,
+    standType,
     rotationZDeg: resolvedRotation,
   }) : null;
   const candidates = [];
@@ -731,12 +733,14 @@ export function snapPlacementToModules({
 }
 
 function createFreePlacement({
+  moduleType = null,
   widthCm,
   depthCm = null,
   pointerXCm,
   pointerYCm,
   standXCm,
   standYCm,
+  standType = null,
   rotationZDeg,
 }) {
   const width = Number(widthCm);
@@ -769,15 +773,22 @@ function createFreePlacement({
 
   if (strictDepth) {
     const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
+    const useWallInnerFaces = moduleType === 'sofa-set';
+    const wallFaceOffsetCm = MODULE_COLLISION_DEPTH_CM / 2;
+    const activeWalls = useWallInnerFaces ? getAllowedWallIds(standType) : [];
+    const leftEdgeCm = activeWalls.includes('left') ? wallFaceOffsetCm : 0;
+    const rightEdgeCm = activeWalls.includes('right') ? xLimit - wallFaceOffsetCm : xLimit;
+    const backEdgeCm = activeWalls.includes('back') ? wallFaceOffsetCm : 0;
+
     if (!vertical) {
-      if (xCm <= edgeSnap + EPSILON_CM) xCm = 0;
-      if (xLimit - (xCm + width) <= edgeSnap + EPSILON_CM) xCm = xLimit - width;
-      if (yCm - halfDepth <= edgeSnap + EPSILON_CM) yCm = halfDepth;
+      if (xCm - leftEdgeCm <= edgeSnap + EPSILON_CM) xCm = leftEdgeCm;
+      if (rightEdgeCm - (xCm + width) <= edgeSnap + EPSILON_CM) xCm = rightEdgeCm - width;
+      if ((yCm - halfDepth) - backEdgeCm <= edgeSnap + EPSILON_CM) yCm = backEdgeCm + halfDepth;
       if (yLimit - (yCm + halfDepth) <= edgeSnap + EPSILON_CM) yCm = yLimit - halfDepth;
     } else {
-      if (xCm - halfDepth <= edgeSnap + EPSILON_CM) xCm = halfDepth;
-      if (xLimit - (xCm + halfDepth) <= edgeSnap + EPSILON_CM) xCm = xLimit - halfDepth;
-      if (yCm <= edgeSnap + EPSILON_CM) yCm = 0;
+      if ((xCm - halfDepth) - leftEdgeCm <= edgeSnap + EPSILON_CM) xCm = leftEdgeCm + halfDepth;
+      if (rightEdgeCm - (xCm + halfDepth) <= edgeSnap + EPSILON_CM) xCm = rightEdgeCm - halfDepth;
+      if (yCm - backEdgeCm <= edgeSnap + EPSILON_CM) yCm = backEdgeCm;
       if (yLimit - (yCm + width) <= edgeSnap + EPSILON_CM) yCm = yLimit - width;
     }
   }
@@ -792,6 +803,7 @@ function createFreePlacement({
 
 export function snapPlacementToStand({
   standType,
+  moduleType = null,
   widthCm,
   depthCm = null,
   forceFree = false,
@@ -819,12 +831,14 @@ export function snapPlacementToStand({
 
   const preferredRotation = normalizeModuleRotationZDeg(preferredRotationZDeg);
   const freePlacement = createFreePlacement({
+    moduleType,
     widthCm: width,
     depthCm,
     pointerXCm: pointerX,
     pointerYCm: pointerY,
     standXCm: xLimit,
     standYCm: yLimit,
+    standType,
     rotationZDeg: preferredRotation,
   });
 

@@ -67,3 +67,21 @@ test('koltuk takımı köşelerde iki eksende de sıfıra oturur', () => {
   assert.equal(br.placement.xCm, 450);
   assert.equal(br.placement.yCm, 525);
 });
+
+
+test('koltuk takımı duvarın 5 cm iç yüzüne köşede tam oturur', () => {
+  const left = snapPlacementToStand({ standType: 'l-left', moduleType: 'sofa-set', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });
+  assert.equal(left.ok, true);
+  assert.equal(left.placement.xCm, 5);
+  assert.equal(left.placement.yCm, 80);
+
+  const right = snapPlacementToStand({ standType: 'l-right', moduleType: 'sofa-set', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 480, pointerYCm: 120, standXCm: 600, standYCm: 600 });
+  assert.equal(right.ok, true);
+  assert.equal(right.placement.xCm, 445);
+  assert.equal(right.placement.yCm, 80);
+
+  const island = snapPlacementToStand({ standType: 'island', moduleType: 'sofa-set', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });
+  assert.equal(island.ok, true);
+  assert.equal(island.placement.xCm, 0);
+  assert.equal(island.placement.yCm, 75);
+});
