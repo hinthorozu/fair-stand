@@ -1,0 +1,29 @@
+name: Fix Placement Feedback Position
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - scripts/fix-placement-feedback-position.mjs
+      - .github/workflows/fix-placement-feedback-position.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - name: Apply feedback position fix
+        run: node scripts/fix-placement-feedback-position.mjs
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/scene3d.js src/placementFeedback.js test/placementFeedback.test.js
+          git diff --cached --quiet || git commit -m "Fix placement feedback positioning"
+          git push origin ROG
