@@ -82,4 +82,4 @@ Bu dosyadaki maddeler, kullanıcı açıkça aksi bir davranış istemedikçe t�
 
 - Tek modül olarak 1 adet yaklaşık 160 cm ikili koltuk, 2 adet yaklaşık 65 cm tekli koltuk ve ortada sabit cam sehpa içerir.
 - Koltuk döşemeleri tek ortak renk state'iyle değişir; cam sehpa sabittir ve renk/görsel almaz.
-- Modül serbest yerleşir; 250 x 250 cm collision footprint kullanır ve 0/90/180/270 dönüşleri destekler.
+- Modül serbest yerleşir; 160 x 160 cm collision footprint kullanır ve 0/90/180/270 dönüşleri destekler.
