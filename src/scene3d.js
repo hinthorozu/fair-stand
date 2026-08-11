@@ -1784,8 +1784,8 @@ function createSofaSetModule(moduleState, moduleIndex) {
   };
 
   addSofa({ x: 0, z: -depthM / 2 + 0.48, seatWidth: 1.60, seatDepth: 0.78, twoSeat: true, facing: 'front' });
-  addSofa({ x: -0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
-  addSofa({ x: 0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
+  addSofa({ x: -0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
+  addSofa({ x: 0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });
 
   const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.30, 0.018, 48), new THREE.MeshPhysicalMaterial({ color: 0xd7e9ed, transparent: true, opacity: 0.42, roughness: 0.12, metalness: 0, transmission: 0.28, depthWrite: false }));
   glass.position.set(0, 0.42, 0.10);
