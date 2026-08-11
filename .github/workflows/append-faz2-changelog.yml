@@ -1,0 +1,29 @@
+name: Append FAZ 2 Changelog
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - scripts/append-faz2-changelog.mjs
+      - .github/workflows/append-faz2-changelog.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - name: Append changelog
+        run: node scripts/append-faz2-changelog.mjs
+      - name: Commit changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Changelog.md
+          git diff --cached --quiet || git commit -m "Document FAZ 2 placement checkpoint"
+          git push origin ROG
