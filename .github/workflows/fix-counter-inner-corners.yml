@@ -1,0 +1,48 @@
+name: Fix Counter Inner Corners
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - scripts/fix-counter-inner-corners.mjs
+      - scripts/add-counter-inner-corner-tests.mjs
+      - .github/workflows/fix-counter-inner-corners.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ROG
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Apply patch
+        run: |
+          node scripts/fix-counter-inner-corners.mjs
+          node scripts/add-counter-inner-corner-tests.mjs
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src test Changelog.md
+          git diff --cached --quiet || git commit -m "Fix banko snapping in U and L inner corners"
+          git push origin ROG
