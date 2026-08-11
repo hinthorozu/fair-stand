@@ -267,6 +267,8 @@ FAZ 3'ün amacı, stand tasarımını yalnızca sahnede düzenlemekten çıkarı
 - [x] 1. Zemin ayarlanması
 - [ ] 2. Projenin kaydedilmesi ve tekrar düzenlenebilmesi
 - [ ] 3. En üste lamba eklenmesi
+  - LED projektör tipi: siyah ince floodlight gövde + üst profil braketi + panel yüzüne gerçek SpotLight aydınlatması.
+  - Üst aksesuar duvar kapasitesini ve zemin collision hesabını tüketmez; 350 cm üst kotta izin verilen duvar kenarlarına 50 cm snap ile yerleşir.
 - [ ] 4. Render alınması
 - [ ] 5. Kendi modülünü oluşturma
 - [ ] 6. UI/UX düzenlemesi ve final polish

@@ -8,6 +8,7 @@ import {
 } from './automaticWall.js';
 import {
   createBarStoolModuleState,
+  createLedFloodlightModuleState,
   createBaseModuleState,
   createCounterModuleState,
   createDoorModuleState,
@@ -153,6 +154,11 @@ const scene3d = createStandScene(
 
       if (moduleType === 'sofa-set') {
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Koltuk Takımı · koltuk döşeme rengi değiştirilebilir · cam sehpa sabittir.';
+        return;
+      }
+
+      if (moduleType === 'led-floodlight') {
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · LED Projektör · 350 cm üst profile bağlı aydınlatma.';
         return;
       }
 
@@ -461,6 +467,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'sofa-set') state = createSofaSetModuleState();
   else if (module.type === 'table-chair-set') state = createTableChairSetModuleState();
   else if (module.type === 'bar-stool') state = createBarStoolModuleState();
+  else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);
   else if (module.type === 'showcase-2' || module.type === 'showcase-3') {
     state = createShowcaseModuleState(module.type, module.widthCm);

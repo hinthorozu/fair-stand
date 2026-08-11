@@ -19,6 +19,7 @@ const DRAGGABLE_MODULE_KEYS = [
   'SOFA_SET',
   'TABLE_CHAIR_SET',
   'BAR_STOOL',
+  'LED_FLOODLIGHT',
   'BASE_200',
   'BASE_150',
   'BASE_100',
@@ -61,6 +62,9 @@ function ensureStyles() {
     .module-drag-bar-stool { position:relative; width:44px; height:58px; }
     .module-drag-bar-stool::before { content:''; position:absolute; left:8px; top:4px; width:28px; height:20px; border:2px solid #9aa0a6; border-radius:10px 10px 5px 5px; background:#f8fafc; }
     .module-drag-bar-stool::after { content:''; position:absolute; left:11px; top:24px; width:22px; height:27px; border-left:3px solid #7b838c; border-right:3px solid #7b838c; border-bottom:3px solid #7b838c; border-radius:0 0 10px 10px; }
+    .module-drag-floodlight { position:relative; width:52px; height:52px; }
+    .module-drag-floodlight::before { content:''; position:absolute; left:10px; top:7px; width:32px; height:22px; border:4px solid #17191c; border-radius:3px; background:#f5fff2; box-shadow:inset 0 0 0 2px #c7ead0; transform:rotate(-8deg); }
+    .module-drag-floodlight::after { content:''; position:absolute; left:23px; top:29px; width:6px; height:16px; border-left:3px solid #292c31; border-bottom:3px solid #292c31; }
     .module-drag-base { position:relative; height:24px; border:3px solid #7b838c; background:#ffffff; box-shadow:4px 4px 0 #d7dde4,0 2px 5px rgba(15,23,42,.08); }
     .module-drag-base::before { content:''; position:absolute; inset:3px; border:1px solid #cbd5e1; background:#f8fafc; }
     .module-drag-base::after { content:''; position:absolute; left:-5px; right:-5px; top:-7px; height:5px; border:1px solid #9aa0a6; background:#ffffff; }
@@ -113,6 +117,13 @@ function createPreview(module) {
   if (module.type === 'bar-stool') {
     const body = document.createElement('div');
     body.className = 'module-drag-bar-stool';
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'led-floodlight') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-floodlight';
     preview.appendChild(body);
     return preview;
   }

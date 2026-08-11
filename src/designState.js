@@ -179,6 +179,20 @@ export function createBarStoolModuleState() {
   };
 }
 
+export function createLedFloodlightModuleState() {
+  return {
+    id: createId('module'),
+    type: 'led-floodlight',
+    widthCm: 50,
+    depthCm: 20,
+    heightCm: 35,
+    surface: {
+      id: createId('surface'),
+      color: '#17191c',
+    },
+  };
+}
+
 export function duplicateModuleState(moduleState) {
   if (!moduleState) return null;
   const duplicate = JSON.parse(JSON.stringify(moduleState));
@@ -252,9 +266,14 @@ export function reconcileWallModules(previousModules, widthsCm) {
 }
 
 export function totalWallWidthCm(modules) {
-  return modules.reduce((sum, module) => sum + module.widthCm, 0);
+  return modules.reduce(
+    (sum, module) => sum + (module?.type === 'led-floodlight' ? 0 : Number(module?.widthCm) || 0),
+    0,
+  );
 }
 
 export function moduleWidths(modules) {
-  return modules.map((module) => module.widthCm);
+  return modules
+    .filter((module) => module?.type !== 'led-floodlight')
+    .map((module) => module.widthCm);
 }

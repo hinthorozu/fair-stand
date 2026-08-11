@@ -91,3 +91,11 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 - Parke seçenekleri serbest renk boyamasının dışında bırakıldı; kendi sabit yüzey tonlarını kullanır.
 - Zemin seçimi ve boyama davranışları mevcut panel/modül renk sistemini bozmadan entegre edildi.
 - **FAZ 3 / 1. Zemin ayarlanması tamamlandı.**
+
+
+## 11 Ağustos 2026 — LED projektör ilk sürüm
+
+- LED Projektör katalog modülü eklendi; siyah ince floodlight gövde, braket ve emissive lens geometrisi oluşturuldu.
+- Projektör 350 cm duvar üst kotuna bağlanan üst aksesuar olarak tanımlandı; duvar kapasitesini ve normal modül collision hesabını tüketmez.
+- Sırt/L/U standların izin verilen duvar üst kenarlarına 50 cm snap ile sürüklenebilir ve taşınabilir hale getirildi.
+- Her projektöre panel yüzüne doğru gerçek Three.js SpotLight ışığı eklendi.

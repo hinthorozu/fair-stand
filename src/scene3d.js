@@ -65,6 +65,10 @@ function isFloorFixtureType(type) {
   return type === 'counter' || type === 'base' || type === 'sofa-set' || type === 'table-chair-set' || type === 'bar-stool';
 }
 
+function isTopFixtureType(type) {
+  return type === 'led-floodlight';
+}
+
 export function createStandScene(
   container,
   onSurfaceSelected,
@@ -611,6 +615,8 @@ export function createStandScene(
         module = createTableChairSetModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'bar-stool') {
         module = createBarStoolModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'led-floodlight') {
+        module = createLedFloodlightModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'shelf') {
         module = createShelfModule(
           moduleState,
@@ -847,6 +853,7 @@ export function createStandScene(
     if (moduleState?.type === 'sofa-set') return 'Koltuk Takımı';
     if (moduleState?.type === 'table-chair-set') return 'Masa Sandalye Takımı';
     if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';
+    if (moduleState?.type === 'led-floodlight') return 'LED Projektör';
     if (moduleState?.type === 'base') return `Baza ${widthCm}`;
     if (moduleState?.type === 'counter') return `Banko ${widthCm}`;
     if (moduleState?.type === 'separator') return `Separatör ${widthCm}`;
@@ -1072,6 +1079,26 @@ export function createStandScene(
       };
     }
 
+    if (isTopFixtureType(moduleState.type)) {
+      const placement = {
+        ...snapped.placement,
+        zCm: Math.round(STAND_DIMENSIONS.height * 100),
+      };
+      showPlacementGhost(moduleState, placement, true);
+      clearPlacementFeedback();
+      return {
+        ok: true,
+        placement: { ...placement },
+        message: null,
+        plan: {
+          ok: true,
+          movingPlacement: { ...placement },
+          placements: new Map([[moduleState.id, { ...placement }]]),
+        },
+        snap: { mode: 'top-wall' },
+      };
+    }
+
     const renderedModules = getRenderedModuleStates();
     const magneticSnap = snapPlacementToModules({
       moduleId: moduleState.id,
@@ -1215,6 +1242,27 @@ export function createStandScene(
         clientX: event.clientX,
         clientY: event.clientY,
       });
+      return;
+    }
+
+    if (isTopFixtureType(moduleState.type)) {
+      const placement = {
+        ...snapped.placement,
+        zCm: Math.round(STAND_DIMENSIONS.height * 100),
+      };
+      dragSession.preview = {
+        placement,
+        valid: true,
+        message: null,
+        plan: {
+          ok: true,
+          movingPlacement: { ...placement },
+          placements: new Map([[moduleState.id, { ...placement }]]),
+        },
+        snap: { mode: 'top-wall' },
+      };
+      showPlacementGhost(moduleState, placement, true);
+      clearPlacementFeedback();
       return;
     }
 
@@ -1892,6 +1940,86 @@ export function createStandScene(
     isFloorSelected: () => floorSelected,
     getSelectedFloorType: () => (floorSelected ? currentFloorType : null),
   };
+}
+
+function createLedFloodlightModule(moduleState, moduleIndex) {
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: 'led-floodlight',
+    widthCm: 50,
+    depthCm: 20,
+    heightCm: 35,
+  };
+
+  const blackMaterial = new THREE.MeshStandardMaterial({
+    color: 0x17191c,
+    roughness: 0.38,
+    metalness: 0.58,
+  });
+  const lensMaterial = new THREE.MeshStandardMaterial({
+    color: 0xf6fff2,
+    emissive: 0xeaffdf,
+    emissiveIntensity: 1.8,
+    roughness: 0.18,
+    metalness: 0,
+    side: THREE.DoubleSide,
+  });
+
+  const mount = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.055, 0.08), blackMaterial.clone());
+  mount.position.set(0, 0.0275, 0.015);
+  mount.castShadow = true;
+  group.add(mount);
+
+  const stem = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.17, 0.055), blackMaterial.clone());
+  stem.position.set(0, 0.125, 0.055);
+  stem.rotation.x = -0.12;
+  stem.castShadow = true;
+  group.add(stem);
+
+  const head = new THREE.Group();
+  head.position.set(0, 0.255, 0.135);
+  head.rotation.x = -0.40;
+  group.add(head);
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.23, 0.055), blackMaterial.clone());
+  body.castShadow = true;
+  body.receiveShadow = true;
+  head.add(body);
+
+  const lens = new THREE.Mesh(new THREE.PlaneGeometry(0.285, 0.175), lensMaterial);
+  lens.position.z = 0.029;
+  head.add(lens);
+
+  const spot = new THREE.SpotLight(0xf5ffe8, 38, 5.2, 0.52, 0.55, 1.45);
+  spot.position.set(0, 0.24, 0.17);
+  spot.castShadow = false;
+  spot.target.position.set(0, -1.55, 1.35);
+  group.add(spot, spot.target);
+
+  const selectionFrame = createSelectionFrame(0.34, 0.23);
+  selectionFrame.visible = false;
+  lens.add(selectionFrame);
+  lens.userData = {
+    kind: 'surface',
+    moduleType: 'led-floodlight',
+    selectionMode: 'module',
+    acceptsImage: false,
+    moduleIndex,
+    moduleId: moduleState.id,
+    widthCm: 50,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceRole: 'light',
+    surfaceId: moduleState.surface?.id,
+    surfaceState: moduleState.surface,
+    selectionFrame,
+    colorTargets: [],
+  };
+
+  return { group, surfaces: [lens] };
 }
 
 function createBarStoolModule(moduleState, moduleIndex) {

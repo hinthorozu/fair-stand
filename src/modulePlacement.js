@@ -43,6 +43,10 @@ function usesLogicalFixtureEndpoint(moduleType) {
   return moduleType === 'counter' || moduleType === 'base';
 }
 
+function isTopFixtureType(moduleType) {
+  return moduleType === 'led-floodlight';
+}
+
 function snapDepthCenterCm(value, depthCm) {
   const depth = Number(depthCm);
   const halfDepth = depth / 2;
@@ -172,13 +176,15 @@ function pointIsSegmentEndpoint(segment, coordinateCm) {
 
 export function getWallUsedCm(modules = [], wallId = 'back') {
   return modules.reduce((sum, module) => (
-    module?.placement?.wallId === wallId ? sum + (Number(module.widthCm) || 0) : sum
+    module?.placement?.wallId === wallId && !isTopFixtureType(module?.type)
+      ? sum + (Number(module.widthCm) || 0)
+      : sum
   ), 0);
 }
 
 export function getWallExtentCm(modules = [], wallId = 'back') {
   return modules.reduce((max, module) => {
-    if (module?.placement?.wallId !== wallId) return max;
+    if (module?.placement?.wallId !== wallId || isTopFixtureType(module?.type)) return max;
     const interval = getPlacementInterval(module.placement, module.widthCm);
     return interval ? Math.max(max, interval.endCm) : max;
   }, 0);
@@ -253,6 +259,7 @@ function getModuleCollisionDepthCm(module) {
 }
 
 export function placementsOverlap(moduleA, moduleB) {
+  if (isTopFixtureType(moduleA?.type) || isTopFixtureType(moduleB?.type)) return false;
   const a = getGroundSegment(moduleA);
   const b = getGroundSegment(moduleB);
   if (!a || !b) return false;
