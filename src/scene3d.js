@@ -1955,51 +1955,74 @@ function createLedFloodlightModule(moduleState, moduleIndex) {
   };
 
   const blackMaterial = new THREE.MeshStandardMaterial({
-    color: 0x17191c,
-    roughness: 0.38,
-    metalness: 0.58,
+    color: 0x15171a,
+    roughness: 0.42,
+    metalness: 0.62,
   });
   const lensMaterial = new THREE.MeshStandardMaterial({
-    color: 0xf6fff2,
-    emissive: 0xeaffdf,
-    emissiveIntensity: 1.8,
-    roughness: 0.18,
+    color: 0xf8fff4,
+    emissive: 0xf2ffe8,
+    emissiveIntensity: 2.1,
+    roughness: 0.14,
     metalness: 0,
     side: THREE.DoubleSide,
   });
 
-  const mount = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.055, 0.08), blackMaterial.clone());
-  mount.position.set(0, 0.0275, 0.015);
+  // Maxima üst profile oturan kısa bağlantı pabucu.
+  const mount = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 0.025, 0.075),
+    blackMaterial.clone(),
+  );
+  mount.position.set(0, 0.0125, 0.015);
   mount.castShadow = true;
   group.add(mount);
 
-  const stem = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.17, 0.055), blackMaterial.clone());
-  stem.position.set(0, 0.125, 0.055);
-  stem.rotation.x = -0.12;
-  stem.castShadow = true;
-  group.add(stem);
+  // Gerçek projektörlerdeki kısa U braket: uzun sap yok.
+  const bracketBase = new THREE.Mesh(
+    new THREE.BoxGeometry(0.22, 0.022, 0.035),
+    blackMaterial.clone(),
+  );
+  bracketBase.position.set(0, 0.055, 0.045);
+  bracketBase.castShadow = true;
+  group.add(bracketBase);
 
+  [-1, 1].forEach((side) => {
+    const ear = new THREE.Mesh(
+      new THREE.BoxGeometry(0.022, 0.085, 0.03),
+      blackMaterial.clone(),
+    );
+    ear.position.set(side * 0.099, 0.092, 0.058);
+    ear.castShadow = true;
+    group.add(ear);
+  });
+
+  // İnce, yatay dikdörtgen floodlight gövdesi. Ön yüz panel yönüne aşağı eğilir.
   const head = new THREE.Group();
-  head.position.set(0, 0.255, 0.135);
-  head.rotation.x = -0.40;
+  head.position.set(0, 0.145, 0.105);
+  head.rotation.x = THREE.MathUtils.degToRad(40);
   group.add(head);
 
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.23, 0.055), blackMaterial.clone());
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(0.29, 0.17, 0.045),
+    blackMaterial.clone(),
+  );
   body.castShadow = true;
   body.receiveShadow = true;
   head.add(body);
 
-  const lens = new THREE.Mesh(new THREE.PlaneGeometry(0.285, 0.175), lensMaterial);
-  lens.position.z = 0.029;
+  // Ön tarafta siyah çerçeve içinde beyaz LED yüzeyi.
+  const lens = new THREE.Mesh(new THREE.PlaneGeometry(0.245, 0.125), lensMaterial);
+  lens.position.z = 0.0235;
   head.add(lens);
 
-  const spot = new THREE.SpotLight(0xf5ffe8, 38, 5.2, 0.52, 0.55, 1.45);
-  spot.position.set(0, 0.24, 0.17);
+  // Panelin üst-orta bölgesine sıcak/nötr beyaz gerçek ışık.
+  const spot = new THREE.SpotLight(0xfffbed, 42, 5.4, 0.48, 0.62, 1.35);
+  spot.position.set(0, 0.16, 0.13);
   spot.castShadow = false;
-  spot.target.position.set(0, -1.55, 1.35);
+  spot.target.position.set(0, -1.45, 1.15);
   group.add(spot, spot.target);
 
-  const selectionFrame = createSelectionFrame(0.34, 0.23);
+  const selectionFrame = createSelectionFrame(0.29, 0.17);
   selectionFrame.visible = false;
   lens.add(selectionFrame);
   lens.userData = {
