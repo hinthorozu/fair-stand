@@ -465,3 +465,40 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 375. Modül çoğaltma ve otomatik duvar limit hataları da aynı görünür popup uyarı davranışına bağlandı.
 376. Stand X/Y doğrulama ve kapasite kuralı için otomatik testler eklendi.
 377. Stand alanı, kapasite kontrolü ve popup UX değişiklikleri GitHub Actions test + Vite build kontrolünden başarıyla geçti.
+
+## FAZ 2 — Ortak yerleşim motoru ve 11 Ağustos 2026 checkpoint
+
+378. Stand tipleri Sırt Duvar, L Stand Sol, L Stand Sağ, U Stand ve Ada Stand olarak gerçek X/Y aktif alan mantığına bağlandı.
+379. Stand ölçülerinde X ve Y değerlerinin 50 cm katı olması ve maksimum 5000 cm sınırı ortak doğrulama kuralı olarak korundu.
+380. Yerleşim standardı proje genelinde X/Y zemin düzlemi ve Z yükseklik olacak şekilde kesinleştirildi.
+381. `modulePlacement.js` ortak yerleşim motoru ile her modülde `xCm`, `yCm`, `zCm`, `rotationZDeg` ve `wallId` placement state'i kullanılmaya başlandı.
+382. Perimeter duvar modülleri ile standın ortasındaki serbest modüller ayrı ürün sınıflarına bölünmeden tek placement sistemi altında birleştirildi.
+383. Modül yerleşimleri 50 cm grid'e bağlandı; serbest 17° / 45° gibi ara açılar yasaklandı.
+384. Tüm mevcut ve gelecekteki modüller için 0° / 90° / 180° / 270° gerçek plan dönüş standardı getirildi.
+385. `R` tuşu her basışta +90°, `Shift+R` her basışta -90° döndürür hale getirildi.
+386. Dönüş hem katalogdan modül sürüklerken hem mevcut modülü taşırken hem de bırakılmış seçili modülde çalışır hale getirildi.
+387. Modül dönüşünde yalnızca eksen değil gerçek ön yüz de döner hale getirildi; kapı kolu, vitrin önü ve panel yüzü 180° / 270° yönlerinde doğru tarafa taşındı.
+388. Bırakılmış modülün dönüşü başlangıç köşesi yerine kendi merkezi etrafında hesaplanıp yeni eksende 50 cm grid'e yeniden oturtuldu.
+389. Geçersiz dönüşte asıl modülün yerinde kalması, denenmek istenen konumun kırmızı ghost olarak gösterilmesi sağlandı.
+390. Katalog kartından doğrudan 3D sahneye drag & drop ve mevcut modüllerin sahne içinde kontrollü drag işlemleri ortak yerleşim doğrulamasına bağlandı.
+391. Magnetic snap eklendi; yaklaşık 30 cm yakınlıkta aynı doğrultuda uç-uca, dik doğrultuda L ve 50 cm bağlantı noktalarında T birleşimleri desteklendi.
+392. Magnetic snap kullanıcının seçtiği 0° / 90° / 180° / 270° yönünü değiştirmeden bağlantı arar hale getirildi.
+393. Collision motorunda merkez çizgisi geometrisine ek olarak gerçek 10 cm Maxima kasa derinliği hesaba katılmaya başlandı.
+394. L / T ve endpoint bağlantılarının kasıtlı birleşim olarak kabul edilmesi, gerçek gövde-gövde + kesişmelerin reddedilmesi sağlandı.
+395. Silinen modülün bıraktığı boşluğun korunması kesin davranış olarak belirlendi; silme sonrasında otomatik sıkıştırma yapılmıyor.
+396. Sürekli perimeter duvar zincirinde Sırt, L Sol, L Sağ ve U stand köşe sırası placement-aware hale getirildi; kullanıcı tarafından bırakılmış kasıtlı boşluklar korunuyor.
+397. Stand tipine göre otomatik duvar toplam kapasitesi senkronize edildi: Sırt=X, L=X+Y, U=X+Y+Y, Ada=0.
+398. `Depo Kapısı 100` gerçek modül olarak tamamlandı: toplam 350 cm yükseklik, alt 200 cm kapalı kapı kanadı, üstte 3 adet 50 cm panel ve sağ tarafta kapı kolu eklendi.
+399. Depo kapısı yüzeyi bağımsız renk/görsel alabilir hale getirildi; üst üç panel normal panel davranışı, görsel ve cam desteğini korudu.
+400. Depo kapısı ortak katalog, drag/drop, 4 yön dönüş, silme, çoğaltma ve placement sistemine bağlandı.
+401. Geçersiz yerleşim feedback'i sadeleştirildi; kullanıcıya teknik zincir mesajları yerine çakışma, stand sınırı veya yeterli boşluk gibi kısa nedenler gösterilmeye başlandı.
+402. Klavye kaynaklı feedback'in yanlışlıkla ekranın sol üstüne düşmesine neden olan null koordinat bug'ı giderildi; klavye feedback'i sahnenin üst-orta kısmına taşındı.
+403. Mouse kaynaklı feedback'in pointer yanında kalması korundu.
+404. Geçici yerleşim hata mesajları varsayılan 1800 ms sonra otomatik kapanır hale getirildi.
+405. Çoklu panel seçiminde farklı düzleme geçmeyi tamamen yasaklayan geçici kısıt geri alındı; bağlı stand köşelerinde renk ve sürekli görsel seçiminin köşeyi dönerek devam edebilmesi korundu.
+406. Issue #1 giderildi: serbest alandaki modül sıralarında `Ekle Sağ/Sol` ve `Çoğalt Sağ/Sol` artık perimeter duvar kapasitesini ölçmüyor.
+407. Serbest sağ/sol ekleme ve çoğaltma hedef modülün gerçek 0° / 90° / 180° / 270° yönüne göre komşu konumu hesaplar hale getirildi.
+408. Serbest bağlamsal eklemeler aktif X/Y stand sınırı, 50 cm grid ve gerçek collision kurallarıyla doğrulanır hale getirildi; gerçek back/left/right duvar zinciri davranışı korunuyor.
+409. Serbest bağlamsal ekleme için 4 yön, çoklu paket sırası, stand taşması ve collision regresyon testleri eklendi.
+410. Yerleşim motorunun güncel davranışları `ROADMAP.md` ile eşitlendi ve kesin varsayılan modül davranışları `PROJECT_RULES.md` içine taşındı.
+411. FAZ 2 bu checkpoint'te henüz resmi olarak kapatılmadı; final genel regresyon turu ve kapanış kararı bekliyor.
