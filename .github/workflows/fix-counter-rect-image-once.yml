@@ -1,0 +1,94 @@
+name: Fix counter grouped image once
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-counter-rect-image-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Make counter images use wall-panel grouping
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('src/main.js')
+          text = path.read_text(encoding='utf-8')
+
+          old = """  const allCounterPanels = selected.every(
+    (surface) => surface.userData.moduleType === 'counter',
+  );
+  if (allCounterPanels) {
+    scene3d.applyImageAsset(selected, activeAssetId, fit);
+    const fitLabel = fit === 'cover' ? 'Doldur' : 'Sığdır';
+    selectionInfo.textContent = `${selected.length} banko paneline görsel uygulandı · ${fitLabel}.`;
+    return true;
+  }
+
+  const result = scene3d.applyRectImageAsset(selected, activeAssetId, fit);
+"""
+
+          new = """  const allCounterPanels = selected.every(
+    (surface) => surface.userData.moduleType === 'counter',
+  );
+  if (allCounterPanels) {
+    const panelsByFace = new Map();
+    selected.forEach((surface) => {
+      const face = surface.userData.surfaceRole ?? 'front';
+      if (!panelsByFace.has(face)) panelsByFace.set(face, []);
+      panelsByFace.get(face).push(surface);
+    });
+
+    let appliedPanelCount = 0;
+    for (const panels of panelsByFace.values()) {
+      const faceResult = scene3d.applyRectImageAsset(panels, activeAssetId, fit);
+      if (!faceResult.ok) {
+        selectionInfo.textContent = faceResult.message;
+        return false;
+      }
+      appliedPanelCount += faceResult.panelCount ?? panels.length;
+    }
+
+    const fitLabel = fit === 'cover' ? 'Doldur' : 'Sığdır';
+    selectionInfo.textContent = `${panelsByFace.size} banko cephesinde ${appliedPanelCount} panele tek parça görsel · ${fitLabel}.`;
+    return true;
+  }
+
+  const result = scene3d.applyRectImageAsset(selected, activeAssetId, fit);
+"""
+
+          if old not in text:
+              raise SystemExit('counter image special-case anchor not found')
+
+          text = text.replace(old, new, 1)
+          path.write_text(text, encoding='utf-8')
+
+      - run: npm test
+      - run: npm run build
+
+      - name: Commit and push
+        run: |
+          rm .github/workflows/fix-counter-rect-image-once.yml
+          git config user.name "OpenAI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/main.js .github/workflows/fix-counter-rect-image-once.yml
+          git commit -m "Make counter images span selected panels"
+          git push origin ROG
