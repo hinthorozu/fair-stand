@@ -1,0 +1,36 @@
+name: Apply Unified Placement Patch
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - scripts/apply-unified-placement.mjs
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - name: Apply patch
+        run: node scripts/apply-unified-placement.mjs
+
+      - name: Commit patch
+        run: |
+          if git diff --quiet -- src/scene3d.js src/main.js test/modulePlacement.test.js; then
+            echo "No patch needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/scene3d.js src/main.js test/modulePlacement.test.js
+          git commit -m "Enable unified 0-90 grid placement"
+          git push origin HEAD:ROG
