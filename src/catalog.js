@@ -15,6 +15,12 @@ export const COUNTER_DIMENSIONS = Object.freeze({
   widthsCm: Object.freeze([100, 150, 200]),
 });
 
+export const BASE_DIMENSIONS = Object.freeze({
+  depthCm: 50,
+  heightCm: 50,
+  widthsCm: Object.freeze([100, 150, 200]),
+});
+
 export const MODULE_CATALOG = Object.freeze({
   PANEL_50: { type: 'flat-panel', widthCm: 50, label: 'Düz Panel 50' },
   PANEL_100: { type: 'flat-panel', widthCm: 100, label: 'Düz Panel 100' },
@@ -28,6 +34,9 @@ export const MODULE_CATALOG = Object.freeze({
   COUNTER_100: { type: 'counter', widthCm: 100, depthCm: 50, heightCm: 100, label: 'Banko 100' },
   COUNTER_150: { type: 'counter', widthCm: 150, depthCm: 50, heightCm: 100, label: 'Banko 150' },
   COUNTER_200: { type: 'counter', widthCm: 200, depthCm: 50, heightCm: 100, label: 'Banko 200' },
+  BASE_100: { type: 'base', widthCm: 100, depthCm: 50, heightCm: 50, label: 'Baza 100' },
+  BASE_150: { type: 'base', widthCm: 150, depthCm: 50, heightCm: 50, label: 'Baza 150' },
+  BASE_200: { type: 'base', widthCm: 200, depthCm: 50, heightCm: 50, label: 'Baza 200' },
   SEPARATOR_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
   SEPARATOR_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
 });

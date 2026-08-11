@@ -246,3 +246,12 @@ Sistem serbest bir CAD programına dönüşmeyecektir. Kullanıcı modülleri s�
 **FAZ 1, 10 Ağustos 2026 itibarıyla kapatılmıştır. FAZ 2 aynı tarih itibarıyla yerleşim motoru geliştirmeleriyle başlamıştır.**
 
 FAZ 1 tabanı; düz/sırt duvar, sahne ölçüsü, katalog, tasarım araçları, kapasite kontrolü, kamera ve CI altyapısı açısından referans sürüm olarak korunacaktır.
+
+
+## Planlanan yeni modül geliştirme sırası
+
+1. Baza
+2. Raf
+3. Koltuk
+4. Masa Sandalye Takımı
+5. Bar Taburesi

@@ -51,6 +51,10 @@ const DEFAULT_VIEW_DISTANCE_FACTOR = 1.32;
 const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
 const STAGE_HOME_DIRECTION = new THREE.Vector3(1, 1.05, 1).normalize();
 
+function isFloorFixtureType(type) {
+  return type === 'counter' || type === 'base';
+}
+
 export function createStandScene(
   container,
   onSurfaceSelected,
@@ -462,6 +466,12 @@ export function createStandScene(
       let module;
       if (moduleState.type === 'separator') {
         module = createSeparatorModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'base') {
+        module = createBaseModule(
+          moduleState,
+          moduleIndex,
+          (surface) => applyStoredImage(surface),
+        );
       } else if (moduleState.type === 'counter') {
         module = createCounterModule(
           moduleState,
@@ -694,6 +704,7 @@ export function createStandScene(
 
   function getDragModuleLabel(moduleState) {
     const widthCm = Number(moduleState?.widthCm) || 0;
+    if (moduleState?.type === 'base') return `Baza ${widthCm}`;
     if (moduleState?.type === 'counter') return `Banko ${widthCm}`;
     if (moduleState?.type === 'separator') return `Separatör ${widthCm}`;
     if (moduleState?.type === 'door') return `Kapı ${widthCm}`;
@@ -747,8 +758,10 @@ export function createStandScene(
     const label = dragBadge.querySelector('[data-role="label"]');
     if (label) label.textContent = getDragModuleLabel(moduleState);
     if (preview) {
-      preview.style.height = moduleState?.type === 'counter' ? '28px' : '48px';
-      if (moduleState?.type === 'counter') {
+      preview.style.height = moduleState?.type === 'base' ? '22px' : (moduleState?.type === 'counter' ? '28px' : '48px');
+      if (moduleState?.type === 'base') {
+        preview.style.background = 'linear-gradient(to bottom,#ffffff 0 20%,#9aa0a6 20% 29%,#f8fafc 29% 86%,#9aa0a6 86% 100%)';
+      } else if (moduleState?.type === 'counter') {
         preview.style.background = 'linear-gradient(to bottom,#eef2f6 0 16%,#d1d5db 16% 20%,#f8fafc 20% 100%)';
       } else if (moduleState?.type === 'separator') {
         preview.style.background = 'repeating-linear-gradient(to bottom,#c79b63 0 2px,#eef2f6 2px 4px)';
@@ -828,7 +841,7 @@ export function createStandScene(
       moduleState.depthCm,
     );
     if (!nextPlacement) return { handled: false, ok: false };
-    nextPlacement.wallId = moduleState.type === 'counter'
+    nextPlacement.wallId = isFloorFixtureType(moduleState.type)
       ? 'free'
       : inferWallIdForRotation(
           nextPlacement,
@@ -890,7 +903,7 @@ export function createStandScene(
       standType: stageLayout.standType,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
-      forceFree: moduleState.type === 'counter',
+      forceFree: isFloorFixtureType(moduleState.type),
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       standXCm: stageLayout.widthCm,
@@ -915,7 +928,7 @@ export function createStandScene(
       moduleType: moduleState.type,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
-      forceFree: moduleState.type === 'counter',
+      forceFree: isFloorFixtureType(moduleState.type),
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       rotationZDeg: preferredRotationZDeg,
@@ -1036,7 +1049,7 @@ export function createStandScene(
       standType: stageLayout.standType,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
-      forceFree: moduleState.type === 'counter',
+      forceFree: isFloorFixtureType(moduleState.type),
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       standXCm: stageLayout.widthCm,
@@ -1061,7 +1074,7 @@ export function createStandScene(
       moduleType: moduleState.type,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
-      forceFree: moduleState.type === 'counter',
+      forceFree: isFloorFixtureType(moduleState.type),
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       rotationZDeg: dragSession.preferredRotationZDeg,
@@ -1714,6 +1727,171 @@ export function createStandScene(
     getSelectedSurface: () => [...selectedSurfaces][0] ?? null,
     getSelectedSurfaces: () => [...selectedSurfaces],
   };
+}
+
+function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
+  const widthCm = Number(moduleState.widthCm);
+  const depthCm = Number(moduleState.depthCm) || 50;
+  const heightCm = Number(moduleState.heightCm) || 50;
+  const widthM = widthCm / 100;
+  const depthM = depthCm / 100;
+  const heightM = heightCm / 100;
+  const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
+  const topThicknessM = 0.035;
+  const topOverhangM = 0.02;
+  const frameHeightM = Math.max(heightM - topThicknessM, profileM * 3);
+  const panelHeightM = Math.max(frameHeightM - profileM * 2, 0.05);
+  const frontPanelWidthM = Math.max(widthM - profileM * 2, 0.05);
+  const sidePanelWidthM = Math.max(depthM - profileM * 2, 0.05);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: moduleState.type,
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const frameMaterial = new THREE.MeshStandardMaterial({
+    color: FRAME_COLOR,
+    metalness: 0.68,
+    roughness: 0.28,
+  });
+  const addProfile = (geometry, position) => {
+    const mesh = new THREE.Mesh(geometry, frameMaterial.clone());
+    mesh.position.copy(position);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    group.add(mesh);
+    return mesh;
+  };
+
+  // Four visible Maxima corner profiles. Rear remains open; only front/left/right are paneled.
+  const cornerPostGeometry = new THREE.BoxGeometry(profileM, frameHeightM, profileM);
+  [-1, 1].forEach((xSide) => {
+    [-1, 1].forEach((zSide) => {
+      addProfile(
+        cornerPostGeometry.clone(),
+        new THREE.Vector3(
+          xSide * (widthM / 2 - profileM / 2),
+          frameHeightM / 2,
+          zSide * (depthM / 2 - profileM / 2),
+        ),
+      );
+    });
+  });
+
+  const frontRailGeometry = new THREE.BoxGeometry(frontPanelWidthM, profileM, profileM);
+  [profileM / 2, frameHeightM - profileM / 2].forEach((y) => {
+    addProfile(
+      frontRailGeometry.clone(),
+      new THREE.Vector3(0, y, depthM / 2 - profileM / 2),
+    );
+  });
+
+  const sideRailGeometry = new THREE.BoxGeometry(profileM, profileM, sidePanelWidthM);
+  [-1, 1].forEach((xSide) => {
+    [profileM / 2, frameHeightM - profileM / 2].forEach((y) => {
+      addProfile(
+        sideRailGeometry.clone(),
+        new THREE.Vector3(xSide * (widthM / 2 - profileM / 2), y, 0),
+      );
+    });
+  });
+
+  const top = new THREE.Mesh(
+    new THREE.BoxGeometry(
+      widthM + topOverhangM * 2,
+      topThicknessM,
+      depthM + topOverhangM * 2,
+    ),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.74, metalness: 0 }),
+  );
+  top.position.set(0, frameHeightM + topThicknessM / 2, 0);
+  top.castShadow = true;
+  top.receiveShadow = true;
+  group.add(top);
+
+  const surfaces = [];
+  const addPanelFace = (surfaceRole, surfaceState, faceWidthM, position, rotationY = 0) => {
+    if (!surfaceState) return;
+
+    const backing = new THREE.Mesh(
+      new THREE.BoxGeometry(faceWidthM, panelHeightM, 0.012),
+      new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74, metalness: 0 }),
+    );
+    backing.position.copy(position);
+    backing.rotation.y = rotationY;
+    backing.castShadow = true;
+    backing.receiveShadow = true;
+    group.add(backing);
+
+    const surface = new THREE.Mesh(
+      new THREE.PlaneGeometry(faceWidthM, panelHeightM),
+      new THREE.MeshStandardMaterial({
+        color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
+        roughness: 0.72,
+        metalness: 0,
+        side: THREE.DoubleSide,
+        emissive: 0x000000,
+        emissiveIntensity: 0,
+      }),
+    );
+    surface.position.copy(position);
+    surface.rotation.y = rotationY;
+    if (surfaceRole === 'front') surface.position.z += 0.0065;
+    else if (surfaceRole === 'left') surface.position.x -= 0.0065;
+    else surface.position.x += 0.0065;
+
+    const selectionFrame = createSelectionFrame(faceWidthM, panelHeightM);
+    selectionFrame.visible = false;
+    surface.add(selectionFrame);
+    surface.userData = {
+      kind: 'surface',
+      moduleType: 'base',
+      selectionMode: 'module',
+      acceptsImage: true,
+      moduleIndex,
+      moduleId: moduleState.id,
+      widthCm,
+      stripIndex: null,
+      stripNumber: null,
+      surfaceRole,
+      surfaceId: surfaceState.id,
+      surfaceState,
+      selectionFrame,
+      backing,
+    };
+    group.add(surface);
+    surfaces.push(surface);
+    onSurfaceReady?.(surface);
+  };
+
+  const panelCenterY = profileM + panelHeightM / 2;
+  addPanelFace(
+    'front',
+    moduleState.faces?.front,
+    frontPanelWidthM,
+    new THREE.Vector3(0, panelCenterY, depthM / 2 - profileM - 0.006),
+  );
+  addPanelFace(
+    'left',
+    moduleState.faces?.left,
+    sidePanelWidthM,
+    new THREE.Vector3(-widthM / 2 + profileM + 0.006, panelCenterY, 0),
+    -Math.PI / 2,
+  );
+  addPanelFace(
+    'right',
+    moduleState.faces?.right,
+    sidePanelWidthM,
+    new THREE.Vector3(widthM / 2 - profileM - 0.006, panelCenterY, 0),
+    Math.PI / 2,
+  );
+
+  return { group, surfaces };
 }
 
 function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {

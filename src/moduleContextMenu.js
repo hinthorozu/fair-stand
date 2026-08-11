@@ -7,6 +7,7 @@ const MODULE_LABELS = {
   separator: 'Separatör',
   door: 'Depo Kapısı',
   counter: 'Banko',
+  base: 'Baza',
 };
 
 const PICKER_MODULE_KEYS = [

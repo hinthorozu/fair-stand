@@ -57,3 +57,13 @@ Bu dosyadaki maddeler, kullanıcı açıkça aksi bir davranış istemedikçe t�
 - Banko genişlikleri X = 100 / 150 / 200 cm; derinlik Y = 50 cm; yükseklik H = 100 cm.
 - Ön X cephesi ile sol ve sağ Y cepheleri birbirinden bağımsız seçilebilir; her cepheye ayrı renk veya görsel atanabilir.
 - Bankolar serbest yerleşim modülüdür; aktif duvar zincirine otomatik katılmaz. 0/90/180/270 dönüş, R / Shift+R ve stand sınırı/collision kontrolleri geçerlidir.
+
+
+## Baza modülü standardı
+
+- Baza genişlikleri X = 100 / 150 / 200 cm; derinlik Y = 50 cm; ilk referans model yüksekliği H = 50 cm.
+- Üst tabla sabit beyaz ahşap/levha görünümündedir ve panel yüzeyi değildir.
+- Ön X paneli ile sol ve sağ Y panelleri birbirinden bağımsız seçilebilir; her panele ayrı renk veya görsel atanabilir.
+- Arka yüz panel ile kapatılmaz; yapı ön/sol/sağ panel ve görünür Maxima köşe profilleriyle oluşturulur.
+- Baza banko gibi serbest yerleşim modülüdür; aktif duvar zincirine otomatik katılmaz. 0/90/180/270 dönüş, R / Shift+R, 50 cm fiziksel derinlik, stand sınırı, collision ve magnetic snap kuralları geçerlidir.
+- İnce Maxima modüllerine uçtan bağlantıda bankoda kullanılan mantıksal merkez/bağlantı çizgisi davranışı uygulanır; nominal 100/150/200 cm ölçüler korunur.

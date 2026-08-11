@@ -39,6 +39,10 @@ function hasStrictDepthBounds(depthCm) {
   return Number.isFinite(depth) && depth > MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
 }
 
+function usesLogicalFixtureEndpoint(moduleType) {
+  return moduleType === 'counter' || moduleType === 'base';
+}
+
 function snapDepthCenterCm(value, depthCm) {
   const depth = Number(depthCm);
   const halfDepth = depth / 2;
@@ -285,9 +289,9 @@ export function placementsOverlap(moduleA, moduleB) {
     const horizontalEndpoint = pointIsSegmentEndpoint(horizontal, intersectionX);
     const verticalEndpoint = pointIsSegmentEndpoint(vertical, intersectionY);
 
-    const counterModule = horizontalModule?.type === 'counter'
+    const counterModule = usesLogicalFixtureEndpoint(horizontalModule?.type)
       ? horizontalModule
-      : (verticalModule?.type === 'counter' ? verticalModule : null);
+      : (usesLogicalFixtureEndpoint(verticalModule?.type) ? verticalModule : null);
     if (counterModule) {
       const counterIsHorizontal = counterModule === horizontalModule;
       const counterSegment = counterIsHorizontal ? horizontal : vertical;
@@ -460,7 +464,7 @@ export function snapPlacementToModules({
   }) : null;
   const candidates = [];
   const counterCornerFaces = [];
-  const isCounter = moduleType === 'counter';
+  const isCounter = usesLogicalFixtureEndpoint(moduleType);
 
   const addCandidate = (
     placement,

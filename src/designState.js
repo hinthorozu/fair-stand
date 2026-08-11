@@ -102,6 +102,24 @@ export function createCounterModuleState(widthCm) {
   };
 }
 
+export function createBaseModuleState(widthCm) {
+  const width = Number(widthCm);
+  if (![100, 150, 200].includes(width)) return null;
+
+  return {
+    id: createId('module'),
+    type: 'base',
+    widthCm: width,
+    depthCm: 50,
+    heightCm: 50,
+    faces: {
+      front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+    },
+  };
+}
+
 export function duplicateModuleState(moduleState) {
   if (!moduleState) return null;
   const duplicate = JSON.parse(JSON.stringify(moduleState));

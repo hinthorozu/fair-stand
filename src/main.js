@@ -7,6 +7,7 @@ import {
   getAutomaticWallCapacityCm,
 } from './automaticWall.js';
 import {
+  createBaseModuleState,
   createCounterModuleState,
   createDoorModuleState,
   createFlatPanelModuleState,
@@ -110,6 +111,14 @@ const scene3d = createStandScene(
           ? 'ön'
           : (surface.userData.surfaceRole === 'left' ? 'sol yan' : 'sağ yan');
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Banko ' + widthCm + ' cm · ' + faceLabel + ' cephe · renk + görsel uygulanabilir.';
+        return;
+      }
+
+      if (moduleType === 'base') {
+        const faceLabel = surface.userData.surfaceRole === 'front'
+          ? 'ön'
+          : (surface.userData.surfaceRole === 'left' ? 'sol yan' : 'sağ yan');
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Baza ' + widthCm + ' cm · ' + faceLabel + ' panel · renk + görsel uygulanabilir.';
         return;
       }
 
@@ -422,6 +431,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
 
   let state = null;
   if (module.type === 'flat-panel') state = createFlatPanelModuleState(module.widthCm);
+  else if (module.type === 'base') state = createBaseModuleState(module.widthCm);
   else if (module.type === 'counter') state = createCounterModuleState(module.widthCm);
   else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm);
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);

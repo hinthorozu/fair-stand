@@ -574,3 +574,14 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 446. Bu mantıksal uç bağlantısı bankoya özeldir; banko-bankoya temas gerçek gövde yüzeyleri üzerinden hesaplanmaya devam eder.
 447. İnce modül -> banko ve banko -> ince modül yerleşimleri aynı endpoint bağlantısını kabul eder; snap hedefi olarak bankoların tek taraflı filtrelenmesi kaldırıldı.
 448. Banko 100/150/200 için tam nominal grid aralığı regresyon testleri ve ters yönde ince-modül -> banko endpoint snap testi eklendi.
+
+
+## Baza modülü
+
+449. Baza 100/150/200 modülleri eklendi; ölçüler X = 100/150/200 cm, Y = 50 cm, H = 50 cm.
+450. Baza geometrisi sabit beyaz üst tabla, ön/sol/sağ bağımsız panel ve dört görünür Maxima köşe profiliyle oluşturuldu; arka yüz açık bırakıldı.
+451. Ön, sol ve sağ baza panelleri birbirinden bağımsız renk ve görsel alabilir; üst tabla sabit beyazdır.
+452. Baza bankoyla aynı serbest placement davranışını kullanır: 50 cm fiziksel derinlik, 4 yön dönüş, R/Shift+R, collision, stand sınırı ve magnetic snap.
+453. Bankoda kullanılan ince Maxima modülü mantıksal endpoint bağlantısı baza için de aktif edildi; 100/150/200 nominal grid aralıkları korunur.
+454. Baza katalog drag kartları, seçim bilgisi, sağ tık etiketi, reset/duplicate state desteği ve regresyon testleri eklendi.
+455. Sonraki modül geliştirme sırası Roadmap'e Baza → Raf → Koltuk → Masa Sandalye Takımı → Bar Taburesi olarak kaydedildi.
