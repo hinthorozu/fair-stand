@@ -1,0 +1,107 @@
+name: Fix Sofa Edge Snap
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - .github/workflows/fix-sofa-edge-snap.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Snap free fixtures exactly to stand edges
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/modulePlacement.js')
+          s = p.read_text()
+          old = """  return createModulePlacement({
+    xCm: !vertical
+      ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
+      : clamp(
+          strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm),
+          minX,
+          maxX,
+        ),
+    yCm: vertical
+      ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
+      : clamp(
+          strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm),
+          minY,
+          maxY,
+        ),
+    rotationZDeg: rotation,
+    wallId: 'free',
+  });
+"""
+          new = """  let xCm = !vertical
+    ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
+    : clamp(
+        strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm),
+        minX,
+        maxX,
+      );
+  let yCm = vertical
+    ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
+    : clamp(
+        strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm),
+        minY,
+        maxY,
+      );
+
+  // Serbest zemin modülleri 50 cm grid üzerinde hareket eder; ancak bir
+  // footprint kenarı stand sınırına 50 cm veya daha fazla yaklaşınca o eksende
+  // gridi ezip sınırın üstüne tam 0 boşlukla oturur. X ve Y bağımsız çalıştığı
+  // için köşelerde iki kenar aynı anda sıfıra oturabilir.
+  if (strictDepth) {
+    const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
+    if (!vertical) {
+      if (xCm <= edgeSnap + EPSILON_CM) xCm = 0;
+      if (xLimit - (xCm + width) <= edgeSnap + EPSILON_CM) xCm = xLimit - width;
+      if (yCm - halfDepth <= edgeSnap + EPSILON_CM) yCm = halfDepth;
+      if (yLimit - (yCm + halfDepth) <= edgeSnap + EPSILON_CM) yCm = yLimit - halfDepth;
+    } else {
+      if (xCm - halfDepth <= edgeSnap + EPSILON_CM) xCm = halfDepth;
+      if (xLimit - (xCm + halfDepth) <= edgeSnap + EPSILON_CM) xCm = xLimit - halfDepth;
+      if (yCm <= edgeSnap + EPSILON_CM) yCm = 0;
+      if (yLimit - (yCm + width) <= edgeSnap + EPSILON_CM) yCm = yLimit - width;
+    }
+  }
+
+  return createModulePlacement({
+    xCm,
+    yCm,
+    rotationZDeg: rotation,
+    wallId: 'free',
+  });
+"""
+          if old not in s:
+            raise SystemExit('createFreePlacement anchor not found')
+          p.write_text(s.replace(old, new))
+
+          t = Path('test/sofaSet.test.js')
+          ts = t.read_text()
+          marker = "koltuk takımı köşelerde iki eksende de sıfıra oturur"
+          if marker not in ts:
+            ts += """\n\ntest('koltuk takımı köşelerde iki eksende de sıfıra oturur', () => {\n  const tl = snapPlacementToStand({ standType: 'island', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 120, pointerYCm: 120, standXCm: 600, standYCm: 600 });\n  assert.equal(tl.ok, true);\n  assert.equal(tl.placement.xCm, 0);\n  assert.equal(tl.placement.yCm, 75);\n\n  const br = snapPlacementToStand({ standType: 'island', widthCm: 150, depthCm: 150, forceFree: true, pointerXCm: 480, pointerYCm: 480, standXCm: 600, standYCm: 600 });\n  assert.equal(br.ok, true);\n  assert.equal(br.placement.xCm, 450);\n  assert.equal(br.placement.yCm, 525);\n});\n"""
+            t.write_text(ts)
+          PY
+      - run: npm test
+      - run: npm run build
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/modulePlacement.js test/sofaSet.test.js
+          git diff --cached --quiet || git commit -m "Fix sofa corner edge snapping"
+          git push origin ROG
