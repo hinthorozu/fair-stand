@@ -55,11 +55,8 @@ const standSizeYInput = document.querySelector('#stand-size-y');
 const createStageButton = document.querySelector('#create-stage');
 const floorTypeSelect = document.querySelector('#floor-type');
 const stageResult = document.querySelector('#stage-result');
-const wallLengthInput = document.querySelector('#wall-length');
-const buildWallButton = document.querySelector('#build-wall');
 const openModuleCatalogButton = document.querySelector('#open-module-catalog');
 const clearWallButton = document.querySelector('#clear-wall');
-const wallResult = document.querySelector('#wall-result');
 const selectionInfo = document.querySelector('#selection-info');
 const colorInput = document.querySelector('#surface-color');
 const applyColorButton = document.querySelector('#apply-color');
@@ -222,13 +219,10 @@ function renderStageResult(message, isError = false) {
 }
 
 function renderWallResult(message, isError = false) {
-  wallResult.textContent = message;
-  wallResult.classList.toggle('error', isError);
+  if (isError) console.warn(message);
 }
 
 function setStandEditingEnabled(enabled) {
-  wallLengthInput.disabled = !enabled;
-  buildWallButton.disabled = !enabled;
   openModuleCatalogButton.disabled = !enabled;
   clearWallButton.disabled = !enabled;
   moduleDragSidebar?.setEnabled(Boolean(enabled && currentStand));
@@ -252,8 +246,6 @@ function syncWallLengthFromSetup(setup) {
   });
   if (!Number.isFinite(capacityCm)) return;
 
-  wallLengthInput.max = String(capacityCm);
-  wallLengthInput.value = String(capacityCm);
 }
 
 function updateStageCreateState() {
@@ -261,7 +253,6 @@ function updateStageCreateState() {
   createStageButton.disabled = !result.ok;
 
   if (result.ok) {
-    syncWallLengthFromSetup(result);
     if (!currentStand) renderStageResult('Stand alanı hazır. Sahneyi oluşturabilirsin.');
     return;
   }
@@ -848,11 +839,30 @@ createStageButton.addEventListener('click', () => {
 
   currentStand = { ...setup, floorType: floorTypeSelect.value };
   scene3d.setFloorType(floorTypeSelect.value);
-  syncWallLengthFromSetup(setup);
   viewportEmpty.hidden = true;
   viewportToolbar.hidden = false;
   setStandEditingEnabled(true);
-  renderWallResult('Duvar boş.');
+
+  const automaticWall = composeAutomaticStandWall({
+    lengthCm: getAutomaticWallCapacityCm({
+      standType: setup.standType,
+      standXCm: setup.xCm,
+      standYCm: setup.yCm,
+    }),
+    standType: setup.standType,
+    standXCm: setup.xCm,
+    standYCm: setup.yCm,
+  });
+  if (!automaticWall.ok) {
+    renderStageResult(automaticWall.message, true);
+    return;
+  }
+  currentModules = automaticWall.widths.map((widthCm, index) => {
+    const moduleState = createFlatPanelModuleState(widthCm);
+    moduleState.placement = { ...automaticWall.placements[index] };
+    return moduleState;
+  });
+  rebuildWall({ resetView: true });
 
   const label = STAND_TYPE_LABELS[setup.standType];
   renderStageResult(
@@ -869,53 +879,6 @@ floorTypeSelect.addEventListener('change', () => {
 openModuleCatalogButton.addEventListener('click', () => {
   if (!currentStand) return;
   moduleContextMenu.openPicker({ placement: 'append' });
-});
-
-function confirmExistingScene(message) {
-  if (!currentModules.length) return true;
-  return window.confirm(message);
-}
-
-function buildAutomaticWall() {
-  if (!currentStand) {
-    renderWallResult('Önce stand tipini ve X / Y ölçülerini girerek sahneyi oluştur.', true);
-    return;
-  }
-
-  const lengthCm = Number(wallLengthInput.value);
-  const result = composeAutomaticStandWall({
-    lengthCm,
-    standType: currentStand.standType,
-    standXCm: currentStand.xCm,
-    standYCm: currentStand.yCm,
-  });
-
-  if (!result.ok) {
-    renderWallResult(result.message, true);
-    if (Number.isFinite(result.capacityCm)) {
-      window.alert(`Duvar oluşturulamadı\n\n${result.message}`);
-    }
-    return;
-  }
-
-  const confirmed = confirmExistingScene(
-    'Sahnede mevcut bir duvar var. Yeni duvar oluşturulursa mevcut panel renkleri, görselleri ve düzenlemeleri silinecek. Devam edilsin mi?',
-  );
-  if (!confirmed) return;
-
-  currentModules = result.widths.map((widthCm, index) => {
-    const moduleState = createFlatPanelModuleState(widthCm);
-    moduleState.placement = { ...result.placements[index] };
-    return moduleState;
-  });
-  moduleContextMenu.close();
-  moduleContextMenu.closePicker();
-  rebuildWall({ resetView: true });
-}
-
-buildWallButton.addEventListener('click', buildAutomaticWall);
-wallLengthInput.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') buildAutomaticWall();
 });
 
 clearWallButton.addEventListener('click', () => {
@@ -1239,7 +1202,6 @@ async function restoreProject(project) {
     if (!stage.ok) throw new Error(stage.message || 'Proje sahnesi oluşturulamadı.');
     scene3d.setFloorType(currentStand.floorType || 'karolaj');
     if (currentStand.floorColor) scene3d.setFloorColor(currentStand.floorColor);
-    syncWallLengthFromSetup(currentStand);
     viewportEmpty.hidden = true;
     viewportToolbar.hidden = false;
     setStandEditingEnabled(true);
