@@ -92,10 +92,82 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 - Zemin seçimi ve boyama davranışları mevcut panel/modül renk sistemini bozmadan entegre edildi.
 - **FAZ 3 / 1. Zemin ayarlanması tamamlandı.**
 
-
-## 11 Ağustos 2026 — LED projektör ilk sürüm
+## 11 Ağustos 2026 — LED projektör ve hareket davranışları
 
 - LED Projektör katalog modülü eklendi; siyah ince floodlight gövde, braket ve emissive lens geometrisi oluşturuldu.
-- Projektör 350 cm duvar üst kotuna bağlanan üst aksesuar olarak tanımlandı; duvar kapasitesini ve normal modül collision hesabını tüketmez.
-- Sırt/L/U standların izin verilen duvar üst kenarlarına 50 cm snap ile sürüklenebilir ve taşınabilir hale getirildi.
-- Her projektöre panel yüzüne doğru gerçek Three.js SpotLight ışığı eklendi.
+- Projektör ilk sürümde 350 cm duvar üst kotuna bağlanan üst aksesuar olarak tanımlandı; duvar kapasitesini ve normal modül collision hesabını tüketmez.
+- Projektör/lamba hareketi 50 cm yerine **20 cm adım/snap** hassasiyetine çekildi.
+- Sağ/sol ekleme sırasında yeni lambanın zemine düşmesi problemi düzeltildi.
+- Lamba/projektör seçim ve hareket yüzeyi genişletildi; yalnız ön yüzünden değil gövdenin kullanılabilir yüzeylerinden seçilebilir hale getirildi.
+- Hareketli modüllerde seçim davranışı ortaklaştırıldı; modülün uygun mesh yüzeylerinden seçim, taşıma ve `R` rotasyonu çalışır.
+- `R` rotasyonu modül merkezinden yapılacak şekilde düzeltildi; dönüş sırasında modülün gereksiz yürümesi azaltıldı.
+- Lambalar yalnız duvar dibine bağlı kalmadan stand alanında **serbest yerleşebilir** hale getirildi.
+- Serbest lambaların köşelerden dönebilmesi ve bırakıldığında kaybolmaması için placement/drop akışı düzeltildi.
+
+## 11 Ağustos 2026 — Mobilya / banko düzenlemeleri
+
+- Raflı modüllerin derinliği **38 cm** olarak güncellendi.
+- 100 / 150 / 200 cm bankolar ortak panel mantığına geçirildi.
+- Bankolarda yalnız **4 köşe dikmesi** kullanılır.
+- Ön, sağ ve sol yüzlerde duvar panel sistemine benzer biçimde **üst üste 2 panel** bulunur.
+- Banko panel yüzeyleri renk/görsel uygulaması için ayrı seçilebilir kalırken modül taşıma ve rotasyon davranışına da katılır.
+- Banko panelleri ve yatay ayrım çizgileri köşe profillerinden dışarı taşmayacak şekilde flush hale getirildi.
+- Banko üst tablası baza mantığıyla **her kenarda 2 cm taşma** yapacak şekilde korundu.
+
+## 11 Ağustos 2026 — Seçim, rotasyon ve silme ergonomisi
+
+- Hareketli modüllerde tıklanabilir/selectable mesh kapsamı genişletildi; üst/yan/ön gibi uygun gövde yüzeylerinden modül seçimi mümkün hale getirildi.
+- Panel yüzeylerinin renk/görsel seçilebilirliği korunurken aynı yüzey üzerinden modül hareket/rotasyon davranışı da desteklendi.
+- `R` ile rotasyon modülün bulunduğu yerde, kendi merkezi etrafında yapılacak şekilde iyileştirildi.
+- Klavyedeki **Delete** tuşu mevcut sağ tık → Sil akışıyla aynı silme fonksiyonuna bağlandı.
+- Input/textarea gibi metin giriş alanlarında Delete kısayolunun modül silmesini tetiklemesi engellendi.
+
+## 11 Ağustos 2026 — Proje kaydetme, açma ve proje izolasyonu
+
+- Proje state'i kalıcı saklanabilir hale getirildi.
+- **Yeni / Kaydet / Aç / Sil** proje akışı eklendi.
+- Projede stand tipi ve ölçüleri, zemin ayarları, tüm modüller, placement/rotasyon state'i, panel renkleri ve panel görsel referansları saklanır.
+- Three.js mesh'leri doğrudan saklanmaz; proje açıldığında kayıtlı state üzerinden sahne yeniden üretilir.
+- Proje kayıtlarına ileride migration yapılabilmesi için versiyonlama altyapısı eklendi.
+- Kullanılan görseller global arşiv yerine **projeye özel asset** mantığına geçirildi.
+- Her görsel `projectId` ile ilişkilendirilir; bir projeye yüklenen görsel başka projede görünmez.
+- Proje silindiğinde o projeye bağlı asset'lerin de temizlenebilmesi için proje-asset ilişkisi kuruldu.
+
+## 11 Ağustos 2026 — Otomatik kaydetme
+
+- Manuel **Kaydet** butonu korunarak otomatik kaydetme eklendi.
+- Proje en az bir kez manuel kaydedildikten sonra autosave aktif olur.
+- Modül ekleme/silme/taşıma/döndürme, renk, görsel, zemin ve proje adı dahil proje state değişiklikleri takip edilir.
+- Son değişiklikten sonra **5 saniye** yeni işlem yapılmazsa tek autosave gerçekleştirilir.
+- Arka arkaya yapılan işlemler debounce edilerek gereksiz IndexedDB yazımı önlenir.
+- Kullanıcıya `Değişiklik var`, `Kaydediliyor…`, `Kaydedildi · Otomatik` durumları gösterilir.
+- Görsel blob'ları her autosave'de yeniden yazılmaz; proje state'i güncellenir.
+
+## 11 Ağustos 2026 — FAZ 3 / Mevcut kamera açısından PNG render
+
+- Sahnedeki **Render Al** özelliği eklendi.
+- Render, preset kamera kullanmaz; kullanıcının o anda baktığı **kamera açısı, zoom ve pan** değerlerini birebir korur.
+- Render sırasında seçim çerçeveleri ve editör yardımcıları geçici olarak gizlenir; işlem sonrası sahne normal haline döner.
+- PNG çıktı kalitesi **3× supersampling** seviyesine yükseltildi.
+- Three.js renderer için **sRGB output color space** ve **ACES Filmic tone mapping** etkinleştirildi.
+- Tone mapping exposure değeri mevcut sahne için ayarlandı.
+- Ana directional light shadow map çözünürlüğü **2048 × 2048 → 4096 × 4096** yükseltildi.
+- Toolbar `pointer-events` davranışı düzeltilerek Render Al butonunun tıklanabilir olması sağlandı.
+- FAZ 3 render hedefi: mevcut gerçek zamanlı Three.js sahnesinden mümkün olan temiz ve yüksek çözünürlüklü çıktıyı almak.
+
+## FAZ 4 NOTU — İleri / fotogerçekçi render
+
+FAZ 3'te render, mevcut gerçek zamanlı Three.js sahnesinin kalite sınırları içinde tutulacaktır. **Fotogerçekçi ve ileri seviye render geliştirmeleri FAZ 4 kapsamına alınmıştır.**
+
+FAZ 4 render araştırma/geliştirme başlıkları:
+
+- Daha fiziksel ve gerçekçi ışık düzeni.
+- Ambient Occlusion / temas gölgeleri.
+- PBR materyal kalitesinin yükseltilmesi (roughness, metalness, normal/bump vb.).
+- Daha gerçekçi zemin, profil, panel, mobilya ve kumaş materyalleri.
+- Gelişmiş shadow/contact shadow kalitesi.
+- Environment / HDRI tabanlı aydınlatma değerlendirmesi.
+- Post-processing ve renk düzenleme seçenekleri.
+- Render için ekran renderer'ından ayrılmış yüksek kaliteli ayrı pipeline ihtiyacının değerlendirilmesi.
+- Gerekirse Three.js dışı veya sunucu/harici render motoru entegrasyonunun teknik ve maliyet açısından değerlendirilmesi.
+- Kullanıcının mevcut kamera açısını koruyarak daha yüksek kaliteli nihai müşteri sunum çıktısı üretmek ana hedef olacaktır.
