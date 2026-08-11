@@ -10,6 +10,7 @@ Bu dosyadaki maddeler, kullanıcı açıkça aksi bir davranış istemedikçe t�
 - `R` tuşuna her basışta modül **+90°** döner: `0 → 90 → 180 → 270 → 0`.
 - `Shift + R` tuşuna her basışta modül **-90°** döner: `0 → 270 → 180 → 90 → 0`.
 - Bu davranış hem **modül sürüklenirken** hem de **modül bırakıldıktan sonra seçiliyken** çalışır.
+- Modül bırakıldıktan sonra döndürülürken başlangıç köşesine çivilenmez; **kendi merkezi etrafında döner** ve yeni eksende en yakın 50 cm grid konumuna oturur.
 - Dönüş yalnızca yerleşim eksenini değiştirmez; modülün **gerçek ön yüzü de yön değiştirir**.
 - Bu kural düz panel, separatör, vitrin, kapı ve sonradan eklenecek tüm modül tipleri için geçerlidir.
 - Yeni bir modül tipi eklenirken dönüş desteği ayrıca istenmesini beklemeden bu standarda uymalıdır.

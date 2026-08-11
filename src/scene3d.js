@@ -13,6 +13,7 @@ import {
   isVerticalModuleRotation,
   normalizeModuleRotationZDeg,
   rotateModuleRotationZDeg,
+  rotateModulePlacementAroundCenter,
   snapPlacementToStand,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
@@ -726,15 +727,16 @@ export function createStandScene(
     const moduleState = moduleGroup?.userData?.moduleState;
     if (!moduleGroup || !moduleState?.placement) return false;
 
-    const nextRotationZDeg = rotateModuleRotationZDeg(
-      moduleState.placement.rotationZDeg,
+    const nextPlacement = rotateModulePlacementAroundCenter(
+      moduleState.placement,
+      moduleState.widthCm,
       deltaDeg,
     );
-    const nextPlacement = {
-      ...moduleState.placement,
-      rotationZDeg: nextRotationZDeg,
-    };
-    nextPlacement.wallId = inferWallIdForRotation(nextPlacement, nextRotationZDeg);
+    if (!nextPlacement) return false;
+    nextPlacement.wallId = inferWallIdForRotation(
+      nextPlacement,
+      nextPlacement.rotationZDeg,
+    );
 
     const validation = validatePlacementAgainstModules({
       placement: nextPlacement,

@@ -40,6 +40,29 @@ export function rotateModuleRotationZDeg(value, deltaDeg = 90) {
   );
 }
 
+export function rotateModulePlacementAroundCenter(placement, widthCm, deltaDeg = 90) {
+  if (!placement) return null;
+  const width = Number(widthCm);
+  const x = Number(placement.xCm);
+  const y = Number(placement.yCm);
+  if (![width, x, y].every(Number.isFinite) || width <= 0) return null;
+
+  const currentRotation = normalizeModuleRotationZDeg(placement.rotationZDeg);
+  const nextRotation = rotateModuleRotationZDeg(currentRotation, deltaDeg);
+  const currentVertical = isVerticalModuleRotation(currentRotation);
+  const nextVertical = isVerticalModuleRotation(nextRotation);
+
+  const centerX = x + (currentVertical ? 0 : width / 2);
+  const centerY = y + (currentVertical ? width / 2 : 0);
+
+  return createModulePlacement({
+    ...placement,
+    xCm: snapCm(nextVertical ? centerX : centerX - width / 2),
+    yCm: snapCm(nextVertical ? centerY - width / 2 : centerY),
+    rotationZDeg: nextRotation,
+  });
+}
+
 export function isVerticalModuleRotation(rotationZDeg) {
   const rotation = normalizeModuleRotationZDeg(rotationZDeg);
   return rotation === 90 || rotation === 270;

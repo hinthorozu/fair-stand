@@ -7,6 +7,7 @@ import {
   rotateModuleRotationZDeg,
   snapCm,
   snapPlacementToStand,
+  rotateModulePlacementAroundCenter,
   validatePlacementAgainstModules,
 } from '../src/modulePlacement.js';
 
@@ -235,4 +236,37 @@ test('rotation lock preserves 180 and 270 degree facing on matching axes', () =>
   });
   assert.equal(right.placement.wallId, 'right');
   assert.equal(right.placement.rotationZDeg, 270);
+});
+
+
+test('selected module quarter-turn keeps its center instead of rotating from the start corner', () => {
+  const rotated = rotateModulePlacementAroundCenter({
+    xCm: 200,
+    yCm: 100,
+    zCm: 0,
+    rotationZDeg: 90,
+    wallId: 'free',
+  }, 100, 90);
+
+  assert.deepEqual(rotated, {
+    xCm: 150,
+    yCm: 150,
+    zCm: 0,
+    rotationZDeg: 180,
+    wallId: 'free',
+  });
+});
+
+test('selected module center rotation stays on the 50 cm grid', () => {
+  const rotated = rotateModulePlacementAroundCenter({
+    xCm: 100,
+    yCm: 100,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'free',
+  }, 50, 90);
+
+  assert.equal(rotated.xCm % 50, 0);
+  assert.equal(rotated.yCm % 50, 0);
+  assert.equal(rotated.rotationZDeg, 90);
 });
