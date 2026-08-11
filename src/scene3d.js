@@ -1216,6 +1216,7 @@ export function createStandScene(
     }
 
     if (isTopFixtureType(moduleState.type)) {
+      const isFreeTopFixture = snapped.placement.wallId === 'free';
       const placement = snapTopFixturePlacement(
         snapped.placement,
         ground,
