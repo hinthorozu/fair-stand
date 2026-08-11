@@ -1,0 +1,37 @@
+name: Step 1 Karolaj Color
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/step1-karolaj-color.mjs'
+      - '.github/workflows/step1-karolaj-color.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: node scripts/step1-karolaj-color.mjs
+      - run: npm test
+      - run: npm run build
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/scene3d.js src/main.js index.html ROADMAP.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Make karolaj floor color editable"
+            git push origin ROG
+          fi
