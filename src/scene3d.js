@@ -41,6 +41,8 @@ const ACTIVE_WALL_GUIDE_COLOR = 0xf97316;
 const ACTIVE_WALL_GUIDE_THICKNESS_M = 0.045;
 const ACTIVE_WALL_GUIDE_HEIGHT_M = 0.018;
 const STAGE_SURROUND_M = 1;
+// Aktif stand zemini fuar salonu zemininden 5 cm yukarıda duran platformdur.
+const ACTIVE_PLATFORM_HEIGHT_M = 0.05;
 const SELECTION_COLOR = 0x2563eb;
 const PLACEMENT_VALID_COLOR = 0x16a34a;
 const PLACEMENT_INVALID_COLOR = 0xdc2626;
@@ -106,11 +108,11 @@ export function createStandScene(
   scene.add(outerFloor);
 
   const activeFloor = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
+    new THREE.BoxGeometry(1, ACTIVE_PLATFORM_HEIGHT_M, 1),
     new THREE.MeshStandardMaterial({ color: FLOOR_COLOR, roughness: 0.92 }),
   );
-  activeFloor.rotation.x = -Math.PI / 2;
   activeFloor.receiveShadow = true;
+  activeFloor.castShadow = true;
   activeFloor.visible = false;
   scene.add(activeFloor);
 
@@ -167,10 +169,10 @@ export function createStandScene(
 
   function createStandOutline(widthM, depthM) {
     const positions = [
-      0, 0.008, 0, widthM, 0.008, 0,
-      widthM, 0.008, 0, widthM, 0.008, depthM,
-      widthM, 0.008, depthM, 0, 0.008, depthM,
-      0, 0.008, depthM, 0, 0.008, 0,
+      0, ACTIVE_PLATFORM_HEIGHT_M + 0.008, 0, widthM, ACTIVE_PLATFORM_HEIGHT_M + 0.008, 0,
+      widthM, ACTIVE_PLATFORM_HEIGHT_M + 0.008, 0, widthM, ACTIVE_PLATFORM_HEIGHT_M + 0.008, depthM,
+      widthM, ACTIVE_PLATFORM_HEIGHT_M + 0.008, depthM, 0, ACTIVE_PLATFORM_HEIGHT_M + 0.008, depthM,
+      0, ACTIVE_PLATFORM_HEIGHT_M + 0.008, depthM, 0, ACTIVE_PLATFORM_HEIGHT_M + 0.008, 0,
     ];
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -202,11 +204,11 @@ export function createStandScene(
       );
 
       if (wallId === 'back') {
-        guide.position.set(widthM / 2, 0.02, 0);
+        guide.position.set(widthM / 2, ACTIVE_PLATFORM_HEIGHT_M + 0.02, 0);
       } else if (wallId === 'left') {
-        guide.position.set(0, 0.02, depthM / 2);
+        guide.position.set(0, ACTIVE_PLATFORM_HEIGHT_M + 0.02, depthM / 2);
       } else {
-        guide.position.set(widthM, 0.02, depthM / 2);
+        guide.position.set(widthM, ACTIVE_PLATFORM_HEIGHT_M + 0.02, depthM / 2);
       }
 
       guide.renderOrder = 20;
@@ -234,8 +236,8 @@ export function createStandScene(
     outerFloor.position.set(centerX, 0, centerZ);
     outerFloor.visible = true;
 
-    activeFloor.scale.set(widthM, depthM, 1);
-    activeFloor.position.set(centerX, 0.002, centerZ);
+    activeFloor.scale.set(widthM, 1, depthM);
+    activeFloor.position.set(centerX, ACTIVE_PLATFORM_HEIGHT_M / 2, centerZ);
     activeFloor.visible = true;
 
     grid = createRectangularGrid(widthM, depthM);
@@ -259,7 +261,8 @@ export function createStandScene(
   }
 
   const wallRoot = new THREE.Group();
-  wallRoot.position.set(0, 0, 0);
+  // Duvarlar ve tüm stand modülleri platformun üst kotundan başlar.
+  wallRoot.position.set(0, ACTIVE_PLATFORM_HEIGHT_M, 0);
   scene.add(wallRoot);
 
   const raycaster = new THREE.Raycaster();
