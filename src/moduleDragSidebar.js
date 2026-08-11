@@ -18,6 +18,7 @@ const DRAGGABLE_MODULE_KEYS = [
   'SHELF_2_100',
   'SOFA_SET',
   'TABLE_CHAIR_SET',
+  'BAR_STOOL',
   'BASE_200',
   'BASE_150',
   'BASE_100',
@@ -57,6 +58,9 @@ function ensureStyles() {
     .module-drag-table-chair { position:relative; width:58px; height:58px; }
     .module-drag-table-chair::before { content:''; position:absolute; left:19px; top:19px; width:20px; height:20px; border:2px solid #7b838c; border-radius:50%; background:#fff; }
     .module-drag-table-chair::after { content:''; position:absolute; left:4px; top:4px; width:13px; height:13px; border:2px solid #9aa0a6; border-radius:4px; background:#f8fafc; box-shadow:37px 0 0 -2px #f8fafc,37px 0 0 0 #9aa0a6,0 37px 0 -2px #f8fafc,0 37px 0 0 #9aa0a6,37px 37px 0 -2px #f8fafc,37px 37px 0 0 #9aa0a6; }
+    .module-drag-bar-stool { position:relative; width:44px; height:58px; }
+    .module-drag-bar-stool::before { content:''; position:absolute; left:8px; top:4px; width:28px; height:20px; border:2px solid #9aa0a6; border-radius:10px 10px 5px 5px; background:#f8fafc; }
+    .module-drag-bar-stool::after { content:''; position:absolute; left:11px; top:24px; width:22px; height:27px; border-left:3px solid #7b838c; border-right:3px solid #7b838c; border-bottom:3px solid #7b838c; border-radius:0 0 10px 10px; }
     .module-drag-base { position:relative; height:24px; border:3px solid #7b838c; background:#ffffff; box-shadow:4px 4px 0 #d7dde4,0 2px 5px rgba(15,23,42,.08); }
     .module-drag-base::before { content:''; position:absolute; inset:3px; border:1px solid #cbd5e1; background:#f8fafc; }
     .module-drag-base::after { content:''; position:absolute; left:-5px; right:-5px; top:-7px; height:5px; border:1px solid #9aa0a6; background:#ffffff; }
@@ -102,6 +106,13 @@ function createPreview(module) {
   if (module.type === 'table-chair-set') {
     const body = document.createElement('div');
     body.className = 'module-drag-table-chair';
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'bar-stool') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-bar-stool';
     preview.appendChild(body);
     return preview;
   }
