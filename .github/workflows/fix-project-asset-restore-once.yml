@@ -1,0 +1,81 @@
+name: Fix project asset restore once
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-project-asset-restore-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Load project assets before rebuilding scene
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('src/main.js')
+          text = path.read_text(encoding='utf-8')
+
+          old_start = """  currentModules = cloneProjectState(project.modules) || [];
+  currentStand = cloneProjectState(project.stand);
+  moduleContextMenu.close();
+  moduleContextMenu.closePicker();
+
+  if (currentStand) {
+"""
+          new_start = """  currentModules = cloneProjectState(project.modules) || [];
+  currentStand = cloneProjectState(project.stand);
+  moduleContextMenu.close();
+  moduleContextMenu.closePicker();
+
+  // Görsel asset URL'leri sahne rebuild edilmeden önce hazır olmalı.
+  // Aksi halde imageAssetId state'te olsa bile texture loader ilk rebuild sırasında kaynak bulamaz.
+  await loadAssetsForActiveProject();
+
+  if (currentStand) {
+"""
+
+          if old_start not in text:
+              raise SystemExit('restoreProject start anchor not found')
+          text = text.replace(old_start, new_start, 1)
+
+          old_end = """  await loadAssetsForActiveProject();
+  await refreshProjectList(activeProjectId);
+"""
+          new_end = """  await refreshProjectList(activeProjectId);
+"""
+
+          if old_end not in text:
+              raise SystemExit('restoreProject end anchor not found')
+          text = text.replace(old_end, new_end, 1)
+
+          path.write_text(text, encoding='utf-8')
+
+      - run: npm test
+      - run: npm run build
+
+      - name: Commit and push
+        run: |
+          rm .github/workflows/fix-project-asset-restore-once.yml
+          git config user.name "OpenAI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/main.js .github/workflows/fix-project-asset-restore-once.yml
+          git commit -m "Load project assets before scene rebuild"
+          git push origin ROG
