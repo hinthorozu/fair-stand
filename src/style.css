@@ -140,6 +140,64 @@ h2 {
   background: #ffffff;
 }
 
+.collapsible-panel {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+}
+
+.panel-summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  color: #222b3b;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.panel-summary::-webkit-details-marker {
+  display: none;
+}
+
+.panel-summary:hover {
+  background: #f8fafc;
+}
+
+.panel-chevron {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-right: 2px solid #7a8494;
+  border-bottom: 2px solid #7a8494;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 160ms ease;
+}
+
+.collapsible-panel[open] > .panel-summary .panel-chevron {
+  transform: rotate(225deg) translate(-1px, -1px);
+}
+
+.panel-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 0 14px 14px;
+}
+
+.collapsible-panel:not([open]) > .panel-card-content {
+  display: none;
+}
+
+.collapsible-panel[open] > .panel-summary {
+  padding-bottom: 10px;
+}
+
 .panel-card.compact {
   padding-bottom: 10px;
 }

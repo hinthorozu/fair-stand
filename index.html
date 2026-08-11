@@ -15,8 +15,9 @@
           <p class="muted">Önce stand tipini ve gerçek stand alanını belirle; sahne yalnızca bu bilgiler tamamlandığında oluşturulur.</p>
         </div>
 
-        <section class="panel-card project-card">
-          <h2>Proje</h2>
+        <details class="panel-card project-card collapsible-panel" open>
+          <summary class="panel-summary"><span>Proje</span><span class="panel-chevron" aria-hidden="true"></span></summary>
+          <div class="panel-card-content">
           <label for="project-name">Proje adı</label>
           <input id="project-name" type="text" value="Adsız Proje" maxlength="120" autocomplete="off" />
           <label for="project-select">Kayıtlı projeler</label>
@@ -31,10 +32,13 @@
             <button id="delete-project" type="button" class="danger ghost">Sil</button>
           </div>
           <p id="project-status" class="status">Aktif proje henüz kaydedilmedi.</p>
-        </section>
+        
+          </div>
+        </details>
 
-        <section class="panel-card stand-setup-card">
-          <h2>Stand Tipi</h2>
+        <details class="panel-card stand-setup-card collapsible-panel">
+          <summary class="panel-summary"><span>Stand Tipi</span><span class="panel-chevron" aria-hidden="true"></span></summary>
+          <div class="panel-card-content">
           <div class="stand-type-grid" role="radiogroup" aria-label="Stand tipi">
             <button class="stand-type-card" type="button" data-stand-type="back-wall" aria-pressed="false">
               <svg class="stand-type-thumb" viewBox="0 0 96 64" aria-hidden="true">
@@ -99,26 +103,35 @@
 
           <button id="create-stage" type="button" class="primary" disabled>Sahneyi Oluştur</button>
           <p id="stage-result" class="status">Stand tipi ile X ve Y ölçülerinin üçü de tamamlanmadan sahne oluşmaz.</p>
-        </section>
+        
+          </div>
+        </details>
 
-        <section class="panel-card">
-          <h2>Düz duvar</h2>
+        <details class="panel-card collapsible-panel">
+          <summary class="panel-summary"><span>Düz duvar</span><span class="panel-chevron" aria-hidden="true"></span></summary>
+          <div class="panel-card-content">
           <label for="wall-length">Toplam genişlik (cm)</label>
           <div class="row">
             <input id="wall-length" type="number" min="50" step="50" value="350" disabled />
             <button id="build-wall" class="primary" disabled>Oluştur</button>
           </div>
           <p id="wall-result" class="status">Önce stand alanını oluştur.</p>
-        </section>
+        
+          </div>
+        </details>
 
-        <section class="panel-card">
-          <h2>Modül ekle</h2>
+        <details class="panel-card collapsible-panel">
+          <summary class="panel-summary"><span>Modül ekle</span><span class="panel-chevron" aria-hidden="true"></span></summary>
+          <div class="panel-card-content">
           <button id="open-module-catalog" disabled>Modül Ekle</button>
           <button id="clear-wall" class="danger ghost" disabled>Duvarı temizle</button>
-        </section>
+        
+          </div>
+        </details>
 
-        <section class="panel-card">
-          <h2>Seçili yüzey</h2>
+        <details class="panel-card collapsible-panel">
+          <summary class="panel-summary"><span>Seçili yüzey</span><span class="panel-chevron" aria-hidden="true"></span></summary>
+          <div class="panel-card-content">
           <p id="selection-info" class="status">Bir panel seç; Ctrl/Cmd + tık ile karşı köşeyi seçip dikdörtgen blok oluştur.</p>
           <label for="surface-color">Aktif renk</label>
           <div class="row">
@@ -184,10 +197,13 @@
 
           <div class="section-divider"></div>
           <button id="reset-module-features" type="button" class="danger ghost">Tüm Özellikleri Kaldır</button>
-        </section>
+        
+          </div>
+        </details>
 
-        <section class="panel-card compact">
-          <h2>Standartlar</h2>
+        <details class="panel-card compact collapsible-panel">
+          <summary class="panel-summary"><span>Standartlar</span><span class="panel-chevron" aria-hidden="true"></span></summary>
+          <div class="panel-card-content">
           <ul>
             <li>Yükseklik: 350 cm</li>
             <li>Derinlik: 10 cm</li>
@@ -199,7 +215,9 @@
             <li>Maksimum stand alanı: 5000 × 5000 cm</li>
             <li>Çoklu seçim: yalnızca tam dikdörtgen blok</li>
           </ul>
-        </section>
+        
+          </div>
+        </details>
       </aside>
 
       <main class="viewport-wrap">
