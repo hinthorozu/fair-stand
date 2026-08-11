@@ -158,8 +158,8 @@ export function createTableChairSetModuleState() {
   return {
     id: createId('module'),
     type: 'table-chair-set',
-    widthCm: 150,
-    depthCm: 150,
+    widthCm: 120,
+    depthCm: 120,
     heightCm: 90,
     surface: {
       id: createId('surface'),
