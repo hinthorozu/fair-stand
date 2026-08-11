@@ -42,3 +42,10 @@ Bu dosyadaki maddeler, kullanıcı açıkça aksi bir davranış istemedikçe t�
 - `wallId: free` modüllerinde sağ/sol Ekle veya Çoğalt işlemleri perimeter duvar toplam kapasitesini kullanmaz.
 - Serbest yerleşim; hedef komşu konum, 50 cm grid, aktif X/Y stand sınırı ve collision kurallarıyla doğrulanır.
 - Gerçek `back / left / right` perimeter duvar zincirlerinde mevcut sürekli duvar davranışı korunur.
+
+## Modül arka yüz standardı
+
+- Aksi açıkça belirtilmedikçe düz panel, vitrin, kapı ve gelecekte eklenecek kapalı yüzeyli modüllerin arka yüzü **tek parça düz yüzey** olarak görünür.
+- Düz arka yüz yalnızca arkadan görünür; öndeki renk, görsel ve cam davranışını kapatmaz veya değiştirmez.
+- **Separatör bu kuralın istisnasıdır**; açık çıtalı yapısı ön/arka olarak korunur.
+- Amaç 0° / 90° / 180° / 270° dönüşlerde modülün ön ve arka yönünün görsel olarak hemen ayırt edilmesidir.

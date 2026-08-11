@@ -502,3 +502,10 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 409. Serbest bağlamsal ekleme için 4 yön, çoklu paket sırası, stand taşması ve collision regresyon testleri eklendi.
 410. Yerleşim motorunun güncel davranışları `ROADMAP.md` ile eşitlendi ve kesin varsayılan modül davranışları `PROJECT_RULES.md` içine taşındı.
 411. FAZ 2 bu checkpoint'te henüz resmi olarak kapatılmadı; final genel regresyon turu ve kapanış kararı bekliyor.
+
+## Modül arka yüz ayrımı
+
+412. Düz panel, depo kapısı ve 2/3 gözlü vitrin modüllerine arkadan bakıldığında tek parça düz arka yüz gösterimi eklendi.
+413. Düz arka yüz yalnızca arka taraftan render edilir hale getirildi; öndeki panel renkleri, görselleri ve cam şeffaflığı etkilenmedi.
+414. Separatör modülleri açık çıtalı ön/arka görünümünü korumak için düz arka yüz standardının dışında bırakıldı.
+415. Modülün 4 yön dönüşünde ön/arka tarafın daha kolay ayırt edilmesi kalıcı görsel standart olarak PROJECT_RULES.md içine eklendi.
