@@ -22,7 +22,8 @@ import {
   totalWallWidthCm,
   moduleWidths,
 } from './designState.js';
-import { loadImageAssets, saveImageAsset } from './assetStore.js';
+import { deleteProjectImageAssets, loadImageAssets, saveImageAsset } from './assetStore.js';
+import { createProjectId, deleteProject, listProjects, loadProject, saveProject } from './projectStore.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu } from './moduleContextMenu.js';
 import { createModuleDragSidebar } from './moduleDragSidebar.js';
@@ -79,6 +80,13 @@ const clearTextureButton = document.querySelector('#clear-texture');
 const resetModuleFeaturesButton = document.querySelector('#reset-module-features');
 const assetLibraryElement = document.querySelector('#asset-library');
 const assetStatus = document.querySelector('#asset-status');
+const projectNameInput = document.querySelector('#project-name');
+const projectSelect = document.querySelector('#project-select');
+const newProjectButton = document.querySelector('#new-project');
+const saveProjectButton = document.querySelector('#save-project');
+const openProjectButton = document.querySelector('#open-project');
+const deleteProjectButton = document.querySelector('#delete-project');
+const projectStatus = document.querySelector('#project-status');
 
 const WALL_LABELS = Object.freeze({
   back: 'Sırt',
@@ -94,6 +102,8 @@ let activeAssetId = null;
 let pendingCatalogAdds = [];
 let catalogAddFlushScheduled = false;
 let moduleDragSidebar = null;
+let activeProjectId = createProjectId();
+let activeProjectCreatedAt = Date.now();
 const imageAssets = new Map();
 
 function getAssetUrl(assetId) {
@@ -1029,6 +1039,113 @@ Object.values(colorCmykInputs).forEach((input) => {
   input.addEventListener('input', syncFromCmykInputs);
 });
 
+function cloneProjectState(value) {
+  return value == null ? value : JSON.parse(JSON.stringify(value));
+}
+
+function clearRegisteredAssets() {
+  imageAssets.forEach((asset) => { if (asset.url) URL.revokeObjectURL(asset.url); });
+  imageAssets.clear();
+  activeAssetId = null;
+  renderAssetLibrary();
+  assetStatus.textContent = 'Görsel seçilmedi.';
+}
+
+function buildProjectSnapshot() {
+  return {
+    id: activeProjectId,
+    name: projectNameInput.value.trim() || 'Adsız Proje',
+    version: 1,
+    createdAt: activeProjectCreatedAt,
+    stand: cloneProjectState(currentStand),
+    modules: cloneProjectState(currentModules),
+  };
+}
+
+async function refreshProjectList(selectedId = activeProjectId) {
+  const projects = await listProjects();
+  projectSelect.innerHTML = '';
+  if (!projects.length) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'Kayıtlı proje yok';
+    projectSelect.appendChild(option);
+    return projects;
+  }
+  projects.forEach((project) => {
+    const option = document.createElement('option');
+    option.value = project.id;
+    option.textContent = project.name || 'Adsız Proje';
+    projectSelect.appendChild(option);
+  });
+  if (projects.some((project) => project.id === selectedId)) projectSelect.value = selectedId;
+  return projects;
+}
+
+async function loadAssetsForActiveProject() {
+  clearRegisteredAssets();
+  const assets = await loadImageAssets(activeProjectId);
+  assets.forEach(registerAsset);
+  if (assets.length) setActiveAsset(assets.at(-1).id);
+  else renderAssetLibrary();
+}
+
+async function persistActiveProject({ quiet = false } = {}) {
+  const stored = await saveProject(buildProjectSnapshot());
+  activeProjectCreatedAt = stored.createdAt;
+  await refreshProjectList(stored.id);
+  if (!quiet) projectStatus.textContent = 'Kaydedildi: ' + stored.name;
+  return stored;
+}
+
+async function restoreProject(project) {
+  if (!project) return;
+  activeProjectId = project.id;
+  activeProjectCreatedAt = Number(project.createdAt) || Date.now();
+  projectNameInput.value = project.name || 'Adsız Proje';
+  currentModules = cloneProjectState(project.modules) || [];
+  currentStand = cloneProjectState(project.stand);
+  moduleContextMenu.close();
+  moduleContextMenu.closePicker();
+
+  if (currentStand) {
+    selectedStandType = currentStand.standType;
+    standTypeButtons.forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.standType === selectedStandType));
+    });
+    standSizeXInput.value = String(currentStand.xCm);
+    standSizeYInput.value = String(currentStand.yCm);
+    floorTypeSelect.value = currentStand.floorType || 'karolaj';
+    const stage = scene3d.createStage({
+      widthCm: currentStand.xCm,
+      depthCm: currentStand.yCm,
+      standType: currentStand.standType,
+      resetView: true,
+    });
+    if (!stage.ok) throw new Error(stage.message || 'Proje sahnesi oluşturulamadı.');
+    scene3d.setFloorType(currentStand.floorType || 'karolaj');
+    if (currentStand.floorColor) scene3d.setFloorColor(currentStand.floorColor);
+    syncWallLengthFromSetup(currentStand);
+    viewportEmpty.hidden = true;
+    viewportToolbar.hidden = false;
+    setStandEditingEnabled(true);
+    rebuildWall({ resetView: true });
+    updateStageCreateState();
+  } else {
+    currentModules = [];
+    selectedStandType = null;
+    standTypeButtons.forEach((button) => button.setAttribute('aria-pressed', 'false'));
+    standSizeXInput.value = '';
+    standSizeYInput.value = '';
+    setStandEditingEnabled(false);
+    updateStageCreateState();
+  }
+
+  await loadAssetsForActiveProject();
+  await refreshProjectList(activeProjectId);
+  projectStatus.textContent = 'Açıldı: ' + (project.name || 'Adsız Proje');
+}
+
 function registerAsset(asset) {
   const previous = imageAssets.get(asset.id);
   if (previous?.url) URL.revokeObjectURL(previous.url);
@@ -1083,7 +1200,7 @@ function renderAssetLibrary() {
 
 async function initializeAssetLibrary() {
   try {
-    const assets = await loadImageAssets();
+    const assets = await loadImageAssets(activeProjectId);
     assets.forEach(registerAsset);
     if (assets.length) activeAssetId = assets.at(-1).id;
     renderAssetLibrary();
@@ -1126,7 +1243,7 @@ imageInput.addEventListener('change', async () => {
   if (!file) return;
 
   try {
-    const asset = await saveImageAsset(file);
+    const asset = await saveImageAsset(activeProjectId, file);
     registerAsset(asset);
     setActiveAsset(asset.id);
 
@@ -1136,6 +1253,47 @@ imageInput.addEventListener('change', async () => {
     console.warn('Görsel kaydedilemedi:', error);
     assetStatus.textContent = 'Görsel arşive kaydedilemedi.';
   }
+});
+
+saveProjectButton.addEventListener('click', async () => {
+  try { await persistActiveProject(); }
+  catch (error) { console.warn('Proje kaydedilemedi:', error); projectStatus.textContent = 'Proje kaydedilemedi.'; }
+});
+
+openProjectButton.addEventListener('click', async () => {
+  const projectId = projectSelect.value;
+  if (!projectId) { projectStatus.textContent = 'Açılacak kayıtlı proje yok.'; return; }
+  try {
+    const project = await loadProject(projectId);
+    if (!project) { projectStatus.textContent = 'Proje bulunamadı.'; return; }
+    await restoreProject(project);
+  } catch (error) { console.warn('Proje açılamadı:', error); projectStatus.textContent = 'Proje açılamadı.'; }
+});
+
+newProjectButton.addEventListener('click', () => {
+  const confirmed = window.confirm('Yeni projeye geçilsin mi? Kaydedilmemiş değişiklikler kaybolabilir.');
+  if (!confirmed) return;
+  window.location.reload();
+});
+
+deleteProjectButton.addEventListener('click', async () => {
+  const projectId = projectSelect.value;
+  if (!projectId) return;
+  const projects = await listProjects();
+  const project = projects.find((item) => item.id === projectId);
+  const confirmed = window.confirm((project?.name || 'Proje') + ' ve bu projeye ait tüm görseller silinecek. Devam edilsin mi?');
+  if (!confirmed) return;
+  try {
+    await deleteProjectImageAssets(projectId);
+    await deleteProject(projectId);
+    if (projectId === activeProjectId) { window.location.reload(); return; }
+    await refreshProjectList();
+    projectStatus.textContent = 'Proje silindi.';
+  } catch (error) { console.warn('Proje silinemedi:', error); projectStatus.textContent = 'Proje silinemedi.'; }
+});
+
+projectNameInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') saveProjectButton.click();
 });
 
 fillImageButton.addEventListener('click', () => {
@@ -1166,3 +1324,4 @@ setStandEditingEnabled(false);
 updateStageCreateState();
 syncColorEditorFromHex(colorInput.value);
 initializeAssetLibrary();
+refreshProjectList().catch((error) => console.warn('Proje listesi açılamadı:', error));

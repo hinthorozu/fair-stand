@@ -766,3 +766,7 @@ h2 {
     height: 116px;
   }
 }
+
+.project-card input, .project-card select { width: 100%; }
+.project-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.project-actions button { width: 100%; }

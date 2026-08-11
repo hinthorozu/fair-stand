@@ -15,6 +15,21 @@
           <p class="muted">Önce stand tipini ve gerçek stand alanını belirle; sahne yalnızca bu bilgiler tamamlandığında oluşturulur.</p>
         </div>
 
+        <section class="panel-card project-card">
+          <h2>Proje</h2>
+          <label for="project-name">Proje adı</label>
+          <input id="project-name" type="text" value="Adsız Proje" maxlength="120" autocomplete="off" />
+          <label for="project-select">Kayıtlı projeler</label>
+          <select id="project-select"><option value="">Kayıtlı proje yok</option></select>
+          <div class="project-actions">
+            <button id="new-project" type="button">Yeni</button>
+            <button id="save-project" type="button" class="primary">Kaydet</button>
+            <button id="open-project" type="button">Aç</button>
+            <button id="delete-project" type="button" class="danger ghost">Sil</button>
+          </div>
+          <p id="project-status" class="status">Aktif proje henüz kaydedilmedi.</p>
+        </section>
+
         <section class="panel-card stand-setup-card">
           <h2>Stand Tipi</h2>
           <div class="stand-type-grid" role="radiogroup" aria-label="Stand tipi">
