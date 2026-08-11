@@ -2497,15 +2497,25 @@ function createBarStoolModule(moduleState, moduleIndex) {
 }
 
 function createTableChairSetModule(moduleState, moduleIndex) {
-  const widthM = Number(moduleState.widthCm || 150) / 100;
-  const depthM = Number(moduleState.depthCm || 150) / 100;
+  const widthM = Number(moduleState.widthCm || 120) / 100;
+  const depthM = Number(moduleState.depthCm || 120) / 100;
   const group = new THREE.Group();
-  group.userData = { kind: 'module', moduleIndex, moduleId: moduleState.id, type: 'table-chair-set', widthCm: Number(moduleState.widthCm || 150), depthCm: Number(moduleState.depthCm || 150), heightCm: Number(moduleState.heightCm || 90) };
+  group.userData = { kind: 'module', moduleIndex, moduleId: moduleState.id, type: 'table-chair-set', widthCm: Number(moduleState.widthCm || 120), depthCm: Number(moduleState.depthCm || 120), heightCm: Number(moduleState.heightCm || 90) };
 
   const color = moduleState.surface?.color ?? '#ffffff';
   const chairMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: 0, emissive: 0x000000, emissiveIntensity: 0 });
   const metalMaterial = new THREE.MeshStandardMaterial({ color: 0x30343a, roughness: 0.32, metalness: 0.74 });
-  const tabletopMaterial = new THREE.MeshStandardMaterial({ color: 0xf3f4f6, roughness: 0.46, metalness: 0.02 });
+  const tabletopMaterial = new THREE.MeshPhysicalMaterial({
+  color: 0xd7e9ed,
+  transparent: true,
+  opacity: 0.42,
+  roughness: 0.10,
+  metalness: 0,
+  transmission: 0.32,
+  clearcoat: 0.65,
+  clearcoatRoughness: 0.08,
+  depthWrite: false,
+});
   const colorTargets = [];
 
   const addChair = (x, z, rotationY) => {
@@ -2538,16 +2548,17 @@ function createTableChairSetModule(moduleState, moduleIndex) {
     group.add(chair);
   };
 
-  // 150 x 150 dış footprint sabit. Sandalyelerin dış uçları yaklaşık ±75 cm sınırında kalır.
-  const chairOffset = 0.50;
+  // 120 x 120 cm dış footprint. Sandalyeler masaya yaklaştırıldı.
+  const chairOffset = 0.35;
   addChair(-chairOffset, -chairOffset, Math.PI / 4);
   addChair(chairOffset, -chairOffset, -Math.PI / 4);
   addChair(-chairOffset, chairOffset, Math.PI * 3 / 4);
   addChair(chairOffset, chairOffset, -Math.PI * 3 / 4);
 
-  const top = new THREE.Mesh(new THREE.CylinderGeometry(0.275, 0.275, 0.045, 48), tabletopMaterial);
+  // Ø75 cm cam masa tablası.
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(0.375, 0.375, 0.018, 64), tabletopMaterial);
   top.position.set(0, 0.74, 0);
-  top.castShadow = true;
+  top.castShadow = false;
   top.receiveShadow = true;
   group.add(top);
 
@@ -2562,7 +2573,7 @@ function createTableChairSetModule(moduleState, moduleIndex) {
   const selectionFrame = createSelectionFrame(0.44, 0.48);
   selectionFrame.visible = false;
   selectable.add(selectionFrame);
-  selectable.userData = { kind: 'surface', moduleType: 'table-chair-set', selectionMode: 'module', acceptsImage: false, moduleIndex, moduleId: moduleState.id, widthCm: Number(moduleState.widthCm || 150), stripIndex: null, stripNumber: null, surfaceRole: 'chair', surfaceId: moduleState.surface?.id, surfaceState: moduleState.surface, selectionFrame, colorTargets };
+  selectable.userData = { kind: 'surface', moduleType: 'table-chair-set', selectionMode: 'module', acceptsImage: false, moduleIndex, moduleId: moduleState.id, widthCm: Number(moduleState.widthCm || 120), stripIndex: null, stripNumber: null, surfaceRole: 'chair', surfaceId: moduleState.surface?.id, surfaceState: moduleState.surface, selectionFrame, colorTargets };
   colorTargets.forEach((mesh, index) => {
     if (index === 0) return;
     mesh.userData = { ...selectable.userData, surfaceId: moduleState.surface?.id + '-' + index, selectionFrame: null };
