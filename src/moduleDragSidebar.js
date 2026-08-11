@@ -100,7 +100,7 @@ export function createModuleDragSidebar({
 
   const hint = document.createElement('p');
   hint.className = 'module-drag-hint';
-  hint.textContent = 'Kartı sahneye sürükle · R: 0° / 90° yön değiştir · 50 cm grid';
+  hint.textContent = 'Kartı sahneye sürükle · R: +90° · Shift+R: -90° · 50 cm grid';
 
   const grid = document.createElement('div');
   grid.className = 'module-drag-grid';
@@ -207,7 +207,8 @@ export function createModuleDragSidebar({
   window.addEventListener('keydown', (event) => {
     if (!activeModuleState || String(event.key).toLowerCase() !== 'r') return;
     event.preventDefault();
-    activeRotationZDeg = activeRotationZDeg === 90 ? 0 : 90;
+    const deltaDeg = event.shiftKey ? -90 : 90;
+    activeRotationZDeg = ((activeRotationZDeg + deltaDeg) % 360 + 360) % 360;
     rotationLocked = true;
     if (Number.isFinite(lastClientX) && Number.isFinite(lastClientY)) {
       onPreview?.(

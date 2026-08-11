@@ -1,5 +1,5 @@
 export const MODULE_PLACEMENT_SNAP_CM = 50;
-export const MODULE_PLACEMENT_ROTATIONS = Object.freeze([0, 90]);
+export const MODULE_PLACEMENT_ROTATIONS = Object.freeze([0, 90, 180, 270]);
 export const MODULE_WALL_SNAP_DISTANCE_CM = 50;
 
 const EPSILON_CM = 0.001;
@@ -25,6 +25,24 @@ function clamp(value, min, max) {
 
 function nearlyEqual(a, b) {
   return Math.abs(Number(a) - Number(b)) <= EPSILON_CM;
+}
+
+export function normalizeModuleRotationZDeg(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 0;
+  const quarterTurns = Math.round(number / 90);
+  return ((quarterTurns * 90) % 360 + 360) % 360;
+}
+
+export function rotateModuleRotationZDeg(value, deltaDeg = 90) {
+  return normalizeModuleRotationZDeg(
+    normalizeModuleRotationZDeg(value) + Number(deltaDeg || 0),
+  );
+}
+
+export function isVerticalModuleRotation(rotationZDeg) {
+  const rotation = normalizeModuleRotationZDeg(rotationZDeg);
+  return rotation === 90 || rotation === 270;
 }
 
 export function snapCm(value, stepCm = MODULE_PLACEMENT_SNAP_CM) {
@@ -53,7 +71,7 @@ export function createModulePlacement({
     xCm: Number(xCm) || 0,
     yCm: Number(yCm) || 0,
     zCm: Number(zCm) || 0,
-    rotationZDeg: rotationZDeg === 90 ? 90 : 0,
+    rotationZDeg: normalizeModuleRotationZDeg(rotationZDeg),
     wallId,
   };
 }
@@ -61,7 +79,7 @@ export function createModulePlacement({
 export function getPlacementInterval(placement, widthCm) {
   if (!placement || !Number.isFinite(Number(widthCm))) return null;
   const axis = getWallAxis(placement.wallId)
-    ?? (placement.rotationZDeg === 90 ? 'y' : 'x');
+    ?? (isVerticalModuleRotation(placement.rotationZDeg) ? 'y' : 'x');
   const startCm = axis === 'y' ? Number(placement.yCm) : Number(placement.xCm);
   return {
     axis,
@@ -75,12 +93,12 @@ function getGroundSegment(module) {
   const widthCm = Number(module?.widthCm);
   if (!placement || !Number.isFinite(widthCm) || widthCm <= 0) return null;
 
-  const rotation = placement.rotationZDeg === 90 ? 90 : 0;
+  const rotation = normalizeModuleRotationZDeg(placement.rotationZDeg);
   const x = Number(placement.xCm);
   const y = Number(placement.yCm);
   if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
 
-  if (rotation === 90) {
+  if (isVerticalModuleRotation(rotation)) {
     return {
       axis: 'y',
       fixedCm: x,
@@ -137,7 +155,8 @@ export function validateModulePlacement({
     return { ok: false, message: 'Bu stand tipinde bu konuma modül yerleştirilemez.' };
   }
 
-  const rotation = placement.rotationZDeg === 90 ? 90 : 0;
+  const rotation = normalizeModuleRotationZDeg(placement.rotationZDeg);
+  const vertical = isVerticalModuleRotation(rotation);
   const x = Number(placement.xCm);
   const y = Number(placement.yCm);
   if (!Number.isFinite(x) || !Number.isFinite(y)) {
@@ -145,17 +164,17 @@ export function validateModulePlacement({
   }
 
   if (placement.wallId === 'back') {
-    if (rotation !== 0 || y !== 0) return { ok: false, message: 'Sırt duvar modülü X yönünde olmalı.' };
+    if (vertical || y !== 0) return { ok: false, message: 'Sırt duvar modülü X yönünde olmalı.' };
     if (x < 0 || x + width > xLimit) return { ok: false, message: 'Modül X stand sınırını aşıyor.' };
   } else if (placement.wallId === 'left') {
-    if (rotation !== 90 || x !== 0) return { ok: false, message: 'Sol duvar modülü Y yönünde olmalı.' };
+    if (!vertical || x !== 0) return { ok: false, message: 'Sol duvar modülü Y yönünde olmalı.' };
     if (y < 0 || y + width > yLimit) return { ok: false, message: 'Modül Y stand sınırını aşıyor.' };
   } else if (placement.wallId === 'right') {
-    if (rotation !== 90 || x !== xLimit) return { ok: false, message: 'Sağ duvar modülü Y yönünde olmalı.' };
+    if (!vertical || x !== xLimit) return { ok: false, message: 'Sağ duvar modülü Y yönünde olmalı.' };
     if (y < 0 || y + width > yLimit) return { ok: false, message: 'Modül Y stand sınırını aşıyor.' };
   } else {
-    const endX = x + (rotation === 0 ? width : 0);
-    const endY = y + (rotation === 90 ? width : 0);
+    const endX = x + (!vertical ? width : 0);
+    const endY = y + (vertical ? width : 0);
     if (x < 0 || y < 0 || endX > xLimit || endY > yLimit) {
       return { ok: false, message: 'Modül aktif stand alanını aşıyor.' };
     }
@@ -238,16 +257,17 @@ function createFreePlacement({
   const width = Number(widthCm);
   const xLimit = Number(standXCm);
   const yLimit = Number(standYCm);
-  const rotation = rotationZDeg === 90 ? 90 : 0;
-  const maxX = rotation === 0 ? xLimit - width : xLimit;
-  const maxY = rotation === 90 ? yLimit - width : yLimit;
+  const rotation = normalizeModuleRotationZDeg(rotationZDeg);
+  const vertical = isVerticalModuleRotation(rotation);
+  const maxX = !vertical ? xLimit - width : xLimit;
+  const maxY = vertical ? yLimit - width : yLimit;
   if (maxX < 0 || maxY < 0) return null;
 
   return createModulePlacement({
-    xCm: rotation === 0
+    xCm: !vertical
       ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
       : clamp(snapCm(pointerXCm), 0, maxX),
-    yCm: rotation === 90
+    yCm: vertical
       ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
       : clamp(snapCm(pointerYCm), 0, maxY),
     rotationZDeg: rotation,
@@ -280,7 +300,7 @@ export function snapPlacementToStand({
     return { ok: false, message: 'Yerleşim için geçerli stand ve modül ölçüleri gerekli.' };
   }
 
-  const preferredRotation = preferredRotationZDeg === 90 ? 90 : 0;
+  const preferredRotation = normalizeModuleRotationZDeg(preferredRotationZDeg);
   const freePlacement = createFreePlacement({
     widthCm: width,
     pointerXCm: pointerX,
@@ -292,8 +312,10 @@ export function snapPlacementToStand({
 
   const activeBoundaryWalls = walls.filter((wallId) => wallId !== 'free');
   const boundaryCandidates = activeBoundaryWalls.map((wallId) => {
-    const wallRotation = wallId === 'back' ? 0 : 90;
-    if (rotationLocked && wallRotation !== preferredRotation) return null;
+    const wallRotation = wallId === 'back' ? 0 : (wallId === 'left' ? 90 : 270);
+    const wallIsVertical = wallId !== 'back';
+    if (rotationLocked && wallIsVertical !== isVerticalModuleRotation(preferredRotation)) return null;
+    const resolvedRotation = rotationLocked ? preferredRotation : wallRotation;
 
     if (wallId === 'back') {
       if (width > xLimit) return null;
@@ -302,7 +324,7 @@ export function snapPlacementToStand({
         placement: createModulePlacement({
           xCm: clamp(snapCm(pointerX - width / 2), 0, xLimit - width),
           yCm: 0,
-          rotationZDeg: 0,
+          rotationZDeg: resolvedRotation,
           wallId,
         }),
       };
@@ -315,7 +337,7 @@ export function snapPlacementToStand({
       placement: createModulePlacement({
         xCm: wallX,
         yCm: clamp(snapCm(pointerY - width / 2), 0, yLimit - width),
-        rotationZDeg: 90,
+        rotationZDeg: resolvedRotation,
         wallId,
       }),
     };

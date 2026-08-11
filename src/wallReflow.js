@@ -77,7 +77,7 @@ function createPlacement(segment, localStartCm, widthCm, standXCm, standYCm) {
       xCm: Number(standXCm),
       yCm: localStartCm,
       zCm: 0,
-      rotationZDeg: 90,
+      rotationZDeg: 270,
       wallId: 'right',
     });
   }

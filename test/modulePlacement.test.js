@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   getAllowedWallIds,
+  isVerticalModuleRotation,
+  normalizeModuleRotationZDeg,
+  rotateModuleRotationZDeg,
   snapCm,
   snapPlacementToStand,
   validatePlacementAgainstModules,
@@ -176,4 +179,60 @@ test('free L and T joins are allowed but a plus crossing is rejected', () => {
     standYCm: 600,
   });
   assert.equal(plusCross.ok, false);
+});
+
+
+test('module rotations use four 90 degree directions', () => {
+  assert.equal(normalizeModuleRotationZDeg(0), 0);
+  assert.equal(normalizeModuleRotationZDeg(90), 90);
+  assert.equal(normalizeModuleRotationZDeg(180), 180);
+  assert.equal(normalizeModuleRotationZDeg(270), 270);
+  assert.equal(normalizeModuleRotationZDeg(360), 0);
+  assert.equal(rotateModuleRotationZDeg(270, 90), 0);
+  assert.equal(rotateModuleRotationZDeg(0, -90), 270);
+  assert.equal(isVerticalModuleRotation(90), true);
+  assert.equal(isVerticalModuleRotation(270), true);
+  assert.equal(isVerticalModuleRotation(180), false);
+});
+
+test('right wall canonical snap faces inward at 270 degrees', () => {
+  const result = snapPlacementToStand({
+    standType: 'u-stand',
+    widthCm: 100,
+    pointerXCm: 795,
+    pointerYCm: 300,
+    standXCm: 800,
+    standYCm: 600,
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.placement.wallId, 'right');
+  assert.equal(result.placement.rotationZDeg, 270);
+});
+
+test('rotation lock preserves 180 and 270 degree facing on matching axes', () => {
+  const back = snapPlacementToStand({
+    standType: 'u-stand',
+    widthCm: 100,
+    pointerXCm: 300,
+    pointerYCm: 10,
+    standXCm: 800,
+    standYCm: 600,
+    preferredRotationZDeg: 180,
+    rotationLocked: true,
+  });
+  assert.equal(back.placement.wallId, 'back');
+  assert.equal(back.placement.rotationZDeg, 180);
+
+  const right = snapPlacementToStand({
+    standType: 'u-stand',
+    widthCm: 100,
+    pointerXCm: 790,
+    pointerYCm: 250,
+    standXCm: 800,
+    standYCm: 600,
+    preferredRotationZDeg: 270,
+    rotationLocked: true,
+  });
+  assert.equal(right.placement.wallId, 'right');
+  assert.equal(right.placement.rotationZDeg, 270);
 });

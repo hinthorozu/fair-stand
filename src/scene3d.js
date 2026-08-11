@@ -10,6 +10,9 @@ import { computeImageFit } from './imageFit.js';
 import {
   createModulePlacement,
   getAllowedWallIds,
+  isVerticalModuleRotation,
+  normalizeModuleRotationZDeg,
+  rotateModuleRotationZDeg,
   snapPlacementToStand,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
@@ -360,13 +363,15 @@ export function createStandScene(
     const xM = Number(placement.xCm) / 100;
     const logicalYM = Number(placement.yCm) / 100;
     const logicalZM = Number(placement.zCm ?? 0) / 100;
+    const rotationZDeg = normalizeModuleRotationZDeg(placement.rotationZDeg);
+    const vertical = isVerticalModuleRotation(rotationZDeg);
 
-    group.rotation.set(0, 0, 0);
+    // Logical Z etrafındaki plan dönüşü Three.js world-Y yaw olarak uygulanır.
+    // 0=ön, 90=sağ, 180=arka, 270=sol. Ön yüz artık wallId hilesiyle değil
+    // doğrudan rotationZDeg state'iyle belirlenir.
+    group.rotation.set(0, THREE.MathUtils.degToRad(rotationZDeg), 0);
 
-    // Proje standardı X/Y zemin, Z yüksekliktir. Three.js sahnesinde mevcut
-    // geometriyi bozmamak için logical Y -> world Z, logical Z -> world Y map edilir.
-    if (placement.rotationZDeg === 90) {
-      group.rotation.y = placement.wallId === 'left' ? Math.PI / 2 : -Math.PI / 2;
+    if (vertical) {
       group.position.set(xM, logicalZM, logicalYM + widthM / 2);
     } else {
       group.position.set(xM + widthM / 2, logicalZM, logicalYM);
@@ -423,7 +428,7 @@ export function createStandScene(
         moduleState.placement = placement;
       }
 
-      if (placement.wallId === 'back' && placement.rotationZDeg === 0) {
+      if (placement.wallId === 'back' && !isVerticalModuleRotation(placement.rotationZDeg)) {
         cursorX = Math.max(cursorX, (Number(placement.xCm) + widthCm) / 100);
       } else {
         hasMultiEdgePlacement = true;
@@ -678,6 +683,74 @@ export function createStandScene(
     return wallRoot.children
       .map((group) => group.userData?.moduleState)
       .filter(Boolean);
+  }
+
+  function inferWallIdForRotation(placement, rotationZDeg) {
+    if (!stageLayout || !placement) return 'free';
+    const allowedWalls = getAllowedWallIds(stageLayout.standType);
+    const vertical = isVerticalModuleRotation(rotationZDeg);
+    const xCm = Number(placement.xCm);
+    const yCm = Number(placement.yCm);
+    const epsilonCm = 0.001;
+
+    if (!vertical && Math.abs(yCm) <= epsilonCm && allowedWalls.includes('back')) {
+      return 'back';
+    }
+    if (vertical && Math.abs(xCm) <= epsilonCm && allowedWalls.includes('left')) {
+      return 'left';
+    }
+    if (
+      vertical
+      && Math.abs(xCm - Number(stageLayout.widthCm)) <= epsilonCm
+      && allowedWalls.includes('right')
+    ) {
+      return 'right';
+    }
+    return 'free';
+  }
+
+  function getSingleSelectedModuleGroup() {
+    const moduleIds = new Set(
+      [...selectedSurfaces].map((surface) => surface.userData?.moduleId).filter(Boolean),
+    );
+    if (moduleIds.size !== 1) return null;
+    const [moduleId] = moduleIds;
+    return wallRoot.children.find((group) => (
+      group.userData?.moduleState?.id === moduleId || group.userData?.moduleId === moduleId
+    )) ?? null;
+  }
+
+  function rotateSelectedModule(deltaDeg) {
+    if (!stageLayout || dragSession?.dragging) return false;
+    const moduleGroup = getSingleSelectedModuleGroup();
+    const moduleState = moduleGroup?.userData?.moduleState;
+    if (!moduleGroup || !moduleState?.placement) return false;
+
+    const nextRotationZDeg = rotateModuleRotationZDeg(
+      moduleState.placement.rotationZDeg,
+      deltaDeg,
+    );
+    const nextPlacement = {
+      ...moduleState.placement,
+      rotationZDeg: nextRotationZDeg,
+    };
+    nextPlacement.wallId = inferWallIdForRotation(nextPlacement, nextRotationZDeg);
+
+    const validation = validatePlacementAgainstModules({
+      placement: nextPlacement,
+      widthCm: moduleState.widthCm,
+      moduleId: moduleState.id,
+      modules: getRenderedModuleStates(),
+      standType: stageLayout.standType,
+      standXCm: stageLayout.widthCm,
+      standYCm: stageLayout.depthCm,
+    });
+    if (!validation.ok) return false;
+
+    moduleState.placement = { ...nextPlacement };
+    moduleGroup.userData.placement = { ...nextPlacement };
+    applyPlacementToGroup(moduleGroup, nextPlacement, moduleState.widthCm);
+    return true;
   }
 
   function previewCatalogModuleDrag(
@@ -1346,7 +1419,7 @@ export function createStandScene(
       moduleState,
       dragging: false,
       preview: null,
-      preferredRotationZDeg: moduleState.placement?.rotationZDeg === 90 ? 90 : 0,
+      preferredRotationZDeg: normalizeModuleRotationZDeg(moduleState.placement?.rotationZDeg),
       rotationLocked: false,
       lastClientX: event.clientX,
       lastClientY: event.clientY,
@@ -1362,14 +1435,33 @@ export function createStandScene(
   });
 
   window.addEventListener('keydown', (event) => {
-    if (!dragSession?.dragging || String(event.key).toLowerCase() !== 'r') return;
-    event.preventDefault();
-    dragSession.preferredRotationZDeg = dragSession.preferredRotationZDeg === 90 ? 0 : 90;
-    dragSession.rotationLocked = true;
-    updatePlacementDrag({
-      clientX: dragSession.lastClientX,
-      clientY: dragSession.lastClientY,
-    });
+    if (String(event.key).toLowerCase() !== 'r') return;
+
+    const target = event.target;
+    const tagName = String(target?.tagName ?? '').toLowerCase();
+    const isEditing = tagName === 'input'
+      || tagName === 'textarea'
+      || tagName === 'select'
+      || Boolean(target?.isContentEditable);
+    if (isEditing && !dragSession?.dragging) return;
+
+    const deltaDeg = event.shiftKey ? -90 : 90;
+
+    if (dragSession?.dragging) {
+      event.preventDefault();
+      dragSession.preferredRotationZDeg = rotateModuleRotationZDeg(
+        dragSession.preferredRotationZDeg,
+        deltaDeg,
+      );
+      dragSession.rotationLocked = true;
+      updatePlacementDrag({
+        clientX: dragSession.lastClientX,
+        clientY: dragSession.lastClientY,
+      });
+      return;
+    }
+
+    if (rotateSelectedModule(deltaDeg)) event.preventDefault();
   });
 
   renderer.domElement.addEventListener('pointerup', (event) => {
