@@ -357,7 +357,7 @@ export function createStandScene(
       surroundM: STAGE_SURROUND_M,
       platformHeightM: ACTIVE_PLATFORM_HEIGHT_M,
       floorType: currentFloorType,
-      floorColor: currentFloorColor,
+      floorColor: floorColors[currentFloorType] ?? null,
     };
 
     setFloorType(currentFloorType);
