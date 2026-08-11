@@ -18,7 +18,7 @@ function left(yCm) {
 }
 
 function right(xCm, yCm) {
-  return { xCm, yCm, zCm: 0, rotationZDeg: 90, wallId: 'right' };
+  return { xCm, yCm, zCm: 0, rotationZDeg: 270, wallId: 'right' };
 }
 
 test('catalog module dropped into a real gap is placed directly', () => {
@@ -118,7 +118,7 @@ test('dropping onto an occupied slot inserts the moving module and shifts the co
   assert.deepEqual(result.orderedModuleIds, ['a', 'moving', 'b', 'c']);
 });
 
-test('dragging from the back wall to a free right-wall slot keeps a 90 degree placement', () => {
+test('dragging from the back wall to a free right-wall slot keeps a 270 degree placement', () => {
   const modules = [
     module('back-a', 100, back(0)),
     module('moving', 100, back(100)),
@@ -137,7 +137,7 @@ test('dragging from the back wall to a free right-wall slot keeps a 90 degree pl
   assert.equal(result.ok, true);
   assert.equal(result.mode, 'direct');
   assert.deepEqual(result.movingPlacement, desired);
-  assert.equal(result.movingPlacement.rotationZDeg, 90);
+  assert.equal(result.movingPlacement.rotationZDeg, 270);
   assert.equal(result.movingPlacement.wallId, 'right');
 });
 

@@ -128,7 +128,7 @@ test('reflow crosses both U stand corners and keeps pushing modules', () => {
     xCm: 500,
     yCm: 0,
     zCm: 0,
-    rotationZDeg: 90,
+    rotationZDeg: 270,
     wallId: 'right',
   });
   const inserted = module('inserted', 200, null);
@@ -309,14 +309,14 @@ test('right wall visual-left add uses the gap before target even when the right 
     xCm: 500,
     yCm: 100,
     zCm: 0,
-    rotationZDeg: 90,
+    rotationZDeg: 270,
     wallId: 'right',
   });
   const next = module('right-next', 300, {
     xCm: 500,
     yCm: 200,
     zCm: 0,
-    rotationZDeg: 90,
+    rotationZDeg: 270,
     wallId: 'right',
   });
   const inserted = module('inserted', 50, null);
@@ -337,7 +337,7 @@ test('right wall visual-left add uses the gap before target even when the right 
     xCm: 500,
     yCm: 50,
     zCm: 0,
-    rotationZDeg: 90,
+    rotationZDeg: 270,
     wallId: 'right',
   });
   assert.equal(result.placements.has('right-target'), false);
