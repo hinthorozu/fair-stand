@@ -5,6 +5,7 @@ on:
     branches: [ROG]
     paths:
       - scripts/add-table-chair-set.mjs
+      - scripts/add-table-chair-set-v2.mjs
       - .github/workflows/add-table-chair-set.yml
 
 permissions:
@@ -21,7 +22,7 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - run: node scripts/add-table-chair-set.mjs
+      - run: node scripts/add-table-chair-set-v2.mjs
       - run: npm test
       - run: npm run build
       - run: |
