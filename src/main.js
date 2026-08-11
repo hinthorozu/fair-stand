@@ -47,6 +47,7 @@ import { planContinuousWallInsertion } from './wallReflow.js';
 const viewport = document.querySelector('#viewport');
 const viewportEmpty = document.querySelector('#viewport-empty');
 const viewportToolbar = document.querySelector('#viewport-toolbar');
+const renderCurrentViewButton = document.querySelector('#render-current-view');
 const standTypeButtons = [...document.querySelectorAll('[data-stand-type]')];
 const standSizeXInput = document.querySelector('#stand-size-x');
 const standSizeYInput = document.querySelector('#stand-size-y');
@@ -747,6 +748,42 @@ moduleDragSidebar = createModuleDragSidebar({
     rebuildWall({ resetView: false });
   },
   onCancel: () => scene3d.clearCatalogModuleDrag(),
+});
+
+renderCurrentViewButton?.addEventListener('click', async () => {
+  if (!currentStand) {
+    renderWallResult('Önce stand sahnesini oluştur.', true);
+    return;
+  }
+
+  const previousText = renderCurrentViewButton.textContent;
+  renderCurrentViewButton.disabled = true;
+  renderCurrentViewButton.textContent = 'Render alınıyor…';
+  try {
+    const result = await scene3d.captureCurrentViewPng({ scale: 2 });
+    if (!result.ok || !result.blob) {
+      renderWallResult(result.message || 'Render alınamadı.', true);
+      return;
+    }
+    const projectName = (projectNameInput.value.trim() || 'fair-stand')
+      .replace(/[^a-zA-Z0-9ğüşöçıİĞÜŞÖÇ_-]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'fair-stand';
+    const url = URL.createObjectURL(result.blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = projectName + '-render.png';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    renderWallResult('Render hazır · ' + result.width + ' × ' + result.height + ' px PNG.');
+  } catch (error) {
+    console.warn('Render alınamadı:', error);
+    renderWallResult('Render alınamadı.', true);
+  } finally {
+    renderCurrentViewButton.disabled = false;
+    renderCurrentViewButton.textContent = previousText;
+  }
 });
 
 standTypeButtons.forEach((button) => {

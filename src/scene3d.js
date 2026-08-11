@@ -2155,7 +2155,52 @@ export function createStandScene(
     renderer.render(scene, camera);
   });
 
+  async function captureCurrentViewPng({ scale = 2 } = {}) {
+    if (!stageLayout) return { ok: false, message: 'Önce stand sahnesini oluştur.' };
+
+    const cssWidth = Math.max(1, renderer.domElement.clientWidth || container.clientWidth || 1);
+    const cssHeight = Math.max(1, renderer.domElement.clientHeight || container.clientHeight || 1);
+    const safeScale = Math.min(3, Math.max(1, Number(scale) || 2));
+    const targetWidth = Math.round(cssWidth * safeScale);
+    const targetHeight = Math.round(cssHeight * safeScale);
+    const previousPixelRatio = renderer.getPixelRatio();
+    const previousAspect = camera.aspect;
+    const selectedFrames = [...selectedSurfaces]
+      .map((surface) => surface.userData?.selectionFrame)
+      .filter(Boolean);
+    const selectedVisibility = selectedFrames.map((frame) => frame.visible);
+    const guideVisibility = activeWallGuides.map((guide) => guide.visible);
+
+    try {
+      selectedFrames.forEach((frame) => { frame.visible = false; });
+      activeWallGuides.forEach((guide) => { guide.visible = false; });
+
+      renderer.setPixelRatio(1);
+      renderer.setSize(targetWidth, targetHeight, false);
+      camera.aspect = targetWidth / targetHeight;
+      camera.updateProjectionMatrix();
+      controls.update();
+      renderer.render(scene, camera);
+
+      const blob = await new Promise((resolve) => {
+        renderer.domElement.toBlob(resolve, 'image/png');
+      });
+      if (!blob) return { ok: false, message: 'Render görüntüsü oluşturulamadı.' };
+      return { ok: true, blob, width: targetWidth, height: targetHeight };
+    } finally {
+      selectedFrames.forEach((frame, index) => { frame.visible = selectedVisibility[index]; });
+      activeWallGuides.forEach((guide, index) => { guide.visible = guideVisibility[index]; });
+      renderer.setPixelRatio(previousPixelRatio);
+      renderer.setSize(cssWidth, cssHeight, false);
+      camera.aspect = previousAspect;
+      camera.updateProjectionMatrix();
+      controls.update();
+      renderer.render(scene, camera);
+    }
+  }
+
   return {
+    captureCurrentViewPng,
     createStage,
     setFloorType,
     setFloorColor,
