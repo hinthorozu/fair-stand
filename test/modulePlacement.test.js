@@ -506,6 +506,77 @@ test('rotated counter side face snaps flush to a perpendicular back wall', () =>
   }).ok, true);
 });
 
+test('counter snaps into U and L inner corners against two walls', () => {
+  const scenarios = [
+    {
+      name: 'u-left',
+      standType: 'u-stand',
+      modules: [
+        { id: 'back', widthCm: 800, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' } },
+        { id: 'left', widthCm: 600, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 90, wallId: 'left' } },
+      ],
+      pointerXCm: 55, pointerYCm: 30, rotationZDeg: 0, expectedX: 5, expectedY: 30,
+    },
+    {
+      name: 'u-right',
+      standType: 'u-stand',
+      modules: [
+        { id: 'back', widthCm: 800, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' } },
+        { id: 'right', widthCm: 600, placement: { xCm: 800, yCm: 0, zCm: 0, rotationZDeg: 270, wallId: 'right' } },
+      ],
+      pointerXCm: 745, pointerYCm: 30, rotationZDeg: 0, expectedX: 695, expectedY: 30,
+    },
+    {
+      name: 'l-left-rotated',
+      standType: 'l-left',
+      modules: [
+        { id: 'back', widthCm: 800, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' } },
+        { id: 'left', widthCm: 600, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 90, wallId: 'left' } },
+      ],
+      pointerXCm: 30, pointerYCm: 55, rotationZDeg: 90, expectedX: 30, expectedY: 5,
+    },
+    {
+      name: 'l-right-rotated',
+      standType: 'l-right',
+      modules: [
+        { id: 'back', widthCm: 800, placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' } },
+        { id: 'right', widthCm: 600, placement: { xCm: 800, yCm: 0, zCm: 0, rotationZDeg: 270, wallId: 'right' } },
+      ],
+      pointerXCm: 770, pointerYCm: 55, rotationZDeg: 90, expectedX: 770, expectedY: 5,
+    },
+  ];
+
+  scenarios.forEach((scenario) => {
+    const snapped = snapPlacementToModules({
+      moduleId: 'counter',
+      moduleType: 'counter',
+      widthCm: 100,
+      depthCm: 50,
+      pointerXCm: scenario.pointerXCm,
+      pointerYCm: scenario.pointerYCm,
+      rotationZDeg: scenario.rotationZDeg,
+      modules: scenario.modules,
+      standType: scenario.standType,
+      standXCm: 800,
+      standYCm: 600,
+    });
+
+    assert.equal(snapped?.snapKind, 'corner-face', scenario.name);
+    assert.equal(snapped?.placement.xCm, scenario.expectedX, scenario.name);
+    assert.equal(snapped?.placement.yCm, scenario.expectedY, scenario.name);
+    assert.equal(validatePlacementAgainstModules({
+      moduleId: 'counter',
+      widthCm: 100,
+      depthCm: 50,
+      placement: snapped.placement,
+      modules: scenario.modules,
+      standType: scenario.standType,
+      standXCm: 800,
+      standYCm: 600,
+    }).ok, true, scenario.name);
+  });
+});
+
 test('physical module depth rejects parallel bodies that are too close', () => {
   const modules = [{
     id: 'a',

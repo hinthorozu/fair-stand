@@ -558,3 +558,10 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 438. Banko yaslama davranışındaki paralel eksen kısıtı kaldırıldı; fiziksel gövdenin ön, arka, sol ve sağ dört tarafı da uygun duvar/modül yüzüne temas ederek yaslanabilir.
 439. Ön/arka temasında gerçek derinlikler birlikte hesaplanır; sol/sağ uç yüz temasında bankonun gerçek uç yüzü hedef modülün kasa yüzüne oturtulur.
 440. 0/90/180/270 derece yönlerin tamamında temas serbest, fiziksel iç içe geçme collision olarak yasaktır.
+
+
+## Banko iç köşe yaslama düzeltmesi
+
+441. Bankonun U/L stand dip köşelerinde iki duvar yüzüne aynı anda sıfır temasla oturabilmesi için bankoya özel iki-yüzey köşe snap adayı eklendi.
+442. Tek duvar snap adayının ikinci duvarla collision'a düşmesi halinde sistem artık iki temas koordinatını birleştirerek gerçek köşe yerleşimini dener; diğer modül tiplerinin snap/collision davranışı değiştirilmedi.
+443. Sol ve sağ dip köşelerde, 0/90/180/270 derece banko yönlerinde fiziksel temas serbest; gerçek iç içe geçme collision olarak kalır.

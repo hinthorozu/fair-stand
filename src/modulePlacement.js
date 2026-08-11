@@ -407,6 +407,7 @@ function createEndpointConnectionPlacement({
 
 export function snapPlacementToModules({
   moduleId = null,
+  moduleType = null,
   widthCm,
   depthCm = null,
   pointerXCm,
@@ -442,6 +443,8 @@ export function snapPlacementToModules({
     rotationZDeg: resolvedRotation,
   }) : null;
   const candidates = [];
+  const counterCornerFaces = [];
+  const isCounter = moduleType === 'counter';
 
   const addCandidate = (
     placement,
@@ -477,6 +480,15 @@ export function snapPlacementToModules({
       snapKind,
       priority,
       distanceCm,
+    });
+  };
+
+  const rememberCounterFace = (placement, targetModule, constrainedAxis) => {
+    if (!isCounter || !placement || !targetModule) return;
+    counterCornerFaces.push({
+      placement: { ...placement },
+      targetModule,
+      constrainedAxis,
     });
   };
 
@@ -517,6 +529,7 @@ export function snapPlacementToModules({
           const alongAxisDistanceCm = movingAxis === 'x'
             ? Math.abs(center.xCm - pointerX)
             : Math.abs(center.yCm - pointerY);
+          rememberCounterFace(placement, targetModule, movingAxis);
           addCandidate(placement, targetModule.id, 'face', -1, alongAxisDistanceCm);
         });
         return;
@@ -545,6 +558,11 @@ export function snapPlacementToModules({
         const perpendicularDistanceCm = movingAxis === 'x'
           ? Math.abs(Number(placement.yCm) - pointerY)
           : Math.abs(Number(placement.xCm) - pointerX);
+        rememberCounterFace(
+          placement,
+          targetModule,
+          movingAxis === 'x' ? 'y' : 'x',
+        );
         addCandidate(placement, targetModule.id, 'face', -1, perpendicularDistanceCm);
       });
       return;
@@ -611,6 +629,62 @@ export function snapPlacementToModules({
       }), targetModule.id, snapKind, priority);
     });
   });
+
+  if (isCounter && counterCornerFaces.length > 1) {
+    const touchesTargetFace = (placement, targetModule) => {
+      const moving = getGroundSegment({ widthCm: width, depthCm, placement });
+      const target = getGroundSegment(targetModule);
+      if (!moving || !target) return false;
+
+      const targetDepthCm = getModuleCollisionDepthCm(targetModule);
+      if (moving.axis === target.axis) {
+        const longitudinalOverlap = moving.startCm < target.endCm - EPSILON_CM
+          && target.startCm < moving.endCm - EPSILON_CM;
+        const centerLineGapCm = Math.abs(moving.fixedCm - target.fixedCm);
+        return longitudinalOverlap
+          && nearlyEqual(centerLineGapCm, (movingDepthCm + targetDepthCm) / 2);
+      }
+
+      const crossMinCm = moving.fixedCm - movingDepthCm / 2;
+      const crossMaxCm = moving.fixedCm + movingDepthCm / 2;
+      const crossOverlap = crossMinCm < target.endCm - EPSILON_CM
+        && target.startCm < crossMaxCm - EPSILON_CM;
+      const targetHalfDepthCm = targetDepthCm / 2;
+      const faceA = target.fixedCm - targetHalfDepthCm;
+      const faceB = target.fixedCm + targetHalfDepthCm;
+      const endpointContact = nearlyEqual(moving.startCm, faceA)
+        || nearlyEqual(moving.startCm, faceB)
+        || nearlyEqual(moving.endCm, faceA)
+        || nearlyEqual(moving.endCm, faceB);
+      return crossOverlap && endpointContact;
+    };
+
+    const xFaces = counterCornerFaces.filter((entry) => entry.constrainedAxis === 'x');
+    const yFaces = counterCornerFaces.filter((entry) => entry.constrainedAxis === 'y');
+
+    xFaces.forEach((xFace) => {
+      yFaces.forEach((yFace) => {
+        if (xFace.targetModule.id === yFace.targetModule.id) return;
+        const placement = createModulePlacement({
+          ...freePlacement,
+          xCm: xFace.placement.xCm,
+          yCm: yFace.placement.yCm,
+          rotationZDeg: resolvedRotation,
+          wallId: 'free',
+        });
+        if (!touchesTargetFace(placement, xFace.targetModule)) return;
+        if (!touchesTargetFace(placement, yFace.targetModule)) return;
+
+        const center = getPlacementCenter(placement, width);
+        if (!center) return;
+        const cornerDistanceCm = Math.max(
+          Math.abs(center.xCm - pointerX),
+          Math.abs(center.yCm - pointerY),
+        );
+        addCandidate(placement, xFace.targetModule.id, 'corner-face', -2, cornerDistanceCm);
+      });
+    });
+  }
 
   if (!candidates.length) return null;
   candidates.sort((a, b) => (
