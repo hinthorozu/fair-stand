@@ -15,9 +15,10 @@ test('snaps module coordinates to 50 cm increments', () => {
 });
 
 test('L stand sides expose only the selected mirrored wall', () => {
-  assert.deepEqual(getAllowedWallIds('l-left'), ['back', 'left']);
-  assert.deepEqual(getAllowedWallIds('l-right'), ['back', 'right']);
-  assert.deepEqual(getAllowedWallIds('u-stand'), ['back', 'left', 'right']);
+  assert.deepEqual(getAllowedWallIds('l-left'), ['back', 'left', 'free']);
+  assert.deepEqual(getAllowedWallIds('l-right'), ['back', 'right', 'free']);
+  assert.deepEqual(getAllowedWallIds('u-stand'), ['back', 'left', 'right', 'free']);
+  assert.deepEqual(getAllowedWallIds('island'), ['free']);
 });
 
 test('snaps an L-left module to the closest active edge', () => {
@@ -88,4 +89,92 @@ test('rejects overlapping modules on the same wall but allows a corner connectio
     standYCm: 500,
   });
   assert.equal(corner.ok, true);
+});
+
+
+test('snaps a module inside every stand to the 50 cm free grid', () => {
+  const result = snapPlacementToStand({
+    standType: 'back-wall',
+    widthCm: 100,
+    pointerXCm: 375,
+    pointerYCm: 275,
+    standXCm: 800,
+    standYCm: 600,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.mode, 'free');
+  assert.deepEqual(result.placement, {
+    xCm: 300,
+    yCm: 300,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'free',
+  });
+});
+
+test('rotation lock keeps a perpendicular return free instead of snapping it onto the back wall', () => {
+  const result = snapPlacementToStand({
+    standType: 'u-stand',
+    widthCm: 100,
+    pointerXCm: 300,
+    pointerYCm: 20,
+    standXCm: 800,
+    standYCm: 600,
+    preferredRotationZDeg: 90,
+    rotationLocked: true,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.placement.wallId, 'free');
+  assert.equal(result.placement.rotationZDeg, 90);
+  assert.equal(result.placement.xCm, 300);
+});
+
+test('free parallel walls may overlap in axis range when they are on different grid lines', () => {
+  const modules = [{
+    id: 'a',
+    widthCm: 200,
+    placement: { xCm: 100, yCm: 100, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  }];
+  const result = validatePlacementAgainstModules({
+    moduleId: 'b',
+    widthCm: 200,
+    placement: { xCm: 100, yCm: 200, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+    modules,
+    standType: 'back-wall',
+    standXCm: 800,
+    standYCm: 600,
+  });
+  assert.equal(result.ok, true);
+});
+
+test('free L and T joins are allowed but a plus crossing is rejected', () => {
+  const horizontal = {
+    id: 'horizontal',
+    widthCm: 300,
+    placement: { xCm: 100, yCm: 200, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  };
+
+  const tJoin = validatePlacementAgainstModules({
+    moduleId: 't',
+    widthCm: 100,
+    placement: { xCm: 250, yCm: 100, zCm: 0, rotationZDeg: 90, wallId: 'free' },
+    modules: [horizontal],
+    standType: 'u-stand',
+    standXCm: 800,
+    standYCm: 600,
+  });
+  assert.equal(tJoin.ok, true);
+
+  const plusCross = validatePlacementAgainstModules({
+    moduleId: 'plus',
+    widthCm: 300,
+    placement: { xCm: 250, yCm: 100, zCm: 0, rotationZDeg: 90, wallId: 'free' },
+    modules: [horizontal],
+    standType: 'u-stand',
+    standXCm: 800,
+    standYCm: 600,
+  });
+  assert.equal(plusCross.ok, false);
 });

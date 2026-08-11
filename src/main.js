@@ -145,9 +145,7 @@ function setStandEditingEnabled(enabled) {
   buildWallButton.disabled = !enabled;
   openModuleCatalogButton.disabled = !enabled;
   clearWallButton.disabled = !enabled;
-  moduleDragSidebar?.setEnabled(
-    Boolean(enabled && currentStand && currentStand.standType !== 'island'),
-  );
+  moduleDragSidebar?.setEnabled(Boolean(enabled && currentStand));
 }
 
 function readStandSetup() {
@@ -339,7 +337,7 @@ function duplicateContextModule(context, side) {
   const duplicate = duplicateModuleState(sourceModule);
   if (!duplicate) return;
 
-  if (sourceModule.placement && currentStand?.standType !== 'island') {
+  if (sourceModule.placement && sourceModule.placement.wallId !== 'free') {
     const plan = planContextContinuousInsertion([duplicate], context, side);
     if (!plan.ok) {
       renderWallResult(plan.message, true);
@@ -539,13 +537,25 @@ const moduleContextMenu = createModuleContextMenu({
 moduleDragSidebar = createModuleDragSidebar({
   anchorButton: openModuleCatalogButton,
   viewport,
-  canDrag: () => Boolean(currentStand && currentStand.standType !== 'island'),
+  canDrag: () => Boolean(currentStand),
   createModuleState: (module) => createCatalogModuleState(module),
-  onPreview: (moduleState, clientX, clientY) => (
-    scene3d.previewCatalogModuleDrag(moduleState, clientX, clientY)
+  onPreview: (moduleState, clientX, clientY, rotationZDeg, rotationLocked) => (
+    scene3d.previewCatalogModuleDrag(
+      moduleState,
+      clientX,
+      clientY,
+      rotationZDeg,
+      rotationLocked,
+    )
   ),
-  onDrop: (moduleState, clientX, clientY) => {
-    const result = scene3d.dropCatalogModuleDrag(moduleState, clientX, clientY);
+  onDrop: (moduleState, clientX, clientY, rotationZDeg, rotationLocked) => {
+    const result = scene3d.dropCatalogModuleDrag(
+      moduleState,
+      clientX,
+      clientY,
+      rotationZDeg,
+      rotationLocked,
+    );
     if (!result.ok || !result.placement) {
       renderWallResult(result.message ?? 'Modül bu konuma bırakılamadı.', true);
       return;

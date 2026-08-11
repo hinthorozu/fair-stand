@@ -671,15 +671,16 @@ export function createStandScene(
       .filter(Boolean);
   }
 
-  function previewCatalogModuleDrag(moduleState, clientX, clientY) {
+  function previewCatalogModuleDrag(
+    moduleState,
+    clientX,
+    clientY,
+    preferredRotationZDeg = 0,
+    rotationLocked = false,
+  ) {
     if (!stageLayout || !moduleState) {
       disposePlacementGhost();
       return { ok: false, message: 'Önce stand alanını oluştur.' };
-    }
-
-    if (stageLayout.standType === 'island') {
-      disposePlacementGhost();
-      return { ok: false, message: 'Ada Stand serbest yerleşimi sonraki adımda eklenecek.' };
     }
 
     const ground = getGroundPoint(clientX, clientY);
@@ -695,7 +696,8 @@ export function createStandScene(
       pointerYCm: ground.yCm,
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
-      preferredRotationZDeg: 0,
+      preferredRotationZDeg,
+      rotationLocked,
     });
 
     if (!snapped.ok || !snapped.placement) {
@@ -706,14 +708,35 @@ export function createStandScene(
       };
     }
 
-    const plan = planContinuousModuleInsert({
-      modules: getRenderedModuleStates(),
-      insertedModule: moduleState,
-      desiredPlacement: snapped.placement,
-      standType: stageLayout.standType,
-      standXCm: stageLayout.widthCm,
-      standYCm: stageLayout.depthCm,
-    });
+    let plan;
+    if (snapped.placement.wallId === 'free') {
+      const validation = validatePlacementAgainstModules({
+        placement: snapped.placement,
+        widthCm: moduleState.widthCm,
+        moduleId: moduleState.id,
+        modules: getRenderedModuleStates(),
+        standType: stageLayout.standType,
+        standXCm: stageLayout.widthCm,
+        standYCm: stageLayout.depthCm,
+      });
+      plan = {
+        ok: validation.ok,
+        message: validation.message ?? null,
+        movingPlacement: { ...snapped.placement },
+        placements: validation.ok
+          ? new Map([[moduleState.id, { ...snapped.placement }]])
+          : new Map(),
+      };
+    } else {
+      plan = planContinuousModuleInsert({
+        modules: getRenderedModuleStates(),
+        insertedModule: moduleState,
+        desiredPlacement: snapped.placement,
+        standType: stageLayout.standType,
+        standXCm: stageLayout.widthCm,
+        standYCm: stageLayout.depthCm,
+      });
+    }
 
     const previewPlacement = plan.ok && plan.movingPlacement
       ? plan.movingPlacement
@@ -727,8 +750,20 @@ export function createStandScene(
     };
   }
 
-  function dropCatalogModuleDrag(moduleState, clientX, clientY) {
-    const result = previewCatalogModuleDrag(moduleState, clientX, clientY);
+  function dropCatalogModuleDrag(
+    moduleState,
+    clientX,
+    clientY,
+    preferredRotationZDeg = 0,
+    rotationLocked = false,
+  ) {
+    const result = previewCatalogModuleDrag(
+      moduleState,
+      clientX,
+      clientY,
+      preferredRotationZDeg,
+      rotationLocked,
+    );
     disposePlacementGhost();
     return result;
   }
@@ -746,6 +781,8 @@ export function createStandScene(
     if (!dragSession.dragging && distance < DRAG_THRESHOLD_PX) return;
 
     dragSession.dragging = true;
+    dragSession.lastClientX = event.clientX;
+    dragSession.lastClientY = event.clientY;
     dragSession.moduleGroup.visible = false;
     updateDragBadge(dragSession.moduleState, event.clientX, event.clientY);
 
@@ -764,7 +801,8 @@ export function createStandScene(
       pointerYCm: ground.yCm,
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
-      preferredRotationZDeg: moduleState.placement?.rotationZDeg ?? 0,
+      preferredRotationZDeg: dragSession.preferredRotationZDeg,
+      rotationLocked: dragSession.rotationLocked,
     });
 
     if (!snapped.ok || !snapped.placement) {
@@ -774,7 +812,7 @@ export function createStandScene(
     }
 
     let plan;
-    if (stageLayout.standType === 'island') {
+    if (snapped.placement.wallId === 'free') {
       const validation = validatePlacementAgainstModules({
         placement: snapped.placement,
         widthCm: moduleState.widthCm,
@@ -1299,6 +1337,10 @@ export function createStandScene(
       moduleState,
       dragging: false,
       preview: null,
+      preferredRotationZDeg: moduleState.placement?.rotationZDeg === 90 ? 90 : 0,
+      rotationLocked: false,
+      lastClientX: event.clientX,
+      lastClientY: event.clientY,
     };
 
     renderer.domElement.setPointerCapture?.(event.pointerId);
@@ -1308,6 +1350,17 @@ export function createStandScene(
   renderer.domElement.addEventListener('pointermove', (event) => {
     if (!dragSession || event.pointerId !== dragSession.pointerId) return;
     updatePlacementDrag(event);
+  });
+
+  window.addEventListener('keydown', (event) => {
+    if (!dragSession?.dragging || String(event.key).toLowerCase() !== 'r') return;
+    event.preventDefault();
+    dragSession.preferredRotationZDeg = dragSession.preferredRotationZDeg === 90 ? 0 : 90;
+    dragSession.rotationLocked = true;
+    updatePlacementDrag({
+      clientX: dragSession.lastClientX,
+      clientY: dragSession.lastClientY,
+    });
   });
 
   renderer.domElement.addEventListener('pointerup', (event) => {
