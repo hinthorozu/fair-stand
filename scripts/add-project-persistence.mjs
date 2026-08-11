@@ -57,3 +57,5 @@ import fs from 'node:fs';
 
   fs.writeFileSync(path, source);
 }
+
+// Trigger marker: project persistence v1.
