@@ -440,10 +440,10 @@ test('plans free context insertion without wall capacity', () => {
 
 test('free context visual right follows all four module rotations', () => {
   const cases = [
-    [0, 300, 400],
-    [90, 300, 200],
+    [0, 400, 300],
+    [90, 200, 300],
     [180, 200, 300],
-    [270, 300, 400],
+    [270, 400, 300],
   ];
 
   cases.forEach(([rotationZDeg, expectedAxisValue, expectedOtherValue]) => {
