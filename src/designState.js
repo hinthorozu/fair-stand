@@ -112,9 +112,12 @@ export function createCounterModuleState(widthCm) {
     depthCm: 50,
     heightCm: 100,
     faces: {
-      front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      frontLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      frontUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      leftLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      leftUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      rightLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      rightUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
     },
   };
 }

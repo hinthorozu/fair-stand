@@ -3,23 +3,32 @@ import assert from 'node:assert/strict';
 import { createCounterModuleState, duplicateModuleState } from '../src/designState.js';
 import { rotateModulePlacementAroundCenter, snapPlacementToStand, validatePlacementAgainstModules } from '../src/modulePlacement.js';
 
-test('counter state exposes three independent editable faces', () => {
-  const counter = createCounterModuleState(150);
-  assert.equal(counter.type, 'counter');
-  assert.equal(counter.widthCm, 150);
-  assert.equal(counter.depthCm, 50);
-  assert.equal(counter.heightCm, 100);
-  assert.deepEqual(Object.keys(counter.faces), ['front', 'left', 'right']);
-  assert.notEqual(counter.faces.front.id, counter.faces.left.id);
-  counter.faces.front.color = '#ff0000';
-  assert.equal(counter.faces.left.color, '#ffffff');
+test('100, 150 and 200 cm counters expose six independent stacked editable faces', () => {
+  const faceKeys = [
+    'frontLower', 'frontUpper',
+    'leftLower', 'leftUpper',
+    'rightLower', 'rightUpper',
+  ];
+
+  for (const widthCm of [100, 150, 200]) {
+    const counter = createCounterModuleState(widthCm);
+    assert.equal(counter.type, 'counter');
+    assert.equal(counter.widthCm, widthCm);
+    assert.equal(counter.depthCm, 50);
+    assert.equal(counter.heightCm, 100);
+    assert.deepEqual(Object.keys(counter.faces), faceKeys);
+    assert.equal(new Set(faceKeys.map((key) => counter.faces[key].id)).size, 6);
+    counter.faces.frontLower.color = '#ff0000';
+    assert.equal(counter.faces.frontUpper.color, '#ffffff');
+    assert.equal(counter.faces.leftLower.color, '#ffffff');
+  }
 });
 
-test('duplicating a counter gives every face a new surface id', () => {
+test('duplicating a counter gives all six panels new surface ids', () => {
   const source = createCounterModuleState(100);
   const copy = duplicateModuleState(source);
   assert.notEqual(copy.id, source.id);
-  for (const key of ['front', 'left', 'right']) {
+  for (const key of Object.keys(source.faces)) {
     assert.notEqual(copy.faces[key].id, source.faces[key].id);
   }
 });

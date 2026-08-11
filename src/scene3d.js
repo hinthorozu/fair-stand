@@ -2740,6 +2740,13 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const widthM = widthCm / 100;
   const depthM = depthCm / 100;
   const heightM = heightCm / 100;
+  const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
+  const topThicknessM = 0.04;
+  const topOverhangM = 0.02;
+  const frameHeightM = Math.max(heightM - topThicknessM, profileM * 5);
+  const panelHeightM = Math.max((frameHeightM - profileM * 3) / 2, 0.05);
+  const frontPanelWidthM = Math.max(widthM - profileM * 2, 0.05);
+  const sidePanelWidthM = Math.max(depthM - profileM * 2, 0.05);
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -2751,29 +2758,91 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     heightCm,
   };
 
-  const body = new THREE.Mesh(
-    new THREE.BoxGeometry(widthM, heightM, depthM),
-    new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: 0.76, metalness: 0 }),
-  );
-  body.position.set(0, heightM / 2, 0);
-  body.castShadow = true;
-  body.receiveShadow = true;
-  group.add(body);
+  const frameMaterial = new THREE.MeshStandardMaterial({
+    color: FRAME_COLOR,
+    metalness: 0.68,
+    roughness: 0.28,
+  });
+  const addProfile = (geometry, position) => {
+    const mesh = new THREE.Mesh(geometry, frameMaterial.clone());
+    mesh.position.copy(position);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    group.add(mesh);
+    return mesh;
+  };
+
+  // 4 visible Maxima corner posts.
+  const cornerPostGeometry = new THREE.BoxGeometry(profileM, frameHeightM, profileM);
+  [-1, 1].forEach((xSide) => {
+    [-1, 1].forEach((zSide) => {
+      addProfile(
+        cornerPostGeometry.clone(),
+        new THREE.Vector3(
+          xSide * (widthM / 2 - profileM / 2),
+          frameHeightM / 2,
+          zSide * (depthM / 2 - profileM / 2),
+        ),
+      );
+    });
+  });
+
+  // Bottom, middle and top rails create two stacked panel openings.
+  const railYs = [profileM / 2, frameHeightM / 2, frameHeightM - profileM / 2];
+  const frontRailGeometry = new THREE.BoxGeometry(frontPanelWidthM, profileM, profileM);
+  railYs.forEach((y) => {
+    addProfile(
+      frontRailGeometry.clone(),
+      new THREE.Vector3(0, y, depthM / 2 - profileM / 2),
+    );
+  });
+
+  const sideRailGeometry = new THREE.BoxGeometry(profileM, profileM, sidePanelWidthM);
+  [-1, 1].forEach((xSide) => {
+    railYs.forEach((y) => {
+      addProfile(
+        sideRailGeometry.clone(),
+        new THREE.Vector3(xSide * (widthM / 2 - profileM / 2), y, 0),
+      );
+    });
+  });
 
   const top = new THREE.Mesh(
-    new THREE.PlaneGeometry(widthM, depthM),
+    new THREE.BoxGeometry(
+      widthM + topOverhangM * 2,
+      topThicknessM,
+      depthM + topOverhangM * 2,
+    ),
     new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.58, metalness: 0 }),
   );
-  top.rotation.x = -Math.PI / 2;
-  top.position.set(0, heightM + 0.0015, 0);
+  top.position.set(0, frameHeightM + topThicknessM / 2, 0);
+  top.castShadow = true;
   top.receiveShadow = true;
   group.add(top);
 
   const surfaces = [];
-  const addFace = (surfaceRole, surfaceState, faceWidthM, position, rotationY = 0) => {
+  const addFace = (
+    surfaceRole,
+    panelLevel,
+    surfaceState,
+    faceWidthM,
+    position,
+    rotationY = 0,
+  ) => {
     if (!surfaceState) return;
+
+    const backing = new THREE.Mesh(
+      new THREE.BoxGeometry(faceWidthM, panelHeightM, 0.012),
+      new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74, metalness: 0 }),
+    );
+    backing.position.copy(position);
+    backing.rotation.y = rotationY;
+    backing.castShadow = true;
+    backing.receiveShadow = true;
+    group.add(backing);
+
     const surface = new THREE.Mesh(
-      new THREE.PlaneGeometry(faceWidthM, heightM),
+      new THREE.PlaneGeometry(faceWidthM, panelHeightM),
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
         roughness: 0.72,
@@ -2785,8 +2854,11 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     );
     surface.position.copy(position);
     surface.rotation.y = rotationY;
+    if (surfaceRole === 'front') surface.position.z += 0.0065;
+    else if (surfaceRole === 'left') surface.position.x -= 0.0065;
+    else surface.position.x += 0.0065;
 
-    const selectionFrame = createSelectionFrame(faceWidthM, heightM);
+    const selectionFrame = createSelectionFrame(faceWidthM, panelHeightM);
     selectionFrame.visible = false;
     surface.add(selectionFrame);
 
@@ -2798,38 +2870,32 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
-      stripIndex: null,
-      stripNumber: null,
+      stripIndex: panelLevel === 'lower' ? 0 : 1,
+      stripNumber: panelLevel === 'lower' ? 1 : 2,
       surfaceRole,
+      panelLevel,
       surfaceId: surfaceState.id,
       surfaceState,
       selectionFrame,
+      backing,
     };
     group.add(surface);
     surfaces.push(surface);
     onSurfaceReady?.(surface);
   };
 
-  addFace(
-    'front',
-    moduleState.faces?.front,
-    widthM,
-    new THREE.Vector3(0, heightM / 2, depthM / 2 + 0.0015),
-  );
-  addFace(
-    'left',
-    moduleState.faces?.left,
-    depthM,
-    new THREE.Vector3(-widthM / 2 - 0.0015, heightM / 2, 0),
-    -Math.PI / 2,
-  );
-  addFace(
-    'right',
-    moduleState.faces?.right,
-    depthM,
-    new THREE.Vector3(widthM / 2 + 0.0015, heightM / 2, 0),
-    Math.PI / 2,
-  );
+  const lowerY = profileM + panelHeightM / 2;
+  const upperY = frameHeightM - profileM - panelHeightM / 2;
+  const frontZ = depthM / 2 - profileM - 0.006;
+  const leftX = -widthM / 2 + profileM + 0.006;
+  const rightX = widthM / 2 - profileM - 0.006;
+
+  addFace('front', 'lower', moduleState.faces?.frontLower, frontPanelWidthM, new THREE.Vector3(0, lowerY, frontZ));
+  addFace('front', 'upper', moduleState.faces?.frontUpper, frontPanelWidthM, new THREE.Vector3(0, upperY, frontZ));
+  addFace('left', 'lower', moduleState.faces?.leftLower, sidePanelWidthM, new THREE.Vector3(leftX, lowerY, 0), -Math.PI / 2);
+  addFace('left', 'upper', moduleState.faces?.leftUpper, sidePanelWidthM, new THREE.Vector3(leftX, upperY, 0), -Math.PI / 2);
+  addFace('right', 'lower', moduleState.faces?.rightLower, sidePanelWidthM, new THREE.Vector3(rightX, lowerY, 0), Math.PI / 2);
+  addFace('right', 'upper', moduleState.faces?.rightUpper, sidePanelWidthM, new THREE.Vector3(rightX, upperY, 0), Math.PI / 2);
 
   return { group, surfaces };
 }
