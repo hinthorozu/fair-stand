@@ -408,6 +408,7 @@ function createEndpointConnectionPlacement({
 export function snapPlacementToModules({
   moduleId = null,
   widthCm,
+  depthCm = null,
   pointerXCm,
   pointerYCm,
   rotationZDeg = 0,
@@ -429,6 +430,17 @@ export function snapPlacementToModules({
 
   const resolvedRotation = normalizeModuleRotationZDeg(rotationZDeg);
   const movingAxis = isVerticalModuleRotation(resolvedRotation) ? 'y' : 'x';
+  const strictMovingDepth = hasStrictDepthBounds(depthCm);
+  const movingDepthCm = strictMovingDepth ? Number(depthCm) : MODULE_COLLISION_DEPTH_CM;
+  const freePlacement = strictMovingDepth ? createFreePlacement({
+    widthCm: width,
+    depthCm,
+    pointerXCm: pointerX,
+    pointerYCm: pointerY,
+    standXCm,
+    standYCm,
+    rotationZDeg: resolvedRotation,
+  }) : null;
   const candidates = [];
 
   const addCandidate = (placement, targetModuleId, snapKind, priority = 0) => {
@@ -440,6 +452,7 @@ export function snapPlacementToModules({
     const validation = validatePlacementAgainstModules({
       placement,
       widthCm: width,
+      depthCm,
       moduleId,
       modules,
       standType,
@@ -461,6 +474,36 @@ export function snapPlacementToModules({
     if (!targetModule?.placement || targetModule.id === moduleId) return;
     const target = getGroundSegment(targetModule);
     if (!target) return;
+
+    if (strictMovingDepth) {
+      if (!freePlacement || target.axis !== movingAxis) return;
+
+      const targetDepthCm = getModuleCollisionDepthCm(targetModule);
+      const faceGapCm = (movingDepthCm + targetDepthCm) / 2;
+
+      [-1, 1].forEach((direction) => {
+        const placement = createModulePlacement({
+          ...freePlacement,
+          xCm: movingAxis === 'y'
+            ? target.fixedCm + (direction * faceGapCm)
+            : freePlacement.xCm,
+          yCm: movingAxis === 'x'
+            ? target.fixedCm + (direction * faceGapCm)
+            : freePlacement.yCm,
+          rotationZDeg: resolvedRotation,
+          wallId: 'free',
+        });
+
+        const movingSegment = getGroundSegment({ widthCm: width, depthCm, placement });
+        if (!movingSegment) return;
+        const longitudinalOverlap = movingSegment.startCm < target.endCm - EPSILON_CM
+          && target.startCm < movingSegment.endCm - EPSILON_CM;
+        if (!longitudinalOverlap) return;
+
+        addCandidate(placement, targetModule.id, 'face', -1);
+      });
+      return;
+    }
 
     if (target.axis === movingAxis) {
       // Aynı doğrultuda yalnızca gerçek uç-uca bağlantı üret.

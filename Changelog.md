@@ -537,3 +537,10 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 429. Bankolar drag kataloguna eklendi ve serbest yerleşime zorlandı; 4 yön dönüş desteklenirken 50 cm derinlik gerçek collision ve aktif alan sınır hesabına dahil edildi.
 430. Banko footprint merkez çizgisi, 50 cm grid üzerinde kenarları hizalayacak 25 cm ofsetli çapraz eksen snap mantığına bağlandı; mevcut 10 cm duvar modülü davranışı değiştirilmedi.
 431. Banko state çoğaltma/sıfırlama desteği, seçili cephe açıklaması, gerçek ölçülü placement ghost ve regresyon testleri eklendi.
+
+
+## Banko yüzeye yaslama düzeltmesi
+
+432. Bankolar paralel bir duvar/modül yüzüne yaklaştırıldığında gerçek fiziksel yüzey temasıyla snap olacak şekilde güncellendi; 50 cm banko derinliği ile hedef modülün kasa derinliği birlikte hesaba katılır.
+433. Temas artık geçerli yerleşimdir; gövdeler birbirinin içine girdiğinde mevcut collision uyarısı korunur. Böylece 50 cm banko, 10 cm duvar modülüne merkez çizgileri arasında 30 cm mesafede sıfır yüzey temasıyla yaslanabilir.
+434. Katalogdan bırakma ve sahnedeki bankoyu taşıma akışlarında aynı yüzeye yaslama snap davranışı etkinleştirildi; normal duvar modüllerinin bankoya manyetik snap davranışı değiştirilmedi.

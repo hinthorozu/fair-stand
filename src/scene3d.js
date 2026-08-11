@@ -909,7 +909,7 @@ export function createStandScene(
     }
 
     const renderedModules = getRenderedModuleStates();
-    const magneticSnap = moduleState.type === 'counter' ? null : snapPlacementToModules({
+    const magneticSnap = snapPlacementToModules({
       moduleId: moduleState.id,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
@@ -917,7 +917,9 @@ export function createStandScene(
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       rotationZDeg: preferredRotationZDeg,
-      modules: renderedModules.filter((module) => module.type !== 'counter'),
+      modules: moduleState.type === 'counter'
+        ? renderedModules
+        : renderedModules.filter((module) => module.type !== 'counter'),
       standType: stageLayout.standType,
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
@@ -1053,7 +1055,7 @@ export function createStandScene(
     }
 
     const renderedModules = getRenderedModuleStates();
-    const magneticSnap = moduleState.type === 'counter' ? null : snapPlacementToModules({
+    const magneticSnap = snapPlacementToModules({
       moduleId: moduleState.id,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
@@ -1061,7 +1063,9 @@ export function createStandScene(
       pointerXCm: ground.xCm,
       pointerYCm: ground.yCm,
       rotationZDeg: dragSession.preferredRotationZDeg,
-      modules: renderedModules.filter((module) => module.type !== 'counter'),
+      modules: moduleState.type === 'counter'
+        ? renderedModules
+        : renderedModules.filter((module) => module.type !== 'counter'),
       standType: stageLayout.standType,
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
