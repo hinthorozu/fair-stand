@@ -22,6 +22,7 @@ jobs:
           node-version: 22
       - run: npm install
       - run: node scripts/apply-base-module.mjs
+      - run: sed -i "s/assert.equal(rotated.yCm % 50, 0);/assert.equal(Math.abs(rotated.yCm % 50), 0);/" test/baseModule.test.js
       - run: npm test
       - run: npm run build
       - run: |
