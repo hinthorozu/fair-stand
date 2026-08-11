@@ -1,0 +1,76 @@
+name: Patch table chair set once
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/patch-table-chair-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Update table chair geometry
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('src/scene3d.js')
+          text = path.read_text(encoding='utf-8')
+          start = text.index('function createTableChairSetModule(moduleState, moduleIndex) {')
+          end = text.index('\nfunction createSofaSetModule(moduleState, moduleIndex) {', start)
+          block = text[start:end]
+
+          replacements = [
+              ('Number(moduleState.widthCm || 150)', 'Number(moduleState.widthCm || 120)'),
+              ('Number(moduleState.depthCm || 150)', 'Number(moduleState.depthCm || 120)'),
+              ("const tabletopMaterial = new THREE.MeshStandardMaterial({ color: 0xf3f4f6, roughness: 0.46, metalness: 0.02 });", """const tabletopMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0xd7e9ed,
+            transparent: true,
+            opacity: 0.42,
+            roughness: 0.10,
+            metalness: 0,
+            transmission: 0.32,
+            clearcoat: 0.65,
+            clearcoatRoughness: 0.08,
+            depthWrite: false,
+          });"""),
+              ('// 150 x 150 dış footprint sabit. Sandalyelerin dış uçları yaklaşık ±75 cm sınırında kalır.\n  const chairOffset = 0.50;', '// 120 x 120 cm dış footprint. Sandalyeler masaya yaklaştırıldı.\n  const chairOffset = 0.35;'),
+              ('const top = new THREE.Mesh(new THREE.CylinderGeometry(0.275, 0.275, 0.045, 48), tabletopMaterial);', '// Ø75 cm cam masa tablası.\n  const top = new THREE.Mesh(new THREE.CylinderGeometry(0.375, 0.375, 0.018, 64), tabletopMaterial);'),
+              ('top.castShadow = true;', 'top.castShadow = false;'),
+          ]
+
+          for old, new in replacements:
+              if old not in block:
+                  raise SystemExit(f'Expected table-chair source not found: {old[:80]}')
+              block = block.replace(old, new)
+
+          text = text[:start] + block + text[end:]
+          path.write_text(text, encoding='utf-8')
+
+      - run: npm test
+      - run: npm run build
+
+      - name: Commit and push
+        run: |
+          rm .github/workflows/patch-table-chair-once.yml
+          git config user.name "OpenAI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/scene3d.js .github/workflows/patch-table-chair-once.yml
+          git commit -m "Resize table chair set and add glass tabletop"
+          git push origin ROG
