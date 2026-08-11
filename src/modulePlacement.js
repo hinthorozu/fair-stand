@@ -773,7 +773,7 @@ function createFreePlacement({
 
   if (strictDepth) {
     const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
-    const useWallInnerFaces = moduleType === 'sofa-set';
+    const useWallInnerFaces = moduleType === 'sofa-set' || moduleType === 'table-chair-set';
     const wallFaceOffsetCm = MODULE_COLLISION_DEPTH_CM / 2;
     const activeWalls = useWallInnerFaces ? getAllowedWallIds(standType) : [];
     const leftEdgeCm = activeWalls.includes('left') ? wallFaceOffsetCm : 0;

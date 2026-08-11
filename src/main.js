@@ -14,6 +14,7 @@ import {
   createSeparatorModuleState,
   createShelfModuleState,
   createSofaSetModuleState,
+  createTableChairSetModuleState,
   createShowcaseModuleState,
   duplicateModuleState,
   totalWallWidthCm,
@@ -449,6 +450,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm);
   else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);
   else if (module.type === 'sofa-set') state = createSofaSetModuleState();
+  else if (module.type === 'table-chair-set') state = createTableChairSetModuleState();
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);
   else if (module.type === 'showcase-2' || module.type === 'showcase-3') {
     state = createShowcaseModuleState(module.type, module.widthCm);

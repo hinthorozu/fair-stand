@@ -151,6 +151,20 @@ export function createSofaSetModuleState() {
   };
 }
 
+export function createTableChairSetModuleState() {
+  return {
+    id: createId('module'),
+    type: 'table-chair-set',
+    widthCm: 150,
+    depthCm: 150,
+    heightCm: 90,
+    surface: {
+      id: createId('surface'),
+      color: DEFAULT_PANEL_COLOR,
+    },
+  };
+}
+
 export function duplicateModuleState(moduleState) {
   if (!moduleState) return null;
   const duplicate = JSON.parse(JSON.stringify(moduleState));
