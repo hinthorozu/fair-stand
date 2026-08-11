@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - name: Fix sofa patch anchors and template literals
+      - name: Fix sofa patch anchors, template literals and chair alignment
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -30,14 +30,29 @@ jobs:
           s = s.replace("`      if (moduleState?.type === 'base') {`,\n`      if (moduleState?.type === 'sofa-set') {\\n        preview.style.background = 'linear-gradient(to bottom,#f8fafc 0 45%,#9aa0a6 45% 52%,#f8fafc 52% 100%)';\\n      } else if (moduleState?.type === 'base') {`, 'sofa badge style');",
                         "`      if (moduleState?.type === 'shelf') {`,\n`      if (moduleState?.type === 'sofa-set') {\\n        preview.style.background = 'linear-gradient(to bottom,#f8fafc 0 45%,#9aa0a6 45% 52%,#f8fafc 52% 100%)';\\n      } else if (moduleState?.type === 'shelf') {`, 'sofa badge style');")
           s = s.replace("surfaceId: \\`${moduleState.surface?.id}-\\${index}\\`", "surfaceId: \\`\\${moduleState.surface?.id}-\\${index}\\`")
+          s = s.replace("addSofa({ x: -0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });", "addSofa({ x: -0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });")
+          s = s.replace("addSofa({ x: 0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });", "addSofa({ x: 0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });")
           p.write_text(s)
           PY
       - run: node scripts/apply-sofa-set.mjs
+      - name: Align single chairs with loveseat outer edges
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/scene3d.js')
+          s = p.read_text()
+          old_left = "  addSofa({ x: -0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"
+          old_right = "  addSofa({ x: 0.78, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"
+          new_left = "  addSofa({ x: -0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"
+          new_right = "  addSofa({ x: 0.475, z: depthM / 2 - 0.50, seatWidth: 0.65, seatDepth: 0.75, facing: 'back' });"
+          s = s.replace(old_left, new_left).replace(old_right, new_right)
+          p.write_text(s)
+          PY
       - run: npm test
       - run: npm run build
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src test Changelog.md PROJECT_RULES.md ROADMAP.md
-          git diff --cached --quiet || git commit -m "Add sofa set module"
+          git add src scripts test Changelog.md PROJECT_RULES.md ROADMAP.md
+          git diff --cached --quiet || git commit -m "Align sofa set chairs"
           git push origin ROG
