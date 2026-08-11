@@ -389,6 +389,7 @@ export function createStandScene(
   let surfaceMeshes = [];
   const selectedSurfaces = new Set();
   let selectionAnchorSurfaceId = null;
+  let selectedModuleId = null;
   let placementGhost = null;
   let dragSession = null;
   let dragBadge = null;
@@ -488,9 +489,19 @@ export function createStandScene(
     clearSelection({ notify: false });
     if (mesh) {
       selectedSurfaces.add(mesh);
+      selectedModuleId = mesh.userData.moduleId ?? null;
       selectionAnchorSurfaceId = mesh.userData.surfaceId ?? null;
       setSelectionVisual(mesh, true);
     }
+    notifySelection();
+  }
+
+  function selectModuleOnly(moduleId) {
+    selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
+    selectedSurfaces.clear();
+    selectionAnchorSurfaceId = null;
+    floorSelected = false;
+    selectedModuleId = moduleId ?? null;
     notifySelection();
   }
 
@@ -524,6 +535,10 @@ export function createStandScene(
       selectedSurfaces.add(entry.mesh);
       setSelectionVisual(entry.mesh, true);
     });
+    const selectedModuleIds = new Set(
+      result.entries.map((entry) => entry.mesh.userData?.moduleId).filter(Boolean),
+    );
+    selectedModuleId = selectedModuleIds.size === 1 ? [...selectedModuleIds][0] : null;
     notifySelection();
   }
 
@@ -1008,11 +1023,14 @@ export function createStandScene(
   }
 
   function getSingleSelectedModuleGroup() {
-    const moduleIds = new Set(
-      [...selectedSurfaces].map((surface) => surface.userData?.moduleId).filter(Boolean),
-    );
-    if (moduleIds.size !== 1) return null;
-    const [moduleId] = moduleIds;
+    let moduleId = selectedModuleId;
+    if (!moduleId) {
+      const moduleIds = new Set(
+        [...selectedSurfaces].map((surface) => surface.userData?.moduleId).filter(Boolean),
+      );
+      if (moduleIds.size !== 1) return null;
+      [moduleId] = moduleIds;
+    }
     return wallRoot.children.find((group) => (
       group.userData?.moduleState?.id === moduleId || group.userData?.moduleId === moduleId
     )) ?? null;
@@ -1814,7 +1832,7 @@ export function createStandScene(
     onModuleContextMenu?.(context);
   });
 
-  function handleSurfaceSelectionAt(clientX, clientY, rectangleSelect) {
+  function handleSurfaceSelectionAt(clientX, clientY, rectangleSelect, fallbackModuleId = null) {
     setPointerFromClient(clientX, clientY);
     raycaster.setFromCamera(pointer, camera);
     const hit = raycaster.intersectObjects(surfaceMeshes, false)[0];
@@ -1832,17 +1850,26 @@ export function createStandScene(
       return;
     }
 
+    if (!rectangleSelect && fallbackModuleId) {
+      selectModuleOnly(fallbackModuleId);
+      return;
+    }
+
     if (!rectangleSelect && activeFloor.visible) {
       const floorHit = raycaster.intersectObject(activeFloor, false)[0];
       if (floorHit) {
         clearSelection({ notify: false });
+        selectedModuleId = null;
         floorSelected = true;
         notifyFloorSelection();
         return;
       }
     }
 
-    if (!rectangleSelect) clearSelection();
+    if (!rectangleSelect) {
+      selectedModuleId = null;
+      clearSelection();
+    }
   }
 
   renderer.domElement.addEventListener('pointerdown', (event) => {
@@ -1861,6 +1888,7 @@ export function createStandScene(
     }
 
     const moduleState = picked.moduleGroup.userData.moduleState;
+    if (moduleState) selectedModuleId = moduleState.id;
     if (!moduleState) {
       handleSurfaceSelectionAt(event.clientX, event.clientY, false);
       return;
@@ -1925,8 +1953,11 @@ export function createStandScene(
     if (!dragSession || event.pointerId !== dragSession.pointerId) return;
     const startClientX = dragSession.startClientX;
     const startClientY = dragSession.startClientY;
+    const clickedModuleId = dragSession.moduleState?.id ?? null;
     const wasDragging = finishPlacementDrag(event);
-    if (!wasDragging) handleSurfaceSelectionAt(startClientX, startClientY, false);
+    if (!wasDragging) {
+      handleSurfaceSelectionAt(startClientX, startClientY, false, clickedModuleId);
+    }
   });
 
   renderer.domElement.addEventListener('pointercancel', (event) => {
@@ -1958,7 +1989,10 @@ export function createStandScene(
     setFloorColor,
     buildWall,
     clearWall,
-    clearSelection,
+    clearSelection: (...args) => {
+      selectedModuleId = null;
+      return clearSelection(...args);
+    },
     resetStageView,
     resetDefaultView,
     applyColor,
