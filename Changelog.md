@@ -544,3 +544,10 @@ Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan 
 432. Bankolar paralel bir duvar/modül yüzüne yaklaştırıldığında gerçek fiziksel yüzey temasıyla snap olacak şekilde güncellendi; 50 cm banko derinliği ile hedef modülün kasa derinliği birlikte hesaba katılır.
 433. Temas artık geçerli yerleşimdir; gövdeler birbirinin içine girdiğinde mevcut collision uyarısı korunur. Böylece 50 cm banko, 10 cm duvar modülüne merkez çizgileri arasında 30 cm mesafede sıfır yüzey temasıyla yaslanabilir.
 434. Katalogdan bırakma ve sahnedeki bankoyu taşıma akışlarında aynı yüzeye yaslama snap davranışı etkinleştirildi; normal duvar modüllerinin bankoya manyetik snap davranışı değiştirilmedi.
+
+
+## Banko yüzeye yaslama snap mesafesi düzeltmesi
+
+435. Banko yüzeye yaslama snap mesafesi artık 2B Öklid mesafesiyle değil, hedef yüzeye dik eksendeki gerçek mesafeyle ölçülür.
+436. X/Y boyunca 50 cm grid hizasından doğan en fazla 25 cm boyuna fark, bankonun duvara yaslanma adayını artık yanlışlıkla iptal etmez.
+437. Böylece banko duvara yaklaştırıldığında 50 cm gerçek derinlik korunarak 10 cm duvar kasasına 30 cm merkez çizgisi mesafesinde sıfır temasla snap olur; iç içe geçme hâlâ collision olarak reddedilir.

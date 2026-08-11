@@ -443,10 +443,20 @@ export function snapPlacementToModules({
   }) : null;
   const candidates = [];
 
-  const addCandidate = (placement, targetModuleId, snapKind, priority = 0) => {
+  const addCandidate = (
+    placement,
+    targetModuleId,
+    snapKind,
+    priority = 0,
+    distanceOverrideCm = null,
+  ) => {
     const center = getPlacementCenter(placement, width);
     if (!center) return;
-    const distanceCm = Math.hypot(center.xCm - pointerX, center.yCm - pointerY);
+    const hasDistanceOverride = distanceOverrideCm !== null && distanceOverrideCm !== undefined;
+    const overrideDistance = hasDistanceOverride ? Number(distanceOverrideCm) : Number.NaN;
+    const distanceCm = Number.isFinite(overrideDistance)
+      ? overrideDistance
+      : Math.hypot(center.xCm - pointerX, center.yCm - pointerY);
     if (distanceCm > threshold + EPSILON_CM) return;
 
     const validation = validatePlacementAgainstModules({
@@ -500,7 +510,10 @@ export function snapPlacementToModules({
           && target.startCm < movingSegment.endCm - EPSILON_CM;
         if (!longitudinalOverlap) return;
 
-        addCandidate(placement, targetModule.id, 'face', -1);
+        const perpendicularDistanceCm = movingAxis === 'x'
+          ? Math.abs(Number(placement.yCm) - pointerY)
+          : Math.abs(Number(placement.xCm) - pointerX);
+        addCandidate(placement, targetModule.id, 'face', -1, perpendicularDistanceCm);
       });
       return;
     }

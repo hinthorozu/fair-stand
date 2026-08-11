@@ -417,6 +417,43 @@ test('counter snaps flush to a parallel module face without overlapping it', () 
   assert.equal(validation.ok, true);
 });
 
+test('counter face snap ignores longitudinal grid offset when measuring wall proximity', () => {
+  const modules = [{
+    id: 'wall',
+    widthCm: 300,
+    placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+  }];
+
+  const snapped = snapPlacementToModules({
+    moduleId: 'counter',
+    widthCm: 100,
+    depthCm: 50,
+    pointerXCm: 125,
+    pointerYCm: 0,
+    rotationZDeg: 0,
+    modules,
+    standType: 'u-stand',
+    standXCm: 800,
+    standYCm: 600,
+  });
+
+  assert.equal(snapped?.snapKind, 'face');
+  assert.equal(snapped?.placement.xCm, 100);
+  assert.equal(snapped?.placement.yCm, 30);
+
+  const validation = validatePlacementAgainstModules({
+    moduleId: 'counter',
+    widthCm: 100,
+    depthCm: 50,
+    placement: snapped.placement,
+    modules,
+    standType: 'u-stand',
+    standXCm: 800,
+    standYCm: 600,
+  });
+  assert.equal(validation.ok, true);
+});
+
 test('physical module depth rejects parallel bodies that are too close', () => {
   const modules = [{
     id: 'a',
