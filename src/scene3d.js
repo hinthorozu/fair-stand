@@ -777,6 +777,33 @@ export function createStandScene(
     };
   }
 
+  function getTopFixtureDragPoint(clientX, clientY, wallId) {
+    if (!stageLayout) return null;
+    setPointerFromClient(clientX, clientY);
+    raycaster.setFromCamera(pointer, camera);
+
+    let plane;
+    if (wallId === 'left') {
+      plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
+    } else if (wallId === 'right') {
+      plane = new THREE.Plane(
+        new THREE.Vector3(1, 0, 0),
+        -Number(stageLayout.widthM),
+      );
+    } else {
+      // Back wall: world Z = 0. Projektör havadayken mouse ray'ini bu duvar düzlemine düşür.
+      plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    }
+
+    const point = new THREE.Vector3();
+    const hit = raycaster.ray.intersectPlane(plane, point);
+    if (!hit) return null;
+    return {
+      xCm: point.x * 100,
+      yCm: point.z * 100,
+    };
+  }
+
   function pickModuleContext(event) {
     const picked = pickModuleAt(event.clientX, event.clientY);
     if (!picked) return null;
@@ -1263,6 +1290,47 @@ export function createStandScene(
     dragSession.moduleGroup.visible = false;
     updateDragBadge(dragSession.moduleState, event.clientX, event.clientY);
 
+    const moduleState = dragSession.moduleState;
+
+    if (isTopFixtureType(moduleState.type)) {
+      const wallId = moduleState.placement?.wallId ?? 'back';
+      const wallPoint = getTopFixtureDragPoint(event.clientX, event.clientY, wallId);
+      if (!wallPoint) {
+        disposePlacementGhost();
+        dragSession.preview = null;
+        showPlacementFeedback('Projektörü üst profil boyunca sürükle.', {
+          clientX: event.clientX,
+          clientY: event.clientY,
+        });
+        return;
+      }
+
+      const basePlacement = {
+        ...(moduleState.placement ?? {}),
+        wallId,
+        rotationZDeg: dragSession.preferredRotationZDeg,
+      };
+      const placement = snapTopFixturePlacement(
+        basePlacement,
+        wallPoint,
+        moduleState.widthCm,
+      );
+      dragSession.preview = {
+        placement,
+        valid: true,
+        message: null,
+        plan: {
+          ok: true,
+          movingPlacement: { ...placement },
+          placements: new Map([[moduleState.id, { ...placement }]]),
+        },
+        snap: { mode: 'top-wall' },
+      };
+      showPlacementGhost(moduleState, placement, true);
+      clearPlacementFeedback();
+      return;
+    }
+
     const ground = getGroundPoint(event.clientX, event.clientY);
     if (!ground) {
       disposePlacementGhost();
@@ -1274,7 +1342,6 @@ export function createStandScene(
       return;
     }
 
-    const moduleState = dragSession.moduleState;
     const snapped = snapPlacementToStand({
       standType: stageLayout.standType,
       widthCm: moduleState.widthCm,
