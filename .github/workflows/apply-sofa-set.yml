@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - name: Fix sofa patch badge anchor
+      - name: Fix sofa patch anchors and template literals
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -29,6 +29,7 @@ jobs:
           s = p.read_text()
           s = s.replace("`      if (moduleState?.type === 'base') {`,\n`      if (moduleState?.type === 'sofa-set') {\\n        preview.style.background = 'linear-gradient(to bottom,#f8fafc 0 45%,#9aa0a6 45% 52%,#f8fafc 52% 100%)';\\n      } else if (moduleState?.type === 'base') {`, 'sofa badge style');",
                         "`      if (moduleState?.type === 'shelf') {`,\n`      if (moduleState?.type === 'sofa-set') {\\n        preview.style.background = 'linear-gradient(to bottom,#f8fafc 0 45%,#9aa0a6 45% 52%,#f8fafc 52% 100%)';\\n      } else if (moduleState?.type === 'shelf') {`, 'sofa badge style');")
+          s = s.replace("surfaceId: \\`${moduleState.surface?.id}-\\${index}\\`", "surfaceId: \\`\\${moduleState.surface?.id}-\\${index}\\`")
           p.write_text(s)
           PY
       - run: node scripts/apply-sofa-set.mjs
