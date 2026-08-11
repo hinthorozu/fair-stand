@@ -1,0 +1,35 @@
+name: Add Project Persistence
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/add-project-persistence.mjs'
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/add-project-persistence.mjs
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html src/main.js src/style.css
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Add project-scoped save and load"
+            git push origin ROG
+          fi
