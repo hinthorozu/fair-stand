@@ -115,8 +115,8 @@ export function createStandScene(
   keyLight.shadow.mapSize.set(4096, 4096);
   scene.add(keyLight);
 
-  // FAZ 4: exhibition environment baseline. For now only a simple surrounding
-  // grey venue floor is rendered; walls, columns, roof, trusses and hall lights are omitted.
+  // FAZ 4: one visually continuous exhibition-hall ground plane.
+  // No walls, columns, roof, trusses or hall lights are rendered.
   const exhibitionHall = new THREE.Group();
   exhibitionHall.name = 'exhibition-hall-environment';
 
@@ -132,13 +132,11 @@ export function createStandScene(
       child.geometry?.dispose?.();
     }
 
-    const marginX = THREE.MathUtils.clamp(standWidthM * 0.22, 8, 12);
-    const marginZ = THREE.MathUtils.clamp(standDepthM * 0.22, 8, 12);
-    const hallWidthM = standWidthM + marginX * 2;
-    const hallDepthM = standDepthM + marginZ * 2;
-
+    // Oversize the single plane so the camera never reads it as a separate square pad.
+    // It stays centered under the stand and visually behaves like one continuous hall floor.
+    const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
     const hallFloor = new THREE.Mesh(
-      new THREE.PlaneGeometry(hallWidthM, hallDepthM),
+      new THREE.PlaneGeometry(hallSizeM, hallSizeM),
       hallFloorMaterial,
     );
     hallFloor.rotation.x = -Math.PI / 2;
@@ -390,7 +388,7 @@ export function createStandScene(
 
     outerFloor.scale.set(sceneWidthM, sceneDepthM, 1);
     outerFloor.position.set(centerX, 0, centerZ);
-    outerFloor.visible = true;
+    outerFloor.visible = false;
 
     activeFloor.scale.set(widthM, 1, depthM);
     activeFloor.position.set(centerX, ACTIVE_PLATFORM_HEIGHT_M / 2, centerZ);
