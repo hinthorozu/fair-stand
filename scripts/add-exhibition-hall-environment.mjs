@@ -26,8 +26,6 @@ const environment = `  // FAZ 4: one visually continuous exhibition-hall ground 
       child.geometry?.dispose?.();
     }
 
-    // Oversize the single plane so the camera never reads it as a separate square pad.
-    // It stays centered under the stand and visually behaves like one continuous hall floor.
     const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
     const hallFloor = new THREE.Mesh(
       new THREE.PlaneGeometry(hallSizeM, hallSizeM),
@@ -55,23 +53,19 @@ if (!stageTail.includes(rebuildLine)) {
   source = source.replace(stageAnchor, `${stageAnchor}\n\n    ${rebuildLine.trim()}\n    ${positionLine.trim()}`);
 }
 
-// The old local surround plane creates a visible second rectangle. Keep the object for
-// compatibility with the rest of the scene API, but do not show it: the hall plane is the ground.
 source = source.replace(`    outerFloor.visible = true;`, `    outerFloor.visible = false;`);
 
-// Shelf cleanup: use a slightly darker neutral grey and move the aluminium front profile
-// fully in front of the shelf slab. Previously the profile occupied the same volume as the
-// shelf front edge, producing depth/shadow flicker at oblique camera angles.
-const oldShelfMaterial = `  const shelfMaterial = new THREE.MeshStandardMaterial({\n    color: 0xffffff,\n    roughness: 0.72,\n    metalness: 0,\n  });`;
-const newShelfMaterial = `  const shelfMaterial = new THREE.MeshStandardMaterial({\n    color: 0xd7d9dc,\n    roughness: 0.76,\n    metalness: 0,\n  });`;
-if (source.includes(oldShelfMaterial)) {
-  source = source.replace(oldShelfMaterial, newShelfMaterial);
-}
+// Shelf cleanup: give the shelf slab enough contrast against the white wall panels and
+// keep the aluminium front profile physically separated from the slab to avoid flicker.
+const shelfMaterialPattern = /  const shelfMaterial = new THREE\.MeshStandardMaterial\(\{\n    color: 0x(?:ffffff|d7d9dc),\n    roughness: 0\.(?:72|76),\n    metalness: 0,\n  \}\);/;
+const shelfMaterial = `  const shelfMaterial = new THREE.MeshStandardMaterial({\n    color: 0xb8bcc1,\n    roughness: 0.78,\n    metalness: 0,\n  });`;
+if (!shelfMaterialPattern.test(source)) throw new Error('shelf material block not found');
+source = source.replace(shelfMaterialPattern, shelfMaterial);
 
 const oldFrontProfileZ = `      wallDepthM / 2 + shelfDepthM - 0.0125,`;
-const newFrontProfileZ = `      wallDepthM / 2 + shelfDepthM + 0.0125,`;
+const separatedFrontProfileZ = `      wallDepthM / 2 + shelfDepthM + 0.0125,`;
 if (source.includes(oldFrontProfileZ)) {
-  source = source.replaceAll(oldFrontProfileZ, newFrontProfileZ);
+  source = source.replaceAll(oldFrontProfileZ, separatedFrontProfileZ);
 }
 
 fs.writeFileSync(path, source);
