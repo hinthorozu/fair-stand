@@ -35,3 +35,5 @@ s = p.read_text()
 s = s.replace('border: 5px solid #6f767d;', 'border: 5px solid var(--aluminum-profile-color);')
 s = s.replace('border-bottom: 2px solid #747b82;', 'border-bottom: 2px solid var(--aluminum-profile-color);')
 p.write_text(s)
+
+# trigger
