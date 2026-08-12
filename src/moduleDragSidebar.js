@@ -82,7 +82,8 @@ function previewWidthPx(widthCm) {
   return Math.max(12, Math.round((width / 350) * 68));
 }
 
-function createPreview(module) {
+export function createModuleCatalogPreview(module) {
+  ensureStyles();
   const preview = document.createElement('div');
   preview.className = 'module-drag-preview';
 
@@ -235,7 +236,7 @@ export function createModuleDragSidebar({
 
       const label = document.createElement('strong');
       label.textContent = module.label;
-      card.append(createPreview(module), label);
+      card.append(createModuleCatalogPreview(module), label);
 
       card.addEventListener('dragstart', (event) => {
         if (!enabled || !canDrag()) {
