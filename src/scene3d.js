@@ -132,8 +132,6 @@ export function createStandScene(
       child.geometry?.dispose?.();
     }
 
-    // Oversize the single plane so the camera never reads it as a separate square pad.
-    // It stays centered under the stand and visually behaves like one continuous hall floor.
     const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
     const hallFloor = new THREE.Mesh(
       new THREE.PlaneGeometry(hallSizeM, hallSizeM),
@@ -3077,8 +3075,8 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
   });
 
   const shelfMaterial = new THREE.MeshStandardMaterial({
-    color: 0xd7d9dc,
-    roughness: 0.76,
+    color: 0xb8bcc1,
+    roughness: 0.78,
     metalness: 0,
   });
   const frameMaterial = new THREE.MeshStandardMaterial({
