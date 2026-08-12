@@ -1,5 +1,5 @@
 import { MODULE_CATALOG } from './catalog.js';
-import { ALUMINUM_PROFILE_COLOR } from './theme.js';
+import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 
 const MODULE_LABELS = {
   'flat-panel': 'Düz Panel',
@@ -41,10 +41,6 @@ const PICKER_MODULE_KEYS = [
   'COUNTER_100',
 ];
 
-// Kullanıcı komutları kameraya göre değil, modülün ön yüzündeki görsel
-// sol/sağa göre verilir. Sürekli duvar zincirinde sağ yan duvarın ilerleme
-// yönü görsel sol/sağın tersidir. Sol yan duvarın zincir terslemesi main.js
-// tarafındaki mevcut normalizasyonda bir kez uygulanır; burada tekrar edilmez.
 export function resolveModuleSidePlacement(context, visualSide) {
   if (visualSide !== 'left' && visualSide !== 'right') return visualSide;
   const wallId = context?.placement?.wallId ?? 'back';
@@ -124,177 +120,6 @@ export function createModuleContextMenu({
     const label = MODULE_LABELS[context?.type] ?? 'Modül';
     const width = Number.isFinite(context?.widthCm) ? ` · ${context.widthCm} cm` : '';
     return `${label}${width}`;
-  }
-
-  function createPanelPreview(widthCm) {
-    const preview = document.createElement('div');
-    preview.className = 'module-card-preview';
-
-    const panel = document.createElement('div');
-    panel.className = 'module-card-flat-panel';
-    panel.style.width = `${Math.max(30, Math.round((widthCm / 200) * 118))}px`;
-
-    for (let index = 0; index < 7; index += 1) {
-      const strip = document.createElement('span');
-      strip.className = 'module-card-strip';
-      panel.appendChild(strip);
-    }
-
-    preview.appendChild(panel);
-    return preview;
-  }
-
-  function createSeparatorPreview(widthCm) {
-    const preview = document.createElement('div');
-    preview.className = 'module-card-preview';
-
-    const frame = document.createElement('div');
-    frame.style.display = 'flex';
-    frame.style.width = `${Math.max(30, Math.round((widthCm / 200) * 118))}px`;
-    frame.style.height = '132px';
-    frame.style.flexDirection = 'column';
-    frame.style.justifyContent = 'space-between';
-    frame.style.padding = '3px 2px';
-    frame.style.border = `5px solid ${ALUMINUM_PROFILE_COLOR}`;
-    frame.style.background = '#eef2f6';
-    frame.style.boxShadow = '5px 7px 12px rgba(15, 23, 42, 0.12)';
-
-    for (let index = 0; index < 36; index += 1) {
-      const slat = document.createElement('span');
-      slat.style.display = 'block';
-      slat.style.width = '100%';
-      slat.style.height = '2px';
-      slat.style.flex = '0 0 2px';
-      slat.style.background = '#c79b63';
-      frame.appendChild(slat);
-    }
-
-    preview.appendChild(frame);
-    return preview;
-  }
-
-  function createShowcasePreview(module) {
-    const preview = document.createElement('div');
-    preview.className = 'module-card-preview';
-
-    const frame = document.createElement('div');
-    frame.className = 'module-card-flat-panel';
-    frame.style.width = `${Math.round((100 / 200) * 118)}px`;
-
-    const shelfCount = module.type === 'showcase-3' ? 2 : 1;
-    const openingSlotCount = module.type === 'showcase-3' ? 3 : 2;
-    const bottomPanelCount = module.type === 'showcase-3' ? 1 : 2;
-
-    const createPanelSlot = () => {
-      const strip = document.createElement('span');
-      strip.className = 'module-card-strip';
-      strip.style.flex = '1 1 0';
-      return strip;
-    };
-
-    for (let index = 0; index < 3; index += 1) {
-      frame.appendChild(createPanelSlot());
-    }
-
-    const opening = document.createElement('div');
-    opening.style.position = 'relative';
-    opening.style.flex = `${openingSlotCount} ${openingSlotCount} 0`;
-    opening.style.minHeight = '0';
-    opening.style.borderTop = `2px solid ${ALUMINUM_PROFILE_COLOR}`;
-    opening.style.borderBottom = `2px solid ${ALUMINUM_PROFILE_COLOR}`;
-    opening.style.background = '#eef1f3';
-
-    for (let index = 1; index <= shelfCount; index += 1) {
-      const shelf = document.createElement('span');
-      shelf.style.position = 'absolute';
-      shelf.style.left = '0';
-      shelf.style.right = '0';
-      shelf.style.top = `${(index / (shelfCount + 1)) * 100}%`;
-      shelf.style.height = '3px';
-      shelf.style.transform = 'translateY(-1.5px)';
-      shelf.style.background = 'rgba(151, 190, 153, 0.9)';
-      opening.appendChild(shelf);
-    }
-
-    frame.appendChild(opening);
-
-    for (let index = 0; index < bottomPanelCount; index += 1) {
-      const strip = createPanelSlot();
-      if (index === bottomPanelCount - 1) strip.style.borderBottom = '0';
-      frame.appendChild(strip);
-    }
-
-    preview.appendChild(frame);
-    return preview;
-  }
-
-  function createShelfPreview(module) {
-    const preview = createPanelPreview(module.widthCm);
-    const panel = preview.querySelector('.module-card-flat-panel');
-    if (!panel) return preview;
-    panel.style.position = 'relative';
-    const positions = Number(module.shelfCount) === 3 ? [71.5, 57.2, 42.9] : [71.5, 57.2];
-    positions.forEach((topPercent) => {
-      const shelf = document.createElement('span');
-      shelf.style.position = 'absolute';
-      shelf.style.left = '-3px';
-      shelf.style.right = '-10px';
-      shelf.style.top = topPercent + '%';
-      shelf.style.height = '4px';
-      shelf.style.border = `1px solid ${ALUMINUM_PROFILE_COLOR}`;
-      shelf.style.background = '#ffffff';
-      shelf.style.boxShadow = '2px 2px 2px rgba(15,23,42,.14)';
-      panel.appendChild(shelf);
-    });
-    return preview;
-  }
-
-  function createDoorPreview(widthCm) {
-    const preview = document.createElement('div');
-    preview.className = 'module-card-preview';
-
-    const frame = document.createElement('div');
-    frame.className = 'module-card-flat-panel';
-    frame.style.position = 'relative';
-    frame.style.width = `${Math.max(30, Math.round((widthCm / 200) * 118))}px`;
-
-    for (let index = 0; index < 3; index += 1) {
-      const strip = document.createElement('span');
-      strip.className = 'module-card-strip';
-      strip.style.flex = '1 1 0';
-      frame.appendChild(strip);
-    }
-
-    const door = document.createElement('div');
-    door.style.position = 'relative';
-    door.style.flex = '4 4 0';
-    door.style.minHeight = '0';
-    door.style.borderTop = `3px solid ${ALUMINUM_PROFILE_COLOR}`;
-    door.style.background = '#e5e7eb';
-
-    const handle = document.createElement('span');
-    handle.style.position = 'absolute';
-    handle.style.right = '6px';
-    handle.style.top = '50%';
-    handle.style.width = '4px';
-    handle.style.height = '4px';
-    handle.style.borderRadius = '50%';
-    handle.style.background = '#4b5563';
-    door.appendChild(handle);
-    frame.appendChild(door);
-
-    preview.appendChild(frame);
-    return preview;
-  }
-
-  function createModulePreview(module) {
-    if (module.type === 'shelf') return createShelfPreview(module);
-    if (module.type === 'separator') return createSeparatorPreview(module.widthCm);
-    if (module.type === 'door') return createDoorPreview(module.widthCm);
-    if (module.type === 'showcase-2' || module.type === 'showcase-3') {
-      return createShowcasePreview(module);
-    }
-    return createPanelPreview(module.widthCm);
   }
 
   function getSelectionCounts() {
@@ -495,7 +320,7 @@ export function createModuleContextMenu({
       countBadge.style.fontWeight = '800';
 
       titleRow.append(cardTitle, countBadge);
-      card.append(titleRow, createModulePreview(module));
+      card.append(titleRow, createModuleCatalogPreview(module));
       card.addEventListener('click', () => addModuleToSelection(moduleKey));
 
       pickerGrid.appendChild(card);
