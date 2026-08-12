@@ -28,6 +28,16 @@ const PICKER_MODULE_KEYS = [
   'SHELF_2_150',
   'SHELF_3_100',
   'SHELF_2_100',
+  'SOFA_SET',
+  'TABLE_CHAIR_SET',
+  'BAR_STOOL',
+  'LED_FLOODLIGHT',
+  'BASE_200',
+  'BASE_150',
+  'BASE_100',
+  'COUNTER_200',
+  'COUNTER_150',
+  'COUNTER_100',
 ];
 
 // Kullanıcı komutları kameraya göre değil, modülün ön yüzündeki görsel
