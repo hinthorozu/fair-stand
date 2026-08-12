@@ -115,6 +115,60 @@ export function createStandScene(
   keyLight.shadow.mapSize.set(4096, 4096);
   scene.add(keyLight);
 
+  // FAZ 4: lightweight 3D exhibition-hall environment. The stand and its platform
+  // remain real scene geometry; this group only supplies the surrounding hall.
+  const exhibitionHall = new THREE.Group();
+  exhibitionHall.name = 'exhibition-hall-environment';
+
+  const hallFloor = new THREE.Mesh(
+    new THREE.PlaneGeometry(140, 140),
+    new THREE.MeshStandardMaterial({ color: 0x777a7d, roughness: 0.82, metalness: 0.08 }),
+  );
+  hallFloor.rotation.x = -Math.PI / 2;
+  hallFloor.position.y = -0.012;
+  hallFloor.receiveShadow = true;
+  exhibitionHall.add(hallFloor);
+
+  // Curved inward-facing shell gives a continuous hall horizon while allowing a
+  // top camera to keep seeing the real floor instead of hitting a ceiling plane.
+  const hallShell = new THREE.Mesh(
+    new THREE.CylinderGeometry(68, 68, 18, 64, 1, true),
+    new THREE.MeshStandardMaterial({
+      color: 0x202428,
+      roughness: 0.96,
+      metalness: 0.04,
+      side: THREE.BackSide,
+    }),
+  );
+  hallShell.position.y = 9;
+  exhibitionHall.add(hallShell);
+
+  // Horizontal architectural bands break up the background like exhibition-hall
+  // wall panels. They are deliberately low-poly and cheap to render.
+  for (const y of [3.2, 6.2, 9.2]) {
+    const band = new THREE.Mesh(
+      new THREE.TorusGeometry(67.72, 0.055, 4, 64),
+      new THREE.MeshBasicMaterial({ color: 0x4b5156, toneMapped: false }),
+    );
+    band.rotation.x = Math.PI / 2;
+    band.position.y = y;
+    exhibitionHall.add(band);
+  }
+
+  // Suspended luminous strips suggest a fair-hall roof from normal/front views.
+  // They do not form a solid ceiling, so bird's-eye views still show the floor.
+  const ceilingLights = new THREE.Group();
+  const lightMaterial = new THREE.MeshBasicMaterial({ color: 0xdde6e8, toneMapped: false });
+  for (let row = -3; row <= 3; row += 1) {
+    for (let col = -4; col <= 4; col += 1) {
+      const strip = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.035, 0.07), lightMaterial);
+      strip.position.set(col * 7.5, 11.8, row * 8.5);
+      ceilingLights.add(strip);
+    }
+  }
+  exhibitionHall.add(ceilingLights);
+  scene.add(exhibitionHall);
+
   const outerFloor = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     new THREE.MeshStandardMaterial({ color: OUTER_FLOOR_COLOR, roughness: 0.94 }),
@@ -349,6 +403,9 @@ export function createStandScene(
     const sceneDepthM = depthM + STAGE_SURROUND_M * 2;
     const centerX = widthM / 2;
     const centerZ = depthM / 2;
+
+    // Keep the surrounding hall centered on the current stand, independent of stand size.
+    exhibitionHall.position.set(centerX, 0, centerZ);
 
     outerFloor.scale.set(sceneWidthM, sceneDepthM, 1);
     outerFloor.position.set(centerX, 0, centerZ);
