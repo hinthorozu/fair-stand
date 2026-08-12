@@ -3077,8 +3077,8 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
   });
 
   const shelfMaterial = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    roughness: 0.72,
+    color: 0xd7d9dc,
+    roughness: 0.76,
     metalness: 0,
   });
   const frameMaterial = new THREE.MeshStandardMaterial({
@@ -3109,7 +3109,7 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
     frontProfile.position.set(
       0,
       seamHeightM + 0.0125,
-      wallDepthM / 2 + shelfDepthM - 0.0125,
+      wallDepthM / 2 + shelfDepthM + 0.0125,
     );
     frontProfile.castShadow = true;
     built.group.add(frontProfile);
