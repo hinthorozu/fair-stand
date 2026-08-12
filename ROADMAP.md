@@ -281,3 +281,39 @@ FAZ 3'ün amacı, stand tasarımını yalnızca sahnede düzenlemekten çıkarı
 - **Karolaj:** gerçek ölçekte 100 × 100 cm; aktif alan sonunda kalan ölçü otomatik kırpılır (ör. 450 cm = 100 + 100 + 100 + 100 + 50). Karolaj color picker ile boyanabilir, derz/grid çizgileri renk değişiminde görünür kalır.
 - **Parke:** serbest boyama yerine üç hazır doku seçeneği kullanılacaktır: Açık/Kirli Beyaz, Açık Naturel-Sarı ve Grimsi. Referans görsellerdeki yazı, ölçü, ok, logo veya watermark kullanılmayacaktır; yalnızca renk ve yüzey karakteri referans alınacaktır.
 - **Halı / Halıfleks:** rip halı/halıfleks karakterinde ince dokulu texture kullanılacaktır. Texture sabit kalırken color picker üzerinden renk değiştirilebilecek; renk değişimi doku detayını yok etmeyecektir.
+
+---
+
+# FAZ 4 — PARAMETRİK / CUSTOM MODÜL SİSTEMİ — BAŞLADI
+
+FAZ 4'ün amacı, FAZ 3 sonuna kadar oluşturulan mevcut modül kütüphanesini **referans / base modül** olarak koruyup, bu modüllerden kural tabanlı yeni varyasyonlar ve kullanıcıya özel custom modüller üretilebilen parametrik bir yapı kurmaktır.
+
+## FAZ 4 temel ilkesi
+
+- Mevcut modüller bozulmayacak; hızlı kullanım için hazır base modüller olarak korunacak.
+- Kullanıcı base modülü kopyalayarak kendi özel varyasyonunu oluşturabilecek.
+- Custom modül, base modülün mevcut davranışlarını miras alacak: renk, görsel atama, cam panel, seçim, drag & drop, snap ve placement state'i korunacak.
+- Sistem serbest CAD programına dönüşmeyecek; tüm özelleştirmeler tanımlı kurallar ve izin verilen parametreler içinde yapılacak.
+- Modül oluşturma akışı bir **Modül Wizard** üzerinden yönetilecek.
+
+## FAZ 4 — İlk temel ölçü kuralı
+
+- Parametrik ana modüllerde minimum ölçü **50 cm** olacaktır.
+- Maksimum ölçü **500 cm / 5 m** olacaktır.
+- Tüm geçerli ölçüler **50 cm'nin katları** olmak zorundadır.
+- Geçerli örnekler: `50`, `100`, `150`, `200`, `250`, `300`, `350`, `400`, `450`, `500` cm.
+- Kurala uymayan ölçüler kabul edilmeyecek ve kullanıcıya açıklayıcı hata mesajı gösterilecektir.
+
+## FAZ 4 — Raflı duvar için ilk kural seti
+
+- Raflı sistem, ayrı bir temel geometri yerine **duvar modülünün parametrik bir varyasyonu** olarak ele alınacaktır.
+- Raf, zemine / en alt profile doğrudan yerleştirilemez.
+- Raf, en üst profile doğrudan yerleştirilemez.
+- Raflar arasındaki minimum mesafe **50 cm / 1 panel** olacaktır.
+- Raf konfigürasyonu üç ana parametreyle tanımlanacaktır:
+  - başlangıç yüksekliği,
+  - raf aralığı,
+  - raf adedi.
+- Sistem bu üç parametreyi birlikte doğrulayacaktır.
+- Örneğin başlangıç yüksekliği + aralık + adet toplamı izin verilen yükseklik içinde kalmıyorsa işlem reddedilecek ve kullanıcıya neden sığmadığı gösterilecektir.
+- Aynı kural motoru hem Wizard üzerinden sayısal girişte hem de sahnedeki sürükle-bırak düzenlemede kullanılacaktır.
