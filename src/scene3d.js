@@ -144,8 +144,6 @@ export function createStandScene(
     metalness: 0.28,
   });
 
-  // Large real floor around the stand. From bird's-eye views this remains the main
-  // visible environment instead of an artificial ceiling/background surface.
   const hallFloor = new THREE.Mesh(
     new THREE.PlaneGeometry(hallWidthM, hallDepthM),
     hallFloorMaterial,
@@ -155,8 +153,6 @@ export function createStandScene(
   hallFloor.receiveShadow = true;
   exhibitionHall.add(hallFloor);
 
-  // Rectangular exhibition hall walls sit far away from the stand so perspective
-  // reads like a real venue rather than a cylindrical studio backdrop.
   const wallThicknessM = 0.18;
   const backWall = new THREE.Mesh(
     new THREE.BoxGeometry(hallWidthM, hallHeightM, wallThicknessM),
@@ -177,8 +173,6 @@ export function createStandScene(
   rightWall.position.x = hallWidthM / 2;
   exhibitionHall.add(rightWall);
 
-  // Dark lower wall band and repeated columns create the scale cues seen in real
-  // fair halls without adding heavy models or textures.
   const wallBandHeightM = 2.7;
   const backBand = new THREE.Mesh(
     new THREE.BoxGeometry(hallWidthM - 0.2, wallBandHeightM, 0.12),
@@ -206,8 +200,6 @@ export function createStandScene(
     }
   }
 
-  // Open roof structure: beams and luminous fixtures are visible from normal camera
-  // angles but there is no solid ceiling, so a top camera can still see the floor.
   const roofY = 9.7;
   const beamThickness = 0.16;
   for (let z = -30; z <= 30; z += 7.5) {
@@ -244,35 +236,6 @@ export function createStandScene(
       exhibitionHall.add(fixture);
     }
   }
-
-  // A few distant booth-like blocks prevent the horizon from feeling empty while
-  // staying intentionally generic and non-interactive.
-  const boothMaterial = new THREE.MeshStandardMaterial({ color: 0xe7e8e9, roughness: 0.88 });
-  const boothAccentMaterial = new THREE.MeshStandardMaterial({ color: 0x596168, roughness: 0.82 });
-  const distantBooths = [
-    [-28, -23, 8, 3.2, 5],
-    [-14, -25, 7, 3.6, 4],
-    [18, -24, 9, 3.4, 5],
-    [31, -21, 7, 3.1, 4],
-    [-31, 22, 8, 3.3, 5],
-    [26, 23, 10, 3.5, 4.5],
-  ];
-  distantBooths.forEach(([x, z, width, height, depth]) => {
-    const block = new THREE.Mesh(
-      new THREE.BoxGeometry(width, height, depth),
-      boothMaterial,
-    );
-    block.position.set(x, height / 2, z);
-    block.receiveShadow = true;
-    exhibitionHall.add(block);
-
-    const fascia = new THREE.Mesh(
-      new THREE.BoxGeometry(width * 0.72, 0.46, 0.1),
-      boothAccentMaterial,
-    );
-    fascia.position.set(x, height - 0.48, z + depth / 2 + 0.06);
-    exhibitionHall.add(fascia);
-  });
 
   scene.add(exhibitionHall);
 
