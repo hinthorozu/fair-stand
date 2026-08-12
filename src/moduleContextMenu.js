@@ -1,4 +1,5 @@
 import { MODULE_CATALOG } from './catalog.js';
+import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 
 const MODULE_LABELS = {
   'flat-panel': 'Düz Panel',
@@ -154,7 +155,7 @@ export function createModuleContextMenu({
     frame.style.flexDirection = 'column';
     frame.style.justifyContent = 'space-between';
     frame.style.padding = '3px 2px';
-    frame.style.border = '5px solid #6f767d';
+    frame.style.border = `5px solid ${ALUMINUM_PROFILE_COLOR}`;
     frame.style.background = '#eef2f6';
     frame.style.boxShadow = '5px 7px 12px rgba(15, 23, 42, 0.12)';
 
@@ -199,8 +200,8 @@ export function createModuleContextMenu({
     opening.style.position = 'relative';
     opening.style.flex = `${openingSlotCount} ${openingSlotCount} 0`;
     opening.style.minHeight = '0';
-    opening.style.borderTop = '2px solid #747b82';
-    opening.style.borderBottom = '2px solid #747b82';
+    opening.style.borderTop = `2px solid ${ALUMINUM_PROFILE_COLOR}`;
+    opening.style.borderBottom = `2px solid ${ALUMINUM_PROFILE_COLOR}`;
     opening.style.background = '#eef1f3';
 
     for (let index = 1; index <= shelfCount; index += 1) {
@@ -240,7 +241,7 @@ export function createModuleContextMenu({
       shelf.style.right = '-10px';
       shelf.style.top = topPercent + '%';
       shelf.style.height = '4px';
-      shelf.style.border = '1px solid #9aa0a6';
+      shelf.style.border = `1px solid ${ALUMINUM_PROFILE_COLOR}`;
       shelf.style.background = '#ffffff';
       shelf.style.boxShadow = '2px 2px 2px rgba(15,23,42,.14)';
       panel.appendChild(shelf);
@@ -268,7 +269,7 @@ export function createModuleContextMenu({
     door.style.position = 'relative';
     door.style.flex = '4 4 0';
     door.style.minHeight = '0';
-    door.style.borderTop = '3px solid #747b82';
+    door.style.borderTop = `3px solid ${ALUMINUM_PROFILE_COLOR}`;
     door.style.background = '#e5e7eb';
 
     const handle = document.createElement('span');

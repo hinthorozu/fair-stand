@@ -1,4 +1,5 @@
 import { MODULE_CATALOG } from './catalog.js';
+import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 
 const DRAGGABLE_MODULE_KEYS = [
   'PANEL_200',
@@ -42,34 +43,34 @@ function ensureStyles() {
     .module-drag-card.is-dragging { opacity:.55; border-color:#f97316; box-shadow:0 0 0 2px rgba(249,115,22,.14); }
     .module-drag-card strong { overflow:hidden; font-size:10px; line-height:1.25; text-overflow:ellipsis; white-space:nowrap; }
     .module-drag-preview { display:flex; height:78px; align-items:center; justify-content:center; overflow:hidden; border-radius:7px; background:#fff; }
-    .module-drag-panel { display:flex; height:68px; flex-direction:column; border:3px solid #8a929a; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
+    .module-drag-panel { display:flex; height:68px; flex-direction:column; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-panel span { flex:1; border-bottom:1px solid #c4c9ce; }
     .module-drag-panel span:last-child { border-bottom:0; }
-    .module-drag-separator { height:68px; border:3px solid #747b82; background:repeating-linear-gradient(to bottom,#c79b63 0 2px,#eef2f6 2px 4px); box-shadow:0 2px 5px rgba(15,23,42,.08); }
-    .module-drag-showcase { position:relative; height:68px; border:3px solid #8a929a; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
+    .module-drag-separator { height:68px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:repeating-linear-gradient(to bottom,#c79b63 0 2px,#eef2f6 2px 4px); box-shadow:0 2px 5px rgba(15,23,42,.08); }
+    .module-drag-showcase { position:relative; height:68px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-showcase::before { content:''; position:absolute; left:3px; right:3px; top:21px; bottom:10px; border:1px solid #9fbfa5; background:rgba(205,232,209,.5); }
     .module-drag-showcase[data-eyes='3']::after { content:''; position:absolute; left:4px; right:4px; top:42px; height:1px; background:#9fbfa5; }
     .module-drag-shelf { position:relative; }
-    .module-drag-shelf i { position:absolute; left:-3px; right:-9px; height:4px; border:1px solid #9aa0a6; background:#fff; box-shadow:2px 2px 2px rgba(15,23,42,.14); pointer-events:none; }
-    .module-drag-door { position:relative; height:68px; border:3px solid #8a929a; background:linear-gradient(to bottom,#f7f7f5 0 13%,#c4c9ce 13% 14%,#f7f7f5 14% 27%,#c4c9ce 27% 28%,#f7f7f5 28% 42%,#747b82 42% 45%,#e5e7eb 45% 100%); box-shadow:0 2px 5px rgba(15,23,42,.08); }
+    .module-drag-shelf i { position:absolute; left:-3px; right:-9px; height:4px; border:1px solid ${ALUMINUM_PROFILE_COLOR}; background:#fff; box-shadow:2px 2px 2px rgba(15,23,42,.14); pointer-events:none; }
+    .module-drag-door { position:relative; height:68px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:linear-gradient(to bottom,#f7f7f5 0 13%,#c4c9ce 13% 14%,#f7f7f5 14% 27%,#c4c9ce 27% 28%,#f7f7f5 28% 42%,${ALUMINUM_PROFILE_COLOR} 42% 45%,#e5e7eb 45% 100%); box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-door::after { content:''; position:absolute; right:3px; bottom:19px; width:3px; height:3px; border-radius:50%; background:#4b5563; }
     .module-drag-sofa { position:relative; width:58px; height:58px; }
-    .module-drag-sofa::before { content:''; position:absolute; left:6px; top:4px; width:46px; height:18px; border:2px solid #9aa0a6; border-radius:5px; background:#f8fafc; box-shadow:0 2px 4px rgba(15,23,42,.08); }
-    .module-drag-sofa::after { content:''; position:absolute; left:7px; bottom:4px; width:18px; height:25px; border:2px solid #9aa0a6; border-radius:5px; background:#f8fafc; box-shadow:28px 0 0 -2px #f8fafc,28px 0 0 0 #9aa0a6; }
+    .module-drag-sofa::before { content:''; position:absolute; left:6px; top:4px; width:46px; height:18px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:5px; background:#f8fafc; box-shadow:0 2px 4px rgba(15,23,42,.08); }
+    .module-drag-sofa::after { content:''; position:absolute; left:7px; bottom:4px; width:18px; height:25px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:5px; background:#f8fafc; box-shadow:28px 0 0 -2px #f8fafc,28px 0 0 0 ${ALUMINUM_PROFILE_COLOR}; }
     .module-drag-table-chair { position:relative; width:58px; height:58px; }
-    .module-drag-table-chair::before { content:''; position:absolute; left:19px; top:19px; width:20px; height:20px; border:2px solid #7b838c; border-radius:50%; background:#fff; }
-    .module-drag-table-chair::after { content:''; position:absolute; left:4px; top:4px; width:13px; height:13px; border:2px solid #9aa0a6; border-radius:4px; background:#f8fafc; box-shadow:37px 0 0 -2px #f8fafc,37px 0 0 0 #9aa0a6,0 37px 0 -2px #f8fafc,0 37px 0 0 #9aa0a6,37px 37px 0 -2px #f8fafc,37px 37px 0 0 #9aa0a6; }
+    .module-drag-table-chair::before { content:''; position:absolute; left:19px; top:19px; width:20px; height:20px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:50%; background:#fff; }
+    .module-drag-table-chair::after { content:''; position:absolute; left:4px; top:4px; width:13px; height:13px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:4px; background:#f8fafc; box-shadow:37px 0 0 -2px #f8fafc,37px 0 0 0 ${ALUMINUM_PROFILE_COLOR},0 37px 0 -2px #f8fafc,0 37px 0 0 ${ALUMINUM_PROFILE_COLOR},37px 37px 0 -2px #f8fafc,37px 37px 0 0 ${ALUMINUM_PROFILE_COLOR}; }
     .module-drag-bar-stool { position:relative; width:44px; height:58px; }
-    .module-drag-bar-stool::before { content:''; position:absolute; left:8px; top:4px; width:28px; height:20px; border:2px solid #9aa0a6; border-radius:10px 10px 5px 5px; background:#f8fafc; }
-    .module-drag-bar-stool::after { content:''; position:absolute; left:11px; top:24px; width:22px; height:27px; border-left:3px solid #7b838c; border-right:3px solid #7b838c; border-bottom:3px solid #7b838c; border-radius:0 0 10px 10px; }
+    .module-drag-bar-stool::before { content:''; position:absolute; left:8px; top:4px; width:28px; height:20px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:10px 10px 5px 5px; background:#f8fafc; }
+    .module-drag-bar-stool::after { content:''; position:absolute; left:11px; top:24px; width:22px; height:27px; border-left:3px solid ${ALUMINUM_PROFILE_COLOR}; border-right:3px solid ${ALUMINUM_PROFILE_COLOR}; border-bottom:3px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:0 0 10px 10px; }
     .module-drag-floodlight { position:relative; width:52px; height:52px; }
     .module-drag-floodlight::before { content:''; position:absolute; left:10px; top:7px; width:32px; height:22px; border:4px solid #17191c; border-radius:3px; background:#f5fff2; box-shadow:inset 0 0 0 2px #c7ead0; transform:rotate(-8deg); }
     .module-drag-floodlight::after { content:''; position:absolute; left:23px; top:29px; width:6px; height:16px; border-left:3px solid #292c31; border-bottom:3px solid #292c31; }
-    .module-drag-base { position:relative; height:24px; border:3px solid #7b838c; background:#ffffff; box-shadow:4px 4px 0 #d7dde4,0 2px 5px rgba(15,23,42,.08); }
+    .module-drag-base { position:relative; height:24px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#ffffff; box-shadow:4px 4px 0 #d7dde4,0 2px 5px rgba(15,23,42,.08); }
     .module-drag-base::before { content:''; position:absolute; inset:3px; border:1px solid #cbd5e1; background:#f8fafc; }
-    .module-drag-base::after { content:''; position:absolute; left:-5px; right:-5px; top:-7px; height:5px; border:1px solid #9aa0a6; background:#ffffff; }
-    .module-drag-counter { position:relative; height:34px; border:3px solid #7b838c; background:#f8fafc; box-shadow:5px 5px 0 #d7dde4,0 2px 5px rgba(15,23,42,.08); }
-    .module-drag-counter::after { content:''; position:absolute; left:-3px; right:-3px; top:-6px; height:5px; border:1px solid #9aa0a6; background:#eef2f6; }
+    .module-drag-base::after { content:''; position:absolute; left:-5px; right:-5px; top:-7px; height:5px; border:1px solid ${ALUMINUM_PROFILE_COLOR}; background:#ffffff; }
+    .module-drag-counter { position:relative; height:34px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f8fafc; box-shadow:5px 5px 0 #d7dde4,0 2px 5px rgba(15,23,42,.08); }
+    .module-drag-counter::after { content:''; position:absolute; left:-3px; right:-3px; top:-6px; height:5px; border:1px solid ${ALUMINUM_PROFILE_COLOR}; background:#eef2f6; }
     .viewport-wrap.catalog-drag-active { outline:2px solid rgba(249,115,22,.2); outline-offset:-2px; }
   `;
   document.head.appendChild(style);

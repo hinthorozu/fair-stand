@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
+import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createRectSelection } from './rectSelection.js';
@@ -24,7 +25,7 @@ import {
   planContinuousModuleMove,
 } from './moduleMove.js';
 
-const FRAME_COLOR = 0x9aa0a6;
+const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
 const PANEL_BACK_COLOR = 0x4b5563;
 const PANEL_RAIL_HEIGHT_M = 0.004;
 const PANEL_VERTICAL_CLEARANCE_M = 0;
