@@ -115,125 +115,165 @@ export function createStandScene(
   keyLight.shadow.mapSize.set(4096, 4096);
   scene.add(keyLight);
 
-  // FAZ 4: lightweight 3D exhibition-hall environment. The stand and its platform
-  // remain real scene geometry; this group supplies a believable surrounding venue.
+  // FAZ 4: dynamic exhibition hall environment. The hall follows the stand size
+  // with a controlled margin, so maximum layouts still read as a real fair venue.
   const exhibitionHall = new THREE.Group();
   exhibitionHall.name = 'exhibition-hall-environment';
 
-  const hallWidthM = 90;
-  const hallDepthM = 70;
-  const hallHeightM = 12;
   const hallFloorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x8d9296,
-    roughness: 0.72,
-    metalness: 0.05,
+    color: 0x8f9294,
+    roughness: 0.62,
+    metalness: 0.06,
   });
   const hallWallMaterial = new THREE.MeshStandardMaterial({
-    color: 0xd2d5d7,
-    roughness: 0.9,
+    color: 0xc8c9c8,
+    roughness: 0.88,
     metalness: 0.02,
   });
   const hallStructureMaterial = new THREE.MeshStandardMaterial({
-    color: 0x3b4146,
-    roughness: 0.58,
-    metalness: 0.5,
+    color: 0x292d30,
+    roughness: 0.5,
+    metalness: 0.58,
   });
   const hallDarkMaterial = new THREE.MeshStandardMaterial({
-    color: 0x24292d,
-    roughness: 0.7,
-    metalness: 0.28,
+    color: 0x242729,
+    roughness: 0.72,
+    metalness: 0.2,
   });
-
-  const hallFloor = new THREE.Mesh(
-    new THREE.PlaneGeometry(hallWidthM, hallDepthM),
-    hallFloorMaterial,
-  );
-  hallFloor.rotation.x = -Math.PI / 2;
-  hallFloor.position.y = -0.014;
-  hallFloor.receiveShadow = true;
-  exhibitionHall.add(hallFloor);
-
-  const wallThicknessM = 0.18;
-  const backWall = new THREE.Mesh(
-    new THREE.BoxGeometry(hallWidthM, hallHeightM, wallThicknessM),
-    hallWallMaterial,
-  );
-  backWall.position.set(0, hallHeightM / 2, -hallDepthM / 2);
-  exhibitionHall.add(backWall);
-
-  const frontWall = backWall.clone();
-  frontWall.position.z = hallDepthM / 2;
-  exhibitionHall.add(frontWall);
-
-  const sideWallGeometry = new THREE.BoxGeometry(wallThicknessM, hallHeightM, hallDepthM);
-  const leftWall = new THREE.Mesh(sideWallGeometry, hallWallMaterial);
-  leftWall.position.set(-hallWidthM / 2, hallHeightM / 2, 0);
-  exhibitionHall.add(leftWall);
-  const rightWall = leftWall.clone();
-  rightWall.position.x = hallWidthM / 2;
-  exhibitionHall.add(rightWall);
-
-  const wallBandHeightM = 2.7;
-  const backBand = new THREE.Mesh(
-    new THREE.BoxGeometry(hallWidthM - 0.2, wallBandHeightM, 0.12),
-    hallDarkMaterial,
-  );
-  backBand.position.set(0, wallBandHeightM / 2, -hallDepthM / 2 + 0.11);
-  exhibitionHall.add(backBand);
-  const frontBand = backBand.clone();
-  frontBand.position.z = hallDepthM / 2 - 0.11;
-  exhibitionHall.add(frontBand);
-
-  const columnGeometry = new THREE.BoxGeometry(0.34, hallHeightM, 0.34);
-  for (let x = -hallWidthM / 2 + 5; x <= hallWidthM / 2 - 5; x += 10) {
-    for (const z of [-hallDepthM / 2 + 0.35, hallDepthM / 2 - 0.35]) {
-      const column = new THREE.Mesh(columnGeometry, hallStructureMaterial);
-      column.position.set(x, hallHeightM / 2, z);
-      exhibitionHall.add(column);
-    }
-  }
-  for (let z = -hallDepthM / 2 + 5; z <= hallDepthM / 2 - 5; z += 10) {
-    for (const x of [-hallWidthM / 2 + 0.35, hallWidthM / 2 - 0.35]) {
-      const column = new THREE.Mesh(columnGeometry, hallStructureMaterial);
-      column.position.set(x, hallHeightM / 2, z);
-      exhibitionHall.add(column);
-    }
-  }
-
-  const roofY = 9.7;
-  const beamThickness = 0.16;
-  for (let z = -30; z <= 30; z += 7.5) {
-    const beam = new THREE.Mesh(
-      new THREE.BoxGeometry(hallWidthM - 2, beamThickness, 0.2),
-      hallStructureMaterial,
-    );
-    beam.position.set(0, roofY, z);
-    exhibitionHall.add(beam);
-  }
-  for (let x = -40; x <= 40; x += 8) {
-    const beam = new THREE.Mesh(
-      new THREE.BoxGeometry(0.2, beamThickness, hallDepthM - 2),
-      hallStructureMaterial,
-    );
-    beam.position.set(x, roofY + 0.08, 0);
-    exhibitionHall.add(beam);
-  }
-
   const hallLightMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     emissive: 0xffffff,
-    emissiveIntensity: 2.1,
-    roughness: 0.34,
+    emissiveIntensity: 2.2,
+    roughness: 0.3,
     metalness: 0,
   });
-  for (let z = -26; z <= 26; z += 13) {
-    for (let x = -36; x <= 36; x += 12) {
-      const fixture = new THREE.Mesh(
-        new THREE.BoxGeometry(4.2, 0.06, 0.18),
-        hallLightMaterial,
+
+  function rebuildExhibitionHall(standWidthM, standDepthM) {
+    while (exhibitionHall.children.length) {
+      const child = exhibitionHall.children.pop();
+      child.geometry?.dispose?.();
+    }
+
+    // Keep the venue close enough to frame the stand while guaranteeing breathing
+    // room around the largest supported stage.
+    const marginX = THREE.MathUtils.clamp(standWidthM * 0.22, 8, 12);
+    const marginZ = THREE.MathUtils.clamp(standDepthM * 0.22, 8, 12);
+    const hallWidthM = standWidthM + marginX * 2;
+    const hallDepthM = standDepthM + marginZ * 2;
+    const hallHeightM = 11.5;
+    const wallThicknessM = 0.22;
+    const roofY = 10.2;
+
+    const hallFloor = new THREE.Mesh(
+      new THREE.PlaneGeometry(hallWidthM, hallDepthM),
+      hallFloorMaterial,
+    );
+    hallFloor.rotation.x = -Math.PI / 2;
+    hallFloor.position.y = -0.014;
+    hallFloor.receiveShadow = true;
+    exhibitionHall.add(hallFloor);
+
+    const backWall = new THREE.Mesh(
+      new THREE.BoxGeometry(hallWidthM, hallHeightM, wallThicknessM),
+      hallWallMaterial,
+    );
+    backWall.position.set(0, hallHeightM / 2, -hallDepthM / 2);
+    exhibitionHall.add(backWall);
+    const frontWall = backWall.clone();
+    frontWall.position.z = hallDepthM / 2;
+    exhibitionHall.add(frontWall);
+
+    const sideWallGeometry = new THREE.BoxGeometry(wallThicknessM, hallHeightM, hallDepthM);
+    const leftWall = new THREE.Mesh(sideWallGeometry, hallWallMaterial);
+    leftWall.position.set(-hallWidthM / 2, hallHeightM / 2, 0);
+    exhibitionHall.add(leftWall);
+    const rightWall = leftWall.clone();
+    rightWall.position.x = hallWidthM / 2;
+    exhibitionHall.add(rightWall);
+
+    // Dark lower wall band gives the hall the same grounded industrial proportion
+    // as a real exhibition venue.
+    const bandHeight = 2.25;
+    const addBand = (width, depth, x, z) => {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(width, bandHeight, depth), hallDarkMaterial);
+      band.position.set(x, bandHeight / 2, z);
+      exhibitionHall.add(band);
+    };
+    addBand(hallWidthM - 0.25, 0.12, 0, -hallDepthM / 2 + 0.12);
+    addBand(hallWidthM - 0.25, 0.12, 0, hallDepthM / 2 - 0.12);
+    addBand(0.12, hallDepthM - 0.25, -hallWidthM / 2 + 0.12, 0);
+    addBand(0.12, hallDepthM - 0.25, hallWidthM / 2 - 0.12, 0);
+
+    // Structural columns stay on the walls instead of floating over the stand.
+    const columnGeometry = new THREE.BoxGeometry(0.46, hallHeightM, 0.46);
+    const columnSpacing = 8;
+    for (let x = -hallWidthM / 2 + 4; x <= hallWidthM / 2 - 4; x += columnSpacing) {
+      for (const z of [-hallDepthM / 2 + 0.32, hallDepthM / 2 - 0.32]) {
+        const column = new THREE.Mesh(columnGeometry, hallStructureMaterial);
+        column.position.set(x, hallHeightM / 2, z);
+        exhibitionHall.add(column);
+      }
+    }
+    for (let z = -hallDepthM / 2 + 4; z <= hallDepthM / 2 - 4; z += columnSpacing) {
+      for (const x of [-hallWidthM / 2 + 0.32, hallWidthM / 2 - 0.32]) {
+        const column = new THREE.Mesh(columnGeometry, hallStructureMaterial);
+        column.position.set(x, hallHeightM / 2, z);
+        exhibitionHall.add(column);
+      }
+    }
+
+    // Roof structure is concentrated around the perimeter. There is deliberately no
+    // solid ceiling and no dense grid directly over the editable stand area.
+    const trussDepth = 2.2;
+    const trussThickness = 0.18;
+    for (const z of [-hallDepthM / 2 + 1.4, hallDepthM / 2 - 1.4]) {
+      const truss = new THREE.Mesh(
+        new THREE.BoxGeometry(hallWidthM - 1.2, trussThickness, trussDepth),
+        hallStructureMaterial,
       );
-      fixture.position.set(x, roofY - 0.22, z);
-      exhibitionHall.add(fixture);
+      truss.position.set(0, roofY, z);
+      exhibitionHall.add(truss);
+    }
+    for (const x of [-hallWidthM / 2 + 1.4, hallWidthM / 2 - 1.4]) {
+      const truss = new THREE.Mesh(
+        new THREE.BoxGeometry(trussDepth, trussThickness, hallDepthM - 1.2),
+        hallStructureMaterial,
+      );
+      truss.position.set(x, roofY, 0);
+      exhibitionHall.add(truss);
+    }
+
+    // Short inward roof ribs add depth at normal camera angles without covering the
+    // stand when viewed from above.
+    for (let x = -hallWidthM / 2 + 4; x <= hallWidthM / 2 - 4; x += 8) {
+      for (const z of [-hallDepthM / 2 + 2.7, hallDepthM / 2 - 2.7]) {
+        const rib = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 2.8), hallStructureMaterial);
+        rib.position.set(x, roofY - 0.06, z);
+        exhibitionHall.add(rib);
+      }
+    }
+    for (let z = -hallDepthM / 2 + 4; z <= hallDepthM / 2 - 4; z += 8) {
+      for (const x of [-hallWidthM / 2 + 2.7, hallWidthM / 2 - 2.7]) {
+        const rib = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.14, 0.14), hallStructureMaterial);
+        rib.position.set(x, roofY - 0.06, z);
+        exhibitionHall.add(rib);
+      }
+    }
+
+    // Perimeter luminaires provide visible hall detail while keeping the center clean.
+    for (let x = -hallWidthM / 2 + 4; x <= hallWidthM / 2 - 4; x += 6) {
+      for (const z of [-hallDepthM / 2 + 2.1, hallDepthM / 2 - 2.1]) {
+        const fixture = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.06, 0.16), hallLightMaterial);
+        fixture.position.set(x, roofY - 0.35, z);
+        exhibitionHall.add(fixture);
+      }
+    }
+    for (let z = -hallDepthM / 2 + 4; z <= hallDepthM / 2 - 4; z += 6) {
+      for (const x of [-hallWidthM / 2 + 2.1, hallWidthM / 2 - 2.1]) {
+        const fixture = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.06, 1.8), hallLightMaterial);
+        fixture.position.set(x, roofY - 0.35, z);
+        exhibitionHall.add(fixture);
+      }
     }
   }
 
@@ -474,7 +514,8 @@ export function createStandScene(
     const centerX = widthM / 2;
     const centerZ = depthM / 2;
 
-    // Keep the surrounding hall centered on the current stand, independent of stand size.
+    // Rebuild the venue around the current stand so large layouts keep realistic clearance.
+    rebuildExhibitionHall(widthM, depthM);
     exhibitionHall.position.set(centerX, 0, centerZ);
 
     outerFloor.scale.set(sceneWidthM, sceneDepthM, 1);
