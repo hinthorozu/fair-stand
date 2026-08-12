@@ -59,4 +59,19 @@ if (!stageTail.includes(rebuildLine)) {
 // compatibility with the rest of the scene API, but do not show it: the hall plane is the ground.
 source = source.replace(`    outerFloor.visible = true;`, `    outerFloor.visible = false;`);
 
+// Shelf cleanup: use a slightly darker neutral grey and move the aluminium front profile
+// fully in front of the shelf slab. Previously the profile occupied the same volume as the
+// shelf front edge, producing depth/shadow flicker at oblique camera angles.
+const oldShelfMaterial = `  const shelfMaterial = new THREE.MeshStandardMaterial({\n    color: 0xffffff,\n    roughness: 0.72,\n    metalness: 0,\n  });`;
+const newShelfMaterial = `  const shelfMaterial = new THREE.MeshStandardMaterial({\n    color: 0xd7d9dc,\n    roughness: 0.76,\n    metalness: 0,\n  });`;
+if (source.includes(oldShelfMaterial)) {
+  source = source.replace(oldShelfMaterial, newShelfMaterial);
+}
+
+const oldFrontProfileZ = `      wallDepthM / 2 + shelfDepthM - 0.0125,`;
+const newFrontProfileZ = `      wallDepthM / 2 + shelfDepthM + 0.0125,`;
+if (source.includes(oldFrontProfileZ)) {
+  source = source.replaceAll(oldFrontProfileZ, newFrontProfileZ);
+}
+
 fs.writeFileSync(path, source);
