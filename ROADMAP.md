@@ -1,266 +1,20 @@
 # Fair Stand Roadmap
 
-Bu belge, Fair Stand / Maxima Stand Konfigüratörü geliştirme fazlarını ve faz sınırlarını netleştirir.
+> Not: ROADMAP'ın FAZ 1–2 ayrıntıları mevcut uygulama tarihçesini temsil eder. FAZ 3 ve FAZ 4 arasındaki kapsam çakışmaları 18 Ağustos 2026'da temizlenmiştir. FAZ 4, custom/parametrik modül üretiminin tek sahibi olarak kabul edilir.
 
 ## Proje durumu
 
 - **FAZ 1: KAPANDI — 10 Ağustos 2026**
 - **FAZ 2: YERLEŞİM MOTORU KAPANIŞ / POLISH AŞAMASI — 11 Ağustos 2026**
 - **FAZ 2.1: temel tamamlandı; 4 yön rotasyon, magnetic snap, serbest yerleşim ve feedback aktif**
-- FAZ 1 bundan sonra yeni özellik eklenmeden referans taban olarak korunacaktır. Kritik bug düzeltmeleri yapılabilir; yeni yerleşim ve stand davranışları FAZ 2 kapsamında geliştirilecektir.
+- **FAZ 3: PROJELEME / SUNUM / POLISH — devam ediyor**
+- **FAZ 4: PARAMETRİK / CUSTOM MODÜL SİSTEMİ — planlandı, uygulama sırası aşağıda**
 
 ---
 
-# FAZ 1 — KAPANDI
+# FAZ 3 — PROJELEME, SUNUM VE POLISH
 
-FAZ 1'in amacı; düz/sırt duvar üzerinde çalışan, gerçek ölçülü sahneye sahip, Maxima modüllerini seçip düzenleyebilen ve temel tasarım özelliklerini uygulayabilen sağlam bir 3D konfigüratör tabanı oluşturmaktı.
-
-## 1. Sahne ve stand alanı
-
-- Kullanıcı sahne oluşturulmadan önce stand tipini seçer.
-- Kullanıcı stand alanını **X ve Y** olarak santimetre cinsinden girer.
-- Stand ölçüleri minimum **50 cm** ve yalnızca **50 cm katları** olabilir.
-- Örnek geçerli ölçüler: `800 × 450`, `350 × 500`, `600 × 600` cm.
-- Örnek geçersiz ölçüler: `25 × 75`, `825 × 450`, `800 × 475` cm.
-- Her eksende maksimum stand ölçüsü **5000 cm / 50 m** olarak sınırlandırılmıştır.
-- Girilen `X × Y` alanı şirketin kiraladığı / aktif kullanabildiği gerçek stand alanıdır.
-- Aktif alanın dört tarafında **100 cm pasif gri çevre** bulunur.
-- Toplam sahne ölçüsü `(X + 200 cm) × (Y + 200 cm)` olarak oluşturulur.
-- Zemin grid'i gerçek ölçekte **100 × 100 cm** hücrelerden oluşur.
-- Stand tipi + X + Y tamamlanmadan sahne oluşturulmaz.
-
-## 2. Eksen standardı
-
-Projede bundan sonra kullanılan teknik eksen standardı:
-
-- **X = zemin yatay ekseni / genişlik**
-- **Y = zemin derinlik ekseni**
-- **Z = yükseklik**
-
-Three.js iç sahnesindeki eski geometri düzeni korunurken FAZ 2 yerleşim state'i bu proje standardını kullanır. Logical Y değeri renderer tarafında Three.js world-Z'ye, logical Z değeri world-Y'ye çevrilir.
-
-## 3. Stand tipi seçim altyapısı
-
-FAZ 1 sonunda kullanıcı arayüzünde beş ayrı stand tipi seçeneği vardır:
-
-- `Sırt Duvar` — `back-wall`
-- `L Stand Sol` — `l-left`
-- `L Stand Sağ` — `l-right`
-- `U Stand` — `u-stand`
-- `Ada Stand` — `island`
-
-**Önemli:** FAZ 1'de gerçek çalışan yerleşim motoru sırt/düz duvar içindir. `L Stand Sol`, `L Stand Sağ`, `U Stand` ve `Ada Stand` seçim/state altyapısı hazırlanmıştır; gerçek çok kenarlı yerleşim motoru FAZ 2 kapsamındadır.
-
-## 4. Düz / sırt duvar motoru
-
-- 50 / 100 / 150 / 200 cm Maxima panel genişlikleri desteklenir.
-- Verilen toplam uzunluk uygun modül kombinasyonlarına bölünebilir.
-- Modüller sırt duvar üzerinde sıralı olarak yerleştirilir.
-- Modül ekleme, silme ve çoğaltma desteklenir.
-- Sağ ve sol tarafa modül ekleme akışı vardır.
-- Modül yeniden oluşturulduğunda tasarım state'i korunur.
-
-## 5. Modül kataloğu
-
-FAZ 1 katalog altyapısında:
-
-- Düz Panel 50
-- Düz Panel 100
-- Düz Panel 150
-- Düz Panel 200
-- Separatör 50
-- Separatör 100
-- 2 Gözlü Vitrin 100
-- 3 Gözlü Vitrin 100
-
-modülleri kullanılabilir.
-
-Katalogda birden fazla modül seçilebilir, seçim sırası değiştirilebilir ve modüller paket halinde eklenebilir.
-
-## 6. Aktif alan / kapasite kuralı
-
-- Modüller aktif stand alanının dışına taşamaz.
-- Kapasite doğrulama altyapısı X ve Y eksenleri için ortak olacak şekilde hazırlanmıştır.
-- Mevcut sırt duvar akışında X kapasitesi aktif olarak uygulanır.
-- Paket eklemede **mevcut toplam + eklenecek paketin tamamı** işlem öncesinde hesaplanır.
-- Sınır aşılırsa paket kısmen eklenmez; **işlemin tamamı reddedilir**.
-- Aynı kontrol modül çoğaltmada ve otomatik düz duvar oluşturmada uygulanır.
-- Hata durumunda kullanıcıya görünür popup gösterilir.
-- Popup'ta eksen sınırı, mevcut toplam, eklenecek miktar ve oluşacak toplam açıkça yazılır.
-- Modül kataloğu kapasite hatasında kapanmaz; kullanıcı seçimini düzeltebilir.
-
-## 7. Panel seçimi ve tasarım
-
-- Tek panel seçimi desteklenir.
-- Ctrl/Cmd + tık ile dikdörtgen panel blokları seçilebilir.
-- `1 × N`, `N × 1` ve `N × M` seçimleri desteklenir.
-- Eksik, boşluklu veya L biçimli panel seçimleri reddedilir.
-- Panel veya panel bloklarına renk uygulanabilir.
-- HEX / RGB / CMYK renk alanları senkron çalışır.
-- Son kullanılan aktif renk korunur.
-
-## 8. Görsel / baskı sistemi
-
-- Görseller tarayıcı arşivine kaydedilip tekrar kullanılabilir.
-- Tek panel veya dikdörtgen panel bloğuna görsel uygulanabilir.
-- `Doldur` gerçek `cover`, `Sığdır` gerçek `contain` mantığıyla çalışır.
-- Görsel paneller arasında birleşik baskı alanı olarak devam edebilir.
-- Panel renk override işlemleri diğer panellerin görsel state'ini bozmaz.
-- Rebuild sonrasında görsel ve texture state'i korunur.
-
-## 9. Cam panel ve toplu sıfırlama
-
-- Panel sağ tık menüsünden `Cam panele çevir` / `Normal panele çevir` işlemi yapılabilir.
-- Cam özelliği çoklu dikdörtgen panel seçiminde toplu uygulanabilir.
-- Cam state'i rebuild ve çoğaltmada korunur.
-- Normal panele dönüldüğünde kayıtlı renk/görsel geri gelir.
-- `Tüm Özellikleri Kaldır` işlemi renk, görsel, cam ve diğer panel özelleştirmelerini sıfırlar.
-- Modül türleri, ölçüleri ve sıraları korunur.
-- Görsel arşivindeki dosyalar toplu sıfırlama sırasında silinmez.
-
-## 10. Kamera ve sahne navigasyonu
-
-- Three.js gerçek zamanlı 3D sahne kullanılır.
-- Sol mouse sürükleme: rotate.
-- Orta mouse / tekerlek basılı sürükleme: pan.
-- Mouse wheel: zoom.
-- ViewCube üzerinden FRONT / BACK / LEFT / RIGHT / TOP / BOTTOM ve diyagonal görünümler desteklenir.
-- Home görünümü bulunur.
-- Duvar düzenleme işlemleri sırasında mevcut kamera açısının korunması sağlanmıştır.
-
-## 11. Kalite altyapısı
-
-- Node testleri bulunmaktadır.
-- GitHub Actions üzerinde otomatik `npm test` ve `npm run build` çalışır.
-- Ana geliştirmeler CI başarıyla geçmeden tamamlanmış kabul edilmez.
-
----
-
-# FAZ 2 — YERLEŞİM MOTORU — BAŞLADI
-
-FAZ 2'nin ana hedefi, sıralı düz duvar mantığını gerçek stand alanında **kontrollü drag & drop + magnetic snap** sistemine dönüştürmektir.
-
-## FAZ 2.1 — tamamlanan temel
-
-- `modulePlacement.js` yerleşim motoru eklendi.
-- Her modül için `xCm`, `yCm`, `zCm`, `rotationZDeg` ve `wallId` yerleşim state'i tanımlandı.
-- Yerleşim koordinatları proje standardına göre **X/Y zemin, Z yükseklik** olarak tutulur.
-- Stand tipine göre izin verilen kenarlar tanımlandı:
-  - Sırt Duvar: `back`
-  - L Stand Sol: `back + left`
-  - L Stand Sağ: `back + right`
-  - U Stand: `back + left + right`
-- Modül konumu **50 cm snap** ile sınırlandırıldı.
-- Modüller yalnızca 0° / 90° / 180° / 270° plan rotasyonlarında çalışır; `R` +90°, `Shift+R` -90° döndürür.
-- Sahnede mevcut bir modül sol mouse ile tutulup sürüklenebilir hale getirildi.
-- Sürükleme sırasında yarı şeffaf **ghost preview** gösterilir.
-- Geçerli yerleşim ghost'u yeşil, geçersiz yerleşim ghost'u kırmızı gösterilir.
-- Aktif stand sınırı dışındaki drop engellenir.
-- Aynı kenardaki modüllerin üst üste binmesi engellenir.
-- Birbirine dik iki kenarın köşede birleşmesine izin verilir.
-- L Sol / L Sağ / U standlarda sürüklenen modül en yakın izin verilen stand kenarına otomatik yönlenir.
-- Rebuild artık modülün placement state'ini okuyarak modülü doğru kenar ve yönde yeniden çizer.
-- Sağ tık çoğaltma ve sağ/sol ekleme akışları modülün bulunduğu kenarı dikkate alacak şekilde placement-aware hale getirildi.
-- `Tüm Özellikleri Kaldır` işlemi renk/görsel/cam özelliklerini sıfırlarken FAZ 2 yerleşim state'ini korur.
-- FAZ 2.1 snap, izin verilen kenar, sınır ve collision davranışları otomatik testlerle güvenceye alındı.
-
-## FAZ 2.1 kullanım davranışı
-
-- **Modül üzerinde sol tuş + sürükle:** modülü yerleştir.
-- **Boş alanda sol sürükle:** kamerayı döndür.
-- **Ctrl/Cmd + tık:** mevcut dikdörtgen panel seçimini kullan.
-- **Orta mouse basılı sürükle:** pan.
-- **Tekerlek:** zoom.
-
-## FAZ 2 — güncel durum (11 Ağustos 2026)
-
-Tamamlanan yerleşim özellikleri:
-
-- Katalog kartından doğrudan 3D sahneye drag & drop.
-- Sırt, L Sol, L Sağ, U ve Ada standlarda ortak 50 cm grid yerleşim motoru.
-- Tüm modüllerde 0° / 90° / 180° / 270° gerçek ön-yüz rotasyonu.
-- Sürüklerken ve seçiliyken R / Shift+R ile dönüş.
-- Modül merkezinden dönüş ve 50 cm grid'e yeniden oturma.
-- Modül-modül magnetic snap: uç-uca, L ve T bağlantıları.
-- Serbest alan yerleşimi ile perimeter duvar yerleşiminin aynı modül sistemi içinde çalışması.
-- Geçersiz sürükleme/dönüşte kırmızı ghost ve kısa kullanıcı feedback'i.
-- Çoklu panel seçimi köşe boyunca devam edebilir; bağlı duvarlarda renk/görsel sürekliliği korunur.
-- Collision kontrolünün merkez çizgisine ek olarak gerçek modül kasa derinliğini hesaba katması.
-- Kullanıcıya gösterilen yerleşim hata mesajlarının sadeleştirilmesi.
-
-FAZ 2 kapanış öncesi kalan:
-
-- ✅ **Issue #1:** serbest alandaki modül sıralarında Ekle/Çoğalt Sağ/Sol artık duvar kapasitesi yerine komşu konum + X/Y sınırı + collision ile doğrulanır.
-- Final regresyon ve FAZ 2 kapanış kararı.
-
-## FAZ 2 ana hedefleri
-
-1. **L Stand Sol ve L Stand Sağ gerçek yerleşimi**
-   - X yönündeki arka duvar.
-   - Sol veya sağ Y kenarındaki yan duvar.
-   - İki yönün ayrı stand tipi olarak korunması.
-
-2. **U Stand gerçek yerleşimi**
-   - Bir X arka duvarı.
-   - İki bağımsız Y yan duvarı.
-   - Her kenarın kapasitesinin ayrı takip edilmesi.
-
-3. **Kontrollü drag & drop**
-   - Mevcut modüllerin sahne içinde kontrollü sürüklenmesi FAZ 2.1'de başladı.
-   - Modül katalog kartından doğrudan sahneye sürüklenebilir.
-   - Sürükleme sırasında yarı şeffaf ghost preview gösterilir.
-   - Modül yalnızca geçerli yerleşime bırakılabilir.
-
-4. **Magnetic snapping**
-   - Modül X veya Y doğrultusuna otomatik oturur.
-   - Mevcut modülün kenarına yaklaşınca kenetlenir.
-   - Stand köşesine yaklaşınca 90° yön değiştirerek uygun kenara snap olabilir.
-   - Serbest 17°, 23° gibi rastgele rotasyonlara izin verilmez.
-
-5. **Sınır ve çakışma motoru**
-   - Modül aktif X/Y alanının dışına taşamaz.
-   - Modüller birbirinin içine giremez.
-   - Geçersiz konum ghost preview ile açıkça gösterilir.
-   - Geçersiz konuma drop engellenir.
-
-6. **Yerleşim state'i**
-   - Her modülün ait olduğu duvar/kenar kimliği tutulur.
-   - X/Y konumu ve Z ekseni etrafındaki 0°/90°/180°/270° yönü state'te saklanır.
-   - L/U standlarda her duvarın modül kapasitesi bağımsız yönetilir.
-
-7. **Ada Stand**
-   - Ada Stand serbest yerleşimi aynı kontrollü 50 cm grid + snap altyapısı üzerinden aktif olarak çalışır.
-
-## FAZ 2 UX ilkesi
-
-Sistem serbest bir CAD programına dönüşmeyecektir. Kullanıcı modülleri sürükleyebilecek ancak yalnızca Maxima sisteminin izin verdiği konum, yön, snap ve bağlantı kuralları içinde hareket edebilecektir.
-
-## FAZ 2 ek not
-
-Özel renk editörü ileride ele alınabilir. Native browser renk picker yerine uygulama içi bir popup geliştirildiğinde 3D sahnedeki canlı renk önizleme davranışı kesinlikle korunmalıdır.
-
----
-
-# Faz sınırı kararı
-
-**FAZ 1, 10 Ağustos 2026 itibarıyla kapatılmıştır. FAZ 2 aynı tarih itibarıyla yerleşim motoru geliştirmeleriyle başlamıştır.**
-
-FAZ 1 tabanı; düz/sırt duvar, sahne ölçüsü, katalog, tasarım araçları, kapasite kontrolü, kamera ve CI altyapısı açısından referans sürüm olarak korunacaktır.
-
-
-## Planlanan yeni modül geliştirme sırası
-
-1. Baza — tamamlandı
-2. Raf — tamamlandı
-3. Koltuk
-4. Masa Sandalye Takımı
-5. Bar Taburesi
-
----
-
-# FAZ 3 — PROJELEME, SUNUM VE ÖZELLEŞTİRME
-
-FAZ 3'ün amacı, stand tasarımını yalnızca sahnede düzenlemekten çıkarıp proje olarak saklanabilir, yeniden açılıp düzenlenebilir, görsel olarak sunulabilir ve kullanıcı tarafından genişletilebilir hale getirmektir.
+FAZ 3'ün amacı stand tasarımını proje olarak saklanabilir, yeniden açılabilir, sunulabilir ve son kullanıcı için üretime hazır hale getirmektir. Parametrik/custom modül üretimi FAZ 4'e taşınmıştır; böylece iki faz aynı özelliğin sahibi değildir.
 
 ## FAZ 3 yapılacaklar
 
@@ -270,10 +24,7 @@ FAZ 3'ün amacı, stand tasarımını yalnızca sahnede düzenlemekten çıkarı
   - LED projektör tipi: siyah ince floodlight gövde + üst profil braketi + panel yüzüne gerçek SpotLight aydınlatması.
   - Üst aksesuar duvar kapasitesini ve zemin collision hesabını tüketmez; 350 cm üst kotta izin verilen duvar kenarlarına 50 cm snap ile yerleşir.
 - [ ] 4. Render alınması
-- [ ] 5. Kendi modülünü oluşturma
-- [ ] 6. UI/UX düzenlemesi ve final polish
-
-
+- [ ] 5. UI/UX düzenlemesi ve final polish
 
 ## FAZ 3 — Zemin teknik kararları
 
@@ -284,36 +35,132 @@ FAZ 3'ün amacı, stand tasarımını yalnızca sahnede düzenlemekten çıkarı
 
 ---
 
-# FAZ 4 — PARAMETRİK / CUSTOM MODÜL SİSTEMİ — BAŞLADI
+# FAZ 4 — PARAMETRİK / CUSTOM MODÜL SİSTEMİ — PLANLANDI
 
-FAZ 4'ün amacı, FAZ 3 sonuna kadar oluşturulan mevcut modül kütüphanesini **referans / base modül** olarak koruyup, bu modüllerden kural tabanlı yeni varyasyonlar ve kullanıcıya özel custom modüller üretilebilen parametrik bir yapı kurmaktır.
+FAZ 4'ün amacı mevcut modül kütüphanesini **referans/base modül** olarak koruyup, ortak bir kural motoru üzerinden yeni varyasyonlar, yapısal bağlantılar ve kullanıcıya özel custom modüller üretmektir.
 
-## FAZ 4 temel ilkesi
+## FAZ 4 temel ilkeleri
 
-- Mevcut modüller bozulmayacak; hızlı kullanım için hazır base modüller olarak korunacak.
-- Kullanıcı base modülü kopyalayarak kendi özel varyasyonunu oluşturabilecek.
-- Custom modül, base modülün mevcut davranışlarını miras alacak: renk, görsel atama, cam panel, seçim, drag & drop, snap ve placement state'i korunacak.
-- Sistem serbest CAD programına dönüşmeyecek; tüm özelleştirmeler tanımlı kurallar ve izin verilen parametreler içinde yapılacak.
-- Modül oluşturma akışı bir **Modül Wizard** üzerinden yönetilecek.
+- Mevcut base modüller bozulmayacak ve hızlı kullanım için korunacak.
+- Kullanıcı base modülü kopyalayarak kendi varyasyonunu oluşturabilecek.
+- Custom modül; renk, görsel atama, cam panel, seçim, drag & drop, snap ve placement state gibi desteklenen base davranışlarını miras alacak.
+- Sistem serbest CAD'e dönüşmeyecek; üretim tanımlı parametre, bağlantı ve validation kuralları içinde kalacak.
+- Wizard ve sahne içi düzenleme **aynı parametrik veri modeli ve aynı validation motorunu** kullanacak; iki ayrı kural sistemi oluşturulmayacak.
+- Base modül, custom modül ve sahne instance'ı birbirinden ayrılacak. Sahnedeki instance değişikliği yanlışlıkla base tanımını değiştirmeyecek.
 
-## FAZ 4 — İlk temel ölçü kuralı
+## 4.1 — Parametrik çekirdek ve kural motoru
 
-- Parametrik ana modüllerde minimum ölçü **50 cm** olacaktır.
-- Maksimum ölçü **500 cm / 5 m** olacaktır.
-- Tüm geçerli ölçüler **50 cm'nin katları** olmak zorundadır.
-- Geçerli örnekler: `50`, `100`, `150`, `200`, `250`, `300`, `350`, `400`, `450`, `500` cm.
-- Kurala uymayan ölçüler kabul edilmeyecek ve kullanıcıya açıklayıcı hata mesajı gösterilecektir.
+- [ ] Ortak `ParametricModuleDefinition` / eşdeğer veri modeli oluşturulacak.
+- [ ] Base modül kimliği, custom modül kimliği, kaynak/base ilişkisi ve schema/version metadata'sı tanımlanacak.
+- [ ] Parametrik ana ölçüler varsayılan olarak **50–500 cm** arasında ve **50 cm katları** olacak.
+- [ ] Modül türü gerektiğinde daha dar sınır tanımlayabilecek; ortak motor bu constraint'leri uygulayacak.
+- [ ] Validation sonucu yalnızca true/false olmayacak; kullanıcıya hangi kuralın neden ihlal edildiğini bildirecek.
+- [ ] Placement/collision, ölçü ve modül-spesifik kurallar tek doğrulama katmanında birleştirilecek.
+- [ ] Parametrik tanımdan Three.js geometrisi/state'i deterministik olarak üretilecek; rebuild aynı girdiden aynı sonucu vermeli.
+- [ ] Kural motoru için birim testleri yazılacak.
 
-## FAZ 4 — Raflı duvar için ilk kural seti
+## 4.2 — Modül Wizard ve canlı önizleme
 
-- Raflı sistem, ayrı bir temel geometri yerine **duvar modülünün parametrik bir varyasyonu** olarak ele alınacaktır.
-- Raf, zemine / en alt profile doğrudan yerleştirilemez.
-- Raf, en üst profile doğrudan yerleştirilemez.
-- Raflar arasındaki minimum mesafe **50 cm / 1 panel** olacaktır.
-- Raf konfigürasyonu üç ana parametreyle tanımlanacaktır:
-  - başlangıç yüksekliği,
-  - raf aralığı,
-  - raf adedi.
-- Sistem bu üç parametreyi birlikte doğrulayacaktır.
-- Örneğin başlangıç yüksekliği + aralık + adet toplamı izin verilen yükseklik içinde kalmıyorsa işlem reddedilecek ve kullanıcıya neden sığmadığı gösterilecektir.
-- Aynı kural motoru hem Wizard üzerinden sayısal girişte hem de sahnedeki sürükle-bırak düzenlemede kullanılacaktır.
+- [ ] Base modülden `Custom oluştur` akışı eklenecek.
+- [ ] Wizard yalnızca seçilen modül tipinin izin verdiği parametreleri gösterecek.
+- [ ] Sayısal alanlar 50 cm snap/constraint kurallarını anında doğrulayacak.
+- [ ] Parametre değişiklikleri sahnede **live preview/ghost preview** olarak gösterilecek.
+- [ ] Geçersiz konfigürasyon kaydedilemeyecek; sebebi kullanıcıya açıkça gösterilecek.
+- [ ] Kaydedilmiş custom modül tekrar Wizard'da açılıp düzenlenebilecek.
+- [ ] Sahnedeki instance üzerinden `Custom modülü düzenle` akışı tanımlanacak; düzenlemenin yalnız instance'a mı yoksa kayıtlı custom tanıma mı uygulanacağı kullanıcıya açık olacak.
+
+## 4.3 — İlk referans implementasyon: Raflı Duvar
+
+- [ ] Raflı sistem ayrı temel geometri değil, **duvar modülünün parametrik varyasyonu** olacak.
+- [ ] Raf zemine/en alt profile doğrudan yerleştirilemeyecek.
+- [ ] Raf en üst profile doğrudan yerleştirilemeyecek.
+- [ ] Raflar arasındaki minimum mesafe **50 cm / 1 panel** olacak.
+- [ ] Konfigürasyon `başlangıç yüksekliği + raf aralığı + raf adedi` parametreleriyle tanımlanacak.
+- [ ] Bu parametrelerin toplamı izin verilen yüksekliği aşıyorsa işlem reddedilecek ve sığmama nedeni gösterilecek.
+- [ ] Aynı raf validation'ı Wizard, live preview ve sahne içi düzenlemede ortak kullanılacak.
+- [ ] Raflı duvar, renk/görsel/cam/selection/placement davranışlarında base duvar ile uyumlu kalacak.
+
+## 4.4 — Yapısal bağlantı / Anchor sistemi
+
+Bu bölüm, separatör–duvar ve benzeri yapısal elemanları koordinat tahminiyle değil açık bağlantı noktalarıyla bağlamak için temel oluşturur.
+
+- [ ] Modüller gerektiğinde tipli **anchor/connection point** tanımlayabilecek.
+- [ ] Anchor; dünya konumu, yön/normal, bağlantı tipi ve izin verilen hedef tiplerini taşıyacak.
+- [ ] Duvar, separatör ve yapısal profiller için gerekli anchor noktaları üretilecek.
+- [ ] Yakındaki uyumlu anchor'lar magnetic snap ile seçilebilecek; uyumsuz bağlantı reddedilecek.
+- [ ] Bağlantı ilişkisi sadece koordinat olarak değil `sourceAnchor -> targetAnchor` referansı olarak state'e kaydedilecek.
+- [ ] Bağlı eleman taşınır/döndürülürse bağımlı bağlantının yeniden hesaplanması veya kullanıcıya geçersiz bağlantı uyarısı verilmesi tanımlanacak.
+- [ ] Separatör → duvar, duvar → separatör ve uygun olduğunda modül → modül bağlantıları aynı altyapıyı kullanacak.
+
+## 4.5 — İki nokta arasında kayıt/profil çekme aracı
+
+- [ ] Sahneye ayrı bir **Kayıt/Profil aracı** eklenecek.
+- [ ] Kullanıcı ilk geçerli anchor/noktayı seçerek başlangıcı belirleyecek.
+- [ ] `Shift + ikinci nokta/anchor seçimi` ile bitiş belirlenecek ve aradaki profil otomatik üretilecek.
+- [ ] İlk seçimden sonra ikinci seçim yapılana kadar ghost çizgi/profil önizlemesi gösterilecek.
+- [ ] `Esc` işlemi iptal edecek; yeni profil ancak iki uç da geçerliyse oluşturulacak.
+- [ ] Profil uzunluğu iki nokta arasından otomatik hesaplanacak; elle uzunluk girme zorunluluğu olmayacak.
+- [ ] Profil yönü ve transform'u iki anchor'dan türetilecek; kullanıcı serbest açı girmek zorunda kalmayacak.
+- [ ] Profil tipi/kesiti desteklenen katalogdan seçilebilecek; fiziksel kesit ve izin verilen maksimum/minimum uzunluk parametreleri tanımlanabilecek.
+- [ ] Profil bağlantısı anchor referanslarıyla saklanacak; bağlı modül hareket ettiğinde profil yeniden hesaplanabilecek.
+- [ ] Profil için collision/stand sınırı/uygun bağlantı doğrulamaları ortak kural motorundan geçecek.
+
+## 4.6 — Custom modül yaşam döngüsü ve kütüphane
+
+- [ ] Custom modüle ad, kategori, açıklama, base modül referansı ve parametrik config kaydedilecek.
+- [ ] Kullanıcı custom modülü kopyalayabilecek, yeniden adlandırabilecek, düzenleyebilecek ve silebilecek.
+- [ ] Base modüller read-only korunacak; custom işlemleri base tanımı mutate etmeyecek.
+- [ ] Katalogda `Base Modüller` ve `Custom Modüller` ayrımı yapılacak; kategori/arama/filtreleme desteklenebilecek.
+- [ ] Custom modül silindiğinde sahnedeki mevcut instance'ların davranışı açıkça tanımlanacak; proje açılışını bozmayacak snapshot/version yaklaşımı kullanılacak.
+- [ ] Base modül şeması değiştiğinde custom modüller için schema version/migration stratejisi uygulanacak; sessiz veri bozulmasına izin verilmeyecek.
+
+## 4.7 — Kullanıcı sahipliği ve persistence
+
+Bu bölüm login/backend hazır olduğunda devreye alınacaktır. Faz 4'ün geometrik çekirdeği kullanıcı sistemi olmadan da geliştirilebilir.
+
+- [ ] Custom modüller yalnız browser-memory state'inde kalmayacak; kalıcı persistence katmanı tanımlanacak.
+- [ ] Her custom modül bir `ownerUserId` / eşdeğer kullanıcı sahipliği ile ilişkilendirilecek.
+- [ ] Kullanıcı varsayılan olarak yalnız kendi custom modüllerini görecek ve değiştirecek.
+- [ ] Sistem/base modüller kullanıcıdan bağımsız ve read-only olacak.
+- [ ] Backend API'de listeleme/oluşturma/güncelleme/silme işlemlerinde ownership server-side doğrulanacak; sadece UI filtresine güvenilmeyecek.
+- [ ] İleride paylaşım/organization library eklenebilmesi için visibility alanı (`private`, ileride `organization/shared`) genişletilebilir tasarlanacak; Faz 4 ilk tesliminde private yeterlidir.
+
+## 4.8 — Proje kaydı, versiyonlama ve geriye uyumluluk
+
+- [ ] Proje kaydı custom modül instance'larını tekrar açabilecek yeterli parametrik snapshot ile saklayacak.
+- [ ] Proje açılırken custom tanım silinmiş/değişmiş olsa bile mümkün olduğunca kaydedilmiş snapshot render edilecek.
+- [ ] Parametrik schema version proje dosyasına/state'ine yazılacak.
+- [ ] Eski projeler için migration/fallback stratejisi olacak.
+- [ ] Base modül güncellemesinin mevcut custom modülleri otomatik ve sessiz biçimde değiştirmesine izin verilmeyecek.
+
+## 4.9 — Test ve Faz 4 kapanış kriterleri
+
+- [ ] Ölçü constraint'leri ve modül-spesifik validation testleri.
+- [ ] Raflı duvar kural testleri.
+- [ ] Anchor compatibility ve snap testleri.
+- [ ] İki noktalı profil üretimi ve bağlı eleman hareketi testleri.
+- [ ] Custom modül create/edit/duplicate/delete testleri.
+- [ ] Project save/load round-trip testleri.
+- [ ] Kullanıcı ownership/backend devreye alındığında authorization testleri.
+- [ ] Mevcut base modüller için regresyon: renk, görsel, cam, seçim, drag/drop, snap ve placement davranışları bozulmayacak.
+- [ ] `npm test` ve `npm run build` başarılı olmadan Faz 4 tamamlanmış sayılmayacak.
+
+## Önerilen uygulama sırası
+
+1. **4.1 Parametrik çekirdek ve kural motoru** — diğer her şey bunun üstüne kurulacak.
+2. **4.2 Wizard + live preview** — parametrik modeli kullanıcıya açan ilk yüzey.
+3. **4.3 Raflı Duvar** — çekirdeği gerçek ve sınırlı bir modülle doğrulayan pilot implementasyon.
+4. **4.4 Anchor sistemi** — yapısal ilişkileri koordinat hack'lerinden kurtaran temel.
+5. **4.5 İki noktalı Kayıt/Profil aracı** — anchor altyapısının ilk güçlü sahne aracı.
+6. **4.6 Custom modül yaşam döngüsü/kütüphane** — üretimi gerçek kullanıcı iş akışına dönüştürür.
+7. **4.8 Proje kaydı + versiyonlama entegrasyonu** — custom içerik kalıcı proje state'ine güvenli biçimde girer.
+8. **4.7 Kullanıcı sahipliği/backend persistence** — login/backend hazır olduğunda private kullanıcı kütüphanesine geçilir.
+9. **4.9 Regresyon, authorization ve Faz 4 kapanışı**.
+
+### Sıralama gerekçesi
+
+- Profil aracını anchor sisteminden önce yapmak, sonradan bağlantı modelini yeniden yazdırır.
+- Kullanıcı/backend persistence'ını geometrik model oturmadan yapmak API ve DB şemasını gereksiz yere birkaç kez değiştirebilir.
+- Raflı duvarı erken yapmak kural motorunu küçük ama gerçek bir problem üzerinde test eder.
+- Proje save/load ile custom module persistence aynı şey değildir: proje bir **instance snapshot'ı**, custom kütüphane ise yeniden kullanılabilir **definition** saklar. İkisi ayrı tutulmalıdır.
+- Faz 3'teki eski `Kendi modülünü oluşturma` maddesi Faz 4'e taşındı; böylece roadmap'te aynı özellik iki farklı fazda tekrar etmiyor.
