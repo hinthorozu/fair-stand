@@ -140,7 +140,7 @@ Fair Stand geliştirme aşamasında persistence katmanı doğrudan belirli bir b
 - [ ] Eski projeler için migration/fallback stratejisi olacak.
 - [ ] Base modül güncellemesinin mevcut custom modülleri otomatik ve sessiz biçimde değiştirmesine izin verilmeyecek.
 
-## 4.9 — Test ve Faz 4 kapanış kriterleri
+## 4.9 — Test, BOM-readiness ve Faz 4 kapanış kriterleri
 
 - [ ] Ölçü constraint'leri ve modül-spesifik validation testleri.
 - [ ] Raflı duvar kural testleri.
@@ -151,19 +151,115 @@ Fair Stand geliştirme aşamasında persistence katmanı doğrudan belirli bir b
 - [ ] Fair CRM/Kyrox Core entegrasyonu devreye alındığında ownership/authorization testleri.
 - [ ] Local repository adapter ile backend repository adapter arasında contract testleri.
 - [ ] Mevcut base modüller için regresyon: renk, görsel, cam, seçim, drag/drop, snap ve placement davranışları bozulmayacak.
+- [ ] Faz 5/6 assembly-aware BOM için sahne state'i modül kimliği, parametrik ölçüler, panel/yüzey bilgisi ve gerçek `sourceAnchor -> targetAnchor` bağlantılarını kaybetmeden sunabilmeli.
+- [ ] BOM-readiness kabul senaryosu: yan yana 4 × 200 cm duvarın dört ayrı instance ve üç gerçek yapısal bağlantı olduğu state üzerinden deterministik biçimde tespit edilebilmeli.
 - [ ] `npm test` ve `npm run build` başarılı olmadan Faz 4 tamamlanmış sayılmayacak.
 
-## Önerilen uygulama sırası
+## FAZ 4 yürütme planı — Sprint 1–7
 
-1. **4.1 Parametrik çekirdek ve kural motoru** — diğer her şey bunun üstüne kurulacak.
-2. **4.2 Wizard + live preview** — parametrik modeli kullanıcıya açan ilk yüzey.
-3. **4.3 Raflı Duvar** — çekirdeği gerçek ve sınırlı bir modülle doğrulayan pilot implementasyon.
-4. **4.4 Anchor sistemi** — yapısal ilişkileri koordinat hack'lerinden kurtaran temel.
-5. **4.5 İki noktalı Kayıt/Profil aracı** — anchor altyapısının ilk güçlü sahne aracı.
-6. **4.6 Custom modül yaşam döngüsü/kütüphane** — üretimi gerçek kullanıcı iş akışına dönüştürür; bu aşamada repository contract/local adapter yeterlidir.
-7. **4.8 Proje kaydı + versiyonlama entegrasyonu** — custom içerik kalıcı proje state'ine güvenli biçimde girer.
-8. **4.7 Fair CRM/Kyrox Core entegrasyonu** — sistem oturduktan sonra auth, gerçek ownership ve backend persistence mevcut CRM/Core altyapısına bağlanır.
-9. **4.9 Regresyon, repository contract, authorization ve Faz 4 kapanışı**.
+Bu sıra yalnız öneri değildir; Faz 4 geliştirmesinin varsayılan yürütme sırasıdır. Bir sprint kapanmadan sonraki sprintin ona bağımlı production implementasyonuna geçilmez. Gerekirse bağımsız araştırma/prototip paralel yapılabilir.
+
+### Sprint 1 — Parametrik Core (4.1)
+
+**Hedef:** Three.js/UI'dan mümkün olduğunca ayrılmış parametrik veri modeli ve ortak Rule Engine.
+
+- `ParametricModuleDefinition`, base/custom/instance ayrımı ve schema version.
+- Ölçü constraint'leri ve açıklanabilir validation sonuçları.
+- Parametrik tanımdan deterministik geometry/state üretimi.
+- Unit testler.
+
+**Sprint çıkışı:** UI olmadan geçerli bir parametrik tanım doğrulanabilmeli ve aynı girdiden aynı sahne geometrisi/state'i üretilebilmeli.
+
+### Sprint 2 — Wizard + Raflı Duvar pilotu (4.2 + 4.3)
+
+**Hedef:** Çekirdeği gerçek kullanıcı akışında ve gerçek bir parametrik varyasyonda doğrulamak.
+
+- Base modülden `Custom oluştur`.
+- Live/ghost preview ve anlık validation.
+- Raflı duvarın başlangıç yüksekliği, raf aralığı, raf adedi ve sınır kuralları.
+- Kaydedilmiş custom tanımı tekrar açıp düzenleme.
+
+**Sprint çıkışı:** Kullanıcı kod yazmadan geçerli raflı duvar varyasyonu oluşturabilmeli; Wizard ve sahne aynı Rule Engine'i kullanmalı.
+
+### Sprint 3 — Anchor / Connection Graph (4.4)
+
+**Hedef:** Yapısal ilişkileri koordinat yakınlığı tahmininden çıkarıp açık bağlantı grafiğine taşımak.
+
+- Tipli anchor/connection point'ler.
+- Anchor compatibility ve magnetic snap.
+- `sourceAnchor -> targetAnchor` state ilişkisi.
+- Taşıma/rotasyon sonrası bağlantı yeniden hesaplama veya geçersizlik bildirimi.
+
+**Sprint çıkışı:** Sistem iki modülün yalnız yakın olduğunu değil, hangi anchor'lar üzerinden gerçekten bağlı olduğunu bilmeli. Bu veri ileride shared-part/BOM normalization için kullanılabilir olmalı.
+
+### Sprint 4 — İki Noktalı Kayıt/Profil Aracı (4.5)
+
+**Hedef:** Anchor altyapısını gerçek yapısal üretim aracında kullanmak.
+
+- İlk anchor seçimi.
+- `Shift + ikinci anchor` ile profil üretimi.
+- Ghost preview, `Esc` iptali.
+- Otomatik uzunluk/yön/transform.
+- Bağlı modül hareketinde profil ilişkisinin korunması veya açık invalid-state.
+
+**Sprint çıkışı:** Profil koordinat hack'iyle değil iki gerçek anchor referansıyla üretilebilmeli ve state'e kaydedilmeli.
+
+### Sprint 5 — Custom Module Library (4.6)
+
+**Hedef:** Parametrik üretimi tekrar kullanılabilir kullanıcı iş akışına dönüştürmek.
+
+- Create/edit/duplicate/rename/delete.
+- Base ve Custom katalog ayrımı.
+- `CustomModuleRepository` contract.
+- Local/browser persistence adapter; business logic storage API'sine doğrudan bağlanmayacak.
+
+**Sprint çıkışı:** Fair CRM entegrasyonu olmadan custom modüller local adapter üzerinden kalıcı biçimde yönetilebilmeli ve adapter değiştirilebilir olmalı.
+
+### Sprint 6 — Project Save/Load + Versioning (4.8)
+
+**Hedef:** Custom/parametrik sahnenin uzun ömürlü proje state'ine güvenli girmesi.
+
+- Definition ile scene instance ayrımı.
+- Instance snapshot.
+- Schema version ve migration/fallback.
+- Custom tanım silinse/değişse bile eski projenin mümkün olduğunca açılabilmesi.
+
+**Sprint çıkışı:** Parametrik/custom içerikli proje save → close/reload → load round-trip sonrasında aynı yapısal state ve bağlantıları korumalı.
+
+### Sprint 7 — Regresyon + BOM-readiness + Faz 4 kapanışı (4.9)
+
+**Hedef:** Faz 4'ü Fair CRM entegrasyonuna ve sonraki assembly-aware BOM/maliyet fazlarına hazır halde kapatmak.
+
+- Base modül regresyonları.
+- Parametrik, raf, anchor, profil, custom library ve save/load testleri.
+- BOM-readiness state doğrulaması.
+- Kabul senaryosu: 4 × 200 cm yan yana duvar = 4 instance + 3 gerçek yapısal bağlantı.
+- `npm test` ve `npm run build` temiz.
+
+**Sprint çıkışı:** Faz 5/6 BOM motoru, sahne geometrisini yeniden tahmin etmek zorunda kalmadan modül/bağlantı/yüzey verisini tüketebilmeli.
+
+## Faz 4 sonrası entegrasyon kapısı — Fair CRM / Kyrox Core (4.7)
+
+4.7 bilinçli olarak Sprint 1–7'nin sonrasındadır. Önce Fair Stand'ın parametrik/geometrik contract'ları stabilize edilir; ardından local repository adapter production backend adapter ile değiştirilir.
+
+- Authentication/session: Kyrox Core.
+- User/organization/permission: mevcut Core modeli.
+- Custom module ownership ve backend persistence: Fair CRM/Core entegrasyon katmanı.
+- Fair Stand içinde ikinci login/role/permission sistemi yok.
+
+Bu entegrasyon tamamlandıktan sonra `ROADMAP_PHASE_5_6.md` içindeki assembly-aware BOM ve Fair CRM costing hattına geçilir.
+
+## Önerilen uygulama sırası — kısa referans
+
+1. **Sprint 1 / 4.1:** Parametrik çekirdek ve kural motoru.
+2. **Sprint 2 / 4.2 + 4.3:** Wizard + Raflı Duvar pilotu.
+3. **Sprint 3 / 4.4:** Anchor sistemi.
+4. **Sprint 4 / 4.5:** İki noktalı Kayıt/Profil aracı.
+5. **Sprint 5 / 4.6:** Custom modül yaşam döngüsü/kütüphane + local repository adapter.
+6. **Sprint 6 / 4.8:** Proje save/load + versiyonlama.
+7. **Sprint 7 / 4.9:** Regresyon + BOM-readiness + Faz 4 kapanışı.
+8. **4.7:** Fair CRM/Kyrox Core entegrasyonu; auth, gerçek ownership ve backend persistence.
+9. **Faz 5/6:** Assembly-aware BOM → Fair CRM maliyet/teklif entegrasyonu.
 
 ### Sıralama gerekçesi
 
@@ -174,3 +270,4 @@ Fair Stand geliştirme aşamasında persistence katmanı doğrudan belirli bir b
 - Raflı duvarı erken yapmak kural motorunu küçük ama gerçek bir problem üzerinde test eder.
 - Proje save/load ile custom module persistence aynı şey değildir: proje bir **instance snapshot'ı**, custom kütüphane ise yeniden kullanılabilir **definition** saklar. İkisi ayrı tutulmalıdır.
 - Faz 3'teki eski `Kendi modülünü oluşturma` maddesi Faz 4'e taşındı; böylece roadmap'te aynı özellik iki farklı fazda tekrar etmiyor.
+- Faz 4 Anchor/Connection Graph yalnız placement özelliği değildir; Faz 5/6'da ortak dikme, profil ve aparatların doğru tekilleştirilmesi için assembly ilişkilerinin güvenilir kaynağı olacaktır.
