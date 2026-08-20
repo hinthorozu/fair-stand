@@ -3,21 +3,39 @@ import fs from 'node:fs';
 const path = 'src/scene3d.js';
 let source = fs.readFileSync(path, 'utf8');
 
+const textureUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_03/concrete_floor_03_diff_1k.jpg';
+const texturePath = 'public/textures/exhibition-floor.jpg';
+fs.mkdirSync('public/textures', { recursive: true });
+const textureResponse = await fetch(textureUrl);
+if (!textureResponse.ok) {
+  throw new Error(`Failed to download exhibition floor texture: ${textureResponse.status}`);
+}
+fs.writeFileSync(texturePath, Buffer.from(await textureResponse.arrayBuffer()));
+
 const startMarker = `  // FAZ 4:`;
 const endMarker = `  const outerFloor = new THREE.Mesh(`;
 const start = source.indexOf(startMarker);
 const end = source.indexOf(endMarker, start);
 if (start < 0 || end < 0) throw new Error('exhibition hall block not found');
 
-const environment = `  // FAZ 4: one visually continuous exhibition-hall ground plane.
-  // No walls, columns, roof, trusses or hall lights are rendered.
+const environment = `  // Fixed exhibition-hall ground: CC0 Concrete Floor 03 texture from Poly Haven.
+  // It is intentionally not user-configurable; the stand platform remains independent.
   const exhibitionHall = new THREE.Group();
   exhibitionHall.name = 'exhibition-hall-environment';
 
+  const hallFloorTexture = new THREE.TextureLoader().load(
+    import.meta.env.BASE_URL + 'textures/exhibition-floor.jpg',
+  );
+  hallFloorTexture.colorSpace = THREE.SRGBColorSpace;
+  hallFloorTexture.wrapS = THREE.RepeatWrapping;
+  hallFloorTexture.wrapT = THREE.RepeatWrapping;
+  hallFloorTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
   const hallFloorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x9a9d9f,
-    roughness: 0.78,
-    metalness: 0.02,
+    color: 0x8b8e91,
+    map: hallFloorTexture,
+    roughness: 0.9,
+    metalness: 0,
   });
 
   function rebuildExhibitionHall(standWidthM, standDepthM) {
@@ -27,6 +45,10 @@ const environment = `  // FAZ 4: one visually continuous exhibition-hall ground 
     }
 
     const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
+    const textureRepeat = Math.max(1, hallSizeM / 2.5);
+    hallFloorTexture.repeat.set(textureRepeat, textureRepeat);
+    hallFloorTexture.needsUpdate = true;
+
     const hallFloor = new THREE.Mesh(
       new THREE.PlaneGeometry(hallSizeM, hallSizeM),
       hallFloorMaterial,
@@ -57,7 +79,7 @@ source = source.replace(`    outerFloor.visible = true;`, `    outerFloor.visibl
 
 // Shelf cleanup: give the shelf slab enough contrast against the white wall panels and
 // keep the aluminium front profile physically separated from the slab to avoid flicker.
-const shelfMaterialPattern = /  const shelfMaterial = new THREE\.MeshStandardMaterial\(\{\n    color: 0x(?:ffffff|d7d9dc),\n    roughness: 0\.(?:72|76),\n    metalness: 0,\n  \}\);/;
+const shelfMaterialPattern = /  const shelfMaterial = new THREE\.MeshStandardMaterial\(\{\n    color: 0x(?:ffffff|d7d9dc|b8bcc1),\n    roughness: 0\.(?:72|76|78),\n    metalness: 0,\n  \}\);/;
 const shelfMaterial = `  const shelfMaterial = new THREE.MeshStandardMaterial({\n    color: 0xb8bcc1,\n    roughness: 0.78,\n    metalness: 0,\n  });`;
 if (!shelfMaterialPattern.test(source)) throw new Error('shelf material block not found');
 source = source.replace(shelfMaterialPattern, shelfMaterial);
