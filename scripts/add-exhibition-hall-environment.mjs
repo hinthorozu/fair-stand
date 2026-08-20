@@ -12,13 +12,16 @@ if (!textureResponse.ok) {
 }
 fs.writeFileSync(texturePath, Buffer.from(await textureResponse.arrayBuffer()));
 
-const startMarker = `  // FAZ 4:`;
+const startMarker = `  // Fixed exhibition-hall ground:`;
+const fallbackStartMarker = `  // FAZ 4:`;
 const endMarker = `  const outerFloor = new THREE.Mesh(`;
-const start = source.indexOf(startMarker);
+let start = source.indexOf(startMarker);
+if (start < 0) start = source.indexOf(fallbackStartMarker);
 const end = source.indexOf(endMarker, start);
 if (start < 0 || end < 0) throw new Error('exhibition hall block not found');
 
-const environment = `  // Fixed exhibition-hall ground: CC0 Concrete Floor 03 texture from Poly Haven.
+const environment = `  // Fixed exhibition-hall ground: one continuous CC0 Concrete Floor 03 image from Poly Haven.
+  // No tiled/repeated pattern: the whole hall reads as one uninterrupted surface.
   // It is intentionally not user-configurable; the stand platform remains independent.
   const exhibitionHall = new THREE.Group();
   exhibitionHall.name = 'exhibition-hall-environment';
@@ -27,14 +30,16 @@ const environment = `  // Fixed exhibition-hall ground: CC0 Concrete Floor 03 te
     import.meta.env.BASE_URL + 'textures/exhibition-floor.jpg',
   );
   hallFloorTexture.colorSpace = THREE.SRGBColorSpace;
-  hallFloorTexture.wrapS = THREE.RepeatWrapping;
-  hallFloorTexture.wrapT = THREE.RepeatWrapping;
+  hallFloorTexture.wrapS = THREE.ClampToEdgeWrapping;
+  hallFloorTexture.wrapT = THREE.ClampToEdgeWrapping;
+  hallFloorTexture.repeat.set(1, 1);
+  hallFloorTexture.offset.set(0, 0);
   hallFloorTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
   const hallFloorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x8b8e91,
+    color: 0x86898c,
     map: hallFloorTexture,
-    roughness: 0.9,
+    roughness: 0.94,
     metalness: 0,
   });
 
@@ -45,10 +50,6 @@ const environment = `  // Fixed exhibition-hall ground: CC0 Concrete Floor 03 te
     }
 
     const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
-    const textureRepeat = Math.max(1, hallSizeM / 2.5);
-    hallFloorTexture.repeat.set(textureRepeat, textureRepeat);
-    hallFloorTexture.needsUpdate = true;
-
     const hallFloor = new THREE.Mesh(
       new THREE.PlaneGeometry(hallSizeM, hallSizeM),
       hallFloorMaterial,
@@ -65,6 +66,11 @@ const environment = `  // Fixed exhibition-hall ground: CC0 Concrete Floor 03 te
 
 source = source.slice(0, start) + environment + source.slice(end);
 
+source = source.replace(
+  `  scene.background = new THREE.Color(0xf4f6f8);`,
+  `  scene.background = new THREE.Color(0x5f6265);`,
+);
+
 const stageAnchor = `    const centerX = widthM / 2;\n    const centerZ = depthM / 2;`;
 const rebuildLine = `    rebuildExhibitionHall(widthM, depthM);`;
 const positionLine = `    exhibitionHall.position.set(centerX, 0, centerZ);`;
@@ -76,6 +82,13 @@ if (!stageTail.includes(rebuildLine)) {
 }
 
 source = source.replace(`    outerFloor.visible = true;`, `    outerFloor.visible = false;`);
+
+// Keep editor measurements out of the visual presentation: the active platform outline
+// remains, but the surrounding square grid no longer breaks the hall into tiles.
+source = source.replace(
+  `    scene.add(grid, standOutline, ...activeWallGuides);`,
+  `    grid.visible = false;\n    scene.add(grid, standOutline, ...activeWallGuides);`,
+);
 
 // Shelf cleanup: give the shelf slab enough contrast against the white wall panels and
 // keep the aluminium front profile physically separated from the slab to avoid flicker.
