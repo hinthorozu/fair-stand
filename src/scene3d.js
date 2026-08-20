@@ -78,7 +78,7 @@ export function createStandScene(
   onFloorSelected = () => {},
 ) {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf4f6f8);
+  scene.background = new THREE.Color(0x5f6265);
 
   const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 2000);
   camera.position.set(4.8, 3.4, 6.2);
@@ -115,7 +115,8 @@ export function createStandScene(
   keyLight.shadow.mapSize.set(4096, 4096);
   scene.add(keyLight);
 
-  // Fixed exhibition-hall ground: CC0 Concrete Floor 03 texture from Poly Haven.
+  // Fixed exhibition-hall ground: one continuous CC0 Concrete Floor 03 image from Poly Haven.
+  // No tiled/repeated pattern: the whole hall reads as one uninterrupted surface.
   // It is intentionally not user-configurable; the stand platform remains independent.
   const exhibitionHall = new THREE.Group();
   exhibitionHall.name = 'exhibition-hall-environment';
@@ -124,14 +125,16 @@ export function createStandScene(
     import.meta.env.BASE_URL + 'textures/exhibition-floor.jpg',
   );
   hallFloorTexture.colorSpace = THREE.SRGBColorSpace;
-  hallFloorTexture.wrapS = THREE.RepeatWrapping;
-  hallFloorTexture.wrapT = THREE.RepeatWrapping;
+  hallFloorTexture.wrapS = THREE.ClampToEdgeWrapping;
+  hallFloorTexture.wrapT = THREE.ClampToEdgeWrapping;
+  hallFloorTexture.repeat.set(1, 1);
+  hallFloorTexture.offset.set(0, 0);
   hallFloorTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
   const hallFloorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x8b8e91,
+    color: 0x86898c,
     map: hallFloorTexture,
-    roughness: 0.9,
+    roughness: 0.94,
     metalness: 0,
   });
 
@@ -142,10 +145,6 @@ export function createStandScene(
     }
 
     const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
-    const textureRepeat = Math.max(1, hallSizeM / 2.5);
-    hallFloorTexture.repeat.set(textureRepeat, textureRepeat);
-    hallFloorTexture.needsUpdate = true;
-
     const hallFloor = new THREE.Mesh(
       new THREE.PlaneGeometry(hallSizeM, hallSizeM),
       hallFloorMaterial,
@@ -408,6 +407,7 @@ export function createStandScene(
     grid = createRectangularGrid(widthM, depthM);
     standOutline = createStandOutline(widthM, depthM);
     activeWallGuides = createActiveWallGuides(standType, widthM, depthM);
+    grid.visible = false;
     scene.add(grid, standOutline, ...activeWallGuides);
 
     stageLayout = {
