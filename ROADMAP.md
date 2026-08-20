@@ -7,7 +7,7 @@
 - **FAZ 1: KAPANDI — 10 Ağustos 2026**
 - **FAZ 2: YERLEŞİM MOTORU KAPANIŞ / POLISH AŞAMASI — 11 Ağustos 2026**
 - **FAZ 2.1: temel tamamlandı; 4 yön rotasyon, magnetic snap, serbest yerleşim ve feedback aktif**
-- **FAZ 3: PROJELEME / SUNUM / POLISH — devam ediyor**
+- **FAZ 3: PROJELEME / SUNUM / POLISH — final polish aşaması**
 - **FAZ 4: PARAMETRİK / CUSTOM MODÜL SİSTEMİ — planlandı, uygulama sırası aşağıda**
 
 ---
@@ -19,12 +19,32 @@ FAZ 3'ün amacı stand tasarımını proje olarak saklanabilir, yeniden açılab
 ## FAZ 3 yapılacaklar
 
 - [x] 1. Zemin ayarlanması
-- [ ] 2. Projenin kaydedilmesi ve tekrar düzenlenebilmesi
-- [ ] 3. En üste lamba eklenmesi
+- [x] 2. Projenin kaydedilmesi ve tekrar düzenlenebilmesi
+- [x] 3. En üste lamba eklenmesi
   - LED projektör tipi: siyah ince floodlight gövde + üst profil braketi + panel yüzüne gerçek SpotLight aydınlatması.
   - Üst aksesuar duvar kapasitesini ve zemin collision hesabını tüketmez; 350 cm üst kotta izin verilen duvar kenarlarına 50 cm snap ile yerleşir.
-- [ ] 4. Render alınması
+- [x] 4. Render alınması
+  - Mevcut basic current-view render Faz 3 teslimi için yeterli kabul edilmiştir; gelişmiş render seçenekleri bu fazın kapanışını bloklamaz.
 - [ ] 5. UI/UX düzenlemesi ve final polish
+
+## FAZ 3 — Final polish checklist
+
+Bu checklist yeni büyük özellik geliştirmek için değil, mevcut editörü Faz 4 öncesinde daha tutarlı ve profesyonel hale getirmek için kullanılacaktır.
+
+- [ ] **1. Sabit dış sahne zemini / ortam görünümü — birinci öncelik.** Stand platformunun dışındaki mevcut boş/açık gri dünya zemini kaldırılacak; kullanıcı seçeneği olmadan sabit, koyu ve daha gerçekçi fuar/stüdyo zemini kullanılacak. Standın kendi 5 cm platform zemini ve zemin tipi sistemi bundan bağımsız kalacak.
+- [ ] **2. Sol panel görsel hiyerarşisi.** Mevcut collapsible kartların başlık, spacing, buton ağırlığı ve bölüm ayrımları tutarlı hale getirilecek; Faz 4'te yeni kontroller eklendiğinde panelin dağılmaması hedeflenecek.
+- [ ] **3. Sahne seçim feedback'i.** Seçili panel/modül/zemin ve aktif aracın sahnede ilk bakışta anlaşılması sağlanacak; mevcut seçim mantığı korunacak, yalnız görsel geri bildirim netleştirilecek.
+- [ ] **4. Durum / başarı / uyarı / hata mesaj standardı.** `stageResult`, `selectionInfo`, `projectStatus`, `assetStatus` ve benzeri kullanıcı mesajları ortak bir UX dili ve görsel hiyerarşiyle sunulacak; kullanıcıya gösterilmesi gereken durumlar yalnız console mesajında kalmayacak.
+- [ ] **5. Buton davranış standardı.** Primary / secondary / ghost / danger / disabled davranışları bütün panellerde tutarlı olacak; silme, temizleme ve yeni proje gibi destructive işlemler açık biçimde ayrıştırılacak.
+- [ ] **6. Loading ve geçiş durumları.** Save/load, import/export ve görsel yükleme gibi işlemlerde kullanıcı işlemin başladığını, sürdüğünü ve bittiğini net görecek; mevcut loading overlay/state yapıları tutarlı hale getirilecek.
+- [ ] **7. Laptop/düşük ekran yüksekliği regresyonu.** Mobil arayüz hedeflenmeden; yaygın laptop çözünürlükleri, düşük viewport yüksekliği ve makul browser zoom seviyelerinde sidebar, toolbar, modal/context menu ve buton taşmaları kontrol edilip düzeltilecek.
+
+### Faz 3 kapanış kriteri
+
+- Yukarıdaki polish checklist tamamlanacak.
+- Mevcut proje save/load, LED projektör ve basic render davranışları regresyona uğramayacak.
+- `npm test` ve `npm run build` temiz olacak.
+- Faz 3 kapandıktan sonra geliştirme odağı Faz 4 Sprint 1 — Parametrik Core'a geçecek.
 
 ## FAZ 3 — Zemin teknik kararları
 
