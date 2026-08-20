@@ -76,6 +76,11 @@ FAZ 4'ün amacı mevcut modül kütüphanesini **referans/base modül** olarak k
 - [ ] Raf en üst profile doğrudan yerleştirilemeyecek.
 - [ ] Raflar arasındaki minimum mesafe **50 cm / 1 panel** olacak.
 - [ ] Konfigürasyon `başlangıç yüksekliği + raf aralığı + raf adedi` parametreleriyle tanımlanacak.
+- [ ] Raflar `lighting: none | led` benzeri tek bir parametrik özellik üzerinden **ışıksız / ışıklı** olarak seçilebilecek; iki ayrı temel modül oluşturulmayacak.
+- [ ] Işıklı rafta görsel LED etkisi gerçek geometri/material state'inin parçası olacak; mümkün olduğunda emissive yüzey + kontrollü gerçek ışık kullanılarak alt yüzeye hafif aydınlatma verilecek.
+- [ ] İlk sürümde LED seçeneği yalnız **açık/kapalı** olacak; renk sıcaklığı, dimmer veya LED konumu gibi ileri ayarlar ancak ortak parametre modeli bozulmadan eklenebilecek şekilde tasarlanacak.
+- [ ] Raf lighting state'i Wizard, live preview, save/load ve custom module definition içinde korunacak.
+- [ ] İleride BOM/maliyet motorunun okuyabilmesi için ışıklı raf, LED şerit/profil/difüzör/kablo/driver gibi maliyet kalemlerini türetebilecek yeterli metadata taşıyacak; Faz 4'te fiyat hesabı yapılmayacak.
 - [ ] Bu parametrelerin toplamı izin verilen yüksekliği aşıyorsa işlem reddedilecek ve sığmama nedeni gösterilecek.
 - [ ] Aynı raf validation'ı Wizard, live preview ve sahne içi düzenlemede ortak kullanılacak.
 - [ ] Raflı duvar, renk/görsel/cam/selection/placement davranışlarında base duvar ile uyumlu kalacak.
@@ -144,6 +149,7 @@ Fair Stand geliştirme aşamasında persistence katmanı doğrudan belirli bir b
 
 - [ ] Ölçü constraint'leri ve modül-spesifik validation testleri.
 - [ ] Raflı duvar kural testleri.
+- [ ] Işıklı/ışıksız raf state'i, preview ve save/load regresyon testleri.
 - [ ] Anchor compatibility ve snap testleri.
 - [ ] İki noktalı profil üretimi ve bağlı eleman hareketi testleri.
 - [ ] Custom modül create/edit/duplicate/delete testleri.
@@ -177,9 +183,10 @@ Bu sıra yalnız öneri değildir; Faz 4 geliştirmesinin varsayılan yürütme 
 - Base modülden `Custom oluştur`.
 - Live/ghost preview ve anlık validation.
 - Raflı duvarın başlangıç yüksekliği, raf aralığı, raf adedi ve sınır kuralları.
+- Raf için ışıklı/ışıksız parametresi; ışıklı durumda emissive/aydınlatma state'i ve gelecekte BOM'a aktarılacak LED metadata'sı.
 - Kaydedilmiş custom tanımı tekrar açıp düzenleme.
 
-**Sprint çıkışı:** Kullanıcı kod yazmadan geçerli raflı duvar varyasyonu oluşturabilmeli; Wizard ve sahne aynı Rule Engine'i kullanmalı.
+**Sprint çıkışı:** Kullanıcı kod yazmadan geçerli raflı duvar varyasyonu oluşturabilmeli; aynı varyasyonda ışıklı/ışıksız seçimi yapılabilmeli; Wizard ve sahne aynı Rule Engine'i kullanmalı.
 
 ### Sprint 3 — Anchor / Connection Graph (4.4)
 
@@ -232,6 +239,7 @@ Bu sıra yalnız öneri değildir; Faz 4 geliştirmesinin varsayılan yürütme 
 
 - Base modül regresyonları.
 - Parametrik, raf, anchor, profil, custom library ve save/load testleri.
+- Işıklı/ışıksız raf state'i ve BOM metadata regresyonu.
 - BOM-readiness state doğrulaması.
 - Kabul senaryosu: 4 × 200 cm yan yana duvar = 4 instance + 3 gerçek yapısal bağlantı.
 - `npm test` ve `npm run build` temiz.
@@ -258,16 +266,3 @@ Bu entegrasyon tamamlandıktan sonra `ROADMAP_PHASE_5_6.md` içindeki assembly-a
 5. **Sprint 5 / 4.6:** Custom modül yaşam döngüsü/kütüphane + local repository adapter.
 6. **Sprint 6 / 4.8:** Proje save/load + versiyonlama.
 7. **Sprint 7 / 4.9:** Regresyon + BOM-readiness + Faz 4 kapanışı.
-8. **4.7:** Fair CRM/Kyrox Core entegrasyonu; auth, gerçek ownership ve backend persistence.
-9. **Faz 5/6:** Assembly-aware BOM → Fair CRM maliyet/teklif entegrasyonu.
-
-### Sıralama gerekçesi
-
-- Profil aracını anchor sisteminden önce yapmak, sonradan bağlantı modelini yeniden yazdırır.
-- Fair CRM/Kyrox Core entegrasyonunu parametrik/geometrik model oturmadan yapmak API ve DB sözleşmesini gereksiz yere birkaç kez değiştirebilir.
-- Fair Stand içinde ayrı login/role/permission sistemi kurmak mevcut Core kimlik altyapısını tekrar etmek olur; bundan özellikle kaçınılacaktır.
-- Repository abstraction sayesinde Fair Stand geliştirilirken local persistence kullanılabilir; production entegrasyonunda parametrik business logic değiştirilmeden backend adapter'a geçilir.
-- Raflı duvarı erken yapmak kural motorunu küçük ama gerçek bir problem üzerinde test eder.
-- Proje save/load ile custom module persistence aynı şey değildir: proje bir **instance snapshot'ı**, custom kütüphane ise yeniden kullanılabilir **definition** saklar. İkisi ayrı tutulmalıdır.
-- Faz 3'teki eski `Kendi modülünü oluşturma` maddesi Faz 4'e taşındı; böylece roadmap'te aynı özellik iki farklı fazda tekrar etmiyor.
-- Faz 4 Anchor/Connection Graph yalnız placement özelliği değildir; Faz 5/6'da ortak dikme, profil ve aparatların doğru tekilleştirilmesi için assembly ilişkilerinin güvenilir kaynağı olacaktır.
