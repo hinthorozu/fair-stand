@@ -115,15 +115,24 @@ export function createStandScene(
   keyLight.shadow.mapSize.set(4096, 4096);
   scene.add(keyLight);
 
-  // FAZ 4: one visually continuous exhibition-hall ground plane.
-  // No walls, columns, roof, trusses or hall lights are rendered.
+  // Fixed exhibition-hall ground: CC0 Concrete Floor 03 texture from Poly Haven.
+  // It is intentionally not user-configurable; the stand platform remains independent.
   const exhibitionHall = new THREE.Group();
   exhibitionHall.name = 'exhibition-hall-environment';
 
+  const hallFloorTexture = new THREE.TextureLoader().load(
+    import.meta.env.BASE_URL + 'textures/exhibition-floor.jpg',
+  );
+  hallFloorTexture.colorSpace = THREE.SRGBColorSpace;
+  hallFloorTexture.wrapS = THREE.RepeatWrapping;
+  hallFloorTexture.wrapT = THREE.RepeatWrapping;
+  hallFloorTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
   const hallFloorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x9a9d9f,
-    roughness: 0.78,
-    metalness: 0.02,
+    color: 0x8b8e91,
+    map: hallFloorTexture,
+    roughness: 0.9,
+    metalness: 0,
   });
 
   function rebuildExhibitionHall(standWidthM, standDepthM) {
@@ -133,6 +142,10 @@ export function createStandScene(
     }
 
     const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
+    const textureRepeat = Math.max(1, hallSizeM / 2.5);
+    hallFloorTexture.repeat.set(textureRepeat, textureRepeat);
+    hallFloorTexture.needsUpdate = true;
+
     const hallFloor = new THREE.Mesh(
       new THREE.PlaneGeometry(hallSizeM, hallSizeM),
       hallFloorMaterial,
