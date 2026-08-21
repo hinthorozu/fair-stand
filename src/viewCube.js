@@ -247,6 +247,14 @@ export function createViewCube(container, camera, controls) {
     event.preventDefault();
     event.stopPropagation();
 
+    if (camera.isOrthographicCamera) {
+      const factor = event.deltaY > 0 ? 0.88 : 1.12;
+      camera.zoom = THREE.MathUtils.clamp(camera.zoom * factor, 0.08, 24);
+      camera.updateProjectionMatrix();
+      controls.update();
+      return;
+    }
+
     const target = controls.target;
     const offset = camera.position.clone().sub(target);
     const currentDistance = offset.length();
@@ -294,6 +302,9 @@ export function createViewCube(container, camera, controls) {
   return {
     update,
     dispose,
+    setCamera(nextCamera) {
+      if (nextCamera) camera = nextCamera;
+    },
     setViewDirection: animateToDirection,
   };
 }

@@ -81,8 +81,11 @@ export function createStandScene(
   scene.background = new THREE.Color(0x5f6265);
   scene.fog = new THREE.Fog(0x5f6265, 55, 90);
 
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 2000);
-  camera.position.set(4.8, 3.4, 6.2);
+  const perspectiveCamera = new THREE.PerspectiveCamera(42, 1, 0.05, 2000);
+  perspectiveCamera.position.set(4.8, 3.4, 6.2);
+  const orthographicCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 2000);
+  orthographicCamera.position.copy(perspectiveCamera.position);
+  let camera = perspectiveCamera;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -107,6 +110,111 @@ export function createStandScene(
   controls.mouseButtons.RIGHT = null;
 
   const viewCube = createViewCube(container, camera, controls);
+
+  let cameraMode = 'perspective';
+  const projectionControl = document.createElement('div');
+  projectionControl.setAttribute('aria-label', 'Kamera projeksiyonu');
+  projectionControl.style.cssText = [
+    'position:absolute',
+    'right:18px',
+    'bottom:18px',
+    'z-index:35',
+    'display:flex',
+    'gap:4px',
+    'padding:4px',
+    'border:1px solid rgba(148,163,184,.55)',
+    'border-radius:9px',
+    'background:rgba(255,255,255,.9)',
+    'box-shadow:0 5px 16px rgba(15,23,42,.12)',
+    'backdrop-filter:blur(5px)',
+  ].join(';');
+
+  const projectionButtons = new Map();
+  [['perspective', 'Persp'], ['orthographic', 'Ortho']].forEach(([mode, label]) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.title = mode === 'perspective' ? 'Perspektif görünüş' : 'Ortografik görünüş';
+    button.style.cssText = [
+      'height:28px',
+      'padding:0 9px',
+      'border:0',
+      'border-radius:6px',
+      'font:700 11px/1 system-ui,sans-serif',
+      'cursor:pointer',
+      'transition:background .15s,color .15s',
+    ].join(';');
+    projectionControl.appendChild(button);
+    projectionButtons.set(mode, button);
+  });
+  container.appendChild(projectionControl);
+
+  function styleProjectionButtons() {
+    projectionButtons.forEach((button, mode) => {
+      const active = mode === cameraMode;
+      button.style.background = active ? '#2563eb' : 'transparent';
+      button.style.color = active ? '#ffffff' : '#475569';
+    });
+  }
+
+  function setOrthographicSpan(verticalSpan, aspect) {
+    const safeSpan = Math.max(0.25, Number(verticalSpan) || 10);
+    const safeAspect = Math.max(0.1, Number(aspect) || 1);
+    orthographicCamera.top = safeSpan / 2;
+    orthographicCamera.bottom = -safeSpan / 2;
+    orthographicCamera.right = (safeSpan * safeAspect) / 2;
+    orthographicCamera.left = -(safeSpan * safeAspect) / 2;
+    orthographicCamera.updateProjectionMatrix();
+  }
+
+  function updateCameraProjection(width, height) {
+    const aspect = Math.max(1, width) / Math.max(1, height);
+    perspectiveCamera.aspect = aspect;
+    perspectiveCamera.updateProjectionMatrix();
+    if (cameraMode === 'orthographic') {
+      const span = Math.max(0.25, (orthographicCamera.top - orthographicCamera.bottom));
+      setOrthographicSpan(span, aspect);
+    }
+  }
+
+  function setCameraMode(nextMode) {
+    const resolved = nextMode === 'orthographic' ? 'orthographic' : 'perspective';
+    if (resolved === cameraMode) return cameraMode;
+
+    const source = camera;
+    const target = resolved === 'orthographic' ? orthographicCamera : perspectiveCamera;
+    const targetPoint = controls.target.clone();
+    const direction = source.position.clone().sub(targetPoint);
+    if (direction.lengthSq() === 0) direction.copy(HOME_DIRECTION);
+    direction.normalize();
+
+    if (resolved === 'orthographic') {
+      const distance = source.position.distanceTo(targetPoint);
+      const verticalSpan = 2 * distance * Math.tan(THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2);
+      const aspect = Math.max(container.clientWidth, 1) / Math.max(container.clientHeight, 1);
+      orthographicCamera.zoom = 1;
+      setOrthographicSpan(verticalSpan, aspect);
+      target.position.copy(source.position);
+    } else {
+      const visibleSpan = (orthographicCamera.top - orthographicCamera.bottom) / Math.max(orthographicCamera.zoom, 0.0001);
+      const distance = visibleSpan / (2 * Math.tan(THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2));
+      target.position.copy(targetPoint).addScaledVector(direction, distance);
+    }
+
+    target.quaternion.copy(source.quaternion);
+    target.up.copy(source.up);
+    camera = target;
+    cameraMode = resolved;
+    controls.object = camera;
+    controls.update();
+    viewCube.setCamera(camera);
+    styleProjectionButtons();
+    return cameraMode;
+  }
+
+  projectionButtons.get('perspective').addEventListener('click', () => setCameraMode('perspective'));
+  projectionButtons.get('orthographic').addEventListener('click', () => setCameraMode('orthographic'));
+  styleProjectionButtons();
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x7f8790, 2.1));
 
@@ -927,6 +1035,12 @@ export function createStandScene(
 
     controls.target.copy(target);
     camera.position.copy(target).addScaledVector(STAGE_HOME_DIRECTION, distance);
+    if (camera.isOrthographicCamera) {
+      camera.zoom = 1;
+      const aspect = Math.max(container.clientWidth, 1) / Math.max(container.clientHeight, 1);
+      const span = 2 * distance * Math.tan(THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2);
+      setOrthographicSpan(span, aspect);
+    }
     camera.lookAt(target);
     controls.update();
   }
@@ -945,6 +1059,12 @@ export function createStandScene(
 
     controls.target.copy(target);
     camera.position.copy(target).addScaledVector(HOME_DIRECTION, distance);
+    if (camera.isOrthographicCamera) {
+      camera.zoom = 1;
+      const aspect = Math.max(container.clientWidth, 1) / Math.max(container.clientHeight, 1);
+      const span = 2 * distance * Math.tan(THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2);
+      setOrthographicSpan(span, aspect);
+    }
     camera.lookAt(target);
     controls.update();
   }
@@ -2367,8 +2487,7 @@ export function createStandScene(
     const width = Math.max(container.clientWidth, 1);
     const height = Math.max(container.clientHeight, 1);
     renderer.setSize(width, height, false);
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
+    updateCameraProjection(width, height);
   }
 
   const resizeObserver = new ResizeObserver(resize);
@@ -2390,7 +2509,6 @@ export function createStandScene(
     const targetWidth = Math.round(cssWidth * safeScale);
     const targetHeight = Math.round(cssHeight * safeScale);
     const previousPixelRatio = renderer.getPixelRatio();
-    const previousAspect = camera.aspect;
     const selectedFrames = [...selectedSurfaces]
       .map((surface) => surface.userData?.selectionFrame)
       .filter(Boolean);
@@ -2403,8 +2521,7 @@ export function createStandScene(
 
       renderer.setPixelRatio(1);
       renderer.setSize(targetWidth, targetHeight, false);
-      camera.aspect = targetWidth / targetHeight;
-      camera.updateProjectionMatrix();
+      updateCameraProjection(targetWidth, targetHeight);
       controls.update();
       renderer.render(scene, camera);
 
@@ -2418,8 +2535,7 @@ export function createStandScene(
       activeWallGuides.forEach((guide, index) => { guide.visible = guideVisibility[index]; });
       renderer.setPixelRatio(previousPixelRatio);
       renderer.setSize(cssWidth, cssHeight, false);
-      camera.aspect = previousAspect;
-      camera.updateProjectionMatrix();
+      updateCameraProjection(cssWidth, cssHeight);
       controls.update();
       renderer.render(scene, camera);
     }
@@ -2427,6 +2543,8 @@ export function createStandScene(
 
   return {
     captureCurrentViewPng,
+    setCameraMode,
+    getCameraMode: () => cameraMode,
     createStage,
     setFloorType,
     setFloorColor,
