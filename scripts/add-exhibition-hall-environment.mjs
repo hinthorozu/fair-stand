@@ -50,7 +50,9 @@ const environment = `  // Fixed exhibition-hall ground: 4K CC0 Damaged Concrete 
       child.geometry?.dispose?.();
     }
 
-    const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
+    // Keep the physical floor well beyond the fog end distance so its rectangular edge
+    // never becomes visible while orbiting or zooming around the stand.
+    const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 180;
     // One texture repeat represents roughly an 8 m square of real floor.
     // Large repeats prevent the checkerboard look while preserving detail near the stand.
     const textureRepeat = Math.max(1, hallSizeM / 8);
@@ -78,6 +80,15 @@ source = source.replace(
   `  scene.background = new THREE.Color(0xf4f6f8);`,
   `  scene.background = new THREE.Color(0x5f6265);`,
 );
+
+// Blend the distant concrete floor into the fixed background instead of exposing a hard
+// rectangular venue edge. The near editing area remains clear; only the far field fades.
+if (!source.includes(`scene.fog = new THREE.Fog(0x5f6265, 55, 90);`)) {
+  source = source.replace(
+    `  scene.background = new THREE.Color(0x5f6265);`,
+    `  scene.background = new THREE.Color(0x5f6265);\n  scene.fog = new THREE.Fog(0x5f6265, 55, 90);`,
+  );
+}
 
 const stageAnchor = `    const centerX = widthM / 2;\n    const centerZ = depthM / 2;`;
 const rebuildLine = `    rebuildExhibitionHall(widthM, depthM);`;
