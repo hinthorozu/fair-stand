@@ -502,10 +502,17 @@ export function createStandScene(
     if (!positions.length) return null;
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    const isConcreteParquetPattern = floorType === 'parke-beton';
     const material = new THREE.LineBasicMaterial({
-      color: PARQUET_TYPES.has(floorType) ? 0x746f68 : 0x9aa0a6,
+      // Beton parke derzleri sahne ışığından bağımsız, daha koyu ve net kalsın.
+      color: isConcreteParquetPattern
+        ? 0x3f3d39
+        : (PARQUET_TYPES.has(floorType) ? 0x746f68 : 0x9aa0a6),
       transparent: true,
-      opacity: PARQUET_TYPES.has(floorType) ? 0.34 : 0.68,
+      opacity: isConcreteParquetPattern
+        ? 0.62
+        : (PARQUET_TYPES.has(floorType) ? 0.34 : 0.68),
+      toneMapped: !isConcreteParquetPattern,
     });
     const lines = new THREE.LineSegments(geometry, material);
     lines.renderOrder = 8;
