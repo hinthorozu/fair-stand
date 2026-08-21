@@ -139,8 +139,6 @@ if (!style.includes('Phase 3 final polish: sidebar hierarchy')) {
   style += polishCss;
 }
 
-// Selection feedback is derived from the existing selection message, so all module types
-// automatically participate without duplicating the selection logic.
 const selectionAnchor = "const projectLoadingOverlay = document.querySelector('#project-loading-overlay');";
 const selectionLogic = `\n\nconst DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile karşı köşeyi seçip dikdörtgen blok oluştur.';\n\nfunction syncSelectionFeedback() {\n  const message = selectionInfo.textContent.trim();\n  selectionInfo.classList.toggle('has-selection', Boolean(message) && message !== DEFAULT_SELECTION_HINT);\n}\n\nnew MutationObserver(syncSelectionFeedback).observe(selectionInfo, {\n  childList: true,\n  subtree: true,\n  characterData: true,\n});\nsyncSelectionFeedback();\n`;
 if (!main.includes('function syncSelectionFeedback()')) {
@@ -148,10 +146,7 @@ if (!main.includes('function syncSelectionFeedback()')) {
   main = main.replace(selectionAnchor, selectionAnchor + selectionLogic);
 }
 
-// Status tone observer standardizes the existing stage/project/asset channels without
-// rewriting their business logic. Explicit .error always wins; other tones are inferred
-// from the human-readable message and remain purely presentational.
-const statusLogic = `\nconst STATUS_ELEMENTS = [stageResult, projectStatus, assetStatus].filter(Boolean);\n\nfunction inferStatusTone(element) {\n  if (element.classList.contains('error')) return 'error';\n  const text = element.textContent.toLocaleLowerCase('tr-TR');\n  if (/hata|başarısız|geçersiz|aşılamaz|bulunamadı|yüklenemedi|kaydedilemedi/.test(text)) return 'error';\n  if (/uyarı|dikkat|seçilmedi|henüz|bekliyor/.test(text)) return 'warning';\n  if (/kaydedildi|yüklendi|oluşturuldu|hazır|tamamlandı|eklendi|aktarıldı|silindi/.test(text)) return 'success';\n  return 'info';\n}\n\nfunction syncStatusTone(element) {\n  element.classList.remove('status-info', 'status-success', 'status-warning', 'status-error');\n  element.classList.add('status-' + inferStatusTone(element));\n}\n\nSTATUS_ELEMENTS.forEach((element) => {\n  new MutationObserver(() => syncStatusTone(element)).observe(element, {\n    childList: true,\n    subtree: true,\n    characterData: true,\n    attributes: true,\n    attributeFilter: ['class'],\n  });\n  syncStatusTone(element);\n});\n`;
+const statusLogic = `\nconst STATUS_ELEMENTS = [stageResult, projectStatus, assetStatus].filter(Boolean);\n\nfunction inferStatusTone(element) {\n  if (element.classList.contains('error')) return 'error';\n  const text = element.textContent.toLocaleLowerCase('tr-TR');\n  if (/hata|başarısız|geçersiz|aşılamaz|bulunamadı|yüklenemedi|kaydedilemedi/.test(text)) return 'error';\n  if (/uyarı|dikkat|seçilmedi|henüz|bekliyor/.test(text)) return 'warning';\n  if (/kaydedildi|yüklendi|oluşturuldu|hazır|tamamlandı|eklendi|aktarıldı|silindi/.test(text)) return 'success';\n  return 'info';\n}\n\nfunction syncStatusTone(element) {\n  element.classList.remove('status-info', 'status-success', 'status-warning', 'status-error');\n  element.classList.add('status-' + inferStatusTone(element));\n}\n\nSTATUS_ELEMENTS.forEach((element) => {\n  new MutationObserver(() => syncStatusTone(element)).observe(element, {\n    childList: true,\n    subtree: true,\n    characterData: true,\n  });\n  syncStatusTone(element);\n});\n`;
 
 if (!main.includes('const STATUS_ELEMENTS = [stageResult, projectStatus, assetStatus]')) {
   const wallLabelsAnchor = 'const WALL_LABELS = Object.freeze({';
@@ -159,8 +154,14 @@ if (!main.includes('const STATUS_ELEMENTS = [stageResult, projectStatus, assetSt
   main = main.replace(wallLabelsAnchor, statusLogic + '\n' + wallLabelsAnchor);
 }
 
+// Repair v1: observing class mutations caused syncStatusTone() to trigger itself forever.
+main = main.replace(
+  `    characterData: true,\n    attributes: true,\n    attributeFilter: ['class'],\n`,
+  `    characterData: true,\n`,
+);
+
 fs.writeFileSync(indexPath, index);
 fs.writeFileSync(stylePath, style);
 fs.writeFileSync(mainPath, main);
 
-// Workflow trigger marker: phase3-polish-v1
+// Workflow trigger marker: phase3-polish-v2
