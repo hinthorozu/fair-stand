@@ -111,7 +111,7 @@ export function createStandScene(
   container.appendChild(renderer.domElement);
 
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = false;
+  controls.enableDamping = true;
   controls.enablePan = true;
   controls.screenSpacePanning = true;
   controls.panSpeed = 1.15;
