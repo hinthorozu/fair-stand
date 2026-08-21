@@ -49,7 +49,7 @@ const PARQUET_TYPES = new Set(['parke-acik', 'parke-sari', 'parke-beton']);
 const PARQUET_COLORS = Object.freeze({
   'parke-acik': '#e8dfd1',
   'parke-sari': '#d5ad79',
-  'parke-beton': '#9b9993',
+  'parke-beton': '#625f58',
 });
 const FLOOR_TOP_EPSILON_M = 0.006;
 const SELECTION_COLOR = 0x2563eb;
@@ -480,9 +480,10 @@ export function createStandScene(
         positions.push(0, topY, z, widthM, topY, z);
       });
     } else if (PARQUET_TYPES.has(floorType)) {
-      // Laminat/parke hissi: ince sıralar, uzun lameller ve 1/3 şaşırtma.
-      const plankDepthM = 0.16;
-      const plankLengthM = 1.40;
+      // Ahşap parkeler ince lamel kalır; beton parke daha geniş ve kısa plakalar kullanır.
+      const isConcreteParquet = floorType === 'parke-beton';
+      const plankDepthM = isConcreteParquet ? 0.28 : 0.16;
+      const plankLengthM = isConcreteParquet ? 1.12 : 1.40;
       collectSurfaceCuts(depthM, plankDepthM).forEach((z) => {
         positions.push(0, topY, z, widthM, topY, z);
       });
