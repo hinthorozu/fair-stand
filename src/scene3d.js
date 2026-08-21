@@ -36,7 +36,7 @@ const GLASS_SURFACE_OPACITY = 0.48;
 const GLASS_BACK_OPACITY = 0.18;
 const FLOOR_COLOR = 0xe9edf1;
 const OUTER_FLOOR_COLOR = 0xd2d8df;
-const GRID_COLOR = 0xb8c1cb;
+const GRID_COLOR = 0x7f8994;
 const STAND_BORDER_COLOR = 0x6f7a87;
 const ACTIVE_WALL_GUIDE_COLOR = 0xf97316;
 const ACTIVE_WALL_GUIDE_THICKNESS_M = 0.045;
@@ -79,6 +79,7 @@ export function createStandScene(
 ) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x5f6265);
+  scene.fog = new THREE.Fog(0x5f6265, 55, 90);
 
   const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 2000);
   camera.position.set(4.8, 3.4, 6.2);
@@ -143,7 +144,9 @@ export function createStandScene(
       child.geometry?.dispose?.();
     }
 
-    const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
+    // Keep the physical floor well beyond the fog end distance so its rectangular edge
+    // never becomes visible while orbiting or zooming around the stand.
+    const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 180;
     // One texture repeat represents roughly an 8 m square of real floor.
     // Large repeats prevent the checkerboard look while preserving detail near the stand.
     const textureRepeat = Math.max(1, hallSizeM / 8);
@@ -317,20 +320,36 @@ export function createStandScene(
     const backZ = -STAGE_SURROUND_M;
     const frontZ = depthM + STAGE_SURROUND_M;
     const positions = [];
+    const boldOffsetM = 0.006;
 
-    collectGridValues(widthM).forEach((x) => {
-      positions.push(x, 0.004, backZ, x, 0.004, frontZ);
-    });
-    collectGridValues(depthM).forEach((z) => {
-      positions.push(leftX, 0.004, z, rightX, 0.004, z);
-    });
+    const pushVertical = (x) => {
+      [-boldOffsetM, 0, boldOffsetM].forEach((offset) => {
+        positions.push(x + offset, 0.006, backZ, x + offset, 0.006, frontZ);
+      });
+    };
+    const pushHorizontal = (z) => {
+      [-boldOffsetM, 0, boldOffsetM].forEach((offset) => {
+        positions.push(leftX, 0.006, z + offset, rightX, 0.006, z + offset);
+      });
+    };
+
+    collectGridValues(widthM).forEach(pushVertical);
+    collectGridValues(depthM).forEach(pushHorizontal);
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    return new THREE.LineSegments(
+    const lines = new THREE.LineSegments(
       geometry,
-      new THREE.LineBasicMaterial({ color: GRID_COLOR }),
+      new THREE.LineBasicMaterial({
+        color: GRID_COLOR,
+        transparent: true,
+        opacity: 0.92,
+        depthWrite: false,
+        toneMapped: false,
+      }),
     );
+    lines.renderOrder = 7;
+    return lines;
   }
 
   function createStandOutline(widthM, depthM) {
@@ -413,7 +432,6 @@ export function createStandScene(
     grid = createRectangularGrid(widthM, depthM);
     standOutline = createStandOutline(widthM, depthM);
     activeWallGuides = createActiveWallGuides(standType, widthM, depthM);
-    grid.visible = false;
     scene.add(grid, standOutline, ...activeWallGuides);
 
     stageLayout = {
