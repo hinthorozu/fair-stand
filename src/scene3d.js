@@ -184,8 +184,8 @@ export function createStandScene(
   activeFloor.visible = false;
   scene.add(activeFloor);
 
-  // Lightweight procedural carpet texture: neutral fibers multiplied by the chosen
-  // carpet color, plus a subtle bump map so grazing light reads as real textile.
+  // Lightweight procedural RIP exhibition carpet. Narrow parallel ribs stay readable
+  // from normal editing distance without turning into a decorative household pattern.
   // Generated in-browser to avoid another heavy image asset or network request.
   function createCarpetTexturePair() {
     const size = 256;
@@ -209,12 +209,14 @@ export function createStandScene(
     for (let y = 0; y < size; y += 1) {
       for (let x = 0; x < size; x += 1) {
         const i = (y * size + x) * 4;
-        const fine = (random() - 0.5) * 28;
-        const weaveA = Math.sin((x * 0.34) + (y * 0.11)) * 11;
-        const weaveB = Math.sin((x * 0.08) - (y * 0.27)) * 7;
-        const tuft = Math.sin((x + y) * 0.055) * 5;
-        const value = Math.max(62, Math.min(194, 128 + fine + weaveA + weaveB + tuft));
-        const bump = Math.max(72, Math.min(184, 128 + fine * 0.75 + weaveA * 1.45 + weaveB * 1.15 + tuft));
+        // Exhibition RIP carpet: narrow, parallel ribs with only a trace of fiber noise.
+        // The rib axis follows canvas Y, so the finished floor reads as one directional roll.
+        const fine = (random() - 0.5) * 5;
+        const rib = Math.sin(x * 1.18);
+        const ribHarmonic = Math.sin(x * 2.36) * 0.22;
+        const ribProfile = rib * 13 + ribHarmonic * 5;
+        const value = Math.max(92, Math.min(164, 128 + ribProfile + fine));
+        const bump = Math.max(82, Math.min(174, 128 + ribProfile * 1.65 + fine * 0.45));
 
         colorImage.data[i] = value;
         colorImage.data[i + 1] = value;
@@ -336,12 +338,12 @@ export function createStandScene(
       material.metalness = 0;
       material.map = carpetTextures.colorMap;
       material.bumpMap = carpetTextures.bumpMap;
-      material.bumpScale = 0.032;
+      material.bumpScale = 0.014;
       if (stageLayout) {
-        // Slightly larger weave remains readable from normal editing distance,
-        // while still staying subtle enough not to look like a printed pattern.
-        const repeatX = Math.max(2, stageLayout.widthM / 1.05);
-        const repeatY = Math.max(2, stageLayout.depthM / 1.05);
+        // A 256px tile spans roughly 34 cm across the ribs. The Y axis repeats slowly
+        // because RIP carpet is directionally continuous rather than a square pattern.
+        const repeatX = Math.max(2, stageLayout.widthM / 0.34);
+        const repeatY = Math.max(1, stageLayout.depthM / 2.4);
         carpetTextures.colorMap.repeat.set(repeatX, repeatY);
         carpetTextures.bumpMap.repeat.set(repeatX, repeatY);
       }
