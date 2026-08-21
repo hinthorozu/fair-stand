@@ -1,0 +1,38 @@
+name: Reset Floor Emissive State
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/reset-floor-emissive-state.mjs'
+      - '.github/workflows/reset-floor-emissive-state.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/reset-floor-emissive-state.mjs
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/scene3d.js
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Reset floor emissive state between materials"
+            git push origin ROG
+          fi
