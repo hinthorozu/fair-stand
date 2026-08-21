@@ -117,6 +117,7 @@ export function createStandScene(
 
   let cameraMode = 'perspective';
   const projectionControl = document.createElement('div');
+  projectionControl.className = 'projection-control';
   projectionControl.setAttribute('aria-label', 'Kamera projeksiyonu');
   projectionControl.style.cssText = [
     'position:absolute',
