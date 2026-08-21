@@ -81,6 +81,16 @@ export function createStandScene(
   scene.background = new THREE.Color(0x5f6265);
   scene.fog = new THREE.Fog(0x5f6265, 55, 90);
 
+  // Keep atmospheric depth outside the editable stand. Fog distances are updated only
+  // when the stage size changes, so this adds no per-frame CPU work or extra draw calls.
+  function updateStageFog(widthM, depthM) {
+    const diagonalM = Math.hypot(Number(widthM) || 0, Number(depthM) || 0);
+    const near = Math.max(55, diagonalM * 1.25 + 18);
+    const far = Math.max(90, near + Math.max(35, diagonalM * 0.8));
+    scene.fog.near = near;
+    scene.fog.far = far;
+  }
+
   const perspectiveCamera = new THREE.PerspectiveCamera(42, 1, 0.05, 2000);
   perspectiveCamera.position.set(4.8, 3.4, 6.2);
   const orthographicCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 2000);
@@ -659,6 +669,8 @@ export function createStandScene(
     if (!Number.isFinite(widthM) || !Number.isFinite(depthM) || widthM <= 0 || depthM <= 0) {
       return { ok: false, message: 'Geçerli bir X ve Y ölçüsü gerekli.' };
     }
+
+    updateStageFog(widthM, depthM);
 
     disposeWall();
     disposeGroundGuides();
