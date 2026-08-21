@@ -1,0 +1,37 @@
+name: Phase 3 UI Polish
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/phase3-ui-polish.mjs'
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/phase3-ui-polish.mjs
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - name: Commit polish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html src/style.css src/main.js
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Polish sidebar selection and status feedback"
+            git push origin ROG
+          fi
