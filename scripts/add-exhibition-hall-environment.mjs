@@ -3,7 +3,9 @@ import fs from 'node:fs';
 const path = 'src/scene3d.js';
 let source = fs.readFileSync(path, 'utf8');
 
-const textureUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_03/concrete_floor_03_diff_1k.jpg';
+// Matches the user-selected Poly Haven package: damaged_concrete_floor_02_4k.blend.zip.
+// Use the 4K diffuse map in-browser; the Blender/EXR files are not needed by the editor.
+const textureUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/4k/damaged_concrete_floor_02/damaged_concrete_floor_02_diff_4k.jpg';
 const texturePath = 'public/textures/exhibition-floor.jpg';
 fs.mkdirSync('public/textures', { recursive: true });
 const textureResponse = await fetch(textureUrl);
@@ -20,8 +22,9 @@ if (start < 0) start = source.indexOf(fallbackStartMarker);
 const end = source.indexOf(endMarker, start);
 if (start < 0 || end < 0) throw new Error('exhibition hall block not found');
 
-const environment = `  // Fixed exhibition-hall ground: one continuous CC0 Concrete Floor 03 image from Poly Haven.
-  // No tiled/repeated pattern: the whole hall reads as one uninterrupted surface.
+const environment = `  // Fixed exhibition-hall ground: 4K CC0 Damaged Concrete Floor 02 from Poly Haven.
+  // The source is seamless and repeated at a large physical scale so the hall reads as
+  // one continuous floor instead of one stretched image or visible square tiles.
   // It is intentionally not user-configurable; the stand platform remains independent.
   const exhibitionHall = new THREE.Group();
   exhibitionHall.name = 'exhibition-hall-environment';
@@ -30,16 +33,14 @@ const environment = `  // Fixed exhibition-hall ground: one continuous CC0 Concr
     import.meta.env.BASE_URL + 'textures/exhibition-floor.jpg',
   );
   hallFloorTexture.colorSpace = THREE.SRGBColorSpace;
-  hallFloorTexture.wrapS = THREE.ClampToEdgeWrapping;
-  hallFloorTexture.wrapT = THREE.ClampToEdgeWrapping;
-  hallFloorTexture.repeat.set(1, 1);
-  hallFloorTexture.offset.set(0, 0);
+  hallFloorTexture.wrapS = THREE.RepeatWrapping;
+  hallFloorTexture.wrapT = THREE.RepeatWrapping;
   hallFloorTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
   const hallFloorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x86898c,
+    color: 0xa9abad,
     map: hallFloorTexture,
-    roughness: 0.94,
+    roughness: 0.96,
     metalness: 0,
   });
 
@@ -50,6 +51,13 @@ const environment = `  // Fixed exhibition-hall ground: one continuous CC0 Concr
     }
 
     const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
+    // One texture repeat represents roughly an 8 m square of real floor.
+    // Large repeats prevent the checkerboard look while preserving detail near the stand.
+    const textureRepeat = Math.max(1, hallSizeM / 8);
+    hallFloorTexture.repeat.set(textureRepeat, textureRepeat);
+    hallFloorTexture.offset.set(0.173, 0.287);
+    hallFloorTexture.needsUpdate = true;
+
     const hallFloor = new THREE.Mesh(
       new THREE.PlaneGeometry(hallSizeM, hallSizeM),
       hallFloorMaterial,
@@ -85,10 +93,12 @@ source = source.replace(`    outerFloor.visible = true;`, `    outerFloor.visibl
 
 // Keep editor measurements out of the visual presentation: the active platform outline
 // remains, but the surrounding square grid no longer breaks the hall into tiles.
-source = source.replace(
-  `    scene.add(grid, standOutline, ...activeWallGuides);`,
-  `    grid.visible = false;\n    scene.add(grid, standOutline, ...activeWallGuides);`,
-);
+if (!source.includes(`    grid.visible = false;\n    scene.add(grid, standOutline, ...activeWallGuides);`)) {
+  source = source.replace(
+    `    scene.add(grid, standOutline, ...activeWallGuides);`,
+    `    grid.visible = false;\n    scene.add(grid, standOutline, ...activeWallGuides);`,
+  );
+}
 
 // Shelf cleanup: give the shelf slab enough contrast against the white wall panels and
 // keep the aluminium front profile physically separated from the slab to avoid flicker.
