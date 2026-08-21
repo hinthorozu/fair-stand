@@ -1,4 +1,4 @@
-name: Add Carpet Texture
+name: Tune Carpet Texture
 
 on:
   push:
@@ -33,6 +33,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Add procedural carpet material texture"
+            git commit -m "Improve carpet texture readability at normal zoom"
             git push origin ROG
           fi
