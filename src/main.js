@@ -91,6 +91,49 @@ const deleteProjectButton = document.querySelector('#delete-project');
 const projectStatus = document.querySelector('#project-status');
 const projectLoadingOverlay = document.querySelector('#project-loading-overlay');
 
+const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile karşı köşeyi seçip dikdörtgen blok oluştur.';
+
+function syncSelectionFeedback() {
+  const message = selectionInfo.textContent.trim();
+  selectionInfo.classList.toggle('has-selection', Boolean(message) && message !== DEFAULT_SELECTION_HINT);
+}
+
+new MutationObserver(syncSelectionFeedback).observe(selectionInfo, {
+  childList: true,
+  subtree: true,
+  characterData: true,
+});
+syncSelectionFeedback();
+
+
+
+const STATUS_ELEMENTS = [stageResult, projectStatus, assetStatus].filter(Boolean);
+
+function inferStatusTone(element) {
+  if (element.classList.contains('error')) return 'error';
+  const text = element.textContent.toLocaleLowerCase('tr-TR');
+  if (/hata|başarısız|geçersiz|aşılamaz|bulunamadı|yüklenemedi|kaydedilemedi/.test(text)) return 'error';
+  if (/uyarı|dikkat|seçilmedi|henüz|bekliyor/.test(text)) return 'warning';
+  if (/kaydedildi|yüklendi|oluşturuldu|hazır|tamamlandı|eklendi|aktarıldı|silindi/.test(text)) return 'success';
+  return 'info';
+}
+
+function syncStatusTone(element) {
+  element.classList.remove('status-info', 'status-success', 'status-warning', 'status-error');
+  element.classList.add('status-' + inferStatusTone(element));
+}
+
+STATUS_ELEMENTS.forEach((element) => {
+  new MutationObserver(() => syncStatusTone(element)).observe(element, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+  syncStatusTone(element);
+});
+
 const WALL_LABELS = Object.freeze({
   back: 'Sırt',
   left: 'Sol',

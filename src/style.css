@@ -866,3 +866,124 @@ h2 {
 @keyframes project-loading-spin {
   to { transform: rotate(360deg); }
 }
+
+
+/* Phase 3 final polish: sidebar hierarchy, selection feedback and status tones */
+.sidebar-intro {
+  padding: 2px 2px 6px;
+}
+
+.sidebar-intro .muted {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.sidebar {
+  gap: 11px;
+  padding: 18px;
+}
+
+.panel-card {
+  gap: 8px;
+  padding: 13px;
+  border-color: #d9dee5;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.025);
+  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+.panel-card[open] {
+  border-color: #c8d0da;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.055);
+}
+
+.panel-summary {
+  min-height: 24px;
+  margin-bottom: 0;
+  border-radius: 8px;
+  color: #2d3748;
+  letter-spacing: -0.01em;
+}
+
+.panel-summary:hover {
+  color: #111827;
+}
+
+.panel-card[open] > .panel-summary {
+  color: #111827;
+}
+
+.panel-card[open] > .panel-summary::before {
+  content: '';
+  width: 3px;
+  height: 16px;
+  flex: 0 0 3px;
+  margin-right: -4px;
+  border-radius: 999px;
+  background: #f97316;
+}
+
+.panel-card-content {
+  gap: 8px;
+  padding-top: 3px;
+}
+
+.project-card[open],
+.stand-setup-card[open] {
+  background: #fdfefe;
+}
+
+/* 2) Selection feedback: make active selection unmistakable without shouting. */
+.selection-status {
+  min-height: 0;
+  padding: 9px 10px;
+  border: 1px solid #dfe4ea;
+  border-radius: 9px;
+  background: #f7f9fb;
+  color: #667085;
+  transition: 140ms ease;
+}
+
+.selection-status.has-selection {
+  border-color: #9bb9ef;
+  background: #eff6ff;
+  color: #1e3a5f;
+  box-shadow: inset 3px 0 0 #2563eb;
+  font-weight: 650;
+}
+
+/* 3) One visual language for info / success / warning / error messages. */
+.status.status-info,
+.status.status-success,
+.status.status-warning,
+.status.status-error {
+  min-height: 0;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.status.status-info {
+  color: #526172;
+  background: #f6f8fa;
+  border-color: #e5e9ee;
+}
+
+.status.status-success {
+  color: #166534;
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.status.status-warning {
+  color: #92400e;
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.status.status-error,
+.status.error {
+  color: #b42318;
+  background: #fff5f4;
+  border-color: #fecaca;
+}
