@@ -19,4 +19,11 @@ if (!scene.includes('    updateStageFog(widthM, depthM);')) {
   scene = scene.replace(stageAnchor, stageReplacement);
 }
 
+const dampingAnchor = '  controls.enableDamping = true;';
+const dampingReplacement = '  controls.enableDamping = false;';
+if (!scene.includes(dampingReplacement)) {
+  if (!scene.includes(dampingAnchor)) throw new Error('OrbitControls damping anchor not found');
+  scene = scene.replace(dampingAnchor, dampingReplacement);
+}
+
 fs.writeFileSync(scenePath, scene);
