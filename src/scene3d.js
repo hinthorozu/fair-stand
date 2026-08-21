@@ -113,7 +113,36 @@ export function createStandScene(
   controls.mouseButtons.MIDDLE = THREE.MOUSE.PAN;
   controls.mouseButtons.RIGHT = null;
 
-  const viewCube = createViewCube(container, camera, controls);
+  function getViewCubeFit() {
+    if (!stageLayout) return null;
+
+    const widthM = stageLayout.widthM + STAGE_SURROUND_M * 2;
+    const depthM = stageLayout.depthM + STAGE_SURROUND_M * 2;
+    const heightM = Math.max(STAND_DIMENSIONS.height + ACTIVE_PLATFORM_HEIGHT_M, 1);
+    const target = new THREE.Vector3(
+      stageLayout.widthM / 2,
+      heightM * 0.48,
+      stageLayout.depthM / 2,
+    );
+
+    // Fit a conservative bounding sphere so every ViewCube preset shows the complete
+    // stand, including the 1 m reference surround, regardless of the previous zoom.
+    const radius = Math.sqrt((widthM ** 2) + (depthM ** 2) + (heightM ** 2)) * 0.5 * 1.08;
+    const aspect = Math.max(container.clientWidth, 1) / Math.max(container.clientHeight, 1);
+    const verticalFov = THREE.MathUtils.degToRad(perspectiveCamera.fov);
+    const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
+    const fitFov = Math.max(THREE.MathUtils.degToRad(12), Math.min(verticalFov, horizontalFov));
+    const distance = THREE.MathUtils.clamp(
+      (radius / Math.sin(fitFov / 2)) * 1.04,
+      controls.minDistance,
+      controls.maxDistance,
+    );
+    const verticalSpan = (radius * 2 * 1.08) / Math.min(1, aspect);
+
+    return { target, distance, verticalSpan };
+  }
+
+  const viewCube = createViewCube(container, camera, controls, getViewCubeFit);
 
   let cameraMode = 'perspective';
   const projectionControl = document.createElement('div');

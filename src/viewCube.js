@@ -19,7 +19,7 @@ const FACE_LABELS = [
   { label: 'BACK', accent: '#64748b' },
 ];
 
-export function createViewCube(container, camera, controls) {
+export function createViewCube(container, camera, controls, getFitView = () => null) {
   const root = document.createElement('div');
   root.className = 'view-cube';
   root.setAttribute('aria-label', 'Kamera yön küpü');
@@ -112,14 +112,28 @@ export function createViewCube(container, camera, controls) {
     }
     safeDirection.normalize();
 
-    const target = controls.target.clone();
+    const fit = getFitView?.(safeDirection) ?? null;
+    const startTarget = controls.target.clone();
+    const target = fit?.target?.isVector3 ? fit.target.clone() : startTarget.clone();
     const distance = THREE.MathUtils.clamp(
-      camera.position.distanceTo(target),
+      Number(fit?.distance) || camera.position.distanceTo(startTarget),
       controls.minDistance,
       controls.maxDistance,
     );
     const startPosition = camera.position.clone();
     const endPosition = target.clone().addScaledVector(safeDirection, distance);
+
+    if (camera.isOrthographicCamera && Number.isFinite(fit?.verticalSpan)) {
+      const aspect = Math.max(container.clientWidth, 1) / Math.max(container.clientHeight, 1);
+      const span = Math.max(0.25, fit.verticalSpan);
+      camera.zoom = 1;
+      camera.top = span / 2;
+      camera.bottom = -span / 2;
+      camera.right = (span * aspect) / 2;
+      camera.left = -(span * aspect) / 2;
+      camera.updateProjectionMatrix();
+    }
+
     const startedAt = performance.now();
     const ownAnimationId = ++animationId;
     controls.enabled = false;
@@ -132,7 +146,8 @@ export function createViewCube(container, camera, controls) {
         : 1 - ((-2 * progress + 2) ** 3) / 2;
 
       camera.position.lerpVectors(startPosition, endPosition, eased);
-      camera.lookAt(target);
+      controls.target.lerpVectors(startTarget, target, eased);
+      camera.lookAt(controls.target);
 
       if (progress < 1) {
         requestAnimationFrame(frame);
