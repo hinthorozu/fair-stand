@@ -883,7 +883,28 @@ createStageButton.addEventListener('click', () => {
     return;
   }
 
-  if (currentModules.length) {
+  // Rebuilding the stage while a stored/opened project is active must never mutate that
+  // project's identity through autosave. Treat the rebuild as the start of a new project.
+  const rebuildingStoredProject = Boolean(currentStand && autosaveEnabled);
+  if (rebuildingStoredProject) {
+    const currentProjectName = projectNameInput.value.trim() || 'Adsız Proje';
+    const confirmed = window.confirm(
+      'Sahne ve proje değiştirilecek.\n\n'
+        + '• Açık proje: "' + currentProjectName + '" korunacak ve değiştirilmeyecek.\n'
+        + '• Mevcut duvarlar, modüller, renkler ve görsel düzenlemeleri yeni sahneye taşınmayacak.\n'
+        + '• Yeni sahne bağımsız, kaydedilmemiş bir proje olarak başlayacak.\n\n'
+        + 'Devam edilsin mi?',
+    );
+    if (!confirmed) return;
+
+    disableAutosave();
+    activeProjectId = createProjectId();
+    activeProjectCreatedAt = Date.now();
+    projectNameInput.value = 'Adsız Proje';
+    projectSelect.selectedIndex = -1;
+    clearRegisteredAssets();
+    projectStatus.textContent = 'Yeni proje başladı · önceki proje korunuyor.';
+  } else if (currentModules.length) {
     const confirmed = window.confirm(
       'Stand alanı yeniden oluşturulursa mevcut duvar, panel renkleri, görselleri ve düzenlemeleri silinecek. Devam edilsin mi?',
     );
