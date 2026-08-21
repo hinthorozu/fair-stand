@@ -48,7 +48,7 @@ const FLOOR_TYPES = Object.freeze(['karolaj', 'hali', 'parke-acik', 'parke-sari'
 const PARQUET_TYPES = new Set(['parke-acik', 'parke-sari', 'parke-beton']);
 const PARQUET_COLORS = Object.freeze({
   'parke-acik': '#e8dfd1',
-  'parke-sari': '#d5ad79',
+  'parke-sari': '#ddb24f',
   'parke-beton': '#625f58',
 });
 const FLOOR_TOP_EPSILON_M = 0.006;
