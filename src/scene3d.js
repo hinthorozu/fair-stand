@@ -528,6 +528,8 @@ export function createStandScene(
       material.color.set(floorColors.hali);
       material.roughness = 1;
       material.metalness = 0;
+      material.emissive.set('#000000');
+      material.emissiveIntensity = 0;
       material.map = carpetTextures.colorMap;
       material.bumpMap = carpetTextures.bumpMap;
       material.bumpScale = 0.018;
@@ -552,6 +554,8 @@ export function createStandScene(
       material.color.set(floorColors.karolaj);
       material.roughness = 0.92;
       material.metalness = 0;
+      material.emissive.set('#000000');
+      material.emissiveIntensity = 0;
       material.map = null;
       material.bumpMap = null;
       material.bumpScale = 0;
