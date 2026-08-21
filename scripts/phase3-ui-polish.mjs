@@ -162,3 +162,5 @@ if (!main.includes('const STATUS_ELEMENTS = [stageResult, projectStatus, assetSt
 fs.writeFileSync(indexPath, index);
 fs.writeFileSync(stylePath, style);
 fs.writeFileSync(mainPath, main);
+
+// Workflow trigger marker: phase3-polish-v1
