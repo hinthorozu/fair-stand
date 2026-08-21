@@ -128,8 +128,6 @@ STATUS_ELEMENTS.forEach((element) => {
     childList: true,
     subtree: true,
     characterData: true,
-    attributes: true,
-    attributeFilter: ['class'],
   });
   syncStatusTone(element);
 });
