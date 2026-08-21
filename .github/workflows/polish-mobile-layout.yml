@@ -1,0 +1,38 @@
+name: Polish Mobile Layout
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/polish-mobile-layout.mjs'
+      - '.github/workflows/polish-mobile-layout.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/polish-mobile-layout.mjs
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/style.css src/scene3d.js
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Polish mobile editor layout"
+            git push origin ROG
+          fi
