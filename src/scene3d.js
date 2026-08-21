@@ -157,8 +157,13 @@ export function createStandScene(
       projectedHalfHeight / Math.tan(verticalFov / 2),
       projectedHalfWidth / Math.tan(horizontalFov / 2),
     ) / occupancy;
+    // Do not add the full projected scene depth to the fit distance. That conservative
+    // term made isometric/home presets pull far away even though the stand already fit.
+    // A small depth allowance keeps near corners safe while letting the stand actually
+    // occupy the intended ~82% of the viewport.
+    const depthAllowance = depthHalf * 0.16;
     const distance = THREE.MathUtils.clamp(
-      depthHalf + perspectiveFit,
+      perspectiveFit + depthAllowance,
       controls.minDistance,
       controls.maxDistance,
     );
