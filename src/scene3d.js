@@ -88,7 +88,11 @@ export function createStandScene(
   let camera = perspectiveCamera;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const coarsePointer = window.matchMedia?.('(pointer: coarse)')?.matches ?? false;
+  const editorPixelRatio = coarsePointer
+    ? Math.min(window.devicePixelRatio, 1)
+    : Math.min(window.devicePixelRatio, 1.5);
+  renderer.setPixelRatio(editorPixelRatio);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
@@ -221,7 +225,9 @@ export function createStandScene(
   const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
   keyLight.position.set(5, 8, 6);
   keyLight.castShadow = true;
-  keyLight.shadow.mapSize.set(4096, 4096);
+  // 2K is visually sufficient for the editor and cuts the directional shadow map
+  // memory/fill cost to one quarter of the previous 4K allocation.
+  keyLight.shadow.mapSize.set(2048, 2048);
   scene.add(keyLight);
 
   // Fixed exhibition-hall ground: 4K CC0 Damaged Concrete Floor 02 from Poly Haven.
@@ -2494,9 +2500,31 @@ export function createStandScene(
   resizeObserver.observe(container);
   resize();
 
-  renderer.setAnimationLoop(() => {
-    controls.update();
-    viewCube.update();
+  // Keep interaction smooth, but do not burn the GPU rendering a static editor at
+  // monitor refresh rate. OrbitControls reports camera movement; while idle we only
+  // refresh occasionally so asynchronous texture/material updates still appear quickly.
+  const activeFrameIntervalMs = coarsePointer ? (1000 / 30) : (1000 / 50);
+  const idleFrameIntervalMs = 250;
+  let lastRenderAt = -Infinity;
+  const lastCubePosition = new THREE.Vector3(Number.NaN, Number.NaN, Number.NaN);
+  const lastCubeQuaternion = new THREE.Quaternion(Number.NaN, Number.NaN, Number.NaN, Number.NaN);
+
+  renderer.setAnimationLoop((now) => {
+    const controlsChanged = Boolean(controls.update());
+    const activelyDragging = Boolean(dragSession?.dragging);
+    const frameInterval = (controlsChanged || activelyDragging)
+      ? activeFrameIntervalMs
+      : idleFrameIntervalMs;
+    if (now - lastRenderAt < frameInterval) return;
+    lastRenderAt = now;
+
+    const cameraChanged = !camera.position.equals(lastCubePosition)
+      || !camera.quaternion.equals(lastCubeQuaternion);
+    if (cameraChanged) {
+      viewCube.update();
+      lastCubePosition.copy(camera.position);
+      lastCubeQuaternion.copy(camera.quaternion);
+    }
     renderer.render(scene, camera);
   });
 
