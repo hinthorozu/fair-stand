@@ -115,8 +115,9 @@ export function createStandScene(
   keyLight.shadow.mapSize.set(4096, 4096);
   scene.add(keyLight);
 
-  // Fixed exhibition-hall ground: one continuous CC0 Concrete Floor 03 image from Poly Haven.
-  // No tiled/repeated pattern: the whole hall reads as one uninterrupted surface.
+  // Fixed exhibition-hall ground: 4K CC0 Damaged Concrete Floor 02 from Poly Haven.
+  // The source is seamless and repeated at a large physical scale so the hall reads as
+  // one continuous floor instead of one stretched image or visible square tiles.
   // It is intentionally not user-configurable; the stand platform remains independent.
   const exhibitionHall = new THREE.Group();
   exhibitionHall.name = 'exhibition-hall-environment';
@@ -125,16 +126,14 @@ export function createStandScene(
     import.meta.env.BASE_URL + 'textures/exhibition-floor.jpg',
   );
   hallFloorTexture.colorSpace = THREE.SRGBColorSpace;
-  hallFloorTexture.wrapS = THREE.ClampToEdgeWrapping;
-  hallFloorTexture.wrapT = THREE.ClampToEdgeWrapping;
-  hallFloorTexture.repeat.set(1, 1);
-  hallFloorTexture.offset.set(0, 0);
+  hallFloorTexture.wrapS = THREE.RepeatWrapping;
+  hallFloorTexture.wrapT = THREE.RepeatWrapping;
   hallFloorTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
   const hallFloorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x86898c,
+    color: 0xa9abad,
     map: hallFloorTexture,
-    roughness: 0.94,
+    roughness: 0.96,
     metalness: 0,
   });
 
@@ -145,6 +144,13 @@ export function createStandScene(
     }
 
     const hallSizeM = Math.max(standWidthM, standDepthM, 20) + 80;
+    // One texture repeat represents roughly an 8 m square of real floor.
+    // Large repeats prevent the checkerboard look while preserving detail near the stand.
+    const textureRepeat = Math.max(1, hallSizeM / 8);
+    hallFloorTexture.repeat.set(textureRepeat, textureRepeat);
+    hallFloorTexture.offset.set(0.173, 0.287);
+    hallFloorTexture.needsUpdate = true;
+
     const hallFloor = new THREE.Mesh(
       new THREE.PlaneGeometry(hallSizeM, hallSizeM),
       hallFloorMaterial,
