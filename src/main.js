@@ -90,6 +90,33 @@ const importProjectFileInput = document.querySelector('#import-project-file');
 const deleteProjectButton = document.querySelector('#delete-project');
 const projectStatus = document.querySelector('#project-status');
 const projectLoadingOverlay = document.querySelector('#project-loading-overlay');
+const projectLoadingTitle = document.querySelector('#project-loading-title');
+const projectLoadingDetail = document.querySelector('#project-loading-detail');
+
+function setButtonBusy(button, busy, busyLabel = null) {
+  if (!button) return;
+  if (busy) {
+    if (!button.dataset.idleLabel) button.dataset.idleLabel = button.textContent;
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    if (busyLabel) button.textContent = busyLabel;
+  } else {
+    button.disabled = false;
+    button.removeAttribute('aria-busy');
+    if (button.dataset.idleLabel) button.textContent = button.dataset.idleLabel;
+  }
+}
+
+function showProjectLoading(title, detail = 'Lütfen bekleyin…') {
+  if (projectLoadingTitle) projectLoadingTitle.textContent = title;
+  if (projectLoadingDetail) projectLoadingDetail.textContent = detail;
+  projectLoadingOverlay.hidden = false;
+}
+
+function hideProjectLoading() {
+  projectLoadingOverlay.hidden = true;
+}
+
 
 const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile karşı köşeyi seçip dikdörtgen blok oluştur.';
 
@@ -1399,12 +1426,18 @@ imageInput.addEventListener('change', async () => {
 });
 
 saveProjectButton.addEventListener('click', async () => {
+  setButtonBusy(saveProjectButton, true, 'Kaydediliyor');
+  projectStatus.textContent = 'Proje kaydediliyor…';
   try {
     clearAutosaveTimer();
     await persistActiveProject();
     enableAutosaveFromCurrentState();
+  } catch (error) {
+    console.warn('Proje kaydedilemedi:', error);
+    projectStatus.textContent = 'Proje kaydedilemedi.';
+  } finally {
+    setButtonBusy(saveProjectButton, false);
   }
-  catch (error) { console.warn('Proje kaydedilemedi:', error); projectStatus.textContent = 'Proje kaydedilemedi.'; }
 });
 
 function safeArchiveName(name) {
@@ -1430,7 +1463,7 @@ function remapAssetIdsInValue(value, idMap) {
 exportProjectButton.addEventListener('click', async () => {
   const projectId = projectSelect.value || activeProjectId;
   if (!projectId) return;
-  exportProjectButton.disabled = true;
+  setButtonBusy(exportProjectButton, true, 'Hazırlanıyor');
   projectStatus.textContent = 'Proje ZIP hazırlanıyor…';
   try {
     if (projectId === activeProjectId) await persistActiveProject({ quiet: true });
@@ -1471,7 +1504,7 @@ exportProjectButton.addEventListener('click', async () => {
     console.warn('Proje dışarı aktarılamadı:', error);
     projectStatus.textContent = 'Proje dışarı aktarılamadı.';
   } finally {
-    exportProjectButton.disabled = false;
+    setButtonBusy(exportProjectButton, false);
   }
 });
 
@@ -1481,8 +1514,8 @@ importProjectFileInput.addEventListener('change', async () => {
   const file = importProjectFileInput.files?.[0];
   importProjectFileInput.value = '';
   if (!file) return;
-  importProjectButton.disabled = true;
-  projectLoadingOverlay.hidden = false;
+  setButtonBusy(importProjectButton, true, 'Aktarılıyor');
+  showProjectLoading('Proje içe aktarılıyor…', 'ZIP paketi ve görseller hazırlanıyor.');
   projectStatus.textContent = 'Proje içe aktarılıyor…';
   try {
     const zip = await JSZip.loadAsync(file);
@@ -1530,8 +1563,8 @@ importProjectFileInput.addEventListener('change', async () => {
     console.warn('Proje içe aktarılamadı:', error);
     projectStatus.textContent = 'Proje ZIP içe aktarılamadı.';
   } finally {
-    projectLoadingOverlay.hidden = true;
-    importProjectButton.disabled = false;
+    hideProjectLoading();
+    setButtonBusy(importProjectButton, false);
   }
 });
 
@@ -1539,8 +1572,8 @@ openProjectButton.addEventListener('click', async () => {
   const projectId = projectSelect.value;
   if (!projectId) { projectStatus.textContent = 'Açılacak kayıtlı proje yok.'; return; }
 
-  projectLoadingOverlay.hidden = false;
-  openProjectButton.disabled = true;
+  showProjectLoading('Proje yükleniyor…', 'Görseller ve sahne hazırlanıyor.');
+  setButtonBusy(openProjectButton, true, 'Açılıyor');
   projectStatus.textContent = 'Proje yükleniyor…';
   try {
     const project = await loadProject(projectId);
@@ -1550,8 +1583,8 @@ openProjectButton.addEventListener('click', async () => {
     console.warn('Proje açılamadı:', error);
     projectStatus.textContent = 'Proje açılamadı.';
   } finally {
-    projectLoadingOverlay.hidden = true;
-    openProjectButton.disabled = false;
+    hideProjectLoading();
+    setButtonBusy(openProjectButton, false);
   }
 });
 
