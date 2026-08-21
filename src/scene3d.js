@@ -536,8 +536,11 @@ export function createStandScene(
       material.bumpMap = null;
       material.bumpScale = 0;
       material.color.set(PARQUET_COLORS[resolved]);
-      material.roughness = 0.78;
+      material.roughness = resolved === 'parke-beton' ? 0.98 : 0.78;
       material.metalness = 0;
+      // Beton parke, güçlü sahne ışığında rengini yıkamadan daha mat ve dengeli kalsın.
+      material.emissive.set(resolved === 'parke-beton' ? PARQUET_COLORS[resolved] : '#000000');
+      material.emissiveIntensity = resolved === 'parke-beton' ? 0.06 : 0;
     } else {
       material.color.set(floorColors.karolaj);
       material.roughness = 0.92;
