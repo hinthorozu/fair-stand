@@ -470,6 +470,37 @@ export function createStandScene(
   let dragBadge = null;
   let placementFeedback = null;
   let placementFeedbackTimer = null;
+  // Structural wall rebuilds (insert/delete/reorder) reuse the already uploaded GPU
+  // textures. This prevents branded panels from flashing blank while TextureLoader
+  // reloads the same assets after every catalog operation. Keys prefer the persistent
+  // surface-state object, so inserting a module before another does not depend on index.
+  let rebuildTextureTransfer = null;
+
+  function getRebuildTextureKey(mesh) {
+    const surfaceState = mesh?.userData?.surfaceState;
+    if (surfaceState && typeof surfaceState === 'object') return surfaceState;
+    return mesh?.userData?.surfaceId ?? null;
+  }
+
+  function retainWallTexturesForRebuild() {
+    const retained = new Map();
+    surfaceMeshes.forEach((surface) => {
+      const texture = surface?.material?.map;
+      const key = getRebuildTextureKey(surface);
+      if (!texture || !key) return;
+      retained.set(key, texture);
+      // disposeWall() owns the old materials. Detach maps first so disposing the old
+      // material does not also destroy a texture that the replacement mesh will reuse.
+      surface.material.map = null;
+    });
+    rebuildTextureTransfer = retained;
+  }
+
+  function disposeUnusedRebuildTextures() {
+    if (!rebuildTextureTransfer) return;
+    rebuildTextureTransfer.forEach((texture) => texture?.dispose?.());
+    rebuildTextureTransfer = null;
+  }
 
   function clearPlacementFeedback() {
     if (placementFeedbackTimer) {
@@ -703,6 +734,7 @@ export function createStandScene(
     const previousAnchorSurfaceId = selectionAnchorSurfaceId;
 
     clearPlacementDrag();
+    retainWallTexturesForRebuild();
     disposeWall({ notify: false, keepAnchor: true });
 
     const totalWidth = modules.reduce((sum, module) => sum + module.widthCm / 100, 0);
@@ -802,6 +834,9 @@ export function createStandScene(
       if (hasMultiEdgePlacement && stageLayout) resetStageView();
       else resetDefaultView(totalWidth);
     }
+    // Any retained texture left here belonged to a deleted surface/module. Reused
+    // textures are removed from the transfer map by applyStoredImage().
+    disposeUnusedRebuildTextures();
     notifySelection();
     return { totalWidth, surfaceCount: surfaceMeshes.length };
   }
@@ -1924,6 +1959,17 @@ export function createStandScene(
 
   function applyStoredImage(mesh) {
     if (mesh.userData.acceptsImage === false) return;
+
+    const transferKey = getRebuildTextureKey(mesh);
+    const retainedTexture = transferKey ? rebuildTextureTransfer?.get(transferKey) : null;
+    if (retainedTexture && mesh.material) {
+      mesh.material.map = retainedTexture;
+      mesh.material.color.set(0xffffff);
+      mesh.material.needsUpdate = true;
+      rebuildTextureTransfer.delete(transferKey);
+      return;
+    }
+
     const assetId = mesh.userData.surfaceState?.imageAssetId;
     if (assetId) loadImageOnSurface(mesh, assetId);
   }
