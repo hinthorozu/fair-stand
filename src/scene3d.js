@@ -209,10 +209,12 @@ export function createStandScene(
     for (let y = 0; y < size; y += 1) {
       for (let x = 0; x < size; x += 1) {
         const i = (y * size + x) * 4;
-        const fine = (random() - 0.5) * 34;
-        const fiber = Math.sin((x * 0.72) + (y * 0.18)) * 5;
-        const value = Math.max(72, Math.min(184, 128 + fine + fiber));
-        const bump = Math.max(88, Math.min(168, 128 + fine * 0.9 + fiber * 1.5));
+        const fine = (random() - 0.5) * 28;
+        const weaveA = Math.sin((x * 0.34) + (y * 0.11)) * 11;
+        const weaveB = Math.sin((x * 0.08) - (y * 0.27)) * 7;
+        const tuft = Math.sin((x + y) * 0.055) * 5;
+        const value = Math.max(62, Math.min(194, 128 + fine + weaveA + weaveB + tuft));
+        const bump = Math.max(72, Math.min(184, 128 + fine * 0.75 + weaveA * 1.45 + weaveB * 1.15 + tuft));
 
         colorImage.data[i] = value;
         colorImage.data[i + 1] = value;
@@ -334,10 +336,12 @@ export function createStandScene(
       material.metalness = 0;
       material.map = carpetTextures.colorMap;
       material.bumpMap = carpetTextures.bumpMap;
-      material.bumpScale = 0.018;
+      material.bumpScale = 0.032;
       if (stageLayout) {
-        const repeatX = Math.max(2, stageLayout.widthM / 0.7);
-        const repeatY = Math.max(2, stageLayout.depthM / 0.7);
+        // Slightly larger weave remains readable from normal editing distance,
+        // while still staying subtle enough not to look like a printed pattern.
+        const repeatX = Math.max(2, stageLayout.widthM / 1.05);
+        const repeatY = Math.max(2, stageLayout.depthM / 1.05);
         carpetTextures.colorMap.repeat.set(repeatX, repeatY);
         carpetTextures.bumpMap.repeat.set(repeatX, repeatY);
       }
