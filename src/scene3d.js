@@ -184,6 +184,64 @@ export function createStandScene(
   activeFloor.visible = false;
   scene.add(activeFloor);
 
+  // Lightweight procedural carpet texture: neutral fibers multiplied by the chosen
+  // carpet color, plus a subtle bump map so grazing light reads as real textile.
+  // Generated in-browser to avoid another heavy image asset or network request.
+  function createCarpetTexturePair() {
+    const size = 256;
+    const colorCanvas = document.createElement('canvas');
+    const bumpCanvas = document.createElement('canvas');
+    colorCanvas.width = colorCanvas.height = size;
+    bumpCanvas.width = bumpCanvas.height = size;
+
+    const colorCtx = colorCanvas.getContext('2d');
+    const bumpCtx = bumpCanvas.getContext('2d');
+    const colorImage = colorCtx.createImageData(size, size);
+    const bumpImage = bumpCtx.createImageData(size, size);
+
+    // Deterministic pseudo-random field keeps the texture stable across rebuilds.
+    let seed = 0x5f3759df;
+    const random = () => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 0xffffffff;
+    };
+
+    for (let y = 0; y < size; y += 1) {
+      for (let x = 0; x < size; x += 1) {
+        const i = (y * size + x) * 4;
+        const fine = (random() - 0.5) * 34;
+        const fiber = Math.sin((x * 0.72) + (y * 0.18)) * 5;
+        const value = Math.max(72, Math.min(184, 128 + fine + fiber));
+        const bump = Math.max(88, Math.min(168, 128 + fine * 0.9 + fiber * 1.5));
+
+        colorImage.data[i] = value;
+        colorImage.data[i + 1] = value;
+        colorImage.data[i + 2] = value;
+        colorImage.data[i + 3] = 255;
+        bumpImage.data[i] = bump;
+        bumpImage.data[i + 1] = bump;
+        bumpImage.data[i + 2] = bump;
+        bumpImage.data[i + 3] = 255;
+      }
+    }
+
+    colorCtx.putImageData(colorImage, 0, 0);
+    bumpCtx.putImageData(bumpImage, 0, 0);
+
+    const colorMap = new THREE.CanvasTexture(colorCanvas);
+    const bumpMap = new THREE.CanvasTexture(bumpCanvas);
+    [colorMap, bumpMap].forEach((texture) => {
+      texture.wrapS = THREE.MirroredRepeatWrapping;
+      texture.wrapT = THREE.MirroredRepeatWrapping;
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      texture.needsUpdate = true;
+    });
+    colorMap.colorSpace = THREE.SRGBColorSpace;
+    return { colorMap, bumpMap };
+  }
+
+  const carpetTextures = createCarpetTexturePair();
+
   let grid = null;
   let standOutline = null;
   let activeWallGuides = [];
@@ -274,7 +332,19 @@ export function createStandScene(
       material.color.set(floorColors.hali);
       material.roughness = 1;
       material.metalness = 0;
+      material.map = carpetTextures.colorMap;
+      material.bumpMap = carpetTextures.bumpMap;
+      material.bumpScale = 0.018;
+      if (stageLayout) {
+        const repeatX = Math.max(2, stageLayout.widthM / 0.7);
+        const repeatY = Math.max(2, stageLayout.depthM / 0.7);
+        carpetTextures.colorMap.repeat.set(repeatX, repeatY);
+        carpetTextures.bumpMap.repeat.set(repeatX, repeatY);
+      }
     } else if (PARQUET_TYPES.has(resolved)) {
+      material.map = null;
+      material.bumpMap = null;
+      material.bumpScale = 0;
       material.color.set(PARQUET_COLORS[resolved]);
       material.roughness = 0.78;
       material.metalness = 0;
@@ -282,6 +352,9 @@ export function createStandScene(
       material.color.set(floorColors.karolaj);
       material.roughness = 0.92;
       material.metalness = 0;
+      material.map = null;
+      material.bumpMap = null;
+      material.bumpScale = 0;
     }
     material.needsUpdate = true;
 
