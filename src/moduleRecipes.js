@@ -45,6 +45,13 @@ const MODULE_RECIPES = Object.freeze({
   'showcase-3:100': Object.freeze({ recipeId: 'showcase-3-100', moduleType: 'showcase-3', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
     Object.freeze({ partId: 'profile_91', quantity: 4 }), Object.freeze({ partId: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'panel_98', quantity: 4 }), Object.freeze({ partId: 'connector_start', quantity: 4 }), Object.freeze({ partId: 'connector_single', quantity: 7 }), Object.freeze({ partId: 'showcase_3_100', quantity: 1 }), Object.freeze({ partId: 'glass_shelf', quantity: 3 }),
   ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_92' }) }),
+
+  'separator:50': Object.freeze({ recipeId: 'separator-50', moduleType: 'separator', nominalWidthCm: 50, connectionMode: 'straight', items: Object.freeze([
+    Object.freeze({ partId: 'profile_41_5', quantity: 2 }), Object.freeze({ partId: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'separator_panel_48_5', quantity: 1 }), Object.freeze({ partId: 'separator_panel_98', quantity: 3 }), Object.freeze({ partId: 'connector_start', quantity: 2 }), Object.freeze({ partId: 'connector_single', quantity: 7 }),
+  ]) }),
+  'separator:100': Object.freeze({ recipeId: 'separator-100', moduleType: 'separator', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
+    Object.freeze({ partId: 'profile_91', quantity: 2 }), Object.freeze({ partId: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'separator_panel_98', quantity: 7 }), Object.freeze({ partId: 'connector_start', quantity: 2 }), Object.freeze({ partId: 'connector_single', quantity: 13 }),
+  ]) }),
 });
 
 export function getStraightWallRecipe(nominalWidthCm) {
