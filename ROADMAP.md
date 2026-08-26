@@ -1,101 +1,101 @@
 # Fair Stand — Master Roadmap
 
-> Bu dosya yalnız **üst seviye proje planını** tutar. Detaylı checklist ve teknik kararlar ilgili faz dosyalarındadır. Aynı iş iki roadmap içinde tekrar edilmez.
+> Bu dosya yalnız **üst seviye proje planını** tutar. Detaylar `ROADMAP_PHASE_4.md` ve `ROADMAP_PHASE_5_6.md` içindedir. Aynı iş iki roadmap içinde tekrar edilmez.
 
 ## Proje durumu
 
 - **FAZ 1: KAPANDI — 10 Ağustos 2026**
-- **FAZ 2: KAPANDI / YERLEŞİM MOTORU TEMELİ TAMAMLANDI**
+- **FAZ 2: KAPANDI — Yerleşim motoru temeli tamamlandı**
 - **FAZ 3: KAPANDI — 26 Ağustos 2026**
-- **FAZ 4: AKTİF — Parametrik / Custom / Yapısal Editör**
-- **FAZ 5: PLANLANDI — Assembly-Aware BOM / Gerçek Malzeme Listesi**
+- **FAZ 4: AKTİF — Modül reçetesi + Parametrik / Custom / Yapısal Editör**
+- **FAZ 5: PLANLANDI — Final BOM / Gerçek Sahne Malzeme Listesi**
 - **FAZ 6: PLANLANDI — Maliyet / Fair CRM Entegrasyonu**
 
 ---
 
-# Mimari faz sınırı
+# FAZ 4 — Modül Reçetesi + Parametrik / Yapısal Editör
 
-## FAZ 4 — Parametrik ve Yapısal Editör
+Önce her modülün fiziksel yapısı tanımlanır; sonra parametrik/custom sistem bunun üzerine kurulur.
 
-**Sahibi olduğu konular:**
+Ana işler:
 
-- Parametrik Core / Rule Engine
-- Base / Custom / Scene Instance ayrımı
-- Custom Modül Wizard
-- Raflı Duvar parametrik pilotu
-- Anchor / Connection Graph
-- İç köşe / inline birleşim gibi yapısal connection semantics
-- İki nokta arasında kayıt/profil aracı
-- Custom Module Library + repository contract
-- Project save/load, snapshot, schema version, migration
-- FAZ 5–6 için gerekli gerçek ölçü, yüz, part/catalog referansı ve connection metadata'sını kayıpsız taşıma
+1. Panel / dikme / profil / aparat parça modeli.
+2. 50/100/150/200 standart duvar reçeteleri.
+3. Module Recipe + Raw BOM motoru.
+4. Parametrik Core / Rule Engine.
+5. Custom Modül Wizard.
+6. Raflı Duvar parametrik pilotu.
+7. Anchor / Connection Graph ve iç köşe / inline semantiği.
+8. İki nokta arasında kayıt/profil aracı.
+9. Custom Module Library.
+10. Project save/load + versioning.
+11. Regresyon ve FAZ 4 kapanışı.
 
-**FAZ 4'te yapılmaz:** nihai BOM/malzeme adedi, shared-part deduction, fiyat/maliyet, fire, işçilik.
+**FAZ 4 çıktısı:** Her modül kendi fiziksel reçetesini/Raw BOM'unu bilir ve sahnedeki gerçek bağlantılar açık connection graph olarak saklanır.
 
-Detaylı plan: **`ROADMAP_PHASE_4.md`**
-
----
-
-## FAZ 5 — Assembly-Aware BOM / Gerçek Malzeme Listesi
-
-**Sahibi olduğu konular:**
-
-- Material/Part catalog contract
-- BOM Recipe modeli
-- 50/100/150/200 duvarların gerçek reçeteleri
-- Düz panel / iç-köşe panel ailesi seçimi
-- Tekli, köşe, çiftli ve başlangıç aparatlarının reçete hesabı
-- Raw BOM
-- Connection graph üzerinden gerçek parça seçimi
-- Shared upright/profile/aparat normalization
-- Final BOM
-- Panel/yüzey m² miktarları
-- Gerçek Excel ile otomatik BOM doğrulaması
-
-**FAZ 5'te fiyat hesabı yapılmaz.** Çıktı doğru fiziksel malzeme ve miktar listesidir.
-
-Detaylı plan: **`ROADMAP_PHASE_5_6.md`**
+Detay: `ROADMAP_PHASE_4.md`
 
 ---
 
-## FAZ 6 — Maliyet / Fair CRM Entegrasyonu
+# FAZ 5 — Final BOM / Gerçek Sahne Malzeme Listesi
 
-**Sahibi olduğu konular:**
+FAZ 4'te kendi reçetesini bilen modüllerin sahne seviyesinde gerçek toplamı hesaplanır.
 
-- Fair CRM / Kyrox Core platform entegrasyonu
-- Custom modül production ownership / authorization
-- Fair CRM catalog ve fiyat source-of-truth entegrasyonu
-- Hazır sahne objelerinin ticari miktarı
-- Final BOM'un fiyatlandırılması
-- Fire, minimum sipariş, işçilik, nakliye, kurulum, elektrik vb. ek maliyetler
-- Costing engine
-- Project/BOM/cost revision ve audit
+Ana işler:
 
-**FAZ 6'nın girdisi FAZ 5 Final BOM'dur.** Doğru miktar tamamlanmadan nihai costing'e geçilmez.
+1. Tüm instance Raw BOM'larını toplama.
+2. Connection graph analizi.
+3. Normal / iç-köşe panel varyantlarının sahne bağlamında doğrulanması.
+4. Tekli / köşe / çiftli / başlangıç aparatlarının nihai kullanımı.
+5. Ortak dikme / profil / aparat normalization.
+6. Final BOM.
+7. Panel/yüzey m² miktarları.
+8. Gerçek Excel ile satır satır doğrulama.
+9. Havrano ve 4 × 200 cm gibi gerçek kabul senaryoları.
 
-Detaylı plan: **`ROADMAP_PHASE_5_6.md`**
+**FAZ 5 çıktısı:** Fiyatsız ama doğru fiziksel malzeme ve miktar listesi.
+
+Detay: `ROADMAP_PHASE_5_6.md`
+
+---
+
+# FAZ 6 — Maliyet / Fair CRM Entegrasyonu
+
+FAZ 5 Final BOM'u ticari veriye dönüştürülür.
+
+Ana işler:
+
+1. Fair CRM / Kyrox Core platform entegrasyonu.
+2. Part ID → Fair CRM catalog/fiyat eşlemesi.
+3. Hazır sahne objelerinin ticari miktarı.
+4. Fire / minimum sipariş kuralları.
+5. İşçilik, nakliye, kurulum, elektrik vb. ek maliyetler.
+6. Costing engine.
+7. Eksik catalog/fiyat uyarıları.
+8. Project / BOM / Cost revision ve audit.
+
+**FAZ 6 çıktısı:** Doğrulanmış malzeme listesinden izlenebilir ve deterministik proje maliyeti.
+
+Detay: `ROADMAP_PHASE_5_6.md`
 
 ---
 
 # Aktif geliştirme sırası
 
-1. **FAZ 4 / Sprint 1 — Parametrik Core + Rule Engine**
-2. **FAZ 4 / Sprint 2 — Custom Wizard + Raflı Duvar**
-3. **FAZ 4 / Sprint 3 — Anchor / Connection Graph**
-4. **FAZ 4 / Sprint 4 — İki Noktalı Kayıt/Profil Aracı**
-5. **FAZ 4 / Sprint 5 — Custom Module Library**
-6. **FAZ 4 / Sprint 6 — Project Save/Load + Versioning**
-7. **FAZ 4 / Sprint 7 — Regresyon + BOM-readiness kapanışı**
-8. **FAZ 5 — BOM Recipe + Raw BOM + connection-based parça seçimi**
-9. **FAZ 5 — Shared-part normalization + Final BOM + gerçek Excel doğrulaması**
-10. **FAZ 6 — Fair CRM/Kyrox Core + catalog/fiyat entegrasyonu**
-11. **FAZ 6 — Costing + fire/işçilik + revision/audit**
+1. **FAZ 4 / Sprint 1 — Üretim Parça Modeli + Standart Modül Reçeteleri**
+2. **FAZ 4 / Sprint 2 — Module Recipe / Raw BOM Motoru**
+3. **FAZ 4 / Sprint 3 — Parametrik Core / Rule Engine**
+4. **FAZ 4 / Sprint 4 — Custom Wizard + Raflı Duvar**
+5. **FAZ 4 / Sprint 5 — Anchor / Connection Graph**
+6. **FAZ 4 / Sprint 6 — İki Noktalı Profil Aracı**
+7. **FAZ 4 / Sprint 7 — Custom Library + Save/Load / Versioning**
+8. **FAZ 4 / Sprint 8 — Regresyon ve kapanış**
+9. **FAZ 5 — Final BOM / Assembly Normalization / Excel doğrulaması**
+10. **FAZ 6 — Fair CRM / Costing / Revision-Audit**
 
 ---
 
-# Bugün doğrulanan üretim bilgileri
-
-Aşağıdaki bilgiler artık ürün gereksinimi olarak kabul edilir; hesaplama implementasyonu FAZ 5'te yapılacaktır.
+# Doğrulanmış üretim bilgileri
 
 - Alüminyum dikme kalınlığı: **8 cm**
 - Default dikme uzunluğu: **346.5 cm**
@@ -107,7 +107,7 @@ Aşağıdaki bilgiler artık ürün gereksinimi olarak kabul edilir; hesaplama i
 - Standın içine doğru 90° birleşim: **köşe bağlantı aparatı**
 - Aynı doğrultuda iki ayrı modül birleşimi: **çiftli bağlantı aparatı**
 - Standart panel dizisi bağlantısı: **tekli/düz bağlantı aparatı**
-- Panel dizisi başlangıcı: **başlangıç aparatı**, yalnız başlangıçta kullanılır
+- Panel dizisi başlangıcı: **başlangıç aparatı**, yalnız başlangıçta
 
 Doğrulanmış 50 cm düz duvar reçetesi:
 
@@ -117,9 +117,9 @@ Doğrulanmış 50 cm düz duvar reçetesi:
 - 2 × başlangıç aparatı
 - 13 × tekli/düz bağlantı aparatı
 
-100 / 150 / 200 cm düz duvarlarda adetler aynı; yalnız panel ve profil genişlikleri ilgili standart ölçülere göre değişir.
+100 / 150 / 200 cm düz duvarlarda adetler aynı; panel ve profil ölçüleri ilgili standarda göre değişir.
 
-Köşe ve modül birleşimlerinin nihai adet reçeteleri gerçek üretim Excel'i tamamlanmadan varsayım olarak kodlanmaz.
+Köşe ve modül birleşimlerinin adet reçeteleri gerçek üretim Excel'i tamamlanmadan tahmin edilmez.
 
 ---
 
@@ -128,5 +128,3 @@ Köşe ve modül birleşimlerinin nihai adet reçeteleri gerçek üretim Excel'i
 FAZ 3 kapanış checkpoint commit'i:
 
 `786672b5 — FAZ 3 Completed`
-
-FAZ 4 geliştirmesi bu checkpoint sonrasından devam eder.
