@@ -1,0 +1,200 @@
+import fs from 'node:fs';
+
+const path = 'src/scene3d.js';
+const source = fs.readFileSync(path, 'utf8');
+const startMarker = 'function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {';
+const endMarker = 'function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {';
+const start = source.indexOf(startMarker);
+const end = source.indexOf(endMarker, start);
+if (start < 0 || end < 0) throw new Error('Baza renderer markers not found');
+
+const replacement = `function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
+  const widthCm = Number(moduleState.widthCm);
+  const depthCm = Number(moduleState.depthCm) || 50;
+  const heightCm = Number(moduleState.heightCm) || 50;
+  const widthM = widthCm / 100;
+  const depthM = depthCm / 100;
+  const heightM = heightCm / 100;
+  const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
+  const railHeightM = PANEL_RAIL_HEIGHT_M;
+  const frameDepthM = Number(STAND_DIMENSIONS.frameDepth);
+  const topThicknessM = 0.035;
+  const topOverhangM = 0.02;
+  const frameHeightM = Math.max(heightM - topThicknessM, profileM * 3);
+  const panelHeightM = Math.max(
+    frameHeightM - railHeightM - PANEL_VERTICAL_CLEARANCE_M,
+    0.05,
+  );
+  const frontPanelWidthM = Math.max(widthM - profileM * 2, 0.05);
+  const sidePanelWidthM = Math.max(depthM - profileM * 2, 0.05);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: moduleState.type,
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const frameMaterial = new THREE.MeshStandardMaterial({
+    color: FRAME_COLOR,
+    metalness: 0.68,
+    roughness: 0.28,
+  });
+  const addProfile = (geometry, position) => {
+    const mesh = new THREE.Mesh(geometry, frameMaterial.clone());
+    mesh.position.copy(position);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    group.add(mesh);
+    return mesh;
+  };
+
+  // Baza keeps its verified outer dimensions. Only the render language changes:
+  // banko-style thin Maxima rails, with no middle rail because each face is one panel.
+  const cornerPostGeometry = new THREE.BoxGeometry(profileM, frameHeightM, profileM);
+  [-1, 1].forEach((xSide) => {
+    [-1, 1].forEach((zSide) => {
+      addProfile(
+        cornerPostGeometry.clone(),
+        new THREE.Vector3(
+          xSide * (widthM / 2 - profileM / 2),
+          frameHeightM / 2,
+          zSide * (depthM / 2 - profileM / 2),
+        ),
+      );
+    });
+  });
+
+  const railYs = [0, frameHeightM];
+  const frontRailGeometry = new THREE.BoxGeometry(frontPanelWidthM, railHeightM, frameDepthM);
+  railYs.forEach((y) => {
+    addProfile(
+      frontRailGeometry.clone(),
+      new THREE.Vector3(0, y, depthM / 2 - frameDepthM / 2),
+    );
+  });
+
+  const sideRailGeometry = new THREE.BoxGeometry(frameDepthM, railHeightM, sidePanelWidthM);
+  [-1, 1].forEach((xSide) => {
+    railYs.forEach((y) => {
+      addProfile(
+        sideRailGeometry.clone(),
+        new THREE.Vector3(xSide * (widthM / 2 - frameDepthM / 2), y, 0),
+      );
+    });
+  });
+
+  const top = new THREE.Mesh(
+    new THREE.BoxGeometry(
+      widthM + topOverhangM * 2,
+      topThicknessM,
+      depthM + topOverhangM * 2,
+    ),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.74, metalness: 0 }),
+  );
+  top.position.set(0, frameHeightM + topThicknessM / 2, 0);
+  top.castShadow = true;
+  top.receiveShadow = true;
+  group.add(top);
+
+  const surfaces = [];
+  const addPanelFace = (surfaceRole, surfaceState, faceWidthM, position, rotationY = 0) => {
+    if (!surfaceState) return;
+
+    const backing = new THREE.Mesh(
+      new THREE.BoxGeometry(faceWidthM, panelHeightM, 0.012),
+      new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74, metalness: 0 }),
+    );
+    backing.position.copy(position);
+    backing.rotation.y = rotationY;
+    if (surfaceRole === 'front') backing.position.z -= 0.006;
+    else if (surfaceRole === 'left') backing.position.x += 0.006;
+    else backing.position.x -= 0.006;
+    backing.castShadow = true;
+    backing.receiveShadow = true;
+    group.add(backing);
+
+    const surface = new THREE.Mesh(
+      new THREE.PlaneGeometry(faceWidthM, panelHeightM),
+      new THREE.MeshStandardMaterial({
+        color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
+        roughness: 0.72,
+        metalness: 0,
+        side: THREE.DoubleSide,
+        emissive: 0x000000,
+        emissiveIntensity: 0,
+      }),
+    );
+    surface.position.copy(position);
+    surface.rotation.y = rotationY;
+    if (surfaceRole === 'front') surface.position.z += 0.006;
+    else if (surfaceRole === 'left') surface.position.x -= 0.006;
+    else surface.position.x += 0.006;
+
+    const selectionFrame = createSelectionFrame(faceWidthM, panelHeightM);
+    selectionFrame.visible = false;
+    surface.add(selectionFrame);
+    surface.userData = {
+      kind: 'surface',
+      moduleType: 'base',
+      selectionMode: 'module',
+      acceptsImage: true,
+      moduleIndex,
+      moduleId: moduleState.id,
+      widthCm,
+      stripIndex: null,
+      stripNumber: null,
+      surfaceRole,
+      surfaceId: surfaceState.id,
+      surfaceState,
+      selectionFrame,
+      backing,
+    };
+    group.add(surface);
+    surfaces.push(surface);
+    onSurfaceReady?.(surface);
+  };
+
+  const panelCenterY = frameHeightM / 2;
+  const frontZ = depthM / 2 - 0.006;
+  const leftX = -widthM / 2 + 0.006;
+  const rightX = widthM / 2 - 0.006;
+
+  addPanelFace('front', moduleState.faces?.front, frontPanelWidthM, new THREE.Vector3(0, panelCenterY, frontZ));
+  addPanelFace('left', moduleState.faces?.left, sidePanelWidthM, new THREE.Vector3(leftX, panelCenterY, 0), -Math.PI / 2);
+  addPanelFace('right', moduleState.faces?.right, sidePanelWidthM, new THREE.Vector3(rightX, panelCenterY, 0), Math.PI / 2);
+
+  return { group, surfaces };
+}
+
+`;
+
+fs.writeFileSync(path, source.slice(0, start) + replacement + source.slice(end));
+
+fs.writeFileSync('test/baseRenderStyle.test.js', `import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+const start = source.indexOf('function createBaseModule(');
+const end = source.indexOf('function createCounterModule(', start);
+const baseBlock = source.slice(start, end);
+
+test('baza renderer uses banko-style thin top and bottom rails with one panel tier', () => {
+  assert.ok(baseBlock.includes('const railHeightM = PANEL_RAIL_HEIGHT_M;'));
+  assert.ok(baseBlock.includes('const railYs = [0, frameHeightM];'));
+  assert.equal(baseBlock.includes('stripHeightM'), false);
+  assert.equal((baseBlock.match(/moduleState\\.faces\\?\\.front/g) ?? []).length, 1);
+  assert.equal((baseBlock.match(/moduleState\\.faces\\?\\.left/g) ?? []).length, 1);
+  assert.equal((baseBlock.match(/moduleState\\.faces\\?\\.right/g) ?? []).length, 1);
+});
+
+test('baza renderer preserves existing width depth and height inputs', () => {
+  assert.ok(baseBlock.includes('const widthCm = Number(moduleState.widthCm);'));
+  assert.ok(baseBlock.includes('const depthCm = Number(moduleState.depthCm) || 50;'));
+  assert.ok(baseBlock.includes('const heightCm = Number(moduleState.heightCm) || 50;'));
+});
+`);
