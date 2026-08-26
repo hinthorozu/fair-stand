@@ -1,0 +1,41 @@
+name: Fix Panel Bazali snap
+on:
+  push:
+    branches: [ROG]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Make Panel Bazali use flat-panel placement footprint
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'src/designState.js';
+          let s = fs.readFileSync(path, 'utf8');
+          const oldBlock = `    type: 'base-wall',\n    widthCm: width,\n    depthCm: 50,\n    heightCm: 350,`;
+          const newBlock = `    type: 'base-wall',\n    widthCm: width,\n    // Yerleşim/snap footprint'i Düz Panel ile aynıdır.\n    // 50 cm baza derinliği yalnızca 3D render içinde ek parça olarak kullanılır.\n    heightCm: 350,`;
+          if (!s.includes(oldBlock)) throw new Error('base-wall state block not found');
+          s = s.replace(oldBlock, newBlock);
+          fs.writeFileSync(path, s);
+          NODE
+      - run: npm test
+      - run: npm run build
+      - name: Commit fix
+        run: |
+          rm -f .github/workflows/fix-base-wall-snap.yml
+          rm -f .github/workflows/fix-base-wall-as-panel.yml
+          git config user.name "mustafa sinan koca"
+          git config user.email "mustafasinankoca@gmail.com"
+          git add -A
+          git commit -m "fix: make Panel Bazalı snap like flat panels [skip ci]"
+          git push origin ROG
