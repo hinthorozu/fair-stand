@@ -17,146 +17,9 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-      - name: Patch Panel Bazali construction
+      - name: Apply mounted-base patch
         run: |
-          node <<'NODE'
-          const fs = require('fs');
-          function replaceOnce(path, needle, replacement) {
-            let s = fs.readFileSync(path, 'utf8');
-            if (!s.includes(needle)) throw new Error(`Needle not found: ${path}`);
-            s = s.replace(needle, replacement);
-            fs.writeFileSync(path, s);
-          }
-
-          // Panel Bazalı is fundamentally a normal wall panel. The baza is only an
-          // attachment on its front; therefore it has no independent full-width front
-          // panel state. Its two editable 48.5 x 47 side panels remain.
-          replaceOnce('src/designState.js',
-`    faces: {
-      front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-    },
-  };
-}
-
-export function createBaseModuleState`,
-`    faces: {
-      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-    },
-  };
-}
-
-export function createBaseModuleState`);
-
-          const scenePath = 'src/scene3d.js';
-          let scene = fs.readFileSync(scenePath, 'utf8');
-          const start = scene.indexOf('  function createBaseWallModule(moduleState, moduleIndex, applyStoredImage) {');
-          const end = scene.indexOf('\n  function buildWall(modules, { resetView = true } = {}) {', start);
-          if (start < 0 || end < 0) throw new Error('createBaseWallModule block not found');
-
-          const replacement = `  function createBaseWallModule(moduleState, moduleIndex, applyStoredImage) {
-    // Panel Bazalı normal Düz Panel ile aynı duvar geometrisidir. Baza, bu panelin
-    // ön yüzüne sonradan monte edilen bir ektir; bağımsız Baza modülünü üst üste
-    // bindirmeyiz. Böylece arka düzlem, uzun dikmeler ve 7 panel birebir base paneldir.
-    const wallState = { ...moduleState, type: 'flat-panel' };
-    const wall = createFlatPanelModule(wallState, moduleIndex, applyStoredImage);
-    const group = wall.group;
-    group.userData.kind = 'module';
-    group.userData.moduleId = moduleState.id;
-    group.userData.moduleType = 'base-wall';
-    group.userData.moduleIndex = moduleIndex;
-
-    const widthM = Number(moduleState.widthCm) / 100;
-    const depthM = 0.50;
-    const heightM = 0.50;
-    const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
-    const railHeightM = PANEL_RAIL_HEIGHT_M;
-    const frameDepthM = Number(STAND_DIMENSIONS.frameDepth);
-    const topThicknessM = 0.035;
-    const topOverhangM = 0.02;
-    const frameHeightM = Math.max(heightM - topThicknessM, profileM * 3);
-    const sidePanelWidthM = Math.max(depthM - profileM * 2, 0.05);
-    const sidePanelHeightM = Math.max(frameHeightM - railHeightM, 0.05);
-    const frontRailWidthM = Math.max(widthM - profileM * 2, 0.05);
-
-    const frameMaterial = new THREE.MeshStandardMaterial({
-      color: FRAME_COLOR,
-      metalness: 0.68,
-      roughness: 0.28,
-    });
-    const addProfile = (geometry, position) => {
-      const mesh = new THREE.Mesh(geometry, frameMaterial.clone());
-      mesh.position.copy(position);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      group.add(mesh);
-      return mesh;
-    };
-
-    // Yalnızca öndeki iki kısa dikme. Arkadaki dikmeler zaten normal panelin
-    // 346,5 cm dikmeleridir; BOM'daki 2 x 49,5 cm kuralı bu yüzden korunur.
-    const shortPostGeometry = new THREE.BoxGeometry(profileM, frameHeightM, profileM);
-    [-1, 1].forEach((xSide) => {
-      addProfile(
-        shortPostGeometry.clone(),
-        new THREE.Vector3(
-          xSide * (widthM / 2 - profileM / 2),
-          frameHeightM / 2,
-          depthM - profileM / 2,
-        ),
-      );
-    });
-
-    // Baza önünde alt + üst uzun profil: reçetedeki normal duvara ek 2 uzun profil.
-    const frontRailGeometry = new THREE.BoxGeometry(frontRailWidthM, railHeightM, frameDepthM);
-    [0, frameHeightM].forEach((y) => {
-      addProfile(
-        frontRailGeometry.clone(),
-        new THREE.Vector3(0, y, depthM - frameDepthM / 2),
-      );
-    });
-
-    // Sol ve sağda alt + üst 41,5 cm bağlantı profilleri.
-    const sideRailGeometry = new THREE.BoxGeometry(frameDepthM, railHeightM, sidePanelWidthM);
-    [-1, 1].forEach((xSide) => {
-      [0, frameHeightM].forEach((y) => {
-        addProfile(
-          sideRailGeometry.clone(),
-          new THREE.Vector3(
-            xSide * (widthM / 2 - frameDepthM / 2),
-            y,
-            depthM / 2,
-          ),
-        );
-      });
-    });
-
-    const top = new THREE.Mesh(
-      new THREE.BoxGeometry(
-        widthM + topOverhangM * 2,
-        topThicknessM,
-        depthM + topOverhangM * 2,
-      ),
-      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.74, metalness: 0 }),
-    );
-    top.position.set(0, frameHeightM + topThicknessM / 2, depthM / 2);
-    top.castShadow = true;
-    top.receiveShadow = true;
-    group.add(top);
-
-    const attachmentSurfaces = [];
-    const addSidePanel = (surfaceRole, surfaceState, x, rotationY) => {
-      if (!surfaceState) return;
-      const panelCenterZ = depthM / 2;
-      const panelCenterY = frameHeightM / 2;
-      const backing = new THREE.Mesh(
-        new THREE.BoxGeometry(sidePanelWidthM, sidePanelHeightM, 0.012),
-        new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74, metalness: 0 }),
-      );
-      backing.position.set(x, panelCenterY, panelCenterZ);
-      backing.rotation.y = rotationY;
+          echo 'CmNvbnN0IGZzID0gcmVxdWlyZSgnZnMnKTsKCmZ1bmN0aW9uIHJlcGxhY2VPbmNlKHBhdGgsIG5lZWRsZSwgcmVwbGFjZW1lbnQpIHsKICBsZXQgcyA9IGZzLnJlYWRGaWxlU3luYyhwYXRoLCAndXRmOCcpOwogIGlmICghcy5pbmNsdWRlcyhuZWVkbGUpKSB0aHJvdyBuZXcgRXJyb3IoYE5lZWRsZSBub3QgZm91bmQ6ICR7cGF0aH1gKTsKICBzID0gcy5yZXBsYWNlKG5lZWRsZSwgcmVwbGFjZW1lbnQpOwogIGZzLndyaXRlRmlsZVN5bmMocGF0aCwgcyk7Cn0KCnJlcGxhY2VPbmNlKAogICdzcmMvZGVzaWduU3RhdGUuanMnLAogICIgICAgZmFjZXM6IHtcbiAgICAgIGZyb250OiBjcmVhdGVFZGl0YWJsZVBhbmVsU3RhdGUobnVsbCwgREVGQVVMVF9QQU5FTF9DT0xPUiksXG4gICAgICBsZWZ0OiBjcmVhdGVFZGl0YWJsZVBhbmVsU3RhdGUobnVsbCwgREVGQVVMVF9QQU5FTF9DT0xPUiksXG4gICAgICByaWdodDogY3JlYXRlRWRpdGFibGVQYW5lbFN0YXRlKG51bGwsIERFRkFVTFRfUEFORUxfQ09MT1IpLFxuICAgIH0sXG4gIH07XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBjcmVhdGVCYXNlTW9kdWxlU3RhdGUiLAogICIgICAgZmFjZXM6IHtcbiAgICAgIGxlZnQ6IGNyZWF0ZUVkaXRhYmxlUGFuZWxTdGF0ZShudWxsLCBERUZBVUxUX1BBTkVMX0NPTE9SKSxcbiAgICAgIHJpZ2h0OiBjcmVhdGVFZGl0YWJsZVBhbmVsU3RhdGUobnVsbCwgREVGQVVMVF9QQU5FTF9DT0xPUiksXG4gICAgfSxcbiAgfTtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIGNyZWF0ZUJhc2VNb2R1bGVTdGF0ZSIsCik7Cgpjb25zdCBzY2VuZVBhdGggPSAnc3JjL3NjZW5lM2QuanMnOwpsZXQgc2NlbmUgPSBmcy5yZWFkRmlsZVN5bmMoc2NlbmVQYXRoLCAndXRmOCcpOwpjb25zdCBzdGFydCA9IHNjZW5lLmluZGV4T2YoJyAgZnVuY3Rpb24gY3JlYXRlQmFzZVdhbGxNb2R1bGUobW9kdWxlU3RhdGUsIG1vZHVsZUluZGV4LCBhcHBseVN0b3JlZEltYWdlKSB7Jyk7CmNvbnN0IGVuZCA9IHNjZW5lLmluZGV4T2YoJ1xuICBmdW5jdGlvbiBidWlsZFdhbGwobW9kdWxlcywgeyByZXNldFZpZXcgPSB0cnVlIH0gPSB7fSkgeycsIHN0YXJ0KTsKaWYgKHN0YXJ0IDwgMCB8fCBlbmQgPCAwKSB0aHJvdyBuZXcgRXJyb3IoJ2NyZWF0ZUJhc2VXYWxsTW9kdWxlIGJsb2NrIG5vdCBmb3VuZCcpOwoKY29uc3QgcmVwbGFjZW1lbnQgPSBgICBmdW5jdGlvbiBjcmVhdGVCYXNlV2FsbE1vZHVsZShtb2R1bGVTdGF0ZSwgbW9kdWxlSW5kZXgsIGFwcGx5U3RvcmVkSW1hZ2UpIHsKICAgIC8vIFBhbmVsIEJhesSxbMSxIG5vcm1hbCBEw7x6IFBhbmVsIGlsZSBheW7EsSBkdXZhciBnZW9tZXRyaXNpZGlyLgogICAgLy8gQmF6YSBzYWRlY2UgcGFuZWxpbiDDtm7DvG5lIG1vbnRlIGVkaWxlbiBla3RpcjsgYmHEn8SxbXPEsXogdGFtIEJhemEgbW9kw7xsw7wgZGXEn2lsZGlyLgogICAgY29uc3Qgd2FsbFN0YXRlID0geyAuLi5tb2R1bGVTdGF0ZSwgdHlwZTogJ2ZsYXQtcGFuZWwnIH07CiAgICBjb25zdCB3YWxsID0gY3JlYXRlRmxhdFBhbmVsTW9kdWxlKHdhbGxTdGF0ZSwgbW9kdWxlSW5kZXgsIGFwcGx5U3RvcmVkSW1hZ2UpOwogICAgY29uc3QgZ3JvdXAgPSB3YWxsLmdyb3VwOwogICAgZ3JvdXAudXNlckRhdGEua2luZCA9ICdtb2R1bGUnOwogICAgZ3JvdXAudXNlckRhdGEubW9kdWxlSWQgPSBtb2R1bGVTdGF0ZS5pZDsKICAgIGdyb3VwLnVzZXJEYXRhLm1vZHVsZVR5cGUgPSAnYmFzZS13YWxsJzsKICAgIGdyb3VwLnVzZXJEYXRhLm1vZHVsZUluZGV4ID0gbW9kdWxlSW5kZXg7CgogICAgY29uc3Qgd2lkdGhNID0gTnVtYmVyKG1vZHVsZVN0YXRlLndpZHRoQ20pIC8gMTAwOwogICAgY29uc3QgZGVwdGhNID0gMC41MDsKICAgIGNvbnN0IGhlaWdodE0gPSAwLjUwOwogICAgY29uc3QgcHJvZmlsZU0gPSBQQU5FTF9WRVJUSUNBTF9QUk9GSUxFX1dJRFRIX007CiAgICBjb25zdCByYWlsSGVpZ2h0TSA9IFBBTkVMX1JBSUxfSEVJR0hUX007CiAgICBjb25zdCBmcmFtZURlcHRoTSA9IE51bWJlcihTVEFO RF9ESU1FTlNJT05TLmZyYW1lRGVwdGgpOwogICAgY29uc3QgdG9wVGhpY2tuZXNzTSA9IDAuMDM1OwogICAgY29uc3QgdG9wT3ZlcmhhbmdNID0gMC4wMjsKICAgIGNvbnN0IGZyYW1lSGVpZ2h0TSA9IE1hdGgubWF4KGhlaWdodE0gLSB0b3BUaGlja25lc3NNLCBwcm9maWxlTSAqIDMpOwogICAgY29uc3Qgc2lkZVBhbmVsV2lkdGhNID0gTWF0aC5tYXgoZGVwdGhNIC0gcHJvZmlsZU0gKiAyLCAwLjA1KTsKICAgIGNvbnN0IHNpZGVQYW5lbEhlaWdodE0gPSBNYXRoLm1heChmcmFtZUhlaWdodE0gLSByYWlsSGVpZ2h0TSwgMC4wNSk7CiAgICBjb25zdCBmcm9udFJhaWxXaWR0aE0gPSBNYXRoLm1heCh3aWR0aE0gLSBwcm9maWxlTSAqIDIsIDAuMDUpOwoKICAgIGNvbnN0IGZyYW1lTWF0ZXJpYWwgPSBuZXcgVEhSRUUuTWVzaFN0YW5kYXJkTWF0ZXJpYWwoewogICAgICBjb2xvcjogRlJBTUVfQ09MT1IsCiAgICAgIG1ldGFsbmVzczogMC42OCwKICAgICAgcm91Z2huZXNzOiAwLjI4LAogICAgfSk7CiAgICBjb25zdCBhZGRQcm9maWxlID0gKGdlb21ldHJ5LCBwb3NpdGlvbikgPT4gewogICAgICBjb25zdCBtZXNoID0gbmV3IFRIUkVFLk1lc2goZ2VvbWV0cnksIGZyYW1lTWF0ZXJpYWwuY2xvbmUoKSk7CiAgICAgIG1lc2gucG9zaXRpb24uY29weShwb3NpdGlvbik7CiAgICAgIG1lc2guY2FzdFNoYWRvdyA9IHRydWU7CiAgICAgIG1lc2gucmVjZWl2ZVNoYWRvdyA9IHRydWU7CiAgICAgIGdyb3VwLmFkZChtZXNoKTsKICAgICAgcmV0dXJuIG1lc2g7CiAgICB9OwoKICAgIC8vIFlhbMSxemNhIMO2bmRla2kgaWtpIGvEsXNhIGRpa21lLiBBcmthIGRpa21lbGVyIG5vcm1hbCBwYW5lbGluIDM0Niw1IGNtIGRpa21lbGVyaWRpci4KICAgIGNvbnN0IHNob3J0UG9zdEdlb21ldHJ5ID0gbmV3IFRIUkVFLkJveEdlb21ldHJ5KHByb2ZpbGVNLCBmcmFtZUhlaWdodE0sIHByb2ZpbGVNKTsKICAgIFstMSwgMV0uZm9yRWFjaCgoeFNpZGUpID0+IHsKICAgICAgYWRkUHJvZmlsZSgKICAgICAgICBzaG9ydFBvc3RHZW9tZXRyeS5jbG9uZSgpLAogICAgICAgIG5ldyBUSFJFRS5WZWN0b3IzKAogICAgICAgICAgeFNpZGUgKiAod2lkdGhNIC8gMiAtIHByb2ZpbGVNIC8gMiksCiAgICAgICAgICBmcmFtZUhlaWdodE0gLyAyLAogICAgICAgICAgZGVwdGhNIC0gcHJvZmlsZU0gLyAyLAogICAgICAgICksCiAgICAgICk7CiAgICB9KTsKCiAgICAvLyDDlm4gYWx0ICsgw7xzdCB1enVuIHByb2ZpbC4KICAgIGNvbnN0IGZyb250UmFpbEdlb21ldHJ5ID0gbmV3IFRIUkVFLkJveEdlb21ldHJ5KGZyb250UmFpbFdpZHRoTSwgcmFpbEhlaWdodE0sIGZyYW1lRGVwdGhNKTsKICAgIFswLCBmcmFtZUhlaWdodE1dLmZvckVhY2goKHkpID0+IHsKICAgICAgYWRkUHJvZmlsZSgKICAgICAgICBmcm9udFJhaWxHZW9tZXRyeS5jbG9uZSgpLAogICAgICAgIG5ldyBUSFJFRS5WZWN0b3IzKDAsIHksIGRlcHRoTSAtIGZyYW1lRGVwdGhNIC8gMiksCiAgICAgICk7CiAgICB9KTsKCiAgICAvLyBTb2wvc2HEnyBhbHQgKyDDvHN0IGJhxJ9sYW50xLEgcHJvZmlsbGVyaS4KICAgIGNvbnN0IHNpZGVSYWlsR2VvbWV0cnkgPSBuZXcgVEhSRUUuQm94R2VvbWV0cnkoZnJhbWVEZXB0aE0sIHJhaWxIZWlnaHRNLCBzaWRlUGFuZWxXaWR0aE0pOwogICAgWy0xLCAxXS5mb3JFYWNoKCh4U2lkZSkgPT4gewogICAgICBbMCwgZnJhbWVIZWlnaHRNXS5mb3JFYWNoKCh5KSA9PiB7CiAgICAgICAgYWRkUHJvZmlsZSgKICAgICAgICAgIHNpZGVSYWlsR2VvbWV0cnkuY2xvbmUoKSwKICAgICAgICAgIG5ldyBUSFJFRS5WZWN0b3IzKAogICAgICAgICAgICB4U2lkZSAqICh3aWR0aE0gLyAyIC0gZnJhbWVEZXB0aE0gLyAyKSwKICAgICAgICAgICAgeSwKICAgICAgICAgICAgZGVwdGhNIC8gMiwKICAgICAgICAgICksCiAgICAgICAgKTsKICAgICAgfSk7CiAgICB9KTsKCiAgICBjb25zdCB0b3AgPSBuZXcgVEhSRUUuTWVzaCgKICAgICAgbmV3IFRIUkVFLkJveEdlb21ldHJ5KAogICAgICAgIHdpZHRoTSArIHRvcE92ZXJoYW5nTSAqIDIsCiAgICAgICAgdG9wVGhpY2tuZXNzTSwKICAgICAgICBkZXB0aE0gKyB0b3BPdmVyaGFuZ00gKiAyLAogICAgICApLAogICAgICBuZXcgVEhSRUUuTWVzaFN0YW5kYXJkTWF0ZXJpYWwoeyBjb2xvcjogMHh mZmZmZmYsIHJvdWdobmVzczogMC43NCwgbWV0YWxuZXNzOiAwIH0pLAogICAgKTsKICAgIHRvcC5wb3NpdGlvbi5zZXQoMCwgZnJhbWVIZWlnaHRNICsgdG9wVGhpY2tuZXNzTSAvIDIsIGRlcHRoTSAvIDIpOwogICAgdG9wLmNhc3RTaGFkb3cgPSB0cnVlOwogICAgdG9wLnJlY2VpdmVTaGFkb3cgPSB0cnVlOwogICAgZ3JvdXAuYWRkKHRvcCk7CgogICAgY29uc3QgYXR0YWNobWVudFN1cmZhY2VzID0gW107CiAgICBjb25zdCBhZGRTaWRlUGFuZWwgPSAoc3VyZmFjZVJvbGUsIHN1cmZhY2VTdGF0ZSwgeCwgcm90YXRpb25ZKSA9PiB7CiAgICAgIGlmICghc3VyZmFjZVN0YXRlKSByZXR1cm47CiAgICAgIGNvbnN0IHBhbmVsQ2VudGVyWiA9IGRlcHRoTSAvIDI7CiAgICAgIGNvbnN0IHBhbmVsQ2VudGVyWSA9IGZyYW1lSGVpZ2h0TSA vIDI7CgogICAgICBjb25zdCBiYWNraW5nID0gbmV3IFRIUkVFLk1lc2goCiAgICAgICAgbmV3IFRIUkVFLkJveEdlb21ldHJ5KHNpZGVQYW5lbFdpZHRoTSwgc2lkZVBhbmVsSGVpZ2h0TSwgMC4wMTIpLAogICAgICAgIG5ldyBUSFJFRS5NZXNoU3RhbmRhcmRNYXRlcmlhbCh7IGNvbG9yOiBQQU5FTF9CQUNLX0NPTE9SLCByb3VnaG5lc3M6IDAuNzQsIG1ldGFsbmVzczogMCB9KSwKICAgICAgKTsKICAgICAgYmFja2luZy5wb3NpdGlvbi5zZXQoeCwgcGFuZWxDZW50ZXJZLCBwYW5lbENlbnRlclopOwogICAgICBiYWNraW5nLnJvdGF0aW9uLnkgPSByb3RhdGlvbll;
       backing.position.x += surfaceRole === 'left' ? 0.006 : -0.006;
       backing.castShadow = true;
       backing.receiveShadow = true;
@@ -200,18 +63,8 @@ export function createBaseModuleState`);
       applyStoredImage?.(surface);
     };
 
-    addSidePanel(
-      'left',
-      moduleState.faces?.left,
-      -widthM / 2 + 0.006,
-      -Math.PI / 2,
-    );
-    addSidePanel(
-      'right',
-      moduleState.faces?.right,
-      widthM / 2 - 0.006,
-      Math.PI / 2,
-    );
+    addSidePanel('left', moduleState.faces?.left, -widthM / 2 + 0.006, -Math.PI / 2);
+    addSidePanel('right', moduleState.faces?.right, widthM / 2 - 0.006, Math.PI / 2);
 
     const surfaces = [...wall.surfaces, ...attachmentSurfaces];
     surfaces.forEach((surface) => {
@@ -222,13 +75,12 @@ export function createBaseModuleState`);
     return { group, surfaces };
   }
 `;
-          scene = scene.slice(0, start) + replacement + scene.slice(end);
-          fs.writeFileSync(scenePath, scene);
+scene = scene.slice(0, start) + replacement + scene.slice(end);
+fs.writeFileSync(scenePath, scene);
 
-          // Make selection text explicit for the mounted side panels vs the seven wall strips.
-          const mainPath = 'src/main.js';
-          let main = fs.readFileSync(mainPath, 'utf8');
-          const anchor = `      if (moduleType === 'base') {
+const mainPath = 'src/main.js';
+let main = fs.readFileSync(mainPath, 'utf8');
+const anchor = `      if (moduleType === 'base') {
         const faceLabel = surface.userData.surfaceRole === 'front'
           ? 'ön'
           : (surface.userData.surfaceRole === 'left' ? 'sol yan' : 'sağ yan');
@@ -236,8 +88,8 @@ export function createBaseModuleState`);
         return;
       }
 `;
-          if (!main.includes(anchor)) throw new Error('main base selection anchor not found');
-          main = main.replace(anchor, anchor + `
+if (!main.includes(anchor)) throw new Error('main base selection anchor not found');
+main = main.replace(anchor, anchor + `
       if (moduleType === 'base-wall') {
         if (surface.userData.surfaceRole === 'left' || surface.userData.surfaceRole === 'right') {
           const faceLabel = surface.userData.surfaceRole === 'left' ? 'sol baza yanı' : 'sağ baza yanı';
@@ -248,11 +100,34 @@ export function createBaseModuleState`);
         return;
       }
 `);
-          fs.writeFileSync(mainPath, main);
+fs.writeFileSync(mainPath, main);
 
-          // Regression: state must encode 7 wall panels + exactly 2 side panels, not a standalone baza.
-          fs.writeFileSync('test/baseWallState.test.js', `import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport { createBaseWallModuleState, duplicateModuleState } from '../src/designState.js';\n\nfor (const width of [100, 150, 200]) {\n  test(\`Panel Bazalı ${'${width}'} normal panel + monte baza state kullanır\`, () => {\n    const state = createBaseWallModuleState(width);\n    assert.equal(state.type, 'base-wall');\n    assert.equal(state.strips.length, 7);\n    assert.deepEqual(Object.keys(state.faces).sort(), ['left', 'right']);\n    assert.equal(state.depthCm, 50);\n    assert.equal(state.heightCm, 350);\n  });\n}\n\ntest('Panel Bazalı kopyası 7 duvar ve 2 yan panel kimliğini bağımsızlaştırır', () => {\n  const source = createBaseWallModuleState(100);\n  const copy = duplicateModuleState(source);\n  assert.notEqual(copy.id, source.id);\n  source.strips.forEach((strip, i) => assert.notEqual(copy.strips[i].id, strip.id));\n  assert.notEqual(copy.faces.left.id, source.faces.left.id);\n  assert.notEqual(copy.faces.right.id, source.faces.right.id);\n});\n`);
-          NODE
+fs.writeFileSync('test/baseWallState.test.js', `import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createBaseWallModuleState, duplicateModuleState } from '../src/designState.js';
+
+for (const width of [100, 150, 200]) {
+  test(`Panel Bazalı ${width} normal panel + monte baza state kullanır`, () => {
+    const state = createBaseWallModuleState(width);
+    assert.equal(state.type, 'base-wall');
+    assert.equal(state.strips.length, 7);
+    assert.deepEqual(Object.keys(state.faces).sort(), ['left', 'right']);
+    assert.equal(state.depthCm, 50);
+    assert.equal(state.heightCm, 350);
+  });
+}
+
+test('Panel Bazalı kopyası 7 duvar ve 2 yan panel kimliğini bağımsızlaştırır', () => {
+  const source = createBaseWallModuleState(100);
+  const copy = duplicateModuleState(source);
+  assert.notEqual(copy.id, source.id);
+  source.strips.forEach((strip, i) => assert.notEqual(copy.strips[i].id, strip.id));
+  assert.notEqual(copy.faces.left.id, source.faces.left.id);
+  assert.notEqual(copy.faces.right.id, source.faces.right.id);
+});
+`);
+' | base64 -d > /tmp/patch.js
+          node /tmp/patch.js
       - run: npm test
       - run: npm run build
       - name: Commit result
