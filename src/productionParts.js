@@ -138,6 +138,14 @@ export const PRODUCTION_PARTS = Object.freeze({
     unit: 'adet',
     connectorType: 'corner',
   }),
+
+  door_100: Object.freeze({
+    partId: 'door_100',
+    name: 'Kapı 100 cm',
+    type: 'door',
+    unit: 'adet',
+    nominalModuleWidthCm: 100,
+  }),
 });
 
 export function getProductionPart(partId) {
