@@ -1,4 +1,4 @@
-import { getExpandedStraightWallRecipe } from './moduleRecipes.js';
+import { getExpandedModuleRecipe } from './moduleRecipes.js';
 
 const selectionInfo = document.querySelector('#selection-info');
 const sidebar = document.querySelector('.sidebar');
@@ -12,7 +12,7 @@ function createPanel() {
   details.innerHTML = `
     <summary class="panel-summary"><span>Üretim Listesi · Debug</span><span class="panel-chevron" aria-hidden="true"></span></summary>
     <div class="panel-card-content">
-      <p data-role="bom-status" class="status">Reçetesi olan bir düz duvar modülü seç.</p>
+      <p data-role="bom-status" class="status">Reçetesi olan bir modül seç.</p>
       <div data-role="bom-content"></div>
     </div>
   `;
@@ -32,8 +32,8 @@ function formatNumber(value) {
   return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(Number(value));
 }
 
-function renderRecipe(widthCm) {
-  const recipe = getExpandedStraightWallRecipe(widthCm);
+function renderRecipe(moduleType, widthCm, label) {
+  const recipe = getExpandedModuleRecipe(moduleType, widthCm);
   if (!status || !content) return;
 
   if (!recipe) {
@@ -42,7 +42,7 @@ function renderRecipe(widthCm) {
     return;
   }
 
-  status.textContent = `${widthCm} cm düz duvar · Raw BOM`;
+  status.textContent = `${label} · Raw BOM`;
   content.innerHTML = '';
 
   const list = document.createElement('ul');
@@ -59,21 +59,25 @@ function syncFromSelection() {
   if (!selectionInfo || !status || !content) return;
   const text = selectionInfo.textContent?.trim() ?? '';
 
+  const doorMatch = text.match(/Kapı\s+(100)\s*cm/i);
+  if (doorMatch) {
+    renderRecipe('door', Number(doorMatch[1]), `Depo Kapısı ${doorMatch[1]} cm`);
+    return;
+  }
+
   // Düz duvar yüzeyi için mevcut seçim metni: "Modül N · 100 cm · alttan ...".
-  // Banko/Baza/Raf/Vitrin/Kapı/Separatör gibi özel modüller aynı genişliği taşıyabilir;
-  // bunları düz duvar reçetesiyle yanlış eşleştirmemek için açıkça hariç tutuyoruz.
   const specialModule = /Banko|Baza|Raf|Vitrin|Kapı|Separatör|Koltuk|Projektör|panel seçili/i.test(text);
   const widthMatch = text.match(/·\s*(50|100|150|200)\s*cm\s*·/i);
 
   if (!widthMatch || specialModule) {
     status.textContent = text && text !== 'Bir panel seç; Ctrl/Cmd + tık ile karşı köşeyi seçip dikdörtgen blok oluştur.'
       ? 'Bu modül için üretim reçetesi henüz tanımlı değil.'
-      : 'Reçetesi olan bir düz duvar modülü seç.';
+      : 'Reçetesi olan bir modül seç.';
     content.innerHTML = '';
     return;
   }
 
-  renderRecipe(Number(widthMatch[1]));
+  renderRecipe('wall', Number(widthMatch[1]), `${widthMatch[1]} cm düz duvar`);
 }
 
 if (selectionInfo && panel) {
