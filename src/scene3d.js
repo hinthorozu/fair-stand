@@ -312,7 +312,7 @@ export function createStandScene(
   exhibitionHall.name = 'exhibition-hall-environment';
 
   const hallFloorTexture = new THREE.TextureLoader().load(
-    import.meta.env.BASE_URL + 'textures/exhibition-floor.jpg',
+    import.meta.env.BASE_URL + 'textures/exhibition-floor-optimized.jpg',
   );
   hallFloorTexture.colorSpace = THREE.SRGBColorSpace;
   hallFloorTexture.wrapS = THREE.RepeatWrapping;
