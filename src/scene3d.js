@@ -1025,7 +1025,13 @@ export function createStandScene(
     group.userData.moduleIndex = moduleIndex;
 
     while (wall.group.children.length) group.add(wall.group.children[0]);
-    while (base.group.children.length) group.add(base.group.children[0]);
+    // Panel Bazalı'da duvar paneli baza derinliğinin ortasında değil arka kenarında kalır.
+    // Duvar düzlemi z=0; 50 cm baza gövdesi standın içine doğru z=0..0.50 uzanır.
+    while (base.group.children.length) {
+      const child = base.group.children[0];
+      child.position.z += 0.25;
+      group.add(child);
+    }
 
     const surfaces = [...wall.surfaces, ...base.surfaces];
     surfaces.forEach((surface) => {
