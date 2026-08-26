@@ -81,6 +81,13 @@ function syncFromSelection() {
     return;
   }
 
+  const separatorMatch = text.match(/Separatör\s+(50|100)\s*cm/i);
+  if (separatorMatch) {
+    const widthCm = Number(separatorMatch[1]);
+    renderRecipe('separator', widthCm, `Separatör ${widthCm} cm`);
+    return;
+  }
+
   // Düz duvar yüzeyi için mevcut seçim metni: "Modül N · 100 cm · alttan ...".
   const specialModule = /Banko|Baza|Raf|Vitrin|Kapı|Separatör|Koltuk|Projektör|panel seçili/i.test(text);
   const widthMatch = text.match(/·\s*(50|100|150|200)\s*cm\s*·/i);
