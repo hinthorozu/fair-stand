@@ -89,6 +89,9 @@ export const MODULE_CATALOG = Object.freeze({
   BASE_100: { type: 'base', widthCm: 100, depthCm: 50, heightCm: 50, label: 'Baza 100' },
   BASE_150: { type: 'base', widthCm: 150, depthCm: 50, heightCm: 50, label: 'Baza 150' },
   BASE_200: { type: 'base', widthCm: 200, depthCm: 50, heightCm: 50, label: 'Baza 200' },
+  BASE_WALL_100: { type: 'base-wall', widthCm: 100, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 100' },
+  BASE_WALL_150: { type: 'base-wall', widthCm: 150, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 150' },
+  BASE_WALL_200: { type: 'base-wall', widthCm: 200, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 200' },
   SEPARATOR_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
   SEPARATOR_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
 });

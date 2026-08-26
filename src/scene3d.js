@@ -1006,6 +1006,36 @@ export function createStandScene(
 
   }
 
+  function createBaseWallModule(moduleState, moduleIndex, applyStoredImage) {
+    const wallState = { ...moduleState, type: 'flat-panel' };
+    const baseState = {
+      ...moduleState,
+      id: `${moduleState.id}-base-layer`,
+      type: 'base',
+      depthCm: 50,
+      heightCm: 50,
+    };
+
+    const wall = createFlatPanelModule(wallState, moduleIndex, applyStoredImage);
+    const base = createBaseModule(baseState, moduleIndex, applyStoredImage);
+    const group = new THREE.Group();
+    group.userData.kind = 'module';
+    group.userData.moduleId = moduleState.id;
+    group.userData.moduleType = 'base-wall';
+    group.userData.moduleIndex = moduleIndex;
+
+    while (wall.group.children.length) group.add(wall.group.children[0]);
+    while (base.group.children.length) group.add(base.group.children[0]);
+
+    const surfaces = [...wall.surfaces, ...base.surfaces];
+    surfaces.forEach((surface) => {
+      surface.userData.moduleId = moduleState.id;
+      surface.userData.moduleType = 'base-wall';
+      surface.userData.moduleIndex = moduleIndex;
+    });
+    return { group, surfaces };
+  }
+
   function buildWall(modules, { resetView = true } = {}) {
     const selectedSurfaceIds = new Set(
       [...selectedSurfaces].map((mesh) => mesh.userData.surfaceId).filter(Boolean),
@@ -1024,6 +1054,12 @@ export function createStandScene(
       let module;
       if (moduleState.type === 'separator') {
         module = createSeparatorModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'base-wall') {
+        module = createBaseWallModule(
+          moduleState,
+          moduleIndex,
+          (surface) => applyStoredImage(surface),
+        );
       } else if (moduleState.type === 'base') {
         module = createBaseModule(
           moduleState,

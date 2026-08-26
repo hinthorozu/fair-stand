@@ -63,6 +63,16 @@ const MODULE_RECIPES = Object.freeze({
     Object.freeze({ partId: 'profile_190', quantity: 3 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 4 }), Object.freeze({ partId: 'panel_197', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ partId: 'connector_start', quantity: 6 }), Object.freeze({ partId: 'connector_single', quantity: 12 }), Object.freeze({ partId: 'counter_top_210_60', quantity: 1 }),
   ]) }),
 
+  'base-wall:100': Object.freeze({ recipeId: 'base-wall-100', moduleType: 'base-wall', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
+    Object.freeze({ partId: 'profile_91', quantity: 4 }), Object.freeze({ partId: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 2 }), Object.freeze({ partId: 'panel_98', quantity: 7 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ partId: 'connector_start', quantity: 6 }), Object.freeze({ partId: 'connector_single', quantity: 17 }), Object.freeze({ partId: 'base_top_107_50', quantity: 1 }),
+  ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_92' }) }),
+  'base-wall:150': Object.freeze({ recipeId: 'base-wall-150', moduleType: 'base-wall', nominalWidthCm: 150, connectionMode: 'straight', items: Object.freeze([
+    Object.freeze({ partId: 'profile_140_5', quantity: 4 }), Object.freeze({ partId: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 2 }), Object.freeze({ partId: 'panel_147_5', quantity: 7 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ partId: 'connector_start', quantity: 6 }), Object.freeze({ partId: 'connector_single', quantity: 17 }), Object.freeze({ partId: 'base_top_157_50', quantity: 1 }),
+  ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_142_5' }) }),
+  'base-wall:200': Object.freeze({ recipeId: 'base-wall-200', moduleType: 'base-wall', nominalWidthCm: 200, connectionMode: 'straight', items: Object.freeze([
+    Object.freeze({ partId: 'profile_190', quantity: 4 }), Object.freeze({ partId: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 2 }), Object.freeze({ partId: 'panel_197', quantity: 7 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ partId: 'connector_start', quantity: 6 }), Object.freeze({ partId: 'connector_single', quantity: 17 }), Object.freeze({ partId: 'base_top_206_50', quantity: 1 }),
+  ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_192' }) }),
+
   'base:100': Object.freeze({ recipeId: 'base-100', moduleType: 'base', nominalWidthCm: 100, items: Object.freeze([
     Object.freeze({ partId: 'profile_91', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_98', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ partId: 'connector_start', quantity: 8 }), Object.freeze({ partId: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_107_50', quantity: 1 }),
   ]) }),
