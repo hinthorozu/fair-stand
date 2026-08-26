@@ -1,5 +1,6 @@
 export const PRODUCTION_PARTS = Object.freeze({
   upright_346_5: Object.freeze({ partId: 'upright_346_5', name: 'Dikme 346,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 346.5, thicknessCm: 8 }) }),
+  upright_99: Object.freeze({ partId: 'upright_99', name: 'Dikme 99 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 99, thicknessCm: 8 }) }),
 
   profile_41_5: Object.freeze({ partId: 'profile_41_5', name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5 }) }),
   profile_91: Object.freeze({ partId: 'profile_91', name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91 }) }),
@@ -34,6 +35,10 @@ export const PRODUCTION_PARTS = Object.freeze({
   showcase_2_100: Object.freeze({ partId: 'showcase_2_100', name: '2 Gözlü Vitrin 100 cm', type: 'showcase', unit: 'adet', eyeCount: 2, nominalModuleWidthCm: 100 }),
   showcase_3_100: Object.freeze({ partId: 'showcase_3_100', name: '3 Gözlü Vitrin 100 cm', type: 'showcase', unit: 'adet', eyeCount: 3, nominalModuleWidthCm: 100 }),
   glass_shelf: Object.freeze({ partId: 'glass_shelf', name: 'Cam Raf', type: 'showcase-accessory', unit: 'adet' }),
+
+  counter_top_110_60: Object.freeze({ partId: 'counter_top_110_60', name: 'Banko Üstü 110 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 110, depthCm: 60 }), nominalModuleWidthCm: 100 }),
+  counter_top_160_60: Object.freeze({ partId: 'counter_top_160_60', name: 'Banko Üstü 160 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 160, depthCm: 60 }), nominalModuleWidthCm: 150 }),
+  counter_top_210_60: Object.freeze({ partId: 'counter_top_210_60', name: 'Banko Üstü 210 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 210, depthCm: 60 }), nominalModuleWidthCm: 200 }),
 });
 
 export function getProductionPart(partId) {
