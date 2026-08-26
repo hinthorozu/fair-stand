@@ -73,6 +73,14 @@ function syncFromSelection() {
     return;
   }
 
+  const showcaseMatch = text.match(/(2|3)\s*Gözlü\s+Vitrin\s+(100)\s*cm/i);
+  if (showcaseMatch) {
+    const eyeCount = Number(showcaseMatch[1]);
+    const widthCm = Number(showcaseMatch[2]);
+    renderRecipe(`showcase-${eyeCount}`, widthCm, `${eyeCount} Gözlü Vitrin ${widthCm} cm`);
+    return;
+  }
+
   // Düz duvar yüzeyi için mevcut seçim metni: "Modül N · 100 cm · alttan ...".
   const specialModule = /Banko|Baza|Raf|Vitrin|Kapı|Separatör|Koltuk|Projektör|panel seçili/i.test(text);
   const widthMatch = text.match(/·\s*(50|100|150|200)\s*cm\s*·/i);
