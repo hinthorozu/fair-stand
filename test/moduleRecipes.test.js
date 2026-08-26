@@ -31,6 +31,13 @@ test('production part catalog contains the 100 cm door part', () => {
   assert.equal(getProductionPart('door_100').unit, 'adet');
 });
 
+test('production part catalog contains shelf sizes and shelf leg', () => {
+  assert.equal(getProductionPart('shelf_100').name, 'Raf 100 cm');
+  assert.equal(getProductionPart('shelf_150').dimensions.lengthCm, 150);
+  assert.equal(getProductionPart('shelf_200').dimensions.lengthCm, 200);
+  assert.equal(getProductionPart('shelf_leg').name, 'Raf Ayağı');
+});
+
 test('50 cm straight wall recipe matches the verified production recipe', () => {
   const recipe = getStraightWallRecipe(50);
 
@@ -77,6 +84,45 @@ test('100 cm door recipe matches verified production data', () => {
   assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_92');
 });
 
+test('100 and 150 cm two-shelf wall recipes match verified production data', () => {
+  const expected = {
+    100: ['profile_91', 'panel_98', 'panel_corner_92', 'shelf_100'],
+    150: ['profile_140_5', 'panel_147_5', 'panel_corner_142_5', 'shelf_150'],
+  };
+
+  for (const [width, [profilePartId, panelPartId, cornerPanelPartId, shelfPartId]] of Object.entries(expected)) {
+    const recipe = getModuleRecipe('shelf', Number(width), { shelfCount: 2 });
+    const quantities = Object.fromEntries(recipe.items.map((item) => [item.partId, item.quantity]));
+    assert.equal(quantities[profilePartId], 2);
+    assert.equal(quantities.upright_346_5, 2);
+    assert.equal(quantities[panelPartId], 7);
+    assert.equal(quantities.connector_start, 2);
+    assert.equal(quantities.connector_single, 13);
+    assert.equal(quantities[shelfPartId], 2);
+    assert.equal(quantities.shelf_leg, 4);
+    assert.equal(recipe.variants.innerCornerPanelPartId, cornerPanelPartId);
+  }
+});
+
+test('200 cm two-shelf wall recipe uses six shelf legs', () => {
+  const recipe = getModuleRecipe('shelf', 200, { shelfCount: 2 });
+  const quantities = Object.fromEntries(recipe.items.map((item) => [item.partId, item.quantity]));
+  assert.equal(quantities.profile_190, 2);
+  assert.equal(quantities.upright_346_5, 2);
+  assert.equal(quantities.panel_197, 7);
+  assert.equal(quantities.connector_start, 2);
+  assert.equal(quantities.connector_single, 13);
+  assert.equal(quantities.shelf_200, 2);
+  assert.equal(quantities.shelf_leg, 6);
+  assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_192');
+});
+
+test('three-shelf recipes stay undefined until production data is verified', () => {
+  assert.equal(getModuleRecipe('shelf', 100, { shelfCount: 3 }), null);
+  assert.equal(getModuleRecipe('shelf', 150, { shelfCount: 3 }), null);
+  assert.equal(getModuleRecipe('shelf', 200, { shelfCount: 3 }), null);
+});
+
 test('recipe lookup rejects unsupported nominal wall widths', () => {
   assert.equal(getStraightWallRecipe(75), null);
   assert.equal(getStraightWallRecipe(250), null);
@@ -96,4 +142,10 @@ test('expanded door recipe resolves the door production part', () => {
   const expanded = getExpandedModuleRecipe('door', 100);
   assert.equal(expanded.items.at(-1).part.name, 'Kapı 100 cm');
   assert.equal(expanded.items[2].part.dimensions.widthCm, 98);
+});
+
+test('expanded shelf recipe resolves shelf and leg production parts', () => {
+  const expanded = getExpandedModuleRecipe('shelf', 150, { shelfCount: 2 });
+  assert.equal(expanded.items.at(-2).part.name, 'Raf 150 cm');
+  assert.equal(expanded.items.at(-1).part.name, 'Raf Ayağı');
 });
