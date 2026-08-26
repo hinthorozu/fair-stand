@@ -2,10 +2,7 @@ import { getProductionPart } from './productionParts.js';
 
 const STRAIGHT_WALL_RECIPES = Object.freeze({
   50: Object.freeze({
-    recipeId: 'wall-straight-50',
-    moduleType: 'wall',
-    nominalWidthCm: 50,
-    connectionMode: 'straight',
+    recipeId: 'wall-straight-50', moduleType: 'wall', nominalWidthCm: 50, connectionMode: 'straight',
     items: Object.freeze([
       Object.freeze({ partId: 'profile_41_5', quantity: 2 }),
       Object.freeze({ partId: 'upright_346_5', quantity: 2 }),
@@ -13,15 +10,10 @@ const STRAIGHT_WALL_RECIPES = Object.freeze({
       Object.freeze({ partId: 'connector_start', quantity: 2 }),
       Object.freeze({ partId: 'connector_single', quantity: 13 }),
     ]),
-    variants: Object.freeze({
-      innerCornerPanelPartId: 'panel_corner_42_5',
-    }),
+    variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_42_5' }),
   }),
   100: Object.freeze({
-    recipeId: 'wall-straight-100',
-    moduleType: 'wall',
-    nominalWidthCm: 100,
-    connectionMode: 'straight',
+    recipeId: 'wall-straight-100', moduleType: 'wall', nominalWidthCm: 100, connectionMode: 'straight',
     items: Object.freeze([
       Object.freeze({ partId: 'profile_91', quantity: 2 }),
       Object.freeze({ partId: 'upright_346_5', quantity: 2 }),
@@ -29,15 +21,10 @@ const STRAIGHT_WALL_RECIPES = Object.freeze({
       Object.freeze({ partId: 'connector_start', quantity: 2 }),
       Object.freeze({ partId: 'connector_single', quantity: 13 }),
     ]),
-    variants: Object.freeze({
-      innerCornerPanelPartId: 'panel_corner_92',
-    }),
+    variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_92' }),
   }),
   150: Object.freeze({
-    recipeId: 'wall-straight-150',
-    moduleType: 'wall',
-    nominalWidthCm: 150,
-    connectionMode: 'straight',
+    recipeId: 'wall-straight-150', moduleType: 'wall', nominalWidthCm: 150, connectionMode: 'straight',
     items: Object.freeze([
       Object.freeze({ partId: 'profile_140_5', quantity: 2 }),
       Object.freeze({ partId: 'upright_346_5', quantity: 2 }),
@@ -45,15 +32,10 @@ const STRAIGHT_WALL_RECIPES = Object.freeze({
       Object.freeze({ partId: 'connector_start', quantity: 2 }),
       Object.freeze({ partId: 'connector_single', quantity: 13 }),
     ]),
-    variants: Object.freeze({
-      innerCornerPanelPartId: 'panel_corner_142_5',
-    }),
+    variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_142_5' }),
   }),
   200: Object.freeze({
-    recipeId: 'wall-straight-200',
-    moduleType: 'wall',
-    nominalWidthCm: 200,
-    connectionMode: 'straight',
+    recipeId: 'wall-straight-200', moduleType: 'wall', nominalWidthCm: 200, connectionMode: 'straight',
     items: Object.freeze([
       Object.freeze({ partId: 'profile_190', quantity: 2 }),
       Object.freeze({ partId: 'upright_346_5', quantity: 2 }),
@@ -61,9 +43,25 @@ const STRAIGHT_WALL_RECIPES = Object.freeze({
       Object.freeze({ partId: 'connector_start', quantity: 2 }),
       Object.freeze({ partId: 'connector_single', quantity: 13 }),
     ]),
-    variants: Object.freeze({
-      innerCornerPanelPartId: 'panel_corner_192',
-    }),
+    variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_192' }),
+  }),
+});
+
+const MODULE_RECIPES = Object.freeze({
+  'door:100': Object.freeze({
+    recipeId: 'door-100',
+    moduleType: 'door',
+    nominalWidthCm: 100,
+    connectionMode: 'straight',
+    items: Object.freeze([
+      Object.freeze({ partId: 'profile_91', quantity: 1 }),
+      Object.freeze({ partId: 'upright_346_5', quantity: 2 }),
+      Object.freeze({ partId: 'panel_98', quantity: 3 }),
+      Object.freeze({ partId: 'connector_start', quantity: 2 }),
+      Object.freeze({ partId: 'connector_single', quantity: 5 }),
+      Object.freeze({ partId: 'door_100', quantity: 1 }),
+    ]),
+    variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_92' }),
   }),
 });
 
@@ -75,18 +73,23 @@ export function listStraightWallRecipes() {
   return Object.values(STRAIGHT_WALL_RECIPES);
 }
 
+export function getModuleRecipe(moduleType, nominalWidthCm) {
+  if (moduleType === 'wall' || moduleType === 'flat-panel') return getStraightWallRecipe(nominalWidthCm);
+  return MODULE_RECIPES[`${moduleType}:${nominalWidthCm}`] ?? null;
+}
+
 export function expandRecipe(recipe) {
   if (!recipe) return null;
-
   return {
     ...recipe,
-    items: recipe.items.map((item) => ({
-      ...item,
-      part: getProductionPart(item.partId),
-    })),
+    items: recipe.items.map((item) => ({ ...item, part: getProductionPart(item.partId) })),
   };
 }
 
 export function getExpandedStraightWallRecipe(nominalWidthCm) {
   return expandRecipe(getStraightWallRecipe(nominalWidthCm));
+}
+
+export function getExpandedModuleRecipe(moduleType, nominalWidthCm) {
+  return expandRecipe(getModuleRecipe(moduleType, nominalWidthCm));
 }
