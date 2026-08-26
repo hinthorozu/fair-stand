@@ -62,6 +62,16 @@ const MODULE_RECIPES = Object.freeze({
   'counter:200': Object.freeze({ recipeId: 'counter-200', moduleType: 'counter', nominalWidthCm: 200, items: Object.freeze([
     Object.freeze({ partId: 'profile_190', quantity: 3 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 4 }), Object.freeze({ partId: 'panel_197', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ partId: 'connector_start', quantity: 6 }), Object.freeze({ partId: 'connector_single', quantity: 12 }), Object.freeze({ partId: 'counter_top_210_60', quantity: 1 }),
   ]) }),
+
+  'base:100': Object.freeze({ recipeId: 'base-100', moduleType: 'base', nominalWidthCm: 100, items: Object.freeze([
+    Object.freeze({ partId: 'profile_91', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_98', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ partId: 'connector_start', quantity: 8 }), Object.freeze({ partId: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_107_50', quantity: 1 }),
+  ]) }),
+  'base:150': Object.freeze({ recipeId: 'base-150', moduleType: 'base', nominalWidthCm: 150, items: Object.freeze([
+    Object.freeze({ partId: 'profile_140_5', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_147_5', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ partId: 'connector_start', quantity: 8 }), Object.freeze({ partId: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_157_50', quantity: 1 }),
+  ]) }),
+  'base:200': Object.freeze({ recipeId: 'base-200', moduleType: 'base', nominalWidthCm: 200, items: Object.freeze([
+    Object.freeze({ partId: 'profile_190', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_197', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ partId: 'connector_start', quantity: 8 }), Object.freeze({ partId: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_206_50', quantity: 1 }),
+  ]) }),
 });
 
 export function getStraightWallRecipe(nominalWidthCm) {
