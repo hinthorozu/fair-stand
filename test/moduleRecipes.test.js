@@ -117,10 +117,37 @@ test('200 cm two-shelf wall recipe uses six shelf legs', () => {
   assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_192');
 });
 
-test('three-shelf recipes stay undefined until production data is verified', () => {
-  assert.equal(getModuleRecipe('shelf', 100, { shelfCount: 3 }), null);
-  assert.equal(getModuleRecipe('shelf', 150, { shelfCount: 3 }), null);
-  assert.equal(getModuleRecipe('shelf', 200, { shelfCount: 3 }), null);
+test('100 and 150 cm three-shelf wall recipes match verified production data', () => {
+  const expected = {
+    100: ['profile_91', 'panel_98', 'panel_corner_92', 'shelf_100'],
+    150: ['profile_140_5', 'panel_147_5', 'panel_corner_142_5', 'shelf_150'],
+  };
+
+  for (const [width, [profilePartId, panelPartId, cornerPanelPartId, shelfPartId]] of Object.entries(expected)) {
+    const recipe = getModuleRecipe('shelf', Number(width), { shelfCount: 3 });
+    const quantities = Object.fromEntries(recipe.items.map((item) => [item.partId, item.quantity]));
+    assert.equal(quantities[profilePartId], 2);
+    assert.equal(quantities.upright_346_5, 2);
+    assert.equal(quantities[panelPartId], 7);
+    assert.equal(quantities.connector_start, 2);
+    assert.equal(quantities.connector_single, 13);
+    assert.equal(quantities[shelfPartId], 3);
+    assert.equal(quantities.shelf_leg, 6);
+    assert.equal(recipe.variants.innerCornerPanelPartId, cornerPanelPartId);
+  }
+});
+
+test('200 cm three-shelf wall recipe uses nine shelf legs', () => {
+  const recipe = getModuleRecipe('shelf', 200, { shelfCount: 3 });
+  const quantities = Object.fromEntries(recipe.items.map((item) => [item.partId, item.quantity]));
+  assert.equal(quantities.profile_190, 2);
+  assert.equal(quantities.upright_346_5, 2);
+  assert.equal(quantities.panel_197, 7);
+  assert.equal(quantities.connector_start, 2);
+  assert.equal(quantities.connector_single, 13);
+  assert.equal(quantities.shelf_200, 3);
+  assert.equal(quantities.shelf_leg, 9);
+  assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_192');
 });
 
 test('recipe lookup rejects unsupported nominal wall widths', () => {
@@ -145,7 +172,7 @@ test('expanded door recipe resolves the door production part', () => {
 });
 
 test('expanded shelf recipe resolves shelf and leg production parts', () => {
-  const expanded = getExpandedModuleRecipe('shelf', 150, { shelfCount: 2 });
+  const expanded = getExpandedModuleRecipe('shelf', 150, { shelfCount: 3 });
   assert.equal(expanded.items.at(-2).part.name, 'Raf 150 cm');
   assert.equal(expanded.items.at(-1).part.name, 'Raf Ayağı');
 });
