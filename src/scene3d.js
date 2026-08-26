@@ -3117,10 +3117,15 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const depthM = depthCm / 100;
   const heightM = heightCm / 100;
   const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
+  const railHeightM = PANEL_RAIL_HEIGHT_M;
+  const frameDepthM = Number(STAND_DIMENSIONS.frameDepth);
   const topThicknessM = 0.035;
   const topOverhangM = 0.02;
   const frameHeightM = Math.max(heightM - topThicknessM, profileM * 3);
-  const panelHeightM = Math.max(frameHeightM - profileM * 2, 0.05);
+  const panelHeightM = Math.max(
+    frameHeightM - railHeightM - PANEL_VERTICAL_CLEARANCE_M,
+    0.05,
+  );
   const frontPanelWidthM = Math.max(widthM - profileM * 2, 0.05);
   const sidePanelWidthM = Math.max(depthM - profileM * 2, 0.05);
   const group = new THREE.Group();
@@ -3148,7 +3153,8 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
     return mesh;
   };
 
-  // Four visible Maxima corner profiles. Rear remains open; only front/left/right are paneled.
+  // Baza keeps its verified outer dimensions. Only the render language changes:
+  // banko-style thin Maxima rails, with no middle rail because each face is one panel.
   const cornerPostGeometry = new THREE.BoxGeometry(profileM, frameHeightM, profileM);
   [-1, 1].forEach((xSide) => {
     [-1, 1].forEach((zSide) => {
@@ -3163,20 +3169,21 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
     });
   });
 
-  const frontRailGeometry = new THREE.BoxGeometry(frontPanelWidthM, profileM, profileM);
-  [profileM / 2, frameHeightM - profileM / 2].forEach((y) => {
+  const railYs = [0, frameHeightM];
+  const frontRailGeometry = new THREE.BoxGeometry(frontPanelWidthM, railHeightM, frameDepthM);
+  railYs.forEach((y) => {
     addProfile(
       frontRailGeometry.clone(),
-      new THREE.Vector3(0, y, depthM / 2 - profileM / 2),
+      new THREE.Vector3(0, y, depthM / 2 - frameDepthM / 2),
     );
   });
 
-  const sideRailGeometry = new THREE.BoxGeometry(profileM, profileM, sidePanelWidthM);
+  const sideRailGeometry = new THREE.BoxGeometry(frameDepthM, railHeightM, sidePanelWidthM);
   [-1, 1].forEach((xSide) => {
-    [profileM / 2, frameHeightM - profileM / 2].forEach((y) => {
+    railYs.forEach((y) => {
       addProfile(
         sideRailGeometry.clone(),
-        new THREE.Vector3(xSide * (widthM / 2 - profileM / 2), y, 0),
+        new THREE.Vector3(xSide * (widthM / 2 - frameDepthM / 2), y, 0),
       );
     });
   });
@@ -3204,6 +3211,9 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
     );
     backing.position.copy(position);
     backing.rotation.y = rotationY;
+    if (surfaceRole === 'front') backing.position.z -= 0.006;
+    else if (surfaceRole === 'left') backing.position.x += 0.006;
+    else backing.position.x -= 0.006;
     backing.castShadow = true;
     backing.receiveShadow = true;
     group.add(backing);
@@ -3221,9 +3231,9 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
     );
     surface.position.copy(position);
     surface.rotation.y = rotationY;
-    if (surfaceRole === 'front') surface.position.z += 0.0065;
-    else if (surfaceRole === 'left') surface.position.x -= 0.0065;
-    else surface.position.x += 0.0065;
+    if (surfaceRole === 'front') surface.position.z += 0.006;
+    else if (surfaceRole === 'left') surface.position.x -= 0.006;
+    else surface.position.x += 0.006;
 
     const selectionFrame = createSelectionFrame(faceWidthM, panelHeightM);
     selectionFrame.visible = false;
@@ -3249,27 +3259,14 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
     onSurfaceReady?.(surface);
   };
 
-  const panelCenterY = profileM + panelHeightM / 2;
-  addPanelFace(
-    'front',
-    moduleState.faces?.front,
-    frontPanelWidthM,
-    new THREE.Vector3(0, panelCenterY, depthM / 2 - profileM - 0.006),
-  );
-  addPanelFace(
-    'left',
-    moduleState.faces?.left,
-    sidePanelWidthM,
-    new THREE.Vector3(-widthM / 2 + profileM + 0.006, panelCenterY, 0),
-    -Math.PI / 2,
-  );
-  addPanelFace(
-    'right',
-    moduleState.faces?.right,
-    sidePanelWidthM,
-    new THREE.Vector3(widthM / 2 - profileM - 0.006, panelCenterY, 0),
-    Math.PI / 2,
-  );
+  const panelCenterY = frameHeightM / 2;
+  const frontZ = depthM / 2 - 0.006;
+  const leftX = -widthM / 2 + 0.006;
+  const rightX = widthM / 2 - 0.006;
+
+  addPanelFace('front', moduleState.faces?.front, frontPanelWidthM, new THREE.Vector3(0, panelCenterY, frontZ));
+  addPanelFace('left', moduleState.faces?.left, sidePanelWidthM, new THREE.Vector3(leftX, panelCenterY, 0), -Math.PI / 2);
+  addPanelFace('right', moduleState.faces?.right, sidePanelWidthM, new THREE.Vector3(rightX, panelCenterY, 0), Math.PI / 2);
 
   return { group, surfaces };
 }
