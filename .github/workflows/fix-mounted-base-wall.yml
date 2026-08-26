@@ -1,0 +1,237 @@
+name: Fix mounted-base Panel Bazali geometry
+on:
+  push:
+    branches: [ROG]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Make Panel Bazali a flat panel with mounted baza
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+
+          const scenePath = 'src/scene3d.js';
+          let scene = fs.readFileSync(scenePath, 'utf8');
+          const start = scene.indexOf('  function createBaseWallModule(moduleState, moduleIndex, applyStoredImage) {');
+          const end = scene.indexOf('\n  function buildWall(modules, { resetView = true } = {}) {', start);
+          if (start < 0 || end < 0) throw new Error('createBaseWallModule block not found');
+
+          const replacement = `  function createBaseWallModule(moduleState, moduleIndex, applyStoredImage) {
+    // Panel Bazalı bir Düz Panel modülüdür; baza sadece önüne monte edilen eklentidir.
+    // Duvar geometrisi/7 panel yerleşimi aynen korunur. Baza için arka dikme ya da
+    // ön panel üretilmez; duvarın iki uzun dikmesi bazanın arka taşıyıcısıdır.
+    const wallState = { ...moduleState, type: 'flat-panel' };
+    const wall = createFlatPanelModule(wallState, moduleIndex, applyStoredImage);
+    const group = wall.group;
+    const surfaces = [...wall.surfaces];
+
+    const widthCm = Number(moduleState.widthCm);
+    const widthM = widthCm / 100;
+    const depthM = 0.50;
+    const heightM = 0.50;
+    const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
+    const railHeightM = PANEL_RAIL_HEIGHT_M;
+    const frameDepthM = Number(STAND_DIMENSIONS.frameDepth);
+    const topThicknessM = 0.035;
+    const topOverhangM = 0.02;
+    const frameHeightM = Math.max(heightM - topThicknessM, profileM * 3);
+    const sidePanelWidthM = Math.max(depthM - profileM * 2, 0.05);
+    const sidePanelHeightM = Math.max(
+      frameHeightM - railHeightM - PANEL_VERTICAL_CLEARANCE_M,
+      0.05,
+    );
+    const frontZ = depthM - profileM / 2;
+    const sideCenterZ = depthM / 2;
+
+    group.userData.kind = 'module';
+    group.userData.moduleId = moduleState.id;
+    group.userData.moduleType = 'base-wall';
+    group.userData.type = 'base-wall';
+    group.userData.moduleIndex = moduleIndex;
+    group.userData.widthCm = widthCm;
+    group.userData.depthCm = 50;
+    group.userData.heightCm = 350;
+
+    const frameMaterial = new THREE.MeshStandardMaterial({
+      color: FRAME_COLOR,
+      metalness: 0.68,
+      roughness: 0.28,
+    });
+    const addProfile = (geometry, position) => {
+      const mesh = new THREE.Mesh(geometry, frameMaterial.clone());
+      mesh.position.copy(position);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      group.add(mesh);
+      return mesh;
+    };
+
+    // Yalnızca öndeki iki kısa dikme. Arkadaki taşıyıcılar Düz Panel'in 346,5 cm dikmeleridir.
+    const frontPostGeometry = new THREE.BoxGeometry(profileM, frameHeightM, profileM);
+    [-1, 1].forEach((xSide) => {
+      addProfile(
+        frontPostGeometry.clone(),
+        new THREE.Vector3(
+          xSide * (widthM / 2 - profileM / 2),
+          frameHeightM / 2,
+          frontZ,
+        ),
+      );
+    });
+
+    // Baza ön kenarındaki iki yatay profil. Ön yüz açık kalır; BOM'da ayrıca ön panel yoktur.
+    const frontRailGeometry = new THREE.BoxGeometry(
+      Math.max(widthM - profileM * 2, 0.02),
+      railHeightM,
+      frameDepthM,
+    );
+    [0, frameHeightM].forEach((y) => {
+      addProfile(
+        frontRailGeometry.clone(),
+        new THREE.Vector3(0, y, depthM - frameDepthM / 2),
+      );
+    });
+
+    // İki yandaki alt/üst 41,5 cm profiller duvar düzleminden ön dikmelere bağlanır.
+    const sideRailGeometry = new THREE.BoxGeometry(
+      frameDepthM,
+      railHeightM,
+      sidePanelWidthM,
+    );
+    [-1, 1].forEach((xSide) => {
+      [0, frameHeightM].forEach((y) => {
+        addProfile(
+          sideRailGeometry.clone(),
+          new THREE.Vector3(
+            xSide * (widthM / 2 - frameDepthM / 2),
+            y,
+            sideCenterZ,
+          ),
+        );
+      });
+    });
+
+    const top = new THREE.Mesh(
+      new THREE.BoxGeometry(
+        widthM + topOverhangM * 2,
+        topThicknessM,
+        depthM + topOverhangM,
+      ),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.74, metalness: 0 }),
+    );
+    // Arka kenar Düz Panel düzlemine oturur; tabla yalnızca standın içine doğru çıkar.
+    top.position.set(0, frameHeightM + topThicknessM / 2, (depthM + topOverhangM) / 2);
+    top.castShadow = true;
+    top.receiveShadow = true;
+    group.add(top);
+
+    const addSidePanel = (surfaceRole, surfaceState, x, rotationY) => {
+      if (!surfaceState) return;
+      const centerY = frameHeightM / 2;
+      const backing = new THREE.Mesh(
+        new THREE.BoxGeometry(sidePanelWidthM, sidePanelHeightM, 0.012),
+        new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74, metalness: 0 }),
+      );
+      backing.position.set(x, centerY, sideCenterZ);
+      backing.rotation.y = rotationY;
+      backing.position.x += surfaceRole === 'left' ? 0.006 : -0.006;
+      backing.castShadow = true;
+      backing.receiveShadow = true;
+      group.add(backing);
+
+      const surface = new THREE.Mesh(
+        new THREE.PlaneGeometry(sidePanelWidthM, sidePanelHeightM),
+        new THREE.MeshStandardMaterial({
+          color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
+          roughness: 0.72,
+          metalness: 0,
+          side: THREE.DoubleSide,
+          emissive: 0x000000,
+          emissiveIntensity: 0,
+        }),
+      );
+      surface.position.set(x, centerY, sideCenterZ);
+      surface.rotation.y = rotationY;
+      surface.position.x += surfaceRole === 'left' ? -0.006 : 0.006;
+
+      const selectionFrame = createSelectionFrame(sidePanelWidthM, sidePanelHeightM);
+      selectionFrame.visible = false;
+      surface.add(selectionFrame);
+      surface.userData = {
+        kind: 'surface',
+        moduleType: 'base-wall',
+        selectionMode: 'module',
+        acceptsImage: true,
+        moduleIndex,
+        moduleId: moduleState.id,
+        widthCm,
+        stripIndex: null,
+        stripNumber: null,
+        surfaceRole,
+        surfaceId: surfaceState.id,
+        surfaceState,
+        selectionFrame,
+        backing,
+      };
+      group.add(surface);
+      surfaces.push(surface);
+      applyStoredImage?.(surface);
+    };
+
+    const leftX = -widthM / 2 + 0.006;
+    const rightX = widthM / 2 - 0.006;
+    addSidePanel('left', moduleState.faces?.left, leftX, -Math.PI / 2);
+    addSidePanel('right', moduleState.faces?.right, rightX, Math.PI / 2);
+
+    // Düz Panel yüzeylerini Panel Bazalı olarak etiketle; panel koordinatları hiç değişmez.
+    wall.surfaces.forEach((surface) => {
+      surface.userData.moduleId = moduleState.id;
+      surface.userData.moduleType = 'base-wall';
+      surface.userData.moduleIndex = moduleIndex;
+    });
+
+    return { group, surfaces };
+  }
+`;
+          scene = scene.slice(0, start) + replacement + scene.slice(end);
+          fs.writeFileSync(scenePath, scene);
+
+          const statePath = 'src/designState.js';
+          let state = fs.readFileSync(statePath, 'utf8');
+          const oldFaces = `    faces: {\n      front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),\n      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),\n      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),\n    },\n  };\n}\n\nexport function createBaseModuleState`;
+          const newFaces = `    faces: {\n      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),\n      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),\n    },\n  };\n}\n\nexport function createBaseModuleState`;
+          if (!state.includes(oldFaces)) throw new Error('base-wall face state block not found');
+          state = state.replace(oldFaces, newFaces);
+          fs.writeFileSync(statePath, state);
+
+          const mainPath = 'src/main.js';
+          let main = fs.readFileSync(mainPath, 'utf8');
+          const oldLabel = `        const label = role === 'front'\n          ? 'baza ön panel'\n          : (role === 'left' ? 'baza sol yan panel' : (role === 'right' ? 'baza sağ yan panel' : \`alttan \${stripNumber}. duvar paneli\`));`;
+          const newLabel = `        const label = role === 'left'\n          ? 'baza sol yan panel'\n          : (role === 'right' ? 'baza sağ yan panel' : \`alttan \${stripNumber}. duvar paneli\`);`;
+          if (!main.includes(oldLabel)) throw new Error('base-wall selection label block not found');
+          main = main.replace(oldLabel, newLabel);
+          fs.writeFileSync(mainPath, main);
+
+          fs.writeFileSync('test/baseWallGeometryContract.test.js', `import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport fs from 'node:fs';\nimport { createBaseWallModuleState } from '../src/designState.js';\n\ntest('Panel Bazalı state yalnız iki baza yan paneli taşır', () => {\n  const state = createBaseWallModuleState(100);\n  assert.deepEqual(Object.keys(state.faces).sort(), ['left', 'right']);\n  assert.equal(state.strips.length, 7);\n  assert.equal(state.depthCm, 50);\n  assert.equal(state.heightCm, 350);\n});\n\ntest('Panel Bazalı renderer Düz Paneli korur ve baza ön paneli üretmez', () => {\n  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n  const start = source.indexOf('function createBaseWallModule');\n  const end = source.indexOf('function buildWall', start);\n  const block = source.slice(start, end);\n  assert.match(block, /createFlatPanelModule\\(wallState/);\n  assert.match(block, /frontPostGeometry/);\n  assert.match(block, /addSidePanel\\('left'/);\n  assert.match(block, /addSidePanel\\('right'/);\n  assert.doesNotMatch(block, /faces\\?\\.front/);\n  assert.doesNotMatch(block, /createBaseModule\\(/);\n});\n`);
+          NODE
+      - run: npm test
+      - run: npm run build
+      - name: Commit result
+        run: |
+          rm -f .github/workflows/fix-mounted-base-wall.yml
+          git config user.name "mustafa sinan koca"
+          git config user.email "mustafasinankoca@gmail.com"
+          git add -A
+          git commit -m "fix: mount baza onto flat Panel Bazalı wall [skip ci]"
+          git push origin ROG
