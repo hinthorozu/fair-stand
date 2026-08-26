@@ -1,0 +1,76 @@
+name: Expose Panel Bazali catalog
+on:
+  push:
+    branches: [ROG]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Patch catalog exposure and module state
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          function replaceOnce(path, needle, replacement) {
+            let s = fs.readFileSync(path, 'utf8');
+            if (!s.includes(needle)) throw new Error(`Needle not found in ${path}: ${needle.slice(0,100)}`);
+            s = s.replace(needle, replacement);
+            fs.writeFileSync(path, s);
+          }
+
+          // 1) Give Panel Bazali its own state: 7 wall strips + 3 baza faces.
+          replaceOnce('src/designState.js',
+            "export function createBaseModuleState(widthCm) {",
+            `export function createBaseWallModuleState(widthCm) {\n  const width = Number(widthCm);\n  if (![100, 150, 200].includes(width)) return null;\n\n  return {\n    id: createId('module'),\n    type: 'base-wall',\n    widthCm: width,\n    depthCm: 50,\n    heightCm: 350,\n    strips: Array.from(\n      { length: STRIP_COUNT },\n      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),\n    ),\n    faces: {\n      front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),\n      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),\n      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),\n    },\n  };\n}\n\nexport function createBaseModuleState(widthCm) {`
+          );
+
+          // 2) Main factory import + creation + selection label.
+          replaceOnce('src/main.js',
+            "  createBaseModuleState,\n",
+            "  createBaseModuleState,\n  createBaseWallModuleState,\n"
+          );
+          replaceOnce('src/main.js',
+            "  else if (module.type === 'base') state = createBaseModuleState(module.widthCm);",
+            "  else if (module.type === 'base') state = createBaseModuleState(module.widthCm);\n  else if (module.type === 'base-wall') state = createBaseWallModuleState(module.widthCm);"
+          );
+          replaceOnce('src/main.js',
+            "      if (moduleType === 'base') {",
+            `      if (moduleType === 'base-wall') {\n        const role = surface.userData.surfaceRole;\n        const label = role === 'front'\n          ? 'baza ön panel'\n          : (role === 'left' ? 'baza sol yan panel' : (role === 'right' ? 'baza sağ yan panel' : \`alttan ${'${stripNumber}'}. duvar paneli\`));\n        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Panel Bazalı ' + widthCm + ' cm · ' + label + ' · renk + görsel uygulanabilir.';\n        return;\n      }\n\n      if (moduleType === 'base') {`
+          );
+
+          // 3) Expose cards in the draggable catalog and give them a recognisable preview.
+          replaceOnce('src/moduleDragSidebar.js',
+            "  'BASE_200',\n  'BASE_150',\n  'BASE_100',\n",
+            "  'BASE_WALL_200',\n  'BASE_WALL_150',\n  'BASE_WALL_100',\n  'BASE_200',\n  'BASE_150',\n  'BASE_100',\n"
+          );
+          replaceOnce('src/moduleDragSidebar.js',
+            "    .module-drag-base::after { content:''; position:absolute; left:-5px; right:-5px; top:-7px; height:5px; border:1px solid ${ALUMINUM_PROFILE_COLOR}; background:#ffffff; }\n",
+            "    .module-drag-base::after { content:''; position:absolute; left:-5px; right:-5px; top:-7px; height:5px; border:1px solid ${ALUMINUM_PROFILE_COLOR}; background:#ffffff; }\n    .module-drag-base-wall { position:relative; display:flex; height:68px; flex-direction:column; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }\n    .module-drag-base-wall span { flex:1; border-bottom:1px solid #c4c9ce; }\n    .module-drag-base-wall span:last-of-type { border-bottom:0; }\n    .module-drag-base-wall::after { content:''; position:absolute; left:-5px; right:-5px; bottom:-3px; height:13px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f8fafc; box-shadow:3px 3px 0 #d7dde4; }\n"
+          );
+          replaceOnce('src/moduleDragSidebar.js',
+            "  if (module.type === 'base') {",
+            `  if (module.type === 'base-wall') {\n    const body = document.createElement('div');\n    body.className = 'module-drag-base-wall';\n    body.style.width = Math.max(34, previewWidthPx(module.widthCm)) + 'px';\n    for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));\n    preview.appendChild(body);\n    return preview;\n  }\n\n  if (module.type === 'base') {`
+          );
+
+          // 4) Regression tests: catalog visibility + factory prerequisites.
+          fs.writeFileSync('test/baseWallCatalog.test.js', `import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport fs from 'node:fs';\nimport { MODULE_CATALOG } from '../src/catalog.js';\nimport { createBaseWallModuleState } from '../src/designState.js';\n\ntest('Panel Bazalı 100 150 200 draggable catalog entries exist', () => {\n  const sidebar = fs.readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');\n  for (const width of [100, 150, 200]) {\n    assert.equal(MODULE_CATALOG[\`BASE_WALL_${'${width}'}\`].type, 'base-wall');\n    assert.ok(sidebar.includes(\`'BASE_WALL_${'${width}'}'\`));\n  }\n});\n\ntest('Panel Bazalı state carries seven wall panels plus three baza faces', () => {\n  const state = createBaseWallModuleState(100);\n  assert.equal(state.type, 'base-wall');\n  assert.equal(state.depthCm, 50);\n  assert.equal(state.heightCm, 350);\n  assert.equal(state.strips.length, 7);\n  assert.deepEqual(Object.keys(state.faces).sort(), ['front', 'left', 'right']);\n});\n`);
+          NODE
+      - run: npm test
+      - run: npm run build
+      - name: Commit result
+        run: |
+          rm -f .github/workflows/expose-base-wall-catalog.yml
+          git config user.name "mustafa sinan koca"
+          git config user.email "mustafasinankoca@gmail.com"
+          git add -A
+          git commit -m "fix: expose Panel Bazalı modules in catalog [skip ci]"
+          git push origin ROG
