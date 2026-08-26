@@ -146,6 +146,37 @@ export const PRODUCTION_PARTS = Object.freeze({
     unit: 'adet',
     nominalModuleWidthCm: 100,
   }),
+
+  shelf_100: Object.freeze({
+    partId: 'shelf_100',
+    name: 'Raf 100 cm',
+    type: 'shelf',
+    unit: 'adet',
+    dimensions: Object.freeze({ lengthCm: 100 }),
+    nominalModuleWidthCm: 100,
+  }),
+  shelf_150: Object.freeze({
+    partId: 'shelf_150',
+    name: 'Raf 150 cm',
+    type: 'shelf',
+    unit: 'adet',
+    dimensions: Object.freeze({ lengthCm: 150 }),
+    nominalModuleWidthCm: 150,
+  }),
+  shelf_200: Object.freeze({
+    partId: 'shelf_200',
+    name: 'Raf 200 cm',
+    type: 'shelf',
+    unit: 'adet',
+    dimensions: Object.freeze({ lengthCm: 200 }),
+    nominalModuleWidthCm: 200,
+  }),
+  shelf_leg: Object.freeze({
+    partId: 'shelf_leg',
+    name: 'Raf Ayağı',
+    type: 'shelf-accessory',
+    unit: 'adet',
+  }),
 });
 
 export function getProductionPart(partId) {
