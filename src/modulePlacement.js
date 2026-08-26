@@ -249,6 +249,9 @@ export function validateModulePlacement({
 }
 
 function getModuleCollisionDepthCm(module) {
+  // Panel Bazalı fiziksel olarak 50 cm baza taşır ama bağlantı omurgası Düz Panel'dir.
+  // Corner/T/snap hesabında baza çıkıntısını değil 10 cm Maxima duvar hattını kullan.
+  if (module?.type === 'base-wall') return MODULE_COLLISION_DEPTH_CM;
   const explicitDepthCm = Number(module?.depthCm);
   if (Number.isFinite(explicitDepthCm) && explicitDepthCm > 0) return explicitDepthCm;
   return MODULE_COLLISION_DEPTH_CM;
@@ -335,17 +338,26 @@ export function validatePlacementAgainstModules({
   standXCm,
   standYCm,
 } = {}) {
+  const effectiveDepthCm = moduleType === 'base-wall'
+    ? MODULE_COLLISION_DEPTH_CM
+    : depthCm;
   const boundary = validateModulePlacement({
     placement,
     widthCm,
-    depthCm,
+    depthCm: effectiveDepthCm,
     standType,
     standXCm,
     standYCm,
   });
   if (!boundary.ok) return boundary;
 
-  const candidate = { id: moduleId, type: moduleType, widthCm, depthCm, placement };
+  const candidate = {
+    id: moduleId,
+    type: moduleType,
+    widthCm,
+    depthCm: effectiveDepthCm,
+    placement,
+  };
   const collision = modules.find((module) => (
     module?.id !== moduleId && placementsOverlap(candidate, module)
   ));
@@ -454,8 +466,13 @@ export function snapPlacementToModules({
 
   const resolvedRotation = normalizeModuleRotationZDeg(rotationZDeg);
   const movingAxis = isVerticalModuleRotation(resolvedRotation) ? 'y' : 'x';
-  const strictMovingDepth = hasStrictDepthBounds(depthCm);
-  const movingDepthCm = strictMovingDepth ? Number(depthCm) : MODULE_COLLISION_DEPTH_CM;
+  const effectiveMovingDepthCm = moduleType === 'base-wall'
+    ? MODULE_COLLISION_DEPTH_CM
+    : depthCm;
+  const strictMovingDepth = hasStrictDepthBounds(effectiveMovingDepthCm);
+  const movingDepthCm = strictMovingDepth
+    ? Number(effectiveMovingDepthCm)
+    : MODULE_COLLISION_DEPTH_CM;
   const freePlacement = strictMovingDepth ? createFreePlacement({
     moduleType,
     widthCm: width,

@@ -808,3 +808,31 @@ test('free context insertion rejects stand overflow and real collision', () => {
   assert.equal(collision.ok, false);
   assert.match(collision.message, /çakışıyor/i);
 });
+
+
+test('Panel Bazalı with 50 cm physical base still uses flat-panel corner snap', () => {
+  const modules = [{
+    id: 'target',
+    type: 'flat-panel',
+    widthCm: 200,
+    placement: { xCm: 100, yCm: 200, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  }];
+  const result = snapPlacementToModules({
+    moduleId: 'base-wall-moving',
+    moduleType: 'base-wall',
+    widthCm: 100,
+    depthCm: 50,
+    pointerXCm: 302,
+    pointerYCm: 248,
+    rotationZDeg: 90,
+    modules,
+    standType: 'island',
+    standXCm: 800,
+    standYCm: 600,
+  });
+
+  assert.equal(result?.snapKind, 'corner');
+  assert.deepEqual(result?.placement, {
+    xCm: 300, yCm: 200, zCm: 0, rotationZDeg: 90, wallId: 'free',
+  });
+});
