@@ -32,8 +32,8 @@ function formatNumber(value) {
   return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(Number(value));
 }
 
-function renderRecipe(moduleType, widthCm, label) {
-  const recipe = getExpandedModuleRecipe(moduleType, widthCm);
+function renderRecipe(moduleType, widthCm, label, options = {}) {
+  const recipe = getExpandedModuleRecipe(moduleType, widthCm, options);
   if (!status || !content) return;
 
   if (!recipe) {
@@ -62,6 +62,14 @@ function syncFromSelection() {
   const doorMatch = text.match(/Kapı\s+(100)\s*cm/i);
   if (doorMatch) {
     renderRecipe('door', Number(doorMatch[1]), `Depo Kapısı ${doorMatch[1]} cm`);
+    return;
+  }
+
+  const shelfMatch = text.match(/Raf\s+(100|150|200)\s*cm\s*·\s*(2|3)\s*raflı/i);
+  if (shelfMatch) {
+    const widthCm = Number(shelfMatch[1]);
+    const shelfCount = Number(shelfMatch[2]);
+    renderRecipe('shelf', widthCm, `Raflı Duvar ${widthCm} · ${shelfCount} Raf`, { shelfCount });
     return;
   }
 
