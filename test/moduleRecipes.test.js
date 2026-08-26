@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 
 import { getProductionPart, listProductionParts } from '../src/productionParts.js';
 import {
+  getExpandedModuleRecipe,
   getExpandedStraightWallRecipe,
+  getModuleRecipe,
   getStraightWallRecipe,
   listStraightWallRecipes,
 } from '../src/moduleRecipes.js';
@@ -22,6 +24,11 @@ test('production part catalog contains all verified panel sizes', () => {
     .sort((a, b) => a - b);
 
   assert.deepEqual(panelWidths, [42.5, 48.5, 92, 98, 142.5, 147.5, 192, 197]);
+});
+
+test('production part catalog contains the 100 cm door part', () => {
+  assert.equal(getProductionPart('door_100').name, 'Kapı 100 cm');
+  assert.equal(getProductionPart('door_100').unit, 'adet');
 });
 
 test('50 cm straight wall recipe matches the verified production recipe', () => {
@@ -57,6 +64,19 @@ test('100/150/200 cm straight wall recipes preserve quantities and change verifi
   }
 });
 
+test('100 cm door recipe matches verified production data', () => {
+  const recipe = getModuleRecipe('door', 100);
+  assert.deepEqual(recipe.items, [
+    { partId: 'profile_91', quantity: 1 },
+    { partId: 'upright_346_5', quantity: 2 },
+    { partId: 'panel_98', quantity: 3 },
+    { partId: 'connector_start', quantity: 2 },
+    { partId: 'connector_single', quantity: 5 },
+    { partId: 'door_100', quantity: 1 },
+  ]);
+  assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_92');
+});
+
 test('recipe lookup rejects unsupported nominal wall widths', () => {
   assert.equal(getStraightWallRecipe(75), null);
   assert.equal(getStraightWallRecipe(250), null);
@@ -70,4 +90,10 @@ test('expanded recipe resolves production part metadata without mutating source 
   assert.equal(expanded.items[1].part.dimensions.lengthCm, 346.5);
   assert.equal(expanded.items[2].part.dimensions.widthCm, 197);
   assert.equal(getStraightWallRecipe(200).items[0].part, undefined);
+});
+
+test('expanded door recipe resolves the door production part', () => {
+  const expanded = getExpandedModuleRecipe('door', 100);
+  assert.equal(expanded.items.at(-1).part.name, 'Kapı 100 cm');
+  assert.equal(expanded.items[2].part.dimensions.widthCm, 98);
 });
