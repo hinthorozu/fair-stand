@@ -11,6 +11,7 @@ import {
   createBarStoolModuleState,
   createLedFloodlightModuleState,
   createBaseModuleState,
+  createBaseWallModuleState,
   createCounterModuleState,
   createDoorModuleState,
   createFlatPanelModuleState,
@@ -203,6 +204,15 @@ const scene3d = createStandScene(
           ? 'ön'
           : (surface.userData.surfaceRole === 'left' ? 'sol yan' : 'sağ yan');
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Banko ' + widthCm + ' cm · ' + faceLabel + ' cephe · renk + görsel uygulanabilir.';
+        return;
+      }
+
+      if (moduleType === 'base-wall') {
+        const role = surface.userData.surfaceRole;
+        const label = role === 'front'
+          ? 'baza ön panel'
+          : (role === 'left' ? 'baza sol yan panel' : (role === 'right' ? 'baza sağ yan panel' : `alttan ${stripNumber}. duvar paneli`));
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Panel Bazalı ' + widthCm + ' cm · ' + label + ' · renk + görsel uygulanabilir.';
         return;
       }
 
@@ -582,6 +592,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   let state = null;
   if (module.type === 'flat-panel') state = createFlatPanelModuleState(module.widthCm);
   else if (module.type === 'base') state = createBaseModuleState(module.widthCm);
+  else if (module.type === 'base-wall') state = createBaseWallModuleState(module.widthCm);
   else if (module.type === 'counter') state = createCounterModuleState(module.widthCm);
   else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm);
   else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);

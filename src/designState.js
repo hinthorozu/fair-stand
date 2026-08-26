@@ -122,6 +122,28 @@ export function createCounterModuleState(widthCm) {
   };
 }
 
+export function createBaseWallModuleState(widthCm) {
+  const width = Number(widthCm);
+  if (![100, 150, 200].includes(width)) return null;
+
+  return {
+    id: createId('module'),
+    type: 'base-wall',
+    widthCm: width,
+    depthCm: 50,
+    heightCm: 350,
+    strips: Array.from(
+      { length: STRIP_COUNT },
+      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
+    ),
+    faces: {
+      front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+    },
+  };
+}
+
 export function createBaseModuleState(widthCm) {
   const width = Number(widthCm);
   if (![100, 150, 200].includes(width)) return null;

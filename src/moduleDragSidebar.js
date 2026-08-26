@@ -21,6 +21,9 @@ const DRAGGABLE_MODULE_KEYS = [
   'TABLE_CHAIR_SET',
   'BAR_STOOL',
   'LED_FLOODLIGHT',
+  'BASE_WALL_200',
+  'BASE_WALL_150',
+  'BASE_WALL_100',
   'BASE_200',
   'BASE_150',
   'BASE_100',
@@ -69,6 +72,10 @@ function ensureStyles() {
     .module-drag-base { position:relative; height:24px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#ffffff; box-shadow:4px 4px 0 #d7dde4,0 2px 5px rgba(15,23,42,.08); }
     .module-drag-base::before { content:''; position:absolute; inset:3px; border:1px solid #cbd5e1; background:#f8fafc; }
     .module-drag-base::after { content:''; position:absolute; left:-5px; right:-5px; top:-7px; height:5px; border:1px solid ${ALUMINUM_PROFILE_COLOR}; background:#ffffff; }
+    .module-drag-base-wall { position:relative; display:flex; height:68px; flex-direction:column; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
+    .module-drag-base-wall span { flex:1; border-bottom:1px solid #c4c9ce; }
+    .module-drag-base-wall span:last-of-type { border-bottom:0; }
+    .module-drag-base-wall::after { content:''; position:absolute; left:-5px; right:-5px; bottom:-3px; height:13px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f8fafc; box-shadow:3px 3px 0 #d7dde4; }
     .module-drag-counter { position:relative; height:34px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f8fafc; box-shadow:5px 5px 0 #d7dde4,0 2px 5px rgba(15,23,42,.08); }
     .module-drag-counter::after { content:''; position:absolute; left:-3px; right:-3px; top:-6px; height:5px; border:1px solid ${ALUMINUM_PROFILE_COLOR}; background:#eef2f6; }
     .viewport-wrap.catalog-drag-active { outline:2px solid rgba(249,115,22,.2); outline-offset:-2px; }
@@ -126,6 +133,15 @@ export function createModuleCatalogPreview(module) {
   if (module.type === 'led-floodlight') {
     const body = document.createElement('div');
     body.className = 'module-drag-floodlight';
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'base-wall') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-base-wall';
+    body.style.width = Math.max(34, previewWidthPx(module.widthCm)) + 'px';
+    for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
     preview.appendChild(body);
     return preview;
   }
