@@ -1,0 +1,44 @@
+name: Fix Panel Bazali depth alignment
+on:
+  push:
+    branches: [ROG]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Move baza body in front of rear wall plane
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'src/scene3d.js';
+          let s = fs.readFileSync(path, 'utf8');
+          const oldText = "    while (wall.group.children.length) group.add(wall.group.children[0]);\n    while (base.group.children.length) group.add(base.group.children[0]);";
+          const newText = "    while (wall.group.children.length) group.add(wall.group.children[0]);\n    // Panel Bazalı'da duvar paneli baza derinliğinin ortasında değil arka kenarında kalır.\n    // Duvar düzlemi z=0; 50 cm baza gövdesi standın içine doğru z=0..0.50 uzanır.\n    while (base.group.children.length) {\n      const child = base.group.children[0];\n      child.position.z += 0.25;\n      group.add(child);\n    }";
+          if (!s.includes(oldText)) throw new Error('Panel Bazalı compose block not found');
+          s = s.replace(oldText, newText);
+          fs.writeFileSync(path, s);
+
+          const testPath = 'test/baseWallDepthAlignment.test.js';
+          fs.writeFileSync(testPath, `import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport fs from 'node:fs';\n\ntest('Panel Bazalı keeps wall on rear plane and moves 50 cm baza body 25 cm forward', () => {\n  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n  assert.match(source, /child\\.position\\.z \\+= 0\\.25/);\n  assert.match(source, /duvar paneli baza derinliğinin ortasında değil arka kenarında/);\n});\n`);
+          NODE
+      - run: npm test
+      - run: npm run build
+      - name: Commit result
+        run: |
+          rm -f .github/workflows/fix-base-wall-depth.yml
+          git config user.name "mustafa sinan koca"
+          git config user.email "mustafasinankoca@gmail.com"
+          git add -A
+          git commit -m "fix: align Panel Bazalı wall to rear edge [skip ci]"
+          git push origin ROG
