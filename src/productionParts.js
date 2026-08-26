@@ -16,6 +16,9 @@ export const PRODUCTION_PARTS = Object.freeze({
   panel_corner_142_5: Object.freeze({ partId: 'panel_corner_142_5', name: 'İç Köşe Paneli 142,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 142.5, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'inner-corner', nominalModuleWidthCm: 150 }),
   panel_corner_192: Object.freeze({ partId: 'panel_corner_192', name: 'İç Köşe Paneli 192 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 192, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'inner-corner', nominalModuleWidthCm: 200 }),
 
+  separator_panel_48_5: Object.freeze({ partId: 'separator_panel_48_5', name: 'Separatör Paneli 48,5 × 47 cm', type: 'separator-panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }), nominalModuleWidthCm: 50 }),
+  separator_panel_98: Object.freeze({ partId: 'separator_panel_98', name: 'Separatör Paneli 98 × 47 cm', type: 'separator-panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), nominalModuleWidthCm: 100 }),
+
   connector_start: Object.freeze({ partId: 'connector_start', name: 'Başlangıç Aparatı', type: 'connector', unit: 'adet', connectorType: 'start' }),
   connector_single: Object.freeze({ partId: 'connector_single', name: 'Tekli Aparat', type: 'connector', unit: 'adet', connectorType: 'single' }),
   connector_double: Object.freeze({ partId: 'connector_double', name: 'Çiftli Aparat', type: 'connector', unit: 'adet', connectorType: 'double' }),
