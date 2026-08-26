@@ -63,6 +63,57 @@ const MODULE_RECIPES = Object.freeze({
     ]),
     variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_92' }),
   }),
+  'shelf:100:2': Object.freeze({
+    recipeId: 'shelf-wall-100-2',
+    moduleType: 'shelf',
+    nominalWidthCm: 100,
+    shelfCount: 2,
+    connectionMode: 'straight',
+    items: Object.freeze([
+      Object.freeze({ partId: 'profile_91', quantity: 2 }),
+      Object.freeze({ partId: 'upright_346_5', quantity: 2 }),
+      Object.freeze({ partId: 'panel_98', quantity: 7 }),
+      Object.freeze({ partId: 'connector_start', quantity: 2 }),
+      Object.freeze({ partId: 'connector_single', quantity: 13 }),
+      Object.freeze({ partId: 'shelf_100', quantity: 2 }),
+      Object.freeze({ partId: 'shelf_leg', quantity: 4 }),
+    ]),
+    variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_92' }),
+  }),
+  'shelf:150:2': Object.freeze({
+    recipeId: 'shelf-wall-150-2',
+    moduleType: 'shelf',
+    nominalWidthCm: 150,
+    shelfCount: 2,
+    connectionMode: 'straight',
+    items: Object.freeze([
+      Object.freeze({ partId: 'profile_140_5', quantity: 2 }),
+      Object.freeze({ partId: 'upright_346_5', quantity: 2 }),
+      Object.freeze({ partId: 'panel_147_5', quantity: 7 }),
+      Object.freeze({ partId: 'connector_start', quantity: 2 }),
+      Object.freeze({ partId: 'connector_single', quantity: 13 }),
+      Object.freeze({ partId: 'shelf_150', quantity: 2 }),
+      Object.freeze({ partId: 'shelf_leg', quantity: 4 }),
+    ]),
+    variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_142_5' }),
+  }),
+  'shelf:200:2': Object.freeze({
+    recipeId: 'shelf-wall-200-2',
+    moduleType: 'shelf',
+    nominalWidthCm: 200,
+    shelfCount: 2,
+    connectionMode: 'straight',
+    items: Object.freeze([
+      Object.freeze({ partId: 'profile_190', quantity: 2 }),
+      Object.freeze({ partId: 'upright_346_5', quantity: 2 }),
+      Object.freeze({ partId: 'panel_197', quantity: 7 }),
+      Object.freeze({ partId: 'connector_start', quantity: 2 }),
+      Object.freeze({ partId: 'connector_single', quantity: 13 }),
+      Object.freeze({ partId: 'shelf_200', quantity: 2 }),
+      Object.freeze({ partId: 'shelf_leg', quantity: 6 }),
+    ]),
+    variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_192' }),
+  }),
 });
 
 export function getStraightWallRecipe(nominalWidthCm) {
@@ -73,8 +124,12 @@ export function listStraightWallRecipes() {
   return Object.values(STRAIGHT_WALL_RECIPES);
 }
 
-export function getModuleRecipe(moduleType, nominalWidthCm) {
+export function getModuleRecipe(moduleType, nominalWidthCm, options = {}) {
   if (moduleType === 'wall' || moduleType === 'flat-panel') return getStraightWallRecipe(nominalWidthCm);
+  if (moduleType === 'shelf') {
+    const shelfCount = Number(options.shelfCount);
+    return MODULE_RECIPES[`shelf:${nominalWidthCm}:${shelfCount}`] ?? null;
+  }
   return MODULE_RECIPES[`${moduleType}:${nominalWidthCm}`] ?? null;
 }
 
@@ -90,6 +145,6 @@ export function getExpandedStraightWallRecipe(nominalWidthCm) {
   return expandRecipe(getStraightWallRecipe(nominalWidthCm));
 }
 
-export function getExpandedModuleRecipe(moduleType, nominalWidthCm) {
-  return expandRecipe(getModuleRecipe(moduleType, nominalWidthCm));
+export function getExpandedModuleRecipe(moduleType, nominalWidthCm, options = {}) {
+  return expandRecipe(getModuleRecipe(moduleType, nominalWidthCm, options));
 }
