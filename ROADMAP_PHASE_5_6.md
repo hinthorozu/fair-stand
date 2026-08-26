@@ -1,184 +1,277 @@
 # Fair Stand — FAZ 5–6 Roadmap
 
-Bu belge, Fair Stand'in parametrik tasarım çıktısını Fair CRM maliyet altyapısına ve gerçek üretim BOM'una bağlayan sonraki iki fazı tanımlar.
+> **Tek kaynak:** Bu belge FAZ 5 ve FAZ 6'nın detaylı planıdır. FAZ 4 detayları `ROADMAP_PHASE_4.md` içindedir.
 
-## Mimari sınır ve çakışma kararı
+## Mimari sınır
 
-- **FAZ 4** geometri, parametrik modül, anchor/connection graph, custom module definition ve project instance bilgisinin sahibidir.
-- **FAZ 5** bu bilgiyi ticari/maliyet miktarlarına dönüştürür ve Fair CRM maliyet altyapısına bağlar.
-- **FAZ 6** aynı sahne/connection graph üzerinden gerçek üretim BOM'unu üretir.
-- Fair Stand içinde ikinci bir ürün/maliyet ana veri sistemi kurulmayacaktır. Ürün, malzeme, fiyat ve maliyet ana verisinin production sahibi **Fair CRM** olacaktır.
-- Fair Stand geometriyi ve miktarı bilir; Fair CRM fiyatı/maliyeti bilir. Entegrasyon bu sınırı koruyacaktır.
-- BOM yalnız `modül reçetesi × adet` olmayacaktır. Bağlantı grafiği okunarak ortak kullanılan dikme, profil, aparat vb. parçalar tekilleştirilecektir.
-- Faz 4 anchor sistemi bu nedenle yalnız snap özelliği değildir; Faz 6 assembly-aware BOM için üretim ilişkilerinin kaynak verisidir.
+Fazlar artık lineer ve çakışmasızdır:
+
+1. **FAZ 4 — Parametrik ve Yapısal Editör:** doğru scene state, parametric config ve connection graph üretir.
+2. **FAZ 5 — Assembly-Aware BOM / Malzeme Listesi:** FAZ 4 state'inden gerçek fiziksel parça ve miktar listesini üretir.
+3. **FAZ 6 — Maliyet / Fair CRM Entegrasyonu:** FAZ 5'in kesin miktarlarını Fair CRM katalog/fiyat verisiyle fiyatlandırır.
+
+Bu sıranın nedeni basittir: **doğru miktar bilinmeden doğru maliyet hesaplanamaz.**
+
+Fair Stand geometriyi, bağlantıyı ve miktarı bilir. Fair CRM ürün/malzeme ana verisi, fiyat, maliyet ve ticari kuralların production source-of-truth'udur.
 
 ---
 
-# FAZ 5 — OTOMATİK MİKTAR VE MALİYET ÇIKARMA
+# FAZ 5 — ASSEMBLY-AWARE BOM / GERÇEK MALZEME LİSTESİ
 
 ## Amaç
 
-Fair Stand projesinde kullanılan hazır ürünleri, parametrik elemanları ve yüzey uygulamalarını ölçülebilir ticari kalemlere dönüştürmek; Fair CRM'deki maliyet altyapısı üzerinden proje maliyetini otomatik hesaplayabilmek.
+Sahnedeki modülleri yalnız görsel objeler olarak değil gerçek üretim assembly'leri olarak okuyup; panel, dikme, yatay profil, raf, LED bileşeni ve bağlantı aparatlarının doğru fiziksel listesini üretmek.
 
-## 5.1 — Fair CRM maliyet ana verisi entegrasyonu
+FAZ 5'te **fiyat hesabı yapılmaz**. Çıktı doğru malzeme/miktar listesidir.
 
-- [ ] Fair CRM tarafındaki maliyet sistemi tamamlandıktan sonra entegrasyon contract'ı tanımlanacak.
-- [ ] Her maliyet kaleminin stabil bir external/catalog ID'si olacak; Fair Stand fiyatı kopyalamak yerine bu ID'yi referanslayacak.
-- [ ] Desteklenen birimler en az `adet`, `m`, `m²`, `kg`, `set` olacak.
-- [ ] Fair CRM; alış/maliyet fiyatı, gerekiyorsa satış fiyatı/markup, para birimi ve geçerlilik tarihinin sahibi olacak.
-- [ ] Fair Stand proje snapshot'ı hesaplamanın hangi catalog/version/fiyat tarihiyle yapıldığını saklayabilecek.
-- [ ] Fiyat bulunamayan kalemler sessizce `0` kabul edilmeyecek; `unpriced` olarak raporlanacak.
+## 5.1 — Üretim Parçası / Material-Part Catalog Contract
 
-## 5.2 — Hazır sahne objelerinin otomatik miktarı
+- [ ] Stabil `partId` / `materialId` modeli.
+- [ ] Birimler en az `adet`, `m`, `m²`, `kg`, `set`.
+- [ ] Fiziksel ölçüler: uzunluk, genişlik, yükseklik/kalınlık gerektiği kadar açık metadata.
+- [ ] İleride Fair CRM'e bağlanmak için opsiyonel `catalogRef` / external ID alanı.
+- [ ] Three.js mesh adı hiçbir zaman üretim parçası kimliği olmaz.
+- [ ] Aynı fiziksel parça farklı geometrik implementasyonlarda aynı `partId` ile temsil edilebilir.
 
-- [ ] Masa, sandalye, masa-sandalye takımı, bar taburesi, TV, depo içeriği, aydınlatma ve benzeri katalog objeleri maliyet kalemine bağlanabilecek.
-- [ ] Sahnedeki instance sayıları otomatik aggregate edilecek.
-- [ ] Aynı catalog ID'ye bağlı objeler tek maliyet satırında toplanabilecek.
-- [ ] Custom varyasyonun maliyet kimliği base objeden miras alabilir veya açıkça override edilebilir.
-- [ ] Silinen/gizlenen/projede aktif olmayan objelerin miktara dahil edilme kuralları net olacak.
+## 5.2 — BOM Recipe modeli
 
-## 5.3 — Yüzey ve m² hesabı
+- [ ] Üretilebilir base/parametrik modül bir `BOM Recipe` tanımlayabilir.
+- [ ] Reçete sabit adet ve parametrik formülleri destekler.
+- [ ] Recipe çıktısı en az `partId`, `quantity`, `unit`, `dimensions`, `catalogRef` ve connection/share semantics taşır.
+- [ ] Profil gibi lineer parçalar gerçek kesim uzunluğu üretir.
+- [ ] Panel gibi parçalar gerçek ölçü ve gerektiğinde m² üretir.
+- [ ] Custom modül BOM'u base recipe + parametric config üzerinden deterministik hesaplanır.
+- [ ] Aynı input aynı Raw BOM'u üretir.
 
-- [ ] Panel ve desteklenen yüzeyler gerçek fiziksel genişlik/yükseklik metadata'sı taşıyacak.
-- [ ] Görsel/baskı uygulanan yüzeyler ayrı `printAreaM2` miktarı üretecek.
-- [ ] Boya/renk uygulanan yüzeyler gerekiyorsa `paintAreaM2` miktarı üretecek.
-- [ ] Cam, standart panel, özel kaplama vb. yüzey türleri ayrı miktar kategorilerine ayrılabilecek.
-- [ ] Hesap yalnız bounding-box alanına güvenmeyecek; hangi panel yüzünün gerçekten uygulama aldığı bilinecek.
-- [ ] Tek yüz / çift yüz uygulama ayrımı desteklenebilecek.
-- [ ] Kesilmiş/parametrik panel ölçüsü değiştiğinde m² otomatik yeniden hesaplanacak.
-- [ ] m² değerlerinde UI yuvarlaması ile hesap motorunun hassas değeri ayrılacak; maliyet ham hassas değer üzerinden hesaplanacak.
+## 5.3 — Doğrulanmış Duvar Üretim Verileri
 
-## 5.4 — Fire, işçilik ve ek maliyet kuralları
+Aşağıdaki bilgiler gerçek üretim verisi olarak doğrulanmıştır.
 
-- [ ] Malzeme bazlı fire oranı Fair CRM'den veya maliyet kuralından alınabilecek.
-- [ ] Baskı/folyo/panel gibi kalemlerde minimum sipariş veya yukarı yuvarlama kuralı desteklenebilecek.
-- [ ] İşçilik `adet`, `m`, `m²`, saat veya reçete bazlı ayrı maliyet kalemi olarak eklenebilecek.
-- [ ] Nakliye, kurulum, elektrik vb. proje seviyesi ek maliyetler BOM malzemesinden ayrı tutulacak.
-- [ ] Otomatik hesap ile manuel ek maliyet aynı satır türü gibi karıştırılmayacak; kaynağı raporda görülecek.
+### Fiziksel standartlar
 
-## 5.5 — Costing output
+- Alüminyum dikme kalınlığı: **8 cm**.
+- Default dikme uzunluğu: **346.5 cm**.
+- Panel yüksekliği: **47 cm**.
+- Panel derinliği/kalınlığı: **0.8 cm**.
 
-- [ ] Proje için `quantity breakdown` üretilecek.
-- [ ] Her satırda kaynak (`scene object`, `surface`, `BOM`, `manual`), miktar, birim ve Fair CRM catalog ID bulunacak.
-- [ ] Fair CRM fiyatlarıyla toplam maliyet hesaplanacak.
-- [ ] Fiyatı eksik kalemler ve validation sorunları ayrıca gösterilecek.
-- [ ] Hesap tekrar çalıştırıldığında aynı proje state + aynı fiyat snapshot'ı deterministik sonuç vermeli.
+### Düz panel ailesi
+
+| Nominal modül | Panel |
+| --- | --- |
+| 50 cm | 48.5 × 47 × 0.8 cm |
+| 100 cm | 98 × 47 × 0.8 cm |
+| 150 cm | 147.5 × 47 × 0.8 cm |
+| 200 cm | 197 × 47 × 0.8 cm |
+
+### İç-köşe panel ailesi
+
+| Nominal modül | Panel |
+| --- | --- |
+| 50 cm | 42.5 × 47 × 0.8 cm |
+| 100 cm | 92 × 47 × 0.8 cm |
+| 150 cm | 142.5 × 47 × 0.8 cm |
+| 200 cm | 192 × 47 × 0.8 cm |
+
+### Üst/alt profil uzunlukları
+
+| Nominal modül | Profil |
+| --- | --- |
+| 50 cm | 41.5 cm |
+| 100 cm | 91 cm |
+| 150 cm | 140.5 cm |
+| 200 cm | 190 cm |
+
+### Doğrulanmış düz duvar reçetesi
+
+50 cm düz duvar:
+
+- 2 × 41.5 cm üst/alt profil,
+- 2 × 346.5 cm dikme,
+- 7 × 48.5 × 47 × 0.8 cm panel,
+- 2 × başlangıç aparatı,
+- 13 × tekli/düz bağlantı aparatı.
+
+100 / 150 / 200 cm düz duvarda adetler aynıdır; yalnız profil ve panel genişliği ilgili tabloya göre değişir.
+
+### Doğrulanmış aparat semantiği
+
+- Standart panel dizisi bağlantısı → **tekli/düz bağlantı aparatı**.
+- Standın içine doğru 90° yapısal birleşim → **köşe bağlantı aparatı**.
+- Aynı doğrultuda iki ayrı modül birleşimi → **çiftli bağlantı aparatı**.
+- Panel dizisi başlangıcı → **başlangıç aparatı**, yalnız başlangıçta kullanılır.
+
+**Kural:** Köşe ve modül birleşimlerinin nihai adet reçeteleri gerçek üretim Excel/verisiyle doğrulanmadan tahmin edilip kodlanmaz.
+
+## 5.4 — Raw BOM
+
+- [ ] Her scene instance önce bağımsız Raw BOM üretir.
+- [ ] Raw BOM hangi instance/recipe'den geldiğini izlenebilir tutar.
+- [ ] Parametrik ölçü değiştiğinde Raw BOM otomatik değişir.
+- [ ] Raflı duvar LED state'i LED şerit/profil/difüzör/kablo/driver gibi gerçek parçalara recipe üzerinden dönüşebilir.
+
+## 5.5 — Connection Graph'tan Parça Seçimi
+
+FAZ 4'ün `INNER_CORNER`, `INLINE_JOIN` ve anchor graph bilgisi burada gerçek malzeme kararına dönüşür.
+
+- [ ] Sistem nominal duvar genişliğine tek başına bakarak panel seçmez.
+- [ ] Connection semantics düz panel ile iç-köşe panel ailesi arasında doğru seçimi yaptırır.
+- [ ] Örneğin 200 cm duvarda 197 × 47 veya 192 × 47 seçimi gerçek connection graph üzerinden yapılır.
+- [ ] İç köşe için köşe bağlantı aparatı recipe'si uygulanır.
+- [ ] Inline modül birleşiminde çiftli bağlantı aparatı recipe'si uygulanır.
+- [ ] Standart panel dizisi içindeki bağlantılar tekli/düz aparat olarak hesaplanır.
+- [ ] Başlangıç aparatı yalnız panel run başlangıcında hesaplanır.
+- [ ] Görsel mesh görünümünden veya koordinat yakınlığı tahmininden BOM kararı verilmez.
+
+## 5.6 — Shared-Part / Assembly Normalization
+
+Pipeline:
+
+`Scene Instances -> Raw BOM -> Connection Analysis -> Shared-Part Deduction/Merge -> Dimension Normalization -> Final BOM`
+
+- [ ] Yan yana/köşe bağlantılarında gerçekten ortak kullanılan dikme/profil/aparat connection semantics üzerinden tespit edilir.
+- [ ] Yalnız koordinatların yakın olması parça düşmek için yeterli değildir.
+- [ ] `shared-upright`, `shared-connector`, `corner-joint`, `inline-joint`, `independent` gibi üretim semantiği gerektiği kadar tanımlanır.
+- [ ] Ortak fiziksel parça yalnız bir kez sayılır.
+- [ ] Paylaşım kuralı doğrulanmamışsa güvenli varsayımla ayrı sayılır; motor tahmin ederek eksiltmez.
+- [ ] Aynı `partId` fakat farklı ölçüdeki parçalar yanlışlıkla merge edilmez.
+- [ ] Aynı `partId + aynı üretim ölçüsü` uygun olduğunda aggregate edilir.
+- [ ] Final miktar negatif olamaz.
+- [ ] Raw → Final farkı açıklanabilir olur: ör. `8 raw dikme - 3 shared = 5 final dikme`.
+
+## 5.7 — Yüzey / Panel Miktarları
+
+- [ ] Fiziksel panel/yüzey gerçek ölçüsünden `areaM2` üretilebilir.
+- [ ] Baskı/görsel uygulanan yüz `printAreaM2` üretebilir.
+- [ ] Boya/kaplama için ayrı miktar kategorileri desteklenebilir.
+- [ ] Tek yüz / çift yüz ayrımı korunur.
+- [ ] Cam, standart panel, özel kaplama gibi yüzey tipleri ayrıştırılır.
+- [ ] Hesap yalnız bounding box'a dayanmaz; gerçek yüz kimliği kullanılır.
+- [ ] UI yuvarlaması ile motorun hassas miktarı ayrıdır.
+
+## 5.8 — Gerçek Proje / Excel Doğrulaması
+
+Elle çıkarılmış gerçek malzeme Excel'i üretim source-of-truth olarak kullanılacaktır.
+
+- [ ] Seçilen gerçek proje state'i otomatik BOM ile hesaplanır.
+- [ ] Aynı proje için elle hazırlanmış Excel ile satır satır karşılaştırılır.
+- [ ] Fark varsa Excel'i sisteme uydurmak yerine connection/recipe/normalization algoritması incelenir.
+- [ ] Havrano gibi gerçek projelerde manuel köşe işaretlemesi olmadan panel ve aparat seçimi yapılabilmeli.
+- [ ] 50/100/150/200 düz duvar referans testleri.
+- [ ] İç köşe testleri.
+- [ ] Inline modül birleşim testleri.
+
+## 5.9 — Referans Kabul: 4 × 200 cm Duvar
+
+- [ ] `4 × 200 cm = 800 cm` duvar zinciri dört ayrı scene instance olarak bilinmeli.
+- [ ] Üç ara birleşim connection graph üzerinden analiz edilmeli.
+- [ ] Her instance bağımsız Raw BOM üretmeli.
+- [ ] Shared parça kuralları gerçek üretim reçetesine göre normalize edilmeli.
+- [ ] Final BOM gerçek toplam panel, dikme, yatay profil ve aparat miktarını vermeli.
+- [ ] Bir bağlantı kaldırıldığında Final BOM deterministik değişmeli.
+
+## FAZ 5 kapanış kriteri
+
+- [ ] Sahne → Raw BOM → connection normalization → Final BOM zinciri deterministik.
+- [ ] Gerçek Excel ile seçilmiş referans projeler doğrulanmış.
+- [ ] BOM satırları stabil part/catalog referansları taşıyor.
+- [ ] Raw/Final traceability mevcut.
+- [ ] `npm test` ve `npm run build` temiz.
+- [ ] Fiyat/maliyet hesabı henüz yapılmıyor.
 
 ---
 
-# FAZ 6 — ASSEMBLY-AWARE BOM / ÜRETİM LİSTESİ
+# FAZ 6 — MALİYET / FAIR CRM ENTEGRASYONU
 
 ## Amaç
 
-Sahnedeki modülleri yalnız görsel objeler olarak değil, gerçek üretim assembly'leri olarak okuyup; dikme, yatay kayıt, panel, profil, bağlantı aparatı ve diğer fiziksel parçaların doğru toplam listesini üretmek.
+FAZ 5'in doğrulanmış fiziksel miktarlarını Fair CRM'deki katalog, maliyet ve ticari kurallarla eşleştirerek proje maliyetini güvenilir şekilde hesaplamak.
 
-## 6.1 — BOM Recipe modeli
+Fair CRM fiyat/maliyet source-of-truth'udur. Fair Stand üretim fiyatı kopyalayıp ikinci bir ana veri sistemi oluşturmaz.
 
-- [ ] Üretilebilir base/parametrik modüller bir `BOM Recipe` / eşdeğer üretim reçetesi tanımlayabilecek.
-- [ ] Reçete sabit adetlerin yanında parametrik formüller destekleyecek.
-- [ ] Reçete çıktısı en az `partId`, `quantity`, `unit`, `dimensions`, `material/catalogRef` ve paylaşılabilirlik/connection semantics bilgisini taşıyacak.
-- [ ] Profil gibi lineer parçalar adet yanında gerçek kesim uzunluğu üretebilecek.
-- [ ] Panel gibi parçalar ölçü ve gerekirse m² üretebilecek.
-- [ ] Custom modül BOM'u base recipe + parametrik config üzerinden deterministik üretilecek.
-- [ ] Görsel Three.js mesh isimleri BOM anahtarı olarak kullanılmayacak; üretim parçası kimliği geometri implementation'ından bağımsız olacak.
+## 6.1 — Fair CRM / Kyrox Core Platform Entegrasyonu
 
-## 6.2 — Raw BOM
+- [ ] Fair Stand içinde ikinci login/kullanıcı sistemi yapılmaz.
+- [ ] Authentication/session kaynağı Kyrox Core / mevcut platform olur.
+- [ ] `CustomModuleRepository` backend adapter'ı local adapter contract'ıyla aynı davranışı sağlar.
+- [ ] Custom modül ownership backend tarafında `ownerUserId` / eşdeğer kimlikle doğrulanır.
+- [ ] Private / organization/shared visibility ileride aynı model üzerinden genişletilebilir.
+- [ ] Authorization yalnız frontend filtresine bırakılmaz.
+- [ ] Project/revision kimliği Fair CRM aktarımında korunur.
 
-- [ ] Her sahne instance'ı önce kendi bağımsız `Raw BOM` çıktısını üretecek.
-- [ ] Örnek: dört adet 200 cm duvarın her biri kendi dikme/panel/kayıt/aparat ihtiyacını üretir.
-- [ ] Raw BOM debug edilebilir olacak; final BOM'daki bir satırın hangi instance/reçetelerden geldiği izlenebilecek.
+## 6.2 — Catalog / Malzeme Ana Veri Entegrasyonu
 
-## 6.3 — Connection graph ve ortak parça analizi
+- [ ] Her maliyetlenebilir `partId` stabil Fair CRM catalog/external ID'ye eşlenir.
+- [ ] Desteklenen birimler `adet`, `m`, `m²`, `kg`, `set` vb. ortak contract ile eşleşir.
+- [ ] Fair CRM alış/maliyet fiyatı, satış/markup gerekirse, para birimi ve geçerlilik tarihinin sahibidir.
+- [ ] Eksik catalog eşleşmesi sessizce geçilmez; açık `unmapped` durumudur.
+- [ ] Eksik fiyat sessizce `0` kabul edilmez; açık `unpriced` durumudur.
+- [ ] Hesap hangi catalog/version/fiyat snapshot'ıyla yapıldığını saklar.
 
-- [ ] Faz 4 anchor/connection graph BOM motorunun girdisi olacak.
-- [ ] Yan yana bağlı iki modülün fiziksel olarak aynı dikme/profil/aparatı paylaşıp paylaşmadığı connection semantics üzerinden belirlenecek.
-- [ ] Yalnız koordinatların yakın olması ortak parça düşmek için yeterli sayılmayacak.
-- [ ] Bağlantı türleri `shared-upright`, `shared-connector`, `butt-joint`, `corner-joint`, `independent` vb. üretim anlamları taşıyabilecek.
-- [ ] Köşe birleşimi, T birleşimi ve düz devam birleşimi farklı normalization kuralı tanımlayabilecek.
-- [ ] Bir parça birden fazla assembly tarafından paylaşılırsa tek fiziksel parça olarak sayılabilecek.
-- [ ] Paylaşım kuralı olmayan parçalar güvenli varsayımla ayrı sayılacak; motor tahmin ederek eksiltme yapmayacak.
+## 6.3 — Hazır Sahne Objeleri
 
-## 6.4 — Assembly normalization
+- [ ] Masa, sandalye, takım, bar taburesi, TV, depo içeriği, aydınlatma vb. hazır objeler catalog ID'ye bağlanabilir.
+- [ ] Scene instance sayıları aggregate edilir.
+- [ ] Aynı catalog ID tek ticari satırda toplanabilir.
+- [ ] Custom varyasyon base catalog kimliğini miras alabilir veya açık override edebilir.
+- [ ] Gizli/silinmiş/aktif olmayan instance miktar kuralları açık tanımlanır.
 
-Final üretim listesi şu pipeline ile üretilecektir:
+## 6.4 — Fire, İşçilik ve Ek Maliyet
 
-`Scene Instances -> Raw BOM -> Connection Analysis -> Shared-Part Deduction/Merge -> Cut/Dimension Normalization -> Final BOM`
+- [ ] Malzeme bazlı fire oranı maliyet kuralından/Fair CRM'den gelebilir.
+- [ ] Minimum sipariş ve yukarı yuvarlama kuralları.
+- [ ] İşçilik `adet`, `m`, `m²`, saat veya recipe bazlı ayrı maliyet satırı olabilir.
+- [ ] Nakliye, kurulum, elektrik vb. proje seviyesinde ayrı tutulur.
+- [ ] Otomatik maliyet ile manuel ek maliyet kaynakları karıştırılmaz.
 
-- [ ] Ortak dikme/aparatlar deduplicate edilecek.
-- [ ] Birleşebilen lineer profil parçaları için üretim kuralı izin veriyorsa merge/cut optimizasyonuna hazırlık metadata'sı üretilecek.
-- [ ] Aynı part ID fakat farklı ölçüdeki parçalar yanlışlıkla tek satıra toplanmayacak.
-- [ ] Aynı part ID + aynı üretim ölçüsü uygun olduğunda aggregate edilecek.
-- [ ] Final miktar hiçbir zaman negatif olamayacak; normalization invariant testleri olacak.
-- [ ] Raw ve Final BOM farkı kullanıcı/debug raporunda açıklanabilecek: örn. `8 raw dikme - 3 shared = 5 final dikme`.
+## 6.5 — Costing Engine
 
-## 6.5 — 8 metre duvar kabul testi
+- [ ] Final BOM ve hazır obje/yüzey miktarlarından `quantity breakdown` oluşturulur.
+- [ ] Her satır kaynak, miktar, birim, catalog ID ve fiyat snapshot'ı taşır.
+- [ ] Fair CRM fiyatlarıyla toplam maliyet hesaplanır.
+- [ ] Markup/satış fiyatı gerekiyorsa ayrı katmanda uygulanır.
+- [ ] Aynı project state + aynı BOM + aynı fiyat snapshot'ı aynı sonucu üretir.
+- [ ] Eksik fiyat/catalog/validation sorunları ayrı raporlanır.
 
-- [ ] Referans senaryo: `4 × 200 cm duvar = 800 cm toplam duvar`.
-- [ ] Dört modülün Raw BOM'u ayrı ayrı hesaplanacak.
-- [ ] Üç ara birleşim connection graph üzerinden analiz edilecek.
-- [ ] Gerçek sistemde ortak kullanılan dikme/aparat varsa yalnız bir kez sayılacak.
-- [ ] Final BOM; gerçek montaj düzenindeki toplam dikme, panel, yatay kayıt/profil ve aparat adetlerini vermeli.
-- [ ] Modüllerden biri ayrılır veya bağlantı tipi değiştirilirse Final BOM otomatik değişmeli.
+## 6.6 — Revision / Audit
 
-## 6.6 — Yüzey/BOM ilişkisi
+- [ ] Tasarım revizyonu ile BOM/maliyet revizyonu ilişkilidir.
+- [ ] Yeni tasarım eski maliyeti sessizce overwrite etmez.
+- [ ] Hangi revizyonun hangi fiyat snapshot'ıyla hesaplandığı izlenebilir.
+- [ ] Fair CRM'e aktarım revision ID taşır.
 
-- [ ] Final BOM'daki panel parçaları sahnedeki yüzey uygulamalarıyla ilişkilendirilebilecek.
-- [ ] Hangi fiziksel panelin baskı/renk/cam/kaplama gerektirdiği üretim listesinde gösterilebilecek.
-- [ ] Baskı alanı Faz 5 miktar motoruna m² olarak aktarılacak.
-- [ ] Aynı panelin iki yüzüne farklı uygulama yapılmışsa üretim/maliyet çıktısı bunu kaybetmeyecek.
+## 6.7 — Test ve Kapanış
 
-## 6.7 — Fair CRM'e BOM aktarımı
+- [ ] Catalog eşleme testleri.
+- [ ] Eksik catalog / eksik fiyat testleri.
+- [ ] Birim dönüşümü ve m² hassasiyet testleri.
+- [ ] Fire/minimum sipariş testleri.
+- [ ] İşçilik ve proje ek maliyet testleri.
+- [ ] Aynı snapshot için deterministik costing testi.
+- [ ] Ownership/authorization contract testleri.
+- [ ] Revision/audit testleri.
 
-- [ ] Final BOM satırları Fair CRM malzeme/catalog ID'leriyle eşleştirilecek.
-- [ ] Fair CRM BOM miktarlarını fiyatlandırabilecek; Fair Stand maliyet fiyatının source-of-truth'u olmayacak.
-- [ ] Fair CRM tarafına aktarımda proje/revision ID bulunacak; hangi tasarım revizyonundan BOM üretildiği izlenebilecek.
-- [ ] Tasarım değişince eski BOM sessizce overwrite edilmek yerine revision/audit yaklaşımıyla yönetilebilecek.
-- [ ] Eksik catalog eşleşmeleri aktarım öncesi raporlanacak.
+## FAZ 6 kapanış kriteri
 
-## 6.8 — Test ve doğrulama
-
-- [ ] Tek modül recipe testleri.
-- [ ] Parametrik ölçü değişiminde BOM testleri.
-- [ ] Düz duvar zinciri shared-part testleri.
-- [ ] Köşe ve T bağlantı normalization testleri.
-- [ ] Profil uzunluğu/kesim ölçüsü testleri.
-- [ ] Panel m² ve tek/çift yüz uygulama testleri.
-- [ ] Connection kaldırma/ekleme sonrası BOM yeniden hesaplama testleri.
-- [ ] Raw BOM -> Final BOM traceability testleri.
-- [ ] Fair CRM catalog eşlemesi ve eksik fiyat/malzeme testleri.
+- [ ] FAZ 5 Final BOM doğrulanmış miktar kaynağı olarak kullanılıyor.
+- [ ] Fair CRM catalog/fiyat verisi source-of-truth.
+- [ ] Eksik eşleşme ve fiyatlar görünür.
+- [ ] Proje maliyeti deterministik ve revision-aware.
+- [ ] Fair Stand içinde paralel fiyat/malzeme ana veri sistemi yok.
+- [ ] `npm test` ve `npm run build` temiz.
 
 ---
 
-# FAZ 4 için ileriye dönük zorunlu metadata
+# Toplam geliştirme sırası
 
-Faz 5–6'da Faz 4'ü yeniden yazmamak için aşağıdaki bilgiler Faz 4 implementasyonunda korunmalıdır:
-
-- Her base/custom modül ve sahne instance'ı stabil kimlik taşımalı.
-- Anchor'lar yalnız koordinat değil **connection semantics** taşımalı.
-- Fiziksel panel/yüzeyler gerçek ölçü ve yüz kimliği taşımalı.
-- Parametrik config, BOM recipe'nin tekrar hesaplanabileceği şekilde saklanmalı.
-- Modül definition ile scene instance ayrımı korunmalı.
-- Sahne bağlantıları save/load sonrasında aynı graph olarak geri kurulabilmeli.
-- Üretim parçası/catalog referansları Three.js mesh adlarından bağımsız olmalı.
-
-Bu maddeler Faz 4'te BOM hesaplamasını implement etmek anlamına gelmez; yalnız ileride BOM/maliyet entegrasyonunu engelleyecek veri kaybını önler.
-
----
-
-# Önerilen toplam geliştirme sırası
-
-1. **FAZ 4:** Parametrik çekirdek + Rule Engine.
-2. **FAZ 4:** Wizard + Raflı Duvar pilotu.
-3. **FAZ 4:** Anchor/connection graph.
-4. **FAZ 4:** İki noktalı kayıt/profil aracı.
-5. **FAZ 4:** Custom library + project snapshot/versioning.
-6. **FAZ 4:** Fair CRM/Kyrox Core kullanıcı sahipliği entegrasyonu.
-7. **Fair CRM:** maliyet/malzeme ana veri altyapısının tamamlanması.
-8. **FAZ 6 çekirdeği:** BOM Recipe + Raw BOM + assembly normalization. Doğru miktar bilinmeden doğru maliyet hesaplanmayacağı için BOM çekirdeği costing'den önce tamamlanır.
-9. **FAZ 5:** hazır obje miktarı + yüzey m² + BOM miktarlarını Fair CRM fiyatlarıyla maliyetlendirme.
-10. **FAZ 6:** gelişmiş üretim listesi, traceability, revision ve Fair CRM BOM aktarımı.
-11. **Kapanış:** uçtan uca `tasarım -> miktar -> Final BOM -> maliyet -> teklif/üretim` doğrulaması.
-
-## Neden FAZ 6'nın çekirdeği FAZ 5 maliyetinden önce?
-
-İşlevsel ürün sırası kullanıcı açısından maliyet sonra BOM gibi görünebilir; fakat teknik bağımlılık tersidir. Maliyet motoru doğru miktara ihtiyaç duyar. Masa/TV gibi hazır objelerde miktar doğrudan sayılabilir; ancak duvar, profil, panel ve aparatta doğru miktar assembly-aware BOM'dan gelir. Bu nedenle BOM'un **recipe + normalization çekirdeği** önce kurulur, ardından Fair CRM maliyet motoru bu miktarları fiyatlandırır.
+1. **FAZ 4:** Parametrik Core / Rule Engine.
+2. **FAZ 4:** Wizard + Raflı Duvar.
+3. **FAZ 4:** Anchor / Connection Graph.
+4. **FAZ 4:** İki noktalı profil aracı.
+5. **FAZ 4:** Custom Library + Save/Load + Versioning.
+6. **FAZ 4:** Regresyon ve BOM-readiness kapanışı.
+7. **FAZ 5:** Part catalog contract + BOM Recipes.
+8. **FAZ 5:** Raw BOM + connection-based parça seçimi.
+9. **FAZ 5:** Shared-part normalization + Final BOM.
+10. **FAZ 5:** Gerçek Excel/proje doğrulaması.
+11. **FAZ 6:** Fair CRM/Kyrox Core platform + catalog entegrasyonu.
+12. **FAZ 6:** Costing, fire, işçilik, revision/audit.
