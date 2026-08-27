@@ -1,0 +1,73 @@
+name: Optimize production bundle
+
+on:
+  push:
+    branches: [ROG]
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply bundle optimization
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+
+          const mainPath = 'src/main.js';
+          let main = fs.readFileSync(mainPath, 'utf8');
+
+          const staticImport = "import JSZip from 'jszip';\n";
+          if (!main.includes(staticImport)) throw new Error('Static JSZip import not found');
+          main = main.replace(staticImport, '');
+
+          const anchor = "import { planContinuousWallInsertion } from './wallReflow.js';\n";
+          if (!main.includes(anchor)) throw new Error('main.js import anchor not found');
+          const lazyLoader = `${anchor}\nlet jsZipModulePromise = null;\n\nasync function loadJSZip() {\n  if (!jsZipModulePromise) {\n    jsZipModulePromise = import('jszip').then((module) => module.default);\n  }\n  return jsZipModulePromise;\n}\n`;
+          main = main.replace(anchor, lazyLoader);
+
+          const exportUse = '    const zip = new JSZip();';
+          if (!main.includes(exportUse)) throw new Error('JSZip export callsite not found');
+          main = main.replace(exportUse, "    const JSZip = await loadJSZip();\n    const zip = new JSZip();");
+
+          const importUse = '    const zip = await JSZip.loadAsync(file);';
+          if (!main.includes(importUse)) throw new Error('JSZip import callsite not found');
+          main = main.replace(importUse, "    const JSZip = await loadJSZip();\n    const zip = await JSZip.loadAsync(file);");
+
+          fs.writeFileSync(mainPath, main);
+
+          fs.writeFileSync('vite.config.js', `import { defineConfig } from 'vite';\n\nexport default defineConfig({\n  build: {\n    // Three.js is intentionally a large core dependency of the 3D editor. Keep it in a\n    // stable vendor chunk so future application features do not continuously invalidate\n    // the renderer payload in browser caches.\n    chunkSizeWarningLimit: 650,\n    rolldownOptions: {\n      output: {\n        codeSplitting: {\n          groups: [\n            {\n              name: 'three-vendor',\n              test: /node_modules[\\\\/]three[\\\\/]/,\n              priority: 20,\n            },\n          ],\n        },\n      },\n    },\n  },\n});\n`);
+
+          fs.writeFileSync('test/bundleLoadingContract.test.js', `import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport fs from 'node:fs';\n\ntest('JSZip stays out of the initial application bundle', () => {\n  const source = fs.readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');\n  assert.doesNotMatch(source, /import\\s+JSZip\\s+from\\s+['\"]jszip['\"]/);\n  assert.match(source, /import\\(['\"]jszip['\"]\\)/);\n  assert.match(source, /await loadJSZip\\(\\)/);\n});\n\ntest('Three.js has a stable Vite vendor chunk', () => {\n  const config = fs.readFileSync(new URL('../vite.config.js', import.meta.url), 'utf8');\n  assert.match(config, /name:\\s*['\"]three-vendor['\"]/);\n  assert.match(config, /codeSplitting/);\n});\n`);
+          NODE
+
+      - name: Test
+        run: npm test
+
+      - name: Build and report chunks
+        run: npm run build
+
+      - name: Commit optimized source and retire workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/optimize-production-bundle.yml
+          git add src/main.js vite.config.js test/bundleLoadingContract.test.js
+          git commit -m "perf: split 3D vendor and lazy-load project ZIP [skip ci]"
+          git push origin ROG
