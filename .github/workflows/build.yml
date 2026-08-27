@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ROG]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,8 +24,24 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Fix L counter 50 module snap
+        run: node .github/scripts/fix-l-counter-50-snap.js
+
       - name: Test
         run: npm test
 
       - name: Build
         run: npm run build
+
+      - name: Commit source changes
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/modulePlacement.js src/scene3d.js src/main.js test/lCounterPlacement.test.js
+          if git diff --cached --quiet; then
+            echo "No source changes to commit"
+            exit 0
+          fi
+          git commit -m "fix: treat L counters as two 50cm arms [skip ci]"
+          git push origin HEAD:ROG
