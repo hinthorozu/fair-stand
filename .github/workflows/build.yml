@@ -6,18 +6,12 @@ on:
   pull_request:
     branches: [ROG]
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ROG
-          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -27,33 +21,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Align L counter top overhangs
-        run: |
-          python3 <<'PY'
-          from pathlib import Path
-          path = Path('src/scene3d.js')
-          text = path.read_text()
-          old_a = "topA.position.set(0,frameHeightM+topThicknessM/2,-0.20);"
-          old_b = "topB.position.set(0.25,frameHeightM+topThicknessM/2,0.25);"
-          if old_a not in text:
-              raise SystemExit('Expected L counter main top position not found')
-          if old_b not in text:
-              raise SystemExit('Expected L counter return top position not found')
-          text = text.replace(old_a, "topA.position.set(0,frameHeightM+topThicknessM/2,-0.25);", 1)
-          text = text.replace(old_b, "topB.position.set(0.25,frameHeightM+topThicknessM/2,0.29);", 1)
-          path.write_text(text)
-          PY
-
       - name: Test
         run: npm test
 
       - name: Build
         run: npm run build
-
-      - name: Commit scene change
-        run: |
-          git config user.name "mustafa sinan koca"
-          git config user.email "mustafasinankoca@gmail.com"
-          git add src/scene3d.js
-          git commit -m "fix: align L counter top overhangs [skip ci]"
-          git push origin ROG
