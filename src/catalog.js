@@ -104,33 +104,43 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'wall_150',
   'wall_100',
   'wall_50',
+
   'wall_separator_100',
   'wall_separator_50',
-  'DOOR_100',
+
   'wall_showcase_100_3',
   'wall_showcase_100_2',
+
   'wall_shelf_3_200',
-  'wall_shelf_2_200',
   'wall_shelf_3_150',
-  'wall_shelf_2_150',
   'wall_shelf_3_100',
+
+  'wall_shelf_2_200',
+  'wall_shelf_2_150',
   'wall_shelf_2_100',
+
+  'wall_base_200',
+  'wall_base_150',
+  'wall_base_100',
+
+  'DOOR_100',
+
+  'desk_banko_200',
+  'desk_banko_150',
+  'desk_banko_100',
+
+  'desk_banko_200_L',
+  'desk_banko_150_L',
+  'desk_banko_100_L',
+
+  'BASE_200',
+  'BASE_150',
+  'BASE_100',
+
   'furniture_sofa_set_classic',
   'furniture_table_chair_set_minyon',
   'furniture_bar_stool_classic',
   'LED_FLOODLIGHT',
-  'wall_base_200',
-  'wall_base_150',
-  'wall_base_100',
-  'BASE_200',
-  'BASE_150',
-  'BASE_100',
-  'desk_banko_200',
-  'desk_banko_200_L',
-  'desk_banko_150',
-  'desk_banko_150_L',
-  'desk_banko_100',
-  'desk_banko_100_L',
 ]);
 
 export function flatPanelKey(widthCm) {
