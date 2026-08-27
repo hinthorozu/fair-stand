@@ -3536,7 +3536,7 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     const topA=new THREE.Mesh(new THREE.BoxGeometry(1.10,topThicknessM,0.60),topMaterial.clone()); topA.position.set(0,frameHeightM+topThicknessM/2,-0.25); topA.castShadow=true; topA.receiveShadow=true; group.add(topA);
     const topB=new THREE.Mesh(new THREE.BoxGeometry(0.52,topThicknessM,0.60),topMaterial.clone()); topB.rotation.y=Math.PI/2; topB.position.set(0.25,frameHeightM+topThicknessM/2,0.29); topB.castShadow=true; topB.receiveShadow=true; group.add(topB);
   } else {
-    // Banko 150 L, normal Banko 150 renderer mantığını kullanır: 2 cm tabla taşması.
+    // 150/200 L bankolar normal düz banko renderer mantığını kullanır: 2 cm tabla taşması.
     const topOverhangM = 0.02;
     const topA = new THREE.Mesh(
       new THREE.BoxGeometry(widthM + topOverhangM * 2, topThicknessM, armM + topOverhangM * 2),

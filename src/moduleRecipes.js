@@ -61,6 +61,10 @@ const MODULE_RECIPES = Object.freeze({
     Object.freeze({ partId: 'profile_140_5', quantity: 5 }), Object.freeze({ partId: 'profile_91', quantity: 1 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_147_5', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ partId: 'connector_start', quantity: 8 }), Object.freeze({ partId: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_160_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_102_60', quantity: 1 }),
   ]) }),
 
+  'counter-l:200': Object.freeze({ recipeId: 'counter-l-200', moduleType: 'counter', shape: 'L', nominalWidthCm: 200, items: Object.freeze([
+    Object.freeze({ partId: 'profile_190', quantity: 5 }), Object.freeze({ partId: 'profile_140_5', quantity: 1 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_197', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ partId: 'connector_start', quantity: 8 }), Object.freeze({ partId: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_210_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_150_60', quantity: 1 }),
+  ]) }),
+
   'counter:100': Object.freeze({ recipeId: 'counter-100', moduleType: 'counter', nominalWidthCm: 100, items: Object.freeze([
     Object.freeze({ partId: 'profile_91', quantity: 3 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 4 }), Object.freeze({ partId: 'panel_98', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ partId: 'connector_start', quantity: 6 }), Object.freeze({ partId: 'connector_single', quantity: 12 }), Object.freeze({ partId: 'counter_top_110_60', quantity: 1 }),
   ]) }),
