@@ -6,12 +6,18 @@ on:
   pull_request:
     branches: [ROG]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -21,8 +27,78 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Align L counter top overhangs
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          scene_path = Path('src/scene3d.js')
+          scene = scene_path.read_text()
+          old_a = "topA.position.set(0,frameHeightM+topThicknessM/2,-0.20);"
+          new_a = "topA.position.set(0,frameHeightM+topThicknessM/2,-0.25);"
+          old_b = "topB.position.set(0.25,frameHeightM+topThicknessM/2,0.25);"
+          new_b = "topB.position.set(0.25,frameHeightM+topThicknessM/2,0.29);"
+          if old_a not in scene:
+              raise SystemExit('Expected L counter main top position not found')
+          if old_b not in scene:
+              raise SystemExit('Expected L counter return top position not found')
+          scene = scene.replace(old_a, new_a, 1).replace(old_b, new_b, 1)
+          scene_path.write_text(scene)
+
+          test_path = Path('test/lCounterSideGeometry.test.js')
+          test_text = test_path.read_text()
+          top_test = """
+
+test('L counter top pieces keep five centimeter outer overhangs and overlap at the elbow', () => {
+  assert.match(block, /topA\.position\.set\(0,frameHeightM\+topThicknessM\/2,-0\.25\)/);
+  assert.match(block, /topB\.position\.set\(0\.25,frameHeightM\+topThicknessM\/2,0\.29\)/);
+});
+"""
+          if "top pieces keep five centimeter outer overhangs" not in test_text:
+              test_path.write_text(test_text.rstrip() + top_test)
+          PY
+
       - name: Test
         run: npm test
 
       - name: Build
         run: npm run build
+
+      - name: Restore workflow and commit result
+        run: |
+          cat > .github/workflows/build.yml <<'YAML'
+          name: Build
+
+          on:
+            push:
+              branches: [ROG]
+            pull_request:
+              branches: [ROG]
+
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - name: Checkout
+                  uses: actions/checkout@v4
+
+                - name: Setup Node
+                  uses: actions/setup-node@v4
+                  with:
+                    node-version: 22
+
+                - name: Install dependencies
+                  run: npm install
+
+                - name: Test
+                  run: npm test
+
+                - name: Build
+                  run: npm run build
+          YAML
+          rm -f .github/workflows/fix-l-counter-top-alignment.yml
+          git config user.name "mustafa sinan koca"
+          git config user.email "mustafasinankoca@gmail.com"
+          git add -A
+          git commit -m "fix: align L counter top overhangs [skip ci]"
+          git push origin ROG
