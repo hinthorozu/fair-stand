@@ -18,7 +18,10 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-      - run: node --input-type=commonjs < .github/scripts/add-l-counter-100.js
+      - name: Run migration
+        run: |
+          sed -i 's/${/\\${/g' .github/scripts/add-l-counter-100.js
+          node --input-type=commonjs < .github/scripts/add-l-counter-100.js
       - run: npm test
       - run: npm run build
       - name: Commit result
