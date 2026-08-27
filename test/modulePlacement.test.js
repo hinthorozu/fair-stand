@@ -836,3 +836,32 @@ test('Panel Bazalı with 50 cm physical base still uses flat-panel corner snap',
     xCm: 300, yCm: 200, zCm: 0, rotationZDeg: 90, wallId: 'free',
   });
 });
+
+
+test('50 cm panel snaps centered to the short side of Banko 150', () => {
+  const modules = [{
+    id: 'counter-150',
+    type: 'counter',
+    widthCm: 150,
+    depthCm: 50,
+    placement: { xCm: 100, yCm: 200, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  }];
+
+  const result = snapPlacementToModules({
+    moduleId: 'panel-50',
+    moduleType: 'flat-panel',
+    widthCm: 50,
+    pointerXCm: 250,
+    pointerYCm: 200,
+    rotationZDeg: 90,
+    modules,
+    standType: 'island',
+    standXCm: 800,
+    standYCm: 600,
+  });
+
+  assert.equal(result?.snapKind, 'fixture-side');
+  assert.deepEqual(result?.placement, {
+    xCm: 250, yCm: 175, zCm: 0, rotationZDeg: 90, wallId: 'free',
+  });
+});

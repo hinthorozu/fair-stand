@@ -642,6 +642,31 @@ export function snapPlacementToModules({
       return;
     }
 
+    // İnce 50 cm panel, Banko/Baza gibi 50 cm derinlikli bir fixture'ın
+    // kısa yan yüzüne geldiğinde merkez çizgisinden başlatma. Paneli fiziksel
+    // yan yüzün tamamına ortala; böylece 150x50 Banko + 50 panel gerçek flush
+    // köşe bağlantısı oluşturur ve collision motoru bunu yanlışlıkla reddetmez.
+    const targetDepthCm = getModuleCollisionDepthCm(targetModule);
+    const thinMovingModule = movingDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
+    const matchesFixtureSide = thinMovingModule
+      && usesLogicalFixtureEndpoint(targetModule?.type)
+      && targetDepthCm > MODULE_COLLISION_DEPTH_CM + EPSILON_CM
+      && nearlyEqual(width, targetDepthCm);
+
+    if (matchesFixtureSide) {
+      [target.startCm, target.endCm].forEach((endpointCm) => {
+        const placement = createModulePlacement({
+          xCm: movingAxis === 'y' ? endpointCm : target.fixedCm - width / 2,
+          yCm: movingAxis === 'y' ? target.fixedCm - width / 2 : endpointCm,
+          zCm: 0,
+          rotationZDeg: resolvedRotation,
+          wallId: 'free',
+        });
+        placement.wallId = inferPlacementWallId({ placement, standType, standXCm });
+        addCandidate(placement, targetModule.id, 'fixture-side', -2);
+      });
+    }
+
     // Dik modül: hedef modül boyunca her 50 cm bağlantı noktasını aday yap.
     // Hedefin ucundaki bağlantı L, gövde üzerindeki bağlantı T olur.
     getSegmentSnapCoordinates(target).forEach((coordinateCm) => {
