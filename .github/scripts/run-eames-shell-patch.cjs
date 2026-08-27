@@ -32,3 +32,11 @@ source = source.replace(chairAnchor, chairReplacement);
 source = source.replace('assert.equal(payload.size, 30726);', 'assert.equal(payload.size, 14999);');
 
 new Function('require', source)(require);
+
+const testPath = 'test/eamesTableChairSetContract.test.js';
+let testSource = fs.readFileSync(testPath, 'utf8');
+testSource = testSource.replace(
+  'assert.match(source, /models/eames-table-chair.mesh.bin/);',
+  'assert.match(source, /models\\/eames-table-chair\\.mesh\\.bin/);',
+);
+fs.writeFileSync(testPath, testSource);
