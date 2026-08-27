@@ -1,4 +1,4 @@
-name: Rename counter catalog IDs
+name: Rename catalog IDs
 
 on:
   push:
@@ -33,6 +33,9 @@ jobs:
               'SEPARATOR_50': 'wall_separator_50',
               'SHOWCASE_2_100': 'wall_showcase_100_2',
               'SHOWCASE_3_100': 'wall_showcase_100_3',
+              'BAR_STOOL': 'moble_bar_stool_classic',
+              'SOFA_SET': 'moble_sofa_set_classic',
+              'TABLE_CHAIR_SET': 'moble_table_chair_set_minyon',
           }
           roots = [Path('src'), Path('test')]
           extra = [Path('SYSTEM_MODULE_CATALOG.md'), Path('ARCHITECTURE_RULES.md'), Path('README.md'), Path('ROADMAP.md'), Path('ROADMAP_PHASE_4.md'), Path('ROADMAP_PHASE_5_6.md')]
@@ -56,7 +59,7 @@ jobs:
       - name: Verify old IDs are gone from runtime/test/docs
         shell: bash
         run: |
-          ! grep -R -n -E "COUNTER_(100|150|200)|SEPARATOR_(50|100)|SHOWCASE_[23]_100" src test SYSTEM_MODULE_CATALOG.md ARCHITECTURE_RULES.md README.md ROADMAP*.md || (echo 'Old catalog IDs remain' && exit 1)
+          ! grep -R -n -E "COUNTER_(100|150|200)|SEPARATOR_(50|100)|SHOWCASE_[23]_100|BAR_STOOL|SOFA_SET|TABLE_CHAIR_SET" src test SYSTEM_MODULE_CATALOG.md ARCHITECTURE_RULES.md README.md ROADMAP*.md || (echo 'Old catalog IDs remain' && exit 1)
       - name: Install
         run: npm ci
       - name: Test
@@ -72,6 +75,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "refactor: rename counter catalog ids [skip ci]"
+            git commit -m "refactor: normalize catalog ids [skip ci]"
             git push origin ROG
           fi
