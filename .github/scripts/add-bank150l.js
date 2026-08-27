@@ -7,45 +7,57 @@ function replaceOnce(file, from, to, label) {
   fs.writeFileSync(file, text);
 }
 
-replaceOnce(
-  'src/catalog.js',
-  "  desk_banko_150: { type: 'counter', widthCm: 150, depthCm: 50, heightCm: 100, label: 'Banko 150' },",
-  "  desk_banko_150: { type: 'counter', widthCm: 150, depthCm: 50, heightCm: 100, label: 'Banko 150' },\n  desk_banko_150_L: { type: 'counter', shape: 'L', widthCm: 150, depthCm: 150, heightCm: 100, label: 'Köşe Banko 150×150' },",
-  'catalog entry',
-);
-replaceOnce(
-  'src/catalog.js',
-  "  'desk_banko_150',\n  'desk_banko_100',",
-  "  'desk_banko_150',\n  'desk_banko_150_L',\n  'desk_banko_100',",
-  'catalog key',
-);
+function insertBeforeOnce(file, needle, addition, label) {
+  let text = fs.readFileSync(file, 'utf8');
+  if (!text.includes(needle)) throw new Error(`Missing insert target: ${label}`);
+  text = text.replace(needle, addition + needle);
+  fs.writeFileSync(file, text);
+}
 
-replaceOnce(
-  'src/designState.js',
-  "  const depthCm = shape === 'L' ? 100 : (Number(options.depthCm) || 50);",
-  "  const depthCm = shape === 'L' ? (Number(options.depthCm) || width) : (Number(options.depthCm) || 50);",
-  'L depth state',
-);
+const catalogSource = fs.readFileSync('src/catalog.js', 'utf8');
+const alreadyApplied = catalogSource.includes('desk_banko_150_L:');
 
-replaceOnce(
-  'src/productionParts.js',
-  "  counter_top_160_60: Object.freeze({ partId: 'counter_top_160_60', name: 'Banko Üstü 160 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 160, depthCm: 60 }), nominalModuleWidthCm: 150 }),",
-  "  counter_top_160_60: Object.freeze({ partId: 'counter_top_160_60', name: 'Banko Üstü 160 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 160, depthCm: 60 }), nominalModuleWidthCm: 150 }),\n  counter_top_102_60: Object.freeze({ partId: 'counter_top_102_60', name: 'Banko Üstü 102 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 102, depthCm: 60 }), nominalModuleWidthCm: 150 }),",
-  '150 L return top part',
-);
+if (!alreadyApplied) {
+  replaceOnce(
+    'src/catalog.js',
+    "  desk_banko_150: { type: 'counter', widthCm: 150, depthCm: 50, heightCm: 100, label: 'Banko 150' },",
+    "  desk_banko_150: { type: 'counter', widthCm: 150, depthCm: 50, heightCm: 100, label: 'Banko 150' },\n  desk_banko_150_L: { type: 'counter', shape: 'L', widthCm: 150, depthCm: 150, heightCm: 100, label: 'Köşe Banko 150×150' },",
+    'catalog entry',
+  );
+  replaceOnce(
+    'src/catalog.js',
+    "  'desk_banko_150',\n  'desk_banko_100',",
+    "  'desk_banko_150',\n  'desk_banko_150_L',\n  'desk_banko_100',",
+    'catalog key',
+  );
 
-replaceOnce(
-  'src/moduleRecipes.js',
-  "  'counter-l:100': Object.freeze({ recipeId: 'counter-l-100', moduleType: 'counter', shape: 'L', nominalWidthCm: 100, items: Object.freeze([\n    Object.freeze({ partId: 'profile_91', quantity: 5 }), Object.freeze({ partId: 'profile_41_5', quantity: 5 }), Object.freeze({ partId: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_98', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ partId: 'connector_start', quantity: 8 }), Object.freeze({ partId: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_110_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_52_60', quantity: 1 }),\n  ]) }),",
-  "  'counter-l:100': Object.freeze({ recipeId: 'counter-l-100', moduleType: 'counter', shape: 'L', nominalWidthCm: 100, items: Object.freeze([\n    Object.freeze({ partId: 'profile_91', quantity: 5 }), Object.freeze({ partId: 'profile_41_5', quantity: 5 }), Object.freeze({ partId: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_98', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ partId: 'connector_start', quantity: 8 }), Object.freeze({ partId: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_110_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_52_60', quantity: 1 }),\n  ]) }),\n  'counter-l:150': Object.freeze({ recipeId: 'counter-l-150', moduleType: 'counter', shape: 'L', nominalWidthCm: 150, items: Object.freeze([\n    Object.freeze({ partId: 'profile_140_5', quantity: 5 }), Object.freeze({ partId: 'profile_91', quantity: 1 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_147_5', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ partId: 'connector_start', quantity: 8 }), Object.freeze({ partId: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_160_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_102_60', quantity: 1 }),\n  ]) }),",
-  '150 L recipe',
-);
+  replaceOnce(
+    'src/designState.js',
+    "  const depthCm = shape === 'L' ? 100 : (Number(options.depthCm) || 50);",
+    "  const depthCm = shape === 'L' ? (Number(options.depthCm) || width) : (Number(options.depthCm) || 50);",
+    'L depth state',
+  );
 
-let scene = fs.readFileSync('src/scene3d.js', 'utf8');
-const start = scene.indexOf('function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {');
-const end = scene.indexOf('\nfunction createShelfModule(moduleState, moduleIndex, onSurfaceReady) {', start);
-if (start < 0 || end < 0) throw new Error('L renderer boundaries not found');
-const replacement = `function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
+  replaceOnce(
+    'src/productionParts.js',
+    "  counter_top_160_60: Object.freeze({ partId: 'counter_top_160_60', name: 'Banko Üstü 160 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 160, depthCm: 60 }), nominalModuleWidthCm: 150 }),",
+    "  counter_top_160_60: Object.freeze({ partId: 'counter_top_160_60', name: 'Banko Üstü 160 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 160, depthCm: 60 }), nominalModuleWidthCm: 150 }),\n  counter_top_102_60: Object.freeze({ partId: 'counter_top_102_60', name: 'Banko Üstü 102 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 102, depthCm: 60 }), nominalModuleWidthCm: 150 }),",
+    '150 L return top part',
+  );
+
+  insertBeforeOnce(
+    'src/moduleRecipes.js',
+    "  'counter:100': Object.freeze(",
+    "  'counter-l:150': Object.freeze({ recipeId: 'counter-l-150', moduleType: 'counter', shape: 'L', nominalWidthCm: 150, items: Object.freeze([\n    Object.freeze({ partId: 'profile_140_5', quantity: 5 }), Object.freeze({ partId: 'profile_91', quantity: 1 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_147_5', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ partId: 'connector_start', quantity: 8 }), Object.freeze({ partId: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_160_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_102_60', quantity: 1 }),\n  ]) }),\n\n",
+    '150 L recipe',
+  );
+
+  let scene = fs.readFileSync('src/scene3d.js', 'utf8');
+  const start = scene.indexOf('function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {');
+  const end = scene.indexOf('\nfunction createShelfModule(moduleState, moduleIndex, onSurfaceReady) {', start);
+  if (start < 0 || end < 0) throw new Error('L renderer boundaries not found');
+
+  const replacement = `function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const widthCm = Number(moduleState.widthCm) || 100;
   const depthCm = Number(moduleState.depthCm) || widthCm;
   const widthM = widthCm / 100;
@@ -84,21 +96,35 @@ const replacement = `function createLCounterModule(moduleState, moduleIndex, onS
   addRailZ(rightPanelM,widthM/2-frameDepthM/2,0);
   addRailZ(shortPanelM,-widthM/2+frameDepthM/2,-depthM/2+armM/2);
   addRailX(shortPanelM,widthM/2-armM/2,depthM/2-frameDepthM/2);
+
   const topMaterial = new THREE.MeshStandardMaterial({ color:0xf8fafc, roughness:0.58, metalness:0 });
   if (widthCm === 100 && depthCm === 100) {
     const topA=new THREE.Mesh(new THREE.BoxGeometry(1.10,topThicknessM,0.60),topMaterial.clone()); topA.position.set(0,frameHeightM+topThicknessM/2,-0.25); topA.castShadow=true; topA.receiveShadow=true; group.add(topA);
     const topB=new THREE.Mesh(new THREE.BoxGeometry(0.52,topThicknessM,0.60),topMaterial.clone()); topB.rotation.y=Math.PI/2; topB.position.set(0.25,frameHeightM+topThicknessM/2,0.29); topB.castShadow=true; topB.receiveShadow=true; group.add(topB);
   } else {
+    // Banko 150 L, normal Banko 150 renderer mantığını kullanır: 2 cm tabla taşması.
     const topOverhangM = 0.02;
-    const topA = new THREE.Mesh(new THREE.BoxGeometry(widthM + topOverhangM * 2, topThicknessM, armM + topOverhangM * 2), topMaterial.clone());
+    const topA = new THREE.Mesh(
+      new THREE.BoxGeometry(widthM + topOverhangM * 2, topThicknessM, armM + topOverhangM * 2),
+      topMaterial.clone(),
+    );
     topA.position.set(0, frameHeightM + topThicknessM / 2, -depthM / 2 + armM / 2);
-    topA.castShadow = true; topA.receiveShadow = true; group.add(topA);
+    topA.castShadow = true;
+    topA.receiveShadow = true;
+    group.add(topA);
+
     const returnExtensionM = Math.max(depthM - armM, 0.02);
-    const topB = new THREE.Mesh(new THREE.BoxGeometry(returnExtensionM + topOverhangM * 2, topThicknessM, armM + topOverhangM * 2), topMaterial.clone());
+    const topB = new THREE.Mesh(
+      new THREE.BoxGeometry(returnExtensionM + topOverhangM * 2, topThicknessM, armM + topOverhangM * 2),
+      topMaterial.clone(),
+    );
     topB.rotation.y = Math.PI / 2;
     topB.position.set(widthM / 2 - armM / 2, frameHeightM + topThicknessM / 2, armM / 2);
-    topB.castShadow = true; topB.receiveShadow = true; group.add(topB);
+    topB.castShadow = true;
+    topB.receiveShadow = true;
+    group.add(topB);
   }
+
   const surfaces=[];
   const addFace=(surfaceRole,panelLevel,surfaceState,faceWidthM,position,rotationY=0,outward=1)=>{
     if(!surfaceState)return;
@@ -115,29 +141,53 @@ const replacement = `function createLCounterModule(moduleState, moduleIndex, onS
   return {group,surfaces};
 }
 `;
-scene = scene.slice(0, start) + replacement + scene.slice(end);
-fs.writeFileSync('src/scene3d.js', scene);
+  scene = scene.slice(0, start) + replacement + scene.slice(end);
+  fs.writeFileSync('src/scene3d.js', scene);
 
-replaceOnce(
-  'src/scene3d.js',
-  "    if (moduleState?.type === 'counter') return moduleState.shape === 'L' ? 'Köşe Banko 100×100' : `Banko ${widthCm}`;",
-  "    if (moduleState?.type === 'counter') return moduleState.shape === 'L' ? ('Köşe Banko ' + widthCm + '×' + (Number(moduleState.depthCm) || widthCm)) : `Banko ${widthCm}`;",
-  'drag label',
-);
-replaceOnce(
-  'src/main.js',
-  "        const counterLabel = surface.userData.counterShape === 'L' ? 'Köşe Banko 100×100' : ('Banko ' + widthCm + ' cm');",
-  "        const counterLabel = surface.userData.counterShape === 'L' ? ('Köşe Banko ' + widthCm + '×' + (Number(surface.userData.depthCm) || widthCm)) : ('Banko ' + widthCm + ' cm');",
-  'selection label',
-);
+  replaceOnce(
+    'src/scene3d.js',
+    "    if (moduleState?.type === 'counter') return moduleState.shape === 'L' ? 'Köşe Banko 100×100' : `Banko ${widthCm}`;",
+    "    if (moduleState?.type === 'counter') return moduleState.shape === 'L' ? ('Köşe Banko ' + widthCm + '×' + (Number(moduleState.depthCm) || widthCm)) : `Banko ${widthCm}`;",
+    'drag label',
+  );
+  replaceOnce(
+    'src/main.js',
+    "        const counterLabel = surface.userData.counterShape === 'L' ? 'Köşe Banko 100×100' : ('Banko ' + widthCm + ' cm');",
+    "        const counterLabel = surface.userData.counterShape === 'L' ? ('Köşe Banko ' + widthCm + '×' + (Number(surface.userData.depthCm) || widthCm)) : ('Banko ' + widthCm + ' cm');",
+    'selection label',
+  );
+}
+
+fs.writeFileSync('test/lCounterSideGeometry.test.js', `import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+const start = source.indexOf('function createLCounterModule');
+const end = source.indexOf('function createShelfModule', start);
+const block = source.slice(start, end);
+
+test('L counter short side panels close the two outer arm ends parametrically', () => {
+  assert.match(block, /new THREE\\.Vector3\\(-widthM\\/2,lowerY,-depthM\\/2\\+armM\\/2\\),-Math\\.PI\\/2,-1/);
+  assert.match(block, /new THREE\\.Vector3\\(widthM\\/2-armM\\/2,lowerY,depthM\\/2\\),0,1/);
+  assert.doesNotMatch(block, /new THREE\\.Vector3\\(-0\\.25,lowerY,0\\),0,1/);
+});
+
+test('L counter side posts use the same profile inset clearance for every size', () => {
+  assert.match(block, /\\[widthM \\/ 2 - armM \\+ profileM \\/ 2, depthM \\/ 2 - profileM \\/ 2\\]/);
+  assert.match(block, /\\[-widthM \\/ 2 \\+ profileM \\/ 2, -depthM \\/ 2 \\+ armM - profileM \\/ 2\\]/);
+  assert.doesNotMatch(block, /\\[0,0\\.5\\]/);
+  assert.doesNotMatch(block, /\\[-0\\.5,0\\]/);
+});
+`);
 
 fs.writeFileSync('test/lCounter150Contract.test.js', `import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
 import { createCounterModuleState } from '../src/designState.js';
 import { getModuleRecipe } from '../src/moduleRecipes.js';
 import { getProductionPart } from '../src/productionParts.js';
-import fs from 'node:fs';
 
 test('desk_banko_150_L is a 150 x 150 catalog module', () => {
   assert.deepEqual(MODULE_CATALOG.desk_banko_150_L, {
@@ -154,16 +204,16 @@ test('150 L counter state keeps 150 cm physical depth and eight editable faces',
   assert.equal(Object.keys(state.faces).length, 8);
 });
 
-test('150 L counter renderer derives a 150 x 150 body from normal 150 counter dimensions', () => {
+test('150 L counter renderer is 150 x 150 with a 50 cm arm and 100 cm return extension', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(source, /const widthCm = Number\(moduleState\.widthCm\) \|\| 100;/);
-  assert.match(source, /const depthCm = Number\(moduleState\.depthCm\) \|\| widthCm;/);
-  assert.match(source, /const armM = 0\.50;/);
-  assert.match(source, /const returnExtensionM = Math\.max\(depthM - armM, 0\.02\);/);
-  assert.match(source, /widthM \+ topOverhangM \* 2/);
+  assert.match(source, /const widthCm = Number\\(moduleState\\.widthCm\\) \\|\\| 100;/);
+  assert.match(source, /const depthCm = Number\\(moduleState\\.depthCm\\) \\|\\| widthCm;/);
+  assert.match(source, /const armM = 0\\.50;/);
+  assert.match(source, /const returnExtensionM = Math\\.max\\(depthM - armM, 0\\.02\\);/);
+  assert.match(source, /widthM \\+ topOverhangM \\* 2/);
 });
 
-test('150 L counter BOM remains a separate explicit recipe', () => {
+test('150 L counter BOM remains separate from renderer geometry', () => {
   const recipe = getModuleRecipe('counter', 150, { shape: 'L' });
   assert.equal(recipe.recipeId, 'counter-l-150');
   assert.deepEqual(recipe.items.map(({ partId, quantity }) => [partId, quantity]), [
