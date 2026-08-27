@@ -23,20 +23,7 @@ jobs:
 
       - name: Apply Eames 4-chair table set patch
         if: github.event_name == 'push'
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('.github/scripts/add-eames-chair.js')
-          s = p.read_text()
-          s = s.replace("const zlib = require('zlib');\n", '')
-          old = "const compressedPayload = fs.readFileSync('.github/eames-table-chair.mesh.bin.gz');\nconst chairPayload = zlib.gunzipSync(compressedPayload);\n"
-          new = "const chairPayload = fs.readFileSync('public/models/eames-table-chair.mesh.bin');\n"
-          if old not in s:
-            raise SystemExit('Eames payload anchor not found')
-          s = s.replace(old, new, 1)
-          p.with_suffix('.cjs').write_text(s)
-          PY
-          node .github/scripts/add-eames-chair.cjs
+        run: node .github/scripts/run-eames-shell-patch.cjs
 
       - name: Install dependencies
         run: npm install
