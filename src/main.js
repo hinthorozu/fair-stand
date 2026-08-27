@@ -1,7 +1,6 @@
 import './style.css';
 import './colorEditor.css';
 import './imageActions.css';
-import JSZip from 'jszip';
 import { createStandScene } from './scene3d.js';
 import {
   composeAutomaticStandWall,
@@ -45,6 +44,15 @@ import {
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
 import { planContinuousWallInsertion } from './wallReflow.js';
+
+let jsZipModulePromise = null;
+
+async function loadJSZip() {
+  if (!jsZipModulePromise) {
+    jsZipModulePromise = import('jszip').then((module) => module.default);
+  }
+  return jsZipModulePromise;
+}
 
 const viewport = document.querySelector('#viewport');
 const viewportEmpty = document.querySelector('#viewport-empty');
@@ -1508,6 +1516,7 @@ exportProjectButton.addEventListener('click', async () => {
     const project = await loadProject(projectId);
     if (!project) throw new Error('Dışarı aktarılacak proje bulunamadı.');
     const assets = await loadImageAssets(projectId);
+    const JSZip = await loadJSZip();
     const zip = new JSZip();
     const manifestAssets = [];
     for (const asset of assets) {
@@ -1556,6 +1565,7 @@ importProjectFileInput.addEventListener('change', async () => {
   showProjectLoading('Proje içe aktarılıyor…', 'ZIP paketi ve görseller hazırlanıyor.');
   projectStatus.textContent = 'Proje içe aktarılıyor…';
   try {
+    const JSZip = await loadJSZip();
     const zip = await JSZip.loadAsync(file);
     const manifestEntry = zip.file('project.json');
     if (!manifestEntry) throw new Error('ZIP içinde project.json bulunamadı.');
