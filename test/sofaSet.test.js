@@ -1,16 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, moble_sofa_set_classic_DIMENSIONS } from '../src/catalog.js';
+import { MODULE_CATALOG, furniture_sofa_set_classic_DIMENSIONS } from '../src/catalog.js';
 import { createSofaSetModuleState, duplicateModuleState } from '../src/designState.js';
 import { snapPlacementToStand, rotateModulePlacementAroundCenter, validatePlacementAgainstModules } from '../src/modulePlacement.js';
 
 test('koltuk takımı tek katalog modülü ve sabit 150 x 150 cm footprint kullanır', () => {
-  assert.equal(MODULE_CATALOG.moble_sofa_set_classic.type, 'sofa-set');
-  assert.equal(moble_sofa_set_classic_DIMENSIONS.loveseatWidthCm, 150);
-  assert.equal(moble_sofa_set_classic_DIMENSIONS.chairWidthCm, 65);
-  assert.equal(moble_sofa_set_classic_DIMENSIONS.tableDiameterCm, 60);
-  assert.equal(moble_sofa_set_classic_DIMENSIONS.widthCm, 150);
-  assert.equal(moble_sofa_set_classic_DIMENSIONS.depthCm, 150);
+  assert.equal(MODULE_CATALOG.furniture_sofa_set_classic.type, 'sofa-set');
+  assert.equal(furniture_sofa_set_classic_DIMENSIONS.loveseatWidthCm, 150);
+  assert.equal(furniture_sofa_set_classic_DIMENSIONS.chairWidthCm, 65);
+  assert.equal(furniture_sofa_set_classic_DIMENSIONS.tableDiameterCm, 60);
+  assert.equal(furniture_sofa_set_classic_DIMENSIONS.widthCm, 150);
+  assert.equal(furniture_sofa_set_classic_DIMENSIONS.depthCm, 150);
 });
 
 test('koltuk takımı tek renk state taşır ve kopyada bağımsız surface id üretir', () => {
