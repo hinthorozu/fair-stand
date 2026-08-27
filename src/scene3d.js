@@ -3508,7 +3508,16 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const frameMaterial = new THREE.MeshStandardMaterial({ color:FRAME_COLOR, metalness:0.68, roughness:0.28 });
   const addProfile = (geometry, position) => { const mesh = new THREE.Mesh(geometry, frameMaterial.clone()); mesh.position.copy(position); mesh.castShadow=true; mesh.receiveShadow=true; group.add(mesh); return mesh; };
   const postGeometry = new THREE.BoxGeometry(profileM, frameHeightM, profileM);
-  [[-0.5,-0.5],[0.5,-0.5],[0.5,0.5],[0,0.5],[-0.5,0]].forEach(([x,z]) => addProfile(postGeometry.clone(), new THREE.Vector3(x + (x<0?profileM/2:x>0?-profileM/2:0), frameHeightM/2, z + (z<0?profileM/2:z>0?-profileM/2:0))));
+  [
+    [-0.5 + profileM / 2, -0.5 + profileM / 2],
+    [0.5 - profileM / 2, -0.5 + profileM / 2],
+    [0.5 - profileM / 2, 0.5 - profileM / 2],
+    [profileM / 2, 0.5 - profileM / 2],
+    [-0.5 + profileM / 2, -profileM / 2],
+  ].forEach(([x, z]) => addProfile(
+    postGeometry.clone(),
+    new THREE.Vector3(x, frameHeightM / 2, z),
+  ));
   const railYs=[0,stripHeightM,frameHeightM];
   const addRailX=(length,x,z)=>railYs.forEach(y=>addProfile(new THREE.BoxGeometry(length,railHeightM,frameDepthM),new THREE.Vector3(x,y,z)));
   const addRailZ=(length,x,z)=>railYs.forEach(y=>addProfile(new THREE.BoxGeometry(frameDepthM,railHeightM,length),new THREE.Vector3(x,y,z)));

@@ -14,7 +14,9 @@ test('L counter short side panels close the two outer arm ends', () => {
   assert.doesNotMatch(block, /new THREE\.Vector3\(0,lowerY,0\.25\),Math\.PI\/2,-1/);
 });
 
-test('L counter five posts support outer side endpoints instead of inner notch', () => {
-  assert.match(block, /\[\[-0\.5,-0\.5\],\[0\.5,-0\.5\],\[0\.5,0\.5\],\[0,0\.5\],\[-0\.5,0\]\]/);
-  assert.doesNotMatch(block, /\[0,0\]\]\.forEach/);
+test('L counter side posts use the same inset clearance as straight Banko 100', () => {
+  assert.match(block, /\[profileM \/ 2, 0\.5 - profileM \/ 2\]/);
+  assert.match(block, /\[-0\.5 \+ profileM \/ 2, -profileM \/ 2\]/);
+  assert.doesNotMatch(block, /\[0,0\.5\]/);
+  assert.doesNotMatch(block, /\[-0\.5,0\]/);
 });
