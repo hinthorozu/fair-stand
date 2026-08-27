@@ -203,7 +203,8 @@ const scene3d = createStandScene(
         const faceLabel = surface.userData.surfaceRole === 'front'
           ? 'ön'
           : (surface.userData.surfaceRole === 'left' ? 'sol yan' : 'sağ yan');
-        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Banko ' + widthCm + ' cm · ' + faceLabel + ' cephe · renk + görsel uygulanabilir.';
+        const counterLabel = surface.userData.counterShape === 'L' ? 'Köşe Banko 100×100' : ('Banko ' + widthCm + ' cm');
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · ' + counterLabel + ' · ' + faceLabel + ' cephe · renk + görsel uygulanabilir.';
         return;
       }
 
@@ -593,7 +594,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   if (module.type === 'flat-panel') state = createFlatPanelModuleState(module.widthCm);
   else if (module.type === 'base') state = createBaseModuleState(module.widthCm);
   else if (module.type === 'base-wall') state = createBaseWallModuleState(module.widthCm);
-  else if (module.type === 'counter') state = createCounterModuleState(module.widthCm);
+  else if (module.type === 'counter') state = createCounterModuleState(module.widthCm, { shape: module.shape, depthCm: module.depthCm });
   else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm);
   else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);
   else if (module.type === 'sofa-set') state = createSofaSetModuleState();

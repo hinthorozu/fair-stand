@@ -1423,7 +1423,7 @@ export function createStandScene(
     if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';
     if (moduleState?.type === 'led-floodlight') return 'LED Projektör';
     if (moduleState?.type === 'base') return `Baza ${widthCm}`;
-    if (moduleState?.type === 'counter') return `Banko ${widthCm}`;
+    if (moduleState?.type === 'counter') return moduleState.shape === 'L' ? 'Köşe Banko 100×100' : `Banko ${widthCm}`;
     if (moduleState?.type === 'separator') return `Separatör ${widthCm}`;
     if (moduleState?.type === 'door') return `Kapı ${widthCm}`;
     if (moduleState?.type === 'showcase-3') return `3 Gözlü Vitrin ${widthCm}`;
@@ -3314,6 +3314,7 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
 }
 
 function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
+  if (moduleState.shape === 'L') return createLCounterModule(moduleState, moduleIndex, onSurfaceReady);
   const widthCm = Number(moduleState.widthCm);
   const depthCm = Number(moduleState.depthCm) || 50;
   const heightCm = Number(moduleState.heightCm) || 100;
@@ -3488,6 +3489,47 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   addFace('right', 'upper', moduleState.faces?.rightUpper, sidePanelWidthM, new THREE.Vector3(rightX, upperY, 0), Math.PI / 2);
 
   return { group, surfaces };
+}
+
+function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
+  const widthCm = 100, depthCm = 100, widthM = 1, depthM = 1, armM = 0.50;
+  const heightM = Number(moduleState.heightCm || 100) / 100;
+  const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
+  const frameDepthM = Number(STAND_DIMENSIONS.frameDepth);
+  const railHeightM = PANEL_RAIL_HEIGHT_M;
+  const topThicknessM = 0.04;
+  const frameHeightM = heightM - topThicknessM;
+  const stripHeightM = frameHeightM / 2;
+  const panelHeightM = Math.max(stripHeightM - railHeightM - PANEL_VERTICAL_CLEARANCE_M, 0.05);
+  const longPanelM = Math.max(widthM - profileM * 2 - 0.012, 0.05);
+  const shortPanelM = Math.max(armM - profileM * 2 - 0.012, 0.05);
+  const group = new THREE.Group();
+  group.userData = { kind:'module', moduleIndex, moduleId:moduleState.id, type:'counter', widthCm, depthCm, heightCm:100, counterShape:'L' };
+  const frameMaterial = new THREE.MeshStandardMaterial({ color:FRAME_COLOR, metalness:0.68, roughness:0.28 });
+  const addProfile = (geometry, position) => { const mesh = new THREE.Mesh(geometry, frameMaterial.clone()); mesh.position.copy(position); mesh.castShadow=true; mesh.receiveShadow=true; group.add(mesh); return mesh; };
+  const postGeometry = new THREE.BoxGeometry(profileM, frameHeightM, profileM);
+  [[-0.5,-0.5],[0.5,-0.5],[0.5,0.5],[0,0.5],[0,0]].forEach(([x,z]) => addProfile(postGeometry.clone(), new THREE.Vector3(x + (x<0?profileM/2:x>0?-profileM/2:0), frameHeightM/2, z + (z<0?profileM/2:z>0?-profileM/2:0))));
+  const railYs=[0,stripHeightM,frameHeightM];
+  const addRailX=(length,x,z)=>railYs.forEach(y=>addProfile(new THREE.BoxGeometry(length,railHeightM,frameDepthM),new THREE.Vector3(x,y,z)));
+  const addRailZ=(length,x,z)=>railYs.forEach(y=>addProfile(new THREE.BoxGeometry(frameDepthM,railHeightM,length),new THREE.Vector3(x,y,z)));
+  addRailX(longPanelM,0,-0.5+frameDepthM/2); addRailZ(longPanelM,0.5-frameDepthM/2,0); addRailX(shortPanelM,-0.25,frameDepthM/2); addRailZ(shortPanelM,frameDepthM/2,0.25);
+  const topMaterial = new THREE.MeshStandardMaterial({ color:0xf8fafc, roughness:0.58, metalness:0 });
+  const topA=new THREE.Mesh(new THREE.BoxGeometry(1.10,topThicknessM,0.60),topMaterial.clone()); topA.position.set(0,frameHeightM+topThicknessM/2,-0.20); topA.castShadow=true; topA.receiveShadow=true; group.add(topA);
+  const topB=new THREE.Mesh(new THREE.BoxGeometry(0.52,topThicknessM,0.60),topMaterial.clone()); topB.rotation.y=Math.PI/2; topB.position.set(0.25,frameHeightM+topThicknessM/2,0.25); topB.castShadow=true; topB.receiveShadow=true; group.add(topB);
+  const surfaces=[];
+  const addFace=(surfaceRole,panelLevel,surfaceState,faceWidthM,position,rotationY=0,outward=1)=>{
+    if(!surfaceState)return;
+    const backing=new THREE.Mesh(new THREE.BoxGeometry(faceWidthM,panelHeightM,0.012),new THREE.MeshStandardMaterial({color:PANEL_BACK_COLOR,roughness:0.74,metalness:0})); backing.position.copy(position); backing.rotation.y=rotationY; backing.castShadow=true; backing.receiveShadow=true; group.add(backing);
+    const surface=new THREE.Mesh(new THREE.PlaneGeometry(faceWidthM,panelHeightM),new THREE.MeshStandardMaterial({color:surfaceState.imageAssetId?0xffffff:surfaceState.color,roughness:0.72,metalness:0,side:THREE.DoubleSide,emissive:0x000000,emissiveIntensity:0})); surface.position.copy(position); surface.rotation.y=rotationY; if(Math.abs(rotationY)<0.01)surface.position.z+=0.007*outward;else surface.position.x+=0.007*outward;
+    const selectionFrame=createSelectionFrame(faceWidthM,panelHeightM); selectionFrame.visible=false; surface.add(selectionFrame);
+    surface.userData={kind:'surface',moduleType:'counter',counterShape:'L',selectionMode:'module',acceptsImage:true,moduleIndex,moduleId:moduleState.id,widthCm,stripIndex:panelLevel==='lower'?0:1,stripNumber:panelLevel==='lower'?1:2,surfaceRole,panelLevel,surfaceId:surfaceState.id,surfaceState,selectionFrame,backing}; group.add(surface); surfaces.push(surface); onSurfaceReady?.(surface);
+  };
+  const lowerY=stripHeightM/2, upperY=stripHeightM+stripHeightM/2;
+  addFace('front','lower',moduleState.faces?.frontLower,longPanelM,new THREE.Vector3(0,lowerY,-0.5),0,-1); addFace('front','upper',moduleState.faces?.frontUpper,longPanelM,new THREE.Vector3(0,upperY,-0.5),0,-1);
+  addFace('right','lower',moduleState.faces?.rightLower,longPanelM,new THREE.Vector3(0.5,lowerY,0),Math.PI/2,1); addFace('right','upper',moduleState.faces?.rightUpper,longPanelM,new THREE.Vector3(0.5,upperY,0),Math.PI/2,1);
+  addFace('left','lower',moduleState.faces?.leftLower,shortPanelM,new THREE.Vector3(-0.25,lowerY,0),0,1); addFace('left','upper',moduleState.faces?.leftUpper,shortPanelM,new THREE.Vector3(-0.25,upperY,0),0,1);
+  addFace('return','lower',moduleState.faces?.returnLower,shortPanelM,new THREE.Vector3(0,lowerY,0.25),Math.PI/2,-1); addFace('return','upper',moduleState.faces?.returnUpper,shortPanelM,new THREE.Vector3(0,upperY,0.25),Math.PI/2,-1);
+  return {group,surfaces};
 }
 
 function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {

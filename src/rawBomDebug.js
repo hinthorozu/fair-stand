@@ -88,6 +88,12 @@ function syncFromSelection() {
     return;
   }
 
+  const cornerCounterMatch = text.match(/Köşe\s+Banko\s+100[×x]100/i);
+  if (cornerCounterMatch) {
+    renderRecipe('counter', 100, 'Köşe Banko 100×100', { shape: 'L' });
+    return;
+  }
+
   const counterMatch = text.match(/Banko\s+(100|150|200)\s*cm/i);
   if (counterMatch) {
     const widthCm = Number(counterMatch[1]);

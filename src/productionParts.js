@@ -38,6 +38,7 @@ export const PRODUCTION_PARTS = Object.freeze({
   glass_shelf: Object.freeze({ partId: 'glass_shelf', name: 'Cam Raf', type: 'showcase-accessory', unit: 'adet' }),
 
   counter_top_110_60: Object.freeze({ partId: 'counter_top_110_60', name: 'Banko Üstü 110 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 110, depthCm: 60 }), nominalModuleWidthCm: 100 }),
+  counter_top_52_60: Object.freeze({ partId: 'counter_top_52_60', name: 'Banko Üstü 52 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 52, depthCm: 60 }), nominalModuleWidthCm: 100 }),
   counter_top_160_60: Object.freeze({ partId: 'counter_top_160_60', name: 'Banko Üstü 160 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 160, depthCm: 60 }), nominalModuleWidthCm: 150 }),
   counter_top_210_60: Object.freeze({ partId: 'counter_top_210_60', name: 'Banko Üstü 210 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 210, depthCm: 60 }), nominalModuleWidthCm: 200 }),
 

@@ -84,6 +84,7 @@ export const MODULE_CATALOG = Object.freeze({
   DOOR_100: { type: 'door', widthCm: 100, label: 'Depo Kapısı 100' },
 
   desk_banko_100: { type: 'counter', widthCm: 100, depthCm: 50, heightCm: 100, label: 'Banko 100' },
+  desk_banko_100_L: { type: 'counter', shape: 'L', widthCm: 100, depthCm: 100, heightCm: 100, label: 'Köşe Banko 100×100' },
   desk_banko_150: { type: 'counter', widthCm: 150, depthCm: 50, heightCm: 100, label: 'Banko 150' },
   desk_banko_200: { type: 'counter', widthCm: 200, depthCm: 50, heightCm: 100, label: 'Banko 200' },
   BASE_100: { type: 'base', widthCm: 100, depthCm: 50, heightCm: 50, label: 'Baza 100' },
@@ -125,6 +126,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'desk_banko_200',
   'desk_banko_150',
   'desk_banko_100',
+  'desk_banko_100_L',
 ]);
 
 export function flatPanelKey(widthCm) {

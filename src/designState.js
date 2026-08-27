@@ -101,25 +101,24 @@ export function createDoorModuleState(widthCm = 100) {
   };
 }
 
-export function createCounterModuleState(widthCm) {
+export function createCounterModuleState(widthCm, options = {}) {
   const width = Number(widthCm);
   if (![100, 150, 200].includes(width)) return null;
-
-  return {
-    id: createId('module'),
-    type: 'counter',
-    widthCm: width,
-    depthCm: 50,
-    heightCm: 100,
-    faces: {
-      frontLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      frontUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      leftLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      leftUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      rightLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      rightUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-    },
+  const shape = options.shape === 'L' ? 'L' : 'straight';
+  const depthCm = shape === 'L' ? 100 : (Number(options.depthCm) || 50);
+  const faces = {
+    frontLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+    frontUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+    leftLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+    leftUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+    rightLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+    rightUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
   };
+  if (shape === 'L') {
+    faces.returnLower = createEditablePanelState(null, DEFAULT_PANEL_COLOR);
+    faces.returnUpper = createEditablePanelState(null, DEFAULT_PANEL_COLOR);
+  }
+  return { id: createId('module'), type: 'counter', shape, widthCm: width, depthCm, heightCm: 100, faces };
 }
 
 export function createBaseWallModuleState(widthCm) {
