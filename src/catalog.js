@@ -69,8 +69,8 @@ export const MODULE_CATALOG = Object.freeze({
   wall_150: { type: 'flat-panel', widthCm: 150, label: 'Düz Panel 150' },
   wall_200: { type: 'flat-panel', widthCm: 200, label: 'Düz Panel 200' },
 
-  SHOWCASE_3_100: { type: 'showcase-3', widthCm: 100, label: '3 Gözlü Vitrin 100' },
-  SHOWCASE_2_100: { type: 'showcase-2', widthCm: 100, label: '2 Gözlü Vitrin 100' },
+  wall_showcase_100_3: { type: 'showcase-3', widthCm: 100, label: '3 Gözlü Vitrin 100' },
+  wall_showcase_100_2: { type: 'showcase-2', widthCm: 100, label: '2 Gözlü Vitrin 100' },
   wall_shelf_2_100: { type: 'shelf', widthCm: 100, shelfCount: 2, label: 'Raf 100 · 2 Raf' },
   wall_shelf_3_100: { type: 'shelf', widthCm: 100, shelfCount: 3, label: 'Raf 100 · 3 Raf' },
   wall_shelf_2_150: { type: 'shelf', widthCm: 150, shelfCount: 2, label: 'Raf 150 · 2 Raf' },
@@ -92,8 +92,8 @@ export const MODULE_CATALOG = Object.freeze({
   wall_base_100: { type: 'base-wall', widthCm: 100, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 100' },
   wall_base_150: { type: 'base-wall', widthCm: 150, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 150' },
   wall_base_200: { type: 'base-wall', widthCm: 200, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 200' },
-  SEPARATOR_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
-  SEPARATOR_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
+  wall_seperator_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
+  wall_seperator_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
 });
 
 export function flatPanelKey(widthCm) {
