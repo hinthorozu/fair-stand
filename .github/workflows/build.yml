@@ -23,7 +23,10 @@ jobs:
 
       - name: Apply Eames 4-chair table set patch
         if: github.event_name == 'push'
-        run: node --input-type=commonjs < .github/scripts/add-eames-chair.js
+        run: |
+          mv .github/eames-table-chair.mesh.bin.gz .github/eames-table-chair.mesh.bin
+          gzip -c .github/eames-table-chair.mesh.bin > .github/eames-table-chair.mesh.bin.gz
+          node --input-type=commonjs < .github/scripts/add-eames-chair.js
 
       - name: Install dependencies
         run: npm install
