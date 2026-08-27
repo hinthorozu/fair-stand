@@ -22,39 +22,17 @@ jobs:
         run: |
           python3 <<'PY'
           from pathlib import Path
-
           scene_path = Path('src/scene3d.js')
           scene = scene_path.read_text()
           old = "  [[-0.5,-0.5],[0.5,-0.5],[0.5,0.5],[0,0.5],[-0.5,0]].forEach(([x,z]) => addProfile(postGeometry.clone(), new THREE.Vector3(x + (x<0?profileM/2:x>0?-profileM/2:0), frameHeightM/2, z + (z<0?profileM/2:z>0?-profileM/2:0))));"
-          new = """  [
-    [-0.5 + profileM / 2, -0.5 + profileM / 2],
-    [0.5 - profileM / 2, -0.5 + profileM / 2],
-    [0.5 - profileM / 2, 0.5 - profileM / 2],
-    [profileM / 2, 0.5 - profileM / 2],
-    [-0.5 + profileM / 2, -profileM / 2],
-  ].forEach(([x, z]) => addProfile(
-    postGeometry.clone(),
-    new THREE.Vector3(x, frameHeightM / 2, z),
-  ));"""
+          new = "  [\n    [-0.5 + profileM / 2, -0.5 + profileM / 2],\n    [0.5 - profileM / 2, -0.5 + profileM / 2],\n    [0.5 - profileM / 2, 0.5 - profileM / 2],\n    [profileM / 2, 0.5 - profileM / 2],\n    [-0.5 + profileM / 2, -profileM / 2],\n  ].forEach(([x, z]) => addProfile(\n    postGeometry.clone(),\n    new THREE.Vector3(x, frameHeightM / 2, z),\n  ));"
           if old not in scene:
               raise SystemExit('Expected L counter post block not found')
-          scene = scene.replace(old, new, 1)
-          scene_path.write_text(scene)
-
+          scene_path.write_text(scene.replace(old, new, 1))
           test_path = Path('test/lCounterSideGeometry.test.js')
           test_text = test_path.read_text()
-          old_test = """test('L counter five posts support outer side endpoints instead of inner notch', () => {
-  assert.match(block, /\\[\\[-0\\.5,-0\\.5\\],\\[0\\.5,-0\\.5\\],\\[0\\.5,0\\.5\\],\\[0,0\\.5\\],\\[-0\\.5,0\\]\\]/);
-  assert.doesNotMatch(block, /\\[0,0\\]\\]\\.forEach/);
-});
-"""
-          new_test = """test('L counter side posts use the same inset clearance as straight Banko 100', () => {
-  assert.match(block, /\\[profileM \\/ 2, 0\\.5 - profileM \\/ 2\\]/);
-  assert.match(block, /\\[-0\\.5 \\+ profileM \\/ 2, -profileM \\/ 2\\]/);
-  assert.doesNotMatch(block, /\\[0,0\\.5\\]/);
-  assert.doesNotMatch(block, /\\[-0\\.5,0\\]/);
-});
-"""
+          old_test = "test('L counter five posts support outer side endpoints instead of inner notch', () => {\n  assert.match(block, /\\[\\[-0\\.5,-0\\.5\\],\\[0\\.5,-0\\.5\\],\\[0\\.5,0\\.5\\],\\[0,0\\.5\\],\\[-0\\.5,0\\]\\]/);\n  assert.doesNotMatch(block, /\\[0,0\\]\\]\\.forEach/);\n});\n"
+          new_test = "test('L counter side posts use the same inset clearance as straight Banko 100', () => {\n  assert.match(block, /\\[profileM \\/ 2, 0\\.5 - profileM \\/ 2\\]/);\n  assert.match(block, /\\[-0\\.5 \\+ profileM \\/ 2, -profileM \\/ 2\\]/);\n  assert.doesNotMatch(block, /\\[0,0\\.5\\]/);\n  assert.doesNotMatch(block, /\\[-0\\.5,0\\]/);\n});\n"
           if old_test not in test_text:
               raise SystemExit('Expected L counter side geometry test block not found')
           test_path.write_text(test_text.replace(old_test, new_test, 1))
