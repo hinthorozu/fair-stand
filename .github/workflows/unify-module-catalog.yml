@@ -119,3 +119,5 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
             git commit -m "refactor: use one module catalog source [skip ci]"
             git push origin ROG
           fi
+
+# trigger: 2
