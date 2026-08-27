@@ -50,41 +50,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Restore workflow and commit result
+      - name: Commit scene change
         run: |
-          printf '%s\n' \
-            'name: Build' \
-            '' \
-            'on:' \
-            '  push:' \
-            '    branches: [ROG]' \
-            '  pull_request:' \
-            '    branches: [ROG]' \
-            '' \
-            'jobs:' \
-            '  build:' \
-            '    runs-on: ubuntu-latest' \
-            '    steps:' \
-            '      - name: Checkout' \
-            '        uses: actions/checkout@v4' \
-            '' \
-            '      - name: Setup Node' \
-            '        uses: actions/setup-node@v4' \
-            '        with:' \
-            '          node-version: 22' \
-            '' \
-            '      - name: Install dependencies' \
-            '        run: npm install' \
-            '' \
-            '      - name: Test' \
-            '        run: npm test' \
-            '' \
-            '      - name: Build' \
-            '        run: npm run build' \
-            > .github/workflows/build.yml
-          rm -f .github/workflows/fix-l-counter-top-alignment.yml
           git config user.name "mustafa sinan koca"
           git config user.email "mustafasinankoca@gmail.com"
-          git add -A
+          git add src/scene3d.js
           git commit -m "fix: align L counter top overhangs [skip ci]"
           git push origin ROG
