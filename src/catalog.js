@@ -31,7 +31,7 @@ export const SHELF_DIMENSIONS = Object.freeze({
   }),
 });
 
-export const SOFA_SET_DIMENSIONS = Object.freeze({
+export const moble_sofa_set_classic_DIMENSIONS = Object.freeze({
   widthCm: 150,
   depthCm: 150,
   heightCm: 80,
@@ -40,7 +40,7 @@ export const SOFA_SET_DIMENSIONS = Object.freeze({
   tableDiameterCm: 60,
 });
 
-export const TABLE_CHAIR_SET_DIMENSIONS = Object.freeze({
+export const moble_table_chair_set_minyon_DIMENSIONS = Object.freeze({
   widthCm: 120,
   depthCm: 120,
   heightCm: 90,
@@ -50,7 +50,7 @@ export const TABLE_CHAIR_SET_DIMENSIONS = Object.freeze({
   tableHeightCm: 74,
 });
 
-export const BAR_STOOL_DIMENSIONS = Object.freeze({
+export const moble_bar_stool_classic_DIMENSIONS = Object.freeze({
   widthCm: 50,
   depthCm: 50,
   heightCm: 80,
@@ -77,9 +77,9 @@ export const MODULE_CATALOG = Object.freeze({
   wall_shelf_3_150: { type: 'shelf', widthCm: 150, shelfCount: 3, label: 'Raf 150 · 3 Raf' },
   wall_shelf_2_200: { type: 'shelf', widthCm: 200, shelfCount: 2, label: 'Raf 200 · 2 Raf' },
   wall_shelf_3_200: { type: 'shelf', widthCm: 200, shelfCount: 3, label: 'Raf 200 · 3 Raf' },
-  SOFA_SET: { type: 'sofa-set', widthCm: 150, depthCm: 150, heightCm: 80, label: 'Koltuk Takımı' },
-  TABLE_CHAIR_SET: { type: 'table-chair-set', widthCm: 120, depthCm: 120, heightCm: 90, label: 'Masa Sandalye Takımı' },
-  BAR_STOOL: { type: 'bar-stool', widthCm: 50, depthCm: 50, heightCm: 80, label: 'Bar Taburesi' },
+  moble_sofa_set_classic: { type: 'sofa-set', widthCm: 150, depthCm: 150, heightCm: 80, label: 'Koltuk Takımı' },
+  moble_table_chair_set_minyon: { type: 'table-chair-set', widthCm: 120, depthCm: 120, heightCm: 90, label: 'Masa Sandalye Takımı' },
+  moble_bar_stool_classic: { type: 'bar-stool', widthCm: 50, depthCm: 50, heightCm: 80, label: 'Bar Taburesi' },
   LED_FLOODLIGHT: { type: 'led-floodlight', widthCm: 50, depthCm: 20, heightCm: 35, label: 'LED Projektör' },
   DOOR_100: { type: 'door', widthCm: 100, label: 'Depo Kapısı 100' },
 

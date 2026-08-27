@@ -613,7 +613,7 @@ olmak üzere duvar + baza yüzeyleri birlikte bulunur.
 
 Bu modüller katalogda ve state sisteminde vardır ancak `moduleRecipes.js` içinde BOM reçeteleri henüz tanımlı değildir.
 
-## `SOFA_SET`
+## `moble_sofa_set_classic`
 
 - Ekrandaki ad: **Koltuk Takımı**
 - Type: `sofa-set`
@@ -629,7 +629,7 @@ Ek sabitler:
 
 ---
 
-## `TABLE_CHAIR_SET`
+## `moble_table_chair_set_minyon`
 
 - Ekrandaki ad: **Masa Sandalye Takımı**
 - Type: `table-chair-set`
@@ -645,7 +645,7 @@ Ek sabitler:
 
 ---
 
-## `BAR_STOOL`
+## `moble_bar_stool_classic`
 
 - Ekrandaki ad: **Bar Taburesi**
 - Type: `bar-stool`

@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BAR_STOOL_DIMENSIONS, MODULE_CATALOG } from '../src/catalog.js';
+import { moble_bar_stool_classic_DIMENSIONS, MODULE_CATALOG } from '../src/catalog.js';
 import { createBarStoolModuleState } from '../src/designState.js';
 import { snapPlacementToStand } from '../src/modulePlacement.js';
 
 test('bar taburesi 50 x 50 x 80 cm ölçülerini kullanır', () => {
-  assert.deepEqual(BAR_STOOL_DIMENSIONS, { widthCm: 50, depthCm: 50, heightCm: 80 });
-  assert.equal(MODULE_CATALOG.BAR_STOOL.widthCm, 50);
-  assert.equal(MODULE_CATALOG.BAR_STOOL.depthCm, 50);
-  assert.equal(MODULE_CATALOG.BAR_STOOL.heightCm, 80);
+  assert.deepEqual(moble_bar_stool_classic_DIMENSIONS, { widthCm: 50, depthCm: 50, heightCm: 80 });
+  assert.equal(MODULE_CATALOG.moble_bar_stool_classic.widthCm, 50);
+  assert.equal(MODULE_CATALOG.moble_bar_stool_classic.depthCm, 50);
+  assert.equal(MODULE_CATALOG.moble_bar_stool_classic.heightCm, 80);
   const state = createBarStoolModuleState();
   assert.equal(state.type, 'bar-stool');
   assert.equal(state.widthCm, 50);
