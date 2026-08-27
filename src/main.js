@@ -202,7 +202,9 @@ const scene3d = createStandScene(
       if (moduleType === 'counter') {
         const faceLabel = surface.userData.surfaceRole === 'front'
           ? 'ön'
-          : (surface.userData.surfaceRole === 'left' ? 'sol yan' : 'sağ yan');
+          : (surface.userData.surfaceRole === 'left'
+            ? 'sol yan'
+            : (surface.userData.surfaceRole === 'return' ? 'L dönüş' : 'sağ yan'));
         const counterLabel = surface.userData.counterShape === 'L' ? ('Köşe Banko ' + widthCm + '×' + (Number(surface.userData.depthCm) || widthCm)) : ('Banko ' + widthCm + ' cm');
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · ' + counterLabel + ' · ' + faceLabel + ' cephe · renk + görsel uygulanabilir.';
         return;
