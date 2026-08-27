@@ -27,53 +27,40 @@ jobs:
           from pathlib import Path
           import re
 
+          keys = [
+              'wall_200', 'wall_150', 'wall_100', 'wall_50',
+              'wall_separator_100', 'wall_separator_50', 'DOOR_100',
+              'wall_showcase_100_3', 'wall_showcase_100_2',
+              'wall_shelf_3_200', 'wall_shelf_2_200',
+              'wall_shelf_3_150', 'wall_shelf_2_150',
+              'wall_shelf_3_100', 'wall_shelf_2_100',
+              'furniture_sofa_set_classic',
+              'furniture_table_chair_set_minyon',
+              'furniture_bar_stool_classic',
+              'LED_FLOODLIGHT',
+              'wall_base_200', 'wall_base_150', 'wall_base_100',
+              'BASE_200', 'BASE_150', 'BASE_100',
+              'desk_banko_200', 'desk_banko_150', 'desk_banko_100',
+          ]
+
           catalog = Path('src/catalog.js')
           text = catalog.read_text(encoding='utf-8')
-          marker = "\nexport function flatPanelKey(widthCm) {"
           if 'export const MODULE_CATALOG_KEYS' not in text:
-              ordered = """
-
-export const MODULE_CATALOG_KEYS = Object.freeze([
-  'wall_200',
-  'wall_150',
-  'wall_100',
-  'wall_50',
-  'wall_separator_100',
-  'wall_separator_50',
-  'DOOR_100',
-  'wall_showcase_100_3',
-  'wall_showcase_100_2',
-  'wall_shelf_3_200',
-  'wall_shelf_2_200',
-  'wall_shelf_3_150',
-  'wall_shelf_2_150',
-  'wall_shelf_3_100',
-  'wall_shelf_2_100',
-  'furniture_sofa_set_classic',
-  'furniture_table_chair_set_minyon',
-  'furniture_bar_stool_classic',
-  'LED_FLOODLIGHT',
-  'wall_base_200',
-  'wall_base_150',
-  'wall_base_100',
-  'BASE_200',
-  'BASE_150',
-  'BASE_100',
-  'desk_banko_200',
-  'desk_banko_150',
-  'desk_banko_100',
-]);
-"""
+              lines = ['', 'export const MODULE_CATALOG_KEYS = Object.freeze([']
+              lines.extend(f"  '{key}'," for key in keys)
+              lines.extend([']);', ''])
+              block = '\n'.join(lines)
+              marker = '\nexport function flatPanelKey(widthCm) {'
               if marker not in text:
                   raise SystemExit('catalog insertion marker not found')
-              text = text.replace(marker, ordered + marker, 1)
+              text = text.replace(marker, block + marker, 1)
               catalog.write_text(text, encoding='utf-8')
 
           sidebar = Path('src/moduleDragSidebar.js')
           text = sidebar.read_text(encoding='utf-8')
           text = text.replace("import { MODULE_CATALOG } from './catalog.js';", "import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from './catalog.js';", 1)
           text = re.sub(r"\nconst DRAGGABLE_MODULE_KEYS = \[.*?\];\n", "\n", text, count=1, flags=re.S)
-          text = text.replace('DRAGGABLE_MODULE_KEYS.forEach((moduleKey) => {', 'MODULE_CATALOG_KEYS.forEach((moduleKey) => {')
+          text = text.replace('const cards = DRAGGABLE_MODULE_KEYS', 'const cards = MODULE_CATALOG_KEYS')
           sidebar.write_text(text, encoding='utf-8')
 
           context = Path('src/moduleContextMenu.js')
@@ -94,7 +81,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
           assert 'export const MODULE_CATALOG_KEYS' in catalog
           assert 'DRAGGABLE_MODULE_KEYS' not in sidebar
           assert 'PICKER_MODULE_KEYS' not in context
-          assert 'MODULE_CATALOG_KEYS.forEach' in sidebar
+          assert 'const cards = MODULE_CATALOG_KEYS' in sidebar
           assert 'MODULE_CATALOG_KEYS.forEach' in context
           for obsolete in ['moble_sofa_set_classic','moble_table_chair_set_minyon','moble_bar_stool_classic']:
               assert obsolete not in sidebar
@@ -119,5 +106,3 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
             git commit -m "refactor: use one module catalog source [skip ci]"
             git push origin ROG
           fi
-
-# trigger: 2
