@@ -1,0 +1,71 @@
+name: Fix L Counter Side Clearance
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-l-counter-side-clearance.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Match L counter side clearances to Banko 100
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          scene_path = Path('src/scene3d.js')
+          scene = scene_path.read_text()
+          old = "  [[-0.5,-0.5],[0.5,-0.5],[0.5,0.5],[0,0.5],[-0.5,0]].forEach(([x,z]) => addProfile(postGeometry.clone(), new THREE.Vector3(x + (x<0?profileM/2:x>0?-profileM/2:0), frameHeightM/2, z + (z<0?profileM/2:z>0?-profileM/2:0))));"
+          new = """  [
+    [-0.5 + profileM / 2, -0.5 + profileM / 2],
+    [0.5 - profileM / 2, -0.5 + profileM / 2],
+    [0.5 - profileM / 2, 0.5 - profileM / 2],
+    [profileM / 2, 0.5 - profileM / 2],
+    [-0.5 + profileM / 2, -profileM / 2],
+  ].forEach(([x, z]) => addProfile(
+    postGeometry.clone(),
+    new THREE.Vector3(x, frameHeightM / 2, z),
+  ));"""
+          if old not in scene:
+              raise SystemExit('Expected L counter post block not found')
+          scene = scene.replace(old, new, 1)
+          scene_path.write_text(scene)
+
+          test_path = Path('test/lCounterSideGeometry.test.js')
+          test_text = test_path.read_text()
+          old_test = """test('L counter five posts support outer side endpoints instead of inner notch', () => {
+  assert.match(block, /\\[\\[-0\\.5,-0\\.5\\],\\[0\\.5,-0\\.5\\],\\[0\\.5,0\\.5\\],\\[0,0\\.5\\],\\[-0\\.5,0\\]\\]/);
+  assert.doesNotMatch(block, /\\[0,0\\]\\]\\.forEach/);
+});
+"""
+          new_test = """test('L counter side posts use the same inset clearance as straight Banko 100', () => {
+  assert.match(block, /\\[profileM \\/ 2, 0\\.5 - profileM \\/ 2\\]/);
+  assert.match(block, /\\[-0\\.5 \\+ profileM \\/ 2, -profileM \\/ 2\\]/);
+  assert.doesNotMatch(block, /\\[0,0\\.5\\]/);
+  assert.doesNotMatch(block, /\\[-0\\.5,0\\]/);
+});
+"""
+          if old_test not in test_text:
+              raise SystemExit('Expected L counter side geometry test block not found')
+          test_path.write_text(test_text.replace(old_test, new_test, 1))
+          PY
+      - run: npm test
+      - run: npm run build
+      - name: Commit result
+        run: |
+          rm -f .github/workflows/fix-l-counter-side-clearance.yml
+          git config user.name "mustafa sinan koca"
+          git config user.email "mustafasinankoca@gmail.com"
+          git add -A
+          git commit -m "fix: match L counter side clearances to Banko 100 [skip ci]"
+          git push origin ROG
