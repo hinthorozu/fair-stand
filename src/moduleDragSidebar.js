@@ -6,11 +6,11 @@ const DRAGGABLE_MODULE_KEYS = [
   'wall_150',
   'wall_100',
   'wall_50',
-  'SEPARATOR_100',
-  'SEPARATOR_50',
+  'wall_separator_100',
+  'wall_separator_50',
   'DOOR_100',
-  'SHOWCASE_3_100',
-  'SHOWCASE_2_100',
+  'wall_showcase_100_3',
+  'wall_showcase_100_2',
   'wall_shelf_3_200',
   'wall_shelf_2_200',
   'wall_shelf_3_150',
@@ -27,9 +27,9 @@ const DRAGGABLE_MODULE_KEYS = [
   'BASE_200',
   'BASE_150',
   'BASE_100',
-  'COUNTER_200',
-  'COUNTER_150',
-  'COUNTER_100',
+  'desk_banko_200',
+  'desk_banko_150',
+  'desk_banko_100',
 ];
 
 function ensureStyles() {

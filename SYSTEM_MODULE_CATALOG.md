@@ -8,7 +8,7 @@ Bu doküman, ROG branch'inde bulunan mevcut sistem koduna göre hazırlanmışt�
 - `src/productionParts.js` — üretim parçaları ve gerçek parça ölçüleri
 - `src/modulePlacement.js` — connect / snap / collision davranışı
 
-> Not: Katalog ID'si (`wall_100`, `COUNTER_150` vb.) sabit sistem kimliğidir. Sahneye eklenen her modül ayrıca `module-<uuid>` formatında dinamik bir instance ID alır.
+> Not: Katalog ID'si (`wall_100`, `desk_banko_150` vb.) sabit sistem kimliğidir. Sahneye eklenen her modül ayrıca `module-<uuid>` formatında dinamik bir instance ID alır.
 
 ## Genel Durum
 
@@ -266,7 +266,7 @@ Sistem sabitleri:
 
 Her vitrin modülü state tarafında 7 düzenlenebilir Maxima panel slotu taşır.
 
-## `SHOWCASE_2_100`
+## `wall_showcase_100_2`
 
 - Ekrandaki ad: **2 Gözlü Vitrin 100**
 - Type: `showcase-2`
@@ -289,7 +289,7 @@ Her vitrin modülü state tarafında 7 düzenlenebilir Maxima panel slotu taşı
 
 ---
 
-## `SHOWCASE_3_100`
+## `wall_showcase_100_3`
 
 - Ekrandaki ad: **3 Gözlü Vitrin 100**
 - Type: `showcase-3`
@@ -343,7 +343,7 @@ Her vitrin modülü state tarafında 7 düzenlenebilir Maxima panel slotu taşı
 
 Separatör state'i tek bir `surface` taşır. Renk düzenlenebilir; normal panel gibi image state'i yoktur.
 
-## `SEPARATOR_50`
+## `wall_separator_50`
 
 - Ekrandaki ad: **Separatör 50**
 - Type: `separator`
@@ -361,7 +361,7 @@ Separatör state'i tek bir `surface` taşır. Renk düzenlenebilir; normal panel
 
 ---
 
-## `SEPARATOR_100`
+## `wall_separator_100`
 
 - Ekrandaki ad: **Separatör 100**
 - Type: `separator`
@@ -391,7 +391,7 @@ State tarafında 6 ayrı düzenlenebilir yüz vardır:
 - `rightLower`
 - `rightUpper`
 
-## `COUNTER_100`
+## `desk_banko_100`
 
 - Ekrandaki ad: **Banko 100**
 - Type: `counter`
@@ -411,7 +411,7 @@ State tarafında 6 ayrı düzenlenebilir yüz vardır:
 
 ---
 
-## `COUNTER_150`
+## `desk_banko_150`
 
 - Ekrandaki ad: **Banko 150**
 - Type: `counter`
@@ -431,7 +431,7 @@ State tarafında 6 ayrı düzenlenebilir yüz vardır:
 
 ---
 
-## `COUNTER_200`
+## `desk_banko_200`
 
 - Ekrandaki ad: **Banko 200**
 - Type: `counter`
