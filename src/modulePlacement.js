@@ -165,6 +165,86 @@ function getGroundSegment(module) {
   };
 }
 
+function isLCounterModule(module) {
+  return module?.type === 'counter' && module?.shape === 'L';
+}
+
+function createGroundSegmentFromWorldPoints(startPoint, endPoint) {
+  const dx = Number(endPoint.xCm) - Number(startPoint.xCm);
+  const dy = Number(endPoint.yCm) - Number(startPoint.yCm);
+  if (![dx, dy].every(Number.isFinite)) return null;
+
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    return {
+      axis: 'x',
+      fixedCm: (Number(startPoint.yCm) + Number(endPoint.yCm)) / 2,
+      startCm: Math.min(Number(startPoint.xCm), Number(endPoint.xCm)),
+      endCm: Math.max(Number(startPoint.xCm), Number(endPoint.xCm)),
+    };
+  }
+
+  return {
+    axis: 'y',
+    fixedCm: (Number(startPoint.xCm) + Number(endPoint.xCm)) / 2,
+    startCm: Math.min(Number(startPoint.yCm), Number(endPoint.yCm)),
+    endCm: Math.max(Number(startPoint.yCm), Number(endPoint.yCm)),
+  };
+}
+
+function getLCounterCollisionSegments(module) {
+  if (!isLCounterModule(module)) return [];
+  const placement = module?.placement;
+  const widthCm = Number(module?.widthCm);
+  const depthCm = Number(module?.depthCm);
+  if (!placement || !Number.isFinite(widthCm) || !Number.isFinite(depthCm) || widthCm <= 0 || depthCm <= 0) {
+    return [];
+  }
+
+  const armCm = 50;
+  const rotationDeg = normalizeModuleRotationZDeg(placement.rotationZDeg);
+  const vertical = isVerticalModuleRotation(rotationDeg);
+  const placementX = Number(placement.xCm);
+  const placementY = Number(placement.yCm);
+  if (!Number.isFinite(placementX) || !Number.isFinite(placementY)) return [];
+
+  const centerX = placementX + (vertical ? 0 : widthCm / 2);
+  const centerY = placementY + (vertical ? widthCm / 2 : 0);
+  const radians = rotationDeg * Math.PI / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const toWorld = (localX, localY) => ({
+    xCm: centerX + localX * cos + localY * sin,
+    yCm: centerY - localX * sin + localY * cos,
+  });
+  const createLocalSegment = (x1, y1, x2, y2) => createGroundSegmentFromWorldPoints(
+    toWorld(x1, y1),
+    toWorld(x2, y2),
+  );
+
+  const armModule = { ...module, depthCm: armCm, shape: null };
+  return [
+    createLocalSegment(
+      -widthCm / 2,
+      -depthCm / 2 + armCm / 2,
+      widthCm / 2,
+      -depthCm / 2 + armCm / 2,
+    ),
+    createLocalSegment(
+      widthCm / 2 - armCm / 2,
+      -depthCm / 2,
+      widthCm / 2 - armCm / 2,
+      depthCm / 2,
+    ),
+  ].filter(Boolean).map((segment) => ({ segment, module: armModule }));
+}
+
+function getModuleCollisionSegments(module) {
+  const lSegments = getLCounterCollisionSegments(module);
+  if (lSegments.length) return lSegments;
+  const segment = getGroundSegment(module);
+  return segment ? [{ segment, module }] : [];
+}
+
 function pointIsSegmentEndpoint(segment, coordinateCm) {
   return nearlyEqual(coordinateCm, segment.startCm)
     || nearlyEqual(coordinateCm, segment.endCm);
@@ -257,12 +337,7 @@ function getModuleCollisionDepthCm(module) {
   return MODULE_COLLISION_DEPTH_CM;
 }
 
-export function placementsOverlap(moduleA, moduleB) {
-  if (isTopFixtureType(moduleA?.type) || isTopFixtureType(moduleB?.type)) return false;
-  const a = getGroundSegment(moduleA);
-  const b = getGroundSegment(moduleB);
-  if (!a || !b) return false;
-
+function collisionSegmentsOverlap(a, moduleA, b, moduleB) {
   const depthA = getModuleCollisionDepthCm(moduleA);
   const depthB = getModuleCollisionDepthCm(moduleB);
 
@@ -290,8 +365,6 @@ export function placementsOverlap(moduleA, moduleB) {
     && intersectionY <= vertical.endCm + EPSILON_CM;
 
   if (onHorizontal && onVertical) {
-    // Gerçek L/T bağlantılarında merkez çizgileri birleşebilir; en az bir
-    // modülün ucu bağlantı noktasındaysa bu birleşim kasıtlıdır.
     const horizontalEndpoint = pointIsSegmentEndpoint(horizontal, intersectionX);
     const verticalEndpoint = pointIsSegmentEndpoint(vertical, intersectionY);
 
@@ -315,9 +388,6 @@ export function placementsOverlap(moduleA, moduleB) {
     return !horizontalEndpoint && !verticalEndpoint;
   }
 
-  // Merkez çizgileri kesişmese bile 10 cm kasalar fiziksel olarak birbirine
-  // girebilir. Dik modülün yarı derinliğini X, yatay modülün yarı derinliğini
-  // Y doğrultusunda genişleterek gerçek footprint çakışmasını yakala.
   const verticalHalfDepth = verticalDepth / 2;
   const horizontalHalfDepth = horizontalDepth / 2;
   const physicalXOverlap = intersectionX > horizontal.startCm - verticalHalfDepth + EPSILON_CM
@@ -327,12 +397,27 @@ export function placementsOverlap(moduleA, moduleB) {
   return physicalXOverlap && physicalYOverlap;
 }
 
+export function placementsOverlap(moduleA, moduleB) {
+  if (isTopFixtureType(moduleA?.type) || isTopFixtureType(moduleB?.type)) return false;
+  const segmentsA = getModuleCollisionSegments(moduleA);
+  const segmentsB = getModuleCollisionSegments(moduleB);
+  if (!segmentsA.length || !segmentsB.length) return false;
+
+  return segmentsA.some((entryA) => segmentsB.some((entryB) => collisionSegmentsOverlap(
+    entryA.segment,
+    entryA.module,
+    entryB.segment,
+    entryB.module,
+  )));
+}
+
 export function validatePlacementAgainstModules({
   placement,
   widthCm,
   depthCm = null,
   moduleId = null,
   moduleType = null,
+  shape = null,
   modules = [],
   standType,
   standXCm,
@@ -354,6 +439,7 @@ export function validatePlacementAgainstModules({
   const candidate = {
     id: moduleId,
     type: moduleType,
+    shape,
     widthCm,
     depthCm: effectiveDepthCm,
     placement,
@@ -443,6 +529,7 @@ function createEndpointConnectionPlacement({
 export function snapPlacementToModules({
   moduleId = null,
   moduleType = null,
+  shape = null,
   widthCm,
   depthCm = null,
   pointerXCm,
@@ -510,6 +597,7 @@ export function snapPlacementToModules({
       depthCm,
       moduleId,
       moduleType,
+      shape,
       modules,
       standType,
       standXCm,
@@ -535,8 +623,97 @@ export function snapPlacementToModules({
     });
   };
 
+  const addThinTargetCandidates = (target, targetModuleForDepth, targetModuleId) => {
+    if (!target) return;
+
+    if (target.axis === movingAxis) {
+      if (movingAxis === 'x') {
+        addCandidate(createEndpointConnectionPlacement({
+          axis: 'x', pointXCm: target.endCm, pointYCm: target.fixedCm,
+          widthCm: width, rotationZDeg: resolvedRotation, movingEndpoint: 'start',
+          standType, standXCm,
+        }), targetModuleId, 'end-to-end', 0);
+        addCandidate(createEndpointConnectionPlacement({
+          axis: 'x', pointXCm: target.startCm, pointYCm: target.fixedCm,
+          widthCm: width, rotationZDeg: resolvedRotation, movingEndpoint: 'end',
+          standType, standXCm,
+        }), targetModuleId, 'end-to-end', 0);
+      } else {
+        addCandidate(createEndpointConnectionPlacement({
+          axis: 'y', pointXCm: target.fixedCm, pointYCm: target.endCm,
+          widthCm: width, rotationZDeg: resolvedRotation, movingEndpoint: 'start',
+          standType, standXCm,
+        }), targetModuleId, 'end-to-end', 0);
+        addCandidate(createEndpointConnectionPlacement({
+          axis: 'y', pointXCm: target.fixedCm, pointYCm: target.startCm,
+          widthCm: width, rotationZDeg: resolvedRotation, movingEndpoint: 'end',
+          standType, standXCm,
+        }), targetModuleId, 'end-to-end', 0);
+      }
+      return;
+    }
+
+    const targetDepthCm = getModuleCollisionDepthCm(targetModuleForDepth);
+    const thinMovingModule = movingDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
+    const matchesFixtureSide = thinMovingModule
+      && usesLogicalFixtureEndpoint(targetModuleForDepth?.type)
+      && targetDepthCm > MODULE_COLLISION_DEPTH_CM + EPSILON_CM
+      && nearlyEqual(width, targetDepthCm);
+
+    if (matchesFixtureSide) {
+      [target.startCm, target.endCm].forEach((endpointCm) => {
+        const placement = createModulePlacement({
+          xCm: movingAxis === 'y' ? endpointCm : target.fixedCm - width / 2,
+          yCm: movingAxis === 'y' ? target.fixedCm - width / 2 : endpointCm,
+          zCm: 0,
+          rotationZDeg: resolvedRotation,
+          wallId: 'free',
+        });
+        placement.wallId = inferPlacementWallId({ placement, standType, standXCm });
+        addCandidate(placement, targetModuleId, 'fixture-side', -2);
+      });
+    }
+
+    getSegmentSnapCoordinates(target).forEach((coordinateCm) => {
+      const pointXCm = target.axis === 'x' ? coordinateCm : target.fixedCm;
+      const pointYCm = target.axis === 'y' ? coordinateCm : target.fixedCm;
+      const targetEndpoint = nearlyEqual(coordinateCm, target.startCm)
+        || nearlyEqual(coordinateCm, target.endCm);
+      const snapKind = targetEndpoint ? 'corner' : 'tee';
+      const priority = targetEndpoint ? 1 : 2;
+
+      addCandidate(createEndpointConnectionPlacement({
+        axis: movingAxis,
+        pointXCm,
+        pointYCm,
+        widthCm: width,
+        rotationZDeg: resolvedRotation,
+        movingEndpoint: 'start',
+        standType,
+        standXCm,
+      }), targetModuleId, snapKind, priority);
+
+      addCandidate(createEndpointConnectionPlacement({
+        axis: movingAxis,
+        pointXCm,
+        pointYCm,
+        widthCm: width,
+        rotationZDeg: resolvedRotation,
+        movingEndpoint: 'end',
+        standType,
+        standXCm,
+      }), targetModuleId, snapKind, priority);
+    });
+  };
+
   modules.forEach((targetModule) => {
     if (!targetModule?.placement || targetModule.id === moduleId) return;
+    if (!strictMovingDepth && isLCounterModule(targetModule)) {
+      getLCounterCollisionSegments(targetModule).forEach(({ segment, module: armModule }) => {
+        addThinTargetCandidates(segment, armModule, targetModule.id);
+      });
+      return;
+    }
     const target = getGroundSegment(targetModule);
     if (!target) return;
 

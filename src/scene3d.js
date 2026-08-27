@@ -1615,6 +1615,7 @@ export function createStandScene(
       depthCm: moduleState.depthCm,
       moduleId: moduleState.id,
       moduleType: moduleState.type,
+      shape: moduleState.shape,
       modules: getRenderedModuleStates(),
       standType: stageLayout.standType,
       standXCm: stageLayout.widthCm,
@@ -1663,6 +1664,7 @@ export function createStandScene(
     const snapped = snapPlacementToStand({
       standType: stageLayout.standType,
       moduleType: moduleState.type,
+      shape: moduleState.shape,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
       forceFree: isFloorFixtureType(moduleState.type),
@@ -1710,6 +1712,7 @@ export function createStandScene(
     const magneticSnap = snapPlacementToModules({
       moduleId: moduleState.id,
       moduleType: moduleState.type,
+      shape: moduleState.shape,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
       forceFree: isFloorFixtureType(moduleState.type),
@@ -1731,6 +1734,7 @@ export function createStandScene(
         depthCm: moduleState.depthCm,
         moduleId: moduleState.id,
         moduleType: moduleState.type,
+      shape: moduleState.shape,
         modules: renderedModules,
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
@@ -1943,6 +1947,7 @@ export function createStandScene(
     const magneticSnap = snapPlacementToModules({
       moduleId: moduleState.id,
       moduleType: moduleState.type,
+      shape: moduleState.shape,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
       forceFree: isFloorFixtureType(moduleState.type),
@@ -1964,6 +1969,7 @@ export function createStandScene(
         depthCm: moduleState.depthCm,
         moduleId: moduleState.id,
         moduleType: moduleState.type,
+      shape: moduleState.shape,
         modules: renderedModules,
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
@@ -4154,6 +4160,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     surface.userData = {
       kind: 'surface',
       moduleType: moduleState.type,
+      shape: moduleState.shape,
       selectionMode: 'panel',
       acceptsImage: true,
       moduleIndex,

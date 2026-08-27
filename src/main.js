@@ -690,7 +690,10 @@ function assignPlannedPlacements(moduleStates, { placementMode = 'append', conte
     const validation = validatePlacementAgainstModules({
       placement,
       widthCm: moduleState.widthCm,
+      depthCm: moduleState.depthCm,
       moduleId: moduleState.id,
+      moduleType: moduleState.type,
+      shape: moduleState.shape,
       modules: [...currentModules, ...planned],
       standType: currentStand.standType,
       standXCm: currentStand.xCm,
