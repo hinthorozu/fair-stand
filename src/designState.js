@@ -105,7 +105,7 @@ export function createCounterModuleState(widthCm, options = {}) {
   const width = Number(widthCm);
   if (![100, 150, 200].includes(width)) return null;
   const shape = options.shape === 'L' ? 'L' : 'straight';
-  const depthCm = shape === 'L' ? 100 : (Number(options.depthCm) || 50);
+  const depthCm = shape === 'L' ? (Number(options.depthCm) || width) : (Number(options.depthCm) || 50);
   const faces = {
     frontLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
     frontUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
