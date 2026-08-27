@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ROG]
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,10 +18,6 @@ jobs:
         with:
           node-version: 22
 
-      - name: Apply Eames 4-chair table set patch
-        if: github.event_name == 'push'
-        run: node .github/scripts/run-eames-shell-patch.cjs
-
       - name: Install dependencies
         run: npm install
 
@@ -33,14 +26,3 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Commit generated Eames table set
-        if: github.event_name == 'push'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/catalog.js src/designState.js src/main.js src/scene3d.js src/moduleDragSidebar.js test/eamesTableChairSetContract.test.js public/models/eames-table-chair.mesh.bin public/models/EAMES_CHAIR_ATTRIBUTION.txt
-          if ! git diff --cached --quiet; then
-            git commit -m "feat: add Eames 4-chair table set [skip ci]"
-            git push
-          fi
