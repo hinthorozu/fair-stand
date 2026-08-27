@@ -5,6 +5,7 @@ on:
     branches: [ROG]
     paths:
       - '.github/workflows/unify-module-catalog.yml'
+      - 'test/baseWallCatalog.test.js'
 
 permissions:
   contents: write
