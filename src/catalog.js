@@ -92,8 +92,8 @@ export const MODULE_CATALOG = Object.freeze({
   wall_base_100: { type: 'base-wall', widthCm: 100, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 100' },
   wall_base_150: { type: 'base-wall', widthCm: 150, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 150' },
   wall_base_200: { type: 'base-wall', widthCm: 200, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 200' },
-  wall_seperator_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
-  wall_seperator_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
+  wall_separator_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
+  wall_separator_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
 });
 
 export function flatPanelKey(widthCm) {
