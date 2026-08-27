@@ -3523,8 +3523,8 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const addRailZ=(length,x,z)=>railYs.forEach(y=>addProfile(new THREE.BoxGeometry(frameDepthM,railHeightM,length),new THREE.Vector3(x,y,z)));
   addRailX(longPanelM,0,-0.5+frameDepthM/2); addRailZ(longPanelM,0.5-frameDepthM/2,0); addRailZ(shortPanelM,-0.5+frameDepthM/2,-0.25); addRailX(shortPanelM,0.25,0.5-frameDepthM/2);
   const topMaterial = new THREE.MeshStandardMaterial({ color:0xf8fafc, roughness:0.58, metalness:0 });
-  const topA=new THREE.Mesh(new THREE.BoxGeometry(1.10,topThicknessM,0.60),topMaterial.clone()); topA.position.set(0,frameHeightM+topThicknessM/2,-0.20); topA.castShadow=true; topA.receiveShadow=true; group.add(topA);
-  const topB=new THREE.Mesh(new THREE.BoxGeometry(0.52,topThicknessM,0.60),topMaterial.clone()); topB.rotation.y=Math.PI/2; topB.position.set(0.25,frameHeightM+topThicknessM/2,0.25); topB.castShadow=true; topB.receiveShadow=true; group.add(topB);
+  const topA=new THREE.Mesh(new THREE.BoxGeometry(1.10,topThicknessM,0.60),topMaterial.clone()); topA.position.set(0,frameHeightM+topThicknessM/2,-0.25); topA.castShadow=true; topA.receiveShadow=true; group.add(topA);
+  const topB=new THREE.Mesh(new THREE.BoxGeometry(0.52,topThicknessM,0.60),topMaterial.clone()); topB.rotation.y=Math.PI/2; topB.position.set(0.25,frameHeightM+topThicknessM/2,0.29); topB.castShadow=true; topB.receiveShadow=true; group.add(topB);
   const surfaces=[];
   const addFace=(surfaceRole,panelLevel,surfaceState,faceWidthM,position,rotationY=0,outward=1)=>{
     if(!surfaceState)return;
