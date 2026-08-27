@@ -7,8 +7,8 @@ import { createBaseWallModuleState } from '../src/designState.js';
 test('Panel Bazalı 100 150 200 draggable catalog entries exist', () => {
   const sidebar = fs.readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
   for (const width of [100, 150, 200]) {
-    assert.equal(MODULE_CATALOG[`BASE_WALL_${width}`].type, 'base-wall');
-    assert.ok(sidebar.includes(`'BASE_WALL_${width}'`));
+    assert.equal(MODULE_CATALOG[`wall_base_${width}`].type, 'base-wall');
+    assert.ok(sidebar.includes(`'wall_base_${width}'`));
   }
 });
 

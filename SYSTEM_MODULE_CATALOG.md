@@ -8,7 +8,7 @@ Bu doküman, ROG branch'inde bulunan mevcut sistem koduna göre hazırlanmışt�
 - `src/productionParts.js` — üretim parçaları ve gerçek parça ölçüleri
 - `src/modulePlacement.js` — connect / snap / collision davranışı
 
-> Not: Katalog ID'si (`PANEL_100`, `COUNTER_150` vb.) sabit sistem kimliğidir. Sahneye eklenen her modül ayrıca `module-<uuid>` formatında dinamik bir instance ID alır.
+> Not: Katalog ID'si (`wall_100`, `COUNTER_150` vb.) sabit sistem kimliğidir. Sahneye eklenen her modül ayrıca `module-<uuid>` formatında dinamik bir instance ID alır.
 
 ## Genel Durum
 
@@ -21,7 +21,7 @@ Sistemde toplam **28 katalog modülü** vardır.
 
 # 1. Düz Panel / Duvar Modülleri
 
-## `PANEL_50`
+## `wall_50`
 
 - Ekrandaki ad: **Düz Panel 50**
 - Type: `flat-panel`
@@ -43,7 +43,7 @@ Sistemde toplam **28 katalog modülü** vardır.
 
 ---
 
-## `PANEL_100`
+## `wall_100`
 
 - Ekrandaki ad: **Düz Panel 100**
 - Type: `flat-panel`
@@ -65,7 +65,7 @@ Sistemde toplam **28 katalog modülü** vardır.
 
 ---
 
-## `PANEL_150`
+## `wall_150`
 
 - Ekrandaki ad: **Düz Panel 150**
 - Type: `flat-panel`
@@ -87,7 +87,7 @@ Sistemde toplam **28 katalog modülü** vardır.
 
 ---
 
-## `PANEL_200`
+## `wall_200`
 
 - Ekrandaki ad: **Düz Panel 200**
 - Type: `flat-panel`
@@ -118,7 +118,7 @@ Sistem sabitleri:
 - Raf projeksiyonu: **38 cm**
 - Raf kalınlığı: **3 cm**
 
-## `SHELF_2_100`
+## `wall_shelf_2_100`
 
 - Ekrandaki ad: **Raf 100 · 2 Raf**
 - Type: `shelf`
@@ -142,7 +142,7 @@ Sistem sabitleri:
 
 ---
 
-## `SHELF_3_100`
+## `wall_shelf_3_100`
 
 - Ekrandaki ad: **Raf 100 · 3 Raf**
 - Type: `shelf`
@@ -166,7 +166,7 @@ Sistem sabitleri:
 
 ---
 
-## `SHELF_2_150`
+## `wall_shelf_2_150`
 
 - Ekrandaki ad: **Raf 150 · 2 Raf**
 - Type: `shelf`
@@ -190,7 +190,7 @@ Sistem sabitleri:
 
 ---
 
-## `SHELF_3_150`
+## `wall_shelf_3_150`
 
 - Ekrandaki ad: **Raf 150 · 3 Raf**
 - Type: `shelf`
@@ -214,7 +214,7 @@ Sistem sabitleri:
 
 ---
 
-## `SHELF_2_200`
+## `wall_shelf_2_200`
 
 - Ekrandaki ad: **Raf 200 · 2 Raf**
 - Type: `shelf`
@@ -238,7 +238,7 @@ Sistem sabitleri:
 
 ---
 
-## `SHELF_3_200`
+## `wall_shelf_3_200`
 
 - Ekrandaki ad: **Raf 200 · 3 Raf**
 - Type: `shelf`
@@ -534,7 +534,7 @@ State tarafında:
 
 olmak üzere duvar + baza yüzeyleri birlikte bulunur.
 
-## `BASE_WALL_100`
+## `wall_base_100`
 
 - Ekrandaki ad: **Panel Bazalı 100**
 - Type: `base-wall`
@@ -559,7 +559,7 @@ olmak üzere duvar + baza yüzeyleri birlikte bulunur.
 
 ---
 
-## `BASE_WALL_150`
+## `wall_base_150`
 
 - Ekrandaki ad: **Panel Bazalı 150**
 - Type: `base-wall`
@@ -584,7 +584,7 @@ olmak üzere duvar + baza yüzeyleri birlikte bulunur.
 
 ---
 
-## `BASE_WALL_200`
+## `wall_base_200`
 
 - Ekrandaki ad: **Panel Bazalı 200**
 - Type: `base-wall`
@@ -795,7 +795,7 @@ Katalog ölçüsü ile üretim ölçüsü aynı kavram değildir.
 
 Örnek:
 
-- `PANEL_100` katalogda nominal olarak **100 cm** modüldür.
+- `wall_100` katalogda nominal olarak **100 cm** modüldür.
 - Gerçek üretim parçaları ise:
   - Profil 91 cm
   - Panel 98 × 47 cm

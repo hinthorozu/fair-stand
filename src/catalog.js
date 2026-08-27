@@ -64,19 +64,19 @@ export const LED_FLOODLIGHT_DIMENSIONS = Object.freeze({
 });
 
 export const MODULE_CATALOG = Object.freeze({
-  PANEL_50: { type: 'flat-panel', widthCm: 50, label: 'Düz Panel 50' },
-  PANEL_100: { type: 'flat-panel', widthCm: 100, label: 'Düz Panel 100' },
-  PANEL_150: { type: 'flat-panel', widthCm: 150, label: 'Düz Panel 150' },
-  PANEL_200: { type: 'flat-panel', widthCm: 200, label: 'Düz Panel 200' },
+  wall_50: { type: 'flat-panel', widthCm: 50, label: 'Düz Panel 50' },
+  wall_100: { type: 'flat-panel', widthCm: 100, label: 'Düz Panel 100' },
+  wall_150: { type: 'flat-panel', widthCm: 150, label: 'Düz Panel 150' },
+  wall_200: { type: 'flat-panel', widthCm: 200, label: 'Düz Panel 200' },
 
   SHOWCASE_3_100: { type: 'showcase-3', widthCm: 100, label: '3 Gözlü Vitrin 100' },
   SHOWCASE_2_100: { type: 'showcase-2', widthCm: 100, label: '2 Gözlü Vitrin 100' },
-  SHELF_2_100: { type: 'shelf', widthCm: 100, shelfCount: 2, label: 'Raf 100 · 2 Raf' },
-  SHELF_3_100: { type: 'shelf', widthCm: 100, shelfCount: 3, label: 'Raf 100 · 3 Raf' },
-  SHELF_2_150: { type: 'shelf', widthCm: 150, shelfCount: 2, label: 'Raf 150 · 2 Raf' },
-  SHELF_3_150: { type: 'shelf', widthCm: 150, shelfCount: 3, label: 'Raf 150 · 3 Raf' },
-  SHELF_2_200: { type: 'shelf', widthCm: 200, shelfCount: 2, label: 'Raf 200 · 2 Raf' },
-  SHELF_3_200: { type: 'shelf', widthCm: 200, shelfCount: 3, label: 'Raf 200 · 3 Raf' },
+  wall_shelf_2_100: { type: 'shelf', widthCm: 100, shelfCount: 2, label: 'Raf 100 · 2 Raf' },
+  wall_shelf_3_100: { type: 'shelf', widthCm: 100, shelfCount: 3, label: 'Raf 100 · 3 Raf' },
+  wall_shelf_2_150: { type: 'shelf', widthCm: 150, shelfCount: 2, label: 'Raf 150 · 2 Raf' },
+  wall_shelf_3_150: { type: 'shelf', widthCm: 150, shelfCount: 3, label: 'Raf 150 · 3 Raf' },
+  wall_shelf_2_200: { type: 'shelf', widthCm: 200, shelfCount: 2, label: 'Raf 200 · 2 Raf' },
+  wall_shelf_3_200: { type: 'shelf', widthCm: 200, shelfCount: 3, label: 'Raf 200 · 3 Raf' },
   SOFA_SET: { type: 'sofa-set', widthCm: 150, depthCm: 150, heightCm: 80, label: 'Koltuk Takımı' },
   TABLE_CHAIR_SET: { type: 'table-chair-set', widthCm: 120, depthCm: 120, heightCm: 90, label: 'Masa Sandalye Takımı' },
   BAR_STOOL: { type: 'bar-stool', widthCm: 50, depthCm: 50, heightCm: 80, label: 'Bar Taburesi' },
@@ -89,13 +89,13 @@ export const MODULE_CATALOG = Object.freeze({
   BASE_100: { type: 'base', widthCm: 100, depthCm: 50, heightCm: 50, label: 'Baza 100' },
   BASE_150: { type: 'base', widthCm: 150, depthCm: 50, heightCm: 50, label: 'Baza 150' },
   BASE_200: { type: 'base', widthCm: 200, depthCm: 50, heightCm: 50, label: 'Baza 200' },
-  BASE_WALL_100: { type: 'base-wall', widthCm: 100, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 100' },
-  BASE_WALL_150: { type: 'base-wall', widthCm: 150, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 150' },
-  BASE_WALL_200: { type: 'base-wall', widthCm: 200, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 200' },
+  wall_base_100: { type: 'base-wall', widthCm: 100, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 100' },
+  wall_base_150: { type: 'base-wall', widthCm: 150, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 150' },
+  wall_base_200: { type: 'base-wall', widthCm: 200, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 200' },
   SEPARATOR_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
   SEPARATOR_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
 });
 
 export function flatPanelKey(widthCm) {
-  return `PANEL_${widthCm}`;
+  return `wall_${widthCm}`;
 }

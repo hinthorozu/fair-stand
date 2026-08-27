@@ -31,7 +31,7 @@ for (const [widthText, ids] of Object.entries(expected)) {
 
 test('Panel Bazalı katalog ölçüleri 100/150/200 ve 50 cm baza derinliğini korur', () => {
   for (const width of [100, 150, 200]) {
-    const item = MODULE_CATALOG[`BASE_WALL_${width}`];
+    const item = MODULE_CATALOG[`wall_base_${width}`];
     assert.equal(item.type, 'base-wall');
     assert.equal(item.widthCm, width);
     assert.equal(item.depthCm, 50);

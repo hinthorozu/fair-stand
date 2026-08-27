@@ -6,9 +6,9 @@ import { snapPlacementToStand } from '../src/modulePlacement.js';
 
 test('shelf catalog exposes 100 150 200 cm widths in 2 and 3 shelf variants', () => {
   const variants = [
-    ['SHELF_2_100', 100, 2], ['SHELF_3_100', 100, 3],
-    ['SHELF_2_150', 150, 2], ['SHELF_3_150', 150, 3],
-    ['SHELF_2_200', 200, 2], ['SHELF_3_200', 200, 3],
+    ['wall_shelf_2_100', 100, 2], ['wall_shelf_3_100', 100, 3],
+    ['wall_shelf_2_150', 150, 2], ['wall_shelf_3_150', 150, 3],
+    ['wall_shelf_2_200', 200, 2], ['wall_shelf_3_200', 200, 3],
   ];
   variants.forEach(([key, widthCm, shelfCount]) => {
     assert.equal(MODULE_CATALOG[key].type, 'shelf');
