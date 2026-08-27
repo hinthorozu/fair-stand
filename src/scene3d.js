@@ -3508,11 +3508,11 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const frameMaterial = new THREE.MeshStandardMaterial({ color:FRAME_COLOR, metalness:0.68, roughness:0.28 });
   const addProfile = (geometry, position) => { const mesh = new THREE.Mesh(geometry, frameMaterial.clone()); mesh.position.copy(position); mesh.castShadow=true; mesh.receiveShadow=true; group.add(mesh); return mesh; };
   const postGeometry = new THREE.BoxGeometry(profileM, frameHeightM, profileM);
-  [[-0.5,-0.5],[0.5,-0.5],[0.5,0.5],[0,0.5],[0,0]].forEach(([x,z]) => addProfile(postGeometry.clone(), new THREE.Vector3(x + (x<0?profileM/2:x>0?-profileM/2:0), frameHeightM/2, z + (z<0?profileM/2:z>0?-profileM/2:0))));
+  [[-0.5,-0.5],[0.5,-0.5],[0.5,0.5],[0,0.5],[-0.5,0]].forEach(([x,z]) => addProfile(postGeometry.clone(), new THREE.Vector3(x + (x<0?profileM/2:x>0?-profileM/2:0), frameHeightM/2, z + (z<0?profileM/2:z>0?-profileM/2:0))));
   const railYs=[0,stripHeightM,frameHeightM];
   const addRailX=(length,x,z)=>railYs.forEach(y=>addProfile(new THREE.BoxGeometry(length,railHeightM,frameDepthM),new THREE.Vector3(x,y,z)));
   const addRailZ=(length,x,z)=>railYs.forEach(y=>addProfile(new THREE.BoxGeometry(frameDepthM,railHeightM,length),new THREE.Vector3(x,y,z)));
-  addRailX(longPanelM,0,-0.5+frameDepthM/2); addRailZ(longPanelM,0.5-frameDepthM/2,0); addRailX(shortPanelM,-0.25,frameDepthM/2); addRailZ(shortPanelM,frameDepthM/2,0.25);
+  addRailX(longPanelM,0,-0.5+frameDepthM/2); addRailZ(longPanelM,0.5-frameDepthM/2,0); addRailZ(shortPanelM,-0.5+frameDepthM/2,-0.25); addRailX(shortPanelM,0.25,0.5-frameDepthM/2);
   const topMaterial = new THREE.MeshStandardMaterial({ color:0xf8fafc, roughness:0.58, metalness:0 });
   const topA=new THREE.Mesh(new THREE.BoxGeometry(1.10,topThicknessM,0.60),topMaterial.clone()); topA.position.set(0,frameHeightM+topThicknessM/2,-0.20); topA.castShadow=true; topA.receiveShadow=true; group.add(topA);
   const topB=new THREE.Mesh(new THREE.BoxGeometry(0.52,topThicknessM,0.60),topMaterial.clone()); topB.rotation.y=Math.PI/2; topB.position.set(0.25,frameHeightM+topThicknessM/2,0.25); topB.castShadow=true; topB.receiveShadow=true; group.add(topB);
@@ -3527,8 +3527,8 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const lowerY=stripHeightM/2, upperY=stripHeightM+stripHeightM/2;
   addFace('front','lower',moduleState.faces?.frontLower,longPanelM,new THREE.Vector3(0,lowerY,-0.5),0,-1); addFace('front','upper',moduleState.faces?.frontUpper,longPanelM,new THREE.Vector3(0,upperY,-0.5),0,-1);
   addFace('right','lower',moduleState.faces?.rightLower,longPanelM,new THREE.Vector3(0.5,lowerY,0),Math.PI/2,1); addFace('right','upper',moduleState.faces?.rightUpper,longPanelM,new THREE.Vector3(0.5,upperY,0),Math.PI/2,1);
-  addFace('left','lower',moduleState.faces?.leftLower,shortPanelM,new THREE.Vector3(-0.25,lowerY,0),0,1); addFace('left','upper',moduleState.faces?.leftUpper,shortPanelM,new THREE.Vector3(-0.25,upperY,0),0,1);
-  addFace('return','lower',moduleState.faces?.returnLower,shortPanelM,new THREE.Vector3(0,lowerY,0.25),Math.PI/2,-1); addFace('return','upper',moduleState.faces?.returnUpper,shortPanelM,new THREE.Vector3(0,upperY,0.25),Math.PI/2,-1);
+  addFace('left','lower',moduleState.faces?.leftLower,shortPanelM,new THREE.Vector3(-0.5,lowerY,-0.25),-Math.PI/2,-1); addFace('left','upper',moduleState.faces?.leftUpper,shortPanelM,new THREE.Vector3(-0.5,upperY,-0.25),-Math.PI/2,-1);
+  addFace('return','lower',moduleState.faces?.returnLower,shortPanelM,new THREE.Vector3(0.25,lowerY,0.5),0,1); addFace('return','upper',moduleState.faces?.returnUpper,shortPanelM,new THREE.Vector3(0.25,upperY,0.5),0,1);
   return {group,surfaces};
 }
 
