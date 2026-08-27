@@ -189,6 +189,21 @@ export function createTableChairSetModuleState() {
   };
 }
 
+export function createEamesTableChairSetModuleState() {
+  return {
+    id: createId('module'),
+    type: 'table-chair-set-eames',
+    widthCm: 150,
+    depthCm: 150,
+    heightCm: 82,
+    chairCount: 4,
+    surface: {
+      id: createId('surface'),
+      color: DEFAULT_PANEL_COLOR,
+    },
+  };
+}
+
 export function createBarStoolModuleState() {
   return {
     id: createId('module'),

@@ -1,0 +1,5 @@
+Eames Chair DSW
+Author: faiyaz5yaz (https://sketchfab.com/faiyaz5yaz)
+Source: https://sketchfab.com/3d-models/eames-chair-dsw-8c5266e27d9b459a814e470c5de06059
+License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+Geometry optimized for fair-stand web rendering.

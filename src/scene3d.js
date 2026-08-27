@@ -62,8 +62,32 @@ const DEFAULT_VIEW_DISTANCE_FACTOR = 1.32;
 const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
 const STAGE_HOME_DIRECTION = new THREE.Vector3(1, 1.05, 1).normalize();
 
+const EAMES_CHAIR_POSITION_SCALE = 1000;
+const EAMES_CHAIR_MODEL_SCALE = 0.715;
+const EAMES_CHAIR_MESH_META = Object.freeze([{"name":"Object_4","role":"shell","vertexCount":547,"faceCount":1094,"indexCount":3282,"positionOffset":0,"indexOffset":3282}].map((entry) => Object.freeze(entry)));
+let eamesChairPayloadPromise = null;
+
+function loadEamesChairPayload() {
+  if (!eamesChairPayloadPromise) {
+    eamesChairPayloadPromise = fetch(
+      import.meta.env.BASE_URL + 'models/eames-table-chair.mesh.bin',
+    ).then((response) => {
+      if (!response.ok) {
+        throw new Error('Eames sandalye modeli yüklenemedi (' + response.status + ')');
+      }
+      return response.arrayBuffer();
+    });
+  }
+  return eamesChairPayloadPromise;
+}
+
 function isFloorFixtureType(type) {
-  return type === 'counter' || type === 'base' || type === 'sofa-set' || type === 'table-chair-set' || type === 'bar-stool';
+  return type === 'counter'
+    || type === 'base'
+    || type === 'sofa-set'
+    || type === 'table-chair-set'
+    || type === 'table-chair-set-eames'
+    || type === 'bar-stool';
 }
 
 function isTopFixtureType(type) {
@@ -1082,6 +1106,8 @@ export function createStandScene(
         module = createSofaSetModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'table-chair-set') {
         module = createTableChairSetModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'table-chair-set-eames') {
+        module = createEamesTableChairSetModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'bar-stool') {
         module = createBarStoolModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'led-floodlight') {
@@ -1420,6 +1446,7 @@ export function createStandScene(
     if (moduleState?.type === 'shelf') return 'Raf ' + widthCm + ' · ' + (Number(moduleState.shelfCount) || 2) + ' Raf';
     if (moduleState?.type === 'sofa-set') return 'Koltuk Takımı';
     if (moduleState?.type === 'table-chair-set') return 'Masa Sandalye Takımı';
+    if (moduleState?.type === 'table-chair-set-eames') return 'Eames Masa Sandalye Takımı';
     if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';
     if (moduleState?.type === 'led-floodlight') return 'LED Projektör';
     if (moduleState?.type === 'base') return `Baza ${widthCm}`;
@@ -3002,6 +3029,219 @@ function createBarStoolModule(moduleState, moduleIndex) {
   });
 
   return { group, surfaces: colorTargets };
+}
+
+
+function createEamesTableChairSetModule(moduleState, moduleIndex) {
+  const widthCm = Number(moduleState.widthCm || 150);
+  const depthCm = Number(moduleState.depthCm || 150);
+  const heightCm = Number(moduleState.heightCm || 82);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: 'table-chair-set-eames',
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const metalMaterial = new THREE.MeshStandardMaterial({
+    color: 0x30343a,
+    roughness: 0.32,
+    metalness: 0.74,
+  });
+  const tabletopMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0xd7e9ed,
+    transparent: true,
+    opacity: 0.42,
+    roughness: 0.10,
+    metalness: 0,
+    transmission: 0.32,
+    clearcoat: 0.65,
+    clearcoatRoughness: 0.08,
+    depthWrite: false,
+  });
+
+  const top = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.375, 0.375, 0.018, 64),
+    tabletopMaterial,
+  );
+  top.position.set(0, 0.74, 0);
+  top.receiveShadow = true;
+  group.add(top);
+
+  const stem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.035, 0.045, 0.70, 20),
+    metalMaterial.clone(),
+  );
+  stem.position.set(0, 0.37, 0);
+  stem.castShadow = true;
+  group.add(stem);
+
+  const base = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32),
+    metalMaterial.clone(),
+  );
+  base.position.set(0, 0.018, 0);
+  base.castShadow = true;
+  base.receiveShadow = true;
+  group.add(base);
+
+  const colorTargets = [];
+  const surfaces = [];
+  const chairPlacements = [
+    [-0.39, -0.39, Math.PI / 4],
+    [0.39, -0.39, -Math.PI / 4],
+    [-0.39, 0.39, Math.PI * 3 / 4],
+    [0.39, 0.39, -Math.PI * 3 / 4],
+  ];
+
+  chairPlacements.forEach(([x, z, rotationY], index) => {
+    const proxy = new THREE.Mesh(
+      new THREE.BoxGeometry(0.48, 0.82, 0.60),
+      new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        colorWrite: false,
+      }),
+    );
+    proxy.position.set(x, 0.41, z);
+    proxy.rotation.y = rotationY;
+    group.add(proxy);
+
+    const selectionFrame = index === 0 ? createSelectionFrame(0.48, 0.82) : null;
+    if (selectionFrame) {
+      selectionFrame.visible = false;
+      proxy.add(selectionFrame);
+    }
+
+    proxy.userData = {
+      kind: 'surface',
+      moduleType: 'table-chair-set-eames',
+      selectionMode: 'module',
+      acceptsImage: false,
+      moduleIndex,
+      moduleId: moduleState.id,
+      widthCm,
+      stripIndex: null,
+      stripNumber: null,
+      surfaceRole: 'chair',
+      surfaceId: index === 0 ? moduleState.surface?.id : moduleState.surface?.id + '-' + index,
+      surfaceState: moduleState.surface,
+      selectionFrame,
+      colorTargets,
+    };
+    surfaces.push(proxy);
+  });
+
+  loadEamesChairPayload().then((buffer) => {
+    if (!group.parent) return;
+
+    const geometries = EAMES_CHAIR_MESH_META.map((meta) => {
+      const quantized = new Int16Array(buffer, meta.positionOffset, meta.vertexCount * 3);
+      const positions = new Float32Array(quantized.length);
+      for (let index = 0; index < quantized.length; index += 1) {
+        positions[index] = quantized[index] / EAMES_CHAIR_POSITION_SCALE;
+      }
+
+      const sourceIndices = new Uint16Array(buffer, meta.indexOffset, meta.indexCount);
+      const indices = new Uint16Array(sourceIndices);
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
+      return { meta, geometry };
+    });
+
+    const shellMaterial = new THREE.MeshStandardMaterial({
+      color: moduleState.surface?.color ?? '#ffffff',
+      roughness: 0.46,
+      metalness: 0,
+    });
+    const woodMaterial = new THREE.MeshStandardMaterial({
+      color: 0x9b6635,
+      roughness: 0.58,
+      metalness: 0,
+    });
+    const supportMaterial = new THREE.MeshStandardMaterial({
+      color: 0x25282d,
+      roughness: 0.34,
+      metalness: 0.58,
+    });
+
+    chairPlacements.forEach(([x, z, rotationY]) => {
+      const chair = new THREE.Group();
+      chair.position.set(x, 0, z);
+      chair.rotation.y = rotationY;
+      chair.scale.setScalar(EAMES_CHAIR_MODEL_SCALE);
+
+      const addRod = (start, end, radius, material, radialSegments = 10) => {
+        const direction = new THREE.Vector3().subVectors(end, start);
+        const length = direction.length();
+        const rod = new THREE.Mesh(
+          new THREE.CylinderGeometry(radius, radius, length, radialSegments),
+          material,
+        );
+        rod.position.copy(start).add(end).multiplyScalar(0.5);
+        rod.quaternion.setFromUnitVectors(
+          new THREE.Vector3(0, 1, 0),
+          direction.clone().normalize(),
+        );
+        rod.castShadow = true;
+        rod.receiveShadow = true;
+        chair.add(rod);
+      };
+
+      const legTopY = 0.49;
+      const legBottomY = 0.025;
+      const legTops = [
+        [-0.17, legTopY, -0.15],
+        [0.17, legTopY, -0.15],
+        [-0.17, legTopY, 0.14],
+        [0.17, legTopY, 0.14],
+      ];
+      const legBottoms = [
+        [-0.27, legBottomY, -0.22],
+        [0.27, legBottomY, -0.22],
+        [-0.27, legBottomY, 0.22],
+        [0.27, legBottomY, 0.22],
+      ];
+      legTops.forEach((coords, legIndex) => {
+        addRod(
+          new THREE.Vector3(...coords),
+          new THREE.Vector3(...legBottoms[legIndex]),
+          0.024,
+          woodMaterial,
+          12,
+        );
+      });
+
+      const braceY = 0.285;
+      addRod(new THREE.Vector3(-0.19, braceY, -0.16), new THREE.Vector3(0.19, braceY, 0.16), 0.007, supportMaterial, 8);
+      addRod(new THREE.Vector3(0.19, braceY, -0.16), new THREE.Vector3(-0.19, braceY, 0.16), 0.007, supportMaterial, 8);
+      addRod(new THREE.Vector3(-0.20, 0.34, 0), new THREE.Vector3(0.20, 0.34, 0), 0.006, supportMaterial, 8);
+
+      geometries.forEach(({ meta, geometry }) => {
+        const material = meta.role === 'shell'
+          ? shellMaterial
+          : (meta.role === 'base' ? woodMaterial : supportMaterial);
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        chair.add(mesh);
+        if (meta.role === 'shell') colorTargets.push(mesh);
+      });
+      group.add(chair);
+    });
+  }).catch((error) => {
+    console.warn('Eames masa sandalye modeli yüklenemedi:', error);
+  });
+
+  return { group, surfaces };
 }
 
 function createTableChairSetModule(moduleState, moduleIndex) {

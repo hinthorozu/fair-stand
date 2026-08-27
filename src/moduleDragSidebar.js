@@ -86,7 +86,7 @@ export function createModuleCatalogPreview(module) {
     return preview;
   }
 
-  if (module.type === 'table-chair-set') {
+  if (module.type === 'table-chair-set' || module.type === 'table-chair-set-eames') {
     const body = document.createElement('div');
     body.className = 'module-drag-table-chair';
     preview.appendChild(body);
