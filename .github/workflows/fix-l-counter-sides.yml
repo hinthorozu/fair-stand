@@ -1,0 +1,83 @@
+name: Fix L Counter Sides
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-l-counter-sides.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Move L counter side panels to outer ends
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path('src/scene3d.js')
+          text = path.read_text()
+
+          replacements = [
+              (
+                  "[[-0.5,-0.5],[0.5,-0.5],[0.5,0.5],[0,0.5],[0,0]]",
+                  "[[-0.5,-0.5],[0.5,-0.5],[0.5,0.5],[0,0.5],[-0.5,0]]",
+              ),
+              (
+                  "addRailX(longPanelM,0,-0.5+frameDepthM/2); addRailZ(longPanelM,0.5-frameDepthM/2,0); addRailX(shortPanelM,-0.25,frameDepthM/2); addRailZ(shortPanelM,frameDepthM/2,0.25);",
+                  "addRailX(longPanelM,0,-0.5+frameDepthM/2); addRailZ(longPanelM,0.5-frameDepthM/2,0); addRailZ(shortPanelM,-0.5+frameDepthM/2,-0.25); addRailX(shortPanelM,0.25,0.5-frameDepthM/2);",
+              ),
+              (
+                  "  addFace('left','lower',moduleState.faces?.leftLower,shortPanelM,new THREE.Vector3(-0.25,lowerY,0),0,1); addFace('left','upper',moduleState.faces?.leftUpper,shortPanelM,new THREE.Vector3(-0.25,upperY,0),0,1);\n  addFace('return','lower',moduleState.faces?.returnLower,shortPanelM,new THREE.Vector3(0,lowerY,0.25),Math.PI/2,-1); addFace('return','upper',moduleState.faces?.returnUpper,shortPanelM,new THREE.Vector3(0,upperY,0.25),Math.PI/2,-1);",
+                  "  addFace('left','lower',moduleState.faces?.leftLower,shortPanelM,new THREE.Vector3(-0.5,lowerY,-0.25),-Math.PI/2,-1); addFace('left','upper',moduleState.faces?.leftUpper,shortPanelM,new THREE.Vector3(-0.5,upperY,-0.25),-Math.PI/2,-1);\n  addFace('return','lower',moduleState.faces?.returnLower,shortPanelM,new THREE.Vector3(0.25,lowerY,0.5),0,1); addFace('return','upper',moduleState.faces?.returnUpper,shortPanelM,new THREE.Vector3(0.25,upperY,0.5),0,1);",
+              ),
+          ]
+
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'Expected L counter geometry block not found: {old[:80]}')
+              text = text.replace(old, new, 1)
+
+          path.write_text(text)
+          PY
+
+          cat > test/lCounterSideGeometry.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+
+          const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+          const start = source.indexOf('function createLCounterModule');
+          const end = source.indexOf('function createShelfModule', start);
+          const block = source.slice(start, end);
+
+          test('L counter short side panels close the two outer arm ends', () => {
+            assert.match(block, /new THREE\.Vector3\(-0\.5,lowerY,-0\.25\),-Math\.PI\/2,-1/);
+            assert.match(block, /new THREE\.Vector3\(0\.25,lowerY,0\.5\),0,1/);
+            assert.doesNotMatch(block, /new THREE\.Vector3\(-0\.25,lowerY,0\),0,1/);
+            assert.doesNotMatch(block, /new THREE\.Vector3\(0,lowerY,0\.25\),Math\.PI\/2,-1/);
+          });
+
+          test('L counter five posts support outer side endpoints instead of inner notch', () => {
+            assert.match(block, /\[\[-0\.5,-0\.5\],\[0\.5,-0\.5\],\[0\.5,0\.5\],\[0,0\.5\],\[-0\.5,0\]\]/);
+            assert.doesNotMatch(block, /\[0,0\]\]\.forEach/);
+          });
+          EOF
+      - run: npm test
+      - run: npm run build
+      - name: Commit result
+        run: |
+          rm -f .github/workflows/fix-l-counter-sides.yml
+          git config user.name "mustafa sinan koca"
+          git config user.email "mustafasinankoca@gmail.com"
+          git add -A
+          git commit -m "fix: place L counter side panels on outer ends [skip ci]"
+          git push origin ROG
