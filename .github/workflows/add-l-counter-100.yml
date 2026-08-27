@@ -22,6 +22,18 @@ jobs:
         run: |
           sed -i 's/${/\\${/g' .github/scripts/add-l-counter-100.js
           node --input-type=commonjs < .github/scripts/add-l-counter-100.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/scene3d.js')
+          s=p.read_text()
+          a=s.index('function createLCounterModule(')
+          b=s.index('function createCounterModule(', a)
+          block=s[a:b]
+          s=s[:a]+s[b:]
+          c=s.index('function createShelfModule(')
+          s=s[:c]+block+s[c:]
+          p.write_text(s)
+          PY
       - run: npm test
       - run: npm run build
       - name: Commit result
