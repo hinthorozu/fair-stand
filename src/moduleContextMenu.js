@@ -1,4 +1,4 @@
-import { MODULE_CATALOG } from './catalog.js';
+import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from './catalog.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 
 const MODULE_LABELS = {
@@ -13,33 +13,6 @@ const MODULE_LABELS = {
   'sofa-set': 'Koltuk Takımı',
 };
 
-const PICKER_MODULE_KEYS = [
-  'wall_200',
-  'wall_150',
-  'wall_100',
-  'wall_50',
-  'wall_separator_100',
-  'wall_separator_50',
-  'DOOR_100',
-  'wall_showcase_100_3',
-  'wall_showcase_100_2',
-  'wall_shelf_3_200',
-  'wall_shelf_2_200',
-  'wall_shelf_3_150',
-  'wall_shelf_2_150',
-  'wall_shelf_3_100',
-  'wall_shelf_2_100',
-  'furniture_sofa_set_classic',
-  'furniture_table_chair_set_minyon',
-  'furniture_bar_stool_classic',
-  'LED_FLOODLIGHT',
-  'BASE_200',
-  'BASE_150',
-  'BASE_100',
-  'desk_banko_200',
-  'desk_banko_150',
-  'desk_banko_100',
-];
 
 export function resolveModuleSidePlacement(context, visualSide) {
   if (visualSide !== 'left' && visualSide !== 'right') return visualSide;
@@ -287,7 +260,7 @@ export function createModuleContextMenu({
   function renderPickerCatalog() {
     pickerGrid.innerHTML = '';
 
-    PICKER_MODULE_KEYS.forEach((moduleKey) => {
+    MODULE_CATALOG_KEYS.forEach((moduleKey) => {
       const module = MODULE_CATALOG[moduleKey];
       if (!module) return;
 
