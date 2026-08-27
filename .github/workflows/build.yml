@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ROG]
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,24 +21,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Add Banko 150 L
-        run: node .github/scripts/add-bank150l.js
-
       - name: Test
         run: npm test
 
       - name: Build
         run: npm run build
-
-      - name: Commit source changes
-        if: github.event_name == 'push'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/catalog.js src/designState.js src/scene3d.js src/main.js src/productionParts.js src/moduleRecipes.js test/lCounter150Contract.test.js test/lCounterSideGeometry.test.js
-          if git diff --cached --quiet; then
-            echo "No source changes to commit"
-            exit 0
-          fi
-          git commit -m "feat: add 150x150 L counter [skip ci]"
-          git push origin HEAD:ROG
