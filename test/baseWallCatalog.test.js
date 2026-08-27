@@ -1,14 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import { MODULE_CATALOG } from '../src/catalog.js';
+import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
 import { createBaseWallModuleState } from '../src/designState.js';
 
-test('Panel Bazalı 100 150 200 draggable catalog entries exist', () => {
-  const sidebar = fs.readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
+test('Panel Bazalı 100 150 200 catalog entries exist in shared catalog keys', () => {
   for (const width of [100, 150, 200]) {
-    assert.equal(MODULE_CATALOG[`wall_base_${width}`].type, 'base-wall');
-    assert.ok(sidebar.includes(`'wall_base_${width}'`));
+    const moduleKey = `wall_base_${width}`;
+    assert.equal(MODULE_CATALOG[moduleKey].type, 'base-wall');
+    assert.ok(MODULE_CATALOG_KEYS.includes(moduleKey));
   }
 });
 
