@@ -1918,6 +1918,8 @@ export function createStandScene(
 
     const snapped = snapPlacementToStand({
       standType: stageLayout.standType,
+      moduleType: moduleState.type,
+      shape: moduleState.shape,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
       forceFree: isFloorFixtureType(moduleState.type),
