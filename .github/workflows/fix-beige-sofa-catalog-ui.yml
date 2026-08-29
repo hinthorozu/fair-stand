@@ -1,0 +1,68 @@
+name: Fix Beige Sofa Catalog UI
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-beige-sofa-catalog-ui.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch catalog UI support
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          sidebar = Path('src/moduleDragSidebar.js')
+          text = sidebar.read_text(encoding='utf-8')
+          old = "if (module.type === 'sofa-set') {"
+          new = "if (module.type === 'sofa-set' || module.type === 'sofa-set-beige') {"
+          if old in text:
+              text = text.replace(old, new, 1)
+          elif new not in text:
+              raise SystemExit('moduleDragSidebar sofa preview anchor not found')
+          sidebar.write_text(text, encoding='utf-8')
+
+          context = Path('src/moduleContextMenu.js')
+          text = context.read_text(encoding='utf-8')
+          old = "  'sofa-set': 'Koltuk Takımı',\n"
+          new = "  'sofa-set': 'Koltuk Takımı',\n  'sofa-set-beige': 'Bej Koltuk Takımı',\n"
+          if old in text and "'sofa-set-beige': 'Bej Koltuk Takımı'" not in text:
+              text = text.replace(old, new, 1)
+          elif "'sofa-set-beige': 'Bej Koltuk Takımı'" not in text:
+              raise SystemExit('moduleContextMenu label anchor not found')
+          context.write_text(text, encoding='utf-8')
+
+          catalog = Path('src/catalog.js').read_text(encoding='utf-8')
+          assert "furniture_sofa_set_beige: { type: 'sofa-set-beige'" in catalog
+          assert "'furniture_sofa_set_beige'," in catalog
+          print('Beige sofa catalog UI support patched.')
+          PY
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/moduleDragSidebar.js src/moduleContextMenu.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "fix: show beige sofa set in catalog ui [skip ci]"
+            git push origin ROG
+          fi
