@@ -35,7 +35,7 @@ if (end < 0) throw new Error('snapPlacementToStand body end not found');
 let block = source.slice(start, end + 1);
 if (!block.includes('const placementSnapCm = getModulePlacementSnapCm(moduleType);')) {
   const splitAt = block.indexOf(bodyStartToken) + bodyStartToken.length;
-  let head = block.slice(0, splitAt);
+  const head = block.slice(0, splitAt);
   let body = block.slice(splitAt);
   body = body.replace(/snapDepthCenterCm\(/g, 'snapDepthForModule(');
   body = body.replace(/snapCm\(/g, 'snapForModule(');
@@ -52,6 +52,6 @@ if (!test.includes('getModulePlacementSnapCm,')) {
   test = test.replace('  getAllowedWallIds,\n', '  getAllowedWallIds,\n  getModulePlacementSnapCm,\n');
 }
 if (!test.includes("furniture modules use a 10 cm free-placement grid")) {
-  test += `\n\ntest('furniture modules use a 10 cm free-placement grid while other modules keep 50 cm', () => {\n  assert.equal(getModulePlacementSnapCm('sofa-set'), 10);\n  assert.equal(getModulePlacementSnapCm('table-chair-set-eames'), 10);\n  assert.equal(getModulePlacementSnapCm('counter'), 50);\n\n  for (const moduleType of ['sofa-set', 'table-chair-set-eames']) {\n    const result = snapPlacementToStand({\n      standType: 'island',\n      moduleType,\n      widthCm: 150,\n      depthCm: 150,\n      forceFree: true,\n      pointerXCm: 143,\n      pointerYCm: 143,\n      standXCm: 800,\n      standYCm: 600,\n    });\n    assert.equal(result.ok, true);\n    assert.equal(result.placement.wallId, 'free');\n    assert.equal(result.placement.xCm, 70);\n    assert.equal(result.placement.yCm, 145);\n  }\n\n  const regular = snapPlacementToStand({\n    standType: 'island',\n    moduleType: 'counter',\n    widthCm: 150,\n    depthCm: 150,\n    forceFree: true,\n    pointerXCm: 143,\n    pointerYCm: 143,\n    standXCm: 800,\n    standYCm: 600,\n  });\n  assert.equal(regular.ok, true);\n  assert.equal(regular.placement.xCm, 50);\n  assert.equal(regular.placement.yCm, 125);\n});\n`;
+  test += `\n\ntest('furniture modules use a 10 cm free-placement grid while other modules keep 50 cm', () => {\n  assert.equal(getModulePlacementSnapCm('sofa-set'), 10);\n  assert.equal(getModulePlacementSnapCm('table-chair-set-eames'), 10);\n  assert.equal(getModulePlacementSnapCm('counter'), 50);\n\n  for (const moduleType of ['sofa-set', 'table-chair-set-eames']) {\n    const result = snapPlacementToStand({\n      standType: 'island',\n      moduleType,\n      widthCm: 150,\n      depthCm: 150,\n      forceFree: true,\n      pointerXCm: 343,\n      pointerYCm: 343,\n      standXCm: 800,\n      standYCm: 600,\n    });\n    assert.equal(result.ok, true);\n    assert.equal(result.placement.wallId, 'free');\n    assert.equal(result.placement.xCm, 270);\n    assert.equal(result.placement.yCm, 345);\n  }\n\n  const regular = snapPlacementToStand({\n    standType: 'island',\n    moduleType: 'counter',\n    widthCm: 150,\n    depthCm: 150,\n    forceFree: true,\n    pointerXCm: 343,\n    pointerYCm: 343,\n    standXCm: 800,\n    standYCm: 600,\n  });\n  assert.equal(regular.ok, true);\n  assert.equal(regular.placement.xCm, 250);\n  assert.equal(regular.placement.yCm, 325);\n});\n`;
 }
 fs.writeFileSync(testPath, test);
