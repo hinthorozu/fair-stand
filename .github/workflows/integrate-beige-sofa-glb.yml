@@ -1,10 +1,10 @@
-name: Integrate Beige Sofa GLB
+name: Integrate Beige Sofa Mesh
 
 on:
   push:
     branches: [ROG]
     paths:
-      - '.github/tmp/beige_sofa_trigger.txt'
+      - '.github/workflows/integrate-beige-sofa-glb.yml'
 
 permissions:
   contents: write
@@ -20,14 +20,107 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install extracted sofa model
+
+      - name: Reconstruct extracted beige sofa mesh
         shell: bash
         run: |
           mkdir -p public/models
-          cat .github/tmp/beige_b64/*.part | base64 -d > public/models/beige_sofa_set.glb
-          test "$(stat -c%s public/models/beige_sofa_set.glb)" -eq 361252
-          test "$(head -c4 public/models/beige_sofa_set.glb)" = "glTF"
-      - name: Replace procedural beige sofa with original GLB
+          cat .github/tmp/beige_mesh_part0{1..7}.b64 | base64 -d > /tmp/beige_mesh.lzma
+          python3 - <<'PY'
+          from pathlib import Path
+          import lzma
+          import struct
+
+          packed = lzma.decompress(Path('/tmp/beige_mesh.lzma').read_bytes())
+          meta = [
+              ('beigechair2seatsofa_tripo_mat_0691346e_0', 5592, 7586,
+               [-0.04798666015267372, 0.0002856234787032008, -0.04909035190939903],
+               [-0.0006629818235523999, 0.025941653177142143, -0.0029292176477611065],
+               0, 30836, 30836, 28459),
+              ('beigechair1_tripo_mat_0691346e_0', 2980, 3832,
+               [-0.035586677491664886, 2.644560765929782e-07, 0.020847946405410767],
+               [-0.008809005841612816, 0.026153039187192917, 0.04909035190939903],
+               59295, 16856, 76151, 14318),
+              ('beigechair3_tripo_mat_0691346e_0', 3272, 4026,
+               [0.019002314656972885, 0.0, -0.038246769458055496],
+               [0.04798666015267372, 0.026116475462913513, -0.010590252466499805],
+               90469, 18007, 108476, 14857),
+          ]
+
+          def decode_varints(data, expected):
+              values = []
+              value = 0
+              shift = 0
+              for byte in data:
+                  value |= (byte & 0x7f) << shift
+                  if byte & 0x80:
+                      shift += 7
+                      continue
+                  values.append(value)
+                  value = 0
+                  shift = 0
+              if value or shift:
+                  raise RuntimeError('Incomplete varint payload')
+              if len(values) != expected:
+                  raise RuntimeError(f'Expected {expected} values, got {len(values)}')
+              return values
+
+          def unzigzag(value):
+              return (value >> 1) ^ -(value & 1)
+
+          output = bytearray()
+          manifest = []
+          for name, vertex_count, face_count, mins, maxs, pos_off, pos_len, idx_off, idx_len in meta:
+              encoded_positions = decode_varints(
+                  packed[pos_off:pos_off + pos_len], vertex_count * 3,
+              )
+              signed_position_deltas = [unzigzag(value) for value in encoded_positions]
+
+              axes = []
+              cursor = 0
+              for axis in range(3):
+                  previous = 0
+                  quantized = []
+                  for delta in signed_position_deltas[cursor:cursor + vertex_count]:
+                      previous += delta
+                      quantized.append(previous)
+                  cursor += vertex_count
+                  span = maxs[axis] - mins[axis]
+                  axes.append([
+                      mins[axis] + (value / 65535.0) * span
+                      for value in quantized
+                  ])
+
+              position_offset = len(output)
+              for index in range(vertex_count):
+                  output += struct.pack('<fff', axes[0][index], axes[1][index], axes[2][index])
+
+              encoded_indices = decode_varints(
+                  packed[idx_off:idx_off + idx_len], face_count * 3,
+              )
+              previous = 0
+              indices = []
+              for value in encoded_indices:
+                  previous += unzigzag(value)
+                  if previous < 0 or previous >= vertex_count:
+                      raise RuntimeError(f'Invalid vertex index {previous} for {name}')
+                  indices.append(previous)
+
+              index_offset = len(output)
+              for index in indices:
+                  output += struct.pack('<H', index)
+
+              manifest.append((name, vertex_count, face_count, position_offset, index_offset))
+
+          target = Path('public/models/beige_sofa_mesh.bin')
+          target.write_bytes(output)
+          if len(output) != 234792:
+              raise RuntimeError(f'Unexpected mesh payload size: {len(output)}')
+          print('Beige sofa mesh:', len(output), 'bytes')
+          print('Manifest:', manifest)
+          PY
+
+      - name: Replace only beige procedural renderer
         shell: bash
         run: |
           python3 - <<'PY'
@@ -36,6 +129,7 @@ jobs:
 
           path = Path('src/scene3d.js')
           text = path.read_text(encoding='utf-8')
+
           loader_anchor = """function loadEamesChairModel() {
             if (!eamesChairModelPromise) {
               const loader = new GLTFLoader();
@@ -47,19 +141,29 @@ jobs:
           }
           """
           loader_block = loader_anchor + """
-          let beigeSofaSetModelPromise = null;
+          const BEIGE_SOFA_MESH_META = Object.freeze([
+            Object.freeze({ name: 'beigechair2seatsofa_tripo_mat_0691346e_0', vertexCount: 5592, faceCount: 7586, positionOffset: 0, indexOffset: 67104 }),
+            Object.freeze({ name: 'beigechair1_tripo_mat_0691346e_0', vertexCount: 2980, faceCount: 3832, positionOffset: 112620, indexOffset: 148380 }),
+            Object.freeze({ name: 'beigechair3_tripo_mat_0691346e_0', vertexCount: 3272, faceCount: 4026, positionOffset: 171372, indexOffset: 210636 }),
+          ]);
+          let beigeSofaMeshPromise = null;
 
-          function loadBeigeSofaSetModel() {
-            if (!beigeSofaSetModelPromise) {
-              const loader = new GLTFLoader();
-              beigeSofaSetModelPromise = loader
-                .loadAsync(import.meta.env.BASE_URL + 'models/beige_sofa_set.glb')
-                .then((gltf) => gltf.scene);
+          function loadBeigeSofaMeshPayload() {
+            if (!beigeSofaMeshPromise) {
+              beigeSofaMeshPromise = fetch(
+                import.meta.env.BASE_URL + 'models/beige_sofa_mesh.bin',
+              ).then((response) => {
+                if (!response.ok) {
+                  throw new Error('Bej koltuk modeli yüklenemedi (' + response.status + ')');
+                }
+                return response.arrayBuffer();
+              });
             }
-            return beigeSofaSetModelPromise;
+            return beigeSofaMeshPromise;
           }
           """
-          if 'function loadBeigeSofaSetModel()' not in text:
+
+          if 'function loadBeigeSofaMeshPayload()' not in text:
               if loader_anchor not in text:
                   raise SystemExit('Eames loader anchor not found')
               text = text.replace(loader_anchor, loader_block, 1)
@@ -73,13 +177,26 @@ jobs:
             const heightM = heightCm / 100;
             const group = new THREE.Group();
             group.userData = {
-              kind: 'module', moduleIndex, moduleId: moduleState.id,
-              type: 'sofa-set-beige', widthCm, depthCm, heightCm,
+              kind: 'module',
+              moduleIndex,
+              moduleId: moduleState.id,
+              type: 'sofa-set-beige',
+              widthCm,
+              depthCm,
+              heightCm,
             };
 
+            // Görünür koltuklar aşağıdaki kaynak mesh payload'ından gelir.
+            // Bu kutu yalnız seçim/raycast alanıdır; render edilmez.
+            const colorTargets = [];
             const proxy = new THREE.Mesh(
               new THREE.BoxGeometry(widthM, heightM, depthM),
-              new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+              new THREE.MeshBasicMaterial({
+                transparent: true,
+                opacity: 0,
+                depthWrite: false,
+                colorWrite: false,
+              }),
             );
             proxy.position.set(0, heightM / 2, depthM / 2);
             group.add(proxy);
@@ -88,30 +205,64 @@ jobs:
             selectionFrame.visible = false;
             proxy.add(selectionFrame);
             proxy.userData = {
-              kind: 'surface', moduleType: 'sofa-set-beige', selectionMode: 'module', acceptsImage: false,
-              moduleIndex, moduleId: moduleState.id, widthCm,
-              stripIndex: null, stripNumber: null, surfaceRole: 'furniture',
-              surfaceId: moduleState.surface?.id, surfaceState: moduleState.surface,
-              selectionFrame, colorTargets: [],
+              kind: 'surface',
+              moduleType: 'sofa-set-beige',
+              selectionMode: 'module',
+              acceptsImage: false,
+              moduleIndex,
+              moduleId: moduleState.id,
+              widthCm,
+              stripIndex: null,
+              stripNumber: null,
+              surfaceRole: 'furniture',
+              surfaceId: moduleState.surface?.id,
+              surfaceState: moduleState.surface,
+              selectionFrame,
+              colorTargets,
             };
 
-            loadBeigeSofaSetModel().then((template) => {
+            loadBeigeSofaMeshPayload().then((buffer) => {
               if (!group.parent) return;
-              const model = template.clone(true);
-              model.traverse((object) => {
-                if (!object.isMesh) return;
-                object.castShadow = true;
-                object.receiveShadow = true;
-                if (object.material) object.material = object.material.clone();
+
+              const model = new THREE.Group();
+              const material = new THREE.MeshStandardMaterial({
+                color: moduleState.surface?.color ?? '#e7ddca',
+                roughness: 0.60,
+                metalness: 0,
               });
+
+              BEIGE_SOFA_MESH_META.forEach((meta) => {
+                const positionCount = meta.vertexCount * 3;
+                const indexCount = meta.faceCount * 3;
+                const positions = new Float32Array(
+                  buffer.slice(meta.positionOffset, meta.positionOffset + positionCount * 4),
+                );
+                const indices = new Uint16Array(
+                  buffer.slice(meta.indexOffset, meta.indexOffset + indexCount * 2),
+                );
+                const geometry = new THREE.BufferGeometry();
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+                geometry.computeVertexNormals();
+                geometry.computeBoundingSphere();
+
+                const mesh = new THREE.Mesh(geometry, material.clone());
+                mesh.name = meta.name;
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                colorTargets.push(mesh);
+                model.add(mesh);
+              });
+
               model.updateMatrixWorld(true);
               let box = new THREE.Box3().setFromObject(model);
               const size = box.getSize(new THREE.Vector3());
               const footprint = Math.max(size.x, size.z);
               const targetFootprint = Math.min(widthM, depthM);
               const scale = footprint > 0 ? targetFootprint / footprint : 1;
-              model.scale.multiplyScalar(scale);
+              model.scale.setScalar(scale);
               model.updateMatrixWorld(true);
+
               box = new THREE.Box3().setFromObject(model);
               const center = box.getCenter(new THREE.Vector3());
               model.position.x -= center.x;
@@ -119,37 +270,49 @@ jobs:
               model.position.y -= box.min.y;
               group.add(model);
             }).catch((error) => {
-              console.warn('Bej koltuk takımı GLB modeli yüklenemedi:', error);
+              console.warn('Bej koltuk takımı kaynak modeli yüklenemedi:', error);
             });
+
             return { group, surfaces: [proxy] };
           }"""
 
-          pattern = re.compile(r"function createBeigeSofaSetModule\(moduleState, moduleIndex\) \{.*?\n\}\n\nfunction createSofaSetModule", re.S)
+          pattern = re.compile(
+              r"function createBeigeSofaSetModule\(moduleState, moduleIndex\) \{.*?\n\}\n\nfunction createSofaSetModule",
+              re.S,
+          )
           text, count = pattern.subn(renderer + "\n\nfunction createSofaSetModule", text, count=1)
           if count != 1:
-              raise SystemExit(f'Beige sofa renderer replacement count={count}')
+              raise SystemExit(f'Beige renderer replacement count={count}')
+
           path.write_text(text, encoding='utf-8')
           PY
+
       - name: Verify requested behavior
         shell: bash
         run: |
-          test -s public/models/beige_sofa_set.glb
-          grep -q "models/beige_sofa_set.glb" src/scene3d.js
+          test "$(stat -c%s public/models/beige_sofa_mesh.bin)" -eq 234792
+          grep -q "models/beige_sofa_mesh.bin" src/scene3d.js
+          grep -q "beigechair2seatsofa_tripo_mat_0691346e_0" src/scene3d.js
+          grep -q "beigechair1_tripo_mat_0691346e_0" src/scene3d.js
+          grep -q "beigechair3_tripo_mat_0691346e_0" src/scene3d.js
           grep -q "function createSofaSetModule" src/scene3d.js
           grep -q "moduleType === 'sofa-set-beige'" src/modulePlacement.js
           grep -q "? 10" src/modulePlacement.js
+
       - run: npm install
       - run: npm test
       - run: npm run build
-      - name: Commit GLB integration and clean staging files
+
+      - name: Commit integration and remove staging files
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          rm -rf .github/tmp/beige_b64
-          rm -f .github/tmp/beige_sofa_model.glb.gz .github/tmp/beige_sofa_glb_part*.b64 .github/tmp/beige_sofa_trigger.txt
-          git add -A .github/tmp public/models/beige_sofa_set.glb src/scene3d.js
+          rm -f .github/tmp/beige_mesh_part*.b64
+          rm -f .github/tmp/beige_sofa_glb_part*.b64
+          rm -f .github/tmp/beige_sofa_model.glb.gz
+          rm -f .github/tmp/beige_sofa_trigger.txt
           git rm -f .github/workflows/integrate-beige-sofa-glb.yml
-          git add -A
-          git commit -m "fix: use extracted beige sofa GLB [skip ci]"
+          git add -A src/scene3d.js public/models/beige_sofa_mesh.bin .github/tmp .github/workflows
+          git commit -m "fix: use extracted beige sofa mesh [skip ci]"
           git push origin ROG
