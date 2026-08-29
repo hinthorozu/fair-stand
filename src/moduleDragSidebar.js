@@ -79,7 +79,7 @@ export function createModuleCatalogPreview(module) {
     return preview;
   }
 
-  if (module.type === 'sofa-set') {
+  if (module.type === 'sofa-set' || module.type === 'sofa-set-beige') {
     const body = document.createElement('div');
     body.className = 'module-drag-sofa';
     preview.appendChild(body);

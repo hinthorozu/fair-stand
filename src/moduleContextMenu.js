@@ -11,6 +11,7 @@ const MODULE_LABELS = {
   base: 'Baza',
   shelf: 'Raf',
   'sofa-set': 'Koltuk Takımı',
+  'sofa-set-beige': 'Bej Koltuk Takımı',
 };
 
 
