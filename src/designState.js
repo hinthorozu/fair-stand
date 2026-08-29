@@ -175,6 +175,20 @@ export function createSofaSetModuleState() {
   };
 }
 
+export function createBeigeSofaSetModuleState() {
+  return {
+    id: createId('module'),
+    type: 'sofa-set-beige',
+    widthCm: 150,
+    depthCm: 150,
+    heightCm: 78,
+    surface: {
+      id: createId('surface'),
+      color: '#e7ddca',
+    },
+  };
+}
+
 export function createEamesTableChairSetModuleState() {
   return {
     id: createId('module'),
