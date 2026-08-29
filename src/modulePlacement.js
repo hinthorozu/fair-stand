@@ -47,10 +47,10 @@ function isTopFixtureType(moduleType) {
   return moduleType === 'led-floodlight';
 }
 
-function snapDepthCenterCm(value, depthCm) {
+function snapDepthCenterCm(value, depthCm, stepCm = MODULE_PLACEMENT_SNAP_CM) {
   const depth = Number(depthCm);
   const halfDepth = depth / 2;
-  return halfDepth + snapCm(Number(value) - halfDepth);
+  return halfDepth + snapCm(Number(value) - halfDepth, stepCm);
 }
 
 export function normalizeModuleRotationZDeg(value) {
@@ -100,6 +100,10 @@ export function snapCm(value, stepCm = MODULE_PLACEMENT_SNAP_CM) {
   const step = Number(stepCm);
   if (!Number.isFinite(number) || !Number.isFinite(step) || step <= 0) return null;
   return Math.round(number / step) * step;
+}
+
+export function getModulePlacementSnapCm(moduleType) {
+  return moduleType === 'sofa-set' || moduleType === 'table-chair-set-eames' ? 10 : MODULE_PLACEMENT_SNAP_CM;
 }
 
 export function getAllowedWallIds(standType) {
@@ -966,6 +970,7 @@ function createFreePlacement({
   rotationZDeg,
 }) {
   const width = Number(widthCm);
+  const placementSnapCm = getModulePlacementSnapCm(moduleType);
   const xLimit = Number(standXCm);
   const yLimit = Number(standYCm);
   const rotation = normalizeModuleRotationZDeg(rotationZDeg);
@@ -979,23 +984,23 @@ function createFreePlacement({
   if (maxX < minX || maxY < minY) return null;
 
   let xCm = !vertical
-    ? clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)
+    ? clamp(snapCm(Number(pointerXCm) - width / 2, placementSnapCm), 0, maxX)
     : clamp(
-        strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm),
+        strictDepth ? snapDepthCenterCm(pointerXCm, depthCm, placementSnapCm) : snapCm(pointerXCm, placementSnapCm),
         minX,
         maxX,
       );
   let yCm = vertical
-    ? clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)
+    ? clamp(snapCm(Number(pointerYCm) - width / 2, placementSnapCm), 0, maxY)
     : clamp(
-        strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm),
+        strictDepth ? snapDepthCenterCm(pointerYCm, depthCm, placementSnapCm) : snapCm(pointerYCm, placementSnapCm),
         minY,
         maxY,
       );
 
   if (strictDepth) {
     const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
-    const useWallInnerFaces = moduleType === 'sofa-set' || moduleType === 'table-chair-set' || moduleType === 'bar-stool';
+    const useWallInnerFaces = moduleType === 'sofa-set' || moduleType === 'table-chair-set-eames' || moduleType === 'bar-stool';
     const wallFaceOffsetCm = MODULE_COLLISION_DEPTH_CM / 2;
     const activeWalls = useWallInnerFaces ? getAllowedWallIds(standType) : [];
     const leftEdgeCm = activeWalls.includes('left') ? wallFaceOffsetCm : 0;

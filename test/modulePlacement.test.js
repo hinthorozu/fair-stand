@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   getAllowedWallIds,
+  getModulePlacementSnapCm,
   isVerticalModuleRotation,
   normalizeModuleRotationZDeg,
   planFreeSideInsertion,
@@ -864,4 +865,44 @@ test('50 cm panel snaps centered to the short side of Banko 150', () => {
   assert.deepEqual(result?.placement, {
     xCm: 250, yCm: 175, zCm: 0, rotationZDeg: 90, wallId: 'free',
   });
+});
+
+
+test('furniture modules use a 10 cm free-placement grid while other modules keep 50 cm', () => {
+  assert.equal(getModulePlacementSnapCm('sofa-set'), 10);
+  assert.equal(getModulePlacementSnapCm('table-chair-set-eames'), 10);
+  assert.equal(getModulePlacementSnapCm('counter'), 50);
+
+  for (const moduleType of ['sofa-set', 'table-chair-set-eames']) {
+    const result = snapPlacementToStand({
+      standType: 'island',
+      moduleType,
+      widthCm: 150,
+      depthCm: 150,
+      forceFree: true,
+      pointerXCm: 343,
+      pointerYCm: 343,
+      standXCm: 800,
+      standYCm: 600,
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.placement.wallId, 'free');
+    assert.equal(result.placement.xCm, 270);
+    assert.equal(result.placement.yCm, 345);
+  }
+
+  const regular = snapPlacementToStand({
+    standType: 'island',
+    moduleType: 'counter',
+    widthCm: 150,
+    depthCm: 150,
+    forceFree: true,
+    pointerXCm: 343,
+    pointerYCm: 343,
+    standXCm: 800,
+    standYCm: 600,
+  });
+  assert.equal(regular.ok, true);
+  assert.equal(regular.placement.xCm, 250);
+  assert.equal(regular.placement.yCm, 325);
 });
