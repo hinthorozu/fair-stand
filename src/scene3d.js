@@ -13,6 +13,7 @@ import { formatPlacementFeedbackMessage, hasPlacementFeedbackPointer } from './p
 import {
   createModulePlacement,
   getAllowedWallIds,
+  getModulePlacementSnapCm,
   isVerticalModuleRotation,
   normalizeModuleRotationZDeg,
   rotateModuleRotationZDeg,
@@ -2581,6 +2582,60 @@ export function createStandScene(
 
   window.addEventListener('keydown', (event) => {
     const pressedKey = String(event.key).toLowerCase();
+
+    const arrowDelta = {
+      arrowleft: [-1, 0],
+      arrowright: [1, 0],
+      arrowup: [0, -1],
+      arrowdown: [0, 1],
+    }[pressedKey];
+    if (arrowDelta) {
+      const target = event.target;
+      const tagName = String(target?.tagName ?? '').toLowerCase();
+      const isEditing = tagName === 'input'
+        || tagName === 'textarea'
+        || tagName === 'select'
+        || Boolean(target?.isContentEditable);
+      if (isEditing || dragSession?.dragging) return;
+
+      const moduleGroup = getSingleSelectedModuleGroup();
+      const moduleState = moduleGroup?.userData?.moduleState;
+      if (!moduleGroup || !moduleState?.placement || !stageLayout) return;
+
+      event.preventDefault();
+      const stepCm = getModulePlacementSnapCm(moduleState.type);
+      const desiredPlacement = createModulePlacement({
+        ...moduleState.placement,
+        xCm: Number(moduleState.placement.xCm || 0) + arrowDelta[0] * stepCm,
+        yCm: Number(moduleState.placement.yCm || 0) + arrowDelta[1] * stepCm,
+        wallId: 'free',
+      });
+      desiredPlacement.zCm = Number(moduleState.placement.zCm || 0);
+
+      const renderedModules = getRenderedModuleStates();
+      const validation = validatePlacementAgainstModules({
+        placement: desiredPlacement,
+        widthCm: moduleState.widthCm,
+        depthCm: moduleState.depthCm,
+        moduleId: moduleState.id,
+        moduleType: moduleState.type,
+        shape: moduleState.shape,
+        modules: renderedModules,
+        standType: stageLayout.standType,
+        standXCm: stageLayout.widthCm,
+        standYCm: stageLayout.depthCm,
+      });
+      if (!validation.ok) {
+        showPlacementFeedback(validation.message ?? 'Bu yöne hareket edemez.', { durationMs: 900 });
+        return;
+      }
+
+      moduleState.placement = { ...desiredPlacement };
+      moduleGroup.userData.placement = { ...desiredPlacement };
+      applyPlacementToGroup(moduleGroup, desiredPlacement, moduleState.widthCm);
+      clearPlacementFeedback();
+      return;
+    }
     if (pressedKey === 'delete') {
       const target = event.target;
       const tagName = String(target?.tagName ?? '').toLowerCase();
