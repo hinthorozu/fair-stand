@@ -5,6 +5,7 @@ on:
     branches: [ROG]
     paths:
       - '.github/tmp/beige_sofa_model.glb.gz'
+      - '.github/tmp/beige_sofa_trigger.txt'
 
 permissions:
   contents: write
@@ -180,7 +181,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm -f .github/tmp/beige_sofa_model.glb.gz
-          rm -f .github/tmp/beige_sofa_glb_part*.b64
+          rm -f .github/tmp/beige_sofa_glb_part*.b64 .github/tmp/beige_sofa_trigger.txt
           git add -A .github/tmp public/models/beige_sofa_set.glb src/scene3d.js
           git rm -f .github/workflows/integrate-beige-sofa-glb.yml
           git add -A
