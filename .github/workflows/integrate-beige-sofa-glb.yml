@@ -4,7 +4,6 @@ on:
   push:
     branches: [ROG]
     paths:
-      - '.github/tmp/beige_sofa_model.glb.gz'
       - '.github/tmp/beige_sofa_trigger.txt'
 
 permissions:
@@ -25,7 +24,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p public/models
-          gzip -dc .github/tmp/beige_sofa_model.glb.gz > public/models/beige_sofa_set.glb
+          cat .github/tmp/beige_b64/*.part | base64 -d > public/models/beige_sofa_set.glb
+          test "$(stat -c%s public/models/beige_sofa_set.glb)" -eq 361252
+          test "$(head -c4 public/models/beige_sofa_set.glb)" = "glTF"
       - name: Replace procedural beige sofa with original GLB
         shell: bash
         run: |
@@ -35,7 +36,6 @@ jobs:
 
           path = Path('src/scene3d.js')
           text = path.read_text(encoding='utf-8')
-
           loader_anchor = """function loadEamesChairModel() {
             if (!eamesChairModelPromise) {
               const loader = new GLTFLoader();
@@ -47,7 +47,6 @@ jobs:
           }
           """
           loader_block = loader_anchor + """
-          const BEIGE_SOFA_SET_TARGET_FOOTPRINT_M = 1.35;
           let beigeSofaSetModelPromise = null;
 
           function loadBeigeSofaSetModel() {
@@ -60,7 +59,6 @@ jobs:
             return beigeSofaSetModelPromise;
           }
           """
-
           if 'function loadBeigeSofaSetModel()' not in text:
               if loader_anchor not in text:
                   raise SystemExit('Eames loader anchor not found')
@@ -75,25 +73,13 @@ jobs:
             const heightM = heightCm / 100;
             const group = new THREE.Group();
             group.userData = {
-              kind: 'module',
-              moduleIndex,
-              moduleId: moduleState.id,
-              type: 'sofa-set-beige',
-              widthCm,
-              depthCm,
-              heightCm,
+              kind: 'module', moduleIndex, moduleId: moduleState.id,
+              type: 'sofa-set-beige', widthCm, depthCm, heightCm,
             };
 
-            // The geometry below is only an invisible hit/selection proxy. The visible
-            // furniture comes exclusively from the extracted original GLB asset.
             const proxy = new THREE.Mesh(
               new THREE.BoxGeometry(widthM, heightM, depthM),
-              new THREE.MeshBasicMaterial({
-                transparent: true,
-                opacity: 0,
-                depthWrite: false,
-                colorWrite: false,
-              }),
+              new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
             );
             proxy.position.set(0, heightM / 2, depthM / 2);
             group.add(proxy);
@@ -102,25 +88,15 @@ jobs:
             selectionFrame.visible = false;
             proxy.add(selectionFrame);
             proxy.userData = {
-              kind: 'surface',
-              moduleType: 'sofa-set-beige',
-              selectionMode: 'module',
-              acceptsImage: false,
-              moduleIndex,
-              moduleId: moduleState.id,
-              widthCm,
-              stripIndex: null,
-              stripNumber: null,
-              surfaceRole: 'furniture',
-              surfaceId: moduleState.surface?.id,
-              surfaceState: moduleState.surface,
-              selectionFrame,
-              colorTargets: [],
+              kind: 'surface', moduleType: 'sofa-set-beige', selectionMode: 'module', acceptsImage: false,
+              moduleIndex, moduleId: moduleState.id, widthCm,
+              stripIndex: null, stripNumber: null, surfaceRole: 'furniture',
+              surfaceId: moduleState.surface?.id, surfaceState: moduleState.surface,
+              selectionFrame, colorTargets: [],
             };
 
             loadBeigeSofaSetModel().then((template) => {
               if (!group.parent) return;
-
               const model = template.clone(true);
               model.traverse((object) => {
                 if (!object.isMesh) return;
@@ -128,40 +104,30 @@ jobs:
                 object.receiveShadow = true;
                 if (object.material) object.material = object.material.clone();
               });
-
               model.updateMatrixWorld(true);
               let box = new THREE.Box3().setFromObject(model);
               const size = box.getSize(new THREE.Vector3());
               const footprint = Math.max(size.x, size.z);
-              const scale = footprint > 0
-                ? BEIGE_SOFA_SET_TARGET_FOOTPRINT_M / footprint
-                : 1;
+              const targetFootprint = Math.min(widthM, depthM);
+              const scale = footprint > 0 ? targetFootprint / footprint : 1;
               model.scale.multiplyScalar(scale);
               model.updateMatrixWorld(true);
-
               box = new THREE.Box3().setFromObject(model);
               const center = box.getCenter(new THREE.Vector3());
               model.position.x -= center.x;
               model.position.z += (depthM / 2) - center.z;
               model.position.y -= box.min.y;
-
               group.add(model);
             }).catch((error) => {
               console.warn('Bej koltuk takımı GLB modeli yüklenemedi:', error);
             });
-
             return { group, surfaces: [proxy] };
           }"""
 
-          pattern = re.compile(
-              r"function createBeigeSofaSetModule\(moduleState, moduleIndex\) \{.*?\n\}\n\nfunction createSofaSetModule",
-              re.S,
-          )
-          replacement = renderer + "\n\nfunction createSofaSetModule"
-          text, count = pattern.subn(replacement, text, count=1)
+          pattern = re.compile(r"function createBeigeSofaSetModule\(moduleState, moduleIndex\) \{.*?\n\}\n\nfunction createSofaSetModule", re.S)
+          text, count = pattern.subn(renderer + "\n\nfunction createSofaSetModule", text, count=1)
           if count != 1:
               raise SystemExit(f'Beige sofa renderer replacement count={count}')
-
           path.write_text(text, encoding='utf-8')
           PY
       - name: Verify requested behavior
@@ -180,8 +146,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm -f .github/tmp/beige_sofa_model.glb.gz
-          rm -f .github/tmp/beige_sofa_glb_part*.b64 .github/tmp/beige_sofa_trigger.txt
+          rm -rf .github/tmp/beige_b64
+          rm -f .github/tmp/beige_sofa_model.glb.gz .github/tmp/beige_sofa_glb_part*.b64 .github/tmp/beige_sofa_trigger.txt
           git add -A .github/tmp public/models/beige_sofa_set.glb src/scene3d.js
           git rm -f .github/workflows/integrate-beige-sofa-glb.yml
           git add -A
