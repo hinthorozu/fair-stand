@@ -1,3 +1,4 @@
+# retry after repaired mesh staging
 name: Integrate Beige Sofa Mesh
 
 on:
@@ -186,8 +187,6 @@ jobs:
               heightCm,
             };
 
-            // Görünür koltuklar aşağıdaki kaynak mesh payload'ından gelir.
-            // Bu kutu yalnız seçim/raycast alanıdır; render edilmez.
             const colorTargets = [];
             const proxy = new THREE.Mesh(
               new THREE.BoxGeometry(widthM, heightM, depthM),
