@@ -3075,10 +3075,10 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
   const colorTargets = [];
   const surfaces = [];
   const chairPlacements = [
-    [-0.43, -0.43, Math.PI / 4],
-    [0.43, -0.43, -Math.PI / 4],
-    [-0.43, 0.43, Math.PI * 3 / 4],
-    [0.43, 0.43, -Math.PI * 3 / 4],
+    [-0.38, -0.38, Math.PI / 4],
+    [0.38, -0.38, -Math.PI / 4],
+    [-0.38, 0.38, Math.PI * 3 / 4],
+    [0.38, 0.38, -Math.PI * 3 / 4],
   ];
 
   chairPlacements.forEach(([x, z, rotationY], index) => {
