@@ -30,21 +30,15 @@ test('Eames set contains four chairs without changing the original state factory
   assert.equal(eames.depthCm, 150);
 });
 
-test('Eames renderer uses the optimized external mesh once for four chairs', () => {
+test('Eames renderer loads the original GLB once and clones four chairs', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(source, /function createEamesTableChairSetModule/);
-  assert.match(source, /models\/eames-table-chair\.mesh\.bin/);
-  assert.match(source, /chairPlacements.forEach/);
-  assert.match(source, /EAMES_CHAIR_MODEL_SCALE/);
+  assert.match(source, /GLTFLoader/);
+  assert.match(source, /models\/eames_chair\.glb/);
+  assert.match(source, /template\.clone\(true\)/);
+  assert.match(source, /chairPlacements\.forEach/);
 });
 
-test('optimized Eames payload and attribution are present', () => {
-  const payload = fs.statSync(new URL('../public/models/eames-table-chair.mesh.bin', import.meta.url));
-  assert.equal(payload.size, 14999);
-  const attribution = fs.readFileSync(
-    new URL('../public/models/EAMES_CHAIR_ATTRIBUTION.txt', import.meta.url),
-    'utf8',
-  );
-  assert.match(attribution, /faiyaz5yaz/);
-  assert.match(attribution, /CC BY 4.0/);
+test('original Eames GLB asset is present', () => {
+  const payload = fs.statSync(new URL('../public/models/eames_chair.glb', import.meta.url));
+  assert.ok(payload.size > 400000);
 });

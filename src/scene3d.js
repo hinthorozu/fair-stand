@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
@@ -62,24 +63,19 @@ const DEFAULT_VIEW_DISTANCE_FACTOR = 1.32;
 const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
 const STAGE_HOME_DIRECTION = new THREE.Vector3(1, 1.05, 1).normalize();
 
-const EAMES_CHAIR_POSITION_SCALE = 1000;
-const EAMES_CHAIR_MODEL_SCALE = 0.715;
-const EAMES_CHAIR_MESH_META = Object.freeze([{"name":"Object_4","role":"shell","vertexCount":547,"faceCount":1094,"indexCount":3282,"positionOffset":0,"indexOffset":3282}].map((entry) => Object.freeze(entry)));
-let eamesChairPayloadPromise = null;
+const EAMES_CHAIR_TARGET_HEIGHT_M = 0.82;
+let eamesChairModelPromise = null;
 
-function loadEamesChairPayload() {
-  if (!eamesChairPayloadPromise) {
-    eamesChairPayloadPromise = fetch(
-      import.meta.env.BASE_URL + 'models/eames-table-chair.mesh.bin',
-    ).then((response) => {
-      if (!response.ok) {
-        throw new Error('Eames sandalye modeli yüklenemedi (' + response.status + ')');
-      }
-      return response.arrayBuffer();
-    });
+function loadEamesChairModel() {
+  if (!eamesChairModelPromise) {
+    const loader = new GLTFLoader();
+    eamesChairModelPromise = loader
+      .loadAsync(import.meta.env.BASE_URL + 'models/eames_chair.glb')
+      .then((gltf) => gltf.scene);
   }
-  return eamesChairPayloadPromise;
+  return eamesChairModelPromise;
 }
+
 
 function isFloorFixtureType(type) {
   return type === 'counter'
@@ -3047,11 +3043,7 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
     heightCm,
   };
 
-  const metalMaterial = new THREE.MeshStandardMaterial({
-    color: 0x30343a,
-    roughness: 0.32,
-    metalness: 0.74,
-  });
+  const metalMaterial = new THREE.MeshStandardMaterial({ color: 0x30343a, roughness: 0.32, metalness: 0.74 });
   const tabletopMaterial = new THREE.MeshPhysicalMaterial({
     color: 0xd7e9ed,
     transparent: true,
@@ -3064,26 +3056,17 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
     depthWrite: false,
   });
 
-  const top = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.375, 0.375, 0.018, 64),
-    tabletopMaterial,
-  );
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(0.375, 0.375, 0.018, 64), tabletopMaterial);
   top.position.set(0, 0.74, 0);
   top.receiveShadow = true;
   group.add(top);
 
-  const stem = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.035, 0.045, 0.70, 20),
-    metalMaterial.clone(),
-  );
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.70, 20), metalMaterial.clone());
   stem.position.set(0, 0.37, 0);
   stem.castShadow = true;
   group.add(stem);
 
-  const base = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32),
-    metalMaterial.clone(),
-  );
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32), metalMaterial.clone());
   base.position.set(0, 0.018, 0);
   base.castShadow = true;
   base.receiveShadow = true;
@@ -3092,27 +3075,22 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
   const colorTargets = [];
   const surfaces = [];
   const chairPlacements = [
-    [-0.39, -0.39, Math.PI / 4],
-    [0.39, -0.39, -Math.PI / 4],
-    [-0.39, 0.39, Math.PI * 3 / 4],
-    [0.39, 0.39, -Math.PI * 3 / 4],
+    [-0.43, -0.43, Math.PI / 4],
+    [0.43, -0.43, -Math.PI / 4],
+    [-0.43, 0.43, Math.PI * 3 / 4],
+    [0.43, 0.43, -Math.PI * 3 / 4],
   ];
 
   chairPlacements.forEach(([x, z, rotationY], index) => {
     const proxy = new THREE.Mesh(
-      new THREE.BoxGeometry(0.48, 0.82, 0.60),
-      new THREE.MeshBasicMaterial({
-        transparent: true,
-        opacity: 0,
-        depthWrite: false,
-        colorWrite: false,
-      }),
+      new THREE.BoxGeometry(0.50, 0.82, 0.56),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
     );
     proxy.position.set(x, 0.41, z);
     proxy.rotation.y = rotationY;
     group.add(proxy);
 
-    const selectionFrame = index === 0 ? createSelectionFrame(0.48, 0.82) : null;
+    const selectionFrame = index === 0 ? createSelectionFrame(0.50, 0.82) : null;
     if (selectionFrame) {
       selectionFrame.visible = false;
       proxy.add(selectionFrame);
@@ -3137,108 +3115,42 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
     surfaces.push(proxy);
   });
 
-  loadEamesChairPayload().then((buffer) => {
+  loadEamesChairModel().then((template) => {
     if (!group.parent) return;
 
-    const geometries = EAMES_CHAIR_MESH_META.map((meta) => {
-      const quantized = new Int16Array(buffer, meta.positionOffset, meta.vertexCount * 3);
-      const positions = new Float32Array(quantized.length);
-      for (let index = 0; index < quantized.length; index += 1) {
-        positions[index] = quantized[index] / EAMES_CHAIR_POSITION_SCALE;
-      }
-
-      const sourceIndices = new Uint16Array(buffer, meta.indexOffset, meta.indexCount);
-      const indices = new Uint16Array(sourceIndices);
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-      geometry.computeVertexNormals();
-      geometry.computeBoundingSphere();
-      return { meta, geometry };
-    });
-
-    const shellMaterial = new THREE.MeshStandardMaterial({
-      color: moduleState.surface?.color ?? '#ffffff',
-      roughness: 0.46,
-      metalness: 0,
-    });
-    const woodMaterial = new THREE.MeshStandardMaterial({
-      color: 0x9b6635,
-      roughness: 0.58,
-      metalness: 0,
-    });
-    const supportMaterial = new THREE.MeshStandardMaterial({
-      color: 0x25282d,
-      roughness: 0.34,
-      metalness: 0.58,
-    });
-
     chairPlacements.forEach(([x, z, rotationY]) => {
-      const chair = new THREE.Group();
-      chair.position.set(x, 0, z);
-      chair.rotation.y = rotationY;
-      chair.scale.setScalar(EAMES_CHAIR_MODEL_SCALE);
-
-      const addRod = (start, end, radius, material, radialSegments = 10) => {
-        const direction = new THREE.Vector3().subVectors(end, start);
-        const length = direction.length();
-        const rod = new THREE.Mesh(
-          new THREE.CylinderGeometry(radius, radius, length, radialSegments),
-          material,
-        );
-        rod.position.copy(start).add(end).multiplyScalar(0.5);
-        rod.quaternion.setFromUnitVectors(
-          new THREE.Vector3(0, 1, 0),
-          direction.clone().normalize(),
-        );
-        rod.castShadow = true;
-        rod.receiveShadow = true;
-        chair.add(rod);
-      };
-
-      const legTopY = 0.49;
-      const legBottomY = 0.025;
-      const legTops = [
-        [-0.17, legTopY, -0.15],
-        [0.17, legTopY, -0.15],
-        [-0.17, legTopY, 0.14],
-        [0.17, legTopY, 0.14],
-      ];
-      const legBottoms = [
-        [-0.27, legBottomY, -0.22],
-        [0.27, legBottomY, -0.22],
-        [-0.27, legBottomY, 0.22],
-        [0.27, legBottomY, 0.22],
-      ];
-      legTops.forEach((coords, legIndex) => {
-        addRod(
-          new THREE.Vector3(...coords),
-          new THREE.Vector3(...legBottoms[legIndex]),
-          0.024,
-          woodMaterial,
-          12,
-        );
+      const chair = template.clone(true);
+      chair.traverse((object) => {
+        if (!object.isMesh) return;
+        object.castShadow = true;
+        object.receiveShadow = true;
+        if (object.material) object.material = object.material.clone();
+        if (object.material?.name === 'plastic_wit') {
+          object.material.color.set(moduleState.surface?.color ?? '#ffffff');
+          colorTargets.push(object);
+        }
       });
 
-      const braceY = 0.285;
-      addRod(new THREE.Vector3(-0.19, braceY, -0.16), new THREE.Vector3(0.19, braceY, 0.16), 0.007, supportMaterial, 8);
-      addRod(new THREE.Vector3(0.19, braceY, -0.16), new THREE.Vector3(-0.19, braceY, 0.16), 0.007, supportMaterial, 8);
-      addRod(new THREE.Vector3(-0.20, 0.34, 0), new THREE.Vector3(0.20, 0.34, 0), 0.006, supportMaterial, 8);
+      chair.updateMatrixWorld(true);
+      let box = new THREE.Box3().setFromObject(chair);
+      const size = box.getSize(new THREE.Vector3());
+      const scale = size.y > 0 ? EAMES_CHAIR_TARGET_HEIGHT_M / size.y : 1;
+      chair.scale.multiplyScalar(scale);
+      chair.updateMatrixWorld(true);
+      box = new THREE.Box3().setFromObject(chair);
+      const center = box.getCenter(new THREE.Vector3());
+      chair.position.x -= center.x;
+      chair.position.z -= center.z;
+      chair.position.y -= box.min.y;
 
-      geometries.forEach(({ meta, geometry }) => {
-        const material = meta.role === 'shell'
-          ? shellMaterial
-          : (meta.role === 'base' ? woodMaterial : supportMaterial);
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        chair.add(mesh);
-        if (meta.role === 'shell') colorTargets.push(mesh);
-      });
-      group.add(chair);
+      const holder = new THREE.Group();
+      holder.position.set(x, 0, z);
+      holder.rotation.y = rotationY;
+      holder.add(chair);
+      group.add(holder);
     });
   }).catch((error) => {
-    console.warn('Eames masa sandalye modeli yüklenemedi:', error);
+    console.warn('Eames GLB modeli yüklenemedi:', error);
   });
 
   return { group, surfaces };
