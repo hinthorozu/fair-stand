@@ -1,16 +1,22 @@
 from pathlib import Path
-import subprocess
+import base64
+import hashlib
+import lzma
 
-HISTORIC_COMMIT = '45f639dee7bdffe6c0e155ce6bae28fe53abe6ef'
-HISTORIC_PATH = '.github/tmp/beige_sofa_model.glb.gz'
 TARGET = Path('public/models/bej_koltuk_1_ciftli_2_tekli.glb')
+PARTS_DIR = Path('.github/beige-upload')
+EXPECTED_SIZE = 377632
+EXPECTED_SHA256 = '35b0f3f8a1daca909507d55d2b3d8f642504ac0911d3b9b66150be9ecea8ad0b'
 
-TARGET.parent.mkdir(parents=True, exist_ok=True)
-gz = subprocess.check_output(['git', 'show', f'{HISTORIC_COMMIT}:{HISTORIC_PATH}'])
-import gzip
-raw = gzip.decompress(gz)
+encoded = ''.join(path.read_text().strip() for path in sorted(PARTS_DIR.glob('part*.b64')))
+raw = lzma.decompress(base64.b64decode(encoded))
+if len(raw) != EXPECTED_SIZE:
+    raise SystemExit(f'unexpected beige GLB size: {len(raw)}')
+if hashlib.sha256(raw).hexdigest() != EXPECTED_SHA256:
+    raise SystemExit('beige GLB checksum mismatch')
 if raw[:4] != b'glTF':
-    raise SystemExit('restored payload is not a GLB')
+    raise SystemExit('staged payload is not a GLB')
+TARGET.parent.mkdir(parents=True, exist_ok=True)
 TARGET.write_bytes(raw)
 print(f'wrote {TARGET} ({len(raw)} bytes)')
 
