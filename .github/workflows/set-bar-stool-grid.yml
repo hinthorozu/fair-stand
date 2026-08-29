@@ -1,0 +1,36 @@
+name: Bar Stool Grid Patch
+
+on:
+  push:
+    branches: [ROG]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply patch
+        run: node .github/scripts/set-bar-stool-grid.cjs
+      - name: Install dependencies
+        run: npm install
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit feature
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/modulePlacement.js
+          if ! git diff --cached --quiet; then
+            git commit -m "feat: move bar stool on 10cm grid [skip ci]"
+            git push
+          fi
