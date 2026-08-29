@@ -1,0 +1,188 @@
+name: Integrate Beige Sofa GLB
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/tmp/beige_sofa_model.glb.gz'
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install extracted sofa model
+        shell: bash
+        run: |
+          mkdir -p public/models
+          gzip -dc .github/tmp/beige_sofa_model.glb.gz > public/models/beige_sofa_set.glb
+      - name: Replace procedural beige sofa with original GLB
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('src/scene3d.js')
+          text = path.read_text(encoding='utf-8')
+
+          loader_anchor = """function loadEamesChairModel() {
+            if (!eamesChairModelPromise) {
+              const loader = new GLTFLoader();
+              eamesChairModelPromise = loader
+                .loadAsync(import.meta.env.BASE_URL + 'models/eames_chair.glb')
+                .then((gltf) => gltf.scene);
+            }
+            return eamesChairModelPromise;
+          }
+          """
+          loader_block = loader_anchor + """
+          const BEIGE_SOFA_SET_TARGET_FOOTPRINT_M = 1.35;
+          let beigeSofaSetModelPromise = null;
+
+          function loadBeigeSofaSetModel() {
+            if (!beigeSofaSetModelPromise) {
+              const loader = new GLTFLoader();
+              beigeSofaSetModelPromise = loader
+                .loadAsync(import.meta.env.BASE_URL + 'models/beige_sofa_set.glb')
+                .then((gltf) => gltf.scene);
+            }
+            return beigeSofaSetModelPromise;
+          }
+          """
+
+          if 'function loadBeigeSofaSetModel()' not in text:
+              if loader_anchor not in text:
+                  raise SystemExit('Eames loader anchor not found')
+              text = text.replace(loader_anchor, loader_block, 1)
+
+          renderer = r"""function createBeigeSofaSetModule(moduleState, moduleIndex) {
+            const widthCm = Number(moduleState.widthCm || 150);
+            const depthCm = Number(moduleState.depthCm || 150);
+            const heightCm = Number(moduleState.heightCm || 78);
+            const widthM = widthCm / 100;
+            const depthM = depthCm / 100;
+            const heightM = heightCm / 100;
+            const group = new THREE.Group();
+            group.userData = {
+              kind: 'module',
+              moduleIndex,
+              moduleId: moduleState.id,
+              type: 'sofa-set-beige',
+              widthCm,
+              depthCm,
+              heightCm,
+            };
+
+            // The geometry below is only an invisible hit/selection proxy. The visible
+            // furniture comes exclusively from the extracted original GLB asset.
+            const proxy = new THREE.Mesh(
+              new THREE.BoxGeometry(widthM, heightM, depthM),
+              new THREE.MeshBasicMaterial({
+                transparent: true,
+                opacity: 0,
+                depthWrite: false,
+                colorWrite: false,
+              }),
+            );
+            proxy.position.set(0, heightM / 2, depthM / 2);
+            group.add(proxy);
+
+            const selectionFrame = createSelectionFrame(widthM, heightM);
+            selectionFrame.visible = false;
+            proxy.add(selectionFrame);
+            proxy.userData = {
+              kind: 'surface',
+              moduleType: 'sofa-set-beige',
+              selectionMode: 'module',
+              acceptsImage: false,
+              moduleIndex,
+              moduleId: moduleState.id,
+              widthCm,
+              stripIndex: null,
+              stripNumber: null,
+              surfaceRole: 'furniture',
+              surfaceId: moduleState.surface?.id,
+              surfaceState: moduleState.surface,
+              selectionFrame,
+              colorTargets: [],
+            };
+
+            loadBeigeSofaSetModel().then((template) => {
+              if (!group.parent) return;
+
+              const model = template.clone(true);
+              model.traverse((object) => {
+                if (!object.isMesh) return;
+                object.castShadow = true;
+                object.receiveShadow = true;
+                if (object.material) object.material = object.material.clone();
+              });
+
+              model.updateMatrixWorld(true);
+              let box = new THREE.Box3().setFromObject(model);
+              const size = box.getSize(new THREE.Vector3());
+              const footprint = Math.max(size.x, size.z);
+              const scale = footprint > 0
+                ? BEIGE_SOFA_SET_TARGET_FOOTPRINT_M / footprint
+                : 1;
+              model.scale.multiplyScalar(scale);
+              model.updateMatrixWorld(true);
+
+              box = new THREE.Box3().setFromObject(model);
+              const center = box.getCenter(new THREE.Vector3());
+              model.position.x -= center.x;
+              model.position.z += (depthM / 2) - center.z;
+              model.position.y -= box.min.y;
+
+              group.add(model);
+            }).catch((error) => {
+              console.warn('Bej koltuk takımı GLB modeli yüklenemedi:', error);
+            });
+
+            return { group, surfaces: [proxy] };
+          }"""
+
+          pattern = re.compile(
+              r"function createBeigeSofaSetModule\(moduleState, moduleIndex\) \{.*?\n\}\n\nfunction createSofaSetModule",
+              re.S,
+          )
+          replacement = renderer + "\n\nfunction createSofaSetModule"
+          text, count = pattern.subn(replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f'Beige sofa renderer replacement count={count}')
+
+          path.write_text(text, encoding='utf-8')
+          PY
+      - name: Verify requested behavior
+        shell: bash
+        run: |
+          test -s public/models/beige_sofa_set.glb
+          grep -q "models/beige_sofa_set.glb" src/scene3d.js
+          grep -q "function createSofaSetModule" src/scene3d.js
+          grep -q "moduleType === 'sofa-set-beige'" src/modulePlacement.js
+          grep -q "? 10" src/modulePlacement.js
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - name: Commit GLB integration and clean staging files
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f .github/tmp/beige_sofa_model.glb.gz
+          rm -f .github/tmp/beige_sofa_glb_part*.b64
+          git add -A .github/tmp public/models/beige_sofa_set.glb src/scene3d.js
+          git rm -f .github/workflows/integrate-beige-sofa-glb.yml
+          git add -A
+          git commit -m "fix: use extracted beige sofa GLB [skip ci]"
+          git push origin ROG
