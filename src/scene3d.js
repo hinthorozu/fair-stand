@@ -3306,9 +3306,26 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
       const indices = new Uint16Array(
         buffer.slice(meta.indexOffset, meta.indexOffset + indexCount * 2),
       );
+      const expandedPositions = new Float32Array(indices.length * 3);
+
+      for (let i = 0; i < indices.length; i += 1) {
+
+        const sourceIndex = indices[i] * 3;
+
+        const targetIndex = i * 3;
+
+        expandedPositions[targetIndex] = positions[sourceIndex];
+
+        expandedPositions[targetIndex + 1] = positions[sourceIndex + 1];
+
+        expandedPositions[targetIndex + 2] = positions[sourceIndex + 2];
+
+      }
+
       const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+
+      geometry.setAttribute('position', new THREE.BufferAttribute(expandedPositions, 3));
+
       geometry.computeVertexNormals();
       geometry.computeBoundingSphere();
 
