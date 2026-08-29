@@ -18,7 +18,6 @@ import {
   createSeparatorModuleState,
   createShelfModuleState,
   createSofaSetModuleState,
-  createTableChairSetModuleState,
   createShowcaseModuleState,
   duplicateModuleState,
   totalWallWidthCm,
@@ -614,7 +613,6 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm);
   else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);
   else if (module.type === 'sofa-set') state = createSofaSetModuleState();
-  else if (module.type === 'table-chair-set') state = createTableChairSetModuleState();
   else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();
   else if (module.type === 'bar-stool') state = createBarStoolModuleState();
   else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();

@@ -81,7 +81,6 @@ function isFloorFixtureType(type) {
   return type === 'counter'
     || type === 'base'
     || type === 'sofa-set'
-    || type === 'table-chair-set'
     || type === 'table-chair-set-eames'
     || type === 'bar-stool';
 }
@@ -1099,10 +1098,7 @@ export function createStandScene(
           (surface) => applyStoredImage(surface),
         );
       } else if (moduleState.type === 'sofa-set') {
-        module = createSofaSetModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'table-chair-set') {
-        module = createTableChairSetModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'table-chair-set-eames') {
+        module = createSofaSetModule(moduleState, moduleIndex);      } else if (moduleState.type === 'table-chair-set-eames') {
         module = createEamesTableChairSetModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'bar-stool') {
         module = createBarStoolModule(moduleState, moduleIndex);
@@ -1441,7 +1437,6 @@ export function createStandScene(
     const widthCm = Number(moduleState?.widthCm) || 0;
     if (moduleState?.type === 'shelf') return 'Raf ' + widthCm + ' · ' + (Number(moduleState.shelfCount) || 2) + ' Raf';
     if (moduleState?.type === 'sofa-set') return 'Koltuk Takımı';
-    if (moduleState?.type === 'table-chair-set') return 'Masa Sandalye Takımı';
     if (moduleState?.type === 'table-chair-set-eames') return 'Eames Masa Sandalye Takımı';
     if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';
     if (moduleState?.type === 'led-floodlight') return 'LED Projektör';
@@ -3154,92 +3149,6 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
   });
 
   return { group, surfaces };
-}
-
-function createTableChairSetModule(moduleState, moduleIndex) {
-  const widthM = Number(moduleState.widthCm || 120) / 100;
-  const depthM = Number(moduleState.depthCm || 120) / 100;
-  const group = new THREE.Group();
-  group.userData = { kind: 'module', moduleIndex, moduleId: moduleState.id, type: 'table-chair-set', widthCm: Number(moduleState.widthCm || 120), depthCm: Number(moduleState.depthCm || 120), heightCm: Number(moduleState.heightCm || 90) };
-
-  const color = moduleState.surface?.color ?? '#ffffff';
-  const chairMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: 0, emissive: 0x000000, emissiveIntensity: 0 });
-  const metalMaterial = new THREE.MeshStandardMaterial({ color: 0x30343a, roughness: 0.32, metalness: 0.74 });
-  const tabletopMaterial = new THREE.MeshPhysicalMaterial({
-  color: 0xd7e9ed,
-  transparent: true,
-  opacity: 0.42,
-  roughness: 0.10,
-  metalness: 0,
-  transmission: 0.32,
-  clearcoat: 0.65,
-  clearcoatRoughness: 0.08,
-  depthWrite: false,
-});
-  const colorTargets = [];
-
-  const addChair = (x, z, rotationY) => {
-    const chair = new THREE.Group();
-    chair.position.set(x, 0, z);
-    chair.rotation.y = rotationY;
-
-    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.075, 0.42), chairMaterial.clone());
-    seat.position.set(0, 0.46, 0);
-    seat.castShadow = true;
-    seat.receiveShadow = true;
-    chair.add(seat);
-    colorTargets.push(seat);
-
-    const back = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.48, 0.065), chairMaterial.clone());
-    back.position.set(0, 0.71, -0.19);
-    back.rotation.x = -0.10;
-    back.castShadow = true;
-    chair.add(back);
-    colorTargets.push(back);
-
-    const legGeometry = new THREE.CylinderGeometry(0.018, 0.014, 0.44, 12);
-    [[-0.16,-0.14],[0.16,-0.14],[-0.16,0.14],[0.16,0.14]].forEach(([lx,lz]) => {
-      const leg = new THREE.Mesh(legGeometry, metalMaterial.clone());
-      leg.position.set(lx, 0.22, lz);
-      leg.rotation.z = lx < 0 ? 0.05 : -0.05;
-      leg.rotation.x = lz < 0 ? -0.05 : 0.05;
-      chair.add(leg);
-    });
-    group.add(chair);
-  };
-
-  // 120 x 120 cm dış footprint. Sandalyeler masaya yaklaştırıldı.
-  const chairOffset = 0.35;
-  addChair(-chairOffset, -chairOffset, Math.PI / 4);
-  addChair(chairOffset, -chairOffset, -Math.PI / 4);
-  addChair(-chairOffset, chairOffset, Math.PI * 3 / 4);
-  addChair(chairOffset, chairOffset, -Math.PI * 3 / 4);
-
-  // Ø75 cm cam masa tablası.
-  const top = new THREE.Mesh(new THREE.CylinderGeometry(0.375, 0.375, 0.018, 64), tabletopMaterial);
-  top.position.set(0, 0.74, 0);
-  top.castShadow = false;
-  top.receiveShadow = true;
-  group.add(top);
-
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.70, 20), metalMaterial.clone());
-  stem.position.set(0, 0.37, 0);
-  group.add(stem);
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32), metalMaterial.clone());
-  base.position.set(0, 0.018, 0);
-  group.add(base);
-
-  const selectable = colorTargets[0];
-  const selectionFrame = createSelectionFrame(0.44, 0.48);
-  selectionFrame.visible = false;
-  selectable.add(selectionFrame);
-  selectable.userData = { kind: 'surface', moduleType: 'table-chair-set', selectionMode: 'module', acceptsImage: false, moduleIndex, moduleId: moduleState.id, widthCm: Number(moduleState.widthCm || 120), stripIndex: null, stripNumber: null, surfaceRole: 'chair', surfaceId: moduleState.surface?.id, surfaceState: moduleState.surface, selectionFrame, colorTargets };
-  colorTargets.forEach((mesh, index) => {
-    if (index === 0) return;
-    mesh.userData = { ...selectable.userData, surfaceId: moduleState.surface?.id + '-' + index, selectionFrame: null };
-  });
-
-  return { group, surfaces: colorTargets };
 }
 
 function createSofaSetModule(moduleState, moduleIndex) {

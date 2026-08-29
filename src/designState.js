@@ -175,20 +175,6 @@ export function createSofaSetModuleState() {
   };
 }
 
-export function createTableChairSetModuleState() {
-  return {
-    id: createId('module'),
-    type: 'table-chair-set',
-    widthCm: 120,
-    depthCm: 120,
-    heightCm: 90,
-    surface: {
-      id: createId('surface'),
-      color: DEFAULT_PANEL_COLOR,
-    },
-  };
-}
-
 export function createEamesTableChairSetModuleState() {
   return {
     id: createId('module'),
