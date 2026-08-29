@@ -77,6 +77,27 @@ function loadEamesChairModel() {
   return eamesChairModelPromise;
 }
 
+const BEIGE_SOFA_MESH_META = Object.freeze([
+  Object.freeze({ name: 'beigechair2seatsofa_tripo_mat_0691346e_0', vertexCount: 5592, faceCount: 7586, positionOffset: 0, indexOffset: 67104 }),
+  Object.freeze({ name: 'beigechair1_tripo_mat_0691346e_0', vertexCount: 2980, faceCount: 3832, positionOffset: 112620, indexOffset: 148380 }),
+  Object.freeze({ name: 'beigechair3_tripo_mat_0691346e_0', vertexCount: 3272, faceCount: 4026, positionOffset: 171372, indexOffset: 210636 }),
+]);
+let beigeSofaMeshPromise = null;
+
+function loadBeigeSofaMeshPayload() {
+  if (!beigeSofaMeshPromise) {
+    beigeSofaMeshPromise = fetch(
+      import.meta.env.BASE_URL + 'models/beige_sofa_mesh.bin',
+    ).then((response) => {
+      if (!response.ok) {
+        throw new Error('Bej koltuk modeli yüklenemedi (' + response.status + ')');
+      }
+      return response.arrayBuffer();
+    });
+  }
+  return beigeSofaMeshPromise;
+}
+
 
 function isFloorFixtureType(type) {
   return type === 'counter'
@@ -3219,100 +3240,106 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
   const widthCm = Number(moduleState.widthCm || 150);
   const depthCm = Number(moduleState.depthCm || 150);
   const heightCm = Number(moduleState.heightCm || 78);
+  const widthM = widthCm / 100;
   const depthM = depthCm / 100;
+  const heightM = heightCm / 100;
   const group = new THREE.Group();
-  group.userData = { kind: 'module', moduleIndex, moduleId: moduleState.id, type: 'sofa-set-beige', widthCm, depthCm, heightCm };
-
-  const upholstery = [];
-  const fabricMaterial = new THREE.MeshStandardMaterial({ color: moduleState.surface?.color ?? '#e7ddca', roughness: 0.9, metalness: 0 });
-  const shadowFabric = new THREE.MeshStandardMaterial({ color: 0xd2c5ae, roughness: 0.94, metalness: 0 });
-  const woodMaterial = new THREE.MeshStandardMaterial({ color: 0xb99772, roughness: 0.72, metalness: 0 });
-  const legMaterial = new THREE.MeshStandardMaterial({ color: 0x6d6256, roughness: 0.55, metalness: 0.08 });
-
-  const addFabricBox = (w, h, d, x, y, z, sourceMaterial = fabricMaterial) => {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), sourceMaterial.clone());
-    mesh.position.set(x, y, z);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    group.add(mesh);
-    upholstery.push(mesh);
-    return mesh;
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: 'sofa-set-beige',
+    widthCm,
+    depthCm,
+    heightCm,
   };
 
-  const addLeg = (x, z) => {
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.11, 0.055), legMaterial.clone());
-    leg.position.set(x, 0.055, z);
-    leg.castShadow = true;
-    group.add(leg);
-  };
+  const colorTargets = [];
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, heightM, depthM),
+    new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      colorWrite: false,
+    }),
+  );
+  proxy.position.set(0, heightM / 2, depthM / 2);
+  group.add(proxy);
 
-  const addSeat = ({ x, z, seatWidth, facing = 'front', twoSeat = false }) => {
-    const dir = facing === 'front' ? 1 : -1;
-    const seatDepth = 0.52;
-    const armW = 0.105;
-    const seatY = 0.27;
-    const backT = 0.12;
-    const backH = 0.64;
-
-    addFabricBox(seatWidth, 0.16, seatDepth, x, 0.16, z, shadowFabric);
-    addLeg(x - seatWidth / 2 + 0.10, z - 0.18);
-    addLeg(x + seatWidth / 2 - 0.10, z - 0.18);
-    addLeg(x - seatWidth / 2 + 0.10, z + 0.18);
-    addLeg(x + seatWidth / 2 - 0.10, z + 0.18);
-
-    if (twoSeat) {
-      const cushionW = (seatWidth - armW * 2 - 0.035) / 2;
-      [-1, 1].forEach((side) => {
-        addFabricBox(cushionW, 0.14, 0.39, x + side * (cushionW / 2 + 0.009), seatY, z + dir * 0.035);
-      });
-    } else {
-      addFabricBox(seatWidth - armW * 2 - 0.025, 0.14, 0.39, x, seatY, z + dir * 0.035);
-    }
-
-    addFabricBox(armW, 0.46, seatDepth, x - seatWidth / 2 + armW / 2, 0.29, z);
-    addFabricBox(armW, 0.46, seatDepth, x + seatWidth / 2 - armW / 2, 0.29, z);
-    const backZ = z - dir * (seatDepth / 2 - backT / 2);
-    addFabricBox(seatWidth - 0.02, backH, backT, x, backH / 2 + 0.08, backZ, shadowFabric);
-
-    if (twoSeat) {
-      const backCushionW = (seatWidth - armW * 2 - 0.05) / 2;
-      [-1, 1].forEach((side) => {
-        const cushion = addFabricBox(backCushionW, 0.38, 0.11, x + side * (backCushionW / 2 + 0.012), 0.50, backZ + dir * 0.065);
-        cushion.rotation.x = dir * -0.08;
-      });
-    } else {
-      const cushion = addFabricBox(seatWidth - armW * 2 - 0.025, 0.38, 0.11, x, 0.50, backZ + dir * 0.065);
-      cushion.rotation.x = dir * -0.08;
-    }
-  };
-
-  addSeat({ x: 0, z: -depthM / 2 + 0.26, seatWidth: 1.50, facing: 'front', twoSeat: true });
-  addSeat({ x: -0.425, z: depthM / 2 - 0.26, seatWidth: 0.65, facing: 'back' });
-  addSeat({ x: 0.425, z: depthM / 2 - 0.26, seatWidth: 0.65, facing: 'back' });
-
-  const tableTop = new THREE.Mesh(new THREE.BoxGeometry(0.60, 0.055, 0.42), woodMaterial.clone());
-  tableTop.position.set(0, 0.38, 0);
-  tableTop.castShadow = true;
-  tableTop.receiveShadow = true;
-  group.add(tableTop);
-  [[-0.24,-0.15],[0.24,-0.15],[-0.24,0.15],[0.24,0.15]].forEach(([x,z]) => {
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.34, 0.045), legMaterial.clone());
-    leg.position.set(x, 0.18, z);
-    leg.castShadow = true;
-    group.add(leg);
-  });
-
-  const selectable = upholstery[0];
-  const selectionFrame = createSelectionFrame(1.46, 0.22);
+  const selectionFrame = createSelectionFrame(widthM, heightM);
   selectionFrame.visible = false;
-  selectable.add(selectionFrame);
-  selectable.userData = { kind: 'surface', moduleType: 'sofa-set-beige', selectionMode: 'module', acceptsImage: false, moduleIndex, moduleId: moduleState.id, widthCm, stripIndex: null, stripNumber: null, surfaceRole: 'upholstery', surfaceId: moduleState.surface?.id, surfaceState: moduleState.surface, selectionFrame, colorTargets: upholstery };
-  upholstery.forEach((mesh, index) => {
-    if (index === 0) return;
-    mesh.userData = { ...selectable.userData, surfaceId: moduleState.surface?.id + '-' + index, selectionFrame: null };
+  proxy.add(selectionFrame);
+  proxy.userData = {
+    kind: 'surface',
+    moduleType: 'sofa-set-beige',
+    selectionMode: 'module',
+    acceptsImage: false,
+    moduleIndex,
+    moduleId: moduleState.id,
+    widthCm,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceRole: 'furniture',
+    surfaceId: moduleState.surface?.id,
+    surfaceState: moduleState.surface,
+    selectionFrame,
+    colorTargets,
+  };
+
+  loadBeigeSofaMeshPayload().then((buffer) => {
+    if (!group.parent) return;
+
+    const model = new THREE.Group();
+    const material = new THREE.MeshStandardMaterial({
+      color: moduleState.surface?.color ?? '#e7ddca',
+      roughness: 0.60,
+      metalness: 0,
+    });
+
+    BEIGE_SOFA_MESH_META.forEach((meta) => {
+      const positionCount = meta.vertexCount * 3;
+      const indexCount = meta.faceCount * 3;
+      const positions = new Float32Array(
+        buffer.slice(meta.positionOffset, meta.positionOffset + positionCount * 4),
+      );
+      const indices = new Uint16Array(
+        buffer.slice(meta.indexOffset, meta.indexOffset + indexCount * 2),
+      );
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
+
+      const mesh = new THREE.Mesh(geometry, material.clone());
+      mesh.name = meta.name;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      colorTargets.push(mesh);
+      model.add(mesh);
+    });
+
+    model.updateMatrixWorld(true);
+    let box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const footprint = Math.max(size.x, size.z);
+    const targetFootprint = Math.min(widthM, depthM);
+    const scale = footprint > 0 ? targetFootprint / footprint : 1;
+    model.scale.setScalar(scale);
+    model.updateMatrixWorld(true);
+
+    box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.x -= center.x;
+    model.position.z += (depthM / 2) - center.z;
+    model.position.y -= box.min.y;
+    group.add(model);
+  }).catch((error) => {
+    console.warn('Bej koltuk takımı kaynak modeli yüklenemedi:', error);
   });
 
-  return { group, surfaces: upholstery };
+  return { group, surfaces: [proxy] };
 }
 
 function createSofaSetModule(moduleState, moduleIndex) {
