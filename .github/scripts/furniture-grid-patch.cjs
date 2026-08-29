@@ -14,34 +14,55 @@ source = source.replace(
   "function snapDepthCenterCm(value, depthCm, stepCm = MODULE_PLACEMENT_SNAP_CM) {\n  const depth = Number(depthCm);\n  const halfDepth = depth / 2;\n  return halfDepth + snapCm(Number(value) - halfDepth, stepCm);\n}",
 );
 
-const marker = 'export function snapPlacementToStand({';
-const start = source.indexOf(marker);
-if (start < 0) throw new Error('snapPlacementToStand not found');
-const bodyStartToken = '} = {}) {';
-const tokenPos = source.indexOf(bodyStartToken, start);
-if (tokenPos < 0) throw new Error('snapPlacementToStand body start not found');
+const freeMarker = 'function createFreePlacement({';
+const freeStart = source.indexOf(freeMarker);
+if (freeStart < 0) throw new Error('createFreePlacement not found');
+const bodyStartToken = '}) {';
+const tokenPos = source.indexOf(bodyStartToken, freeStart);
+if (tokenPos < 0) throw new Error('createFreePlacement body start not found');
 const bodyOpen = tokenPos + bodyStartToken.length - 1;
 let depth = 0;
-let end = -1;
+let freeEnd = -1;
 for (let i = bodyOpen; i < source.length; i += 1) {
   if (source[i] === '{') depth += 1;
   else if (source[i] === '}') {
     depth -= 1;
-    if (depth === 0) { end = i; break; }
+    if (depth === 0) { freeEnd = i; break; }
   }
 }
-if (end < 0) throw new Error('snapPlacementToStand body end not found');
+if (freeEnd < 0) throw new Error('createFreePlacement body end not found');
 
-let block = source.slice(start, end + 1);
-if (!block.includes('const placementSnapCm = getModulePlacementSnapCm(moduleType);')) {
-  const splitAt = block.indexOf(bodyStartToken) + bodyStartToken.length;
-  const head = block.slice(0, splitAt);
-  let body = block.slice(splitAt);
-  body = body.replace(/snapDepthCenterCm\(/g, 'snapDepthForModule(');
-  body = body.replace(/snapCm\(/g, 'snapForModule(');
-  const locals = "\n  const placementSnapCm = getModulePlacementSnapCm(moduleType);\n  const snapForModule = (value, stepCm = placementSnapCm) => snapCm(value, stepCm);\n  const snapDepthForModule = (value, depthCm) => snapDepthCenterCm(value, depthCm, placementSnapCm);\n";
-  block = head + locals + body;
-  source = source.slice(0, start) + block + source.slice(end + 1);
+let freeBlock = source.slice(freeStart, freeEnd + 1);
+if (!freeBlock.includes('const placementSnapCm = getModulePlacementSnapCm(moduleType);')) {
+  freeBlock = freeBlock.replace(
+    "  const width = Number(widthCm);\n",
+    "  const width = Number(widthCm);\n  const placementSnapCm = getModulePlacementSnapCm(moduleType);\n",
+  );
+  freeBlock = freeBlock.replace(
+    'clamp(snapCm(Number(pointerXCm) - width / 2), 0, maxX)',
+    'clamp(snapCm(Number(pointerXCm) - width / 2, placementSnapCm), 0, maxX)',
+  );
+  freeBlock = freeBlock.replace(
+    'strictDepth ? snapDepthCenterCm(pointerXCm, depthCm) : snapCm(pointerXCm)',
+    'strictDepth ? snapDepthCenterCm(pointerXCm, depthCm, placementSnapCm) : snapCm(pointerXCm, placementSnapCm)',
+  );
+  freeBlock = freeBlock.replace(
+    'clamp(snapCm(Number(pointerYCm) - width / 2), 0, maxY)',
+    'clamp(snapCm(Number(pointerYCm) - width / 2, placementSnapCm), 0, maxY)',
+  );
+  freeBlock = freeBlock.replace(
+    'strictDepth ? snapDepthCenterCm(pointerYCm, depthCm) : snapCm(pointerYCm)',
+    'strictDepth ? snapDepthCenterCm(pointerYCm, depthCm, placementSnapCm) : snapCm(pointerYCm, placementSnapCm)',
+  );
+  freeBlock = freeBlock.replace(
+    "const useWallInnerFaces = moduleType === 'sofa-set' || moduleType === 'table-chair-set' || moduleType === 'bar-stool';",
+    "const useWallInnerFaces = moduleType === 'sofa-set' || moduleType === 'table-chair-set-eames' || moduleType === 'bar-stool';",
+  );
+  source = source.slice(0, freeStart) + freeBlock + source.slice(freeEnd + 1);
+}
+
+if (source.includes("moduleType === 'table-chair-set'")) {
+  throw new Error('legacy table-chair-set token still present in modulePlacement.js');
 }
 
 fs.writeFileSync(placementPath, source);
