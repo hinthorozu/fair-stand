@@ -6,6 +6,8 @@ on:
       - ROG
     paths:
       - .github/workflows/use-direct-beige-glb.yml
+      - .github/scripts/use_direct_beige_glb.py
+      - .github/beige-upload/**
 
 permissions:
   contents: write
@@ -35,6 +37,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/scene3d.js public/models/bej_koltuk_1_ciftli_2_tekli.glb public/models/beige_sofa_mesh.bin
+          git add -A src/scene3d.js public/models
           git commit -m "fix: load beige sofa set directly from GLB [skip ci]"
           git push origin ROG
