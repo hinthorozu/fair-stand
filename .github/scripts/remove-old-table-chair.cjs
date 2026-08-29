@@ -4,8 +4,9 @@ function read(path) { return fs.readFileSync(path, 'utf8'); }
 function write(path, text) { fs.writeFileSync(path, text); }
 function removeFunction(source, name) {
   const marker = `function ${name}(`;
-  const start = source.indexOf(marker);
+  let start = source.indexOf(marker);
   if (start < 0) return source;
+  if (source.slice(Math.max(0, start - 7), start) === 'export ') start -= 7;
   const braceStart = source.indexOf('{', start);
   let depth = 0;
   for (let i = braceStart; i < source.length; i += 1) {
@@ -47,6 +48,8 @@ write('src/main.js', main);
 let sidebar = read('src/moduleDragSidebar.js');
 sidebar = sidebar.replace("module.type === 'table-chair-set' || module.type === 'table-chair-set-eames'", "module.type === 'table-chair-set-eames'");
 write('src/moduleDragSidebar.js', sidebar);
+
+if (fs.existsSync('test/tableChairSet.test.js')) fs.unlinkSync('test/tableChairSet.test.js');
 
 const test = `import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport fs from 'node:fs';\nimport { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';\nimport { createEamesTableChairSetModuleState } from '../src/designState.js';\n\ntest('Eames is the only table-chair set in the catalog', () => {\n  const eames = MODULE_CATALOG.furniture_table_chair_set_eames;\n  assert.equal(MODULE_CATALOG.furniture_table_chair_set_minyon, undefined);\n  assert.equal(MODULE_CATALOG_KEYS.includes('furniture_table_chair_set_minyon'), false);\n  assert.equal(eames.type, 'table-chair-set-eames');\n  assert.equal(eames.widthCm, 150);\n  assert.equal(eames.depthCm, 150);\n});\n\ntest('Eames set contains four chairs', () => {\n  const eames = createEamesTableChairSetModuleState();\n  assert.equal(eames.type, 'table-chair-set-eames');\n  assert.equal(eames.chairCount, 4);\n  assert.equal(eames.widthCm, 150);\n  assert.equal(eames.depthCm, 150);\n});\n\ntest('Eames renderer loads the original GLB once and clones four chairs', () => {\n  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n  assert.match(source, /GLTFLoader/);\n  assert.match(source, /models\\/eames_chair\\.glb/);\n  assert.match(source, /template\\.clone\\(true\\)/);\n  assert.match(source, /chairPlacements\\.forEach/);\n});\n\ntest('original Eames GLB asset is present', () => {\n  const payload = fs.statSync(new URL('../public/models/eames_chair.glb', import.meta.url));\n  assert.ok(payload.size > 400000);\n});\n`;
 write('test/eamesTableChairSetContract.test.js', test);
