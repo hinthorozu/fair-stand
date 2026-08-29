@@ -1,4 +1,4 @@
-# retry after repaired mesh staging
+# retry after repaired part01 staging
 name: Integrate Beige Sofa Mesh
 
 on:
@@ -311,7 +311,6 @@ jobs:
           rm -f .github/tmp/beige_sofa_glb_part*.b64
           rm -f .github/tmp/beige_sofa_model.glb.gz
           rm -f .github/tmp/beige_sofa_trigger.txt
-          git rm -f .github/workflows/integrate-beige-sofa-glb.yml
-          git add -A src/scene3d.js public/models/beige_sofa_mesh.bin .github/tmp .github/workflows
+          git add -A src/scene3d.js public/models/beige_sofa_mesh.bin .github/tmp
           git commit -m "fix: use extracted beige sofa mesh [skip ci]"
           git push origin ROG
