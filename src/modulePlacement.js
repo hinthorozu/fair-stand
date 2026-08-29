@@ -103,7 +103,9 @@ export function snapCm(value, stepCm = MODULE_PLACEMENT_SNAP_CM) {
 }
 
 export function getModulePlacementSnapCm(moduleType) {
-  return moduleType === 'sofa-set' || moduleType === 'table-chair-set-eames' ? 10 : MODULE_PLACEMENT_SNAP_CM;
+  return moduleType === 'sofa-set' || moduleType === 'table-chair-set-eames' || moduleType === 'bar-stool'
+    ? 10
+    : MODULE_PLACEMENT_SNAP_CM;
 }
 
 export function getAllowedWallIds(standType) {
