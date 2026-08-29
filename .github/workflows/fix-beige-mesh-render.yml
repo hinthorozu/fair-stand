@@ -19,28 +19,15 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p=Path('src/scene3d.js')
           s=p.read_text()
-          old="""                const geometry = new THREE.BufferGeometry();
-                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-                geometry.computeVertexNormals();"""
-          new="""                // Expand indexed source triangles explicitly. This keeps the extracted
-                // source topology intact and avoids the corrupted indexed rendering seen in WebGL.
-                const expandedPositions = new Float32Array(indices.length * 3);
-                for (let i = 0; i < indices.length; i += 1) {
-                  const sourceIndex = indices[i] * 3;
-                  const targetIndex = i * 3;
-                  expandedPositions[targetIndex] = positions[sourceIndex];
-                  expandedPositions[targetIndex + 1] = positions[sourceIndex + 1];
-                  expandedPositions[targetIndex + 2] = positions[sourceIndex + 2];
-                }
-                const geometry = new THREE.BufferGeometry();
-                geometry.setAttribute('position', new THREE.BufferAttribute(expandedPositions, 3));
-                geometry.computeVertexNormals();"""
-          if old not in s:
-              raise SystemExit('target block not found')
-          p.write_text(s.replace(old,new,1))
+          pattern=re.compile(r"(?P<i>\s*)const geometry = new THREE\.BufferGeometry\(\);\s*geometry\.setAttribute\('position', new THREE\.BufferAttribute\(positions, 3\)\);\s*geometry\.setIndex\([^;]+;\s*geometry\.computeVertexNormals\(\);")
+          m=pattern.search(s)
+          if not m: raise SystemExit('indexed beige geometry block not found')
+          i=m.group('i')
+          new=f"""{i}const expandedPositions = new Float32Array(indices.length * 3);\n{i}for (let i = 0; i < indices.length; i += 1) {{\n{i}  const sourceIndex = indices[i] * 3;\n{i}  const targetIndex = i * 3;\n{i}  expandedPositions[targetIndex] = positions[sourceIndex];\n{i}  expandedPositions[targetIndex + 1] = positions[sourceIndex + 1];\n{i}  expandedPositions[targetIndex + 2] = positions[sourceIndex + 2];\n{i}}}\n{i}const geometry = new THREE.BufferGeometry();\n{i}geometry.setAttribute('position', new THREE.BufferAttribute(expandedPositions, 3));\n{i}geometry.computeVertexNormals();"""
+          p.write_text(s[:m.start()]+new+s[m.end():])
           PY
       - run: npm install
       - run: npm test
