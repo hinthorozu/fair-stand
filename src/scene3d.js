@@ -2603,7 +2603,9 @@ export function createStandScene(
       if (!moduleGroup || !moduleState?.placement || !stageLayout) return;
 
       event.preventDefault();
-      const stepCm = getModulePlacementSnapCm(moduleState.type);
+      const stepCm = isTopFixtureType(moduleState.type)
+        ? 20
+        : getModulePlacementSnapCm(moduleState.type);
       const desiredPlacement = createModulePlacement({
         ...moduleState.placement,
         xCm: Number(moduleState.placement.xCm || 0) + arrowDelta[0] * stepCm,
