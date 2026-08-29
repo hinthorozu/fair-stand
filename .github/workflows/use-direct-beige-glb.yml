@@ -1,0 +1,131 @@
+name: Use Direct Beige GLB
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/use-direct-beige-glb.yml']
+permissions:
+  contents: write
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Restore the original extracted GLB directly
+        run: |
+          mkdir -p public/models
+          git show 45f639dee7bdffe6c0e155ce6bae28fe53abe6ef:.github/tmp/beige_sofa_model.glb.gz > /tmp/beige_sofa_model.glb.gz
+          gzip -dc /tmp/beige_sofa_model.glb.gz > public/models/bej_koltuk_1_ciftli_2_tekli.glb
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('public/models/bej_koltuk_1_ciftli_2_tekli.glb')
+          data = p.read_bytes()
+          if data[:4] != b'glTF':
+              raise SystemExit('restored file is not GLB')
+          print('GLB bytes:', len(data))
+          PY
+      - name: Load the GLB directly with GLTFLoader
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/scene3d.js')
+          s = p.read_text()
+
+          loader_start = s.find('const BEIGE_SOFA_MESH_META')
+          floor_start = s.find('function isFloorFixtureType', loader_start)
+          if loader_start < 0 or floor_start < 0:
+              raise SystemExit('beige binary loader block not found')
+          direct_loader = """let beigeSofaModelPromise = null;
+
+function loadBeigeSofaModel() {
+  if (!beigeSofaModelPromise) {
+    const loader = new GLTFLoader();
+    beigeSofaModelPromise = loader
+      .loadAsync(import.meta.env.BASE_URL + 'models/bej_koltuk_1_ciftli_2_tekli.glb')
+      .then((gltf) => gltf.scene);
+  }
+  return beigeSofaModelPromise;
+}
+
+
+"""
+          s = s[:loader_start] + direct_loader + s[floor_start:]
+
+          fn_start = s.find('function createBeigeSofaSetModule(')
+          next_fn = s.find('function createSofaSetModule(', fn_start)
+          if fn_start < 0 or next_fn < 0:
+              raise SystemExit('beige sofa renderer block not found')
+
+          direct_renderer = """function createBeigeSofaSetModule(moduleState, moduleIndex) {
+  const group = new THREE.Group();
+  const widthM = Number(moduleState.widthCm || 150) / 100;
+  const depthM = Number(moduleState.depthCm || 150) / 100;
+  const heightM = Number(moduleState.heightCm || 78) / 100;
+
+  const proxyMaterial = new THREE.MeshBasicMaterial({
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+  });
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, Math.max(heightM, 0.02), depthM),
+    proxyMaterial,
+  );
+  proxy.position.y = Math.max(heightM, 0.02) / 2;
+  proxy.userData.surfaceId = moduleState.surface?.id;
+  proxy.userData.moduleIndex = moduleIndex;
+  group.add(proxy);
+
+  loadBeigeSofaModel()
+    .then((sourceScene) => {
+      const model = sourceScene.clone(true);
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+
+      model.updateMatrixWorld(true);
+      const sourceBox = new THREE.Box3().setFromObject(model);
+      const sourceSize = sourceBox.getSize(new THREE.Vector3());
+      const footprint = Math.max(sourceSize.x, sourceSize.z);
+      if (Number.isFinite(footprint) && footprint > 0) {
+        const scale = Math.min(widthM, depthM) / footprint;
+        model.scale.setScalar(scale);
+      }
+
+      model.updateMatrixWorld(true);
+      const fittedBox = new THREE.Box3().setFromObject(model);
+      const fittedCenter = fittedBox.getCenter(new THREE.Vector3());
+      model.position.x -= fittedCenter.x;
+      model.position.z -= fittedCenter.z;
+      model.position.y -= fittedBox.min.y;
+      group.add(model);
+    })
+    .catch((error) => {
+      console.error('Bej koltuk GLB yüklenemedi:', error);
+    });
+
+  return { group, surfaces: [proxy] };
+}
+
+"""
+          s = s[:fn_start] + direct_renderer + s[next_fn:]
+          p.write_text(s)
+          PY
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - name: Commit direct GLB integration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/scene3d.js public/models/bej_koltuk_1_ciftli_2_tekli.glb
+          git commit -m "fix: load beige sofa set directly from GLB [skip ci]"
+          git push origin ROG
