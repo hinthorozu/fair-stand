@@ -34,7 +34,6 @@ jobs:
               'SHOWCASE_2_100': 'wall_showcase_100_2',
               'SHOWCASE_3_100': 'wall_showcase_100_3',
               'BAR_STOOL': 'moble_bar_stool_classic',
-              'SOFA_SET': 'moble_sofa_set_classic',
               'TABLE_CHAIR_SET': 'moble_table_chair_set_minyon',
           }
           roots = [Path('src'), Path('test')]
@@ -59,7 +58,7 @@ jobs:
       - name: Verify old IDs are gone from runtime/test/docs
         shell: bash
         run: |
-          ! grep -R -n -E "COUNTER_(100|150|200)|SEPARATOR_(50|100)|SHOWCASE_[23]_100|BAR_STOOL|SOFA_SET|TABLE_CHAIR_SET" src test SYSTEM_MODULE_CATALOG.md ARCHITECTURE_RULES.md README.md ROADMAP*.md || (echo 'Old catalog IDs remain' && exit 1)
+          ! grep -R -n -E "COUNTER_(100|150|200)|SEPARATOR_(50|100)|SHOWCASE_[23]_100|BAR_STOOL|TABLE_CHAIR_SET" src test SYSTEM_MODULE_CATALOG.md ARCHITECTURE_RULES.md README.md ROADMAP*.md || (echo 'Old catalog IDs remain' && exit 1)
       - name: Install
         run: npm ci
       - name: Test
