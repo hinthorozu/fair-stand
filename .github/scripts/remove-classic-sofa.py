@@ -88,13 +88,14 @@ text = p.read_text()
 start = text.find('## `furniture_sofa_set_classic`')
 end = text.find('## `furniture_table_chair_set_minyon`', start)
 if start < 0 or end < 0: raise SystemExit('SYSTEM_MODULE_CATALOG.md: legacy sofa section boundaries not found')
-# preserve one section separator before the next module
 text = text[:start] + text[end:]
 p.write_text(text)
 
 # Historical one-shot workflows must not preserve/reintroduce the deleted ID.
 replace_all('.github/workflows/fix-furniture-ids.yml', "              'moble_sofa_set_classic': 'furniture_sofa_set_classic',\n", '')
 replace_all('.github/workflows/unify-module-catalog.yml', "              'furniture_sofa_set_classic',\n", '')
+replace_all('.github/workflows/unify-module-catalog.yml', "          for obsolete in ['moble_sofa_set_classic','moble_table_chair_set_minyon','moble_bar_stool_classic']:\n", "          for obsolete in ['moble_table_chair_set_minyon','moble_bar_stool_classic']:\n")
+replace_all('.github/workflows/rename-counter-ids.yml', "              'SOFA_SET': 'moble_sofa_set_classic',\n", '')
 
 # Hard guard across the whole repo (temporary cleanup helper/workflow excluded because
 # they necessarily contain the search terms and are deleted before final commit).
