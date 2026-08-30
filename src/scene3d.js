@@ -3225,6 +3225,75 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
   return { group, surfaces };
 }
 
+
+const beigeWhiteUpholsteryTextureCache = new WeakMap();
+
+function createBeigeWhiteUpholsteryTexture(sourceTexture) {
+  if (!sourceTexture?.image || typeof document === 'undefined') return sourceTexture;
+  const cached = beigeWhiteUpholsteryTextureCache.get(sourceTexture);
+  if (cached) return cached;
+
+  const image = sourceTexture.image;
+  const width = Number(image.width || image.videoWidth || 0);
+  const height = Number(image.height || image.videoHeight || 0);
+  if (!width || !height) return sourceTexture;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  if (!context) return sourceTexture;
+
+  context.drawImage(image, 0, 0, width, height);
+  const imageData = context.getImageData(0, 0, width, height);
+  const pixels = imageData.data;
+
+  for (let index = 0; index < pixels.length; index += 4) {
+    const r = pixels[index];
+    const g = pixels[index + 1];
+    const b = pixels[index + 2];
+    const a = pixels[index + 3];
+    if (a === 0) continue;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const saturation = max > 0 ? (max - min) / max : 0;
+    const brightness = max / 255;
+
+    // Wooden legs/details are distinctly warmer and more saturated than the fabric.
+    // Keep those pixels unchanged; only neutralize the beige upholstery.
+    const isWood = (
+      brightness > 0.12
+      && brightness < 0.86
+      && saturation > 0.20
+      && r > g * 1.035
+      && g > b * 1.035
+    );
+    if (isWood || brightness < 0.08) continue;
+
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const whiteLevel = Math.max(188, Math.min(248, 222 + (luminance - 160) * 0.34));
+    pixels[index] = whiteLevel;
+    pixels[index + 1] = whiteLevel;
+    pixels[index + 2] = whiteLevel;
+  }
+
+  context.putImageData(imageData, 0, 0);
+  const texture = sourceTexture.clone();
+  texture.image = canvas;
+  texture.needsUpdate = true;
+  beigeWhiteUpholsteryTextureCache.set(sourceTexture, texture);
+  return texture;
+}
+
+function cloneBeigeSofaMaterial(material) {
+  if (!material) return material;
+  const cloned = material.clone?.() ?? material;
+  if (cloned.map) cloned.map = createBeigeWhiteUpholsteryTexture(cloned.map);
+  if (cloned.color) cloned.color.set('#ffffff');
+  return cloned;
+}
+
 function createBeigeSofaSetModule(moduleState, moduleIndex) {
   const widthCm = Number(moduleState.widthCm || 150);
   const depthCm = Number(moduleState.depthCm || 150);
@@ -3312,9 +3381,9 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
         object.castShadow = true;
         object.receiveShadow = true;
         if (Array.isArray(object.material)) {
-          object.material = object.material.map((material) => material?.clone?.() ?? material);
+          object.material = object.material.map(cloneBeigeSofaMaterial);
         } else if (object.material) {
-          object.material = object.material.clone();
+          object.material = cloneBeigeSofaMaterial(object.material);
         }
         colorTargets.push(object);
       });

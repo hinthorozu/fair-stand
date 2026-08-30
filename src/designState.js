@@ -170,7 +170,7 @@ export function createBeigeSofaSetModuleState() {
     heightCm: 78,
     surface: {
       id: createId('surface'),
-      color: '#e7ddca',
+      color: '#ffffff',
     },
   };
 }
