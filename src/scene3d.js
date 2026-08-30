@@ -1135,12 +1135,15 @@ export function createStandScene(
           moduleIndex,
           (surface) => applyStoredImage(surface),
         );
-      } else {
+      } else if (moduleState.type === 'flat-panel') {
         module = createFlatPanelModule(
           moduleState,
           moduleIndex,
           (surface) => applyStoredImage(surface),
         );
+      } else {
+        console.warn('Desteklenmeyen modül tipi atlandı:', moduleState.type, moduleState.id);
+        return;
       }
 
       const widthCm = Number(moduleState.widthCm);
@@ -3923,7 +3926,11 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
 
   for (let stripIndex = 0; stripIndex < stripCount; stripIndex += 1) {
     const centerY = stripIndex * stripHeight + stripHeight / 2;
-    const surfaceState = moduleState.strips[stripIndex];
+    const surfaceState = moduleState.strips?.[stripIndex];
+    if (!surfaceState) {
+      console.warn('Eksik panel strip state atlandı:', moduleState.type, moduleState.id, stripIndex);
+      continue;
+    }
     const isGlass = Boolean(surfaceState.isGlass);
 
     const backing = new THREE.Mesh(
