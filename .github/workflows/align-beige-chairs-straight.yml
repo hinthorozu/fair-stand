@@ -1,0 +1,31 @@
+name: Align Beige Chairs Straight
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/align-beige-chairs-straight.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/align-beige-chairs-straight.py
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/scripts/align-beige-chairs-straight.py .github/workflows/align-beige-chairs-straight.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: align beige single chairs straight [skip ci]'
+          branch: ROG
