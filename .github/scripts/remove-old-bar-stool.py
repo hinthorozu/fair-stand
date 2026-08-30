@@ -51,7 +51,12 @@ s, n = re.subn(r"\n  if \(module\.type === 'bar-stool'\) \{\n    const body = do
 if n != 1: raise SystemExit('old bar stool sidebar preview branch not found')
 p.write_text(s)
 
-# Remove old-stool-only test references; keep Tabure 2 tests.
+# The old procedural stool has a dedicated legacy test file; remove it entirely.
+legacy_test = Path('test/barStool.test.js')
+if legacy_test.exists():
+    legacy_test.unlink()
+
+# Remove any remaining old-stool-only references elsewhere; keep Tabure 2 tests.
 for path in Path('test').rglob('*.js'):
     text = path.read_text()
     original = text
