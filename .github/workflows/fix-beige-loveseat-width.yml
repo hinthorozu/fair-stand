@@ -1,0 +1,44 @@
+name: Fix Beige Loveseat Width
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-beige-loveseat-width.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - name: Fix loveseat axis
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/scene3d.js')
+          s = p.read_text()
+          old = "rotationYDeg: -45.26002361732807"
+          new = "rotationYDeg: -135.26002361732807"
+          if old not in s:
+              raise SystemExit('loveseat rotation marker not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+      - name: Test
+        run: |
+          npm install
+          npm test
+          npm run build
+      - name: Commit
+        run: |
+          rm -f .github/workflows/fix-beige-loveseat-width.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: make beige loveseat true 150cm wide [skip ci]"
+          git push
