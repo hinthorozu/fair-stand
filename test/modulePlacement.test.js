@@ -869,11 +869,11 @@ test('50 cm panel snaps centered to the short side of Banko 150', () => {
 
 
 test('furniture modules use a 10 cm free-placement grid while other modules keep 50 cm', () => {
-  assert.equal(getModulePlacementSnapCm('sofa-set-beige'), 10);
+  assert.equal(getModulePlacementSnapCm('sofa-set-classic'), 10);
   assert.equal(getModulePlacementSnapCm('table-chair-set-eames'), 10);
   assert.equal(getModulePlacementSnapCm('counter'), 50);
 
-  for (const moduleType of ['sofa-set-beige', 'table-chair-set-eames']) {
+  for (const moduleType of ['sofa-set-classic', 'table-chair-set-eames']) {
     const result = snapPlacementToStand({
       standType: 'island',
       moduleType,

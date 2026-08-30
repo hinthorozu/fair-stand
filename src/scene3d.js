@@ -92,7 +92,7 @@ function loadBeigeSofaModel() {
 function isFloorFixtureType(type) {
   return type === 'counter'
     || type === 'base'
-    || type === 'sofa-set-beige'
+    || type === 'sofa-set-classic'
     || type === 'table-chair-set-eames'
     || type === 'bar-stool';
 }
@@ -1109,7 +1109,7 @@ export function createStandScene(
           moduleIndex,
           (surface) => applyStoredImage(surface),
         );
-      } else if (moduleState.type === 'sofa-set-beige') {
+      } else if (moduleState.type === 'sofa-set-classic') {
         module = createBeigeSofaSetModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'table-chair-set-eames') {
         module = createEamesTableChairSetModule(moduleState, moduleIndex);
@@ -1452,7 +1452,7 @@ export function createStandScene(
   function getDragModuleLabel(moduleState) {
     const widthCm = Number(moduleState?.widthCm) || 0;
     if (moduleState?.type === 'shelf') return 'Raf ' + widthCm + ' · ' + (Number(moduleState.shelfCount) || 2) + ' Raf';
-    if (moduleState?.type === 'sofa-set-beige') return 'Bej Koltuk Takımı';
+    if (moduleState?.type === 'sofa-set-classic') return 'Bej Koltuk Takımı';
     if (moduleState?.type === 'table-chair-set-eames') return 'Eames Masa Sandalye Takımı';
     if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';
     if (moduleState?.type === 'led-floodlight') return 'LED Projektör';
@@ -1510,8 +1510,8 @@ export function createStandScene(
     const label = dragBadge.querySelector('[data-role="label"]');
     if (label) label.textContent = getDragModuleLabel(moduleState);
     if (preview) {
-      preview.style.height = (moduleState?.type === 'sofa-set-beige') ? '34px' : (moduleState?.type === 'base' ? '22px' : (moduleState?.type === 'counter' ? '28px' : '48px'));
-      if (moduleState?.type === 'sofa-set-beige') {
+      preview.style.height = (moduleState?.type === 'sofa-set-classic') ? '34px' : (moduleState?.type === 'base' ? '22px' : (moduleState?.type === 'counter' ? '28px' : '48px'));
+      if (moduleState?.type === 'sofa-set-classic') {
         preview.style.background = 'linear-gradient(to bottom,#f8fafc 0 45%,#9aa0a6 45% 52%,#f8fafc 52% 100%)';
       } else if (moduleState?.type === 'shelf') {
         preview.style.background = moduleState.shelfCount === 3
@@ -2123,7 +2123,7 @@ export function createStandScene(
         ? mesh.userData.colorTargets
         : [mesh];
 
-      if (mesh.userData.moduleType === 'sofa-set-beige') {
+      if (mesh.userData.moduleType === 'sofa-set-classic') {
         colorTargets.forEach((target) => applyBeigeSofaBodyColor(target, hexColor));
         return;
       }
@@ -3363,7 +3363,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
     kind: 'module',
     moduleIndex,
     moduleId: moduleState.id,
-    type: 'sofa-set-beige',
+    type: 'sofa-set-classic',
     widthCm,
     depthCm,
     heightCm,
@@ -3390,7 +3390,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
   proxy.add(selectionFrame);
   proxy.userData = {
     kind: 'surface',
-    moduleType: 'sofa-set-beige',
+    moduleType: 'sofa-set-classic',
     selectionMode: 'module',
     acceptsImage: false,
     moduleIndex,

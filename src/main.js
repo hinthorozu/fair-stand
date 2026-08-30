@@ -607,7 +607,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'counter') state = createCounterModuleState(module.widthCm, { shape: module.shape, depthCm: module.depthCm });
   else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm);
   else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);
-  else if (module.type === 'sofa-set-beige') state = createBeigeSofaSetModuleState();
+  else if (module.type === 'sofa-set-classic') state = createBeigeSofaSetModuleState();
   else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();
   else if (module.type === 'bar-stool') state = createBarStoolModuleState();
   else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();

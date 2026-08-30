@@ -164,7 +164,7 @@ export function createBaseModuleState(widthCm) {
 export function createBeigeSofaSetModuleState() {
   return {
     id: createId('module'),
-    type: 'sofa-set-beige',
+    type: 'sofa-set-classic',
     widthCm: 150,
     depthCm: 150,
     heightCm: 78,
