@@ -1,0 +1,9 @@
+Tabure 2 model attribution
+
+Title: Bar Chair
+Author: Ivar Kramer (@ivarkramer12)
+Source: https://sketchfab.com/3d-models/bar-chair-d5125bd7fae44192b59bd792f1d2bbd3
+License: CC BY 4.0
+License URL: https://creativecommons.org/licenses/by/4.0/
+
+The application loads the supplied GLB directly as public/models/bar_chair.glb; no model format conversion is required.
