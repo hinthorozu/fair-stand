@@ -10,7 +10,6 @@ const MODULE_LABELS = {
   counter: 'Banko',
   base: 'Baza',
   shelf: 'Raf',
-  'sofa-set': 'Koltuk Takımı',
   'sofa-set-beige': 'Bej Koltuk Takımı',
 };
 

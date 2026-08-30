@@ -161,20 +161,6 @@ export function createBaseModuleState(widthCm) {
   };
 }
 
-export function createSofaSetModuleState() {
-  return {
-    id: createId('module'),
-    type: 'sofa-set',
-    widthCm: 150,
-    depthCm: 150,
-    heightCm: 80,
-    surface: {
-      id: createId('surface'),
-      color: DEFAULT_PANEL_COLOR,
-    },
-  };
-}
-
 export function createBeigeSofaSetModuleState() {
   return {
     id: createId('module'),

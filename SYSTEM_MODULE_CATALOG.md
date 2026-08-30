@@ -613,22 +613,6 @@ olmak üzere duvar + baza yüzeyleri birlikte bulunur.
 
 Bu modüller katalogda ve state sisteminde vardır ancak `moduleRecipes.js` içinde BOM reçeteleri henüz tanımlı değildir.
 
-## `furniture_sofa_set_classic`
-
-- Ekrandaki ad: **Koltuk Takımı**
-- Type: `sofa-set`
-- Ölçü: **150 × 150 × 80 cm**
-- State: tek renk yüzeyi
-- BOM: **Yok**
-
-Ek sabitler:
-
-- Loveseat genişliği: 150 cm
-- Sandalye genişliği: 65 cm
-- Masa çapı: 60 cm
-
----
-
 ## `furniture_table_chair_set_minyon`
 
 - Ekrandaki ad: **Masa Sandalye Takımı**
