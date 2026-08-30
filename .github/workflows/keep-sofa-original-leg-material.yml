@@ -1,0 +1,28 @@
+name: Keep Sofa Original Leg Material
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/keep-sofa-original-leg-material.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/keep-sofa-original-leg-material.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/scripts/keep-sofa-original-leg-material.py .github/workflows/keep-sofa-original-leg-material.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: preserve original sofa leg material [skip ci]'
+          branch: ROG
