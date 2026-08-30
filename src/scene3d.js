@@ -3341,7 +3341,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
 
       // Loveseat is exactly 150 cm wide. Singles keep the requested +25% visual size,
       // while every axis still uses one uniform scale so the GLB proportions stay intact.
-      const sizeCorrection = isLoveseat ? 1.50 : 1.25;
+      const sizeCorrection = isLoveseat ? 1.40 : 1.25;
       const physicalWidthM = isLoveseat
         ? orientedSize.x
         : Math.max(sourceSize.x, sourceSize.z);
@@ -3363,7 +3363,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
     new THREE.BoxGeometry(0.60, 0.018, 0.42),
     new THREE.MeshPhysicalMaterial({ color: 0xd7e9ed, transparent: true, opacity: 0.42, roughness: 0.12, metalness: 0, transmission: 0.28, depthWrite: false }),
   );
-  tableTop.position.set(0, 0.38, 0);
+  tableTop.position.set(0, 0.38, 0.10);
   tableTop.receiveShadow = true;
   group.add(tableTop);
 
@@ -3371,7 +3371,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
     new THREE.CylinderGeometry(0.035, 0.035, 0.35, 20),
     new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.28 }),
   );
-  tableStem.position.set(0, 0.19, 0);
+  tableStem.position.set(0, 0.19, 0.10);
   tableStem.castShadow = true;
   group.add(tableStem);
 
@@ -3379,7 +3379,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
     new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32),
     new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.30 }),
   );
-  tableBase.position.set(0, 0.018, 0);
+  tableBase.position.set(0, 0.018, 0.10);
   tableBase.castShadow = true;
   tableBase.receiveShadow = true;
   group.add(tableBase);
