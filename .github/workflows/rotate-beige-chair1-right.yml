@@ -1,0 +1,27 @@
+name: Rotate Beige Chair 1 Right
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/rotate-beige-chair1-right.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/rotate-beige-chair1-right.py
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/scripts/rotate-beige-chair1-right.py .github/workflows/rotate-beige-chair1-right.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: rotate first beige single chair right [skip ci]'
+          branch: ROG
