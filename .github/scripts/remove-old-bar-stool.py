@@ -19,10 +19,11 @@ s, n = re.subn(r"\nexport function createBarStoolModuleState\(\) \{\n  return \{
 if n != 1: raise SystemExit('old bar stool state factory not found')
 p.write_text(s)
 
-# main.js: remove import and catalog factory branch if present.
+# main.js: remove import and catalog factory branch.
 p = Path('src/main.js')
 s = p.read_text()
-s = re.sub(r"\s*createBarStoolModuleState,\n", "", s)
+s = re.sub(r"^\s*createBarStoolModuleState,\n", "", s, flags=re.M)
+s = s.replace("  else if (module.type === 'bar-stool') state = createBarStoolModuleState();\n", "")
 s = re.sub(r"\n\s*if \(catalogEntry\.type === 'bar-stool'\) return createBarStoolModuleState\(\);", "", s)
 s = re.sub(r"\n\s*case 'bar-stool':\n\s*return createBarStoolModuleState\(\);", "", s)
 p.write_text(s)
