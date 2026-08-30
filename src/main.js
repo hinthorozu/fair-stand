@@ -7,7 +7,7 @@ import {
   getAutomaticWallCapacityCm,
 } from './automaticWall.js';
 import {
-  createBarStool2ModuleState,
+  createBarStoolModuleState,
   createLedFloodlightModuleState,
   createBaseModuleState,
   createBaseWallModuleState,
@@ -264,8 +264,8 @@ const scene3d = createStandScene(
         return;
       }
 
-      if (moduleType === 'bar-stool-2') {
-        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Tabure 2 · GLB model.';
+      if (moduleType === 'bar-stool') {
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Bar Taburesi · GLB model.';
         return;
       }
 
@@ -614,7 +614,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);
   else if (module.type === 'sofa-set-classic') state = createBeigeSofaSetModuleState();
   else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();
-  else if (module.type === 'bar-stool-2') state = createBarStool2ModuleState();
+  else if (module.type === 'bar-stool') state = createBarStoolModuleState();
   else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);
   else if (module.type === 'showcase-2' || module.type === 'showcase-3') {

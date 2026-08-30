@@ -77,16 +77,16 @@ function loadEamesChairModel() {
   return eamesChairModelPromise;
 }
 
-let barStool2ModelPromise = null;
+let barStoolModelPromise = null;
 
-function loadBarStool2Model() {
-  if (!barStool2ModelPromise) {
+function loadBarStoolModel() {
+  if (!barStoolModelPromise) {
     const loader = new GLTFLoader();
-    barStool2ModelPromise = loader
+    barStoolModelPromise = loader
       .loadAsync(import.meta.env.BASE_URL + 'models/bar_chair.glb')
       .then((gltf) => gltf.scene);
   }
-  return barStool2ModelPromise;
+  return barStoolModelPromise;
 }
 
 let beigeSofaModelPromise = null;
@@ -106,7 +106,7 @@ function isFloorFixtureType(type) {
     || type === 'base'
     || type === 'sofa-set-classic'
     || type === 'table-chair-set-eames'
-    || type === 'bar-stool-2';
+    || type === 'bar-stool';
 }
 
 function isTopFixtureType(type) {
@@ -1125,8 +1125,8 @@ export function createStandScene(
         module = createBeigeSofaSetModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'table-chair-set-eames') {
         module = createEamesTableChairSetModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'bar-stool-2') {
-        module = createBarStool2Module(moduleState, moduleIndex);
+      } else if (moduleState.type === 'bar-stool') {
+        module = createBarStoolModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'led-floodlight') {
         module = createLedFloodlightModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'shelf') {
@@ -3057,7 +3057,7 @@ function createLedFloodlightModule(moduleState, moduleIndex) {
   return { group, surfaces: [lens] };
 }
 
-function createBarStool2Module(moduleState, moduleIndex) {
+function createBarStoolModule(moduleState, moduleIndex) {
   const widthCm = Number(moduleState.widthCm || 60);
   const depthCm = Number(moduleState.depthCm || 55);
   const heightCm = Number(moduleState.heightCm || 121);
@@ -3066,7 +3066,7 @@ function createBarStool2Module(moduleState, moduleIndex) {
     kind: 'module',
     moduleIndex,
     moduleId: moduleState.id,
-    type: 'bar-stool-2',
+    type: 'bar-stool',
     widthCm,
     depthCm,
     heightCm,
@@ -3086,7 +3086,7 @@ function createBarStool2Module(moduleState, moduleIndex) {
   proxy.add(selectionFrame);
   proxy.userData = {
     kind: 'surface',
-    moduleType: 'bar-stool-2',
+    moduleType: 'bar-stool',
     selectionMode: 'module',
     acceptsImage: false,
     moduleIndex,
@@ -3101,7 +3101,7 @@ function createBarStool2Module(moduleState, moduleIndex) {
     colorTargets,
   };
 
-  loadBarStool2Model().then((template) => {
+  loadBarStoolModel().then((template) => {
     if (!group.parent) return;
     const chair = template.clone(true);
     chair.traverse((object) => {
@@ -3130,7 +3130,7 @@ function createBarStool2Module(moduleState, moduleIndex) {
     chair.position.y -= box.min.y;
     group.add(chair);
   }).catch((error) => {
-    console.warn('Tabure 2 GLB modeli yüklenemedi:', error);
+    console.warn('Bar Taburesi GLB modeli yüklenemedi:', error);
   });
 
   return { group, surfaces: [proxy] };

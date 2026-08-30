@@ -191,10 +191,10 @@ export function createEamesTableChairSetModuleState() {
 }
 
 
-export function createBarStool2ModuleState() {
+export function createBarStoolModuleState() {
   return {
     id: createId('module'),
-    type: 'bar-stool-2',
+    type: 'bar-stool',
     widthCm: 60,
     depthCm: 55,
     heightCm: 121,

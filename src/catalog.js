@@ -55,7 +55,7 @@ export const furniture_table_chair_set_eames_DIMENSIONS = Object.freeze({
 });
 
 
-export const furniture_bar_stool_2_DIMENSIONS = Object.freeze({
+export const furniture_bar_stool_classic_DIMENSIONS = Object.freeze({
   widthCm: 60,
   depthCm: 55,
   heightCm: 121,
@@ -84,7 +84,7 @@ export const MODULE_CATALOG = Object.freeze({
   wall_shelf_3_200: { type: 'shelf', widthCm: 200, shelfCount: 3, label: 'Raf 200 · 3 Raf' },
   furniture_sofa_set_classic: { type: 'sofa-set-classic', widthCm: 150, depthCm: 150, heightCm: 78, label: 'Koltuk Takımı' },
   furniture_table_chair_set_eames: { type: 'table-chair-set-eames', widthCm: 150, depthCm: 150, heightCm: 82, label: 'Eames Masa Sandalye Takımı' },
-  furniture_bar_stool_2: { type: 'bar-stool-2', widthCm: 60, depthCm: 55, heightCm: 121, label: 'Tabure 2' },
+  furniture_bar_stool_classic: { type: 'bar-stool', widthCm: 60, depthCm: 55, heightCm: 121, label: 'Bar Taburesi' },
   LED_FLOODLIGHT: { type: 'led-floodlight', widthCm: 50, depthCm: 20, heightCm: 35, label: 'LED Projektör' },
   DOOR_100: { type: 'door', widthCm: 100, label: 'Depo Kapısı 100' },
 
@@ -143,7 +143,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'BASE_100',
   'furniture_sofa_set_classic',
   'furniture_table_chair_set_eames',
-  'furniture_bar_stool_2',
+  'furniture_bar_stool_classic',
   'LED_FLOODLIGHT',
 ]);
 
