@@ -1,0 +1,28 @@
+name: Fix Beige Sofa Loader
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/fix-beige-sofa-loader.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/fix-beige-sofa-loader.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/scripts/fix-beige-sofa-loader.py
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: preserve beige sofa GLB transforms [skip ci]'
+          branch: ROG
