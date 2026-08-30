@@ -45,8 +45,8 @@ p.write_text(s)
 # moduleDragSidebar.js: remove old stool-specific preview CSS and preview branch.
 p = Path('src/moduleDragSidebar.js')
 s = p.read_text()
-s = re.sub(r"^\s*\.module-drag-bar-stool \{.*?\n\s*\.module-drag-bar-stool::after \{.*?\n", "", s, count=1, flags=re.M)
-s, n = re.subn(r"\n  if \(module\.type === 'bar-stool'\) \{\n    const body = document\.createElement\('div'\);\n    body\.className = 'module-drag-bar-stool';\n    preview\.appendChild\(body\);\n    return preview;\n  \}\n", "\n", s, count=1)
+s = ''.join(line for line in s.splitlines(keepends=True) if 'module-drag-bar-stool' not in line)
+s, n = re.subn(r"\n  if \(module\.type === 'bar-stool'\) \{\n    const body = document\.createElement\('div'\);\n    preview\.appendChild\(body\);\n    return preview;\n  \}\n", "\n", s, count=1)
 if n != 1: raise SystemExit('old bar stool sidebar preview branch not found')
 p.write_text(s)
 
