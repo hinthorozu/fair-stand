@@ -17,6 +17,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: python .github/scripts/remove-classic-sofa.py
+      - run: node --check src/catalog.js && node --check src/designState.js && node --check src/modulePlacement.js && node --check src/moduleDragSidebar.js && node --check src/scene3d.js
       - run: npm ci
       - run: npm test
       - run: npm run build
