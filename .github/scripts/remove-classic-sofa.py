@@ -1,83 +1,122 @@
 from pathlib import Path
 import re
 
-ROOT = Path('.')
+# Remove only structurally known legacy-sofa blocks/references. Never delete arbitrary
+# lines just because they contain "sofa-set"; beige uses the same prefix.
 
-# 1) Catalog: remove classic dimensions block, catalog entry, and key.
-catalog = Path('src/catalog.js')
-text = catalog.read_text()
-text = re.sub(
-    r"\nexport const furniture_sofa_set_classic_DIMENSIONS = Object\.freeze\(\{.*?\n\}\);\n",
+def replace_once(path, old, new):
+    p = Path(path)
+    text = p.read_text()
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f'{path}: expected 1 exact match, found {count}: {old[:80]!r}')
+    p.write_text(text.replace(old, new, 1))
+
+# catalog.js: dimensions, catalog item and exposed key.
+p = Path('src/catalog.js')
+text = p.read_text()
+text, n = re.subn(
+    r"\nexport const furniture_sofa_set_classic_DIMENSIONS = Object\.freeze\(\{\n(?:.*\n)*?\}\);\n",
     "\n",
     text,
-    flags=re.S,
+    count=1,
 )
-text = re.sub(r"^\s*furniture_sofa_set_classic:.*\n", "", text, flags=re.M)
-text = re.sub(r"^\s*'furniture_sofa_set_classic',\s*\n", "", text, flags=re.M)
-catalog.write_text(text)
+if n != 1:
+    raise SystemExit(f'src/catalog.js: classic dimensions removals={n}')
+text, n = re.subn(r"^\s*furniture_sofa_set_classic:\s*\{[^\n]*\},\n", "", text, count=1, flags=re.M)
+if n != 1:
+    raise SystemExit(f'src/catalog.js: classic catalog item removals={n}')
+text, n = re.subn(r"^\s*'furniture_sofa_set_classic',\s*\n", "", text, count=1, flags=re.M)
+if n != 1:
+    raise SystemExit(f'src/catalog.js: classic catalog key removals={n}')
+p.write_text(text)
 
-# 2) Scene renderer: remove the whole procedural classic sofa renderer block.
-scene = Path('src/scene3d.js')
-text = scene.read_text()
+# designState.js: remove only the complete legacy state factory.
+p = Path('src/designState.js')
+text = p.read_text()
+start = text.find('export function createSofaSetModuleState() {')
+end = text.find('export function createBeigeSofaSetModuleState() {', start)
+if start < 0 or end < 0:
+    raise SystemExit('src/designState.js: legacy sofa state boundaries not found')
+p.write_text(text[:start] + text[end:])
+
+# Placement/sidebar: keep beige and other furniture behavior, remove only the legacy OR term.
+replace_once(
+    'src/modulePlacement.js',
+    "moduleType === 'sofa-set' || moduleType === 'sofa-set-beige'",
+    "moduleType === 'sofa-set-beige'",
+)
+replace_once(
+    'src/moduleDragSidebar.js',
+    "module.type === 'sofa-set' || module.type === 'sofa-set-beige'",
+    "module.type === 'sofa-set-beige'",
+)
+
+# scene3d.js: remove the complete procedural legacy renderer.
+p = Path('src/scene3d.js')
+text = p.read_text()
 start = text.find('function createSofaSetModule(moduleState, moduleIndex) {')
-if start >= 0:
-    end = text.find('function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {', start)
-    if end < 0:
-        raise SystemExit('classic sofa renderer end boundary not found')
-    text = text[:start] + text[end:]
+end = text.find('function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {', start)
+if start < 0 or end < 0:
+    raise SystemExit('src/scene3d.js: legacy renderer boundaries not found')
+text = text[:start] + text[end:]
 
-# Remove any remaining direct renderer call / exact classic type branches.
-text = ''.join(
-    line for line in text.splitlines(keepends=True)
-    if 'createSofaSetModule(' not in line
-    and not re.search(r"['\"]sofa-set['\"]", line)
-    and 'furniture_sofa_set_classic' not in line
-)
-scene.write_text(text)
+# Remove only complete dispatcher branches that call the deleted renderer.
+patterns = [
+    r"\n\s*if \(moduleState\.type === ['\"]sofa-set['\"]\) \{\n\s*return createSofaSetModule\(moduleState, moduleIndex\);\n\s*\}\n",
+    r"\n\s*else if \(moduleState\.type === ['\"]sofa-set['\"]\) \{\n\s*return createSofaSetModule\(moduleState, moduleIndex\);\n\s*\}\n",
+    r"\n\s*if \(moduleState\.type === ['\"]sofa-set['\"]\) return createSofaSetModule\(moduleState, moduleIndex\);\n",
+    r"\n\s*else if \(moduleState\.type === ['\"]sofa-set['\"]\) return createSofaSetModule\(moduleState, moduleIndex\);\n",
+    r"\n\s*case ['\"]sofa-set['\"]:\s*return createSofaSetModule\(moduleState, moduleIndex\);\n",
+]
+for pattern in patterns:
+    text = re.sub(pattern, '\n', text)
+p.write_text(text)
 
-# 3) Sweep source/tests/config text files for leftover exact classic references.
-#    Beige sofa-set-beige is intentionally preserved because regex matches only exact quoted sofa-set.
-skip_roots = {'.git', 'node_modules', 'dist', 'coverage', '.github'}
-for path in ROOT.rglob('*'):
-    if not path.is_file():
-        continue
-    if any(part in skip_roots for part in path.parts):
-        continue
-    try:
-        data = path.read_text()
-    except (UnicodeDecodeError, OSError):
-        continue
-    if 'furniture_sofa_set_classic' not in data and not re.search(r"['\"]sofa-set['\"]", data) and 'createSofaSetModule' not in data:
-        continue
-    cleaned = ''.join(
-        line for line in data.splitlines(keepends=True)
-        if 'furniture_sofa_set_classic' not in line
-        and 'createSofaSetModule' not in line
-        and not re.search(r"['\"]sofa-set['\"]", line)
-    )
-    path.write_text(cleaned)
+# The old sofa contract test belongs to the deleted module, not the beige GLB module.
+legacy_test = Path('test/sofaSet.test.js')
+if not legacy_test.exists():
+    raise SystemExit('test/sofaSet.test.js: expected legacy test file not found')
+legacy_test.unlink()
 
-# 4) Hard guard across the whole tracked workspace (except temporary workflow/script).
+# Hard guard across the whole tracked working tree (excluding this temporary cleanup helper).
+# No legacy ID, state/renderer symbol, or exact legacy type may remain anywhere.
+forbidden = [
+    re.compile(r'furniture_sofa_set_classic'),
+    re.compile(r'createSofaSetModule(?:State)?'),
+    re.compile(r"(?<![A-Za-z0-9_-])['\"]sofa-set['\"](?![A-Za-z0-9_-])"),
+]
+exclude = {
+    '.github/scripts/remove-classic-sofa.py',
+    '.github/workflows/remove-classic-sofa.yml',
+}
 residuals = []
-for path in ROOT.rglob('*'):
-    if not path.is_file():
-        continue
-    if any(part in skip_roots for part in path.parts):
+for path in Path('.').rglob('*'):
+    if not path.is_file() or '.git' in path.parts or str(path) in exclude:
         continue
     try:
         data = path.read_text()
     except (UnicodeDecodeError, OSError):
         continue
-    if (
-        'furniture_sofa_set_classic' in data
-        or 'createSofaSetModule' in data
-        or re.search(r"['\"]sofa-set['\"]", data)
-    ):
-        residuals.append(str(path))
-
+    for rx in forbidden:
+        for match in rx.finditer(data):
+            line = data.count('\n', 0, match.start()) + 1
+            residuals.append(f'{path}:{line}: {match.group(0)}')
 if residuals:
-    raise SystemExit('classic sofa references remain: ' + ', '.join(residuals))
+    print('LEGACY SOFA RESIDUALS:')
+    print('\n'.join(residuals))
+    raise SystemExit(2)
 
-# Beige GLB must still exist in source.
-if 'furniture_sofa_set_beige' not in Path('src/catalog.js').read_text():
-    raise SystemExit('beige sofa catalog entry was removed unexpectedly')
+# Beige GLB contract must still exist.
+required = {
+    'src/catalog.js': ['furniture_sofa_set_beige', "type: 'sofa-set-beige'"],
+    'src/designState.js': ['createBeigeSofaSetModuleState', "type: 'sofa-set-beige'"],
+    'src/scene3d.js': ['createBeigeSofaSetModule', 'bej_koltuk_1_ciftli_2_tekli.glb'],
+}
+for filename, needles in required.items():
+    data = Path(filename).read_text()
+    for needle in needles:
+        if needle not in data:
+            raise SystemExit(f'{filename}: beige sofa contract missing: {needle}')
+
+print('Legacy sofa purge guard: clean')
