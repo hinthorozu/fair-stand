@@ -1,0 +1,28 @@
+name: Clean Beige Sofa Material Code
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/clean-beige-sofa-material-code.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/clean-beige-sofa-material-code.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/scripts/clean-beige-sofa-material-code.py .github/workflows/clean-beige-sofa-material-code.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: keep beige sofa GLB materials untouched [skip ci]'
+          branch: ROG
