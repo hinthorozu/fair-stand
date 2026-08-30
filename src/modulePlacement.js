@@ -103,7 +103,7 @@ export function snapCm(value, stepCm = MODULE_PLACEMENT_SNAP_CM) {
 }
 
 export function getModulePlacementSnapCm(moduleType) {
-  return moduleType === 'sofa-set-classic' || moduleType === 'table-chair-set-eames' || moduleType === 'bar-stool' || moduleType === 'bar-stool-2'
+  return moduleType === 'sofa-set-classic' || moduleType === 'table-chair-set-eames' || moduleType === 'bar-stool-2'
     ? 10
     : MODULE_PLACEMENT_SNAP_CM;
 }
@@ -1002,7 +1002,7 @@ function createFreePlacement({
 
   if (strictDepth) {
     const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
-    const useWallInnerFaces = moduleType === 'sofa-set-classic' || moduleType === 'table-chair-set-eames' || moduleType === 'bar-stool';
+    const useWallInnerFaces = moduleType === 'sofa-set-classic' || moduleType === 'table-chair-set-eames';
     const wallFaceOffsetCm = MODULE_COLLISION_DEPTH_CM / 2;
     const activeWalls = useWallInnerFaces ? getAllowedWallIds(standType) : [];
     const leftEdgeCm = activeWalls.includes('left') ? wallFaceOffsetCm : 0;

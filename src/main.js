@@ -7,7 +7,6 @@ import {
   getAutomaticWallCapacityCm,
 } from './automaticWall.js';
 import {
-  createBarStoolModuleState,
   createBarStool2ModuleState,
   createLedFloodlightModuleState,
   createBaseModuleState,
@@ -615,7 +614,6 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);
   else if (module.type === 'sofa-set-classic') state = createBeigeSofaSetModuleState();
   else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();
-  else if (module.type === 'bar-stool') state = createBarStoolModuleState();
   else if (module.type === 'bar-stool-2') state = createBarStool2ModuleState();
   else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);

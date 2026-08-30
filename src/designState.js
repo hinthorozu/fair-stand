@@ -190,19 +190,6 @@ export function createEamesTableChairSetModuleState() {
   };
 }
 
-export function createBarStoolModuleState() {
-  return {
-    id: createId('module'),
-    type: 'bar-stool',
-    widthCm: 50,
-    depthCm: 50,
-    heightCm: 80,
-    surface: {
-      id: createId('surface'),
-      color: DEFAULT_PANEL_COLOR,
-    },
-  };
-}
 
 export function createBarStool2ModuleState() {
   return {

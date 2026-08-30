@@ -106,7 +106,6 @@ function isFloorFixtureType(type) {
     || type === 'base'
     || type === 'sofa-set-classic'
     || type === 'table-chair-set-eames'
-    || type === 'bar-stool'
     || type === 'bar-stool-2';
 }
 
@@ -1126,8 +1125,6 @@ export function createStandScene(
         module = createBeigeSofaSetModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'table-chair-set-eames') {
         module = createEamesTableChairSetModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'bar-stool') {
-        module = createBarStoolModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'bar-stool-2') {
         module = createBarStool2Module(moduleState, moduleIndex);
       } else if (moduleState.type === 'led-floodlight') {
@@ -1469,7 +1466,6 @@ export function createStandScene(
     if (moduleState?.type === 'shelf') return 'Raf ' + widthCm + ' · ' + (Number(moduleState.shelfCount) || 2) + ' Raf';
     if (moduleState?.type === 'sofa-set-classic') return 'Bej Koltuk Takımı';
     if (moduleState?.type === 'table-chair-set-eames') return 'Eames Masa Sandalye Takımı';
-    if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';
     if (moduleState?.type === 'led-floodlight') return 'LED Projektör';
     if (moduleState?.type === 'base') return `Baza ${widthCm}`;
     if (moduleState?.type === 'counter') return moduleState.shape === 'L' ? ('Köşe Banko ' + widthCm + '×' + (Number(moduleState.depthCm) || widthCm)) : `Banko ${widthCm}`;
@@ -3060,62 +3056,6 @@ function createLedFloodlightModule(moduleState, moduleIndex) {
 
   return { group, surfaces: [lens] };
 }
-
-function createBarStoolModule(moduleState, moduleIndex) {
-  const group = new THREE.Group();
-  group.userData = { kind: 'module', moduleIndex, moduleId: moduleState.id, type: 'bar-stool', widthCm: 50, depthCm: 50, heightCm: 80 };
-
-  const seatMaterial = new THREE.MeshStandardMaterial({ color: moduleState.surface?.color ?? '#ffffff', roughness: 0.56, metalness: 0, emissive: 0x000000, emissiveIntensity: 0 });
-  const woodMaterial = new THREE.MeshStandardMaterial({ color: 0x8a4f24, roughness: 0.62, metalness: 0 });
-  const metalMaterial = new THREE.MeshStandardMaterial({ color: 0x30343a, roughness: 0.32, metalness: 0.72 });
-  const colorTargets = [];
-
-  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.07, 0.40), seatMaterial.clone());
-  seat.position.set(0, 0.60, 0.02);
-  seat.rotation.x = -0.03;
-  seat.castShadow = true;
-  seat.receiveShadow = true;
-  group.add(seat);
-  colorTargets.push(seat);
-
-  const back = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.24, 0.055), seatMaterial.clone());
-  back.position.set(0, 0.72, -0.17);
-  back.rotation.x = -0.12;
-  back.castShadow = true;
-  group.add(back);
-  colorTargets.push(back);
-
-  const legGeometry = new THREE.CylinderGeometry(0.022, 0.017, 0.61, 14);
-  [[-0.16,-0.14],[0.16,-0.14],[-0.16,0.14],[0.16,0.14]].forEach(([lx,lz]) => {
-    const leg = new THREE.Mesh(legGeometry, woodMaterial.clone());
-    leg.position.set(lx, 0.30, lz);
-    leg.rotation.z = lx < 0 ? 0.09 : -0.09;
-    leg.rotation.x = lz < 0 ? -0.09 : 0.09;
-    leg.castShadow = true;
-    group.add(leg);
-  });
-
-  const footRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.18, 0.012, 10, 40),
-    metalMaterial.clone(),
-  );
-  footRing.rotation.x = Math.PI / 2;
-  footRing.position.set(0, 0.25, 0);
-  group.add(footRing);
-
-  const selectable = colorTargets[0];
-  const selectionFrame = createSelectionFrame(0.42, 0.24);
-  selectionFrame.visible = false;
-  selectable.add(selectionFrame);
-  selectable.userData = { kind: 'surface', moduleType: 'bar-stool', selectionMode: 'module', acceptsImage: false, moduleIndex, moduleId: moduleState.id, widthCm: 50, stripIndex: null, stripNumber: null, surfaceRole: 'seat', surfaceId: moduleState.surface?.id, surfaceState: moduleState.surface, selectionFrame, colorTargets };
-  colorTargets.forEach((mesh, index) => {
-    if (index === 0) return;
-    mesh.userData = { ...selectable.userData, surfaceId: String(moduleState.surface?.id) + '-' + index, selectionFrame: null };
-  });
-
-  return { group, surfaces: colorTargets };
-}
-
 
 function createBarStool2Module(moduleState, moduleIndex) {
   const widthCm = Number(moduleState.widthCm || 60);
