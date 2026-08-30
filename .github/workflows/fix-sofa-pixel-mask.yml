@@ -1,0 +1,28 @@
+name: Fix Sofa Pixel Mask
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/fix-sofa-pixel-mask.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/fix-sofa-pixel-mask.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/scripts/fix-sofa-pixel-mask.py .github/workflows/fix-sofa-pixel-mask.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: recolor all sofa pixels except wooden legs [skip ci]'
+          branch: ROG
