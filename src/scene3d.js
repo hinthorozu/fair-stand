@@ -3292,7 +3292,18 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
         return;
       }
 
+      // Preserve the complete GLB node transform chain. Cloning only the mesh and
+      // detaching it from its parents can lose scale/rotation authored above the mesh.
+      source.updateWorldMatrix(true, false);
       const mesh = source.clone(true);
+      mesh.matrixAutoUpdate = true;
+      mesh.position.set(0, 0, 0);
+      mesh.rotation.set(0, 0, 0);
+      mesh.quaternion.identity();
+      mesh.scale.set(1, 1, 1);
+      mesh.updateMatrix();
+      mesh.applyMatrix4(source.matrixWorld);
+
       mesh.traverse((object) => {
         if (!object.isMesh) return;
         object.castShadow = true;
@@ -3305,12 +3316,15 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
         colorTargets.push(object);
       });
 
+      // Normalize around the object's real physical footprint and put its feet on y=0.
       mesh.updateMatrixWorld(true);
-      const sourceBox = new THREE.Box3().setFromObject(mesh);
+      let sourceBox = new THREE.Box3().setFromObject(mesh);
       const sourceCenter = sourceBox.getCenter(new THREE.Vector3());
       mesh.position.x -= sourceCenter.x;
-      mesh.position.y -= sourceCenter.y;
       mesh.position.z -= sourceCenter.z;
+      mesh.position.y -= sourceBox.min.y;
+      mesh.updateMatrixWorld(true);
+      sourceBox = new THREE.Box3().setFromObject(mesh);
 
       const oriented = new THREE.Group();
       oriented.rotation.y = THREE.MathUtils.degToRad(placement.rotationYDeg);
@@ -3319,24 +3333,22 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
 
       const orientedBox = new THREE.Box3().setFromObject(oriented);
       const orientedSize = orientedBox.getSize(new THREE.Vector3());
-      const fitted = new THREE.Group();
-      // GLB'nin doğal en-boy-yükseklik oranını bozma. Sadece hedef genişliğe
-      // göre tek katsayıyla ölçekle; derinlik ve yükseklik modelden doğal gelir.
-      const isLoveseat = placement.meshName === 'beigechair2seatsofa_tripo_mat_0691346e_0';
-      const loveseatSizeCorrection = isLoveseat ? 1.50 : 1.25;
       const sourceSize = sourceBox.getSize(new THREE.Vector3());
+      const isLoveseat = placement.meshName === 'beigechair2seatsofa_tripo_mat_0691346e_0';
+
+      // Loveseat is exactly 150 cm wide. Singles keep the requested +25% visual size,
+      // while every axis still uses one uniform scale so the GLB proportions stay intact.
+      const sizeCorrection = isLoveseat ? 1 : 1.25;
       const physicalWidthM = isLoveseat
         ? orientedSize.x
         : Math.max(sourceSize.x, sourceSize.z);
       const uniformScale = physicalWidthM > 0
-        ? (placement.targetWidthM / physicalWidthM) * loveseatSizeCorrection
-        : loveseatSizeCorrection;
+        ? (placement.targetWidthM / physicalWidthM) * sizeCorrection
+        : sizeCorrection;
+
+      const fitted = new THREE.Group();
       fitted.scale.setScalar(uniformScale);
-      fitted.position.set(
-        placement.x,
-        (orientedSize.y * uniformScale) / 2,
-        placement.z,
-      );
+      fitted.position.set(placement.x, 0, placement.z);
       fitted.add(oriented);
       group.add(fitted);
     });
