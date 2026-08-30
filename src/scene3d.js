@@ -1404,8 +1404,9 @@ export function createStandScene(
   function disposePlacementGhost() {
     if (!placementGhost) return;
     scene.remove(placementGhost.root);
-    placementGhost.mesh.geometry?.dispose?.();
-    placementGhost.mesh.material?.dispose?.();
+    if (placementGhost.ownsGeometry) placementGhost.mesh?.geometry?.dispose?.();
+    placementGhost.mesh?.material?.dispose?.();
+    placementGhost.tintMaterials?.forEach((material) => material?.dispose?.());
     placementGhost = null;
   }
 
@@ -1432,37 +1433,60 @@ export function createStandScene(
 
     const root = new THREE.Group();
 
-    // Bar Taburesi uses a chair-shaped placement ghost so drag feedback matches the GLB module.
+    // Bar Taburesi uses the actual GLB geometry as its placement ghost.
     if (moduleOrWidthCm?.type === 'bar-stool') {
-      const material = new THREE.MeshBasicMaterial({
-        color: PLACEMENT_VALID_COLOR,
-        transparent: true,
-        opacity: PLACEMENT_GHOST_OPACITY,
-        depthWrite: false,
-        depthTest: false,
-        side: THREE.DoubleSide,
-      });
-      const parts = [];
-      const addBox = (w, h, d, x, y, z) => {
-        const part = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
-        part.position.set(x, y, z);
-        part.renderOrder = 10000;
-        root.add(part);
-        parts.push(part);
-        return part;
-      };
-      const widthM = Math.max(dimensions.widthCm / 100, 0.60);
-      const depthM = Math.max(dimensions.depthM, 0.55);
-      const heightM = Math.max(dimensions.heightM, 1.21);
-      const seatY = Math.min(heightM * 0.66, 0.80);
-      const seat = addBox(widthM * 0.72, 0.09, depthM * 0.66, 0, seatY, 0.02);
-      addBox(widthM * 0.70, Math.max(heightM - seatY - 0.08, 0.28), 0.08, 0, seatY + (heightM - seatY) / 2, -depthM * 0.28);
-      const legH = Math.max(seatY - 0.06, 0.45);
-      const legX = widthM * 0.26;
-      const legZ = depthM * 0.23;
-      [[-legX,-legZ],[legX,-legZ],[-legX,legZ],[legX,legZ]].forEach(([x,z]) => addBox(0.045, legH, 0.045, x, legH / 2, z));
+      const proxy = new THREE.Mesh(
+        new THREE.BoxGeometry(
+          Math.max(dimensions.widthCm / 100, 0.02),
+          dimensions.heightM,
+          dimensions.depthM,
+        ),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+      );
+      proxy.position.y = dimensions.heightM / 2;
+      root.add(proxy);
       scene.add(root);
-      placementGhost = { root, mesh: seat, key, widthCm: dimensions.widthCm };
+
+      const tintMaterials = [];
+      placementGhost = {
+        root,
+        mesh: proxy,
+        tintMaterials,
+        key,
+        widthCm: dimensions.widthCm,
+        ownsGeometry: true,
+        colorHex: PLACEMENT_VALID_COLOR,
+      };
+
+      loadBarStoolModel().then((template) => {
+        if (placementGhost?.key !== key || placementGhost.root !== root) return;
+        const chair = template.clone(true);
+        chair.traverse((object) => {
+          if (!object.isMesh) return;
+          const material = new THREE.MeshBasicMaterial({
+            color: placementGhost.colorHex ?? PLACEMENT_VALID_COLOR,
+            transparent: true,
+            opacity: 0.38,
+            depthWrite: false,
+            depthTest: false,
+            side: THREE.DoubleSide,
+          });
+          object.material = material;
+          object.renderOrder = 10000;
+          tintMaterials.push(material);
+        });
+
+        chair.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(chair);
+        const center = box.getCenter(new THREE.Vector3());
+        chair.position.x -= center.x;
+        chair.position.z -= center.z;
+        chair.position.y -= box.min.y;
+        root.add(chair);
+      }).catch((error) => {
+        console.warn('Bar Taburesi ghost GLB modeli yüklenemedi:', error);
+      });
+
       return placementGhost;
     }
 
@@ -1491,7 +1515,13 @@ export function createStandScene(
 
   function showPlacementGhost(moduleOrWidthCm, placement, valid) {
     const ghost = ensurePlacementGhost(moduleOrWidthCm);
-    ghost.mesh.material.color.setHex(valid ? PLACEMENT_VALID_COLOR : PLACEMENT_INVALID_COLOR);
+    const colorHex = valid ? PLACEMENT_VALID_COLOR : PLACEMENT_INVALID_COLOR;
+    ghost.colorHex = colorHex;
+    if (ghost.tintMaterials?.length) {
+      ghost.tintMaterials.forEach((material) => material.color?.setHex(colorHex));
+    } else if (ghost.mesh?.material?.color) {
+      ghost.mesh.material.color.setHex(colorHex);
+    }
     applyPlacementToGroup(ghost.root, placement, ghost.widthCm);
     ghost.root.visible = true;
   }
@@ -1557,8 +1587,24 @@ export function createStandScene(
     const label = dragBadge.querySelector('[data-role="label"]');
     if (label) label.textContent = getDragModuleLabel(moduleState);
     if (preview) {
+      preview.innerHTML = '';
+      preview.style.width = '24px';
       preview.style.height = (moduleState?.type === 'sofa-set-classic') ? '34px' : (moduleState?.type === 'base' ? '22px' : (moduleState?.type === 'counter' ? '28px' : '48px'));
-      if (moduleState?.type === 'sofa-set-classic') {
+      preview.style.position = 'relative';
+      preview.style.border = '2px solid #8a929a';
+      preview.style.background = 'repeating-linear-gradient(to bottom,#f7f7f5 0 5px,#c4c9ce 5px 6px)';
+
+      if (moduleState?.type === 'bar-stool') {
+        preview.style.width = '44px';
+        preview.style.height = '58px';
+        preview.style.border = '0';
+        preview.style.background = 'transparent';
+        const seat = document.createElement('span');
+        seat.style.cssText = 'position:absolute;left:8px;top:4px;width:28px;height:20px;box-sizing:border-box;border:2px solid #8a929a;border-radius:10px 10px 5px 5px;background:#f8fafc';
+        const frame = document.createElement('span');
+        frame.style.cssText = 'position:absolute;left:11px;top:24px;width:22px;height:27px;box-sizing:border-box;border-left:3px solid #8a929a;border-right:3px solid #8a929a;border-bottom:3px solid #8a929a;border-radius:0 0 10px 10px';
+        preview.append(seat, frame);
+      } else if (moduleState?.type === 'sofa-set-classic') {
         preview.style.background = 'linear-gradient(to bottom,#f8fafc 0 45%,#9aa0a6 45% 52%,#f8fafc 52% 100%)';
       } else if (moduleState?.type === 'shelf') {
         preview.style.background = moduleState.shelfCount === 3

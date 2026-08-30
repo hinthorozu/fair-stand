@@ -33,9 +33,9 @@ function ensureStyles() {
     .module-drag-table-chair { position:relative; width:58px; height:58px; }
     .module-drag-table-chair::before { content:''; position:absolute; left:19px; top:19px; width:20px; height:20px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:50%; background:#fff; }
     .module-drag-table-chair::after { content:''; position:absolute; left:4px; top:4px; width:13px; height:13px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:4px; background:#f8fafc; box-shadow:37px 0 0 -2px #f8fafc,37px 0 0 0 ${ALUMINUM_PROFILE_COLOR},0 37px 0 -2px #f8fafc,0 37px 0 0 ${ALUMINUM_PROFILE_COLOR},37px 37px 0 -2px #f8fafc,37px 37px 0 0 ${ALUMINUM_PROFILE_COLOR}; }
-    .module-drag-bar-stool { position:relative; width:46px; height:62px; }
-    .module-drag-bar-stool::before { content:''; position:absolute; left:8px; top:5px; width:30px; height:25px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:9px 9px 5px 5px; background:#ffffff; box-shadow:0 2px 4px rgba(15,23,42,.08); }
-    .module-drag-bar-stool::after { content:''; position:absolute; left:10px; top:31px; width:26px; height:6px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:3px; background:#ffffff; box-shadow:-2px 9px 0 -2px ${ALUMINUM_PROFILE_COLOR},20px 9px 0 -2px ${ALUMINUM_PROFILE_COLOR},-4px 20px 0 -2px ${ALUMINUM_PROFILE_COLOR},22px 20px 0 -2px ${ALUMINUM_PROFILE_COLOR}; }
+    .module-drag-bar-stool { position:relative; width:44px; height:58px; }
+    .module-drag-bar-stool::before { content:''; position:absolute; left:8px; top:4px; width:28px; height:20px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:10px 10px 5px 5px; background:#f8fafc; }
+    .module-drag-bar-stool::after { content:''; position:absolute; left:11px; top:24px; width:22px; height:27px; border-left:3px solid ${ALUMINUM_PROFILE_COLOR}; border-right:3px solid ${ALUMINUM_PROFILE_COLOR}; border-bottom:3px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:0 0 10px 10px; }
     .module-drag-floodlight { position:relative; width:52px; height:52px; }
     .module-drag-floodlight::before { content:''; position:absolute; left:10px; top:7px; width:32px; height:22px; border:4px solid #17191c; border-radius:3px; background:#f5fff2; box-shadow:inset 0 0 0 2px #c7ead0; transform:rotate(-8deg); }
     .module-drag-floodlight::after { content:''; position:absolute; left:23px; top:29px; width:6px; height:16px; border-left:3px solid #292c31; border-bottom:3px solid #292c31; }
