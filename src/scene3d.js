@@ -3327,7 +3327,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
       // GLB'nin doğal en-boy-yükseklik oranını bozma. Sadece hedef genişliğe
       // göre tek katsayıyla ölçekle; derinlik ve yükseklik modelden doğal gelir.
       const isLoveseat = placement.meshName === 'beigechair2seatsofa_tripo_mat_0691346e_0';
-      const loveseatSizeCorrection = isLoveseat ? 1.50 : 1;
+      const loveseatSizeCorrection = isLoveseat ? 1.50 : 1.25;
       const sourceSize = sourceBox.getSize(new THREE.Vector3());
       const physicalWidthM = isLoveseat
         ? orientedSize.x
