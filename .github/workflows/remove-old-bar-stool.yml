@@ -1,5 +1,5 @@
 name: Remove Old Bar Stool
-# retry 2
+# retry 3
 on:
   push:
     branches: [ROG]
@@ -27,7 +27,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: |
-          ! grep -R -n -E "furniture_bar_stool_classic|createBarStoolModuleState|createBarStoolModule\(|['\"]bar-stool['\"]|Bar Taburesi" src test || (echo 'Old bar stool references remain' && exit 1)
+          ! grep -R -n -E "furniture_bar_stool_classic|createBarStoolModuleState|createBarStoolModule\(|['\"]bar-stool['\"]|Bar Taburesi|module-drag-bar-stool" src test || (echo 'Old bar stool references remain' && exit 1)
           grep -R -n "bar-stool-2" src >/dev/null
       - run: rm -f .github/scripts/remove-old-bar-stool.py .github/workflows/remove-old-bar-stool.yml
       - uses: stefanzweifel/git-auto-commit-action@v5
