@@ -3334,8 +3334,9 @@ function separateBeigeSofaWoodMaterial(object, upholsteryColor = '#ffffff') {
   upholsteryMaterial.color?.set(upholsteryColor);
   upholsteryMaterial.userData = { ...(upholsteryMaterial.userData || {}), sofaUpholstery: true };
 
+  // Wooden legs must keep the GLB's original material exactly as authored.
+  // Do not change color, texture map, roughness, metalness or any other property.
   const woodMaterial = sourceMaterial.clone();
-  woodMaterial.color?.set('#ffffff');
   woodMaterial.userData = { ...(woodMaterial.userData || {}), sofaFixedWood: true };
 
   geometry.clearGroups();
