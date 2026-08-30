@@ -1,4 +1,4 @@
-name: Remove Classic Sofa
+name: Purge Legacy Sofa
 on:
   push:
     branches: [ROG]
@@ -17,7 +17,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: python .github/scripts/remove-classic-sofa.py
-      - run: node --check src/catalog.js && node --check src/designState.js && node --check src/modulePlacement.js && node --check src/moduleDragSidebar.js && node --check src/scene3d.js
+      - run: node --check src/catalog.js && node --check src/designState.js && node --check src/modulePlacement.js && node --check src/moduleDragSidebar.js && node --check src/moduleContextMenu.js && node --check src/main.js && node --check src/scene3d.js
       - run: npm ci
       - run: npm test
       - run: npm run build
