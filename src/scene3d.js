@@ -3236,99 +3236,130 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
 }
 
 
-const beigeUpholsteryTextureCache = new WeakMap();
+function separateBeigeSofaWoodMaterial(object, upholsteryColor = '#ffffff') {
+  if (!object?.isMesh || !object.geometry || !object.material) return;
 
-function normalizeSofaColor(hexColor = '#ffffff') {
-  const raw = String(hexColor || '#ffffff').trim();
-  return /^#[0-9a-fA-F]{6}$/.test(raw) ? raw.toLowerCase() : '#ffffff';
-}
+  const sourceGeometry = object.geometry;
+  const position = sourceGeometry.getAttribute('position');
+  if (!position || position.count < 3) return;
 
-function createBeigeUpholsteryTexture(sourceTexture, hexColor = '#ffffff') {
-  if (!sourceTexture?.image || typeof document === 'undefined') return sourceTexture;
-  const colorKey = normalizeSofaColor(hexColor);
-  let colorCache = beigeUpholsteryTextureCache.get(sourceTexture);
-  if (!colorCache) {
-    colorCache = new Map();
-    beigeUpholsteryTextureCache.set(sourceTexture, colorCache);
-  }
-  const cached = colorCache.get(colorKey);
-  if (cached) return cached;
+  const geometry = sourceGeometry.clone();
+  object.geometry = geometry;
 
-  const image = sourceTexture.image;
-  const width = Number(image.width || image.videoWidth || 0);
-  const height = Number(image.height || image.videoHeight || 0);
-  if (!width || !height) return sourceTexture;
+  const index = geometry.index;
+  const triangleCount = Math.floor((index ? index.count : position.count) / 3);
+  if (!triangleCount) return;
 
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext('2d', { willReadFrequently: true });
-  if (!context) return sourceTexture;
+  const vertexKey = (vertexIndex) => {
+    const x = position.getX(vertexIndex).toFixed(5);
+    const y = position.getY(vertexIndex).toFixed(5);
+    const z = position.getZ(vertexIndex).toFixed(5);
+    return `${x}|${y}|${z}`;
+  };
 
-  context.drawImage(image, 0, 0, width, height);
-  const imageData = context.getImageData(0, 0, width, height);
-  const pixels = imageData.data;
-  const targetR = parseInt(colorKey.slice(1, 3), 16);
-  const targetG = parseInt(colorKey.slice(3, 5), 16);
-  const targetB = parseInt(colorKey.slice(5, 7), 16);
+  const triangleKeys = new Array(triangleCount);
+  const keyToTriangles = new Map();
+  let globalMinY = Infinity;
+  let globalMaxY = -Infinity;
 
-  for (let index = 0; index < pixels.length; index += 4) {
-    const r = pixels[index];
-    const g = pixels[index + 1];
-    const b = pixels[index + 2];
-    if (pixels[index + 3] === 0) continue;
+  for (let tri = 0; tri < triangleCount; tri += 1) {
+    const ids = index
+      ? [index.getX(tri * 3), index.getX(tri * 3 + 1), index.getX(tri * 3 + 2)]
+      : [tri * 3, tri * 3 + 1, tri * 3 + 2];
+    const keys = ids.map(vertexKey);
+    triangleKeys[tri] = { ids, keys };
 
-    // GLB atlasında gerçek ahşap ayaklar kumaştan belirgin biçimde daha koyu,
-    // sıcak ve doygun kahverengi. Sadece bu dar aralığı dokunulmaz bırak.
-    const isWood = (
-      r < 145
-      && g < 105
-      && b < 80
-      && r - g > 24
-      && g - b > 14
-      && r - b > 44
-    );
-    if (isWood) continue;
+    ids.forEach((vertexIndex) => {
+      const y = position.getY(vertexIndex);
+      globalMinY = Math.min(globalMinY, y);
+      globalMaxY = Math.max(globalMaxY, y);
+    });
 
-    // Döşeme tek renk olsun. Modelin formunu texture lekesi değil sahne ışığı verir.
-    pixels[index] = targetR;
-    pixels[index + 1] = targetG;
-    pixels[index + 2] = targetB;
+    keys.forEach((key) => {
+      const list = keyToTriangles.get(key) || [];
+      list.push(tri);
+      keyToTriangles.set(key, list);
+    });
   }
 
-  context.putImageData(imageData, 0, 0);
-  const texture = sourceTexture.clone();
-  texture.image = canvas;
-  texture.needsUpdate = true;
-  colorCache.set(colorKey, texture);
-  return texture;
-}
+  const componentByTriangle = new Int32Array(triangleCount);
+  componentByTriangle.fill(-1);
+  const components = [];
 
-function cloneBeigeSofaMaterial(material, upholsteryColor = '#ffffff') {
-  if (!material) return material;
-  const cloned = material.clone?.() ?? material;
-  cloned.userData = { ...(cloned.userData || {}), sofaSourceMap: material.map || null };
-  if (material.map) cloned.map = createBeigeUpholsteryTexture(material.map, upholsteryColor);
-  if (cloned.color) cloned.color.set('#ffffff');
-  return cloned;
+  for (let start = 0; start < triangleCount; start += 1) {
+    if (componentByTriangle[start] !== -1) continue;
+    const componentIndex = components.length;
+    const queue = [start];
+    componentByTriangle[start] = componentIndex;
+    const triangles = [];
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    while (queue.length) {
+      const tri = queue.pop();
+      triangles.push(tri);
+      const entry = triangleKeys[tri];
+      entry.ids.forEach((vertexIndex) => {
+        const y = position.getY(vertexIndex);
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+      });
+      entry.keys.forEach((key) => {
+        (keyToTriangles.get(key) || []).forEach((neighbor) => {
+          if (componentByTriangle[neighbor] !== -1) return;
+          componentByTriangle[neighbor] = componentIndex;
+          queue.push(neighbor);
+        });
+      });
+    }
+
+    components.push({ triangles, minY, maxY });
+  }
+
+  const totalHeight = Math.max(globalMaxY - globalMinY, 1e-6);
+  const woodComponents = new Set();
+  components.forEach((component, componentIndex) => {
+    const componentHeight = component.maxY - component.minY;
+    const nearFloor = component.minY <= globalMinY + totalHeight * 0.08;
+    const staysLow = component.maxY <= globalMinY + totalHeight * 0.34;
+    const isSmall = component.triangles.length <= triangleCount * 0.14;
+    const isLegSized = componentHeight <= totalHeight * 0.36;
+    if (nearFloor && staysLow && isSmall && isLegSized) woodComponents.add(componentIndex);
+  });
+
+  const sourceMaterials = Array.isArray(object.material) ? object.material : [object.material];
+  const sourceMaterial = sourceMaterials[0];
+  const upholsteryMaterial = sourceMaterial.clone();
+  upholsteryMaterial.map = null;
+  upholsteryMaterial.color?.set(upholsteryColor);
+  upholsteryMaterial.userData = { ...(upholsteryMaterial.userData || {}), sofaUpholstery: true };
+
+  const woodMaterial = sourceMaterial.clone();
+  woodMaterial.color?.set('#ffffff');
+  woodMaterial.userData = { ...(woodMaterial.userData || {}), sofaFixedWood: true };
+
+  geometry.clearGroups();
+  let runStart = 0;
+  let runMaterial = woodComponents.has(componentByTriangle[0]) ? 1 : 0;
+  for (let tri = 1; tri <= triangleCount; tri += 1) {
+    const nextMaterial = tri < triangleCount && woodComponents.has(componentByTriangle[tri]) ? 1 : 0;
+    if (tri < triangleCount && nextMaterial === runMaterial) continue;
+    geometry.addGroup(runStart * 3, (tri - runStart) * 3, runMaterial);
+    runStart = tri;
+    runMaterial = nextMaterial;
+  }
+
+  object.material = [upholsteryMaterial, woodMaterial];
 }
 
 function applyBeigeSofaUpholsteryColor(target, hexColor) {
   if (!target?.material) return;
   const materials = Array.isArray(target.material) ? target.material : [target.material];
   materials.forEach((material) => {
-    if (!material) return;
-    const sourceMap = material.userData?.sofaSourceMap;
-    if (sourceMap) {
-      const nextMap = createBeigeUpholsteryTexture(sourceMap, hexColor);
-      if (material.map && material.map !== nextMap && material.map !== sourceMap) {
-        material.map.dispose?.();
-      }
-      material.map = nextMap;
-      material.color?.set('#ffffff');
-    } else {
-      material.color?.set(hexColor);
-    }
+    if (!material || material.userData?.sofaFixedWood) return;
+    material.map?.dispose?.();
+    material.map = null;
+    material.color?.set(hexColor);
     material.needsUpdate = true;
   });
 }
@@ -3419,11 +3450,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
         if (!object.isMesh) return;
         object.castShadow = true;
         object.receiveShadow = true;
-        if (Array.isArray(object.material)) {
-          object.material = object.material.map((material) => cloneBeigeSofaMaterial(material, moduleState.surface?.color ?? '#ffffff'));
-        } else if (object.material) {
-          object.material = cloneBeigeSofaMaterial(object.material, moduleState.surface?.color ?? '#ffffff');
-        }
+        separateBeigeSofaWoodMaterial(object, moduleState.surface?.color ?? '#ffffff');
         colorTargets.push(object);
       });
 
