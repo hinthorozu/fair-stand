@@ -1,0 +1,40 @@
+name: Rename Bar Stool Classic Identity
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/rename-tabure2-to-classic.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/rename-tabure2-to-classic.py
+      - run: node --check src/catalog.js
+      - run: node --check src/designState.js
+      - run: node --check src/main.js
+      - run: node --check src/scene3d.js
+      - run: node --check src/modulePlacement.js
+      - run: node --check src/moduleDragSidebar.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: |
+          ! grep -R -n -E "furniture_bar_stool_2|bar-stool-2|createBarStool2ModuleState|createBarStool2Module|loadBarStool2Model|barStool2ModelPromise|Tabure 2" src test || (echo 'Temporary Tabure 2 identity remains' && exit 1)
+          grep -R -n "furniture_bar_stool_classic" src test >/dev/null
+          grep -R -n "'bar-stool'" src test >/dev/null
+          grep -R -n "Bar Taburesi" src test >/dev/null
+          test -f public/models/bar_chair.glb
+          test -f dist/models/bar_chair.glb
+      - run: rm -f .github/scripts/rename-tabure2-to-classic.py .github/workflows/rename-tabure2-to-classic.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'refactor: rename current bar stool to classic identity [skip ci]'
+          branch: ROG
