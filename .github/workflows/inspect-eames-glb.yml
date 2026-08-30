@@ -11,4 +11,4 @@ jobs:
         with:
           ref: ROG
       - run: python .github/scripts/inspect-eames-glb.py
-      - run: echo texture-inspection-v2
+      - run: echo bounds-inspection-v3
