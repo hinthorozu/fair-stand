@@ -103,7 +103,7 @@ export function snapCm(value, stepCm = MODULE_PLACEMENT_SNAP_CM) {
 }
 
 export function getModulePlacementSnapCm(moduleType) {
-  return moduleType === 'sofa-set-classic' || moduleType === 'table-chair-set-eames' || moduleType === 'bar-stool'
+  return moduleType === 'sofa-set-classic' || moduleType === 'table-chair-set-eames' || moduleType === 'bar-stool' || moduleType === 'bar-stool-2'
     ? 10
     : MODULE_PLACEMENT_SNAP_CM;
 }
