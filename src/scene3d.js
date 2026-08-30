@@ -77,27 +77,17 @@ function loadEamesChairModel() {
   return eamesChairModelPromise;
 }
 
-const BEIGE_SOFA_MESH_META = Object.freeze([
-  Object.freeze({ name: 'beigechair2seatsofa_tripo_mat_0691346e_0', vertexCount: 5592, faceCount: 7586, positionOffset: 0, indexOffset: 67104 }),
-  Object.freeze({ name: 'beigechair1_tripo_mat_0691346e_0', vertexCount: 2980, faceCount: 3832, positionOffset: 112620, indexOffset: 148380 }),
-  Object.freeze({ name: 'beigechair3_tripo_mat_0691346e_0', vertexCount: 3272, faceCount: 4026, positionOffset: 171372, indexOffset: 210636 }),
-]);
-let beigeSofaMeshPromise = null;
+let beigeSofaModelPromise = null;
 
-function loadBeigeSofaMeshPayload() {
-  if (!beigeSofaMeshPromise) {
-    beigeSofaMeshPromise = fetch(
-      import.meta.env.BASE_URL + 'models/beige_sofa_mesh.bin',
-    ).then((response) => {
-      if (!response.ok) {
-        throw new Error('Bej koltuk modeli yüklenemedi (' + response.status + ')');
-      }
-      return response.arrayBuffer();
-    });
+function loadBeigeSofaModel() {
+  if (!beigeSofaModelPromise) {
+    const loader = new GLTFLoader();
+    beigeSofaModelPromise = loader
+      .loadAsync(import.meta.env.BASE_URL + 'models/bej_koltuk_1_ciftli_2_tekli.glb')
+      .then((gltf) => gltf.scene);
   }
-  return beigeSofaMeshPromise;
+  return beigeSofaModelPromise;
 }
-
 
 function isFloorFixtureType(type) {
   return type === 'counter'
@@ -3254,8 +3244,6 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
     heightCm,
   };
 
-  // Bej takım mevcut klasik koltuk takımının doğrulanmış 150 x 150 yerleşimini kullanır:
-  // 150 cm ikili koltuk bir tarafta, 65 + 65 cm iki tekli karşı tarafta, sehpa ortada.
   const loveseatWidthM = 1.50;
   const chairWidthM = 0.65;
   const sofaDepthM = 0.45;
@@ -3267,12 +3255,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
   const colorTargets = [];
   const proxy = new THREE.Mesh(
     new THREE.BoxGeometry(widthM, heightM, depthM),
-    new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-      depthWrite: false,
-      colorWrite: false,
-    }),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
   );
   proxy.position.set(0, heightM / 2, 0);
   group.add(proxy);
@@ -3297,89 +3280,41 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
     colorTargets,
   };
 
-  // Yüklenen bej GLB'deki üç gerçek mesh'in kaynak yönleri ölçülerek çıkarıldı.
-  // Bu dönüşler mesh'leri plan eksenine getirir; ikili merkeze, iki tekli de karşısına bakar.
   const placements = Object.freeze([
-    Object.freeze({
-      meshName: 'beigechair2seatsofa_tripo_mat_0691346e_0',
-      targetWidthM: loveseatWidthM,
-      targetDepthM: sofaDepthM,
-      targetHeightM: heightM,
-      x: 0,
-      z: backRowZ,
-      rotationYDeg: -45.26002361732807,
-    }),
-    Object.freeze({
-      meshName: 'beigechair1_tripo_mat_0691346e_0',
-      targetWidthM: chairWidthM,
-      targetDepthM: sofaDepthM,
-      targetHeightM: heightM,
-      x: -chairCenterOffsetM,
-      z: frontRowZ,
-      rotationYDeg: 35.1154498349714,
-    }),
-    Object.freeze({
-      meshName: 'beigechair3_tripo_mat_0691346e_0',
-      targetWidthM: chairWidthM,
-      targetDepthM: sofaDepthM,
-      targetHeightM: heightM,
-      x: chairCenterOffsetM,
-      z: frontRowZ,
-      rotationYDeg: -136.13688181359935,
-    }),
+    Object.freeze({ meshName: 'beigechair2seatsofa_tripo_mat_0691346e_0', targetWidthM: loveseatWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: 0, z: backRowZ, rotationYDeg: -45.26002361732807 }),
+    Object.freeze({ meshName: 'beigechair1_tripo_mat_0691346e_0', targetWidthM: chairWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: -chairCenterOffsetM, z: frontRowZ, rotationYDeg: 35.1154498349714 }),
+    Object.freeze({ meshName: 'beigechair3_tripo_mat_0691346e_0', targetWidthM: chairWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: chairCenterOffsetM, z: frontRowZ, rotationYDeg: -136.13688181359935 }),
   ]);
 
-  loadBeigeSofaMeshPayload().then((buffer) => {
+  loadBeigeSofaModel().then((template) => {
     if (!group.parent) return;
 
-    const material = new THREE.MeshStandardMaterial({
-      color: moduleState.surface?.color ?? '#e7ddca',
-      roughness: 0.60,
-      metalness: 0,
-    });
-    const metaByName = new Map(BEIGE_SOFA_MESH_META.map((meta) => [meta.name, meta]));
-
-    const createSourceMesh = (meta) => {
-      const positionCount = meta.vertexCount * 3;
-      const indexCount = meta.faceCount * 3;
-      const positions = new Float32Array(
-        buffer.slice(meta.positionOffset, meta.positionOffset + positionCount * 4),
-      );
-      const indices = new Uint16Array(
-        buffer.slice(meta.indexOffset, meta.indexOffset + indexCount * 2),
-      );
-      const expandedPositions = new Float32Array(indices.length * 3);
-
-      for (let i = 0; i < indices.length; i += 1) {
-        const sourceIndex = indices[i] * 3;
-        const targetIndex = i * 3;
-        expandedPositions[targetIndex] = positions[sourceIndex];
-        expandedPositions[targetIndex + 1] = positions[sourceIndex + 1];
-        expandedPositions[targetIndex + 2] = positions[sourceIndex + 2];
+    placements.forEach((placement) => {
+      const source = template.getObjectByName(placement.meshName);
+      if (!source) {
+        console.warn('Bej koltuk GLB mesh bulunamadı:', placement.meshName);
+        return;
       }
 
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.BufferAttribute(expandedPositions, 3));
-      geometry.computeVertexNormals();
-      geometry.computeBoundingBox();
-      geometry.computeBoundingSphere();
+      const mesh = source.clone(true);
+      mesh.traverse((object) => {
+        if (!object.isMesh) return;
+        object.castShadow = true;
+        object.receiveShadow = true;
+        if (Array.isArray(object.material)) {
+          object.material = object.material.map((material) => material?.clone?.() ?? material);
+        } else if (object.material) {
+          object.material = object.material.clone();
+        }
+        colorTargets.push(object);
+      });
 
-      const mesh = new THREE.Mesh(geometry, material.clone());
-      mesh.name = meta.name;
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      colorTargets.push(mesh);
-      return mesh;
-    };
-
-    placements.forEach((placement) => {
-      const meta = metaByName.get(placement.meshName);
-      if (!meta) return;
-
-      const mesh = createSourceMesh(meta);
+      mesh.updateMatrixWorld(true);
       const sourceBox = new THREE.Box3().setFromObject(mesh);
       const sourceCenter = sourceBox.getCenter(new THREE.Vector3());
-      mesh.position.sub(sourceCenter);
+      mesh.position.x -= sourceCenter.x;
+      mesh.position.y -= sourceCenter.y;
+      mesh.position.z -= sourceCenter.z;
 
       const oriented = new THREE.Group();
       oriented.rotation.y = THREE.MathUtils.degToRad(placement.rotationYDeg);
@@ -3399,21 +3334,12 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
       group.add(fitted);
     });
   }).catch((error) => {
-    console.warn('Bej koltuk takımı kaynak modeli yüklenemedi:', error);
+    console.warn('Bej koltuk takımı GLB modeli yüklenemedi:', error);
   });
 
-  // Bej katalog ölçüsü: 60 x 42 x 38 cm. Klasik takımdaki cam sehpa dili korunur.
   const tableTop = new THREE.Mesh(
     new THREE.BoxGeometry(0.60, 0.018, 0.42),
-    new THREE.MeshPhysicalMaterial({
-      color: 0xd7e9ed,
-      transparent: true,
-      opacity: 0.42,
-      roughness: 0.12,
-      metalness: 0,
-      transmission: 0.28,
-      depthWrite: false,
-    }),
+    new THREE.MeshPhysicalMaterial({ color: 0xd7e9ed, transparent: true, opacity: 0.42, roughness: 0.12, metalness: 0, transmission: 0.28, depthWrite: false }),
   );
   tableTop.position.set(0, 0.38, 0);
   tableTop.receiveShadow = true;
