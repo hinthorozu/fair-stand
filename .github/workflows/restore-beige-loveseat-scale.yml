@@ -1,0 +1,28 @@
+name: Restore Beige Loveseat Scale
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/restore-beige-loveseat-scale.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/restore-beige-loveseat-scale.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/scripts/restore-beige-loveseat-scale.py .github/workflows/restore-beige-loveseat-scale.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: restore beige loveseat scale [skip ci]'
+          branch: ROG
