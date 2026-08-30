@@ -1,0 +1,27 @@
+name: Remove Classic Sofa
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/remove-classic-sofa.yml']
+permissions:
+  contents: write
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/remove-classic-sofa.py
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/scripts/remove-classic-sofa.py .github/workflows/remove-classic-sofa.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'refactor: remove classic sofa set [skip ci]'
+          branch: ROG
