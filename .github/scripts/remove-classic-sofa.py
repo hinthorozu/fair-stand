@@ -70,7 +70,7 @@ text = text.replace(old, '', 1)
 old = "(moduleState?.type === 'sofa-set' || moduleState?.type === 'sofa-set-beige')"
 count = text.count(old)
 if count != 2: raise SystemExit(f'src/scene3d.js: expected 2 legacy preview conditions, found {count}')
-text = text.replace(old, "moduleState?.type === 'sofa-set-beige'")
+text = text.replace(old, "(moduleState?.type === 'sofa-set-beige')")
 p.write_text(text)
 
 # Delete dedicated old-sofa test.
