@@ -1,0 +1,28 @@
+name: Fix Sofa Upholstery Color
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/fix-sofa-upholstery-color.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/fix-sofa-upholstery-color.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/scripts/fix-sofa-upholstery-color.py .github/workflows/fix-sofa-upholstery-color.yml .github/scripts/inspect-sofa-color-flow.py .github/workflows/inspect-sofa-color-flow.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: isolate sofa upholstery color from wooden legs [skip ci]'
+          branch: ROG
