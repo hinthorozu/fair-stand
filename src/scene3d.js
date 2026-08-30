@@ -77,6 +77,18 @@ function loadEamesChairModel() {
   return eamesChairModelPromise;
 }
 
+let barStool2ModelPromise = null;
+
+function loadBarStool2Model() {
+  if (!barStool2ModelPromise) {
+    const loader = new GLTFLoader();
+    barStool2ModelPromise = loader
+      .loadAsync(import.meta.env.BASE_URL + 'models/bar_chair.glb')
+      .then((gltf) => gltf.scene);
+  }
+  return barStool2ModelPromise;
+}
+
 let beigeSofaModelPromise = null;
 
 function loadBeigeSofaModel() {
@@ -94,7 +106,8 @@ function isFloorFixtureType(type) {
     || type === 'base'
     || type === 'sofa-set-classic'
     || type === 'table-chair-set-eames'
-    || type === 'bar-stool';
+    || type === 'bar-stool'
+    || type === 'bar-stool-2';
 }
 
 function isTopFixtureType(type) {
@@ -1115,6 +1128,8 @@ export function createStandScene(
         module = createEamesTableChairSetModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'bar-stool') {
         module = createBarStoolModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'bar-stool-2') {
+        module = createBarStool2Module(moduleState, moduleIndex);
       } else if (moduleState.type === 'led-floodlight') {
         module = createLedFloodlightModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'shelf') {
@@ -3099,6 +3114,74 @@ function createBarStoolModule(moduleState, moduleIndex) {
   });
 
   return { group, surfaces: colorTargets };
+}
+
+
+function createBarStool2Module(moduleState, moduleIndex) {
+  const widthCm = Number(moduleState.widthCm || 60);
+  const depthCm = Number(moduleState.depthCm || 55);
+  const heightCm = Number(moduleState.heightCm || 121);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: 'bar-stool-2',
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  // Selection proxy only; the uploaded GLB remains visually/materially untouched.
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(widthCm / 100, heightCm / 100, depthCm / 100),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+  );
+  proxy.position.set(0, heightCm / 200, 0);
+  group.add(proxy);
+
+  const selectionFrame = createSelectionFrame(widthCm / 100, heightCm / 100);
+  selectionFrame.visible = false;
+  proxy.add(selectionFrame);
+  proxy.userData = {
+    kind: 'surface',
+    moduleType: 'bar-stool-2',
+    selectionMode: 'module',
+    acceptsImage: false,
+    moduleIndex,
+    moduleId: moduleState.id,
+    widthCm,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceRole: 'chair',
+    surfaceId: moduleState.surface?.id,
+    surfaceState: moduleState.surface,
+    selectionFrame,
+    colorTargets: [],
+  };
+
+  loadBarStool2Model().then((template) => {
+    if (!group.parent) return;
+    const chair = template.clone(true);
+    chair.traverse((object) => {
+      if (!object.isMesh) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+      // Do not replace, recolor or rebuild GLB materials/textures.
+    });
+
+    chair.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(chair);
+    const center = box.getCenter(new THREE.Vector3());
+    chair.position.x -= center.x;
+    chair.position.z -= center.z;
+    chair.position.y -= box.min.y;
+    group.add(chair);
+  }).catch((error) => {
+    console.warn('Tabure 2 GLB modeli yüklenemedi:', error);
+  });
+
+  return { group, surfaces: [proxy] };
 }
 
 

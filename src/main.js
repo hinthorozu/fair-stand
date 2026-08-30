@@ -8,6 +8,7 @@ import {
 } from './automaticWall.js';
 import {
   createBarStoolModuleState,
+  createBarStool2ModuleState,
   createLedFloodlightModuleState,
   createBaseModuleState,
   createBaseWallModuleState,
@@ -261,6 +262,11 @@ const scene3d = createStandScene(
 
       if (moduleType === 'table-chair-set-eames') {
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Eames Masa Sandalye Takımı · 4 Eames sandalye · sandalye gövde rengi değiştirilebilir · cam masa sabittir.';
+        return;
+      }
+
+      if (moduleType === 'bar-stool-2') {
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Tabure 2 · GLB model.';
         return;
       }
 
@@ -610,6 +616,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'sofa-set-classic') state = createBeigeSofaSetModuleState();
   else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();
   else if (module.type === 'bar-stool') state = createBarStoolModuleState();
+  else if (module.type === 'bar-stool-2') state = createBarStool2ModuleState();
   else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);
   else if (module.type === 'showcase-2' || module.type === 'showcase-3') {

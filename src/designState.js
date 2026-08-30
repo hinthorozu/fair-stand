@@ -204,6 +204,20 @@ export function createBarStoolModuleState() {
   };
 }
 
+export function createBarStool2ModuleState() {
+  return {
+    id: createId('module'),
+    type: 'bar-stool-2',
+    widthCm: 60,
+    depthCm: 55,
+    heightCm: 121,
+    surface: {
+      id: createId('surface'),
+      color: DEFAULT_PANEL_COLOR,
+    },
+  };
+}
+
 export function createLedFloodlightModuleState() {
   return {
     id: createId('module'),
