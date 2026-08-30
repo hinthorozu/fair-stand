@@ -43,8 +43,8 @@ s = p.read_text()
 s = s.replace("    || type === 'bar-stool'\n", "")
 s = s.replace("    if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';\n", "")
 s = s.replace("      } else if (moduleState.type === 'bar-stool') {\n        module = createBarStoolModule(moduleState, moduleIndex);\n", "")
-# Renderer lies immediately before createBarStool2Module in current source.
-s, n = re.subn(r"\nfunction createBarStoolModule\(moduleState, moduleIndex\) \{.*?\n\}\n\n(?=function createBarStool2Module\()", "\n", s, count=1, flags=re.S)
+# Renderer lies before createBarStool2Module; allow arbitrary blank lines between functions.
+s, n = re.subn(r"\nfunction createBarStoolModule\(moduleState, moduleIndex\) \{.*?\n\}\n+(?=function createBarStool2Module\()", "\n", s, count=1, flags=re.S)
 if n != 1: raise SystemExit('old bar stool renderer block not found')
 p.write_text(s)
 
@@ -58,10 +58,8 @@ p.write_text(s)
 for path in Path('test').rglob('*.js'):
     text = path.read_text()
     original = text
-    # Remove simple imports/spec entries/fixture cases that mention only the old id/type/factory.
     text = re.sub(r"^.*furniture_bar_stool_classic.*\n", "", text, flags=re.M)
     text = re.sub(r"^.*createBarStoolModuleState.*\n", "", text, flags=re.M)
-    # Old bar-stool-only assertions/cases are obsolete; remove single lines. Multi-line leftovers are caught below.
     text = re.sub(r"^.*['\"]bar-stool['\"].*\n", "", text, flags=re.M)
     text = re.sub(r"^.*Bar Taburesi.*\n", "", text, flags=re.M)
     if text != original:
