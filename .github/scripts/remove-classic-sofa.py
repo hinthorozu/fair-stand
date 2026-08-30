@@ -4,13 +4,13 @@ import re
 # Remove only structurally known legacy-sofa blocks/references. Never delete arbitrary
 # lines just because they contain "sofa-set"; beige uses the same prefix.
 
-def replace_once(path, old, new):
+def replace_all(path, old, new, minimum=1):
     p = Path(path)
     text = p.read_text()
     count = text.count(old)
-    if count != 1:
-        raise SystemExit(f'{path}: expected 1 exact match, found {count}: {old[:80]!r}')
-    p.write_text(text.replace(old, new, 1))
+    if count < minimum:
+        raise SystemExit(f'{path}: expected at least {minimum} exact match, found {count}: {old[:80]!r}')
+    p.write_text(text.replace(old, new))
 
 # catalog.js: dimensions, catalog item and exposed key.
 p = Path('src/catalog.js')
@@ -41,12 +41,12 @@ if start < 0 or end < 0:
 p.write_text(text[:start] + text[end:])
 
 # Placement/sidebar: keep beige and other furniture behavior, remove only the legacy OR term.
-replace_once(
+replace_all(
     'src/modulePlacement.js',
     "moduleType === 'sofa-set' || moduleType === 'sofa-set-beige'",
     "moduleType === 'sofa-set-beige'",
 )
-replace_once(
+replace_all(
     'src/moduleDragSidebar.js',
     "module.type === 'sofa-set' || module.type === 'sofa-set-beige'",
     "module.type === 'sofa-set-beige'",
