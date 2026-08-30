@@ -3281,12 +3281,12 @@ function createBeigeUpholsteryTexture(sourceTexture, hexColor = '#ffffff') {
     // GLB atlasında gerçek ahşap ayaklar kumaştan belirgin biçimde daha koyu,
     // sıcak ve doygun kahverengi. Sadece bu dar aralığı dokunulmaz bırak.
     const isWood = (
-      r < 185
-      && g < 150
-      && b < 120
-      && r > g * 1.08
-      && g > b * 1.05
-      && r - b > 34
+      r < 145
+      && g < 105
+      && b < 80
+      && r - g > 24
+      && g - b > 14
+      && r - b > 44
     );
     if (isWood) continue;
 
