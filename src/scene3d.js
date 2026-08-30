@@ -3327,8 +3327,8 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
       // GLB'nin doğal en-boy-yükseklik oranını bozma. Sadece hedef genişliğe
       // göre tek katsayıyla ölçekle; derinlik ve yükseklik modelden doğal gelir.
       const uniformScale = orientedSize.x > 0
-        ? (placement.targetWidthM / orientedSize.x) * 1.25
-        : 1.25;
+        ? (placement.targetWidthM / orientedSize.x)
+        : 1;
       fitted.scale.setScalar(uniformScale);
       fitted.position.set(
         placement.x,
