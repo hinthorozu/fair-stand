@@ -1,0 +1,40 @@
+name: Fix Beige Sofa Scale
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-beige-sofa-scale.yml'
+      - '.github/scripts/fix-beige-sofa-scale.py'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Patch scale
+        run: python3 .github/scripts/fix-beige-sofa-scale.py
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit
+        run: |
+          rm -f .github/scripts/fix-beige-sofa-scale.py
+          rm -f .github/workflows/fix-beige-sofa-scale.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: preserve beige sofa GLB proportions [skip ci]"
+          git push
