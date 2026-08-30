@@ -2123,6 +2123,11 @@ export function createStandScene(
         ? mesh.userData.colorTargets
         : [mesh];
 
+      if (mesh.userData.moduleType === 'sofa-set-beige') {
+        colorTargets.forEach((target) => applyBeigeSofaUpholsteryColor(target, hexColor));
+        return;
+      }
+
       colorTargets.forEach((target) => {
         if (!target?.material) return;
         target.material.map?.dispose?.();
@@ -3231,11 +3236,22 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
 }
 
 
-const beigeWhiteUpholsteryTextureCache = new WeakMap();
+const beigeUpholsteryTextureCache = new WeakMap();
 
-function createBeigeWhiteUpholsteryTexture(sourceTexture) {
+function normalizeSofaColor(hexColor = '#ffffff') {
+  const raw = String(hexColor || '#ffffff').trim();
+  return /^#[0-9a-fA-F]{6}$/.test(raw) ? raw.toLowerCase() : '#ffffff';
+}
+
+function createBeigeUpholsteryTexture(sourceTexture, hexColor = '#ffffff') {
   if (!sourceTexture?.image || typeof document === 'undefined') return sourceTexture;
-  const cached = beigeWhiteUpholsteryTextureCache.get(sourceTexture);
+  const colorKey = normalizeSofaColor(hexColor);
+  let colorCache = beigeUpholsteryTextureCache.get(sourceTexture);
+  if (!colorCache) {
+    colorCache = new Map();
+    beigeUpholsteryTextureCache.set(sourceTexture, colorCache);
+  }
+  const cached = colorCache.get(colorKey);
   if (cached) return cached;
 
   const image = sourceTexture.image;
@@ -3252,51 +3268,69 @@ function createBeigeWhiteUpholsteryTexture(sourceTexture) {
   context.drawImage(image, 0, 0, width, height);
   const imageData = context.getImageData(0, 0, width, height);
   const pixels = imageData.data;
+  const targetR = parseInt(colorKey.slice(1, 3), 16);
+  const targetG = parseInt(colorKey.slice(3, 5), 16);
+  const targetB = parseInt(colorKey.slice(5, 7), 16);
 
   for (let index = 0; index < pixels.length; index += 4) {
     const r = pixels[index];
     const g = pixels[index + 1];
     const b = pixels[index + 2];
-    const a = pixels[index + 3];
-    if (a === 0) continue;
+    if (pixels[index + 3] === 0) continue;
 
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const saturation = max > 0 ? (max - min) / max : 0;
-    const brightness = max / 255;
-
-    // Wooden legs/details are distinctly warmer and more saturated than the fabric.
-    // Keep those pixels unchanged; only neutralize the beige upholstery.
+    // GLB atlasında gerçek ahşap ayaklar kumaştan belirgin biçimde daha koyu,
+    // sıcak ve doygun kahverengi. Sadece bu dar aralığı dokunulmaz bırak.
     const isWood = (
-      brightness > 0.12
-      && brightness < 0.86
-      && saturation > 0.20
-      && r > g * 1.035
-      && g > b * 1.035
+      r < 185
+      && g < 150
+      && b < 120
+      && r > g * 1.08
+      && g > b * 1.05
+      && r - b > 34
     );
-    if (isWood || brightness < 0.08) continue;
+    if (isWood) continue;
 
-    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    const whiteLevel = Math.max(188, Math.min(248, 222 + (luminance - 160) * 0.34));
-    pixels[index] = whiteLevel;
-    pixels[index + 1] = whiteLevel;
-    pixels[index + 2] = whiteLevel;
+    // Döşeme tek renk olsun. Modelin formunu texture lekesi değil sahne ışığı verir.
+    pixels[index] = targetR;
+    pixels[index + 1] = targetG;
+    pixels[index + 2] = targetB;
   }
 
   context.putImageData(imageData, 0, 0);
   const texture = sourceTexture.clone();
   texture.image = canvas;
   texture.needsUpdate = true;
-  beigeWhiteUpholsteryTextureCache.set(sourceTexture, texture);
+  colorCache.set(colorKey, texture);
   return texture;
 }
 
-function cloneBeigeSofaMaterial(material) {
+function cloneBeigeSofaMaterial(material, upholsteryColor = '#ffffff') {
   if (!material) return material;
   const cloned = material.clone?.() ?? material;
-  if (cloned.map) cloned.map = createBeigeWhiteUpholsteryTexture(cloned.map);
+  cloned.userData = { ...(cloned.userData || {}), sofaSourceMap: material.map || null };
+  if (material.map) cloned.map = createBeigeUpholsteryTexture(material.map, upholsteryColor);
   if (cloned.color) cloned.color.set('#ffffff');
   return cloned;
+}
+
+function applyBeigeSofaUpholsteryColor(target, hexColor) {
+  if (!target?.material) return;
+  const materials = Array.isArray(target.material) ? target.material : [target.material];
+  materials.forEach((material) => {
+    if (!material) return;
+    const sourceMap = material.userData?.sofaSourceMap;
+    if (sourceMap) {
+      const nextMap = createBeigeUpholsteryTexture(sourceMap, hexColor);
+      if (material.map && material.map !== nextMap && material.map !== sourceMap) {
+        material.map.dispose?.();
+      }
+      material.map = nextMap;
+      material.color?.set('#ffffff');
+    } else {
+      material.color?.set(hexColor);
+    }
+    material.needsUpdate = true;
+  });
 }
 
 function createBeigeSofaSetModule(moduleState, moduleIndex) {
@@ -3386,9 +3420,9 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
         object.castShadow = true;
         object.receiveShadow = true;
         if (Array.isArray(object.material)) {
-          object.material = object.material.map(cloneBeigeSofaMaterial);
+          object.material = object.material.map((material) => cloneBeigeSofaMaterial(material, moduleState.surface?.color ?? '#ffffff'));
         } else if (object.material) {
-          object.material = cloneBeigeSofaMaterial(object.material);
+          object.material = cloneBeigeSofaMaterial(object.material, moduleState.surface?.color ?? '#ffffff');
         }
         colorTargets.push(object);
       });
