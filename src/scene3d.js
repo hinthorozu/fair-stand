@@ -3281,7 +3281,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
   };
 
   const placements = Object.freeze([
-    Object.freeze({ meshName: 'beigechair2seatsofa_tripo_mat_0691346e_0', targetWidthM: loveseatWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: 0, z: backRowZ, rotationYDeg: -45.26002361732807 }),
+    Object.freeze({ meshName: 'beigechair2seatsofa_tripo_mat_0691346e_0', targetWidthM: loveseatWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: 0, z: backRowZ, rotationYDeg: -135.26002361732807 }),
     Object.freeze({ meshName: 'beigechair1_tripo_mat_0691346e_0', targetWidthM: chairWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: -chairCenterOffsetM, z: frontRowZ, rotationYDeg: 35.1154498349714 }),
     Object.freeze({ meshName: 'beigechair3_tripo_mat_0691346e_0', targetWidthM: chairWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: chairCenterOffsetM, z: frontRowZ, rotationYDeg: 223.86311818640065 }),
   ]);
