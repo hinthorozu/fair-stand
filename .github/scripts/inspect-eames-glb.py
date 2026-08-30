@@ -7,9 +7,11 @@ while o < len(data):
     chunk=data[o:o+chunk_len]; o+=chunk_len
     if chunk_type == 0x4E4F534A:
         doc=json.loads(chunk.decode('utf-8').rstrip('\x00 '))
-        print('IMAGES', [(i,x.get('name'),x.get('mimeType')) for i,x in enumerate(doc.get('images',[]))])
-        print('TEXTURES', [(i,x.get('name'),x.get('source')) for i,x in enumerate(doc.get('textures',[]))])
-        print('MATERIALS')
-        for i,m in enumerate(doc.get('materials', [])):
-            print(i, m.get('name'), json.dumps(m.get('pbrMetallicRoughness',{}), ensure_ascii=False))
+        mats=doc.get('materials',[]); acc=doc.get('accessors',[])
+        for mi,m in enumerate(doc.get('meshes', [])):
+            for pi,pr in enumerate(m.get('primitives',[])):
+                ai=pr.get('attributes',{}).get('POSITION')
+                a=acc[ai] if ai is not None else {}
+                mat=pr.get('material'); name=mats[mat].get('name') if mat is not None else None
+                print('MESH',mi,m.get('name'),'MAT',mat,name,'MIN',a.get('min'),'MAX',a.get('max'),'COUNT',a.get('count'))
         break
