@@ -91,23 +91,17 @@ if start < 0 or end < 0: raise SystemExit('SYSTEM_MODULE_CATALOG.md: legacy sofa
 text = text[:start] + text[end:]
 p.write_text(text)
 
-# Historical one-shot workflows must not preserve/reintroduce the deleted ID.
-replace_all('.github/workflows/fix-furniture-ids.yml', "              'moble_sofa_set_classic': 'furniture_sofa_set_classic',\n", '')
-replace_all('.github/workflows/unify-module-catalog.yml', "              'furniture_sofa_set_classic',\n", '')
-replace_all('.github/workflows/unify-module-catalog.yml', "          for obsolete in ['moble_sofa_set_classic','moble_table_chair_set_minyon','moble_bar_stool_classic']:\n", "          for obsolete in ['moble_table_chair_set_minyon','moble_bar_stool_classic']:\n")
-replace_all('.github/workflows/rename-counter-ids.yml', "              'SOFA_SET': 'moble_sofa_set_classic',\n", '')
-
-# Hard guard across the whole repo (temporary cleanup helper/workflow excluded because
-# they necessarily contain the search terms and are deleted before final commit).
+# Hard guard for application/source/tests/docs. Workflow files are cleaned separately
+# through the GitHub connector because GitHub Actions tokens cannot update workflows.
 forbidden = [
     re.compile(r'sofa_set_classic'),
     re.compile(r'createSofaSetModule(?:State)?'),
     re.compile(r"(?<![A-Za-z0-9_-])['\"]sofa-set['\"](?![A-Za-z0-9_-])"),
 ]
-exclude = {'.github/scripts/remove-classic-sofa.py', '.github/workflows/remove-classic-sofa.yml'}
+exclude = {'.github/scripts/remove-classic-sofa.py'}
 residuals = []
 for path in Path('.').rglob('*'):
-    if not path.is_file() or '.git' in path.parts or str(path) in exclude:
+    if not path.is_file() or '.git' in path.parts or '.github/workflows' in str(path) or str(path) in exclude:
         continue
     try: data = path.read_text()
     except (UnicodeDecodeError, OSError): continue
@@ -131,4 +125,4 @@ for filename, needles in required.items():
     for needle in needles:
         if needle not in data: raise SystemExit(f'{filename}: beige sofa contract missing: {needle}')
 
-print('Legacy sofa purge guard: clean')
+print('Legacy sofa application purge guard: clean')
