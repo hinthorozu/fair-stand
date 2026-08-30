@@ -23,5 +23,5 @@ jobs:
       - run: rm -f .github/scripts/remove-classic-sofa.py .github/workflows/remove-classic-sofa.yml
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'refactor: remove classic sofa set [skip ci]'
+          commit_message: 'refactor: remove classic sofa set completely [skip ci]'
           branch: ROG
