@@ -1,7 +1,54 @@
 from pathlib import Path
+import base64
+import hashlib
+import lzma
+
+TARGET = Path('public/models/bej_koltuk_1_ciftli_2_tekli.glb')
+PARTS_DIR = Path('.github/beige-upload')
+EXPECTED_SIZE = 377632
+EXPECTED_SHA256 = '35b0f3f8a1daca909507d55d2b3d8f642504ac0911d3b9b66150be9ecea8ad0b'
+
+encoded = ''.join(path.read_text().strip() for path in sorted(PARTS_DIR.glob('part*.b64')))
+raw = lzma.decompress(base64.b64decode(encoded))
+if len(raw) != EXPECTED_SIZE:
+    raise SystemExit(f'unexpected beige GLB size: {len(raw)}')
+if hashlib.sha256(raw).hexdigest() != EXPECTED_SHA256:
+    raise SystemExit('beige GLB checksum mismatch')
+if raw[:4] != b'glTF':
+    raise SystemExit('staged payload is not a GLB')
+TARGET.parent.mkdir(parents=True, exist_ok=True)
+TARGET.write_bytes(raw)
+
+obsolete = Path('public/models/beige_sofa_mesh.bin')
+if obsolete.exists():
+    obsolete.unlink()
 
 scene_path = Path('src/scene3d.js')
 s = scene_path.read_text()
+
+loader_start = s.find('const BEIGE_SOFA_MESH_META')
+floor_start = s.find('function isFloorFixtureType', loader_start)
+if loader_start < 0 or floor_start < 0:
+    loader_start = s.find('let beigeSofaModelPromise')
+    floor_start = s.find('function isFloorFixtureType', loader_start)
+if loader_start < 0 or floor_start < 0:
+    raise SystemExit('beige loader block not found')
+
+direct_loader = """let beigeSofaModelPromise = null;
+
+function loadBeigeSofaModel() {
+  if (!beigeSofaModelPromise) {
+    const loader = new GLTFLoader();
+    beigeSofaModelPromise = loader
+      .loadAsync(import.meta.env.BASE_URL + 'models/bej_koltuk_1_ciftli_2_tekli.glb')
+      .then((gltf) => gltf.scene);
+  }
+  return beigeSofaModelPromise;
+}
+
+
+"""
+s = s[:loader_start] + direct_loader + s[floor_start:]
 
 fn_start = s.find('function createBeigeSofaSetModule(')
 next_fn = s.find('function createSofaSetModule(', fn_start)
@@ -26,8 +73,6 @@ renderer = r"""function createBeigeSofaSetModule(moduleState, moduleIndex) {
     heightCm,
   };
 
-  // Bej takım mevcut klasik koltuk takımının doğrulanmış 150 x 150 yerleşimini kullanır:
-  // 150 cm ikili koltuk bir tarafta, 65 + 65 cm iki tekli karşı tarafta, sehpa ortada.
   const loveseatWidthM = 1.50;
   const chairWidthM = 0.65;
   const sofaDepthM = 0.45;
@@ -39,12 +84,7 @@ renderer = r"""function createBeigeSofaSetModule(moduleState, moduleIndex) {
   const colorTargets = [];
   const proxy = new THREE.Mesh(
     new THREE.BoxGeometry(widthM, heightM, depthM),
-    new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-      depthWrite: false,
-      colorWrite: false,
-    }),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
   );
   proxy.position.set(0, heightM / 2, 0);
   group.add(proxy);
@@ -69,112 +109,122 @@ renderer = r"""function createBeigeSofaSetModule(moduleState, moduleIndex) {
     colorTargets,
   };
 
-  // Yüklenen bej GLB'deki üç gerçek mesh'in kaynak yönleri ölçülerek çıkarıldı.
-  // Bu dönüşler mesh'leri plan eksenine getirir; ikili merkeze, iki tekli de karşısına bakar.
-  const placements = Object.freeze([
-    Object.freeze({
+  const placements = [
+    {
       meshName: 'beigechair2seatsofa_tripo_mat_0691346e_0',
       targetWidthM: loveseatWidthM,
       targetDepthM: sofaDepthM,
       targetHeightM: heightM,
       x: 0,
       z: backRowZ,
-      rotationYDeg: -45.26002361732807,
-    }),
-    Object.freeze({
+      desiredFrontAngle: Math.PI / 2,
+    },
+    {
       meshName: 'beigechair1_tripo_mat_0691346e_0',
       targetWidthM: chairWidthM,
       targetDepthM: sofaDepthM,
       targetHeightM: heightM,
       x: -chairCenterOffsetM,
       z: frontRowZ,
-      rotationYDeg: 35.1154498349714,
-    }),
-    Object.freeze({
+      desiredFrontAngle: -Math.PI / 2,
+    },
+    {
       meshName: 'beigechair3_tripo_mat_0691346e_0',
       targetWidthM: chairWidthM,
       targetDepthM: sofaDepthM,
       targetHeightM: heightM,
       x: chairCenterOffsetM,
       z: frontRowZ,
-      rotationYDeg: -136.13688181359935,
-    }),
-  ]);
+      desiredFrontAngle: -Math.PI / 2,
+    },
+  ];
 
-  loadBeigeSofaMeshPayload().then((buffer) => {
+  function getPrincipalAxisAngle(mesh) {
+    const position = mesh.geometry?.getAttribute?.('position');
+    if (!position || position.count < 2) return 0;
+    let meanX = 0;
+    let meanZ = 0;
+    for (let i = 0; i < position.count; i += 1) {
+      meanX += position.getX(i);
+      meanZ += position.getZ(i);
+    }
+    meanX /= position.count;
+    meanZ /= position.count;
+    let xx = 0;
+    let zz = 0;
+    let xz = 0;
+    for (let i = 0; i < position.count; i += 1) {
+      const x = position.getX(i) - meanX;
+      const z = position.getZ(i) - meanZ;
+      xx += x * x;
+      zz += z * z;
+      xz += x * z;
+    }
+    return 0.5 * Math.atan2(2 * xz, xx - zz);
+  }
+
+  loadBeigeSofaModel().then((sourceScene) => {
     if (!group.parent) return;
 
-    const material = new THREE.MeshStandardMaterial({
-      color: moduleState.surface?.color ?? '#e7ddca',
-      roughness: 0.60,
-      metalness: 0,
-    });
-    const metaByName = new Map(BEIGE_SOFA_MESH_META.map((meta) => [meta.name, meta]));
-
-    const createSourceMesh = (meta) => {
-      const positionCount = meta.vertexCount * 3;
-      const indexCount = meta.faceCount * 3;
-      const positions = new Float32Array(
-        buffer.slice(meta.positionOffset, meta.positionOffset + positionCount * 4),
-      );
-      const indices = new Uint16Array(
-        buffer.slice(meta.indexOffset, meta.indexOffset + indexCount * 2),
-      );
-      const expandedPositions = new Float32Array(indices.length * 3);
-
-      for (let i = 0; i < indices.length; i += 1) {
-        const sourceIndex = indices[i] * 3;
-        const targetIndex = i * 3;
-        expandedPositions[targetIndex] = positions[sourceIndex];
-        expandedPositions[targetIndex + 1] = positions[sourceIndex + 1];
-        expandedPositions[targetIndex + 2] = positions[sourceIndex + 2];
+    placements.forEach((placement) => {
+      const source = sourceScene.getObjectByName(placement.meshName);
+      if (!source?.isMesh) {
+        console.warn('Bej koltuk mesh bulunamadı:', placement.meshName);
+        return;
       }
 
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.BufferAttribute(expandedPositions, 3));
-      geometry.computeVertexNormals();
-      geometry.computeBoundingBox();
-      geometry.computeBoundingSphere();
-
-      const mesh = new THREE.Mesh(geometry, material.clone());
-      mesh.name = meta.name;
+      const mesh = source.clone(true);
+      if (mesh.material) mesh.material = mesh.material.clone();
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       colorTargets.push(mesh);
-      return mesh;
-    };
 
-    placements.forEach((placement) => {
-      const meta = metaByName.get(placement.meshName);
-      if (!meta) return;
+      mesh.updateMatrixWorld(true);
+      const originalBox = new THREE.Box3().setFromObject(mesh);
+      const originalCenter = originalBox.getCenter(new THREE.Vector3());
+      const sourceCenterXZ = new THREE.Vector2(originalCenter.x, originalCenter.z);
+      mesh.position.sub(originalCenter);
 
-      const mesh = createSourceMesh(meta);
-      const sourceBox = new THREE.Box3().setFromObject(mesh);
-      const sourceCenter = sourceBox.getCenter(new THREE.Vector3());
-      mesh.position.sub(sourceCenter);
+      const longAxis = getPrincipalAxisAngle(mesh);
+      const normalA = longAxis + Math.PI / 2;
+      const normalB = longAxis - Math.PI / 2;
+      const towardOrigin = Math.atan2(-sourceCenterXZ.y, -sourceCenterXZ.x);
+      const angleDistance = (a, b) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
+      const sourceFront = angleDistance(normalA, towardOrigin) <= angleDistance(normalB, towardOrigin)
+        ? normalA
+        : normalB;
+      const rotationY = sourceFront - placement.desiredFrontAngle;
 
       const oriented = new THREE.Group();
-      oriented.rotation.y = THREE.MathUtils.degToRad(placement.rotationYDeg);
+      oriented.rotation.y = rotationY;
       oriented.add(mesh);
       oriented.updateMatrixWorld(true);
 
       const orientedBox = new THREE.Box3().setFromObject(oriented);
       const orientedSize = orientedBox.getSize(new THREE.Vector3());
-      const fitted = new THREE.Group();
-      fitted.scale.set(
+      const uniformScale = Math.min(
         orientedSize.x > 0 ? placement.targetWidthM / orientedSize.x : 1,
-        orientedSize.y > 0 ? placement.targetHeightM / orientedSize.y : 1,
         orientedSize.z > 0 ? placement.targetDepthM / orientedSize.z : 1,
+        orientedSize.y > 0 ? placement.targetHeightM / orientedSize.y : 1,
       );
-      fitted.position.set(placement.x, placement.targetHeightM / 2, placement.z);
+
+      const fitted = new THREE.Group();
+      fitted.scale.setScalar(Number.isFinite(uniformScale) && uniformScale > 0 ? uniformScale : 1);
       fitted.add(oriented);
+      fitted.updateMatrixWorld(true);
+      const fittedBox = new THREE.Box3().setFromObject(fitted);
+      const fittedCenter = fittedBox.getCenter(new THREE.Vector3());
+      fitted.position.set(
+        placement.x - fittedCenter.x,
+        -fittedBox.min.y,
+        placement.z - fittedCenter.z,
+      );
       group.add(fitted);
     });
   }).catch((error) => {
-    console.warn('Bej koltuk takımı kaynak modeli yüklenemedi:', error);
+    console.warn('Bej koltuk GLB yüklenemedi:', error);
   });
 
-  // Bej katalog ölçüsü: 60 x 42 x 38 cm. Klasik takımdaki cam sehpa dili korunur.
   const tableTop = new THREE.Mesh(
     new THREE.BoxGeometry(0.60, 0.018, 0.42),
     new THREE.MeshPhysicalMaterial({
@@ -212,7 +262,6 @@ renderer = r"""function createBeigeSofaSetModule(moduleState, moduleIndex) {
 }
 
 """
-
 s = s[:fn_start] + renderer + s[next_fn:]
 scene_path.write_text(s)
-print('scene3d.js beige sofa set arranged as opposing seating with center table')
+print(f'wrote {TARGET} and switched beige sofa to native GLTFLoader')
