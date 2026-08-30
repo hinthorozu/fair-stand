@@ -1,4 +1,4 @@
-name: Purge Legacy Sofa Verified
+name: Purge Legacy Sofa Source
 on:
   push:
     branches: [ROG]
@@ -21,7 +21,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - run: rm -f .github/scripts/remove-classic-sofa.py .github/workflows/remove-classic-sofa.yml
+      - run: rm -f .github/scripts/remove-classic-sofa.py
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'refactor: remove classic sofa set completely [skip ci]'
