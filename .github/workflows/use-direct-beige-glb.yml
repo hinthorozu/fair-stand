@@ -25,7 +25,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Apply direct GLB patch
+      - name: Assemble verified GLB payload
+        run: |
+          mkdir -p /tmp/beige-parts
+          cp .github/beige-upload/part00.b64 /tmp/beige-parts/part00.b64
+          cp .github/beige-upload/missing-a1.b64 /tmp/beige-parts/part01.b64
+          cp .github/beige-upload/missing-a2.b64 /tmp/beige-parts/part02.b64
+          cp .github/beige-upload/missing-a3.b64 /tmp/beige-parts/part03.b64
+          cp .github/beige-upload/missing-a4.b64 /tmp/beige-parts/part04.b64
+          cp .github/beige-upload/part01.b64 /tmp/beige-parts/part05.b64
+          cp .github/beige-upload/missing-b1.b64 /tmp/beige-parts/part06.b64
+          cp .github/beige-upload/missing-b2.b64 /tmp/beige-parts/part07.b64
+          cp .github/beige-upload/part02.b64 /tmp/beige-parts/part08.b64
+          cp .github/beige-upload/part03.b64 /tmp/beige-parts/part09.b64
+          rm -f .github/beige-upload/part*.b64
+          cp /tmp/beige-parts/part*.b64 .github/beige-upload/
+      - name: Apply native GLB patch
         run: python3 .github/scripts/use_direct_beige_glb.py
       - name: Install dependencies
         run: npm install
