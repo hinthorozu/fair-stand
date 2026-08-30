@@ -3282,8 +3282,8 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
 
   const placements = Object.freeze([
     Object.freeze({ meshName: 'beigechair2seatsofa_tripo_mat_0691346e_0', targetWidthM: loveseatWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: 0, z: backRowZ, rotationYDeg: -45.26002361732807 }),
-    Object.freeze({ meshName: 'beigechair1_tripo_mat_0691346e_0', targetWidthM: chairWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: -chairCenterOffsetM, z: frontRowZ, rotationYDeg: 35.1154498349714 }),
-    Object.freeze({ meshName: 'beigechair3_tripo_mat_0691346e_0', targetWidthM: chairWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: chairCenterOffsetM, z: frontRowZ, rotationYDeg: -136.13688181359935 }),
+    Object.freeze({ meshName: 'beigechair1_tripo_mat_0691346e_0', targetWidthM: chairWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: -chairCenterOffsetM, z: frontRowZ, rotationYDeg: 215.1154498349714 }),
+    Object.freeze({ meshName: 'beigechair3_tripo_mat_0691346e_0', targetWidthM: chairWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: chairCenterOffsetM, z: frontRowZ, rotationYDeg: 43.86311818640065 }),
   ]);
 
   loadBeigeSofaModel().then((template) => {
@@ -3324,12 +3324,17 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
       const orientedBox = new THREE.Box3().setFromObject(oriented);
       const orientedSize = orientedBox.getSize(new THREE.Vector3());
       const fitted = new THREE.Group();
-      fitted.scale.set(
-        orientedSize.x > 0 ? placement.targetWidthM / orientedSize.x : 1,
-        orientedSize.y > 0 ? placement.targetHeightM / orientedSize.y : 1,
-        orientedSize.z > 0 ? placement.targetDepthM / orientedSize.z : 1,
+      // GLB'nin doğal en-boy-yükseklik oranını bozma. Sadece hedef genişliğe
+      // göre tek katsayıyla ölçekle; derinlik ve yükseklik modelden doğal gelir.
+      const uniformScale = orientedSize.x > 0
+        ? placement.targetWidthM / orientedSize.x
+        : 1;
+      fitted.scale.setScalar(uniformScale);
+      fitted.position.set(
+        placement.x,
+        (orientedSize.y * uniformScale) / 2,
+        placement.z,
       );
-      fitted.position.set(placement.x, placement.targetHeightM / 2, placement.z);
       fitted.add(oriented);
       group.add(fitted);
     });
