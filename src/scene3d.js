@@ -1426,11 +1426,46 @@ export function createStandScene(
 
   function ensurePlacementGhost(moduleOrWidthCm) {
     const dimensions = getPlacementGhostDimensions(moduleOrWidthCm);
-    const key = [dimensions.widthCm, dimensions.depthM, dimensions.heightM].join(':');
+    const key = [moduleOrWidthCm?.type ?? 'generic', dimensions.widthCm, dimensions.depthM, dimensions.heightM].join(':');
     if (placementGhost?.key === key) return placementGhost;
     disposePlacementGhost();
 
     const root = new THREE.Group();
+
+    // Bar Taburesi uses a chair-shaped placement ghost so drag feedback matches the GLB module.
+    if (moduleOrWidthCm?.type === 'bar-stool') {
+      const material = new THREE.MeshBasicMaterial({
+        color: PLACEMENT_VALID_COLOR,
+        transparent: true,
+        opacity: PLACEMENT_GHOST_OPACITY,
+        depthWrite: false,
+        depthTest: false,
+        side: THREE.DoubleSide,
+      });
+      const parts = [];
+      const addBox = (w, h, d, x, y, z) => {
+        const part = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+        part.position.set(x, y, z);
+        part.renderOrder = 10000;
+        root.add(part);
+        parts.push(part);
+        return part;
+      };
+      const widthM = Math.max(dimensions.widthCm / 100, 0.60);
+      const depthM = Math.max(dimensions.depthM, 0.55);
+      const heightM = Math.max(dimensions.heightM, 1.21);
+      const seatY = Math.min(heightM * 0.66, 0.80);
+      const seat = addBox(widthM * 0.72, 0.09, depthM * 0.66, 0, seatY, 0.02);
+      addBox(widthM * 0.70, Math.max(heightM - seatY - 0.08, 0.28), 0.08, 0, seatY + (heightM - seatY) / 2, -depthM * 0.28);
+      const legH = Math.max(seatY - 0.06, 0.45);
+      const legX = widthM * 0.26;
+      const legZ = depthM * 0.23;
+      [[-legX,-legZ],[legX,-legZ],[-legX,legZ],[legX,legZ]].forEach(([x,z]) => addBox(0.045, legH, 0.045, x, legH / 2, z));
+      scene.add(root);
+      placementGhost = { root, mesh: seat, key, widthCm: dimensions.widthCm };
+      return placementGhost;
+    }
+
     const mesh = new THREE.Mesh(
       new THREE.BoxGeometry(
         Math.max(dimensions.widthCm / 100, 0.02),
@@ -1473,6 +1508,7 @@ export function createStandScene(
     if (moduleState?.type === 'door') return `Kapı ${widthCm}`;
     if (moduleState?.type === 'showcase-3') return `3 Gözlü Vitrin ${widthCm}`;
     if (moduleState?.type === 'showcase-2') return `2 Gözlü Vitrin ${widthCm}`;
+    if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';
     return `Düz Panel ${widthCm}`;
   }
 
