@@ -2116,13 +2116,17 @@ export function createStandScene(
   function applyColor(meshOrMeshes, hexColor) {
     normalizeMeshes(meshOrMeshes).forEach((mesh) => {
       if (!mesh?.material) return;
-      if (mesh.userData.moduleType === 'sofa-set-beige') return;
       const surfaceState = mesh.userData.surfaceState;
       applyColorOverride(surfaceState, hexColor);
 
       const colorTargets = mesh.userData.colorTargets?.length
         ? mesh.userData.colorTargets
         : [mesh];
+
+      if (mesh.userData.moduleType === 'sofa-set-beige') {
+        colorTargets.forEach((target) => applyBeigeSofaBodyColor(target, hexColor));
+        return;
+      }
 
       colorTargets.forEach((target) => {
         if (!target?.material) return;
@@ -3266,7 +3270,7 @@ const BEIGE_SOFA_LEG_MASKS = Object.freeze({
   }),
 });
 
-function makeBeigeSofaBodyWhite(object) {
+function makeBeigeSofaBodyWhite(object, upholsteryColor = '#ffffff') {
   if (!object?.isMesh || !object.geometry || !object.material) return;
   const mask = BEIGE_SOFA_LEG_MASKS[object.name];
   if (!mask) return;
@@ -3311,11 +3315,13 @@ function makeBeigeSofaBodyWhite(object) {
 
   const whiteMaterial = sourceMaterial.clone();
   whiteMaterial.map = null;
-  whiteMaterial.color?.set('#ffffff');
+  whiteMaterial.color?.set(upholsteryColor);
+  whiteMaterial.userData = { ...(whiteMaterial.userData || {}), sofaUpholstery: true };
   whiteMaterial.needsUpdate = true;
 
   // Leg material is a plain clone of the original GLB material. No property is altered.
   const originalLegMaterial = sourceMaterial.clone();
+  originalLegMaterial.userData = { ...(originalLegMaterial.userData || {}), sofaFixedWood: true };
 
   geometry.clearGroups();
   if (triangleCount > 0) {
@@ -3332,6 +3338,17 @@ function makeBeigeSofaBodyWhite(object) {
 
   object.geometry = geometry;
   object.material = [whiteMaterial, originalLegMaterial];
+}
+
+function applyBeigeSofaBodyColor(target, hexColor) {
+  if (!target?.material) return;
+  const materials = Array.isArray(target.material) ? target.material : [target.material];
+  materials.forEach((material) => {
+    if (!material?.userData?.sofaUpholstery) return;
+    material.map = null;
+    material.color?.set(hexColor);
+    material.needsUpdate = true;
+  });
 }
 
 function createBeigeSofaSetModule(moduleState, moduleIndex) {
@@ -3420,7 +3437,8 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
         if (!object.isMesh) return;
         object.castShadow = true;
         object.receiveShadow = true;
-        makeBeigeSofaBodyWhite(object);
+        makeBeigeSofaBodyWhite(object, moduleState.surface?.color ?? '#ffffff');
+        colorTargets.push(object);
       });
 
       // Normalize around the object's real physical footprint and put its feet on y=0.
