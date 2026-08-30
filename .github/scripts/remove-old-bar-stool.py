@@ -3,16 +3,6 @@ import re
 
 # Remove the old procedural Bar Taburesi implementation while keeping Tabure 2 intact.
 
-def replace(path, old, new, count=None):
-    p = Path(path)
-    text = p.read_text()
-    n = text.count(old)
-    if n == 0:
-        raise SystemExit(f'pattern not found in {path}: {old[:80]!r}')
-    if count is not None and n != count:
-        raise SystemExit(f'unexpected occurrence count in {path}: {n} != {count}')
-    p.write_text(text.replace(old, new))
-
 # catalog.js: dimensions, catalog entry and key.
 p = Path('src/catalog.js')
 s = p.read_text()
@@ -43,18 +33,24 @@ s = p.read_text()
 s = s.replace("    || type === 'bar-stool'\n", "")
 s = s.replace("    if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';\n", "")
 s = s.replace("      } else if (moduleState.type === 'bar-stool') {\n        module = createBarStoolModule(moduleState, moduleIndex);\n", "")
-# Renderer lies before createBarStool2Module; allow arbitrary blank lines between functions.
 s, n = re.subn(r"\nfunction createBarStoolModule\(moduleState, moduleIndex\) \{.*?\n\}\n+(?=function createBarStool2Module\()", "\n", s, count=1, flags=re.S)
 if n != 1: raise SystemExit('old bar stool renderer block not found')
 p.write_text(s)
 
 # modulePlacement.js: old stool no longer participates in 10cm snap special-case.
 p = Path('src/modulePlacement.js')
-s = p.read_text()
-s = s.replace(" || moduleType === 'bar-stool'", "")
+s = p.read_text().replace(" || moduleType === 'bar-stool'", "")
 p.write_text(s)
 
-# Remove exact old-stool references from tests; keep Tabure 2 tests.
+# moduleDragSidebar.js: remove old stool-specific preview CSS and preview branch.
+p = Path('src/moduleDragSidebar.js')
+s = p.read_text()
+s = re.sub(r"^\s*\.module-drag-bar-stool \{.*?\n\s*\.module-drag-bar-stool::after \{.*?\n", "", s, count=1, flags=re.M)
+s, n = re.subn(r"\n  if \(module\.type === 'bar-stool'\) \{\n    const body = document\.createElement\('div'\);\n    body\.className = 'module-drag-bar-stool';\n    preview\.appendChild\(body\);\n    return preview;\n  \}\n", "\n", s, count=1)
+if n != 1: raise SystemExit('old bar stool sidebar preview branch not found')
+p.write_text(s)
+
+# Remove old-stool-only test references; keep Tabure 2 tests.
 for path in Path('test').rglob('*.js'):
     text = path.read_text()
     original = text
@@ -65,9 +61,9 @@ for path in Path('test').rglob('*.js'):
     if text != original:
         path.write_text(text)
 
-# Ensure no production reference to the old stool remains.
-needles = ['furniture_bar_stool_classic', "'bar-stool'", '"bar-stool"', 'createBarStoolModuleState', 'createBarStoolModule(', 'Bar Taburesi']
-for root in ['src']:
+# Ensure no production/test reference to the old stool remains.
+needles = ['furniture_bar_stool_classic', "'bar-stool'", '"bar-stool"', 'createBarStoolModuleState', 'createBarStoolModule(', 'Bar Taburesi', 'module-drag-bar-stool']
+for root in ['src', 'test']:
     for path in Path(root).rglob('*.js'):
         text = path.read_text()
         for needle in needles:
