@@ -22,6 +22,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: rm -f .github/scripts/remove-classic-sofa.py .github/workflows/remove-classic-sofa.yml
+      - run: '! git grep -n -E "furniture_sofa_set_classic|createSofaSetModule(State)?|['"'"']sofa-set['"'"']" -- . ":(exclude)public/models/*"'
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'refactor: remove classic sofa set completely [skip ci]'
