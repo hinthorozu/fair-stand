@@ -1,0 +1,28 @@
+name: Tune Beige Sofa Layout
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/tune-beige-sofa-layout.yml']
+permissions:
+  contents: write
+jobs:
+  tune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/tune-beige-sofa-layout.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/scripts/tune-beige-sofa-layout.py .github/workflows/tune-beige-sofa-layout.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: tune beige sofa proportions and table position [skip ci]'
+          branch: ROG
