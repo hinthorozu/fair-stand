@@ -3132,7 +3132,8 @@ function createBarStool2Module(moduleState, moduleIndex) {
     heightCm,
   };
 
-  // Selection proxy only; the uploaded GLB remains visually/materially untouched.
+  // Selection proxy only. The GLB frame/legs stay untouched; only the seat is color-editable.
+  const colorTargets = [];
   const proxy = new THREE.Mesh(
     new THREE.BoxGeometry(widthCm / 100, heightCm / 100, depthCm / 100),
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
@@ -3157,7 +3158,7 @@ function createBarStool2Module(moduleState, moduleIndex) {
     surfaceId: moduleState.surface?.id,
     surfaceState: moduleState.surface,
     selectionFrame,
-    colorTargets: [],
+    colorTargets,
   };
 
   loadBarStool2Model().then((template) => {
@@ -3167,7 +3168,18 @@ function createBarStool2Module(moduleState, moduleIndex) {
       if (!object.isMesh) return;
       object.castShadow = true;
       object.receiveShadow = true;
-      // Do not replace, recolor or rebuild GLB materials/textures.
+
+      const isSeat = object.name === 'Cube.001_Burlington Leather_0'
+        || object.material?.name === 'Burlington_Leather';
+      if (!isSeat || !object.material) return;
+
+      // The seat starts white and follows the module surface color. Remove only the
+      // base-color texture so the original frame/legs and every other GLB material stay intact.
+      object.material = object.material.clone();
+      object.material.map = null;
+      object.material.color?.set(moduleState.surface?.color ?? '#ffffff');
+      object.material.needsUpdate = true;
+      colorTargets.push(object);
     });
 
     chair.updateMatrixWorld(true);
