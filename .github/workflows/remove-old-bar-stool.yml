@@ -1,5 +1,5 @@
 name: Remove Old Bar Stool
-# retry 5
+# final
 on:
   push:
     branches: [ROG]
