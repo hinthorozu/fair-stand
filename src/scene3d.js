@@ -3341,7 +3341,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
 
       // Loveseat is exactly 150 cm wide. Singles keep the requested +25% visual size,
       // while every axis still uses one uniform scale so the GLB proportions stay intact.
-      const sizeCorrection = isLoveseat ? 1 : 1.25;
+      const sizeCorrection = isLoveseat ? 1.50 : 1.25;
       const physicalWidthM = isLoveseat
         ? orientedSize.x
         : Math.max(sourceSize.x, sourceSize.z);
