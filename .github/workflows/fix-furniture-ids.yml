@@ -26,7 +26,6 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           replacements = {
-              'moble_sofa_set_classic': 'furniture_sofa_set_classic',
               'moble_table_chair_set_minyon': 'furniture_table_chair_set_minyon',
               'moble_bar_stool_classic': 'furniture_bar_stool_classic',
           }
