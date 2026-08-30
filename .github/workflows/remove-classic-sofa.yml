@@ -1,4 +1,4 @@
-name: Purge Legacy Sofa
+name: Purge Legacy Sofa Final
 on:
   push:
     branches: [ROG]
