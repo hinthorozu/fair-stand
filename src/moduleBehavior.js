@@ -59,12 +59,12 @@ const TYPE_BEHAVIORS = Object.freeze({
     ghost: Object.freeze({ kind: 'real-model', renderer: 'bar-stool', opacity: 0.38 }),
   }),
   tv: Object.freeze({
-    placement: 'wall',
-    moveSnapCm: 50,
+    placement: 'wall-overlay',
+    moveSnapCm: 10,
     rotationStepDeg: 90,
     defaultRotationDeg: 0,
-    allowSideInsert: true,
-    collision: 'segment',
+    allowSideInsert: false,
+    collision: 'none',
     ghost: Object.freeze({ kind: 'real-model', renderer: 'tv', opacity: 0.38 }),
   }),
   'led-floodlight': Object.freeze({
@@ -126,4 +126,8 @@ export function isFreePlacementModule(moduleOrType) {
 
 export function isTopPlacementModule(moduleOrType) {
   return getModuleBehavior(moduleOrType).placement === 'top';
+}
+
+export function isWallOverlayModule(moduleOrType) {
+  return getModuleBehavior(moduleOrType).placement === 'wall-overlay';
 }

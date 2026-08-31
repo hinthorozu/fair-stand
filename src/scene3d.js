@@ -26,7 +26,7 @@ import {
   planContinuousModuleInsert,
   planContinuousModuleMove,
 } from './moduleMove.js';
-import { getModuleGhostBehavior, getModuleRotationStepDeg, isFreePlacementModule, isTopPlacementModule } from './moduleBehavior.js';
+import { getModuleGhostBehavior, getModuleRotationStepDeg, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule } from './moduleBehavior.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
 const PANEL_BACK_COLOR = 0x4b5563;
@@ -2130,6 +2130,23 @@ export function createStandScene(
       };
     }
 
+    if (isWallOverlayModule(moduleState.type)) {
+      const placement = { ...snapped.placement };
+      showPlacementGhost(moduleState, placement, true);
+      clearPlacementFeedback();
+      return {
+        ok: true,
+        placement,
+        message: null,
+        plan: {
+          ok: true,
+          movingPlacement: { ...placement },
+          placements: new Map([[moduleState.id, { ...placement }]]),
+        },
+        snap: { mode: 'wall-overlay' },
+      };
+    }
+
     if (isTopFixtureType(moduleState.type)) {
       const isFreeTopFixture = snapped.placement.wallId === 'free';
       const placement = snapTopFixturePlacement(
@@ -2364,6 +2381,24 @@ export function createStandScene(
         clientX: event.clientX,
         clientY: event.clientY,
       });
+      return;
+    }
+
+    if (isWallOverlayModule(moduleState.type)) {
+      const placement = { ...snapped.placement };
+      dragSession.preview = {
+        placement,
+        valid: true,
+        message: null,
+        plan: {
+          ok: true,
+          movingPlacement: { ...placement },
+          placements: new Map([[moduleState.id, { ...placement }]]),
+        },
+        snap: { mode: 'wall-overlay' },
+      };
+      showPlacementGhost(moduleState, placement, true);
+      clearPlacementFeedback();
       return;
     }
 
