@@ -1,3 +1,9 @@
+const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
+  kind: 'proxy',
+  renderer: 'proxy',
+  opacity: 0.30,
+});
+
 const DEFAULT_BEHAVIOR = Object.freeze({
   placement: 'wall',
   moveSnapCm: 50,
@@ -5,6 +11,7 @@ const DEFAULT_BEHAVIOR = Object.freeze({
   defaultRotationDeg: 0,
   allowSideInsert: true,
   collision: 'segment',
+  ghost: DEFAULT_GHOST_BEHAVIOR,
 });
 
 const TYPE_BEHAVIORS = Object.freeze({
@@ -31,6 +38,7 @@ const TYPE_BEHAVIORS = Object.freeze({
     defaultRotationDeg: 0,
     allowSideInsert: true,
     collision: 'footprint',
+    ghost: Object.freeze({ kind: 'custom', renderer: 'sofa-set-classic', opacity: 0.38 }),
   }),
   'table-chair-set-eames': Object.freeze({
     placement: 'free',
@@ -39,6 +47,7 @@ const TYPE_BEHAVIORS = Object.freeze({
     defaultRotationDeg: 0,
     allowSideInsert: true,
     collision: 'footprint',
+    ghost: Object.freeze({ kind: 'custom', renderer: 'table-chair-set-eames', opacity: 0.38 }),
   }),
   'bar-stool': Object.freeze({
     placement: 'free',
@@ -47,6 +56,7 @@ const TYPE_BEHAVIORS = Object.freeze({
     defaultRotationDeg: 270,
     allowSideInsert: true,
     collision: 'footprint',
+    ghost: Object.freeze({ kind: 'real-model', renderer: 'bar-stool', opacity: 0.38 }),
   }),
   'led-floodlight': Object.freeze({
     placement: 'top',
@@ -68,7 +78,10 @@ function normalizeDescriptor(moduleOrType) {
 export function getModuleBehavior(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
   const type = module.type ?? null;
-  const base = TYPE_BEHAVIORS[type] ?? DEFAULT_BEHAVIOR;
+  const declared = TYPE_BEHAVIORS[type] ?? DEFAULT_BEHAVIOR;
+  const base = declared.ghost
+    ? declared
+    : { ...declared, ghost: DEFAULT_GHOST_BEHAVIOR };
 
   // Only the verified straight Banko family (100/150/200) gets 45-degree turns.
   if (
@@ -92,6 +105,10 @@ export function getModuleDefaultRotationDeg(moduleOrType) {
 
 export function getModuleMoveSnapCm(moduleOrType) {
   return Number(getModuleBehavior(moduleOrType).moveSnapCm) || 50;
+}
+
+export function getModuleGhostBehavior(moduleOrType) {
+  return getModuleBehavior(moduleOrType).ghost ?? DEFAULT_GHOST_BEHAVIOR;
 }
 
 export function isFreePlacementModule(moduleOrType) {

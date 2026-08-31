@@ -26,7 +26,7 @@ import {
   planContinuousModuleInsert,
   planContinuousModuleMove,
 } from './moduleMove.js';
-import { getModuleRotationStepDeg, isFreePlacementModule, isTopPlacementModule } from './moduleBehavior.js';
+import { getModuleGhostBehavior, getModuleRotationStepDeg, isFreePlacementModule, isTopPlacementModule } from './moduleBehavior.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
 const PANEL_BACK_COLOR = 0x4b5563;
@@ -1423,6 +1423,7 @@ export function createStandScene(
   }
 
   function ensurePlacementGhost(moduleOrWidthCm) {
+    const ghostBehavior = getModuleGhostBehavior(moduleOrWidthCm);
     const dimensions = getPlacementGhostDimensions(moduleOrWidthCm);
     const key = [moduleOrWidthCm?.type ?? 'generic', dimensions.widthCm, dimensions.depthM, dimensions.heightM].join(':');
     if (placementGhost?.key === key) return placementGhost;
@@ -1431,7 +1432,7 @@ export function createStandScene(
     const root = new THREE.Group();
 
     // Koltuk Takımı uses its actual GLB sofa geometry plus the real coffee-table geometry.
-    if (moduleOrWidthCm?.type === 'sofa-set-classic') {
+    if (ghostBehavior.renderer === 'sofa-set-classic') {
       const proxy = new THREE.Mesh(
         new THREE.BoxGeometry(
           Math.max(dimensions.widthCm / 100, 0.02),
@@ -1570,7 +1571,7 @@ export function createStandScene(
     }
 
     // Eames Masa Sandalye Takımı uses the real table geometry plus the actual chair GLB geometry.
-    if (moduleOrWidthCm?.type === 'table-chair-set-eames') {
+    if (ghostBehavior.renderer === 'table-chair-set-eames') {
       const proxy = new THREE.Mesh(
         new THREE.BoxGeometry(
           Math.max(dimensions.widthCm / 100, 0.02),
@@ -1674,7 +1675,7 @@ export function createStandScene(
     }
 
     // Bar Taburesi uses the actual GLB geometry as its placement ghost.
-    if (moduleOrWidthCm?.type === 'bar-stool') {
+    if (ghostBehavior.renderer === 'bar-stool') {
       const proxy = new THREE.Mesh(
         new THREE.BoxGeometry(
           Math.max(dimensions.widthCm / 100, 0.02),
@@ -1739,7 +1740,7 @@ export function createStandScene(
       new THREE.MeshBasicMaterial({
         color: PLACEMENT_VALID_COLOR,
         transparent: true,
-        opacity: PLACEMENT_GHOST_OPACITY,
+        opacity: Number(ghostBehavior.opacity) || PLACEMENT_GHOST_OPACITY,
         depthWrite: false,
         depthTest: false,
         side: THREE.DoubleSide,
