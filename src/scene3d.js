@@ -1433,6 +1433,110 @@ export function createStandScene(
 
     const root = new THREE.Group();
 
+    // Eames Masa Sandalye Takımı uses the real table geometry plus the actual chair GLB geometry.
+    if (moduleOrWidthCm?.type === 'table-chair-set-eames') {
+      const proxy = new THREE.Mesh(
+        new THREE.BoxGeometry(
+          Math.max(dimensions.widthCm / 100, 0.02),
+          dimensions.heightM,
+          dimensions.depthM,
+        ),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+      );
+      proxy.position.y = dimensions.heightM / 2;
+      root.add(proxy);
+      scene.add(root);
+
+      const tintMaterials = [];
+      const makeGhostMaterial = () => {
+        const material = new THREE.MeshBasicMaterial({
+          color: PLACEMENT_VALID_COLOR,
+          transparent: true,
+          opacity: 0.38,
+          depthWrite: false,
+          depthTest: false,
+          side: THREE.DoubleSide,
+        });
+        tintMaterials.push(material);
+        return material;
+      };
+
+      const tableTop = new THREE.Mesh(new THREE.CylinderGeometry(0.375, 0.375, 0.018, 64), makeGhostMaterial());
+      tableTop.position.set(0, 0.74, 0);
+      tableTop.renderOrder = 10000;
+      root.add(tableTop);
+
+      const tableStem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.70, 20), makeGhostMaterial());
+      tableStem.position.set(0, 0.37, 0);
+      tableStem.renderOrder = 10000;
+      root.add(tableStem);
+
+      const tableBase = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32), makeGhostMaterial());
+      tableBase.position.set(0, 0.018, 0);
+      tableBase.renderOrder = 10000;
+      root.add(tableBase);
+
+      placementGhost = {
+        root,
+        mesh: proxy,
+        tintMaterials,
+        key,
+        widthCm: dimensions.widthCm,
+        ownsGeometry: true,
+        colorHex: PLACEMENT_VALID_COLOR,
+      };
+
+      const chairPlacements = [
+        [-0.33, -0.33, Math.PI / 4],
+        [0.33, -0.33, -Math.PI / 4],
+        [-0.33, 0.33, Math.PI * 3 / 4],
+        [0.33, 0.33, -Math.PI * 3 / 4],
+      ];
+
+      loadEamesChairModel().then((template) => {
+        if (placementGhost?.key !== key || placementGhost.root !== root) return;
+        chairPlacements.forEach(([x, z, rotationY]) => {
+          const chair = template.clone(true);
+          chair.traverse((object) => {
+            if (!object.isMesh) return;
+            const material = new THREE.MeshBasicMaterial({
+              color: placementGhost.colorHex ?? PLACEMENT_VALID_COLOR,
+              transparent: true,
+              opacity: 0.38,
+              depthWrite: false,
+              depthTest: false,
+              side: THREE.DoubleSide,
+            });
+            object.material = material;
+            object.renderOrder = 10000;
+            tintMaterials.push(material);
+          });
+
+          chair.updateMatrixWorld(true);
+          let box = new THREE.Box3().setFromObject(chair);
+          const size = box.getSize(new THREE.Vector3());
+          const scale = size.y > 0 ? EAMES_CHAIR_TARGET_HEIGHT_M / size.y : 1;
+          chair.scale.multiplyScalar(scale);
+          chair.updateMatrixWorld(true);
+          box = new THREE.Box3().setFromObject(chair);
+          const center = box.getCenter(new THREE.Vector3());
+          chair.position.x -= center.x;
+          chair.position.z -= center.z;
+          chair.position.y -= box.min.y;
+
+          const holder = new THREE.Group();
+          holder.position.set(x, 0, z);
+          holder.rotation.y = rotationY;
+          holder.add(chair);
+          root.add(holder);
+        });
+      }).catch((error) => {
+        console.warn('Eames ghost GLB modeli yüklenemedi:', error);
+      });
+
+      return placementGhost;
+    }
+
     // Bar Taburesi uses the actual GLB geometry as its placement ghost.
     if (moduleOrWidthCm?.type === 'bar-stool') {
       const proxy = new THREE.Mesh(
