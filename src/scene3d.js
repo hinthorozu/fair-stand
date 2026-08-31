@@ -2097,9 +2097,12 @@ export function createStandScene(
 
     const allowedWalls = getAllowedWallIds(stageLayout.standType)
       .filter((wallId) => wallId === 'back' || wallId === 'left' || wallId === 'right');
-    const candidateWalls = preferredWallId && allowedWalls.includes(preferredWallId)
-      ? [preferredWallId]
-      : allowedWalls;
+    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
+    const pointedWallId = pointedModule?.placement?.wallId;
+    const targetWallId = allowedWalls.includes(pointedWallId)
+      ? pointedWallId
+      : (preferredWallId && allowedWalls.includes(preferredWallId) ? preferredWallId : null);
+    const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
     const intersections = [];
 
     candidateWalls.forEach((wallId) => {
