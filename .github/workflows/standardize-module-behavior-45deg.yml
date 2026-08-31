@@ -18,6 +18,7 @@ jobs:
           cache: npm
       - run: mkdir -p tests
       - run: python .github/scripts/standardize-module-behavior-45deg.py
+      - run: python .github/scripts/fix-generated-module-placement.py
       - run: node --check src/moduleBehavior.js
       - run: node --check src/modulePlacement.js
       - run: node --check src/moduleDragSidebar.js
@@ -30,7 +31,7 @@ jobs:
           grep -n "rotationStepDeg: 45" src/moduleBehavior.js
           grep -n "getModuleRotationStepDeg" src/moduleDragSidebar.js src/scene3d.js
           grep -n "eighthTurns" src/modulePlacement.js
-      - run: rm -f .github/scripts/standardize-module-behavior-45deg.py .github/workflows/standardize-module-behavior-45deg.yml
+      - run: rm -f .github/scripts/standardize-module-behavior-45deg.py .github/scripts/fix-generated-module-placement.py .github/workflows/standardize-module-behavior-45deg.yml
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'feat: standardize module behavior and add 45deg rotation [skip ci]'
