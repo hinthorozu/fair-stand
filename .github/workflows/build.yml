@@ -25,68 +25,12 @@ jobs:
 
       - name: Patch TV wall drag
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('src/scene3d.js')
-          s=p.read_text()
-          s=s.replace("""    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
-              const pointedWallId = pointedModule?.placement?.wallId;
-              const targetWallId = allowedWalls.includes(pointedWallId)
-                ? pointedWallId
-                : (preferredWallId && allowedWalls.includes(preferredWallId) ? preferredWallId : null);
-              const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
-""", """    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
-              const pointedWallId = pointedModule?.placement?.wallId;
-              const targetWallId = allowedWalls.includes(pointedWallId) ? pointedWallId : null;
-              const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
-""", 1)
-          s=s.replace("""      const currentWallId = dragSession.preview?.placement?.wallId
-                ?? moduleState.placement?.wallId
-                ?? null;
-              const wallPoint = getWallOverlayDragPoint(
-                event.clientX,
-                event.clientY,
-                currentWallId,
-                moduleState,
-              );
-""", """      const wallPoint = getWallOverlayDragPoint(
-                event.clientX,
-                event.clientY,
-                null,
-                moduleState,
-              );
-""", 1)
-          p.write_text(s)
-          Path('.github/workflows/build.yml').write_text("""name: Build
+          python -c "from pathlib import Path; p=Path('src/scene3d.js'); s=p.read_text(); s=s.replace('''    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;\n    const pointedWallId = pointedModule?.placement?.wallId;\n    const targetWallId = allowedWalls.includes(pointedWallId)\n      ? pointedWallId\n      : (preferredWallId && allowedWalls.includes(preferredWallId) ? preferredWallId : null);\n    const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;\n''','''    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;\n    const pointedWallId = pointedModule?.placement?.wallId;\n    const targetWallId = allowedWalls.includes(pointedWallId) ? pointedWallId : null;\n    const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;\n''',1); s=s.replace('''      const currentWallId = dragSession.preview?.placement?.wallId\n        ?? moduleState.placement?.wallId\n        ?? null;\n      const wallPoint = getWallOverlayDragPoint(\n        event.clientX,\n        event.clientY,\n        currentWallId,\n        moduleState,\n      );\n''','''      const wallPoint = getWallOverlayDragPoint(\n        event.clientX,\n        event.clientY,\n        null,\n        moduleState,\n      );\n''',1); p.write_text(s)"
 
-on:
-  push:
-    branches: [ROG]
-  pull_request:
-    branches: [ROG]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
-""")
-          PY
+      - name: Verify patch
+        run: |
+          grep -F "const targetWallId = allowedWalls.includes(pointedWallId) ? pointedWallId : null;" src/scene3d.js
+          grep -A5 "const wallPoint = getWallOverlayDragPoint(" src/scene3d.js | grep -F "null,"
 
       - name: Install dependencies
         run: npm install
