@@ -105,7 +105,7 @@ input[type="file"] {
 
 .sidebar-toggle {
   position: fixed;
-  z-index: 20;
+  z-index: 1000;
   top: 12px;
   left: 292px;
   width: 28px;
@@ -129,11 +129,11 @@ input[type="file"] {
   box-shadow: none;
 }
 
-#app.sidebar-collapsed .sidebar > :not(.sidebar-toggle) {
+#app.sidebar-collapsed .sidebar > * {
   display: none;
 }
 
-#app.sidebar-collapsed .sidebar-toggle {
+#app.sidebar-collapsed > .sidebar-toggle {
   left: 10px;
 }
 
