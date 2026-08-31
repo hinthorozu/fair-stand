@@ -239,7 +239,7 @@ export function createModuleDragSidebar({
 
         activeCard = card;
         activeModuleState = state;
-        activeRotationZDeg = 0;
+        activeRotationZDeg = state.type === 'bar-stool' ? 90 : 0;
         rotationLocked = false;
         card.classList.add('is-dragging');
         viewport.closest('.viewport-wrap')?.classList.add('catalog-drag-active');
