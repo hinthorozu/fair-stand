@@ -1,0 +1,28 @@
+name: Fix Sidebar Reopen
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/fix-sidebar-reopen.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/fix-sidebar-reopen.py
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: grep -n "sidebar-toggle\|sidebar-collapsed" index.html src/style.css
+      - run: rm -f .github/scripts/fix-sidebar-reopen.py .github/workflows/fix-sidebar-reopen.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: keep sidebar toggle accessible when collapsed [skip ci]'
+          branch: ROG
