@@ -17,6 +17,14 @@ jobs:
           node-version: 20
           cache: npm
       - run: python .github/scripts/fix-tv42-pure-module.py
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('test/tv42Module.test.js')
+          s = p.read_text()
+          s = s.replace("assert.equal(getModuleGhostBehavior({ type: 'tv' }).mode, 'proxy');", "assert.equal(getModuleGhostBehavior({ type: 'tv' }).kind, 'real-model');\n  assert.equal(getModuleGhostBehavior({ type: 'tv' }).renderer, 'tv');")
+          p.write_text(s)
+          PY
       - run: node --check src/designState.js && node --check src/moduleBehavior.js && node --check src/main.js && node --check src/scene3d.js && node --check test/tv42Module.test.js
       - run: npm ci
       - run: npm test
