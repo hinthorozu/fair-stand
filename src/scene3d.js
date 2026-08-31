@@ -2099,9 +2099,7 @@ export function createStandScene(
       .filter((wallId) => wallId === 'back' || wallId === 'left' || wallId === 'right');
     const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
     const pointedWallId = pointedModule?.placement?.wallId;
-    const targetWallId = allowedWalls.includes(pointedWallId)
-      ? pointedWallId
-      : (preferredWallId && allowedWalls.includes(preferredWallId) ? preferredWallId : null);
+    const targetWallId = allowedWalls.includes(pointedWallId) ? pointedWallId : null;
     const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
     const intersections = [];
 
@@ -2389,13 +2387,10 @@ export function createStandScene(
     const moduleState = dragSession.moduleState;
 
     if (isWallOverlayModule(moduleState.type)) {
-      const currentWallId = dragSession.preview?.placement?.wallId
-        ?? moduleState.placement?.wallId
-        ?? null;
       const wallPoint = getWallOverlayDragPoint(
         event.clientX,
         event.clientY,
-        currentWallId,
+        null,
         moduleState,
       );
       if (!wallPoint) {
