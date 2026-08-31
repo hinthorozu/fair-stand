@@ -1,0 +1,47 @@
+name: TV Visible Wall Fix
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/tv-visible-wall-fix.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Patch visible wall targeting
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/scene3d.js')
+          s=p.read_text()
+          old="""    const candidateWalls = preferredWallId && allowedWalls.includes(preferredWallId)
+              ? [preferredWallId]
+              : allowedWalls;
+          """
+          new="""    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
+              const pointedWallId = pointedModule?.placement?.wallId;
+              const targetWallId = allowedWalls.includes(pointedWallId)
+                ? pointedWallId
+                : (preferredWallId && allowedWalls.includes(preferredWallId) ? preferredWallId : null);
+              const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
+          """
+          if old not in s: raise SystemExit('target block not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/workflows/tv-visible-wall-fix.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: attach TV to visible wall panel [skip ci]'
+          branch: ROG
