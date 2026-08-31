@@ -769,6 +769,39 @@ test('free left batch keeps visual order while placing nearest module last in th
   assert.equal(result.placements.get('b').xCm, 400);
 });
 
+
+
+test('free-side insertion supports strict-depth fixtures without throwing', () => {
+  const source = {
+    id: 'counter-source',
+    type: 'counter',
+    widthCm: 100,
+    depthCm: 50,
+    placement: { xCm: 100, yCm: 100, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  };
+  const stool = {
+    id: 'stool-new',
+    type: 'bar-stool',
+    widthCm: 60,
+    depthCm: 55,
+    placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 270, wallId: 'free' },
+  };
+
+  const result = planFreeSideInsertion({
+    modules: [source],
+    insertedModules: [stool],
+    targetModuleId: source.id,
+    side: 'right',
+    standType: 'island',
+    standXCm: 500,
+    standYCm: 500,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.placements.has(stool.id), true);
+  assert.equal(result.placements.get(stool.id).rotationZDeg, 270);
+});
+
 test('free context insertion rejects stand overflow and real collision', () => {
   const edgeSource = {
     id: 'edge-source',

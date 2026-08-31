@@ -1245,6 +1245,69 @@ export function createFreeSidePlacement({
   });
 }
 
+function createFreeSideFixturePlacement({
+  sourceModule,
+  insertedModule,
+  side,
+  standXCm,
+  standYCm,
+} = {}) {
+  if (!sourceModule?.placement || !insertedModule) return null;
+  const sourceWidth = Number(sourceModule.widthCm);
+  const sourceDepth = Number(sourceModule.depthCm);
+  const insertedWidth = Number(insertedModule.widthCm);
+  const insertedDepth = Number(insertedModule.depthCm);
+  if (![sourceWidth, insertedWidth, insertedDepth].every(Number.isFinite)) return null;
+
+  const sourceRotation = normalizeModuleRotationZDeg(sourceModule.placement.rotationZDeg);
+  const insertedRotation = normalizeModuleRotationZDeg(
+    insertedModule.type === 'bar-stool' ? 270 : sourceRotation,
+  );
+  const right = getVisualRightVector(sourceRotation);
+  const direction = side === 'right' ? 1 : -1;
+  const sourceCenter = getPlacementCenterCm(sourceModule.placement, sourceWidth);
+  if (!sourceCenter) return null;
+
+  const sourcePhysicalDepth = Number.isFinite(sourceDepth) && sourceDepth > 0
+    ? sourceDepth
+    : MODULE_COLLISION_DEPTH_CM;
+  const sourceExtents = getRotatedHalfExtentsCm(sourceWidth, sourcePhysicalDepth, sourceRotation);
+  const insertedExtents = getRotatedHalfExtentsCm(insertedWidth, insertedDepth, insertedRotation);
+  const centerDistance = Math.abs(right.x) * (sourceExtents.halfX + insertedExtents.halfX)
+    + Math.abs(right.y) * (sourceExtents.halfY + insertedExtents.halfY);
+
+  let centerXCm = sourceCenter.xCm + right.x * centerDistance * direction;
+  let centerYCm = sourceCenter.yCm + right.y * centerDistance * direction;
+  const xLimit = Number(standXCm);
+  const yLimit = Number(standYCm);
+  if (![centerXCm, centerYCm, xLimit, yLimit].every(Number.isFinite)) return null;
+
+  // Keep the side contact, but clamp the perpendicular axis so deeper fixtures remain inside the stand.
+  const perpendicular = { x: -right.y, y: right.x };
+  const minCenterX = insertedExtents.halfX;
+  const maxCenterX = xLimit - insertedExtents.halfX;
+  const minCenterY = insertedExtents.halfY;
+  const maxCenterY = yLimit - insertedExtents.halfY;
+  if (maxCenterX < minCenterX || maxCenterY < minCenterY) return null;
+
+  if (Math.abs(perpendicular.x) > Math.abs(perpendicular.y)) {
+    centerXCm = clamp(centerXCm, minCenterX, maxCenterX);
+  } else {
+    centerYCm = clamp(centerYCm, minCenterY, maxCenterY);
+  }
+
+  return placementFromCenterCm({
+    centerXCm,
+    centerYCm,
+    widthCm: insertedWidth,
+    rotationZDeg: insertedRotation,
+    template: {
+      zCm: insertedModule.placement?.zCm ?? sourceModule.placement.zCm ?? 0,
+      wallId: 'free',
+    },
+  });
+}
+
 export function planFreeSideInsertion({
   modules = [],
   insertedModules = [],
