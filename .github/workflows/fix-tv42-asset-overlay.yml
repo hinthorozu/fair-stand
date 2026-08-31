@@ -21,15 +21,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - run: python - <<'PY'
-          from pathlib import Path
-          import struct
-          p=Path('public/models/tv.glb')
-          d=p.read_bytes()
-          assert d[:4] == b'glTF'
-          assert struct.unpack('<I',d[8:12])[0] == len(d)
-          print('tv.glb bytes', len(d))
-          PY
+      - run: python -c "from pathlib import Path; import struct; d=Path('public/models/tv.glb').read_bytes(); assert d[:4] == b'glTF'; assert struct.unpack('<I', d[8:12])[0] == len(d); print('tv.glb bytes', len(d))"
       - run: rm -f .github/scripts/fix-tv42-asset-overlay.py .github/workflows/fix-tv42-asset-overlay.yml
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
