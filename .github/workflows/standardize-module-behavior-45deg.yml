@@ -16,6 +16,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      - run: mkdir -p tests
       - run: python .github/scripts/standardize-module-behavior-45deg.py
       - run: node --check src/moduleBehavior.js
       - run: node --check src/modulePlacement.js
