@@ -55,3 +55,13 @@ test('TV is a non-colliding wall overlay accessory', () => {
   assert.equal(behavior.allowSideInsert, false);
   assert.equal(isWallOverlayModule({ type: 'tv' }), true);
 });
+
+
+test('TV wall overlay drag snaps horizontal and height movement to 10 cm', () => {
+  const behavior = getModuleGhostBehavior({ type: 'tv' });
+  assert.equal(behavior.renderer, 'tv');
+  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  assert.match(source, /function getWallOverlayDragPoint/);
+  assert.match(source, /Math\.round\(rawOffsetCm \/ 10\) \* 10/);
+  assert.match(source, /snap: \{ mode: 'wall-overlay'/);
+});

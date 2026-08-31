@@ -2083,6 +2083,63 @@ export function createStandScene(
     return { handled: true, ok: true };
   }
 
+  function getWallOverlayDragPoint(clientX, clientY, preferredWallId = null, moduleState = null) {
+    if (!stageLayout) return null;
+    const rect = renderer.domElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+
+    const ndc = new THREE.Vector2(
+      ((clientX - rect.left) / rect.width) * 2 - 1,
+      -((clientY - rect.top) / rect.height) * 2 + 1,
+    );
+    const overlayRaycaster = new THREE.Raycaster();
+    overlayRaycaster.setFromCamera(ndc, camera);
+
+    const allowedWalls = getAllowedWallIds(stageLayout.standType)
+      .filter((wallId) => wallId === 'back' || wallId === 'left' || wallId === 'right');
+    const candidateWalls = preferredWallId && allowedWalls.includes(preferredWallId)
+      ? [preferredWallId]
+      : allowedWalls;
+    const intersections = [];
+
+    candidateWalls.forEach((wallId) => {
+      let plane;
+      if (wallId === 'back') {
+        plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+      } else if (wallId === 'left') {
+        plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
+      } else {
+        plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), -stageLayout.widthM);
+      }
+
+      const hit = new THREE.Vector3();
+      if (!overlayRaycaster.ray.intersectPlane(plane, hit)) return;
+      const relativeY = hit.y - ACTIVE_PLATFORM_HEIGHT_M;
+      if (relativeY < 0 || relativeY > STAND_DIMENSIONS.height) return;
+      if (wallId === 'back' && (hit.x < 0 || hit.x > stageLayout.widthM)) return;
+      if ((wallId === 'left' || wallId === 'right') && (hit.z < 0 || hit.z > stageLayout.depthM)) return;
+
+      intersections.push({ wallId, hit, distance: hit.distanceTo(overlayRaycaster.ray.origin) });
+    });
+
+    if (!intersections.length) return null;
+    intersections.sort((a, b) => a.distance - b.distance);
+    const { wallId, hit } = intersections[0];
+    const rotationZDeg = wallId === 'left' ? 90 : (wallId === 'right' ? 270 : 0);
+    const pointerXCm = wallId === 'right' ? stageLayout.widthCm : Math.max(0, hit.x * 100);
+    const pointerYCm = wallId === 'back' ? 0 : Math.max(0, hit.z * 100);
+
+    const heightCm = Math.max(1, Number(moduleState?.screenHeightCm ?? moduleState?.heightCm ?? 52.3));
+    const halfHeightM = heightCm / 200;
+    const defaultCenterM = 1.75;
+    const minOffsetCm = Math.ceil(((halfHeightM - defaultCenterM) * 100) / 10) * 10;
+    const maxOffsetCm = Math.floor(((STAND_DIMENSIONS.height - halfHeightM - defaultCenterM) * 100) / 10) * 10;
+    const rawOffsetCm = (hit.y - ACTIVE_PLATFORM_HEIGHT_M - defaultCenterM) * 100;
+    const zCm = THREE.MathUtils.clamp(Math.round(rawOffsetCm / 10) * 10, minOffsetCm, maxOffsetCm);
+
+    return { wallId, pointerXCm, pointerYCm, rotationZDeg, zCm };
+  }
+
   function previewCatalogModuleDrag(
     moduleState,
     clientX,
@@ -2090,6 +2147,50 @@ export function createStandScene(
     preferredRotationZDeg = 0,
     rotationLocked = false,
   ) {
+    if (isWallOverlayModule(moduleState.type)) {
+      const wallPoint = getWallOverlayDragPoint(clientX, clientY, null, moduleState);
+      if (!wallPoint) {
+        disposePlacementGhost();
+        const message = 'TV\'yi aktif duvar yüzeyine bırak.';
+        showPlacementFeedback(message, { clientX, clientY });
+        return { ok: false, message };
+      }
+      const snapped = snapPlacementToStand({
+        standType: stageLayout.standType,
+        moduleType: moduleState.type,
+        shape: moduleState.shape,
+        widthCm: moduleState.widthCm,
+        depthCm: moduleState.depthCm,
+        pointerXCm: wallPoint.pointerXCm,
+        pointerYCm: wallPoint.pointerYCm,
+        standXCm: stageLayout.widthCm,
+        standYCm: stageLayout.depthCm,
+        preferredRotationZDeg: wallPoint.rotationZDeg,
+        rotationLocked: true,
+      });
+      if (!snapped.ok || !snapped.placement) {
+        disposePlacementGhost();
+        const message = snapped.message ?? 'TV bu duvar konumuna yerleştirilemedi.';
+        showPlacementFeedback(message, { clientX, clientY });
+        return { ok: false, message };
+      }
+      const placement = { ...snapped.placement, zCm: wallPoint.zCm };
+      const plan = {
+        ok: true,
+        message: null,
+        movingPlacement: { ...placement },
+        placements: new Map([[moduleState.id, { ...placement }]]),
+      };
+      showPlacementGhost(moduleState, placement, true);
+      clearPlacementFeedback();
+      return {
+        ok: true,
+        placement: { ...placement },
+        message: null,
+        plan,
+        snap: { mode: 'wall-overlay', wallId: wallPoint.wallId },
+      };
+    }
     if (!stageLayout || !moduleState) {
       disposePlacementGhost();
       const message = 'Önce stand alanını oluştur.';
@@ -2283,6 +2384,64 @@ export function createStandScene(
     updateDragBadge(dragSession.moduleState, event.clientX, event.clientY);
 
     const moduleState = dragSession.moduleState;
+
+    if (isWallOverlayModule(moduleState.type)) {
+      const currentWallId = dragSession.preview?.placement?.wallId
+        ?? moduleState.placement?.wallId
+        ?? null;
+      const wallPoint = getWallOverlayDragPoint(
+        event.clientX,
+        event.clientY,
+        currentWallId,
+        moduleState,
+      );
+      if (!wallPoint) {
+        disposePlacementGhost();
+        dragSession.preview = null;
+        showPlacementFeedback('TV\'yi aktif duvar yüzeyi üzerinde sürükle.', {
+          clientX: event.clientX,
+          clientY: event.clientY,
+        });
+        return;
+      }
+      const snapped = snapPlacementToStand({
+        standType: stageLayout.standType,
+        moduleType: moduleState.type,
+        shape: moduleState.shape,
+        widthCm: moduleState.widthCm,
+        depthCm: moduleState.depthCm,
+        pointerXCm: wallPoint.pointerXCm,
+        pointerYCm: wallPoint.pointerYCm,
+        standXCm: stageLayout.widthCm,
+        standYCm: stageLayout.depthCm,
+        preferredRotationZDeg: wallPoint.rotationZDeg,
+        rotationLocked: true,
+      });
+      if (!snapped.ok || !snapped.placement) {
+        dragSession.preview = null;
+        disposePlacementGhost();
+        showPlacementFeedback(snapped.message ?? 'TV bu duvar konumuna taşınamadı.', {
+          clientX: event.clientX,
+          clientY: event.clientY,
+        });
+        return;
+      }
+      const placement = { ...snapped.placement, zCm: wallPoint.zCm };
+      dragSession.preview = {
+        placement,
+        valid: true,
+        message: null,
+        plan: {
+          ok: true,
+          movingPlacement: { ...placement },
+          placements: new Map([[moduleState.id, { ...placement }]]),
+        },
+        snap: { mode: 'wall-overlay', wallId: wallPoint.wallId },
+      };
+      showPlacementGhost(moduleState, placement, true);
+      clearPlacementFeedback();
+      return;
+    }
 
     if (isTopFixtureType(moduleState.type)) {
       const currentWallId = dragSession.preview?.placement?.wallId
