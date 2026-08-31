@@ -21,7 +21,10 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - run: grep -n "does not inherit flat panel state\|renderer: 'tv'\|function createTvModule" test/tv42Module.test.js src/moduleBehavior.js src/scene3d.js
+      - run: |
+          grep -n "does not inherit flat panel state" test/tv42Module.test.js
+          grep -n "renderer: 'tv'" src/moduleBehavior.js
+          grep -n "function createTvModule" src/scene3d.js
       - run: rm -f .github/scripts/fix-tv42-pure-module.py .github/workflows/fix-tv42-pure-module.yml
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
