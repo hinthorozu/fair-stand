@@ -1,7 +1,4 @@
-from pathlib import Path
-
-Path('tests').mkdir(exist_ok=True)
-Path('tests/moduleBehavior.test.js').write_text(r'''import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   getModuleBehavior,
@@ -57,5 +54,3 @@ test('rotated footprint participates in stand boundary validation', () => {
   });
   assert.equal(result.ok, false);
 });
-''')
-print('Rewrote module behavior regression tests for node:test.')

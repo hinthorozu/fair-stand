@@ -1,5 +1,6 @@
 import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
+import { getModuleDefaultRotationDeg, getModuleRotationStepDeg } from './moduleBehavior.js';
 
 
 function ensureStyles() {
@@ -183,7 +184,7 @@ export function createModuleDragSidebar({
 
   const hint = document.createElement('p');
   hint.className = 'module-drag-hint';
-  hint.textContent = 'Kartı sahneye sürükle · R: +90° · Shift+R: -90° · 50 cm grid';
+  hint.textContent = 'Kartı sahneye sürükle · R/Shift+R: modül standardına göre döndür · grid modüle göre';
 
   const grid = document.createElement('div');
   grid.className = 'module-drag-grid';
@@ -239,7 +240,7 @@ export function createModuleDragSidebar({
 
         activeCard = card;
         activeModuleState = state;
-        activeRotationZDeg = state.type === 'bar-stool' ? 270 : 0;
+        activeRotationZDeg = getModuleDefaultRotationDeg(state);
         rotationLocked = false;
         card.classList.add('is-dragging');
         viewport.closest('.viewport-wrap')?.classList.add('catalog-drag-active');
@@ -290,7 +291,8 @@ export function createModuleDragSidebar({
   window.addEventListener('keydown', (event) => {
     if (!activeModuleState || String(event.key).toLowerCase() !== 'r') return;
     event.preventDefault();
-    const deltaDeg = event.shiftKey ? -90 : 90;
+    const rotationStepDeg = getModuleRotationStepDeg(activeModuleState);
+    const deltaDeg = event.shiftKey ? -rotationStepDeg : rotationStepDeg;
     activeRotationZDeg = ((activeRotationZDeg + deltaDeg) % 360 + 360) % 360;
     rotationLocked = true;
     if (Number.isFinite(lastClientX) && Number.isFinite(lastClientY)) {

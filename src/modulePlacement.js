@@ -1,7 +1,8 @@
 import { STAND_DIMENSIONS } from './catalog.js';
+import { getModuleMoveSnapCm } from './moduleBehavior.js';
 
 export const MODULE_PLACEMENT_SNAP_CM = 50;
-export const MODULE_PLACEMENT_ROTATIONS = Object.freeze([0, 90, 180, 270]);
+export const MODULE_PLACEMENT_ROTATIONS = Object.freeze([0, 45, 90, 135, 180, 225, 270, 315]);
 export const MODULE_WALL_SNAP_DISTANCE_CM = 50;
 export const MODULE_NEIGHBOR_SNAP_DISTANCE_CM = 30;
 export const MODULE_COLLISION_DEPTH_CM = Math.max(
@@ -56,8 +57,8 @@ function snapDepthCenterCm(value, depthCm, stepCm = MODULE_PLACEMENT_SNAP_CM) {
 export function normalizeModuleRotationZDeg(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return 0;
-  const quarterTurns = Math.round(number / 90);
-  return ((quarterTurns * 90) % 360 + 360) % 360;
+  const eighthTurns = Math.round(number / 45);
+  return ((eighthTurns * 45) % 360 + 360) % 360;
 }
 
 export function rotateModuleRotationZDeg(value, deltaDeg = 90) {
@@ -69,30 +70,64 @@ export function rotateModuleRotationZDeg(value, deltaDeg = 90) {
 export function rotateModulePlacementAroundCenter(placement, widthCm, deltaDeg = 90, depthCm = null) {
   if (!placement) return null;
   const width = Number(widthCm);
-  const x = Number(placement.xCm);
-  const y = Number(placement.yCm);
-  if (![width, x, y].every(Number.isFinite) || width <= 0) return null;
+  if (!Number.isFinite(width) || width <= 0) return null;
+  const center = getPlacementCenterCm(placement, width);
+  if (!center) return null;
 
-  const currentRotation = normalizeModuleRotationZDeg(placement.rotationZDeg);
-  const nextRotation = rotateModuleRotationZDeg(currentRotation, deltaDeg);
-  const currentVertical = isVerticalModuleRotation(currentRotation);
-  const nextVertical = isVerticalModuleRotation(nextRotation);
-
-  // R ile dönüşte modülün dünya merkezini sabit tut. Grid snap yalnız sürükleme/yerleştirmede uygulanır.
-  const centerX = x + (currentVertical ? 0 : width / 2);
-  const centerY = y + (currentVertical ? width / 2 : 0);
-
-  return createModulePlacement({
-    ...placement,
-    xCm: nextVertical ? centerX : centerX - width / 2,
-    yCm: nextVertical ? centerY - width / 2 : centerY,
+  const nextRotation = rotateModuleRotationZDeg(placement.rotationZDeg, deltaDeg);
+  return placementFromCenterCm({
+    centerXCm: center.xCm,
+    centerYCm: center.yCm,
+    widthCm: width,
     rotationZDeg: nextRotation,
+    template: placement,
   });
 }
 
 export function isVerticalModuleRotation(rotationZDeg) {
   const rotation = normalizeModuleRotationZDeg(rotationZDeg);
   return rotation === 90 || rotation === 270;
+}
+
+function isCardinalModuleRotation(rotationZDeg) {
+  return normalizeModuleRotationZDeg(rotationZDeg) % 90 === 0;
+}
+
+function getPlacementCenterCm(placement, widthCm) {
+  if (!placement) return null;
+  const width = Number(widthCm);
+  const x = Number(placement.xCm);
+  const y = Number(placement.yCm);
+  if (![width, x, y].every(Number.isFinite) || width <= 0) return null;
+  const vertical = isVerticalModuleRotation(placement.rotationZDeg);
+  return {
+    xCm: x + (vertical ? 0 : width / 2),
+    yCm: y + (vertical ? width / 2 : 0),
+  };
+}
+
+function placementFromCenterCm({ centerXCm, centerYCm, widthCm, rotationZDeg, template = {} }) {
+  const width = Number(widthCm);
+  const vertical = isVerticalModuleRotation(rotationZDeg);
+  return createModulePlacement({
+    ...template,
+    xCm: vertical ? centerXCm : centerXCm - width / 2,
+    yCm: vertical ? centerYCm - width / 2 : centerYCm,
+    rotationZDeg,
+    wallId: template.wallId ?? 'free',
+  });
+}
+
+function getRotatedHalfExtentsCm(widthCm, depthCm, rotationZDeg) {
+  const width = Number(widthCm);
+  const depth = Number(depthCm);
+  const radians = normalizeModuleRotationZDeg(rotationZDeg) * Math.PI / 180;
+  const cos = Math.abs(Math.cos(radians));
+  const sin = Math.abs(Math.sin(radians));
+  return {
+    halfX: (cos * width + sin * depth) / 2,
+    halfY: (sin * width + cos * depth) / 2,
+  };
 }
 
 export function snapCm(value, stepCm = MODULE_PLACEMENT_SNAP_CM) {
@@ -103,9 +138,7 @@ export function snapCm(value, stepCm = MODULE_PLACEMENT_SNAP_CM) {
 }
 
 export function getModulePlacementSnapCm(moduleType) {
-  return moduleType === 'sofa-set-classic' || moduleType === 'table-chair-set-eames' || moduleType === 'bar-stool'
-    ? 10
-    : MODULE_PLACEMENT_SNAP_CM;
+  return getModuleMoveSnapCm(moduleType);
 }
 
 export function getAllowedWallIds(standType) {
@@ -314,12 +347,15 @@ export function validateModulePlacement({
   } else {
     const strictDepth = hasStrictDepthBounds(depthCm);
     if (strictDepth) {
-      const halfDepth = Number(depthCm) / 2;
-      if (vertical) {
-        if (x - halfDepth < 0 || x + halfDepth > xLimit || y < 0 || y + width > yLimit) {
-          return { ok: false, message: 'Modül aktif stand alanını aşıyor.' };
-        }
-      } else if (x < 0 || x + width > xLimit || y - halfDepth < 0 || y + halfDepth > yLimit) {
+      const center = getPlacementCenterCm(placement, width);
+      const extents = getRotatedHalfExtentsCm(width, depthCm, rotation);
+      if (
+        !center
+        || center.xCm - extents.halfX < -EPSILON_CM
+        || center.xCm + extents.halfX > xLimit + EPSILON_CM
+        || center.yCm - extents.halfY < -EPSILON_CM
+        || center.yCm + extents.halfY > yLimit + EPSILON_CM
+      ) {
         return { ok: false, message: 'Modül aktif stand alanını aşıyor.' };
       }
     } else {
@@ -403,8 +439,52 @@ function collisionSegmentsOverlap(a, moduleA, b, moduleB) {
   return physicalXOverlap && physicalYOverlap;
 }
 
+function getOrientedFootprint(module) {
+  const placement = module?.placement;
+  const width = Number(module?.widthCm);
+  const depth = getModuleCollisionDepthCm(module);
+  if (!placement || !Number.isFinite(width) || width <= 0 || !Number.isFinite(depth) || depth <= 0) return null;
+  const center = getPlacementCenterCm(placement, width);
+  if (!center) return null;
+  const radians = normalizeModuleRotationZDeg(placement.rotationZDeg) * Math.PI / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  return {
+    center,
+    axes: [
+      { x: cos, y: -sin },
+      { x: sin, y: cos },
+    ],
+    half: [width / 2, depth / 2],
+  };
+}
+
+function orientedFootprintsOverlap(moduleA, moduleB) {
+  const a = getOrientedFootprint(moduleA);
+  const b = getOrientedFootprint(moduleB);
+  if (!a || !b) return false;
+  const delta = {
+    x: b.center.xCm - a.center.xCm,
+    y: b.center.yCm - a.center.yCm,
+  };
+  const axes = [...a.axes, ...b.axes];
+  return axes.every((axis) => {
+    const centerDistance = Math.abs(delta.x * axis.x + delta.y * axis.y);
+    const radiusA = a.half[0] * Math.abs(a.axes[0].x * axis.x + a.axes[0].y * axis.y)
+      + a.half[1] * Math.abs(a.axes[1].x * axis.x + a.axes[1].y * axis.y);
+    const radiusB = b.half[0] * Math.abs(b.axes[0].x * axis.x + b.axes[0].y * axis.y)
+      + b.half[1] * Math.abs(b.axes[1].x * axis.x + b.axes[1].y * axis.y);
+    return centerDistance < radiusA + radiusB - EPSILON_CM;
+  });
+}
+
 export function placementsOverlap(moduleA, moduleB) {
   if (isTopFixtureType(moduleA?.type) || isTopFixtureType(moduleB?.type)) return false;
+  const angleA = normalizeModuleRotationZDeg(moduleA?.placement?.rotationZDeg);
+  const angleB = normalizeModuleRotationZDeg(moduleB?.placement?.rotationZDeg);
+  if (!isLCounterModule(moduleA) && !isLCounterModule(moduleB) && (!isCardinalModuleRotation(angleA) || !isCardinalModuleRotation(angleB))) {
+    return orientedFootprintsOverlap(moduleA, moduleB);
+  }
   const segmentsA = getModuleCollisionSegments(moduleA);
   const segmentsB = getModuleCollisionSegments(moduleB);
   if (!segmentsA.length || !segmentsB.length) return false;
@@ -558,6 +638,7 @@ export function snapPlacementToModules({
   ) return null;
 
   const resolvedRotation = normalizeModuleRotationZDeg(rotationZDeg);
+  if (!isCardinalModuleRotation(resolvedRotation)) return null;
   const movingAxis = isVerticalModuleRotation(resolvedRotation) ? 'y' : 'x';
   const effectiveMovingDepthCm = moduleType === 'base-wall'
     ? MODULE_COLLISION_DEPTH_CM
@@ -979,6 +1060,21 @@ function createFreePlacement({
   const vertical = isVerticalModuleRotation(rotation);
   const strictDepth = hasStrictDepthBounds(depthCm);
   const halfDepth = strictDepth ? Number(depthCm) / 2 : 0;
+
+  if (strictDepth && !isCardinalModuleRotation(rotation)) {
+    const extents = getRotatedHalfExtentsCm(width, depthCm, rotation);
+    if (xLimit < extents.halfX * 2 || yLimit < extents.halfY * 2) return null;
+    const centerXCm = clamp(snapCm(pointerX, placementSnapCm), extents.halfX, xLimit - extents.halfX);
+    const centerYCm = clamp(snapCm(pointerY, placementSnapCm), extents.halfY, yLimit - extents.halfY);
+    return placementFromCenterCm({
+      centerXCm,
+      centerYCm,
+      widthCm: width,
+      rotationZDeg: rotation,
+      template: { wallId: 'free' },
+    });
+  }
+
   const minX = vertical && strictDepth ? halfDepth : 0;
   const maxX = !vertical ? xLimit - width : (strictDepth ? xLimit - halfDepth : xLimit);
   const minY = !vertical && strictDepth ? halfDepth : 0;
@@ -1114,12 +1210,9 @@ export function snapPlacementToStand({
 }
 
 
-function getVisualRightAxisDirection(rotationZDeg) {
-  const rotation = normalizeModuleRotationZDeg(rotationZDeg);
-  if (rotation === 0) return { axis: 'x', sign: 1 };
-  if (rotation === 90) return { axis: 'y', sign: -1 };
-  if (rotation === 180) return { axis: 'x', sign: -1 };
-  return { axis: 'y', sign: 1 };
+function getVisualRightVector(rotationZDeg) {
+  const radians = normalizeModuleRotationZDeg(rotationZDeg) * Math.PI / 180;
+  return { x: Math.cos(radians), y: -Math.sin(radians) };
 }
 
 export function createFreeSidePlacement({
@@ -1131,98 +1224,24 @@ export function createFreeSidePlacement({
   if (!sourcePlacement || (side !== 'left' && side !== 'right')) return null;
   const sourceWidth = Number(sourceWidthCm);
   const insertedWidth = Number(insertedWidthCm);
-  const sourceX = Number(sourcePlacement.xCm);
-  const sourceY = Number(sourcePlacement.yCm);
-  if (
-    ![sourceWidth, insertedWidth, sourceX, sourceY].every(Number.isFinite)
-    || sourceWidth <= 0
-    || insertedWidth <= 0
-  ) return null;
+  if (![sourceWidth, insertedWidth].every(Number.isFinite) || sourceWidth <= 0 || insertedWidth <= 0) return null;
 
   const rotationZDeg = normalizeModuleRotationZDeg(sourcePlacement.rotationZDeg);
-  const rightDirection = getVisualRightAxisDirection(rotationZDeg);
-  const direction = rightDirection.sign * (side === 'right' ? 1 : -1);
-  let xCm = sourceX;
-  let yCm = sourceY;
+  const sourceCenter = getPlacementCenterCm(sourcePlacement, sourceWidth);
+  if (!sourceCenter) return null;
+  const right = getVisualRightVector(rotationZDeg);
+  const direction = side === 'right' ? 1 : -1;
+  const centerDistance = (sourceWidth + insertedWidth) / 2;
 
-  if (rightDirection.axis === 'x') {
-    xCm = direction > 0 ? sourceX + sourceWidth : sourceX - insertedWidth;
-  } else {
-    yCm = direction > 0 ? sourceY + sourceWidth : sourceY - insertedWidth;
-  }
-
-  return createModulePlacement({
-    xCm,
-    yCm,
-    zCm: sourcePlacement.zCm ?? 0,
+  return placementFromCenterCm({
+    centerXCm: sourceCenter.xCm + right.x * centerDistance * direction,
+    centerYCm: sourceCenter.yCm + right.y * centerDistance * direction,
+    widthCm: insertedWidth,
     rotationZDeg,
-    wallId: 'free',
-  });
-}
-
-function createFreeSideFixturePlacement({
-  sourceModule,
-  insertedModule,
-  side,
-  standXCm,
-  standYCm,
-} = {}) {
-  if (!sourceModule?.placement || !insertedModule) return null;
-  const sourceWidth = Number(sourceModule.widthCm);
-  const sourceDepth = Number(sourceModule.depthCm);
-  const insertedWidth = Number(insertedModule.widthCm);
-  const insertedDepth = Number(insertedModule.depthCm);
-  if (![sourceWidth, insertedWidth, insertedDepth].every(Number.isFinite)) return null;
-
-  const sourceRotation = normalizeModuleRotationZDeg(sourceModule.placement.rotationZDeg);
-  const insertedRotation = normalizeModuleRotationZDeg(
-    insertedModule.type === 'bar-stool' ? 270 : sourceRotation,
-  );
-  const directionInfo = getVisualRightAxisDirection(sourceRotation);
-  const direction = directionInfo.sign * (side === 'right' ? 1 : -1);
-  const sourceVertical = isVerticalModuleRotation(sourceRotation);
-  const insertedVertical = isVerticalModuleRotation(insertedRotation);
-  const sourceCenter = {
-    xCm: Number(sourceModule.placement.xCm) + (sourceVertical ? 0 : sourceWidth / 2),
-    yCm: Number(sourceModule.placement.yCm) + (sourceVertical ? sourceWidth / 2 : 0),
-  };
-  if (![sourceCenter.xCm, sourceCenter.yCm].every(Number.isFinite)) return null;
-
-  const sourcePhysicalDepth = Number.isFinite(sourceDepth) && sourceDepth > 0
-    ? sourceDepth
-    : MODULE_COLLISION_DEPTH_CM;
-  const sourceHalfAlong = directionInfo.axis === 'x'
-    ? (sourceVertical ? sourcePhysicalDepth / 2 : sourceWidth / 2)
-    : (sourceVertical ? sourceWidth / 2 : sourcePhysicalDepth / 2);
-  const insertedHalfAlong = directionInfo.axis === 'x'
-    ? (insertedVertical ? insertedDepth / 2 : insertedWidth / 2)
-    : (insertedVertical ? insertedWidth / 2 : insertedDepth / 2);
-
-  const center = { ...sourceCenter };
-  center[directionInfo.axis === 'x' ? 'xCm' : 'yCm'] += direction * (sourceHalfAlong + insertedHalfAlong);
-
-  let xCm = insertedVertical ? center.xCm : center.xCm - insertedWidth / 2;
-  let yCm = insertedVertical ? center.yCm - insertedWidth / 2 : center.yCm;
-  const xLimit = Number(standXCm);
-  const yLimit = Number(standYCm);
-
-  // Keep the side contact fixed, but clamp the perpendicular axis so a deeper/wider
-  // floor fixture can sit flush beside a target that itself is close to a stand edge.
-  if (directionInfo.axis === 'x') {
-    if (insertedVertical) yCm = clamp(yCm, 0, Math.max(0, yLimit - insertedWidth));
-    else yCm = clamp(yCm, insertedDepth / 2, Math.max(insertedDepth / 2, yLimit - insertedDepth / 2));
-  } else if (insertedVertical) {
-    xCm = clamp(xCm, insertedDepth / 2, Math.max(insertedDepth / 2, xLimit - insertedDepth / 2));
-  } else {
-    xCm = clamp(xCm, 0, Math.max(0, xLimit - insertedWidth));
-  }
-
-  return createModulePlacement({
-    xCm,
-    yCm,
-    zCm: insertedModule.placement?.zCm ?? sourceModule.placement.zCm ?? 0,
-    rotationZDeg: insertedRotation,
-    wallId: 'free',
+    template: {
+      zCm: sourcePlacement.zCm ?? 0,
+      wallId: 'free',
+    },
   });
 }
 

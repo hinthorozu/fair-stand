@@ -44,6 +44,7 @@ import {
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
 import { getContinuousWallSegments, planContinuousWallInsertion } from './wallReflow.js';
+import { getModuleDefaultRotationDeg } from './moduleBehavior.js';
 
 let jsZipModulePromise = null;
 
@@ -761,7 +762,7 @@ function assignPlannedPlacements(moduleStates, { placementMode = 'append', conte
       xCm: cursorCm,
       yCm: 0,
       zCm: 0,
-      rotationZDeg: moduleState.type === 'bar-stool' ? 270 : 0,
+      rotationZDeg: getModuleDefaultRotationDeg(moduleState),
       wallId: 'back',
     });
 

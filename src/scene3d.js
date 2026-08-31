@@ -26,6 +26,7 @@ import {
   planContinuousModuleInsert,
   planContinuousModuleMove,
 } from './moduleMove.js';
+import { getModuleRotationStepDeg, isFreePlacementModule, isTopPlacementModule } from './moduleBehavior.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
 const PANEL_BACK_COLOR = 0x4b5563;
@@ -102,15 +103,11 @@ function loadBeigeSofaModel() {
 }
 
 function isFloorFixtureType(type) {
-  return type === 'counter'
-    || type === 'base'
-    || type === 'sofa-set-classic'
-    || type === 'table-chair-set-eames'
-    || type === 'bar-stool';
+  return isFreePlacementModule(type);
 }
 
 function isTopFixtureType(type) {
-  return type === 'led-floodlight';
+  return isTopPlacementModule(type);
 }
 
 export function createStandScene(
@@ -1965,10 +1962,12 @@ export function createStandScene(
     const moduleState = moduleGroup?.userData?.moduleState;
     if (!moduleGroup || !moduleState?.placement) return { handled: false, ok: false };
 
+    const stepDeg = getModuleRotationStepDeg(moduleState);
+    const effectiveDeltaDeg = deltaDeg < 0 ? -stepDeg : stepDeg;
     const nextPlacement = rotateModulePlacementAroundCenter(
       moduleState.placement,
       moduleState.widthCm,
-      deltaDeg,
+      effectiveDeltaDeg,
       moduleState.depthCm,
     );
     if (!nextPlacement) return { handled: false, ok: false };
