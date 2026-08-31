@@ -1,0 +1,29 @@
+name: Add TV 42
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/add-tv42.yml']
+permissions:
+  contents: write
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/add-tv42.py
+      - run: node --check src/catalog.js && node --check src/designState.js && node --check src/moduleBehavior.js && node --check src/main.js && node --check src/scene3d.js && node --check test/tv42Module.test.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: test -f public/models/tv.glb && grep -n "TV_42\|createTvModule\|models/tv.glb" src/catalog.js src/designState.js src/scene3d.js
+      - run: rm -f .github/scripts/add-tv42.py .github/workflows/add-tv42.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'feat: add TV 42 shared-GLB module [skip ci]'
+          branch: ROG
