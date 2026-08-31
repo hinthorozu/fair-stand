@@ -1,0 +1,29 @@
+name: Fix Eames Real Ghost
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/fix-eames-real-ghost.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/fix-eames-real-ghost.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: grep -n "Eames Masa Sandalye Takımı uses the real table geometry" src/scene3d.js
+      - run: rm -f .github/scripts/fix-eames-real-ghost.py .github/workflows/fix-eames-real-ghost.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: use real Eames set placement ghost [skip ci]'
+          branch: ROG
