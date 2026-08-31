@@ -17,7 +17,8 @@ test('TV 42 catalog and state use one shared GLB-scaled 93.0 x 52.3 screen', () 
 });
 
 test('TV module has explicit ghost behavior contract', () => {
-  assert.equal(getModuleGhostBehavior({ type: 'tv' }).mode, 'proxy');
+  assert.equal(getModuleGhostBehavior({ type: 'tv' }).kind, 'real-model');
+  assert.equal(getModuleGhostBehavior({ type: 'tv' }).renderer, 'tv');
 });
 
 test('TV renderer loads shared tv.glb and hides receiver meshes', () => {
@@ -25,4 +26,15 @@ test('TV renderer loads shared tv.glb and hides receiver meshes', () => {
   assert.match(source, /models\/tv\.glb/);
   assert.match(source, /new Set\(\['Object_4', 'Object_5'\]\)/);
   assert.match(source, /KYROX/);
+});
+
+
+test('TV 42 does not inherit flat panel state', () => {
+  const tv = createTvModuleState(42);
+  assert.equal(tv.type, 'tv');
+  assert.equal(tv.widthCm, 100);
+  assert.equal(tv.screenWidthCm, 93);
+  assert.equal(tv.screenHeightCm, 52.3);
+  assert.equal('strips' in tv, false);
+  assert.equal('faces' in tv, false);
 });

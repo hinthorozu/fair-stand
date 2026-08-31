@@ -1137,7 +1137,7 @@ export function createStandScene(
       } else if (moduleState.type === 'bar-stool') {
         module = createBarStoolModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'tv') {
-        module = createTvModule(moduleState, moduleIndex, (surface) => applyStoredImage(surface));
+        module = createTvModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'led-floodlight') {
         module = createLedFloodlightModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'shelf') {
@@ -1685,6 +1685,65 @@ export function createStandScene(
         console.warn('Eames ghost GLB modeli yüklenemedi:', error);
       });
 
+      return placementGhost;
+    }
+
+    if (ghostBehavior.renderer === 'tv') {
+      const proxy = new THREE.Mesh(
+        new THREE.BoxGeometry(0.93, 0.523, 0.06),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+      );
+      proxy.position.y = 1.75;
+      root.add(proxy);
+      scene.add(root);
+
+      const tintMaterials = [];
+      placementGhost = {
+        root,
+        mesh: proxy,
+        tintMaterials,
+        key,
+        widthCm: dimensions.widthCm,
+        ownsGeometry: true,
+        colorHex: PLACEMENT_VALID_COLOR,
+      };
+
+      loadTvModel().then((template) => {
+        if (placementGhost?.key !== key || placementGhost.root !== root) return;
+        const tv = template.clone(true);
+        const allowedMeshes = new Set(['Object_4', 'Object_5']);
+        tv.traverse((object) => {
+          if (!object.isMesh) return;
+          if (!allowedMeshes.has(object.name)) {
+            object.visible = false;
+            return;
+          }
+          const material = new THREE.MeshBasicMaterial({
+            color: placementGhost.colorHex ?? PLACEMENT_VALID_COLOR,
+            transparent: true,
+            opacity: 0.38,
+            depthWrite: false,
+            depthTest: false,
+            side: THREE.DoubleSide,
+          });
+          object.material = material;
+          object.renderOrder = 10000;
+          tintMaterials.push(material);
+        });
+        tv.updateMatrixWorld(true);
+        let box = new THREE.Box3().setFromObject(tv);
+        const size = box.getSize(new THREE.Vector3());
+        tv.scale.multiplyScalar(size.x > 0 ? 0.93 / size.x : 1);
+        tv.updateMatrixWorld(true);
+        box = new THREE.Box3().setFromObject(tv);
+        const center = box.getCenter(new THREE.Vector3());
+        tv.position.x -= center.x;
+        tv.position.y -= center.y;
+        tv.position.z -= box.min.z;
+        tv.position.y += 1.75;
+        tv.position.z += 0.058;
+        root.add(tv);
+      }).catch((error) => console.warn('TV ghost GLB modeli yüklenemedi:', error));
       return placementGhost;
     }
 
@@ -3188,21 +3247,49 @@ export function createStandScene(
   };
 }
 
-function createTvModule(moduleState, moduleIndex, onSurfaceReady) {
-  const wallState = { ...moduleState, type: 'flat-panel' };
-  const built = createFlatPanelModule(wallState, moduleIndex, onSurfaceReady);
-  const group = built.group;
-  group.userData.type = 'tv';
-  group.userData.moduleType = 'tv';
-  group.userData.moduleState = moduleState;
-  built.surfaces.forEach((surface) => {
-    surface.userData.moduleType = 'tv';
-  });
-
+function createTvModule(moduleState, moduleIndex) {
+  const logicalWidthCm = Number(moduleState.widthCm || 100);
   const targetWidthM = Number(moduleState.screenWidthCm || 93) / 100;
   const targetHeightM = Number(moduleState.screenHeightCm || 52.3) / 100;
-  const mountCenterY = 1.75;
-  const mountFrontZ = 0.058;
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: 'tv',
+    moduleType: 'tv',
+    widthCm: logicalWidthCm,
+    depthCm: Number(moduleState.depthCm || 6),
+    heightCm: Number(moduleState.heightCm || 52.3),
+    moduleState,
+  };
+
+  // Invisible selection proxy only; no wall/panel geometry is created for TV modules.
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(targetWidthM, targetHeightM, 0.06),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+  );
+  proxy.position.set(0, 1.75, 0.05);
+  group.add(proxy);
+  const selectionFrame = createSelectionFrame(targetWidthM, targetHeightM);
+  selectionFrame.visible = false;
+  proxy.add(selectionFrame);
+  proxy.userData = {
+    kind: 'surface',
+    moduleType: 'tv',
+    selectionMode: 'module',
+    acceptsImage: false,
+    moduleIndex,
+    moduleId: moduleState.id,
+    widthCm: logicalWidthCm,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceRole: 'tv',
+    surfaceId: `${moduleState.id}-tv`,
+    surfaceState: null,
+    selectionFrame,
+    colorTargets: [],
+  };
 
   loadTvModel().then((template) => {
     if (!group.parent) return;
@@ -3226,11 +3313,10 @@ function createTvModule(moduleState, moduleIndex, onSurfaceReady) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = '700 92px Arial, sans-serif';
-        const y = canvas.height / 2;
         ctx.fillStyle = '#f8fafc';
-        ctx.fillText('KYROX', 430, y);
+        ctx.fillText('KYROX', 430, canvas.height / 2);
         ctx.fillStyle = '#3b82f6';
-        ctx.fillText('.STUDIO', 680, y);
+        ctx.fillText('.STUDIO', 680, canvas.height / 2);
         const texture = new THREE.CanvasTexture(canvas);
         texture.colorSpace = THREE.SRGBColorSpace;
         object.material = new THREE.MeshBasicMaterial({ map: texture, toneMapped: false });
@@ -3244,23 +3330,18 @@ function createTvModule(moduleState, moduleIndex, onSurfaceReady) {
     tv.scale.multiplyScalar(scale);
     tv.updateMatrixWorld(true);
     box = new THREE.Box3().setFromObject(tv);
-    const scaledSize = box.getSize(new THREE.Vector3());
-    // Width drives uniform scaling; 16:9 source should land at the requested height.
-    if (Math.abs(scaledSize.y - targetHeightM) > 0.02) {
-      console.warn('TV 42 GLB aspect ratio differs from catalog target:', scaledSize.x, scaledSize.y);
-    }
     const center = box.getCenter(new THREE.Vector3());
     tv.position.x -= center.x;
     tv.position.y -= center.y;
     tv.position.z -= box.min.z;
-    tv.position.y += mountCenterY;
-    tv.position.z += mountFrontZ;
+    tv.position.y += 1.75;
+    tv.position.z += 0.058;
     group.add(tv);
   }).catch((error) => {
     console.warn('TV GLB modeli yüklenemedi:', error);
   });
 
-  return built;
+  return { group, surfaces: [proxy] };
 }
 
 function createLedFloodlightModule(moduleState, moduleIndex) {

@@ -289,6 +289,11 @@ const scene3d = createStandScene(
       }
 
       if (moduleType === 'tv') {
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · TV 42\" · 93.0 × 52.3 cm · bağımsız GLB model.';
+        return;
+      }
+
+      if (moduleType === 'tv') {
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · TV 42" · 93.0 × 52.3 cm ekran.';
         return;
       }

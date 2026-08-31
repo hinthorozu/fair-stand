@@ -65,7 +65,7 @@ const TYPE_BEHAVIORS = Object.freeze({
     defaultRotationDeg: 0,
     allowSideInsert: true,
     collision: 'segment',
-    ghost: Object.freeze({ mode: 'proxy', renderer: null, opacity: 0.3 }),
+    ghost: Object.freeze({ kind: 'real-model', renderer: 'tv', opacity: 0.38 }),
   }),
   'led-floodlight': Object.freeze({
     placement: 'top',
