@@ -6,17 +6,31 @@ on:
   pull_request:
     branches: [ROG]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ROG
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Patch TV free-space placement
+        run: python .github/scripts/tv_free_space.py
+
+      - name: Verify patch
+        run: |
+          node --check src/scene3d.js
+          grep -F "function getFreeTvPlacement" src/scene3d.js
+          grep -F "snap: { mode: 'free' }" src/scene3d.js
 
       - name: Install dependencies
         run: npm install
@@ -26,3 +40,11 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Cleanup temp files
+        run: rm -f .github/scripts/tv_free_space.py .github/workflows/tv-free-space.yml
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: allow TV placement in free stand area [skip ci]'
+          branch: ROG
