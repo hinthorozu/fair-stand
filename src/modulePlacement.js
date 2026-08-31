@@ -1160,6 +1160,72 @@ export function createFreeSidePlacement({
   });
 }
 
+function createFreeSideFixturePlacement({
+  sourceModule,
+  insertedModule,
+  side,
+  standXCm,
+  standYCm,
+} = {}) {
+  if (!sourceModule?.placement || !insertedModule) return null;
+  const sourceWidth = Number(sourceModule.widthCm);
+  const sourceDepth = Number(sourceModule.depthCm);
+  const insertedWidth = Number(insertedModule.widthCm);
+  const insertedDepth = Number(insertedModule.depthCm);
+  if (![sourceWidth, insertedWidth, insertedDepth].every(Number.isFinite)) return null;
+
+  const sourceRotation = normalizeModuleRotationZDeg(sourceModule.placement.rotationZDeg);
+  const insertedRotation = normalizeModuleRotationZDeg(
+    insertedModule.type === 'bar-stool' ? 270 : sourceRotation,
+  );
+  const directionInfo = getVisualRightAxisDirection(sourceRotation);
+  const direction = directionInfo.sign * (side === 'right' ? 1 : -1);
+  const sourceVertical = isVerticalModuleRotation(sourceRotation);
+  const insertedVertical = isVerticalModuleRotation(insertedRotation);
+  const sourceCenter = {
+    xCm: Number(sourceModule.placement.xCm) + (sourceVertical ? 0 : sourceWidth / 2),
+    yCm: Number(sourceModule.placement.yCm) + (sourceVertical ? sourceWidth / 2 : 0),
+  };
+  if (![sourceCenter.xCm, sourceCenter.yCm].every(Number.isFinite)) return null;
+
+  const sourcePhysicalDepth = Number.isFinite(sourceDepth) && sourceDepth > 0
+    ? sourceDepth
+    : MODULE_COLLISION_DEPTH_CM;
+  const sourceHalfAlong = directionInfo.axis === 'x'
+    ? (sourceVertical ? sourcePhysicalDepth / 2 : sourceWidth / 2)
+    : (sourceVertical ? sourceWidth / 2 : sourcePhysicalDepth / 2);
+  const insertedHalfAlong = directionInfo.axis === 'x'
+    ? (insertedVertical ? insertedDepth / 2 : insertedWidth / 2)
+    : (insertedVertical ? insertedWidth / 2 : insertedDepth / 2);
+
+  const center = { ...sourceCenter };
+  center[directionInfo.axis === 'x' ? 'xCm' : 'yCm'] += direction * (sourceHalfAlong + insertedHalfAlong);
+
+  let xCm = insertedVertical ? center.xCm : center.xCm - insertedWidth / 2;
+  let yCm = insertedVertical ? center.yCm - insertedWidth / 2 : center.yCm;
+  const xLimit = Number(standXCm);
+  const yLimit = Number(standYCm);
+
+  // Keep the side contact fixed, but clamp the perpendicular axis so a deeper/wider
+  // floor fixture can sit flush beside a target that itself is close to a stand edge.
+  if (directionInfo.axis === 'x') {
+    if (insertedVertical) yCm = clamp(yCm, 0, Math.max(0, yLimit - insertedWidth));
+    else yCm = clamp(yCm, insertedDepth / 2, Math.max(insertedDepth / 2, yLimit - insertedDepth / 2));
+  } else if (insertedVertical) {
+    xCm = clamp(xCm, insertedDepth / 2, Math.max(insertedDepth / 2, xLimit - insertedDepth / 2));
+  } else {
+    xCm = clamp(xCm, 0, Math.max(0, xLimit - insertedWidth));
+  }
+
+  return createModulePlacement({
+    xCm,
+    yCm,
+    zCm: insertedModule.placement?.zCm ?? sourceModule.placement.zCm ?? 0,
+    rotationZDeg: insertedRotation,
+    wallId: 'free',
+  });
+}
+
 export function planFreeSideInsertion({
   modules = [],
   insertedModules = [],
@@ -1191,12 +1257,23 @@ export function planFreeSideInsertion({
   let anchorWidthCm = Number(sourceModule.widthCm);
 
   for (const module of physicalOrder) {
-    const nextPlacement = createFreeSidePlacement({
-      sourcePlacement: anchorPlacement,
-      sourceWidthCm: anchorWidthCm,
-      insertedWidthCm: module.widthCm,
-      side,
-    });
+    const anchorModule = plannedModules.length
+      ? plannedModules[plannedModules.length - 1]
+      : sourceModule;
+    const nextPlacement = hasStrictDepthBounds(module.depthCm)
+      ? createFreeSideFixturePlacement({
+          sourceModule: { ...anchorModule, placement: anchorPlacement, widthCm: anchorWidthCm },
+          insertedModule: module,
+          side,
+          standXCm,
+          standYCm,
+        })
+      : createFreeSidePlacement({
+          sourcePlacement: anchorPlacement,
+          sourceWidthCm: anchorWidthCm,
+          insertedWidthCm: module.widthCm,
+          side,
+        });
     if (!nextPlacement) {
       return { ok: false, message: 'Serbest komşu yerleşimi hesaplanamadı.' };
     }
@@ -1206,6 +1283,8 @@ export function planFreeSideInsertion({
       widthCm: module.widthCm,
       depthCm: module.depthCm,
       moduleId: module.id,
+      moduleType: module.type,
+      shape: module.shape,
       modules: [...modules, ...plannedModules],
       standType,
       standXCm,

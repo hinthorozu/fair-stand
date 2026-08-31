@@ -761,7 +761,7 @@ function assignPlannedPlacements(moduleStates, { placementMode = 'append', conte
       xCm: cursorCm,
       yCm: 0,
       zCm: 0,
-      rotationZDeg: moduleState.type === 'bar-stool' ? 90 : 0,
+      rotationZDeg: moduleState.type === 'bar-stool' ? 270 : 0,
       wallId: 'back',
     });
 
