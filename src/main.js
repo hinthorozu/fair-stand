@@ -9,6 +9,7 @@ import {
 import {
   createBarStoolModuleState,
   createLedFloodlightModuleState,
+  createTvModuleState,
   createBaseModuleState,
   createBaseWallModuleState,
   createCounterModuleState,
@@ -284,6 +285,11 @@ const scene3d = createStandScene(
 
       if (moduleType === 'bar-stool') {
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Bar Taburesi · GLB model.';
+        return;
+      }
+
+      if (moduleType === 'tv') {
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · TV 42" · 93.0 × 52.3 cm ekran.';
         return;
       }
 
@@ -633,6 +639,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'sofa-set-classic') state = createBeigeSofaSetModuleState();
   else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();
   else if (module.type === 'bar-stool') state = createBarStoolModuleState();
+  else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);
   else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);
   else if (module.type === 'showcase-2' || module.type === 'showcase-3') {

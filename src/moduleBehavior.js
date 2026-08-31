@@ -58,6 +58,15 @@ const TYPE_BEHAVIORS = Object.freeze({
     collision: 'footprint',
     ghost: Object.freeze({ kind: 'real-model', renderer: 'bar-stool', opacity: 0.38 }),
   }),
+  tv: Object.freeze({
+    placement: 'wall',
+    moveSnapCm: 50,
+    rotationStepDeg: 90,
+    defaultRotationDeg: 0,
+    allowSideInsert: true,
+    collision: 'segment',
+    ghost: Object.freeze({ mode: 'proxy', renderer: null, opacity: 0.3 }),
+  }),
   'led-floodlight': Object.freeze({
     placement: 'top',
     moveSnapCm: 20,

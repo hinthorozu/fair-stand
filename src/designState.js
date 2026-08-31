@@ -205,6 +205,19 @@ export function createBarStoolModuleState() {
   };
 }
 
+export function createTvModuleState(sizeInch = 42) {
+  if (Number(sizeInch) !== 42) return null;
+  const base = createFlatPanelModuleState(100);
+  return {
+    ...base,
+    type: 'tv',
+    heightCm: 350,
+    sizeInch: 42,
+    screenWidthCm: 93.0,
+    screenHeightCm: 52.3,
+  };
+}
+
 export function createLedFloodlightModuleState() {
   return {
     id: createId('module'),
