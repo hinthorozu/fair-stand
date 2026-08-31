@@ -6,6 +6,65 @@ on:
   pull_request:
     branches: [ROG]
 
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ROG
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Patch TV wall drag
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/scene3d.js')
+          s=p.read_text()
+          s=s.replace("""    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
+              const pointedWallId = pointedModule?.placement?.wallId;
+              const targetWallId = allowedWalls.includes(pointedWallId)
+                ? pointedWallId
+                : (preferredWallId && allowedWalls.includes(preferredWallId) ? preferredWallId : null);
+              const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
+""", """    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
+              const pointedWallId = pointedModule?.placement?.wallId;
+              const targetWallId = allowedWalls.includes(pointedWallId) ? pointedWallId : null;
+              const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
+""", 1)
+          s=s.replace("""      const currentWallId = dragSession.preview?.placement?.wallId
+                ?? moduleState.placement?.wallId
+                ?? null;
+              const wallPoint = getWallOverlayDragPoint(
+                event.clientX,
+                event.clientY,
+                currentWallId,
+                moduleState,
+              );
+""", """      const wallPoint = getWallOverlayDragPoint(
+                event.clientX,
+                event.clientY,
+                null,
+                moduleState,
+              );
+""", 1)
+          p.write_text(s)
+          Path('.github/workflows/build.yml').write_text("""name: Build
+
+on:
+  push:
+    branches: [ROG]
+  pull_request:
+    branches: [ROG]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,3 +85,22 @@ jobs:
 
       - name: Build
         run: npm run build
+""")
+          PY
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Cleanup temp workflow
+        run: rm -f .github/workflows/tv-free-wall-drag.yml
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: let TV move freely across visible walls [skip ci]'
+          branch: ROG
