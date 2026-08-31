@@ -27,6 +27,7 @@ import {
   planContinuousModuleMove,
 } from './moduleMove.js';
 import { getModuleGhostBehavior, getModuleRotationStepDeg, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule } from './moduleBehavior.js';
+import { TV_SCREEN_DATA_URL } from './tvScreenImage.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
 const PANEL_BACK_COLOR = 0x4b5563;
@@ -792,6 +793,27 @@ export function createStandScene(
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const textureLoader = new THREE.TextureLoader();
+  const tvScreenTexture = textureLoader.load(TV_SCREEN_DATA_URL);
+  tvScreenTexture.colorSpace = THREE.SRGBColorSpace;
+  tvScreenTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+  function addTvScreenOverlay(group) {
+    if (!group || group.getObjectByName('tv-screen-image-overlay')) return;
+    const screen = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.88, 0.495),
+      new THREE.MeshBasicMaterial({
+        map: tvScreenTexture,
+        toneMapped: false,
+        side: THREE.FrontSide,
+      }),
+    );
+    screen.name = 'tv-screen-image-overlay';
+    screen.position.set(0, 1.75, 0.041);
+    screen.renderOrder = 50;
+    screen.userData.kind = 'tv-screen-overlay';
+    screen.userData.acceptsImage = false;
+    group.add(screen);
+  }
   let surfaceMeshes = [];
   const selectedSurfaces = new Set();
   let selectionAnchorSurfaceId = null;
@@ -1192,6 +1214,7 @@ export function createStandScene(
       module.group.userData.placement = { ...placement };
       applyPlacementToGroup(module.group, placement, widthCm);
       wallRoot.add(module.group);
+      if (moduleState.type === 'tv') addTvScreenOverlay(module.group);
       surfaceMeshes.push(...module.surfaces);
     });
 
