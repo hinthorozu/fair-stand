@@ -2083,6 +2083,32 @@ export function createStandScene(
     return { handled: true, ok: true };
   }
 
+  function getFreeTvPlacement(clientX, clientY, moduleState, preferredRotationZDeg = 0) {
+    if (!stageLayout || !moduleState) return null;
+    const ground = getGroundPoint(clientX, clientY);
+    if (!ground) return null;
+    const snapped = snapPlacementToStand({
+      standType: stageLayout.standType,
+      moduleType: moduleState.type,
+      shape: moduleState.shape,
+      widthCm: moduleState.widthCm,
+      depthCm: moduleState.depthCm,
+      forceFree: true,
+      pointerXCm: ground.xCm,
+      pointerYCm: ground.yCm,
+      standXCm: stageLayout.widthCm,
+      standYCm: stageLayout.depthCm,
+      preferredRotationZDeg,
+      rotationLocked: true,
+    });
+    if (!snapped.ok || !snapped.placement) return null;
+    return {
+      ...snapped.placement,
+      wallId: 'free',
+      zCm: Number(moduleState.placement?.zCm ?? 0),
+    };
+  }
+
   function getWallOverlayDragPoint(clientX, clientY, preferredWallId = null, moduleState = null) {
     if (!stageLayout) return null;
     const rect = renderer.domElement.getBoundingClientRect();
@@ -2149,10 +2175,36 @@ export function createStandScene(
     rotationLocked = false,
   ) {
     if (isWallOverlayModule(moduleState.type)) {
-      const wallPoint = getWallOverlayDragPoint(clientX, clientY, null, moduleState);
+      const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
+      const pointedOnWall = ['back', 'left', 'right'].includes(pointedModule?.placement?.wallId);
+      if (!pointedOnWall) {
+        const placement = getFreeTvPlacement(clientX, clientY, moduleState, preferredRotationZDeg);
+        if (!placement) {
+          disposePlacementGhost();
+          const message = 'TV\'yi aktif stand alanına bırak.';
+          showPlacementFeedback(message, { clientX, clientY });
+          return { ok: false, message };
+        }
+        const plan = {
+          ok: true,
+          message: null,
+          movingPlacement: { ...placement },
+          placements: new Map([[moduleState.id, { ...placement }]]),
+        };
+        showPlacementGhost(moduleState, placement, true);
+        clearPlacementFeedback();
+        return {
+          ok: true,
+          placement: { ...placement },
+          message: null,
+          plan,
+          snap: { mode: 'free' },
+        };
+      }
+      const wallPoint = getWallOverlayDragPoint(clientX, clientY, pointedModule.placement.wallId, moduleState);
       if (!wallPoint) {
         disposePlacementGhost();
-        const message = 'TV\'yi aktif duvar yüzeyine bırak.';
+        const message = 'TV bu yüzeye yerleştirilemedi.';
         showPlacementFeedback(message, { clientX, clientY });
         return { ok: false, message };
       }
@@ -2387,16 +2439,49 @@ export function createStandScene(
     const moduleState = dragSession.moduleState;
 
     if (isWallOverlayModule(moduleState.type)) {
+      const pointedModule = pickModuleAt(event.clientX, event.clientY)?.moduleGroup?.userData?.moduleState;
+      const pointedOnWall = ['back', 'left', 'right'].includes(pointedModule?.placement?.wallId);
+      if (!pointedOnWall) {
+        const placement = getFreeTvPlacement(
+          event.clientX,
+          event.clientY,
+          moduleState,
+          dragSession.preferredRotationZDeg,
+        );
+        if (!placement) {
+          disposePlacementGhost();
+          dragSession.preview = null;
+          showPlacementFeedback('TV\'yi aktif stand alanında sürükle.', {
+            clientX: event.clientX,
+            clientY: event.clientY,
+          });
+          return;
+        }
+        dragSession.preview = {
+          placement,
+          valid: true,
+          message: null,
+          plan: {
+            ok: true,
+            movingPlacement: { ...placement },
+            placements: new Map([[moduleState.id, { ...placement }]]),
+          },
+          snap: { mode: 'free' },
+        };
+        showPlacementGhost(moduleState, placement, true);
+        clearPlacementFeedback();
+        return;
+      }
       const wallPoint = getWallOverlayDragPoint(
         event.clientX,
         event.clientY,
-        null,
+        pointedModule.placement.wallId,
         moduleState,
       );
       if (!wallPoint) {
         disposePlacementGhost();
         dragSession.preview = null;
-        showPlacementFeedback('TV\'yi aktif duvar yüzeyi üzerinde sürükle.', {
+        showPlacementFeedback('TV bu yüzeye taşınamadı.', {
           clientX: event.clientX,
           clientY: event.clientY,
         });
