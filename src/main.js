@@ -55,6 +55,8 @@ async function loadJSZip() {
   return jsZipModulePromise;
 }
 
+const appElement = document.querySelector('#app');
+const sidebarToggleButton = document.querySelector('#sidebar-toggle');
 const viewport = document.querySelector('#viewport');
 const viewportEmpty = document.querySelector('#viewport-empty');
 const viewportToolbar = document.querySelector('#viewport-toolbar');
@@ -102,6 +104,21 @@ const projectStatus = document.querySelector('#project-status');
 const projectLoadingOverlay = document.querySelector('#project-loading-overlay');
 const projectLoadingTitle = document.querySelector('#project-loading-title');
 const projectLoadingDetail = document.querySelector('#project-loading-detail');
+
+function setSidebarCollapsed(collapsed) {
+  appElement?.classList.toggle('sidebar-collapsed', collapsed);
+  if (sidebarToggleButton) {
+    sidebarToggleButton.textContent = collapsed ? '›' : '‹';
+    sidebarToggleButton.setAttribute('aria-expanded', String(!collapsed));
+    sidebarToggleButton.setAttribute('aria-label', collapsed ? 'Menüyü aç' : 'Menüyü kapat');
+    sidebarToggleButton.title = collapsed ? 'Menüyü aç' : 'Menüyü kapat';
+  }
+  window.dispatchEvent(new Event('resize'));
+}
+
+sidebarToggleButton?.addEventListener('click', () => {
+  setSidebarCollapsed(!appElement?.classList.contains('sidebar-collapsed'));
+});
 
 function setButtonBusy(button, busy, busyLabel = null) {
   if (!button) return;

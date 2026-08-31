@@ -85,6 +85,7 @@ input[type="file"] {
 #app {
   display: grid;
   grid-template-columns: 330px minmax(0, 1fr);
+  transition: grid-template-columns 180ms ease;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -100,6 +101,40 @@ input[type="file"] {
   background: rgba(250, 251, 252, 0.98);
   border-right: 1px solid #d9dee5;
   box-shadow: 6px 0 22px rgba(17, 24, 39, 0.04);
+}
+
+.sidebar-toggle {
+  position: fixed;
+  z-index: 20;
+  top: 12px;
+  left: 292px;
+  width: 28px;
+  height: 42px;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 25px;
+  line-height: 1;
+  box-shadow: 0 3px 12px rgba(17, 24, 39, 0.16);
+  transition: left 180ms ease, transform 120ms ease;
+}
+
+#app.sidebar-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+#app.sidebar-collapsed .sidebar {
+  overflow: visible;
+  padding: 0;
+  border-right: 0;
+  box-shadow: none;
+}
+
+#app.sidebar-collapsed .sidebar > :not(.sidebar-toggle) {
+  display: none;
+}
+
+#app.sidebar-collapsed .sidebar-toggle {
+  left: 10px;
 }
 
 .eyebrow {
