@@ -1064,8 +1064,8 @@ function createFreePlacement({
   if (strictDepth && !isCardinalModuleRotation(rotation)) {
     const extents = getRotatedHalfExtentsCm(width, depthCm, rotation);
     if (xLimit < extents.halfX * 2 || yLimit < extents.halfY * 2) return null;
-    const centerXCm = clamp(snapCm(pointerX, placementSnapCm), extents.halfX, xLimit - extents.halfX);
-    const centerYCm = clamp(snapCm(pointerY, placementSnapCm), extents.halfY, yLimit - extents.halfY);
+    const centerXCm = clamp(snapCm(pointerXCm, placementSnapCm), extents.halfX, xLimit - extents.halfX);
+    const centerYCm = clamp(snapCm(pointerYCm, placementSnapCm), extents.halfY, yLimit - extents.halfY);
     return placementFromCenterCm({
       centerXCm,
       centerYCm,

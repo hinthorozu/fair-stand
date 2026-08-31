@@ -10,6 +10,7 @@ import {
   createModulePlacement,
   normalizeModuleRotationZDeg,
   rotateModulePlacementAroundCenter,
+  snapPlacementToStand,
   validateModulePlacement,
 } from '../src/modulePlacement.js';
 
@@ -53,4 +54,43 @@ test('rotated footprint participates in stand boundary validation', () => {
     standYCm: 300,
   });
   assert.equal(result.ok, false);
+});
+
+
+test('Bar Taburesi 45 degree catalog preview placement stays valid', () => {
+  const result = snapPlacementToStand({
+    standType: 'island',
+    moduleType: 'bar-stool',
+    widthCm: 60,
+    depthCm: 55,
+    forceFree: true,
+    pointerXCm: 150,
+    pointerYCm: 150,
+    standXCm: 400,
+    standYCm: 400,
+    preferredRotationZDeg: 315,
+    rotationLocked: true,
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.placement.rotationZDeg, 315);
+  assert.equal(result.placement.wallId, 'free');
+});
+
+test('straight Banko 45 degree catalog preview placement stays valid', () => {
+  const result = snapPlacementToStand({
+    standType: 'island',
+    moduleType: 'counter',
+    widthCm: 150,
+    depthCm: 50,
+    forceFree: true,
+    pointerXCm: 200,
+    pointerYCm: 200,
+    standXCm: 500,
+    standYCm: 500,
+    preferredRotationZDeg: 45,
+    rotationLocked: true,
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.placement.rotationZDeg, 45);
+  assert.equal(result.placement.wallId, 'free');
 });
