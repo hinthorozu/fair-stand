@@ -20,21 +20,19 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('src/scene3d.js')
           s=p.read_text()
-          old="""    const candidateWalls = preferredWallId && allowedWalls.includes(preferredWallId)
-              ? [preferredWallId]
-              : allowedWalls;
-          """
-          new="""    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
+          pattern=r"    const candidateWalls = preferredWallId && allowedWalls\.includes\(preferredWallId\)\n      \? \[preferredWallId\]\n      : allowedWalls;"
+          replacement="""    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
               const pointedWallId = pointedModule?.placement?.wallId;
               const targetWallId = allowedWalls.includes(pointedWallId)
                 ? pointedWallId
                 : (preferredWallId && allowedWalls.includes(preferredWallId) ? preferredWallId : null);
-              const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
-          """
-          if old not in s: raise SystemExit('target block not found')
-          p.write_text(s.replace(old,new,1))
+              const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;"""
+          s,n=re.subn(pattern,replacement,s,count=1)
+          if n != 1: raise SystemExit('target block not found')
+          p.write_text(s)
           PY
       - run: node --check src/scene3d.js
       - run: npm ci
