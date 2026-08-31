@@ -1,0 +1,72 @@
+name: TV Free Wall Drag
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/tv-free-wall-drag.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Patch TV free wall drag
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/scene3d.js')
+          s=p.read_text()
+          old="""    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
+              const pointedWallId = pointedModule?.placement?.wallId;
+              const targetWallId = allowedWalls.includes(pointedWallId)
+                ? pointedWallId
+                : (preferredWallId && allowedWalls.includes(preferredWallId) ? preferredWallId : null);
+              const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
+"""
+          new="""    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
+              const pointedWallId = pointedModule?.placement?.wallId;
+              // TV behaves like the LED projector: while dragging, the pointer decides
+              // which visible wall receives it. Do not lock an existing TV to its old wall.
+              const targetWallId = allowedWalls.includes(pointedWallId) ? pointedWallId : null;
+              const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
+"""
+          if old not in s:
+              raise SystemExit('TV target block not found')
+          s=s.replace(old,new,1)
+          old2="""      const currentWallId = dragSession.preview?.placement?.wallId
+                ?? moduleState.placement?.wallId
+                ?? null;
+              const wallPoint = getWallOverlayDragPoint(
+                event.clientX,
+                event.clientY,
+                currentWallId,
+                moduleState,
+              );
+"""
+          new2="""      const wallPoint = getWallOverlayDragPoint(
+                event.clientX,
+                event.clientY,
+                null,
+                moduleState,
+              );
+"""
+          if old2 not in s:
+              raise SystemExit('TV drag lock block not found')
+          s=s.replace(old2,new2,1)
+          p.write_text(s)
+          PY
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f .github/workflows/tv-free-wall-drag.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: let TV move freely across visible walls [skip ci]'
+          branch: ROG
