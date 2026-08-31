@@ -1,0 +1,37 @@
+name: Fix TV 42 Asset Overlay
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/fix-tv42-asset-overlay.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python .github/scripts/fix-tv42-asset-overlay.py
+      - run: node --check src/moduleBehavior.js && node --check src/scene3d.js && node --check test/tv42Module.test.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: python - <<'PY'
+          from pathlib import Path
+          import struct
+          p=Path('public/models/tv.glb')
+          d=p.read_bytes()
+          assert d[:4] == b'glTF'
+          assert struct.unpack('<I',d[8:12])[0] == len(d)
+          print('tv.glb bytes', len(d))
+          PY
+      - run: rm -f .github/scripts/fix-tv42-asset-overlay.py .github/workflows/fix-tv42-asset-overlay.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: repair TV GLB and allow wall overlay [skip ci]'
+          branch: ROG
