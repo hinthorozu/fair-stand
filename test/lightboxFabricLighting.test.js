@@ -17,7 +17,10 @@ test('lightbox backlight brightens only the fabric material without a physical l
   assert.match(scene, /function applyFabricOverlayLighting/);
   assert.match(scene, /fabricLightingOn/);
   assert.match(scene, /material\.emissiveMap = material\.map/);
-  assert.match(scene, /material\.emissiveIntensity = 1\.60/);
+  assert.match(scene, /material\.emissiveIntensity = 1\.08/);
+  assert.match(scene, /context\.filter = 'saturate\(1\.08\) contrast\(1\.06\)'/);
+  assert.match(scene, /side: THREE\.FrontSide/);
+  assert.match(scene, /if \(backing\) backing\.visible = true/);
   assert.match(scene, /function setFabricLighting/);
   assert.match(scene, /setFabricLighting,/);
 });

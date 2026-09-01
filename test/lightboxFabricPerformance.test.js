@@ -7,7 +7,7 @@ test('active fabric releases hidden panel GPU textures and drawing', () => {
   assert.match(scene, /function suspendFabricSurface\(surface\)/);
   assert.match(scene, /surface\.material\.map\?\.dispose\?\.\(\)/);
   assert.match(scene, /surface\.material\.colorWrite = false/);
-  assert.match(scene, /backing\) backing\.visible = false/);
+  assert.match(scene, /backing\) backing\.visible = true/);
   assert.match(scene, /meshes\.forEach\(suspendFabricSurface\)/);
 });
 

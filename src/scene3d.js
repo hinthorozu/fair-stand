@@ -2946,7 +2946,8 @@ export function createStandScene(
     surface.material.depthWrite = false;
     surface.material.needsUpdate = true;
     const backing = surface.userData?.backing;
-    if (backing) backing.visible = false;
+    // Bez yalnızca ön baskı yüzeyini devralır; modülün arka paneli korunur.
+    if (backing) backing.visible = true;
   }
 
   function restoreFabricSurface(surface) {
@@ -2984,7 +2985,7 @@ export function createStandScene(
       // fakat sahneye fiziksel ışık saçılmaz.
       material.emissive.set(0xffffff);
       material.emissiveMap = material.map;
-      material.emissiveIntensity = 1.60;
+      material.emissiveIntensity = 1.08;
     } else {
       material.emissiveMap = null;
       material.emissive.set(fabricState.fabricColor ?? fabricState.color ?? '#ffffff');
@@ -3031,6 +3032,8 @@ export function createStandScene(
 
         context.fillStyle = '#ffffff';
         context.fillRect(0, 0, canvas.width, canvas.height);
+        // Lightbox baskısında emissive parlamanın yaptığı solmayı telafi et.
+        context.filter = 'saturate(1.08) contrast(1.06)';
         context.drawImage(
           image,
           layout.drawX,
@@ -3128,7 +3131,8 @@ export function createStandScene(
           metalness: 0,
           emissive: 0x000000,
           emissiveIntensity: 0,
-          side: THREE.DoubleSide,
+          // Baskı ön yüzde kalır; arkadan normal panel/backing görünür.
+          side: THREE.FrontSide,
           polygonOffset: true,
           polygonOffsetFactor: -2,
           polygonOffsetUnits: -2,
@@ -3742,6 +3746,15 @@ export function createStandScene(
       clearSelection();
     }
   }
+
+  // Ctrl/Cmd + sol tık çoklu panel seçimini OrbitControls'tan önce yakala.
+  // Capture fazı kamera döndürme listener'ının seçimi bozmasını engeller.
+  renderer.domElement.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || !(event.ctrlKey || event.metaKey)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    handleSurfaceSelectionAt(event.clientX, event.clientY, true);
+  }, { capture: true });
 
   renderer.domElement.addEventListener('pointerdown', (event) => {
     if (event.button !== 0) return;
