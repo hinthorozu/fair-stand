@@ -95,7 +95,7 @@ export function getModuleBehavior(moduleOrType) {
   // Corner Bankos all enter the scene with the verified customer-facing L orientation.
   // Keep their geometry and 90-degree rotation behavior unchanged.
   if (type === 'counter' && module.shape === 'L') {
-    return { ...base, defaultRotationDeg: 180 };
+    return { ...base, defaultRotationDeg: 270 };
   }
 
   // Only the verified straight Banko family (100/150/200) gets 45-degree turns.
