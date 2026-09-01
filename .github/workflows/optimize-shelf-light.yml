@@ -1,0 +1,196 @@
+name: Optimize Shelf Lighting
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/optimize-shelf-light.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Optimize shelf lighting
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/scene3d.js')
+          s = p.read_text(encoding='utf-8')
+
+          old = '''    if (shelfLightingOn) {
+      // Boydan boya lineer LED: raf geometrisine dokunmadan alt yüzeye oturur.
+      const ledStripWidthM = Math.max(innerWidthM - 0.04, 0.08);
+      const ledStripDepthM = 0.016;
+      const ledStripThicknessM = 0.006;
+      const shelfBottomY = seamHeightM;
+      const ledCenterZM = wallDepthM / 2 + shelfDepthM * 0.78;
+
+      const ledStrip = new THREE.Mesh(
+        new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
+        new THREE.MeshStandardMaterial({
+          color: 0xfff6e8,
+          emissive: 0xffddb5,
+          emissiveIntensity: 6.0,
+          roughness: 0.28,
+          metalness: 0,
+        }),
+      );
+      ledStrip.position.set(
+        0,
+        shelfBottomY - ledStripThicknessM / 2 - 0.001,
+        ledCenterZM,
+      );
+      ledStrip.userData.kind = 'decoration';
+      ledStrip.userData.role = 'shelf-under-led-strip';
+      built.group.add(ledStrip);
+
+      // Geniş alan ışığı spot konisini kaldırır ve raf eni boyunca homojen yayılır.
+      const areaLight = new THREE.RectAreaLight(
+        0xffe4c8,
+        28.0,
+        ledStripWidthM,
+        Math.max(shelfDepthM * 0.95, 0.18),
+      );
+      areaLight.position.set(
+        0,
+        shelfBottomY - 0.006,
+        wallDepthM / 2 + shelfDepthM * 0.54,
+      );
+      areaLight.lookAt(new THREE.Vector3(
+        0,
+        shelfBottomY - 0.55,
+        wallDepthM / 2 + shelfDepthM * 0.20,
+      ));
+      areaLight.userData.kind = 'decoration';
+      areaLight.userData.role = 'shelf-under-light';
+      built.group.add(areaLight);
+    }'''
+
+          new = '''    if (shelfLightingOn) {
+      // Boydan boya lineer LED: raf geometrisine dokunmadan alt yüzeye oturur.
+      const ledStripWidthM = Math.max(innerWidthM - 0.04, 0.08);
+      const ledStripDepthM = 0.016;
+      const ledStripThicknessM = 0.006;
+      const shelfBottomY = seamHeightM;
+      const ledCenterZM = wallDepthM / 2 + shelfDepthM * 0.78;
+
+      const ledStrip = new THREE.Mesh(
+        new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
+        new THREE.MeshStandardMaterial({
+          color: 0xfff6e8,
+          emissive: 0xffddb5,
+          emissiveIntensity: 6.0,
+          roughness: 0.28,
+          metalness: 0,
+        }),
+      );
+      ledStrip.position.set(
+        0,
+        shelfBottomY - ledStripThicknessM / 2 - 0.001,
+        ledCenterZM,
+      );
+      ledStrip.userData.kind = 'decoration';
+      ledStrip.userData.role = 'shelf-under-led-strip';
+      built.group.add(ledStrip);
+
+      // Ucuz görsel yıkama: her raf için ekstra gerçek ışık üretmeden arka yüzeyi aydınlık gösterir.
+      const glowHeightM = Math.max(shelfDepthM * 1.10, 0.22);
+      const wallGlow = new THREE.Mesh(
+        new THREE.PlaneGeometry(ledStripWidthM, glowHeightM),
+        new THREE.MeshBasicMaterial({
+          color: 0xffe4c8,
+          transparent: true,
+          opacity: 0.20,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide,
+        }),
+      );
+      wallGlow.position.set(
+        0,
+        shelfBottomY - glowHeightM / 2 - 0.02,
+        wallDepthM / 2 + 0.003,
+      );
+      wallGlow.userData.kind = 'decoration';
+      wallGlow.userData.role = 'shelf-under-light-wash';
+      built.group.add(wallGlow);
+    }'''
+
+          if old not in s:
+              raise SystemExit('current shelf lighting block not found')
+          s = s.replace(old, new, 1)
+
+          marker = '''  });
+
+  return built;
+}
+
+function createFlatPanelModule'''
+          shared = '''  });
+
+  // Performans: her raf yerine modül başına yalnızca bir gerçek alan ışığı kullan.
+  if (shelfLightingOn && shelfHeightsCm.length > 0) {
+    const averageShelfHeightM = shelfHeightsCm.reduce((sum, value) => sum + Number(value), 0)
+      / shelfHeightsCm.length / 100;
+    const areaLight = new THREE.RectAreaLight(
+      0xffe4c8,
+      18.0,
+      Math.max(innerWidthM - 0.04, 0.08),
+      Math.max(shelfDepthM * 0.95, 0.18),
+    );
+    areaLight.position.set(
+      0,
+      averageShelfHeightM - 0.01,
+      wallDepthM / 2 + shelfDepthM * 0.54,
+    );
+    areaLight.lookAt(new THREE.Vector3(
+      0,
+      Math.max(averageShelfHeightM - 0.55, 0.05),
+      wallDepthM / 2 + shelfDepthM * 0.20,
+    ));
+    areaLight.userData.kind = 'decoration';
+    areaLight.userData.role = 'shelf-under-light';
+    built.group.add(areaLight);
+  }
+
+  return built;
+}
+
+function createFlatPanelModule'''
+
+          if marker not in s:
+              raise SystemExit('shelf function end marker not found')
+          s = s.replace(marker, shared, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Syntax check
+        run: node --check src/scene3d.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit and push
+        shell: bash
+        run: |
+          rm -f .github/workflows/optimize-shelf-light.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/scene3d.js .github/workflows/optimize-shelf-light.yml
+          git commit -m "perf: reduce shelf lighting cost [skip ci]"
+          git push origin ROG
