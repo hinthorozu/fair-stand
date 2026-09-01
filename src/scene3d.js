@@ -79,17 +79,16 @@ function loadEamesChairModel() {
   return eamesChairModelPromise;
 }
 
-let tvModelPromise = null;
+let tvScreenTexture = null;
 
-function loadTvModel() {
-  if (!tvModelPromise) {
-    const loader = new GLTFLoader();
-    tvModelPromise = loader
-      .loadAsync(import.meta.env.BASE_URL + 'models/tv.glb')
-      .then((gltf) => gltf.scene);
+function getTvScreenTexture() {
+  if (!tvScreenTexture) {
+    tvScreenTexture = new THREE.TextureLoader().load(TV_SCREEN_DATA_URL);
+    tvScreenTexture.colorSpace = THREE.SRGBColorSpace;
   }
-  return tvModelPromise;
+  return tvScreenTexture;
 }
+
 
 let barStoolModelPromise = null;
 
@@ -1712,63 +1711,35 @@ export function createStandScene(
     }
 
     if (ghostBehavior.renderer === 'tv') {
-      const proxy = new THREE.Mesh(
-        new THREE.BoxGeometry(0.93, 0.523, 0.06),
-        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
-      );
-      proxy.position.y = 1.75;
-      root.add(proxy);
-      scene.add(root);
+    const root = new THREE.Group();
+    const ghostMaterial = new THREE.MeshBasicMaterial({
+      color: PLACEMENT_VALID_COLOR,
+      transparent: true,
+      opacity: 0.38,
+      depthWrite: false,
+      depthTest: false,
+      side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.93, 0.523, 0.05),
+      ghostMaterial,
+    );
+    mesh.position.set(0, 1.75, 0.025);
+    mesh.renderOrder = 10000;
+    root.add(mesh);
+    scene.add(root);
 
-      const tintMaterials = [];
-      placementGhost = {
-        root,
-        mesh: proxy,
-        tintMaterials,
-        key,
-        widthCm: dimensions.widthCm,
-        ownsGeometry: true,
-        colorHex: PLACEMENT_VALID_COLOR,
-      };
-
-      loadTvModel().then((template) => {
-        if (placementGhost?.key !== key || placementGhost.root !== root) return;
-        const tv = template.clone(true);
-        const allowedMeshes = new Set(['Object_4', 'Object_5']);
-        tv.traverse((object) => {
-          if (!object.isMesh) return;
-          if (!allowedMeshes.has(object.name)) {
-            object.visible = false;
-            return;
-          }
-          const material = new THREE.MeshBasicMaterial({
-            color: placementGhost.colorHex ?? PLACEMENT_VALID_COLOR,
-            transparent: true,
-            opacity: 0.38,
-            depthWrite: false,
-            depthTest: false,
-            side: THREE.DoubleSide,
-          });
-          object.material = material;
-          object.renderOrder = 10000;
-          tintMaterials.push(material);
-        });
-        tv.updateMatrixWorld(true);
-        let box = new THREE.Box3().setFromObject(tv);
-        const size = box.getSize(new THREE.Vector3());
-        tv.scale.multiplyScalar(size.x > 0 ? 0.93 / size.x : 1);
-        tv.updateMatrixWorld(true);
-        box = new THREE.Box3().setFromObject(tv);
-        const center = box.getCenter(new THREE.Vector3());
-        tv.position.x -= center.x;
-        tv.position.y -= center.y;
-        tv.position.z -= box.min.z;
-        tv.position.y += 1.75;
-        tv.position.z += 0.058;
-        root.add(tv);
-      }).catch((error) => console.warn('TV ghost GLB modeli yüklenemedi:', error));
-      return placementGhost;
-    }
+    placementGhost = {
+      root,
+      mesh,
+      tintMaterials: [ghostMaterial],
+      key,
+      widthCm: dimensions.widthCm,
+      ownsGeometry: true,
+      colorHex: PLACEMENT_VALID_COLOR,
+    };
+    return placementGhost;
+  }
 
     // Bar Taburesi uses the actual GLB geometry as its placement ghost.
     if (ghostBehavior.renderer === 'bar-stool') {
@@ -3548,98 +3519,66 @@ export function createStandScene(
 }
 
 function createTvModule(moduleState, moduleIndex) {
-  const logicalWidthCm = Number(moduleState.widthCm || 100);
   const targetWidthM = Number(moduleState.screenWidthCm || 93) / 100;
   const targetHeightM = Number(moduleState.screenHeightCm || 52.3) / 100;
+  const depthM = 0.05;
+  const centerYM = 1.75;
+  const bezelM = 0.012;
+
   const group = new THREE.Group();
-  group.userData = {
-    kind: 'module',
-    moduleIndex,
-    moduleId: moduleState.id,
-    type: 'tv',
-    moduleType: 'tv',
-    widthCm: logicalWidthCm,
-    depthCm: Number(moduleState.depthCm || 6),
-    heightCm: Number(moduleState.heightCm || 52.3),
-    moduleState,
-  };
+  group.userData.kind = 'module';
+  group.userData.moduleId = moduleState.id;
+  group.userData.moduleIndex = moduleIndex;
+  group.userData.moduleType = 'tv';
 
-  // Invisible selection proxy only; no wall/panel geometry is created for TV modules.
-  const proxy = new THREE.Mesh(
-    new THREE.BoxGeometry(targetWidthM, targetHeightM, 0.06),
-    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
-  );
-  proxy.position.set(0, 1.75, 0.05);
-  group.add(proxy);
-  const selectionFrame = createSelectionFrame(targetWidthM, targetHeightM);
-  selectionFrame.visible = false;
-  proxy.add(selectionFrame);
-  proxy.userData = {
-    kind: 'surface',
-    moduleType: 'tv',
-    selectionMode: 'module',
-    acceptsImage: false,
-    moduleIndex,
-    moduleId: moduleState.id,
-    widthCm: logicalWidthCm,
-    stripIndex: null,
-    stripNumber: null,
-    surfaceRole: 'tv',
-    surfaceId: `${moduleState.id}-tv`,
-    surfaceState: null,
-    selectionFrame,
-    colorTargets: [],
-  };
-
-  loadTvModel().then((template) => {
-    if (!group.parent) return;
-    const tv = template.clone(true);
-    const allowedMeshes = new Set(['Object_4', 'Object_5']);
-    tv.traverse((object) => {
-      if (!object.isMesh) return;
-      if (!allowedMeshes.has(object.name)) {
-        object.visible = false;
-        return;
-      }
-      object.castShadow = true;
-      object.receiveShadow = true;
-      if (object.name === 'Object_5') {
-        const canvas = document.createElement('canvas');
-        canvas.width = 1024;
-        canvas.height = 576;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#111318';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = '700 92px Arial, sans-serif';
-        ctx.fillStyle = '#f8fafc';
-        ctx.fillText('KYROX', 430, canvas.height / 2);
-        ctx.fillStyle = '#3b82f6';
-        ctx.fillText('.STUDIO', 680, canvas.height / 2);
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.colorSpace = THREE.SRGBColorSpace;
-        object.material = new THREE.MeshBasicMaterial({ map: texture, toneMapped: false });
-      }
-    });
-
-    tv.updateMatrixWorld(true);
-    let box = new THREE.Box3().setFromObject(tv);
-    const size = box.getSize(new THREE.Vector3());
-    const scale = size.x > 0 ? targetWidthM / size.x : 1;
-    tv.scale.multiplyScalar(scale);
-    tv.updateMatrixWorld(true);
-    box = new THREE.Box3().setFromObject(tv);
-    const center = box.getCenter(new THREE.Vector3());
-    tv.position.x -= center.x;
-    tv.position.y -= center.y;
-    tv.position.z -= box.min.z;
-    tv.position.y += 1.75;
-    tv.position.z += 0.058;
-    group.add(tv);
-  }).catch((error) => {
-    console.warn('TV GLB modeli yüklenemedi:', error);
+  const bodyMaterial = new THREE.MeshStandardMaterial({
+    color: 0x111111,
+    roughness: 0.58,
+    metalness: 0.12,
   });
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(targetWidthM, targetHeightM, depthM),
+    bodyMaterial,
+  );
+  body.position.set(0, centerYM, depthM / 2);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
+
+  const screenMaterial = new THREE.MeshBasicMaterial({
+    map: getTvScreenTexture(),
+    toneMapped: false,
+    side: THREE.FrontSide,
+  });
+  const screen = new THREE.Mesh(
+    new THREE.PlaneGeometry(
+      Math.max(0.02, targetWidthM - bezelM * 2),
+      Math.max(0.02, targetHeightM - bezelM * 2),
+    ),
+    screenMaterial,
+  );
+  screen.position.set(0, centerYM, depthM + 0.001);
+  screen.renderOrder = 2;
+  group.add(screen);
+
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(targetWidthM, targetHeightM, depthM),
+    new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      colorWrite: false,
+    }),
+  );
+  proxy.position.set(0, centerYM, depthM / 2);
+  proxy.userData.kind = 'surface';
+  proxy.userData.surfaceId = `${moduleState.id}:tv`;
+  proxy.userData.moduleId = moduleState.id;
+  proxy.userData.moduleType = 'tv';
+  proxy.userData.moduleIndex = moduleIndex;
+  proxy.userData.acceptsImage = false;
+  proxy.userData.selectionMode = 'module';
+  group.add(proxy);
 
   return { group, surfaces: [proxy] };
 }

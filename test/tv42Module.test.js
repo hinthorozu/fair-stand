@@ -5,7 +5,7 @@ import { MODULE_CATALOG } from '../src/catalog.js';
 import { createTvModuleState } from '../src/designState.js';
 import { getModuleBehavior, getModuleGhostBehavior, isWallOverlayModule } from '../src/moduleBehavior.js';
 
-test('TV 42 catalog and state use one shared GLB-scaled 93.0 x 52.3 screen', () => {
+test('TV 42 catalog and state use one shared 93.0 x 52.3 screen', () => {
   const item = MODULE_CATALOG.TV_42;
   assert.equal(item.type, 'tv');
   assert.equal(item.screenWidthCm, 93);
@@ -21,11 +21,13 @@ test('TV module has explicit ghost behavior contract', () => {
   assert.equal(getModuleGhostBehavior({ type: 'tv' }).renderer, 'tv');
 });
 
-test('TV renderer loads shared tv.glb and hides receiver meshes', () => {
+test('TV renderer is procedural and maps the supplied screen image to the front face', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(source, /models\/tv\.glb/);
-  assert.match(source, /new Set\(\['Object_4', 'Object_5'\]\)/);
-  assert.match(source, /KYROX/);
+  assert.doesNotMatch(source, /models\/tv\.glb/);
+  assert.doesNotMatch(source, /loadTvModel/);
+  assert.match(source, /new THREE\.BoxGeometry\(targetWidthM, targetHeightM, depthM\)/);
+  assert.match(source, /map: getTvScreenTexture\(\)/);
+  assert.match(source, /side: THREE\.FrontSide/);
 });
 
 
@@ -40,12 +42,10 @@ test('TV 42 does not inherit flat panel state', () => {
 });
 
 
-test('TV asset GLB header length matches actual file size', () => {
-  const data = fs.readFileSync(new URL('../public/models/tv.glb', import.meta.url));
-  assert.equal(data.subarray(0, 4).toString('ascii'), 'glTF');
-  assert.equal(data.readUInt32LE(4), 2);
-  assert.equal(data.readUInt32LE(8), data.length);
-  assert.ok(data.length > 1000);
+test('TV no longer depends on a GLB asset', () => {
+  assert.equal(fs.existsSync(new URL('../public/models/tv.glb', import.meta.url)), false);
+  const imageSource = fs.readFileSync(new URL('../src/tvScreenImage.js', import.meta.url), 'utf8');
+  assert.match(imageSource, /data:image\/jpeg;base64,/);
 });
 
 test('TV is a non-colliding wall overlay accessory', () => {
