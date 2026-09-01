@@ -95,3 +95,24 @@ test('allows rectangle selection across wall-plane metadata', () => {
   assert.equal(result.ok, true);
   assert.equal(result.panelCount, 6);
 });
+
+
+test('rectangle columns ignore gaps from non-panel module indices', () => {
+  const items = [
+    { moduleIndex: 0, stripIndex: 1, id: '0:1' },
+    { moduleIndex: 0, stripIndex: 2, id: '0:2' },
+    { moduleIndex: 3, stripIndex: 1, id: '3:1' },
+    { moduleIndex: 3, stripIndex: 2, id: '3:2' },
+  ];
+  const result = createRectSelection(
+    items,
+    { moduleIndex: 0, stripIndex: 1 },
+    { moduleIndex: 3, stripIndex: 2 },
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.columnCount, 2);
+  assert.equal(result.rowCount, 2);
+  assert.equal(result.panelCount, 4);
+  assert.deepEqual(result.entries.map((item) => item.id), ['0:1', '3:1', '0:2', '3:2']);
+});

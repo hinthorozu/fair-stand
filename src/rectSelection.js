@@ -22,25 +22,40 @@ export function createRectSelection(items, anchorPoint, targetPoint) {
     return { ok: false, message: 'Seçim başlangıç veya bitiş noktası geçersiz.' };
   }
 
-  const minModuleIndex = Math.min(anchor.moduleIndex, target.moduleIndex);
-  const maxModuleIndex = Math.max(anchor.moduleIndex, target.moduleIndex);
+  const selectableModuleIndices = [...new Set(
+    items
+      .map((item) => Number(item?.moduleIndex))
+      .filter(Number.isInteger),
+  )].sort((a, b) => a - b);
+  const anchorColumn = selectableModuleIndices.indexOf(anchor.moduleIndex);
+  const targetColumn = selectableModuleIndices.indexOf(target.moduleIndex);
+  if (anchorColumn < 0 || targetColumn < 0) {
+    return { ok: false, message: 'Seçim başlangıç veya bitiş paneli bulunamadı.' };
+  }
+
+  const minColumn = Math.min(anchorColumn, targetColumn);
+  const maxColumn = Math.max(anchorColumn, targetColumn);
+  const selectedModuleIndices = selectableModuleIndices.slice(minColumn, maxColumn + 1);
+  const selectedModuleSet = new Set(selectedModuleIndices);
+  const minModuleIndex = selectedModuleIndices[0];
+  const maxModuleIndex = selectedModuleIndices.at(-1);
   const minStripIndex = Math.min(anchor.stripIndex, target.stripIndex);
   const maxStripIndex = Math.max(anchor.stripIndex, target.stripIndex);
 
-  const columnCount = maxModuleIndex - minModuleIndex + 1;
+  const columnCount = selectedModuleIndices.length;
   const rowCount = maxStripIndex - minStripIndex + 1;
   const expectedCount = columnCount * rowCount;
+  const columnOrder = new Map(selectedModuleIndices.map((moduleIndex, index) => [moduleIndex, index]));
 
   const entries = items
     .filter((item) => (
-      item.moduleIndex >= minModuleIndex
-      && item.moduleIndex <= maxModuleIndex
+      selectedModuleSet.has(item.moduleIndex)
       && item.stripIndex >= minStripIndex
       && item.stripIndex <= maxStripIndex
     ))
     .sort((a, b) => (
       a.stripIndex - b.stripIndex
-      || a.moduleIndex - b.moduleIndex
+      || columnOrder.get(a.moduleIndex) - columnOrder.get(b.moduleIndex)
     ));
 
   const coordinateCount = new Set(
