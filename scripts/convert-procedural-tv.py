@@ -162,3 +162,20 @@ s = s[:start] + ghost + s[end:]
 
 path.write_text(s)
 Path('public/models/tv.glb').unlink(missing_ok=True)
+
+# Update TV-specific tests from the old GLB contract to the procedural contract.
+test_path = Path('test/tv42Module.test.js')
+t = test_path.read_text()
+t = t.replace(
+"test('TV 42 catalog and state use one shared GLB-scaled 93.0 x 52.3 screen', () => {",
+"test('TV 42 catalog and state use one shared 93.0 x 52.3 screen', () => {",
+)
+t = t.replace(
+"""test('TV renderer loads shared tv.glb and hides receiver meshes', () => {\n  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n  assert.match(source, /models\\/tv\\.glb/);\n  assert.match(source, /new Set\\(\\['Object_4', 'Object_5'\\]\\)/);\n  assert.match(source, /KYROX/);\n});""",
+"""test('TV renderer is procedural and maps the supplied screen image to the front face', () => {\n  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n  assert.doesNotMatch(source, /models\\/tv\\.glb/);\n  assert.doesNotMatch(source, /loadTvModel/);\n  assert.match(source, /new THREE\\.BoxGeometry\\(targetWidthM, targetHeightM, depthM\\)/);\n  assert.match(source, /map: getTvScreenTexture\\(\\)/);\n  assert.match(source, /side: THREE\\.FrontSide/);\n});""",
+)
+t = t.replace(
+"""test('TV asset GLB header length matches actual file size', () => {\n  const data = fs.readFileSync(new URL('../public/models/tv.glb', import.meta.url));\n  assert.equal(data.subarray(0, 4).toString('ascii'), 'glTF');\n  assert.equal(data.readUInt32LE(4), 2);\n  assert.equal(data.readUInt32LE(8), data.length);\n  assert.ok(data.length > 1000);\n});""",
+"""test('TV no longer depends on a GLB asset', () => {\n  assert.equal(fs.existsSync(new URL('../public/models/tv.glb', import.meta.url)), false);\n  const imageSource = fs.readFileSync(new URL('../src/tvScreenImage.js', import.meta.url), 'utf8');\n  assert.match(imageSource, /data:image\\/jpeg;base64,/);\n});""",
+)
+test_path.write_text(t)
