@@ -1,0 +1,42 @@
+name: Fix L Counter Default Orientation
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/fix-l-counter-default-orientation.py'
+      - '.github/workflows/fix-l-counter-default-orientation.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Apply patch
+        run: python3 scripts/fix-l-counter-default-orientation.py
+      - name: Syntax check
+        run: node --check src/moduleBehavior.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit and push
+        run: |
+          rm scripts/fix-l-counter-default-orientation.py .github/workflows/fix-l-counter-default-orientation.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: orient corner counters consistently [skip ci]'
+          git push origin ROG
