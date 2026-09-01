@@ -1694,38 +1694,48 @@ importProjectFileInput.addEventListener('change', async () => {
   setButtonBusy(importProjectButton, true, 'Aktarılıyor');
   showProjectLoading('Proje içe aktarılıyor…', 'ZIP paketi ve görseller hazırlanıyor.');
   projectStatus.textContent = 'Proje içe aktarılıyor…';
+
+  let importedProjectId = null;
+  let importStorageTouched = false;
+
   try {
     const JSZip = await loadJSZip();
     const zip = await JSZip.loadAsync(file);
     const manifestEntry = zip.file('project.json');
     if (!manifestEntry) throw new Error('ZIP içinde project.json bulunamadı.');
-    const manifest = JSON.parse(await manifestEntry.async('text'));
-    if (manifest.archiveVersion !== 1 || !manifest.project) throw new Error('Desteklenmeyen proje paketi.');
 
-    const existing = await listProjects();
-    const existingIds = new Set(existing.map((item) => item.id));
-    const importedProjectId = existingIds.has(manifest.project.id) ? createProjectId() : manifest.project.id;
-    const idMap = new Map();
-    for (const asset of manifest.assets || []) {
-      const newAssetId = crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-      idMap.set(asset.id, newAssetId);
+    const manifest = JSON.parse(await manifestEntry.async('text'));
+    if (manifest?.archiveVersion !== 1 || !manifest?.project || typeof manifest.project !== 'object') {
+      throw new Error('Desteklenmeyen proje paketi.');
+    }
+    if (typeof manifest.project.id !== 'string' || !manifest.project.id.trim()) {
+      throw new Error('Proje kimliği geçersiz.');
+    }
+    if (manifest.assets != null && !Array.isArray(manifest.assets)) {
+      throw new Error('Proje görsel listesi geçersiz.');
     }
 
-    const importedProject = remapAssetIdsInValue({
-      ...manifest.project,
-      id: importedProjectId,
-      name: manifest.project.name || 'İçe Aktarılan Proje',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    }, idMap);
-    await saveProject(importedProject);
+    const manifestAssets = manifest.assets || [];
+    const existing = await listProjects();
+    const existingIds = new Set(existing.map((item) => item.id));
+    importedProjectId = existingIds.has(manifest.project.id) ? createProjectId() : manifest.project.id;
 
-    for (const asset of manifest.assets || []) {
+    const idMap = new Map();
+    const preparedAssets = [];
+    for (const asset of manifestAssets) {
+      if (!asset || typeof asset.id !== 'string' || !asset.id || typeof asset.path !== 'string' || !asset.path) {
+        throw new Error('Proje görsel kaydı geçersiz.');
+      }
+      if (idMap.has(asset.id)) throw new Error(`Tekrarlanan asset kimliği: ${asset.id}`);
+
       const entry = zip.file(asset.path);
-      if (!entry) throw new Error(`Eksik asset: ${asset.path}`);
+      if (!entry || entry.dir) throw new Error(`Eksik asset: ${asset.path}`);
       const blob = await entry.async('blob');
-      await saveImportedImageAsset(importedProjectId, {
-        id: idMap.get(asset.id),
+      const newAssetId = globalThis.crypto?.randomUUID?.()
+        ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+      idMap.set(asset.id, newAssetId);
+      preparedAssets.push({
+        id: newAssetId,
         name: asset.name,
         type: asset.type,
         createdAt: asset.createdAt,
@@ -1733,13 +1743,39 @@ importProjectFileInput.addEventListener('change', async () => {
       });
     }
 
+    // Storage'a dokunmadan önce ZIP'in tamamı ve bütün asset'ler doğrulanmış olur.
+    const importedProject = remapAssetIdsInValue({
+      ...manifest.project,
+      id: importedProjectId,
+      name: manifest.project.name || 'İçe Aktarılan Proje',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    }, idMap);
+
+    await saveProject(importedProject);
+    importStorageTouched = true;
+
+    for (const asset of preparedAssets) {
+      await saveImportedImageAsset(importedProjectId, asset);
+    }
+
     await refreshProjectList(importedProjectId);
     const project = await loadProject(importedProjectId);
+    if (!project) throw new Error('İçe aktarılan proje tekrar okunamadı.');
     await restoreProject(project);
-    projectStatus.textContent = `İçe aktarıldı · ${(manifest.assets || []).length} görsel`;
+    projectStatus.textContent = `İçe aktarıldı · ${preparedAssets.length} görsel`;
   } catch (error) {
+    if (importStorageTouched && importedProjectId) {
+      try {
+        await deleteProjectImageAssets(importedProjectId);
+        await deleteProject(importedProjectId);
+        await refreshProjectList();
+      } catch (cleanupError) {
+        console.warn('Başarısız içe aktarma temizlenemedi:', cleanupError);
+      }
+    }
     console.warn('Proje içe aktarılamadı:', error);
-    projectStatus.textContent = 'Proje ZIP içe aktarılamadı.';
+    projectStatus.textContent = `Proje ZIP içe aktarılamadı: ${error?.message || 'Bilinmeyen hata.'}`;
   } finally {
     hideProjectLoading();
     setButtonBusy(importProjectButton, false);
