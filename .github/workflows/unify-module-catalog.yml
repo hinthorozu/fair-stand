@@ -5,7 +5,7 @@ on:
     branches: [ROG]
     paths:
       - '.github/workflows/unify-module-catalog.yml'
-      - 'test/baseWallCatalog.test.js'
+      - '.github/scripts/catalog-single-source.py'
 
 permissions:
   contents: write
@@ -21,88 +21,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Make catalog the single source of truth
-        shell: bash
+      - name: Apply single-source catalog architecture
+        run: python3 .github/scripts/catalog-single-source.py
+      - name: Syntax check
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          keys = [
-              'wall_200', 'wall_150', 'wall_100', 'wall_50',
-              'wall_separator_100', 'wall_separator_50', 'DOOR_100',
-              'wall_showcase_100_3', 'wall_showcase_100_2',
-              'wall_shelf_3_200', 'wall_shelf_2_200',
-              'wall_shelf_3_150', 'wall_shelf_2_150',
-              'wall_shelf_3_100', 'wall_shelf_2_100',
-              'furniture_table_chair_set_minyon',
-              'furniture_bar_stool_classic',
-              'LED_FLOODLIGHT',
-              'wall_base_200', 'wall_base_150', 'wall_base_100',
-              'BASE_200', 'BASE_150', 'BASE_100',
-              'desk_banko_200', 'desk_banko_150', 'desk_banko_100',
-          ]
-
-          catalog = Path('src/catalog.js')
-          text = catalog.read_text(encoding='utf-8')
-          if 'export const MODULE_CATALOG_KEYS' not in text:
-              lines = ['', 'export const MODULE_CATALOG_KEYS = Object.freeze([']
-              lines.extend(f"  '{key}'," for key in keys)
-              lines.extend([']);', ''])
-              block = '\n'.join(lines)
-              marker = '\nexport function flatPanelKey(widthCm) {'
-              if marker not in text:
-                  raise SystemExit('catalog insertion marker not found')
-              text = text.replace(marker, block + marker, 1)
-              catalog.write_text(text, encoding='utf-8')
-
-          sidebar = Path('src/moduleDragSidebar.js')
-          text = sidebar.read_text(encoding='utf-8')
-          text = text.replace("import { MODULE_CATALOG } from './catalog.js';", "import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from './catalog.js';", 1)
-          text = re.sub(r"\nconst DRAGGABLE_MODULE_KEYS = \[.*?\];\n", "\n", text, count=1, flags=re.S)
-          text = text.replace('const cards = DRAGGABLE_MODULE_KEYS', 'const cards = MODULE_CATALOG_KEYS')
-          sidebar.write_text(text, encoding='utf-8')
-
-          context = Path('src/moduleContextMenu.js')
-          text = context.read_text(encoding='utf-8')
-          text = text.replace("import { MODULE_CATALOG } from './catalog.js';", "import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from './catalog.js';", 1)
-          text = re.sub(r"\nconst PICKER_MODULE_KEYS = \[.*?\];\n", "\n", text, count=1, flags=re.S)
-          text = text.replace('PICKER_MODULE_KEYS.forEach((moduleKey) => {', 'MODULE_CATALOG_KEYS.forEach((moduleKey) => {')
-          context.write_text(text, encoding='utf-8')
-          PY
-      - name: Verify catalog consistency
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          catalog = Path('src/catalog.js').read_text(encoding='utf-8')
-          sidebar = Path('src/moduleDragSidebar.js').read_text(encoding='utf-8')
-          context = Path('src/moduleContextMenu.js').read_text(encoding='utf-8')
-          assert 'export const MODULE_CATALOG_KEYS' in catalog
-          assert 'DRAGGABLE_MODULE_KEYS' not in sidebar
-          assert 'PICKER_MODULE_KEYS' not in context
-          assert 'const cards = MODULE_CATALOG_KEYS' in sidebar
-          assert 'MODULE_CATALOG_KEYS.forEach' in context
-          for obsolete in ['moble_table_chair_set_minyon','moble_bar_stool_classic']:
-              assert obsolete not in sidebar
-              assert obsolete not in context
-          print('Catalog source is unified.')
-          PY
+          node --check src/catalog.js
+          node --check src/moduleDragSidebar.js
+          node --check src/moduleContextMenu.js
+          node --check src/scene3d.js
+          node --check src/main.js
       - name: Install
         run: npm ci
       - name: Test
         run: npm test
       - name: Build
         run: npm run build
-      - name: Commit unified catalog
-        shell: bash
+      - name: Commit unified module presentation
         run: |
+          rm -f .github/workflows/catalog-single-source.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/catalog.js src/moduleDragSidebar.js src/moduleContextMenu.js
+          git add -A
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "refactor: use one module catalog source [skip ci]"
+            git commit -m "refactor: use catalog for all module presentation [skip ci]"
             git push origin ROG
           fi
