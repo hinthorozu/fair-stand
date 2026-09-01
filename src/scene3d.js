@@ -2137,6 +2137,49 @@ export function createStandScene(
     const overlayRaycaster = new THREE.Raycaster();
     overlayRaycaster.setFromCamera(ndc, camera);
 
+    const pointed = pickModuleAt(clientX, clientY);
+    const pointedModuleState = pointed?.moduleGroup?.userData?.moduleState;
+    const freePanelSupportTypes = new Set([
+      'flat-panel',
+      'base-wall',
+      'shelf',
+      'door',
+      'showcase-2',
+      'showcase-3',
+      'separator',
+    ]);
+    if (
+      pointedModuleState?.placement?.wallId === 'free'
+      && freePanelSupportTypes.has(pointedModuleState.type)
+      && pointed?.hit?.point
+    ) {
+      const supportRotationZDeg = normalizeModuleRotationZDeg(pointedModuleState.placement.rotationZDeg);
+      const supportFront = new THREE.Vector3(0, 0, 1)
+        .applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(supportRotationZDeg));
+      const cameraSide = overlayRaycaster.ray.origin.clone().sub(pointed.hit.point).dot(supportFront);
+      const rotationZDeg = normalizeModuleRotationZDeg(
+        supportRotationZDeg + (cameraSide < 0 ? 180 : 0),
+      );
+      const hit = pointed.hit.point;
+      const heightCm = Math.max(1, Number(moduleState?.screenHeightCm ?? moduleState?.heightCm ?? 52.3));
+      const halfHeightM = heightCm / 200;
+      const defaultCenterM = 1.75;
+      const minOffsetCm = Math.ceil(((halfHeightM - defaultCenterM) * 100) / 10) * 10;
+      const maxOffsetCm = Math.floor(((STAND_DIMENSIONS.height - halfHeightM - defaultCenterM) * 100) / 10) * 10;
+      const rawOffsetCm = (hit.y - ACTIVE_PLATFORM_HEIGHT_M - defaultCenterM) * 100;
+      const zCm = THREE.MathUtils.clamp(Math.round(rawOffsetCm / 10) * 10, minOffsetCm, maxOffsetCm);
+
+      return {
+        wallId: 'free',
+        pointerXCm: hit.x * 100,
+        pointerYCm: hit.z * 100,
+        rotationZDeg,
+        zCm,
+        freePanelSupport: true,
+        supportModuleId: pointedModuleState.id,
+      };
+    }
+
     const allowedWalls = getAllowedWallIds(stageLayout.standType)
       .filter((wallId) => wallId === 'back' || wallId === 'left' || wallId === 'right');
     const targetWallId = allowedWalls.includes(preferredWallId) ? preferredWallId : null;
@@ -2231,6 +2274,7 @@ export function createStandScene(
         shape: moduleState.shape,
         widthCm: moduleState.widthCm,
         depthCm: moduleState.depthCm,
+        forceFree: wallPoint.freePanelSupport === true,
         pointerXCm: wallPoint.pointerXCm,
         pointerYCm: wallPoint.pointerYCm,
         standXCm: stageLayout.widthCm,
@@ -2502,6 +2546,7 @@ export function createStandScene(
         shape: moduleState.shape,
         widthCm: moduleState.widthCm,
         depthCm: moduleState.depthCm,
+        forceFree: wallPoint.freePanelSupport === true,
         pointerXCm: wallPoint.pointerXCm,
         pointerYCm: wallPoint.pointerYCm,
         standXCm: stageLayout.widthCm,
