@@ -23,8 +23,8 @@ if old not in scene:
     raise SystemExit('fabric canvas draw block not found')
 scene = scene.replace(old, new, 1)
 
-old = """          color: baseColor,\n          roughness: 0.86,\n          metalness: 0,\n          side: THREE.DoubleSide,\n          polygonOffset: true,\n"""
-new = """          color: baseColor,\n          roughness: 0.86,\n          metalness: 0,\n          // Baskı yalnızca standın önünden görünür; arkadan normal panel/backing görünür.\n          side: THREE.FrontSide,\n          polygonOffset: true,\n"""
+old = """          color: baseColor,\n          roughness: 0.86,\n          metalness: 0,\n          emissive: 0x000000,\n          emissiveIntensity: 0,\n          side: THREE.DoubleSide,\n          polygonOffset: true,\n"""
+new = """          color: baseColor,\n          roughness: 0.86,\n          metalness: 0,\n          emissive: 0x000000,\n          emissiveIntensity: 0,\n          // Baskı yalnızca standın önünden görünür; arkadan normal panel/backing görünür.\n          side: THREE.FrontSide,\n          polygonOffset: true,\n"""
 if old not in scene:
     raise SystemExit('fabric material side block not found')
 scene = scene.replace(old, new, 1)
