@@ -1,0 +1,65 @@
+name: Fix Kettle Preview
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-kettle-preview.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - name: Fix kettle catalog preview
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/moduleDragSidebar.js')
+          text = path.read_text()
+
+          css_marker = "    .module-drag-mini-fridge::after { content:''; position:absolute; right:4px; top:7px; width:2px; height:8px; border-radius:2px; background:#555b61; box-shadow:0 21px 0 #555b61; }\n"
+          css_add = css_marker + """    .module-drag-kettle { position:relative; width:58px; height:58px; }\n    .module-drag-kettle-body { position:absolute; left:17px; top:20px; width:25px; height:27px; box-sizing:border-box; border:3px solid #4b5563; border-radius:7px 7px 12px 12px; background:#f8fafc; }\n    .module-drag-kettle-handle { position:absolute; left:6px; top:23px; width:14px; height:21px; box-sizing:border-box; border:3px solid #4b5563; border-right:0; border-radius:13px 0 0 13px; }\n    .module-drag-kettle-spout { position:absolute; left:40px; top:23px; width:14px; height:13px; box-sizing:border-box; border-top:4px solid #4b5563; border-right:4px solid #4b5563; border-radius:0 8px 2px 0; transform:skewY(-18deg); }\n    .module-drag-kettle-lid { position:absolute; left:18px; top:16px; width:23px; height:4px; border-radius:3px; background:#4b5563; }\n    .module-drag-kettle-knob { position:absolute; left:27px; top:12px; width:6px; height:5px; border-radius:4px 4px 1px 1px; background:#4b5563; }\n"""
+          if '.module-drag-kettle-body' not in text:
+              if css_marker not in text:
+                  raise SystemExit('kettle css marker missing')
+              text = text.replace(css_marker, css_add, 1)
+
+          preview_marker = """  if (module.type === 'mini-fridge') {\n    const body = document.createElement('div');\n    body.className = 'module-drag-mini-fridge';\n    preview.appendChild(body);\n    return preview;\n  }\n"""
+          preview_add = preview_marker + """\n  if (module.type === 'kettle') {\n    const kettle = document.createElement('div');\n    kettle.className = 'module-drag-kettle';\n    ['body', 'handle', 'spout', 'lid', 'knob'].forEach((part) => {\n      const element = document.createElement('i');\n      element.className = `module-drag-kettle-${part}`;\n      kettle.appendChild(element);\n    });\n    preview.appendChild(kettle);\n    return preview;\n  }\n"""
+          if "module.type === 'kettle'" not in text:
+              if preview_marker not in text:
+                  raise SystemExit('kettle preview marker missing')
+              text = text.replace(preview_marker, preview_add, 1)
+
+          path.write_text(text)
+          PY
+
+      - name: Syntax check
+        run: node --check src/moduleDragSidebar.js
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit and push
+        run: |
+          rm .github/workflows/fix-kettle-preview.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: improve kettle catalog preview [skip ci]'
+          git push origin ROG
