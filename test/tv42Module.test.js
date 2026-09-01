@@ -29,7 +29,10 @@ test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its fr
   const tvSource = source.slice(start, finish);
   assert.match(tvSource, /const depthM = 0\.05/);
   assert.match(tvSource, /new THREE\.BoxGeometry\(widthM, heightM, depthM\)/);
-  assert.match(tvSource, /map: getTvScreenTexture\(\)/);
+  assert.match(tvSource, /getTvScreenTexture\(\)\.clone\(\)/);
+  assert.match(tvSource, /map: screenTexture/);
+  assert.match(tvSource, /createSelectionFrame\(widthM, heightM\)/);
+  assert.match(tvSource, /tv\.userData\.selectionFrame = selectionFrame/);
   assert.doesNotMatch(tvSource, /new THREE\.PlaneGeometry/);
 });
 
