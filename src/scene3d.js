@@ -2984,11 +2984,11 @@ export function createStandScene(
       // fakat sahneye fiziksel ışık saçılmaz.
       material.emissive.set(0xffffff);
       material.emissiveMap = material.map;
-      material.emissiveIntensity = 1.35;
+      material.emissiveIntensity = 1.60;
     } else {
       material.emissiveMap = null;
       material.emissive.set(fabricState.fabricColor ?? fabricState.color ?? '#ffffff');
-      material.emissiveIntensity = 0.72;
+      material.emissiveIntensity = 0.82;
     }
     material.needsUpdate = true;
   }
