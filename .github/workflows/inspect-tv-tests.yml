@@ -1,0 +1,17 @@
+name: Inspect TV Tests
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/inspect-tv-tests.yml']
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - name: Locate assertions
+        run: |
+          grep -R -n -F "ctx.fillText('KYROX'" . --exclude-dir=node_modules || true
+          grep -R -n -F "KYROX.STUDIO" . --exclude-dir=node_modules || true
+          find . -name '*tv*.test*' -o -name '*sofa*.test*'
