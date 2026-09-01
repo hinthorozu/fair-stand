@@ -37,6 +37,9 @@ function ensureStyles() {
     .module-drag-bar-stool { position:relative; width:44px; height:58px; }
     .module-drag-bar-stool::before { content:''; position:absolute; left:8px; top:4px; width:28px; height:20px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:10px 10px 5px 5px; background:#f8fafc; }
     .module-drag-bar-stool::after { content:''; position:absolute; left:11px; top:24px; width:22px; height:27px; border-left:3px solid ${ALUMINUM_PROFILE_COLOR}; border-right:3px solid ${ALUMINUM_PROFILE_COLOR}; border-bottom:3px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:0 0 10px 10px; }
+    .module-drag-tv { position:relative; width:66px; height:54px; }
+    .module-drag-tv::before { content:''; position:absolute; left:4px; top:3px; width:58px; height:36px; box-sizing:border-box; border:4px solid #26292d; border-radius:2px; background:#f8fafc; box-shadow:0 2px 5px rgba(15,23,42,.12); }
+    .module-drag-tv::after { content:''; position:absolute; left:22px; top:39px; width:22px; height:5px; background:#30343a; box-shadow:0 7px 0 -1px #30343a; clip-path:polygon(27% 0,73% 0,86% 100%,100% 100%,100% 100%,0 100%,14% 100%); }
     .module-drag-floodlight { position:relative; width:52px; height:52px; }
     .module-drag-floodlight::before { content:''; position:absolute; left:10px; top:7px; width:32px; height:22px; border:4px solid #17191c; border-radius:3px; background:#f5fff2; box-shadow:inset 0 0 0 2px #c7ead0; transform:rotate(-8deg); }
     .module-drag-floodlight::after { content:''; position:absolute; left:23px; top:29px; width:6px; height:16px; border-left:3px solid #292c31; border-bottom:3px solid #292c31; }
@@ -101,6 +104,13 @@ export function createModuleCatalogPreview(module) {
     return preview;
   }
 
+
+  if (module.type === 'tv') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-tv';
+    preview.appendChild(body);
+    return preview;
+  }
 
   if (module.type === 'led-floodlight') {
     const body = document.createElement('div');
