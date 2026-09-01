@@ -1,0 +1,42 @@
+name: Ctrl Panel Multiselect
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/ctrl-panel-multiselect.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply patch
+        run: python scripts/patch-ctrl-panel-multiselect.py
+      - name: Syntax check
+        run: |
+          node --check src/scene3d.js
+          node --check src/main.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit and push
+        run: |
+          rm -f scripts/patch-ctrl-panel-multiselect.py .github/workflows/ctrl-panel-multiselect.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: make ctrl click true panel multiselect [skip ci]'
+          git push origin ROG
