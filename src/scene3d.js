@@ -1197,7 +1197,7 @@ export function createStandScene(
       module.group.userData.placement = { ...placement };
       applyPlacementToGroup(module.group, placement, widthCm);
       wallRoot.add(module.group);
-      if (moduleState.type === 'tv') addTvScreenOverlay(module.group);
+      
       surfaceMeshes.push(...module.surfaces);
     });
 
