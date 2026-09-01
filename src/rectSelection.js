@@ -5,6 +5,75 @@ function normalizePoint(point) {
   };
 }
 
+export function createPanelRangeSelection(items, anchorPoint, targetPoint) {
+  if (!Array.isArray(items) || !items.length) {
+    return { ok: false, message: 'Seçilebilir panel bulunamadı.' };
+  }
+
+  const anchor = normalizePoint(anchorPoint);
+  const target = normalizePoint(targetPoint);
+
+  if (
+    !Number.isInteger(anchor.moduleIndex)
+    || !Number.isInteger(anchor.stripIndex)
+    || !Number.isInteger(target.moduleIndex)
+    || !Number.isInteger(target.stripIndex)
+  ) {
+    return { ok: false, message: 'Seçim başlangıç veya bitiş noktası geçersiz.' };
+  }
+
+  const selectableModuleIndices = [...new Set(
+    items
+      .map((item) => Number(item?.moduleIndex))
+      .filter(Number.isInteger),
+  )].sort((a, b) => a - b);
+  const anchorColumn = selectableModuleIndices.indexOf(anchor.moduleIndex);
+  const targetColumn = selectableModuleIndices.indexOf(target.moduleIndex);
+  if (anchorColumn < 0 || targetColumn < 0) {
+    return { ok: false, message: 'Seçim başlangıç veya bitiş paneli bulunamadı.' };
+  }
+
+  const minColumn = Math.min(anchorColumn, targetColumn);
+  const maxColumn = Math.max(anchorColumn, targetColumn);
+  const selectedModuleIndices = selectableModuleIndices.slice(minColumn, maxColumn + 1);
+  const selectedModuleSet = new Set(selectedModuleIndices);
+  const minStripIndex = Math.min(anchor.stripIndex, target.stripIndex);
+  const maxStripIndex = Math.max(anchor.stripIndex, target.stripIndex);
+  const columnOrder = new Map(selectedModuleIndices.map((moduleIndex, index) => [moduleIndex, index]));
+
+  // Ctrl/Cmd çoklu seçimde kural modül tipi değil panel varlığıdır. Aralıkta
+  // kapı/vitrin açıklığı gibi panel olmayan hücreler bulunabilir; bunlar seçimi
+  // bozmaz, yalnızca gerçekten var olan panel yüzeyleri seçilir.
+  const entries = items
+    .filter((item) => (
+      selectedModuleSet.has(Number(item?.moduleIndex))
+      && Number(item?.stripIndex) >= minStripIndex
+      && Number(item?.stripIndex) <= maxStripIndex
+    ))
+    .sort((a, b) => (
+      Number(a.stripIndex) - Number(b.stripIndex)
+      || columnOrder.get(Number(a.moduleIndex)) - columnOrder.get(Number(b.moduleIndex))
+    ));
+
+  if (!entries.length) {
+    return { ok: false, message: 'Seçim aralığında panel bulunamadı.' };
+  }
+
+  return {
+    ok: true,
+    entries,
+    panelCount: entries.length,
+    columnCount: selectedModuleIndices.length,
+    rowCount: maxStripIndex - minStripIndex + 1,
+    bounds: {
+      minModuleIndex: selectedModuleIndices[0],
+      maxModuleIndex: selectedModuleIndices.at(-1),
+      minStripIndex,
+      maxStripIndex,
+    },
+  };
+}
+
 export function createRectSelection(items, anchorPoint, targetPoint) {
   if (!Array.isArray(items) || !items.length) {
     return { ok: false, message: 'Seçilebilir panel bulunamadı.' };

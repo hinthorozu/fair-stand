@@ -5,7 +5,7 @@ import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DI
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
-import { createRectSelection } from './rectSelection.js';
+import { createPanelRangeSelection, createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
 import { createViewCube } from './viewCube.js';
 import { computeImageFit } from './imageFit.js';
@@ -1058,7 +1058,7 @@ export function createStandScene(
     const targetColumn = columnByModuleId.get(targetMeta.moduleId);
     if (!Number.isInteger(anchorColumn) || !Number.isInteger(targetColumn)) return;
 
-    const result = createRectSelection(
+    const result = createPanelRangeSelection(
       planePanels.map(({ surface, meta }) => ({
         mesh: surface,
         moduleIndex: columnByModuleId.get(meta.moduleId),
