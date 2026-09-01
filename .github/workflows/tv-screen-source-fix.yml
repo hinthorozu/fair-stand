@@ -1,0 +1,70 @@
+name: TV Screen Source Fix
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/tv-screen-source-fix.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Replace KYROX canvas with uploaded image
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/scene3d.js')
+          s = p.read_text()
+          if "new THREE.TextureLoader().load(TV_SCREEN_DATA_URL)" not in s:
+              start = s.rfind("      if (object.name === 'Object_5') {")
+              if start < 0:
+                  raise SystemExit('Object_5 start not found')
+              marker = "        object.material = new THREE.MeshBasicMaterial({ map: texture, toneMapped: false });\n      }"
+              end = s.find(marker, start)
+              if end < 0:
+                  raise SystemExit('Object_5 old material end not found')
+              end += len(marker)
+              replacement = """      if (object.name === 'Object_5') {
+                const texture = new THREE.TextureLoader().load(TV_SCREEN_DATA_URL);
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.flipY = false;
+                object.material = new THREE.MeshBasicMaterial({
+                  map: texture,
+                  toneMapped: false,
+                  side: THREE.DoubleSide,
+                });
+                object.material.needsUpdate = true;
+              }"""
+              s = s[:start] + replacement + s[end:]
+          s = s.replace("      if (moduleState.type === 'tv') addTvScreenOverlay(module.group);\n", "")
+          p.write_text(s)
+          PY
+      - name: Verify source
+        run: |
+          node --check src/scene3d.js
+          grep -F "new THREE.TextureLoader().load(TV_SCREEN_DATA_URL)" src/scene3d.js
+          grep -F "texture.flipY = false" src/scene3d.js
+          if grep -F "ctx.fillText('KYROX'" src/scene3d.js; then exit 1; fi
+      - name: Install
+        run: npm install
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Cleanup temporary workflows
+        run: |
+          rm -f .github/workflows/tv-screen-source-fix.yml
+          rm -f .github/workflows/tv-screen-final-fix.yml
+          rm -f .github/workflows/tv-screen-direct-v2.yml
+          rm -f .github/workflows/inspect-tv-object5.yml
+          rm -f .github/workflows/inspect-tv-tests.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: display uploaded image on TV screen [skip ci]'
+          branch: ROG
