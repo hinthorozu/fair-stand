@@ -3524,6 +3524,8 @@ function createTvModule(moduleState, moduleIndex) {
   const depthM = 0.05;
   const centerYM = 1.75;
   const bezelM = 0.012;
+  const frontZ = depthM / 2 + 0.0015;
+  const backZ = -(depthM / 2 + 0.0015);
 
   const group = new THREE.Group();
   group.userData.kind = 'module';
@@ -3531,35 +3533,49 @@ function createTvModule(moduleState, moduleIndex) {
   group.userData.moduleIndex = moduleIndex;
   group.userData.moduleType = 'tv';
 
-  const bodyMaterial = new THREE.MeshStandardMaterial({
-    color: 0x111111,
-    roughness: 0.58,
-    metalness: 0.12,
-  });
+  // One centered 5 cm body; no detached second slab.
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(targetWidthM, targetHeightM, depthM),
-    bodyMaterial,
+    new THREE.MeshStandardMaterial({
+      color: 0x161616,
+      roughness: 0.72,
+      metalness: 0.05,
+    }),
   );
-  body.position.set(0, centerYM, depthM / 2);
+  body.position.set(0, centerYM, 0);
   body.castShadow = true;
   body.receiveShadow = true;
   group.add(body);
 
-  const screenMaterial = new THREE.MeshBasicMaterial({
-    map: getTvScreenTexture(),
-    toneMapped: false,
-    side: THREE.FrontSide,
-  });
+  // The supplied image exists only on the front (+Z) screen face.
   const screen = new THREE.Mesh(
     new THREE.PlaneGeometry(
       Math.max(0.02, targetWidthM - bezelM * 2),
       Math.max(0.02, targetHeightM - bezelM * 2),
     ),
-    screenMaterial,
+    new THREE.MeshBasicMaterial({
+      map: getTvScreenTexture(),
+      toneMapped: false,
+      side: THREE.FrontSide,
+    }),
   );
-  screen.position.set(0, centerYM, depthM + 0.001);
-  screen.renderOrder = 2;
+  screen.position.set(0, centerYM, frontZ);
+  screen.renderOrder = 3;
   group.add(screen);
+
+  // Rear cover sits flush on the same body and makes front/back obvious.
+  const back = new THREE.Mesh(
+    new THREE.PlaneGeometry(targetWidthM - 0.02, targetHeightM - 0.02),
+    new THREE.MeshStandardMaterial({
+      color: 0x2d2d2d,
+      roughness: 0.9,
+      metalness: 0,
+      side: THREE.FrontSide,
+    }),
+  );
+  back.rotation.y = Math.PI;
+  back.position.set(0, centerYM, backZ);
+  group.add(back);
 
   const proxy = new THREE.Mesh(
     new THREE.BoxGeometry(targetWidthM, targetHeightM, depthM),
@@ -3570,7 +3586,7 @@ function createTvModule(moduleState, moduleIndex) {
       colorWrite: false,
     }),
   );
-  proxy.position.set(0, centerYM, depthM / 2);
+  proxy.position.set(0, centerYM, 0);
   proxy.userData.kind = 'surface';
   proxy.userData.surfaceId = `${moduleState.id}:tv`;
   proxy.userData.moduleId = moduleState.id;
