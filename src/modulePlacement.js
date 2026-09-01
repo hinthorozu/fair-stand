@@ -478,7 +478,16 @@ function orientedFootprintsOverlap(moduleA, moduleB) {
   });
 }
 
+function isKettleMiniFridgeStackPair(moduleA, moduleB) {
+  const types = new Set([moduleA?.type, moduleB?.type]);
+  return types.has('kettle') && types.has('mini-fridge');
+}
+
 export function placementsOverlap(moduleA, moduleB) {
+  // Kettle is intentionally mounted at the mini-fridge top elevation (66 cm).
+  // Their X/Y footprints are allowed to overlap because they occupy different Z levels.
+  // This prevents drag collision resolution from pushing/skipping the kettle past the fridge.
+  if (isKettleMiniFridgeStackPair(moduleA, moduleB)) return false;
   if (isTopFixtureType(moduleA?.type) || isTopFixtureType(moduleB?.type)) return false;
   const angleA = normalizeModuleRotationZDeg(moduleA?.placement?.rotationZDeg);
   const angleB = normalizeModuleRotationZDeg(moduleB?.placement?.rotationZDeg);
