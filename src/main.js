@@ -934,6 +934,23 @@ function changeContextShelfLighting(context, enabled) {
     : 'Raf altı aydınlatma kapatıldı.';
 }
 
+function changeContextFabricMode(context, enabled) {
+  if (!context?.supportsFabric) return;
+
+  const selectedPanels = scene3d.getSelectedSurfaces().filter(
+    (surface) => surface.userData.selectionMode === 'panel',
+  );
+  const result = scene3d.applyFabricMode(selectedPanels, enabled);
+  if (!result?.ok) {
+    selectionInfo.textContent = result?.message || 'Bez işlemi uygulanamadı.';
+    return;
+  }
+
+  selectionInfo.textContent = result.enabled
+    ? `${result.panelCount} panel tek parça beze çevrildi.`
+    : 'Bez kaldırıldı; paneller normal görünüme döndü.';
+}
+
 function changeContextPanelGlassMode(context, isGlass) {
   if (!context?.supportsGlass) return;
 
@@ -955,6 +972,7 @@ const moduleContextMenu = createModuleContextMenu({
   onAdd: addCatalogModule,
   onValidateAddBatch: validateCatalogAddBatch,
   onGlassModeChange: changeContextPanelGlassMode,
+  onFabricModeChange: changeContextFabricMode,
   getShelfLightingState: getContextShelfLightingState,
   onShelfLightingChange: changeContextShelfLighting,
 });

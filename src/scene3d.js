@@ -826,6 +826,7 @@ export function createStandScene(
   const textureLoader = new THREE.TextureLoader();
   
   let surfaceMeshes = [];
+  let fabricOverlayMeshes = [];
   const selectedSurfaces = new Set();
   let selectionAnchorSurfaceId = null;
   let selectedModuleId = null;
@@ -1249,6 +1250,8 @@ export function createStandScene(
       }
     });
 
+    rebuildFabricOverlays();
+
     selectionAnchorSurfaceId = surfaceMeshes.some(
       (surface) => surface.userData.surfaceId === previousAnchorSurfaceId,
     )
@@ -1478,6 +1481,8 @@ export function createStandScene(
       stripNumber: supportsGlass ? surface.userData.stripNumber : null,
       supportsGlass,
       isGlass: supportsGlass ? Boolean(surface.userData.surfaceState?.isGlass) : false,
+      supportsFabric: supportsGlass,
+      isFabric: supportsGlass ? Boolean(surface.userData.surfaceState?.fabricGroupId) : false,
       clientX: event.clientX,
       clientY: event.clientY,
     };
@@ -2899,6 +2904,190 @@ export function createStandScene(
     });
   }
 
+  function clearFabricOverlays() {
+    fabricOverlayMeshes.forEach((overlay) => {
+      overlay.parent?.remove(overlay);
+      overlay.geometry?.dispose?.();
+      if (Array.isArray(overlay.material)) {
+        overlay.material.forEach((material) => material?.dispose?.());
+      } else {
+        overlay.material?.dispose?.();
+      }
+    });
+    fabricOverlayMeshes = [];
+  }
+
+  function rebuildFabricOverlays() {
+    clearFabricOverlays();
+
+    const groups = new Map();
+    surfaceMeshes.forEach((surface) => {
+      if (surface?.userData?.selectionMode !== 'panel') return;
+      const groupId = surface.userData.surfaceState?.fabricGroupId;
+      if (!groupId) return;
+      if (!groups.has(groupId)) groups.set(groupId, []);
+      groups.get(groupId).push(surface);
+    });
+
+    if (!groups.size) return;
+    wallRoot.updateWorldMatrix(true, true);
+    const wallQuaternion = wallRoot.getWorldQuaternion(new THREE.Quaternion());
+    const inverseWallQuaternion = wallQuaternion.clone().invert();
+
+    groups.forEach((surfaces, groupId) => {
+      if (surfaces.length < 2) return;
+
+      const first = surfaces[0];
+      first.updateWorldMatrix(true, false);
+      const surfaceQuaternion = first.getWorldQuaternion(new THREE.Quaternion());
+      const right = new THREE.Vector3(1, 0, 0).applyQuaternion(surfaceQuaternion).normalize();
+      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(surfaceQuaternion).normalize();
+      const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(surfaceQuaternion).normalize();
+
+      let minU = Infinity;
+      let maxU = -Infinity;
+      let minV = Infinity;
+      let maxV = -Infinity;
+      let planeN = 0;
+      let validCount = 0;
+
+      surfaces.forEach((surface) => {
+        surface.updateWorldMatrix(true, false);
+        const center = surface.getWorldPosition(new THREE.Vector3());
+        const width = Number(surface.geometry?.parameters?.width) || 0;
+        const height = Number(surface.geometry?.parameters?.height) || 0;
+        const u = center.dot(right);
+        const v = center.dot(up);
+        minU = Math.min(minU, u - width / 2);
+        maxU = Math.max(maxU, u + width / 2);
+        minV = Math.min(minV, v - height / 2);
+        maxV = Math.max(maxV, v + height / 2);
+        planeN += center.dot(normal);
+        validCount += 1;
+      });
+
+      if (!validCount || !Number.isFinite(minU) || !Number.isFinite(minV)) return;
+      planeN /= validCount;
+      const width = maxU - minU;
+      const height = maxV - minV;
+      if (width <= 0 || height <= 0) return;
+
+      const centerWorld = right.clone().multiplyScalar((minU + maxU) / 2)
+        .add(up.clone().multiplyScalar((minV + maxV) / 2))
+        .add(normal.clone().multiplyScalar(planeN + 0.006));
+
+      const baseColor = first.material?.color?.clone?.() ?? new THREE.Color(0xffffff);
+      const overlay = new THREE.Mesh(
+        new THREE.PlaneGeometry(width, height),
+        new THREE.MeshStandardMaterial({
+          color: baseColor,
+          roughness: 0.86,
+          metalness: 0,
+          side: THREE.DoubleSide,
+          polygonOffset: true,
+          polygonOffsetFactor: -2,
+          polygonOffsetUnits: -2,
+        }),
+      );
+      overlay.position.copy(wallRoot.worldToLocal(centerWorld.clone()));
+      overlay.quaternion.copy(inverseWallQuaternion.clone().multiply(surfaceQuaternion));
+      overlay.castShadow = false;
+      overlay.receiveShadow = true;
+      overlay.renderOrder = 3;
+      overlay.userData.kind = 'decoration';
+      overlay.userData.role = 'lightbox-fabric';
+      overlay.userData.fabricGroupId = groupId;
+      // Bez öndeki tek parça yüzeydir; seçim/raycast alttaki gerçek panellerden devam eder.
+      overlay.raycast = () => {};
+      wallRoot.add(overlay);
+      fabricOverlayMeshes.push(overlay);
+    });
+  }
+
+  function applyFabricMode(meshOrMeshes, enabled) {
+    const meshes = normalizeMeshes(meshOrMeshes).filter(
+      (mesh) => mesh?.userData?.selectionMode === 'panel' && mesh.userData.surfaceState,
+    );
+    const fabric = Boolean(enabled);
+
+    if (fabric) {
+      if (meshes.length < 2) {
+        return { ok: false, message: 'Ctrl ile en az 2 panel seç; bez tek parça blok olarak oluşturulur.' };
+      }
+
+      const moduleIndices = meshes.map((mesh) => Number(mesh.userData.moduleIndex));
+      const stripIndices = meshes.map((mesh) => Number(mesh.userData.stripIndex));
+      const bounds = {
+        minModuleIndex: Math.min(...moduleIndices),
+        maxModuleIndex: Math.max(...moduleIndices),
+        minStripIndex: Math.min(...stripIndices),
+        maxStripIndex: Math.max(...stripIndices),
+      };
+      const rect = createRectSelection(
+        meshes.map((mesh) => ({
+          mesh,
+          moduleIndex: Number(mesh.userData.moduleIndex),
+          stripIndex: Number(mesh.userData.stripIndex),
+        })),
+        { moduleIndex: bounds.minModuleIndex, stripIndex: bounds.minStripIndex },
+        { moduleIndex: bounds.maxModuleIndex, stripIndex: bounds.maxStripIndex },
+      );
+      if (!rect.ok || rect.entries.length !== meshes.length) {
+        return { ok: false, message: 'Bez yalnızca eksiksiz dikdörtgen panel bloğundan oluşturulabilir.' };
+      }
+
+      const first = meshes[0];
+      first.updateWorldMatrix(true, false);
+      const firstQuaternion = first.getWorldQuaternion(new THREE.Quaternion());
+      const firstNormal = new THREE.Vector3(0, 0, 1).applyQuaternion(firstQuaternion).normalize();
+      const firstPosition = first.getWorldPosition(new THREE.Vector3());
+      const firstPlane = firstPosition.dot(firstNormal);
+      const samePlane = meshes.every((mesh) => {
+        mesh.updateWorldMatrix(true, false);
+        const quaternion = mesh.getWorldQuaternion(new THREE.Quaternion());
+        const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(quaternion).normalize();
+        const position = mesh.getWorldPosition(new THREE.Vector3());
+        return Math.abs(normal.dot(firstNormal)) > 0.999
+          && Math.abs(position.dot(firstNormal) - firstPlane) < 0.03;
+      });
+      if (!samePlane) {
+        return { ok: false, message: 'Bez yalnızca aynı düzlemdeki panellerden oluşturulabilir.' };
+      }
+
+      const replacedGroupIds = new Set(
+        meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
+      );
+      if (replacedGroupIds.size) {
+        surfaceMeshes.forEach((surface) => {
+          if (replacedGroupIds.has(surface.userData.surfaceState?.fabricGroupId)) {
+            delete surface.userData.surfaceState.fabricGroupId;
+          }
+        });
+      }
+
+      const groupId = `fabric-${globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
+      meshes.forEach((mesh) => {
+        mesh.userData.surfaceState.fabricGroupId = groupId;
+      });
+      rebuildFabricOverlays();
+      return { ok: true, enabled: true, panelCount: meshes.length, fabricGroupId: groupId };
+    }
+
+    const groupIds = new Set(
+      meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
+    );
+    if (!groupIds.size) {
+      return { ok: false, message: 'Seçimde kaldırılacak bez bulunamadı.' };
+    }
+    surfaceMeshes.forEach((surface) => {
+      if (groupIds.has(surface.userData.surfaceState?.fabricGroupId)) {
+        delete surface.userData.surfaceState.fabricGroupId;
+      }
+    });
+    rebuildFabricOverlays();
+    return { ok: true, enabled: false, panelCount: meshes.length };
+  }
+
   function applyGlassMode(meshOrMeshes, isGlass) {
     const glass = Boolean(isGlass);
 
@@ -3642,6 +3831,7 @@ export function createStandScene(
     resetDefaultView,
     applyColor,
     applyGlassMode,
+    applyFabricMode,
     applyImageAsset,
     applyHorizontalImageAsset,
     applyRectImageAsset,
