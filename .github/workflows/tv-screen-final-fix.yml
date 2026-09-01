@@ -1,0 +1,87 @@
+name: TV Screen Final Fix
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/tv-screen-final-fix.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch TV screen and stale tests
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          scene = Path('src/scene3d.js')
+          s = scene.read_text()
+          direct = "new THREE.TextureLoader().load(TV_SCREEN_DATA_URL)"
+          if direct not in s:
+              start = s.rfind("      if (object.name === 'Object_5') {")
+              if start < 0:
+                  raise SystemExit('Object_5 block start not found')
+              end_marker = "        object.material = new THREE.MeshBasicMaterial({ map: texture, toneMapped: false });\n      }"
+              end = s.find(end_marker, start)
+              if end < 0:
+                  raise SystemExit('Old Object_5 canvas block end not found')
+              end += len(end_marker)
+              replacement = """      if (object.name === 'Object_5') {
+                const texture = new THREE.TextureLoader().load(TV_SCREEN_DATA_URL);
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.flipY = false;
+                object.material = new THREE.MeshBasicMaterial({
+                  map: texture,
+                  toneMapped: false,
+                  side: THREE.DoubleSide,
+                });
+                object.material.needsUpdate = true;
+              }"""
+              s = s[:start] + replacement + s[end:]
+          s = s.replace("      if (moduleState.type === 'tv') addTvScreenOverlay(module.group);\n", "")
+          scene.write_text(s)
+
+          changed_tests = []
+          for p in Path('.').rglob('*.test.js'):
+              t = p.read_text()
+              if "ctx.fillText('KYROX'" not in t and "ctx.fillText('.STUDIO'" not in t:
+                  continue
+              old = t
+              t = t.replace("expect(source.includes(\"ctx.fillText('KYROX'\")).toBe(true);", "expect(source.includes('new THREE.TextureLoader().load(TV_SCREEN_DATA_URL)')).toBe(true);")
+              t = t.replace("expect(source.includes(\"ctx.fillText('.STUDIO'\")).toBe(true);", "expect(source.includes('texture.flipY = false')).toBe(true);")
+              t = t.replace('TV modülü .glb ekrana KYROX.STUDIO yazar ve hedef genişliğe ölçekler', 'TV modülü .glb ekranda yüklenen TV görselini kullanır ve hedef genişliğe ölçekler')
+              t = t.replace('TV ekranında KYROX.STUDIO marka görseli kullanılır', 'TV ekranında yüklenen TV görseli kullanılır')
+              if t != old:
+                  p.write_text(t)
+                  changed_tests.append(str(p))
+          print('updated tests:', changed_tests)
+          if not changed_tests:
+              raise SystemExit('Expected stale TV tests were not found')
+          PY
+      - name: Verify source
+        run: |
+          node --check src/scene3d.js
+          grep -F "new THREE.TextureLoader().load(TV_SCREEN_DATA_URL)" src/scene3d.js
+          grep -F "texture.flipY = false" src/scene3d.js
+          if grep -R -F "ctx.fillText('KYROX'" --include='*.test.js' .; then exit 1; fi
+      - name: Install
+        run: npm install
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Cleanup temporary workflows
+        run: |
+          rm -f .github/workflows/tv-screen-final-fix.yml
+          rm -f .github/workflows/tv-screen-direct-v2.yml
+          rm -f .github/workflows/inspect-tv-object5.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: show uploaded image on TV screen [skip ci]'
+          branch: ROG
