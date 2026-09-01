@@ -1340,8 +1340,12 @@ export function createStandScene(
 
         const nearestWall = wallDistances[0];
         const wallSnapDistanceCm = 30;
-        if (nearestWall && nearestWall.distanceCm <= wallSnapDistanceCm) {
-          return { wallId: nearestWall.wallId, xCm, yCm, mode: 'wall' };
+        const preferredWall = wallDistances.find((entry) => entry.wallId === preferredWallId);
+        const snapWall = preferredWall && preferredWall.distanceCm <= wallSnapDistanceCm
+          ? preferredWall
+          : nearestWall;
+        if (snapWall && snapWall.distanceCm <= wallSnapDistanceCm) {
+          return { wallId: snapWall.wallId, xCm, yCm, mode: 'wall' };
         }
 
         return { wallId: 'free', xCm, yCm, mode: 'free' };
@@ -2122,10 +2126,8 @@ export function createStandScene(
 
     const allowedWalls = getAllowedWallIds(stageLayout.standType)
       .filter((wallId) => wallId === 'back' || wallId === 'left' || wallId === 'right');
-    const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
-    const pointedWallId = pointedModule?.placement?.wallId;
-    const targetWallId = allowedWalls.includes(pointedWallId) ? pointedWallId : null;
-    const candidateWalls = targetWallId ? [targetWallId] : allowedWalls;
+    const targetWallId = allowedWalls.includes(preferredWallId) ? preferredWallId : null;
+    const candidateWalls = allowedWalls;
     const intersections = [];
 
     candidateWalls.forEach((wallId) => {
@@ -2150,7 +2152,10 @@ export function createStandScene(
 
     if (!intersections.length) return null;
     intersections.sort((a, b) => a.distance - b.distance);
-    const { wallId, hit } = intersections[0];
+    const preferredIntersection = targetWallId
+      ? intersections.find((entry) => entry.wallId === targetWallId)
+      : null;
+    const { wallId, hit } = preferredIntersection ?? intersections[0];
     const rotationZDeg = wallId === 'left' ? 90 : (wallId === 'right' ? 270 : 0);
     const pointerXCm = wallId === 'right' ? stageLayout.widthCm : Math.max(0, hit.x * 100);
     const pointerYCm = wallId === 'back' ? 0 : Math.max(0, hit.z * 100);
@@ -2438,9 +2443,16 @@ export function createStandScene(
     const moduleState = dragSession.moduleState;
 
     if (isWallOverlayModule(moduleState.type)) {
-      const pointedModule = pickModuleAt(event.clientX, event.clientY)?.moduleGroup?.userData?.moduleState;
-      const pointedOnWall = ['back', 'left', 'right'].includes(pointedModule?.placement?.wallId);
-      if (!pointedOnWall) {
+      const currentWallId = ['back', 'left', 'right'].includes(dragSession.preview?.placement?.wallId)
+        ? dragSession.preview.placement.wallId
+        : (['back', 'left', 'right'].includes(moduleState.placement?.wallId) ? moduleState.placement.wallId : null);
+      const wallPoint = getWallOverlayDragPoint(
+        event.clientX,
+        event.clientY,
+        currentWallId,
+        moduleState,
+      );
+      if (!wallPoint) {
         const placement = getFreeTvPlacement(
           event.clientX,
           event.clientY,
@@ -2469,21 +2481,6 @@ export function createStandScene(
         };
         showPlacementGhost(moduleState, placement, true);
         clearPlacementFeedback();
-        return;
-      }
-      const wallPoint = getWallOverlayDragPoint(
-        event.clientX,
-        event.clientY,
-        pointedModule.placement.wallId,
-        moduleState,
-      );
-      if (!wallPoint) {
-        disposePlacementGhost();
-        dragSession.preview = null;
-        showPlacementFeedback('TV bu yüzeye taşınamadı.', {
-          clientX: event.clientX,
-          clientY: event.clientY,
-        });
         return;
       }
       const snapped = snapPlacementToStand({
