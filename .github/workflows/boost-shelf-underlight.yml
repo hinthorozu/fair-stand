@@ -1,0 +1,132 @@
+name: Boost Shelf Under-light
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/boost-shelf-underlight.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Strengthen shelf under-light
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          scene = Path('src/scene3d.js')
+          s = scene.read_text(encoding='utf-8')
+
+          s = s.replace('emissiveIntensity: 3.0,', 'emissiveIntensity: 5.5,', 1)
+
+          old = '''      // Geniş alan ışığı spot konisini kaldırır ve raf eni boyunca homojen yayılır.
+      const areaLight = new THREE.RectAreaLight(
+        0xffe4c8,
+        8.5,
+        ledStripWidthM,
+        Math.max(shelfDepthM * 0.72, 0.12),
+      );
+      areaLight.position.set(
+        0,
+        shelfBottomY - 0.008,
+        wallDepthM / 2 + shelfDepthM * 0.56,
+      );
+      areaLight.lookAt(new THREE.Vector3(
+        0,
+        shelfBottomY - 1,
+        wallDepthM / 2 + shelfDepthM * 0.56,
+      ));
+      areaLight.userData.kind = 'decoration';
+      areaLight.userData.role = 'shelf-under-light';
+      built.group.add(areaLight);'''
+
+          new = '''      // Ana alan ışığı raf boyunca aşağıya homojen ışık verir.
+      const areaLight = new THREE.RectAreaLight(
+        0xffe4c8,
+        22.0,
+        ledStripWidthM,
+        Math.max(shelfDepthM * 0.90, 0.16),
+      );
+      areaLight.position.set(
+        0,
+        shelfBottomY - 0.010,
+        wallDepthM / 2 + shelfDepthM * 0.62,
+      );
+      areaLight.lookAt(new THREE.Vector3(
+        0,
+        shelfBottomY - 1,
+        wallDepthM / 2 + shelfDepthM * 0.62,
+      ));
+      areaLight.userData.kind = 'decoration';
+      areaLight.userData.role = 'shelf-under-light';
+      built.group.add(areaLight);
+
+      // İkinci geniş ışık arka panele doğru yıkama yapar; noktasal leke oluşturmaz.
+      const wallWashLight = new THREE.RectAreaLight(
+        0xffe4c8,
+        18.0,
+        ledStripWidthM,
+        Math.max(shelfDepthM * 0.34, 0.08),
+      );
+      wallWashLight.position.set(
+        0,
+        shelfBottomY - 0.018,
+        wallDepthM / 2 + shelfDepthM * 0.70,
+      );
+      wallWashLight.lookAt(new THREE.Vector3(
+        0,
+        shelfBottomY - 0.38,
+        wallDepthM / 2 + 0.015,
+      ));
+      wallWashLight.userData.kind = 'decoration';
+      wallWashLight.userData.role = 'shelf-under-wall-wash';
+      built.group.add(wallWashLight);'''
+
+          if old not in s:
+              raise SystemExit('shelf light block marker not found')
+          s = s.replace(old, new, 1)
+          scene.write_text(s, encoding='utf-8')
+
+          test = Path('test/shelfLighting.test.js')
+          t = test.read_text(encoding='utf-8')
+          marker = "  assert.match(source, /role = 'shelf-under-light'/);\n"
+          addition = marker + "  assert.match(source, /role = 'shelf-under-wall-wash'/);\n  assert.match(source, /22\\.0/);\n  assert.match(source, /18\\.0/);\n"
+          if "shelf-under-wall-wash" not in t:
+              if marker not in t:
+                  raise SystemExit('shelf lighting test marker not found')
+              t = t.replace(marker, addition, 1)
+          test.write_text(t, encoding='utf-8')
+          PY
+
+      - name: Syntax check
+        run: |
+          node --check src/scene3d.js
+          node --check test/shelfLighting.test.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit and push
+        shell: bash
+        run: |
+          rm -f .github/workflows/boost-shelf-underlight.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/scene3d.js test/shelfLighting.test.js .github/workflows/boost-shelf-underlight.yml
+          git commit -m "fix: strengthen shelf under-light wash [skip ci]"
+          git push origin ROG
