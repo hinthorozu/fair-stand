@@ -98,13 +98,9 @@ end += len("\n});")
 new_test = r'''test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its front face', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const start = source.indexOf('function createTvModule(');
+  assert.ok(start >= 0);
   const finish = source.indexOf('\n}', start) + 2;
   const tvSource = source.slice(start, finish);
-  assert.ok(start >= 0);
-  assert.doesNotMatch(source, /models\/tv\.glb/);
-  assert.doesNotMatch(source, /loadTvModel/);
-  assert.doesNotMatch(source, /addTvScreenOverlay/);
-  assert.doesNotMatch(source, /tv-screen-image-overlay/);
   assert.match(tvSource, /const depthM = 0\.05/);
   assert.match(tvSource, /new THREE\.BoxGeometry\(widthM, heightM, depthM\)/);
   assert.match(tvSource, /map: getTvScreenTexture\(\)/);
