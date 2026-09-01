@@ -74,8 +74,20 @@ log "Production build alınıyor..."
 npm run build
 [[ -f "${DIST_DIR}/index.html" ]] || fail "Build tamamlandı ancak dist/index.html bulunamadı."
 
-log "Nginx site ayarı yazılıyor..."
-cat > "${NGINX_AVAILABLE}" <<EOF
+ssl_ready=0
+if [[ -f "${CERT_PATH}" ]] \
+  && openssl x509 -checkend 86400 -noout -in "${CERT_PATH}" >/dev/null 2>&1 \
+  && [[ -f "${NGINX_AVAILABLE}" ]] \
+  && grep -Fq "ssl_certificate ${CERT_PATH}" "${NGINX_AVAILABLE}"; then
+  ssl_ready=1
+fi
+
+if (( ssl_ready == 1 )); then
+  log "Geçerli SSL + nginx yapılandırması mevcut; nginx site dosyası korunuyor."
+  ln -sfn "${NGINX_AVAILABLE}" "${NGINX_ENABLED}"
+else
+  log "HTTP nginx site ayarı hazırlanıyor..."
+  cat > "${NGINX_AVAILABLE}" <<EOF
 server {
     listen 80;
     listen [::]:80;
@@ -91,7 +103,8 @@ server {
 }
 EOF
 
-ln -sfn "${NGINX_AVAILABLE}" "${NGINX_ENABLED}"
+  ln -sfn "${NGINX_AVAILABLE}" "${NGINX_ENABLED}"
+fi
 
 log "Nginx yapılandırması doğrulanıyor..."
 nginx -t
@@ -105,7 +118,7 @@ if command -v ufw >/dev/null 2>&1 && ufw status | grep -q '^Status: active'; the
   ufw allow 443/tcp >/dev/null
 fi
 
-if [[ -f "${CERT_PATH}" ]] && openssl x509 -checkend 86400 -noout -in "${CERT_PATH}" >/dev/null 2>&1; then
+if (( ssl_ready == 1 )); then
   log "Geçerli SSL sertifikası mevcut; yeniden alınmayacak."
 else
   log "SSL sertifikası alınıyor: ${DOMAIN}"
