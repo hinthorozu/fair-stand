@@ -1,0 +1,112 @@
+from pathlib import Path
+
+
+def replace_once(path, old, new, label):
+    p = Path(path)
+    s = p.read_text(encoding='utf-8')
+    if new in s:
+        return
+    if old not in s:
+        raise SystemExit(f'{label}: marker not found in {path}')
+    p.write_text(s.replace(old, new, 1), encoding='utf-8')
+
+
+replace_once(
+    'src/designState.js',
+    "    shelfCount: count,\n    strips: Array.from(\n",
+    "    shelfCount: count,\n    shelfLightingOn: false,\n    strips: Array.from(\n",
+    'shelf lighting state',
+)
+
+replace_once(
+    'src/scene3d.js',
+    "  const shelfHeightsCm = SHELF_DIMENSIONS.heightsByCountCm[shelfCount] ?? [];\n\n  built.group.userData.type = 'shelf';\n",
+    "  const shelfHeightsCm = SHELF_DIMENSIONS.heightsByCountCm[shelfCount] ?? [];\n  const shelfLightingOn = Boolean(moduleState.shelfLightingOn);\n\n  built.group.userData.type = 'shelf';\n",
+    'shelf lighting renderer state',
+)
+replace_once(
+    'src/scene3d.js',
+    "  built.group.userData.shelfCount = shelfCount;\n",
+    "  built.group.userData.shelfCount = shelfCount;\n  built.group.userData.shelfLightingOn = shelfLightingOn;\n",
+    'shelf lighting group state',
+)
+replace_once(
+    'src/scene3d.js',
+    "    frontProfile.castShadow = true;\n    built.group.add(frontProfile);\n  });\n\n  return built;\n}\n",
+    "    frontProfile.castShadow = true;\n    built.group.add(frontProfile);\n\n    if (shelfLightingOn) {\n      const light = new THREE.SpotLight(0xffffff, 22, 1.45, 0.95, 0.72, 1.5);\n      light.position.set(\n        0,\n        seamHeightM - 0.012,\n        wallDepthM / 2 + shelfDepthM * 0.58,\n      );\n      light.castShadow = false;\n      light.target.position.set(\n        0,\n        Math.max(0.04, seamHeightM - 0.72),\n        wallDepthM / 2 + shelfDepthM * 0.72,\n      );\n      light.userData.kind = 'decoration';\n      light.userData.role = 'shelf-under-light';\n      built.group.add(light, light.target);\n    }\n  });\n\n  return built;\n}\n",
+    'shelf lights',
+)
+
+replace_once(
+    'src/moduleContextMenu.js',
+    "  onValidateAddBatch,\n  onGlassModeChange,\n}) {\n",
+    "  onValidateAddBatch,\n  onGlassModeChange,\n  getShelfLightingState,\n  onShelfLightingChange,\n}) {\n",
+    'context menu callbacks',
+)
+replace_once(
+    'src/moduleContextMenu.js',
+    "    <button type=\"button\" data-module-action=\"toggle-glass\" hidden>Cam panele çevir</button>\n    <button type=\"button\" data-module-action=\"add-right\">Ekle Sağ Tarafa…</button>\n",
+    "    <button type=\"button\" data-module-action=\"toggle-glass\" hidden>Cam panele çevir</button>\n    <button type=\"button\" data-module-action=\"toggle-shelf-light\" hidden>Raf altı aydınlatmayı aç</button>\n    <button type=\"button\" data-module-action=\"add-right\">Ekle Sağ Tarafa…</button>\n",
+    'shelf light menu button',
+)
+replace_once(
+    'src/moduleContextMenu.js',
+    "  const glassModeButton = menu.querySelector('[data-module-action=\"toggle-glass\"]');\n",
+    "  const glassModeButton = menu.querySelector('[data-module-action=\"toggle-glass\"]');\n  const shelfLightingButton = menu.querySelector('[data-module-action=\"toggle-shelf-light\"]');\n",
+    'shelf light button ref',
+)
+replace_once(
+    'src/moduleContextMenu.js',
+    "    glassModeButton.textContent = context.isGlass\n      ? 'Normal panele çevir'\n      : 'Cam panele çevir';\n    menu.hidden = false;\n",
+    "    glassModeButton.textContent = context.isGlass\n      ? 'Normal panele çevir'\n      : 'Cam panele çevir';\n\n    const isShelf = (context.moduleType ?? context.type) === 'shelf';\n    const shelfLightingOn = isShelf ? Boolean(getShelfLightingState?.(context)) : false;\n    shelfLightingButton.hidden = !isShelf;\n    shelfLightingButton.textContent = shelfLightingOn\n      ? 'Raf altı aydınlatmayı kapat'\n      : 'Raf altı aydınlatmayı aç';\n    menu.hidden = false;\n",
+    'shelf light open state',
+)
+replace_once(
+    'src/moduleContextMenu.js',
+    "    if (action === 'toggle-glass' && context.supportsGlass) {\n      close();\n      onGlassModeChange?.(context, !context.isGlass);\n      return;\n    }\n\n    if (action === 'add-right') {\n",
+    "    if (action === 'toggle-glass' && context.supportsGlass) {\n      close();\n      onGlassModeChange?.(context, !context.isGlass);\n      return;\n    }\n\n    if (action === 'toggle-shelf-light' && (context.moduleType ?? context.type) === 'shelf') {\n      const nextState = !Boolean(getShelfLightingState?.(context));\n      close();\n      onShelfLightingChange?.(context, nextState);\n      return;\n    }\n\n    if (action === 'add-right') {\n",
+    'shelf light action',
+)
+
+replace_once(
+    'src/main.js',
+    "function changeContextPanelGlassMode(context, isGlass) {\n",
+    "function getContextShelfLightingState(context) {\n  const index = findContextModuleIndex(context);\n  const moduleState = index >= 0 ? currentModules[index] : null;\n  return moduleState?.type === 'shelf' && Boolean(moduleState.shelfLightingOn);\n}\n\nfunction changeContextShelfLighting(context, enabled) {\n  const index = findContextModuleIndex(context);\n  if (index < 0 || currentModules[index]?.type !== 'shelf') return;\n\n  currentModules[index].shelfLightingOn = Boolean(enabled);\n  rebuildWall({ resetView: false });\n  selectionInfo.textContent = enabled\n    ? 'Raf altı aydınlatma açıldı.'\n    : 'Raf altı aydınlatma kapatıldı.';\n}\n\nfunction changeContextPanelGlassMode(context, isGlass) {\n",
+    'main shelf light handlers',
+)
+replace_once(
+    'src/main.js',
+    "  onValidateAddBatch: validateCatalogAddBatch,\n  onGlassModeChange: changeContextPanelGlassMode,\n});\n",
+    "  onValidateAddBatch: validateCatalogAddBatch,\n  onGlassModeChange: changeContextPanelGlassMode,\n  getShelfLightingState: getContextShelfLightingState,\n  onShelfLightingChange: changeContextShelfLighting,\n});\n",
+    'main context callbacks',
+)
+
+Path('test/shelfLighting.test.js').write_text(r'''import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { createShelfModuleState } from '../src/designState.js';
+
+test('shelf under-lighting is persisted and off by default', () => {
+  const state = createShelfModuleState(100, 2);
+  assert.equal(state.type, 'shelf');
+  assert.equal(state.shelfLightingOn, false);
+});
+
+test('shelf renderer adds lights without changing shelf box geometry', () => {
+  const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  assert.match(source, /const shelfLightingOn = Boolean\(moduleState\.shelfLightingOn\)/);
+  assert.match(source, /new THREE\.SpotLight\(0xffffff, 22, 1\.45, 0\.95, 0\.72, 1\.5\)/);
+  assert.match(source, /role = 'shelf-under-light'/);
+  assert.match(source, /new THREE\.BoxGeometry\(innerWidthM, shelfThicknessM, shelfDepthM\)/);
+});
+
+test('shelf lighting toggle is available only from shelf context', () => {
+  const menu = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');
+  const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  assert.match(menu, /toggle-shelf-light/);
+  assert.match(menu, /Raf altı aydınlatmayı aç/);
+  assert.match(menu, /Raf altı aydınlatmayı kapat/);
+  assert.match(main, /changeContextShelfLighting/);
+  assert.match(main, /shelfLightingOn = Boolean\(enabled\)/);
+});
+''', encoding='utf-8')
