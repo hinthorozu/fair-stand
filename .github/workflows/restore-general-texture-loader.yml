@@ -1,0 +1,29 @@
+name: Restore General Texture Loader
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/restore-general-texture-loader.py'
+      - '.github/workflows/restore-general-texture-loader.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: python scripts/restore-general-texture-loader.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f scripts/restore-general-texture-loader.py .github/workflows/restore-general-texture-loader.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: restore shared image texture loader [skip ci]'
+          branch: ROG
