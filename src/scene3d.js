@@ -808,7 +808,7 @@ export function createStandScene(
       }),
     );
     screen.name = 'tv-screen-image-overlay';
-    screen.position.set(0, 1.75, 0.041);
+    screen.position.set(0, 1.75, 0.105);
     screen.renderOrder = 50;
     screen.userData.kind = 'tv-screen-overlay';
     screen.userData.acceptsImage = false;
