@@ -20,8 +20,8 @@ if end is None:
     raise SystemExit('createTvModule block not closed')
 
 replacement = r'''function createTvModule(moduleState, moduleIndex) {
-  const widthM = Number(moduleState.screenWidthCm || 93) / 100;
-  const heightM = Number(moduleState.screenHeightCm || 52.3) / 100;
+  const targetWidthM = Number(moduleState.screenWidthCm || 93) / 100;
+  const targetHeightM = Number(moduleState.screenHeightCm || 52.3) / 100;
   const depthM = 0.05;
   const centerYM = 1.75;
   const bezelM = 0.012;
@@ -34,9 +34,9 @@ replacement = r'''function createTvModule(moduleState, moduleIndex) {
   group.userData.moduleIndex = moduleIndex;
   group.userData.moduleType = 'tv';
 
-  // Keep the TV centered on its local origin so the 5 cm body is a single slab.
+  // One centered 5 cm body; no detached second slab.
   const body = new THREE.Mesh(
-    new THREE.BoxGeometry(widthM, heightM, depthM),
+    new THREE.BoxGeometry(targetWidthM, targetHeightM, depthM),
     new THREE.MeshStandardMaterial({
       color: 0x161616,
       roughness: 0.72,
@@ -48,11 +48,11 @@ replacement = r'''function createTvModule(moduleState, moduleIndex) {
   body.receiveShadow = true;
   group.add(body);
 
-  // Front screen: only this face carries the user-provided TV image.
+  // The supplied image exists only on the front (+Z) screen face.
   const screen = new THREE.Mesh(
     new THREE.PlaneGeometry(
-      Math.max(0.02, widthM - bezelM * 2),
-      Math.max(0.02, heightM - bezelM * 2),
+      Math.max(0.02, targetWidthM - bezelM * 2),
+      Math.max(0.02, targetHeightM - bezelM * 2),
     ),
     new THREE.MeshBasicMaterial({
       map: getTvScreenTexture(),
@@ -64,9 +64,9 @@ replacement = r'''function createTvModule(moduleState, moduleIndex) {
   screen.renderOrder = 3;
   group.add(screen);
 
-  // Back cover gives a clearly different rear face without creating a second slab.
+  // Rear cover sits flush on the same body and makes front/back obvious.
   const back = new THREE.Mesh(
-    new THREE.PlaneGeometry(widthM - 0.02, heightM - 0.02),
+    new THREE.PlaneGeometry(targetWidthM - 0.02, targetHeightM - 0.02),
     new THREE.MeshStandardMaterial({
       color: 0x2d2d2d,
       roughness: 0.9,
@@ -79,7 +79,7 @@ replacement = r'''function createTvModule(moduleState, moduleIndex) {
   group.add(back);
 
   const proxy = new THREE.Mesh(
-    new THREE.BoxGeometry(widthM, heightM, depthM),
+    new THREE.BoxGeometry(targetWidthM, targetHeightM, depthM),
     new THREE.MeshBasicMaterial({
       transparent: true,
       opacity: 0,
