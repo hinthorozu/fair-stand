@@ -5125,8 +5125,8 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
       const ledStrip = new THREE.Mesh(
         new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
         new THREE.MeshStandardMaterial({
-          color: 0xffffff,
-          emissive: 0xeaf6ff,
+          color: 0xfff6e8,
+          emissive: 0xffddb5,
           emissiveIntensity: 3.0,
           roughness: 0.28,
           metalness: 0,
@@ -5143,7 +5143,7 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
 
       // Geniş alan ışığı spot konisini kaldırır ve raf eni boyunca homojen yayılır.
       const areaLight = new THREE.RectAreaLight(
-        0xf4fbff,
+        0xffe4c8,
         8.5,
         ledStripWidthM,
         Math.max(shelfDepthM * 0.72, 0.12),
