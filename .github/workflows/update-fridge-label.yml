@@ -1,0 +1,140 @@
+name: Update Fridge Label
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/update-fridge-label.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Update fridge label
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/scene3d.js')
+          s = p.read_text(encoding='utf-8')
+          old = """function createMiniFridgeTopLabel(heightCm) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 256;
+  const context = canvas.getContext('2d');
+  if (!context) return null;
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.font = '800 128px Arial, Helvetica, sans-serif';
+  context.lineJoin = 'round';
+  context.lineWidth = 24;
+  context.strokeStyle = 'rgba(255,255,255,0.96)';
+  context.strokeText('BUZ DOLABI', canvas.width / 2, canvas.height / 2);
+  context.fillStyle = '#111827';
+  context.fillText('BUZ DOLABI', canvas.width / 2, canvas.height / 2);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+
+  const label = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.38, 0.095),
+    new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+  label.rotation.x = -Math.PI / 2;
+  label.position.set(0, Number(heightCm) / 100 + 0.004, -0.12);
+  label.renderOrder = 30;
+  label.userData.kind = 'decoration';
+  label.userData.role = 'mini-fridge-top-label';
+  return label;
+}
+"""
+          new = """function createMiniFridgeTopLabel(heightCm) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 768;
+  const context = canvas.getContext('2d');
+  if (!context) return null;
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.font = '800 220px Arial, Helvetica, sans-serif';
+  context.lineJoin = 'round';
+  context.lineWidth = 32;
+  context.strokeStyle = 'rgba(255,255,255,0.96)';
+  context.strokeText('BUZ', canvas.width / 2, 245);
+  context.strokeText('DOLABI', canvas.width / 2, 525);
+  context.fillStyle = '#111827';
+  context.fillText('BUZ', canvas.width / 2, 245);
+  context.fillText('DOLABI', canvas.width / 2, 525);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+
+  const label = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.40, 0.30),
+    new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+  label.rotation.x = -Math.PI / 2;
+  label.position.set(0, Number(heightCm) / 100 + 0.004, -0.04);
+  label.renderOrder = 30;
+  label.userData.kind = 'decoration';
+  label.userData.role = 'mini-fridge-top-label';
+  return label;
+}
+"""
+          if old not in s:
+              raise SystemExit('current fridge label block not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+
+          t = Path('test/miniFridgeTopLabel.test.js')
+          ts = t.read_text(encoding='utf-8')
+          ts = ts.replace("  assert.match(source, /strokeText\\('BUZ DOLABI'/);\n  assert.match(source, /fillText\\('BUZ DOLABI'/);\n", "  assert.match(source, /strokeText\\('BUZ'/);\n  assert.match(source, /strokeText\\('DOLABI'/);\n  assert.match(source, /fillText\\('BUZ'/);\n  assert.match(source, /fillText\\('DOLABI'/);\n  assert.match(source, /PlaneGeometry\\(0\\.40, 0\\.30\\)/);\n")
+          t.write_text(ts, encoding='utf-8')
+          PY
+      - name: Syntax check
+        run: |
+          node --check src/scene3d.js
+          node --check test/miniFridgeTopLabel.test.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit and push
+        shell: bash
+        run: |
+          rm -f .github/workflows/update-fridge-label.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/scene3d.js test/miniFridgeTopLabel.test.js .github/workflows/update-fridge-label.yml
+          git commit -m "fix: enlarge stacked fridge label [skip ci]"
+          git push origin ROG
