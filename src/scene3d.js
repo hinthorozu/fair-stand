@@ -3573,13 +3573,6 @@ function createTvModule(moduleState, moduleIndex) {
   tv.castShadow = true;
   tv.receiveShadow = true;
 
-  // TV uses an array of six face materials, so emissive-based selection cannot mark it.
-  // Give it the same explicit selection frame used by selectable panel surfaces.
-  const selectionFrame = createSelectionFrame(widthM, heightM);
-  selectionFrame.position.z = depthM / 2 + 0.006;
-  selectionFrame.visible = false;
-  tv.add(selectionFrame);
-
   tv.userData.kind = 'surface';
   tv.userData.surfaceId = `${moduleState.id}:tv`;
   tv.userData.moduleId = moduleState.id;
@@ -3587,7 +3580,6 @@ function createTvModule(moduleState, moduleIndex) {
   tv.userData.moduleIndex = moduleIndex;
   tv.userData.acceptsImage = false;
   tv.userData.selectionMode = 'module';
-  tv.userData.selectionFrame = selectionFrame;
   group.add(tv);
 
   return { group, surfaces: [tv] };
