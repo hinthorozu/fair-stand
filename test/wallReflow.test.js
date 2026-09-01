@@ -406,3 +406,58 @@ test('rejects only when the continuous active wall chain has no remaining capaci
   assert.equal(result.ok, false);
   assert.match(result.message, /yeterli alan yok/i);
 });
+
+
+test('top fixtures do not consume continuous wall capacity during duplication', () => {
+  const target = { id: 'panel-a', type: 'flat-panel', widthCm: 200, placement: {
+    xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back',
+  } };
+  const next = { id: 'panel-b', type: 'flat-panel', widthCm: 200, placement: {
+    xCm: 200, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back',
+  } };
+  const lamp = { id: 'lamp', type: 'led-floodlight', widthCm: 50, placement: {
+    xCm: 150, yCm: 0, zCm: 350, rotationZDeg: 0, wallId: 'back',
+  } };
+  const duplicate = { id: 'panel-copy', type: 'flat-panel', widthCm: 100, placement: null };
+
+  const result = planContinuousWallInsertion({
+    modules: [target, lamp, next],
+    insertedModules: [duplicate],
+    targetModuleId: target.id,
+    side: 'right',
+    standType: 'back-wall',
+    standXCm: 500,
+    standYCm: 500,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.placements.get('panel-copy').xCm, 200);
+  assert.equal(result.placements.get('panel-b').xCm, 300);
+  assert.equal(result.placements.has('lamp'), false);
+  assert.ok(result.orderedModuleIds.includes('lamp'));
+});
+
+test('wall overlays do not consume continuous wall capacity', () => {
+  const target = { id: 'panel-a', type: 'flat-panel', widthCm: 200, placement: {
+    xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back',
+  } };
+  const tv = { id: 'tv', type: 'tv', widthCm: 93, placement: {
+    xCm: 100, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back',
+  } };
+  const duplicate = { id: 'panel-copy', type: 'flat-panel', widthCm: 200, placement: null };
+
+  const result = planContinuousWallInsertion({
+    modules: [target, tv],
+    insertedModules: [duplicate],
+    targetModuleId: target.id,
+    side: 'right',
+    standType: 'back-wall',
+    standXCm: 400,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.placements.get('panel-copy').xCm, 200);
+  assert.equal(result.placements.has('tv'), false);
+  assert.ok(result.orderedModuleIds.includes('tv'));
+});

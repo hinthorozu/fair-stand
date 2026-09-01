@@ -1,4 +1,5 @@
 import { createModulePlacement } from './modulePlacement.js';
+import { getModuleBehavior } from './moduleBehavior.js';
 
 const EPSILON_CM = 0.001;
 
@@ -398,7 +399,10 @@ export function planContinuousWallInsertion({
 
   const activeWallIds = new Set(segments.map((segment) => segment.wallId));
   const activeModules = modules
-    .filter((module) => activeWallIds.has(module?.placement?.wallId))
+    .filter((module) => (
+      getModuleBehavior(module).placement === 'wall'
+      && activeWallIds.has(module?.placement?.wallId)
+    ))
     .map((module, originalIndex) => ({
       module,
       originalIndex,
