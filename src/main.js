@@ -2,6 +2,7 @@ import './style.css';
 import './colorEditor.css';
 import './imageActions.css';
 import { createStandScene } from './scene3d.js';
+import { resolveModuleCatalogKey } from './catalog.js';
 import {
   composeAutomaticStandWall,
   getAutomaticWallCapacityCm,
@@ -637,7 +638,7 @@ function duplicateContextModule(context, side) {
   rebuildWall({ resetView: false });
 }
 
-function createCatalogModuleState(module, { preservePlacement = false } = {}) {
+function createCatalogModuleState(module, { preservePlacement = false, catalogKey = null } = {}) {
   if (!module) return null;
 
   let state = null;
@@ -659,6 +660,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
     state = createShowcaseModuleState(module.type, module.widthCm);
   }
 
+  if (state) state.catalogKey = catalogKey ?? resolveModuleCatalogKey(module);
   if (state && preservePlacement && module.placement) {
     state.placement = { ...module.placement };
   }
@@ -937,7 +939,7 @@ moduleDragSidebar = createModuleDragSidebar({
   anchorButton: openModuleCatalogButton,
   viewport,
   canDrag: () => Boolean(currentStand),
-  createModuleState: (module) => createCatalogModuleState(module),
+  createModuleState: (module, moduleKey) => createCatalogModuleState(module, { catalogKey: moduleKey }),
   onPreview: (moduleState, clientX, clientY, rotationZDeg, rotationLocked) => (
     scene3d.previewCatalogModuleDrag(
       moduleState,
@@ -1414,6 +1416,9 @@ async function restoreProject(project) {
   activeProjectCreatedAt = Number(project.createdAt) || Date.now();
   projectNameInput.value = project.name || 'Adsız Proje';
   currentModules = cloneProjectState(project.modules) || [];
+  currentModules.forEach((moduleState) => {
+    if (!moduleState.catalogKey) moduleState.catalogKey = resolveModuleCatalogKey(moduleState);
+  });
   currentStand = cloneProjectState(project.stand);
   moduleContextMenu.close();
   moduleContextMenu.closePicker();

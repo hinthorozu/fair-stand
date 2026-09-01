@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
+import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
@@ -27,6 +27,7 @@ import {
   planContinuousModuleMove,
 } from './moduleMove.js';
 import { getModuleGhostBehavior, getModuleRotationStepDeg, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule } from './moduleBehavior.js';
+import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
 const PANEL_BACK_COLOR = 0x4b5563;
@@ -1442,11 +1443,18 @@ export function createStandScene(
     const { moduleGroup, hit } = picked;
     const surface = hit.object.userData?.kind === 'surface' ? hit.object : null;
     const supportsGlass = surface?.userData.selectionMode === 'panel';
+    const moduleState = moduleGroup.userData.moduleState ?? {};
     return {
       moduleIndex: moduleGroup.userData.moduleIndex,
       moduleId: moduleGroup.userData.moduleId,
-      type: moduleGroup.userData.type,
-      widthCm: moduleGroup.userData.widthCm,
+      catalogKey: moduleState.catalogKey ?? null,
+      type: moduleState.type ?? moduleGroup.userData.type,
+      widthCm: moduleState.widthCm ?? moduleGroup.userData.widthCm,
+      depthCm: moduleState.depthCm ?? moduleGroup.userData.depthCm,
+      shape: moduleState.shape ?? null,
+      shelfCount: moduleState.shelfCount ?? null,
+      sizeInch: moduleState.sizeInch ?? null,
+      screenWidthCm: moduleState.screenWidthCm ?? null,
       placement: moduleGroup.userData.moduleState?.placement
         ? { ...moduleGroup.userData.moduleState.placement }
         : null,
@@ -1881,24 +1889,6 @@ export function createStandScene(
     ghost.root.visible = true;
   }
 
-  function getDragModuleLabel(moduleState) {
-    const widthCm = Number(moduleState?.widthCm) || 0;
-    if (moduleState?.type === 'shelf') return 'Raf ' + widthCm + ' · ' + (Number(moduleState.shelfCount) || 2) + ' Raf';
-    if (moduleState?.type === 'sofa-set-classic') return 'Bej Koltuk Takımı';
-    if (moduleState?.type === 'table-chair-set-eames') return 'Eames Masa Sandalye Takımı';
-    if (moduleState?.type === 'led-floodlight') return 'LED Projektör';
-    if (moduleState?.type === 'base') return `Baza ${widthCm}`;
-    if (moduleState?.type === 'counter') return moduleState.shape === 'L' ? ('Köşe Banko ' + widthCm + '×' + (Number(moduleState.depthCm) || widthCm)) : `Banko ${widthCm}`;
-    if (moduleState?.type === 'separator') return `Separatör ${widthCm}`;
-    if (moduleState?.type === 'door') return `Kapı ${widthCm}`;
-    if (moduleState?.type === 'showcase-3') return `3 Gözlü Vitrin ${widthCm}`;
-    if (moduleState?.type === 'showcase-2') return `2 Gözlü Vitrin ${widthCm}`;
-    if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';
-    if (moduleState?.type === 'mini-fridge') return 'Mini Buzdolabı';
-    if (moduleState?.type === 'tv') return `TV ${Number(moduleState.sizeInch) || 42}"`;
-    return `Düz Panel ${widthCm}`;
-  }
-
   function disposeDragBadge() {
     dragBadge?.remove?.();
     dragBadge = null;
@@ -1924,73 +1914,33 @@ export function createStandScene(
         'user-select:none',
       ].join(';');
 
-      const preview = document.createElement('div');
-      preview.dataset.role = 'preview';
-      preview.style.cssText = [
-        'width:24px',
-        'height:48px',
-        'box-sizing:border-box',
-        'border:2px solid #8a929a',
-        'background:repeating-linear-gradient(to bottom,#f7f7f5 0 5px,#c4c9ce 5px 6px)',
-      ].join(';');
-
+      const previewSlot = document.createElement('div');
+      previewSlot.dataset.role = 'preview-slot';
+      previewSlot.style.cssText = 'width:66px;height:58px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 66px';
       const label = document.createElement('span');
       label.dataset.role = 'label';
-      dragBadge.append(preview, label);
+      dragBadge.append(previewSlot, label);
       document.body.appendChild(dragBadge);
     }
 
-    const preview = dragBadge.querySelector('[data-role="preview"]');
+    const catalogItem = getModuleCatalogItem(moduleState) ?? moduleState;
+    const labelText = getModuleCatalogLabel(moduleState);
+    const previewSlot = dragBadge.querySelector('[data-role="preview-slot"]');
     const label = dragBadge.querySelector('[data-role="label"]');
-    if (label) label.textContent = getDragModuleLabel(moduleState);
-    if (preview) {
-      preview.innerHTML = '';
-      preview.style.width = '24px';
-      preview.style.height = (moduleState?.type === 'sofa-set-classic') ? '34px' : (moduleState?.type === 'base' ? '22px' : (moduleState?.type === 'counter' ? '28px' : '48px'));
-      preview.style.position = 'relative';
-      preview.style.border = '2px solid #8a929a';
-      preview.style.background = 'repeating-linear-gradient(to bottom,#f7f7f5 0 5px,#c4c9ce 5px 6px)';
+    if (label) label.textContent = labelText;
 
-      if (moduleState?.type === 'bar-stool') {
-        preview.style.width = '44px';
+    if (previewSlot) {
+      const signature = `${moduleState?.catalogKey ?? ''}|${labelText}|${moduleState?.type ?? ''}|${moduleState?.widthCm ?? ''}|${moduleState?.shelfCount ?? ''}|${moduleState?.sizeInch ?? ''}`;
+      if (previewSlot.dataset.signature !== signature) {
+        previewSlot.dataset.signature = signature;
+        previewSlot.innerHTML = '';
+        const preview = createModuleCatalogPreview(catalogItem);
+        preview.style.width = '66px';
         preview.style.height = '58px';
-        preview.style.border = '0';
+        preview.style.flex = '0 0 66px';
         preview.style.background = 'transparent';
-        const seat = document.createElement('span');
-        seat.style.cssText = 'position:absolute;left:8px;top:4px;width:28px;height:20px;box-sizing:border-box;border:2px solid #8a929a;border-radius:10px 10px 5px 5px;background:#f8fafc';
-        const frame = document.createElement('span');
-        frame.style.cssText = 'position:absolute;left:11px;top:24px;width:22px;height:27px;box-sizing:border-box;border-left:3px solid #8a929a;border-right:3px solid #8a929a;border-bottom:3px solid #8a929a;border-radius:0 0 10px 10px';
-        preview.append(seat, frame);
-      } else if (moduleState?.type === 'sofa-set-classic') {
-        preview.style.background = 'linear-gradient(to bottom,#f8fafc 0 45%,#9aa0a6 45% 52%,#f8fafc 52% 100%)';
-      } else if (moduleState?.type === 'shelf') {
-        preview.style.background = moduleState.shelfCount === 3
-          ? 'linear-gradient(to bottom,#f7f7f5 0 40%,#ffffff 40% 45%,#c4c9ce 45% 46%,#f7f7f5 46% 55%,#ffffff 55% 60%,#c4c9ce 60% 61%,#f7f7f5 61% 70%,#ffffff 70% 75%,#c4c9ce 75% 76%,#f7f7f5 76% 100%)'
-          : 'linear-gradient(to bottom,#f7f7f5 0 55%,#ffffff 55% 60%,#c4c9ce 60% 61%,#f7f7f5 61% 70%,#ffffff 70% 75%,#c4c9ce 75% 76%,#f7f7f5 76% 100%)';
-      } else if (moduleState?.type === 'base') {
-        preview.style.background = 'linear-gradient(to bottom,#ffffff 0 20%,#9aa0a6 20% 29%,#f8fafc 29% 86%,#9aa0a6 86% 100%)';
-      } else if (moduleState?.type === 'counter') {
-        preview.style.background = 'linear-gradient(to bottom,#eef2f6 0 16%,#d1d5db 16% 20%,#f8fafc 20% 100%)';
-      } else if (moduleState?.type === 'separator') {
-        preview.style.background = 'repeating-linear-gradient(to bottom,#c79b63 0 2px,#eef2f6 2px 4px)';
-      } else if (moduleState?.type === 'door') {
-        preview.style.background = 'linear-gradient(to bottom,#f7f7f5 0 40%,#8a929a 40% 44%,#e5e7eb 44% 100%)';
-      } else if (moduleState?.type === 'showcase-2' || moduleState?.type === 'showcase-3') {
-        preview.style.background = 'linear-gradient(to bottom,#f7f7f5 0 32%,#d8eadb 32% 72%,#f7f7f5 72% 100%)';
-      } else if (moduleState?.type === 'tv') {
-        preview.style.width = '48px';
-        preview.style.height = '42px';
-        preview.style.border = '0';
-        preview.style.background = 'transparent';
-        const screen = document.createElement('span');
-        screen.style.cssText = 'position:absolute;left:3px;top:2px;width:42px;height:25px;box-sizing:border-box;border:3px solid #34383d;background:#f8fafc;border-radius:2px';
-        const stem = document.createElement('span');
-        stem.style.cssText = 'position:absolute;left:21px;top:27px;width:6px;height:7px;background:#34383d';
-        const base = document.createElement('span');
-        base.style.cssText = 'position:absolute;left:13px;top:34px;width:22px;height:4px;background:#34383d;border-radius:2px';
-        preview.append(screen, stem, base);
-      } else {
-        preview.style.background = 'repeating-linear-gradient(to bottom,#f7f7f5 0 5px,#c4c9ce 5px 6px)';
+        preview.style.borderRadius = '0';
+        previewSlot.appendChild(preview);
       }
     }
 

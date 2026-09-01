@@ -1,17 +1,5 @@
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from './catalog.js';
+import { getModuleCatalogLabel, MODULE_CATALOG, MODULE_CATALOG_KEYS } from './catalog.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
-
-const MODULE_LABELS = {
-  'flat-panel': 'Düz Panel',
-  'showcase-2': '2 Gözlü Vitrin',
-  'showcase-3': '3 Gözlü Vitrin',
-  separator: 'Separatör',
-  door: 'Depo Kapısı',
-  counter: 'Banko',
-  base: 'Baza',
-  shelf: 'Raf',
-  'sofa-set-classic': 'Bej Koltuk Takımı',
-};
 
 
 export function resolveModuleSidePlacement(context, visualSide) {
@@ -90,9 +78,7 @@ export function createModuleContextMenu({
   const pickerSelectionClear = pickerBackdrop.querySelector('.module-picker-selection-clear');
 
   function describeModule(context) {
-    const label = MODULE_LABELS[context?.type] ?? 'Modül';
-    const width = Number.isFinite(context?.widthCm) ? ` · ${context.widthCm} cm` : '';
-    return `${label}${width}`;
+    return getModuleCatalogLabel(context);
   }
 
   function getSelectionCounts() {

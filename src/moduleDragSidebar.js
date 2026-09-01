@@ -1,4 +1,4 @@
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from './catalog.js';
+import { MODULE_CATALOG, MODULE_CATALOG_GROUPS, MODULE_CATALOG_KEYS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { getModuleDefaultRotationDeg, getModuleRotationStepDeg } from './moduleBehavior.js';
 
@@ -236,32 +236,7 @@ export function createModuleDragSidebar({
   root.append(hint, groupsRoot);
   anchorButton.parentElement.insertBefore(root, anchorButton);
 
-  const groupDefinitions = [
-    {
-      label: 'Panel & Duvar',
-      keys: ['wall_200', 'wall_150', 'wall_100', 'wall_50', 'wall_separator_100', 'wall_separator_50', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'DOOR_100'],
-    },
-    {
-      label: 'Raf & Vitrin',
-      keys: ['wall_showcase_100_3', 'wall_showcase_100_2', 'wall_shelf_3_200', 'wall_shelf_3_150', 'wall_shelf_3_100', 'wall_shelf_2_200', 'wall_shelf_2_150', 'wall_shelf_2_100'],
-    },
-    {
-      label: 'Banko & Baza',
-      keys: ['desk_banko_200', 'desk_banko_150', 'desk_banko_100', 'desk_banko_200_L', 'desk_banko_150_L', 'desk_banko_100_L', 'BASE_200', 'BASE_150', 'BASE_100'],
-    },
-    {
-      label: 'Mobilya',
-      keys: ['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic'],
-    },
-    {
-      label: 'Depo',
-      keys: ['DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE'],
-    },
-    {
-      label: 'Elektronik & Aydınlatma',
-      keys: ['TV_42', 'TV_55', 'TV_65', 'LED_FLOODLIGHT'],
-    },
-  ];
+  const groupDefinitions = MODULE_CATALOG_GROUPS;
 
   const groupGridByKey = new Map();
   groupDefinitions.forEach((group, index) => {
@@ -320,7 +295,7 @@ export function createModuleDragSidebar({
           return;
         }
 
-        const state = createModuleState?.(module);
+        const state = createModuleState?.(module, moduleKey);
         if (!state) {
           event.preventDefault();
           return;

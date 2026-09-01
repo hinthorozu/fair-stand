@@ -189,6 +189,93 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'LED_FLOODLIGHT',
 ]);
 
+export const MODULE_CATALOG_GROUPS = Object.freeze([
+  Object.freeze({
+    label: 'Panel & Duvar',
+    keys: Object.freeze(['wall_200', 'wall_150', 'wall_100', 'wall_50', 'wall_separator_100', 'wall_separator_50', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'DOOR_100']),
+  }),
+  Object.freeze({
+    label: 'Raf & Vitrin',
+    keys: Object.freeze(['wall_showcase_100_3', 'wall_showcase_100_2', 'wall_shelf_3_200', 'wall_shelf_3_150', 'wall_shelf_3_100', 'wall_shelf_2_200', 'wall_shelf_2_150', 'wall_shelf_2_100']),
+  }),
+  Object.freeze({
+    label: 'Banko & Baza',
+    keys: Object.freeze(['desk_banko_200', 'desk_banko_150', 'desk_banko_100', 'desk_banko_200_L', 'desk_banko_150_L', 'desk_banko_100_L', 'BASE_200', 'BASE_150', 'BASE_100']),
+  }),
+  Object.freeze({
+    label: 'Mobilya',
+    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic']),
+  }),
+  Object.freeze({
+    label: 'Depo',
+    keys: Object.freeze(['DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE']),
+  }),
+  Object.freeze({
+    label: 'Elektronik & Aydınlatma',
+    keys: Object.freeze(['TV_42', 'TV_55', 'TV_65', 'LED_FLOODLIGHT']),
+  }),
+]);
+
+function optionalNumber(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function normalizeCatalogDescriptor(descriptor) {
+  const nested = descriptor?.moduleState && typeof descriptor.moduleState === 'object'
+    ? descriptor.moduleState
+    : null;
+  const source = nested ?? descriptor ?? {};
+  return {
+    catalogKey: source.catalogKey ?? descriptor?.catalogKey ?? null,
+    type: source.type ?? source.moduleType ?? descriptor?.type ?? descriptor?.moduleType ?? null,
+    widthCm: optionalNumber(source.widthCm ?? descriptor?.widthCm),
+    depthCm: optionalNumber(source.depthCm ?? descriptor?.depthCm),
+    shape: source.shape ?? source.counterShape ?? descriptor?.shape ?? descriptor?.counterShape ?? null,
+    shelfCount: optionalNumber(source.shelfCount ?? descriptor?.shelfCount),
+    sizeInch: optionalNumber(source.sizeInch ?? descriptor?.sizeInch),
+    screenWidthCm: optionalNumber(source.screenWidthCm ?? descriptor?.screenWidthCm),
+  };
+}
+
+export function resolveModuleCatalogKey(descriptor) {
+  const normalized = normalizeCatalogDescriptor(descriptor);
+  if (normalized.catalogKey && MODULE_CATALOG[normalized.catalogKey]) return normalized.catalogKey;
+  if (!normalized.type) return null;
+
+  const candidates = MODULE_CATALOG_KEYS.filter(
+    (moduleKey) => MODULE_CATALOG[moduleKey]?.type === normalized.type,
+  );
+  if (!candidates.length) return null;
+
+  const matches = candidates.filter((moduleKey) => {
+    const item = MODULE_CATALOG[moduleKey];
+    if (normalized.widthCm !== null && optionalNumber(item.widthCm) !== null && optionalNumber(item.widthCm) !== normalized.widthCm) return false;
+    if (normalized.depthCm !== null && optionalNumber(item.depthCm) !== null && optionalNumber(item.depthCm) !== normalized.depthCm) return false;
+    if ((normalized.shape !== null || item.shape != null) && (item.shape ?? null) !== normalized.shape) return false;
+    if ((normalized.shelfCount !== null || item.shelfCount != null) && optionalNumber(item.shelfCount) !== normalized.shelfCount) return false;
+    if (normalized.sizeInch !== null && optionalNumber(item.sizeInch) !== null && optionalNumber(item.sizeInch) !== normalized.sizeInch) return false;
+    if (normalized.type === 'tv' && normalized.sizeInch === null && normalized.screenWidthCm !== null && optionalNumber(item.screenWidthCm) !== normalized.screenWidthCm) return false;
+    return true;
+  });
+
+  if (matches.length === 1) return matches[0];
+  if (candidates.length === 1) return candidates[0];
+  return null;
+}
+
+export function getModuleCatalogItem(descriptor) {
+  const moduleKey = resolveModuleCatalogKey(descriptor);
+  return moduleKey ? MODULE_CATALOG[moduleKey] ?? null : null;
+}
+
+export function getModuleCatalogLabel(descriptor) {
+  return getModuleCatalogItem(descriptor)?.label
+    ?? (typeof descriptor?.label === 'string' ? descriptor.label : null)
+    ?? 'Modül';
+}
+
 export function flatPanelKey(widthCm) {
   return `wall_${widthCm}`;
 }
