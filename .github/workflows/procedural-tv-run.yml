@@ -1,0 +1,29 @@
+name: Procedural TV Run
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/procedural-tv-run.yml'
+permissions:
+  contents: write
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python scripts/convert-procedural-tv.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f scripts/convert-procedural-tv.py .github/workflows/procedural-tv-run.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'refactor: replace GLB TV with procedural display [skip ci]'
+          branch: ROG
