@@ -25,8 +25,9 @@ scene.write_text(s)
 test = Path('test/tv42Module.test.js')
 t = test.read_text()
 t = t.replace("  assert.match(tvSource, /new THREE\\.TextureLoader\\(\\)\\.load\\(TV_SCREEN_DATA_URL\\)/);\n", "  assert.match(tvSource, /createTvScreenTexture\\(\\)/);\n")
+t = t.replace("  assert.match(tvSource, /screenTexture\\.colorSpace = THREE\\.SRGBColorSpace/);\n", "")
 needle = "test('TV 42 does not inherit flat panel state'"
-guard = """test('TV texture avoids loading the data URI as a URL', () => {\n  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n  assert.match(source, /function getTvScreenBlob\\(\\)/);\n  assert.match(source, /URL\\.createObjectURL\\(getTvScreenBlob\\(\\)\\)/);\n  assert.doesNotMatch(source, /load\\(TV_SCREEN_DATA_URL\\)/);\n});\n\n"""
+guard = """test('TV texture avoids loading the data URI as a URL', () => {\n  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n  assert.match(source, /function getTvScreenBlob\\(\\)/);\n  assert.match(source, /URL\\.createObjectURL\\(getTvScreenBlob\\(\\)\\)/);\n  assert.match(source, /texture\\.colorSpace = THREE\\.SRGBColorSpace/);\n  assert.doesNotMatch(source, /load\\(TV_SCREEN_DATA_URL\\)/);\n});\n\n"""
 if guard not in t:
     t = t.replace(needle, guard + needle, 1)
 test.write_text(t)
