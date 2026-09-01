@@ -29,6 +29,10 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 
+log "Repo güncelleniyor..."
+cd "${REPO_ROOT}"
+git pull --ff-only
+
 log "Temel paketler kuruluyor..."
 apt-get update
 apt-get install -y ca-certificates curl gnupg nginx certbot python3-certbot-nginx
