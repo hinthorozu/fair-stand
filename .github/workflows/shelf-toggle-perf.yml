@@ -49,3 +49,5 @@ jobs:
           git add -A
           git commit -m "perf: toggle shelf lights without rebuilding scene [skip ci]"
           git push origin ROG
+
+# rerun 2
