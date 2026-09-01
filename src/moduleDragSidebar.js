@@ -10,7 +10,14 @@ function ensureStyles() {
   style.textContent = `
     .module-drag-catalog { display:flex; flex-direction:column; gap:8px; }
     .module-drag-hint { margin:0; color:#7a8494; font-size:10px; line-height:1.45; }
-    .module-drag-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+    .module-drag-groups { display:flex; flex-direction:column; gap:7px; }
+    .module-drag-group { overflow:hidden; border:1px solid #d9dee5; border-radius:10px; background:#fff; }
+    .module-drag-group > summary { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 10px; color:#364152; font-size:11px; font-weight:700; cursor:pointer; user-select:none; list-style:none; }
+    .module-drag-group > summary::-webkit-details-marker { display:none; }
+    .module-drag-group > summary::after { content:'▸'; color:#7a8494; font-size:12px; transition:transform .15s ease; }
+    .module-drag-group[open] > summary::after { transform:rotate(90deg); }
+    .module-drag-group[open] > summary { border-bottom:1px solid #e6eaf0; }
+    .module-drag-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; padding:7px; }
     .module-drag-card { display:flex; min-width:0; min-height:116px; flex-direction:column; align-items:stretch; justify-content:space-between; gap:7px; padding:8px; border:1px solid #d9dee5; border-radius:10px; background:#f8fafc; color:#364152; cursor:grab; user-select:none; }
     .module-drag-card:hover { border-color:#f97316; background:#fff8f2; }
     .module-drag-card.is-disabled { opacity:.45; cursor:not-allowed; }
@@ -196,10 +203,49 @@ export function createModuleDragSidebar({
   hint.className = 'module-drag-hint';
   hint.textContent = 'Kartı sahneye sürükle · R/Shift+R: modül standardına göre döndür · grid modüle göre';
 
-  const grid = document.createElement('div');
-  grid.className = 'module-drag-grid';
-  root.append(hint, grid);
+  const groupsRoot = document.createElement('div');
+  groupsRoot.className = 'module-drag-groups';
+  root.append(hint, groupsRoot);
   anchorButton.parentElement.insertBefore(root, anchorButton);
+
+  const groupDefinitions = [
+    {
+      label: 'Panel & Duvar',
+      keys: ['wall_200', 'wall_150', 'wall_100', 'wall_50', 'wall_separator_100', 'wall_separator_50', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'DOOR_100'],
+    },
+    {
+      label: 'Raf & Vitrin',
+      keys: ['wall_showcase_100_3', 'wall_showcase_100_2', 'wall_shelf_3_200', 'wall_shelf_3_150', 'wall_shelf_3_100', 'wall_shelf_2_200', 'wall_shelf_2_150', 'wall_shelf_2_100'],
+    },
+    {
+      label: 'Banko & Baza',
+      keys: ['desk_banko_200', 'desk_banko_150', 'desk_banko_100', 'desk_banko_200_L', 'desk_banko_150_L', 'desk_banko_100_L', 'BASE_200', 'BASE_150', 'BASE_100'],
+    },
+    {
+      label: 'Mobilya',
+      keys: ['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic'],
+    },
+    {
+      label: 'Elektronik & Aydınlatma',
+      keys: ['TV_42', 'TV_55', 'TV_65', 'LED_FLOODLIGHT'],
+    },
+  ];
+
+  const groupGridByKey = new Map();
+  groupDefinitions.forEach((group, index) => {
+    const details = document.createElement('details');
+    details.className = 'module-drag-group';
+    details.open = index === 0;
+
+    const summary = document.createElement('summary');
+    summary.textContent = group.label;
+
+    const grid = document.createElement('div');
+    grid.className = 'module-drag-grid';
+    details.append(summary, grid);
+    groupsRoot.appendChild(details);
+    group.keys.forEach((moduleKey) => groupGridByKey.set(moduleKey, grid));
+  });
 
   let enabled = false;
   let activeCard = null;
@@ -263,7 +309,11 @@ export function createModuleDragSidebar({
         onCancel?.();
       });
 
-      grid.appendChild(card);
+      const targetGrid = groupGridByKey.get(moduleKey);
+      if (!targetGrid) {
+        throw new Error(`Module catalog group missing for ${moduleKey}`);
+      }
+      targetGrid.appendChild(card);
       return card;
     });
 
