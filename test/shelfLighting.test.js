@@ -14,6 +14,9 @@ test('shelf renderer adds lights without changing shelf box geometry', () => {
   assert.match(source, /const shelfLightingOn = Boolean\(moduleState\.shelfLightingOn\)/);
   assert.match(source, /new THREE\.RectAreaLight\(/);
   assert.match(source, /shelf-under-led-strip/);
+  assert.match(source, /color: 0xffffff/);
+  assert.match(source, /emissive: 0xeaf6ff/);
+  assert.match(source, /0xf4fbff/);
   assert.match(source, /shelfBottomY - ledStripThicknessM \/ 2 - 0\.001/);
   assert.match(source, /role = 'shelf-under-light'/);
   assert.match(source, /new THREE\.BoxGeometry\(innerWidthM, shelfThicknessM, shelfDepthM\)/);
