@@ -12,7 +12,9 @@ test('shelf under-lighting is persisted and off by default', () => {
 test('shelf renderer adds lights without changing shelf box geometry', () => {
   const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(source, /const shelfLightingOn = Boolean\(moduleState\.shelfLightingOn\)/);
-  assert.match(source, /new THREE\.SpotLight\(0xffffff, 22, 1\.45, 0\.95, 0\.72, 1\.5\)/);
+  assert.match(source, /new THREE\.RectAreaLight\(/);
+  assert.match(source, /shelf-under-led-strip/);
+  assert.match(source, /shelfBottomY - ledStripThicknessM \/ 2 - 0\.001/);
   assert.match(source, /role = 'shelf-under-light'/);
   assert.match(source, /new THREE\.BoxGeometry\(innerWidthM, shelfThicknessM, shelfDepthM\)/);
 });

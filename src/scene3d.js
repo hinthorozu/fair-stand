@@ -5115,21 +5115,52 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
     built.group.add(frontProfile);
 
     if (shelfLightingOn) {
-      const light = new THREE.SpotLight(0xffffff, 22, 1.45, 0.95, 0.72, 1.5);
-      light.position.set(
-        0,
-        seamHeightM - 0.012,
-        wallDepthM / 2 + shelfDepthM * 0.58,
+      // Boydan boya lineer LED: raf geometrisine dokunmadan alt yüzeye oturur.
+      const ledStripWidthM = Math.max(innerWidthM - 0.04, 0.08);
+      const ledStripDepthM = 0.016;
+      const ledStripThicknessM = 0.006;
+      const shelfBottomY = seamHeightM;
+      const ledCenterZM = wallDepthM / 2 + shelfDepthM * 0.78;
+
+      const ledStrip = new THREE.Mesh(
+        new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
+        new THREE.MeshStandardMaterial({
+          color: 0xfff8e8,
+          emissive: 0xffefc2,
+          emissiveIntensity: 3.0,
+          roughness: 0.28,
+          metalness: 0,
+        }),
       );
-      light.castShadow = false;
-      light.target.position.set(
+      ledStrip.position.set(
         0,
-        Math.max(0.04, seamHeightM - 0.72),
-        wallDepthM / 2 + shelfDepthM * 0.72,
+        shelfBottomY - ledStripThicknessM / 2 - 0.001,
+        ledCenterZM,
       );
-      light.userData.kind = 'decoration';
-      light.userData.role = 'shelf-under-light';
-      built.group.add(light, light.target);
+      ledStrip.userData.kind = 'decoration';
+      ledStrip.userData.role = 'shelf-under-led-strip';
+      built.group.add(ledStrip);
+
+      // Geniş alan ışığı spot konisini kaldırır ve raf eni boyunca homojen yayılır.
+      const areaLight = new THREE.RectAreaLight(
+        0xfff3d6,
+        8.5,
+        ledStripWidthM,
+        Math.max(shelfDepthM * 0.72, 0.12),
+      );
+      areaLight.position.set(
+        0,
+        shelfBottomY - 0.008,
+        wallDepthM / 2 + shelfDepthM * 0.56,
+      );
+      areaLight.lookAt(new THREE.Vector3(
+        0,
+        shelfBottomY - 1,
+        wallDepthM / 2 + shelfDepthM * 0.56,
+      ));
+      areaLight.userData.kind = 'decoration';
+      areaLight.userData.role = 'shelf-under-light';
+      built.group.add(areaLight);
     }
   });
 
