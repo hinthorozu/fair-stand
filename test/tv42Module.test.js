@@ -21,13 +21,16 @@ test('TV module has explicit ghost behavior contract', () => {
   assert.equal(getModuleGhostBehavior({ type: 'tv' }).renderer, 'tv');
 });
 
-test('TV renderer is procedural and maps the supplied screen image to the front face', () => {
+test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its front face', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(source, /models\/tv\.glb/);
-  assert.doesNotMatch(source, /loadTvModel/);
-  assert.match(source, /new THREE\.BoxGeometry\(targetWidthM, targetHeightM, depthM\)/);
-  assert.match(source, /map: getTvScreenTexture\(\)/);
-  assert.match(source, /side: THREE\.FrontSide/);
+  const start = source.indexOf('function createTvModule(');
+  assert.ok(start >= 0);
+  const finish = source.indexOf('\n}', start) + 2;
+  const tvSource = source.slice(start, finish);
+  assert.match(tvSource, /const depthM = 0\.05/);
+  assert.match(tvSource, /new THREE\.BoxGeometry\(widthM, heightM, depthM\)/);
+  assert.match(tvSource, /map: getTvScreenTexture\(\)/);
+  assert.doesNotMatch(tvSource, /new THREE\.PlaneGeometry/);
 });
 
 

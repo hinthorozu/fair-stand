@@ -796,23 +796,7 @@ export function createStandScene(
   tvScreenTexture.colorSpace = THREE.SRGBColorSpace;
   tvScreenTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
-  function addTvScreenOverlay(group) {
-    if (!group || group.getObjectByName('tv-screen-image-overlay')) return;
-    const screen = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.88, 0.495),
-      new THREE.MeshBasicMaterial({
-        map: tvScreenTexture,
-        toneMapped: false,
-        side: THREE.FrontSide,
-      }),
-    );
-    screen.name = 'tv-screen-image-overlay';
-    screen.position.set(0, 1.75, 0.105);
-    screen.renderOrder = 50;
-    screen.userData.kind = 'tv-screen-overlay';
-    screen.userData.acceptsImage = false;
-    group.add(screen);
-  }
+  
   let surfaceMeshes = [];
   const selectedSurfaces = new Set();
   let selectionAnchorSurfaceId = null;
@@ -3519,13 +3503,10 @@ export function createStandScene(
 }
 
 function createTvModule(moduleState, moduleIndex) {
-  const targetWidthM = Number(moduleState.screenWidthCm || 93) / 100;
-  const targetHeightM = Number(moduleState.screenHeightCm || 52.3) / 100;
+  const widthM = Number(moduleState.screenWidthCm || 93) / 100;
+  const heightM = Number(moduleState.screenHeightCm || 52.3) / 100;
   const depthM = 0.05;
   const centerYM = 1.75;
-  const bezelM = 0.012;
-  const frontZ = depthM / 2 + 0.0015;
-  const backZ = -(depthM / 2 + 0.0015);
 
   const group = new THREE.Group();
   group.userData.kind = 'module';
@@ -3533,70 +3514,44 @@ function createTvModule(moduleState, moduleIndex) {
   group.userData.moduleIndex = moduleIndex;
   group.userData.moduleType = 'tv';
 
-  // One centered 5 cm body; no detached second slab.
-  const body = new THREE.Mesh(
-    new THREE.BoxGeometry(targetWidthM, targetHeightM, depthM),
-    new THREE.MeshStandardMaterial({
-      color: 0x161616,
-      roughness: 0.72,
-      metalness: 0.05,
-    }),
-  );
-  body.position.set(0, centerYM, 0);
-  body.castShadow = true;
-  body.receiveShadow = true;
-  group.add(body);
+  const blackMaterial = () => new THREE.MeshStandardMaterial({
+    color: 0x111111,
+    roughness: 0.72,
+    metalness: 0.05,
+  });
 
-  // The supplied image exists only on the front (+Z) screen face.
-  const screen = new THREE.Mesh(
-    new THREE.PlaneGeometry(
-      Math.max(0.02, targetWidthM - bezelM * 2),
-      Math.max(0.02, targetHeightM - bezelM * 2),
-    ),
+  // BoxGeometry face material order:
+  // +X, -X, +Y, -Y, +Z(front), -Z(back).
+  // The TV is ONE 93 x 52.3 x 5 cm solid. No extra screen plane exists.
+  const materials = [
+    blackMaterial(),
+    blackMaterial(),
+    blackMaterial(),
+    blackMaterial(),
     new THREE.MeshBasicMaterial({
       map: getTvScreenTexture(),
       toneMapped: false,
-      side: THREE.FrontSide,
     }),
-  );
-  screen.position.set(0, centerYM, frontZ);
-  screen.renderOrder = 3;
-  group.add(screen);
+    blackMaterial(),
+  ];
 
-  // Rear cover sits flush on the same body and makes front/back obvious.
-  const back = new THREE.Mesh(
-    new THREE.PlaneGeometry(targetWidthM - 0.02, targetHeightM - 0.02),
-    new THREE.MeshStandardMaterial({
-      color: 0x2d2d2d,
-      roughness: 0.9,
-      metalness: 0,
-      side: THREE.FrontSide,
-    }),
+  const tv = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, heightM, depthM),
+    materials,
   );
-  back.rotation.y = Math.PI;
-  back.position.set(0, centerYM, backZ);
-  group.add(back);
+  tv.position.set(0, centerYM, 0);
+  tv.castShadow = true;
+  tv.receiveShadow = true;
+  tv.userData.kind = 'surface';
+  tv.userData.surfaceId = `${moduleState.id}:tv`;
+  tv.userData.moduleId = moduleState.id;
+  tv.userData.moduleType = 'tv';
+  tv.userData.moduleIndex = moduleIndex;
+  tv.userData.acceptsImage = false;
+  tv.userData.selectionMode = 'module';
+  group.add(tv);
 
-  const proxy = new THREE.Mesh(
-    new THREE.BoxGeometry(targetWidthM, targetHeightM, depthM),
-    new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-      depthWrite: false,
-      colorWrite: false,
-    }),
-  );
-  proxy.position.set(0, centerYM, 0);
-  proxy.userData.kind = 'surface';
-  proxy.userData.surfaceId = `${moduleState.id}:tv`;
-  proxy.userData.moduleId = moduleState.id;
-  proxy.userData.moduleType = 'tv';
-  proxy.userData.moduleIndex = moduleIndex;
-  proxy.userData.acceptsImage = false;
-  proxy.userData.selectionMode = 'module';
-  group.add(proxy);
-
-  return { group, surfaces: [proxy] };
+  return { group, surfaces: [tv] };
 }
 
 function createLedFloodlightModule(moduleState, moduleIndex) {
