@@ -4,6 +4,7 @@ on:
     branches: [ROG]
     paths:
       - '.github/workflows/tv-single-box.yml'
+      - 'scripts/make-tv-single-box.py'
 permissions:
   contents: write
 jobs:
