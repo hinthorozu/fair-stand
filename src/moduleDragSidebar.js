@@ -47,6 +47,12 @@ function ensureStyles() {
     .module-drag-mini-fridge { position:relative; width:38px; height:58px; border:3px solid #6b7280; border-radius:5px; background:#e7e5df; box-shadow:3px 3px 0 #cbd5e1; box-sizing:border-box; }
     .module-drag-mini-fridge::before { content:''; position:absolute; left:2px; right:2px; top:18px; height:2px; background:#8b8f94; }
     .module-drag-mini-fridge::after { content:''; position:absolute; right:4px; top:7px; width:2px; height:8px; border-radius:2px; background:#555b61; box-shadow:0 21px 0 #555b61; }
+    .module-drag-kettle { position:relative; width:58px; height:58px; }
+    .module-drag-kettle-body { position:absolute; left:17px; top:20px; width:25px; height:27px; box-sizing:border-box; border:3px solid #4b5563; border-radius:7px 7px 12px 12px; background:#f8fafc; }
+    .module-drag-kettle-handle { position:absolute; left:6px; top:23px; width:14px; height:21px; box-sizing:border-box; border:3px solid #4b5563; border-right:0; border-radius:13px 0 0 13px; }
+    .module-drag-kettle-spout { position:absolute; left:40px; top:23px; width:14px; height:13px; box-sizing:border-box; border-top:4px solid #4b5563; border-right:4px solid #4b5563; border-radius:0 8px 2px 0; transform:skewY(-18deg); }
+    .module-drag-kettle-lid { position:absolute; left:18px; top:16px; width:23px; height:4px; border-radius:3px; background:#4b5563; }
+    .module-drag-kettle-knob { position:absolute; left:27px; top:12px; width:6px; height:5px; border-radius:4px 4px 1px 1px; background:#4b5563; }
     .module-drag-tv { position:relative; width:66px; height:54px; }
     .module-drag-tv::before { content:''; position:absolute; left:4px; top:3px; width:58px; height:36px; box-sizing:border-box; border:4px solid #26292d; border-radius:2px; background:#f8fafc; box-shadow:0 2px 5px rgba(15,23,42,.12); }
     .module-drag-tv::after { content:''; position:absolute; left:22px; top:39px; width:22px; height:5px; background:#30343a; box-shadow:0 7px 0 -1px #30343a; clip-path:polygon(27% 0,73% 0,86% 100%,100% 100%,100% 100%,0 100%,14% 100%); }
@@ -118,6 +124,18 @@ export function createModuleCatalogPreview(module) {
     const body = document.createElement('div');
     body.className = 'module-drag-mini-fridge';
     preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'kettle') {
+    const kettle = document.createElement('div');
+    kettle.className = 'module-drag-kettle';
+    ['body', 'handle', 'spout', 'lid', 'knob'].forEach((part) => {
+      const element = document.createElement('i');
+      element.className = `module-drag-kettle-${part}`;
+      kettle.appendChild(element);
+    });
+    preview.appendChild(kettle);
     return preview;
   }
 
