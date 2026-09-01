@@ -5115,17 +5115,21 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
     built.group.add(frontProfile);
 
     if (shelfLightingOn) {
-      // Boydan boya lineer LED: raf geometrisine dokunmadan alt yüzeye oturur.
+      // Gerçek raf altı aydınlatma: görünür lineer LED + aşağı/öne bakan spot.
       const ledStripWidthM = Math.max(innerWidthM - 0.04, 0.08);
-      const ledStripDepthM = 0.028;
-      const ledStripThicknessM = 0.008;
+      const ledStripDepthM = 0.016;
+      const ledStripThicknessM = 0.006;
       const shelfBottomY = seamHeightM;
       const ledCenterZM = wallDepthM / 2 + shelfDepthM * 0.78;
 
       const ledStrip = new THREE.Mesh(
         new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
-        new THREE.MeshBasicMaterial({
-          color: 0xffefd2,
+        new THREE.MeshStandardMaterial({
+          color: 0xfff4df,
+          emissive: 0xffe3bd,
+          emissiveIntensity: 3.2,
+          roughness: 0.28,
+          metalness: 0,
         }),
       );
       ledStrip.position.set(
@@ -5137,50 +5141,28 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
       ledStrip.userData.role = 'shelf-under-led-strip';
       built.group.add(ledStrip);
 
-      // Raf altındaki yerel parıltı; gerçek ışık yok, duvar ve malzeme renklerini etkilemez.
-      const glowDepthM = Math.max(shelfDepthM * 0.72, 0.14);
-      const underGlow = new THREE.Mesh(
-        new THREE.PlaneGeometry(ledStripWidthM, glowDepthM),
-        new THREE.MeshBasicMaterial({
-          color: 0xffedcf,
-          transparent: true,
-          opacity: 0.38,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending,
-          side: THREE.DoubleSide,
-        }),
+      const spot = new THREE.SpotLight(
+        0xfff2dc,
+        20,
+        1.15,
+        0.78,
+        0.82,
+        1.6,
       );
-      underGlow.rotation.x = -Math.PI / 2;
-      underGlow.position.set(
+      spot.position.set(
         0,
-        shelfBottomY - 0.009,
-        wallDepthM / 2 + shelfDepthM * 0.62,
+        shelfBottomY - 0.018,
+        wallDepthM / 2 + shelfDepthM * 0.76,
       );
-      underGlow.userData.kind = 'decoration';
-      underGlow.userData.role = 'shelf-under-light';
-      built.group.add(underGlow);
-
-
-      // Ön kenarın hemen altında görünen ince bloom bandı; sahne ışığı değildir.
-      const frontGlow = new THREE.Mesh(
-        new THREE.PlaneGeometry(ledStripWidthM, 0.045),
-        new THREE.MeshBasicMaterial({
-          color: 0xffefd2,
-          transparent: true,
-          opacity: 0.58,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending,
-          side: THREE.DoubleSide,
-        }),
-      );
-      frontGlow.position.set(
+      spot.target.position.set(
         0,
-        shelfBottomY - 0.024,
-        wallDepthM / 2 + shelfDepthM + 0.004,
+        Math.max(0.04, shelfBottomY - 0.58),
+        wallDepthM / 2 + shelfDepthM * 1.02,
       );
-      frontGlow.userData.kind = 'decoration';
-      frontGlow.userData.role = 'shelf-under-front-glow';
-      built.group.add(frontGlow);
+      spot.castShadow = false;
+      spot.userData.kind = 'decoration';
+      spot.userData.role = 'shelf-under-light';
+      built.group.add(spot, spot.target);
     }
   });
 
