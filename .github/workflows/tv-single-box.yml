@@ -21,9 +21,22 @@ jobs:
       - run: python scripts/make-tv-single-box.py
       - run: node --check src/scene3d.js
       - run: npm ci
-      - run: npm test
+      - name: Run npm test
+        run: |
+          set +e
+          npm test > tv-test-output.txt 2>&1
+          code=$?
+          cat tv-test-output.txt
+          exit $code
+      - name: Save test failure
+        if: failure()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          file_pattern: tv-test-output.txt
+          commit_message: 'chore: capture TV test failure [skip ci]'
+          branch: ROG
       - run: npm run build
-      - run: rm -f scripts/make-tv-single-box.py .github/workflows/tv-single-box.yml
+      - run: rm -f scripts/make-tv-single-box.py .github/workflows/tv-single-box.yml tv-test-output.txt
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'fix: make TV a single textured 5cm box [skip ci]'
