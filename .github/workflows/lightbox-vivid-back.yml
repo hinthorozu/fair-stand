@@ -36,6 +36,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
-          git commit -m 'fix: preserve vivid lightbox image and rear panel [skip ci]'
+          git commit -m 'fix: lightbox contrast rear panel and ctrl multi-select [skip ci]'
           git push origin ROG
-# rerun: vivid front + preserved rear
+# rerun: vivid lightbox + preserved rear + ctrl selection
