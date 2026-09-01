@@ -54,7 +54,7 @@ replacement = r'''function createTvModule(moduleState, moduleIndex) {
     blackMaterial(),
     blackMaterial(),
     new THREE.MeshBasicMaterial({
-      map: tvScreenTexture,
+      map: getTvScreenTexture(),
       toneMapped: false,
     }),
     blackMaterial(),
@@ -86,6 +86,8 @@ scene.write_text(s)
 test = Path('test/tv42Module.test.js')
 t = test.read_text()
 old_start = "test('TV renderer is procedural and maps the supplied screen image to the front face', () => {"
+if old_start not in t:
+    old_start = "test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its front face', () => {"
 start = t.find(old_start)
 if start < 0:
     raise SystemExit('TV renderer test not found')
@@ -95,14 +97,18 @@ if end < 0:
 end += len("\n});")
 new_test = r'''test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its front face', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function createTvModule(');
+  const finish = source.indexOf('\n}', start) + 2;
+  const tvSource = source.slice(start, finish);
+  assert.ok(start >= 0);
   assert.doesNotMatch(source, /models\/tv\.glb/);
   assert.doesNotMatch(source, /loadTvModel/);
   assert.doesNotMatch(source, /addTvScreenOverlay/);
   assert.doesNotMatch(source, /tv-screen-image-overlay/);
-  assert.match(source, /const depthM = 0\.05/);
-  assert.match(source, /new THREE\.BoxGeometry\(widthM, heightM, depthM\)/);
-  assert.match(source, /map: tvScreenTexture/);
-  assert.doesNotMatch(source, /new THREE\.PlaneGeometry\([^)]*heightM/);
+  assert.match(tvSource, /const depthM = 0\.05/);
+  assert.match(tvSource, /new THREE\.BoxGeometry\(widthM, heightM, depthM\)/);
+  assert.match(tvSource, /map: getTvScreenTexture\(\)/);
+  assert.doesNotMatch(tvSource, /new THREE\.PlaneGeometry/);
 });'''
 t = t[:start] + new_test + t[end:]
 test.write_text(t)
