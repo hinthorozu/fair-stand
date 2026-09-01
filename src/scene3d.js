@@ -2936,6 +2936,34 @@ export function createStandScene(
     fabricOverlayMeshes = [];
   }
 
+  function suspendFabricSurface(surface) {
+    if (!surface?.material) return;
+    surface.material.map?.dispose?.();
+    surface.material.map = null;
+    surface.material.colorWrite = false;
+    surface.material.depthWrite = false;
+    surface.material.needsUpdate = true;
+    const backing = surface.userData?.backing;
+    if (backing) backing.visible = false;
+  }
+
+  function restoreFabricSurface(surface) {
+    if (!surface?.material) return;
+    const state = surface.userData?.surfaceState;
+    surface.material.colorWrite = true;
+    surface.material.depthWrite = !Boolean(state?.isGlass);
+    surface.material.needsUpdate = true;
+    const backing = surface.userData?.backing;
+    if (backing) backing.visible = true;
+
+    if (state?.imageAssetId) {
+      applyStoredImage(surface);
+    } else {
+      surface.material.color.set(state?.isGlass ? GLASS_SURFACE_COLOR : (state?.color ?? '#ffffff'));
+      surface.material.needsUpdate = true;
+    }
+  }
+
   function loadFabricOverlayImage(overlay, assetId, fit = 'cover') {
     const assetUrl = getAssetUrl(assetId);
     if (!overlay?.material || !assetUrl) return;
@@ -3015,6 +3043,9 @@ export function createStandScene(
 
     groups.forEach((surfaces, groupId) => {
       if (surfaces.length < 2) return;
+      // Bez aktifken alttaki paneller yalnızca seçim proxy'si olarak kalır:
+      // texture GPU'da tutulmaz, panel/backing çizimi kapatılır.
+      surfaces.forEach(suspendFabricSurface);
 
       const first = surfaces[0];
       first.updateWorldMatrix(true, false);
@@ -3144,17 +3175,16 @@ export function createStandScene(
         meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
       );
       if (replacedGroupIds.size) {
+        const replacedSurfaces = [];
         surfaceMeshes.forEach((surface) => {
-          if (replacedGroupIds.has(surface.userData.surfaceState?.fabricGroupId)) {
-            delete surface.userData.surfaceState.fabricGroupId;
-        delete surface.userData.surfaceState.fabricColor;
-        delete surface.userData.surfaceState.fabricImageAssetId;
-        delete surface.userData.surfaceState.fabricImageFit;
-            delete surface.userData.surfaceState.fabricColor;
-            delete surface.userData.surfaceState.fabricImageAssetId;
-            delete surface.userData.surfaceState.fabricImageFit;
-          }
+          if (!replacedGroupIds.has(surface.userData.surfaceState?.fabricGroupId)) return;
+          replacedSurfaces.push(surface);
+          delete surface.userData.surfaceState.fabricGroupId;
+          delete surface.userData.surfaceState.fabricColor;
+          delete surface.userData.surfaceState.fabricImageAssetId;
+          delete surface.userData.surfaceState.fabricImageFit;
         });
+        replacedSurfaces.forEach(restoreFabricSurface);
       }
 
       const groupId = `fabric-${globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
@@ -3166,6 +3196,7 @@ export function createStandScene(
         state.fabricImageAssetId = null;
         state.fabricImageFit = 'cover';
       });
+      meshes.forEach(suspendFabricSurface);
       rebuildFabricOverlays();
       return { ok: true, enabled: true, panelCount: meshes.length, fabricGroupId: groupId };
     }
@@ -3176,14 +3207,17 @@ export function createStandScene(
     if (!groupIds.size) {
       return { ok: false, message: 'Seçimde kaldırılacak bez bulunamadı.' };
     }
+    const restoredSurfaces = [];
     surfaceMeshes.forEach((surface) => {
       if (groupIds.has(surface.userData.surfaceState?.fabricGroupId)) {
+        restoredSurfaces.push(surface);
         delete surface.userData.surfaceState.fabricGroupId;
         delete surface.userData.surfaceState.fabricColor;
         delete surface.userData.surfaceState.fabricImageAssetId;
         delete surface.userData.surfaceState.fabricImageFit;
       }
     });
+    restoredSurfaces.forEach(restoreFabricSurface);
     rebuildFabricOverlays();
     return { ok: true, enabled: false, panelCount: meshes.length };
   }
@@ -3291,7 +3325,7 @@ export function createStandScene(
       assetUrl,
       (sourceTexture) => {
         const surfaceState = mesh.userData.surfaceState;
-        if (surfaceState?.imageAssetId !== assetId) {
+        if (surfaceState?.fabricGroupId || surfaceState?.imageAssetId !== assetId) {
           sourceTexture.dispose();
           return;
         }
@@ -3331,7 +3365,8 @@ export function createStandScene(
         const surfaceState = mesh.userData.surfaceState;
         const transform = surfaceState?.imageTransform;
         if (
-          surfaceState?.imageAssetId !== assetId
+          surfaceState?.fabricGroupId
+          || surfaceState?.imageAssetId !== assetId
           || transform?.mode !== expectedMode
         ) {
           sourceTexture.dispose();
@@ -3389,6 +3424,8 @@ export function createStandScene(
 
   function applyStoredImage(mesh) {
     if (mesh.userData.acceptsImage === false) return;
+    // Bez aktifken eski panel görsel state'i korunur ama texture tekrar GPU'ya yüklenmez.
+    if (mesh.userData.surfaceState?.fabricGroupId) return;
 
     const transferKey = getRebuildTextureKey(mesh);
     const retainedTexture = transferKey ? rebuildTextureTransfer?.get(transferKey) : null;
