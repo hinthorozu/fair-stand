@@ -3,62 +3,6 @@ name: Build
 on:
   push:
     branches: [ROG]
-
-permissions:
-  contents: write
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ROG
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Patch TV screen mesh material
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('src/scene3d.js')
-          s = p.read_text()
-          old = """      if (object.name === 'Object_5') {
-        const texture = createTvBrandTexture();
-        object.material = new THREE.MeshBasicMaterial({
-          map: texture,
-          toneMapped: false,
-          side: THREE.DoubleSide,
-        });
-      } else if (object.material) {
-"""
-          new = """      if (object.name === 'Object_5') {
-        const texture = new THREE.TextureLoader().load(TV_SCREEN_DATA_URL);
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.flipY = false;
-        object.material = new THREE.MeshBasicMaterial({
-          map: texture,
-          toneMapped: false,
-          side: THREE.DoubleSide,
-        });
-        object.material.needsUpdate = true;
-      } else if (object.material) {
-"""
-          if old not in s:
-              raise SystemExit('Object_5 material block not found')
-          s = s.replace(old, new, 1)
-          s = s.replace("      if (moduleState.type === 'tv') addTvScreenOverlay(module.group);\n", "")
-          p.write_text(s)
-
-          Path('.github/workflows/build.yml').write_text("""name: Build
-
-on:
-  push:
-    branches: [ROG]
   pull_request:
     branches: [ROG]
 
@@ -82,28 +26,3 @@ jobs:
 
       - name: Build
         run: npm run build
-""")
-          PY
-
-      - name: Verify
-        run: |
-          node --check src/scene3d.js
-          grep -F "new THREE.TextureLoader().load(TV_SCREEN_DATA_URL)" src/scene3d.js
-          grep -F "texture.flipY = false" src/scene3d.js
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
-
-      - name: Cleanup temp workflow
-        run: rm -f .github/workflows/tv-screen-direct-material.yml
-
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: 'fix: map uploaded image directly to TV screen mesh [skip ci]'
-          branch: ROG
