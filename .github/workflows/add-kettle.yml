@@ -1,0 +1,221 @@
+name: Add Kettle
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/add-kettle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - name: Add kettle module
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f'marker not found in {path}: {old[:100]!r}')
+              p.write_text(text.replace(old, new, 1))
+
+          if not Path('public/models/kettle.glb').is_file():
+              raise SystemExit('public/models/kettle.glb is missing')
+
+          # Kettle GLB world proportions are preserved; the scene target height is 25 cm.
+          # This yields an approximately 24 x 19 cm footprint without distorting the model.
+          replace_once(
+              'src/catalog.js',
+              "  DEPOT_MINI_FRIDGE_AVANTI: { type: 'mini-fridge', widthCm: 45, depthCm: 43, heightCm: 66, label: 'Mini Buzdolabı' },\n",
+              "  DEPOT_MINI_FRIDGE_AVANTI: { type: 'mini-fridge', widthCm: 45, depthCm: 43, heightCm: 66, label: 'Mini Buzdolabı' },\n  DEPOT_KETTLE: { type: 'kettle', widthCm: 24, depthCm: 19, heightCm: 25, label: 'Kettle' },\n",
+          )
+          replace_once(
+              'src/catalog.js',
+              "  'DEPOT_MINI_FRIDGE_AVANTI',\n  'TV_42',\n",
+              "  'DEPOT_MINI_FRIDGE_AVANTI',\n  'DEPOT_KETTLE',\n  'TV_42',\n",
+          )
+
+          replace_once(
+              'src/designState.js',
+              "export function createTvModuleState(sizeInch = 42) {\n",
+              "export function createKettleModuleState() {\n  return {\n    id: createId('module'),\n    type: 'kettle',\n    widthCm: 24,\n    depthCm: 19,\n    heightCm: 25,\n  };\n}\n\nexport function createTvModuleState(sizeInch = 42) {\n",
+          )
+
+          replace_once(
+              'src/moduleBehavior.js',
+              "  'mini-fridge': Object.freeze({\n    placement: 'free',\n    moveSnapCm: 10,\n    rotationStepDeg: 90,\n    defaultRotationDeg: 0,\n    allowSideInsert: true,\n    collision: 'footprint',\n  }),\n",
+              "  'mini-fridge': Object.freeze({\n    placement: 'free',\n    moveSnapCm: 10,\n    rotationStepDeg: 90,\n    defaultRotationDeg: 0,\n    allowSideInsert: true,\n    collision: 'footprint',\n  }),\n  kettle: Object.freeze({\n    placement: 'free',\n    moveSnapCm: 10,\n    rotationStepDeg: 90,\n    defaultRotationDeg: 0,\n    allowSideInsert: true,\n    collision: 'footprint',\n  }),\n",
+          )
+
+          replace_once(
+              'src/main.js',
+              "  createMiniFridgeModuleState,\n  createLedFloodlightModuleState,\n",
+              "  createMiniFridgeModuleState,\n  createKettleModuleState,\n  createLedFloodlightModuleState,\n",
+          )
+          replace_once(
+              'src/main.js',
+              "  else if (module.type === 'mini-fridge') state = createMiniFridgeModuleState();\n  else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);\n",
+              "  else if (module.type === 'mini-fridge') state = createMiniFridgeModuleState();\n  else if (module.type === 'kettle') state = createKettleModuleState();\n  else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);\n",
+          )
+
+          replace_once(
+              'src/moduleDragSidebar.js',
+              "      keys: ['DEPOT_MINI_FRIDGE_AVANTI'],\n",
+              "      keys: ['DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE'],\n",
+          )
+
+          replace_once(
+              'src/scene3d.js',
+              "function loadMiniFridgeModel() {\n  if (!miniFridgeModelPromise) {\n    const loader = new GLTFLoader();\n    miniFridgeModelPromise = loader\n      .loadAsync(import.meta.env.BASE_URL + 'models/80s_avanti_mini_fridge.glb')\n      .then((gltf) => gltf.scene);\n  }\n  return miniFridgeModelPromise;\n}\n",
+              "function loadMiniFridgeModel() {\n  if (!miniFridgeModelPromise) {\n    const loader = new GLTFLoader();\n    miniFridgeModelPromise = loader\n      .loadAsync(import.meta.env.BASE_URL + 'models/80s_avanti_mini_fridge.glb')\n      .then((gltf) => gltf.scene);\n  }\n  return miniFridgeModelPromise;\n}\n\nlet kettleModelPromise = null;\n\nfunction loadKettleModel() {\n  if (!kettleModelPromise) {\n    const loader = new GLTFLoader();\n    kettleModelPromise = loader\n      .loadAsync(import.meta.env.BASE_URL + 'models/kettle.glb')\n      .then((gltf) => gltf.scene);\n  }\n  return kettleModelPromise;\n}\n",
+          )
+
+          replace_once(
+              'src/scene3d.js',
+              "      } else if (moduleState.type === 'mini-fridge') {\n        module = createMiniFridgeModule(moduleState, moduleIndex);\n      } else if (moduleState.type === 'tv') {\n",
+              "      } else if (moduleState.type === 'mini-fridge') {\n        module = createMiniFridgeModule(moduleState, moduleIndex);\n      } else if (moduleState.type === 'kettle') {\n        module = createKettleModule(moduleState, moduleIndex);\n      } else if (moduleState.type === 'tv') {\n",
+          )
+
+          kettle_fn = r'''function createKettleModule(moduleState, moduleIndex) {
+            const widthCm = Number(moduleState.widthCm || 24);
+            const depthCm = Number(moduleState.depthCm || 19);
+            const heightCm = Number(moduleState.heightCm || 25);
+            const group = new THREE.Group();
+            group.userData = {
+              kind: 'module',
+              moduleIndex,
+              moduleId: moduleState.id,
+              moduleType: 'kettle',
+              type: 'kettle',
+              widthCm,
+              depthCm,
+              heightCm,
+            };
+
+            const proxy = new THREE.Mesh(
+              new THREE.BoxGeometry(widthCm / 100, heightCm / 100, depthCm / 100),
+              new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+            );
+            proxy.position.y = heightCm / 200;
+            proxy.userData = {
+              kind: 'surface',
+              surfaceId: `${moduleState.id}:kettle`,
+              moduleId: moduleState.id,
+              moduleType: 'kettle',
+              moduleIndex,
+              selectionMode: 'module',
+              acceptsImage: false,
+              widthCm,
+              depthCm,
+              heightCm,
+            };
+            group.add(proxy);
+
+            loadKettleModel().then((template) => {
+              const model = template.clone(true);
+              model.traverse((object) => {
+                if (!object.isMesh) return;
+                object.castShadow = true;
+                object.receiveShadow = true;
+              });
+
+              model.updateMatrixWorld(true);
+              let box = new THREE.Box3().setFromObject(model);
+              const size = box.getSize(new THREE.Vector3());
+              const targetHeightM = heightCm / 100;
+              const uniformScale = size.y > 0 ? targetHeightM / size.y : 1;
+              model.scale.multiplyScalar(uniformScale);
+              model.updateMatrixWorld(true);
+
+              box = new THREE.Box3().setFromObject(model);
+              const center = box.getCenter(new THREE.Vector3());
+              model.position.x -= center.x;
+              model.position.z -= center.z;
+              model.position.y -= box.min.y;
+              group.add(model);
+            }).catch((error) => {
+              console.warn('Kettle GLB modeli yüklenemedi:', error);
+            });
+
+            return { group, surfaces: [proxy] };
+          }
+
+          '''
+          replace_once(
+              'src/scene3d.js',
+              "function createLedFloodlightModule(moduleState, moduleIndex) {\n",
+              kettle_fn + "function createLedFloodlightModule(moduleState, moduleIndex) {\n",
+          )
+
+          # License attribution embedded in the supplied GLB metadata.
+          Path('public/models/KETTLE_ATTRIBUTION.txt').write_text(
+              'Kettle model attribution\n\n'
+              'Title: Kettle\n'
+              'Author: simalmaili\n'
+              'Source: https://sketchfab.com/3d-models/kettle-3e65d8a8cb6740519f753179ff2c14f1\n'
+              'License: CC BY 4.0\n'
+              'License URL: https://creativecommons.org/licenses/by/4.0/\n'
+          )
+
+          Path('test/kettle.test.js').write_text("""import test from 'node:test';
+          import assert from 'node:assert/strict';
+
+          import { MODULE_CATALOG } from '../src/catalog.js';
+          import { createKettleModuleState } from '../src/designState.js';
+          import { getModuleBehavior } from '../src/moduleBehavior.js';
+
+          test('kettle catalog and state stay aligned', () => {
+            const catalog = MODULE_CATALOG.DEPOT_KETTLE;
+            const state = createKettleModuleState();
+            assert.deepEqual([catalog.widthCm, catalog.depthCm, catalog.heightCm], [24, 19, 25]);
+            assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [24, 19, 25]);
+          });
+
+          test('kettle is a free footprint module', () => {
+            const behavior = getModuleBehavior({ type: 'kettle' });
+            assert.equal(behavior.placement, 'free');
+            assert.equal(behavior.collision, 'footprint');
+            assert.equal(behavior.rotationStepDeg, 90);
+          });
+          """)
+
+          print('kettle module added')
+          PY
+
+      - name: Syntax check
+        run: |
+          node --check src/catalog.js
+          node --check src/designState.js
+          node --check src/moduleBehavior.js
+          node --check src/main.js
+          node --check src/scene3d.js
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit and push
+        run: |
+          rm .github/workflows/add-kettle.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: add depot kettle GLB module [skip ci]'
+          git push origin ROG
