@@ -29,8 +29,7 @@ test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its fr
   const tvSource = source.slice(start, finish);
   assert.match(tvSource, /const depthM = 0\.05/);
   assert.match(tvSource, /new THREE\.BoxGeometry\(widthM, heightM, depthM\)/);
-  assert.match(tvSource, /new THREE\.TextureLoader\(\)\.load\(TV_SCREEN_DATA_URL\)/);
-  assert.match(tvSource, /screenTexture\.colorSpace = THREE\.SRGBColorSpace/);
+  assert.match(tvSource, /createTvScreenTexture\(\)/);
   assert.doesNotMatch(tvSource, /getTvScreenTexture\(\)\.clone\(\)/);
   assert.match(tvSource, /map: screenTexture/);
   assert.match(tvSource, /createSelectionFrame\(widthM, heightM\)/);
@@ -38,6 +37,14 @@ test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its fr
   assert.doesNotMatch(tvSource, /new THREE\.PlaneGeometry/);
 });
 
+
+test('TV texture avoids loading the data URI as a URL', () => {
+  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  assert.match(source, /function getTvScreenBlob\(\)/);
+  assert.match(source, /URL\.createObjectURL\(getTvScreenBlob\(\)\)/);
+  assert.match(source, /texture\.colorSpace = THREE\.SRGBColorSpace/);
+  assert.doesNotMatch(source, /load\(TV_SCREEN_DATA_URL\)/);
+});
 
 test('TV 42 does not inherit flat panel state', () => {
   const tv = createTvModuleState(42);

@@ -79,14 +79,31 @@ function loadEamesChairModel() {
   return eamesChairModelPromise;
 }
 
-let tvScreenTexture = null;
+let tvScreenBlob = null;
 
-function getTvScreenTexture() {
-  if (!tvScreenTexture) {
-    tvScreenTexture = new THREE.TextureLoader().load(TV_SCREEN_DATA_URL);
-    tvScreenTexture.colorSpace = THREE.SRGBColorSpace;
-  }
-  return tvScreenTexture;
+function getTvScreenBlob() {
+  if (tvScreenBlob) return tvScreenBlob;
+  const marker = 'base64,';
+  const markerIndex = TV_SCREEN_DATA_URL.indexOf(marker);
+  if (markerIndex < 0) throw new Error('TV screen image is not a base64 data URL.');
+  const payload = TV_SCREEN_DATA_URL.slice(markerIndex + marker.length);
+  const binary = window.atob(payload);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  tvScreenBlob = new Blob([bytes], { type: 'image/jpeg' });
+  return tvScreenBlob;
+}
+
+function createTvScreenTexture() {
+  const objectUrl = URL.createObjectURL(getTvScreenBlob());
+  const texture = new THREE.TextureLoader().load(
+    objectUrl,
+    () => URL.revokeObjectURL(objectUrl),
+    undefined,
+    () => URL.revokeObjectURL(objectUrl),
+  );
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
 }
 
 
@@ -791,11 +808,6 @@ export function createStandScene(
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
-  const textureLoader = new THREE.TextureLoader();
-  const tvScreenTexture = textureLoader.load(TV_SCREEN_DATA_URL);
-  tvScreenTexture.colorSpace = THREE.SRGBColorSpace;
-  tvScreenTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-
   
   let surfaceMeshes = [];
   const selectedSurfaces = new Set();
@@ -3510,8 +3522,7 @@ function createTvModule(moduleState, moduleIndex) {
   // Each rendered TV owns a real TextureLoader result. Cloning the cached texture
   // before its async image load completes leaves clone.image empty and WebGL warns
   // "Texture marked for update but no image data found".
-  const screenTexture = new THREE.TextureLoader().load(TV_SCREEN_DATA_URL);
-  screenTexture.colorSpace = THREE.SRGBColorSpace;
+  const screenTexture = createTvScreenTexture();
 
   const group = new THREE.Group();
   group.userData.kind = 'module';
