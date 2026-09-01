@@ -808,6 +808,8 @@ export function createStandScene(
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
+  // Shared loader for normal editable surface images. TV uses its own Blob/object-URL path.
+  const textureLoader = new THREE.TextureLoader();
   
   let surfaceMeshes = [];
   const selectedSurfaces = new Set();

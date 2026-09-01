@@ -38,6 +38,14 @@ test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its fr
 });
 
 
+test('scene keeps the shared textureLoader for normal panel images', () => {
+  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  const sceneStart = source.indexOf('export function createStandScene');
+  const surfaceStart = source.indexOf('let surfaceMeshes', sceneStart);
+  const setupSource = source.slice(sceneStart, surfaceStart);
+  assert.match(setupSource, /const textureLoader = new THREE\.TextureLoader\(\)/);
+});
+
 test('TV texture avoids loading the data URI as a URL', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(source, /function getTvScreenBlob\(\)/);
