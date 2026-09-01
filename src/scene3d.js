@@ -1436,7 +1436,7 @@ export function createStandScene(
   function ensurePlacementGhost(moduleOrWidthCm) {
     const ghostBehavior = getModuleGhostBehavior(moduleOrWidthCm);
     const dimensions = getPlacementGhostDimensions(moduleOrWidthCm);
-    const key = [moduleOrWidthCm?.type ?? 'generic', dimensions.widthCm, dimensions.depthM, dimensions.heightM].join(':');
+    const key = [moduleOrWidthCm?.type ?? 'generic', dimensions.widthCm, dimensions.depthM, dimensions.heightM, moduleOrWidthCm?.screenWidthCm ?? '', moduleOrWidthCm?.screenHeightCm ?? ''].join(':');
     if (placementGhost?.key === key) return placementGhost;
     disposePlacementGhost();
 
@@ -1686,50 +1686,53 @@ export function createStandScene(
     }
 
     if (ghostBehavior.renderer === 'tv') {
-    const root = new THREE.Group();
-    const ghostMaterial = new THREE.MeshBasicMaterial({
-      color: PLACEMENT_VALID_COLOR,
-      transparent: true,
-      opacity: 0.48,
-      depthWrite: false,
-      depthTest: false,
-      side: THREE.DoubleSide,
-    });
-    const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.93, 0.523, 0.05),
-      ghostMaterial,
-    );
-    mesh.position.set(0, 1.75, 0.055);
-    mesh.renderOrder = 10000;
-    root.add(mesh);
-
-    const bezelMaterial = ghostMaterial.clone();
-    bezelMaterial.opacity = 0.9;
-    const bezel = new THREE.LineSegments(
-      new THREE.EdgesGeometry(new THREE.BoxGeometry(0.93, 0.523, 0.05)),
-      new THREE.LineBasicMaterial({
+      const tvWidthM = Math.max(Number(moduleOrWidthCm?.screenWidthCm || 93) / 100, 0.02);
+      const tvHeightM = Math.max(Number(moduleOrWidthCm?.screenHeightCm || 52.3) / 100, 0.02);
+      const tvDepthM = Math.max(Number(moduleOrWidthCm?.depthCm || 5) / 100, 0.02);
+      const root = new THREE.Group();
+      const ghostMaterial = new THREE.MeshBasicMaterial({
         color: PLACEMENT_VALID_COLOR,
         transparent: true,
-        opacity: 0.95,
+        opacity: 0.48,
+        depthWrite: false,
         depthTest: false,
-      }),
-    );
-    bezel.position.copy(mesh.position);
-    bezel.renderOrder = 10001;
-    root.add(bezel);
-    scene.add(root);
+        side: THREE.DoubleSide,
+      });
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(tvWidthM, tvHeightM, tvDepthM),
+        ghostMaterial,
+      );
+      mesh.position.set(0, 1.75, 0.055);
+      mesh.renderOrder = 10000;
+      root.add(mesh);
 
-    placementGhost = {
-      root,
-      mesh,
-      tintMaterials: [ghostMaterial],
-      key,
-      widthCm: dimensions.widthCm,
-      ownsGeometry: true,
-      colorHex: PLACEMENT_VALID_COLOR,
-    };
-    return placementGhost;
-  }
+      const bezelMaterial = ghostMaterial.clone();
+      bezelMaterial.opacity = 0.9;
+      const bezel = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.BoxGeometry(tvWidthM, tvHeightM, tvDepthM)),
+        new THREE.LineBasicMaterial({
+          color: PLACEMENT_VALID_COLOR,
+          transparent: true,
+          opacity: 0.95,
+          depthTest: false,
+        }),
+      );
+      bezel.position.copy(mesh.position);
+      bezel.renderOrder = 10001;
+      root.add(bezel);
+      scene.add(root);
+
+      placementGhost = {
+        root,
+        mesh,
+        tintMaterials: [ghostMaterial],
+        key,
+        widthCm: dimensions.widthCm,
+        ownsGeometry: true,
+        colorHex: PLACEMENT_VALID_COLOR,
+      };
+      return placementGhost;
+    }
 
     // Bar Taburesi uses the actual GLB geometry as its placement ghost.
     if (ghostBehavior.renderer === 'bar-stool') {
@@ -1837,7 +1840,7 @@ export function createStandScene(
     if (moduleState?.type === 'showcase-3') return `3 Gözlü Vitrin ${widthCm}`;
     if (moduleState?.type === 'showcase-2') return `2 Gözlü Vitrin ${widthCm}`;
     if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';
-    if (moduleState?.type === 'tv') return 'TV 42"';
+    if (moduleState?.type === 'tv') return `TV ${Number(moduleState.sizeInch) || 42}"`;
     return `Düz Panel ${widthCm}`;
   }
 
@@ -3523,7 +3526,7 @@ export function createStandScene(
 function createTvModule(moduleState, moduleIndex) {
   const widthM = Number(moduleState.screenWidthCm || 93) / 100;
   const heightM = Number(moduleState.screenHeightCm || 52.3) / 100;
-  const depthM = 0.05;
+  const depthM = Number(moduleState.depthCm || 5) / 100;
   const centerYM = 1.75;
   // Each rendered TV owns a real TextureLoader result. Cloning the cached texture
   // before its async image load completes leaves clone.image empty and WebGL warns

@@ -289,12 +289,11 @@ const scene3d = createStandScene(
       }
 
       if (moduleType === 'tv') {
-        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · TV 42\" · 93.0 × 52.3 cm · bağımsız GLB model.';
-        return;
-      }
-
-      if (moduleType === 'tv') {
-        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · TV 42" · 93.0 × 52.3 cm ekran.';
+        const tvState = currentModules[moduleIndex];
+        const sizeInch = Number(tvState?.sizeInch) || 42;
+        const screenWidthCm = Number(tvState?.screenWidthCm) || 93;
+        const screenHeightCm = Number(tvState?.screenHeightCm) || 52.3;
+        selectionInfo.textContent = `Modül ${moduleIndex + 1} · TV ${sizeInch}" · ${screenWidthCm} × ${screenHeightCm} cm ekran.`;
         return;
       }
 

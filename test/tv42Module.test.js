@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { MODULE_CATALOG } from '../src/catalog.js';
+import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
 import { createTvModuleState } from '../src/designState.js';
+import { getTvDefinition, TV_42_BASE } from '../src/tvConfig.js';
 import { getModuleBehavior, getModuleGhostBehavior, isWallOverlayModule } from '../src/moduleBehavior.js';
 
 test('TV 42 catalog and state use one shared 93.0 x 52.3 screen', () => {
@@ -14,6 +15,51 @@ test('TV 42 catalog and state use one shared 93.0 x 52.3 screen', () => {
   assert.equal(state.widthCm, 100);
   assert.equal(state.screenWidthCm, 93);
   assert.equal(state.screenHeightCm, 52.3);
+  assert.equal(state.depthCm, 5);
+});
+
+
+test('TV 55 and 65 inherit TV 42 and override only their screen size identity', () => {
+  const expected = {
+    42: [93, 52.3],
+    55: [121.8, 68.5],
+    65: [143.9, 80.9],
+  };
+
+  for (const sizeInch of [42, 55, 65]) {
+    const definition = getTvDefinition(sizeInch);
+    const item = MODULE_CATALOG[`TV_${sizeInch}`];
+    const state = createTvModuleState(sizeInch);
+    assert.ok(definition);
+    assert.ok(item);
+    assert.ok(state);
+    assert.equal(definition.type, TV_42_BASE.type);
+    assert.equal(definition.widthCm, TV_42_BASE.widthCm);
+    assert.equal(definition.depthCm, TV_42_BASE.depthCm);
+    assert.equal(definition.catalogHeightCm, TV_42_BASE.catalogHeightCm);
+    assert.equal(item.type, TV_42_BASE.type);
+    assert.equal(item.widthCm, TV_42_BASE.widthCm);
+    assert.equal(item.depthCm, 5);
+    assert.equal(state.type, TV_42_BASE.type);
+    assert.equal(state.widthCm, TV_42_BASE.widthCm);
+    assert.equal(state.depthCm, 5);
+    assert.equal(state.sizeInch, sizeInch);
+    assert.equal(state.screenWidthCm, expected[sizeInch][0]);
+    assert.equal(state.screenHeightCm, expected[sizeInch][1]);
+  }
+
+  assert.ok(MODULE_CATALOG_KEYS.includes('TV_42'));
+  assert.ok(MODULE_CATALOG_KEYS.includes('TV_55'));
+  assert.ok(MODULE_CATALOG_KEYS.includes('TV_65'));
+  assert.equal(createTvModuleState(50), null);
+});
+
+test('TV ghost geometry reads each TV state screen dimensions instead of hard-coding 42 inch', () => {
+  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  assert.match(source, /moduleOrWidthCm\?\.screenWidthCm/);
+  assert.match(source, /moduleOrWidthCm\?\.screenHeightCm/);
+  assert.match(source, /new THREE\.BoxGeometry\(tvWidthM, tvHeightM, tvDepthM\)/);
+  assert.doesNotMatch(source, /new THREE\.BoxGeometry\(0\.93, 0\.523, 0\.05\)/);
 });
 
 test('TV module has explicit ghost behavior contract', () => {
@@ -27,7 +73,7 @@ test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its fr
   assert.ok(start >= 0);
   const finish = source.indexOf('\n}', start) + 2;
   const tvSource = source.slice(start, finish);
-  assert.match(tvSource, /const depthM = 0\.05/);
+  assert.match(tvSource, /const depthM = Number\(moduleState\.depthCm \|\| 5\) \/ 100/);
   assert.match(tvSource, /new THREE\.BoxGeometry\(widthM, heightM, depthM\)/);
   assert.match(tvSource, /createTvScreenTexture\(\)/);
   assert.doesNotMatch(tvSource, /getTvScreenTexture\(\)\.clone\(\)/);

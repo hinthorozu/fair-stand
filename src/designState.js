@@ -1,3 +1,5 @@
+import { getTvDefinition } from './tvConfig.js';
+
 const DEFAULT_PANEL_COLOR = '#ffffff';
 const DEFAULT_SEPARATOR_COLOR = '#c79b63';
 const STRIP_COUNT = 7;
@@ -206,16 +208,17 @@ export function createBarStoolModuleState() {
 }
 
 export function createTvModuleState(sizeInch = 42) {
-  if (Number(sizeInch) !== 42) return null;
+  const definition = getTvDefinition(sizeInch);
+  if (!definition) return null;
   return {
     id: createId('module'),
-    type: 'tv',
-    widthCm: 100,
-    depthCm: 6,
-    heightCm: 52.3,
-    sizeInch: 42,
-    screenWidthCm: 93.0,
-    screenHeightCm: 52.3,
+    type: definition.type,
+    widthCm: definition.widthCm,
+    depthCm: definition.depthCm,
+    heightCm: definition.screenHeightCm,
+    sizeInch: definition.sizeInch,
+    screenWidthCm: definition.screenWidthCm,
+    screenHeightCm: definition.screenHeightCm,
   };
 }
 
