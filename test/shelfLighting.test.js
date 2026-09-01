@@ -19,8 +19,12 @@ test('shelf renderer adds lights without changing shelf box geometry', () => {
   assert.match(source, /emissive: 0xffe3bd/);
   assert.match(source, /0xfff2dc/);
   assert.match(source, /shelfBottomY - ledStripThicknessM \/ 2 - 0\.001/);
+  assert.match(source, /spot\.visible = shelfLightingOn/);
+  assert.match(source, /ledStrip\.visible = shelfLightingOn/);
   assert.match(source, /spot\.castShadow = false/);
   assert.match(source, /role = 'shelf-under-light'/);
+  assert.match(source, /function setShelfLightingVisible\(moduleIndex, enabled\)/);
+  assert.match(source, /module\.group\.userData\.moduleIndex = moduleIndex/);
   assert.doesNotMatch(source, /shelf-under-front-glow/);
   assert.match(source, /new THREE\.BoxGeometry\(innerWidthM, shelfThicknessM, shelfDepthM\)/);
 });
@@ -32,5 +36,6 @@ test('shelf lighting toggle is available only from shelf context', () => {
   assert.match(menu, /Raf altı aydınlatmayı aç/);
   assert.match(menu, /Raf altı aydınlatmayı kapat/);
   assert.match(main, /changeContextShelfLighting/);
-  assert.match(main, /shelfLightingOn = Boolean\(enabled\)/);
+  assert.match(main, /currentModules\[index\]\.shelfLightingOn = nextEnabled/);
+  assert.match(main, /scene3d\.setShelfLightingVisible\(index, nextEnabled\)/);
 });

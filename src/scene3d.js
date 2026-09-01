@@ -1234,6 +1234,7 @@ export function createStandScene(
       }
 
       module.group.userData.moduleState = moduleState;
+      module.group.userData.moduleIndex = moduleIndex;
       module.group.userData.placement = { ...placement };
       applyPlacementToGroup(module.group, placement, widthCm);
       wallRoot.add(module.group);
@@ -3601,8 +3602,31 @@ export function createStandScene(
     }
   }
 
+  function setShelfLightingVisible(moduleIndex, enabled) {
+    const targetIndex = Number(moduleIndex);
+    const visible = Boolean(enabled);
+    let changed = false;
+
+    wallRoot.children.forEach((group) => {
+      if (Number(group.userData?.moduleIndex) !== targetIndex) return;
+      if (group.userData?.moduleState?.type !== 'shelf') return;
+
+      group.userData.moduleState.shelfLightingOn = visible;
+      group.traverse((object) => {
+        const role = object.userData?.role;
+        if (role === 'shelf-under-led-strip' || role === 'shelf-under-light') {
+          object.visible = visible;
+          changed = true;
+        }
+      });
+    });
+
+    return changed;
+  }
+
   return {
     captureCurrentViewPng,
+    setShelfLightingVisible,
     setCameraMode,
     getCameraMode: () => cameraMode,
     createStage,
@@ -5114,8 +5138,8 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
     frontProfile.castShadow = true;
     built.group.add(frontProfile);
 
-    if (shelfLightingOn) {
-      // Gerçek raf altı aydınlatma: görünür lineer LED + aşağı/öne bakan spot.
+    {
+      // Raf ışıkları bir kez oluşturulur; aç/kapa sadece visible değiştirir.
       const ledStripWidthM = Math.max(innerWidthM - 0.04, 0.08);
       const ledStripDepthM = 0.016;
       const ledStripThicknessM = 0.006;
@@ -5137,6 +5161,7 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
         shelfBottomY - ledStripThicknessM / 2 - 0.001,
         ledCenterZM,
       );
+      ledStrip.visible = shelfLightingOn;
       ledStrip.userData.kind = 'decoration';
       ledStrip.userData.role = 'shelf-under-led-strip';
       built.group.add(ledStrip);
@@ -5162,6 +5187,7 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
           Math.max(0.04, shelfBottomY - 0.58),
           wallDepthM / 2 + shelfDepthM * 1.02,
         );
+        spot.visible = shelfLightingOn;
         spot.castShadow = false;
         spot.userData.kind = 'decoration';
         spot.userData.role = 'shelf-under-light';

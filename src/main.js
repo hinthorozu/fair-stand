@@ -924,9 +924,12 @@ function changeContextShelfLighting(context, enabled) {
   const index = findContextModuleIndex(context);
   if (index < 0 || currentModules[index]?.type !== 'shelf') return;
 
-  currentModules[index].shelfLightingOn = Boolean(enabled);
-  rebuildWall({ resetView: false });
-  selectionInfo.textContent = enabled
+  const nextEnabled = Boolean(enabled);
+  currentModules[index].shelfLightingOn = nextEnabled;
+  if (!scene3d.setShelfLightingVisible(index, nextEnabled)) {
+    rebuildWall({ resetView: false });
+  }
+  selectionInfo.textContent = nextEnabled
     ? 'Raf altı aydınlatma açıldı.'
     : 'Raf altı aydınlatma kapatıldı.';
 }
