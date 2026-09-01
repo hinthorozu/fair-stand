@@ -1,0 +1,45 @@
+name: Add Mini Fridge
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/add-mini-fridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - name: Apply patch
+        run: python scripts/add-mini-fridge.py
+      - name: Syntax check
+        run: |
+          node --check src/catalog.js
+          node --check src/designState.js
+          node --check src/moduleBehavior.js
+          node --check src/moduleDragSidebar.js
+          node --check src/main.js
+          node --check src/scene3d.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit and push
+        run: |
+          rm scripts/add-mini-fridge.py
+          rm .github/workflows/add-mini-fridge.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: add depot mini fridge GLB module [skip ci]'
+          git push origin ROG
