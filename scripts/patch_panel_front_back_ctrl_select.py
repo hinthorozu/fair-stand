@@ -1,0 +1,23 @@
+from pathlib import Path
+
+scene_path = Path('src/scene3d.js')
+scene = scene_path.read_text(encoding='utf-8')
+
+needle = """  function handleSurfaceSelectionAt(clientX, clientY, rectangleSelect, fallbackModuleId = null) {\n    setPointerFromClient(clientX, clientY);\n    raycaster.setFromCamera(pointer, camera);\n    const hits = raycaster.intersectObjects(surfaceMeshes, false);\n    // Ctrl/Cmd seçiminin kuralı paneldir: görünür noktada panel hit'i varsa\n    // modül proxy/yardımcı yüzeyinden önce onu seç. Panel yoksa eski ilk-hit\n    // davranışını koru (örn. banko özel çoklu seçimi).\n    const panelHit = rectangleSelect\n      ? hits.find((entry) => entry.object?.userData?.selectionMode === 'panel')\n      : null;\n    const hit = panelHit ?? hits[0];\n"""
+
+replacement = """  function pickPanelSurfaceAt(clientX, clientY) {\n    setPointerFromClient(clientX, clientY);\n    raycaster.setFromCamera(pointer, camera);\n\n    let best = null;\n    surfaceMeshes.forEach((surface) => {\n      if (surface.userData?.selectionMode !== 'panel') return;\n      const geometry = surface.geometry;\n      const width = Number(geometry?.parameters?.width);\n      const height = Number(geometry?.parameters?.height);\n      if (!(width > 0) || !(height > 0)) return;\n\n      surface.updateWorldMatrix(true, false);\n      const inverseWorld = surface.matrixWorld.clone().invert();\n      const localRay = raycaster.ray.clone().applyMatrix4(inverseWorld);\n      const directionZ = Number(localRay.direction.z);\n      if (Math.abs(directionZ) < 1e-9) return;\n\n      const distanceAlongRay = -Number(localRay.origin.z) / directionZ;\n      if (!(distanceAlongRay >= 0)) return;\n      const localPoint = localRay.at(distanceAlongRay, new THREE.Vector3());\n      const epsilon = 0.002;\n      if (\n        Math.abs(localPoint.x) > width / 2 + epsilon\n        || Math.abs(localPoint.y) > height / 2 + epsilon\n      ) return;\n\n      const worldPoint = localPoint.clone().applyMatrix4(surface.matrixWorld);\n      const distance = raycaster.ray.origin.distanceTo(worldPoint);\n      if (!best || distance < best.distance) {\n        best = { object: surface, point: worldPoint, distance };\n      }\n    });\n    return best;\n  }\n\n  function handleSurfaceSelectionAt(clientX, clientY, rectangleSelect, fallbackModuleId = null) {\n    setPointerFromClient(clientX, clientY);\n    raycaster.setFromCamera(pointer, camera);\n    const hits = raycaster.intersectObjects(surfaceMeshes, false);\n    // Ctrl/Cmd panel seçimi görünür materyal yüz yönüne bağlı değildir. PlaneGeometry\n    // panel alanını iki taraftan geometrik olarak test ederek önden/arkadan aynı hit'i bul.\n    const panelHit = rectangleSelect ? pickPanelSurfaceAt(clientX, clientY) : null;\n    const hit = panelHit ?? hits[0];\n"""
+
+if needle not in scene:
+    raise SystemExit('scene selection block not found')
+scene = scene.replace(needle, replacement, 1)
+scene_path.write_text(scene, encoding='utf-8')
+
+test_path = Path('test/ctrlMultiSelect.test.js')
+test = test_path.read_text(encoding='utf-8')
+marker = """  assert.match(scene, /planePanels\\.map/);\n"""
+extra = """  assert.match(scene, /function pickPanelSurfaceAt\\(clientX, clientY\\)/);\n  assert.match(scene, /surface\\.userData\\?\\.selectionMode !== 'panel'/);\n  assert.match(scene, /localRay = raycaster\\.ray\\.clone\\(\\)\\.applyMatrix4\\(inverseWorld\\)/);\n  assert.match(scene, /const panelHit = rectangleSelect \\? pickPanelSurfaceAt\\(clientX, clientY\\) : null/);\n"""
+if extra.strip() not in test:
+    if marker not in test:
+        raise SystemExit('ctrl test marker not found')
+    test = test.replace(marker, marker + extra, 1)
+test_path.write_text(test, encoding='utf-8')
