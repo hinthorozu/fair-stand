@@ -1,0 +1,29 @@
+name: Add TV Sizes
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/add-tv-sizes.py'
+      - '.github/workflows/add-tv-sizes.yml'
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python scripts/add-tv-sizes.py
+      - run: node --check src/catalog.js
+      - run: node --check src/designState.js
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f scripts/add-tv-sizes.py .github/workflows/add-tv-sizes.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'feat: add 55 and 65 inch TV variants [skip ci]'
