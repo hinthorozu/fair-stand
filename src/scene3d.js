@@ -3507,10 +3507,11 @@ function createTvModule(moduleState, moduleIndex) {
   const heightM = Number(moduleState.screenHeightCm || 52.3) / 100;
   const depthM = 0.05;
   const centerYM = 1.75;
-  // Each rendered TV owns its texture clone. disposeWall() may dispose module maps
-  // during rebuilds without invalidating the cached source texture used by later TVs.
-  const screenTexture = getTvScreenTexture().clone();
-  screenTexture.needsUpdate = true;
+  // Each rendered TV owns a real TextureLoader result. Cloning the cached texture
+  // before its async image load completes leaves clone.image empty and WebGL warns
+  // "Texture marked for update but no image data found".
+  const screenTexture = new THREE.TextureLoader().load(TV_SCREEN_DATA_URL);
+  screenTexture.colorSpace = THREE.SRGBColorSpace;
 
   const group = new THREE.Group();
   group.userData.kind = 'module';
