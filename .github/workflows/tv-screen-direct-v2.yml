@@ -1,0 +1,45 @@
+name: TV Screen Direct V2
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/tv-screen-direct-v2.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch Object_5 material
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/scene3d.js')
+          s = p.read_text()
+          old = "      if (object.name === 'Object_5') {\n        const texture = createTvBrandTexture();\n        object.material = new THREE.MeshBasicMaterial({\n          map: texture,\n          toneMapped: false,\n          side: THREE.DoubleSide,\n        });\n      } else if (object.material) {\n"
+          new = "      if (object.name === 'Object_5') {\n        const texture = new THREE.TextureLoader().load(TV_SCREEN_DATA_URL);\n        texture.colorSpace = THREE.SRGBColorSpace;\n        texture.flipY = false;\n        object.material = new THREE.MeshBasicMaterial({\n          map: texture,\n          toneMapped: false,\n          side: THREE.DoubleSide,\n        });\n        object.material.needsUpdate = true;\n      } else if (object.material) {\n"
+          if old not in s:
+              raise SystemExit('Object_5 material block not found')
+          s = s.replace(old, new, 1)
+          s = s.replace("      if (moduleState.type === 'tv') addTvScreenOverlay(module.group);\n", "")
+          p.write_text(s)
+          PY
+      - name: Verify
+        run: |
+          node --check src/scene3d.js
+          grep -F "new THREE.TextureLoader().load(TV_SCREEN_DATA_URL)" src/scene3d.js
+          grep -F "texture.flipY = false" src/scene3d.js
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - name: Cleanup
+        run: rm -f .github/workflows/tv-screen-direct-v2.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: bind uploaded image to TV screen mesh [skip ci]'
+          branch: ROG
