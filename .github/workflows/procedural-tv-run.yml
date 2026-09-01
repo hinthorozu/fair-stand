@@ -27,3 +27,4 @@ jobs:
         with:
           commit_message: 'refactor: replace GLB TV with procedural display [skip ci]'
           branch: ROG
+# rerun after TV test contract update
