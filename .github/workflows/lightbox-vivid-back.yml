@@ -1,0 +1,40 @@
+name: Lightbox Vivid Back
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/lightbox-vivid-back.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply patch
+        run: python scripts/patch-lightbox-vivid-back.py
+      - name: Syntax check
+        run: node --check src/scene3d.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit and push
+        run: |
+          rm -f scripts/patch-lightbox-vivid-back.py .github/workflows/lightbox-vivid-back.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: preserve vivid lightbox image and rear panel [skip ci]'
+          git push origin ROG
