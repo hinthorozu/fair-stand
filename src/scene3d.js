@@ -3538,7 +3538,11 @@ function createTvModule(moduleState, moduleIndex) {
     new THREE.BoxGeometry(widthM, heightM, depthM),
     materials,
   );
-  tv.position.set(0, centerYM, 0);
+  // Keep the TV fully in front of the wall panel. Flat-panel surfaces sit at roughly
+  // wallDepth/2 + 1.5 mm, so a TV centered at local z=0 is mostly buried/occluded.
+  // Local +Z is the module front and rotates correctly with left/right wall placement.
+  const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
+  tv.position.set(0, centerYM, wallFrontM + depthM / 2 + 0.003);
   tv.castShadow = true;
   tv.receiveShadow = true;
 

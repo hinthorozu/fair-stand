@@ -33,6 +33,8 @@ test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its fr
   assert.doesNotMatch(tvSource, /getTvScreenTexture\(\)\.clone\(\)/);
   assert.match(tvSource, /map: screenTexture/);
   assert.match(tvSource, /createSelectionFrame\(widthM, heightM\)/);
+  assert.match(tvSource, /wallFrontM = STAND_DIMENSIONS\.depth \/ 2 \+ 0\.0015/);
+  assert.match(tvSource, /wallFrontM \+ depthM \/ 2 \+ 0\.003/);
   assert.match(tvSource, /tv\.userData\.selectionFrame = selectionFrame/);
   assert.doesNotMatch(tvSource, /new THREE\.PlaneGeometry/);
 });
