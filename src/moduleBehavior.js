@@ -58,6 +58,14 @@ const TYPE_BEHAVIORS = Object.freeze({
     collision: 'footprint',
     ghost: Object.freeze({ kind: 'real-model', renderer: 'bar-stool', opacity: 0.38 }),
   }),
+  'mini-fridge': Object.freeze({
+    placement: 'free',
+    moveSnapCm: 10,
+    rotationStepDeg: 90,
+    defaultRotationDeg: 0,
+    allowSideInsert: true,
+    collision: 'footprint',
+  }),
   tv: Object.freeze({
     placement: 'wall-overlay',
     moveSnapCm: 10,

@@ -8,6 +8,7 @@ import {
 } from './automaticWall.js';
 import {
   createBarStoolModuleState,
+  createMiniFridgeModuleState,
   createLedFloodlightModuleState,
   createTvModuleState,
   createBaseModuleState,
@@ -285,6 +286,11 @@ const scene3d = createStandScene(
 
       if (moduleType === 'bar-stool') {
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Bar Taburesi · GLB model.';
+        return;
+      }
+
+      if (moduleType === 'mini-fridge') {
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Mini Buzdolabı · 45 × 43 × 66 cm · GLB model.';
         return;
       }
 
@@ -643,6 +649,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'sofa-set-classic') state = createBeigeSofaSetModuleState();
   else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();
   else if (module.type === 'bar-stool') state = createBarStoolModuleState();
+  else if (module.type === 'mini-fridge') state = createMiniFridgeModuleState();
   else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);
   else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);

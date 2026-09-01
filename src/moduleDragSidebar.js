@@ -44,6 +44,9 @@ function ensureStyles() {
     .module-drag-bar-stool { position:relative; width:44px; height:58px; }
     .module-drag-bar-stool::before { content:''; position:absolute; left:8px; top:4px; width:28px; height:20px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:10px 10px 5px 5px; background:#f8fafc; }
     .module-drag-bar-stool::after { content:''; position:absolute; left:11px; top:24px; width:22px; height:27px; border-left:3px solid ${ALUMINUM_PROFILE_COLOR}; border-right:3px solid ${ALUMINUM_PROFILE_COLOR}; border-bottom:3px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:0 0 10px 10px; }
+    .module-drag-mini-fridge { position:relative; width:38px; height:58px; border:3px solid #6b7280; border-radius:5px; background:#e7e5df; box-shadow:3px 3px 0 #cbd5e1; box-sizing:border-box; }
+    .module-drag-mini-fridge::before { content:''; position:absolute; left:2px; right:2px; top:18px; height:2px; background:#8b8f94; }
+    .module-drag-mini-fridge::after { content:''; position:absolute; right:4px; top:7px; width:2px; height:8px; border-radius:2px; background:#555b61; box-shadow:0 21px 0 #555b61; }
     .module-drag-tv { position:relative; width:66px; height:54px; }
     .module-drag-tv::before { content:''; position:absolute; left:4px; top:3px; width:58px; height:36px; box-sizing:border-box; border:4px solid #26292d; border-radius:2px; background:#f8fafc; box-shadow:0 2px 5px rgba(15,23,42,.12); }
     .module-drag-tv::after { content:''; position:absolute; left:22px; top:39px; width:22px; height:5px; background:#30343a; box-shadow:0 7px 0 -1px #30343a; clip-path:polygon(27% 0,73% 0,86% 100%,100% 100%,100% 100%,0 100%,14% 100%); }
@@ -107,6 +110,13 @@ export function createModuleCatalogPreview(module) {
   if (module.type === 'bar-stool') {
     const body = document.createElement('div');
     body.className = 'module-drag-bar-stool';
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'mini-fridge') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-mini-fridge';
     preview.appendChild(body);
     return preview;
   }
@@ -224,6 +234,10 @@ export function createModuleDragSidebar({
     {
       label: 'Mobilya',
       keys: ['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic'],
+    },
+    {
+      label: 'Depo',
+      keys: ['DEPOT_MINI_FRIDGE_AVANTI'],
     },
     {
       label: 'Elektronik & Aydınlatma',

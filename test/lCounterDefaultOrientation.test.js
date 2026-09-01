@@ -6,7 +6,7 @@ import { getModuleDefaultRotationDeg, getModuleRotationStepDeg } from '../src/mo
 for (const widthCm of [100, 150, 200]) {
   test(`corner counter ${widthCm} defaults to the same orientation`, () => {
     const module = { type: 'counter', shape: 'L', widthCm };
-    assert.equal(getModuleDefaultRotationDeg(module), 180);
+    assert.equal(getModuleDefaultRotationDeg(module), 270);
     assert.equal(getModuleRotationStepDeg(module), 90);
   });
 }

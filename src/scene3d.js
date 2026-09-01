@@ -96,6 +96,18 @@ function loadBarStoolModel() {
   return barStoolModelPromise;
 }
 
+let miniFridgeModelPromise = null;
+
+function loadMiniFridgeModel() {
+  if (!miniFridgeModelPromise) {
+    const loader = new GLTFLoader();
+    miniFridgeModelPromise = loader
+      .loadAsync(import.meta.env.BASE_URL + 'models/80s_avanti_mini_fridge.glb')
+      .then((gltf) => gltf.scene);
+  }
+  return miniFridgeModelPromise;
+}
+
 let beigeSofaModelPromise = null;
 
 function loadBeigeSofaModel() {
@@ -1132,6 +1144,8 @@ export function createStandScene(
         module = createEamesTableChairSetModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'bar-stool') {
         module = createBarStoolModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'mini-fridge') {
+        module = createMiniFridgeModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'tv') {
         module = createTvModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'led-floodlight') {
@@ -1857,6 +1871,7 @@ export function createStandScene(
     if (moduleState?.type === 'showcase-3') return `3 Gözlü Vitrin ${widthCm}`;
     if (moduleState?.type === 'showcase-2') return `2 Gözlü Vitrin ${widthCm}`;
     if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';
+    if (moduleState?.type === 'mini-fridge') return 'Mini Buzdolabı';
     if (moduleState?.type === 'tv') return `TV ${Number(moduleState.sizeInch) || 42}"`;
     return `Düz Panel ${widthCm}`;
   }
@@ -3694,6 +3709,70 @@ function createTvModule(moduleState, moduleIndex) {
   group.add(tv);
 
   return { group, surfaces: [tv] };
+}
+
+function createMiniFridgeModule(moduleState, moduleIndex) {
+  const widthCm = Number(moduleState.widthCm || 45);
+  const depthCm = Number(moduleState.depthCm || 43);
+  const heightCm = Number(moduleState.heightCm || 66);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    moduleType: 'mini-fridge',
+    type: 'mini-fridge',
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(widthCm / 100, heightCm / 100, depthCm / 100),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+  );
+  proxy.position.y = heightCm / 200;
+  proxy.userData = {
+    kind: 'surface',
+    surfaceId: `${moduleState.id}:mini-fridge`,
+    moduleId: moduleState.id,
+    moduleType: 'mini-fridge',
+    moduleIndex,
+    selectionMode: 'module',
+    acceptsImage: false,
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+  group.add(proxy);
+
+  loadMiniFridgeModel().then((template) => {
+    const model = template.clone(true);
+    model.traverse((object) => {
+      if (!object.isMesh) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+    });
+
+    model.updateMatrixWorld(true);
+    let box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const targetHeightM = heightCm / 100;
+    const uniformScale = size.y > 0 ? targetHeightM / size.y : 1;
+    model.scale.multiplyScalar(uniformScale);
+    model.updateMatrixWorld(true);
+
+    box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= box.min.y;
+    group.add(model);
+  }).catch((error) => {
+    console.warn('Mini Buzdolabı GLB modeli yüklenemedi:', error);
+  });
+
+  return { group, surfaces: [proxy] };
 }
 
 function createLedFloodlightModule(moduleState, moduleIndex) {

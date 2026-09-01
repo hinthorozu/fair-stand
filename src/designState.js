@@ -207,6 +207,16 @@ export function createBarStoolModuleState() {
   };
 }
 
+export function createMiniFridgeModuleState() {
+  return {
+    id: createId('module'),
+    type: 'mini-fridge',
+    widthCm: 45,
+    depthCm: 43,
+    heightCm: 66,
+  };
+}
+
 export function createTvModuleState(sizeInch = 42) {
   const definition = getTvDefinition(sizeInch);
   if (!definition) return null;

@@ -63,6 +63,12 @@ export const furniture_bar_stool_classic_DIMENSIONS = Object.freeze({
   heightCm: 121,
 });
 
+export const DEPOT_MINI_FRIDGE_DIMENSIONS = Object.freeze({
+  widthCm: 45,
+  depthCm: 43,
+  heightCm: 66,
+});
+
 const TV_42_DEFINITION = getTvDefinition(42);
 const TV_55_DEFINITION = getTvDefinition(55);
 const TV_65_DEFINITION = getTvDefinition(65);
@@ -111,6 +117,7 @@ export const MODULE_CATALOG = Object.freeze({
   furniture_sofa_set_classic: { type: 'sofa-set-classic', widthCm: 150, depthCm: 150, heightCm: 78, label: 'Koltuk Takımı' },
   furniture_table_chair_set_eames: { type: 'table-chair-set-eames', widthCm: 150, depthCm: 150, heightCm: 82, label: 'Eames Masa Sandalye Takımı' },
   furniture_bar_stool_classic: { type: 'bar-stool', widthCm: 60, depthCm: 55, heightCm: 121, label: 'Bar Taburesi' },
+  DEPOT_MINI_FRIDGE_AVANTI: { type: 'mini-fridge', widthCm: 45, depthCm: 43, heightCm: 66, label: 'Mini Buzdolabı' },
   TV_42: createTvCatalogItem(TV_42_DEFINITION),
   TV_55: createTvCatalogItem(TV_55_DEFINITION),
   TV_65: createTvCatalogItem(TV_65_DEFINITION),
@@ -173,6 +180,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'furniture_sofa_set_classic',
   'furniture_table_chair_set_eames',
   'furniture_bar_stool_classic',
+  'DEPOT_MINI_FRIDGE_AVANTI',
   'TV_42',
   'TV_55',
   'TV_65',
