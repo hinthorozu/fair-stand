@@ -13,6 +13,8 @@ test('shelf renderer adds lights without changing shelf box geometry', () => {
   const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(source, /const shelfLightingOn = Boolean\(moduleState\.shelfLightingOn\)/);
   assert.match(source, /new THREE\.SpotLight\(/);
+  assert.match(source, /const spotOffsets = \[-innerWidthM \* 0\.25, innerWidthM \* 0\.25\]/);
+  assert.match(source, /spotOffsets\.forEach\(\(spotX\) =>/);
   assert.match(source, /shelf-under-led-strip/);
   assert.match(source, /emissive: 0xffe3bd/);
   assert.match(source, /0xfff2dc/);

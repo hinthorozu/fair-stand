@@ -5141,28 +5141,32 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
       ledStrip.userData.role = 'shelf-under-led-strip';
       built.group.add(ledStrip);
 
-      const spot = new THREE.SpotLight(
-        0xfff2dc,
-        20,
-        1.15,
-        0.78,
-        0.82,
-        1.6,
-      );
-      spot.position.set(
-        0,
-        shelfBottomY - 0.018,
-        wallDepthM / 2 + shelfDepthM * 0.76,
-      );
-      spot.target.position.set(
-        0,
-        Math.max(0.04, shelfBottomY - 0.58),
-        wallDepthM / 2 + shelfDepthM * 1.02,
-      );
-      spot.castShadow = false;
-      spot.userData.kind = 'decoration';
-      spot.userData.role = 'shelf-under-light';
-      built.group.add(spot, spot.target);
+      // Sağ-sol simetrik iki spot; raf genişliğinin çeyrek noktalarına yerleşir.
+      const spotOffsets = [-innerWidthM * 0.25, innerWidthM * 0.25];
+      spotOffsets.forEach((spotX) => {
+        const spot = new THREE.SpotLight(
+          0xfff2dc,
+          14,
+          1.0,
+          0.68,
+          0.82,
+          1.6,
+        );
+        spot.position.set(
+          spotX,
+          shelfBottomY - 0.018,
+          wallDepthM / 2 + shelfDepthM * 0.76,
+        );
+        spot.target.position.set(
+          spotX,
+          Math.max(0.04, shelfBottomY - 0.58),
+          wallDepthM / 2 + shelfDepthM * 1.02,
+        );
+        spot.castShadow = false;
+        spot.userData.kind = 'decoration';
+        spot.userData.role = 'shelf-under-light';
+        built.group.add(spot, spot.target);
+      });
     }
   });
 
