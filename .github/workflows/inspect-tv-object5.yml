@@ -1,0 +1,17 @@
+name: Inspect TV Object5
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/inspect-tv-object5.yml']
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - name: Show Object_5 context
+        run: |
+          grep -n -C 14 "Object_5" src/scene3d.js || true
+          grep -n -C 8 "createTvBrandTexture" src/scene3d.js || true
+          grep -n -C 8 "TV_SCREEN_DATA_URL" src/scene3d.js || true
