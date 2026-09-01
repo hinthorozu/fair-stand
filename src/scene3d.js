@@ -5141,26 +5141,28 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
       ledStrip.userData.role = 'shelf-under-led-strip';
       built.group.add(ledStrip);
 
-      // Geniş alan ışığı spot konisini kaldırır ve raf eni boyunca homojen yayılır.
-      const areaLight = new THREE.RectAreaLight(
-        0xffe4c8,
-        28.0,
-        ledStripWidthM,
-        Math.max(shelfDepthM * 0.95, 0.18),
+      // Raf altındaki yerel parıltı; gerçek ışık yok, duvar ve malzeme renklerini etkilemez.
+      const glowDepthM = Math.max(shelfDepthM * 0.72, 0.14);
+      const underGlow = new THREE.Mesh(
+        new THREE.PlaneGeometry(ledStripWidthM, glowDepthM),
+        new THREE.MeshBasicMaterial({
+          color: 0xfff3dc,
+          transparent: true,
+          opacity: 0.18,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide,
+        }),
       );
-      areaLight.position.set(
+      underGlow.rotation.x = -Math.PI / 2;
+      underGlow.position.set(
         0,
-        shelfBottomY - 0.006,
-        wallDepthM / 2 + shelfDepthM * 0.54,
+        shelfBottomY - 0.009,
+        wallDepthM / 2 + shelfDepthM * 0.62,
       );
-      areaLight.lookAt(new THREE.Vector3(
-        0,
-        shelfBottomY - 0.55,
-        wallDepthM / 2 + shelfDepthM * 0.20,
-      ));
-      areaLight.userData.kind = 'decoration';
-      areaLight.userData.role = 'shelf-under-light';
-      built.group.add(areaLight);
+      underGlow.userData.kind = 'decoration';
+      underGlow.userData.role = 'shelf-under-light';
+      built.group.add(underGlow);
     }
   });
 
