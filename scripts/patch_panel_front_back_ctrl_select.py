@@ -1,18 +1,20 @@
 from pathlib import Path
 import re
 
-scene_path = Path('src/scene3d.js')
-scene = scene_path.read_text(encoding='utf-8')
+scene_path = Path("src/scene3d.js")
+with scene_path.open("r", encoding="utf-8", newline="") as handle:
+    scene = handle.read()
 
-# Ctrl/Cmd range selection used to reject every module whose placement.wallId was
-# "free". That made wall-backed rows selectable while freestanding/front rows
-# silently returned before building the range. Describe both wall planes and
-# coplanar free rows with one stable planeKey instead.
-pattern = re.compile(
-    r"  function getSurfaceSelectionPlaneMeta\(surface\) \{\n.*?\n  \}\n\n  function selectRectangleTo",
-    re.DOTALL,
-)
-replacement = """  function getSurfaceSelectionPlaneMeta(surface) {
+newline = "\r\n" if "\r\n" in scene else "\n"
+
+start_marker = "  function getSurfaceSelectionPlaneMeta(surface) {"
+end_marker = "  function selectRectangleTo"
+start = scene.find(start_marker)
+end = scene.find(end_marker, start + len(start_marker))
+if start < 0 or end < 0:
+    raise SystemExit("selection-plane function markers not found")
+
+function_text = """  function getSurfaceSelectionPlaneMeta(surface) {
     if (!surface || surface.userData?.selectionMode !== 'panel') return null;
     const moduleGroup = findModuleGroup(surface);
     const moduleState = moduleGroup?.userData?.moduleState;
@@ -56,21 +58,27 @@ replacement = """  function getSurfaceSelectionPlaneMeta(surface) {
     };
   }
 
-  function selectRectangleTo"""
-scene, count = pattern.subn(replacement, scene, count=1)
-if count != 1:
-    raise SystemExit(f'expected one selection-plane function, found {count}')
+""".replace("\n", newline)
 
-old_guard = "if (!anchorMeta || !targetMeta || anchorMeta.wallId !== targetMeta.wallId) return;"
+scene = scene[:start] + function_text + scene[end:]
+
+old_guard_re = re.compile(
+    r"if\s*\(\s*!anchorMeta\s*\|\|\s*!targetMeta\s*\|\|\s*anchorMeta\.wallId\s*!==\s*targetMeta\.wallId\s*\)\s*return;"
+)
 new_guard = "if (!anchorMeta || !targetMeta || anchorMeta.planeKey !== targetMeta.planeKey) return;"
-if old_guard not in scene:
-    raise SystemExit('selection plane guard not found')
-scene = scene.replace(old_guard, new_guard, 1)
+if new_guard not in scene:
+    scene, guard_count = old_guard_re.subn(new_guard, scene, count=1)
+    if guard_count != 1:
+        raise SystemExit("selection plane guard not found")
 
-old_filter = ".filter((entry) => entry.meta?.wallId === anchorMeta.wallId);"
+old_filter_re = re.compile(
+    r"\.filter\(\(entry\)\s*=>\s*entry\.meta\?\.wallId\s*===\s*anchorMeta\.wallId\);"
+)
 new_filter = ".filter((entry) => entry.meta?.planeKey === anchorMeta.planeKey);"
-if old_filter not in scene:
-    raise SystemExit('selection plane filter not found')
-scene = scene.replace(old_filter, new_filter, 1)
+if new_filter not in scene:
+    scene, filter_count = old_filter_re.subn(new_filter, scene, count=1)
+    if filter_count != 1:
+        raise SystemExit("selection plane filter not found")
 
-scene_path.write_text(scene, encoding='utf-8')
+with scene_path.open("w", encoding="utf-8", newline="") as handle:
+    handle.write(scene)
