@@ -237,7 +237,7 @@ export function createModuleDragSidebar({
     },
     {
       label: 'Depo',
-      keys: ['DEPOT_MINI_FRIDGE_AVANTI'],
+      keys: ['DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE'],
     },
     {
       label: 'Elektronik & Aydınlatma',

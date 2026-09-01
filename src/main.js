@@ -9,6 +9,7 @@ import {
 import {
   createBarStoolModuleState,
   createMiniFridgeModuleState,
+  createKettleModuleState,
   createLedFloodlightModuleState,
   createTvModuleState,
   createBaseModuleState,
@@ -650,6 +651,7 @@ function createCatalogModuleState(module, { preservePlacement = false } = {}) {
   else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();
   else if (module.type === 'bar-stool') state = createBarStoolModuleState();
   else if (module.type === 'mini-fridge') state = createMiniFridgeModuleState();
+  else if (module.type === 'kettle') state = createKettleModuleState();
   else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);
   else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);

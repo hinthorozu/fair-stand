@@ -217,6 +217,16 @@ export function createMiniFridgeModuleState() {
   };
 }
 
+export function createKettleModuleState() {
+  return {
+    id: createId('module'),
+    type: 'kettle',
+    widthCm: 24,
+    depthCm: 19,
+    heightCm: 25,
+  };
+}
+
 export function createTvModuleState(sizeInch = 42) {
   const definition = getTvDefinition(sizeInch);
   if (!definition) return null;
