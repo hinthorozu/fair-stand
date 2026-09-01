@@ -27,7 +27,6 @@ import {
   planContinuousModuleMove,
 } from './moduleMove.js';
 import { getModuleGhostBehavior, getModuleRotationStepDeg, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule } from './moduleBehavior.js';
-import { TV_SCREEN_DATA_URL } from './tvScreenImage.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
 const PANEL_BACK_COLOR = 0x4b5563;
@@ -79,33 +78,11 @@ function loadEamesChairModel() {
   return eamesChairModelPromise;
 }
 
-let tvScreenBlob = null;
-
-function getTvScreenBlob() {
-  if (tvScreenBlob) return tvScreenBlob;
-  const marker = 'base64,';
-  const markerIndex = TV_SCREEN_DATA_URL.indexOf(marker);
-  if (markerIndex < 0) throw new Error('TV screen image is not a base64 data URL.');
-  const payload = TV_SCREEN_DATA_URL.slice(markerIndex + marker.length);
-  const binary = window.atob(payload);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  tvScreenBlob = new Blob([bytes], { type: 'image/jpeg' });
-  return tvScreenBlob;
-}
-
 function createTvScreenTexture() {
-  const objectUrl = URL.createObjectURL(getTvScreenBlob());
-  const texture = new THREE.TextureLoader().load(
-    objectUrl,
-    () => URL.revokeObjectURL(objectUrl),
-    undefined,
-    () => URL.revokeObjectURL(objectUrl),
-  );
+  const texture = new THREE.TextureLoader().load(import.meta.env.BASE_URL + 'tv-screen.jpg');
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
 }
-
 
 let barStoolModelPromise = null;
 

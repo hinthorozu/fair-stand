@@ -46,12 +46,13 @@ test('scene keeps the shared textureLoader for normal panel images', () => {
   assert.match(setupSource, /const textureLoader = new THREE\.TextureLoader\(\)/);
 });
 
-test('TV texture avoids loading the data URI as a URL', () => {
+test('TV texture loads from a real public JPEG asset', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(source, /function getTvScreenBlob\(\)/);
-  assert.match(source, /URL\.createObjectURL\(getTvScreenBlob\(\)\)/);
+  assert.match(source, /load\(import\.meta\.env\.BASE_URL \+ 'tv-screen\.jpg'\)/);
   assert.match(source, /texture\.colorSpace = THREE\.SRGBColorSpace/);
-  assert.doesNotMatch(source, /load\(TV_SCREEN_DATA_URL\)/);
+  assert.doesNotMatch(source, /atob\(/);
+  assert.doesNotMatch(source, /TV_SCREEN_DATA_URL/);
+  assert.equal(fs.existsSync(new URL('../public/tv-screen.jpg', import.meta.url)), true);
 });
 
 test('TV 42 does not inherit flat panel state', () => {
@@ -65,10 +66,10 @@ test('TV 42 does not inherit flat panel state', () => {
 });
 
 
-test('TV no longer depends on a GLB asset', () => {
+test('TV uses the public JPEG asset and no GLB or inline data module', () => {
   assert.equal(fs.existsSync(new URL('../public/models/tv.glb', import.meta.url)), false);
-  const imageSource = fs.readFileSync(new URL('../src/tvScreenImage.js', import.meta.url), 'utf8');
-  assert.match(imageSource, /data:image\/jpeg;base64,/);
+  assert.equal(fs.existsSync(new URL('../src/tvScreenImage.js', import.meta.url)), false);
+  assert.equal(fs.existsSync(new URL('../public/tv-screen.jpg', import.meta.url)), true);
 });
 
 test('TV is a non-colliding wall overlay accessory', () => {
