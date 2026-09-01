@@ -10,6 +10,22 @@ test('Ctrl/Cmd panel range selection is based on panel presence, not module type
   assert.match(scene, /\.filter\(\(surface\) => surface\.userData\.selectionMode === 'panel'\)/);
 });
 
+
+test('scene handles same-module panel ranges before wall-plane selection', () => {
+  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  assert.match(scene, /anchorModuleId && anchorModuleId === targetModuleId/);
+  assert.match(scene, /sameModuleResult = createPanelRangeSelection/);
+  assert.match(scene, /surface\.userData\.moduleId === anchorModuleId/);
+  assert.match(scene, /selectedModuleId = anchorModuleId/);
+});
+
+test('Ctrl\/Cmd raycast prefers a real panel surface over module proxy hits', () => {
+  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  assert.match(scene, /const hits = raycaster\.intersectObjects\(surfaceMeshes, false\)/);
+  assert.match(scene, /hits\.find\(\(entry\) => entry\.object\?\.userData\?\.selectionMode === 'panel'\)/);
+  assert.match(scene, /const hit = panelHit \?\? hits\[0\]/);
+});
+
 test('door upper panels 4-6 can be selected vertically as one range', () => {
   const items = [4, 5, 6].map((stripIndex) => ({ moduleIndex: 0, stripIndex, id: `door-${stripIndex}` }));
   const result = createPanelRangeSelection(

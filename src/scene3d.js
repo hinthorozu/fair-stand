@@ -1035,6 +1035,41 @@ export function createStandScene(
       selectionAnchorSurfaceId = anchorMesh.userData.surfaceId ?? null;
     }
 
+    const anchorModuleId = anchorMesh.userData.moduleId ?? null;
+    const targetModuleId = mesh.userData.moduleId ?? null;
+
+    // Aynı modül içindeki gerçek panel aralığı duvar placement hesabına bağlı değildir.
+    // Kapının üst 3 paneli (strip 4-6), raf modülü ve diğer panel taşıyan modüller
+    // kendi içlerinde doğrudan dikey Ctrl/Cmd aralık seçimine izin verir.
+    if (anchorModuleId && anchorModuleId === targetModuleId) {
+      const modulePanels = surfaceMeshes
+        .filter((surface) => (
+          surface.userData.selectionMode === 'panel'
+          && surface.userData.moduleId === anchorModuleId
+          && Number.isInteger(Number(surface.userData.stripIndex))
+        ))
+        .map((surface) => ({
+          mesh: surface,
+          moduleIndex: 0,
+          stripIndex: Number(surface.userData.stripIndex),
+        }));
+      const sameModuleResult = createPanelRangeSelection(
+        modulePanels,
+        { moduleIndex: 0, stripIndex: Number(anchorMesh.userData.stripIndex) },
+        { moduleIndex: 0, stripIndex: Number(mesh.userData.stripIndex) },
+      );
+      if (!sameModuleResult.ok) return;
+
+      clearSelection({ notify: false, keepAnchor: true });
+      sameModuleResult.entries.forEach((entry) => {
+        selectedSurfaces.add(entry.mesh);
+        setSelectionVisual(entry.mesh, true);
+      });
+      selectedModuleId = anchorModuleId;
+      notifySelection();
+      return;
+    }
+
     const anchorMeta = getSurfaceSelectionPlaneMeta(anchorMesh);
     const targetMeta = getSurfaceSelectionPlaneMeta(mesh);
     // Köşeyi dönüp başka duvara taşma: dikdörtgen seçim yalnızca aynı fiziksel
@@ -3748,7 +3783,14 @@ export function createStandScene(
   function handleSurfaceSelectionAt(clientX, clientY, rectangleSelect, fallbackModuleId = null) {
     setPointerFromClient(clientX, clientY);
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(surfaceMeshes, false)[0];
+    const hits = raycaster.intersectObjects(surfaceMeshes, false);
+    // Ctrl/Cmd seçiminin kuralı paneldir: görünür noktada panel hit'i varsa
+    // modül proxy/yardımcı yüzeyinden önce onu seç. Panel yoksa eski ilk-hit
+    // davranışını koru (örn. banko özel çoklu seçimi).
+    const panelHit = rectangleSelect
+      ? hits.find((entry) => entry.object?.userData?.selectionMode === 'panel')
+      : null;
+    const hit = panelHit ?? hits[0];
 
     if (hit) {
       if (rectangleSelect && hit.object.userData.moduleType === 'counter') {
