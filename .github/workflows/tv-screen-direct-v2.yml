@@ -15,26 +15,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Patch Object_5 material
+      - name: Patch exact TV screen block
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
           p = Path('src/scene3d.js')
           s = p.read_text()
-          pattern = r"      if \(object\.name === 'Object_5'\) \{.*?      \} else if \(object\.material\) \{"
-          replacement = "      if (object.name === 'Object_5') {\n        const texture = new THREE.TextureLoader().load(TV_SCREEN_DATA_URL);\n        texture.colorSpace = THREE.SRGBColorSpace;\n        texture.flipY = false;\n        object.material = new THREE.MeshBasicMaterial({\n          map: texture,\n          toneMapped: false,\n          side: THREE.DoubleSide,\n        });\n        object.material.needsUpdate = true;\n      } else if (object.material) {"
-          s2, count = re.subn(pattern, replacement, s, count=1, flags=re.S)
-          if count != 1:
-              raise SystemExit(f'Object_5 block replacement count={count}')
-          s2 = s2.replace("      if (moduleState.type === 'tv') addTvScreenOverlay(module.group);\n", "")
-          p.write_text(s2)
+          old = "      if (object.name === 'Object_5') {\n        const canvas = document.createElement('canvas');\n        canvas.width = 1024;\n        canvas.height = 576;\n        const ctx = canvas.getContext('2d');\n        ctx.fillStyle = '#111318';\n        ctx.fillRect(0, 0, canvas.width, canvas.height);\n        ctx.textAlign = 'center';\n        ctx.textBaseline = 'middle';\n        ctx.font = '700 92px Arial, sans-serif';\n        ctx.fillStyle = '#f8fafc';\n        ctx.fillText('KYROX', 430, canvas.height / 2);\n        ctx.fillStyle = '#3b82f6';\n        ctx.fillText('.STUDIO', 680, canvas.height / 2);\n        const texture = new THREE.CanvasTexture(canvas);\n        texture.colorSpace = THREE.SRGBColorSpace;\n        object.material = new THREE.MeshBasicMaterial({ map: texture, toneMapped: false });\n      }\n"
+          new = "      if (object.name === 'Object_5') {\n        const texture = new THREE.TextureLoader().load(TV_SCREEN_DATA_URL);\n        texture.colorSpace = THREE.SRGBColorSpace;\n        texture.flipY = false;\n        object.material = new THREE.MeshBasicMaterial({\n          map: texture,\n          toneMapped: false,\n          side: THREE.DoubleSide,\n        });\n        object.material.needsUpdate = true;\n      }\n"
+          if old not in s:
+              raise SystemExit('Exact Object_5 canvas block not found')
+          s = s.replace(old, new, 1)
+          s = s.replace("      if (moduleState.type === 'tv') addTvScreenOverlay(module.group);\n", "")
+          p.write_text(s)
           PY
       - name: Verify
         run: |
           node --check src/scene3d.js
           grep -F "new THREE.TextureLoader().load(TV_SCREEN_DATA_URL)" src/scene3d.js
-          grep -F "texture.flipY = false" src/scene3d.js
+          ! grep -F "ctx.fillText('KYROX'" src/scene3d.js
       - run: npm install
       - run: npm test
       - run: npm run build
@@ -42,5 +41,5 @@ jobs:
         run: rm -f .github/workflows/tv-screen-direct-v2.yml .github/workflows/inspect-tv-object5.yml
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'fix: bind uploaded image to TV screen mesh [skip ci]'
+          commit_message: 'fix: use uploaded image on TV screen mesh [skip ci]'
           branch: ROG
