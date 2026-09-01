@@ -5117,19 +5117,15 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
     if (shelfLightingOn) {
       // Boydan boya lineer LED: raf geometrisine dokunmadan alt yüzeye oturur.
       const ledStripWidthM = Math.max(innerWidthM - 0.04, 0.08);
-      const ledStripDepthM = 0.016;
-      const ledStripThicknessM = 0.006;
+      const ledStripDepthM = 0.028;
+      const ledStripThicknessM = 0.008;
       const shelfBottomY = seamHeightM;
       const ledCenterZM = wallDepthM / 2 + shelfDepthM * 0.78;
 
       const ledStrip = new THREE.Mesh(
         new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
-        new THREE.MeshStandardMaterial({
-          color: 0xfff6e8,
-          emissive: 0xffddb5,
-          emissiveIntensity: 6.0,
-          roughness: 0.28,
-          metalness: 0,
+        new THREE.MeshBasicMaterial({
+          color: 0xffefd2,
         }),
       );
       ledStrip.position.set(
@@ -5146,9 +5142,9 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
       const underGlow = new THREE.Mesh(
         new THREE.PlaneGeometry(ledStripWidthM, glowDepthM),
         new THREE.MeshBasicMaterial({
-          color: 0xfff3dc,
+          color: 0xffedcf,
           transparent: true,
-          opacity: 0.18,
+          opacity: 0.38,
           depthWrite: false,
           blending: THREE.AdditiveBlending,
           side: THREE.DoubleSide,
@@ -5163,6 +5159,28 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
       underGlow.userData.kind = 'decoration';
       underGlow.userData.role = 'shelf-under-light';
       built.group.add(underGlow);
+
+
+      // Ön kenarın hemen altında görünen ince bloom bandı; sahne ışığı değildir.
+      const frontGlow = new THREE.Mesh(
+        new THREE.PlaneGeometry(ledStripWidthM, 0.045),
+        new THREE.MeshBasicMaterial({
+          color: 0xffefd2,
+          transparent: true,
+          opacity: 0.58,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide,
+        }),
+      );
+      frontGlow.position.set(
+        0,
+        shelfBottomY - 0.024,
+        wallDepthM / 2 + shelfDepthM + 0.004,
+      );
+      frontGlow.userData.kind = 'decoration';
+      frontGlow.userData.role = 'shelf-under-front-glow';
+      built.group.add(frontGlow);
     }
   });
 

@@ -14,10 +14,11 @@ test('shelf renderer adds lights without changing shelf box geometry', () => {
   assert.match(source, /const shelfLightingOn = Boolean\(moduleState\.shelfLightingOn\)/);
   assert.match(source, /new THREE\.PlaneGeometry\(ledStripWidthM, glowDepthM\)/);
   assert.match(source, /shelf-under-led-strip/);
-  assert.match(source, /color: 0xfff6e8/);
-  assert.match(source, /emissive: 0xffddb5/);
-  assert.match(source, /0xfff3dc/);
+  assert.match(source, /color: 0xffefd2/);
+  assert.match(source, /shelf-under-front-glow/);
+  assert.match(source, /0xffedcf/);
   assert.match(source, /shelfBottomY - ledStripThicknessM \/ 2 - 0\.001/);
+  assert.match(source, /opacity: 0\.58/);
   assert.match(source, /role = 'shelf-under-light'/);
   assert.match(source, /new THREE\.BoxGeometry\(innerWidthM, shelfThicknessM, shelfDepthM\)/);
 });
