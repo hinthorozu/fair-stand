@@ -1483,6 +1483,7 @@ export function createStandScene(
       isGlass: supportsGlass ? Boolean(surface.userData.surfaceState?.isGlass) : false,
       supportsFabric: supportsGlass,
       isFabric: supportsGlass ? Boolean(surface.userData.surfaceState?.fabricGroupId) : false,
+      fabricLightingOn: supportsGlass ? Boolean(surface.userData.surfaceState?.fabricLightingOn) : false,
       clientX: event.clientX,
       clientY: event.clientY,
     };
@@ -2891,6 +2892,7 @@ export function createStandScene(
         state.fabricColor = hexColor;
         state.fabricImageAssetId = null;
         state.fabricImageFit = 'cover';
+        state.fabricLightingOn = false;
       });
     });
 
@@ -2964,6 +2966,33 @@ export function createStandScene(
     }
   }
 
+  function applyFabricOverlayLighting(overlay, fabricState = {}) {
+    const material = overlay?.material;
+    if (!material) return;
+
+    const lightingOn = Boolean(fabricState.fabricLightingOn);
+    if (!lightingOn) {
+      material.emissiveMap = null;
+      material.emissive.set(0x000000);
+      material.emissiveIntensity = 0;
+      material.needsUpdate = true;
+      return;
+    }
+
+    if (material.map) {
+      // Aynı baskı dokusu emissiveMap olarak kullanılır: görsel kendi içinden parlar,
+      // fakat sahneye fiziksel ışık saçılmaz.
+      material.emissive.set(0xffffff);
+      material.emissiveMap = material.map;
+      material.emissiveIntensity = 1.35;
+    } else {
+      material.emissiveMap = null;
+      material.emissive.set(fabricState.fabricColor ?? fabricState.color ?? '#ffffff');
+      material.emissiveIntensity = 0.72;
+    }
+    material.needsUpdate = true;
+  }
+
   function loadFabricOverlayImage(overlay, assetId, fit = 'cover') {
     const assetUrl = getAssetUrl(assetId);
     if (!overlay?.material || !assetUrl) return;
@@ -3016,7 +3045,7 @@ export function createStandScene(
         overlay.material.map?.dispose?.();
         overlay.material.map = fabricTexture;
         overlay.material.color.set(0xffffff);
-        overlay.material.needsUpdate = true;
+        applyFabricOverlayLighting(overlay, overlay.userData.fabricState);
         sourceTexture.dispose();
       },
       undefined,
@@ -3097,6 +3126,8 @@ export function createStandScene(
           color: baseColor,
           roughness: 0.86,
           metalness: 0,
+          emissive: 0x000000,
+          emissiveIntensity: 0,
           side: THREE.DoubleSide,
           polygonOffset: true,
           polygonOffsetFactor: -2,
@@ -3111,6 +3142,8 @@ export function createStandScene(
       overlay.userData.kind = 'decoration';
       overlay.userData.role = 'lightbox-fabric';
       overlay.userData.fabricGroupId = groupId;
+      overlay.userData.fabricState = fabricState;
+      applyFabricOverlayLighting(overlay, fabricState);
       // Bez öndeki tek parça yüzeydir; seçim/raycast alttaki gerçek panellerden devam eder.
       overlay.raycast = () => {};
       wallRoot.add(overlay);
@@ -3183,6 +3216,7 @@ export function createStandScene(
           delete surface.userData.surfaceState.fabricColor;
           delete surface.userData.surfaceState.fabricImageAssetId;
           delete surface.userData.surfaceState.fabricImageFit;
+          delete surface.userData.surfaceState.fabricLightingOn;
         });
         replacedSurfaces.forEach(restoreFabricSurface);
       }
@@ -3215,11 +3249,39 @@ export function createStandScene(
         delete surface.userData.surfaceState.fabricColor;
         delete surface.userData.surfaceState.fabricImageAssetId;
         delete surface.userData.surfaceState.fabricImageFit;
+        delete surface.userData.surfaceState.fabricLightingOn;
       }
     });
     restoredSurfaces.forEach(restoreFabricSurface);
     rebuildFabricOverlays();
     return { ok: true, enabled: false, panelCount: meshes.length };
+  }
+
+  function setFabricLighting(meshOrMeshes, enabled) {
+    const meshes = normalizeMeshes(meshOrMeshes).filter(
+      (mesh) => mesh?.userData?.selectionMode === 'panel' && mesh.userData.surfaceState?.fabricGroupId,
+    );
+    const groupIds = new Set(
+      meshes.map((mesh) => mesh.userData.surfaceState.fabricGroupId).filter(Boolean),
+    );
+    if (groupIds.size !== 1) {
+      return { ok: false, message: 'Aydınlatma için tek bir lightbox bezi seç.' };
+    }
+
+    const [groupId] = groupIds;
+    const lightingOn = Boolean(enabled);
+    const groupSurfaces = surfaceMeshes.filter(
+      (surface) => surface.userData.surfaceState?.fabricGroupId === groupId,
+    );
+    groupSurfaces.forEach((surface) => {
+      surface.userData.surfaceState.fabricLightingOn = lightingOn;
+    });
+
+    fabricOverlayMeshes
+      .filter((overlay) => overlay.userData?.fabricGroupId === groupId)
+      .forEach((overlay) => applyFabricOverlayLighting(overlay, groupSurfaces[0]?.userData.surfaceState));
+
+    return { ok: true, enabled: lightingOn, panelCount: groupSurfaces.length, fabricGroupId: groupId };
   }
 
   function applyGlassMode(meshOrMeshes, isGlass) {
@@ -4010,6 +4072,7 @@ export function createStandScene(
     applyColor,
     applyGlassMode,
     applyFabricMode,
+    setFabricLighting,
     applyImageAsset,
     applyHorizontalImageAsset,
     applyRectImageAsset,

@@ -960,6 +960,23 @@ function changeContextFabricMode(context, enabled) {
     : 'Bez kaldırıldı; paneller normal görünüme döndü.';
 }
 
+function changeContextFabricLighting(context, enabled) {
+  if (!context?.isFabric) return;
+
+  const selectedPanels = scene3d.getSelectedSurfaces().filter(
+    (surface) => surface.userData.selectionMode === 'panel',
+  );
+  const result = scene3d.setFabricLighting(selectedPanels, enabled);
+  if (!result?.ok) {
+    selectionInfo.textContent = result?.message || 'Lightbox aydınlatması değiştirilemedi.';
+    return;
+  }
+
+  selectionInfo.textContent = result.enabled
+    ? 'Lightbox aydınlatması açıldı · yalnızca bez/görsel parlıyor.'
+    : 'Lightbox aydınlatması kapatıldı.';
+}
+
 function changeContextPanelGlassMode(context, isGlass) {
   if (!context?.supportsGlass) return;
 
@@ -982,6 +999,7 @@ const moduleContextMenu = createModuleContextMenu({
   onValidateAddBatch: validateCatalogAddBatch,
   onGlassModeChange: changeContextPanelGlassMode,
   onFabricModeChange: changeContextFabricMode,
+  onFabricLightingChange: changeContextFabricLighting,
   getShelfLightingState: getContextShelfLightingState,
   onShelfLightingChange: changeContextShelfLighting,
 });
