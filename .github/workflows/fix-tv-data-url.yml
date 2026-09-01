@@ -1,0 +1,29 @@
+name: Fix TV Blob Texture
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/fix-tv-data-url.py'
+      - '.github/workflows/fix-tv-data-url.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: python scripts/fix-tv-data-url.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f scripts/fix-tv-data-url.py .github/workflows/fix-tv-data-url.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: load TV image through blob URL [skip ci]'
+          branch: ROG
