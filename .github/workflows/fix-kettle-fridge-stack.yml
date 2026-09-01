@@ -1,0 +1,71 @@
+name: Fix Kettle Fridge Stack
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-kettle-fridge-stack.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Allow kettle on mini fridge
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/modulePlacement.js')
+          text = path.read_text(encoding='utf-8')
+          old = """export function placementsOverlap(moduleA, moduleB) {\n  if (isTopFixtureType(moduleA?.type) || isTopFixtureType(moduleB?.type)) return false;\n"""
+          new = """function isKettleMiniFridgeStackPair(moduleA, moduleB) {\n  const types = new Set([moduleA?.type, moduleB?.type]);\n  return types.has('kettle') && types.has('mini-fridge');\n}\n\nexport function placementsOverlap(moduleA, moduleB) {\n  // Kettle is intentionally mounted at the mini-fridge top elevation (66 cm).\n  // Their X/Y footprints are allowed to overlap because they occupy different Z levels.\n  // This prevents drag collision resolution from pushing/skipping the kettle past the fridge.\n  if (isKettleMiniFridgeStackPair(moduleA, moduleB)) return false;\n  if (isTopFixtureType(moduleA?.type) || isTopFixtureType(moduleB?.type)) return false;\n"""
+          if old not in text:
+              raise SystemExit('placementsOverlap insertion point not found')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          test_path = Path('test/kettle.test.js')
+          test_text = test_path.read_text(encoding='utf-8')
+          if "kettle may share the mini-fridge footprint" not in test_text:
+              test_text = test_text.replace(
+                  "import { getModuleBehavior } from '../src/moduleBehavior.js';",
+                  "import { getModuleBehavior } from '../src/moduleBehavior.js';\nimport { placementsOverlap } from '../src/modulePlacement.js';",
+                  1,
+              )
+              test_text += """\n\ntest('kettle may share the mini-fridge footprint at its raised placement', () => {\n  const fridge = {\n    id: 'fridge',\n    type: 'mini-fridge',\n    widthCm: 45,\n    depthCm: 43,\n    heightCm: 66,\n    placement: { xCm: 100, yCm: 100, zCm: 0, rotationZDeg: 0, wallId: 'free' },\n  };\n  const kettle = {\n    id: 'kettle',\n    type: 'kettle',\n    widthCm: 24,\n    depthCm: 19,\n    heightCm: 25,\n    placement: { xCm: 110, yCm: 110, zCm: 66, rotationZDeg: 0, wallId: 'free' },\n  };\n\n  assert.equal(placementsOverlap(kettle, fridge), false);\n  assert.equal(placementsOverlap(fridge, kettle), false);\n});\n"""
+              test_path.write_text(test_text, encoding='utf-8')
+          PY
+
+      - name: Syntax check
+        run: |
+          node --check src/modulePlacement.js
+          node --check test/kettle.test.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit and push
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/modulePlacement.js test/kettle.test.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "fix: allow kettle to sit on mini fridge [skip ci]"
+            git push origin ROG
+          fi
