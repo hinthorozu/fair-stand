@@ -102,6 +102,9 @@ old_toggle = """function changeContextShelfLighting(context, enabled) {
 
   currentModules[index].shelfLightingOn = Boolean(enabled);
   rebuildWall({ resetView: false });
+  selectionInfo.textContent = enabled
+    ? 'Raf altı aydınlatma açıldı.'
+    : 'Raf altı aydınlatma kapatıldı.';
 }
 """
 new_toggle = """function changeContextShelfLighting(context, enabled) {
@@ -113,6 +116,9 @@ new_toggle = """function changeContextShelfLighting(context, enabled) {
   if (!scene3d.setShelfLightingVisible(index, nextEnabled)) {
     rebuildWall({ resetView: false });
   }
+  selectionInfo.textContent = nextEnabled
+    ? 'Raf altı aydınlatma açıldı.'
+    : 'Raf altı aydınlatma kapatıldı.';
 }
 """
 if old_toggle not in main:
