@@ -3371,13 +3371,13 @@ export function createStandScene(
   window.addEventListener('keydown', (event) => {
     const pressedKey = String(event.key).toLowerCase();
 
-    const arrowDelta = {
-      arrowleft: [-1, 0],
-      arrowright: [1, 0],
-      arrowup: [0, -1],
-      arrowdown: [0, 1],
+    const arrowScreenDirection = {
+      arrowleft: new THREE.Vector2(-1, 0),
+      arrowright: new THREE.Vector2(1, 0),
+      arrowup: new THREE.Vector2(0, 1),
+      arrowdown: new THREE.Vector2(0, -1),
     }[pressedKey];
-    if (arrowDelta) {
+    if (arrowScreenDirection) {
       const target = event.target;
       const tagName = String(target?.tagName ?? '').toLowerCase();
       const isEditing = tagName === 'input'
@@ -3394,10 +3394,36 @@ export function createStandScene(
       const stepCm = isTopFixtureType(moduleState.type)
         ? 20
         : getModulePlacementSnapCm(moduleState.type);
+      const moduleWorldPosition = new THREE.Vector3();
+      moduleGroup.getWorldPosition(moduleWorldPosition);
+      const projectedOrigin = moduleWorldPosition.clone().project(camera);
+      const worldStepM = stepCm / 100;
+      const candidates = [
+        { xCm: stepCm, yCm: 0, world: new THREE.Vector3(worldStepM, 0, 0) },
+        { xCm: -stepCm, yCm: 0, world: new THREE.Vector3(-worldStepM, 0, 0) },
+        { xCm: 0, yCm: stepCm, world: new THREE.Vector3(0, 0, worldStepM) },
+        { xCm: 0, yCm: -stepCm, world: new THREE.Vector3(0, 0, -worldStepM) },
+      ];
+      const bestArrowMove = candidates
+        .map((candidate) => {
+          const projectedTarget = moduleWorldPosition.clone().add(candidate.world).project(camera);
+          const screenDelta = new THREE.Vector2(
+            projectedTarget.x - projectedOrigin.x,
+            projectedTarget.y - projectedOrigin.y,
+          );
+          const lengthSq = screenDelta.lengthSq();
+          const score = lengthSq > 1e-12
+            ? screenDelta.normalize().dot(arrowScreenDirection)
+            : -Infinity;
+          return { ...candidate, score };
+        })
+        .sort((a, b) => b.score - a.score)[0];
+      if (!bestArrowMove || !Number.isFinite(bestArrowMove.score)) return;
+
       const desiredPlacement = createModulePlacement({
         ...moduleState.placement,
-        xCm: Number(moduleState.placement.xCm || 0) + arrowDelta[0] * stepCm,
-        yCm: Number(moduleState.placement.yCm || 0) + arrowDelta[1] * stepCm,
+        xCm: Number(moduleState.placement.xCm || 0) + bestArrowMove.xCm,
+        yCm: Number(moduleState.placement.yCm || 0) + bestArrowMove.yCm,
         wallId: 'free',
       });
       desiredPlacement.zCm = Number(moduleState.placement.zCm || 0);
