@@ -38,3 +38,4 @@ jobs:
           git add -A
           git commit -m 'fix: preserve vivid lightbox image and rear panel [skip ci]'
           git push origin ROG
+# rerun: vivid front + preserved rear
