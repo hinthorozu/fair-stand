@@ -72,7 +72,8 @@ const TYPE_BEHAVIORS = Object.freeze({
     rotationStepDeg: 90,
     defaultRotationDeg: 0,
     allowSideInsert: true,
-    collision: 'footprint',
+    // Kettle lives at the mini-fridge top elevation, so its 2D footprint may overlap the fridge.
+    collision: 'none',
   }),
   tv: Object.freeze({
     placement: 'wall-overlay',

@@ -1062,6 +1062,12 @@ export function createStandScene(
     const xM = Number(placement.xCm) / 100;
     const logicalYM = Number(placement.yCm) / 100;
     const logicalZM = Number(placement.zCm ?? 0) / 100;
+    // Mini fridge height is 66 cm. Kettle never sits on the floor; its local base
+    // is always raised to the refrigerator top plane.
+    const fixedElevationM = (group.userData?.type === 'kettle' || group.userData?.moduleState?.type === 'kettle')
+      ? 0.66
+      : 0;
+    const worldYM = logicalZM + fixedElevationM;
     const rotationZDeg = normalizeModuleRotationZDeg(placement.rotationZDeg);
     const vertical = isVerticalModuleRotation(rotationZDeg);
 
@@ -1071,9 +1077,9 @@ export function createStandScene(
     group.rotation.set(0, THREE.MathUtils.degToRad(rotationZDeg), 0);
 
     if (vertical) {
-      group.position.set(xM, logicalZM, logicalYM + widthM / 2);
+      group.position.set(xM, worldYM, logicalYM + widthM / 2);
     } else {
-      group.position.set(xM + widthM / 2, logicalZM, logicalYM);
+      group.position.set(xM + widthM / 2, worldYM, logicalYM);
     }
 
   }
@@ -1867,6 +1873,9 @@ export function createStandScene(
       ghost.tintMaterials.forEach((material) => material.color?.setHex(colorHex));
     } else if (ghost.mesh?.material?.color) {
       ghost.mesh.material.color.setHex(colorHex);
+    }
+    if (moduleOrWidthCm && typeof moduleOrWidthCm === 'object') {
+      ghost.root.userData.type = moduleOrWidthCm.type ?? ghost.root.userData.type;
     }
     applyPlacementToGroup(ghost.root, placement, ghost.widthCm);
     ghost.root.visible = true;

@@ -12,9 +12,9 @@ test('kettle catalog and state stay aligned', () => {
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [24, 19, 25]);
 });
 
-test('kettle is a free footprint module', () => {
+test('kettle is free-positioned at fridge-top elevation without floor-footprint collision', () => {
   const behavior = getModuleBehavior({ type: 'kettle' });
   assert.equal(behavior.placement, 'free');
-  assert.equal(behavior.collision, 'footprint');
+  assert.equal(behavior.collision, 'none');
   assert.equal(behavior.rotationStepDeg, 90);
 });
