@@ -150,7 +150,7 @@ function hideProjectLoading() {
 }
 
 
-const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile karşı köşeyi seçip dikdörtgen blok oluştur.';
+const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
 
 function syncSelectionFeedback() {
   const message = selectionInfo.textContent.trim();
@@ -222,7 +222,7 @@ const scene3d = createStandScene(
   viewport,
   (surfaces) => {
     if (!surfaces?.length) {
-      selectionInfo.textContent = 'Bir panel seç; Ctrl/Cmd + tık ile karşı köşeyi seçip dikdörtgen blok oluştur.';
+      selectionInfo.textContent = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
       return;
     }
 
@@ -311,7 +311,7 @@ const scene3d = createStandScene(
         return;
       }
 
-      selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${widthCm} cm · alttan ${stripNumber}. panel · Ctrl/Cmd + tık ile blok seç.`;
+      selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${widthCm} cm · alttan ${stripNumber}. panel · Ctrl/Cmd + tık ile çoklu seç.`;
       return;
     }
 
@@ -333,14 +333,7 @@ const scene3d = createStandScene(
       return;
     }
 
-    const shape = describeRectSelection(
-      surfaces.map((surface) => ({
-        moduleIndex: surface.userData.moduleIndex,
-        stripIndex: surface.userData.stripIndex,
-      })),
-    );
-
-    selectionInfo.textContent = `${shape.columnCount} × ${shape.rowCount} blok · ${shape.panelCount} panel seçili.`;
+    selectionInfo.textContent = `${surfaces.length} panel seçili · Beze çevir için eksiksiz dikdörtgen panel grubunu seç.`;
   },
   getAssetUrl,
   (context) => moduleContextMenu.open(context),

@@ -1002,6 +1002,28 @@ export function createStandScene(
     return true;
   }
 
+  function toggleSurfaceSelection(mesh) {
+    if (!mesh || mesh.userData?.selectionMode === 'module') return false;
+    if (mesh.userData?.moduleType === 'counter') return toggleCounterSurface(mesh);
+
+    if (selectedSurfaces.has(mesh)) {
+      selectedSurfaces.delete(mesh);
+      setSelectionVisual(mesh, false);
+    } else {
+      selectedSurfaces.add(mesh);
+      setSelectionVisual(mesh, true);
+    }
+
+    floorSelected = false;
+    const selectedModuleIds = new Set(
+      [...selectedSurfaces].map((surface) => surface.userData?.moduleId).filter(Boolean),
+    );
+    selectedModuleId = selectedModuleIds.size === 1 ? [...selectedModuleIds][0] : null;
+    selectionAnchorSurfaceId = [...selectedSurfaces][0]?.userData.surfaceId ?? null;
+    notifySelection();
+    return true;
+  }
+
   function selectRectangleTo(mesh) {
     if (!mesh) return;
 
@@ -3708,20 +3730,15 @@ export function createStandScene(
     const hit = raycaster.intersectObjects(surfaceMeshes, false)[0];
 
     if (hit) {
-      if (rectangleSelect && hit.object.userData.moduleType === 'counter') {
-        toggleCounterSurface(hit.object);
+      // Ctrl/Cmd + sol tık klasik çoklu seçim gibi davranır: tıklanan paneli
+      // mevcut seçime ekler veya seçimden çıkarır. Dikdörtgen doğrulaması
+      // Beze çevir / toplu görsel işlemi uygulanırken ayrıca yapılır.
+      if (rectangleSelect && hit.object.userData.selectionMode !== 'module') {
+        toggleSurfaceSelection(hit.object);
         return;
       }
 
-      const anchorMesh = surfaceMeshes.find(
-        (surface) => surface.userData.surfaceId === selectionAnchorSurfaceId,
-      );
-      const canRectangleSelect = rectangleSelect
-        && hit.object.userData.selectionMode !== 'module'
-        && anchorMesh?.userData.selectionMode !== 'module';
-
-      if (canRectangleSelect) selectRectangleTo(hit.object);
-      else selectOnly(hit.object);
+      selectOnly(hit.object);
       return;
     }
 
