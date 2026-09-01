@@ -69,6 +69,12 @@ export const DEPOT_MINI_FRIDGE_DIMENSIONS = Object.freeze({
   heightCm: 66,
 });
 
+export const DEPOT_COAT_RACK_DIMENSIONS = Object.freeze({
+  widthCm: 43,
+  depthCm: 43,
+  heightCm: 180,
+});
+
 const TV_42_DEFINITION = getTvDefinition(42);
 const TV_55_DEFINITION = getTvDefinition(55);
 const TV_65_DEFINITION = getTvDefinition(65);
@@ -119,6 +125,7 @@ export const MODULE_CATALOG = Object.freeze({
   furniture_bar_stool_classic: { type: 'bar-stool', widthCm: 60, depthCm: 55, heightCm: 121, label: 'Bar Taburesi' },
   DEPOT_MINI_FRIDGE_AVANTI: { type: 'mini-fridge', widthCm: 45, depthCm: 43, heightCm: 66, label: 'Mini Buzdolabı' },
   DEPOT_KETTLE: { type: 'kettle', widthCm: 24, depthCm: 19, heightCm: 25, label: 'Kettle' },
+  DEPOT_COAT_RACK: { type: 'coat-rack', widthCm: 43, depthCm: 43, heightCm: 180, label: 'Askılık' },
   TV_42: createTvCatalogItem(TV_42_DEFINITION),
   TV_55: createTvCatalogItem(TV_55_DEFINITION),
   TV_65: createTvCatalogItem(TV_65_DEFINITION),
@@ -183,6 +190,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'furniture_bar_stool_classic',
   'DEPOT_MINI_FRIDGE_AVANTI',
   'DEPOT_KETTLE',
+  'DEPOT_COAT_RACK',
   'TV_42',
   'TV_55',
   'TV_65',
@@ -208,7 +216,7 @@ export const MODULE_CATALOG_GROUPS = Object.freeze([
   }),
   Object.freeze({
     label: 'Depo',
-    keys: Object.freeze(['DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE']),
+    keys: Object.freeze(['DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK']),
   }),
   Object.freeze({
     label: 'Elektronik & Aydınlatma',

@@ -227,6 +227,16 @@ export function createKettleModuleState() {
   };
 }
 
+export function createCoatRackModuleState() {
+  return {
+    id: createId('module'),
+    type: 'coat-rack',
+    widthCm: 43,
+    depthCm: 43,
+    heightCm: 180,
+  };
+}
+
 export function createTvModuleState(sizeInch = 42) {
   const definition = getTvDefinition(sizeInch);
   if (!definition) return null;

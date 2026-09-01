@@ -109,6 +109,18 @@ function loadMiniFridgeModel() {
   return miniFridgeModelPromise;
 }
 
+let coatRackModelPromise = null;
+
+function loadCoatRackModel() {
+  if (!coatRackModelPromise) {
+    const loader = new GLTFLoader();
+    coatRackModelPromise = loader
+      .loadAsync(import.meta.env.BASE_URL + 'models/coat_rack.glb')
+      .then((gltf) => gltf.scene);
+  }
+  return coatRackModelPromise;
+}
+
 let kettleModelPromise = null;
 
 function loadKettleModel() {
@@ -1167,6 +1179,8 @@ export function createStandScene(
         module = createMiniFridgeModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'kettle') {
         module = createKettleModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'coat-rack') {
+        module = createCoatRackModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'tv') {
         module = createTvModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'led-floodlight') {
@@ -3785,6 +3799,71 @@ function createMiniFridgeModule(moduleState, moduleIndex) {
     group.add(model);
   }).catch((error) => {
     console.warn('Mini Buzdolabı GLB modeli yüklenemedi:', error);
+  });
+
+  return { group, surfaces: [proxy] };
+}
+
+function createCoatRackModule(moduleState, moduleIndex) {
+  const widthCm = Number(moduleState.widthCm || 43);
+  const depthCm = Number(moduleState.depthCm || 43);
+  const heightCm = Number(moduleState.heightCm || 180);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    moduleType: 'coat-rack',
+    type: 'coat-rack',
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(widthCm / 100, heightCm / 100, depthCm / 100),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+  );
+  proxy.position.y = heightCm / 200;
+  proxy.userData = {
+    kind: 'surface',
+    surfaceId: `${moduleState.id}:coat-rack`,
+    moduleId: moduleState.id,
+    moduleType: 'coat-rack',
+    moduleIndex,
+    selectionMode: 'module',
+    acceptsImage: false,
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+  group.add(proxy);
+
+  loadCoatRackModel().then((template) => {
+    if (!group.parent) return;
+    const model = template.clone(true);
+    model.traverse((object) => {
+      if (!object.isMesh) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+    });
+
+    model.updateMatrixWorld(true);
+    let box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const targetHeightM = heightCm / 100;
+    const uniformScale = size.y > 0 ? targetHeightM / size.y : 1;
+    model.scale.multiplyScalar(uniformScale);
+    model.updateMatrixWorld(true);
+
+    box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= box.min.y;
+    group.add(model);
+  }).catch((error) => {
+    console.warn('Askılık GLB modeli yüklenemedi:', error);
   });
 
   return { group, surfaces: [proxy] };
