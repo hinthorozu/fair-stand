@@ -5127,7 +5127,7 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
         new THREE.MeshStandardMaterial({
           color: 0xfff6e8,
           emissive: 0xffddb5,
-          emissiveIntensity: 3.0,
+          emissiveIntensity: 6.0,
           roughness: 0.28,
           metalness: 0,
         }),
@@ -5144,19 +5144,19 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
       // Geniş alan ışığı spot konisini kaldırır ve raf eni boyunca homojen yayılır.
       const areaLight = new THREE.RectAreaLight(
         0xffe4c8,
-        8.5,
+        28.0,
         ledStripWidthM,
-        Math.max(shelfDepthM * 0.72, 0.12),
+        Math.max(shelfDepthM * 0.95, 0.18),
       );
       areaLight.position.set(
         0,
-        shelfBottomY - 0.008,
-        wallDepthM / 2 + shelfDepthM * 0.56,
+        shelfBottomY - 0.006,
+        wallDepthM / 2 + shelfDepthM * 0.54,
       );
       areaLight.lookAt(new THREE.Vector3(
         0,
-        shelfBottomY - 1,
-        wallDepthM / 2 + shelfDepthM * 0.56,
+        shelfBottomY - 0.55,
+        wallDepthM / 2 + shelfDepthM * 0.20,
       ));
       areaLight.userData.kind = 'decoration';
       areaLight.userData.role = 'shelf-under-light';
