@@ -2,17 +2,15 @@ from pathlib import Path
 
 scene = Path('src/scene3d.js')
 s = scene.read_text()
-old = "      wallRoot.add(module.group);\n      if (moduleState.type === 'tv') addTvScreenOverlay(module.group);\n      surfaceMeshes.push(...module.surfaces);"
-new = "      wallRoot.add(module.group);\n      surfaceMeshes.push(...module.surfaces);"
-if old not in s:
-    raise SystemExit('stale TV overlay call block not found')
-s = s.replace(old, new, 1)
+stale = "if (moduleState.type === 'tv') addTvScreenOverlay(module.group);"
+if stale in s:
+    s = s.replace(stale, '', 1)
 scene.write_text(s)
 
 test = Path('test/tv42Module.test.js')
 t = test.read_text()
 needle = "  assert.doesNotMatch(source, /addTvScreenOverlay/);"
-if needle not in t:
-    raise SystemExit('TV runtime guard insertion point not found')
-t = t.replace(needle, needle + "\n  assert.doesNotMatch(source, /if \\(moduleState\\.type === 'tv'\\) addTvScreenOverlay/);", 1)
+guard = "  assert.doesNotMatch(source, /if \\(moduleState\\.type === 'tv'\\) addTvScreenOverlay/);"
+if needle in t and guard not in t:
+    t = t.replace(needle, needle + "\n" + guard, 1)
 test.write_text(t)
