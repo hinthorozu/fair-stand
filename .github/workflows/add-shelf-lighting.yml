@@ -1,6 +1,6 @@
 name: Add Shelf Lighting
 
-on:
+"on":
   push:
     branches: [ROG]
     paths:
@@ -36,7 +36,6 @@ jobs:
                   raise SystemExit(f'{label}: marker not found in {path}')
               p.write_text(s.replace(old, new, 1), encoding='utf-8')
 
-          # Shelf state: off by default, so old projects keep their current appearance.
           replace_once(
               'src/designState.js',
               "    shelfCount: count,\n    strips: Array.from(\n",
@@ -44,7 +43,6 @@ jobs:
               'shelf lighting state',
           )
 
-          # Renderer: geometry stays untouched; only real Three.js lights are added under shelves.
           replace_once(
               'src/scene3d.js',
               "  const shelfHeightsCm = SHELF_DIMENSIONS.heightsByCountCm[shelfCount] ?? [];\n\n  built.group.userData.type = 'shelf';\n",
@@ -64,7 +62,6 @@ jobs:
               'shelf lights',
           )
 
-          # Right-click menu gets one shelf-only toggle.
           replace_once(
               'src/moduleContextMenu.js',
               "  onValidateAddBatch,\n  onGlassModeChange,\n}) {\n",
@@ -96,7 +93,6 @@ jobs:
               'shelf light action',
           )
 
-          # Main owns the persistent module state and rebuilds the same shelf geometry.
           replace_once(
               'src/main.js',
               "function changeContextPanelGlassMode(context, isGlass) {\n",
