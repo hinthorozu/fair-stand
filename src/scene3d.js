@@ -1002,6 +1002,28 @@ export function createStandScene(
     return true;
   }
 
+  function getSurfaceSelectionPlaneMeta(surface) {
+    if (!surface || surface.userData?.selectionMode !== 'panel') return null;
+    const moduleGroup = findModuleGroup(surface);
+    const moduleState = moduleGroup?.userData?.moduleState;
+    const placement = moduleState?.placement ?? moduleGroup?.userData?.placement;
+    const wallId = placement?.wallId ?? null;
+    if (!['back', 'left', 'right'].includes(wallId)) return null;
+
+    // Dikdörtgen seçim global moduleIndex sırasına değil, panelin gerçekten
+    // bulunduğu duvar düzlemindeki fiziksel yatay konuma göre ilerler.
+    const pathCm = wallId === 'back'
+      ? Number(placement.xCm)
+      : Number(placement.yCm);
+    if (!Number.isFinite(pathCm)) return null;
+
+    return {
+      wallId,
+      pathCm,
+      moduleId: surface.userData.moduleId ?? moduleState?.id ?? null,
+    };
+  }
+
   function selectRectangleTo(mesh) {
     if (!mesh) return;
 
@@ -1013,16 +1035,37 @@ export function createStandScene(
       selectionAnchorSurfaceId = anchorMesh.userData.surfaceId ?? null;
     }
 
+    const anchorMeta = getSurfaceSelectionPlaneMeta(anchorMesh);
+    const targetMeta = getSurfaceSelectionPlaneMeta(mesh);
+    // Köşeyi dönüp başka duvara taşma: dikdörtgen seçim yalnızca aynı fiziksel
+    // duvar düzleminde yapılır. Raflı modül gibi farklı tipler aynı düzlemdeyse dahildir.
+    if (!anchorMeta || !targetMeta || anchorMeta.wallId !== targetMeta.wallId) return;
+
+    const planePanels = surfaceMeshes
+      .filter((surface) => surface.userData.selectionMode === 'panel')
+      .map((surface) => ({ surface, meta: getSurfaceSelectionPlaneMeta(surface) }))
+      .filter((entry) => entry.meta?.wallId === anchorMeta.wallId);
+
+    const orderedModules = [...new Map(
+      planePanels
+        .filter((entry) => entry.meta.moduleId)
+        .map((entry) => [entry.meta.moduleId, entry.meta]),
+    ).values()].sort((a, b) => (a.pathCm - b.pathCm));
+    const columnByModuleId = new Map(
+      orderedModules.map((entry, index) => [entry.moduleId, index]),
+    );
+    const anchorColumn = columnByModuleId.get(anchorMeta.moduleId);
+    const targetColumn = columnByModuleId.get(targetMeta.moduleId);
+    if (!Number.isInteger(anchorColumn) || !Number.isInteger(targetColumn)) return;
+
     const result = createRectSelection(
-      surfaceMeshes
-        .filter((surface) => surface.userData.selectionMode === 'panel')
-        .map((surface) => ({
-          mesh: surface,
-          moduleIndex: surface.userData.moduleIndex,
-          stripIndex: surface.userData.stripIndex,
-        })),
-      anchorMesh.userData,
-      mesh.userData,
+      planePanels.map(({ surface, meta }) => ({
+        mesh: surface,
+        moduleIndex: columnByModuleId.get(meta.moduleId),
+        stripIndex: surface.userData.stripIndex,
+      })),
+      { moduleIndex: anchorColumn, stripIndex: anchorMesh.userData.stripIndex },
+      { moduleIndex: targetColumn, stripIndex: mesh.userData.stripIndex },
     );
 
     if (!result.ok) return;

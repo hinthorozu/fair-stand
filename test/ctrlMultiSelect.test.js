@@ -9,5 +9,10 @@ test('Ctrl/Cmd left click is captured before OrbitControls and selects a rectang
   assert.match(scene, /\}, \{ capture: true \}\);/);
   assert.doesNotMatch(scene, /function toggleSurfaceSelection\(mesh\)/);
   assert.match(scene, /const canRectangleSelect = rectangleSelect[\s\S]*selectionMode === 'panel'[\s\S]*selectRectangleTo\(hit\.object\)/);
-  assert.match(scene, /\.filter\(\(surface\) => surface\.userData\.selectionMode === 'panel'\)/);
+  assert.match(scene, /function getSurfaceSelectionPlaneMeta\(surface\)/);
+  assert.match(scene, /anchorMeta\.wallId !== targetMeta\.wallId/);
+  assert.match(scene, /const pathCm = wallId === 'back'[\s\S]*Number\(placement\.xCm\)[\s\S]*Number\(placement\.yCm\)/);
+  assert.match(scene, /orderedModules[\s\S]*sort\(\(a, b\) => \(a\.pathCm - b\.pathCm\)\)/);
+  assert.match(scene, /columnByModuleId/);
+  assert.match(scene, /planePanels\.map/);
 });
