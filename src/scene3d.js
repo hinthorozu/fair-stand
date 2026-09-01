@@ -2880,7 +2880,21 @@ export function createStandScene(
   }
 
   function applyColor(meshOrMeshes, hexColor) {
-    normalizeMeshes(meshOrMeshes).forEach((mesh) => {
+    const meshes = normalizeMeshes(meshOrMeshes);
+    const fabricGroupIds = new Set(
+      meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
+    );
+    fabricGroupIds.forEach((groupId) => {
+      surfaceMeshes.forEach((surface) => {
+        const state = surface.userData.surfaceState;
+        if (state?.fabricGroupId !== groupId) return;
+        state.fabricColor = hexColor;
+        state.fabricImageAssetId = null;
+        state.fabricImageFit = 'cover';
+      });
+    });
+
+    meshes.filter((mesh) => !mesh.userData.surfaceState?.fabricGroupId).forEach((mesh) => {
       if (!mesh?.material) return;
       const surfaceState = mesh.userData.surfaceState;
       applyColorOverride(surfaceState, hexColor);
@@ -2902,6 +2916,7 @@ export function createStandScene(
         target.material.needsUpdate = true;
       });
     });
+    if (fabricGroupIds.size) rebuildFabricOverlays();
   }
 
   function clearFabricOverlays() {
@@ -2909,12 +2924,76 @@ export function createStandScene(
       overlay.parent?.remove(overlay);
       overlay.geometry?.dispose?.();
       if (Array.isArray(overlay.material)) {
-        overlay.material.forEach((material) => material?.dispose?.());
+        overlay.material.forEach((material) => {
+          material?.map?.dispose?.();
+          material?.dispose?.();
+        });
       } else {
+        overlay.material?.map?.dispose?.();
         overlay.material?.dispose?.();
       }
     });
     fabricOverlayMeshes = [];
+  }
+
+  function loadFabricOverlayImage(overlay, assetId, fit = 'cover') {
+    const assetUrl = getAssetUrl(assetId);
+    if (!overlay?.material || !assetUrl) return;
+
+    textureLoader.load(
+      assetUrl,
+      (sourceTexture) => {
+        const image = sourceTexture.image;
+        const imageWidth = Number(image?.naturalWidth || image?.videoWidth || image?.width) || 0;
+        const imageHeight = Number(image?.naturalHeight || image?.videoHeight || image?.height) || 0;
+        const planeWidth = Number(overlay.geometry?.parameters?.width) || 1;
+        const planeHeight = Number(overlay.geometry?.parameters?.height) || 1;
+        const targetAspect = Math.max(0.01, planeWidth / Math.max(planeHeight, 0.01));
+        const maxCanvasSide = 1536;
+        const canvas = document.createElement('canvas');
+        if (targetAspect >= 1) {
+          canvas.width = maxCanvasSide;
+          canvas.height = Math.max(1, Math.round(maxCanvasSide / targetAspect));
+        } else {
+          canvas.height = maxCanvasSide;
+          canvas.width = Math.max(1, Math.round(maxCanvasSide * targetAspect));
+        }
+
+        const context = canvas.getContext('2d');
+        const layout = computeImageFit(
+          imageWidth,
+          imageHeight,
+          canvas.width,
+          canvas.height,
+          fit,
+        );
+        if (!context || !layout) {
+          sourceTexture.dispose();
+          return;
+        }
+
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(
+          image,
+          layout.drawX,
+          layout.drawY,
+          layout.drawWidth,
+          layout.drawHeight,
+        );
+
+        const fabricTexture = new THREE.CanvasTexture(canvas);
+        fabricTexture.colorSpace = THREE.SRGBColorSpace;
+        fabricTexture.needsUpdate = true;
+        overlay.material.map?.dispose?.();
+        overlay.material.map = fabricTexture;
+        overlay.material.color.set(0xffffff);
+        overlay.material.needsUpdate = true;
+        sourceTexture.dispose();
+      },
+      undefined,
+      () => {},
+    );
   }
 
   function rebuildFabricOverlays() {
@@ -2976,7 +3055,11 @@ export function createStandScene(
         .add(up.clone().multiplyScalar((minV + maxV) / 2))
         .add(normal.clone().multiplyScalar(planeN + 0.006));
 
-      const baseColor = first.material?.color?.clone?.() ?? new THREE.Color(0xffffff);
+      const fabricState = first.userData.surfaceState ?? {};
+      const fabricImageAssetId = fabricState.fabricImageAssetId ?? null;
+      const fabricImageFit = fabricState.fabricImageFit === 'contain' ? 'contain' : 'cover';
+      const fabricColor = fabricState.fabricColor ?? fabricState.color ?? '#ffffff';
+      const baseColor = new THREE.Color(fabricImageAssetId ? '#ffffff' : fabricColor);
       const overlay = new THREE.Mesh(
         new THREE.PlaneGeometry(width, height),
         new THREE.MeshStandardMaterial({
@@ -3001,6 +3084,9 @@ export function createStandScene(
       overlay.raycast = () => {};
       wallRoot.add(overlay);
       fabricOverlayMeshes.push(overlay);
+      if (fabricImageAssetId) {
+        loadFabricOverlayImage(overlay, fabricImageAssetId, fabricImageFit);
+      }
     });
   }
 
@@ -3061,13 +3147,24 @@ export function createStandScene(
         surfaceMeshes.forEach((surface) => {
           if (replacedGroupIds.has(surface.userData.surfaceState?.fabricGroupId)) {
             delete surface.userData.surfaceState.fabricGroupId;
+        delete surface.userData.surfaceState.fabricColor;
+        delete surface.userData.surfaceState.fabricImageAssetId;
+        delete surface.userData.surfaceState.fabricImageFit;
+            delete surface.userData.surfaceState.fabricColor;
+            delete surface.userData.surfaceState.fabricImageAssetId;
+            delete surface.userData.surfaceState.fabricImageFit;
           }
         });
       }
 
       const groupId = `fabric-${globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
+      const initialFabricColor = meshes[0]?.userData.surfaceState?.color ?? '#ffffff';
       meshes.forEach((mesh) => {
-        mesh.userData.surfaceState.fabricGroupId = groupId;
+        const state = mesh.userData.surfaceState;
+        state.fabricGroupId = groupId;
+        state.fabricColor = initialFabricColor;
+        state.fabricImageAssetId = null;
+        state.fabricImageFit = 'cover';
       });
       rebuildFabricOverlays();
       return { ok: true, enabled: true, panelCount: meshes.length, fabricGroupId: groupId };
@@ -3082,6 +3179,9 @@ export function createStandScene(
     surfaceMeshes.forEach((surface) => {
       if (groupIds.has(surface.userData.surfaceState?.fabricGroupId)) {
         delete surface.userData.surfaceState.fabricGroupId;
+        delete surface.userData.surfaceState.fabricColor;
+        delete surface.userData.surfaceState.fabricImageAssetId;
+        delete surface.userData.surfaceState.fabricImageFit;
       }
     });
     rebuildFabricOverlays();
@@ -3366,6 +3466,33 @@ export function createStandScene(
   function applyRectImageAsset(meshOrMeshes, assetId, fit = 'contain') {
     const meshes = normalizeMeshes(meshOrMeshes);
     if (!assetId) return { ok: false, message: 'Önce bir görsel seç.' };
+    const fabricGroupIds = new Set(
+      meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
+    );
+    if (fabricGroupIds.size > 1) {
+      return { ok: false, message: 'Görsel için tek bir bez seç.' };
+    }
+    if (fabricGroupIds.size === 1) {
+      const [groupId] = fabricGroupIds;
+      if (!meshes.every((mesh) => mesh.userData.surfaceState?.fabricGroupId === groupId)) {
+        return { ok: false, message: 'Bez ile normal panelleri aynı anda görselleme; tek bir bez seç.' };
+      }
+      const groupSurfaces = surfaceMeshes.filter(
+        (surface) => surface.userData.surfaceState?.fabricGroupId === groupId,
+      );
+      groupSurfaces.forEach((surface) => {
+        const state = surface.userData.surfaceState;
+        state.fabricImageAssetId = assetId;
+        state.fabricImageFit = fit === 'contain' ? 'contain' : 'cover';
+      });
+      rebuildFabricOverlays();
+      return {
+        ok: true,
+        mode: 'fabric-group',
+        panelCount: groupSurfaces.length,
+        fabricGroupId: groupId,
+      };
+    }
     if (meshes.some((mesh) => mesh.userData.acceptsImage === false)) {
       return { ok: false, message: 'Bu modüle görsel uygulanamaz; yalnızca renk uygulanabilir.' };
     }
@@ -3421,7 +3548,20 @@ export function createStandScene(
   }
 
   function clearImage(meshOrMeshes) {
-    normalizeMeshes(meshOrMeshes).forEach((mesh) => {
+    const meshes = normalizeMeshes(meshOrMeshes);
+    const fabricGroupIds = new Set(
+      meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
+    );
+    fabricGroupIds.forEach((groupId) => {
+      surfaceMeshes.forEach((surface) => {
+        const state = surface.userData.surfaceState;
+        if (state?.fabricGroupId !== groupId) return;
+        state.fabricImageAssetId = null;
+        state.fabricImageFit = 'cover';
+      });
+    });
+
+    meshes.filter((mesh) => !mesh.userData.surfaceState?.fabricGroupId).forEach((mesh) => {
       if (!mesh?.material || mesh.userData.acceptsImage === false) return;
       const surfaceState = mesh.userData.surfaceState;
       if (surfaceState) {
@@ -3789,6 +3929,7 @@ export function createStandScene(
       controls.update();
       renderer.render(scene, camera);
     }
+    if (fabricGroupIds.size) rebuildFabricOverlays();
   }
 
   function setShelfLightingVisible(moduleIndex, enabled) {

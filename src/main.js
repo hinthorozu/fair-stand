@@ -324,6 +324,15 @@ const scene3d = createStandScene(
       return;
     }
 
+    const selectedFabricGroupIds = new Set(
+      surfaces.map((surface) => surface.userData.surfaceState?.fabricGroupId).filter(Boolean),
+    );
+    if (selectedFabricGroupIds.size === 1
+      && surfaces.every((surface) => surface.userData.surfaceState?.fabricGroupId)) {
+      selectionInfo.textContent = 'Tek parça lightbox bezi seçili · renk + görsel uygulanabilir.';
+      return;
+    }
+
     const shape = describeRectSelection(
       surfaces.map((surface) => ({
         moduleIndex: surface.userData.moduleIndex,
@@ -1615,7 +1624,9 @@ function applyActiveImageToSelection(fit = 'cover') {
   }
 
   const fitLabel = fit === 'cover' ? 'Doldur' : 'Sığdır';
-  if (result.mode === 'rect-group') {
+  if (result.mode === 'fabric-group') {
+    selectionInfo.textContent = `Tek parça lightbox bezine görsel uygulandı · ${fitLabel}.`;
+  } else if (result.mode === 'rect-group') {
     selectionInfo.textContent = `${result.columnCount} × ${result.rowCount} blokta ${result.panelCount} panele görsel · ${fitLabel}.`;
   } else {
     selectionInfo.textContent = `Görsel seçili panele uygulandı · ${fitLabel}.`;
