@@ -1,0 +1,136 @@
+name: Fix Shelf Light Homogeneous
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-shelf-light-homogeneous.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Apply homogeneous shelf lighting
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          scene = Path('src/scene3d.js')
+          s = scene.read_text(encoding='utf-8')
+
+          old = '''    if (shelfLightingOn) {
+      const light = new THREE.SpotLight(0xffffff, 22, 1.45, 0.95, 0.72, 1.5);
+      light.position.set(
+        0,
+        seamHeightM - 0.012,
+        wallDepthM / 2 + shelfDepthM * 0.58,
+      );
+      light.castShadow = false;
+      light.target.position.set(
+        0,
+        Math.max(0.04, seamHeightM - 0.72),
+        wallDepthM / 2 + shelfDepthM * 0.72,
+      );
+      light.userData.kind = 'decoration';
+      light.userData.role = 'shelf-under-light';
+      built.group.add(light, light.target);
+    }
+'''
+
+          new = '''    if (shelfLightingOn) {
+      // Boydan boya lineer LED: fiziksel raf geometrisini değiştirmez, sadece altına
+      // çok ince bir ışık şeridi ve homojen alan ışığı ekler.
+      const ledStripWidthM = Math.max(innerWidthM - 0.04, 0.08);
+      const ledStripDepthM = 0.016;
+      const ledStripThicknessM = 0.006;
+      const shelfBottomY = seamHeightM;
+      const ledCenterZM = wallDepthM / 2 + shelfDepthM * 0.78;
+
+      const ledStrip = new THREE.Mesh(
+        new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
+        new THREE.MeshStandardMaterial({
+          color: 0xfff8e8,
+          emissive: 0xffefc2,
+          emissiveIntensity: 3.0,
+          roughness: 0.28,
+          metalness: 0,
+        }),
+      );
+      ledStrip.position.set(
+        0,
+        shelfBottomY - ledStripThicknessM / 2 - 0.001,
+        ledCenterZM,
+      );
+      ledStrip.userData.kind = 'decoration';
+      ledStrip.userData.role = 'shelf-under-led-strip';
+      built.group.add(ledStrip);
+
+      // RectAreaLight tek bir spot konisi üretmez; raf eni boyunca eşit ve yumuşak
+      // bir aydınlatma verir. Işık düzlemi rafın alt yüzeyine sıfırdan yakın oturur.
+      const areaLight = new THREE.RectAreaLight(
+        0xfff3d6,
+        8.5,
+        ledStripWidthM,
+        Math.max(shelfDepthM * 0.72, 0.12),
+      );
+      areaLight.position.set(
+        0,
+        shelfBottomY - 0.008,
+        wallDepthM / 2 + shelfDepthM * 0.56,
+      );
+      areaLight.lookAt(new THREE.Vector3(
+        0,
+        shelfBottomY - 1,
+        wallDepthM / 2 + shelfDepthM * 0.56,
+      ));
+      areaLight.userData.kind = 'decoration';
+      areaLight.userData.role = 'shelf-under-light';
+      built.group.add(areaLight);
+    }
+'''
+
+          if old not in s:
+              raise SystemExit('old shelf spotlight block not found')
+          s = s.replace(old, new, 1)
+          scene.write_text(s, encoding='utf-8')
+
+          test = Path('test/shelfLighting.test.js')
+          t = test.read_text(encoding='utf-8')
+          t = t.replace(
+              "assert.match(source, /new THREE\\.SpotLight\\(0xffffff, 22, 1\\.45, 0\\.95, 0\\.72, 1\\.5\\)/);",
+              "assert.match(source, /new THREE\\.RectAreaLight\\(/);\n  assert.match(source, /shelf-under-led-strip/);\n  assert.match(source, /shelfBottomY - ledStripThicknessM \\/ 2 - 0\\.001/);",
+          )
+          test.write_text(t, encoding='utf-8')
+          PY
+
+      - name: Syntax check
+        run: |
+          node --check src/scene3d.js
+          node --check test/shelfLighting.test.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit and push
+        shell: bash
+        run: |
+          rm -f .github/workflows/fix-shelf-light-homogeneous.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/scene3d.js test/shelfLighting.test.js .github/workflows/fix-shelf-light-homogeneous.yml
+          git commit -m "fix: make shelf lighting linear and homogeneous [skip ci]"
+          git push origin ROG
