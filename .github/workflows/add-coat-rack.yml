@@ -1,0 +1,275 @@
+name: Add Coat Rack
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/add-coat-rack.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Integrate coat rack
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new, label):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if new in text:
+                  return
+              if old not in text:
+                  raise SystemExit(f'{label}: marker not found in {path}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          # catalog.js — one source for name, dimensions and Depo grouping.
+          replace_once(
+              'src/catalog.js',
+              "export const DEPOT_MINI_FRIDGE_DIMENSIONS = Object.freeze({\n  widthCm: 45,\n  depthCm: 43,\n  heightCm: 66,\n});\n",
+              "export const DEPOT_MINI_FRIDGE_DIMENSIONS = Object.freeze({\n  widthCm: 45,\n  depthCm: 43,\n  heightCm: 66,\n});\n\nexport const DEPOT_COAT_RACK_DIMENSIONS = Object.freeze({\n  widthCm: 43,\n  depthCm: 43,\n  heightCm: 180,\n});\n",
+              'catalog dimensions',
+          )
+          replace_once(
+              'src/catalog.js',
+              "  DEPOT_KETTLE: { type: 'kettle', widthCm: 24, depthCm: 19, heightCm: 25, label: 'Kettle' },\n",
+              "  DEPOT_KETTLE: { type: 'kettle', widthCm: 24, depthCm: 19, heightCm: 25, label: 'Kettle' },\n  DEPOT_COAT_RACK: { type: 'coat-rack', widthCm: 43, depthCm: 43, heightCm: 180, label: 'Askılık' },\n",
+              'catalog entry',
+          )
+          replace_once(
+              'src/catalog.js',
+              "  'DEPOT_KETTLE',\n  'TV_42',\n",
+              "  'DEPOT_KETTLE',\n  'DEPOT_COAT_RACK',\n  'TV_42',\n",
+              'catalog key',
+          )
+          replace_once(
+              'src/catalog.js',
+              "    keys: Object.freeze(['DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE']),\n",
+              "    keys: Object.freeze(['DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK']),\n",
+              'depot group',
+          )
+
+          # designState.js
+          replace_once(
+              'src/designState.js',
+              "export function createKettleModuleState() {\n  return {\n    id: createId('module'),\n    type: 'kettle',\n    widthCm: 24,\n    depthCm: 19,\n    heightCm: 25,\n  };\n}\n",
+              "export function createKettleModuleState() {\n  return {\n    id: createId('module'),\n    type: 'kettle',\n    widthCm: 24,\n    depthCm: 19,\n    heightCm: 25,\n  };\n}\n\nexport function createCoatRackModuleState() {\n  return {\n    id: createId('module'),\n    type: 'coat-rack',\n    widthCm: 43,\n    depthCm: 43,\n    heightCm: 180,\n  };\n}\n",
+              'coat rack state',
+          )
+
+          # moduleBehavior.js
+          replace_once(
+              'src/moduleBehavior.js',
+              "  kettle: Object.freeze({\n    placement: 'free',\n    moveSnapCm: 10,\n    rotationStepDeg: 90,\n    defaultRotationDeg: 0,\n    allowSideInsert: true,\n    // Kettle lives at the mini-fridge top elevation, so its 2D footprint may overlap the fridge.\n    collision: 'none',\n  }),\n",
+              "  kettle: Object.freeze({\n    placement: 'free',\n    moveSnapCm: 10,\n    rotationStepDeg: 90,\n    defaultRotationDeg: 0,\n    allowSideInsert: true,\n    // Kettle lives at the mini-fridge top elevation, so its 2D footprint may overlap the fridge.\n    collision: 'none',\n  }),\n  'coat-rack': Object.freeze({\n    placement: 'free',\n    moveSnapCm: 10,\n    rotationStepDeg: 90,\n    defaultRotationDeg: 0,\n    allowSideInsert: true,\n    collision: 'footprint',\n  }),\n",
+              'coat rack behavior',
+          )
+
+          # main.js — catalog state factory uses same central catalog record.
+          replace_once(
+              'src/main.js',
+              "  createKettleModuleState,\n  createLedFloodlightModuleState,\n",
+              "  createKettleModuleState,\n  createCoatRackModuleState,\n  createLedFloodlightModuleState,\n",
+              'main import',
+          )
+          replace_once(
+              'src/main.js',
+              "  else if (module.type === 'kettle') state = createKettleModuleState();\n  else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);\n",
+              "  else if (module.type === 'kettle') state = createKettleModuleState();\n  else if (module.type === 'coat-rack') state = createCoatRackModuleState();\n  else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);\n",
+              'main factory mapping',
+          )
+
+          # moduleDragSidebar.js — shared catalog/drag/context preview silhouette.
+          replace_once(
+              'src/moduleDragSidebar.js',
+              "    .module-drag-kettle-knob { position:absolute; left:27px; top:12px; width:6px; height:5px; border-radius:4px 4px 1px 1px; background:#4b5563; }\n",
+              "    .module-drag-kettle-knob { position:absolute; left:27px; top:12px; width:6px; height:5px; border-radius:4px 4px 1px 1px; background:#4b5563; }\n    .module-drag-coat-rack { position:relative; width:46px; height:64px; }\n    .module-drag-coat-rack::before { content:''; position:absolute; left:21px; top:8px; width:4px; height:46px; border-radius:3px; background:#6b4f35; box-shadow:-12px 11px 0 -1px #6b4f35,12px 11px 0 -1px #6b4f35,-9px 20px 0 -1px #6b4f35,9px 20px 0 -1px #6b4f35; }\n    .module-drag-coat-rack::after { content:''; position:absolute; left:8px; bottom:4px; width:30px; height:7px; border:3px solid #6b4f35; border-radius:50%; box-sizing:border-box; }\n",
+              'coat rack preview css',
+          )
+          replace_once(
+              'src/moduleDragSidebar.js',
+              "  if (module.type === 'kettle') {\n    const kettle = document.createElement('div');\n    kettle.className = 'module-drag-kettle';\n",
+              "  if (module.type === 'coat-rack') {\n    const body = document.createElement('div');\n    body.className = 'module-drag-coat-rack';\n    preview.appendChild(body);\n    return preview;\n  }\n\n  if (module.type === 'kettle') {\n    const kettle = document.createElement('div');\n    kettle.className = 'module-drag-kettle';\n",
+              'coat rack preview branch',
+          )
+
+          # scene3d.js — GLB loader + renderer + dispatch.
+          replace_once(
+              'src/scene3d.js',
+              "let kettleModelPromise = null;\n\nfunction loadKettleModel() {\n",
+              "let coatRackModelPromise = null;\n\nfunction loadCoatRackModel() {\n  if (!coatRackModelPromise) {\n    const loader = new GLTFLoader();\n    coatRackModelPromise = loader\n      .loadAsync(import.meta.env.BASE_URL + 'models/coat_rack.glb')\n      .then((gltf) => gltf.scene);\n  }\n  return coatRackModelPromise;\n}\n\nlet kettleModelPromise = null;\n\nfunction loadKettleModel() {\n",
+              'coat rack loader',
+          )
+          replace_once(
+              'src/scene3d.js',
+              "      } else if (moduleState.type === 'kettle') {\n        module = createKettleModule(moduleState, moduleIndex);\n      } else if (moduleState.type === 'tv') {\n",
+              "      } else if (moduleState.type === 'kettle') {\n        module = createKettleModule(moduleState, moduleIndex);\n      } else if (moduleState.type === 'coat-rack') {\n        module = createCoatRackModule(moduleState, moduleIndex);\n      } else if (moduleState.type === 'tv') {\n",
+              'scene dispatch',
+          )
+          scene_path = Path('src/scene3d.js')
+          scene = scene_path.read_text(encoding='utf-8')
+          if 'function createCoatRackModule(moduleState, moduleIndex)' not in scene:
+              marker = 'function createKettleModule(moduleState, moduleIndex) {'
+              if marker not in scene:
+                  raise SystemExit('coat rack renderer marker not found')
+              renderer = r'''function createCoatRackModule(moduleState, moduleIndex) {
+  const widthCm = Number(moduleState.widthCm || 43);
+  const depthCm = Number(moduleState.depthCm || 43);
+  const heightCm = Number(moduleState.heightCm || 180);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    moduleType: 'coat-rack',
+    type: 'coat-rack',
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(widthCm / 100, heightCm / 100, depthCm / 100),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+  );
+  proxy.position.y = heightCm / 200;
+  proxy.userData = {
+    kind: 'surface',
+    surfaceId: `${moduleState.id}:coat-rack`,
+    moduleId: moduleState.id,
+    moduleType: 'coat-rack',
+    moduleIndex,
+    selectionMode: 'module',
+    acceptsImage: false,
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+  group.add(proxy);
+
+  loadCoatRackModel().then((template) => {
+    if (!group.parent) return;
+    const model = template.clone(true);
+    model.traverse((object) => {
+      if (!object.isMesh) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+    });
+
+    model.updateMatrixWorld(true);
+    let box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const targetHeightM = heightCm / 100;
+    const uniformScale = size.y > 0 ? targetHeightM / size.y : 1;
+    model.scale.multiplyScalar(uniformScale);
+    model.updateMatrixWorld(true);
+
+    box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= box.min.y;
+    group.add(model);
+  }).catch((error) => {
+    console.warn('Askılık GLB modeli yüklenemedi:', error);
+  });
+
+  return { group, surfaces: [proxy] };
+}
+
+'''
+              scene = scene.replace(marker, renderer + marker, 1)
+              scene_path.write_text(scene, encoding='utf-8')
+
+          # CC BY attribution embedded in supplied GLB metadata.
+          Path('public/models/COAT_RACK_ATTRIBUTION.txt').write_text(
+              "Askılık model attribution\n\n"
+              "Title: Coat Rack\n"
+              "Author: martn00\n"
+              "Source: https://sketchfab.com/3d-models/coat-rack-cb8fc6499d694c789550fe829e573887\n"
+              "License: CC BY 4.0\n"
+              "License URL: https://creativecommons.org/licenses/by/4.0/\n",
+              encoding='utf-8',
+          )
+
+          # Integration test: central catalog + state + behavior + real GLB renderer.
+          Path('test/coatRackModule.test.js').write_text(r'''import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { MODULE_CATALOG, MODULE_CATALOG_GROUPS } from '../src/catalog.js';
+import { createCoatRackModuleState } from '../src/designState.js';
+import { getModuleBehavior } from '../src/moduleBehavior.js';
+
+test('coat rack is a Depo catalog module backed by the supplied GLB', () => {
+  const item = MODULE_CATALOG.DEPOT_COAT_RACK;
+  assert.deepEqual(item, {
+    type: 'coat-rack',
+    widthCm: 43,
+    depthCm: 43,
+    heightCm: 180,
+    label: 'Askılık',
+  });
+  const depot = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Depo');
+  assert.ok(depot?.keys.includes('DEPOT_COAT_RACK'));
+
+  const state = createCoatRackModuleState();
+  assert.equal(state.type, 'coat-rack');
+  assert.equal(state.widthCm, 43);
+  assert.equal(state.depthCm, 43);
+  assert.equal(state.heightCm, 180);
+
+  const behavior = getModuleBehavior(state);
+  assert.equal(behavior.placement, 'free');
+  assert.equal(behavior.collision, 'footprint');
+
+  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  assert.match(scene, /models\/coat_rack\.glb/);
+  assert.match(scene, /function createCoatRackModule\(moduleState, moduleIndex\)/);
+  assert.match(scene, /moduleState\.type === 'coat-rack'/);
+
+  const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  assert.match(main, /createCoatRackModuleState/);
+  assert.match(main, /module\.type === 'coat-rack'/);
+});
+''', encoding='utf-8')
+          PY
+
+      - name: Syntax check
+        run: |
+          node --check src/catalog.js
+          node --check src/designState.js
+          node --check src/moduleBehavior.js
+          node --check src/main.js
+          node --check src/moduleDragSidebar.js
+          node --check src/scene3d.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit and push
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/catalog.js src/designState.js src/moduleBehavior.js src/main.js src/moduleDragSidebar.js src/scene3d.js public/models/COAT_RACK_ATTRIBUTION.txt test/coatRackModule.test.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "feat: add coat rack depot module [skip ci]"
+            git push origin ROG
+          fi
