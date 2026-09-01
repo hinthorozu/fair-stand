@@ -3684,11 +3684,53 @@ function createTvModule(moduleState, moduleIndex) {
   return { group, surfaces: [tv] };
 }
 
+function createMiniFridgeTopLabel(heightCm) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 256;
+  const context = canvas.getContext('2d');
+  if (!context) return null;
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.font = '800 128px Arial, Helvetica, sans-serif';
+  context.lineJoin = 'round';
+  context.lineWidth = 24;
+  context.strokeStyle = 'rgba(255,255,255,0.96)';
+  context.strokeText('BUZ DOLABI', canvas.width / 2, canvas.height / 2);
+  context.fillStyle = '#111827';
+  context.fillText('BUZ DOLABI', canvas.width / 2, canvas.height / 2);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+
+  const label = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.38, 0.095),
+    new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+  label.rotation.x = -Math.PI / 2;
+  label.position.set(0, Number(heightCm) / 100 + 0.004, -0.12);
+  label.renderOrder = 30;
+  label.userData.kind = 'decoration';
+  label.userData.role = 'mini-fridge-top-label';
+  return label;
+}
+
 function createMiniFridgeModule(moduleState, moduleIndex) {
   const widthCm = Number(moduleState.widthCm || 45);
   const depthCm = Number(moduleState.depthCm || 43);
   const heightCm = Number(moduleState.heightCm || 66);
   const group = new THREE.Group();
+  const topLabel = createMiniFridgeTopLabel(heightCm);
+  if (topLabel) group.add(topLabel);
   group.userData = {
     kind: 'module',
     moduleIndex,
