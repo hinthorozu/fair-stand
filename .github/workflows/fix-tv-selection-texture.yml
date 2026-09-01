@@ -1,0 +1,33 @@
+name: Fix TV Selection Texture
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/fix-tv-selection-texture.py'
+      - '.github/workflows/fix-tv-selection-texture.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: python scripts/fix-tv-selection-texture.py
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: rm -f scripts/fix-tv-selection-texture.py .github/workflows/fix-tv-selection-texture.yml
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'fix: restore TV selection and front image [skip ci]'
+          branch: ROG
