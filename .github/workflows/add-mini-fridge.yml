@@ -19,7 +19,22 @@ jobs:
           ref: ROG
           fetch-depth: 0
       - name: Apply patch
-        run: python scripts/add-mini-fridge.py
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/add-mini-fridge.py')
+          s = p.read_text()
+          start = s.index('# drag label')
+          end = s.index('# renderer function')
+          fixed = '''# drag label
+          replace_once('src/scene3d.js',
+          "    if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';\\n",
+          "    if (moduleState?.type === 'bar-stool') return 'Bar Taburesi';\\n    if (moduleState?.type === 'mini-fridge') return 'Mini Buzdolabı';\\n")
+
+          '''
+          p.write_text(s[:start] + fixed + s[end:])
+          PY
+          python scripts/add-mini-fridge.py
       - name: Syntax check
         run: |
           node --check src/catalog.js
