@@ -1,139 +1,36 @@
-name: Build
+name: Shelf Glow Apply
 
 on:
   push:
-    branches: [ROG]
-  pull_request:
     branches: [ROG]
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  patch:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ROG
           fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      - name: Apply shelf-only glow patch
-        if: github.event_name == 'push'
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          scene = Path('src/scene3d.js')
-          s = scene.read_text(encoding='utf-8')
-          old = """      // Geniş alan ışığı spot konisini kaldırır ve raf eni boyunca homojen yayılır.
-      const areaLight = new THREE.RectAreaLight(
-        0xffe4c8,
-        28.0,
-        ledStripWidthM,
-        Math.max(shelfDepthM * 0.95, 0.18),
-      );
-      areaLight.position.set(
-        0,
-        shelfBottomY - 0.006,
-        wallDepthM / 2 + shelfDepthM * 0.54,
-      );
-      areaLight.lookAt(new THREE.Vector3(
-        0,
-        shelfBottomY - 0.55,
-        wallDepthM / 2 + shelfDepthM * 0.20,
-      ));
-      areaLight.userData.kind = 'decoration';
-      areaLight.userData.role = 'shelf-under-light';
-      built.group.add(areaLight);
-"""
-          new = """      // Raf altındaki yerel parıltı; gerçek ışık yok, duvar ve malzeme renklerini etkilemez.
-      const glowDepthM = Math.max(shelfDepthM * 0.72, 0.14);
-      const underGlow = new THREE.Mesh(
-        new THREE.PlaneGeometry(ledStripWidthM, glowDepthM),
-        new THREE.MeshBasicMaterial({
-          color: 0xfff3dc,
-          transparent: true,
-          opacity: 0.18,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending,
-          side: THREE.DoubleSide,
-        }),
-      );
-      underGlow.rotation.x = -Math.PI / 2;
-      underGlow.position.set(
-        0,
-        shelfBottomY - 0.009,
-        wallDepthM / 2 + shelfDepthM * 0.62,
-      );
-      underGlow.userData.kind = 'decoration';
-      underGlow.userData.role = 'shelf-under-light';
-      built.group.add(underGlow);
-"""
-          if old not in s:
-              raise SystemExit('shelf area light block not found')
-          scene.write_text(s.replace(old, new, 1), encoding='utf-8')
-
-          test = Path('test/shelfLighting.test.js')
-          t = test.read_text(encoding='utf-8')
-          t = t.replace("  assert.match(source, /new THREE\\.RectAreaLight\\(/);\n", "  assert.match(source, /new THREE\\.PlaneGeometry\\(ledStripWidthM, glowDepthM\\)/);\n", 1)
-          t = t.replace("  assert.match(source, /0xffe4c8/);\n", "  assert.match(source, /0xfff3dc/);\n", 1)
-          test.write_text(t, encoding='utf-8')
-          PY
-
+      - name: Apply patch
+        run: python3 scripts/patch_shelf_glow.py
       - name: Install dependencies
         run: npm install
-
       - name: Test
         run: npm test
-
       - name: Build
         run: npm run build
-
-      - name: Commit shelf-only glow
-        if: github.event_name == 'push'
+      - name: Commit and push
         shell: bash
         run: |
-          rm -f .github/workflows/optimize-shelf-light.yml
-          cat > .github/workflows/build.yml <<'EOF'
-          name: Build
-
-          on:
-            push:
-              branches: [ROG]
-            pull_request:
-              branches: [ROG]
-
-          jobs:
-            build:
-              runs-on: ubuntu-latest
-              steps:
-                - name: Checkout
-                  uses: actions/checkout@v4
-
-                - name: Setup Node
-                  uses: actions/setup-node@v4
-                  with:
-                    node-version: 22
-
-                - name: Install dependencies
-                  run: npm install
-
-                - name: Test
-                  run: npm test
-
-                - name: Build
-                  run: npm run build
-          EOF
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add src/scene3d.js test/shelfLighting.test.js .github/workflows/build.yml .github/workflows/optimize-shelf-light.yml
+          git add -A
           git commit -m "perf: confine shelf glow under shelves [skip ci]"
           git push origin ROG
