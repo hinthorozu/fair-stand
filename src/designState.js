@@ -79,6 +79,7 @@ export function createShelfModuleState(widthCm, shelfCount = 2) {
     type: 'shelf',
     widthCm: width,
     shelfCount: count,
+    shelfLightingOn: false,
     strips: Array.from(
       { length: STRIP_COUNT },
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),

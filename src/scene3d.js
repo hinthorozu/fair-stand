@@ -5066,9 +5066,11 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
   const wallDepthM = Number(STAND_DIMENSIONS.depth);
   const innerWidthM = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
   const shelfHeightsCm = SHELF_DIMENSIONS.heightsByCountCm[shelfCount] ?? [];
+  const shelfLightingOn = Boolean(moduleState.shelfLightingOn);
 
   built.group.userData.type = 'shelf';
   built.group.userData.shelfCount = shelfCount;
+  built.group.userData.shelfLightingOn = shelfLightingOn;
   built.surfaces.forEach((surface) => {
     surface.userData.moduleType = 'shelf';
     surface.userData.shelfCount = shelfCount;
@@ -5111,6 +5113,24 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
     );
     frontProfile.castShadow = true;
     built.group.add(frontProfile);
+
+    if (shelfLightingOn) {
+      const light = new THREE.SpotLight(0xffffff, 22, 1.45, 0.95, 0.72, 1.5);
+      light.position.set(
+        0,
+        seamHeightM - 0.012,
+        wallDepthM / 2 + shelfDepthM * 0.58,
+      );
+      light.castShadow = false;
+      light.target.position.set(
+        0,
+        Math.max(0.04, seamHeightM - 0.72),
+        wallDepthM / 2 + shelfDepthM * 0.72,
+      );
+      light.userData.kind = 'decoration';
+      light.userData.role = 'shelf-under-light';
+      built.group.add(light, light.target);
+    }
   });
 
   return built;

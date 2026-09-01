@@ -15,6 +15,8 @@ export function createModuleContextMenu({
   onAdd,
   onValidateAddBatch,
   onGlassModeChange,
+  getShelfLightingState,
+  onShelfLightingChange,
 }) {
   let activeContext = null;
   let pickerRequest = null;
@@ -32,6 +34,7 @@ export function createModuleContextMenu({
     <button type="button" data-module-action="duplicate-left">Çoğalt Sol Tarafa</button>
     <div class="module-context-separator"></div>
     <button type="button" data-module-action="toggle-glass" hidden>Cam panele çevir</button>
+    <button type="button" data-module-action="toggle-shelf-light" hidden>Raf altı aydınlatmayı aç</button>
     <button type="button" data-module-action="add-right">Ekle Sağ Tarafa…</button>
     <button type="button" data-module-action="add-left">Ekle Sol Tarafa…</button>
   `;
@@ -69,6 +72,7 @@ export function createModuleContextMenu({
 
   const title = menu.querySelector('.module-context-title');
   const glassModeButton = menu.querySelector('[data-module-action="toggle-glass"]');
+  const shelfLightingButton = menu.querySelector('[data-module-action="toggle-shelf-light"]');
   const pickerTitle = pickerBackdrop.querySelector('#module-picker-title');
   const pickerContext = pickerBackdrop.querySelector('.module-picker-context');
   const pickerGrid = pickerBackdrop.querySelector('.module-catalog-grid');
@@ -342,6 +346,13 @@ export function createModuleContextMenu({
     glassModeButton.textContent = context.isGlass
       ? 'Normal panele çevir'
       : 'Cam panele çevir';
+
+    const isShelf = (context.moduleType ?? context.type) === 'shelf';
+    const shelfLightingOn = isShelf ? Boolean(getShelfLightingState?.(context)) : false;
+    shelfLightingButton.hidden = !isShelf;
+    shelfLightingButton.textContent = shelfLightingOn
+      ? 'Raf altı aydınlatmayı kapat'
+      : 'Raf altı aydınlatmayı aç';
     menu.hidden = false;
 
     const margin = 8;
@@ -377,6 +388,13 @@ export function createModuleContextMenu({
     if (action === 'toggle-glass' && context.supportsGlass) {
       close();
       onGlassModeChange?.(context, !context.isGlass);
+      return;
+    }
+
+    if (action === 'toggle-shelf-light' && (context.moduleType ?? context.type) === 'shelf') {
+      const nextState = !Boolean(getShelfLightingState?.(context));
+      close();
+      onShelfLightingChange?.(context, nextState);
       return;
     }
 

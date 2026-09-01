@@ -914,6 +914,23 @@ function addCatalogModule(request) {
   queueMicrotask(flushCatalogModuleAdds);
 }
 
+function getContextShelfLightingState(context) {
+  const index = findContextModuleIndex(context);
+  const moduleState = index >= 0 ? currentModules[index] : null;
+  return moduleState?.type === 'shelf' && Boolean(moduleState.shelfLightingOn);
+}
+
+function changeContextShelfLighting(context, enabled) {
+  const index = findContextModuleIndex(context);
+  if (index < 0 || currentModules[index]?.type !== 'shelf') return;
+
+  currentModules[index].shelfLightingOn = Boolean(enabled);
+  rebuildWall({ resetView: false });
+  selectionInfo.textContent = enabled
+    ? 'Raf altı aydınlatma açıldı.'
+    : 'Raf altı aydınlatma kapatıldı.';
+}
+
 function changeContextPanelGlassMode(context, isGlass) {
   if (!context?.supportsGlass) return;
 
@@ -935,6 +952,8 @@ const moduleContextMenu = createModuleContextMenu({
   onAdd: addCatalogModule,
   onValidateAddBatch: validateCatalogAddBatch,
   onGlassModeChange: changeContextPanelGlassMode,
+  getShelfLightingState: getContextShelfLightingState,
+  onShelfLightingChange: changeContextShelfLighting,
 });
 
 moduleDragSidebar = createModuleDragSidebar({
