@@ -1,8 +1,9 @@
-name: Video wall single image
+name: Fix video wall single image
 on:
   push:
     branches: [ROG]
-    paths: ['.github/workflows/video-wall-single-image.yml']
+    paths:
+      - '.github/workflows/video-wall-single-image.yml'
 permissions:
   contents: write
 jobs:
@@ -15,50 +16,125 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Patch video wall texture
+      - name: Replace video wall renderer
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('src/scene3d.js')
-          s=p.read_text()
-          old="""  const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
+          p = Path('src/scene3d.js')
+          s = p.read_text()
+          start = s.index('function createTvModule(moduleState, moduleIndex) {')
+          end = s.index('\nfunction createMiniFridgeTopLabel', start)
+          new_func = r'''function createTvModule(moduleState, moduleIndex) {
+  const rows = Math.max(1, Math.round(Number(moduleState.videoWallRows) || 1));
+  const cols = Math.max(1, Math.round(Number(moduleState.videoWallCols) || 1));
+  const panelWidthM = Number(moduleState.panelScreenWidthCm || moduleState.screenWidthCm || 93) / 100;
+  const panelHeightM = Number(moduleState.panelScreenHeightCm || moduleState.screenHeightCm || 52.3) / 100;
+  const widthM = panelWidthM * cols;
+  const heightM = panelHeightM * rows;
+  const depthM = Number(moduleState.depthCm || 5) / 100;
+  const centerYM = 1.75;
+  const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
   const centerZM = wallFrontM + depthM / 2 + 0.003;
-  const surfaces = [];
-
-  for (let row = 0; row < rows; row += 1) {
-    for (let col = 0; col < cols; col += 1) {
-      const screenTexture = createTvScreenTexture();"""
-          new="""  const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
-  const centerZM = wallFrontM + depthM / 2 + 0.003;
-  const surfaces = [];
   const isVideoWall = rows > 1 || cols > 1;
-  // Video wall uses ONE source image across the complete matrix. Each physical TV
-  // receives only its own UV crop, while the bezel/seam geometry stays visible.
-  const videoWallSourceTexture = isVideoWall ? createTvScreenTexture() : null;
 
-  for (let row = 0; row < rows; row += 1) {
-    for (let col = 0; col < cols; col += 1) {
-      const screenTexture = isVideoWall ? videoWallSourceTexture.clone() : createTvScreenTexture();
-      if (isVideoWall) {
-        screenTexture.needsUpdate = true;
-        screenTexture.wrapS = THREE.ClampToEdgeWrapping;
-        screenTexture.wrapT = THREE.ClampToEdgeWrapping;
-        screenTexture.repeat.set(1 / cols, 1 / rows);
-        screenTexture.offset.set(col / cols, (rows - 1 - row) / rows);
-      }"""
-          if old not in s:
-              raise SystemExit('video wall texture block not found')
-          p.write_text(s.replace(old,new,1))
+  const group = new THREE.Group();
+  group.userData.kind = 'module';
+  group.userData.moduleId = moduleState.id;
+  group.userData.moduleIndex = moduleIndex;
+  group.userData.moduleType = 'tv';
+  group.userData.type = 'tv';
+  group.userData.widthCm = Number(moduleState.widthCm || widthM * 100);
+  group.userData.depthCm = Number(moduleState.depthCm || 5);
+  group.userData.heightCm = heightM * 100;
+  group.userData.videoWallRows = rows;
+  group.userData.videoWallCols = cols;
+
+  const blackMaterial = () => new THREE.MeshStandardMaterial({
+    color: 0x111111,
+    roughness: 0.72,
+    metalness: 0.05,
+  });
+
+  // Tek bir görüntü bütün Video Wall yüzeyine yayılır.
+  const screenTexture = createTvScreenTexture();
+  const materials = [
+    blackMaterial(),
+    blackMaterial(),
+    blackMaterial(),
+    blackMaterial(),
+    new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false }),
+    blackMaterial(),
+  ];
+
+  const tv = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, heightM, depthM),
+    materials,
+  );
+  tv.position.set(0, centerYM, centerZM);
+  tv.castShadow = true;
+  tv.receiveShadow = true;
+  tv.userData.kind = 'surface';
+  tv.userData.surfaceId = `${moduleState.id}:tv`;
+  tv.userData.moduleId = moduleState.id;
+  tv.userData.moduleType = 'tv';
+  tv.userData.moduleIndex = moduleIndex;
+  tv.userData.acceptsImage = false;
+  tv.userData.selectionMode = 'module';
+  group.add(tv);
+
+  // Fiziksel TV birleşim izleri görünür kalır; görüntü bölünmez.
+  if (isVideoWall) {
+    const seamMaterial = new THREE.MeshBasicMaterial({ color: 0x090909, toneMapped: false });
+    const seamThicknessM = 0.010;
+    for (let col = 1; col < cols; col += 1) {
+      const seam = new THREE.Mesh(
+        new THREE.PlaneGeometry(seamThicknessM, heightM),
+        seamMaterial.clone(),
+      );
+      seam.position.set(
+        (col - cols / 2) * panelWidthM,
+        centerYM,
+        centerZM + depthM / 2 + 0.0008,
+      );
+      group.add(seam);
+    }
+    for (let row = 1; row < rows; row += 1) {
+      const seam = new THREE.Mesh(
+        new THREE.PlaneGeometry(widthM, seamThicknessM),
+        seamMaterial.clone(),
+      );
+      seam.position.set(
+        0,
+        centerYM + (rows / 2 - row) * panelHeightM,
+        centerZM + depthM / 2 + 0.0009,
+      );
+      group.add(seam);
+    }
+  }
+
+  group.userData.selectionBounds = Object.freeze({
+    widthM,
+    heightM,
+    depthM,
+    centerX: 0,
+    centerY: centerYM,
+    centerZ: centerZM,
+  });
+
+  return { group, surfaces: [tv] };
+}
+'''
+          p.write_text(s[:start] + new_func + s[end:])
           Path('.github/workflows/video-wall-single-image.yml').unlink(missing_ok=True)
           PY
       - name: Build
         run: |
           npm ci
           npm run build
-      - name: Commit
+      - name: Commit and push
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add src/scene3d.js .github/workflows/video-wall-single-image.yml
-          git commit -m "Span one image across video wall panels"
+          git commit -m "Render one image across video wall with visible seams"
           git push origin ROG
