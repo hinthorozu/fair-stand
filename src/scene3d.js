@@ -977,6 +977,8 @@ export function createStandScene(
     frame.position.set(0, heightM / 2, 0);
     frame.renderOrder = 1000;
     frame.visible = false;
+    // Selection visuals are display-only and must never become pick targets.
+    frame.raycast = () => {};
     frame.userData.isModuleSelectionVisual = true;
     moduleGroup.add(frame);
     moduleGroup.userData.moduleSelectionFrame = frame;
@@ -1022,6 +1024,7 @@ export function createStandScene(
     setModuleSelectionVisual(selectedModuleId, false);
     selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
     selectedSurfaces.clear();
+    selectedModuleId = null;
     floorSelected = false;
     if (!keepAnchor) selectionAnchorSurfaceId = null;
     if (notify) notifySelection();
@@ -4336,7 +4339,6 @@ export function createStandScene(
     }
 
     const moduleState = picked.moduleGroup.userData.moduleState;
-    if (moduleState) selectedModuleId = moduleState.id;
     if (!moduleState) {
       handleSurfaceSelectionAt(event.clientX, event.clientY, false);
       return;
