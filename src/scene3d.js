@@ -1008,19 +1008,41 @@ export function createStandScene(
     const moduleState = moduleGroup?.userData?.moduleState;
     const placement = moduleState?.placement ?? moduleGroup?.userData?.placement;
     const wallId = placement?.wallId ?? null;
-    if (!['back', 'left', 'right'].includes(wallId)) return null;
+    const moduleId = surface.userData.moduleId ?? moduleState?.id ?? null;
 
-    // Dikdörtgen seçim global moduleIndex sırasına değil, panelin gerçekten
-    // bulunduğu duvar düzlemindeki fiziksel yatay konuma göre ilerler.
-    const pathCm = wallId === 'back'
-      ? Number(placement.xCm)
-      : Number(placement.yCm);
-    if (!Number.isFinite(pathCm)) return null;
+    if (['back', 'left', 'right'].includes(wallId)) {
+      const pathCm = wallId === 'back'
+        ? Number(placement.xCm)
+        : Number(placement.yCm);
+      if (!Number.isFinite(pathCm)) return null;
+      return {
+        wallId,
+        planeKey: `wall:${wallId}`,
+        pathCm,
+        moduleId,
+      };
+    }
+
+    // Ön/serbest sıradaki modüller placement.wallId === 'free' olur. Aynı
+    // fiziksel doğrultu ve aynı çapraz koordinattaki modülleri tek seçim
+    // düzlemi say; başka bir serbest sıraya Ctrl seçiminin taşmasını engelle.
+    if (wallId !== 'free') return null;
+    const xCm = Number(placement.xCm);
+    const yCm = Number(placement.yCm);
+    if (!Number.isFinite(xCm) || !Number.isFinite(yCm)) return null;
+
+    const rotationZDeg = normalizeModuleRotationZDeg(placement.rotationZDeg);
+    const vertical = isVerticalModuleRotation(rotationZDeg);
+    const pathCm = vertical ? yCm : xCm;
+    const crossCm = vertical ? xCm : yCm;
+    const axis = vertical ? 'y' : 'x';
+    const quantizedCrossCm = Math.round(crossCm * 10) / 10;
 
     return {
       wallId,
+      planeKey: `free:${axis}:${quantizedCrossCm}`,
       pathCm,
-      moduleId: surface.userData.moduleId ?? moduleState?.id ?? null,
+      moduleId,
     };
   }
 
@@ -1074,12 +1096,12 @@ export function createStandScene(
     const targetMeta = getSurfaceSelectionPlaneMeta(mesh);
     // Köşeyi dönüp başka duvara taşma: dikdörtgen seçim yalnızca aynı fiziksel
     // duvar düzleminde yapılır. Raflı modül gibi farklı tipler aynı düzlemdeyse dahildir.
-    if (!anchorMeta || !targetMeta || anchorMeta.wallId !== targetMeta.wallId) return;
+    if (!anchorMeta || !targetMeta || anchorMeta.planeKey !== targetMeta.planeKey) return;
 
     const planePanels = surfaceMeshes
       .filter((surface) => surface.userData.selectionMode === 'panel')
       .map((surface) => ({ surface, meta: getSurfaceSelectionPlaneMeta(surface) }))
-      .filter((entry) => entry.meta?.wallId === anchorMeta.wallId);
+      .filter((entry) => entry.meta?.planeKey === anchorMeta.planeKey);
 
     const orderedModules = [...new Map(
       planePanels
