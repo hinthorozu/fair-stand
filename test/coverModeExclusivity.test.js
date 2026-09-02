@@ -24,11 +24,10 @@ test('image plus glass keeps the image and uses the original glass opacity contr
   assert.match(scene, /backing\.material\.opacity = glass \? GLASS_BACK_OPACITY : 1/);
 });
 
-test('Mesh stays one continuous plane and uses much finer perforations', () => {
+test('Mesh stays one continuous plane without a perforation mask', () => {
   assert.match(scene, /new THREE\.PlaneGeometry\(width, height\)/);
-  assert.match(scene, /Number\(widthM\) \* 300/);
-  assert.match(scene, /Number\(heightM\) \* 300/);
-  assert.match(scene, /texture\.minFilter = THREE\.LinearMipmapLinearFilter/);
-  assert.match(scene, /texture\.anisotropy = renderer\.capabilities\.getMaxAnisotropy\(\)/);
-  assert.match(scene, /overlayMaterial\.alphaToCoverage = true/);
+  assert.doesNotMatch(scene, /overlayMaterial\.alphaMap/);
+  assert.doesNotMatch(scene, /overlayMaterial\.alphaTest/);
+  assert.doesNotMatch(scene, /overlayMaterial\.alphaToCoverage/);
+  assert.match(scene, /if \(fabricType === 'mesh'\) \{\s*overlayMaterial\.transparent = false;\s*overlayMaterial\.depthWrite = true;/);
 });

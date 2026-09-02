@@ -3527,9 +3527,6 @@ export function createStandScene(
         polygonOffsetUnits: -2,
       });
       if (fabricType === 'mesh') {
-        overlayMaterial.alphaMap = createMeshBrandaAlphaMap(width, height);
-        overlayMaterial.alphaTest = 0.45;
-        overlayMaterial.alphaToCoverage = true;
         overlayMaterial.transparent = false;
         overlayMaterial.depthWrite = true;
       }

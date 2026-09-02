@@ -12,7 +12,7 @@ test('multi-panel lightbox fabric is exposed from panel context menu', () => {
   assert.match(main, /scene3d\.applyFabricMode\(selectedPanels, enabled\)/);
 });
 
-test('mesh branda is a separate perforated cover without lightbox lighting', () => {
+test('mesh branda is a separate one-piece cover without lightbox lighting', () => {
   const menu = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');
   const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
@@ -24,9 +24,6 @@ test('mesh branda is a separate perforated cover without lightbox lighting', () 
   assert.match(main, /scene3d\.applyMeshMode\(selectedPanels, enabled\)/);
   assert.match(scene, /function applyMeshMode\(meshOrMeshes, enabled\)/);
   assert.match(scene, /fabricType === 'mesh'/);
-  assert.match(scene, /function createMeshBrandaAlphaMap/);
-  assert.match(scene, /overlayMaterial\.alphaMap = createMeshBrandaAlphaMap/);
-  assert.match(scene, /overlayMaterial\.alphaTest = 0\.45/);
   assert.match(scene, /backing\.visible = fabricType !== 'mesh'/);
   assert.match(scene, /Mesh Branda aydınlatılamaz/);
 });
