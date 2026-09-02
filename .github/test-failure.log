@@ -1,0 +1,4291 @@
+
+> fair-stand@0.1.0 test
+> node --test
+
+TAP version 13
+# Subtest: L stand 500 x 400 accepts 900 cm and fills left before back
+ok 1 - L stand 500 x 400 accepts 900 cm and fills left before back
+  ---
+  duration_ms: 3.638767
+  type: 'test'
+  ...
+# Subtest: U stand 400 x 400 accepts the full 1200 cm chain
+ok 2 - U stand 400 x 400 accepts the full 1200 cm chain
+  ---
+  duration_ms: 1.231079
+  type: 'test'
+  ...
+# Subtest: 450 cm side is completed with a 50 cm module before turning the corner
+ok 3 - 450 cm side is completed with a 50 cm module before turning the corner
+  ---
+  duration_ms: 0.640497
+  type: 'test'
+  ...
+# Subtest: rejects lengths above the total active wall chain
+ok 4 - rejects lengths above the total active wall chain
+  ---
+  duration_ms: 0.484224
+  type: 'test'
+  ...
+# Subtest: Bar Taburesi katalog ve state kimliği sabittir
+ok 5 - Bar Taburesi katalog ve state kimliği sabittir
+  ---
+  duration_ms: 5.118589
+  type: 'test'
+  ...
+# Subtest: baza catalog exposes 100 150 200 cm sizes at 50 x 50 cm depth and height
+ok 6 - baza catalog exposes 100 150 200 cm sizes at 50 x 50 cm depth and height
+  ---
+  duration_ms: 2.030582
+  type: 'test'
+  ...
+# Subtest: baza state has independent front left and right editable panels
+ok 7 - baza state has independent front left and right editable panels
+  ---
+  duration_ms: 3.068962
+  type: 'test'
+  ...
+# Subtest: duplicating a baza preserves design and creates independent face ids
+ok 8 - duplicating a baza preserves design and creates independent face ids
+  ---
+  duration_ms: 0.709225
+  type: 'test'
+  ...
+# Subtest: baza uses the same 50 cm free footprint and four-direction center rotation as banko
+ok 9 - baza uses the same 50 cm free footprint and four-direction center rotation as banko
+  ---
+  duration_ms: 1.496475
+  type: 'test'
+  ...
+# Subtest: all baza widths fit exact logical grid gaps next to thin Maxima modules
+ok 10 - all baza widths fit exact logical grid gaps next to thin Maxima modules
+  ---
+  duration_ms: 4.390369
+  type: 'test'
+  ...
+# Subtest: baza physical depth still rejects real body overlap
+ok 11 - baza physical depth still rejects real body overlap
+  ---
+  duration_ms: 0.261949
+  type: 'test'
+  ...
+# Subtest: production catalog contains verified baza upright and tops
+ok 12 - production catalog contains verified baza upright and tops
+  ---
+  duration_ms: 3.682197
+  type: 'test'
+  ...
+# Subtest: baza 100 recipe matches verified production data
+ok 13 - baza 100 recipe matches verified production data
+  ---
+  duration_ms: 0.334034
+  type: 'test'
+  ...
+# Subtest: baza 150 recipe matches verified production data
+ok 14 - baza 150 recipe matches verified production data
+  ---
+  duration_ms: 0.289741
+  type: 'test'
+  ...
+# Subtest: baza 200 recipe matches verified production data
+ok 15 - baza 200 recipe matches verified production data
+  ---
+  duration_ms: 0.23041
+  type: 'test'
+  ...
+# Subtest: expanded baza recipe resolves top and upright production parts
+ok 16 - expanded baza recipe resolves top and upright production parts
+  ---
+  duration_ms: 0.340306
+  type: 'test'
+  ...
+# Subtest: baza renderer uses banko-style thin top and bottom rails with one panel tier
+ok 17 - baza renderer uses banko-style thin top and bottom rails with one panel tier
+  ---
+  duration_ms: 3.877171
+  type: 'test'
+  ...
+# Subtest: baza renderer preserves existing width depth and height inputs
+ok 18 - baza renderer preserves existing width depth and height inputs
+  ---
+  duration_ms: 0.292417
+  type: 'test'
+  ...
+# Subtest: Panel Bazalı 100 150 200 catalog entries exist in shared catalog keys
+ok 19 - Panel Bazalı 100 150 200 catalog entries exist in shared catalog keys
+  ---
+  duration_ms: 2.470895
+  type: 'test'
+  ...
+# Subtest: Panel Bazalı state carries seven wall panels plus three baza faces
+ok 20 - Panel Bazalı state carries seven wall panels plus three baza faces
+  ---
+  duration_ms: 4.038473
+  type: 'test'
+  ...
+# Subtest: Panel Bazalı keeps wall on rear plane and moves 50 cm baza body 25 cm forward
+ok 21 - Panel Bazalı keeps wall on rear plane and moves 50 cm baza body 25 cm forward
+  ---
+  duration_ms: 3.074623
+  type: 'test'
+  ...
+# Subtest: Panel Bazalı 100 reçetesi verilen üretim adetlerini korur
+ok 22 - Panel Bazalı 100 reçetesi verilen üretim adetlerini korur
+  ---
+  duration_ms: 1.834967
+  type: 'test'
+  ...
+# Subtest: Panel Bazalı 150 reçetesi verilen üretim adetlerini korur
+ok 23 - Panel Bazalı 150 reçetesi verilen üretim adetlerini korur
+  ---
+  duration_ms: 0.275023
+  type: 'test'
+  ...
+# Subtest: Panel Bazalı 200 reçetesi verilen üretim adetlerini korur
+ok 24 - Panel Bazalı 200 reçetesi verilen üretim adetlerini korur
+  ---
+  duration_ms: 0.212758
+  type: 'test'
+  ...
+# Subtest: Panel Bazalı katalog ölçüleri 100/150/200 ve 50 cm baza derinliğini korur
+ok 25 - Panel Bazalı katalog ölçüleri 100/150/200 ve 50 cm baza derinliğini korur
+  ---
+  duration_ms: 0.248323
+  type: 'test'
+  ...
+# Subtest: JSZip stays out of the initial application bundle
+ok 26 - JSZip stays out of the initial application bundle
+  ---
+  duration_ms: 1.607482
+  type: 'test'
+  ...
+# Subtest: Three.js has a stable Vite vendor chunk
+ok 27 - Three.js has a stable Vite vendor chunk
+  ---
+  duration_ms: 0.328514
+  type: 'test'
+  ...
+# Subtest: every catalog module belongs to exactly one catalog group
+ok 28 - every catalog module belongs to exactly one catalog group
+  ---
+  duration_ms: 3.226676
+  type: 'test'
+  ...
+# Subtest: every catalog module resolves its single-source key and label
+ok 29 - every catalog module resolves its single-source key and label
+  ---
+  duration_ms: 1.032959
+  type: 'test'
+  ...
+# Subtest: left catalog, context catalog and drag badge share catalog presentation source
+ok 30 - left catalog, context catalog and drag badge share catalog presentation source
+  ---
+  duration_ms: 2.631865
+  type: 'test'
+  ...
+# Subtest: coat rack is an Extra catalog module backed by the supplied GLB
+ok 31 - coat rack is an Extra catalog module backed by the supplied GLB
+  ---
+  duration_ms: 6.922408
+  type: 'test'
+  ...
+# Subtest: normalizes short and long HEX values
+ok 32 - normalizes short and long HEX values
+  ---
+  duration_ms: 1.164776
+  type: 'test'
+  ...
+# Subtest: converts HEX and RGB in both directions
+ok 33 - converts HEX and RGB in both directions
+  ---
+  duration_ms: 0.816194
+  type: 'test'
+  ...
+# Subtest: converts black and white RGB values to CMYK
+ok 34 - converts black and white RGB values to CMYK
+  ---
+  duration_ms: 0.435513
+  type: 'test'
+  ...
+# Subtest: converts CMYK back to RGB
+ok 35 - converts CMYK back to RGB
+  ---
+  duration_ms: 0.296184
+  type: 'test'
+  ...
+# Subtest: returns synchronized HEX RGB and CMYK values
+ok 36 - returns synchronized HEX RGB and CMYK values
+  ---
+  duration_ms: 1.223395
+  type: 'test'
+  ...
+# Subtest: keeps placement on the same wall while there is enough room
+ok 37 - keeps placement on the same wall while there is enough room
+  ---
+  duration_ms: 2.421743
+  type: 'test'
+  ...
+# Subtest: wraps from back-right corner to the right wall in U stand
+ok 38 - wraps from back-right corner to the right wall in U stand
+  ---
+  duration_ms: 0.448006
+  type: 'test'
+  ...
+# Subtest: wraps from back-left corner to the left wall when that wall is active
+ok 39 - wraps from back-left corner to the left wall when that wall is active
+  ---
+  duration_ms: 0.26231
+  type: 'test'
+  ...
+# Subtest: rejects a back-right corner wrap when the stand has no right wall
+ok 40 - rejects a back-right corner wrap when the stand has no right wall
+  ---
+  duration_ms: 0.425535
+  type: 'test'
+  ...
+# Subtest: wraps from the left wall back corner onto the back wall
+ok 41 - wraps from the left wall back corner onto the back wall
+  ---
+  duration_ms: 0.388996
+  type: 'test'
+  ...
+# Subtest: wraps from the right wall back corner onto the right end of back wall
+ok 42 - wraps from the right wall back corner onto the right end of back wall
+  ---
+  duration_ms: 0.356286
+  type: 'test'
+  ...
+# Subtest: does not wrap through the open front edge
+ok 43 - does not wrap through the open front edge
+  ---
+  duration_ms: 0.306874
+  type: 'test'
+  ...
+# Subtest: 100, 150 and 200 cm counters expose six independent stacked editable faces
+ok 44 - 100, 150 and 200 cm counters expose six independent stacked editable faces
+  ---
+  duration_ms: 5.439399
+  type: 'test'
+  ...
+# Subtest: duplicating a counter gives all six panels new surface ids
+ok 45 - duplicating a counter gives all six panels new surface ids
+  ---
+  duration_ms: 0.628794
+  type: 'test'
+  ...
+# Subtest: counter free placement stays inside the stand with 50 cm physical depth
+ok 46 - counter free placement stays inside the stand with 50 cm physical depth
+  ---
+  duration_ms: 1.558
+  type: 'test'
+  ...
+# Subtest: counter depth participates in collision checks
+ok 47 - counter depth participates in collision checks
+  ---
+  duration_ms: 2.944189
+  type: 'test'
+  ...
+# Subtest: counter selected rotation remains free and snaps its 50 cm depth axis safely
+ok 48 - counter selected rotation remains free and snaps its 50 cm depth axis safely
+  ---
+  duration_ms: 0.578561
+  type: 'test'
+  ...
+# Subtest: production catalog contains verified banko upright and tops
+ok 49 - production catalog contains verified banko upright and tops
+  ---
+  duration_ms: 2.351462
+  type: 'test'
+  ...
+# Subtest: banko 100 recipe matches verified production data
+ok 50 - banko 100 recipe matches verified production data
+  ---
+  duration_ms: 0.324706
+  type: 'test'
+  ...
+# Subtest: banko 150 recipe matches verified production data
+ok 51 - banko 150 recipe matches verified production data
+  ---
+  duration_ms: 0.231122
+  type: 'test'
+  ...
+# Subtest: banko 200 recipe matches verified production data
+ok 52 - banko 200 recipe matches verified production data
+  ---
+  duration_ms: 0.194834
+  type: 'test'
+  ...
+# Subtest: expanded banko recipe resolves top and upright production parts
+ok 53 - expanded banko recipe resolves top and upright production parts
+  ---
+  duration_ms: 0.270816
+  type: 'test'
+  ...
+# Subtest: glass cancels any active Lightbox or Mesh group before applying glass
+ok 54 - glass cancels any active Lightbox or Mesh group before applying glass
+  ---
+  duration_ms: 1.592865
+  type: 'test'
+  ...
+# Subtest: Lightbox and Mesh cancel glass before creating their one-piece cover
+ok 55 - Lightbox and Mesh cancel glass before creating their one-piece cover
+  ---
+  duration_ms: 0.54644
+  type: 'test'
+  ...
+# Subtest: image plus glass keeps the image and uses the original glass opacity contract
+ok 56 - image plus glass keeps the image and uses the original glass opacity contract
+  ---
+  duration_ms: 0.652328
+  type: 'test'
+  ...
+# Subtest: Mesh stays one continuous plane without a perforation mask
+ok 57 - Mesh stays one continuous plane without a perforation mask
+  ---
+  duration_ms: 0.816054
+  type: 'test'
+  ...
+# Subtest: Ctrl/Cmd left click is captured before OrbitControls and selects a rectangle
+ok 58 - Ctrl/Cmd left click is captured before OrbitControls and selects a rectangle
+  ---
+  duration_ms: 9.539016
+  type: 'test'
+  ...
+# Subtest: adding a module preserves existing panel color and image state
+ok 59 - adding a module preserves existing panel color and image state
+  ---
+  duration_ms: 4.385801
+  type: 'test'
+  ...
+# Subtest: same automatic wall composition reuses existing module state
+ok 60 - same automatic wall composition reuses existing module state
+  ---
+  duration_ms: 0.307755
+  type: 'test'
+  ...
+# Subtest: color override removes the image only from the targeted panel state
+ok 61 - color override removes the image only from the targeted panel state
+  ---
+  duration_ms: 0.349002
+  type: 'test'
+  ...
+# Subtest: duplicating a module preserves its design but creates independent identities
+ok 62 - duplicating a module preserves its design but creates independent identities
+  ---
+  duration_ms: 1.455728
+  type: 'test'
+  ...
+# Subtest: separator state is color-only and uses the requested module width
+ok 63 - separator state is color-only and uses the requested module width
+  ---
+  duration_ms: 0.510844
+  type: 'test'
+  ...
+# Subtest: duplicating a separator preserves color with independent ids
+ok 64 - duplicating a separator preserves color with independent ids
+  ---
+  duration_ms: 0.291294
+  type: 'test'
+  ...
+# Subtest: showcase states expose seven editable Maxima panel slots
+ok 65 - showcase states expose seven editable Maxima panel slots
+  ---
+  duration_ms: 0.444731
+  type: 'test'
+  ...
+# Subtest: showcase panel color and image state behaves like a flat panel
+ok 66 - showcase panel color and image state behaves like a flat panel
+  ---
+  duration_ms: 0.19272
+  type: 'test'
+  ...
+# Subtest: duplicating a showcase preserves panel design with independent ids
+ok 67 - duplicating a showcase preserves panel design with independent ids
+  ---
+  duration_ms: 0.751103
+  type: 'test'
+  ...
+# Subtest: door state has three upper panels and one independent editable door surface
+ok 68 - door state has three upper panels and one independent editable door surface
+  ---
+  duration_ms: 0.499132
+  type: 'test'
+  ...
+# Subtest: door surface color and image state is independent from upper panels and survives duplication
+ok 69 - door surface color and image state is independent from upper panels and survives duplication
+  ---
+  duration_ms: 0.386352
+  type: 'test'
+  ...
+# Subtest: Eames is the only table-chair set in the catalog
+ok 70 - Eames is the only table-chair set in the catalog
+  ---
+  duration_ms: 1.290521
+  type: 'test'
+  ...
+# Subtest: Eames set contains four chairs
+ok 71 - Eames set contains four chairs
+  ---
+  duration_ms: 2.85916
+  type: 'test'
+  ...
+# Subtest: Eames renderer loads the original GLB once and clones four chairs
+ok 72 - Eames renderer loads the original GLB once and clones four chairs
+  ---
+  duration_ms: 2.325844
+  type: 'test'
+  ...
+# Subtest: original Eames GLB asset is present
+ok 73 - original Eames GLB asset is present
+  ---
+  duration_ms: 0.363418
+  type: 'test'
+  ...
+# Subtest: fabric records its owning surfaces and modules
+ok 74 - fabric records its owning surfaces and modules
+  ---
+  duration_ms: 1.48313
+  type: 'test'
+  ...
+# Subtest: single-module fabric overlay is parented to its module
+ok 75 - single-module fabric overlay is parented to its module
+  ---
+  duration_ms: 0.339264
+  type: 'test'
+  ...
+# Subtest: multi-module one-piece fabric blocks individual movement
+ok 76 - multi-module one-piece fabric blocks individual movement
+  ---
+  duration_ms: 0.419233
+  type: 'test'
+  ...
+# Subtest: fabric ownership metadata is cleared when fabric is removed
+ok 77 - fabric ownership metadata is cleared when fabric is removed
+  ---
+  duration_ms: 0.248535
+  type: 'test'
+  ...
+# Subtest: every current and future module inherits the lightweight silhouette ghost rule
+ok 78 - every current and future module inherits the lightweight silhouette ghost rule
+  ---
+  duration_ms: 2.712306
+  type: 'test'
+  ...
+# Subtest: scene ghost reuses normal module geometry and one textureless basic material
+ok 79 - scene ghost reuses normal module geometry and one textureless basic material
+  ---
+  duration_ms: 1.884089
+  type: 'test'
+  ...
+# Subtest: placement ghost is a singleton instead of a per-model cache
+ok 80 - placement ghost is a singleton instead of a per-model cache
+  ---
+  duration_ms: 1.248101
+  type: 'test'
+  ...
+# Subtest: keeps 1 metre grid cells at the default size
+ok 81 - keeps 1 metre grid cells at the default size
+  ---
+  duration_ms: 1.387783
+  type: 'test'
+  ...
+# Subtest: grows the ground in 10 metre steps as the wall extends
+ok 82 - grows the ground in 10 metre steps as the wall extends
+  ---
+  duration_ms: 0.264625
+  type: 'test'
+  ...
+# Subtest: supports very long walls without changing grid cell size
+ok 83 - supports very long walls without changing grid cell size
+  ---
+  duration_ms: 0.263401
+  type: 'test'
+  ...
+# Subtest: in-app help guide is wired into the application
+ok 84 - in-app help guide is wired into the application
+  ---
+  duration_ms: 1.454616
+  type: 'test'
+  ...
+# Subtest: help guide exposes a fixed question-mark launcher and collapsible sections
+ok 85 - help guide exposes a fixed question-mark launcher and collapsible sections
+  ---
+  duration_ms: 0.325037
+  type: 'test'
+  ...
+# Subtest: help guide supports close button, backdrop click and Escape
+ok 86 - help guide supports close button, backdrop click and Escape
+  ---
+  duration_ms: 0.362978
+  type: 'test'
+  ...
+# Subtest: creates one continuous horizontal image region across adjacent panels
+ok 87 - creates one continuous horizontal image region across adjacent panels
+  ---
+  duration_ms: 1.078524
+  type: 'test'
+  ...
+# Subtest: rejects panels from different horizontal rows
+ok 88 - rejects panels from different horizontal rows
+  ---
+  duration_ms: 0.173303
+  type: 'test'
+  ...
+# Subtest: rejects non-adjacent modules
+ok 89 - rejects non-adjacent modules
+  ---
+  duration_ms: 0.153817
+  type: 'test'
+  ...
+# Subtest: panel systems keep only bottom and top horizontal profiles
+ok 90 - panel systems keep only bottom and top horizontal profiles
+  ---
+  duration_ms: 1.575712
+  type: 'test'
+  ...
+# Subtest: counter and door panel systems do not create intermediate horizontal rails
+ok 91 - counter and door panel systems do not create intermediate horizontal rails
+  ---
+  duration_ms: 1.006009
+  type: 'test'
+  ...
+# Subtest: image asset reference helper finds normal panel and fabric assignments
+ok 92 - image asset reference helper finds normal panel and fabric assignments
+  ---
+  duration_ms: 1.059328
+  type: 'test'
+  ...
+# Subtest: clearing one image asset removes only that asset assignments
+ok 93 - clearing one image asset removes only that asset assignments
+  ---
+  duration_ms: 0.21407
+  type: 'test'
+  ...
+# Subtest: image library exposes right-click and focused Delete through one safe delete path
+ok 94 - image library exposes right-click and focused Delete through one safe delete path
+  ---
+  duration_ms: 0.959502
+  type: 'test'
+  ...
+# Subtest: asset deletion clears matching live panel and fabric textures immediately
+ok 95 - asset deletion clears matching live panel and fabric textures immediately
+  ---
+  duration_ms: 1.340264
+  type: 'test'
+  ...
+# Subtest: clearImage rebuilds fabric overlays after removing a fabric image
+ok 96 - clearImage rebuilds fabric overlays after removing a fabric image
+  ---
+  duration_ms: 0.323844
+  type: 'test'
+  ...
+# Subtest: library deletion clears the live scene before persisted references
+ok 97 - library deletion clears the live scene before persisted references
+  ---
+  duration_ms: 0.329996
+  type: 'test'
+  ...
+# Subtest: contain keeps the full image visible and centers letterboxing
+ok 98 - contain keeps the full image visible and centers letterboxing
+  ---
+  duration_ms: 1.316789
+  type: 'test'
+  ...
+# Subtest: cover fills the target and crops the overflow from the center
+ok 99 - cover fills the target and crops the overflow from the center
+  ---
+  duration_ms: 0.206856
+  type: 'test'
+  ...
+# Subtest: unknown fit mode falls back to contain
+ok 100 - unknown fit mode falls back to contain
+  ---
+  duration_ms: 0.2626
+  type: 'test'
+  ...
+# Subtest: invalid dimensions are rejected
+ok 101 - invalid dimensions are rejected
+  ---
+  duration_ms: 0.186468
+  type: 'test'
+  ...
+# Subtest: Yapay Çiçek 1 is the only active artificial plant inside Extra
+ok 102 - Yapay Çiçek 1 is the only active artificial plant inside Extra
+  ---
+  duration_ms: 3.595808
+  type: 'test'
+  ...
+# Subtest: Yapay Çiçek 1 uses 10 cm free-placement snapping
+ok 103 - Yapay Çiçek 1 uses 10 cm free-placement snapping
+  ---
+  duration_ms: 0.236171
+  type: 'test'
+  ...
+# Subtest: only Yapay Çiçek 1 is wired while the second GLB file remains parked
+not ok 104 - only Yapay Çiçek 1 is wired while the second GLB file remains parked
+  ---
+  duration_ms: 7.099088
+  type: 'test'
+  location: '/home/runner/work/fair-stand/fair-stand/test/indoorPlants.test.js:25:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /createIndoorPlantModuleState\(\)/. Input:
+    
+    "import './style.css';\n" +
+      "import './colorEditor.css';\n" +
+      "import './imageActions.css';\n" +
+      "import './helpGuide.css';\n" +
+      "import { createStandScene } from './scene3d.js';\n" +
+      "import { initHelpGuide } from './helpGuide.js';\n" +
+      "import { resolveModuleCatalogKey } from './catalog.js';\n" +
+      'import {\n' +
+      '  composeAutomaticStandWall,\n' +
+      '  getAutomaticWallCapacityCm,\n' +
+      "} from './automaticWall.js';\n" +
+      'import {\n' +
+      '  createBarStoolModuleState,\n' +
+      '  createMiniFridgeModuleState,\n' +
+      '  createKettleModuleState,\n' +
+      '  createCoatRackModuleState,\n' +
+      '  createIndoorPlantModuleState,\n' +
+      '  createLedFloodlightModuleState,\n' +
+      '  createTvModuleState,\n' +
+      '  createBaseModuleState,\n' +
+      '  createBaseWallModuleState,\n' +
+      '  createCounterModuleState,\n' +
+      '  createDoorModuleState,\n' +
+      '  createEamesTableChairSetModuleState,\n' +
+      '  createFlatPanelModuleState,\n' +
+      '  createSeparatorModuleState,\n' +
+      '  createShelfModuleState,\n' +
+      '  createBeigeSofaSetModuleState,\n' +
+      '  createShowcaseModuleState,\n' +
+      '  duplicateModuleState,\n' +
+      '  totalWallWidthCm,\n' +
+      '  moduleWidths,\n' +
+      "} from './designState.js';\n" +
+      "import { deleteImageAsset, deleteProjectImageAssets, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';\n" +
+      "import { clearImageAssetReferences, countImageAssetReferences } from './imageAssetReferences.js';\n" +
+      "import { createProjectId, deleteProject, listProjects, loadProject, saveProject } from './projectStore.js';\n" +
+      "import { describeRectSelection } from './rectSelection.js';\n" +
+      "import { createModuleContextMenu } from './moduleContextMenu.js';\n" +
+      "import { createModuleDragSidebar } from './moduleDragSidebar.js';\n" +
+      'import {\n' +
+      '  colorValuesFromHex,\n' +
+      '  cmykToRgb,\n' +
+      '  rgbToHex,\n' +
+      "} from './colorUtils.js';\n" +
+      "import { STAND_TYPE_LABELS, validateStandSetup } from './standSetup.js';\n" +
+      "import { validateStandAxisCapacity } from './standCapacity.js';\n" +
+      'import {\n' +
+      '  createModulePlacement,\n' +
+      '  getWallAxis,\n' +
+      '  getWallExtentCm,\n' +
+      '  getWallUsedCm,\n' +
+      '  planFreeSideInsertion,\n' +
+      '  validatePlacementAgainstModules,\n' +
+      "} from './modulePlacement.js';\n" +
+      "import { getContinuousWallSegments, planContinuousWallInsertion } from './wallReflow.js';\n" +
+      "import { getModuleDefaultRotationDeg } from './moduleBehavior.js';\n" +
+      '\n' +
+      'let jsZipModulePromise = null;\n' +
+      '\n' +
+      'async function loadJSZip() {\n' +
+      '  if (!jsZipModulePromise) {\n' +
+      "    jsZipModulePromise = import('jszip').then((module) => module.default);\n" +
+      '  }\n' +
+      '  return jsZipModulePromise;\n' +
+      '}\n' +
+      '\n' +
+      "const appElement = document.querySelector('#app');\n" +
+      "const sidebarToggleButton = document.querySelector('#sidebar-toggle');\n" +
+      "const viewport = document.querySelector('#viewport');\n" +
+      "const viewportEmpty = document.querySelector('#viewport-empty');\n" +
+      "const viewportToolbar = document.querySelector('#viewport-toolbar');\n" +
+      "const renderCurrentViewButton = document.querySelector('#render-current-view');\n" +
+      "const standTypeButtons = [...document.querySelectorAll('[data-stand-type]')];\n" +
+      "const standSizeXInput = document.querySelector('#stand-size-x');\n" +
+      "const standSizeYInput = document.querySelector('#stand-size-y');\n" +
+      "const createStageButton = document.querySelector('#create-stage');\n" +
+      "const floorTypeSelect = document.querySelector('#floor-type');\n" +
+      "const stageResult = document.querySelector('#stage-result');\n" +
+      "const openModuleCatalogButton = document.querySelector('#open-module-catalog');\n" +
+      "const clearWallButton = document.querySelector('#clear-wall');\n" +
+      "const selectionInfo = document.querySelector('#selection-info');\n" +
+      "const colorInput = document.querySelector('#surface-color');\n" +
+      "const applyColorButton = document.querySelector('#apply-color');\n" +
+      "const colorHexInput = document.querySelector('#color-hex');\n" +
+      'const colorRgbInputs = {\n' +
+      "  r: document.querySelector('#color-r'),\n" +
+      "  g: document.querySelector('#color-g'),\n" +
+      "  b: document.querySelector('#color-b'),\n" +
+      '};\n' +
+      'const colorCmykInputs = {\n' +
+      "  c: document.querySelector('#color-c'),\n" +
+      "  m: document.querySelector('#color-m'),\n" +
+      "  y: document.querySelector('#color-y'),\n" +
+      "  k: document.querySelector('#color-k'),\n" +
+      '};\n' +
+      "const imageInput = document.querySelector('#surface-image');\n" +
+      "const fillImageButton = document.querySelector('#fit-image-cover');\n" +
+      "const fitImageButton = document.querySelector('#fit-image-contain');\n" +
+      "const clearTextureButton = document.querySelector('#clear-texture');\n" +
+      "const resetModuleFeaturesButton = document.querySelector('#reset-module-features');\n" +
+      "const assetLibraryElement = document.querySelector('#asset-library');\n" +
+      "const assetStatus = document.querySelector('#asset-status');\n" +
+      "const projectNameInput = document.querySelector('#project-name');\n" +
+      "const projectSelect = document.querySelector('#project-select');\n" +
+      "const newProjectButton = document.querySelector('#new-project');\n" +
+      "const saveProjectButton = document.querySelector('#save-project');\n" +
+      "const openProjectButton = document.querySelector('#open-project');\n" +
+      "const exportProjectButton = document.querySelector('#export-project');\n" +
+      "const importProjectButton = document.querySelector('#import-project');\n" +
+      "const importProjectFileInput = document.querySelector('#import-project-file');\n" +
+      "const deleteProjectButton = document.querySelector('#delete-project');\n" +
+      "const projectStatus = document.querySelector('#project-status');\n" +
+      "const projectLoadingOverlay = document.querySelector('#project-loading-overlay');\n" +
+      "const projectLoadingTitle = document.querySelector('#project-loading-title');\n" +
+      "const projectLoadingDetail = document.querySelector('#project-loading-detail');\n" +
+      '\n' +
+      'function setSidebarCollapsed(collapsed) {\n' +
+      "  appElement?.classList.toggle('sidebar-collapsed', collapsed);\n" +
+      '  if (sidebarToggleButton) {\n' +
+      "    sidebarToggleButton.textContent = collapsed ? '›' : '‹';\n" +
+      "    sidebarToggleButton.setAttribute('aria-expanded', String(!collapsed));\n" +
+      "    sidebarToggleButton.setAttribute('aria-label', collapsed ? 'Menüyü aç' : 'Menüyü kapat');\n" +
+      "    sidebarToggleButton.title = collapsed ? 'Menüyü aç' : 'Menüyü kapat';\n" +
+      '  }\n' +
+      "  window.dispatchEvent(new Event('resize'));\n" +
+      '}\n' +
+      '\n' +
+      "sidebarToggleButton?.addEventListener('click', () => {\n" +
+      "  setSidebarCollapsed(!appElement?.classList.contains('sidebar-collapsed'));\n" +
+      '});\n' +
+      '\n' +
+      'function setButtonBusy(button, busy, busyLabel = null) {\n' +
+      '  if (!button) return;\n' +
+      '  if (busy) {\n' +
+      '    if (!button.dataset.idleLabel) button.dataset.idleLabel = button.textContent;\n' +
+      '    button.disabled = true;\n' +
+      "    button.setAttribute('aria-busy', 'true');\n" +
+      '    if (busyLabel) button.textContent = busyLabel;\n' +
+      '  } else {\n' +
+      '    button.disabled = false;\n' +
+      "    button.removeAttribute('aria-busy');\n" +
+      '    if (button.dataset.idleLabel) button.textContent = button.dataset.idleLabel;\n' +
+      '  }\n' +
+      '}\n' +
+      '\n' +
+      "function showProjectLoading(title, detail = 'Lütfen bekleyin…') {\n" +
+      '  if (projectLoadingTitle) projectLoadingTitle.textContent = title;\n' +
+      '  if (projectLoadingDetail) projectLoadingDetail.textContent = detail;\n' +
+      '  projectLoadingOverlay.hidden = false;\n' +
+      '}\n' +
+      '\n' +
+      'function hideProjectLoading() {\n' +
+      '  projectLoadingOverlay.hidden = true;\n' +
+      '}\n' +
+      '\n' +
+      '\n' +
+      "const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';\n" +
+      '\n' +
+      'function syncSelectionFeedback() {\n' +
+      '  const message = selectionInfo.textContent.trim();\n' +
+      "  selectionInfo.classList.toggle('has-selection', Boolean(message) && message !== DEFAULT_SELECTION_HINT);\n" +
+      '}\n' +
+      '\n' +
+      'new MutationObserver(syncSelectionFeedback).observe(selectionInfo, {\n' +
+      '  childList: true,\n' +
+      '  subtree: true,\n' +
+      '  characterData: true,\n' +
+      '});\n' +
+      'syncSelectionFeedback();\n' +
+      '\n' +
+      '\n' +
+      '\n' +
+      'const STATUS_ELEMENTS = [stageResult, projectStatus, assetStatus].filter(Boolean);\n' +
+      '\n' +
+      'function inferStatusTone(element) {\n' +
+      "  if (element.classList.contains('error')) return 'error';\n" +
+      "  const text = element.textContent.toLocaleLowerCase('tr-TR');\n" +
+      "  if (/hata|başarısız|geçersiz|aşılamaz|bulunamadı|yüklenemedi|kaydedilemedi/.test(text)) return 'error';\n" +
+      "  if (/uyarı|dikkat|seçilmedi|henüz|bekliyor/.test(text)) return 'warning';\n" +
+      "  if (/kaydedildi|yüklendi|oluşturuldu|hazır|tamamlandı|eklendi|aktarıldı|silindi/.test(text)) return 'success';\n" +
+      "  return 'info';\n" +
+      '}\n' +
+      '\n' +
+      'function syncStatusTone(element) {\n' +
+      "  element.classList.remove('status-info', 'status-success', 'status-warning', 'status-error');\n" +
+      "  element.classList.add('status-' + inferStatusTone(element));\n" +
+      '}\n' +
+      '\n' +
+      'STATUS_ELEMENTS.forEach((element) => {\n' +
+      '  new MutationObserver(() => syncStatusTone(element)).observe(element, {\n' +
+      '    childList: true,\n' +
+      '    subtree: true,\n' +
+      '    characterData: true,\n' +
+      '  });\n' +
+      '  syncStatusTone(element);\n' +
+      '});\n' +
+      '\n' +
+      'const WALL_LABELS = Object.freeze({\n' +
+      "  back: 'Sırt',\n" +
+      "  left: 'Sol',\n" +
+      "  right: 'Sağ',\n" +
+      "  free: 'Serbest',\n" +
+      '});\n' +
+      '\n' +
+      'let currentModules = [];\n' +
+      'let currentStand = null;\n' +
+      'let selectedStandType = null;\n' +
+      'let activeAssetId = null;\n' +
+      'let pendingCatalogAdds = [];\n' +
+      'let catalogAddFlushScheduled = false;\n' +
+      'let moduleDragSidebar = null;\n' +
+      'let activeProjectId = createProjectId();\n' +
+      'let activeProjectCreatedAt = Date.now();\n' +
+      'let autosaveEnabled = false;\n' +
+      'let autosaveTimer = null;\n' +
+      'let autosaveObservedSignature = null;\n' +
+      'const AUTOSAVE_DELAY_MS = 5000;\n' +
+      'const AUTOSAVE_WATCH_INTERVAL_MS = 1000;\n' +
+      'const imageAssets = new Map();\n' +
+      'let assetContextAssetId = null;\n' +
+      '\n' +
+      "const assetContextMenu = document.createElement('div');\n" +
+      "assetContextMenu.className = 'module-context-menu asset-context-menu';\n" +
+      'assetContextMenu.hidden = true;\n' +
+      'assetContextMenu.innerHTML = `\n' +
+      '  <div class="module-context-title">Görsel</div>\n' +
+      '  <button type="button" data-asset-action="delete" class="danger">Sil</button>\n' +
+      '`;\n' +
+      'document.body.appendChild(assetContextMenu);\n' +
+      '\n' +
+      'function getAssetUrl(assetId) {\n' +
+      '  return imageAssets.get(assetId)?.url ?? null;\n' +
+      '}\n' +
+      '\n' +
+      'const scene3d = createStandScene(\n' +
+      '  viewport,\n' +
+      '  (surfaces) => {\n' +
+      '    if (!surfaces?.length) {\n' +
+      "      selectionInfo.textContent = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';\n" +
+      '      return;\n' +
+      '    }\n' +
+      '\n' +
+      '    if (surfaces.length === 1) {\n' +
+      '      const surface = surfaces[0];\n' +
+      '      const { moduleIndex, widthCm, stripNumber, moduleType } = surface.userData;\n' +
+      '\n' +
+      "      if (moduleType === 'counter') {\n" +
+      "        const faceLabel = surface.userData.surfaceRole === 'front'\n" +
+      "          ? 'ön'\n" +
+      "          : (surface.userData.surfaceRole === 'left'\n" +
+      "            ? 'sol yan'\n" +
+      "            : (surface.userData.surfaceRole === 'return' ? 'L dönüş' : 'sağ yan'));\n" +
+      "        const counterLabel = surface.userData.counterShape === 'L' ? ('Köşe Banko ' + widthCm + '×' + (Number(surface.userData.depthCm) || widthCm)) : ('Banko ' + widthCm + ' cm');\n" +
+      "        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · ' + counterLabel + ' · ' +"... 63991 more characters
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: |-
+    import './style.css';
+    import './colorEditor.css';
+    import './imageActions.css';
+    import './helpGuide.css';
+    import { createStandScene } from './scene3d.js';
+    import { initHelpGuide } from './helpGuide.js';
+    import { resolveModuleCatalogKey } from './catalog.js';
+    import {
+      composeAutomaticStandWall,
+      getAutomaticWallCapacityCm,
+    } from './automaticWall.js';
+    import {
+      createBarStoolModuleState,
+      createMiniFridgeModuleState,
+      createKettleModuleState,
+      createCoatRackModuleState,
+      createIndoorPlantModuleState,
+      createLedFloodlightModuleState,
+      createTvModuleState,
+      createBaseModuleState,
+      createBaseWallModuleState,
+      createCounterModuleState,
+      createDoorModuleState,
+      createEamesTableChairSetModuleState,
+      createFlatPanelModuleState,
+      createSeparatorModuleState,
+      createShelfModuleState,
+      createBeigeSofaSetModuleState,
+      createShowcaseModuleState,
+      duplicateModuleState,
+      totalWallWidthCm,
+      moduleWidths,
+    } from './designState.js';
+    import { deleteImageAsset, deleteProjectImageAssets, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
+    import { clearImageAssetReferences, countImageAssetReferences } from './imageAssetReferences.js';
+    import { createProjectId, deleteProject, listProjects, loadProject, saveProject } from './projectStore.js';
+    import { describeRectSelection } from './rectSelection.js';
+    import { createModuleContextMenu } from './moduleContextMenu.js';
+    import { createModuleDragSidebar } from './moduleDragSidebar.js';
+    import {
+      colorValuesFromHex,
+      cmykToRgb,
+      rgbToHex,
+    } from './colorUtils.js';
+    import { STAND_TYPE_LABELS, validateStandSetup } from './standSetup.js';
+    import { validateStandAxisCapacity } from './standCapacity.js';
+    import {
+      createModulePlacement,
+      getWallAxis,
+      getWallExtentCm,
+      getWallUsedCm,
+      planFreeSideInsertion,
+      validatePlacementAgainstModules,
+    } from './modulePlacement.js';
+    import { getContinuousWallSegments, planContinuousWallInsertion } from './wallReflow.js';
+    import { getModuleDefaultRotationDeg } from './moduleBehavior.js';
+    
+    let jsZipModulePromise = null;
+    
+    async function loadJSZip() {
+      if (!jsZipModulePromise) {
+        jsZipModulePromise = import('jszip').then((module) => module.default);
+      }
+      return jsZipModulePromise;
+    }
+    
+    const appElement = document.querySelector('#app');
+    const sidebarToggleButton = document.querySelector('#sidebar-toggle');
+    const viewport = document.querySelector('#viewport');
+    const viewportEmpty = document.querySelector('#viewport-empty');
+    const viewportToolbar = document.querySelector('#viewport-toolbar');
+    const renderCurrentViewButton = document.querySelector('#render-current-view');
+    const standTypeButtons = [...document.querySelectorAll('[data-stand-type]')];
+    const standSizeXInput = document.querySelector('#stand-size-x');
+    const standSizeYInput = document.querySelector('#stand-size-y');
+    const createStageButton = document.querySelector('#create-stage');
+    const floorTypeSelect = document.querySelector('#floor-type');
+    const stageResult = document.querySelector('#stage-result');
+    const openModuleCatalogButton = document.querySelector('#open-module-catalog');
+    const clearWallButton = document.querySelector('#clear-wall');
+    const selectionInfo = document.querySelector('#selection-info');
+    const colorInput = document.querySelector('#surface-color');
+    const applyColorButton = document.querySelector('#apply-color');
+    const colorHexInput = document.querySelector('#color-hex');
+    const colorRgbInputs = {
+      r: document.querySelector('#color-r'),
+      g: document.querySelector('#color-g'),
+      b: document.querySelector('#color-b'),
+    };
+    const colorCmykInputs = {
+      c: document.querySelector('#color-c'),
+      m: document.querySelector('#color-m'),
+      y: document.querySelector('#color-y'),
+      k: document.querySelector('#color-k'),
+    };
+    const imageInput = document.querySelector('#surface-image');
+    const fillImageButton = document.querySelector('#fit-image-cover');
+    const fitImageButton = document.querySelector('#fit-image-contain');
+    const clearTextureButton = document.querySelector('#clear-texture');
+    const resetModuleFeaturesButton = document.querySelector('#reset-module-features');
+    const assetLibraryElement = document.querySelector('#asset-library');
+    const assetStatus = document.querySelector('#asset-status');
+    const projectNameInput = document.querySelector('#project-name');
+    const projectSelect = document.querySelector('#project-select');
+    const newProjectButton = document.querySelector('#new-project');
+    const saveProjectButton = document.querySelector('#save-project');
+    const openProjectButton = document.querySelector('#open-project');
+    const exportProjectButton = document.querySelector('#export-project');
+    const importProjectButton = document.querySelector('#import-project');
+    const importProjectFileInput = document.querySelector('#import-project-file');
+    const deleteProjectButton = document.querySelector('#delete-project');
+    const projectStatus = document.querySelector('#project-status');
+    const projectLoadingOverlay = document.querySelector('#project-loading-overlay');
+    const projectLoadingTitle = document.querySelector('#project-loading-title');
+    const projectLoadingDetail = document.querySelector('#project-loading-detail');
+    
+    function setSidebarCollapsed(collapsed) {
+      appElement?.classList.toggle('sidebar-collapsed', collapsed);
+      if (sidebarToggleButton) {
+        sidebarToggleButton.textContent = collapsed ? '›' : '‹';
+        sidebarToggleButton.setAttribute('aria-expanded', String(!collapsed));
+        sidebarToggleButton.setAttribute('aria-label', collapsed ? 'Menüyü aç' : 'Menüyü kapat');
+        sidebarToggleButton.title = collapsed ? 'Menüyü aç' : 'Menüyü kapat';
+      }
+      window.dispatchEvent(new Event('resize'));
+    }
+    
+    sidebarToggleButton?.addEventListener('click', () => {
+      setSidebarCollapsed(!appElement?.classList.contains('sidebar-collapsed'));
+    });
+    
+    function setButtonBusy(button, busy, busyLabel = null) {
+      if (!button) return;
+      if (busy) {
+        if (!button.dataset.idleLabel) button.dataset.idleLabel = button.textContent;
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        if (busyLabel) button.textContent = busyLabel;
+      } else {
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+        if (button.dataset.idleLabel) button.textContent = button.dataset.idleLabel;
+      }
+    }
+    
+    function showProjectLoading(title, detail = 'Lütfen bekleyin…') {
+      if (projectLoadingTitle) projectLoadingTitle.textContent = title;
+      if (projectLoadingDetail) projectLoadingDetail.textContent = detail;
+      projectLoadingOverlay.hidden = false;
+    }
+    
+    function hideProjectLoading() {
+      projectLoadingOverlay.hidden = true;
+    }
+    
+    
+    const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
+    
+    function syncSelectionFeedback() {
+      const message = selectionInfo.textContent.trim();
+      selectionInfo.classList.toggle('has-selection', Boolean(message) && message !== DEFAULT_SELECTION_HINT);
+    }
+    
+    new MutationObserver(syncSelectionFeedback).observe(selectionInfo, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+    syncSelectionFeedback();
+    
+    
+    
+    const STATUS_ELEMENTS = [stageResult, projectStatus, assetStatus].filter(Boolean);
+    
+    function inferStatusTone(element) {
+      if (element.classList.contains('error')) return 'error';
+      const text = element.textContent.toLocaleLowerCase('tr-TR');
+      if (/hata|başarısız|geçersiz|aşılamaz|bulunamadı|yüklenemedi|kaydedilemedi/.test(text)) return 'error';
+      if (/uyarı|dikkat|seçilmedi|henüz|bekliyor/.test(text)) return 'warning';
+      if (/kaydedildi|yüklendi|oluşturuldu|hazır|tamamlandı|eklendi|aktarıldı|silindi/.test(text)) return 'success';
+      return 'info';
+    }
+    
+    function syncStatusTone(element) {
+      element.classList.remove('status-info', 'status-success', 'status-warning', 'status-error');
+      element.classList.add('status-' + inferStatusTone(element));
+    }
+    
+    STATUS_ELEMENTS.forEach((element) => {
+      new MutationObserver(() => syncStatusTone(element)).observe(element, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+      syncStatusTone(element);
+    });
+    
+    const WALL_LABELS = Object.freeze({
+      back: 'Sırt',
+      left: 'Sol',
+      right: 'Sağ',
+      free: 'Serbest',
+    });
+    
+    let currentModules = [];
+    let currentStand = null;
+    let selectedStandType = null;
+    let activeAssetId = null;
+    let pendingCatalogAdds = [];
+    let catalogAddFlushScheduled = false;
+    let moduleDragSidebar = null;
+    let activeProjectId = createProjectId();
+    let activeProjectCreatedAt = Date.now();
+    let autosaveEnabled = false;
+    let autosaveTimer = null;
+    let autosaveObservedSignature = null;
+    const AUTOSAVE_DELAY_MS = 5000;
+    const AUTOSAVE_WATCH_INTERVAL_MS = 1000;
+    const imageAssets = new Map();
+    let assetContextAssetId = null;
+    
+    const assetContextMenu = document.createElement('div');
+    assetContextMenu.className = 'module-context-menu asset-context-menu';
+    assetContextMenu.hidden = true;
+    assetContextMenu.innerHTML = `
+      <div class="module-context-title">Görsel</div>
+      <button type="button" data-asset-action="delete" class="danger">Sil</button>
+    `;
+    document.body.appendChild(assetContextMenu);
+    
+    function getAssetUrl(assetId) {
+      return imageAssets.get(assetId)?.url ?? null;
+    }
+    
+    const scene3d = createStandScene(
+      viewport,
+      (surfaces) => {
+        if (!surfaces?.length) {
+          selectionInfo.textContent = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
+          return;
+        }
+    
+        if (surfaces.length === 1) {
+          const surface = surfaces[0];
+          const { moduleIndex, widthCm, stripNumber, moduleType } = surface.userData;
+    
+          if (moduleType === 'counter') {
+            const faceLabel = surface.userData.surfaceRole === 'front'
+              ? 'ön'
+              : (surface.userData.surfaceRole === 'left'
+                ? 'sol yan'
+                : (surface.userData.surfaceRole === 'return' ? 'L dönüş' : 'sağ yan'));
+            const counterLabel = surface.userData.counterShape === 'L' ? ('Köşe Banko ' + widthCm + '×' + (Number(surface.userData.depthCm) || widthCm)) : ('Banko ' + widthCm + ' cm');
+            selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · ' + counterLabel + ' · ' + faceLabel + ' cephe · renk + görsel uygulanabilir.';
+            return;
+          }
+    
+          if (moduleType === 'base-wall') {
+            const role = surface.userData.surfaceRole;
+            const label = role === 'front'
+              ? 'baza ön panel'
+              : (role === 'left' ? 'baza sol yan panel' : (role === 'right' ? 'baza sağ yan panel' : `alttan ${stripNumber}. duvar paneli`));
+            selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Panel Bazalı ' + widthCm + ' cm · ' + label + ' · renk + görsel uygulanabilir.';
+            return;
+          }
+    
+          if (moduleType === 'base') {
+            const faceLabel = surface.userData.surfaceRole === 'front'
+              ? 'ön'
+              : (surface.userData.surfaceRole === 'left' ? 'sol yan' : 'sağ yan');
+            selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Baza ' + widthCm + ' cm · ' + faceLabel + ' panel · renk + görsel uygulanabilir.';
+            return;
+          }
+    
+          if (moduleType === 'separator') {
+            selectionInfo.textContent = `Modül ${moduleIndex + 1} · Separatör ${widthCm} cm · yalnızca renk uygulanabilir.`;
+            return;
+          }
+    
+          if (moduleType === 'door') {
+            selectionInfo.textContent = surface.userData.surfaceRole === 'door'
+              ? `Modül ${moduleIndex + 1} · Kapı ${widthCm} cm · kapı yüzeyi · renk + görsel uygulanabilir.`
+              : `Modül ${moduleIndex + 1} · Kapı ${widthCm} cm · üst ${stripNumber}. panel · renk + görsel uygulanabilir.`;
+            return;
+          }
+    
+          if (moduleType === 'showcase-3' || moduleType === 'showcase-2') {
+            const eyeCount = moduleType === 'showcase-3' ? 3 : 2;
+            selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${eyeCount} Gözlü Vitrin ${widthCm} cm · alttan ${stripNumber}. panel · renk + görsel uygulanabilir.`;
+            return;
+          }
+    
+          if (moduleType === 'shelf') {
+            const shelfCount = Number(surface.userData.shelfCount) || 2;
+            selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Raf ' + widthCm + ' cm · ' + shelfCount + ' raflı · alttan ' + stripNumber + '. panel · renk + görsel uygulanabilir.';
+            return;
+          }
+    
+          if (moduleType === 'table-chair-set-eames') {
+            selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Eames Masa Sandalye Takımı · 4 Eames sandalye · sandalye gövde rengi değiştirilebilir · cam masa sabittir.';
+            return;
+          }
+    
+          if (moduleType === 'bar-stool') {
+            selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Bar Taburesi · GLB model.';
+            return;
+          }
+    
+          if (moduleType === 'indoor-plant-1' && currentModules[moduleIndex]?.surface) {
+            selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Uzun Saksı 100 · saksı gövdesi · renk uygulanabilir.';
+            return;
+          }
+    
+          if (moduleType === 'mini-fridge') {
+            selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Mini Buzdolabı · 45 × 43 × 66 cm · GLB model.';
+            return;
+          }
+    
+          if (moduleType === 'tv') {
+            const tvState = currentModules[moduleIndex];
+            const sizeInch = Number(tvState?.sizeInch) || 42;
+            const screenWidthCm = Number(tvState?.screenWidthCm) || 93;
+            const screenHeightCm = Number(tvState?.screenHeightCm) || 52.3;
+            selectionInfo.textContent = `Modül ${moduleIndex + 1} · TV ${sizeInch}" · ${screenWidthCm} × ${screenHeightCm} cm ekran.`;
+            return;
+          }
+    
+          if (moduleType === 'led-floodlight') {
+            selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · LED Projektör · 350 cm üst profile bağlı aydınlatma.';
+            return;
+          }
+    
+          selectionInfo.textContent = `Modül ${moduleIndex + 1} · ${widthCm} cm · alttan ${stripNumber}. panel · Ctrl/Cmd + tık ile çoklu seç.`;
+          return;
+        }
+    
+        const allCounterPanels = surfaces.every(
+          (surface) => surface.userData.moduleType === 'counter',
+        );
+        if (allCounterPanels) {
+          const widthCm = surfaces[0]?.userData.widthCm ?? '';
+          selectionInfo.textContent = `Banko ${widthCm} cm · ${surfaces.length} panel seçili · renk + görsel toplu uygulanabilir.`;
+          return;
+        }
+    
+        const selectedFabricGroupIds = new Set(
+          surfaces.map((surface) => surface.userData.surfaceState?.fabricGroupId).filter(Boolean),
+        );
+        if (selectedFabricGroupIds.size === 1
+          && surfaces.every((surface) => surface.userData.surfaceState?.fabricGroupId)) {
+          const fabricType = surfaces[0]?.userData.surfaceState?.fabricType === 'mesh'
+            ? 'mesh'
+            : 'lightbox';
+          selectionInfo.textContent = fabricType === 'mesh'
+            ? 'Tek parça Mesh (Delikli) Branda seçili · renk + görsel uygulanabilir.'
+            : 'Tek parça Lightbox Kumaş seçili · renk + görsel uygulanabilir.';
+          return;
+        }
+    
+        selectionInfo.textContent = `${surfaces.length} panel seçili · Lightbox Kumaş / Mesh Branda için eksiksiz dikdörtgen panel grubunu seç.`;
+      },
+      getAssetUrl,
+      (context) => moduleContextMenu.open(context),
+      ({ selected, floorType, paintable }) => {
+        if (!selected) return;
+        const label = floorType === 'karolaj' ? 'Karolaj' : (floorType === 'hali' ? 'Halı' : 'Parke');
+        selectionInfo.textContent = paintable
+          ? label + ' zemini seçili · mevcut Aktif renk ile boyanabilir.'
+          : label + ' zemini seçili · bu zemin tipi boyanamaz.';
+      },
+    );
+    
+    function renderStageResult(message, isError = false) {
+      stageResult.textContent = message;
+      stageResult.classList.toggle('error', isError);
+    }
+    
+    function renderWallResult(message, isError = false) {
+      if (isError) console.warn(message);
+    }
+    
+    function setStandEditingEnabled(enabled) {
+      openModuleCatalogButton.disabled = !enabled;
+      clearWallButton.disabled = !enabled;
+      moduleDragSidebar?.setEnabled(Boolean(enabled && currentStand));
+    }
+    
+    function readStandSetup() {
+      return validateStandSetup({
+        standType: selectedStandType,
+        xCm: standSizeXInput.value,
+        yCm: standSizeYInput.value,
+      });
+    }
+    
+    function syncWallLengthFromSetup(setup) {
+      if (!setup?.ok) return;
+    
+      const capacityCm = getAutomaticWallCapacityCm({
+        standType: setup.standType,
+        standXCm: setup.xCm,
+        standYCm: setup.yCm,
+      });
+      if (!Number.isFinite(capacityCm)) return;
+    
+    }
+    
+    function updateStageCreateState() {
+      const result = readStandSetup();
+      createStageButton.disabled = !result.ok;
+    
+      if (result.ok) {
+        if (!currentStand) renderStageResult('Stand alanı hazır. Sahneyi oluşturabilirsin.');
+        return;
+      }
+    
+      const xHasValue = standSizeXInput.value.trim() !== '';
+      const yHasValue = standSizeYInput.value.trim() !== '';
+      if (selectedStandType && xHasValue && yHasValue) {
+        renderStageResult(result.message, true);
+      } else if (!currentStand) {
+        renderStageResult('Stand tipi ile X ve Y ölçülerinin üçü de tamamlanmadan sahne oluşmaz.');
+      }
+    }
+    
+    function renderCurrentWallResult() {
+      const total = totalWallWidthCm(currentModules);
+      const widths = moduleWidths(currentModules);
+      const activeWalls = ['back', 'left', 'right', 'free']
+        .map((wallId) => ({ wallId, usedCm: getWallUsedCm(currentModules, wallId) }))
+        .filter((wall) => wall.usedCm > 0);
+    
+      if (!currentModules.length) {
+        renderWallResult('Duvar boş.');
+        return;
+      }
+    
+      if (activeWalls.length <= 1 && (activeWalls[0]?.wallId ?? 'back') === 'back') {
+        renderWallResult(`${total} cm = ${widths.join(' + ')} · ${currentModules.length} modül`);
+        return;
+      }
+    
+      const wallSummary = activeWalls
+        .map(({ wallId, usedCm }) => `${WALL_LABELS[wallId] ?? wallId}: ${usedCm} cm`)
+        .join(' · ');
+      renderWallResult(`${currentModules.length} modül · ${wallSummary}`);
+    }
+    
+    function formatCapacityPopup(result, title) {
+      const axis = result.axis?.toUpperCase() ?? '';
+      return `${title}\n\n`
+        + `${axis} stand sınırı: ${result.limitCm} cm\n`
+        + `Mevcut toplam: ${result.currentCm} cm\n`
+        + `Eklenmek istenen: ${result.addedCm} cm\n`
+        + `Oluşacak toplam: ${result.projectedCm} cm\n\n`
+        + 'Aktif stand alanı aşılamaz.';
+    }
+    
+    function defaultCurrentCapacityCm(axis) {
+      if (axis === 'x') return getWallUsedCm(currentModules, 'back');
+      return Math.max(
+        getWallUsedCm(currentModules, 'left'),
+        getWallUsedCm(currentModules, 'right'),
+      );
+    }
+    
+    function validateCurrentAxisCapacity(
+      axis,
+      addedCm,
+      currentCm = defaultCurrentCapacityCm(axis),
+      { popupTitle = null } = {},
+    ) {
+      const result = validateStandAxisCapacity({
+        axis,
+        currentCm,
+        addedCm,
+        xCm: currentStand?.xCm,
+        yCm: currentStand?.yCm,
+      });
+    
+      if (!result.ok) {
+        renderWallResult(result.message, true);
+        if (popupTitle && Number.isFinite(result.projectedCm)) {
+          window.alert(formatCapacityPopup(result, popupTitle));
+        }
+      }
+      return result;
+    }
+    
+    function rebuildWall({ resetView = true } = {}) {
+      if (!currentStand) {
+        renderWallResult('Önce stand alanını oluştur.', true);
+        return;
+      }
+    
+      scene3d.buildWall(currentModules, { resetView });
+      renderCurrentWallResult();
+    }
+    
+    function findContextModuleIndex(context) {
+      if (!context) return -1;
+      const byId = currentModules.findIndex((module) => module.id === context.moduleId);
+      if (byId >= 0) return byId;
+      return Number.isInteger(context.moduleIndex) ? context.moduleIndex : -1;
+    }
+    
+    function deleteContextModule(context) {
+      const index = findContextModuleIndex(context);
+      if (index < 0 || index >= currentModules.length) return;
+    
+      const module = currentModules[index];
+      const confirmed = window.confirm(
+        `Modül ${index + 1} · ${module.widthCm} cm silinecek. Bu modüldeki renk ve görsel düzenlemeleri de kaybolacak. Devam edilsin mi?`,
+      );
+      if (!confirmed) return;
+    
+      currentModules.splice(index, 1);
+      rebuildWall({ resetView: false });
+    }
+    
+    window.addEventListener('fair-stand:delete-selected-module', (event) => {
+      const detail = event?.detail;
+      if (!detail?.moduleId && !Number.isInteger(detail?.moduleIndex)) return;
+      deleteContextModule(detail);
+    });
+    
+    function normalizeContinuousSide(context, side) {
+      if (side !== 'left' && side !== 'right') return side;
+      const wallId = context?.placement?.wallId ?? 'back';
+      if (wallId !== 'left') return side;
+      return side === 'left' ? 'right' : 'left';
+    }
+    
+    function planContextContinuousInsertion(insertedModules, context, side) {
+      if (!currentStand) return { ok: false, message: 'Önce stand alanını oluştur.' };
+      const index = findContextModuleIndex(context);
+      if (index < 0 || index >= currentModules.length) {
+        return { ok: false, message: 'Hedef modül bulunamadı.' };
+      }
+    
+      const sourceModule = currentModules[index];
+      if (!sourceModule?.placement) {
+        return { ok: false, message: 'Hedef modülün yerleşim bilgisi bulunamadı.' };
+      }
+    
+      return planContinuousWallInsertion({
+        modules: currentModules,
+        insertedModules,
+        targetModuleId: sourceModule.id,
+        side: normalizeContinuousSide(context, side),
+        standType: currentStand.standType,
+        standXCm: currentStand.xCm,
+        standYCm: currentStand.yCm,
+      });
+    }
+    
+    function planContextFreeInsertion(insertedModules, context, side) {
+      if (!currentStand) return { ok: false, message: 'Önce stand alanını oluştur.' };
+      const index = findContextModuleIndex(context);
+      if (index < 0 || index >= currentModules.length) {
+        return { ok: false, message: 'Hedef modül bulunamadı.' };
+      }
+    
+      const sourceModule = currentModules[index];
+      return planFreeSideInsertion({
+        modules: currentModules,
+        insertedModules,
+        targetModuleId: sourceModule.id,
+        side,
+        standType: currentStand.standType,
+        standXCm: currentStand.xCm,
+        standYCm: currentStand.yCm,
+      });
+    }
+    
+    function applyFreeInsertionPlan(plan, insertedModules, context, side) {
+      const index = findContextModuleIndex(context);
+      if (index < 0 || index >= currentModules.length) return false;
+    
+      plan.placements?.forEach((nextPlacement, moduleId) => {
+        const module = insertedModules.find((candidate) => candidate.id === moduleId);
+        if (module) module.placement = { ...nextPlacement };
+      });
+    
+      const insertIndex = side === 'left' ? index : index + 1;
+      currentModules.splice(insertIndex, 0, ...insertedModules);
+      return true;
+    }
+    
+    function isFreeContextInsertion(context) {
+      const index = findContextModuleIndex(context);
+      return index >= 0 && currentModules[index]?.placement?.wallId === 'free';
+    }
+    
+    function applyContinuousInsertionPlan(plan, insertedModules) {
+      const moduleMap = new Map(
+        [...currentModules, ...insertedModules].map((module) => [module.id, module]),
+      );
+    
+      plan.placements?.forEach((placement, moduleId) => {
+        const module = moduleMap.get(moduleId);
+        if (module) module.placement = { ...placement };
+      });
+    
+      currentModules = (plan.orderedModuleIds ?? [])
+        .map((moduleId) => moduleMap.get(moduleId))
+        .filter(Boolean);
+    }
+    
+    function duplicateContextModule(context, side) {
+      const index = findContextModuleIndex(context);
+      if (index < 0 || index >= currentModules.length) return;
+    
+      const sourceModule = currentModules[index];
+      const duplicate = duplicateModuleState(sourceModule);
+      if (!duplicate) return;
+    
+      if (sourceModule.type === 'led-floodlight' && sourceModule.placement) {
+        const sourcePlacement = sourceModule.placement;
+        const placement = { ...sourcePlacement, zCm: 350 };
+        const deltaCm = side === 'left' ? -20 : 20;
+        const widthCm = Number(duplicate.widthCm) || 50;
+    
+        if (sourcePlacement.wallId === 'back') {
+          placement.xCm = Math.min(
+            Math.max(0, Number(currentStand?.xCm) - widthCm),
+            Math.max(0, Number(sourcePlacement.xCm) + deltaCm),
+          );
+          placement.yCm = 0;
+        } else if (sourcePlacement.wallId === 'left' || sourcePlacement.wallId === 'right') {
+          placement.yCm = Math.min(
+            Math.max(0, Number(currentStand?.yCm) - widthCm),
+            Math.max(0, Number(sourcePlacement.yCm) + deltaCm),
+          );
+          placement.xCm = sourcePlacement.wallId === 'right' ? Number(currentStand?.xCm) : 0;
+        }
+    
+        duplicate.placement = placement;
+        currentModules.push(duplicate);
+        rebuildWall({ resetView: false });
+        return;
+      }
+    
+      if (sourceModule.placement && sourceModule.placement.wallId !== 'free') {
+        const plan = planContextContinuousInsertion([duplicate], context, side);
+        if (!plan.ok) {
+          renderWallResult(plan.message, true);
+          window.alert(`Modül çoğaltılamadı\n\n${plan.message}`);
+          return;
+        }
+    
+        applyContinuousInsertionPlan(plan, [duplicate]);
+        rebuildWall({ resetView: false });
+        return;
+      }
+    
+      const plan = planContextFreeInsertion([duplicate], context, side);
+      if (!plan.ok) {
+        renderWallResult(plan.message, true);
+        window.alert(`Modül çoğaltılamadı\n\n${plan.message}`);
+        return;
+      }
+    
+      applyFreeInsertionPlan(plan, [duplicate], context, side);
+      rebuildWall({ resetView: false });
+    }
+    
+    function createCatalogModuleState(module, { preservePlacement = false, catalogKey = null } = {}) {
+      if (!module) return null;
+    
+      let state = null;
+      if (module.type === 'flat-panel') state = createFlatPanelModuleState(module.widthCm);
+      else if (module.type === 'base') state = createBaseModuleState(module.widthCm);
+      else if (module.type === 'base-wall') state = createBaseWallModuleState(module.widthCm);
+      else if (module.type === 'counter') state = createCounterModuleState(module.widthCm, { shape: module.shape, depthCm: module.depthCm });
+      else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm);
+      else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);
+      else if (module.type === 'sofa-set-classic') state = createBeigeSofaSetModuleState();
+      else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();
+      else if (module.type === 'bar-stool') state = createBarStoolModuleState();
+      else if (module.type === 'mini-fridge') state = createMiniFridgeModuleState();
+      else if (module.type === 'kettle') state = createKettleModuleState();
+      else if (module.type === 'coat-rack') state = createCoatRackModuleState();
+      else if (module.type === 'indoor-plant-1') state = createIndoorPlantModuleState(module);
+      else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);
+      else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();
+      else if (module.type === 'door') state = createDoorModuleState(module.widthCm);
+      else if (module.type === 'showcase-2' || module.type === 'showcase-3') {
+        state = createShowcaseModuleState(module.type, module.widthCm);
+      }
+    
+      if (state) state.catalogKey = catalogKey ?? resolveModuleCatalogKey(module);
+      if (state && preservePlacement && module.placement) {
+        state.placement = { ...module.placement };
+      }
+      return state;
+    }
+    
+    function getRequestWallId({ context = null } = {}) {
+      return context?.placement?.wallId ?? 'back';
+    }
+    
+    function getContinuousModulePathStartCm(module, segments) {
+      const placement = module?.placement;
+      const widthCm = Number(module?.widthCm);
+      if (!placement || !Number.isFinite(widthCm) || widthCm <= 0) return null;
+    
+      const segment = segments.find((candidate) => candidate.wallId === placement.wallId);
+      if (!segment) return null;
+    
+      let localStartCm = null;
+      if (placement.wallId === 'left') {
+        localStartCm = Number(currentStand?.yCm) - (Number(placement.yCm) + widthCm);
+      } else if (placement.wallId === 'back') {
+        localStartCm = Number(placement.xCm);
+      } else if (placement.wallId === 'right') {
+        localStartCm = Number(placement.yCm);
+      }
+    
+      if (!Number.isFinite(localStartCm)) return null;
+      return Number(segment.offsetCm) + localStartCm;
+    }
+    
+    function getContinuousAppendTargetModule() {
+      if (!currentStand) return null;
+      const segments = getContinuousWallSegments(
+        currentStand.standType,
+        currentStand.xCm,
+        currentStand.yCm,
+      );
+      if (!segments.length) return null;
+    
+      return currentModules
+        .map((module) => ({
+          module,
+          pathStartCm: getContinuousModulePathStartCm(module, segments),
+        }))
+        .filter((entry) => Number.isFinite(entry.pathStartCm))
+        .sort((a, b) => a.pathStartCm - b.pathStartCm)
+        .at(-1)?.module ?? null;
+    }
+    
+    function planCatalogAppendInsertion(moduleStates) {
+      const targetModule = getContinuousAppendTargetModule();
+      if (!targetModule) {
+        const initialPlan = assignPlannedPlacements(moduleStates, {
+          placementMode: 'append',
+          context: null,
+        });
+        return { ...initialPlan, appendMode: 'initial' };
+      }
+    
+      // wallReflow yan duvar çağrı yönünü zincir yönüne normalize ediyor.
+      // Fiziksel zincir sonuna eklemek için yan duvarda caller side ters gönderilir.
+      const targetWallId = targetModule.placement?.wallId;
+      const side = targetWallId === 'left' || targetWallId === 'right' ? 'left' : 'right';
+      const plan = planContinuousWallInsertion({
+        modules: currentModules,
+        insertedModules: moduleStates,
+        targetModuleId: targetModule.id,
+        side,
+        standType: currentStand.standType,
+        standXCm: currentStand.xCm,
+        standYCm: currentStand.yCm,
+      });
+      return { ...plan, appendMode: 'continuous' };
+    }
+    
+    function validateCatalogAddBatch({
+      entries = [],
+      context = null,
+      placement = 'append',
+    } = {}) {
+      if (placement === 'append' || !context) {
+        const moduleStates = entries.map((entry) => createCatalogModuleState(entry.module));
+        if (moduleStates.some((moduleState) => !moduleState)) {
+          return { ok: false, message: 'Seçilen modüller hazırlanamadı.' };
+        }
+    
+        const plan = planCatalogAppendInsertion(moduleStates);
+        if (!plan.ok) {
+          renderWallResult(plan.message, true);
+          window.alert(`Modüller eklenemedi\n\n${plan.message}`);
+        }
+        return plan;
+      }
+    
+      let moduleStates = entries.map((entry) => createCatalogModuleState(entry.module));
+      if (moduleStates.some((moduleState) => !moduleState)) {
+        return { ok: false, message: 'Seçilen modüller hazırlanamadı.' };
+      }
+    
+      if ((placement === 'left' || placement === 'right') && isFreeContextInsertion(context)) {
+        // Picker sağ eklemede gönderim sırasını ters çevirir; burada tekrar görsel
+        // seçim sırasına döndürüp serbest komşu planına veriyoruz.
+        const visualOrderedStates = placement === 'right'
+          ? [...moduleStates].reverse()
+          : moduleStates;
+        const plan = planContextFreeInsertion(visualOrderedStates, context, placement);
+        if (!plan.ok) {
+          renderWallResult(plan.message, true);
+          window.alert(`Modüller eklenemedi\n\n${plan.message}`);
+        }
+        return plan;
+      }
+    
+      if (placement === 'left' || placement === 'right') {
+        moduleStates = [...moduleStates].reverse();
+      }
+    
+      const plan = planContextContinuousInsertion(moduleStates, context, placement);
+      if (!plan.ok) {
+        renderWallResult(plan.message, true);
+        window.alert(`Modüller eklenemedi\n\n${plan.message}`);
+      }
+      return plan;
+    }
+    
+    function assignPlannedPlacements(moduleStates, { placementMode = 'append', context = null } = {}) {
+      if (!currentStand) return { ok: false, message: 'Önce stand alanını oluştur.' };
+      if (placementMode !== 'append' || context) {
+        return { ok: false, message: 'Bağlamsal ekleme sürekli duvar motoru üzerinden yapılmalı.' };
+      }
+    
+      const planned = [];
+      let cursorCm = getWallExtentCm(currentModules, 'back');
+    
+      for (const moduleState of moduleStates) {
+        const placement = createModulePlacement({
+          xCm: cursorCm,
+          yCm: 0,
+          zCm: 0,
+          rotationZDeg: getModuleDefaultRotationDeg(moduleState),
+          wallId: 'back',
+        });
+    
+        const validation = validatePlacementAgainstModules({
+          placement,
+          widthCm: moduleState.widthCm,
+          depthCm: moduleState.depthCm,
+          moduleId: moduleState.id,
+          moduleType: moduleState.type,
+          shape: moduleState.shape,
+          modules: [...currentModules, ...planned],
+          standType: currentStand.standType,
+          standXCm: currentStand.xCm,
+          standYCm: currentStand.yCm,
+        });
+        if (!validation.ok) return validation;
+    
+        moduleState.placement = placement;
+        planned.push(moduleState);
+        cursorCm += Number(moduleState.widthCm);
+      }
+    
+      return { ok: true };
+    }
+    
+    function flushCatalogModuleAdds() {
+      catalogAddFlushScheduled = false;
+      const requests = pendingCatalogAdds;
+      pendingCatalogAdds = [];
+    
+      if (!currentStand || !requests.length) return;
+    
+      const firstRequest = requests[0];
+      let moduleStates = requests.map((request) => createCatalogModuleState(request.module));
+      if (moduleStates.some((moduleState) => !moduleState)) return;
+    
+      const placementMode = firstRequest.placement ?? 'append';
+      const context = firstRequest.context ?? null;
+    
+      if (placementMode === 'append' && !context) {
+        const plan = planCatalogAppendInsertion(moduleStates);
+        if (!plan.ok) {
+          renderWallResult(plan.message, true);
+          window.alert(`Modüller eklenemedi\n\n${plan.message}`);
+          return;
+        }
+    
+        if (plan.appendMode === 'continuous') {
+          applyContinuousInsertionPlan(plan, moduleStates);
+        } else {
+          currentModules.push(...moduleStates);
+        }
+        rebuildWall({ resetView: false });
+        return;
+      }
+    
+      if ((placementMode === 'left' || placementMode === 'right') && context) {
+        if (isFreeContextInsertion(context)) {
+          const visualOrderedStates = placementMode === 'right'
+            ? [...moduleStates].reverse()
+            : moduleStates;
+          const plan = planContextFreeInsertion(visualOrderedStates, context, placementMode);
+          if (!plan.ok) {
+            renderWallResult(plan.message, true);
+            window.alert(`Modüller eklenemedi\n\n${plan.message}`);
+            return;
+          }
+    
+          applyFreeInsertionPlan(plan, visualOrderedStates, context, placementMode);
+          rebuildWall({ resetView: false });
+          return;
+        }
+    
+        moduleStates = [...moduleStates].reverse();
+        const plan = planContextContinuousInsertion(moduleStates, context, placementMode);
+        if (!plan.ok) {
+          renderWallResult(plan.message, true);
+          window.alert(`Modüller eklenemedi\n\n${plan.message}`);
+          return;
+        }
+    
+        applyContinuousInsertionPlan(plan, moduleStates);
+        rebuildWall({ resetView: false });
+        return;
+      }
+    
+      const placementPlan = assignPlannedPlacements(moduleStates, {
+        placementMode,
+        context,
+      });
+      if (!placementPlan.ok) {
+        renderWallResult(placementPlan.message, true);
+        window.alert(`Modüller eklenemedi\n\n${placementPlan.message}`);
+        return;
+      }
+    
+      currentModules.push(...moduleStates);
+      rebuildWall({ resetView: false });
+    }
+    
+    function addCatalogModule(request) {
+      if (!currentStand || !request?.module) return;
+    
+      pendingCatalogAdds.push(request);
+      if (catalogAddFlushScheduled) return;
+    
+      catalogAddFlushScheduled = true;
+      queueMicrotask(flushCatalogModuleAdds);
+    }
+    
+    function getContextShelfLightingState(context) {
+      const index = findContextModuleIndex(context);
+      const moduleState = index >= 0 ? currentModules[index] : null;
+      return moduleState?.type === 'shelf' && Boolean(moduleState.shelfLightingOn);
+    }
+    
+    function changeContextShelfLighting(context, enabled) {
+      const index = findContextModuleIndex(context);
+      if (index < 0 || currentModules[index]?.type !== 'shelf') return;
+    
+      const nextEnabled = Boolean(enabled);
+      currentModules[index].shelfLightingOn = nextEnabled;
+      if (!scene3d.setShelfLightingVisible(index, nextEnabled)) {
+        rebuildWall({ resetView: false });
+      }
+      selectionInfo.textContent = nextEnabled
+        ? 'Raf altı aydınlatma açıldı.'
+        : 'Raf altı aydınlatma kapatıldı.';
+    }
+    
+    function changeContextFabricMode(context, enabled) {
+      if (!context?.supportsFabric) return;
+    
+      const selectedPanels = scene3d.getSelectedSurfaces().filter(
+        (surface) => surface.userData.selectionMode === 'panel',
+      );
+      const result = scene3d.applyFabricMode(selectedPanels, enabled);
+      if (!result?.ok) {
+        selectionInfo.textContent = result?.message || 'Lightbox Kumaş işlemi uygulanamadı.';
+        return;
+      }
+    
+      selectionInfo.textContent = result.enabled
+        ? `${result.panelCount} panel tek parça Lightbox Kumaşa çevrildi.`
+        : 'Lightbox Kumaş kaldırıldı; paneller normal görünüme döndü.';
+    }
+    
+    function changeContextMeshMode(context, enabled) {
+      if (!context?.supportsFabric) return;
+    
+      const selectedPanels = scene3d.getSelectedSurfaces().filter(
+        (surface) => surface.userData.selectionMode === 'panel',
+      );
+      const result = scene3d.applyMeshMode(selectedPanels, enabled);
+      if (!result?.ok) {
+        selectionInfo.textContent = result?.message || 'Mesh Branda işlemi uygulanamadı.';
+        return;
+      }
+    
+      selectionInfo.textContent = result.enabled
+        ? `${result.panelCount} panel tek parça Mesh (Delikli) Brandaya çevrildi.`
+        : 'Mesh Branda kaldırıldı; paneller normal görünüme döndü.';
+    }
+    
+    function changeContextFabricLighting(context, enabled) {
+      if (!context?.isLightboxFabric) return;
+    
+      const selectedPanels = scene3d.getSelectedSurfaces().filter(
+        (surface) => surface.userData.selectionMode === 'panel',
+      );
+      const result = scene3d.setFabricLighting(selectedPanels, enabled);
+      if (!result?.ok) {
+        selectionInfo.textContent = result?.message || 'Lightbox aydınlatması değiştirilemedi.';
+        return;
+      }
+    
+      selectionInfo.textContent = result.enabled
+        ? 'Lightbox aydınlatması açıldı · yalnızca bez/görsel parlıyor.'
+        : 'Lightbox aydınlatması kapatıldı.';
+    }
+    
+    function changeContextPanelGlassMode(context, isGlass) {
+      if (!context?.supportsGlass) return;
+    
+      const selectedPanels = scene3d.getSelectedSurfaces().filter(
+        (surface) => surface.userData.selectionMode === 'panel',
+      );
+      if (!selectedPanels.length) return;
+    
+      scene3d.applyGlassMode(selectedPanels, isGlass);
+      const panelCount = selectedPanels.length;
+      selectionInfo.textContent = isGlass
+        ? `${panelCount} panel cam panele çevrildi.`
+        : `${panelCount} panel normal panele çevrildi.`;
+    }
+    
+    const moduleContextMenu = createModuleContextMenu({
+      onDelete: deleteContextModule,
+      onDuplicate: duplicateContextModule,
+      onAdd: addCatalogModule,
+      onValidateAddBatch: validateCatalogAddBatch,
+      onGlassModeChange: changeContextPanelGlassMode,
+      onFabricModeChange: changeContextFabricMode,
+      onMeshModeChange: changeContextMeshMode,
+      onFabricLightingChange: changeContextFabricLighting,
+      getShelfLightingState: getContextShelfLightingState,
+      onShelfLightingChange: changeContextShelfLighting,
+    });
+    
+    moduleDragSidebar = createModuleDragSidebar({
+      anchorButton: openModuleCatalogButton,
+      viewport,
+      canDrag: () => Boolean(currentStand),
+      createModuleState: (module, moduleKey) => createCatalogModuleState(module, { catalogKey: moduleKey }),
+      onPreview: (moduleState, clientX, clientY, rotationZDeg, rotationLocked) => (
+        scene3d.previewCatalogModuleDrag(
+          moduleState,
+          clientX,
+          clientY,
+          rotationZDeg,
+          rotationLocked,
+        )
+      ),
+      onDrop: (moduleState, clientX, clientY, rotationZDeg, rotationLocked) => {
+        const result = scene3d.dropCatalogModuleDrag(
+          moduleState,
+          clientX,
+          clientY,
+          rotationZDeg,
+          rotationLocked,
+        );
+        if (!result.ok || !result.placement) {
+          renderWallResult(result.message ?? 'Modül bu konuma bırakılamadı.', true);
+          return;
+        }
+    
+        if (result.plan?.placements instanceof Map && result.plan?.orderedModuleIds?.length) {
+          applyContinuousInsertionPlan(result.plan, [moduleState]);
+        } else {
+          moduleState.placement = { ...result.placement };
+          currentModules.push(moduleState);
+        }
+        rebuildWall({ resetView: false });
+      },
+      onCancel: () => scene3d.clearCatalogModuleDrag(),
+    });
+    
+    renderCurrentViewButton?.addEventListener('click', async () => {
+      if (!currentStand) {
+        renderWallResult('Önce stand sahnesini oluştur.', true);
+        return;
+      }
+    
+      const previousText = renderCurrentViewButton.textContent;
+      renderCurrentViewButton.disabled = true;
+      renderCurrentViewButton.textContent = 'Render alınıyor…';
+      try {
+        const result = await scene3d.captureCurrentViewPng({ scale: 3 });
+        if (!result.ok || !result.blob) {
+          renderWallResult(result.message || 'Render alınamadı.', true);
+          return;
+        }
+        const projectName = (projectNameInput.value.trim() || 'fair-stand')
+          .replace(/[^a-zA-Z0-9ğüşöçıİĞÜŞÖÇ_-]+/g, '-')
+          .replace(/^-+|-+$/g, '') || 'fair-stand';
+        const url = URL.createObjectURL(result.blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = projectName + '-render.png';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        renderWallResult('Render hazır · ' + result.width + ' × ' + result.height + ' px PNG.');
+      } catch (error) {
+        console.warn('Render alınamadı:', error);
+        renderWallResult('Render alınamadı.', true);
+      } finally {
+        renderCurrentViewButton.disabled = false;
+        renderCurrentViewButton.textContent = previousText;
+      }
+    });
+    
+    standTypeButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedStandType = button.dataset.standType;
+        standTypeButtons.forEach((candidate) => {
+          candidate.setAttribute('aria-pressed', String(candidate === button));
+        });
+        updateStageCreateState();
+      });
+    });
+    
+    [standSizeXInput, standSizeYInput].forEach((input) => {
+      input.addEventListener('input', updateStageCreateState);
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !createStageButton.disabled) createStageButton.click();
+      });
+    });
+    
+    createStageButton.addEventListener('click', () => {
+      const setup = readStandSetup();
+      if (!setup.ok) {
+        renderStageResult(setup.message, true);
+        return;
+      }
+    
+      // Rebuilding the stage while a stored/opened project is active must never mutate that
+      // project's identity through autosave. Treat the rebuild as the start of a new project.
+      const rebuildingStoredProject = Boolean(currentStand && autosaveEnabled);
+      if (rebuildingStoredProject) {
+        const currentProjectName = projectNameInput.value.trim() || 'Adsız Proje';
+        const confirmed = window.confirm(
+          'Sahne ve proje değiştirilecek.\n\n'
+            + '• Açık proje: "' + currentProjectName + '" korunacak ve değiştirilmeyecek.\n'
+            + '• Mevcut duvarlar, modüller, renkler ve görsel düzenlemeleri yeni sahneye taşınmayacak.\n'
+            + '• Yeni sahne bağımsız, kaydedilmemiş bir proje olarak başlayacak.\n\n'
+            + 'Devam edilsin mi?',
+        );
+        if (!confirmed) return;
+    
+        disableAutosave();
+        activeProjectId = createProjectId();
+        activeProjectCreatedAt = Date.now();
+        projectNameInput.value = 'Adsız Proje';
+        projectSelect.selectedIndex = -1;
+        clearRegisteredAssets();
+        projectStatus.textContent = 'Yeni proje başladı · önceki proje korunuyor.';
+      } else if (currentModules.length) {
+        const confirmed = window.confirm(
+          'Stand alanı yeniden oluşturulursa mevcut duvar, panel renkleri, görselleri ve düzenlemeleri silinecek. Devam edilsin mi?',
+        );
+        if (!confirmed) return;
+      }
+    
+      currentModules = [];
+      moduleContextMenu.close();
+      moduleContextMenu.closePicker();
+    
+      const stage = scene3d.createStage({
+        widthCm: setup.xCm,
+        depthCm: setup.yCm,
+        standType: setup.standType,
+        resetView: true,
+      });
+      if (!stage.ok) {
+        renderStageResult(stage.message, true);
+        return;
+      }
+    
+      currentStand = { ...setup, floorType: floorTypeSelect.value };
+      scene3d.setFloorType(floorTypeSelect.value);
+      viewportEmpty.hidden = true;
+      viewportToolbar.hidden = false;
+      setStandEditingEnabled(true);
+    
+      const automaticWall = composeAutomaticStandWall({
+        lengthCm: getAutomaticWallCapacityCm({
+          standType: setup.standType,
+          standXCm: setup.xCm,
+          standYCm: setup.yCm,
+        }),
+        standType: setup.standType,
+        standXCm: setup.xCm,
+        standYCm: setup.yCm,
+      });
+      if (!automaticWall.ok) {
+        renderStageResult(automaticWall.message, true);
+        return;
+      }
+      currentModules = automaticWall.widths.map((widthCm, index) => {
+        const moduleState = createFlatPanelModuleState(widthCm);
+        moduleState.placement = { ...automaticWall.placements[index] };
+        return moduleState;
+      });
+      rebuildWall({ resetView: true });
+    
+      const label = STAND_TYPE_LABELS[setup.standType];
+      renderStageResult(
+        `${label} · ${setup.xCm} × ${setup.yCm} cm aktif alan · ${setup.sceneWidthM} × ${setup.sceneDepthM} m toplam sahne`,
+      );
+    });
+    
+    floorTypeSelect.addEventListener('change', () => {
+      if (!currentStand) return;
+      currentStand = { ...currentStand, floorType: floorTypeSelect.value };
+      scene3d.setFloorType(floorTypeSelect.value);
+    });
+    
+    openModuleCatalogButton.addEventListener('click', () => {
+      if (!currentStand) return;
+      moduleContextMenu.openPicker({ placement: 'append' });
+    });
+    
+    clearWallButton.addEventListener('click', () => {
+      if (!currentStand) {
+        renderWallResult('Önce stand alanını oluştur.', true);
+        return;
+      }
+    
+      if (!currentModules.length) {
+        renderWallResult('Duvar zaten boş.');
+        return;
+      }
+    
+      const confirmed = window.confirm(
+        'Sahnedeki mevcut duvar, panel renkleri ve görseller silinecek. Duvar temizlensin mi?',
+      );
+      if (!confirmed) return;
+    
+      currentModules = [];
+      moduleContextMenu.close();
+      moduleContextMenu.closePicker();
+      scene3d.clearWall({ resetView: true });
+      renderWallResult('Duvar boş.');
+    });
+    
+    resetModuleFeaturesButton.addEventListener('click', () => {
+      if (!currentModules.length) {
+        renderWallResult('Sıfırlanacak modül yok.');
+        return;
+      }
+    
+      const confirmed = window.confirm(
+        'Tüm modüller varsayılan ayarlarına dönecektir. Onaylıyor musunuz?\n\n'
+          + 'Kaldırılacak özellikler:\n'
+          + '• Atanan resimler\n'
+          + '• Atanan cam özellikleri\n'
+          + '• Atanan renkler\n'
+          + '• Diğer panel özelleştirmeleri\n\n'
+          + 'Modül türleri, genişlikleri, sıraları ve FAZ 2 yerleşimleri korunacaktır.',
+      );
+      if (!confirmed) return;
+    
+      const resetModules = currentModules.map((module) => createCatalogModuleState(
+        module,
+        { preservePlacement: true },
+      ));
+      if (resetModules.some((module) => !module)) {
+        selectionInfo.textContent = 'Bazı modül türleri varsayılan ayarlarına döndürülemedi.';
+        return;
+      }
+    
+      currentModules = resetModules;
+      moduleContextMenu.close();
+      moduleContextMenu.closePicker();
+      rebuildWall({ resetView: false });
+      syncColorEditorFromHex('#ffffff');
+      selectionInfo.textContent = 'Tüm modüller varsayılan ayarlarına döndürüldü. Modül dizilimi ve yerleşimi korundu.';
+    });
+    
+    function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
+      if (scene3d.isFloorSelected()) {
+        const floorType = scene3d.getSelectedFloorType();
+        if (floorType === 'parke') {
+          selectionInfo.textContent = 'Parke zemini boyanamaz; hazır parke seçeneklerinden biri kullanılacak.';
+          return false;
+        }
+        const applied = scene3d.setFloorColor(colorInput.value);
+        if (applied) {
+          const label = floorType === 'hali' ? 'Halı' : 'Karolaj';
+          if (currentStand) currentStand = { ...currentStand, floorColor: applied };
+          selectionInfo.textContent = label + ' zemini · renk ' + applied.toUpperCase() + ' uygulandı.';
+          return true;
+        }
+      }
+    
+      const selected = scene3d.getSelectedSurfaces();
+      if (!selected.length) {
+        if (showMissingSelection) {
+          selectionInfo.textContent = 'Önce 3D sahnede boyamak istediğin panel, panel bloğu, modül veya zemini seç.';
+        }
+        return false;
+      }
+    
+      scene3d.applyColor(selected, colorInput.value);
+      return true;
+    }
+    
+    function syncColorEditorFromHex(hex, { apply = false } = {}) {
+      const values = colorValuesFromHex(hex);
+      if (!values) return false;
+    
+      colorInput.value = values.hex;
+      colorHexInput.value = values.hex;
+      colorRgbInputs.r.value = String(values.rgb.r);
+      colorRgbInputs.g.value = String(values.rgb.g);
+      colorRgbInputs.b.value = String(values.rgb.b);
+      colorCmykInputs.c.value = String(values.cmyk.c);
+      colorCmykInputs.m.value = String(values.cmyk.m);
+      colorCmykInputs.y.value = String(values.cmyk.y);
+      colorCmykInputs.k.value = String(values.cmyk.k);
+    
+      if (apply) applyActiveColorToSelection();
+      return true;
+    }
+    
+    function readNumberGroup(inputs) {
+      const values = {};
+      for (const [key, input] of Object.entries(inputs)) {
+        if (input.value.trim() === '') return null;
+        const value = Number(input.value);
+        if (!Number.isFinite(value)) return null;
+        values[key] = value;
+      }
+      return values;
+    }
+    
+    function syncFromRgbInputs() {
+      const rgb = readNumberGroup(colorRgbInputs);
+      if (!rgb) return;
+      syncColorEditorFromHex(rgbToHex(rgb.r, rgb.g, rgb.b), { apply: true });
+    }
+    
+    function syncFromCmykInputs() {
+      const cmyk = readNumberGroup(colorCmykInputs);
+      if (!cmyk) return;
+    
+      const normalizedCmyk = Object.fromEntries(
+        Object.entries(cmyk).map(([key, value]) => [
+          key,
+          Math.min(100, Math.max(0, Math.round(value))),
+        ]),
+      );
+      Object.entries(normalizedCmyk).forEach(([key, value]) => {
+        colorCmykInputs[key].value = String(value);
+      });
+    
+      const rgb = cmykToRgb(
+        normalizedCmyk.c,
+        normalizedCmyk.m,
+        normalizedCmyk.y,
+        normalizedCmyk.k,
+      );
+      const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+      colorInput.value = hex;
+      colorHexInput.value = hex;
+      colorRgbInputs.r.value = String(rgb.r);
+      colorRgbInputs.g.value = String(rgb.g);
+      colorRgbInputs.b.value = String(rgb.b);
+      applyActiveColorToSelection();
+    }
+    
+    applyColorButton.addEventListener('click', () => {
+      applyActiveColorToSelection({ showMissingSelection: true });
+    });
+    
+    colorInput.addEventListener('input', () => {
+      syncColorEditorFromHex(colorInput.value, { apply: true });
+    });
+    
+    colorHexInput.addEventListener('input', () => {
+      const raw = colorHexInput.value.trim();
+      if (!/^#?[0-9a-fA-F]{6}$/.test(raw)) return;
+      syncColorEditorFromHex(raw, { apply: true });
+    });
+    
+    colorHexInput.addEventListener('change', () => {
+      if (!syncColorEditorFromHex(colorHexInput.value, { apply: true })) {
+        syncColorEditorFromHex(colorInput.value);
+      }
+    });
+    
+    Object.values(colorRgbInputs).forEach((input) => {
+      input.addEventListener('input', syncFromRgbInputs);
+    });
+    
+    Object.values(colorCmykInputs).forEach((input) => {
+      input.addEventListener('input', syncFromCmykInputs);
+    });
+    
+    function cloneProjectState(value) {
+      return value == null ? value : JSON.parse(JSON.stringify(value));
+    }
+    
+    function clearRegisteredAssets() {
+      imageAssets.forEach((asset) => { if (asset.url) URL.revokeObjectURL(asset.url); });
+      imageAssets.clear();
+      activeAssetId = null;
+      closeAssetContextMenu();
+      renderAssetLibrary();
+      assetStatus.textContent = 'Görsel seçilmedi.';
+    }
+    
+    function buildProjectSnapshot() {
+      return {
+        id: activeProjectId,
+        name: projectNameInput.value.trim() || 'Adsız Proje',
+        version: 1,
+        createdAt: activeProjectCreatedAt,
+        stand: cloneProjectState(currentStand),
+        modules: cloneProjectState(currentModules),
+      };
+    }
+    
+    function getProjectStateSignature() {
+      const snapshot = buildProjectSnapshot();
+      return JSON.stringify({
+        name: snapshot.name,
+        stand: snapshot.stand,
+        modules: snapshot.modules,
+      });
+    }
+    
+    function clearAutosaveTimer() {
+      if (autosaveTimer) clearTimeout(autosaveTimer);
+      autosaveTimer = null;
+    }
+    
+    function scheduleAutosave() {
+      if (!autosaveEnabled) return;
+      clearAutosaveTimer();
+      projectStatus.textContent = 'Değişiklik var · 5 sn içinde otomatik kaydedilecek…';
+      autosaveTimer = setTimeout(async () => {
+        autosaveTimer = null;
+        if (!autosaveEnabled) return;
+        projectStatus.textContent = 'Kaydediliyor…';
+        try {
+          await persistActiveProject({ quiet: true });
+          autosaveObservedSignature = getProjectStateSignature();
+          projectStatus.textContent = 'Kaydedildi · Otomatik';
+        } catch (error) {
+          console.warn('Otomatik kayıt başarısız:', error);
+          projectStatus.textContent = 'Otomatik kayıt başarısız.';
+        }
+      }, AUTOSAVE_DELAY_MS);
+    }
+    
+    function enableAutosaveFromCurrentState() {
+      clearAutosaveTimer();
+      autosaveObservedSignature = getProjectStateSignature();
+      autosaveEnabled = true;
+    }
+    
+    function disableAutosave() {
+      autosaveEnabled = false;
+      clearAutosaveTimer();
+      autosaveObservedSignature = null;
+    }
+    
+    setInterval(() => {
+      if (!autosaveEnabled) return;
+      const signature = getProjectStateSignature();
+      if (signature === autosaveObservedSignature) return;
+      autosaveObservedSignature = signature;
+      scheduleAutosave();
+    }, AUTOSAVE_WATCH_INTERVAL_MS);
+    
+    async function refreshProjectList(selectedId = activeProjectId) {
+      const projects = await listProjects();
+      projectSelect.innerHTML = '';
+      if (!projects.length) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Kayıtlı proje yok';
+        projectSelect.appendChild(option);
+        return projects;
+      }
+      projects.forEach((project) => {
+        const option = document.createElement('option');
+        option.value = project.id;
+        option.textContent = project.name || 'Adsız Proje';
+        projectSelect.appendChild(option);
+      });
+      if (projects.some((project) => project.id === selectedId)) projectSelect.value = selectedId;
+      return projects;
+    }
+    
+    async function loadAssetsForActiveProject() {
+      clearRegisteredAssets();
+      const assets = await loadImageAssets(activeProjectId);
+      assets.forEach(registerAsset);
+      if (assets.length) setActiveAsset(assets.at(-1).id);
+      else renderAssetLibrary();
+    }
+    
+    async function persistActiveProject({ quiet = false } = {}) {
+      const stored = await saveProject(buildProjectSnapshot());
+      activeProjectCreatedAt = stored.createdAt;
+      await refreshProjectList(stored.id);
+      if (!quiet) projectStatus.textContent = 'Kaydedildi: ' + stored.name;
+      return stored;
+    }
+    
+    async function restoreProject(project) {
+      if (!project) return;
+      disableAutosave();
+      activeProjectId = project.id;
+      activeProjectCreatedAt = Number(project.createdAt) || Date.now();
+      projectNameInput.value = project.name || 'Adsız Proje';
+      currentModules = cloneProjectState(project.modules) || [];
+      currentModules.forEach((moduleState) => {
+        if (!moduleState.catalogKey) moduleState.catalogKey = resolveModuleCatalogKey(moduleState);
+      });
+      currentStand = cloneProjectState(project.stand);
+      moduleContextMenu.close();
+      moduleContextMenu.closePicker();
+    
+      // Project image URLs must exist before the scene is rebuilt.
+      // Otherwise stored imageAssetId values cannot resolve on the first open.
+      await loadAssetsForActiveProject();
+    
+      if (currentStand) {
+        selectedStandType = currentStand.standType;
+        standTypeButtons.forEach((button) => {
+          button.setAttribute('aria-pressed', String(button.dataset.standType === selectedStandType));
+        });
+        standSizeXInput.value = String(currentStand.xCm);
+        standSizeYInput.value = String(currentStand.yCm);
+        floorTypeSelect.value = currentStand.floorType || 'karolaj';
+        const stage = scene3d.createStage({
+          widthCm: currentStand.xCm,
+          depthCm: currentStand.yCm,
+          standType: currentStand.standType,
+          resetView: true,
+        });
+        if (!stage.ok) throw new Error(stage.message || 'Proje sahnesi oluşturulamadı.');
+        scene3d.setFloorType(currentStand.floorType || 'karolaj');
+        if (currentStand.floorColor) scene3d.setFloorColor(currentStand.floorColor);
+        viewportEmpty.hidden = true;
+        viewportToolbar.hidden = false;
+        setStandEditingEnabled(true);
+        rebuildWall({ resetView: true });
+        updateStageCreateState();
+      } else {
+        currentModules = [];
+        selectedStandType = null;
+        standTypeButtons.forEach((button) => button.setAttribute('aria-pressed', 'false'));
+        standSizeXInput.value = '';
+        standSizeYInput.value = '';
+        setStandEditingEnabled(false);
+        updateStageCreateState();
+      }
+    
+      await refreshProjectList(activeProjectId);
+      enableAutosaveFromCurrentState();
+      projectStatus.textContent = 'Açıldı: ' + (project.name || 'Adsız Proje');
+    }
+    
+    function registerAsset(asset) {
+      const previous = imageAssets.get(asset.id);
+      if (previous?.url) URL.revokeObjectURL(previous.url);
+    
+      imageAssets.set(asset.id, {
+        ...asset,
+        url: URL.createObjectURL(asset.blob),
+      });
+    }
+    
+    function closeAssetContextMenu() {
+      assetContextMenu.hidden = true;
+      assetContextAssetId = null;
+    }
+    
+    function openAssetContextMenu(assetId, clientX, clientY) {
+      const asset = imageAssets.get(assetId);
+      if (!asset) return;
+    
+      assetContextAssetId = assetId;
+      assetContextMenu.querySelector('.module-context-title').textContent = `Görsel · ${asset.name}`;
+      assetContextMenu.hidden = false;
+    
+      const margin = 8;
+      const rect = assetContextMenu.getBoundingClientRect();
+      const left = Math.max(margin, Math.min(clientX, window.innerWidth - rect.width - margin));
+      const top = Math.max(margin, Math.min(clientY, window.innerHeight - rect.height - margin));
+      assetContextMenu.style.left = `${left}px`;
+      assetContextMenu.style.top = `${top}px`;
+    }
+    
+    function getImageAssetUsageCount(assetId) {
+      return countImageAssetReferences(currentModules, assetId)
+        + countImageAssetReferences(currentStand, assetId);
+    }
+    
+    async function requestDeleteImageAsset(assetId) {
+      const asset = imageAssets.get(assetId);
+      if (!asset) return false;
+    
+      const usageCount = getImageAssetUsageCount(assetId);
+      const confirmed = window.confirm(
+        usageCount > 0
+          ? `"${asset.name}" şu anda sahnede bir veya daha fazla yere atanmış.\n\nBu görseli silersen atandığı panel/bezlerden de kaldırılacak.\n\nYine de silinsin mi?`
+          : `"${asset.name}" görseli görsel kütüphanesinden kalıcı olarak silinecek.\n\nDevam edilsin mi?`,
+      );
+      if (!confirmed) return false;
+    
+      closeAssetContextMenu();
+    
+      if (usageCount > 0) {
+        // Canlı sahneyi önce Kaldır davranışıyla temizle; blob silme/persist beklenmez.
+        scene3d.clearImageAssetById(assetId);
+        clearImageAssetReferences(currentModules, assetId);
+        clearImageAssetReferences(currentStand, assetId);
+      }
+    
+      try {
+        // Kayıtlı projede önce referansları kalıcılaştır; ardından blob'u sil.
+        // Böylece proje hiçbir zaman silinmiş bir asset'e bilinçli olarak bağlı bırakılmaz.
+        if (usageCount > 0 && autosaveEnabled) {
+          clearAutosaveTimer();
+          await persistActiveProject({ quiet: true });
+          autosaveObservedSignature = getProjectStateSignature();
+        }
+    
+        const deleted = await deleteImageAsset(activeProjectId, assetId);
+        if (!deleted) throw new Error('Görsel kaydı bulunamadı veya bu projeye ait değil.');
+    
+        if (asset.url) URL.revokeObjectURL(asset.url);
+        imageAssets.delete(assetId);
+    
+        if (activeAssetId === assetId) {
+          activeAssetId = [...imageAssets.values()]
+            .sort((a, b) => a.createdAt - b.createdAt)
+            .at(-1)?.id ?? null;
+        }
+        renderAssetLibrary();
+        assetStatus.textContent = usageCount > 0
+          ? 'Görsel silindi · atandığı yerlerden de kaldırıldı.'
+          : 'Görsel silindi.';
+        return true;
+      } catch (error) {
+        console.warn('Görsel silinemedi:', error);
+        assetStatus.textContent = `Görsel silinemedi: ${error?.message || 'Bilinmeyen hata.'}`;
+        return false;
+      }
+    }
+    
+    function setActiveAsset(assetId, { focus = false } = {}) {
+      activeAssetId = assetId;
+      renderAssetLibrary();
+      if (focus && assetId) {
+        const activeTile = [...assetLibraryElement.querySelectorAll('.asset-tile')]
+          .find((tile) => tile.dataset.assetId === assetId);
+        activeTile?.focus({ preventScroll: true });
+      }
+      const asset = imageAssets.get(assetId);
+      assetStatus.textContent = asset
+        ? `Aktif görsel: ${asset.name}`
+        : 'Görsel seçilmedi.';
+    }
+    
+    function renderAssetLibrary() {
+      assetLibraryElement.innerHTML = '';
+    
+      if (!imageAssets.size) {
+        const empty = document.createElement('p');
+        empty.className = 'asset-empty';
+        empty.textContent = 'Henüz görsel yok. Bir kez yüklediğinde burada kalır.';
+        assetLibraryElement.appendChild(empty);
+        return;
+      }
+    
+      [...imageAssets.values()]
+        .sort((a, b) => a.createdAt - b.createdAt)
+        .forEach((asset) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'asset-tile';
+          button.classList.toggle('active', asset.id === activeAssetId);
+          button.dataset.assetId = asset.id;
+          button.title = asset.name;
+    
+          const image = document.createElement('img');
+          image.src = asset.url;
+          image.alt = asset.name;
+    
+          const label = document.createElement('span');
+          label.textContent = asset.name;
+    
+          button.append(image, label);
+          button.addEventListener('click', () => {
+            closeAssetContextMenu();
+            setActiveAsset(asset.id, { focus: true });
+          });
+          button.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setActiveAsset(asset.id, { focus: true });
+            openAssetContextMenu(asset.id, event.clientX, event.clientY);
+          });
+          assetLibraryElement.appendChild(button);
+        });
+    }
+    
+    assetContextMenu.querySelector('[data-asset-action="delete"]').addEventListener('click', () => {
+      const assetId = assetContextAssetId;
+      closeAssetContextMenu();
+      if (assetId) void requestDeleteImageAsset(assetId);
+    });
+    
+    document.addEventListener('pointerdown', (event) => {
+      if (!assetContextMenu.contains(event.target)) closeAssetContextMenu();
+    
+      if (!assetLibraryElement.contains(event.target)) {
+        const focused = document.activeElement;
+        if (focused?.classList?.contains('asset-tile')) focused.blur();
+      }
+    });
+    
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !assetContextMenu.hidden) {
+        closeAssetContextMenu();
+        return;
+      }
+      if (event.key !== 'Delete') return;
+    
+      const focused = document.activeElement;
+      if (!focused?.classList?.contains('asset-tile')) return;
+      const assetId = focused.dataset.assetId;
+      if (!assetId || assetId !== activeAssetId) return;
+    
+      // Sahnenin mevcut Delete-modül kısayolundan önce görsel silme niyetini tüket.
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      void requestDeleteImageAsset(assetId);
+    }, { capture: true });
+    
+    async function initializeAssetLibrary() {
+      try {
+        const assets = await loadImageAssets(activeProjectId);
+        assets.forEach(registerAsset);
+        if (assets.length) activeAssetId = assets.at(-1).id;
+        renderAssetLibrary();
+        if (activeAssetId) setActiveAsset(activeAssetId);
+      } catch (error) {
+        console.warn('Görsel arşivi açılamadı:', error);
+        assetStatus.textContent = 'Tarayıcı görsel arşivini açamadı.';
+      }
+    }
+    
+    function applyActiveImageToSelection(fit = 'cover') {
+      const selected = scene3d.getSelectedSurfaces();
+      if (!selected.length) {
+        selectionInfo.textContent = 'Görsel uygulamak için önce bir panel veya panel bloğu seç.';
+        return false;
+      }
+      if (!activeAssetId) {
+        assetStatus.textContent = 'Önce arşivden bir görsel seç veya yeni görsel yükle.';
+        return false;
+      }
+    
+      const allCounterPanels = selected.every(
+        (surface) => surface.userData.moduleType === 'counter',
+      );
+      if (allCounterPanels) {
+        const panelsByFace = new Map();
+        selected.forEach((surface) => {
+          const face = surface.userData.surfaceRole ?? 'front';
+          if (!panelsByFace.has(face)) panelsByFace.set(face, []);
+          panelsByFace.get(face).push(surface);
+        });
+    
+        let appliedPanelCount = 0;
+        for (const panels of panelsByFace.values()) {
+          const faceResult = scene3d.applyRectImageAsset(panels, activeAssetId, fit);
+          if (!faceResult.ok) {
+            selectionInfo.textContent = faceResult.message;
+            return false;
+          }
+          appliedPanelCount += faceResult.panelCount ?? panels.length;
+        }
+    
+        const fitLabel = fit === 'cover' ? 'Doldur' : 'Sığdır';
+        selectionInfo.textContent = `${panelsByFace.size} banko cephesinde ${appliedPanelCount} panele tek parça görsel · ${fitLabel}.`;
+        return true;
+      }
+    
+      const result = scene3d.applyRectImageAsset(selected, activeAssetId, fit);
+      if (!result.ok) {
+        selectionInfo.textContent = result.message;
+        return false;
+      }
+    
+      const fitLabel = fit === 'cover' ? 'Doldur' : 'Sığdır';
+      if (result.mode === 'fabric-group') {
+        selectionInfo.textContent = result.fabricType === 'mesh'
+          ? `Tek parça Mesh (Delikli) Brandaya görsel uygulandı · ${fitLabel}.`
+          : `Tek parça Lightbox Kumaşa görsel uygulandı · ${fitLabel}.`;
+      } else if (result.mode === 'rect-group') {
+        selectionInfo.textContent = `${result.columnCount} × ${result.rowCount} blokta ${result.panelCount} panele görsel · ${fitLabel}.`;
+      } else {
+        selectionInfo.textContent = `Görsel seçili panele uygulandı · ${fitLabel}.`;
+      }
+      return true;
+    }
+    
+    imageInput.addEventListener('change', async () => {
+      const file = imageInput.files?.[0];
+      imageInput.value = '';
+      if (!file) return;
+    
+      try {
+        const asset = await saveImageAsset(activeProjectId, file);
+        registerAsset(asset);
+        setActiveAsset(asset.id);
+    
+        const selected = scene3d.getSelectedSurfaces();
+        if (selected.length) applyActiveImageToSelection('cover');
+      } catch (error) {
+        console.warn('Görsel kaydedilemedi:', error);
+        assetStatus.textContent = 'Görsel arşive kaydedilemedi.';
+      }
+    });
+    
+    saveProjectButton.addEventListener('click', async () => {
+      setButtonBusy(saveProjectButton, true, 'Kaydediliyor');
+      projectStatus.textContent = 'Proje kaydediliyor…';
+      try {
+        clearAutosaveTimer();
+        await persistActiveProject();
+        enableAutosaveFromCurrentState();
+      } catch (error) {
+        console.warn('Proje kaydedilemedi:', error);
+        projectStatus.textContent = 'Proje kaydedilemedi.';
+      } finally {
+        setButtonBusy(saveProjectButton, false);
+      }
+    });
+    
+    function safeArchiveName(name) {
+      return (name || 'fair-stand-project')
+        .replace(/[^a-zA-Z0-9ğüşöçıİĞÜŞÖÇ._-]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'fair-stand-project';
+    }
+    
+    function remapAssetIdsInValue(value, idMap) {
+      if (Array.isArray(value)) return value.map((item) => remapAssetIdsInValue(item, idMap));
+      if (!value || typeof value !== 'object') return value;
+      const output = {};
+      Object.entries(value).forEach(([key, item]) => {
+        if (key === 'imageAssetId' && typeof item === 'string' && idMap.has(item)) {
+          output[key] = idMap.get(item);
+        } else {
+          output[key] = remapAssetIdsInValue(item, idMap);
+        }
+      });
+      return output;
+    }
+    
+    exportProjectButton.addEventListener('click', async () => {
+      const projectId = projectSelect.value || activeProjectId;
+      if (!projectId) return;
+      setButtonBusy(exportProjectButton, true, 'Hazırlanıyor');
+      projectStatus.textContent = 'Proje ZIP hazırlanıyor…';
+      try {
+        if (projectId === activeProjectId) await persistActiveProject({ quiet: true });
+        const project = await loadProject(projectId);
+        if (!project) throw new Error('Dışarı aktarılacak proje bulunamadı.');
+        const assets = await loadImageAssets(projectId);
+        const JSZip = await loadJSZip();
+        const zip = new JSZip();
+        const manifestAssets = [];
+        for (const asset of assets) {
+          const ext = (asset.name?.match(/\.[a-zA-Z0-9]+$/)?.[0] || '') || '';
+          const path = `assets/${asset.id}${ext}`;
+          zip.file(path, asset.blob);
+          manifestAssets.push({
+            id: asset.id,
+            name: asset.name,
+            type: asset.type,
+            createdAt: asset.createdAt,
+            path,
+          });
+        }
+        zip.file('project.json', JSON.stringify({
+          archiveVersion: 1,
+          exportedAt: Date.now(),
+          project,
+          assets: manifestAssets,
+        }, null, 2));
+        const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${safeArchiveName(project.name)}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        projectStatus.textContent = `Dışarı aktarıldı · ${assets.length} görsel`;
+      } catch (error) {
+        console.warn('Proje dışarı aktarılamadı:', error);
+        projectStatus.textContent = 'Proje dışarı aktarılamadı.';
+      } finally {
+        setButtonBusy(exportProjectButton, false);
+      }
+    });
+    
+    importProjectButton.addEventListener('click', () => importProjectFileInput.click());
+    
+    importProjectFileInput.addEventListener('change', async () => {
+      const file = importProjectFileInput.files?.[0];
+      importProjectFileInput.value = '';
+      if (!file) return;
+      setButtonBusy(importProjectButton, true, 'Aktarılıyor');
+      showProjectLoading('Proje içe aktarılıyor…', 'ZIP paketi ve görseller hazırlanıyor.');
+      projectStatus.textContent = 'Proje içe aktarılıyor…';
+    
+      let importedProjectId = null;
+      let importStorageTouched = false;
+    
+      try {
+        const JSZip = await loadJSZip();
+        const zip = await JSZip.loadAsync(file);
+        const manifestEntry = zip.file('project.json');
+        if (!manifestEntry) throw new Error('ZIP içinde project.json bulunamadı.');
+    
+        const manifest = JSON.parse(await manifestEntry.async('text'));
+        if (manifest?.archiveVersion !== 1 || !manifest?.project || typeof manifest.project !== 'object') {
+          throw new Error('Desteklenmeyen proje paketi.');
+        }
+        if (typeof manifest.project.id !== 'string' || !manifest.project.id.trim()) {
+          throw new Error('Proje kimliği geçersiz.');
+        }
+        if (manifest.assets != null && !Array.isArray(manifest.assets)) {
+          throw new Error('Proje görsel listesi geçersiz.');
+        }
+    
+        const manifestAssets = manifest.assets || [];
+        const existing = await listProjects();
+        const existingIds = new Set(existing.map((item) => item.id));
+        importedProjectId = existingIds.has(manifest.project.id) ? createProjectId() : manifest.project.id;
+    
+        const idMap = new Map();
+        const preparedAssets = [];
+        for (const asset of manifestAssets) {
+          if (!asset || typeof asset.id !== 'string' || !asset.id || typeof asset.path !== 'string' || !asset.path) {
+            throw new Error('Proje görsel kaydı geçersiz.');
+          }
+          if (idMap.has(asset.id)) throw new Error(`Tekrarlanan asset kimliği: ${asset.id}`);
+    
+          const entry = zip.file(asset.path);
+          if (!entry || entry.dir) throw new Error(`Eksik asset: ${asset.path}`);
+          const blob = await entry.async('blob');
+          const newAssetId = globalThis.crypto?.randomUUID?.()
+            ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+          idMap.set(asset.id, newAssetId);
+          preparedAssets.push({
+            id: newAssetId,
+            name: asset.name,
+            type: asset.type,
+            createdAt: asset.createdAt,
+            blob: new Blob([blob], { type: asset.type || blob.type }),
+          });
+        }
+    
+        // Storage'a dokunmadan önce ZIP'in tamamı ve bütün asset'ler doğrulanmış olur.
+        const importedProject = remapAssetIdsInValue({
+          ...manifest.project,
+          id: importedProjectId,
+          name: manifest.project.name || 'İçe Aktarılan Proje',
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        }, idMap);
+    
+        await saveProject(importedProject);
+        importStorageTouched = true;
+    
+        for (const asset of preparedAssets) {
+          await saveImportedImageAsset(importedProjectId, asset);
+        }
+    
+        await refreshProjectList(importedProjectId);
+        const project = await loadProject(importedProjectId);
+        if (!project) throw new Error('İçe aktarılan proje tekrar okunamadı.');
+        await restoreProject(project);
+        projectStatus.textContent = `İçe aktarıldı · ${preparedAssets.length} görsel`;
+      } catch (error) {
+        if (importStorageTouched && importedProjectId) {
+          try {
+            await deleteProjectImageAssets(importedProjectId);
+            await deleteProject(importedProjectId);
+            await refreshProjectList();
+          } catch (cleanupError) {
+            console.warn('Başarısız içe aktarma temizlenemedi:', cleanupError);
+          }
+        }
+        console.warn('Proje içe aktarılamadı:', error);
+        projectStatus.textContent = `Proje ZIP içe aktarılamadı: ${error?.message || 'Bilinmeyen hata.'}`;
+      } finally {
+        hideProjectLoading();
+        setButtonBusy(importProjectButton, false);
+      }
+    });
+    
+    openProjectButton.addEventListener('click', async () => {
+      const projectId = projectSelect.value;
+      if (!projectId) { projectStatus.textContent = 'Açılacak kayıtlı proje yok.'; return; }
+    
+      showProjectLoading('Proje yükleniyor…', 'Görseller ve sahne hazırlanıyor.');
+      setButtonBusy(openProjectButton, true, 'Açılıyor');
+      projectStatus.textContent = 'Proje yükleniyor…';
+      try {
+        const project = await loadProject(projectId);
+        if (!project) { projectStatus.textContent = 'Proje bulunamadı.'; return; }
+        await restoreProject(project);
+      } catch (error) {
+        console.warn('Proje açılamadı:', error);
+        projectStatus.textContent = 'Proje açılamadı.';
+      } finally {
+        hideProjectLoading();
+        setButtonBusy(openProjectButton, false);
+      }
+    });
+    
+    newProjectButton.addEventListener('click', () => {
+      const confirmed = window.confirm('Yeni projeye geçilsin mi? Kaydedilmemiş değişiklikler kaybolabilir.');
+      if (!confirmed) return;
+      window.location.reload();
+    });
+    
+    deleteProjectButton.addEventListener('click', async () => {
+      const projectId = projectSelect.value;
+      if (!projectId) return;
+      const projects = await listProjects();
+      const project = projects.find((item) => item.id === projectId);
+      const confirmed = window.confirm((project?.name || 'Proje') + ' ve bu projeye ait tüm görseller silinecek. Devam edilsin mi?');
+      if (!confirmed) return;
+      try {
+        await deleteProjectImageAssets(projectId);
+        await deleteProject(projectId);
+        if (projectId === activeProjectId) { window.location.reload(); return; }
+        await refreshProjectList();
+        projectStatus.textContent = 'Proje silindi.';
+      } catch (error) { console.warn('Proje silinemedi:', error); projectStatus.textContent = 'Proje silinemedi.'; }
+    });
+    
+    projectNameInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') saveProjectButton.click();
+    });
+    
+    fillImageButton.addEventListener('click', () => {
+      applyActiveImageToSelection('cover');
+    });
+    
+    fitImageButton.addEventListener('click', () => {
+      applyActiveImageToSelection('contain');
+    });
+    
+    clearTextureButton.addEventListener('click', () => {
+      const selected = scene3d.getSelectedSurfaces();
+      if (!selected.length) {
+        selectionInfo.textContent = 'Önce bir panel veya panel bloğu seç.';
+        return;
+      }
+      scene3d.clearImage(selected);
+      selectionInfo.textContent = 'Seçili panel veya panel bloğundaki görsel kaldırıldı.';
+    });
+    
+    window.addEventListener('beforeunload', () => {
+      disableAutosave();
+      imageAssets.forEach((asset) => {
+        if (asset.url) URL.revokeObjectURL(asset.url);
+      });
+    });
+    
+    setStandEditingEnabled(false);
+    updateStageCreateState();
+    syncColorEditorFromHex(colorInput.value);
+    initializeAssetLibrary();
+    initHelpGuide();
+    refreshProjectList().catch((error) => console.warn('Proje listesi açılamadı:', error));
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///home/runner/work/fair-stand/fair-stand/test/indoorPlants.test.js:38:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: kettle catalog and state stay aligned
+ok 105 - kettle catalog and state stay aligned
+  ---
+  duration_ms: 4.207889
+  type: 'test'
+  ...
+# Subtest: kettle is free-positioned at fridge-top elevation without floor-footprint collision
+ok 106 - kettle is free-positioned at fridge-top elevation without floor-footprint collision
+  ---
+  duration_ms: 0.440783
+  type: 'test'
+  ...
+# Subtest: kettle may share the mini-fridge footprint at its raised placement
+ok 107 - kettle may share the mini-fridge footprint at its raised placement
+  ---
+  duration_ms: 0.328844
+  type: 'test'
+  ...
+# Subtest: desk_banko_100_L catalog contract
+ok 108 - desk_banko_100_L catalog contract
+  ---
+  duration_ms: 1.037048
+  type: 'test'
+  ...
+# Subtest: L counter editable state
+ok 109 - L counter editable state
+  ---
+  duration_ms: 2.038287
+  type: 'test'
+  ...
+# Subtest: L counter BOM exact
+ok 110 - L counter BOM exact
+  ---
+  duration_ms: 0.886525
+  type: 'test'
+  ...
+# Subtest: L counter renderer routing
+ok 111 - L counter renderer routing
+  ---
+  duration_ms: 1.504029
+  type: 'test'
+  ...
+# Subtest: desk_banko_150_L is a 150 x 150 catalog module
+ok 112 - desk_banko_150_L is a 150 x 150 catalog module
+  ---
+  duration_ms: 2.159072
+  type: 'test'
+  ...
+# Subtest: 150 L counter state keeps 150 cm physical depth and eight editable faces
+ok 113 - 150 L counter state keeps 150 cm physical depth and eight editable faces
+  ---
+  duration_ms: 3.119295
+  type: 'test'
+  ...
+# Subtest: 150 L counter renderer is 150 x 150 with a 50 cm arm and 100 cm return extension
+ok 114 - 150 L counter renderer is 150 x 150 with a 50 cm arm and 100 cm return extension
+  ---
+  duration_ms: 2.534864
+  type: 'test'
+  ...
+# Subtest: 150 L counter BOM remains separate from renderer geometry
+ok 115 - 150 L counter BOM remains separate from renderer geometry
+  ---
+  duration_ms: 0.576798
+  type: 'test'
+  ...
+# Subtest: desk_banko_200_L is a 200 x 200 catalog module
+ok 116 - desk_banko_200_L is a 200 x 200 catalog module
+  ---
+  duration_ms: 2.00822
+  type: 'test'
+  ...
+# Subtest: 200 L counter state keeps 200 cm physical depth and eight editable faces
+ok 117 - 200 L counter state keeps 200 cm physical depth and eight editable faces
+  ---
+  duration_ms: 2.924262
+  type: 'test'
+  ...
+# Subtest: 200 L renderer is 200 x 200 with a 50 cm arm and 150 cm return extension
+ok 118 - 200 L renderer is 200 x 200 with a 50 cm arm and 150 cm return extension
+  ---
+  duration_ms: 2.277975
+  type: 'test'
+  ...
+# Subtest: 200 L counter BOM remains separate from renderer geometry
+ok 119 - 200 L counter BOM remains separate from renderer geometry
+  ---
+  duration_ms: 0.498881
+  type: 'test'
+  ...
+# Subtest: corner counter 100 defaults to the same orientation
+ok 120 - corner counter 100 defaults to the same orientation
+  ---
+  duration_ms: 1.410935
+  type: 'test'
+  ...
+# Subtest: corner counter 150 defaults to the same orientation
+ok 121 - corner counter 150 defaults to the same orientation
+  ---
+  duration_ms: 0.138378
+  type: 'test'
+  ...
+# Subtest: corner counter 200 defaults to the same orientation
+ok 122 - corner counter 200 defaults to the same orientation
+  ---
+  duration_ms: 0.116979
+  type: 'test'
+  ...
+# Subtest: straight counter default orientation is unchanged
+ok 123 - straight counter default orientation is unchanged
+  ---
+  duration_ms: 0.167363
+  type: 'test'
+  ...
+# Subtest: Köşe Banko 100 empty inner area is not treated as a solid rectangle
+ok 124 - Köşe Banko 100 empty inner area is not treated as a solid rectangle
+  ---
+  duration_ms: 2.546476
+  type: 'test'
+  ...
+# Subtest: Düz Panel 50 snaps flush to exposed short side of Köşe Banko 100
+ok 125 - Düz Panel 50 snaps flush to exposed short side of Köşe Banko 100
+  ---
+  duration_ms: 16.614221
+  type: 'test'
+  ...
+# Subtest: Köşe Banko 150 empty inner area is not treated as a solid rectangle
+ok 126 - Köşe Banko 150 empty inner area is not treated as a solid rectangle
+  ---
+  duration_ms: 0.462834
+  type: 'test'
+  ...
+# Subtest: Düz Panel 50 snaps flush to exposed short side of Köşe Banko 150
+ok 127 - Düz Panel 50 snaps flush to exposed short side of Köşe Banko 150
+  ---
+  duration_ms: 0.876968
+  type: 'test'
+  ...
+# Subtest: Köşe Banko 200 empty inner area is not treated as a solid rectangle
+ok 128 - Köşe Banko 200 empty inner area is not treated as a solid rectangle
+  ---
+  duration_ms: 0.333563
+  type: 'test'
+  ...
+# Subtest: Düz Panel 50 snaps flush to exposed short side of Köşe Banko 200
+ok 129 - Düz Panel 50 snaps flush to exposed short side of Köşe Banko 200
+  ---
+  duration_ms: 0.662467
+  type: 'test'
+  ...
+# Subtest: L counter short side panels close the two outer arm ends parametrically
+ok 130 - L counter short side panels close the two outer arm ends parametrically
+  ---
+  duration_ms: 1.45639
+  type: 'test'
+  ...
+# Subtest: L counter side posts use the same profile inset clearance for every size
+ok 131 - L counter side posts use the same profile inset clearance for every size
+  ---
+  duration_ms: 0.273171
+  type: 'test'
+  ...
+# Subtest: LED projektor katalogda 50 cm ust aksesuar olarak tanimlidir
+ok 132 - LED projektor katalogda 50 cm ust aksesuar olarak tanimlidir
+  ---
+  duration_ms: 2.616326
+  type: 'test'
+  ...
+# Subtest: LED projektor state sabit siyah govde ve ust aksesuar olculerini tasir
+ok 133 - LED projektor state sabit siyah govde ve ust aksesuar olculerini tasir
+  ---
+  duration_ms: 5.186517
+  type: 'test'
+  ...
+# Subtest: LED projektor duvar kapasitesini ve fiziksel collision hesabini etkilemez
+ok 134 - LED projektor duvar kapasitesini ve fiziksel collision hesabini etkilemez
+  ---
+  duration_ms: 0.554035
+  type: 'test'
+  ...
+# Subtest: multi-panel lightbox fabric is exposed from panel context menu
+ok 135 - multi-panel lightbox fabric is exposed from panel context menu
+  ---
+  duration_ms: 2.37162
+  type: 'test'
+  ...
+# Subtest: mesh branda is a separate one-piece cover without lightbox lighting
+ok 136 - mesh branda is a separate one-piece cover without lightbox lighting
+  ---
+  duration_ms: 4.264044
+  type: 'test'
+  ...
+# Subtest: lightbox lighting stays fully opaque
+ok 137 - lightbox lighting stays fully opaque
+  ---
+  duration_ms: 3.733393
+  type: 'test'
+  ...
+# Subtest: fabric conversion requires a rectangular multi-panel block and renders one overlay
+ok 138 - fabric conversion requires a rectangular multi-panel block and renders one overlay
+  ---
+  duration_ms: 2.132553
+  type: 'test'
+  ...
+# Subtest: lightbox fabric owns one persistent color and image state
+ok 139 - lightbox fabric owns one persistent color and image state
+  ---
+  duration_ms: 2.488397
+  type: 'test'
+  ...
+# Subtest: main editor treats a fabric group as one color and image target
+ok 140 - main editor treats a fabric group as one color and image target
+  ---
+  duration_ms: 0.617333
+  type: 'test'
+  ...
+# Subtest: lightbox fabric lighting is a right-click toggle
+ok 141 - lightbox fabric lighting is a right-click toggle
+  ---
+  duration_ms: 2.545815
+  type: 'test'
+  ...
+# Subtest: lightbox backlight brightens only the fabric material without a physical light
+ok 142 - lightbox backlight brightens only the fabric material without a physical light
+  ---
+  duration_ms: 2.117373
+  type: 'test'
+  ...
+# Subtest: active fabric releases hidden panel GPU textures and drawing
+ok 143 - active fabric releases hidden panel GPU textures and drawing
+  ---
+  duration_ms: 3.311836
+  type: 'test'
+  ...
+# Subtest: removing fabric restores panel rendering and stored images
+ok 144 - removing fabric restores panel rendering and stored images
+  ---
+  duration_ms: 2.205028
+  type: 'test'
+  ...
+# Subtest: fabric state prevents hidden panel textures from reloading asynchronously
+ok 145 - fabric state prevents hidden panel textures from reloading asynchronously
+  ---
+  duration_ms: 3.298952
+  type: 'test'
+  ...
+# Subtest: mini fridge catalog/state dimensions stay aligned
+ok 146 - mini fridge catalog/state dimensions stay aligned
+  ---
+  duration_ms: 3.746277
+  type: 'test'
+  ...
+# Subtest: mini fridge is a free footprint module
+ok 147 - mini fridge is a free footprint module
+  ---
+  duration_ms: 0.306843
+  type: 'test'
+  ...
+# Subtest: mini fridge owns centered two-line BUZ DOLABI top label
+ok 148 - mini fridge owns centered two-line BUZ DOLABI top label
+  ---
+  duration_ms: 2.432012
+  type: 'test'
+  ...
+# Subtest: back wall keeps visual left and right directions
+ok 149 - back wall keeps visual left and right directions
+  ---
+  duration_ms: 1.46683
+  type: 'test'
+  ...
+# Subtest: left wall maps visual sides to the opposite continuous-chain directions
+ok 150 - left wall maps visual sides to the opposite continuous-chain directions
+  ---
+  duration_ms: 0.20878
+  type: 'test'
+  ...
+# Subtest: right wall maps visual sides to the opposite continuous-chain directions
+ok 151 - right wall maps visual sides to the opposite continuous-chain directions
+  ---
+  duration_ms: 0.26744
+  type: 'test'
+  ...
+# Subtest: direction mapping is independent of camera data
+ok 152 - direction mapping is independent of camera data
+  ---
+  duration_ms: 0.220853
+  type: 'test'
+  ...
+# Subtest: catalog module dropped into a real gap is placed directly
+ok 153 - catalog module dropped into a real gap is placed directly
+  ---
+  duration_ms: 4.221665
+  type: 'test'
+  ...
+# Subtest: catalog module dropped onto occupied space inserts and shifts the collision chain
+ok 154 - catalog module dropped onto occupied space inserts and shifts the collision chain
+  ---
+  duration_ms: 2.021626
+  type: 'test'
+  ...
+# Subtest: moving into a real gap keeps every other module in place
+ok 155 - moving into a real gap keeps every other module in place
+  ---
+  duration_ms: 2.099311
+  type: 'test'
+  ...
+# Subtest: dropping onto an occupied slot inserts the moving module and shifts the collision chain
+ok 156 - dropping onto an occupied slot inserts the moving module and shifts the collision chain
+  ---
+  duration_ms: 0.404215
+  type: 'test'
+  ...
+# Subtest: dragging from the back wall to a free right-wall slot keeps a 270 degree placement
+ok 157 - dragging from the back wall to a free right-wall slot keeps a 270 degree placement
+  ---
+  duration_ms: 0.307604
+  type: 'test'
+  ...
+# Subtest: drag insertion can cross a U corner and push the right-wall chain forward
+ok 158 - drag insertion can cross a U corner and push the right-wall chain forward
+  ---
+  duration_ms: 0.465108
+  type: 'test'
+  ...
+# Subtest: catalog insert at U start edge keeps new module on the edge and pushes chain inward
+ok 159 - catalog insert at U start edge keeps new module on the edge and pushes chain inward
+  ---
+  duration_ms: 0.43903
+  type: 'test'
+  ...
+# Subtest: catalog insert at U end edge keeps new module on the edge and pushes chain inward
+ok 160 - catalog insert at U end edge keeps new module on the edge and pushes chain inward
+  ---
+  duration_ms: 0.47671
+  type: 'test'
+  ...
+# Subtest: catalog insert at L-left start edge shifts the first module inward
+ok 161 - catalog insert at L-left start edge shifts the first module inward
+  ---
+  duration_ms: 0.509982
+  type: 'test'
+  ...
+# Subtest: catalog insert at L-right end edge shifts the last module inward
+ok 162 - catalog insert at L-right end edge shifts the last module inward
+  ---
+  duration_ms: 0.684889
+  type: 'test'
+  ...
+# Subtest: snaps module coordinates to 50 cm increments
+ok 163 - snaps module coordinates to 50 cm increments
+  ---
+  duration_ms: 2.21123
+  type: 'test'
+  ...
+# Subtest: L stand sides expose only the selected mirrored wall
+ok 164 - L stand sides expose only the selected mirrored wall
+  ---
+  duration_ms: 0.997323
+  type: 'test'
+  ...
+# Subtest: snaps an L-left module to the closest active edge
+ok 165 - snaps an L-left module to the closest active edge
+  ---
+  duration_ms: 0.815393
+  type: 'test'
+  ...
+# Subtest: snaps a back wall module and keeps it inside X limit
+ok 166 - snaps a back wall module and keeps it inside X limit
+  ---
+  duration_ms: 0.40136
+  type: 'test'
+  ...
+# Subtest: rejects overlapping modules on the same wall but allows a corner connection
+ok 167 - rejects overlapping modules on the same wall but allows a corner connection
+  ---
+  duration_ms: 1.200212
+  type: 'test'
+  ...
+# Subtest: snaps a module inside every stand to the 50 cm free grid
+ok 168 - snaps a module inside every stand to the 50 cm free grid
+  ---
+  duration_ms: 0.361114
+  type: 'test'
+  ...
+# Subtest: rotation lock keeps a perpendicular return free instead of snapping it onto the back wall
+ok 169 - rotation lock keeps a perpendicular return free instead of snapping it onto the back wall
+  ---
+  duration_ms: 0.391451
+  type: 'test'
+  ...
+# Subtest: free parallel walls may overlap in axis range when they are on different grid lines
+ok 170 - free parallel walls may overlap in axis range when they are on different grid lines
+  ---
+  duration_ms: 0.270806
+  type: 'test'
+  ...
+# Subtest: free L and T joins are allowed but a plus crossing is rejected
+ok 171 - free L and T joins are allowed but a plus crossing is rejected
+  ---
+  duration_ms: 0.555347
+  type: 'test'
+  ...
+# Subtest: module rotations use four 90 degree directions
+ok 172 - module rotations use four 90 degree directions
+  ---
+  duration_ms: 0.418411
+  type: 'test'
+  ...
+# Subtest: right wall canonical snap faces inward at 270 degrees
+ok 173 - right wall canonical snap faces inward at 270 degrees
+  ---
+  duration_ms: 0.272599
+  type: 'test'
+  ...
+# Subtest: rotation lock preserves 180 and 270 degree facing on matching axes
+ok 174 - rotation lock preserves 180 and 270 degree facing on matching axes
+  ---
+  duration_ms: 0.178022
+  type: 'test'
+  ...
+# Subtest: selected module quarter-turn keeps its center instead of rotating from the start corner
+ok 175 - selected module quarter-turn keeps its center instead of rotating from the start corner
+  ---
+  duration_ms: 0.381241
+  type: 'test'
+  ...
+# Subtest: selected module rotation keeps its world center fixed without grid snapping
+ok 176 - selected module rotation keeps its world center fixed without grid snapping
+  ---
+  duration_ms: 0.152855
+  type: 'test'
+  ...
+# Subtest: magnetic snap joins parallel modules end to end without changing rotation
+ok 177 - magnetic snap joins parallel modules end to end without changing rotation
+  ---
+  duration_ms: 1.14058
+  type: 'test'
+  ...
+# Subtest: magnetic snap creates an L connection at a target endpoint
+ok 178 - magnetic snap creates an L connection at a target endpoint
+  ---
+  duration_ms: 0.525572
+  type: 'test'
+  ...
+# Subtest: magnetic snap creates a T connection on a 50 cm point along target body
+ok 179 - magnetic snap creates a T connection on a 50 cm point along target body
+  ---
+  duration_ms: 0.436916
+  type: 'test'
+  ...
+# Subtest: magnetic snap preserves 270 degree facing and ignores distant targets
+ok 180 - magnetic snap preserves 270 degree facing and ignores distant targets
+  ---
+  duration_ms: 0.263643
+  type: 'test'
+  ...
+# Subtest: counter snaps flush to a parallel module face without overlapping it
+ok 181 - counter snaps flush to a parallel module face without overlapping it
+  ---
+  duration_ms: 0.550037
+  type: 'test'
+  ...
+# Subtest: counter face snap ignores longitudinal grid offset when measuring wall proximity
+ok 182 - counter face snap ignores longitudinal grid offset when measuring wall proximity
+  ---
+  duration_ms: 0.304599
+  type: 'test'
+  ...
+# Subtest: counter side faces snap flush to perpendicular walls
+ok 183 - counter side faces snap flush to perpendicular walls
+  ---
+  duration_ms: 0.504853
+  type: 'test'
+  ...
+# Subtest: rotated counter side face snaps flush to a perpendicular back wall
+ok 184 - rotated counter side face snaps flush to a perpendicular back wall
+  ---
+  duration_ms: 0.303978
+  type: 'test'
+  ...
+# Subtest: counter snaps into U and L inner corners against two walls
+ok 185 - counter snaps into U and L inner corners against two walls
+  ---
+  duration_ms: 1.156771
+  type: 'test'
+  ...
+# Subtest: all banko widths fit exact logical grid gaps next to thin modules
+ok 186 - all banko widths fit exact logical grid gaps next to thin modules
+  ---
+  duration_ms: 0.435043
+  type: 'test'
+  ...
+# Subtest: thin modules may snap to a banko endpoint symmetrically
+ok 187 - thin modules may snap to a banko endpoint symmetrically
+  ---
+  duration_ms: 1.185123
+  type: 'test'
+  ...
+# Subtest: physical module depth rejects parallel bodies that are too close
+ok 188 - physical module depth rejects parallel bodies that are too close
+  ---
+  duration_ms: 0.196056
+  type: 'test'
+  ...
+# Subtest: plans free context insertion without wall capacity
+ok 189 - plans free context insertion without wall capacity
+  ---
+  duration_ms: 0.599689
+  type: 'test'
+  ...
+# Subtest: free context visual right follows all four module rotations
+ok 190 - free context visual right follows all four module rotations
+  ---
+  duration_ms: 0.597376
+  type: 'test'
+  ...
+# Subtest: free left batch keeps visual order while placing nearest module last in the selection
+ok 191 - free left batch keeps visual order while placing nearest module last in the selection
+  ---
+  duration_ms: 0.468164
+  type: 'test'
+  ...
+# Subtest: free-side insertion supports strict-depth fixtures without throwing
+ok 192 - free-side insertion supports strict-depth fixtures without throwing
+  ---
+  duration_ms: 0.458706
+  type: 'test'
+  ...
+# Subtest: free context insertion rejects stand overflow and real collision
+ok 193 - free context insertion rejects stand overflow and real collision
+  ---
+  duration_ms: 0.536332
+  type: 'test'
+  ...
+# Subtest: Panel Bazalı with 50 cm physical base still uses flat-panel corner snap
+ok 194 - Panel Bazalı with 50 cm physical base still uses flat-panel corner snap
+  ---
+  duration_ms: 0.334555
+  type: 'test'
+  ...
+# Subtest: 50 cm panel snaps centered to the short side of Banko 150
+ok 195 - 50 cm panel snaps centered to the short side of Banko 150
+  ---
+  duration_ms: 10.105033
+  type: 'test'
+  ...
+# Subtest: furniture modules use a 10 cm free-placement grid while other modules keep 50 cm
+ok 196 - furniture modules use a 10 cm free-placement grid while other modules keep 50 cm
+  ---
+  duration_ms: 0.435243
+  type: 'test'
+  ...
+# Subtest: production part catalog contains the verified connector names
+ok 197 - production part catalog contains the verified connector names
+  ---
+  duration_ms: 1.337097
+  type: 'test'
+  ...
+# Subtest: production part catalog contains all verified panel sizes
+ok 198 - production part catalog contains all verified panel sizes
+  ---
+  duration_ms: 1.077543
+  type: 'test'
+  ...
+# Subtest: production part catalog contains the 100 cm door part
+ok 199 - production part catalog contains the 100 cm door part
+  ---
+  duration_ms: 0.180066
+  type: 'test'
+  ...
+# Subtest: production part catalog contains shelf sizes and shelf leg
+ok 200 - production part catalog contains shelf sizes and shelf leg
+  ---
+  duration_ms: 0.183162
+  type: 'test'
+  ...
+# Subtest: 50 cm straight wall recipe matches the verified production recipe
+ok 201 - 50 cm straight wall recipe matches the verified production recipe
+  ---
+  duration_ms: 0.45998
+  type: 'test'
+  ...
+# Subtest: 100/150/200 cm straight wall recipes preserve quantities and change verified sizes
+ok 202 - 100/150/200 cm straight wall recipes preserve quantities and change verified sizes
+  ---
+  duration_ms: 0.327632
+  type: 'test'
+  ...
+# Subtest: 100 cm door recipe matches verified production data
+ok 203 - 100 cm door recipe matches verified production data
+  ---
+  duration_ms: 0.395549
+  type: 'test'
+  ...
+# Subtest: 100 and 150 cm two-shelf wall recipes match verified production data
+ok 204 - 100 and 150 cm two-shelf wall recipes match verified production data
+  ---
+  duration_ms: 0.31585
+  type: 'test'
+  ...
+# Subtest: 200 cm two-shelf wall recipe uses six shelf legs
+ok 205 - 200 cm two-shelf wall recipe uses six shelf legs
+  ---
+  duration_ms: 0.53
+  type: 'test'
+  ...
+# Subtest: 100 and 150 cm three-shelf wall recipes match verified production data
+ok 206 - 100 and 150 cm three-shelf wall recipes match verified production data
+  ---
+  duration_ms: 0.688025
+  type: 'test'
+  ...
+# Subtest: 200 cm three-shelf wall recipe uses nine shelf legs
+ok 207 - 200 cm three-shelf wall recipe uses nine shelf legs
+  ---
+  duration_ms: 0.307364
+  type: 'test'
+  ...
+# Subtest: recipe lookup rejects unsupported nominal wall widths
+ok 208 - recipe lookup rejects unsupported nominal wall widths
+  ---
+  duration_ms: 0.179986
+  type: 'test'
+  ...
+# Subtest: expanded recipe resolves production part metadata without mutating source recipe
+ok 209 - expanded recipe resolves production part metadata without mutating source recipe
+  ---
+  duration_ms: 0.280193
+  type: 'test'
+  ...
+# Subtest: expanded door recipe resolves the door production part
+ok 210 - expanded door recipe resolves the door production part
+  ---
+  duration_ms: 0.217696
+  type: 'test'
+  ...
+# Subtest: expanded shelf recipe resolves shelf and leg production parts
+ok 211 - expanded shelf recipe resolves shelf and leg production parts
+  ---
+  duration_ms: 0.181169
+  type: 'test'
+  ...
+# Subtest: generic module selection frame never participates in raycast picking
+ok 212 - generic module selection frame never participates in raycast picking
+  ---
+  duration_ms: 1.373776
+  type: 'test'
+  ...
+# Subtest: clearSelection clears selectedModuleId as part of the central contract
+ok 213 - clearSelection clears selectedModuleId as part of the central contract
+  ---
+  duration_ms: 0.362657
+  type: 'test'
+  ...
+# Subtest: pointerdown waits for click resolution before changing selectedModuleId
+ok 214 - pointerdown waits for click resolution before changing selectedModuleId
+  ---
+  duration_ms: 0.51419
+  type: 'test'
+  ...
+# Subtest: module selection falls back to a generic blue 3D frame
+ok 215 - module selection falls back to a generic blue 3D frame
+  ---
+  duration_ms: 1.005979
+  type: 'test'
+  ...
+# Subtest: fallback-only module hits show and clear the generic selection frame
+ok 216 - fallback-only module hits show and clear the generic selection frame
+  ---
+  duration_ms: 0.317183
+  type: 'test'
+  ...
+# Subtest: render export hides the generic module selection frame
+ok 217 - render export hides the generic module selection frame
+  ---
+  duration_ms: 0.215382
+  type: 'test'
+  ...
+# Subtest: Ctrl/Cmd panel range selection is based on panel presence, not module type
+ok 218 - Ctrl/Cmd panel range selection is based on panel presence, not module type
+  ---
+  duration_ms: 3.328827
+  type: 'test'
+  ...
+# Subtest: scene handles same-module panel ranges before wall-plane selection
+ok 219 - scene handles same-module panel ranges before wall-plane selection
+  ---
+  duration_ms: 2.01305
+  type: 'test'
+  ...
+# Subtest: Ctrl/Cmd raycast prefers a real panel surface over module proxy hits
+ok 220 - Ctrl/Cmd raycast prefers a real panel surface over module proxy hits
+  ---
+  duration_ms: 2.032947
+  type: 'test'
+  ...
+# Subtest: door upper panels 4-6 can be selected vertically as one range
+ok 221 - door upper panels 4-6 can be selected vertically as one range
+  ---
+  duration_ms: 1.787178
+  type: 'test'
+  ...
+# Subtest: missing non-panel cells do not block Ctrl/Cmd multi selection
+ok 222 - missing non-panel cells do not block Ctrl/Cmd multi selection
+  ---
+  duration_ms: 0.725124
+  type: 'test'
+  ...
+# Subtest: catalog panel-bearing wall module builders expose panel selection mode
+ok 223 - catalog panel-bearing wall module builders expose panel selection mode
+  ---
+  duration_ms: 2.814987
+  type: 'test'
+  ...
+# Subtest: simplifies collision feedback
+ok 224 - simplifies collision feedback
+  ---
+  duration_ms: 1.385598
+  type: 'test'
+  ...
+# Subtest: simplifies stand boundary feedback
+ok 225 - simplifies stand boundary feedback
+  ---
+  duration_ms: 0.522936
+  type: 'test'
+  ...
+# Subtest: simplifies continuous wall capacity feedback
+ok 226 - simplifies continuous wall capacity feedback
+  ---
+  duration_ms: 0.246981
+  type: 'test'
+  ...
+# Subtest: treats null coordinates as no pointer
+ok 227 - treats null coordinates as no pointer
+  ---
+  duration_ms: 0.213298
+  type: 'test'
+  ...
+# Subtest: accepts real pointer coordinates including zero
+ok 228 - accepts real pointer coordinates including zero
+  ---
+  duration_ms: 0.346687
+  type: 'test'
+  ...
+# Subtest: feedback timeout stays finite by default
+ok 229 - feedback timeout stays finite by default
+  ---
+  duration_ms: 0.171631
+  type: 'test'
+  ...
+# Subtest: project import validates and prepares archive before saving
+ok 230 - project import validates and prepares archive before saving
+  ---
+  duration_ms: 1.342146
+  type: 'test'
+  ...
+# Subtest: failed import rolls back project and assets
+ok 231 - failed import rolls back project and assets
+  ---
+  duration_ms: 0.271677
+  type: 'test'
+  ...
+# Subtest: aktif stand platformu 5 cm yükseltilir ve wallRoot aynı kota taşınır
+ok 232 - aktif stand platformu 5 cm yükseltilir ve wallRoot aynı kota taşınır
+  ---
+  duration_ms: 2.99854
+  type: 'test'
+  ...
+# Subtest: creates a 3 x 2 grouped image layout with mixed column widths
+ok 233 - creates a 3 x 2 grouped image layout with mixed column widths
+  ---
+  duration_ms: 1.448806
+  type: 'test'
+  ...
+# Subtest: supports a single vertical column spanning all seven rows
+ok 234 - supports a single vertical column spanning all seven rows
+  ---
+  duration_ms: 0.416166
+  type: 'test'
+  ...
+# Subtest: rejects an L-shaped or incomplete selection
+ok 235 - rejects an L-shaped or incomplete selection
+  ---
+  duration_ms: 0.262881
+  type: 'test'
+  ...
+# Subtest: rejects gaps between selected columns
+ok 236 - rejects gaps between selected columns
+  ---
+  duration_ms: 0.971093
+  type: 'test'
+  ...
+# Subtest: selects a complete 3x2 rectangle from two corners
+ok 237 - selects a complete 3x2 rectangle from two corners
+  ---
+  duration_ms: 3.582802
+  type: 'test'
+  ...
+# Subtest: supports a full vertical 1x7 selection
+ok 238 - supports a full vertical 1x7 selection
+  ---
+  duration_ms: 0.311
+  type: 'test'
+  ...
+# Subtest: supports a 10x7 selection
+ok 239 - supports a 10x7 selection
+  ---
+  duration_ms: 0.320589
+  type: 'test'
+  ...
+# Subtest: rejects a rectangle when a cell inside the block is missing
+ok 240 - rejects a rectangle when a cell inside the block is missing
+  ---
+  duration_ms: 0.244707
+  type: 'test'
+  ...
+# Subtest: describes rectangle dimensions
+ok 241 - describes rectangle dimensions
+  ---
+  duration_ms: 0.403283
+  type: 'test'
+  ...
+# Subtest: allows rectangle selection across wall-plane metadata
+ok 242 - allows rectangle selection across wall-plane metadata
+  ---
+  duration_ms: 0.293608
+  type: 'test'
+  ...
+# Subtest: rectangle columns ignore gaps from non-panel module indices
+ok 243 - rectangle columns ignore gaps from non-panel module indices
+  ---
+  duration_ms: 0.452576
+  type: 'test'
+  ...
+# Subtest: finds a connected free-panel path around an L corner
+ok 244 - finds a connected free-panel path around an L corner
+  ---
+  duration_ms: 0.590473
+  type: 'test'
+  ...
+# Subtest: does not bridge separate free-panel rows
+ok 245 - does not bridge separate free-panel rows
+  ---
+  duration_ms: 0.609077
+  type: 'test'
+  ...
+# Subtest: connects a visually joined free-panel corner within panel-depth tolerance
+ok 246 - connects a visually joined free-panel corner within panel-depth tolerance
+  ---
+  duration_ms: 0.599489
+  type: 'test'
+  ...
+# Subtest: does not bridge free-panel rows farther apart than panel depth
+ok 247 - does not bridge free-panel rows farther apart than panel depth
+  ---
+  duration_ms: 0.324497
+  type: 'test'
+  ...
+# Subtest: Yapay Çiçek 2 is removed from every system code path
+ok 248 - Yapay Çiçek 2 is removed from every system code path
+  ---
+  duration_ms: 1.882716
+  type: 'test'
+  ...
+# Subtest: indoor_plants2.glb remains parked in public models for possible future use
+ok 249 - indoor_plants2.glb remains parked in public models for possible future use
+  ---
+  duration_ms: 0.351987
+  type: 'test'
+  ...
+# Subtest: production catalog contains separator panel parts
+ok 250 - production catalog contains separator panel parts
+  ---
+  duration_ms: 2.99311
+  type: 'test'
+  ...
+# Subtest: separator 50 recipe matches verified production data
+ok 251 - separator 50 recipe matches verified production data
+  ---
+  duration_ms: 1.086089
+  type: 'test'
+  ...
+# Subtest: separator 100 recipe matches verified production data
+ok 252 - separator 100 recipe matches verified production data
+  ---
+  duration_ms: 0.233086
+  type: 'test'
+  ...
+# Subtest: expanded separator recipe resolves separator panel metadata
+ok 253 - expanded separator recipe resolves separator panel metadata
+  ---
+  duration_ms: 0.534589
+  type: 'test'
+  ...
+# Subtest: shelf under-lighting is persisted and off by default
+ok 254 - shelf under-lighting is persisted and off by default
+  ---
+  duration_ms: 5.238732
+  type: 'test'
+  ...
+# Subtest: shelf renderer adds lights without changing shelf box geometry
+ok 255 - shelf renderer adds lights without changing shelf box geometry
+  ---
+  duration_ms: 3.370225
+  type: 'test'
+  ...
+# Subtest: shelf lighting toggle is available only from shelf context
+ok 256 - shelf lighting toggle is available only from shelf context
+  ---
+  duration_ms: 0.959171
+  type: 'test'
+  ...
+# Subtest: shelf catalog exposes 100 150 200 cm widths in 2 and 3 shelf variants
+ok 257 - shelf catalog exposes 100 150 200 cm widths in 2 and 3 shelf variants
+  ---
+  duration_ms: 1.35398
+  type: 'test'
+  ...
+# Subtest: shelf heights sit on Maxima 50 cm panel seams
+ok 258 - shelf heights sit on Maxima 50 cm panel seams
+  ---
+  duration_ms: 1.17818
+  type: 'test'
+  ...
+# Subtest: shelf state keeps seven editable wall panels and its shelf count
+ok 259 - shelf state keeps seven editable wall panels and its shelf count
+  ---
+  duration_ms: 2.804859
+  type: 'test'
+  ...
+# Subtest: duplicating a shelf preserves panel design with independent surface ids
+ok 260 - duplicating a shelf preserves panel design with independent surface ids
+  ---
+  duration_ms: 0.716699
+  type: 'test'
+  ...
+# Subtest: shelf module uses normal wall placement instead of floor-fixture depth rules
+ok 261 - shelf module uses normal wall placement instead of floor-fixture depth rules
+  ---
+  duration_ms: 1.117577
+  type: 'test'
+  ...
+# Subtest: showcase is 30 cm deep and projects behind the panel plane
+ok 262 - showcase is 30 cm deep and projects behind the panel plane
+  ---
+  duration_ms: 0.950515
+  type: 'test'
+  ...
+# Subtest: showcase case stays white while rear remains open
+ok 263 - showcase case stays white while rear remains open
+  ---
+  duration_ms: 0.336709
+  type: 'test'
+  ...
+# Subtest: showcase extra depth projects behind the panel, not in front
+ok 264 - showcase extra depth projects behind the panel, not in front
+  ---
+  duration_ms: 1.434989
+  type: 'test'
+  ...
+# Subtest: showcase styling is isolated to the showcase box, not the parent module frame
+ok 265 - showcase styling is isolated to the showcase box, not the parent module frame
+  ---
+  duration_ms: 0.36454
+  type: 'test'
+  ...
+# Subtest: showcase rear is open while the showcase case remains intact
+ok 266 - showcase rear is open while the showcase case remains intact
+  ---
+  duration_ms: 0.250117
+  type: 'test'
+  ...
+# Subtest: production catalog contains showcase parts and glass shelf
+ok 267 - production catalog contains showcase parts and glass shelf
+  ---
+  duration_ms: 2.859611
+  type: 'test'
+  ...
+# Subtest: 2-eye showcase 100 recipe matches verified production data
+ok 268 - 2-eye showcase 100 recipe matches verified production data
+  ---
+  duration_ms: 1.144157
+  type: 'test'
+  ...
+# Subtest: 3-eye showcase 100 recipe matches verified production data
+ok 269 - 3-eye showcase 100 recipe matches verified production data
+  ---
+  duration_ms: 0.364311
+  type: 'test'
+  ...
+# Subtest: expanded showcase recipe resolves showcase and glass shelf parts
+ok 270 - expanded showcase recipe resolves showcase and glass shelf parts
+  ---
+  duration_ms: 0.301002
+  type: 'test'
+  ...
+# Subtest: allows a total exactly on the X limit
+ok 271 - allows a total exactly on the X limit
+  ---
+  duration_ms: 1.277876
+  type: 'test'
+  ...
+# Subtest: rejects the whole X addition when the projected total exceeds the stand
+ok 272 - rejects the whole X addition when the projected total exceeds the stand
+  ---
+  duration_ms: 0.212557
+  type: 'test'
+  ...
+# Subtest: applies the same total rule on the Y axis
+ok 273 - applies the same total rule on the Y axis
+  ---
+  duration_ms: 0.21397
+  type: 'test'
+  ...
+# Subtest: requires a stand type and both dimensions
+ok 274 - requires a stand type and both dimensions
+  ---
+  duration_ms: 1.416877
+  type: 'test'
+  ...
+# Subtest: supports left and right L stands as separate stand types
+ok 275 - supports left and right L stands as separate stand types
+  ---
+  duration_ms: 0.251269
+  type: 'test'
+  ...
+# Subtest: accepts stand dimensions only in 50 cm increments
+ok 276 - accepts stand dimensions only in 50 cm increments
+  ---
+  duration_ms: 0.338593
+  type: 'test'
+  ...
+# Subtest: converts centimetres to the active area and adds a 1 metre surround
+ok 277 - converts centimetres to the active area and adds a 1 metre surround
+  ---
+  duration_ms: 0.418141
+  type: 'test'
+  ...
+# Subtest: allows up to 50 metres on each axis and rejects anything larger
+ok 278 - allows up to 50 metres on each axis and rejects anything larger
+  ---
+  duration_ms: 1.436403
+  type: 'test'
+  ...
+# Subtest: TV 42 catalog and state use one shared 93.0 x 52.3 screen
+ok 279 - TV 42 catalog and state use one shared 93.0 x 52.3 screen
+  ---
+  duration_ms: 2.890399
+  type: 'test'
+  ...
+# Subtest: TV 55 and 65 inherit TV 42 and override only their screen size identity
+ok 280 - TV 55 and 65 inherit TV 42 and override only their screen size identity
+  ---
+  duration_ms: 0.452816
+  type: 'test'
+  ...
+# Subtest: TV uses the central silhouette ghost contract
+ok 281 - TV uses the central silhouette ghost contract
+  ---
+  duration_ms: 0.73882
+  type: 'test'
+  ...
+# Subtest: TV renderer is one 5 cm BoxGeometry with the supplied image only on its front face
+ok 282 - TV renderer is one 5 cm BoxGeometry with the supplied image only on its front face
+  ---
+  duration_ms: 1.679217
+  type: 'test'
+  ...
+# Subtest: scene keeps the shared textureLoader for normal panel images
+ok 283 - scene keeps the shared textureLoader for normal panel images
+  ---
+  duration_ms: 1.203738
+  type: 'test'
+  ...
+# Subtest: TV texture loads from a real public JPEG asset
+ok 284 - TV texture loads from a real public JPEG asset
+  ---
+  duration_ms: 2.427995
+  type: 'test'
+  ...
+# Subtest: TV 42 does not inherit flat panel state
+ok 285 - TV 42 does not inherit flat panel state
+  ---
+  duration_ms: 0.169095
+  type: 'test'
+  ...
+# Subtest: TV uses the public JPEG asset and no GLB or inline data module
+ok 286 - TV uses the public JPEG asset and no GLB or inline data module
+  ---
+  duration_ms: 0.265526
+  type: 'test'
+  ...
+# Subtest: TV is a non-colliding wall overlay accessory
+ok 287 - TV is a non-colliding wall overlay accessory
+  ---
+  duration_ms: 0.349944
+  type: 'test'
+  ...
+# Subtest: TV wall overlay drag snaps horizontal and height movement to 10 cm
+ok 288 - TV wall overlay drag snaps horizontal and height movement to 10 cm
+  ---
+  duration_ms: 1.484953
+  type: 'test'
+  ...
+# Subtest: TV catalog preview uses a dedicated TV silhouette instead of panel strips
+ok 289 - TV catalog preview uses a dedicated TV silhouette instead of panel strips
+  ---
+  duration_ms: 0.296204
+  type: 'test'
+  ...
+# Subtest: 350 cm duvarı 200 + 150 olarak çözer
+ok 290 - 350 cm duvarı 200 + 150 olarak çözer
+  ---
+  duration_ms: 2.655029
+  type: 'test'
+  ...
+# Subtest: 600 cm duvarı üç adet 200 cm modülle çözer
+ok 291 - 600 cm duvarı üç adet 200 cm modülle çözer
+  ---
+  duration_ms: 0.31043
+  type: 'test'
+  ...
+# Subtest: 50 cm katı olmayan ölçüyü reddeder
+ok 292 - 50 cm katı olmayan ölçüyü reddeder
+  ---
+  duration_ms: 0.237283
+  type: 'test'
+  ...
+# Subtest: 50 cm altındaki duvarı reddeder
+ok 293 - 50 cm altındaki duvarı reddeder
+  ---
+  duration_ms: 0.208109
+  type: 'test'
+  ...
+# Subtest: wall overlay drag prefers its current wall while that wall intersection remains valid
+ok 294 - wall overlay drag prefers its current wall while that wall intersection remains valid
+  ---
+  duration_ms: 1.025556
+  type: 'test'
+  ...
+# Subtest: wall overlay move uses the dragged module current wall instead of the module under the pointer
+ok 295 - wall overlay move uses the dragged module current wall instead of the module under the pointer
+  ---
+  duration_ms: 0.331068
+  type: 'test'
+  ...
+# Subtest: top fixture keeps preferred wall when both walls are within the existing 30 cm snap zone
+ok 296 - top fixture keeps preferred wall when both walls are within the existing 30 cm snap zone
+  ---
+  duration_ms: 0.19276
+  type: 'test'
+  ...
+# Subtest: U stand 400 x 400 exposes a 1200 cm continuous wall chain
+ok 297 - U stand 400 x 400 exposes a 1200 cm continuous wall chain
+  ---
+  duration_ms: 2.666961
+  type: 'test'
+  ...
+# Subtest: L stand 500 x 400 exposes a 900 cm chain from the physical left side
+ok 298 - L stand 500 x 400 exposes a 900 cm chain from the physical left side
+  ---
+  duration_ms: 0.392754
+  type: 'test'
+  ...
+# Subtest: automatic U wall starts at left, crosses back and ends on right
+ok 299 - automatic U wall starts at left, crosses back and ends on right
+  ---
+  duration_ms: 0.672156
+  type: 'test'
+  ...
+# Subtest: U stand pushes an occupied corner forward like one continuous straight wall
+ok 300 - U stand pushes an occupied corner forward like one continuous straight wall
+  ---
+  duration_ms: 1.808338
+  type: 'test'
+  ...
+# Subtest: reflow crosses both U stand corners and keeps pushing modules
+ok 301 - reflow crosses both U stand corners and keeps pushing modules
+  ---
+  duration_ms: 0.341097
+  type: 'test'
+  ...
+# Subtest: left insertion at the path boundary falls back to shifting target and following modules right
+ok 302 - left insertion at the path boundary falls back to shifting target and following modules right
+  ---
+  duration_ms: 0.377956
+  type: 'test'
+  ...
+# Subtest: right insertion keeps an existing gap instead of pulling a distant module into the corner
+ok 303 - right insertion keeps an existing gap instead of pulling a distant module into the corner
+  ---
+  duration_ms: 0.347529
+  type: 'test'
+  ...
+# Subtest: left insertion uses the free gap before target and does not move target or distant next module
+ok 304 - left insertion uses the free gap before target and does not move target or distant next module
+  ---
+  duration_ms: 0.204111
+  type: 'test'
+  ...
+# Subtest: left insertion succeeds in a 50 cm gap even when the chain to the right is completely full
+ok 305 - left insertion succeeds in a 50 cm gap even when the chain to the right is completely full
+  ---
+  duration_ms: 0.443699
+  type: 'test'
+  ...
+# Subtest: right wall visual-left add uses the gap before target even when the right end is full
+ok 306 - right wall visual-left add uses the gap before target even when the right end is full
+  ---
+  duration_ms: 0.458997
+  type: 'test'
+  ...
+# Subtest: right insertion uses an available gap after target without moving a distant next module
+ok 307 - right insertion uses an available gap after target without moving a distant next module
+  ---
+  duration_ms: 0.282037
+  type: 'test'
+  ...
+# Subtest: rejects only when the continuous active wall chain has no remaining capacity
+ok 308 - rejects only when the continuous active wall chain has no remaining capacity
+  ---
+  duration_ms: 0.402963
+  type: 'test'
+  ...
+# Subtest: top fixtures do not consume continuous wall capacity during duplication
+ok 309 - top fixtures do not consume continuous wall capacity during duplication
+  ---
+  duration_ms: 0.284181
+  type: 'test'
+  ...
+# Subtest: wall overlays do not consume continuous wall capacity
+ok 310 - wall overlays do not consume continuous wall capacity
+  ---
+  duration_ms: 0.207919
+  type: 'test'
+  ...
+# Subtest: straight 100/150/200 counters use 45 degree rotation steps
+ok 311 - straight 100/150/200 counters use 45 degree rotation steps
+  ---
+  duration_ms: 1.1137
+  type: 'test'
+  ...
+# Subtest: Bar Taburesi standard keeps 10 cm snap, 45 degree turns and 270 default
+ok 312 - Bar Taburesi standard keeps 10 cm snap, 45 degree turns and 270 default
+  ---
+  duration_ms: 0.19771
+  type: 'test'
+  ...
+# Subtest: 45 degree rotation preserves module center
+ok 313 - 45 degree rotation preserves module center
+  ---
+  duration_ms: 0.419133
+  type: 'test'
+  ...
+# Subtest: rotation normalization supports eighth turns
+ok 314 - rotation normalization supports eighth turns
+  ---
+  duration_ms: 0.15035
+  type: 'test'
+  ...
+# Subtest: rotated footprint participates in stand boundary validation
+ok 315 - rotated footprint participates in stand boundary validation
+  ---
+  duration_ms: 0.457154
+  type: 'test'
+  ...
+# Subtest: Bar Taburesi 45 degree catalog preview placement stays valid
+ok 316 - Bar Taburesi 45 degree catalog preview placement stays valid
+  ---
+  duration_ms: 0.538286
+  type: 'test'
+  ...
+# Subtest: straight Banko 45 degree catalog preview placement stays valid
+ok 317 - straight Banko 45 degree catalog preview placement stays valid
+  ---
+  duration_ms: 0.300061
+  type: 'test'
+  ...
+# Subtest: ghost behavior is one central silhouette contract for every module
+ok 318 - ghost behavior is one central silhouette contract for every module
+  ---
+  duration_ms: 0.769457
+  type: 'test'
+  ...
+1..318
+# tests 318
+# suites 0
+# pass 317
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1810.193902
