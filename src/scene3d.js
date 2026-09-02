@@ -3527,8 +3527,10 @@ export function createStandScene(
         polygonOffsetUnits: -2,
       });
       if (fabricType === 'mesh') {
-        overlayMaterial.transparent = false;
-        overlayMaterial.depthWrite = true;
+        // Mesh Lightbox gibi tek parça kalır; şeffaflık Cam panelin ön yüz kontratını kullanır.
+        overlayMaterial.transparent = true;
+        overlayMaterial.opacity = GLASS_SURFACE_OPACITY;
+        overlayMaterial.depthWrite = false;
       }
       const overlay = new THREE.Mesh(
         new THREE.PlaneGeometry(width, height),

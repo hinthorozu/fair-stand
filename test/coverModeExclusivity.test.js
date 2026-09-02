@@ -29,5 +29,5 @@ test('Mesh stays one continuous plane without a perforation mask', () => {
   assert.doesNotMatch(scene, /overlayMaterial\.alphaMap/);
   assert.doesNotMatch(scene, /overlayMaterial\.alphaTest/);
   assert.doesNotMatch(scene, /overlayMaterial\.alphaToCoverage/);
-  assert.match(scene, /if \(fabricType === 'mesh'\) \{\s*overlayMaterial\.transparent = false;\s*overlayMaterial\.depthWrite = true;/);
+  assert.match(scene, /if \(fabricType === 'mesh'\) \{[\s\S]*?overlayMaterial\.transparent = true;[\s\S]*?overlayMaterial\.opacity = GLASS_SURFACE_OPACITY;[\s\S]*?overlayMaterial\.depthWrite = false;/);
 });
