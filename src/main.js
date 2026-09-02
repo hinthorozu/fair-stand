@@ -1626,9 +1626,14 @@ async function requestDeleteImageAsset(assetId) {
   }
 }
 
-function setActiveAsset(assetId) {
+function setActiveAsset(assetId, { focus = false } = {}) {
   activeAssetId = assetId;
   renderAssetLibrary();
+  if (focus && assetId) {
+    const activeTile = [...assetLibraryElement.querySelectorAll('.asset-tile')]
+      .find((tile) => tile.dataset.assetId === assetId);
+    activeTile?.focus({ preventScroll: true });
+  }
   const asset = imageAssets.get(assetId);
   assetStatus.textContent = asset
     ? `Aktif görsel: ${asset.name}`
@@ -1666,13 +1671,12 @@ function renderAssetLibrary() {
       button.append(image, label);
       button.addEventListener('click', () => {
         closeAssetContextMenu();
-        setActiveAsset(asset.id);
+        setActiveAsset(asset.id, { focus: true });
       });
       button.addEventListener('contextmenu', (event) => {
         event.preventDefault();
         event.stopPropagation();
-        setActiveAsset(asset.id);
-        button.focus({ preventScroll: true });
+        setActiveAsset(asset.id, { focus: true });
         openAssetContextMenu(asset.id, event.clientX, event.clientY);
       });
       assetLibraryElement.appendChild(button);

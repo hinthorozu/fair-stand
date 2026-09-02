@@ -33,6 +33,7 @@ test('image library exposes right-click and focused Delete through one safe dele
   const store = fs.readFileSync(new URL('../src/assetStore.js', import.meta.url), 'utf8');
 
   assert.match(main, /button\.addEventListener\('contextmenu'/);
+  assert.match(main, /setActiveAsset\(asset\.id, \{ focus: true \}\)/);
   assert.match(main, /openAssetContextMenu\(asset\.id, event\.clientX, event\.clientY\)/);
   assert.match(main, /if \(event\.key !== 'Delete'\) return;/);
   assert.match(main, /event\.stopImmediatePropagation\(\)/);
