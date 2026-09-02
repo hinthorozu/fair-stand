@@ -12,6 +12,7 @@ export function resolveModuleSidePlacement(context, visualSide) {
 export function createModuleContextMenu({
   onDelete,
   onDuplicate,
+  onResize,
   onAdd,
   onValidateAddBatch,
   onGlassModeChange,
@@ -35,6 +36,7 @@ export function createModuleContextMenu({
     <button type="button" data-module-action="delete" class="danger">Sil</button>
     <button type="button" data-module-action="duplicate-right">Çoğalt Sağ Tarafa</button>
     <button type="button" data-module-action="duplicate-left">Çoğalt Sol Tarafa</button>
+    <button type="button" data-module-action="resize-foam" hidden>Boyutlandır…</button>
     <div class="module-context-separator"></div>
     <button type="button" data-module-action="toggle-glass" hidden>Cam Panele Çevir</button>
     <button type="button" data-module-action="toggle-fabric" hidden>Lightbox Kumaşa Çevir</button>
@@ -82,6 +84,7 @@ export function createModuleContextMenu({
   const meshModeButton = menu.querySelector('[data-module-action="toggle-mesh"]');
   const fabricLightingButton = menu.querySelector('[data-module-action="toggle-fabric-light"]');
   const shelfLightingButton = menu.querySelector('[data-module-action="toggle-shelf-light"]');
+  const foamResizeButton = menu.querySelector('[data-module-action="resize-foam"]');
   const pickerTitle = pickerBackdrop.querySelector('#module-picker-title');
   const pickerContext = pickerBackdrop.querySelector('.module-picker-context');
   const pickerGrid = pickerBackdrop.querySelector('.module-catalog-grid');
@@ -374,7 +377,10 @@ export function createModuleContextMenu({
       ? 'Lightbox aydınlatmayı kapat'
       : 'Lightbox aydınlatmayı aç';
 
-    const isShelf = (context.moduleType ?? context.type) === 'shelf';
+    const moduleType = context.moduleType ?? context.type;
+    const isFoam = moduleType === 'illuminated-foam';
+    foamResizeButton.hidden = !isFoam;
+    const isShelf = moduleType === 'shelf';
     const shelfLightingOn = isShelf ? Boolean(getShelfLightingState?.(context)) : false;
     shelfLightingButton.hidden = !isShelf;
     shelfLightingButton.textContent = shelfLightingOn
@@ -401,6 +407,12 @@ export function createModuleContextMenu({
     if (action === 'delete') {
       close();
       onDelete?.(context);
+      return;
+    }
+
+    if (action === 'resize-foam' && (context.moduleType ?? context.type) === 'illuminated-foam') {
+      close();
+      onResize?.(context);
       return;
     }
 

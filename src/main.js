@@ -1043,9 +1043,21 @@ function changeContextPanelGlassMode(context, isGlass) {
     : `${panelCount} panel normal panele çevrildi.`;
 }
 
+async function resizeContextIlluminatedFoam(context) {
+  const index = findContextModuleIndex(context);
+  if (index < 0 || currentModules[index]?.type !== 'illuminated-foam') return;
+  const moduleState = currentModules[index];
+  const dimensions = await requestIlluminatedFoamDimensions(moduleState.widthCm, moduleState.heightCm);
+  if (!dimensions) return;
+  moduleState.widthCm = dimensions.widthCm;
+  moduleState.heightCm = dimensions.heightCm;
+  rebuildWall({ resetView: false });
+  selectionInfo.textContent = `Modül ${index + 1} · Işıklı Strafor · ${moduleState.widthCm} × ${moduleState.heightCm} cm · ${moduleState.depthCm || 3.5} cm kalınlık · ışık ${moduleState.haloColor || '#ffffff'}.`;
+}
 const moduleContextMenu = createModuleContextMenu({
   onDelete: deleteContextModule,
   onDuplicate: duplicateContextModule,
+  onResize: resizeContextIlluminatedFoam,
   onAdd: addCatalogModule,
   onValidateAddBatch: validateCatalogAddBatch,
   onGlassModeChange: changeContextPanelGlassMode,
