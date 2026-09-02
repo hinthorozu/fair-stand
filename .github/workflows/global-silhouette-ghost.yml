@@ -23,15 +23,18 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Apply central ghost rule
+      - name: Apply singleton silhouette ghost rule
         run: python3 .github/scripts/apply-global-silhouette-ghost.py
 
       - name: Verify migration shape
         run: |
           grep -n "kind: 'silhouette'" src/moduleBehavior.js
           grep -n "function createRenderableModule" src/scene3d.js
-          grep -n "placementGhostTemplates" src/scene3d.js
+          grep -n "function destroyPlacementGhost" src/scene3d.js
+          grep -n "placementGhost = createPlacementGhost" src/scene3d.js
+          if grep -n "placementGhostTemplates" src/scene3d.js; then exit 1; fi
           if grep -n "ghostBehavior.renderer ===" src/scene3d.js; then exit 1; fi
+          node --check src/scene3d.js
           git diff --check
 
       - name: Install
@@ -48,6 +51,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git rm .github/workflows/global-silhouette-ghost.yml .github/scripts/apply-global-silhouette-ghost.py
-          git add src test/globalSilhouetteGhost.test.js
-          git commit -m 'feat: make module ghosts lightweight silhouettes [skip ci]'
+          git add src test tests
+          git commit -m 'feat: make module ghosts singleton silhouettes [skip ci]'
           git push origin ROG
