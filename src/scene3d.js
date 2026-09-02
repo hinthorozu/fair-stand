@@ -4010,6 +4010,30 @@ export function createStandScene(
       );
       mesh.material.needsUpdate = true;
     });
+    if (fabricGroupIds.size) rebuildFabricOverlays();
+  }
+
+  function clearImageAssetById(assetId) {
+    if (!assetId) return 0;
+
+    const directSurfaces = surfaceMeshes.filter(
+      (surface) => surface.userData?.surfaceState?.imageAssetId === assetId,
+    );
+    const fabricGroupIds = new Set(
+      surfaceMeshes
+        .filter((surface) => surface.userData?.surfaceState?.fabricImageAssetId === assetId)
+        .map((surface) => surface.userData?.surfaceState?.fabricGroupId)
+        .filter(Boolean),
+    );
+    const fabricSurfaces = surfaceMeshes.filter(
+      (surface) => fabricGroupIds.has(surface.userData?.surfaceState?.fabricGroupId),
+    );
+    const targets = [...new Set([...directSurfaces, ...fabricSurfaces])];
+    if (!targets.length) return 0;
+
+    clearImage(targets);
+    renderer.render(scene, camera);
+    return targets.length;
   }
 
   renderer.domElement.addEventListener('contextmenu', (event) => {
@@ -4448,6 +4472,7 @@ export function createStandScene(
     applyHorizontalImageAsset,
     applyRectImageAsset,
     clearImage,
+    clearImageAssetById,
     previewCatalogModuleDrag,
     dropCatalogModuleDrag,
     clearCatalogModuleDrag,

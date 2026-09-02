@@ -1589,9 +1589,10 @@ async function requestDeleteImageAsset(assetId) {
   closeAssetContextMenu();
 
   if (usageCount > 0) {
+    // Canlı sahneyi önce Kaldır davranışıyla temizle; blob silme/persist beklenmez.
+    scene3d.clearImageAssetById(assetId);
     clearImageAssetReferences(currentModules, assetId);
     clearImageAssetReferences(currentStand, assetId);
-    if (currentStand) rebuildWall({ resetView: false });
   }
 
   try {
