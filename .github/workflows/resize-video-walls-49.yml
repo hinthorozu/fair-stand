@@ -1,8 +1,9 @@
 name: Resize video walls to 49 inch panels
-on:
+'on':
   push:
     branches: [ROG]
-    paths: ['.github/workflows/resize-video-walls-49.yml']
+    paths:
+      - '.github/workflows/resize-video-walls-49.yml'
 permissions:
   contents: write
 jobs:
@@ -16,46 +17,13 @@ jobs:
         with:
           node-version: 22
       - name: Resize video wall catalog geometry
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('src/catalog.js')
-          s=p.read_text()
-          start=s.index('  VIDEO_WALL_2X2: Object.freeze({')
-          end=s.index('  TV_65: createTvCatalogItem', start)
-          block="""  VIDEO_WALL_2X2: Object.freeze({
-    ...createTvCatalogItem(TV_55_DEFINITION),
-    widthCm: 108.5 * 2,
-    heightCm: 61 * 2,
-    screenWidthCm: 108.5 * 2,
-    screenHeightCm: 61 * 2,
-    panelScreenWidthCm: 108.5,
-    panelScreenHeightCm: 61,
-    videoWallRows: 2,
-    videoWallCols: 2,
-    label: 'Video Wall 2×2',
-  }),
-  VIDEO_WALL_3X3: Object.freeze({
-    ...createTvCatalogItem(TV_55_DEFINITION),
-    widthCm: 108.5 * 3,
-    heightCm: 61 * 3,
-    screenWidthCm: 108.5 * 3,
-    screenHeightCm: 61 * 3,
-    panelScreenWidthCm: 108.5,
-    panelScreenHeightCm: 61,
-    videoWallRows: 3,
-    videoWallCols: 3,
-    label: 'Video Wall 3×3',
-  }),
-"""
-          p.write_text(s[:start]+block+s[end:])
-          PY
+        run: node -e "const fs=require('fs');let s=fs.readFileSync('src/catalog.js','utf8');const a=s.indexOf('  VIDEO_WALL_2X2: Object.freeze({');const b=s.indexOf('  TV_65: createTvCatalogItem',a);if(a<0||b<0)throw new Error('video wall blocks not found');const block=['  VIDEO_WALL_2X2: Object.freeze({','    ...createTvCatalogItem(TV_55_DEFINITION),','    widthCm: 108.5 * 2,','    heightCm: 61 * 2,','    screenWidthCm: 108.5 * 2,','    screenHeightCm: 61 * 2,','    panelScreenWidthCm: 108.5,','    panelScreenHeightCm: 61,','    videoWallRows: 2,','    videoWallCols: 2,',\"    label: 'Video Wall 2×2',\",'  }),','  VIDEO_WALL_3X3: Object.freeze({','    ...createTvCatalogItem(TV_55_DEFINITION),','    widthCm: 108.5 * 3,','    heightCm: 61 * 3,','    screenWidthCm: 108.5 * 3,','    screenHeightCm: 61 * 3,','    panelScreenWidthCm: 108.5,','    panelScreenHeightCm: 61,','    videoWallRows: 3,','    videoWallCols: 3,',\"    label: 'Video Wall 3×3',\",'  }),',''].join('\\n');fs.writeFileSync('src/catalog.js',s.slice(0,a)+block+s.slice(b));"
       - name: Test and build
         run: |
           npm ci
           npm test
           npm run build
-      - name: Commit
+      - name: Commit and push
         run: |
           rm -f .github/workflows/resize-video-walls-49.yml
           git config user.name github-actions[bot]
