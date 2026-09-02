@@ -11,19 +11,17 @@ s = s.replace(importNeedle, importNeedle +
 
 const rendererNeedle = "  container.appendChild(renderer.domElement);\n";
 if (!s.includes(rendererNeedle)) throw new Error('renderer append not found');
-s = s.replace(rendererNeedle, rendererNeedle + `\n  const composer = new EffectComposer(renderer);\n  composer.addPass(new RenderPass(scene, camera));\n  const foamBloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 1.25, 0.58, 1.05);\n  foamBloomPass.threshold = 1.05;\n  foamBloomPass.strength = 1.25;\n  foamBloomPass.radius = 0.58;\n  composer.addPass(foamBloomPass);\n`);
+s = s.replace(rendererNeedle, rendererNeedle + `\n  const composer = new EffectComposer(renderer);\n  const renderPass = new RenderPass(scene, camera);\n  composer.addPass(renderPass);\n  const foamBloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 1.15, 0.62, 1.05);\n  foamBloomPass.threshold = 1.05;\n  foamBloomPass.strength = 1.15;\n  foamBloomPass.radius = 0.62;\n  composer.addPass(foamBloomPass);\n`);
 
-const renderMatches = s.match(/renderer\.render\(scene, camera\);/g) || [];
-if (renderMatches.length !== 1) throw new Error(`expected one renderer.render, found ${renderMatches.length}`);
-s = s.replace('renderer.render(scene, camera);', 'composer.render();');
+const loopRender = `    renderer.render(scene, camera);\n  });\n\n  async function captureCurrentViewPng`;
+const loopBloom = `    renderPass.camera = camera;\n    composer.render();\n  });\n\n  async function captureCurrentViewPng`;
+if (!s.includes(loopRender)) throw new Error('editor animation render not found');
+s = s.replace(loopRender, loopBloom);
 
-const sizeRegex = /renderer\.setSize\(([^;]+)\);/g;
-let sizeCount = 0;
-s = s.replace(sizeRegex, (match, args) => {
-  sizeCount += 1;
-  return `${match}\n    composer.setSize(${args});`;
-});
-if (!sizeCount) throw new Error('renderer.setSize not found');
+const resizeNeedle = `    renderer.setSize(width, height, false);\n    updateCameraProjection(width, height);`;
+const resizeBloom = `    renderer.setSize(width, height, false);\n    composer.setSize(width, height);\n    updateCameraProjection(width, height);`;
+if (!s.includes(resizeNeedle)) throw new Error('editor resize block not found');
+s = s.replace(resizeNeedle, resizeBloom);
 
 const haloMaterialOld = `            new THREE.MeshBasicMaterial({\n              color: 0xffffff,\n              transparent: true,\n              opacity: 0.58,\n              depthWrite: false,\n              toneMapped: false,\n              blending: THREE.AdditiveBlending,\n            }),`;
 const haloMaterialNew = `            new THREE.MeshBasicMaterial({\n              color: new THREE.Color().setRGB(4.0, 4.0, 4.0),\n              transparent: true,\n              opacity: 0.72,\n              depthWrite: false,\n              toneMapped: false,\n              blending: THREE.AdditiveBlending,\n            }),`;
