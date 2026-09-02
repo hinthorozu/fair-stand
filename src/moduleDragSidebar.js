@@ -65,7 +65,6 @@ function ensureStyles() {
     .module-drag-plant .leaf-c { left:18px; bottom:33px; transform:rotate(38deg); }
     .module-drag-plant .leaf-d { left:29px; bottom:38px; transform:scaleX(-1) rotate(38deg); }
     .module-drag-plant-1 .leaf-c, .module-drag-plant-1 .leaf-d { display:none; }
-    .module-drag-plant-2 .leaf-d { display:none; }
     .module-drag-tv { position:relative; width:66px; height:54px; }
     .module-drag-tv::before { content:''; position:absolute; left:4px; top:3px; width:58px; height:36px; box-sizing:border-box; border:4px solid #26292d; border-radius:2px; background:#f8fafc; box-shadow:0 2px 5px rgba(15,23,42,.12); }
     .module-drag-tv::after { content:''; position:absolute; left:22px; top:39px; width:22px; height:5px; background:#30343a; box-shadow:0 7px 0 -1px #30343a; clip-path:polygon(27% 0,73% 0,86% 100%,100% 100%,100% 100%,0 100%,14% 100%); }
@@ -147,11 +146,9 @@ export function createModuleCatalogPreview(module) {
     return preview;
   }
 
-  if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {
+  if (module.type === 'indoor-plant-1') {
     const plant = document.createElement('div');
-    const plantVariant = module.type === 'indoor-plant-1' ? '1' : '2';
-    const leafCount = plantVariant === '1' ? 2 : 3;
-    plant.className = `module-drag-plant module-drag-plant-${plantVariant}`;
+    plant.className = 'module-drag-plant module-drag-plant-1';
 
     ['pot', 'stem'].forEach((part) => {
       const element = document.createElement('i');
@@ -159,7 +156,7 @@ export function createModuleCatalogPreview(module) {
       plant.appendChild(element);
     });
 
-    ['a', 'b', 'c'].slice(0, leafCount).forEach((leafName) => {
+    ['a', 'b'].forEach((leafName) => {
       const leaf = document.createElement('i');
       leaf.className = `module-drag-plant-leaf leaf-${leafName}`;
       plant.appendChild(leaf);

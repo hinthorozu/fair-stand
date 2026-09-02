@@ -1470,7 +1470,7 @@ export function createStandScene(
         module = createKettleModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'coat-rack') {
         module = createCoatRackModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'indoor-plant-1' || moduleState.type === 'indoor-plant-2') {
+      } else if (moduleState.type === 'indoor-plant-1') {
         module = createIndoorPlantModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'tv') {
         module = createTvModule(moduleState, moduleIndex);
@@ -4869,8 +4869,8 @@ function createMiniFridgeModule(moduleState, moduleIndex) {
 
 
 function createIndoorPlantModule(moduleState, moduleIndex) {
-  const type = moduleState.type === 'indoor-plant-2' ? 'indoor-plant-2' : 'indoor-plant-1';
-  const modelFile = type === 'indoor-plant-2' ? 'indoor_plants2.glb' : 'indoor_plants.glb';
+  const type = 'indoor-plant-1';
+  const modelFile = 'indoor_plants.glb';
   const widthCm = Number(moduleState.widthCm || 60);
   const depthCm = Number(moduleState.depthCm || 60);
   const heightCm = Number(moduleState.heightCm || 120);
