@@ -1094,9 +1094,51 @@ export function createStandScene(
 
     const anchorMeta = getSurfaceSelectionPlaneMeta(anchorMesh);
     const targetMeta = getSurfaceSelectionPlaneMeta(mesh);
-    // Köşeyi dönüp başka duvara taşma: dikdörtgen seçim yalnızca aynı fiziksel
-    // duvar düzleminde yapılır. Raflı modül gibi farklı tipler aynı düzlemdeyse dahildir.
-    if (!anchorMeta || !targetMeta || anchorMeta.planeKey !== targetMeta.planeKey) return;
+    if (!anchorMeta || !targetMeta) return;
+
+    // Aynı fiziksel düzlemde bugünkü plane-aware seçim korunur. İki uç farklı
+    // stand duvarlarındaysa eski duvar-zinciri dikdörtgen seçimini kullan: örneğin
+    // sol üst + arka duvarda üstten ikinci panel, aradaki 2 x N panel bloğunu seçer.
+    // Serbest ön sıralar bu fallback'e girmez; yalnızca gerçek stand duvarları girer.
+    if (anchorMeta.planeKey !== targetMeta.planeKey) {
+      const wallIds = ['back', 'left', 'right'];
+      if (!wallIds.includes(anchorMeta.wallId) || !wallIds.includes(targetMeta.wallId)) return;
+
+      const wallPanels = surfaceMeshes
+        .filter((surface) => surface.userData.selectionMode === 'panel')
+        .map((surface) => ({ surface, meta: getSurfaceSelectionPlaneMeta(surface) }))
+        .filter((entry) => wallIds.includes(entry.meta?.wallId))
+        .map(({ surface }) => ({
+          mesh: surface,
+          moduleIndex: Number(surface.userData.moduleIndex),
+          stripIndex: Number(surface.userData.stripIndex),
+        }));
+
+      const crossWallResult = createPanelRangeSelection(
+        wallPanels,
+        {
+          moduleIndex: Number(anchorMesh.userData.moduleIndex),
+          stripIndex: Number(anchorMesh.userData.stripIndex),
+        },
+        {
+          moduleIndex: Number(mesh.userData.moduleIndex),
+          stripIndex: Number(mesh.userData.stripIndex),
+        },
+      );
+      if (!crossWallResult.ok) return;
+
+      clearSelection({ notify: false, keepAnchor: true });
+      crossWallResult.entries.forEach((entry) => {
+        selectedSurfaces.add(entry.mesh);
+        setSelectionVisual(entry.mesh, true);
+      });
+      const selectedModuleIds = new Set(
+        crossWallResult.entries.map((entry) => entry.mesh.userData?.moduleId).filter(Boolean),
+      );
+      selectedModuleId = selectedModuleIds.size === 1 ? [...selectedModuleIds][0] : null;
+      notifySelection();
+      return;
+    }
 
     const planePanels = surfaceMeshes
       .filter((surface) => surface.userData.selectionMode === 'panel')
