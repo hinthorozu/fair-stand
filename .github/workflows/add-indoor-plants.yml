@@ -1,0 +1,312 @@
+name: Add Indoor Plant Modules
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/add-indoor-plants.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Add indoor plant modules
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from textwrap import dedent
+
+          def replace_once(path, old, new, label):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 anchor, found {count}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          # catalog.js
+          replace_once(
+              'src/catalog.js',
+              "  DEPOT_COAT_RACK: { type: 'coat-rack', widthCm: 43, depthCm: 43, heightCm: 180, label: 'Askılık' },\n  TV_42:",
+              "  DEPOT_COAT_RACK: { type: 'coat-rack', widthCm: 43, depthCm: 43, heightCm: 180, label: 'Askılık' },\n  EXTRA_INDOOR_PLANT_1: { type: 'indoor-plant-1', widthCm: 60, depthCm: 60, heightCm: 120, label: 'Yapay Çiçek 1' },\n  EXTRA_INDOOR_PLANT_2: { type: 'indoor-plant-2', widthCm: 60, depthCm: 60, heightCm: 120, label: 'Yapay Çiçek 2' },\n  TV_42:",
+              'catalog items',
+          )
+          replace_once(
+              'src/catalog.js',
+              "  'DEPOT_COAT_RACK',\n  'TV_42',",
+              "  'DEPOT_COAT_RACK',\n  'EXTRA_INDOOR_PLANT_1',\n  'EXTRA_INDOOR_PLANT_2',\n  'TV_42',",
+              'catalog keys',
+          )
+          replace_once(
+              'src/catalog.js',
+              "    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic', 'DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK']),",
+              "    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic', 'DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK', 'EXTRA_INDOOR_PLANT_1', 'EXTRA_INDOOR_PLANT_2']),",
+              'Extra group',
+          )
+
+          # designState.js
+          replace_once(
+              'src/designState.js',
+              "export function createTvModuleState(sizeInch = 42) {",
+              dedent("""
+              export function createIndoorPlantModuleState(variant = 1) {
+                const resolvedVariant = Number(variant) === 2 ? 2 : 1;
+                return {
+                  id: createId('module'),
+                  type: resolvedVariant === 2 ? 'indoor-plant-2' : 'indoor-plant-1',
+                  widthCm: 60,
+                  depthCm: 60,
+                  heightCm: 120,
+                };
+              }
+
+              export function createTvModuleState(sizeInch = 42) {
+              """).lstrip(),
+              'plant state factory',
+          )
+
+          # moduleBehavior.js
+          plant_behavior = dedent("""
+            'indoor-plant-1': Object.freeze({
+              placement: 'free',
+              moveSnapCm: 10,
+              rotationStepDeg: 90,
+              defaultRotationDeg: 0,
+              allowSideInsert: true,
+              collision: 'footprint',
+            }),
+            'indoor-plant-2': Object.freeze({
+              placement: 'free',
+              moveSnapCm: 10,
+              rotationStepDeg: 90,
+              defaultRotationDeg: 0,
+              allowSideInsert: true,
+              collision: 'footprint',
+            }),
+          """)
+          replace_once(
+              'src/moduleBehavior.js',
+              "  tv: Object.freeze({",
+              plant_behavior + "  tv: Object.freeze({",
+              'plant behavior',
+          )
+
+          # main.js
+          replace_once(
+              'src/main.js',
+              "  createKettleModuleState,\n  createCoatRackModuleState,\n  createLedFloodlightModuleState,",
+              "  createKettleModuleState,\n  createCoatRackModuleState,\n  createIndoorPlantModuleState,\n  createLedFloodlightModuleState,",
+              'main import',
+          )
+          replace_once(
+              'src/main.js',
+              "  else if (module.type === 'coat-rack') state = createCoatRackModuleState();\n  else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);",
+              "  else if (module.type === 'coat-rack') state = createCoatRackModuleState();\n  else if (module.type === 'indoor-plant-1') state = createIndoorPlantModuleState(1);\n  else if (module.type === 'indoor-plant-2') state = createIndoorPlantModuleState(2);\n  else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);",
+              'main catalog dispatch',
+          )
+
+          # scene3d.js loader
+          loader_block = dedent("""
+          const indoorPlantModelPromises = new Map();
+
+          function loadIndoorPlantModel(modelFile) {
+            if (!indoorPlantModelPromises.has(modelFile)) {
+              const loader = new GLTFLoader();
+              indoorPlantModelPromises.set(
+                modelFile,
+                loader.loadAsync(import.meta.env.BASE_URL + 'models/' + modelFile).then((gltf) => gltf.scene),
+              );
+            }
+            return indoorPlantModelPromises.get(modelFile);
+          }
+
+          """)
+          replace_once(
+              'src/scene3d.js',
+              "let beigeSofaModelPromise = null;",
+              loader_block + "let beigeSofaModelPromise = null;",
+              'plant loader',
+          )
+
+          creator_block = dedent("""
+          function createIndoorPlantModule(moduleState, moduleIndex) {
+            const type = moduleState.type === 'indoor-plant-2' ? 'indoor-plant-2' : 'indoor-plant-1';
+            const modelFile = type === 'indoor-plant-2' ? 'indoor_plants2.glb' : 'indoor_plants.glb';
+            const widthCm = Number(moduleState.widthCm || 60);
+            const depthCm = Number(moduleState.depthCm || 60);
+            const heightCm = Number(moduleState.heightCm || 120);
+            const widthM = widthCm / 100;
+            const depthM = depthCm / 100;
+            const heightM = heightCm / 100;
+
+            const group = new THREE.Group();
+            group.userData = {
+              kind: 'module',
+              moduleIndex,
+              moduleId: moduleState.id,
+              moduleType: type,
+              type,
+              widthCm,
+              depthCm,
+              heightCm,
+            };
+
+            const proxy = new THREE.Mesh(
+              new THREE.BoxGeometry(widthM, heightM, depthM),
+              new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+            );
+            proxy.position.y = heightM / 2;
+            proxy.userData = {
+              kind: 'surface',
+              surfaceId: `${moduleState.id}:${type}`,
+              moduleId: moduleState.id,
+              moduleType: type,
+              moduleIndex,
+              selectionMode: 'module',
+              acceptsImage: false,
+              widthCm,
+              depthCm,
+              heightCm,
+              stripIndex: null,
+              stripNumber: null,
+              surfaceRole: 'plant',
+              surfaceState: null,
+              selectionFrame: null,
+              colorTargets: [],
+            };
+            group.add(proxy);
+
+            loadIndoorPlantModel(modelFile).then((template) => {
+              if (!group.parent) return;
+              const model = template.clone(true);
+              model.traverse((child) => {
+                if (!child.isMesh) return;
+                child.castShadow = true;
+                child.receiveShadow = true;
+              });
+
+              const sourceBox = new THREE.Box3().setFromObject(model);
+              const sourceSize = sourceBox.getSize(new THREE.Vector3());
+              const fitScales = [
+                sourceSize.x > 0 ? widthM / sourceSize.x : Infinity,
+                sourceSize.y > 0 ? heightM / sourceSize.y : Infinity,
+                sourceSize.z > 0 ? depthM / sourceSize.z : Infinity,
+              ].filter((value) => Number.isFinite(value) && value > 0);
+              const uniformScale = fitScales.length ? Math.min(...fitScales) : 1;
+              model.scale.setScalar(uniformScale);
+
+              const fittedBox = new THREE.Box3().setFromObject(model);
+              const fittedCenter = fittedBox.getCenter(new THREE.Vector3());
+              model.position.set(-fittedCenter.x, -fittedBox.min.y, -fittedCenter.z);
+              group.add(model);
+            }).catch((error) => {
+              console.warn('Yapay çiçek modeli yüklenemedi:', modelFile, error);
+            });
+
+            return { group, surfaces: [proxy] };
+          }
+
+          """)
+          replace_once(
+              'src/scene3d.js',
+              "function createCoatRackModule(moduleState, moduleIndex) {",
+              creator_block + "function createCoatRackModule(moduleState, moduleIndex) {",
+              'plant scene creator',
+          )
+          replace_once(
+              'src/scene3d.js',
+              "      } else if (moduleState.type === 'coat-rack') {\n        module = createCoatRackModule(moduleState, moduleIndex);\n      } else if (moduleState.type === 'tv') {",
+              "      } else if (moduleState.type === 'coat-rack') {\n        module = createCoatRackModule(moduleState, moduleIndex);\n      } else if (moduleState.type === 'indoor-plant-1' || moduleState.type === 'indoor-plant-2') {\n        module = createIndoorPlantModule(moduleState, moduleIndex);\n      } else if (moduleState.type === 'tv') {",
+              'plant scene dispatch',
+          )
+
+          # Tests
+          Path('test/indoorPlants.test.js').write_text(dedent("""
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { existsSync, readFileSync } from 'node:fs';
+          import { MODULE_CATALOG, MODULE_CATALOG_GROUPS } from '../src/catalog.js';
+          import { createIndoorPlantModuleState } from '../src/designState.js';
+          import { getModuleBehavior } from '../src/moduleBehavior.js';
+
+          test('artificial plants are catalogued inside Extra', () => {
+            assert.deepEqual(MODULE_CATALOG.EXTRA_INDOOR_PLANT_1, {
+              type: 'indoor-plant-1', widthCm: 60, depthCm: 60, heightCm: 120, label: 'Yapay Çiçek 1',
+            });
+            assert.deepEqual(MODULE_CATALOG.EXTRA_INDOOR_PLANT_2, {
+              type: 'indoor-plant-2', widthCm: 60, depthCm: 60, heightCm: 120, label: 'Yapay Çiçek 2',
+            });
+            const extra = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Extra');
+            assert.ok(extra?.keys.includes('EXTRA_INDOOR_PLANT_1'));
+            assert.ok(extra?.keys.includes('EXTRA_INDOOR_PLANT_2'));
+          });
+
+          test('artificial plants use 10 cm free-placement snapping', () => {
+            for (const type of ['indoor-plant-1', 'indoor-plant-2']) {
+              const behavior = getModuleBehavior(type);
+              assert.equal(behavior.placement, 'free');
+              assert.equal(behavior.moveSnapCm, 10);
+              assert.equal(behavior.collision, 'footprint');
+            }
+          });
+
+          test('artificial plant state variants and GLB files are wired', () => {
+            assert.equal(createIndoorPlantModuleState(1).type, 'indoor-plant-1');
+            assert.equal(createIndoorPlantModuleState(2).type, 'indoor-plant-2');
+            assert.ok(existsSync(new URL('../public/models/indoor_plants.glb', import.meta.url)));
+            assert.ok(existsSync(new URL('../public/models/indoor_plants2.glb', import.meta.url)));
+
+            const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+            assert.match(scene, /indoor_plants\.glb/);
+            assert.match(scene, /indoor_plants2\.glb/);
+            assert.match(scene, /function createIndoorPlantModule\(moduleState, moduleIndex\)/);
+            assert.match(scene, /selectionMode: 'module'/);
+
+            const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+            assert.match(main, /createIndoorPlantModuleState\(1\)/);
+            assert.match(main, /createIndoorPlantModuleState\(2\)/);
+          });
+          """).lstrip(), encoding='utf-8')
+          PY
+
+      - name: Verify exact scope
+        run: |
+          test -s public/models/indoor_plants.glb
+          test -s public/models/indoor_plants2.glb
+          grep -F "label: 'Yapay Çiçek 1'" src/catalog.js
+          grep -F "label: 'Yapay Çiçek 2'" src/catalog.js
+          grep -F "moveSnapCm: 10" src/moduleBehavior.js
+          grep -F "indoor_plants.glb" src/scene3d.js
+          grep -F "indoor_plants2.glb" src/scene3d.js
+          git diff -- src/catalog.js src/designState.js src/moduleBehavior.js src/main.js src/scene3d.js test/indoorPlants.test.js
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/add-indoor-plants.yml
+          git add src/catalog.js src/designState.js src/moduleBehavior.js src/main.js src/scene3d.js test/indoorPlants.test.js
+          git commit -m 'feat: add artificial plant modules to Extra [skip ci]'
+          git push origin ROG
