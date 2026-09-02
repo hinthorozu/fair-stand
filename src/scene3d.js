@@ -133,6 +133,20 @@ function loadKettleModel() {
   return kettleModelPromise;
 }
 
+
+const indoorPlantModelPromises = new Map();
+
+function loadIndoorPlantModel(modelFile) {
+  if (!indoorPlantModelPromises.has(modelFile)) {
+    const loader = new GLTFLoader();
+    indoorPlantModelPromises.set(
+      modelFile,
+      loader.loadAsync(import.meta.env.BASE_URL + 'models/' + modelFile).then((gltf) => gltf.scene),
+    );
+  }
+  return indoorPlantModelPromises.get(modelFile);
+}
+
 let beigeSofaModelPromise = null;
 
 function loadBeigeSofaModel() {
@@ -1453,6 +1467,8 @@ export function createStandScene(
         module = createKettleModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'coat-rack') {
         module = createCoatRackModule(moduleState, moduleIndex);
+      } else if (moduleState.type === 'indoor-plant-1' || moduleState.type === 'indoor-plant-2') {
+        module = createIndoorPlantModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'tv') {
         module = createTvModule(moduleState, moduleIndex);
       } else if (moduleState.type === 'led-floodlight') {
@@ -4844,6 +4860,84 @@ function createMiniFridgeModule(moduleState, moduleIndex) {
     group.add(model);
   }).catch((error) => {
     console.warn('Mini Buzdolabı GLB modeli yüklenemedi:', error);
+  });
+
+  return { group, surfaces: [proxy] };
+}
+
+
+function createIndoorPlantModule(moduleState, moduleIndex) {
+  const type = moduleState.type === 'indoor-plant-2' ? 'indoor-plant-2' : 'indoor-plant-1';
+  const modelFile = type === 'indoor-plant-2' ? 'indoor_plants2.glb' : 'indoor_plants.glb';
+  const widthCm = Number(moduleState.widthCm || 60);
+  const depthCm = Number(moduleState.depthCm || 60);
+  const heightCm = Number(moduleState.heightCm || 120);
+  const widthM = widthCm / 100;
+  const depthM = depthCm / 100;
+  const heightM = heightCm / 100;
+
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    moduleType: type,
+    type,
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, heightM, depthM),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+  );
+  proxy.position.y = heightM / 2;
+  proxy.userData = {
+    kind: 'surface',
+    surfaceId: `${moduleState.id}:${type}`,
+    moduleId: moduleState.id,
+    moduleType: type,
+    moduleIndex,
+    selectionMode: 'module',
+    acceptsImage: false,
+    widthCm,
+    depthCm,
+    heightCm,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceRole: 'plant',
+    surfaceState: null,
+    selectionFrame: null,
+    colorTargets: [],
+  };
+  group.add(proxy);
+
+  loadIndoorPlantModel(modelFile).then((template) => {
+    if (!group.parent) return;
+    const model = template.clone(true);
+    model.traverse((child) => {
+      if (!child.isMesh) return;
+      child.castShadow = true;
+      child.receiveShadow = true;
+    });
+
+    const sourceBox = new THREE.Box3().setFromObject(model);
+    const sourceSize = sourceBox.getSize(new THREE.Vector3());
+    const fitScales = [
+      sourceSize.x > 0 ? widthM / sourceSize.x : Infinity,
+      sourceSize.y > 0 ? heightM / sourceSize.y : Infinity,
+      sourceSize.z > 0 ? depthM / sourceSize.z : Infinity,
+    ].filter((value) => Number.isFinite(value) && value > 0);
+    const uniformScale = fitScales.length ? Math.min(...fitScales) : 1;
+    model.scale.setScalar(uniformScale);
+
+    const fittedBox = new THREE.Box3().setFromObject(model);
+    const fittedCenter = fittedBox.getCenter(new THREE.Vector3());
+    model.position.set(-fittedCenter.x, -fittedBox.min.y, -fittedCenter.z);
+    group.add(model);
+  }).catch((error) => {
+    console.warn('Yapay çiçek modeli yüklenemedi:', modelFile, error);
   });
 
   return { group, surfaces: [proxy] };

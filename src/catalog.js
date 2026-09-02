@@ -126,6 +126,8 @@ export const MODULE_CATALOG = Object.freeze({
   DEPOT_MINI_FRIDGE_AVANTI: { type: 'mini-fridge', widthCm: 45, depthCm: 43, heightCm: 66, label: 'Mini Buzdolabı' },
   DEPOT_KETTLE: { type: 'kettle', widthCm: 24, depthCm: 19, heightCm: 25, label: 'Kettle' },
   DEPOT_COAT_RACK: { type: 'coat-rack', widthCm: 43, depthCm: 43, heightCm: 180, label: 'Askılık' },
+  EXTRA_INDOOR_PLANT_1: { type: 'indoor-plant-1', widthCm: 60, depthCm: 60, heightCm: 120, label: 'Yapay Çiçek 1' },
+  EXTRA_INDOOR_PLANT_2: { type: 'indoor-plant-2', widthCm: 60, depthCm: 60, heightCm: 120, label: 'Yapay Çiçek 2' },
   TV_42: createTvCatalogItem(TV_42_DEFINITION),
   TV_55: createTvCatalogItem(TV_55_DEFINITION),
   TV_65: createTvCatalogItem(TV_65_DEFINITION),
@@ -191,6 +193,8 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'DEPOT_MINI_FRIDGE_AVANTI',
   'DEPOT_KETTLE',
   'DEPOT_COAT_RACK',
+  'EXTRA_INDOOR_PLANT_1',
+  'EXTRA_INDOOR_PLANT_2',
   'TV_42',
   'TV_55',
   'TV_65',
@@ -212,7 +216,7 @@ export const MODULE_CATALOG_GROUPS = Object.freeze([
   }),
   Object.freeze({
     label: 'Extra',
-    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic', 'DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK']),
+    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic', 'DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK', 'EXTRA_INDOOR_PLANT_1', 'EXTRA_INDOOR_PLANT_2']),
   }),
   Object.freeze({
     label: 'Elektronik & Aydınlatma',

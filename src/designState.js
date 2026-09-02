@@ -238,7 +238,19 @@ export function createCoatRackModuleState() {
   };
 }
 
+export function createIndoorPlantModuleState(variant = 1) {
+  const resolvedVariant = Number(variant) === 2 ? 2 : 1;
+  return {
+    id: createId('module'),
+    type: resolvedVariant === 2 ? 'indoor-plant-2' : 'indoor-plant-1',
+    widthCm: 60,
+    depthCm: 60,
+    heightCm: 120,
+  };
+}
+
 export function createTvModuleState(sizeInch = 42) {
+
   const definition = getTvDefinition(sizeInch);
   if (!definition) return null;
   return {

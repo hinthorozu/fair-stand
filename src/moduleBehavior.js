@@ -83,6 +83,23 @@ const TYPE_BEHAVIORS = Object.freeze({
     allowSideInsert: true,
     collision: 'footprint',
   }),
+
+'indoor-plant-1': Object.freeze({
+  placement: 'free',
+  moveSnapCm: 10,
+  rotationStepDeg: 90,
+  defaultRotationDeg: 0,
+  allowSideInsert: true,
+  collision: 'footprint',
+}),
+'indoor-plant-2': Object.freeze({
+  placement: 'free',
+  moveSnapCm: 10,
+  rotationStepDeg: 90,
+  defaultRotationDeg: 0,
+  allowSideInsert: true,
+  collision: 'footprint',
+}),
   tv: Object.freeze({
     placement: 'wall-overlay',
     moveSnapCm: 10,
