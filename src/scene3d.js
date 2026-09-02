@@ -6558,16 +6558,6 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const caseFrontZ = depth / 2;
   const caseCenterZ = caseFrontZ - showcaseDepth / 2;
 
-  const backPanel = new THREE.Mesh(
-    new THREE.BoxGeometry(innerWidth, openingHeight, 0.018),
-    showcaseWhiteMaterial.clone(),
-  );
-  // Arka kapak modulun eski arka duzleminde degil, vitrinin 30 cm kasasinin
-  // en arka ucunda durur. 9 mm ofset panel kalinliginin merkezidir.
-  backPanel.position.set(0, openingCenterY, caseFrontZ - showcaseDepth + 0.009);
-  backPanel.receiveShadow = true;
-  group.add(backPanel);
-
   const sidePanelGeometry = new THREE.BoxGeometry(0.018, openingHeight, showcaseDepth);
   for (const side of [-1, 1]) {
     const sidePanel = new THREE.Mesh(sidePanelGeometry.clone(), showcaseWhiteMaterial.clone());

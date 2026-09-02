@@ -13,10 +13,10 @@ test('showcase is 30 cm deep and projects behind the panel plane', () => {
   assert.match(showcase, /const caseCenterZ = caseFrontZ - showcaseDepth \/ 2;/);
 });
 
-test('showcase back, frame and top-bottom caps are white', () => {
+test('showcase case stays white while rear remains open', () => {
   assert.match(showcase, /const showcaseWhiteMaterial = new THREE\.MeshStandardMaterial\(\{/);
   assert.match(showcase, /color: 0xffffff/);
-  assert.match(showcase, /const backPanel = new THREE\.Mesh\([\s\S]*?showcaseWhiteMaterial\.clone\(\)/);
+  assert.doesNotMatch(showcase, /const backPanel = new THREE\.Mesh/);
   assert.match(showcase, /const capGeometry = new THREE\.BoxGeometry\([\s\S]*?showcaseDepth/);
   assert.match(showcase, /for \(const y of \[openingBottom, openingTop\]\)/);
   assert.match(showcase, /frontPostGeometry\.clone\(\), showcaseWhiteMaterial\.clone\(\)/);
