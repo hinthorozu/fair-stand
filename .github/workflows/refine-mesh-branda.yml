@@ -1,8 +1,9 @@
-name: Refine Mesh Branda
+name: Refine panel cover modes
 
 on:
   push:
-    branches: [ROG]
+    branches:
+      - ROG
     paths:
       - '.github/workflows/refine-mesh-branda.yml'
 
@@ -10,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  refine-validate-push:
+  apply:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,43 +24,75 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Refine Mesh Branda as one continuous fine mesh
+      - name: Apply exclusive cover mode rules
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
-          scene_path = Path('src/scene3d.js')
-          scene = scene_path.read_text(encoding='utf-8')
-          old = """    // İki delik / tile ekseninde yaklaşık 18 delik/metre görsel yoğunluk verir.
-    texture.repeat.set(
-      Math.max(1, Number(widthM) * 9),
-      Math.max(1, Number(heightM) * 9),
-    );"""
-          new = """    // Yaklaşık %31 açık alan oranını korurken fiziksel delikleri yaklaşık 9x küçült.
-    // Desen panel başına değil, fabricGroupId için oluşturulan tek PlaneGeometry üzerinde kesintisiz akar.
-    texture.repeat.set(
-      Math.max(1, Number(widthM) * 80),
-      Math.max(1, Number(heightM) * 80),
-    );"""
-          if scene.count(old) != 1:
-              raise SystemExit(f'mesh density block: expected 1 match, got {scene.count(old)}')
-          scene = scene.replace(old, new, 1)
-          scene_path.write_text(scene, encoding='utf-8')
+          path = Path('src/scene3d.js')
+          text = path.read_text(encoding='utf-8')
 
-          test_path = Path('test/lightboxFabric.test.js')
-          test = test_path.read_text(encoding='utf-8')
-          marker = "  assert.match(scene, /overlayMaterial\\.alphaTest = 0\\.45/);\n"
-          insertion = marker + "  assert.match(scene, /Number\\(widthM\\) \\* 80/);\n  assert.match(scene, /Number\\(heightM\\) \\* 80/);\n  assert.match(scene, /new THREE\\.PlaneGeometry\\(width, height\\)/);\n"
-          if test.count(marker) != 1:
-              raise SystemExit(f'mesh test marker: expected 1 match, got {test.count(marker)}')
-          test = test.replace(marker, insertion, 1)
-          test_path.write_text(test, encoding='utf-8')
+          old = "  function applyGlassMode(meshOrMeshes, isGlass) {\n    const glass = Boolean(isGlass);\n\n    normalizeMeshes(meshOrMeshes).forEach((mesh) => {"
+          new = "  function applyGlassMode(meshOrMeshes, isGlass) {\n    const glass = Boolean(isGlass);\n    const glassMeshes = normalizeMeshes(meshOrMeshes).filter(\n      (mesh) => mesh?.userData?.selectionMode === 'panel' && mesh.userData.surfaceState,\n    );\n\n    if (glass) {\n      const conflictingFabricGroupIds = new Set(\n        glassMeshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),\n      );\n      if (conflictingFabricGroupIds.size) {\n        surfaceMeshes.forEach((surface) => {\n          if (!conflictingFabricGroupIds.has(surface.userData.surfaceState?.fabricGroupId)) return;\n          clearFabricState(surface);\n        });\n        rebuildFabricOverlays();\n      }\n    }\n\n    glassMeshes.forEach((mesh) => {"
+          if text.count(old) != 1:
+              raise SystemExit(f'applyGlassMode anchor count={text.count(old)}')
+          text = text.replace(old, new, 1)
+
+          old = "    const fabric = Boolean(enabled);\n    const resolvedFabricType = fabricType === 'mesh' ? 'mesh' : 'lightbox';"
+          new = "    const fabric = Boolean(enabled);\n    const resolvedFabricType = fabricType === 'mesh' ? 'mesh' : 'lightbox';\n\n    if (fabric) {\n      applyGlassMode(meshes, false);\n    }"
+          if text.count(old) != 1:
+              raise SystemExit(f'fabric mode anchor count={text.count(old)}')
+          text = text.replace(old, new, 1)
+
+          if text.count("Number(widthM) * 9") != 1 or text.count("Number(heightM) * 9") != 1:
+              raise SystemExit('mesh density anchors not found exactly once')
+          text = text.replace("Number(widthM) * 9", "Number(widthM) * 80", 1)
+          text = text.replace("Number(heightM) * 9", "Number(heightM) * 80", 1)
+          text = text.replace("// İki delik / tile ekseninde yaklaşık 18 delik/metre görsel yoğunluk verir.", "// Yaklaşık %31 açık alan korunur; delikler fiziksel olarak çok daha küçük ve sık görünür.", 1)
+
+          path.write_text(text, encoding='utf-8')
           PY
+
+      - name: Add cover mode regression contract
+        run: |
+          cat > test/coverModeExclusivity.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+
+          const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+
+          test('glass cancels any active Lightbox or Mesh group before applying glass', () => {
+            assert.match(scene, /const glassMeshes = normalizeMeshes\(meshOrMeshes\)\.filter/);
+            assert.match(scene, /if \(glass\) \{[\s\S]*?conflictingFabricGroupIds[\s\S]*?clearFabricState\(surface\)[\s\S]*?rebuildFabricOverlays\(\);/);
+          });
+
+          test('Lightbox and Mesh cancel glass before creating their one-piece cover', () => {
+            assert.match(scene, /if \(fabric\) \{\s*applyGlassMode\(meshes, false\);\s*\}/);
+            assert.match(scene, /const replacedGroupIds = new Set/);
+            assert.match(scene, /state\.fabricType = resolvedFabricType/);
+          });
+
+          test('image plus glass keeps the image and uses the original glass opacity contract', () => {
+            assert.match(scene, /const hasImage = Boolean\(mesh\.material\.map\)/);
+            assert.match(scene, /mesh\.material\.transparent = glass/);
+            assert.match(scene, /mesh\.material\.opacity = glass \? GLASS_SURFACE_OPACITY : 1/);
+            assert.match(scene, /mesh\.material\.depthWrite = !glass/);
+            assert.match(scene, /glass\s*\? \(hasImage \? 0xffffff : GLASS_SURFACE_COLOR\)/);
+            assert.match(scene, /backing\.material\.opacity = glass \? GLASS_BACK_OPACITY : 1/);
+          });
+
+          test('Mesh stays one continuous plane and uses much finer perforations', () => {
+            assert.match(scene, /new THREE\.PlaneGeometry\(width, height\)/);
+            assert.match(scene, /Number\(widthM\) \* 80/);
+            assert.match(scene, /Number\(heightM\) \* 80/);
+          });
+          EOF
 
       - name: Syntax check
         run: |
           node --check src/scene3d.js
-          node --check test/lightboxFabric.test.js
+          node --check test/coverModeExclusivity.test.js
 
       - name: Install
         run: npm ci
@@ -70,11 +103,11 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Commit refined Mesh Branda
+      - name: Commit final cover mode behavior
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git rm .github/workflows/refine-mesh-branda.yml
-          git add src/scene3d.js test/lightboxFabric.test.js
-          git commit -m 'fix: make mesh branda continuous with finer perforation [skip ci]'
+          git add src/scene3d.js test/coverModeExclusivity.test.js
+          git commit -m 'fix: make glass lightbox and mesh mutually exclusive [skip ci]'
           git push origin ROG
