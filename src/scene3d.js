@@ -6442,10 +6442,11 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     widthCm,
   };
 
+  // Vitrin modulu komple beyaz kasalidir; cam yalnizca yatay raflarda kullanilir.
   const frameMaterial = new THREE.MeshStandardMaterial({
-    color: FRAME_COLOR,
-    metalness: 0.68,
-    roughness: 0.28,
+    color: 0xffffff,
+    metalness: 0,
+    roughness: 0.58,
   });
   const showcaseWhiteMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
@@ -6493,7 +6494,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
       new THREE.MeshStandardMaterial({
-        color: isGlass ? GLASS_BACK_COLOR : PANEL_BACK_COLOR,
+        color: isGlass ? GLASS_BACK_COLOR : 0xffffff,
         roughness: isGlass ? 0.22 : 0.74,
         transparent: isGlass,
         opacity: isGlass ? GLASS_BACK_OPACITY : 1,
@@ -6568,24 +6569,17 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   backPanel.receiveShadow = true;
   group.add(backPanel);
 
-  const sideGlassMaterial = new THREE.MeshStandardMaterial({
-    color: 0xdfe8e8,
-    roughness: 0.18,
-    metalness: 0,
-    transparent: true,
-    opacity: 0.32,
-    side: THREE.DoubleSide,
-    depthWrite: false,
-  });
-  const sideGlassGeometry = new THREE.BoxGeometry(0.018, openingHeight, showcaseDepth);
+  const sidePanelGeometry = new THREE.BoxGeometry(0.018, openingHeight, showcaseDepth);
   for (const side of [-1, 1]) {
-    const sideGlass = new THREE.Mesh(sideGlassGeometry.clone(), sideGlassMaterial.clone());
-    sideGlass.position.set(
+    const sidePanel = new THREE.Mesh(sidePanelGeometry.clone(), showcaseWhiteMaterial.clone());
+    sidePanel.position.set(
       side * (innerWidth / 2 - 0.009),
       openingCenterY,
       caseCenterZ,
     );
-    group.add(sideGlass);
+    sidePanel.castShadow = true;
+    sidePanel.receiveShadow = true;
+    group.add(sidePanel);
   }
 
   const capGeometry = new THREE.BoxGeometry(
