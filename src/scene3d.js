@@ -925,10 +925,66 @@ export function createStandScene(
     }
   }
 
+  function findModuleGroupById(moduleId) {
+    if (!moduleId) return null;
+    let found = null;
+    wallRoot.traverse((object) => {
+      if (!found && object.userData?.kind === 'module' && object.userData?.moduleId === moduleId) {
+        found = object;
+      }
+    });
+    return found;
+  }
+
+  function ensureModuleSelectionFrame(moduleGroup) {
+    if (!moduleGroup) return null;
+    if (moduleGroup.userData?.moduleSelectionFrame) return moduleGroup.userData.moduleSelectionFrame;
+
+    const widthM = Number(moduleGroup.userData?.widthCm) / 100;
+    const depthM = Number(moduleGroup.userData?.depthCm) / 100;
+    const heightM = Number(moduleGroup.userData?.heightCm) / 100;
+    if (!(widthM > 0) || !(depthM > 0) || !(heightM > 0)) return null;
+
+    const paddingM = 0.02;
+    const frame = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(
+        widthM + paddingM,
+        heightM + paddingM,
+        depthM + paddingM,
+      )),
+      new THREE.LineBasicMaterial({
+        color: SELECTION_COLOR,
+        transparent: true,
+        opacity: 0.95,
+        depthTest: false,
+        toneMapped: false,
+      }),
+    );
+    frame.position.set(0, heightM / 2, 0);
+    frame.renderOrder = 1000;
+    frame.visible = false;
+    frame.userData.isModuleSelectionVisual = true;
+    moduleGroup.add(frame);
+    moduleGroup.userData.moduleSelectionFrame = frame;
+    return frame;
+  }
+
+  function setModuleSelectionVisual(moduleId, selected) {
+    const moduleGroup = findModuleGroupById(moduleId);
+    if (!moduleGroup) return;
+    const frame = selected
+      ? ensureModuleSelectionFrame(moduleGroup)
+      : moduleGroup.userData?.moduleSelectionFrame;
+    if (frame) frame.visible = Boolean(selected);
+  }
+
   function setSelectionVisual(mesh, selected) {
     if (!mesh) return;
     const frame = mesh.userData.selectionFrame;
     if (frame) frame.visible = selected;
+    if (!frame && mesh.userData?.selectionMode === 'module') {
+      setModuleSelectionVisual(mesh.userData?.moduleId, selected);
+    }
     if (mesh.material?.emissive) {
       mesh.material.emissive.setHex(selected ? SELECTION_COLOR : 0x000000);
       mesh.material.emissiveIntensity = selected ? 0.08 : 0;
@@ -949,6 +1005,7 @@ export function createStandScene(
   }
 
   function clearSelection({ notify = true, keepAnchor = false } = {}) {
+    setModuleSelectionVisual(selectedModuleId, false);
     selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
     selectedSurfaces.clear();
     floorSelected = false;
@@ -968,11 +1025,13 @@ export function createStandScene(
   }
 
   function selectModuleOnly(moduleId) {
+    setModuleSelectionVisual(selectedModuleId, false);
     selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
     selectedSurfaces.clear();
     selectionAnchorSurfaceId = null;
     floorSelected = false;
     selectedModuleId = moduleId ?? null;
+    setModuleSelectionVisual(selectedModuleId, true);
     notifySelection();
   }
 
@@ -4523,10 +4582,13 @@ export function createStandScene(
       .map((surface) => surface.userData?.selectionFrame)
       .filter(Boolean);
     const selectedVisibility = selectedFrames.map((frame) => frame.visible);
+    const moduleSelectionFrame = findModuleGroupById(selectedModuleId)?.userData?.moduleSelectionFrame ?? null;
+    const moduleSelectionVisibility = moduleSelectionFrame?.visible ?? false;
     const guideVisibility = activeWallGuides.map((guide) => guide.visible);
 
     try {
       selectedFrames.forEach((frame) => { frame.visible = false; });
+      if (moduleSelectionFrame) moduleSelectionFrame.visible = false;
       activeWallGuides.forEach((guide) => { guide.visible = false; });
 
       renderer.setPixelRatio(1);
@@ -4542,6 +4604,7 @@ export function createStandScene(
       return { ok: true, blob, width: targetWidth, height: targetHeight };
     } finally {
       selectedFrames.forEach((frame, index) => { frame.visible = selectedVisibility[index]; });
+      if (moduleSelectionFrame) moduleSelectionFrame.visible = moduleSelectionVisibility;
       activeWallGuides.forEach((guide, index) => { guide.visible = guideVisibility[index]; });
       renderer.setPixelRatio(previousPixelRatio);
       renderer.setSize(cssWidth, cssHeight, false);
