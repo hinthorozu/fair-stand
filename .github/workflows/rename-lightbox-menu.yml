@@ -39,6 +39,9 @@ jobs:
                   'Beze çevir': 'Lightbox Kumaşa Çevir',
                   'Bezden çıkar': 'Lightbox Kumaştan Çıkar',
               },
+              Path('test/lightboxFabric.test.js'): {
+                  '/Beze çevir/': '/Lightbox Kumaşa Çevir/',
+              },
           }
 
           for path, mapping in replacements.items():
@@ -51,6 +54,7 @@ jobs:
         run: |
           node --check src/moduleContextMenu.js
           node --check src/helpGuide.js
+          node --check test/lightboxFabric.test.js
       - name: Install
         run: npm ci
       - name: Test
@@ -62,6 +66,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git rm .github/workflows/rename-lightbox-menu.yml
-          git add src/moduleContextMenu.js src/helpGuide.js
+          git add src/moduleContextMenu.js src/helpGuide.js test/lightboxFabric.test.js
           git commit -m 'fix: rename panel and lightbox menu labels [skip ci]'
           git push origin ROG
