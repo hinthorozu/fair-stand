@@ -4622,7 +4622,7 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
             new THREE.MeshBasicMaterial({
               color: 0xffffff,
               transparent: true,
-              opacity: 0.32,
+              opacity: 0.58,
               depthWrite: false,
               toneMapped: false,
               blending: THREE.AdditiveBlending,
@@ -4644,10 +4644,10 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
       visualRoot.add(raw);
 
       const halo = haloShapeGroup;
-      halo.scale.set(scale * 1.018, -scale * 1.018, 1);
+      halo.scale.set(scale * 1.025, -scale * 1.025, 1);
       halo.position.set(
-        -center.x * scale * 1.018,
-        center.y * scale * 1.018,
+        -center.x * scale * 1.025,
+        center.y * scale * 1.025,
         -Math.max(0.003, wallGapM * 0.72),
       );
       visualRoot.add(halo);
