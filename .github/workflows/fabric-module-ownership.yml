@@ -1,0 +1,55 @@
+name: Fabric Module Ownership Fix
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - 'scripts/patch_fabric_module_ownership.py'
+      - '.github/workflows/fabric-module-ownership.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Apply patch
+        run: python3 scripts/patch_fabric_module_ownership.py
+
+      - name: Syntax check
+        run: node --check src/scene3d.js
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit and push
+        shell: bash
+        run: |
+          rm -f scripts/patch_fabric_module_ownership.py
+          rm -f .github/workflows/fabric-module-ownership.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'fix: bind lightbox fabric ownership to modules [skip ci]'
+          git push origin HEAD:ROG
