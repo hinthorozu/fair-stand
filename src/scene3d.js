@@ -4193,6 +4193,88 @@ export function createStandScene(
         });
         return;
       }
+      if (isWallOverlayModule(moduleState.type)) {
+        const stepCm = getModulePlacementSnapCm(moduleState.type);
+        const wallId = moduleState.placement.wallId ?? 'free';
+        const rotationZDeg = normalizeModuleRotationZDeg(moduleState.placement.rotationZDeg);
+        const vertical = isVerticalModuleRotation(rotationZDeg);
+        const horizontalAxis = wallId === 'back'
+          ? 'x'
+          : ((wallId === 'left' || wallId === 'right') ? 'y' : (vertical ? 'y' : 'x'));
+        const horizontalLimitCm = horizontalAxis === 'x'
+          ? Number(stageLayout.widthCm)
+          : Number(stageLayout.depthCm);
+        const widthCm = Math.max(1, Number(moduleState.widthCm) || 1);
+        const currentHorizontalCm = Number(moduleState.placement[horizontalAxis + 'Cm'] || 0);
+        const maxHorizontalCm = Math.max(0, horizontalLimitCm - widthCm);
+        const currentZCm = Number(moduleState.placement.zCm || 0);
+        const heightCm = Math.max(1, Number(moduleState.screenHeightCm ?? moduleState.heightCm ?? 52.3));
+        const halfHeightCm = heightCm / 2;
+        const defaultCenterCm = 175;
+        const minZCm = Math.ceil((halfHeightCm - defaultCenterCm) / stepCm) * stepCm;
+        const maxZCm = Math.floor(((STAND_DIMENSIONS.height * 100) - halfHeightCm - defaultCenterCm) / stepCm) * stepCm;
+
+        const moduleWorldPosition = new THREE.Vector3();
+        moduleGroup.getWorldPosition(moduleWorldPosition);
+        const projectedOrigin = moduleWorldPosition.clone().project(camera);
+        const worldStepM = stepCm / 100;
+        const horizontalWorld = horizontalAxis === 'x'
+          ? new THREE.Vector3(worldStepM, 0, 0)
+          : new THREE.Vector3(0, 0, worldStepM);
+        const candidates = [
+          { kind: 'horizontal', deltaCm: stepCm, world: horizontalWorld.clone() },
+          { kind: 'horizontal', deltaCm: -stepCm, world: horizontalWorld.clone().multiplyScalar(-1) },
+          { kind: 'vertical', deltaCm: stepCm, world: new THREE.Vector3(0, worldStepM, 0) },
+          { kind: 'vertical', deltaCm: -stepCm, world: new THREE.Vector3(0, -worldStepM, 0) },
+        ];
+        const bestArrowMove = candidates
+          .map((candidate) => {
+            const projectedTarget = moduleWorldPosition.clone().add(candidate.world).project(camera);
+            const screenDelta = new THREE.Vector2(
+              projectedTarget.x - projectedOrigin.x,
+              projectedTarget.y - projectedOrigin.y,
+            );
+            const lengthSq = screenDelta.lengthSq();
+            const score = lengthSq > 1e-12
+              ? screenDelta.normalize().dot(arrowScreenDirection)
+              : -Infinity;
+            return { ...candidate, score };
+          })
+          .sort((a, b) => b.score - a.score)[0];
+        if (!bestArrowMove || !Number.isFinite(bestArrowMove.score)) return;
+
+        const desiredPlacement = { ...moduleState.placement };
+        if (bestArrowMove.kind === 'vertical') {
+          const nextZCm = THREE.MathUtils.clamp(
+            currentZCm + bestArrowMove.deltaCm,
+            minZCm,
+            maxZCm,
+          );
+          if (nextZCm === currentZCm) {
+            showPlacementFeedback('TV bu yönde stand sınırına ulaştı.', { durationMs: 900 });
+            return;
+          }
+          desiredPlacement.zCm = nextZCm;
+        } else {
+          const nextHorizontalCm = THREE.MathUtils.clamp(
+            currentHorizontalCm + bestArrowMove.deltaCm,
+            0,
+            maxHorizontalCm,
+          );
+          if (nextHorizontalCm === currentHorizontalCm) {
+            showPlacementFeedback('TV bu yönde stand sınırına ulaştı.', { durationMs: 900 });
+            return;
+          }
+          desiredPlacement[horizontalAxis + 'Cm'] = nextHorizontalCm;
+        }
+
+        moduleState.placement = { ...desiredPlacement };
+        moduleGroup.userData.placement = { ...desiredPlacement };
+        applyPlacementToGroup(moduleGroup, desiredPlacement, moduleState.widthCm);
+        clearPlacementFeedback();
+        return;
+      }
+
       const stepCm = isTopFixtureType(moduleState.type)
         ? 20
         : getModulePlacementSnapCm(moduleState.type);
