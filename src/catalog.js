@@ -169,7 +169,19 @@ export const MODULE_CATALOG = Object.freeze({
     panelScreenHeightCm: TV_55_DEFINITION.screenHeightCm,
     videoWallRows: 2,
     videoWallCols: 2,
-    label: 'Video Wall 2×2 · 4×55\"',
+    label: 'Video Wall 2×2',
+  }),
+  VIDEO_WALL_3X3: Object.freeze({
+    ...createTvCatalogItem(TV_55_DEFINITION),
+    widthCm: TV_55_DEFINITION.screenWidthCm * 3,
+    heightCm: TV_55_DEFINITION.screenHeightCm * 3,
+    screenWidthCm: TV_55_DEFINITION.screenWidthCm * 3,
+    screenHeightCm: TV_55_DEFINITION.screenHeightCm * 3,
+    panelScreenWidthCm: TV_55_DEFINITION.screenWidthCm,
+    panelScreenHeightCm: TV_55_DEFINITION.screenHeightCm,
+    videoWallRows: 3,
+    videoWallCols: 3,
+    label: 'Video Wall 3×3',
   }),
   TV_65: createTvCatalogItem(TV_65_DEFINITION),
   LED_FLOODLIGHT: { type: 'led-floodlight', widthCm: 50, depthCm: 20, heightCm: 35, label: 'LED Projektör' },
@@ -245,6 +257,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'TV_42',
   'TV_55',
   'VIDEO_WALL_2X2',
+  'VIDEO_WALL_3X3',
   'TV_65',
   'LED_FLOODLIGHT',
 ]);
@@ -268,7 +281,7 @@ export const MODULE_CATALOG_GROUPS = Object.freeze([
   }),
   Object.freeze({
     label: 'Elektronik & Aydınlatma',
-    keys: Object.freeze(['TV_42', 'TV_55', 'VIDEO_WALL_2X2', 'TV_65', 'LED_FLOODLIGHT']),
+    keys: Object.freeze(['TV_42', 'TV_55', 'VIDEO_WALL_2X2', 'VIDEO_WALL_3X3', 'TV_65', 'LED_FLOODLIGHT']),
   }),
 ]);
 
