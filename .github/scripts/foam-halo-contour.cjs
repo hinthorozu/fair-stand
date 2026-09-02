@@ -1,0 +1,16 @@
+const fs = require('fs');
+const p = 'src/scene3d.js';
+let s = fs.readFileSync(p, 'utf8');
+const oldA = `      const raw = new THREE.Group();\n      const haloShapeGroup = new THREE.Group();\n      let meshCount = 0;`;
+const newA = `      const raw = new THREE.Group();\n      const haloContourPoints = [];\n      let meshCount = 0;`;
+if (!s.includes(oldA)) throw new Error('halo group block not found');
+s = s.replace(oldA, newA);
+const oldB = `          raw.add(mesh);\n          const haloMesh = new THREE.Mesh(new THREE.ShapeGeometry(shape, 10), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending }));\n          haloShapeGroup.add(haloMesh);\n          meshCount += 1;`;
+const newB = `          raw.add(mesh);\n          const contour = shape.getSpacedPoints(36);\n          contour.forEach((point) => haloContourPoints.push(point.clone()));\n          shape.holes.forEach((hole) => {\n            hole.getSpacedPoints(20).forEach((point) => haloContourPoints.push(point.clone()));\n          });\n          meshCount += 1;`;
+if (!s.includes(oldB)) throw new Error('halo mesh block not found');
+s = s.replace(oldB, newB);
+const oldC = `      const haloLayers = [\n        { scale: 1.016, opacity: 0.78, z: -Math.max(0.002, wallGapM * 0.22) },\n        { scale: 1.040, opacity: 0.46, z: -Math.max(0.003, wallGapM * 0.45) },\n        { scale: 1.080, opacity: 0.24, z: -Math.max(0.004, wallGapM * 0.68) },\n        { scale: 1.135, opacity: 0.10, z: -Math.max(0.005, wallGapM * 0.90) },\n      ];\n      haloLayers.forEach((layer) => {\n        const halo = haloShapeGroup.clone(true);\n        halo.traverse((child) => { if (child.isMesh) { child.material = child.material.clone(); child.material.opacity = layer.opacity; } });\n        halo.scale.set(scale * layer.scale, -scale * layer.scale, 1);\n        halo.position.set(-center.x * scale * layer.scale, center.y * scale * layer.scale, layer.z);\n        visualRoot.add(halo);\n      });`;
+const newC = `      const maxHaloLights = 40;\n      const step = Math.max(1, Math.ceil(haloContourPoints.length / maxHaloLights));\n      for (let i = 0; i < haloContourPoints.length; i += step) {\n        const point = haloContourPoints[i];\n        const light = new THREE.PointLight(0xffffff, 0.42, 0.22, 2);\n        light.position.set(\n          (point.x - center.x) * scale,\n          (center.y - point.y) * scale,\n          -Math.max(0.004, wallGapM * 0.58),\n        );\n        light.castShadow = false;\n        visualRoot.add(light);\n      }`;
+if (!s.includes(oldC)) throw new Error('halo layers block not found');
+s = s.replace(oldC, newC);
+fs.writeFileSync(p, s);
