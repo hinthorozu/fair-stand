@@ -6432,7 +6432,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const eyeCount = moduleState.type === 'showcase-3' ? 3 : 2;
   const openingStartStrip = eyeCount === 3 ? 1 : 2;
   const openingStripCount = eyeCount;
-  const showcaseDepth = 0.36;
+  const showcaseDepth = 0.30;
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -6446,6 +6446,11 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     color: FRAME_COLOR,
     metalness: 0.68,
     roughness: 0.28,
+  });
+  const showcaseWhiteMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    metalness: 0,
+    roughness: 0.72,
   });
 
   const profileGeometry = new THREE.BoxGeometry(PANEL_VERTICAL_PROFILE_WIDTH_M, height, frameDepth);
@@ -6548,14 +6553,14 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const openingTop = (openingStartStrip + openingStripCount) * stripHeight - railHeight / 2;
   const openingHeight = openingTop - openingBottom;
   const openingCenterY = (openingBottom + openingTop) / 2;
-  // Vitrinin on yuzu modulun on panel duzleminde kalir; 36 cm derinligin
+  // Vitrinin on yuzu modulun on panel duzleminde kalir; 30 cm derinligin
   // standart modul derinligini asan kismi tamamen arkaya dogru tasar.
   const caseFrontZ = depth / 2;
   const caseCenterZ = caseFrontZ - showcaseDepth / 2;
 
   const backPanel = new THREE.Mesh(
     new THREE.BoxGeometry(innerWidth, openingHeight, 0.018),
-    new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.82 }),
+    showcaseWhiteMaterial.clone(),
   );
   backPanel.position.set(0, openingCenterY, -depth / 2 + 0.009);
   backPanel.receiveShadow = true;
@@ -6581,9 +6586,22 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(sideGlass);
   }
 
+  const capGeometry = new THREE.BoxGeometry(
+    Math.max(innerWidth - 0.018, 0.02),
+    0.018,
+    showcaseDepth,
+  );
+  for (const y of [openingBottom, openingTop]) {
+    const cap = new THREE.Mesh(capGeometry.clone(), showcaseWhiteMaterial.clone());
+    cap.position.set(0, y, caseCenterZ);
+    cap.castShadow = true;
+    cap.receiveShadow = true;
+    group.add(cap);
+  }
+
   const frontPostGeometry = new THREE.BoxGeometry(0.028, openingHeight, 0.028);
   for (const side of [-1, 1]) {
-    const post = new THREE.Mesh(frontPostGeometry.clone(), frameMaterial.clone());
+    const post = new THREE.Mesh(frontPostGeometry.clone(), showcaseWhiteMaterial.clone());
     post.position.set(
       side * (innerWidth / 2 - 0.014),
       openingCenterY,
@@ -6595,7 +6613,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
 
   const frontEdgeGeometry = new THREE.BoxGeometry(innerWidth, 0.028, 0.028);
   for (const y of [openingBottom, openingTop]) {
-    const edge = new THREE.Mesh(frontEdgeGeometry.clone(), frameMaterial.clone());
+    const edge = new THREE.Mesh(frontEdgeGeometry.clone(), showcaseWhiteMaterial.clone());
     edge.position.set(0, y, caseFrontZ - 0.014);
     edge.castShadow = true;
     group.add(edge);
@@ -6624,7 +6642,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     shelf.receiveShadow = true;
     group.add(shelf);
 
-    const shelfFront = new THREE.Mesh(shelfFrontGeometry.clone(), frameMaterial.clone());
+    const shelfFront = new THREE.Mesh(shelfFrontGeometry.clone(), showcaseWhiteMaterial.clone());
     shelfFront.position.set(0, shelfY, caseFrontZ - 0.012);
     shelfFront.castShadow = true;
     group.add(shelfFront);
