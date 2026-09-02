@@ -41,7 +41,22 @@ jobs:
         run: npm ci
 
       - name: Test
-        run: npm test
+        run: |
+          set +e
+          npm test > /tmp/global-silhouette-test.log 2>&1
+          status=$?
+          cat /tmp/global-silhouette-test.log
+          exit $status
+
+      - name: Capture test failure
+        if: failure()
+        run: |
+          cp /tmp/global-silhouette-test.log .github/test-failure.log
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/test-failure.log
+          git commit -m 'ci: capture silhouette ghost test failure [skip ci]'
+          git push origin ROG
 
       - name: Build
         run: npm run build
@@ -51,6 +66,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git rm .github/workflows/global-silhouette-ghost.yml .github/scripts/apply-global-silhouette-ghost.py
+          if git ls-files --error-unmatch .github/test-failure.log >/dev/null 2>&1; then git rm -f .github/test-failure.log; fi
           git add src test tests
           git commit -m 'feat: make module ghosts singleton silhouettes [skip ci]'
           git push origin ROG
