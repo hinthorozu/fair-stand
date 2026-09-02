@@ -424,6 +424,24 @@ function collisionSegmentsOverlap(a, moduleA, b, moduleB) {
       if (logicalCounterEndpointJoin) return false;
     }
 
+    // All four catalog plant/planter modules use type=indoor-plant-1.
+    // They are floor fixtures and should be allowed to finish flush against a thin
+    // Maxima wall/panel line when rotated 90deg. Touching the wall at the plant's
+    // endpoint is not a physical overlap; crossing through the wall still is.
+    const plantModule = horizontalModule?.type === 'indoor-plant-1'
+      ? horizontalModule
+      : (verticalModule?.type === 'indoor-plant-1' ? verticalModule : null);
+    if (plantModule) {
+      const plantIsHorizontal = plantModule === horizontalModule;
+      const plantSegment = plantIsHorizontal ? horizontal : vertical;
+      const otherModule = plantIsHorizontal ? verticalModule : horizontalModule;
+      const plantIntersectionCm = plantIsHorizontal ? intersectionX : intersectionY;
+      const otherDepthCm = getModuleCollisionDepthCm(otherModule);
+      const plantEndpointJoin = otherDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM
+        && pointIsSegmentEndpoint(plantSegment, plantIntersectionCm);
+      if (plantEndpointJoin) return false;
+    }
+
     const thinEndpointJoin = horizontalDepth <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM
       && verticalDepth <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
     if (!thinEndpointJoin) return true;
