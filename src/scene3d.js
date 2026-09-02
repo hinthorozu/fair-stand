@@ -4562,6 +4562,14 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
   const centerZM = bodyBackZM + depthM / 2;
 
   const group = new THREE.Group();
+  group.userData.kind = 'module';
+  group.userData.moduleId = moduleState.id;
+  group.userData.moduleIndex = moduleIndex;
+  group.userData.moduleType = 'illuminated-foam';
+  group.userData.type = 'illuminated-foam';
+  group.userData.widthCm = Number(moduleState.widthCm) || 200;
+  group.userData.depthCm = Number(moduleState.depthCm) || 3.5;
+  group.userData.heightCm = Number(moduleState.heightCm) || 50;
   const hitbox = new THREE.Mesh(
     new THREE.BoxGeometry(widthM, heightM, depthM),
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }),
