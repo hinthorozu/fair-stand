@@ -35,7 +35,7 @@ test('only Yapay Çiçek 1 is wired while the second GLB file remains parked', (
   assert.match(scene, /selectionMode: 'module'/);
 
   const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
-  assert.match(main, /createIndoorPlantModuleState\(\)/);
+  assert.match(main, /createIndoorPlantModuleState\(module\)/);
   assert.doesNotMatch(main, /createIndoorPlantModuleState\(2\)/);
   assert.doesNotMatch(main, /indoor-plant-2/);
 });

@@ -1422,6 +1422,61 @@ export function createStandScene(
     return { group, surfaces };
   }
 
+  function createRenderableModule(moduleState, moduleIndex, onSurfaceReady = null) {
+    if (moduleState.type === 'separator') {
+      return createSeparatorModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'base-wall') {
+      return createBaseWallModule(moduleState, moduleIndex, onSurfaceReady);
+    }
+    if (moduleState.type === 'base') {
+      return createBaseModule(moduleState, moduleIndex, onSurfaceReady);
+    }
+    if (moduleState.type === 'counter') {
+      return createCounterModule(moduleState, moduleIndex, onSurfaceReady);
+    }
+    if (moduleState.type === 'sofa-set-classic') {
+      return createBeigeSofaSetModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'table-chair-set-eames') {
+      return createEamesTableChairSetModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'bar-stool') {
+      return createBarStoolModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'mini-fridge') {
+      return createMiniFridgeModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'kettle') {
+      return createKettleModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'coat-rack') {
+      return createCoatRackModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'indoor-plant-1') {
+      return createIndoorPlantModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'tv') {
+      return createTvModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'led-floodlight') {
+      return createLedFloodlightModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'shelf') {
+      return createShelfModule(moduleState, moduleIndex, onSurfaceReady);
+    }
+    if (moduleState.type === 'door') {
+      return createDoorModule(moduleState, moduleIndex, onSurfaceReady);
+    }
+    if (moduleState.type === 'showcase-2' || moduleState.type === 'showcase-3') {
+      return createShowcaseModule(moduleState, moduleIndex, onSurfaceReady);
+    }
+    if (moduleState.type === 'flat-panel') {
+      return createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady);
+    }
+    return null;
+  }
+
   function buildWall(modules, { resetView = true } = {}) {
     const selectedSurfaceIds = new Set(
       [...selectedSurfaces].map((mesh) => mesh.userData.surfaceId).filter(Boolean),
@@ -1437,70 +1492,12 @@ export function createStandScene(
     let hasMultiEdgePlacement = false;
 
     modules.forEach((moduleState, moduleIndex) => {
-      let module;
-      if (moduleState.type === 'separator') {
-        module = createSeparatorModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'base-wall') {
-        module = createBaseWallModule(
-          moduleState,
-          moduleIndex,
-          (surface) => applyStoredImage(surface),
-        );
-      } else if (moduleState.type === 'base') {
-        module = createBaseModule(
-          moduleState,
-          moduleIndex,
-          (surface) => applyStoredImage(surface),
-        );
-      } else if (moduleState.type === 'counter') {
-        module = createCounterModule(
-          moduleState,
-          moduleIndex,
-          (surface) => applyStoredImage(surface),
-        );
-      } else if (moduleState.type === 'sofa-set-classic') {
-        module = createBeigeSofaSetModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'table-chair-set-eames') {
-        module = createEamesTableChairSetModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'bar-stool') {
-        module = createBarStoolModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'mini-fridge') {
-        module = createMiniFridgeModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'kettle') {
-        module = createKettleModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'coat-rack') {
-        module = createCoatRackModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'indoor-plant-1') {
-        module = createIndoorPlantModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'tv') {
-        module = createTvModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'led-floodlight') {
-        module = createLedFloodlightModule(moduleState, moduleIndex);
-      } else if (moduleState.type === 'shelf') {
-        module = createShelfModule(
-          moduleState,
-          moduleIndex,
-          (surface) => applyStoredImage(surface),
-        );
-      } else if (moduleState.type === 'door') {
-        module = createDoorModule(
-          moduleState,
-          moduleIndex,
-          (surface) => applyStoredImage(surface),
-        );
-      } else if (moduleState.type === 'showcase-2' || moduleState.type === 'showcase-3') {
-        module = createShowcaseModule(
-          moduleState,
-          moduleIndex,
-          (surface) => applyStoredImage(surface),
-        );
-      } else if (moduleState.type === 'flat-panel') {
-        module = createFlatPanelModule(
-          moduleState,
-          moduleIndex,
-          (surface) => applyStoredImage(surface),
-        );
-      } else {
+      const module = createRenderableModule(
+        moduleState,
+        moduleIndex,
+        (surface) => applyStoredImage(surface),
+      );
+      if (!module) {
         console.warn('Desteklenmeyen modül tipi atlandı:', moduleState.type, moduleState.id);
         return;
       }
@@ -1792,10 +1789,13 @@ export function createStandScene(
 
   function disposePlacementGhost() {
     if (!placementGhost) return;
+    placementGhost.root.visible = false;
+  }
+
+  function destroyPlacementGhost() {
+    if (!placementGhost) return;
     scene.remove(placementGhost.root);
-    if (placementGhost.ownsGeometry) placementGhost.mesh?.geometry?.dispose?.();
-    placementGhost.mesh?.material?.dispose?.();
-    placementGhost.tintMaterials?.forEach((material) => material?.dispose?.());
+    placementGhost.material?.dispose?.();
     placementGhost = null;
   }
 
@@ -1814,384 +1814,152 @@ export function createStandScene(
     };
   }
 
-  function ensurePlacementGhost(moduleOrWidthCm) {
-    const ghostBehavior = getModuleGhostBehavior(moduleOrWidthCm);
-    const dimensions = getPlacementGhostDimensions(moduleOrWidthCm);
-    const key = [moduleOrWidthCm?.type ?? 'generic', dimensions.widthCm, dimensions.depthM, dimensions.heightM, moduleOrWidthCm?.screenWidthCm ?? '', moduleOrWidthCm?.screenHeightCm ?? ''].join(':');
-    if (placementGhost?.key === key) return placementGhost;
-    disposePlacementGhost();
+  function getPlacementGhostKey(moduleOrWidthCm, dimensions) {
+    if (!moduleOrWidthCm || typeof moduleOrWidthCm !== 'object') {
+      return ['generic', dimensions.widthCm, dimensions.depthM, dimensions.heightM].join(':');
+    }
+    return [
+      moduleOrWidthCm.type ?? 'generic',
+      dimensions.widthCm,
+      dimensions.depthM,
+      dimensions.heightM,
+      moduleOrWidthCm.shape ?? '',
+      moduleOrWidthCm.shelfCount ?? '',
+      moduleOrWidthCm.sizeInch ?? '',
+      moduleOrWidthCm.screenWidthCm ?? '',
+      moduleOrWidthCm.screenHeightCm ?? '',
+    ].join(':');
+  }
 
+  function createSilhouetteGhostMaterial(opacity) {
+    return new THREE.MeshBasicMaterial({
+      color: PLACEMENT_VALID_COLOR,
+      transparent: true,
+      opacity: Number(opacity) || 0.38,
+      depthWrite: false,
+      depthTest: false,
+      side: THREE.DoubleSide,
+      toneMapped: false,
+      fog: false,
+    });
+  }
+
+  function preparePlacementGhostTree(object, ghostMaterial) {
+    if (!object) return;
+
+    if (!object.userData?.placementGhostAddWrapped) {
+      const originalAdd = object.add.bind(object);
+      object.add = (...children) => {
+        children.forEach((child) => preparePlacementGhostTree(child, ghostMaterial));
+        return originalAdd(...children);
+      };
+      object.userData = {
+        ...object.userData,
+        placementGhostAddWrapped: true,
+      };
+    }
+
+    object.raycast = () => {};
+
+    if (
+      object.isLight
+      || object.isLine
+      || object.isLineSegments
+      || object.isPoints
+      || object.isSprite
+      || object.userData?.isModuleSelectionVisual
+    ) {
+      object.visible = false;
+    } else if (object.isMesh) {
+      const sourceMaterials = Array.isArray(object.material) ? object.material : [object.material];
+      const isInvisiblePickingProxy = sourceMaterials.some((material) => (
+        material?.colorWrite === false
+        || (material?.transparent === true && Number(material?.opacity) === 0)
+      ));
+
+      if (isInvisiblePickingProxy) {
+        object.visible = false;
+        object.userData = {
+          ...object.userData,
+          placementGhostHiddenProxy: true,
+        };
+      } else {
+        object.material = ghostMaterial;
+        object.castShadow = false;
+        object.receiveShadow = false;
+        object.renderOrder = 10000;
+      }
+    }
+
+    object.children.forEach((child) => preparePlacementGhostTree(child, ghostMaterial));
+  }
+
+  function createFallbackPlacementGhost(dimensions, key, opacity) {
     const root = new THREE.Group();
-
-    // Koltuk Takımı uses its actual GLB sofa geometry plus the real coffee-table geometry.
-    if (ghostBehavior.renderer === 'sofa-set-classic') {
-      const proxy = new THREE.Mesh(
-        new THREE.BoxGeometry(
-          Math.max(dimensions.widthCm / 100, 0.02),
-          dimensions.heightM,
-          dimensions.depthM,
-        ),
-        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
-      );
-      proxy.position.y = dimensions.heightM / 2;
-      root.add(proxy);
-      scene.add(root);
-
-      const tintMaterials = [];
-      const makeGhostMaterial = () => {
-        const material = new THREE.MeshBasicMaterial({
-          color: PLACEMENT_VALID_COLOR,
-          transparent: true,
-          opacity: 0.38,
-          depthWrite: false,
-          depthTest: false,
-          side: THREE.DoubleSide,
-        });
-        tintMaterials.push(material);
-        return material;
-      };
-
-      // Same coffee table dimensions and +10 cm Z offset as the rendered module.
-      const tableTop = new THREE.Mesh(new THREE.BoxGeometry(0.60, 0.018, 0.42), makeGhostMaterial());
-      tableTop.position.set(0, 0.38, 0.10);
-      tableTop.renderOrder = 10000;
-      root.add(tableTop);
-
-      const tableStem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.35, 20), makeGhostMaterial());
-      tableStem.position.set(0, 0.19, 0.10);
-      tableStem.renderOrder = 10000;
-      root.add(tableStem);
-
-      const tableBase = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32), makeGhostMaterial());
-      tableBase.position.set(0, 0.018, 0.10);
-      tableBase.renderOrder = 10000;
-      root.add(tableBase);
-
-      placementGhost = {
-        root,
-        mesh: proxy,
-        tintMaterials,
-        key,
-        widthCm: dimensions.widthCm,
-        ownsGeometry: true,
-        colorHex: PLACEMENT_VALID_COLOR,
-      };
-
-      const widthM = dimensions.widthCm / 100;
-      const depthM = dimensions.depthM;
-      const heightM = dimensions.heightM;
-      const loveseatWidthM = 1.50;
-      const chairWidthM = 0.65;
-      const sofaDepthM = 0.45;
-      const chairGapM = 0.20;
-      const chairCenterOffsetM = (chairWidthM + chairGapM) / 2;
-      const backRowZ = -depthM / 2 + sofaDepthM / 2;
-      const frontRowZ = depthM / 2 - sofaDepthM / 2;
-      const placements = [
-        { meshName: 'beigechair2seatsofa_tripo_mat_0691346e_0', targetWidthM: loveseatWidthM, x: 0, z: backRowZ, rotationYDeg: -45 },
-        { meshName: 'beigechair1_tripo_mat_0691346e_0', targetWidthM: chairWidthM, x: -chairCenterOffsetM, z: frontRowZ, rotationYDeg: 40 },
-        { meshName: 'beigechair3_tripo_mat_0691346e_0', targetWidthM: chairWidthM, x: chairCenterOffsetM, z: frontRowZ, rotationYDeg: 225 },
-      ];
-
-      loadBeigeSofaModel().then((template) => {
-        if (placementGhost?.key !== key || placementGhost.root !== root) return;
-
-        placements.forEach((placement) => {
-          const source = template.getObjectByName(placement.meshName);
-          if (!source) return;
-
-          source.updateWorldMatrix(true, false);
-          const mesh = source.clone(true);
-          mesh.matrixAutoUpdate = true;
-          mesh.position.set(0, 0, 0);
-          mesh.rotation.set(0, 0, 0);
-          mesh.quaternion.identity();
-          mesh.scale.set(1, 1, 1);
-          mesh.updateMatrix();
-          mesh.applyMatrix4(source.matrixWorld);
-
-          mesh.traverse((object) => {
-            if (!object.isMesh) return;
-            const material = new THREE.MeshBasicMaterial({
-              color: placementGhost.colorHex ?? PLACEMENT_VALID_COLOR,
-              transparent: true,
-              opacity: 0.38,
-              depthWrite: false,
-              depthTest: false,
-              side: THREE.DoubleSide,
-            });
-            object.material = material;
-            object.renderOrder = 10000;
-            tintMaterials.push(material);
-          });
-
-          mesh.updateMatrixWorld(true);
-          let sourceBox = new THREE.Box3().setFromObject(mesh);
-          const sourceCenter = sourceBox.getCenter(new THREE.Vector3());
-          mesh.position.x -= sourceCenter.x;
-          mesh.position.z -= sourceCenter.z;
-          mesh.position.y -= sourceBox.min.y;
-          mesh.updateMatrixWorld(true);
-          sourceBox = new THREE.Box3().setFromObject(mesh);
-
-          const oriented = new THREE.Group();
-          oriented.rotation.y = THREE.MathUtils.degToRad(placement.rotationYDeg);
-          oriented.add(mesh);
-          oriented.updateMatrixWorld(true);
-
-          const orientedBox = new THREE.Box3().setFromObject(oriented);
-          const orientedSize = orientedBox.getSize(new THREE.Vector3());
-          const sourceSize = sourceBox.getSize(new THREE.Vector3());
-          const isLoveseat = placement.meshName === 'beigechair2seatsofa_tripo_mat_0691346e_0';
-          const sizeCorrection = isLoveseat ? 1.40 : 1.25;
-          const physicalWidthM = isLoveseat ? orientedSize.x : Math.max(sourceSize.x, sourceSize.z);
-          const uniformScale = physicalWidthM > 0
-            ? (placement.targetWidthM / physicalWidthM) * sizeCorrection
-            : sizeCorrection;
-
-          const fitted = new THREE.Group();
-          fitted.scale.setScalar(uniformScale);
-          fitted.position.set(placement.x, 0, placement.z);
-          fitted.add(oriented);
-          root.add(fitted);
-        });
-      }).catch((error) => {
-        console.warn('Koltuk Takımı ghost GLB modeli yüklenemedi:', error);
-      });
-
-      return placementGhost;
-    }
-
-    // Eames Masa Sandalye Takımı uses the real table geometry plus the actual chair GLB geometry.
-    if (ghostBehavior.renderer === 'table-chair-set-eames') {
-      const proxy = new THREE.Mesh(
-        new THREE.BoxGeometry(
-          Math.max(dimensions.widthCm / 100, 0.02),
-          dimensions.heightM,
-          dimensions.depthM,
-        ),
-        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
-      );
-      proxy.position.y = dimensions.heightM / 2;
-      root.add(proxy);
-      scene.add(root);
-
-      const tintMaterials = [];
-      const makeGhostMaterial = () => {
-        const material = new THREE.MeshBasicMaterial({
-          color: PLACEMENT_VALID_COLOR,
-          transparent: true,
-          opacity: 0.38,
-          depthWrite: false,
-          depthTest: false,
-          side: THREE.DoubleSide,
-        });
-        tintMaterials.push(material);
-        return material;
-      };
-
-      const tableTop = new THREE.Mesh(new THREE.CylinderGeometry(0.375, 0.375, 0.018, 64), makeGhostMaterial());
-      tableTop.position.set(0, 0.74, 0);
-      tableTop.renderOrder = 10000;
-      root.add(tableTop);
-
-      const tableStem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.70, 20), makeGhostMaterial());
-      tableStem.position.set(0, 0.37, 0);
-      tableStem.renderOrder = 10000;
-      root.add(tableStem);
-
-      const tableBase = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32), makeGhostMaterial());
-      tableBase.position.set(0, 0.018, 0);
-      tableBase.renderOrder = 10000;
-      root.add(tableBase);
-
-      placementGhost = {
-        root,
-        mesh: proxy,
-        tintMaterials,
-        key,
-        widthCm: dimensions.widthCm,
-        ownsGeometry: true,
-        colorHex: PLACEMENT_VALID_COLOR,
-      };
-
-      const chairPlacements = [
-        [-0.33, -0.33, Math.PI / 4],
-        [0.33, -0.33, -Math.PI / 4],
-        [-0.33, 0.33, Math.PI * 3 / 4],
-        [0.33, 0.33, -Math.PI * 3 / 4],
-      ];
-
-      loadEamesChairModel().then((template) => {
-        if (placementGhost?.key !== key || placementGhost.root !== root) return;
-        chairPlacements.forEach(([x, z, rotationY]) => {
-          const chair = template.clone(true);
-          chair.traverse((object) => {
-            if (!object.isMesh) return;
-            const material = new THREE.MeshBasicMaterial({
-              color: placementGhost.colorHex ?? PLACEMENT_VALID_COLOR,
-              transparent: true,
-              opacity: 0.38,
-              depthWrite: false,
-              depthTest: false,
-              side: THREE.DoubleSide,
-            });
-            object.material = material;
-            object.renderOrder = 10000;
-            tintMaterials.push(material);
-          });
-
-          chair.updateMatrixWorld(true);
-          let box = new THREE.Box3().setFromObject(chair);
-          const size = box.getSize(new THREE.Vector3());
-          const scale = size.y > 0 ? EAMES_CHAIR_TARGET_HEIGHT_M / size.y : 1;
-          chair.scale.multiplyScalar(scale);
-          chair.updateMatrixWorld(true);
-          box = new THREE.Box3().setFromObject(chair);
-          const center = box.getCenter(new THREE.Vector3());
-          chair.position.x -= center.x;
-          chair.position.z -= center.z;
-          chair.position.y -= box.min.y;
-
-          const holder = new THREE.Group();
-          holder.position.set(x, 0, z);
-          holder.rotation.y = rotationY;
-          holder.add(chair);
-          root.add(holder);
-        });
-      }).catch((error) => {
-        console.warn('Eames ghost GLB modeli yüklenemedi:', error);
-      });
-
-      return placementGhost;
-    }
-
-    if (ghostBehavior.renderer === 'tv') {
-      const tvWidthM = Math.max(Number(moduleOrWidthCm?.screenWidthCm || 93) / 100, 0.02);
-      const tvHeightM = Math.max(Number(moduleOrWidthCm?.screenHeightCm || 52.3) / 100, 0.02);
-      const tvDepthM = Math.max(Number(moduleOrWidthCm?.depthCm || 5) / 100, 0.02);
-      const root = new THREE.Group();
-      const ghostMaterial = new THREE.MeshBasicMaterial({
-        color: PLACEMENT_VALID_COLOR,
-        transparent: true,
-        opacity: 0.48,
-        depthWrite: false,
-        depthTest: false,
-        side: THREE.DoubleSide,
-      });
-      const mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(tvWidthM, tvHeightM, tvDepthM),
-        ghostMaterial,
-      );
-      mesh.position.set(0, 1.75, 0.055);
-      mesh.renderOrder = 10000;
-      root.add(mesh);
-
-      const bezelMaterial = ghostMaterial.clone();
-      bezelMaterial.opacity = 0.9;
-      const bezel = new THREE.LineSegments(
-        new THREE.EdgesGeometry(new THREE.BoxGeometry(tvWidthM, tvHeightM, tvDepthM)),
-        new THREE.LineBasicMaterial({
-          color: PLACEMENT_VALID_COLOR,
-          transparent: true,
-          opacity: 0.95,
-          depthTest: false,
-        }),
-      );
-      bezel.position.copy(mesh.position);
-      bezel.renderOrder = 10001;
-      root.add(bezel);
-      scene.add(root);
-
-      placementGhost = {
-        root,
-        mesh,
-        tintMaterials: [ghostMaterial],
-        key,
-        widthCm: dimensions.widthCm,
-        ownsGeometry: true,
-        colorHex: PLACEMENT_VALID_COLOR,
-      };
-      return placementGhost;
-    }
-
-    // Bar Taburesi uses the actual GLB geometry as its placement ghost.
-    if (ghostBehavior.renderer === 'bar-stool') {
-      const proxy = new THREE.Mesh(
-        new THREE.BoxGeometry(
-          Math.max(dimensions.widthCm / 100, 0.02),
-          dimensions.heightM,
-          dimensions.depthM,
-        ),
-        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
-      );
-      proxy.position.y = dimensions.heightM / 2;
-      root.add(proxy);
-      scene.add(root);
-
-      const tintMaterials = [];
-      placementGhost = {
-        root,
-        mesh: proxy,
-        tintMaterials,
-        key,
-        widthCm: dimensions.widthCm,
-        ownsGeometry: true,
-        colorHex: PLACEMENT_VALID_COLOR,
-      };
-
-      loadBarStoolModel().then((template) => {
-        if (placementGhost?.key !== key || placementGhost.root !== root) return;
-        const chair = template.clone(true);
-        chair.traverse((object) => {
-          if (!object.isMesh) return;
-          const material = new THREE.MeshBasicMaterial({
-            color: placementGhost.colorHex ?? PLACEMENT_VALID_COLOR,
-            transparent: true,
-            opacity: 0.38,
-            depthWrite: false,
-            depthTest: false,
-            side: THREE.DoubleSide,
-          });
-          object.material = material;
-          object.renderOrder = 10000;
-          tintMaterials.push(material);
-        });
-
-        chair.updateMatrixWorld(true);
-        const box = new THREE.Box3().setFromObject(chair);
-        const center = box.getCenter(new THREE.Vector3());
-        chair.position.x -= center.x;
-        chair.position.z -= center.z;
-        chair.position.y -= box.min.y;
-        root.add(chair);
-      }).catch((error) => {
-        console.warn('Bar Taburesi ghost GLB modeli yüklenemedi:', error);
-      });
-
-      return placementGhost;
-    }
-
+    const material = createSilhouetteGhostMaterial(opacity);
     const mesh = new THREE.Mesh(
       new THREE.BoxGeometry(
         Math.max(dimensions.widthCm / 100, 0.02),
         dimensions.heightM,
         dimensions.depthM,
       ),
-      new THREE.MeshBasicMaterial({
-        color: PLACEMENT_VALID_COLOR,
-        transparent: true,
-        opacity: Number(ghostBehavior.opacity) || PLACEMENT_GHOST_OPACITY,
-        depthWrite: false,
-        depthTest: false,
-        side: THREE.DoubleSide,
-      }),
+      material,
     );
-    mesh.renderOrder = 10000;
     mesh.position.y = dimensions.heightM / 2;
+    mesh.renderOrder = 10000;
+    mesh.raycast = () => {};
     root.add(mesh);
+    root.visible = false;
     scene.add(root);
-    placementGhost = { root, mesh, key, widthCm: dimensions.widthCm };
+    return {
+      root,
+      material,
+      key,
+      widthCm: dimensions.widthCm,
+      colorHex: PLACEMENT_VALID_COLOR,
+      isFallback: true,
+    };
+  }
+
+  function createPlacementGhost(moduleOrWidthCm, dimensions, key, ghostBehavior) {
+    if (!moduleOrWidthCm || typeof moduleOrWidthCm !== 'object') {
+      return createFallbackPlacementGhost(dimensions, key, ghostBehavior.opacity);
+    }
+
+    const built = createRenderableModule(moduleOrWidthCm, -1, null);
+    if (!built?.group) {
+      console.warn('Silüet ghost için modül renderer bulunamadı; kutu fallback kullanılıyor:', moduleOrWidthCm.type);
+      return createFallbackPlacementGhost(dimensions, key, ghostBehavior.opacity);
+    }
+
+    const root = built.group;
+    root.position.set(0, 0, 0);
+    root.rotation.set(0, 0, 0);
+    root.scale.set(1, 1, 1);
+    root.visible = false;
+
+    const material = createSilhouetteGhostMaterial(ghostBehavior.opacity);
+    preparePlacementGhostTree(root, material);
+    scene.add(root);
+
+    return {
+      root,
+      material,
+      key,
+      widthCm: dimensions.widthCm,
+      colorHex: PLACEMENT_VALID_COLOR,
+      isFallback: false,
+    };
+  }
+
+  function ensurePlacementGhost(moduleOrWidthCm) {
+    const ghostBehavior = getModuleGhostBehavior(moduleOrWidthCm);
+    const dimensions = getPlacementGhostDimensions(moduleOrWidthCm);
+    const key = getPlacementGhostKey(moduleOrWidthCm, dimensions);
+    if (placementGhost?.key === key) return placementGhost;
+
+    destroyPlacementGhost();
+    placementGhost = createPlacementGhost(moduleOrWidthCm, dimensions, key, ghostBehavior);
     return placementGhost;
   }
 
@@ -2199,11 +1967,7 @@ export function createStandScene(
     const ghost = ensurePlacementGhost(moduleOrWidthCm);
     const colorHex = valid ? PLACEMENT_VALID_COLOR : PLACEMENT_INVALID_COLOR;
     ghost.colorHex = colorHex;
-    if (ghost.tintMaterials?.length) {
-      ghost.tintMaterials.forEach((material) => material.color?.setHex(colorHex));
-    } else if (ghost.mesh?.material?.color) {
-      ghost.mesh.material.color.setHex(colorHex);
-    }
+    ghost.material?.color?.setHex(colorHex);
     if (moduleOrWidthCm && typeof moduleOrWidthCm === 'object') {
       ghost.root.userData.type = moduleOrWidthCm.type ?? ghost.root.userData.type;
     }

@@ -54,17 +54,12 @@ test('TV 55 and 65 inherit TV 42 and override only their screen size identity', 
   assert.equal(createTvModuleState(50), null);
 });
 
-test('TV ghost geometry reads each TV state screen dimensions instead of hard-coding 42 inch', () => {
-  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(source, /moduleOrWidthCm\?\.screenWidthCm/);
-  assert.match(source, /moduleOrWidthCm\?\.screenHeightCm/);
-  assert.match(source, /new THREE\.BoxGeometry\(tvWidthM, tvHeightM, tvDepthM\)/);
-  assert.doesNotMatch(source, /new THREE\.BoxGeometry\(0\.93, 0\.523, 0\.05\)/);
-});
-
-test('TV module has explicit ghost behavior contract', () => {
-  assert.equal(getModuleGhostBehavior({ type: 'tv' }).kind, 'real-model');
-  assert.equal(getModuleGhostBehavior({ type: 'tv' }).renderer, 'tv');
+test('TV uses the central silhouette ghost contract', () => {
+  assert.deepEqual(getModuleGhostBehavior({ type: 'tv' }), {
+    kind: 'silhouette',
+    renderer: 'module-silhouette',
+    opacity: 0.38,
+  });
 });
 
 test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its front face', () => {
@@ -131,7 +126,7 @@ test('TV is a non-colliding wall overlay accessory', () => {
 
 test('TV wall overlay drag snaps horizontal and height movement to 10 cm', () => {
   const behavior = getModuleGhostBehavior({ type: 'tv' });
-  assert.equal(behavior.renderer, 'tv');
+  assert.equal(behavior.renderer, 'module-silhouette');
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(source, /function getWallOverlayDragPoint/);
   assert.match(source, /Math\.round\(rawOffsetCm \/ 10\) \* 10/);

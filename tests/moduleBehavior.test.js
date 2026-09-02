@@ -97,20 +97,11 @@ test('straight Banko 45 degree catalog preview placement stays valid', () => {
 });
 
 
-test('ghost behavior is part of the central module contract', () => {
-  assert.deepEqual(getModuleGhostBehavior({ type: 'bar-stool' }), {
-    kind: 'real-model', renderer: 'bar-stool', opacity: 0.38,
-  });
-  assert.deepEqual(getModuleGhostBehavior({ type: 'table-chair-set-eames' }), {
-    kind: 'custom', renderer: 'table-chair-set-eames', opacity: 0.38,
-  });
-  assert.deepEqual(getModuleGhostBehavior({ type: 'sofa-set-classic' }), {
-    kind: 'custom', renderer: 'sofa-set-classic', opacity: 0.38,
-  });
-});
-
-test('new or unknown modules get a safe proxy ghost by default', () => {
-  assert.deepEqual(getModuleGhostBehavior({ type: 'future-module' }), {
-    kind: 'proxy', renderer: 'proxy', opacity: 0.30,
-  });
+test('ghost behavior is one central silhouette contract for every module', () => {
+  const expected = {
+    kind: 'silhouette', renderer: 'module-silhouette', opacity: 0.38,
+  };
+  for (const type of ['bar-stool', 'table-chair-set-eames', 'sofa-set-classic', 'tv', 'future-module']) {
+    assert.deepEqual(getModuleGhostBehavior({ type }), expected);
+  }
 });

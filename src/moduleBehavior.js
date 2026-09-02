@@ -1,7 +1,7 @@
 const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
-  kind: 'proxy',
-  renderer: 'proxy',
-  opacity: 0.30,
+  kind: 'silhouette',
+  renderer: 'module-silhouette',
+  opacity: 0.38,
 });
 
 const DEFAULT_BEHAVIOR = Object.freeze({
@@ -38,7 +38,6 @@ const TYPE_BEHAVIORS = Object.freeze({
     defaultRotationDeg: 0,
     allowSideInsert: true,
     collision: 'footprint',
-    ghost: Object.freeze({ kind: 'custom', renderer: 'sofa-set-classic', opacity: 0.38 }),
   }),
   'table-chair-set-eames': Object.freeze({
     placement: 'free',
@@ -47,7 +46,6 @@ const TYPE_BEHAVIORS = Object.freeze({
     defaultRotationDeg: 0,
     allowSideInsert: true,
     collision: 'footprint',
-    ghost: Object.freeze({ kind: 'custom', renderer: 'table-chair-set-eames', opacity: 0.38 }),
   }),
   'bar-stool': Object.freeze({
     placement: 'free',
@@ -56,7 +54,6 @@ const TYPE_BEHAVIORS = Object.freeze({
     defaultRotationDeg: 270,
     allowSideInsert: true,
     collision: 'footprint',
-    ghost: Object.freeze({ kind: 'real-model', renderer: 'bar-stool', opacity: 0.38 }),
   }),
   'mini-fridge': Object.freeze({
     placement: 'free',
@@ -99,7 +96,6 @@ const TYPE_BEHAVIORS = Object.freeze({
     defaultRotationDeg: 0,
     allowSideInsert: false,
     collision: 'none',
-    ghost: Object.freeze({ kind: 'real-model', renderer: 'tv', opacity: 0.38 }),
   }),
   'led-floodlight': Object.freeze({
     placement: 'top',
