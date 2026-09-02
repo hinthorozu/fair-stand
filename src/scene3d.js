@@ -2,10 +2,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
@@ -211,34 +207,6 @@ export function createStandScene(
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.appendChild(renderer.domElement);
-
-  const FOAM_BLOOM_LAYER = 1;
-  const bloomRenderPass = new RenderPass(scene, camera);
-  const foamBloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 1.35, 0.68, 1.0);
-  foamBloomPass.threshold = 1.0;
-  foamBloomPass.strength = 1.35;
-  foamBloomPass.radius = 0.68;
-  const bloomComposer = new EffectComposer(renderer);
-  bloomComposer.renderToScreen = false;
-  bloomComposer.setPixelRatio(Math.min(editorPixelRatio, 0.75));
-  bloomComposer.addPass(bloomRenderPass);
-  bloomComposer.addPass(foamBloomPass);
-
-  const finalRenderPass = new RenderPass(scene, camera);
-  const finalPass = new ShaderPass(
-    new THREE.ShaderMaterial({
-      uniforms: {
-        baseTexture: { value: null },
-        bloomTexture: { value: bloomComposer.renderTarget2.texture },
-      },
-      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-      fragmentShader: 'uniform sampler2D baseTexture; uniform sampler2D bloomTexture; varying vec2 vUv; void main(){ gl_FragColor = texture2D(baseTexture, vUv) + texture2D(bloomTexture, vUv); }',
-    }),
-    'baseTexture',
-  );
-  const finalComposer = new EffectComposer(renderer);
-  finalComposer.addPass(finalRenderPass);
-  finalComposer.addPass(finalPass);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -4443,8 +4411,6 @@ export function createStandScene(
     const width = Math.max(container.clientWidth, 1);
     const height = Math.max(container.clientHeight, 1);
     renderer.setSize(width, height, false);
-    bloomComposer.setSize(width, height);
-    finalComposer.setSize(width, height);
     updateCameraProjection(width, height);
   }
 
@@ -4477,14 +4443,7 @@ export function createStandScene(
       lastCubePosition.copy(camera.position);
       lastCubeQuaternion.copy(camera.quaternion);
     }
-    const previousLayerMask = camera.layers.mask;
-    camera.layers.set(FOAM_BLOOM_LAYER);
-    bloomRenderPass.camera = camera;
-    bloomComposer.render();
-    camera.layers.set(0);
-    finalRenderPass.camera = camera;
-    finalComposer.render();
-    camera.layers.mask = previousLayerMask;
+    renderer.render(scene, camera);
   });
 
   async function captureCurrentViewPng({ scale = 3 } = {}) {
@@ -4634,7 +4593,6 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
     const loader = new SVGLoader();
     loader.loadAsync(assetUrl).then((data) => {
       const raw = new THREE.Group();
-      const haloContourGroup = new THREE.Group();
       let meshCount = 0;
       data.paths.forEach((path) => {
         const style = path.userData?.style ?? {};
@@ -4658,25 +4616,6 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
           mesh.castShadow = true;
           mesh.receiveShadow = true;
           raw.add(mesh);
-          const addHaloContour = (points) => {
-            if (!points || points.length < 2) return;
-            const geometry = new THREE.BufferGeometry().setFromPoints(
-              points.map((point) => new THREE.Vector3(point.x, point.y, 0)),
-            );
-            const line = new THREE.LineLoop(
-              geometry,
-              new THREE.LineBasicMaterial({
-                color: new THREE.Color().setRGB(5.0, 5.0, 5.0),
-                toneMapped: false,
-                transparent: false,
-                depthWrite: false,
-              }),
-            );
-            line.layers.set(1);
-            haloContourGroup.add(line);
-          };
-          addHaloContour(shape.getSpacedPoints(72));
-          shape.holes.forEach((hole) => addHaloContour(hole.getSpacedPoints(40)));
           meshCount += 1;
         });
       });
@@ -4691,14 +4630,29 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
       raw.position.set(-center.x * scale, center.y * scale, 0);
       visualRoot.add(raw);
 
-      const halo = haloContourGroup;
-      halo.scale.set(scale, -scale, 1);
-      halo.position.set(
-        -center.x * scale,
-        center.y * scale,
-        -Math.max(0.003, wallGapM * 0.72),
-      );
-      visualRoot.add(halo);
+      const haloCanvas = document.createElement('canvas');
+      haloCanvas.width = 512; haloCanvas.height = 256;
+      const haloCtx = haloCanvas.getContext('2d');
+      const haloImage = new Image();
+      haloImage.onload = () => {
+        haloCtx.clearRect(0,0,512,256);
+        haloCtx.filter = 'blur(14px)';
+        haloCtx.globalAlpha = 0.9;
+        haloCtx.drawImage(haloImage,24,24,464,208);
+        haloCtx.filter = 'none';
+        haloCtx.globalCompositeOperation = 'source-in';
+        haloCtx.fillStyle = '#ffffff';
+        haloCtx.fillRect(0,0,512,256);
+        haloCtx.globalCompositeOperation = 'source-over';
+        const texture = new THREE.CanvasTexture(haloCanvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.generateMipmaps = false;
+        const halo = new THREE.Mesh(new THREE.PlaneGeometry(widthM * 1.10, heightM * 1.18), new THREE.MeshBasicMaterial({map:texture,transparent:true,opacity:0.72,depthWrite:false,toneMapped:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+        halo.position.set(0,0,-Math.max(0.004,wallGapM*0.68));
+        halo.raycast=()=>{};
+        visualRoot.add(halo);
+      };
+      haloImage.src = assetUrl;
     }).catch((error) => {
       console.warn('Işıklı strafor SVG yüklenemedi:', error);
     });
