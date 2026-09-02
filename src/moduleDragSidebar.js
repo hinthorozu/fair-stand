@@ -149,12 +149,22 @@ export function createModuleCatalogPreview(module) {
 
   if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {
     const plant = document.createElement('div');
-    plant.className = `module-drag-plant module-drag-plant-${module.type === 'indoor-plant-1' ? '1' : '2'}`;
-    ['pot', 'stem', 'leaf leaf-a', 'leaf leaf-b', 'leaf leaf-c', 'leaf leaf-d'].forEach((part) => {
+    const plantVariant = module.type === 'indoor-plant-1' ? '1' : '2';
+    const leafCount = plantVariant === '1' ? 2 : 3;
+    plant.className = `module-drag-plant module-drag-plant-${plantVariant}`;
+
+    ['pot', 'stem'].forEach((part) => {
       const element = document.createElement('i');
-      element.className = `module-drag-plant-${part.replace(' ', ' module-drag-plant-')}`;
+      element.className = `module-drag-plant-${part}`;
       plant.appendChild(element);
     });
+
+    ['a', 'b', 'c'].slice(0, leafCount).forEach((leafName) => {
+      const leaf = document.createElement('i');
+      leaf.className = `module-drag-plant-leaf leaf-${leafName}`;
+      plant.appendChild(leaf);
+    });
+
     preview.appendChild(plant);
     return preview;
   }
