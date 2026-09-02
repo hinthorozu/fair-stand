@@ -1,0 +1,54 @@
+name: Fix TV Selection Frame
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-tv-selection-frame.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Apply TV selection frame fix
+        run: python3 .github/scripts/fix-tv-selection-frame.py
+
+      - name: Verify source shape
+        run: |
+          grep -Fn "const selectionBounds = moduleGroup.userData?.selectionBounds ?? null;" src/scene3d.js
+          grep -Fn "group.userData.selectionBounds = Object.freeze({" src/scene3d.js
+          grep -Fn "centerY: tv.position.y" src/scene3d.js
+          node --check src/scene3d.js
+          node --check test/tv42Module.test.js
+          git diff --check
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/fix-tv-selection-frame.yml .github/scripts/fix-tv-selection-frame.py
+          git add src/scene3d.js test/tv42Module.test.js
+          git commit -m 'fix: align TV selection frame with rendered screen [skip ci]'
+          git push origin ROG
