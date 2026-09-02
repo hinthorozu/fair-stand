@@ -45,7 +45,7 @@ jobs:
           grep -n "function createRenderableModule" src/scene3d.js
           grep -n "function destroyPlacementGhost" src/scene3d.js
           grep -n "placementGhost = createPlacementGhost" src/scene3d.js
-          grep -n "createIndoorPlantModuleState\\(module\\)" test/indoorPlants.test.js
+          grep -Fn "createIndoorPlantModuleState(module)" test/indoorPlants.test.js
           if grep -n "placementGhostTemplates" src/scene3d.js; then exit 1; fi
           if grep -n "ghostBehavior.renderer ===" src/scene3d.js; then exit 1; fi
           node --check src/scene3d.js
@@ -65,10 +65,12 @@ jobs:
       - name: Capture test failure
         if: failure()
         run: |
+          if [ ! -f /tmp/global-silhouette-test.log ]; then exit 0; fi
           cp /tmp/global-silhouette-test.log .github/test-failure.log
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -f .github/test-failure.log
+          if git diff --cached --quiet; then exit 0; fi
           git commit -m 'ci: capture silhouette ghost test failure [skip ci]'
           git push origin ROG
 
