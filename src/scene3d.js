@@ -3311,13 +3311,15 @@ export function createStandScene(
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    // Yaklaşık %31 açık alan korunur; delikler fiziksel olarak çok daha küçük ve sık görünür.
+    // Yaklaşık %31 açık alan korunur; delikler yaklaşık 1 mm ölçeğine iner. Mipmap ve alpha-to-coverage açılı bakışta moiré/aliasing desenlerini bastırır.
     texture.repeat.set(
-      Math.max(1, Number(widthM) * 80),
-      Math.max(1, Number(heightM) * 80),
+      Math.max(1, Number(widthM) * 300),
+      Math.max(1, Number(heightM) * 300),
     );
-    texture.minFilter = THREE.LinearFilter;
+    texture.generateMipmaps = true;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     texture.generateMipmaps = false;
     texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     texture.needsUpdate = true;
@@ -3527,6 +3529,7 @@ export function createStandScene(
       if (fabricType === 'mesh') {
         overlayMaterial.alphaMap = createMeshBrandaAlphaMap(width, height);
         overlayMaterial.alphaTest = 0.45;
+        overlayMaterial.alphaToCoverage = true;
         overlayMaterial.transparent = false;
         overlayMaterial.depthWrite = true;
       }

@@ -26,6 +26,9 @@ test('image plus glass keeps the image and uses the original glass opacity contr
 
 test('Mesh stays one continuous plane and uses much finer perforations', () => {
   assert.match(scene, /new THREE\.PlaneGeometry\(width, height\)/);
-  assert.match(scene, /Number\(widthM\) \* 80/);
-  assert.match(scene, /Number\(heightM\) \* 80/);
+  assert.match(scene, /Number\(widthM\) \* 300/);
+  assert.match(scene, /Number\(heightM\) \* 300/);
+  assert.match(scene, /texture\.minFilter = THREE\.LinearMipmapLinearFilter/);
+  assert.match(scene, /texture\.anisotropy = renderer\.capabilities\.getMaxAnisotropy\(\)/);
+  assert.match(scene, /overlayMaterial\.alphaToCoverage = true/);
 });
