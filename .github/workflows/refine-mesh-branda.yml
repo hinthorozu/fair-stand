@@ -1,0 +1,80 @@
+name: Refine Mesh Branda
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/refine-mesh-branda.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refine-validate-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Refine Mesh Branda as one continuous fine mesh
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          scene_path = Path('src/scene3d.js')
+          scene = scene_path.read_text(encoding='utf-8')
+          old = """    // İki delik / tile ekseninde yaklaşık 18 delik/metre görsel yoğunluk verir.
+    texture.repeat.set(
+      Math.max(1, Number(widthM) * 9),
+      Math.max(1, Number(heightM) * 9),
+    );"""
+          new = """    // Yaklaşık %31 açık alan oranını korurken fiziksel delikleri yaklaşık 9x küçült.
+    // Desen panel başına değil, fabricGroupId için oluşturulan tek PlaneGeometry üzerinde kesintisiz akar.
+    texture.repeat.set(
+      Math.max(1, Number(widthM) * 80),
+      Math.max(1, Number(heightM) * 80),
+    );"""
+          if scene.count(old) != 1:
+              raise SystemExit(f'mesh density block: expected 1 match, got {scene.count(old)}')
+          scene = scene.replace(old, new, 1)
+          scene_path.write_text(scene, encoding='utf-8')
+
+          test_path = Path('test/lightboxFabric.test.js')
+          test = test_path.read_text(encoding='utf-8')
+          marker = "  assert.match(scene, /overlayMaterial\\.alphaTest = 0\\.45/);\n"
+          insertion = marker + "  assert.match(scene, /Number\\(widthM\\) \\* 80/);\n  assert.match(scene, /Number\\(heightM\\) \\* 80/);\n  assert.match(scene, /new THREE\\.PlaneGeometry\\(width, height\\)/);\n"
+          if test.count(marker) != 1:
+              raise SystemExit(f'mesh test marker: expected 1 match, got {test.count(marker)}')
+          test = test.replace(marker, insertion, 1)
+          test_path.write_text(test, encoding='utf-8')
+          PY
+
+      - name: Syntax check
+        run: |
+          node --check src/scene3d.js
+          node --check test/lightboxFabric.test.js
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit refined Mesh Branda
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/refine-mesh-branda.yml
+          git add src/scene3d.js test/lightboxFabric.test.js
+          git commit -m 'fix: make mesh branda continuous with finer perforation [skip ci]'
+          git push origin ROG
