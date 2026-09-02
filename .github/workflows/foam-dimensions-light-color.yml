@@ -1,0 +1,32 @@
+name: Foam Dimensions Light Color
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/foam-dimensions-light-color.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node .github/scripts/foam-dimensions-light-color.cjs
+      - run: node --check src/main.js
+      - run: node --check src/designState.js
+      - run: node --check src/scene3d.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: |
+          rm -f .github/workflows/foam-dimensions-light-color.yml .github/scripts/foam-dimensions-light-color.cjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html src/main.js src/designState.js src/scene3d.js .github/workflows/foam-dimensions-light-color.yml .github/scripts/foam-dimensions-light-color.cjs
+          git commit -m "Add foam dimensions and light color controls"
+          git push origin ROG
