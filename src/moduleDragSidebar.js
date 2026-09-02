@@ -56,6 +56,16 @@ function ensureStyles() {
     .module-drag-coat-rack { position:relative; width:46px; height:64px; }
     .module-drag-coat-rack::before { content:''; position:absolute; left:21px; top:8px; width:4px; height:46px; border-radius:3px; background:#6b4f35; box-shadow:-12px 11px 0 -1px #6b4f35,12px 11px 0 -1px #6b4f35,-9px 20px 0 -1px #6b4f35,9px 20px 0 -1px #6b4f35; }
     .module-drag-coat-rack::after { content:''; position:absolute; left:8px; bottom:4px; width:30px; height:7px; border:3px solid #6b4f35; border-radius:50%; box-sizing:border-box; }
+    .module-drag-plant { position:relative; width:58px; height:62px; }
+    .module-drag-plant-pot { position:absolute; left:19px; bottom:4px; width:20px; height:14px; border:2px solid #8b6f47; border-top:0; border-radius:0 0 6px 6px; background:#d6b986; box-sizing:border-box; }
+    .module-drag-plant-stem { position:absolute; left:28px; bottom:17px; width:3px; height:28px; border-radius:3px; background:#54845f; }
+    .module-drag-plant-leaf { position:absolute; width:15px; height:9px; border:2px solid #54845f; border-radius:100% 0 100% 0; background:#dcebd9; box-sizing:border-box; }
+    .module-drag-plant .leaf-a { left:15px; bottom:30px; transform:rotate(22deg); }
+    .module-drag-plant .leaf-b { left:29px; bottom:34px; transform:scaleX(-1) rotate(22deg); }
+    .module-drag-plant .leaf-c { left:18px; bottom:42px; transform:rotate(38deg); }
+    .module-drag-plant .leaf-d { left:29px; bottom:47px; transform:scaleX(-1) rotate(38deg); }
+    .module-drag-plant-1 .leaf-d { display:none; }
+    .module-drag-plant-2 .module-drag-plant-stem { height:32px; }
     .module-drag-tv { position:relative; width:66px; height:54px; }
     .module-drag-tv::before { content:''; position:absolute; left:4px; top:3px; width:58px; height:36px; box-sizing:border-box; border:4px solid #26292d; border-radius:2px; background:#f8fafc; box-shadow:0 2px 5px rgba(15,23,42,.12); }
     .module-drag-tv::after { content:''; position:absolute; left:22px; top:39px; width:22px; height:5px; background:#30343a; box-shadow:0 7px 0 -1px #30343a; clip-path:polygon(27% 0,73% 0,86% 100%,100% 100%,100% 100%,0 100%,14% 100%); }
@@ -134,6 +144,18 @@ export function createModuleCatalogPreview(module) {
     const body = document.createElement('div');
     body.className = 'module-drag-coat-rack';
     preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {
+    const plant = document.createElement('div');
+    plant.className = `module-drag-plant module-drag-plant-${module.type === 'indoor-plant-1' ? '1' : '2'}`;
+    ['pot', 'stem', 'leaf leaf-a', 'leaf leaf-b', 'leaf leaf-c', 'leaf leaf-d'].forEach((part) => {
+      const element = document.createElement('i');
+      element.className = `module-drag-plant-${part.replace(' ', ' module-drag-plant-')}`;
+      plant.appendChild(element);
+    });
+    preview.appendChild(plant);
     return preview;
   }
 
