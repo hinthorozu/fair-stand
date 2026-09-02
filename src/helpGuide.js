@@ -42,6 +42,7 @@ const GUIDE_SECTIONS = [
       <ul>
         <li><strong>Sil:</strong> Modülü sahneden kaldırır.</li>
         <li><strong>Çoğalt Sağ / Sol:</strong> Aynı modülün kopyasını belirtilen tarafa ekler.</li>
+        <li><strong>Boyutlandır…:</strong> Işıklı Strafor seçiliyken mevcut X/Y ölçülerini açar; yeni ölçüler girildiğinde aynı modül konumu ve ışık rengi korunarak yeniden boyutlandırılır.</li>
         <li><strong>Cam Panele Çevir / Normal Panele Çevir:</strong> Uygun panelin cam durumunu değiştirir.</li>
         <li><strong>Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar:</strong> Uygun panel bloğunu tek parça opak Lightbox Kumaşa dönüştürür veya geri alır.</li>
         <li><strong>Mesh (Delikli) Brandaya Çevir / Mesh Brandadan Çıkar:</strong> Aynı panel bloğunu gerçek delik maskeli Mesh Branda olarak kullanır; deliklerden sahnenin arkası görünür.</li>
@@ -100,6 +101,30 @@ const GUIDE_SECTIONS = [
       <h4>Görsel silme</h4>
       <p>İki yöntem vardır: görsel üzerinde <strong>sağ tık → Sil</strong> veya görsele normal tıklayıp <strong>Delete</strong> tuşuna basmak.</p>
       <p>Görsel sahnede kullanılıyorsa önce uyarı gösterilir. Onaylanırsa görsel hem kütüphaneden silinir hem de atandığı panel/bezlerden anında kaldırılır.</p>
+    `,
+  },
+  {
+    title: 'Işıklı Strafor',
+    html: `
+      <p>Işıklı Strafor, SVG logoyu 3B strafor gövde ve arka halo ışığıyla duvar üzerine yerleştirir. Özellik yalnızca SVG görsellerde kullanılabilir.</p>
+      <h4>Oluşturma</h4>
+      <ol>
+        <li>SVG dosyasını Görsel Kütüphanesine yükle.</li>
+        <li>Görsel üzerinde <strong>sağ tık → Işıklı Strafora Dönüştür</strong> seç.</li>
+        <li>Açılan pencerede gerçek dış ölçüyü <strong>X · Genişlik (cm)</strong> ve <strong>Y · Yükseklik (cm)</strong> olarak gir.</li>
+        <li>Mouse ile duvara götürüp uygun konuma bırak.</li>
+      </ol>
+      <ul>
+        <li>Strafor gövde kalınlığı sabit <strong>3,5 cm</strong>'dir.</li>
+        <li>Duvar ile strafor arasında sabit <strong>1,5 cm</strong> ışık boşluğu vardır.</li>
+        <li>X ve Y ölçüleri birbirinden bağımsızdır; girilen değerler sahnedeki gerçek dış ölçüyü belirler.</li>
+        <li>Ön yüzde SVG'nin kendi renkleri korunur.</li>
+      </ul>
+      <h4>Sonradan boyutlandırma</h4>
+      <p>Sahnedeki strafora <strong>sağ tık → Boyutlandır…</strong> ile mevcut X/Y ölçülerini tekrar açabilirsin. Yeni ölçüler uygulandığında modülün mevcut konumu, SVG görseli ve ışık rengi korunur.</p>
+      <h4>Işık rengini değiştirme</h4>
+      <p>Işıklı Straforu seçtiğinde sol taraftaki <strong>Seçili yüzey</strong> bölümünde <strong>Işıklı Strafor · Işık rengi</strong> kontrolü görünür. Renk seçici yalnızca arkadaki halo ışığını değiştirir; SVG'nin ön yüz renklerini değiştirmez.</p>
+      <p class="help-guide-note">Yerleştirme sırasında Esc tuşu ile işlem iptal edilebilir. Strafor, duvar üstü modül gibi taşınır ve kendi hareket snap adımını kullanır.</p>
     `,
   },
   {
