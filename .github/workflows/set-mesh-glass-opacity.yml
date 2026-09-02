@@ -1,0 +1,87 @@
+name: Set Mesh Glass Opacity
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/set-mesh-glass-opacity.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Apply Mesh glass opacity
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          scene_path = Path('src/scene3d.js')
+          scene = scene_path.read_text(encoding='utf-8')
+          old = """      if (fabricType === 'mesh') {
+        overlayMaterial.transparent = false;
+        overlayMaterial.depthWrite = true;
+      }"""
+          new = """      if (fabricType === 'mesh') {
+        // Mesh Lightbox gibi tek parça kalır; şeffaflık Cam panelin ön yüz kontratını kullanır.
+        overlayMaterial.transparent = true;
+        overlayMaterial.opacity = GLASS_SURFACE_OPACITY;
+        overlayMaterial.depthWrite = false;
+      }"""
+          if scene.count(old) != 1:
+              raise SystemExit('mesh material block match count=' + str(scene.count(old)))
+          scene = scene.replace(old, new, 1)
+          scene_path.write_text(scene, encoding='utf-8')
+
+          test_path = Path('test/coverModeExclusivity.test.js')
+          test = test_path.read_text(encoding='utf-8')
+          old_test = """  assert.match(scene, /if \\(fabricType === 'mesh'\\) \\{\\s*overlayMaterial\\.transparent = false;\\s*overlayMaterial\\.depthWrite = true;/);"""
+          new_test = """  assert.match(scene, /if \\(fabricType === 'mesh'\\) \\{[\\s\\S]*?overlayMaterial\\.transparent = true;[\\s\\S]*?overlayMaterial\\.opacity = GLASS_SURFACE_OPACITY;[\\s\\S]*?overlayMaterial\\.depthWrite = false;/);"""
+          if test.count(old_test) != 1:
+              raise SystemExit('mesh opacity test match count=' + str(test.count(old_test)))
+          test = test.replace(old_test, new_test, 1)
+          test_path.write_text(test, encoding='utf-8')
+          PY
+
+      - name: Verify contracts
+        run: |
+          grep -F "overlayMaterial.opacity = GLASS_SURFACE_OPACITY" src/scene3d.js
+          grep -F "const GLASS_SURFACE_OPACITY = 0.48" src/scene3d.js
+          grep -F "new THREE.PlaneGeometry(width, height)" src/scene3d.js
+          ! grep -F "overlayMaterial.alphaMap" src/scene3d.js
+          ! grep -F "overlayMaterial.alphaTest" src/scene3d.js
+
+      - name: Syntax check
+        run: |
+          node --check src/scene3d.js
+          node --check test/coverModeExclusivity.test.js
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit final Mesh opacity
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/set-mesh-glass-opacity.yml
+          git add src/scene3d.js test/coverModeExclusivity.test.js
+          git commit -m 'fix: use glass opacity for one-piece mesh [skip ci]'
+          git push origin ROG
