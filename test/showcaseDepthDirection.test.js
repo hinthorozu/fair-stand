@@ -7,5 +7,6 @@ const scene = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'ut
 test('showcase extra depth projects behind the panel, not in front', () => {
   assert.match(scene, /const caseFrontZ = depth \/ 2;/);
   assert.match(scene, /const caseCenterZ = caseFrontZ - showcaseDepth \/ 2;/);
+  assert.match(scene, /backPanel\.position\.set\(0, openingCenterY, caseFrontZ - showcaseDepth \+ 0\.009\);/);
   assert.doesNotMatch(scene, /caseCenterZ = \(showcaseDepth - depth\) \/ 2/);
 });
