@@ -1014,11 +1014,20 @@ export function createStandScene(
       const pathCm = wallId === 'back'
         ? Number(placement.xCm)
         : Number(placement.yCm);
-      if (!Number.isFinite(pathCm)) return null;
+      const crossCm = wallId === 'back'
+        ? Number(placement.yCm)
+        : Number(placement.xCm);
+      const axis = wallId === 'back' ? 'x' : 'y';
+      const widthCm = Number(moduleState?.widthCm ?? surface.userData.widthCm);
+      if (![pathCm, crossCm, widthCm].every(Number.isFinite) || widthCm <= 0) return null;
       return {
         wallId,
         planeKey: `wall:${wallId}`,
         pathCm,
+        axis,
+        crossCm,
+        startCm: pathCm,
+        endCm: pathCm + widthCm,
         moduleId,
       };
     }
@@ -1107,12 +1116,12 @@ export function createStandScene(
     // sol üst + arka duvarda üstten ikinci panel, aradaki 2 x N panel bloğunu seçer.
     // Serbest ön sıralar bu fallback'e girmez; yalnızca gerçek stand duvarları girer.
     if (anchorMeta.planeKey !== targetMeta.planeKey) {
-      if (anchorMeta.wallId === 'free' && targetMeta.wallId === 'free') {
+      if (anchorMeta.wallId === 'free' || targetMeta.wallId === 'free') {
         const freeModuleMeta = [...new Map(
           surfaceMeshes
             .filter((surface) => surface.userData.selectionMode === 'panel')
             .map((surface) => getSurfaceSelectionPlaneMeta(surface))
-            .filter((meta) => meta?.wallId === 'free' && meta.moduleId)
+            .filter((meta) => meta?.moduleId && (meta.axis === 'x' || meta.axis === 'y'))
             .map((meta) => [meta.moduleId, meta]),
         ).values()];
         const freePath = createConnectedPanelModulePath(
