@@ -107,3 +107,5 @@ replaceOnce(
 
       if (moduleType === 'mini-fridge') {`,
 );
+
+// trigger
