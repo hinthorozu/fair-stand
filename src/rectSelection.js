@@ -5,6 +5,83 @@ function normalizePoint(point) {
   };
 }
 
+export function createConnectedPanelModulePath(modules, anchorModuleId, targetModuleId, toleranceCm = 0.5) {
+  if (!Array.isArray(modules) || !anchorModuleId || !targetModuleId) {
+    return { ok: false, moduleIds: [] };
+  }
+
+  const tolerance = Math.max(0, Number(toleranceCm) || 0);
+  const byId = new Map();
+  modules.forEach((module) => {
+    const moduleId = module?.moduleId ?? null;
+    const axis = module?.axis;
+    const startCm = Number(module?.startCm);
+    const endCm = Number(module?.endCm);
+    const crossCm = Number(module?.crossCm);
+    if (!moduleId || (axis !== 'x' && axis !== 'y')) return;
+    if (![startCm, endCm, crossCm].every(Number.isFinite)) return;
+    byId.set(moduleId, {
+      moduleId,
+      axis,
+      startCm: Math.min(startCm, endCm),
+      endCm: Math.max(startCm, endCm),
+      crossCm,
+    });
+  });
+
+  if (!byId.has(anchorModuleId) || !byId.has(targetModuleId)) {
+    return { ok: false, moduleIds: [] };
+  }
+  if (anchorModuleId === targetModuleId) {
+    return { ok: true, moduleIds: [anchorModuleId] };
+  }
+
+  const near = (a, b) => Math.abs(Number(a) - Number(b)) <= tolerance;
+  const connected = (a, b) => {
+    if (a.axis === b.axis) {
+      return near(a.crossCm, b.crossCm)
+        && (near(a.endCm, b.startCm) || near(b.endCm, a.startCm));
+    }
+
+    const xSegment = a.axis === 'x' ? a : b;
+    const ySegment = a.axis === 'y' ? a : b;
+    const intersectionX = ySegment.crossCm;
+    const intersectionY = xSegment.crossCm;
+    const xEndpoint = near(intersectionX, xSegment.startCm)
+      || near(intersectionX, xSegment.endCm);
+    const yEndpoint = near(intersectionY, ySegment.startCm)
+      || near(intersectionY, ySegment.endCm);
+    return xEndpoint && yEndpoint;
+  };
+
+  const ids = [...byId.keys()];
+  const previous = new Map([[anchorModuleId, null]]);
+  const queue = [anchorModuleId];
+
+  while (queue.length) {
+    const currentId = queue.shift();
+    const current = byId.get(currentId);
+    for (const candidateId of ids) {
+      if (previous.has(candidateId) || candidateId === currentId) continue;
+      if (!connected(current, byId.get(candidateId))) continue;
+      previous.set(candidateId, currentId);
+      if (candidateId === targetModuleId) {
+        const moduleIds = [];
+        let cursor = targetModuleId;
+        while (cursor) {
+          moduleIds.push(cursor);
+          cursor = previous.get(cursor) ?? null;
+        }
+        moduleIds.reverse();
+        return { ok: true, moduleIds };
+      }
+      queue.push(candidateId);
+    }
+  }
+
+  return { ok: false, moduleIds: [] };
+}
+
 export function createPanelRangeSelection(items, anchorPoint, targetPoint) {
   if (!Array.isArray(items) || !items.length) {
     return { ok: false, message: 'Seçilebilir panel bulunamadı.' };

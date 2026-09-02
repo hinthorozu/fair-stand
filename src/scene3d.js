@@ -5,7 +5,7 @@ import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DI
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
-import { createPanelRangeSelection, createRectSelection } from './rectSelection.js';
+import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
 import { createViewCube } from './viewCube.js';
 import { computeImageFit } from './imageFit.js';
@@ -1036,12 +1036,18 @@ export function createStandScene(
     const pathCm = vertical ? yCm : xCm;
     const crossCm = vertical ? xCm : yCm;
     const axis = vertical ? 'y' : 'x';
+    const widthCm = Number(moduleState?.widthCm ?? surface.userData.widthCm);
+    if (!Number.isFinite(widthCm) || widthCm <= 0) return null;
     const quantizedCrossCm = Math.round(crossCm * 10) / 10;
 
     return {
       wallId,
       planeKey: `free:${axis}:${quantizedCrossCm}`,
       pathCm,
+      axis,
+      crossCm,
+      startCm: pathCm,
+      endCm: pathCm + widthCm,
       moduleId,
     };
   }
@@ -1101,6 +1107,61 @@ export function createStandScene(
     // sol üst + arka duvarda üstten ikinci panel, aradaki 2 x N panel bloğunu seçer.
     // Serbest ön sıralar bu fallback'e girmez; yalnızca gerçek stand duvarları girer.
     if (anchorMeta.planeKey !== targetMeta.planeKey) {
+      if (anchorMeta.wallId === 'free' && targetMeta.wallId === 'free') {
+        const freeModuleMeta = [...new Map(
+          surfaceMeshes
+            .filter((surface) => surface.userData.selectionMode === 'panel')
+            .map((surface) => getSurfaceSelectionPlaneMeta(surface))
+            .filter((meta) => meta?.wallId === 'free' && meta.moduleId)
+            .map((meta) => [meta.moduleId, meta]),
+        ).values()];
+        const freePath = createConnectedPanelModulePath(
+          freeModuleMeta,
+          anchorMeta.moduleId,
+          targetMeta.moduleId,
+        );
+        if (!freePath.ok) return;
+
+        const columnByModuleId = new Map(
+          freePath.moduleIds.map((moduleId, index) => [moduleId, index]),
+        );
+        const freePathSet = new Set(freePath.moduleIds);
+        const freePathPanels = surfaceMeshes
+          .filter((surface) => (
+            surface.userData.selectionMode === 'panel'
+            && freePathSet.has(surface.userData.moduleId)
+          ))
+          .map((surface) => ({
+            mesh: surface,
+            moduleIndex: columnByModuleId.get(surface.userData.moduleId),
+            stripIndex: Number(surface.userData.stripIndex),
+          }));
+        const freeCornerResult = createPanelRangeSelection(
+          freePathPanels,
+          {
+            moduleIndex: columnByModuleId.get(anchorMeta.moduleId),
+            stripIndex: Number(anchorMesh.userData.stripIndex),
+          },
+          {
+            moduleIndex: columnByModuleId.get(targetMeta.moduleId),
+            stripIndex: Number(mesh.userData.stripIndex),
+          },
+        );
+        if (!freeCornerResult.ok) return;
+
+        clearSelection({ notify: false, keepAnchor: true });
+        freeCornerResult.entries.forEach((entry) => {
+          selectedSurfaces.add(entry.mesh);
+          setSelectionVisual(entry.mesh, true);
+        });
+        const selectedModuleIds = new Set(
+          freeCornerResult.entries.map((entry) => entry.mesh.userData?.moduleId).filter(Boolean),
+        );
+        selectedModuleId = selectedModuleIds.size === 1 ? [...selectedModuleIds][0] : null;
+        notifySelection();
+        return;
+      }
+
       const wallIds = ['back', 'left', 'right'];
       if (!wallIds.includes(anchorMeta.wallId) || !wallIds.includes(targetMeta.wallId)) return;
 

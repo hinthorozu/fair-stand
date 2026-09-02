@@ -13,6 +13,9 @@ test('Ctrl/Cmd left click is captured before OrbitControls and selects a rectang
   assert.match(scene, /planeKey: `wall:\$\{wallId\}`/);
   assert.match(scene, /planeKey: `free:\$\{axis\}:\$\{quantizedCrossCm\}`/);
   assert.match(scene, /anchorMeta\.planeKey !== targetMeta\.planeKey/);
+  assert.match(scene, /createConnectedPanelModulePath/);
+  assert.match(scene, /anchorMeta\.wallId === 'free' && targetMeta\.wallId === 'free'/);
+  assert.match(scene, /const freePathSet = new Set\(freePath\.moduleIds\)/);
   assert.match(scene, /const wallIds = \['back', 'left', 'right'\]/);
   assert.match(scene, /\.filter\(\(entry\) => wallIds\.includes\(entry\.meta\?\.wallId\)\)/);
   assert.match(scene, /const crossWallResult = createPanelRangeSelection\([\s\S]*wallPanels[\s\S]*moduleIndex: Number\(anchorMesh\.userData\.moduleIndex\)[\s\S]*moduleIndex: Number\(mesh\.userData\.moduleIndex\)/);

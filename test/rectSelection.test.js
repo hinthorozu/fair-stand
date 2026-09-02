@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createRectSelection, describeRectSelection } from '../src/rectSelection.js';
+import { createConnectedPanelModulePath, createRectSelection, describeRectSelection } from '../src/rectSelection.js';
 
 function makeGrid(columns = 4, rows = 7) {
   const items = [];
@@ -115,4 +115,27 @@ test('rectangle columns ignore gaps from non-panel module indices', () => {
   assert.equal(result.rowCount, 2);
   assert.equal(result.panelCount, 4);
   assert.deepEqual(result.entries.map((item) => item.id), ['0:1', '3:1', '0:2', '3:2']);
+});
+
+
+test('finds a connected free-panel path around an L corner', () => {
+  const result = createConnectedPanelModulePath([
+    { moduleId: 'a', axis: 'x', startCm: 0, endCm: 100, crossCm: 300 },
+    { moduleId: 'b', axis: 'x', startCm: 100, endCm: 200, crossCm: 300 },
+    { moduleId: 'c', axis: 'y', startCm: 300, endCm: 400, crossCm: 200 },
+  ], 'a', 'c');
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.moduleIds, ['a', 'b', 'c']);
+});
+
+test('does not bridge separate free-panel rows', () => {
+  const result = createConnectedPanelModulePath([
+    { moduleId: 'a', axis: 'x', startCm: 0, endCm: 100, crossCm: 300 },
+    { moduleId: 'b', axis: 'x', startCm: 100, endCm: 200, crossCm: 300 },
+    { moduleId: 'other', axis: 'x', startCm: 0, endCm: 100, crossCm: 500 },
+  ], 'a', 'other');
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.moduleIds, []);
 });
