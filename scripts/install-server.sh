@@ -31,6 +31,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 log "Repo güncelleniyor..."
 cd "${REPO_ROOT}"
+git remote set-url origin git@github.com:hinthorozu/fair-stand.git
 git pull --ff-only
 
 log "Temel paketler kuruluyor..."
