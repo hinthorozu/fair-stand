@@ -1,0 +1,53 @@
+name: Global Silhouette Ghost
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/global-silhouette-ghost.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Apply central ghost rule
+        run: python3 .github/scripts/apply-global-silhouette-ghost.py
+
+      - name: Verify migration shape
+        run: |
+          grep -n "kind: 'silhouette'" src/moduleBehavior.js
+          grep -n "function createRenderableModule" src/scene3d.js
+          grep -n "placementGhostTemplates" src/scene3d.js
+          if grep -n "ghostBehavior.renderer ===" src/scene3d.js; then exit 1; fi
+          git diff --check
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/global-silhouette-ghost.yml .github/scripts/apply-global-silhouette-ghost.py
+          git add src test/globalSilhouetteGhost.test.js
+          git commit -m 'feat: make module ghosts lightweight silhouettes [skip ci]'
+          git push origin ROG
