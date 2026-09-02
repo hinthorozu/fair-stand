@@ -81,6 +81,48 @@ test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its fr
 });
 
 
+test('module selection frame honors renderer-provided local bounds', () => {
+  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function ensureModuleSelectionFrame');
+  const finish = source.indexOf('\n  function setModuleSelectionVisual', start);
+  assert.ok(start >= 0 && finish > start);
+  const selectionSource = source.slice(start, finish);
+  assert.match(selectionSource, /moduleGroup\.userData\?\.selectionBounds/);
+  assert.match(selectionSource, /selectionBounds\?\.widthM/);
+  assert.match(selectionSource, /selectionBounds\?\.heightM/);
+  assert.match(selectionSource, /selectionBounds\?\.depthM/);
+  assert.match(selectionSource, /Number\.isFinite\(centerY\) \? centerY : heightM \/ 2/);
+});
+
+test('TV 42 55 and 65 selection bounds follow the real rendered screen box', () => {
+  const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function createTvModule(');
+  assert.ok(start >= 0);
+  const finish = source.indexOf('\n}', start) + 2;
+  const tvSource = source.slice(start, finish);
+
+  assert.match(tvSource, /const widthM = Number\(moduleState\.screenWidthCm \|\| 93\) \/ 100/);
+  assert.match(tvSource, /const heightM = Number\(moduleState\.screenHeightCm \|\| 52\.3\) \/ 100/);
+  assert.match(tvSource, /group\.userData\.selectionBounds = Object\.freeze\(\{/);
+  assert.match(tvSource, /widthM,\s+heightM,\s+depthM,/);
+  assert.match(tvSource, /centerX: tv\.position\.x/);
+  assert.match(tvSource, /centerY: tv\.position\.y/);
+  assert.match(tvSource, /centerZ: tv\.position\.z/);
+
+  const expected = {
+    42: [0.93, 0.523],
+    55: [1.218, 0.685],
+    65: [1.439, 0.809],
+  };
+  for (const sizeInch of [42, 55, 65]) {
+    const state = createTvModuleState(sizeInch);
+    assert.deepEqual(
+      [state.screenWidthCm / 100, state.screenHeightCm / 100],
+      expected[sizeInch],
+    );
+  }
+});
+
 test('scene keeps the shared textureLoader for normal panel images', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const sceneStart = source.indexOf('export function createStandScene');

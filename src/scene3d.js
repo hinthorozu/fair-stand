@@ -954,10 +954,15 @@ export function createStandScene(
     if (!moduleGroup) return null;
     if (moduleGroup.userData?.moduleSelectionFrame) return moduleGroup.userData.moduleSelectionFrame;
 
-    const widthM = Number(moduleGroup.userData?.widthCm) / 100;
-    const depthM = Number(moduleGroup.userData?.depthCm) / 100;
-    const heightM = Number(moduleGroup.userData?.heightCm) / 100;
+    const selectionBounds = moduleGroup.userData?.selectionBounds ?? null;
+    const widthM = Number(selectionBounds?.widthM ?? (Number(moduleGroup.userData?.widthCm) / 100));
+    const depthM = Number(selectionBounds?.depthM ?? (Number(moduleGroup.userData?.depthCm) / 100));
+    const heightM = Number(selectionBounds?.heightM ?? (Number(moduleGroup.userData?.heightCm) / 100));
     if (!(widthM > 0) || !(depthM > 0) || !(heightM > 0)) return null;
+
+    const centerX = Number(selectionBounds?.centerX);
+    const centerY = Number(selectionBounds?.centerY);
+    const centerZ = Number(selectionBounds?.centerZ);
 
     const paddingM = 0.02;
     const frame = new THREE.LineSegments(
@@ -974,7 +979,11 @@ export function createStandScene(
         toneMapped: false,
       }),
     );
-    frame.position.set(0, heightM / 2, 0);
+    frame.position.set(
+      Number.isFinite(centerX) ? centerX : 0,
+      Number.isFinite(centerY) ? centerY : heightM / 2,
+      Number.isFinite(centerZ) ? centerZ : 0,
+    );
     frame.renderOrder = 1000;
     frame.visible = false;
     // Selection visuals are display-only and must never become pick targets.
@@ -4506,6 +4515,14 @@ function createTvModule(moduleState, moduleIndex) {
   // Local +Z is the module front and rotates correctly with left/right wall placement.
   const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
   tv.position.set(0, centerYM, wallFrontM + depthM / 2 + 0.003);
+  group.userData.selectionBounds = Object.freeze({
+    widthM,
+    heightM,
+    depthM,
+    centerX: tv.position.x,
+    centerY: tv.position.y,
+    centerZ: tv.position.z,
+  });
   tv.castShadow = true;
   tv.receiveShadow = true;
 
