@@ -65,6 +65,10 @@ function ensureStyles() {
     .module-drag-plant .leaf-c { left:18px; bottom:33px; transform:rotate(38deg); }
     .module-drag-plant .leaf-d { left:29px; bottom:38px; transform:scaleX(-1) rotate(38deg); }
     .module-drag-plant-1 .leaf-c, .module-drag-plant-1 .leaf-d { display:none; }
+    .module-drag-long-planter { position:relative; width:76px; height:54px; transform:translateY(6px); }
+    .module-drag-long-planter-pot { position:absolute; left:7px; right:7px; bottom:2px; height:15px; border:2px solid #8b8f94; border-top:0; border-radius:0 0 5px 5px; background:#ffffff; box-sizing:border-box; box-shadow:0 2px 3px rgba(15,23,42,.10); }
+    .module-drag-long-planter-soil { position:absolute; left:9px; right:9px; bottom:15px; height:5px; border-radius:50%; background:#776a5c; }
+    .module-drag-long-planter-leaves { position:absolute; left:9px; right:9px; bottom:18px; height:28px; background:repeating-linear-gradient(100deg, transparent 0 6px, #6f956f 6px 10px, transparent 10px 13px); clip-path:polygon(0 100%,5% 38%,12% 67%,18% 12%,25% 70%,32% 25%,39% 75%,46% 5%,53% 72%,61% 20%,68% 75%,76% 15%,83% 67%,91% 28%,100% 100%); }
     .module-drag-tv { position:relative; width:66px; height:54px; }
     .module-drag-tv::before { content:''; position:absolute; left:4px; top:3px; width:58px; height:36px; box-sizing:border-box; border:4px solid #26292d; border-radius:2px; background:#f8fafc; box-shadow:0 2px 5px rgba(15,23,42,.12); }
     .module-drag-tv::after { content:''; position:absolute; left:22px; top:39px; width:22px; height:5px; background:#30343a; box-shadow:0 7px 0 -1px #30343a; clip-path:polygon(27% 0,73% 0,86% 100%,100% 100%,100% 100%,0 100%,14% 100%); }
@@ -143,6 +147,18 @@ export function createModuleCatalogPreview(module) {
     const body = document.createElement('div');
     body.className = 'module-drag-coat-rack';
     preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'indoor-plant-1' && module.modelFile === 'saksi_bitkili_100x30x30.glb') {
+    const planter = document.createElement('div');
+    planter.className = 'module-drag-long-planter';
+    ['pot', 'soil', 'leaves'].forEach((part) => {
+      const element = document.createElement('i');
+      element.className = `module-drag-long-planter-${part}`;
+      planter.appendChild(element);
+    });
+    preview.appendChild(planter);
     return preview;
   }
 
