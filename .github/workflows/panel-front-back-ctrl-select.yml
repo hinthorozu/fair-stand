@@ -5,6 +5,7 @@ on:
     branches: [ROG]
     paths:
       - 'scripts/patch_panel_front_back_ctrl_select.py'
+      - 'test/ctrlMultiSelect.test.js'
       - '.github/workflows/panel-front-back-ctrl-select.yml'
 
 permissions:

@@ -10,9 +10,13 @@ test('Ctrl/Cmd left click is captured before OrbitControls and selects a rectang
   assert.doesNotMatch(scene, /function toggleSurfaceSelection\(mesh\)/);
   assert.match(scene, /const canRectangleSelect = rectangleSelect[\s\S]*selectionMode === 'panel'[\s\S]*selectRectangleTo\(hit\.object\)/);
   assert.match(scene, /function getSurfaceSelectionPlaneMeta\(surface\)/);
-  assert.match(scene, /anchorMeta\.wallId !== targetMeta\.wallId/);
+  assert.match(scene, /planeKey: `wall:\$\{wallId\}`/);
+  assert.match(scene, /planeKey: `free:\$\{axis\}:\$\{quantizedCrossCm\}`/);
+  assert.match(scene, /anchorMeta\.planeKey !== targetMeta\.planeKey/);
+  assert.doesNotMatch(scene, /anchorMeta\.wallId !== targetMeta\.wallId/);
   assert.match(scene, /const pathCm = wallId === 'back'[\s\S]*Number\(placement\.xCm\)[\s\S]*Number\(placement\.yCm\)/);
   assert.match(scene, /orderedModules[\s\S]*sort\(\(a, b\) => \(a\.pathCm - b\.pathCm\)\)/);
   assert.match(scene, /columnByModuleId/);
   assert.match(scene, /planePanels\.map/);
+  assert.match(scene, /\.filter\(\(entry\) => entry\.meta\?\.planeKey === anchorMeta\.planeKey\)/);
 });
