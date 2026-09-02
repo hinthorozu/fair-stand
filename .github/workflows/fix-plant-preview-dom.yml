@@ -1,0 +1,115 @@
+name: Fix Plant Preview DOM
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-plant-preview-dom.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Fix plant preview DOM
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('src/moduleDragSidebar.js')
+          text = path.read_text(encoding='utf-8')
+          old = """  if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {
+    const plant = document.createElement('div');
+    plant.className = `module-drag-plant module-drag-plant-${module.type === 'indoor-plant-1' ? '1' : '2'}`;
+    ['pot', 'stem', 'leaf leaf-a', 'leaf leaf-b', 'leaf leaf-c', 'leaf leaf-d'].forEach((part) => {
+      const element = document.createElement('i');
+      element.className = `module-drag-plant-${part.replace(' ', ' module-drag-plant-')}`;
+      plant.appendChild(element);
+    });
+    preview.appendChild(plant);
+    return preview;
+  }
+"""
+          new = """  if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {
+    const plant = document.createElement('div');
+    const plantVariant = module.type === 'indoor-plant-1' ? '1' : '2';
+    const leafCount = plantVariant === '1' ? 2 : 3;
+    plant.className = `module-drag-plant module-drag-plant-${plantVariant}`;
+
+    ['pot', 'stem'].forEach((part) => {
+      const element = document.createElement('i');
+      element.className = `module-drag-plant-${part}`;
+      plant.appendChild(element);
+    });
+
+    ['a', 'b', 'c'].slice(0, leafCount).forEach((leafName) => {
+      const leaf = document.createElement('i');
+      leaf.className = `module-drag-plant-leaf leaf-${leafName}`;
+      plant.appendChild(leaf);
+    });
+
+    preview.appendChild(plant);
+    return preview;
+  }
+"""
+          if text.count(old) != 1:
+              raise SystemExit(f'plant preview anchor count={text.count(old)}')
+          text = text.replace(old, new, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          cat > test/plantCatalogPreview.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+
+          const sidebar = readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
+
+          test('plant catalog previews create exact 2 and 3 leaf variants with CSS-compatible classes', () => {
+            assert.match(sidebar, /const leafCount = plantVariant === '1' \? 2 : 3/);
+            assert.match(sidebar, /\['a', 'b', 'c'\]\.slice\(0, leafCount\)/);
+            assert.match(sidebar, /leaf\.className = `module-drag-plant-leaf leaf-\$\{leafName\}`/);
+            assert.doesNotMatch(sidebar, /part\.replace\(' ', ' module-drag-plant-'\)/);
+          });
+
+          test('plant catalog previews stay shorter and lower in their cards', () => {
+            assert.match(sidebar, /\.module-drag-plant \{ position:relative; width:58px; height:54px; transform:translateY\(6px\); \}/);
+            assert.match(sidebar, /\.module-drag-plant-stem \{[^}]*height:22px;/);
+            assert.match(sidebar, /\.module-drag-plant \.leaf-a \{[^}]*bottom:24px;/);
+          });
+          EOF
+
+      - name: Verify exact scope
+        run: |
+          grep -F "const leafCount = plantVariant === '1' ? 2 : 3;" src/moduleDragSidebar.js
+          grep -F 'leaf.className = `module-drag-plant-leaf leaf-${leafName}`;' src/moduleDragSidebar.js
+          git diff -- src/moduleDragSidebar.js test/plantCatalogPreview.test.js
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/fix-plant-preview-dom.yml
+          git add src/moduleDragSidebar.js test/plantCatalogPreview.test.js
+          git commit -m 'fix: render exact plant catalog leaf counts [skip ci]'
+          git push origin ROG
