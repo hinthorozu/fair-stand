@@ -1,0 +1,41 @@
+name: Improve vine separator catalog icon
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/improve-vine-separator-catalog-icon.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Make vine visible in separator catalog preview
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/moduleDragSidebar.js')
+          s = p.read_text()
+          old = ".module-drag-separator.is-vine::after { content:''; position:absolute; inset:2px 7px; pointer-events:none; background:radial-gradient(ellipse at 22% 12%,#5f8e5c 0 4px,transparent 4.5px),radial-gradient(ellipse at 68% 23%,#6f9f69 0 4px,transparent 4.5px),radial-gradient(ellipse at 35% 38%,#547f51 0 4px,transparent 4.5px),radial-gradient(ellipse at 72% 52%,#6a9864 0 4px,transparent 4.5px),radial-gradient(ellipse at 28% 66%,#5b8957 0 4px,transparent 4.5px),radial-gradient(ellipse at 64% 82%,#709f68 0 4px,transparent 4.5px),linear-gradient(75deg,transparent 46%,#4d784b 47% 51%,transparent 52%),linear-gradient(105deg,transparent 48%,#5c8757 49% 52%,transparent 53%); opacity:.98; }"
+          new = ".module-drag-separator.is-vine::after { content:''; position:absolute; inset:1px; pointer-events:none; background:radial-gradient(ellipse at 25% 10%,#527d50 0 2px,transparent 2.5px),radial-gradient(ellipse at 70% 20%,#6b9865 0 2px,transparent 2.5px),radial-gradient(ellipse at 30% 34%,#5c8958 0 2px,transparent 2.5px),radial-gradient(ellipse at 72% 47%,#527d50 0 2px,transparent 2.5px),radial-gradient(ellipse at 27% 61%,#6b9865 0 2px,transparent 2.5px),radial-gradient(ellipse at 68% 74%,#5c8958 0 2px,transparent 2.5px),radial-gradient(ellipse at 30% 88%,#527d50 0 2px,transparent 2.5px),linear-gradient(82deg,transparent 42%,#4d784b 44% 48%,transparent 50%),linear-gradient(98deg,transparent 50%,#5c8757 52% 56%,transparent 58%); opacity:1; }"
+          if old not in s:
+              raise SystemExit('vine icon CSS pattern not found')
+          p.write_text(s.replace(old, new, 1))
+          Path('.github/workflows/improve-vine-separator-catalog-icon.yml').unlink(missing_ok=True)
+          PY
+      - name: Verify build
+        run: |
+          npm ci
+          npm run build
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/moduleDragSidebar.js .github/workflows/improve-vine-separator-catalog-icon.yml
+          git commit -m "Make vine separator catalog icon visible"
+          git push origin ROG
