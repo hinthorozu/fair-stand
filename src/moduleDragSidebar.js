@@ -75,6 +75,7 @@ function ensureStyles() {
     .module-drag-tv::after { content:''; position:absolute; left:22px; top:39px; width:22px; height:5px; background:#30343a; box-shadow:0 7px 0 -1px #30343a; clip-path:polygon(27% 0,73% 0,86% 100%,100% 100%,100% 100%,0 100%,14% 100%); }
     .module-drag-tv.is-video-wall::before { left:3px; top:5px; width:60px; height:42px; border:3px solid #26292d; border-radius:1px; background:linear-gradient(to right,transparent calc(50% - 1px),#111 50%,transparent calc(50% + 1px)),linear-gradient(to bottom,transparent calc(50% - 1px),#111 50%,transparent calc(50% + 1px)),#dbeafe; box-sizing:border-box; }
     .module-drag-tv.is-video-wall::after { display:none; }
+    .module-drag-tv.is-video-wall.is-video-wall-3x3::before { background:linear-gradient(to right,transparent calc(33.333% - 1px),#111 33.333%,transparent calc(33.333% + 1px),transparent calc(66.667% - 1px),#111 66.667%,transparent calc(66.667% + 1px)),linear-gradient(to bottom,transparent calc(33.333% - 1px),#111 33.333%,transparent calc(33.333% + 1px),transparent calc(66.667% - 1px),#111 66.667%,transparent calc(66.667% + 1px)),#dbeafe; }
     .module-drag-floodlight { position:relative; width:52px; height:52px; }
     .module-drag-floodlight::before { content:''; position:absolute; left:10px; top:7px; width:32px; height:22px; border:4px solid #17191c; border-radius:3px; background:#f5fff2; box-shadow:inset 0 0 0 2px #c7ead0; transform:rotate(-8deg); }
     .module-drag-floodlight::after { content:''; position:absolute; left:23px; top:29px; width:6px; height:16px; border-left:3px solid #292c31; border-bottom:3px solid #292c31; }
@@ -202,6 +203,7 @@ export function createModuleCatalogPreview(module) {
     const body = document.createElement('div');
     body.className = 'module-drag-tv';
     if (Number(module.videoWallRows) > 1 || Number(module.videoWallCols) > 1) body.classList.add('is-video-wall');
+    if (Number(module.videoWallRows) === 3 && Number(module.videoWallCols) === 3) body.classList.add('is-video-wall-3x3');
     preview.appendChild(body);
     return preview;
   }
