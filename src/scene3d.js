@@ -4468,10 +4468,10 @@ export function createStandScene(
 function createTvModule(moduleState, moduleIndex) {
   const rows = Math.max(1, Math.round(Number(moduleState.videoWallRows) || 1));
   const cols = Math.max(1, Math.round(Number(moduleState.videoWallCols) || 1));
+  const widthM = Number(moduleState.screenWidthCm || 93) / 100;
+  const heightM = Number(moduleState.screenHeightCm || 52.3) / 100;
   const panelWidthM = Number(moduleState.panelScreenWidthCm || moduleState.screenWidthCm || 93) / 100;
   const panelHeightM = Number(moduleState.panelScreenHeightCm || moduleState.screenHeightCm || 52.3) / 100;
-  const widthM = panelWidthM * cols;
-  const heightM = panelHeightM * rows;
   const depthM = Number(moduleState.depthCm || 5) / 100;
   const centerYM = 1.75;
   const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
@@ -4520,20 +4520,26 @@ function createTvModule(moduleState, moduleIndex) {
   if (isVideoWall) {
     const seamMaterial = new THREE.MeshBasicMaterial({ color: 0x090909, toneMapped: false });
     const seamThicknessM = 0.010;
+    const seamDepthM = 0.002;
     for (let col = 1; col < cols; col += 1) {
-      const seam = new THREE.Mesh(new THREE.PlaneGeometry(seamThicknessM, heightM), seamMaterial.clone());
-      seam.position.set((col - cols / 2) * panelWidthM, centerYM, centerZM + depthM / 2 + 0.0008);
+      const seam = new THREE.Mesh(new THREE.BoxGeometry(seamThicknessM, heightM, seamDepthM), seamMaterial.clone());
+      seam.position.set((col - cols / 2) * panelWidthM, centerYM, centerZM + depthM / 2 + seamDepthM / 2 + 0.0002);
       group.add(seam);
     }
     for (let row = 1; row < rows; row += 1) {
-      const seam = new THREE.Mesh(new THREE.PlaneGeometry(widthM, seamThicknessM), seamMaterial.clone());
-      seam.position.set(0, centerYM + (rows / 2 - row) * panelHeightM, centerZM + depthM / 2 + 0.0009);
+      const seam = new THREE.Mesh(new THREE.BoxGeometry(widthM, seamThicknessM, seamDepthM), seamMaterial.clone());
+      seam.position.set(0, centerYM + (rows / 2 - row) * panelHeightM, centerZM + depthM / 2 + seamDepthM / 2 + 0.0003);
       group.add(seam);
     }
   }
 
   group.userData.selectionBounds = Object.freeze({
-    widthM, heightM, depthM, centerX: 0, centerY: centerYM, centerZ: centerZM,
+    widthM,
+    heightM,
+    depthM,
+    centerX: tv.position.x,
+    centerY: tv.position.y,
+    centerZ: tv.position.z,
   });
   return { group, surfaces: [tv] };
 }
