@@ -150,7 +150,7 @@ export function createModuleCatalogPreview(module) {
     return preview;
   }
 
-  if (module.type === 'indoor-plant-1' && module.modelFile === 'saksi_bitkili_100x30x30.glb') {
+  if (module.type === 'indoor-plant-1' && /^saksi_bitkili_\d+x30x30\.glb$/i.test(module.modelFile ?? '')) {
     const planter = document.createElement('div');
     planter.className = 'module-drag-long-planter';
     ['pot', 'soil', 'leaves'].forEach((part) => {

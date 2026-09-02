@@ -307,7 +307,7 @@ const scene3d = createStandScene(
       }
 
       if (moduleType === 'indoor-plant-1' && currentModules[moduleIndex]?.surface) {
-        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Uzun Saksı 100 · saksı gövdesi · renk uygulanabilir.';
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Uzun Saksı ' + (Number(currentModules[moduleIndex]?.widthCm) || '') + ' · saksı gövdesi · renk uygulanabilir.';
         return;
       }
 
