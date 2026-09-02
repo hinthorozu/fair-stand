@@ -1,0 +1,116 @@
+name: Disable Mesh Holes
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/disable-mesh-holes.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Remove only Mesh hole mask
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          scene_path = Path('src/scene3d.js')
+          scene = scene_path.read_text(encoding='utf-8')
+          old = """      if (fabricType === 'mesh') {
+        overlayMaterial.alphaMap = createMeshBrandaAlphaMap(width, height);
+        overlayMaterial.alphaTest = 0.45;
+        overlayMaterial.alphaToCoverage = true;
+        overlayMaterial.transparent = false;
+        overlayMaterial.depthWrite = true;
+      }"""
+          new = """      if (fabricType === 'mesh') {
+        overlayMaterial.transparent = false;
+        overlayMaterial.depthWrite = true;
+      }"""
+          if scene.count(old) != 1:
+              raise SystemExit(f'Mesh alpha block: expected 1 match, got {scene.count(old)}')
+          scene = scene.replace(old, new, 1)
+          scene_path.write_text(scene, encoding='utf-8')
+
+          cover_path = Path('test/coverModeExclusivity.test.js')
+          cover = cover_path.read_text(encoding='utf-8')
+          old_cover = """test('Mesh stays one continuous plane and uses much finer perforations', () => {
+  assert.match(scene, /new THREE\\.PlaneGeometry\\(width, height\\)/);
+  assert.match(scene, /Number\\(widthM\\) \\* 300/);
+  assert.match(scene, /Number\\(heightM\\) \\* 300/);
+  assert.match(scene, /texture\\.minFilter = THREE\\.LinearMipmapLinearFilter/);
+  assert.match(scene, /texture\\.anisotropy = renderer\\.capabilities\\.getMaxAnisotropy\\(\\)/);
+  assert.match(scene, /overlayMaterial\\.alphaToCoverage = true/);
+});"""
+          new_cover = """test('Mesh stays one continuous plane without a perforation mask', () => {
+  assert.match(scene, /new THREE\\.PlaneGeometry\\(width, height\\)/);
+  assert.doesNotMatch(scene, /overlayMaterial\\.alphaMap/);
+  assert.doesNotMatch(scene, /overlayMaterial\\.alphaTest/);
+  assert.doesNotMatch(scene, /overlayMaterial\\.alphaToCoverage/);
+  assert.match(scene, /if \\(fabricType === 'mesh'\\) \\{\\s*overlayMaterial\\.transparent = false;\\s*overlayMaterial\\.depthWrite = true;/);
+});"""
+          if cover.count(old_cover) != 1:
+              raise SystemExit(f'cover test block: expected 1 match, got {cover.count(old_cover)}')
+          cover = cover.replace(old_cover, new_cover, 1)
+          cover_path.write_text(cover, encoding='utf-8')
+
+          lightbox_path = Path('test/lightboxFabric.test.js')
+          lightbox = lightbox_path.read_text(encoding='utf-8')
+          lightbox = lightbox.replace(
+              "test('mesh branda is a separate perforated cover without lightbox lighting', () => {",
+              "test('mesh branda is a separate one-piece cover without lightbox lighting', () => {",
+              1,
+          )
+          for line in [
+              "  assert.match(scene, /function createMeshBrandaAlphaMap/);\n",
+              "  assert.match(scene, /overlayMaterial\\.alphaMap = createMeshBrandaAlphaMap/);\n",
+              "  assert.match(scene, /overlayMaterial\\.alphaTest = 0\\.45/);\n",
+          ]:
+              if lightbox.count(line) != 1:
+                  raise SystemExit(f'lightbox stale alpha assertion: expected 1 match, got {lightbox.count(line)}: {line!r}')
+              lightbox = lightbox.replace(line, '', 1)
+          lightbox_path.write_text(lightbox, encoding='utf-8')
+          PY
+
+      - name: Verify opacity contract untouched
+        run: |
+          grep -F "mesh.material.opacity = glass ? GLASS_SURFACE_OPACITY : 1" src/scene3d.js
+          grep -F "material.opacity = 1" src/scene3d.js
+
+      - name: Syntax check
+        run: |
+          node --check src/scene3d.js
+          node --check test/coverModeExclusivity.test.js
+          node --check test/lightboxFabric.test.js
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit Mesh without holes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/disable-mesh-holes.yml
+          git add src/scene3d.js test/coverModeExclusivity.test.js test/lightboxFabric.test.js
+          git commit -m 'fix: disable mesh perforation mask [skip ci]'
+          git push origin ROG
