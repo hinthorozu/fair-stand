@@ -42,19 +42,53 @@ jobs:
           PY
           python3 /tmp/mesh_patch.py
 
-      - name: Update Lightbox role contract for typed covers
+      - name: Refresh Lightbox and Mesh test contracts
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
-          path = Path('test/lightboxFabric.test.js')
-          text = path.read_text(encoding='utf-8')
-          old = "  assert.match(scene, /role = 'lightbox-fabric'/);"
-          new = r"  assert.match(scene, /overlay\.userData\.role = fabricType === 'mesh' \? 'mesh-branda' : 'lightbox-fabric'/);"
-          count = text.count(old)
-          if count != 1:
-              raise SystemExit(f'lightbox role assertion: expected 1 match, got {count}')
-          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          def replace_once(path, old, new, label):
+              file = Path(path)
+              text = file.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, got {count}')
+              file.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          replace_once(
+              'test/lightboxFabric.test.js',
+              "  assert.match(scene, /role = 'lightbox-fabric'/);",
+              r"  assert.match(scene, /overlay\.userData\.role = fabricType === 'mesh' \? 'mesh-branda' : 'lightbox-fabric'/);",
+              'lightbox typed role',
+          )
+
+          replace_once(
+              'test/lightboxFabricAppearance.test.js',
+              "  assert.match(main, /Tek parça lightbox bezi seçili · renk \\+ görsel uygulanabilir/);\n  assert.match(main, /result\\.mode === 'fabric-group'/);\n  assert.match(main, /Tek parça lightbox bezine görsel uygulandı/);",
+              "  assert.match(main, /Tek parça Lightbox Kumaş seçili · renk \\+ görsel uygulanabilir/);\n  assert.match(main, /Tek parça Mesh \\(Delikli\\) Branda seçili · renk \\+ görsel uygulanabilir/);\n  assert.match(main, /result\\.mode === 'fabric-group'/);\n  assert.match(main, /Tek parça Lightbox Kumaşa görsel uygulandı/);\n  assert.match(main, /Tek parça Mesh \\(Delikli\\) Brandaya görsel uygulandı/);",
+              'appearance copy contract',
+          )
+
+          replace_once(
+              'test/lightboxFabricLighting.test.js',
+              "  assert.match(scene, /context\\.filter = 'saturate\\(1\\.08\\) contrast\\(1\\.06\\)'/);\n  assert.match(scene, /side: THREE\\.FrontSide/);\n  assert.match(scene, /if \\(backing\\) backing\\.visible = true/);",
+              "  assert.match(scene, /overlay\\.userData\\.fabricType === 'mesh'/);\n  assert.match(scene, /'saturate\\(1\\.08\\) contrast\\(1\\.06\\)'/);\n  assert.match(scene, /side: fabricType === 'mesh' \\? THREE\\.DoubleSide : THREE\\.FrontSide/);\n  assert.match(scene, /backing\\.visible = fabricType !== 'mesh'/);",
+              'lighting typed cover contract',
+          )
+
+          replace_once(
+              'test/lightboxFabricPerformance.test.js',
+              "  assert.match(scene, /function suspendFabricSurface\\(surface\\)/);\n  assert.match(scene, /surface\\.material\\.map\\?\\.dispose\\?\\.\\(\\)/);\n  assert.match(scene, /surface\\.material\\.colorWrite = false/);\n  assert.match(scene, /backing\\) backing\\.visible = true/);\n  assert.match(scene, /meshes\\.forEach\\(suspendFabricSurface\\)/);",
+              "  assert.match(scene, /function suspendFabricSurface\\(surface, fabricType = 'lightbox'\\)/);\n  assert.match(scene, /surface\\.material\\.map\\?\\.dispose\\?\\.\\(\\)/);\n  assert.match(scene, /surface\\.material\\.colorWrite = false/);\n  assert.match(scene, /backing\\.visible = fabricType !== 'mesh'/);\n  assert.match(scene, /meshes\\.forEach\\(\\(mesh\\) => suspendFabricSurface\\(mesh, resolvedFabricType\\)\\)/);",
+              'performance typed cover contract',
+          )
+
+          replace_once(
+              'test/fabricModuleOwnership.test.js',
+              "  assert.match(scene, /Taşımak için önce Bezi kaldır/);\n  assert.match(scene, /Döndürmek için önce Bezi kaldır/);",
+              "  assert.match(scene, /Taşımak için önce kaplamayı kaldır/);\n  assert.match(scene, /Döndürmek için önce kaplamayı kaldır/);",
+              'ownership cover wording',
+          )
           PY
 
       - name: Syntax check
@@ -64,6 +98,10 @@ jobs:
           node --check src/scene3d.js
           node --check src/helpGuide.js
           node --check test/lightboxFabric.test.js
+          node --check test/lightboxFabricAppearance.test.js
+          node --check test/lightboxFabricLighting.test.js
+          node --check test/lightboxFabricPerformance.test.js
+          node --check test/fabricModuleOwnership.test.js
 
       - name: Install
         run: npm ci
@@ -71,17 +109,14 @@ jobs:
       - name: Test and build
         run: |
           set +e
-          {
-            echo '=== npm test ==='
-            npm test
-            test_status=$?
-            if [ "$test_status" -ne 0 ]; then
-              exit "$test_status"
-            fi
-            echo '=== npm run build ==='
-            npm run build
-          } 2>&1 | tee /tmp/mesh-branda-validation.log
+          echo '=== npm test ===' | tee /tmp/mesh-branda-validation.log
+          npm test 2>&1 | tee -a /tmp/mesh-branda-validation.log
           status=${PIPESTATUS[0]}
+          if [ "$status" -eq 0 ]; then
+            echo '=== npm run build ===' | tee -a /tmp/mesh-branda-validation.log
+            npm run build 2>&1 | tee -a /tmp/mesh-branda-validation.log
+            status=${PIPESTATUS[0]}
+          fi
           set -e
           if [ "$status" -ne 0 ]; then
             cp /tmp/mesh-branda-validation.log mesh-branda-validation.log
@@ -99,8 +134,11 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git rm .github/workflows/add-mesh-branda.yml .github/workflows/rerun-mesh-branda.yml
           git rm -f mesh-branda-validation.log 2>/dev/null || true
-          git add src/moduleContextMenu.js src/main.js src/scene3d.js src/helpGuide.js test/lightboxFabric.test.js
+          git add src/moduleContextMenu.js src/main.js src/scene3d.js src/helpGuide.js \
+            test/lightboxFabric.test.js test/lightboxFabricAppearance.test.js \
+            test/lightboxFabricLighting.test.js test/lightboxFabricPerformance.test.js \
+            test/fabricModuleOwnership.test.js
           git commit -m 'feat: add perforated mesh branda mode [skip ci]'
           git push origin ROG
 
-# trigger: corrected regex escaping
+# trigger: refresh all stale lightbox contracts
