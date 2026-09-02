@@ -4634,9 +4634,10 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
       visualRoot.add(raw);
 
       const haloLayers = [
-        { scale: 1.018, opacity: 0.44, z: -Math.max(0.002, wallGapM * 0.28) },
-        { scale: 1.045, opacity: 0.22, z: -Math.max(0.003, wallGapM * 0.52) },
-        { scale: 1.085, opacity: 0.09, z: -Math.max(0.004, wallGapM * 0.78) },
+        { scale: 1.016, opacity: 0.78, z: -Math.max(0.002, wallGapM * 0.22) },
+        { scale: 1.040, opacity: 0.46, z: -Math.max(0.003, wallGapM * 0.45) },
+        { scale: 1.080, opacity: 0.24, z: -Math.max(0.004, wallGapM * 0.68) },
+        { scale: 1.135, opacity: 0.10, z: -Math.max(0.005, wallGapM * 0.90) },
       ];
       haloLayers.forEach((layer) => {
         const halo = haloShapeGroup.clone(true);
