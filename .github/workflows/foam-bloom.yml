@@ -28,3 +28,4 @@ jobs:
           git add src/scene3d.js .github/workflows/foam-bloom.yml .github/scripts/foam-bloom.cjs
           git commit -m "Add bloom halo for illuminated foam"
           git push origin ROG
+# rerun 2
