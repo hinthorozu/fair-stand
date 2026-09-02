@@ -25,7 +25,41 @@ jobs:
 
       - name: Fix plant preview DOM
         run: |
-          python3 -c "from pathlib import Path; p=Path('src/moduleDragSidebar.js'); t=p.read_text(encoding='utf-8'); old=\"  if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {\\n    const plant = document.createElement('div');\\n    plant.className = `module-drag-plant module-drag-plant-\\${module.type === 'indoor-plant-1' ? '1' : '2'}`;\\n    ['pot', 'stem', 'leaf leaf-a', 'leaf leaf-b', 'leaf leaf-c', 'leaf leaf-d'].forEach((part) => {\\n      const element = document.createElement('i');\\n      element.className = `module-drag-plant-\\${part.replace(' ', ' module-drag-plant-')}`;\\n      plant.appendChild(element);\\n    });\\n    preview.appendChild(plant);\\n    return preview;\\n  }\\n\"; new=\"  if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {\\n    const plant = document.createElement('div');\\n    const plantVariant = module.type === 'indoor-plant-1' ? '1' : '2';\\n    const leafCount = plantVariant === '1' ? 2 : 3;\\n    plant.className = `module-drag-plant module-drag-plant-\\${plantVariant}`;\\n\\n    ['pot', 'stem'].forEach((part) => {\\n      const element = document.createElement('i');\\n      element.className = `module-drag-plant-\\${part}`;\\n      plant.appendChild(element);\\n    });\\n\\n    ['a', 'b', 'c'].slice(0, leafCount).forEach((leafName) => {\\n      const leaf = document.createElement('i');\\n      leaf.className = `module-drag-plant-leaf leaf-\\${leafName}`;\\n      plant.appendChild(leaf);\\n    });\\n\\n    preview.appendChild(plant);\\n    return preview;\\n  }\\n\"; assert t.count(old)==1, f'anchor count={t.count(old)}'; p.write_text(t.replace(old,new,1),encoding='utf-8')"
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('src/moduleDragSidebar.js')
+          lines = path.read_text(encoding='utf-8').splitlines()
+          anchor = "  if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {"
+          start = lines.index(anchor)
+          old = lines[start:start + 11]
+          assert old[-1] == '  }', old[-1]
+          assert "part.replace(' ', ' module-drag-plant-')" in old[5], old[5]
+          new = [
+              "  if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {",
+              "    const plant = document.createElement('div');",
+              "    const plantVariant = module.type === 'indoor-plant-1' ? '1' : '2';",
+              "    const leafCount = plantVariant === '1' ? 2 : 3;",
+              "    plant.className = `module-drag-plant module-drag-plant-${plantVariant}`;",
+              "",
+              "    ['pot', 'stem'].forEach((part) => {",
+              "      const element = document.createElement('i');",
+              "      element.className = `module-drag-plant-${part}`;",
+              "      plant.appendChild(element);",
+              "    });",
+              "",
+              "    ['a', 'b', 'c'].slice(0, leafCount).forEach((leafName) => {",
+              "      const leaf = document.createElement('i');",
+              "      leaf.className = `module-drag-plant-leaf leaf-${leafName}`;",
+              "      plant.appendChild(leaf);",
+              "    });",
+              "",
+              "    preview.appendChild(plant);",
+              "    return preview;",
+              "  }",
+          ]
+          lines[start:start + 11] = new
+          path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          PY
 
       - name: Verify exact scope
         run: |
