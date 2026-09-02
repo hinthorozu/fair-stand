@@ -177,6 +177,8 @@ export const MODULE_CATALOG = Object.freeze({
   wall_base_200: { type: 'base-wall', widthCm: 200, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 200' },
   wall_separator_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
   wall_separator_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
+  wall_separator_100_sarmasik: { type: 'separator', widthCm: 100, modelFile: 'wall_separator_100_sarmasik.glb', label: 'Separatör 100 Sarmaşık' },
+  wall_separator_50_sarmasik: { type: 'separator', widthCm: 50, modelFile: 'wall_separator_50_sarmasik.glb', label: 'Separatör 50 Sarmaşık' },
 });
 
 export const MODULE_CATALOG_KEYS = Object.freeze([
@@ -187,6 +189,8 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
 
   'wall_separator_100',
   'wall_separator_50',
+  'wall_separator_100_sarmasik',
+  'wall_separator_50_sarmasik',
 
   'wall_showcase_100_3',
   'wall_showcase_100_2',
@@ -235,7 +239,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
 export const MODULE_CATALOG_GROUPS = Object.freeze([
   Object.freeze({
     label: 'Panel & Duvar',
-    keys: Object.freeze(['wall_200', 'wall_150', 'wall_100', 'wall_50', 'wall_separator_100', 'wall_separator_50', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'DOOR_100']),
+    keys: Object.freeze(['wall_200', 'wall_150', 'wall_100', 'wall_50', 'wall_separator_100', 'wall_separator_50', 'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'DOOR_100']),
   }),
   Object.freeze({
     label: 'Raf & Vitrin',

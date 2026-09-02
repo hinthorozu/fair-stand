@@ -43,11 +43,12 @@ export function createFlatPanelModuleState(widthCm) {
   };
 }
 
-export function createSeparatorModuleState(widthCm) {
+export function createSeparatorModuleState(widthCm, descriptor = {}) {
   return {
     id: createId('module'),
     type: 'separator',
     widthCm,
+    modelFile: descriptor.modelFile ?? null,
     surface: {
       id: createId('surface'),
       color: DEFAULT_SEPARATOR_COLOR,

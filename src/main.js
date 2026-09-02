@@ -673,7 +673,7 @@ function createCatalogModuleState(module, { preservePlacement = false, catalogKe
   else if (module.type === 'base') state = createBaseModuleState(module.widthCm);
   else if (module.type === 'base-wall') state = createBaseWallModuleState(module.widthCm);
   else if (module.type === 'counter') state = createCounterModuleState(module.widthCm, { shape: module.shape, depthCm: module.depthCm });
-  else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm);
+  else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm, module);
   else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);
   else if (module.type === 'sofa-set-classic') state = createBeigeSofaSetModuleState();
   else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();

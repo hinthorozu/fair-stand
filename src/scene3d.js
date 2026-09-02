@@ -6533,6 +6533,32 @@ function createSeparatorModule(moduleState, moduleIndex) {
   };
   group.add(selector);
 
+  if (moduleState.modelFile) {
+    loadIndoorPlantModel(moduleState.modelFile).then((template) => {
+      if (!group.parent) return;
+      const model = template.clone(true);
+      let visibleVineCount = 0;
+      model.traverse((child) => {
+        if (!child.isMesh) return;
+        const targetName = [child.name, child.geometry?.name, child.material?.name].filter(Boolean).join(' ');
+        const isVine = /Vines_FIXED_/i.test(targetName);
+        child.visible = isVine;
+        if (!isVine) return;
+        visibleVineCount += 1;
+        child.castShadow = true;
+        child.receiveShadow = true;
+        child.raycast = () => {};
+      });
+      if (!visibleVineCount) {
+        console.warn('Sarmaşık separatör GLB içinde Vines_FIXED mesh bulunamadı:', moduleState.modelFile);
+        return;
+      }
+      group.add(model);
+    }).catch((error) => {
+      console.warn('Sarmaşık separatör GLB modeli yüklenemedi:', moduleState.modelFile, error);
+    });
+  }
+
   return { group, surfaces: [selector] };
 }
 
