@@ -11,16 +11,7 @@ def replace_exact(path, old, new, count=1):
     p.write_text(text.replace(old, new, count), encoding='utf-8')
 
 
-def regex_replace_exact(path, pattern, replacement, count=1, flags=0):
-    p = Path(path)
-    text = p.read_text(encoding='utf-8')
-    new_text, found = re.subn(pattern, replacement, text, count=count, flags=flags)
-    if found != count:
-        raise SystemExit(f'{path}: expected {count} regex matches, found {found}: {pattern!r}')
-    p.write_text(new_text, encoding='utf-8')
-
-
-# 1) Central contract: every module, including future module types, inherits a real-shape silhouette ghost.
+# 1) Central contract: every module uses the same lightweight silhouette ghost behavior.
 replace_exact(
     'src/moduleBehavior.js',
     "const DEFAULT_GHOST_BEHAVIOR = Object.freeze({\n  kind: 'proxy',\n  renderer: 'proxy',\n  opacity: 0.30,\n});",
@@ -37,14 +28,7 @@ for old in [
 scene_path = Path('src/scene3d.js')
 scene = scene_path.read_text(encoding='utf-8')
 
-# 2) Keep reusable silhouette templates parented to the scene so async GLB loaders can finish safely.
-old_state = "  let placementGhost = null;\n  let dragSession = null;"
-new_state = "  let placementGhost = null;\n  const placementGhostTemplates = new Map();\n  const placementGhostTemplateRoot = new THREE.Group();\n  placementGhostTemplateRoot.name = 'placement-ghost-templates';\n  scene.add(placementGhostTemplateRoot);\n  let dragSession = null;"
-if scene.count(old_state) != 1:
-    raise SystemExit('scene3d.js: placement ghost state anchor mismatch')
-scene = scene.replace(old_state, new_state, 1)
-
-# 3) Replace all per-module ghost renderers and the generic box fallback with one central silhouette factory.
+# 2) Replace every per-module ghost renderer with one singleton silhouette renderer.
 start = scene.find('  function disposePlacementGhost() {')
 end = scene.find('  function disposeDragBadge() {', start)
 if start < 0 or end < 0:
@@ -53,6 +37,12 @@ if start < 0 or end < 0:
 new_ghost_block = r'''  function disposePlacementGhost() {
     if (!placementGhost) return;
     placementGhost.root.visible = false;
+  }
+
+  function destroyPlacementGhost() {
+    if (!placementGhost) return;
+    scene.remove(placementGhost.root);
+    placementGhost.material?.dispose?.();
     placementGhost = null;
   }
 
@@ -118,7 +108,14 @@ new_ghost_block = r'''  function disposePlacementGhost() {
 
     object.raycast = () => {};
 
-    if (object.isLight || object.isLine || object.isLineSegments || object.isPoints || object.isSprite || object.userData?.isModuleSelectionVisual) {
+    if (
+      object.isLight
+      || object.isLine
+      || object.isLineSegments
+      || object.isPoints
+      || object.isSprite
+      || object.userData?.isModuleSelectionVisual
+    ) {
       object.visible = false;
     } else if (object.isMesh) {
       const sourceMaterials = Array.isArray(object.material) ? object.material : [object.material];
@@ -146,25 +143,24 @@ new_ghost_block = r'''  function disposePlacementGhost() {
 
   function createFallbackPlacementGhost(dimensions, key, opacity) {
     const root = new THREE.Group();
-    const ghostMaterial = createSilhouetteGhostMaterial(opacity);
+    const material = createSilhouetteGhostMaterial(opacity);
     const mesh = new THREE.Mesh(
       new THREE.BoxGeometry(
         Math.max(dimensions.widthCm / 100, 0.02),
         dimensions.heightM,
         dimensions.depthM,
       ),
-      ghostMaterial,
+      material,
     );
     mesh.position.y = dimensions.heightM / 2;
     mesh.renderOrder = 10000;
     mesh.raycast = () => {};
     root.add(mesh);
     root.visible = false;
-    placementGhostTemplateRoot.add(root);
+    scene.add(root);
     return {
       root,
-      mesh,
-      tintMaterials: [ghostMaterial],
+      material,
       key,
       widthCm: dimensions.widthCm,
       colorHex: PLACEMENT_VALID_COLOR,
@@ -172,7 +168,7 @@ new_ghost_block = r'''  function disposePlacementGhost() {
     };
   }
 
-  function createPlacementGhostTemplate(moduleOrWidthCm, dimensions, key, ghostBehavior) {
+  function createPlacementGhost(moduleOrWidthCm, dimensions, key, ghostBehavior) {
     if (!moduleOrWidthCm || typeof moduleOrWidthCm !== 'object') {
       return createFallbackPlacementGhost(dimensions, key, ghostBehavior.opacity);
     }
@@ -189,14 +185,13 @@ new_ghost_block = r'''  function disposePlacementGhost() {
     root.scale.set(1, 1, 1);
     root.visible = false;
 
-    const ghostMaterial = createSilhouetteGhostMaterial(ghostBehavior.opacity);
-    preparePlacementGhostTree(root, ghostMaterial);
-    placementGhostTemplateRoot.add(root);
+    const material = createSilhouetteGhostMaterial(ghostBehavior.opacity);
+    preparePlacementGhostTree(root, material);
+    scene.add(root);
 
     return {
       root,
-      mesh: null,
-      tintMaterials: [ghostMaterial],
+      material,
       key,
       widthCm: dimensions.widthCm,
       colorHex: PLACEMENT_VALID_COLOR,
@@ -210,13 +205,8 @@ new_ghost_block = r'''  function disposePlacementGhost() {
     const key = getPlacementGhostKey(moduleOrWidthCm, dimensions);
     if (placementGhost?.key === key) return placementGhost;
 
-    disposePlacementGhost();
-    let template = placementGhostTemplates.get(key);
-    if (!template) {
-      template = createPlacementGhostTemplate(moduleOrWidthCm, dimensions, key, ghostBehavior);
-      placementGhostTemplates.set(key, template);
-    }
-    placementGhost = template;
+    destroyPlacementGhost();
+    placementGhost = createPlacementGhost(moduleOrWidthCm, dimensions, key, ghostBehavior);
     return placementGhost;
   }
 
@@ -224,7 +214,7 @@ new_ghost_block = r'''  function disposePlacementGhost() {
     const ghost = ensurePlacementGhost(moduleOrWidthCm);
     const colorHex = valid ? PLACEMENT_VALID_COLOR : PLACEMENT_INVALID_COLOR;
     ghost.colorHex = colorHex;
-    ghost.tintMaterials?.forEach((material) => material.color?.setHex(colorHex));
+    ghost.material?.color?.setHex(colorHex);
     if (moduleOrWidthCm && typeof moduleOrWidthCm === 'object') {
       ghost.root.userData.type = moduleOrWidthCm.type ?? ghost.root.userData.type;
     }
@@ -235,8 +225,7 @@ new_ghost_block = r'''  function disposePlacementGhost() {
 '''
 scene = scene[:start] + new_ghost_block + scene[end:]
 
-# 4) Centralize normal module rendering. The ghost factory reuses this same function,
-# so future module types need only one renderer route, not a second ghost implementation.
+# 3) Centralize normal module rendering. Ghost generation reuses this exact factory.
 build_anchor = '  function buildWall(modules, { resetView = true } = {}) {'
 idx = scene.find(build_anchor)
 if idx < 0:
@@ -300,7 +289,6 @@ render_factory = r'''  function createRenderableModule(moduleState, moduleIndex,
 '''
 scene = scene[:idx] + render_factory + scene[idx:]
 
-# Replace the duplicated routing chain inside buildWall with the central renderer.
 pattern = re.compile(
     r"    modules\.forEach\(\(moduleState, moduleIndex\) => \{\n"
     r"      let module;\n"
@@ -330,7 +318,52 @@ if count != 1:
 
 scene_path.write_text(scene, encoding='utf-8')
 
-# 5) Regression contract for all current and future modules.
+# 4) Update old tests that explicitly required special-case ghost renderers.
+behavior_test_path = Path('tests/moduleBehavior.test.js')
+behavior_test = behavior_test_path.read_text(encoding='utf-8')
+behavior_start = behavior_test.find("test('ghost behavior is part of the central module contract'")
+if behavior_start < 0:
+    raise SystemExit('tests/moduleBehavior.test.js: ghost contract anchor not found')
+behavior_test = behavior_test[:behavior_start] + r'''test('ghost behavior is one central silhouette contract for every module', () => {
+  const expected = {
+    kind: 'silhouette', renderer: 'module-silhouette', opacity: 0.38,
+  };
+  for (const type of ['bar-stool', 'table-chair-set-eames', 'sofa-set-classic', 'tv', 'future-module']) {
+    assert.deepEqual(getModuleGhostBehavior({ type }), expected);
+  }
+});
+'''
+behavior_test_path.write_text(behavior_test, encoding='utf-8')
+
+tv_test_path = Path('test/tv42Module.test.js')
+tv_test = tv_test_path.read_text(encoding='utf-8')
+tv_test, tv_contract_count = re.subn(
+    r"test\('TV ghost geometry reads each TV state screen dimensions instead of hard-coding 42 inch', \(\) => \{.*?\n\}\);\n\n"
+    r"test\('TV module has explicit ghost behavior contract', \(\) => \{.*?\n\}\);\n",
+    r'''test('TV uses the central silhouette ghost contract', () => {
+  assert.deepEqual(getModuleGhostBehavior({ type: 'tv' }), {
+    kind: 'silhouette',
+    renderer: 'module-silhouette',
+    opacity: 0.38,
+  });
+});
+''',
+    tv_test,
+    count=1,
+    flags=re.S,
+)
+if tv_contract_count != 1:
+    raise SystemExit(f'test/tv42Module.test.js: ghost contract replacement count {tv_contract_count}')
+if tv_test.count("  assert.equal(behavior.renderer, 'tv');\n") != 1:
+    raise SystemExit('test/tv42Module.test.js: wall overlay ghost assertion anchor mismatch')
+tv_test = tv_test.replace(
+    "  assert.equal(behavior.renderer, 'tv');\n",
+    "  assert.equal(behavior.renderer, 'module-silhouette');\n",
+    1,
+)
+tv_test_path.write_text(tv_test, encoding='utf-8')
+
+# 5) Regression contract: exact model geometry, one textureless material, one active ghost object.
 Path('test/globalSilhouetteGhost.test.js').write_text(r'''import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -345,29 +378,27 @@ test('every current and future module inherits the lightweight silhouette ghost 
   }
 });
 
-test('scene ghost uses the normal module renderer and one textureless basic material', () => {
+test('scene ghost reuses normal module geometry and one textureless basic material', () => {
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(scene, /function createRenderableModule\(moduleState, moduleIndex, onSurfaceReady = null\)/);
   assert.match(scene, /const built = createRenderableModule\(moduleOrWidthCm, -1, null\)/);
-  assert.match(scene, /const placementGhostTemplates = new Map\(\)/);
   assert.match(scene, /new THREE\.MeshBasicMaterial\(\{[\s\S]*?transparent: true,[\s\S]*?depthWrite: false,[\s\S]*?depthTest: false,[\s\S]*?toneMapped: false,[\s\S]*?fog: false/);
   assert.match(scene, /object\.material = ghostMaterial/);
   assert.match(scene, /object\.castShadow = false/);
   assert.match(scene, /object\.receiveShadow = false/);
+  assert.match(scene, /object\.raycast = \(\) => \{\}/);
+  assert.match(scene, /object\.isLight[\s\S]*?object\.visible = false/);
   assert.match(scene, /object\.add = \(\.\.\.children\) =>/);
-  assert.doesNotMatch(scene, /ghostBehavior\.renderer === 'sofa-set-classic'/);
-  assert.doesNotMatch(scene, /ghostBehavior\.renderer === 'table-chair-set-eames'/);
-  assert.doesNotMatch(scene, /ghostBehavior\.renderer === 'bar-stool'/);
-  assert.doesNotMatch(scene, /ghostBehavior\.renderer === 'tv'/);
+  assert.doesNotMatch(scene, /ghostBehavior\.renderer ===/);
 });
 
-test('inactive silhouette templates stay cached instead of being rebuilt on every pointer move', () => {
+test('placement ghost is a singleton instead of a per-model cache', () => {
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(scene, /placementGhostTemplates\.get\(key\)/);
-  assert.match(scene, /placementGhostTemplates\.set\(key, template\)/);
-  assert.match(scene, /placementGhost\.root\.visible = false/);
-  assert.doesNotMatch(scene, /scene\.remove\(placementGhost\.root\)/);
+  assert.doesNotMatch(scene, /placementGhostTemplates/);
+  assert.match(scene, /if \(placementGhost\?\.key === key\) return placementGhost/);
+  assert.match(scene, /destroyPlacementGhost\(\);\n    placementGhost = createPlacementGhost/);
+  assert.match(scene, /function disposePlacementGhost\(\) \{\n    if \(!placementGhost\) return;\n    placementGhost\.root\.visible = false/);
 });
 ''', encoding='utf-8')
 
-print('Global silhouette ghost rule applied.')
+print('Global singleton silhouette ghost rule applied.')
