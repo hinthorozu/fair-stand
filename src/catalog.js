@@ -211,12 +211,8 @@ export const MODULE_CATALOG_GROUPS = Object.freeze([
     keys: Object.freeze(['desk_banko_200', 'desk_banko_150', 'desk_banko_100', 'desk_banko_200_L', 'desk_banko_150_L', 'desk_banko_100_L', 'BASE_200', 'BASE_150', 'BASE_100']),
   }),
   Object.freeze({
-    label: 'Mobilya',
-    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic']),
-  }),
-  Object.freeze({
-    label: 'Depo',
-    keys: Object.freeze(['DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK']),
+    label: 'Extra',
+    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic', 'DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK']),
   }),
   Object.freeze({
     label: 'Elektronik & Aydınlatma',

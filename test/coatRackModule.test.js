@@ -5,7 +5,7 @@ import { MODULE_CATALOG, MODULE_CATALOG_GROUPS } from '../src/catalog.js';
 import { createCoatRackModuleState } from '../src/designState.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
-test('coat rack is a Depo catalog module backed by the supplied GLB', () => {
+test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
   const item = MODULE_CATALOG.DEPOT_COAT_RACK;
   assert.deepEqual(item, {
     type: 'coat-rack',
@@ -14,8 +14,8 @@ test('coat rack is a Depo catalog module backed by the supplied GLB', () => {
     heightCm: 180,
     label: 'Askılık',
   });
-  const depot = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Depo');
-  assert.ok(depot?.keys.includes('DEPOT_COAT_RACK'));
+  const extra = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Extra');
+  assert.ok(extra?.keys.includes('DEPOT_COAT_RACK'));
 
   const state = createCoatRackModuleState();
   assert.equal(state.type, 'coat-rack');
