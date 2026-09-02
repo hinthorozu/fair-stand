@@ -103,4 +103,4 @@ jobs:
           git commit -m 'feat: add perforated mesh branda mode [skip ci]'
           git push origin ROG
 
-# trigger: existing workflow
+# trigger: corrected regex escaping
