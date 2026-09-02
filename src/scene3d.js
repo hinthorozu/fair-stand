@@ -3311,10 +3311,10 @@ export function createStandScene(
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    // İki delik / tile ekseninde yaklaşık 18 delik/metre görsel yoğunluk verir.
+    // Yaklaşık %31 açık alan korunur; delikler fiziksel olarak çok daha küçük ve sık görünür.
     texture.repeat.set(
-      Math.max(1, Number(widthM) * 9),
-      Math.max(1, Number(heightM) * 9),
+      Math.max(1, Number(widthM) * 80),
+      Math.max(1, Number(heightM) * 80),
     );
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
@@ -3569,6 +3569,10 @@ export function createStandScene(
     );
     const fabric = Boolean(enabled);
     const resolvedFabricType = fabricType === 'mesh' ? 'mesh' : 'lightbox';
+
+    if (fabric) {
+      applyGlassMode(meshes, false);
+    }
     const fabricLabel = resolvedFabricType === 'mesh' ? 'Mesh Branda' : 'Lightbox Kumaş';
 
     if (fabric) {
@@ -3725,8 +3729,24 @@ export function createStandScene(
 
   function applyGlassMode(meshOrMeshes, isGlass) {
     const glass = Boolean(isGlass);
+    const glassMeshes = normalizeMeshes(meshOrMeshes).filter(
+      (mesh) => mesh?.userData?.selectionMode === 'panel' && mesh.userData.surfaceState,
+    );
 
-    normalizeMeshes(meshOrMeshes).forEach((mesh) => {
+    if (glass) {
+      const conflictingFabricGroupIds = new Set(
+        glassMeshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
+      );
+      if (conflictingFabricGroupIds.size) {
+        surfaceMeshes.forEach((surface) => {
+          if (!conflictingFabricGroupIds.has(surface.userData.surfaceState?.fabricGroupId)) return;
+          clearFabricState(surface);
+        });
+        rebuildFabricOverlays();
+      }
+    }
+
+    glassMeshes.forEach((mesh) => {
       if (!mesh?.material || mesh.userData.selectionMode !== 'panel') return;
       const surfaceState = mesh.userData.surfaceState;
       if (!surfaceState) return;
