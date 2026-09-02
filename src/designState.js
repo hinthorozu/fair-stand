@@ -271,6 +271,7 @@ export function createIlluminatedFoamModuleState(imageAssetId, descriptor = {}) 
     heightCm,
     depthCm: 3.5,
     wallGapCm: 1.5,
+    haloColor: /^#[0-9a-fA-F]{6}$/.test(String(descriptor.haloColor ?? '')) ? String(descriptor.haloColor).toLowerCase() : '#ffffff',
   };
 }
 

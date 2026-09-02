@@ -4548,6 +4548,16 @@ export function createStandScene(
     getSelectedSurfaces: () => [...selectedSurfaces],
     isFloorSelected: () => floorSelected,
     getSelectedFloorType: () => (floorSelected ? currentFloorType : null),
+    setIlluminatedFoamHaloColor: (moduleId, color) => {
+      const normalized=String(color??'').trim().toLowerCase();
+      if(!/^#[0-9a-f]{6}$/.test(normalized)) return false;
+      let changed=false;
+      wallRoot.traverse((object)=>{
+        if(object.userData?.role!=='illuminated-foam-halo'||object.userData?.moduleId!==moduleId) return;
+        if(object.material?.color){ object.material.color.set(normalized); object.material.needsUpdate=true; changed=true; }
+      });
+      return changed;
+    },
   };
 }
 
@@ -4625,9 +4635,10 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
       const size = box.getSize(new THREE.Vector3());
       const center = box.getCenter(new THREE.Vector3());
       if (!(size.x > 0 && size.y > 0)) return;
-      const scale = Math.min(widthM / size.x, heightM / size.y);
-      raw.scale.set(scale, -scale, 1);
-      raw.position.set(-center.x * scale, center.y * scale, 0);
+      const scaleX = widthM / size.x;
+      const scaleY = heightM / size.y;
+      raw.scale.set(scaleX, -scaleY, 1);
+      raw.position.set(-center.x * scaleX, center.y * scaleY, 0);
       visualRoot.add(raw);
 
       const haloCanvas = document.createElement('canvas');
@@ -4647,9 +4658,12 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
         const texture = new THREE.CanvasTexture(haloCanvas);
         texture.colorSpace = THREE.SRGBColorSpace;
         texture.generateMipmaps = false;
-        const halo = new THREE.Mesh(new THREE.PlaneGeometry(widthM * 1.10, heightM * 1.18), new THREE.MeshBasicMaterial({map:texture,transparent:true,opacity:0.72,depthWrite:false,toneMapped:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+        const haloMaterial = new THREE.MeshBasicMaterial({map:texture,color:new THREE.Color(moduleState.haloColor || '#ffffff'),transparent:true,opacity:0.72,depthWrite:false,toneMapped:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+        const halo = new THREE.Mesh(new THREE.PlaneGeometry(widthM * 1.10, heightM * 1.18), haloMaterial);
         halo.position.set(0,0,-Math.max(0.004,wallGapM*0.68));
         halo.raycast=()=>{};
+        halo.userData.role='illuminated-foam-halo';
+        halo.userData.moduleId=moduleState.id;
         visualRoot.add(halo);
       };
       haloImage.src = assetUrl;

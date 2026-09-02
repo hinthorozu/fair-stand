@@ -94,6 +94,8 @@ const colorCmykInputs = {
   y: document.querySelector('#color-y'),
   k: document.querySelector('#color-k'),
 };
+const foamLightControls=document.querySelector('#foam-light-controls');
+const foamLightColorInput=document.querySelector('#foam-light-color');
 const imageInput = document.querySelector('#surface-image');
 const fillImageButton = document.querySelector('#fit-image-cover');
 const fitImageButton = document.querySelector('#fit-image-contain');
@@ -219,6 +221,7 @@ const AUTOSAVE_DELAY_MS = 5000;
 const AUTOSAVE_WATCH_INTERVAL_MS = 1000;
 const imageAssets = new Map();
 let assetContextAssetId = null;
+let selectedFoamModuleId = null;
 
 const assetContextMenu = document.createElement('div');
 assetContextMenu.className = 'module-context-menu asset-context-menu';
@@ -237,6 +240,8 @@ function getAssetUrl(assetId) {
 const scene3d = createStandScene(
   viewport,
   (surfaces) => {
+    selectedFoamModuleId=null;
+    if(foamLightControls) foamLightControls.hidden=true;
     if (!surfaces?.length) {
       selectionInfo.textContent = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
       return;
@@ -319,8 +324,11 @@ const scene3d = createStandScene(
       }
 
       if (moduleType === 'illuminated-foam') {
-        const foamState = currentModules[moduleIndex];
-        selectionInfo.textContent = `Modül ${moduleIndex + 1} · Işıklı Strafor · ${Number(foamState?.depthCm) || 3.5} cm kalınlık · duvardan ${Number(foamState?.wallGapCm) || 1.5} cm boşluk.`;
+        const foamState=currentModules[moduleIndex];
+        selectedFoamModuleId=foamState?.id??null;
+        if(foamLightControls) foamLightControls.hidden=false;
+        if(foamLightColorInput) foamLightColorInput.value=foamState?.haloColor||'#ffffff';
+        selectionInfo.textContent=`Modül ${moduleIndex + 1} · Işıklı Strafor · ${Number(foamState?.widthCm)||0} × ${Number(foamState?.heightCm)||0} cm · ${Number(foamState?.depthCm)||3.5} cm kalınlık · ışık ${foamState?.haloColor||'#ffffff'}.`;
         return;
       }
 
@@ -1742,6 +1750,22 @@ function getSvgAspectRatioFromText(svgText) {
   return width > 0 && height > 0 ? width / height : 4;
 }
 
+function requestIlluminatedFoamDimensions(defaultWidthCm, defaultHeightCm) {
+  return new Promise((resolve) => {
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.48);display:grid;place-items:center;padding:20px';
+    const form=document.createElement('form');
+    form.style.cssText='width:min(360px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
+    form.innerHTML='<strong style="font-size:16px">Işıklı Strafor Ölçüsü</strong><span style="color:#64748b">Gerçek dış ölçüyü cm olarak gir.</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label style="display:grid;gap:5px">X · Genişlik (cm)<input name="width" type="number" min="10" max="5000" step="1" value="'+Math.round(defaultWidthCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label><label style="display:grid;gap:5px">Y · Yükseklik (cm)<input name="height" type="number" min="5" max="350" step="1" value="'+Math.round(defaultHeightCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label></div><span style="color:#64748b">Gövde: 3,5 cm · Duvar boşluğu: 1,5 cm</span><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" data-cancel>İptal</button><button type="submit" class="primary">Yerleştir</button></div>';
+    overlay.appendChild(form); document.body.appendChild(overlay);
+    const finish=(value)=>{ overlay.remove(); resolve(value); };
+    form.querySelector('[data-cancel]').addEventListener('click',()=>finish(null));
+    overlay.addEventListener('pointerdown',(event)=>{ if(event.target===overlay) finish(null); });
+    form.addEventListener('submit',(event)=>{ event.preventDefault(); const data=new FormData(form); const widthCm=Number(data.get('width')); const heightCm=Number(data.get('height')); if(!(widthCm>=10&&widthCm<=5000&&heightCm>=5&&heightCm<=350)) return; finish({widthCm,heightCm}); });
+    form.querySelector('input[name="width"]')?.focus();
+  });
+}
+
 async function beginIlluminatedFoamAssetDrag(assetId) {
   const asset = imageAssets.get(assetId);
   if (!asset) return false;
@@ -1758,10 +1782,12 @@ async function beginIlluminatedFoamAssetDrag(assetId) {
   if (illuminatedFoamAssetDragCleanup) illuminatedFoamAssetDragCleanup();
 
   const svgText = await asset.blob.text();
-  const aspect = Math.max(0.1, getSvgAspectRatioFromText(svgText));
-  const widthCm = 200;
-  const heightCm = Math.max(10, widthCm / aspect);
-  const moduleState = createIlluminatedFoamModuleState(asset.id, { widthCm, heightCm });
+  const aspect=Math.max(0.1,getSvgAspectRatioFromText(svgText));
+  const defaultWidthCm=200;
+  const defaultHeightCm=Math.max(10,defaultWidthCm/aspect);
+  const dimensions=await requestIlluminatedFoamDimensions(defaultWidthCm,defaultHeightCm);
+  if(!dimensions){ assetStatus.textContent='Işıklı Strafor oluşturma iptal edildi.'; return false; }
+  const moduleState=createIlluminatedFoamModuleState(asset.id,{widthCm:dimensions.widthCm,heightCm:dimensions.heightCm,haloColor:'#ffffff'});
   let lastPreview = null;
 
   const onPointerMove = (event) => {
@@ -1784,7 +1810,7 @@ async function beginIlluminatedFoamAssetDrag(assetId) {
     currentModules.push(moduleState);
     cleanup();
     rebuildWall({ resetView: false });
-    assetStatus.textContent = 'Işıklı Strafor sahneye eklendi · 3,5 cm kalınlık · 1,5 cm ışık boşluğu.';
+    assetStatus.textContent=`Işıklı Strafor sahneye eklendi · ${moduleState.widthCm} × ${moduleState.heightCm} cm · 3,5 cm kalınlık · 1,5 cm ışık boşluğu.`;
   };
   const onKeyDown = (event) => {
     if (event.key !== 'Escape') return;
@@ -1800,6 +1826,17 @@ async function beginIlluminatedFoamAssetDrag(assetId) {
   assetStatus.textContent = 'Işıklı Strafor hazır · mouse ile duvara götür ve tıkla.';
   return Boolean(lastPreview) || true;
 }
+
+foamLightColorInput?.addEventListener('input',()=>{
+  if(!selectedFoamModuleId) return;
+  const moduleState=currentModules.find((module)=>module.id===selectedFoamModuleId);
+  if(!moduleState||moduleState.type!=='illuminated-foam') return;
+  const color=String(foamLightColorInput.value||'#ffffff').toLowerCase();
+  moduleState.haloColor=color;
+  scene3d.setIlluminatedFoamHaloColor?.(moduleState.id,color);
+  const moduleIndex=currentModules.indexOf(moduleState);
+  selectionInfo.textContent=`Modül ${moduleIndex+1} · Işıklı Strafor · ${moduleState.widthCm} × ${moduleState.heightCm} cm · ${moduleState.depthCm||3.5} cm kalınlık · ışık ${color}.`;
+});
 
 assetContextMenu.querySelector('[data-asset-action="illuminated-foam"]').addEventListener('click', () => {
   const assetId = assetContextAssetId;
