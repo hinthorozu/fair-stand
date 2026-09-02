@@ -5,7 +5,7 @@ function normalizePoint(point) {
   };
 }
 
-export function createConnectedPanelModulePath(modules, anchorModuleId, targetModuleId, toleranceCm = 0.5) {
+export function createConnectedPanelModulePath(modules, anchorModuleId, targetModuleId, toleranceCm = 10.5) {
   if (!Array.isArray(modules) || !anchorModuleId || !targetModuleId) {
     return { ok: false, moduleIds: [] };
   }
