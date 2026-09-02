@@ -260,7 +260,7 @@ export function createIndoorPlantModuleState(descriptor = {}) {
   };
 }
 
-export function createTvModuleState(sizeInch = 42) {
+export function createTvModuleState(sizeInch = 42, descriptor = {}) {
 
   const definition = getTvDefinition(sizeInch);
   if (!definition) return null;
@@ -271,8 +271,14 @@ export function createTvModuleState(sizeInch = 42) {
     depthCm: definition.depthCm,
     heightCm: definition.screenHeightCm,
     sizeInch: definition.sizeInch,
-    screenWidthCm: definition.screenWidthCm,
-    screenHeightCm: definition.screenHeightCm,
+    screenWidthCm: Number(descriptor.screenWidthCm) || definition.screenWidthCm,
+    screenHeightCm: Number(descriptor.screenHeightCm) || definition.screenHeightCm,
+    videoWallRows: Math.max(1, Number(descriptor.videoWallRows) || 1),
+    videoWallCols: Math.max(1, Number(descriptor.videoWallCols) || 1),
+    panelScreenWidthCm: Number(descriptor.panelScreenWidthCm) || definition.screenWidthCm,
+    panelScreenHeightCm: Number(descriptor.panelScreenHeightCm) || definition.screenHeightCm,
+    widthCm: Number(descriptor.widthCm) || definition.widthCm,
+    heightCm: Number(descriptor.screenHeightCm) || definition.screenHeightCm,
   };
 }
 

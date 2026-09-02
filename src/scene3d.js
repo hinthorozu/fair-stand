@@ -4466,14 +4466,14 @@ export function createStandScene(
 }
 
 function createTvModule(moduleState, moduleIndex) {
-  const widthM = Number(moduleState.screenWidthCm || 93) / 100;
-  const heightM = Number(moduleState.screenHeightCm || 52.3) / 100;
+  const rows = Math.max(1, Math.round(Number(moduleState.videoWallRows) || 1));
+  const cols = Math.max(1, Math.round(Number(moduleState.videoWallCols) || 1));
+  const panelWidthM = Number(moduleState.panelScreenWidthCm || moduleState.screenWidthCm || 93) / 100;
+  const panelHeightM = Number(moduleState.panelScreenHeightCm || moduleState.screenHeightCm || 52.3) / 100;
+  const widthM = panelWidthM * cols;
+  const heightM = panelHeightM * rows;
   const depthM = Number(moduleState.depthCm || 5) / 100;
   const centerYM = 1.75;
-  // Each rendered TV owns a real TextureLoader result. Cloning the cached texture
-  // before its async image load completes leaves clone.image empty and WebGL warns
-  // "Texture marked for update but no image data found".
-  const screenTexture = createTvScreenTexture();
 
   const group = new THREE.Group();
   group.userData.kind = 'module';
@@ -4481,9 +4481,11 @@ function createTvModule(moduleState, moduleIndex) {
   group.userData.moduleIndex = moduleIndex;
   group.userData.moduleType = 'tv';
   group.userData.type = 'tv';
-  group.userData.widthCm = Number(moduleState.widthCm || 100);
-  group.userData.depthCm = 5;
-  group.userData.heightCm = Number(moduleState.screenHeightCm || 52.3);
+  group.userData.widthCm = Number(moduleState.widthCm || widthM * 100);
+  group.userData.depthCm = Number(moduleState.depthCm || 5);
+  group.userData.heightCm = heightM * 100;
+  group.userData.videoWallRows = rows;
+  group.userData.videoWallCols = cols;
 
   const blackMaterial = () => new THREE.MeshStandardMaterial({
     color: 0x111111,
@@ -4491,51 +4493,72 @@ function createTvModule(moduleState, moduleIndex) {
     metalness: 0.05,
   });
 
-  // BoxGeometry face material order:
-  // +X, -X, +Y, -Y, +Z(front), -Z(back).
-  // The TV is ONE 93 x 52.3 x 5 cm solid. No extra screen plane exists.
-  const materials = [
-    blackMaterial(),
-    blackMaterial(),
-    blackMaterial(),
-    blackMaterial(),
-    new THREE.MeshBasicMaterial({
-      map: screenTexture,
-      toneMapped: false,
-    }),
-    blackMaterial(),
-  ];
-
-  const tv = new THREE.Mesh(
-    new THREE.BoxGeometry(widthM, heightM, depthM),
-    materials,
-  );
-  // Keep the TV fully in front of the wall panel. Flat-panel surfaces sit at roughly
-  // wallDepth/2 + 1.5 mm, so a TV centered at local z=0 is mostly buried/occluded.
-  // Local +Z is the module front and rotates correctly with left/right wall placement.
   const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
-  tv.position.set(0, centerYM, wallFrontM + depthM / 2 + 0.003);
+  const centerZM = wallFrontM + depthM / 2 + 0.003;
+  const surfaces = [];
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const screenTexture = createTvScreenTexture();
+      const materials = [
+        blackMaterial(),
+        blackMaterial(),
+        blackMaterial(),
+        blackMaterial(),
+        new THREE.MeshBasicMaterial({ map: screenTexture, toneMapped: false }),
+        blackMaterial(),
+      ];
+      const tv = new THREE.Mesh(
+        new THREE.BoxGeometry(panelWidthM, panelHeightM, depthM),
+        materials,
+      );
+      tv.position.set(
+        (col - (cols - 1) / 2) * panelWidthM,
+        centerYM + ((rows - 1) / 2 - row) * panelHeightM,
+        centerZM,
+      );
+      tv.castShadow = true;
+      tv.receiveShadow = true;
+      tv.userData.kind = 'surface';
+      tv.userData.surfaceId = `${moduleState.id}:tv:${row}:${col}`;
+      tv.userData.moduleId = moduleState.id;
+      tv.userData.moduleType = 'tv';
+      tv.userData.moduleIndex = moduleIndex;
+      tv.userData.acceptsImage = false;
+      tv.userData.selectionMode = 'module';
+      tv.userData.videoWallRow = row;
+      tv.userData.videoWallCol = col;
+      group.add(tv);
+      surfaces.push(tv);
+    }
+  }
+
+  // Visible 10 mm panel seams make the 2x2 construction readable as four TVs.
+  if (rows > 1 || cols > 1) {
+    const seamMaterial = new THREE.MeshBasicMaterial({ color: 0x090909, toneMapped: false });
+    const seamThicknessM = 0.010;
+    for (let col = 1; col < cols; col += 1) {
+      const seam = new THREE.Mesh(new THREE.PlaneGeometry(seamThicknessM, heightM), seamMaterial.clone());
+      seam.position.set((col - cols / 2) * panelWidthM, centerYM, centerZM + depthM / 2 + 0.0006);
+      group.add(seam);
+    }
+    for (let row = 1; row < rows; row += 1) {
+      const seam = new THREE.Mesh(new THREE.PlaneGeometry(widthM, seamThicknessM), seamMaterial.clone());
+      seam.position.set(0, centerYM + (rows / 2 - row) * panelHeightM, centerZM + depthM / 2 + 0.0007);
+      group.add(seam);
+    }
+  }
+
   group.userData.selectionBounds = Object.freeze({
     widthM,
     heightM,
     depthM,
-    centerX: tv.position.x,
-    centerY: tv.position.y,
-    centerZ: tv.position.z,
+    centerX: 0,
+    centerY: centerYM,
+    centerZ: centerZM,
   });
-  tv.castShadow = true;
-  tv.receiveShadow = true;
 
-  tv.userData.kind = 'surface';
-  tv.userData.surfaceId = `${moduleState.id}:tv`;
-  tv.userData.moduleId = moduleState.id;
-  tv.userData.moduleType = 'tv';
-  tv.userData.moduleIndex = moduleIndex;
-  tv.userData.acceptsImage = false;
-  tv.userData.selectionMode = 'module';
-  group.add(tv);
-
-  return { group, surfaces: [tv] };
+  return { group, surfaces };
 }
 
 function createMiniFridgeTopLabel(heightCm) {
