@@ -1,0 +1,117 @@
+name: Fix Module Selection State
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/fix-module-selection-state.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Fix sticky module selection
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/scene3d.js')
+          text = path.read_text(encoding='utf-8')
+
+          old_frame = """    frame.renderOrder = 1000;
+    frame.visible = false;
+    frame.userData.isModuleSelectionVisual = true;
+"""
+          new_frame = """    frame.renderOrder = 1000;
+    frame.visible = false;
+    // Selection visuals are display-only. They must never become a large invisible pick target.
+    frame.raycast = () => {};
+    frame.userData.isModuleSelectionVisual = true;
+"""
+          if text.count(old_frame) != 1:
+              raise SystemExit(f'frame anchor count={text.count(old_frame)}')
+          text = text.replace(old_frame, new_frame, 1)
+
+          old_clear = """  function clearSelection({ notify = true, keepAnchor = false } = {}) {
+    setModuleSelectionVisual(selectedModuleId, false);
+    selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
+    selectedSurfaces.clear();
+    floorSelected = false;
+"""
+          new_clear = """  function clearSelection({ notify = true, keepAnchor = false } = {}) {
+    setModuleSelectionVisual(selectedModuleId, false);
+    selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
+    selectedSurfaces.clear();
+    selectedModuleId = null;
+    floorSelected = false;
+"""
+          if text.count(old_clear) != 1:
+              raise SystemExit(f'clear anchor count={text.count(old_clear)}')
+          text = text.replace(old_clear, new_clear, 1)
+
+          early_assignment = "    if (moduleState) selectedModuleId = moduleState.id;\n"
+          if text.count(early_assignment) != 1:
+              raise SystemExit(f'early selection assignment count={text.count(early_assignment)}')
+          text = text.replace(early_assignment, '', 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          cat > test/moduleSelectionState.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+
+          const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+
+          test('generic module selection frame is display-only and never raycastable', () => {
+            assert.match(scene, /frame\.raycast = \(\) => \{\};/);
+          });
+
+          test('clearing selection also clears selectedModuleId', () => {
+            assert.match(scene, /function clearSelection[\s\S]*?selectedSurfaces\.clear\(\);\s*selectedModuleId = null;/);
+          });
+
+          test('pointerdown does not preassign selectedModuleId before click selection resolves', () => {
+            assert.doesNotMatch(scene, /if \(moduleState\) selectedModuleId = moduleState\.id;/);
+            assert.match(scene, /if \(!wasDragging\) \{\s*handleSurfaceSelectionAt\(startClientX, startClientY, false, clickedModuleId\);/);
+          });
+          EOF
+
+      - name: Verify exact scope
+        run: |
+          grep -F 'frame.raycast = () => {};' src/scene3d.js
+          grep -F 'selectedModuleId = null;' src/scene3d.js
+          if grep -F 'if (moduleState) selectedModuleId = moduleState.id;' src/scene3d.js; then exit 1; fi
+          git diff -- src/scene3d.js test/moduleSelectionState.test.js
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/fix-module-selection-state.yml
+          git add src/scene3d.js test/moduleSelectionState.test.js
+          git commit -m 'fix: prevent sticky multi-module selection [skip ci]'
+          git push origin ROG
