@@ -1,0 +1,64 @@
+name: Video wall single image
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/video-wall-single-image.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch video wall texture
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/scene3d.js')
+          s=p.read_text()
+          old="""  const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
+  const centerZM = wallFrontM + depthM / 2 + 0.003;
+  const surfaces = [];
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const screenTexture = createTvScreenTexture();"""
+          new="""  const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
+  const centerZM = wallFrontM + depthM / 2 + 0.003;
+  const surfaces = [];
+  const isVideoWall = rows > 1 || cols > 1;
+  // Video wall uses ONE source image across the complete matrix. Each physical TV
+  // receives only its own UV crop, while the bezel/seam geometry stays visible.
+  const videoWallSourceTexture = isVideoWall ? createTvScreenTexture() : null;
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const screenTexture = isVideoWall ? videoWallSourceTexture.clone() : createTvScreenTexture();
+      if (isVideoWall) {
+        screenTexture.needsUpdate = true;
+        screenTexture.wrapS = THREE.ClampToEdgeWrapping;
+        screenTexture.wrapT = THREE.ClampToEdgeWrapping;
+        screenTexture.repeat.set(1 / cols, 1 / rows);
+        screenTexture.offset.set(col / cols, (rows - 1 - row) / rows);
+      }"""
+          if old not in s:
+              raise SystemExit('video wall texture block not found')
+          p.write_text(s.replace(old,new,1))
+          Path('.github/workflows/video-wall-single-image.yml').unlink(missing_ok=True)
+          PY
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/scene3d.js .github/workflows/video-wall-single-image.yml
+          git commit -m "Span one image across video wall panels"
+          git push origin ROG
