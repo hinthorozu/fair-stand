@@ -35,8 +35,8 @@ export function createModuleContextMenu({
     <button type="button" data-module-action="duplicate-right">Çoğalt Sağ Tarafa</button>
     <button type="button" data-module-action="duplicate-left">Çoğalt Sol Tarafa</button>
     <div class="module-context-separator"></div>
-    <button type="button" data-module-action="toggle-glass" hidden>Cam panele çevir</button>
-    <button type="button" data-module-action="toggle-fabric" hidden>Beze çevir</button>
+    <button type="button" data-module-action="toggle-glass" hidden>Cam Panele Çevir</button>
+    <button type="button" data-module-action="toggle-fabric" hidden>Lightbox Kumaşa Çevir</button>
     <button type="button" data-module-action="toggle-fabric-light" hidden>Lightbox aydınlatmayı aç</button>
     <button type="button" data-module-action="toggle-shelf-light" hidden>Raf altı aydınlatmayı aç</button>
     <button type="button" data-module-action="add-right">Ekle Sağ Tarafa…</button>
@@ -350,13 +350,13 @@ export function createModuleContextMenu({
     title.textContent = `Modül ${context.moduleIndex + 1} · ${describeModule(context)}${panelSuffix}`;
     glassModeButton.hidden = !context.supportsGlass;
     glassModeButton.textContent = context.isGlass
-      ? 'Normal panele çevir'
-      : 'Cam panele çevir';
+      ? 'Normal Panele Çevir'
+      : 'Cam Panele Çevir';
 
     fabricModeButton.hidden = !context.supportsFabric;
     fabricModeButton.textContent = context.isFabric
-      ? 'Bezden çıkar'
-      : 'Beze çevir';
+      ? 'Lightbox Kumaştan Çıkar'
+      : 'Lightbox Kumaşa Çevir';
 
     fabricLightingButton.hidden = !context.isFabric;
     fabricLightingButton.textContent = context.fabricLightingOn

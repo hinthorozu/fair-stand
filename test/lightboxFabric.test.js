@@ -6,8 +6,8 @@ test('multi-panel lightbox fabric is exposed from panel context menu', () => {
   const menu = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');
   const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   assert.match(menu, /data-module-action="toggle-fabric"/);
-  assert.match(menu, /Beze çevir/);
-  assert.match(menu, /Bezden çıkar/);
+  assert.match(menu, /Lightbox Kumaşa Çevir/);
+  assert.match(menu, /Lightbox Kumaştan Çıkar/);
   assert.match(main, /function changeContextFabricMode/);
   assert.match(main, /scene3d\.applyFabricMode\(selectedPanels, enabled\)/);
 });

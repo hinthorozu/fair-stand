@@ -42,8 +42,8 @@ const GUIDE_SECTIONS = [
       <ul>
         <li><strong>Sil:</strong> Modülü sahneden kaldırır.</li>
         <li><strong>Çoğalt Sağ / Sol:</strong> Aynı modülün kopyasını belirtilen tarafa ekler.</li>
-        <li><strong>Cam panele çevir / Normal panele çevir:</strong> Uygun panelin cam durumunu değiştirir.</li>
-        <li><strong>Beze çevir / Bezden çıkar:</strong> Uygun panel bloğunu tek parça lightbox bezine dönüştürür veya geri alır.</li>
+        <li><strong>Cam Panele Çevir / Normal Panele Çevir:</strong> Uygun panelin cam durumunu değiştirir.</li>
+        <li><strong>Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar:</strong> Uygun panel bloğunu tek parça lightbox bezine dönüştürür veya geri alır.</li>
         <li><strong>Lightbox aydınlatmayı aç / kapat:</strong> Bez yüzeyinin aydınlatmasını kontrol eder.</li>
         <li><strong>Raf altı aydınlatmayı aç / kapat:</strong> Raf modülündeki LED görünümünü kontrol eder.</li>
         <li><strong>Ekle Sağ / Sol Tarafa…:</strong> Hedef modülün yanına katalogdan yeni modül ekler.</li>
@@ -104,7 +104,7 @@ const GUIDE_SECTIONS = [
   {
     title: 'Cam Panel',
     html: `
-      <p>Cam özelliğini destekleyen paneli seçip sağ tık menüsünden <strong>Cam panele çevir</strong> seçeneğini kullanabilirsin. Aynı menüden tekrar normal panele döndürülebilir.</p>
+      <p>Cam özelliğini destekleyen paneli seçip sağ tık menüsünden <strong>Cam Panele Çevir</strong> seçeneğini kullanabilirsin. Aynı menüden tekrar normal panele döndürülebilir.</p>
       <p class="help-guide-note">Cam görsel/şeffaf baskı davranışları geliştikçe bu bölüm güncellenecektir.</p>
     `,
   },
@@ -116,7 +116,7 @@ const GUIDE_SECTIONS = [
         <li>Beze renk ve görsel uygulanabilir.</li>
         <li>Doldur ve Sığdır seçenekleri kullanılabilir.</li>
         <li>Lightbox aydınlatması açılıp kapatılabilir.</li>
-        <li>Bezden çıkar ile normal panel sistemine dönülür.</li>
+        <li>Lightbox Kumaştan Çıkar ile normal panel sistemine dönülür.</li>
         <li>Tek parça bez birden fazla modülü kapsıyorsa bu modüllerden biri tek başına taşınamaz/döndürülemez.</li>
       </ul>
     `,
