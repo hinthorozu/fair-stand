@@ -1,7 +1,9 @@
 import './style.css';
 import './colorEditor.css';
 import './imageActions.css';
+import './helpGuide.css';
 import { createStandScene } from './scene3d.js';
+import { initHelpGuide } from './helpGuide.js';
 import { resolveModuleCatalogKey } from './catalog.js';
 import {
   composeAutomaticStandWall,
@@ -2058,4 +2060,5 @@ setStandEditingEnabled(false);
 updateStageCreateState();
 syncColorEditorFromHex(colorInput.value);
 initializeAssetLibrary();
+initHelpGuide();
 refreshProjectList().catch((error) => console.warn('Proje listesi açılamadı:', error));
