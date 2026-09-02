@@ -49,3 +49,5 @@ jobs:
           git add src test/removedIndoorPlant2.test.js
           git commit -m 'fix: remove Yapay Çiçek 2 from system [skip ci]'
           git push origin ROG
+
+# rerun after aligning legacy indoor plant tests
