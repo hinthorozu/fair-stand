@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
@@ -1464,6 +1465,9 @@ export function createStandScene(
     }
     if (moduleState.type === 'indoor-plant-1') {
       return createIndoorPlantModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'illuminated-foam') {
+      return createIlluminatedFoamModule(moduleState, moduleIndex, getAssetUrl(moduleState.imageAssetId));
     }
     if (moduleState.type === 'tv') {
       return createTvModule(moduleState, moduleIndex);
@@ -4545,6 +4549,100 @@ export function createStandScene(
     isFloorSelected: () => floorSelected,
     getSelectedFloorType: () => (floorSelected ? currentFloorType : null),
   };
+}
+
+function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
+  const widthM = Math.max(0.1, Number(moduleState.widthCm || 200) / 100);
+  const heightM = Math.max(0.05, Number(moduleState.heightCm || 50) / 100);
+  const depthM = Math.max(0.005, Number(moduleState.depthCm || 3.5) / 100);
+  const wallGapM = Math.max(0, Number(moduleState.wallGapCm || 1.5) / 100);
+  const centerYM = 1.75;
+  const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
+  const bodyBackZM = wallFrontM + wallGapM;
+  const centerZM = bodyBackZM + depthM / 2;
+
+  const group = new THREE.Group();
+  const hitbox = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, heightM, depthM),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }),
+  );
+  hitbox.position.set(0, centerYM, centerZM);
+  hitbox.userData.kind = 'surface';
+  hitbox.userData.surfaceId = moduleState.id + ':illuminated-foam';
+  hitbox.userData.moduleId = moduleState.id;
+  hitbox.userData.moduleType = 'illuminated-foam';
+  hitbox.userData.moduleIndex = moduleIndex;
+  hitbox.userData.widthCm = Number(moduleState.widthCm) || 200;
+  hitbox.userData.acceptsImage = false;
+  hitbox.userData.selectionMode = 'module';
+  group.add(hitbox);
+
+  const visualRoot = new THREE.Group();
+  visualRoot.position.set(0, centerYM, bodyBackZM);
+  group.add(visualRoot);
+
+  if (assetUrl) {
+    const loader = new SVGLoader();
+    loader.loadAsync(assetUrl).then((data) => {
+      const raw = new THREE.Group();
+      let meshCount = 0;
+      data.paths.forEach((path) => {
+        const style = path.userData?.style ?? {};
+        const fill = style.fill;
+        const fillOpacity = Number(style.fillOpacity ?? style.opacity ?? 1);
+        if (!fill || fill === 'none' || fill === 'transparent' || fillOpacity < 0.5) return;
+        const shapes = SVGLoader.createShapes(path);
+        shapes.forEach((shape) => {
+          const geometry = new THREE.ExtrudeGeometry(shape, {
+            depth: 1,
+            bevelEnabled: false,
+            curveSegments: 10,
+          });
+          const material = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(fill),
+            roughness: 0.72,
+            metalness: 0,
+          });
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.scale.z = depthM;
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          raw.add(mesh);
+          meshCount += 1;
+        });
+      });
+
+      if (!meshCount) return;
+      const box = new THREE.Box3().setFromObject(raw);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      if (!(size.x > 0 && size.y > 0)) return;
+      const scale = Math.min(widthM / size.x, heightM / size.y);
+      raw.position.set(-center.x, -center.y, 0);
+      raw.scale.set(scale, -scale, 1);
+      visualRoot.add(raw);
+
+      const lightCount = 5;
+      for (let i = 0; i < lightCount; i += 1) {
+        const t = lightCount === 1 ? 0.5 : i / (lightCount - 1);
+        const light = new THREE.PointLight(0xffffff, 1.8, 0.55, 2);
+        light.position.set((t - 0.5) * widthM * 0.82, 0, -wallGapM * 0.55);
+        visualRoot.add(light);
+      }
+    }).catch((error) => {
+      console.warn('Işıklı strafor SVG yüklenemedi:', error);
+    });
+  }
+
+  group.userData.selectionBounds = Object.freeze({
+    widthM,
+    heightM,
+    depthM,
+    centerX: hitbox.position.x,
+    centerY: hitbox.position.y,
+    centerZ: hitbox.position.z,
+  });
+  return { group, surfaces: [hitbox] };
 }
 
 function createTvModule(moduleState, moduleIndex) {

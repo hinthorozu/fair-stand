@@ -15,6 +15,7 @@ import {
   createKettleModuleState,
   createCoatRackModuleState,
   createIndoorPlantModuleState,
+  createIlluminatedFoamModuleState,
   createLedFloodlightModuleState,
   createTvModuleState,
   createBaseModuleState,
@@ -224,6 +225,7 @@ assetContextMenu.className = 'module-context-menu asset-context-menu';
 assetContextMenu.hidden = true;
 assetContextMenu.innerHTML = `
   <div class="module-context-title">Görsel</div>
+  <button type="button" data-asset-action="illuminated-foam">Işıklı Strafora Dönüştür</button>
   <button type="button" data-asset-action="delete" class="danger">Sil</button>
 `;
 document.body.appendChild(assetContextMenu);
@@ -313,6 +315,12 @@ const scene3d = createStandScene(
 
       if (moduleType === 'mini-fridge') {
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Mini Buzdolabı · 45 × 43 × 66 cm · GLB model.';
+        return;
+      }
+
+      if (moduleType === 'illuminated-foam') {
+        const foamState = currentModules[moduleIndex];
+        selectionInfo.textContent = `Modül ${moduleIndex + 1} · Işıklı Strafor · ${Number(foamState?.depthCm) || 3.5} cm kalınlık · duvardan ${Number(foamState?.wallGapCm) || 1.5} cm boşluk.`;
         return;
       }
 
@@ -1591,6 +1599,9 @@ function openAssetContextMenu(assetId, clientX, clientY) {
 
   assetContextAssetId = assetId;
   assetContextMenu.querySelector('.module-context-title').textContent = `Görsel · ${asset.name}`;
+  const foamAction = assetContextMenu.querySelector('[data-asset-action="illuminated-foam"]');
+  const isSvg = asset.type === 'image/svg+xml' || /\.svg$/i.test(asset.name || '');
+  if (foamAction) foamAction.hidden = !isSvg;
   assetContextMenu.hidden = false;
 
   const margin = 8;
@@ -1715,6 +1726,86 @@ function renderAssetLibrary() {
       assetLibraryElement.appendChild(button);
     });
 }
+
+let illuminatedFoamAssetDragCleanup = null;
+
+function getSvgAspectRatioFromText(svgText) {
+  const documentNode = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+  if (documentNode.querySelector('parsererror')) return 4;
+  const svg = documentNode.documentElement;
+  const viewBox = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+  if (viewBox.length === 4 && viewBox.every(Number.isFinite) && viewBox[2] > 0 && viewBox[3] > 0) {
+    return viewBox[2] / viewBox[3];
+  }
+  const width = Number.parseFloat(svg.getAttribute('width'));
+  const height = Number.parseFloat(svg.getAttribute('height'));
+  return width > 0 && height > 0 ? width / height : 4;
+}
+
+async function beginIlluminatedFoamAssetDrag(assetId) {
+  const asset = imageAssets.get(assetId);
+  if (!asset) return false;
+  const isSvg = asset.type === 'image/svg+xml' || /\.svg$/i.test(asset.name || '');
+  if (!isSvg) {
+    assetStatus.textContent = 'Işıklı Strafor için SVG görsel kullan.';
+    return false;
+  }
+  if (!currentStand) {
+    assetStatus.textContent = 'Önce stand sahnesini oluştur.';
+    return false;
+  }
+
+  if (illuminatedFoamAssetDragCleanup) illuminatedFoamAssetDragCleanup();
+
+  const svgText = await asset.blob.text();
+  const aspect = Math.max(0.1, getSvgAspectRatioFromText(svgText));
+  const widthCm = 200;
+  const heightCm = Math.max(10, widthCm / aspect);
+  const moduleState = createIlluminatedFoamModuleState(asset.id, { widthCm, heightCm });
+  let lastPreview = null;
+
+  const onPointerMove = (event) => {
+    lastPreview = scene3d.previewCatalogModuleDrag(moduleState, event.clientX, event.clientY, 0, false);
+  };
+  const cleanup = () => {
+    document.removeEventListener('pointermove', onPointerMove, true);
+    document.removeEventListener('pointerup', onPointerUp, true);
+    document.removeEventListener('keydown', onKeyDown, true);
+    scene3d.clearCatalogModuleDrag();
+    illuminatedFoamAssetDragCleanup = null;
+  };
+  const onPointerUp = (event) => {
+    const result = scene3d.dropCatalogModuleDrag(moduleState, event.clientX, event.clientY, 0, false);
+    if (!result.ok || !result.placement) {
+      assetStatus.textContent = result.message || 'Işıklı Strafor bu konuma bırakılamadı.';
+      return;
+    }
+    moduleState.placement = { ...result.placement };
+    currentModules.push(moduleState);
+    cleanup();
+    rebuildWall({ resetView: false });
+    assetStatus.textContent = 'Işıklı Strafor sahneye eklendi · 3,5 cm kalınlık · 1,5 cm ışık boşluğu.';
+  };
+  const onKeyDown = (event) => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    cleanup();
+    assetStatus.textContent = 'Işıklı Strafor yerleştirme iptal edildi.';
+  };
+
+  document.addEventListener('pointermove', onPointerMove, true);
+  document.addEventListener('pointerup', onPointerUp, true);
+  document.addEventListener('keydown', onKeyDown, true);
+  illuminatedFoamAssetDragCleanup = cleanup;
+  assetStatus.textContent = 'Işıklı Strafor hazır · mouse ile duvara götür ve tıkla.';
+  return Boolean(lastPreview) || true;
+}
+
+assetContextMenu.querySelector('[data-asset-action="illuminated-foam"]').addEventListener('click', () => {
+  const assetId = assetContextAssetId;
+  closeAssetContextMenu();
+  if (assetId) void beginIlluminatedFoamAssetDrag(assetId);
+});
 
 assetContextMenu.querySelector('[data-asset-action="delete"]').addEventListener('click', () => {
   const assetId = assetContextAssetId;

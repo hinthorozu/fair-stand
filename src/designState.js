@@ -260,6 +260,20 @@ export function createIndoorPlantModuleState(descriptor = {}) {
   };
 }
 
+export function createIlluminatedFoamModuleState(imageAssetId, descriptor = {}) {
+  const widthCm = Math.max(10, Number(descriptor.widthCm) || 200);
+  const heightCm = Math.max(5, Number(descriptor.heightCm) || 50);
+  return {
+    id: createId('module'),
+    type: 'illuminated-foam',
+    imageAssetId,
+    widthCm,
+    heightCm,
+    depthCm: 3.5,
+    wallGapCm: 1.5,
+  };
+}
+
 export function createTvModuleState(sizeInch = 42, descriptor = {}) {
 
   const definition = getTvDefinition(sizeInch);

@@ -89,6 +89,14 @@ const TYPE_BEHAVIORS = Object.freeze({
   allowSideInsert: true,
   collision: 'footprint',
 }),
+  'illuminated-foam': Object.freeze({
+    placement: 'wall-overlay',
+    moveSnapCm: 10,
+    rotationStepDeg: 90,
+    defaultRotationDeg: 0,
+    allowSideInsert: false,
+    collision: 'none',
+  }),
   tv: Object.freeze({
     placement: 'wall-overlay',
     moveSnapCm: 10,
