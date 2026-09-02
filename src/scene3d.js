@@ -4618,8 +4618,8 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
       const center = box.getCenter(new THREE.Vector3());
       if (!(size.x > 0 && size.y > 0)) return;
       const scale = Math.min(widthM / size.x, heightM / size.y);
-      raw.position.set(-center.x, -center.y, 0);
       raw.scale.set(scale, -scale, 1);
+      raw.position.set(-center.x * scale, center.y * scale, 0);
       visualRoot.add(raw);
 
       const lightCount = 5;
