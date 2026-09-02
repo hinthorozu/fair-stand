@@ -4,6 +4,7 @@ on:
     branches: [ROG]
     paths:
       - 'scripts/patch-video-wall-single-image.cjs'
+      - '.github/workflows/apply-video-wall-single-image.yml'
 permissions:
   contents: write
 jobs:
