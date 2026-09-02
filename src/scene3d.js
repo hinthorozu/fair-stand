@@ -4593,7 +4593,7 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
     const loader = new SVGLoader();
     loader.loadAsync(assetUrl).then((data) => {
       const raw = new THREE.Group();
-      const haloContourPoints = [];
+      const haloShapeGroup = new THREE.Group();
       let meshCount = 0;
       data.paths.forEach((path) => {
         const style = path.userData?.style ?? {};
@@ -4617,11 +4617,18 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
           mesh.castShadow = true;
           mesh.receiveShadow = true;
           raw.add(mesh);
-          const contour = shape.getSpacedPoints(36);
-          contour.forEach((point) => haloContourPoints.push(point.clone()));
-          shape.holes.forEach((hole) => {
-            hole.getSpacedPoints(20).forEach((point) => haloContourPoints.push(point.clone()));
-          });
+          const haloMesh = new THREE.Mesh(
+            new THREE.ShapeGeometry(shape, 8),
+            new THREE.MeshBasicMaterial({
+              color: 0xffffff,
+              transparent: true,
+              opacity: 0.32,
+              depthWrite: false,
+              toneMapped: false,
+              blending: THREE.AdditiveBlending,
+            }),
+          );
+          haloShapeGroup.add(haloMesh);
           meshCount += 1;
         });
       });
@@ -4636,19 +4643,14 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
       raw.position.set(-center.x * scale, center.y * scale, 0);
       visualRoot.add(raw);
 
-      const maxHaloLights = 40;
-      const step = Math.max(1, Math.ceil(haloContourPoints.length / maxHaloLights));
-      for (let i = 0; i < haloContourPoints.length; i += step) {
-        const point = haloContourPoints[i];
-        const light = new THREE.PointLight(0xffffff, 0.42, 0.22, 2);
-        light.position.set(
-          (point.x - center.x) * scale,
-          (center.y - point.y) * scale,
-          -Math.max(0.004, wallGapM * 0.58),
-        );
-        light.castShadow = false;
-        visualRoot.add(light);
-      }
+      const halo = haloShapeGroup;
+      halo.scale.set(scale * 1.018, -scale * 1.018, 1);
+      halo.position.set(
+        -center.x * scale * 1.018,
+        center.y * scale * 1.018,
+        -Math.max(0.003, wallGapM * 0.72),
+      );
+      visualRoot.add(halo);
     }).catch((error) => {
       console.warn('Işıklı strafor SVG yüklenemedi:', error);
     });
