@@ -11,14 +11,14 @@ test('showcase extra depth projects behind the panel, not in front', () => {
   assert.doesNotMatch(scene, /caseCenterZ = \(showcaseDepth - depth\) \/ 2/);
 });
 
-
-test('showcase case is white and only horizontal shelves use glass material', () => {
+test('showcase styling is isolated to the showcase box, not the parent module frame', () => {
   const start = scene.indexOf('function createShowcaseModule(');
   const end = scene.indexOf('function createSelectionFrame(', start);
   const showcase = scene.slice(start, end);
-  assert.match(showcase, /const frameMaterial = new THREE\.MeshStandardMaterial\(\{\s*color: 0xffffff,/);
+  assert.match(showcase, /const frameMaterial = new THREE\.MeshStandardMaterial\(\{\s*color: FRAME_COLOR,\s*metalness: 0\.68,\s*roughness: 0\.28,/);
+  assert.match(showcase, /color: isGlass \? GLASS_BACK_COLOR : PANEL_BACK_COLOR,/);
   assert.match(showcase, /const sidePanelGeometry = new THREE\.BoxGeometry\(0\.018, openingHeight, showcaseDepth\);/);
   assert.match(showcase, /new THREE\.Mesh\(sidePanelGeometry\.clone\(\), showcaseWhiteMaterial\.clone\(\)\)/);
-  assert.doesNotMatch(showcase, /sideGlassMaterial|sideGlassGeometry/);
+  assert.match(showcase, /const cap = new THREE\.Mesh\(capGeometry\.clone\(\), showcaseWhiteMaterial\.clone\(\)\);/);
   assert.match(showcase, /const shelf = new THREE\.Mesh\(shelfGeometry\.clone\(\), glassMaterial\.clone\(\)\);/);
 });

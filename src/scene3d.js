@@ -6442,11 +6442,10 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     widthCm,
   };
 
-  // Vitrin modulu komple beyaz kasalidir; cam yalnizca yatay raflarda kullanilir.
   const frameMaterial = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    metalness: 0,
-    roughness: 0.58,
+    color: FRAME_COLOR,
+    metalness: 0.68,
+    roughness: 0.28,
   });
   const showcaseWhiteMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
@@ -6494,7 +6493,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
       new THREE.MeshStandardMaterial({
-        color: isGlass ? GLASS_BACK_COLOR : 0xffffff,
+        color: isGlass ? GLASS_BACK_COLOR : PANEL_BACK_COLOR,
         roughness: isGlass ? 0.22 : 0.74,
         transparent: isGlass,
         opacity: isGlass ? GLASS_BACK_OPACITY : 1,
