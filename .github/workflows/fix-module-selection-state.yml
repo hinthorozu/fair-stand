@@ -27,69 +27,26 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
           path = Path('src/scene3d.js')
           text = path.read_text(encoding='utf-8')
-
-          old_frame = """    frame.renderOrder = 1000;
-    frame.visible = false;
-    frame.userData.isModuleSelectionVisual = true;
-"""
-          new_frame = """    frame.renderOrder = 1000;
-    frame.visible = false;
-    // Selection visuals are display-only. They must never become a large invisible pick target.
-    frame.raycast = () => {};
-    frame.userData.isModuleSelectionVisual = true;
-"""
-          if text.count(old_frame) != 1:
-              raise SystemExit(f'frame anchor count={text.count(old_frame)}')
-          text = text.replace(old_frame, new_frame, 1)
-
-          old_clear = """  function clearSelection({ notify = true, keepAnchor = false } = {}) {
-    setModuleSelectionVisual(selectedModuleId, false);
-    selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
-    selectedSurfaces.clear();
-    floorSelected = false;
-"""
-          new_clear = """  function clearSelection({ notify = true, keepAnchor = false } = {}) {
-    setModuleSelectionVisual(selectedModuleId, false);
-    selectedSurfaces.forEach((mesh) => setSelectionVisual(mesh, false));
-    selectedSurfaces.clear();
-    selectedModuleId = null;
-    floorSelected = false;
-"""
-          if text.count(old_clear) != 1:
-              raise SystemExit(f'clear anchor count={text.count(old_clear)}')
-          text = text.replace(old_clear, new_clear, 1)
-
-          early_assignment = "    if (moduleState) selectedModuleId = moduleState.id;\n"
+          frame_anchor = '    frame.userData.isModuleSelectionVisual = true;\n'
+          frame_replacement = '    // Selection visuals are display-only and must never become pick targets.\n    frame.raycast = () => {};\n' + frame_anchor
+          if text.count(frame_anchor) != 1:
+              raise SystemExit(f'frame anchor count={text.count(frame_anchor)}')
+          text = text.replace(frame_anchor, frame_replacement, 1)
+          clear_anchor = '    selectedSurfaces.clear();\n    floorSelected = false;\n'
+          clear_replacement = '    selectedSurfaces.clear();\n    selectedModuleId = null;\n    floorSelected = false;\n'
+          if text.count(clear_anchor) != 1:
+              raise SystemExit(f'clear anchor count={text.count(clear_anchor)}')
+          text = text.replace(clear_anchor, clear_replacement, 1)
+          early_assignment = '    if (moduleState) selectedModuleId = moduleState.id;\n'
           if text.count(early_assignment) != 1:
-              raise SystemExit(f'early selection assignment count={text.count(early_assignment)}')
+              raise SystemExit(f'early assignment count={text.count(early_assignment)}')
           text = text.replace(early_assignment, '', 1)
-
           path.write_text(text, encoding='utf-8')
+          test = Path('test/moduleSelectionState.test.js')
+          test.write_text("import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport { readFileSync } from 'node:fs';\n\nconst scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n\ntest('generic module selection frame never participates in raycast picking', () => {\n  assert.match(scene, /frame\\.raycast = \\(\\) => \\{\\};/);\n});\n\ntest('clearSelection clears selectedModuleId as part of the central contract', () => {\n  assert.match(scene, /function clearSelection[\\s\\S]*?selectedSurfaces\\.clear\\(\\);\\s*selectedModuleId = null;/);\n});\n\ntest('pointerdown waits for click resolution before changing selectedModuleId', () => {\n  assert.doesNotMatch(scene, /if \\(moduleState\\) selectedModuleId = moduleState\\.id;/);\n  assert.match(scene, /if \\(!wasDragging\\) \\{\\s*handleSurfaceSelectionAt\\(startClientX, startClientY, false, clickedModuleId\\);/);\n});\n", encoding='utf-8')
           PY
-
-          cat > test/moduleSelectionState.test.js <<'EOF'
-          import test from 'node:test';
-          import assert from 'node:assert/strict';
-          import { readFileSync } from 'node:fs';
-
-          const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-
-          test('generic module selection frame is display-only and never raycastable', () => {
-            assert.match(scene, /frame\.raycast = \(\) => \{\};/);
-          });
-
-          test('clearing selection also clears selectedModuleId', () => {
-            assert.match(scene, /function clearSelection[\s\S]*?selectedSurfaces\.clear\(\);\s*selectedModuleId = null;/);
-          });
-
-          test('pointerdown does not preassign selectedModuleId before click selection resolves', () => {
-            assert.doesNotMatch(scene, /if \(moduleState\) selectedModuleId = moduleState\.id;/);
-            assert.match(scene, /if \(!wasDragging\) \{\s*handleSurfaceSelectionAt\(startClientX, startClientY, false, clickedModuleId\);/);
-          });
-          EOF
 
       - name: Verify exact scope
         run: |
