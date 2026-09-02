@@ -28,7 +28,8 @@ import {
   totalWallWidthCm,
   moduleWidths,
 } from './designState.js';
-import { deleteProjectImageAssets, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
+import { deleteImageAsset, deleteProjectImageAssets, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
+import { clearImageAssetReferences, countImageAssetReferences } from './imageAssetReferences.js';
 import { createProjectId, deleteProject, listProjects, loadProject, saveProject } from './projectStore.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu } from './moduleContextMenu.js';
@@ -213,6 +214,16 @@ let autosaveObservedSignature = null;
 const AUTOSAVE_DELAY_MS = 5000;
 const AUTOSAVE_WATCH_INTERVAL_MS = 1000;
 const imageAssets = new Map();
+let assetContextAssetId = null;
+
+const assetContextMenu = document.createElement('div');
+assetContextMenu.className = 'module-context-menu asset-context-menu';
+assetContextMenu.hidden = true;
+assetContextMenu.innerHTML = `
+  <div class="module-context-title">Görsel</div>
+  <button type="button" data-asset-action="delete" class="danger">Sil</button>
+`;
+document.body.appendChild(assetContextMenu);
 
 function getAssetUrl(assetId) {
   return imageAssets.get(assetId)?.url ?? null;
@@ -1367,6 +1378,7 @@ function clearRegisteredAssets() {
   imageAssets.forEach((asset) => { if (asset.url) URL.revokeObjectURL(asset.url); });
   imageAssets.clear();
   activeAssetId = null;
+  closeAssetContextMenu();
   renderAssetLibrary();
   assetStatus.textContent = 'Görsel seçilmedi.';
 }
@@ -1536,6 +1548,84 @@ function registerAsset(asset) {
   });
 }
 
+function closeAssetContextMenu() {
+  assetContextMenu.hidden = true;
+  assetContextAssetId = null;
+}
+
+function openAssetContextMenu(assetId, clientX, clientY) {
+  const asset = imageAssets.get(assetId);
+  if (!asset) return;
+
+  assetContextAssetId = assetId;
+  assetContextMenu.querySelector('.module-context-title').textContent = `Görsel · ${asset.name}`;
+  assetContextMenu.hidden = false;
+
+  const margin = 8;
+  const rect = assetContextMenu.getBoundingClientRect();
+  const left = Math.max(margin, Math.min(clientX, window.innerWidth - rect.width - margin));
+  const top = Math.max(margin, Math.min(clientY, window.innerHeight - rect.height - margin));
+  assetContextMenu.style.left = `${left}px`;
+  assetContextMenu.style.top = `${top}px`;
+}
+
+function getImageAssetUsageCount(assetId) {
+  return countImageAssetReferences(currentModules, assetId)
+    + countImageAssetReferences(currentStand, assetId);
+}
+
+async function requestDeleteImageAsset(assetId) {
+  const asset = imageAssets.get(assetId);
+  if (!asset) return false;
+
+  const usageCount = getImageAssetUsageCount(assetId);
+  const confirmed = window.confirm(
+    usageCount > 0
+      ? `"${asset.name}" şu anda sahnede bir veya daha fazla yere atanmış.\n\nBu görseli silersen atandığı panel/bezlerden de kaldırılacak.\n\nYine de silinsin mi?`
+      : `"${asset.name}" görseli görsel kütüphanesinden kalıcı olarak silinecek.\n\nDevam edilsin mi?`,
+  );
+  if (!confirmed) return false;
+
+  closeAssetContextMenu();
+
+  if (usageCount > 0) {
+    clearImageAssetReferences(currentModules, assetId);
+    clearImageAssetReferences(currentStand, assetId);
+    if (currentStand) rebuildWall({ resetView: false });
+  }
+
+  try {
+    // Kayıtlı projede önce referansları kalıcılaştır; ardından blob'u sil.
+    // Böylece proje hiçbir zaman silinmiş bir asset'e bilinçli olarak bağlı bırakılmaz.
+    if (usageCount > 0 && autosaveEnabled) {
+      clearAutosaveTimer();
+      await persistActiveProject({ quiet: true });
+      autosaveObservedSignature = getProjectStateSignature();
+    }
+
+    const deleted = await deleteImageAsset(activeProjectId, assetId);
+    if (!deleted) throw new Error('Görsel kaydı bulunamadı veya bu projeye ait değil.');
+
+    if (asset.url) URL.revokeObjectURL(asset.url);
+    imageAssets.delete(assetId);
+
+    if (activeAssetId === assetId) {
+      activeAssetId = [...imageAssets.values()]
+        .sort((a, b) => a.createdAt - b.createdAt)
+        .at(-1)?.id ?? null;
+    }
+    renderAssetLibrary();
+    assetStatus.textContent = usageCount > 0
+      ? 'Görsel silindi · atandığı yerlerden de kaldırıldı.'
+      : 'Görsel silindi.';
+    return true;
+  } catch (error) {
+    console.warn('Görsel silinemedi:', error);
+    assetStatus.textContent = `Görsel silinemedi: ${error?.message || 'Bilinmeyen hata.'}`;
+    return false;
+  }
+}
+
 function setActiveAsset(assetId) {
   activeAssetId = assetId;
   renderAssetLibrary();
@@ -1563,6 +1653,7 @@ function renderAssetLibrary() {
       button.type = 'button';
       button.className = 'asset-tile';
       button.classList.toggle('active', asset.id === activeAssetId);
+      button.dataset.assetId = asset.id;
       button.title = asset.name;
 
       const image = document.createElement('img');
@@ -1573,10 +1664,53 @@ function renderAssetLibrary() {
       label.textContent = asset.name;
 
       button.append(image, label);
-      button.addEventListener('click', () => setActiveAsset(asset.id));
+      button.addEventListener('click', () => {
+        closeAssetContextMenu();
+        setActiveAsset(asset.id);
+      });
+      button.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setActiveAsset(asset.id);
+        button.focus({ preventScroll: true });
+        openAssetContextMenu(asset.id, event.clientX, event.clientY);
+      });
       assetLibraryElement.appendChild(button);
     });
 }
+
+assetContextMenu.querySelector('[data-asset-action="delete"]').addEventListener('click', () => {
+  const assetId = assetContextAssetId;
+  closeAssetContextMenu();
+  if (assetId) void requestDeleteImageAsset(assetId);
+});
+
+document.addEventListener('pointerdown', (event) => {
+  if (!assetContextMenu.contains(event.target)) closeAssetContextMenu();
+
+  if (!assetLibraryElement.contains(event.target)) {
+    const focused = document.activeElement;
+    if (focused?.classList?.contains('asset-tile')) focused.blur();
+  }
+});
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !assetContextMenu.hidden) {
+    closeAssetContextMenu();
+    return;
+  }
+  if (event.key !== 'Delete') return;
+
+  const focused = document.activeElement;
+  if (!focused?.classList?.contains('asset-tile')) return;
+  const assetId = focused.dataset.assetId;
+  if (!assetId || assetId !== activeAssetId) return;
+
+  // Sahnenin mevcut Delete-modül kısayolundan önce görsel silme niyetini tüket.
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  void requestDeleteImageAsset(assetId);
+}, { capture: true });
 
 async function initializeAssetLibrary() {
   try {

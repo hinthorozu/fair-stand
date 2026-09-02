@@ -77,6 +77,31 @@ export async function loadImageAssets(projectId) {
   return assets.sort((a, b) => a.createdAt - b.createdAt);
 }
 
+export async function deleteImageAsset(projectId, assetId) {
+  if (!projectId || !assetId) return false;
+  const db = await openDb();
+  const deleted = await new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    let removed = false;
+    const request = store.get(assetId);
+
+    request.onsuccess = () => {
+      const asset = request.result;
+      if (!asset || asset.projectId !== projectId) return;
+      store.delete(assetId);
+      removed = true;
+    };
+    request.onerror = () => reject(request.error);
+    transaction.oncomplete = () => resolve(removed);
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+
+  db.close();
+  return deleted;
+}
+
 export async function deleteProjectImageAssets(projectId) {
   if (!projectId) return;
   const db = await openDb();
