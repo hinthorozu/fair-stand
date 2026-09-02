@@ -239,15 +239,23 @@ export function createCoatRackModuleState() {
 }
 
 export function createIndoorPlantModuleState(descriptor = {}) {
+  const modelFile = descriptor.modelFile ?? 'indoor_plants.glb';
+  const isLongPlanter = /^saksi_bitkili_/i.test(modelFile);
   return {
     id: createId('module'),
     type: 'indoor-plant-1',
     widthCm: Number(descriptor.widthCm) || 60,
     depthCm: Number(descriptor.depthCm) || 60,
     heightCm: Number(descriptor.heightCm) || 120,
-    modelFile: descriptor.modelFile ?? 'indoor_plants.glb',
+    modelFile,
     modelRotationYDeg: Number(descriptor.modelRotationYDeg) || 0,
     preserveModelScale: Boolean(descriptor.preserveModelScale),
+    ...(isLongPlanter ? {
+      surface: {
+        id: createId('surface'),
+        color: DEFAULT_PANEL_COLOR,
+      },
+    } : {}),
   };
 }
 

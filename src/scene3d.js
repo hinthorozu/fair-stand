@@ -4908,8 +4908,9 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
     heightCm,
     stripIndex: null,
     stripNumber: null,
-    surfaceRole: 'plant',
-    surfaceState: null,
+    surfaceRole: moduleState.surface ? 'planter-body' : 'plant',
+    surfaceId: moduleState.surface?.id ?? null,
+    surfaceState: moduleState.surface ?? null,
     selectionFrame: null,
     colorTargets: [],
   };
@@ -4922,7 +4923,30 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
       if (!child.isMesh) return;
       child.castShadow = true;
       child.receiveShadow = true;
+
+      if (moduleState.surface) {
+        const targetName = [child.name, child.geometry?.name, child.material?.name]
+          .filter(Boolean)
+          .join(' ');
+        if (/planter|plant_pot|pot_0/i.test(targetName)) {
+          child.material = Array.isArray(child.material)
+            ? child.material.map((material) => material.clone())
+            : child.material?.clone?.() ?? child.material;
+          proxy.userData.colorTargets.push(child);
+        }
+      }
     });
+
+    if (moduleState.surface?.color && proxy.userData.colorTargets.length) {
+      proxy.userData.colorTargets.forEach((target) => {
+        const materials = Array.isArray(target.material) ? target.material : [target.material];
+        materials.forEach((material) => {
+          if (!material?.color) return;
+          material.color.set(moduleState.surface.color);
+          material.needsUpdate = true;
+        });
+      });
+    }
 
     model.rotation.y = THREE.MathUtils.degToRad(Number(moduleState.modelRotationYDeg) || 0);
     model.updateMatrixWorld(true);

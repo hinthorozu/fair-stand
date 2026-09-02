@@ -306,6 +306,11 @@ const scene3d = createStandScene(
         return;
       }
 
+      if (moduleType === 'indoor-plant-1' && currentModules[moduleIndex]?.surface) {
+        selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Uzun Saksı 100 · saksı gövdesi · renk uygulanabilir.';
+        return;
+      }
+
       if (moduleType === 'mini-fridge') {
         selectionInfo.textContent = 'Modül ' + (moduleIndex + 1) + ' · Mini Buzdolabı · 45 × 43 × 66 cm · GLB model.';
         return;
