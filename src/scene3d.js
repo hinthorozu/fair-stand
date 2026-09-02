@@ -6548,8 +6548,10 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const openingTop = (openingStartStrip + openingStripCount) * stripHeight - railHeight / 2;
   const openingHeight = openingTop - openingBottom;
   const openingCenterY = (openingBottom + openingTop) / 2;
-  const caseCenterZ = (showcaseDepth - depth) / 2;
-  const caseFrontZ = caseCenterZ + showcaseDepth / 2;
+  // Vitrinin on yuzu modulun on panel duzleminde kalir; 36 cm derinligin
+  // standart modul derinligini asan kismi tamamen arkaya dogru tasar.
+  const caseFrontZ = depth / 2;
+  const caseCenterZ = caseFrontZ - showcaseDepth / 2;
 
   const backPanel = new THREE.Mesh(
     new THREE.BoxGeometry(innerWidth, openingHeight, 0.018),
