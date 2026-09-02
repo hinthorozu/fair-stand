@@ -2,9 +2,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
@@ -210,15 +207,6 @@ export function createStandScene(
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.appendChild(renderer.domElement);
-
-  const composer = new EffectComposer(renderer);
-  const renderPass = new RenderPass(scene, camera);
-  composer.addPass(renderPass);
-  const foamBloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 1.15, 0.62, 1.05);
-  foamBloomPass.threshold = 1.05;
-  foamBloomPass.strength = 1.15;
-  foamBloomPass.radius = 0.62;
-  composer.addPass(foamBloomPass);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -4423,7 +4411,6 @@ export function createStandScene(
     const width = Math.max(container.clientWidth, 1);
     const height = Math.max(container.clientHeight, 1);
     renderer.setSize(width, height, false);
-    composer.setSize(width, height);
     updateCameraProjection(width, height);
   }
 
@@ -4456,8 +4443,7 @@ export function createStandScene(
       lastCubePosition.copy(camera.position);
       lastCubeQuaternion.copy(camera.quaternion);
     }
-    renderPass.camera = camera;
-    composer.render();
+    renderer.render(scene, camera);
   });
 
   async function captureCurrentViewPng({ scale = 3 } = {}) {
@@ -4634,9 +4620,9 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
           const haloMesh = new THREE.Mesh(
             new THREE.ShapeGeometry(shape, 8),
             new THREE.MeshBasicMaterial({
-              color: new THREE.Color().setRGB(4.0, 4.0, 4.0),
+              color: 0xffffff,
               transparent: true,
-              opacity: 0.72,
+              opacity: 0.58,
               depthWrite: false,
               toneMapped: false,
               blending: THREE.AdditiveBlending,
