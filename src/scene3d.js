@@ -5834,8 +5834,8 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     });
   });
 
-  // Duvar modülündeki gibi 4 mm yatay raylar: alt, orta ve üst.
-  const railYs = [0, stripHeightM, frameHeightM];
+  // Ara yatay profil kaldırıldı; yalnız en alt ve en üst profil kalır.
+  const railYs = [0, frameHeightM];
   const frameDepthM = Number(STAND_DIMENSIONS.frameDepth);
   const frontRailGeometry = new THREE.BoxGeometry(frontPanelWidthM, railHeightM, frameDepthM);
   railYs.forEach((y) => {
@@ -6195,9 +6195,10 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     frameDepth,
   );
 
-  for (let i = 0; i <= stripCount; i += 1) {
+  // Ara yatay profiller yok; panel grubunda yalnız en alt ve en üst profil kalır.
+  for (const y of [0, stripCount * stripHeight]) {
     const rail = new THREE.Mesh(railGeometry.clone(), frameMaterial.clone());
-    rail.position.set(0, i * stripHeight, 0);
+    rail.position.set(0, y, 0);
     rail.castShadow = true;
     group.add(rail);
   }
@@ -6319,13 +6320,8 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     railHeight,
     frameDepth,
   );
-  const railYs = [
-    0,
-    doorHeight,
-    doorHeight + stripHeight,
-    doorHeight + stripHeight * 2,
-    height,
-  ];
+  // Kapılı panelde de ara yatay profiller yok; yalnız en alt ve en üst profil kalır.
+  const railYs = [0, height];
   railYs.forEach((y) => {
     const rail = new THREE.Mesh(railGeometry.clone(), frameMaterial.clone());
     rail.position.set(0, y, 0);
@@ -6621,9 +6617,10 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     frameDepth,
   );
 
-  for (let index = 0; index <= stripCount; index += 1) {
+  // Ara yatay profiller yok; panel grubunda yalnız en alt ve en üst profil kalır.
+  for (const y of [0, stripCount * stripHeight]) {
     const rail = new THREE.Mesh(railGeometry.clone(), frameMaterial.clone());
-    rail.position.set(0, index * stripHeight, 0);
+    rail.position.set(0, y, 0);
     rail.castShadow = true;
     group.add(rail);
   }
