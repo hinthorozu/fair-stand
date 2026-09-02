@@ -1,0 +1,10 @@
+const fs = require('fs');
+const p = 'src/scene3d.js';
+let s = fs.readFileSync(p, 'utf8');
+s = s.replace("      const raw = new THREE.Group();\n      const haloContourPoints = [];\n      let meshCount = 0;", "      const raw = new THREE.Group();\n      const haloShapeGroup = new THREE.Group();\n      let meshCount = 0;");
+s = s.replace("          raw.add(mesh);\n          const contour = shape.getSpacedPoints(36);\n          contour.forEach((point) => haloContourPoints.push(point.clone()));\n          shape.holes.forEach((hole) => {\n            hole.getSpacedPoints(20).forEach((point) => haloContourPoints.push(point.clone()));\n          });\n          meshCount += 1;", "          raw.add(mesh);\n          const haloMesh = new THREE.Mesh(\n            new THREE.ShapeGeometry(shape, 8),\n            new THREE.MeshBasicMaterial({\n              color: 0xffffff,\n              transparent: true,\n              opacity: 0.32,\n              depthWrite: false,\n              toneMapped: false,\n              blending: THREE.AdditiveBlending,\n            }),\n          );\n          haloShapeGroup.add(haloMesh);\n          meshCount += 1;");
+const oldBlock = `      const maxHaloLights = 40;\n      const step = Math.max(1, Math.ceil(haloContourPoints.length / maxHaloLights));\n      for (let i = 0; i < haloContourPoints.length; i += step) {\n        const point = haloContourPoints[i];\n        const light = new THREE.PointLight(0xffffff, 0.42, 0.22, 2);\n        light.position.set(\n          (point.x - center.x) * scale,\n          (center.y - point.y) * scale,\n          -Math.max(0.004, wallGapM * 0.58),\n        );\n        light.castShadow = false;\n        visualRoot.add(light);\n      }`;
+const newBlock = `      const halo = haloShapeGroup;\n      halo.scale.set(scale * 1.018, -scale * 1.018, 1);\n      halo.position.set(\n        -center.x * scale * 1.018,\n        center.y * scale * 1.018,\n        -Math.max(0.003, wallGapM * 0.72),\n      );\n      visualRoot.add(halo);`;
+if (!s.includes(oldBlock)) throw new Error('point light block not found');
+s = s.replace(oldBlock, newBlock);
+fs.writeFileSync(p, s);
