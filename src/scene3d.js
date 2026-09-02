@@ -4870,7 +4870,7 @@ function createMiniFridgeModule(moduleState, moduleIndex) {
 
 function createIndoorPlantModule(moduleState, moduleIndex) {
   const type = 'indoor-plant-1';
-  const modelFile = 'indoor_plants.glb';
+  const modelFile = moduleState.modelFile ?? 'indoor_plants.glb';
   const widthCm = Number(moduleState.widthCm || 60);
   const depthCm = Number(moduleState.depthCm || 60);
   const heightCm = Number(moduleState.heightCm || 120);
@@ -4924,15 +4924,22 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
       child.receiveShadow = true;
     });
 
+    model.rotation.y = THREE.MathUtils.degToRad(Number(moduleState.modelRotationYDeg) || 0);
+    model.updateMatrixWorld(true);
+
     const sourceBox = new THREE.Box3().setFromObject(model);
     const sourceSize = sourceBox.getSize(new THREE.Vector3());
-    const fitScales = [
-      sourceSize.x > 0 ? widthM / sourceSize.x : Infinity,
-      sourceSize.y > 0 ? heightM / sourceSize.y : Infinity,
-      sourceSize.z > 0 ? depthM / sourceSize.z : Infinity,
-    ].filter((value) => Number.isFinite(value) && value > 0);
-    const uniformScale = fitScales.length ? Math.min(...fitScales) : 1;
-    model.scale.setScalar(uniformScale);
+
+    if (!moduleState.preserveModelScale) {
+      const fitScales = [
+        sourceSize.x > 0 ? widthM / sourceSize.x : Infinity,
+        sourceSize.y > 0 ? heightM / sourceSize.y : Infinity,
+        sourceSize.z > 0 ? depthM / sourceSize.z : Infinity,
+      ].filter((value) => Number.isFinite(value) && value > 0);
+      const uniformScale = fitScales.length ? Math.min(...fitScales) : 1;
+      model.scale.setScalar(uniformScale);
+      model.updateMatrixWorld(true);
+    }
 
     const fittedBox = new THREE.Box3().setFromObject(model);
     const fittedCenter = fittedBox.getCenter(new THREE.Vector3());

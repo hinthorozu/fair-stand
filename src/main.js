@@ -676,7 +676,7 @@ function createCatalogModuleState(module, { preservePlacement = false, catalogKe
   else if (module.type === 'mini-fridge') state = createMiniFridgeModuleState();
   else if (module.type === 'kettle') state = createKettleModuleState();
   else if (module.type === 'coat-rack') state = createCoatRackModuleState();
-  else if (module.type === 'indoor-plant-1') state = createIndoorPlantModuleState();
+  else if (module.type === 'indoor-plant-1') state = createIndoorPlantModuleState(module);
   else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42);
   else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();
   else if (module.type === 'door') state = createDoorModuleState(module.widthCm);

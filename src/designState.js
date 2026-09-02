@@ -238,13 +238,16 @@ export function createCoatRackModuleState() {
   };
 }
 
-export function createIndoorPlantModuleState() {
+export function createIndoorPlantModuleState(descriptor = {}) {
   return {
     id: createId('module'),
     type: 'indoor-plant-1',
-    widthCm: 60,
-    depthCm: 60,
-    heightCm: 120,
+    widthCm: Number(descriptor.widthCm) || 60,
+    depthCm: Number(descriptor.depthCm) || 60,
+    heightCm: Number(descriptor.heightCm) || 120,
+    modelFile: descriptor.modelFile ?? 'indoor_plants.glb',
+    modelRotationYDeg: Number(descriptor.modelRotationYDeg) || 0,
+    preserveModelScale: Boolean(descriptor.preserveModelScale),
   };
 }
 
