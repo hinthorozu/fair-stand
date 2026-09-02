@@ -1,0 +1,284 @@
+name: Mesh Branda Implementation
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/add-mesh-branda.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Add Mesh Branda mode
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def load(path):
+              raw = Path(path).read_bytes()
+              crlf = raw.count(b'\r\n') > max(1, raw.count(b'\n') // 2)
+              text = raw.decode('utf-8').replace('\r\n', '\n')
+              return text, crlf
+
+          def save(path, text, crlf):
+              if crlf:
+                  text = text.replace('\n', '\r\n')
+              Path(path).write_bytes(text.encode('utf-8'))
+
+          def replace_once(text, old, new, label):
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, got {count}')
+              return text.replace(old, new, 1)
+
+          # ---------------- moduleContextMenu.js ----------------
+          path = 'src/moduleContextMenu.js'
+          text, crlf = load(path)
+          text = replace_once(text,
+          """  onFabricModeChange,\n  onFabricLightingChange,""",
+          """  onFabricModeChange,\n  onMeshModeChange,\n  onFabricLightingChange,""",
+          'context callback signature')
+
+          text = replace_once(text,
+          """    <button type=\"button\" data-module-action=\"toggle-fabric\" hidden>Lightbox Kumaşa Çevir</button>\n    <button type=\"button\" data-module-action=\"toggle-fabric-light\" hidden>Lightbox aydınlatmayı aç</button>""",
+          """    <button type=\"button\" data-module-action=\"toggle-fabric\" hidden>Lightbox Kumaşa Çevir</button>\n    <button type=\"button\" data-module-action=\"toggle-mesh\" hidden>Mesh (Delikli) Brandaya Çevir</button>\n    <button type=\"button\" data-module-action=\"toggle-fabric-light\" hidden>Lightbox aydınlatmayı aç</button>""",
+          'context mesh button')
+
+          text = replace_once(text,
+          """  const fabricModeButton = menu.querySelector('[data-module-action=\"toggle-fabric\"]');\n  const fabricLightingButton = menu.querySelector('[data-module-action=\"toggle-fabric-light\"]');""",
+          """  const fabricModeButton = menu.querySelector('[data-module-action=\"toggle-fabric\"]');\n  const meshModeButton = menu.querySelector('[data-module-action=\"toggle-mesh\"]');\n  const fabricLightingButton = menu.querySelector('[data-module-action=\"toggle-fabric-light\"]');""",
+          'context mesh query')
+
+          text = replace_once(text,
+          """    fabricModeButton.hidden = !context.supportsFabric;\n    fabricModeButton.textContent = context.isFabric\n      ? 'Lightbox Kumaştan Çıkar'\n      : 'Lightbox Kumaşa Çevir';\n\n    fabricLightingButton.hidden = !context.isFabric;\n    fabricLightingButton.textContent = context.fabricLightingOn\n      ? 'Lightbox aydınlatmayı kapat'\n      : 'Lightbox aydınlatmayı aç';""",
+          """    const isLightboxFabric = Boolean(context.isFabric && context.fabricType !== 'mesh');\n    const isMeshFabric = Boolean(context.isFabric && context.fabricType === 'mesh');\n\n    fabricModeButton.hidden = !context.supportsFabric || isMeshFabric;\n    fabricModeButton.textContent = isLightboxFabric\n      ? 'Lightbox Kumaştan Çıkar'\n      : 'Lightbox Kumaşa Çevir';\n\n    meshModeButton.hidden = !context.supportsFabric || isLightboxFabric;\n    meshModeButton.textContent = isMeshFabric\n      ? 'Mesh Brandadan Çıkar'\n      : 'Mesh (Delikli) Brandaya Çevir';\n\n    fabricLightingButton.hidden = !isLightboxFabric;\n    fabricLightingButton.textContent = context.fabricLightingOn\n      ? 'Lightbox aydınlatmayı kapat'\n      : 'Lightbox aydınlatmayı aç';""",
+          'context fabric open state')
+
+          text = replace_once(text,
+          """    if (action === 'toggle-fabric' && context.supportsFabric) {\n      close();\n      onFabricModeChange?.(context, !context.isFabric);\n      return;\n    }\n\n    if (action === 'toggle-fabric-light' && context.isFabric) {\n      close();\n      onFabricLightingChange?.(context, !context.fabricLightingOn);\n      return;\n    }""",
+          """    if (action === 'toggle-fabric' && context.supportsFabric && context.fabricType !== 'mesh') {\n      close();\n      onFabricModeChange?.(context, !(context.isFabric && context.fabricType !== 'mesh'));\n      return;\n    }\n\n    if (action === 'toggle-mesh' && context.supportsFabric && context.fabricType !== 'lightbox') {\n      close();\n      onMeshModeChange?.(context, !(context.isFabric && context.fabricType === 'mesh'));\n      return;\n    }\n\n    if (action === 'toggle-fabric-light' && context.isLightboxFabric) {\n      close();\n      onFabricLightingChange?.(context, !context.fabricLightingOn);\n      return;\n    }""",
+          'context fabric actions')
+          save(path, text, crlf)
+
+          # ---------------- main.js ----------------
+          path = 'src/main.js'
+          text, crlf = load(path)
+          text = replace_once(text,
+          """    const selectedFabricGroupIds = new Set(\n      surfaces.map((surface) => surface.userData.surfaceState?.fabricGroupId).filter(Boolean),\n    );\n    if (selectedFabricGroupIds.size === 1\n      && surfaces.every((surface) => surface.userData.surfaceState?.fabricGroupId)) {\n      selectionInfo.textContent = 'Tek parça lightbox bezi seçili · renk + görsel uygulanabilir.';\n      return;\n    }\n\n    selectionInfo.textContent = `${surfaces.length} panel seçili · Beze çevir için eksiksiz dikdörtgen panel grubunu seç.`;""",
+          """    const selectedFabricGroupIds = new Set(\n      surfaces.map((surface) => surface.userData.surfaceState?.fabricGroupId).filter(Boolean),\n    );\n    if (selectedFabricGroupIds.size === 1\n      && surfaces.every((surface) => surface.userData.surfaceState?.fabricGroupId)) {\n      const fabricType = surfaces[0]?.userData.surfaceState?.fabricType === 'mesh'\n        ? 'mesh'\n        : 'lightbox';\n      selectionInfo.textContent = fabricType === 'mesh'\n        ? 'Tek parça Mesh (Delikli) Branda seçili · renk + görsel uygulanabilir.'\n        : 'Tek parça Lightbox Kumaş seçili · renk + görsel uygulanabilir.';\n      return;\n    }\n\n    selectionInfo.textContent = `${surfaces.length} panel seçili · Lightbox Kumaş / Mesh Branda için eksiksiz dikdörtgen panel grubunu seç.`;""",
+          'main selection feedback')
+
+          text = replace_once(text,
+          """function changeContextFabricMode(context, enabled) {\n  if (!context?.supportsFabric) return;\n\n  const selectedPanels = scene3d.getSelectedSurfaces().filter(\n    (surface) => surface.userData.selectionMode === 'panel',\n  );\n  const result = scene3d.applyFabricMode(selectedPanels, enabled);\n  if (!result?.ok) {\n    selectionInfo.textContent = result?.message || 'Bez işlemi uygulanamadı.';\n    return;\n  }\n\n  selectionInfo.textContent = result.enabled\n    ? `${result.panelCount} panel tek parça beze çevrildi.`\n    : 'Bez kaldırıldı; paneller normal görünüme döndü.';\n}\n\nfunction changeContextFabricLighting(context, enabled) {\n  if (!context?.isFabric) return;""",
+          """function changeContextFabricMode(context, enabled) {\n  if (!context?.supportsFabric) return;\n\n  const selectedPanels = scene3d.getSelectedSurfaces().filter(\n    (surface) => surface.userData.selectionMode === 'panel',\n  );\n  const result = scene3d.applyFabricMode(selectedPanels, enabled);\n  if (!result?.ok) {\n    selectionInfo.textContent = result?.message || 'Lightbox Kumaş işlemi uygulanamadı.';\n    return;\n  }\n\n  selectionInfo.textContent = result.enabled\n    ? `${result.panelCount} panel tek parça Lightbox Kumaşa çevrildi.`\n    : 'Lightbox Kumaş kaldırıldı; paneller normal görünüme döndü.';\n}\n\nfunction changeContextMeshMode(context, enabled) {\n  if (!context?.supportsFabric) return;\n\n  const selectedPanels = scene3d.getSelectedSurfaces().filter(\n    (surface) => surface.userData.selectionMode === 'panel',\n  );\n  const result = scene3d.applyMeshMode(selectedPanels, enabled);\n  if (!result?.ok) {\n    selectionInfo.textContent = result?.message || 'Mesh Branda işlemi uygulanamadı.';\n    return;\n  }\n\n  selectionInfo.textContent = result.enabled\n    ? `${result.panelCount} panel tek parça Mesh (Delikli) Brandaya çevrildi.`\n    : 'Mesh Branda kaldırıldı; paneller normal görünüme döndü.';\n}\n\nfunction changeContextFabricLighting(context, enabled) {\n  if (!context?.isLightboxFabric) return;""",
+          'main mesh handler')
+
+          text = replace_once(text,
+          """  onGlassModeChange: changeContextPanelGlassMode,\n  onFabricModeChange: changeContextFabricMode,\n  onFabricLightingChange: changeContextFabricLighting,""",
+          """  onGlassModeChange: changeContextPanelGlassMode,\n  onFabricModeChange: changeContextFabricMode,\n  onMeshModeChange: changeContextMeshMode,\n  onFabricLightingChange: changeContextFabricLighting,""",
+          'main context callbacks')
+
+          text = replace_once(text,
+          """  if (result.mode === 'fabric-group') {\n    selectionInfo.textContent = `Tek parça lightbox bezine görsel uygulandı · ${fitLabel}.`;""",
+          """  if (result.mode === 'fabric-group') {\n    selectionInfo.textContent = result.fabricType === 'mesh'\n      ? `Tek parça Mesh (Delikli) Brandaya görsel uygulandı · ${fitLabel}.`\n      : `Tek parça Lightbox Kumaşa görsel uygulandı · ${fitLabel}.`;""",
+          'main fabric image feedback')
+          save(path, text, crlf)
+
+          # ---------------- scene3d.js ----------------
+          path = 'src/scene3d.js'
+          text, crlf = load(path)
+
+          text = replace_once(text,
+          """  function clearFabricOverlays() {\n    fabricOverlayMeshes.forEach((overlay) => {\n      overlay.parent?.remove(overlay);\n      overlay.geometry?.dispose?.();\n      if (Array.isArray(overlay.material)) {\n        overlay.material.forEach((material) => {\n          material?.map?.dispose?.();\n          material?.dispose?.();\n        });\n      } else {\n        overlay.material?.map?.dispose?.();\n        overlay.material?.dispose?.();\n      }\n    });\n    fabricOverlayMeshes = [];\n  }\n\n  function suspendFabricSurface(surface) {\n    if (!surface?.material) return;\n    surface.material.map?.dispose?.();\n    surface.material.map = null;\n    surface.material.colorWrite = false;\n    surface.material.depthWrite = false;\n    surface.material.needsUpdate = true;\n    const backing = surface.userData?.backing;\n    // Bez yalnızca ön baskı yüzeyini devralır; modülün arka paneli korunur.\n    if (backing) backing.visible = true;\n  }""",
+          """  function clearFabricOverlays() {\n    fabricOverlayMeshes.forEach((overlay) => {\n      overlay.parent?.remove(overlay);\n      overlay.geometry?.dispose?.();\n      if (Array.isArray(overlay.material)) {\n        overlay.material.forEach((material) => {\n          material?.map?.dispose?.();\n          material?.alphaMap?.dispose?.();\n          material?.dispose?.();\n        });\n      } else {\n        overlay.material?.map?.dispose?.();\n        overlay.material?.alphaMap?.dispose?.();\n        overlay.material?.dispose?.();\n      }\n    });\n    fabricOverlayMeshes = [];\n  }\n\n  function suspendFabricSurface(surface, fabricType = 'lightbox') {\n    if (!surface?.material) return;\n    surface.material.map?.dispose?.();\n    surface.material.map = null;\n    surface.material.colorWrite = false;\n    surface.material.depthWrite = false;\n    surface.material.needsUpdate = true;\n    const backing = surface.userData?.backing;\n    // Lightbox arka paneli korur; Mesh deliklerinde gerçek sahnenin görünmesi için backing gizlenir.\n    if (backing) backing.visible = fabricType !== 'mesh';\n  }""",
+          'scene fabric clear/suspend')
+
+          text = replace_once(text,
+          """    delete state.fabricImageFit;\n    delete state.fabricLightingOn;\n    delete state.fabricOwnerSurfaceIds;""",
+          """    delete state.fabricImageFit;\n    delete state.fabricLightingOn;\n    delete state.fabricType;\n    delete state.fabricOwnerSurfaceIds;""",
+          'scene clearFabricState type')
+
+          helper_marker = """  function applyFabricOverlayLighting(overlay, fabricState = {}) {"""
+          helper = """  function createMeshBrandaAlphaMap(widthM, heightM) {\n    const size = 64;\n    const canvas = document.createElement('canvas');\n    canvas.width = size;\n    canvas.height = size;\n    const context = canvas.getContext('2d');\n    if (!context) return null;\n\n    // Yaklaşık %31 açık alan: opak baskı yüzeyi korunur, yalnız delikler gerçek cutout olur.\n    context.fillStyle = '#ffffff';\n    context.fillRect(0, 0, size, size);\n    context.fillStyle = '#000000';\n    const radius = 10.2;\n    [16, 48].forEach((x) => {\n      [16, 48].forEach((y) => {\n        context.beginPath();\n        context.arc(x, y, radius, 0, Math.PI * 2);\n        context.fill();\n      });\n    });\n\n    const texture = new THREE.CanvasTexture(canvas);\n    texture.wrapS = THREE.RepeatWrapping;\n    texture.wrapT = THREE.RepeatWrapping;\n    // İki delik / tile ekseninde yaklaşık 18 delik/metre görsel yoğunluk verir.\n    texture.repeat.set(\n      Math.max(1, Number(widthM) * 9),\n      Math.max(1, Number(heightM) * 9),\n    );\n    texture.minFilter = THREE.LinearFilter;\n    texture.magFilter = THREE.LinearFilter;\n    texture.generateMipmaps = false;\n    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();\n    texture.needsUpdate = true;\n    return texture;\n  }\n\n  function applyFabricOverlayLighting(overlay, fabricState = {}) {"""
+          text = replace_once(text, helper_marker, helper, 'scene mesh alpha helper')
+
+          text = replace_once(text,
+          """  function applyFabricOverlayLighting(overlay, fabricState = {}) {\n    const material = overlay?.material;\n    if (!material) return;\n\n    const lightingOn = Boolean(fabricState.fabricLightingOn);""",
+          """  function applyFabricOverlayLighting(overlay, fabricState = {}) {\n    const material = overlay?.material;\n    if (!material) return;\n\n    const fabricType = fabricState.fabricType === 'mesh' ? 'mesh' : 'lightbox';\n    // Lightbox ışığı açıldığında daima %100 opak kalır. Mesh ise emissive kullanmaz.\n    material.opacity = 1;\n    material.transparent = false;\n    material.depthWrite = true;\n    if (fabricType === 'mesh') {\n      material.emissiveMap = null;\n      material.emissive.set(0x000000);\n      material.emissiveIntensity = 0;\n      material.needsUpdate = true;\n      return;\n    }\n\n    const lightingOn = Boolean(fabricState.fabricLightingOn);""",
+          'scene lighting type guard')
+
+          text = replace_once(text,
+          """        // Lightbox baskısında emissive parlamanın yaptığı solmayı telafi et.\n        context.filter = 'saturate(1.08) contrast(1.06)';""",
+          """        // Lightbox baskısında emissive parlamanın yaptığı solmayı telafi et; Mesh baskıyı doğal bırak.\n        context.filter = overlay.userData.fabricType === 'mesh'\n          ? 'none'\n          : 'saturate(1.08) contrast(1.06)';""",
+          'scene image filter by type')
+
+          text = replace_once(text,
+          """      if (surfaces.length < 2) return;\n      // Bez aktifken alttaki paneller yalnızca seçim proxy'si olarak kalır:\n      // texture GPU'da tutulmaz, panel/backing çizimi kapatılır.\n      surfaces.forEach(suspendFabricSurface);""",
+          """      if (surfaces.length < 2) return;\n      const groupFabricType = surfaces[0]?.userData?.surfaceState?.fabricType === 'mesh'\n        ? 'mesh'\n        : 'lightbox';\n      // Kaplama aktifken alttaki paneller yalnızca seçim proxy'si olarak kalır.\n      // Mesh'te backing de gizlenir ki deliklerden gerçek sahne görünsün.\n      surfaces.forEach((surface) => suspendFabricSurface(surface, groupFabricType));""",
+          'scene rebuild suspend type')
+
+          text = replace_once(text,
+          """      const fabricState = first.userData.surfaceState ?? {};\n      const fabricImageAssetId = fabricState.fabricImageAssetId ?? null;\n      const fabricImageFit = fabricState.fabricImageFit === 'contain' ? 'contain' : 'cover';\n      const fabricColor = fabricState.fabricColor ?? fabricState.color ?? '#ffffff';\n      const baseColor = new THREE.Color(fabricImageAssetId ? '#ffffff' : fabricColor);\n      const overlay = new THREE.Mesh(\n        new THREE.PlaneGeometry(width, height),\n        new THREE.MeshStandardMaterial({\n          color: baseColor,\n          roughness: 0.86,\n          metalness: 0,\n          emissive: 0x000000,\n          emissiveIntensity: 0,\n          // Baskı ön yüzde kalır; arkadan normal panel/backing görünür.\n          side: THREE.FrontSide,\n          polygonOffset: true,\n          polygonOffsetFactor: -2,\n          polygonOffsetUnits: -2,\n        }),\n      );""",
+          """      const fabricState = first.userData.surfaceState ?? {};\n      const fabricType = fabricState.fabricType === 'mesh' ? 'mesh' : 'lightbox';\n      const fabricImageAssetId = fabricState.fabricImageAssetId ?? null;\n      const fabricImageFit = fabricState.fabricImageFit === 'contain' ? 'contain' : 'cover';\n      const fabricColor = fabricState.fabricColor ?? fabricState.color ?? '#ffffff';\n      const baseColor = new THREE.Color(fabricImageAssetId ? '#ffffff' : fabricColor);\n      const overlayMaterial = new THREE.MeshStandardMaterial({\n        color: baseColor,\n        roughness: fabricType === 'mesh' ? 0.92 : 0.86,\n        metalness: 0,\n        emissive: 0x000000,\n        emissiveIntensity: 0,\n        side: fabricType === 'mesh' ? THREE.DoubleSide : THREE.FrontSide,\n        polygonOffset: true,\n        polygonOffsetFactor: -2,\n        polygonOffsetUnits: -2,\n      });\n      if (fabricType === 'mesh') {\n        overlayMaterial.alphaMap = createMeshBrandaAlphaMap(width, height);\n        overlayMaterial.alphaTest = 0.45;\n        overlayMaterial.transparent = false;\n        overlayMaterial.depthWrite = true;\n      }\n      const overlay = new THREE.Mesh(\n        new THREE.PlaneGeometry(width, height),\n        overlayMaterial,\n      );""",
+          'scene overlay material type')
+
+          text = replace_once(text,
+          """      overlay.userData.kind = 'decoration';\n      overlay.userData.role = 'lightbox-fabric';\n      overlay.userData.fabricGroupId = groupId;\n      overlay.userData.fabricState = fabricState;""",
+          """      overlay.userData.kind = 'decoration';\n      overlay.userData.role = fabricType === 'mesh' ? 'mesh-branda' : 'lightbox-fabric';\n      overlay.userData.fabricType = fabricType;\n      overlay.userData.fabricGroupId = groupId;\n      overlay.userData.fabricState = fabricState;""",
+          'scene overlay metadata')
+
+          text = replace_once(text,
+          """  function applyFabricMode(meshOrMeshes, enabled) {\n    const meshes = normalizeMeshes(meshOrMeshes).filter(\n      (mesh) => mesh?.userData?.selectionMode === 'panel' && mesh.userData.surfaceState,\n    );\n    const fabric = Boolean(enabled);""",
+          """  function applyFabricMode(meshOrMeshes, enabled) {\n    return applyFabricCoverMode(meshOrMeshes, enabled, 'lightbox');\n  }\n\n  function applyMeshMode(meshOrMeshes, enabled) {\n    return applyFabricCoverMode(meshOrMeshes, enabled, 'mesh');\n  }\n\n  function applyFabricCoverMode(meshOrMeshes, enabled, fabricType = 'lightbox') {\n    const meshes = normalizeMeshes(meshOrMeshes).filter(\n      (mesh) => mesh?.userData?.selectionMode === 'panel' && mesh.userData.surfaceState,\n    );\n    const fabric = Boolean(enabled);\n    const resolvedFabricType = fabricType === 'mesh' ? 'mesh' : 'lightbox';\n    const fabricLabel = resolvedFabricType === 'mesh' ? 'Mesh Branda' : 'Lightbox Kumaş';""",
+          'scene generalized fabric mode')
+
+          text = text.replace(
+              "return { ok: false, message: 'Ctrl ile en az 2 panel seç; bez tek parça blok olarak oluşturulur.' };",
+              "return { ok: false, message: `Ctrl ile en az 2 panel seç; ${fabricLabel} tek parça blok olarak oluşturulur.` };",
+              1,
+          )
+          text = text.replace(
+              "return { ok: false, message: 'Bez yalnızca eksiksiz dikdörtgen panel bloğundan oluşturulabilir.' };",
+              "return { ok: false, message: `${fabricLabel} yalnızca eksiksiz dikdörtgen panel bloğundan oluşturulabilir.` };",
+              1,
+          )
+          text = text.replace(
+              "return { ok: false, message: 'Bez yalnızca aynı düzlemdeki panellerden oluşturulabilir.' };",
+              "return { ok: false, message: `${fabricLabel} yalnızca aynı düzlemdeki panellerden oluşturulabilir.` };",
+              1,
+          )
+
+          # Cleanup every physical cover state path, including replaced/orphaned groups.
+          text = text.replace(
+              "delete surface.userData.surfaceState.fabricLightingOn;\n          delete surface.userData.surfaceState.fabricOwnerSurfaceIds;",
+              "delete surface.userData.surfaceState.fabricLightingOn;\n          delete surface.userData.surfaceState.fabricType;\n          delete surface.userData.surfaceState.fabricOwnerSurfaceIds;",
+          )
+          text = text.replace(
+              "delete surface.userData.surfaceState.fabricLightingOn;\n        delete surface.userData.surfaceState.fabricOwnerSurfaceIds;",
+              "delete surface.userData.surfaceState.fabricLightingOn;\n        delete surface.userData.surfaceState.fabricType;\n        delete surface.userData.surfaceState.fabricOwnerSurfaceIds;",
+          )
+
+          text = replace_once(text,
+          """        state.fabricGroupId = groupId;\n        state.fabricColor = initialFabricColor;\n        state.fabricImageAssetId = null;\n        state.fabricImageFit = 'cover';\n        state.fabricOwnerSurfaceIds = [...fabricOwnerSurfaceIds];""",
+          """        state.fabricGroupId = groupId;\n        state.fabricType = resolvedFabricType;\n        state.fabricColor = initialFabricColor;\n        state.fabricImageAssetId = null;\n        state.fabricImageFit = 'cover';\n        state.fabricLightingOn = false;\n        state.fabricOwnerSurfaceIds = [...fabricOwnerSurfaceIds];""",
+          'scene set fabric type')
+
+          text = replace_once(text,
+          """      meshes.forEach(suspendFabricSurface);\n      rebuildFabricOverlays();\n      return { ok: true, enabled: true, panelCount: meshes.length, fabricGroupId: groupId };""",
+          """      meshes.forEach((mesh) => suspendFabricSurface(mesh, resolvedFabricType));\n      rebuildFabricOverlays();\n      return {\n        ok: true,\n        enabled: true,\n        panelCount: meshes.length,\n        fabricGroupId: groupId,\n        fabricType: resolvedFabricType,\n      };""",
+          'scene fabric return type')
+
+          text = replace_once(text,
+          """    if (!groupIds.size) {\n      return { ok: false, message: 'Seçimde kaldırılacak bez bulunamadı.' };\n    }""",
+          """    if (!groupIds.size) {\n      return { ok: false, message: `Seçimde kaldırılacak ${fabricLabel} bulunamadı.` };\n    }""",
+          'scene remove message')
+
+          text = replace_once(text,
+          """    const [groupId] = groupIds;\n    const lightingOn = Boolean(enabled);\n    const groupSurfaces = surfaceMeshes.filter(\n      (surface) => surface.userData.surfaceState?.fabricGroupId === groupId,\n    );""",
+          """    const [groupId] = groupIds;\n    const groupSurfaces = surfaceMeshes.filter(\n      (surface) => surface.userData.surfaceState?.fabricGroupId === groupId,\n    );\n    const fabricType = groupSurfaces[0]?.userData.surfaceState?.fabricType === 'mesh'\n      ? 'mesh'\n      : 'lightbox';\n    if (fabricType !== 'lightbox') {\n      return { ok: false, message: 'Mesh Branda aydınlatılamaz; aydınlatma yalnızca Lightbox Kumaşa aittir.' };\n    }\n    const lightingOn = Boolean(enabled);""",
+          'scene lighting mesh rejection')
+
+          text = replace_once(text,
+          """      isGlass: supportsGlass ? Boolean(surface.userData.surfaceState?.isGlass) : false,\n      supportsFabric: supportsGlass,\n      isFabric: supportsGlass ? Boolean(surface.userData.surfaceState?.fabricGroupId) : false,\n      fabricLightingOn: supportsGlass ? Boolean(surface.userData.surfaceState?.fabricLightingOn) : false,""",
+          """      isGlass: supportsGlass ? Boolean(surface.userData.surfaceState?.isGlass) : false,\n      supportsFabric: supportsGlass,\n      isFabric: supportsGlass ? Boolean(surface.userData.surfaceState?.fabricGroupId) : false,\n      fabricType: supportsGlass && surface.userData.surfaceState?.fabricGroupId\n        ? (surface.userData.surfaceState?.fabricType === 'mesh' ? 'mesh' : 'lightbox')\n        : null,\n      isLightboxFabric: supportsGlass\n        ? Boolean(surface.userData.surfaceState?.fabricGroupId && surface.userData.surfaceState?.fabricType !== 'mesh')\n        : false,\n      isMeshFabric: supportsGlass\n        ? Boolean(surface.userData.surfaceState?.fabricGroupId && surface.userData.surfaceState?.fabricType === 'mesh')\n        : false,\n      fabricLightingOn: supportsGlass\n        ? Boolean(surface.userData.surfaceState?.fabricLightingOn && surface.userData.surfaceState?.fabricType !== 'mesh')\n        : false,""",
+          'scene context fabric type')
+
+          text = replace_once(text,
+          """      return {\n        ok: true,\n        mode: 'fabric-group',\n        panelCount: groupSurfaces.length,\n        fabricGroupId: groupId,\n      };""",
+          """      return {\n        ok: true,\n        mode: 'fabric-group',\n        panelCount: groupSurfaces.length,\n        fabricGroupId: groupId,\n        fabricType: groupSurfaces[0]?.userData.surfaceState?.fabricType === 'mesh' ? 'mesh' : 'lightbox',\n      };""",
+          'scene image result fabric type')
+
+          text = text.replace(
+              "return { ok: false, message: 'Görsel için tek bir bez seç.' };",
+              "return { ok: false, message: 'Görsel için tek bir Lightbox/Mesh kaplaması seç.' };",
+          )
+          text = text.replace(
+              "return { ok: false, message: 'Bez ile normal panelleri aynı anda görselleme; tek bir bez seç.' };",
+              "return { ok: false, message: 'Lightbox/Mesh kaplaması ile normal panelleri aynı anda görselleme; tek bir kaplama seç.' };",
+          )
+
+          text = text.replace(
+              "'Bu modül tek parça beze bağlı. Döndürmek için önce Bezi kaldır.'",
+              "'Bu modül tek parça Lightbox/Mesh kaplamasına bağlı. Döndürmek için önce kaplamayı kaldır.'",
+          )
+          text = text.replace(
+              "'Bu modül tek parça beze bağlı. Taşımak için önce Bezi kaldır.'",
+              "'Bu modül tek parça Lightbox/Mesh kaplamasına bağlı. Taşımak için önce kaplamayı kaldır.'",
+          )
+
+          text = replace_once(text,
+          """    applyGlassMode,\n    applyFabricMode,\n    setFabricLighting,""",
+          """    applyGlassMode,\n    applyFabricMode,\n    applyMeshMode,\n    setFabricLighting,""",
+          'scene api mesh mode')
+          save(path, text, crlf)
+
+          # ---------------- helpGuide.js ----------------
+          path = 'src/helpGuide.js'
+          text, crlf = load(path)
+          replacements = {
+              'Panel seç → Renk / görsel / cam / bez uygula': 'Panel seç → Renk / görsel / cam / Lightbox / Mesh uygula',
+              '<li><strong>Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar:</strong> Uygun panel bloğunu tek parça lightbox bezine dönüştürür veya geri alır.</li>': '<li><strong>Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar:</strong> Uygun panel bloğunu tek parça opak Lightbox Kumaşa dönüştürür veya geri alır.</li>\n        <li><strong>Mesh (Delikli) Brandaya Çevir / Mesh Brandadan Çıkar:</strong> Aynı panel bloğunu gerçek delik maskeli Mesh Branda olarak kullanır; deliklerden sahnenin arkası görünür.</li>',
+              'Bez oluşturma için seçim daha katıdır: eksiksiz dikdörtgen ve aynı düzlem şarttır.': 'Lightbox Kumaş veya Mesh Branda oluşturmak için seçim daha katıdır: eksiksiz dikdörtgen ve aynı düzlem şarttır.',
+              'Birden fazla modülü kaplayan tek parça beze bağlı modül tek başına taşınamaz veya döndürülemez; önce bez kaldırılmalıdır.': 'Birden fazla modülü kaplayan tek parça Lightbox/Mesh kaplamasına bağlı modül tek başına taşınamaz veya döndürülemez; önce kaplama kaldırılmalıdır.',
+              '<li>Lightbox bezine görsel tek parça olarak uygulanır.</li>': '<li>Lightbox Kumaşa ve Mesh Brandaya görsel tek parça olarak uygulanır.</li>',
+              "title: 'Bez / Lightbox'": "title: 'Lightbox Kumaş / Mesh Branda'",
+              '<p>Bez oluşturmak için en az iki panel seçilmeli; seçim eksiksiz dikdörtgen ve aynı düzlemde olmalıdır.</p>': '<p>Lightbox Kumaş veya Mesh Branda oluşturmak için en az iki panel seçilmeli; seçim eksiksiz dikdörtgen ve aynı düzlemde olmalıdır.</p>',
+              '<li>Beze renk ve görsel uygulanabilir.</li>': '<li>Her iki kaplamaya da renk ve görsel uygulanabilir.</li>',
+              '<li>Lightbox aydınlatması açılıp kapatılabilir.</li>': '<li>Lightbox aydınlatması açılıp kapatılabilir ve ışık açıkken yüzey %100 opaktır.</li>\n        <li>Mesh Branda aydınlatılmaz; delikli alpha maskesi sayesinde arka sahne görünür.</li>',
+              '<li>Tek parça bez birden fazla modülü kapsıyorsa bu modüllerden biri tek başına taşınamaz/döndürülemez.</li>': '<li>Tek parça Lightbox/Mesh kaplaması birden fazla modülü kapsıyorsa bu modüllerden biri tek başına taşınamaz/döndürülemez.</li>',
+              'Çoklu panel seçimi ile bez oluşturma aynı kural değildir; bez için aynı düzlem ve eksiksiz dikdörtgen zorunludur.': 'Çoklu panel seçimi ile Lightbox/Mesh oluşturma aynı kural değildir; kaplama için aynı düzlem ve eksiksiz dikdörtgen zorunludur.',
+          }
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f'help guide missing: {old[:70]}')
+              text = text.replace(old, new)
+          save(path, text, crlf)
+
+          # ---------------- tests ----------------
+          path = 'test/lightboxFabric.test.js'
+          text, crlf = load(path)
+          text = replace_once(text,
+          """  assert.match(main, /scene3d\\.applyFabricMode\\(selectedPanels, enabled\\)/);\n});""",
+          """  assert.match(main, /scene3d\\.applyFabricMode\\(selectedPanels, enabled\\)/);\n});\n\ntest('mesh branda is a separate perforated cover without lightbox lighting', () => {\n  const menu = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');\n  const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');\n  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n\n  assert.match(menu, /data-module-action=\"toggle-mesh\"/);\n  assert.match(menu, /Mesh \\(Delikli\\) Brandaya Çevir/);\n  assert.match(menu, /Mesh Brandadan Çıkar/);\n  assert.match(main, /function changeContextMeshMode/);\n  assert.match(main, /scene3d\\.applyMeshMode\\(selectedPanels, enabled\\)/);\n  assert.match(scene, /function applyMeshMode\\(meshOrMeshes, enabled\\)/);\n  assert.match(scene, /fabricType === 'mesh'/);\n  assert.match(scene, /function createMeshBrandaAlphaMap/);\n  assert.match(scene, /overlayMaterial\\.alphaMap = createMeshBrandaAlphaMap/);\n  assert.match(scene, /overlayMaterial\\.alphaTest = 0\\.45/);\n  assert.match(scene, /backing\\.visible = fabricType !== 'mesh'/);\n  assert.match(scene, /Mesh Branda aydınlatılamaz/);\n});\n\ntest('lightbox lighting stays fully opaque', () => {\n  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n  assert.match(scene, /material\\.opacity = 1/);\n  assert.match(scene, /material\\.transparent = false/);\n  assert.match(scene, /fabricType = fabricState\\.fabricType === 'mesh'/);\n});""",
+          'test mesh insertion')
+          save(path, text, crlf)
+          PY
+
+      - name: Syntax check
+        run: |
+          node --check src/moduleContextMenu.js
+          node --check src/main.js
+          node --check src/scene3d.js
+          node --check src/helpGuide.js
+          node --check test/lightboxFabric.test.js
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit and push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/add-mesh-branda.yml
+          git add src/moduleContextMenu.js src/main.js src/scene3d.js src/helpGuide.js test/lightboxFabric.test.js
+          git commit -m 'feat: add perforated mesh branda mode [skip ci]'
+          git push origin ROG
