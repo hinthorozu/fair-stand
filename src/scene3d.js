@@ -2274,6 +2274,12 @@ export function createStandScene(
     const moduleState = moduleGroup?.userData?.moduleState;
     if (!moduleGroup || !moduleState?.placement) return { handled: false, ok: false };
 
+    if (getFabricMoveLock(moduleState.id)) {
+      const message = 'Bu modül tek parça beze bağlı. Döndürmek için önce Bezi kaldır.';
+      showPlacementFeedback(message, { durationMs: 1800 });
+      return { handled: true, ok: false, message };
+    }
+
     const stepDeg = getModuleRotationStepDeg(moduleState);
     const effectiveDeltaDeg = deltaDeg < 0 ? -stepDeg : stepDeg;
     const nextPlacement = rotateModulePlacementAroundCenter(
@@ -3179,6 +3185,94 @@ export function createStandScene(
     }
   }
 
+
+  function clearFabricState(surface, { restore = true } = {}) {
+    const state = surface?.userData?.surfaceState;
+    if (!state) return;
+    delete state.fabricGroupId;
+    delete state.fabricColor;
+    delete state.fabricImageAssetId;
+    delete state.fabricImageFit;
+    delete state.fabricLightingOn;
+    delete state.fabricOwnerSurfaceIds;
+    delete state.fabricOwnerModuleIds;
+    if (restore) restoreFabricSurface(surface);
+  }
+
+  function normalizeFabricOwnership() {
+    const groups = new Map();
+    surfaceMeshes.forEach((surface) => {
+      const groupId = surface?.userData?.surfaceState?.fabricGroupId;
+      if (!groupId) return;
+      if (!groups.has(groupId)) groups.set(groupId, []);
+      groups.get(groupId).push(surface);
+    });
+
+    groups.forEach((surfaces) => {
+      const firstState = surfaces[0]?.userData?.surfaceState;
+      if (!firstState) return;
+
+      const currentSurfaceIds = surfaces
+        .map((surface) => surface.userData?.surfaceId)
+        .filter(Boolean);
+      const ownerSurfaceIds = Array.isArray(firstState.fabricOwnerSurfaceIds)
+        && firstState.fabricOwnerSurfaceIds.length
+        ? [...new Set(firstState.fabricOwnerSurfaceIds.filter(Boolean))]
+        : [...new Set(currentSurfaceIds)];
+      const ownerSurfaceSet = new Set(ownerSurfaceIds);
+
+      // A duplicated module may clone the old fabricGroupId. It must not silently
+      // become part of the original physical fabric, so strip only unexpected clones.
+      surfaces
+        .filter((surface) => !ownerSurfaceSet.has(surface.userData?.surfaceId))
+        .forEach((surface) => clearFabricState(surface));
+
+      const ownedSurfaces = surfaces.filter(
+        (surface) => ownerSurfaceSet.has(surface.userData?.surfaceId),
+      );
+      const actualSurfaceSet = new Set(
+        ownedSurfaces.map((surface) => surface.userData?.surfaceId).filter(Boolean),
+      );
+
+      // If an original owner surface disappeared (module deleted/type changed), the
+      // one-piece fabric no longer exists physically. Dissolve it instead of leaving
+      // an orphaned or shortened overlay behind.
+      if (ownerSurfaceIds.some((surfaceId) => !actualSurfaceSet.has(surfaceId))) {
+        ownedSurfaces.forEach((surface) => clearFabricState(surface));
+        return;
+      }
+
+      const ownerModuleIds = [...new Set(
+        ownedSurfaces.map((surface) => surface.userData?.moduleId).filter(Boolean),
+      )];
+      ownedSurfaces.forEach((surface) => {
+        const state = surface.userData.surfaceState;
+        state.fabricOwnerSurfaceIds = [...ownerSurfaceIds];
+        state.fabricOwnerModuleIds = [...ownerModuleIds];
+      });
+    });
+  }
+
+  function getFabricMoveLock(moduleId) {
+    if (!moduleId) return null;
+    const groupIds = new Set(
+      surfaceMeshes
+        .filter((surface) => surface.userData?.moduleId === moduleId)
+        .map((surface) => surface.userData?.surfaceState?.fabricGroupId)
+        .filter(Boolean),
+    );
+
+    for (const groupId of groupIds) {
+      const moduleIds = new Set(
+        surfaceMeshes
+          .filter((surface) => surface.userData?.surfaceState?.fabricGroupId === groupId)
+          .map((surface) => surface.userData?.moduleId)
+          .filter(Boolean),
+      );
+      if (moduleIds.size > 1) return { groupId, moduleIds: [...moduleIds] };
+    }
+    return null;
+  }
   function applyFabricOverlayLighting(overlay, fabricState = {}) {
     const material = overlay?.material;
     if (!material) return;
@@ -3270,6 +3364,7 @@ export function createStandScene(
 
   function rebuildFabricOverlays() {
     clearFabricOverlays();
+    normalizeFabricOwnership();
 
     const groups = new Map();
     surfaceMeshes.forEach((surface) => {
@@ -3281,15 +3376,28 @@ export function createStandScene(
     });
 
     if (!groups.size) return;
-    wallRoot.updateWorldMatrix(true, true);
-    const wallQuaternion = wallRoot.getWorldQuaternion(new THREE.Quaternion());
-    const inverseWallQuaternion = wallQuaternion.clone().invert();
 
     groups.forEach((surfaces, groupId) => {
       if (surfaces.length < 2) return;
       // Bez aktifken alttaki paneller yalnızca seçim proxy'si olarak kalır:
       // texture GPU'da tutulmaz, panel/backing çizimi kapatılır.
       surfaces.forEach(suspendFabricSurface);
+
+      const moduleIds = new Set(
+        surfaces.map((surface) => surface.userData?.moduleId).filter(Boolean),
+      );
+      const [singleModuleId] = moduleIds.size === 1 ? moduleIds : [];
+      const singleModuleGroup = singleModuleId
+        ? wallRoot.children.find((group) => (
+            group.userData?.moduleState?.id === singleModuleId
+            || group.userData?.moduleId === singleModuleId
+          ))
+        : null;
+      const overlayParent = singleModuleGroup ?? wallRoot;
+      overlayParent.updateWorldMatrix(true, true);
+      const inverseOverlayParentQuaternion = overlayParent
+        .getWorldQuaternion(new THREE.Quaternion())
+        .invert();
 
       const first = surfaces[0];
       first.updateWorldMatrix(true, false);
@@ -3350,8 +3458,8 @@ export function createStandScene(
           polygonOffsetUnits: -2,
         }),
       );
-      overlay.position.copy(wallRoot.worldToLocal(centerWorld.clone()));
-      overlay.quaternion.copy(inverseWallQuaternion.clone().multiply(surfaceQuaternion));
+      overlay.position.copy(overlayParent.worldToLocal(centerWorld.clone()));
+      overlay.quaternion.copy(inverseOverlayParentQuaternion.clone().multiply(surfaceQuaternion));
       overlay.castShadow = false;
       overlay.receiveShadow = true;
       overlay.renderOrder = 3;
@@ -3362,7 +3470,7 @@ export function createStandScene(
       applyFabricOverlayLighting(overlay, fabricState);
       // Bez öndeki tek parça yüzeydir; seçim/raycast alttaki gerçek panellerden devam eder.
       overlay.raycast = () => {};
-      wallRoot.add(overlay);
+      overlayParent.add(overlay);
       fabricOverlayMeshes.push(overlay);
       if (fabricImageAssetId) {
         loadFabricOverlayImage(overlay, fabricImageAssetId, fabricImageFit);
@@ -3433,18 +3541,28 @@ export function createStandScene(
           delete surface.userData.surfaceState.fabricImageAssetId;
           delete surface.userData.surfaceState.fabricImageFit;
           delete surface.userData.surfaceState.fabricLightingOn;
+          delete surface.userData.surfaceState.fabricOwnerSurfaceIds;
+          delete surface.userData.surfaceState.fabricOwnerModuleIds;
         });
         replacedSurfaces.forEach(restoreFabricSurface);
       }
 
       const groupId = `fabric-${globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
       const initialFabricColor = meshes[0]?.userData.surfaceState?.color ?? '#ffffff';
+      const fabricOwnerSurfaceIds = [...new Set(
+        meshes.map((mesh) => mesh.userData.surfaceId).filter(Boolean),
+      )];
+      const fabricOwnerModuleIds = [...new Set(
+        meshes.map((mesh) => mesh.userData.moduleId).filter(Boolean),
+      )];
       meshes.forEach((mesh) => {
         const state = mesh.userData.surfaceState;
         state.fabricGroupId = groupId;
         state.fabricColor = initialFabricColor;
         state.fabricImageAssetId = null;
         state.fabricImageFit = 'cover';
+        state.fabricOwnerSurfaceIds = [...fabricOwnerSurfaceIds];
+        state.fabricOwnerModuleIds = [...fabricOwnerModuleIds];
       });
       meshes.forEach(suspendFabricSurface);
       rebuildFabricOverlays();
@@ -3466,6 +3584,8 @@ export function createStandScene(
         delete surface.userData.surfaceState.fabricImageAssetId;
         delete surface.userData.surfaceState.fabricImageFit;
         delete surface.userData.surfaceState.fabricLightingOn;
+        delete surface.userData.surfaceState.fabricOwnerSurfaceIds;
+        delete surface.userData.surfaceState.fabricOwnerModuleIds;
       }
     });
     restoredSurfaces.forEach(restoreFabricSurface);
@@ -3997,6 +4117,19 @@ export function createStandScene(
       return;
     }
 
+    const fabricMoveLock = getFabricMoveLock(moduleState.id);
+    if (fabricMoveLock) {
+      handleSurfaceSelectionAt(event.clientX, event.clientY, false, moduleState.id);
+      showPlacementFeedback('Bu modül tek parça beze bağlı. Taşımak için önce Bezi kaldır.', {
+        clientX: event.clientX,
+        clientY: event.clientY,
+        durationMs: 1800,
+      });
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+
     controls.enabled = false;
     const dragRotationZDeg = normalizeModuleRotationZDeg(moduleState.placement?.rotationZDeg);
     const dragVertical = isVerticalModuleRotation(dragRotationZDeg);
@@ -4054,6 +4187,12 @@ export function createStandScene(
       if (!moduleGroup || !moduleState?.placement || !stageLayout) return;
 
       event.preventDefault();
+      if (getFabricMoveLock(moduleState.id)) {
+        showPlacementFeedback('Bu modül tek parça beze bağlı. Taşımak için önce Bezi kaldır.', {
+          durationMs: 1800,
+        });
+        return;
+      }
       const stepCm = isTopFixtureType(moduleState.type)
         ? 20
         : getModulePlacementSnapCm(moduleState.type);
