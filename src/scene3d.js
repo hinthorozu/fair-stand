@@ -4593,6 +4593,7 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
     const loader = new SVGLoader();
     loader.loadAsync(assetUrl).then((data) => {
       const raw = new THREE.Group();
+      const haloShapeGroup = new THREE.Group();
       let meshCount = 0;
       data.paths.forEach((path) => {
         const style = path.userData?.style ?? {};
@@ -4616,6 +4617,8 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
           mesh.castShadow = true;
           mesh.receiveShadow = true;
           raw.add(mesh);
+          const haloMesh = new THREE.Mesh(new THREE.ShapeGeometry(shape, 10), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending }));
+          haloShapeGroup.add(haloMesh);
           meshCount += 1;
         });
       });
@@ -4630,13 +4633,18 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
       raw.position.set(-center.x * scale, center.y * scale, 0);
       visualRoot.add(raw);
 
-      const lightCount = 5;
-      for (let i = 0; i < lightCount; i += 1) {
-        const t = lightCount === 1 ? 0.5 : i / (lightCount - 1);
-        const light = new THREE.PointLight(0xffffff, 1.8, 0.55, 2);
-        light.position.set((t - 0.5) * widthM * 0.82, 0, -wallGapM * 0.55);
-        visualRoot.add(light);
-      }
+      const haloLayers = [
+        { scale: 1.018, opacity: 0.44, z: -Math.max(0.002, wallGapM * 0.28) },
+        { scale: 1.045, opacity: 0.22, z: -Math.max(0.003, wallGapM * 0.52) },
+        { scale: 1.085, opacity: 0.09, z: -Math.max(0.004, wallGapM * 0.78) },
+      ];
+      haloLayers.forEach((layer) => {
+        const halo = haloShapeGroup.clone(true);
+        halo.traverse((child) => { if (child.isMesh) { child.material = child.material.clone(); child.material.opacity = layer.opacity; } });
+        halo.scale.set(scale * layer.scale, -scale * layer.scale, 1);
+        halo.position.set(-center.x * scale * layer.scale, center.y * scale * layer.scale, layer.z);
+        visualRoot.add(halo);
+      });
     }).catch((error) => {
       console.warn('Işıklı strafor SVG yüklenemedi:', error);
     });
