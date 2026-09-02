@@ -1,0 +1,29 @@
+name: Run final video wall single image fix
+on:
+  push:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch
+        run: node scripts/patch-video-wall-single-image.cjs
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+      - name: Commit
+        run: |
+          rm -f .github/workflows/run-video-wall-single-image-fix.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/scene3d.js .github/workflows/run-video-wall-single-image-fix.yml
+          git commit -m "Fix 2x2 video wall to use one image"
+          git push origin ROG
