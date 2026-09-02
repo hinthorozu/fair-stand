@@ -1,0 +1,45 @@
+name: Add Illuminated Foam V1
+
+on:
+  push:
+    branches: [ROG]
+    paths:
+      - '.github/workflows/add-illuminated-foam-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply patch
+        run: node .github/scripts/add-illuminated-foam-v1.cjs
+      - name: Syntax checks
+        run: |
+          node --check src/main.js
+          node --check src/scene3d.js
+          node --check src/designState.js
+          node --check src/moduleBehavior.js
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit source and cleanup
+        shell: bash
+        run: |
+          rm -f .github/workflows/add-illuminated-foam-v1.yml .github/scripts/add-illuminated-foam-v1.cjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/main.js src/scene3d.js src/designState.js src/moduleBehavior.js test/illuminatedFoamModule.test.js .github/workflows/add-illuminated-foam-v1.yml .github/scripts/add-illuminated-foam-v1.cjs
+          git commit -m "Add SVG illuminated foam wall module"
+          git push origin ROG
