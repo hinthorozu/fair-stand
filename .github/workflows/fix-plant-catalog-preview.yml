@@ -25,50 +25,44 @@ jobs:
 
       - name: Add plant catalog icons
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path('src/moduleDragSidebar.js')
-          text = path.read_text(encoding='utf-8')
-
-          css_anchor = "    .module-drag-tv { position:relative; width:66px; height:54px; }\n"
-          css = """    .module-drag-plant { position:relative; width:58px; height:62px; }
-    .module-drag-plant-pot { position:absolute; left:19px; bottom:4px; width:20px; height:14px; border:2px solid #8b6f47; border-top:0; border-radius:0 0 6px 6px; background:#d6b986; box-sizing:border-box; }
-    .module-drag-plant-stem { position:absolute; left:28px; bottom:17px; width:3px; height:28px; border-radius:3px; background:#54845f; }
-    .module-drag-plant-leaf { position:absolute; width:15px; height:9px; border:2px solid #54845f; border-radius:100% 0 100% 0; background:#dcebd9; box-sizing:border-box; }
-    .module-drag-plant .leaf-a { left:15px; bottom:30px; transform:rotate(22deg); }
-    .module-drag-plant .leaf-b { left:29px; bottom:34px; transform:scaleX(-1) rotate(22deg); }
-    .module-drag-plant .leaf-c { left:18px; bottom:42px; transform:rotate(38deg); }
-    .module-drag-plant .leaf-d { left:29px; bottom:47px; transform:scaleX(-1) rotate(38deg); }
-    .module-drag-plant-1 .leaf-d { display:none; }
-    .module-drag-plant-2 .module-drag-plant-stem { height:32px; }
-"""
-          if text.count(css_anchor) != 1:
-              raise SystemExit(f'css anchor count={text.count(css_anchor)}')
-          text = text.replace(css_anchor, css + css_anchor, 1)
-
-          preview_anchor = """  if (module.type === 'kettle') {
-    const kettle = document.createElement('div');
-"""
-          preview = """  if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {
-    const plant = document.createElement('div');
-    plant.className = `module-drag-plant module-drag-plant-${module.type === 'indoor-plant-1' ? '1' : '2'}`;
-    ['pot', 'stem', 'leaf leaf-a', 'leaf leaf-b', 'leaf leaf-c', 'leaf leaf-d'].forEach((part) => {
-      const element = document.createElement('i');
-      element.className = `module-drag-plant-${part.replace(' ', ' module-drag-plant-')}`;
-      plant.appendChild(element);
-    });
-    preview.appendChild(plant);
-    return preview;
-  }
-
-"""
-          if text.count(preview_anchor) != 1:
-              raise SystemExit(f'preview anchor count={text.count(preview_anchor)}')
-          text = text.replace(preview_anchor, preview + preview_anchor, 1)
-
-          path.write_text(text, encoding='utf-8')
-          PY
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'src/moduleDragSidebar.js';
+          let text = fs.readFileSync(path, 'utf8');
+          const cssAnchor = "    .module-drag-tv { position:relative; width:66px; height:54px; }\n";
+          const css = [
+            "    .module-drag-plant { position:relative; width:58px; height:62px; }",
+            "    .module-drag-plant-pot { position:absolute; left:19px; bottom:4px; width:20px; height:14px; border:2px solid #8b6f47; border-top:0; border-radius:0 0 6px 6px; background:#d6b986; box-sizing:border-box; }",
+            "    .module-drag-plant-stem { position:absolute; left:28px; bottom:17px; width:3px; height:28px; border-radius:3px; background:#54845f; }",
+            "    .module-drag-plant-leaf { position:absolute; width:15px; height:9px; border:2px solid #54845f; border-radius:100% 0 100% 0; background:#dcebd9; box-sizing:border-box; }",
+            "    .module-drag-plant .leaf-a { left:15px; bottom:30px; transform:rotate(22deg); }",
+            "    .module-drag-plant .leaf-b { left:29px; bottom:34px; transform:scaleX(-1) rotate(22deg); }",
+            "    .module-drag-plant .leaf-c { left:18px; bottom:42px; transform:rotate(38deg); }",
+            "    .module-drag-plant .leaf-d { left:29px; bottom:47px; transform:scaleX(-1) rotate(38deg); }",
+            "    .module-drag-plant-1 .leaf-d { display:none; }",
+            "    .module-drag-plant-2 .module-drag-plant-stem { height:32px; }",
+          ].join('\n') + '\n';
+          if (text.split(cssAnchor).length - 1 !== 1) throw new Error('CSS anchor must appear exactly once');
+          text = text.replace(cssAnchor, css + cssAnchor);
+          const previewAnchor = "  if (module.type === 'kettle') {\n    const kettle = document.createElement('div');\n";
+          const preview = [
+            "  if (module.type === 'indoor-plant-1' || module.type === 'indoor-plant-2') {",
+            "    const plant = document.createElement('div');",
+            "    plant.className = `module-drag-plant module-drag-plant-${module.type === 'indoor-plant-1' ? '1' : '2'}`;",
+            "    ['pot', 'stem', 'leaf leaf-a', 'leaf leaf-b', 'leaf leaf-c', 'leaf leaf-d'].forEach((part) => {",
+            "      const element = document.createElement('i');",
+            "      element.className = `module-drag-plant-${part.replace(' ', ' module-drag-plant-')}`;",
+            "      plant.appendChild(element);",
+            "    });",
+            "    preview.appendChild(plant);",
+            "    return preview;",
+            "  }",
+            "",
+          ].join('\n') + '\n';
+          if (text.split(previewAnchor).length - 1 !== 1) throw new Error('Preview anchor must appear exactly once');
+          text = text.replace(previewAnchor, preview + previewAnchor);
+          fs.writeFileSync(path, text, 'utf8');
+          NODE
 
       - name: Verify exact scope
         run: |
