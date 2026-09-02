@@ -3332,9 +3332,9 @@ export function createStandScene(
 
     const fabricType = fabricState.fabricType === 'mesh' ? 'mesh' : 'lightbox';
     // Lightbox ışığı açıldığında daima %100 opak kalır. Mesh ise emissive kullanmaz.
-    material.opacity = 1;
-    material.transparent = false;
-    material.depthWrite = true;
+    material.opacity = fabricType === 'mesh' ? GLASS_SURFACE_OPACITY : 1;
+    material.transparent = fabricType === 'mesh';
+    material.depthWrite = fabricType !== 'mesh';
     if (fabricType === 'mesh') {
       material.emissiveMap = null;
       material.emissive.set(0x000000);
