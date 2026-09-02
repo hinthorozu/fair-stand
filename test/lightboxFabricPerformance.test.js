@@ -4,11 +4,11 @@ import { readFileSync } from 'node:fs';
 
 test('active fabric releases hidden panel GPU textures and drawing', () => {
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(scene, /function suspendFabricSurface\(surface\)/);
+  assert.match(scene, /function suspendFabricSurface\(surface, fabricType = 'lightbox'\)/);
   assert.match(scene, /surface\.material\.map\?\.dispose\?\.\(\)/);
   assert.match(scene, /surface\.material\.colorWrite = false/);
-  assert.match(scene, /backing\) backing\.visible = true/);
-  assert.match(scene, /meshes\.forEach\(suspendFabricSurface\)/);
+  assert.match(scene, /backing\.visible = fabricType !== 'mesh'/);
+  assert.match(scene, /meshes\.forEach\(\(mesh\) => suspendFabricSurface\(mesh, resolvedFabricType\)\)/);
 });
 
 test('removing fabric restores panel rendering and stored images', () => {

@@ -342,11 +342,16 @@ const scene3d = createStandScene(
     );
     if (selectedFabricGroupIds.size === 1
       && surfaces.every((surface) => surface.userData.surfaceState?.fabricGroupId)) {
-      selectionInfo.textContent = 'Tek parça lightbox bezi seçili · renk + görsel uygulanabilir.';
+      const fabricType = surfaces[0]?.userData.surfaceState?.fabricType === 'mesh'
+        ? 'mesh'
+        : 'lightbox';
+      selectionInfo.textContent = fabricType === 'mesh'
+        ? 'Tek parça Mesh (Delikli) Branda seçili · renk + görsel uygulanabilir.'
+        : 'Tek parça Lightbox Kumaş seçili · renk + görsel uygulanabilir.';
       return;
     }
 
-    selectionInfo.textContent = `${surfaces.length} panel seçili · Beze çevir için eksiksiz dikdörtgen panel grubunu seç.`;
+    selectionInfo.textContent = `${surfaces.length} panel seçili · Lightbox Kumaş / Mesh Branda için eksiksiz dikdörtgen panel grubunu seç.`;
   },
   getAssetUrl,
   (context) => moduleContextMenu.open(context),
@@ -957,17 +962,34 @@ function changeContextFabricMode(context, enabled) {
   );
   const result = scene3d.applyFabricMode(selectedPanels, enabled);
   if (!result?.ok) {
-    selectionInfo.textContent = result?.message || 'Bez işlemi uygulanamadı.';
+    selectionInfo.textContent = result?.message || 'Lightbox Kumaş işlemi uygulanamadı.';
     return;
   }
 
   selectionInfo.textContent = result.enabled
-    ? `${result.panelCount} panel tek parça beze çevrildi.`
-    : 'Bez kaldırıldı; paneller normal görünüme döndü.';
+    ? `${result.panelCount} panel tek parça Lightbox Kumaşa çevrildi.`
+    : 'Lightbox Kumaş kaldırıldı; paneller normal görünüme döndü.';
+}
+
+function changeContextMeshMode(context, enabled) {
+  if (!context?.supportsFabric) return;
+
+  const selectedPanels = scene3d.getSelectedSurfaces().filter(
+    (surface) => surface.userData.selectionMode === 'panel',
+  );
+  const result = scene3d.applyMeshMode(selectedPanels, enabled);
+  if (!result?.ok) {
+    selectionInfo.textContent = result?.message || 'Mesh Branda işlemi uygulanamadı.';
+    return;
+  }
+
+  selectionInfo.textContent = result.enabled
+    ? `${result.panelCount} panel tek parça Mesh (Delikli) Brandaya çevrildi.`
+    : 'Mesh Branda kaldırıldı; paneller normal görünüme döndü.';
 }
 
 function changeContextFabricLighting(context, enabled) {
-  if (!context?.isFabric) return;
+  if (!context?.isLightboxFabric) return;
 
   const selectedPanels = scene3d.getSelectedSurfaces().filter(
     (surface) => surface.userData.selectionMode === 'panel',
@@ -1005,6 +1027,7 @@ const moduleContextMenu = createModuleContextMenu({
   onValidateAddBatch: validateCatalogAddBatch,
   onGlassModeChange: changeContextPanelGlassMode,
   onFabricModeChange: changeContextFabricMode,
+  onMeshModeChange: changeContextMeshMode,
   onFabricLightingChange: changeContextFabricLighting,
   getShelfLightingState: getContextShelfLightingState,
   onShelfLightingChange: changeContextShelfLighting,
@@ -1777,7 +1800,9 @@ function applyActiveImageToSelection(fit = 'cover') {
 
   const fitLabel = fit === 'cover' ? 'Doldur' : 'Sığdır';
   if (result.mode === 'fabric-group') {
-    selectionInfo.textContent = `Tek parça lightbox bezine görsel uygulandı · ${fitLabel}.`;
+    selectionInfo.textContent = result.fabricType === 'mesh'
+      ? `Tek parça Mesh (Delikli) Brandaya görsel uygulandı · ${fitLabel}.`
+      : `Tek parça Lightbox Kumaşa görsel uygulandı · ${fitLabel}.`;
   } else if (result.mode === 'rect-group') {
     selectionInfo.textContent = `${result.columnCount} × ${result.rowCount} blokta ${result.panelCount} panele görsel · ${fitLabel}.`;
   } else {

@@ -16,6 +16,7 @@ export function createModuleContextMenu({
   onValidateAddBatch,
   onGlassModeChange,
   onFabricModeChange,
+  onMeshModeChange,
   onFabricLightingChange,
   getShelfLightingState,
   onShelfLightingChange,
@@ -37,6 +38,7 @@ export function createModuleContextMenu({
     <div class="module-context-separator"></div>
     <button type="button" data-module-action="toggle-glass" hidden>Cam Panele Çevir</button>
     <button type="button" data-module-action="toggle-fabric" hidden>Lightbox Kumaşa Çevir</button>
+    <button type="button" data-module-action="toggle-mesh" hidden>Mesh (Delikli) Brandaya Çevir</button>
     <button type="button" data-module-action="toggle-fabric-light" hidden>Lightbox aydınlatmayı aç</button>
     <button type="button" data-module-action="toggle-shelf-light" hidden>Raf altı aydınlatmayı aç</button>
     <button type="button" data-module-action="add-right">Ekle Sağ Tarafa…</button>
@@ -77,6 +79,7 @@ export function createModuleContextMenu({
   const title = menu.querySelector('.module-context-title');
   const glassModeButton = menu.querySelector('[data-module-action="toggle-glass"]');
   const fabricModeButton = menu.querySelector('[data-module-action="toggle-fabric"]');
+  const meshModeButton = menu.querySelector('[data-module-action="toggle-mesh"]');
   const fabricLightingButton = menu.querySelector('[data-module-action="toggle-fabric-light"]');
   const shelfLightingButton = menu.querySelector('[data-module-action="toggle-shelf-light"]');
   const pickerTitle = pickerBackdrop.querySelector('#module-picker-title');
@@ -353,12 +356,20 @@ export function createModuleContextMenu({
       ? 'Normal Panele Çevir'
       : 'Cam Panele Çevir';
 
-    fabricModeButton.hidden = !context.supportsFabric;
-    fabricModeButton.textContent = context.isFabric
+    const isLightboxFabric = Boolean(context.isFabric && context.fabricType !== 'mesh');
+    const isMeshFabric = Boolean(context.isFabric && context.fabricType === 'mesh');
+
+    fabricModeButton.hidden = !context.supportsFabric || isMeshFabric;
+    fabricModeButton.textContent = isLightboxFabric
       ? 'Lightbox Kumaştan Çıkar'
       : 'Lightbox Kumaşa Çevir';
 
-    fabricLightingButton.hidden = !context.isFabric;
+    meshModeButton.hidden = !context.supportsFabric || isLightboxFabric;
+    meshModeButton.textContent = isMeshFabric
+      ? 'Mesh Brandadan Çıkar'
+      : 'Mesh (Delikli) Brandaya Çevir';
+
+    fabricLightingButton.hidden = !isLightboxFabric;
     fabricLightingButton.textContent = context.fabricLightingOn
       ? 'Lightbox aydınlatmayı kapat'
       : 'Lightbox aydınlatmayı aç';
@@ -407,13 +418,19 @@ export function createModuleContextMenu({
       return;
     }
 
-    if (action === 'toggle-fabric' && context.supportsFabric) {
+    if (action === 'toggle-fabric' && context.supportsFabric && context.fabricType !== 'mesh') {
       close();
-      onFabricModeChange?.(context, !context.isFabric);
+      onFabricModeChange?.(context, !(context.isFabric && context.fabricType !== 'mesh'));
       return;
     }
 
-    if (action === 'toggle-fabric-light' && context.isFabric) {
+    if (action === 'toggle-mesh' && context.supportsFabric && context.fabricType !== 'lightbox') {
+      close();
+      onMeshModeChange?.(context, !(context.isFabric && context.fabricType === 'mesh'));
+      return;
+    }
+
+    if (action === 'toggle-fabric-light' && context.isLightboxFabric) {
       close();
       onFabricLightingChange?.(context, !context.fabricLightingOn);
       return;

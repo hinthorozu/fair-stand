@@ -19,8 +19,8 @@ test('single-module fabric overlay is parented to its module', () => {
 test('multi-module one-piece fabric blocks individual movement', () => {
   assert.match(scene, /function getFabricMoveLock\(moduleId\)/);
   assert.match(scene, /if \(moduleIds\.size > 1\) return/);
-  assert.match(scene, /Taşımak için önce Bezi kaldır/);
-  assert.match(scene, /Döndürmek için önce Bezi kaldır/);
+  assert.match(scene, /Taşımak için önce kaplamayı kaldır/);
+  assert.match(scene, /Döndürmek için önce kaplamayı kaldır/);
 });
 
 test('fabric ownership metadata is cleared when fabric is removed', () => {

@@ -1695,7 +1695,18 @@ export function createStandScene(
       isGlass: supportsGlass ? Boolean(surface.userData.surfaceState?.isGlass) : false,
       supportsFabric: supportsGlass,
       isFabric: supportsGlass ? Boolean(surface.userData.surfaceState?.fabricGroupId) : false,
-      fabricLightingOn: supportsGlass ? Boolean(surface.userData.surfaceState?.fabricLightingOn) : false,
+      fabricType: supportsGlass && surface.userData.surfaceState?.fabricGroupId
+        ? (surface.userData.surfaceState?.fabricType === 'mesh' ? 'mesh' : 'lightbox')
+        : null,
+      isLightboxFabric: supportsGlass
+        ? Boolean(surface.userData.surfaceState?.fabricGroupId && surface.userData.surfaceState?.fabricType !== 'mesh')
+        : false,
+      isMeshFabric: supportsGlass
+        ? Boolean(surface.userData.surfaceState?.fabricGroupId && surface.userData.surfaceState?.fabricType === 'mesh')
+        : false,
+      fabricLightingOn: supportsGlass
+        ? Boolean(surface.userData.surfaceState?.fabricLightingOn && surface.userData.surfaceState?.fabricType !== 'mesh')
+        : false,
       clientX: event.clientX,
       clientY: event.clientY,
     };
@@ -2275,7 +2286,7 @@ export function createStandScene(
     if (!moduleGroup || !moduleState?.placement) return { handled: false, ok: false };
 
     if (getFabricMoveLock(moduleState.id)) {
-      const message = 'Bu modül tek parça beze bağlı. Döndürmek için önce Bezi kaldır.';
+      const message = 'Bu modül tek parça Lightbox/Mesh kaplamasına bağlı. Döndürmek için önce kaplamayı kaldır.';
       showPlacementFeedback(message, { durationMs: 1800 });
       return { handled: true, ok: false, message };
     }
@@ -3146,17 +3157,19 @@ export function createStandScene(
       if (Array.isArray(overlay.material)) {
         overlay.material.forEach((material) => {
           material?.map?.dispose?.();
+          material?.alphaMap?.dispose?.();
           material?.dispose?.();
         });
       } else {
         overlay.material?.map?.dispose?.();
+        overlay.material?.alphaMap?.dispose?.();
         overlay.material?.dispose?.();
       }
     });
     fabricOverlayMeshes = [];
   }
 
-  function suspendFabricSurface(surface) {
+  function suspendFabricSurface(surface, fabricType = 'lightbox') {
     if (!surface?.material) return;
     surface.material.map?.dispose?.();
     surface.material.map = null;
@@ -3164,8 +3177,8 @@ export function createStandScene(
     surface.material.depthWrite = false;
     surface.material.needsUpdate = true;
     const backing = surface.userData?.backing;
-    // Bez yalnızca ön baskı yüzeyini devralır; modülün arka paneli korunur.
-    if (backing) backing.visible = true;
+    // Lightbox arka paneli korur; Mesh deliklerinde gerçek sahnenin görünmesi için backing gizlenir.
+    if (backing) backing.visible = fabricType !== 'mesh';
   }
 
   function restoreFabricSurface(surface) {
@@ -3194,6 +3207,7 @@ export function createStandScene(
     delete state.fabricImageAssetId;
     delete state.fabricImageFit;
     delete state.fabricLightingOn;
+    delete state.fabricType;
     delete state.fabricOwnerSurfaceIds;
     delete state.fabricOwnerModuleIds;
     if (restore) restoreFabricSurface(surface);
@@ -3273,9 +3287,59 @@ export function createStandScene(
     }
     return null;
   }
+  function createMeshBrandaAlphaMap(widthM, heightM) {
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+
+    // Yaklaşık %31 açık alan: opak baskı yüzeyi korunur, yalnız delikler gerçek cutout olur.
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, size, size);
+    context.fillStyle = '#000000';
+    const radius = 10.2;
+    [16, 48].forEach((x) => {
+      [16, 48].forEach((y) => {
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.fill();
+      });
+    });
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    // İki delik / tile ekseninde yaklaşık 18 delik/metre görsel yoğunluk verir.
+    texture.repeat.set(
+      Math.max(1, Number(widthM) * 9),
+      Math.max(1, Number(heightM) * 9),
+    );
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    texture.needsUpdate = true;
+    return texture;
+  }
+
   function applyFabricOverlayLighting(overlay, fabricState = {}) {
     const material = overlay?.material;
     if (!material) return;
+
+    const fabricType = fabricState.fabricType === 'mesh' ? 'mesh' : 'lightbox';
+    // Lightbox ışığı açıldığında daima %100 opak kalır. Mesh ise emissive kullanmaz.
+    material.opacity = 1;
+    material.transparent = false;
+    material.depthWrite = true;
+    if (fabricType === 'mesh') {
+      material.emissiveMap = null;
+      material.emissive.set(0x000000);
+      material.emissiveIntensity = 0;
+      material.needsUpdate = true;
+      return;
+    }
 
     const lightingOn = Boolean(fabricState.fabricLightingOn);
     if (!lightingOn) {
@@ -3338,8 +3402,10 @@ export function createStandScene(
 
         context.fillStyle = '#ffffff';
         context.fillRect(0, 0, canvas.width, canvas.height);
-        // Lightbox baskısında emissive parlamanın yaptığı solmayı telafi et.
-        context.filter = 'saturate(1.08) contrast(1.06)';
+        // Lightbox baskısında emissive parlamanın yaptığı solmayı telafi et; Mesh baskıyı doğal bırak.
+        context.filter = overlay.userData.fabricType === 'mesh'
+          ? 'none'
+          : 'saturate(1.08) contrast(1.06)';
         context.drawImage(
           image,
           layout.drawX,
@@ -3379,9 +3445,12 @@ export function createStandScene(
 
     groups.forEach((surfaces, groupId) => {
       if (surfaces.length < 2) return;
-      // Bez aktifken alttaki paneller yalnızca seçim proxy'si olarak kalır:
-      // texture GPU'da tutulmaz, panel/backing çizimi kapatılır.
-      surfaces.forEach(suspendFabricSurface);
+      const groupFabricType = surfaces[0]?.userData?.surfaceState?.fabricType === 'mesh'
+        ? 'mesh'
+        : 'lightbox';
+      // Kaplama aktifken alttaki paneller yalnızca seçim proxy'si olarak kalır.
+      // Mesh'te backing de gizlenir ki deliklerden gerçek sahne görünsün.
+      surfaces.forEach((surface) => suspendFabricSurface(surface, groupFabricType));
 
       const moduleIds = new Set(
         surfaces.map((surface) => surface.userData?.moduleId).filter(Boolean),
@@ -3439,24 +3508,31 @@ export function createStandScene(
         .add(normal.clone().multiplyScalar(planeN + 0.006));
 
       const fabricState = first.userData.surfaceState ?? {};
+      const fabricType = fabricState.fabricType === 'mesh' ? 'mesh' : 'lightbox';
       const fabricImageAssetId = fabricState.fabricImageAssetId ?? null;
       const fabricImageFit = fabricState.fabricImageFit === 'contain' ? 'contain' : 'cover';
       const fabricColor = fabricState.fabricColor ?? fabricState.color ?? '#ffffff';
       const baseColor = new THREE.Color(fabricImageAssetId ? '#ffffff' : fabricColor);
+      const overlayMaterial = new THREE.MeshStandardMaterial({
+        color: baseColor,
+        roughness: fabricType === 'mesh' ? 0.92 : 0.86,
+        metalness: 0,
+        emissive: 0x000000,
+        emissiveIntensity: 0,
+        side: fabricType === 'mesh' ? THREE.DoubleSide : THREE.FrontSide,
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
+        polygonOffsetUnits: -2,
+      });
+      if (fabricType === 'mesh') {
+        overlayMaterial.alphaMap = createMeshBrandaAlphaMap(width, height);
+        overlayMaterial.alphaTest = 0.45;
+        overlayMaterial.transparent = false;
+        overlayMaterial.depthWrite = true;
+      }
       const overlay = new THREE.Mesh(
         new THREE.PlaneGeometry(width, height),
-        new THREE.MeshStandardMaterial({
-          color: baseColor,
-          roughness: 0.86,
-          metalness: 0,
-          emissive: 0x000000,
-          emissiveIntensity: 0,
-          // Baskı ön yüzde kalır; arkadan normal panel/backing görünür.
-          side: THREE.FrontSide,
-          polygonOffset: true,
-          polygonOffsetFactor: -2,
-          polygonOffsetUnits: -2,
-        }),
+        overlayMaterial,
       );
       overlay.position.copy(overlayParent.worldToLocal(centerWorld.clone()));
       overlay.quaternion.copy(inverseOverlayParentQuaternion.clone().multiply(surfaceQuaternion));
@@ -3464,7 +3540,8 @@ export function createStandScene(
       overlay.receiveShadow = true;
       overlay.renderOrder = 3;
       overlay.userData.kind = 'decoration';
-      overlay.userData.role = 'lightbox-fabric';
+      overlay.userData.role = fabricType === 'mesh' ? 'mesh-branda' : 'lightbox-fabric';
+      overlay.userData.fabricType = fabricType;
       overlay.userData.fabricGroupId = groupId;
       overlay.userData.fabricState = fabricState;
       applyFabricOverlayLighting(overlay, fabricState);
@@ -3479,14 +3556,24 @@ export function createStandScene(
   }
 
   function applyFabricMode(meshOrMeshes, enabled) {
+    return applyFabricCoverMode(meshOrMeshes, enabled, 'lightbox');
+  }
+
+  function applyMeshMode(meshOrMeshes, enabled) {
+    return applyFabricCoverMode(meshOrMeshes, enabled, 'mesh');
+  }
+
+  function applyFabricCoverMode(meshOrMeshes, enabled, fabricType = 'lightbox') {
     const meshes = normalizeMeshes(meshOrMeshes).filter(
       (mesh) => mesh?.userData?.selectionMode === 'panel' && mesh.userData.surfaceState,
     );
     const fabric = Boolean(enabled);
+    const resolvedFabricType = fabricType === 'mesh' ? 'mesh' : 'lightbox';
+    const fabricLabel = resolvedFabricType === 'mesh' ? 'Mesh Branda' : 'Lightbox Kumaş';
 
     if (fabric) {
       if (meshes.length < 2) {
-        return { ok: false, message: 'Ctrl ile en az 2 panel seç; bez tek parça blok olarak oluşturulur.' };
+        return { ok: false, message: `Ctrl ile en az 2 panel seç; ${fabricLabel} tek parça blok olarak oluşturulur.` };
       }
 
       const moduleIndices = meshes.map((mesh) => Number(mesh.userData.moduleIndex));
@@ -3507,7 +3594,7 @@ export function createStandScene(
         { moduleIndex: bounds.maxModuleIndex, stripIndex: bounds.maxStripIndex },
       );
       if (!rect.ok || rect.entries.length !== meshes.length) {
-        return { ok: false, message: 'Bez yalnızca eksiksiz dikdörtgen panel bloğundan oluşturulabilir.' };
+        return { ok: false, message: `${fabricLabel} yalnızca eksiksiz dikdörtgen panel bloğundan oluşturulabilir.` };
       }
 
       const first = meshes[0];
@@ -3525,7 +3612,7 @@ export function createStandScene(
           && Math.abs(position.dot(firstNormal) - firstPlane) < 0.03;
       });
       if (!samePlane) {
-        return { ok: false, message: 'Bez yalnızca aynı düzlemdeki panellerden oluşturulabilir.' };
+        return { ok: false, message: `${fabricLabel} yalnızca aynı düzlemdeki panellerden oluşturulabilir.` };
       }
 
       const replacedGroupIds = new Set(
@@ -3541,6 +3628,7 @@ export function createStandScene(
           delete surface.userData.surfaceState.fabricImageAssetId;
           delete surface.userData.surfaceState.fabricImageFit;
           delete surface.userData.surfaceState.fabricLightingOn;
+          delete surface.userData.surfaceState.fabricType;
           delete surface.userData.surfaceState.fabricOwnerSurfaceIds;
           delete surface.userData.surfaceState.fabricOwnerModuleIds;
         });
@@ -3558,22 +3646,30 @@ export function createStandScene(
       meshes.forEach((mesh) => {
         const state = mesh.userData.surfaceState;
         state.fabricGroupId = groupId;
+        state.fabricType = resolvedFabricType;
         state.fabricColor = initialFabricColor;
         state.fabricImageAssetId = null;
         state.fabricImageFit = 'cover';
+        state.fabricLightingOn = false;
         state.fabricOwnerSurfaceIds = [...fabricOwnerSurfaceIds];
         state.fabricOwnerModuleIds = [...fabricOwnerModuleIds];
       });
-      meshes.forEach(suspendFabricSurface);
+      meshes.forEach((mesh) => suspendFabricSurface(mesh, resolvedFabricType));
       rebuildFabricOverlays();
-      return { ok: true, enabled: true, panelCount: meshes.length, fabricGroupId: groupId };
+      return {
+        ok: true,
+        enabled: true,
+        panelCount: meshes.length,
+        fabricGroupId: groupId,
+        fabricType: resolvedFabricType,
+      };
     }
 
     const groupIds = new Set(
       meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
     );
     if (!groupIds.size) {
-      return { ok: false, message: 'Seçimde kaldırılacak bez bulunamadı.' };
+      return { ok: false, message: `Seçimde kaldırılacak ${fabricLabel} bulunamadı.` };
     }
     const restoredSurfaces = [];
     surfaceMeshes.forEach((surface) => {
@@ -3584,6 +3680,7 @@ export function createStandScene(
         delete surface.userData.surfaceState.fabricImageAssetId;
         delete surface.userData.surfaceState.fabricImageFit;
         delete surface.userData.surfaceState.fabricLightingOn;
+        delete surface.userData.surfaceState.fabricType;
         delete surface.userData.surfaceState.fabricOwnerSurfaceIds;
         delete surface.userData.surfaceState.fabricOwnerModuleIds;
       }
@@ -3605,10 +3702,16 @@ export function createStandScene(
     }
 
     const [groupId] = groupIds;
-    const lightingOn = Boolean(enabled);
     const groupSurfaces = surfaceMeshes.filter(
       (surface) => surface.userData.surfaceState?.fabricGroupId === groupId,
     );
+    const fabricType = groupSurfaces[0]?.userData.surfaceState?.fabricType === 'mesh'
+      ? 'mesh'
+      : 'lightbox';
+    if (fabricType !== 'lightbox') {
+      return { ok: false, message: 'Mesh Branda aydınlatılamaz; aydınlatma yalnızca Lightbox Kumaşa aittir.' };
+    }
+    const lightingOn = Boolean(enabled);
     groupSurfaces.forEach((surface) => {
       surface.userData.surfaceState.fabricLightingOn = lightingOn;
     });
@@ -3905,12 +4008,12 @@ export function createStandScene(
       meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
     );
     if (fabricGroupIds.size > 1) {
-      return { ok: false, message: 'Görsel için tek bir bez seç.' };
+      return { ok: false, message: 'Görsel için tek bir Lightbox/Mesh kaplaması seç.' };
     }
     if (fabricGroupIds.size === 1) {
       const [groupId] = fabricGroupIds;
       if (!meshes.every((mesh) => mesh.userData.surfaceState?.fabricGroupId === groupId)) {
-        return { ok: false, message: 'Bez ile normal panelleri aynı anda görselleme; tek bir bez seç.' };
+        return { ok: false, message: 'Lightbox/Mesh kaplaması ile normal panelleri aynı anda görselleme; tek bir kaplama seç.' };
       }
       const groupSurfaces = surfaceMeshes.filter(
         (surface) => surface.userData.surfaceState?.fabricGroupId === groupId,
@@ -3926,6 +4029,7 @@ export function createStandScene(
         mode: 'fabric-group',
         panelCount: groupSurfaces.length,
         fabricGroupId: groupId,
+        fabricType: groupSurfaces[0]?.userData.surfaceState?.fabricType === 'mesh' ? 'mesh' : 'lightbox',
       };
     }
     if (meshes.some((mesh) => mesh.userData.acceptsImage === false)) {
@@ -4144,7 +4248,7 @@ export function createStandScene(
     const fabricMoveLock = getFabricMoveLock(moduleState.id);
     if (fabricMoveLock) {
       handleSurfaceSelectionAt(event.clientX, event.clientY, false, moduleState.id);
-      showPlacementFeedback('Bu modül tek parça beze bağlı. Taşımak için önce Bezi kaldır.', {
+      showPlacementFeedback('Bu modül tek parça Lightbox/Mesh kaplamasına bağlı. Taşımak için önce kaplamayı kaldır.', {
         clientX: event.clientX,
         clientY: event.clientY,
         durationMs: 1800,
@@ -4212,7 +4316,7 @@ export function createStandScene(
 
       event.preventDefault();
       if (getFabricMoveLock(moduleState.id)) {
-        showPlacementFeedback('Bu modül tek parça beze bağlı. Taşımak için önce Bezi kaldır.', {
+        showPlacementFeedback('Bu modül tek parça Lightbox/Mesh kaplamasına bağlı. Taşımak için önce kaplamayı kaldır.', {
           durationMs: 1800,
         });
         return;
@@ -4467,6 +4571,7 @@ export function createStandScene(
     applyColor,
     applyGlassMode,
     applyFabricMode,
+    applyMeshMode,
     setFabricLighting,
     applyImageAsset,
     applyHorizontalImageAsset,

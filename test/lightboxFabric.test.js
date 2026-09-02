@@ -12,6 +12,32 @@ test('multi-panel lightbox fabric is exposed from panel context menu', () => {
   assert.match(main, /scene3d\.applyFabricMode\(selectedPanels, enabled\)/);
 });
 
+test('mesh branda is a separate perforated cover without lightbox lighting', () => {
+  const menu = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');
+  const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+
+  assert.match(menu, /data-module-action="toggle-mesh"/);
+  assert.match(menu, /Mesh \(Delikli\) Brandaya Çevir/);
+  assert.match(menu, /Mesh Brandadan Çıkar/);
+  assert.match(main, /function changeContextMeshMode/);
+  assert.match(main, /scene3d\.applyMeshMode\(selectedPanels, enabled\)/);
+  assert.match(scene, /function applyMeshMode\(meshOrMeshes, enabled\)/);
+  assert.match(scene, /fabricType === 'mesh'/);
+  assert.match(scene, /function createMeshBrandaAlphaMap/);
+  assert.match(scene, /overlayMaterial\.alphaMap = createMeshBrandaAlphaMap/);
+  assert.match(scene, /overlayMaterial\.alphaTest = 0\.45/);
+  assert.match(scene, /backing\.visible = fabricType !== 'mesh'/);
+  assert.match(scene, /Mesh Branda aydınlatılamaz/);
+});
+
+test('lightbox lighting stays fully opaque', () => {
+  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  assert.match(scene, /material\.opacity = 1/);
+  assert.match(scene, /material\.transparent = false/);
+  assert.match(scene, /fabricType = fabricState\.fabricType === 'mesh'/);
+});
+
 test('fabric conversion requires a rectangular multi-panel block and renders one overlay', () => {
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(scene, /function applyFabricMode\(meshOrMeshes, enabled\)/);
@@ -19,7 +45,7 @@ test('fabric conversion requires a rectangular multi-panel block and renders one
   assert.match(scene, /createRectSelection\(/);
   assert.match(scene, /fabricGroupId/);
   assert.match(scene, /function rebuildFabricOverlays\(\)/);
-  assert.match(scene, /role = 'lightbox-fabric'/);
+  assert.match(scene, /overlay\.userData\.role = fabricType === 'mesh' \? 'mesh-branda' : 'lightbox-fabric'/);
   assert.match(scene, /new THREE\.PlaneGeometry\(width, height\)/);
   assert.match(scene, /overlay\.raycast = \(\) => \{\}/);
 });

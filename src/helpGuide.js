@@ -4,7 +4,7 @@ const GUIDE_SECTIONS = [
     open: true,
     html: `
       <p>Stand tipini seç, X ve Y ölçülerini gir ve <strong>Sahneyi Oluştur</strong> ile çalışmaya başla. Sonra katalogdan modül ekleyebilir, sahnedeki modülleri taşıyabilir ve panel yüzeylerini özelleştirebilirsin.</p>
-      <div class="help-guide-callout"><strong>Temel akış:</strong> Sahne oluştur → Modül ekle → Yerleştir → Panel seç → Renk / görsel / cam / bez uygula → Kaydet veya Render Al.</div>
+      <div class="help-guide-callout"><strong>Temel akış:</strong> Sahne oluştur → Modül ekle → Yerleştir → Panel seç → Renk / görsel / cam / Lightbox / Mesh uygula → Kaydet veya Render Al.</div>
     `,
   },
   {
@@ -43,7 +43,8 @@ const GUIDE_SECTIONS = [
         <li><strong>Sil:</strong> Modülü sahneden kaldırır.</li>
         <li><strong>Çoğalt Sağ / Sol:</strong> Aynı modülün kopyasını belirtilen tarafa ekler.</li>
         <li><strong>Cam Panele Çevir / Normal Panele Çevir:</strong> Uygun panelin cam durumunu değiştirir.</li>
-        <li><strong>Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar:</strong> Uygun panel bloğunu tek parça lightbox bezine dönüştürür veya geri alır.</li>
+        <li><strong>Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar:</strong> Uygun panel bloğunu tek parça opak Lightbox Kumaşa dönüştürür veya geri alır.</li>
+        <li><strong>Mesh (Delikli) Brandaya Çevir / Mesh Brandadan Çıkar:</strong> Aynı panel bloğunu gerçek delik maskeli Mesh Branda olarak kullanır; deliklerden sahnenin arkası görünür.</li>
         <li><strong>Lightbox aydınlatmayı aç / kapat:</strong> Bez yüzeyinin aydınlatmasını kontrol eder.</li>
         <li><strong>Raf altı aydınlatmayı aç / kapat:</strong> Raf modülündeki LED görünümünü kontrol eder.</li>
         <li><strong>Ekle Sağ / Sol Tarafa…:</strong> Hedef modülün yanına katalogdan yeni modül ekler.</li>
@@ -57,7 +58,7 @@ const GUIDE_SECTIONS = [
       <ul>
         <li>Panel seçimi fiziksel panel yüzeylerini esas alır.</li>
         <li>Bağlı duvar/köşe düzenlerinde seçim duvar zinciri boyunca devam edebilir.</li>
-        <li>Bez oluşturma için seçim daha katıdır: eksiksiz dikdörtgen ve aynı düzlem şarttır.</li>
+        <li>Lightbox Kumaş veya Mesh Branda oluşturmak için seçim daha katıdır: eksiksiz dikdörtgen ve aynı düzlem şarttır.</li>
       </ul>
     `,
   },
@@ -70,7 +71,7 @@ const GUIDE_SECTIONS = [
         <li>Mobilya ve bazı serbest objeler genellikle 10 cm adım kullanır.</li>
         <li>LED projektör gibi üst elemanlarda farklı snap adımı uygulanabilir.</li>
         <li>Geçersiz yerleşim kabul edilmez; modül eski/geçerli konumunda kalır.</li>
-        <li>Birden fazla modülü kaplayan tek parça beze bağlı modül tek başına taşınamaz veya döndürülemez; önce bez kaldırılmalıdır.</li>
+        <li>Birden fazla modülü kaplayan tek parça Lightbox/Mesh kaplamasına bağlı modül tek başına taşınamaz veya döndürülemez; önce kaplama kaldırılmalıdır.</li>
       </ul>
     `,
   },
@@ -94,7 +95,7 @@ const GUIDE_SECTIONS = [
         <li><strong>Sığdır:</strong> Görselin tamamını seçili alana sığdırır.</li>
         <li><strong>Kaldır:</strong> Görseli panel/bez üzerinden kaldırır; kütüphaneden silmez.</li>
         <li>Dikdörtgen çoklu panel seçiminde tek büyük görsel panellere bölünerek uygulanabilir.</li>
-        <li>Lightbox bezine görsel tek parça olarak uygulanır.</li>
+        <li>Lightbox Kumaşa ve Mesh Brandaya görsel tek parça olarak uygulanır.</li>
       </ul>
       <h4>Görsel silme</h4>
       <p>İki yöntem vardır: görsel üzerinde <strong>sağ tık → Sil</strong> veya görsele normal tıklayıp <strong>Delete</strong> tuşuna basmak.</p>
@@ -109,15 +110,16 @@ const GUIDE_SECTIONS = [
     `,
   },
   {
-    title: 'Bez / Lightbox',
+    title: 'Lightbox Kumaş / Mesh Branda',
     html: `
-      <p>Bez oluşturmak için en az iki panel seçilmeli; seçim eksiksiz dikdörtgen ve aynı düzlemde olmalıdır.</p>
+      <p>Lightbox Kumaş veya Mesh Branda oluşturmak için en az iki panel seçilmeli; seçim eksiksiz dikdörtgen ve aynı düzlemde olmalıdır.</p>
       <ul>
-        <li>Beze renk ve görsel uygulanabilir.</li>
+        <li>Her iki kaplamaya da renk ve görsel uygulanabilir.</li>
         <li>Doldur ve Sığdır seçenekleri kullanılabilir.</li>
-        <li>Lightbox aydınlatması açılıp kapatılabilir.</li>
+        <li>Lightbox aydınlatması açılıp kapatılabilir ve ışık açıkken yüzey %100 opaktır.</li>
+        <li>Mesh Branda aydınlatılmaz; delikli alpha maskesi sayesinde arka sahne görünür.</li>
         <li>Lightbox Kumaştan Çıkar ile normal panel sistemine dönülür.</li>
-        <li>Tek parça bez birden fazla modülü kapsıyorsa bu modüllerden biri tek başına taşınamaz/döndürülemez.</li>
+        <li>Tek parça Lightbox/Mesh kaplaması birden fazla modülü kapsıyorsa bu modüllerden biri tek başına taşınamaz/döndürülemez.</li>
       </ul>
     `,
   },
@@ -188,7 +190,7 @@ const GUIDE_SECTIONS = [
     title: 'Önemli Kurallar ve Uyarılar',
     html: `
       <ul>
-        <li>Çoklu panel seçimi ile bez oluşturma aynı kural değildir; bez için aynı düzlem ve eksiksiz dikdörtgen zorunludur.</li>
+        <li>Çoklu panel seçimi ile Lightbox/Mesh oluşturma aynı kural değildir; kaplama için aynı düzlem ve eksiksiz dikdörtgen zorunludur.</li>
         <li>Geçersiz modül yerleşimleri ve çarpışmalar sistem tarafından engellenir.</li>
         <li>Kütüphaneden kullanılan bir görsel silinirse, onay sonrası atandığı yüzeylerden de kaldırılır.</li>
         <li>Birden fazla modülü kapsayan tek parça bez varken bağlı modüller ayrı ayrı taşınamaz/döndürülemez.</li>
