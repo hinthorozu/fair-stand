@@ -40,12 +40,7 @@ import { createProjectId, deleteProject, listProjects, loadProject, saveProject 
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu } from './moduleContextMenu.js';
 import { createModuleDragSidebar } from './moduleDragSidebar.js';
-import {
-  colorValuesFromHex,
-  cmykToRgb,
-  rgbToHex,
-} from './colorUtils.js';
-import { normalizeCmykValues, readNumberGroup } from './colorEditorInputs.js';
+import { createColorEditorController } from './colorEditorController.js';
 import { STAND_TYPE_LABELS, validateStandSetup } from './standSetup.js';
 import { validateStandAxisCapacity } from './standCapacity.js';
 import {
@@ -1395,53 +1390,17 @@ function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
   return true;
 }
 
-function syncColorEditorFromHex(hex, { apply = false } = {}) {
-  const values = colorValuesFromHex(hex);
-  if (!values) return false;
-
-  colorInput.value = values.hex;
-  colorHexInput.value = values.hex;
-  colorRgbInputs.r.value = String(values.rgb.r);
-  colorRgbInputs.g.value = String(values.rgb.g);
-  colorRgbInputs.b.value = String(values.rgb.b);
-  colorCmykInputs.c.value = String(values.cmyk.c);
-  colorCmykInputs.m.value = String(values.cmyk.m);
-  colorCmykInputs.y.value = String(values.cmyk.y);
-  colorCmykInputs.k.value = String(values.cmyk.k);
-
-  if (apply) applyActiveColorToSelection();
-  return true;
-}
-
-function syncFromRgbInputs() {
-  const rgb = readNumberGroup(colorRgbInputs);
-  if (!rgb) return;
-  syncColorEditorFromHex(rgbToHex(rgb.r, rgb.g, rgb.b), { apply: true });
-}
-
-function syncFromCmykInputs() {
-  const cmyk = readNumberGroup(colorCmykInputs);
-  if (!cmyk) return;
-
-  const normalizedCmyk = normalizeCmykValues(cmyk);
-  Object.entries(normalizedCmyk).forEach(([key, value]) => {
-    colorCmykInputs[key].value = String(value);
-  });
-
-  const rgb = cmykToRgb(
-    normalizedCmyk.c,
-    normalizedCmyk.m,
-    normalizedCmyk.y,
-    normalizedCmyk.k,
-  );
-  const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
-  colorInput.value = hex;
-  colorHexInput.value = hex;
-  colorRgbInputs.r.value = String(rgb.r);
-  colorRgbInputs.g.value = String(rgb.g);
-  colorRgbInputs.b.value = String(rgb.b);
-  applyActiveColorToSelection();
-}
+const {
+  syncFromHex: syncColorEditorFromHex,
+  syncFromRgbInputs,
+  syncFromCmykInputs,
+} = createColorEditorController({
+  colorInput,
+  colorHexInput,
+  colorRgbInputs,
+  colorCmykInputs,
+  onApply: () => applyActiveColorToSelection(),
+});
 
 applyColorButton.addEventListener('click', () => {
   applyActiveColorToSelection({ showMissingSelection: true });
