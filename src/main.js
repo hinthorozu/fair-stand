@@ -1167,17 +1167,20 @@ standTypeButtons.forEach((button) => {
   });
 });
 
-function requestNewProjectName(defaultName = '') {
+function requestProjectName({ defaultName = '', mode = 'create' } = {}) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.48);display:grid;place-items:center;padding:20px';
     const form = document.createElement('form');
     form.style.cssText = 'width:min(380px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
     const title = document.createElement('strong');
-    title.textContent = 'Yeni Proje';
+    const isRename = mode === 'rename';
+    title.textContent = isRename ? 'Proje Adını Değiştir' : 'Yeni Proje';
     title.style.fontSize = '16px';
     const description = document.createElement('span');
-    description.textContent = 'Sahne oluşturulmadan önce proje adını gir.';
+    description.textContent = isRename
+      ? 'Mevcut proje için yeni adı gir.'
+      : 'Sahne oluşturulmadan önce proje adını gir.';
     description.style.color = '#64748b';
     const label = document.createElement('label');
     label.style.cssText = 'display:grid;gap:5px';
@@ -1200,7 +1203,7 @@ function requestNewProjectName(defaultName = '') {
     const submitButton = document.createElement('button');
     submitButton.type = 'submit';
     submitButton.className = 'primary';
-    submitButton.textContent = 'Projeyi Oluştur';
+    submitButton.textContent = isRename ? 'Kaydet' : 'Projeyi Oluştur';
     actions.append(cancelButton, submitButton);
     form.append(title, description, label, actions);
     overlay.appendChild(form);
@@ -1238,7 +1241,7 @@ createStageButton.addEventListener('click', async () => {
     if (!confirmed) return;
   }
 
-  const projectName = await requestNewProjectName('');
+  const projectName = await requestProjectName({ mode: 'create' });
   if (!projectName) return;
 
   disableAutosave();
@@ -2043,7 +2046,7 @@ imageInput.addEventListener('change', async () => {
 
 renameProjectButton?.addEventListener('click', async () => {
   const currentName = projectNameInput.value.trim() || 'Adsız Proje';
-  const nextName = await requestNewProjectName(currentName);
+  const nextName = await requestProjectName({ defaultName: currentName, mode: 'rename' });
   if (!nextName || nextName === currentName) return;
   setProjectName(nextName);
   if (currentStand || autosaveEnabled) {
