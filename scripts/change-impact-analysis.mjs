@@ -1,6 +1,6 @@
 import { posix as path } from 'node:path';
 
-const TEST_PREFIXES = ['test/', 'tests/'];
+const TEST_PREFIXES = ['test/', 'tests/', 'e2e/'];
 const AUDIT_PREFIX = 'audit/';
 const DOC_SUFFIXES = ['.md'];
 
