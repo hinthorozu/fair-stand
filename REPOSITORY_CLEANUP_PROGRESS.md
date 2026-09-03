@@ -90,19 +90,19 @@ Bu nedenle yeni kural: **doküman sadeleştirmesinde içerik sessizce silinmez; 
 
 ## P1 — Kayıpsız dokümantasyon sınıflandırması
 
-Durum: **UYGULANDI — PR/CI BEKLİYOR**
+Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
-Branch: `docs/preserve-and-classify`
+Merge: PR #7
 
-Yapılanlar:
+Merge commit: `0f99b8cfa58fd14cf6bb5a992e52e2d0f2b89eb5`
 
 - PR #6 öncesi eski README snapshot'ı tekrar incelendi.
-- `PRODUCT_FUTURE.md` oluşturuldu: PDF teklif, montaj sırası, depo toplama, paketleme, stok, baskı dosyaları, montaj şeması, proje paylaşma/onaylama ve teknik/ticari veri ihtiyaçları burada korunuyor.
-- `LEGACY_TRASH.md` oluşturuldu: güncel sistemle uyuşmayan eski MVP varsayımları, eski klasör önerisi, eski uygulama sırası ve doğrulanmamış saha tahminleri kayıpsız tutuluyor.
-- `RENDER_FUTURE_BACKLOG.md` oluşturuldu: geçmişte FAZ 4 adıyla yazılmış HDRI/PBR/AO/ileri render hedefleri yeni FAZ 4 ile çakışmadan korunuyor.
-- `MILESTONES.md` tarihsel kayıt olarak işaretlendi; aktif roadmap source-of-truth olmadığı açıklandı.
+- `PRODUCT_FUTURE.md` oluşturuldu.
+- `LEGACY_TRASH.md` oluşturuldu.
+- `RENDER_FUTURE_BACKLOG.md` oluşturuldu.
+- `MILESTONES.md` tarihsel kayıt olarak netleştirildi.
 - README içine dokümantasyon sınıflandırma haritası eklendi.
-- Uygulama runtime koduna dokunulmadı.
+- Canonical CI install/test/build başarılı geçti.
 
 Doküman sınıfları:
 
@@ -113,7 +113,28 @@ Doküman sınıfları:
 - Legacy/incompatible/unverified: `LEGACY_TRASH.md`.
 - History: `MILESTONES.md`, `Changelog.md`, Git history.
 
+---
+
+## P1 — Roadmap implementation reconciliation
+
+Durum: **UYGULANDI — PR/CI BEKLİYOR**
+
+Branch: `docs/roadmap-status-reconcile`
+
+Yapılanlar:
+
+- `ROADMAP.md` gerçek source/test durumuyla karşılaştırıldı.
+- Production parts temelinin ve 50/100/150/200 düz duvar recipe'lerinin mevcut olduğu açıkça işaretlendi.
+- Recipe registry ile gerçek scene-instance Raw BOM pipeline'ı birbirinden ayrıldı; olmayan katman tamamlanmış gösterilmedi.
+- `ROADMAP_PHASE_4.md` checkbox'ları yalnız source + regression testiyle doğrulanan maddelerde kapatıldı.
+- Fiziksel ölçü metadata'sı, Three.js'ten bağımsız production-part identity, dört connector tanımı, recipe definition eşdeğeri ve standart duvar recipe testleri tamamlanmış olarak işaretlendi.
+- `materialId`, tüm hedef birimler/kategoriler, `catalogRef`, instance Raw BOM, parametrik core, custom library/wizard ve connection graph açık bırakıldı.
+- Hiçbir gelecek plan maddesi silinmedi.
+- Runtime uygulama koduna dokunulmadı.
+
 ## Sıradaki İş
 
-1. Bu dokümantasyon sınıflandırma branch'ini PR + canonical CI ile doğrula ve merge et.
-2. Ardından `ROADMAP.md` / `ROADMAP_PHASE_4.md` checkbox ve durumlarını gerçek implementasyonla eşleştir. Özellikle production parts ve standard recipe altyapısının kod/testte mevcut olduğu halde roadmap'te `[ ]` görünmesi incelenecek.
+1. Roadmap reconciliation branch'i için PR aç.
+2. Canonical CI sonucunu doğrula.
+3. Başarılıysa ROG'a merge et.
+4. Sonraki P1: `main.js` için yeni sorumluluk eklememe kuralını somutlaştır ve ilk düşük riskli controller extraction adayını belirle.

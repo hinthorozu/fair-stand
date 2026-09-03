@@ -1,6 +1,8 @@
 # Fair Stand — Master Roadmap
 
 > Bu dosya yalnız **üst seviye proje planını** tutar. Detaylar `ROADMAP_PHASE_4.md` ve `ROADMAP_PHASE_5_6.md` içindedir. Aynı iş iki roadmap içinde tekrar edilmez.
+>
+> Roadmap maddeleri yalnız isim benzerliğine göre tamamlandı sayılmaz. Durum işaretleri repository source code + regression testleriyle doğrulanır.
 
 ## Proje durumu
 
@@ -11,6 +13,27 @@
 - **FAZ 5: PLANLANDI — Final BOM / Gerçek Sahne Malzeme Listesi**
 - **FAZ 6: PLANLANDI — Maliyet / Fair CRM Entegrasyonu**
 
+### 3 Eylül 2026 implementasyon doğrulaması
+
+FAZ 4 tamamen sıfırdan başlamıyor. Repository incelemesinde şu altyapılar **mevcut ve testli** olarak doğrulandı:
+
+- `src/productionParts.js` içinde stabil `partId` kullanan fiziksel parça sözlüğü mevcut.
+- Doğrulanmış düz/iç-köşe panel ölçüleri, dikmeler, profiller ve başlangıç/tekli/çiftli/köşe aparatları kodda mevcut.
+- `src/moduleRecipes.js` içinde 50/100/150/200 düz duvar reçeteleri ve çeşitli mevcut modül reçeteleri mevcut.
+- Recipe'lerin production-part metadata ile genişletilebildiği API mevcut.
+- `test/moduleRecipes.test.js` içinde doğrulanmış production part ve standart duvar recipe regresyonları mevcut.
+
+Buna karşılık aşağıdakiler **henüz tamamlandı kabul edilmez**:
+
+- scene-instance seviyesinde izlenebilir Raw BOM pipeline'ı,
+- parametrik definition/config modeli,
+- custom module wizard/library,
+- explicit `sourceAnchor -> targetAnchor` connection graph,
+- connection-semantic tabanlı Final BOM normalization,
+- Fair CRM costing entegrasyonu.
+
+Bu ayrımın detaylı checklist karşılığı `ROADMAP_PHASE_4.md` içindedir.
+
 ---
 
 # FAZ 4 — Modül Reçetesi + Parametrik / Yapısal Editör
@@ -19,17 +42,17 @@
 
 Ana işler:
 
-1. Panel / dikme / profil / aparat parça modeli.
-2. 50/100/150/200 standart duvar reçeteleri.
-3. Module Recipe + Raw BOM motoru.
-4. Parametrik Core / Rule Engine.
-5. Custom Modül Wizard.
-6. Raflı Duvar parametrik pilotu.
-7. Anchor / Connection Graph ve iç köşe / inline semantiği.
-8. İki nokta arasında kayıt/profil aracı.
-9. Custom Module Library.
-10. Project save/load + versioning.
-11. Regresyon ve FAZ 4 kapanışı.
+1. Panel / dikme / profil / aparat parça modeli — **KISMEN / temel sözlük mevcut**.
+2. 50/100/150/200 standart duvar reçeteleri — **MEVCUT / TESTLİ**.
+3. Module Recipe + Raw BOM motoru — **KISMEN / recipe registry mevcut, instance Raw BOM tamamlanmadı**.
+4. Parametrik Core / Rule Engine — **PLANLANDI**.
+5. Custom Modül Wizard — **PLANLANDI**.
+6. Raflı Duvar parametrik pilotu — **PLANLANDI**.
+7. Anchor / Connection Graph ve iç köşe / inline semantiği — **PLANLANDI**.
+8. İki nokta arasında kayıt/profil aracı — **PLANLANDI**.
+9. Custom Module Library — **PLANLANDI**.
+10. Project save/load + versioning — **mevcut proje storage altyapısından ayrı FAZ 4 parametrik round-trip kapsamı henüz tamamlanmadı**.
+11. Regresyon ve FAZ 4 kapanışı — **PLANLANDI**.
 
 **FAZ 4 çıktısı:** Her modül kendi fiziksel reçetesini/Raw BOM'unu bilir ve sahnedeki gerçek bağlantılar açık connection graph olarak saklanır.
 
@@ -82,8 +105,8 @@ Detay: `ROADMAP_PHASE_5_6.md`
 
 # Aktif geliştirme sırası
 
-1. **FAZ 4 / Sprint 1 — Üretim Parça Modeli + Standart Modül Reçeteleri**
-2. **FAZ 4 / Sprint 2 — Module Recipe / Raw BOM Motoru**
+1. **FAZ 4 / Sprint 1 — Mevcut Production Parts temelini eksik contract'larla tamamla**
+2. **FAZ 4 / Sprint 2 — Mevcut Module Recipe registry'sini gerçek instance Raw BOM motoruna tamamla**
 3. **FAZ 4 / Sprint 3 — Parametrik Core / Rule Engine**
 4. **FAZ 4 / Sprint 4 — Custom Wizard + Raflı Duvar**
 5. **FAZ 4 / Sprint 5 — Anchor / Connection Graph**
