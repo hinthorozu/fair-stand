@@ -5,6 +5,7 @@ import './helpGuide.css';
 import { createStandScene } from './scene3d.js';
 import { initHelpGuide } from './helpGuide.js';
 import { resolveModuleCatalogKey } from './catalog.js';
+import { planAutomaticDepot } from './autoDepot.js';
 import {
   composeAutomaticStandWall,
   getAutomaticWallCapacityCm,
@@ -76,6 +77,9 @@ const standSizeXInput = document.querySelector('#stand-size-x');
 const standSizeYInput = document.querySelector('#stand-size-y');
 const createStageButton = document.querySelector('#create-stage');
 const floorTypeSelect = document.querySelector('#floor-type');
+const autoDepotEnabledInput = document.querySelector('#auto-depot-enabled');
+const autoDepotSizeSelect = document.querySelector('#auto-depot-size');
+const autoDepotContentsInput = document.querySelector('#auto-depot-contents');
 const stageResult = document.querySelector('#stage-result');
 const openModuleCatalogButton = document.querySelector('#open-module-catalog');
 const clearWallButton = document.querySelector('#clear-wall');
@@ -1166,6 +1170,33 @@ standTypeButtons.forEach((button) => {
     if (event.key === 'Enter' && !createStageButton.disabled) createStageButton.click();
   });
 });
+autoDepotEnabledInput?.addEventListener('change', syncAutoDepotControls);
+syncAutoDepotControls();
+
+function syncAutoDepotControls() {
+  const enabled = Boolean(autoDepotEnabledInput?.checked);
+  if (autoDepotSizeSelect) autoDepotSizeSelect.disabled = !enabled;
+  if (autoDepotContentsInput) {
+    autoDepotContentsInput.disabled = !enabled;
+    if (!enabled) autoDepotContentsInput.checked = false;
+  }
+}
+
+function createAutomaticDepotStates(plan) {
+  if (!plan?.ok) return [];
+  return plan.specs.map((spec) => {
+    let state = null;
+    if (spec.kind === 'wall') state = createFlatPanelModuleState(spec.widthCm);
+    else if (spec.kind === 'door') state = createDoorModuleState(100);
+    else if (spec.kind === 'mini-fridge') state = createMiniFridgeModuleState();
+    else if (spec.kind === 'kettle') state = createKettleModuleState();
+    else if (spec.kind === 'coat-rack') state = createCoatRackModuleState();
+    if (!state) return null;
+    state.placement = { ...spec.placement };
+    state.autoDepot = true;
+    return state;
+  }).filter(Boolean);
+}
 
 function requestProjectName({ defaultName = '', mode = 'create' } = {}) {
   return new Promise((resolve) => {
@@ -1241,6 +1272,17 @@ createStageButton.addEventListener('click', async () => {
     if (!confirmed) return;
   }
 
+  const depotConfig = autoDepotEnabledInput?.checked ? {
+    enabled: true,
+    sizeKey: autoDepotSizeSelect?.value || '100x100',
+    includeContents: Boolean(autoDepotContentsInput?.checked),
+  } : { enabled: false, sizeKey: null, includeContents: false };
+  const depotPlan = depotConfig.enabled ? planAutomaticDepot({
+    standType: setup.standType, standXCm: setup.xCm, standYCm: setup.yCm,
+    sizeKey: depotConfig.sizeKey, includeContents: depotConfig.includeContents,
+  }) : null;
+  if (depotPlan && !depotPlan.ok) { renderStageResult(depotPlan.message, true); return; }
+
   const projectName = await requestProjectName({ mode: 'create' });
   if (!projectName) return;
 
@@ -1267,31 +1309,27 @@ createStageButton.addEventListener('click', async () => {
     return;
   }
 
-  currentStand = { ...setup, floorType: floorTypeSelect.value };
+  currentStand = { ...setup, floorType: floorTypeSelect.value, depot: depotConfig };
   scene3d.setFloorType(floorTypeSelect.value);
   viewportEmpty.hidden = true;
   viewportToolbar.hidden = false;
   setStandEditingEnabled(true);
 
-  const automaticWall = composeAutomaticStandWall({
-    lengthCm: getAutomaticWallCapacityCm({
-      standType: setup.standType,
-      standXCm: setup.xCm,
-      standYCm: setup.yCm,
-    }),
-    standType: setup.standType,
-    standXCm: setup.xCm,
-    standYCm: setup.yCm,
-  });
-  if (!automaticWall.ok) {
-    renderStageResult(automaticWall.message, true);
-    return;
+  if (setup.standType === 'island') {
+    currentModules = [];
+  } else {
+    const automaticWall = composeAutomaticStandWall({
+      lengthCm: getAutomaticWallCapacityCm({ standType: setup.standType, standXCm: setup.xCm, standYCm: setup.yCm }),
+      standType: setup.standType, standXCm: setup.xCm, standYCm: setup.yCm,
+    });
+    if (!automaticWall.ok) { renderStageResult(automaticWall.message, true); return; }
+    currentModules = automaticWall.widths.map((widthCm, index) => {
+      const moduleState = createFlatPanelModuleState(widthCm);
+      moduleState.placement = { ...automaticWall.placements[index] };
+      return moduleState;
+    });
   }
-  currentModules = automaticWall.widths.map((widthCm, index) => {
-    const moduleState = createFlatPanelModuleState(widthCm);
-    moduleState.placement = { ...automaticWall.placements[index] };
-    return moduleState;
-  });
+  if (depotPlan?.ok) currentModules.push(...createAutomaticDepotStates(depotPlan));
   rebuildWall({ resetView: true });
 
   const label = STAND_TYPE_LABELS[setup.standType];
@@ -1637,6 +1675,10 @@ async function restoreProject(project) {
     standSizeXInput.value = String(currentStand.xCm);
     standSizeYInput.value = String(currentStand.yCm);
     floorTypeSelect.value = currentStand.floorType || 'karolaj';
+    if (autoDepotEnabledInput) autoDepotEnabledInput.checked = Boolean(currentStand.depot?.enabled);
+    if (autoDepotSizeSelect && currentStand.depot?.sizeKey) autoDepotSizeSelect.value = currentStand.depot.sizeKey;
+    if (autoDepotContentsInput) autoDepotContentsInput.checked = Boolean(currentStand.depot?.includeContents);
+    syncAutoDepotControls();
     const stage = scene3d.createStage({
       widthCm: currentStand.xCm,
       depthCm: currentStand.yCm,

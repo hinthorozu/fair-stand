@@ -3,7 +3,7 @@ const GUIDE_SECTIONS = [
     title: 'Hızlı Başlangıç',
     open: true,
     html: `
-      <p>Stand tipini seç, X ve Y ölçülerini gir ve <strong>Sahneyi Oluştur</strong> butonuna bas. Açılan küçük pencerede proje adını girdikten sonra sistem yeni ve bağımsız projeyi oluşturur ve ilk kaydı otomatik olarak yapar. Sonra katalogdan modül ekleyebilir, sahnedeki modülleri taşıyabilir ve panel yüzeylerini özelleştirebilirsin.</p>
+      <p>Stand tipini seç, X ve Y ölçülerini gir; istersen <strong>Depo eklensin</strong> seçeneğini açıp 1×1, 1,5×1, 2×1 veya 2×2 m depo ölçüsünü belirle. <strong>Depo içeriği eklensin</strong> seçilirse Mini Buzdolabı, Kettle ve Askılık da otomatik yerleşir. Sonra <strong>Sahneyi Oluştur</strong> butonuna bas ve proje adını gir; sistem projeyi oluşturup ilk kaydı otomatik yapar.</p>
       <div class="help-guide-callout"><strong>Temel akış:</strong> Sahne oluştur + proje adını gir → Proje otomatik kaydedilir → Modül ekle → Yerleştir → Panel seç → Renk / görsel / cam / Lightbox / Mesh uygula → Render Al.</div>
     `,
   },
