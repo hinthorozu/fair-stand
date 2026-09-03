@@ -18,13 +18,21 @@ The behavior contract currently covers:
 
 These values are **not global constants**. Different module types may intentionally use different snap distances, rotation steps, placement modes, or collision strategies.
 
+## Explicit catalog behavior contract
+
+Every module type exposed through `MODULE_CATALOG` must have an explicit entry in the behavior registry, even when that type intentionally uses the standard wall behavior.
+
+`hasExplicitModuleBehavior()` exposes whether a type is declared by the registry. `test/moduleBehaviorContract.test.js` compares all unique catalog module types against this contract, so adding a new catalog type without declaring its behavior fails CI.
+
+This prevents a newly added catalog type from silently inheriting fallback behavior by accident.
+
 ## Defaults
 
-Unknown or undeclared module types currently fall back to the default behavior defined in `src/moduleBehavior.js`.
+Unknown or undeclared non-catalog module types still fall back to the default behavior defined in `src/moduleBehavior.js`.
 
 The current default behavior is wall placement with the default movement/rotation/collision contract declared in code. Documentation should not duplicate those numeric defaults as a separate source of truth.
 
-A catalog-to-behavior coverage test should eventually ensure that newly added module types do not accidentally rely on fallback behavior when an explicit contract is required.
+Fallback remains useful as a defensive runtime behavior, but catalog entries must not depend on it implicitly.
 
 ## Ghost contract
 
@@ -82,8 +90,9 @@ Descriptor-aware overrides are allowed when a family needs behavior based on mod
 
 When adding a new module:
 
-1. Add or verify its behavior contract in `src/moduleBehavior.js`.
-2. Avoid new scattered placement/type checks outside the registry unless the behavior cannot reasonably be represented by the contract.
-3. Add a regression test for any non-default placement, snap, rotation, collision, or ghost behavior.
-4. Keep renderer, state, catalog and BOM responsibilities separate from editor behavior.
-5. Run `npm test` and `npm run build`.
+1. Add its catalog entry when applicable.
+2. Declare its type explicitly in `src/moduleBehavior.js`, even if it intentionally uses standard wall behavior.
+3. Avoid new scattered placement/type checks outside the registry unless the behavior cannot reasonably be represented by the contract.
+4. Add a regression test for any non-default placement, snap, rotation, collision, or ghost behavior.
+5. Keep renderer, state, catalog and BOM responsibilities separate from editor behavior.
+6. Run `npm test` and `npm run build`.

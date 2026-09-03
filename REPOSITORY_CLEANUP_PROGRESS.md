@@ -52,52 +52,45 @@ Merge: PR #3
 
 Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
-Branch:
-
-- `cleanup/documentation-contracts`
-
-PR:
-
-- #4 — `Align documentation contracts with runtime behavior`
+Merge: PR #4
 
 Yapılanlar:
 
-### `PROJECT_RULES.md`
+- `PROJECT_RULES.md` yalnız gerçek global product invariant'larına indirildi.
+- Module-specific 90° / 50 cm varsayımları global kurallardan çıkarıldı.
+- `ARCHITECTURE_RULES.md` source-of-truth ve sistem katmanı sınırlarına odaklandı.
+- `MODULE_BEHAVIOR_STANDARD.md` gerçek runtime behavior contract ile hizalandı.
+- `wall-overlay` ve gerçek silhouette ghost contract dokümante edildi.
+- Canonical CI başarılı geçti.
 
-- Module-specific 90° / 50 cm gibi artık global olmayan varsayımlar kaldırıldı.
-- Banko, Baza, Raf ve Koltuk gibi module-specific ürün detayları global rules dokümanından çıkarıldı.
-- Dosya yalnız gerçek global product invariant'larına indirildi.
-- X/Y zemin + Z yükseklik koordinat modeli korundu.
-- Silme sonrası boşluğun korunması ve auto-compaction yapılmaması korundu.
-- Nominal placement ölçüsü / fiziksel geometri / BOM ölçüsü ayrımı açıklaştırıldı.
-- Canonical source sınırları tanımlandı.
+---
 
-### `ARCHITECTURE_RULES.md`
+## P1 — Catalog → module behavior contract coverage
 
-- Runtime sabitlerinin ikinci kopyası olmaktan çıkarıldı.
-- Sistem katmanları ve source-of-truth sınırlarına odaklandı.
-- Rotation ve movement grid'in global sabit olmadığı açıklandı.
-- Placement, behavior registry, connection/collision, state/renderer ve BOM sorumlulukları ayrıştırıldı.
+Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
-### `MODULE_BEHAVIOR_STANDARD.md`
+Branch:
 
-- `wall-overlay` placement contract'a eklendi.
-- Eski `proxy / 0.30` ghost dokümantasyonu gerçek runtime ile hizalandı: central silhouette ghost.
-- Tüm modüllerin 90° / 50 cm kullanmadığı açıkça belirtildi.
-- Behavior helper fonksiyonlarının kullanılması dokümante edildi.
-- Descriptor-aware override'ların `moduleBehavior.js` içinde merkezi kalması gerektiği belirtildi.
-- Yeni module checklist'i netleştirildi.
+- `test/catalog-module-behavior-contract`
 
-### Doğrulama
+PR:
 
-- Canonical CI çalıştı.
-- `npm ci` başarılı.
-- `npm test` başarılı.
-- `npm run build` başarılı.
-- Uygulama runtime koduna dokunulmadı.
+- #5 — `Enforce catalog module behavior contracts`
 
-## Sıradaki P1
+Yapılanlar:
 
-Önerilen ilk P1 işi: **Catalog → module behavior coverage testi**.
+- `src/moduleBehavior.js` içinde katalogda kullanılan standart wall module type'ları da explicit registry entry haline getirildi.
+- Ortak wall davranışı `WALL_BEHAVIOR` üzerinden paylaşılır; runtime davranışı değiştirilmeden implicit fallback bağımlılığı kaldırıldı.
+- `hasExplicitModuleBehavior()` helper'ı eklendi.
+- `test/moduleBehaviorContract.test.js` eklendi.
+- Test, `MODULE_CATALOG_KEYS` üzerinden tüm benzersiz katalog type'larını çıkarıp her birinin explicit behavior contract'a sahip olduğunu doğrular.
+- Yeni bir catalog type davranış kaydı olmadan eklenirse CI artık kırılır.
+- Unknown/non-catalog type fallback davranışının hâlâ korunduğu ayrıca test edilir.
+- `MODULE_BEHAVIOR_STANDARD.md` bu yeni explicit catalog contract ile güncellendi.
+- Canonical CI'da `npm ci`, `npm test` ve `npm run build` başarılı geçti.
 
-Amaç: katalogda yeni bir module type tanımlandığında gerekli explicit behavior contract unutulursa CI'ın bunu yakalaması. Bu küçük ve düşük riskli değişiklik, ardından yapılacak README/ROADMAP temizliği ve daha büyük refactor'lar için güvenliği artırır.
+## Sıradaki İş
+
+Sonraki P1: **README ve ROADMAP güncelliğini gerçek repository durumu ile karşılaştır ve düzelt.**
+
+Önce mevcut README/ROADMAP içeriğini gerçek catalog, scripts ve mevcut feature set ile karşılaştır; sonra yalnız doğrulanmış güncel bilgileri dokümante et.
