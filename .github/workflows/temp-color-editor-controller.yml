@@ -1,0 +1,225 @@
+name: Temporary color editor controller extraction
+
+on:
+  push:
+    branches:
+      - refactor/extract-color-editor-controller
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/extract-color-editor-controller
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Extract color editor controller
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          main = Path('src/main.js')
+          s = main.read_text()
+
+          old_imports = """import {\n  colorValuesFromHex,\n  cmykToRgb,\n  rgbToHex,\n} from './colorUtils.js';\nimport { normalizeCmykValues, readNumberGroup } from './colorEditorInputs.js';\n"""
+          new_imports = """import { createColorEditorController } from './colorEditorController.js';\n"""
+          if s.count(old_imports) != 1:
+              raise SystemExit(f'color import block mismatch: {s.count(old_imports)}')
+          s = s.replace(old_imports, new_imports, 1)
+
+          pattern = re.compile(r"\nfunction syncColorEditorFromHex\(hex, \{ apply = false \} = \{\}\) \{.*?\n\}\n\napplyColorButton\.addEventListener", re.S)
+          matches = list(pattern.finditer(s))
+          if len(matches) != 1:
+              raise SystemExit(f'color sync block mismatch: {len(matches)}')
+          replacement = """
+const {
+  syncFromHex: syncColorEditorFromHex,
+  syncFromRgbInputs,
+  syncFromCmykInputs,
+} = createColorEditorController({
+  colorInput,
+  colorHexInput,
+  colorRgbInputs,
+  colorCmykInputs,
+  onApply: () => applyActiveColorToSelection(),
+});
+
+applyColorButton.addEventListener"""
+          s = pattern.sub(replacement, s, count=1)
+          main.write_text(s)
+
+          Path('src/colorEditorController.js').write_text("""import { colorValuesFromHex, cmykToRgb, rgbToHex } from './colorUtils.js';
+import { normalizeCmykValues, readNumberGroup } from './colorEditorInputs.js';
+
+function writeRgbInputs(inputs, rgb) {
+  inputs.r.value = String(rgb.r);
+  inputs.g.value = String(rgb.g);
+  inputs.b.value = String(rgb.b);
+}
+
+function writeCmykInputs(inputs, cmyk) {
+  inputs.c.value = String(cmyk.c);
+  inputs.m.value = String(cmyk.m);
+  inputs.y.value = String(cmyk.y);
+  inputs.k.value = String(cmyk.k);
+}
+
+export function createColorEditorController({
+  colorInput,
+  colorHexInput,
+  colorRgbInputs,
+  colorCmykInputs,
+  onApply = () => {},
+}) {
+  function syncFromHex(hex, { apply = false } = {}) {
+    const values = colorValuesFromHex(hex);
+    if (!values) return false;
+
+    colorInput.value = values.hex;
+    colorHexInput.value = values.hex;
+    writeRgbInputs(colorRgbInputs, values.rgb);
+    writeCmykInputs(colorCmykInputs, values.cmyk);
+
+    if (apply) onApply();
+    return true;
+  }
+
+  function syncFromRgbInputs() {
+    const rgb = readNumberGroup(colorRgbInputs);
+    if (!rgb) return false;
+    return syncFromHex(rgbToHex(rgb.r, rgb.g, rgb.b), { apply: true });
+  }
+
+  function syncFromCmykInputs() {
+    const cmyk = readNumberGroup(colorCmykInputs);
+    if (!cmyk) return false;
+
+    const normalizedCmyk = normalizeCmykValues(cmyk);
+    writeCmykInputs(colorCmykInputs, normalizedCmyk);
+
+    const rgb = cmykToRgb(
+      normalizedCmyk.c,
+      normalizedCmyk.m,
+      normalizedCmyk.y,
+      normalizedCmyk.k,
+    );
+    const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    colorInput.value = hex;
+    colorHexInput.value = hex;
+    writeRgbInputs(colorRgbInputs, rgb);
+    onApply();
+    return true;
+  }
+
+  return { syncFromHex, syncFromRgbInputs, syncFromCmykInputs };
+}
+""")
+
+          Path('test/colorEditorController.test.js').write_text("""import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createColorEditorController } from '../src/colorEditorController.js';
+
+function createFixture() {
+  const colorInput = { value: '#000000' };
+  const colorHexInput = { value: '#000000' };
+  const colorRgbInputs = { r: { value: '' }, g: { value: '' }, b: { value: '' } };
+  const colorCmykInputs = { c: { value: '' }, m: { value: '' }, y: { value: '' }, k: { value: '' } };
+  let applyCount = 0;
+  const controller = createColorEditorController({
+    colorInput,
+    colorHexInput,
+    colorRgbInputs,
+    colorCmykInputs,
+    onApply: () => { applyCount += 1; },
+  });
+  return { colorInput, colorHexInput, colorRgbInputs, colorCmykInputs, controller, getApplyCount: () => applyCount };
+}
+
+test('syncFromHex updates HEX, RGB and CMYK without applying by default', () => {
+  const f = createFixture();
+  assert.equal(f.controller.syncFromHex('#ff0000'), true);
+  assert.equal(f.colorInput.value, '#FF0000');
+  assert.equal(f.colorHexInput.value, '#FF0000');
+  assert.deepEqual(Object.fromEntries(Object.entries(f.colorRgbInputs).map(([k, v]) => [k, v.value])), { r: '255', g: '0', b: '0' });
+  assert.deepEqual(Object.fromEntries(Object.entries(f.colorCmykInputs).map(([k, v]) => [k, v.value])), { c: '0', m: '100', y: '100', k: '0' });
+  assert.equal(f.getApplyCount(), 0);
+});
+
+test('syncFromHex rejects invalid hex without mutating or applying', () => {
+  const f = createFixture();
+  assert.equal(f.controller.syncFromHex('nope', { apply: true }), false);
+  assert.equal(f.colorInput.value, '#000000');
+  assert.equal(f.getApplyCount(), 0);
+});
+
+test('syncFromRgbInputs converts current RGB fields and applies once', () => {
+  const f = createFixture();
+  f.colorRgbInputs.r.value = '12';
+  f.colorRgbInputs.g.value = '34';
+  f.colorRgbInputs.b.value = '56';
+  assert.equal(f.controller.syncFromRgbInputs(), true);
+  assert.equal(f.colorInput.value, '#0C2238');
+  assert.equal(f.colorHexInput.value, '#0C2238');
+  assert.equal(f.getApplyCount(), 1);
+});
+
+test('syncFromCmykInputs clamps fields, updates RGB/HEX and applies once', () => {
+  const f = createFixture();
+  f.colorCmykInputs.c.value = '-5';
+  f.colorCmykInputs.m.value = '101';
+  f.colorCmykInputs.y.value = '0';
+  f.colorCmykInputs.k.value = '0';
+  assert.equal(f.controller.syncFromCmykInputs(), true);
+  assert.deepEqual(Object.fromEntries(Object.entries(f.colorCmykInputs).map(([k, v]) => [k, v.value])), { c: '0', m: '100', y: '0', k: '0' });
+  assert.deepEqual(Object.fromEntries(Object.entries(f.colorRgbInputs).map(([k, v]) => [k, v.value])), { r: '255', g: '0', b: '255' });
+  assert.equal(f.colorInput.value, '#FF00FF');
+  assert.equal(f.getApplyCount(), 1);
+});
+
+test('blank numeric groups do not apply', () => {
+  const f = createFixture();
+  assert.equal(f.controller.syncFromRgbInputs(), false);
+  assert.equal(f.controller.syncFromCmykInputs(), false);
+  assert.equal(f.getApplyCount(), 0);
+});
+""")
+
+          Path('test/colorEditorControllerMainIntegration.test.js').write_text("""import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const source = fs.readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+
+test('main delegates color editor synchronization to the controller', () => {
+  assert.match(source, /import \{ createColorEditorController \} from '\\.\/colorEditorController\\.js'/);
+  assert.match(source, /createColorEditorController\(\{[\s\S]*onApply: \(\) => applyActiveColorToSelection\(\)/);
+  assert.match(source, /syncFromHex: syncColorEditorFromHex/);
+  assert.doesNotMatch(source, /function syncColorEditorFromHex\(/);
+  assert.doesNotMatch(source, /function syncFromRgbInputs\(/);
+  assert.doesNotMatch(source, /function syncFromCmykInputs\(/);
+});
+""")
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/main.js src/colorEditorController.js test/colorEditorController.test.js test/colorEditorControllerMainIntegration.test.js
+          git commit -m "Extract color editor synchronization controller"
+          git push origin HEAD:refactor/extract-color-editor-controller
