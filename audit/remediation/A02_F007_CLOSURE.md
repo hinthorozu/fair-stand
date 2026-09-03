@@ -2,7 +2,7 @@
 
 Finding: **F-007 — `test/` and `tests/` outside change-gate guarded-file governance**
 
-Status: **IMPLEMENTED — awaiting final PR CI, merge, and post-merge ROG CI**
+Status: **CLOSED pending post-merge ROG verification**
 
 Remediation:
 - `test/**` is now a guarded change surface.
@@ -13,7 +13,7 @@ Remediation:
 Targeted regression:
 - `test/systemChangeGate.test.js`
 
-Closure requires:
-- PR CI: Change contract gate + install + full test + build green.
-- merge to fresh `ROG`.
-- post-merge ROG CI green.
+Validation:
+- implementation PR CI run #117: Change contract gate, install, full test, and build all passed.
+- final branch CI after closure-ledger updates must pass before merge.
+- post-merge ROG CI must pass before F-008 begins.
