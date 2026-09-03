@@ -62,6 +62,7 @@ import { createAutosaveController } from './autosaveController.js';
 import { createProjectLoadingController, setButtonBusy } from './projectUi.js';
 import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';
 import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';
+import { createSidebarController } from './sidebarController.js';
 
 let jsZipModulePromise = null;
 
@@ -140,20 +141,10 @@ const { setProjectName, requestProjectName } = createProjectNamingController({
   projectNameDisplay,
 });
 
-function setSidebarCollapsed(collapsed) {
-  appElement?.classList.toggle('sidebar-collapsed', collapsed);
-  if (sidebarToggleButton) {
-    sidebarToggleButton.textContent = collapsed ? '›' : '‹';
-    sidebarToggleButton.setAttribute('aria-expanded', String(!collapsed));
-    sidebarToggleButton.setAttribute('aria-label', collapsed ? 'Menüyü aç' : 'Menüyü kapat');
-    sidebarToggleButton.title = collapsed ? 'Menüyü aç' : 'Menüyü kapat';
-  }
-  window.dispatchEvent(new Event('resize'));
-}
-
-sidebarToggleButton?.addEventListener('click', () => {
-  setSidebarCollapsed(!appElement?.classList.contains('sidebar-collapsed'));
-});
+createSidebarController({
+  appElement,
+  toggleButton: sidebarToggleButton,
+}).bind();
 
 
 const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
