@@ -17,3 +17,10 @@ test('help guide documents view shortcuts and new clockwise rotation binding', (
     assert.match(helpSource, new RegExp(`<tr><th>${key.replace(/[+]/g, '\\+')}</th>`));
   }
 });
+
+test('drag rotation keeps an independent cursor so invalid previews do not stop later Shift+R turns', () => {
+  assert.match(sceneSource, /rotationCursorZDeg: dragRotationZDeg/);
+  assert.match(sceneSource, /dragSession\.rotationCursorZDeg \?\? dragSession\.preferredRotationZDeg/);
+  assert.match(sceneSource, /dragSession\.rotationCursorZDeg = rotationCursorZDeg[\s\S]*updatePlacementDrag\([\s\S]*dragSession\.preferredRotationZDeg = rotationCursorZDeg/);
+  assert.doesNotMatch(sceneSource, /if \(dragSession\.preview\?\.valid\)[\s\S]{0,250}rotationCursorZDeg/);
+});
