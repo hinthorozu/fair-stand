@@ -1199,7 +1199,7 @@ function createAutomaticDepotStates(plan) {
   }).filter(Boolean);
 }
 
-function buildAutomaticProjectNamePrefix(standType, xCm, yCm) {
+function buildAutomaticProjectNameSuffix(standType, xCm, yCm) {
   const typePrefix = {
     'l-left': 'L_Sol',
     'l-right': 'L_Sag',
@@ -1207,10 +1207,20 @@ function buildAutomaticProjectNamePrefix(standType, xCm, yCm) {
     island: 'Ada',
     'back-wall': 'Sirt',
   }[standType] || 'Stand';
-  return `${typePrefix}_${Math.round(Number(xCm) || 0)}_${Math.round(Number(yCm) || 0)}_`;
+  return `${typePrefix}_${Math.round(Number(xCm) || 0)}_${Math.round(Number(yCm) || 0)}`;
 }
 
-function requestProjectName({ defaultName = '', mode = 'create', prefix = '' } = {}) {
+function getEditableProjectName(fullName, suffix = '') {
+  const name = String(fullName || '').trim();
+  if (!suffix) return name;
+  for (const separator of ['-', '_']) {
+    const tail = separator + suffix;
+    if (name.endsWith(tail)) return name.slice(0, -tail.length);
+  }
+  return name;
+}
+
+function requestProjectName({ defaultName = '', mode = 'create', suffix = '' } = {}) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.48);display:grid;place-items:center;padding:20px';
@@ -1237,11 +1247,11 @@ function requestProjectName({ defaultName = '', mode = 'create', prefix = '' } =
     input.value = defaultName && defaultName !== 'Adsız Proje' ? defaultName : '';
     input.placeholder = isRename ? 'Örn. İstanbul Fuar Standı' : 'Örn. Ferromet';
     const preview = document.createElement('span');
-    if (!isRename && prefix) {
+    if (suffix) {
       preview.style.cssText = 'font-weight:700;color:#334155;word-break:break-word';
       const updatePreview = () => {
         const standName = input.value.trim().replace(/\s+/g, '_');
-        preview.textContent = 'Proje adı: ' + (standName || '[Stand_Adi]') + '_' + prefix.replace(/_$/, '');
+        preview.textContent = 'Proje adı: ' + (standName || '[Proje_adi]') + '-' + suffix;
       };
       input.addEventListener('input', updatePreview);
       updatePreview();
@@ -1269,7 +1279,8 @@ function requestProjectName({ defaultName = '', mode = 'create', prefix = '' } =
       event.preventDefault();
       const name = input.value.trim();
       if (!name) { input.focus(); return; }
-      const finalName = isRename ? name : name.replace(/\s+/g, '_') + '_' + prefix.replace(/_$/, '');
+      const normalizedName = name.replace(/\s+/g, '_');
+      const finalName = suffix ? normalizedName + '-' + suffix : normalizedName;
       finish(finalName);
     });
     input.focus();
@@ -1307,8 +1318,8 @@ createStageButton.addEventListener('click', async () => {
   }) : null;
   if (depotPlan && !depotPlan.ok) { renderStageResult(depotPlan.message, true); return; }
 
-  const projectNamePrefix = buildAutomaticProjectNamePrefix(setup.standType, setup.xCm, setup.yCm);
-  const projectName = await requestProjectName({ mode: 'create', prefix: projectNamePrefix });
+  const projectNameSuffix = buildAutomaticProjectNameSuffix(setup.standType, setup.xCm, setup.yCm);
+  const projectName = await requestProjectName({ mode: 'create', suffix: projectNameSuffix });
   if (!projectName) return;
 
   disableAutosave();
@@ -2131,7 +2142,11 @@ imageInput.addEventListener('change', async () => {
 
 renameProjectButton?.addEventListener('click', async () => {
   const currentName = projectNameInput.value.trim() || 'Adsız Proje';
-  const nextName = await requestProjectName({ defaultName: currentName, mode: 'rename' });
+  const projectNameSuffix = currentStand
+    ? buildAutomaticProjectNameSuffix(currentStand.standType, currentStand.xCm, currentStand.yCm)
+    : '';
+  const editableName = getEditableProjectName(currentName, projectNameSuffix);
+  const nextName = await requestProjectName({ defaultName: editableName, mode: 'rename', suffix: projectNameSuffix });
   if (!nextName || nextName === currentName) return;
   setProjectName(nextName);
   if (currentStand || autosaveEnabled) {
