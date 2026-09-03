@@ -17,8 +17,9 @@ Repository ilk MVP taslağının ötesindedir. Mevcut uygulama aşağıdaki ana 
 - Renk, görsel ve editable surface state altyapısı.
 - Recipe / production-parts tabanlı BOM ve üretim verisi altyapısı.
 - Proje ve asset yönetimi için ayrı state/storage katmanları.
-- Module/feature contract altyapısı ve universal system change gate.
-- Geniş regresyon test paketi ve canonical GitHub Actions CI.
+- Module/feature contract altyapısı, universal system change gate ve full-system impact sweep.
+- Node regression test paketi ve Playwright tabanlı gerçek-browser E2E katmanı.
+- Canonical GitHub Actions CI.
 
 > Modül bazlı kesin placement, snap, rotation, collision, production ölçüsü veya recipe adetleri README içinde tekrar tutulmaz. Bunların canonical kaynakları ilgili runtime/contract dosyalarıdır.
 
@@ -28,6 +29,7 @@ Repository ilk MVP taslağının ötesindedir. Mevcut uygulama aşağıdaki ana 
 - Three.js
 - Vite
 - Node.js built-in test runner (`node --test`)
+- Playwright + Chromium E2E
 - JSZip
 - GitHub Actions
 
@@ -46,23 +48,30 @@ Vite geliştirme sunucusunun verdiği local adresi tarayıcıda açın.
 
 ```bash
 npm run dev              # local development server
-npm run contract:verify  # system change contract schema/diff verification
-npm test                 # regression test suite
+npm run contract:verify  # schema + diff + full-system impact verification
+npm test                 # unit/integration regression suite
 npm run build            # production build
+npm run e2e:deps         # pinned Playwright test runner'ı local node_modules'a kur
+npm run e2e:install      # Chromium browser binary'sini kur
+npm run e2e              # real-browser Playwright E2E suite
 npm run preview          # built application preview
 ```
 
 ## Zorunlu değişiklik akışı
 
-İnsan veya AI bir değişiklik yapmadan önce **iki katmanlı sözleşmeyi** izler:
+İnsan veya AI bir guarded değişiklikte şu katmanları izler:
 
-1. `SYSTEM_CHANGE_GATE.md` — değişikliğin sistemde hangi domainleri etkilediğini belirler.
-2. `.github/change-contract.json` — bu impact kararlarının machine-readable deklarasyonudur.
-3. `SYSTEM_DEVELOPMENT_CONTRACT.md` — module / feature / core değişikliğinin kendi domain contract'larını tanımlar.
-4. İlgili canonical owner dosyaları güncellenir.
-5. Değişen davranış için targeted regression eklenir/güncellenir.
-6. Full test + build çalıştırılır.
-7. PR canonical CI'dan yeşil geçmeden merge edilmez.
+1. `SYSTEM_CHANGE_GATE.md` — universal değişiklik kabul kapısı.
+2. `SYSTEM_IMPACT_SWEEP.md` — değişen dosya/symbol/UI/asset yüzeyinden callers, transitive dependents, mevcut testler, docs/contracts ve audit finding adaylarının tam taraması.
+3. `.github/change-contract.json` — impact ve review kararlarının machine-readable deklarasyonu.
+4. `SYSTEM_DEVELOPMENT_CONTRACT.md` — module / feature / core değişikliğinin domain contract'ları.
+5. İlgili canonical owner dosyaları güncellenir.
+6. Değişen davranış için targeted regression eklenir/güncellenir.
+7. `SYSTEM_BROWSER_E2E_DOMAINS` registry'sindeki bir browser-impact domain etkileniyorsa değişikliğe özel targeted E2E yazılır.
+8. Full test + build + Playwright E2E çalıştırılır.
+9. PR canonical CI'dan tamamen yeşil geçmeden merge edilmez.
+
+Impact domain sayısı sabit değildir. `.github/change-contract.json`, `src/systemChangeContract.js` içindeki `SYSTEM_IMPACT_DOMAINS` registry'sinde o anda tanımlı **bütün domainler** için karar taşır. Browser E2E zorunluluğu da `SYSTEM_BROWSER_E2E_DOMAINS` registry'sinden hesaplanır.
 
 Canonical CI şu sırayı çalıştırır:
 
@@ -72,9 +81,14 @@ checkout (full git history)
 → npm ci
 → npm test
 → npm run build
+→ Playwright runner kurulumu
+→ Chromium kurulumu
+→ npm run e2e
 ```
 
-`npm run contract:verify` local ortamda diff bilgisinin mevcut olmadığı koşullarda yalnız schema doğrulayabilir; gerçek PR/push diff enforcement canonical CI'da yapılır. Bu local-enforcement açığı audit finding `F-009` olarak ayrıca takip edilir.
+E2E failure olduğunda Playwright trace/screenshot/video kanıtları GitHub Actions artifact olarak saklanır. Böylece browser akışındaki gerçek hata CI logu ve görsel kanıt üzerinden incelenebilir.
+
+`npm run contract:verify` local ortamda da committed/staged/unstaged/untracked farkları fail-closed biçimde denetler. Gerekirse base açıkça `CHANGE_GATE_BASE=<git-ref>` ile verilebilir.
 
 ## Temel mimari
 
@@ -120,7 +134,7 @@ Placement core stand sınırı, snap, bağlantı geometrisi, collision ve reflow
 
 ### State
 
-State factory dosyaları modüllerin kalıcı/editable durumunu taşır. Runtime-derived veya renderer-only değerler gereksiz yere persisted state'e dönüştürülmemelidir.
+State construction'ın canonical sahibi `src/designState.js` ve ilgili state factory/registry yapısıdır. Runtime-derived veya renderer-only değerler gereksiz yere persisted state'e dönüştürülmemelidir.
 
 ### Renderer
 
@@ -152,23 +166,26 @@ Yeni iş yalnız katalog satırı veya UI butonu eklemek değildir.
 
 Önce universal change declaration hazırlanır:
 
-1. `SYSTEM_CHANGE_GATE.md` okunur.
-2. Etkilenen 17 domain için `affected` / `not-applicable` kararı verilir.
-3. `.github/change-contract.json` değişiklikle birlikte güncellenir.
-4. Sonra `SYSTEM_DEVELOPMENT_CONTRACT.md` içindeki module/feature/core contract akışı uygulanır.
+1. `SYSTEM_CHANGE_GATE.md` ve `SYSTEM_IMPACT_SWEEP.md` okunur.
+2. `SYSTEM_IMPACT_DOMAINS` registry'sindeki bütün domainler için `affected` / `not-applicable` kararı verilir.
+3. Reverse dependency/test/doc/finding discovery çalıştırılır ve `.github/change-contract.json` içinde acknowledgement yapılır.
+4. Browser-impact domain varsa `tests.e2e.required=true` ve değişikliğe özel targeted `e2e/**` spec beyan edilir.
+5. Sonra `SYSTEM_DEVELOPMENT_CONTRACT.md` içindeki module/feature/core contract akışı uygulanır.
 
 Bir katalog modülü için en az şu alanlar kontrol edilir:
 
 - catalog identity / descriptor,
 - module contract/profile,
-- state factory,
+- state construction,
 - explicit behavior,
 - placement/collision etkisi,
 - renderer/routing,
 - persistence,
 - BOM policy / recipe,
 - composition/dependency,
-- targeted regression.
+- affected existing tests,
+- targeted regression,
+- targeted E2E browser akışı.
 
 Bir feature birden fazla modülü/domaini koordine ediyorsa `src/featureContracts.js` contract'ı ayrıca kontrol edilir.
 
@@ -178,7 +195,8 @@ Bir feature birden fazla modülü/domaini koordine ediyorsa `src/featureContract
 
 - `PROJECT_RULES.md` — global product invariant'ları.
 - `ARCHITECTURE_RULES.md` — sistem katmanları ve source-of-truth sınırları.
-- `SYSTEM_CHANGE_GATE.md` — universal system-change impact sözleşmesi.
+- `SYSTEM_CHANGE_GATE.md` — universal system-change kabul sözleşmesi.
+- `SYSTEM_IMPACT_SWEEP.md` — reverse dependency/test/doc/finding + browser-impact tarama sözleşmesi.
 - `SYSTEM_DEVELOPMENT_CONTRACT.md` — module/feature/core geliştirme sözleşmesi.
 - `MODULE_BEHAVIOR_STANDARD.md` — module behavior registry sözleşmesi.
 - `SYSTEM_MODULE_CATALOG.md` — runtime catalog/contracts ile test edilen okunabilir katalog indeksi; runtime source-of-truth değildir.
@@ -210,19 +228,23 @@ Standart akış:
 ```text
 fresh ROG
 → branch
-→ SYSTEM_CHANGE_GATE impact declaration
+→ SYSTEM_CHANGE_GATE domain declaration
+→ SYSTEM_IMPACT_SWEEP dependency/test/finding discovery
 → module/feature/core contract kararı
 → implementation
+→ impact sweep tekrar
 → targeted regression
+→ browser-impact ise targeted E2E
 → npm test
 → npm run build
+→ npm run e2e
 → PR
 → canonical CI
 → merge
 → post-merge ROG CI
 ```
 
-Core placement, behavior, catalog, persistence, renderer, BOM veya başka bir domain değişiyorsa ilgili regression aynı PR içinde eklenmeli/güncellenmelidir.
+Core placement, behavior, catalog, persistence, renderer, BOM veya başka bir domain değişiyorsa ilgili regression aynı PR içinde eklenmeli/güncellenmelidir. Browser-visible etkisi olan değişiklik kendi Playwright E2E akışını da aynı PR içinde taşır.
 
 ## Product invariant'ları
 
@@ -234,4 +256,4 @@ Kısa özet:
 - Nominal placement ölçüsü, fiziksel footprint ve production/BOM ölçüsü birbirinden farklı olabilir.
 - Module-specific davranışlar global varsayımlara göre değil behavior registry üzerinden belirlenir.
 
-Ayrıntılı canonical kurallar için `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `SYSTEM_CHANGE_GATE.md`, `SYSTEM_DEVELOPMENT_CONTRACT.md` ve `MODULE_BEHAVIOR_STANDARD.md` dosyalarına bakın.
+Ayrıntılı canonical kurallar için `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `SYSTEM_CHANGE_GATE.md`, `SYSTEM_IMPACT_SWEEP.md`, `SYSTEM_DEVELOPMENT_CONTRACT.md` ve `MODULE_BEHAVIOR_STANDARD.md` dosyalarına bakın.
