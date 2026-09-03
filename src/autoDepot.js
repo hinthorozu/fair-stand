@@ -46,10 +46,32 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
   addFront(specs, xCm, yCm + size.depthCm, size.widthCm);
 
   if (includeContents) {
-    const inset = 5;
-    specs.push(fixture('mini-fridge', 45, 43, xCm + inset, yCm + inset));
-    specs.push(fixture('coat-rack', 43, 43, xCm + size.widthCm - 43 - inset, yCm + inset));
-    specs.push(fixture('kettle', 24, 19, xCm + (size.widthCm - 24) / 2, yCm + Math.min(size.depthCm - 24, 55)));
+    const fridgeWidth = 45;
+    const fridgeDepth = 43;
+    const rackWidth = 43;
+    const rackDepth = 43;
+    const kettleWidth = 24;
+    const kettleDepth = 19;
+    const gapCm = 6;
+
+    // Buzdolabı + askılık grubunu depo tabanında ortala.
+    const groupWidth = fridgeWidth + gapCm + rackWidth;
+    const groupDepth = Math.max(fridgeDepth, rackDepth);
+    const groupX = xCm + (size.widthCm - groupWidth) / 2;
+    const groupY = yCm + (size.depthCm - groupDepth) / 2;
+
+    const fridgeX = groupX;
+    const fridgeY = groupY;
+    const rackX = groupX + fridgeWidth + gapCm;
+    const rackY = groupY;
+
+    // Kettle buzdolabının üstünde render edilir; plan düzleminde buzdolabının tam merkezine oturt.
+    const kettleX = fridgeX + (fridgeWidth - kettleWidth) / 2;
+    const kettleY = fridgeY + (fridgeDepth - kettleDepth) / 2;
+
+    specs.push(fixture('mini-fridge', fridgeWidth, fridgeDepth, fridgeX, fridgeY));
+    specs.push(fixture('kettle', kettleWidth, kettleDepth, kettleX, kettleY));
+    specs.push(fixture('coat-rack', rackWidth, rackDepth, rackX, rackY));
   }
 
   return { ok: true, sizeKey, widthCm: size.widthCm, depthCm: size.depthCm, originXCm: xCm, originYCm: yCm, specs };
