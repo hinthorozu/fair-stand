@@ -117,11 +117,11 @@ Doküman sınıfları:
 
 ## P1 — Roadmap implementation reconciliation
 
-Durum: **UYGULANDI — PR/CI BEKLİYOR**
+Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
-Branch: `docs/roadmap-status-reconcile`
+Merge: PR #8
 
-Yapılanlar:
+Merge commit: `537622c6bdf5384be7e12456866a20ab58014ef3`
 
 - `ROADMAP.md` gerçek source/test durumuyla karşılaştırıldı.
 - Production parts temelinin ve 50/100/150/200 düz duvar recipe'lerinin mevcut olduğu açıkça işaretlendi.
@@ -130,11 +130,39 @@ Yapılanlar:
 - Fiziksel ölçü metadata'sı, Three.js'ten bağımsız production-part identity, dört connector tanımı, recipe definition eşdeğeri ve standart duvar recipe testleri tamamlanmış olarak işaretlendi.
 - `materialId`, tüm hedef birimler/kategoriler, `catalogRef`, instance Raw BOM, parametrik core, custom library/wizard ve connection graph açık bırakıldı.
 - Hiçbir gelecek plan maddesi silinmedi.
-- Runtime uygulama koduna dokunulmadı.
+
+---
+
+## P1 — `main.js` sorumluluk azaltma / ilk controller extraction
+
+Durum: **UYGULANDI — PR/CI BEKLİYOR**
+
+Branch: `refactor/extract-project-naming`
+
+İlk düşük riskli extraction olarak proje adlandırma alanı seçildi.
+
+Yapılanlar:
+
+- `src/projectNaming.js` oluşturuldu.
+- Otomatik proje suffix üretimi `main.js` dışına taşındı.
+- Rename sırasında otomatik suffix'i ayıran helper `main.js` dışına taşındı.
+- Proje adı normalize/sync davranışı controller'a taşındı.
+- Yeni proje / rename modal üretimi controller'a taşındı.
+- `main.js` yalnız DOM dependency'lerini controller'a bağlar hale getirildi; proje state/storage davranışı değiştirilmedi.
+- `test/projectNaming.test.js` eklendi.
+- Suffix contract'ı, Adsız Proje fallback'i, editable-name davranışı ve input/display sync test edildi.
+- Extraction patch'i sırasında `npm test` ve `npm run build` başarılı geçti.
+- Geçici patch workflow final branch tree'sinden kaldırıldı; repository'de canonical `.github/workflows/ci.yml` dışında yeni kalıcı workflow bırakılmadı.
+
+Branch diff özeti:
+
+- `src/main.js`: +10 / -94
+- `src/projectNaming.js`: yeni, 111 satır
+- `test/projectNaming.test.js`: yeni, 46 satır
 
 ## Sıradaki İş
 
-1. Roadmap reconciliation branch'i için PR aç.
-2. Canonical CI sonucunu doğrula.
+1. Project naming extraction için PR aç.
+2. Canonical CI install/test/build sonucunu doğrula.
 3. Başarılıysa ROG'a merge et.
-4. Sonraki P1: `main.js` için yeni sorumluluk eklememe kuralını somutlaştır ve ilk düşük riskli controller extraction adayını belirle.
+4. Sonraki düşük riskli `main.js` extraction adayı olarak autosave veya project UI helper grubunu source/test üzerinden değerlendir.
