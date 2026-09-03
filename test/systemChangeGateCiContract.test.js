@@ -12,12 +12,12 @@ test('package exposes universal change-gate and Playwright E2E commands', () => 
 });
 
 test('canonical CI enforces gate, unit tests, build and real-browser E2E in order', () => {
-  const gateIndex = ciWorkflow.indexOf('npm run contract:verify');
-  const testIndex = ciWorkflow.indexOf('npm test');
-  const buildIndex = ciWorkflow.indexOf('npm run build');
-  const e2eDepsIndex = ciWorkflow.indexOf('npm run e2e:deps');
-  const chromiumIndex = ciWorkflow.indexOf('playwright install --with-deps chromium');
-  const e2eIndex = ciWorkflow.indexOf('npm run e2e');
+  const gateIndex = ciWorkflow.indexOf('run: npm run contract:verify');
+  const testIndex = ciWorkflow.indexOf('run: npm test');
+  const buildIndex = ciWorkflow.indexOf('run: npm run build');
+  const e2eDepsIndex = ciWorkflow.indexOf('run: npm run e2e:deps');
+  const chromiumIndex = ciWorkflow.indexOf('run: npx playwright install --with-deps chromium');
+  const e2eIndex = ciWorkflow.indexOf('run: npm run e2e\n');
 
   assert.ok(ciWorkflow.includes('fetch-depth: 0'));
   assert.ok(gateIndex >= 0, 'CI must run the change contract gate');
