@@ -46,8 +46,8 @@ jobs:
               raise SystemExit(f'drag rotation block mismatch: {s.count(old_drag)}')
           s = s.replace(old_drag, new_drag, 1)
 
-          old_call = "    const result = rotateSelectedModule(deltaDeg);"
-          new_call = "    const result = rotateSelectedModule(requestedDeltaDeg);"
+          old_call = "    const rotationResult = rotateSelectedModule(deltaDeg);"
+          new_call = "    const rotationResult = rotateSelectedModule(requestedDeltaDeg);"
           if s.count(old_call) != 1:
               raise SystemExit(f'selected rotation call mismatch: {s.count(old_call)}')
           s = s.replace(old_call, new_call, 1)
