@@ -4,15 +4,17 @@ Bu dosya yalnızca `refactor/extract-selection-feedback` işi tamamlanana kadar 
 
 Kural: Maddeler **tek tek** uygulanacak. Bir madde tamamlanıp doğrulanmadan sonraki maddeye geçilmeyecek.
 
+> Not: `DEFAULT_SELECTION_HINT` importu tek başına build edilemiyor; aynı isimdeki lokal `const` ile çakışıyor. Bu nedenle 1–4 teknik olarak tek atomik hazırlık adımı olarak uygulandı ve birlikte doğrulandı. Surface/floor callback mantığına bu adımda dokunulmadı.
+
 ## Checklist
 
-- [ ] 1. `src/main.js` içine `selectionFeedback.js` importlarını ekle:
+- [x] 1. `src/main.js` içine `selectionFeedback.js` importlarını ekle:
   - `DEFAULT_SELECTION_HINT`
   - `describeFloorSelection`
   - `describeSurfaceSelection`
-- [ ] 2. Bu import değişikliğini test et.
-- [ ] 3. `src/main.js` içindeki lokal `DEFAULT_SELECTION_HINT` sabitini kaldır.
-- [ ] 4. Sabit kaldırma değişikliğini test et.
+- [x] 2. Import hazırlığını doğrula.
+- [x] 3. `src/main.js` içindeki lokal `DEFAULT_SELECTION_HINT` sabitini kaldır.
+- [x] 4. Atomik import + lokal sabit kaldırma değişikliğini test/build ile doğrula.
 - [ ] 5. Yalnızca `createStandScene(...)` içindeki **surface selection callback** karar mantığını `describeSurfaceSelection(surfaces, currentModules)` helper'ına bağla. `main.js` içinde yalnızca UI state/DOM yazımı kalsın.
 - [ ] 6. Surface selection değişikliğini test et.
 - [ ] 7. Yalnızca **floor selection callback** mesaj kararını `describeFloorSelection(floorSelection)` helper'ına bağla.
