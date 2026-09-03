@@ -64,6 +64,7 @@ import {
 } from './projectNaming.js';
 import { createAutosaveController } from './autosaveController.js';
 import { createProjectLoadingController, setButtonBusy } from './projectUi.js';
+import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';
 
 let jsZipModulePromise = null;
 
@@ -2203,24 +2204,61 @@ importProjectFileInput.addEventListener('change', async () => {
   }
 });
 
-openProjectButton.addEventListener('click', async () => {
-  const projectId = projectSelect.value;
-  if (!projectId) { projectStatus.textContent = 'Açılacak kayıtlı proje yok.'; return; }
+async function openStoredProject(projectId) {
+  if (!projectId) {
+    projectStatus.textContent = 'Açılacak kayıtlı proje yok.';
+    return false;
+  }
 
   projectLoading.show('Proje yükleniyor…', 'Görseller ve sahne hazırlanıyor.');
   setButtonBusy(openProjectButton, true, 'Açılıyor');
   projectStatus.textContent = 'Proje yükleniyor…';
   try {
     const project = await loadProject(projectId);
-    if (!project) { projectStatus.textContent = 'Proje bulunamadı.'; return; }
+    if (!project) {
+      projectStatus.textContent = 'Proje bulunamadı.';
+      return false;
+    }
     await restoreProject(project);
+    return true;
   } catch (error) {
     console.warn('Proje açılamadı:', error);
     projectStatus.textContent = 'Proje açılamadı.';
+    return false;
   } finally {
     projectLoading.hide();
     setButtonBusy(openProjectButton, false);
   }
+}
+
+function restoreProjectSelectToActiveProject() {
+  const hasActiveOption = [...projectSelect.options]
+    .some((option) => option.value === activeProjectId);
+  if (hasActiveOption) projectSelect.value = activeProjectId;
+  else projectSelect.selectedIndex = -1;
+}
+
+projectSelect.addEventListener('change', async () => {
+  const projectId = projectSelect.value;
+  if (!shouldConfirmProjectSwitch(activeProjectId, projectId)) return;
+
+  const currentProjectName = projectNameInput.value.trim() || 'Adsız Proje';
+  const targetProjectName = projectSelect.selectedOptions?.[0]?.textContent?.trim() || 'Adsız Proje';
+  const confirmed = window.confirm(
+    formatProjectSwitchMessage(currentProjectName, targetProjectName),
+  );
+  if (!confirmed) {
+    restoreProjectSelectToActiveProject();
+    projectStatus.textContent = 'Proje değişikliği iptal edildi.';
+    return;
+  }
+
+  const opened = await openStoredProject(projectId);
+  if (!opened) restoreProjectSelectToActiveProject();
+});
+
+openProjectButton.addEventListener('click', async () => {
+  await openStoredProject(projectSelect.value);
 });
 
 deleteProjectButton.addEventListener('click', async () => {
