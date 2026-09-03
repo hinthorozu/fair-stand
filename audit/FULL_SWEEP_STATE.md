@@ -18,16 +18,18 @@ Current phase: **REMEDIATION IN PROGRESS**
 - Audit status: **COMPLETE — A00–A24 / 25 of 25 inspected**
 - Remediation starting ROG SHA: `392e839804e5b0379186af8b950117154b20c195`
 - Remediation status: **IN PROGRESS**
-- Last remediation section: `A01 — CLOSED / AUDITED_OK`
+- Last fully closed remediation section: `A01 — CLOSED / AUDITED_OK`
+- Current remediation section: `A02 — Universal change gate`
 - A00 closure evidence: `audit/remediation/A00_CLOSURE.md`
 - A01 closure evidence: `audit/remediation/A01_CLOSURE.md`
-- Next remediation section: `A02 — Universal change gate`
-- Next finding set: `F-005, F-006, F-007, F-008, F-009`
+- A02 closed finding: `F-005 — audit/remediation/A02_F005_CLOSURE.md`
+- Next finding: `F-006 — canonical rule/gate Markdown not protected by change gate`
+- Remaining A02 findings after F-005: `F-006, F-007, F-008, F-009`
 - Finding range: `F-001..F-046`
-- Closed findings: `4`
-- Open findings: `42`
+- Closed findings: `5`
+- Open findings: `41`
 - Open P0: `0`
-- Open P1: `19`
+- Open P1: `18`
 - Open P2: `23`
 - Open P3: `0`
 - Canonical finding ledger: `audit/FINDINGS.md`
@@ -51,15 +53,12 @@ Current phase: **REMEDIATION IN PROGRESS**
 
 Section revalidation: `audit/remediation/A01_CLOSURE.md`.
 
-## Current open totals
+## Current section — A02 Universal change gate
 
-- P0: 0
-- P1: 19
-- P2: 23
-- P3: 0
+- **F-005 CLOSED** — all 51 current source files now have explicit ownership-derived mandatory impact-domain mappings; a regression enumerates `src/` and blocks unmapped future source files.
+- F-006 OPEN — canonical governance Markdown is not yet guarded.
+- F-007 OPEN — test surfaces are not yet guarded.
+- F-008 OPEN — targeted tests/test impact policy is not yet machine-required.
+- F-009 OPEN — local verifier can still skip diff enforcement.
 
-These counts reflect F-001 through F-004 closed. Findings F-005 through F-046 remain governed by `audit/FINDINGS.md`.
-
-## Next
-
-Proceed to **A02 — Universal change gate** only after PR #39 final branch CI and post-merge ROG push CI are green.
+A02 remains **IN PROGRESS** and must not advance to A03 until F-006 through F-009 are closed/accepted and A02 revalidation is recorded.
