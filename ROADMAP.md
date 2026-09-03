@@ -3,6 +3,8 @@
 > Bu dosya yalnız **üst seviye proje planını** tutar. Detaylar `ROADMAP_PHASE_4.md` ve `ROADMAP_PHASE_5_6.md` içindedir. Aynı iş iki roadmap içinde tekrar edilmez.
 >
 > Roadmap maddeleri yalnız isim benzerliğine göre tamamlandı sayılmaz. Durum işaretleri repository source code + regression testleriyle doğrulanır.
+>
+> **Production dataset kuralı:** Fiziksel parça ölçüleri, part ID'leri ve recipe miktarları roadmap içinde ikinci bir canonical veri seti olarak tutulmaz. Bu verilerin canonical sahipleri `src/productionParts.js` ve `src/moduleRecipes.js`; BOM politika sahibi `src/moduleContracts.js`'dir.
 
 ## Proje durumu
 
@@ -18,10 +20,10 @@
 FAZ 4 tamamen sıfırdan başlamıyor. Repository incelemesinde şu altyapılar **mevcut ve testli** olarak doğrulandı:
 
 - `src/productionParts.js` içinde stabil `partId` kullanan fiziksel parça sözlüğü mevcut.
-- Doğrulanmış düz/iç-köşe panel ölçüleri, dikmeler, profiller ve başlangıç/tekli/çiftli/köşe aparatları kodda mevcut.
-- `src/moduleRecipes.js` içinde 50/100/150/200 düz duvar reçeteleri ve çeşitli mevcut modül reçeteleri mevcut.
+- Standart panel/profil/dikme/connector ailelerinin production metadata'sı canonical production-part katmanında mevcut.
+- `src/moduleRecipes.js` içinde standart duvar ve çeşitli mevcut modül reçeteleri mevcut.
 - Recipe'lerin production-part metadata ile genişletilebildiği API mevcut.
-- `test/moduleRecipes.test.js` içinde doğrulanmış production part ve standart duvar recipe regresyonları mevcut.
+- `test/moduleRecipes.test.js` canonical production-part / recipe davranışını doğruluyor.
 
 Buna karşılık aşağıdakiler **henüz tamamlandı kabul edilmez**:
 
@@ -38,12 +40,12 @@ Bu ayrımın detaylı checklist karşılığı `ROADMAP_PHASE_4.md` içindedir.
 
 # FAZ 4 — Modül Reçetesi + Parametrik / Yapısal Editör
 
-Önce her modülün fiziksel yapısı tanımlanır; sonra parametrik/custom sistem bunun üzerine kurulur.
+Önce her modülün fiziksel yapısı canonical recipe/part katmanlarında tanımlanır; sonra parametrik/custom sistem bunun üzerine kurulur.
 
 Ana işler:
 
 1. Panel / dikme / profil / aparat parça modeli — **KISMEN / temel sözlük mevcut**.
-2. 50/100/150/200 standart duvar reçeteleri — **MEVCUT / TESTLİ**.
+2. Standart duvar reçeteleri — **MEVCUT / TESTLİ**.
 3. Module Recipe + Raw BOM motoru — **KISMEN / recipe registry mevcut, instance Raw BOM tamamlanmadı**.
 4. Parametrik Core / Rule Engine — **PLANLANDI**.
 5. Custom Modül Wizard — **PLANLANDI**.
@@ -74,7 +76,7 @@ Ana işler:
 6. Final BOM.
 7. Panel/yüzey m² miktarları.
 8. Gerçek Excel ile satır satır doğrulama.
-9. Havrano ve 4 × 200 cm gibi gerçek kabul senaryoları.
+9. Gerçek kabul senaryoları.
 
 **FAZ 5 çıktısı:** Fiyatsız ama doğru fiziksel malzeme ve miktar listesi.
 
@@ -118,31 +120,18 @@ Detay: `ROADMAP_PHASE_5_6.md`
 
 ---
 
-# Doğrulanmış üretim bilgileri
+# Production source-of-truth
 
-- Alüminyum dikme kalınlığı: **8 cm**
-- Default dikme uzunluğu: **346.5 cm**
-- Panel yüksekliği: **47 cm**
-- Panel kalınlığı: **0.8 cm**
-- Düz panel genişlikleri: **48.5 / 98 / 147.5 / 197 cm**
-- İç-köşe panel genişlikleri: **42.5 / 92 / 142.5 / 192 cm**
-- Üst/alt profil uzunlukları: **41.5 / 91 / 140.5 / 190 cm**
-- Standın içine doğru 90° birleşim: **köşe bağlantı aparatı**
-- Aynı doğrultuda iki ayrı modül birleşimi: **çiftli bağlantı aparatı**
-- Standart panel dizisi bağlantısı: **tekli/düz bağlantı aparatı**
-- Panel dizisi başlangıcı: **başlangıç aparatı**, yalnız başlangıçta
+Roadmap, üretim veri tablosu değildir. Güncel üretim gerçekleri aşağıdaki canonical kaynaklardan okunur:
 
-Doğrulanmış 50 cm düz duvar reçetesi:
+- `src/productionParts.js` — stabil production part kimlikleri, kategoriler, birimler ve fiziksel metadata,
+- `src/moduleRecipes.js` — module recipe miktarları, part referansları ve varyant çözümü,
+- `src/moduleContracts.js` — modülün BOM politikası (`recipe`, `decision-required` vb.),
+- `test/moduleRecipes.test.js` ve ilgili contract testleri — bu veri/ilişkilerin regresyon güvencesi.
 
-- 2 × 41.5 cm üst/alt profil
-- 2 × 346.5 cm dikme
-- 7 × 48.5 × 47 × 0.8 cm panel
-- 2 × başlangıç aparatı
-- 13 × tekli/düz bağlantı aparatı
+Roadmap içinde sabit panel/profil/dikme ölçüleri veya belirli bir duvarın parça adetleri tekrar yazılmaz. Üretim dataset'i değişirse yalnız canonical kod sahipleri ve onları doğrulayan testler değiştirilir; roadmap yalnız plan/acceptance durumunu anlatır.
 
-100 / 150 / 200 cm düz duvarlarda adetler aynı; panel ve profil ölçüleri ilgili standarda göre değişir.
-
-Köşe ve modül birleşimlerinin adet reçeteleri gerçek üretim Excel'i tamamlanmadan tahmin edilmez.
+Köşe ve modül birleşimlerinin üretim kararı da doğrulanmış canonical veri olmadan roadmap metninden türetilmez.
 
 ---
 
