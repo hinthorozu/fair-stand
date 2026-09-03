@@ -235,6 +235,8 @@ export function isGuardedChangeFile(path) {
     || path.startsWith('src/')
     || path.startsWith('public/')
     || path.startsWith('scripts/')
+    || path.startsWith('test/')
+    || path.startsWith('tests/')
     || path.startsWith('.github/workflows/')
     || path.startsWith('vite.config');
 }
@@ -247,6 +249,7 @@ export function requiredDomainsForFile(path) {
 
   if (path === 'index.html') required.add('ui');
   if (path.startsWith('public/')) required.add('assets');
+  if (path.startsWith('test/') || path.startsWith('tests/')) required.add('tests');
 
   if (
     path === 'package.json'
