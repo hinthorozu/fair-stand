@@ -1,15 +1,49 @@
 {
   "schemaVersion": 1,
-  "id": "remediate-f007-test-surface-guard",
+  "id": "remediate-f008-require-targeted-tests",
   "kind": "architecture",
-  "summary": "Close F-007 by making both test/ and legacy tests/ guarded change surfaces that require an explicit tests impact declaration.",
-  "owners": ["src/systemChangeContract.js", "test/systemChangeGate.test.js"],
-  "sourceOfTruth": ["SYSTEM_CHANGE_GATE.md", "audit/evidence/A02_CHANGE_GATE.md"],
+  "summary": "Close F-008 by requiring every change declaration to mark tests as affected and name at least one targeted regression test.",
+  "owners": [
+    "src/systemChangeContract.js",
+    "test/systemChangeGate.test.js"
+  ],
+  "sourceOfTruth": [
+    "SYSTEM_CHANGE_GATE.md",
+    "audit/evidence/A02_CHANGE_GATE.md"
+  ],
   "impact": {
-    "catalog":"not-applicable","behavior":"not-applicable","state":"not-applicable","placement":"not-applicable","renderer":"not-applicable","persistence":"not-applicable","bom":"not-applicable","ui":"not-applicable","composition":"not-applicable","assets":"not-applicable","storage":"not-applicable","importExport":"not-applicable","performance":"not-applicable","accessibility":"not-applicable","architecture":"affected","security":"not-applicable","tests":"affected"
+    "catalog": "not-applicable",
+    "behavior": "not-applicable",
+    "state": "not-applicable",
+    "placement": "not-applicable",
+    "renderer": "not-applicable",
+    "persistence": "not-applicable",
+    "bom": "not-applicable",
+    "ui": "not-applicable",
+    "composition": "not-applicable",
+    "assets": "not-applicable",
+    "storage": "not-applicable",
+    "importExport": "not-applicable",
+    "performance": "not-applicable",
+    "accessibility": "not-applicable",
+    "architecture": "affected",
+    "security": "not-applicable",
+    "tests": "affected"
   },
-  "tests": {"targeted":["test/systemChangeGate.test.js"],"fullSuite":true,"build":true},
-  "risk":{"level":"medium","notes":"This tightens CI governance for test-only changes; runtime behavior is unchanged."},
-  "migration":{"required":false,"notes":"No runtime or persisted-data migration."},
-  "rollback":"Revert the F-007 remediation PR to restore unguarded test-only diffs."
+  "tests": {
+    "targeted": [
+      "test/systemChangeGate.test.js"
+    ],
+    "fullSuite": true,
+    "build": true
+  },
+  "risk": {
+    "level": "medium",
+    "notes": "This tightens the acceptance contract for all future changes; runtime product behavior is unchanged."
+  },
+  "migration": {
+    "required": false,
+    "notes": "No runtime or persisted-data migration is introduced."
+  },
+  "rollback": "Revert the F-008 remediation PR to restore optional targeted-test and tests-impact declarations."
 }

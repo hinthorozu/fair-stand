@@ -22,18 +22,19 @@ Current phase: **REMEDIATION IN PROGRESS**
 - Current remediation section: `A02 — Universal change gate`
 - A00 closure evidence: `audit/remediation/A00_CLOSURE.md`
 - A01 closure evidence: `audit/remediation/A01_CLOSURE.md`
-- A02 closed findings: `F-005, F-006, F-007`
+- A02 closed findings: `F-005, F-006, F-007, F-008`
 - F-005 evidence: `audit/remediation/A02_F005_CLOSURE.md`
 - F-006 evidence: `audit/remediation/A02_F006_CLOSURE.md`
 - F-007 evidence: `audit/remediation/A02_F007_CLOSURE.md`
-- Next finding: `F-008 — targeted regression declaration can be empty; test impact not machine-required`
-- Remaining A02 findings: `F-008, F-009`
+- F-008 evidence: `audit/remediation/A02_F008_CLOSURE.md`
+- Next finding: `F-009 — local contract:verify can skip diff enforcement outside CI/env input`
+- Remaining A02 findings: `F-009`
 - Finding range: `F-001..F-046`
-- Closed findings: `7`
-- Open findings: `39`
+- Closed findings: `8`
+- Open findings: `38`
 - Open P0: `0`
 - Open P1: `17`
-- Open P2: `22`
+- Open P2: `21`
 - Open P3: `0`
 - Canonical finding ledger: `audit/FINDINGS.md`
 - Cross-domain matrix: `audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md`
@@ -61,7 +62,7 @@ Section revalidation: `audit/remediation/A01_CLOSURE.md`.
 - **F-005 CLOSED** — all 51 current source files have explicit ownership-derived mandatory impact-domain mappings; new unmapped source files fail regression.
 - **F-006 CLOSED** — canonical governance/developer-entrypoint Markdown is guarded and requires architecture impact.
 - **F-007 CLOSED** — both `test/**` and legacy `tests/**` are guarded and require `tests` impact.
-- F-008 OPEN — targeted tests/test impact policy is not yet machine-required for every declared change.
+- **F-008 CLOSED** — every change contract must mark tests affected and name at least one non-empty targeted regression path.
 - F-009 OPEN — local verifier can still skip diff enforcement.
 
-A02 remains **IN PROGRESS** and must not advance to A03 until F-008 and F-009 are closed/accepted and A02 revalidation is recorded.
+A02 remains **IN PROGRESS** and must not advance to A03 until F-009 is closed/accepted and A02 revalidation is recorded.

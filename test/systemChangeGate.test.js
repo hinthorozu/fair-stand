@@ -52,6 +52,33 @@ test('every impact domain requires an explicit decision', () => {
   assert.ok(errors.some((error) => error.includes('Missing impact decisions: security')));
 });
 
+test('every change must mark tests as affected', () => {
+  const contract = validContract({
+    impact: {
+      ...validContract().impact,
+      tests: 'not-applicable',
+    },
+  });
+
+  const errors = validateSystemChangeContract(contract);
+  assert.ok(errors.some((error) => error.includes('All changes must mark tests as affected')));
+});
+
+test('every change must name at least one non-empty targeted regression test', () => {
+  for (const targeted of [[], ['   ']]) {
+    const contract = validContract({
+      tests: {
+        targeted,
+        fullSuite: true,
+        build: true,
+      },
+    });
+
+    const errors = validateSystemChangeContract(contract);
+    assert.ok(errors.some((error) => error.includes('tests.targeted must contain at least one targeted regression test')));
+  }
+});
+
 test('UI controls cannot declare UI as not applicable', () => {
   const contract = validContract({
     kind: 'ui-control',

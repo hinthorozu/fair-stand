@@ -8,13 +8,13 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 ## Summary
 
 - Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **39**
-- Closed findings: **7**
+- Open findings: **38**
+- Closed findings: **8**
 - Open P0: **0**
 - Open P1: **17**
-- Open P2: **22**
+- Open P2: **21**
 - Open P3: **0**
-- Remediation progress: **A00 closed; A01 closed; A02 in progress (F-005/F-006/F-007 closed; F-008 next)**
+- Remediation progress: **A00 closed; A01 closed; A02 in progress (F-005/F-006/F-007/F-008 closed; F-009 next)**
 
 ## Findings
 
@@ -27,7 +27,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-005 | P1 | Change-gate path/domain wall incomplete; 20/51 `src/` files have zero mandatory mapping | **CLOSED** — `audit/remediation/A02_F005_CLOSURE.md` |
 | F-006 | P1 | Canonical rule/gate Markdown not protected by change gate | **CLOSED** — `audit/remediation/A02_F006_CLOSURE.md` |
 | F-007 | P2 | `test/` and `tests/` outside change-gate guarded-file governance | **CLOSED** — `audit/remediation/A02_F007_CLOSURE.md` |
-| F-008 | P2 | Targeted regression declaration can be empty; test impact not machine-required | OPEN |
+| F-008 | P2 | Targeted regression declaration can be empty; test impact not machine-required | **CLOSED** — `audit/remediation/A02_F008_CLOSURE.md` |
 | F-009 | P2 | Local `contract:verify` can skip diff enforcement outside CI/env input | OPEN |
 | F-010 | P1 | `main.js` contains parallel/hidden runtime module-state construction registry | OPEN |
 | F-011 | P1 | Module-specific placement/interaction policy fragmented outside behavior contract | OPEN |
