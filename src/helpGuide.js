@@ -3,8 +3,8 @@ const GUIDE_SECTIONS = [
     title: 'Hızlı Başlangıç',
     open: true,
     html: `
-      <p>Stand tipini seç, X ve Y ölçülerini gir ve <strong>Sahneyi Oluştur</strong> butonuna bas. Açılan küçük pencerede proje adını girdikten sonra sistem yeni ve bağımsız projeyi oluşturur. Sonra katalogdan modül ekleyebilir, sahnedeki modülleri taşıyabilir ve panel yüzeylerini özelleştirebilirsin.</p>
-      <div class="help-guide-callout"><strong>Temel akış:</strong> Sahne oluştur → Modül ekle → Yerleştir → Panel seç → Renk / görsel / cam / Lightbox / Mesh uygula → Kaydet veya Render Al.</div>
+      <p>Stand tipini seç, X ve Y ölçülerini gir ve <strong>Sahneyi Oluştur</strong> butonuna bas. Açılan küçük pencerede proje adını girdikten sonra sistem yeni ve bağımsız projeyi oluşturur ve ilk kaydı otomatik olarak yapar. Sonra katalogdan modül ekleyebilir, sahnedeki modülleri taşıyabilir ve panel yüzeylerini özelleştirebilirsin.</p>
+      <div class="help-guide-callout"><strong>Temel akış:</strong> Sahne oluştur + proje adını gir → Proje otomatik kaydedilir → Modül ekle → Yerleştir → Panel seç → Renk / görsel / cam / Lightbox / Mesh uygula → Render Al.</div>
     `,
   },
   {

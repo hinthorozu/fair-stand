@@ -1238,7 +1238,7 @@ createStageButton.addEventListener('click', async () => {
   projectNameInput.value = projectName;
   projectSelect.selectedIndex = -1;
   clearRegisteredAssets();
-  projectStatus.textContent = 'Yeni proje hazır: ' + projectName + ' · henüz kaydedilmedi.';
+  projectStatus.textContent = 'Yeni proje hazırlanıyor: ' + projectName + '…';
 
   currentModules = [];
   moduleContextMenu.close();
@@ -1286,6 +1286,16 @@ createStageButton.addEventListener('click', async () => {
   renderStageResult(
     `${label} · ${setup.xCm} × ${setup.yCm} cm aktif alan · ${setup.sceneWidthM} × ${setup.sceneDepthM} m toplam sahne`,
   );
+
+  try {
+    await persistActiveProject({ quiet: true });
+    enableAutosaveFromCurrentState();
+    projectStatus.textContent = 'Oluşturuldu ve kaydedildi: ' + projectName;
+  } catch (error) {
+    console.warn('Yeni proje ilk kayıt sırasında kaydedilemedi:', error);
+    disableAutosave();
+    projectStatus.textContent = 'Proje oluşturuldu ancak kaydedilemedi.';
+  }
 });
 
 floorTypeSelect.addEventListener('change', () => {
