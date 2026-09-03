@@ -2,7 +2,7 @@
 
 > Bu belge `SYSTEM_DEVELOPMENT_CONTRACT.md` üzerindeki üst seviye geliştirme kapısıdır.
 >
-> Amaç mevcut sistemi bu dosyada denetlemek değildir. Amaç, bundan sonra insan veya AI tarafından yapılan her anlamlı değişikliğin **önce etkisini beyan etmesini**, sonra uygulanmasını ve CI tarafından doğrulanmasını sağlamaktır.
+> Amaç mevcut sistemi bu dosyada denetlemek değildir. Amaç, bundan sonra insan veya AI tarafından yapılan her anlamlı değişikliğin **önce etkisini beyan etmesini**, sonra uygulanmasını ve gate/test/build zinciri tarafından doğrulanmasını sağlamaktır.
 
 ---
 
@@ -28,7 +28,7 @@ Aşağıdakilerin tamamı change contract kapsamına girer:
 - build / CI / script / dependency değişikliği,
 - bugfix.
 
-**Kural:** Guarded sistem dosyaları değişiyorsa `.github/change-contract.json` aynı değişiklik setinde güncellenmeden CI kabul etmez.
+**Kural:** Guarded sistem dosyaları değişiyorsa `.github/change-contract.json` aynı değişiklik setinde güncellenmeden değişiklik kabul edilmez.
 
 ---
 
@@ -42,14 +42,16 @@ Aşağıdakilerin tamamı change contract kapsamına girer:
 4. Bu `SYSTEM_CHANGE_GATE.md` dosyasını oku.
 5. Değişikliği sınıflandır.
 6. `.github/change-contract.json` içinde bütün impact domain'leri tek tek `affected` veya `not-applicable` olarak işaretle.
-7. Canonical owner/source-of-truth dosyalarını belirt.
-8. Risk, migration ve rollback kararlarını belirt.
-9. Targeted testleri belirt.
-10. Ondan sonra implementasyona başla.
-11. Targeted regression testlerini çalıştır.
-12. Full `npm test` çalıştır.
-13. `npm run build` çalıştır.
-14. Change gate + test + build yeşil olmadan tamamlandı deme.
+7. `tests` domain'ini her değişiklikte `affected` olarak işaretle.
+8. Canonical owner/source-of-truth dosyalarını belirt.
+9. Risk, migration ve rollback kararlarını belirt.
+10. En az bir non-empty targeted regression test path'i belirt.
+11. Ondan sonra implementasyona başla.
+12. `npm run contract:verify` çalıştır.
+13. Targeted regression testlerini çalıştır.
+14. Full `npm test` çalıştır.
+15. `npm run build` çalıştır.
+16. Change gate + test + build yeşil olmadan tamamlandı deme.
 
 ---
 
@@ -75,9 +77,9 @@ Her change contract aşağıdaki alanların **tamamı** için karar taşır:
 | `accessibility` | Keyboard/ARIA/focus/label davranışı etkileniyor mu? |
 | `architecture` | Source-of-truth, ownership, dependency veya build mimarisi değişiyor mu? |
 | `security` | Yetki, veri sınırı, dış kaynak, input validation veya güvenlik etkisi var mı? |
-| `tests` | Test sözleşmesi/regresyon kapsamı değişiyor mu? |
+| `tests` | Bu değişikliği koruyan regression/test sözleşmesi nedir? |
 
-Bir alan "unutuldu" diye boş bırakılamaz. Uygulanmıyorsa açıkça `not-applicable` yazılır.
+Bir alan unutulduğu için boş bırakılamaz. Uygulanmıyorsa açıkça `not-applicable` yazılır; **tek istisna `tests` domain'idir ve her change contract için `affected` olmak zorundadır.**
 
 ---
 
@@ -105,6 +107,7 @@ Tür bazı domain kararlarını zorunlu kılar. Örneğin:
 - `persistence-change` → `persistence: affected`
 - `bom-change` → `bom: affected`
 - `architecture` / `tooling` → `architecture: affected`
+- bütün change türleri → `tests: affected`
 
 ---
 
@@ -112,24 +115,19 @@ Tür bazı domain kararlarını zorunlu kılar. Örneğin:
 
 Sadece geliştiricinin beyanına güvenilmez.
 
-`scripts/verify-change-contract.mjs` değişen dosyalardan bazı zorunlu domain'leri ayrıca türetir.
+`scripts/verify-change-contract.mjs`, değişen dosyalardan zorunlu impact domain'lerini ayrıca türetir. Canonical mapping `src/systemChangeContract.js` içindedir.
 
-Örnekler:
+Kurallar:
 
-- `src/catalog.js` → `catalog`
-- `src/moduleBehavior.js`, `moduleMove.js`, `modulePlacement.js`, `wallReflow.js`, `cornerPlacement.js` → `behavior + placement`
-- `src/designState.js` → `state + persistence`
-- `src/scene3d.js`, `viewCube.js` → `renderer`
-- `src/projectStore.js`, `assetStore.js`, `imageAssetReferences.js` → `persistence + storage`
-- `src/moduleRecipes.js`, `productionParts.js`, `rawBomDebug.js` → `bom`
-- `src/autoDepot.js`, `automaticWall.js`, `featureContracts.js` → `composition`
-- `public/**` → `assets`
-- `index.html` ve belirli UI/controller dosyaları → `ui`
-- `package*.json`, `scripts/**`, `.github/workflows/**`, contract altyapısı → `architecture`
+- mevcut **51 `src/` dosyasının tamamı** explicit ownership-derived domain mapping taşır; yeni bir `src/` dosyası mapping eklenmeden regression suite geçmez,
+- multi-responsibility source dosyaları bilinen bütün kritik domain'lerini zorunlu kılar,
+- `public/**` → `assets`,
+- `test/**` ve legacy `tests/**` → `tests`,
+- `README.md`, `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `SYSTEM_DEVELOPMENT_CONTRACT.md`, `SYSTEM_CHANGE_GATE.md`, `MODULE_BEHAVIOR_STANDARD.md`, `SYSTEM_AUDIT_CHECKLIST.md` → `architecture`,
+- `package.json`, `package-lock.json`, `scripts/**`, `.github/workflows/**`, `vite.config*` → `architecture`,
+- `index.html` → `ui`.
 
 Dosya yolu bir domain'i zorunlu kılıyorsa change contract bunu `not-applicable` diyerek geçemez.
-
-Bu path haritası mevcut sistem denetlendikçe genişletilecektir.
 
 ---
 
@@ -157,32 +155,52 @@ Bu gate mevcut contract'ların yerine geçmez.
 - Module-level detay → `src/moduleContracts.js`
 - Feature/composition detay → `src/featureContracts.js`
 - Universal değişiklik etkisi → `.github/change-contract.json`
-- Universal schema/validator → `src/systemChangeContract.js`
+- Universal schema/validator/path map → `src/systemChangeContract.js`
 
 Örneğin yeni çöp kovası eklenirken:
 
 1. Universal change contract açılır.
 2. `module` olarak sınıflandırılır.
 3. catalog/behavior/state/renderer/persistence/BOM/UI vb. etkiler beyan edilir.
-4. Sonra `moduleContracts.js` içindeki gerçek modül contract'ı oluşturulur.
-5. Sonra implementation + tests yapılır.
+4. `tests: affected` ve targeted regression path'i yazılır.
+5. Sonra `moduleContracts.js` içindeki gerçek modül contract'ı oluşturulur.
+6. Sonra implementation + targeted regression + full test/build yapılır.
 
 ---
 
-# 8. CI davranışı
+# 8. CI ve local verifier davranışı
 
-PR veya ROG push'unda guarded dosya değişmişse:
+## CI
 
-1. `.github/change-contract.json` değişmiş mi?
+PR veya ROG push'unda verifier değişen dosyaları GitHub event SHA'larından çözer ve şunları denetler:
+
+1. Guarded dosya değişmişse `.github/change-contract.json` aynı diff içinde değişmiş mi?
 2. Contract schema eksiksiz mi?
 3. Bütün impact domain'leri explicit mi?
-4. Change kind ile zorunlu domain'ler uyumlu mu?
-5. Path-aware zorunlu domain'ler `affected` mı?
-6. Full-suite ve build policy açıkça zorunlu mu?
-
-Kontrollerden biri başarısızsa gate kırılır.
+4. `tests: affected` mı?
+5. En az bir targeted regression path'i var mı?
+6. Change kind ile zorunlu domain'ler uyumlu mu?
+7. Path-aware zorunlu domain'ler `affected` mı?
+8. Full-suite ve build policy `true` mu?
 
 Ardından normal `npm test` ve `npm run build` çalışır.
+
+## Local
+
+CI environment değişkenleri yoksa `npm run contract:verify` artık diff enforcement'ı **atlamaz**.
+
+Verifier:
+
+- feature branch'te `ROG` veya `origin/ROG` ile merge-base üzerinden committed farkı bulur,
+- mevcut `ROG` branch'inde mümkünse `origin/ROG` ile local commit farkını karşılaştırır,
+- staged değişiklikleri ekler,
+- unstaged değişiklikleri ekler,
+- untracked dosyaları ekler,
+- bütün dosya listesini tekilleştirip aynı guarded/path-domain kurallarından geçirir.
+
+Gerekirse base açıkça `CHANGE_GATE_BASE=<git-ref> npm run contract:verify` ile verilebilir.
+
+Local base çözülemiyorsa verifier sessizce schema-only success vermez; **fail-closed** olur ve `CHANGE_GATE_BASE` veya `ROG` ref'i ister.
 
 ---
 
@@ -195,15 +213,13 @@ Bu dosya:
 - mevcut bütün state alanlarının doğrulandığı anlamına gelmez,
 - mevcut bütün renderer/placement/BOM alanlarının temiz olduğu iddiası değildir.
 
-Bu turda sadece **denetim yapacağımız çerçeve** kurulmaktadır.
-
-Sonraki ayrı çalışma, bu framework kullanılarak sistemi domain domain tarayacaktır.
+Bu belge yeni değişikliklerin kabul kapısını tanımlar. Mevcut sistemin audit/remediation durumu `SYSTEM_AUDIT_CHECKLIST.md` ve `audit/` kayıtlarında tutulur.
 
 ---
 
-# 10. Sonraki audit statüleri
+# 10. Audit statüleri
 
-İleride alanlar tek tek denetlenirken aşağıdaki statüler kullanılabilir:
+Alanlar denetlenirken kullanılan statüler:
 
 - `AUDITED_OK` — contract ve implementation uyumlu.
 - `GAP` — eksik veya drift var.
