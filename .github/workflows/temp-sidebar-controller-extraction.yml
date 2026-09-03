@@ -1,0 +1,58 @@
+name: Temporary sidebar controller extraction
+
+on:
+  push:
+    branches:
+      - refactor/extract-sidebar-controller
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/extract-sidebar-controller
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Patch main sidebar wiring
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/main.js')
+          s = p.read_text()
+
+          anchor = "import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';\n"
+          replacement = anchor + "import { createSidebarController } from './sidebarController.js';\n"
+          if s.count(anchor) != 1:
+              raise SystemExit(f'import anchor mismatch: {s.count(anchor)}')
+          s = s.replace(anchor, replacement, 1)
+
+          old = """function setSidebarCollapsed(collapsed) {\n  appElement?.classList.toggle('sidebar-collapsed', collapsed);\n  if (sidebarToggleButton) {\n    sidebarToggleButton.textContent = collapsed ? '›' : '‹';\n    sidebarToggleButton.setAttribute('aria-expanded', String(!collapsed));\n    sidebarToggleButton.setAttribute('aria-label', collapsed ? 'Menüyü aç' : 'Menüyü kapat');\n    sidebarToggleButton.title = collapsed ? 'Menüyü aç' : 'Menüyü kapat';\n  }\n  window.dispatchEvent(new Event('resize'));\n}\n\nsidebarToggleButton?.addEventListener('click', () => {\n  setSidebarCollapsed(!appElement?.classList.contains('sidebar-collapsed'));\n});\n"""
+          new = """createSidebarController({\n  appElement,\n  toggleButton: sidebarToggleButton,\n}).bind();\n"""
+          if s.count(old) != 1:
+              raise SystemExit(f'sidebar block mismatch: {s.count(old)}')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/main.js
+          git commit -m "Delegate sidebar collapse behavior from main"
+          git push origin HEAD:refactor/extract-sidebar-controller
