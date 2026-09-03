@@ -85,22 +85,22 @@ Kullanıcı düzeltme isterse ayrı, küçük PR ile uygulanır. Fix sonrası il
 
 > Yeni başlayan insan/AI **önce bu bloğu okur**. Audit'e başka yerden başlanmaz.
 
-- **Audit status:** `NOT_STARTED`
+- **Audit status:** `IN_PROGRESS`
 - **Audit baseline branch:** `ROG`
-- **Audit baseline SHA:** `c4dd02b1e6cafdebd5ba02fc3f98a9357a1822f4`
-- **Current section:** `A00 — Audit bootstrap`
-- **Current item:** `A00.01`
-- **Last completed item:** `NONE`
-- **Next item:** `A00.01`
-- **Last audited SHA:** `NONE`
-- **Last audit PR:** `NONE`
-- **Last audit CI:** `NONE`
+- **Audit baseline SHA:** `6a702b000ffb3f9977f6e0853e23e840285eb60e`
+- **Current section:** `A01 — Canonical docs + source-of-truth`
+- **Current item:** `A01.01`
+- **Last completed item:** `A00.07`
+- **Next item:** `A01.01`
+- **Last audited SHA:** `6a702b000ffb3f9977f6e0853e23e840285eb60e`
+- **Last audit PR:** `#31`
+- **Last audit CI:** `baseline ROG CI #74 / run 33786201978 / success`
 - **Open P0 findings:** `0`
 - **Open P1 findings:** `0`
 - **Open P2 findings:** `0`
 - **Open P3 findings:** `0`
 - **Decision required count:** `0`
-- **Last update note:** `Checklist created; audit has not started.`
+- **Last update note:** `A00 bootstrap completed against ROG 6a702b0; evidence recorded in audit/evidence/A00_BASELINE.md. Next strict item is A01.01.`
 
 ### Resume kuralı
 
@@ -122,7 +122,7 @@ güncellenir ve commit edilir.
 
 | ID | Severity | Domain | Summary | Status | Evidence | Fix PR |
 |---|---|---|---|---|---|---|
-| — | — | — | Henüz audit başlamadı | — | — | — |
+| — | — | — | No findings in A00 bootstrap | — | `audit/evidence/A00_BASELINE.md` | — |
 
 ---
 
@@ -160,15 +160,15 @@ Audit aşağıdaki sırada ilerler. Bir bölüm bitmeden sonraki bölüm `IN_PRO
 
 # A00 — Audit bootstrap / baseline
 
-- [ ] **A00.01** Freeze current ROG SHA and confirm audit baseline. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A00.02** Confirm working tree audit starts from current ROG, not stale branch. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A00.03** Record current CI state for baseline SHA. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A00.04** Snapshot repo root, `src/`, `test/`, `tests/`, `scripts/`, `.github/`, `public/`. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A00.05** Snapshot package scripts/dependencies and build tool versions. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A00.06** Confirm no audit conclusion is inherited from stale historical docs. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A00.07** Create/update findings index structure before first finding. | status: `NOT_AUDITED` | evidence: —
+- [x] **A00.01** Freeze current ROG SHA and confirm audit baseline. | status: `AUDITED_OK` | evidence: `audit/evidence/A00_BASELINE.md` → ROG `6a702b000ffb3f9977f6e0853e23e840285eb60e`
+- [x] **A00.02** Confirm working tree audit starts from current ROG, not stale branch. | status: `AUDITED_OK` | evidence: `audit/full-system-a00` created from current ROG; `audit/evidence/A00_BASELINE.md`
+- [x] **A00.03** Record current CI state for baseline SHA. | status: `AUDITED_OK` | evidence: CI run #74 / id `33786201978` / head `6a702b0` / success
+- [x] **A00.04** Snapshot repo root, `src/`, `test/`, `tests/`, `scripts/`, `.github/`, `public/`. | status: `AUDITED_OK` | evidence: recursive tree `678de4daa0250dfc9c8f7fc0a80252e0c02fe4a7`; `audit/evidence/A00_BASELINE.md`
+- [x] **A00.05** Snapshot package scripts/dependencies and build tool versions. | status: `AUDITED_OK` | evidence: `package.json` blob `e01cb63831103e59bc0dd868a7c4d485a3ed59c2`; lock blob `f151efd6222152f326718e9fd23bec2b2b2ef768`; Node 22 CI
+- [x] **A00.06** Confirm no audit conclusion is inherited from stale historical docs. | status: `AUDITED_OK` | evidence: A00 evidence explicitly isolates historical conclusions; all later conclusions require fresh SHA verification
+- [x] **A00.07** Create/update findings index structure before first finding. | status: `AUDITED_OK` | evidence: canonical Findings Index + finding protocol present; A00 created no finding
 
-**Section status:** `NOT_AUDITED`
+**Section status:** `AUDITED_OK`
 
 ---
 
@@ -713,7 +713,16 @@ Notes: ...
 
 ## Session log
 
-- Henüz audit oturumu başlamadı.
+```text
+AUDIT SESSION 2026-09-03
+Baseline/checked SHA: 6a702b000ffb3f9977f6e0853e23e840285eb60e
+Completed: A00.01 – A00.07
+Findings created: none
+Audit PR: #31
+CI evidence: baseline ROG CI #74 / run 33786201978 / success
+Next: A01.01
+Notes: Bootstrap only. No runtime/domain conclusion inherited from historical docs.
+```
 
 ---
 
