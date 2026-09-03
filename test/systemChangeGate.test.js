@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 
 import {
+  GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS,
   SOURCE_FILE_REQUIRED_DOMAINS,
   SYSTEM_IMPACT_DOMAINS,
   isGuardedChangeFile,
@@ -79,13 +80,35 @@ test('architecture changes must declare architecture impact', () => {
   assert.ok(errors.some((error) => error.includes('architecture changes must mark architecture as affected')));
 });
 
-test('guarded paths cover runtime, UI, assets and delivery infrastructure', () => {
+test('guarded paths cover runtime, UI, assets, governance docs and delivery infrastructure', () => {
   assert.equal(isGuardedChangeFile('src/main.js'), true);
   assert.equal(isGuardedChangeFile('index.html'), true);
   assert.equal(isGuardedChangeFile('public/models/example.glb'), true);
   assert.equal(isGuardedChangeFile('scripts/install-server.sh'), true);
   assert.equal(isGuardedChangeFile('.github/workflows/ci.yml'), true);
-  assert.equal(isGuardedChangeFile('README.md'), false);
+  assert.equal(isGuardedChangeFile('README.md'), true);
+  assert.equal(isGuardedChangeFile('SYSTEM_CHANGE_GATE.md'), true);
+  assert.equal(isGuardedChangeFile('PROJECT_RULES.md'), true);
+  assert.equal(isGuardedChangeFile('ROADMAP.md'), false);
+});
+
+test('canonical governance documents are guarded architecture surfaces', () => {
+  const expected = [
+    'README.md',
+    'PROJECT_RULES.md',
+    'ARCHITECTURE_RULES.md',
+    'SYSTEM_DEVELOPMENT_CONTRACT.md',
+    'SYSTEM_CHANGE_GATE.md',
+    'MODULE_BEHAVIOR_STANDARD.md',
+    'SYSTEM_AUDIT_CHECKLIST.md',
+  ].sort();
+
+  assert.deepEqual(Object.keys(GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS).sort(), expected);
+
+  for (const path of expected) {
+    assert.equal(isGuardedChangeFile(path), true, `${path} must be guarded`);
+    assert.deepEqual(requiredDomainsForFile(path), ['architecture'], `${path} must require architecture impact`);
+  }
 });
 
 test('every current src file has an explicit non-empty impact-domain ownership mapping', () => {

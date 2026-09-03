@@ -122,6 +122,18 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/wallReflow.js': frozenDomains('behavior', 'placement'),
 });
 
+// Human/AI governance surfaces are themselves part of the architecture contract.
+// They must not be weakened or drift without the same explicit change declaration.
+export const GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS = Object.freeze({
+  'README.md': frozenDomains('architecture'),
+  'PROJECT_RULES.md': frozenDomains('architecture'),
+  'ARCHITECTURE_RULES.md': frozenDomains('architecture'),
+  'SYSTEM_DEVELOPMENT_CONTRACT.md': frozenDomains('architecture'),
+  'SYSTEM_CHANGE_GATE.md': frozenDomains('architecture'),
+  'MODULE_BEHAVIOR_STANDARD.md': frozenDomains('architecture'),
+  'SYSTEM_AUDIT_CHECKLIST.md': frozenDomains('architecture'),
+});
+
 function isNonEmptyString(value) {
   return typeof value === 'string' && value.trim().length > 0;
 }
@@ -219,6 +231,7 @@ export function isGuardedChangeFile(path) {
   return path === 'index.html'
     || path === 'package.json'
     || path === 'package-lock.json'
+    || Object.hasOwn(GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS, path)
     || path.startsWith('src/')
     || path.startsWith('public/')
     || path.startsWith('scripts/')
@@ -227,7 +240,10 @@ export function isGuardedChangeFile(path) {
 }
 
 export function requiredDomainsForFile(path) {
-  const required = new Set(SOURCE_FILE_REQUIRED_DOMAINS[path] ?? []);
+  const required = new Set([
+    ...(SOURCE_FILE_REQUIRED_DOMAINS[path] ?? []),
+    ...(GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS[path] ?? []),
+  ]);
 
   if (path === 'index.html') required.add('ui');
   if (path.startsWith('public/')) required.add('assets');
