@@ -1,0 +1,100 @@
+name: Temporary project dropdown switch patch
+
+on:
+  push:
+    branches:
+      - refactor/project-dropdown-switch
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/project-dropdown-switch
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Patch dropdown project switching with confirmation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/main.js')
+          text = path.read_text()
+
+          def replace_once(old, new, label):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly 1 match, got {count}')
+              text = text.replace(old, new, 1)
+
+          import_anchor = "import { createProjectLoadingController, setButtonBusy } from './projectUi.js';\n"
+          replace_once(
+              import_anchor,
+              import_anchor + "import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';\n",
+              'project switch import anchor',
+          )
+
+          old_open = """openProjectButton.addEventListener('click', async () => {\n  const projectId = projectSelect.value;\n  if (!projectId) { projectStatus.textContent = 'Açılacak kayıtlı proje yok.'; return; }\n\n  projectLoading.show('Proje yükleniyor…', 'Görseller ve sahne hazırlanıyor.');\n  setButtonBusy(openProjectButton, true, 'Açılıyor');\n  projectStatus.textContent = 'Proje yükleniyor…';\n  try {\n    const project = await loadProject(projectId);\n    if (!project) { projectStatus.textContent = 'Proje bulunamadı.'; return; }\n    await restoreProject(project);\n  } catch (error) {\n    console.warn('Proje açılamadı:', error);\n    projectStatus.textContent = 'Proje açılamadı.';\n  } finally {\n    projectLoading.hide();\n    setButtonBusy(openProjectButton, false);\n  }\n});\n"""
+
+          new_open = """async function openStoredProject(projectId) {\n  if (!projectId) {\n    projectStatus.textContent = 'Açılacak kayıtlı proje yok.';\n    return false;\n  }\n\n  projectLoading.show('Proje yükleniyor…', 'Görseller ve sahne hazırlanıyor.');\n  setButtonBusy(openProjectButton, true, 'Açılıyor');\n  projectStatus.textContent = 'Proje yükleniyor…';\n  try {\n    const project = await loadProject(projectId);\n    if (!project) {\n      projectStatus.textContent = 'Proje bulunamadı.';\n      return false;\n    }\n    await restoreProject(project);\n    return true;\n  } catch (error) {\n    console.warn('Proje açılamadı:', error);\n    projectStatus.textContent = 'Proje açılamadı.';\n    return false;\n  } finally {\n    projectLoading.hide();\n    setButtonBusy(openProjectButton, false);\n  }\n}\n\nfunction restoreProjectSelectToActiveProject() {\n  const hasActiveOption = [...projectSelect.options]\n    .some((option) => option.value === activeProjectId);\n  if (hasActiveOption) projectSelect.value = activeProjectId;\n  else projectSelect.selectedIndex = -1;\n}\n\nprojectSelect.addEventListener('change', async () => {\n  const projectId = projectSelect.value;\n  if (!shouldConfirmProjectSwitch(activeProjectId, projectId)) return;\n\n  const currentProjectName = projectNameInput.value.trim() || 'Adsız Proje';\n  const targetProjectName = projectSelect.selectedOptions?.[0]?.textContent?.trim() || 'Adsız Proje';\n  const confirmed = window.confirm(\n    formatProjectSwitchMessage(currentProjectName, targetProjectName),\n  );\n  if (!confirmed) {\n    restoreProjectSelectToActiveProject();\n    projectStatus.textContent = 'Proje değişikliği iptal edildi.';\n    return;\n  }\n\n  const opened = await openStoredProject(projectId);\n  if (!opened) restoreProjectSelectToActiveProject();\n});\n\nopenProjectButton.addEventListener('click', async () => {\n  await openStoredProject(projectSelect.value);\n});\n"""
+
+          replace_once(old_open, new_open, 'open project listener')
+
+          if text.count("projectSelect.addEventListener('change'") != 1:
+              raise SystemExit('expected exactly one project select change listener')
+          if text.count('formatProjectSwitchMessage(') != 1:
+              raise SystemExit('expected exactly one project switch confirmation message use')
+          if text.count('openStoredProject(') != 3:
+              raise SystemExit(f'expected openStoredProject definition + two calls, got {text.count("openStoredProject(")}')
+
+          path.write_text(text)
+          PY
+
+          cat > test/projectDropdownSwitchIntegration.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+
+          const mainSource = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
+
+          test('project dropdown change asks for confirmation and opens the selected project', () => {
+            assert.match(mainSource, /projectSelect\.addEventListener\('change', async \(\) => \{/);
+            assert.match(mainSource, /shouldConfirmProjectSwitch\(activeProjectId, projectId\)/);
+            assert.match(mainSource, /formatProjectSwitchMessage\(currentProjectName, targetProjectName\)/);
+            assert.match(mainSource, /const opened = await openStoredProject\(projectId\)/);
+          });
+
+          test('cancelled or failed dropdown switch restores the active project selection', () => {
+            assert.match(mainSource, /function restoreProjectSelectToActiveProject\(\)/);
+            assert.match(mainSource, /if \(!confirmed\) \{[\s\S]*restoreProjectSelectToActiveProject\(\)/);
+            assert.match(mainSource, /if \(!opened\) restoreProjectSelectToActiveProject\(\)/);
+          });
+
+          test('manual open button reuses the same stored-project loading path', () => {
+            assert.match(mainSource, /openProjectButton\.addEventListener\('click', async \(\) => \{\n  await openStoredProject\(projectSelect\.value\);\n\}\);/);
+          });
+          EOF
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit patch
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/main.js test/projectDropdownSwitchIntegration.test.js
+          git commit -m "Open selected project from project dropdown"
+          git push origin HEAD:refactor/project-dropdown-switch
