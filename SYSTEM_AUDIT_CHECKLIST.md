@@ -88,19 +88,19 @@ Kullanıcı düzeltme isterse ayrı, küçük PR ile uygulanır. Fix sonrası il
 - **Audit status:** `IN_PROGRESS`
 - **Audit baseline branch:** `ROG`
 - **Audit baseline SHA:** `6a702b000ffb3f9977f6e0853e23e840285eb60e`
-- **Current section:** `A02 — Universal change gate`
-- **Current item:** `A02.01`
-- **Last completed item:** `A01.13`
-- **Next item:** `A02.01`
-- **Last audited SHA:** `6b9a4400f10d8a1957ffd52dbc6a8da3f0141af5`
-- **Last audit PR:** `#32`
-- **Last audit CI:** `ROG CI #77 / run 33789639960 / success`
+- **Current section:** `A03 — Repository architecture / ownership`
+- **Current item:** `A03.01`
+- **Last completed item:** `A02.19`
+- **Next item:** `A03.01`
+- **Last audited SHA:** `dda455183e5c713cb55a24232436cfd39c68ce7b`
+- **Last audit PR:** `#33`
+- **Last audit CI:** `ROG CI #80 / run 33790676809 / success`
 - **Open P0 findings:** `0`
-- **Open P1 findings:** `1`
-- **Open P2 findings:** `3`
+- **Open P1 findings:** `3`
+- **Open P2 findings:** `6`
 - **Open P3 findings:** `0`
 - **Decision required count:** `0`
-- **Last update note:** `A01 completed against ROG 6b9a440. Four documentation/source-of-truth findings recorded in audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md. Next strict item is A02.01.`
+- **Last update note:** `A02 universal change-gate audit completed against ROG dda4551. Five new gate/governance gaps F-005..F-009 recorded. Next strict item is A03.01.`
 
 ### Resume kuralı
 
@@ -126,6 +126,11 @@ güncellenir ve commit edilir.
 | F-002 | P2 | docs/history | Fresh review / cleanup progress docs are not clearly historical and contain superseded current-state statements | OPEN | `audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md` | — |
 | F-003 | P2 | docs/production | Roadmap docs duplicate canonical production dimensions and recipe facts from runtime code | OPEN | `audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md` | — |
 | F-004 | P2 | docs/process | README / development entrypoint predates universal change gate and documents an incomplete workflow | OPEN | `audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md` | — |
+| F-005 | P1 | architecture/change-gate | 20/51 current `src/` files are guarded but have zero path-required impact domains; other mappings are partial | OPEN | `audit/evidence/A02_CHANGE_GATE.md` | — |
+| F-006 | P1 | architecture/governance | Canonical rule/gate Markdown, including `SYSTEM_CHANGE_GATE.md`, is not guarded by the change gate | OPEN | `audit/evidence/A02_CHANGE_GATE.md` | — |
+| F-007 | P2 | tests/governance | `test/` and `tests/` are unguarded; gate regression tests can change without declaration | OPEN | `audit/evidence/A02_CHANGE_GATE.md` | — |
+| F-008 | P2 | tests/change-contract | Targeted regression tests can be empty and `impact.tests` is not machine-required | OPEN | `audit/evidence/A02_CHANGE_GATE.md` | — |
+| F-009 | P2 | tooling/workflow | Local `contract:verify` skips diff enforcement outside CI unless explicit environment input is supplied | OPEN | `audit/evidence/A02_CHANGE_GATE.md` | — |
 
 ---
 
@@ -197,25 +202,27 @@ Audit aşağıdaki sırada ilerler. Bir bölüm bitmeden sonraki bölüm `IN_PRO
 
 # A02 — Universal change gate
 
-- [ ] **A02.01** All 17 impact domains are defined once and validator requires all decisions. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.02** All supported change kinds have correct mandatory domains. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.03** Guarded-file detection covers all product/runtime entry points. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.04** Path-aware rules cover catalog files. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.05** Path-aware rules cover behavior/placement files. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.06** Path-aware rules cover state/persistence/storage files. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.07** Path-aware rules cover renderer files. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.08** Path-aware rules cover UI/static + dynamic controller files. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.09** Path-aware rules cover BOM/production files. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.10** Path-aware rules cover composition/automation files. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.11** Path-aware rules cover public assets. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.12** Path-aware rules cover scripts/dependencies/workflows/build config. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.13** Gate detects change-contract omission in PR diffs. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.14** Gate rejects false `not-applicable` when path requires a domain. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.15** Risk/migration/rollback/test declarations are validated. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.16** Gate itself cannot be modified without architecture impact declaration. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A02.17** Identify guarded source files currently missing any path-domain mapping and record gaps. | status: `NOT_AUDITED` | evidence: —
+- [x] **A02.01** All 17 impact domains are defined once and validator requires all decisions. | status: `AUDITED_OK` | evidence: `systemChangeContract.js`; explicit missing-domain regression in `test/systemChangeGate.test.js`; see A02 evidence
+- [x] **A02.02** All supported change kinds have correct mandatory domains. | status: `AUDITED_OK` | evidence: kind constraints validated; targeted-test policy gap tracked separately as F-008
+- [x] **A02.03** Guarded-file detection covers all product/runtime entry points. | status: `AUDITED_OK` | evidence: index/package/lock/all src/public/scripts/workflows/vite config guarded; governance/test exclusions are F-006/F-007
+- [x] **A02.04** Path-aware rules cover catalog files. | status: `GAP` | evidence: `catalog.js` mapped, but catalog-defining `tvConfig.js` has zero mapping; `F-005`
+- [x] **A02.05** Path-aware rules cover behavior/placement files. | status: `GAP` | evidence: core files mapped, but `groundLayout`, `standCapacity`, `standSetup`, `wall` and related sources are unmapped; `F-005`
+- [x] **A02.06** Path-aware rules cover state/persistence/storage files. | status: `GAP` | evidence: canonical stores mapped, but autosave/project-switch/orchestration coverage is incomplete; `F-005`
+- [x] **A02.07** Path-aware rules cover renderer files. | status: `GAP` | evidence: scene3d/viewCube mapped; image layout/fit and TV config helpers unmapped; `F-005`
+- [x] **A02.08** Path-aware rules cover UI/static + dynamic controller files. | status: `GAP` | evidence: several controllers mapped but CSS/color inputs/keyboard shortcuts/main are not UI-forced; `F-005`
+- [x] **A02.09** Path-aware rules cover BOM/production files. | status: `AUDITED_OK` | evidence: current canonical `moduleRecipes`, `productionParts`, `rawBomDebug` paths require BOM
+- [x] **A02.10** Path-aware rules cover composition/automation files. | status: `AUDITED_OK` | evidence: `autoDepot`, `automaticWall`, `featureContracts` require composition
+- [x] **A02.11** Path-aware rules cover public assets. | status: `AUDITED_OK` | evidence: every `public/**` path requires assets
+- [x] **A02.12** Path-aware rules cover scripts/dependencies/workflows/build config. | status: `AUDITED_OK` | evidence: package/lock/scripts/workflows/vite configuration require architecture
+- [x] **A02.13** Gate detects change-contract omission in PR diffs. | status: `AUDITED_OK` | evidence: verifier diffs PR base→HEAD / push before→after and exits non-zero when guarded files changed without contract update
+- [x] **A02.14** Gate rejects false `not-applicable` when path requires a domain. | status: `AUDITED_OK` | evidence: verifier requires every collected path-domain to equal `affected`; limitation for unmapped paths is F-005
+- [x] **A02.15** Risk/migration/rollback/test declarations are validated. | status: `GAP` | evidence: risk/migration/rollback/fullSuite/build enforced, but targeted array may be empty and tests impact need not be affected; `F-008`
+- [x] **A02.16** Gate itself cannot be modified without architecture impact declaration. | status: `GAP` | evidence: machine code/scripts/workflow guarded, but `SYSTEM_CHANGE_GATE.md` and gate tests are not; `F-006`, `F-007`
+- [x] **A02.17** Identify guarded source files currently missing any path-domain mapping and record gaps. | status: `GAP` | evidence: exactly 20/51 current `src/` files have zero required domains; full list in A02 evidence; `F-005`
+- [x] **A02.18** Local verifier enforces guarded-file diff, not only schema. | status: `GAP` | evidence: audit-discovered item; verifier explicitly skips diff enforcement outside CI without env input; `F-009`
+- [x] **A02.19** Test-only changes participate in change-contract governance and targeted regression policy. | status: `GAP` | evidence: audit-discovered item; test directories unguarded and targeted tests may be empty; `F-007`, `F-008`
 
-**Section status:** `NOT_AUDITED`
+**Section status:** `GAP` — audit complete; findings F-005..F-009 added
 
 ---
 
@@ -737,6 +744,17 @@ Audit PR: #32
 CI evidence before section: ROG CI #77 / run 33789639960 / success
 Next: A02.01
 Notes: Documentation/source-of-truth audit completed. No findings fixed during audit.
+```
+
+```text
+AUDIT SESSION 2026-09-03
+Baseline/checked SHA: dda455183e5c713cb55a24232436cfd39c68ce7b
+Completed: A02.01 – A02.19
+Findings created: F-005, F-006, F-007, F-008, F-009
+Audit PR: #33
+CI evidence before section: ROG CI #80 / run 33790676809 / success
+Next: A03.01
+Notes: Universal change-gate audit completed. Gate is active but not yet a closed all-surfaces wall; no findings fixed during audit.
 ```
 
 ---
