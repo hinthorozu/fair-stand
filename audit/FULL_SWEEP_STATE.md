@@ -18,23 +18,20 @@ Current phase: **REMEDIATION IN PROGRESS**
 - Audit status: **COMPLETE — A00–A24 / 25 of 25 inspected**
 - Remediation starting ROG SHA: `392e839804e5b0379186af8b950117154b20c195`
 - Remediation status: **IN PROGRESS**
-- Last fully closed remediation section: `A01 — CLOSED / AUDITED_OK`
-- Current remediation section: `A02 — Universal change gate`
+- Last fully closed remediation section: `A02 — CLOSED / AUDITED_OK pending post-merge ROG verification`
+- Current remediation section: `A02 — final verification`
 - A00 closure evidence: `audit/remediation/A00_CLOSURE.md`
 - A01 closure evidence: `audit/remediation/A01_CLOSURE.md`
-- A02 closed findings: `F-005, F-006, F-007, F-008`
-- F-005 evidence: `audit/remediation/A02_F005_CLOSURE.md`
-- F-006 evidence: `audit/remediation/A02_F006_CLOSURE.md`
-- F-007 evidence: `audit/remediation/A02_F007_CLOSURE.md`
-- F-008 evidence: `audit/remediation/A02_F008_CLOSURE.md`
-- Next finding: `F-009 — local contract:verify can skip diff enforcement outside CI/env input`
-- Remaining A02 findings: `F-009`
+- A02 closure evidence: `audit/remediation/A02_CLOSURE.md`
+- A02 closed findings: `F-005, F-006, F-007, F-008, F-009`
+- Next remediation section after final verification: `A03 — Repository architecture / ownership`
+- Next finding set: `F-010, F-011, F-012`
 - Finding range: `F-001..F-046`
-- Closed findings: `8`
-- Open findings: `38`
+- Closed findings: `9`
+- Open findings: `37`
 - Open P0: `0`
 - Open P1: `17`
-- Open P2: `21`
+- Open P2: `20`
 - Open P3: `0`
 - Canonical finding ledger: `audit/FINDINGS.md`
 - Cross-domain matrix: `audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md`
@@ -57,12 +54,18 @@ Current phase: **REMEDIATION IN PROGRESS**
 
 Section revalidation: `audit/remediation/A01_CLOSURE.md`.
 
-## Current section — A02 Universal change gate
+### A02 — Universal change gate
 
-- **F-005 CLOSED** — all 51 current source files have explicit ownership-derived mandatory impact-domain mappings; new unmapped source files fail regression.
-- **F-006 CLOSED** — canonical governance/developer-entrypoint Markdown is guarded and requires architecture impact.
-- **F-007 CLOSED** — both `test/**` and legacy `tests/**` are guarded and require `tests` impact.
-- **F-008 CLOSED** — every change contract must mark tests affected and name at least one non-empty targeted regression path.
-- F-009 OPEN — local verifier can still skip diff enforcement.
+**CLOSED / AUDITED_OK pending final post-merge ROG CI.**
 
-A02 remains **IN PROGRESS** and must not advance to A03 until F-009 is closed/accepted and A02 revalidation is recorded.
+- F-005 — all 51 current source files explicitly mapped to ownership-derived impact domains.
+- F-006 — canonical governance/developer-entrypoint Markdown guarded with architecture impact.
+- F-007 — `test/**` and `tests/**` guarded with tests impact.
+- F-008 — all changes require `tests: affected` and a non-empty targeted regression list.
+- F-009 — local verifier enforces committed + staged + unstaged + untracked git diff and fails closed when the base cannot be resolved.
+
+Section revalidation: `audit/remediation/A02_CLOSURE.md`.
+
+## Next
+
+Do not start A03 until PR #44 final branch CI and its merge SHA ROG push CI are green. Then begin **F-010** from fresh ROG.
