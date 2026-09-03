@@ -1,0 +1,245 @@
+name: Temporary project naming extraction
+
+on:
+  push:
+    branches:
+      - refactor/extract-project-naming
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/extract-project-naming
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Extract project naming module
+        shell: bash
+        run: |
+          cat > src/projectNaming.js <<'EOF'
+          export function normalizeProjectName(name) {
+            return String(name || '').trim() || 'Adsız Proje';
+          }
+
+          export function buildAutomaticProjectNameSuffix(standType, xCm, yCm) {
+            const typePrefix = {
+              'l-left': 'L_Sol',
+              'l-right': 'L_Sag',
+              'u-stand': 'U',
+              island: 'Ada',
+              'back-wall': 'Sirt',
+            }[standType] || 'Stand';
+            return `${typePrefix}_${Math.round(Number(xCm) || 0)}_${Math.round(Number(yCm) || 0)}`;
+          }
+
+          export function getEditableProjectName(fullName, suffix = '') {
+            const name = String(fullName || '').trim();
+            if (!suffix) return name;
+            for (const separator of ['-', '_']) {
+              const tail = separator + suffix;
+              if (name.endsWith(tail)) return name.slice(0, -tail.length);
+            }
+            return name;
+          }
+
+          export function createProjectNamingController({
+            documentRef = globalThis.document,
+            projectNameInput,
+            projectNameDisplay,
+          } = {}) {
+            function setProjectName(name) {
+              const normalized = normalizeProjectName(name);
+              if (projectNameInput) projectNameInput.value = normalized;
+              if (projectNameDisplay) projectNameDisplay.textContent = normalized;
+              return normalized;
+            }
+
+            function requestProjectName({ defaultName = '', mode = 'create', suffix = '' } = {}) {
+              if (!documentRef?.createElement || !documentRef?.body) {
+                throw new Error('Project naming dialog requires a DOM document.');
+              }
+
+              return new Promise((resolve) => {
+                const overlay = documentRef.createElement('div');
+                overlay.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.48);display:grid;place-items:center;padding:20px';
+                const form = documentRef.createElement('form');
+                form.style.cssText = 'width:min(380px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
+                const title = documentRef.createElement('strong');
+                const isRename = mode === 'rename';
+                title.textContent = isRename ? 'Proje Adını Değiştir' : 'Yeni Proje';
+                title.style.fontSize = '16px';
+                const description = documentRef.createElement('span');
+                description.textContent = isRename
+                  ? 'Mevcut proje için yeni adı gir.'
+                  : 'Stand adını gir; proje adı stand tipi ve ölçülerle otomatik oluşturulacak.';
+                description.style.color = '#64748b';
+                const label = documentRef.createElement('label');
+                label.style.cssText = 'display:grid;gap:5px';
+                label.textContent = isRename ? 'Proje adı' : 'Stand adı';
+                const input = documentRef.createElement('input');
+                input.type = 'text';
+                input.name = 'projectName';
+                input.maxLength = 120;
+                input.autocomplete = 'off';
+                input.required = true;
+                input.value = defaultName && defaultName !== 'Adsız Proje' ? defaultName : '';
+                input.placeholder = isRename ? 'Örn. İstanbul Fuar Standı' : 'Örn. Ferromet';
+                const preview = documentRef.createElement('span');
+                if (suffix) {
+                  preview.style.cssText = 'font-weight:700;color:#334155;word-break:break-word';
+                  const updatePreview = () => {
+                    const standName = input.value.trim().replace(/\s+/g, '_');
+                    preview.textContent = 'Proje adı: ' + (standName || '[Proje_adi]') + '-' + suffix;
+                  };
+                  input.addEventListener('input', updatePreview);
+                  updatePreview();
+                  label.appendChild(preview);
+                }
+                input.style.cssText = 'height:40px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px';
+                label.appendChild(input);
+                const actions = documentRef.createElement('div');
+                actions.style.cssText = 'display:flex;justify-content:flex-end;gap:8px';
+                const cancelButton = documentRef.createElement('button');
+                cancelButton.type = 'button';
+                cancelButton.textContent = 'İptal';
+                const submitButton = documentRef.createElement('button');
+                submitButton.type = 'submit';
+                submitButton.className = 'primary';
+                submitButton.textContent = isRename ? 'Kaydet' : 'Projeyi Oluştur';
+                actions.append(cancelButton, submitButton);
+                form.append(title, description, label, actions);
+                overlay.appendChild(form);
+                documentRef.body.appendChild(overlay);
+                const finish = (value) => { overlay.remove(); resolve(value); };
+                cancelButton.addEventListener('click', () => finish(null));
+                overlay.addEventListener('pointerdown', (event) => { if (event.target === overlay) finish(null); });
+                form.addEventListener('submit', (event) => {
+                  event.preventDefault();
+                  const name = input.value.trim();
+                  if (!name) { input.focus(); return; }
+                  const normalizedName = name.replace(/\s+/g, '_');
+                  const finalName = suffix ? normalizedName + '-' + suffix : normalizedName;
+                  finish(finalName);
+                });
+                input.focus();
+                input.select();
+              });
+            }
+
+            return Object.freeze({ setProjectName, requestProjectName });
+          }
+          EOF
+
+          cat > test/projectNaming.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+
+          import {
+            buildAutomaticProjectNameSuffix,
+            createProjectNamingController,
+            getEditableProjectName,
+            normalizeProjectName,
+          } from '../src/projectNaming.js';
+
+          test('normalizeProjectName trims names and preserves the unnamed fallback', () => {
+            assert.equal(normalizeProjectName('  Ferromet  '), 'Ferromet');
+            assert.equal(normalizeProjectName(''), 'Adsız Proje');
+            assert.equal(normalizeProjectName(null), 'Adsız Proje');
+          });
+
+          test('automatic project suffix keeps the existing stand type naming contract', () => {
+            assert.equal(buildAutomaticProjectNameSuffix('l-left', 400, 300), 'L_Sol_400_300');
+            assert.equal(buildAutomaticProjectNameSuffix('l-right', 400.4, 299.6), 'L_Sag_400_300');
+            assert.equal(buildAutomaticProjectNameSuffix('u-stand', 500, 400), 'U_500_400');
+            assert.equal(buildAutomaticProjectNameSuffix('island', 600, 600), 'Ada_600_600');
+            assert.equal(buildAutomaticProjectNameSuffix('back-wall', 300, 200), 'Sirt_300_200');
+            assert.equal(buildAutomaticProjectNameSuffix('unknown', 250, 150), 'Stand_250_150');
+          });
+
+          test('editable project name removes only the known automatic suffix', () => {
+            const suffix = 'L_Sol_400_300';
+            assert.equal(getEditableProjectName('Ferromet-L_Sol_400_300', suffix), 'Ferromet');
+            assert.equal(getEditableProjectName('Ferromet_L_Sol_400_300', suffix), 'Ferromet');
+            assert.equal(getEditableProjectName('Ferromet', suffix), 'Ferromet');
+            assert.equal(getEditableProjectName(' Ferromet '), 'Ferromet');
+          });
+
+          test('project naming controller syncs input and display without owning application state', () => {
+            const projectNameInput = { value: '' };
+            const projectNameDisplay = { textContent: '' };
+            const controller = createProjectNamingController({
+              documentRef: null,
+              projectNameInput,
+              projectNameDisplay,
+            });
+
+            assert.equal(controller.setProjectName('  Demo  '), 'Demo');
+            assert.equal(projectNameInput.value, 'Demo');
+            assert.equal(projectNameDisplay.textContent, 'Demo');
+          });
+          EOF
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('src/main.js')
+          text = path.read_text()
+
+          anchor = "import { getModuleDefaultRotationDeg } from './moduleBehavior.js';\n"
+          addition = anchor + "import {\n  buildAutomaticProjectNameSuffix,\n  createProjectNamingController,\n  getEditableProjectName,\n} from './projectNaming.js';\n"
+          if text.count(anchor) != 1:
+              raise SystemExit('moduleBehavior import anchor mismatch')
+          text = text.replace(anchor, addition, 1)
+
+          old_setter = """function setProjectName(name) {\n  const normalized = String(name || '').trim() || 'Adsız Proje';\n  projectNameInput.value = normalized;\n  if (projectNameDisplay) projectNameDisplay.textContent = normalized;\n  return normalized;\n}\n\n"""
+          if text.count(old_setter) != 1:
+              raise SystemExit('setProjectName block mismatch')
+          text = text.replace(old_setter, '', 1)
+
+          dom_anchor = "const projectLoadingDetail = document.querySelector('#project-loading-detail');\n\n"
+          controller = dom_anchor + "const { setProjectName, requestProjectName } = createProjectNamingController({\n  documentRef: document,\n  projectNameInput,\n  projectNameDisplay,\n});\n\n"
+          if text.count(dom_anchor) != 1:
+              raise SystemExit('project DOM anchor mismatch')
+          text = text.replace(dom_anchor, controller, 1)
+
+          pattern = re.compile(
+              r"function buildAutomaticProjectNameSuffix\(standType, xCm, yCm\) \{.*?\n\}\ncreateStageButton\.addEventListener",
+              re.S,
+          )
+          match = pattern.search(text)
+          if not match:
+              raise SystemExit('project naming block mismatch')
+          text = text[:match.start()] + 'createStageButton.addEventListener' + text[match.end():]
+
+          if 'function buildAutomaticProjectNameSuffix' in text:
+              raise SystemExit('suffix helper still present in main')
+          if 'function requestProjectName' in text:
+              raise SystemExit('dialog helper still present in main')
+          if 'function getEditableProjectName' in text:
+              raise SystemExit('editable helper still present in main')
+
+          path.write_text(text)
+          PY
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit extraction
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/main.js src/projectNaming.js test/projectNaming.test.js
+          git commit -m "Extract project naming controller"
+          git push origin HEAD:refactor/extract-project-naming
