@@ -49,6 +49,79 @@ const KIND_REQUIRED_DOMAINS = Object.freeze({
   tooling: Object.freeze(['architecture']),
 });
 
+function frozenDomains(...domains) {
+  return Object.freeze(domains);
+}
+
+// Explicit ownership-derived map for every current source file. A new src file
+// intentionally has no fallback: the regression suite must classify it before CI can pass.
+export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
+  'src/assetStore.js': frozenDomains('persistence', 'storage'),
+  'src/autoDepot.js': frozenDomains('composition', 'placement'),
+  'src/automaticWall.js': frozenDomains('composition', 'placement'),
+  'src/autosaveController.js': frozenDomains('persistence'),
+  'src/catalog.js': frozenDomains('catalog'),
+  'src/colorEditor.css': frozenDomains('ui'),
+  'src/colorEditorController.js': frozenDomains('ui'),
+  'src/colorEditorInputs.js': frozenDomains('ui'),
+  'src/colorUtils.js': frozenDomains('ui'),
+  'src/cornerPlacement.js': frozenDomains('behavior', 'placement'),
+  'src/designState.js': frozenDomains('state', 'persistence'),
+  'src/featureContracts.js': frozenDomains('architecture', 'composition'),
+  'src/groundLayout.js': frozenDomains('renderer', 'placement'),
+  'src/helpGuide.css': frozenDomains('ui'),
+  'src/helpGuide.js': frozenDomains('ui', 'accessibility'),
+  'src/horizontalImageLayout.js': frozenDomains('renderer', 'state'),
+  'src/imageActions.css': frozenDomains('ui'),
+  'src/imageAssetReferences.js': frozenDomains('persistence', 'storage'),
+  'src/imageFit.js': frozenDomains('renderer'),
+  'src/main.js': frozenDomains(
+    'architecture',
+    'catalog',
+    'behavior',
+    'state',
+    'placement',
+    'renderer',
+    'persistence',
+    'ui',
+    'composition',
+    'assets',
+    'storage',
+    'importExport',
+  ),
+  'src/moduleBehavior.js': frozenDomains('behavior'),
+  'src/moduleContextMenu.js': frozenDomains('ui', 'catalog', 'behavior'),
+  'src/moduleContracts.js': frozenDomains('architecture', 'catalog', 'behavior', 'bom'),
+  'src/moduleDragSidebar.js': frozenDomains('ui', 'catalog'),
+  'src/moduleMove.js': frozenDomains('behavior', 'placement'),
+  'src/modulePlacement.js': frozenDomains('behavior', 'placement'),
+  'src/moduleRecipes.js': frozenDomains('bom'),
+  'src/placementFeedback.js': frozenDomains('ui', 'placement'),
+  'src/productionParts.js': frozenDomains('bom'),
+  'src/projectNaming.js': frozenDomains('ui'),
+  'src/projectStore.js': frozenDomains('persistence', 'storage'),
+  'src/projectSwitch.js': frozenDomains('ui', 'persistence'),
+  'src/projectUi.js': frozenDomains('ui'),
+  'src/rawBomDebug.js': frozenDomains('bom', 'ui'),
+  'src/rectImageLayout.js': frozenDomains('renderer', 'state'),
+  'src/rectSelection.js': frozenDomains('ui'),
+  'src/scene3d.js': frozenDomains('renderer', 'state', 'placement', 'behavior', 'performance'),
+  'src/selectionFeedback.js': frozenDomains('ui'),
+  'src/sidebarController.js': frozenDomains('ui'),
+  'src/stageFeedback.js': frozenDomains('ui'),
+  'src/standCapacity.js': frozenDomains('placement', 'composition'),
+  'src/standSetup.js': frozenDomains('placement', 'composition', 'renderer'),
+  'src/style.css': frozenDomains('ui'),
+  'src/systemChangeContract.js': frozenDomains('architecture'),
+  'src/theme.js': frozenDomains('ui', 'renderer'),
+  'src/tvConfig.js': frozenDomains('catalog', 'state', 'renderer'),
+  'src/uiFeedback.js': frozenDomains('ui', 'accessibility'),
+  'src/viewCube.js': frozenDomains('renderer', 'ui'),
+  'src/viewKeyboardShortcuts.js': frozenDomains('behavior', 'ui', 'accessibility'),
+  'src/wall.js': frozenDomains('composition', 'placement'),
+  'src/wallReflow.js': frozenDomains('behavior', 'placement'),
+});
+
 function isNonEmptyString(value) {
   return typeof value === 'string' && value.trim().length > 0;
 }
@@ -154,38 +227,9 @@ export function isGuardedChangeFile(path) {
 }
 
 export function requiredDomainsForFile(path) {
-  const required = new Set();
+  const required = new Set(SOURCE_FILE_REQUIRED_DOMAINS[path] ?? []);
 
   if (path === 'index.html') required.add('ui');
-  if (path === 'src/catalog.js') required.add('catalog');
-
-  if ([
-    'src/moduleBehavior.js',
-    'src/moduleMove.js',
-    'src/modulePlacement.js',
-    'src/wallReflow.js',
-    'src/cornerPlacement.js',
-  ].includes(path)) {
-    required.add('behavior');
-    required.add('placement');
-  }
-
-  if (path === 'src/designState.js') {
-    required.add('state');
-    required.add('persistence');
-  }
-
-  if (path === 'src/scene3d.js' || path === 'src/viewCube.js') required.add('renderer');
-
-  if (['src/projectStore.js', 'src/assetStore.js', 'src/imageAssetReferences.js'].includes(path)) {
-    required.add('persistence');
-    required.add('storage');
-  }
-
-  if (['src/moduleRecipes.js', 'src/productionParts.js', 'src/rawBomDebug.js'].includes(path)) required.add('bom');
-
-  if (['src/autoDepot.js', 'src/automaticWall.js', 'src/featureContracts.js'].includes(path)) required.add('composition');
-
   if (path.startsWith('public/')) required.add('assets');
 
   if (
@@ -194,21 +238,8 @@ export function requiredDomainsForFile(path) {
     || path.startsWith('scripts/')
     || path.startsWith('.github/workflows/')
     || path.startsWith('vite.config')
-    || path === 'src/systemChangeContract.js'
-    || path === 'src/moduleContracts.js'
   ) {
     required.add('architecture');
-  }
-
-  if (
-    path === 'src/projectUi.js'
-    || path === 'src/moduleContextMenu.js'
-    || path === 'src/moduleDragSidebar.js'
-    || path === 'src/helpGuide.js'
-    || path === 'src/sidebarController.js'
-    || /(?:Ui|UI|Controller|Feedback)\.js$/.test(path)
-  ) {
-    required.add('ui');
   }
 
   return [...required];
