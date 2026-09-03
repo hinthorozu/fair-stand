@@ -1,0 +1,300 @@
+  duration_ms: 0.416847
+  type: 'test'
+  ...
+# Subtest: TV uses the public JPEG asset and no GLB or inline data module
+ok 372 - TV uses the public JPEG asset and no GLB or inline data module
+  ---
+  duration_ms: 0.509096
+  type: 'test'
+  ...
+# Subtest: TV is a non-colliding wall overlay accessory
+ok 373 - TV is a non-colliding wall overlay accessory
+  ---
+  duration_ms: 0.228454
+  type: 'test'
+  ...
+# Subtest: TV wall overlay drag snaps horizontal and height movement to 10 cm
+ok 374 - TV wall overlay drag snaps horizontal and height movement to 10 cm
+  ---
+  duration_ms: 1.488329
+  type: 'test'
+  ...
+# Subtest: TV catalog preview uses a dedicated TV silhouette instead of panel strips
+ok 375 - TV catalog preview uses a dedicated TV silhouette instead of panel strips
+  ---
+  duration_ms: 0.302244
+  type: 'test'
+  ...
+# Subtest: inferStatusTone preserves explicit error class priority
+ok 376 - inferStatusTone preserves explicit error class priority
+  ---
+  duration_ms: 0.914395
+  type: 'test'
+  ...
+# Subtest: inferStatusTone preserves Turkish status keyword mapping
+ok 377 - inferStatusTone preserves Turkish status keyword mapping
+  ---
+  duration_ms: 0.470367
+  type: 'test'
+  ...
+# Subtest: syncStatusTone replaces previous status tone class
+ok 378 - syncStatusTone replaces previous status tone class
+  ---
+  duration_ms: 0.218819
+  type: 'test'
+  ...
+# Subtest: syncSelectionFeedback only marks non-default non-empty feedback
+ok 379 - syncSelectionFeedback only marks non-default non-empty feedback
+  ---
+  duration_ms: 0.211398
+  type: 'test'
+  ...
+# Subtest: main delegates selection and status feedback observers to uiFeedback helpers
+ok 380 - main delegates selection and status feedback observers to uiFeedback helpers
+  ---
+  duration_ms: 0.920144
+  type: 'test'
+  ...
+# Subtest: scene delegates keyboard mapping and reuses existing camera/viewcube APIs
+ok 381 - scene delegates keyboard mapping and reuses existing camera/viewcube APIs
+  ---
+  duration_ms: 1.058823
+  type: 'test'
+  ...
+# Subtest: help guide documents view shortcuts and new clockwise rotation binding
+ok 382 - help guide documents view shortcuts and new clockwise rotation binding
+  ---
+  duration_ms: 0.312811
+  type: 'test'
+  ...
+# Subtest: drag rotation keeps an independent cursor so invalid previews do not stop later Shift+R turns
+ok 383 - drag rotation keeps an independent cursor so invalid previews do not stop later Shift+R turns
+  ---
+  duration_ms: 1.108788
+  type: 'test'
+  ...
+# Subtest: view shortcuts map P/O/L/R/T/F/H without modifiers
+ok 384 - view shortcuts map P/O/L/R/T/F/H without modifiers
+  ---
+  duration_ms: 1.456661
+  type: 'test'
+  ...
+# Subtest: Shift+R is the only module rotation shortcut and rotates clockwise
+ok 385 - Shift+R is the only module rotation shortcut and rotates clockwise
+  ---
+  duration_ms: 0.261683
+  type: 'test'
+  ...
+# Subtest: unrelated modified view keys do not trigger camera shortcuts
+ok 386 - unrelated modified view keys do not trigger camera shortcuts
+  ---
+  duration_ms: 0.138198
+  type: 'test'
+  ...
+# Subtest: editable target guard covers form and contenteditable fields
+ok 387 - editable target guard covers form and contenteditable fields
+  ---
+  duration_ms: 0.124737
+  type: 'test'
+  ...
+# Subtest: 350 cm duvarı 200 + 150 olarak çözer
+ok 388 - 350 cm duvarı 200 + 150 olarak çözer
+  ---
+  duration_ms: 1.92778
+  type: 'test'
+  ...
+# Subtest: 600 cm duvarı üç adet 200 cm modülle çözer
+ok 389 - 600 cm duvarı üç adet 200 cm modülle çözer
+  ---
+  duration_ms: 0.161273
+  type: 'test'
+  ...
+# Subtest: 50 cm katı olmayan ölçüyü reddeder
+ok 390 - 50 cm katı olmayan ölçüyü reddeder
+  ---
+  duration_ms: 0.100742
+  type: 'test'
+  ...
+# Subtest: 50 cm altındaki duvarı reddeder
+ok 391 - 50 cm altındaki duvarı reddeder
+  ---
+  duration_ms: 0.090556
+  type: 'test'
+  ...
+# Subtest: wall overlay drag prefers its current wall while that wall intersection remains valid
+ok 392 - wall overlay drag prefers its current wall while that wall intersection remains valid
+  ---
+  duration_ms: 0.97743
+  type: 'test'
+  ...
+# Subtest: wall overlay move uses the dragged module current wall instead of the module under the pointer
+ok 393 - wall overlay move uses the dragged module current wall instead of the module under the pointer
+  ---
+  duration_ms: 0.284478
+  type: 'test'
+  ...
+# Subtest: top fixture keeps preferred wall when both walls are within the existing 30 cm snap zone
+ok 394 - top fixture keeps preferred wall when both walls are within the existing 30 cm snap zone
+  ---
+  duration_ms: 0.204047
+  type: 'test'
+  ...
+# Subtest: U stand 400 x 400 exposes a 1200 cm continuous wall chain
+ok 395 - U stand 400 x 400 exposes a 1200 cm continuous wall chain
+  ---
+  duration_ms: 1.539996
+  type: 'test'
+  ...
+# Subtest: L stand 500 x 400 exposes a 900 cm chain from the physical left side
+ok 396 - L stand 500 x 400 exposes a 900 cm chain from the physical left side
+  ---
+  duration_ms: 0.300783
+  type: 'test'
+  ...
+# Subtest: automatic U wall starts at left, crosses back and ends on right
+ok 397 - automatic U wall starts at left, crosses back and ends on right
+  ---
+  duration_ms: 0.47915
+  type: 'test'
+  ...
+# Subtest: U stand pushes an occupied corner forward like one continuous straight wall
+ok 398 - U stand pushes an occupied corner forward like one continuous straight wall
+  ---
+  duration_ms: 1.475559
+  type: 'test'
+  ...
+# Subtest: reflow crosses both U stand corners and keeps pushing modules
+ok 399 - reflow crosses both U stand corners and keeps pushing modules
+  ---
+  duration_ms: 0.256756
+  type: 'test'
+  ...
+# Subtest: left insertion at the path boundary falls back to shifting target and following modules right
+ok 400 - left insertion at the path boundary falls back to shifting target and following modules right
+  ---
+  duration_ms: 0.252159
+  type: 'test'
+  ...
+# Subtest: right insertion keeps an existing gap instead of pulling a distant module into the corner
+ok 401 - right insertion keeps an existing gap instead of pulling a distant module into the corner
+  ---
+  duration_ms: 0.293662
+  type: 'test'
+  ...
+# Subtest: left insertion uses the free gap before target and does not move target or distant next module
+ok 402 - left insertion uses the free gap before target and does not move target or distant next module
+  ---
+  duration_ms: 0.255845
+  type: 'test'
+  ...
+# Subtest: left insertion succeeds in a 50 cm gap even when the chain to the right is completely full
+ok 403 - left insertion succeeds in a 50 cm gap even when the chain to the right is completely full
+  ---
+  duration_ms: 0.360913
+  type: 'test'
+  ...
+# Subtest: right wall visual-left add uses the gap before target even when the right end is full
+ok 404 - right wall visual-left add uses the gap before target even when the right end is full
+  ---
+  duration_ms: 0.366862
+  type: 'test'
+  ...
+# Subtest: right insertion uses an available gap after target without moving a distant next module
+ok 405 - right insertion uses an available gap after target without moving a distant next module
+  ---
+  duration_ms: 0.216946
+  type: 'test'
+  ...
+# Subtest: rejects only when the continuous active wall chain has no remaining capacity
+ok 406 - rejects only when the continuous active wall chain has no remaining capacity
+  ---
+  duration_ms: 0.307002
+  type: 'test'
+  ...
+# Subtest: top fixtures do not consume continuous wall capacity during duplication
+ok 407 - top fixtures do not consume continuous wall capacity during duplication
+  ---
+  duration_ms: 0.208734
+  type: 'test'
+  ...
+# Subtest: wall overlays do not consume continuous wall capacity
+ok 408 - wall overlays do not consume continuous wall capacity
+  ---
+  duration_ms: 0.130316
+  type: 'test'
+  ...
+# Subtest: L-left depot uses existing back and left walls
+ok 409 - L-left depot uses existing back and left walls
+  ---
+  duration_ms: 1.103289
+  type: 'test'
+  ...
+# Subtest: back wall depot is centered
+ok 410 - back wall depot is centered
+  ---
+  duration_ms: 0.21268
+  type: 'test'
+  ...
+# Subtest: island depot is centered and contains four sides
+ok 411 - island depot is centered and contains four sides
+  ---
+  duration_ms: 0.340192
+  type: 'test'
+  ...
+# Subtest: straight 100/150/200 counters use 45 degree rotation steps
+ok 412 - straight 100/150/200 counters use 45 degree rotation steps
+  ---
+  duration_ms: 0.766123
+  type: 'test'
+  ...
+# Subtest: Bar Taburesi standard keeps 10 cm snap, 45 degree turns and 270 default
+ok 413 - Bar Taburesi standard keeps 10 cm snap, 45 degree turns and 270 default
+  ---
+  duration_ms: 0.163146
+  type: 'test'
+  ...
+# Subtest: 45 degree rotation preserves module center
+ok 414 - 45 degree rotation preserves module center
+  ---
+  duration_ms: 0.291128
+  type: 'test'
+  ...
+# Subtest: rotation normalization supports eighth turns
+ok 415 - rotation normalization supports eighth turns
+  ---
+  duration_ms: 0.095164
+  type: 'test'
+  ...
+# Subtest: rotated footprint participates in stand boundary validation
+ok 416 - rotated footprint participates in stand boundary validation
+  ---
+  duration_ms: 0.297477
+  type: 'test'
+  ...
+# Subtest: Bar Taburesi 45 degree catalog preview placement stays valid
+ok 417 - Bar Taburesi 45 degree catalog preview placement stays valid
+  ---
+  duration_ms: 0.408725
+  type: 'test'
+  ...
+# Subtest: straight Banko 45 degree catalog preview placement stays valid
+ok 418 - straight Banko 45 degree catalog preview placement stays valid
+  ---
+  duration_ms: 0.181923
+  type: 'test'
+  ...
+# Subtest: ghost behavior is one central silhouette contract for every module
+ok 419 - ghost behavior is one central silhouette contract for every module
+  ---
+  duration_ms: 0.542746
+  type: 'test'
+  ...
+1..419
+# tests 419
+# suites 0
+# pass 418
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1987.372839
