@@ -1,51 +1,15 @@
 {
   "schemaVersion": 1,
-  "id": "remediate-f006-governance-doc-guard",
+  "id": "remediate-f007-test-surface-guard",
   "kind": "architecture",
-  "summary": "Close F-006 by making the canonical developer entrypoint and governance/change-gate Markdown files guarded architecture surfaces that require a change declaration.",
-  "owners": [
-    "src/systemChangeContract.js",
-    "test/systemChangeGate.test.js"
-  ],
-  "sourceOfTruth": [
-    "README.md",
-    "SYSTEM_CHANGE_GATE.md",
-    "SYSTEM_DEVELOPMENT_CONTRACT.md",
-    "SYSTEM_AUDIT_CHECKLIST.md"
-  ],
+  "summary": "Close F-007 by making both test/ and legacy tests/ guarded change surfaces that require an explicit tests impact declaration.",
+  "owners": ["src/systemChangeContract.js", "test/systemChangeGate.test.js"],
+  "sourceOfTruth": ["SYSTEM_CHANGE_GATE.md", "audit/evidence/A02_CHANGE_GATE.md"],
   "impact": {
-    "catalog": "not-applicable",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
-    "placement": "not-applicable",
-    "renderer": "not-applicable",
-    "persistence": "not-applicable",
-    "bom": "not-applicable",
-    "ui": "not-applicable",
-    "composition": "not-applicable",
-    "assets": "not-applicable",
-    "storage": "not-applicable",
-    "importExport": "not-applicable",
-    "performance": "not-applicable",
-    "accessibility": "not-applicable",
-    "architecture": "affected",
-    "security": "not-applicable",
-    "tests": "affected"
+    "catalog":"not-applicable","behavior":"not-applicable","state":"not-applicable","placement":"not-applicable","renderer":"not-applicable","persistence":"not-applicable","bom":"not-applicable","ui":"not-applicable","composition":"not-applicable","assets":"not-applicable","storage":"not-applicable","importExport":"not-applicable","performance":"not-applicable","accessibility":"not-applicable","architecture":"affected","security":"not-applicable","tests":"affected"
   },
-  "tests": {
-    "targeted": [
-      "test/systemChangeGate.test.js"
-    ],
-    "fullSuite": true,
-    "build": true
-  },
-  "risk": {
-    "level": "medium",
-    "notes": "This tightens change-gate governance for canonical documentation and may cause future docs-only governance PRs to require an explicit declaration. Runtime behavior is unchanged."
-  },
-  "migration": {
-    "required": false,
-    "notes": "No runtime or stored-project migration is introduced."
-  },
-  "rollback": "Revert the F-006 remediation PR to make governance Markdown unguarded again."
+  "tests": {"targeted":["test/systemChangeGate.test.js"],"fullSuite":true,"build":true},
+  "risk":{"level":"medium","notes":"This tightens CI governance for test-only changes; runtime behavior is unchanged."},
+  "migration":{"required":false,"notes":"No runtime or persisted-data migration."},
+  "rollback":"Revert the F-007 remediation PR to restore unguarded test-only diffs."
 }
