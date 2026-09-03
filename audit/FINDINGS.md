@@ -2,7 +2,7 @@
 
 Audit baseline: `ROG e7647326668ab25c96f3a3139f0d855c03176325`
 Audit branch: `audit/full-system-a00-a24-sweep`
-Mode: **AUDIT COMPLETE / REMEDIATION NOT STARTED**
+Mode: **AUDIT COMPLETE / REMEDIATION IN PROGRESS**
 
 This is the canonical finding index for the A00–A24 full-system audit. Detailed evidence lives in `audit/evidence/Axx_*.md`. No finding in this file is considered fixed until a remediation change has targeted regression evidence, full tests, build and required CI/retest evidence.
 
@@ -13,7 +13,8 @@ This is the canonical finding index for the A00–A24 full-system audit. Detaile
 - P1: **20**
 - P2: **26**
 - P3: **0**
-- Runtime/product/documentation fixes performed during audit: **NONE**
+- Remediation progress: **A00 CLOSED / NO FIX REQUIRED**
+- Findings closed so far: **0** — A00 originated no finding
 
 ## Findings
 
@@ -83,4 +84,4 @@ Final audit classification: `audit/evidence/A24_FINAL_CLOSURE.md`.
 
 ## Closure rule
 
-The detection/audit phase is complete. Remediation has **not** started. Do not change any finding status from `OPEN` until the corresponding fix has been implemented and independently retested under the audit closure rules.
+The detection/audit phase is complete. Remediation is **in progress**. A00 is closed with no fix required. Do not change any finding status from `OPEN` until the corresponding fix has been implemented and independently retested under the audit closure rules.
