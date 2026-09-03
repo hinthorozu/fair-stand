@@ -80,16 +80,25 @@ test('architecture changes must declare architecture impact', () => {
   assert.ok(errors.some((error) => error.includes('architecture changes must mark architecture as affected')));
 });
 
-test('guarded paths cover runtime, UI, assets, governance docs and delivery infrastructure', () => {
+test('guarded paths cover runtime, UI, assets, tests, governance docs and delivery infrastructure', () => {
   assert.equal(isGuardedChangeFile('src/main.js'), true);
   assert.equal(isGuardedChangeFile('index.html'), true);
   assert.equal(isGuardedChangeFile('public/models/example.glb'), true);
   assert.equal(isGuardedChangeFile('scripts/install-server.sh'), true);
+  assert.equal(isGuardedChangeFile('test/systemChangeGate.test.js'), true);
+  assert.equal(isGuardedChangeFile('tests/legacy-regression.test.js'), true);
   assert.equal(isGuardedChangeFile('.github/workflows/ci.yml'), true);
   assert.equal(isGuardedChangeFile('README.md'), true);
   assert.equal(isGuardedChangeFile('SYSTEM_CHANGE_GATE.md'), true);
   assert.equal(isGuardedChangeFile('PROJECT_RULES.md'), true);
   assert.equal(isGuardedChangeFile('ROADMAP.md'), false);
+});
+
+test('test surfaces require an explicit tests impact declaration', () => {
+  for (const path of ['test/systemChangeGate.test.js', 'tests/legacy-regression.test.js']) {
+    assert.equal(isGuardedChangeFile(path), true, `${path} must be guarded`);
+    assert.deepEqual(requiredDomainsForFile(path), ['tests'], `${path} must require tests impact`);
+  }
 });
 
 test('canonical governance documents are guarded architecture surfaces', () => {
