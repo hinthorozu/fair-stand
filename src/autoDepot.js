@@ -17,10 +17,17 @@ function fixture(kind, widthCm, depthCm, xCm, yCm, rotationZDeg = 0) {
   return { kind, widthCm, depthCm, placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }) };
 }
 
-function addFront(specs, xCm, yCm, widthCm) {
+function addFront(specs, xCm, yCm, widthCm, standType) {
   if (widthCm === 100) { specs.push(door(xCm, yCm)); return; }
   if (widthCm === 150) { specs.push(wall(50, xCm, yCm), door(xCm + 50, yCm)); return; }
-  specs.push(wall(50, xCm, yCm), door(xCm + 50, yCm), wall(50, xCm + 150, yCm));
+  if (widthCm === 200) {
+    // 2 m depo önü: 100 cm kapı + 100 cm panel.
+    // Sırt duvar / ada (ve U) standda kapı solda. L standlarda kapı dış duvarın tersinde, stand içine doğru kalır.
+    if (standType === 'l-left') specs.push(wall(100, xCm, yCm), door(xCm + 100, yCm));
+    else specs.push(door(xCm, yCm), wall(100, xCm + 100, yCm));
+    return;
+  }
+  specs.push(door(xCm, yCm), wall(widthCm - 100, xCm + 100, yCm));
 }
 
 export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '100x100', includeContents = false } = {}) {
@@ -47,7 +54,7 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
   if (!useLeftWall) specs.push(wall(size.depthCm, xCm, yCm, 270));
   // Sağ yan duvarın dış yüzü +X yönüne bakar.
   if (!useRightWall) specs.push(wall(size.depthCm, xCm + size.widthCm, yCm, 90));
-  addFront(specs, xCm, yCm + size.depthCm, size.widthCm);
+  addFront(specs, xCm, yCm + size.depthCm, size.widthCm, standType);
 
   if (includeContents) {
     const fridgeWidth = 45;
