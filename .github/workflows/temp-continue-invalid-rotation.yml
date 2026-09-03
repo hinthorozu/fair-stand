@@ -1,0 +1,65 @@
+name: Temporary continue invalid rotation
+
+on:
+  push:
+    branches:
+      - fix/continue-rotation-through-invalid
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/continue-rotation-through-invalid
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Patch rotation cursor
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/scene3d.js')
+          s = p.read_text()
+
+          old = """      preferredRotationZDeg: dragRotationZDeg,\n      rotationLocked: false,\n"""
+          new = """      preferredRotationZDeg: dragRotationZDeg,\n      rotationCursorZDeg: dragRotationZDeg,\n      rotationLocked: false,\n"""
+          if s.count(old) != 1:
+              raise SystemExit(f'drag session anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new, 1)
+
+          old = """    if (dragSession?.dragging) {\n      event.preventDefault();\n      dragSession.preferredRotationZDeg = rotateModuleRotationZDeg(\n        dragSession.preferredRotationZDeg,\n        deltaDeg,\n      );\n      dragSession.rotationLocked = true;\n      updatePlacementDrag({\n        clientX: dragSession.lastClientX,\n        clientY: dragSession.lastClientY,\n      });\n      return;\n    }\n"""
+          new = """    if (dragSession?.dragging) {\n      event.preventDefault();\n      const rotationCursorZDeg = rotateModuleRotationZDeg(\n        dragSession.rotationCursorZDeg ?? dragSession.preferredRotationZDeg,\n        deltaDeg,\n      );\n      // Rotation intent must survive an invalid intermediate preview. Snap/validation may\n      // turn the ghost red, but the next Shift+R continues from this requested angle\n      // instead of falling back to the last valid placement rotation.\n      dragSession.rotationCursorZDeg = rotationCursorZDeg;\n      dragSession.preferredRotationZDeg = rotationCursorZDeg;\n      dragSession.rotationLocked = true;\n      updatePlacementDrag({\n        clientX: dragSession.lastClientX,\n        clientY: dragSession.lastClientY,\n      });\n      dragSession.preferredRotationZDeg = rotationCursorZDeg;\n      return;\n    }\n"""
+          if s.count(old) != 1:
+              raise SystemExit(f'rotation handler anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+
+          t = Path('test/viewKeyboardMainIntegration.test.js')
+          ts = t.read_text()
+          addition = """\n\ntest('drag rotation keeps an independent cursor so invalid previews do not stop later Shift+R turns', () => {\n  assert.match(sceneSource, /rotationCursorZDeg: dragRotationZDeg/);\n  assert.match(sceneSource, /dragSession\\.rotationCursorZDeg \\?\\? dragSession\\.preferredRotationZDeg/);\n  assert.match(sceneSource, /dragSession\\.rotationCursorZDeg = rotationCursorZDeg[\\s\\S]*updatePlacementDrag\\([\\s\\S]*dragSession\\.preferredRotationZDeg = rotationCursorZDeg/);\n  assert.doesNotMatch(sceneSource, /if \\(dragSession\\.preview\\?\\.valid\\)[\\s\\S]{0,250}rotationCursorZDeg/);\n});\n"""
+          if "invalid previews do not stop later Shift+R turns" in ts:
+              raise SystemExit('integration test already present')
+          t.write_text(ts.rstrip() + addition)
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/scene3d.js test/viewKeyboardMainIntegration.test.js
+          git commit -m "Allow rotation through invalid drag previews"
+          git push origin HEAD:fix/continue-rotation-through-invalid
