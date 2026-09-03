@@ -70,26 +70,28 @@ Merge: PR #5
 
 ## P1 — README güncellemesi
 
-Durum: **UYGULANDI / CI BEKLENİYOR**
+Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
 Branch:
 
 - `docs/update-readme`
+
+PR:
+
+- #6 — `Refresh README for current Fair Stand architecture`
 
 Yapılanlar:
 
 - Eski ilk-MVP/gelecek-zaman anlatımı kaldırıldı.
 - README mevcut ürün ve repository yapısını anlatacak şekilde yeniden yazıldı.
 - Güncel katalog/modül aileleri, behavior registry, placement, state, renderer ve BOM katmanları özetlendi.
-- Gerçek package scripts ve CI akışı dokümante edildi.
+- Gerçek package scripts ve canonical CI akışı dokümante edildi.
 - `npm ci`, `npm run dev`, `npm test`, `npm run build`, `npm run preview` komutları güncel şekilde yazıldı.
 - Global 90° / 50 cm gibi artık doğru olmayan varsayımlar README'ye taşınmadı; canonical `moduleBehavior.js` kaynağına yönlendirme yapıldı.
 - Yeni module checklist'i ve canonical repository dokümanları eklendi.
 - Uygulama runtime koduna dokunulmadı.
+- Canonical CI'da install, test ve build adımları başarılı geçti.
 
 ## Sıradaki İş
 
-1. README branch'i için PR aç.
-2. Canonical CI sonucunu doğrula.
-3. Başarılıysa ROG'a merge et.
-4. Sonraki P1 olarak `ROADMAP.md` ve ilgili phase roadmap'lerini gerçek implementasyon durumuyla karşılaştırıp güncelle.
+Sonraki P1: **`ROADMAP.md` ve ilgili phase roadmap'lerini gerçek implementasyon durumuyla karşılaştırıp güncelle.**
