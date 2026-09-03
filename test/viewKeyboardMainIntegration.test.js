@@ -9,7 +9,7 @@ test('scene delegates keyboard mapping and reuses existing camera/viewcube APIs'
   assert.match(sceneSource, /resolveViewKeyboardShortcut\(event\)/);
   assert.match(sceneSource, /setCameraMode\(shortcut\.mode\)/);
   assert.match(sceneSource, /viewCube\.setViewDirection\(direction\)/);
-  assert.match(sceneSource, /const deltaDeg = 90;/);
+  assert.match(sceneSource, /const deltaDeg = -90;/);
 });
 
 test('help guide documents view shortcuts and new clockwise rotation binding', () => {

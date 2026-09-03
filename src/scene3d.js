@@ -4394,7 +4394,7 @@ export function createStandScene(
 
     if (shortcut.type !== 'rotate') return;
 
-    const deltaDeg = 90;
+    const deltaDeg = -90;
 
     if (dragSession?.dragging) {
       event.preventDefault();
