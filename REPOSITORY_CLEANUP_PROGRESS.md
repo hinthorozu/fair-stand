@@ -50,11 +50,15 @@ Merge: PR #3
 
 ## P0 — Documentation / contract cleanup
 
-Durum: **UYGULANDI — PR/CI BEKLİYOR**
+Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
 Branch:
 
 - `cleanup/documentation-contracts`
+
+PR:
+
+- #4 — `Align documentation contracts with runtime behavior`
 
 Yapılanlar:
 
@@ -84,14 +88,16 @@ Yapılanlar:
 - Descriptor-aware override'ların `moduleBehavior.js` içinde merkezi kalması gerektiği belirtildi.
 - Yeni module checklist'i netleştirildi.
 
-### Uygulama kodu
+### Doğrulama
 
-- Bu adımda `src/` altında hiçbir runtime kod değişikliği yapılmadı.
-- Değişiklik yalnız documentation contract temizliğidir.
+- Canonical CI çalıştı.
+- `npm ci` başarılı.
+- `npm test` başarılı.
+- `npm run build` başarılı.
+- Uygulama runtime koduna dokunulmadı.
 
-## Sıradaki işlem
+## Sıradaki P1
 
-1. `cleanup/documentation-contracts` branch'ini PR'a çevir.
-2. Canonical CI sonucunu doğrula.
-3. CI yeşilse ROG'a merge et.
-4. Ardından P1'e geç: önce README/ROADMAP current-state temizliği veya catalog → behavior coverage testi.
+Önerilen ilk P1 işi: **Catalog → module behavior coverage testi**.
+
+Amaç: katalogda yeni bir module type tanımlandığında gerekli explicit behavior contract unutulursa CI'ın bunu yakalaması. Bu küçük ve düşük riskli değişiklik, ardından yapılacak README/ROADMAP temizliği ve daha büyük refactor'lar için güvenliği artırır.
