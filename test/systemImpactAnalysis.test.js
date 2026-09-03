@@ -139,6 +139,21 @@ test('full analysis reports code dependents, existing tests, docs and finding ca
   assert.ok(result.candidateFindings.includes('F-028'));
 });
 
+test('E2E specs are classified as affected tests during reverse discovery', () => {
+  const files = {
+    'src/main.js': 'export function createStageFromUi() {}\n',
+    'e2e/stage.spec.mjs': "const source = new URL('../src/main.js', import.meta.url);\n",
+  };
+
+  const result = analyzeChangeImpact({
+    changedFiles: ['src/main.js'],
+    fileContents: files,
+  });
+
+  assert.ok(result.affectedTests.includes('e2e/stage.spec.mjs'));
+  assert.equal(result.affectedFiles.includes('e2e/stage.spec.mjs'), false);
+});
+
 test('F-010-style ownership refactor discovers the real stale source-shape tests and linked F-028 finding', () => {
   const paths = [
     'src/main.js',
