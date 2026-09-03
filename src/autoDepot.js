@@ -19,7 +19,13 @@ function fixture(kind, widthCm, depthCm, xCm, yCm, rotationZDeg = 0) {
 
 function addFront(specs, xCm, yCm, widthCm, standType) {
   if (widthCm === 100) { specs.push(door(xCm, yCm)); return; }
-  if (widthCm === 150) { specs.push(wall(50, xCm, yCm), door(xCm + 50, yCm)); return; }
+  if (widthCm === 150) {
+    // 1,5 m depo önü: 100 cm kapı + 50 cm panel.
+    // Sırt duvar / ada (ve U) standda kapı solda. L standlarda kapı dış duvarın tersinde, stand içine doğru kalır.
+    if (standType === 'l-left') specs.push(wall(50, xCm, yCm), door(xCm + 50, yCm));
+    else specs.push(door(xCm, yCm), wall(50, xCm + 100, yCm));
+    return;
+  }
   if (widthCm === 200) {
     // 2 m depo önü: 100 cm kapı + 100 cm panel.
     // Sırt duvar / ada (ve U) standda kapı solda. L standlarda kapı dış duvarın tersinde, stand içine doğru kalır.
