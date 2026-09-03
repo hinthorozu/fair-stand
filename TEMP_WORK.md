@@ -17,9 +17,9 @@ Kural: Maddeler **tek tek** uygulanacak. Bir madde tamamlanıp doğrulanmadan so
 - [x] 4. Atomik import + lokal sabit kaldırma değişikliğini test/build ile doğrula.
 - [x] 5. Yalnızca `createStandScene(...)` içindeki **surface selection callback** karar mantığını `describeSurfaceSelection(surfaces, currentModules)` helper'ına bağla. `main.js` içinde yalnızca UI state/DOM yazımı kalsın.
 - [x] 6. Surface selection değişikliğini helper testleri + build ile doğrula.
-- [ ] 7. Yalnızca **floor selection callback** mesaj kararını `describeFloorSelection(floorSelection)` helper'ına bağla.
-- [ ] 8. Floor selection değişikliğini test et.
-- [ ] 9. Selection feedback'e ait eski duplicate karar kodunun `main.js` içinde kalmadığını kontrol et ve yalnızca bu scope içindeki artıkları temizle.
+- [x] 7. Yalnızca **floor selection callback** mesaj kararını `describeFloorSelection(floorSelection)` helper'ına bağla.
+- [x] 8. Floor selection değişikliğini focused selection testleri + integration guard + build ile doğrula.
+- [x] 9. `createStandScene(...)` selection wiring bloğunda eski duplicate karar kodunun kalmadığını doğrula; ek temizlik gerekmedi.
 - [ ] 10. Tam doğrulama çalıştır:
   - `npm ci`
   - `npm test`
