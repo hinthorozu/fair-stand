@@ -15,13 +15,24 @@ const currentContract = JSON.parse(readFileSync(new URL('../.github/change-contr
 
 function validContract(overrides = {}) {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     id: 'example-change',
     kind: 'bugfix',
     summary: 'Example guarded change.',
     owners: ['src/example.js'],
     sourceOfTruth: ['PROJECT_RULES.md'],
     impact: Object.fromEntries(SYSTEM_IMPACT_DOMAINS.map((domain) => [domain, domain === 'tests' ? 'affected' : 'not-applicable'])),
+    impactAnalysis: {
+      mode: 'full-system',
+      affectedFiles: [],
+      affectedTests: ['test/example.test.js'],
+      affectedDocs: [],
+      relatedFindings: {
+        affected: [],
+        reviewedNotAffected: [],
+      },
+      notes: 'All discovered dependents were reviewed.',
+    },
     tests: {
       targeted: ['test/example.test.js'],
       fullSuite: true,
@@ -64,6 +75,36 @@ test('every change must mark tests as affected', () => {
   assert.ok(errors.some((error) => error.includes('All changes must mark tests as affected')));
 });
 
+test('every change must declare a full-system impact analysis', () => {
+  const contract = validContract();
+  delete contract.impactAnalysis;
+
+  const errors = validateSystemChangeContract(contract);
+  assert.ok(errors.some((error) => error.includes('impactAnalysis is required for every change')));
+});
+
+test('impact analysis must explicitly inventory code, tests, docs and finding review', () => {
+  const contract = validContract({
+    impactAnalysis: {
+      mode: 'partial',
+      affectedFiles: 'src/main.js',
+      affectedTests: [],
+      affectedDocs: [],
+      relatedFindings: {
+        affected: ['F-28'],
+        reviewedNotAffected: [],
+      },
+      notes: '',
+    },
+  });
+
+  const errors = validateSystemChangeContract(contract);
+  assert.ok(errors.some((error) => error.includes('impactAnalysis.mode must be full-system')));
+  assert.ok(errors.some((error) => error.includes('impactAnalysis.affectedFiles must be an array')));
+  assert.ok(errors.some((error) => error.includes('invalid finding id: F-28')));
+  assert.ok(errors.some((error) => error.includes('impactAnalysis.notes is required')));
+});
+
 test('every change must name at least one non-empty targeted regression test', () => {
   for (const targeted of [[], ['   ']]) {
     const contract = validContract({
@@ -77,6 +118,18 @@ test('every change must name at least one non-empty targeted regression test', (
     const errors = validateSystemChangeContract(contract);
     assert.ok(errors.some((error) => error.includes('tests.targeted must contain at least one targeted regression test')));
   }
+});
+
+test('targeted regressions must be part of the reviewed affected-test inventory', () => {
+  const contract = validContract({
+    impactAnalysis: {
+      ...validContract().impactAnalysis,
+      affectedTests: [],
+    },
+  });
+
+  const errors = validateSystemChangeContract(contract);
+  assert.ok(errors.some((error) => error.includes('Targeted tests must also appear in impactAnalysis.affectedTests')));
 });
 
 test('UI controls cannot declare UI as not applicable', () => {
@@ -117,6 +170,7 @@ test('guarded paths cover runtime, UI, assets, tests, governance docs and delive
   assert.equal(isGuardedChangeFile('.github/workflows/ci.yml'), true);
   assert.equal(isGuardedChangeFile('README.md'), true);
   assert.equal(isGuardedChangeFile('SYSTEM_CHANGE_GATE.md'), true);
+  assert.equal(isGuardedChangeFile('SYSTEM_IMPACT_SWEEP.md'), true);
   assert.equal(isGuardedChangeFile('PROJECT_RULES.md'), true);
   assert.equal(isGuardedChangeFile('ROADMAP.md'), false);
 });
@@ -135,6 +189,7 @@ test('canonical governance documents are guarded architecture surfaces', () => {
     'ARCHITECTURE_RULES.md',
     'SYSTEM_DEVELOPMENT_CONTRACT.md',
     'SYSTEM_CHANGE_GATE.md',
+    'SYSTEM_IMPACT_SWEEP.md',
     'MODULE_BEHAVIOR_STANDARD.md',
     'SYSTEM_AUDIT_CHECKLIST.md',
   ].sort();
