@@ -1199,7 +1199,18 @@ function createAutomaticDepotStates(plan) {
   }).filter(Boolean);
 }
 
-function requestProjectName({ defaultName = '', mode = 'create' } = {}) {
+function buildAutomaticProjectNamePrefix(standType, xCm, yCm) {
+  const typePrefix = {
+    'l-left': 'L_Sol',
+    'l-right': 'L_Sag',
+    'u-stand': 'U',
+    island: 'Ada',
+    'back-wall': 'Sirt',
+  }[standType] || 'Stand';
+  return `${typePrefix}_${Math.round(Number(xCm) || 0)}_${Math.round(Number(yCm) || 0)}_`;
+}
+
+function requestProjectName({ defaultName = '', mode = 'create', prefix = '' } = {}) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.48);display:grid;place-items:center;padding:20px';
@@ -1212,11 +1223,11 @@ function requestProjectName({ defaultName = '', mode = 'create' } = {}) {
     const description = document.createElement('span');
     description.textContent = isRename
       ? 'Mevcut proje için yeni adı gir.'
-      : 'Sahne oluşturulmadan önce proje adını gir.';
+      : 'Stand adını gir; proje adı stand tipi ve ölçülerle otomatik oluşturulacak.';
     description.style.color = '#64748b';
     const label = document.createElement('label');
     label.style.cssText = 'display:grid;gap:5px';
-    label.textContent = 'Proje adı';
+    label.textContent = isRename ? 'Proje adı' : 'Stand adı';
     const input = document.createElement('input');
     input.type = 'text';
     input.name = 'projectName';
@@ -1224,7 +1235,18 @@ function requestProjectName({ defaultName = '', mode = 'create' } = {}) {
     input.autocomplete = 'off';
     input.required = true;
     input.value = defaultName && defaultName !== 'Adsız Proje' ? defaultName : '';
-    input.placeholder = 'Örn. İstanbul Fuar Standı';
+    input.placeholder = isRename ? 'Örn. İstanbul Fuar Standı' : 'Örn. Ferromet';
+    const preview = document.createElement('span');
+    if (!isRename && prefix) {
+      preview.style.cssText = 'font-weight:700;color:#334155;word-break:break-word';
+      const updatePreview = () => {
+        const standName = input.value.trim().replace(/\s+/g, '_');
+        preview.textContent = 'Proje adı: ' + prefix + (standName || '[Stand_Adi]');
+      };
+      input.addEventListener('input', updatePreview);
+      updatePreview();
+      label.appendChild(preview);
+    }
     input.style.cssText = 'height:40px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px';
     label.appendChild(input);
     const actions = document.createElement('div');
@@ -1247,7 +1269,8 @@ function requestProjectName({ defaultName = '', mode = 'create' } = {}) {
       event.preventDefault();
       const name = input.value.trim();
       if (!name) { input.focus(); return; }
-      finish(name);
+      const finalName = isRename ? name : prefix + name.replace(/\s+/g, '_');
+      finish(finalName);
     });
     input.focus();
     input.select();
@@ -1284,7 +1307,8 @@ createStageButton.addEventListener('click', async () => {
   }) : null;
   if (depotPlan && !depotPlan.ok) { renderStageResult(depotPlan.message, true); return; }
 
-  const projectName = await requestProjectName({ mode: 'create' });
+  const projectNamePrefix = buildAutomaticProjectNamePrefix(setup.standType, setup.xCm, setup.yCm);
+  const projectName = await requestProjectName({ mode: 'create', prefix: projectNamePrefix });
   if (!projectName) return;
 
   disableAutosave();
