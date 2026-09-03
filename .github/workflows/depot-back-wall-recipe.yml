@@ -18,6 +18,7 @@ jobs:
           node-version: 22
       - run: node .github/scripts/depot-back-wall-recipe.cjs
       - run: node --check src/automaticWall.js
+      - run: node --check src/autoDepot.js
       - run: node --check src/main.js
       - run: node --check test/depotBackWallRecipe.test.js
       - run: npm ci
@@ -27,6 +28,6 @@ jobs:
           rm -f .github/workflows/depot-back-wall-recipe.yml .github/scripts/depot-back-wall-recipe.cjs
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/automaticWall.js src/main.js test/depotBackWallRecipe.test.js .github/workflows/depot-back-wall-recipe.yml .github/scripts/depot-back-wall-recipe.cjs
+          git add src/automaticWall.js src/autoDepot.js src/main.js test/depotBackWallRecipe.test.js .github/workflows/depot-back-wall-recipe.yml .github/scripts/depot-back-wall-recipe.cjs
           git commit -m "Use depot-sized back wall panels"
           git push origin ROG
