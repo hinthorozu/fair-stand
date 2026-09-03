@@ -9,7 +9,7 @@ Current phase: **REMEDIATION IN PROGRESS**
 2. Findings remain canonical in `audit/FINDINGS.md`.
 3. Remediation proceeds section-by-section without silently pulling later findings forward.
 4. A finding closes only after fix + targeted regression + full suite + build + required CI/retest evidence.
-5. A section with no finding may close as `NO FIX REQUIRED` after revalidation.
+5. A section closes only after all findings it owns are closed/accepted and section revalidation is recorded.
 
 ## Resume — READ THIS FIRST
 
@@ -18,49 +18,48 @@ Current phase: **REMEDIATION IN PROGRESS**
 - Audit status: **COMPLETE — A00–A24 / 25 of 25 inspected**
 - Remediation starting ROG SHA: `392e839804e5b0379186af8b950117154b20c195`
 - Remediation status: **IN PROGRESS**
-- Last remediation section: `A00 — CLOSED / NO FIX REQUIRED`
+- Last remediation section: `A01 — CLOSED / AUDITED_OK`
 - A00 closure evidence: `audit/remediation/A00_CLOSURE.md`
-- Next remediation section: `A01 — Canonical docs + source-of-truth`
-- Next finding set: `F-001, F-002, F-003, F-004`
+- A01 closure evidence: `audit/remediation/A01_CLOSURE.md`
+- Next remediation section: `A02 — Universal change gate`
+- Next finding set: `F-005, F-006, F-007, F-008, F-009`
 - Finding range: `F-001..F-046`
+- Closed findings: `4`
+- Open findings: `42`
 - Open P0: `0`
-- Open P1: `20`
-- Open P2: `26`
+- Open P1: `19`
+- Open P2: `23`
 - Open P3: `0`
-- Findings closed in A00: `NONE — A00 originated no finding`
-- Runtime/product changes in A00 remediation: `NONE`
 - Canonical finding ledger: `audit/FINDINGS.md`
 - Cross-domain matrix: `audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md`
 - Final audit closure: `audit/evidence/A24_FINAL_CLOSURE.md`
 
-## A00 remediation result
+## Closed remediation sections
 
-A00 was revalidated and is remediation-closed as **NO FIX REQUIRED**. Its original baseline evidence stays frozen at SHA `6a702b000ffb3f9977f6e0853e23e840285eb60e`; it is intentionally not rewritten to current ROG because it is provenance evidence.
+### A00 — Audit bootstrap / baseline
 
-## Audit interpretation
+**CLOSED — NO FIX REQUIRED.** A00 originated no finding. Evidence: `audit/remediation/A00_CLOSURE.md`.
 
-`AUDIT COMPLETE` means every planned area was inspected and classified. It does not mean the product is clean or release-green. Remediation is now active, starting from A00 and proceeding by section.
+### A01 — Canonical docs + source-of-truth
 
-Open audit totals remain:
+**CLOSED / AUDITED_OK** after closing all four A01 findings:
+
+- F-001 — current catalog reference + catalog-doc regression.
+- F-002 — historical review/progress classification + status regression.
+- F-003 — roadmap production dataset deduplication + source-of-truth regression.
+- F-004 — README/development contract universal change-gate onboarding + developer-entrypoint regression.
+
+Section revalidation: `audit/remediation/A01_CLOSURE.md`.
+
+## Current open totals
 
 - P0: 0
-- P1: 20
-- P2: 26
+- P1: 19
+- P2: 23
 - P3: 0
 
-## Evidence coverage
-
-Every section has a dedicated evidence record under `audit/evidence/` from A00 through A24. Canonical closure/index files are:
-
-- `audit/FINDINGS.md`
-- `audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md`
-- `audit/evidence/A24_FINAL_CLOSURE.md`
-- `audit/remediation/A00_CLOSURE.md`
-
-## Infrastructure verification before remediation
-
-Canonical ROG `392e839804e5b0379186af8b950117154b20c195` had successful CI run #85 / id `33797480406` with change-contract gate, `npm ci`, `npm test`, and `npm run build` all successful.
+These counts reflect F-001 through F-004 closed. Findings F-005 through F-046 remain governed by `audit/FINDINGS.md`.
 
 ## Next
 
-Proceed to A01 only after the A00 closure PR is merged and its ROG push CI is green.
+Proceed to **A02 — Universal change gate** only after PR #39 final branch CI and post-merge ROG push CI are green.
