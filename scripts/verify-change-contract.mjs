@@ -171,6 +171,10 @@ function buildPatchText(diff, changedFiles) {
   return gitText(args, { allowFailure: true }) ?? '';
 }
 
+function isTestPath(path) {
+  return path.startsWith('test/') || path.startsWith('tests/');
+}
+
 function missingDeclared(discovered, declared) {
   const declaredSet = new Set(declared ?? []);
   return discovered.filter((item) => !declaredSet.has(item));
@@ -232,10 +236,15 @@ if (undeclaredRequiredDomains.length) {
 let discovered;
 try {
   const fileContents = readRepositoryTextFiles();
-  const symbolDiscoveryFiles = guardedFiles.filter((file) => SYMBOL_DISCOVERY_EXTENSIONS.has(extname(file)));
+  delete fileContents[CONTRACT_PATH];
+  const symbolDiscoveryFiles = guardedFiles.filter((file) => (
+    !isTestPath(file)
+    && SYMBOL_DISCOVERY_EXTENSIONS.has(extname(file))
+  ));
   const patchText = buildPatchText(diff, symbolDiscoveryFiles);
   discovered = analyzeChangeImpact({
     changedFiles: guardedFiles,
+    tokenFiles: symbolDiscoveryFiles,
     fileContents,
     patchText,
   });
