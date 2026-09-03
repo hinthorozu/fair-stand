@@ -1241,7 +1241,7 @@ function requestProjectName({ defaultName = '', mode = 'create', prefix = '' } =
       preview.style.cssText = 'font-weight:700;color:#334155;word-break:break-word';
       const updatePreview = () => {
         const standName = input.value.trim().replace(/\s+/g, '_');
-        preview.textContent = 'Proje adı: ' + prefix + (standName || '[Stand_Adi]');
+        preview.textContent = 'Proje adı: ' + (standName || '[Stand_Adi]') + '_' + prefix.replace(/_$/, '');
       };
       input.addEventListener('input', updatePreview);
       updatePreview();
@@ -1269,7 +1269,7 @@ function requestProjectName({ defaultName = '', mode = 'create', prefix = '' } =
       event.preventDefault();
       const name = input.value.trim();
       if (!name) { input.focus(); return; }
-      const finalName = isRename ? name : prefix + name.replace(/\s+/g, '_');
+      const finalName = isRename ? name : name.replace(/\s+/g, '_') + '_' + prefix.replace(/_$/, '');
       finish(finalName);
     });
     input.focus();
