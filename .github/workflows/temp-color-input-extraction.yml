@@ -1,0 +1,70 @@
+name: Temporary color input helper extraction
+
+on:
+  push:
+    branches:
+      - refactor/extract-color-input-helpers
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/extract-color-input-helpers
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Extract color input helpers
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          main = Path('src/main.js')
+          s = main.read_text()
+
+          import_anchor = """import {\n  colorValuesFromHex,\n  cmykToRgb,\n  rgbToHex,\n} from './colorUtils.js';\n"""
+          import_replacement = """import {\n  colorValuesFromHex,\n  cmykToRgb,\n  rgbToHex,\n} from './colorUtils.js';\nimport { normalizeCmykValues, readNumberGroup } from './colorEditorInputs.js';\n"""
+          if s.count(import_anchor) != 1:
+              raise SystemExit(f'color import anchor mismatch: {s.count(import_anchor)}')
+          s = s.replace(import_anchor, import_replacement, 1)
+
+          pattern = re.compile(r"\nfunction readNumberGroup\(inputs\) \{.*?\n\}\n\nfunction syncFromRgbInputs\(\) \{", re.S)
+          matches = list(pattern.finditer(s))
+          if len(matches) != 1:
+              raise SystemExit(f'readNumberGroup block mismatch: {len(matches)}')
+          s = pattern.sub("\nfunction syncFromRgbInputs() {", s, count=1)
+
+          old_cmyk = """  const normalizedCmyk = Object.fromEntries(\n    Object.entries(cmyk).map(([key, value]) => [\n      key,\n      Math.min(100, Math.max(0, Math.round(value))),\n    ]),\n  );\n"""
+          if s.count(old_cmyk) != 1:
+              raise SystemExit(f'CMYK normalize anchor mismatch: {s.count(old_cmyk)}')
+          s = s.replace(old_cmyk, "  const normalizedCmyk = normalizeCmykValues(cmyk);\n", 1)
+          main.write_text(s)
+
+          Path('src/colorEditorInputs.js').write_text("""export function readNumberGroup(inputs) {\n  const values = {};\n  for (const [key, input] of Object.entries(inputs ?? {})) {\n    const rawValue = String(input?.value ?? '').trim();\n    if (rawValue === '') return null;\n    const value = Number(rawValue);\n    if (!Number.isFinite(value)) return null;\n    values[key] = value;\n  }\n  return values;\n}\n\nexport function normalizeCmykValues(values) {\n  if (!values) return null;\n  return Object.fromEntries(\n    Object.entries(values).map(([key, value]) => [\n      key,\n      Math.min(100, Math.max(0, Math.round(Number(value) || 0))),\n    ]),\n  );\n}\n""")
+
+          Path('test/colorEditorInputs.test.js').write_text("""import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport { normalizeCmykValues, readNumberGroup } from '../src/colorEditorInputs.js';\n\ntest('readNumberGroup preserves numeric input values', () => {\n  assert.deepEqual(readNumberGroup({ r: { value: ' 12 ' }, g: { value: '34.5' }, b: { value: '0' } }), {\n    r: 12,\n    g: 34.5,\n    b: 0,\n  });\n});\n\ntest('readNumberGroup rejects blank or non-finite input', () => {\n  assert.equal(readNumberGroup({ r: { value: '' } }), null);\n  assert.equal(readNumberGroup({ r: { value: 'abc' } }), null);\n});\n\ntest('normalizeCmykValues rounds and clamps channels to 0..100', () => {\n  assert.deepEqual(normalizeCmykValues({ c: -5, m: 44.6, y: 120, k: 9.2 }), {\n    c: 0,\n    m: 45,\n    y: 100,\n    k: 9,\n  });\n});\n""")
+
+          Path('test/colorEditorMainIntegration.test.js').write_text("""import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport fs from 'node:fs';\n\nconst source = fs.readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');\n\ntest('main delegates color input parsing and CMYK normalization to extracted helpers', () => {\n  assert.match(source, /import \{ normalizeCmykValues, readNumberGroup \} from '\\.\/colorEditorInputs\\.js'/);\n  assert.doesNotMatch(source, /function readNumberGroup\\(/);\n  assert.match(source, /const normalizedCmyk = normalizeCmykValues\\(cmyk\\)/);\n});\n""")
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/main.js src/colorEditorInputs.js test/colorEditorInputs.test.js test/colorEditorMainIntegration.test.js
+          git commit -m "Extract color editor input helpers"
+          git push origin HEAD:refactor/extract-color-input-helpers
