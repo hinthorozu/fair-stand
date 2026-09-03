@@ -1,12 +1,16 @@
 # Fair Stand Milestones
 
+> Bu dosya **tarihsel kapanış kaydıdır**; aktif roadmap veya güncel faz tanımı değildir.
+>
+> Aktif fazların canonical kaynağı `ROADMAP.md` ve ilgili `ROADMAP_PHASE_*.md` dosyalarıdır. Geçmişte FAZ 4 etiketiyle yazılmış render hedefleri korunarak `RENDER_FUTURE_BACKLOG.md` dosyasına ayrılmıştır.
+
 ## FAZ 3 — KAPANDI
 
-**Kapanış tarihi:** 12 Ağustos 2026
+**Tarihsel kapanış kaydı:** 12 Ağustos 2026
 
 FAZ 3 tamamlanmış ve kapanış milestone'u alınmıştır.
 
-Bu milestone ile birlikte FAZ 3 kapsamındaki mevcut çalışma tabanı referans sürüm olarak sabitlenmiştir. Sonraki geliştirmeler FAZ 4 kapsamında ilerleyecektir.
+Bu milestone ile birlikte FAZ 3 kapsamındaki mevcut çalışma tabanı referans sürüm olarak sabitlenmiştir.
 
 ### FAZ 3 kapsamında tamamlanan ana başlıklar
 
@@ -21,6 +25,15 @@ Bu milestone ile birlikte FAZ 3 kapsamındaki mevcut çalışma tabanı referans
 - 3× supersampling, sRGB output ve ACES Filmic tone mapping.
 - Shadow map kalitesinin yükseltilmesi.
 
-### Sonraki faz
+### O tarihte kaydedilmiş sonraki render hedefleri
 
-FAZ 4; sahne gerçekçiliği, fuar salonu environment/HDRI, ileri ışıklandırma, PBR materyaller, ambient/contact shadow ve daha kaliteli nihai render çıktısı üzerine ilerleyecektir.
+Bu milestone oluşturulduğunda bir sonraki render çalışmaları `FAZ 4` adıyla not edilmişti:
+
+- sahne gerçekçiliği,
+- fuar salonu environment/HDRI,
+- ileri ışıklandırma,
+- PBR materyaller,
+- ambient/contact shadow,
+- daha kaliteli nihai render çıktısı.
+
+**Bu etiket artık güncel değildir.** Güncel FAZ 4 başka bir teknik kapsam taşır. Render hedeflerinin tamamı kaybolmadan `RENDER_FUTURE_BACKLOG.md` içinde korunmaktadır.
