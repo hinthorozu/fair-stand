@@ -188,7 +188,7 @@ export function analyzeChangeImpact({
   const tokenRoots = unique(tokenFiles).sort();
   const referenceRoots = unique(referenceFiles).sort();
   const reverseGraph = buildReverseReferenceGraph(fileContents);
-  const dependencyRefs = collectReverseDependents(roots, reverseGraph);
+  const directDependencyRefs = collectReverseDependents(roots, reverseGraph);
   const patchTokens = extractImpactTokensFromPatch(patchText);
   const pathTokens = referenceRoots.flatMap((filePath) => {
     const tokens = [filePath, path.basename(filePath)];
@@ -197,7 +197,8 @@ export function analyzeChangeImpact({
   });
   const tokens = unique([...patchTokens, ...pathTokens]).filter((token) => token.length >= 5);
   const tokenRefs = collectTokenReferences(fileContents, tokens, roots);
-  const allRefs = unique([...dependencyRefs, ...tokenRefs]).sort();
+  const tokenDependentRefs = collectReverseDependents(tokenRefs, reverseGraph);
+  const allRefs = unique([...directDependencyRefs, ...tokenRefs, ...tokenDependentRefs]).sort();
 
   const affectedTests = allRefs.filter(isTestPath);
   const affectedDocs = allRefs.filter((filePath) => !isTestPath(filePath) && isDocPath(filePath));
