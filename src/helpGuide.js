@@ -32,8 +32,7 @@ const GUIDE_SECTIONS = [
         <tr><th>T</th><td>ViewCube Üst (Top) görünüşüne geçer.</td></tr>
         <tr><th>F</th><td>ViewCube Ön (Front) görünüşüne geçer.</td></tr>
         <tr><th>H</th><td>Home / varsayılan izometrik görünüşe döner.</td></tr>
-        <tr><th>Ctrl/Cmd + R</th><td>Seçili modülü saat yönünde döndürür. Sürükleme sırasında da kullanılabilir.</td></tr>
-        <tr><th>Shift + R</th><td>Seçili modülü ters yönde döndürür.</td></tr>
+        <tr><th>Shift + R</th><td>Seçili modülü saat yönünde döndürür. Sürükleme sırasında da kullanılabilir.</td></tr>
         <tr><th>↑ ↓ ← →</th><td>Seçili modülü kendi snap adımına göre ekranda görülen yöne taşır.</td></tr>
         <tr><th>Delete</th><td>Sahnede tek modül seçiliyse modülü siler. Görsel kütüphanesinde bir görsel seçili/odaktaysa görsel silme uyarısını açar.</td></tr>
         <tr><th>Esc</th><td>Açık sağ tık menüsü, katalog veya yardım penceresini kapatır.</td></tr>

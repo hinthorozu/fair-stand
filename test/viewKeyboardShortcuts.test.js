@@ -12,10 +12,10 @@ test('view shortcuts map P/O/L/R/T/F/H without modifiers', () => {
   assert.deepEqual(resolveViewKeyboardShortcut({ key: 'H' }), { type: 'view', direction: 'home' });
 });
 
-test('rotation keeps Shift+R reverse and moves clockwise rotation to Ctrl/Cmd+R', () => {
-  assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', ctrlKey: true }), { type: 'rotate', direction: 'clockwise' });
-  assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', metaKey: true }), { type: 'rotate', direction: 'clockwise' });
-  assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', shiftKey: true }), { type: 'rotate', direction: 'counterclockwise' });
+test('Shift+R is the only module rotation shortcut and rotates clockwise', () => {
+  assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', shiftKey: true }), { type: 'rotate', direction: 'clockwise' });
+  assert.equal(resolveViewKeyboardShortcut({ key: 'r', ctrlKey: true }), null);
+  assert.equal(resolveViewKeyboardShortcut({ key: 'r', metaKey: true }), null);
 });
 
 test('unrelated modified view keys do not trigger camera shortcuts', () => {
