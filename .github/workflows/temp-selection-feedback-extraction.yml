@@ -1,0 +1,96 @@
+name: Temporary selection feedback extraction
+
+on:
+  push:
+    branches:
+      - refactor/extract-selection-feedback
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/extract-selection-feedback
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Patch main selection feedback wiring
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/main.js')
+          s = p.read_text()
+
+          import_anchor = "import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';\n"
+          import_line = "import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';\n"
+          if s.count(import_anchor) != 1:
+              raise SystemExit(f'import anchor mismatch: {s.count(import_anchor)}')
+          if import_line in s:
+              raise SystemExit('selection feedback import already present')
+          s = s.replace(import_anchor, import_anchor + import_line, 1)
+
+          hint_block = "\nconst DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';\n"
+          if s.count(hint_block) != 1:
+              raise SystemExit(f'default hint block mismatch: {s.count(hint_block)}')
+          s = s.replace(hint_block, '', 1)
+
+          start_marker = 'const scene3d = createStandScene(\n'
+          end_marker = '\n\nfunction renderStageResult(message, isError = false) {'
+          start = s.find(start_marker)
+          end = s.find(end_marker, start)
+          if start < 0 or end < 0:
+              raise SystemExit(f'scene callback markers not found: start={start}, end={end}')
+          old_block = s[start:end]
+          required = [
+              "if (moduleType === 'counter')",
+              "if (moduleType === 'illuminated-foam')",
+              'selectedFabricGroupIds = new Set',
+              "(context) => moduleContextMenu.open(context)",
+          ]
+          missing = [item for item in required if item not in old_block]
+          if missing:
+              raise SystemExit(f'scene callback guard mismatch: {missing}')
+
+          new_block = """const scene3d = createStandScene(
+            viewport,
+            (surfaces) => {
+              const feedback = describeSurfaceSelection(surfaces, currentModules);
+              selectedFoamModuleId = feedback.foamModuleId;
+              if (foamLightControls) foamLightControls.hidden = !feedback.foamControlsVisible;
+              if (feedback.foamControlsVisible && foamLightColorInput) {
+                foamLightColorInput.value = feedback.foamColor;
+              }
+              selectionInfo.textContent = feedback.message;
+            },
+            getAssetUrl,
+            (context) => moduleContextMenu.open(context),
+            (floorSelection) => {
+              const message = describeFloorSelection(floorSelection);
+              if (message) selectionInfo.textContent = message;
+            },
+          );"""
+          s = s[:start] + new_block + s[end:]
+          p.write_text(s)
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/main.js
+          git commit -m "Delegate selection feedback from main"
+          git push origin HEAD:refactor/extract-selection-feedback
