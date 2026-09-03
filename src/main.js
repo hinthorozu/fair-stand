@@ -63,6 +63,7 @@ import { createProjectLoadingController, setButtonBusy } from './projectUi.js';
 import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';
 import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';
 import { createSidebarController } from './sidebarController.js';
+import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';
 
 let jsZipModulePromise = null;
 
@@ -340,12 +341,7 @@ const scene3d = createStandScene(
 );
 
 function renderStageResult(message, isError = false) {
-  stageResult.textContent = message;
-  stageResult.classList.toggle('error', isError);
-}
-
-function renderWallResult(message, isError = false) {
-  if (isError) console.warn(message);
+  renderStageResultInto(stageResult, message, isError);
 }
 
 function setStandEditingEnabled(enabled) {
@@ -413,16 +409,6 @@ function renderCurrentWallResult() {
     .map(({ wallId, usedCm }) => `${WALL_LABELS[wallId] ?? wallId}: ${usedCm} cm`)
     .join(' · ');
   renderWallResult(`${currentModules.length} modül · ${wallSummary}`);
-}
-
-function formatCapacityPopup(result, title) {
-  const axis = result.axis?.toUpperCase() ?? '';
-  return `${title}\n\n`
-    + `${axis} stand sınırı: ${result.limitCm} cm\n`
-    + `Mevcut toplam: ${result.currentCm} cm\n`
-    + `Eklenmek istenen: ${result.addedCm} cm\n`
-    + `Oluşacak toplam: ${result.projectedCm} cm\n\n`
-    + 'Aktif stand alanı aşılamaz.';
 }
 
 function defaultCurrentCapacityCm(axis) {
