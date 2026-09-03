@@ -1,0 +1,198 @@
+name: Temporary project UI helper extraction
+
+on:
+  push:
+    branches:
+      - refactor/extract-project-ui-helpers
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/extract-project-ui-helpers
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Extract project UI helpers with guarded replacements
+        shell: bash
+        run: |
+          cat > src/projectUi.js <<'EOF'
+          export function setButtonBusy(button, busy, busyLabel = null) {
+            if (!button) return;
+            if (busy) {
+              if (!button.dataset.idleLabel) button.dataset.idleLabel = button.textContent;
+              button.disabled = true;
+              button.setAttribute('aria-busy', 'true');
+              if (busyLabel) button.textContent = busyLabel;
+            } else {
+              button.disabled = false;
+              button.removeAttribute('aria-busy');
+              if (button.dataset.idleLabel) button.textContent = button.dataset.idleLabel;
+            }
+          }
+
+          export function createProjectLoadingController({
+            overlay,
+            titleElement,
+            detailElement,
+            defaultDetail = 'Lütfen bekleyin…',
+          } = {}) {
+            function show(title, detail = defaultDetail) {
+              if (titleElement) titleElement.textContent = title;
+              if (detailElement) detailElement.textContent = detail;
+              if (overlay) overlay.hidden = false;
+            }
+
+            function hide() {
+              if (overlay) overlay.hidden = true;
+            }
+
+            return Object.freeze({ show, hide });
+          }
+          EOF
+
+          cat > test/projectUi.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+
+          import { createProjectLoadingController, setButtonBusy } from '../src/projectUi.js';
+
+          function createFakeButton(label = 'Kaydet') {
+            const attrs = new Map();
+            return {
+              textContent: label,
+              disabled: false,
+              dataset: {},
+              setAttribute(name, value) { attrs.set(name, value); },
+              removeAttribute(name) { attrs.delete(name); },
+              getAttribute(name) { return attrs.get(name); },
+            };
+          }
+
+          test('setButtonBusy preserves the original label and aria busy contract', () => {
+            const button = createFakeButton('Kaydet');
+            setButtonBusy(button, true, 'Kaydediliyor');
+            assert.equal(button.disabled, true);
+            assert.equal(button.textContent, 'Kaydediliyor');
+            assert.equal(button.dataset.idleLabel, 'Kaydet');
+            assert.equal(button.getAttribute('aria-busy'), 'true');
+
+            setButtonBusy(button, false);
+            assert.equal(button.disabled, false);
+            assert.equal(button.textContent, 'Kaydet');
+            assert.equal(button.getAttribute('aria-busy'), undefined);
+          });
+
+          test('repeated busy calls do not overwrite the stored idle label', () => {
+            const button = createFakeButton('Aç');
+            setButtonBusy(button, true, 'Açılıyor');
+            setButtonBusy(button, true, 'Bekleyin');
+            assert.equal(button.dataset.idleLabel, 'Aç');
+            setButtonBusy(button, false);
+            assert.equal(button.textContent, 'Aç');
+          });
+
+          test('loading controller preserves show/hide text and hidden-state behavior', () => {
+            const overlay = { hidden: true };
+            const titleElement = { textContent: '' };
+            const detailElement = { textContent: '' };
+            const controller = createProjectLoadingController({ overlay, titleElement, detailElement });
+
+            controller.show('Proje yükleniyor…');
+            assert.equal(overlay.hidden, false);
+            assert.equal(titleElement.textContent, 'Proje yükleniyor…');
+            assert.equal(detailElement.textContent, 'Lütfen bekleyin…');
+
+            controller.show('İçe aktarılıyor…', 'ZIP hazırlanıyor.');
+            assert.equal(detailElement.textContent, 'ZIP hazırlanıyor.');
+            controller.hide();
+            assert.equal(overlay.hidden, true);
+          });
+          EOF
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/main.js')
+          text = path.read_text()
+
+          def replace_once(old, new, label):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly 1 match, got {count}')
+              text = text.replace(old, new, 1)
+
+          import_anchor = "import { createAutosaveController } from './autosaveController.js';\n"
+          replace_once(
+              import_anchor,
+              import_anchor + "import { createProjectLoadingController, setButtonBusy } from './projectUi.js';\n",
+              'project UI import anchor',
+          )
+
+          old_busy = """function setButtonBusy(button, busy, busyLabel = null) {\n  if (!button) return;\n  if (busy) {\n    if (!button.dataset.idleLabel) button.dataset.idleLabel = button.textContent;\n    button.disabled = true;\n    button.setAttribute('aria-busy', 'true');\n    if (busyLabel) button.textContent = busyLabel;\n  } else {\n    button.disabled = false;\n    button.removeAttribute('aria-busy');\n    if (button.dataset.idleLabel) button.textContent = button.dataset.idleLabel;\n  }\n}\n\n"""
+          replace_once(old_busy, '', 'local setButtonBusy helper')
+
+          old_loading = """function showProjectLoading(title, detail = 'Lütfen bekleyin…') {\n  if (projectLoadingTitle) projectLoadingTitle.textContent = title;\n  if (projectLoadingDetail) projectLoadingDetail.textContent = detail;\n  projectLoadingOverlay.hidden = false;\n}\n\nfunction hideProjectLoading() {\n  projectLoadingOverlay.hidden = true;\n}\n\n"""
+          replace_once(old_loading, '', 'local project loading helpers')
+
+          dom_anchor = "const projectLoadingDetail = document.querySelector('#project-loading-detail');\n\n"
+          controller = dom_anchor + "const projectLoading = createProjectLoadingController({\n  overlay: projectLoadingOverlay,\n  titleElement: projectLoadingTitle,\n  detailElement: projectLoadingDetail,\n});\n\n"
+          replace_once(dom_anchor, controller, 'project loading DOM anchor')
+
+          show_count = text.count('showProjectLoading(')
+          hide_count = text.count('hideProjectLoading()')
+          if show_count != 2:
+              raise SystemExit(f'showProjectLoading call count: expected 2, got {show_count}')
+          if hide_count != 2:
+              raise SystemExit(f'hideProjectLoading call count: expected 2, got {hide_count}')
+          text = text.replace('showProjectLoading(', 'projectLoading.show(')
+          text = text.replace('hideProjectLoading()', 'projectLoading.hide()')
+
+          forbidden = ['function setButtonBusy(', 'function showProjectLoading(', 'function hideProjectLoading(']
+          remaining = [token for token in forbidden if token in text]
+          if remaining:
+              raise SystemExit(f'legacy project UI helpers remain: {remaining}')
+
+          path.write_text(text)
+          PY
+
+          cat > test/projectUiMainIntegration.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+
+          const mainSource = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
+
+          test('main.js delegates generic project UI helpers to projectUi module', () => {
+            assert.match(mainSource, /import \{ createProjectLoadingController, setButtonBusy \} from '\.\/projectUi\.js';/);
+            assert.equal(mainSource.includes('function setButtonBusy('), false);
+            assert.equal(mainSource.includes('function showProjectLoading('), false);
+            assert.equal(mainSource.includes('function hideProjectLoading('), false);
+            assert.match(mainSource, /const projectLoading = createProjectLoadingController\(\{/);
+            assert.equal((mainSource.match(/projectLoading\.show\(/g) || []).length, 2);
+            assert.equal((mainSource.match(/projectLoading\.hide\(\)/g) || []).length, 2);
+          });
+          EOF
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit extraction
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/main.js src/projectUi.js test/projectUi.test.js test/projectUiMainIntegration.test.js
+          git commit -m "Extract project UI helpers from main"
+          git push origin HEAD:refactor/extract-project-ui-helpers
