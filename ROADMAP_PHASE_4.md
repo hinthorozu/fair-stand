@@ -3,17 +3,18 @@
 > **Tek kaynak:** Bu belge FAZ 4'ün detaylı uygulama planıdır. `ROADMAP.md` yalnız üst seviye durum/özet tutar. Nihai sahne BOM'u ve maliyet işleri `ROADMAP_PHASE_5_6.md` içindedir.
 >
 > Checkbox'lar yalnız source code ve regression testleriyle doğrulanmış mevcut implementasyonu gösterir. Kısmi altyapı varsa madde tamamlandı sayılmaz; açıklama notuyla belirtilir.
+>
+> **Production dataset kuralı:** Fiziksel parça ölçüleri ve recipe adetleri bu roadmap içinde kopyalanmaz. Canonical üretim verisi `src/productionParts.js`, canonical recipe verisi `src/moduleRecipes.js`, BOM politika sahibi `src/moduleContracts.js`'dir.
 
 ## FAZ 4 ana hedefi
 
-FAZ 4'ün görevi yalnız parametrik geometri üretmek değildir. Önce modüllerin **gerçek fiziksel reçetesini** tanımlamak, sonra bu reçeteyi parametrik/custom yapıya bağlamak ve sahnedeki gerçek bağlantıları güvenilir biçimde saklamaktır.
+FAZ 4'ün görevi yalnız parametrik geometri üretmek değildir. Önce modüllerin **gerçek fiziksel reçetesini** canonical production/recipe katmanlarında tanımlamak, sonra bu reçeteyi parametrik/custom yapıya bağlamak ve sahnedeki gerçek bağlantıları güvenilir biçimde saklamaktır.
 
 FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
-- Kaç panel içeriyor?
-- Kaç dikme içeriyor?
-- Hangi üst/alt profilleri kullanıyor?
-- Hangi başlangıç / tekli / köşe / çiftli aparat kurallarına sahip?
+- Hangi fiziksel parçalardan oluşuyor?
+- Hangi production part kimliklerini kullanıyor?
+- Hangi başlangıç / tekli / köşe / çiftli bağlantı semantiğine sahip?
 - Parametre değişirse kendi Raw BOM / module recipe çıktısı nasıl değişiyor?
 - Sahnedeki başka modüllere nereden ve nasıl bağlı?
 
@@ -22,9 +23,9 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 ## 3 Eylül 2026 doğrulanmış mevcut temel
 
 - `src/productionParts.js` stabil `partId` kullanan bağımsız production-part sözlüğü içeriyor.
-- Düz/iç-köşe panel, profil, dikme ve dört connector tipi production-part olarak tanımlı.
-- `src/moduleRecipes.js` 50/100/150/200 düz duvar reçetelerini ve çeşitli mevcut modül reçetelerini içeriyor.
-- `test/moduleRecipes.test.js` production-part ve standart duvar reçetelerini doğruluyor.
+- Panel, profil, dikme ve connector production-part aileleri canonical kodda tanımlı.
+- `src/moduleRecipes.js` standart duvar reçetelerini ve çeşitli mevcut modül reçetelerini içeriyor.
+- `test/moduleRecipes.test.js` production-part ve standart duvar recipe ilişkilerini doğruluyor.
 - Bu mevcut temel **scene instance Raw BOM**, parametrik config, custom definition ve connection graph anlamına gelmez; ilgili maddeler açık kalır.
 
 ---
@@ -43,82 +44,45 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
 # Sprint 1 — Üretim Parça Modeli + Standart Modül Reçeteleri
 
-**Hedef:** Önce panel, dikme, profil ve aparat sistemini gerçek üretim verisiyle oturtmak.
+**Hedef:** Panel, dikme, profil ve aparat sistemini canonical üretim verisi ve testlerle güvenilir hale getirmek.
 
 ## 1.1 — Part / Material Definition
 
 - [ ] Stabil `partId` / `materialId` modeli. — **Kısmi:** stabil `partId` mevcut; `materialId` contract'ı doğrulanmadı.
 - [ ] Parça kategorileri en az: `panel`, `upright`, `profile`, `connector`, `shelf`, `lighting`. — **Kısmi:** temel üretim kategorileri mevcut; tüm hedef kategori seti tamamlandı sayılmıyor.
 - [ ] Birimler: en az `adet`, `m`, `m²`, `set`. — **Kısmi:** mevcut production parts ağırlıklı `adet` kullanıyor.
-- [x] Gerçek fiziksel ölçüler metadata olarak tutulur.
+- [x] Gerçek fiziksel ölçüler canonical production metadata olarak tutulur.
 - [ ] Opsiyonel `catalogRef` alanı ileride Fair CRM eşlemesi için hazır olur.
 - [x] Üretim parçası kimliği Three.js implementation'ından bağımsızdır.
 
-## 1.2 — Doğrulanmış fiziksel standartlar
+## 1.2 — Fiziksel standartların canonical sahibi
 
-- Alüminyum dikme kalınlığı: **8 cm**.
-- Default dikme uzunluğu: **346.5 cm**.
-- Panel yüksekliği: **47 cm**.
-- Panel kalınlığı/derinliği: **0.8 cm**.
+Bu roadmap fiziksel ölçü tablosu tutmaz.
 
-### Düz panel ailesi
+- Production part kimliği, birimi ve fiziksel metadata: `src/productionParts.js`
+- Modülün hangi part'ı hangi miktarda kullandığı: `src/moduleRecipes.js`
+- Bu ilişkilerin regression doğrulaması: `test/moduleRecipes.test.js` ve ilgili contract testleri
 
-| Nominal modül | Panel |
-| --- | --- |
-| 50 cm | 48.5 × 47 × 0.8 cm |
-| 100 cm | 98 × 47 × 0.8 cm |
-| 150 cm | 147.5 × 47 × 0.8 cm |
-| 200 cm | 197 × 47 × 0.8 cm |
-
-### İç-köşe panel ailesi
-
-| Nominal modül | Panel |
-| --- | --- |
-| 50 cm | 42.5 × 47 × 0.8 cm |
-| 100 cm | 92 × 47 × 0.8 cm |
-| 150 cm | 142.5 × 47 × 0.8 cm |
-| 200 cm | 192 × 47 × 0.8 cm |
-
-### Üst/alt profil uzunlukları
-
-| Nominal modül | Profil |
-| --- | --- |
-| 50 cm | 41.5 cm |
-| 100 cm | 91 cm |
-| 150 cm | 140.5 cm |
-| 200 cm | 190 cm |
+**Kabul kriteri:** Standart üretim ailelerinin ihtiyaç duyduğu fiziksel metadata canonical production-part katmanından çözülebilmeli ve recipe katmanı aynı part ID'lerini kullanmalıdır. Roadmap'te bunların ikinci bir sabit sayı tablosu bulunmamalıdır.
 
 ## 1.3 — Aparat sözlüğü
 
-- [x] Başlangıç aparatı.
-- [x] Tekli / düz bağlantı aparatı.
-- [x] Köşe bağlantı aparatı.
-- [x] Çiftli bağlantı aparatı.
+- [x] Başlangıç aparatı production-part sözlüğünde tanımlı.
+- [x] Tekli / düz bağlantı aparatı production-part sözlüğünde tanımlı.
+- [x] Köşe bağlantı aparatı production-part sözlüğünde tanımlı.
+- [x] Çiftli bağlantı aparatı production-part sözlüğünde tanımlı.
 
-Doğrulanmış semantik:
+Bağlantı aparatlarının gerçek sahne kullanım adedi yalnız module recipe ve ileride connection graph / Final BOM semantiğinden türetilir. Roadmap bu adetleri veya üretim formülünü ikinci kez tanımlamaz.
 
-- Panel dizisi başlangıcı → **başlangıç aparatı**, yalnız başlangıçta.
-- Standart panel dizisi içi bağlantı → **tekli/düz bağlantı aparatı**.
-- Standın içine doğru 90° birleşim → **köşe bağlantı aparatı**.
-- Aynı doğrultuda iki ayrı modül birleşimi → **çiftli bağlantı aparatı**.
+## 1.4 — Standart duvar recipe contract'ı
 
-## 1.4 — Doğrulanmış düz duvar reçetesi
+Standart duvar recipe tanımları canonical olarak `src/moduleRecipes.js` içindedir. Fiziksel parça metadata'sı `src/productionParts.js` üzerinden çözülür.
 
-50 cm düz duvar:
+**Implementasyon durumu:** Standart duvar recipe aileleri kodda mevcut ve regression testleriyle doğrulanıyor.
 
-- 2 × 41.5 cm üst/alt profil,
-- 2 × 346.5 cm dikme,
-- 7 × 48.5 × 47 × 0.8 cm panel,
-- 2 × başlangıç aparatı,
-- 13 × tekli/düz bağlantı aparatı.
+**Kural:** Köşe ve modül birleşimlerinin adet reçeteleri gerçek üretim verisi ve explicit connection semantics ile doğrulanmadan tahmin edilip kodlanmaz.
 
-100 / 150 / 200 cm düz duvarda adetler aynıdır; yalnız panel ve profil genişliği ilgili standart ölçüye göre değişir.
-
-**Kural:** Köşe ve modül birleşimlerinin adet reçeteleri gerçek üretim Excel/verisiyle doğrulanmadan tahmin edilip kodlanmaz.
-
-**Implementasyon durumu:** 50/100/150/200 düz duvar recipe tanımları kodda mevcut ve regression testleriyle doğrulanıyor.
-
-**Sprint çıkışı:** 50/100/150/200 standart duvar için fiziksel parça sözlüğü ve doğrulanmış module recipe sistemi hazır olur.
+**Sprint çıkışı:** Standart duvar ailesi için fiziksel parça sözlüğü ve doğrulanmış module recipe sistemi hazır olur; gerçek ölçü/miktar dataseti roadmap'te kopyalanmaz.
 
 ---
 
@@ -148,7 +112,7 @@ Doğrulanmış semantik:
 - [ ] `BaseDefinition`, `CustomDefinition`, `SceneInstance` ayrımı.
 - [ ] Stabil `definitionId`, `baseDefinitionId`, `instanceId`.
 - [ ] `schemaVersion` / migration metadata'sı.
-- [ ] Ana ölçüler varsayılan 50–500 cm ve 50 cm katları; modül tipi daha dar constraint tanımlayabilir.
+- [ ] Ana ölçüler için genel constraint sistemi; her modül tipi kendi izin verilen aralığını/adımını canonical definition'da tanımlar.
 - [ ] Validation sonucu yalnız true/false değil, kural kodu ve açıklanabilir neden döndürür.
 - [ ] Ölçü, placement/collision ve modül-spesifik kurallar tek Rule Engine'de birleşir.
 - [ ] Parametrik config hem geometry hem Raw BOM üretiminde kullanılır.
@@ -176,7 +140,7 @@ Doğrulanmış semantik:
 - [ ] Raflı duvar ayrı base geometri değil, duvarın parametrik varyasyonudur.
 - [ ] Parametreler: başlangıç yüksekliği, raf aralığı, raf adedi.
 - [ ] Raf zemine/en alt profile veya en üst profile doğrudan yerleşemez.
-- [ ] Raflar arasında minimum 50 cm / 1 panel mesafe.
+- [ ] Raf aralıkları modülün canonical constraint'i üzerinden doğrulanır; sabit üretim ölçüsü roadmap'te ikinci kez tutulmaz.
 - [ ] `lighting: none | led` ile tek modelde ışıklı/ışıksız seçenek.
 - [ ] LED state'i geometry, Raw BOM metadata, preview ve save/load içinde korunur.
 - [ ] LED için ileride gerçek parçalara dönüşecek semantic metadata tutulur.
@@ -198,7 +162,7 @@ Doğrulanmış semantik:
 
 ## Üretim semantiği
 
-- [ ] `INNER_CORNER`: standın içine doğru 90° yapısal birleşim.
+- [ ] `INNER_CORNER`: iç köşe yapısal birleşimi.
 - [ ] `INLINE_JOIN`: aynı doğrultuda iki ayrı modül birleşimi.
 - [ ] Standart panel dizisi içi bağlantı ile modüller arası bağlantı ayrılır.
 - [ ] `START_OF_RUN` gibi reçeteyi etkileyen semantic flag'ler desteklenebilir.
@@ -207,7 +171,7 @@ Doğrulanmış semantik:
 
 **Önemli sınır:** Connection graph, modülün Raw BOM'unu ve bağlantı tipini bilir; ancak tüm sahnedeki ortak dikme/aparat düşümü ve Final BOM hesabı FAZ 5'tedir.
 
-**Sprint çıkışı:** Havrano benzeri projede sistem manuel işaretleme olmadan iç köşe ve inline birleşimleri tespit edebilir.
+**Sprint çıkışı:** Gerçek projelerde sistem manuel işaretleme olmadan iç köşe ve inline birleşimleri tespit edebilir.
 
 ---
 
@@ -252,7 +216,7 @@ Doğrulanmış semantik:
 
 # Sprint 8 — Regresyon + FAZ 4 Kapanışı
 
-- [x] Standart 50/100/150/200 duvar recipe testleri.
+- [x] Standart duvar recipe testleri.
 - [ ] Raw BOM determinism testleri.
 - [ ] Parametric config değişiminde geometry + Raw BOM birlikte değişim testleri.
 - [ ] Wizard/live preview testleri.
@@ -271,7 +235,7 @@ Bir modül ve bir proje için sistem aşağıdakileri kayıpsız ve deterministi
 
 - modül/instance kimlikleri,
 - parametrik config,
-- gerçek fiziksel panel/dikme/profil/aparat tanımları,
+- canonical production part referansları,
 - modül seviyesinde doğru Raw BOM / recipe,
 - `sourceAnchor -> targetAnchor` connection graph,
 - `INNER_CORNER`, `INLINE_JOIN` gibi üretim semantiği,
