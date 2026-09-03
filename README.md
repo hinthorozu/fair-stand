@@ -6,22 +6,21 @@ Amaç serbest çizim yapmak değil; katalogda tanımlı gerçek modülleri, plac
 
 ## Güncel durum
 
-Repository artık ilk MVP taslağının ötesindedir. Mevcut uygulama aşağıdaki ana yetenekleri içerir:
+Repository ilk MVP taslağının ötesindedir. Mevcut uygulama aşağıdaki ana yetenekleri içerir:
 
 - Gerçek zamanlı Three.js 3D stand sahnesi.
 - Ortak placement, snap, connection ve collision altyapısı.
-- Module type'a göre merkezi behavior registry: placement mode, hareket snap'i, dönüş adımı, başlangıç yönü, collision ve ghost davranışı.
+- Module type'a göre merkezi behavior registry.
 - Otomatik duvar ve depo yerleşim yardımcıları.
 - Panel, separatör, vitrin, raf, depo kapısı, panel bazalı duvar, banko ve baza modülleri.
-- Koltuk takımı, Eames masa-sandalye takımı, bar taburesi, mini buzdolabı, kettle, askılık ve bitki/saksı modülleri.
-- TV 42/55/65, 2×2 ve 3×3 video wall ve LED projektör katalog öğeleri.
+- Mobilya, depo ekipmanı, bitki/saksı, TV/video-wall ve LED projektör katalog öğeleri.
 - Renk, görsel ve editable surface state altyapısı.
 - Recipe / production-parts tabanlı BOM ve üretim verisi altyapısı.
 - Proje ve asset yönetimi için ayrı state/storage katmanları.
-- Catalog → module behavior contract kontrolü; yeni katalog tipi explicit behavior tanımı olmadan CI'dan geçmez.
+- Module/feature contract altyapısı ve universal system change gate.
 - Geniş regresyon test paketi ve canonical GitHub Actions CI.
 
-> Modül bazlı kesin placement, snap, rotation ve collision değerleri README içinde tekrar tutulmaz. Bunların canonical kaynağı `src/moduleBehavior.js` ve ilgili testlerdir.
+> Modül bazlı kesin placement, snap, rotation, collision, production ölçüsü veya recipe adetleri README içinde tekrar tutulmaz. Bunların canonical kaynakları ilgili runtime/contract dosyalarıdır.
 
 ## Teknoloji
 
@@ -46,19 +45,36 @@ Vite geliştirme sunucusunun verdiği local adresi tarayıcıda açın.
 ## Komutlar
 
 ```bash
-npm run dev      # local development server
-npm test         # regression test suite
-npm run build    # production build
-npm run preview  # built application preview
+npm run dev              # local development server
+npm run contract:verify  # system change contract schema/diff verification
+npm test                 # regression test suite
+npm run build            # production build
+npm run preview          # built application preview
 ```
 
-PR ve `ROG` branch doğrulamasında canonical CI şu sırayı çalıştırır:
+## Zorunlu değişiklik akışı
 
-```bash
-npm ci
-npm test
-npm run build
+İnsan veya AI bir değişiklik yapmadan önce **iki katmanlı sözleşmeyi** izler:
+
+1. `SYSTEM_CHANGE_GATE.md` — değişikliğin sistemde hangi domainleri etkilediğini belirler.
+2. `.github/change-contract.json` — bu impact kararlarının machine-readable deklarasyonudur.
+3. `SYSTEM_DEVELOPMENT_CONTRACT.md` — module / feature / core değişikliğinin kendi domain contract'larını tanımlar.
+4. İlgili canonical owner dosyaları güncellenir.
+5. Değişen davranış için targeted regression eklenir/güncellenir.
+6. Full test + build çalıştırılır.
+7. PR canonical CI'dan yeşil geçmeden merge edilmez.
+
+Canonical CI şu sırayı çalıştırır:
+
+```text
+checkout (full git history)
+→ npm run contract:verify
+→ npm ci
+→ npm test
+→ npm run build
 ```
+
+`npm run contract:verify` local ortamda diff bilgisinin mevcut olmadığı koşullarda yalnız schema doğrulayabilir; gerçek PR/push diff enforcement canonical CI'da yapılır. Bu local-enforcement açığı audit finding `F-009` olarak ayrıca takip edilir.
 
 ## Temel mimari
 
@@ -68,9 +84,19 @@ Sistem, tek bir dosyanın bütün ürün kurallarını taşıması yerine soruml
 
 `src/catalog.js`
 
-Kullanıcıya sunulan katalog kimlikleri, nominal ölçüler ve catalog metadata burada tutulur.
+Kullanıcıya sunulan katalog kimlikleri, nominal ölçüler ve catalog metadata burada tutulur. Nominal katalog/placement ölçüsü ile gerçek üretim kesim ölçüsü aynı kavram değildir.
 
-Nominal katalog/placement ölçüsü ile gerçek üretim kesim ölçüsü aynı kavram değildir.
+### Module contract
+
+`src/moduleContracts.js`
+
+Her katalog anahtarının profile, state/appearance/renderer/runtime/composition ve BOM policy sözleşmesini açıklar. Katalog dışı explicit runtime modülleri de burada ayrı registry üzerinden contract taşır.
+
+### Feature contract
+
+`src/featureContracts.js`
+
+Birden fazla modülü/domaini koordine eden scene-composition özelliklerinin contract sahibidir.
 
 ### Module behavior
 
@@ -86,39 +112,31 @@ Module type'a göre değişen editor davranışlarının canonical kaynağıdır
 - collision strategy,
 - ghost strategy.
 
-Katalogdaki her mevcut module type explicit behavior contract'a sahip olmak zorundadır. `test/moduleBehaviorContract.test.js` bu sözleşmeyi CI seviyesinde korur.
+Katalogdaki her mevcut runtime type explicit behavior coverage taşımak zorundadır.
 
 ### Placement / connection
 
-Placement core;
-
-- stand sınırı,
-- grid/snap,
-- end-to-end bağlantı,
-- corner/L bağlantı,
-- tee/T bağlantı,
-- segment ve footprint collision,
-- reflow
-
-gibi geometrik kuralları doğrular.
-
-Behavior registry hangi stratejinin kullanılacağını seçebilir; gerçek geometrik hesap placement katmanında kalır.
+Placement core stand sınırı, snap, bağlantı geometrisi, collision ve reflow gibi geometrik kuralları doğrular. Behavior registry hangi stratejinin kullanılacağını seçebilir; gerçek geometrik hesap placement katmanında kalır.
 
 ### State
 
-State factory dosyaları modüllerin kalıcı/editable durumunu taşır. Panel yüzeyleri, renkler, görseller ve module-specific editable alanlar renderer'dan bağımsız tutulmaya çalışılır.
+State factory dosyaları modüllerin kalıcı/editable durumunu taşır. Runtime-derived veya renderer-only değerler gereksiz yere persisted state'e dönüştürülmemelidir.
 
 ### Renderer
 
-`src/scene3d.js` Three.js sahnesini ve module rendering akışını yönetir.
-
-Placement veya üretim kuralı renderer'ın tek sorumluluğu haline getirilmemelidir.
+`src/scene3d.js` Three.js sahnesini ve module rendering akışını yönetir. Placement veya üretim kuralı renderer'ın tek sorumluluğu haline getirilmemelidir.
 
 ### Production / BOM
 
-Recipe ve production-parts katmanı gerçek üretim parçası, adet ve kesim ölçülerinin kaynağıdır.
+- `src/productionParts.js` — production part kimliği ve fiziksel metadata.
+- `src/moduleRecipes.js` — module recipe/part miktarı ilişkileri.
+- `src/moduleContracts.js` — modülün BOM policy'si.
 
-Bu katman nominal katalog ölçüsünden bilinçli olarak farklı değerler taşıyabilir.
+Roadmap veya README bu verilerin ikinci sabit kopyası değildir.
+
+### Persistence / storage
+
+Project state ve asset blob storage ayrı katmanlarda tutulur. Project switch/save/load/import-export gibi cross-domain akışlar ilgili persistence/storage contract ve regression testleriyle korunur.
 
 ## Koordinat standardı
 
@@ -128,60 +146,83 @@ Bu katman nominal katalog ölçüsünden bilinçli olarak farklı değerler taş
 
 Dönüş adımı ve movement snap global sabit değildir. Modül davranışı `src/moduleBehavior.js` üzerinden okunmalıdır.
 
-## Yeni modül eklerken
+## Yeni modül / feature eklerken
 
-Yeni bir katalog modülü eklenirken yalnız katalog satırı eklemek yeterli değildir. İlgili değişiklikte şu kontratlar kontrol edilmelidir:
+Yeni iş yalnız katalog satırı veya UI butonu eklemek değildir.
 
-1. Catalog descriptor.
-2. State factory / runtime state.
-3. Explicit module behavior.
-4. Renderer veya renderer routing ihtiyacı.
-5. Recipe/BOM gerekiyorsa üretim reçetesi.
-6. Regression testleri.
+Önce universal change declaration hazırlanır:
 
-Yeni bir katalog type'ı behavior registry'ye eklenmezse CI bunu yakalar.
+1. `SYSTEM_CHANGE_GATE.md` okunur.
+2. Etkilenen 17 domain için `affected` / `not-applicable` kararı verilir.
+3. `.github/change-contract.json` değişiklikle birlikte güncellenir.
+4. Sonra `SYSTEM_DEVELOPMENT_CONTRACT.md` içindeki module/feature/core contract akışı uygulanır.
+
+Bir katalog modülü için en az şu alanlar kontrol edilir:
+
+- catalog identity / descriptor,
+- module contract/profile,
+- state factory,
+- explicit behavior,
+- placement/collision etkisi,
+- renderer/routing,
+- persistence,
+- BOM policy / recipe,
+- composition/dependency,
+- targeted regression.
+
+Bir feature birden fazla modülü/domaini koordine ediyorsa `src/featureContracts.js` contract'ı ayrıca kontrol edilir.
 
 ## Repository belgeleri
 
-- `PROJECT_RULES.md` — yalnız gerçekten global product invariant'ları.
+### Canonical bugün
+
+- `PROJECT_RULES.md` — global product invariant'ları.
 - `ARCHITECTURE_RULES.md` — sistem katmanları ve source-of-truth sınırları.
+- `SYSTEM_CHANGE_GATE.md` — universal system-change impact sözleşmesi.
+- `SYSTEM_DEVELOPMENT_CONTRACT.md` — module/feature/core geliştirme sözleşmesi.
 - `MODULE_BEHAVIOR_STANDARD.md` — module behavior registry sözleşmesi.
-- `SYSTEM_MODULE_CATALOG.md` — katalog/BOM görünümü; manuel doküman olduğu için kod ile birlikte doğrulanmalıdır.
-- `ROADMAP.md` — aktif üst seviye ürün ve teknik geliştirme planı.
+- `SYSTEM_MODULE_CATALOG.md` — runtime catalog/contracts ile test edilen okunabilir katalog indeksi; runtime source-of-truth değildir.
+- `SYSTEM_AUDIT_CHECKLIST.md` — A00–A24 audit metodolojisi/checklist'i.
+- `audit/FINDINGS.md` — full-system audit finding ledger'ı.
+- `audit/FULL_SWEEP_STATE.md` — audit/remediation resume state'i.
+
+### Plan / gelecek
+
+- `ROADMAP.md` — aktif üst seviye ürün/teknik plan.
 - `ROADMAP_PHASE_4.md` — FAZ 4 ayrıntılı planı.
 - `ROADMAP_PHASE_5_6.md` — FAZ 5–6 ayrıntılı planı.
-- `PRODUCT_FUTURE.md` — eski README dahil farklı belgelerden korunmuş, henüz aktif faza eksiksiz yerleştirilmemiş gelecek ürün gereksinimleri.
-- `RENDER_FUTURE_BACKLOG.md` — geçmişte FAZ 4 adıyla yazılmış render/HDRI/PBR hedeflerinin faz çakışması olmadan korunduğu gelecek backlog'u.
-- `LEGACY_TRASH.md` — güncel sistemle uyumsuz/eski/doğrulanmamış içeriklerin silinmeden tutulduğu çöp kutusu.
-- `MILESTONES.md` — tarihsel faz kapanış kayıtları; aktif roadmap için source-of-truth değildir.
-- `REPOSITORY_CLEANUP_PROGRESS.md` — repository cleanup/refactor checkpoint'i.
-- `FRESH_REPOSITORY_REVIEW.md` — fresh repository inceleme raporu.
+- `PRODUCT_FUTURE.md` — henüz aktif faza eksiksiz yerleştirilmemiş gelecek gereksinimleri.
+- `RENDER_FUTURE_BACKLOG.md` — future render/HDRI/PBR backlog'u.
 
-### Dokümantasyon sınıflandırması
+### Historical / legacy
 
-- **Bugün çalışan sistem:** `README.md` + runtime source-of-truth dosyaları.
-- **Global invariant / architecture contract:** `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `MODULE_BEHAVIOR_STANDARD.md`.
-- **Aktif gelecek planı:** `ROADMAP*.md`.
-- **Kaybolmaması gereken fakat henüz fazlandırılmamış gelecek fikirleri:** `PRODUCT_FUTURE.md` ve `RENDER_FUTURE_BACKLOG.md`.
-- **Eski, uyumsuz veya doğrulanmamış bilgi:** `LEGACY_TRASH.md`.
-- **Tarihsel kayıt:** `MILESTONES.md`, `Changelog.md` ve Git history.
+- `MILESTONES.md`, `Changelog.md` — tarihsel kayıtlar.
+- `FRESH_REPOSITORY_REVIEW.md` — explicit historical repository-review snapshot.
+- `REPOSITORY_CLEANUP_PROGRESS.md` — explicit historical cleanup-progress snapshot.
+- `LEGACY_TRASH.md` — güncel sistemle uyumsuz/eski/doğrulanmamış içeriklerin korunduğu legacy alan.
 
-İçerik yalnız eski olduğu için sessizce silinmez; uygun sınıfa taşınır.
+Historical dosyalardaki “mevcut / sıradaki iş” ifadeleri current ROG truth'u olarak kullanılmaz.
 
 ## Geliştirme politikası
 
-Core davranış değişikliklerinde önerilen akış:
+Standart akış:
 
 ```text
-branch
-→ kod / doküman değişikliği
-→ regression test
+fresh ROG
+→ branch
+→ SYSTEM_CHANGE_GATE impact declaration
+→ module/feature/core contract kararı
+→ implementation
+→ targeted regression
+→ npm test
+→ npm run build
 → PR
 → canonical CI
 → merge
+→ post-merge ROG CI
 ```
 
-Core placement, behavior, catalog veya recipe contract'ı değişiyorsa ilgili test aynı PR içinde eklenmeli veya güncellenmelidir.
+Core placement, behavior, catalog, persistence, renderer, BOM veya başka bir domain değişiyorsa ilgili regression aynı PR içinde eklenmeli/güncellenmelidir.
 
 ## Product invariant'ları
 
@@ -191,6 +232,6 @@ Kısa özet:
 - Auto-compaction varsayılan davranış değildir.
 - `wallId` placement metadata'sıdır; ayrı ürün sınıfı değildir.
 - Nominal placement ölçüsü, fiziksel footprint ve production/BOM ölçüsü birbirinden farklı olabilir.
-- Module-specific davranışlar global 90°/50 cm varsayımlarına göre değil behavior registry üzerinden belirlenir.
+- Module-specific davranışlar global varsayımlara göre değil behavior registry üzerinden belirlenir.
 
-Ayrıntılı ve canonical kurallar için `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md` ve `MODULE_BEHAVIOR_STANDARD.md` dosyalarına bakın.
+Ayrıntılı canonical kurallar için `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `SYSTEM_CHANGE_GATE.md`, `SYSTEM_DEVELOPMENT_CONTRACT.md` ve `MODULE_BEHAVIOR_STANDARD.md` dosyalarına bakın.
