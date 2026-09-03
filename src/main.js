@@ -203,12 +203,9 @@ const scene3d = createStandScene(
   },
   getAssetUrl,
   (context) => moduleContextMenu.open(context),
-  ({ selected, floorType, paintable }) => {
-    if (!selected) return;
-    const label = floorType === 'karolaj' ? 'Karolaj' : (floorType === 'hali' ? 'Halı' : 'Parke');
-    selectionInfo.textContent = paintable
-      ? label + ' zemini seçili · mevcut Aktif renk ile boyanabilir.'
-      : label + ' zemini seçili · bu zemin tipi boyanamaz.';
+  (floorSelection) => {
+    const message = describeFloorSelection(floorSelection);
+    if (message) selectionInfo.textContent = message;
   },
 );
 
