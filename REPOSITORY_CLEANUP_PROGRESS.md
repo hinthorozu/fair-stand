@@ -1,55 +1,34 @@
 # Fair Stand — Repository Cleanup Progress
 
-Bu dosya, fresh repository incelemesi sonrasında nerede kalındığını ve sıradaki işleri takip etmek için oluşturulmuştur.
+Bu dosya, fresh repository incelemesi sonrasında nerede kalındığını ve sıradaki işleri takip etmek için tutulur.
 
-## Başlangıç Durumu
-
-Repository baştan sona fresh gözle incelendi. Ayrıntılı teknik rapor şu dosyada tutuluyor:
+Ayrıntılı ilk teknik rapor:
 
 - `FRESH_REPOSITORY_REVIEW.md`
 
-İnceleme sonucunda ana problem alanları:
+## Öncelik sırası
 
-- eski tek-seferlik GitHub Actions workflow/scriptlerinin repository içinde kalması,
-- `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md` ve `MODULE_BEHAVIOR_STANDARD.md` arasında contract drift,
-- CI workflow'unun sadeleştirilmesi ihtiyacı,
-- README / ROADMAP / CHANGELOG dokümantasyonunun güncel runtime seviyesinin gerisinde kalması,
-- `main.js` ve `scene3d.js` dosyalarının giderek fazla sorumluluk taşıması,
-- yeni module type'lar için behavior registry contract'ının daha sıkı hale getirilmesi ihtiyacı.
+### P0
 
-## Kararlaştırılan Öncelik Sırası
+1. GitHub Actions/workflow temizliği.
+2. Tek canonical CI ve deterministik `npm ci` akışı.
+3. `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `MODULE_BEHAVIOR_STANDARD.md` contract drift temizliği.
 
-### P0 — Önce yapılacaklar
-
-1. `.github/workflows` ve `.github/scripts` içindeki eski tek-seferlik patch/fix/inspect workflow ve scriptlerini temizle.
-2. Tek canonical CI workflow bırak.
-3. CI dependency kurulumunda `npm ci` kullan.
-4. CI içinde `npm test` + `npm run build` zorunlu olsun.
-5. `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `MODULE_BEHAVIOR_STANDARD.md` çelişkilerini temizle.
-
-### P1 — P0 sonrasında
+### P1
 
 1. README'yi mevcut ürün seviyesine göre yeniden yaz.
 2. ROADMAP'i gerçek implementasyon durumuyla eşleştir.
 3. Catalog → module behavior coverage testi ekle.
 4. `main.js` içine yeni sorumluluk eklememeye başla; yeni controller'ları ayrı dosyalara çıkar.
 
-### P2 / P3 — Daha sonra
+### P2 / P3
 
 - `scene3d.js` renderer sorumluluklarını kademeli böl.
 - `SYSTEM_MODULE_CATALOG.md` dokümanını koddan generate etmeyi değerlendir.
 - ESLint / Prettier / JSDoc contract desteği ekle.
 - `src/` ve `test/` yapısını domain bazlı düzenle.
 
-## PROJECT_RULES Kararı
-
-`PROJECT_RULES.md` doğrudan silinmeyecek.
-
-Hedef:
-
-- yalnız gerçekten global product invariant'ları bırakmak,
-- module-specific rotation / snap / collision gibi runtime davranışlarını `moduleBehavior.js` + testlere devretmek,
-- aynı davranışı birden fazla Markdown dosyasında tekrar tarif etmemek.
+---
 
 ## P0 — GitHub Actions temizliği
 
@@ -61,16 +40,64 @@ Yapılanlar:
 - `.github/scripts` altındaki geçmiş patch scriptleri kaldırıldı.
 - Eski `build.yml` kaldırıldı.
 - Tek kalıcı workflow olarak `.github/workflows/ci.yml` bırakıldı.
-- Canonical CI Node 22 kullanıyor.
-- Dependency kurulumu `npm ci` ile deterministik hale getirildi.
-- `npm test` ve `npm run build` zorunlu CI adımlarıdır.
+- Canonical CI Node 22 + `npm ci` + `npm test` + `npm run build` kullanıyor.
 - Temizlik doğrulamasında 349 test geçti ve production build başarılı oldu.
-- Uygulama kaynak koduna bu adımda dokunulmadı.
+- Uygulama kaynak koduna dokunulmadı.
 
-Not: İlk otomatik cleanup denemesinde GitHub App workflow dosyası yazma yetkisi olmadığı için push reddedildi. Temizlik bunun yerine ayrı `cleanup/github-actions` branch'inde GitHub API üzerinden hazırlanıp PR/CI ile birleştirilecek şekilde düzeltildi.
+Merge: PR #3
 
-## Sıradaki İş
+---
 
-**P0 contract cleanup:**
+## P0 — Documentation / contract cleanup
 
-`PROJECT_RULES.md`, `ARCHITECTURE_RULES.md` ve `MODULE_BEHAVIOR_STANDARD.md` arasındaki çelişkileri gerçek runtime davranışıyla karşılaştır ve canonical source sınırlarını netleştir.
+Durum: **TAMAMLANDI / CI DOĞRULANDI**
+
+Branch:
+
+- `cleanup/documentation-contracts`
+
+PR:
+
+- #4 — `Align documentation contracts with runtime behavior`
+
+Yapılanlar:
+
+### `PROJECT_RULES.md`
+
+- Module-specific 90° / 50 cm gibi artık global olmayan varsayımlar kaldırıldı.
+- Banko, Baza, Raf ve Koltuk gibi module-specific ürün detayları global rules dokümanından çıkarıldı.
+- Dosya yalnız gerçek global product invariant'larına indirildi.
+- X/Y zemin + Z yükseklik koordinat modeli korundu.
+- Silme sonrası boşluğun korunması ve auto-compaction yapılmaması korundu.
+- Nominal placement ölçüsü / fiziksel geometri / BOM ölçüsü ayrımı açıklaştırıldı.
+- Canonical source sınırları tanımlandı.
+
+### `ARCHITECTURE_RULES.md`
+
+- Runtime sabitlerinin ikinci kopyası olmaktan çıkarıldı.
+- Sistem katmanları ve source-of-truth sınırlarına odaklandı.
+- Rotation ve movement grid'in global sabit olmadığı açıklandı.
+- Placement, behavior registry, connection/collision, state/renderer ve BOM sorumlulukları ayrıştırıldı.
+
+### `MODULE_BEHAVIOR_STANDARD.md`
+
+- `wall-overlay` placement contract'a eklendi.
+- Eski `proxy / 0.30` ghost dokümantasyonu gerçek runtime ile hizalandı: central silhouette ghost.
+- Tüm modüllerin 90° / 50 cm kullanmadığı açıkça belirtildi.
+- Behavior helper fonksiyonlarının kullanılması dokümante edildi.
+- Descriptor-aware override'ların `moduleBehavior.js` içinde merkezi kalması gerektiği belirtildi.
+- Yeni module checklist'i netleştirildi.
+
+### Doğrulama
+
+- Canonical CI çalıştı.
+- `npm ci` başarılı.
+- `npm test` başarılı.
+- `npm run build` başarılı.
+- Uygulama runtime koduna dokunulmadı.
+
+## Sıradaki P1
+
+Önerilen ilk P1 işi: **Catalog → module behavior coverage testi**.
+
+Amaç: katalogda yeni bir module type tanımlandığında gerekli explicit behavior contract unutulursa CI'ın bunu yakalaması. Bu küçük ve düşük riskli değişiklik, ardından yapılacak README/ROADMAP temizliği ve daha büyük refactor'lar için güvenliği artırır.
