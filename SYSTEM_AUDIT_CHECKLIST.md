@@ -88,19 +88,19 @@ Kullanıcı düzeltme isterse ayrı, küçük PR ile uygulanır. Fix sonrası il
 - **Audit status:** `IN_PROGRESS`
 - **Audit baseline branch:** `ROG`
 - **Audit baseline SHA:** `6a702b000ffb3f9977f6e0853e23e840285eb60e`
-- **Current section:** `A01 — Canonical docs + source-of-truth`
-- **Current item:** `A01.01`
-- **Last completed item:** `A00.07`
-- **Next item:** `A01.01`
-- **Last audited SHA:** `6a702b000ffb3f9977f6e0853e23e840285eb60e`
-- **Last audit PR:** `#31`
-- **Last audit CI:** `baseline ROG CI #74 / run 33786201978 / success`
+- **Current section:** `A02 — Universal change gate`
+- **Current item:** `A02.01`
+- **Last completed item:** `A01.13`
+- **Next item:** `A02.01`
+- **Last audited SHA:** `6b9a4400f10d8a1957ffd52dbc6a8da3f0141af5`
+- **Last audit PR:** `#32`
+- **Last audit CI:** `ROG CI #77 / run 33789639960 / success`
 - **Open P0 findings:** `0`
-- **Open P1 findings:** `0`
-- **Open P2 findings:** `0`
+- **Open P1 findings:** `1`
+- **Open P2 findings:** `3`
 - **Open P3 findings:** `0`
 - **Decision required count:** `0`
-- **Last update note:** `A00 bootstrap completed against ROG 6a702b0; evidence recorded in audit/evidence/A00_BASELINE.md. Next strict item is A01.01.`
+- **Last update note:** `A01 completed against ROG 6b9a440. Four documentation/source-of-truth findings recorded in audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md. Next strict item is A02.01.`
 
 ### Resume kuralı
 
@@ -122,7 +122,10 @@ güncellenir ve commit edilir.
 
 | ID | Severity | Domain | Summary | Status | Evidence | Fix PR |
 |---|---|---|---|---|---|---|
-| — | — | — | No findings in A00 bootstrap | — | `audit/evidence/A00_BASELINE.md` | — |
+| F-001 | P1 | docs/catalog/BOM | `SYSTEM_MODULE_CATALOG.md` is materially stale: 28 documented vs 45 runtime catalog entries; old identities/BOM counts | OPEN | `audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md` | — |
+| F-002 | P2 | docs/history | Fresh review / cleanup progress docs are not clearly historical and contain superseded current-state statements | OPEN | `audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md` | — |
+| F-003 | P2 | docs/production | Roadmap docs duplicate canonical production dimensions and recipe facts from runtime code | OPEN | `audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md` | — |
+| F-004 | P2 | docs/process | README / development entrypoint predates universal change gate and documents an incomplete workflow | OPEN | `audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md` | — |
 
 ---
 
@@ -174,20 +177,21 @@ Audit aşağıdaki sırada ilerler. Bir bölüm bitmeden sonraki bölüm `IN_PRO
 
 # A01 — Canonical docs + source-of-truth
 
-- [ ] **A01.01** `PROJECT_RULES.md` rules match current architecture and contain no stale global invariant. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.02** `ARCHITECTURE_RULES.md` ownership boundaries match runtime code. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.03** `SYSTEM_DEVELOPMENT_CONTRACT.md` references real canonical owners. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.04** `SYSTEM_CHANGE_GATE.md` domain list matches `src/systemChangeContract.js`. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.05** `MODULE_BEHAVIOR_STANDARD.md` matches `moduleBehavior.js` contract. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.06** `SYSTEM_MODULE_CATALOG.md` is compared against runtime catalog/recipes and classified current or stale. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.07** `ROADMAP.md` contains only active product phase truth. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.08** `PRODUCT_FUTURE.md` is future/backlog only; no current rule leaks into runtime assumptions. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.09** `RENDER_FUTURE_BACKLOG.md` remains future-only. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.10** Historical docs are visibly historical and cannot be mistaken for current source-of-truth. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.11** `LEGACY_TRASH.md` contains no rule currently consumed by runtime code without validation. | status: `NOT_AUDITED` | evidence: —
-- [ ] **A01.12** No duplicated numeric/business rule exists in Markdown and code as competing canonical sources. | status: `NOT_AUDITED` | evidence: —
+- [x] **A01.01** `PROJECT_RULES.md` rules match current architecture and contain no stale global invariant. | status: `AUDITED_OK` | evidence: `PROJECT_RULES.md` + `moduleBehavior.js` + `modulePlacement.js`; see A01 evidence
+- [x] **A01.02** `ARCHITECTURE_RULES.md` ownership boundaries match runtime code. | status: `AUDITED_OK` | evidence: `ARCHITECTURE_RULES.md` + catalog/behavior/placement/state/recipe owners; see A01 evidence
+- [x] **A01.03** `SYSTEM_DEVELOPMENT_CONTRACT.md` references real canonical owners. | status: `GAP` | evidence: owners exist, but mandatory workflow omits newer universal change-gate handoff; `F-004`
+- [x] **A01.04** `SYSTEM_CHANGE_GATE.md` domain list matches `src/systemChangeContract.js`. | status: `AUDITED_OK` | evidence: exact 17-domain match; see A01 evidence
+- [x] **A01.05** `MODULE_BEHAVIOR_STANDARD.md` matches `moduleBehavior.js` contract. | status: `AUDITED_OK` | evidence: behavior fields/modes/fallback/ghost match runtime; see A01 evidence
+- [x] **A01.06** `SYSTEM_MODULE_CATALOG.md` is compared against runtime catalog/recipes and classified current or stale. | status: `GAP` | evidence: `F-001`; doc says 28, runtime catalog has 45; old identities/BOM counts present
+- [x] **A01.07** `ROADMAP.md` contains only active product phase truth. | status: `GAP` | evidence: phase structure is coherent, but fixed production dimensions/full recipe facts are duplicated there; `F-003`
+- [x] **A01.08** `PRODUCT_FUTURE.md` is future/backlog only; no current rule leaks into runtime assumptions. | status: `AUDITED_OK` | evidence: document explicitly future-only and defers unverified field rules
+- [x] **A01.09** `RENDER_FUTURE_BACKLOG.md` remains future-only. | status: `AUDITED_OK` | evidence: explicitly disclaims old FAZ 4 label and requires reactivation via roadmap
+- [x] **A01.10** Historical docs are visibly historical and cannot be mistaken for current source-of-truth. | status: `GAP` | evidence: `F-002`; fresh review and cleanup progress contain superseded state without historical/archive marker
+- [x] **A01.11** `LEGACY_TRASH.md` contains no rule currently consumed by runtime code without validation. | status: `AUDITED_OK` | evidence: legacy file explicitly non-canonical; no runtime import/reference; current capacity logic uses actual stand bounds
+- [x] **A01.12** No duplicated numeric/business rule exists in Markdown and code as competing canonical sources. | status: `GAP` | evidence: `F-001`, `F-003`; roadmap/catalog docs manually duplicate production values/recipes
+- [x] **A01.13** README / developer entrypoint reflects current canonical change-gate workflow. | status: `GAP` | evidence: audit-discovered item; `F-004`; README omits `contract:verify` and new canonical gate/audit docs
 
-**Section status:** `NOT_AUDITED`
+**Section status:** `GAP` — audit complete; findings F-001..F-004 remain open
 
 ---
 
@@ -722,6 +726,17 @@ Audit PR: #31
 CI evidence: baseline ROG CI #74 / run 33786201978 / success
 Next: A01.01
 Notes: Bootstrap only. No runtime/domain conclusion inherited from historical docs.
+```
+
+```text
+AUDIT SESSION 2026-09-03
+Baseline/checked SHA: 6b9a4400f10d8a1957ffd52dbc6a8da3f0141af5
+Completed: A01.01 – A01.13
+Findings created: F-001, F-002, F-003, F-004
+Audit PR: #32
+CI evidence before section: ROG CI #77 / run 33789639960 / success
+Next: A02.01
+Notes: Documentation/source-of-truth audit completed. No findings fixed during audit.
 ```
 
 ---
