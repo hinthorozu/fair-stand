@@ -39,7 +39,9 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
 
   const specs = [];
   if (!useBackWall) specs.push(wall(size.widthCm, xCm, yCm));
-  if (!useLeftWall) specs.push(wall(size.depthCm, xCm, yCm, 90));
+  // Depo sol yan duvarının panel yüzü deponun dışına (-X) bakmalı.
+  if (!useLeftWall) specs.push(wall(size.depthCm, xCm, yCm, 270));
+  // Sağ yan duvarın dış yüzü +X yönüne bakar.
   if (!useRightWall) specs.push(wall(size.depthCm, xCm + size.widthCm, yCm, 90));
   addFront(specs, xCm, yCm + size.depthCm, size.widthCm);
 
