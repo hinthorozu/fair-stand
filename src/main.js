@@ -8,6 +8,7 @@ import { resolveModuleCatalogKey } from './catalog.js';
 import { planAutomaticDepot } from './autoDepot.js';
 import {
   composeAutomaticStandWall,
+  composeAutomaticBackWallWithDepot,
   getAutomaticWallCapacityCm,
 } from './automaticWall.js';
 import {
@@ -1328,6 +1329,24 @@ createStageButton.addEventListener('click', async () => {
       moduleState.placement = { ...automaticWall.placements[index] };
       return moduleState;
     });
+
+    if (depotPlan?.ok) {
+      const customBack = composeAutomaticBackWallWithDepot({
+        standXCm: setup.xCm,
+        depotOriginXCm: depotPlan.originXCm,
+        depotWidthCm: depotPlan.widthCm,
+      });
+      if (!customBack.ok) { renderStageResult(customBack.message, true); return; }
+
+      currentModules = currentModules.filter((moduleState) => moduleState.placement?.wallId !== 'back');
+      const backStates = customBack.modules.map((entry) => {
+        const moduleState = createFlatPanelModuleState(entry.widthCm);
+        moduleState.placement = { ...entry.placement };
+        if (entry.depotBack) moduleState.autoDepotBack = true;
+        return moduleState;
+      });
+      currentModules.push(...backStates);
+    }
   }
   if (depotPlan?.ok) currentModules.push(...createAutomaticDepotStates(depotPlan));
   rebuildWall({ resetView: true });

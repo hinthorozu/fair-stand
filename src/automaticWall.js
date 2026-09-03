@@ -83,3 +83,41 @@ export function composeAutomaticStandWall({
     placements: planningModules.map((module) => ({ ...layout.placements.get(module.id) })),
   };
 }
+
+export function composeAutomaticBackWallWithDepot({ standXCm, depotOriginXCm, depotWidthCm } = {}) {
+  const standX = Number(standXCm);
+  const depotX = Number(depotOriginXCm);
+  const depotWidth = Number(depotWidthCm);
+  if (![standX, depotX, depotWidth].every(Number.isFinite) || standX <= 0 || depotWidth <= 0) {
+    return { ok: false, message: 'Depo sırt duvarı ölçüleri geçersiz.' };
+  }
+  if (depotX < 0 || depotX + depotWidth > standX) {
+    return { ok: false, message: 'Depo sırt duvarı stand sınırını aşıyor.' };
+  }
+
+  const modules = [];
+  const addChunk = (lengthCm, startXCm, exact = false) => {
+    if (lengthCm <= 0) return true;
+    if (exact) {
+      modules.push({ widthCm: lengthCm, placement: { xCm: startXCm, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' }, depotBack: true });
+      return true;
+    }
+    const composed = composeStraightWall(lengthCm);
+    if (!composed.ok) return false;
+    let cursor = startXCm;
+    for (const widthCm of composed.modules) {
+      modules.push({ widthCm, placement: { xCm: cursor, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' }, depotBack: false });
+      cursor += widthCm;
+    }
+    return true;
+  };
+
+  const beforeCm = depotX;
+  const afterStartCm = depotX + depotWidth;
+  const afterCm = standX - afterStartCm;
+  if (!addChunk(beforeCm, 0)) return { ok: false, message: 'Depo öncesi sırt duvarı oluşturulamadı.' };
+  if (!addChunk(depotWidth, depotX, true)) return { ok: false, message: 'Depo sırt paneli oluşturulamadı.' };
+  if (!addChunk(afterCm, afterStartCm)) return { ok: false, message: 'Depo sonrası sırt duvarı oluşturulamadı.' };
+
+  return { ok: true, modules };
+}

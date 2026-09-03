@@ -33,7 +33,11 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
   let xCm = 0; let yCm = 0; let useBackWall = true; let useLeftWall = false; let useRightWall = false;
   if (standType === 'l-left') { xCm = 0; yCm = 0; useLeftWall = true; }
   else if (standType === 'l-right') { xCm = standX - size.widthCm; yCm = 0; useRightWall = true; }
-  else if (standType === 'back-wall' || standType === 'u-stand') { xCm = (standX - size.widthCm) / 2; yCm = 0; }
+  else if (standType === 'back-wall' || standType === 'u-stand') {
+    // Sırt duvarı üretim reçetesi 50 cm gridde kalmalı; 150 cm depo için merkezi en yakın 50 cm noktasına al.
+    xCm = Math.round(((standX - size.widthCm) / 2) / 50) * 50;
+    yCm = 0;
+  }
   else if (standType === 'island') { xCm = (standX - size.widthCm) / 2; yCm = (standY - size.depthCm) / 2; useBackWall = false; }
   else return { ok: false, message: 'Bu stand tipi için otomatik depo yerleşimi desteklenmiyor.' };
 
