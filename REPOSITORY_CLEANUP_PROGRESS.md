@@ -1,5 +1,13 @@
 # Fair Stand — Repository Cleanup Progress
 
+> **HISTORICAL PROGRESS SNAPSHOT — AKTİF İŞ TAKİP DOSYASI DEĞİLDİR.**
+>
+> Bu dosya eski cleanup döneminde “nerede kalındı / sırada ne var” kaydı olarak kullanılmıştır. İçindeki pending/next-work ifadeleri artık güncel değildir ve yeni iş planı olarak kullanılmamalıdır.
+>
+> Güncel audit/remediation durumu için `audit/FULL_SWEEP_STATE.md` ve `audit/FINDINGS.md` kullanılır. Aktif ürün planı için `ROADMAP.md`; canonical geliştirme kuralları için `SYSTEM_DEVELOPMENT_CONTRACT.md` ve `SYSTEM_CHANGE_GATE.md` kullanılır. Bu dosya yalnız geçmiş cleanup sırasını ve PR geçmişini korur.
+
+---
+
 Bu dosya, fresh repository incelemesi sonrasında nerede kalındığını ve sıradaki işleri takip etmek için tutulur.
 
 Ayrıntılı ilk teknik rapor: `FRESH_REPOSITORY_REVIEW.md`
