@@ -198,7 +198,8 @@ const GUIDE_SECTIONS = [
         <li><strong>Proje adını değiştir:</strong> <strong>Değiştir</strong> butonu yalnızca tireden önceki proje/stand adı bölümünü düzenler. Otomatik <strong>StandTipi_X_Y</strong> bölümü korunur; örneğin <strong>Ferromet-L_Sol_800_600</strong> adı <strong>Umaay-L_Sol_800_600</strong> olarak değiştirilebilir.</li>
         <li><strong>Kaydet:</strong> Stand, modüller, yerleşimler ve proje durumunu kaydeder.</li>
         <li><strong>Otomatik kayıt:</strong> Kayıtlı/açılmış projede değişiklik algılandıktan yaklaşık 5 saniye sonra çalışır.</li>
-        <li><strong>Aç:</strong> Kayıtlı projeyi görselleriyle birlikte yükler.</li>
+        <li><strong>Kayıtlı projeler:</strong> Dropdown'dan aktif projeden farklı bir proje seçildiğinde sistem <strong>"[mevcut proje] projeden [seçilen proje] projeye geçilecek"</strong> uyarısını gösterir. Onay verilirse seçilen proje açılır; iptal edilirse dropdown tekrar aktif projeye döner.</li>
+        <li><strong>Aç:</strong> Dropdown'da seçili kayıtlı projeyi görselleriyle birlikte yükler. Dropdown üzerinden onaylı geçiş ile aynı proje açma akışını kullanır.</li>
         <li><strong>Dışarı Aktar:</strong> Proje ve görselleri ZIP dosyasına paketler.</li>
         <li><strong>İçe Aktar:</strong> Uyumlu proje ZIP paketini sisteme alır.</li>
         <li><strong>Sil:</strong> Projeyi ve projeye ait görselleri onay sonrası kaldırır.</li>
