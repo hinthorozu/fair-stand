@@ -15,14 +15,14 @@ User-directed rule for this sweep:
 
 - Baseline branch: `ROG`
 - Baseline SHA for full sweep: `e7647326668ab25c96f3a3139f0d855c03176325`
-- Current section: `A03 — Repository architecture / ownership`
-- Current item: `A03.01`
-- Last fully audited section: `A02`
-- Existing finding range: `F-001..F-009`
+- Current section: `A04 — Catalog + module contracts`
+- Current item: `A04.01`
+- Last fully audited section: `A03`
+- Existing finding range: `F-001..F-012`
 - Runtime/product fixes performed during sweep: `NONE`
 - Sweep branch: `audit/full-system-a00-a24-sweep`
 
-## Existing findings carried into full sweep
+## Findings ledger
 
 - F-001 P1 — stale `SYSTEM_MODULE_CATALOG.md`
 - F-002 P2 — historical/progress docs can be mistaken for current truth
@@ -33,10 +33,19 @@ User-directed rule for this sweep:
 - F-007 P2 — test directories are not change-gate guarded
 - F-008 P2 — targeted regression declaration can be empty
 - F-009 P2 — local contract verifier skips diff enforcement without CI/env input
+- F-010 P1 — hidden runtime module-construction registry in `main.js`
+- F-011 P1 — module-specific placement policy fragmented beyond behavior contract
+- F-012 P2 — stand scene-surround rule duplicated between setup and renderer
 
 ## Evidence files
 
 - `audit/evidence/A00_BASELINE.md`
 - `audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md`
 - `audit/evidence/A02_CHANGE_GATE.md`
-- A03+ evidence will be added during this sweep.
+- `audit/evidence/A03_ARCHITECTURE.md`
+- A04+ evidence will be added during this sweep.
+
+## Latest infrastructure verification
+
+- PR #33 merged to ROG as `e7647326668ab25c96f3a3139f0d855c03176325`.
+- Post-merge ROG CI #83 / run `33792514084`: `success`.
