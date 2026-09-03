@@ -1,13 +1,17 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { extname, resolve } from 'node:path';
 import {
   isGuardedChangeFile,
   requiredDomainsForFile,
   validateSystemChangeContract,
 } from '../src/systemChangeContract.js';
+import { analyzeChangeImpact } from './change-impact-analysis.mjs';
 
 const CONTRACT_PATH = '.github/change-contract.json';
+const TEXT_EXTENSIONS = new Set([
+  '.js', '.mjs', '.cjs', '.json', '.md', '.html', '.css', '.yml', '.yaml', '.txt', '.sh', '.py',
+]);
 
 function readJson(path) {
   return JSON.parse(readFileSync(resolve(path), 'utf8'));
@@ -79,6 +83,8 @@ function changedFilesFromEnvironment() {
     return {
       files: uniqueFiles(process.env.CHANGE_GATE_FILES.split(/[,\n]/).map((item) => item.trim())),
       source: 'CHANGE_GATE_FILES',
+      baseRef: null,
+      headRef: null,
     };
   }
 
@@ -95,17 +101,20 @@ function changedFilesFromEnvironment() {
     return {
       files: gitDiffFiles(baseSha, 'HEAD'),
       source: `GitHub pull_request base ${baseSha}`,
+      baseRef: baseSha,
+      headRef: 'HEAD',
     };
   }
 
   if (eventName === 'push') {
     const before = event.before;
     const after = event.after || 'HEAD';
+    const newRef = !before || /^0+$/.test(before);
     return {
-      files: !before || /^0+$/.test(before)
-        ? gitDiffFiles('HEAD^', 'HEAD')
-        : gitDiffFiles(before, after),
+      files: newRef ? gitDiffFiles('HEAD^', 'HEAD') : gitDiffFiles(before, after),
       source: `GitHub push ${before || '<new-ref>'}..${after}`,
+      baseRef: newRef ? 'HEAD^' : before,
+      headRef: after,
     };
   }
 
@@ -115,9 +124,10 @@ function changedFilesFromEnvironment() {
 function changedFilesFromLocalGit() {
   const baseRef = resolveLocalBaseRef();
   const committedFiles = [];
+  let mergeBase = 'HEAD';
 
   if (baseRef !== 'HEAD') {
-    const mergeBase = gitText(['merge-base', baseRef, 'HEAD']);
+    mergeBase = gitText(['merge-base', baseRef, 'HEAD']);
     committedFiles.push(...gitDiffFiles(mergeBase, 'HEAD'));
   }
 
@@ -125,7 +135,48 @@ function changedFilesFromLocalGit() {
   return {
     files: uniqueFiles([...committedFiles, ...workingTreeFiles]),
     source: `local git diff against ${baseRef} + staged/unstaged/untracked`,
+    baseRef: mergeBase,
+    headRef: null,
   };
+}
+
+function readRepositoryTextFiles() {
+  const tracked = splitFiles(gitText(['ls-files']));
+  const untracked = splitFiles(gitText(['ls-files', '--others', '--exclude-standard']));
+  const files = uniqueFiles([...tracked, ...untracked]);
+  const contents = {};
+
+  for (const file of files) {
+    const extension = extname(file);
+    if (!TEXT_EXTENSIONS.has(extension) && !['Dockerfile', 'Makefile'].includes(file)) continue;
+    if (!existsSync(resolve(file))) continue;
+    try {
+      contents[file] = readFileSync(resolve(file), 'utf8');
+    } catch {
+      // Binary or unreadable files do not participate in textual/static impact discovery.
+    }
+  }
+
+  return contents;
+}
+
+function buildPatchText(diff, changedFiles) {
+  if (!diff.baseRef) return '';
+  const args = ['diff', '--unified=0', diff.baseRef];
+  if (diff.headRef) args.push(diff.headRef);
+  args.push('--', ...changedFiles);
+  return gitText(args, { allowFailure: true }) ?? '';
+}
+
+function missingDeclared(discovered, declared) {
+  const declaredSet = new Set(declared ?? []);
+  return discovered.filter((item) => !declaredSet.has(item));
+}
+
+function printMissing(title, items) {
+  if (!items.length) return;
+  console.error(title);
+  for (const item of items) console.error(`- ${item}`);
 }
 
 const contract = readJson(CONTRACT_PATH);
@@ -175,6 +226,40 @@ if (undeclaredRequiredDomains.length) {
   process.exit(1);
 }
 
+let discovered;
+try {
+  const fileContents = readRepositoryTextFiles();
+  const patchText = buildPatchText(diff, guardedFiles);
+  discovered = analyzeChangeImpact({
+    changedFiles: guardedFiles,
+    fileContents,
+    patchText,
+  });
+} catch (error) {
+  console.error(`Unable to complete full-system impact discovery: ${error.message}`);
+  process.exit(1);
+}
+
+const missingFiles = missingDeclared(discovered.affectedFiles, contract.impactAnalysis.affectedFiles);
+const missingTests = missingDeclared(discovered.affectedTests, contract.impactAnalysis.affectedTests);
+const missingDocs = missingDeclared(discovered.affectedDocs, contract.impactAnalysis.affectedDocs);
+const reviewedFindings = [
+  ...contract.impactAnalysis.relatedFindings.affected,
+  ...contract.impactAnalysis.relatedFindings.reviewedNotAffected,
+];
+const missingFindings = missingDeclared(discovered.candidateFindings, reviewedFindings);
+
+if (missingFiles.length || missingTests.length || missingDocs.length || missingFindings.length) {
+  console.error('Full-system impact sweep found undeclared affected/review surfaces.');
+  printMissing('Code/runtime dependents missing from impactAnalysis.affectedFiles:', missingFiles);
+  printMissing('Existing tests missing from impactAnalysis.affectedTests:', missingTests);
+  printMissing('Docs/contracts missing from impactAnalysis.affectedDocs:', missingDocs);
+  printMissing('Candidate findings not reviewed in impactAnalysis.relatedFindings:', missingFindings);
+  if (discovered.tokens.length) console.error(`Discovery tokens: ${discovered.tokens.join(', ')}`);
+  process.exit(1);
+}
+
 console.log(`Change contract accepted: ${contract.id}`);
 console.log(`Guarded files: ${guardedFiles.length}`);
 if (requiredDomains.size) console.log(`Path-required domains: ${[...requiredDomains].join(', ')}`);
+console.log(`Impact sweep: ${discovered.affectedFiles.length} code dependents, ${discovered.affectedTests.length} tests, ${discovered.affectedDocs.length} docs, ${discovered.candidateFindings.length} finding candidates reviewed.`);
