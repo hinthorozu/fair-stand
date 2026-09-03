@@ -1,0 +1,88 @@
+name: Temporary Shift R clockwise update
+
+on:
+  push:
+    branches:
+      - fix/shift-r-clockwise-only
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/shift-r-clockwise-only
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Patch shortcut behavior
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/viewKeyboardShortcuts.js')
+          s = p.read_text()
+          old = """  if (key === 'r' && ctrlOrMeta && !shift && !alt) {\n    return Object.freeze({ type: 'rotate', direction: 'clockwise' });\n  }\n  if (key === 'r' && shift && !ctrlOrMeta && !alt) {\n    return Object.freeze({ type: 'rotate', direction: 'counterclockwise' });\n  }\n"""
+          new = """  if (key === 'r' && shift && !ctrlOrMeta && !alt) {\n    return Object.freeze({ type: 'rotate', direction: 'clockwise' });\n  }\n"""
+          if s.count(old) != 1:
+              raise SystemExit('shortcut resolver anchor mismatch')
+          p.write_text(s.replace(old, new, 1))
+
+          p = Path('src/scene3d.js')
+          s = p.read_text()
+          old = """    // Ctrl/Cmd+R is reserved for module rotation in the editor. Suppress the browser\n    // reload shortcut even when an editable field currently owns focus.\n    if (shortcut.type === 'rotate' && shortcut.direction === 'clockwise') {\n      event.preventDefault();\n    }\n\n    if (isEditing && !dragSession?.dragging) return;\n"""
+          new = """    if (isEditing && !dragSession?.dragging) return;\n"""
+          if s.count(old) != 1:
+              raise SystemExit('scene reload suppression anchor mismatch')
+          s = s.replace(old, new, 1)
+          old2 = "const deltaDeg = shortcut.direction === 'counterclockwise' ? -90 : 90;"
+          if s.count(old2) != 1:
+              raise SystemExit('scene rotation delta anchor mismatch')
+          s = s.replace(old2, "const deltaDeg = 90;", 1)
+          p.write_text(s)
+
+          p = Path('test/viewKeyboardShortcuts.test.js')
+          s = p.read_text()
+          old = """test('rotation keeps Shift+R reverse and moves clockwise rotation to Ctrl/Cmd+R', () => {\n  assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', ctrlKey: true }), { type: 'rotate', direction: 'clockwise' });\n  assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', metaKey: true }), { type: 'rotate', direction: 'clockwise' });\n  assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', shiftKey: true }), { type: 'rotate', direction: 'counterclockwise' });\n});\n"""
+          new = """test('Shift+R is the only module rotation shortcut and rotates clockwise', () => {\n  assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', shiftKey: true }), { type: 'rotate', direction: 'clockwise' });\n  assert.equal(resolveViewKeyboardShortcut({ key: 'r', ctrlKey: true }), null);\n  assert.equal(resolveViewKeyboardShortcut({ key: 'r', metaKey: true }), null);\n});\n"""
+          if s.count(old) != 1:
+              raise SystemExit('shortcut test anchor mismatch')
+          p.write_text(s.replace(old, new, 1))
+
+          p = Path('test/viewKeyboardMainIntegration.test.js')
+          s = p.read_text()
+          s = s.replace("assert.match(sceneSource, /shortcut\\.direction === 'counterclockwise' \\? -90 : 90/);", "assert.match(sceneSource, /const deltaDeg = 90;/);")
+          old = """test('Ctrl/Cmd+R suppresses browser reload before rotation handling', () => {\n  assert.match(sceneSource, /shortcut\\.type === 'rotate' && shortcut\\.direction === 'clockwise'[\\s\\S]*event\\.preventDefault\\(\\)/);\n});\n\n"""
+          if s.count(old) != 1:
+              raise SystemExit('integration browser reload test anchor mismatch')
+          s = s.replace(old, '', 1)
+          p.write_text(s)
+
+          p = Path('src/helpGuide.js')
+          s = p.read_text()
+          old = """        <tr><th>Ctrl/Cmd + R</th><td>Seçili modülü saat yönünde döndürür. Sürükleme sırasında da kullanılabilir.</td></tr>\n        <tr><th>Shift + R</th><td>Seçili modülü ters yönde döndürür.</td></tr>"""
+          new = """        <tr><th>Shift + R</th><td>Seçili modülü saat yönünde döndürür. Sürükleme sırasında da kullanılabilir.</td></tr>"""
+          if s.count(old) != 1:
+              raise SystemExit('help guide rotation rows anchor mismatch')
+          p.write_text(s.replace(old, new, 1))
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/viewKeyboardShortcuts.js src/scene3d.js src/helpGuide.js test/viewKeyboardShortcuts.test.js test/viewKeyboardMainIntegration.test.js
+          git commit -m "Use Shift+R for clockwise rotation only"
+          git push origin HEAD:fix/shift-r-clockwise-only
