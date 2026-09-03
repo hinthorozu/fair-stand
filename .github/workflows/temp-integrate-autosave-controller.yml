@@ -54,39 +54,34 @@ jobs:
           replacements = [
               ('if (currentStand || currentModules.length || autosaveEnabled) {', 'if (currentStand || currentModules.length || autosaveController.isEnabled()) {', 'new project autosave enabled check'),
               ("+ (autosaveEnabled\n", "+ (autosaveController.isEnabled()\n", 'new project confirmation autosave check'),
-              ('  disableAutosave();', '  autosaveController.disable();', 'create/restore/beforeunload disable call first'),
+              ('  disableAutosave();', '  autosaveController.disable();', 'autosave disable call sites'),
           ]
           for old, new, label in replacements:
               count = text.count(old)
-              if label == 'create/restore/beforeunload disable call first':
-                  if count != 3:
-                      raise SystemExit(f'{label}: expected exactly 3 matches, got {count}')
+              if label == 'autosave disable call sites':
+                  if count != 4:
+                      raise SystemExit(f'{label}: expected exactly 4 matches, got {count}')
                   text = text.replace(old, new)
               else:
                   replace_once(old, new, label)
 
-          # Three enable call sites: create success, restore, manual save/rename paths are handled below.
           enable_old = '  enableAutosaveFromCurrentState();'
           enable_count = text.count(enable_old)
           if enable_count != 4:
               raise SystemExit(f'enable calls: expected exactly 4 matches, got {enable_count}')
           text = text.replace(enable_old, '  autosaveController.enableFromCurrentState();')
 
-          # Remaining disabled state in create failure.
           if 'disableAutosave();' in text:
               raise SystemExit('legacy disableAutosave call remains')
 
-          # Asset deletion external persist path.
           old_asset = """    if (usageCount > 0 && autosaveEnabled) {\n      clearAutosaveTimer();\n      await persistActiveProject({ quiet: true });\n      autosaveObservedSignature = getProjectStateSignature();\n    }\n"""
           new_asset = """    if (usageCount > 0 && autosaveController.isEnabled()) {\n      autosaveController.clearPending();\n      await persistActiveProject({ quiet: true });\n      autosaveController.markSavedState();\n    }\n"""
           replace_once(old_asset, new_asset, 'asset delete autosave coordination')
 
-          # Rename path: pending debounce is cancelled before explicit persist, then baseline is reset by enableFromCurrentState.
           old_rename = """  if (currentStand || autosaveEnabled) {\n    try {\n      clearAutosaveTimer();\n      await persistActiveProject({ quiet: true });\n      autosaveController.enableFromCurrentState();\n"""
           new_rename = """  if (currentStand || autosaveController.isEnabled()) {\n    try {\n      autosaveController.clearPending();\n      await persistActiveProject({ quiet: true });\n      autosaveController.enableFromCurrentState();\n"""
           replace_once(old_rename, new_rename, 'rename autosave coordination')
 
-          # Manual save path.
           replace_once(
               """  try {\n    clearAutosaveTimer();\n    await persistActiveProject();\n    autosaveController.enableFromCurrentState();\n""",
               """  try {\n    autosaveController.clearPending();\n    await persistActiveProject();\n    autosaveController.enableFromCurrentState();\n""",
