@@ -17,9 +17,10 @@ Ayrıntılı ilk teknik rapor:
 ### P1
 
 1. README'yi mevcut ürün seviyesine göre yeniden yaz.
-2. ROADMAP'i gerçek implementasyon durumuyla eşleştir.
-3. Catalog → module behavior coverage testi ekle.
-4. `main.js` içine yeni sorumluluk eklememeye başla; yeni controller'ları ayrı dosyalara çıkar.
+2. Dokümantasyonu kayıpsız sınıflandır; eski/uyumsuz bilgiyi sessizce silme.
+3. ROADMAP'i gerçek implementasyon durumuyla eşleştir.
+4. Catalog → module behavior coverage testi ekle.
+5. `main.js` içine yeni sorumluluk eklememeye başla; yeni controller'ları ayrı dosyalara çıkar.
 
 ### P2 / P3
 
@@ -72,26 +73,47 @@ Merge: PR #5
 
 Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
-Branch:
+Merge: PR #6
 
-- `docs/update-readme`
-
-PR:
-
-- #6 — `Refresh README for current Fair Stand architecture`
-
-Yapılanlar:
-
-- Eski ilk-MVP/gelecek-zaman anlatımı kaldırıldı.
 - README mevcut ürün ve repository yapısını anlatacak şekilde yeniden yazıldı.
 - Güncel katalog/modül aileleri, behavior registry, placement, state, renderer ve BOM katmanları özetlendi.
 - Gerçek package scripts ve canonical CI akışı dokümante edildi.
-- `npm ci`, `npm run dev`, `npm test`, `npm run build`, `npm run preview` komutları güncel şekilde yazıldı.
-- Global 90° / 50 cm gibi artık doğru olmayan varsayımlar README'ye taşınmadı; canonical `moduleBehavior.js` kaynağına yönlendirme yapıldı.
-- Yeni module checklist'i ve canonical repository dokümanları eklendi.
+- Global 90° / 50 cm gibi artık doğru olmayan varsayımlar README'ye taşınmadı.
+
+### Sonradan tespit edilen koruma ihtiyacı
+
+README sadeleştirmesinde eski gelecek/tarihsel içeriğin tamamının ayrı bir dosyaya taşınmadığı fark edildi. İçerik Git history'de kaybolmamış olsa da aktif dokümantasyonda görünürlüğü azalmıştı.
+
+Bu nedenle yeni kural: **doküman sadeleştirmesinde içerik sessizce silinmez; canonical / future / legacy / history sınıflarından birine taşınır.**
+
+---
+
+## P1 — Kayıpsız dokümantasyon sınıflandırması
+
+Durum: **UYGULANDI — PR/CI BEKLİYOR**
+
+Branch: `docs/preserve-and-classify`
+
+Yapılanlar:
+
+- PR #6 öncesi eski README snapshot'ı tekrar incelendi.
+- `PRODUCT_FUTURE.md` oluşturuldu: PDF teklif, montaj sırası, depo toplama, paketleme, stok, baskı dosyaları, montaj şeması, proje paylaşma/onaylama ve teknik/ticari veri ihtiyaçları burada korunuyor.
+- `LEGACY_TRASH.md` oluşturuldu: güncel sistemle uyuşmayan eski MVP varsayımları, eski klasör önerisi, eski uygulama sırası ve doğrulanmamış saha tahminleri kayıpsız tutuluyor.
+- `RENDER_FUTURE_BACKLOG.md` oluşturuldu: geçmişte FAZ 4 adıyla yazılmış HDRI/PBR/AO/ileri render hedefleri yeni FAZ 4 ile çakışmadan korunuyor.
+- `MILESTONES.md` tarihsel kayıt olarak işaretlendi; aktif roadmap source-of-truth olmadığı açıklandı.
+- README içine dokümantasyon sınıflandırma haritası eklendi.
 - Uygulama runtime koduna dokunulmadı.
-- Canonical CI'da install, test ve build adımları başarılı geçti.
+
+Doküman sınıfları:
+
+- Current/runtime: `README.md` + source code/contracts.
+- Global rules/contracts: `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `MODULE_BEHAVIOR_STANDARD.md`.
+- Active plan: `ROADMAP*.md`.
+- Unscheduled preserved future: `PRODUCT_FUTURE.md`, `RENDER_FUTURE_BACKLOG.md`.
+- Legacy/incompatible/unverified: `LEGACY_TRASH.md`.
+- History: `MILESTONES.md`, `Changelog.md`, Git history.
 
 ## Sıradaki İş
 
-Sonraki P1: **`ROADMAP.md` ve ilgili phase roadmap'lerini gerçek implementasyon durumuyla karşılaştırıp güncelle.**
+1. Bu dokümantasyon sınıflandırma branch'ini PR + canonical CI ile doğrula ve merge et.
+2. Ardından `ROADMAP.md` / `ROADMAP_PHASE_4.md` checkbox ve durumlarını gerçek implementasyonla eşleştir. Özellikle production parts ve standard recipe altyapısının kod/testte mevcut olduğu halde roadmap'te `[ ]` görünmesi incelenecek.
