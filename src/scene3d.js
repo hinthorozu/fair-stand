@@ -4152,6 +4152,7 @@ export function createStandScene(
       dragging: false,
       preview: null,
       preferredRotationZDeg: dragRotationZDeg,
+      rotationCursorZDeg: dragRotationZDeg,
       rotationLocked: false,
       dragPlaneY,
       dragAnchorOffsetXCm: dragStartPoint ? moduleCenterXCm - dragStartPoint.xCm : 0,
@@ -4398,15 +4399,21 @@ export function createStandScene(
 
     if (dragSession?.dragging) {
       event.preventDefault();
-      dragSession.preferredRotationZDeg = rotateModuleRotationZDeg(
-        dragSession.preferredRotationZDeg,
+      const rotationCursorZDeg = rotateModuleRotationZDeg(
+        dragSession.rotationCursorZDeg ?? dragSession.preferredRotationZDeg,
         deltaDeg,
       );
+      // Rotation intent must survive an invalid intermediate preview. Snap/validation may
+      // turn the ghost red, but the next Shift+R continues from this requested angle
+      // instead of falling back to the last valid placement rotation.
+      dragSession.rotationCursorZDeg = rotationCursorZDeg;
+      dragSession.preferredRotationZDeg = rotationCursorZDeg;
       dragSession.rotationLocked = true;
       updatePlacementDrag({
         clientX: dragSession.lastClientX,
         clientY: dragSession.lastClientY,
       });
+      dragSession.preferredRotationZDeg = rotationCursorZDeg;
       return;
     }
 
