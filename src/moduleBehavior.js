@@ -166,6 +166,13 @@ export function getModuleRotationStepDeg(moduleOrType) {
   return Number(getModuleBehavior(moduleOrType).rotationStepDeg) || 90;
 }
 
+export function resolveModuleRotationDeltaDeg(moduleOrType, requestedDeltaDeg) {
+  const requested = Number(requestedDeltaDeg) || 0;
+  if (requested === 0) return 0;
+  const stepDeg = getModuleRotationStepDeg(moduleOrType);
+  return requested < 0 ? -stepDeg : stepDeg;
+}
+
 export function getModuleDefaultRotationDeg(moduleOrType) {
   return Number(getModuleBehavior(moduleOrType).defaultRotationDeg) || 0;
 }

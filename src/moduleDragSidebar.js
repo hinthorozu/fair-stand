@@ -1,6 +1,6 @@
 import { MODULE_CATALOG, MODULE_CATALOG_GROUPS, MODULE_CATALOG_KEYS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
-import { getModuleDefaultRotationDeg, getModuleRotationStepDeg } from './moduleBehavior.js';
+import { getModuleDefaultRotationDeg, resolveModuleRotationDeltaDeg } from './moduleBehavior.js';
 
 
 function ensureStyles() {
@@ -426,10 +426,10 @@ export function createModuleDragSidebar({
       && !event.altKey;
     if (!isShiftR) return;
     event.preventDefault();
-    const rotationStepDeg = getModuleRotationStepDeg(activeModuleState);
-    // Catalog drag must use the same visual clockwise convention as scene drag.
+    const deltaDeg = resolveModuleRotationDeltaDeg(activeModuleState, -90);
+    // Catalog drag, existing-module drag and stationary selection share one module rotation policy.
     // Keep advancing the requested angle even when the current preview is invalid/red.
-    activeRotationZDeg = ((activeRotationZDeg - rotationStepDeg) % 360 + 360) % 360;
+    activeRotationZDeg = ((activeRotationZDeg + deltaDeg) % 360 + 360) % 360;
     rotationLocked = true;
     if (Number.isFinite(lastClientX) && Number.isFinite(lastClientY)) {
       onPreview?.(

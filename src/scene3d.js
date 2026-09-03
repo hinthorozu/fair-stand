@@ -28,7 +28,7 @@ import {
   planContinuousModuleInsert,
   planContinuousModuleMove,
 } from './moduleMove.js';
-import { getModuleGhostBehavior, getModuleRotationStepDeg, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule } from './moduleBehavior.js';
+import { getModuleGhostBehavior, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule, resolveModuleRotationDeltaDeg } from './moduleBehavior.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
@@ -2175,8 +2175,7 @@ export function createStandScene(
       return { handled: true, ok: false, message };
     }
 
-    const stepDeg = getModuleRotationStepDeg(moduleState);
-    const effectiveDeltaDeg = deltaDeg < 0 ? -stepDeg : stepDeg;
+    const effectiveDeltaDeg = resolveModuleRotationDeltaDeg(moduleState, deltaDeg);
     const rotationCursor = getKeyboardRotationCursor(moduleState);
     rotationCursor.rotationZDeg = rotateModuleRotationZDeg(
       rotationCursor.rotationZDeg,
@@ -4435,10 +4434,11 @@ export function createStandScene(
 
     if (shortcut.type !== 'rotate') return;
 
-    const deltaDeg = -90;
+    const requestedDeltaDeg = -90;
 
     if (dragSession?.dragging) {
       event.preventDefault();
+      const deltaDeg = resolveModuleRotationDeltaDeg(dragSession.moduleState, requestedDeltaDeg);
       const rotationCursorZDeg = rotateModuleRotationZDeg(
         dragSession.rotationCursorZDeg ?? dragSession.preferredRotationZDeg,
         deltaDeg,
@@ -4457,7 +4457,7 @@ export function createStandScene(
       return;
     }
 
-    const rotationResult = rotateSelectedModule(deltaDeg);
+    const rotationResult = rotateSelectedModule(requestedDeltaDeg);
     if (rotationResult.handled) event.preventDefault();
   });
 
