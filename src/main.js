@@ -63,6 +63,7 @@ import {
   getEditableProjectName,
 } from './projectNaming.js';
 import { createAutosaveController } from './autosaveController.js';
+import { createProjectLoadingController, setButtonBusy } from './projectUi.js';
 
 let jsZipModulePromise = null;
 
@@ -129,6 +130,12 @@ const projectLoadingOverlay = document.querySelector('#project-loading-overlay')
 const projectLoadingTitle = document.querySelector('#project-loading-title');
 const projectLoadingDetail = document.querySelector('#project-loading-detail');
 
+const projectLoading = createProjectLoadingController({
+  overlay: projectLoadingOverlay,
+  titleElement: projectLoadingTitle,
+  detailElement: projectLoadingDetail,
+});
+
 const { setProjectName, requestProjectName } = createProjectNamingController({
   documentRef: document,
   projectNameInput,
@@ -149,30 +156,6 @@ function setSidebarCollapsed(collapsed) {
 sidebarToggleButton?.addEventListener('click', () => {
   setSidebarCollapsed(!appElement?.classList.contains('sidebar-collapsed'));
 });
-
-function setButtonBusy(button, busy, busyLabel = null) {
-  if (!button) return;
-  if (busy) {
-    if (!button.dataset.idleLabel) button.dataset.idleLabel = button.textContent;
-    button.disabled = true;
-    button.setAttribute('aria-busy', 'true');
-    if (busyLabel) button.textContent = busyLabel;
-  } else {
-    button.disabled = false;
-    button.removeAttribute('aria-busy');
-    if (button.dataset.idleLabel) button.textContent = button.dataset.idleLabel;
-  }
-}
-
-function showProjectLoading(title, detail = 'Lütfen bekleyin…') {
-  if (projectLoadingTitle) projectLoadingTitle.textContent = title;
-  if (projectLoadingDetail) projectLoadingDetail.textContent = detail;
-  projectLoadingOverlay.hidden = false;
-}
-
-function hideProjectLoading() {
-  projectLoadingOverlay.hidden = true;
-}
 
 
 const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
@@ -2130,7 +2113,7 @@ importProjectFileInput.addEventListener('change', async () => {
   importProjectFileInput.value = '';
   if (!file) return;
   setButtonBusy(importProjectButton, true, 'Aktarılıyor');
-  showProjectLoading('Proje içe aktarılıyor…', 'ZIP paketi ve görseller hazırlanıyor.');
+  projectLoading.show('Proje içe aktarılıyor…', 'ZIP paketi ve görseller hazırlanıyor.');
   projectStatus.textContent = 'Proje içe aktarılıyor…';
 
   let importedProjectId = null;
@@ -2215,7 +2198,7 @@ importProjectFileInput.addEventListener('change', async () => {
     console.warn('Proje içe aktarılamadı:', error);
     projectStatus.textContent = `Proje ZIP içe aktarılamadı: ${error?.message || 'Bilinmeyen hata.'}`;
   } finally {
-    hideProjectLoading();
+    projectLoading.hide();
     setButtonBusy(importProjectButton, false);
   }
 });
@@ -2224,7 +2207,7 @@ openProjectButton.addEventListener('click', async () => {
   const projectId = projectSelect.value;
   if (!projectId) { projectStatus.textContent = 'Açılacak kayıtlı proje yok.'; return; }
 
-  showProjectLoading('Proje yükleniyor…', 'Görseller ve sahne hazırlanıyor.');
+  projectLoading.show('Proje yükleniyor…', 'Görseller ve sahne hazırlanıyor.');
   setButtonBusy(openProjectButton, true, 'Açılıyor');
   projectStatus.textContent = 'Proje yükleniyor…';
   try {
@@ -2235,7 +2218,7 @@ openProjectButton.addEventListener('click', async () => {
     console.warn('Proje açılamadı:', error);
     projectStatus.textContent = 'Proje açılamadı.';
   } finally {
-    hideProjectLoading();
+    projectLoading.hide();
     setButtonBusy(openProjectButton, false);
   }
 });
