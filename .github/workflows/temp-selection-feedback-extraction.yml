@@ -6,11 +6,10 @@ on:
       - refactor/extract-selection-feedback
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  diagnose:
-    if: github.actor != 'github-actions[bot]'
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,31 +19,45 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Install dependencies
-        run: npm ci
-      - name: Capture failing assertion context
+      - name: Verify selection wiring scope
         shell: bash
         run: |
-          set +e
-          npm test > /tmp/full-test.log 2>&1
-          status=$?
-          set -e
-          if [ "$status" -eq 0 ]; then
-            rm -f TEMP_TEST_FAILURE.txt
-            exit 0
-          fi
-          {
-            echo '=== FAILING TEST CONTEXT ==='
-            grep -n -B 30 -A 90 '^not ok' /tmp/full-test.log || true
-            echo
-            echo '=== TEST SUMMARY ==='
-            tail -n 20 /tmp/full-test.log
-          } > TEMP_TEST_FAILURE.txt
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add TEMP_TEST_FAILURE.txt
-          git commit -m "Capture failing test assertion context"
-          git push origin HEAD:refactor/extract-selection-feedback
-          exit "$status"
+          python3 - <<'PY'
+          from pathlib import Path
+
+          s = Path('src/main.js').read_text()
+          import_line = "import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';"
+          if s.count(import_line) != 1:
+              raise SystemExit(f'selectionFeedback import count mismatch: {s.count(import_line)}')
+          if "const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';" in s:
+              raise SystemExit('local DEFAULT_SELECTION_HINT still present')
+
+          scene_start = s.find('const scene3d = createStandScene(\n')
+          scene_end = s.find('\n\nfunction renderStageResult', scene_start)
+          if scene_start < 0 or scene_end < 0:
+              raise SystemExit(f'scene wiring boundaries missing: {scene_start}, {scene_end}')
+          scene = s[scene_start:scene_end]
+
+          required = [
+              'describeSurfaceSelection(surfaces, currentModules)',
+              'describeFloorSelection(floorSelection)',
+          ]
+          missing = [item for item in required if item not in scene]
+          if missing:
+              raise SystemExit(f'helper delegation missing: {missing}')
+
+          forbidden = [
+              "if (moduleType === 'counter')",
+              'selectedFabricGroupIds = new Set',
+              '({ selected, floorType, paintable }) =>',
+          ]
+          residue = [item for item in forbidden if item in scene]
+          if residue:
+              raise SystemExit(f'old selection decision logic remains in scene wiring: {residue}')
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Full test suite
+        run: npm test
       - name: Production build
         run: npm run build
