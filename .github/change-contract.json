@@ -1,15 +1,16 @@
 {
-  "schemaVersion": 1,
-  "id": "remediate-f009-local-diff-enforcement",
+  "schemaVersion": 2,
+  "id": "governance-full-system-impact-sweep",
   "kind": "architecture",
-  "summary": "Close F-009 by making local contract verification resolve and enforce the actual git diff instead of skipping diff enforcement outside CI.",
+  "summary": "Require every guarded change to discover and acknowledge reverse dependencies, existing tests, related docs/contracts and candidate audit findings before implementation can be accepted.",
   "owners": [
+    "scripts/change-impact-analysis.mjs",
     "scripts/verify-change-contract.mjs",
-    "test/systemChangeGateLocalDiff.test.js"
+    "src/systemChangeContract.js"
   ],
   "sourceOfTruth": [
     "SYSTEM_CHANGE_GATE.md",
-    "audit/evidence/A02_CHANGE_GATE.md"
+    "SYSTEM_IMPACT_SWEEP.md"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -30,21 +31,57 @@
     "security": "not-applicable",
     "tests": "affected"
   },
+  "impactAnalysis": {
+    "mode": "full-system",
+    "affectedFiles": [
+      "package.json",
+      ".github/workflows/ci.yml"
+    ],
+    "affectedTests": [
+      "test/systemChangeGate.test.js",
+      "test/systemChangeGateCiContract.test.js",
+      "test/systemChangeGateLocalDiff.test.js",
+      "test/systemImpactAnalysis.test.js",
+      "test/systemDevelopmentContract.test.js"
+    ],
+    "affectedDocs": [
+      "PROJECT_RULES.md",
+      "SYSTEM_CHANGE_GATE.md",
+      "SYSTEM_DEVELOPMENT_CONTRACT.md",
+      "audit/evidence/A02_CHANGE_GATE.md",
+      "audit/remediation/A02_CLOSURE.md"
+    ],
+    "relatedFindings": {
+      "affected": [],
+      "reviewedNotAffected": [
+        "F-005",
+        "F-006",
+        "F-007",
+        "F-008",
+        "F-009",
+        "F-041",
+        "F-042",
+        "F-046"
+      ]
+    },
+    "notes": "This governance change strengthens acceptance criteria rather than changing runtime product behavior. Existing change-gate tests, CI wiring and A02 governance evidence are reviewed because they depend on the verifier/schema contract. Closed findings remain closed; the new sweep prevents future remediation from silently missing dependent code/tests/findings."
+  },
   "tests": {
     "targeted": [
+      "test/systemChangeGate.test.js",
       "test/systemChangeGateLocalDiff.test.js",
-      "test/systemChangeGateCiContract.test.js"
+      "test/systemImpactAnalysis.test.js"
     ],
     "fullSuite": true,
     "build": true
   },
   "risk": {
     "level": "medium",
-    "notes": "This changes local development acceptance behavior and intentionally fails closed when a local base cannot be resolved; runtime product behavior is unchanged."
+    "notes": "The gate intentionally becomes stricter and may reject changes until all automatically discovered dependents, tests, docs and finding candidates are explicitly reviewed. Runtime application behavior is unchanged."
   },
   "migration": {
     "required": false,
-    "notes": "No runtime or persisted-data migration is introduced."
+    "notes": "No product or persisted-data migration is required. Future change declarations must use schemaVersion 2 and include impactAnalysis."
   },
-  "rollback": "Revert the F-009 remediation PR to restore CI-only diff enforcement."
+  "rollback": "Revert the full-system impact sweep governance commits to restore schemaVersion 1 and path/domain-only change verification."
 }
