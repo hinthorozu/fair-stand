@@ -67,11 +67,15 @@ Yapılanlar:
 
 ## P1 — Catalog → module behavior contract coverage
 
-Durum: **UYGULANDI / CI BEKLENİYOR**
+Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
 Branch:
 
 - `test/catalog-module-behavior-contract`
+
+PR:
+
+- #5 — `Enforce catalog module behavior contracts`
 
 Yapılanlar:
 
@@ -83,10 +87,10 @@ Yapılanlar:
 - Yeni bir catalog type davranış kaydı olmadan eklenirse CI artık kırılır.
 - Unknown/non-catalog type fallback davranışının hâlâ korunduğu ayrıca test edilir.
 - `MODULE_BEHAVIOR_STANDARD.md` bu yeni explicit catalog contract ile güncellendi.
+- Canonical CI'da `npm ci`, `npm test` ve `npm run build` başarılı geçti.
 
 ## Sıradaki İş
 
-1. Bu branch için PR aç.
-2. Canonical CI sonucunu doğrula.
-3. Başarılıysa ROG'a merge et.
-4. Sonraki P1 olarak README ve ROADMAP güncelliğini ele al.
+Sonraki P1: **README ve ROADMAP güncelliğini gerçek repository durumu ile karşılaştır ve düzelt.**
+
+Önce mevcut README/ROADMAP içeriğini gerçek catalog, scripts ve mevcut feature set ile karşılaştır; sonra yalnız doğrulanmış güncel bilgileri dokümante et.
