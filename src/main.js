@@ -104,6 +104,8 @@ const resetModuleFeaturesButton = document.querySelector('#reset-module-features
 const assetLibraryElement = document.querySelector('#asset-library');
 const assetStatus = document.querySelector('#asset-status');
 const projectNameInput = document.querySelector('#project-name');
+const projectNameDisplay = document.querySelector('#project-name-display');
+const renameProjectButton = document.querySelector('#rename-project');
 const projectSelect = document.querySelector('#project-select');
 const saveProjectButton = document.querySelector('#save-project');
 const openProjectButton = document.querySelector('#open-project');
@@ -115,6 +117,13 @@ const projectStatus = document.querySelector('#project-status');
 const projectLoadingOverlay = document.querySelector('#project-loading-overlay');
 const projectLoadingTitle = document.querySelector('#project-loading-title');
 const projectLoadingDetail = document.querySelector('#project-loading-detail');
+
+function setProjectName(name) {
+  const normalized = String(name || '').trim() || 'Adsız Proje';
+  projectNameInput.value = normalized;
+  if (projectNameDisplay) projectNameDisplay.textContent = normalized;
+  return normalized;
+}
 
 function setSidebarCollapsed(collapsed) {
   appElement?.classList.toggle('sidebar-collapsed', collapsed);
@@ -1235,7 +1244,7 @@ createStageButton.addEventListener('click', async () => {
   disableAutosave();
   activeProjectId = createProjectId();
   activeProjectCreatedAt = Date.now();
-  projectNameInput.value = projectName;
+  setProjectName(projectName);
   projectSelect.selectedIndex = -1;
   clearRegisteredAssets();
   projectStatus.textContent = 'Yeni proje hazırlanıyor: ' + projectName + '…';
@@ -1604,7 +1613,7 @@ async function restoreProject(project) {
   disableAutosave();
   activeProjectId = project.id;
   activeProjectCreatedAt = Number(project.createdAt) || Date.now();
-  projectNameInput.value = project.name || 'Adsız Proje';
+  setProjectName(project.name || 'Adsız Proje');
   currentModules = cloneProjectState(project.modules) || [];
   currentModules.forEach((moduleState) => {
     if (!moduleState.catalogKey) moduleState.catalogKey = resolveModuleCatalogKey(moduleState);
@@ -2032,6 +2041,26 @@ imageInput.addEventListener('change', async () => {
   }
 });
 
+renameProjectButton?.addEventListener('click', async () => {
+  const currentName = projectNameInput.value.trim() || 'Adsız Proje';
+  const nextName = await requestNewProjectName(currentName);
+  if (!nextName || nextName === currentName) return;
+  setProjectName(nextName);
+  if (currentStand || autosaveEnabled) {
+    try {
+      clearAutosaveTimer();
+      await persistActiveProject({ quiet: true });
+      enableAutosaveFromCurrentState();
+      projectStatus.textContent = 'Proje adı değiştirildi ve kaydedildi: ' + nextName;
+    } catch (error) {
+      console.warn('Proje adı değiştirilemedi:', error);
+      projectStatus.textContent = 'Proje adı değiştirildi ancak kaydedilemedi.';
+    }
+  } else {
+    projectStatus.textContent = 'Proje adı hazır: ' + nextName;
+  }
+});
+
 saveProjectButton.addEventListener('click', async () => {
   setButtonBusy(saveProjectButton, true, 'Kaydediliyor');
   projectStatus.textContent = 'Proje kaydediliyor…';
@@ -2247,10 +2276,6 @@ deleteProjectButton.addEventListener('click', async () => {
     await refreshProjectList();
     projectStatus.textContent = 'Proje silindi.';
   } catch (error) { console.warn('Proje silinemedi:', error); projectStatus.textContent = 'Proje silinemedi.'; }
-});
-
-projectNameInput.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') saveProjectButton.click();
 });
 
 fillImageButton.addEventListener('click', () => {
