@@ -3,7 +3,7 @@ const GUIDE_SECTIONS = [
     title: 'Hızlı Başlangıç',
     open: true,
     html: `
-      <p>Stand tipini seç, X ve Y ölçülerini gir ve <strong>Sahneyi Oluştur</strong> ile çalışmaya başla. Sonra katalogdan modül ekleyebilir, sahnedeki modülleri taşıyabilir ve panel yüzeylerini özelleştirebilirsin.</p>
+      <p>Stand tipini seç, X ve Y ölçülerini gir ve <strong>Sahneyi Oluştur</strong> butonuna bas. Açılan küçük pencerede proje adını girdikten sonra sistem yeni ve bağımsız projeyi oluşturur. Sonra katalogdan modül ekleyebilir, sahnedeki modülleri taşıyabilir ve panel yüzeylerini özelleştirebilirsin.</p>
       <div class="help-guide-callout"><strong>Temel akış:</strong> Sahne oluştur → Modül ekle → Yerleştir → Panel seç → Renk / görsel / cam / Lightbox / Mesh uygula → Kaydet veya Render Al.</div>
     `,
   },
@@ -194,7 +194,7 @@ const GUIDE_SECTIONS = [
     title: 'Proje Kaydetme, Açma ve Yedekleme',
     html: `
       <ul>
-        <li><strong>Yeni:</strong> Yeni çalışma başlatır; kaydedilmemiş değişiklikler için uyarı verir.</li>
+        <li><strong>Yeni proje:</strong> Ayrı bir “Yeni” butonu yoktur. Stand Tipi bölümündeki <strong>Sahneyi Oluştur</strong> yeni proje başlatır ve önce proje adını sorar.</li>
         <li><strong>Kaydet:</strong> Stand, modüller, yerleşimler ve proje durumunu kaydeder.</li>
         <li><strong>Otomatik kayıt:</strong> Kayıtlı/açılmış projede değişiklik algılandıktan yaklaşık 5 saniye sonra çalışır.</li>
         <li><strong>Aç:</strong> Kayıtlı projeyi görselleriyle birlikte yükler.</li>
