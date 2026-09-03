@@ -8,13 +8,13 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 ## Summary
 
 - Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **42**
-- Closed findings: **4**
+- Open findings: **41**
+- Closed findings: **5**
 - Open P0: **0**
-- Open P1: **19**
+- Open P1: **18**
 - Open P2: **23**
 - Open P3: **0**
-- Remediation progress: **A00 closed; A01 closed; A02 next**
+- Remediation progress: **A00 closed; A01 closed; A02 in progress (F-005 closed; F-006 next)**
 
 ## Findings
 
@@ -24,7 +24,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-002 | P2 | Historical/repository-progress docs can be mistaken for current truth | **CLOSED** — `audit/remediation/A01_F002_CLOSURE.md` |
 | F-003 | P2 | Roadmaps duplicate canonical production dimensions/recipe facts | **CLOSED** — `audit/remediation/A01_F003_CLOSURE.md` |
 | F-004 | P2 | README/developer entrypoint predates universal change-gate workflow | **CLOSED** — `audit/remediation/A01_F004_CLOSURE.md` |
-| F-005 | P1 | Change-gate path/domain wall incomplete; 20/51 `src/` files have zero mandatory mapping | OPEN |
+| F-005 | P1 | Change-gate path/domain wall incomplete; 20/51 `src/` files have zero mandatory mapping | **CLOSED** — `audit/remediation/A02_F005_CLOSURE.md` |
 | F-006 | P1 | Canonical rule/gate Markdown not protected by change gate | OPEN |
 | F-007 | P2 | `test/` and `tests/` outside change-gate guarded-file governance | OPEN |
 | F-008 | P2 | Targeted regression declaration can be empty; test impact not machine-required | OPEN |
