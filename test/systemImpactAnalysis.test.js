@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import {
   analyzeChangeImpact,
@@ -110,5 +111,40 @@ test('full analysis reports code dependents, existing tests, docs and finding ca
   assert.ok(result.affectedFiles.includes('src/main.js'));
   assert.ok(result.affectedTests.includes('test/module.test.js'));
   assert.ok(result.affectedDocs.includes('SYSTEM_IMPACT_SWEEP.md'));
+  assert.ok(result.candidateFindings.includes('F-028'));
+});
+
+test('F-010-style ownership refactor discovers the real stale source-shape tests and linked F-028 finding', () => {
+  const paths = [
+    'src/main.js',
+    'src/designState.js',
+    'test/coatRackModule.test.js',
+    'test/indoorPlants.test.js',
+    'audit/evidence/A10_UI_CONTROLS.md',
+  ];
+  const files = Object.fromEntries(paths.map((filePath) => [
+    filePath,
+    readFileSync(new URL(`../${filePath}`, import.meta.url), 'utf8'),
+  ]));
+
+  const patch = `
+--- a/src/main.js
++++ b/src/main.js
+@@ -1,2 +1,2 @@
+-const createCatalogModuleState = (module) => createCoatRackModuleState(module);
++const createCatalogModuleState = (module) => createModuleStateFromDescriptor(module);
+-createIndoorPlantModuleState(module);
++createModuleStateFromDescriptor(module);
+`;
+
+  const result = analyzeChangeImpact({
+    changedFiles: ['src/main.js', 'src/designState.js'],
+    tokenFiles: ['src/main.js', 'src/designState.js'],
+    fileContents: files,
+    patchText: patch,
+  });
+
+  assert.ok(result.affectedTests.includes('test/coatRackModule.test.js'));
+  assert.ok(result.affectedTests.includes('test/indoorPlants.test.js'));
   assert.ok(result.candidateFindings.includes('F-028'));
 });
