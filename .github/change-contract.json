@@ -48,12 +48,19 @@
       "PROJECT_RULES.md",
       "SYSTEM_CHANGE_GATE.md",
       "SYSTEM_DEVELOPMENT_CONTRACT.md",
+      "SYSTEM_AUDIT_CHECKLIST.md",
+      "audit/evidence/A00_BASELINE.md",
+      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
       "audit/evidence/A02_CHANGE_GATE.md",
-      "audit/remediation/A02_CLOSURE.md"
+      "audit/evidence/A03_ARCHITECTURE.md",
+      "audit/remediation/A02_CLOSURE.md",
+      "audit/remediation/A02_F005_CLOSURE.md",
+      "audit/remediation/A02_F006_CLOSURE.md"
     ],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": [
+        "F-004",
         "F-005",
         "F-006",
         "F-007",
@@ -64,7 +71,7 @@
         "F-046"
       ]
     },
-    "notes": "This governance change strengthens acceptance criteria rather than changing runtime product behavior. Existing change-gate tests, CI wiring and A02 governance evidence are reviewed because they depend on the verifier/schema contract. Closed findings remain closed; the new sweep prevents future remediation from silently missing dependent code/tests/findings."
+    "notes": "This governance change strengthens acceptance criteria rather than changing runtime product behavior. Existing change-gate tests, CI wiring, canonical governance documents and historical audit/closure records that reference the gate are explicitly reviewed. F-004 is a discovery candidate because it references the developer entrypoint/change-gate workflow, but its closed documentation alignment remains valid and is not functionally changed. Other listed findings remain unchanged; the new sweep prevents future remediation from silently missing dependent code/tests/findings."
   },
   "tests": {
     "targeted": [
