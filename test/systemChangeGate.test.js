@@ -5,9 +5,11 @@ import { readFileSync, readdirSync } from 'node:fs';
 import {
   GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS,
   SOURCE_FILE_REQUIRED_DOMAINS,
+  SYSTEM_BROWSER_E2E_DOMAINS,
   SYSTEM_IMPACT_DOMAINS,
   isGuardedChangeFile,
   requiredDomainsForFile,
+  requiresBrowserE2E,
   validateSystemChangeContract,
 } from '../src/systemChangeContract.js';
 
@@ -37,6 +39,11 @@ function validContract(overrides = {}) {
       targeted: ['test/example.test.js'],
       fullSuite: true,
       build: true,
+      e2e: {
+        required: false,
+        targeted: [],
+        reason: 'This fixture has no browser-impacting domain.',
+      },
     },
     risk: {
       level: 'low',
@@ -109,9 +116,8 @@ test('every change must name at least one non-empty targeted regression test', (
   for (const targeted of [[], ['   ']]) {
     const contract = validContract({
       tests: {
+        ...validContract().tests,
         targeted,
-        fullSuite: true,
-        build: true,
       },
     });
 
@@ -130,6 +136,58 @@ test('targeted regressions must be part of the reviewed affected-test inventory'
 
   const errors = validateSystemChangeContract(contract);
   assert.ok(errors.some((error) => error.includes('Targeted tests must also appear in impactAnalysis.affectedTests')));
+});
+
+test('browser-impacting domains automatically require E2E coverage', () => {
+  for (const domain of SYSTEM_BROWSER_E2E_DOMAINS) {
+    const contract = validContract({
+      impact: {
+        ...validContract().impact,
+        [domain]: 'affected',
+      },
+    });
+
+    assert.equal(requiresBrowserE2E(contract.impact), true, `${domain} must trigger browser E2E`);
+    const errors = validateSystemChangeContract(contract);
+    assert.ok(
+      errors.some((error) => error.includes('Browser-impacting changes must require E2E coverage')),
+      `${domain} must be rejected without E2E`,
+    );
+  }
+});
+
+test('required E2E must name real e2e paths in the reviewed affected-test inventory', () => {
+  const contract = validContract({
+    impact: {
+      ...validContract().impact,
+      ui: 'affected',
+    },
+    tests: {
+      ...validContract().tests,
+      e2e: {
+        required: true,
+        targeted: ['test/not-e2e.test.js', 'e2e/missing-review.spec.mjs'],
+        reason: 'Browser-visible behavior changed.',
+      },
+    },
+  });
+
+  const errors = validateSystemChangeContract(contract);
+  assert.ok(errors.some((error) => error.includes('E2E targeted tests must live under e2e/')));
+  assert.ok(errors.some((error) => error.includes('E2E targeted tests must also appear in impactAnalysis.affectedTests')));
+});
+
+test('non-browser governance changes may explicitly declare E2E not required', () => {
+  const contract = validContract({
+    kind: 'architecture',
+    impact: {
+      ...validContract().impact,
+      architecture: 'affected',
+    },
+  });
+
+  assert.equal(requiresBrowserE2E(contract.impact), false);
+  assert.deepEqual(validateSystemChangeContract(contract), []);
 });
 
 test('UI controls cannot declare UI as not applicable', () => {
@@ -160,13 +218,15 @@ test('architecture changes must declare architecture impact', () => {
   assert.ok(errors.some((error) => error.includes('architecture changes must mark architecture as affected')));
 });
 
-test('guarded paths cover runtime, UI, assets, tests, governance docs and delivery infrastructure', () => {
+test('guarded paths cover runtime, UI, assets, unit tests, E2E, governance docs and delivery infrastructure', () => {
   assert.equal(isGuardedChangeFile('src/main.js'), true);
   assert.equal(isGuardedChangeFile('index.html'), true);
   assert.equal(isGuardedChangeFile('public/models/example.glb'), true);
   assert.equal(isGuardedChangeFile('scripts/install-server.sh'), true);
   assert.equal(isGuardedChangeFile('test/systemChangeGate.test.js'), true);
   assert.equal(isGuardedChangeFile('tests/legacy-regression.test.js'), true);
+  assert.equal(isGuardedChangeFile('e2e/smoke.spec.mjs'), true);
+  assert.equal(isGuardedChangeFile('playwright.config.mjs'), true);
   assert.equal(isGuardedChangeFile('.github/workflows/ci.yml'), true);
   assert.equal(isGuardedChangeFile('README.md'), true);
   assert.equal(isGuardedChangeFile('SYSTEM_CHANGE_GATE.md'), true);
@@ -175,11 +235,12 @@ test('guarded paths cover runtime, UI, assets, tests, governance docs and delive
   assert.equal(isGuardedChangeFile('ROADMAP.md'), false);
 });
 
-test('test surfaces require an explicit tests impact declaration', () => {
-  for (const path of ['test/systemChangeGate.test.js', 'tests/legacy-regression.test.js']) {
+test('all test surfaces require explicit tests impact', () => {
+  for (const path of ['test/systemChangeGate.test.js', 'tests/legacy-regression.test.js', 'e2e/smoke.spec.mjs']) {
     assert.equal(isGuardedChangeFile(path), true, `${path} must be guarded`);
     assert.deepEqual(requiredDomainsForFile(path), ['tests'], `${path} must require tests impact`);
   }
+  assert.deepEqual(requiredDomainsForFile('playwright.config.mjs').sort(), ['architecture', 'tests']);
 });
 
 test('canonical governance documents are guarded architecture surfaces', () => {
