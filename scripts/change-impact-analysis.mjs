@@ -19,7 +19,7 @@ function unique(values) {
 export function extractLocalReferenceSpecifiers(source) {
   const specifiers = [];
   const patterns = [
-    /\b(?:import|export)\s+(?:[\s\S]*?\s+from\s*)?['"]([^'"]+)['"]/g,
+    /\b(?:import|export)\s+(?:[^;'"`]*?\s+from\s*)?['"]([^'"]+)['"]/g,
     /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
     /new\s+URL\s*\(\s*['"]([^'"]+)['"]\s*,\s*import\.meta\.url\s*\)/g,
     /['"]((?:\.\.\/|\.\/)[^'"]+)['"]/g,
@@ -111,8 +111,10 @@ export function extractImpactTokensFromPatch(patchText) {
     for (const match of line.matchAll(/\b([A-Za-z_$][\w$]*(?:State|Controller|Registry|Contract|Module|Descriptor|Factory|Handler|Action|Policy|Config))\b/g)) addToken(tokens, match[1]);
     for (const match of line.matchAll(/\bid\s*=\s*['"]([^'"]+)['"]/g)) addToken(tokens, match[1]);
     for (const match of line.matchAll(/\bdata-[\w-]+\s*=\s*['"]([^'"]+)['"]/g)) addToken(tokens, match[1]);
+    for (const match of line.matchAll(/\bclass\s*=\s*['"]([^'"]+)['"]/g)) {
+      for (const className of match[1].split(/\s+/)) addToken(tokens, className);
+    }
     for (const match of line.matchAll(/#([A-Za-z][\w-]{4,})\b/g)) addToken(tokens, match[1]);
-    for (const match of line.matchAll(/\.([A-Za-z][\w-]{4,})\b/g)) addToken(tokens, match[1]);
   }
 
   return [...tokens].sort();
