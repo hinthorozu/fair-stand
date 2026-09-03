@@ -1,0 +1,61 @@
+name: Temporary catalog Shift R fix
+
+on:
+  push:
+    branches:
+      - fix/continue-rotation-through-invalid
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/continue-rotation-through-invalid
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Patch catalog drag shortcut
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/moduleDragSidebar.js')
+          s = p.read_text()
+
+          old_hint = "hint.textContent = 'Kartı sahneye sürükle · R/Shift+R: modül standardına göre döndür · grid modüle göre';"
+          new_hint = "hint.textContent = 'Kartı sahneye sürükle · Shift+R: saat yönünde döndür · grid modüle göre';"
+          if s.count(old_hint) != 1:
+              raise SystemExit(f'hint anchor mismatch: {s.count(old_hint)}')
+          s = s.replace(old_hint, new_hint, 1)
+
+          old = """  window.addEventListener('keydown', (event) => {\n    if (!activeModuleState || String(event.key).toLowerCase() !== 'r') return;\n    event.preventDefault();\n    const rotationStepDeg = getModuleRotationStepDeg(activeModuleState);\n    const deltaDeg = event.shiftKey ? -rotationStepDeg : rotationStepDeg;\n    activeRotationZDeg = ((activeRotationZDeg + deltaDeg) % 360 + 360) % 360;\n    rotationLocked = true;\n    if (Number.isFinite(lastClientX) && Number.isFinite(lastClientY)) {\n      onPreview?.(\n        activeModuleState,\n        lastClientX,\n        lastClientY,\n        activeRotationZDeg,\n        rotationLocked,\n      );\n    }\n  });\n"""
+          new = """  window.addEventListener('keydown', (event) => {\n    const isShiftR = activeModuleState\n      && String(event.key).toLowerCase() === 'r'\n      && event.shiftKey\n      && !event.ctrlKey\n      && !event.metaKey\n      && !event.altKey;\n    if (!isShiftR) return;\n    event.preventDefault();\n    const rotationStepDeg = getModuleRotationStepDeg(activeModuleState);\n    // Catalog drag must use the same visual clockwise convention as scene drag.\n    // Keep advancing the requested angle even when the current preview is invalid/red.\n    activeRotationZDeg = ((activeRotationZDeg - rotationStepDeg) % 360 + 360) % 360;\n    rotationLocked = true;\n    if (Number.isFinite(lastClientX) && Number.isFinite(lastClientY)) {\n      onPreview?.(\n        activeModuleState,\n        lastClientX,\n        lastClientY,\n        activeRotationZDeg,\n        rotationLocked,\n      );\n    }\n  });\n"""
+          if s.count(old) != 1:
+              raise SystemExit(f'keydown anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+
+          t = Path('test/catalogDragKeyboardIntegration.test.js')
+          t.write_text("""import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport fs from 'node:fs';\n\nconst source = fs.readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');\n\ntest('catalog drag uses only Shift+R and advances clockwise without validity gating', () => {\n  assert.match(source, /String\\(event\\.key\\)\\.toLowerCase\\(\\) === 'r'[\\s\\S]*event\\.shiftKey/);\n  assert.match(source, /activeRotationZDeg = \\(\\(activeRotationZDeg - rotationStepDeg\\)/);\n  assert.match(source, /onPreview\\?\\.\\([\\s\\S]*activeRotationZDeg,[\\s\\S]*rotationLocked/);\n  assert.doesNotMatch(source, /event\\.shiftKey \\? -rotationStepDeg : rotationStepDeg/);\n  assert.doesNotMatch(source, /R\\/Shift\\+R: modül standardına göre döndür/);\n});\n\ntest('catalog drag help text documents Shift+R clockwise rotation', () => {\n  assert.match(source, /Shift\\+R: saat yönünde döndür/);\n});\n""")
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/moduleDragSidebar.js test/catalogDragKeyboardIntegration.test.js
+          git commit -m "Align catalog drag Shift R rotation behavior"
+          git push origin HEAD:fix/continue-rotation-through-invalid
