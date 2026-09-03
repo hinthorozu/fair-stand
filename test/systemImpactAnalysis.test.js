@@ -11,13 +11,16 @@ import {
   extractLocalReferenceSpecifiers,
 } from '../scripts/change-impact-analysis.mjs';
 
-test('reference extraction sees imports, dynamic imports, new URL source reads and relative path strings', () => {
+test('reference extraction sees imports, source reads, HTML resources and CSS asset URLs', () => {
   const source = `
     import { alpha } from '../src/a.js';
     export { beta } from '../src/b.js';
     const lazy = import('../src/c.js');
     const sourceText = new URL('../src/main.js', import.meta.url);
     const legacy = '../src/legacy.js';
+    <link href="/src/style.css" rel="stylesheet">
+    <script src="/src/main.js"></script>
+    .stage { background-image: url('/textures/background.jpg'); }
   `;
 
   assert.deepEqual(extractLocalReferenceSpecifiers(source).sort(), [
@@ -26,6 +29,9 @@ test('reference extraction sees imports, dynamic imports, new URL source reads a
     '../src/c.js',
     '../src/legacy.js',
     '../src/main.js',
+    '/src/main.js',
+    '/src/style.css',
+    '/textures/background.jpg',
   ].sort());
 });
 
@@ -43,6 +49,25 @@ test('reverse dependency discovery walks transitive callers and source-text test
     'src/wrapper.js',
     'test/coreShape.test.js',
   ]);
+});
+
+test('changed public background asset discovers the code and CSS that reference it', () => {
+  const files = {
+    'src/scene3d.js': "const floor = '/textures/exhibition-floor.jpg';\n",
+    'src/style.css': ".stage { background: url('/textures/exhibition-floor.jpg'); }\n",
+    'test/render.test.js': "const scene = new URL('../src/scene3d.js', import.meta.url);\n",
+  };
+
+  const result = analyzeChangeImpact({
+    changedFiles: ['public/textures/exhibition-floor.jpg'],
+    tokenFiles: [],
+    referenceFiles: ['public/textures/exhibition-floor.jpg'],
+    fileContents: files,
+  });
+
+  assert.ok(result.affectedFiles.includes('src/scene3d.js'));
+  assert.ok(result.affectedFiles.includes('src/style.css'));
+  assert.ok(result.affectedTests.includes('test/render.test.js'));
 });
 
 test('diff token discovery sees removed implementation symbols and UI identifiers', () => {
