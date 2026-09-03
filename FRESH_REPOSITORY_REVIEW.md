@@ -1,5 +1,13 @@
 # Fair Stand — Fresh Repository Review
 
+> **HISTORICAL SNAPSHOT — CURRENT SOURCE OF TRUTH DEĞİLDİR.**
+>
+> Bu dosya repository'nin daha önceki bir durumuna ait inceleme kaydıdır. İçindeki “mevcut”, “şu anda”, öncelik ve öneri ifadeleri **bugünkü ROG durumunu temsil etmez** ve yeni iş planı olarak kullanılmamalıdır.
+>
+> Güncel durum için sırasıyla `audit/FULL_SWEEP_STATE.md`, `audit/FINDINGS.md`, `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `SYSTEM_DEVELOPMENT_CONTRACT.md` ve `SYSTEM_CHANGE_GATE.md` okunmalıdır. Bu historical kayıt yalnız geçmiş kararların/tespitlerin bağlamını korumak için tutulur.
+
+---
+
 > Bu rapor, mevcut geliştirme geçmişinden bağımsız, repository'ye fresh bir gözle bakılarak hazırlanmıştır. Amaç çalışan özellikleri yeniden tasarlamak değil; saçma, çelişkili, eskimiş, riskli veya iyileştirilebilir alanları tespit edip uygulanabilir bir temizlik/refactor sırası çıkarmaktır.
 
 ## Genel Sonuç
