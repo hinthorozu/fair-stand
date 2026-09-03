@@ -135,9 +135,11 @@ Merge commit: `537622c6bdf5384be7e12456866a20ab58014ef3`
 
 ## P1 — `main.js` sorumluluk azaltma / ilk controller extraction
 
-Durum: **UYGULANDI — PR/CI BEKLİYOR**
+Durum: **TAMAMLANDI / CI DOĞRULANDI — MERGE BEKLİYOR**
 
 Branch: `refactor/extract-project-naming`
+
+PR: #9 — `Extract project naming controller from main.js`
 
 İlk düşük riskli extraction olarak proje adlandırma alanı seçildi.
 
@@ -152,6 +154,7 @@ Yapılanlar:
 - `test/projectNaming.test.js` eklendi.
 - Suffix contract'ı, Adsız Proje fallback'i, editable-name davranışı ve input/display sync test edildi.
 - Extraction patch'i sırasında `npm test` ve `npm run build` başarılı geçti.
+- PR #9 canonical CI'da `npm ci`, `npm test`, `npm run build` başarılı geçti.
 - Geçici patch workflow final branch tree'sinden kaldırıldı; repository'de canonical `.github/workflows/ci.yml` dışında yeni kalıcı workflow bırakılmadı.
 
 Branch diff özeti:
@@ -162,7 +165,5 @@ Branch diff özeti:
 
 ## Sıradaki İş
 
-1. Project naming extraction için PR aç.
-2. Canonical CI install/test/build sonucunu doğrula.
-3. Başarılıysa ROG'a merge et.
-4. Sonraki düşük riskli `main.js` extraction adayı olarak autosave veya project UI helper grubunu source/test üzerinden değerlendir.
+1. PR #9'u latest-head CI tekrar başarılı olduktan sonra ROG'a merge et.
+2. Sonraki düşük riskli `main.js` extraction adayı olarak autosave controller ile project UI helper grubunu karşılaştır; davranış sınırı daha net ve test edilebilir olanı seç.
