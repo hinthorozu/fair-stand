@@ -45,6 +45,7 @@ import {
   cmykToRgb,
   rgbToHex,
 } from './colorUtils.js';
+import { normalizeCmykValues, readNumberGroup } from './colorEditorInputs.js';
 import { STAND_TYPE_LABELS, validateStandSetup } from './standSetup.js';
 import { validateStandAxisCapacity } from './standCapacity.js';
 import {
@@ -1412,17 +1413,6 @@ function syncColorEditorFromHex(hex, { apply = false } = {}) {
   return true;
 }
 
-function readNumberGroup(inputs) {
-  const values = {};
-  for (const [key, input] of Object.entries(inputs)) {
-    if (input.value.trim() === '') return null;
-    const value = Number(input.value);
-    if (!Number.isFinite(value)) return null;
-    values[key] = value;
-  }
-  return values;
-}
-
 function syncFromRgbInputs() {
   const rgb = readNumberGroup(colorRgbInputs);
   if (!rgb) return;
@@ -1433,12 +1423,7 @@ function syncFromCmykInputs() {
   const cmyk = readNumberGroup(colorCmykInputs);
   if (!cmyk) return;
 
-  const normalizedCmyk = Object.fromEntries(
-    Object.entries(cmyk).map(([key, value]) => [
-      key,
-      Math.min(100, Math.max(0, Math.round(value))),
-    ]),
-  );
+  const normalizedCmyk = normalizeCmykValues(cmyk);
   Object.entries(normalizedCmyk).forEach(([key, value]) => {
     colorCmykInputs[key].value = String(value);
   });

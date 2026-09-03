@@ -18,7 +18,7 @@ Ayrıntılı ilk teknik rapor: `FRESH_REPOSITORY_REVIEW.md`
 2. Dokümantasyonu kayıpsız sınıflandır; eski/uyumsuz bilgiyi sessizce silme.
 3. ROADMAP'i gerçek implementasyon durumuyla eşleştir.
 4. Catalog → module behavior coverage testi ekle.
-5. `main.js` içine yeni sorumluluk eklememeye başla; yeni controller'ları ayrı dosyalara çıkar.
+5. `main.js` içine yeni sorumluluk eklememeye başla; yeni controller/helper'ları ayrı dosyalara çıkar.
 
 ### P2 / P3
 
@@ -33,11 +33,11 @@ Ayrıntılı ilk teknik rapor: `FRESH_REPOSITORY_REVIEW.md`
 
 Durum: **TAMAMLANDI**
 
+Merge: PR #3
+
 - Eski tek-seferlik workflow/scriptler kaldırıldı.
 - Tek canonical `.github/workflows/ci.yml` bırakıldı.
 - CI Node 22 + `npm ci` + `npm test` + `npm run build` kullanıyor.
-
-Merge: PR #3
 
 ---
 
@@ -132,26 +132,51 @@ Merge commit: `fa8f518825d9efd2a15c548f078e316cef0e4502`
 
 ## P1 — Project UI helper extraction
 
+Durum: **TAMAMLANDI / CI DOĞRULANDI**
+
+Merge: PR #12
+
+Merge commit: `c46ee5cc117df5d8b1625924bc6c072bdeec571d`
+
+- `src/projectUi.js` oluşturuldu.
+- `setButtonBusy()` ve project loading overlay show/hide davranışı `main.js` dışına taşındı.
+- Unit + integration guard testleri eklendi.
+
+---
+
+## Feature / UX araya giren işler
+
+Cleanup planını iptal etmeden, kullanıcı tarafındaki ihtiyaçlar nedeniyle PR #13–#20 arası aşağıdaki işler ROG'a alındı:
+
+- PR #13–#14: kayıtlı proje dropdown geçişi + yardım kılavuzu.
+- PR #15–#17: kamera kısayolları ve `Shift+R` saat yönü standardı.
+- PR #18–#20: sürükleme ve sabit seçili modül rotasyonunun invalid ara açılardan devam etmesi.
+
+Son doğrulanmış ROG merge commit: `0ee4eb8a73f0140a98d131a9b3a275f6685d4a2c`.
+
+---
+
+## P1 — Color editor input helper extraction
+
 Durum: **UYGULANDI — PR/CANONICAL CI BEKLİYOR**
 
-Branch: `refactor/extract-project-ui-helpers`
+Branch: `refactor/extract-color-input-helpers`
 
-Amaç: `main.js` içindeki düşük riskli, generic project UI yardımcılarını state/storage davranışına dokunmadan ayırmak.
+Amaç: asset library gibi storage/autosave/project-state ile yüksek coupling taşıyan alana girmeden önce color editor'ın en düşük riskli, saf input işleme kısmını `main.js` dışına çıkarmak.
 
 Yapılanlar:
 
-- `src/projectUi.js` oluşturuldu.
-- `setButtonBusy()` `main.js` dışına taşındı; idle label, disabled state ve `aria-busy` davranışı birebir korundu.
-- Proje loading overlay show/hide davranışı `createProjectLoadingController()` içine taşındı.
-- `main.js` yalnız DOM elementlerini controller'a bağlıyor.
-- `test/projectUi.test.js` ile busy-button ve loading overlay kontratları test edildi.
-- `test/projectUiMainIntegration.test.js` ile legacy helper fonksiyonlarının `main.js` içine geri dönmesi engelleniyor.
-- Guarded patch + full `npm test` + `npm run build` başarılı geçti.
-- Geçici extraction workflow final branch tree'sinden kaldırıldı.
+- `src/colorEditorInputs.js` eklendi.
+- Numeric RGB/CMYK input grubu okuma `readNumberGroup()` helper'ına taşındı.
+- CMYK clamp/round işlemi `normalizeCmykValues()` helper'ına taşındı.
+- `main.js` yalnız color editor orchestration ve scene apply davranışını tutuyor.
+- `test/colorEditorInputs.test.js` ile helper contract'ları test edildi.
+- `test/colorEditorMainIntegration.test.js` ile helper'ların tekrar `main.js` içine gömülmesi engelleniyor.
+- Guarded patch sonrası `npm ci`, `npm test`, `npm run build` başarılı geçti.
 
 ## Sıradaki İş
 
-1. Project UI helper extraction için PR aç.
+1. Bu extraction branch'inden PR aç.
 2. Latest-head canonical CI'da `npm ci`, `npm test`, `npm run build` başarılarını doğrula.
 3. Başarılıysa ROG'a merge et.
-4. Sonraki düşük riskli `main.js` sorumluluğu için color editor ile asset library gruplarını coupling açısından karşılaştır.
+4. Sonraki color editor adımında DOM sync/orchestration ile scene uygulama sınırını tekrar değerlendir; asset library'ye ancak daha düşük riskli color parçaları bittikten sonra gir.
