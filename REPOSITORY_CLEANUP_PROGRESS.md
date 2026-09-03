@@ -34,15 +34,9 @@ Ayrıntılı ilk teknik rapor:
 
 Durum: **TAMAMLANDI**
 
-Yapılanlar:
-
-- Eski tek-seferlik `add-*`, `fix-*`, `inspect-*`, `rename-*` ve video-wall patch workflow'ları kaldırıldı.
-- `.github/scripts` altındaki geçmiş patch scriptleri kaldırıldı.
-- Eski `build.yml` kaldırıldı.
-- Tek kalıcı workflow olarak `.github/workflows/ci.yml` bırakıldı.
-- Canonical CI Node 22 + `npm ci` + `npm test` + `npm run build` kullanıyor.
-- Temizlik doğrulamasında 349 test geçti ve production build başarılı oldu.
-- Uygulama kaynak koduna dokunulmadı.
+- Eski tek-seferlik workflow/scriptler kaldırıldı.
+- Tek canonical `.github/workflows/ci.yml` bırakıldı.
+- CI Node 22 + `npm ci` + `npm test` + `npm run build` kullanıyor.
 
 Merge: PR #3
 
@@ -52,16 +46,11 @@ Merge: PR #3
 
 Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
-Merge: PR #4
-
-Yapılanlar:
-
-- `PROJECT_RULES.md` yalnız gerçek global product invariant'larına indirildi.
-- Module-specific 90° / 50 cm varsayımları global kurallardan çıkarıldı.
+- `PROJECT_RULES.md` global invariant'lara indirildi.
 - `ARCHITECTURE_RULES.md` source-of-truth ve sistem katmanı sınırlarına odaklandı.
-- `MODULE_BEHAVIOR_STANDARD.md` gerçek runtime behavior contract ile hizalandı.
-- `wall-overlay` ve gerçek silhouette ghost contract dokümante edildi.
-- Canonical CI başarılı geçti.
+- `MODULE_BEHAVIOR_STANDARD.md` runtime behavior contract ile hizalandı.
+
+Merge: PR #4
 
 ---
 
@@ -69,28 +58,38 @@ Yapılanlar:
 
 Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
+- Katalogdaki her module type explicit behavior contract'a bağlandı.
+- `hasExplicitModuleBehavior()` eklendi.
+- `test/moduleBehaviorContract.test.js` eklendi.
+- Yeni catalog type behavior kaydı olmadan eklenirse CI kırılır.
+- Unknown/non-catalog fallback davranışı korunur.
+
+Merge: PR #5
+
+---
+
+## P1 — README güncellemesi
+
+Durum: **UYGULANDI / CI BEKLENİYOR**
+
 Branch:
 
-- `test/catalog-module-behavior-contract`
-
-PR:
-
-- #5 — `Enforce catalog module behavior contracts`
+- `docs/update-readme`
 
 Yapılanlar:
 
-- `src/moduleBehavior.js` içinde katalogda kullanılan standart wall module type'ları da explicit registry entry haline getirildi.
-- Ortak wall davranışı `WALL_BEHAVIOR` üzerinden paylaşılır; runtime davranışı değiştirilmeden implicit fallback bağımlılığı kaldırıldı.
-- `hasExplicitModuleBehavior()` helper'ı eklendi.
-- `test/moduleBehaviorContract.test.js` eklendi.
-- Test, `MODULE_CATALOG_KEYS` üzerinden tüm benzersiz katalog type'larını çıkarıp her birinin explicit behavior contract'a sahip olduğunu doğrular.
-- Yeni bir catalog type davranış kaydı olmadan eklenirse CI artık kırılır.
-- Unknown/non-catalog type fallback davranışının hâlâ korunduğu ayrıca test edilir.
-- `MODULE_BEHAVIOR_STANDARD.md` bu yeni explicit catalog contract ile güncellendi.
-- Canonical CI'da `npm ci`, `npm test` ve `npm run build` başarılı geçti.
+- Eski ilk-MVP/gelecek-zaman anlatımı kaldırıldı.
+- README mevcut ürün ve repository yapısını anlatacak şekilde yeniden yazıldı.
+- Güncel katalog/modül aileleri, behavior registry, placement, state, renderer ve BOM katmanları özetlendi.
+- Gerçek package scripts ve CI akışı dokümante edildi.
+- `npm ci`, `npm run dev`, `npm test`, `npm run build`, `npm run preview` komutları güncel şekilde yazıldı.
+- Global 90° / 50 cm gibi artık doğru olmayan varsayımlar README'ye taşınmadı; canonical `moduleBehavior.js` kaynağına yönlendirme yapıldı.
+- Yeni module checklist'i ve canonical repository dokümanları eklendi.
+- Uygulama runtime koduna dokunulmadı.
 
 ## Sıradaki İş
 
-Sonraki P1: **README ve ROADMAP güncelliğini gerçek repository durumu ile karşılaştır ve düzelt.**
-
-Önce mevcut README/ROADMAP içeriğini gerçek catalog, scripts ve mevcut feature set ile karşılaştır; sonra yalnız doğrulanmış güncel bilgileri dokümante et.
+1. README branch'i için PR aç.
+2. Canonical CI sonucunu doğrula.
+3. Başarılıysa ROG'a merge et.
+4. Sonraki P1 olarak `ROADMAP.md` ve ilgili phase roadmap'lerini gerçek implementasyon durumuyla karşılaştırıp güncelle.
