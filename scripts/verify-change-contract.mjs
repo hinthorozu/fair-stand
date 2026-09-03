@@ -172,7 +172,7 @@ function buildPatchText(diff, changedFiles) {
 }
 
 function isTestPath(path) {
-  return path.startsWith('test/') || path.startsWith('tests/');
+  return path.startsWith('test/') || path.startsWith('tests/') || path.startsWith('e2e/');
 }
 
 function missingDeclared(discovered, declared) {
@@ -192,6 +192,17 @@ const schemaErrors = validateSystemChangeContract(contract);
 if (schemaErrors.length) {
   console.error('System change contract is invalid:');
   for (const error of schemaErrors) console.error(`- ${error}`);
+  process.exit(1);
+}
+
+const declaredTestFiles = uniqueFiles([
+  ...(contract.tests?.targeted ?? []),
+  ...(contract.tests?.e2e?.targeted ?? []),
+]);
+const missingDeclaredTestFiles = declaredTestFiles.filter((path) => !existsSync(resolve(path)));
+if (missingDeclaredTestFiles.length) {
+  console.error('Declared regression/E2E test files do not exist:');
+  for (const path of missingDeclaredTestFiles) console.error(`- ${path}`);
   process.exit(1);
 }
 
@@ -281,3 +292,8 @@ console.log(`Change contract accepted: ${contract.id}`);
 console.log(`Guarded files: ${guardedFiles.length}`);
 if (requiredDomains.size) console.log(`Path-required domains: ${[...requiredDomains].join(', ')}`);
 console.log(`Impact sweep: ${discovered.affectedFiles.length} code dependents, ${discovered.affectedTests.length} tests, ${discovered.affectedDocs.length} docs, ${discovered.candidateFindings.length} finding candidates reviewed.`);
+if (contract.tests.e2e.required) {
+  console.log(`E2E required: ${contract.tests.e2e.targeted.join(', ')}`);
+} else {
+  console.log(`E2E not required: ${contract.tests.e2e.reason}`);
+}
