@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Step 1-2 - import helpers and remove local hint declaration only
+      - name: Step 5 - delegate surface selection only
         shell: bash
         run: |
           python3 - <<'PY'
@@ -28,32 +28,46 @@ jobs:
 
           p = Path('src/main.js')
           s = p.read_text()
-          anchor = "import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';\n"
-          line = "import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';\n"
-          hint_block = "\nconst DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';\n"
+          scene_start = s.find('const scene3d = createStandScene(\n')
+          callback_start = s.find('  (surfaces) => {\n', scene_start)
+          callback_end = s.find('  getAssetUrl,\n', callback_start)
+          if min(scene_start, callback_start, callback_end) < 0:
+              raise SystemExit(f'surface callback markers missing: scene={scene_start}, start={callback_start}, end={callback_end}')
 
-          if s.count(anchor) != 1:
-              raise SystemExit(f'import anchor mismatch: {s.count(anchor)}')
-          if line not in s:
-              s = s.replace(anchor, anchor + line, 1)
+          old_callback = s[callback_start:callback_end]
+          if 'const feedback = describeSurfaceSelection(surfaces, currentModules);' not in old_callback:
+              required = ["if (moduleType === 'counter')", "if (moduleType === 'illuminated-foam')", 'selectedFabricGroupIds = new Set']
+              missing = [item for item in required if item not in old_callback]
+              if missing:
+                  raise SystemExit(f'surface callback guard mismatch: {missing}')
+              new_callback = """  (surfaces) => {
+    const feedback = describeSurfaceSelection(surfaces, currentModules);
+    selectedFoamModuleId = feedback.foamModuleId;
+    if (foamLightControls) foamLightControls.hidden = !feedback.foamControlsVisible;
+    if (feedback.foamControlsVisible && foamLightColorInput) {
+      foamLightColorInput.value = feedback.foamColor;
+    }
+    selectionInfo.textContent = feedback.message;
+  },
+"""
+              s = s[:callback_start] + new_callback + s[callback_end:]
+              p.write_text(s)
 
-          if hint_block in s:
-              s = s.replace(hint_block, '', 1)
-
-          p.write_text(s)
           updated = p.read_text()
-          if updated.count(line) != 1:
-              raise SystemExit(f'selection feedback import count mismatch: {updated.count(line)}')
-          if hint_block in updated:
-              raise SystemExit('local DEFAULT_SELECTION_HINT declaration still present')
-          if "if (moduleType === 'counter')" not in updated:
-              raise SystemExit('surface callback changed unexpectedly')
-          if 'selectedFabricGroupIds = new Set' not in updated:
-              raise SystemExit('surface multi-selection callback changed unexpectedly')
+          scene_start = updated.find('const scene3d = createStandScene(\n')
+          callback_start = updated.find('  (surfaces) => {\n', scene_start)
+          callback_end = updated.find('  getAssetUrl,\n', callback_start)
+          callback = updated[callback_start:callback_end]
+          if callback.count('describeSurfaceSelection(surfaces, currentModules)') != 1:
+              raise SystemExit('surface helper delegation missing or duplicated')
+          if "if (moduleType === 'counter')" in callback or 'selectedFabricGroupIds = new Set' in callback:
+              raise SystemExit('old surface decision logic still present in surface callback')
+          if '  ({ selected, floorType, paintable }) => {\n' not in updated:
+              raise SystemExit('floor callback changed unexpectedly')
           PY
       - name: Install dependencies
         run: npm ci
-      - name: Helper tests
+      - name: Surface helper tests
         run: node --test test/selectionFeedback.test.js
       - name: Build
         run: npm run build
@@ -67,5 +81,5 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add src/main.js
-          git commit -m "Import selection feedback helpers"
+          git commit -m "Delegate surface selection feedback"
           git push origin HEAD:refactor/extract-selection-feedback
