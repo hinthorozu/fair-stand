@@ -15,12 +15,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+
+      - name: Change contract gate
+        run: npm run contract:verify
 
       - name: Install dependencies
         run: npm ci

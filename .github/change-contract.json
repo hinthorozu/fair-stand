@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "bootstrap-system-change-gate",
+  "kind": "architecture",
+  "summary": "Introduce the universal change declaration and CI gate used before module, feature, UI, state, renderer, persistence, BOM, tooling, or structural changes are accepted.",
+  "owners": [
+    "SYSTEM_CHANGE_GATE.md",
+    "src/systemChangeContract.js",
+    "scripts/verify-change-contract.mjs"
+  ],
+  "sourceOfTruth": [
+    "PROJECT_RULES.md",
+    "ARCHITECTURE_RULES.md",
+    "SYSTEM_DEVELOPMENT_CONTRACT.md",
+    "SYSTEM_CHANGE_GATE.md"
+  ],
+  "impact": {
+    "catalog": "not-applicable",
+    "behavior": "not-applicable",
+    "state": "not-applicable",
+    "placement": "not-applicable",
+    "renderer": "not-applicable",
+    "persistence": "not-applicable",
+    "bom": "not-applicable",
+    "ui": "not-applicable",
+    "composition": "not-applicable",
+    "assets": "not-applicable",
+    "storage": "not-applicable",
+    "importExport": "not-applicable",
+    "performance": "not-applicable",
+    "accessibility": "not-applicable",
+    "architecture": "affected",
+    "security": "not-applicable",
+    "tests": "affected"
+  },
+  "tests": {
+    "targeted": [
+      "test/systemChangeGate.test.js"
+    ],
+    "fullSuite": true,
+    "build": true
+  },
+  "risk": {
+    "level": "medium",
+    "notes": "This changes the development/CI acceptance path but intentionally does not change runtime product behavior."
+  },
+  "migration": {
+    "required": false,
+    "notes": "No runtime or stored-project migration is introduced."
+  },
+  "rollback": "Revert the system change gate PR to restore the previous CI acceptance path."
+}
