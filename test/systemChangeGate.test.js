@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 
 import {
+  SOURCE_FILE_REQUIRED_DOMAINS,
   SYSTEM_IMPACT_DOMAINS,
   isGuardedChangeFile,
   requiredDomainsForFile,
@@ -87,14 +88,53 @@ test('guarded paths cover runtime, UI, assets and delivery infrastructure', () =
   assert.equal(isGuardedChangeFile('README.md'), false);
 });
 
-test('high-risk canonical paths derive mandatory impact domains', () => {
+test('every current src file has an explicit non-empty impact-domain ownership mapping', () => {
+  const sourceFiles = readdirSync(new URL('../src/', import.meta.url), { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => `src/${entry.name}`)
+    .sort();
+  const mappedFiles = Object.keys(SOURCE_FILE_REQUIRED_DOMAINS).sort();
+
+  assert.deepEqual(mappedFiles, sourceFiles, 'SOURCE_FILE_REQUIRED_DOMAINS must classify every current src file exactly once');
+
+  for (const path of sourceFiles) {
+    const domains = requiredDomainsForFile(path);
+    assert.ok(domains.length > 0, `${path} must require at least one impact domain`);
+    assert.ok(domains.every((domain) => SYSTEM_IMPACT_DOMAINS.includes(domain)), `${path} contains an unknown impact domain`);
+  }
+});
+
+test('high-risk canonical paths derive ownership-appropriate mandatory impact domains', () => {
   assert.deepEqual(requiredDomainsForFile('src/catalog.js'), ['catalog']);
   assert.deepEqual(requiredDomainsForFile('src/designState.js').sort(), ['persistence', 'state']);
-  assert.deepEqual(requiredDomainsForFile('src/scene3d.js'), ['renderer']);
   assert.deepEqual(requiredDomainsForFile('src/moduleRecipes.js'), ['bom']);
-  assert.deepEqual(requiredDomainsForFile('src/autoDepot.js'), ['composition']);
+  assert.deepEqual(requiredDomainsForFile('src/autosaveController.js'), ['persistence']);
+  assert.deepEqual(requiredDomainsForFile('src/tvConfig.js').sort(), ['catalog', 'renderer', 'state']);
+  assert.deepEqual(requiredDomainsForFile('src/viewKeyboardShortcuts.js').sort(), ['accessibility', 'behavior', 'ui']);
+  assert.deepEqual(requiredDomainsForFile('src/wall.js').sort(), ['composition', 'placement']);
+  assert.deepEqual(requiredDomainsForFile('src/groundLayout.js').sort(), ['placement', 'renderer']);
   assert.deepEqual(requiredDomainsForFile('public/models/example.glb'), ['assets']);
   assert.deepEqual(requiredDomainsForFile('index.html'), ['ui']);
+});
+
+test('central orchestration cannot hide its known cross-domain responsibilities', () => {
+  const domains = new Set(requiredDomainsForFile('src/main.js'));
+  for (const domain of [
+    'architecture',
+    'catalog',
+    'behavior',
+    'state',
+    'placement',
+    'renderer',
+    'persistence',
+    'ui',
+    'composition',
+    'assets',
+    'storage',
+    'importExport',
+  ]) {
+    assert.equal(domains.has(domain), true, `src/main.js must require ${domain}`);
+  }
 });
 
 test('placement core changes require both behavior and placement declarations', () => {
