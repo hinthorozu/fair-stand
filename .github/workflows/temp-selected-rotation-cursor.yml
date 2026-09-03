@@ -1,0 +1,73 @@
+name: Temporary selected rotation cursor fix
+
+on:
+  push:
+    branches:
+      - fix/selected-module-rotation-cursor
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/selected-module-rotation-cursor
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Patch selected module rotation cursor
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/scene3d.js')
+          s = p.read_text()
+
+          old = """  let placementGhost = null;\n  let dragSession = null;\n  let dragBadge = null;\n"""
+          new = """  let placementGhost = null;\n  let dragSession = null;\n  let keyboardRotationCursor = null;\n  let dragBadge = null;\n"""
+          if s.count(old) != 1:
+              raise SystemExit(f'cursor state anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new, 1)
+
+          old = """  function getSingleSelectedModuleGroup() {\n    let moduleId = selectedModuleId;\n    if (!moduleId) {\n      const moduleIds = new Set(\n        [...selectedSurfaces].map((surface) => surface.userData?.moduleId).filter(Boolean),\n      );\n      if (moduleIds.size !== 1) return null;\n      [moduleId] = moduleIds;\n    }\n    return wallRoot.children.find((group) => (\n      group.userData?.moduleState?.id === moduleId || group.userData?.moduleId === moduleId\n    )) ?? null;\n  }\n\n  function rotateSelectedModule(deltaDeg) {\n"""
+          new = """  function getSingleSelectedModuleGroup() {\n    let moduleId = selectedModuleId;\n    if (!moduleId) {\n      const moduleIds = new Set(\n        [...selectedSurfaces].map((surface) => surface.userData?.moduleId).filter(Boolean),\n      );\n      if (moduleIds.size !== 1) return null;\n      [moduleId] = moduleIds;\n    }\n    return wallRoot.children.find((group) => (\n      group.userData?.moduleState?.id === moduleId || group.userData?.moduleId === moduleId\n    )) ?? null;\n  }\n\n  function getKeyboardRotationPlacementSignature(placement) {\n    if (!placement) return '';\n    return [\n      Number(placement.xCm),\n      Number(placement.yCm),\n      Number(placement.zCm ?? 0),\n      normalizeModuleRotationZDeg(placement.rotationZDeg),\n      placement.wallId ?? 'free',\n    ].join('|');\n  }\n\n  function getKeyboardRotationCursor(moduleState) {\n    const committedPlacementSignature = getKeyboardRotationPlacementSignature(moduleState?.placement);\n    if (\n      !keyboardRotationCursor\n      || keyboardRotationCursor.moduleId !== moduleState?.id\n      || keyboardRotationCursor.committedPlacementSignature !== committedPlacementSignature\n    ) {\n      keyboardRotationCursor = {\n        moduleId: moduleState?.id ?? null,\n        rotationZDeg: normalizeModuleRotationZDeg(moduleState?.placement?.rotationZDeg),\n        committedPlacementSignature,\n      };\n    }\n    return keyboardRotationCursor;\n  }\n\n  function rotateSelectedModule(deltaDeg) {\n"""
+          if s.count(old) != 1:
+              raise SystemExit(f'rotation helper anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new, 1)
+
+          old = """    const stepDeg = getModuleRotationStepDeg(moduleState);\n    const effectiveDeltaDeg = deltaDeg < 0 ? -stepDeg : stepDeg;\n    const nextPlacement = rotateModulePlacementAroundCenter(\n      moduleState.placement,\n      moduleState.widthCm,\n      effectiveDeltaDeg,\n      moduleState.depthCm,\n    );\n"""
+          new = """    const stepDeg = getModuleRotationStepDeg(moduleState);\n    const effectiveDeltaDeg = deltaDeg < 0 ? -stepDeg : stepDeg;\n    const rotationCursor = getKeyboardRotationCursor(moduleState);\n    rotationCursor.rotationZDeg = rotateModuleRotationZDeg(\n      rotationCursor.rotationZDeg,\n      effectiveDeltaDeg,\n    );\n    const currentRotationZDeg = normalizeModuleRotationZDeg(moduleState.placement.rotationZDeg);\n    const targetRotationZDeg = rotationCursor.rotationZDeg;\n    const rotationDeltaFromCommittedDeg = effectiveDeltaDeg < 0\n      ? -((currentRotationZDeg - targetRotationZDeg + 360) % 360)\n      : ((targetRotationZDeg - currentRotationZDeg + 360) % 360);\n    const nextPlacement = rotateModulePlacementAroundCenter(\n      moduleState.placement,\n      moduleState.widthCm,\n      rotationDeltaFromCommittedDeg,\n      moduleState.depthCm,\n    );\n"""
+          if s.count(old) != 1:
+              raise SystemExit(f'rotation calculation anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new, 1)
+
+          old = """    moduleState.placement = { ...nextPlacement };\n    moduleGroup.userData.placement = { ...nextPlacement };\n    applyPlacementToGroup(moduleGroup, nextPlacement, moduleState.widthCm);\n    return { handled: true, ok: true };\n"""
+          new = """    moduleState.placement = { ...nextPlacement };\n    moduleGroup.userData.placement = { ...nextPlacement };\n    applyPlacementToGroup(moduleGroup, nextPlacement, moduleState.widthCm);\n    rotationCursor.rotationZDeg = normalizeModuleRotationZDeg(nextPlacement.rotationZDeg);\n    rotationCursor.committedPlacementSignature = getKeyboardRotationPlacementSignature(nextPlacement);\n    return { handled: true, ok: true };\n"""
+          if s.count(old) != 1:
+              raise SystemExit(f'rotation commit anchor mismatch: {s.count(old)}')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+
+          t = Path('test/selectedModuleRotationCursor.test.js')
+          t.write_text("""import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport fs from 'node:fs';\n\nconst source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');\n\ntest('selected module rotation keeps a cursor across invalid intermediate angles', () => {\n  assert.match(source, /let keyboardRotationCursor = null/);\n  assert.match(source, /function getKeyboardRotationCursor\\(moduleState\\)/);\n  assert.match(source, /rotationCursor\\.rotationZDeg = rotateModuleRotationZDeg\\([\\s\\S]*effectiveDeltaDeg/);\n  assert.match(source, /rotationDeltaFromCommittedDeg = effectiveDeltaDeg < 0[\\s\\S]*currentRotationZDeg - targetRotationZDeg/);\n});\n\ntest('invalid selected rotation does not discard the speculative rotation cursor', () => {\n  const invalidBranch = source.match(/if \\(!validation\\.ok\\) \\{[\\s\\S]*?return \\{ handled: true, ok: false, message \\};\\n    \\}/)?.[0] ?? '';\n  assert.ok(invalidBranch, 'invalid rotation branch must exist');\n  assert.doesNotMatch(invalidBranch, /keyboardRotationCursor = null/);\n  assert.doesNotMatch(invalidBranch, /rotationCursor\\.rotationZDeg = currentRotationZDeg/);\n});\n\ntest('valid selected rotation advances the committed baseline to the accepted angle', () => {\n  assert.match(source, /rotationCursor\\.rotationZDeg = normalizeModuleRotationZDeg\\(nextPlacement\\.rotationZDeg\\)/);\n  assert.match(source, /rotationCursor\\.committedPlacementSignature = getKeyboardRotationPlacementSignature\\(nextPlacement\\)/);\n});\n""")
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/scene3d.js test/selectedModuleRotationCursor.test.js
+          git commit -m "Continue selected rotation through invalid angles"
+          git push origin HEAD:fix/selected-module-rotation-cursor
