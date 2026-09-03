@@ -291,7 +291,7 @@ export function createModuleDragSidebar({
 
   const hint = document.createElement('p');
   hint.className = 'module-drag-hint';
-  hint.textContent = 'Kartı sahneye sürükle · R/Shift+R: modül standardına göre döndür · grid modüle göre';
+  hint.textContent = 'Kartı sahneye sürükle · Shift+R: saat yönünde döndür · grid modüle göre';
 
   const groupsRoot = document.createElement('div');
   groupsRoot.className = 'module-drag-groups';
@@ -418,11 +418,18 @@ export function createModuleDragSidebar({
   });
 
   window.addEventListener('keydown', (event) => {
-    if (!activeModuleState || String(event.key).toLowerCase() !== 'r') return;
+    const isShiftR = activeModuleState
+      && String(event.key).toLowerCase() === 'r'
+      && event.shiftKey
+      && !event.ctrlKey
+      && !event.metaKey
+      && !event.altKey;
+    if (!isShiftR) return;
     event.preventDefault();
     const rotationStepDeg = getModuleRotationStepDeg(activeModuleState);
-    const deltaDeg = event.shiftKey ? -rotationStepDeg : rotationStepDeg;
-    activeRotationZDeg = ((activeRotationZDeg + deltaDeg) % 360 + 360) % 360;
+    // Catalog drag must use the same visual clockwise convention as scene drag.
+    // Keep advancing the requested angle even when the current preview is invalid/red.
+    activeRotationZDeg = ((activeRotationZDeg - rotationStepDeg) % 360 + 360) % 360;
     rotationLocked = true;
     if (Number.isFinite(lastClientX) && Number.isFinite(lastClientY)) {
       onPreview?.(
