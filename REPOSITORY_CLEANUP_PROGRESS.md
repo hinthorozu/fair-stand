@@ -152,31 +152,45 @@ Cleanup planını iptal etmeden, kullanıcı tarafındaki ihtiyaçlar nedeniyle 
 - PR #15–#17: kamera kısayolları ve `Shift+R` saat yönü standardı.
 - PR #18–#20: sürükleme ve sabit seçili modül rotasyonunun invalid ara açılardan devam etmesi.
 
-Son doğrulanmış ROG merge commit: `0ee4eb8a73f0140a98d131a9b3a275f6685d4a2c`.
-
 ---
 
 ## P1 — Color editor input helper extraction
 
-Durum: **UYGULANDI — PR/CANONICAL CI BEKLİYOR**
+Durum: **TAMAMLANDI / CI DOĞRULANDI**
 
-Branch: `refactor/extract-color-input-helpers`
+Merge: PR #21
 
-Amaç: asset library gibi storage/autosave/project-state ile yüksek coupling taşıyan alana girmeden önce color editor'ın en düşük riskli, saf input işleme kısmını `main.js` dışına çıkarmak.
-
-Yapılanlar:
+Merge commit: `4ddb846c2e9ae773593ebad2e299a370b09af668`
 
 - `src/colorEditorInputs.js` eklendi.
 - Numeric RGB/CMYK input grubu okuma `readNumberGroup()` helper'ına taşındı.
 - CMYK clamp/round işlemi `normalizeCmykValues()` helper'ına taşındı.
-- `main.js` yalnız color editor orchestration ve scene apply davranışını tutuyor.
-- `test/colorEditorInputs.test.js` ile helper contract'ları test edildi.
-- `test/colorEditorMainIntegration.test.js` ile helper'ların tekrar `main.js` içine gömülmesi engelleniyor.
-- Guarded patch sonrası `npm ci`, `npm test`, `npm run build` başarılı geçti.
+- Saf input contract testleri eklendi.
+
+---
+
+## P1 — Color editor synchronization controller extraction
+
+Durum: **UYGULANDI — PR/CANONICAL CI BEKLİYOR**
+
+Branch: `refactor/extract-color-editor-controller`
+
+Amaç: color editor'ın HEX/RGB/CMYK DOM senkronizasyonunu ve dönüşüm orchestration'ını `main.js` dışına almak; scene selection/application kurallarını `main.js` içinde bırakmak.
+
+Yapılanlar:
+
+- `src/colorEditorController.js` eklendi.
+- HEX → RGB/CMYK senkronizasyonu controller'a taşındı.
+- RGB input → HEX ve CMYK input → RGB/HEX akışları controller'a taşındı.
+- `applyActiveColorToSelection()` ve floor/surface selection kuralları `main.js` içinde bırakıldı; controller yalnız `onApply` callback'i çağırıyor.
+- Eski callback return semantiği korundu: RGB/CMYK input handler'ları `undefined`, HEX sync ise başarı durumunda boolean döndürüyor.
+- Unit testleri ve layering/integration guard testleri eklendi/güncellendi.
+- Guarded branch patch üzerinde `npm ci`, `npm test`, `npm run build` başarılı geçti.
+- Geçici patch workflow final branch tree'sinden kaldırıldı.
 
 ## Sıradaki İş
 
-1. Bu extraction branch'inden PR aç.
+1. Color editor synchronization controller extraction için PR aç.
 2. Latest-head canonical CI'da `npm ci`, `npm test`, `npm run build` başarılarını doğrula.
 3. Başarılıysa ROG'a merge et.
-4. Sonraki color editor adımında DOM sync/orchestration ile scene uygulama sınırını tekrar değerlendir; asset library'ye ancak daha düşük riskli color parçaları bittikten sonra gir.
+4. Sonraki adımda color editor event-listener wiring'ini controller'a taşımaya değip değmediğini coupling açısından değerlendir; gereksiz soyutlama yaratıyorsa color editor'ı burada bırakıp sıradaki düşük riskli `main.js` sorumluluğuna geç.
