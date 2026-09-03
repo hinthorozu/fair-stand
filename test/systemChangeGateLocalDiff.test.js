@@ -6,6 +6,7 @@ import {
   copyFileSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -43,6 +44,7 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
     mkdirSync(join(cwd, '.github'), { recursive: true });
     mkdirSync(join(cwd, 'scripts'), { recursive: true });
     mkdirSync(join(cwd, 'src'), { recursive: true });
+    mkdirSync(join(cwd, 'test'), { recursive: true });
 
     copyFileSync(
       new URL('../.github/change-contract.json', import.meta.url),
@@ -53,10 +55,29 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
       join(cwd, 'scripts/verify-change-contract.mjs'),
     );
     copyFileSync(
+      new URL('../scripts/change-impact-analysis.mjs', import.meta.url),
+      join(cwd, 'scripts/change-impact-analysis.mjs'),
+    );
+    copyFileSync(
       new URL('../src/systemChangeContract.js', import.meta.url),
       join(cwd, 'src/systemChangeContract.js'),
     );
     writeFileSync(join(cwd, 'package.json'), '{"type":"module"}\n');
+    writeFileSync(join(cwd, 'test/example.test.js'), 'export {};\n');
+
+    // The fixture exercises a non-browser local source change. Keep its test inventory
+    // self-contained so the verifier can enforce real test-file existence without
+    // depending on the parent repository's E2E target.
+    const fixtureContractPath = join(cwd, '.github/change-contract.json');
+    const fixtureContract = JSON.parse(readFileSync(fixtureContractPath, 'utf8'));
+    fixtureContract.tests.targeted = ['test/example.test.js'];
+    fixtureContract.tests.e2e = {
+      required: false,
+      targeted: [],
+      reason: 'Temporary verifier fixture has no browser-impacting domain.',
+    };
+    fixtureContract.impactAnalysis.affectedTests = ['test/example.test.js'];
+    writeFileSync(fixtureContractPath, `${JSON.stringify(fixtureContract, null, 2)}\n`);
 
     git(cwd, ['init', '-q']);
     git(cwd, ['config', 'user.email', 'change-gate-test@example.invalid']);
@@ -77,6 +98,8 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
     result = runVerifier(cwd);
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /Change contract accepted:/);
+    assert.match(result.stdout, /Impact sweep:/);
+    assert.match(result.stdout, /E2E not required:/);
 
     // Commit both changes and verify local committed-diff enforcement against an explicit base.
     git(cwd, ['add', '.github/change-contract.json']);

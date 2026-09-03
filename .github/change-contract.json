@@ -1,15 +1,17 @@
 {
-  "schemaVersion": 1,
-  "id": "remediate-f009-local-diff-enforcement",
+  "schemaVersion": 2,
+  "id": "governance-full-system-impact-sweep",
   "kind": "architecture",
-  "summary": "Close F-009 by making local contract verification resolve and enforce the actual git diff instead of skipping diff enforcement outside CI.",
+  "summary": "Require every guarded change to discover and acknowledge reverse dependencies, existing tests, related docs/contracts and candidate audit findings, and require real-browser Playwright E2E for browser-impacting changes.",
   "owners": [
+    "scripts/change-impact-analysis.mjs",
     "scripts/verify-change-contract.mjs",
-    "test/systemChangeGateLocalDiff.test.js"
+    "src/systemChangeContract.js",
+    "playwright.config.mjs"
   ],
   "sourceOfTruth": [
     "SYSTEM_CHANGE_GATE.md",
-    "audit/evidence/A02_CHANGE_GATE.md"
+    "SYSTEM_IMPACT_SWEEP.md"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -30,21 +32,90 @@
     "security": "not-applicable",
     "tests": "affected"
   },
+  "impactAnalysis": {
+    "mode": "full-system",
+    "affectedFiles": [
+      ".github/workflows/ci.yml",
+      "package.json",
+      "scripts/install-server.sh",
+      "vite.config.js"
+    ],
+    "affectedTests": [
+      "e2e/smoke.spec.mjs",
+      "test/bundleLoadingContract.test.js",
+      "test/developerEntrypointDocs.test.js",
+      "test/historicalDocumentationStatus.test.js",
+      "test/systemChangeGate.test.js",
+      "test/systemChangeGateCiContract.test.js",
+      "test/systemChangeGateLocalDiff.test.js",
+      "test/systemImpactAnalysis.test.js",
+      "test/systemDevelopmentContract.test.js"
+    ],
+    "affectedDocs": [
+      "ARCHITECTURE_RULES.md",
+      "Changelog.md",
+      "FRESH_REPOSITORY_REVIEW.md",
+      "PROJECT_RULES.md",
+      "README.md",
+      "REPOSITORY_CLEANUP_PROGRESS.md",
+      "SYSTEM_AUDIT_CHECKLIST.md",
+      "SYSTEM_CHANGE_GATE.md",
+      "SYSTEM_DEVELOPMENT_CONTRACT.md",
+      "audit/evidence/A00_BASELINE.md",
+      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
+      "audit/evidence/A02_CHANGE_GATE.md",
+      "audit/evidence/A03_ARCHITECTURE.md",
+      "audit/evidence/A18_TEST_REGRESSION_ARCHITECTURE.md",
+      "audit/evidence/A20_BUILD_CI_DEPLOY.md",
+      "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
+      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
+      "audit/remediation/A02_CLOSURE.md",
+      "audit/remediation/A02_F005_CLOSURE.md",
+      "audit/remediation/A02_F006_CLOSURE.md"
+    ],
+    "relatedFindings": {
+      "affected": [
+        "F-040"
+      ],
+      "reviewedNotAffected": [
+        "F-004",
+        "F-005",
+        "F-006",
+        "F-007",
+        "F-008",
+        "F-009",
+        "F-041",
+        "F-042",
+        "F-046"
+      ]
+    },
+    "notes": "The full-system sweep discovered the CI/package/server/Vite consumers, governance and historical tests, canonical/historical docs, and F-040. F-040 is directly affected because this PR introduces the missing real-browser E2E harness; it remains OPEN until normal remediation closure requirements (green PR CI, merge, and required post-merge verification) are satisfied. Other candidate findings were reviewed and are not functionally remediated by this PR. Runtime product behavior is intentionally unchanged."
+  },
   "tests": {
     "targeted": [
+      "test/systemChangeGate.test.js",
       "test/systemChangeGateLocalDiff.test.js",
-      "test/systemChangeGateCiContract.test.js"
+      "test/systemImpactAnalysis.test.js",
+      "test/systemChangeGateCiContract.test.js",
+      "test/developerEntrypointDocs.test.js"
     ],
     "fullSuite": true,
-    "build": true
+    "build": true,
+    "e2e": {
+      "required": true,
+      "targeted": [
+        "e2e/smoke.spec.mjs"
+      ],
+      "reason": "This governance change introduces the Playwright browser gate itself, so the harness must be proven by a real user-flow smoke test even though product runtime domains are not changed."
+    }
   },
   "risk": {
     "level": "medium",
-    "notes": "This changes local development acceptance behavior and intentionally fails closed when a local base cannot be resolved; runtime product behavior is unchanged."
+    "notes": "The gate intentionally becomes stricter and CI now installs/runs Chromium. Incomplete impact declarations or missing browser coverage will block changes; runtime application behavior is unchanged."
   },
   "migration": {
     "required": false,
-    "notes": "No runtime or persisted-data migration is introduced."
+    "notes": "No product or persisted-data migration is required. Future change declarations use schemaVersion 2, include full-system impactAnalysis, and declare tests.e2e."
   },
-  "rollback": "Revert the F-009 remediation PR to restore CI-only diff enforcement."
+  "rollback": "Revert the full-system impact sweep and Playwright governance commits to restore the previous path/domain-only change verification and unit/build-only CI."
 }

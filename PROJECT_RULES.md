@@ -35,19 +35,29 @@ Modül tipine göre değişen rotation, move snap, placement, collision, side-in
 - Module-type editor davranışları: `src/moduleBehavior.js`
 - Placement, snap, collision ve bağlantı algoritmaları: ilgili placement/core dosyaları ve regresyon testleri
 - Katalog kimliği ve nominal ölçüler: `src/catalog.js`
-- Runtime state yapıları: ilgili state factory dosyaları
+- Runtime state construction: `src/designState.js`
 - BOM / üretim verileri: recipe ve production-parts katmanı
 - Mimari sınırlar: `ARCHITECTURE_RULES.md`
+- Universal impact domain registry: `src/systemChangeContract.js > SYSTEM_IMPACT_DOMAINS`
+- Browser E2E trigger registry: `src/systemChangeContract.js > SYSTEM_BROWSER_E2E_DOMAINS`
+- Full-system change dependency/test/finding taraması: `SYSTEM_IMPACT_SWEEP.md`
+- Real-browser regression: `e2e/` + `playwright.config.mjs`
 
 Aynı runtime davranışı birden fazla Markdown dosyasında sabit değer olarak tekrar edilmemelidir.
 
 ## 6. Değişiklik politikası
 
-Core davranış değişikliği yapılırken:
+Core veya browser-visible davranış değişikliği yapılırken:
 
-1. Gerçek source of truth dosyası değiştirilir.
-2. İlgili regresyon testi eklenir veya güncellenir.
-3. Davranışı açıklayan canonical doküman etkileniyorsa güncellenir.
-4. `npm test` ve `npm run build` başarılı olmadan değişiklik tamamlanmış sayılmaz.
+1. Değişiklik `SYSTEM_CHANGE_GATE.md` üzerinden sınıflandırılır ve `SYSTEM_IMPACT_DOMAINS` registry'sindeki bütün domainler değerlendirilir.
+2. `SYSTEM_IMPACT_SWEEP.md` uyarınca değişen dosya/symbol/UI/asset yüzeyinin callers, reverse/transitive dependents, existing unit/integration/E2E tests, docs/contracts ve candidate findings etkisi çıkarılır.
+3. Gerçek source-of-truth dosyası değiştirilir.
+4. Discovery tarafından bulunan mevcut testler yeni canonical davranış/ownership açısından gözden geçirilir; eski implementation detail'e kilitli assertion bırakılmaz.
+5. İlgili targeted unit/integration regression testi eklenir veya güncellenir.
+6. `SYSTEM_BROWSER_E2E_DOMAINS` registry'sindeki bir domain etkileniyorsa değişikliğe özel targeted Playwright E2E aynı PR içinde eklenir/güncellenir.
+7. Davranışı açıklayan canonical doküman etkileniyorsa güncellenir.
+8. `npm run contract:verify` full-system impact acknowledgement ve E2E declaration dahil başarılı olmalıdır.
+9. `npm test`, `npm run build` ve canonical `npm run e2e` başarılı olmadan değişiklik tamamlanmış sayılmaz.
+10. PR CI ve post-merge ROG CI tamamen yeşil olmadan finding/iş kapatılmaz.
 
 Yeni bir modül eklemek mevcut global kuralları veya core placement sözleşmesini otomatik olarak değiştirme gerekçesi değildir.

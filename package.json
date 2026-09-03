@@ -8,7 +8,10 @@
     "contract:verify": "node scripts/verify-change-contract.mjs",
     "test": "node --test",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "e2e:deps": "npm install --no-save --no-package-lock @playwright/test@1.62.1",
+    "e2e:install": "playwright install chromium",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "jszip": "^3.10.1",

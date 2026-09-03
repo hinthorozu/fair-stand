@@ -1,4 +1,4 @@
-export const CHANGE_CONTRACT_SCHEMA_VERSION = 1;
+export const CHANGE_CONTRACT_SCHEMA_VERSION = 2;
 
 export const SYSTEM_CHANGE_KINDS = Object.freeze([
   'module',
@@ -32,6 +32,22 @@ export const SYSTEM_IMPACT_DOMAINS = Object.freeze([
   'architecture',
   'security',
   'tests',
+]);
+
+export const SYSTEM_BROWSER_E2E_DOMAINS = Object.freeze([
+  'catalog',
+  'behavior',
+  'state',
+  'placement',
+  'renderer',
+  'persistence',
+  'bom',
+  'ui',
+  'composition',
+  'assets',
+  'storage',
+  'importExport',
+  'accessibility',
 ]);
 
 export const SYSTEM_IMPACT_DECISIONS = Object.freeze([
@@ -130,6 +146,7 @@ export const GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS = Object.freeze({
   'ARCHITECTURE_RULES.md': frozenDomains('architecture'),
   'SYSTEM_DEVELOPMENT_CONTRACT.md': frozenDomains('architecture'),
   'SYSTEM_CHANGE_GATE.md': frozenDomains('architecture'),
+  'SYSTEM_IMPACT_SWEEP.md': frozenDomains('architecture'),
   'MODULE_BEHAVIOR_STANDARD.md': frozenDomains('architecture'),
   'SYSTEM_AUDIT_CHECKLIST.md': frozenDomains('architecture'),
 });
@@ -138,8 +155,40 @@ function isNonEmptyString(value) {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+function isStringArray(value) {
+  return Array.isArray(value) && value.every(isNonEmptyString);
+}
+
 function isNonEmptyStringArray(value) {
-  return Array.isArray(value) && value.length > 0 && value.every(isNonEmptyString);
+  return isStringArray(value) && value.length > 0;
+}
+
+function hasDuplicates(value) {
+  return Array.isArray(value) && new Set(value).size !== value.length;
+}
+
+function validatePathArray(errors, value, fieldName) {
+  if (!isStringArray(value)) {
+    errors.push(`${fieldName} must be an array of non-empty paths.`);
+    return;
+  }
+  if (hasDuplicates(value)) errors.push(`${fieldName} must not contain duplicates.`);
+}
+
+function validateFindingArray(errors, value, fieldName) {
+  if (!isStringArray(value)) {
+    errors.push(`${fieldName} must be an array.`);
+    return;
+  }
+  if (hasDuplicates(value)) errors.push(`${fieldName} must not contain duplicates.`);
+  for (const finding of value) {
+    if (!/^F-\d{3}$/.test(finding)) errors.push(`${fieldName} contains invalid finding id: ${finding}.`);
+  }
+}
+
+export function requiresBrowserE2E(impact) {
+  if (!impact || typeof impact !== 'object' || Array.isArray(impact)) return false;
+  return SYSTEM_BROWSER_E2E_DOMAINS.some((domain) => impact[domain] === 'affected');
 }
 
 export function validateSystemChangeContract(contract) {
@@ -204,6 +253,31 @@ export function validateSystemChangeContract(contract) {
     }
   }
 
+  if (!contract.impactAnalysis || typeof contract.impactAnalysis !== 'object' || Array.isArray(contract.impactAnalysis)) {
+    errors.push('impactAnalysis is required for every change.');
+  } else {
+    if (contract.impactAnalysis.mode !== 'full-system') {
+      errors.push('impactAnalysis.mode must be full-system.');
+    }
+    validatePathArray(errors, contract.impactAnalysis.affectedFiles, 'impactAnalysis.affectedFiles');
+    validatePathArray(errors, contract.impactAnalysis.affectedTests, 'impactAnalysis.affectedTests');
+    validatePathArray(errors, contract.impactAnalysis.affectedDocs, 'impactAnalysis.affectedDocs');
+
+    const related = contract.impactAnalysis.relatedFindings;
+    if (!related || typeof related !== 'object' || Array.isArray(related)) {
+      errors.push('impactAnalysis.relatedFindings is required.');
+    } else {
+      validateFindingArray(errors, related.affected, 'impactAnalysis.relatedFindings.affected');
+      validateFindingArray(errors, related.reviewedNotAffected, 'impactAnalysis.relatedFindings.reviewedNotAffected');
+      const overlap = (related.affected ?? []).filter((finding) => (related.reviewedNotAffected ?? []).includes(finding));
+      if (overlap.length) errors.push(`Findings cannot be both affected and reviewedNotAffected: ${overlap.join(', ')}.`);
+    }
+
+    if (!isNonEmptyString(contract.impactAnalysis.notes)) {
+      errors.push('impactAnalysis.notes is required.');
+    }
+  }
+
   if (!contract.tests || typeof contract.tests !== 'object' || Array.isArray(contract.tests)) {
     errors.push('tests policy is required.');
   } else {
@@ -212,6 +286,46 @@ export function validateSystemChangeContract(contract) {
     }
     if (contract.tests.fullSuite !== true) errors.push('tests.fullSuite must be true.');
     if (contract.tests.build !== true) errors.push('tests.build must be true.');
+
+    if (isStringArray(contract.tests.targeted) && isStringArray(contract.impactAnalysis?.affectedTests)) {
+      const missingFromReview = contract.tests.targeted.filter((testPath) => !contract.impactAnalysis.affectedTests.includes(testPath));
+      if (missingFromReview.length) {
+        errors.push(`Targeted tests must also appear in impactAnalysis.affectedTests: ${missingFromReview.join(', ')}.`);
+      }
+    }
+
+    const e2e = contract.tests.e2e;
+    if (!e2e || typeof e2e !== 'object' || Array.isArray(e2e)) {
+      errors.push('tests.e2e declaration is required for every change.');
+    } else {
+      if (typeof e2e.required !== 'boolean') errors.push('tests.e2e.required must be boolean.');
+      validatePathArray(errors, e2e.targeted, 'tests.e2e.targeted');
+      if (!isNonEmptyString(e2e.reason)) errors.push('tests.e2e.reason is required.');
+
+      const browserImpact = requiresBrowserE2E(contract.impact);
+      if (browserImpact && e2e.required !== true) {
+        errors.push(`Browser-impacting changes must require E2E coverage. Trigger domains: ${SYSTEM_BROWSER_E2E_DOMAINS.filter((domain) => contract.impact?.[domain] === 'affected').join(', ')}.`);
+      }
+
+      if (e2e.required === true) {
+        if (!isNonEmptyStringArray(e2e.targeted)) {
+          errors.push('tests.e2e.targeted must contain at least one E2E test when E2E is required.');
+        } else {
+          const invalidE2EPaths = e2e.targeted.filter((testPath) => !testPath.startsWith('e2e/'));
+          if (invalidE2EPaths.length) {
+            errors.push(`E2E targeted tests must live under e2e/: ${invalidE2EPaths.join(', ')}.`);
+          }
+          if (isStringArray(contract.impactAnalysis?.affectedTests)) {
+            const missingE2EReview = e2e.targeted.filter((testPath) => !contract.impactAnalysis.affectedTests.includes(testPath));
+            if (missingE2EReview.length) {
+              errors.push(`E2E targeted tests must also appear in impactAnalysis.affectedTests: ${missingE2EReview.join(', ')}.`);
+            }
+          }
+        }
+      } else if (isStringArray(e2e.targeted) && e2e.targeted.length > 0) {
+        errors.push('tests.e2e.targeted must be empty when tests.e2e.required is false.');
+      }
+    }
   }
 
   if (!contract.risk || typeof contract.risk !== 'object' || Array.isArray(contract.risk)) {
@@ -243,8 +357,10 @@ export function isGuardedChangeFile(path) {
     || path.startsWith('scripts/')
     || path.startsWith('test/')
     || path.startsWith('tests/')
+    || path.startsWith('e2e/')
     || path.startsWith('.github/workflows/')
-    || path.startsWith('vite.config');
+    || path.startsWith('vite.config')
+    || path.startsWith('playwright.config');
 }
 
 export function requiredDomainsForFile(path) {
@@ -255,7 +371,7 @@ export function requiredDomainsForFile(path) {
 
   if (path === 'index.html') required.add('ui');
   if (path.startsWith('public/')) required.add('assets');
-  if (path.startsWith('test/') || path.startsWith('tests/')) required.add('tests');
+  if (path.startsWith('test/') || path.startsWith('tests/') || path.startsWith('e2e/')) required.add('tests');
 
   if (
     path === 'package.json'
@@ -263,9 +379,12 @@ export function requiredDomainsForFile(path) {
     || path.startsWith('scripts/')
     || path.startsWith('.github/workflows/')
     || path.startsWith('vite.config')
+    || path.startsWith('playwright.config')
   ) {
     required.add('architecture');
   }
+
+  if (path.startsWith('playwright.config')) required.add('tests');
 
   return [...required];
 }
