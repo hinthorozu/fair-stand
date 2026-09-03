@@ -1,16 +1,18 @@
 # Fair Stand — System Development Contract
 
-> **Bu belge geliştirmeye başlamadan önce okunması gereken canonical iş sözleşmesidir.**
+> **Bu belge module / feature / core implementasyon sözleşmesidir.**
+>
+> Her değişiklik bundan **önce** `SYSTEM_CHANGE_GATE.md` üzerinden universal impact classification alır ve `.github/change-contract.json` içinde machine-readable olarak beyan edilir.
 >
 > Amaç: İnsan veya AI tarafından sisteme yeni modül, modül varyantı, otomasyon veya davranış eklenirken eksik sorumluluk bırakılmasını engellemek.
 >
-> Kod yazmaya başlamadan önce değişikliğin contract'ı tanımlanır. Contract tanımlanmadan uygulama tamamlanmış sayılmaz.
+> Kod yazmaya başlamadan önce universal impact declaration ve ilgili domain contract kararları tanımlanır. Bunlar tanımlanmadan uygulama tamamlanmış sayılmaz.
 
 ---
 
 # 1. Bu contract neden var?
 
-Fair Stand'da bir modül yalnızca 3D obje değildir. Bir modül veya feature aynı anda şu alanları etkileyebilir:
+Fair Stand'da bir değişiklik yalnızca tek bir dosya veya 3D obje değildir. Bir modül veya feature aynı anda şu alanları etkileyebilir:
 
 - katalog kimliği,
 - state,
@@ -29,6 +31,8 @@ Fair Stand'da bir modül yalnızca 3D obje değildir. Bir modül veya feature ay
 
 Bu nedenle "modeli sahneye ekledim" bir feature'ın tamamlandığı anlamına gelmez.
 
+Universal `SYSTEM_CHANGE_GATE.md` bu değişikliğin hangi sistem domainlerini etkilediğini sorar; bu belge ise module/feature/core katmanında o etkilerin nasıl uygulanacağını tanımlar.
+
 ---
 
 # 2. Canonical source-of-truth dağılımı
@@ -37,6 +41,7 @@ Bu belge runtime değerlerinin ikinci kopyası değildir. Hangi kararın nerede 
 
 | Konu | Canonical kaynak |
 |---|---|
+| Universal değişiklik impact sınıflandırması | `SYSTEM_CHANGE_GATE.md` + `.github/change-contract.json` |
 | Global ürün invariantları | `PROJECT_RULES.md` |
 | Mimari sınırlar | `ARCHITECTURE_RULES.md` |
 | Katalog kimliği / nominal descriptor | `src/catalog.js` |
@@ -55,7 +60,10 @@ Bu belge runtime değerlerinin ikinci kopyası değildir. Hangi kararın nerede 
 
 # 3. Değişiklik önce sınıflandırılır
 
-Kod yazmadan önce iş aşağıdaki sınıflardan birine konur.
+İki aşamalı sınıflandırma zorunludur:
+
+1. **Universal:** `SYSTEM_CHANGE_GATE.md` içindeki 17 domain için `affected` / `not-applicable` kararı verilir ve `.github/change-contract.json` güncellenir.
+2. **Domain:** Aşağıdaki module / variant / runtime-module / feature-composition / core-change sınıflarından uygun olanı seçilir.
 
 ## A. Yeni katalog modülü
 
@@ -72,8 +80,8 @@ Bu iş için `MODULE_CATALOG` + module contract zorunludur.
 
 Örnek:
 
-- aynı saksının 100 / 150 / 200 cm varyantı,
-- aynı modül ailesinin farklı ölçüsü.
+- aynı modül ailesinin yeni varyantı,
+- aynı modül ailesinin farklı nominal ölçüsü.
 
 Mevcut profile gerçekten uyuyorsa inheritance kullanılabilir. Uymuyorsa override veya yeni profile tanımlanır.
 
@@ -213,7 +221,7 @@ Birden fazla modülün birlikte oluşturulma kuralı renderer içine gömülmez;
 Her modül/feature için en az:
 
 - contract coverage,
-- değişen davranışın regression testi,
+- değişen davranışın targeted regression testi,
 - full `npm test`,
 - `npm run build`
 
@@ -239,6 +247,8 @@ Save/load etkileniyorsa persistence round-trip; BOM etkileniyorsa recipe/BOM con
 - Katalog dışı mevcut runtime modülü `illuminated-foam` explicit contract taşımalı.
 
 Böylece yeni bir katalog anahtarı eklenip contract unutulursa CI kırılır.
+
+Bu module gate, universal system change gate'in yerine geçmez; onun altında domain-specific enforcement katmanıdır.
 
 ---
 
@@ -270,31 +280,19 @@ Contract testi, `autoDepot.js` tarafından gerçekten üretilen içeriklerle bu 
 
 Kullanıcı:
 
-> Sisteme çöp kovası ekle. Çöp kovası yalnız 0° ile 210° arasında saat yönüne dönebilsin.
+> Sisteme çöp kovası ekle. Çöp kovası yalnız belirli bir açı aralığında tek yönde dönebilsin.
 
 Uygulama sırası:
 
-1. Yeni katalog kimliği belirlenir.
-2. Module contract profile seçilir.
-3. State / appearance / renderer / persistence / BOM policy belirlenir.
-4. Mevcut `moduleBehavior.js` bounded + clockwise-only rotation contract'ını destekliyor mu kontrol edilir.
-5. Desteklemiyorsa önce behavior modeli genişletilir.
-6. Rotation kuralı yalnız renderer veya keydown handler içinde özel `if` olarak yazılmaz.
-7. 0° altına ve 210° üstüne çıkılmadığını doğrulayan regression testi eklenir.
-8. BOM politikası karar verilmeden production-ready sayılmaz.
-
-Örnek hedef policy:
-
-```text
-catalogKey: ACCESSORY_TRASH_BIN
-profile: free-model-fixed
-behavior: free + bounded-clockwise rotation 0..210
-appearance: fixed veya kararlaştırılan editable policy
-persistence: project-state
-bom: commercial-item / recipe / excluded -> karar zorunlu
-runtime: static
-composition: standalone
-```
+1. Önce universal change impact declaration hazırlanır.
+2. Yeni katalog kimliği belirlenir.
+3. Module contract profile seçilir.
+4. State / appearance / renderer / persistence / BOM policy belirlenir.
+5. Mevcut `moduleBehavior.js` gerekli bounded/directional rotation contract'ını destekliyor mu kontrol edilir.
+6. Desteklemiyorsa önce behavior modeli genişletilir.
+7. Rotation kuralı yalnız renderer veya keydown handler içinde özel `if` olarak yazılmaz.
+8. Sınırları doğrulayan targeted regression testi eklenir.
+9. BOM politikası karar verilmeden production-ready sayılmaz.
 
 ---
 
@@ -317,7 +315,7 @@ Contract kararları:
 - renderer: specialized clock renderer,
 - BOM: explicit policy.
 
-**Kural:** "Şu an saat 14:32" proje state'ine kaydedilmez. O değer runtime'da yeniden hesaplanır.
+**Kural:** Anlık saat değeri proje state'ine kaydedilmez. O değer runtime'da yeniden hesaplanır.
 
 ---
 
@@ -329,20 +327,17 @@ Kullanıcı:
 
 Bu tek bir module contract değildir; scene-composition contract'tır.
 
-Bugünkü canonical depo içeriği `automatic-depot` contract'ında:
+Bugünkü canonical depo içeriği `automatic-depot` contract'ında tanımlıdır.
 
-- mini-fridge,
-- kettle,
-- coat-rack.
-
-İleride "çöp kovası da koy" denirse yalnız renderer içine obje eklenmez.
+İleride içerik değişirse yalnız renderer içine obje eklenmez.
 
 Gerekli sıra:
 
-1. `automatic-depot` feature contract güncellenir.
-2. `autoDepot.js` planner güncellenir.
-3. Contract/regression testleri güncellenir.
-4. Full test + build yapılır.
+1. Universal change declaration'da composition ve etkilenen diğer domainler beyan edilir.
+2. `automatic-depot` feature contract güncellenir.
+3. `autoDepot.js` planner güncellenir.
+4. Contract/regression testleri güncellenir.
+5. Full test + build yapılır.
 
 ---
 
@@ -350,22 +345,22 @@ Gerekli sıra:
 
 İnsan veya AI aşağıdaki sırayı izler:
 
-1. `SYSTEM_DEVELOPMENT_CONTRACT.md` oku.
-2. İşin module / variant / runtime-module / feature-composition / core-change sınıfını belirle.
-3. Etkilenen mevcut canonical kaynakları kontrol et.
-4. Contract/profile/policy kararlarını ver.
-5. Contract registry'yi ekle veya güncelle.
-6. Gerekliyse behavior/core contract'ı genişlet.
-7. State'i uygula.
-8. Renderer'ı uygula.
-9. Persistence etkisini uygula.
-10. BOM politikasını uygula veya açık policy kararını kaydet.
-11. Feature/composition varsa ilgili feature contract'ı güncelle.
-12. Contract testlerini yaz/güncelle.
-13. Davranış regression testlerini yaz/güncelle.
-14. `npm test`.
-15. `npm run build`.
-16. CI yeşil olmadan tamamlandı deme.
+1. Fresh `ROG` üzerinden branch oluştur.
+2. `SYSTEM_CHANGE_GATE.md` oku.
+3. Değişikliğin tüm 17 impact domainini `affected` / `not-applicable` olarak sınıflandır.
+4. `.github/change-contract.json` deklarasyonunu değişiklikle birlikte güncelle.
+5. Bu `SYSTEM_DEVELOPMENT_CONTRACT.md` belgesini oku ve işin module / variant / runtime-module / feature-composition / core-change sınıfını belirle.
+6. Etkilenen canonical kaynakları kontrol et.
+7. Contract/profile/policy kararlarını ver.
+8. Contract registry'yi ekle veya güncelle.
+9. Gerekliyse behavior/core contract'ı genişlet.
+10. State / renderer / persistence / BOM / composition uygulamalarından etkilenenleri uygula.
+11. Contract testlerini ve değişen davranışın targeted regression testlerini yaz/güncelle.
+12. `npm run contract:verify` çalıştır; local diff enforcement koşullarının F-009 kapsamında ayrıca takip edildiğini unutma.
+13. `npm test` çalıştır.
+14. `npm run build` çalıştır.
+15. PR aç; canonical CI'nın `contract:verify → npm ci → npm test → npm run build` zinciri yeşil olmalı.
+16. Merge sonrası ROG push CI yeşil olmadan finding/iş tamamlandı sayılmaz.
 
 ---
 
@@ -373,6 +368,8 @@ Gerekli sıra:
 
 Aşağıdakiler contract ihlalidir:
 
+- Universal change impact declaration yapmadan guarded sistem değişikliği tamamlamak.
+- Etkilenen domaini gerçeğe aykırı `not-applicable` işaretlemek.
 - Catalog'a yeni modül ekleyip module contract eklememek.
 - Yeni modülü varsayılan behavior'a sessizce bırakmak.
 - Rotation / collision / snap gibi core davranışları yalnız `main.js` veya `scene3d.js` içinde type-specific `if` ile çözmek.
@@ -380,17 +377,18 @@ Aşağıdakiler contract ihlalidir:
 - BOM kararını sessizce atlamak.
 - Runtime-derived değeri gereksiz yere project state'e kaydetmek.
 - Multi-module automation kuralını yalnız UI callback içine gömmek.
-- Contract/regression testi olmadan core davranış değişikliği tamamlamak.
+- Targeted regression olmadan core davranış değişikliği tamamlamak.
+- PR CI ve post-merge ROG CI doğrulanmadan işi kapalı saymak.
 
 ---
 
 # 12. Bu yapının sonraki genişleme noktaları
 
-Bu ilk sürüm bilinçli olarak mevcut mimarinin üzerine minimum riskle kurulmuştur.
+Bu contract mevcut mimarinin üzerine kontrollü genişleme için tasarlanmıştır.
 
-Sonraki kontrollü genişlemeler:
+Sonraki genişlemeler ilgili finding/roadmap kararlarıyla yapılır:
 
-- bounded / directional rotation gibi richer behavior schema,
+- richer behavior schema,
 - commercial-item BOM contract'ının production part / CRM kimliğiyle bağlanması,
 - renderer capability registry,
 - persistence schema/version contract,
