@@ -4,7 +4,7 @@ const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
   opacity: 0.38,
 });
 
-const DEFAULT_BEHAVIOR = Object.freeze({
+const WALL_BEHAVIOR = Object.freeze({
   placement: 'wall',
   moveSnapCm: 50,
   rotationStepDeg: 90,
@@ -14,7 +14,16 @@ const DEFAULT_BEHAVIOR = Object.freeze({
   ghost: DEFAULT_GHOST_BEHAVIOR,
 });
 
+const DEFAULT_BEHAVIOR = WALL_BEHAVIOR;
+
 const TYPE_BEHAVIORS = Object.freeze({
+  'flat-panel': WALL_BEHAVIOR,
+  'showcase-3': WALL_BEHAVIOR,
+  'showcase-2': WALL_BEHAVIOR,
+  shelf: WALL_BEHAVIOR,
+  door: WALL_BEHAVIOR,
+  'base-wall': WALL_BEHAVIOR,
+  separator: WALL_BEHAVIOR,
   counter: Object.freeze({
     placement: 'free',
     moveSnapCm: 50,
@@ -80,15 +89,14 @@ const TYPE_BEHAVIORS = Object.freeze({
     allowSideInsert: true,
     collision: 'footprint',
   }),
-
-'indoor-plant-1': Object.freeze({
-  placement: 'free',
-  moveSnapCm: 10,
-  rotationStepDeg: 90,
-  defaultRotationDeg: 0,
-  allowSideInsert: true,
-  collision: 'footprint',
-}),
+  'indoor-plant-1': Object.freeze({
+    placement: 'free',
+    moveSnapCm: 10,
+    rotationStepDeg: 90,
+    defaultRotationDeg: 0,
+    allowSideInsert: true,
+    collision: 'footprint',
+  }),
   'illuminated-foam': Object.freeze({
     placement: 'wall-overlay',
     moveSnapCm: 10,
@@ -120,6 +128,12 @@ const STRAIGHT_COUNTER_WIDTHS_CM = new Set([100, 150, 200]);
 function normalizeDescriptor(moduleOrType) {
   if (typeof moduleOrType === 'string') return { type: moduleOrType };
   return moduleOrType ?? {};
+}
+
+export function hasExplicitModuleBehavior(moduleOrType) {
+  const module = normalizeDescriptor(moduleOrType);
+  const type = module.type ?? null;
+  return type !== null && Object.hasOwn(TYPE_BEHAVIORS, type);
 }
 
 export function getModuleBehavior(moduleOrType) {
