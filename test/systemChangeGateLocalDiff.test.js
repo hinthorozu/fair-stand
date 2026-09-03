@@ -53,6 +53,10 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
       join(cwd, 'scripts/verify-change-contract.mjs'),
     );
     copyFileSync(
+      new URL('../scripts/change-impact-analysis.mjs', import.meta.url),
+      join(cwd, 'scripts/change-impact-analysis.mjs'),
+    );
+    copyFileSync(
       new URL('../src/systemChangeContract.js', import.meta.url),
       join(cwd, 'src/systemChangeContract.js'),
     );
@@ -77,6 +81,7 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
     result = runVerifier(cwd);
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /Change contract accepted:/);
+    assert.match(result.stdout, /Impact sweep:/);
 
     // Commit both changes and verify local committed-diff enforcement against an explicit base.
     git(cwd, ['add', '.github/change-contract.json']);
