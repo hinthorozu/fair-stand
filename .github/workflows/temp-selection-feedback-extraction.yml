@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Step 5 - delegate surface selection only
+      - name: Step 7 - delegate floor selection only
         shell: bash
         run: |
           python3 - <<'PY'
@@ -28,48 +28,45 @@ jobs:
 
           p = Path('src/main.js')
           s = p.read_text()
-          scene_start = s.find('const scene3d = createStandScene(\n')
-          callback_start = s.find('  (surfaces) => {\n', scene_start)
-          callback_end = s.find('  getAssetUrl,\n', callback_start)
-          if min(scene_start, callback_start, callback_end) < 0:
-              raise SystemExit(f'surface callback markers missing: scene={scene_start}, start={callback_start}, end={callback_end}')
+          old_floor = (
+              "  ({ selected, floorType, paintable }) => {\n"
+              "    if (!selected) return;\n"
+              "    const label = floorType === 'karolaj' ? 'Karolaj' : (floorType === 'hali' ? 'Halı' : 'Parke');\n"
+              "    selectionInfo.textContent = paintable\n"
+              "      ? label + ' zemini seçili · mevcut Aktif renk ile boyanabilir.'\n"
+              "      : label + ' zemini seçili · bu zemin tipi boyanamaz.';\n"
+              "  },\n"
+          )
+          new_floor = (
+              "  (floorSelection) => {\n"
+              "    const message = describeFloorSelection(floorSelection);\n"
+              "    if (message) selectionInfo.textContent = message;\n"
+              "  },\n"
+          )
 
-          old_callback = s[callback_start:callback_end]
-          if 'const feedback = describeSurfaceSelection(surfaces, currentModules);' not in old_callback:
-              required = ["if (moduleType === 'counter')", "if (moduleType === 'illuminated-foam')", 'selectedFabricGroupIds = new Set']
-              missing = [item for item in required if item not in old_callback]
-              if missing:
-                  raise SystemExit(f'surface callback guard mismatch: {missing}')
-              new_callback = (
-                  "  (surfaces) => {\n"
-                  "    const feedback = describeSurfaceSelection(surfaces, currentModules);\n"
-                  "    selectedFoamModuleId = feedback.foamModuleId;\n"
-                  "    if (foamLightControls) foamLightControls.hidden = !feedback.foamControlsVisible;\n"
-                  "    if (feedback.foamControlsVisible && foamLightColorInput) {\n"
-                  "      foamLightColorInput.value = feedback.foamColor;\n"
-                  "    }\n"
-                  "    selectionInfo.textContent = feedback.message;\n"
-                  "  },\n"
-              )
-              s = s[:callback_start] + new_callback + s[callback_end:]
+          if new_floor not in s:
+              if s.count(old_floor) != 1:
+                  raise SystemExit(f'floor callback guard mismatch: {s.count(old_floor)}')
+              s = s.replace(old_floor, new_floor, 1)
               p.write_text(s)
 
           updated = p.read_text()
+          if updated.count('describeFloorSelection(floorSelection)') != 1:
+              raise SystemExit('floor helper delegation missing or duplicated')
+          if old_floor in updated:
+              raise SystemExit('old floor decision logic still present')
           scene_start = updated.find('const scene3d = createStandScene(\n')
-          callback_start = updated.find('  (surfaces) => {\n', scene_start)
-          callback_end = updated.find('  getAssetUrl,\n', callback_start)
-          callback = updated[callback_start:callback_end]
-          if callback.count('describeSurfaceSelection(surfaces, currentModules)') != 1:
-              raise SystemExit('surface helper delegation missing or duplicated')
-          if "if (moduleType === 'counter')" in callback or 'selectedFabricGroupIds = new Set' in callback:
-              raise SystemExit('old surface decision logic still present in surface callback')
-          if '  ({ selected, floorType, paintable }) => {\n' not in updated:
-              raise SystemExit('floor callback changed unexpectedly')
+          scene_end = updated.find('\n\nfunction renderStageResult', scene_start)
+          scene = updated[scene_start:scene_end]
+          if scene.count('describeSurfaceSelection(surfaces, currentModules)') != 1:
+              raise SystemExit('surface delegation changed unexpectedly')
+          if "if (moduleType === 'counter')" in scene or 'selectedFabricGroupIds = new Set' in scene:
+              raise SystemExit('old surface decision logic reappeared unexpectedly')
           PY
       - name: Install dependencies
         run: npm ci
-      - name: Surface helper tests
-        run: node --test test/selectionFeedback.test.js
+      - name: Selection feedback tests
+        run: node --test test/selectionFeedback.test.js test/selectionFeedbackMainIntegration.test.js
       - name: Build
         run: npm run build
       - name: Commit step if changed
@@ -82,5 +79,5 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add src/main.js
-          git commit -m "Delegate surface selection feedback"
+          git commit -m "Delegate floor selection feedback"
           git push origin HEAD:refactor/extract-selection-feedback
