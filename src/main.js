@@ -62,6 +62,7 @@ import {
   createProjectNamingController,
   getEditableProjectName,
 } from './projectNaming.js';
+import { createAutosaveController } from './autosaveController.js';
 
 let jsZipModulePromise = null;
 
@@ -231,11 +232,6 @@ let catalogAddFlushScheduled = false;
 let moduleDragSidebar = null;
 let activeProjectId = createProjectId();
 let activeProjectCreatedAt = Date.now();
-let autosaveEnabled = false;
-let autosaveTimer = null;
-let autosaveObservedSignature = null;
-const AUTOSAVE_DELAY_MS = 5000;
-const AUTOSAVE_WATCH_INTERVAL_MS = 1000;
 const imageAssets = new Map();
 let assetContextAssetId = null;
 let selectedFoamModuleId = null;
@@ -1210,11 +1206,11 @@ createStageButton.addEventListener('click', async () => {
     return;
   }
 
-  if (currentStand || currentModules.length || autosaveEnabled) {
+  if (currentStand || currentModules.length || autosaveController.isEnabled()) {
     const currentProjectName = projectNameInput.value.trim() || 'Adsız Proje';
     const confirmed = window.confirm(
       'Yeni proje oluşturulacak.\n\n'
-        + (autosaveEnabled
+        + (autosaveController.isEnabled()
           ? '• Açık kayıtlı proje: "' + currentProjectName + '" korunacak.\n'
           : '• Mevcut kaydedilmemiş sahne ve düzenlemeler temizlenecek.\n')
         + '• Mevcut modüller, renkler ve görseller yeni projeye taşınmayacak.\n\n'
@@ -1238,7 +1234,7 @@ createStageButton.addEventListener('click', async () => {
   const projectName = await requestProjectName({ mode: 'create', suffix: projectNameSuffix });
   if (!projectName) return;
 
-  disableAutosave();
+  autosaveController.disable();
   activeProjectId = createProjectId();
   activeProjectCreatedAt = Date.now();
   setProjectName(projectName);
@@ -1309,11 +1305,11 @@ createStageButton.addEventListener('click', async () => {
 
   try {
     await persistActiveProject({ quiet: true });
-    enableAutosaveFromCurrentState();
+    autosaveController.enableFromCurrentState();
     projectStatus.textContent = 'Oluşturuldu ve kaydedildi: ' + projectName;
   } catch (error) {
     console.warn('Yeni proje ilk kayıt sırasında kaydedilemedi:', error);
-    disableAutosave();
+    autosaveController.disable();
     projectStatus.textContent = 'Proje oluşturuldu ancak kaydedilemedi.';
   }
 });
@@ -1539,49 +1535,12 @@ function getProjectStateSignature() {
   });
 }
 
-function clearAutosaveTimer() {
-  if (autosaveTimer) clearTimeout(autosaveTimer);
-  autosaveTimer = null;
-}
-
-function scheduleAutosave() {
-  if (!autosaveEnabled) return;
-  clearAutosaveTimer();
-  projectStatus.textContent = 'Değişiklik var · 5 sn içinde otomatik kaydedilecek…';
-  autosaveTimer = setTimeout(async () => {
-    autosaveTimer = null;
-    if (!autosaveEnabled) return;
-    projectStatus.textContent = 'Kaydediliyor…';
-    try {
-      await persistActiveProject({ quiet: true });
-      autosaveObservedSignature = getProjectStateSignature();
-      projectStatus.textContent = 'Kaydedildi · Otomatik';
-    } catch (error) {
-      console.warn('Otomatik kayıt başarısız:', error);
-      projectStatus.textContent = 'Otomatik kayıt başarısız.';
-    }
-  }, AUTOSAVE_DELAY_MS);
-}
-
-function enableAutosaveFromCurrentState() {
-  clearAutosaveTimer();
-  autosaveObservedSignature = getProjectStateSignature();
-  autosaveEnabled = true;
-}
-
-function disableAutosave() {
-  autosaveEnabled = false;
-  clearAutosaveTimer();
-  autosaveObservedSignature = null;
-}
-
-setInterval(() => {
-  if (!autosaveEnabled) return;
-  const signature = getProjectStateSignature();
-  if (signature === autosaveObservedSignature) return;
-  autosaveObservedSignature = signature;
-  scheduleAutosave();
-}, AUTOSAVE_WATCH_INTERVAL_MS);
+const autosaveController = createAutosaveController({
+  getSignature: getProjectStateSignature,
+  persist: persistActiveProject,
+  setStatus: (message) => { projectStatus.textContent = message; },
+  onError: (error) => console.warn('Otomatik kayıt başarısız:', error),
+});
 
 async function refreshProjectList(selectedId = activeProjectId) {
   const projects = await listProjects();
@@ -1621,7 +1580,7 @@ async function persistActiveProject({ quiet = false } = {}) {
 
 async function restoreProject(project) {
   if (!project) return;
-  disableAutosave();
+  autosaveController.disable();
   activeProjectId = project.id;
   activeProjectCreatedAt = Number(project.createdAt) || Date.now();
   setProjectName(project.name || 'Adsız Proje');
@@ -1674,7 +1633,7 @@ async function restoreProject(project) {
   }
 
   await refreshProjectList(activeProjectId);
-  enableAutosaveFromCurrentState();
+  autosaveController.enableFromCurrentState();
   projectStatus.textContent = 'Açıldı: ' + (project.name || 'Adsız Proje');
 }
 
@@ -1741,10 +1700,10 @@ async function requestDeleteImageAsset(assetId) {
   try {
     // Kayıtlı projede önce referansları kalıcılaştır; ardından blob'u sil.
     // Böylece proje hiçbir zaman silinmiş bir asset'e bilinçli olarak bağlı bırakılmaz.
-    if (usageCount > 0 && autosaveEnabled) {
-      clearAutosaveTimer();
+    if (usageCount > 0 && autosaveController.isEnabled()) {
+      autosaveController.clearPending();
       await persistActiveProject({ quiet: true });
-      autosaveObservedSignature = getProjectStateSignature();
+      autosaveController.markSavedState();
     }
 
     const deleted = await deleteImageAsset(activeProjectId, assetId);
@@ -2065,11 +2024,11 @@ renameProjectButton?.addEventListener('click', async () => {
   const nextName = await requestProjectName({ defaultName: editableName, mode: 'rename', suffix: projectNameSuffix });
   if (!nextName || nextName === currentName) return;
   setProjectName(nextName);
-  if (currentStand || autosaveEnabled) {
+  if (currentStand || autosaveController.isEnabled()) {
     try {
-      clearAutosaveTimer();
+      autosaveController.clearPending();
       await persistActiveProject({ quiet: true });
-      enableAutosaveFromCurrentState();
+      autosaveController.enableFromCurrentState();
       projectStatus.textContent = 'Proje adı değiştirildi ve kaydedildi: ' + nextName;
     } catch (error) {
       console.warn('Proje adı değiştirilemedi:', error);
@@ -2084,9 +2043,9 @@ saveProjectButton.addEventListener('click', async () => {
   setButtonBusy(saveProjectButton, true, 'Kaydediliyor');
   projectStatus.textContent = 'Proje kaydediliyor…';
   try {
-    clearAutosaveTimer();
+    autosaveController.clearPending();
     await persistActiveProject();
-    enableAutosaveFromCurrentState();
+    autosaveController.enableFromCurrentState();
   } catch (error) {
     console.warn('Proje kaydedilemedi:', error);
     projectStatus.textContent = 'Proje kaydedilemedi.';
@@ -2316,7 +2275,7 @@ clearTextureButton.addEventListener('click', () => {
 });
 
 window.addEventListener('beforeunload', () => {
-  disableAutosave();
+  autosaveController.disable();
   imageAssets.forEach((asset) => {
     if (asset.url) URL.revokeObjectURL(asset.url);
   });
