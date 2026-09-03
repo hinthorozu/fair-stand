@@ -38,6 +38,7 @@ Modül tipine göre değişen rotation, move snap, placement, collision, side-in
 - Runtime state yapıları: ilgili state factory dosyaları
 - BOM / üretim verileri: recipe ve production-parts katmanı
 - Mimari sınırlar: `ARCHITECTURE_RULES.md`
+- Full-system change dependency/test/finding taraması: `SYSTEM_IMPACT_SWEEP.md`
 
 Aynı runtime davranışı birden fazla Markdown dosyasında sabit değer olarak tekrar edilmemelidir.
 
@@ -45,9 +46,13 @@ Aynı runtime davranışı birden fazla Markdown dosyasında sabit değer olarak
 
 Core davranış değişikliği yapılırken:
 
-1. Gerçek source of truth dosyası değiştirilir.
-2. İlgili regresyon testi eklenir veya güncellenir.
-3. Davranışı açıklayan canonical doküman etkileniyorsa güncellenir.
-4. `npm test` ve `npm run build` başarılı olmadan değişiklik tamamlanmış sayılmaz.
+1. Değişiklik `SYSTEM_CHANGE_GATE.md` üzerinden sınıflandırılır ve registry'deki bütün impact domainleri değerlendirilir.
+2. `SYSTEM_IMPACT_SWEEP.md` uyarınca değişen dosya/symbol/UI yüzeyinin callers, reverse dependents, existing tests, docs/contracts ve candidate findings etkisi çıkarılır.
+3. Gerçek source of truth dosyası değiştirilir.
+4. Discovery tarafından bulunan mevcut testler yeni canonical davranış/ownership açısından gözden geçirilir; eski implementation detail'e kilitli assertion bırakılmaz.
+5. İlgili targeted regresyon testi eklenir veya güncellenir.
+6. Davranışı açıklayan canonical doküman etkileniyorsa güncellenir.
+7. `npm run contract:verify` full-system impact acknowledgement dahil başarılı olmalıdır.
+8. `npm test` ve `npm run build` başarılı olmadan değişiklik tamamlanmış sayılmaz.
 
 Yeni bir modül eklemek mevcut global kuralları veya core placement sözleşmesini otomatik olarak değiştirme gerekçesi değildir.
