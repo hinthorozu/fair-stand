@@ -12,6 +12,9 @@ const CONTRACT_PATH = '.github/change-contract.json';
 const TEXT_EXTENSIONS = new Set([
   '.js', '.mjs', '.cjs', '.json', '.md', '.html', '.css', '.yml', '.yaml', '.txt', '.sh', '.py',
 ]);
+const SYMBOL_DISCOVERY_EXTENSIONS = new Set([
+  '.js', '.mjs', '.cjs', '.json', '.html', '.css', '.yml', '.yaml',
+]);
 
 function readJson(path) {
   return JSON.parse(readFileSync(resolve(path), 'utf8'));
@@ -161,7 +164,7 @@ function readRepositoryTextFiles() {
 }
 
 function buildPatchText(diff, changedFiles) {
-  if (!diff.baseRef) return '';
+  if (!diff.baseRef || changedFiles.length === 0) return '';
   const args = ['diff', '--unified=0', diff.baseRef];
   if (diff.headRef) args.push(diff.headRef);
   args.push('--', ...changedFiles);
@@ -229,7 +232,8 @@ if (undeclaredRequiredDomains.length) {
 let discovered;
 try {
   const fileContents = readRepositoryTextFiles();
-  const patchText = buildPatchText(diff, guardedFiles);
+  const symbolDiscoveryFiles = guardedFiles.filter((file) => SYMBOL_DISCOVERY_EXTENSIONS.has(extname(file)));
+  const patchText = buildPatchText(diff, symbolDiscoveryFiles);
   discovered = analyzeChangeImpact({
     changedFiles: guardedFiles,
     fileContents,
