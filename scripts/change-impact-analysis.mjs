@@ -105,8 +105,8 @@ export function extractImpactTokensFromPatch(patchText) {
     .map((line) => line.slice(1));
 
   for (const line of changedLines) {
-    for (const match of line.matchAll(/\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/g)) addToken(tokens, match[1]);
-    for (const match of line.matchAll(/\bclass\s+([A-Za-z_$][\w$]*)/g)) addToken(tokens, match[1]);
+    for (const match of line.matchAll(/\bexport\s+(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/g)) addToken(tokens, match[1]);
+    for (const match of line.matchAll(/\bexport\s+class\s+([A-Za-z_$][\w$]*)/g)) addToken(tokens, match[1]);
     for (const match of line.matchAll(/\b([A-Za-z_$][\w$]*(?:State|Controller|Registry|Contract|Module|Descriptor|Factory|Handler|Action|Policy|Config))\b/g)) addToken(tokens, match[1]);
     for (const match of line.matchAll(/\bid\s*=\s*['"]([^'"]+)['"]/g)) addToken(tokens, match[1]);
     for (const match of line.matchAll(/\bdata-[\w-]+\s*=\s*['"]([^'"]+)['"]/g)) addToken(tokens, match[1]);
