@@ -61,6 +61,7 @@ import {
 import { createAutosaveController } from './autosaveController.js';
 import { createProjectLoadingController, setButtonBusy } from './projectUi.js';
 import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';
+import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';
 
 let jsZipModulePromise = null;
 
@@ -157,44 +158,12 @@ sidebarToggleButton?.addEventListener('click', () => {
 
 const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
 
-function syncSelectionFeedback() {
-  const message = selectionInfo.textContent.trim();
-  selectionInfo.classList.toggle('has-selection', Boolean(message) && message !== DEFAULT_SELECTION_HINT);
-}
-
-new MutationObserver(syncSelectionFeedback).observe(selectionInfo, {
-  childList: true,
-  subtree: true,
-  characterData: true,
+observeSelectionFeedback({
+  element: selectionInfo,
+  defaultHint: DEFAULT_SELECTION_HINT,
 });
-syncSelectionFeedback();
 
-
-
-const STATUS_ELEMENTS = [stageResult, projectStatus, assetStatus].filter(Boolean);
-
-function inferStatusTone(element) {
-  if (element.classList.contains('error')) return 'error';
-  const text = element.textContent.toLocaleLowerCase('tr-TR');
-  if (/hata|başarısız|geçersiz|aşılamaz|bulunamadı|yüklenemedi|kaydedilemedi/.test(text)) return 'error';
-  if (/uyarı|dikkat|seçilmedi|henüz|bekliyor/.test(text)) return 'warning';
-  if (/kaydedildi|yüklendi|oluşturuldu|hazır|tamamlandı|eklendi|aktarıldı|silindi/.test(text)) return 'success';
-  return 'info';
-}
-
-function syncStatusTone(element) {
-  element.classList.remove('status-info', 'status-success', 'status-warning', 'status-error');
-  element.classList.add('status-' + inferStatusTone(element));
-}
-
-STATUS_ELEMENTS.forEach((element) => {
-  new MutationObserver(() => syncStatusTone(element)).observe(element, {
-    childList: true,
-    subtree: true,
-    characterData: true,
-  });
-  syncStatusTone(element);
-});
+observeStatusTones({ elements: [stageResult, projectStatus, assetStatus] });
 
 const WALL_LABELS = Object.freeze({
   back: 'Sırt',
