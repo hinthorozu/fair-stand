@@ -10,6 +10,8 @@ export const MODULE_COLLISION_DEPTH_CM = Math.max(
   Number(STAND_DIMENSIONS.depth) * 100 || 0,
 );
 
+const DEPOT_FREE_NO_MAGNETIC_SNAP_TYPES = new Set(['mini-fridge', 'kettle', 'coat-rack']);
+
 const EPSILON_CM = 0.001;
 
 const WALL_AXIS = Object.freeze({
@@ -654,6 +656,8 @@ export function snapPlacementToModules({
   standYCm,
   snapDistanceCm = MODULE_NEIGHBOR_SNAP_DISTANCE_CM,
 } = {}) {
+  if (DEPOT_FREE_NO_MAGNETIC_SNAP_TYPES.has(moduleType)) return null;
+
   const width = Number(widthCm);
   const pointerX = Number(pointerXCm);
   const pointerY = Number(pointerYCm);
