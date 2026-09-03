@@ -1,292 +1,136 @@
-  duration_ms: 0.416847
-  type: 'test'
-  ...
-# Subtest: TV uses the public JPEG asset and no GLB or inline data module
-ok 372 - TV uses the public JPEG asset and no GLB or inline data module
-  ---
-  duration_ms: 0.509096
-  type: 'test'
-  ...
-# Subtest: TV is a non-colliding wall overlay accessory
-ok 373 - TV is a non-colliding wall overlay accessory
-  ---
-  duration_ms: 0.228454
-  type: 'test'
-  ...
-# Subtest: TV wall overlay drag snaps horizontal and height movement to 10 cm
-ok 374 - TV wall overlay drag snaps horizontal and height movement to 10 cm
-  ---
-  duration_ms: 1.488329
-  type: 'test'
-  ...
-# Subtest: TV catalog preview uses a dedicated TV silhouette instead of panel strips
-ok 375 - TV catalog preview uses a dedicated TV silhouette instead of panel strips
-  ---
-  duration_ms: 0.302244
-  type: 'test'
-  ...
-# Subtest: inferStatusTone preserves explicit error class priority
-ok 376 - inferStatusTone preserves explicit error class priority
-  ---
-  duration_ms: 0.914395
-  type: 'test'
-  ...
-# Subtest: inferStatusTone preserves Turkish status keyword mapping
-ok 377 - inferStatusTone preserves Turkish status keyword mapping
-  ---
-  duration_ms: 0.470367
-  type: 'test'
-  ...
-# Subtest: syncStatusTone replaces previous status tone class
-ok 378 - syncStatusTone replaces previous status tone class
-  ---
-  duration_ms: 0.218819
-  type: 'test'
-  ...
-# Subtest: syncSelectionFeedback only marks non-default non-empty feedback
-ok 379 - syncSelectionFeedback only marks non-default non-empty feedback
-  ---
-  duration_ms: 0.211398
-  type: 'test'
-  ...
-# Subtest: main delegates selection and status feedback observers to uiFeedback helpers
-ok 380 - main delegates selection and status feedback observers to uiFeedback helpers
-  ---
-  duration_ms: 0.920144
-  type: 'test'
-  ...
-# Subtest: scene delegates keyboard mapping and reuses existing camera/viewcube APIs
-ok 381 - scene delegates keyboard mapping and reuses existing camera/viewcube APIs
-  ---
-  duration_ms: 1.058823
-  type: 'test'
-  ...
-# Subtest: help guide documents view shortcuts and new clockwise rotation binding
-ok 382 - help guide documents view shortcuts and new clockwise rotation binding
-  ---
-  duration_ms: 0.312811
-  type: 'test'
-  ...
-# Subtest: drag rotation keeps an independent cursor so invalid previews do not stop later Shift+R turns
-ok 383 - drag rotation keeps an independent cursor so invalid previews do not stop later Shift+R turns
-  ---
-  duration_ms: 1.108788
-  type: 'test'
-  ...
-# Subtest: view shortcuts map P/O/L/R/T/F/H without modifiers
-ok 384 - view shortcuts map P/O/L/R/T/F/H without modifiers
-  ---
-  duration_ms: 1.456661
-  type: 'test'
-  ...
-# Subtest: Shift+R is the only module rotation shortcut and rotates clockwise
-ok 385 - Shift+R is the only module rotation shortcut and rotates clockwise
-  ---
-  duration_ms: 0.261683
-  type: 'test'
-  ...
-# Subtest: unrelated modified view keys do not trigger camera shortcuts
-ok 386 - unrelated modified view keys do not trigger camera shortcuts
-  ---
-  duration_ms: 0.138198
-  type: 'test'
-  ...
-# Subtest: editable target guard covers form and contenteditable fields
-ok 387 - editable target guard covers form and contenteditable fields
-  ---
-  duration_ms: 0.124737
-  type: 'test'
-  ...
-# Subtest: 350 cm duvarı 200 + 150 olarak çözer
-ok 388 - 350 cm duvarı 200 + 150 olarak çözer
-  ---
-  duration_ms: 1.92778
-  type: 'test'
-  ...
-# Subtest: 600 cm duvarı üç adet 200 cm modülle çözer
-ok 389 - 600 cm duvarı üç adet 200 cm modülle çözer
-  ---
-  duration_ms: 0.161273
-  type: 'test'
-  ...
-# Subtest: 50 cm katı olmayan ölçüyü reddeder
-ok 390 - 50 cm katı olmayan ölçüyü reddeder
-  ---
-  duration_ms: 0.100742
-  type: 'test'
-  ...
-# Subtest: 50 cm altındaki duvarı reddeder
-ok 391 - 50 cm altındaki duvarı reddeder
-  ---
-  duration_ms: 0.090556
-  type: 'test'
-  ...
-# Subtest: wall overlay drag prefers its current wall while that wall intersection remains valid
-ok 392 - wall overlay drag prefers its current wall while that wall intersection remains valid
-  ---
-  duration_ms: 0.97743
-  type: 'test'
-  ...
-# Subtest: wall overlay move uses the dragged module current wall instead of the module under the pointer
-ok 393 - wall overlay move uses the dragged module current wall instead of the module under the pointer
-  ---
-  duration_ms: 0.284478
-  type: 'test'
-  ...
-# Subtest: top fixture keeps preferred wall when both walls are within the existing 30 cm snap zone
-ok 394 - top fixture keeps preferred wall when both walls are within the existing 30 cm snap zone
-  ---
-  duration_ms: 0.204047
-  type: 'test'
-  ...
-# Subtest: U stand 400 x 400 exposes a 1200 cm continuous wall chain
-ok 395 - U stand 400 x 400 exposes a 1200 cm continuous wall chain
-  ---
-  duration_ms: 1.539996
-  type: 'test'
-  ...
-# Subtest: L stand 500 x 400 exposes a 900 cm chain from the physical left side
-ok 396 - L stand 500 x 400 exposes a 900 cm chain from the physical left side
-  ---
-  duration_ms: 0.300783
-  type: 'test'
-  ...
-# Subtest: automatic U wall starts at left, crosses back and ends on right
-ok 397 - automatic U wall starts at left, crosses back and ends on right
-  ---
-  duration_ms: 0.47915
-  type: 'test'
-  ...
-# Subtest: U stand pushes an occupied corner forward like one continuous straight wall
-ok 398 - U stand pushes an occupied corner forward like one continuous straight wall
-  ---
-  duration_ms: 1.475559
-  type: 'test'
-  ...
-# Subtest: reflow crosses both U stand corners and keeps pushing modules
-ok 399 - reflow crosses both U stand corners and keeps pushing modules
-  ---
-  duration_ms: 0.256756
-  type: 'test'
-  ...
-# Subtest: left insertion at the path boundary falls back to shifting target and following modules right
-ok 400 - left insertion at the path boundary falls back to shifting target and following modules right
-  ---
-  duration_ms: 0.252159
-  type: 'test'
-  ...
-# Subtest: right insertion keeps an existing gap instead of pulling a distant module into the corner
-ok 401 - right insertion keeps an existing gap instead of pulling a distant module into the corner
-  ---
-  duration_ms: 0.293662
-  type: 'test'
-  ...
-# Subtest: left insertion uses the free gap before target and does not move target or distant next module
-ok 402 - left insertion uses the free gap before target and does not move target or distant next module
-  ---
-  duration_ms: 0.255845
-  type: 'test'
-  ...
-# Subtest: left insertion succeeds in a 50 cm gap even when the chain to the right is completely full
-ok 403 - left insertion succeeds in a 50 cm gap even when the chain to the right is completely full
-  ---
-  duration_ms: 0.360913
-  type: 'test'
-  ...
-# Subtest: right wall visual-left add uses the gap before target even when the right end is full
-ok 404 - right wall visual-left add uses the gap before target even when the right end is full
-  ---
-  duration_ms: 0.366862
-  type: 'test'
-  ...
-# Subtest: right insertion uses an available gap after target without moving a distant next module
-ok 405 - right insertion uses an available gap after target without moving a distant next module
-  ---
-  duration_ms: 0.216946
-  type: 'test'
-  ...
-# Subtest: rejects only when the continuous active wall chain has no remaining capacity
-ok 406 - rejects only when the continuous active wall chain has no remaining capacity
-  ---
-  duration_ms: 0.307002
-  type: 'test'
-  ...
-# Subtest: top fixtures do not consume continuous wall capacity during duplication
-ok 407 - top fixtures do not consume continuous wall capacity during duplication
-  ---
-  duration_ms: 0.208734
-  type: 'test'
-  ...
-# Subtest: wall overlays do not consume continuous wall capacity
-ok 408 - wall overlays do not consume continuous wall capacity
-  ---
-  duration_ms: 0.130316
-  type: 'test'
-  ...
-# Subtest: L-left depot uses existing back and left walls
-ok 409 - L-left depot uses existing back and left walls
-  ---
-  duration_ms: 1.103289
-  type: 'test'
-  ...
-# Subtest: back wall depot is centered
-ok 410 - back wall depot is centered
-  ---
-  duration_ms: 0.21268
-  type: 'test'
-  ...
-# Subtest: island depot is centered and contains four sides
-ok 411 - island depot is centered and contains four sides
-  ---
-  duration_ms: 0.340192
-  type: 'test'
-  ...
-# Subtest: straight 100/150/200 counters use 45 degree rotation steps
-ok 412 - straight 100/150/200 counters use 45 degree rotation steps
-  ---
-  duration_ms: 0.766123
-  type: 'test'
-  ...
-# Subtest: Bar Taburesi standard keeps 10 cm snap, 45 degree turns and 270 default
-ok 413 - Bar Taburesi standard keeps 10 cm snap, 45 degree turns and 270 default
-  ---
-  duration_ms: 0.163146
-  type: 'test'
-  ...
-# Subtest: 45 degree rotation preserves module center
-ok 414 - 45 degree rotation preserves module center
-  ---
-  duration_ms: 0.291128
-  type: 'test'
-  ...
-# Subtest: rotation normalization supports eighth turns
-ok 415 - rotation normalization supports eighth turns
-  ---
-  duration_ms: 0.095164
-  type: 'test'
-  ...
-# Subtest: rotated footprint participates in stand boundary validation
-ok 416 - rotated footprint participates in stand boundary validation
-  ---
-  duration_ms: 0.297477
-  type: 'test'
-  ...
-# Subtest: Bar Taburesi 45 degree catalog preview placement stays valid
-ok 417 - Bar Taburesi 45 degree catalog preview placement stays valid
-  ---
-  duration_ms: 0.408725
-  type: 'test'
-  ...
-# Subtest: straight Banko 45 degree catalog preview placement stays valid
+=== FAILING TEST CONTEXT ===
+1099-ok 183 - multi-panel lightbox fabric is exposed from panel context menu
+1100-  ---
+1101-  duration_ms: 2.286068
+1102-  type: 'test'
+1103-  ...
+1104-# Subtest: mesh branda is a separate one-piece cover without lightbox lighting
+1105-ok 184 - mesh branda is a separate one-piece cover without lightbox lighting
+1106-  ---
+1107-  duration_ms: 4.150997
+1108-  type: 'test'
+1109-  ...
+1110-# Subtest: lightbox lighting stays fully opaque
+1111-ok 185 - lightbox lighting stays fully opaque
+1112-  ---
+1113-  duration_ms: 3.467808
+1114-  type: 'test'
+1115-  ...
+1116-# Subtest: fabric conversion requires a rectangular multi-panel block and renders one overlay
+1117-ok 186 - fabric conversion requires a rectangular multi-panel block and renders one overlay
+1118-  ---
+1119-  duration_ms: 2.723507
+1120-  type: 'test'
+1121-  ...
+1122-# Subtest: lightbox fabric owns one persistent color and image state
+1123-ok 187 - lightbox fabric owns one persistent color and image state
+1124-  ---
+1125-  duration_ms: 3.699793
+1126-  type: 'test'
+1127-  ...
+1128-# Subtest: main editor treats a fabric group as one color and image target
+1129:not ok 188 - main editor treats a fabric group as one color and image target
+1130-  ---
+1131-  duration_ms: 4.789532
+1132-  type: 'test'
+1133-  location: '/home/runner/work/fair-stand/fair-stand/test/lightboxFabricAppearance.test.js:17:1'
+1134-  failureType: 'testCodeFailure'
+1135-  error: |-
+1136-    The input did not match the regular expression /Tek parça Lightbox Kumaş seçili · renk \+ görsel uygulanabilir/. Input:
+1137-    
+1138-    "import './style.css';\n" +
+1139-      "import './colorEditor.css';\n" +
+1140-      "import './imageActions.css';\n" +
+1141-      "import './helpGuide.css';\n" +
+1142-      "import { createStandScene } from './scene3d.js';\n" +
+1143-      "import { initHelpGuide } from './helpGuide.js';\n" +
+1144-      "import { resolveModuleCatalogKey } from './catalog.js';\n" +
+1145-      "import { planAutomaticDepot } from './autoDepot.js';\n" +
+1146-      'import {\n' +
+1147-      '  composeAutomaticStandWall,\n' +
+1148-      '  composeAutomaticBackWallWithDepot,\n' +
+1149-      '  getAutomaticWallCapacityCm,\n' +
+1150-      "} from './automaticWall.js';\n" +
+1151-      'import {\n' +
+1152-      '  createBarStoolModuleState,\n' +
+1153-      '  createMiniFridgeModuleState,\n' +
+1154-      '  createKettleModuleState,\n' +
+1155-      '  createCoatRackModuleState,\n' +
+1156-      '  createIndoorPlantModuleState,\n' +
+1157-      '  createIlluminatedFoamModuleState,\n' +
+1158-      '  createLedFloodlightModuleState,\n' +
+1159-      '  createTvModuleState,\n' +
+1160-      '  createBaseModuleState,\n' +
+1161-      '  createBaseWallModuleState,\n' +
+1162-      '  createCounterModuleState,\n' +
+1163-      '  createDoorModuleState,\n' +
+1164-      '  createEamesTableChairSetModuleState,\n' +
+1165-      '  createFlatPanelModuleState,\n' +
+1166-      '  createSeparatorModuleState,\n' +
+1167-      '  createShelfModuleState,\n' +
+1168-      '  createBeigeSofaSetModuleState,\n' +
+1169-      '  createShowcaseModuleState,\n' +
+1170-      '  duplicateModuleState,\n' +
+1171-      '  totalWallWidthCm,\n' +
+1172-      '  moduleWidths,\n' +
+1173-      "} from './designState.js';\n" +
+1174-      "import { deleteImageAsset, deleteProjectImageAssets, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';\n" +
+1175-      "import { clearImageAssetReferences, countImageAssetReferences } from './imageAssetReferences.js';\n" +
+1176-      "import { createProjectId, deleteProject, listProjects, loadProject, saveProject } from './projectStore.js';\n" +
+1177-      "import { describeRectSelection } from './rectSelection.js';\n" +
+1178-      "import { createModuleContextMenu } from './moduleContextMenu.js';\n" +
+1179-      "import { createModuleDragSidebar } from './moduleDragSidebar.js';\n" +
+1180-      "import { createColorEditorController } from './colorEditorController.js';\n" +
+1181-      "import { STAND_TYPE_LABELS, validateStandSetup } from './standSetup.js';\n" +
+1182-      "import { validateStandAxisCapacity } from './standCapacity.js';\n" +
+1183-      'import {\n' +
+1184-      '  createModulePlacement,\n' +
+1185-      '  getWallAxis,\n' +
+1186-      '  getWallExtentCm,\n' +
+1187-      '  getWallUsedCm,\n' +
+1188-      '  planFreeSideInsertion,\n' +
+1189-      '  validatePlacementAgainstModules,\n' +
+1190-      "} from './modulePlacement.js';\n" +
+1191-      "import { getContinuousWallSegments, planContinuousWallInsertion } from './wallReflow.js';\n" +
+1192-      "import { getModuleDefaultRotationDeg } from './moduleBehavior.js';\n" +
+1193-      'import {\n' +
+1194-      '  buildAutomaticProjectNameSuffix,\n' +
+1195-      '  createProjectNamingController,\n' +
+1196-      '  getEditableProjectName,\n' +
+1197-      "} from './projectNaming.js';\n" +
+1198-      "import { createAutosaveController } from './autosaveController.js';\n" +
+1199-      "import { createProjectLoadingController, setButtonBusy } from './projectUi.js';\n" +
+1200-      "import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';\n" +
+1201-      "import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';\n" +
+1202-      "import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';\n" +
+1203-      "import { createSidebarController } from './sidebarController.js';\n" +
+1204-      "import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';\n" +
+1205-      '\n' +
+1206-      'let jsZipModulePromise = null;\n' +
+1207-      '\n' +
+1208-      'async function loadJSZip() {\n' +
+1209-      '  if (!jsZipModulePromise) {\n' +
+1210-      "    jsZipModulePromise = import('jszip').then((module) => module.default);\n" +
+1211-      '  }\n' +
+1212-      '  return jsZipModulePromise;\n' +
+1213-      '}\n' +
+1214-      '\n' +
+1215-      "const appElement = document.querySelector('#app');\n" +
+1216-      "const sidebarToggleButton = document.querySelector('#sidebar-toggle');\n" +
+1217-      "const viewport = document.querySelector('#viewport');\n" +
+1218-      "const viewportEmpty = document.querySelector('#viewport-empty');\n" +
+1219-      "const viewportToolbar = document.querySelector('#viewport-toolbar');\n" +
+
+=== TEST SUMMARY ===
 ok 418 - straight Banko 45 degree catalog preview placement stays valid
   ---
-  duration_ms: 0.181923
+  duration_ms: 0.244788
   type: 'test'
   ...
 # Subtest: ghost behavior is one central silhouette contract for every module
 ok 419 - ghost behavior is one central silhouette contract for every module
   ---
-  duration_ms: 0.542746
+  duration_ms: 0.734955
   type: 'test'
   ...
 1..419
@@ -297,4 +141,4 @@ ok 419 - ghost behavior is one central silhouette contract for every module
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 1987.372839
+# duration_ms 2489.355826
