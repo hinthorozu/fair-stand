@@ -40,16 +40,17 @@ jobs:
               missing = [item for item in required if item not in old_callback]
               if missing:
                   raise SystemExit(f'surface callback guard mismatch: {missing}')
-              new_callback = """  (surfaces) => {
-    const feedback = describeSurfaceSelection(surfaces, currentModules);
-    selectedFoamModuleId = feedback.foamModuleId;
-    if (foamLightControls) foamLightControls.hidden = !feedback.foamControlsVisible;
-    if (feedback.foamControlsVisible && foamLightColorInput) {
-      foamLightColorInput.value = feedback.foamColor;
-    }
-    selectionInfo.textContent = feedback.message;
-  },
-"""
+              new_callback = (
+                  "  (surfaces) => {\n"
+                  "    const feedback = describeSurfaceSelection(surfaces, currentModules);\n"
+                  "    selectedFoamModuleId = feedback.foamModuleId;\n"
+                  "    if (foamLightControls) foamLightControls.hidden = !feedback.foamControlsVisible;\n"
+                  "    if (feedback.foamControlsVisible && foamLightColorInput) {\n"
+                  "      foamLightColorInput.value = feedback.foamColor;\n"
+                  "    }\n"
+                  "    selectionInfo.textContent = feedback.message;\n"
+                  "  },\n"
+              )
               s = s[:callback_start] + new_callback + s[callback_end:]
               p.write_text(s)
 
