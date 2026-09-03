@@ -8,11 +8,11 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 ## Summary
 
 - Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **45**
-- Closed findings: **1**
+- Open findings: **44**
+- Closed findings: **2**
 - Open P0: **0**
 - Open P1: **19**
-- Open P2: **26**
+- Open P2: **25**
 - Open P3: **0**
 - Remediation progress: **A00 closed; A01 in progress**
 
@@ -21,7 +21,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | ID | Sev | Summary | Status |
 |---|---|---|---|
 | F-001 | P1 | `SYSTEM_MODULE_CATALOG.md` stale versus runtime catalog/BOM policy | **CLOSED** — `audit/remediation/A01_F001_CLOSURE.md` |
-| F-002 | P2 | Historical/repository-progress docs can be mistaken for current truth | OPEN |
+| F-002 | P2 | Historical/repository-progress docs can be mistaken for current truth | **CLOSED** — `audit/remediation/A01_F002_CLOSURE.md` |
 | F-003 | P2 | Roadmaps duplicate canonical production dimensions/recipe facts | OPEN |
 | F-004 | P2 | README/developer entrypoint predates universal change-gate workflow | OPEN |
 | F-005 | P1 | Change-gate path/domain wall incomplete; 20/51 `src/` files have zero mandatory mapping | OPEN |
