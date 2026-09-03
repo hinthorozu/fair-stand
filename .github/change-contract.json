@@ -1,18 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "bootstrap-system-change-gate",
+  "id": "remediate-f005-source-domain-map",
   "kind": "architecture",
-  "summary": "Introduce the universal change declaration and CI gate used before module, feature, UI, state, renderer, persistence, BOM, tooling, or structural changes are accepted.",
+  "summary": "Close F-005 by replacing partial/accidental source path mappings with an explicit ownership-derived domain map for every current src file and regression coverage that fails when a new src file is left unmapped.",
   "owners": [
-    "SYSTEM_CHANGE_GATE.md",
     "src/systemChangeContract.js",
-    "scripts/verify-change-contract.mjs"
+    "test/systemChangeGate.test.js"
   ],
   "sourceOfTruth": [
-    "PROJECT_RULES.md",
-    "ARCHITECTURE_RULES.md",
-    "SYSTEM_DEVELOPMENT_CONTRACT.md",
-    "SYSTEM_CHANGE_GATE.md"
+    "SYSTEM_CHANGE_GATE.md",
+    "audit/evidence/A03_ARCHITECTURE.md",
+    "audit/evidence/A02_CHANGE_GATE.md"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -42,11 +40,11 @@
   },
   "risk": {
     "level": "medium",
-    "notes": "This changes the development/CI acceptance path but intentionally does not change runtime product behavior."
+    "notes": "This tightens CI acceptance rules for source changes. Runtime product behavior is unchanged, but future source PRs may correctly require additional impact declarations."
   },
   "migration": {
     "required": false,
-    "notes": "No runtime or stored-project migration is introduced."
+    "notes": "No runtime state or stored-project migration is introduced."
   },
-  "rollback": "Revert the system change gate PR to restore the previous CI acceptance path."
+  "rollback": "Revert the F-005 remediation PR to restore the previous partial path-domain mapping behavior."
 }
