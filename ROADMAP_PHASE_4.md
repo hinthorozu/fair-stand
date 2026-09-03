@@ -1,6 +1,8 @@
 # Fair Stand — FAZ 4 Roadmap
 
 > **Tek kaynak:** Bu belge FAZ 4'ün detaylı uygulama planıdır. `ROADMAP.md` yalnız üst seviye durum/özet tutar. Nihai sahne BOM'u ve maliyet işleri `ROADMAP_PHASE_5_6.md` içindedir.
+>
+> Checkbox'lar yalnız source code ve regression testleriyle doğrulanmış mevcut implementasyonu gösterir. Kısmi altyapı varsa madde tamamlandı sayılmaz; açıklama notuyla belirtilir.
 
 ## FAZ 4 ana hedefi
 
@@ -16,6 +18,14 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 - Sahnedeki başka modüllere nereden ve nasıl bağlı?
 
 **FAZ 4'te yapılmayacaklar:** tüm sahnenin ortak parça düşümü/normalization sonucu olan Final BOM, fiyat/maliyet, fire, işçilik, Fair CRM fiyatlandırması.
+
+## 3 Eylül 2026 doğrulanmış mevcut temel
+
+- `src/productionParts.js` stabil `partId` kullanan bağımsız production-part sözlüğü içeriyor.
+- Düz/iç-köşe panel, profil, dikme ve dört connector tipi production-part olarak tanımlı.
+- `src/moduleRecipes.js` 50/100/150/200 düz duvar reçetelerini ve çeşitli mevcut modül reçetelerini içeriyor.
+- `test/moduleRecipes.test.js` production-part ve standart duvar reçetelerini doğruluyor.
+- Bu mevcut temel **scene instance Raw BOM**, parametrik config, custom definition ve connection graph anlamına gelmez; ilgili maddeler açık kalır.
 
 ---
 
@@ -37,12 +47,12 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
 ## 1.1 — Part / Material Definition
 
-- [ ] Stabil `partId` / `materialId` modeli.
-- [ ] Parça kategorileri en az: `panel`, `upright`, `profile`, `connector`, `shelf`, `lighting`.
-- [ ] Birimler: en az `adet`, `m`, `m²`, `set`.
-- [ ] Gerçek fiziksel ölçüler metadata olarak tutulur.
+- [ ] Stabil `partId` / `materialId` modeli. — **Kısmi:** stabil `partId` mevcut; `materialId` contract'ı doğrulanmadı.
+- [ ] Parça kategorileri en az: `panel`, `upright`, `profile`, `connector`, `shelf`, `lighting`. — **Kısmi:** temel üretim kategorileri mevcut; tüm hedef kategori seti tamamlandı sayılmıyor.
+- [ ] Birimler: en az `adet`, `m`, `m²`, `set`. — **Kısmi:** mevcut production parts ağırlıklı `adet` kullanıyor.
+- [x] Gerçek fiziksel ölçüler metadata olarak tutulur.
 - [ ] Opsiyonel `catalogRef` alanı ileride Fair CRM eşlemesi için hazır olur.
-- [ ] Üretim parçası kimliği Three.js implementation'ından bağımsızdır.
+- [x] Üretim parçası kimliği Three.js implementation'ından bağımsızdır.
 
 ## 1.2 — Doğrulanmış fiziksel standartlar
 
@@ -80,10 +90,10 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
 ## 1.3 — Aparat sözlüğü
 
-- [ ] Başlangıç aparatı.
-- [ ] Tekli / düz bağlantı aparatı.
-- [ ] Köşe bağlantı aparatı.
-- [ ] Çiftli bağlantı aparatı.
+- [x] Başlangıç aparatı.
+- [x] Tekli / düz bağlantı aparatı.
+- [x] Köşe bağlantı aparatı.
+- [x] Çiftli bağlantı aparatı.
 
 Doğrulanmış semantik:
 
@@ -106,6 +116,8 @@ Doğrulanmış semantik:
 
 **Kural:** Köşe ve modül birleşimlerinin adet reçeteleri gerçek üretim Excel/verisiyle doğrulanmadan tahmin edilip kodlanmaz.
 
+**Implementasyon durumu:** 50/100/150/200 düz duvar recipe tanımları kodda mevcut ve regression testleriyle doğrulanıyor.
+
 **Sprint çıkışı:** 50/100/150/200 standart duvar için fiziksel parça sözlüğü ve doğrulanmış module recipe sistemi hazır olur.
 
 ---
@@ -114,15 +126,15 @@ Doğrulanmış semantik:
 
 **Hedef:** Her modülün kendi başına hangi fiziksel parçalardan oluştuğunu deterministik hesaplamak.
 
-- [ ] `ModuleRecipeDefinition` / eşdeğer model.
-- [ ] Sabit adet + parametrik formül desteği.
-- [ ] Recipe çıktısı en az `partId`, `quantity`, `unit`, `dimensions`, `catalogRef` alanlarını taşıyabilir.
+- [x] `ModuleRecipeDefinition` / eşdeğer model. — Mevcut implementation registry/object tabanlı recipe tanımı kullanıyor.
+- [ ] Sabit adet + parametrik formül desteği. — Sabit/variant reçeteler mevcut; genel parametrik formül contract'ı tamamlandı sayılmıyor.
+- [ ] Recipe çıktısı en az `partId`, `quantity`, `unit`, `dimensions`, `catalogRef` alanlarını taşıyabilir. — `partId`, `quantity` ve expanded production metadata mevcut; `catalogRef` hedefi tamamlanmadı.
 - [ ] Her scene instance bağımsız **Raw BOM** üretebilir.
 - [ ] Raw BOM hangi instance/recipe'den geldiğini izlenebilir tutar.
 - [ ] Parametre değişince Raw BOM otomatik değişir.
 - [ ] Geometry ve Raw BOM aynı parametrik config'ten türetilir.
 - [ ] Aynı input aynı geometry + aynı Raw BOM çıktısını verir.
-- [ ] Unit testler.
+- [ ] Unit testler. — Recipe/production-part testleri mevcut; Raw BOM pipeline testleri henüz bu sprint maddesini kapatacak kapsamda değil.
 
 **Sprint çıkışı:** Bir modülü sahneye koymadan bile `bu modül = şu parçalar` sonucu deterministik alınabilir.
 
@@ -240,7 +252,7 @@ Doğrulanmış semantik:
 
 # Sprint 8 — Regresyon + FAZ 4 Kapanışı
 
-- [ ] Standart 50/100/150/200 duvar recipe testleri.
+- [x] Standart 50/100/150/200 duvar recipe testleri.
 - [ ] Raw BOM determinism testleri.
 - [ ] Parametric config değişiminde geometry + Raw BOM birlikte değişim testleri.
 - [ ] Wizard/live preview testleri.
