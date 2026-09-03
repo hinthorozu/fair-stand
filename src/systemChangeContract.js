@@ -1,4 +1,4 @@
-export const CHANGE_CONTRACT_SCHEMA_VERSION = 1;
+export const CHANGE_CONTRACT_SCHEMA_VERSION = 2;
 
 export const SYSTEM_CHANGE_KINDS = Object.freeze([
   'module',
@@ -130,6 +130,7 @@ export const GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS = Object.freeze({
   'ARCHITECTURE_RULES.md': frozenDomains('architecture'),
   'SYSTEM_DEVELOPMENT_CONTRACT.md': frozenDomains('architecture'),
   'SYSTEM_CHANGE_GATE.md': frozenDomains('architecture'),
+  'SYSTEM_IMPACT_SWEEP.md': frozenDomains('architecture'),
   'MODULE_BEHAVIOR_STANDARD.md': frozenDomains('architecture'),
   'SYSTEM_AUDIT_CHECKLIST.md': frozenDomains('architecture'),
 });
@@ -138,8 +139,35 @@ function isNonEmptyString(value) {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+function isStringArray(value) {
+  return Array.isArray(value) && value.every(isNonEmptyString);
+}
+
 function isNonEmptyStringArray(value) {
-  return Array.isArray(value) && value.length > 0 && value.every(isNonEmptyString);
+  return isStringArray(value) && value.length > 0;
+}
+
+function hasDuplicates(value) {
+  return Array.isArray(value) && new Set(value).size !== value.length;
+}
+
+function validatePathArray(errors, value, fieldName) {
+  if (!isStringArray(value)) {
+    errors.push(`${fieldName} must be an array of non-empty paths.`);
+    return;
+  }
+  if (hasDuplicates(value)) errors.push(`${fieldName} must not contain duplicates.`);
+}
+
+function validateFindingArray(errors, value, fieldName) {
+  if (!isStringArray(value)) {
+    errors.push(`${fieldName} must be an array.`);
+    return;
+  }
+  if (hasDuplicates(value)) errors.push(`${fieldName} must not contain duplicates.`);
+  for (const finding of value) {
+    if (!/^F-\d{3}$/.test(finding)) errors.push(`${fieldName} contains invalid finding id: ${finding}.`);
+  }
 }
 
 export function validateSystemChangeContract(contract) {
@@ -204,6 +232,31 @@ export function validateSystemChangeContract(contract) {
     }
   }
 
+  if (!contract.impactAnalysis || typeof contract.impactAnalysis !== 'object' || Array.isArray(contract.impactAnalysis)) {
+    errors.push('impactAnalysis is required for every change.');
+  } else {
+    if (contract.impactAnalysis.mode !== 'full-system') {
+      errors.push('impactAnalysis.mode must be full-system.');
+    }
+    validatePathArray(errors, contract.impactAnalysis.affectedFiles, 'impactAnalysis.affectedFiles');
+    validatePathArray(errors, contract.impactAnalysis.affectedTests, 'impactAnalysis.affectedTests');
+    validatePathArray(errors, contract.impactAnalysis.affectedDocs, 'impactAnalysis.affectedDocs');
+
+    const related = contract.impactAnalysis.relatedFindings;
+    if (!related || typeof related !== 'object' || Array.isArray(related)) {
+      errors.push('impactAnalysis.relatedFindings is required.');
+    } else {
+      validateFindingArray(errors, related.affected, 'impactAnalysis.relatedFindings.affected');
+      validateFindingArray(errors, related.reviewedNotAffected, 'impactAnalysis.relatedFindings.reviewedNotAffected');
+      const overlap = (related.affected ?? []).filter((finding) => (related.reviewedNotAffected ?? []).includes(finding));
+      if (overlap.length) errors.push(`Findings cannot be both affected and reviewedNotAffected: ${overlap.join(', ')}.`);
+    }
+
+    if (!isNonEmptyString(contract.impactAnalysis.notes)) {
+      errors.push('impactAnalysis.notes is required.');
+    }
+  }
+
   if (!contract.tests || typeof contract.tests !== 'object' || Array.isArray(contract.tests)) {
     errors.push('tests policy is required.');
   } else {
@@ -212,6 +265,13 @@ export function validateSystemChangeContract(contract) {
     }
     if (contract.tests.fullSuite !== true) errors.push('tests.fullSuite must be true.');
     if (contract.tests.build !== true) errors.push('tests.build must be true.');
+
+    if (isStringArray(contract.tests.targeted) && isStringArray(contract.impactAnalysis?.affectedTests)) {
+      const missingFromReview = contract.tests.targeted.filter((testPath) => !contract.impactAnalysis.affectedTests.includes(testPath));
+      if (missingFromReview.length) {
+        errors.push(`Targeted tests must also appear in impactAnalysis.affectedTests: ${missingFromReview.join(', ')}.`);
+      }
+    }
   }
 
   if (!contract.risk || typeof contract.risk !== 'object' || Array.isArray(contract.risk)) {
