@@ -20,12 +20,12 @@ Kural: Maddeler **tek tek** uygulanacak. Bir madde tamamlanıp doğrulanmadan so
 - [x] 7. Yalnızca **floor selection callback** mesaj kararını `describeFloorSelection(floorSelection)` helper'ına bağla.
 - [x] 8. Floor selection değişikliğini focused selection testleri + integration guard + build ile doğrula.
 - [x] 9. `createStandScene(...)` selection wiring bloğunda eski duplicate karar kodunun kalmadığını doğrula; ek temizlik gerekmedi.
-- [ ] 10. Tam doğrulama çalıştır:
-  - `npm ci`
-  - `npm test`
-  - `npm run build`
-- [ ] 11. Gerçek `src/main.js` değişikliği branch'e commit edildikten ve doğrulamalar yeşil olduktan sonra `.github/workflows/temp-selection-feedback-extraction.yml` dosyasını kaldır.
-- [ ] 12. Final branch diff'ini kontrol et. Selection-feedback işi dışında değişiklik olmamalı.
+- [x] 10. Tam doğrulama çalıştır:
+  - `npm ci` — yeşil
+  - `npm test` — 419/419 yeşil
+  - `npm run build` — yeşil
+- [x] 11. Gerçek `src/main.js` değişikliği branch'e commit edildikten ve doğrulamalar yeşil olduktan sonra `.github/workflows/temp-selection-feedback-extraction.yml` dosyasını kaldır.
+- [x] 12. Final branch diff'ini kontrol et. Geçici workflow/diagnostic dosya yok; kalan değişiklikler yalnızca selection-feedback kapsamı + bu geçici checklist.
 - [ ] 13. PR CI yeşil olduktan ve iş tamamlandıktan sonra **bu `TEMP_WORK.md` dosyasını sil**.
 
 ## Final hedef
