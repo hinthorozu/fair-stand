@@ -2,7 +2,7 @@ import { posix as path } from 'node:path';
 
 const TEST_PREFIXES = ['test/', 'tests/'];
 const AUDIT_PREFIX = 'audit/';
-const DOC_SUFFIXES = ['.md', '.html'];
+const DOC_SUFFIXES = ['.md'];
 
 function isTestPath(filePath) {
   return TEST_PREFIXES.some((prefix) => filePath.startsWith(prefix));
@@ -107,7 +107,6 @@ export function extractImpactTokensFromPatch(patchText) {
   for (const line of changedLines) {
     for (const match of line.matchAll(/\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/g)) addToken(tokens, match[1]);
     for (const match of line.matchAll(/\bclass\s+([A-Za-z_$][\w$]*)/g)) addToken(tokens, match[1]);
-    for (const match of line.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\b/g)) addToken(tokens, match[1]);
     for (const match of line.matchAll(/\b([A-Za-z_$][\w$]*(?:State|Controller|Registry|Contract|Module|Descriptor|Factory|Handler|Action|Policy|Config))\b/g)) addToken(tokens, match[1]);
     for (const match of line.matchAll(/\bid\s*=\s*['"]([^'"]+)['"]/g)) addToken(tokens, match[1]);
     for (const match of line.matchAll(/\bdata-[\w-]+\s*=\s*['"]([^'"]+)['"]/g)) addToken(tokens, match[1]);
@@ -167,12 +166,13 @@ export function discoverCandidateFindings(fileContents, tokens, changedFiles = [
   return [...candidates].sort();
 }
 
-export function analyzeChangeImpact({ changedFiles, fileContents, patchText = '' }) {
+export function analyzeChangeImpact({ changedFiles, tokenFiles = changedFiles, fileContents, patchText = '' }) {
   const roots = unique(changedFiles).sort();
+  const tokenRoots = unique(tokenFiles).sort();
   const reverseGraph = buildReverseReferenceGraph(fileContents);
   const dependencyRefs = collectReverseDependents(roots, reverseGraph);
   const patchTokens = extractImpactTokensFromPatch(patchText);
-  const pathTokens = roots.flatMap((filePath) => [filePath, path.basename(filePath)]);
+  const pathTokens = tokenRoots.flatMap((filePath) => [filePath, path.basename(filePath)]);
   const tokens = unique([...patchTokens, ...pathTokens]).filter((token) => token.length >= 5);
   const tokenRefs = collectTokenReferences(fileContents, tokens, roots);
   const allRefs = unique([...dependencyRefs, ...tokenRefs]).sort();
