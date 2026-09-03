@@ -241,10 +241,15 @@ try {
     !isTestPath(file)
     && SYMBOL_DISCOVERY_EXTENSIONS.has(extname(file))
   ));
+  const referenceDiscoveryFiles = uniqueFiles([
+    ...symbolDiscoveryFiles,
+    ...guardedFiles.filter((file) => file.startsWith('public/')),
+  ]);
   const patchText = buildPatchText(diff, symbolDiscoveryFiles);
   discovered = analyzeChangeImpact({
     changedFiles: guardedFiles,
     tokenFiles: symbolDiscoveryFiles,
+    referenceFiles: referenceDiscoveryFiles,
     fileContents,
     patchText,
   });
