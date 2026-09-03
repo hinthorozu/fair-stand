@@ -22,13 +22,16 @@ export function extractLocalReferenceSpecifiers(source) {
     /\b(?:import|export)\s+(?:[^;'"`]*?\s+from\s*)?['"]([^'"]+)['"]/g,
     /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
     /new\s+URL\s*\(\s*['"]([^'"]+)['"]\s*,\s*import\.meta\.url\s*\)/g,
+    /\b(?:src|href)\s*=\s*['"]([^'"]+)['"]/g,
+    /url\(\s*['"]?([^'"\)]+)['"]?\s*\)/g,
     /['"]((?:\.\.\/|\.\/)[^'"]+)['"]/g,
   ];
 
   for (const pattern of patterns) {
     for (const match of source.matchAll(pattern)) {
       const specifier = match[1]?.trim();
-      if (specifier?.startsWith('.')) specifiers.push(specifier);
+      if (!specifier || specifier.startsWith('//')) continue;
+      if (specifier.startsWith('.') || specifier.startsWith('/')) specifiers.push(specifier);
     }
   }
 
@@ -36,7 +39,15 @@ export function extractLocalReferenceSpecifiers(source) {
 }
 
 export function resolveLocalReference(fromFile, specifier, knownPaths = new Set()) {
-  const raw = path.normalize(path.join(path.dirname(fromFile), specifier));
+  let raw;
+  if (specifier.startsWith('/src/')) {
+    raw = specifier.slice(1);
+  } else if (specifier.startsWith('/')) {
+    raw = `public${specifier}`;
+  } else {
+    raw = path.normalize(path.join(path.dirname(fromFile), specifier));
+  }
+
   const candidates = unique([
     raw,
     `${raw}.js`,
@@ -113,7 +124,7 @@ export function extractImpactTokensFromPatch(patchText) {
     for (const match of line.matchAll(/\bclass\s*=\s*['"]([^'"]+)['"]/g)) {
       for (const className of match[1].split(/\s+/)) addToken(tokens, className);
     }
-    for (const match of line.matchAll(/#([A-Za-z][\w-]{4,})\b/g)) addToken(tokens, match[1]);
+    for (const match of line.matchAll(/['"]#([A-Za-z][\w-]{4,})['"]/g)) addToken(tokens, match[1]);
   }
 
   return [...tokens].sort();
@@ -166,13 +177,24 @@ export function discoverCandidateFindings(fileContents, tokens, changedFiles = [
   return [...candidates].sort();
 }
 
-export function analyzeChangeImpact({ changedFiles, tokenFiles = changedFiles, fileContents, patchText = '' }) {
+export function analyzeChangeImpact({
+  changedFiles,
+  tokenFiles = changedFiles,
+  referenceFiles = tokenFiles,
+  fileContents,
+  patchText = '',
+}) {
   const roots = unique(changedFiles).sort();
   const tokenRoots = unique(tokenFiles).sort();
+  const referenceRoots = unique(referenceFiles).sort();
   const reverseGraph = buildReverseReferenceGraph(fileContents);
   const dependencyRefs = collectReverseDependents(roots, reverseGraph);
   const patchTokens = extractImpactTokensFromPatch(patchText);
-  const pathTokens = tokenRoots.flatMap((filePath) => [filePath, path.basename(filePath)]);
+  const pathTokens = referenceRoots.flatMap((filePath) => {
+    const tokens = [filePath, path.basename(filePath)];
+    if (filePath.startsWith('public/')) tokens.push(`/${filePath.slice('public/'.length)}`);
+    return tokens;
+  });
   const tokens = unique([...patchTokens, ...pathTokens]).filter((token) => token.length >= 5);
   const tokenRefs = collectTokenReferences(fileContents, tokens, roots);
   const allRefs = unique([...dependencyRefs, ...tokenRefs]).sort();
