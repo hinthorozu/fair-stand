@@ -151,6 +151,7 @@ Yeni bir katalog type'ı behavior registry'ye eklenmezse CI bunu yakalar.
 - `ROADMAP_PHASE_4.md` — FAZ 4 ayrıntılı planı.
 - `ROADMAP_PHASE_5_6.md` — FAZ 5–6 ayrıntılı planı.
 - `PRODUCT_FUTURE.md` — eski README dahil farklı belgelerden korunmuş, henüz aktif faza eksiksiz yerleştirilmemiş gelecek ürün gereksinimleri.
+- `RENDER_FUTURE_BACKLOG.md` — geçmişte FAZ 4 adıyla yazılmış render/HDRI/PBR hedeflerinin faz çakışması olmadan korunduğu gelecek backlog'u.
 - `LEGACY_TRASH.md` — güncel sistemle uyumsuz/eski/doğrulanmamış içeriklerin silinmeden tutulduğu çöp kutusu.
 - `MILESTONES.md` — tarihsel faz kapanış kayıtları; aktif roadmap için source-of-truth değildir.
 - `REPOSITORY_CLEANUP_PROGRESS.md` — repository cleanup/refactor checkpoint'i.
@@ -161,7 +162,7 @@ Yeni bir katalog type'ı behavior registry'ye eklenmezse CI bunu yakalar.
 - **Bugün çalışan sistem:** `README.md` + runtime source-of-truth dosyaları.
 - **Global invariant / architecture contract:** `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `MODULE_BEHAVIOR_STANDARD.md`.
 - **Aktif gelecek planı:** `ROADMAP*.md`.
-- **Kaybolmaması gereken fakat henüz fazlandırılmamış gelecek fikirleri:** `PRODUCT_FUTURE.md`.
+- **Kaybolmaması gereken fakat henüz fazlandırılmamış gelecek fikirleri:** `PRODUCT_FUTURE.md` ve `RENDER_FUTURE_BACKLOG.md`.
 - **Eski, uyumsuz veya doğrulanmamış bilgi:** `LEGACY_TRASH.md`.
 - **Tarihsel kayıt:** `MILESTONES.md`, `Changelog.md` ve Git history.
 
