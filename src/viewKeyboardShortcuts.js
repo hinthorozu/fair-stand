@@ -12,11 +12,8 @@ export function resolveViewKeyboardShortcut(event = {}) {
   const shift = Boolean(event.shiftKey);
   const alt = Boolean(event.altKey);
 
-  if (key === 'r' && ctrlOrMeta && !shift && !alt) {
-    return Object.freeze({ type: 'rotate', direction: 'clockwise' });
-  }
   if (key === 'r' && shift && !ctrlOrMeta && !alt) {
-    return Object.freeze({ type: 'rotate', direction: 'counterclockwise' });
+    return Object.freeze({ type: 'rotate', direction: 'clockwise' });
   }
   if (ctrlOrMeta || shift || alt) return null;
 

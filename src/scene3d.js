@@ -4367,12 +4367,6 @@ export function createStandScene(
 
     const isEditing = isEditableKeyboardTarget(event.target);
 
-    // Ctrl/Cmd+R is reserved for module rotation in the editor. Suppress the browser
-    // reload shortcut even when an editable field currently owns focus.
-    if (shortcut.type === 'rotate' && shortcut.direction === 'clockwise') {
-      event.preventDefault();
-    }
-
     if (isEditing && !dragSession?.dragging) return;
 
     if (shortcut.type === 'projection') {
@@ -4400,7 +4394,7 @@ export function createStandScene(
 
     if (shortcut.type !== 'rotate') return;
 
-    const deltaDeg = shortcut.direction === 'counterclockwise' ? -90 : 90;
+    const deltaDeg = 90;
 
     if (dragSession?.dragging) {
       event.preventDefault();
