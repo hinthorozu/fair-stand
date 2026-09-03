@@ -3,8 +3,8 @@ const GUIDE_SECTIONS = [
     title: 'Hızlı Başlangıç',
     open: true,
     html: `
-      <p>Stand tipini seç, X ve Y ölçülerini gir; istersen <strong>Depo eklensin</strong> seçeneğini açıp 1×1, 1,5×1, 2×1 veya 2×2 m depo ölçüsünü belirle. <strong>Depo içeriği eklensin</strong> seçilirse Mini Buzdolabı, Kettle ve Askılık da otomatik yerleşir. Sonra <strong>Sahneyi Oluştur</strong> butonuna bas ve proje adını gir; sistem projeyi oluşturup ilk kaydı otomatik yapar.</p>
-      <div class="help-guide-callout"><strong>Temel akış:</strong> Sahne oluştur + proje adını gir → Proje otomatik kaydedilir → Modül ekle → Yerleştir → Panel seç → Renk / görsel / cam / Lightbox / Mesh uygula → Render Al.</div>
+      <p>Stand tipini seç, X ve Y ölçülerini gir; istersen <strong>Depo eklensin</strong> seçeneğini açıp 1×1, 1,5×1, 2×1 veya 2×2 m depo ölçüsünü belirle. <strong>Depo içeriği eklensin</strong> seçilirse Mini Buzdolabı, Kettle ve Askılık da otomatik yerleşir. Sonra <strong>Sahneyi Oluştur</strong> butonuna bas ve yalnızca proje/stand adını gir. Sistem stand tipi ve ölçülerini ada otomatik ekler, projeyi oluşturur ve ilk kaydı otomatik yapar.</p>
+      <div class="help-guide-callout"><strong>Temel akış:</strong> Sahne oluştur + proje/stand adını gir → Otomatik proje adı oluşur → Proje otomatik kaydedilir → Modül ekle → Yerleştir → Panel seç → Renk / görsel / cam / Lightbox / Mesh uygula → Render Al.</div>
     `,
   },
   {
@@ -194,7 +194,8 @@ const GUIDE_SECTIONS = [
     title: 'Proje Kaydetme, Açma ve Yedekleme',
     html: `
       <ul>
-        <li><strong>Yeni proje:</strong> Ayrı bir “Yeni” butonu yoktur. Stand Tipi bölümündeki <strong>Sahneyi Oluştur</strong> yeni proje başlatır ve önce proje adını sorar.</li>
+        <li><strong>Yeni proje:</strong> Ayrı bir “Yeni” butonu yoktur. Stand Tipi bölümündeki <strong>Sahneyi Oluştur</strong> yeni proje başlatır ve yalnızca proje/stand adını sorar. Tam ad otomatik olarak <strong>Proje_adi-StandTipi_X_Y</strong> biçiminde oluşturulur; örneğin <strong>Ferromet-L_Sol_800_600</strong>.</li>
+        <li><strong>Proje adını değiştir:</strong> <strong>Değiştir</strong> butonu yalnızca tireden önceki proje/stand adı bölümünü düzenler. Otomatik <strong>StandTipi_X_Y</strong> bölümü korunur; örneğin <strong>Ferromet-L_Sol_800_600</strong> adı <strong>Umaay-L_Sol_800_600</strong> olarak değiştirilebilir.</li>
         <li><strong>Kaydet:</strong> Stand, modüller, yerleşimler ve proje durumunu kaydeder.</li>
         <li><strong>Otomatik kayıt:</strong> Kayıtlı/açılmış projede değişiklik algılandıktan yaklaşık 5 saniye sonra çalışır.</li>
         <li><strong>Aç:</strong> Kayıtlı projeyi görselleriyle birlikte yükler.</li>
