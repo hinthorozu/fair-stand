@@ -15,8 +15,8 @@ Kural: Maddeler **tek tek** uygulanacak. Bir madde tamamlanıp doğrulanmadan so
 - [x] 2. Import hazırlığını doğrula.
 - [x] 3. `src/main.js` içindeki lokal `DEFAULT_SELECTION_HINT` sabitini kaldır.
 - [x] 4. Atomik import + lokal sabit kaldırma değişikliğini test/build ile doğrula.
-- [ ] 5. Yalnızca `createStandScene(...)` içindeki **surface selection callback** karar mantığını `describeSurfaceSelection(surfaces, currentModules)` helper'ına bağla. `main.js` içinde yalnızca UI state/DOM yazımı kalsın.
-- [ ] 6. Surface selection değişikliğini test et.
+- [x] 5. Yalnızca `createStandScene(...)` içindeki **surface selection callback** karar mantığını `describeSurfaceSelection(surfaces, currentModules)` helper'ına bağla. `main.js` içinde yalnızca UI state/DOM yazımı kalsın.
+- [x] 6. Surface selection değişikliğini helper testleri + build ile doğrula.
 - [ ] 7. Yalnızca **floor selection callback** mesaj kararını `describeFloorSelection(floorSelection)` helper'ına bağla.
 - [ ] 8. Floor selection değişikliğini test et.
 - [ ] 9. Selection feedback'e ait eski duplicate karar kodunun `main.js` içinde kalmadığını kontrol et ve yalnızca bu scope içindeki artıkları temizle.
