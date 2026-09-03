@@ -9,6 +9,7 @@ import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
 import { createViewCube } from './viewCube.js';
+import { isEditableKeyboardTarget, resolveViewKeyboardShortcut } from './viewKeyboardShortcuts.js';
 import { computeImageFit } from './imageFit.js';
 import { formatPlacementFeedbackMessage, hasPlacementFeedbackPointer } from './placementFeedback.js';
 import {
@@ -4361,17 +4362,45 @@ export function createStandScene(
       return;
     }
 
-    if (pressedKey !== 'r') return;
+    const shortcut = resolveViewKeyboardShortcut(event);
+    if (!shortcut) return;
 
-    const target = event.target;
-    const tagName = String(target?.tagName ?? '').toLowerCase();
-    const isEditing = tagName === 'input'
-      || tagName === 'textarea'
-      || tagName === 'select'
-      || Boolean(target?.isContentEditable);
+    const isEditing = isEditableKeyboardTarget(event.target);
+
+    // Ctrl/Cmd+R is reserved for module rotation in the editor. Suppress the browser
+    // reload shortcut even when an editable field currently owns focus.
+    if (shortcut.type === 'rotate' && shortcut.direction === 'clockwise') {
+      event.preventDefault();
+    }
+
     if (isEditing && !dragSession?.dragging) return;
 
-    const deltaDeg = event.shiftKey ? -90 : 90;
+    if (shortcut.type === 'projection') {
+      if (dragSession?.dragging) return;
+      event.preventDefault();
+      setCameraMode(shortcut.mode);
+      return;
+    }
+
+    if (shortcut.type === 'view') {
+      if (dragSession?.dragging) return;
+      const directions = {
+        left: new THREE.Vector3(-1, 0, 0),
+        right: new THREE.Vector3(1, 0, 0),
+        top: new THREE.Vector3(0, 1, 0),
+        front: new THREE.Vector3(0, 0, 1),
+        home: HOME_DIRECTION.clone(),
+      };
+      const direction = directions[shortcut.direction];
+      if (!direction) return;
+      event.preventDefault();
+      viewCube.setViewDirection(direction);
+      return;
+    }
+
+    if (shortcut.type !== 'rotate') return;
+
+    const deltaDeg = shortcut.direction === 'counterclockwise' ? -90 : 90;
 
     if (dragSession?.dragging) {
       event.preventDefault();
