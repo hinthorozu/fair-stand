@@ -1,0 +1,178 @@
+name: Temporary view keyboard shortcut patch
+
+on:
+  push:
+    branches:
+      - feature/view-keyboard-shortcuts
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/view-keyboard-shortcuts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Patch view and rotation keyboard shortcuts
+        shell: bash
+        run: |
+          cat > src/viewKeyboardShortcuts.js <<'EOF'
+          export function isEditableKeyboardTarget(target) {
+            const tagName = String(target?.tagName ?? '').toLowerCase();
+            return tagName === 'input'
+              || tagName === 'textarea'
+              || tagName === 'select'
+              || Boolean(target?.isContentEditable);
+          }
+
+          export function resolveViewKeyboardShortcut(event = {}) {
+            const key = String(event.key ?? '').toLowerCase();
+            const ctrlOrMeta = Boolean(event.ctrlKey || event.metaKey);
+            const shift = Boolean(event.shiftKey);
+            const alt = Boolean(event.altKey);
+
+            if (key === 'r' && ctrlOrMeta && !shift && !alt) {
+              return Object.freeze({ type: 'rotate', direction: 'clockwise' });
+            }
+            if (key === 'r' && shift && !ctrlOrMeta && !alt) {
+              return Object.freeze({ type: 'rotate', direction: 'counterclockwise' });
+            }
+            if (ctrlOrMeta || shift || alt) return null;
+
+            const shortcuts = {
+              p: { type: 'projection', mode: 'perspective' },
+              o: { type: 'projection', mode: 'orthographic' },
+              l: { type: 'view', direction: 'left' },
+              r: { type: 'view', direction: 'right' },
+              t: { type: 'view', direction: 'top' },
+              f: { type: 'view', direction: 'front' },
+              h: { type: 'view', direction: 'home' },
+            };
+            return shortcuts[key] ? Object.freeze({ ...shortcuts[key] }) : null;
+          }
+          EOF
+
+          cat > test/viewKeyboardShortcuts.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { isEditableKeyboardTarget, resolveViewKeyboardShortcut } from '../src/viewKeyboardShortcuts.js';
+
+          test('view shortcuts map P/O/L/R/T/F/H without modifiers', () => {
+            assert.deepEqual(resolveViewKeyboardShortcut({ key: 'P' }), { type: 'projection', mode: 'perspective' });
+            assert.deepEqual(resolveViewKeyboardShortcut({ key: 'o' }), { type: 'projection', mode: 'orthographic' });
+            assert.deepEqual(resolveViewKeyboardShortcut({ key: 'L' }), { type: 'view', direction: 'left' });
+            assert.deepEqual(resolveViewKeyboardShortcut({ key: 'R' }), { type: 'view', direction: 'right' });
+            assert.deepEqual(resolveViewKeyboardShortcut({ key: 'T' }), { type: 'view', direction: 'top' });
+            assert.deepEqual(resolveViewKeyboardShortcut({ key: 'F' }), { type: 'view', direction: 'front' });
+            assert.deepEqual(resolveViewKeyboardShortcut({ key: 'H' }), { type: 'view', direction: 'home' });
+          });
+
+          test('rotation keeps Shift+R reverse and moves clockwise rotation to Ctrl/Cmd+R', () => {
+            assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', ctrlKey: true }), { type: 'rotate', direction: 'clockwise' });
+            assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', metaKey: true }), { type: 'rotate', direction: 'clockwise' });
+            assert.deepEqual(resolveViewKeyboardShortcut({ key: 'r', shiftKey: true }), { type: 'rotate', direction: 'counterclockwise' });
+          });
+
+          test('unrelated modified view keys do not trigger camera shortcuts', () => {
+            assert.equal(resolveViewKeyboardShortcut({ key: 'p', ctrlKey: true }), null);
+            assert.equal(resolveViewKeyboardShortcut({ key: 'l', shiftKey: true }), null);
+            assert.equal(resolveViewKeyboardShortcut({ key: 'f', altKey: true }), null);
+          });
+
+          test('editable target guard covers form and contenteditable fields', () => {
+            assert.equal(isEditableKeyboardTarget({ tagName: 'INPUT' }), true);
+            assert.equal(isEditableKeyboardTarget({ tagName: 'textarea' }), true);
+            assert.equal(isEditableKeyboardTarget({ tagName: 'SELECT' }), true);
+            assert.equal(isEditableKeyboardTarget({ tagName: 'DIV', isContentEditable: true }), true);
+            assert.equal(isEditableKeyboardTarget({ tagName: 'CANVAS' }), false);
+          });
+          EOF
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/scene3d.js')
+          text = path.read_text()
+
+          def replace_once(old, new, label):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly 1 match, got {count}')
+              text = text.replace(old, new, 1)
+
+          import_anchor = "import { createViewCube } from './viewCube.js';\n"
+          replace_once(
+              import_anchor,
+              import_anchor + "import { isEditableKeyboardTarget, resolveViewKeyboardShortcut } from './viewKeyboardShortcuts.js';\n",
+              'view keyboard import',
+          )
+
+          old = """    if (pressedKey !== 'r') return;\n\n    const target = event.target;\n    const tagName = String(target?.tagName ?? '').toLowerCase();\n    const isEditing = tagName === 'input'\n      || tagName === 'textarea'\n      || tagName === 'select'\n      || Boolean(target?.isContentEditable);\n    if (isEditing && !dragSession?.dragging) return;\n\n    const deltaDeg = event.shiftKey ? -90 : 90;\n"""
+
+          new = """    const shortcut = resolveViewKeyboardShortcut(event);\n    if (!shortcut) return;\n\n    const isEditing = isEditableKeyboardTarget(event.target);\n\n    // Ctrl/Cmd+R is reserved for module rotation in the editor. Suppress the browser\n    // reload shortcut even when an editable field currently owns focus.\n    if (shortcut.type === 'rotate' && shortcut.direction === 'clockwise') {\n      event.preventDefault();\n    }\n\n    if (isEditing && !dragSession?.dragging) return;\n\n    if (shortcut.type === 'projection') {\n      if (dragSession?.dragging) return;\n      event.preventDefault();\n      setCameraMode(shortcut.mode);\n      return;\n    }\n\n    if (shortcut.type === 'view') {\n      if (dragSession?.dragging) return;\n      const directions = {\n        left: new THREE.Vector3(-1, 0, 0),\n        right: new THREE.Vector3(1, 0, 0),\n        top: new THREE.Vector3(0, 1, 0),\n        front: new THREE.Vector3(0, 0, 1),\n        home: HOME_DIRECTION.clone(),\n      };\n      const direction = directions[shortcut.direction];\n      if (!direction) return;\n      event.preventDefault();\n      viewCube.setViewDirection(direction);\n      return;\n    }\n\n    if (shortcut.type !== 'rotate') return;\n\n    const deltaDeg = shortcut.direction === 'counterclockwise' ? -90 : 90;\n"""
+          replace_once(old, new, 'legacy R rotation shortcut block')
+
+          path.write_text(text)
+          PY
+
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('src/helpGuide.js')
+          text = path.read_text()
+          old = """        <tr><th>R</th><td>Seçili modülü saat yönünde döndürür. Sürükleme sırasında da kullanılabilir.</td></tr>\n        <tr><th>Shift + R</th><td>Seçili modülü ters yönde döndürür.</td></tr>\n        <tr><th>↑ ↓ ← →</th><td>Seçili modülü kendi snap adımına göre ekranda görülen yöne taşır.</td></tr>"""
+          new = """        <tr><th>P</th><td>Perspektif kamera görünüşüne geçer.</td></tr>\n        <tr><th>O</th><td>Ortografik kamera görünüşüne geçer.</td></tr>\n        <tr><th>L</th><td>ViewCube Sol (Left) görünüşüne geçer.</td></tr>\n        <tr><th>R</th><td>ViewCube Sağ (Right) görünüşüne geçer.</td></tr>\n        <tr><th>T</th><td>ViewCube Üst (Top) görünüşüne geçer.</td></tr>\n        <tr><th>F</th><td>ViewCube Ön (Front) görünüşüne geçer.</td></tr>\n        <tr><th>H</th><td>Home / varsayılan izometrik görünüşe döner.</td></tr>\n        <tr><th>Ctrl/Cmd + R</th><td>Seçili modülü saat yönünde döndürür. Sürükleme sırasında da kullanılabilir.</td></tr>\n        <tr><th>Shift + R</th><td>Seçili modülü ters yönde döndürür.</td></tr>\n        <tr><th>↑ ↓ ← →</th><td>Seçili modülü kendi snap adımına göre ekranda görülen yöne taşır.</td></tr>"""
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'help shortcut rows: expected exactly 1 match, got {count}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+
+          cat > test/viewKeyboardMainIntegration.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+
+          const sceneSource = await readFile(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+          const helpSource = await readFile(new URL('../src/helpGuide.js', import.meta.url), 'utf8');
+
+          test('scene delegates keyboard mapping and reuses existing camera/viewcube APIs', () => {
+            assert.match(sceneSource, /resolveViewKeyboardShortcut\(event\)/);
+            assert.match(sceneSource, /setCameraMode\(shortcut\.mode\)/);
+            assert.match(sceneSource, /viewCube\.setViewDirection\(direction\)/);
+            assert.match(sceneSource, /shortcut\.direction === 'counterclockwise' \? -90 : 90/);
+          });
+
+          test('Ctrl/Cmd+R suppresses browser reload before rotation handling', () => {
+            assert.match(sceneSource, /shortcut\.type === 'rotate' && shortcut\.direction === 'clockwise'[\s\S]*event\.preventDefault\(\)/);
+          });
+
+          test('help guide documents view shortcuts and new clockwise rotation binding', () => {
+            for (const key of ['P', 'O', 'L', 'R', 'T', 'F', 'H', 'Ctrl/Cmd + R', 'Shift + R']) {
+              assert.match(helpSource, new RegExp(`<tr><th>${key.replace(/[+]/g, '\\+')}</th>`));
+            }
+          });
+          EOF
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit shortcut changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/scene3d.js src/viewKeyboardShortcuts.js src/helpGuide.js test/viewKeyboardShortcuts.test.js test/viewKeyboardMainIntegration.test.js
+          git commit -m "Add keyboard shortcuts for camera views"
+          git push origin HEAD:feature/view-keyboard-shortcuts
