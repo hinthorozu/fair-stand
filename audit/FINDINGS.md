@@ -14,7 +14,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 - Open P1: **17**
 - Open P2: **20**
 - Open P3: **0**
-- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK pending post-merge ROG verification; A03 next**
+- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 next**
 
 ## Findings
 

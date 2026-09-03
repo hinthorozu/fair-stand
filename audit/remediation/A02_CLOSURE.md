@@ -1,6 +1,6 @@
 # A02 — Universal change gate remediation closure
 
-Section status: **AUDITED_OK pending post-merge ROG verification**
+Section status: **CLOSED / AUDITED_OK / POST-MERGE VERIFIED**
 
 Original audit evidence: `audit/evidence/A02_CHANGE_GATE.md`
 Closed findings: **F-005, F-006, F-007, F-008, F-009**
@@ -38,9 +38,10 @@ The local-diff regression uses a real temporary git repository rather than sourc
 ## CI evidence
 
 - F-009 implementation PR #44 CI run #127: gate + install + full test + build passed.
-- Final branch CI after this closure record must pass before merge.
-- Final section closure becomes unconditional only after the PR #44 merge SHA receives a green ROG push CI.
+- PR #44 final branch CI run #131: gate + install + full test + build passed.
+- PR #44 merged to ROG as `14b4e5b83b2cefe48aaa8cefc761a73d8e0b82fe`.
+- Post-merge ROG CI run #132 / id `33804101800`: **completed / success**; gate + install + full test + build passed.
 
 ## Result
 
-A02 has no remaining open finding. After final PR and post-merge verification, remediation may advance to **A03 — Repository architecture / ownership**, beginning with F-010.
+A02 has no remaining open finding and is fully post-merge verified. Remediation may advance to **A03 — Repository architecture / ownership**, beginning with F-010.
