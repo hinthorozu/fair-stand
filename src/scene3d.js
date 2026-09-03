@@ -848,6 +848,7 @@ export function createStandScene(
   let selectedModuleId = null;
   let placementGhost = null;
   let dragSession = null;
+  let keyboardRotationCursor = null;
   let dragBadge = null;
   let placementFeedback = null;
   let placementFeedbackTimer = null;
@@ -2135,6 +2136,33 @@ export function createStandScene(
     )) ?? null;
   }
 
+  function getKeyboardRotationPlacementSignature(placement) {
+    if (!placement) return '';
+    return [
+      Number(placement.xCm),
+      Number(placement.yCm),
+      Number(placement.zCm ?? 0),
+      normalizeModuleRotationZDeg(placement.rotationZDeg),
+      placement.wallId ?? 'free',
+    ].join('|');
+  }
+
+  function getKeyboardRotationCursor(moduleState) {
+    const committedPlacementSignature = getKeyboardRotationPlacementSignature(moduleState?.placement);
+    if (
+      !keyboardRotationCursor
+      || keyboardRotationCursor.moduleId !== moduleState?.id
+      || keyboardRotationCursor.committedPlacementSignature !== committedPlacementSignature
+    ) {
+      keyboardRotationCursor = {
+        moduleId: moduleState?.id ?? null,
+        rotationZDeg: normalizeModuleRotationZDeg(moduleState?.placement?.rotationZDeg),
+        committedPlacementSignature,
+      };
+    }
+    return keyboardRotationCursor;
+  }
+
   function rotateSelectedModule(deltaDeg) {
     if (!stageLayout || dragSession?.dragging) return { handled: false, ok: false };
     const moduleGroup = getSingleSelectedModuleGroup();
@@ -2149,10 +2177,20 @@ export function createStandScene(
 
     const stepDeg = getModuleRotationStepDeg(moduleState);
     const effectiveDeltaDeg = deltaDeg < 0 ? -stepDeg : stepDeg;
+    const rotationCursor = getKeyboardRotationCursor(moduleState);
+    rotationCursor.rotationZDeg = rotateModuleRotationZDeg(
+      rotationCursor.rotationZDeg,
+      effectiveDeltaDeg,
+    );
+    const currentRotationZDeg = normalizeModuleRotationZDeg(moduleState.placement.rotationZDeg);
+    const targetRotationZDeg = rotationCursor.rotationZDeg;
+    const rotationDeltaFromCommittedDeg = effectiveDeltaDeg < 0
+      ? -((currentRotationZDeg - targetRotationZDeg + 360) % 360)
+      : ((targetRotationZDeg - currentRotationZDeg + 360) % 360);
     const nextPlacement = rotateModulePlacementAroundCenter(
       moduleState.placement,
       moduleState.widthCm,
-      effectiveDeltaDeg,
+      rotationDeltaFromCommittedDeg,
       moduleState.depthCm,
     );
     if (!nextPlacement) return { handled: false, ok: false };
@@ -2190,6 +2228,8 @@ export function createStandScene(
     moduleState.placement = { ...nextPlacement };
     moduleGroup.userData.placement = { ...nextPlacement };
     applyPlacementToGroup(moduleGroup, nextPlacement, moduleState.widthCm);
+    rotationCursor.rotationZDeg = normalizeModuleRotationZDeg(nextPlacement.rotationZDeg);
+    rotationCursor.committedPlacementSignature = getKeyboardRotationPlacementSignature(nextPlacement);
     return { handled: true, ok: true };
   }
 
