@@ -62,6 +62,7 @@ import { createAutosaveController } from './autosaveController.js';
 import { createProjectLoadingController, setButtonBusy } from './projectUi.js';
 import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';
 import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';
+import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';
 import { createSidebarController } from './sidebarController.js';
 import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';
 
@@ -147,8 +148,6 @@ createSidebarController({
   toggleButton: sidebarToggleButton,
 }).bind();
 
-
-const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
 
 observeSelectionFeedback({
   element: selectionInfo,
