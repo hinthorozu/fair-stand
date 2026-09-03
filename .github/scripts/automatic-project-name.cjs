@@ -36,3 +36,4 @@ rep("      finish(name);\n    });",`      const finalName = isRename ? name : pr
 rep("  const projectName = await requestProjectName({ mode: 'create' });",`  const projectNamePrefix = buildAutomaticProjectNamePrefix(setup.standType, setup.xCm, setup.yCm);
   const projectName = await requestProjectName({ mode: 'create', prefix: projectNamePrefix });`);
 fs.writeFileSync(p,s);
+// trigger
