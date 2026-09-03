@@ -1,0 +1,168 @@
+name: Temporary autosave controller integration
+
+on:
+  push:
+    branches:
+      - refactor/integrate-autosave-controller
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/integrate-autosave-controller
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Integrate autosave controller with guarded replacements
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/main.js')
+          text = path.read_text()
+
+          def replace_once(old, new, label):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly 1 match, got {count}')
+              text = text.replace(old, new, 1)
+
+          import_anchor = "} from './projectNaming.js';\n"
+          replace_once(
+              import_anchor,
+              import_anchor + "import { createAutosaveController } from './autosaveController.js';\n",
+              'autosave import anchor',
+          )
+
+          old_vars = """let activeProjectId = createProjectId();\nlet activeProjectCreatedAt = Date.now();\nlet autosaveEnabled = false;\nlet autosaveTimer = null;\nlet autosaveObservedSignature = null;\nconst AUTOSAVE_DELAY_MS = 5000;\nconst AUTOSAVE_WATCH_INTERVAL_MS = 1000;\nconst imageAssets = new Map();\n"""
+          new_vars = """let activeProjectId = createProjectId();\nlet activeProjectCreatedAt = Date.now();\nconst imageAssets = new Map();\n"""
+          replace_once(old_vars, new_vars, 'legacy autosave state block')
+
+          old_loop = """function clearAutosaveTimer() {\n  if (autosaveTimer) clearTimeout(autosaveTimer);\n  autosaveTimer = null;\n}\n\nfunction scheduleAutosave() {\n  if (!autosaveEnabled) return;\n  clearAutosaveTimer();\n  projectStatus.textContent = 'Değişiklik var · 5 sn içinde otomatik kaydedilecek…';\n  autosaveTimer = setTimeout(async () => {\n    autosaveTimer = null;\n    if (!autosaveEnabled) return;\n    projectStatus.textContent = 'Kaydediliyor…';\n    try {\n      await persistActiveProject({ quiet: true });\n      autosaveObservedSignature = getProjectStateSignature();\n      projectStatus.textContent = 'Kaydedildi · Otomatik';\n    } catch (error) {\n      console.warn('Otomatik kayıt başarısız:', error);\n      projectStatus.textContent = 'Otomatik kayıt başarısız.';\n    }\n  }, AUTOSAVE_DELAY_MS);\n}\n\nfunction enableAutosaveFromCurrentState() {\n  clearAutosaveTimer();\n  autosaveObservedSignature = getProjectStateSignature();\n  autosaveEnabled = true;\n}\n\nfunction disableAutosave() {\n  autosaveEnabled = false;\n  clearAutosaveTimer();\n  autosaveObservedSignature = null;\n}\n\nsetInterval(() => {\n  if (!autosaveEnabled) return;\n  const signature = getProjectStateSignature();\n  if (signature === autosaveObservedSignature) return;\n  autosaveObservedSignature = signature;\n  scheduleAutosave();\n}, AUTOSAVE_WATCH_INTERVAL_MS);\n\n"""
+          new_loop = """const autosaveController = createAutosaveController({\n  getSignature: getProjectStateSignature,\n  persist: persistActiveProject,\n  setStatus: (message) => { projectStatus.textContent = message; },\n  onError: (error) => console.warn('Otomatik kayıt başarısız:', error),\n});\n\n"""
+          replace_once(old_loop, new_loop, 'legacy autosave implementation block')
+
+          replacements = [
+              ('if (currentStand || currentModules.length || autosaveEnabled) {', 'if (currentStand || currentModules.length || autosaveController.isEnabled()) {', 'new project autosave enabled check'),
+              ("+ (autosaveEnabled\n", "+ (autosaveController.isEnabled()\n", 'new project confirmation autosave check'),
+              ('  disableAutosave();', '  autosaveController.disable();', 'create/restore/beforeunload disable call first'),
+          ]
+          for old, new, label in replacements:
+              count = text.count(old)
+              if label == 'create/restore/beforeunload disable call first':
+                  if count != 3:
+                      raise SystemExit(f'{label}: expected exactly 3 matches, got {count}')
+                  text = text.replace(old, new)
+              else:
+                  replace_once(old, new, label)
+
+          # Three enable call sites: create success, restore, manual save/rename paths are handled below.
+          enable_old = '  enableAutosaveFromCurrentState();'
+          enable_count = text.count(enable_old)
+          if enable_count != 4:
+              raise SystemExit(f'enable calls: expected exactly 4 matches, got {enable_count}')
+          text = text.replace(enable_old, '  autosaveController.enableFromCurrentState();')
+
+          # Remaining disabled state in create failure.
+          if 'disableAutosave();' in text:
+              raise SystemExit('legacy disableAutosave call remains')
+
+          # Asset deletion external persist path.
+          old_asset = """    if (usageCount > 0 && autosaveEnabled) {\n      clearAutosaveTimer();\n      await persistActiveProject({ quiet: true });\n      autosaveObservedSignature = getProjectStateSignature();\n    }\n"""
+          new_asset = """    if (usageCount > 0 && autosaveController.isEnabled()) {\n      autosaveController.clearPending();\n      await persistActiveProject({ quiet: true });\n      autosaveController.markSavedState();\n    }\n"""
+          replace_once(old_asset, new_asset, 'asset delete autosave coordination')
+
+          # Rename path: pending debounce is cancelled before explicit persist, then baseline is reset by enableFromCurrentState.
+          old_rename = """  if (currentStand || autosaveEnabled) {\n    try {\n      clearAutosaveTimer();\n      await persistActiveProject({ quiet: true });\n      autosaveController.enableFromCurrentState();\n"""
+          new_rename = """  if (currentStand || autosaveController.isEnabled()) {\n    try {\n      autosaveController.clearPending();\n      await persistActiveProject({ quiet: true });\n      autosaveController.enableFromCurrentState();\n"""
+          replace_once(old_rename, new_rename, 'rename autosave coordination')
+
+          # Manual save path.
+          replace_once(
+              """  try {\n    clearAutosaveTimer();\n    await persistActiveProject();\n    autosaveController.enableFromCurrentState();\n""",
+              """  try {\n    autosaveController.clearPending();\n    await persistActiveProject();\n    autosaveController.enableFromCurrentState();\n""",
+              'manual save autosave coordination',
+          )
+
+          forbidden = [
+              'autosaveEnabled',
+              'autosaveTimer',
+              'autosaveObservedSignature',
+              'AUTOSAVE_DELAY_MS',
+              'AUTOSAVE_WATCH_INTERVAL_MS',
+              'clearAutosaveTimer',
+              'scheduleAutosave',
+              'enableAutosaveFromCurrentState',
+              'disableAutosave',
+          ]
+          remaining = [token for token in forbidden if token in text]
+          if remaining:
+              raise SystemExit(f'legacy autosave tokens remain: {remaining}')
+
+          if text.count("createAutosaveController({") != 1:
+              raise SystemExit('expected one autosave controller construction')
+          if text.count('autosaveController.isEnabled()') < 3:
+              raise SystemExit('expected autosave enabled checks to be controller-backed')
+
+          path.write_text(text)
+          PY
+
+          cat > test/autosaveMainIntegration.test.js <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+
+          const mainSource = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
+
+          test('main.js delegates autosave lifecycle to autosaveController', () => {
+            assert.match(mainSource, /import \{ createAutosaveController \} from '\.\/autosaveController\.js';/);
+            assert.equal((mainSource.match(/createAutosaveController\(\{/g) || []).length, 1);
+            assert.match(mainSource, /getSignature: getProjectStateSignature/);
+            assert.match(mainSource, /persist: persistActiveProject/);
+            assert.match(mainSource, /autosaveController\.enableFromCurrentState\(\)/);
+            assert.match(mainSource, /autosaveController\.disable\(\)/);
+            assert.match(mainSource, /autosaveController\.clearPending\(\)/);
+            assert.match(mainSource, /autosaveController\.markSavedState\(\)/);
+          });
+
+          test('legacy autosave globals and duplicate timer loop are absent from main.js', () => {
+            for (const token of [
+              'autosaveEnabled',
+              'autosaveTimer',
+              'autosaveObservedSignature',
+              'AUTOSAVE_DELAY_MS',
+              'AUTOSAVE_WATCH_INTERVAL_MS',
+              'clearAutosaveTimer',
+              'scheduleAutosave',
+              'enableAutosaveFromCurrentState',
+              'disableAutosave',
+            ]) {
+              assert.equal(mainSource.includes(token), false, `${token} should not remain in main.js`);
+            }
+            assert.equal(mainSource.includes('setInterval(() => {\n  if (!autosave'), false);
+          });
+          EOF
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit integration
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/main.js test/autosaveMainIntegration.test.js
+          git commit -m "Integrate autosave controller into main"
+          git push origin HEAD:refactor/integrate-autosave-controller
