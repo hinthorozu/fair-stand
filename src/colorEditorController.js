@@ -36,13 +36,13 @@ export function createColorEditorController({
 
   function syncFromRgbInputs() {
     const rgb = readNumberGroup(colorRgbInputs);
-    if (!rgb) return false;
-    return syncFromHex(rgbToHex(rgb.r, rgb.g, rgb.b), { apply: true });
+    if (!rgb) return;
+    syncFromHex(rgbToHex(rgb.r, rgb.g, rgb.b), { apply: true });
   }
 
   function syncFromCmykInputs() {
     const cmyk = readNumberGroup(colorCmykInputs);
-    if (!cmyk) return false;
+    if (!cmyk) return;
 
     const normalizedCmyk = normalizeCmykValues(cmyk);
     writeCmykInputs(colorCmykInputs, normalizedCmyk);
@@ -58,7 +58,6 @@ export function createColorEditorController({
     colorHexInput.value = hex;
     writeRgbInputs(colorRgbInputs, rgb);
     onApply();
-    return true;
   }
 
   return { syncFromHex, syncFromRgbInputs, syncFromCmykInputs };
