@@ -57,11 +57,19 @@ jobs:
 
           p = Path('test/viewKeyboardMainIntegration.test.js')
           s = p.read_text()
-          s = s.replace("assert.match(sceneSource, /shortcut\\.direction === 'counterclockwise' \\? -90 : 90/);", "assert.match(sceneSource, /const deltaDeg = 90;/);")
+          old_delta = "assert.match(sceneSource, /shortcut\\.direction === 'counterclockwise' \\? -90 : 90/);"
+          if s.count(old_delta) != 1:
+              raise SystemExit('integration delta assertion mismatch')
+          s = s.replace(old_delta, "assert.match(sceneSource, /const deltaDeg = 90;/);", 1)
           old = """test('Ctrl/Cmd+R suppresses browser reload before rotation handling', () => {\n  assert.match(sceneSource, /shortcut\\.type === 'rotate' && shortcut\\.direction === 'clockwise'[\\s\\S]*event\\.preventDefault\\(\\)/);\n});\n\n"""
           if s.count(old) != 1:
               raise SystemExit('integration browser reload test anchor mismatch')
           s = s.replace(old, '', 1)
+          old_keys = "['P', 'O', 'L', 'R', 'T', 'F', 'H', 'Ctrl/Cmd + R', 'Shift + R']"
+          new_keys = "['P', 'O', 'L', 'R', 'T', 'F', 'H', 'Shift + R']"
+          if s.count(old_keys) != 1:
+              raise SystemExit('integration help keys anchor mismatch')
+          s = s.replace(old_keys, new_keys, 1)
           p.write_text(s)
 
           p = Path('src/helpGuide.js')
