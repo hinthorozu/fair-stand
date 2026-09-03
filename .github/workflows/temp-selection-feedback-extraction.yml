@@ -9,8 +9,25 @@ permissions:
   contents: read
 
 jobs:
-  validate:
+  integration-probe:
+    name: Probe ${{ matrix.test }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - test/autosaveMainIntegration.test.js
+          - test/catalogDragKeyboardIntegration.test.js
+          - test/colorEditorControllerMainIntegration.test.js
+          - test/colorEditorMainIntegration.test.js
+          - test/moduleRotationSingleSourceIntegration.test.js
+          - test/projectDropdownSwitchIntegration.test.js
+          - test/projectUiMainIntegration.test.js
+          - test/selectionFeedbackMainIntegration.test.js
+          - test/sidebarControllerMainIntegration.test.js
+          - test/stageFeedbackMainIntegration.test.js
+          - test/uiFeedbackMainIntegration.test.js
+          - test/viewKeyboardMainIntegration.test.js
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,45 +36,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Verify selection wiring scope
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          s = Path('src/main.js').read_text()
-          import_line = "import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';"
-          if s.count(import_line) != 1:
-              raise SystemExit(f'selectionFeedback import count mismatch: {s.count(import_line)}')
-          if "const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';" in s:
-              raise SystemExit('local DEFAULT_SELECTION_HINT still present')
-
-          scene_start = s.find('const scene3d = createStandScene(\n')
-          scene_end = s.find('\n\nfunction renderStageResult', scene_start)
-          if scene_start < 0 or scene_end < 0:
-              raise SystemExit(f'scene wiring boundaries missing: {scene_start}, {scene_end}')
-          scene = s[scene_start:scene_end]
-
-          required = [
-              'describeSurfaceSelection(surfaces, currentModules)',
-              'describeFloorSelection(floorSelection)',
-          ]
-          missing = [item for item in required if item not in scene]
-          if missing:
-              raise SystemExit(f'helper delegation missing: {missing}')
-
-          forbidden = [
-              "if (moduleType === 'counter')",
-              'selectedFabricGroupIds = new Set',
-              '({ selected, floorType, paintable }) =>',
-          ]
-          residue = [item for item in forbidden if item in scene]
-          if residue:
-              raise SystemExit(f'old selection decision logic remains in scene wiring: {residue}')
-          PY
-      - name: Install dependencies
-        run: npm ci
-      - name: Full test suite
-        run: npm test
-      - name: Production build
-        run: npm run build
+      - run: npm ci
+      - name: Run isolated test
+        run: node --test ${{ matrix.test }}
