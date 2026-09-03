@@ -21,14 +21,11 @@ Repository baştan sona fresh gözle incelendi. Ayrıntılı teknik rapor şu do
 
 ### P0 — Önce yapılacaklar
 
-1. `.github/workflows` ve `.github/scripts` içindeki eski tek-seferlik patch/fix/inspect workflow ve scriptlerini incele.
-2. Gerçekten gerekli olan kalıcı workflow'ları ayır.
-3. Artık görevi olmayan workflow/scriptler için silinecekler listesini çıkar.
-4. Kullanıcıya listeyi göster; onay sonrası temizliği uygula.
-5. Tek canonical CI workflow bırak.
-6. CI dependency kurulumunu `npm install` yerine `npm ci` kullanacak şekilde düzelt.
-7. CI içinde en az `npm test` + `npm run build` zorunlu olsun.
-8. `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `MODULE_BEHAVIOR_STANDARD.md` çelişkilerini temizle.
+1. `.github/workflows` ve `.github/scripts` içindeki eski tek-seferlik patch/fix/inspect workflow ve scriptlerini temizle.
+2. Tek canonical CI workflow bırak.
+3. CI dependency kurulumunda `npm ci` kullan.
+4. CI içinde `npm test` + `npm run build` zorunlu olsun.
+5. `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md`, `MODULE_BEHAVIOR_STANDARD.md` çelişkilerini temizle.
 
 ### P1 — P0 sonrasında
 
@@ -54,25 +51,26 @@ Hedef:
 - module-specific rotation / snap / collision gibi runtime davranışlarını `moduleBehavior.js` + testlere devretmek,
 - aynı davranışı birden fazla Markdown dosyasında tekrar tarif etmemek.
 
-## Şu Anki Checkpoint
+## P0 — GitHub Actions temizliği
 
-Henüz cleanup/refactor uygulanmadı.
+Durum: **TAMAMLANDI**
 
-Şu ana kadar yalnız:
+Yapılanlar:
 
-1. Repository fresh incelemesi tamamlandı.
-2. `FRESH_REPOSITORY_REVIEW.md` oluşturuldu.
-3. Temizlik için öncelik sırası belirlendi.
-4. İlk uygulanacak iş olarak **GitHub Actions workflow/script envanteri ve temizlik listesi** seçildi.
+- Eski tek-seferlik `add-*`, `fix-*`, `inspect-*`, `rename-*` ve video-wall patch workflow'ları kaldırıldı.
+- `.github/scripts` altındaki geçmiş patch scriptleri kaldırıldı.
+- Eski `build.yml` kaldırıldı.
+- Tek kalıcı workflow olarak `.github/workflows/ci.yml` bırakıldı.
+- Canonical CI Node 22 kullanıyor.
+- Dependency kurulumu `npm ci` ile deterministik hale getirildi.
+- `npm test` ve `npm run build` zorunlu CI adımlarıdır.
+- Temizlik doğrulamasında 349 test geçti ve production build başarılı oldu.
+- Uygulama kaynak koduna bu adımda dokunulmadı.
+
+Not: İlk otomatik cleanup denemesinde GitHub App workflow dosyası yazma yetkisi olmadığı için push reddedildi. Temizlik bunun yerine ayrı `cleanup/github-actions` branch'inde GitHub API üzerinden hazırlanıp PR/CI ile birleştirilecek şekilde düzeltildi.
 
 ## Sıradaki İş
 
-**`.github/workflows` ve `.github/scripts` envanterini çıkar.**
+**P0 contract cleanup:**
 
-Her dosya için şu sınıflandırmayı yap:
-
-- `KORU` — kalıcı CI/deploy görevi var.
-- `SİL` — tek-seferlik geçmiş patch/fix/inspect işi; artık gerekli değil.
-- `İNCELE` — görevi belirsiz veya başka workflow ile çakışıyor.
-
-Önce raporla; çalışan uygulama koduna dokunma ve liste onaylanmadan toplu silme yapma.
+`PROJECT_RULES.md`, `ARCHITECTURE_RULES.md` ve `MODULE_BEHAVIOR_STANDARD.md` arasındaki çelişkileri gerçek runtime davranışıyla karşılaştır ve canonical source sınırlarını netleştir.
