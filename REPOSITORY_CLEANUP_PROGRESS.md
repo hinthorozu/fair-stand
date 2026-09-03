@@ -142,13 +142,11 @@ Merge commit: `006917a74c9e9b24db3ae056efd984a4c5f126b2`
 
 ## P1 — Autosave controller integration
 
-Durum: **UYGULANDI — PR/CANONICAL CI BEKLİYOR**
+Durum: **TAMAMLANDI / CI DOĞRULANDI — MERGE BEKLİYOR**
 
 Branch: `refactor/integrate-autosave-controller`
 
-Amaç: `main.js` içindeki legacy autosave state/timer döngüsünü, PR #10'da test edilmiş controller'a davranışı değiştirmeden bağlamak.
-
-Yapılanlar:
+PR: #11 — `Integrate tested autosave controller into main`
 
 - `main.js` artık `createAutosaveController()` kullanıyor.
 - Legacy `autosaveEnabled`, `autosaveTimer`, `autosaveObservedSignature`, 5s/1s local constants ve local `setInterval` autosave loop kaldırıldı.
@@ -156,15 +154,13 @@ Yapılanlar:
 - Başarılı create/restore/manual-save/rename akışları `enableFromCurrentState()` ile baseline alıyor.
 - Asset delete sırasında explicit persist sonrası `markSavedState()` ile signature yeniden baseline ediliyor.
 - Manuel save/rename öncesi pending debounce `clearPending()` ile iptal ediliyor.
-- `test/autosaveMainIntegration.test.js` eklendi; `main.js` içinde legacy autosave globals/duplicate timer loop geri gelirse test kırılır.
-- `docs/AUTOSAVE_INTEGRATION_NOTES.md` ile korunması gereken davranış invariant'ları kaydedildi.
-- Guarded patch aşamasında ilk deneme, beklenen disable-call sayısının 3 değil 4 olduğunu fark edip **kod değiştirmeden fail-fast** oldu.
-- Guard düzeltilince patch + full `npm test` + `npm run build` başarılı geçti.
-- Geçici integration workflow final branch tree'sinden kaldırıldı; kalıcı workflow olarak yalnız canonical CI kalıyor.
+- `test/autosaveMainIntegration.test.js` legacy autosave globals/duplicate timer loop geri gelirse CI'ı kırıyor.
+- `docs/AUTOSAVE_INTEGRATION_NOTES.md` korunması gereken davranış invariant'larını kaydediyor.
+- Guarded patch'in ilk denemesi, beklenen disable-call sayısı yanlış olduğu için kodu commit etmeden fail-fast oldu; guard düzeltildikten sonra patch + full test + build başarılı geçti.
+- Geçici integration workflow final branch tree'sinden kaldırıldı.
+- PR #11 canonical CI: `npm ci` ✅ `npm test` ✅ `npm run build` ✅.
 
 ## Sıradaki İş
 
-1. Autosave integration branch'i için PR aç.
-2. Latest-head canonical CI'da `npm ci`, `npm test`, `npm run build` başarılarını doğrula.
-3. Başarılıysa ROG'a merge et.
-4. Sonraki düşük riskli `main.js` sorumluluğu olarak project UI helpers / asset library / color editor gruplarını karşılaştır ve en az coupling'e sahip olanı seç.
+1. PR #11 latest-head canonical CI tekrar başarılı olduktan sonra ROG'a merge et.
+2. Sonraki düşük riskli `main.js` sorumluluğu olarak project UI helpers / asset library / color editor gruplarını karşılaştır ve en az coupling'e sahip olanı seç.
