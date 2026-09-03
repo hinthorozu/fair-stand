@@ -6,28 +6,12 @@ on:
       - refactor/extract-selection-feedback
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  integration-probe:
-    name: Probe ${{ matrix.test }}
+  diagnose:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        test:
-          - test/autosaveMainIntegration.test.js
-          - test/catalogDragKeyboardIntegration.test.js
-          - test/colorEditorControllerMainIntegration.test.js
-          - test/colorEditorMainIntegration.test.js
-          - test/moduleRotationSingleSourceIntegration.test.js
-          - test/projectDropdownSwitchIntegration.test.js
-          - test/projectUiMainIntegration.test.js
-          - test/selectionFeedbackMainIntegration.test.js
-          - test/sidebarControllerMainIntegration.test.js
-          - test/stageFeedbackMainIntegration.test.js
-          - test/uiFeedbackMainIntegration.test.js
-          - test/viewKeyboardMainIntegration.test.js
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,6 +20,25 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - name: Run isolated test
-        run: node --test ${{ matrix.test }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Capture full test failure
+        shell: bash
+        run: |
+          set +e
+          npm test > /tmp/full-test.log 2>&1
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            rm -f TEMP_TEST_FAILURE.txt
+            exit 0
+          fi
+          tail -n 300 /tmp/full-test.log > TEMP_TEST_FAILURE.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add TEMP_TEST_FAILURE.txt
+          git commit -m "Capture temporary full test failure"
+          git push origin HEAD:refactor/extract-selection-feedback
+          exit "$status"
+      - name: Production build
+        run: npm run build
