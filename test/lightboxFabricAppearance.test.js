@@ -16,8 +16,9 @@ test('lightbox fabric owns one persistent color and image state', () => {
 
 test('main editor treats a fabric group as one color and image target', () => {
   const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
-  assert.match(main, /Tek parça Lightbox Kumaş seçili · renk \+ görsel uygulanabilir/);
-  assert.match(main, /Tek parça Mesh \(Delikli\) Branda seçili · renk \+ görsel uygulanabilir/);
+  const selectionFeedback = readFileSync(new URL('../src/selectionFeedback.js', import.meta.url), 'utf8');
+  assert.match(selectionFeedback, /Tek parça Lightbox Kumaş seçili · renk \+ görsel uygulanabilir/);
+  assert.match(selectionFeedback, /Tek parça Mesh \(Delikli\) Branda seçili · renk \+ görsel uygulanabilir/);
   assert.match(main, /result\.mode === 'fabric-group'/);
   assert.match(main, /Tek parça Lightbox Kumaşa görsel uygulandı/);
   assert.match(main, /Tek parça Mesh \(Delikli\) Brandaya görsel uygulandı/);
