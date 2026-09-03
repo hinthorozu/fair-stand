@@ -179,6 +179,10 @@ export function validateSystemChangeContract(contract) {
     const affectedCount = SYSTEM_IMPACT_DOMAINS.filter((domain) => contract.impact[domain] === 'affected').length;
     if (affectedCount === 0) errors.push('At least one impact domain must be affected.');
 
+    if (contract.impact.tests !== 'affected') {
+      errors.push('All changes must mark tests as affected.');
+    }
+
     for (const requiredDomain of KIND_REQUIRED_DOMAINS[contract.kind] ?? []) {
       if (contract.impact[requiredDomain] !== 'affected') {
         errors.push(`${contract.kind} changes must mark ${requiredDomain} as affected.`);
@@ -203,7 +207,9 @@ export function validateSystemChangeContract(contract) {
   if (!contract.tests || typeof contract.tests !== 'object' || Array.isArray(contract.tests)) {
     errors.push('tests policy is required.');
   } else {
-    if (!Array.isArray(contract.tests.targeted)) errors.push('tests.targeted must be an array.');
+    if (!isNonEmptyStringArray(contract.tests.targeted)) {
+      errors.push('tests.targeted must contain at least one targeted regression test.');
+    }
     if (contract.tests.fullSuite !== true) errors.push('tests.fullSuite must be true.');
     if (contract.tests.build !== true) errors.push('tests.build must be true.');
   }
