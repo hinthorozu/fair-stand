@@ -22,7 +22,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Capture full test failure
+      - name: Capture failing assertion context
         shell: bash
         run: |
           set +e
@@ -33,11 +33,17 @@ jobs:
             rm -f TEMP_TEST_FAILURE.txt
             exit 0
           fi
-          tail -n 300 /tmp/full-test.log > TEMP_TEST_FAILURE.txt
+          {
+            echo '=== FAILING TEST CONTEXT ==='
+            grep -n -B 30 -A 90 '^not ok' /tmp/full-test.log || true
+            echo
+            echo '=== TEST SUMMARY ==='
+            tail -n 20 /tmp/full-test.log
+          } > TEMP_TEST_FAILURE.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add TEMP_TEST_FAILURE.txt
-          git commit -m "Capture temporary full test failure"
+          git commit -m "Capture failing test assertion context"
           git push origin HEAD:refactor/extract-selection-feedback
           exit "$status"
       - name: Production build
