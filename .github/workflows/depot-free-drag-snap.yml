@@ -1,0 +1,31 @@
+name: Depot Free Drag Snap
+on:
+  push:
+    branches: [ROG]
+    paths: ['.github/workflows/depot-free-drag-snap.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ROG
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node .github/scripts/depot-free-drag-snap.cjs
+      - run: node --check src/modulePlacement.js
+      - run: node --check test/depotFreeDragSnap.test.js
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: |
+          rm -f .github/workflows/depot-free-drag-snap.yml .github/scripts/depot-free-drag-snap.cjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/modulePlacement.js test/depotFreeDragSnap.test.js .github/workflows/depot-free-drag-snap.yml .github/scripts/depot-free-drag-snap.cjs
+          git commit -m "Disable magnetic snapping for depot fixtures"
+          git push origin ROG
