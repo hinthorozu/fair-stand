@@ -1,0 +1,58 @@
+name: Temporary UI feedback extraction
+
+on:
+  push:
+    branches:
+      - refactor/extract-ui-feedback
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/extract-ui-feedback
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Patch main UI feedback wiring
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/main.js')
+          s = p.read_text()
+
+          anchor = "import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';\n"
+          replacement = anchor + "import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';\n"
+          if s.count(anchor) != 1:
+              raise SystemExit(f'import anchor mismatch: {s.count(anchor)}')
+          s = s.replace(anchor, replacement, 1)
+
+          old = """const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';\n\nfunction syncSelectionFeedback() {\n  const message = selectionInfo.textContent.trim();\n  selectionInfo.classList.toggle('has-selection', Boolean(message) && message !== DEFAULT_SELECTION_HINT);\n}\n\nnew MutationObserver(syncSelectionFeedback).observe(selectionInfo, {\n  childList: true,\n  subtree: true,\n  characterData: true,\n});\nsyncSelectionFeedback();\n\n\n\nconst STATUS_ELEMENTS = [stageResult, projectStatus, assetStatus].filter(Boolean);\n\nfunction inferStatusTone(element) {\n  if (element.classList.contains('error')) return 'error';\n  const text = element.textContent.toLocaleLowerCase('tr-TR');\n  if (/hata|başarısız|geçersiz|aşılamaz|bulunamadı|yüklenemedi|kaydedilemedi/.test(text)) return 'error';\n  if (/uyarı|dikkat|seçilmedi|henüz|bekliyor/.test(text)) return 'warning';\n  if (/kaydedildi|yüklendi|oluşturuldu|hazır|tamamlandı|eklendi|aktarıldı|silindi/.test(text)) return 'success';\n  return 'info';\n}\n\nfunction syncStatusTone(element) {\n  element.classList.remove('status-info', 'status-success', 'status-warning', 'status-error');\n  element.classList.add('status-' + inferStatusTone(element));\n}\n\nSTATUS_ELEMENTS.forEach((element) => {\n  new MutationObserver(() => syncStatusTone(element)).observe(element, {\n    childList: true,\n    subtree: true,\n    characterData: true,\n  });\n  syncStatusTone(element);\n});\n"""
+          new = """const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';\n\nobserveSelectionFeedback({\n  element: selectionInfo,\n  defaultHint: DEFAULT_SELECTION_HINT,\n});\n\nobserveStatusTones({ elements: [stageResult, projectStatus, assetStatus] });\n"""
+          if s.count(old) != 1:
+              raise SystemExit(f'UI feedback block mismatch: {s.count(old)}')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/main.js
+          git commit -m "Delegate UI feedback observers from main"
+          git push origin HEAD:refactor/extract-ui-feedback
