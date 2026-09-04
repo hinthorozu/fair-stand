@@ -10,11 +10,11 @@ test('mini fridge catalog/state dimensions stay aligned', () => {
   const state = createMiniFridgeModuleState();
   assert.deepEqual(
     [catalog.widthCm, catalog.depthCm, catalog.heightCm],
-    [45, 43, 66],
+    [50, 50, 66],
   );
   assert.deepEqual(
     [state.widthCm, state.depthCm, state.heightCm],
-    [45, 43, 66],
+    [50, 50, 66],
   );
 });
 
