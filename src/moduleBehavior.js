@@ -4,6 +4,8 @@ const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
   opacity: 0.38,
 });
 
+const NO_OVERLAP_TYPES = Object.freeze([]);
+
 const WALL_BEHAVIOR = Object.freeze({
   placement: 'wall',
   moveSnapCm: 50,
@@ -17,6 +19,7 @@ const WALL_BEHAVIOR = Object.freeze({
   endpointContact: 'standard',
   boundarySnap: 'stand-edge',
   sideInsertRotation: 'inherit',
+  overlapWithTypes: NO_OVERLAP_TYPES,
   supportsWallOverlayMount: true,
   wallCapacity: 'include',
   ghost: DEFAULT_GHOST_BEHAVIOR,
@@ -38,6 +41,7 @@ function freeBehavior(overrides = {}) {
     endpointContact: 'standard',
     boundarySnap: 'stand-edge',
     sideInsertRotation: 'inherit',
+    overlapWithTypes: NO_OVERLAP_TYPES,
     supportsWallOverlayMount: false,
     wallCapacity: 'include',
     ghost: DEFAULT_GHOST_BEHAVIOR,
@@ -59,6 +63,7 @@ function overlayBehavior(overrides = {}) {
     endpointContact: 'standard',
     boundarySnap: 'stand-edge',
     sideInsertRotation: 'inherit',
+    overlapWithTypes: NO_OVERLAP_TYPES,
     supportsWallOverlayMount: false,
     wallCapacity: 'include',
     ghost: DEFAULT_GHOST_BEHAVIOR,
@@ -100,11 +105,12 @@ const TYPE_BEHAVIORS = Object.freeze({
   'mini-fridge': freeBehavior({
     moveSnapCm: 10,
     magneticSnap: 'none',
+    overlapWithTypes: Object.freeze(['kettle']),
   }),
   kettle: freeBehavior({
     moveSnapCm: 10,
     magneticSnap: 'none',
-    collision: 'none',
+    overlapWithTypes: Object.freeze(['mini-fridge']),
   }),
   'coat-rack': freeBehavior({
     moveSnapCm: 10,
@@ -129,6 +135,7 @@ const TYPE_BEHAVIORS = Object.freeze({
     endpointContact: 'standard',
     boundarySnap: 'stand-edge',
     sideInsertRotation: 'inherit',
+    overlapWithTypes: NO_OVERLAP_TYPES,
     supportsWallOverlayMount: false,
     wallCapacity: 'exclude',
     ghost: DEFAULT_GHOST_BEHAVIOR,
@@ -222,6 +229,15 @@ export function resolveSideInsertRotationDeg(moduleOrType, inheritedRotationDeg 
   return behavior.sideInsertRotation === 'default'
     ? getModuleDefaultRotationDeg(moduleOrType)
     : Number(inheritedRotationDeg) || 0;
+}
+
+export function canModulesOverlapByBehavior(moduleA, moduleB) {
+  const typeA = normalizeDescriptor(moduleA).type ?? null;
+  const typeB = normalizeDescriptor(moduleB).type ?? null;
+  if (!typeA || !typeB) return false;
+  const allowedA = getModuleBehavior(moduleA).overlapWithTypes ?? NO_OVERLAP_TYPES;
+  const allowedB = getModuleBehavior(moduleB).overlapWithTypes ?? NO_OVERLAP_TYPES;
+  return allowedA.includes(typeB) || allowedB.includes(typeA);
 }
 
 export function supportsWallOverlayMount(moduleOrType) {
