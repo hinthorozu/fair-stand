@@ -66,7 +66,7 @@ test('F-010 catalog construction persists a module created through the real pick
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
   await createStand(page, {
-    standName: 'Ada Stand',
+    standName: 'Sırt Duvar',
     projectName: 'F010 Catalog Module',
   });
 
@@ -74,6 +74,12 @@ test('F-010 catalog construction persists a module created through the real pick
   const modulePanel = page.locator('details', { has: openCatalogButton });
   await expect(modulePanel).toHaveCount(1);
   await modulePanel.locator(':scope > summary').click();
+
+  const clearWallButton = page.locator('#clear-wall');
+  await expect(clearWallButton).toBeVisible();
+  await expect(clearWallButton).toBeEnabled();
+  page.once('dialog', (dialog) => dialog.accept());
+  await clearWallButton.click();
 
   await expect(openCatalogButton).toBeVisible();
   await expect(openCatalogButton).toBeEnabled();
