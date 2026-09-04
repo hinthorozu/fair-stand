@@ -64,8 +64,8 @@ export const furniture_bar_stool_classic_DIMENSIONS = Object.freeze({
 });
 
 export const DEPOT_MINI_FRIDGE_DIMENSIONS = Object.freeze({
-  widthCm: 45,
-  depthCm: 43,
+  widthCm: 50,
+  depthCm: 50,
   heightCm: 66,
 });
 
@@ -123,7 +123,7 @@ export const MODULE_CATALOG = Object.freeze({
   furniture_sofa_set_classic: { type: 'sofa-set-classic', widthCm: 150, depthCm: 150, heightCm: 78, label: 'Koltuk Takımı' },
   furniture_table_chair_set_eames: { type: 'table-chair-set-eames', widthCm: 150, depthCm: 150, heightCm: 82, label: 'Eames Masa Sandalye Takımı' },
   furniture_bar_stool_classic: { type: 'bar-stool', widthCm: 60, depthCm: 55, heightCm: 121, label: 'Bar Taburesi' },
-  DEPOT_MINI_FRIDGE_AVANTI: { type: 'mini-fridge', widthCm: 45, depthCm: 43, heightCm: 66, label: 'Mini Buzdolabı' },
+  DEPOT_MINI_FRIDGE_AVANTI: { type: 'mini-fridge', widthCm: 50, depthCm: 50, heightCm: 66, label: 'Mini Buzdolabı' },
   DEPOT_KETTLE: { type: 'kettle', widthCm: 24, depthCm: 19, heightCm: 25, label: 'Kettle' },
   DEPOT_COAT_RACK: { type: 'coat-rack', widthCm: 43, depthCm: 43, heightCm: 180, label: 'Askılık' },
   EXTRA_INDOOR_PLANT_1: { type: 'indoor-plant-1', widthCm: 60, depthCm: 60, heightCm: 120, label: 'Yapay Çiçek 1' },
