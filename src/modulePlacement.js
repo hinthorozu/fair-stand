@@ -1,5 +1,16 @@
 import { STAND_DIMENSIONS } from './catalog.js';
-import { getModuleMoveSnapCm } from './moduleBehavior.js';
+import {
+  allowsThinWallEndpointContact,
+  canModulesOverlapByBehavior,
+  countsTowardWallCapacity,
+  getModuleCollisionStrategy,
+  getModuleMagneticSnapStrategy,
+  getModuleMoveSnapCm,
+  resolveSideInsertRotationDeg,
+  usesLogicalFixtureEndpoint,
+  usesWallBackboneCollisionDepth,
+  usesWallInnerFaceBoundary,
+} from './moduleBehavior.js';
 
 export const MODULE_PLACEMENT_SNAP_CM = 50;
 export const MODULE_PLACEMENT_ROTATIONS = Object.freeze([0, 45, 90, 135, 180, 225, 270, 315]);
@@ -9,8 +20,6 @@ export const MODULE_COLLISION_DEPTH_CM = Math.max(
   0,
   Number(STAND_DIMENSIONS.depth) * 100 || 0,
 );
-
-const DEPOT_FREE_NO_MAGNETIC_SNAP_TYPES = new Set(['mini-fridge', 'kettle', 'coat-rack']);
 
 const EPSILON_CM = 0.001;
 
@@ -40,14 +49,6 @@ function nearlyEqual(a, b) {
 function hasStrictDepthBounds(depthCm) {
   const depth = Number(depthCm);
   return Number.isFinite(depth) && depth > MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
-}
-
-function usesLogicalFixtureEndpoint(moduleType) {
-  return moduleType === 'counter' || moduleType === 'base';
-}
-
-function isTopFixtureType(moduleType) {
-  return moduleType === 'led-floodlight';
 }
 
 function snapDepthCenterCm(value, depthCm, stepCm = MODULE_PLACEMENT_SNAP_CM) {
@@ -247,7 +248,6 @@ function getLCounterCollisionSegments(module) {
   const placementX = Number(placement.xCm);
   const placementY = Number(placement.yCm);
   if (!Number.isFinite(placementX) || !Number.isFinite(placementY)) return [];
-
   const centerX = placementX + (vertical ? 0 : widthCm / 2);
   const centerY = placementY + (vertical ? widthCm / 2 : 0);
   const radians = rotationDeg * Math.PI / 180;
@@ -293,7 +293,7 @@ function pointIsSegmentEndpoint(segment, coordinateCm) {
 
 export function getWallUsedCm(modules = [], wallId = 'back') {
   return modules.reduce((sum, module) => (
-    module?.placement?.wallId === wallId && !isTopFixtureType(module?.type)
+    module?.placement?.wallId === wallId && countsTowardWallCapacity(module)
       ? sum + (Number(module.widthCm) || 0)
       : sum
   ), 0);
@@ -301,7 +301,7 @@ export function getWallUsedCm(modules = [], wallId = 'back') {
 
 export function getWallExtentCm(modules = [], wallId = 'back') {
   return modules.reduce((max, module) => {
-    if (module?.placement?.wallId !== wallId || isTopFixtureType(module?.type)) return max;
+    if (module?.placement?.wallId !== wallId || !countsTowardWallCapacity(module)) return max;
     const interval = getPlacementInterval(module.placement, module.widthCm);
     return interval ? Math.max(max, interval.endCm) : max;
   }, 0);
@@ -375,7 +375,7 @@ export function validateModulePlacement({
 function getModuleCollisionDepthCm(module) {
   // Panel Bazalı fiziksel olarak 50 cm baza taşır ama bağlantı omurgası Düz Panel'dir.
   // Corner/T/snap hesabında baza çıkıntısını değil 10 cm Maxima duvar hattını kullan.
-  if (module?.type === 'base-wall') return MODULE_COLLISION_DEPTH_CM;
+  if (usesWallBackboneCollisionDepth(module)) return MODULE_COLLISION_DEPTH_CM;
   const explicitDepthCm = Number(module?.depthCm);
   if (Number.isFinite(explicitDepthCm) && explicitDepthCm > 0) return explicitDepthCm;
   return MODULE_COLLISION_DEPTH_CM;
@@ -412,36 +412,32 @@ function collisionSegmentsOverlap(a, moduleA, b, moduleB) {
     const horizontalEndpoint = pointIsSegmentEndpoint(horizontal, intersectionX);
     const verticalEndpoint = pointIsSegmentEndpoint(vertical, intersectionY);
 
-    const counterModule = usesLogicalFixtureEndpoint(horizontalModule?.type)
+    const fixtureModule = usesLogicalFixtureEndpoint(horizontalModule)
       ? horizontalModule
-      : (usesLogicalFixtureEndpoint(verticalModule?.type) ? verticalModule : null);
-    if (counterModule) {
-      const counterIsHorizontal = counterModule === horizontalModule;
-      const counterSegment = counterIsHorizontal ? horizontal : vertical;
-      const thinModule = counterIsHorizontal ? verticalModule : horizontalModule;
-      const counterIntersectionCm = counterIsHorizontal ? intersectionX : intersectionY;
+      : (usesLogicalFixtureEndpoint(verticalModule) ? verticalModule : null);
+    if (fixtureModule) {
+      const fixtureIsHorizontal = fixtureModule === horizontalModule;
+      const fixtureSegment = fixtureIsHorizontal ? horizontal : vertical;
+      const thinModule = fixtureIsHorizontal ? verticalModule : horizontalModule;
+      const fixtureIntersectionCm = fixtureIsHorizontal ? intersectionX : intersectionY;
       const thinDepthCm = getModuleCollisionDepthCm(thinModule);
-      const logicalCounterEndpointJoin = thinDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM
-        && pointIsSegmentEndpoint(counterSegment, counterIntersectionCm);
-      if (logicalCounterEndpointJoin) return false;
+      const logicalFixtureEndpointJoin = thinDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM
+        && pointIsSegmentEndpoint(fixtureSegment, fixtureIntersectionCm);
+      if (logicalFixtureEndpointJoin) return false;
     }
 
-    // All four catalog plant/planter modules use type=indoor-plant-1.
-    // They are floor fixtures and should be allowed to finish flush against a thin
-    // Maxima wall/panel line when rotated 90deg. Touching the wall at the plant's
-    // endpoint is not a physical overlap; crossing through the wall still is.
-    const plantModule = horizontalModule?.type === 'indoor-plant-1'
+    const endpointContactModule = allowsThinWallEndpointContact(horizontalModule)
       ? horizontalModule
-      : (verticalModule?.type === 'indoor-plant-1' ? verticalModule : null);
-    if (plantModule) {
-      const plantIsHorizontal = plantModule === horizontalModule;
-      const plantSegment = plantIsHorizontal ? horizontal : vertical;
-      const otherModule = plantIsHorizontal ? verticalModule : horizontalModule;
-      const plantIntersectionCm = plantIsHorizontal ? intersectionX : intersectionY;
+      : (allowsThinWallEndpointContact(verticalModule) ? verticalModule : null);
+    if (endpointContactModule) {
+      const contactIsHorizontal = endpointContactModule === horizontalModule;
+      const contactSegment = contactIsHorizontal ? horizontal : vertical;
+      const otherModule = contactIsHorizontal ? verticalModule : horizontalModule;
+      const contactIntersectionCm = contactIsHorizontal ? intersectionX : intersectionY;
       const otherDepthCm = getModuleCollisionDepthCm(otherModule);
-      const plantEndpointJoin = otherDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM
-        && pointIsSegmentEndpoint(plantSegment, plantIntersectionCm);
-      if (plantEndpointJoin) return false;
+      const allowedEndpointJoin = otherDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM
+        && pointIsSegmentEndpoint(contactSegment, contactIntersectionCm);
+      if (allowedEndpointJoin) return false;
     }
 
     const thinEndpointJoin = horizontalDepth <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM
@@ -498,17 +494,11 @@ function orientedFootprintsOverlap(moduleA, moduleB) {
   });
 }
 
-function isKettleMiniFridgeStackPair(moduleA, moduleB) {
-  const types = new Set([moduleA?.type, moduleB?.type]);
-  return types.has('kettle') && types.has('mini-fridge');
-}
-
 export function placementsOverlap(moduleA, moduleB) {
-  // Kettle is intentionally mounted at the mini-fridge top elevation (66 cm).
-  // Their X/Y footprints are allowed to overlap because they occupy different Z levels.
-  // This prevents drag collision resolution from pushing/skipping the kettle past the fridge.
-  if (isKettleMiniFridgeStackPair(moduleA, moduleB)) return false;
-  if (isTopFixtureType(moduleA?.type) || isTopFixtureType(moduleB?.type)) return false;
+  if (canModulesOverlapByBehavior(moduleA, moduleB)) return false;
+  if (getModuleCollisionStrategy(moduleA) === 'none' || getModuleCollisionStrategy(moduleB) === 'none') {
+    return false;
+  }
   const angleA = normalizeModuleRotationZDeg(moduleA?.placement?.rotationZDeg);
   const angleB = normalizeModuleRotationZDeg(moduleB?.placement?.rotationZDeg);
   if (!isLCounterModule(moduleA) && !isLCounterModule(moduleB) && (!isCardinalModuleRotation(angleA) || !isCardinalModuleRotation(angleB))) {
@@ -538,7 +528,8 @@ export function validatePlacementAgainstModules({
   standXCm,
   standYCm,
 } = {}) {
-  const effectiveDepthCm = moduleType === 'base-wall'
+  const moduleDescriptor = { type: moduleType, shape, widthCm, depthCm };
+  const effectiveDepthCm = usesWallBackboneCollisionDepth(moduleDescriptor)
     ? MODULE_COLLISION_DEPTH_CM
     : depthCm;
   const boundary = validateModulePlacement({
@@ -656,7 +647,8 @@ export function snapPlacementToModules({
   standYCm,
   snapDistanceCm = MODULE_NEIGHBOR_SNAP_DISTANCE_CM,
 } = {}) {
-  if (DEPOT_FREE_NO_MAGNETIC_SNAP_TYPES.has(moduleType)) return null;
+  const movingDescriptor = { type: moduleType, shape, widthCm, depthCm };
+  if (getModuleMagneticSnapStrategy(movingDescriptor) === 'none') return null;
 
   const width = Number(widthCm);
   const pointerX = Number(pointerXCm);
@@ -671,7 +663,7 @@ export function snapPlacementToModules({
   const resolvedRotation = normalizeModuleRotationZDeg(rotationZDeg);
   if (!isCardinalModuleRotation(resolvedRotation)) return null;
   const movingAxis = isVerticalModuleRotation(resolvedRotation) ? 'y' : 'x';
-  const effectiveMovingDepthCm = moduleType === 'base-wall'
+  const effectiveMovingDepthCm = usesWallBackboneCollisionDepth(movingDescriptor)
     ? MODULE_COLLISION_DEPTH_CM
     : depthCm;
   const strictMovingDepth = hasStrictDepthBounds(effectiveMovingDepthCm);
@@ -691,7 +683,7 @@ export function snapPlacementToModules({
   }) : null;
   const candidates = [];
   const counterCornerFaces = [];
-  const isCounter = usesLogicalFixtureEndpoint(moduleType);
+  const isCounter = usesLogicalFixtureEndpoint(movingDescriptor);
 
   const addCandidate = (
     placement,
@@ -774,7 +766,7 @@ export function snapPlacementToModules({
     const targetDepthCm = getModuleCollisionDepthCm(targetModuleForDepth);
     const thinMovingModule = movingDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
     const matchesFixtureSide = thinMovingModule
-      && usesLogicalFixtureEndpoint(targetModuleForDepth?.type)
+      && usesLogicalFixtureEndpoint(targetModuleForDepth)
       && targetDepthCm > MODULE_COLLISION_DEPTH_CM + EPSILON_CM
       && nearlyEqual(width, targetDepthCm);
 
@@ -944,7 +936,7 @@ export function snapPlacementToModules({
     const targetDepthCm = getModuleCollisionDepthCm(targetModule);
     const thinMovingModule = movingDepthCm <= MODULE_COLLISION_DEPTH_CM + EPSILON_CM;
     const matchesFixtureSide = thinMovingModule
-      && usesLogicalFixtureEndpoint(targetModule?.type)
+      && usesLogicalFixtureEndpoint(targetModule)
       && targetDepthCm > MODULE_COLLISION_DEPTH_CM + EPSILON_CM
       && nearlyEqual(width, targetDepthCm);
 
@@ -1129,7 +1121,7 @@ function createFreePlacement({
 
   if (strictDepth) {
     const edgeSnap = MODULE_PLACEMENT_SNAP_CM;
-    const useWallInnerFaces = moduleType === 'sofa-set-classic' || moduleType === 'table-chair-set-eames';
+    const useWallInnerFaces = usesWallInnerFaceBoundary({ type: moduleType });
     const wallFaceOffsetCm = MODULE_COLLISION_DEPTH_CM / 2;
     const activeWalls = useWallInnerFaces ? getAllowedWallIds(standType) : [];
     const leftEdgeCm = activeWalls.includes('left') ? wallFaceOffsetCm : 0;
@@ -1292,7 +1284,7 @@ function createFreeSideFixturePlacement({
 
   const sourceRotation = normalizeModuleRotationZDeg(sourceModule.placement.rotationZDeg);
   const insertedRotation = normalizeModuleRotationZDeg(
-    insertedModule.type === 'bar-stool' ? 270 : sourceRotation,
+    resolveSideInsertRotationDeg(insertedModule, sourceRotation),
   );
   const right = getVisualRightVector(sourceRotation);
   const direction = side === 'right' ? 1 : -1;
