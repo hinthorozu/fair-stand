@@ -205,7 +205,8 @@
       "test/indoorPlants.test.js",
       "test/illuminatedFoamModule.test.js",
       "test/automaticWall.test.js",
-      "tests/autoDepot.test.js"
+      "tests/autoDepot.test.js",
+      "test/systemChangeGateLocalDiff.test.js"
     ],
     "fullSuite": true,
     "build": true,
