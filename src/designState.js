@@ -213,8 +213,8 @@ export function createMiniFridgeModuleState() {
   return {
     id: createId('module'),
     type: 'mini-fridge',
-    widthCm: 45,
-    depthCm: 43,
+    widthCm: 50,
+    depthCm: 50,
     heightCm: 66,
   };
 }
