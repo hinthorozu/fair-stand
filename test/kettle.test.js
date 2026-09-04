@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { MODULE_CATALOG } from '../src/catalog.js';
 import { createKettleModuleState } from '../src/designState.js';
-import { getModuleBehavior } from '../src/moduleBehavior.js';
+import { canModulesOverlapByBehavior, getModuleBehavior } from '../src/moduleBehavior.js';
 import { placementsOverlap } from '../src/modulePlacement.js';
 
 test('kettle catalog and state stay aligned', () => {
@@ -13,11 +13,13 @@ test('kettle catalog and state stay aligned', () => {
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [24, 19, 25]);
 });
 
-test('kettle is free-positioned at fridge-top elevation without floor-footprint collision', () => {
+test('kettle is free-positioned with normal footprint collision and an explicit fridge-stack exception', () => {
   const behavior = getModuleBehavior({ type: 'kettle' });
   assert.equal(behavior.placement, 'free');
-  assert.equal(behavior.collision, 'none');
+  assert.equal(behavior.collision, 'footprint');
+  assert.equal(behavior.magneticSnap, 'none');
   assert.equal(behavior.rotationStepDeg, 90);
+  assert.deepEqual(behavior.overlapWithTypes, ['mini-fridge']);
 });
 
 
@@ -39,6 +41,27 @@ test('kettle may share the mini-fridge footprint at its raised placement', () =>
     placement: { xCm: 110, yCm: 110, zCm: 66, rotationZDeg: 0, wallId: 'free' },
   };
 
+  assert.equal(canModulesOverlapByBehavior(kettle, fridge), true);
   assert.equal(placementsOverlap(kettle, fridge), false);
   assert.equal(placementsOverlap(fridge, kettle), false);
+});
+
+test('kettle does not receive a global collision bypass for unrelated fixtures', () => {
+  const kettle = {
+    id: 'kettle',
+    type: 'kettle',
+    widthCm: 24,
+    depthCm: 19,
+    placement: { xCm: 100, yCm: 100, zCm: 66, rotationZDeg: 0, wallId: 'free' },
+  };
+  const counter = {
+    id: 'counter',
+    type: 'counter',
+    widthCm: 100,
+    depthCm: 50,
+    placement: { xCm: 80, yCm: 90, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  };
+
+  assert.equal(canModulesOverlapByBehavior(kettle, counter), false);
+  assert.equal(placementsOverlap(kettle, counter), true);
 });
