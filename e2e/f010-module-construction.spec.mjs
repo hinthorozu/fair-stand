@@ -70,7 +70,16 @@ test('F-010 catalog construction persists a module created through the real pick
     projectName: 'F010 Catalog Module',
   });
 
-  await page.locator('#open-module-catalog').click();
+  const modulePanel = page.locator('details').filter({
+    has: page.locator('summary', { hasText: 'Modül ekle' }),
+  });
+  await modulePanel.locator('summary').click();
+
+  const openCatalogButton = modulePanel.locator('#open-module-catalog');
+  await expect(openCatalogButton).toBeVisible();
+  await expect(openCatalogButton).toBeEnabled();
+  await openCatalogButton.click();
+
   const picker = page.locator('.module-picker-backdrop');
   await expect(picker).toBeVisible();
 
