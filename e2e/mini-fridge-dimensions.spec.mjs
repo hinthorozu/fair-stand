@@ -39,6 +39,11 @@ async function saveAndReadProject(page) {
   });
 }
 
+function isTenCmGridAligned(value) {
+  const units = Number(value) / 10;
+  return Number.isFinite(units) && Math.abs(units - Math.round(units)) < 1e-9;
+}
+
 test('mini fridge uses the 50x50x66 nominal footprint in the real catalog drag flow', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -75,7 +80,19 @@ test('mini fridge uses the 50x50x66 nominal footprint in the real catalog drag f
   expect(fridge).toBeTruthy();
   expect([fridge.widthCm, fridge.depthCm, fridge.heightCm]).toEqual([50, 50, 66]);
   expect(fridge.placement.wallId).toBe('free');
-  expect(Number(fridge.placement.xCm) % 10).toBe(0);
-  expect(Number(fridge.placement.yCm) % 10).toBe(0);
+  expect(Number(fridge.placement.rotationZDeg)).toBe(0);
+
+  // Free-placement xCm is the width-edge origin, while yCm is the footprint centerline
+  // for the default 0-degree orientation. Assert the physical 50x50 footprint edges,
+  // not the center coordinate itself, against the 10 cm grid.
+  const xMin = Number(fridge.placement.xCm);
+  const xMax = xMin + Number(fridge.widthCm);
+  const yCenter = Number(fridge.placement.yCm);
+  const yMin = yCenter - Number(fridge.depthCm) / 2;
+  const yMax = yCenter + Number(fridge.depthCm) / 2;
+  expect(isTenCmGridAligned(xMin)).toBe(true);
+  expect(isTenCmGridAligned(xMax)).toBe(true);
+  expect(isTenCmGridAligned(yMin)).toBe(true);
+  expect(isTenCmGridAligned(yMax)).toBe(true);
   expect(pageErrors).toEqual([]);
 });
