@@ -65,7 +65,7 @@ test('F-011 free-placement behavior survives the real catalog drag flow in Chrom
   await fridgeCard.dragTo(viewport, {
     targetPosition: {
       x: Math.round(viewportBox.width * 0.52),
-      y: Math.round(viewportBox.height * 0.58),
+      y: Math.round(viewportBox.height * 0.82),
     },
   });
 
