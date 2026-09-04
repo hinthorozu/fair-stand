@@ -26,13 +26,18 @@ Current phase: **REMEDIATION IN PROGRESS**
 - A02 closed findings: `F-005, F-006, F-007, F-008, F-009`
 - A02 final merge SHA: `14b4e5b83b2cefe48aaa8cefc761a73d8e0b82fe`
 - A02 post-merge ROG CI: `#132 / run 33804101800 / success`
-- Next finding: `F-010 — main.js contains parallel/hidden runtime module-state construction registry`
-- Remaining A03 findings: `F-010, F-011, F-012`
+- A03 closed findings: `F-010`
+- F-010 closure evidence: `audit/remediation/A03_F010_CLOSURE.md`
+- F-010 implementation PR: `#46`
+- F-010 implementation merge SHA: `f45cbe55030e8bc4361d4e2ce2a4d6a6d86e0a89`
+- F-010 post-merge ROG CI: `#177 / run 33852027783 / success`
+- Next finding: `F-011 — module-specific placement/interaction policy fragmented outside behavior contract`
+- Remaining A03 findings: `F-011, F-012`
 - Finding range: `F-001..F-046`
-- Closed findings: `9`
-- Open findings: `37`
+- Closed findings: `10`
+- Open findings: `36`
 - Open P0: `0`
-- Open P1: `17`
+- Open P1: `16`
 - Open P2: `20`
 - Open P3: `0`
 - Canonical finding ledger: `audit/FINDINGS.md`
@@ -71,4 +76,6 @@ Post-merge verification: ROG `14b4e5b83b2cefe48aaa8cefc761a73d8e0b82fe`, CI #132
 
 ## Current section — A03 Repository architecture / ownership
 
-A03 remediation may now proceed. Start with **F-010** from fresh ROG. Do not advance to A04 until every A03-owned finding is closed/accepted and A03 revalidation is recorded.
+**F-010 CLOSED / POST-MERGE VERIFIED.** Canonical module-state construction now belongs to `src/designState.js`; implementation PR #46 merged to ROG as `f45cbe55030e8bc4361d4e2ce2a4d6a6d86e0a89`, and post-merge CI #177 / run `33852027783` completed successfully. Closure evidence: `audit/remediation/A03_F010_CLOSURE.md`.
+
+Continue A03 with **F-011**. F-012 remains open. Do not advance to A04 until every A03-owned finding is closed/accepted and A03 revalidation is recorded.
