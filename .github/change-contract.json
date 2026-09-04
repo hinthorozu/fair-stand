@@ -1,27 +1,30 @@
 {
   "schemaVersion": 2,
-  "id": "close-f010-audit-bookkeeping",
+  "id": "close-f011-module-behavior-policy",
   "kind": "architecture",
-  "summary": "Record F-010 as closed after PR #46 and its post-merge ROG verification succeeded, updating only canonical audit/remediation bookkeeping.",
+  "summary": "Close F-011 by making moduleBehavior the declarative owner of module-specific placement/interaction policy selection while keeping geometric algorithms in placement core.",
   "owners": [
-    "audit/FINDINGS.md",
-    "audit/FULL_SWEEP_STATE.md",
-    "audit/remediation/A03_F010_CLOSURE.md"
+    "src/moduleBehavior.js",
+    "src/modulePlacement.js",
+    "src/scene3d.js",
+    "MODULE_BEHAVIOR_STANDARD.md"
   ],
   "sourceOfTruth": [
     "audit/evidence/A03_ARCHITECTURE.md",
-    "audit/remediation/A03_F010_CLOSURE.md",
-    "SYSTEM_IMPACT_SWEEP.md"
+    "audit/evidence/A05_MODULE_BEHAVIOR.md",
+    "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
+    "MODULE_BEHAVIOR_STANDARD.md",
+    "ARCHITECTURE_RULES.md"
   ],
   "impact": {
     "catalog": "not-applicable",
-    "behavior": "not-applicable",
+    "behavior": "affected",
     "state": "not-applicable",
-    "placement": "not-applicable",
-    "renderer": "not-applicable",
+    "placement": "affected",
+    "renderer": "affected",
     "persistence": "not-applicable",
     "bom": "not-applicable",
-    "ui": "not-applicable",
+    "ui": "affected",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
@@ -34,60 +37,87 @@
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [],
+    "affectedFiles": [
+      "src/moduleBehavior.js",
+      "src/modulePlacement.js",
+      "src/moduleMove.js",
+      "src/wallReflow.js",
+      "src/scene3d.js",
+      "src/moduleContracts.js"
+    ],
     "affectedTests": [
-      "test/systemChangeGate.test.js",
-      "test/systemImpactAnalysis.test.js"
+      "test/moduleBehaviorContract.test.js",
+      "test/moduleBehaviorPolicy.test.js",
+      "test/modulePlacement.test.js",
+      "test/depotFreeDragSnap.test.js",
+      "test/kettle.test.js",
+      "test/miniFridge.test.js",
+      "test/baseModule.test.js",
+      "test/lCounterPlacement.test.js",
+      "test/indoorPlants.test.js",
+      "test/ledFloodlightModule.test.js",
+      "test/tv42Module.test.js",
+      "test/wallReflow.test.js",
+      "test/moduleMove.test.js",
+      "e2e/f011-module-behavior.spec.mjs"
     ],
     "affectedDocs": [
-      "audit/FINDINGS.md",
-      "audit/FULL_SWEEP_STATE.md",
-      "audit/remediation/A03_F010_CLOSURE.md",
-      "audit/evidence/A03_ARCHITECTURE.md"
+      "MODULE_BEHAVIOR_STANDARD.md",
+      "ARCHITECTURE_RULES.md",
+      "SYSTEM_DEVELOPMENT_CONTRACT.md",
+      "audit/evidence/A03_ARCHITECTURE.md",
+      "audit/evidence/A05_MODULE_BEHAVIOR.md",
+      "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
+      "audit/FINDINGS.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-010"
+        "F-011",
+        "F-015",
+        "F-016"
       ],
       "reviewedNotAffected": [
-        "F-005",
-        "F-011",
+        "F-010",
         "F-012",
-        "F-013",
-        "F-014",
-        "F-015",
         "F-017",
-        "F-018",
-        "F-019",
         "F-028",
         "F-029",
-        "F-040",
-        "F-041",
-        "F-045"
+        "F-040"
       ]
     },
-    "notes": "This change records closure evidence only. Runtime ownership was changed and fully verified in PR #46. F-028 was affected by the implementation but remains independently open; F-011 and F-012 remain the outstanding A03 findings. No later finding is closed by this bookkeeping change."
+    "notes": "F-011 centralizes policy selection only; geometric algorithms remain in modulePlacement. F-015 side-insert enforcement and F-016 right-wall orientation remain independently open and are not closed by this change. Initial inventory will be expanded to every surface discovered by the full-system gate."
   },
   "tests": {
     "targeted": [
-      "test/systemChangeGate.test.js",
-      "test/systemImpactAnalysis.test.js"
+      "test/moduleBehaviorContract.test.js",
+      "test/moduleBehaviorPolicy.test.js",
+      "test/modulePlacement.test.js",
+      "test/depotFreeDragSnap.test.js",
+      "test/kettle.test.js",
+      "test/miniFridge.test.js",
+      "test/baseModule.test.js",
+      "test/lCounterPlacement.test.js",
+      "test/indoorPlants.test.js",
+      "test/ledFloodlightModule.test.js",
+      "test/tv42Module.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "Audit closure bookkeeping has no browser-visible runtime impact. The canonical CI still runs the full baseline Chromium E2E suite."
+      "required": true,
+      "targeted": [
+        "e2e/f011-module-behavior.spec.mjs"
+      ],
+      "reason": "F-011 changes browser-visible placement and interaction policy routing; a representative real catalog free-placement flow is required in Chromium."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "Only canonical audit status and closure evidence are updated after already-successful implementation and post-merge verification."
+    "level": "high",
+    "notes": "Placement/collision policy ownership affects many module families. Runtime behavior is intended to remain stable except correcting the kettle contract from a global collision bypass declaration to an explicit fridge-stack overlap relationship."
   },
   "migration": {
     "required": false,
-    "notes": "No runtime or persisted-state schema change is made by this bookkeeping PR."
+    "notes": "No persisted project-state schema changes. Behavior policy is runtime-derived from module type/descriptor."
   },
-  "rollback": "Revert the audit closure bookkeeping commit if any recorded CI or finding status is inaccurate."
+  "rollback": "Revert the F-011 policy commits if any placement, collision, snap, support, or interaction regression is observed."
 }
