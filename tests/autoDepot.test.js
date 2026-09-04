@@ -18,4 +18,6 @@ test('island depot is centered and contains four sides', () => {
   const p = planAutomaticDepot({ standType:'island', standXCm:600, standYCm:500, sizeKey:'200x200', includeContents:true });
   assert.equal(p.originXCm,200); assert.equal(p.originYCm,150);
   assert.equal(p.specs.filter(s=>['mini-fridge','kettle','coat-rack'].includes(s.kind)).length,3);
+  const fridge = p.specs.find((s) => s.kind === 'mini-fridge');
+  assert.deepEqual([fridge.widthCm, fridge.depthCm], [50, 50]);
 });
