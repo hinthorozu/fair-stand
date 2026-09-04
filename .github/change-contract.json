@@ -1,31 +1,30 @@
 {
   "schemaVersion": 2,
-  "id": "governance-full-system-impact-sweep",
+  "id": "remediate-f010-state-construction-registry",
   "kind": "architecture",
-  "summary": "Require every guarded change to discover and acknowledge reverse dependencies, existing tests, related docs/contracts and candidate audit findings, and require real-browser Playwright E2E for browser-impacting changes.",
+  "summary": "Close F-010 by moving catalog and runtime module state construction routing out of main.js into one canonical design-state construction registry, with full-system impact review under the current gate.",
   "owners": [
-    "scripts/change-impact-analysis.mjs",
-    "scripts/verify-change-contract.mjs",
-    "src/systemChangeContract.js",
-    "playwright.config.mjs"
+    "src/designState.js",
+    "src/main.js"
   ],
   "sourceOfTruth": [
-    "SYSTEM_CHANGE_GATE.md",
-    "SYSTEM_IMPACT_SWEEP.md"
+    "ARCHITECTURE_RULES.md",
+    "SYSTEM_IMPACT_SWEEP.md",
+    "audit/evidence/A03_ARCHITECTURE.md"
   ],
   "impact": {
-    "catalog": "not-applicable",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
-    "placement": "not-applicable",
-    "renderer": "not-applicable",
-    "persistence": "not-applicable",
+    "catalog": "affected",
+    "behavior": "affected",
+    "state": "affected",
+    "placement": "affected",
+    "renderer": "affected",
+    "persistence": "affected",
     "bom": "not-applicable",
-    "ui": "not-applicable",
-    "composition": "not-applicable",
-    "assets": "not-applicable",
-    "storage": "not-applicable",
-    "importExport": "not-applicable",
+    "ui": "affected",
+    "composition": "affected",
+    "assets": "affected",
+    "storage": "affected",
+    "importExport": "affected",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
     "architecture": "affected",
@@ -35,69 +34,40 @@
   "impactAnalysis": {
     "mode": "full-system",
     "affectedFiles": [
-      ".github/workflows/ci.yml",
-      "package.json",
-      "scripts/install-server.sh",
-      "vite.config.js"
+      "src/main.js",
+      "src/designState.js"
     ],
     "affectedTests": [
-      "e2e/smoke.spec.mjs",
-      "test/bundleLoadingContract.test.js",
-      "test/developerEntrypointDocs.test.js",
-      "test/historicalDocumentationStatus.test.js",
-      "test/systemChangeGate.test.js",
-      "test/systemChangeGateCiContract.test.js",
-      "test/systemChangeGateLocalDiff.test.js",
-      "test/systemImpactAnalysis.test.js",
-      "test/systemDevelopmentContract.test.js"
+      "test/moduleStateConstructionRegistry.test.js",
+      "test/coatRackModule.test.js",
+      "test/indoorPlants.test.js",
+      "e2e/smoke.spec.mjs"
     ],
     "affectedDocs": [
       "ARCHITECTURE_RULES.md",
-      "Changelog.md",
-      "FRESH_REPOSITORY_REVIEW.md",
-      "PROJECT_RULES.md",
-      "README.md",
-      "REPOSITORY_CLEANUP_PROGRESS.md",
-      "SYSTEM_AUDIT_CHECKLIST.md",
-      "SYSTEM_CHANGE_GATE.md",
-      "SYSTEM_DEVELOPMENT_CONTRACT.md",
-      "audit/evidence/A00_BASELINE.md",
-      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
-      "audit/evidence/A02_CHANGE_GATE.md",
+      "SYSTEM_IMPACT_SWEEP.md",
       "audit/evidence/A03_ARCHITECTURE.md",
-      "audit/evidence/A18_TEST_REGRESSION_ARCHITECTURE.md",
-      "audit/evidence/A20_BUILD_CI_DEPLOY.md",
-      "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
-      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
-      "audit/remediation/A02_CLOSURE.md",
-      "audit/remediation/A02_F005_CLOSURE.md",
-      "audit/remediation/A02_F006_CLOSURE.md"
+      "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
+      "audit/evidence/A10_UI_CONTROLS.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-040"
+        "F-010",
+        "F-028"
       ],
       "reviewedNotAffected": [
-        "F-004",
-        "F-005",
-        "F-006",
-        "F-007",
-        "F-008",
-        "F-009",
-        "F-041",
-        "F-042",
-        "F-046"
+        "F-013",
+        "F-018",
+        "F-019"
       ]
     },
-    "notes": "The full-system sweep discovered the CI/package/server/Vite consumers, governance and historical tests, canonical/historical docs, and F-040. F-040 is directly affected because this PR introduces the missing real-browser E2E harness; it remains OPEN until normal remediation closure requirements (green PR CI, merge, and required post-merge verification) are satisfied. Other candidate findings were reviewed and are not functionally remediated by this PR. Runtime product behavior is intentionally unchanged."
+    "notes": "Retroactive full-system revalidation after the F-010 branch was rebased onto the current ROG gate. The canonical constructor changes state-construction ownership across catalog, automatic wall/depot and illuminated-foam paths. F-028 is explicitly affected because its reset failure depends on the old non-catalog construction gap; it is not closed by this PR without its own acceptance/closure evidence. F-013/F-018/F-019 were reviewed because they share identity/state-factory surfaces but their independent root gaps are not remediated here."
   },
   "tests": {
     "targeted": [
-      "test/systemChangeGate.test.js",
-      "test/systemChangeGateLocalDiff.test.js",
-      "test/systemImpactAnalysis.test.js",
-      "test/systemChangeGateCiContract.test.js",
-      "test/developerEntrypointDocs.test.js"
+      "test/moduleStateConstructionRegistry.test.js",
+      "test/coatRackModule.test.js",
+      "test/indoorPlants.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -106,16 +76,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "This governance change introduces the Playwright browser gate itself, so the harness must be proven by a real user-flow smoke test even though product runtime domains are not changed."
+      "reason": "F-010 changes browser-visible stage/module construction routes. The canonical smoke flow creates a real stand through the UI and exercises automatic wall state construction under Chromium; registry/unit coverage separately exercises every catalog descriptor and illuminated-foam."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "The gate intentionally becomes stricter and CI now installs/runs Chromium. Incomplete impact declarations or missing browser coverage will block changes; runtime application behavior is unchanged."
+    "notes": "Module creation routing changes ownership but is intended to preserve existing factory semantics, catalog identity attachment, placement preservation, automatic-wall/depot construction and illuminated-foam behavior."
   },
   "migration": {
     "required": false,
-    "notes": "No product or persisted-data migration is required. Future change declarations use schemaVersion 2, include full-system impactAnalysis, and declare tests.e2e."
+    "notes": "No persisted project schema changes; existing module state shapes remain unchanged."
   },
-  "rollback": "Revert the full-system impact sweep and Playwright governance commits to restore the previous path/domain-only change verification and unit/build-only CI."
+  "rollback": "Revert the F-010 remediation commit to restore main.js-owned construction dispatch."
 }

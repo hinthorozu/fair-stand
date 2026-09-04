@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { MODULE_CATALOG, MODULE_CATALOG_GROUPS } from '../src/catalog.js';
-import { createCoatRackModuleState } from '../src/designState.js';
+import { createCoatRackModuleState, createModuleStateFromDescriptor } from '../src/designState.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
 test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
@@ -23,6 +23,11 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
   assert.equal(state.depthCm, 43);
   assert.equal(state.heightCm, 180);
 
+  const canonicalState = createModuleStateFromDescriptor(item, { catalogKey: 'DEPOT_COAT_RACK' });
+  assert.ok(canonicalState);
+  assert.equal(canonicalState.type, 'coat-rack');
+  assert.equal(canonicalState.catalogKey, 'DEPOT_COAT_RACK');
+
   const behavior = getModuleBehavior(state);
   assert.equal(behavior.placement, 'free');
   assert.equal(behavior.collision, 'footprint');
@@ -31,8 +36,4 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
   assert.match(scene, /models\/coat_rack\.glb/);
   assert.match(scene, /function createCoatRackModule\(moduleState, moduleIndex\)/);
   assert.match(scene, /moduleState\.type === 'coat-rack'/);
-
-  const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
-  assert.match(main, /createCoatRackModuleState/);
-  assert.match(main, /module\.type === 'coat-rack'/);
 });

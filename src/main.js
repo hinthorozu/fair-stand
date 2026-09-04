@@ -12,24 +12,7 @@ import {
   getAutomaticWallCapacityCm,
 } from './automaticWall.js';
 import {
-  createBarStoolModuleState,
-  createMiniFridgeModuleState,
-  createKettleModuleState,
-  createCoatRackModuleState,
-  createIndoorPlantModuleState,
-  createIlluminatedFoamModuleState,
-  createLedFloodlightModuleState,
-  createTvModuleState,
-  createBaseModuleState,
-  createBaseWallModuleState,
-  createCounterModuleState,
-  createDoorModuleState,
-  createEamesTableChairSetModuleState,
-  createFlatPanelModuleState,
-  createSeparatorModuleState,
-  createShelfModuleState,
-  createBeigeSofaSetModuleState,
-  createShowcaseModuleState,
+  createModuleStateFromDescriptor,
   duplicateModuleState,
   totalWallWidthCm,
   moduleWidths,
@@ -491,33 +474,10 @@ function duplicateContextModule(context, side) {
 
 function createCatalogModuleState(module, { preservePlacement = false, catalogKey = null } = {}) {
   if (!module) return null;
-
-  let state = null;
-  if (module.type === 'flat-panel') state = createFlatPanelModuleState(module.widthCm);
-  else if (module.type === 'base') state = createBaseModuleState(module.widthCm);
-  else if (module.type === 'base-wall') state = createBaseWallModuleState(module.widthCm);
-  else if (module.type === 'counter') state = createCounterModuleState(module.widthCm, { shape: module.shape, depthCm: module.depthCm });
-  else if (module.type === 'separator') state = createSeparatorModuleState(module.widthCm, module);
-  else if (module.type === 'shelf') state = createShelfModuleState(module.widthCm, module.shelfCount);
-  else if (module.type === 'sofa-set-classic') state = createBeigeSofaSetModuleState();
-  else if (module.type === 'table-chair-set-eames') state = createEamesTableChairSetModuleState();
-  else if (module.type === 'bar-stool') state = createBarStoolModuleState();
-  else if (module.type === 'mini-fridge') state = createMiniFridgeModuleState();
-  else if (module.type === 'kettle') state = createKettleModuleState();
-  else if (module.type === 'coat-rack') state = createCoatRackModuleState();
-  else if (module.type === 'indoor-plant-1') state = createIndoorPlantModuleState(module);
-  else if (module.type === 'tv') state = createTvModuleState(module.sizeInch ?? 42, module);
-  else if (module.type === 'led-floodlight') state = createLedFloodlightModuleState();
-  else if (module.type === 'door') state = createDoorModuleState(module.widthCm);
-  else if (module.type === 'showcase-2' || module.type === 'showcase-3') {
-    state = createShowcaseModuleState(module.type, module.widthCm);
-  }
-
-  if (state) state.catalogKey = catalogKey ?? resolveModuleCatalogKey(module);
-  if (state && preservePlacement && module.placement) {
-    state.placement = { ...module.placement };
-  }
-  return state;
+  return createModuleStateFromDescriptor(module, {
+    catalogKey: catalogKey ?? resolveModuleCatalogKey(module),
+    preservePlacement,
+  });
 }
 
 function getRequestWallId({ context = null } = {}) {
@@ -981,12 +941,11 @@ function syncAutoDepotControls() {
 function createAutomaticDepotStates(plan) {
   if (!plan?.ok) return [];
   return plan.specs.map((spec) => {
-    let state = null;
-    if (spec.kind === 'wall') state = createFlatPanelModuleState(spec.widthCm);
-    else if (spec.kind === 'door') state = createDoorModuleState(100);
-    else if (spec.kind === 'mini-fridge') state = createMiniFridgeModuleState();
-    else if (spec.kind === 'kettle') state = createKettleModuleState();
-    else if (spec.kind === 'coat-rack') state = createCoatRackModuleState();
+    const descriptor = {
+      ...spec,
+      type: spec.kind === 'wall' ? 'flat-panel' : spec.kind,
+    };
+    const state = createModuleStateFromDescriptor(descriptor);
     if (!state) return null;
     state.placement = { ...spec.placement };
     state.autoDepot = true;
@@ -1067,7 +1026,7 @@ createStageButton.addEventListener('click', async () => {
     });
     if (!automaticWall.ok) { renderStageResult(automaticWall.message, true); return; }
     currentModules = automaticWall.widths.map((widthCm, index) => {
-      const moduleState = createFlatPanelModuleState(widthCm);
+      const moduleState = createModuleStateFromDescriptor({ type: 'flat-panel', widthCm });
       moduleState.placement = { ...automaticWall.placements[index] };
       return moduleState;
     });
@@ -1082,7 +1041,7 @@ createStageButton.addEventListener('click', async () => {
 
       currentModules = currentModules.filter((moduleState) => moduleState.placement?.wallId !== 'back');
       const backStates = customBack.modules.map((entry) => {
-        const moduleState = createFlatPanelModuleState(entry.widthCm);
+        const moduleState = createModuleStateFromDescriptor({ type: 'flat-panel', widthCm: entry.widthCm });
         moduleState.placement = { ...entry.placement };
         if (entry.depotBack) moduleState.autoDepotBack = true;
         return moduleState;
@@ -1581,7 +1540,7 @@ async function beginIlluminatedFoamAssetDrag(assetId) {
   const defaultHeightCm=Math.max(10,defaultWidthCm/aspect);
   const dimensions=await requestIlluminatedFoamDimensions(defaultWidthCm,defaultHeightCm);
   if(!dimensions){ assetStatus.textContent='Işıklı Strafor oluşturma iptal edildi.'; return false; }
-  const moduleState=createIlluminatedFoamModuleState(asset.id,{widthCm:dimensions.widthCm,heightCm:dimensions.heightCm,haloColor:'#ffffff'});
+  const moduleState=createModuleStateFromDescriptor({type:'illuminated-foam',widthCm:dimensions.widthCm,heightCm:dimensions.heightCm,haloColor:'#ffffff'},{imageAssetId:asset.id});
   let lastPreview = null;
 
   const onPointerMove = (event) => {

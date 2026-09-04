@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { MODULE_CATALOG, MODULE_CATALOG_GROUPS } from '../src/catalog.js';
-import { createIndoorPlantModuleState } from '../src/designState.js';
+import { createIndoorPlantModuleState, createModuleStateFromDescriptor } from '../src/designState.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
 test('Yapay Çiçek 1 is the only active artificial plant inside Extra', () => {
@@ -27,6 +27,13 @@ test('only Yapay Çiçek 1 is wired while the second GLB file remains parked', (
   assert.ok(existsSync(new URL('../public/models/indoor_plants.glb', import.meta.url)));
   assert.ok(existsSync(new URL('../public/models/indoor_plants2.glb', import.meta.url)));
 
+  const canonicalState = createModuleStateFromDescriptor(MODULE_CATALOG.EXTRA_INDOOR_PLANT_1, {
+    catalogKey: 'EXTRA_INDOOR_PLANT_1',
+  });
+  assert.ok(canonicalState);
+  assert.equal(canonicalState.type, 'indoor-plant-1');
+  assert.equal(canonicalState.catalogKey, 'EXTRA_INDOOR_PLANT_1');
+
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(scene, /indoor_plants\.glb/);
   assert.doesNotMatch(scene, /indoor_plants2\.glb/);
@@ -34,8 +41,7 @@ test('only Yapay Çiçek 1 is wired while the second GLB file remains parked', (
   assert.match(scene, /function createIndoorPlantModule\(moduleState, moduleIndex\)/);
   assert.match(scene, /selectionMode: 'module'/);
 
-  const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
-  assert.match(main, /createIndoorPlantModuleState\(module\)/);
-  assert.doesNotMatch(main, /createIndoorPlantModuleState\(2\)/);
-  assert.doesNotMatch(main, /indoor-plant-2/);
+  const designState = readFileSync(new URL('../src/designState.js', import.meta.url), 'utf8');
+  assert.match(designState, /createIndoorPlantModuleState/);
+  assert.doesNotMatch(designState, /indoor-plant-2/);
 });
