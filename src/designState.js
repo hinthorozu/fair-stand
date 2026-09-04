@@ -311,6 +311,52 @@ export function createLedFloodlightModuleState() {
   };
 }
 
+const MODULE_STATE_FACTORIES = Object.freeze({
+  'flat-panel': (descriptor) => createFlatPanelModuleState(descriptor.widthCm),
+  base: (descriptor) => createBaseModuleState(descriptor.widthCm),
+  'base-wall': (descriptor) => createBaseWallModuleState(descriptor.widthCm),
+  counter: (descriptor) => createCounterModuleState(descriptor.widthCm, {
+    shape: descriptor.shape,
+    depthCm: descriptor.depthCm,
+  }),
+  separator: (descriptor) => createSeparatorModuleState(descriptor.widthCm, descriptor),
+  shelf: (descriptor) => createShelfModuleState(descriptor.widthCm, descriptor.shelfCount),
+  'sofa-set-classic': () => createBeigeSofaSetModuleState(),
+  'table-chair-set-eames': () => createEamesTableChairSetModuleState(),
+  'bar-stool': () => createBarStoolModuleState(),
+  'mini-fridge': () => createMiniFridgeModuleState(),
+  kettle: () => createKettleModuleState(),
+  'coat-rack': () => createCoatRackModuleState(),
+  'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
+  tv: (descriptor) => createTvModuleState(descriptor.sizeInch ?? 42, descriptor),
+  'led-floodlight': () => createLedFloodlightModuleState(),
+  door: (descriptor) => createDoorModuleState(descriptor.widthCm),
+  'showcase-2': (descriptor) => createShowcaseModuleState(descriptor.type, descriptor.widthCm),
+  'showcase-3': (descriptor) => createShowcaseModuleState(descriptor.type, descriptor.widthCm),
+  'illuminated-foam': (descriptor, options) => createIlluminatedFoamModuleState(
+    options.imageAssetId ?? descriptor.imageAssetId ?? null,
+    descriptor,
+  ),
+});
+
+export function createModuleStateFromDescriptor(
+  descriptor,
+  { catalogKey = null, preservePlacement = false, imageAssetId = null } = {},
+) {
+  if (!descriptor || typeof descriptor !== 'object' || Array.isArray(descriptor)) return null;
+  const factory = MODULE_STATE_FACTORIES[descriptor.type];
+  if (!factory) return null;
+
+  const state = factory(descriptor, { imageAssetId });
+  if (!state) return null;
+
+  if (catalogKey !== null && catalogKey !== undefined) state.catalogKey = catalogKey;
+  if (preservePlacement && descriptor.placement) {
+    state.placement = { ...descriptor.placement };
+  }
+  return state;
+}
+
 export function duplicateModuleState(moduleState) {
   if (!moduleState) return null;
   const duplicate = JSON.parse(JSON.stringify(moduleState));

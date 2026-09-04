@@ -6,7 +6,6 @@ import {
   copyFileSync,
   mkdirSync,
   mkdtempSync,
-  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -37,6 +36,66 @@ function runVerifier(cwd, base = 'HEAD') {
   });
 }
 
+function createFixtureContract() {
+  return {
+    schemaVersion: 2,
+    id: 'local-diff-verifier-fixture',
+    kind: 'bugfix',
+    summary: 'Exercise local committed, staged, unstaged and untracked diff enforcement in isolation.',
+    owners: ['scripts/verify-change-contract.mjs'],
+    sourceOfTruth: ['scripts/verify-change-contract.mjs'],
+    impact: {
+      catalog: 'not-applicable',
+      behavior: 'not-applicable',
+      state: 'not-applicable',
+      placement: 'not-applicable',
+      renderer: 'not-applicable',
+      persistence: 'not-applicable',
+      bom: 'not-applicable',
+      ui: 'not-applicable',
+      composition: 'not-applicable',
+      assets: 'not-applicable',
+      storage: 'not-applicable',
+      importExport: 'not-applicable',
+      performance: 'not-applicable',
+      accessibility: 'not-applicable',
+      architecture: 'not-applicable',
+      security: 'not-applicable',
+      tests: 'affected',
+    },
+    impactAnalysis: {
+      mode: 'full-system',
+      affectedFiles: [],
+      affectedTests: ['test/example.test.js'],
+      affectedDocs: [],
+      relatedFindings: {
+        affected: [],
+        reviewedNotAffected: [],
+      },
+      notes: 'Temporary non-browser fixture isolates local diff detection from the parent repository change declaration.',
+    },
+    tests: {
+      targeted: ['test/example.test.js'],
+      fullSuite: true,
+      build: true,
+      e2e: {
+        required: false,
+        targeted: [],
+        reason: 'Temporary verifier fixture has no browser-impacting domain.',
+      },
+    },
+    risk: {
+      level: 'low',
+      notes: 'Test-only temporary git repository.',
+    },
+    migration: {
+      required: false,
+      notes: 'No runtime or persisted data exists in the fixture.',
+    },
+    rollback: 'Delete the temporary fixture repository.',
+  };
+}
+
 test('local verifier enforces committed, staged, unstaged and untracked git changes without CI env', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'fair-stand-change-gate-'));
 
@@ -46,9 +105,9 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
     mkdirSync(join(cwd, 'src'), { recursive: true });
     mkdirSync(join(cwd, 'test'), { recursive: true });
 
-    copyFileSync(
-      new URL('../.github/change-contract.json', import.meta.url),
+    writeFileSync(
       join(cwd, '.github/change-contract.json'),
+      `${JSON.stringify(createFixtureContract(), null, 2)}\n`,
     );
     copyFileSync(
       new URL('../scripts/verify-change-contract.mjs', import.meta.url),
@@ -64,20 +123,6 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
     );
     writeFileSync(join(cwd, 'package.json'), '{"type":"module"}\n');
     writeFileSync(join(cwd, 'test/example.test.js'), 'export {};\n');
-
-    // The fixture exercises a non-browser local source change. Keep its test inventory
-    // self-contained so the verifier can enforce real test-file existence without
-    // depending on the parent repository's E2E target.
-    const fixtureContractPath = join(cwd, '.github/change-contract.json');
-    const fixtureContract = JSON.parse(readFileSync(fixtureContractPath, 'utf8'));
-    fixtureContract.tests.targeted = ['test/example.test.js'];
-    fixtureContract.tests.e2e = {
-      required: false,
-      targeted: [],
-      reason: 'Temporary verifier fixture has no browser-impacting domain.',
-    };
-    fixtureContract.impactAnalysis.affectedTests = ['test/example.test.js'];
-    writeFileSync(fixtureContractPath, `${JSON.stringify(fixtureContract, null, 2)}\n`);
 
     git(cwd, ['init', '-q']);
     git(cwd, ['config', 'user.email', 'change-gate-test@example.invalid']);
