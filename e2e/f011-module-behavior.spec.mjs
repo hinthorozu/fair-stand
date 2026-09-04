@@ -39,7 +39,7 @@ async function saveAndReadProject(page) {
   });
 }
 
-test('F-011 free-placement behavior survives the real catalog flow in Chromium', async ({ page }) => {
+test('F-011 free-placement behavior survives the real catalog drag flow in Chromium', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
@@ -48,19 +48,26 @@ test('F-011 free-placement behavior survives the real catalog flow in Chromium',
   const openCatalogButton = page.locator('#open-module-catalog');
   const modulePanel = page.locator('details', { has: openCatalogButton });
   await modulePanel.locator(':scope > summary').click();
-  await expect(openCatalogButton).toBeEnabled();
-  await openCatalogButton.click();
 
-  const picker = page.locator('.module-picker-backdrop');
-  await expect(picker).toBeVisible();
-  const fridgeCard = picker.locator('[data-module-key="DEPOT_MINI_FRIDGE_AVANTI"]');
+  const fridgeCard = page.locator('.module-drag-card[data-module-key="DEPOT_MINI_FRIDGE_AVANTI"]');
+  const fridgeGroup = page.locator('.module-drag-group', { has: fridgeCard });
+  if (!(await fridgeGroup.getAttribute('open'))) {
+    await fridgeGroup.locator(':scope > summary').click();
+  }
+
   await expect(fridgeCard).toBeVisible();
-  await fridgeCard.click();
+  await expect(fridgeCard).toHaveAttribute('aria-disabled', 'false');
 
-  const addButton = picker.locator('.module-picker-add');
-  await expect(addButton).toBeEnabled();
-  await addButton.click();
-  await expect(picker).toBeHidden();
+  const viewport = page.locator('#viewport');
+  await expect(viewport).toBeVisible();
+  const viewportBox = await viewport.boundingBox();
+  expect(viewportBox).not.toBeNull();
+  await fridgeCard.dragTo(viewport, {
+    targetPosition: {
+      x: Math.round(viewportBox.width * 0.52),
+      y: Math.round(viewportBox.height * 0.58),
+    },
+  });
 
   const project = await saveAndReadProject(page);
   expect(project).not.toBeNull();
