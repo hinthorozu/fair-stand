@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "id": "add-plastic-trash-bin-glb-asset",
+  "id": "diagnose-plastic-trash-bin-glb-bounds",
   "kind": "architecture",
-  "summary": "Add the plastic_trash_bin.glb model to the canonical public model inventory as a standalone asset, without registering a new runtime/catalog module yet.",
+  "summary": "Measure the committed plastic_trash_bin.glb transformed scene bounds in the normal Node test suite without changing runtime behavior.",
   "owners": [
-    "public/models/plastic_trash_bin.glb"
+    "test/plasticTrashBinBoundsDiagnostic.test.js"
   ],
   "sourceOfTruth": [
     "public/models/plastic_trash_bin.glb"
@@ -19,56 +19,53 @@
     "bom": "not-applicable",
     "ui": "not-applicable",
     "composition": "not-applicable",
-    "assets": "affected",
+    "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "affected",
+    "architecture": "not-applicable",
     "security": "not-applicable",
     "tests": "affected"
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [],
+    "affectedFiles": [
+      "test/plasticTrashBinBoundsDiagnostic.test.js"
+    ],
     "affectedTests": [
-      "test/plasticTrashBinAsset.test.js",
-      "e2e/plastic-trash-bin-asset.spec.mjs"
+      "test/plasticTrashBinBoundsDiagnostic.test.js"
     ],
     "affectedDocs": [],
     "relatedFindings": {
-      "affected": [
-        "F-033",
-        "F-034"
-      ],
+      "affected": [],
       "reviewedNotAffected": [
         "F-014",
-        "F-024"
+        "F-033",
+        "F-034"
       ]
     },
-    "notes": "The GLB is added to public/models but is intentionally not referenced by catalog, state factories, renderer, placement, or BOM yet. Existing open asset hygiene/provenance findings F-033 and F-034 remain open and are explicitly reviewed. F-014 is not changed because no runtime module is being admitted by this PR."
+    "notes": "Diagnostic-only test reads the already-canonical GLB asset and reports its transformed geometry bounds. No runtime/catalog/BOM behavior is changed."
   },
   "tests": {
     "targeted": [
-      "test/plasticTrashBinAsset.test.js"
+      "test/plasticTrashBinBoundsDiagnostic.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": [
-        "e2e/plastic-trash-bin-asset.spec.mjs"
-      ],
-      "reason": "public/ asset changes are browser-impacting under the system contract; Chromium verifies the GLB is served and retains a valid binary glTF header."
+      "required": false,
+      "targeted": [],
+      "reason": "No browser/runtime behavior changes; this is a Node-side binary geometry diagnostic only."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "The change adds one standalone binary asset and tests only; no runtime module, catalog entry, placement behavior, state schema, or BOM behavior changes."
+    "notes": "Diagnostic-only test file; no production behavior changes."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted data or runtime schema changes are introduced."
+    "notes": "No persisted data or runtime schema changes."
   },
-  "rollback": "Remove public/models/plastic_trash_bin.glb and its two asset-validation tests if the asset is invalid or should not ship."
+  "rollback": "Remove the diagnostic bounds test after the canonical module dimensions are established."
 }
