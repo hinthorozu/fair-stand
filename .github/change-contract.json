@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "fix-plastic-trash-bin-catalog-identity-preview",
   "kind": "module",
-  "summary": "Correct the plastic trash bin catalog identity from indoor-plant-1 to plastic-trash-bin and render a dedicated trash-bin catalog preview instead of a plant icon, while preserving the existing fixed-model runtime bridge.",
+  "summary": "Correct the plastic trash bin identity to plastic-trash-bin across catalog, canonical state, behavior, automatic depot and scene rendering, and render a dedicated trash-bin catalog preview instead of a plant icon.",
   "owners": [
     "src/catalog.js",
     "src/moduleBehavior.js",
@@ -30,7 +30,7 @@
     "assets": "affected",
     "storage": "not-applicable",
     "importExport": "affected",
-    "performance": "not-applicable",
+    "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
@@ -217,7 +217,7 @@
         "F-045"
       ]
     },
-    "notes": "Corrective patch only. The current trash-bin dimensions are deliberately not changed here. Catalog identity is now plastic-trash-bin rather than indoor-plant-1. State construction explicitly bridges this descriptor to the existing fixed-model renderer state so drag/drop and automatic-depot rendering remain functional without pretending the catalog product is a plant. Browser regression now fails if the trash-bin card renders the plant preview and verifies the dedicated bin silhouette styling in both catalog surfaces."
+    "notes": "Corrective patch only. The current trash-bin dimensions are deliberately not changed here. Catalog, canonical state, behavior and automatic-depot identity are plastic-trash-bin. scene3d now dispatches that canonical type through the existing fixed-GLB normalization path and loads plastic_trash_bin.glb without converting the module back to a plant type. Browser regression exercises real drag/drop, waits for the GLB to finish loading into the real scene module, and confirms the rendered module is interactable through its context menu."
   },
   "tests": {
     "targeted": [
@@ -230,16 +230,16 @@
       "targeted": [
         "e2e/plastic-trash-bin-module.spec.mjs"
       ],
-      "reason": "Catalog visibility and visual identity, drag/drop, Add picker admission, persistence, and automatic depot composition are browser-visible behavior and require Chromium coverage."
+      "reason": "Catalog visibility, real drag/drop, canonical state persistence, successful plastic_trash_bin.glb scene load, rendered-module interaction, Add picker admission, and automatic depot composition are browser-visible behavior and require Chromium coverage."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Primary risk is breaking state construction after separating catalog identity from the existing fixed-model renderer path. Targeted unit coverage locks the new catalog type and compatibility bridge; Chromium verifies the catalog no longer renders the plant preview and drag/drop still persists the module."
+    "notes": "Primary risks are renderer dispatch drift, failed GLB loading/normalization, canonical type loss, or fixture placement regressions. Targeted unit coverage locks identity/behavior and Chromium now verifies the real scene renderer completes the trash-bin GLB load after drag/drop."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted schema version change is introduced. Existing saved trash-bin instances keep their stored runtime state; new catalog descriptors use plastic-trash-bin and are bridged into the existing fixed-model state path."
+    "notes": "No persisted schema version change is introduced. Existing saved trash-bin instances remain readable; newly created trash-bin instances persist the canonical plastic-trash-bin type."
   },
-  "rollback": "Revert the trash-bin catalog type, catalog preview styling, state-factory bridge, and their regressions if the corrective patch causes a runtime regression."
+  "rollback": "Revert the trash-bin catalog identity, renderer dispatch, catalog preview styling and their regressions if the corrective patch causes a runtime regression."
 }
