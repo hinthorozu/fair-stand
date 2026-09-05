@@ -85,6 +85,10 @@ test('trash bin is visible in the catalog and persists through the real drag/dro
 
   await expect(trashCard).toBeVisible();
   await expect(trashCard).toHaveAttribute('aria-disabled', 'false');
+  await expect(trashCard.locator('.module-drag-plant')).toHaveCount(0);
+  const trashPreview = trashCard.locator('.module-drag-panel');
+  await expect(trashPreview).toBeVisible();
+  await expect(trashPreview).toHaveCSS('width', '34px');
 
   const viewport = page.locator('#viewport');
   const viewportBox = await viewport.boundingBox();
@@ -128,6 +132,8 @@ test('trash bin is visible and selectable in the existing Add catalog', async ({
   const trashCard = picker.locator(`[data-module-key="${TRASH_KEY}"]`);
   await expect(trashCard).toBeVisible();
   await expect(trashCard).toHaveAttribute('aria-selected', 'false');
+  await expect(trashCard.locator('.module-drag-plant')).toHaveCount(0);
+  await expect(trashCard.locator('.module-drag-panel')).toHaveCSS('width', '34px');
 
   await trashCard.click();
   await expect(trashCard).toHaveAttribute('aria-selected', 'true');
