@@ -24,7 +24,7 @@
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "not-applicable",
+    "architecture": "affected",
     "security": "not-applicable",
     "tests": "affected"
   },
