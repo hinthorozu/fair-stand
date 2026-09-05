@@ -5,6 +5,7 @@ import {
   DEFAULT_AUTOSAVE_DELAY_MS,
   DEFAULT_AUTOSAVE_WATCH_INTERVAL_MS,
   createAutosaveController,
+  getActiveAutosaveController,
 } from '../src/autosaveController.js';
 
 function createFakeClock() {
@@ -202,4 +203,39 @@ test('markSavedState cancels pending debounce and re-baselines the current signa
   assert.deepEqual(clock.clearedTimeouts, [timeoutId]);
   assert.equal(clock.timeouts.size, 0);
   assert.equal(controller.checkForChanges(), false);
+});
+
+test('flush cancels pending debounce, persists immediately, and re-baselines current state', async () => {
+  const clock = createFakeClock();
+  const persistCalls = [];
+  let signature = 'a';
+  const controller = createAutosaveController({
+    getSignature: () => signature,
+    persist: async (options) => { persistCalls.push(options); },
+    ...clock,
+  });
+
+  controller.enableFromCurrentState();
+  signature = 'b';
+  controller.checkForChanges();
+  const timeoutId = [...clock.timeouts.keys()][0];
+
+  await controller.flush({ quiet: true });
+
+  assert.deepEqual(persistCalls, [{ quiet: true }]);
+  assert.deepEqual(clock.clearedTimeouts, [timeoutId]);
+  assert.equal(clock.timeouts.size, 0);
+  assert.equal(controller.isEnabled(), true);
+  assert.equal(controller.checkForChanges(), false);
+});
+
+test('active controller registry exposes the controller used by project action guards', () => {
+  const clock = createFakeClock();
+  const controller = createAutosaveController({
+    getSignature: () => 'current',
+    persist: async () => {},
+    ...clock,
+  });
+
+  assert.equal(getActiveAutosaveController(), controller);
 });
