@@ -10,10 +10,11 @@ test('canonical state construction registry instantiates every catalog entry', (
 
   for (const catalogKey of MODULE_CATALOG_KEYS) {
     const descriptor = MODULE_CATALOG[catalogKey];
-    const state = createModuleStateFromDescriptor(descriptor, { catalogKey });
+    const state = createModuleStateFromDescriptor(descriptor);
     assert.ok(state, `${catalogKey} must resolve to a runtime module state`);
     assert.equal(state.type, descriptor.type, `${catalogKey} type must be preserved`);
-    assert.equal(state.catalogKey, catalogKey, `${catalogKey} identity must be attached by the canonical constructor`);
+    assert.equal(state.catalogKey, catalogKey, `${catalogKey} identity must be attached automatically by the canonical constructor`);
+    assert.notEqual(state.catalogKey, null, `${catalogKey} catalog identity must never be null`);
   }
 });
 
@@ -45,6 +46,23 @@ test('canonical registry includes the active non-catalog illuminated-foam family
   assert.equal(state.imageAssetId, 'asset-1');
   assert.equal(state.widthCm, 180);
   assert.equal(state.heightCm, 45);
+  assert.equal(Object.hasOwn(state, 'catalogKey'), false);
+});
+
+test('automatic catalog-equivalent descriptors receive canonical catalog identity', () => {
+  const wall = createModuleStateFromDescriptor({ type: 'flat-panel', widthCm: 100 });
+  const door = createModuleStateFromDescriptor({ type: 'door', widthCm: 100 });
+  const normalSeparator = createModuleStateFromDescriptor({ type: 'separator', widthCm: 100 });
+  const vineSeparator = createModuleStateFromDescriptor({
+    type: 'separator',
+    widthCm: 100,
+    modelFile: 'wall_separator_100_sarmasik.glb',
+  });
+
+  assert.equal(wall.catalogKey, 'wall_100');
+  assert.equal(door.catalogKey, 'DOOR_100');
+  assert.equal(normalSeparator.catalogKey, 'wall_separator_100');
+  assert.equal(vineSeparator.catalogKey, 'wall_separator_100_sarmasik');
 });
 
 test('main.js delegates construction instead of owning a parallel type dispatcher', async () => {
