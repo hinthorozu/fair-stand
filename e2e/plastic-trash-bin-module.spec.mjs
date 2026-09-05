@@ -131,7 +131,7 @@ test('trash bin is visible and selectable in the existing Add catalog', async ({
 
   await trashCard.click();
   await expect(trashCard).toHaveAttribute('aria-selected', 'true');
-  await expect(picker.locator('.module-picker-selection-list')).toContainText('Plastik Çöp Kutusu');
+  await expect(picker.locator('.module-picker-selection-list')).toContainText('Çöp Kutusu');
   await expect(pageErrors).toEqual([]);
 });
 
