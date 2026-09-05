@@ -13,10 +13,10 @@ test('kettle catalog and state stay aligned', () => {
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [24, 19, 25]);
 });
 
-test('kettle is free-positioned with normal footprint collision and an explicit fridge-stack exception', () => {
+test('kettle keeps its declared free-positioned collision contract', () => {
   const behavior = getModuleBehavior({ type: 'kettle' });
   assert.equal(behavior.placement, 'free');
-  assert.equal(behavior.collision, 'footprint');
+  assert.equal(behavior.collision, 'none');
   assert.equal(behavior.magneticSnap, 'none');
   assert.equal(behavior.rotationStepDeg, 90);
   assert.deepEqual(behavior.overlapWithTypes, ['mini-fridge']);
@@ -46,7 +46,7 @@ test('kettle may share the mini-fridge footprint at its raised placement', () =>
   assert.equal(placementsOverlap(fridge, kettle), false);
 });
 
-test('kettle does not receive a global collision bypass for unrelated fixtures', () => {
+test('kettle keeps pre-F-011 placement collision behavior for unrelated fixtures', () => {
   const kettle = {
     id: 'kettle',
     type: 'kettle',
