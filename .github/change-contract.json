@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "integrate-plastic-trash-bin-module",
+  "id": "fix-plastic-trash-bin-catalog-identity-preview",
   "kind": "module",
-  "summary": "Register the existing plastic_trash_bin.glb asset as a 40x40x60 cm catalog module, give it mini-fridge-style 10 cm free movement without overlap exceptions, expose it in catalog drag/Add flows, and include it in automatic depot contents without floor-fixture overlap.",
+  "summary": "Correct the plastic trash bin catalog identity from indoor-plant-1 to plastic-trash-bin and render a dedicated trash-bin catalog preview instead of a plant icon, while preserving the existing fixed-model runtime bridge.",
   "owners": [
     "src/catalog.js",
     "src/moduleBehavior.js",
@@ -215,7 +215,7 @@
         "F-045"
       ]
     },
-    "notes": "The user explicitly set the trash-bin nominal product dimensions to 40x40x60 cm. The previously measured raw GLB transform scale is not used as product dimensions; the existing model renderer normalizes model geometry to descriptor bounds. Exact product identity is DEPOT_PLASTIC_TRASH_BIN and modelFile is plastic_trash_bin.glb. The new item remains decision-required under F-014; no BOM classification is invented. Automatic depot packing is derived from the catalog dimensions and keeps the trash bin, mini fridge and coat rack footprints disjoint; kettle retains its existing supported fridge-top relationship. Existing generic catalog Add behavior is preserved rather than inventing a new default free-placement position in this feature. The full-system reverse-dependency, test, documentation and finding surfaces reported by the gate are explicitly reviewed here; declaration does not imply unrelated behavior changes in those files."
+    "notes": "Corrective patch only. The current trash-bin dimensions are deliberately not changed here. Catalog identity is now plastic-trash-bin rather than indoor-plant-1. State construction explicitly bridges this descriptor to the existing fixed-model renderer state so drag/drop and automatic-depot rendering remain functional without pretending the catalog product is a plant. Browser regression now fails if the trash-bin card renders the plant preview and verifies the dedicated bin silhouette styling in both catalog surfaces."
   },
   "tests": {
     "targeted": [
@@ -228,16 +228,16 @@
       "targeted": [
         "e2e/plastic-trash-bin-module.spec.mjs"
       ],
-      "reason": "Catalog visibility, drag/drop, Add picker admission, model rendering/persistence, and automatic depot composition are browser-visible behavior and require Chromium coverage."
+      "reason": "Catalog visibility and visual identity, drag/drop, Add picker admission, persistence, and automatic depot composition are browser-visible behavior and require Chromium coverage."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "The change admits a new active catalog product and automatic-depot content. Primary risks are catalog identity drift, incorrect GLB normalization, free-placement behavior drift, or fixture overlap. Targeted unit and Chromium tests cover these paths while the full suite/build protect existing modules."
+    "notes": "Primary risk is breaking state construction after separating catalog identity from the existing fixed-model renderer path. Targeted unit coverage locks the new catalog type and compatibility bridge; Chromium verifies the catalog no longer renders the plant preview and drag/drop still persists the module."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted schema version changes. New projects may persist DEPOT_PLASTIC_TRASH_BIN catalog identity and the existing project-state format already stores the required descriptor/state fields."
+    "notes": "No persisted schema version change is introduced. Existing saved trash-bin instances keep their stored runtime state; new catalog descriptors use plastic-trash-bin and are bridged into the existing fixed-model state path."
   },
-  "rollback": "Revert the trash-bin catalog/behavior/contract/auto-depot commits while leaving the already-merged plastic_trash_bin.glb asset in public/models if any product integration regression is observed."
+  "rollback": "Revert the trash-bin catalog type, catalog preview styling, state-factory bridge, and their regressions if the corrective patch causes a runtime regression."
 }
