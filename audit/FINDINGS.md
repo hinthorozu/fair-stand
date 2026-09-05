@@ -8,13 +8,13 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 ## Summary
 
 - Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **30**
-- Closed findings: **16**
+- Open findings: **29**
+- Closed findings: **17**
 - Open P0: **0**
-- Open P1: **14**
+- Open P1: **13**
 - Open P2: **16**
 - Open P3: **0**
-- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open; A08 in progress — F-020 closed / post-merge verified; F-023 closed / post-merge verified; F-021/F-022 remain open**
+- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open; A08 in progress — F-020 closed / post-merge verified; F-023 closed / post-merge verified; F-021/F-022 remain open; A21 in progress — F-041 closed / repository ruleset verified; F-034/F-043/F-044/F-045/F-046 remain open**
 
 ## Findings
 
@@ -60,7 +60,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-038 | P2 | Dependency/security advisory scanning not enforced in CI | OPEN |
 | F-039 | P2 | Dynamic modal/context-menu focus/accessibility semantics inconsistent | OPEN |
 | F-040 | P1 | No real browser E2E harness covers critical user workflows | OPEN |
-| F-041 | P1 | ROG unprotected; green CI/change gate not enforced before merge/direct push | OPEN |
+| F-041 | P1 | ROG unprotected; green CI/change gate not enforced before merge/direct push | **CLOSED** — `audit/remediation/A21_F041_CLOSURE.md` |
 | F-042 | P1 | Server deploy path not commit-pinned and weaker than CI gate/test chain | OPEN |
 | F-043 | P2 | Public repository has no explicit root software license decision/file | OPEN / DECISION_REQUIRED |
 | F-044 | P2 | Many merged/superseded branches remain | OPEN |

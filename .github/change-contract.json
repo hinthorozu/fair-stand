@@ -1,13 +1,16 @@
 {
   "schemaVersion": 2,
-  "id": "f033-remove-unused-production-assets",
-  "kind": "refactor",
-  "summary": "Remove three parked and unreferenced public assets identified by F-033 so they are no longer copied into the production build.",
+  "id": "f041-closure-bookkeeping",
+  "kind": "architecture",
+  "summary": "Record the verified repository ruleset that protects ROG with pull-request and strict CI requirements, then close F-041 in the canonical audit ledger.",
   "owners": [
-    "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md"
+    "audit/FINDINGS.md",
+    "audit/remediation/A21_F041_CLOSURE.md"
   ],
   "sourceOfTruth": [
-    "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md"
+    "audit/FINDINGS.md",
+    "audit/remediation/A21_F041_CLOSURE.md",
+    "PROJECT_RULES.md"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -19,65 +22,72 @@
     "bom": "not-applicable",
     "ui": "not-applicable",
     "composition": "not-applicable",
-    "assets": "affected",
+    "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
-    "performance": "affected",
+    "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "not-applicable",
-    "security": "not-applicable",
+    "architecture": "affected",
+    "security": "affected",
     "tests": "affected"
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [],
+    "affectedFiles": [
+      "scripts/verify-change-contract.mjs",
+      "src/systemChangeContract.js"
+    ],
     "affectedTests": [
-      "test/removedIndoorPlant2.test.js",
-      "test/indoorPlants.test.js",
-      "test/systemImpactAnalysis.test.js",
-      "e2e/smoke.spec.mjs"
+      "test/systemChangeGate.test.js",
+      "test/systemChangeGateLocalDiff.test.js"
     ],
     "affectedDocs": [
-      "RELEASE_HARDENING_ROADMAP.md",
+      "PROJECT_RULES.md",
+      "SYSTEM_CHANGE_GATE.md",
+      "SYSTEM_DEVELOPMENT_CONTRACT.md",
       "audit/FINDINGS.md",
-      "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
-      "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
+      "audit/evidence/A02_CHANGE_GATE.md",
       "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
-      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md"
+      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
+      "audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md",
+      "audit/remediation/A21_F041_CLOSURE.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-033"
+        "F-041"
       ],
       "reviewedNotAffected": [
-        "F-024",
-        "F-034",
-        "F-045"
+        "F-005",
+        "F-006",
+        "F-007",
+        "F-038",
+        "F-040",
+        "F-042",
+        "F-044",
+        "F-046"
       ]
     },
-    "notes": "Full-system review confirms indoor_plants2.glb, bar_chair2.glb and exhibition-floor.jpg are parked/unreferenced production payload. Their removal does not change catalog, runtime renderer selection, module state, placement or persistence. The active exhibition-floor-optimized.jpg remains present. Impact sweep also reviews the indoor plant and impact-analysis regression surfaces plus the release-hardening roadmap reference. The existing parked-indoor-plant regression is updated to lock the new removal decision, and browser smoke coverage verifies the application still boots after the asset cleanup."
+    "notes": "Bookkeeping-only closure after live GitHub repository ruleset verification. The active `Protect ROG` ruleset targets refs/heads/ROG, requires pull requests, requires the `verify` status check with strict status-check policy, blocks deletion and non-fast-forward updates, and has no bypass actors. This closure changes no runtime, build, deployment, project data, Item/BOM, renderer, placement, catalog, persistence, storage, import/export or schema semantics."
   },
   "tests": {
     "targeted": [
-      "test/removedIndoorPlant2.test.js"
+      "test/systemChangeGate.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": [
-        "e2e/smoke.spec.mjs"
-      ],
-      "reason": "The change removes public production assets; browser smoke coverage verifies the built application still loads while the active optimized floor texture remains available."
+      "required": false,
+      "targeted": [],
+      "reason": "The remediation is repository governance enforced by a GitHub ruleset and this PR only records verified closure evidence; no browser-visible runtime behavior changes."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "The three deleted files were classified by the audit as inactive runtime inputs. Risk is limited to an overlooked reference, which is covered by full tests, build and browser smoke verification."
+    "notes": "Risk is limited to audit bookkeeping accuracy. The protection itself is already active in GitHub and was verified directly from the repository ruleset API."
   },
   "migration": {
     "required": false,
-    "notes": "No saved project schema, IndexedDB data or import/export format changes are involved."
+    "notes": "No application or persisted schema change."
   },
-  "rollback": "Restore the three deleted public assets from the parent ROG commit and revert the F-033 asset-presence regression expectation."
+  "rollback": "Revert the closure bookkeeping commit if the recorded repository-ruleset evidence is found to be incorrect."
 }
