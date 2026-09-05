@@ -33,7 +33,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-011 | P1 | Module-specific placement/interaction policy fragmented outside behavior contract | **CLOSED** — `audit/remediation/A03_F011_CLOSURE.md` |
 | F-012 | P2 | Stand scene-surround rule duplicated between setup and renderer | **CLOSED** — `audit/remediation/A03_F012_CLOSURE.md` |
 | F-013 | P2 | Exact catalog identity ambiguous for normal vs vine separators when `catalogKey` absent | **CLOSED** — `audit/remediation/A04_F013_CLOSURE.md` |
-| F-014 | P1 | 17 active module contracts require final BOM classification | OPEN / DECISION_REQUIRED |
+| F-014 | P1 | 18 active module contracts require final BOM classification | OPEN / DECISION_REQUIRED |
 | F-015 | P1 | `allowSideInsert:false` declared but not enforced by context/runtime insertion | OPEN |
 | F-016 | P2 | Right-wall corner orientation conflict: 90° helper vs 270° active placement/reflow | OPEN |
 | F-017 | P2 | Renderer directly mutates persistent editable state | OPEN |
