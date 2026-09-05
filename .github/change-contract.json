@@ -173,7 +173,7 @@
         "F-040"
       ]
     },
-    "notes": "F-011 centralizes policy selection only; geometric algorithms remain in modulePlacement. F-015 side-insert enforcement and F-016 right-wall orientation remain independently open and are not closed by this change. F-014 was reviewed because the sweep found module-contract references, but no BOM classification is changed. All initial full-system discovery surfaces are explicitly reviewed here."
+    "notes": "F-011 centralizes policy selection only; geometric algorithms remain in the placement/core layer. Existing product behavior is preserved, including the pre-F-011 kettle declaration collision:none and its existing placement collision semantics. F-015 side-insert enforcement and F-016 right-wall orientation remain independently open and are not closed by this change. F-014 was reviewed because the sweep found module-contract references, but no BOM classification is changed. All initial full-system discovery surfaces are explicitly reviewed here."
   },
   "tests": {
     "targeted": [
@@ -201,7 +201,7 @@
   },
   "risk": {
     "level": "high",
-    "notes": "Placement/collision policy ownership affects many module families. Runtime behavior is intended to remain stable except correcting the kettle contract from a global collision bypass declaration to an explicit fridge-stack overlap relationship."
+    "notes": "Placement/collision policy ownership affects many module families. This remediation is ownership-only: existing product/runtime behavior is intended to remain unchanged."
   },
   "migration": {
     "required": false,
