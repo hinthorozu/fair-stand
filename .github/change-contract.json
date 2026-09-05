@@ -1,34 +1,37 @@
 {
   "schemaVersion": 2,
-  "id": "mini-fridge-50x50x66",
-  "kind": "module",
-  "summary": "Standardize the Mini Buzdolabı nominal dimensions from 45x43x66 cm to 50x50x66 cm across catalog, runtime state, automatic-depot composition, persistence expectations, placement footprint, rendering inputs, and targeted browser coverage.",
+  "id": "close-f011-module-behavior-policy",
+  "kind": "architecture",
+  "summary": "Close F-011 by making moduleBehavior the declarative owner of module-specific placement/interaction policy selection while keeping geometric algorithms in placement core.",
   "owners": [
-    "src/catalog.js",
-    "src/designState.js",
-    "src/autoDepot.js"
+    "src/moduleBehavior.js",
+    "src/modulePlacement.js",
+    "src/scene3d.js",
+    "MODULE_BEHAVIOR_STANDARD.md"
   ],
   "sourceOfTruth": [
-    "SYSTEM_MODULE_CATALOG.md",
-    "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
-    "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md"
+    "audit/evidence/A03_ARCHITECTURE.md",
+    "audit/evidence/A05_MODULE_BEHAVIOR.md",
+    "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
+    "MODULE_BEHAVIOR_STANDARD.md",
+    "ARCHITECTURE_RULES.md"
   ],
   "impact": {
     "catalog": "affected",
-    "behavior": "not-applicable",
+    "behavior": "affected",
     "state": "affected",
     "placement": "affected",
     "renderer": "affected",
     "persistence": "affected",
     "bom": "not-applicable",
-    "ui": "not-applicable",
+    "ui": "affected",
     "composition": "affected",
-    "assets": "not-applicable",
-    "storage": "not-applicable",
+    "assets": "affected",
+    "storage": "affected",
     "importExport": "affected",
-    "performance": "not-applicable",
+    "performance": "affected",
     "accessibility": "not-applicable",
-    "architecture": "not-applicable",
+    "architecture": "affected",
     "security": "not-applicable",
     "tests": "affected"
   },
@@ -38,37 +41,32 @@
       "index.html",
       "scripts/add-tv-sizes.py",
       "scripts/add-video-wall-2x2.py",
+      "scripts/fix-tv-screen-face.py",
       "scripts/patch-video-wall-2x2.cjs",
+      "scripts/patch-video-wall-single-image.cjs",
       "scripts/verify-change-contract.mjs",
       "src/autoDepot.js",
       "src/automaticWall.js",
-      "src/catalog.js",
       "src/cornerPlacement.js",
-      "src/designState.js",
-      "src/featureContracts.js",
       "src/main.js",
+      "src/moduleBehavior.js",
       "src/moduleContextMenu.js",
       "src/moduleContracts.js",
       "src/moduleDragSidebar.js",
       "src/moduleMove.js",
       "src/modulePlacement.js",
-      "src/projectStore.js",
       "src/scene3d.js",
       "src/systemChangeContract.js",
-      "src/wall.js",
+      "src/viewCube.js",
       "src/wallReflow.js"
     ],
     "affectedTests": [
-      "e2e/mini-fridge-dimensions.spec.mjs",
       "test/autoDepotOrientation.test.js",
       "test/automaticWall.test.js",
       "test/autosaveMainIntegration.test.js",
-      "test/barStool2.test.js",
       "test/baseModule.test.js",
       "test/baseRenderStyle.test.js",
-      "test/baseWallCatalog.test.js",
       "test/baseWallDepthAlignment.test.js",
-      "test/baseWallRecipes.test.js",
       "test/bundleLoadingContract.test.js",
       "test/catalogDragKeyboardIntegration.test.js",
       "test/catalogSingleSource.test.js",
@@ -82,7 +80,6 @@
       "test/depotBackWallRecipe.test.js",
       "test/depotFreeDragSnap.test.js",
       "test/depotFrontRecipe.test.js",
-      "test/designState.test.js",
       "test/developerEntrypointDocs.test.js",
       "test/eamesTableChairSetContract.test.js",
       "test/fabricModuleOwnership.test.js",
@@ -99,6 +96,7 @@
       "test/lCounter100Contract.test.js",
       "test/lCounter150Contract.test.js",
       "test/lCounter200Contract.test.js",
+      "test/lCounterDefaultOrientation.test.js",
       "test/lCounterPlacement.test.js",
       "test/lCounterSideGeometry.test.js",
       "test/ledFloodlightModule.test.js",
@@ -109,9 +107,11 @@
       "test/miniFridge.test.js",
       "test/miniFridgeTopLabel.test.js",
       "test/moduleBehaviorContract.test.js",
+      "test/moduleBehaviorPolicy.test.js",
       "test/moduleContextDirection.test.js",
       "test/moduleMove.test.js",
       "test/modulePlacement.test.js",
+      "test/moduleRotationPolicy.test.js",
       "test/moduleRotationSingleSourceIntegration.test.js",
       "test/moduleSelectionState.test.js",
       "test/moduleSelectionVisual.test.js",
@@ -138,74 +138,94 @@
       "test/tv42Module.test.js",
       "test/uiFeedbackMainIntegration.test.js",
       "test/viewKeyboardMainIntegration.test.js",
-      "test/wall.test.js",
       "test/wallDragStickiness.test.js",
       "test/wallReflow.test.js",
       "tests/autoDepot.test.js",
-      "tests/moduleBehavior.test.js"
+      "tests/moduleBehavior.test.js",
+      "e2e/f011-module-behavior.spec.mjs"
     ],
     "affectedDocs": [
       "ARCHITECTURE_RULES.md",
       "FRESH_REPOSITORY_REVIEW.md",
+      "MODULE_BEHAVIOR_STANDARD.md",
       "PROJECT_RULES.md",
       "README.md",
+      "RELEASE_HARDENING_ROADMAP.md",
+      "REPOSITORY_CLEANUP_PROGRESS.md",
       "SYSTEM_AUDIT_CHECKLIST.md",
       "SYSTEM_DEVELOPMENT_CONTRACT.md",
       "SYSTEM_MODULE_CATALOG.md",
       "audit/FINDINGS.md",
-      "audit/FULL_SWEEP_STATE.md",
       "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
       "audit/evidence/A02_CHANGE_GATE.md",
       "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
+      "audit/evidence/A05_MODULE_BEHAVIOR.md",
       "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
+      "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
+      "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
       "audit/evidence/A11_FEATURE_COMPOSITION.md",
+      "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
+      "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
       "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
-      "audit/remediation/A02_CLOSURE.md",
-      "audit/remediation/A03_F010_CLOSURE.md"
+      "audit/remediation/A02_F005_CLOSURE.md",
+      "audit/remediation/A03_F010_CLOSURE.md",
+      "docs/AUTOSAVE_INTEGRATION_NOTES.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-019"
+        "F-011",
+        "F-015",
+        "F-016"
       ],
       "reviewedNotAffected": [
+        "F-005",
         "F-010",
-        "F-011",
+        "F-012",
         "F-014",
         "F-017",
-        "F-018",
-        "F-021",
-        "F-022",
-        "F-030",
+        "F-028",
+        "F-029",
+        "F-033",
+        "F-040",
         "F-045"
       ]
     },
-    "notes": "The dimension change is intentionally isolated from F-011. The full-system sweep's code, test, documentation, and finding candidates are explicitly reviewed here rather than narrowed to the files that literally contain 45/43. F-019 is affected because Mini Buzdolabı dimensions are currently duplicated across catalog/state/composition, but this PR does not claim to close the broader F-019 finding. F-017 is not affected because no renderer mutation ownership changes; F-045 is not affected because historical rewrite scripts are only reference-discovered and are not modified or executed. Placement and rendering algorithms are unchanged; their inputs change from a 45x43 footprint to 50x50. Existing persisted project instances retain their stored dimensions; newly created/reconstructed Mini Buzdolabı modules use 50x50x66."
+    "notes": "F-011 centralizes policy selection only; geometric algorithms remain in the placement/core layer. Existing product behavior is preserved, including the pre-F-011 kettle declaration collision:none and its existing placement collision semantics. The scene3d wall-overlay support list is replaced by the existing supportsWallOverlayMount behavior capability without changing support geometry. The main.js top-fixture duplication selector now routes through isTopPlacementModule without changing the existing 20 cm offset, z=350, clamp, or wall-axis geometry. F-015 side-insert enforcement and F-016 right-wall orientation remain independently open and are not closed by this change. F-005 and its autosave/persistence surfaces were reviewed because main.js is a broad controller dependency; no persistence behavior is changed. F-014 was reviewed because the sweep found module-contract references, but no BOM classification is changed. F-033 and F-045 were reviewed because renderer/performance and historical rewrite-script references were discovered; no asset payload or historical script behavior is changed. All full-system discovery surfaces are explicitly reviewed here."
   },
   "tests": {
     "targeted": [
+      "test/moduleBehaviorContract.test.js",
+      "test/moduleBehaviorPolicy.test.js",
+      "test/modulePlacement.test.js",
+      "test/depotFreeDragSnap.test.js",
+      "test/kettle.test.js",
       "test/miniFridge.test.js",
-      "tests/autoDepot.test.js"
+      "test/baseModule.test.js",
+      "test/lCounterPlacement.test.js",
+      "test/indoorPlants.test.js",
+      "test/ledFloodlightModule.test.js",
+      "test/tv42Module.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/mini-fridge-dimensions.spec.mjs"
+        "e2e/f011-module-behavior.spec.mjs"
       ],
-      "reason": "The nominal footprint changes browser-visible drag placement, collision bounds, rendered scale inputs, and persisted module dimensions, so a real Chromium catalog drag-and-save regression is required."
+      "reason": "F-011 changes browser-visible placement and interaction policy routing; a representative real catalog free-placement flow is required in Chromium."
     }
   },
   "risk": {
-    "level": "medium",
-    "notes": "The 5 cm width and 7 cm depth increase changes the Mini Buzdolabı footprint used by free placement and automatic-depot composition. The height remains 66 cm and no placement algorithm or persisted schema is changed."
+    "level": "high",
+    "notes": "Placement/collision policy ownership affects many module families. This remediation is ownership-only: existing product/runtime behavior is intended to remain unchanged."
   },
   "migration": {
     "required": false,
-    "notes": "No project-state schema changes. Existing saved Mini Buzdolabı instances keep their stored dimensions; newly created/reconstructed instances use the new 50x50x66 nominal dimensions. A global historical-state migration would belong to the separate project migration work rather than this dimension update."
+    "notes": "No persisted project-state schema changes. Behavior policy is runtime-derived from module type/descriptor."
   },
-  "rollback": "Revert the Mini Buzdolabı catalog/state/depot dimension commits and targeted regressions if the 50x50 footprint causes an unacceptable placement or composition regression."
+  "rollback": "Revert the F-011 policy commits if any placement, collision, snap, support, or interaction regression is observed."
 }

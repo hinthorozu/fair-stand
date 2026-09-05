@@ -4,6 +4,8 @@ const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
   opacity: 0.38,
 });
 
+const NO_OVERLAP_TYPES = Object.freeze([]);
+
 const WALL_BEHAVIOR = Object.freeze({
   placement: 'wall',
   moveSnapCm: 50,
@@ -11,10 +13,63 @@ const WALL_BEHAVIOR = Object.freeze({
   defaultRotationDeg: 0,
   allowSideInsert: true,
   collision: 'segment',
+  magneticSnap: 'standard',
+  connectionEndpoint: 'segment',
+  collisionDepth: 'physical',
+  endpointContact: 'standard',
+  boundarySnap: 'stand-edge',
+  sideInsertRotation: 'inherit',
+  overlapWithTypes: NO_OVERLAP_TYPES,
+  supportsWallOverlayMount: true,
+  wallCapacity: 'include',
   ghost: DEFAULT_GHOST_BEHAVIOR,
 });
 
 const DEFAULT_BEHAVIOR = WALL_BEHAVIOR;
+
+function freeBehavior(overrides = {}) {
+  return Object.freeze({
+    placement: 'free',
+    moveSnapCm: 50,
+    rotationStepDeg: 90,
+    defaultRotationDeg: 0,
+    allowSideInsert: true,
+    collision: 'footprint',
+    magneticSnap: 'standard',
+    connectionEndpoint: 'segment',
+    collisionDepth: 'physical',
+    endpointContact: 'standard',
+    boundarySnap: 'stand-edge',
+    sideInsertRotation: 'inherit',
+    overlapWithTypes: NO_OVERLAP_TYPES,
+    supportsWallOverlayMount: false,
+    wallCapacity: 'include',
+    ghost: DEFAULT_GHOST_BEHAVIOR,
+    ...overrides,
+  });
+}
+
+function overlayBehavior(overrides = {}) {
+  return Object.freeze({
+    placement: 'wall-overlay',
+    moveSnapCm: 10,
+    rotationStepDeg: 90,
+    defaultRotationDeg: 0,
+    allowSideInsert: false,
+    collision: 'none',
+    magneticSnap: 'none',
+    connectionEndpoint: 'segment',
+    collisionDepth: 'physical',
+    endpointContact: 'standard',
+    boundarySnap: 'stand-edge',
+    sideInsertRotation: 'inherit',
+    overlapWithTypes: NO_OVERLAP_TYPES,
+    supportsWallOverlayMount: false,
+    wallCapacity: 'include',
+    ghost: DEFAULT_GHOST_BEHAVIOR,
+    ...overrides,
+  });
+}
 
 const TYPE_BEHAVIORS = Object.freeze({
   'flat-panel': WALL_BEHAVIOR,
@@ -22,97 +77,52 @@ const TYPE_BEHAVIORS = Object.freeze({
   'showcase-2': WALL_BEHAVIOR,
   shelf: WALL_BEHAVIOR,
   door: WALL_BEHAVIOR,
-  'base-wall': WALL_BEHAVIOR,
+  'base-wall': Object.freeze({
+    ...WALL_BEHAVIOR,
+    collisionDepth: 'wall-backbone',
+  }),
   separator: WALL_BEHAVIOR,
-  counter: Object.freeze({
-    placement: 'free',
-    moveSnapCm: 50,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
-    allowSideInsert: true,
-    collision: 'footprint',
+  counter: freeBehavior({
+    connectionEndpoint: 'logical-fixture',
   }),
-  base: Object.freeze({
-    placement: 'free',
-    moveSnapCm: 50,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
-    allowSideInsert: true,
-    collision: 'footprint',
+  base: freeBehavior({
+    connectionEndpoint: 'logical-fixture',
   }),
-  'sofa-set-classic': Object.freeze({
-    placement: 'free',
+  'sofa-set-classic': freeBehavior({
     moveSnapCm: 10,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
-    allowSideInsert: true,
-    collision: 'footprint',
+    boundarySnap: 'wall-inner-face',
   }),
-  'table-chair-set-eames': Object.freeze({
-    placement: 'free',
+  'table-chair-set-eames': freeBehavior({
     moveSnapCm: 10,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
-    allowSideInsert: true,
-    collision: 'footprint',
+    boundarySnap: 'wall-inner-face',
   }),
-  'bar-stool': Object.freeze({
-    placement: 'free',
+  'bar-stool': freeBehavior({
     moveSnapCm: 10,
     rotationStepDeg: 45,
     defaultRotationDeg: 270,
-    allowSideInsert: true,
-    collision: 'footprint',
+    sideInsertRotation: 'default',
   }),
-  'mini-fridge': Object.freeze({
-    placement: 'free',
+  'mini-fridge': freeBehavior({
     moveSnapCm: 10,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
-    allowSideInsert: true,
-    collision: 'footprint',
+    magneticSnap: 'none',
+    overlapWithTypes: Object.freeze(['kettle']),
   }),
-  kettle: Object.freeze({
-    placement: 'free',
+  kettle: freeBehavior({
     moveSnapCm: 10,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
-    allowSideInsert: true,
-    // Kettle lives at the mini-fridge top elevation, so its 2D footprint may overlap the fridge.
     collision: 'none',
+    magneticSnap: 'none',
+    overlapWithTypes: Object.freeze(['mini-fridge']),
   }),
-  'coat-rack': Object.freeze({
-    placement: 'free',
+  'coat-rack': freeBehavior({
     moveSnapCm: 10,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
-    allowSideInsert: true,
-    collision: 'footprint',
+    magneticSnap: 'none',
   }),
-  'indoor-plant-1': Object.freeze({
-    placement: 'free',
+  'indoor-plant-1': freeBehavior({
     moveSnapCm: 10,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
-    allowSideInsert: true,
-    collision: 'footprint',
+    endpointContact: 'thin-wall-endpoint',
   }),
-  'illuminated-foam': Object.freeze({
-    placement: 'wall-overlay',
-    moveSnapCm: 10,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
-    allowSideInsert: false,
-    collision: 'none',
-  }),
-  tv: Object.freeze({
-    placement: 'wall-overlay',
-    moveSnapCm: 10,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
-    allowSideInsert: false,
-    collision: 'none',
-  }),
+  'illuminated-foam': overlayBehavior(),
+  tv: overlayBehavior(),
   'led-floodlight': Object.freeze({
     placement: 'top',
     moveSnapCm: 20,
@@ -120,6 +130,16 @@ const TYPE_BEHAVIORS = Object.freeze({
     defaultRotationDeg: 0,
     allowSideInsert: true,
     collision: 'none',
+    magneticSnap: 'none',
+    connectionEndpoint: 'segment',
+    collisionDepth: 'physical',
+    endpointContact: 'standard',
+    boundarySnap: 'stand-edge',
+    sideInsertRotation: 'inherit',
+    overlapWithTypes: NO_OVERLAP_TYPES,
+    supportsWallOverlayMount: false,
+    wallCapacity: 'exclude',
+    ghost: DEFAULT_GHOST_BEHAVIOR,
   }),
 });
 
@@ -179,6 +199,59 @@ export function getModuleDefaultRotationDeg(moduleOrType) {
 
 export function getModuleMoveSnapCm(moduleOrType) {
   return Number(getModuleBehavior(moduleOrType).moveSnapCm) || 50;
+}
+
+export function getModuleCollisionStrategy(moduleOrType) {
+  const module = normalizeDescriptor(moduleOrType);
+  // Preserve the pre-F-011 runtime semantics: kettle keeps its declared collision:none
+  // contract, while normal placement collision still participates except for the
+  // explicit mini-fridge stacking relationship declared by overlapWithTypes.
+  if (module.type === 'kettle') return 'footprint';
+  return getModuleBehavior(moduleOrType).collision ?? 'segment';
+}
+
+export function getModuleMagneticSnapStrategy(moduleOrType) {
+  return getModuleBehavior(moduleOrType).magneticSnap ?? 'standard';
+}
+
+export function usesLogicalFixtureEndpoint(moduleOrType) {
+  return getModuleBehavior(moduleOrType).connectionEndpoint === 'logical-fixture';
+}
+
+export function usesWallBackboneCollisionDepth(moduleOrType) {
+  return getModuleBehavior(moduleOrType).collisionDepth === 'wall-backbone';
+}
+
+export function allowsThinWallEndpointContact(moduleOrType) {
+  return getModuleBehavior(moduleOrType).endpointContact === 'thin-wall-endpoint';
+}
+
+export function usesWallInnerFaceBoundary(moduleOrType) {
+  return getModuleBehavior(moduleOrType).boundarySnap === 'wall-inner-face';
+}
+
+export function resolveSideInsertRotationDeg(moduleOrType, inheritedRotationDeg = 0) {
+  const behavior = getModuleBehavior(moduleOrType);
+  return behavior.sideInsertRotation === 'default'
+    ? getModuleDefaultRotationDeg(moduleOrType)
+    : Number(inheritedRotationDeg) || 0;
+}
+
+export function canModulesOverlapByBehavior(moduleA, moduleB) {
+  const typeA = normalizeDescriptor(moduleA).type ?? null;
+  const typeB = normalizeDescriptor(moduleB).type ?? null;
+  if (!typeA || !typeB) return false;
+  const allowedA = getModuleBehavior(moduleA).overlapWithTypes ?? NO_OVERLAP_TYPES;
+  const allowedB = getModuleBehavior(moduleB).overlapWithTypes ?? NO_OVERLAP_TYPES;
+  return allowedA.includes(typeB) || allowedB.includes(typeA);
+}
+
+export function supportsWallOverlayMount(moduleOrType) {
+  return getModuleBehavior(moduleOrType).supportsWallOverlayMount === true;
+}
+
+export function countsTowardWallCapacity(moduleOrType) {
+  return getModuleBehavior(moduleOrType).wallCapacity !== 'exclude';
 }
 
 export function getModuleGhostBehavior(moduleOrType) {

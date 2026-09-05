@@ -28,7 +28,7 @@ import {
   planContinuousModuleInsert,
   planContinuousModuleMove,
 } from './moduleMove.js';
-import { getModuleGhostBehavior, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule, resolveModuleRotationDeltaDeg } from './moduleBehavior.js';
+import { getModuleGhostBehavior, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule, resolveModuleRotationDeltaDeg, supportsWallOverlayMount } from './moduleBehavior.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
@@ -2272,18 +2272,9 @@ export function createStandScene(
 
     const pointed = pickModuleAt(clientX, clientY);
     const pointedModuleState = pointed?.moduleGroup?.userData?.moduleState;
-    const freePanelSupportTypes = new Set([
-      'flat-panel',
-      'base-wall',
-      'shelf',
-      'door',
-      'showcase-2',
-      'showcase-3',
-      'separator',
-    ]);
     if (
       pointedModuleState?.placement?.wallId === 'free'
-      && freePanelSupportTypes.has(pointedModuleState.type)
+      && supportsWallOverlayMount(pointedModuleState)
       && pointed?.hit?.point
     ) {
       const supportRotationZDeg = normalizeModuleRotationZDeg(pointedModuleState.placement.rotationZDeg);

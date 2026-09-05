@@ -30,10 +30,48 @@ test('unknown module types remain distinguishable from declared catalog behavior
     defaultRotationDeg: 0,
     allowSideInsert: true,
     collision: 'segment',
+    magneticSnap: 'standard',
+    connectionEndpoint: 'segment',
+    collisionDepth: 'physical',
+    endpointContact: 'standard',
+    boundarySnap: 'stand-edge',
+    sideInsertRotation: 'inherit',
+    overlapWithTypes: [],
+    supportsWallOverlayMount: true,
+    wallCapacity: 'include',
     ghost: {
       kind: 'silhouette',
       renderer: 'module-silhouette',
       opacity: 0.38,
     },
   });
+});
+
+test('every declared catalog behavior exposes the complete placement policy schema', () => {
+  const requiredKeys = [
+    'placement',
+    'moveSnapCm',
+    'rotationStepDeg',
+    'defaultRotationDeg',
+    'allowSideInsert',
+    'collision',
+    'magneticSnap',
+    'connectionEndpoint',
+    'collisionDepth',
+    'endpointContact',
+    'boundarySnap',
+    'sideInsertRotation',
+    'overlapWithTypes',
+    'supportsWallOverlayMount',
+    'wallCapacity',
+    'ghost',
+  ];
+
+  for (const moduleKey of MODULE_CATALOG_KEYS) {
+    const descriptor = MODULE_CATALOG[moduleKey];
+    const behavior = getModuleBehavior({ ...descriptor, catalogKey: moduleKey });
+    for (const key of requiredKeys) {
+      assert.equal(Object.hasOwn(behavior, key), true, `${moduleKey}: missing ${key}`);
+    }
+  }
 });

@@ -13,10 +13,21 @@ The behavior contract currently covers:
 - `rotationStepDeg`: R / Shift+R rotation step
 - `defaultRotationDeg`: initial facing
 - `allowSideInsert`: whether context left/right insertion is allowed
-- `collision`: collision strategy
+- `collision`: declared collision contract
+- `magneticSnap`: normal module-to-module magnetic snap or an explicit opt-out
+- `connectionEndpoint`: standard segment endpoints or a logical fixture endpoint strategy
+- `collisionDepth`: physical depth or a declared logical wall-backbone depth
+- `endpointContact`: standard contact or a declared thin-wall endpoint exception
+- `boundarySnap`: normal stand-edge snap or a declared wall-inner-face boundary strategy
+- `sideInsertRotation`: inherit the source rotation or use the inserted module default
+- `overlapWithTypes`: explicit relationship-specific overlap exceptions
+- `supportsWallOverlayMount`: whether the module can act as a free-standing wall-overlay support
+- `wallCapacity`: whether the module consumes wall-chain capacity
 - `ghost`: placement preview strategy
 
-These values are **not global constants**. Different module types may intentionally use different snap distances, rotation steps, placement modes, or collision strategies.
+These values are **not global constants**. Different module types may intentionally use different snap distances, rotation steps, placement modes, collision strategies, connection strategies, or support capabilities.
+
+Policy selection belongs here; the geometric algorithms implementing those strategies remain in the placement/core layer.
 
 ## Explicit catalog behavior contract
 
@@ -30,7 +41,7 @@ This prevents a newly added catalog type from silently inheriting fallback behav
 
 Unknown or undeclared non-catalog module types still fall back to the default behavior defined in `src/moduleBehavior.js`.
 
-The current default behavior is wall placement with the default movement/rotation/collision contract declared in code. Documentation should not duplicate those numeric defaults as a separate source of truth.
+The current default behavior is wall placement with the default movement/rotation/collision/connection contract declared in code. Documentation should not duplicate those numeric defaults as a separate source of truth.
 
 Fallback remains useful as a defensive runtime behavior, but catalog entries must not depend on it implicitly.
 
@@ -61,15 +72,19 @@ Placement mode expresses editor intent:
 
 Exact geometric validation remains the responsibility of the placement/core layer.
 
+Module-specific selection of special geometry must be represented by a named behavior strategy. For example, logical fixture endpoints, wall-backbone collision depth, wall-inner-face snapping and relationship-specific overlap are declared here; `modulePlacement.js` implements the geometry without owning a second module-type registry.
+
 ## Collision contract
 
-Behavior records declare the collision strategy, while the placement/core layer performs the actual geometric validation.
+Behavior records preserve each module's declared collision value, while placement core consumes the canonical effective strategy through `getModuleCollisionStrategy()`. Compatibility-specific resolution therefore also belongs to `src/moduleBehavior.js`; placement code must not maintain a second module-type collision registry.
 
 Current strategies include contracts such as:
 
 - `segment`
 - `footprint`
 - `none`
+
+Relationship-specific overlap belongs in `overlapWithTypes`. This keeps exceptions such as raised fixture stacking declarative without moving their geometric implementation out of placement core.
 
 Do not duplicate module-specific collision decisions in unrelated editor/controller code when they can be expressed through this registry.
 
@@ -91,8 +106,9 @@ Descriptor-aware overrides are allowed when a family needs behavior based on mod
 When adding a new module:
 
 1. Add its catalog entry when applicable.
-2. Declare its type explicitly in `src/moduleBehavior.js`, even if it intentionally uses standard wall behavior.
-3. Avoid new scattered placement/type checks outside the registry unless the behavior cannot reasonably be represented by the contract.
-4. Add a regression test for any non-default placement, snap, rotation, collision, or ghost behavior.
-5. Keep renderer, state, catalog and BOM responsibilities separate from editor behavior.
-6. Run `npm test` and `npm run build`.
+2. Declare its type explicitly in `src/moduleBehavior.js`, even if it intentionally uses the standard wall behavior.
+3. Express special placement/interaction selection with a named strategy/capability in the behavior contract instead of adding a type list to placement, scene, or controller code.
+4. Keep the geometric implementation in the placement/core layer.
+5. Add a regression test for any non-default placement, snap, rotation, collision, connection, overlap, support, capacity, or ghost behavior.
+6. Keep renderer, state, catalog and BOM responsibilities separate from editor behavior.
+7. Run `npm test` and `npm run build`.
