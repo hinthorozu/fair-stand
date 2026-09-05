@@ -1,34 +1,31 @@
 {
   "schemaVersion": 2,
-  "id": "close-f011-audit-bookkeeping",
-  "kind": "architecture",
-  "summary": "Record F-011 as closed after PR #49 and its post-merge ROG verification succeeded, updating only canonical audit/remediation bookkeeping.",
+  "id": "enforce-canonical-catalog-identity",
+  "kind": "state-change",
+  "summary": "Ensure every catalog-equivalent runtime module has a valid canonical catalogKey, keep non-catalog modules keyless, and resolve legacy normal versus vine separators by modelFile.",
   "owners": [
-    "audit/FINDINGS.md",
-    "audit/FULL_SWEEP_STATE.md",
-    "audit/remediation/A03_F011_CLOSURE.md"
+    "src/catalog.js",
+    "src/designState.js",
+    "src/main.js"
   ],
   "sourceOfTruth": [
-    "audit/evidence/A03_ARCHITECTURE.md",
-    "audit/evidence/A05_MODULE_BEHAVIOR.md",
-    "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
-    "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
-    "audit/remediation/A03_F011_CLOSURE.md",
-    "SYSTEM_IMPACT_SWEEP.md"
+    "src/catalog.js",
+    "src/designState.js",
+    "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md"
   ],
   "impact": {
-    "catalog": "not-applicable",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
-    "placement": "not-applicable",
-    "renderer": "not-applicable",
-    "persistence": "not-applicable",
+    "catalog": "affected",
+    "behavior": "affected",
+    "state": "affected",
+    "placement": "affected",
+    "renderer": "affected",
+    "persistence": "affected",
     "bom": "not-applicable",
-    "ui": "not-applicable",
-    "composition": "not-applicable",
-    "assets": "not-applicable",
-    "storage": "not-applicable",
-    "importExport": "not-applicable",
+    "ui": "affected",
+    "composition": "affected",
+    "assets": "affected",
+    "storage": "affected",
+    "importExport": "affected",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
     "architecture": "affected",
@@ -37,62 +34,65 @@
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [],
+    "affectedFiles": [
+      "src/catalog.js",
+      "src/designState.js",
+      "src/main.js"
+    ],
     "affectedTests": [
+      "test/catalogSingleSource.test.js",
+      "test/moduleStateConstructionRegistry.test.js",
       "test/systemChangeGate.test.js",
-      "test/systemImpactAnalysis.test.js"
+      "test/systemChangeGateLocalDiff.test.js",
+      "test/systemImpactAnalysis.test.js",
+      "e2e/f010-module-construction.spec.mjs"
     ],
     "affectedDocs": [
       "audit/FINDINGS.md",
-      "audit/FULL_SWEEP_STATE.md",
-      "audit/remediation/A03_F011_CLOSURE.md",
-      "audit/evidence/A03_ARCHITECTURE.md",
-      "audit/evidence/A05_MODULE_BEHAVIOR.md",
-      "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
-      "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md"
+      "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
+      "SYSTEM_IMPACT_SWEEP.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-011"
+        "F-013"
       ],
       "reviewedNotAffected": [
-        "F-005",
         "F-010",
         "F-012",
         "F-014",
-        "F-015",
-        "F-016",
-        "F-017",
-        "F-028",
+        "F-018",
+        "F-019",
+        "F-022",
         "F-029",
-        "F-033",
-        "F-040",
-        "F-041",
-        "F-045"
+        "F-030",
+        "F-036",
+        "F-040"
       ]
     },
-    "notes": "This change records closure evidence only. Runtime ownership was changed and fully verified in PR #49. F-015 and F-016 remain independent open findings; F-012 is the remaining A03 finding. No later finding is closed by this bookkeeping change."
+    "notes": "Catalog identity becomes an invariant of canonical state construction and project restore. Catalog descriptors resolve a valid key automatically; non-catalog illuminated-foam omits catalogKey. Automatic wall/custom back/auto-depot descriptors therefore receive catalog identity when they correspond to current catalog products. F-013 is directly addressed by including separator modelFile in legacy identity resolution. No dimensions, geometry, placement arithmetic, renderer appearance, BOM classification, or non-catalog module semantics are intentionally changed."
   },
   "tests": {
     "targeted": [
-      "test/systemChangeGate.test.js",
-      "test/systemImpactAnalysis.test.js"
+      "test/catalogSingleSource.test.js",
+      "test/moduleStateConstructionRegistry.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "Audit closure bookkeeping has no browser-visible runtime impact. The canonical CI still runs the full baseline Chromium E2E suite."
+      "required": true,
+      "targeted": [
+        "e2e/f010-module-construction.spec.mjs"
+      ],
+      "reason": "Catalog identity is persisted state and automatic/catalog construction is browser-visible; Chromium verifies both automatic wall and real catalog-picker persistence carry canonical keys."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "Only canonical audit status and closure evidence are updated after already-successful implementation and post-merge verification."
+    "level": "medium",
+    "notes": "The change touches canonical construction and restore identity normalization. Product dimensions and placement behavior are unchanged; the risk is incorrect identity attachment or legacy repair, covered by catalog-wide and browser persistence tests."
   },
   "migration": {
     "required": false,
-    "notes": "No runtime or persisted-state schema change is made by this bookkeeping PR."
+    "notes": "No persisted schema version changes. Legacy states are normalized opportunistically on restore: resolvable catalog products gain their canonical key and unresolved/non-catalog states omit the field instead of storing null."
   },
-  "rollback": "Revert the audit closure bookkeeping commit if any recorded CI or finding status is inaccurate."
+  "rollback": "Revert the catalog identity commits if a runtime module receives an incorrect catalogKey or any legacy project restore regression is observed."
 }
