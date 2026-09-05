@@ -21,6 +21,9 @@ test('Yapay Çiçek 2 is removed from every system code path', () => {
   assert.doesNotMatch(source, /indoor_plants2\.glb/);
 });
 
-test('indoor_plants2.glb remains parked in public models for possible future use', () => {
-  assert.equal(existsSync(new URL('../public/models/indoor_plants2.glb', import.meta.url)), true);
+test('F-033 parked assets are removed while the active floor texture remains', () => {
+  assert.equal(existsSync(new URL('../public/models/indoor_plants2.glb', import.meta.url)), false);
+  assert.equal(existsSync(new URL('../public/models/bar_chair2.glb', import.meta.url)), false);
+  assert.equal(existsSync(new URL('../public/textures/exhibition-floor.jpg', import.meta.url)), false);
+  assert.equal(existsSync(new URL('../public/textures/exhibition-floor-optimized.jpg', import.meta.url)), true);
 });
