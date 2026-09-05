@@ -7,6 +7,7 @@ import {
   canModulesOverlapByBehavior,
   countsTowardWallCapacity,
   getModuleBehavior,
+  getModuleCollisionStrategy,
   getModuleMagneticSnapStrategy,
   resolveSideInsertRotationDeg,
   supportsWallOverlayMount,
@@ -50,11 +51,12 @@ test('F-011 special placement policies are declared by the canonical behavior co
   assert.equal(resolveSideInsertRotationDeg('counter', 90), 90);
 });
 
-test('stacking exception is relationship-specific rather than a global kettle collision bypass', () => {
+test('kettle keeps its pre-F-011 declared contract and runtime collision semantics', () => {
   assert.equal(canModulesOverlapByBehavior({ type: 'kettle' }, { type: 'mini-fridge' }), true);
   assert.equal(canModulesOverlapByBehavior({ type: 'mini-fridge' }, { type: 'kettle' }), true);
   assert.equal(canModulesOverlapByBehavior({ type: 'kettle' }, { type: 'counter' }), false);
-  assert.equal(getModuleBehavior('kettle').collision, 'footprint');
+  assert.equal(getModuleBehavior('kettle').collision, 'none');
+  assert.equal(getModuleCollisionStrategy('kettle'), 'footprint');
 });
 
 test('placement core selects F-011 policies through moduleBehavior instead of private type registries', () => {
