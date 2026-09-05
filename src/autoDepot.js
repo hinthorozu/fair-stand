@@ -63,8 +63,8 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
   addFront(specs, xCm, yCm + size.depthCm, size.widthCm, standType);
 
   if (includeContents) {
-    const fridgeWidth = 45;
-    const fridgeDepth = 43;
+    const fridgeWidth = 50;
+    const fridgeDepth = 50;
     const rackWidth = 43;
     const rackDepth = 43;
     const kettleWidth = 24;
