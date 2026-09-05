@@ -71,6 +71,11 @@ function overlayBehavior(overrides = {}) {
   });
 }
 
+const PLASTIC_TRASH_BIN_BEHAVIOR = freeBehavior({
+  moveSnapCm: 10,
+  magneticSnap: 'none',
+});
+
 const TYPE_BEHAVIORS = Object.freeze({
   'flat-panel': WALL_BEHAVIOR,
   'showcase-3': WALL_BEHAVIOR,
@@ -150,16 +155,24 @@ function normalizeDescriptor(moduleOrType) {
   return moduleOrType ?? {};
 }
 
+function isPlasticTrashBin(module) {
+  return module?.catalogKey === 'DEPOT_PLASTIC_TRASH_BIN'
+    || module?.modelFile === 'plastic_trash_bin.glb';
+}
+
 export function hasExplicitModuleBehavior(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
   const type = module.type ?? null;
-  return type !== null && Object.hasOwn(TYPE_BEHAVIORS, type);
+  return isPlasticTrashBin(module)
+    || (type !== null && Object.hasOwn(TYPE_BEHAVIORS, type));
 }
 
 export function getModuleBehavior(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
   const type = module.type ?? null;
-  const declared = TYPE_BEHAVIORS[type] ?? DEFAULT_BEHAVIOR;
+  const declared = isPlasticTrashBin(module)
+    ? PLASTIC_TRASH_BIN_BEHAVIOR
+    : (TYPE_BEHAVIORS[type] ?? DEFAULT_BEHAVIOR);
   const base = declared.ghost
     ? declared
     : { ...declared, ghost: DEFAULT_GHOST_BEHAVIOR };

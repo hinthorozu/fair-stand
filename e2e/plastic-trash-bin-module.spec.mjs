@@ -1,0 +1,161 @@
+import { test, expect } from '@playwright/test';
+
+const TRASH_KEY = 'DEPOT_PLASTIC_TRASH_BIN';
+
+async function createIslandStand(page, projectName, { depotContents = false } = {}) {
+  await page.goto('/');
+
+  const standSetup = page.locator('details.stand-setup-card');
+  await standSetup.locator('summary').click();
+  await standSetup.getByRole('button', { name: 'Ada Stand' }).click();
+  await page.locator('#stand-size-x').fill('500');
+  await page.locator('#stand-size-y').fill('500');
+
+  if (depotContents) {
+    await page.locator('#auto-depot-enabled').check();
+    await page.locator('#auto-depot-size').selectOption('100x100');
+    await page.locator('#auto-depot-contents').check();
+  }
+
+  await page.locator('#create-stage').click();
+  const projectNameInput = page.locator('form input[name="projectName"]');
+  await expect(projectNameInput).toBeVisible();
+  await projectNameInput.fill(projectName);
+  await page.getByRole('button', { name: 'Projeyi Oluştur' }).click();
+  await expect(page.locator('#viewport-toolbar')).toBeVisible();
+}
+
+async function saveAndReadProject(page) {
+  const saveButton = page.locator('#save-project');
+  await saveButton.click();
+  await expect(saveButton).toBeEnabled();
+
+  return page.evaluate(async () => {
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('fair-stand-configurator', 2);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const projects = await new Promise((resolve, reject) => {
+      const tx = db.transaction('projects', 'readonly');
+      const request = tx.objectStore('projects').getAll();
+      request.onsuccess = () => resolve(request.result ?? []);
+      request.onerror = () => reject(request.error);
+    });
+    db.close();
+    return projects.sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0))[0] ?? null;
+  });
+}
+
+function footprint(moduleState) {
+  const xMin = Number(moduleState.placement.xCm);
+  const xMax = xMin + Number(moduleState.widthCm);
+  const yCenter = Number(moduleState.placement.yCm);
+  const halfDepth = Number(moduleState.depthCm) / 2;
+  return { xMin, xMax, yMin: yCenter - halfDepth, yMax: yCenter + halfDepth };
+}
+
+function overlaps(a, b) {
+  return a.xMin < b.xMax
+    && a.xMax > b.xMin
+    && a.yMin < b.yMax
+    && a.yMax > b.yMin;
+}
+
+function isTenCmGridAligned(value) {
+  const units = Number(value) / 10;
+  return Number.isFinite(units) && Math.abs(units - Math.round(units)) < 1e-9;
+}
+
+test('trash bin is visible in the catalog and persists through the real drag/drop flow', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+
+  await createIslandStand(page, 'Trash Bin Drag');
+
+  const openCatalogButton = page.locator('#open-module-catalog');
+  const modulePanel = page.locator('details', { has: openCatalogButton });
+  await modulePanel.locator(':scope > summary').click();
+
+  const trashCard = page.locator(`.module-drag-card[data-module-key="${TRASH_KEY}"]`);
+  const trashGroup = page.locator('.module-drag-group', { has: trashCard });
+  if (!(await trashGroup.getAttribute('open'))) {
+    await trashGroup.locator(':scope > summary').click();
+  }
+
+  await expect(trashCard).toBeVisible();
+  await expect(trashCard).toHaveAttribute('aria-disabled', 'false');
+
+  const viewport = page.locator('#viewport');
+  const viewportBox = await viewport.boundingBox();
+  expect(viewportBox).not.toBeNull();
+  await trashCard.dragTo(viewport, {
+    targetPosition: {
+      x: Math.round(viewportBox.width * 0.57),
+      y: Math.round(viewportBox.height * 0.80),
+    },
+  });
+
+  const project = await saveAndReadProject(page);
+  const trash = project.modules.find((moduleState) => moduleState.catalogKey === TRASH_KEY);
+  expect(trash).toBeTruthy();
+  expect([trash.widthCm, trash.depthCm, trash.heightCm]).toEqual([40, 40, 60]);
+  expect(trash.modelFile).toBe('plastic_trash_bin.glb');
+  expect(trash.placement.wallId).toBe('free');
+  expect(Number(trash.placement.rotationZDeg)).toBe(0);
+
+  const box = footprint(trash);
+  expect(isTenCmGridAligned(box.xMin)).toBe(true);
+  expect(isTenCmGridAligned(box.xMax)).toBe(true);
+  expect(isTenCmGridAligned(box.yMin)).toBe(true);
+  expect(isTenCmGridAligned(box.yMax)).toBe(true);
+  expect(pageErrors).toEqual([]);
+});
+
+test('trash bin is visible and selectable in the existing Add catalog', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+
+  await createIslandStand(page, 'Trash Bin Add Catalog');
+
+  const openCatalogButton = page.locator('#open-module-catalog');
+  const modulePanel = page.locator('details', { has: openCatalogButton });
+  await modulePanel.locator(':scope > summary').click();
+  await openCatalogButton.click();
+
+  const picker = page.locator('.module-picker-backdrop');
+  await expect(picker).toBeVisible();
+  const trashCard = picker.locator(`[data-module-key="${TRASH_KEY}"]`);
+  await expect(trashCard).toBeVisible();
+  await expect(trashCard).toHaveAttribute('aria-selected', 'false');
+
+  await trashCard.click();
+  await expect(trashCard).toHaveAttribute('aria-selected', 'true');
+  await expect(picker.locator('.module-picker-selection-list')).toContainText('Çöp Kutusu');
+  await expect(pageErrors).toEqual([]);
+});
+
+test('100x100 automatic depot includes trash bin without overlapping floor fixtures', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+
+  await createIslandStand(page, 'Trash Bin Auto Depot', { depotContents: true });
+  const project = await saveAndReadProject(page);
+
+  const trash = project.modules.find((moduleState) => moduleState.catalogKey === TRASH_KEY);
+  const fridge = project.modules.find((moduleState) => moduleState.type === 'mini-fridge');
+  const rack = project.modules.find((moduleState) => moduleState.type === 'coat-rack');
+  expect(trash).toBeTruthy();
+  expect(fridge).toBeTruthy();
+  expect(rack).toBeTruthy();
+  expect(trash.autoDepot).toBe(true);
+  expect([trash.widthCm, trash.depthCm, trash.heightCm]).toEqual([40, 40, 60]);
+
+  const trashBox = footprint(trash);
+  const fridgeBox = footprint(fridge);
+  const rackBox = footprint(rack);
+  expect(overlaps(trashBox, fridgeBox)).toBe(false);
+  expect(overlaps(trashBox, rackBox)).toBe(false);
+  expect(overlaps(fridgeBox, rackBox)).toBe(false);
+  expect(pageErrors).toEqual([]);
+});

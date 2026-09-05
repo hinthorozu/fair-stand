@@ -132,6 +132,7 @@ export const MODULE_CONTRACT_ASSIGNMENTS = Object.freeze({
   DEPOT_MINI_FRIDGE_AVANTI: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
   DEPOT_KETTLE: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
   DEPOT_COAT_RACK: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
+  DEPOT_PLASTIC_TRASH_BIN: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
   EXTRA_INDOOR_PLANT_1: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
   EXTRA_LONG_PLANTER_100: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
   EXTRA_LONG_PLANTER_150: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
