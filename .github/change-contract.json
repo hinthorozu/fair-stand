@@ -33,9 +33,12 @@
     "affectedFiles": [],
     "affectedTests": [
       "test/removedIndoorPlant2.test.js",
+      "test/indoorPlants.test.js",
+      "test/systemImpactAnalysis.test.js",
       "e2e/smoke.spec.mjs"
     ],
     "affectedDocs": [
+      "RELEASE_HARDENING_ROADMAP.md",
       "audit/FINDINGS.md",
       "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
       "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
@@ -52,7 +55,7 @@
         "F-045"
       ]
     },
-    "notes": "Full-system review confirms indoor_plants2.glb, bar_chair2.glb and exhibition-floor.jpg are parked/unreferenced production payload. Their removal does not change catalog, runtime renderer selection, module state, placement or persistence. The active exhibition-floor-optimized.jpg remains present. The existing parked-indoor-plant regression is updated to lock the new removal decision, and browser smoke coverage verifies the application still boots after the asset cleanup."
+    "notes": "Full-system review confirms indoor_plants2.glb, bar_chair2.glb and exhibition-floor.jpg are parked/unreferenced production payload. Their removal does not change catalog, runtime renderer selection, module state, placement or persistence. The active exhibition-floor-optimized.jpg remains present. Impact sweep also reviews the indoor plant and impact-analysis regression surfaces plus the release-hardening roadmap reference. The existing parked-indoor-plant regression is updated to lock the new removal decision, and browser smoke coverage verifies the application still boots after the asset cleanup."
   },
   "tests": {
     "targeted": [
