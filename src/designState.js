@@ -328,6 +328,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   'mini-fridge': () => createMiniFridgeModuleState(),
   kettle: () => createKettleModuleState(),
   'coat-rack': () => createCoatRackModuleState(),
+  'plastic-trash-bin': (descriptor) => createIndoorPlantModuleState(descriptor),
   'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
   tv: (descriptor) => createTvModuleState(descriptor.sizeInch ?? 42, descriptor),
   'led-floodlight': () => createLedFloodlightModuleState(),
