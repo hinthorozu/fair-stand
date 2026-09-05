@@ -229,6 +229,8 @@ test('guarded paths cover runtime, UI, assets, unit tests, E2E, governance docs 
   assert.equal(isGuardedChangeFile('playwright.config.mjs'), true);
   assert.equal(isGuardedChangeFile('.github/workflows/ci.yml'), true);
   assert.equal(isGuardedChangeFile('README.md'), true);
+  assert.equal(isGuardedChangeFile('AGENTS.md'), true);
+  assert.equal(isGuardedChangeFile('ITEM_CONTRACT.md'), true);
   assert.equal(isGuardedChangeFile('SYSTEM_CHANGE_GATE.md'), true);
   assert.equal(isGuardedChangeFile('SYSTEM_IMPACT_SWEEP.md'), true);
   assert.equal(isGuardedChangeFile('PROJECT_RULES.md'), true);
@@ -245,6 +247,8 @@ test('all test surfaces require explicit tests impact', () => {
 
 test('canonical governance documents are guarded architecture surfaces', () => {
   const expected = [
+    'AGENTS.md',
+    'ITEM_CONTRACT.md',
     'README.md',
     'PROJECT_RULES.md',
     'ARCHITECTURE_RULES.md',
