@@ -118,6 +118,7 @@ test('trash bin is visible in the catalog, renders its GLB, and persists through
         && Array.isArray(entry.removedNodes)
         && entry.removedNodes.includes('Sphere_1')
         && entry.topLabelRole === 'plastic-trash-bin-top-label'
+        && Math.abs(Number(entry.topLabelRotationZ) - Math.PI) < 1e-9
         && Array.isArray(entry.trashBodyMaterials)
         && entry.trashBodyMaterials.some((body) => (
           body.name === 'Object_5'

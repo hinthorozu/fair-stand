@@ -4905,6 +4905,7 @@ function createPlasticTrashBinTopLabel(heightCm) {
     }),
   );
   label.rotation.x = -Math.PI / 2;
+  label.rotation.z = Math.PI;
   label.position.set(0, Number(heightCm) / 100 + 0.004, -0.04);
   label.renderOrder = 30;
   label.userData.kind = 'decoration';
@@ -5123,7 +5124,7 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
     group.userData.modelLoaded = true;
     group.userData.modelFile = modelFile;
     window.dispatchEvent(new CustomEvent('fair-stand:model-rendered', {
-      detail: { moduleId: moduleState.id, moduleIndex, type, modelFile, removedNodes, trashBodyMaterials, topLabelRole: group.children.find((child) => child.userData?.role === 'plastic-trash-bin-top-label')?.userData.role ?? null },
+      detail: { moduleId: moduleState.id, moduleIndex, type, modelFile, removedNodes, trashBodyMaterials, topLabelRole: group.children.find((child) => child.userData?.role === 'plastic-trash-bin-top-label')?.userData.role ?? null, topLabelRotationZ: group.children.find((child) => child.userData?.role === 'plastic-trash-bin-top-label')?.rotation.z ?? null },
     }));
   }).catch((error) => {
     console.warn('Sabit GLB modülü yüklenemedi:', type, modelFile, error);
