@@ -4,14 +4,21 @@ Bu doküman sistemin **mimari sınırlarını ve source-of-truth dağılımını
 
 ## 1. Canonical kaynaklar
 
+- `ITEM_CONTRACT.md` — BOM, üretim veya maliyet hesabına giren fiziksel öğelerin kök `Item` semantiği; `itemKey` / `type` / instance ayrımı; BOM sahipliği; quantity+unit; bileşik/parametrik/recursive Item kuralları.
 - `src/moduleBehavior.js` — module-type editor davranışları: placement mode, move snap, rotation step, default rotation, side insert, collision strategy ve ghost behavior.
 - Placement/core dosyaları — koordinat doğrulaması, duvar snap'i, komşu snap'i, collision, connection ve reflow algoritmaları.
 - `src/catalog.js` — katalog kimliği, kullanıcıya sunulan nominal ölçüler ve katalog metadata'sı.
-- State factory dosyaları — runtime module state yapıları ve editable surface state'leri.
+- State factory dosyaları — runtime module/item state yapıları ve editable surface state'leri.
 - Recipe / production-parts katmanı — BOM, üretim adetleri ve gerçek kesim/parça ölçüleri.
 - Regresyon testleri — bu contract'ların uygulanmaya devam ettiğini doğrular.
 
 Bir davranış için canonical kaynak mevcutsa aynı sabit değeri birden fazla Markdown dokümanında tekrar etmekten kaçınılır.
+
+### 1.1 Item kök contract'ı
+
+Aksine açık ürün kararı yoksa BOM, üretim veya maliyet hesabına girebilen her fiziksel öğe `Item`dır. `module`, `floor`, `furniture`, `print`, `material` gibi kavramlar `Item`ın type/ailesi/rolü olabilir; paralel kök ürün sistemleri oluşturulmaz.
+
+Yeni bir fiziksel ürün, zemin, malzeme, kombinasyon veya runtime öğesi eklenirken önce `ITEM_CONTRACT.md` uygulanır. Catalog/renderer/GLB/UI eklemek tek başına Item implementasyonu sayılmaz.
 
 ---
 
@@ -38,7 +45,7 @@ Desteklenen placement kavramları arasında duvar, serbest zemin, duvar üstü o
 
 ## 4. Behavior registry contract'ı
 
-Module-specific editor davranışları dağınık `if (module.type === ...)` kontrolleri halinde çoğaltılmamalıdır.
+Item/module-specific editor davranışları dağınık `if (module.type === ...)` veya `if (itemKey === ...)` kontrolleri halinde çoğaltılmamalıdır.
 
 Aşağıdaki kararlar mümkün olduğunca behavior registry üzerinden verilmelidir:
 
@@ -48,21 +55,26 @@ Aşağıdaki kararlar mümkün olduğunca behavior registry üzerinden verilmeli
 - default rotation,
 - side insertion capability,
 - collision strategy,
-- ghost strategy.
+- ghost strategy,
+- context-menu action capability.
 
-Detaylı sözleşme `MODULE_BEHAVIOR_STANDARD.md` dosyasındadır.
+Davranış gerçekten farklıysa ayrı bir behavior family / `type` tanımlanır; item-level override normal genişleme yolu değildir.
+
+Detaylı sözleşme `MODULE_BEHAVIOR_STANDARD.md` dosyasındadır. Item seviyesindeki ownership ilkeleri `ITEM_CONTRACT.md` tarafından belirlenir.
 
 ---
 
 ## 5. Placement ölçüsü, fiziksel geometri ve BOM ayrımı
 
-Aynı modül için üç farklı ölçü katmanı bulunabilir:
+Aynı Item/modül için üç farklı ölçü katmanı bulunabilir:
 
 1. **Nominal catalog/placement ölçüsü** — kullanıcıya sunulan ürün ölçüsü ve placement kimliği.
 2. **Fiziksel geometri / footprint** — collision ve 3D gövde için gereken gerçek fiziksel alan.
 3. **Production/BOM ölçüsü** — üretilecek panel, profil, tabla ve diğer parçaların gerçek ölçüleri.
 
 Bu üç kavram bilinçli olarak farklı olabilir. Birinin değiştirilmesi diğerlerini otomatik olarak değiştirmemelidir.
+
+BOM hesabı render/mesh/GLB/texture görünümünden değil Item'ın gerçek state/ölçü/parametrelerinden türetilir.
 
 Panel Bazalı gibi modüllerde fiziksel çıkıntı ile connect/snap omurgasının farklı olması bu ayrımın geçerli bir örneğidir.
 
@@ -89,27 +101,42 @@ Hangi modülün hangi collision stratejisini kullandığı behavior contract'ın
 
 ## 7. State ve renderer sınırı
 
-State, ürünün kalıcı/editable durumunu taşır. Renderer state'i görselleştirir; kalıcı ürün kuralının tek sahibi olmamalıdır.
+State, Item'ın kalıcı/editable durumunu taşır. Renderer state'i görselleştirir; kalıcı ürün kuralının tek sahibi olmamalıdır.
 
-Yeni bir module type eklenirken mümkün olduğunca şu sorumluluklar ayrık tutulur:
+Yeni bir Item/module type eklenirken mümkün olduğunca şu sorumluluklar ayrık tutulur:
 
+- canonical item identity (`itemKey`),
 - catalog descriptor,
 - state factory,
-- module behavior,
+- item/module behavior,
 - renderer,
 - recipe/BOM,
+- pricing/costing,
 - regression tests.
 
-Renderer içinde yalnız görselleştirme için gerekli module-specific routing bulunmalıdır; placement kuralı renderer'a taşınmamalıdır.
+Canonical Item tanımı ile proje instance state'i ayrıdır. Project-specific ölçü/adet/konfigürasyon canonical ürün tanımını değiştirmez.
+
+Renderer içinde yalnız görselleştirme için gerekli item/module-specific routing bulunmalıdır; placement veya BOM kuralı renderer'a taşınmamalıdır.
 
 ---
 
-## 8. Test contract'ı
+## 8. BOM ve maliyet sınırı
+
+Her Item BOM'a nasıl dönüştüğünü canonical recipe/resolver üzerinden tanımlar. Item tekil, bileşik veya parametrik olabilir; bileşik Item'lar recursive olarak terminal BOM kalemlerine çözülebilir ve döngüsel dependency yasaktır.
+
+Terminal BOM kalemi canonical kimlik + quantity + unit taşır. Unit (`adet`, `m2`, `mt`, `paket` vb.) tahmin edilmez.
+
+BOM sistemi fiziksel ihtiyacı üretir; fiyatlandırma/maliyet sistemi bu çıktıya fiyat uygular. Birim fiyat değişikliği BOM recipe'sini değiştirmez.
+
+---
+
+## 9. Test contract'ı
 
 Core davranış değişiklikleri regresyon testi olmadan tamamlanmış sayılmaz.
 
 Özellikle şu sınıflar testlerle korunmalıdır:
 
+- Item identity / type / instance ayrımı,
 - placement sınırları,
 - rotation behavior,
 - movement snap,
@@ -117,19 +144,23 @@ Core davranış değişiklikleri regresyon testi olmadan tamamlanmış sayılmaz
 - collision stratejileri,
 - catalog/state uyumu,
 - recipe/BOM sözleşmeleri,
-- module-specific behavior overrides.
+- quantity + unit contract'ı,
+- recursive BOM çözümü ve cycle rejection,
+- module/item-specific behavior family kuralları.
 
-Yeni module type eklenirken behavior contract'ının da aynı değişiklik içinde doğrulanması gerekir.
+Yeni Item/module type eklenirken Item contract ve behavior contract aynı değişiklik içinde doğrulanmalıdır.
 
 ---
 
-## 9. Değişiklik politikası
+## 10. Değişiklik politikası
 
-Core davranış değiştirileceğinde sıra:
+Core davranış veya yeni fiziksel Item değiştirileceğinde sıra:
 
-1. İlgili canonical kod kaynağı değiştirilir.
-2. Regresyon testi eklenir veya güncellenir.
-3. Bu değişiklik mimari sınırı etkiliyorsa ilgili canonical doküman güncellenir.
-4. `npm test` ve `npm run build` başarılı olmalıdır.
+1. `ITEM_CONTRACT.md` kapsamı değerlendirilir; Item ise identity/type/state/BOM/unit/instance/behavior kararları verilir.
+2. İlgili canonical kod kaynağı değiştirilir.
+3. Regresyon testi eklenir veya güncellenir.
+4. Bu değişiklik mimari sınırı etkiliyorsa ilgili canonical doküman güncellenir.
+5. Repository universal change gate ve impact sweep uygulanır.
+6. `npm test`, `npm run build` ve gerekli E2E başarılı olmalıdır.
 
 Dokümanlar runtime davranışının bağımsız ikinci implementasyonu haline gelmemelidir.
