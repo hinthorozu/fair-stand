@@ -1,21 +1,21 @@
 {
   "schemaVersion": 2,
-  "id": "f016-right-wall-orientation-alignment",
-  "kind": "bugfix",
-  "summary": "Align the stale corner-placement helper and its regression fixtures with the canonical 270 degree right-wall orientation used by active placement and reflow.",
+  "id": "f016-closure-bookkeeping",
+  "kind": "architecture",
+  "summary": "Record post-merge verification evidence and close F-016 in the canonical audit ledger after the implementation PR and ROG CI both passed.",
   "owners": [
-    "src/cornerPlacement.js"
+    "audit/FINDINGS.md",
+    "audit/remediation/A04_F016_CLOSURE.md"
   ],
   "sourceOfTruth": [
-    "src/wallReflow.js",
-    "src/modulePlacement.js",
-    "PROJECT_RULES.md"
+    "audit/FINDINGS.md",
+    "audit/remediation/A04_F016_CLOSURE.md"
   ],
   "impact": {
     "catalog": "not-applicable",
-    "behavior": "affected",
+    "behavior": "not-applicable",
     "state": "not-applicable",
-    "placement": "affected",
+    "placement": "not-applicable",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "not-applicable",
@@ -26,7 +26,7 @@
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "not-applicable",
+    "architecture": "affected",
     "security": "not-applicable",
     "tests": "affected"
   },
@@ -34,30 +34,18 @@
     "mode": "full-system",
     "affectedFiles": [
       "scripts/verify-change-contract.mjs",
-      "src/cornerPlacement.js",
-      "src/modulePlacement.js",
-      "src/systemChangeContract.js",
-      "src/wallReflow.js"
+      "src/systemChangeContract.js"
     ],
     "affectedTests": [
-      "e2e/f011-module-behavior.spec.mjs",
-      "test/cornerPlacement.test.js",
-      "test/modulePlacement.test.js",
-      "test/rightWallOrientation.test.js",
       "test/systemChangeGate.test.js",
-      "test/systemChangeGateLocalDiff.test.js",
-      "test/wallReflow.test.js"
+      "test/systemChangeGateLocalDiff.test.js"
     ],
     "affectedDocs": [
-      "ARCHITECTURE_RULES.md",
-      "MODULE_BEHAVIOR_STANDARD.md",
-      "PROJECT_RULES.md",
       "audit/FINDINGS.md",
-      "audit/evidence/A02_CHANGE_GATE.md",
-      "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
-      "audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md"
+      "audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md",
+      "audit/remediation/A04_F016_CLOSURE.md"
     ],
     "relatedFindings": {
       "affected": [
@@ -68,30 +56,27 @@
         "F-015"
       ]
     },
-    "notes": "F-016 is a stale helper/test conflict, not a requested runtime behavior change. Active right-wall placement and reflow already use 270 degrees. This remediation changes the alternate corner helper so right-wall placements also use 270 degrees, keeps left-wall placement at 90 degrees, updates right-wall test fixtures, and adds a cross-path regression proving the helper and active reflow agree. Full-system discovery also identified the change-gate verifier/system contract and their tests/docs as review surfaces because they reference the guarded cornerPlacement path; those surfaces are acknowledged without semantic changes. No catalog, state, renderer, persistence, BOM, UI or composition semantics are intentionally changed."
+    "notes": "Bookkeeping-only closure after implementation PR #65 and post-merge ROG CI run 33993672871 both succeeded. No runtime, placement, behavior, UI, renderer, persistence, BOM, catalog or project-state semantics are changed by this closure commit. The audit ledger counts/status and closure evidence are updated to reflect already-verified repository state."
   },
   "tests": {
     "targeted": [
-      "test/cornerPlacement.test.js",
-      "test/rightWallOrientation.test.js"
+      "test/systemChangeGate.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": [
-        "e2e/f011-module-behavior.spec.mjs"
-      ],
-      "reason": "Placement/behavior domains are affected by the guarded helper change; the existing Chromium behavior flow is rerun to prove the active editor path remains unchanged while the stale helper is aligned."
+      "required": false,
+      "targeted": [],
+      "reason": "This change only records verified closure evidence and audit-ledger status; it does not alter browser-visible or runtime behavior."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "The active runtime already uses 270 degrees on the right wall. Risk is limited to accidentally changing left-wall orientation or creating a regression in the alternate corner helper."
+    "notes": "Risk is limited to audit bookkeeping drift; implementation behavior was already verified by PR and post-merge CI before this closure update."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted schema or project data changes."
+    "notes": "No runtime or persisted schema change."
   },
-  "rollback": "Revert the corner helper/test alignment if right-wall corner regression coverage or placement validation fails."
+  "rollback": "Revert the closure bookkeeping commit if the recorded CI/merge evidence or ledger counts are found to be incorrect."
 }
