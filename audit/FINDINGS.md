@@ -8,13 +8,13 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 ## Summary
 
 - Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **33**
-- Closed findings: **13**
+- Open findings: **32**
+- Closed findings: **14**
 - Open P0: **0**
 - Open P1: **15**
-- Open P2: **18**
+- Open P2: **17**
 - Open P3: **0**
-- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-014 next**
+- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open**
 
 ## Findings
 
@@ -35,7 +35,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-013 | P2 | Exact catalog identity ambiguous for normal vs vine separators when `catalogKey` absent | **CLOSED** — `audit/remediation/A04_F013_CLOSURE.md` |
 | F-014 | P1 | 18 active module contracts require final BOM classification | OPEN / DECISION_REQUIRED |
 | F-015 | P1 | `allowSideInsert:false` declared but not enforced by context/runtime insertion | OPEN |
-| F-016 | P2 | Right-wall corner orientation conflict: 90° helper vs 270° active placement/reflow | OPEN |
+| F-016 | P2 | Right-wall corner orientation conflict: 90° helper vs 270° active placement/reflow | **CLOSED** — `audit/remediation/A04_F016_CLOSURE.md` |
 | F-017 | P2 | Renderer directly mutates persistent editable state | OPEN |
 | F-018 | P2 | Structural strip/panel count duplicated between catalog and state factories | OPEN |
 | F-019 | P1 | Catalog/runtime dimensions duplicated/hard-coded in state factories | OPEN |
