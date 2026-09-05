@@ -188,6 +188,7 @@
       "audit/remediation/A01_F003_CLOSURE.md",
       "audit/remediation/A02_CLOSURE.md",
       "audit/remediation/A03_CLOSURE.md",
+      "audit/remediation/A03_F010_CLOSURE.md",
       "audit/remediation/A03_F011_CLOSURE.md",
       "audit/remediation/A04_F013_CLOSURE.md"
     ],
@@ -203,6 +204,7 @@
         "F-011",
         "F-013",
         "F-015",
+        "F-017",
         "F-018",
         "F-019",
         "F-022",
