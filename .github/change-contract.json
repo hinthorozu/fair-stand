@@ -17,18 +17,18 @@
     "ARCHITECTURE_RULES.md"
   ],
   "impact": {
-    "catalog": "not-applicable",
+    "catalog": "affected",
     "behavior": "affected",
     "state": "affected",
     "placement": "affected",
     "renderer": "affected",
-    "persistence": "not-applicable",
+    "persistence": "affected",
     "bom": "not-applicable",
     "ui": "affected",
-    "composition": "not-applicable",
-    "assets": "not-applicable",
-    "storage": "not-applicable",
-    "importExport": "not-applicable",
+    "composition": "affected",
+    "assets": "affected",
+    "storage": "affected",
+    "importExport": "affected",
     "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "affected",
@@ -186,7 +186,7 @@
         "F-045"
       ]
     },
-    "notes": "F-011 centralizes policy selection only; geometric algorithms remain in the placement/core layer. Existing product behavior is preserved, including the pre-F-011 kettle declaration collision:none and its existing placement collision semantics. The scene3d wall-overlay support list is replaced by the existing supportsWallOverlayMount behavior capability without changing support geometry. F-015 side-insert enforcement and F-016 right-wall orientation remain independently open and are not closed by this change. F-014 was reviewed because the sweep found module-contract references, but no BOM classification is changed. F-033 and F-045 were reviewed because renderer/performance and historical rewrite-script references were discovered; no asset payload or historical script behavior is changed. All full-system discovery surfaces are explicitly reviewed here."
+    "notes": "F-011 centralizes policy selection only; geometric algorithms remain in the placement/core layer. Existing product behavior is preserved, including the pre-F-011 kettle declaration collision:none and its existing placement collision semantics. The scene3d wall-overlay support list is replaced by the existing supportsWallOverlayMount behavior capability without changing support geometry. The main.js top-fixture duplication selector now routes through isTopPlacementModule without changing the existing 20 cm offset, z=350, clamp, or wall-axis geometry. F-015 side-insert enforcement and F-016 right-wall orientation remain independently open and are not closed by this change. F-014 was reviewed because the sweep found module-contract references, but no BOM classification is changed. F-033 and F-045 were reviewed because renderer/performance and historical rewrite-script references were discovered; no asset payload or historical script behavior is changed. All full-system discovery surfaces are explicitly reviewed here."
   },
   "tests": {
     "targeted": [
