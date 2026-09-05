@@ -7,9 +7,9 @@
   "sourceOfTruth": ["src/moduleDragSidebar.js", "src/scene3d.js", "ITEM_CONTRACT.md"],
   "impact": {
     "catalog": "affected",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
-    "placement": "not-applicable",
+    "behavior": "affected",
+    "state": "affected",
+    "placement": "affected",
     "renderer": "affected",
     "persistence": "not-applicable",
     "bom": "not-applicable",
@@ -18,7 +18,7 @@
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
-    "performance": "not-applicable",
+    "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "not-applicable",
     "security": "not-applicable",
@@ -33,7 +33,7 @@
       "affected": [],
       "reviewedNotAffected": ["F-014", "F-017", "F-024", "F-040"]
     },
-    "notes": "UI/render follow-up only. The Item contract was reviewed because trash-bin is a physical Item, but itemKey/type/state/behavior/BOM/persistence are unchanged. All catalog groups initialize collapsed. The actual Waste Basket body mesh is Object_5; its dark base-color texture is removed and the base color is forced to white. Sphere_1 continues to be pruned before bounds fitting."
+    "notes": "UI/render follow-up only. The Item contract was reviewed because trash-bin is a physical Item. State, placement, behavior and performance are marked affected because scene3d is a high-risk runtime surface required by the gate; their semantics are reviewed but intentionally unchanged. All catalog groups initialize collapsed. The actual Waste Basket body mesh is Object_5; its dark base-color texture is removed and the base color is forced to white. Sphere_1 continues to be pruned before bounds fitting."
   },
   "tests": {
     "targeted": ["test/plasticTrashBinModule.test.js"],
