@@ -1,3 +1,4 @@
+import { MODULE_CATALOG } from './catalog.js';
 import { createModulePlacement } from './modulePlacement.js';
 
 export const AUTO_DEPOT_SIZES = Object.freeze({
@@ -7,14 +8,23 @@ export const AUTO_DEPOT_SIZES = Object.freeze({
   '200x200': Object.freeze({ widthCm: 200, depthCm: 200, label: '2 × 2 m' }),
 });
 
+const PLASTIC_TRASH_BIN_CATALOG_KEY = 'DEPOT_PLASTIC_TRASH_BIN';
+const PLASTIC_TRASH_BIN_DESCRIPTOR = MODULE_CATALOG[PLASTIC_TRASH_BIN_CATALOG_KEY];
+
 function wall(widthCm, xCm, yCm, rotationZDeg = 0) {
   return { kind: 'wall', widthCm, placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }) };
 }
 function door(xCm, yCm, rotationZDeg = 0) {
   return { kind: 'door', widthCm: 100, placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }) };
 }
-function fixture(kind, widthCm, depthCm, xCm, yCm, rotationZDeg = 0) {
-  return { kind, widthCm, depthCm, placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }) };
+function fixture(kind, widthCm, depthCm, xCm, yCm, rotationZDeg = 0, descriptor = {}) {
+  return {
+    kind,
+    widthCm,
+    depthCm,
+    ...descriptor,
+    placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }),
+  };
 }
 
 function addFront(specs, xCm, yCm, widthCm, standType) {
@@ -69,18 +79,25 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
     const rackDepth = 43;
     const kettleWidth = 24;
     const kettleDepth = 19;
+    const trashBinWidth = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.widthCm);
+    const trashBinDepth = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.depthCm);
+    const trashBinHeight = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.heightCm);
     const gapCm = 6;
 
-    // Buzdolabı + askılık grubunu depo tabanında ortala.
-    const groupWidth = fridgeWidth + gapCm + rackWidth;
-    const groupDepth = Math.max(fridgeDepth, rackDepth);
-    const groupX = xCm + (size.widthCm - groupWidth) / 2;
-    const groupY = yCm + (size.depthCm - groupDepth) / 2;
+    // Buzdolabı + askılık üst sırada, çöp kutusu alt sırada kalır.
+    // 100x100 dahil tüm desteklenen depo ölçülerinde gerçek footprint'ler üst üste binmez.
+    const upperRowWidth = fridgeWidth + gapCm + rackWidth;
+    const upperRowDepth = Math.max(fridgeDepth, rackDepth);
+    const packedDepth = upperRowDepth + gapCm + trashBinDepth;
+    const upperRowX = xCm + (size.widthCm - upperRowWidth) / 2;
+    const upperRowY = yCm + (size.depthCm - packedDepth) / 2;
 
-    const fridgeX = groupX;
-    const fridgeY = groupY;
-    const rackX = groupX + fridgeWidth + gapCm;
-    const rackY = groupY;
+    const fridgeX = upperRowX;
+    const fridgeY = upperRowY;
+    const rackX = upperRowX + fridgeWidth + gapCm;
+    const rackY = upperRowY;
+    const trashBinX = xCm + (size.widthCm - trashBinWidth) / 2;
+    const trashBinY = upperRowY + upperRowDepth + gapCm;
 
     // Kettle buzdolabının üstünde render edilir; plan düzleminde buzdolabının tam merkezine oturt.
     const kettleX = fridgeX + (fridgeWidth - kettleWidth) / 2;
@@ -89,6 +106,20 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
     specs.push(fixture('mini-fridge', fridgeWidth, fridgeDepth, fridgeX, fridgeY));
     specs.push(fixture('kettle', kettleWidth, kettleDepth, kettleX, kettleY));
     specs.push(fixture('coat-rack', rackWidth, rackDepth, rackX, rackY));
+    specs.push(fixture(
+      PLASTIC_TRASH_BIN_DESCRIPTOR.type,
+      trashBinWidth,
+      trashBinDepth,
+      trashBinX,
+      trashBinY,
+      0,
+      {
+        catalogKey: PLASTIC_TRASH_BIN_CATALOG_KEY,
+        heightCm: trashBinHeight,
+        modelFile: PLASTIC_TRASH_BIN_DESCRIPTOR.modelFile,
+        preserveModelScale: Boolean(PLASTIC_TRASH_BIN_DESCRIPTOR.preserveModelScale),
+      },
+    ));
   }
 
   return { ok: true, sizeKey, widthCm: size.widthCm, depthCm: size.depthCm, originXCm: xCm, originYCm: yCm, specs };
