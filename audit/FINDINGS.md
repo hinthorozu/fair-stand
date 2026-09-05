@@ -8,13 +8,13 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 ## Summary
 
 - Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **35**
-- Closed findings: **11**
+- Open findings: **34**
+- Closed findings: **12**
 - Open P0: **0**
 - Open P1: **15**
-- Open P2: **20**
+- Open P2: **19**
 - Open P3: **0**
-- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 in progress — F-010 and F-011 closed / post-merge verified; F-012 next**
+- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 next — F-013**
 
 ## Findings
 
@@ -31,7 +31,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-009 | P2 | Local `contract:verify` can skip diff enforcement outside CI/env input | **CLOSED** — `audit/remediation/A02_F009_CLOSURE.md` |
 | F-010 | P1 | `main.js` contains parallel/hidden runtime module-state construction registry | **CLOSED** — `audit/remediation/A03_F010_CLOSURE.md` |
 | F-011 | P1 | Module-specific placement/interaction policy fragmented outside behavior contract | **CLOSED** — `audit/remediation/A03_F011_CLOSURE.md` |
-| F-012 | P2 | Stand scene-surround rule duplicated between setup and renderer | OPEN |
+| F-012 | P2 | Stand scene-surround rule duplicated between setup and renderer | **CLOSED** — `audit/remediation/A03_F012_CLOSURE.md` |
 | F-013 | P2 | Exact catalog identity ambiguous for normal vs vine separators when `catalogKey` absent | OPEN |
 | F-014 | P1 | 17 active module contracts require final BOM classification | OPEN / DECISION_REQUIRED |
 | F-015 | P1 | `allowSideInsert:false` declared but not enforced by context/runtime insertion | OPEN |
