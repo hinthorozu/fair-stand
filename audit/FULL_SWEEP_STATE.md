@@ -74,7 +74,7 @@ Section revalidation: `audit/remediation/A01_CLOSURE.md`.
 
 **CLOSED / AUDITED_OK / POST-MERGE VERIFIED.**
 
-- F-005 — all 51 current source files explicitly mapped to ownership-derived impact domains.
+- F-005 — every current source file is explicitly mapped to ownership-derived impact domains; the regression remains responsible for guarding future additions.
 - F-006 — canonical governance/developer-entrypoint Markdown guarded with architecture impact.
 - F-007 — `test/**` and `tests/**` guarded with tests impact.
 - F-008 — all changes require `tests: affected` and a non-empty targeted regression list.
