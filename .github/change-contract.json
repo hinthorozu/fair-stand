@@ -1,29 +1,29 @@
 {
   "schemaVersion": 2,
-  "id": "f023-atomic-project-delete",
-  "kind": "bugfix",
-  "summary": "Delete a project record and all of its image assets in one IndexedDB transaction so whole-project deletion is all-or-nothing.",
+  "id": "f023-closure-bookkeeping",
+  "kind": "architecture",
+  "summary": "Record post-merge verification evidence and close F-023 in the canonical audit ledger after the implementation PR and ROG CI both passed.",
   "owners": [
-    "src/projectStore.js"
+    "audit/FINDINGS.md",
+    "audit/remediation/A08_F023_CLOSURE.md"
   ],
   "sourceOfTruth": [
-    "src/projectStore.js",
-    "src/main.js",
-    "PROJECT_RULES.md"
+    "audit/FINDINGS.md",
+    "audit/remediation/A08_F023_CLOSURE.md"
   ],
   "impact": {
-    "catalog": "affected",
-    "behavior": "affected",
-    "state": "affected",
-    "placement": "affected",
-    "renderer": "affected",
-    "persistence": "affected",
+    "catalog": "not-applicable",
+    "behavior": "not-applicable",
+    "state": "not-applicable",
+    "placement": "not-applicable",
+    "renderer": "not-applicable",
+    "persistence": "not-applicable",
     "bom": "not-applicable",
-    "ui": "affected",
-    "composition": "affected",
-    "assets": "affected",
-    "storage": "affected",
-    "importExport": "affected",
+    "ui": "not-applicable",
+    "composition": "not-applicable",
+    "assets": "not-applicable",
+    "storage": "not-applicable",
+    "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
     "architecture": "affected",
@@ -33,165 +33,56 @@
   "impactAnalysis": {
     "mode": "full-system",
     "affectedFiles": [
-      "index.html",
-      "scripts/add-tv-sizes.py",
-      "scripts/add-video-wall-2x2.py",
-      "scripts/patch-video-wall-2x2.cjs",
       "scripts/verify-change-contract.mjs",
-      "src/assetStore.js",
-      "src/automaticWall.js",
-      "src/main.js",
-      "src/moduleMove.js",
-      "src/projectStore.js",
-      "src/scene3d.js",
-      "src/systemChangeContract.js",
-      "src/viewCube.js",
-      "src/wallReflow.js"
+      "src/systemChangeContract.js"
     ],
     "affectedTests": [
-      "e2e/f023-atomic-project-delete.spec.mjs",
-      "test/automaticWall.test.js",
-      "test/autosaveMainIntegration.test.js",
-      "test/baseRenderStyle.test.js",
-      "test/baseWallDepthAlignment.test.js",
-      "test/bundleLoadingContract.test.js",
-      "test/catalogSingleSource.test.js",
-      "test/coatRackModule.test.js",
-      "test/colorEditorControllerMainIntegration.test.js",
-      "test/colorEditorMainIntegration.test.js",
-      "test/coverModeExclusivity.test.js",
-      "test/ctrlMultiSelect.test.js",
-      "test/depotBackWallRecipe.test.js",
-      "test/eamesTableChairSetContract.test.js",
-      "test/fabricModuleOwnership.test.js",
-      "test/globalSilhouetteGhost.test.js",
-      "test/helpGuide.test.js",
-      "test/historicalDocumentationStatus.test.js",
-      "test/horizontalPanelRails.test.js",
-      "test/illuminatedFoamInteraction.test.js",
-      "test/illuminatedFoamModule.test.js",
-      "test/imageAssetDeletion.test.js",
-      "test/imageAssetLiveDelete.test.js",
-      "test/indoorPlants.test.js",
-      "test/lCounter100Contract.test.js",
-      "test/lCounter150Contract.test.js",
-      "test/lCounter200Contract.test.js",
-      "test/lCounterSideGeometry.test.js",
-      "test/lightboxFabric.test.js",
-      "test/lightboxFabricAppearance.test.js",
-      "test/lightboxFabricLighting.test.js",
-      "test/lightboxFabricPerformance.test.js",
-      "test/miniFridgeTopLabel.test.js",
-      "test/moduleBehaviorPolicy.test.js",
-      "test/moduleMove.test.js",
-      "test/moduleRotationSingleSourceIntegration.test.js",
-      "test/moduleSelectionState.test.js",
-      "test/moduleSelectionVisual.test.js",
-      "test/moduleStateConstructionRegistry.test.js",
-      "test/panelMultiSelectRule.test.js",
-      "test/plasticTrashBinTopLabel.test.js",
-      "test/projectAtomicDeletion.test.js",
-      "test/projectDropdownSwitchIntegration.test.js",
-      "test/projectImportFlow.test.js",
-      "test/projectUiMainIntegration.test.js",
-      "test/raisedPlatform.test.js",
-      "test/removedIndoorPlant2.test.js",
-      "test/rightWallOrientation.test.js",
-      "test/sceneSurroundSingleSource.test.js",
-      "test/selectedModuleRotationCursor.test.js",
-      "test/selectionFeedbackMainIntegration.test.js",
-      "test/shelfLighting.test.js",
-      "test/showcaseAppearance.test.js",
-      "test/showcaseDepthDirection.test.js",
-      "test/sidebarControllerMainIntegration.test.js",
-      "test/stageFeedbackMainIntegration.test.js",
       "test/systemChangeGate.test.js",
-      "test/systemChangeGateLocalDiff.test.js",
-      "test/systemImpactAnalysis.test.js",
-      "test/tv42Module.test.js",
-      "test/uiFeedbackMainIntegration.test.js",
-      "test/viewKeyboardMainIntegration.test.js",
-      "test/wallDragStickiness.test.js",
-      "test/wallReflow.test.js"
+      "test/systemChangeGateLocalDiff.test.js"
     ],
     "affectedDocs": [
-      "ARCHITECTURE_RULES.md",
-      "FRESH_REPOSITORY_REVIEW.md",
-      "PROJECT_RULES.md",
-      "RELEASE_HARDENING_ROADMAP.md",
-      "REPOSITORY_CLEANUP_PROGRESS.md",
-      "SYSTEM_AUDIT_CHECKLIST.md",
-      "SYSTEM_CHANGE_GATE.md",
-      "SYSTEM_DEVELOPMENT_CONTRACT.md",
-      "SYSTEM_IMPACT_SWEEP.md",
       "audit/FINDINGS.md",
-      "audit/evidence/A02_CHANGE_GATE.md",
-      "audit/evidence/A03_ARCHITECTURE.md",
-      "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
-      "audit/evidence/A05_MODULE_BEHAVIOR.md",
-      "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
       "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
-      "audit/evidence/A11_FEATURE_COMPOSITION.md",
       "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
-      "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
-      "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
       "audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md",
-      "audit/remediation/A02_F005_CLOSURE.md",
-      "audit/remediation/A03_CLOSURE.md",
-      "audit/remediation/A03_F010_CLOSURE.md",
-      "audit/remediation/A03_F011_CLOSURE.md",
-      "audit/remediation/A04_F013_CLOSURE.md",
-      "docs/AUTOSAVE_INTEGRATION_NOTES.md"
+      "audit/remediation/A08_F023_CLOSURE.md"
     ],
     "relatedFindings": {
       "affected": [
         "F-023"
       ],
       "reviewedNotAffected": [
-        "F-005",
-        "F-010",
-        "F-011",
-        "F-012",
-        "F-013",
-        "F-014",
-        "F-015",
-        "F-017",
         "F-020",
         "F-021",
         "F-022",
-        "F-029",
         "F-032",
         "F-035",
         "F-036",
-        "F-037",
-        "F-045"
+        "F-037"
       ]
     },
-    "notes": "F-023 is specifically the whole-project deletion atomicity gap. The implementation adds one project-store operation that opens a single readwrite transaction spanning both the projects and image-assets object stores, deletes matching project assets and the project record inside that transaction, and updates the main deletion and failed-import cleanup paths to call that canonical operation. Existing DB/schema constants remain unchanged; F-032 storage ownership duplication is reviewed but intentionally not remediated here. Full-system discovery surfaces that reference main.js/projectStore.js and their architecture, module, persistence, renderer, placement and historical documentation paths are explicitly acknowledged without semantic changes. No Item/BOM, placement, renderer, catalog, project schema, or import archive format semantics are intentionally changed."
+    "notes": "Bookkeeping-only closure after implementation PR #73 and post-merge ROG CI run 33997841213 both succeeded. No runtime, persistence, storage, import/export, UI, project-state, Item/BOM, placement, renderer, catalog, IndexedDB schema, or project schema semantics are changed by this closure commit. The audit ledger counts/status and closure evidence are updated to reflect already-verified repository state. A08 remains a GAP section because F-021 and F-022 remain open."
   },
   "tests": {
     "targeted": [
-      "test/projectAtomicDeletion.test.js",
-      "test/projectImportFlow.test.js"
+      "test/systemChangeGate.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": [
-        "e2e/f023-atomic-project-delete.spec.mjs"
-      ],
-      "reason": "Project deletion is browser-visible persistence/storage behavior. Chromium must prove that deleting a project removes both its project record and its image assets while leaving another project's data intact."
+      "required": false,
+      "targeted": [],
+      "reason": "This change only records verified closure evidence and audit-ledger status; it does not alter browser-visible or runtime behavior."
     }
   },
   "risk": {
-    "level": "medium",
-    "notes": "The deletion boundary moves from two independent transactions to one cross-store transaction. Main risks are deleting assets belonging to another project, failing to delete all target assets, or changing failed-import cleanup behavior. Targeted storage/integration and browser tests cover those boundaries."
+    "level": "low",
+    "notes": "Risk is limited to audit bookkeeping drift; implementation behavior was already verified by PR and post-merge CI before this closure update."
   },
   "migration": {
     "required": false,
-    "notes": "No IndexedDB version, object-store schema, project schema, or persisted record shape changes."
+    "notes": "No runtime, IndexedDB, or persisted project schema change."
   },
-  "rollback": "Revert the atomic project+asset deletion API, restore the previous two-step main deletion/cleanup calls, and remove the targeted regressions."
+  "rollback": "Revert the closure bookkeeping commit if the recorded CI/merge evidence or ledger counts are found to be incorrect."
 }
