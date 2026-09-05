@@ -1,0 +1,35 @@
+name: Inspect trash GLB
+
+on:
+  push:
+    branches:
+      - diagnostic/trash-glb-shape
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect GLB JSON
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const p = 'public/models/plastic_trash_bin.glb';
+          const b = fs.readFileSync(p);
+          const magic = b.toString('utf8',0,4);
+          const version = b.readUInt32LE(4);
+          const length = b.readUInt32LE(8);
+          const jsonLength = b.readUInt32LE(12);
+          const jsonType = b.readUInt32LE(16);
+          const jsonText = b.toString('utf8',20,20+jsonLength).replace(/\u0000+$/,'').trim();
+          const g = JSON.parse(jsonText);
+          console.log('GLB', {magic,version,length,actual:b.length,jsonLength,jsonType:'0x'+jsonType.toString(16)});
+          console.log('asset', g.asset);
+          console.log('scene', g.scene, g.scenes?.[g.scene ?? 0]);
+          console.log('nodes', (g.nodes||[]).map((n,i)=>({i,name:n.name,mesh:n.mesh,children:n.children,translation:n.translation,rotation:n.rotation,scale:n.scale,matrix:n.matrix})));
+          console.log('meshes', (g.meshes||[]).map((m,i)=>({i,name:m.name,primitives:m.primitives?.map((p,j)=>({j,mode:p.mode,material:p.material,positionAccessor:p.attributes?.POSITION,indices:p.indices}))})));
+          console.log('materials', (g.materials||[]).map((m,i)=>({i,name:m.name,baseColorFactor:m.pbrMetallicRoughness?.baseColorFactor,baseColorTexture:m.pbrMetallicRoughness?.baseColorTexture,metallicFactor:m.pbrMetallicRoughness?.metallicFactor,roughnessFactor:m.pbrMetallicRoughness?.roughnessFactor,alphaMode:m.alphaMode,doubleSided:m.doubleSided})));
+          console.log('positionAccessors', (g.accessors||[]).map((a,i)=>a.type==='VEC3'&&a.min&&a.max?{i,min:a.min,max:a.max,count:a.count}:null).filter(Boolean));
+          console.log('images', g.images);
+          console.log('textures', g.textures);
+          NODE
