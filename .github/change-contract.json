@@ -36,27 +36,41 @@
   "impactAnalysis": {
     "mode": "full-system",
     "affectedFiles": [
-      "src/systemChangeContract.js"
+      "src/systemChangeContract.js",
+      "scripts/verify-change-contract.mjs"
     ],
     "affectedTests": [
       "test/developerEntrypointDocs.test.js",
-      "test/systemChangeGate.test.js"
+      "test/systemChangeGate.test.js",
+      "test/systemChangeGateLocalDiff.test.js"
     ],
     "affectedDocs": [
       "AGENTS.md",
       "ITEM_CONTRACT.md",
       "ARCHITECTURE_RULES.md",
       "PROJECT_RULES.md",
-      "SYSTEM_DEVELOPMENT_CONTRACT.md"
+      "README.md",
+      "SYSTEM_AUDIT_CHECKLIST.md",
+      "SYSTEM_CHANGE_GATE.md",
+      "SYSTEM_DEVELOPMENT_CONTRACT.md",
+      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
+      "audit/evidence/A02_CHANGE_GATE.md",
+      "audit/evidence/A03_ARCHITECTURE.md",
+      "audit/remediation/A02_CLOSURE.md",
+      "audit/remediation/A02_F005_CLOSURE.md",
+      "audit/remediation/A02_F006_CLOSURE.md"
     ],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": [
+        "F-004",
+        "F-005",
+        "F-006",
         "F-014",
         "F-015"
       ]
     },
-    "notes": "Governance-only Item root contract. No catalog descriptor, runtime behavior, state schema, placement, renderer, persistence, BOM calculation or pricing implementation changes in this PR. F-015 remains open because side-insert runtime enforcement is intentionally not changed here; this PR only establishes the canonical future Item/behavior ownership rule. F-014 BOM classification is likewise not resolved by this governance change."
+    "notes": "Governance-only Item root contract. Full-system discovery surfaces for the change gate, developer entrypoint, architecture docs, historical audit evidence and candidate findings were reviewed and acknowledged. No catalog descriptor, runtime behavior, state schema, placement, renderer, persistence, BOM calculation or pricing implementation changes in this PR. F-015 remains open because side-insert runtime enforcement is intentionally not changed here; this PR only establishes the canonical future Item/behavior ownership rule. F-014 BOM classification is likewise not resolved by this governance change."
   },
   "tests": {
     "targeted": [
