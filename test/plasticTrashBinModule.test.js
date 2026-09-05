@@ -71,8 +71,7 @@ test('trash bin state and behavior preserve fridge-style movement without overla
   const state = createModuleStateFromDescriptor(descriptor, { catalogKey: KEY });
   assert.ok(state);
   assert.equal(state.catalogKey, KEY);
-  // Existing fixed-model renderer is preserved while catalog identity is no longer a plant type.
-  assert.equal(state.type, 'indoor-plant-1');
+  assert.equal(state.type, 'plastic-trash-bin');
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [40, 40, 60]);
   assert.equal(state.modelFile, MODEL_FILE);
   assert.equal(state.preserveModelScale, false);
