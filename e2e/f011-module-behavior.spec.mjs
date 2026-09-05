@@ -74,7 +74,17 @@ test('F-011 free-placement behavior survives the real catalog drag flow in Chrom
   const fridge = project.modules.find((moduleState) => moduleState.type === 'mini-fridge');
   expect(fridge).toBeTruthy();
   expect(fridge.placement.wallId).toBe('free');
-  expect(Number(fridge.placement.xCm) % 10).toBe(0);
-  expect(Number(fridge.placement.yCm) % 10).toBe(0);
+
+  const widthCm = Number(fridge.widthCm);
+  const depthCm = Number(fridge.depthCm);
+  const xMinCm = Number(fridge.placement.xCm);
+  const xMaxCm = xMinCm + widthCm;
+  const yCenterCm = Number(fridge.placement.yCm);
+  const yMinCm = yCenterCm - depthCm / 2;
+  const yMaxCm = yCenterCm + depthCm / 2;
+
+  for (const edgeCm of [xMinCm, xMaxCm, yMinCm, yMaxCm]) {
+    expect(edgeCm % 10).toBe(0);
+  }
   expect(pageErrors).toEqual([]);
 });
