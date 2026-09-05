@@ -90,3 +90,38 @@ export async function deleteProject(projectId) {
   });
   db.close();
 }
+
+export async function deleteProjectWithAssets(projectId) {
+  if (!projectId) return false;
+
+  const db = await openDb();
+  try {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(
+        [PROJECT_STORE_NAME, ASSET_STORE_NAME],
+        'readwrite',
+      );
+      const projectStore = tx.objectStore(PROJECT_STORE_NAME);
+      const assetStore = tx.objectStore(ASSET_STORE_NAME);
+      const assetIndex = assetStore.index(ASSET_PROJECT_INDEX);
+
+      projectStore.delete(projectId);
+
+      const request = assetIndex.openCursor(projectId);
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) return;
+        cursor.delete();
+        cursor.continue();
+      };
+
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error ?? new Error('Proje silme işlemi iptal edildi.'));
+    });
+  } finally {
+    db.close();
+  }
+
+  return true;
+}
