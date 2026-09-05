@@ -1,27 +1,35 @@
 {
   "schemaVersion": 2,
-  "id": "add-plastic-trash-bin-glb-asset",
-  "kind": "architecture",
-  "summary": "Add the plastic_trash_bin.glb model to the canonical public model inventory as a standalone asset, without registering a new runtime/catalog module yet.",
+  "id": "integrate-plastic-trash-bin-module",
+  "kind": "product-feature",
+  "summary": "Register the existing plastic_trash_bin.glb asset as a 40x40x60 cm catalog module, give it mini-fridge-style 10 cm free movement without overlap exceptions, expose it in catalog drag/Add flows, and include it in automatic depot contents without floor-fixture overlap.",
   "owners": [
-    "public/models/plastic_trash_bin.glb"
+    "src/catalog.js",
+    "src/moduleBehavior.js",
+    "src/moduleContracts.js",
+    "src/autoDepot.js",
+    "src/featureContracts.js"
   ],
   "sourceOfTruth": [
-    "public/models/plastic_trash_bin.glb"
+    "src/catalog.js",
+    "src/moduleBehavior.js",
+    "src/moduleContracts.js",
+    "src/autoDepot.js",
+    "src/featureContracts.js"
   ],
   "impact": {
-    "catalog": "not-applicable",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
-    "placement": "not-applicable",
-    "renderer": "not-applicable",
-    "persistence": "not-applicable",
-    "bom": "not-applicable",
-    "ui": "not-applicable",
-    "composition": "not-applicable",
+    "catalog": "affected",
+    "behavior": "affected",
+    "state": "affected",
+    "placement": "affected",
+    "renderer": "affected",
+    "persistence": "affected",
+    "bom": "affected",
+    "ui": "affected",
+    "composition": "affected",
     "assets": "affected",
     "storage": "not-applicable",
-    "importExport": "not-applicable",
+    "importExport": "affected",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
     "architecture": "affected",
@@ -30,45 +38,84 @@
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [],
-    "affectedTests": [
-      "test/plasticTrashBinAsset.test.js",
-      "e2e/plastic-trash-bin-asset.spec.mjs"
+    "affectedFiles": [
+      "index.html",
+      "src/autoDepot.js",
+      "src/catalog.js",
+      "src/designState.js",
+      "src/featureContracts.js",
+      "src/main.js",
+      "src/moduleBehavior.js",
+      "src/moduleContracts.js",
+      "src/moduleContextMenu.js",
+      "src/moduleDragSidebar.js",
+      "src/modulePlacement.js",
+      "src/scene3d.js"
     ],
-    "affectedDocs": [],
+    "affectedTests": [
+      "e2e/f010-module-construction.spec.mjs",
+      "e2e/f011-module-behavior.spec.mjs",
+      "e2e/mini-fridge-dimensions.spec.mjs",
+      "e2e/plastic-trash-bin-module.spec.mjs",
+      "test/catalogSingleSource.test.js",
+      "test/indoorPlants.test.js",
+      "test/moduleBehaviorContract.test.js",
+      "test/moduleStateConstructionRegistry.test.js",
+      "test/plasticTrashBinAsset.test.js",
+      "test/plasticTrashBinModule.test.js",
+      "test/systemDevelopmentContract.test.js",
+      "test/systemModuleCatalogDoc.test.js",
+      "tests/autoDepot.test.js",
+      "tests/moduleBehavior.test.js"
+    ],
+    "affectedDocs": [
+      "SYSTEM_MODULE_CATALOG.md",
+      "audit/FINDINGS.md",
+      "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md"
+    ],
     "relatedFindings": {
       "affected": [
+        "F-014",
         "F-033",
         "F-034"
       ],
       "reviewedNotAffected": [
-        "F-014",
-        "F-024"
+        "F-010",
+        "F-011",
+        "F-013",
+        "F-015",
+        "F-019",
+        "F-022",
+        "F-024",
+        "F-029",
+        "F-030",
+        "F-036",
+        "F-040"
       ]
     },
-    "notes": "The GLB is added to public/models but is intentionally not referenced by catalog, state factories, renderer, placement, or BOM yet. Existing open asset hygiene/provenance findings F-033 and F-034 remain open and are explicitly reviewed. F-014 is not changed because no runtime module is being admitted by this PR."
+    "notes": "The user explicitly set the trash-bin nominal product dimensions to 40x40x60 cm. The previously measured raw GLB transform scale is not used as product dimensions; the existing model renderer normalizes model geometry to descriptor bounds. Exact product identity is DEPOT_PLASTIC_TRASH_BIN and modelFile is plastic_trash_bin.glb. The new item remains decision-required under F-014; no BOM classification is invented. Automatic depot packing is derived from the catalog dimensions and keeps the trash bin, mini fridge and coat rack footprints disjoint; kettle retains its existing supported fridge-top relationship. Existing generic catalog Add behavior is preserved rather than inventing a new default free-placement position in this feature."
   },
   "tests": {
     "targeted": [
-      "test/plasticTrashBinAsset.test.js"
+      "test/plasticTrashBinModule.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/plastic-trash-bin-asset.spec.mjs"
+        "e2e/plastic-trash-bin-module.spec.mjs"
       ],
-      "reason": "public/ asset changes are browser-impacting under the system contract; Chromium verifies the GLB is served and retains a valid binary glTF header."
+      "reason": "Catalog visibility, drag/drop, Add picker admission, model rendering/persistence, and automatic depot composition are browser-visible behavior and require Chromium coverage."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "The change adds one standalone binary asset and tests only; no runtime module, catalog entry, placement behavior, state schema, or BOM behavior changes."
+    "level": "medium",
+    "notes": "The change admits a new active catalog product and automatic-depot content. Primary risks are catalog identity drift, incorrect GLB normalization, free-placement behavior drift, or fixture overlap. Targeted unit and Chromium tests cover these paths while the full suite/build protect existing modules."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted data or runtime schema changes are introduced."
+    "notes": "No persisted schema version changes. New projects may persist DEPOT_PLASTIC_TRASH_BIN catalog identity and the existing project-state format already stores the required descriptor/state fields."
   },
-  "rollback": "Remove public/models/plastic_trash_bin.glb and its two asset-validation tests if the asset is invalid or should not ship."
+  "rollback": "Revert the trash-bin catalog/behavior/contract/auto-depot commits while leaving the already-merged plastic_trash_bin.glb asset in public/models if any product integration regression is observed."
 }
