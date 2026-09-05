@@ -1,28 +1,25 @@
 {
   "schemaVersion": 2,
-  "id": "f027-closure-bookkeeping",
+  "id": "f028-remove-illuminated-foam-on-feature-reset",
   "kind": "bugfix",
-  "summary": "Record verified post-merge evidence for F-027 and close the finding in the canonical audit ledger.",
+  "summary": "Make Tüm Özellikleri Kaldır delete illuminated-foam modules from the scene while resetting all remaining modules to their defaults with placement preserved.",
   "owners": [
-    "audit/FINDINGS.md",
-    "audit/remediation/A10_F027_CLOSURE.md"
+    "src/main.js"
   ],
   "sourceOfTruth": [
-    "audit/FINDINGS.md",
-    "audit/remediation/A10_F027_CLOSURE.md",
-    "audit/evidence/A10_UI_CONTROLS.md"
+    "src/main.js"
   ],
   "impact": {
     "catalog": "not-applicable",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
+    "behavior": "affected",
+    "state": "affected",
     "placement": "not-applicable",
-    "renderer": "not-applicable",
-    "persistence": "not-applicable",
+    "renderer": "affected",
+    "persistence": "affected",
     "bom": "not-applicable",
-    "ui": "not-applicable",
+    "ui": "affected",
     "composition": "not-applicable",
-    "assets": "not-applicable",
+    "assets": "affected",
     "storage": "not-applicable",
     "importExport": "not-applicable",
     "performance": "not-applicable",
@@ -33,49 +30,55 @@
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [],
+    "affectedFiles": [
+      "src/main.js"
+    ],
     "affectedTests": [
-      "test/f027SceneReset.test.js",
-      "e2e/f027-scene-reset.spec.mjs"
+      "e2e/f028-reset-features.spec.mjs",
+      "e2e/smoke.spec.mjs",
+      "test/f028FeatureReset.test.js",
+      "test/illuminatedFoamModule.test.js",
+      "test/systemImpactAnalysis.test.js"
     ],
     "affectedDocs": [
+      "RELEASE_HARDENING_ROADMAP.md",
       "audit/FINDINGS.md",
-      "audit/evidence/A10_UI_CONTROLS.md",
-      "audit/remediation/A10_F027_CLOSURE.md"
+      "audit/evidence/A10_UI_CONTROLS.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-027"
+        "F-028"
       ],
       "reviewedNotAffected": [
-        "F-025",
-        "F-026",
-        "F-028",
+        "F-010",
+        "F-027",
         "F-039",
         "F-040"
       ]
     },
-    "notes": "Closure bookkeeping only. Runtime remediation already merged through PR #77 and the post-merge ROG verify workflow completed successfully. This PR records that evidence and updates the canonical findings ledger without changing product behavior."
+    "notes": "F-028 is intentionally narrow. During the existing global feature-reset action, illuminated-foam modules are removed instead of recreated; every other module still passes through the canonical createCatalogModuleState path with preservePlacement=true. The image asset itself remains in the project asset library, so only the scene module/reference is removed. Unknown module types still preserve the existing fail-closed reset behavior. No catalog dimensions, placement rules, project schema, archive format or BOM policy changes are intended."
   },
   "tests": {
     "targeted": [
-      "test/f027SceneReset.test.js"
+      "test/f028FeatureReset.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "This closure PR changes audit bookkeeping only; browser-visible behavior was already covered by e2e/f027-scene-reset.spec.mjs on the implementation PR and verified again after merge."
+      "required": true,
+      "targeted": [
+        "e2e/f028-reset-features.spec.mjs"
+      ],
+      "reason": "The fix changes a browser-visible destructive reset action. Chromium verifies that illuminated foam is removed, the confirmation discloses that removal, and all other module type/width/placement values survive the reset and save path."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "Risk is limited to audit bookkeeping accuracy; no runtime files are changed by this closure PR."
+    "level": "medium",
+    "notes": "The action intentionally deletes illuminated-foam scene modules. Risk is limited to deleting the wrong module family or disturbing other module layout; targeted unit and browser regressions lock both boundaries."
   },
   "migration": {
     "required": false,
-    "notes": "No runtime, persisted project, IndexedDB, archive or schema change."
+    "notes": "No IndexedDB version, project schema, module schema or ZIP archive schema changes are involved."
   },
-  "rollback": "Revert the closure bookkeeping commit if the recorded F-027 verification evidence is found to be incorrect."
+  "rollback": "Restore the previous reset handler that maps every current module through createCatalogModuleState and remove the F-028 targeted regressions."
 }
