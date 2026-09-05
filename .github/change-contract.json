@@ -19,7 +19,7 @@
   "impact": {
     "catalog": "not-applicable",
     "behavior": "affected",
-    "state": "not-applicable",
+    "state": "affected",
     "placement": "affected",
     "renderer": "affected",
     "persistence": "not-applicable",
@@ -29,7 +29,7 @@
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
-    "performance": "not-applicable",
+    "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
