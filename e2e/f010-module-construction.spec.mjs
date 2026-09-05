@@ -71,16 +71,26 @@ test('F-010 catalog construction persists a module created through the real pick
     projectName: 'F010 Catalog Module',
   });
 
+  // F-027 changed the old clear-wall control into "Sahneyi Sıfırla". Create
+  // capacity for this construction test through the existing module-delete path
+  // instead of depending on the removed clear-all behavior.
+  const initialProject = await saveAndReadProject(page);
+  expect(initialProject).not.toBeNull();
+  expect(initialProject.modules.length).toBeGreaterThan(0);
+  const removedModule = initialProject.modules[0];
+  expect(removedModule.catalogKey).toBe(`wall_${removedModule.widthCm}`);
+
+  page.once('dialog', async (dialog) => dialog.accept());
+  await page.evaluate((moduleId) => {
+    window.dispatchEvent(new CustomEvent('fair-stand:delete-selected-module', {
+      detail: { moduleId },
+    }));
+  }, removedModule.id);
+
   const openCatalogButton = page.locator('#open-module-catalog');
   const modulePanel = page.locator('details', { has: openCatalogButton });
   await expect(modulePanel).toHaveCount(1);
   await modulePanel.locator(':scope > summary').click();
-
-  const clearWallButton = page.locator('#clear-wall');
-  await expect(clearWallButton).toBeVisible();
-  await expect(clearWallButton).toBeEnabled();
-  page.once('dialog', (dialog) => dialog.accept());
-  await clearWallButton.click();
 
   await expect(openCatalogButton).toBeVisible();
   await expect(openCatalogButton).toBeEnabled();
@@ -89,9 +99,9 @@ test('F-010 catalog construction persists a module created through the real pick
   const picker = page.locator('.module-picker-backdrop');
   await expect(picker).toBeVisible();
 
-  const wallCard = picker.locator('[data-module-key="wall_100"]');
-  await expect(wallCard).toBeVisible();
-  await wallCard.click();
+  const replacementCard = picker.locator(`[data-module-key="${removedModule.catalogKey}"]`);
+  await expect(replacementCard).toBeVisible();
+  await replacementCard.click();
 
   const addButton = picker.locator('.module-picker-add');
   await expect(addButton).toBeEnabled();
@@ -100,9 +110,14 @@ test('F-010 catalog construction persists a module created through the real pick
 
   const project = await saveAndReadProject(page);
   expect(project).not.toBeNull();
-  expect(project.modules).toHaveLength(1);
-  expect(project.modules[0].type).toBe('flat-panel');
-  expect(project.modules[0].widthCm).toBe(100);
-  expect(project.modules[0].catalogKey).toBe('wall_100');
+  expect(project.modules).toHaveLength(initialProject.modules.length);
+  expect(project.modules.some((moduleState) => moduleState.id === removedModule.id)).toBe(false);
+  const replacement = project.modules.find(
+    (moduleState) => moduleState.catalogKey === removedModule.catalogKey
+      && moduleState.id !== removedModule.id,
+  );
+  expect(replacement).toBeTruthy();
+  expect(replacement.type).toBe('flat-panel');
+  expect(replacement.widthCm).toBe(removedModule.widthCm);
   expect(pageErrors).toEqual([]);
 });

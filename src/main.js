@@ -953,12 +953,121 @@ function createAutomaticDepotStates(plan) {
   }).filter(Boolean);
 }
 
-createStageButton.addEventListener('click', async () => {
+function readSceneSetupFromControls() {
   const setup = readStandSetup();
-  if (!setup.ok) {
-    renderStageResult(setup.message, true);
+  if (!setup.ok) return { ok: false, message: setup.message };
+
+  const depotConfig = autoDepotEnabledInput?.checked ? {
+    enabled: true,
+    sizeKey: autoDepotSizeSelect?.value || '100x100',
+    includeContents: Boolean(autoDepotContentsInput?.checked),
+  } : { enabled: false, sizeKey: null, includeContents: false };
+
+  const depotPlan = depotConfig.enabled ? planAutomaticDepot({
+    standType: setup.standType,
+    standXCm: setup.xCm,
+    standYCm: setup.yCm,
+    sizeKey: depotConfig.sizeKey,
+    includeContents: depotConfig.includeContents,
+  }) : null;
+
+  if (depotPlan && !depotPlan.ok) {
+    return { ok: false, message: depotPlan.message };
+  }
+
+  return { ok: true, setup, depotConfig, depotPlan };
+}
+
+function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
+  currentModules = [];
+  moduleContextMenu.close();
+  moduleContextMenu.closePicker();
+
+  const stage = scene3d.createStage({
+    widthCm: setup.xCm,
+    depthCm: setup.yCm,
+    standType: setup.standType,
+    resetView: true,
+  });
+  if (!stage.ok) {
+    renderStageResult(stage.message, true);
+    return false;
+  }
+
+  currentStand = { ...setup, floorType: floorTypeSelect.value, depot: depotConfig };
+  scene3d.setFloorType(floorTypeSelect.value);
+  viewportEmpty.hidden = true;
+  viewportToolbar.hidden = false;
+  setStandEditingEnabled(true);
+
+  if (setup.standType === 'island') {
+    currentModules = [];
+  } else {
+    const automaticWall = composeAutomaticStandWall({
+      lengthCm: getAutomaticWallCapacityCm({
+        standType: setup.standType,
+        standXCm: setup.xCm,
+        standYCm: setup.yCm,
+      }),
+      standType: setup.standType,
+      standXCm: setup.xCm,
+      standYCm: setup.yCm,
+    });
+    if (!automaticWall.ok) {
+      renderStageResult(automaticWall.message, true);
+      return false;
+    }
+
+    currentModules = automaticWall.widths.map((widthCm, index) => {
+      const moduleState = createModuleStateFromDescriptor({ type: 'flat-panel', widthCm });
+      moduleState.placement = { ...automaticWall.placements[index] };
+      return moduleState;
+    });
+
+    if (depotPlan?.ok) {
+      const customBack = composeAutomaticBackWallWithDepot({
+        standXCm: setup.xCm,
+        depotOriginXCm: depotPlan.originXCm,
+        depotWidthCm: depotPlan.widthCm,
+      });
+      if (!customBack.ok) {
+        renderStageResult(customBack.message, true);
+        return false;
+      }
+
+      currentModules = currentModules.filter(
+        (moduleState) => moduleState.placement?.wallId !== 'back',
+      );
+      const backStates = customBack.modules.map((entry) => {
+        const moduleState = createModuleStateFromDescriptor({
+          type: 'flat-panel',
+          widthCm: entry.widthCm,
+        });
+        moduleState.placement = { ...entry.placement };
+        if (entry.depotBack) moduleState.autoDepotBack = true;
+        return moduleState;
+      });
+      currentModules.push(...backStates);
+    }
+  }
+
+  if (depotPlan?.ok) currentModules.push(...createAutomaticDepotStates(depotPlan));
+  rebuildWall({ resetView: true });
+
+  const label = STAND_TYPE_LABELS[setup.standType];
+  renderStageResult(
+    `${label} · ${setup.xCm} × ${setup.yCm} cm aktif alan · ${setup.sceneWidthM} × ${setup.sceneDepthM} m toplam sahne`,
+  );
+  return true;
+}
+
+createStageButton.addEventListener('click', async () => {
+  const sceneSetup = readSceneSetupFromControls();
+  if (!sceneSetup.ok) {
+    renderStageResult(sceneSetup.message, true);
     return;
   }
+  const { setup, depotConfig, depotPlan } = sceneSetup;
 
   if (currentStand || currentModules.length || autosaveController.isEnabled()) {
     const currentProjectName = projectNameInput.value.trim() || 'Adsız Proje';
@@ -973,17 +1082,6 @@ createStageButton.addEventListener('click', async () => {
     if (!confirmed) return;
   }
 
-  const depotConfig = autoDepotEnabledInput?.checked ? {
-    enabled: true,
-    sizeKey: autoDepotSizeSelect?.value || '100x100',
-    includeContents: Boolean(autoDepotContentsInput?.checked),
-  } : { enabled: false, sizeKey: null, includeContents: false };
-  const depotPlan = depotConfig.enabled ? planAutomaticDepot({
-    standType: setup.standType, standXCm: setup.xCm, standYCm: setup.yCm,
-    sizeKey: depotConfig.sizeKey, includeContents: depotConfig.includeContents,
-  }) : null;
-  if (depotPlan && !depotPlan.ok) { renderStageResult(depotPlan.message, true); return; }
-
   const projectNameSuffix = buildAutomaticProjectNameSuffix(setup.standType, setup.xCm, setup.yCm);
   const projectName = await requestProjectName({ mode: 'create', suffix: projectNameSuffix });
   if (!projectName) return;
@@ -996,66 +1094,7 @@ createStageButton.addEventListener('click', async () => {
   clearRegisteredAssets();
   projectStatus.textContent = 'Yeni proje hazırlanıyor: ' + projectName + '…';
 
-  currentModules = [];
-  moduleContextMenu.close();
-  moduleContextMenu.closePicker();
-
-  const stage = scene3d.createStage({
-    widthCm: setup.xCm,
-    depthCm: setup.yCm,
-    standType: setup.standType,
-    resetView: true,
-  });
-  if (!stage.ok) {
-    renderStageResult(stage.message, true);
-    return;
-  }
-
-  currentStand = { ...setup, floorType: floorTypeSelect.value, depot: depotConfig };
-  scene3d.setFloorType(floorTypeSelect.value);
-  viewportEmpty.hidden = true;
-  viewportToolbar.hidden = false;
-  setStandEditingEnabled(true);
-
-  if (setup.standType === 'island') {
-    currentModules = [];
-  } else {
-    const automaticWall = composeAutomaticStandWall({
-      lengthCm: getAutomaticWallCapacityCm({ standType: setup.standType, standXCm: setup.xCm, standYCm: setup.yCm }),
-      standType: setup.standType, standXCm: setup.xCm, standYCm: setup.yCm,
-    });
-    if (!automaticWall.ok) { renderStageResult(automaticWall.message, true); return; }
-    currentModules = automaticWall.widths.map((widthCm, index) => {
-      const moduleState = createModuleStateFromDescriptor({ type: 'flat-panel', widthCm });
-      moduleState.placement = { ...automaticWall.placements[index] };
-      return moduleState;
-    });
-
-    if (depotPlan?.ok) {
-      const customBack = composeAutomaticBackWallWithDepot({
-        standXCm: setup.xCm,
-        depotOriginXCm: depotPlan.originXCm,
-        depotWidthCm: depotPlan.widthCm,
-      });
-      if (!customBack.ok) { renderStageResult(customBack.message, true); return; }
-
-      currentModules = currentModules.filter((moduleState) => moduleState.placement?.wallId !== 'back');
-      const backStates = customBack.modules.map((entry) => {
-        const moduleState = createModuleStateFromDescriptor({ type: 'flat-panel', widthCm: entry.widthCm });
-        moduleState.placement = { ...entry.placement };
-        if (entry.depotBack) moduleState.autoDepotBack = true;
-        return moduleState;
-      });
-      currentModules.push(...backStates);
-    }
-  }
-  if (depotPlan?.ok) currentModules.push(...createAutomaticDepotStates(depotPlan));
-  rebuildWall({ resetView: true });
-
-  const label = STAND_TYPE_LABELS[setup.standType];
-  renderStageResult(
-    `${label} · ${setup.xCm} × ${setup.yCm} cm aktif alan · ${setup.sceneWidthM} × ${setup.sceneDepthM} m toplam sahne`,
-  );
+  if (!rebuildSceneFromSetup({ setup, depotConfig, depotPlan })) return;
 
   try {
     await persistActiveProject({ quiet: true });
@@ -1080,26 +1119,13 @@ openModuleCatalogButton.addEventListener('click', () => {
 });
 
 clearWallButton.addEventListener('click', () => {
-  if (!currentStand) {
-    renderWallResult('Önce stand alanını oluştur.', true);
+  const sceneSetup = readSceneSetupFromControls();
+  if (!sceneSetup.ok) {
+    renderStageResult(sceneSetup.message, true);
     return;
   }
 
-  if (!currentModules.length) {
-    renderWallResult('Duvar zaten boş.');
-    return;
-  }
-
-  const confirmed = window.confirm(
-    'Sahnedeki mevcut duvar, panel renkleri ve görseller silinecek. Duvar temizlensin mi?',
-  );
-  if (!confirmed) return;
-
-  currentModules = [];
-  moduleContextMenu.close();
-  moduleContextMenu.closePicker();
-  scene3d.clearWall({ resetView: true });
-  renderWallResult('Duvar boş.');
+  rebuildSceneFromSetup(sceneSetup);
 });
 
 resetModuleFeaturesButton.addEventListener('click', () => {
