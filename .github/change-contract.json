@@ -37,6 +37,7 @@
     "mode": "full-system",
     "affectedFiles": [
       "index.html",
+      "scripts/install-server.sh",
       "scripts/verify-change-contract.mjs",
       "src/assetStore.js",
       "src/autosaveController.js",
@@ -45,50 +46,80 @@
       "src/projectStore.js",
       "src/projectSwitch.js",
       "src/projectUi.js",
+      "src/style.css",
       "src/systemChangeContract.js"
     ],
     "affectedTests": [
+      "e2e/f010-module-construction.spec.mjs",
       "e2e/f020-save-before-project-actions.spec.mjs",
+      "e2e/smoke.spec.mjs",
       "test/autosaveController.test.js",
       "test/autosaveMainIntegration.test.js",
+      "test/bundleLoadingContract.test.js",
+      "test/colorEditorControllerMainIntegration.test.js",
+      "test/colorEditorMainIntegration.test.js",
+      "test/helpGuide.test.js",
+      "test/historicalDocumentationStatus.test.js",
+      "test/illuminatedFoamModule.test.js",
+      "test/imageAssetDeletion.test.js",
+      "test/imageAssetLiveDelete.test.js",
+      "test/lightboxFabric.test.js",
+      "test/lightboxFabricAppearance.test.js",
+      "test/lightboxFabricLighting.test.js",
+      "test/moduleBehaviorPolicy.test.js",
+      "test/moduleStateConstructionRegistry.test.js",
       "test/projectActionSaveGuard.test.js",
       "test/projectDropdownSwitchIntegration.test.js",
       "test/projectImportFlow.test.js",
       "test/projectSwitch.test.js",
       "test/projectUi.test.js",
       "test/projectUiMainIntegration.test.js",
+      "test/removedIndoorPlant2.test.js",
+      "test/selectionFeedbackMainIntegration.test.js",
+      "test/shelfLighting.test.js",
+      "test/sidebarControllerMainIntegration.test.js",
+      "test/stageFeedbackMainIntegration.test.js",
       "test/systemChangeGate.test.js",
       "test/systemChangeGateLocalDiff.test.js",
-      "test/systemImpactAnalysis.test.js"
+      "test/systemImpactAnalysis.test.js",
+      "test/uiFeedbackMainIntegration.test.js"
     ],
     "affectedDocs": [
       "ARCHITECTURE_RULES.md",
+      "FRESH_REPOSITORY_REVIEW.md",
       "PROJECT_RULES.md",
+      "RELEASE_HARDENING_ROADMAP.md",
+      "REPOSITORY_CLEANUP_PROGRESS.md",
       "SYSTEM_AUDIT_CHECKLIST.md",
+      "SYSTEM_CHANGE_GATE.md",
       "audit/FINDINGS.md",
       "audit/evidence/A02_CHANGE_GATE.md",
       "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
       "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
+      "audit/evidence/A10_UI_CONTROLS.md",
       "audit/evidence/A14_IMPORT_EXPORT_ARCHIVE.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
-      "audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md"
+      "audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md",
+      "docs/AUTOSAVE_INTEGRATION_NOTES.md"
     ],
     "relatedFindings": {
       "affected": [
         "F-020"
       ],
       "reviewedNotAffected": [
+        "F-005",
         "F-021",
         "F-022",
         "F-023",
+        "F-025",
         "F-032",
         "F-035",
         "F-036",
         "F-037"
       ]
     },
-    "notes": "F-020 is a project-action durability bug. The remediation keeps the existing 5-second autosave debounce, adds an immediate autosave-controller flush that performs the same clear-pending -> persist -> re-baseline/enable lifecycle as the existing Save action, and adds one project-action guard for Open/switch, Export, Import, and Create Stage. The guard preserves the selected target project across the save-triggered project-list refresh. Import preserves the browser user-activation requirement by starting the save before opening the file picker and awaiting that same save before archive processing. If the immediate save fails, the requested project action does not continue. No project schema, Item/BOM rule, placement rule, or renderer semantics are changed."
+    "notes": "F-020 is a project-action durability bug. The remediation keeps the existing 5-second autosave debounce, adds an immediate autosave-controller flush that performs the same clear-pending -> persist -> re-baseline/enable lifecycle as the existing Save action, and adds one project-action guard for Open/switch, Export, Import, and Create Stage. The guard preserves the selected target project across the save-triggered project-list refresh. Import preserves the browser user-activation requirement by starting the save before opening the file picker and awaiting that same save before archive processing. If the immediate save fails, the requested project action does not continue. Full-system discovery surfaces that reference the affected entrypoint/autosave/project UI paths are explicitly reviewed here; F-005 and F-025 are acknowledged as unchanged. No project schema, Item/BOM rule, placement rule, renderer semantics, deployment behavior, or raw BOM debug behavior is intentionally changed."
   },
   "tests": {
     "targeted": [
