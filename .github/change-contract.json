@@ -58,6 +58,7 @@
       "test/bundleLoadingContract.test.js",
       "test/colorEditorControllerMainIntegration.test.js",
       "test/colorEditorMainIntegration.test.js",
+      "test/developerEntrypointDocs.test.js",
       "test/helpGuide.test.js",
       "test/historicalDocumentationStatus.test.js",
       "test/illuminatedFoamModule.test.js",
@@ -88,11 +89,14 @@
       "ARCHITECTURE_RULES.md",
       "FRESH_REPOSITORY_REVIEW.md",
       "PROJECT_RULES.md",
+      "README.md",
       "RELEASE_HARDENING_ROADMAP.md",
       "REPOSITORY_CLEANUP_PROGRESS.md",
       "SYSTEM_AUDIT_CHECKLIST.md",
       "SYSTEM_CHANGE_GATE.md",
+      "SYSTEM_DEVELOPMENT_CONTRACT.md",
       "audit/FINDINGS.md",
+      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
       "audit/evidence/A02_CHANGE_GATE.md",
       "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
@@ -101,6 +105,9 @@
       "audit/evidence/A14_IMPORT_EXPORT_ARCHIVE.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
       "audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md",
+      "audit/remediation/A02_CLOSURE.md",
+      "audit/remediation/A02_F005_CLOSURE.md",
+      "audit/remediation/A02_F006_CLOSURE.md",
       "docs/AUTOSAVE_INTEGRATION_NOTES.md"
     ],
     "relatedFindings": {
@@ -108,7 +115,9 @@
         "F-020"
       ],
       "reviewedNotAffected": [
+        "F-004",
         "F-005",
+        "F-006",
         "F-021",
         "F-022",
         "F-023",
@@ -119,7 +128,7 @@
         "F-037"
       ]
     },
-    "notes": "F-020 is a project-action durability bug. The remediation keeps the existing 5-second autosave debounce, adds an immediate autosave-controller flush that performs the same clear-pending -> persist -> re-baseline/enable lifecycle as the existing Save action, and adds one project-action guard for Open/switch, Export, Import, and Create Stage. The guard preserves the selected target project across the save-triggered project-list refresh. Import preserves the browser user-activation requirement by starting the save before opening the file picker and awaiting that same save before archive processing. If the immediate save fails, the requested project action does not continue. Full-system discovery surfaces that reference the affected entrypoint/autosave/project UI paths are explicitly reviewed here; F-005 and F-025 are acknowledged as unchanged. No project schema, Item/BOM rule, placement rule, renderer semantics, deployment behavior, or raw BOM debug behavior is intentionally changed."
+    "notes": "F-020 is a project-action durability bug. The remediation keeps the existing 5-second autosave debounce, adds an immediate autosave-controller flush that performs the same clear-pending -> persist -> re-baseline/enable lifecycle as the existing Save action, and adds one project-action guard for Open/switch, Export, Import, and Create Stage. The guard preserves the selected target project across the save-triggered project-list refresh. Import preserves the browser user-activation requirement by starting the save before opening the file picker and awaiting that same save before archive processing. If the immediate save fails, the requested project action does not continue. Full-system discovery surfaces that reference the affected entrypoint/autosave/project UI paths are explicitly reviewed here; F-004, F-005, F-006 and F-025 are acknowledged as unchanged. No project schema, Item/BOM rule, placement rule, renderer semantics, deployment behavior, raw BOM debug behavior, or governance contract semantics are intentionally changed."
   },
   "tests": {
     "targeted": [
