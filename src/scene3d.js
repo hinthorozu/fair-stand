@@ -4991,9 +4991,16 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
   const heightM = heightCm / 100;
 
   const group = new THREE.Group();
+  let topLabel = null;
+  let trashVisualGroup = null;
   if (type === 'plastic-trash-bin') {
-    const topLabel = createPlasticTrashBinTopLabel(heightCm);
-    if (topLabel) group.add(topLabel);
+    trashVisualGroup = new THREE.Group();
+    trashVisualGroup.userData.role = 'plastic-trash-bin-visual';
+    // Top view: rotate the entire trash-bin visual (GLB + label) 90° clockwise together.
+    trashVisualGroup.rotation.y = -Math.PI / 2;
+    group.add(trashVisualGroup);
+    topLabel = createPlasticTrashBinTopLabel(heightCm);
+    if (topLabel) trashVisualGroup.add(topLabel);
   }
   group.userData = {
     kind: 'module',
@@ -5120,11 +5127,12 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
     const fittedBox = new THREE.Box3().setFromObject(model);
     const fittedCenter = fittedBox.getCenter(new THREE.Vector3());
     model.position.set(-fittedCenter.x, -fittedBox.min.y, -fittedCenter.z);
-    group.add(model);
+    if (trashVisualGroup) trashVisualGroup.add(model);
+    else group.add(model);
     group.userData.modelLoaded = true;
     group.userData.modelFile = modelFile;
     window.dispatchEvent(new CustomEvent('fair-stand:model-rendered', {
-      detail: { moduleId: moduleState.id, moduleIndex, type, modelFile, removedNodes, trashBodyMaterials, topLabelRole: group.children.find((child) => child.userData?.role === 'plastic-trash-bin-top-label')?.userData.role ?? null, topLabelRotationZ: group.children.find((child) => child.userData?.role === 'plastic-trash-bin-top-label')?.rotation.z ?? null },
+      detail: { moduleId: moduleState.id, moduleIndex, type, modelFile, removedNodes, trashBodyMaterials, topLabelRole: topLabel?.userData.role ?? null, topLabelRotationZ: topLabel?.rotation.z ?? null, trashVisualRotationY: trashVisualGroup?.rotation.y ?? null, topLabelParentRole: topLabel?.parent?.userData?.role ?? null, modelParentRole: model.parent?.userData?.role ?? null },
     }));
   }).catch((error) => {
     console.warn('Sabit GLB modülü yüklenemedi:', type, modelFile, error);
