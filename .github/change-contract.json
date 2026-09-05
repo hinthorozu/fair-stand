@@ -1,32 +1,36 @@
 {
   "schemaVersion": 2,
-  "id": "close-f012-scene-surround-single-source",
+  "id": "close-a03-f012-bookkeeping",
   "kind": "architecture",
-  "summary": "Close F-012 by defining the 1 metre scene surround once as SCENE_SURROUND_M and making stand setup and renderer consume that canonical value without changing scene geometry.",
+  "summary": "Record F-012 and A03 as closed after PR #52 and its post-merge ROG verification succeeded, updating only canonical audit/remediation bookkeeping.",
   "owners": [
-    "src/sceneDimensions.js",
-    "src/standSetup.js",
-    "src/scene3d.js"
+    "audit/FINDINGS.md",
+    "audit/FULL_SWEEP_STATE.md",
+    "audit/remediation/A03_F012_CLOSURE.md",
+    "audit/remediation/A03_CLOSURE.md"
   ],
   "sourceOfTruth": [
     "audit/evidence/A03_ARCHITECTURE.md",
-    "src/sceneDimensions.js",
-    "ARCHITECTURE_RULES.md"
+    "audit/remediation/A03_F010_CLOSURE.md",
+    "audit/remediation/A03_F011_CLOSURE.md",
+    "audit/remediation/A03_F012_CLOSURE.md",
+    "audit/remediation/A03_CLOSURE.md",
+    "SYSTEM_IMPACT_SWEEP.md"
   ],
   "impact": {
     "catalog": "not-applicable",
-    "behavior": "affected",
-    "state": "affected",
-    "placement": "affected",
-    "renderer": "affected",
+    "behavior": "not-applicable",
+    "state": "not-applicable",
+    "placement": "not-applicable",
+    "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "not-applicable",
     "ui": "not-applicable",
-    "composition": "affected",
+    "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
-    "performance": "affected",
+    "performance": "not-applicable",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
@@ -34,120 +38,29 @@
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [
-      "index.html",
-      "scripts/add-tv-sizes.py",
-      "scripts/add-video-wall-2x2.py",
-      "scripts/fix-tv-screen-face.py",
-      "scripts/patch-video-wall-2x2.cjs",
-      "scripts/patch-video-wall-single-image.cjs",
-      "scripts/verify-change-contract.mjs",
-      "src/main.js",
-      "src/scene3d.js",
-      "src/sceneDimensions.js",
-      "src/standSetup.js",
-      "src/systemChangeContract.js"
-    ],
+    "affectedFiles": [],
     "affectedTests": [
-      "test/autosaveMainIntegration.test.js",
-      "test/baseRenderStyle.test.js",
-      "test/baseWallDepthAlignment.test.js",
-      "test/bundleLoadingContract.test.js",
-      "test/catalogSingleSource.test.js",
-      "test/coatRackModule.test.js",
-      "test/colorEditorControllerMainIntegration.test.js",
-      "test/colorEditorMainIntegration.test.js",
-      "test/coverModeExclusivity.test.js",
-      "test/ctrlMultiSelect.test.js",
-      "test/developerEntrypointDocs.test.js",
-      "test/eamesTableChairSetContract.test.js",
-      "test/fabricModuleOwnership.test.js",
-      "test/globalSilhouetteGhost.test.js",
-      "test/helpGuide.test.js",
-      "test/historicalDocumentationStatus.test.js",
-      "test/horizontalPanelRails.test.js",
-      "test/illuminatedFoamInteraction.test.js",
-      "test/illuminatedFoamModule.test.js",
-      "test/imageAssetDeletion.test.js",
-      "test/imageAssetLiveDelete.test.js",
-      "test/indoorPlants.test.js",
-      "test/lCounter100Contract.test.js",
-      "test/lCounter150Contract.test.js",
-      "test/lCounter200Contract.test.js",
-      "test/lCounterSideGeometry.test.js",
-      "test/lightboxFabric.test.js",
-      "test/lightboxFabricAppearance.test.js",
-      "test/lightboxFabricLighting.test.js",
-      "test/lightboxFabricPerformance.test.js",
-      "test/miniFridgeTopLabel.test.js",
-      "test/moduleBehaviorPolicy.test.js",
-      "test/moduleRotationSingleSourceIntegration.test.js",
-      "test/moduleSelectionState.test.js",
-      "test/moduleSelectionVisual.test.js",
-      "test/moduleStateConstructionRegistry.test.js",
-      "test/panelMultiSelectRule.test.js",
-      "test/projectDropdownSwitchIntegration.test.js",
-      "test/projectImportFlow.test.js",
-      "test/projectUiMainIntegration.test.js",
-      "test/raisedPlatform.test.js",
-      "test/removedIndoorPlant2.test.js",
-      "test/sceneSurroundSingleSource.test.js",
-      "test/selectedModuleRotationCursor.test.js",
-      "test/selectionFeedbackMainIntegration.test.js",
-      "test/shelfLighting.test.js",
-      "test/showcaseAppearance.test.js",
-      "test/showcaseDepthDirection.test.js",
-      "test/sidebarControllerMainIntegration.test.js",
-      "test/stageFeedbackMainIntegration.test.js",
-      "test/standSetup.test.js",
       "test/systemChangeGate.test.js",
-      "test/systemChangeGateLocalDiff.test.js",
-      "test/systemImpactAnalysis.test.js",
-      "test/tv42Module.test.js",
-      "test/uiFeedbackMainIntegration.test.js",
-      "test/viewKeyboardMainIntegration.test.js",
-      "test/wallDragStickiness.test.js",
-      "e2e/smoke.spec.mjs"
+      "test/systemImpactAnalysis.test.js"
     ],
     "affectedDocs": [
-      "ARCHITECTURE_RULES.md",
-      "FRESH_REPOSITORY_REVIEW.md",
-      "MODULE_BEHAVIOR_STANDARD.md",
-      "PROJECT_RULES.md",
-      "README.md",
-      "RELEASE_HARDENING_ROADMAP.md",
-      "REPOSITORY_CLEANUP_PROGRESS.md",
-      "SYSTEM_AUDIT_CHECKLIST.md",
-      "SYSTEM_CHANGE_GATE.md",
-      "SYSTEM_DEVELOPMENT_CONTRACT.md",
-      "SYSTEM_IMPACT_SWEEP.md",
       "audit/FINDINGS.md",
-      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
-      "audit/evidence/A02_CHANGE_GATE.md",
+      "audit/FULL_SWEEP_STATE.md",
       "audit/evidence/A03_ARCHITECTURE.md",
-      "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
-      "audit/evidence/A05_MODULE_BEHAVIOR.md",
-      "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
-      "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
-      "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
-      "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
-      "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
-      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
-      "audit/remediation/A02_CLOSURE.md",
-      "audit/remediation/A02_F005_CLOSURE.md",
-      "audit/remediation/A02_F006_CLOSURE.md",
-      "audit/remediation/A03_F011_CLOSURE.md"
+      "audit/remediation/A03_F010_CLOSURE.md",
+      "audit/remediation/A03_F011_CLOSURE.md",
+      "audit/remediation/A03_F012_CLOSURE.md",
+      "audit/remediation/A03_CLOSURE.md"
     ],
     "relatedFindings": {
       "affected": [
         "F-012"
       ],
       "reviewedNotAffected": [
-        "F-004",
         "F-005",
-        "F-006",
         "F-010",
         "F-011",
+        "F-013",
         "F-014",
         "F-015",
         "F-016",
@@ -155,35 +68,32 @@
         "F-018",
         "F-019",
         "F-029",
-        "F-033",
         "F-040",
         "F-045"
       ]
     },
-    "notes": "F-012 is an ownership-only remediation. The physical surround remains exactly 1 metre. standSetup and scene3d now consume SCENE_SURROUND_M from one canonical source. scene3d's behavior/state/placement/performance domains are declared affected because the source-file governance map requires those domains whenever scene3d changes; no module behavior, editable-state schema, placement algorithm, performance policy, catalog, persistence, BOM, or asset semantics are intentionally changed. Full-system discovery surfaces above were reviewed because scene3d and the change-gate ownership map are broad dependency roots; listing them does not imply runtime edits to those files. The existing browser smoke flow creates a real stage and protects runtime module loading after the shared import change."
+    "notes": "This change records closure evidence only. Runtime ownership was changed and fully verified in PR #52. F-013 and later findings remain independent open findings; no A04+ finding is closed by this bookkeeping change."
   },
   "tests": {
     "targeted": [
-      "test/sceneSurroundSingleSource.test.js",
-      "test/standSetup.test.js"
+      "test/systemChangeGate.test.js",
+      "test/systemImpactAnalysis.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": [
-        "e2e/smoke.spec.mjs"
-      ],
-      "reason": "The renderer import path changes, so the real browser stage-creation smoke flow must prove the application loads and creates the stage with no runtime error."
+      "required": false,
+      "targeted": [],
+      "reason": "Audit closure bookkeeping has no browser-visible runtime impact. The canonical CI still runs the full baseline Chromium E2E suite."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "The value remains 1 metre and all arithmetic is unchanged; the change removes duplicate ownership and renames consumers to the canonical constant."
+    "notes": "Only canonical audit status and closure evidence are updated after already-successful implementation and post-merge verification."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted project-state or archive schema changes."
+    "notes": "No runtime or persisted-state schema change is made by this bookkeeping PR."
   },
-  "rollback": "Revert the F-012 single-source commits if stage setup dimensions, grid extents, camera framing, or stage creation regress."
+  "rollback": "Revert the audit closure bookkeeping commit if any recorded CI or finding status is inaccurate."
 }
