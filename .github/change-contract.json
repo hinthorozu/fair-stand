@@ -1,35 +1,32 @@
 {
   "schemaVersion": 2,
-  "id": "close-f011-audit-bookkeeping",
+  "id": "close-f012-scene-surround-single-source",
   "kind": "architecture",
-  "summary": "Record F-011 as closed after PR #49 and its post-merge ROG verification succeeded, updating only canonical audit/remediation bookkeeping.",
+  "summary": "Close F-012 by defining the 1 metre scene surround once as SCENE_SURROUND_M and making stand setup and renderer consume that canonical value without changing scene geometry.",
   "owners": [
-    "audit/FINDINGS.md",
-    "audit/FULL_SWEEP_STATE.md",
-    "audit/remediation/A03_F011_CLOSURE.md"
+    "src/sceneDimensions.js",
+    "src/standSetup.js",
+    "src/scene3d.js"
   ],
   "sourceOfTruth": [
     "audit/evidence/A03_ARCHITECTURE.md",
-    "audit/evidence/A05_MODULE_BEHAVIOR.md",
-    "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
-    "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
-    "audit/remediation/A03_F011_CLOSURE.md",
-    "SYSTEM_IMPACT_SWEEP.md"
+    "src/sceneDimensions.js",
+    "ARCHITECTURE_RULES.md"
   ],
   "impact": {
     "catalog": "not-applicable",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
-    "placement": "not-applicable",
-    "renderer": "not-applicable",
+    "behavior": "affected",
+    "state": "affected",
+    "placement": "affected",
+    "renderer": "affected",
     "persistence": "not-applicable",
     "bom": "not-applicable",
     "ui": "not-applicable",
-    "composition": "not-applicable",
+    "composition": "affected",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
-    "performance": "not-applicable",
+    "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
@@ -37,62 +34,67 @@
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [],
+    "affectedFiles": [
+      "src/sceneDimensions.js",
+      "src/standSetup.js",
+      "src/scene3d.js",
+      "src/systemChangeContract.js"
+    ],
     "affectedTests": [
+      "test/sceneSurroundSingleSource.test.js",
+      "test/standSetup.test.js",
       "test/systemChangeGate.test.js",
-      "test/systemImpactAnalysis.test.js"
+      "test/systemChangeGateLocalDiff.test.js",
+      "test/systemImpactAnalysis.test.js",
+      "e2e/smoke.spec.mjs"
     ],
     "affectedDocs": [
+      "ARCHITECTURE_RULES.md",
+      "SYSTEM_CHANGE_GATE.md",
+      "SYSTEM_IMPACT_SWEEP.md",
       "audit/FINDINGS.md",
-      "audit/FULL_SWEEP_STATE.md",
-      "audit/remediation/A03_F011_CLOSURE.md",
-      "audit/evidence/A03_ARCHITECTURE.md",
-      "audit/evidence/A05_MODULE_BEHAVIOR.md",
-      "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
-      "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md"
+      "audit/evidence/A03_ARCHITECTURE.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-011"
+        "F-012"
       ],
       "reviewedNotAffected": [
-        "F-005",
         "F-010",
-        "F-012",
-        "F-014",
+        "F-011",
         "F-015",
         "F-016",
         "F-017",
-        "F-028",
+        "F-018",
+        "F-019",
         "F-029",
-        "F-033",
-        "F-040",
-        "F-041",
-        "F-045"
+        "F-040"
       ]
     },
-    "notes": "This change records closure evidence only. Runtime ownership was changed and fully verified in PR #49. F-015 and F-016 remain independent open findings; F-012 is the remaining A03 finding. No later finding is closed by this bookkeeping change."
+    "notes": "F-012 is an ownership-only remediation. The physical surround remains exactly 1 metre. standSetup and scene3d now consume SCENE_SURROUND_M from one canonical source. scene3d's behavior/state/placement/performance domains are declared affected because the source-file governance map requires those domains whenever scene3d changes; no module behavior, editable-state schema, placement algorithm, performance policy, catalog, persistence, BOM, or asset semantics are intentionally changed. The existing browser smoke flow creates a real stage and therefore protects runtime module loading after the shared import change."
   },
   "tests": {
     "targeted": [
-      "test/systemChangeGate.test.js",
-      "test/systemImpactAnalysis.test.js"
+      "test/sceneSurroundSingleSource.test.js",
+      "test/standSetup.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "Audit closure bookkeeping has no browser-visible runtime impact. The canonical CI still runs the full baseline Chromium E2E suite."
+      "required": true,
+      "targeted": [
+        "e2e/smoke.spec.mjs"
+      ],
+      "reason": "The renderer import path changes, so the real browser stage-creation smoke flow must prove the application loads and creates the stage with no runtime error."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Only canonical audit status and closure evidence are updated after already-successful implementation and post-merge verification."
+    "notes": "The value remains 1 metre and all arithmetic is unchanged; the change removes duplicate ownership and renames consumers to the canonical constant."
   },
   "migration": {
     "required": false,
-    "notes": "No runtime or persisted-state schema change is made by this bookkeeping PR."
+    "notes": "No persisted project-state or archive schema changes."
   },
-  "rollback": "Revert the audit closure bookkeeping commit if any recorded CI or finding status is inaccurate."
+  "rollback": "Revert the F-012 single-source commits if stage setup dimensions, grid extents, camera framing, or stage creation regress."
 }
