@@ -19,7 +19,7 @@ function createWallPlacement(wallId, startCm, standXCm) {
     xCm: wallId === 'right' ? standXCm : 0,
     yCm: startCm,
     zCm: 0,
-    rotationZDeg: 90,
+    rotationZDeg: wallId === 'right' ? 270 : 90,
     wallId,
   });
 }

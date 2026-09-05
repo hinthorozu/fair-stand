@@ -43,7 +43,7 @@ test('wraps from back-right corner to the right wall in U stand', () => {
     xCm: 500,
     yCm: 0,
     zCm: 0,
-    rotationZDeg: 90,
+    rotationZDeg: 270,
     wallId: 'right',
   });
 });
@@ -112,7 +112,7 @@ test('wraps from the left wall back corner onto the back wall', () => {
 
 test('wraps from the right wall back corner onto the right end of back wall', () => {
   const result = resolveAdjacentPlacement({
-    sourcePlacement: { xCm: 500, yCm: 0, rotationZDeg: 90, wallId: 'right' },
+    sourcePlacement: { xCm: 500, yCm: 0, rotationZDeg: 270, wallId: 'right' },
     sourceWidthCm: 200,
     addedWidthCm: 100,
     side: 'left',
