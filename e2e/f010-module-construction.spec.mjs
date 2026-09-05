@@ -58,6 +58,7 @@ test('F-010 automatic wall construction reaches persisted runtime state through 
   expect(project).not.toBeNull();
   expect(project.modules.length).toBeGreaterThan(0);
   expect(project.modules.every((moduleState) => moduleState.type === 'flat-panel')).toBe(true);
+  expect(project.modules.every((moduleState) => moduleState.catalogKey === `wall_${moduleState.widthCm}`)).toBe(true);
   expect(pageErrors).toEqual([]);
 });
 
@@ -102,5 +103,6 @@ test('F-010 catalog construction persists a module created through the real pick
   expect(project.modules).toHaveLength(1);
   expect(project.modules[0].type).toBe('flat-panel');
   expect(project.modules[0].widthCm).toBe(100);
+  expect(project.modules[0].catalogKey).toBe('wall_100');
   expect(pageErrors).toEqual([]);
 });
