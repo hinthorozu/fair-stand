@@ -41,6 +41,7 @@
       "e2e/f011-module-behavior.spec.mjs",
       "test/cornerPlacement.test.js",
       "test/modulePlacement.test.js",
+      "test/rightWallOrientation.test.js",
       "test/wallReflow.test.js"
     ],
     "affectedDocs": [
@@ -61,12 +62,12 @@
         "F-015"
       ]
     },
-    "notes": "F-016 is a stale helper/test conflict, not a requested runtime behavior change. Active right-wall placement and reflow already use 270 degrees. This remediation changes the alternate corner helper so right-wall placements also use 270 degrees, keeps left-wall placement at 90 degrees, and updates right-wall test fixtures to the same canonical orientation. No catalog, state, renderer, persistence, BOM, UI or composition semantics are intentionally changed."
+    "notes": "F-016 is a stale helper/test conflict, not a requested runtime behavior change. Active right-wall placement and reflow already use 270 degrees. This remediation changes the alternate corner helper so right-wall placements also use 270 degrees, keeps left-wall placement at 90 degrees, updates right-wall test fixtures, and adds a cross-path regression proving the helper and active reflow agree. No catalog, state, renderer, persistence, BOM, UI or composition semantics are intentionally changed."
   },
   "tests": {
     "targeted": [
       "test/cornerPlacement.test.js",
-      "test/wallReflow.test.js"
+      "test/rightWallOrientation.test.js"
     ],
     "fullSuite": true,
     "build": true,
