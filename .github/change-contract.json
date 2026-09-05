@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "integrate-plastic-trash-bin-module",
-  "kind": "product-feature",
+  "kind": "module",
   "summary": "Register the existing plastic_trash_bin.glb asset as a 40x40x60 cm catalog module, give it mini-fridge-style 10 cm free movement without overlap exceptions, expose it in catalog drag/Add flows, and include it in automatic depot contents without floor-fixture overlap.",
   "owners": [
     "src/catalog.js",
