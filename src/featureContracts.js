@@ -16,18 +16,19 @@ export const FEATURE_CONTRACTS = Object.freeze({
     ]),
     creates: Object.freeze({
       structuralKinds: Object.freeze(['wall', 'door']),
-      contentKinds: Object.freeze(['mini-fridge', 'kettle', 'coat-rack']),
+      contentKinds: Object.freeze(['mini-fridge', 'kettle', 'coat-rack', 'indoor-plant-1']),
+      contentCatalogKeys: Object.freeze(['DEPOT_PLASTIC_TRASH_BIN']),
     }),
     placement: Object.freeze({
       owner: 'src/autoDepot.js',
-      rule: 'planned-inside-stand-and-depot-footprint',
+      rule: 'planned-inside-stand-and-depot-footprint-without-floor-fixture-overlap',
     }),
     persistence: Object.freeze({
       mode: 'generated-modules-enter-project-state',
     }),
     tests: Object.freeze({
       contract: 'required',
-      regressionFiles: Object.freeze(['tests/autoDepot.test.js']),
+      regressionFiles: Object.freeze(['tests/autoDepot.test.js', 'test/plasticTrashBinModule.test.js']),
       fullSuite: 'required',
       build: 'required',
     }),
