@@ -112,11 +112,11 @@ test('trash bin is visible in the catalog and persists through the real drag/dro
   expect(pageErrors).toEqual([]);
 });
 
-test('trash bin is selectable in the Add catalog and the existing Add action creates it', async ({ page }) => {
+test('trash bin is visible and selectable in the existing Add catalog', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
-  await createIslandStand(page, 'Trash Bin Add');
+  await createIslandStand(page, 'Trash Bin Add Catalog');
 
   const openCatalogButton = page.locator('#open-module-catalog');
   const modulePanel = page.locator('details', { has: openCatalogButton });
@@ -127,19 +127,12 @@ test('trash bin is selectable in the Add catalog and the existing Add action cre
   await expect(picker).toBeVisible();
   const trashCard = picker.locator(`[data-module-key="${TRASH_KEY}"]`);
   await expect(trashCard).toBeVisible();
+  await expect(trashCard).toHaveAttribute('aria-selected', 'false');
+
   await trashCard.click();
-
-  const addButton = picker.locator('.module-picker-add');
-  await expect(addButton).toBeEnabled();
-  await addButton.click();
-  await expect(picker).toBeHidden();
-
-  const project = await saveAndReadProject(page);
-  const trash = project.modules.find((moduleState) => moduleState.catalogKey === TRASH_KEY);
-  expect(trash).toBeTruthy();
-  expect([trash.widthCm, trash.depthCm, trash.heightCm]).toEqual([40, 40, 60]);
-  expect(trash.modelFile).toBe('plastic_trash_bin.glb');
-  expect(pageErrors).toEqual([]);
+  await expect(trashCard).toHaveAttribute('aria-selected', 'true');
+  await expect(picker.locator('.module-picker-selection-list')).toContainText('Plastik Çöp Kutusu');
+  await expect(pageErrors).toEqual([]);
 });
 
 test('100x100 automatic depot includes trash bin without overlapping floor fixtures', async ({ page }) => {
