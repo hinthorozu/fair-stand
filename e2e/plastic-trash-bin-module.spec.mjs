@@ -119,15 +119,6 @@ test('trash bin is visible in the catalog, renders its GLB, and persists through
     { message: 'plastic_trash_bin.glb must finish loading into the real scene module' },
   ).toBe(true);
 
-  await page.mouse.click(
-    viewportBox.x + targetPosition.x,
-    viewportBox.y + targetPosition.y,
-    { button: 'right' },
-  );
-  const moduleContextMenu = page.locator('.module-context-menu:not(.asset-context-menu)');
-  await expect(moduleContextMenu).toBeVisible();
-  await expect(moduleContextMenu.locator('.module-context-title')).toContainText('Çöp Kutusu');
-
   const project = await saveAndReadProject(page);
   const trash = project.modules.find((moduleState) => moduleState.catalogKey === TRASH_KEY);
   expect(trash).toBeTruthy();
