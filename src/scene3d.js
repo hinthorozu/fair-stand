@@ -12,6 +12,7 @@ import { createViewCube } from './viewCube.js';
 import { isEditableKeyboardTarget, resolveViewKeyboardShortcut } from './viewKeyboardShortcuts.js';
 import { computeImageFit } from './imageFit.js';
 import { formatPlacementFeedbackMessage, hasPlacementFeedbackPointer } from './placementFeedback.js';
+import { SCENE_SURROUND_M } from './sceneDimensions.js';
 import {
   createModulePlacement,
   getAllowedWallIds,
@@ -47,7 +48,6 @@ const STAND_BORDER_COLOR = 0x6f7a87;
 const ACTIVE_WALL_GUIDE_COLOR = 0xf97316;
 const ACTIVE_WALL_GUIDE_THICKNESS_M = 0.045;
 const ACTIVE_WALL_GUIDE_HEIGHT_M = 0.018;
-const STAGE_SURROUND_M = 1;
 // Aktif stand zemini fuar salonu zemininden 5 cm yukarıda duran platformdur.
 const ACTIVE_PLATFORM_HEIGHT_M = 0.05;
 const FLOOR_TYPES = Object.freeze(['karolaj', 'hali', 'parke-acik', 'parke-sari', 'parke-beton']);
@@ -225,8 +225,8 @@ export function createStandScene(
   function getViewCubeFit(direction = HOME_DIRECTION) {
     if (!stageLayout) return null;
 
-    const widthM = stageLayout.widthM + STAGE_SURROUND_M * 2;
-    const depthM = stageLayout.depthM + STAGE_SURROUND_M * 2;
+    const widthM = stageLayout.widthM + SCENE_SURROUND_M * 2;
+    const depthM = stageLayout.depthM + SCENE_SURROUND_M * 2;
     const heightM = Math.max(STAND_DIMENSIONS.height + ACTIVE_PLATFORM_HEIGHT_M, 1);
     const target = new THREE.Vector3(
       stageLayout.widthM / 2,
@@ -684,17 +684,17 @@ export function createStandScene(
   }
 
   function collectGridValues(lengthM) {
-    const values = [-STAGE_SURROUND_M, 0, lengthM, lengthM + STAGE_SURROUND_M];
+    const values = [-SCENE_SURROUND_M, 0, lengthM, lengthM + SCENE_SURROUND_M];
     for (let value = 1; value < lengthM; value += 1) values.push(value);
     return [...new Set(values.map((value) => Number(value.toFixed(6))))]
       .sort((a, b) => a - b);
   }
 
   function createRectangularGrid(widthM, depthM) {
-    const leftX = -STAGE_SURROUND_M;
-    const rightX = widthM + STAGE_SURROUND_M;
-    const backZ = -STAGE_SURROUND_M;
-    const frontZ = depthM + STAGE_SURROUND_M;
+    const leftX = -SCENE_SURROUND_M;
+    const rightX = widthM + SCENE_SURROUND_M;
+    const backZ = -SCENE_SURROUND_M;
+    const frontZ = depthM + SCENE_SURROUND_M;
     const positions = [];
     const boldOffsetM = 0.006;
 
@@ -790,8 +790,8 @@ export function createStandScene(
     disposeGroundGuides();
     clearPlacementDrag();
 
-    const sceneWidthM = widthM + STAGE_SURROUND_M * 2;
-    const sceneDepthM = depthM + STAGE_SURROUND_M * 2;
+    const sceneWidthM = widthM + SCENE_SURROUND_M * 2;
+    const sceneDepthM = depthM + SCENE_SURROUND_M * 2;
     const centerX = widthM / 2;
     const centerZ = depthM / 2;
 
@@ -820,7 +820,7 @@ export function createStandScene(
       depthCm: Math.round(depthM * 100),
       sceneWidthM,
       sceneDepthM,
-      surroundM: STAGE_SURROUND_M,
+      surroundM: SCENE_SURROUND_M,
       platformHeightM: ACTIVE_PLATFORM_HEIGHT_M,
       floorType: currentFloorType,
       floorColor: floorColors[currentFloorType] ?? null,
