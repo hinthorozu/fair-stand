@@ -35,7 +35,7 @@ import {
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
 import { getContinuousWallSegments, planContinuousWallInsertion } from './wallReflow.js';
-import { getModuleDefaultRotationDeg } from './moduleBehavior.js';
+import { getModuleDefaultRotationDeg, isTopPlacementModule } from './moduleBehavior.js';
 import {
   buildAutomaticProjectNameSuffix,
   createProjectNamingController,
@@ -422,7 +422,7 @@ function duplicateContextModule(context, side) {
   const duplicate = duplicateModuleState(sourceModule);
   if (!duplicate) return;
 
-  if (sourceModule.type === 'led-floodlight' && sourceModule.placement) {
+  if (isTopPlacementModule(sourceModule) && sourceModule.placement) {
     const sourcePlacement = sourceModule.placement;
     const placement = { ...sourcePlacement, zCm: 350 };
     const deltaCm = side === 'left' ? -20 : 20;

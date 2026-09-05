@@ -9,6 +9,7 @@ import {
   getModuleBehavior,
   getModuleCollisionStrategy,
   getModuleMagneticSnapStrategy,
+  isTopPlacementModule,
   resolveSideInsertRotationDeg,
   supportsWallOverlayMount,
   usesLogicalFixtureEndpoint,
@@ -46,6 +47,8 @@ test('F-011 special placement policies are declared by the canonical behavior co
 
   assert.equal(countsTowardWallCapacity('led-floodlight'), false);
   assert.equal(countsTowardWallCapacity('flat-panel'), true);
+  assert.equal(isTopPlacementModule('led-floodlight'), true);
+  assert.equal(isTopPlacementModule('flat-panel'), false);
 
   assert.equal(resolveSideInsertRotationDeg('bar-stool', 90), 270);
   assert.equal(resolveSideInsertRotationDeg('counter', 90), 90);
@@ -81,4 +84,10 @@ test('placement core selects F-011 policies through moduleBehavior instead of pr
   ]) {
     assert.match(source, new RegExp(helper), helper);
   }
+});
+
+test('controller routes top-fixture duplication through moduleBehavior instead of a LED type check', () => {
+  const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /sourceModule\.type === 'led-floodlight'/);
+  assert.match(source, /isTopPlacementModule\(sourceModule\)/);
 });
