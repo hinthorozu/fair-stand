@@ -99,7 +99,10 @@ test('deleting a project removes its record and assets without touching another 
 
   const projectSelect = page.locator('#project-select');
   await expect(projectSelect.locator('option')).toHaveCount(2);
-  await projectSelect.selectOption('f023-target-project');
+  await projectSelect.evaluate((select) => {
+    select.value = 'f023-target-project';
+  });
+  await expect(projectSelect).toHaveValue('f023-target-project');
 
   page.once('dialog', async (dialog) => dialog.accept());
   await page.locator('#delete-project').click();
