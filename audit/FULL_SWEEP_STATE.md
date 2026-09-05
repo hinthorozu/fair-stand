@@ -40,14 +40,20 @@ Current phase: **REMEDIATION IN PROGRESS**
 - F-012 implementation PR: `#52`
 - F-012 implementation merge SHA: `1ca9f6e386a6cbdb7377ce35bf22a26b75e4ba80`
 - F-012 post-merge ROG CI: `#221 / run 33974468120 / success`
-- Next finding: `F-013 — exact catalog identity ambiguous for normal vs vine separators when catalogKey absent`
+- A04 closed findings so far: `F-013`
+- F-013 closure evidence: `audit/remediation/A04_F013_CLOSURE.md`
+- F-013 implementation PR: `#53`
+- F-013 implementation merge SHA: `238c2946d9e09451f22d040dd04a340cde7991a9`
+- F-013 post-merge ROG CI: `#226 / run 33976491702 / success`
+- Next finding: `F-014 — 17 active module contracts require final BOM classification`
 - Remaining A03 findings: `none`
+- Remaining A04 findings: `F-014`
 - Finding range: `F-001..F-046`
-- Closed findings: `12`
-- Open findings: `34`
+- Closed findings: `13`
+- Open findings: `33`
 - Open P0: `0`
 - Open P1: `15`
-- Open P2: `19`
+- Open P2: `18`
 - Open P3: `0`
 - Canonical finding ledger: `audit/FINDINGS.md`
 - Cross-domain matrix: `audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md`
@@ -96,6 +102,10 @@ Final A03 implementation verification: ROG `1ca9f6e386a6cbdb7377ce35bf22a26b75e4
 
 ## Current section — A04 Catalog + module contracts
 
-A03 is closed. Continue remediation in section order with **F-013 — exact catalog identity ambiguous for normal vs vine separators when `catalogKey` is absent**.
+**F-013 is CLOSED / POST-MERGE VERIFIED.** Canonical catalog identity now distinguishes normal and vine separators during legacy/keyless resolution and canonical construction/restore enforces valid catalog identity for catalog-equivalent runtime modules.
 
-Do not treat later A04+ findings as closed until their own implementation, targeted regression, full suite/build, CI and required post-merge closure evidence are complete.
+F-013 closure evidence: `audit/remediation/A04_F013_CLOSURE.md`.
+
+A04 remains open because **F-014 — 17 active module contracts require final BOM classification** is still `OPEN / DECISION_REQUIRED`.
+
+Continue remediation in section order with **F-014**. Do not treat later A04+ findings as closed until their own implementation, targeted regression, full suite/build, CI and required post-merge closure evidence are complete.
