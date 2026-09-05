@@ -27,7 +27,7 @@
   "impactAnalysis": {
     "mode": "full-system",
     "affectedFiles": ["src/moduleDragSidebar.js", "src/scene3d.js"],
-    "affectedTests": ["e2e/plastic-trash-bin-module.spec.mjs"],
+    "affectedTests": ["test/plasticTrashBinModule.test.js", "e2e/plastic-trash-bin-module.spec.mjs"],
     "affectedDocs": ["ITEM_CONTRACT.md"],
     "relatedFindings": {
       "affected": [],
@@ -36,7 +36,7 @@
     "notes": "UI/render follow-up only. The Item contract was reviewed because trash-bin is a physical Item, but itemKey/type/state/behavior/BOM/persistence are unchanged. All catalog groups initialize collapsed. The actual Waste Basket body mesh is Object_5; its dark base-color texture is removed and the base color is forced to white. Sphere_1 continues to be pruned before bounds fitting."
   },
   "tests": {
-    "targeted": [],
+    "targeted": ["test/plasticTrashBinModule.test.js"],
     "fullSuite": true,
     "build": true,
     "e2e": {
