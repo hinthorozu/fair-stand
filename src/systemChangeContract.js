@@ -142,6 +142,8 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
 // Human/AI governance surfaces are themselves part of the architecture contract.
 // They must not be weakened or drift without the same explicit change declaration.
 export const GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS = Object.freeze({
+  'AGENTS.md': frozenDomains('architecture'),
+  'ITEM_CONTRACT.md': frozenDomains('architecture'),
   'README.md': frozenDomains('architecture'),
   'PROJECT_RULES.md': frozenDomains('architecture'),
   'ARCHITECTURE_RULES.md': frozenDomains('architecture'),
