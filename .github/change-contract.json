@@ -33,8 +33,10 @@
   "impactAnalysis": {
     "mode": "full-system",
     "affectedFiles": [
+      "scripts/verify-change-contract.mjs",
       "src/cornerPlacement.js",
       "src/modulePlacement.js",
+      "src/systemChangeContract.js",
       "src/wallReflow.js"
     ],
     "affectedTests": [
@@ -42,6 +44,8 @@
       "test/cornerPlacement.test.js",
       "test/modulePlacement.test.js",
       "test/rightWallOrientation.test.js",
+      "test/systemChangeGate.test.js",
+      "test/systemChangeGateLocalDiff.test.js",
       "test/wallReflow.test.js"
     ],
     "affectedDocs": [
@@ -49,6 +53,8 @@
       "MODULE_BEHAVIOR_STANDARD.md",
       "PROJECT_RULES.md",
       "audit/FINDINGS.md",
+      "audit/evidence/A02_CHANGE_GATE.md",
+      "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
       "audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md"
@@ -62,7 +68,7 @@
         "F-015"
       ]
     },
-    "notes": "F-016 is a stale helper/test conflict, not a requested runtime behavior change. Active right-wall placement and reflow already use 270 degrees. This remediation changes the alternate corner helper so right-wall placements also use 270 degrees, keeps left-wall placement at 90 degrees, updates right-wall test fixtures, and adds a cross-path regression proving the helper and active reflow agree. No catalog, state, renderer, persistence, BOM, UI or composition semantics are intentionally changed."
+    "notes": "F-016 is a stale helper/test conflict, not a requested runtime behavior change. Active right-wall placement and reflow already use 270 degrees. This remediation changes the alternate corner helper so right-wall placements also use 270 degrees, keeps left-wall placement at 90 degrees, updates right-wall test fixtures, and adds a cross-path regression proving the helper and active reflow agree. Full-system discovery also identified the change-gate verifier/system contract and their tests/docs as review surfaces because they reference the guarded cornerPlacement path; those surfaces are acknowledged without semantic changes. No catalog, state, renderer, persistence, BOM, UI or composition semantics are intentionally changed."
   },
   "tests": {
     "targeted": [
