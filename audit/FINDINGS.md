@@ -8,13 +8,13 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 ## Summary
 
 - Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **28**
-- Closed findings: **18**
+- Open findings: **27**
+- Closed findings: **19**
 - Open P0: **0**
-- Open P1: **13**
+- Open P1: **12**
 - Open P2: **15**
 - Open P3: **0**
-- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open; A08 in progress — F-020 closed / post-merge verified; F-023 closed / post-merge verified; F-021/F-022 remain open; A13 in progress — F-033 closed / post-merge verified; F-032/F-034 remain open; A21 in progress — F-041 closed / repository ruleset verified; F-034/F-043/F-044/F-045/F-046 remain open**
+- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open; A08 in progress — F-020 closed / post-merge verified; F-023 closed / post-merge verified; F-021/F-022 remain open; A10 in progress — F-027 closed / post-merge verified; F-025/F-026/F-028 remain open; A13 in progress — F-033 closed / post-merge verified; F-032/F-034 remain open; A21 in progress — F-041 closed / repository ruleset verified; F-034/F-043/F-044/F-045/F-046 remain open**
 
 ## Findings
 
@@ -46,7 +46,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-024 | P2 | Model-load failure can leave invisible modules; rejected loader promises stay cached | OPEN |
 | F-025 | P1 | Production entrypoint loads visible `rawBomDebug.js` UI | OPEN |
 | F-026 | P2 | User-visible standards/feature facts duplicated as static HTML text | OPEN |
-| F-027 | P1 | “Duvarı temizle” deletes all modules beyond label/confirmation scope | OPEN |
+| F-027 | P1 | “Duvarı temizle” deletes all modules beyond label/confirmation scope | **CLOSED** — `audit/remediation/A10_F027_CLOSURE.md` |
 | F-028 | P1 | “Tüm Özellikleri Kaldır” can fail when `illuminated-foam` exists | OPEN |
 | F-029 | P1 | Active automatic-wall composition has no explicit feature contract | OPEN |
 | F-030 | P1 | No canonical project-level Final BOM generator | OPEN |
