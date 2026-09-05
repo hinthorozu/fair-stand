@@ -126,6 +126,7 @@
       "test/projectUiMainIntegration.test.js",
       "test/raisedPlatform.test.js",
       "test/removedIndoorPlant2.test.js",
+      "test/sceneSurroundSingleSource.test.js",
       "test/selectedModuleRotationCursor.test.js",
       "test/selectionFeedbackMainIntegration.test.js",
       "test/shelfLighting.test.js",
@@ -174,6 +175,7 @@
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
       "audit/remediation/A02_CLOSURE.md",
       "audit/remediation/A02_F005_CLOSURE.md",
+      "audit/remediation/A03_CLOSURE.md",
       "audit/remediation/A03_F010_CLOSURE.md",
       "audit/remediation/A03_F011_CLOSURE.md",
       "docs/AUTOSAVE_INTEGRATION_NOTES.md"
