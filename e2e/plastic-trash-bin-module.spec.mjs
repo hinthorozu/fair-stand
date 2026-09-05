@@ -87,6 +87,7 @@ test('trash bin is visible in the catalog, renders its GLB, and persists through
   await modulePanel.locator(':scope > summary').click();
 
   const trashCard = page.locator(`.module-drag-card[data-module-key="${TRASH_KEY}"]`);
+  await expect(page.locator('.module-drag-group[open]')).toHaveCount(0);
   const trashGroup = page.locator('.module-drag-group', { has: trashCard });
   if (!(await trashGroup.getAttribute('open'))) {
     await trashGroup.locator(':scope > summary').click();
@@ -116,6 +117,13 @@ test('trash bin is visible in the catalog, renders its GLB, and persists through
         && Number(entry.moduleIndex) >= 0
         && Array.isArray(entry.removedNodes)
         && entry.removedNodes.includes('Sphere_1')
+        && Array.isArray(entry.trashBodyMaterials)
+        && entry.trashBodyMaterials.some((body) => (
+          body.name === 'Object_5'
+          && Array.isArray(body.materials)
+          && body.materials.length > 0
+          && body.materials.every((material) => material.color === 'ffffff' && material.hasMap === false)
+        ))
       )) ?? false
     )),
     { message: 'plastic_trash_bin.glb must finish loading and be added to the real scene module' },
