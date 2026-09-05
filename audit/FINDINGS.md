@@ -8,13 +8,13 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 ## Summary
 
 - Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **29**
-- Closed findings: **17**
+- Open findings: **28**
+- Closed findings: **18**
 - Open P0: **0**
 - Open P1: **13**
-- Open P2: **16**
+- Open P2: **15**
 - Open P3: **0**
-- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open; A08 in progress — F-020 closed / post-merge verified; F-023 closed / post-merge verified; F-021/F-022 remain open; A21 in progress — F-041 closed / repository ruleset verified; F-034/F-043/F-044/F-045/F-046 remain open**
+- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open; A08 in progress — F-020 closed / post-merge verified; F-023 closed / post-merge verified; F-021/F-022 remain open; A13 in progress — F-033 closed / post-merge verified; F-032/F-034 remain open; A21 in progress — F-041 closed / repository ruleset verified; F-034/F-043/F-044/F-045/F-046 remain open**
 
 ## Findings
 
@@ -52,7 +52,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-030 | P1 | No canonical project-level Final BOM generator | OPEN |
 | F-031 | P1 | Relationship/corner connector parts not derived from project relationships | OPEN |
 | F-032 | P2 | IndexedDB schema/migration ownership duplicated across stores | OPEN |
-| F-033 | P2 | ~30.64 MiB parked/unreferenced assets under `public/` ship with production | OPEN |
+| F-033 | P2 | ~30.64 MiB parked/unreferenced assets under `public/` ship with production | **CLOSED** — `audit/remediation/A13_F033_CLOSURE.md` |
 | F-034 | P2 | Public model/asset provenance and license inventory incomplete | OPEN / DECISION_REQUIRED |
 | F-035 | P2 | ZIP archive version/schema has no shared canonical owner/migration registry | OPEN |
 | F-036 | P1 | Imported project/module state persisted without structural domain validation | OPEN |
