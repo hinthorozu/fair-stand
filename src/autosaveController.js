@@ -1,6 +1,12 @@
 export const DEFAULT_AUTOSAVE_DELAY_MS = 5000;
 export const DEFAULT_AUTOSAVE_WATCH_INTERVAL_MS = 1000;
 
+let activeAutosaveController = null;
+
+export function getActiveAutosaveController() {
+  return activeAutosaveController;
+}
+
 export function createAutosaveController({
   getSignature,
   persist,
@@ -26,6 +32,7 @@ export function createAutosaveController({
   let pendingTimer = null;
   let watchTimer = null;
   let observedSignature = null;
+  let flushPromise = null;
 
   function clearPending() {
     if (pendingTimer !== null) clearTimeoutFn(pendingTimer);
@@ -99,13 +106,33 @@ export function createAutosaveController({
     return enabled;
   }
 
-  return Object.freeze({
+  async function flush({ quiet = true } = {}) {
+    clearPending();
+    if (flushPromise) return flushPromise;
+
+    flushPromise = (async () => {
+      await persist({ quiet });
+      enableFromCurrentState();
+      return true;
+    })();
+
+    try {
+      return await flushPromise;
+    } finally {
+      flushPromise = null;
+    }
+  }
+
+  const controller = Object.freeze({
     checkForChanges,
     clearPending,
     disable,
     enableFromCurrentState,
+    flush,
     isEnabled,
     markSavedState,
     schedule,
   });
+  activeAutosaveController = controller;
+  return controller;
 }
