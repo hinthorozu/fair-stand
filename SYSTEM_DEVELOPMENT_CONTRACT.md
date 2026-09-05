@@ -3,8 +3,10 @@
 > **Bu belge module / feature / core implementasyon sözleşmesidir.**
 >
 > Her değişiklik bundan **önce** `SYSTEM_CHANGE_GATE.md` üzerinden universal impact classification alır, `SYSTEM_IMPACT_SWEEP.md` ile dependency/test/finding taramasından geçer ve `.github/change-contract.json` içinde machine-readable olarak beyan edilir.
+>
+> BOM, üretim veya maliyet hesabına girebilen fiziksel ürün/zemin/malzeme/kombinasyon işleri ayrıca **implementasyondan önce `ITEM_CONTRACT.md` sözleşmesini uygulamak zorundadır**.
 
-Amaç, insan veya AI tarafından sisteme yeni modül, feature, otomasyon veya davranış eklenirken yalnız değiştirilen dosyaya bakıp başka sorumlulukların geride bırakılmasını engellemektir.
+Amaç, insan veya AI tarafından sisteme yeni modül, feature, otomasyon, Item veya davranış eklenirken yalnız değiştirilen dosyaya bakıp başka sorumlulukların geride bırakılmasını engellemektir.
 
 ---
 
@@ -14,7 +16,7 @@ Fair Stand'da bir değişiklik yalnızca tek bir dosya veya 3D obje değildir. A
 
 Bu nedenle "modeli sahneye ekledim", "butonu bağladım" veya "fonksiyonu refactor ettim" tek başına tamamlanmış iş değildir.
 
-Universal gate gerçek etki alanını ve bağımlılıkları bulur; bu belge module/feature/core katmanında bu etkilerin nasıl uygulanacağını tanımlar.
+Universal gate gerçek etki alanını ve bağımlılıkları bulur; `ITEM_CONTRACT.md` fiziksel/BOM kapsamındaki öğelerin kök semantiğini belirler; bu belge module/feature/core katmanında bu etkilerin nasıl uygulanacağını tanımlar.
 
 ---
 
@@ -22,6 +24,7 @@ Universal gate gerçek etki alanını ve bağımlılıkları bulur; bu belge mod
 
 | Konu | Canonical kaynak |
 |---|---|
+| Item kök semantiği / itemKey-type-instance / BOM ownership | `ITEM_CONTRACT.md` |
 | Universal impact domain registry | `src/systemChangeContract.js > SYSTEM_IMPACT_DOMAINS` |
 | Browser E2E trigger registry | `src/systemChangeContract.js > SYSTEM_BROWSER_E2E_DOMAINS` |
 | Universal değişiklik kabul kapısı | `SYSTEM_CHANGE_GATE.md` + `.github/change-contract.json` |
@@ -48,51 +51,64 @@ Universal gate gerçek etki alanını ve bağımlılıkları bulur; bu belge mod
 İki aşama zorunludur:
 
 1. **Universal:** `SYSTEM_IMPACT_DOMAINS` registry'sinde o anda tanımlı bütün domainler için `affected` / `not-applicable` kararı verilir. Domain sayısı sabit değildir.
-2. **Domain:** İş module / variant / runtime-module / feature-composition / core-change sınıflarından uygun olanıyla uygulanır.
+2. **Domain:** İş Item / module / variant / runtime-module / feature-composition / core-change sınıflarından uygun olanıyla uygulanır.
 
 Browser-visible etki varsa `SYSTEM_BROWSER_E2E_DOMAINS` registry'si E2E'yi otomatik zorunlu kılar.
 
-## A. Yeni katalog modülü
+## A. Yeni Item
 
-`MODULE_CATALOG` + explicit module contract + behavior + state construction + renderer + persistence + BOM policy + targeted regression + targeted E2E gerekir.
+BOM, üretim veya maliyet hesabına girebilen yeni fiziksel ürün, zemin, malzeme, kombinasyon veya runtime öğesinde önce `ITEM_CONTRACT.md` uygulanır. En az canonical `itemKey`, `type`, state/parametre sahipliği, tekil/bileşik/parametrik yapı, BOM recipe/resolver, quantity+unit, project instance ayrımı, behavior family, render/persistence ve test etkileri karara bağlanır.
 
-## B. Mevcut modül varyantı
+Catalog, renderer, GLB veya UI eklemek tek başına yeni Item implementasyonu değildir.
 
-Mevcut profile gerçekten uyuyorsa inheritance kullanılabilir. Uymuyorsa override veya yeni profile tanımlanır. Varyantın browser akışı değişiyorsa E2E aynı PR'da güncellenir.
+## B. Yeni katalog modülü
 
-## C. Katalog dışı runtime modülü
+`MODULE_CATALOG` + explicit module contract + behavior + state construction + renderer + persistence + BOM policy + targeted regression + targeted E2E gerekir. Fiziksel/BOM kapsamındaysa ayrıca Item contract'ı zorunludur.
 
-Katalogda görünmese bile explicit module contract ve canonical state construction zorunludur. Mevcut örnek `illuminated-foam` ailesidir.
+## C. Mevcut modül varyantı
 
-## D. Feature / scene composition
+Mevcut profile gerçekten uyuyorsa inheritance kullanılabilir. Uymuyorsa yeni davranış ailesi/profile değerlendirilir; sürekli item-level override normal genişleme yolu değildir. Varyantın browser akışı değişiyorsa E2E aynı PR'da güncellenir.
+
+## D. Katalog dışı runtime modülü
+
+Katalogda görünmese bile explicit module contract ve canonical state construction zorunludur. Mevcut örnek `illuminated-foam` ailesidir. BOM/maliyet kapsamındaki runtime modülü aynı zamanda Item contract'ını taşır.
+
+## E. Feature / scene composition
 
 Birden fazla modülü/domaini koordine eden işler `src/featureContracts.js` içinde feature contract taşır. UI callback veya renderer içine gizlenmiş composition kuralı kabul edilmez.
 
-## E. Core davranış değişikliği
+## F. Core davranış değişikliği
 
 Rotation, collision, placement, state construction veya benzeri core değişiklikte önce mevcut core contract'ın ihtiyacı ifade edip edemediği kontrol edilir. Edemiyorsa canonical contract genişletilir; type-specific dağınık `if` ile başlanmaz.
 
 ---
 
-# 4. Her modül/feature için cevaplanması gereken alanlar
+# 4. Her Item/modül/feature için cevaplanması gereken alanlar
 
 ## 4.1 Identity
 
-- Catalog key nedir?
-- Runtime `type` nedir?
-- Mevcut bir ailenin varyantı mı?
+Item kapsamındaysa:
+
+- canonical `itemKey` nedir?
+- runtime `type` / behavior family nedir?
+- project instance `id` canonical ürün kimliğinden nasıl ayrılır?
+- mevcut `catalogKey` ile ilişki nedir; paralel ikinci kimlik yaratılıyor mu?
+
+Module-only kapsamda mevcut catalog identity kuralları korunur.
 
 ## 4.2 Profile / inheritance
 
-- Hangi profile kullanılıyor?
+- Hangi profile/type family kullanılıyor?
 - Hangi davranışlar miras alınıyor?
-- Hangi alanlar neden override ediliyor?
+- Davranış gerçekten farklıysa yeni family gerekiyor mu?
+- Item-specific override yerine family-level contract kurulabilir mi?
 
 ## 4.3 State
 
 - State construction canonical olarak nerede?
 - Hangi alanlar persisted?
 - Hangi alanlar runtime-derived?
+- Project instance ölçü/adet/konfigürasyonu canonical Item tanımından ayrılmış mı?
 - Save/load round-trip sonrası anlam korunuyor mu?
 
 ## 4.4 Placement / movement / rotation / collision
@@ -104,7 +120,7 @@ Rotation, collision, placement, state construction veya benzeri core değişikli
 - side insert var mı?
 - ghost nasıl davranır?
 
-Module-specific farklar `src/moduleBehavior.js` ve placement core üzerinden ifade edilir.
+Item/module-specific farklar `src/moduleBehavior.js` ve placement core üzerinden ifade edilir. Context-menu görünürlüğü ve runtime enforcement aynı canonical capability/behavior kaynağını tüketmelidir.
 
 ## 4.5 Appearance
 
@@ -121,7 +137,7 @@ Module-specific farklar `src/moduleBehavior.js` ve placement core üzerinden ifa
 - specialized renderer var mı?
 - asset değişikliği hangi JS/CSS/HTML/browser akışını etkiliyor?
 
-Renderer ürün kuralının tek sahibi haline getirilmez.
+Renderer ürün kuralının veya BOM hesabının tek sahibi haline getirilmez. BOM render/mesh/texture görünümünden türetilmez.
 
 ## 4.7 Persistence / storage
 
@@ -131,13 +147,19 @@ Renderer ürün kuralının tek sahibi haline getirilmez.
 
 ## 4.8 BOM policy
 
-Her modül açıkça şu politikalardan birine sahip olmalıdır:
+Her fiziksel Item/modül BOM'a nasıl dönüştüğünü canonical olarak tanımlamalıdır.
+
+Mevcut module contract politikaları:
 
 - `recipe`
 - `commercial-item`
 - `excluded`
 
+Item seviyesinde BOM resolver tekil, bileşik veya parametrik olabilir. Terminal BOM kalemleri canonical kimlik + `quantity` + canonical `unit` taşır. Bileşik Item çözümü recursive olabilir; cycle yasaktır.
+
 `decision-required` production-ready yeni iş için kabul edilen son durum değildir.
+
+BOM ile pricing/costing ayrıdır; fiyat değişikliği BOM recipe'sini değiştirmez.
 
 ## 4.9 Runtime behavior
 
@@ -148,8 +170,8 @@ Her modül açıkça şu politikalardan birine sahip olmalıdır:
 
 ## 4.10 Composition / dependencies
 
-- başka modül oluşturuyor mu?
-- parent/child ilişkisi var mı?
+- başka Item/modül oluşturuyor mu?
+- parent/child veya component ilişkisi var mı?
 - hangi wrapper/orchestrator çağırıyor?
 - reverse dependents neler?
 
@@ -169,7 +191,7 @@ zorunludur.
 
 `SYSTEM_BROWSER_E2E_DOMAINS` içindeki herhangi bir domain `affected` ise ayrıca **değişikliğe özel targeted `e2e/**` spec** zorunludur. Baseline smoke tek başına yeni browser davranışının kanıtı sayılmaz.
 
-Save/load etkileniyorsa persistence round-trip; BOM etkileniyorsa recipe/BOM contract; UI/renderer/placement etkileniyorsa gerçek kullanıcı akışı ayrıca doğrulanır.
+Save/load etkileniyorsa persistence round-trip; BOM etkileniyorsa Item/recipe/BOM quantity+unit contract; UI/renderer/placement etkileniyorsa gerçek kullanıcı akışı ayrıca doğrulanır.
 
 ---
 
@@ -182,7 +204,7 @@ Save/load etkileniyorsa persistence round-trip; BOM etkileniyorsa recipe/BOM con
 
 `test/systemDevelopmentContract.test.js` katalog öğelerinin explicit contract ataması taşımasını, gerekli policy bölümlerini resolve etmesini, recipe-backed modüllerin gerçek recipe çözmesini ve katalog dışı runtime modüllerinin explicit contract taşımasını zorlar.
 
-Bu module gate universal change gate'in yerine geçmez; onun altında domain-specific enforcement katmanıdır.
+Bu module gate universal change gate'in veya `ITEM_CONTRACT.md` kapsamındaki Item gate'in yerine geçmez; onların altında domain-specific enforcement katmanıdır.
 
 ---
 
@@ -196,13 +218,15 @@ Feature browser-visible ise Playwright E2E gerçek kullanıcı akışını da do
 
 ---
 
-# 7. Örnek — yeni modül
+# 7. Örnek — yeni Item / modül
 
 Yeni bir çöp kovası eklendiğinde yalnız catalog + GLB yeterli değildir.
 
 Zorunlu zincir:
 
-`impact sweep → module contract → behavior → state construction → renderer/asset → persistence → BOM → affected existing tests → targeted regression → targeted E2E → full CI`
+`Item contract → impact sweep → itemKey/type → module contract → behavior → state construction → renderer/asset → persistence → BOM quantity+unit → affected existing tests → targeted regression → targeted E2E → full CI`
+
+Yeni bir cam zemin eklendiğinde de yalnız `floorType === 'glass'` branch'i eklenmez; `itemKey`, `type=floor`, state/ölçü parametreleri, BOM resolver, behavior/capability, render, persistence ve test sözleşmeleri birlikte tanımlanır.
 
 ---
 
@@ -217,12 +241,13 @@ Canlı saat için runtime time değeri persisted state'e yazılmaz. Config persi
 Depo içeriği değişirse yalnız renderer içine obje eklenmez.
 
 1. Universal impact + full-system discovery yapılır.
-2. `automatic-depot` feature contract güncellenir.
-3. Planner ve canonical state construction yolu güncellenir.
-4. Existing dependent tests review edilir.
-5. Targeted unit/integration regression yazılır.
-6. Gerçek UI akışını doğrulayan targeted E2E yazılır.
-7. Full test + build + E2E çalışır.
+2. Yeni/etkilenen fiziksel öğeler için `ITEM_CONTRACT.md` uygulanır.
+3. `automatic-depot` feature contract güncellenir.
+4. Planner ve canonical state construction yolu güncellenir.
+5. Existing dependent tests review edilir.
+6. Targeted unit/integration regression yazılır.
+7. Gerçek UI akışını doğrulayan targeted E2E yazılır.
+8. Full test + build + E2E çalışır.
 
 ---
 
@@ -230,34 +255,41 @@ Depo içeriği değişirse yalnız renderer içine obje eklenmez.
 
 1. Fresh `ROG` üzerinden branch oluştur.
 2. `SYSTEM_CHANGE_GATE.md` ve `SYSTEM_IMPACT_SWEEP.md` oku.
-3. `SYSTEM_IMPACT_DOMAINS` registry'sindeki bütün domainleri sınıflandır.
-4. İlk reverse dependency/test/doc/finding taramasını çıkar.
-5. `.github/change-contract.json` içinde impact + acknowledgement yaz.
-6. Browser-impact varsa `tests.e2e.required=true` ve targeted E2E path belirle.
-7. İlgili module/feature/core contract kararlarını ver.
-8. Implementation yap.
-9. `npm run contract:verify` ile gerçek diff üzerinden impact sweep'i yeniden hesapla.
-10. Yeni bulunan caller/test/doc/finding yüzeylerini review edip contract'ı güncelle.
-11. Targeted regressionları çalıştır.
-12. `npm test` çalıştır.
-13. `npm run build` çalıştır.
-14. Playwright/Chromium hazır değilse local runner/browser dependency'lerini kur.
-15. `npm run e2e` çalıştır.
-16. PR aç; canonical CI'nın `contract:verify → npm ci → npm test → npm run build → Chromium → npm run e2e` zinciri yeşil olmalı.
-17. Merge sonrası post-merge ROG CI yeşil olmadan finding/iş tamamlandı sayılmaz.
+3. İş BOM/üretim/maliyet kapsamındaki fiziksel öğeyi etkiliyorsa `ITEM_CONTRACT.md` oku ve Item kararlarını ver.
+4. `SYSTEM_IMPACT_DOMAINS` registry'sindeki bütün domainleri sınıflandır.
+5. İlk reverse dependency/test/doc/finding taramasını çıkar.
+6. `.github/change-contract.json` içinde impact + acknowledgement yaz.
+7. Browser-impact varsa `tests.e2e.required=true` ve targeted E2E path belirle.
+8. İlgili Item/module/feature/core contract kararlarını ver.
+9. Implementation yap.
+10. `npm run contract:verify` ile gerçek diff üzerinden impact sweep'i yeniden hesapla.
+11. Yeni bulunan caller/test/doc/finding yüzeylerini review edip contract'ı güncelle.
+12. Targeted regressionları çalıştır.
+13. `npm test` çalıştır.
+14. `npm run build` çalıştır.
+15. Playwright/Chromium hazır değilse local runner/browser dependency'lerini kur.
+16. `npm run e2e` çalıştır.
+17. PR aç; canonical CI'nın `contract:verify → npm ci → npm test → npm run build → Chromium → npm run e2e` zinciri yeşil olmalı.
+18. Merge sonrası post-merge ROG CI yeşil olmadan finding/iş tamamlandı sayılmaz.
 
 ---
 
 # 11. Yasaklanan geliştirme kalıpları
 
 - Universal impact declaration veya full-system sweep olmadan guarded değişiklik tamamlamak.
+- `ITEM_CONTRACT.md` kapsamındaki fiziksel öğeyi Item gate dışında eklemek.
+- Yeni Item'ı yalnız catalog/renderer/GLB/UI ekleyerek tamamlanmış saymak.
+- `itemKey` yerine label, model filename veya renderer node adını canonical ürün kimliği yapmak.
 - Registry'deki bir domaini gerçeğe aykırı `not-applicable` işaretlemek.
 - Caller/dependent/test discovery sonucunu görmezden gelmek.
 - Yeni canonical API ekleyip eski source-shape testlerini sessizce bırakmak.
 - Catalog'a yeni modül ekleyip module contract eklememek.
 - Yeni modülü varsayılan behavior'a sessizce bırakmak.
-- Rotation/collision/snap/state construction gibi core davranışı dağınık type-specific `if` ile çözmek.
-- BOM kararını atlamak.
+- Rotation/collision/snap/state construction/context-menu capability gibi davranışı dağınık item/type-specific `if` ile çözmek.
+- Aynı davranış ailesi içinde item-level override'ı normal genişleme yöntemi yapmak.
+- BOM kararını atlamak veya unitsiz quantity üretmek.
+- BOM'u renderer/mesh/texture üzerinden türetmek.
+- BOM recipe ile fiyatlandırmayı aynı canonical kaynakta birleştirmek.
 - Runtime-derived değeri gereksiz yere project state'e kaydetmek.
 - Multi-module automation kuralını yalnız UI callback içine gömmek.
 - Targeted regression olmadan davranış değişikliği tamamlamak.
@@ -268,6 +300,6 @@ Depo içeriği değişirse yalnız renderer içine obje eklenmez.
 
 # 12. Genişleme ilkesi
 
-Bu contract sabit domain sayısına veya bugünkü modül listesine bağlı değildir. Yeni domain, browser capability, contract türü veya test katmanı eklendiğinde canonical registry/schema genişletilir; validator ve regression suite yeni sözleşmeyi otomatik zorlar.
+Bu contract sabit domain sayısına veya bugünkü modül/Item listesine bağlı değildir. Yeni domain, browser capability, Item family, contract türü veya test katmanı eklendiğinde canonical registry/schema genişletilir; validator ve regression suite yeni sözleşmeyi otomatik zorlar.
 
 Contract registry runtime davranışının ikinci implementasyonu haline getirilmez; canonical source-of-truth sahipliği korunur.
