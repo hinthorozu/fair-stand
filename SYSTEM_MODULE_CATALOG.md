@@ -17,9 +17,9 @@ Bu dosya insan/AI için **okunabilir katalog indeksi**dir. Runtime source-of-tru
 
 Bu snapshot `ROG` üzerindeki `MODULE_CATALOG_KEYS` ve `MODULE_CONTRACT_ASSIGNMENTS` ile eşleşmek zorundadır; `test/systemModuleCatalogDoc.test.js` drift olduğunda CI'yi kırar.
 
-- Catalog entries: **45**
+- Catalog entries: **46**
 - BOM mode `recipe`: **29**
-- BOM mode `decision-required`: **16**
+- BOM mode `decision-required`: **17**
 - Katalog dışı explicit runtime module: **1** (`illuminated-foam`)
 - Katalog dışı module BOM mode `decision-required`: **1**
 
@@ -65,6 +65,7 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `DEPOT_MINI_FRIDGE_AVANTI`
 - `DEPOT_KETTLE`
 - `DEPOT_COAT_RACK`
+- `DEPOT_PLASTIC_TRASH_BIN`
 - `EXTRA_INDOOR_PLANT_1`
 - `EXTRA_LONG_PLANTER_100`
 - `EXTRA_LONG_PLANTER_150`
@@ -95,7 +96,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Mobilya / Depo / Bitki
 
-`furniture_sofa_set_classic`, `furniture_table_chair_set_eames`, `furniture_bar_stool_classic`, `DEPOT_MINI_FRIDGE_AVANTI`, `DEPOT_KETTLE`, `DEPOT_COAT_RACK`, `EXTRA_INDOOR_PLANT_1`, `EXTRA_LONG_PLANTER_100`, `EXTRA_LONG_PLANTER_150`, `EXTRA_LONG_PLANTER_200`
+`furniture_sofa_set_classic`, `furniture_table_chair_set_eames`, `furniture_bar_stool_classic`, `DEPOT_MINI_FRIDGE_AVANTI`, `DEPOT_KETTLE`, `DEPOT_COAT_RACK`, `DEPOT_PLASTIC_TRASH_BIN`, `EXTRA_INDOOR_PLANT_1`, `EXTRA_LONG_PLANTER_100`, `EXTRA_LONG_PLANTER_150`, `EXTRA_LONG_PLANTER_200`
 
 ### Medya / Işık
 
@@ -107,12 +108,12 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 Duvar/panel, separatör, vitrin, raf, panel bazalı duvar, depo kapısı, düz/L banko ve baza ailelerinin contract'ı `recipe` modundadır. Gerçek recipe çözümü `src/moduleRecipes.js` tarafından yapılır ve contract testleri recipe-backed kayıtların gerçekten resolve olduğunu doğrular.
 
-### `decision-required` — 16 katalog kaydı
+### `decision-required` — 17 katalog kaydı
 
 Şu katalog aileleri için Final BOM sınıflandırması henüz ürün/üretim kararı bekler:
 
 - mobilya setleri / bar taburesi
-- depo mini buzdolabı / kettle / askılık
+- depo mini buzdolabı / kettle / askılık / çöp kutusu
 - yapay bitki / uzun saksılar
 - TV 42 / 55 / 65
 - Video Wall 2×2 / 3×3
