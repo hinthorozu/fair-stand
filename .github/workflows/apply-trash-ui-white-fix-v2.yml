@@ -1,0 +1,100 @@
+name: Apply trash and catalog UI fix v2
+on:
+  push:
+    branches: [fix/catalog-default-closed-trash-white]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/catalog-default-closed-trash-white
+      - name: Patch catalog defaults, trash body material, E2E, and contract
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import json
+
+          p = Path('src/moduleDragSidebar.js')
+          s = p.read_text()
+          old = "    details.open = index === 0;"
+          assert old in s
+          p.write_text(s.replace(old, "    details.open = false;", 1))
+
+          p = Path('src/scene3d.js')
+          s = p.read_text()
+          old = """    const model = template.clone(true);\n    const removedNodes = [];\n    if (type === 'plastic-trash-bin') {\n      const strayNodes = [];\n      model.traverse((object) => {\n        if (object.name === 'Sphere_1') strayNodes.push(object);\n      });\n      strayNodes.forEach((object) => {\n        removedNodes.push(object.name);\n        object.parent?.remove(object);\n      });\n    }\n    model.traverse((child) => {\n      if (!child.isMesh) return;\n      child.castShadow = true;\n      child.receiveShadow = true;\n"""
+          new = """    const model = template.clone(true);\n    const removedNodes = [];\n    const trashBodyMaterials = [];\n    if (type === 'plastic-trash-bin') {\n      const strayNodes = [];\n      model.traverse((object) => {\n        if (object.name === 'Sphere_1') strayNodes.push(object);\n      });\n      strayNodes.forEach((object) => {\n        removedNodes.push(object.name);\n        object.parent?.remove(object);\n      });\n    }\n    model.traverse((child) => {\n      if (!child.isMesh) return;\n      child.castShadow = true;\n      child.receiveShadow = true;\n\n      if (type === 'plastic-trash-bin' && child.name === 'Object_5') {\n        const sourceMaterials = Array.isArray(child.material) ? child.material : [child.material];\n        const whiteMaterials = sourceMaterials.map((material) => {\n          const next = material?.clone?.() ?? material;\n          if (!next) return next;\n          next.map = null;\n          next.color?.set(0xffffff);\n          if ('metalness' in next) next.metalness = 0;\n          if ('roughness' in next) next.roughness = 0.58;\n          next.needsUpdate = true;\n          return next;\n        });\n        child.material = Array.isArray(child.material) ? whiteMaterials : whiteMaterials[0];\n        trashBodyMaterials.push({\n          name: child.name,\n          materials: whiteMaterials.filter(Boolean).map((material) => ({\n            color: material.color?.getHexString?.() ?? null,\n            hasMap: Boolean(material.map),\n          })),\n        });\n      }\n"""
+          assert old in s
+          s = s.replace(old, new, 1)
+          old = "detail: { moduleId: moduleState.id, moduleIndex, type, modelFile, removedNodes },"
+          assert old in s
+          s = s.replace(old, "detail: { moduleId: moduleState.id, moduleIndex, type, modelFile, removedNodes, trashBodyMaterials },", 1)
+          p.write_text(s)
+
+          p = Path('e2e/plastic-trash-bin-module.spec.mjs')
+          s = p.read_text()
+          old = """  const trashCard = page.locator(`.module-drag-card[data-module-key=\"${TRASH_KEY}\"]`);\n  const trashGroup = page.locator('.module-drag-group', { has: trashCard });\n"""
+          assert old in s
+          s = s.replace(old, """  const trashCard = page.locator(`.module-drag-card[data-module-key=\"${TRASH_KEY}\"]`);\n  await expect(page.locator('.module-drag-group[open]')).toHaveCount(0);\n  const trashGroup = page.locator('.module-drag-group', { has: trashCard });\n""", 1)
+          old = """        && Array.isArray(entry.removedNodes)\n        && entry.removedNodes.includes('Sphere_1')\n"""
+          assert old in s
+          s = s.replace(old, """        && Array.isArray(entry.removedNodes)\n        && entry.removedNodes.includes('Sphere_1')\n        && Array.isArray(entry.trashBodyMaterials)\n        && entry.trashBodyMaterials.some((body) => (\n          body.name === 'Object_5'\n          && Array.isArray(body.materials)\n          && body.materials.length > 0\n          && body.materials.every((material) => material.color === 'ffffff' && material.hasMap === false)\n        ))\n""", 1)
+          p.write_text(s)
+
+          contract = {
+            "schemaVersion": 2,
+            "id": "catalog-default-closed-trash-white-body",
+            "kind": "module",
+            "summary": "Make every module catalog group start collapsed and render the plastic trash-bin body mesh white while preserving the corrected trash-bin geometry.",
+            "owners": ["src/moduleDragSidebar.js", "src/scene3d.js"],
+            "sourceOfTruth": ["src/moduleDragSidebar.js", "src/scene3d.js", "ITEM_CONTRACT.md"],
+            "impact": {
+              "catalog": "affected", "behavior": "not-applicable", "state": "not-applicable",
+              "placement": "not-applicable", "renderer": "affected", "persistence": "not-applicable",
+              "bom": "not-applicable", "ui": "affected", "composition": "not-applicable",
+              "assets": "not-applicable", "storage": "not-applicable", "importExport": "not-applicable",
+              "performance": "not-applicable", "accessibility": "not-applicable", "architecture": "not-applicable",
+              "security": "not-applicable", "tests": "affected"
+            },
+            "impactAnalysis": {
+              "mode": "full-system",
+              "affectedFiles": ["src/moduleDragSidebar.js", "src/scene3d.js"],
+              "affectedTests": ["e2e/plastic-trash-bin-module.spec.mjs"],
+              "affectedDocs": ["ITEM_CONTRACT.md"],
+              "relatedFindings": {
+                "affected": [],
+                "reviewedNotAffected": ["F-014", "F-017", "F-024", "F-040"]
+              },
+              "notes": "UI/render follow-up only. The Item contract was reviewed because trash-bin is a physical Item, but itemKey/type/state/behavior/BOM/persistence are unchanged. All catalog groups initialize collapsed. The actual Waste Basket body mesh is Object_5; its dark base-color texture is removed and the base color is forced to white. Sphere_1 continues to be pruned before bounds fitting."
+            },
+            "tests": {
+              "targeted": [], "fullSuite": true, "build": true,
+              "e2e": {
+                "required": true,
+                "targeted": ["e2e/plastic-trash-bin-module.spec.mjs"],
+                "reason": "Chromium verifies every catalog group is initially collapsed, real trash drag/drop completes, Sphere_1 is pruned, and the actual Object_5 body material is white with no dark base-color map."
+              }
+            },
+            "risk": {
+              "level": "medium",
+              "notes": "Primary risks are catalog accordion default-state regression or applying the white override to the wrong GLB mesh. The source GLB was inspected: Object_5 is the 956-vertex Waste Basket body branch, while Sphere_1 is the unrelated backdrop sphere."
+            },
+            "migration": {"required": false, "notes": "No persisted schema or runtime Item identity changes."},
+            "rollback": "Revert the catalog default-closed change and trash body material override if the UI or trash appearance regresses."
+          }
+          Path('.github/change-contract.json').write_text(json.dumps(contract, indent=2, ensure_ascii=False) + '\n')
+          PY
+      - name: Commit patch and remove helper workflow
+        shell: bash
+        run: |
+          rm .github/workflows/apply-trash-ui-white-fix-v2.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/moduleDragSidebar.js src/scene3d.js e2e/plastic-trash-bin-module.spec.mjs .github/change-contract.json .github/workflows/apply-trash-ui-white-fix-v2.yml
+          git commit -m 'Close catalog groups and whiten trash body'
+          git push origin HEAD:fix/catalog-default-closed-trash-white
