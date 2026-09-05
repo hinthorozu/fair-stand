@@ -8,13 +8,13 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 ## Summary
 
 - Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **31**
-- Closed findings: **15**
+- Open findings: **30**
+- Closed findings: **16**
 - Open P0: **0**
 - Open P1: **14**
-- Open P2: **17**
+- Open P2: **16**
 - Open P3: **0**
-- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open; A08 in progress — F-020 closed / post-merge verified; F-021/F-022/F-023 remain open**
+- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open; A08 in progress — F-020 closed / post-merge verified; F-023 closed / post-merge verified; F-021/F-022 remain open**
 
 ## Findings
 
@@ -42,7 +42,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-020 | P1 | Pending autosave can be cancelled/lost during project switch/open | **CLOSED** — `audit/remediation/A08_F020_CLOSURE.md` |
 | F-021 | P2 | Project `version` exists without canonical validation/migration pipeline | OPEN |
 | F-022 | P2 | No complete persistence round-trip contract for every special module family | OPEN |
-| F-023 | P2 | Whole-project deletion not atomic across project and asset stores | OPEN |
+| F-023 | P2 | Whole-project deletion not atomic across project and asset stores | **CLOSED** — `audit/remediation/A08_F023_CLOSURE.md` |
 | F-024 | P2 | Model-load failure can leave invisible modules; rejected loader promises stay cached | OPEN |
 | F-025 | P1 | Production entrypoint loads visible `rawBomDebug.js` UI | OPEN |
 | F-026 | P2 | User-visible standards/feature facts duplicated as static HTML text | OPEN |
