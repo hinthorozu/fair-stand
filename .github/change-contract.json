@@ -1,97 +1,57 @@
 {
   "schemaVersion": 2,
-  "id": "item-contract-governance",
-  "kind": "architecture",
-  "summary": "Introduce the canonical Item contract for every physical BOM/cost-bearing stand entity, make it a mandatory repository-agent/development entrypoint, and guard the contract itself through the universal change gate.",
-  "owners": [
-    "ITEM_CONTRACT.md",
-    "AGENTS.md",
-    "src/systemChangeContract.js"
-  ],
-  "sourceOfTruth": [
-    "ITEM_CONTRACT.md",
-    "SYSTEM_DEVELOPMENT_CONTRACT.md",
-    "PROJECT_RULES.md",
-    "ARCHITECTURE_RULES.md"
-  ],
+  "id": "catalog-default-closed-trash-white-body",
+  "kind": "module",
+  "summary": "Make every module catalog group start collapsed and render the plastic trash-bin body mesh white while preserving the corrected trash-bin geometry.",
+  "owners": ["src/moduleDragSidebar.js", "src/scene3d.js"],
+  "sourceOfTruth": ["src/moduleDragSidebar.js", "src/scene3d.js", "ITEM_CONTRACT.md"],
   "impact": {
-    "catalog": "not-applicable",
+    "catalog": "affected",
     "behavior": "not-applicable",
     "state": "not-applicable",
     "placement": "not-applicable",
-    "renderer": "not-applicable",
+    "renderer": "affected",
     "persistence": "not-applicable",
     "bom": "not-applicable",
-    "ui": "not-applicable",
+    "ui": "affected",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "affected",
+    "architecture": "not-applicable",
     "security": "not-applicable",
     "tests": "affected"
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [
-      "src/systemChangeContract.js",
-      "scripts/verify-change-contract.mjs"
-    ],
-    "affectedTests": [
-      "test/developerEntrypointDocs.test.js",
-      "test/systemChangeGate.test.js",
-      "test/systemChangeGateLocalDiff.test.js"
-    ],
-    "affectedDocs": [
-      "AGENTS.md",
-      "ITEM_CONTRACT.md",
-      "ARCHITECTURE_RULES.md",
-      "PROJECT_RULES.md",
-      "README.md",
-      "SYSTEM_AUDIT_CHECKLIST.md",
-      "SYSTEM_CHANGE_GATE.md",
-      "SYSTEM_DEVELOPMENT_CONTRACT.md",
-      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
-      "audit/evidence/A02_CHANGE_GATE.md",
-      "audit/evidence/A03_ARCHITECTURE.md",
-      "audit/remediation/A02_CLOSURE.md",
-      "audit/remediation/A02_F005_CLOSURE.md",
-      "audit/remediation/A02_F006_CLOSURE.md"
-    ],
+    "affectedFiles": ["src/moduleDragSidebar.js", "src/scene3d.js"],
+    "affectedTests": ["e2e/plastic-trash-bin-module.spec.mjs"],
+    "affectedDocs": ["ITEM_CONTRACT.md"],
     "relatedFindings": {
       "affected": [],
-      "reviewedNotAffected": [
-        "F-004",
-        "F-005",
-        "F-006",
-        "F-014",
-        "F-015"
-      ]
+      "reviewedNotAffected": ["F-014", "F-017", "F-024", "F-040"]
     },
-    "notes": "Governance-only Item root contract. Full-system discovery surfaces for the change gate, developer entrypoint, architecture docs, historical audit evidence and candidate findings were reviewed and acknowledged. No catalog descriptor, runtime behavior, state schema, placement, renderer, persistence, BOM calculation or pricing implementation changes in this PR. F-015 remains open because side-insert runtime enforcement is intentionally not changed here; this PR only establishes the canonical future Item/behavior ownership rule. F-014 BOM classification is likewise not resolved by this governance change."
+    "notes": "UI/render follow-up only. The Item contract was reviewed because trash-bin is a physical Item, but itemKey/type/state/behavior/BOM/persistence are unchanged. All catalog groups initialize collapsed. The actual Waste Basket body mesh is Object_5; its dark base-color texture is removed and the base color is forced to white. Sphere_1 continues to be pruned before bounds fitting."
   },
   "tests": {
-    "targeted": [
-      "test/developerEntrypointDocs.test.js",
-      "test/systemChangeGate.test.js"
-    ],
+    "targeted": [],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "This PR changes repository governance contracts and their machine-enforced document gate only; it does not change browser-visible behavior or any browser-impact domain."
+      "required": true,
+      "targeted": ["e2e/plastic-trash-bin-module.spec.mjs"],
+      "reason": "Chromium verifies every catalog group is initially collapsed, real trash drag/drop completes, Sphere_1 is pruned, and the actual Object_5 body material is white with no dark base-color map."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "The change intentionally broadens repository governance for future physical Item work. Runtime behavior is unchanged, but an incorrect contract could constrain future implementations, so the contract is guarded by tests and the universal architecture gate."
+    "notes": "Primary risks are catalog accordion default-state regression or applying the white override to the wrong GLB mesh. The source GLB was inspected: Object_5 is the 956-vertex Waste Basket body branch, while Sphere_1 is the unrelated backdrop sphere."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted project schema or runtime Item state is migrated in this PR. The existing module/catalog model remains operational until a later implementation change explicitly adopts the Item runtime model."
+    "notes": "No persisted schema or runtime Item identity changes."
   },
-  "rollback": "Revert the Item governance PR to remove ITEM_CONTRACT.md, AGENTS.md, the development/architecture references, and the governance-document gate entries; runtime product behavior remains unchanged either way."
+  "rollback": "Revert the catalog default-closed change and trash body material override if the UI or trash appearance regresses."
 }

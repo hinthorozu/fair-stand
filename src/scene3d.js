@@ -4989,6 +4989,7 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
     if (!group.parent) return;
     const model = template.clone(true);
     const removedNodes = [];
+    const trashBodyMaterials = [];
     if (type === 'plastic-trash-bin') {
       const strayNodes = [];
       model.traverse((object) => {
@@ -5003,6 +5004,28 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
       if (!child.isMesh) return;
       child.castShadow = true;
       child.receiveShadow = true;
+
+      if (type === 'plastic-trash-bin' && child.name === 'Object_5') {
+        const sourceMaterials = Array.isArray(child.material) ? child.material : [child.material];
+        const whiteMaterials = sourceMaterials.map((material) => {
+          const next = material?.clone?.() ?? material;
+          if (!next) return next;
+          next.map = null;
+          next.color?.set(0xffffff);
+          if ('metalness' in next) next.metalness = 0;
+          if ('roughness' in next) next.roughness = 0.58;
+          next.needsUpdate = true;
+          return next;
+        });
+        child.material = Array.isArray(child.material) ? whiteMaterials : whiteMaterials[0];
+        trashBodyMaterials.push({
+          name: child.name,
+          materials: whiteMaterials.filter(Boolean).map((material) => ({
+            color: material.color?.getHexString?.() ?? null,
+            hasMap: Boolean(material.map),
+          })),
+        });
+      }
 
       if (moduleState.surface) {
         const targetName = [child.name, child.geometry?.name, child.material?.name]
@@ -5052,7 +5075,7 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
     group.userData.modelLoaded = true;
     group.userData.modelFile = modelFile;
     window.dispatchEvent(new CustomEvent('fair-stand:model-rendered', {
-      detail: { moduleId: moduleState.id, moduleIndex, type, modelFile, removedNodes },
+      detail: { moduleId: moduleState.id, moduleIndex, type, modelFile, removedNodes, trashBodyMaterials },
     }));
   }).catch((error) => {
     console.warn('Sabit GLB modülü yüklenemedi:', type, modelFile, error);

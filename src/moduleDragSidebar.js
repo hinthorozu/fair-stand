@@ -304,7 +304,7 @@ export function createModuleDragSidebar({
   groupDefinitions.forEach((group, index) => {
     const details = document.createElement('details');
     details.className = 'module-drag-group';
-    details.open = index === 0;
+    details.open = false;
 
     const summary = document.createElement('summary');
     summary.textContent = group.label;
