@@ -4988,6 +4988,17 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
   loadIndoorPlantModel(modelFile).then((template) => {
     if (!group.parent) return;
     const model = template.clone(true);
+    const removedNodes = [];
+    if (type === 'plastic-trash-bin') {
+      const strayNodes = [];
+      model.traverse((object) => {
+        if (object.name === 'Sphere_1') strayNodes.push(object);
+      });
+      strayNodes.forEach((object) => {
+        removedNodes.push(object.name);
+        object.parent?.remove(object);
+      });
+    }
     model.traverse((child) => {
       if (!child.isMesh) return;
       child.castShadow = true;
@@ -5041,7 +5052,7 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
     group.userData.modelLoaded = true;
     group.userData.modelFile = modelFile;
     window.dispatchEvent(new CustomEvent('fair-stand:model-rendered', {
-      detail: { moduleId: moduleState.id, moduleIndex, type, modelFile },
+      detail: { moduleId: moduleState.id, moduleIndex, type, modelFile, removedNodes },
     }));
   }).catch((error) => {
     console.warn('Sabit GLB modülü yüklenemedi:', type, modelFile, error);

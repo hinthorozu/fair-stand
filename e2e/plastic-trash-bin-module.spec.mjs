@@ -114,6 +114,8 @@ test('trash bin is visible in the catalog, renders its GLB, and persists through
         entry.type === 'plastic-trash-bin'
         && entry.modelFile === 'plastic_trash_bin.glb'
         && Number(entry.moduleIndex) >= 0
+        && Array.isArray(entry.removedNodes)
+        && entry.removedNodes.includes('Sphere_1')
       )) ?? false
     )),
     { message: 'plastic_trash_bin.glb must finish loading and be added to the real scene module' },
