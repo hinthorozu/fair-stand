@@ -1,17 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "close-a04-f013-bookkeeping",
+  "id": "add-plastic-trash-bin-glb-asset",
   "kind": "architecture",
-  "summary": "Record F-013 as closed after PR #53 and its post-merge ROG verification succeeded, updating only canonical audit/remediation bookkeeping while leaving A04 open for F-014.",
+  "summary": "Add the plastic_trash_bin.glb model to the canonical public model inventory as a standalone asset, without registering a new runtime/catalog module yet.",
   "owners": [
-    "audit/FINDINGS.md",
-    "audit/FULL_SWEEP_STATE.md",
-    "audit/remediation/A04_F013_CLOSURE.md"
+    "public/models/plastic_trash_bin.glb"
   ],
   "sourceOfTruth": [
-    "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
-    "audit/remediation/A04_F013_CLOSURE.md",
-    "SYSTEM_IMPACT_SWEEP.md"
+    "public/models/plastic_trash_bin.glb"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -23,7 +19,7 @@
     "bom": "not-applicable",
     "ui": "not-applicable",
     "composition": "not-applicable",
-    "assets": "not-applicable",
+    "assets": "affected",
     "storage": "not-applicable",
     "importExport": "not-applicable",
     "performance": "not-applicable",
@@ -36,59 +32,43 @@
     "mode": "full-system",
     "affectedFiles": [],
     "affectedTests": [
-      "test/systemChangeGate.test.js",
-      "test/systemImpactAnalysis.test.js"
+      "test/plasticTrashBinAsset.test.js",
+      "e2e/plastic-trash-bin-asset.spec.mjs"
     ],
-    "affectedDocs": [
-      "audit/FINDINGS.md",
-      "audit/FULL_SWEEP_STATE.md",
-      "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
-      "audit/remediation/A04_F013_CLOSURE.md"
-    ],
+    "affectedDocs": [],
     "relatedFindings": {
       "affected": [
-        "F-013"
+        "F-033",
+        "F-034"
       ],
       "reviewedNotAffected": [
-        "F-010",
-        "F-011",
-        "F-012",
         "F-014",
-        "F-015",
-        "F-016",
-        "F-017",
-        "F-018",
-        "F-019",
-        "F-022",
-        "F-029",
-        "F-030",
-        "F-036",
-        "F-040",
-        "F-045"
+        "F-024"
       ]
     },
-    "notes": "This change records closure evidence only. Runtime catalog identity was changed and fully verified in PR #53. F-014 remains open and keeps A04 in progress; no later finding is closed by this bookkeeping change."
+    "notes": "The GLB is added to public/models but is intentionally not referenced by catalog, state factories, renderer, placement, or BOM yet. Existing open asset hygiene/provenance findings F-033 and F-034 remain open and are explicitly reviewed. F-014 is not changed because no runtime module is being admitted by this PR."
   },
   "tests": {
     "targeted": [
-      "test/systemChangeGate.test.js",
-      "test/systemImpactAnalysis.test.js"
+      "test/plasticTrashBinAsset.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "Audit closure bookkeeping has no browser-visible runtime impact. The canonical CI still runs the full baseline Chromium E2E suite."
+      "required": true,
+      "targeted": [
+        "e2e/plastic-trash-bin-asset.spec.mjs"
+      ],
+      "reason": "public/ asset changes are browser-impacting under the system contract; Chromium verifies the GLB is served and retains a valid binary glTF header."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Only canonical audit status and closure evidence are updated after already-successful implementation and post-merge verification."
+    "notes": "The change adds one standalone binary asset and tests only; no runtime module, catalog entry, placement behavior, state schema, or BOM behavior changes."
   },
   "migration": {
     "required": false,
-    "notes": "No runtime or persisted-state schema change is made by this bookkeeping PR."
+    "notes": "No persisted data or runtime schema changes are introduced."
   },
-  "rollback": "Revert the audit closure bookkeeping commit if any recorded CI or finding status is inaccurate."
+  "rollback": "Remove public/models/plastic_trash_bin.glb and its two asset-validation tests if the asset is invalid or should not ship."
 }
