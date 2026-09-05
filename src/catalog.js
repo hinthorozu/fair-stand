@@ -75,6 +75,12 @@ export const DEPOT_COAT_RACK_DIMENSIONS = Object.freeze({
   heightCm: 180,
 });
 
+export const DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS = Object.freeze({
+  widthCm: 40,
+  depthCm: 40,
+  heightCm: 60,
+});
+
 const TV_42_DEFINITION = getTvDefinition(42);
 const TV_55_DEFINITION = getTvDefinition(55);
 const TV_65_DEFINITION = getTvDefinition(65);
@@ -126,6 +132,15 @@ export const MODULE_CATALOG = Object.freeze({
   DEPOT_MINI_FRIDGE_AVANTI: { type: 'mini-fridge', widthCm: 50, depthCm: 50, heightCm: 66, label: 'Mini Buzdolabı' },
   DEPOT_KETTLE: { type: 'kettle', widthCm: 24, depthCm: 19, heightCm: 25, label: 'Kettle' },
   DEPOT_COAT_RACK: { type: 'coat-rack', widthCm: 43, depthCm: 43, heightCm: 180, label: 'Askılık' },
+  DEPOT_PLASTIC_TRASH_BIN: {
+    type: 'indoor-plant-1',
+    widthCm: DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS.widthCm,
+    depthCm: DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS.depthCm,
+    heightCm: DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS.heightCm,
+    modelFile: 'plastic_trash_bin.glb',
+    preserveModelScale: false,
+    label: 'Çöp Kutusu',
+  },
   EXTRA_INDOOR_PLANT_1: { type: 'indoor-plant-1', widthCm: 60, depthCm: 60, heightCm: 120, label: 'Yapay Çiçek 1' },
   EXTRA_LONG_PLANTER_100: {
     type: 'indoor-plant-1',
@@ -250,6 +265,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'DEPOT_MINI_FRIDGE_AVANTI',
   'DEPOT_KETTLE',
   'DEPOT_COAT_RACK',
+  'DEPOT_PLASTIC_TRASH_BIN',
   'EXTRA_INDOOR_PLANT_1',
   'EXTRA_LONG_PLANTER_100',
   'EXTRA_LONG_PLANTER_150',
@@ -277,7 +293,7 @@ export const MODULE_CATALOG_GROUPS = Object.freeze([
   }),
   Object.freeze({
     label: 'Extra',
-    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic', 'DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK', 'EXTRA_INDOOR_PLANT_1', 'EXTRA_LONG_PLANTER_100', 'EXTRA_LONG_PLANTER_150', 'EXTRA_LONG_PLANTER_200']),
+    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic', 'DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK', 'DEPOT_PLASTIC_TRASH_BIN', 'EXTRA_INDOOR_PLANT_1', 'EXTRA_LONG_PLANTER_100', 'EXTRA_LONG_PLANTER_150', 'EXTRA_LONG_PLANTER_200']),
   }),
   Object.freeze({
     label: 'Elektronik & Aydınlatma',
