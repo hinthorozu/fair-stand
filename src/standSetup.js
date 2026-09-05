@@ -1,7 +1,8 @@
+import { SCENE_SURROUND_M } from './sceneDimensions.js';
+
 export const MIN_STAND_DIMENSION_CM = 50;
 export const MAX_STAND_DIMENSION_CM = 5000;
 export const STAND_DIMENSION_STEP_CM = 50;
-export const STAND_SURROUND_M = 1;
 
 export const STAND_TYPE_LABELS = Object.freeze({
   'back-wall': 'Sırt Duvar',
@@ -64,7 +65,7 @@ export function validateStandSetup({ standType, xCm, yCm } = {}) {
     yCm: normalizedYCm,
     widthM,
     depthM,
-    sceneWidthM: widthM + STAND_SURROUND_M * 2,
-    sceneDepthM: depthM + STAND_SURROUND_M * 2,
+    sceneWidthM: widthM + SCENE_SURROUND_M * 2,
+    sceneDepthM: depthM + SCENE_SURROUND_M * 2,
   };
 }
