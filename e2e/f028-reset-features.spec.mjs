@@ -97,7 +97,7 @@ test('Tüm Özellikleri Kaldır deletes illuminated foam and preserves other mod
 
   const preserved = await seedIlluminatedFoam(page);
   await page.locator('#open-project').click();
-  await expect(page.locator('#project-status')).toContainText('Yüklendi:');
+  await expect(page.locator('#project-status')).toContainText('Açıldı:');
 
   page.once('dialog', async (dialog) => {
     expect(dialog.message()).toContain('1 Işıklı Strafor sahneden silinecek');
