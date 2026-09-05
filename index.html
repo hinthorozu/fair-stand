@@ -5,6 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#111827" />
     <title>Fair Stand Configurator</title>
+    <style>
+      .module-drag-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel,
+      .module-catalog-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel {
+        position: relative;
+        display: block;
+        width: 34px !important;
+        height: 48px;
+        border: 3px solid #4b5563;
+        border-radius: 5px 5px 8px 8px;
+        background: #d7dce2;
+        box-sizing: border-box;
+        box-shadow: 3px 3px 0 #b8c0c9;
+      }
+      .module-drag-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel span,
+      .module-catalog-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel span {
+        display: none;
+      }
+      .module-drag-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel::before,
+      .module-catalog-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel::before {
+        content: '';
+        position: absolute;
+        left: -5px;
+        right: -5px;
+        top: -8px;
+        height: 7px;
+        border: 3px solid #4b5563;
+        border-radius: 5px 5px 2px 2px;
+        background: #aeb6c0;
+        box-sizing: border-box;
+      }
+      .module-drag-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel::after,
+      .module-catalog-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel::after {
+        content: '';
+        position: absolute;
+        left: 6px;
+        right: 6px;
+        top: 8px;
+        bottom: 7px;
+        border-left: 2px solid #9aa3ad;
+        border-right: 2px solid #9aa3ad;
+      }
+    </style>
   </head>
   <body>
     <div id="app">
