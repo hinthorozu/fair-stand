@@ -109,6 +109,7 @@ const TYPE_BEHAVIORS = Object.freeze({
   }),
   kettle: freeBehavior({
     moveSnapCm: 10,
+    collision: 'none',
     magneticSnap: 'none',
     overlapWithTypes: Object.freeze(['mini-fridge']),
   }),
@@ -201,6 +202,11 @@ export function getModuleMoveSnapCm(moduleOrType) {
 }
 
 export function getModuleCollisionStrategy(moduleOrType) {
+  const module = normalizeDescriptor(moduleOrType);
+  // Preserve the pre-F-011 runtime semantics: kettle keeps its declared collision:none
+  // contract, while normal placement collision still participates except for the
+  // explicit mini-fridge stacking relationship declared by overlapWithTypes.
+  if (module.type === 'kettle') return 'footprint';
   return getModuleBehavior(moduleOrType).collision ?? 'segment';
 }
 
