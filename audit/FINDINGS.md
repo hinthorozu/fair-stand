@@ -7,12 +7,12 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 
 ## Summary
 
-- Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **34**
+- Total findings: **47** (`F-001` … `F-047`)
+- Open findings: **35**
 - Closed findings: **12**
 - Open P0: **0**
 - Open P1: **15**
-- Open P2: **19**
+- Open P2: **20**
 - Open P3: **0**
 - Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 next — F-013**
 
@@ -66,12 +66,13 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-044 | P2 | Many merged/superseded branches remain | OPEN |
 | F-045 | P2 | Historical source-rewriting patch scripts remain beside canonical tooling | OPEN |
 | F-046 | P2 | No lint/format/static-quality gate in canonical CI chain | OPEN |
+| F-047 | P2 | Non-catalog runtime object extensibility has no explicit canonical admission/contract rule; current example is `illuminated-foam` (ışıklı strafor/logo) | OPEN — review only after F-046 |
 
 ## Cross-domain remediation clusters
 
 1. Governance wall: F-005/F-006/F-007/F-041/F-042.
 2. Persistence/schema/data safety: F-020/F-021/F-022/F-023/F-032/F-035/F-036/F-037.
-3. Module identity/state construction: F-010/F-013/F-018/F-019.
+3. Module identity/state construction: F-010/F-013/F-018/F-019/F-047.
 4. Behavior/placement: F-011/F-015/F-016.
 5. BOM: F-014/F-025/F-029/F-030/F-031.
 6. Browser/UI accessibility: F-027/F-028/F-039/F-040.
