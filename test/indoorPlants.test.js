@@ -22,10 +22,10 @@ test('Yapay Çiçek 1 uses 10 cm free-placement snapping', () => {
   assert.equal(behavior.collision, 'footprint');
 });
 
-test('only Yapay Çiçek 1 is wired while the second GLB file remains parked', () => {
+test('only Yapay Çiçek 1 is wired and the removed second GLB stays absent', () => {
   assert.equal(createIndoorPlantModuleState().type, 'indoor-plant-1');
   assert.ok(existsSync(new URL('../public/models/indoor_plants.glb', import.meta.url)));
-  assert.ok(existsSync(new URL('../public/models/indoor_plants2.glb', import.meta.url)));
+  assert.equal(existsSync(new URL('../public/models/indoor_plants2.glb', import.meta.url)), false);
 
   const canonicalState = createModuleStateFromDescriptor(MODULE_CATALOG.EXTRA_INDOOR_PLANT_1, {
     catalogKey: 'EXTRA_INDOOR_PLANT_1',
