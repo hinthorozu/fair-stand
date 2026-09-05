@@ -84,22 +84,24 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
     const trashBinHeight = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.heightCm);
     const gapCm = 6;
 
-    // Buzdolabı + askılık üst sırada, çöp kutusu alt sırada kalır.
-    // 100x100 dahil tüm desteklenen depo ölçülerinde gerçek footprint'ler üst üste binmez.
+    // xCm is the footprint start edge; yCm is the footprint centerline for 0° free fixtures.
+    // Keep fridge + rack in the first row and the trash bin in a second row so even 100x100
+    // depot contents remain inside the depot and floor fixtures never overlap each other.
     const upperRowWidth = fridgeWidth + gapCm + rackWidth;
     const upperRowDepth = Math.max(fridgeDepth, rackDepth);
     const packedDepth = upperRowDepth + gapCm + trashBinDepth;
     const upperRowX = xCm + (size.widthCm - upperRowWidth) / 2;
-    const upperRowY = yCm + (size.depthCm - packedDepth) / 2;
+    const packStartY = yCm + (size.depthCm - packedDepth) / 2;
+    const upperRowY = packStartY + upperRowDepth / 2;
 
     const fridgeX = upperRowX;
     const fridgeY = upperRowY;
     const rackX = upperRowX + fridgeWidth + gapCm;
     const rackY = upperRowY;
     const trashBinX = xCm + (size.widthCm - trashBinWidth) / 2;
-    const trashBinY = upperRowY + upperRowDepth + gapCm;
+    const trashBinY = packStartY + upperRowDepth + gapCm + trashBinDepth / 2;
 
-    // Kettle buzdolabının üstünde render edilir; plan düzleminde buzdolabının tam merkezine oturt.
+    // Kettle buzdolabının üstünde render edilir; mevcut yerleşim davranışını koru.
     const kettleX = fridgeX + (fridgeWidth - kettleWidth) / 2;
     const kettleY = fridgeY + (fridgeDepth - kettleDepth) / 2;
 
