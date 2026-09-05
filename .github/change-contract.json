@@ -225,7 +225,7 @@
         "F-045"
       ]
     },
-    "notes": "Corrective patch only. The current trash-bin dimensions are deliberately not changed here. Catalog, canonical state, behavior and automatic-depot identity are plastic-trash-bin. scene3d now dispatches that canonical type through the existing fixed-GLB normalization path and loads plastic_trash_bin.glb without converting the module back to a plant type. Browser regression exercises real drag/drop, waits for the GLB to finish loading into the real scene module, and confirms the rendered module is interactable through its context menu."
+    "notes": "Corrective patch only. The current trash-bin dimensions are deliberately not changed here. Catalog, canonical state, behavior and automatic-depot identity are plastic-trash-bin. scene3d now dispatches that canonical type through the existing fixed-GLB normalization path and loads plastic_trash_bin.glb without converting the module back to a plant type. Browser regression exercises real drag/drop, waits for the GLB to finish loading and be added to the real scene module, then verifies canonical persistence."
   },
   "tests": {
     "targeted": [
@@ -238,7 +238,7 @@
       "targeted": [
         "e2e/plastic-trash-bin-module.spec.mjs"
       ],
-      "reason": "Catalog visibility, real drag/drop, canonical state persistence, successful plastic_trash_bin.glb scene load, rendered-module interaction, Add picker admission, and automatic depot composition are browser-visible behavior and require Chromium coverage."
+      "reason": "Catalog visibility, real drag/drop, canonical state persistence, successful plastic_trash_bin.glb scene load into the real module, Add picker admission, and automatic depot composition are browser-visible behavior and require Chromium coverage."
     }
   },
   "risk": {
