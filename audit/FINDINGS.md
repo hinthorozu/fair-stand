@@ -8,13 +8,13 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 ## Summary
 
 - Total findings: **46** (`F-001` … `F-046`)
-- Open findings: **32**
-- Closed findings: **14**
+- Open findings: **31**
+- Closed findings: **15**
 - Open P0: **0**
-- Open P1: **15**
+- Open P1: **14**
 - Open P2: **17**
 - Open P3: **0**
-- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open**
+- Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open; A08 in progress — F-020 closed / post-merge verified; F-021/F-022/F-023 remain open**
 
 ## Findings
 
@@ -39,7 +39,7 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 | F-017 | P2 | Renderer directly mutates persistent editable state | OPEN |
 | F-018 | P2 | Structural strip/panel count duplicated between catalog and state factories | OPEN |
 | F-019 | P1 | Catalog/runtime dimensions duplicated/hard-coded in state factories | OPEN |
-| F-020 | P1 | Pending autosave can be cancelled/lost during project switch/open | OPEN |
+| F-020 | P1 | Pending autosave can be cancelled/lost during project switch/open | **CLOSED** — `audit/remediation/A08_F020_CLOSURE.md` |
 | F-021 | P2 | Project `version` exists without canonical validation/migration pipeline | OPEN |
 | F-022 | P2 | No complete persistence round-trip contract for every special module family | OPEN |
 | F-023 | P2 | Whole-project deletion not atomic across project and asset stores | OPEN |
