@@ -117,6 +117,7 @@ test('trash bin is visible in the catalog, renders its GLB, and persists through
         && Number(entry.moduleIndex) >= 0
         && Array.isArray(entry.removedNodes)
         && entry.removedNodes.includes('Sphere_1')
+        && entry.topLabelRole === 'plastic-trash-bin-top-label'
         && Array.isArray(entry.trashBodyMaterials)
         && entry.trashBodyMaterials.some((body) => (
           body.name === 'Object_5'
