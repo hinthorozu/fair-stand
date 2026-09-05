@@ -122,6 +122,7 @@ const TYPE_BEHAVIORS = Object.freeze({
     moveSnapCm: 10,
     magneticSnap: 'none',
   }),
+  'plastic-trash-bin': PLASTIC_TRASH_BIN_BEHAVIOR,
   'indoor-plant-1': freeBehavior({
     moveSnapCm: 10,
     endpointContact: 'thin-wall-endpoint',

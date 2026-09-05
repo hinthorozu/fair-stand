@@ -1465,7 +1465,7 @@ export function createStandScene(
     if (moduleState.type === 'coat-rack') {
       return createCoatRackModule(moduleState, moduleIndex);
     }
-    if (moduleState.type === 'indoor-plant-1') {
+    if (moduleState.type === 'indoor-plant-1' || moduleState.type === 'plastic-trash-bin') {
       return createIndoorPlantModule(moduleState, moduleIndex);
     }
     if (moduleState.type === 'illuminated-foam') {
@@ -4935,8 +4935,9 @@ function createMiniFridgeModule(moduleState, moduleIndex) {
 
 
 function createIndoorPlantModule(moduleState, moduleIndex) {
-  const type = 'indoor-plant-1';
-  const modelFile = moduleState.modelFile ?? 'indoor_plants.glb';
+  const type = moduleState.type === 'plastic-trash-bin' ? 'plastic-trash-bin' : 'indoor-plant-1';
+  const modelFile = moduleState.modelFile
+    ?? (type === 'plastic-trash-bin' ? 'plastic_trash_bin.glb' : 'indoor_plants.glb');
   const widthCm = Number(moduleState.widthCm || 60);
   const depthCm = Number(moduleState.depthCm || 60);
   const heightCm = Number(moduleState.heightCm || 120);
@@ -4974,7 +4975,9 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
     heightCm,
     stripIndex: null,
     stripNumber: null,
-    surfaceRole: moduleState.surface ? 'planter-body' : 'plant',
+    surfaceRole: type === 'plastic-trash-bin'
+      ? 'trash-bin'
+      : (moduleState.surface ? 'planter-body' : 'plant'),
     surfaceId: moduleState.surface?.id ?? null,
     surfaceState: moduleState.surface ?? null,
     selectionFrame: null,
@@ -5035,8 +5038,13 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
     const fittedCenter = fittedBox.getCenter(new THREE.Vector3());
     model.position.set(-fittedCenter.x, -fittedBox.min.y, -fittedCenter.z);
     group.add(model);
+    group.userData.modelLoaded = true;
+    group.userData.modelFile = modelFile;
+    window.dispatchEvent(new CustomEvent('fair-stand:model-rendered', {
+      detail: { moduleId: moduleState.id, moduleIndex, type, modelFile },
+    }));
   }).catch((error) => {
-    console.warn('Yapay çiçek modeli yüklenemedi:', modelFile, error);
+    console.warn('Sabit GLB modülü yüklenemedi:', type, modelFile, error);
   });
 
   return { group, surfaces: [proxy] };

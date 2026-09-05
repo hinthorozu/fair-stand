@@ -42,6 +42,7 @@ test('plastic trash bin is a canonical 40x40x60 fixed-model catalog module', () 
   const descriptor = MODULE_CATALOG[KEY];
   assert.ok(descriptor);
   assert.equal(descriptor.label, 'Çöp Kutusu');
+  assert.equal(descriptor.type, 'plastic-trash-bin');
   assert.deepEqual(
     [descriptor.widthCm, descriptor.depthCm, descriptor.heightCm],
     [40, 40, 60],
@@ -70,7 +71,7 @@ test('trash bin state and behavior preserve fridge-style movement without overla
   const state = createModuleStateFromDescriptor(descriptor, { catalogKey: KEY });
   assert.ok(state);
   assert.equal(state.catalogKey, KEY);
-  assert.equal(state.type, 'indoor-plant-1');
+  assert.equal(state.type, 'plastic-trash-bin');
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [40, 40, 60]);
   assert.equal(state.modelFile, MODEL_FILE);
   assert.equal(state.preserveModelScale, false);
@@ -119,7 +120,7 @@ test('automatic depot adds the trash bin inside every supported depot without fl
     assert.ok(trash, `${sizeKey}: trash bin missing`);
     assert.ok(fridge, `${sizeKey}: fridge missing`);
     assert.ok(rack, `${sizeKey}: rack missing`);
-    assert.equal(trash.kind, 'indoor-plant-1');
+    assert.equal(trash.kind, 'plastic-trash-bin');
     assert.equal(trash.modelFile, MODEL_FILE);
     assert.deepEqual([trash.widthCm, trash.depthCm, trash.heightCm], [40, 40, 60]);
 

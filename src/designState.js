@@ -240,6 +240,19 @@ export function createCoatRackModuleState() {
   };
 }
 
+export function createPlasticTrashBinModuleState(descriptor = {}) {
+  return {
+    id: createId('module'),
+    type: 'plastic-trash-bin',
+    widthCm: Number(descriptor.widthCm),
+    depthCm: Number(descriptor.depthCm),
+    heightCm: Number(descriptor.heightCm),
+    modelFile: descriptor.modelFile,
+    modelRotationYDeg: Number(descriptor.modelRotationYDeg) || 0,
+    preserveModelScale: Boolean(descriptor.preserveModelScale),
+  };
+}
+
 export function createIndoorPlantModuleState(descriptor = {}) {
   const modelFile = descriptor.modelFile ?? 'indoor_plants.glb';
   const isLongPlanter = /^saksi_bitkili_/i.test(modelFile);
@@ -328,6 +341,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   'mini-fridge': () => createMiniFridgeModuleState(),
   kettle: () => createKettleModuleState(),
   'coat-rack': () => createCoatRackModuleState(),
+  'plastic-trash-bin': (descriptor) => createPlasticTrashBinModuleState(descriptor),
   'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
   tv: (descriptor) => createTvModuleState(descriptor.sizeInch ?? 42, descriptor),
   'led-floodlight': () => createLedFloodlightModuleState(),

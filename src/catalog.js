@@ -133,7 +133,7 @@ export const MODULE_CATALOG = Object.freeze({
   DEPOT_KETTLE: { type: 'kettle', widthCm: 24, depthCm: 19, heightCm: 25, label: 'Kettle' },
   DEPOT_COAT_RACK: { type: 'coat-rack', widthCm: 43, depthCm: 43, heightCm: 180, label: 'Askılık' },
   DEPOT_PLASTIC_TRASH_BIN: {
-    type: 'indoor-plant-1',
+    type: 'plastic-trash-bin',
     widthCm: DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS.widthCm,
     depthCm: DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS.depthCm,
     heightCm: DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS.heightCm,

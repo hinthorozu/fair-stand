@@ -67,11 +67,20 @@ function isTenCmGridAligned(value) {
   return Number.isFinite(units) && Math.abs(units - Math.round(units)) < 1e-9;
 }
 
-test('trash bin is visible in the catalog and persists through the real drag/drop flow', async ({ page }) => {
+test('trash bin is visible in the catalog, renders its GLB, and persists through the real drag/drop flow', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
   await createIslandStand(page, 'Trash Bin Drag');
+  await page.evaluate(() => {
+    window.__plasticTrashBinRendered = [];
+    window.addEventListener('fair-stand:model-rendered', (event) => {
+      const detail = event.detail ?? {};
+      if (detail.type === 'plastic-trash-bin') {
+        window.__plasticTrashBinRendered.push(detail);
+      }
+    });
+  });
 
   const openCatalogButton = page.locator('#open-module-catalog');
   const modulePanel = page.locator('details', { has: openCatalogButton });
@@ -85,20 +94,35 @@ test('trash bin is visible in the catalog and persists through the real drag/dro
 
   await expect(trashCard).toBeVisible();
   await expect(trashCard).toHaveAttribute('aria-disabled', 'false');
+  await expect(trashCard.locator('.module-drag-plant')).toHaveCount(0);
+  const trashPreview = trashCard.locator('.module-drag-panel');
+  await expect(trashPreview).toBeVisible();
+  await expect(trashPreview).toHaveCSS('width', '34px');
 
   const viewport = page.locator('#viewport');
   const viewportBox = await viewport.boundingBox();
   expect(viewportBox).not.toBeNull();
-  await trashCard.dragTo(viewport, {
-    targetPosition: {
-      x: Math.round(viewportBox.width * 0.57),
-      y: Math.round(viewportBox.height * 0.80),
-    },
-  });
+  const targetPosition = {
+    x: Math.round(viewportBox.width * 0.57),
+    y: Math.round(viewportBox.height * 0.80),
+  };
+  await trashCard.dragTo(viewport, { targetPosition });
+
+  await expect.poll(
+    () => page.evaluate(() => (
+      window.__plasticTrashBinRendered?.some((entry) => (
+        entry.type === 'plastic-trash-bin'
+        && entry.modelFile === 'plastic_trash_bin.glb'
+        && Number(entry.moduleIndex) >= 0
+      )) ?? false
+    )),
+    { message: 'plastic_trash_bin.glb must finish loading and be added to the real scene module' },
+  ).toBe(true);
 
   const project = await saveAndReadProject(page);
   const trash = project.modules.find((moduleState) => moduleState.catalogKey === TRASH_KEY);
   expect(trash).toBeTruthy();
+  expect(trash.type).toBe('plastic-trash-bin');
   expect([trash.widthCm, trash.depthCm, trash.heightCm]).toEqual([40, 40, 60]);
   expect(trash.modelFile).toBe('plastic_trash_bin.glb');
   expect(trash.placement.wallId).toBe('free');
@@ -128,6 +152,8 @@ test('trash bin is visible and selectable in the existing Add catalog', async ({
   const trashCard = picker.locator(`[data-module-key="${TRASH_KEY}"]`);
   await expect(trashCard).toBeVisible();
   await expect(trashCard).toHaveAttribute('aria-selected', 'false');
+  await expect(trashCard.locator('.module-drag-plant')).toHaveCount(0);
+  await expect(trashCard.locator('.module-drag-panel')).toHaveCSS('width', '34px');
 
   await trashCard.click();
   await expect(trashCard).toHaveAttribute('aria-selected', 'true');
