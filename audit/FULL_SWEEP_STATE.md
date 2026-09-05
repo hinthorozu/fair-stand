@@ -18,15 +18,16 @@ Current phase: **REMEDIATION IN PROGRESS**
 - Audit status: **COMPLETE — A00–A24 / 25 of 25 inspected**
 - Remediation starting ROG SHA: `392e839804e5b0379186af8b950117154b20c195`
 - Remediation status: **IN PROGRESS**
-- Last fully closed remediation section: `A02 — CLOSED / AUDITED_OK / POST-MERGE VERIFIED`
-- Current remediation section: `A03 — Repository architecture / ownership`
+- Last fully closed remediation section: `A03 — CLOSED / AUDITED_OK / POST-MERGE VERIFIED`
+- Current remediation section: `A04 — Catalog + module contracts`
 - A00 closure evidence: `audit/remediation/A00_CLOSURE.md`
 - A01 closure evidence: `audit/remediation/A01_CLOSURE.md`
 - A02 closure evidence: `audit/remediation/A02_CLOSURE.md`
+- A03 closure evidence: `audit/remediation/A03_CLOSURE.md`
 - A02 closed findings: `F-005, F-006, F-007, F-008, F-009`
 - A02 final merge SHA: `14b4e5b83b2cefe48aaa8cefc761a73d8e0b82fe`
 - A02 post-merge ROG CI: `#132 / run 33804101800 / success`
-- A03 closed findings: `F-010, F-011`
+- A03 closed findings: `F-010, F-011, F-012`
 - F-010 closure evidence: `audit/remediation/A03_F010_CLOSURE.md`
 - F-010 implementation PR: `#46`
 - F-010 implementation merge SHA: `f45cbe55030e8bc4361d4e2ce2a4d6a6d86e0a89`
@@ -35,14 +36,18 @@ Current phase: **REMEDIATION IN PROGRESS**
 - F-011 implementation PR: `#49`
 - F-011 implementation merge SHA: `934ca39a19453e8660f9cdbae81ce000e91edae1`
 - F-011 post-merge ROG CI: `#212 / run 33953247234 / success`
-- Next finding: `F-012 — stand scene-surround rule duplicated between setup and renderer`
-- Remaining A03 findings: `F-012`
+- F-012 closure evidence: `audit/remediation/A03_F012_CLOSURE.md`
+- F-012 implementation PR: `#52`
+- F-012 implementation merge SHA: `1ca9f6e386a6cbdb7377ce35bf22a26b75e4ba80`
+- F-012 post-merge ROG CI: `#221 / run 33974468120 / success`
+- Next finding: `F-013 — exact catalog identity ambiguous for normal vs vine separators when catalogKey absent`
+- Remaining A03 findings: `none`
 - Finding range: `F-001..F-046`
-- Closed findings: `11`
-- Open findings: `35`
+- Closed findings: `12`
+- Open findings: `34`
 - Open P0: `0`
 - Open P1: `15`
-- Open P2: `20`
+- Open P2: `19`
 - Open P3: `0`
 - Canonical finding ledger: `audit/FINDINGS.md`
 - Cross-domain matrix: `audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md`
@@ -78,10 +83,19 @@ Section revalidation: `audit/remediation/A01_CLOSURE.md`.
 Section revalidation: `audit/remediation/A02_CLOSURE.md`.
 Post-merge verification: ROG `14b4e5b83b2cefe48aaa8cefc761a73d8e0b82fe`, CI #132 / run `33804101800` / success.
 
-## Current section — A03 Repository architecture / ownership
+### A03 — Repository architecture / ownership
 
-**F-010 CLOSED / POST-MERGE VERIFIED.** Canonical module-state construction now belongs to `src/designState.js`; implementation PR #46 merged to ROG as `f45cbe55030e8bc4361d4e2ce2a4d6a6d86e0a89`, and post-merge CI #177 / run `33852027783` completed successfully. Closure evidence: `audit/remediation/A03_F010_CLOSURE.md`.
+**CLOSED / AUDITED_OK / POST-MERGE VERIFIED.**
 
-**F-011 CLOSED / POST-MERGE VERIFIED.** Canonical module-specific placement/interaction policy selection now belongs to `src/moduleBehavior.js`; implementation PR #49 merged to ROG as `934ca39a19453e8660f9cdbae81ce000e91edae1`, and post-merge CI #212 / run `33953247234` completed successfully. Closure evidence: `audit/remediation/A03_F011_CLOSURE.md`.
+- F-010 — runtime module-state construction centralized in `src/designState.js`.
+- F-011 — module-specific placement/interaction policy selection centralized in `src/moduleBehavior.js`.
+- F-012 — scene surround centralized as `SCENE_SURROUND_M = 1` in `src/sceneDimensions.js`; setup and renderer consume the same canonical value.
 
-Continue A03 with **F-012**. Do not advance to A04 until every A03-owned finding is closed/accepted and A03 revalidation is recorded.
+Section revalidation: `audit/remediation/A03_CLOSURE.md`.
+Final A03 implementation verification: ROG `1ca9f6e386a6cbdb7377ce35bf22a26b75e4ba80`, CI #221 / run `33974468120` / success.
+
+## Current section — A04 Catalog + module contracts
+
+A03 is closed. Continue remediation in section order with **F-013 — exact catalog identity ambiguous for normal vs vine separators when `catalogKey` is absent**.
+
+Do not treat later A04+ findings as closed until their own implementation, targeted regression, full suite/build, CI and required post-merge closure evidence are complete.
