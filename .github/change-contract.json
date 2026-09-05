@@ -10,21 +10,21 @@
     "src/main.js"
   ],
   "impact": {
-    "catalog": "not-applicable",
+    "catalog": "affected",
     "behavior": "affected",
     "state": "affected",
-    "placement": "not-applicable",
+    "placement": "affected",
     "renderer": "affected",
     "persistence": "affected",
     "bom": "not-applicable",
     "ui": "affected",
-    "composition": "not-applicable",
+    "composition": "affected",
     "assets": "affected",
-    "storage": "not-applicable",
-    "importExport": "not-applicable",
+    "storage": "affected",
+    "importExport": "affected",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "not-applicable",
+    "architecture": "affected",
     "security": "not-applicable",
     "tests": "affected"
   },
@@ -56,7 +56,7 @@
         "F-040"
       ]
     },
-    "notes": "F-028 is intentionally narrow. During the existing global feature-reset action, illuminated-foam modules are removed instead of recreated; every other module still passes through the canonical createCatalogModuleState path with preservePlacement=true. The image asset itself remains in the project asset library, so only the scene module/reference is removed. Unknown module types still preserve the existing fail-closed reset behavior. No catalog dimensions, placement rules, project schema, archive format or BOM policy changes are intended."
+    "notes": "F-028 is intentionally narrow. During the existing global feature-reset action, illuminated-foam modules are removed instead of recreated; every other module still passes through the canonical createCatalogModuleState path with preservePlacement=true. The high-risk main.js governance domains are marked affected so the full-system gate reviews those boundaries, but no catalog dimensions, placement rules, composition rules, storage schema, archive format or architecture ownership are intentionally changed. The image asset itself remains in the project asset library, so only the scene module/reference is removed. Unknown module types still preserve the existing fail-closed reset behavior."
   },
   "tests": {
     "targeted": [
