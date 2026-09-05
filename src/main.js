@@ -17,9 +17,9 @@ import {
   totalWallWidthCm,
   moduleWidths,
 } from './designState.js';
-import { deleteImageAsset, deleteProjectImageAssets, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
+import { deleteImageAsset, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
 import { clearImageAssetReferences, countImageAssetReferences } from './imageAssetReferences.js';
-import { createProjectId, deleteProject, listProjects, loadProject, saveProject } from './projectStore.js';
+import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject } from './projectStore.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu } from './moduleContextMenu.js';
 import { createModuleDragSidebar } from './moduleDragSidebar.js';
@@ -1909,8 +1909,7 @@ importProjectFileInput.addEventListener('change', async () => {
   } catch (error) {
     if (importStorageTouched && importedProjectId) {
       try {
-        await deleteProjectImageAssets(importedProjectId);
-        await deleteProject(importedProjectId);
+        await deleteProjectWithAssets(importedProjectId);
         await refreshProjectList();
       } catch (cleanupError) {
         console.warn('Başarısız içe aktarma temizlenemedi:', cleanupError);
@@ -1989,8 +1988,7 @@ deleteProjectButton.addEventListener('click', async () => {
   const confirmed = window.confirm((project?.name || 'Proje') + ' ve bu projeye ait tüm görseller silinecek. Devam edilsin mi?');
   if (!confirmed) return;
   try {
-    await deleteProjectImageAssets(projectId);
-    await deleteProject(projectId);
+    await deleteProjectWithAssets(projectId);
     if (projectId === activeProjectId) { window.location.reload(); return; }
     await refreshProjectList();
     projectStatus.textContent = 'Proje silindi.';
