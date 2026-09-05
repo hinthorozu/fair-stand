@@ -26,6 +26,19 @@ test('every catalog module resolves its single-source key and label', () => {
   });
 });
 
+test('legacy separators resolve exact normal versus vine catalog identity from modelFile', () => {
+  assert.equal(resolveModuleCatalogKey({ type: 'separator', widthCm: 100 }), 'wall_separator_100');
+  assert.equal(resolveModuleCatalogKey({ type: 'separator', widthCm: 50 }), 'wall_separator_50');
+  assert.equal(
+    resolveModuleCatalogKey({ type: 'separator', widthCm: 100, modelFile: 'wall_separator_100_sarmasik.glb' }),
+    'wall_separator_100_sarmasik',
+  );
+  assert.equal(
+    resolveModuleCatalogKey({ type: 'separator', widthCm: 50, modelFile: 'wall_separator_50_sarmasik.glb' }),
+    'wall_separator_50_sarmasik',
+  );
+});
+
 test('left catalog, context catalog and drag badge share catalog presentation source', () => {
   const sidebar = readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
   const contextMenu = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');

@@ -303,6 +303,7 @@ function normalizeCatalogDescriptor(descriptor) {
     depthCm: optionalNumber(source.depthCm ?? descriptor?.depthCm),
     shape: source.shape ?? source.counterShape ?? descriptor?.shape ?? descriptor?.counterShape ?? null,
     shelfCount: optionalNumber(source.shelfCount ?? descriptor?.shelfCount),
+    modelFile: source.modelFile ?? descriptor?.modelFile ?? null,
     sizeInch: optionalNumber(source.sizeInch ?? descriptor?.sizeInch),
     screenWidthCm: optionalNumber(source.screenWidthCm ?? descriptor?.screenWidthCm),
   };
@@ -324,6 +325,7 @@ export function resolveModuleCatalogKey(descriptor) {
     if (normalized.depthCm !== null && optionalNumber(item.depthCm) !== null && optionalNumber(item.depthCm) !== normalized.depthCm) return false;
     if ((normalized.shape !== null || item.shape != null) && (item.shape ?? null) !== normalized.shape) return false;
     if ((normalized.shelfCount !== null || item.shelfCount != null) && optionalNumber(item.shelfCount) !== normalized.shelfCount) return false;
+    if ((normalized.modelFile !== null || item.modelFile != null) && (item.modelFile ?? null) !== normalized.modelFile) return false;
     if (normalized.sizeInch !== null && optionalNumber(item.sizeInch) !== null && optionalNumber(item.sizeInch) !== normalized.sizeInch) return false;
     if (normalized.type === 'tv' && normalized.sizeInch === null && normalized.screenWidthCm !== null && optionalNumber(item.screenWidthCm) !== normalized.screenWidthCm) return false;
     return true;

@@ -1288,7 +1288,9 @@ async function restoreProject(project) {
   setProjectName(project.name || 'Adsız Proje');
   currentModules = cloneProjectState(project.modules) || [];
   currentModules.forEach((moduleState) => {
-    if (!moduleState.catalogKey) moduleState.catalogKey = resolveModuleCatalogKey(moduleState);
+    const resolvedCatalogKey = resolveModuleCatalogKey(moduleState);
+    if (resolvedCatalogKey) moduleState.catalogKey = resolvedCatalogKey;
+    else delete moduleState.catalogKey;
   });
   currentStand = cloneProjectState(project.stand);
   moduleContextMenu.close();

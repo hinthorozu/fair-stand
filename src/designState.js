@@ -1,3 +1,4 @@
+import { resolveModuleCatalogKey } from './catalog.js';
 import { getTvDefinition } from './tvConfig.js';
 
 const DEFAULT_PANEL_COLOR = '#ffffff';
@@ -350,7 +351,13 @@ export function createModuleStateFromDescriptor(
   const state = factory(descriptor, { imageAssetId });
   if (!state) return null;
 
-  if (catalogKey !== null && catalogKey !== undefined) state.catalogKey = catalogKey;
+  const resolvedCatalogKey = resolveModuleCatalogKey({
+    ...descriptor,
+    catalogKey: catalogKey ?? descriptor.catalogKey ?? null,
+  });
+  if (resolvedCatalogKey) state.catalogKey = resolvedCatalogKey;
+  else delete state.catalogKey;
+
   if (preservePlacement && descriptor.placement) {
     state.placement = { ...descriptor.placement };
   }
