@@ -40,6 +40,10 @@
     "affectedFiles": [
       "index.html",
       "scripts/add-tv-sizes.py",
+      "scripts/add-video-wall-2x2.py",
+      "scripts/fix-tv-screen-face.py",
+      "scripts/patch-video-wall-2x2.cjs",
+      "scripts/patch-video-wall-single-image.cjs",
       "scripts/verify-change-contract.mjs",
       "src/autoDepot.js",
       "src/automaticWall.js",
@@ -145,6 +149,8 @@
       "MODULE_BEHAVIOR_STANDARD.md",
       "PROJECT_RULES.md",
       "README.md",
+      "RELEASE_HARDENING_ROADMAP.md",
+      "REPOSITORY_CLEANUP_PROGRESS.md",
       "SYSTEM_AUDIT_CHECKLIST.md",
       "SYSTEM_DEVELOPMENT_CONTRACT.md",
       "SYSTEM_MODULE_CATALOG.md",
@@ -155,6 +161,11 @@
       "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
       "audit/evidence/A05_MODULE_BEHAVIOR.md",
       "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
+      "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
+      "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
+      "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
+      "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
+      "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md"
     ],
     "relatedFindings": {
@@ -170,10 +181,12 @@
         "F-017",
         "F-028",
         "F-029",
-        "F-040"
+        "F-033",
+        "F-040",
+        "F-045"
       ]
     },
-    "notes": "F-011 centralizes policy selection only; geometric algorithms remain in the placement/core layer. Existing product behavior is preserved, including the pre-F-011 kettle declaration collision:none and its existing placement collision semantics. F-015 side-insert enforcement and F-016 right-wall orientation remain independently open and are not closed by this change. F-014 was reviewed because the sweep found module-contract references, but no BOM classification is changed. All initial full-system discovery surfaces are explicitly reviewed here."
+    "notes": "F-011 centralizes policy selection only; geometric algorithms remain in the placement/core layer. Existing product behavior is preserved, including the pre-F-011 kettle declaration collision:none and its existing placement collision semantics. The scene3d wall-overlay support list is replaced by the existing supportsWallOverlayMount behavior capability without changing support geometry. F-015 side-insert enforcement and F-016 right-wall orientation remain independently open and are not closed by this change. F-014 was reviewed because the sweep found module-contract references, but no BOM classification is changed. F-033 and F-045 were reviewed because renderer/performance and historical rewrite-script references were discovered; no asset payload or historical script behavior is changed. All full-system discovery surfaces are explicitly reviewed here."
   },
   "tests": {
     "targeted": [
