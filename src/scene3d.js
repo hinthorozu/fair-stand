@@ -4905,7 +4905,7 @@ function createPlasticTrashBinTopLabel(heightCm) {
     }),
   );
   label.rotation.x = -Math.PI / 2;
-  label.rotation.z = Math.PI;
+  label.rotation.z = Math.PI / 2;
   label.position.set(0, Number(heightCm) / 100 + 0.004, -0.04);
   label.renderOrder = 30;
   label.userData.kind = 'decoration';
