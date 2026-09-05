@@ -67,11 +67,20 @@ function isTenCmGridAligned(value) {
   return Number.isFinite(units) && Math.abs(units - Math.round(units)) < 1e-9;
 }
 
-test('trash bin is visible in the catalog and persists through the real drag/drop flow', async ({ page }) => {
+test('trash bin is visible in the catalog, renders its GLB, and persists through the real drag/drop flow', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
   await createIslandStand(page, 'Trash Bin Drag');
+  await page.evaluate(() => {
+    window.__plasticTrashBinRendered = [];
+    window.addEventListener('fair-stand:model-rendered', (event) => {
+      const detail = event.detail ?? {};
+      if (detail.type === 'plastic-trash-bin') {
+        window.__plasticTrashBinRendered.push(detail);
+      }
+    });
+  });
 
   const openCatalogButton = page.locator('#open-module-catalog');
   const modulePanel = page.locator('details', { has: openCatalogButton });
@@ -93,16 +102,36 @@ test('trash bin is visible in the catalog and persists through the real drag/dro
   const viewport = page.locator('#viewport');
   const viewportBox = await viewport.boundingBox();
   expect(viewportBox).not.toBeNull();
-  await trashCard.dragTo(viewport, {
-    targetPosition: {
-      x: Math.round(viewportBox.width * 0.57),
-      y: Math.round(viewportBox.height * 0.80),
-    },
-  });
+  const targetPosition = {
+    x: Math.round(viewportBox.width * 0.57),
+    y: Math.round(viewportBox.height * 0.80),
+  };
+  await trashCard.dragTo(viewport, { targetPosition });
+
+  await expect.poll(
+    () => page.evaluate(() => (
+      window.__plasticTrashBinRendered?.some((entry) => (
+        entry.type === 'plastic-trash-bin'
+        && entry.modelFile === 'plastic_trash_bin.glb'
+        && Number(entry.moduleIndex) >= 0
+      )) ?? false
+    )),
+    { message: 'plastic_trash_bin.glb must finish loading into the real scene module' },
+  ).toBe(true);
+
+  await page.mouse.click(
+    viewportBox.x + targetPosition.x,
+    viewportBox.y + targetPosition.y,
+    { button: 'right' },
+  );
+  const moduleContextMenu = page.locator('.module-context-menu:not(.asset-context-menu)');
+  await expect(moduleContextMenu).toBeVisible();
+  await expect(moduleContextMenu.locator('.module-context-title')).toContainText('Çöp Kutusu');
 
   const project = await saveAndReadProject(page);
   const trash = project.modules.find((moduleState) => moduleState.catalogKey === TRASH_KEY);
   expect(trash).toBeTruthy();
+  expect(trash.type).toBe('plastic-trash-bin');
   expect([trash.widthCm, trash.depthCm, trash.heightCm]).toEqual([40, 40, 60]);
   expect(trash.modelFile).toBe('plastic_trash_bin.glb');
   expect(trash.placement.wallId).toBe('free');
