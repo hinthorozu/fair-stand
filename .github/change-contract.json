@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "plastic-trash-bin-top-label",
+  "id": "plastic-trash-bin-top-label-orientation",
   "kind": "module",
-  "summary": "Add a top-facing ÇÖP KOVASI label to the plastic trash bin using the proven mini-fridge top-label rendering pattern.",
+  "summary": "Rotate only the plastic trash bin top label 180 degrees in-plane toward the requested plan-view direction; keep the trash-bin model and persisted placement unchanged.",
   "owners": [
     "src/scene3d.js"
   ],
@@ -191,7 +191,7 @@
         "F-045"
       ]
     },
-    "notes": "Renderer/UI-only label addition. Full scene3d dependency surfaces were reviewed. State, placement, behavior and performance are declared affected because scene3d is a high-risk runtime owner, but their semantics are unchanged. Plastic trash bin receives a top-facing two-line ÇÖP/KOVASI label using the same canvas/plane dimensions, orientation and offset pattern already proven by the mini-fridge top label."
+    "notes": "Renderer/UI-only orientation correction. Full scene3d dependency surfaces remain reviewed. The plastic trash-bin label receives a local rotation.z = Math.PI after its horizontal-plane tilt. The module group/model is not rotated by this patch, so persisted placement and body orientation semantics remain unchanged."
   },
   "tests": {
     "targeted": [
@@ -205,16 +205,16 @@
       "targeted": [
         "e2e/plastic-trash-bin-module.spec.mjs"
       ],
-      "reason": "Real Chromium drag/drop must produce a plastic-trash-bin scene group that contains the plastic-trash-bin-top-label decoration while the model render completes."
+      "reason": "Real Chromium drag/drop must render the trash-bin scene group with the top label at local rotation.z = PI while persisted module placement rotation remains 0."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Uses the existing mini-fridge top-label implementation pattern; risk is limited to label placement/readability and unintended scene decoration regression."
+    "notes": "Low-risk local decoration transform: only the plastic-trash-bin top-label mesh changes orientation; body/model transform and placement state are untouched."
   },
   "migration": {
     "required": false,
     "notes": "No persisted state or schema change."
   },
-  "rollback": "Revert the trash-bin top-label function, group attachment, event detail, and regression assertions."
+  "rollback": "Remove the local label.rotation.z = Math.PI assignment and the matching runtime/test assertions."
 }
