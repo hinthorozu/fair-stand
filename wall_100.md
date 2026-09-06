@@ -1,249 +1,179 @@
 # wall_100 — Mevcut Sistem Profili
 
-Bu belge `wall_100` için mevcut çalışan sistemdeki kimlik, state, davranış, placement, context menu, panel işlemleri, görünüm özellikleri, BOM ve bilinen açık noktaları tek yerde toplar.
+Bu belge `wall_100` için `Version2` runtime kodunda bugün gerçekten bulunan state, behavior, placement, interaction, renderer, persistence ve BOM akışlarını toplar. Yeni davranış tanımlamaz; yorum/audit kaynağı kullanmaz.
 
-> Bu dosya yeni davranış tanımlamaz. Bilgiler `item-yapilandirmasi` branch'indeki mevcut koddan çıkarılmıştır.
+## Kimlik
 
-## 1. Kimlik
-
-| Alan | Mevcut değer |
+| Alan | Kod değeri |
 |---|---|
 | Catalog key | `wall_100` |
 | Label | `Düz Panel 100` |
 | Type | `flat-panel` |
 | Nominal genişlik | `100 cm` |
 | Stand yüksekliği | `350 cm` |
-| Duvar derinliği | `10 cm` |
-| Panel sırası | `7` |
-| Her sıra yüksekliği | `50 cm` |
+| Nominal duvar derinliği | `10 cm` |
+| Strip/panel state sayısı | `7` |
+| Strip yüksekliği | `50 cm` |
 
-Katalog tanımı:
+Runtime state'te `itemKey` / `class` alanı yoktur. Kimlik için `catalogKey = wall_100` ve `type = flat-panel` kullanılır.
 
-```js
-wall_100: { type: 'flat-panel', widthCm: 100, label: 'Düz Panel 100' }
-```
+## Factory / default state
 
-Item diliyle mevcut karşılığı:
+`createFlatPanelModuleState(100)` temel olarak:
 
 ```text
-itemKey: wall_100
-type: flat-panel
-class: composite Item
-```
-
-Aktif kaynaklar:
-
-- `src/catalog.js`
-- `src/moduleContracts.js`
-- `src/moduleBehavior.js`
-- `src/designState.js`
-- `src/moduleRecipes.js`
-- `src/productionParts.js`
-- `src/moduleContextMenu.js`
-- `src/scene3d.js`
-
----
-
-## 2. Proje instance state'i
-
-`wall_100`, `flat-panel` factory'si üzerinden oluşturulur.
-
-Instance kabaca:
-
-```text
-id
-catalogKey = wall_100
+id = generated
 type = flat-panel
 widthCm = 100
-placement
 strips[0..6]
 ```
 
-`createFlatPanelModuleState(widthCm)` 7 adet editable panel state'i oluşturur.
-
-Her panel:
+Her strip:
 
 ```text
-id
-stripIndex
-color
-imageAssetId
-imageTransform
+id = generated
+stripIndex = 0..6
+color = #ffffff
+imageAssetId = null
+imageTransform = { mode: single, offsetX: 0, offsetY: 0, repeatX: 1, repeatY: 1, rotation: 0 }
 ```
 
-taşır.
+`catalogKey` factory'nin içinde değil, `createModuleStateFromDescriptor()` içindeki `resolveModuleCatalogKey()` sonucuyla state'e eklenir.
 
-Default state:
+## Contract
 
-- 7 panel
-- panel rengi `#ffffff`
-- `imageAssetId = null`
-- default image transform `single`
-
-Catalog descriptor çözümünde `catalogKey = wall_100` state'e yazılır.
-
----
-
-## 3. Contract
-
-`moduleContracts.js` içinde:
-
-```text
-wall_100 → wall-editable
-BOM → recipe
-source → src/moduleRecipes.js
-```
-
-`wall-editable` profili:
-
-```text
-state.owner = src/designState.js
-state.persistence = project-state
-appearance.color = editable
-appearance.image = editable
-renderer.mode = procedural-or-specialized
-runtime.mode = static
-composition.mode = standalone
-```
-
----
-
-## 4. Canonical davranış
-
-`wall_100`, `type = flat-panel` olduğu için `WALL_BEHAVIOR` kullanır.
-
-| Davranış | Değer |
+| Alan | Kod değeri |
 |---|---|
-| Placement | `wall` |
-| Hareket snap | `50 cm` |
+| Profile | `wall-editable` |
+| State owner | `src/designState.js` |
+| Persistence | `project-state` |
+| Color | `editable` |
+| Image | `editable` |
+| Renderer policy | `procedural-or-specialized` |
+| Runtime | `static` |
+| Composition | `standalone` |
+| BOM mode | `recipe` |
+| BOM source | `src/moduleRecipes.js` |
+
+## Behavior
+
+| Alan | Kod değeri |
+|---|---|
+| Placement contract | `wall` |
+| Move snap | `50 cm` |
 | Rotation step | `90°` |
 | Default rotation | `0°` |
-| Side insert | `true` |
-| Collision | `segment` |
+| Side insert flag | `true` |
+| Collision contract | `segment` |
 | Magnetic snap | `standard` |
 | Connection endpoint | `segment` |
 | Collision depth | `physical` |
 | Endpoint contact | `standard` |
 | Boundary snap | `stand-edge` |
-| Side insert rotation | `inherit` |
-| Overlap izinleri | Yok |
-| Wall overlay mount | `true` |
+| Side-insert rotation | `inherit` |
+| Overlap izinleri | `[]` |
+| Wall-overlay host | `true` |
 | Wall capacity | `include` |
-| Ghost | `silhouette` |
-| Ghost renderer | `module-silhouette` |
-| Ghost opacity | `0.38` |
+| Ghost | `silhouette / module-silhouette / opacity 0.38` |
 
-`wall_100` adına özel behavior override bulunmaz.
+`behavior.placement = wall` olmasına rağmen `snapPlacementToStand()` allowed wall sınırına yeterince yakın olmayan fakat stand alanına sığan modül için `wallId = free` placement döndürebilir.
 
----
+## Placement / rotation / hareket
 
-## 5. Rotation
-
-Rotation step:
+Stand tipine göre allowed wall kimlikleri kodda:
 
 ```text
-90°
+back-wall → back, free
+l-left    → back, left, free
+l-right   → back, right, free
+u-stand   → back, left, right, free
+island    → free
 ```
 
-Akış:
+Wall snap mesafesi `50 cm`, module-neighbor snap mesafesi `30 cm`dir. Wall orientation değerleri `back=0°`, `left=90°`, `right=270°`dir. `wall_100` rotation step'i `90°`, move snap'i `50 cm`dir.
+
+Yön tuşu hareket yolunda non-overlay module için yeni placement `wallId = free` olarak kurulabilir; collision validation sonrası module serbest placement'a geçebilir.
+
+Wall placement'ta context insertion/move continuous-wall planına girer. `wallId = free` context'te sağ/sol ekleme ve duplicate `planFreeSideInsertion()` yoluna gider. Delete akışı global compact/reflow çağırmaz.
+
+Magnetic snap motoru uygun durumda end-to-end, corner ve T adayları üretebilir.
+
+## Otomatik oluşma
+
+`composeStraightWall()` mevcut `MODULE_WIDTHS_CM = [50,100,150,200]` değerlerini büyükten küçüğe kullanır. Uygun stand uzunluklarında `100 cm` flat-panel otomatik stand duvarının parçası olarak üretilebilir.
+
+Automatic depot tarafında da wall spec'leri `flat-panel` state'e çevrilir. Bu kayıtlarda placement `free` olabilir; otomatik depo state'inde `autoDepot` ve arka depo duvarında uygun kayıtta `autoDepotBack` flag'i eklenir.
+
+## Procedural renderer
+
+`wall_100` GLB kullanmaz; `createFlatPanelModule()` ile procedural oluşturulur.
+
+| Renderer alanı | Kod değeri |
+|---|---:|
+| Nominal width | `100 cm` |
+| Height | `350 cm` |
+| Frame depth | `10 cm` |
+| Dikey profil genişliği | `4 cm` |
+| Dikey profil adedi | `2` |
+| Rail yüksekliği | `0.4 cm` |
+| Ara yatay rail | `yok` |
+| Render panel iç genişliği | `90.8 cm` |
+| Render panel yüksekliği | `49.6 cm` |
+| Panel backing depth | `7.4 cm` |
+| Render panel sayısı | `7` |
+
+Renderer yalnız alt ve üst rail üretir. Her strip yüzeyi `selectionMode = panel`, `acceptsImage = true` ile oluşturulur. Eksik strip state'i varsa o panel atlanır ve console warning yazılır.
+
+## Selection / panel işlemleri
+
+Tek panel selection vardır. Ctrl/Cmd range selection ile tam rectangle selection ayrı kurallardır:
+
+- `createPanelRangeSelection()` aralıkta panel olmayan hücre varsa mevcut panelleri seçmeye devam edebilir.
+- `createRectSelection()` tam grid ister; eksik hücre varsa geçersiz döner.
+- Free placement panel zincirlerinde `createConnectedPanelModulePath()` aynı eksendeki endpoint temaslarını ve dik eksendeki endpoint kesişimlerini bağlı path olarak çözebilir; default tolerance `10.5 cm`dir.
+
+## Color / image
+
+Panel rengi editable'dır. `applyColorOverride()` hedef panelde:
 
 ```text
-0° → 90° → 180° → 270° → 0°
+color = yeni renk
+imageAssetId = null
+imageTransform = default single transform
 ```
 
-Interactive rotation merkezi `moduleBehavior.js` resolver'ı üzerinden çözülür.
+uygular. UI renk girişi color picker yanında HEX, RGB ve CMYK kontrollerinden de uygulanabilir.
 
-Katalog sürükleme sırasında:
+Panel görselleri `imageAssetId` + `imageTransform` state'iyle tutulur. Ana UI seçili panel/panel bloğuna `cover`, `contain`, clear ve rectangle image layout uygular. Scene ayrıca horizontal image API export eder.
+
+## Glass / Lightbox / Mesh
+
+Panel right-click context'i glass, Lightbox ve Mesh aksiyonlarını açabilir.
+
+Lightbox/Mesh oluşturmak için en az 2 panel, aynı fiziksel düzlem ve geçerli tam rectangle block gerekir. Fabric state alanları kodda:
 
 ```text
-Shift + R → saat yönünde döndür
+fabricGroupId
+fabricType
+fabricColor
+fabricImageAssetId
+fabricImageFit
+fabricLightingOn
+fabricOwnerSurfaceIds
+fabricOwnerModuleIds
 ```
 
-Context menüde ayrı `Sağa Döndür` / `Sola Döndür` butonu yoktur.
+Lightbox tek continuous plane üretir; lighting state emissive görünümü kontrol eder. Mesh tek continuous plane üretir; aktif material `transparent=true`, `opacity≈0.48`, `depthWrite=false`, emissive kapalıdır. `createMeshBrandaAlphaMap()` helper'ı kodda bulunur fakat aktif Mesh material yolunda `alphaMap` olarak bağlanmaz.
 
----
+Cover-mode geçişlerinde glass ve fabric state birbirini temizleyen yollar kullanır. Multi-module tek parça fabric grubunda `moduleIds.size > 1` olduğunda ilgili module move/rotation kilidi uygulanabilir.
 
-## 6. Placement / wall ilişkisi
+## Wall-overlay host
 
-Placement state:
+`supportsWallOverlayMount = true`. TV ve illuminated-foam gibi wall-overlay modüller duvara veya free placement'taki destek panelinin ön yüzüne bağlanabilir. Overlay modül `wall_100` recipe'sine otomatik eklenmez.
 
-```text
-xCm
-yCm
-zCm
-rotationZDeg
-wallId
-```
+## Context menu
 
-`wall_100` wall-placement ailesindedir.
-
-Mevcut wall sistemi üzerinden:
-
-- back
-- left
-- right
-
-duvarlarına yerleşebilir.
-
-Sağ duvar canonical orientation değeri mevcut sistemde `270°`dır.
-
-Continuous wall insertion / move sırasında reflow altyapısına katılır.
-
-Nominal wall capacity tüketimi:
-
-```text
-100 cm
-```
-
----
-
-## 7. Hareket
-
-```text
-placement = wall
-moveSnapCm = 50
-```
-
-Serbest zemin objesi değildir.
-
-Placement validation ve continuous wall reflow altyapısını kullanır.
-
-Silme sonrası tüm duvarı otomatik sıkıştıran global compact/reflow davranışı yoktur.
-
----
-
-## 8. Selection / sol click
-
-`wall_100` 7 editable flat-panel yüzeyi taşır.
-
-Mevcut panel selection sistemi üzerinden:
-
-- tek panel selection
-- Ctrl/Cmd + sol click multi-selection
-- panel range / rectangular selection
-- bağlı panel yüzeylerinde selection genişletme
-
-davranışlarına katılır.
-
-Bu interaction `wall_100` için özel değildir; flat-panel ailesinin ortak davranışıdır.
-
----
-
-## 9. Mouse / kamera
-
-Scene genel mouse mapping:
-
-```text
-Sol mouse drag → kamera rotate
-Orta mouse     → pan
-Sağ mouse      → context interaction için OrbitControls dışı
-```
-
----
-
-## 10. Context menu
-
-### Modül seviyesi
+`moduleContextMenu.js` içindeki modül menüsü şu temel aksiyonları içerir:
 
 ```text
 Sil
@@ -253,183 +183,47 @@ Ekle Sağ Tarafa…
 Ekle Sol Tarafa…
 ```
 
-### Panel seviyesi / uygun selection durumunda
+Right-click edilen yüzey `selectionMode = panel` ise ayrıca:
 
 ```text
-Cam Panele Çevir
-Normal Panele Çevir
-
-Lightbox Kumaşa Çevir
-Lightbox Kumaştan Çıkar
-
-Mesh (Delikli) Brandaya Çevir
-Mesh Brandadan Çıkar
-
-Lightbox aydınlatmayı aç
-Lightbox aydınlatmayı kapat
+Cam Panele Çevir / Normal Panele Çevir
+Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar
+Mesh (Delikli) Brandaya Çevir / Mesh Brandadan Çıkar
+Lightbox aydınlatmayı aç / kapat
 ```
 
-`wall_100` için olmayan özel seçenekler:
+Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kaydı birden fazla kez seçilebilir, seçim chip'leri drag ile sıralanabilir. Sağ ekleme isteğinde picker gönderim sırasını ters çevirir; `main.js` placement yoluna göre continuous-wall veya free-side insertion planını kullanır.
+
+`allowSideInsert` behavior alanı context menu butonlarını gizlemek için kullanılmıyor; menü HTML'inde ekleme/çoğaltma aksiyonları genel olarak bulunuyor.
+
+## Duplicate / delete
+
+`duplicateModuleState()` state'i JSON clone eder, yeni module `id` üretir ve varsa strip/face/surface kimliklerini yeniler. `wall_100` için clone edilen normal nested state alanları korunur.
+
+Lightbox/Mesh ownership için scene rebuild sırasında `fabricGroupId` normalizasyonu yapılır. Duplicate'ın eski fabric grubuna yanlış owner olarak katılması engellenir; beklenmeyen clone yüzeylerinde fabric state temizlenebilir.
+
+`Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
+
+Silinen modül multi-module Lightbox/Mesh owner grubunun parçasıysa rebuild sırasında eksik owner yüzey algılandığında kalan fabric ownership de çözülebilir.
+
+## Persistence / save / load
+
+`buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `wall_100` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
+
+Proje restore sırasında modüller clone edilir ve `resolveModuleCatalogKey(moduleState)` tekrar çalıştırılır. Asset'ler scene rebuild edilmeden önce yüklenir. Autosave signature `stand` ve `modules` state'ini kapsar.
+
+ZIP export yapısı:
 
 ```text
-Boyutlandır…        → illuminated-foam
-Raf altı aydınlatma → shelf
+project.json
+assets/*
 ```
 
-`wall_100` için ayrı width-specific context-menu override bulunmaz.
+ZIP import sırasında recursive asset remap özel olarak `imageAssetId` key'ini dönüştürür. Kodun asset-reference temizleme walker'ı ise `imageAssetId` ve `fabricImageAssetId` alanlarını tanır. Bu iki akışın anahtar listesi aynı değildir.
 
----
+`Tüm Özellikleri Kaldır` akışında katalog modülleri `createCatalogModuleState(module, { preservePlacement: true })` ile default state'ten yeniden oluşturulur; placement korunur, instance/surface kimlikleri ve düzenlenebilir state defaultlara döner.
 
-## 11. Sağ / sol tarafa ekleme
-
-```text
-allowSideInsert = true
-```
-
-Desteklenen context aksiyonları:
-
-```text
-Ekle Sağ Tarafa…
-Ekle Sol Tarafa…
-```
-
-Picker:
-
-- birden çok katalog Item'ı seçebilir,
-- aynı Item'ı tekrar seçebilir,
-- selection sırasını değiştirebilir,
-- batch validation uygular.
-
----
-
-## 12. Çoğaltma
-
-```text
-Çoğalt Sağ Tarafa
-Çoğalt Sol Tarafa
-```
-
-Flat-panel duplicate akışı tasarım state'ini korur.
-
-Korunanlar:
-
-- panel renkleri
-- panel image state
-- image transform
-
-Yenilenenler:
-
-- module ID
-- surface/panel ID'leri
-
----
-
-## 13. Silme
-
-`Sil` aksiyonu vardır.
-
-Hedef module project module listesinden çıkarılır ve scene yeniden kurulur.
-
-Silme sonrasında global compact/reflow yapılmaz.
-
----
-
-## 14. Panel rengi
-
-```text
-appearance.color = editable
-```
-
-7 panel ayrı renk state'i taşır.
-
-Renk override hedef paneldeki image state'i temizleyebilir; diğer paneller etkilenmez.
-
----
-
-## 15. Panel görseli
-
-```text
-appearance.image = editable
-```
-
-Panel:
-
-```text
-imageAssetId
-imageTransform
-```
-
-taşır.
-
-Flat-panel image düzenleme altyapısını kullanır.
-
----
-
-## 16. Cam / Lightbox / Mesh
-
-`wall_100` flat-panel olduğu için mevcut panel cover-mode sistemine katılır.
-
-Desteklenen işlemler:
-
-```text
-Cam Panele Çevir
-Normal Panele Çevir
-Lightbox Kumaşa Çevir
-Lightbox Kumaştan Çıkar
-Lightbox aydınlatmayı aç/kapat
-Mesh (Delikli) Brandaya Çevir
-Mesh Brandadan Çıkar
-```
-
-Mevcut exclusivity:
-
-```text
-Cam açılırsa       → Lightbox/Mesh kaldırılır
-Lightbox açılırsa  → cam kaldırılır
-Mesh açılırsa      → cam kaldırılır
-```
-
-Lightbox / Mesh rectangular multi-panel selection altyapısını kullanır.
-
----
-
-## 17. Wall-overlay taşıyıcılığı
-
-```text
-supportsWallOverlayMount = true
-```
-
-TV / illuminated-foam benzeri wall-overlay Item'lar bu wall ailesi üzerine mount edilebilir.
-
-Overlay ayrı Item/state olarak tutulur; `wall_100` BOM'una otomatik dahil olmaz.
-
----
-
-## 18. Collision / ghost
-
-```text
-collision = segment
-magneticSnap = standard
-connectionEndpoint = segment
-collisionDepth = physical
-endpointContact = standard
-boundarySnap = stand-edge
-overlapWithTypes = []
-```
-
-Ghost:
-
-```text
-kind = silhouette
-renderer = module-silhouette
-opacity = 0.38
-```
-
----
-
-## 19. BOM / üretim reçetesi
-
-Canonical recipe:
+## BOM / production recipe
 
 ```text
 recipeId = wall-straight-100
@@ -438,9 +232,7 @@ nominalWidthCm = 100
 connectionMode = straight
 ```
 
-### Normal Raw BOM
-
-| Part ID | Sistem adı | Miktar | Birim |
+| Part ID | Kod adı | Adet | Birim |
 |---|---|---:|---|
 | `profile_91` | Profil 91 cm | 2 | adet |
 | `upright_346_5` | Dikme 346,5 cm | 2 | adet |
@@ -448,146 +240,37 @@ connectionMode = straight
 | `connector_start` | Başlangıç Aparatı | 2 | adet |
 | `connector_single` | Tekli Aparat | 13 | adet |
 
-Production dimensions:
+Recipe metadata'sında ayrıca:
 
 ```text
-profile_91
-length = 91 cm
-
-upright_346_5
-length = 346.5 cm
-thickness = 8 cm
-
-panel_98
-width = 98 cm
-height = 47 cm
-thickness = 0.8 cm
+variants.innerCornerPanelPartId = panel_corner_92
 ```
 
----
+`panel_corner_92` production registry kaydı: `İç Köşe Paneli 92 × 47 cm` (widthCm=92, heightCm=47, thicknessCm=0.8). Bu part normal `recipe.items` satırlarında yer almaz.
 
-## 20. İç köşe panel varyantı
+`rawBomDebug.js` seçili modül için `getExpandedModuleRecipe()` çağırıp `recipe.items` satırlarını gösterir. Bu ekranda placement ilişkilerinden ayrıca part dönüşümü yapan bir çağrı yoktur.
 
-Recipe variant:
+## Catalog sidebar / selection feedback
 
-```text
-innerCornerPanelPartId = panel_corner_92
-```
+`moduleDragSidebar.js` içinde `wall_100` katalog grubu **Panel & Duvar** altında yer alır. Catalog card drag akışı `Shift+R` ile behavior rotation step'ini kullanır; ghost/placement preview `scene3d.previewCatalogModuleDrag()` yoluna gider.
 
-Production part:
+Flat-panel selection feedback width ve strip numarasını gösterir; Ctrl/Cmd ile çoklu seçim ipucu verir.
 
-```text
-partId = panel_corner_92
-name = İç Köşe Paneli 92 × 47 cm
-unit = adet
-panelRole = inner-corner
-nominalModuleWidthCm = 100
-width = 92 cm
-height = 47 cm
-thickness = 0.8 cm
-```
+## Kod kaynakları
 
----
-
-## 21. Connector Item'ları
-
-Sistemde tanımlı connector Item'ları:
-
-```text
-connector_start   = Başlangıç Aparatı
-connector_single  = Tekli Aparat
-connector_double  = Çiftli Aparat
-connector_corner  = Köşe Aparatı
-```
-
-Normal `wall_100` straight recipe:
-
-```text
-2 × connector_start
-13 × connector_single
-```
-
-`connector_double` ve `connector_corner` production sisteminde vardır ancak straight recipe satırında kullanılmaz.
-
----
-
-## 22. Raw BOM Debug
-
-`rawBomDebug.js` düz duvar genişlikleri arasında `100` değerini tanır ve:
-
-```text
-renderRecipe('wall', 100, '100 cm düz duvar')
-```
-
-akışıyla Raw BOM gösterir.
-
-Bu Final Project BOM değildir.
-
----
-
-## 23. Project relationship / Final BOM durumu
-
-Mevcut sistemde:
-
-- straight recipe var,
-- inner-corner panel part var,
-- double/corner connector Item'ları var,
-- wall relationship / placement altyapısı var.
-
-Ancak project-level gerçek komşuluk/köşe ilişkilerinden terminal BOM değişimini canonical şekilde türeten Final BOM çözümü tamamlanmış değildir.
-
-İlgili açık audit alanları:
-
-```text
-F-030 — No canonical project-level Final BOM generator
-F-031 — Relationship/corner connector parts not derived from project relationships
-```
-
----
-
-# wall_100 vs wall_150 / wall_200 — Sistemden doğrulanmış farklar
-
-## 24. Gerçek farklar
-
-| Alan | `wall_100` | `wall_150` | `wall_200` |
-|---|---|---|---|
-| Genişlik | 100 cm | 150 cm | 200 cm |
-| Recipe | `wall-straight-100` | `wall-straight-150` | `wall-straight-200` |
-| Profil | `profile_91` | `profile_140_5` | `profile_190` |
-| Normal panel | `panel_98` | `panel_147_5` | `panel_197` |
-| İç köşe panel | `panel_corner_92` | `panel_corner_142_5` | `panel_corner_192` |
-
-## 25. Aynı olanlar
-
-Aşağıdakiler mevcut sistemde aynıdır:
-
-- `type = flat-panel`
-- `profile = wall-editable`
-- 7 panel
-- 350 cm yükseklik
-- 10 cm duvar derinliği
-- 50 cm move snap
-- 90° rotation step
-- 0° default rotation
-- side insert true
-- segment collision
-- standard magnetic snap
-- stand-edge boundary snap
-- wall-overlay host true
-- aynı context menu
-- aynı panel selection sistemi
-- aynı color/image sistemi
-- aynı Cam/Lightbox/Mesh sistemi
-- aynı ghost
-- 2 adet profil
-- 2 adet `upright_346_5`
-- 7 adet normal panel
-- 2 adet başlangıç aparatı
-- 13 adet tekli aparat
-- BOM policy = recipe
-
-## 26. Sonuç
-
-Mevcut kodda `wall_100` için `wall_150` veya `wall_200`den farklı özel rotation, click, context menu, collision, side-insert, ghost veya appearance davranışı bulunmamaktadır.
-
-Farklar width-specific geometry ve production Item kimlikleridir.
+- `src/catalog.js`
+- `src/designState.js`
+- `src/moduleContracts.js`
+- `src/moduleBehavior.js`
+- `src/modulePlacement.js`
+- `src/moduleMove.js`
+- `src/wallReflow.js`
+- `src/automaticWall.js`
+- `src/autoDepot.js`
+- `src/scene3d.js`
+- `src/moduleContextMenu.js`
+- `src/main.js`
+- `src/moduleRecipes.js`
+- `src/productionParts.js`
+- `src/rawBomDebug.js`
+- `src/imageAssetReferences.js`
