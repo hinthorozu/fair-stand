@@ -55,26 +55,26 @@ async function seedIlluminatedFoam(page) {
       tx.objectStore('projects').put(project);
     });
     db.close();
-    return preserved;
+    return { projectId: project.id, preserved };
   });
 }
 
-async function readProjectModules(page) {
-  return page.evaluate(async () => {
+async function readProjectModules(page, projectId) {
+  return page.evaluate(async (id) => {
     const db = await new Promise((resolve, reject) => {
       const request = indexedDB.open('fair-stand-configurator', 2);
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
-    const projects = await new Promise((resolve, reject) => {
+    const project = await new Promise((resolve, reject) => {
       const tx = db.transaction('projects', 'readonly');
-      const request = tx.objectStore('projects').getAll();
-      request.onsuccess = () => resolve(request.result ?? []);
+      const request = tx.objectStore('projects').get(id);
+      request.onsuccess = () => resolve(request.result ?? null);
       request.onerror = () => reject(request.error);
     });
     db.close();
-    return projects[0]?.modules ?? [];
-  });
+    return project?.modules ?? [];
+  }, projectId);
 }
 
 test('Tüm Özellikleri Kaldır deletes illuminated foam and preserves other module layout', async ({ page }) => {
@@ -95,8 +95,14 @@ test('Tüm Özellikleri Kaldır deletes illuminated foam and preserves other mod
   await page.getByRole('button', { name: 'Projeyi Oluştur' }).click();
   await expect(page.locator('#stage-result')).toContainText('L Stand Sol · 500 × 300 cm');
 
-  const preserved = await seedIlluminatedFoam(page);
-  await page.locator('#open-project').click();
+  const { projectId, preserved } = await seedIlluminatedFoam(page);
+
+  // Reload clears the active in-memory project so the F-020 preflight save cannot
+  // overwrite the seeded persisted project before the real open flow reads it.
+  await page.reload();
+  const projectSelect = page.locator('#project-select');
+  await expect(projectSelect.locator(`option[value="${projectId}"]`)).toHaveCount(1);
+  await projectSelect.selectOption(projectId);
   await expect(page.locator('#project-status')).toContainText('Açıldı:');
 
   const featurePanel = page.locator('details.panel-card').filter({
@@ -115,7 +121,7 @@ test('Tüm Özellikleri Kaldır deletes illuminated foam and preserves other mod
   await page.locator('#save-project').click();
   await expect(page.locator('#project-status')).toContainText('Kaydedildi:');
 
-  const modules = await readProjectModules(page);
+  const modules = await readProjectModules(page, projectId);
   expect(modules.some((module) => module.type === 'illuminated-foam')).toBe(false);
   expect(modules.map((module) => ({
     type: module.type,
