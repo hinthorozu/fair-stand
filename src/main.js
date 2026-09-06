@@ -1134,18 +1134,25 @@ resetModuleFeaturesButton.addEventListener('click', () => {
     return;
   }
 
+  const illuminatedFoamCount = currentModules.filter(
+    (module) => module?.type === 'illuminated-foam',
+  ).length;
   const confirmed = window.confirm(
-    'Tüm modüller varsayılan ayarlarına dönecektir. Onaylıyor musunuz?\n\n'
+    'Tüm modül özellikleri varsayılan ayarlarına dönecektir. Onaylıyor musunuz?\n\n'
       + 'Kaldırılacak özellikler:\n'
       + '• Atanan resimler\n'
       + '• Atanan cam özellikleri\n'
       + '• Atanan renkler\n'
-      + '• Diğer panel özelleştirmeleri\n\n'
-      + 'Modül türleri, genişlikleri, sıraları ve FAZ 2 yerleşimleri korunacaktır.',
+      + '• Diğer panel özelleştirmeleri\n'
+      + (illuminatedFoamCount > 0 ? `• ${illuminatedFoamCount} Işıklı Strafor sahneden silinecek\n` : '')
+      + '\nDiğer modül türleri, genişlikleri, sıraları ve FAZ 2 yerleşimleri korunacaktır.',
   );
   if (!confirmed) return;
 
-  const resetModules = currentModules.map((module) => createCatalogModuleState(
+  const resetCandidates = currentModules.filter(
+    (module) => module?.type !== 'illuminated-foam',
+  );
+  const resetModules = resetCandidates.map((module) => createCatalogModuleState(
     module,
     { preservePlacement: true },
   ));
@@ -1155,11 +1162,15 @@ resetModuleFeaturesButton.addEventListener('click', () => {
   }
 
   currentModules = resetModules;
+  selectedFoamModuleId = null;
+  if (foamLightControls) foamLightControls.hidden = true;
   moduleContextMenu.close();
   moduleContextMenu.closePicker();
   rebuildWall({ resetView: false });
   syncColorEditorFromHex('#ffffff');
-  selectionInfo.textContent = 'Tüm modüller varsayılan ayarlarına döndürüldü. Modül dizilimi ve yerleşimi korundu.';
+  selectionInfo.textContent = illuminatedFoamCount > 0
+    ? `Tüm özellikler kaldırıldı. ${illuminatedFoamCount} Işıklı Strafor sahneden silindi; diğer modüllerin dizilimi ve yerleşimi korundu.`
+    : 'Tüm modüller varsayılan ayarlarına döndürüldü. Modül dizilimi ve yerleşimi korundu.';
 });
 
 function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
