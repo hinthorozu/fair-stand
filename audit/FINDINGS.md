@@ -7,19 +7,22 @@ Detailed audit evidence lives under `audit/evidence/`. Remediation closure evide
 
 ## Summary
 
-- Total findings: **48** (`F-001` … `F-048`)
-- Open findings: **28**
+- Total findings: **49** (`F-000` + `F-001` … `F-048`)
+- Open findings: **29**
 - Closed findings: **20**
 - Open P0: **0**
-- Open P1: **12**
+- Open P1: **13**
 - Open P2: **16**
 - Open P3: **0**
+- Priority remediation: **F-000 — Add canonical Item contract and enforce it at repo entrypoints — FIRST**
+- Remediation order: complete `F-000` first; then continue the existing canonical OPEN finding sequence starting with `F-014`, `F-015`, and onward. `F-000` does not close or supersede any other finding.
 - Remediation progress: **A00 closed; A01 closed; A02 closed / AUDITED_OK / post-merge verified; A03 closed / AUDITED_OK / post-merge verified; A04 in progress — F-013 closed / post-merge verified; F-016 closed / post-merge verified out of sequence; F-014/F-015 remain open; A08 in progress — F-020 closed / post-merge verified; F-023 closed / post-merge verified; F-021/F-022 remain open; A10 in progress — F-027/F-028 closed / post-merge verified; F-025/F-026 remain open; A13 in progress — F-033 closed / post-merge verified; F-032/F-034 remain open; A21 in progress — F-041 closed / repository ruleset verified; F-034/F-043/F-044/F-045/F-046 remain open; F-047/F-048 restored to canonical backlog as OPEN**
 
 ## Findings
 
 | ID | Sev | Summary | Status |
 |---|---|---|---|
+| F-000 | P1 | Add canonical Item contract and enforce it at repo entrypoints | **OPEN / FIRST** |
 | F-001 | P1 | `SYSTEM_MODULE_CATALOG.md` stale versus runtime catalog/BOM policy | **CLOSED** — `audit/remediation/A01_F001_CLOSURE.md` |
 | F-002 | P2 | Historical/repository-progress docs can be mistaken for current truth | **CLOSED** — `audit/remediation/A01_F002_CLOSURE.md` |
 | F-003 | P2 | Roadmaps duplicate canonical production dimensions/recipe facts | **CLOSED** — `audit/remediation/A01_F003_CLOSURE.md` |
