@@ -102,7 +102,10 @@ test('Tüm Özellikleri Kaldır deletes illuminated foam and preserves other mod
   await page.reload();
   const projectSelect = page.locator('#project-select');
   await expect(projectSelect.locator(`option[value="${projectId}"]`)).toHaveCount(1);
-  await projectSelect.selectOption(projectId);
+  await projectSelect.evaluate((select, id) => {
+    select.value = id;
+  }, projectId);
+  await page.locator('#open-project').click();
   await expect(page.locator('#project-status')).toContainText('Açıldı:');
 
   const featurePanel = page.locator('details.panel-card').filter({
