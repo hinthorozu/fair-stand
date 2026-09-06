@@ -1,0 +1,140 @@
+# VIDEO_WALL_2X2 — Mevcut Sistem Profili
+
+Bu belge `VIDEO_WALL_2X2` için `Version2` runtime kodunda çalışan TV / wall-overlay akışını toplar.
+
+## Kimlik / state
+
+| Alan | Kod değeri |
+|---|---|
+| Catalog key | `VIDEO_WALL_2X2` |
+| Label | `Video Wall 2×2` |
+| Type | `tv` |
+| Catalog width | `217 cm` |
+| Catalog height | `122 cm` |
+| State screen width | `217 cm` |
+| State screen height | `122 cm` |
+| State depth | `5 cm` |
+| Rows × Cols | `2 × 2` |
+| Panel screen | `108.5 × 61 cm` |
+
+Factory state `heightCm` alanını actual `screenHeightCm` ile yazar. Ordinary TV katalog kayıtlarında catalog `heightCm=350` iken instance state yüksekliği ekran yüksekliğidir.
+
+## Contract
+
+| Alan | Kod değeri |
+|---|---|
+| Profile | `wall-media` |
+| State owner | `src/designState.js` |
+| Persistence | `project-state` |
+| Color | `fixed` |
+| Image | `renderer-managed` |
+| Renderer policy | `specialized-media` |
+| Runtime | `static` |
+| Composition | `standalone` |
+| BOM mode | `decision-required` |
+| BOM source | `None` |
+
+## Behavior / placement
+
+| Alan | Kod değeri |
+|---|---|
+| Placement contract | `wall-overlay` |
+| Move snap | `10 cm` |
+| Rotation step | `90°` |
+| Default rotation | `0°` |
+| Side insert flag | `false` |
+| Collision contract | `none` |
+| Magnetic snap | `none` |
+| Connection endpoint | `segment` |
+| Collision depth | `physical` |
+| Endpoint contact | `standard` |
+| Boundary snap | `stand-edge` |
+| Side-insert rotation | `inherit` |
+| Overlap izinleri | `[]` |
+| Wall-overlay host | `false` |
+| Wall capacity | `include` |
+| Ghost | `silhouette / module-silhouette / opacity 0.38` |
+
+TV `wall-overlay` placement kullanır; move snap `10 cm`, rotation step `90°`, collision/magnetic snap `none`dir.
+
+Scene drag hit-test gerçek stand wall yüzünü veya `supportsWallOverlayMount=true` olan free paneli support olarak kullanabilir. Support bulunmazsa stand alanında free overlay placement yolu da vardır. Vertical movement ekran yüksekliği ile 350 cm wall yüksekliği arasında clamp edilir.
+
+Behavior `allowSideInsert=false` olmasına rağmen generic context menu HTML'inde duplicate/add-left/add-right butonları yine bulunur; `main.js` handler'ları context placement `wallId` değerine göre continuous/free insertion yollarını çağırır.
+
+## Renderer
+
+`createTvModule()` procedural black TV box oluşturur ve front face'e `tv-screen.jpg` texture uygular. Ekran center Y `1.75 m`dir; Z offset stand wall front + TV depth üzerinden hesaplanır.
+
+Bu video wall varyantında `2×2` panel grid'i için 1 cm black seam mesh'leri panel sınırlarına eklenir.
+
+Selection `module` seviyesindedir; `acceptsImage=false`. Contract `appearance.image=renderer-managed`dir; kullanıcı panel image editor'ı TV screen texture'ını değiştiren yol değildir.
+
+## Context menu
+
+`moduleContextMenu.js` içindeki modül menüsü şu temel aksiyonları içerir:
+
+```text
+Sil
+Çoğalt Sağ Tarafa
+Çoğalt Sol Tarafa
+Ekle Sağ Tarafa…
+Ekle Sol Tarafa…
+```
+
+Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kaydı birden fazla kez seçilebilir, seçim chip'leri drag ile sıralanabilir. Sağ ekleme isteğinde picker gönderim sırasını ters çevirir; `main.js` placement yoluna göre continuous-wall veya free-side insertion planını kullanır.
+
+`allowSideInsert` behavior alanı context menu butonlarını gizlemek için kullanılmıyor; menü HTML'inde ekleme/çoğaltma aksiyonları genel olarak bulunuyor.
+
+## Duplicate / delete
+
+`duplicateModuleState()` state'i JSON clone eder, yeni module `id` üretir ve varsa strip/face/surface kimliklerini yeniler. `VIDEO_WALL_2X2` için clone edilen normal nested state alanları korunur.
+
+`Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
+
+## Persistence / save / load
+
+`buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `VIDEO_WALL_2X2` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
+
+Proje restore sırasında modüller clone edilir ve `resolveModuleCatalogKey(moduleState)` tekrar çalıştırılır. Asset'ler scene rebuild edilmeden önce yüklenir. Autosave signature `stand` ve `modules` state'ini kapsar.
+
+ZIP export yapısı:
+
+```text
+project.json
+assets/*
+```
+
+`Tüm Özellikleri Kaldır` akışında katalog modülleri `createCatalogModuleState(module, { preservePlacement: true })` ile default state'ten yeniden oluşturulur; placement korunur, instance/surface kimlikleri ve düzenlenebilir state defaultlara döner.
+
+## BOM
+
+Kodda bu Item için recipe yoktur.
+
+```text
+bom.mode = decision-required
+bom.source = None
+```
+
+`moduleContracts.js` içindeki mevcut reason:
+
+> Existing module has no canonical BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
+
+Bu dosyada olmayan bir BOM satırı eklenmemiştir.
+
+## Catalog sidebar / selection feedback
+
+`moduleDragSidebar.js` içinde `VIDEO_WALL_2X2` katalog grubu **Elektronik & Aydınlatma** altında yer alır. Catalog card drag akışı `Shift+R` ile behavior rotation step'ini kullanır; ghost/placement preview `scene3d.previewCatalogModuleDrag()` yoluna gider.
+
+`selectionFeedback.js` TV seçiminde `sizeInch`, `screenWidthCm` ve `screenHeightCm` değerlerini state'ten okuyup ekran ölçüsü mesajı üretir.
+
+## Kod kaynakları
+
+- `src/catalog.js`
+- `src/tvConfig.js`
+- `src/designState.js`
+- `src/moduleContracts.js`
+- `src/moduleBehavior.js`
+- `src/modulePlacement.js`
+- `src/scene3d.js`
+- `src/moduleContextMenu.js`
+- `src/main.js`
