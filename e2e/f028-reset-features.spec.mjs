@@ -99,6 +99,12 @@ test('Tüm Özellikleri Kaldır deletes illuminated foam and preserves other mod
   await page.locator('#open-project').click();
   await expect(page.locator('#project-status')).toContainText('Açıldı:');
 
+  const featurePanel = page.locator('details.panel-card').filter({
+    has: page.locator('#reset-module-features'),
+  });
+  await featurePanel.locator('summary').click();
+  await expect(page.locator('#reset-module-features')).toBeVisible();
+
   page.once('dialog', async (dialog) => {
     expect(dialog.message()).toContain('1 Işıklı Strafor sahneden silinecek');
     await dialog.accept();
