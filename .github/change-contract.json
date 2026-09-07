@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "version2-canonical-ci-baseline",
   "kind": "tooling",
-  "summary": "Align canonical CI, local change-gate baseline, active development docs and regressions with Version2 as the integration branch.",
+  "summary": "Align canonical CI, local change-gate baseline, active development docs and regressions with Version2 as the integration branch, including the canonical Item contract path after the docs/items reorganization.",
   "owners": [
     ".github/workflows/ci.yml",
     "scripts/verify-change-contract.mjs"
@@ -58,7 +58,9 @@
       "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
       "audit/evidence/A02_CHANGE_GATE.md",
       "audit/evidence/A20_BUILD_CI_DEPLOY.md",
-      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md"
+      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
+      "docs/items/contract/ITEM_CONTRACT.md",
+      "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md"
     ],
     "relatedFindings": {
       "affected": [
@@ -69,7 +71,7 @@
         "F-005"
       ]
     },
-    "notes": "Version2 is the active integration branch. This change moves CI triggers and local change-gate merge-base resolution from the frozen ROG reference to Version2, updates active governance/developer documentation, and adds regressions for the branch policy. No browser/runtime Item behavior changes."
+    "notes": "Version2 is the active integration branch. This change moves CI triggers and local change-gate merge-base resolution from the frozen ROG reference to Version2, updates active governance/developer documentation, and adds regressions for the branch policy. The Item documentation reorganization places ITEM_CONTRACT.md under docs/items/contract, so developerEntrypointDocs.test.js now reads the canonical file from that actual path. No browser/runtime Item behavior changes."
   },
   "tests": {
     "targeted": [
@@ -88,11 +90,11 @@
   },
   "risk": {
     "level": "medium",
-    "notes": "CI routing and local baseline selection are release-governance critical; regressions explicitly verify Version2 targeting and feature-branch base resolution."
+    "notes": "CI routing and local baseline selection are release-governance critical; regressions explicitly verify Version2 targeting, feature-branch base resolution, and the canonical Item contract documentation path."
   },
   "migration": {
     "required": false,
     "notes": "No runtime, persisted project, IndexedDB, archive or Item schema migration."
   },
-  "rollback": "Revert the Version2 CI/baseline alignment commit and restore the previous branch policy if Version2 is no longer the canonical integration branch."
+  "rollback": "Revert the Version2 CI/baseline alignment and Item contract documentation-path updates if the branch or documentation layout is rolled back."
 }
