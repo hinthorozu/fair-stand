@@ -11,6 +11,12 @@ test('package exposes universal change-gate and Playwright E2E commands', () => 
   assert.equal(packageJson.scripts.e2e, 'playwright test');
 });
 
+test('canonical CI targets Version2 for pull requests and post-merge pushes', () => {
+  assert.match(ciWorkflow, /push:\s*\n\s*branches: \[Version2\]/);
+  assert.match(ciWorkflow, /pull_request:\s*\n\s*branches: \[Version2\]/);
+  assert.doesNotMatch(ciWorkflow, /branches: \[ROG\]/);
+});
+
 test('canonical CI enforces gate, unit tests, build and real-browser E2E in order', () => {
   const gateIndex = ciWorkflow.indexOf('run: npm run contract:verify');
   const testIndex = ciWorkflow.indexOf('run: npm test');
