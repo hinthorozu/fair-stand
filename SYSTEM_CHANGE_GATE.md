@@ -220,7 +220,7 @@ Bu gate mevcut contract'ların yerine geçmez.
 
 ## CI
 
-PR veya ROG push'unda verifier değişen dosyaları GitHub event SHA'larından çözer ve şunları denetler:
+PR veya Version2 push'unda verifier değişen dosyaları GitHub event SHA'larından çözer ve şunları denetler:
 
 1. Guarded dosya değişmişse `.github/change-contract.json` aynı diff içinde değişmiş mi?
 2. Contract schema eksiksiz mi?
@@ -253,8 +253,8 @@ CI environment değişkenleri yoksa `npm run contract:verify` diff enforcement'�
 
 Verifier:
 
-- feature branch'te `ROG` veya `origin/ROG` ile merge-base üzerinden committed farkı bulur,
-- mevcut `ROG` branch'inde mümkünse `origin/ROG` ile local commit farkını karşılaştırır,
+- feature branch'te `Version2` veya `origin/Version2` ile merge-base üzerinden committed farkı bulur,
+- mevcut `Version2` branch'inde mümkünse `origin/Version2` ile local commit farkını karşılaştırır,
 - staged değişiklikleri ekler,
 - unstaged değişiklikleri ekler,
 - untracked dosyaları ekler,
@@ -270,7 +270,7 @@ E2E'yi local çalıştırmak için Playwright runner bir kez `npm run e2e:deps` 
 
 Gerekirse base açıkça `CHANGE_GATE_BASE=<git-ref> npm run contract:verify` ile verilebilir.
 
-Local base çözülemiyorsa verifier sessizce schema-only success vermez; **fail-closed** olur ve `CHANGE_GATE_BASE` veya `ROG` ref'i ister.
+Local base çözülemiyorsa verifier sessizce schema-only success vermez; **fail-closed** olur ve `CHANGE_GATE_BASE` veya `Version2` ref'i ister.
 
 ---
 
