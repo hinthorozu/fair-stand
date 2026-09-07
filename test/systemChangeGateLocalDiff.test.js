@@ -36,6 +36,20 @@ function runVerifier(cwd, base = 'HEAD') {
   });
 }
 
+function runVerifierWithDefaultBase(cwd) {
+  const env = { ...process.env };
+  delete env.CHANGE_GATE_BASE;
+  delete env.CHANGE_GATE_FILES;
+  delete env.GITHUB_EVENT_NAME;
+  delete env.GITHUB_EVENT_PATH;
+
+  return spawnSync(process.execPath, ['scripts/verify-change-contract.mjs'], {
+    cwd,
+    env,
+    encoding: 'utf8',
+  });
+}
+
 function createFixtureContract() {
   return {
     schemaVersion: 2,
@@ -153,6 +167,55 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /Diff source: local git diff against HEAD\^ \+ staged\/unstaged\/untracked/);
     assert.match(result.stdout, /Guarded files: 1/);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test('local verifier uses Version2 as the default integration base for feature branches', () => {
+  const cwd = mkdtempSync(join(tmpdir(), 'fair-stand-version2-base-'));
+
+  try {
+    mkdirSync(join(cwd, '.github'), { recursive: true });
+    mkdirSync(join(cwd, 'scripts'), { recursive: true });
+    mkdirSync(join(cwd, 'src'), { recursive: true });
+    mkdirSync(join(cwd, 'test'), { recursive: true });
+
+    writeFileSync(
+      join(cwd, '.github/change-contract.json'),
+      `${JSON.stringify(createFixtureContract(), null, 2)}\n`,
+    );
+    copyFileSync(
+      new URL('../scripts/verify-change-contract.mjs', import.meta.url),
+      join(cwd, 'scripts/verify-change-contract.mjs'),
+    );
+    copyFileSync(
+      new URL('../scripts/change-impact-analysis.mjs', import.meta.url),
+      join(cwd, 'scripts/change-impact-analysis.mjs'),
+    );
+    copyFileSync(
+      new URL('../src/systemChangeContract.js', import.meta.url),
+      join(cwd, 'src/systemChangeContract.js'),
+    );
+    writeFileSync(join(cwd, 'package.json'), '{"type":"module"}\n');
+    writeFileSync(join(cwd, 'test/example.test.js'), 'export {};\n');
+
+    git(cwd, ['init', '-q']);
+    git(cwd, ['config', 'user.email', 'change-gate-test@example.invalid']);
+    git(cwd, ['config', 'user.name', 'Change Gate Test']);
+    git(cwd, ['add', '.']);
+    git(cwd, ['commit', '-qm', 'baseline']);
+    git(cwd, ['branch', '-M', 'Version2']);
+    git(cwd, ['checkout', '-qb', 'feature/version2-base']);
+
+    appendFileSync(join(cwd, 'test/example.test.js'), 'export const changed = true;\n');
+    appendFileSync(join(cwd, '.github/change-contract.json'), '\n');
+    git(cwd, ['add', '.']);
+    git(cwd, ['commit', '-qm', 'feature change']);
+
+    const result = runVerifierWithDefaultBase(cwd);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /Diff source: local git diff against Version2 \+ staged\/unstaged\/untracked/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

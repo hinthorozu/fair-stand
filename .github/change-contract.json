@@ -1,21 +1,18 @@
 {
   "schemaVersion": 2,
-  "id": "version2-canonical-baseline",
+  "id": "version2-canonical-ci-baseline",
   "kind": "tooling",
-  "summary": "Use Version2 as the canonical development baseline for CI, local change-gate resolution and active development documentation.",
+  "summary": "Align canonical CI, local change-gate baseline, active development docs and regressions with Version2 as the integration branch.",
   "owners": [
     ".github/workflows/ci.yml",
-    "scripts/verify-change-contract.mjs",
-    "SYSTEM_CHANGE_GATE.md",
-    "SYSTEM_DEVELOPMENT_CONTRACT.md"
+    "scripts/verify-change-contract.mjs"
   ],
   "sourceOfTruth": [
     ".github/workflows/ci.yml",
     "scripts/verify-change-contract.mjs",
     "SYSTEM_CHANGE_GATE.md",
     "SYSTEM_DEVELOPMENT_CONTRACT.md",
-    "PROJECT_RULES.md",
-    "README.md"
+    "PROJECT_RULES.md"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -42,13 +39,19 @@
       "package.json"
     ],
     "affectedTests": [
-      "test/developerEntrypointDocs.test.js",
-      "test/systemChangeGate.test.js",
       "test/systemChangeGateCiContract.test.js",
       "test/systemChangeGateLocalDiff.test.js",
-      "test/historicalDocumentationStatus.test.js"
+      "test/developerEntrypointDocs.test.js",
+      "test/systemModuleCatalogDoc.test.js",
+      "test/historicalDocumentationStatus.test.js",
+      "test/systemChangeGate.test.js"
     ],
     "affectedDocs": [
+      "README.md",
+      "SYSTEM_CHANGE_GATE.md",
+      "SYSTEM_DEVELOPMENT_CONTRACT.md",
+      "PROJECT_RULES.md",
+      "SYSTEM_MODULE_CATALOG.md",
       "FRESH_REPOSITORY_REVIEW.md",
       "REPOSITORY_CLEANUP_PROGRESS.md",
       "audit/evidence/A00_BASELINE.md",
@@ -58,37 +61,38 @@
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md"
     ],
     "relatedFindings": {
-      "affected": [],
-      "reviewedNotAffected": [
+      "affected": [
         "F-004",
-        "F-005",
         "F-009"
+      ],
+      "reviewedNotAffected": [
+        "F-005"
       ]
     },
-    "notes": "This changes only the active development baseline from ROG to Version2. Historical audit/remediation evidence remains frozen and unchanged."
+    "notes": "Version2 is the active integration branch. This change moves CI triggers and local change-gate merge-base resolution from the frozen ROG reference to Version2, updates active governance/developer documentation, and adds regressions for the branch policy. No browser/runtime Item behavior changes."
   },
   "tests": {
     "targeted": [
-      "test/developerEntrypointDocs.test.js",
-      "test/systemChangeGate.test.js",
       "test/systemChangeGateCiContract.test.js",
-      "test/systemChangeGateLocalDiff.test.js"
+      "test/systemChangeGateLocalDiff.test.js",
+      "test/developerEntrypointDocs.test.js",
+      "test/systemModuleCatalogDoc.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": false,
       "targeted": [],
-      "reason": "The change affects repository governance/CI branch targeting only and does not alter browser-visible product behavior."
+      "reason": "This is repository CI/change-gate tooling and documentation alignment; it does not change browser-visible product behavior."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "An incorrect baseline could block or mis-scope CI/change-gate enforcement, so both PR CI and post-merge Version2 CI must pass."
+    "notes": "CI routing and local baseline selection are release-governance critical; regressions explicitly verify Version2 targeting and feature-branch base resolution."
   },
   "migration": {
     "required": false,
-    "notes": "No runtime, persisted project, IndexedDB, archive or schema migration is involved."
+    "notes": "No runtime, persisted project, IndexedDB, archive or Item schema migration."
   },
-  "rollback": "Revert this branch-baseline commit to restore the prior ROG-based CI and local change-gate targeting."
+  "rollback": "Revert the Version2 CI/baseline alignment commit and restore the previous branch policy if Version2 is no longer the canonical integration branch."
 }
