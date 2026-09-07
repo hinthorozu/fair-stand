@@ -63,6 +63,6 @@ Core veya browser-visible davranış değişikliği yapılırken:
 8. Davranışı açıklayan canonical doküman etkileniyorsa güncellenir.
 9. `npm run contract:verify` full-system impact acknowledgement ve E2E declaration dahil başarılı olmalıdır.
 10. `npm test`, `npm run build` ve canonical `npm run e2e` başarılı olmadan değişiklik tamamlanmış sayılmaz.
-11. PR CI ve post-merge ROG CI tamamen yeşil olmadan finding/iş kapatılmaz.
+11. PR CI ve post-merge Version2 CI tamamen yeşil olmadan finding/iş kapatılmaz.
 
 Yeni bir Item/modül eklemek mevcut global kuralları veya core placement sözleşmesini otomatik olarak değiştirme gerekçesi değildir.
