@@ -28,3 +28,8 @@ test('failed import rolls back project and assets atomically', () => {
   assert.doesNotMatch(handler, /await deleteProject\(importedProjectId\)/);
   assert.match(handler, /error\?\.message/);
 });
+
+test('project import remaps every persisted image-reference field before saving', () => {
+  assert.match(source, /remapImageAssetReferences/);
+  assert.doesNotMatch(source, /key === 'imageAssetId'/);
+});

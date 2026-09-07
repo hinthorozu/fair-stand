@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { clearImageAssetReferences, countImageAssetReferences } from '../src/imageAssetReferences.js';
+import { clearImageAssetReferences, countImageAssetReferences, remapImageAssetReferences } from '../src/imageAssetReferences.js';
 
 test('image asset reference helper finds normal panel and fabric assignments', () => {
   const state = {
@@ -12,6 +12,38 @@ test('image asset reference helper finds normal panel and fabric assignments', (
   };
   assert.equal(countImageAssetReferences(state, 'asset-a'), 2);
   assert.equal(countImageAssetReferences(state, 'asset-b'), 1);
+});
+
+
+test('project import remaps both normal panel and Lightbox/Mesh image asset ids', () => {
+  const state = {
+    modules: [
+      { strips: [{ imageAssetId: 'asset-a' }, { isGlass: true }] },
+      {
+        strips: [{
+          fabricGroupId: 'fabric-1',
+          fabricType: 'mesh',
+          fabricColor: '#123456',
+          fabricImageAssetId: 'asset-b',
+          fabricImageFit: 'contain',
+          fabricLightingOn: false,
+        }],
+      },
+    ],
+  };
+  const remapped = remapImageAssetReferences(state, new Map([
+    ['asset-a', 'new-a'],
+    ['asset-b', 'new-b'],
+  ]));
+
+  assert.equal(remapped.modules[0].strips[0].imageAssetId, 'new-a');
+  assert.equal(remapped.modules[1].strips[0].fabricImageAssetId, 'new-b');
+  assert.equal(remapped.modules[0].strips[1].isGlass, true);
+  assert.equal(remapped.modules[1].strips[0].fabricGroupId, 'fabric-1');
+  assert.equal(remapped.modules[1].strips[0].fabricType, 'mesh');
+  assert.equal(remapped.modules[1].strips[0].fabricColor, '#123456');
+  assert.equal(remapped.modules[1].strips[0].fabricImageFit, 'contain');
+  assert.equal(remapped.modules[1].strips[0].fabricLightingOn, false);
 });
 
 test('clearing one image asset removes only that asset assignments', () => {

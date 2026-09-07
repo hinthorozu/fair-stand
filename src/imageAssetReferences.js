@@ -17,6 +17,22 @@ function walkImageAssetReferences(value, assetId, visitor) {
   });
 }
 
+export function remapImageAssetReferences(value, idMap) {
+  if (Array.isArray(value)) return value.map((item) => remapImageAssetReferences(item, idMap));
+  if (!value || typeof value !== 'object') return value;
+
+  const output = {};
+  Object.entries(value).forEach(([key, item]) => {
+    if (IMAGE_ASSET_REFERENCE_KEYS.has(key) && typeof item === 'string' && idMap.has(item)) {
+      output[key] = idMap.get(item);
+      return;
+    }
+    output[key] = remapImageAssetReferences(item, idMap);
+  });
+  return output;
+}
+
+
 export function countImageAssetReferences(value, assetId) {
   let count = 0;
   walkImageAssetReferences(value, assetId, () => { count += 1; });
