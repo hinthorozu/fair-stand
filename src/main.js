@@ -18,7 +18,7 @@ import {
   moduleWidths,
 } from './designState.js';
 import { deleteImageAsset, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
-import { clearImageAssetReferences, countImageAssetReferences } from './imageAssetReferences.js';
+import { clearImageAssetReferences, countImageAssetReferences, remapImageAssetReferences } from './imageAssetReferences.js';
 import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject } from './projectStore.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu } from './moduleContextMenu.js';
@@ -1801,20 +1801,6 @@ function safeArchiveName(name) {
     .replace(/^-+|-+$/g, '') || 'fair-stand-project';
 }
 
-function remapAssetIdsInValue(value, idMap) {
-  if (Array.isArray(value)) return value.map((item) => remapAssetIdsInValue(item, idMap));
-  if (!value || typeof value !== 'object') return value;
-  const output = {};
-  Object.entries(value).forEach(([key, item]) => {
-    if (key === 'imageAssetId' && typeof item === 'string' && idMap.has(item)) {
-      output[key] = idMap.get(item);
-    } else {
-      output[key] = remapAssetIdsInValue(item, idMap);
-    }
-  });
-  return output;
-}
-
 exportProjectButton.addEventListener('click', async () => {
   const projectId = projectSelect.value || activeProjectId;
   if (!projectId) return;
@@ -1923,7 +1909,7 @@ importProjectFileInput.addEventListener('change', async () => {
     }
 
     // Storage'a dokunmadan önce ZIP'in tamamı ve bütün asset'ler doğrulanmış olur.
-    const importedProject = remapAssetIdsInValue({
+    const importedProject = remapImageAssetReferences({
       ...manifest.project,
       id: importedProjectId,
       name: manifest.project.name || 'İçe Aktarılan Proje',

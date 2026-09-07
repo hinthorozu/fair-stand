@@ -1,31 +1,34 @@
 {
   "schemaVersion": 2,
-  "id": "l-counter-front-surface-orientation",
+  "id": "project-import-fabric-image-remap",
   "kind": "bugfix",
-  "summary": "Fix mirrored image/logo rendering on the outward front faces of all L-shaped counter sizes by correcting front-face orientation and surface offset handling.",
+  "summary": "Preserve Lightbox/Mesh fabric image assignments when importing project ZIP archives by remapping every persisted image asset reference field through the shared image-reference helper.",
   "owners": [
-    "src/scene3d.js",
-    "test/lCounterSideGeometry.test.js"
+    "src/imageAssetReferences.js",
+    "src/main.js",
+    "test/imageAssetDeletion.test.js",
+    "test/projectImportFlow.test.js"
   ],
   "sourceOfTruth": [
-    "src/scene3d.js"
+    "src/imageAssetReferences.js",
+    "src/main.js"
   ],
   "impact": {
-    "catalog": "not-applicable",
+    "catalog": "affected",
     "behavior": "affected",
     "state": "affected",
     "placement": "affected",
     "renderer": "affected",
-    "persistence": "not-applicable",
+    "persistence": "affected",
     "bom": "not-applicable",
-    "ui": "not-applicable",
-    "composition": "not-applicable",
-    "assets": "not-applicable",
-    "storage": "not-applicable",
-    "importExport": "not-applicable",
-    "performance": "affected",
+    "ui": "affected",
+    "composition": "affected",
+    "assets": "affected",
+    "storage": "affected",
+    "importExport": "affected",
+    "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "not-applicable",
+    "architecture": "affected",
     "security": "not-applicable",
     "tests": "affected"
   },
@@ -54,12 +57,14 @@
       "src/scene3d.js",
       "src/selectionFeedback.js",
       "src/systemChangeContract.js",
+      "src/viewCube.js",
       "src/wall.js",
       "src/wallReflow.js"
     ],
     "affectedTests": [
       "e2e/f010-module-construction.spec.mjs",
       "e2e/f011-module-behavior.spec.mjs",
+      "e2e/f020-save-before-project-actions.spec.mjs",
       "e2e/mini-fridge-dimensions.spec.mjs",
       "e2e/plastic-trash-bin-module.spec.mjs",
       "test/autoDepotOrientation.test.js",
@@ -163,18 +168,26 @@
       "RELEASE_HARDENING_ROADMAP.md",
       "REPOSITORY_CLEANUP_PROGRESS.md",
       "SYSTEM_AUDIT_CHECKLIST.md",
+      "audit/FINDINGS.md",
       "audit/evidence/A02_CHANGE_GATE.md",
       "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
       "audit/evidence/A05_MODULE_BEHAVIOR.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
+      "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
+      "audit/evidence/A11_FEATURE_COMPOSITION.md",
       "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
       "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
       "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
+      "audit/remediation/A02_F005_CLOSURE.md",
+      "audit/remediation/A03_CLOSURE.md",
+      "audit/remediation/A03_F010_CLOSURE.md",
       "audit/remediation/A03_F011_CLOSURE.md",
       "audit/remediation/A03_F012_CLOSURE.md",
+      "audit/remediation/A04_F013_CLOSURE.md",
+      "docs/AUTOSAVE_INTEGRATION_NOTES.md",
       "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md",
       "docs/items/current-system/base_top_107_50.md",
       "docs/items/current-system/base_top_157_50.md",
@@ -268,41 +281,43 @@
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": [
+        "F-005",
+        "F-010",
         "F-011",
         "F-012",
+        "F-013",
         "F-014",
         "F-015",
         "F-017",
+        "F-029",
         "F-033",
         "F-045"
       ]
     },
-    "notes": "The runtime change is limited to createLCounterModule surface orientation/offset math. Full-system discovery dependents are acknowledged; no catalog, persistence, BOM, asset, storage, import/export, UI-control, accessibility, composition, architecture, or security behavior is changed."
+    "notes": "Import remaps persisted image asset references through the shared image-reference key set. Normal panel imageAssetId and Lightbox/Mesh fabricImageAssetId now follow the same old-to-new asset ID map; unrelated project state is preserved."
   },
   "tests": {
     "targeted": [
-      "test/lCounterSideGeometry.test.js",
-      "test/lCounter100Contract.test.js",
-      "test/lCounter150Contract.test.js",
-      "test/lCounter200Contract.test.js"
+      "test/projectImportFlow.test.js",
+      "test/imageAssetDeletion.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/f010-module-construction.spec.mjs"
+        "e2e/f020-save-before-project-actions.spec.mjs"
       ],
-      "reason": "Renderer-visible L-counter fix; targeted Chromium construction coverage verifies the browser scene path while lCounterSideGeometry locks the corrected face orientation."
+      "reason": "Import/export and persisted project state are browser-impacting; the existing project-action E2E is included alongside deterministic import remap unit coverage, and CI runs the full E2E suite."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Localized renderer orientation change shared by 100/150/200 L counters; regression asserts outward front-face rotation and correct axis offset behavior."
+    "notes": "Localized import remap refactor using the already-canonical image reference key set; no schema migration and no asset bytes are changed."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted state or schema migration."
+    "notes": "No persisted schema migration; imported archives are remapped at load time."
   },
-  "rollback": "Revert the L-counter front-face rotation/offset change and its regression test."
+  "rollback": "Revert the shared import remap helper usage and its regression tests."
 }
