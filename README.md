@@ -219,14 +219,14 @@ Bir feature birden fazla modülü/domaini koordine ediyorsa `src/featureContract
 - `REPOSITORY_CLEANUP_PROGRESS.md` — explicit historical cleanup-progress snapshot.
 - `LEGACY_TRASH.md` — güncel sistemle uyumsuz/eski/doğrulanmamış içeriklerin korunduğu legacy alan.
 
-Historical dosyalardaki “mevcut / sıradaki iş” ifadeleri current ROG truth'u olarak kullanılmaz.
+Historical dosyalardaki “mevcut / sıradaki iş” ifadeleri current Version2 truth'u olarak kullanılmaz.
 
 ## Geliştirme politikası
 
 Standart akış:
 
 ```text
-fresh ROG
+fresh Version2
 → branch
 → SYSTEM_CHANGE_GATE domain declaration
 → SYSTEM_IMPACT_SWEEP dependency/test/finding discovery
@@ -241,7 +241,7 @@ fresh ROG
 → PR
 → canonical CI
 → merge
-→ post-merge ROG CI
+→ post-merge Version2 CI
 ```
 
 Core placement, behavior, catalog, persistence, renderer, BOM veya başka bir domain değişiyorsa ilgili regression aynı PR içinde eklenmeli/güncellenmelidir. Browser-visible etkisi olan değişiklik kendi Playwright E2E akışını da aynı PR içinde taşır.

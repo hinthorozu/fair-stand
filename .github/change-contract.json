@@ -1,16 +1,21 @@
 {
   "schemaVersion": 2,
-  "id": "f028-closure-bookkeeping",
-  "kind": "bugfix",
-  "summary": "Record verified post-merge evidence for F-028 and close the finding in the canonical audit ledger.",
+  "id": "version2-canonical-baseline",
+  "kind": "tooling",
+  "summary": "Use Version2 as the canonical development baseline for CI, local change-gate resolution and active development documentation.",
   "owners": [
-    "audit/FINDINGS.md",
-    "audit/remediation/A10_F028_CLOSURE.md"
+    ".github/workflows/ci.yml",
+    "scripts/verify-change-contract.mjs",
+    "SYSTEM_CHANGE_GATE.md",
+    "SYSTEM_DEVELOPMENT_CONTRACT.md"
   ],
   "sourceOfTruth": [
-    "audit/FINDINGS.md",
-    "audit/remediation/A10_F028_CLOSURE.md",
-    "audit/evidence/A10_UI_CONTROLS.md"
+    ".github/workflows/ci.yml",
+    "scripts/verify-change-contract.mjs",
+    "SYSTEM_CHANGE_GATE.md",
+    "SYSTEM_DEVELOPMENT_CONTRACT.md",
+    "PROJECT_RULES.md",
+    "README.md"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -27,55 +32,63 @@
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "not-applicable",
+    "architecture": "affected",
     "security": "not-applicable",
     "tests": "affected"
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [],
+    "affectedFiles": [
+      "package.json"
+    ],
     "affectedTests": [
-      "test/f028FeatureReset.test.js",
-      "e2e/f028-reset-features.spec.mjs"
+      "test/developerEntrypointDocs.test.js",
+      "test/systemChangeGate.test.js",
+      "test/systemChangeGateCiContract.test.js",
+      "test/systemChangeGateLocalDiff.test.js",
+      "test/historicalDocumentationStatus.test.js"
     ],
     "affectedDocs": [
-      "audit/FINDINGS.md",
-      "audit/evidence/A10_UI_CONTROLS.md",
-      "audit/remediation/A10_F028_CLOSURE.md"
+      "FRESH_REPOSITORY_REVIEW.md",
+      "REPOSITORY_CLEANUP_PROGRESS.md",
+      "audit/evidence/A00_BASELINE.md",
+      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
+      "audit/evidence/A02_CHANGE_GATE.md",
+      "audit/evidence/A20_BUILD_CI_DEPLOY.md",
+      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md"
     ],
     "relatedFindings": {
-      "affected": [
-        "F-028"
-      ],
+      "affected": [],
       "reviewedNotAffected": [
-        "F-025",
-        "F-026",
-        "F-027",
-        "F-039",
-        "F-040"
+        "F-004",
+        "F-005",
+        "F-009"
       ]
     },
-    "notes": "Closure bookkeeping only. Runtime remediation already merged through PR #81 and the post-merge ROG CI workflow completed successfully. The user also manually verified the resulting product behavior. This PR records that evidence and updates the canonical findings ledger without changing product behavior."
+    "notes": "This changes only the active development baseline from ROG to Version2. Historical audit/remediation evidence remains frozen and unchanged."
   },
   "tests": {
     "targeted": [
-      "test/f028FeatureReset.test.js"
+      "test/developerEntrypointDocs.test.js",
+      "test/systemChangeGate.test.js",
+      "test/systemChangeGateCiContract.test.js",
+      "test/systemChangeGateLocalDiff.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": false,
       "targeted": [],
-      "reason": "This closure PR changes audit bookkeeping only; browser-visible behavior was already covered by e2e/f028-reset-features.spec.mjs on the implementation PR and verified again after merge."
+      "reason": "The change affects repository governance/CI branch targeting only and does not alter browser-visible product behavior."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "Risk is limited to audit bookkeeping accuracy; no runtime files are changed by this closure PR."
+    "level": "medium",
+    "notes": "An incorrect baseline could block or mis-scope CI/change-gate enforcement, so both PR CI and post-merge Version2 CI must pass."
   },
   "migration": {
     "required": false,
-    "notes": "No runtime, persisted project, IndexedDB, archive or schema change."
+    "notes": "No runtime, persisted project, IndexedDB, archive or schema migration is involved."
   },
-  "rollback": "Revert the closure bookkeeping commit if the recorded F-028 verification evidence is found to be incorrect."
+  "rollback": "Revert this branch-baseline commit to restore the prior ROG-based CI and local change-gate targeting."
 }

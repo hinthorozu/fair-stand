@@ -23,7 +23,7 @@ test('README documents the universal impact sweep and canonical browser CI order
   assert.match(source, /contract:verify[\s\S]*npm ci[\s\S]*npm test[\s\S]*npm run build[\s\S]*Chromium[\s\S]*npm run e2e/);
   assert.match(source, /targeted regression/);
   assert.match(source, /targeted E2E/);
-  assert.match(source, /post-merge ROG CI/);
+  assert.match(source, /post-merge Version2 CI/);
 });
 
 test('SYSTEM_DEVELOPMENT_CONTRACT hands off to the dynamic universal gate and browser E2E policy', async () => {
@@ -38,7 +38,7 @@ test('SYSTEM_DEVELOPMENT_CONTRACT hands off to the dynamic universal gate and br
   assert.match(source, /SYSTEM_BROWSER_E2E_DOMAINS/);
   assert.match(source, /npm run contract:verify/);
   assert.match(source, /contract:verify → npm ci → npm test → npm run build[\s\S]*npm run e2e/);
-  assert.match(source, /post-merge ROG CI/);
+  assert.match(source, /post-merge Version2 CI/);
 });
 
 test('repository agent and architecture entrypoints require the canonical Item contract', async () => {

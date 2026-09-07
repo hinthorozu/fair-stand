@@ -67,17 +67,17 @@ function resolveLocalBaseRef() {
 
   const currentBranch = gitText(['branch', '--show-current'], { allowFailure: true }) ?? '';
 
-  if (currentBranch === 'ROG') {
-    if (gitRefExists('refs/remotes/origin/ROG')) return 'refs/remotes/origin/ROG';
+  if (currentBranch === 'Version2') {
+    if (gitRefExists('refs/remotes/origin/Version2')) return 'refs/remotes/origin/Version2';
     return 'HEAD';
   }
 
-  for (const candidate of ['ROG', 'refs/remotes/origin/ROG']) {
+  for (const candidate of ['Version2', 'refs/remotes/origin/Version2']) {
     if (gitRefExists(candidate)) return candidate;
   }
 
   throw new Error(
-    'Unable to resolve a local change-gate base. Fetch/create ROG or set CHANGE_GATE_BASE explicitly.',
+    'Unable to resolve a local change-gate base. Fetch/create Version2 or set CHANGE_GATE_BASE explicitly.',
   );
 }
 
