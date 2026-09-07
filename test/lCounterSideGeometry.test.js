@@ -19,3 +19,10 @@ test('L counter side posts use the same profile inset clearance for every size',
   assert.doesNotMatch(block, /\[0,0\.5\]/);
   assert.doesNotMatch(block, /\[-0\.5,0\]/);
 });
+
+test('L counter front image surfaces face outward instead of exposing PlaneGeometry backs', () => {
+  assert.match(block, /frontLower,frontPanelM,new THREE\.Vector3\(0,lowerY,-depthM\/2\),Math\.PI,-1/);
+  assert.match(block, /frontUpper,frontPanelM,new THREE\.Vector3\(0,upperY,-depthM\/2\),Math\.PI,-1/);
+  assert.match(block, /Math\.abs\(Math\.sin\(rotationY\)\)<0\.01/);
+  assert.doesNotMatch(block, /frontLower,frontPanelM,new THREE\.Vector3\(0,lowerY,-depthM\/2\),0,-1/);
+});
