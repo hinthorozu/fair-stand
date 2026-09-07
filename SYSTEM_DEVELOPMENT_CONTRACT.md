@@ -253,7 +253,7 @@ Depo içeriği değişirse yalnız renderer içine obje eklenmez.
 
 # 10. Yeni iş için zorunlu çalışma sırası
 
-1. Fresh `ROG` üzerinden branch oluştur.
+1. Fresh `Version2` üzerinden branch oluştur.
 2. `SYSTEM_CHANGE_GATE.md` ve `SYSTEM_IMPACT_SWEEP.md` oku.
 3. İş BOM/üretim/maliyet kapsamındaki fiziksel öğeyi etkiliyorsa `ITEM_CONTRACT.md` oku ve Item kararlarını ver.
 4. `SYSTEM_IMPACT_DOMAINS` registry'sindeki bütün domainleri sınıflandır.
@@ -270,7 +270,7 @@ Depo içeriği değişirse yalnız renderer içine obje eklenmez.
 15. Playwright/Chromium hazır değilse local runner/browser dependency'lerini kur.
 16. `npm run e2e` çalıştır.
 17. PR aç; canonical CI'nın `contract:verify → npm ci → npm test → npm run build → Chromium → npm run e2e` zinciri yeşil olmalı.
-18. Merge sonrası post-merge ROG CI yeşil olmadan finding/iş tamamlandı sayılmaz.
+18. Merge sonrası post-merge Version2 CI yeşil olmadan finding/iş tamamlandı sayılmaz.
 
 ---
 
