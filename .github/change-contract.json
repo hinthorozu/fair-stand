@@ -34,6 +34,9 @@
     "affectedFiles": [
       ".github/workflows/tmp-apply-l-counter-logo-orientation.yml",
       "index.html",
+      "scripts/add-tv-sizes.py",
+      "scripts/add-video-wall-2x2.py",
+      "scripts/fix-tv-screen-face.py",
       "scripts/patch-video-wall-2x2.cjs",
       "scripts/patch-video-wall-single-image.cjs",
       "scripts/verify-change-contract.mjs",
@@ -49,6 +52,7 @@
       "src/moduleMove.js",
       "src/modulePlacement.js",
       "src/scene3d.js",
+      "src/selectionFeedback.js",
       "src/systemChangeContract.js",
       "src/wall.js",
       "src/wallReflow.js"
@@ -130,6 +134,7 @@
       "test/rightWallOrientation.test.js",
       "test/sceneSurroundSingleSource.test.js",
       "test/selectedModuleRotationCursor.test.js",
+      "test/selectionFeedback.test.js",
       "test/selectionFeedbackMainIntegration.test.js",
       "test/shelfLighting.test.js",
       "test/shelfModule.test.js",
