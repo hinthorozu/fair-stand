@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 const README_URL = new URL('../README.md', import.meta.url);
 const CONTRACT_URL = new URL('../SYSTEM_DEVELOPMENT_CONTRACT.md', import.meta.url);
-const ITEM_CONTRACT_URL = new URL('../ITEM_CONTRACT.md', import.meta.url);
+const ITEM_CONTRACT_URL = new URL('../docs/items/contract/ITEM_CONTRACT.md', import.meta.url);
 const AGENTS_URL = new URL('../AGENTS.md', import.meta.url);
 const PROJECT_RULES_URL = new URL('../PROJECT_RULES.md', import.meta.url);
 const ARCHITECTURE_RULES_URL = new URL('../ARCHITECTURE_RULES.md', import.meta.url);
