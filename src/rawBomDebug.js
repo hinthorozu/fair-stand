@@ -49,7 +49,7 @@ function renderRecipe(moduleType, widthCm, label, options = {}) {
   list.style.cssText = 'margin:8px 0 0;padding-left:18px;display:grid;gap:5px';
   recipe.items.forEach((item) => {
     const li = document.createElement('li');
-    li.textContent = `${formatNumber(item.quantity)} × ${item.part?.name ?? item.partId}`;
+    li.textContent = `${formatNumber(item.quantity)} × ${item.part?.name ?? item.itemKey ?? item.partId}`;
     list.appendChild(li);
   });
   content.appendChild(list);

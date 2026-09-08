@@ -32,7 +32,7 @@ const expectedRecipes = {
 for (const [width, expected] of Object.entries(expectedRecipes)) {
   test(`baza ${width} recipe matches verified production data`, () => {
     const recipe = getModuleRecipe('base', Number(width));
-    const quantities = Object.fromEntries(recipe.items.map((item) => [item.partId, item.quantity]));
+    const quantities = Object.fromEntries(recipe.items.map((item) => [item.itemKey ?? item.partId, item.quantity]));
 
     assert.equal(quantities[expected.profilePartId], 4);
     assert.equal(quantities.profile_41_5, 4);
@@ -47,6 +47,6 @@ for (const [width, expected] of Object.entries(expectedRecipes)) {
 
 test('expanded baza recipe resolves top and upright production parts', () => {
   const expanded = getExpandedModuleRecipe('base', 150);
-  assert.equal(expanded.items.find((item) => item.partId === 'upright_49_5').part.name, 'Dikme 49,5 cm');
+  assert.equal(expanded.items.find((item) => item.itemKey === 'upright_49_5').part.name, 'Dikme 49,5 cm');
   assert.equal(expanded.items.at(-1).part.name, 'Baza Üstü 157 × 50 cm');
 });

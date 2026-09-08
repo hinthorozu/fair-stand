@@ -1,6 +1,64 @@
-# Item Yapılandırması — Üst Seviye Item Listesi
+# Item Yapılandırması — Item Envanteri ve Migration Listesi
 
-Bu liste, Item yapılandırması çalışmasında ele alınacak üst seviye Item'ların tek listesidir.
+Bu belge Item Contract migrationında izlenecek Item envanterini tutar.
+
+Temel model:
+
+- sistemde BOM, üretim veya maliyet hesabına giren her fiziksel öğe `Item`dır,
+- başka Item bileşimi içermeyenler **Tekil Item**,
+- başka Item'lardan oluşanlar **Bileşik Item**dır,
+- "alt Item" ayrı bir sınıf değil, bir Item'ın parent/bileşik Item içindeki kullanım rolüdür,
+- migration bottom-up ilerler; ilk pilot `connector_start`tır,
+- ilk pilot dışındaki kesin sıra mevcut kod zinciri incelendikçe belirlenir; bu liste tahmini sıra dayatmaz.
+
+## A. Production / alt Item envanteri
+
+Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical production metadata olarak bulunan ve bileşik Item reçetelerinde kullanılabilen fiziksel Item'lardır.
+
+| Item key | Type / rol | Migration notu |
+|---|---|---|
+| `connector_start` | `connector` | **Tamam — ilk pilot** |
+| `connector_single` | `connector` | **Tamam — 27 aktif recipe canonical `itemKey`** |
+| `connector_double` | `connector` | **Tamam — canonical Item ve aktif connector BOM çıktısı; quantity uydurulmaz** |
+| `connector_corner` | `connector` | **Tamam — canonical Item ve aktif connector BOM çıktısı; quantity uydurulmaz** |
+| `upright_346_5` | `upright` | **Tamam — canonical `itemKey`; 18 aktif recipe içinde ×2** |
+| `upright_99` | `upright` | **Tamam — canonical `itemKey`; 3 düz bankoda ×4, 3 L bankoda ×5** |
+| `upright_49_5` | `upright` | **Tamam — canonical `itemKey`; 3 base-wall içinde ×2, 3 base içinde ×4** |
+| `profile_41_5` | `profile` | Bekliyor |
+| `profile_91` | `profile` | Bekliyor |
+| `profile_140_5` | `profile` | Bekliyor |
+| `profile_190` | `profile` | Bekliyor |
+| `panel_48_5` | `panel` | Bekliyor |
+| `panel_98` | `panel` | Bekliyor |
+| `panel_147_5` | `panel` | Bekliyor |
+| `panel_197` | `panel` | Bekliyor |
+| `panel_corner_42_5` | `panel` | Bekliyor |
+| `panel_corner_92` | `panel` | Bekliyor |
+| `panel_corner_142_5` | `panel` | Bekliyor |
+| `panel_corner_192` | `panel` | Bekliyor |
+| `separator_panel_48_5` | `separator-panel` | Bekliyor |
+| `separator_panel_98` | `separator-panel` | Bekliyor |
+| `door_100` | `door` | Bekliyor |
+| `shelf_100` | `shelf` | Bekliyor |
+| `shelf_150` | `shelf` | Bekliyor |
+| `shelf_200` | `shelf` | Bekliyor |
+| `shelf_leg` | `shelf-accessory` | Bekliyor |
+| `showcase_2_100` | `showcase` | Bekliyor |
+| `showcase_3_100` | `showcase` | Bekliyor |
+| `glass_shelf` | `showcase-accessory` | Bekliyor |
+| `counter_top_110_60` | `counter-top` | Bekliyor |
+| `counter_top_52_60` | `counter-top` | Bekliyor |
+| `counter_top_160_60` | `counter-top` | Bekliyor |
+| `counter_top_102_60` | `counter-top` | Bekliyor |
+| `counter_top_210_60` | `counter-top` | Bekliyor |
+| `counter_top_150_60` | `counter-top` | Bekliyor |
+| `base_top_107_50` | `base-top` | Bekliyor |
+| `base_top_157_50` | `base-top` | Bekliyor |
+| `base_top_206_50` | `base-top` | Bekliyor |
+
+## B. Üst seviye / catalog Item envanteri
+
+Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik durumu her Item incelenirken mevcut koddan doğrulanır; isim veya catalog konumundan tahmin edilmez.
 
 | # | Item key | Adı | Type / Not |
 |---:|---|---|---|

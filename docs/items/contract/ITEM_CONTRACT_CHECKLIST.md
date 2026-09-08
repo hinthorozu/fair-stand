@@ -52,13 +52,13 @@ Aynı BOM kuralı controller, renderer, UI veya başka yardımcı dosyalarda iki
 
 ---
 
-## 3. Item tekil, bileşik veya parametrik olabilir
+## 3. Item tekil veya bileşiktir; ayrıca parametrik olabilir
 
-- **Tekil Item:** ör. çiçek, TV, bar taburesi.
-- **Bileşik Item:** ör. 1 masa + 4 sandalye, banko, karolaj sistemi.
-- **Parametrik Item:** ör. halı, parke, baskı; ölçüye göre miktar değişir.
+- **Tekil Item:** sistem açısından başka Item'lardan oluşmayan Item'dır. Örn. kettle, `connector_start`, panel, TV. Başka bir Item'ın reçetesinde kullanılması onu farklı bir sınıfa dönüştürmez; o bağlamda yalnızca parent Item'ın alt Item'ıdır.
+- **Bileşik Item:** başka Item'lardan oluşan Item'dır. Canonical composition/reçetesi hangi alt Item'lardan ve hangi miktarlardan oluştuğunu tanımlar. Örn. `wall_200`; vitrinli bir sistem aynı temel Item'lara ek olarak cam, raf ve vitrine özel başka Item'lar içerebilir.
+- **Parametrik:** ayrı bir üçüncü Item sınıfı değildir. Tekil veya bileşik bir Item'ın ölçü, state veya konfigürasyona göre miktarının/bileşiminin değişebildiğini belirtir.
 
-Bir Item aynı anda hem bileşik hem parametrik olabilir.
+Bir Item yapısal olarak ya tekil ya bileşiktir; her iki yapı da parametrik olabilir.
 
 ---
 
@@ -183,7 +183,7 @@ Render, mesh, GLB, texture, piksel çözünürlüğü veya ekrandaki görünüm 
 
 ## 8. Her BOM kalemi açık miktar ve birim taşır
 
-Her terminal BOM çıktısı en az şunları taşır:
+Her nihai BOM kalemi en az şunları taşır:
 
 - canonical BOM item kimliği,
 - `quantity`,
@@ -208,7 +208,7 @@ Miktar çıplak sayı olarak yorumlanmaz; birim tahmin edilmez.
 
 Bir Item başka Item'lardan oluşabilir; alt Item'lar da kendi BOM reçetelerine sahip olabilir.
 
-BOM resolver gerektiğinde terminal BOM kalemlerine kadar recursive çözüm yapabilmelidir.
+BOM resolver gerektiğinde başka Item bileşimi olmayan Item'lara kadar recursive çözüm yapabilmelidir; bunlar nihai BOM kalemlerini oluşturur.
 
 Döngüsel bağımlılık yasaktır:
 
@@ -234,11 +234,11 @@ Yeni bir fiziksel ürün, zemin, malzeme, kombinasyon veya üretilebilir öğe e
 
 1. `itemKey` nedir?
 2. `type` / davranış ailesi nedir?
-3. Tekil, bileşik ve/veya parametrik mi?
+3. Yapısal olarak tekil mi bileşik mi; ayrıca parametrik mi?
 4. Canonical state/ölçü/parametreleri nerede tutulur?
 5. Hangi behavior/capability contract'ını kullanır?
 6. BOM reçetesi/resolver'ı nedir?
-7. Terminal BOM birimleri nelerdir?
+7. Nihai BOM kalemlerinin birimleri nelerdir?
 8. Proje instance override/konfigürasyonu gerekiyorsa canonical tanımdan nasıl ayrılır?
 9. Render/asset temsili nedir ve business rule'dan nasıl ayrılır?
 10. BOM, behavior, state, persistence ve browser akışı için hangi regression testleri gerekir?
@@ -262,7 +262,8 @@ Project
       -> relationships
           -> relationship-derived behavior / reflow
       -> BOM resolver
-          -> terminal BOM items (quantity + unit)
+          -> child Items / composition
+              -> nihai BOM kalemleri (itemKey + quantity + unit)
               -> pricing / costing
 ```
 
@@ -290,12 +291,17 @@ Canonical ürün kimliği nedir?
 ### ☐ `type`
 Davranış ailesi nedir?
 
-### ☐ Item sınıfı
-- ☐ Terminal Item
-- ☐ Composite Item
-- ☐ Parametric Item
+### ☐ Item yapısı
+- ☐ Tekil Item
+- ☐ Bileşik Item
 
-Gerekirse bir Item aynı anda bileşik ve parametrik olabilir; sınıf mevcut gerçek yapıya göre belirlenir.
+Tekil Item sistem açısından başka Item bileşimi içermez. Bileşik Item canonical alt Item listesi/reçetesi taşır. Bir Item'ın başka bir Item içinde kullanılması onu ayrı bir sınıfa dönüştürmez; o kullanımda parent'ın alt Item'ıdır.
+
+### ☐ Parametrik mi?
+- ☐ Evet
+- ☐ Hayır
+
+Parametrik olmak ayrı bir Item sınıfı değildir; tekil veya bileşik Item'ın ölçü/state/konfigürasyona göre değişebilmesini belirtir.
 
 ### ☐ Factory / oluşturulma noktası
 Item instance'ını hangi mevcut factory/resolver/builder oluşturuyor? Default state ve instance kimliği hangi kaynaktan geliyor?
@@ -484,7 +490,7 @@ Renderer veya mesh business state/BOM kaynağı haline gelmiş mi? Contract gere
 Bu bölüm Item'ın başka Item'larla kurduğu mevcut canonical veya fiili ilişkiyi doğrular.
 
 ### ☐ İçindeki Item'lar
-Composite Item ise hangi canonical alt Item'lardan oluşuyor?
+Bileşik Item ise hangi canonical alt Item'lardan oluşuyor?
 
 ### ☐ Bağlandığı Item'lar
 Connection/mount/host ilişkileri var mı?
@@ -532,16 +538,16 @@ Recipe kullanılıyorsa canonical sahibi nerede?
 BOM hangi resolver üzerinden çözülüyor?
 
 ### ☐ Alt Item listesi
-Composite ise hangi canonical Item'ları içeriyor?
+Bileşik ise hangi canonical Item'ları içeriyor?
 
 ### ☐ Quantity
-Her terminal BOM kaleminin miktarı nedir?
+Her nihai BOM kaleminin miktarı nedir?
 
 ### ☐ Unit
-Her terminal BOM kaleminin canonical birimi nedir?
+Her nihai BOM kaleminin canonical birimi nedir?
 
 ### ☐ Recursive BOM
-Child Item'ların kendi BOM'u varsa terminal Item'lara kadar çözüm kuralı var mı?
+Alt Item'ların kendi bileşimi/BOM'u varsa başka Item bileşimi olmayan Item'lara kadar recursive çözüm kuralı var mı?
 
 ### ☐ Circular dependency
 Recursive Item zincirinde döngü engelleniyor mu?
@@ -562,6 +568,9 @@ Komşuluk, corner, connection veya başka relationship BOM sonucunu değiştiriy
 
 ### ☐ Final BOM bağlantısı
 Item'ın raw/recipe çıktısı ile project-level Final BOM arasındaki mevcut durum nedir? Eksikse açık problem olarak kaydedilir.
+
+### ☐ Gerçek BOM consumer cutover'ı
+Yeni Item/recipe/resolver yolu yalnız tanımlanmış olmakla tamamlanmış sayılmaz. Raw BOM, Final BOM, debug veya ilgili gerçek tüketici hangi kaynağı kullanıyorsa yeni canonical kimlik/bileşim yolunu gerçekten tükettiği doğrulanır. Kullanılmayan resolver veya paralel ikinci BOM yolu tamamlanmış migration sayılmaz.
 
 ---
 
@@ -602,6 +611,9 @@ Recipe/resolver/varyant/recursive BOM testleri var mı?
 ### ☐ Regression testleri
 Mevcut davranış değişikliğini yakalayacak regression koruması var mı?
 
+### ☐ Item-by-Item migration izolasyonu
+Yalnız hedef Item'ın yeni canonical kimlik/yola geçtiği; henüz migrate edilmeyen Item'ların mevcut kimlik/yolunda kaldığı test ile doğrulanıyor mu? Bir Item migration'ı komşu Item'ları sessizce toplu migrate etmemelidir.
+
 ### ☐ Persistence / migration testleri
 Save/load ve migration davranışı test ediliyor mu?
 
@@ -638,7 +650,7 @@ Kimlik, ölçü, state, behavior, relationship veya BOM kuralı birden fazla yer
 
 Bir Item ancak aşağıdaki konular sistemden doğrulanıp kayıt altına alındığında tamamlanmış kabul edilir:
 
-1. Canonical `itemKey`, `type` ve Item sınıfı.
+1. Canonical `itemKey`, `type`, Item yapısı (tekil/bileşik) ve parametrik durumu.
 2. Factory/oluşturulma noktası ve catalog bağlantısı.
 3. Instance state, default değerler, gerçek ölçüler ve configurable alanlar.
 4. Persistence, save/load, migration ve instance-ID mantığı.
@@ -651,7 +663,7 @@ Bir Item ancak aşağıdaki konular sistemden doğrulanıp kayıt altına alınd
 11. Parent/child, neighbor, connection, host, corner veya continuous-chain ilişkileri.
 12. Relationship-derived behavior/reflow sonucu.
 13. BOM policy, recipe/resolver, alt Item'lar, quantity ve unit.
-14. Composite Item ise recursive BOM çözümü.
+14. Bileşik Item ise recursive BOM çözümü.
 15. Varyant veya relationship-derived BOM durumu.
 16. BOM ile pricing ayrımı.
 17. Mevcut testler, regression koruması ve build durumu.
@@ -672,7 +684,7 @@ Bugünkü module tabanlı sistem incelenirken başlıca canonical/aktif kaynakla
 - State factory/default/instance verileri: `src/designState.js`
 - Placement/move/rotation/collision/snap/ghost ve diğer behavior: `src/moduleBehavior.js` ve ilgili placement akışı
 - Recipe BOM: `src/moduleRecipes.js`
-- Terminal üretim parçaları ve ölçüleri: `src/productionParts.js`
+- Tekil üretim kalemleri/production part metadata'sı ve ölçüleri: `src/productionParts.js`
 - Context menu: `src/moduleContextMenu.js`
 - Scene/selection/render interaction'ları: `src/scene3d.js` ve ilgili interaction dosyaları
 - Regression doğrulaması: `test/` altındaki ilgili testler
