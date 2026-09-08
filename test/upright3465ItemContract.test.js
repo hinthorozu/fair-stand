@@ -65,13 +65,13 @@ test('upright_346_5 uses canonical itemKey in all 18 verified parent recipes and
   assert.equal(occurrences, 18);
 });
 
-test('upright_346_5 migration does not migrate neighboring upright Items', () => {
-  const legacyUprights = ['upright_99', 'upright_49_5'];
-
-  for (const itemKey of legacyUprights) {
+test('upright_346_5 remains canonical while neighboring upright Items migrate independently', () => {
+  for (const itemKey of ['upright_346_5', 'upright_99', 'upright_49_5']) {
     const item = getProductionItem(itemKey);
-    assert.equal(item.partId, itemKey);
-    assert.equal(item.itemKey, undefined);
+    assert.equal(item.itemKey, itemKey);
+    assert.equal(item.partId, undefined);
+    assert.equal(item.type, 'upright');
+    assert.equal(item.unit, 'adet');
   }
 });
 
