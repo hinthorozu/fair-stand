@@ -125,7 +125,7 @@ getProductionItem(itemKey)
 - `src/productionParts.js`: `partId` kaldırıldı, canonical `itemKey = upright_346_5` oldu.
 - `src/moduleRecipes.js`: 18 occurrence `partId` yerine `itemKey` kullanıyor.
 - Tüm 18 recipe'de quantity `2` olarak aynen korundu.
-- `upright_99` ve `upright_49_5` migrate edilmedi; legacy `partId` ile kalıyor.
+- `upright_99` ve `upright_49_5` bağımsız migrationlarında canonical `itemKey` kimliğine geçirilmiştir; bu Item'ın quantity/behavior sözleşmesini değiştirmez.
 - Renderer/state/persistence tarafında yeni davranış eklenmedi.
 
 ## 8. Regression sözleşmesi
@@ -137,7 +137,7 @@ Testler şunları doğrular:
 - 18 recipe occurrence'ın tamamı `itemKey` kullanır,
 - 18 occurrence'ın tamamında quantity `2` korunur,
 - daha önce migrate edilen connector Item'lar canonical `itemKey` olarak kalır,
-- `upright_99`, `upright_49_5` ve diğer migrate edilmemiş recipe kalemleri yanlışlıkla taşınmaz,
+- `upright_99` ve `upright_49_5` canonical `itemKey` olarak kalır; diğer migrate edilmemiş recipe kalemleri yanlışlıkla taşınmaz,
 - expanded recipe metadata'yı canonical `itemKey` üzerinden çözer.
 
 ## Sonuç

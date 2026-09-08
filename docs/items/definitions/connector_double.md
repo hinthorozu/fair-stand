@@ -22,7 +22,7 @@ Migration öncesi stabil kimlik `partId = connector_double` idi. Cutover ile ayn
 
 Migration öncesi doğrulanan mevcut sistemde `connector_double` hiçbir sabit module recipe içinde yer almıyordu. Bu gerçek korunur; sırf Item'ı BOM'a sokmak için mevcut recipe'lere tahmini miktar eklenmez.
 
-`connector_double` buna rağmen aktif production/BOM Item'ıdır. Canonical connector BOM resolver açıkça verilen `double` gereksinimini:
+`connector_double` canonical production Item tanımıdır. `resolveConnectorBom()` yardımcı resolver'ı, bir caller açıkça `double` gereksinimi ve doğrulanmış quantity verdiğinde şu capability'yi sağlar:
 
 ```text
 connectorType = double + quantity
@@ -30,15 +30,15 @@ connectorType = double + quantity
 → quantity + unit=adet
 ```
 
-olarak üretir.
+olarak üretebilir. Mevcut çalışan `src/` runtime içinde bu resolver'ı çağıran gerçek consumer yoktur; bu nedenle bu capability aktif BOM consumer cutover'ı olarak sayılmaz.
 
 ## 3. Quantity ownership
 
-`src/productionParts.js` quantity üretmez veya tahmin etmez. Quantity, gerçek bağlantı/relationship'i bilen canonical caller tarafından sağlanmak zorundadır.
+`src/productionParts.js` quantity üretmez veya tahmin etmez. Resolver kullanılacaksa quantity, gerçek ürün ihtiyacını bilen doğrulanmış bir caller tarafından sağlanmak zorundadır. Mevcut çalışan runtime'da böyle bir caller/quantity source henüz yoktur.
 
 Özellikle transient placement `snapKind` değerleri otomatik olarak `connector_double` miktarına çevrilmez. Mevcut kodda bu ürün kararını doğrulayan kalıcı relationship/quantity kaynağı bulunmadığı için migration böyle bir mapping icat etmez.
 
-Bu ayrım `connector_double`ı pasif yapmaz: Item canonical BOM resolver'ın gerçek çıktı tipidir; yalnız miktar ownership'i doğru katmanda tutulur.
+Bu nedenle canonical Item identity ve resolver capability hazırdır; fakat gerçek runtime BOM consumer cutover'ı tamam değildir. Consumer/quantity source doğrulanmadan Item `Tamam` sayılmaz.
 
 ## 4. State / persistence / renderer
 
@@ -47,9 +47,10 @@ Mevcut sistemde bağımsız `connector_double` project instance/state/persistenc
 ## 5. Uygulanan cutover
 
 - `src/productionParts.js`: canonical `itemKey = connector_double`.
-- `src/productionParts.js`: `connectorType = double` gereksinimini canonical BOM satırına çözer.
-- BOM çıktısı `itemKey + quantity + unit` taşır.
+- `resolveConnectorBom()` explicit `connectorType = double + quantity` girdisini `itemKey + quantity + unit` capability'siyle çözebilir.
+- Mevcut çalışan `src/` runtime içinde `resolveConnectorBom()` consumer'ı yoktur.
 - Sabit module recipe'lere tahmini `connector_double` miktarı eklenmez.
+- Gerçek consumer/quantity source doğrulanana kadar migration completion açık kalır.
 
 ## 6. Regression sözleşmesi
 
@@ -57,9 +58,10 @@ Testler şunları doğrular:
 
 - canonical kimlik `itemKey`dir; `partId` yoktur.
 - `connectorType = double` doğru Item'a çözülür.
-- BOM resolver gerçek `connector_double` satırı üretir.
+- resolver capability doğrudan çağrıldığında `connector_double` satırı üretir.
 - quantity eksik/0 ise resolver fail eder; miktar uydurmaz.
 - mevcut fixed module recipes içine yanlışlıkla double eklenmez.
+- çalışan `src/` runtime'da resolver consumer'ı olmadığı ayrıca regression ile doğrulanır; test içinden doğrudan resolver çağrısı aktif consumer kanıtı sayılmaz.
 
 ## Sonuç
 
@@ -68,7 +70,9 @@ structure = Tekil Item
 parametric = hayır
 itemKey = connector_double
 unit = adet
-BOM status = aktif canonical connector BOM çıktısı
-quantity owner = canonical caller / relationship layer
+BOM resolver capability = var
+active runtime BOM consumer = yok
+quantity source = mevcut çalışan runtime'da yok; tahmin edilmez
 fixed module recipe quantity = yok; tahmin edilmez
+migration status = Bekliyor — gerçek consumer cutover doğrulanana kadar
 ```
