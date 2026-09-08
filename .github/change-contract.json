@@ -1,14 +1,20 @@
 {
   "schemaVersion": 2,
-  "id": "upright-family-item-contract-cutover",
+  "id": "connector-upright-item-contract-batch",
   "kind": "bom-change",
-  "summary": "Migrate upright_99 and upright_49_5 from legacy partId identity to canonical Item itemKey identity, completing the three verified upright production Items while preserving quantities, units and production dimensions.",
+  "summary": "Migrate connector_start, connector_single, connector_double, connector_corner and the three verified upright production Items to canonical Item itemKey identity while preserving verified recipe quantities, units and production metadata; double/corner connector quantities remain explicit caller-owned BOM inputs.",
   "owners": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
+    "src/rawBomDebug.js",
+    "test/connectorBom.test.js",
+    "test/moduleRecipes.test.js",
     "test/upright3465ItemContract.test.js",
     "test/upright99And495ItemContract.test.js",
-    "test/moduleRecipes.test.js",
+    "docs/items/definitions/connector_start.md",
+    "docs/items/definitions/connector_single.md",
+    "docs/items/definitions/connector_double.md",
+    "docs/items/definitions/connector_corner.md",
     "docs/items/definitions/upright_346_5.md",
     "docs/items/definitions/upright_99.md",
     "docs/items/definitions/upright_49_5.md"
@@ -25,7 +31,7 @@
     "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "affected",
-    "ui": "not-applicable",
+    "ui": "affected",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
@@ -164,30 +170,32 @@
     ],
     "relatedFindings": {
       "affected": [
+        "F-031",
         "F-048"
       ],
       "reviewedNotAffected": [
         "F-001",
         "F-003",
         "F-014",
-        "F-030",
-        "F-031"
+        "F-030"
       ]
     },
-    "notes": "Reviewed the full upright_99 and upright_49_5 production/BOM surfaces against their current-system maps and the Item Contract. Both are cut over to canonical itemKey with verified quantity parity. Existing procedural renderer geometry remains unchanged because no canonical production identity-to-renderer mapping is verified."
+    "notes": "Reviewed the combined Version2-to-item-contract-start Item Contract batch. connector_start/single and all three upright Items move to canonical itemKey with verified recipe quantity parity. connector_double/corner are active canonical BOM-capable Items with explicit caller-owned quantities; no placement/snap-to-connector mapping is invented. rawBomDebug keeps compatibility display fallback, so the full PR has BOM + UI impact while renderer/state/persistence behavior remains unchanged."
   },
   "tests": {
     "targeted": [
+      "test/connectorBom.test.js",
       "test/upright3465ItemContract.test.js",
       "test/upright99And495ItemContract.test.js",
       "test/moduleRecipes.test.js",
+      "test/showcaseRecipes.test.js",
+      "test/separatorRecipes.test.js",
       "test/counterRecipes.test.js",
-      "test/baseWallRecipes.test.js",
-      "test/baseRecipes.test.js",
       "test/lCounter100Contract.test.js",
       "test/lCounter150Contract.test.js",
       "test/lCounter200Contract.test.js",
-      "test/connectorBom.test.js"
+      "test/baseWallRecipes.test.js",
+      "test/baseRecipes.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -196,16 +204,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "BOM is a browser-impact domain under the repository change gate; smoke E2E remains required even though upright renderer behavior is unchanged."
+      "reason": "The combined batch affects BOM and rawBomDebug UI-facing output; canonical smoke E2E is required by the repository browser-impact policy."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "upright_99 changes identity in 6 counter recipes and upright_49_5 in 6 base/base-wall recipes. Quantity parity and canonical metadata resolution are regression-tested; renderer geometry is intentionally unchanged."
+    "notes": "This batch changes production identity across all verified connector recipe consumers and the three upright families. Existing quantities are preserved and regression-tested; compatibility fallback remains for not-yet-migrated Items, and double/corner quantities are never inferred."
   },
   "migration": {
     "required": false,
-    "notes": "No project/persistence schema migration. Runtime production identity for upright_99 and upright_49_5 changes from legacy partId to canonical itemKey; legacy getProductionPart lookup remains compatible during incremental migration."
+    "notes": "No project/persistence schema migration. Runtime production identity for connector_start/single/double/corner and upright_346_5/upright_99/upright_49_5 is canonical itemKey; legacy getProductionPart and recipe partId fallback remain temporarily for not-yet-migrated Items."
   },
-  "rollback": "Restore upright_99 and upright_49_5 partId in productionParts.js and their 12 recipe entries, remove the two migration definitions and combined upright regression test, and restore affected recipe expectations."
+  "rollback": "Revert the connector/upright itemKey production definitions and recipe entries, remove connector BOM resolver/tests and Item definition docs, restore rawBomDebug legacy fallback, and restore affected recipe regression expectations."
 }
