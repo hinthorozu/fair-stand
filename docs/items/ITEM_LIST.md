@@ -32,9 +32,9 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `panel_98` | `panel` | **Tamam — canonical `itemKey`; 10 doğrulanmış parent recipe quantity parity korunur** |
 | `panel_147_5` | `panel` | **Tamam — canonical `itemKey`; 7 doğrulanmış parent recipe quantity parity korunur** |
 | `panel_197` | `panel` | **Tamam — canonical `itemKey`; 7 aktif 200 cm recipe içinde doğrulanmış miktarlar korunur** |
-| `panel_corner_42_5` | `panel` | Bekliyor |
-| `panel_corner_92` | `panel` | Bekliyor |
-| `panel_corner_142_5` | `panel` | Bekliyor |
+| `panel_corner_42_5` | `panel` | **Tamam — canonical `itemKey`; 1 doğrulanmış 50 cm recipe variant referansı; `panel_48_5` miktarı 1:1 replacement** |
+| `panel_corner_92` | `panel` | **Tamam — canonical `itemKey`; 7 doğrulanmış 100 cm recipe variant referansı; `panel_98` miktarı 1:1 replacement** |
+| `panel_corner_142_5` | `panel` | **Tamam — canonical `itemKey`; 4 doğrulanmış 150 cm recipe variant referansı; `panel_147_5` miktarı 1:1 replacement** |
 | `panel_corner_192` | `panel` | **Tamam — canonical `itemKey`; 4 doğrulanmış 200 cm recipe variant referansı; inner-corner BOM'da `panel_197` miktarı 1:1 korunarak replacement** |
 | `separator_panel_48_5` | `separator-panel` | Bekliyor |
 | `separator_panel_98` | `separator-panel` | Bekliyor |

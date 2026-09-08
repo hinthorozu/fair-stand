@@ -65,7 +65,7 @@ Mevcut renderer production Item identity'sini doğrudan tüketmez; procedural mo
 
 ## 6. Corner/separator izolasyonu
 
-Bu migration yalnız straight paneli kapsar. İlgili corner/separator Item'ları bağımsız migration konusudur ve legacy `partId` üzerinde kalır. Legacy `innerCornerPanelPartId` metadata'sı bu migrationda canonical corner replacement davranışını aktive etmez.
+Bu Item'ın kendi migrationı yalnız straight paneli kapsar. Güncel sistemde inner-corner panel ailesi de canonical `itemKey` / `innerCornerPanelItemKey` yoluna taşınmıştır ve caller `panelVariant = inner-corner` verdiğinde doğrulanmış 1:1 replacement çalışır. Separator Item'ları bağımsız migration konusudur ve legacy `partId` üzerinde kalır.
 
 ## 7. Regression sözleşmesi
 

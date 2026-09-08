@@ -21,7 +21,7 @@ test('2-eye showcase 100 recipe matches verified production data', () => {
     { partId: 'showcase_2_100', quantity: 1 },
     { partId: 'glass_shelf', quantity: 2 },
   ]);
-  assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_92');
+  assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_92');
 });
 
 test('3-eye showcase 100 recipe matches verified production data', () => {
@@ -35,7 +35,7 @@ test('3-eye showcase 100 recipe matches verified production data', () => {
     { partId: 'showcase_3_100', quantity: 1 },
     { partId: 'glass_shelf', quantity: 3 },
   ]);
-  assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_92');
+  assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_92');
 });
 
 test('expanded showcase recipe resolves showcase and glass shelf parts', () => {
