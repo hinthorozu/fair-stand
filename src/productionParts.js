@@ -1,7 +1,7 @@
 export const PRODUCTION_PARTS = Object.freeze({
   upright_346_5: Object.freeze({ itemKey: 'upright_346_5', name: 'Dikme 346,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 346.5, thicknessCm: 8 }) }),
-  upright_99: Object.freeze({ partId: 'upright_99', name: 'Dikme 99 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 99, thicknessCm: 8 }) }),
-  upright_49_5: Object.freeze({ partId: 'upright_49_5', name: 'Dikme 49,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 49.5, thicknessCm: 8 }) }),
+  upright_99: Object.freeze({ itemKey: 'upright_99', name: 'Dikme 99 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 99, thicknessCm: 8 }) }),
+  upright_49_5: Object.freeze({ itemKey: 'upright_49_5', name: 'Dikme 49,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 49.5, thicknessCm: 8 }) }),
 
   profile_41_5: Object.freeze({ partId: 'profile_41_5', name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5 }) }),
   profile_91: Object.freeze({ partId: 'profile_91', name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91 }) }),
