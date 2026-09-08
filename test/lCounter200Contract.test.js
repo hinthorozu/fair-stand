@@ -33,7 +33,7 @@ test('200 L renderer is 200 x 200 with a 50 cm arm and 150 cm return extension',
 test('200 L counter BOM remains separate from renderer geometry', () => {
   const recipe = getModuleRecipe('counter', 200, { shape: 'L' });
   assert.equal(recipe.recipeId, 'counter-l-200');
-  assert.deepEqual(recipe.items.map(({ partId, quantity }) => [partId, quantity]), [
+  assert.deepEqual(recipe.items.map((item) => [item.itemKey ?? item.partId, item.quantity]), [
     ['profile_190', 5], ['profile_140_5', 1], ['profile_41_5', 4], ['upright_99', 5],
     ['panel_197', 4], ['panel_48_5', 4], ['connector_start', 8], ['connector_single', 16],
     ['counter_top_210_60', 1], ['counter_top_150_60', 1],

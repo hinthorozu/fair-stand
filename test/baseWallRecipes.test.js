@@ -14,7 +14,7 @@ for (const [widthText, ids] of Object.entries(expected)) {
   test(`Panel Bazalı ${width} reçetesi verilen üretim adetlerini korur`, () => {
     const recipe = getModuleRecipe('base-wall', width);
     assert.ok(recipe);
-    const q = Object.fromEntries(recipe.items.map((item) => [item.partId, item.quantity]));
+    const q = Object.fromEntries(recipe.items.map((item) => [item.itemKey ?? item.partId, item.quantity]));
     assert.equal(q[ids.profile], 4);
     assert.equal(q.upright_346_5, 2);
     assert.equal(q.profile_41_5, 4);

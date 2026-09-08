@@ -2,21 +2,21 @@
 
 Bu belge, mevcut çalışan sistemden yeni Item mimarisine geçiş sırasında uygulanacak zorunlu migration kurallarını tanımlar.
 
-## 1. Migration Item bazında yapılır
+## 1. Migration Item bazında ve bottom-up yapılır
 
 Geçiş bütün sistem için tek seferde yapılmaz.
 
-`ITEM_LIST.md` sırasındaki Item'lar tek tek ele alınır. İlk pilot Item `wall_200`'dür.
+Sistemde BOM, üretim veya maliyet hesabına giren her fiziksel öğe Item'dır. Bileşik Item'lar başka Item'lardan oluştuğu için migration mümkün olduğunda alt/production Item'lardan başlayıp parent/bileşik Item'lara doğru ilerler.
+
+İlk doğrulanan pilot Item `connector_start`tır. Sonraki Item sırası mevcut kod zinciri ve birlikte alınan migration kararıyla belirlenir; doküman sırf sıra doldurmak için tahmin üretmez.
 
 ```text
-wall_200
-→ wall_150
-→ wall_100
-→ wall_50
-→ ...
+connector_start   → ilk pilot / alt Item
+...               → diğer doğrulanan alt Item'lar
+wall_200          → alt Item'ları hazır olduğunda bileşik Item olarak ele alınır
 ```
 
-Bir Item tamamlanmadan sıradaki Item'ın eski runtime yolu sökülmez.
+Bir Item tamamlanmadan sıradaki Item'ın eski runtime yolu sökülmez. Bir parent/bileşik Item migrate edilirken henüz migrate edilmemiş alt Item'lar varsa mevcut compatibility yolu korunabilir.
 
 ---
 
@@ -44,37 +44,21 @@ Yeni implementasyon hazır ve doğrulanmış olmadan mevcut çalışan yol kesil
 
 ---
 
-## 3. Pilot Item `wall_200` tamamen bitirilir
+## 3. Her Item kendi gerçek kapsamıyla tamamen bitirilir
 
-`wall_200` baştan aşağı ele alınır.
+Her Item için parity kapsamı o Item'ın mevcut runtime kodundan çıkarılır; başka Item'ların davranışları hedef Item'a zorla uygulanmaz.
 
-Yeni yapıya geçtikten sonra `wall_200` sistemsel olarak çalışmaya devam etmek zorundadır. Mevcut runtime özelliklerinden hiçbiri migration nedeniyle kaybolamaz.
+Örneğin `connector_start` mevcut sistemde bağımsız scene/editor instance'ı değildir. Bu nedenle onun migration parity'si öncelikle şunları kapsar:
 
-Parity kapsamı yalnız render değildir. `wall_200` için mevcut kodda çalışan bütün davranışlar dikkate alınır; örneğin:
+- canonical identity / production metadata,
+- parent recipe kullanımları ve quantity parity,
+- BOM/raw BOM consumer bağlantısı,
+- Item-by-Item migration izolasyonu,
+- ilgili regression testleri.
 
-- creation / catalog resolution,
-- instance state,
-- placement,
-- move / rotation,
-- magnetic snap,
-- collision,
-- continuous wall / reflow,
-- free placement ve free side insertion,
-- automatic wall / depot üretimi,
-- renderer,
-- selection,
-- context menu,
-- duplicate / delete,
-- color / image,
-- glass / Lightbox / Mesh,
-- overlay ilişkileri,
-- save / load / autosave,
-- asset persistence,
-- reset akışları,
-- BOM / production-part resolution.
+`wall_200` gibi scene/editor davranışı olan bileşik bir Item ele alındığında ise mevcut kodda gerçekten çalışan creation, state, placement, move/rotation, collision, reflow, renderer, selection, persistence, BOM ve diğer davranışların tamamı parity kapsamına girer.
 
-Bu liste yeni davranış tanımlamaz; parity kontrolünün kapsamını belirtir. Gerçek davranışın source of truth'u mevcut runtime kodudur.
-
+Bu örnekler yeni davranış tanımlamaz. Her Item için gerçek kapsamın source of truth'u mevcut runtime kodudur.
 ---
 
 ## 4. Eski ve yeni yapı geçiş sırasında eş zamanlı bulunabilir
@@ -84,11 +68,10 @@ Migration süresince bazı Item'lar yeni Item mimarisinden, diğer Item'lar mevc
 Örnek ara durum:
 
 ```text
-wall_200 → yeni Item yapısı
-wall_150 → mevcut yapı
-wall_100 → mevcut yapı
-wall_50  → mevcut yapı
-...      → mevcut yapı
+connector_start  → yeni Item kimlik/yolu
+connector_single → mevcut yapı
+wall_200         → mevcut yapı
+...              → mevcut yapı
 ```
 
 Bu durum migration için geçerlidir ve sistemin çalışmasını kesmeden Item-by-Item ilerlemeyi sağlar.
@@ -129,7 +112,7 @@ Bir Item'ın eski bağlantılarını kaldırmak, diğer Item'ların kullandığ�
 - shared renderer helpers,
 - BOM / production-part ortak resolver altyapıları.
 
-`wall_200` migration'ında yalnız `wall_200`'ün eski identity / routing / resolution bağımlılıkları, yeni Item yolunun tam karşılığı doğrulandıktan sonra kaldırılır.
+Örneğin `connector_start` migration'ında yalnız `connector_start`ın eski identity / routing / resolution bağımlılıkları, yeni Item yolunun tam karşılığı doğrulandıktan sonra kaldırılır. Ortak production-part, recipe veya BOM altyapısı diğer Item'lar kullandığı sürece korunur.
 
 ---
 

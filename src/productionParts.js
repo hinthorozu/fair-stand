@@ -21,7 +21,7 @@ export const PRODUCTION_PARTS = Object.freeze({
   separator_panel_48_5: Object.freeze({ partId: 'separator_panel_48_5', name: 'Separatör Paneli 48,5 × 47 cm', type: 'separator-panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }), nominalModuleWidthCm: 50 }),
   separator_panel_98: Object.freeze({ partId: 'separator_panel_98', name: 'Separatör Paneli 98 × 47 cm', type: 'separator-panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), nominalModuleWidthCm: 100 }),
 
-  connector_start: Object.freeze({ partId: 'connector_start', name: 'Başlangıç Aparatı', type: 'connector', unit: 'adet', connectorType: 'start' }),
+  connector_start: Object.freeze({ itemKey: 'connector_start', name: 'Başlangıç Aparatı', type: 'connector', unit: 'adet', connectorType: 'start' }),
   connector_single: Object.freeze({ partId: 'connector_single', name: 'Tekli Aparat', type: 'connector', unit: 'adet', connectorType: 'single' }),
   connector_double: Object.freeze({ partId: 'connector_double', name: 'Çiftli Aparat', type: 'connector', unit: 'adet', connectorType: 'double' }),
   connector_corner: Object.freeze({ partId: 'connector_corner', name: 'Köşe Aparatı', type: 'connector', unit: 'adet', connectorType: 'corner' }),
@@ -49,8 +49,13 @@ export const PRODUCTION_PARTS = Object.freeze({
   base_top_206_50: Object.freeze({ partId: 'base_top_206_50', name: 'Baza Üstü 206 × 50 cm', type: 'base-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 206, depthCm: 50 }), nominalModuleWidthCm: 200 }),
 });
 
+export function getProductionItem(itemKey) {
+  return PRODUCTION_PARTS[itemKey] ?? null;
+}
+
+// Legacy production-part lookup retained while remaining production items migrate item-by-item.
 export function getProductionPart(partId) {
-  return PRODUCTION_PARTS[partId] ?? null;
+  return getProductionItem(partId);
 }
 
 export function listProductionParts() {

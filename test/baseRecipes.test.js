@@ -32,7 +32,7 @@ const expectedRecipes = {
 for (const [width, expected] of Object.entries(expectedRecipes)) {
   test(`baza ${width} recipe matches verified production data`, () => {
     const recipe = getModuleRecipe('base', Number(width));
-    const quantities = Object.fromEntries(recipe.items.map((item) => [item.partId, item.quantity]));
+    const quantities = Object.fromEntries(recipe.items.map((item) => [item.itemKey ?? item.partId, item.quantity]));
 
     assert.equal(quantities[expected.profilePartId], 4);
     assert.equal(quantities.profile_41_5, 4);

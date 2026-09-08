@@ -19,14 +19,14 @@ test('banko 100 recipe matches verified production data', () => {
     { partId: 'upright_99', quantity: 4 },
     { partId: 'panel_98', quantity: 2 },
     { partId: 'panel_48_5', quantity: 4 },
-    { partId: 'connector_start', quantity: 6 },
+    { itemKey: 'connector_start', quantity: 6 },
     { partId: 'connector_single', quantity: 12 },
     { partId: 'counter_top_110_60', quantity: 1 },
   ]);
 });
 
 test('banko 150 recipe matches verified production data', () => {
-  const quantities = Object.fromEntries(getModuleRecipe('counter', 150).items.map((item) => [item.partId, item.quantity]));
+  const quantities = Object.fromEntries(getModuleRecipe('counter', 150).items.map((item) => [item.itemKey ?? item.partId, item.quantity]));
   assert.equal(quantities.profile_140_5, 3);
   assert.equal(quantities.profile_41_5, 4);
   assert.equal(quantities.upright_99, 4);
@@ -38,7 +38,7 @@ test('banko 150 recipe matches verified production data', () => {
 });
 
 test('banko 200 recipe matches verified production data', () => {
-  const quantities = Object.fromEntries(getModuleRecipe('counter', 200).items.map((item) => [item.partId, item.quantity]));
+  const quantities = Object.fromEntries(getModuleRecipe('counter', 200).items.map((item) => [item.itemKey ?? item.partId, item.quantity]));
   assert.equal(quantities.profile_190, 3);
   assert.equal(quantities.profile_41_5, 4);
   assert.equal(quantities.upright_99, 4);
