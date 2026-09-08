@@ -19,8 +19,8 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 |---|---|---|
 | `connector_start` | `connector` | **Tamam — ilk pilot** |
 | `connector_single` | `connector` | **Tamam — 27 aktif recipe canonical `itemKey`** |
-| `connector_double` | `connector` | **Bekliyor — canonical `itemKey` ve resolver capability hazır; aktif runtime BOM consumer yok, quantity uydurulmaz** |
-| `connector_corner` | `connector` | **Bekliyor — canonical `itemKey` ve resolver capability hazır; aktif runtime BOM consumer yok, quantity uydurulmaz** |
+| `connector_double` | `connector` | **Tamam — canonical `itemKey` + explicit connector BOM resolver; fixed parent recipe kullanımı bugün uygulanmıyor, quantity uydurulmaz** |
+| `connector_corner` | `connector` | **Tamam — canonical `itemKey` + explicit connector BOM resolver; fixed parent recipe kullanımı bugün uygulanmıyor, quantity uydurulmaz** |
 | `upright_346_5` | `upright` | **Tamam — canonical `itemKey`; 18 aktif recipe içinde ×2** |
 | `upright_99` | `upright` | **Tamam — canonical `itemKey`; 3 düz bankoda ×4, 3 L bankoda ×5** |
 | `upright_49_5` | `upright` | **Tamam — canonical `itemKey`; 3 base-wall içinde ×2, 3 base içinde ×4** |
