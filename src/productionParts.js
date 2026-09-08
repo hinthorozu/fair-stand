@@ -6,7 +6,7 @@ export const PRODUCTION_PARTS = Object.freeze({
   profile_41_5: Object.freeze({ partId: 'profile_41_5', name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5 }) }),
   profile_91: Object.freeze({ partId: 'profile_91', name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91 }) }),
   profile_140_5: Object.freeze({ partId: 'profile_140_5', name: 'Profil 140,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 140.5 }) }),
-  profile_190: Object.freeze({ partId: 'profile_190', name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190 }) }),
+  profile_190: Object.freeze({ itemKey: 'profile_190', name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190, thicknessCm: 8 }) }),
 
   panel_48_5: Object.freeze({ partId: 'panel_48_5', name: 'Panel 48,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 50 }),
   panel_98: Object.freeze({ partId: 'panel_98', name: 'Panel 98 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 100 }),
