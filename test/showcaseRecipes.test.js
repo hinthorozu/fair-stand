@@ -15,7 +15,7 @@ test('2-eye showcase 100 recipe matches verified production data', () => {
   assert.deepEqual(recipe.items, [
     { partId: 'profile_91', quantity: 4 },
     { itemKey: 'upright_346_5', quantity: 2 },
-    { partId: 'panel_98', quantity: 5 },
+    { itemKey: 'panel_98', quantity: 5 },
     { itemKey: 'connector_start', quantity: 4 },
     { itemKey: 'connector_single', quantity: 9 },
     { partId: 'showcase_2_100', quantity: 1 },
@@ -29,7 +29,7 @@ test('3-eye showcase 100 recipe matches verified production data', () => {
   assert.deepEqual(recipe.items, [
     { partId: 'profile_91', quantity: 4 },
     { itemKey: 'upright_346_5', quantity: 2 },
-    { partId: 'panel_98', quantity: 4 },
+    { itemKey: 'panel_98', quantity: 4 },
     { itemKey: 'connector_start', quantity: 4 },
     { itemKey: 'connector_single', quantity: 7 },
     { partId: 'showcase_3_100', quantity: 1 },

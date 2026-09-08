@@ -1,14 +1,17 @@
 {
   "schemaVersion": 2,
-  "id": "profile-190-item-contract-cutover",
+  "id": "straight-panels-item-contract-cutover",
   "kind": "bom-change",
-  "summary": "Migrate profile_190 to canonical itemKey identity, preserve all seven verified parent recipe quantities, and record the verified 190 x 8 cm production dimensions without coupling renderer geometry.",
+  "summary": "Migrate panel_48_5, panel_98, and panel_147_5 to canonical itemKey identity while preserving 30 verified parent recipe occurrences, dimensions, and quantity parity without migrating corner/separator Items or coupling renderer geometry.",
   "owners": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
-    "test/profile190ItemContract.test.js",
+    "test/straightPanelsItemContract.test.js",
     "test/moduleRecipes.test.js",
-    "docs/items/definitions/profile_190.md"
+    "test/panel197ItemContract.test.js",
+    "docs/items/definitions/panel_48_5.md",
+    "docs/items/definitions/panel_98.md",
+    "docs/items/definitions/panel_147_5.md"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
@@ -68,7 +71,8 @@
       "test/upright99And495ItemContract.test.js",
       "test/panel197ItemContract.test.js",
       "test/panelCorner192ItemContract.test.js",
-      "test/profile190ItemContract.test.js"
+      "test/profile190ItemContract.test.js",
+      "test/straightPanelsItemContract.test.js"
     ],
     "affectedDocs": [
       "FRESH_REPOSITORY_REVIEW.md",
@@ -169,7 +173,10 @@
       "docs/items/definitions/panel_197.md",
       "docs/items/definitions/panel_corner_192.md",
       "docs/items/contract/ITEM_CONTRACT.md",
-      "docs/items/definitions/profile_190.md"
+      "docs/items/definitions/profile_190.md",
+      "docs/items/definitions/panel_48_5.md",
+      "docs/items/definitions/panel_98.md",
+      "docs/items/definitions/panel_147_5.md"
     ],
     "relatedFindings": {
       "affected": [
@@ -184,15 +191,19 @@
         "F-003"
       ]
     },
-    "notes": "profile_190 becomes a canonical Tekil Item with itemKey identity. Exactly seven verified parent recipe occurrences move from partId to itemKey and preserve quantities 2/2/2/5/3/4/4. dimensions.lengthCm remains 190 and dimensions.thicknessCm=8 is added from verified real product data. No project state, persistence, behavior, interaction, pricing, or renderer mapping is invented. Neighboring profile_41_5/profile_91/profile_140_5 remain legacy."
+    "notes": "panel_48_5, panel_98, and panel_147_5 become canonical Tekil Items with itemKey identity. Exactly 30 verified parent recipe occurrences move from partId to itemKey with all quantities unchanged. Existing 48.5/98/147.5 x 47 x 0.8 cm dimensions, panelRole=straight, and nominal widths 50/100/150 are preserved. Corner panels panel_corner_42_5/panel_corner_92/panel_corner_142_5 and separator panels remain legacy and their replacement behavior is not activated. No project state, persistence, behavior, interaction, pricing, or renderer mapping is invented."
   },
   "tests": {
     "targeted": [
-      "test/profile190ItemContract.test.js",
+      "test/straightPanelsItemContract.test.js",
       "test/moduleRecipes.test.js",
+      "test/panel197ItemContract.test.js",
       "test/baseWallRecipes.test.js",
       "test/counterRecipes.test.js",
       "test/baseRecipes.test.js",
+      "test/showcaseRecipes.test.js",
+      "test/lCounter100Contract.test.js",
+      "test/lCounter150Contract.test.js",
       "test/lCounter200Contract.test.js"
     ],
     "fullSuite": true,
@@ -207,11 +218,11 @@
   },
   "risk": {
     "level": "medium",
-    "notes": "Production identity and seven recipe references change. Dedicated regression locks canonical identity, verified 190 x 8 cm dimensions, exact quantity parity, expanded metadata resolution, and neighboring profile migration isolation."
+    "notes": "Production identity and 30 recipe references change across three straight panel Items. Dedicated regression locks canonical identity, verified dimensions, exact recipe occurrence/quantity parity, expanded metadata resolution, and corner/separator migration isolation."
   },
   "migration": {
     "required": false,
-    "notes": "No project/persistence schema migration. Runtime production identity for profile_190 changes from legacy partId to canonical itemKey; neighboring profile Items remain on partId compatibility until migrated independently."
+    "notes": "No project/persistence schema migration. Runtime production identity for panel_48_5, panel_98, and panel_147_5 changes from legacy partId to canonical itemKey; corner and separator Items remain on partId compatibility until migrated independently."
   },
-  "rollback": "Restore profile_190 partId and 190-only dimensions, restore seven recipe references to partId, remove the dedicated definition/regression test, and restore ITEM_LIST/moduleRecipes migration-isolation expectations."
+  "rollback": "Restore partId on panel_48_5/panel_98/panel_147_5, restore the 30 recipe references to partId, remove the three definitions and dedicated regression test, and restore ITEM_LIST/moduleRecipes/panel197 migration-isolation expectations."
 }

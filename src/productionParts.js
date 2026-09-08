@@ -8,9 +8,9 @@ export const PRODUCTION_PARTS = Object.freeze({
   profile_140_5: Object.freeze({ partId: 'profile_140_5', name: 'Profil 140,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 140.5 }) }),
   profile_190: Object.freeze({ itemKey: 'profile_190', name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190, thicknessCm: 8 }) }),
 
-  panel_48_5: Object.freeze({ partId: 'panel_48_5', name: 'Panel 48,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 50 }),
-  panel_98: Object.freeze({ partId: 'panel_98', name: 'Panel 98 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 100 }),
-  panel_147_5: Object.freeze({ partId: 'panel_147_5', name: 'Panel 147,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 147.5, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 150 }),
+  panel_48_5: Object.freeze({ itemKey: 'panel_48_5', name: 'Panel 48,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 50 }),
+  panel_98: Object.freeze({ itemKey: 'panel_98', name: 'Panel 98 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 100 }),
+  panel_147_5: Object.freeze({ itemKey: 'panel_147_5', name: 'Panel 147,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 147.5, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 150 }),
   panel_197: Object.freeze({ itemKey: 'panel_197', name: 'Panel 197 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 197, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 200 }),
 
   panel_corner_42_5: Object.freeze({ partId: 'panel_corner_42_5', name: 'İç Köşe Paneli 42,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 42.5, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'inner-corner', nominalModuleWidthCm: 50 }),

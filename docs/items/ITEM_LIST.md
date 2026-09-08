@@ -28,9 +28,9 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `profile_91` | `profile` | Bekliyor |
 | `profile_140_5` | `profile` | Bekliyor |
 | `profile_190` | `profile` | **Tamam — canonical `itemKey`; 7 aktif 200 cm recipe içinde doğrulanmış miktarlar korunur; `190 × 8 cm` üretim ölçüsü** |
-| `panel_48_5` | `panel` | Bekliyor |
-| `panel_98` | `panel` | Bekliyor |
-| `panel_147_5` | `panel` | Bekliyor |
+| `panel_48_5` | `panel` | **Tamam — canonical `itemKey`; 13 doğrulanmış parent recipe quantity parity korunur** |
+| `panel_98` | `panel` | **Tamam — canonical `itemKey`; 10 doğrulanmış parent recipe quantity parity korunur** |
+| `panel_147_5` | `panel` | **Tamam — canonical `itemKey`; 7 doğrulanmış parent recipe quantity parity korunur** |
 | `panel_197` | `panel` | **Tamam — canonical `itemKey`; 7 aktif 200 cm recipe içinde doğrulanmış miktarlar korunur** |
 | `panel_corner_42_5` | `panel` | Bekliyor |
 | `panel_corner_92` | `panel` | Bekliyor |
