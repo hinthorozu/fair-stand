@@ -47,6 +47,6 @@ for (const [width, expected] of Object.entries(expectedRecipes)) {
 
 test('expanded baza recipe resolves top and upright production parts', () => {
   const expanded = getExpandedModuleRecipe('base', 150);
-  assert.equal(expanded.items.find((item) => item.partId === 'upright_49_5').part.name, 'Dikme 49,5 cm');
+  assert.equal(expanded.items.find((item) => item.itemKey === 'upright_49_5').part.name, 'Dikme 49,5 cm');
   assert.equal(expanded.items.at(-1).part.name, 'Baza Üstü 157 × 50 cm');
 });
