@@ -54,88 +54,58 @@ const MODULE_RECIPES = Object.freeze({
   ]) }),
 
   'counter-l:100': Object.freeze({ recipeId: 'counter-l-100', moduleType: 'counter', shape: 'L', nominalWidthCm: 100, items: Object.freeze([
-    Object.freeze({ partId: 'profile_91', quantity: 5 }), Object.freeze({ partId: 'profile_41_5', quantity: 5 }), Object.freeze({ partId: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_98', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_110_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_52_60', quantity: 1 }),
+    Object.freeze({ partId: 'profile_91', quantity: 5 }), Object.freeze({ partId: 'profile_41_5', quantity: 5 }), Object.freeze({ itemKey: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_98', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_110_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_52_60', quantity: 1 }),
   ]) }),
-
   'counter-l:150': Object.freeze({ recipeId: 'counter-l-150', moduleType: 'counter', shape: 'L', nominalWidthCm: 150, items: Object.freeze([
-    Object.freeze({ partId: 'profile_140_5', quantity: 5 }), Object.freeze({ partId: 'profile_91', quantity: 1 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_147_5', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_160_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_102_60', quantity: 1 }),
+    Object.freeze({ partId: 'profile_140_5', quantity: 5 }), Object.freeze({ partId: 'profile_91', quantity: 1 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_147_5', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_160_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_102_60', quantity: 1 }),
   ]) }),
-
   'counter-l:200': Object.freeze({ recipeId: 'counter-l-200', moduleType: 'counter', shape: 'L', nominalWidthCm: 200, items: Object.freeze([
-    Object.freeze({ partId: 'profile_190', quantity: 5 }), Object.freeze({ partId: 'profile_140_5', quantity: 1 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_197', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_210_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_150_60', quantity: 1 }),
+    Object.freeze({ partId: 'profile_190', quantity: 5 }), Object.freeze({ partId: 'profile_140_5', quantity: 1 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_99', quantity: 5 }), Object.freeze({ partId: 'panel_197', quantity: 4 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 16 }), Object.freeze({ partId: 'counter_top_210_60', quantity: 1 }), Object.freeze({ partId: 'counter_top_150_60', quantity: 1 }),
   ]) }),
 
   'counter:100': Object.freeze({ recipeId: 'counter-100', moduleType: 'counter', nominalWidthCm: 100, items: Object.freeze([
-    Object.freeze({ partId: 'profile_91', quantity: 3 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 4 }), Object.freeze({ partId: 'panel_98', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 12 }), Object.freeze({ partId: 'counter_top_110_60', quantity: 1 }),
+    Object.freeze({ partId: 'profile_91', quantity: 3 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_99', quantity: 4 }), Object.freeze({ partId: 'panel_98', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 12 }), Object.freeze({ partId: 'counter_top_110_60', quantity: 1 }),
   ]) }),
   'counter:150': Object.freeze({ recipeId: 'counter-150', moduleType: 'counter', nominalWidthCm: 150, items: Object.freeze([
-    Object.freeze({ partId: 'profile_140_5', quantity: 3 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 4 }), Object.freeze({ partId: 'panel_147_5', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 12 }), Object.freeze({ partId: 'counter_top_160_60', quantity: 1 }),
+    Object.freeze({ partId: 'profile_140_5', quantity: 3 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_99', quantity: 4 }), Object.freeze({ partId: 'panel_147_5', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 12 }), Object.freeze({ partId: 'counter_top_160_60', quantity: 1 }),
   ]) }),
   'counter:200': Object.freeze({ recipeId: 'counter-200', moduleType: 'counter', nominalWidthCm: 200, items: Object.freeze([
-    Object.freeze({ partId: 'profile_190', quantity: 3 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_99', quantity: 4 }), Object.freeze({ partId: 'panel_197', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 12 }), Object.freeze({ partId: 'counter_top_210_60', quantity: 1 }),
+    Object.freeze({ partId: 'profile_190', quantity: 3 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_99', quantity: 4 }), Object.freeze({ partId: 'panel_197', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 12 }), Object.freeze({ partId: 'counter_top_210_60', quantity: 1 }),
   ]) }),
 
   'base-wall:100': Object.freeze({ recipeId: 'base-wall-100', moduleType: 'base-wall', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ partId: 'profile_91', quantity: 4 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 2 }), Object.freeze({ partId: 'panel_98', quantity: 7 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 17 }), Object.freeze({ partId: 'base_top_107_50', quantity: 1 }),
+    Object.freeze({ partId: 'profile_91', quantity: 4 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }), Object.freeze({ partId: 'panel_98', quantity: 7 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 17 }), Object.freeze({ partId: 'base_top_107_50', quantity: 1 }),
   ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_92' }) }),
   'base-wall:150': Object.freeze({ recipeId: 'base-wall-150', moduleType: 'base-wall', nominalWidthCm: 150, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ partId: 'profile_140_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 2 }), Object.freeze({ partId: 'panel_147_5', quantity: 7 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 17 }), Object.freeze({ partId: 'base_top_157_50', quantity: 1 }),
+    Object.freeze({ partId: 'profile_140_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }), Object.freeze({ partId: 'panel_147_5', quantity: 7 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 17 }), Object.freeze({ partId: 'base_top_157_50', quantity: 1 }),
   ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_142_5' }) }),
   'base-wall:200': Object.freeze({ recipeId: 'base-wall-200', moduleType: 'base-wall', nominalWidthCm: 200, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ partId: 'profile_190', quantity: 4 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 2 }), Object.freeze({ partId: 'panel_197', quantity: 7 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 17 }), Object.freeze({ partId: 'base_top_206_50', quantity: 1 }),
+    Object.freeze({ partId: 'profile_190', quantity: 4 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }), Object.freeze({ partId: 'panel_197', quantity: 7 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 17 }), Object.freeze({ partId: 'base_top_206_50', quantity: 1 }),
   ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_192' }) }),
 
   'base:100': Object.freeze({ recipeId: 'base-100', moduleType: 'base', nominalWidthCm: 100, items: Object.freeze([
-    Object.freeze({ partId: 'profile_91', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_98', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_107_50', quantity: 1 }),
+    Object.freeze({ partId: 'profile_91', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_98', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_107_50', quantity: 1 }),
   ]) }),
   'base:150': Object.freeze({ recipeId: 'base-150', moduleType: 'base', nominalWidthCm: 150, items: Object.freeze([
-    Object.freeze({ partId: 'profile_140_5', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_147_5', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_157_50', quantity: 1 }),
+    Object.freeze({ partId: 'profile_140_5', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_147_5', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_157_50', quantity: 1 }),
   ]) }),
   'base:200': Object.freeze({ recipeId: 'base-200', moduleType: 'base', nominalWidthCm: 200, items: Object.freeze([
-    Object.freeze({ partId: 'profile_190', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ partId: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_197', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_206_50', quantity: 1 }),
+    Object.freeze({ partId: 'profile_190', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_197', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_206_50', quantity: 1 }),
   ]) }),
 });
 
-export function getStraightWallRecipe(nominalWidthCm) {
-  return STRAIGHT_WALL_RECIPES[nominalWidthCm] ?? null;
-}
-
-export function listStraightWallRecipes() {
-  return Object.values(STRAIGHT_WALL_RECIPES);
-}
-
+export function getStraightWallRecipe(nominalWidthCm) { return STRAIGHT_WALL_RECIPES[nominalWidthCm] ?? null; }
+export function listStraightWallRecipes() { return Object.values(STRAIGHT_WALL_RECIPES); }
 export function getModuleRecipe(moduleType, nominalWidthCm, options = {}) {
   if (moduleType === 'wall' || moduleType === 'flat-panel') return getStraightWallRecipe(nominalWidthCm);
-  if (moduleType === 'shelf') {
-    const shelfCount = Number(options.shelfCount);
-    return MODULE_RECIPES[`shelf:${nominalWidthCm}:${shelfCount}`] ?? null;
-  }
-  if (moduleType === 'counter' && options.shape === 'L') {
-    return MODULE_RECIPES[`counter-l:${nominalWidthCm}`] ?? null;
-  }
+  if (moduleType === 'shelf') return MODULE_RECIPES[`shelf:${nominalWidthCm}:${Number(options.shelfCount)}`] ?? null;
+  if (moduleType === 'counter' && options.shape === 'L') return MODULE_RECIPES[`counter-l:${nominalWidthCm}`] ?? null;
   return MODULE_RECIPES[`${moduleType}:${nominalWidthCm}`] ?? null;
 }
-
-export function getRecipeItemKey(item) {
-  return item?.itemKey ?? item?.partId ?? null;
-}
-
+export function getRecipeItemKey(item) { return item?.itemKey ?? item?.partId ?? null; }
 export function expandRecipe(recipe) {
   if (!recipe) return null;
-
-  return {
-    ...recipe,
-    items: recipe.items.map((item) => ({
-      ...item,
-      part: getProductionItem(getRecipeItemKey(item)),
-    })),
-  };
+  return { ...recipe, items: recipe.items.map((item) => ({ ...item, part: getProductionItem(getRecipeItemKey(item)) })) };
 }
-
-export function getExpandedStraightWallRecipe(nominalWidthCm) {
-  return expandRecipe(getStraightWallRecipe(nominalWidthCm));
-}
-
-export function getExpandedModuleRecipe(moduleType, nominalWidthCm, options = {}) {
-  return expandRecipe(getModuleRecipe(moduleType, nominalWidthCm, options));
-}
+export function getExpandedStraightWallRecipe(nominalWidthCm) { return expandRecipe(getStraightWallRecipe(nominalWidthCm)); }
+export function getExpandedModuleRecipe(moduleType, nominalWidthCm, options = {}) { return expandRecipe(getModuleRecipe(moduleType, nominalWidthCm, options)); }
