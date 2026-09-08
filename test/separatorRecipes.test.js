@@ -13,7 +13,7 @@ test('separator 50 recipe matches verified production data', () => {
   const recipe = getModuleRecipe('separator', 50);
   assert.deepEqual(recipe.items, [
     { partId: 'profile_41_5', quantity: 2 },
-    { partId: 'upright_346_5', quantity: 2 },
+    { itemKey: 'upright_346_5', quantity: 2 },
     { partId: 'separator_panel_48_5', quantity: 1 },
     { partId: 'separator_panel_98', quantity: 3 },
     { itemKey: 'connector_start', quantity: 2 },
@@ -25,7 +25,7 @@ test('separator 100 recipe matches verified production data', () => {
   const recipe = getModuleRecipe('separator', 100);
   assert.deepEqual(recipe.items, [
     { partId: 'profile_91', quantity: 2 },
-    { partId: 'upright_346_5', quantity: 2 },
+    { itemKey: 'upright_346_5', quantity: 2 },
     { partId: 'separator_panel_98', quantity: 7 },
     { itemKey: 'connector_start', quantity: 2 },
     { itemKey: 'connector_single', quantity: 13 },

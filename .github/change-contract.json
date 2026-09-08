@@ -1,16 +1,14 @@
 {
   "schemaVersion": 2,
-  "id": "connector-family-item-contract-cutover",
+  "id": "upright-346-5-item-contract-cutover",
   "kind": "bom-change",
-  "summary": "Migrate connector_single, connector_double and connector_corner to canonical Item itemKey identity, preserve all verified connector_single recipe quantities, and make double/corner available as active canonical BOM outputs without guessing relationship quantities.",
+  "summary": "Migrate upright_346_5 from legacy partId identity to canonical Item itemKey identity across all 18 verified parent recipes while preserving quantity, unit and production dimensions.",
   "owners": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
+    "test/upright3465ItemContract.test.js",
     "test/moduleRecipes.test.js",
-    "test/connectorBom.test.js",
-    "docs/items/definitions/connector_single.md",
-    "docs/items/definitions/connector_double.md",
-    "docs/items/definitions/connector_corner.md"
+    "docs/items/definitions/upright_346_5.md"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
@@ -64,7 +62,8 @@
       "test/systemChangeGate.test.js",
       "test/systemChangeGateLocalDiff.test.js",
       "test/systemDevelopmentContract.test.js",
-      "test/systemModuleCatalogDoc.test.js"
+      "test/systemModuleCatalogDoc.test.js",
+      "test/upright3465ItemContract.test.js"
     ],
     "affectedDocs": [
       "FRESH_REPOSITORY_REVIEW.md",
@@ -80,6 +79,7 @@
       "audit/evidence/A12_BOM_RECIPES_PRODUCTION.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
       "audit/remediation/A01_F003_CLOSURE.md",
+      "docs/items/ITEM_LIST.md",
       "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md",
       "docs/items/current-system/base_top_107_50.md",
       "docs/items/current-system/base_top_157_50.md",
@@ -135,6 +135,7 @@
       "docs/items/definitions/hali.md",
       "docs/items/definitions/karolaj.md",
       "docs/items/definitions/parke.md",
+      "docs/items/definitions/upright_346_5.md",
       "docs/items/definitions/wall_100.md",
       "docs/items/definitions/wall_150.md",
       "docs/items/definitions/wall_200.md",
@@ -153,35 +154,35 @@
       "docs/items/definitions/wall_shelf_3_150.md",
       "docs/items/definitions/wall_shelf_3_200.md",
       "docs/items/definitions/wall_showcase_100_2.md",
-      "docs/items/definitions/wall_showcase_100_3.md",
-      "docs/items/ITEM_LIST.md"
+      "docs/items/definitions/wall_showcase_100_3.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-031",
         "F-048"
       ],
       "reviewedNotAffected": [
         "F-001",
         "F-003",
         "F-014",
-        "F-030"
+        "F-030",
+        "F-031"
       ]
     },
-    "notes": "Reviewed the full BOM/recipe dependency surface. connector_single remains recipe-owned with exact existing quantities. connector_double and connector_corner become active canonical connector BOM outputs, but this change does not invent placement-to-connector mappings or claim a project-level Final BOM generator."
+    "notes": "Reviewed the full upright_346_5 recipe/BOM and renderer/state surfaces. The Item is cut over to canonical itemKey in 18 verified parent recipes with quantity parity. Existing procedural renderer dimensions are intentionally not rebound because the verified production dimensions and renderer geometry are not numerically equivalent; no renderer behavior is invented in this migration."
   },
   "tests": {
     "targeted": [
-      "test/baseRecipes.test.js",
+      "test/upright3465ItemContract.test.js",
+      "test/moduleRecipes.test.js",
+      "test/showcaseRecipes.test.js",
+      "test/separatorRecipes.test.js",
       "test/baseWallRecipes.test.js",
-      "test/connectorBom.test.js",
+      "test/baseRecipes.test.js",
       "test/counterRecipes.test.js",
       "test/lCounter100Contract.test.js",
       "test/lCounter150Contract.test.js",
       "test/lCounter200Contract.test.js",
-      "test/moduleRecipes.test.js",
-      "test/separatorRecipes.test.js",
-      "test/showcaseRecipes.test.js"
+      "test/connectorBom.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -190,16 +191,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "BOM is a browser-impact domain under the repository change gate, so the canonical smoke E2E remains required even though this connector cutover does not change UI/renderer behavior."
+      "reason": "BOM is a browser-impact domain under the repository change gate; smoke E2E remains required even though upright_346_5 renderer behavior is unchanged."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Connector recipe identity changes touch every verified recipe family. Quantity parity and migration isolation are regression-tested; double/corner quantities are caller-owned and never inferred."
+    "notes": "upright_346_5 identity changes in 18 recipes across wall, door, shelf, showcase, separator and base-wall families. Quantity parity and migration isolation are regression-tested; renderer geometry is intentionally unchanged."
   },
   "migration": {
     "required": false,
-    "notes": "No project/persistence schema migration. Runtime production identity for the three connector Items changes from legacy partId to canonical itemKey; legacy getProductionPart lookup remains compatible."
+    "notes": "No project/persistence schema migration. Runtime production identity for upright_346_5 changes from legacy partId to canonical itemKey; legacy getProductionPart lookup remains compatible during incremental migration."
   },
-  "rollback": "Revert connector_single/double/corner itemKey definitions, restore connector_single recipe partId entries, remove connector BOM resolver exports/tests/docs, and restore affected recipe tests."
+  "rollback": "Restore upright_346_5 partId in productionParts.js and its 18 recipe entries, remove upright-specific migration docs/tests, and restore affected recipe expectations."
 }

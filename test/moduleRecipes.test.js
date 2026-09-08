@@ -48,21 +48,24 @@ test('all four connector production definitions use canonical itemKey identity',
   }
 });
 
-test('connector_start and connector_single recipe identities use itemKey while legacy parts keep partId', () => {
+test('migrated recipe identities use itemKey while legacy parts keep partId', () => {
   const recipe = getStraightWallRecipe(200);
   const start = recipe.items.find((item) => getRecipeItemKey(item) === 'connector_start');
   const single = recipe.items.find((item) => getRecipeItemKey(item) === 'connector_single');
+  const upright = recipe.items.find((item) => getRecipeItemKey(item) === 'upright_346_5');
   const profile = recipe.items.find((item) => getRecipeItemKey(item) === 'profile_190');
 
   assert.deepEqual(start, { itemKey: 'connector_start', quantity: 2 });
   assert.deepEqual(single, { itemKey: 'connector_single', quantity: 13 });
+  assert.deepEqual(upright, { itemKey: 'upright_346_5', quantity: 2 });
   assert.equal(start.partId, undefined);
   assert.equal(single.partId, undefined);
+  assert.equal(upright.partId, undefined);
   assert.equal(profile.partId, 'profile_190');
   assert.equal(profile.itemKey, undefined);
 });
 
-test('item-by-item migration is isolated to connector_start and connector_single across every recipe', () => {
+test('item-by-item migration is isolated to migrated Items across every recipe', () => {
   const recipes = [
     ...listStraightWallRecipes(),
     ...[
@@ -94,13 +97,15 @@ test('item-by-item migration is isolated to connector_start and connector_single
 
   let startOccurrences = 0;
   let singleOccurrences = 0;
+  let uprightOccurrences = 0;
   for (const recipe of recipes) {
     assert.ok(recipe);
     for (const item of recipe.items) {
       const key = getRecipeItemKey(item);
-      if (key === 'connector_start' || key === 'connector_single') {
+      if (key === 'connector_start' || key === 'connector_single' || key === 'upright_346_5') {
         if (key === 'connector_start') startOccurrences += 1;
         if (key === 'connector_single') singleOccurrences += 1;
+        if (key === 'upright_346_5') uprightOccurrences += 1;
         assert.equal(item.itemKey, key);
         assert.equal(item.partId, undefined);
       } else {
@@ -112,6 +117,7 @@ test('item-by-item migration is isolated to connector_start and connector_single
 
   assert.equal(startOccurrences, 27);
   assert.equal(singleOccurrences, 27);
+  assert.equal(uprightOccurrences, 18);
 });
 
 test('expanded recipes resolve connector_start metadata through its canonical itemKey', () => {
@@ -150,7 +156,7 @@ test('50 cm straight wall recipe matches the verified production recipe', () => 
 
   assert.deepEqual(recipe.items, [
     { partId: 'profile_41_5', quantity: 2 },
-    { partId: 'upright_346_5', quantity: 2 },
+    { itemKey: 'upright_346_5', quantity: 2 },
     { partId: 'panel_48_5', quantity: 7 },
     { itemKey: 'connector_start', quantity: 2 },
     { itemKey: 'connector_single', quantity: 13 },
@@ -182,7 +188,7 @@ test('100 cm door recipe matches verified production data', () => {
   const recipe = getModuleRecipe('door', 100);
   assert.deepEqual(recipe.items, [
     { partId: 'profile_91', quantity: 1 },
-    { partId: 'upright_346_5', quantity: 2 },
+    { itemKey: 'upright_346_5', quantity: 2 },
     { partId: 'panel_98', quantity: 3 },
     { itemKey: 'connector_start', quantity: 2 },
     { itemKey: 'connector_single', quantity: 5 },
