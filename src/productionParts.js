@@ -11,7 +11,7 @@ export const PRODUCTION_PARTS = Object.freeze({
   panel_48_5: Object.freeze({ partId: 'panel_48_5', name: 'Panel 48,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 50 }),
   panel_98: Object.freeze({ partId: 'panel_98', name: 'Panel 98 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 100 }),
   panel_147_5: Object.freeze({ partId: 'panel_147_5', name: 'Panel 147,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 147.5, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 150 }),
-  panel_197: Object.freeze({ partId: 'panel_197', name: 'Panel 197 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 197, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 200 }),
+  panel_197: Object.freeze({ itemKey: 'panel_197', name: 'Panel 197 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 197, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'straight', nominalModuleWidthCm: 200 }),
 
   panel_corner_42_5: Object.freeze({ partId: 'panel_corner_42_5', name: 'İç Köşe Paneli 42,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 42.5, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'inner-corner', nominalModuleWidthCm: 50 }),
   panel_corner_92: Object.freeze({ partId: 'panel_corner_92', name: 'İç Köşe Paneli 92 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 92, heightCm: 47, thicknessCm: 0.8 }), panelRole: 'inner-corner', nominalModuleWidthCm: 100 }),
