@@ -1,18 +1,19 @@
 {
   "schemaVersion": 2,
-  "id": "legacy-item-completion-status-remediation",
+  "id": "connector-completion-semantics-correction",
   "kind": "bugfix",
-  "summary": "Align connector_double, connector_corner, and upright_346_5 migration records with the verified current Version2 runtime: keep canonical connector identity/resolver capability, mark double/corner pending because no active runtime BOM consumer exists, and remove stale upright neighbor wording without inventing runtime behavior or quantities.",
+  "summary": "Correct connector_double and connector_corner completion semantics: fixed parent recipe usage is not currently used and is therefore not a migration gap; preserve canonical itemKey/resolver behavior and the valid upright_346_5 documentation refresh.",
   "owners": [
     "docs/items/ITEM_LIST.md",
     "docs/items/definitions/connector_double.md",
     "docs/items/definitions/connector_corner.md",
-    "docs/items/definitions/upright_346_5.md",
     "test/connectorBom.test.js"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
-    "src/moduleRecipes.js"
+    "src/moduleRecipes.js",
+    "docs/items/current-system/connector_double.md",
+    "docs/items/current-system/connector_corner.md"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -21,7 +22,7 @@
     "placement": "not-applicable",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
-    "bom": "affected",
+    "bom": "not-applicable",
     "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
@@ -37,48 +38,40 @@
     "mode": "full-system",
     "affectedFiles": [],
     "affectedTests": [
-      "e2e/smoke.spec.mjs",
       "test/connectorBom.test.js",
-      "test/moduleRecipes.test.js",
-      "test/upright3465ItemContract.test.js",
-      "test/upright99And495ItemContract.test.js"
+      "test/moduleRecipes.test.js"
     ],
     "affectedDocs": [
       "docs/items/ITEM_LIST.md",
       "docs/items/definitions/connector_double.md",
-      "docs/items/definitions/connector_corner.md",
-      "docs/items/definitions/upright_346_5.md"
+      "docs/items/definitions/connector_corner.md"
     ],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": []
     },
-    "notes": "No runtime production, recipe, placement, renderer, state, persistence, or quantity logic changes. Current source proves connector_double and connector_corner have canonical itemKey definitions and resolver capability but no active src runtime consumer; completion records are corrected to Bekliyor. upright_346_5 runtime remains unchanged and only stale documentation about already-migrated upright_99/upright_49_5 is corrected."
+    "notes": "No runtime source changes. connector_double and connector_corner are canonical Tekil production Items with explicit resolver capability. Their absence from current fixed parent recipes is current recipe usage state (UYGULANMIYOR), not an incomplete migration. No quantity, renderer, state, persistence, placement, relationship, or visual behavior is invented."
   },
   "tests": {
     "targeted": [
       "test/connectorBom.test.js",
-      "test/moduleRecipes.test.js",
-      "test/upright3465ItemContract.test.js",
-      "test/upright99And495ItemContract.test.js"
+      "test/moduleRecipes.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": [
-        "e2e/smoke.spec.mjs"
-      ],
-      "reason": "BOM completion/status semantics are affected; repository browser-impact policy keeps smoke E2E required even though runtime behavior is unchanged."
+      "required": false,
+      "targeted": [],
+      "reason": "Documentation/completion-semantics correction plus regression wording only; no browser-impacting runtime source changes."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "No runtime code changes. Risk is limited to keeping migration completion status and regression wording aligned with the verified current runtime."
+    "notes": "No production runtime code or recipe quantity changes."
   },
   "migration": {
     "required": false,
-    "notes": "No project data or persistence migration. Connector runtime identity/resolver code and upright runtime behavior are unchanged."
+    "notes": "No runtime or persistence migration."
   },
-  "rollback": "Restore the previous completion wording/status and test descriptions; no runtime source rollback is required because runtime code is unchanged."
+  "rollback": "Restore the previous connector completion wording/status and previous change contract; runtime code remains unchanged either way."
 }
