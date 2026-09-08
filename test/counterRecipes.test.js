@@ -16,7 +16,7 @@ test('banko 100 recipe matches verified production data', () => {
   assert.deepEqual(recipe.items, [
     { partId: 'profile_91', quantity: 3 },
     { partId: 'profile_41_5', quantity: 4 },
-    { partId: 'upright_99', quantity: 4 },
+    { itemKey: 'upright_99', quantity: 4 },
     { partId: 'panel_98', quantity: 2 },
     { partId: 'panel_48_5', quantity: 4 },
     { itemKey: 'connector_start', quantity: 6 },
