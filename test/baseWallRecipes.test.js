@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getModuleRecipe, expandRecipe } from '../src/moduleRecipes.js';
+import { expandRecipe, getModuleRecipe, getRecipeInnerCornerPanelKey } from '../src/moduleRecipes.js';
 import { MODULE_CATALOG } from '../src/catalog.js';
 
 const expected = {
@@ -24,7 +24,7 @@ for (const [widthText, ids] of Object.entries(expected)) {
     assert.equal(q.connector_start, 6);
     assert.equal(q.connector_single, 17);
     assert.equal(q[ids.top], 1);
-    assert.equal(recipe.variants.innerCornerPanelPartId, ids.corner);
+    assert.equal(getRecipeInnerCornerPanelKey(recipe), ids.corner);
     assert.ok(expandRecipe(recipe).items.every((item) => item.part));
   });
 }

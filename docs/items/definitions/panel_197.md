@@ -90,9 +90,9 @@ Renderer BOM'un canonical kaynağı yapılmaz ve mevcut görünüm değiştirilm
 
 ## 6. Variant / corner panel ayrımı
 
-200 cm straight/base-wall recipe metadata'sında `innerCornerPanelPartId = panel_corner_192` bulunur. Mevcut runtime'da placement ilişkisini okuyup `panel_197` miktarını otomatik `panel_corner_192`a dönüştüren doğrulanmış canonical BOM resolver yoktur.
+`panel_corner_192` ayrı bir Tekil Item'dır; `panel_197`nin child/variant identity'si değildir. Sonraki `panel_corner_192` migrationında 200 cm wall/shelf/base-wall recipe metadata'sı canonical `innerCornerPanelItemKey = panel_corner_192` referansına taşınmıştır.
 
-Bu migration `panel_197` ile `panel_corner_192` arasında yeni ilişki/quantity kuralı icat etmez. Corner panel migrationı ayrı Item çalışmasıdır.
+Doğrulanmış BOM business rule 1:1 replacement'tır: caller canonical relationship bilgisini `panelVariant = inner-corner` olarak verdiğinde ilgili recipe'deki `panel_197 × N` satırı aynı `N` miktarıyla `panel_corner_192 × N` olur. İki panel birlikte eklenmez. Project placement ilişkisinden bu konfigürasyonu otomatik üreten project-level Final BOM resolver hâlâ ayrı sistem işidir.
 
 ## 7. Uygulanan cutover
 

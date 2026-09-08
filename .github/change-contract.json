@@ -1,14 +1,15 @@
 {
   "schemaVersion": 2,
-  "id": "panel-197-item-contract-cutover",
+  "id": "panel-corner-192-item-contract-cutover",
   "kind": "bom-change",
-  "summary": "Migrate panel_197 from legacy partId identity to canonical Item itemKey identity while preserving verified production metadata and all seven parent-recipe quantities.",
+  "summary": "Migrate panel_corner_192 to canonical itemKey identity and encode the verified 1:1 inner-corner panel replacement rule without inventing project relationship state.",
   "owners": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
-    "test/panel197ItemContract.test.js",
+    "test/panelCorner192ItemContract.test.js",
     "test/moduleRecipes.test.js",
-    "docs/items/definitions/panel_197.md"
+    "test/baseWallRecipes.test.js",
+    "docs/items/definitions/panel_corner_192.md"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
@@ -40,7 +41,8 @@
       "scripts/verify-change-contract.mjs",
       "src/moduleContracts.js",
       "src/rawBomDebug.js",
-      "src/systemChangeContract.js"
+      "src/systemChangeContract.js",
+      "src/modulePlacement.js"
     ],
     "affectedTests": [
       "e2e/smoke.spec.mjs",
@@ -65,7 +67,8 @@
       "test/systemModuleCatalogDoc.test.js",
       "test/upright3465ItemContract.test.js",
       "test/upright99And495ItemContract.test.js",
-      "test/panel197ItemContract.test.js"
+      "test/panel197ItemContract.test.js",
+      "test/panelCorner192ItemContract.test.js"
     ],
     "affectedDocs": [
       "FRESH_REPOSITORY_REVIEW.md",
@@ -163,31 +166,31 @@
       "audit/FINDINGS.md",
       "audit/evidence/A10_UI_CONTROLS.md",
       "docs/items/definitions/connector_start.md",
-      "docs/items/definitions/panel_197.md"
+      "docs/items/definitions/panel_197.md",
+      "docs/items/definitions/panel_corner_192.md",
+      "docs/items/contract/ITEM_CONTRACT.md"
     ],
     "relatedFindings": {
       "affected": [
         "F-048"
       ],
       "reviewedNotAffected": [
-        "F-001",
-        "F-003",
         "F-014",
         "F-025",
         "F-030",
-        "F-031"
+        "F-031",
+        "F-001",
+        "F-003"
       ]
     },
-    "notes": "Reviewed the full panel_197 production/BOM dependency surface against its current-system map and the Item Contract. panel_197 moves to canonical itemKey in exactly seven verified 200 cm parent recipes with quantity parity. Production dimensions/role metadata remain unchanged. Project state, persistence, behavior and procedural renderer geometry are intentionally unchanged because no canonical production-to-renderer mapping is verified. panel_corner_192 remains a separate legacy Item and no corner replacement rule is invented."
+    "notes": "panel_corner_192 becomes a separate canonical Tekil Item with itemKey identity. Exactly four verified 200 cm recipe variant references move from innerCornerPanelPartId to innerCornerPanelItemKey. The verified business rule is 1:1 replacement: when a caller supplies canonical inner-corner configuration, panel_197 x N is replaced by panel_corner_192 x N with the parent recipe quantity preserved. No project placement/state/persistence/renderer mapping is invented; automatic project relationship to Final BOM remains open. Neighboring 50/100/150 cm corner panels remain legacy and do not activate replacement."
   },
   "tests": {
     "targeted": [
+      "test/panelCorner192ItemContract.test.js",
       "test/panel197ItemContract.test.js",
       "test/moduleRecipes.test.js",
-      "test/baseWallRecipes.test.js",
-      "test/baseRecipes.test.js",
-      "test/counterRecipes.test.js",
-      "test/lCounter200Contract.test.js"
+      "test/baseWallRecipes.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -196,16 +199,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "BOM is a browser-impact domain under the repository change gate; smoke E2E remains required even though panel renderer behavior is unchanged."
+      "reason": "BOM is a browser-impact domain under the repository change gate; smoke E2E remains required even though no UI/renderer behavior is changed."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "panel_197 identity changes in seven verified 200 cm recipes. Quantity parity, canonical metadata resolution and migration isolation are regression-tested; neighboring panel Items remain legacy and renderer behavior is unchanged."
+    "notes": "Identity and four 200 cm variant references change. Dedicated regression locks 1:1 quantity replacement and verifies no neighboring corner panel migration or implicit project relationship behavior."
   },
   "migration": {
     "required": false,
-    "notes": "No project/persistence schema migration. Runtime production identity for panel_197 changes from legacy partId to canonical itemKey; legacy getProductionPart and recipe partId fallback remain temporarily for not-yet-migrated Items."
+    "notes": "No project/persistence schema migration. Runtime production identity for panel_corner_192 changes from legacy partId to canonical itemKey; remaining corner panel Items stay on legacy partId compatibility until migrated separately."
   },
-  "rollback": "Restore panel_197 partId in productionParts.js and its seven recipe entries, remove the panel_197 migration definition/regression test, and restore migration-isolation expectations and ITEM_LIST status."
+  "rollback": "Restore panel_corner_192 partId, restore the four 200 cm innerCornerPanelPartId references, remove panel variant replacement resolution and its dedicated definition/regression test, and restore ITEM_LIST/panel_197 documentation."
 }

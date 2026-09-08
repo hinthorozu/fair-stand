@@ -35,7 +35,7 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `panel_corner_42_5` | `panel` | Bekliyor |
 | `panel_corner_92` | `panel` | Bekliyor |
 | `panel_corner_142_5` | `panel` | Bekliyor |
-| `panel_corner_192` | `panel` | Bekliyor |
+| `panel_corner_192` | `panel` | **Tamam — canonical `itemKey`; 4 doğrulanmış 200 cm recipe variant referansı; inner-corner BOM'da `panel_197` miktarı 1:1 korunarak replacement** |
 | `separator_panel_48_5` | `separator-panel` | Bekliyor |
 | `separator_panel_98` | `separator-panel` | Bekliyor |
 | `door_100` | `door` | Bekliyor |
