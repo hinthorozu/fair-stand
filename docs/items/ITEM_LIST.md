@@ -27,7 +27,7 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `profile_41_5` | `profile` | Bekliyor |
 | `profile_91` | `profile` | Bekliyor |
 | `profile_140_5` | `profile` | Bekliyor |
-| `profile_190` | `profile` | Bekliyor |
+| `profile_190` | `profile` | **Tamam — canonical `itemKey`; 7 aktif 200 cm recipe içinde doğrulanmış miktarlar korunur; `190 × 8 cm` üretim ölçüsü** |
 | `panel_48_5` | `panel` | Bekliyor |
 | `panel_98` | `panel` | Bekliyor |
 | `panel_147_5` | `panel` | Bekliyor |

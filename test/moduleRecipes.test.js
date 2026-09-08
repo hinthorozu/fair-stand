@@ -65,8 +65,8 @@ test('migrated recipe identities use itemKey while legacy parts keep partId', ()
   assert.equal(single.partId, undefined);
   assert.equal(upright.partId, undefined);
   assert.equal(panel.partId, undefined);
-  assert.equal(profile.partId, 'profile_190');
-  assert.equal(profile.itemKey, undefined);
+  assert.deepEqual(profile, { itemKey: 'profile_190', quantity: 2 });
+  assert.equal(profile.partId, undefined);
 });
 
 test('item-by-item migration is isolated to migrated Items across every recipe', () => {
@@ -103,15 +103,17 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   let singleOccurrences = 0;
   const uprightOccurrences = { upright_346_5: 0, upright_99: 0, upright_49_5: 0 };
   let panel197Occurrences = 0;
+  let profile190Occurrences = 0;
   for (const recipe of recipes) {
     assert.ok(recipe);
     for (const item of recipe.items) {
       const key = getRecipeItemKey(item);
-      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197') {
+      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key === 'profile_190') {
         if (key === 'connector_start') startOccurrences += 1;
         if (key === 'connector_single') singleOccurrences += 1;
         if (key in uprightOccurrences) uprightOccurrences[key] += 1;
         if (key === 'panel_197') panel197Occurrences += 1;
+        if (key === 'profile_190') profile190Occurrences += 1;
         assert.equal(item.itemKey, key);
         assert.equal(item.partId, undefined);
       } else {
@@ -125,6 +127,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   assert.equal(singleOccurrences, 27);
   assert.deepEqual(uprightOccurrences, { upright_346_5: 18, upright_99: 6, upright_49_5: 6 });
   assert.equal(panel197Occurrences, 7);
+  assert.equal(profile190Occurrences, 7);
 });
 
 test('expanded recipes resolve connector_start metadata through its canonical itemKey', () => {
