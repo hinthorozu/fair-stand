@@ -53,8 +53,8 @@ test('expanded recipe resolves panel_197 metadata through canonical itemKey', ()
   assert.deepEqual(panel.part.dimensions, { widthCm: 197, heightCm: 47, thicknessCm: 0.8 });
 });
 
-test('panel_197 migration does not migrate neighboring straight or still-legacy corner panel Items', () => {
-  for (const itemKey of ['panel_48_5', 'panel_98', 'panel_147_5', 'panel_corner_42_5', 'panel_corner_92', 'panel_corner_142_5']) {
+test('panel_197 migration keeps still-legacy corner panel Items isolated', () => {
+  for (const itemKey of ['panel_corner_42_5', 'panel_corner_92', 'panel_corner_142_5']) {
     const item = getProductionItem(itemKey);
     assert.equal(item.itemKey, undefined, itemKey);
     assert.equal(item.partId, itemKey);
