@@ -73,16 +73,18 @@ Bu nedenle mevcut recipe tanımı `panel_corner_192` için bir miktar (`quantity
 
 # 4. Resolver / expand davranışı
 
-Recipe lookup `src/moduleRecipes.js:99-117` üzerinden yapılır. `expandRecipe()` ise `src/moduleRecipes.js:119-122` içinde yalnızca `recipe.items` elemanlarını `getProductionPart(item.partId)` ile genişletir:
+Recipe lookup `src/moduleRecipes.js` üzerinden yapılır. Bu Item migrationı başlamadan hemen önce ortak `expandRecipe()` zinciri, daha önce migrate edilen Item'lar nedeniyle mixed identity compatibility kullanır:
 
 ```js
-export function expandRecipe(recipe) {
-  if (!recipe) return null;
-  return { ...recipe, items: recipe.items.map((item) => ({ ...item, part: getProductionPart(item.partId) })) };
-}
+getRecipeItemKey(item)
+  = item?.itemKey ?? item?.partId ?? null
+
+expandRecipe(recipe)
+  -> recipe.items
+  -> getProductionItem(getRecipeItemKey(item))
 ```
 
-`variants.innerCornerPanelPartId` aynen string olarak kalır. `expandRecipe()` bu değeri `getProductionPart('panel_corner_192')` ile çözmez.
+Bu pre-migration durumda `variants.innerCornerPanelPartId` aynen string metadata olarak kalır; ortak `expandRecipe()` yalnız `recipe.items` satırlarını genişlettiği için bu variant değerini BOM satırına dönüştürmez.
 
 Mevcut `src/` kodunda `recipe.variants.innerCornerPanelPartId` alanını okuyup `panel_corner_192` metadata'sına veya bir BOM satırına dönüştüren başka bir runtime tüketici bulunmadı.
 

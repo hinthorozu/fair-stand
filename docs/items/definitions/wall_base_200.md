@@ -148,7 +148,7 @@ connectionMode = straight
 Recipe metadata'sında ayrıca:
 
 ```text
-variants.innerCornerPanelPartId = panel_corner_192
+variants.innerCornerPanelItemKey = panel_corner_192
 ```
 
 `panel_corner_192` production registry kaydı: `İç Köşe Paneli 192 × 47 cm` (widthCm=192, heightCm=47, thicknessCm=0.8). Bu part normal `recipe.items` satırlarında yer almaz.

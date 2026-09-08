@@ -6,6 +6,7 @@ import {
   getExpandedModuleRecipe,
   getExpandedStraightWallRecipe,
   getModuleRecipe,
+  getRecipeInnerCornerPanelKey,
   getRecipeItemKey,
   getStraightWallRecipe,
   listStraightWallRecipes,
@@ -167,7 +168,7 @@ test('50 cm straight wall recipe matches the verified production recipe', () => 
     { itemKey: 'connector_start', quantity: 2 },
     { itemKey: 'connector_single', quantity: 13 },
   ]);
-  assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_42_5');
+  assert.equal(getRecipeInnerCornerPanelKey(recipe), 'panel_corner_42_5');
 });
 
 test('100/150/200 cm straight wall recipes preserve quantities and change verified sizes', () => {
@@ -186,7 +187,7 @@ test('100/150/200 cm straight wall recipes preserve quantities and change verifi
     assert.equal(quantities[panelPartId], 7);
     assert.equal(quantities.connector_start, 2);
     assert.equal(quantities.connector_single, 13);
-    assert.equal(recipe.variants.innerCornerPanelPartId, cornerPanelPartId);
+    assert.equal(getRecipeInnerCornerPanelKey(recipe), cornerPanelPartId);
   }
 });
 
@@ -200,7 +201,7 @@ test('100 cm door recipe matches verified production data', () => {
     { itemKey: 'connector_single', quantity: 5 },
     { partId: 'door_100', quantity: 1 },
   ]);
-  assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_92');
+  assert.equal(getRecipeInnerCornerPanelKey(recipe), 'panel_corner_92');
 });
 
 test('100 and 150 cm two-shelf wall recipes match verified production data', () => {
@@ -219,7 +220,7 @@ test('100 and 150 cm two-shelf wall recipes match verified production data', () 
     assert.equal(quantities.connector_single, 13);
     assert.equal(quantities[shelfPartId], 2);
     assert.equal(quantities.shelf_leg, 4);
-    assert.equal(recipe.variants.innerCornerPanelPartId, cornerPanelPartId);
+    assert.equal(getRecipeInnerCornerPanelKey(recipe), cornerPanelPartId);
   }
 });
 
@@ -233,7 +234,7 @@ test('200 cm two-shelf wall recipe uses six shelf legs', () => {
   assert.equal(quantities.connector_single, 13);
   assert.equal(quantities.shelf_200, 2);
   assert.equal(quantities.shelf_leg, 6);
-  assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_192');
+  assert.equal(getRecipeInnerCornerPanelKey(recipe), 'panel_corner_192');
 });
 
 test('100 and 150 cm three-shelf wall recipes match verified production data', () => {
@@ -252,7 +253,7 @@ test('100 and 150 cm three-shelf wall recipes match verified production data', (
     assert.equal(quantities.connector_single, 13);
     assert.equal(quantities[shelfPartId], 3);
     assert.equal(quantities.shelf_leg, 6);
-    assert.equal(recipe.variants.innerCornerPanelPartId, cornerPanelPartId);
+    assert.equal(getRecipeInnerCornerPanelKey(recipe), cornerPanelPartId);
   }
 });
 
@@ -266,7 +267,7 @@ test('200 cm three-shelf wall recipe uses nine shelf legs', () => {
   assert.equal(quantities.connector_single, 13);
   assert.equal(quantities.shelf_200, 3);
   assert.equal(quantities.shelf_leg, 9);
-  assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_192');
+  assert.equal(getRecipeInnerCornerPanelKey(recipe), 'panel_corner_192');
 });
 
 test('recipe lookup rejects unsupported nominal wall widths', () => {

@@ -12,7 +12,7 @@ const STRAIGHT_WALL_RECIPES = Object.freeze({
   ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_142_5' }) }),
   200: Object.freeze({ recipeId: 'wall-straight-200', moduleType: 'wall', nominalWidthCm: 200, connectionMode: 'straight', items: Object.freeze([
     Object.freeze({ partId: 'profile_190', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_197', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
-  ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_192' }) }),
+  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_192' }) }),
 });
 
 const MODULE_RECIPES = Object.freeze({
@@ -28,7 +28,7 @@ const MODULE_RECIPES = Object.freeze({
   ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_142_5' }) }),
   'shelf:200:2': Object.freeze({ recipeId: 'shelf-wall-200-2', moduleType: 'shelf', nominalWidthCm: 200, shelfCount: 2, connectionMode: 'straight', items: Object.freeze([
     Object.freeze({ partId: 'profile_190', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_197', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }), Object.freeze({ partId: 'shelf_200', quantity: 2 }), Object.freeze({ partId: 'shelf_leg', quantity: 6 }),
-  ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_192' }) }),
+  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_192' }) }),
   'shelf:100:3': Object.freeze({ recipeId: 'shelf-wall-100-3', moduleType: 'shelf', nominalWidthCm: 100, shelfCount: 3, connectionMode: 'straight', items: Object.freeze([
     Object.freeze({ partId: 'profile_91', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'panel_98', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }), Object.freeze({ partId: 'shelf_100', quantity: 3 }), Object.freeze({ partId: 'shelf_leg', quantity: 6 }),
   ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_92' }) }),
@@ -37,7 +37,7 @@ const MODULE_RECIPES = Object.freeze({
   ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_142_5' }) }),
   'shelf:200:3': Object.freeze({ recipeId: 'shelf-wall-200-3', moduleType: 'shelf', nominalWidthCm: 200, shelfCount: 3, connectionMode: 'straight', items: Object.freeze([
     Object.freeze({ partId: 'profile_190', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_197', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }), Object.freeze({ partId: 'shelf_200', quantity: 3 }), Object.freeze({ partId: 'shelf_leg', quantity: 9 }),
-  ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_192' }) }),
+  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_192' }) }),
 
   'showcase-2:100': Object.freeze({ recipeId: 'showcase-2-100', moduleType: 'showcase-2', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
     Object.freeze({ partId: 'profile_91', quantity: 4 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'panel_98', quantity: 5 }), Object.freeze({ itemKey: 'connector_start', quantity: 4 }), Object.freeze({ itemKey: 'connector_single', quantity: 9 }), Object.freeze({ partId: 'showcase_2_100', quantity: 1 }), Object.freeze({ partId: 'glass_shelf', quantity: 2 }),
@@ -81,7 +81,7 @@ const MODULE_RECIPES = Object.freeze({
   ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_142_5' }) }),
   'base-wall:200': Object.freeze({ recipeId: 'base-wall-200', moduleType: 'base-wall', nominalWidthCm: 200, connectionMode: 'straight', items: Object.freeze([
     Object.freeze({ partId: 'profile_190', quantity: 4 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_197', quantity: 7 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 17 }), Object.freeze({ partId: 'base_top_206_50', quantity: 1 }),
-  ]), variants: Object.freeze({ innerCornerPanelPartId: 'panel_corner_192' }) }),
+  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_192' }) }),
 
   'base:100': Object.freeze({ recipeId: 'base-100', moduleType: 'base', nominalWidthCm: 100, items: Object.freeze([
     Object.freeze({ partId: 'profile_91', quantity: 4 }), Object.freeze({ partId: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 4 }), Object.freeze({ partId: 'panel_98', quantity: 2 }), Object.freeze({ partId: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 8 }), Object.freeze({ partId: 'base_top_107_50', quantity: 1 }),
@@ -103,9 +103,52 @@ export function getModuleRecipe(moduleType, nominalWidthCm, options = {}) {
   return MODULE_RECIPES[`${moduleType}:${nominalWidthCm}`] ?? null;
 }
 export function getRecipeItemKey(item) { return item?.itemKey ?? item?.partId ?? null; }
-export function expandRecipe(recipe) {
-  if (!recipe) return null;
-  return { ...recipe, items: recipe.items.map((item) => ({ ...item, part: getProductionItem(getRecipeItemKey(item)) })) };
+
+// Compatibility read while corner-panel Items migrate one-by-one.
+export function getRecipeInnerCornerPanelKey(recipe) {
+  return recipe?.variants?.innerCornerPanelItemKey
+    ?? recipe?.variants?.innerCornerPanelPartId
+    ?? null;
 }
-export function getExpandedStraightWallRecipe(nominalWidthCm) { return expandRecipe(getStraightWallRecipe(nominalWidthCm)); }
-export function getExpandedModuleRecipe(moduleType, nominalWidthCm, options = {}) { return expandRecipe(getModuleRecipe(moduleType, nominalWidthCm, options)); }
+
+function resolveRecipeItemsForPanelVariant(recipe, panelVariant = 'straight') {
+  if (panelVariant !== 'inner-corner') return recipe.items;
+
+  // Only canonical migrated corner-panel references activate replacement.
+  // Legacy innerCornerPanelPartId metadata remains descriptive until that Item migrates.
+  const cornerPanelItemKey = recipe?.variants?.innerCornerPanelItemKey ?? null;
+  if (!cornerPanelItemKey) return recipe.items;
+
+  const cornerPanel = getProductionItem(cornerPanelItemKey);
+  if (!cornerPanel || cornerPanel.type !== 'panel' || cornerPanel.panelRole !== 'inner-corner') {
+    throw new TypeError(`Invalid inner-corner panel Item: ${cornerPanelItemKey}.`);
+  }
+
+  const straightPanelIndex = recipe.items.findIndex((item) => {
+    const productionItem = getProductionItem(getRecipeItemKey(item));
+    return productionItem?.type === 'panel'
+      && productionItem.panelRole === 'straight'
+      && productionItem.nominalModuleWidthCm === cornerPanel.nominalModuleWidthCm;
+  });
+
+  if (straightPanelIndex < 0) {
+    throw new TypeError(`Recipe ${recipe.recipeId ?? 'unknown'} has no matching straight panel for ${cornerPanelItemKey}.`);
+  }
+
+  return recipe.items.map((item, index) => {
+    if (index !== straightPanelIndex) return item;
+    return Object.freeze({ itemKey: cornerPanelItemKey, quantity: item.quantity });
+  });
+}
+
+export function expandRecipe(recipe, options = {}) {
+  if (!recipe) return null;
+  const items = resolveRecipeItemsForPanelVariant(recipe, options.panelVariant);
+  return { ...recipe, items: items.map((item) => ({ ...item, part: getProductionItem(getRecipeItemKey(item)) })) };
+}
+export function getExpandedStraightWallRecipe(nominalWidthCm, options = {}) {
+  return expandRecipe(getStraightWallRecipe(nominalWidthCm), options);
+}
+export function getExpandedModuleRecipe(moduleType, nominalWidthCm, options = {}) {
+  return expandRecipe(getModuleRecipe(moduleType, nominalWidthCm, options), options);
+}
