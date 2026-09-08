@@ -22,9 +22,9 @@ export const PRODUCTION_PARTS = Object.freeze({
   separator_panel_98: Object.freeze({ partId: 'separator_panel_98', name: 'Separatör Paneli 98 × 47 cm', type: 'separator-panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), nominalModuleWidthCm: 100 }),
 
   connector_start: Object.freeze({ itemKey: 'connector_start', name: 'Başlangıç Aparatı', type: 'connector', unit: 'adet', connectorType: 'start' }),
-  connector_single: Object.freeze({ partId: 'connector_single', name: 'Tekli Aparat', type: 'connector', unit: 'adet', connectorType: 'single' }),
-  connector_double: Object.freeze({ partId: 'connector_double', name: 'Çiftli Aparat', type: 'connector', unit: 'adet', connectorType: 'double' }),
-  connector_corner: Object.freeze({ partId: 'connector_corner', name: 'Köşe Aparatı', type: 'connector', unit: 'adet', connectorType: 'corner' }),
+  connector_single: Object.freeze({ itemKey: 'connector_single', name: 'Tekli Aparat', type: 'connector', unit: 'adet', connectorType: 'single' }),
+  connector_double: Object.freeze({ itemKey: 'connector_double', name: 'Çiftli Aparat', type: 'connector', unit: 'adet', connectorType: 'double' }),
+  connector_corner: Object.freeze({ itemKey: 'connector_corner', name: 'Köşe Aparatı', type: 'connector', unit: 'adet', connectorType: 'corner' }),
 
   door_100: Object.freeze({ partId: 'door_100', name: 'Kapı 100 cm', type: 'door', unit: 'adet', nominalModuleWidthCm: 100 }),
 
@@ -51,6 +51,54 @@ export const PRODUCTION_PARTS = Object.freeze({
 
 export function getProductionItem(itemKey) {
   return PRODUCTION_PARTS[itemKey] ?? null;
+}
+
+
+const CONNECTOR_ITEM_KEYS_BY_TYPE = Object.freeze({
+  start: 'connector_start',
+  single: 'connector_single',
+  double: 'connector_double',
+  corner: 'connector_corner',
+});
+
+export function getConnectorItemKey(connectorType) {
+  return CONNECTOR_ITEM_KEYS_BY_TYPE[connectorType] ?? null;
+}
+
+function normalizePositiveQuantity(value) {
+  const quantity = Number(value);
+  return Number.isFinite(quantity) && quantity > 0 ? quantity : null;
+}
+
+/**
+ * Canonical connector BOM resolver.
+ *
+ * Quantity/classification ownership stays with the caller (recipe or canonical
+ * relationship resolver). This layer never guesses connector quantities from
+ * renderer geometry, proximity, or transient placement snap kinds.
+ */
+export function resolveConnectorBom(requirements = []) {
+  const quantities = new Map();
+
+  for (const requirement of requirements) {
+    const itemKey = requirement?.itemKey ?? getConnectorItemKey(requirement?.connectorType);
+    const item = getProductionItem(itemKey);
+    if (!item || item.type !== 'connector') {
+      throw new TypeError(`Unknown connector Item: ${itemKey ?? requirement?.connectorType ?? 'unknown'}.`);
+    }
+
+    const quantity = normalizePositiveQuantity(requirement?.quantity);
+    if (quantity === null) {
+      throw new TypeError(`Connector quantity is required for ${itemKey}.`);
+    }
+
+    quantities.set(itemKey, (quantities.get(itemKey) ?? 0) + quantity);
+  }
+
+  return Array.from(quantities, ([itemKey, quantity]) => {
+    const item = getProductionItem(itemKey);
+    return Object.freeze({ itemKey, quantity, unit: item.unit, item });
+  });
 }
 
 // Legacy production-part lookup retained while remaining production items migrate item-by-item.

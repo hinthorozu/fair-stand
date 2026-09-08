@@ -17,7 +17,7 @@ test('2-eye showcase 100 recipe matches verified production data', () => {
     { partId: 'upright_346_5', quantity: 2 },
     { partId: 'panel_98', quantity: 5 },
     { itemKey: 'connector_start', quantity: 4 },
-    { partId: 'connector_single', quantity: 9 },
+    { itemKey: 'connector_single', quantity: 9 },
     { partId: 'showcase_2_100', quantity: 1 },
     { partId: 'glass_shelf', quantity: 2 },
   ]);
@@ -31,7 +31,7 @@ test('3-eye showcase 100 recipe matches verified production data', () => {
     { partId: 'upright_346_5', quantity: 2 },
     { partId: 'panel_98', quantity: 4 },
     { itemKey: 'connector_start', quantity: 4 },
-    { partId: 'connector_single', quantity: 7 },
+    { itemKey: 'connector_single', quantity: 7 },
     { partId: 'showcase_3_100', quantity: 1 },
     { partId: 'glass_shelf', quantity: 3 },
   ]);

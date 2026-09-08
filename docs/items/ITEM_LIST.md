@@ -17,10 +17,10 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 
 | Item key | Type / rol | Migration notu |
 |---|---|---|
-| `connector_start` | `connector` | **İlk pilot** |
-| `connector_single` | `connector` | Bekliyor |
-| `connector_double` | `connector` | Bekliyor; aktif recipe kullanımı koddan ayrıca doğrulanır |
-| `connector_corner` | `connector` | Bekliyor; aktif recipe kullanımı koddan ayrıca doğrulanır |
+| `connector_start` | `connector` | **Tamam — ilk pilot** |
+| `connector_single` | `connector` | **Tamam — 27 aktif recipe canonical `itemKey`** |
+| `connector_double` | `connector` | **Tamam — canonical Item ve aktif connector BOM çıktısı; quantity uydurulmaz** |
+| `connector_corner` | `connector` | **Tamam — canonical Item ve aktif connector BOM çıktısı; quantity uydurulmaz** |
 | `upright_346_5` | `upright` | Bekliyor |
 | `upright_99` | `upright` | Bekliyor |
 | `upright_49_5` | `upright` | Bekliyor |

@@ -1,23 +1,20 @@
 {
   "schemaVersion": 2,
-  "id": "connector-start-item-contract-cutover",
+  "id": "connector-family-item-contract-cutover",
   "kind": "bom-change",
-  "summary": "Migrate connector_start from legacy recipe partId identity to canonical Item itemKey identity, define Item structure as single vs composite, and preserve all existing recipe quantities.",
+  "summary": "Migrate connector_single, connector_double and connector_corner to canonical Item itemKey identity, preserve all verified connector_single recipe quantities, and make double/corner available as active canonical BOM outputs without guessing relationship quantities.",
   "owners": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
-    "src/rawBomDebug.js",
     "test/moduleRecipes.test.js",
-    "docs/items/contract/ITEM_CONTRACT.md",
-    "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md",
-    "docs/items/definitions/connector_start.md",
-    "docs/items/ITEM_LIST.md",
-    "docs/items/ITEM_MIGRATION_RULES.md"
+    "test/connectorBom.test.js",
+    "docs/items/definitions/connector_single.md",
+    "docs/items/definitions/connector_double.md",
+    "docs/items/definitions/connector_corner.md"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
-    "src/moduleRecipes.js",
-    "docs/items/contract/ITEM_CONTRACT.md"
+    "src/moduleRecipes.js"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -27,14 +24,14 @@
     "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "affected",
-    "ui": "affected",
-    "composition": "affected",
+    "ui": "not-applicable",
+    "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "affected",
+    "architecture": "not-applicable",
     "security": "not-applicable",
     "tests": "affected"
   },
@@ -45,17 +42,13 @@
       "scripts/verify-change-contract.mjs",
       "src/moduleContracts.js",
       "src/rawBomDebug.js",
-      "src/systemChangeContract.js",
-      "scripts/install-server.sh",
-      "src/main.js",
-      "src/projectActionSaveGuard.js",
-      "src/style.css",
-      "src/uiFeedback.js"
+      "src/systemChangeContract.js"
     ],
     "affectedTests": [
       "e2e/smoke.spec.mjs",
       "test/baseRecipes.test.js",
       "test/baseWallRecipes.test.js",
+      "test/connectorBom.test.js",
       "test/counterRecipes.test.js",
       "test/developerEntrypointDocs.test.js",
       "test/f027SceneReset.test.js",
@@ -71,38 +64,7 @@
       "test/systemChangeGate.test.js",
       "test/systemChangeGateLocalDiff.test.js",
       "test/systemDevelopmentContract.test.js",
-      "test/systemModuleCatalogDoc.test.js",
-      "e2e/f020-save-before-project-actions.spec.mjs",
-      "e2e/f023-atomic-project-delete.spec.mjs",
-      "e2e/f027-scene-reset.spec.mjs",
-      "e2e/f028-reset-features.spec.mjs",
-      "test/autosaveMainIntegration.test.js",
-      "test/bundleLoadingContract.test.js",
-      "test/colorEditorControllerMainIntegration.test.js",
-      "test/colorEditorMainIntegration.test.js",
-      "test/f028FeatureReset.test.js",
-      "test/helpGuide.test.js",
-      "test/illuminatedFoamModule.test.js",
-      "test/imageAssetDeletion.test.js",
-      "test/imageAssetLiveDelete.test.js",
-      "test/lightboxFabric.test.js",
-      "test/lightboxFabricAppearance.test.js",
-      "test/lightboxFabricLighting.test.js",
-      "test/moduleBehaviorPolicy.test.js",
-      "test/moduleStateConstructionRegistry.test.js",
-      "test/projectActionSaveGuard.test.js",
-      "test/projectAtomicDeletion.test.js",
-      "test/projectDropdownSwitchIntegration.test.js",
-      "test/projectImportFlow.test.js",
-      "test/projectUiMainIntegration.test.js",
-      "test/removedIndoorPlant2.test.js",
-      "test/selectionFeedbackMainIntegration.test.js",
-      "test/shelfLighting.test.js",
-      "test/sidebarControllerMainIntegration.test.js",
-      "test/stageFeedbackMainIntegration.test.js",
-      "test/systemImpactAnalysis.test.js",
-      "test/uiFeedback.test.js",
-      "test/uiFeedbackMainIntegration.test.js"
+      "test/systemModuleCatalogDoc.test.js"
     ],
     "affectedDocs": [
       "FRESH_REPOSITORY_REVIEW.md",
@@ -161,7 +123,9 @@
       "docs/items/definitions/BASE_150.md",
       "docs/items/definitions/BASE_200.md",
       "docs/items/definitions/DOOR_100.md",
-      "docs/items/definitions/connector_start.md",
+      "docs/items/definitions/connector_corner.md",
+      "docs/items/definitions/connector_double.md",
+      "docs/items/definitions/connector_single.md",
       "docs/items/definitions/desk_banko_100.md",
       "docs/items/definitions/desk_banko_100_L.md",
       "docs/items/definitions/desk_banko_150.md",
@@ -190,87 +154,34 @@
       "docs/items/definitions/wall_shelf_3_200.md",
       "docs/items/definitions/wall_showcase_100_2.md",
       "docs/items/definitions/wall_showcase_100_3.md",
-      "docs/items/contract/ITEM_CONTRACT.md",
-      "docs/items/ITEM_LIST.md",
-      "docs/items/ITEM_MIGRATION_RULES.md",
-      "RELEASE_HARDENING_ROADMAP.md",
-      "SYSTEM_AUDIT_CHECKLIST.md",
-      "SYSTEM_IMPACT_SWEEP.md",
-      "audit/FINDINGS.md",
-      "audit/FULL_SWEEP_STATE.md",
-      "audit/evidence/A05_MODULE_BEHAVIOR.md",
-      "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
-      "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
-      "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
-      "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
-      "audit/evidence/A10_UI_CONTROLS.md",
-      "audit/evidence/A11_FEATURE_COMPOSITION.md",
-      "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
-      "audit/evidence/A14_IMPORT_EXPORT_ARCHIVE_SCHEMA.md",
-      "audit/evidence/A15_SECURITY_VALIDATION_TRUST.md",
-      "audit/evidence/A16_ACCESSIBILITY_KEYBOARD_FOCUS.md",
-      "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
-      "audit/evidence/A18_TEST_REGRESSION_ARCHITECTURE.md",
-      "audit/evidence/A19_BROWSER_E2E_CRITICAL_FLOWS.md",
-      "audit/evidence/A20_BUILD_CI_DEPLOY.md",
-      "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
-      "audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md",
-      "audit/evidence/A24_FINAL_CLOSURE.md",
-      "audit/remediation/A00_CLOSURE.md",
-      "audit/remediation/A01_CLOSURE.md",
-      "audit/remediation/A01_F002_CLOSURE.md",
-      "audit/remediation/A02_CLOSURE.md",
-      "audit/remediation/A02_F007_CLOSURE.md",
-      "audit/remediation/A03_CLOSURE.md",
-      "audit/remediation/A21_F041_CLOSURE.md"
+      "docs/items/ITEM_LIST.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-000",
+        "F-031",
         "F-048"
       ],
       "reviewedNotAffected": [
         "F-001",
         "F-003",
         "F-014",
-        "F-002",
-        "F-004",
-        "F-007",
-        "F-009",
-        "F-012",
-        "F-015",
-        "F-016",
-        "F-019",
-        "F-023",
-        "F-024",
-        "F-025",
-        "F-028",
-        "F-029",
-        "F-030",
-        "F-031",
-        "F-034",
-        "F-037",
-        "F-038",
-        "F-039",
-        "F-040",
-        "F-041",
-        "F-042",
-        "F-046"
+        "F-030"
       ]
     },
-    "notes": "connector_start only: canonical identity moves to itemKey in all 27 recipe occurrences while every non-migrated production item stays on legacy partId. Item structure is Tekil vs Bileşik; parametrik is an orthogonal property and alt Item is a relationship role. No terminal Item class, bom.mode=terminal, or parallel item-specific BOM resolver is introduced. Raw BOM debug supports the mixed identity transition."
+    "notes": "Reviewed the full BOM/recipe dependency surface. connector_single remains recipe-owned with exact existing quantities. connector_double and connector_corner become active canonical connector BOM outputs, but this change does not invent placement-to-connector mappings or claim a project-level Final BOM generator."
   },
   "tests": {
     "targeted": [
-      "test/moduleRecipes.test.js",
-      "test/showcaseRecipes.test.js",
-      "test/separatorRecipes.test.js",
+      "test/baseRecipes.test.js",
+      "test/baseWallRecipes.test.js",
+      "test/connectorBom.test.js",
       "test/counterRecipes.test.js",
       "test/lCounter100Contract.test.js",
       "test/lCounter150Contract.test.js",
       "test/lCounter200Contract.test.js",
-      "test/baseWallRecipes.test.js",
-      "test/baseRecipes.test.js"
+      "test/moduleRecipes.test.js",
+      "test/separatorRecipes.test.js",
+      "test/showcaseRecipes.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -279,16 +190,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "The system change gate classifies BOM changes as browser-impacting. Connector BOM parity is covered deterministically by targeted unit tests; the existing smoke flow is the targeted browser regression surface."
+      "reason": "BOM is a browser-impact domain under the repository change gate, so the canonical smoke E2E remains required even though this connector cutover does not change UI/renderer behavior."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Identity routing changes for connector_start across every recipe; quantities and all other production item identities remain unchanged. A strict regression test asserts exactly 27 connector_start itemKey occurrences and forbids accidental itemKey migration of neighboring items."
+    "notes": "Connector recipe identity changes touch every verified recipe family. Quantity parity and migration isolation are regression-tested; double/corner quantities are caller-owned and never inferred."
   },
   "migration": {
-    "required": true,
-    "notes": "Runtime identity migration only: connector_start recipe entries move from partId to itemKey. No project/persistence schema or stored data migration is required because connector_start is not persisted as a project instance."
+    "required": false,
+    "notes": "No project/persistence schema migration. Runtime production identity for the three connector Items changes from legacy partId to canonical itemKey; legacy getProductionPart lookup remains compatible."
   },
-  "rollback": "Revert connector_start recipe entries to partId, remove getProductionItem/getRecipeItemKey compatibility routing and raw BOM itemKey fallback, and restore the prior Item Contract/checklist wording."
+  "rollback": "Revert connector_single/double/corner itemKey definitions, restore connector_single recipe partId entries, remove connector BOM resolver exports/tests/docs, and restore affected recipe tests."
 }

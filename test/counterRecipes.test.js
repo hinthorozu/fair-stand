@@ -20,7 +20,7 @@ test('banko 100 recipe matches verified production data', () => {
     { partId: 'panel_98', quantity: 2 },
     { partId: 'panel_48_5', quantity: 4 },
     { itemKey: 'connector_start', quantity: 6 },
-    { partId: 'connector_single', quantity: 12 },
+    { itemKey: 'connector_single', quantity: 12 },
     { partId: 'counter_top_110_60', quantity: 1 },
   ]);
 });

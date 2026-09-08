@@ -17,7 +17,7 @@ test('separator 50 recipe matches verified production data', () => {
     { partId: 'separator_panel_48_5', quantity: 1 },
     { partId: 'separator_panel_98', quantity: 3 },
     { itemKey: 'connector_start', quantity: 2 },
-    { partId: 'connector_single', quantity: 7 },
+    { itemKey: 'connector_single', quantity: 7 },
   ]);
 });
 
@@ -28,7 +28,7 @@ test('separator 100 recipe matches verified production data', () => {
     { partId: 'upright_346_5', quantity: 2 },
     { partId: 'separator_panel_98', quantity: 7 },
     { itemKey: 'connector_start', quantity: 2 },
-    { partId: 'connector_single', quantity: 13 },
+    { itemKey: 'connector_single', quantity: 13 },
   ]);
 });
 

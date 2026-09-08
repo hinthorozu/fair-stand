@@ -1,11 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {
-  getProductionItem,
-  getProductionPart,
-  listProductionParts,
-} from '../src/productionParts.js';
+import { getProductionItem, getProductionPart, listProductionParts } from '../src/productionParts.js';
 import {
   getExpandedModuleRecipe,
   getExpandedStraightWallRecipe,
@@ -22,7 +18,8 @@ test('production part catalog contains the verified connector names', () => {
   assert.equal(getProductionPart('connector_corner').name, 'Köşe Aparatı');
 });
 
-test('connector_start is a canonical single Item', () => {
+
+test('connector_start remains a canonical single Item', () => {
   const item = getProductionItem('connector_start');
 
   assert.equal(item.itemKey, 'connector_start');
@@ -32,18 +29,40 @@ test('connector_start is a canonical single Item', () => {
   assert.equal(item.unit, 'adet');
 });
 
-test('connector_start recipe identity is cut over to itemKey while legacy parts keep partId', () => {
+
+test('all four connector production definitions use canonical itemKey identity', () => {
+  const expectedTypes = {
+    connector_start: 'start',
+    connector_single: 'single',
+    connector_double: 'double',
+    connector_corner: 'corner',
+  };
+
+  for (const [itemKey, connectorType] of Object.entries(expectedTypes)) {
+    const item = getProductionItem(itemKey);
+    assert.equal(item.itemKey, itemKey);
+    assert.equal(item.partId, undefined);
+    assert.equal(item.type, 'connector');
+    assert.equal(item.connectorType, connectorType);
+    assert.equal(item.unit, 'adet');
+  }
+});
+
+test('connector_start and connector_single recipe identities use itemKey while legacy parts keep partId', () => {
   const recipe = getStraightWallRecipe(200);
-  const connector = recipe.items.find((item) => getRecipeItemKey(item) === 'connector_start');
+  const start = recipe.items.find((item) => getRecipeItemKey(item) === 'connector_start');
+  const single = recipe.items.find((item) => getRecipeItemKey(item) === 'connector_single');
   const profile = recipe.items.find((item) => getRecipeItemKey(item) === 'profile_190');
 
-  assert.deepEqual(connector, { itemKey: 'connector_start', quantity: 2 });
-  assert.equal(connector.partId, undefined);
+  assert.deepEqual(start, { itemKey: 'connector_start', quantity: 2 });
+  assert.deepEqual(single, { itemKey: 'connector_single', quantity: 13 });
+  assert.equal(start.partId, undefined);
+  assert.equal(single.partId, undefined);
   assert.equal(profile.partId, 'profile_190');
   assert.equal(profile.itemKey, undefined);
 });
 
-test('item-by-item migration is isolated to connector_start across every recipe', () => {
+test('item-by-item migration is isolated to connector_start and connector_single across every recipe', () => {
   const recipes = [
     ...listStraightWallRecipes(),
     ...[
@@ -73,13 +92,16 @@ test('item-by-item migration is isolated to connector_start across every recipe'
     ].map(([type, width, options]) => getModuleRecipe(type, width, options ?? {})),
   ];
 
-  let migratedOccurrences = 0;
+  let startOccurrences = 0;
+  let singleOccurrences = 0;
   for (const recipe of recipes) {
     assert.ok(recipe);
     for (const item of recipe.items) {
-      if (getRecipeItemKey(item) === 'connector_start') {
-        migratedOccurrences += 1;
-        assert.equal(item.itemKey, 'connector_start');
+      const key = getRecipeItemKey(item);
+      if (key === 'connector_start' || key === 'connector_single') {
+        if (key === 'connector_start') startOccurrences += 1;
+        if (key === 'connector_single') singleOccurrences += 1;
+        assert.equal(item.itemKey, key);
         assert.equal(item.partId, undefined);
       } else {
         assert.equal(item.itemKey, undefined, `${recipe.recipeId}: unexpected itemKey migration for ${item.partId}`);
@@ -88,7 +110,8 @@ test('item-by-item migration is isolated to connector_start across every recipe'
     }
   }
 
-  assert.equal(migratedOccurrences, 27);
+  assert.equal(startOccurrences, 27);
+  assert.equal(singleOccurrences, 27);
 });
 
 test('expanded recipes resolve connector_start metadata through its canonical itemKey', () => {
@@ -130,7 +153,7 @@ test('50 cm straight wall recipe matches the verified production recipe', () => 
     { partId: 'upright_346_5', quantity: 2 },
     { partId: 'panel_48_5', quantity: 7 },
     { itemKey: 'connector_start', quantity: 2 },
-    { partId: 'connector_single', quantity: 13 },
+    { itemKey: 'connector_single', quantity: 13 },
   ]);
   assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_42_5');
 });
@@ -162,7 +185,7 @@ test('100 cm door recipe matches verified production data', () => {
     { partId: 'upright_346_5', quantity: 2 },
     { partId: 'panel_98', quantity: 3 },
     { itemKey: 'connector_start', quantity: 2 },
-    { partId: 'connector_single', quantity: 5 },
+    { itemKey: 'connector_single', quantity: 5 },
     { partId: 'door_100', quantity: 1 },
   ]);
   assert.equal(recipe.variants.innerCornerPanelPartId, 'panel_corner_92');
@@ -259,4 +282,27 @@ test('expanded shelf recipe resolves shelf and leg production parts', () => {
   const expanded = getExpandedModuleRecipe('shelf', 150, { shelfCount: 3 });
   assert.equal(expanded.items.at(-2).part.name, 'Raf 150 cm');
   assert.equal(expanded.items.at(-1).part.name, 'Raf Ayağı');
+});
+
+test('double and corner connectors are BOM-capable Items and are not baked into fixed module recipes', () => {
+  const recipes = [
+    ...listStraightWallRecipes(),
+    getModuleRecipe('door', 100),
+    ...[100, 150, 200].flatMap((width) => [
+      getModuleRecipe('shelf', width, { shelfCount: 2 }),
+      getModuleRecipe('shelf', width, { shelfCount: 3 }),
+      getModuleRecipe('counter', width, { shape: 'L' }),
+      getModuleRecipe('counter', width),
+      getModuleRecipe('base-wall', width),
+      getModuleRecipe('base', width),
+    ]),
+    getModuleRecipe('showcase-2', 100),
+    getModuleRecipe('showcase-3', 100),
+    getModuleRecipe('separator', 50),
+    getModuleRecipe('separator', 100),
+  ];
+
+  const keys = recipes.flatMap((recipe) => recipe.items.map((item) => item.itemKey ?? item.partId));
+  assert.equal(keys.includes('connector_double'), false);
+  assert.equal(keys.includes('connector_corner'), false);
 });
