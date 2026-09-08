@@ -22,8 +22,8 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `connector_double` | `connector` | **Tamam — canonical Item ve aktif connector BOM çıktısı; quantity uydurulmaz** |
 | `connector_corner` | `connector` | **Tamam — canonical Item ve aktif connector BOM çıktısı; quantity uydurulmaz** |
 | `upright_346_5` | `upright` | **Tamam — canonical `itemKey`; 18 aktif recipe içinde ×2** |
-| `upright_99` | `upright` | Bekliyor |
-| `upright_49_5` | `upright` | Bekliyor |
+| `upright_99` | `upright` | **Tamam — canonical `itemKey`; 3 düz bankoda ×4, 3 L bankoda ×5** |
+| `upright_49_5` | `upright` | **Tamam — canonical `itemKey`; 3 base-wall içinde ×2, 3 base içinde ×4** |
 | `profile_41_5` | `profile` | Bekliyor |
 | `profile_91` | `profile` | Bekliyor |
 | `profile_140_5` | `profile` | Bekliyor |
