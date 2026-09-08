@@ -1,29 +1,27 @@
 # connector_start — Item Contract Migration
 
-Bu belge `connector_start` için migration öncesi kod haritasını (`docs/items/current-system/connector_start.md`), Item Contract mapping'ini ve uygulanan runtime cutover durumunu birlikte kaydeder.
+Bu belge `docs/items/current-system/connector_start.md` içindeki migration öncesi kod haritasını `docs/items/contract/ITEM_CONTRACT.md` ve `ITEM_CONTRACT_CHECKLIST.md` ile eşler ve uygulanmış canonical cutover durumunu kaydeder.
 
-Bu migration yeni connector davranışı icat etmez. Mevcut `connector_start` miktarları, adı, `type`, `unit` ve `connectorType` değerleri korunmuştur.
+Bu belge yeni behavior, relationship, quantity veya renderer kuralı icat etmez. Yalnız doğrulanmış mevcut runtime ile uygulanmış Item Contract migrationını kayıt altına alır.
 
-## 1. Canonical kimlik
+## 1. Kimlik ve sınıflandırma
 
-| Alan | Güncel runtime değeri |
+| Alan | Durum / değer |
 |---|---|
 | `itemKey` | `connector_start` |
 | Ad | `Başlangıç Aparatı` |
 | `type` | `connector` |
 | Item yapısı | Tekil Item |
+| Parametrik | Hayır |
 | `unit` | `adet` |
-| Metadata | `connectorType = start` |
-| Project instance | Uygulanmıyor |
-| Renderer / placement | Uygulanmıyor |
+| Item metadata | `connectorType = start` |
+| Project instance `id` | Uygulanmıyor |
+| Factory / oluşturulma noktası | Uygulanmıyor; bağımsız project instance oluşturulmuyor |
+| Catalog bağlantısı | Doğrudan catalog Item değildir; parent module recipe içinde production Item olarak kullanılır |
 
-Migration öncesinde aynı stabil kimlik `partId = connector_start` olarak kullanılıyordu. Cutover ile `connector_start` için canonical runtime kimliği `itemKey` oldu; yeni ikinci bir ürün kimliği üretilmedi.
+Migration öncesi gerçek production kimliği `partId = connector_start` idi. Migration ile aynı ürün canonical `itemKey = connector_start` kimliğine taşındı; paralel ikinci ürün kimliği oluşturulmadı.
 
-`connector_single`, `connector_double`, `connector_corner` ve diğer production parçaları bu migration kapsamında değildir ve mevcut `partId` yolunda kalır.
-
-## 2. Canonical Item definition
-
-Canonical Item kaydı `src/productionParts.js` içinde tutulur:
+Canonical runtime tanımı `src/productionParts.js` içindedir:
 
 ```js
 connector_start: Object.freeze({
@@ -35,72 +33,116 @@ connector_start: Object.freeze({
 })
 ```
 
-Ayrı project-instance factory oluşturulmadı; çünkü mevcut sistemde `connector_start` scene/project instance değildir.
+## 2. State ve veri modeli
 
-## 3. Item/BOM rolü
+`connector_start` bağımsız proje Item instance'ı değildir.
 
-`connector_start` başka Item bileşimi içermez; bu nedenle **Tekil Item**dır. `wall_200`, vitrin, banko, baza gibi parent/bileşik Item reçetelerinde kullanıldığında o parent'ın **alt Item'ı** rolündedir.
+Bu nedenle checklist karşılıkları:
 
-Miktarın source-of-truth'u bugün parent `moduleRecipes.js` reçetesidir. `unit = adet` production metadata'sından gelir. Bu migration ayrı bir `terminal` sınıfı, `bom.mode = terminal` veya paralel ikinci BOM resolver oluşturmaz.
+- Instance state: **uygulanmıyor**.
+- Default project state: **uygulanmıyor**.
+- Configurable project alanları: **uygulanmıyor**.
+- Project instance `id`: **uygulanmıyor**.
+- Child/alt state: **uygulanmıyor**.
+- Persistent state: **uygulanmıyor**.
+- Save/load migration: **uygulanmıyor**; connector ayrı state olarak kaydedilmez.
 
-## 4. Recipe cutover
+Production metadata `src/productionParts.js`; miktar state'i ise parent recipe içinde `src/moduleRecipes.js` tarafından tutulur.
 
-Migration öncesi:
+## 3. Behavior
 
-```js
-{ partId: 'connector_start', quantity: N }
-```
+`connector_start` için bağımsız editor behavior instance'ı bulunmaz.
 
-Migration sonrası:
+Aşağıdaki behavior alanları mevcut sistemde connector production Item seviyesinde **uygulanmıyor**:
 
-```js
-{ itemKey: 'connector_start', quantity: N }
-```
+- placement,
+- move/drag,
+- rotation / rotation step / default rotation,
+- collision,
+- magnetic veya boundary snap,
+- side insert,
+- overlap,
+- host capacity,
+- ghost / preview.
 
-`src/moduleRecipes.js` içindeki 27 `connector_start` recipe satırının tamamı `itemKey` kullanır.
+`type = connector` production sınıflandırmasıdır; mevcut runtime'da bu Item için bağımsız scene behavior contract'ı oluşturmaz. Migration bu davranışları icat etmez.
 
-Diğer henüz migrate edilmemiş production parçaları aynı recipe içinde `partId` kullanmaya devam eder. Mixed migration resolver'ı:
+## 4. Interaction
 
-```js
-getRecipeItemKey(item)
-```
+`connector_start` sahnede seçilebilir/taşınabilir bağımsız bir project instance değildir.
 
-şu sırayı kullanır:
+Bu nedenle aşağıdakiler **uygulanmıyor**:
+
+- sol click selection,
+- drag,
+- sağ click/context menu,
+- keyboard interaction,
+- duplicate,
+- delete.
+
+Raw BOM debug UI bu Item'ı recipe çıktısında metin olarak gösterebilir; bu durum Item interaction kimliği anlamına gelmez.
+
+## 5. Renderer
+
+Mevcut sistemde `connector_start` için bağımsız renderer/mesh/asset identity yoktur.
+
+Checklist karşılıkları:
+
+- Renderer tipi: **uygulanmıyor**.
+- Asset bağlantısı: **uygulanmıyor**.
+- Renk/image/özel görsel modu: **uygulanmıyor**.
+- Ghost renderer: **uygulanmıyor**.
+
+Renderer production BOM source-of-truth değildir. Migration connector miktarını renderer geometrisinden türetmez.
+
+## 6. Item ilişkileri
+
+`connector_start` başka Item'lardan oluşmaz; kendisi Tekil Item'dır.
+
+Mevcut doğrulanmış sistemde:
+
+- child Item listesi: **yok**,
+- parent-child project relationship: **yok**,
+- persistent neighbor/connection relationship: **yok**,
+- host/overlay relationship: **yok**,
+- continuous chain/reflow: **yok**,
+- relationship resolver: **yok / uygulanmıyor**,
+- relationship-derived behavior: **yok**,
+- relationship-derived BOM: **yok**.
+
+`src/modulePlacement.js` içindeki geometrik `snapKind` değerleri ile `connector_start` production quantity arasında canonical mapping yoktur. Migration böyle bir mapping uydurmaz.
+
+## 7. BOM / production
+
+`connector_start` aktif production/BOM Item'ıdır.
+
+Canonical metadata sahibi:
 
 ```text
-item.itemKey
-→ yoksa item.partId
+src/productionParts.js
 ```
 
-Bu, `ITEM_MIGRATION_RULES.md` içindeki Item-by-Item geçiş kuralını uygular; diğer Item'ları topluca migrate etmez.
-
-## 5. Runtime resolution zinciri
-
-Güncel zincir:
+Canonical parent quantity sahibi:
 
 ```text
-module type + nominal width + options
-→ getModuleRecipe(...)
-→ recipe item { itemKey: 'connector_start', quantity: N }
-→ expandRecipe(...)
-→ getRecipeItemKey(...)
+src/moduleRecipes.js
+```
+
+Aktif recipe yolu:
+
+```text
+parent module recipe
+→ { itemKey: 'connector_start', quantity: N }
+→ expandRecipe()
 → getProductionItem('connector_start')
-→ production metadata (`unit = adet`)
+→ quantity + unit=adet + production metadata
 ```
 
-Legacy production lookup:
+Migration sonrası `connector_start` **27/27 verified recipe** içinde canonical `itemKey` ile kullanılır; `partId` recipe occurrence kalmamıştır.
 
-```js
-getProductionPart(partId)
-```
+Doğrulanmış miktar dağılımı:
 
-paylaşılan eski production parçaları migrate edilirken compatibility için korunmuştur. `connector_start`ın kendi definition kaydında artık `partId` alanı yoktur.
-
-## 6. Mevcut miktarlar korunmuştur
-
-`connector_start` hâlâ 27 parent recipe'de aynı sabit miktarlarla kullanılır:
-
-| Recipe ailesi | Recipe sayısı | Miktar |
+| Recipe ailesi | Recipe sayısı | Quantity |
 |---|---:|---:|
 | straight wall 50/100/150/200 | 4 | 2 |
 | door 100 | 1 | 2 |
@@ -112,112 +154,85 @@ paylaşılan eski production parçaları migrate edilirken compatibility için k
 | base-wall 100/150/200 | 3 | 6 |
 | base 100/150/200 | 3 | 8 |
 
-Toplam: 27 recipe.
+Toplam: **27 recipe**.
 
-Miktarlar project adjacency/corner state'inden türetilmiyor. Bu migration ilişki-temelli connector hesabı eklemez.
+BOM checklist karşılıkları:
 
-## 7. State / behavior / interaction / renderer / persistence
+- BOM var mı?: **Evet**.
+- BOM policy: parent module tarafında `mode = recipe`.
+- Recipe kaynağı: `src/moduleRecipes.js`.
+- Production lookup: `getProductionItem()` / `src/productionParts.js`.
+- Child Item listesi: **yok**; Tekil Item.
+- Quantity: parent recipe tarafından açıkça verilir.
+- Unit: `adet`.
+- Recursive BOM: connector'ın kendisi için **uygulanmıyor**; nihai BOM kalemidir.
+- Circular dependency: **uygulanmıyor**.
+- Variant BOM: **yok**.
+- State/ölçü/parametre kaynaklı BOM: **yok**.
+- Relationship-derived BOM: **yok**.
+- Final project BOM bağlantısı: project-level canonical Final BOM resolver ayrı sistem işi olarak değerlendirilir; bu Item migrationı onu icat etmez.
 
-Aşağıdaki alanlar `connector_start` için uygulanmıyor ve migration ile eklenmedi:
+## 8. Maliyet / fiyatlandırma ayrımı
 
-- project instance `id`,
-- mutable Item state,
-- save/load edilen connector instance,
-- placement,
-- move / rotation,
-- collision / snap,
-- selection / drag / context menu,
-- renderer / mesh / GLB,
-- ghost / preview,
-- asset / color / image.
+`connector_start` tanımı ihtiyaç/miktar/birim bilgisini üretim tarafında taşır; birim fiyat veya satış fiyatı Item recipe içine gömülmez.
 
-`type = connector` production metadata'sıdır; `src/moduleBehavior.js` içinde connector behavior family oluşturulmadı.
+- BOM yalnız Item + quantity + unit üretir: **Evet**.
+- Pricing canonical production recipe'nin parçası mı?: **Hayır**.
+- Birim fiyat değişikliği recipe quantity'yi değiştirmeli mi?: **Hayır**.
 
-## 8. Relationship durumu
+Bu migration pricing sistemi eklemez.
 
-`src/modulePlacement.js` içindeki module-level `end-to-end`, `corner`, `tee`, `fixture-side`, `corner-face` ilişkileri ile `connector_start` arasında bugün canonical BOM mapping yoktur.
+## 9. Uygulanan cutover
 
-Dolayısıyla bu migration sonrasında da:
+- `src/productionParts.js`: `partId` kaldırıldı; canonical `itemKey = connector_start` oldu.
+- `src/moduleRecipes.js`: 27/27 recipe kullanımı `{ itemKey: 'connector_start', quantity: N }` oldu.
+- `getProductionItem()` canonical lookup olarak kullanılır.
+- `getProductionPart()` incremental migration süresince legacy compatibility wrapper olarak korunur.
+- Existing recipe quantity'leri değiştirilmedi.
+- State, persistence, behavior, interaction ve renderer'a yeni connector instance mantığı eklenmedi.
+- Placement geometry'den connector quantity tahmin edilmedi.
 
-```text
-connector_start quantity = parent recipe sabiti
-```
+## 10. Test ve kalite
 
-olarak kalır.
+Mevcut regression sözleşmesi şunları doğrular:
 
-Relationship-derived connector miktarı ayrı bir ürün/mimari kararı gerektirir; bu migration kapsamında tahmin edilmemiştir.
+- `connector_start.itemKey === 'connector_start'`.
+- `partId` canonical production tanımında yoktur.
+- `type === 'connector'`.
+- `connectorType === 'start'`.
+- `unit === 'adet'`.
+- 27 recipe'nin tamamında identity `itemKey`dir.
+- Migration sonrası recipe quantity parity korunur.
+- Expanded recipe metadata'yı canonical `itemKey` üzerinden çözer.
+- Connector family mapping `start → connector_start` olarak çözülür.
 
-## 9. Regression / parity
+State/behavior/interaction/persistence testleri connector project instance'ı olmadığı için **uygulanmıyor**.
 
-Hedefli test seti:
+Browser tarafında Raw BOM mevcut expanded recipe yolunu tüketmeye devam eder; migration renderer veya UI quantity kuralı oluşturmaz.
 
-```text
-test/moduleRecipes.test.js
-test/showcaseRecipes.test.js
-test/separatorRecipes.test.js
-test/counterRecipes.test.js
-test/lCounter100Contract.test.js
-test/lCounter150Contract.test.js
-test/lCounter200Contract.test.js
-test/baseWallRecipes.test.js
-test/baseRecipes.test.js
-```
+## 11. Açık problemler / sınırlar
 
-Migration sonrası sonuç:
+- `connector_start` miktarı mevcut sistemde parent recipe içinde sabittir; gerçek scene adjacency'den türetilmez.
+- Placement snap ilişkisi ile production connector quantity arasında canonical relationship mapping yoktur.
+- Project-level canonical Final BOM sistemi bu Item definition'ın kapsamı değildir.
+- `getProductionPart()` compatibility yolu, diğer production Item migrationları tamamlanana kadar bilinçli olarak korunmaktadır; zero legacy usage doğrulanmadan silinmez.
 
-```text
-53 pass
-0 fail
-```
+Bunlar migration sırasında tahminle kapatılmaz.
 
-Yeni regression kontrolleri özellikle şunları doğrular:
-
-1. `connector_start.itemKey === 'connector_start'`.
-2. Definition üzerinde legacy `partId` bulunmaması.
-3. `connector_start` recipe kimliğinin `itemKey` olması.
-4. Aynı recipe'deki migrate edilmemiş parçaların `partId` kullanmaya devam etmesi.
-5. 27 recipe kullanımının tamamında yalnız `connector_start`ın migrate edilmiş olması.
-6. Expanded recipe'nin canonical production metadata'yı `itemKey` üzerinden çözmesi.
-7. Raw BOM debug consumer'ın mixed `itemKey` / `partId` geçişini okuyabilmesi.
-
-Full `node --test` sonucu:
+## Sonuç
 
 ```text
-501 test
-496 pass
-5 fail
+structure = Tekil Item
+parametric = hayır
+itemKey = connector_start
+type = connector
+connectorType = start
+unit = adet
+recipe identity cutover = 27/27
+legacy recipe partId occurrence = 0
+quantity ownership = src/moduleRecipes.js
+production metadata ownership = src/productionParts.js
+project instance/state/persistence = uygulanmıyor
+behavior/interaction/renderer identity = uygulanmıyor
+relationship-derived quantity = yok; tahmin edilmez
 ```
-
-Fail olan testler migration öncesi baseline ile aynı beş testtir:
-
-- `test/globalSilhouetteGhost.test.js`
-- `test/projectDropdownSwitchIntegration.test.js`
-- `test/selectedModuleRotationCursor.test.js`
-- `test/selectionFeedbackMainIntegration.test.js`
-- `test/systemChangeGateCiContract.test.js`
-
-Bu değişiklik yeni bir full-suite fail eklememiştir.
-
-## 10. Migration durumu
-
-```text
-1. Current runtime code map      → TAMAM
-2. ITEM_CONTRACT mapping         → TAMAM
-3. Yeni Item implementasyonu     → TAMAM
-4. Parity doğrulaması            → TAMAM (53/53 targeted)
-5. Runtime cutover               → TAMAM (`connector_start` recipe identity = itemKey)
-6. Eski Item-specific yol sökümü → TAMAM (`connector_start` definition/recipe partId yolu kaldırıldı)
-7. Regression doğrulaması        → TARGETED TAMAM; full suite mevcut 5 baseline fail ile aynı durumda
-```
-
-## 11. Açık kalan sistem seviyesi doğrulamalar
-
-Bu çalışma ağacında dependency kurulumu tamamlanamadı. `npm run build` `vite: not found` ile; targeted `npm run e2e -- e2e/smoke.spec.mjs` ise Node `@playwright/test` CLI mevcut olmadığı için çalışmadı. Sonuç doğrulanmadan build veya browser E2E'nin başarılı olduğu varsayılmaz.
-
-Change contract lokal git baseline'a karşı çalıştırıldı:
-
-```bash
-CHANGE_GATE_BASE=HEAD node scripts/verify-change-contract.mjs
-```
-
-Sonuç: `connector-start-item-contract-cutover` kabul edildi; BOM/UI/test domainleri review edildi, targeted E2E zorunluluğu `e2e/smoke.spec.mjs` olarak kaydedildi.
