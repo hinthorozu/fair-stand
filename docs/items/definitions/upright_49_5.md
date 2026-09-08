@@ -21,7 +21,7 @@ Migration öncesi production kimliği `partId = upright_49_5`; migration sonras�
 
 ## 2. Composition / parent recipe kullanımı
 
-`upright_49_5` başka Item'lardan oluşmaz; kendisi **Tekil Item**'dır.
+`upright_49_5` başka Item'lardan oluşmaz; kendisi **Tekil Item**dır.
 
 Mevcut sistemde 6 recipe'de kullanılır:
 
