@@ -31,7 +31,7 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `panel_48_5` | `panel` | Bekliyor |
 | `panel_98` | `panel` | Bekliyor |
 | `panel_147_5` | `panel` | Bekliyor |
-| `panel_197` | `panel` | Bekliyor |
+| `panel_197` | `panel` | **Tamam — canonical `itemKey`; 7 aktif 200 cm recipe içinde doğrulanmış miktarlar korunur** |
 | `panel_corner_42_5` | `panel` | Bekliyor |
 | `panel_corner_92` | `panel` | Bekliyor |
 | `panel_corner_142_5` | `panel` | Bekliyor |

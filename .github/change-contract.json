@@ -1,23 +1,14 @@
 {
   "schemaVersion": 2,
-  "id": "connector-upright-item-contract-batch",
+  "id": "panel-197-item-contract-cutover",
   "kind": "bom-change",
-  "summary": "Migrate connector_start, connector_single, connector_double, connector_corner and the three verified upright production Items to canonical Item itemKey identity while preserving verified recipe quantities, units and production metadata; double/corner connector quantities remain explicit caller-owned BOM inputs.",
+  "summary": "Migrate panel_197 from legacy partId identity to canonical Item itemKey identity while preserving verified production metadata and all seven parent-recipe quantities.",
   "owners": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
-    "src/rawBomDebug.js",
-    "test/connectorBom.test.js",
+    "test/panel197ItemContract.test.js",
     "test/moduleRecipes.test.js",
-    "test/upright3465ItemContract.test.js",
-    "test/upright99And495ItemContract.test.js",
-    "docs/items/definitions/connector_start.md",
-    "docs/items/definitions/connector_single.md",
-    "docs/items/definitions/connector_double.md",
-    "docs/items/definitions/connector_corner.md",
-    "docs/items/definitions/upright_346_5.md",
-    "docs/items/definitions/upright_99.md",
-    "docs/items/definitions/upright_49_5.md"
+    "docs/items/definitions/panel_197.md"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
@@ -31,7 +22,7 @@
     "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "affected",
-    "ui": "affected",
+    "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
@@ -73,7 +64,8 @@
       "test/systemDevelopmentContract.test.js",
       "test/systemModuleCatalogDoc.test.js",
       "test/upright3465ItemContract.test.js",
-      "test/upright99And495ItemContract.test.js"
+      "test/upright99And495ItemContract.test.js",
+      "test/panel197ItemContract.test.js"
     ],
     "affectedDocs": [
       "FRESH_REPOSITORY_REVIEW.md",
@@ -170,37 +162,32 @@
       "RELEASE_HARDENING_ROADMAP.md",
       "audit/FINDINGS.md",
       "audit/evidence/A10_UI_CONTROLS.md",
-      "docs/items/definitions/connector_start.md"
+      "docs/items/definitions/connector_start.md",
+      "docs/items/definitions/panel_197.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-031",
-        "F-048",
-        "F-025"
+        "F-048"
       ],
       "reviewedNotAffected": [
         "F-001",
         "F-003",
         "F-014",
-        "F-030"
+        "F-025",
+        "F-030",
+        "F-031"
       ]
     },
-    "notes": "Reviewed the combined Version2-to-item-contract-start Item Contract batch. connector_start/single and all three upright Items move to canonical itemKey with verified recipe quantity parity. connector_double/corner are active canonical BOM-capable Items with explicit caller-owned quantities; no placement/snap-to-connector mapping is invented. rawBomDebug keeps compatibility display fallback, so the full PR has BOM + UI impact while renderer/state/persistence behavior remains unchanged. F-025 is affected because rawBomDebug.js is touched, but the finding remains OPEN: this batch does not remove the production debug UI or claim closure."
+    "notes": "Reviewed the full panel_197 production/BOM dependency surface against its current-system map and the Item Contract. panel_197 moves to canonical itemKey in exactly seven verified 200 cm parent recipes with quantity parity. Production dimensions/role metadata remain unchanged. Project state, persistence, behavior and procedural renderer geometry are intentionally unchanged because no canonical production-to-renderer mapping is verified. panel_corner_192 remains a separate legacy Item and no corner replacement rule is invented."
   },
   "tests": {
     "targeted": [
-      "test/connectorBom.test.js",
-      "test/upright3465ItemContract.test.js",
-      "test/upright99And495ItemContract.test.js",
+      "test/panel197ItemContract.test.js",
       "test/moduleRecipes.test.js",
-      "test/showcaseRecipes.test.js",
-      "test/separatorRecipes.test.js",
-      "test/counterRecipes.test.js",
-      "test/lCounter100Contract.test.js",
-      "test/lCounter150Contract.test.js",
-      "test/lCounter200Contract.test.js",
       "test/baseWallRecipes.test.js",
-      "test/baseRecipes.test.js"
+      "test/baseRecipes.test.js",
+      "test/counterRecipes.test.js",
+      "test/lCounter200Contract.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -209,16 +196,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "The combined batch affects BOM and rawBomDebug UI-facing output; canonical smoke E2E is required by the repository browser-impact policy."
+      "reason": "BOM is a browser-impact domain under the repository change gate; smoke E2E remains required even though panel renderer behavior is unchanged."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "This batch changes production identity across all verified connector recipe consumers and the three upright families. Existing quantities are preserved and regression-tested; compatibility fallback remains for not-yet-migrated Items, and double/corner quantities are never inferred."
+    "notes": "panel_197 identity changes in seven verified 200 cm recipes. Quantity parity, canonical metadata resolution and migration isolation are regression-tested; neighboring panel Items remain legacy and renderer behavior is unchanged."
   },
   "migration": {
     "required": false,
-    "notes": "No project/persistence schema migration. Runtime production identity for connector_start/single/double/corner and upright_346_5/upright_99/upright_49_5 is canonical itemKey; legacy getProductionPart and recipe partId fallback remain temporarily for not-yet-migrated Items."
+    "notes": "No project/persistence schema migration. Runtime production identity for panel_197 changes from legacy partId to canonical itemKey; legacy getProductionPart and recipe partId fallback remain temporarily for not-yet-migrated Items."
   },
-  "rollback": "Revert the connector/upright itemKey production definitions and recipe entries, remove connector BOM resolver/tests and Item definition docs, restore rawBomDebug legacy fallback, and restore affected recipe regression expectations."
+  "rollback": "Restore panel_197 partId in productionParts.js and its seven recipe entries, remove the panel_197 migration definition/regression test, and restore migration-isolation expectations and ITEM_LIST status."
 }

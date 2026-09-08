@@ -53,14 +53,17 @@ test('migrated recipe identities use itemKey while legacy parts keep partId', ()
   const start = recipe.items.find((item) => getRecipeItemKey(item) === 'connector_start');
   const single = recipe.items.find((item) => getRecipeItemKey(item) === 'connector_single');
   const upright = recipe.items.find((item) => getRecipeItemKey(item) === 'upright_346_5');
+  const panel = recipe.items.find((item) => getRecipeItemKey(item) === 'panel_197');
   const profile = recipe.items.find((item) => getRecipeItemKey(item) === 'profile_190');
 
   assert.deepEqual(start, { itemKey: 'connector_start', quantity: 2 });
   assert.deepEqual(single, { itemKey: 'connector_single', quantity: 13 });
   assert.deepEqual(upright, { itemKey: 'upright_346_5', quantity: 2 });
+  assert.deepEqual(panel, { itemKey: 'panel_197', quantity: 7 });
   assert.equal(start.partId, undefined);
   assert.equal(single.partId, undefined);
   assert.equal(upright.partId, undefined);
+  assert.equal(panel.partId, undefined);
   assert.equal(profile.partId, 'profile_190');
   assert.equal(profile.itemKey, undefined);
 });
@@ -98,14 +101,16 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   let startOccurrences = 0;
   let singleOccurrences = 0;
   const uprightOccurrences = { upright_346_5: 0, upright_99: 0, upright_49_5: 0 };
+  let panel197Occurrences = 0;
   for (const recipe of recipes) {
     assert.ok(recipe);
     for (const item of recipe.items) {
       const key = getRecipeItemKey(item);
-      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences) {
+      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197') {
         if (key === 'connector_start') startOccurrences += 1;
         if (key === 'connector_single') singleOccurrences += 1;
         if (key in uprightOccurrences) uprightOccurrences[key] += 1;
+        if (key === 'panel_197') panel197Occurrences += 1;
         assert.equal(item.itemKey, key);
         assert.equal(item.partId, undefined);
       } else {
@@ -118,6 +123,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   assert.equal(startOccurrences, 27);
   assert.equal(singleOccurrences, 27);
   assert.deepEqual(uprightOccurrences, { upright_346_5: 18, upright_99: 6, upright_49_5: 6 });
+  assert.equal(panel197Occurrences, 7);
 });
 
 test('expanded recipes resolve connector_start metadata through its canonical itemKey', () => {
