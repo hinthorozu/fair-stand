@@ -166,12 +166,17 @@
       "docs/items/definitions/wall_showcase_100_2.md",
       "docs/items/definitions/wall_showcase_100_3.md",
       "docs/items/definitions/upright_99.md",
-      "docs/items/definitions/upright_49_5.md"
+      "docs/items/definitions/upright_49_5.md",
+      "RELEASE_HARDENING_ROADMAP.md",
+      "audit/FINDINGS.md",
+      "audit/evidence/A10_UI_CONTROLS.md",
+      "docs/items/definitions/connector_start.md"
     ],
     "relatedFindings": {
       "affected": [
         "F-031",
-        "F-048"
+        "F-048",
+        "F-025"
       ],
       "reviewedNotAffected": [
         "F-001",
@@ -180,7 +185,7 @@
         "F-030"
       ]
     },
-    "notes": "Reviewed the combined Version2-to-item-contract-start Item Contract batch. connector_start/single and all three upright Items move to canonical itemKey with verified recipe quantity parity. connector_double/corner are active canonical BOM-capable Items with explicit caller-owned quantities; no placement/snap-to-connector mapping is invented. rawBomDebug keeps compatibility display fallback, so the full PR has BOM + UI impact while renderer/state/persistence behavior remains unchanged."
+    "notes": "Reviewed the combined Version2-to-item-contract-start Item Contract batch. connector_start/single and all three upright Items move to canonical itemKey with verified recipe quantity parity. connector_double/corner are active canonical BOM-capable Items with explicit caller-owned quantities; no placement/snap-to-connector mapping is invented. rawBomDebug keeps compatibility display fallback, so the full PR has BOM + UI impact while renderer/state/persistence behavior remains unchanged. F-025 is affected because rawBomDebug.js is touched, but the finding remains OPEN: this batch does not remove the production debug UI or claim closure."
   },
   "tests": {
     "targeted": [
