@@ -1,25 +1,23 @@
 # panel_corner_142_5 — Item Contract Definition
 
-## 1. Canonical kimlik ve intrinsic properties
-`PRODUCTION_PARTS.panel_corner_142_5`: `itemKey`, `type=panel`, `unit=adet`, `142.5 × 47 × 0.8 cm`, `panelRole=inner-corner`, nominal `150`; Tekil Item. Doğrulanmış material/product defaultColor yoktur.
+## Canonical Item
 
-## 2. Canonical creation / state
-`getProductionItem('panel_corner_142_5')`; ayrı leaf factory/state yoktur.
+- `itemKey`: `panel_corner_142_5`
+- `type`: `panel`
+- `unit`: `adet`
+- dimensions: `142.5 × 47 × 0.8 cm`
+- `material`: `sunta`
+- `panelRole`: `inner-corner`
+- `nominalModuleWidthCm`: `150`
 
-## 3. Behavior / capability ownership
-Independent leaf behavior/context-menu lifecycle'ı yoktur; parent behavior/relationship layer geçerlidir.
+## Ownership / behavior
 
-## 4. Canonical relationship-derived BOM
-`panel_147_5 ×N` → `panel_corner_142_5 ×N` 1:1 replacement. Variant refs: wall150 `×7`, shelf150 2/3 `×7`, base-wall150 `×7`. Placement→variant parent/composite Item scope'udur.
+Intrinsic ürün gerçeğinin source-of-truth'u Item kaydıdır. Leaf ayrı scene/project instance değildir; placement/move/rotation/snap/collision/context-menu/persistence parent module/relationship zincirindedir. Renderer override edebilir fakat product `material` değişmez.
 
-## 5. Persistence
-Leaf ayrı persisted entity değildir.
+## Relationship / BOM
 
-## 6. Renderer boundary
-Renderer ayrı corner identity source-of-truth değildir; specialized override izinlidir.
+`innerCornerPanelItemKey` üzerinden matching `panel_147_5 × N` satırını `panel_corner_142_5 × N` olarak 1:1 değiştirir. Quantity parent recipe'den korunur.
 
-## 7. Regression
-`test/cornerPanelsItemContract.test.js`.
+## Regression
 
-## Checklist sonucu
-Identity/dimensions/role **VAR**; material/defaultColor **YOK**; canonical variant/replacement **VAR**; independent leaf behavior/state/persistence **UYGULANMIYOR**; renderer override **izinli**; regression **VAR**.
+Corner panel contract testleri + `test/boardMaterialItemContract.test.js`.

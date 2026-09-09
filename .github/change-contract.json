@@ -1,9 +1,11 @@
 {
   "schemaVersion": 2,
-  "id": "panel-items-checklist-revalidation",
+  "id": "sunta-board-materials",
   "kind": "architecture",
-  "summary": "Re-validate four straight panel and four inner-corner panel production Items against the strengthened Item checklist, refresh stale current-system inventories and canonical definitions, distinguish generic project-surface defaults from verified product defaults, and document parent-owned interaction/persistence plus canonical 1:1 corner BOM replacement without runtime changes.",
+  "summary": "Set the canonical production material to sunta for all 17 verified panel, inner-corner panel, base-top and counter-top Items, refresh their Item documentation, and lock the product decision with regression coverage. Renderer overrides remain unchanged.",
   "owners": [
+    "src/productionParts.js",
+    "test/boardMaterialItemContract.test.js",
     "docs/items/current-system/panel_48_5.md",
     "docs/items/current-system/panel_98.md",
     "docs/items/current-system/panel_147_5.md",
@@ -12,6 +14,12 @@
     "docs/items/current-system/panel_corner_92.md",
     "docs/items/current-system/panel_corner_142_5.md",
     "docs/items/current-system/panel_corner_192.md",
+    "docs/items/current-system/counter_top_102_60.md",
+    "docs/items/current-system/counter_top_110_60.md",
+    "docs/items/current-system/counter_top_150_60.md",
+    "docs/items/current-system/counter_top_160_60.md",
+    "docs/items/current-system/counter_top_210_60.md",
+    "docs/items/current-system/counter_top_52_60.md",
     "docs/items/definitions/panel_48_5.md",
     "docs/items/definitions/panel_98.md",
     "docs/items/definitions/panel_147_5.md",
@@ -19,17 +27,19 @@
     "docs/items/definitions/panel_corner_42_5.md",
     "docs/items/definitions/panel_corner_92.md",
     "docs/items/definitions/panel_corner_142_5.md",
-    "docs/items/definitions/panel_corner_192.md"
+    "docs/items/definitions/panel_corner_192.md",
+    "docs/items/definitions/counter_top_102_60.md",
+    "docs/items/definitions/counter_top_110_60.md",
+    "docs/items/definitions/counter_top_150_60.md",
+    "docs/items/definitions/counter_top_160_60.md",
+    "docs/items/definitions/counter_top_210_60.md",
+    "docs/items/definitions/counter_top_52_60.md"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
-    "src/designState.js",
-    "src/moduleBehavior.js",
-    "src/moduleContextMenu.js",
-    "src/main.js",
-    "src/projectStore.js",
-    "src/scene3d.js"
+    "docs/items/contract/ITEM_CONTRACT.md",
+    "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -38,7 +48,7 @@
     "placement": "not-applicable",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
-    "bom": "not-applicable",
+    "bom": "affected",
     "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
@@ -74,6 +84,7 @@
       "test/baseRecipes.test.js",
       "test/baseTopsItemContract.test.js",
       "test/baseWallRecipes.test.js",
+      "test/boardMaterialItemContract.test.js",
       "test/connectorBom.test.js",
       "test/cornerPanelsItemContract.test.js",
       "test/counterRecipes.test.js",
@@ -224,31 +235,33 @@
       "affected": [],
       "reviewedNotAffected": ["F-001", "F-003"]
     },
-    "notes": "Documentation revalidation only. Fresh Version2 runtime inspection confirms all eight panel Items already own canonical itemKey, dimensions, panelRole and nominal module metadata, while recipe expansion and inner-corner replacement consume canonical Item identity. No verified material/defaultColor exists for these production Items; designState DEFAULT_PANEL_COLOR=#ffffff is a generic project-surface starting value also used outside panel Items and is not promoted to product metadata. Placement/move/rotation/snap/collision/context-menu/persistence are parent module/project responsibilities for these leaf production Items. Corner replacement is canonical and 1:1 in moduleRecipes; placement-to-panelVariant inference belongs parent/composite Item relationship scope. No audit remediation or runtime implementation change is included."
+    "notes": "User product decision: all 17 listed panel/base-top/counter-top Items are manufactured from sunta. Existing base-top material values already match. Eight straight/corner panels and six counter tops receive canonical material metadata. No renderer, placement, state, persistence, relationship or BOM quantity behavior changes. Full-system references are declared for gate review only; no audit remediation is included."
   },
   "tests": {
     "targeted": [
+      "test/boardMaterialItemContract.test.js",
+      "test/baseTopsItemContract.test.js",
+      "test/counterTopsItemContract.test.js",
       "test/straightPanelsItemContract.test.js",
       "test/panel197ItemContract.test.js",
       "test/cornerPanelsItemContract.test.js",
-      "test/panelCorner192ItemContract.test.js",
-      "test/moduleRecipes.test.js"
+      "test/panelCorner192ItemContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "This batch refreshes Item inventories/definitions after fresh runtime verification; runtime implementation is unchanged. Repository full CI still runs."
+      "required": true,
+      "targeted": ["e2e/f010-module-construction.spec.mjs"],
+      "reason": "The repository change gate classifies BOM-domain metadata changes as browser-impacting, so the existing module-construction E2E is required even though placement/render behavior is unchanged."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Documentation-only alignment with the strengthened Item checklist; no production metadata, BOM quantity, project state, persistence or renderer implementation changes."
+    "notes": "Adds a verified intrinsic product property without changing quantities, placement, state, persistence or renderer behavior."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted data or production metadata migration is required."
+    "notes": "No persisted project schema migration is required."
   },
-  "rollback": "Restore the previous eight panel current-system and definition documents; runtime state is unaffected."
+  "rollback": "Remove material=sunta from the newly updated panel/counter-top Items and restore the previous Item documentation; base-top material remains unchanged."
 }

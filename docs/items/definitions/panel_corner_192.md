@@ -1,25 +1,23 @@
 # panel_corner_192 — Item Contract Definition
 
-## 1. Canonical kimlik ve intrinsic properties
-`PRODUCTION_PARTS.panel_corner_192`: `itemKey`, `type=panel`, `unit=adet`, `192 × 47 × 0.8 cm`, `panelRole=inner-corner`, nominal `200`; Tekil Item. Doğrulanmış material/product defaultColor yoktur.
+## Canonical Item
 
-## 2. Canonical creation / state
-`getProductionItem('panel_corner_192')`; ayrı leaf scene/project factory/state yoktur.
+- `itemKey`: `panel_corner_192`
+- `type`: `panel`
+- `unit`: `adet`
+- dimensions: `192 × 47 × 0.8 cm`
+- `material`: `sunta`
+- `panelRole`: `inner-corner`
+- `nominalModuleWidthCm`: `200`
 
-## 3. Behavior / capability ownership
-Independent leaf behavior/context-menu lifecycle'ı yoktur; parent module/type behavior ve relationship layer geçerlidir.
+## Ownership / behavior
 
-## 4. Canonical relationship-derived BOM
-`panel_197 ×N` → `panel_corner_192 ×N` 1:1 replacement. Variant refs: wall200 `×7`, shelf200 2/3 `×7`, base-wall200 `×7`. Quantity korunur; duplicate yoktur. Placement→variant parent/composite Item scope'udur.
+Intrinsic ürün gerçeğinin source-of-truth'u Item kaydıdır. Leaf ayrı scene/project instance değildir; placement/move/rotation/snap/collision/context-menu/persistence parent module/relationship zincirindedir. Renderer override edebilir fakat product `material` değişmez.
 
-## 5. Persistence
-Leaf ayrı persisted entity değildir.
+## Relationship / BOM
 
-## 6. Renderer boundary
-Renderer ayrı corner production identity kullanmaz; specialized override izinlidir.
+`innerCornerPanelItemKey` üzerinden matching `panel_197 × N` satırını `panel_corner_192 × N` olarak 1:1 değiştirir. Quantity parent recipe'den korunur.
 
-## 7. Regression
-`test/panelCorner192ItemContract.test.js`.
+## Regression
 
-## Checklist sonucu
-Identity/dimensions/role **VAR**; material/defaultColor **YOK**; canonical variant/replacement **VAR**; independent leaf behavior/state/persistence **UYGULANMIYOR**; renderer override **izinli**; regression **VAR**.
+Corner panel contract testleri + `test/boardMaterialItemContract.test.js`.

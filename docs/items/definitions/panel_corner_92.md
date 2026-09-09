@@ -1,25 +1,23 @@
 # panel_corner_92 — Item Contract Definition
 
-## 1. Canonical kimlik ve intrinsic properties
-`PRODUCTION_PARTS.panel_corner_92`: `itemKey`, `type=panel`, `unit=adet`, `92 × 47 × 0.8 cm`, `panelRole=inner-corner`, nominal `100`; Tekil Item. Doğrulanmış material/product defaultColor yoktur.
+## Canonical Item
 
-## 2. Canonical creation / state
-`getProductionItem('panel_corner_92')`; ayrı leaf scene/project factory/state yoktur.
+- `itemKey`: `panel_corner_92`
+- `type`: `panel`
+- `unit`: `adet`
+- dimensions: `92 × 47 × 0.8 cm`
+- `material`: `sunta`
+- `panelRole`: `inner-corner`
+- `nominalModuleWidthCm`: `100`
 
-## 3. Behavior / capability ownership
-Independent leaf behavior/context-menu lifecycle'ı yoktur; parent module/type behavior ve relationship layer geçerlidir.
+## Ownership / behavior
 
-## 4. Canonical relationship-derived BOM
-`panel_98 ×N` → `panel_corner_92 ×N` 1:1 replacement. Variant refs: wall100 `×7`, door100 `×3`, shelf100 2/3 `×7`, showcase2 `×5`, showcase3 `×4`, base-wall100 `×7`. Quantity korunur; duplicate yoktur. Placement→variant parent/composite scope'udur.
+Intrinsic ürün gerçeğinin source-of-truth'u Item kaydıdır. Leaf ayrı scene/project instance değildir; placement/move/rotation/snap/collision/context-menu/persistence parent module/relationship zincirindedir. Renderer override edebilir fakat product `material` değişmez.
 
-## 5. Persistence
-Leaf ayrı persisted entity değildir.
+## Relationship / BOM
 
-## 6. Renderer boundary
-Renderer ayrı corner itemKey source-of-truth kullanmaz; specialized override izinlidir.
+`innerCornerPanelItemKey` üzerinden matching `panel_98 × N` satırını `panel_corner_92 × N` olarak 1:1 değiştirir. Quantity parent recipe'den korunur.
 
-## 7. Regression
-`test/cornerPanelsItemContract.test.js`.
+## Regression
 
-## Checklist sonucu
-Identity/dimensions/role **VAR**; material/defaultColor **YOK**; canonical variant/replacement **VAR**; independent leaf behavior/state/persistence **UYGULANMIYOR**; renderer override **izinli**; regression **VAR**.
+Corner panel contract testleri + `test/boardMaterialItemContract.test.js`.
