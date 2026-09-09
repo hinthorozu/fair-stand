@@ -6,9 +6,12 @@ import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.j
 
 test('production catalog contains verified banko upright and tops', () => {
   assert.equal(getProductionPart('upright_99').dimensions.lengthCm, 99);
-  assert.deepEqual(getProductionPart('counter_top_110_60').dimensions, { widthCm: 110, depthCm: 60 });
-  assert.deepEqual(getProductionPart('counter_top_160_60').dimensions, { widthCm: 160, depthCm: 60 });
-  assert.deepEqual(getProductionPart('counter_top_210_60').dimensions, { widthCm: 210, depthCm: 60 });
+  assert.deepEqual(getProductionPart('counter_top_110_60').dimensions, { widthCm: 110, depthCm: 60, thicknessCm: 1.8 });
+  assert.deepEqual(getProductionPart('counter_top_160_60').dimensions, { widthCm: 160, depthCm: 60, thicknessCm: 1.8 });
+  assert.deepEqual(getProductionPart('counter_top_210_60').dimensions, { widthCm: 210, depthCm: 60, thicknessCm: 1.8 });
+  assert.deepEqual(getProductionPart('counter_top_52_60').dimensions, { widthCm: 52, depthCm: 60, thicknessCm: 1.8 });
+  assert.deepEqual(getProductionPart('counter_top_102_60').dimensions, { widthCm: 102, depthCm: 60, thicknessCm: 1.8 });
+  assert.deepEqual(getProductionPart('counter_top_150_60').dimensions, { widthCm: 150, depthCm: 60, thicknessCm: 1.8 });
 });
 
 test('banko 100 recipe matches verified production data', () => {
@@ -21,7 +24,7 @@ test('banko 100 recipe matches verified production data', () => {
     { itemKey: 'panel_48_5', quantity: 4 },
     { itemKey: 'connector_start', quantity: 6 },
     { itemKey: 'connector_single', quantity: 12 },
-    { partId: 'counter_top_110_60', quantity: 1 },
+    { itemKey: 'counter_top_110_60', quantity: 1 },
   ]);
 });
 
