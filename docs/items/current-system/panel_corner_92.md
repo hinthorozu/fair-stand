@@ -1,104 +1,57 @@
-`panel_corner_92` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# panel_corner_92 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Bu belge güncel `Version2` sisteminde `panel_corner_92` Item'ını güçlendirilmiş Item Contract checklist'ine göre envanterler.
 
-# 1. Gerçek kimlik
+## 1. Kimlik / sınıflandırma
+Canonical `itemKey = panel_corner_92`; `name = İç Köşe Paneli 92 × 47 cm`; `type = panel`; `unit = adet`; Tekil Item; `panelRole = inner-corner`; nominal `100`.
 
-`src/productionParts.js:17`:
+## 2. Intrinsic / default Item properties
+Canonical `src/productionParts.js`: `92 × 47 × 0.8 cm`. Doğrulanmış material/product defaultColor yoktur; generic `DEFAULT_PANEL_COLOR = '#ffffff'` product kararı değildir.
 
-```text
-partId = panel_corner_92
-name = İç Köşe Paneli 92 × 47 cm
-type = panel
-unit = adet
-dimensions = 92 × 47 × 0.8 cm
-panelRole = inner-corner
-nominalModuleWidthCm = 100
-```
+## 3. State / default state
+Ayrı project leaf state/id yoktur; relationship/configuration parent/project katmanındadır.
 
-Lookup `src/productionParts.js:52-54` içindeki `getProductionPart(partId)` ile yapılır. Standalone catalog girdisi veya project-state instance mevcut runtime kodunda yoktur.
+## 4. Factory / creation
+`getProductionItem('panel_corner_92')`; bağımsız scene factory **UYGULANMIYOR**.
 
-# 2. Gerçek recipe referansları
+## 5. Placement
+Bağımsız placement **UYGULANMIYOR**.
 
-`panel_corner_92` normal `recipe.items` kalemi değildir; 7 recipe'de `variants.innerCornerPanelPartId` olarak geçer:
+## 6. Move
+Bağımsız move **UYGULANMIYOR**.
 
-| Recipe | Kaynak |
-|---|---|
-| `wall-straight-100` | `src/moduleRecipes.js:7-9` |
-| `door-100` | `19-21` |
-| `shelf-wall-100-2` | `23-25` |
-| `shelf-wall-100-3` | `32-34` |
-| `showcase-2-100` | `42-44` |
-| `showcase-3-100` | `45-47` |
-| `base-wall-100` | `78-80` |
+## 7. Rotation
+Bağımsız rotation **UYGULANMIYOR**.
 
-İlgili catalog anahtarları: `wall_100`, `DOOR_100`, `wall_shelf_2_100`, `wall_shelf_3_100`, `wall_showcase_100_2`, `wall_showcase_100_3`, `wall_base_100`.
+## 8. Snap / collision / connection
+Bağımsız leaf snap/collision **UYGULANMIYOR**; variant kararı renderer proximity'den türetilmez.
 
-# 3. Resolver / lookup davranışı
+## 9. Selection / sol click / drag
+Production corner identity ayrı selectable mesh değildir; parent surface/module interaction geçerlidir.
 
-`src/moduleRecipes.js:107-116` recipe seçimini yapar. `expandRecipe()` (`119-122`) yalnız `recipe.items.map(...)` üzerinde `getProductionPart(item.partId)` çağırır; `variants.innerCornerPanelPartId` alanını genişletmez.
+## 10. Sağ click / context menu
+Ayrı leaf context menu yoktur; parent context geçerlidir.
 
-```text
-recipe.variants.innerCornerPanelPartId = panel_corner_92
-→ recipe metadata olarak kalır
-→ expanded.items içine girmez
-→ getProductionPart('panel_corner_92') otomatik çağrılmaz
-```
+## 11. Delete / duplicate / keyboard
+Bağımsız lifecycle **UYGULANMIYOR**.
 
-# 4. State
+## 12. Persistence
+Ayrı corner entity persist edilmez; parent project state saklanır.
 
-İlgili wall/door/shelf/showcase/base-wall state'leri `src/designState.js` içinde generic `strips`, `surface` ve `faces` taşır (`35-149`). Production `panel_corner_92` kimliği state'e yazılmaz.
+## 13. Relationships / reflow
+Canonical kural `panel_98 × N → panel_corner_92 × N` (`panelVariant = inner-corner`). `innerCornerPanelItemKey` 1:1 replacement yapar; quantity korunur, duplicate yoktur. Placement→variant üretimi parent/composite Item relationship scope'udur.
 
-# 5. Renderer
+## 14. BOM / composition
+Variant referansları: `wall-straight-100 ×7`, `door-100 ×3`, `shelf-wall-100-2 ×7`, `shelf-wall-100-3 ×7`, `showcase-2-100 ×5`, `showcase-3-100 ×4`, `base-wall-100 ×7`.
 
-`src/scene3d.js` `productionParts.js` / `moduleRecipes.js` import etmez (`1-33`). Duvar ve türevleri module ölçüsü + generic state'ten procedural oluşturulur. `innerCornerPanelPartId` alanını okuyup 92 cm corner production paneline özel mesh/identity oluşturan renderer veya placement kodu mevcut runtime kodunda yoktur.
+## 15. Renderer / asset / override sınırı
+Renderer ayrı corner itemKey mesh kullanmaz; parent geometry procedural kalır. Specialized override izinlidir.
 
-# 6. BOM / UI runtime tüketimi
+## 16. Runtime owners
+`productionParts.js` metadata; `moduleRecipes.js` variant; `moduleContracts.js` BOM; `designState.js` state; `moduleBehavior.js` behavior; `moduleContextMenu.js + main.js` interaction; `projectStore.js` persistence; `scene3d.js` renderer.
 
-`src/rawBomDebug.js:35-55` yalnız `recipe.items` listesini gösterir. `variants` okuması yoktur. Bu nedenle `panel_corner_92` Raw BOM terminal satırı olmaz.
+## 17. Regression
+`test/cornerPanelsItemContract.test.js` identity, `92 × 47 × 0.8`, seven variant refs ve 1:1 replacement parity'sini kilitler.
 
-Mevcut kodda placement'a göre `panel_98` miktarını azaltıp `panel_corner_92` ekleyen bir runtime BOM resolver da bulunmadı.
-
-# 7. Persistence
-
-`src/main.js:1263-1264,1326+` module state snapshot/restore yapar. Production corner panel state içinde olmadığı için ayrı `panel_corner_92` instance'ı persistence'a yazılmaz.
-
-# 8. Ownership
-
-```text
-production metadata → src/productionParts.js
-variant metadata    → src/moduleRecipes.js
-BOM policy          → src/moduleContracts.js
-Raw BOM UI          → src/rawBomDebug.js (variant tüketmiyor)
-renderer            → src/scene3d.js (ayrı)
-```
-
-# 9. Testler
-
-- `test/moduleRecipes.test.js:54-70` wall100 corner variant.
-- `74-85` door100 corner variant.
-- `87-138` shelf100 2/3 raf corner variant.
-- `test/showcaseRecipes.test.js:24,38` showcase-2/3 corner variant.
-- `test/baseWallRecipes.test.js:6-29` base-wall100 corner variant.
-- `test/moduleRecipes.test.js:20-27` 92 cm production panel genişliği doğrulanır.
-
-Çalıştırılan ortak hedefli set: **49 test / 49 pass / 0 fail**.
-
-# 10. Sonuç
-
-```text
-production partId                 EVET
-production metadata               EVET
-normal recipe items kalemi        HAYIR
-recipe variant metadata           EVET
-variant runtime BOM substitution  HAYIR
-standalone catalog item           HAYIR
-project-state production instance HAYIR
-render mesh partId identity       HAYIR
-persistence production instance   HAYIR
-Raw BOM terminal satırı           HAYIR
-```
-
-`panel_corner_92` production registry ve recipe variant metadata'da mevcut; bu metadata'yı gerçek placement-aware BOM dönüşümüne çeviren runtime tüketici yoktur.
-
-**Kod zinciri burada bitiyor.**
+## 18. Açık durum / karar
+Identity/dimensions/role **VAR**; material/defaultColor **YOK**; canonical relationship BOM **VAR**; independent leaf lifecycle **UYGULANMIYOR — parent-owned**; project placement→variant parent/composite Item scope; renderer override **izinli**.
