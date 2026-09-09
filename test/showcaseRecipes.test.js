@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionPart } from '../src/productionParts.js';
+import { getProductionItem, getProductionPart } from '../src/productionParts.js';
 import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
 
 test('production catalog contains showcase parts and glass shelf', () => {
   assert.equal(getProductionPart('showcase_2_100').name, '2 Gözlü Vitrin 100 cm');
   assert.equal(getProductionPart('showcase_3_100').name, '3 Gözlü Vitrin 100 cm');
-  assert.equal(getProductionPart('glass_shelf').name, 'Cam Raf');
+  assert.equal(getProductionItem('glass_shelf').name, 'Cam Raf');
 });
 
 test('2-eye showcase 100 recipe matches verified production data', () => {
@@ -19,7 +19,7 @@ test('2-eye showcase 100 recipe matches verified production data', () => {
     { itemKey: 'connector_start', quantity: 4 },
     { itemKey: 'connector_single', quantity: 9 },
     { partId: 'showcase_2_100', quantity: 1 },
-    { partId: 'glass_shelf', quantity: 2 },
+    { itemKey: 'glass_shelf', quantity: 2 },
   ]);
   assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_92');
 });
@@ -33,7 +33,7 @@ test('3-eye showcase 100 recipe matches verified production data', () => {
     { itemKey: 'connector_start', quantity: 4 },
     { itemKey: 'connector_single', quantity: 7 },
     { partId: 'showcase_3_100', quantity: 1 },
-    { partId: 'glass_shelf', quantity: 3 },
+    { itemKey: 'glass_shelf', quantity: 3 },
   ]);
   assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_92');
 });

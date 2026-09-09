@@ -35,7 +35,7 @@ export const PRODUCTION_PARTS = Object.freeze({
 
   showcase_2_100: Object.freeze({ partId: 'showcase_2_100', name: '2 Gözlü Vitrin 100 cm', type: 'showcase', unit: 'adet', eyeCount: 2, nominalModuleWidthCm: 100 }),
   showcase_3_100: Object.freeze({ partId: 'showcase_3_100', name: '3 Gözlü Vitrin 100 cm', type: 'showcase', unit: 'adet', eyeCount: 3, nominalModuleWidthCm: 100 }),
-  glass_shelf: Object.freeze({ partId: 'glass_shelf', name: 'Cam Raf', type: 'showcase-accessory', unit: 'adet' }),
+  glass_shelf: Object.freeze({ itemKey: 'glass_shelf', name: 'Cam Raf', type: 'showcase-accessory', unit: 'adet', dimensions: Object.freeze({ lengthCm: 87.3, depthCm: 28.5, thicknessCm: 0.6 }), material: 'cam' }),
 
   counter_top_110_60: Object.freeze({ itemKey: 'counter_top_110_60', name: 'Banko Üstü 110 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 110, depthCm: 60, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xf8fafc, nominalModuleWidthCm: 100 }),
   counter_top_52_60: Object.freeze({ itemKey: 'counter_top_52_60', name: 'Banko Üstü 52 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 52, depthCm: 60, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xf8fafc, nominalModuleWidthCm: 100 }),

@@ -3,8 +3,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
-import { ALUMINUM_PROFILE_COLOR } from './theme.js';
-import { getShelfProductionItem } from './productionParts.js';
+import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
+import { getProductionItem, getShelfProductionItem } from './productionParts.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
@@ -38,10 +38,7 @@ const PANEL_BACK_COLOR = 0x4b5563;
 const PANEL_RAIL_HEIGHT_M = 0.004;
 const PANEL_VERTICAL_CLEARANCE_M = 0;
 const PANEL_VERTICAL_PROFILE_WIDTH_M = 0.040;
-const GLASS_SURFACE_COLOR = 0xd7e9ed;
-const GLASS_BACK_COLOR = 0xc9dce1;
-const GLASS_SURFACE_OPACITY = 0.48;
-const GLASS_BACK_OPACITY = 0.18;
+const MESH_FABRIC_OPACITY = 0.48;
 const FLOOR_COLOR = 0xe9edf1;
 const OUTER_FLOOR_COLOR = 0xd2d8df;
 const GRID_COLOR = 0x7f8994;
@@ -3030,7 +3027,7 @@ export function createStandScene(
         if (!target?.material) return;
         target.material.map?.dispose?.();
         target.material.map = null;
-        target.material.color.set(surfaceState?.isGlass ? GLASS_SURFACE_COLOR : hexColor);
+        target.material.color.set(surfaceState?.isGlass ? GLASS_APPEARANCE.color : hexColor);
         target.material.needsUpdate = true;
       });
     });
@@ -3080,7 +3077,7 @@ export function createStandScene(
     if (state?.imageAssetId) {
       applyStoredImage(surface);
     } else {
-      surface.material.color.set(state?.isGlass ? GLASS_SURFACE_COLOR : (state?.color ?? '#ffffff'));
+      surface.material.color.set(state?.isGlass ? GLASS_APPEARANCE.color : (state?.color ?? '#ffffff'));
       surface.material.needsUpdate = true;
     }
   }
@@ -3219,7 +3216,7 @@ export function createStandScene(
 
     const fabricType = fabricState.fabricType === 'mesh' ? 'mesh' : 'lightbox';
     // Lightbox ışığı açıldığında daima %100 opak kalır. Mesh ise emissive kullanmaz.
-    material.opacity = fabricType === 'mesh' ? GLASS_SURFACE_OPACITY : 1;
+    material.opacity = fabricType === 'mesh' ? MESH_FABRIC_OPACITY : 1;
     material.transparent = fabricType === 'mesh';
     material.depthWrite = fabricType !== 'mesh';
     if (fabricType === 'mesh') {
@@ -3416,7 +3413,7 @@ export function createStandScene(
       if (fabricType === 'mesh') {
         // Mesh Lightbox gibi tek parça kalır; şeffaflık Cam panelin ön yüz kontratını kullanır.
         overlayMaterial.transparent = true;
-        overlayMaterial.opacity = GLASS_SURFACE_OPACITY;
+        overlayMaterial.opacity = MESH_FABRIC_OPACITY;
         overlayMaterial.depthWrite = false;
       }
       const overlay = new THREE.Mesh(
@@ -3643,13 +3640,13 @@ export function createStandScene(
       surfaceState.isGlass = glass;
       const hasImage = Boolean(mesh.material.map);
       mesh.material.transparent = glass;
-      mesh.material.opacity = glass ? GLASS_SURFACE_OPACITY : 1;
+      mesh.material.opacity = glass ? GLASS_APPEARANCE.opacity : 1;
       mesh.material.depthWrite = !glass;
-      mesh.material.roughness = glass ? 0.16 : 0.72;
+      mesh.material.roughness = glass ? GLASS_APPEARANCE.roughness : 0.72;
       mesh.material.metalness = 0;
       mesh.material.color.set(
         glass
-          ? (hasImage ? 0xffffff : GLASS_SURFACE_COLOR)
+          ? (hasImage ? 0xffffff : GLASS_APPEARANCE.color)
           : (hasImage ? 0xffffff : (surfaceState.color ?? '#ffffff')),
       );
       mesh.material.needsUpdate = true;
@@ -3657,10 +3654,10 @@ export function createStandScene(
       const backing = mesh.userData.backing;
       if (backing?.material) {
         backing.material.transparent = glass;
-        backing.material.opacity = glass ? GLASS_BACK_OPACITY : 1;
+        backing.material.opacity = glass ? PANEL_GLASS_BACKING_APPEARANCE.opacity : 1;
         backing.material.depthWrite = !glass;
-        backing.material.roughness = glass ? 0.22 : 0.74;
-        backing.material.color.set(glass ? GLASS_BACK_COLOR : PANEL_BACK_COLOR);
+        backing.material.roughness = glass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74;
+        backing.material.color.set(glass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR);
         backing.material.needsUpdate = true;
         backing.castShadow = !glass;
       }
@@ -3758,7 +3755,7 @@ export function createStandScene(
       () => {
         const surfaceState = mesh.userData.surfaceState;
         const stateColor = surfaceState?.isGlass
-          ? GLASS_SURFACE_COLOR
+          ? GLASS_APPEARANCE.color
           : (surfaceState?.color ?? '#ffffff');
         if (mesh.material) mesh.material.color.set(stateColor);
       },
@@ -3811,7 +3808,7 @@ export function createStandScene(
       () => {
         const surfaceState = mesh.userData.surfaceState;
         const stateColor = surfaceState?.isGlass
-          ? GLASS_SURFACE_COLOR
+          ? GLASS_APPEARANCE.color
           : (surfaceState?.color ?? '#ffffff');
         if (mesh.material) mesh.material.color.set(stateColor);
       },
@@ -4019,7 +4016,7 @@ export function createStandScene(
       mesh.material.map?.dispose?.();
       mesh.material.map = null;
       mesh.material.color.set(
-        surfaceState?.isGlass ? GLASS_SURFACE_COLOR : (surfaceState?.color ?? '#ffffff'),
+        surfaceState?.isGlass ? GLASS_APPEARANCE.color : (surfaceState?.color ?? '#ffffff'),
       );
       mesh.material.needsUpdate = true;
     });
@@ -5577,15 +5574,8 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
 
   const metalMaterial = new THREE.MeshStandardMaterial({ color: 0x30343a, roughness: 0.32, metalness: 0.74 });
   const tabletopMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xd7e9ed,
-    transparent: true,
-    opacity: 0.42,
-    roughness: 0.10,
-    metalness: 0,
-    transmission: 0.32,
-    clearcoat: 0.65,
+    ...TABLE_GLASS_APPEARANCE,
     clearcoatRoughness: 0.08,
-    depthWrite: false,
   });
 
   const top = new THREE.Mesh(new THREE.CylinderGeometry(0.375, 0.375, 0.018, 64), tabletopMaterial);
@@ -5941,7 +5931,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
 
   const tableTop = new THREE.Mesh(
     new THREE.BoxGeometry(0.60, 0.018, 0.42),
-    new THREE.MeshPhysicalMaterial({ color: 0xd7e9ed, transparent: true, opacity: 0.42, roughness: 0.12, metalness: 0, transmission: 0.28, depthWrite: false }),
+    new THREE.MeshPhysicalMaterial({ ...TABLE_GLASS_APPEARANCE, clearcoatRoughness: 0.08 }),
   );
   tableTop.position.set(0, 0.38, 0.10);
   tableTop.receiveShadow = true;
@@ -6580,10 +6570,10 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
       new THREE.MeshStandardMaterial({
-        color: isGlass ? GLASS_BACK_COLOR : PANEL_BACK_COLOR,
-        roughness: isGlass ? 0.22 : 0.74,
+        color: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR,
+        roughness: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74,
         transparent: isGlass,
-        opacity: isGlass ? GLASS_BACK_OPACITY : 1,
+        opacity: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.opacity : 1,
         depthWrite: !isGlass,
       }),
     );
@@ -6597,11 +6587,11 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId
           ? 0xffffff
-          : (isGlass ? GLASS_SURFACE_COLOR : surfaceState.color),
-        roughness: isGlass ? 0.16 : 0.72,
+          : (isGlass ? GLASS_APPEARANCE.color : surfaceState.color),
+        roughness: isGlass ? GLASS_APPEARANCE.roughness : 0.72,
         metalness: 0,
         transparent: isGlass,
-        opacity: isGlass ? GLASS_SURFACE_OPACITY : 1,
+        opacity: isGlass ? GLASS_APPEARANCE.opacity : 1,
         depthWrite: !isGlass,
         side: THREE.DoubleSide,
         emissive: 0x000000,
@@ -6761,10 +6751,10 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
       new THREE.MeshStandardMaterial({
-        color: surfaceState.isGlass ? GLASS_BACK_COLOR : PANEL_BACK_COLOR,
-        roughness: surfaceState.isGlass ? 0.22 : 0.74,
+        color: surfaceState.isGlass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR,
+        roughness: surfaceState.isGlass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74,
         transparent: Boolean(surfaceState.isGlass),
-        opacity: surfaceState.isGlass ? GLASS_BACK_OPACITY : 1,
+        opacity: surfaceState.isGlass ? PANEL_GLASS_BACKING_APPEARANCE.opacity : 1,
         depthWrite: !surfaceState.isGlass,
       }),
     );
@@ -6778,11 +6768,11 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId
           ? 0xffffff
-          : (surfaceState.isGlass ? GLASS_SURFACE_COLOR : surfaceState.color),
-        roughness: surfaceState.isGlass ? 0.16 : 0.72,
+          : (surfaceState.isGlass ? GLASS_APPEARANCE.color : surfaceState.color),
+        roughness: surfaceState.isGlass ? GLASS_APPEARANCE.roughness : 0.72,
         metalness: 0,
         transparent: Boolean(surfaceState.isGlass),
-        opacity: surfaceState.isGlass ? GLASS_SURFACE_OPACITY : 1,
+        opacity: surfaceState.isGlass ? GLASS_APPEARANCE.opacity : 1,
         depthWrite: !surfaceState.isGlass,
         side: THREE.DoubleSide,
         emissive: 0x000000,
@@ -7028,10 +7018,10 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
       new THREE.MeshStandardMaterial({
-        color: isGlass ? GLASS_BACK_COLOR : PANEL_BACK_COLOR,
-        roughness: isGlass ? 0.22 : 0.74,
+        color: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR,
+        roughness: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74,
         transparent: isGlass,
-        opacity: isGlass ? GLASS_BACK_OPACITY : 1,
+        opacity: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.opacity : 1,
         depthWrite: !isGlass,
       }),
     );
@@ -7045,11 +7035,11 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId
           ? 0xffffff
-          : (isGlass ? GLASS_SURFACE_COLOR : surfaceState.color),
-        roughness: isGlass ? 0.16 : 0.72,
+          : (isGlass ? GLASS_APPEARANCE.color : surfaceState.color),
+        roughness: isGlass ? GLASS_APPEARANCE.roughness : 0.72,
         metalness: 0,
         transparent: isGlass,
-        opacity: isGlass ? GLASS_SURFACE_OPACITY : 1,
+        opacity: isGlass ? GLASS_APPEARANCE.opacity : 1,
         depthWrite: !isGlass,
         side: THREE.DoubleSide,
         emissive: 0x000000,
@@ -7139,24 +7129,29 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(edge);
   }
 
+  const glassShelfItem = getProductionItem('glass_shelf');
+  const glassAppearance = getMaterialAppearance(glassShelfItem?.material);
+  if (!glassShelfItem?.dimensions || !glassAppearance) {
+    throw new Error('glass_shelf canonical product properties are required by showcase renderer.');
+  }
+  const glassShelfLengthM = glassShelfItem.dimensions.lengthCm / 100;
+  const glassShelfDepthM = glassShelfItem.dimensions.depthCm / 100;
+  const glassShelfThicknessM = glassShelfItem.dimensions.thicknessCm / 100;
   const glassMaterial = new THREE.MeshStandardMaterial({
-    color: 0xb7d5b5,
-    roughness: 0.08,
-    metalness: 0,
-    transparent: true,
-    opacity: 0.48,
+    ...glassAppearance,
     side: THREE.DoubleSide,
   });
   const shelfGeometry = new THREE.BoxGeometry(
-    Math.max(innerWidth - 0.035, 0.02),
-    0.018,
-    Math.max(showcaseDepth - 0.035, 0.04),
+    glassShelfLengthM,
+    glassShelfThicknessM,
+    glassShelfDepthM,
   );
   const shelfFrontGeometry = new THREE.BoxGeometry(innerWidth, 0.018, 0.024);
 
   for (let index = 1; index < eyeCount; index += 1) {
     const shelfY = openingBottom + (openingHeight * index) / eyeCount;
     const shelf = new THREE.Mesh(shelfGeometry.clone(), glassMaterial.clone());
+    shelf.userData.itemKey = glassShelfItem.itemKey;
     shelf.position.set(0, shelfY, caseCenterZ);
     shelf.castShadow = true;
     shelf.receiveShadow = true;

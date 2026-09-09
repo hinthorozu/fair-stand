@@ -73,7 +73,7 @@ test('expanded separator recipes resolve canonical separator metadata through it
 });
 
 test('separator panel migration remains isolated from still-legacy production families', () => {
-  for (const itemKey of ['door_100', 'shelf_leg', 'showcase_2_100', 'glass_shelf']) {
+  for (const itemKey of ['door_100', 'shelf_leg', 'showcase_2_100']) {
     const item = getProductionItem(itemKey);
     assert.equal(item.itemKey, undefined, itemKey);
     assert.equal(item.partId, itemKey);

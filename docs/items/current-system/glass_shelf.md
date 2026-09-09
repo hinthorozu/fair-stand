@@ -1,57 +1,32 @@
-`glass_shelf` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# glass_shelf — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası güncel durum.
 
-# 1. Gerçek kimlik / tanım
+## Checklist
 
-`src/productionParts.js:38`:
+| # | Alan | Durum | Güncel gerçek / owner |
+|---:|---|---|---|
+| 1 | Identity / type | VAR | `itemKey=glass_shelf`, `type=showcase-accessory`, `unit=adet`; canonical owner `src/productionParts.js`. |
+| 2 | Intrinsic properties | VAR | `87.3 × 28.5 × 0.6 cm` (`length × depth × thickness`), `material=cam`; ölçüler ve material kullanıcı ürün kararıdır. `0.6 cm = 6 mm`. |
+| 3 | Default state | UYGULANMIYOR | Leaf production Item ayrı project state/default state taşımaz. Cam appearance product state'i değildir; renderer standardıdır. |
+| 4 | Factory / creation | PARENT-OWNED | Ayrı leaf project factory yok. `createShowcaseModuleState()` parent showcase instance'ını üretir; BOM expansion canonical Item'ı `itemKey` ile çözer. |
+| 5 | Placement | PARENT-OWNED | Parent `showcase-2` / `showcase-3` wall module placement contract'ını kullanır. |
+| 6 | Move | PARENT-OWNED | Parent showcase module move/continuous-wall akışı üzerinden taşınır; leaf cam raf ayrı taşınmaz. |
+| 7 | Rotation | PARENT-OWNED | Rotation parent showcase module behavior contract'ıdır. |
+| 8 | Snap / collision / connection | PARENT-OWNED | Wall placement/snap/collision parent showcase module'a aittir; leaf cam raf için ayrı spatial rule yoktur. |
+| 9 | Selection / drag | PARENT-OWNED | Leaf glass shelf ayrı selectable/drag entity değildir; parent showcase module/surface akışı kullanılır. |
+| 10 | Context menu | PARENT-OWNED | Leaf cam raf için ayrı context menu yoktur; parent module işlemleri geçerlidir. |
+| 11 | Delete / duplicate / keyboard | PARENT-OWNED | Parent showcase module üzerinde uygulanır. |
+| 12 | Persistence | PARENT-OWNED | Parent showcase state persist/restore edilir; `glass_shelf` ayrı persisted entity değildir. |
+| 13 | Relationships / reflow | PARENT-OWNED | Parent showcase continuous wall relationship/reflow zincirine katılır; leaf cam rafın ayrı persisted relationship'i yoktur. |
+| 14 | BOM / composition | VAR | Tekil production Item. `showcase-2:100` recipe'de ×2, `showcase-3:100` recipe'de ×3; quantity parent recipe sahibidir ve migrationda korunur. |
+| 15 | Renderer / asset / override boundary | VAR | `createShowcaseModule()` artık canonical `lengthCm=87.3`, `depthCm=28.5`, `thicknessCm=0.6` ve `material=cam` tüketir. `material=cam` ortak normal glass appearance standardına çözülür. Masa camı specialized override, panel backing panel-only efekt, projektör lensi specialized optical override'dır. |
+| 16 | Runtime owners | VAR | Product: `productionParts.js`; BOM: `moduleRecipes.js`; parent state: `designState.js`; behavior/placement: module behavior/placement zinciri; persistence: `main.js` + `projectStore.js`; renderer: `scene3d.js`; shared glass appearance: `theme.js`. |
+| 17 | Regression | VAR | `test/glassShelfItemContract.test.js`, `test/showcaseRecipes.test.js`, `test/showcaseDepthDirection.test.js`, `test/materialAppearance.test.js` + full suite/E2E. |
+| 18 | Open decisions / completion | KAPALI / CI BEKLİYOR | Canonical ürün ölçü/material kararı kapalıdır. Existing BOM ×2/×3 korunur; renderer'ın `eyeCount-1` iç divider mesh sayısı BOM kaynağı değildir. Operational completion PR checks + squash merge + post-merge `Version2` CI FULL GREEN sonrası verilir. |
 
-```js
-glass_shelf: Object.freeze({ partId: 'glass_shelf', name: 'Cam Raf', type: 'showcase-accessory', unit: 'adet' }),
-```
+## Canonical cutover
 
-Gerçek production/BOM kimliği `partId = glass_shelf`; lookup `src/productionParts.js:52-54` `getProductionPart(partId)` ile yapılır. Standalone catalog item veya proje instance entity’si mevcut runtime kodunda yok.
+Eski `partId=glass_shelf` kimliği canonical `itemKey=glass_shelf` kimliğine taşındı. Showcase recipe entry'leri canonical `itemKey` kullanır. Renderer'daki eski implicit `87.3 cm` (`innerWidth - 3.5 cm`), `26.5 cm` (`showcaseDepth - 3.5 cm`) ve `1.8 cm` glass-shelf geometry sabitleri kaldırıldı; gerçek `87.3 × 28.5 × 0.6 cm` Item ölçüleri tüketilir.
 
-# 2. Recipe / BOM
-
-- `src/moduleRecipes.js:43` → `showcase-2:100` → `glass_shelf ×2`
-- `src/moduleRecipes.js:46` → `showcase-3:100` → `glass_shelf ×3`
-
-Resolver `src/moduleRecipes.js:107-129` recipe item’ı `expandRecipe()` ile production registry’ye bağlar.
-
-İlgili module catalog key’leri: `wall_showcase_100_2`, `wall_showcase_100_3`.
-
-# 3. State / renderer paralel temsili
-
-`src/designState.js:60-71` showcase state yalnız module id/type/width ve editable strip state taşır; ayrı `glass_shelf` instance listesi yoktur.
-
-`src/scene3d.js:6949+` `createShowcaseModule()` cam raf geometrisini vitrinin renderer mantığı içinde procedural üretir. Renderer `productionParts.js` / `moduleRecipes.js` import etmediği için bu geometri `glass_shelf` production partId üzerinden üretilmez. Mesh/userData üzerinde `partId=glass_shelf` mevcut runtime kodunda yoktur.
-
-# 4. UI/runtime
-
-`src/selectionFeedback.js:57-59` vitrin seçim metnini üretir; `src/rawBomDebug.js:76-81` 2/3 gözlü vitrini recipe’ye resolve eder. `rawBomDebug.js:35-55` expanded recipe sonucu `2 × Cam Raf` veya `3 × Cam Raf` gösterebilir.
-
-# 5. Persistence
-
-`src/main.js:1257-1265` showcase module state’ini snapshot’a alır; `src/projectStore.js:39-56` persist eder; restore `src/main.js:1320-1331`. `glass_shelf` production instance’ları ayrı persistence kaydı değildir.
-
-# 6. Ownership
-
-```text
-glass_shelf metadata → src/productionParts.js
-adet kuralı → src/moduleRecipes.js
-BOM policy → src/moduleContracts.js:4-7
-showcase state → src/designState.js
-showcase render → src/scene3d.js
-Raw BOM UI → src/rawBomDebug.js
-```
-
-# 7. Testler
-
-`test/showcaseRecipes.test.js` `Cam Raf` production adını, 2 gözlü vitrin için ×2, 3 gözlü için ×3 ve expanded resolver metadata’sını doğrular. Batch sonucu **45 test / 45 pass / 0 fail**.
-
-# 8. Sonuç
-
-`glass_shelf` aktif production/BOM accessory `partId` kimliğidir. İki showcase recipe’sinde 2 veya 3 adet kullanılır; state/persistence/renderer tarafında ayrı `glass_shelf` production identity mevcut runtime kodunda yoktur.
-
-**Kod zinciri burada bitiyor. Hedef mimari veya entegrasyon tasarımı yapılmadı.**
+Cam görünümü tekleştirildi: normal cam `GLASS_APPEARANCE`, masa camı explicit `TABLE_GLASS_APPEARANCE`, panel arka okunabilirlik efekti `PANEL_GLASS_BACKING_APPEARANCE` kullanır. Projektör lensi bu standardizasyonun dışındadır. Mesh kumaş cam opacity sabitini kullanmaz.

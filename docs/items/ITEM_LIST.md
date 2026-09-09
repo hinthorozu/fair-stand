@@ -45,7 +45,7 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `shelf_leg` | `shelf-accessory` | Bekliyor |
 | `showcase_2_100` | `showcase` | Bekliyor |
 | `showcase_3_100` | `showcase` | Bekliyor |
-| `glass_shelf` | `showcase-accessory` | Bekliyor |
+| `glass_shelf` | `showcase-accessory` | **Tamam — canonical `itemKey`; `87.3 × 28.5 × 0.6 cm`; cam; showcase recipes ×2/×3 quantity parity; renderer canonical ölçü/material tüketimi** |
 | `counter_top_110_60` | `counter-top` | **Tamam — canonical `itemKey`; `110 × 60 × 1.8 cm`; düz 100 + L100 içinde ×1 quantity parity** |
 | `counter_top_52_60` | `counter-top` | **Tamam — canonical `itemKey`; `52 × 60 × 1.8 cm`; L100 içinde ×1 quantity parity** |
 | `counter_top_160_60` | `counter-top` | **Tamam — canonical `itemKey`; `160 × 60 × 1.8 cm`; düz 150 + L150 içinde ×1 quantity parity** |
