@@ -1,57 +1,85 @@
-`base_top_157_50` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# base_top_157_50 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Bu belge güncel sistemde `base_top_157_50` Item'ını yeni Item Contract checklist'ine göre eksiksiz envanterler.
 
-# 1. Gerçek kimlik / tanım
+## 1. Kimlik / sınıflandırma
+- Canonical kimlik: `itemKey = base_top_157_50`.
+- `type = base-top`, `unit = adet`.
+- Tekil, parametrik olmayan production/BOM Item'ıdır.
+- Standalone catalog kaydı yoktur; parent catalog Item'ları `BASE_150` ve `wall_base_150`'dır.
 
-`src/productionParts.js:48`:
+## 2. Intrinsic / default Item properties
+Canonical kaynak `src/productionParts.js` → `PRODUCTION_PARTS.base_top_157_50`.
 
-```js
-base_top_157_50: Object.freeze({ partId: 'base_top_157_50', name: 'Baza Üstü 157 × 50 cm', type: 'base-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 157, depthCm: 50 }), nominalModuleWidthCm: 150 }),
-```
+- `name = Baza Üstü 157 × 50 cm`
+- `dimensions.widthCm = 157`
+- `dimensions.depthCm = 50`
+- `dimensions.thicknessCm = 1.8`
+- `material = sunta`
+- `defaultColor = 0xffffff`
+- `nominalModuleWidthCm = 150`
 
-Gerçek production/BOM kimliği `partId = base_top_157_50`; lookup `src/productionParts.js:52-54` ile yapılır. Standalone catalog/project production entity mevcut runtime kodunda yok.
+`material` ve `defaultColor` bu Item için doğrulanmış canonical default metadata'dır. Explicit proje/runtime veya specialized renderer override bu default'ları ezebilir; canonical Item tanımını değiştirmez.
 
-# 2. Recipe / BOM
+## 3. State / default state
+Ayrı `base_top_157_50` project instance state'i yoktur. Parent `base` / `base-wall` state'i `src/designState.js` tarafından oluşturulur. Leaf top'un mutable state'i ve ayrı project `id`'si yoktur.
 
-- `src/moduleRecipes.js:82` → `base-wall:150` / `base-wall-150` → `base_top_157_50 ×1`
-- `src/moduleRecipes.js:92` → `base:150` / `base-150` → `base_top_157_50 ×1`
+## 4. Factory / creation
+Bağımsız leaf factory **UYGULANMIYOR**. Item `getProductionItem('base_top_157_50')` ile resolve edilir; parent instance ilgili base/base-wall factory/state yolundan oluşur.
 
-Resolver `src/moduleRecipes.js:107-129`: module type/width → recipe → `expandRecipe()` → `getProductionPart('base_top_157_50')`.
+## 5. Placement
+Leaf production top bağımsız placement hedefi değildir: **UYGULANMIYOR**. Placement parent base/base-wall seviyesindedir.
 
-İlgili module catalog yolları `src/catalog.js:212,215`: `BASE_150`, `wall_base_150`.
+## 6. Move
+Bağımsız move davranışı yoktur: **UYGULANMIYOR**. Parent ile birlikte hareket eder.
 
-# 3. State / renderer paralel temsili
+## 7. Rotation
+Bağımsız rotation/step/default-rotation yoktur: **UYGULANMIYOR**. Parent behavior geçerlidir.
 
-`src/designState.js:151-166` `createBaseModuleState(150)`; `129-148` `createBaseWallModuleState(150)` generic module state üretir. Production top partId state içinde yoktur.
+## 8. Snap / collision / connection
+Leaf top için bağımsız snap, collision, boundary, endpoint veya side-insert capability yoktur: **UYGULANMIYOR**.
 
-Renderer `src/scene3d.js:5969+` `createBaseModule()` ve `1401-1417` `createBaseWallModule()` procedural geometri üretir. `scene3d.js` productionParts/moduleRecipes import etmez; `base_top_157_50` metadata’sını resolve ederek mesh oluşturmaz. Mesh/userData üzerinde bu partId identity’si mevcut runtime kodunda yoktur.
+## 9. Selection / sol click / drag
+Leaf production Item ayrı selectable scene entity değildir: **UYGULANMIYOR**. Selection ve drag parent base/base-wall seviyesindedir.
 
-# 4. UI/runtime
+## 10. Sağ click / context menu
+Leaf top için ayrı context menu yoktur: **UYGULANMIYOR**. Sil/çoğalt/taşı/döndür parent interaction'ına aittir.
 
-`src/selectionFeedback.js:30-44` base/base-wall seçim etiketlerini üretir. `src/rawBomDebug.js:104-115` `Panel Bazalı 150` ve `Baza 150 cm` seçimlerini recipe resolver’a taşır; her iki durumda expanded recipe `base_top_157_50 ×1` satırını production adıyla gösterebilir.
+## 11. Delete / duplicate / keyboard
+Leaf top ayrı instance olmadığı için bağımsız lifecycle yoktur: **UYGULANMIYOR**.
 
-# 5. Persistence
+## 12. Persistence
+Leaf production top ayrı entity olarak persist edilmez. Parent module state save/load edilir; leaf identity recipe + canonical production Item üzerinden resolve edilir.
 
-Base/base-wall module state `src/main.js:1257-1265` snapshot’ında persist edilir; `src/projectStore.js:39-56` IndexedDB’ye yazar; restore `src/main.js:1320-1331`. Production top ayrı instance değildir.
+## 13. Relationships / reflow
+Canonical leaf relationship/reflow state'i yoktur: **UYGULANMIYOR**. Quantity/composition ownership parent recipe'dedir.
 
-# 6. Ownership
+## 14. BOM / composition
+`base_top_157_50` iki aktif parent recipe'de canonical `itemKey` ile `×1` kullanılır:
+- `base:150` / `base-150`
+- `base-wall:150` / `base-wall-150`
 
+Expansion `getRecipeItemKey()` → `getProductionItem()` ile canonical Item metadata'sını tüketir. Leaf başka Item'lardan oluşmaz.
+
+## 15. Renderer / asset / override sınırı
+`src/scene3d.js#createBaseModule()` top'u procedural çizer. Renderer'ın kendi kalınlık/overhang ve `color: 0xffffff` değerleri specialized render override'ıdır; canonical production ölçüsü `157 × 50 × 1.8 cm`, malzeme `sunta`, default renk `0xffffff` Item'da kalır. Renderer business/BOM source-of-truth değildir.
+
+## 16. Runtime owners
 ```text
-metadata → src/productionParts.js
-recipe/quantity → src/moduleRecipes.js
-BOM policy → src/moduleContracts.js:4-7
-state → src/designState.js
-renderer → src/scene3d.js
-Raw BOM UI → src/rawBomDebug.js
+canonical Item metadata → src/productionParts.js
+recipe / quantity       → src/moduleRecipes.js
+BOM policy              → src/moduleContracts.js
+parent state            → src/designState.js
+parent persistence      → src/main.js + src/projectStore.js
+renderer override       → src/scene3d.js
+Raw BOM consumer        → src/rawBomDebug.js
 ```
 
-# 7. Testler
+## 17. Regression
+`test/baseTopsItemContract.test.js`, `test/baseRecipes.test.js` ve `test/baseWallRecipes.test.js` canonical identity, intrinsic metadata, recipe quantity ve expansion parity'sini korur.
 
-`test/baseRecipes.test.js` 157×50 metadata ve base-150 top partId’sini; `test/baseWallRecipes.test.js` base-wall-150 top mapping’ini doğrular. Batch hedefli test sonucu **45 test / 45 pass / 0 fail**.
-
-# 8. Sonuç
-
-`base_top_157_50` hem `BASE_150` hem `wall_base_150` recipe’lerinde ×1 kullanılan production/BOM `partId` kimliğidir. Ayrı project-state entity’si, persisted production instance’ı veya renderer partId identity’si mevcut runtime kodunda yoktur.
-
-**Kod zinciri burada bitiyor. Hedef mimari veya entegrasyon tasarımı yapılmadı.**
+## 18. Açık durum / karar
+- Intrinsic/default property ownership: **VAR**.
+- Canonical BOM consumer cutover: **VAR**.
+- Renderer override: **VAR ve izinli**.
+- Ayrı leaf behavior/state/persistence: **UYGULANMIYOR**.

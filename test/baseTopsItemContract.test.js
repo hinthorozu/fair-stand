@@ -26,7 +26,7 @@ const BASE_TOP_CASES = {
   },
 };
 
-test('base tops are canonical single Items with verified 1.8 cm thickness', () => {
+test('base tops are canonical single Items with complete intrinsic defaults', () => {
   for (const [itemKey, expected] of Object.entries(BASE_TOP_CASES)) {
     const item = getProductionItem(itemKey);
     assert.ok(item, itemKey);
@@ -36,6 +36,8 @@ test('base tops are canonical single Items with verified 1.8 cm thickness', () =
     assert.equal(item.type, 'base-top');
     assert.equal(item.unit, 'adet');
     assert.deepEqual(item.dimensions, expected.dimensions);
+    assert.equal(item.material, 'sunta', itemKey);
+    assert.equal(item.defaultColor, 0xffffff, itemKey);
     assert.equal(item.nominalModuleWidthCm, expected.nominalModuleWidthCm);
   }
 });
@@ -58,7 +60,7 @@ test('base tops use canonical itemKey in exactly six active parent recipe rows w
   assert.equal(occurrences, 6);
 });
 
-test('expanded base/base-wall recipes resolve canonical base-top metadata', () => {
+test('expanded base/base-wall recipes resolve canonical base-top metadata and intrinsic defaults', () => {
   for (const [itemKey, expected] of Object.entries(BASE_TOP_CASES)) {
     for (const moduleType of ['base', 'base-wall']) {
       const expanded = getExpandedModuleRecipe(moduleType, expected.nominalModuleWidthCm);
@@ -70,6 +72,8 @@ test('expanded base/base-wall recipes resolve canonical base-top metadata', () =
       assert.equal(top.part.type, 'base-top', expanded.recipeId);
       assert.equal(top.part.unit, 'adet', expanded.recipeId);
       assert.deepEqual(top.part.dimensions, expected.dimensions, expanded.recipeId);
+      assert.equal(top.part.material, 'sunta', expanded.recipeId);
+      assert.equal(top.part.defaultColor, 0xffffff, expanded.recipeId);
     }
   }
 });
