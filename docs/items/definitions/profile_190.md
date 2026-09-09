@@ -66,16 +66,18 @@ Bu nedenle migration yalnız identity/BOM cutover yapar; renderer geometrisi pro
 
 Pricing bu Item zincirinde **UYGULANMIYOR**. Item/BOM gereken Item, quantity ve unit bilgisini taşır; maliyet/fiyatlandırma ayrı sorumluluktur.
 
-## 8. Migration izolasyonu
+## 8. Profile ailesi kimlik durumu
 
-Yalnız `profile_190` migrate edilmiştir. Komşu profile Item'ları bu migration kapsamı dışında kalır:
+Production profile ailesinin dört doğrulanmış Item'ı da artık canonical `itemKey` kullanır:
 
 ```text
-profile_41_5  -> legacy partId
-profile_91    -> legacy partId
-profile_140_5 -> legacy partId
+profile_41_5  -> canonical itemKey
+profile_91    -> canonical itemKey
+profile_140_5 -> canonical itemKey
 profile_190   -> canonical itemKey
 ```
+
+Bu durum renderer geometrisini production profile identity'sine bağlamaz; her Item'ın doğrulanmış metadata ve parent recipe miktarları bağımsız korunur.
 
 ## 9. Regression sözleşmesi
 
@@ -86,7 +88,7 @@ profile_190   -> canonical itemKey
 3. tam 7 parent recipe canonical `itemKey` kullanır,
 4. quantity parity `2, 2, 2, 5, 3, 4, 4` olarak korunur,
 5. expanded recipe production metadata'yı canonical kimlikle çözer,
-6. `profile_41_5`, `profile_91`, `profile_140_5` yanlışlıkla migrate edilmez.
+6. sibling `profile_41_5`, `profile_91`, `profile_140_5` Item'larının da canonical kimlik kullandığı ve `profile_190` contract'ını bozmadığı doğrulanır.
 
 ## 10. Açık sistem konuları
 
