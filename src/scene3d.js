@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
+import { getShelfProductionItem } from './productionParts.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
@@ -6394,8 +6395,12 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
   const built = createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady);
   const widthM = Number(moduleState.widthCm) / 100;
   const shelfCount = Number(moduleState.shelfCount) === 3 ? 3 : 2;
-  const shelfDepthM = Number(SHELF_DIMENSIONS.projectionCm) / 100;
-  const shelfThicknessM = Number(SHELF_DIMENSIONS.thicknessCm) / 100;
+  const shelfItem = getShelfProductionItem(moduleState.widthCm);
+  if (!shelfItem) {
+    throw new TypeError(`Missing canonical shelf Item for ${moduleState.widthCm} cm module.`);
+  }
+  const shelfDepthM = Number(shelfItem.dimensions.depthCm) / 100;
+  const shelfThicknessM = Number(shelfItem.dimensions.thicknessCm) / 100;
   const wallDepthM = Number(STAND_DIMENSIONS.depth);
   const innerWidthM = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
   const shelfHeightsCm = SHELF_DIMENSIONS.heightsByCountCm[shelfCount] ?? [];
@@ -6410,7 +6415,7 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
   });
 
   const shelfMaterial = new THREE.MeshStandardMaterial({
-    color: 0xb8bcc1,
+    color: shelfItem.defaultColor,
     roughness: 0.78,
     metalness: 0,
   });
