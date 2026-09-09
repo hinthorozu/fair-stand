@@ -37,12 +37,12 @@ export const PRODUCTION_PARTS = Object.freeze({
   showcase_3_100: Object.freeze({ partId: 'showcase_3_100', name: '3 Gözlü Vitrin 100 cm', type: 'showcase', unit: 'adet', eyeCount: 3, nominalModuleWidthCm: 100 }),
   glass_shelf: Object.freeze({ partId: 'glass_shelf', name: 'Cam Raf', type: 'showcase-accessory', unit: 'adet' }),
 
-  counter_top_110_60: Object.freeze({ partId: 'counter_top_110_60', name: 'Banko Üstü 110 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 110, depthCm: 60 }), nominalModuleWidthCm: 100 }),
-  counter_top_52_60: Object.freeze({ partId: 'counter_top_52_60', name: 'Banko Üstü 52 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 52, depthCm: 60 }), nominalModuleWidthCm: 100 }),
-  counter_top_160_60: Object.freeze({ partId: 'counter_top_160_60', name: 'Banko Üstü 160 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 160, depthCm: 60 }), nominalModuleWidthCm: 150 }),
-  counter_top_102_60: Object.freeze({ partId: 'counter_top_102_60', name: 'Banko Üstü 102 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 102, depthCm: 60 }), nominalModuleWidthCm: 150 }),
-  counter_top_210_60: Object.freeze({ partId: 'counter_top_210_60', name: 'Banko Üstü 210 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 210, depthCm: 60 }), nominalModuleWidthCm: 200 }),
-  counter_top_150_60: Object.freeze({ partId: 'counter_top_150_60', name: 'Banko Üstü 150 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 150, depthCm: 60 }), nominalModuleWidthCm: 200 }),
+  counter_top_110_60: Object.freeze({ itemKey: 'counter_top_110_60', name: 'Banko Üstü 110 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 110, depthCm: 60, thicknessCm: 1.8 }), nominalModuleWidthCm: 100 }),
+  counter_top_52_60: Object.freeze({ itemKey: 'counter_top_52_60', name: 'Banko Üstü 52 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 52, depthCm: 60, thicknessCm: 1.8 }), nominalModuleWidthCm: 100 }),
+  counter_top_160_60: Object.freeze({ itemKey: 'counter_top_160_60', name: 'Banko Üstü 160 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 160, depthCm: 60, thicknessCm: 1.8 }), nominalModuleWidthCm: 150 }),
+  counter_top_102_60: Object.freeze({ itemKey: 'counter_top_102_60', name: 'Banko Üstü 102 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 102, depthCm: 60, thicknessCm: 1.8 }), nominalModuleWidthCm: 150 }),
+  counter_top_210_60: Object.freeze({ itemKey: 'counter_top_210_60', name: 'Banko Üstü 210 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 210, depthCm: 60, thicknessCm: 1.8 }), nominalModuleWidthCm: 200 }),
+  counter_top_150_60: Object.freeze({ itemKey: 'counter_top_150_60', name: 'Banko Üstü 150 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 150, depthCm: 60, thicknessCm: 1.8 }), nominalModuleWidthCm: 200 }),
 
   base_top_107_50: Object.freeze({ itemKey: 'base_top_107_50', name: 'Baza Üstü 107 × 50 cm', type: 'base-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 107, depthCm: 50, thicknessCm: 1.8 }), nominalModuleWidthCm: 100 }),
   base_top_157_50: Object.freeze({ itemKey: 'base_top_157_50', name: 'Baza Üstü 157 × 50 cm', type: 'base-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 157, depthCm: 50, thicknessCm: 1.8 }), nominalModuleWidthCm: 150 }),

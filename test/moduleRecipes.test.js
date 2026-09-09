@@ -106,11 +106,12 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   const profileOccurrences = { profile_41_5: 0, profile_91: 0, profile_140_5: 0, profile_190: 0 };
   const straightPanelOccurrences = { panel_48_5: 0, panel_98: 0, panel_147_5: 0 };
   const baseTopOccurrences = { base_top_107_50: 0, base_top_157_50: 0, base_top_206_50: 0 };
+  const counterTopOccurrences = { counter_top_110_60: 0, counter_top_52_60: 0, counter_top_160_60: 0, counter_top_102_60: 0, counter_top_210_60: 0, counter_top_150_60: 0 };
   for (const recipe of recipes) {
     assert.ok(recipe);
     for (const item of recipe.items) {
       const key = getRecipeItemKey(item);
-      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key in profileOccurrences || key in straightPanelOccurrences || key in baseTopOccurrences) {
+      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key in profileOccurrences || key in straightPanelOccurrences || key in baseTopOccurrences || key in counterTopOccurrences) {
         if (key === 'connector_start') startOccurrences += 1;
         if (key === 'connector_single') singleOccurrences += 1;
         if (key in uprightOccurrences) uprightOccurrences[key] += 1;
@@ -118,6 +119,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
         if (key in profileOccurrences) profileOccurrences[key] += 1;
         if (key in straightPanelOccurrences) straightPanelOccurrences[key] += 1;
         if (key in baseTopOccurrences) baseTopOccurrences[key] += 1;
+        if (key in counterTopOccurrences) counterTopOccurrences[key] += 1;
         assert.equal(item.itemKey, key);
         assert.equal(item.partId, undefined);
       } else {
@@ -134,6 +136,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   assert.deepEqual(profileOccurrences, { profile_41_5: 14, profile_91: 12, profile_140_5: 8, profile_190: 7 });
   assert.deepEqual(straightPanelOccurrences, { panel_48_5: 13, panel_98: 10, panel_147_5: 7 });
   assert.deepEqual(baseTopOccurrences, { base_top_107_50: 2, base_top_157_50: 2, base_top_206_50: 2 });
+  assert.deepEqual(counterTopOccurrences, { counter_top_110_60: 2, counter_top_52_60: 1, counter_top_160_60: 2, counter_top_102_60: 1, counter_top_210_60: 2, counter_top_150_60: 1 });
 });
 
 test('expanded recipes resolve connector_start metadata through its canonical itemKey', () => {
