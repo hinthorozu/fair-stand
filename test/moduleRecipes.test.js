@@ -105,17 +105,19 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   let panel197Occurrences = 0;
   const profileOccurrences = { profile_41_5: 0, profile_91: 0, profile_140_5: 0, profile_190: 0 };
   const straightPanelOccurrences = { panel_48_5: 0, panel_98: 0, panel_147_5: 0 };
+  const baseTopOccurrences = { base_top_107_50: 0, base_top_157_50: 0, base_top_206_50: 0 };
   for (const recipe of recipes) {
     assert.ok(recipe);
     for (const item of recipe.items) {
       const key = getRecipeItemKey(item);
-      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key in profileOccurrences || key in straightPanelOccurrences) {
+      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key in profileOccurrences || key in straightPanelOccurrences || key in baseTopOccurrences) {
         if (key === 'connector_start') startOccurrences += 1;
         if (key === 'connector_single') singleOccurrences += 1;
         if (key in uprightOccurrences) uprightOccurrences[key] += 1;
         if (key === 'panel_197') panel197Occurrences += 1;
         if (key in profileOccurrences) profileOccurrences[key] += 1;
         if (key in straightPanelOccurrences) straightPanelOccurrences[key] += 1;
+        if (key in baseTopOccurrences) baseTopOccurrences[key] += 1;
         assert.equal(item.itemKey, key);
         assert.equal(item.partId, undefined);
       } else {
@@ -131,6 +133,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   assert.equal(panel197Occurrences, 7);
   assert.deepEqual(profileOccurrences, { profile_41_5: 14, profile_91: 12, profile_140_5: 8, profile_190: 7 });
   assert.deepEqual(straightPanelOccurrences, { panel_48_5: 13, panel_98: 10, panel_147_5: 7 });
+  assert.deepEqual(baseTopOccurrences, { base_top_107_50: 2, base_top_157_50: 2, base_top_206_50: 2 });
 });
 
 test('expanded recipes resolve connector_start metadata through its canonical itemKey', () => {
@@ -242,7 +245,6 @@ test('200 cm two-shelf wall recipe uses six shelf legs', () => {
   assert.equal(quantities.shelf_leg, 6);
   assert.equal(getRecipeInnerCornerPanelKey(recipe), 'panel_corner_192');
 });
-
 
 test('100 and 150 cm three-shelf wall recipes match verified production data', () => {
   const expected = {
