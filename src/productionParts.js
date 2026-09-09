@@ -3,10 +3,10 @@ export const PRODUCTION_PARTS = Object.freeze({
   upright_99: Object.freeze({ itemKey: 'upright_99', name: 'Dikme 99 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 99, thicknessCm: 8 }) }),
   upright_49_5: Object.freeze({ itemKey: 'upright_49_5', name: 'Dikme 49,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 49.5, thicknessCm: 8 }) }),
 
-  profile_41_5: Object.freeze({ itemKey: 'profile_41_5', name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5, thicknessCm: 8 }) }),
-  profile_91: Object.freeze({ itemKey: 'profile_91', name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91, thicknessCm: 8 }) }),
-  profile_140_5: Object.freeze({ itemKey: 'profile_140_5', name: 'Profil 140,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 140.5, thicknessCm: 8 }) }),
-  profile_190: Object.freeze({ itemKey: 'profile_190', name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190, thicknessCm: 8 }) }),
+  profile_41_5: Object.freeze({ itemKey: 'profile_41_5', name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_91: Object.freeze({ itemKey: 'profile_91', name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_140_5: Object.freeze({ itemKey: 'profile_140_5', name: 'Profil 140,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 140.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_190: Object.freeze({ itemKey: 'profile_190', name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
 
   panel_48_5: Object.freeze({ itemKey: 'panel_48_5', name: 'Panel 48,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }), material: 'sunta', panelRole: 'straight', nominalModuleWidthCm: 50 }),
   panel_98: Object.freeze({ itemKey: 'panel_98', name: 'Panel 98 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), material: 'sunta', panelRole: 'straight', nominalModuleWidthCm: 100 }),

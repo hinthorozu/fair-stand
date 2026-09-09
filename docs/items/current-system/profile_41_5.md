@@ -1,217 +1,74 @@
-`profile_41_5` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# profile_41_5 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Baseline: `Version2`. Bu envanter `ITEM_CONTRACT_CHECKLIST.md` zorunlu kapsamına göre fresh runtime doğrulamasıdır.
 
-# 1. Mevcut gerçek kimlik ve tanım
+## 1. Identity / type — VAR
+`itemKey=profile_41_5`, `name=Profil 41,5 cm`, `type=profile`, `unit=adet`; owner `src/productionParts.js`. Legacy `partId`: YOK.
 
-Kaynak: `src/productionParts.js:6`
+## 2. Intrinsic properties — VAR
+`lengthCm=41.5`, `thicknessCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Material kullanıcı ürün kararıdır. Mevcut render default'u `src/theme.js` içindeki `ALUMINUM_PROFILE_COLOR='#D0D3D4'` ile eşdeğerdir.
 
-```js
-profile_41_5: Object.freeze({
-  partId: 'profile_41_5',
-  name: 'Profil 41,5 cm',
-  type: 'profile',
-  unit: 'adet',
-  dimensions: Object.freeze({ lengthCm: 41.5 })
-}),
-```
+## 3. Default state — UYGULANMIYOR
+Ayrı mutable leaf project state yoktur.
 
-Lookup `src/productionParts.js:52-54` içindeki `getProductionPart(partId)` ile yapılır. Gerçek kimlik `partId = profile_41_5`'dir. Standalone `MODULE_CATALOG` girdisi veya proje-state production instance'ı mevcut kodda yoktur.
+## 4. Factory / creation — UYGULANMIYOR
+Bağımsız project-instance factory yoktur; parent recipe içinde production Item olarak çözülür.
 
-# 2. Recipe kullanımları
+## 5. Placement — UYGULANMIYOR
+Parent module placement sahibidir.
 
-`src/` altında exact kullanım `src/productionParts.js` ve `src/moduleRecipes.js` dosyalarındadır.
+## 6. Move — UYGULANMIYOR
+Parent module/type behavior sahibidir.
 
-`profile_41_5` toplam 14 recipe'de geçer:
+## 7. Rotation — UYGULANMIYOR
+Bağımsız leaf rotation contract'ı yoktur.
 
-| Recipe grubu | Recipe | Miktar |
-|---|---|---:|
-| düz duvar | `wall-straight-50` | 2 |
-| separatör | `separator-50` | 2 |
-| L banko | `counter-l-100` | 5 |
-| L banko | `counter-l-150` | 4 |
-| L banko | `counter-l-200` | 4 |
-| düz banko | `counter-100` | 4 |
-| düz banko | `counter-150` | 4 |
-| düz banko | `counter-200` | 4 |
-| panel bazalı | `base-wall-100` | 4 |
-| panel bazalı | `base-wall-150` | 4 |
-| panel bazalı | `base-wall-200` | 4 |
-| baza | `base-100` | 4 |
-| baza | `base-150` | 4 |
-| baza | `base-200` | 4 |
+## 8. Snap — UYGULANMIYOR
+Bağımsız leaf snap contract'ı yoktur.
 
-Kaynak satırlar: `src/moduleRecipes.js:4-6,49-50,56-75,78-95`.
+## 9. Collision — UYGULANMIYOR
+Bağımsız leaf collision contract'ı yoktur.
 
-# 3. Resolver / katalog zincirleri
+## 10. Selection — UYGULANMIYOR
+Kullanıcı production profile değil parent module'ü seçer.
 
-`getModuleRecipe()` `src/moduleRecipes.js:107-116` şu yolları çözer:
+## 11. Context menu — UYGULANMIYOR
+Context-menu parent module seviyesindedir.
 
+## 12. Delete / duplicate / capabilities — UYGULANMIYOR
+Leaf production Item bağımsız editor instance değildir.
+
+## 13. Persistence — UYGULANMIYOR
+Project snapshot parent module state'ini persist eder; ayrı `profile_41_5` instance'ı yoktur.
+
+## 14. Relationships / reflow — UYGULANMIYOR
+Leaf profile için ayrı spatial relationship/reflow state'i yoktur; kullanım ve quantity parent recipe sahibidir.
+
+## 15. BOM / composition — VAR
+Tekil Item. 14 doğrulanmış parent recipe (wall/separator/counter/L-counter/base/base-wall); recipe satırları canonical `itemKey` kullanır, quantity parent recipe'den gelir ve expansion `getProductionItem()` ile metadata çözer.
+
+## 16. Renderer / asset boundary — VAR
+`src/scene3d.js` production profile identity'sini mesh identity olarak tüketmez; bağlama göre 39 / 40.8 / 42 cm gibi procedural geometry üretir. Production length renderer'a zorla bağlanmaz. `ALUMINUM_PROFILE_COLOR` specialized renderer/theme override olarak kalabilir; canonical product default `Item.defaultColor=0xd0d3d4` Item'dadır.
+
+## 17. Runtime owners — VAR
+Product metadata `src/productionParts.js`; recipe `src/moduleRecipes.js`; BOM policy `src/moduleContracts.js`; state `src/designState.js`; renderer `src/scene3d.js`; render theme `src/theme.js`; persistence `src/main.js` + `src/projectStore.js`; Raw BOM `src/rawBomDebug.js`.
+
+## 18. Regression — VAR
+Profile Item Contract ve recipe testleri identity/dimensions/quantity/expansion parity'yi korur. `test/profileIntrinsicProperties.test.js` dört profile için `material='alüminyum'` ve `defaultColor=0xd0d3d4` değerlerini kilitler.
+
+## Checklist sonucu
 ```text
-flat-panel/wall, 50 → getStraightWallRecipe(50)
-separator, 50       → separator:50
-counter, width      → counter:<width>
-counter + shape=L   → counter-l:<width>
-base-wall, width    → base-wall:<width>
-base, width         → base:<width>
+identity/type/unit                 VAR
+length/thickness                   VAR
+material                           VAR (alüminyum)
+defaultColor                       VAR (0xd0d3d4)
+state/factory                      UYGULANMIYOR
+placement/move/rotation/snap       UYGULANMIYOR
+collision/selection/context-menu   UYGULANMIYOR
+delete/duplicate                   UYGULANMIYOR
+persistence                        UYGULANMIYOR
+relationships/reflow               UYGULANMIYOR
+BOM / parent recipe                VAR (14)
+renderer boundary                  VAR
+regression                         VAR
 ```
-
-İlgili katalog örnekleri `src/catalog.js:116,205-220`:
-
-```text
-wall_50
-wall_separator_50
-wall_separator_50_sarmasik
-desk_banko_100/150/200
-desk_banko_100_L/150_L/200_L
-wall_base_100/150/200
-BASE_100/150/200
-```
-
-`wall_separator_50` ve `wall_separator_50_sarmasik` ayrı catalog key'leridir; ikisi de `type=separator,widthCm=50` üzerinden aynı `separator:50` recipe'sine gider.
-
-`expandRecipe()` `src/moduleRecipes.js:119-122` her `{partId,quantity}` satırını `getProductionPart()` ile metadata'ya bağlar.
-
-# 4. State
-
-Bu production parçasını kullanan üst modüllerin state'leri `src/designState.js` içinde module seviyesinde tutulur:
-
-- flat panel: `createFlatPanelModuleState()` `35-44`
-- separator: `createSeparatorModuleState()` `47-57`
-- counter: `createCounterModuleState()` `109-126`
-- base-wall: `createBaseWallModuleState()` `129-148`
-- base: `createBaseModuleState()` `151-166`
-
-`createModuleStateFromDescriptor()` `357-378` module `catalogKey`'ini resolve eder.
-
-Bu state'lerde `profile_41_5`, `lengthCm=41.5` veya production profile instance'ı tutulmaz. State tarafında production part ownership mevcut runtime kodunda yoktur.
-
-# 5. Renderer tarafında paralel profil geometrileri
-
-`src/scene3d.js` `productionParts.js`/`moduleRecipes.js` tüketmez ve render mesh'lerine `profile_41_5` partId'si yazmaz.
-
-Aynı fiziksel işleve benzeyen yatay profiller farklı procedural formüllerle çizilir:
-
-## 50 cm düz duvar
-
-`createFlatPanelModule()` `src/scene3d.js:6511-6559`:
-
-```text
-rail length = widthM - 2 × 0.040
-50 cm için = 42 cm
-```
-
-BOM tarafı `profile_41_5 = 41.5 cm ×2`'dir. Renderer 42 cm rail üretir; production 41.5 cm değerini okumaz.
-
-## Separatör 50
-
-`createSeparatorModule()` `src/scene3d.js:6817-6860` `STAND_DIMENSIONS.frameWidth` üzerinden:
-
-```text
-cross rail length = widthM - 2 × frameWidth
-frameWidth = 5.5 cm olduğundan 50 cm separatörde ≈39 cm
-```
-
-Recipe yine `profile_41_5 ×2` üretir. Doğrudan identity bağı yoktur.
-
-## Düz bankolar
-
-`createCounterModule()` `src/scene3d.js:6131-6211`:
-
-```text
-sidePanelWidthM = depthM - 2×profileM - 0.012
-50 cm depth için ≈40.8 cm
-```
-
-Recipe düz bankolarda `profile_41_5 ×4` üretir. Renderer side rail geometrisi production 41.5 cm'den hesaplanmaz.
-
-## L bankolar
-
-`createLCounterModule()` `src/scene3d.js:6309-6347` içinde `armM=0.50` ve `shortPanelM = armM - 2×profileM - 0.012` ile yaklaşık 40.8 cm kısa rail geometrisi kurulur. L100 recipe `profile_41_5 ×5`, L150/L200 `×4` üretir; renderer mesh'lerinde production identity yoktur.
-
-## Baza / panel bazalı
-
-`createBaseModule()` `src/scene3d.js:5969-6046` 50 cm derinlikte side rail uzunluğunu `depthM - 2×profileM = 42 cm` hesaplar. `createBaseWallModule()` ise base renderer'ını düz duvar renderer'ıyla birleştirir. Recipe tarafında her base/base-wall için `profile_41_5 ×4` vardır; renderer doğrudan bu partId'yi tüketmez.
-
-# 6. UI / Raw BOM
-
-Selection UI `src/selectionFeedback.js:11-108` module type/width/surface üzerinden konuşur; `profile_41_5` selection identity değildir.
-
-`src/rawBomDebug.js:35-56` expanded recipe satırını `N × Profil 41,5 cm` olarak gösterebilir. Parser yolları:
-
-- düz wall 50: `118-130`
-- separator 50: `84-89`
-- düz counter 100/150/200: `97-101`
-- L100: `91-95`
-- base-wall 100/150/200: `104-109`
-- base 100/150/200: `111-115`
-
-`counter-l-150` ve `counter-l-200` recipe'leri kodda olsa da Raw BOM seçim parser'ında bu L ölçüler için branch yoktur.
-
-# 7. Persistence
-
-`src/main.js:1257-1265` module state'i snapshot'a alır, `1320-1331` restore eder. `src/projectStore.js:39-56` project'i IndexedDB'ye yazar.
-
-Module state'lerinde `profile_41_5` production kimliği bulunmadığından ayrı profile instance'ı persistence'a yazılmaz.
-
-# 8. BOM ownership / source-of-truth
-
-`src/moduleContracts.js:4-7` recipe BOM source'unu `src/moduleRecipes.js` olarak belirler. İlgili wall/separator/counter/base-wall/base catalog key'leri `RECIPE_BOM_POLICY` kullanır (`src/moduleContracts.js:94-127`).
-
-Mevcut ayrım:
-
-```text
-production metadata → src/productionParts.js
-recipe/adet         → src/moduleRecipes.js
-module BOM policy   → src/moduleContracts.js
-state               → src/designState.js
-renderer            → src/scene3d.js
-persistence         → src/main.js + src/projectStore.js
-```
-
-`src/systemChangeContract.js:114-122` de production/recipe kaynaklarını BOM domain'ine, `rawBomDebug.js`'i BOM + UI domain'ine koyar.
-
-# 9. Testler
-
-Doğrudan `profile_41_5` geçen testler:
-
-```text
-test/moduleRecipes.test.js
-test/separatorRecipes.test.js
-test/counterRecipes.test.js
-test/baseRecipes.test.js
-test/baseWallRecipes.test.js
-test/lCounter100Contract.test.js
-test/lCounter150Contract.test.js
-test/lCounter200Contract.test.js
-```
-
-Önemli doğrulamalar:
-
-- `test/moduleRecipes.test.js:41-51`: wall50 → `profile_41_5 ×2`.
-- `test/separatorRecipes.test.js:12-21`: separator50 → `profile_41_5 ×2`.
-- `test/counterRecipes.test.js:14-49`: düz bankolar → `profile_41_5 ×4`.
-- `test/baseRecipes.test.js:32-45`: bazalar → `profile_41_5 ×4`.
-- `test/baseWallRecipes.test.js:12-29`: panel bazalılar → `profile_41_5 ×4`.
-- L100/L150/L200 contract testleri ilgili L recipe miktarlarını doğrular.
-
-Bu çalışma sırasında ortak hedefli test seti çalıştırıldı: `49 test / 49 pass / 0 fail`.
-
-# 10. Sonuç
-
-```text
-partId olarak var                        EVET
-production metadata olarak var           EVET
-recipe BOM kalemi olarak var              EVET (14 recipe)
-standalone MODULE_CATALOG girdisi         HAYIR
-ayrı project-state entity/instance        HAYIR
-render mesh partId identity               HAYIR
-persistence profile_41_5 instance         HAYIR
-UI selection identity profile_41_5        HAYIR
-renderer productionParts tüketimi         HAYIR
-renderer moduleRecipes tüketimi           HAYIR
-```
-
-`profile_41_5` çok sayıda recipe tarafından ortak kullanılan production/BOM profilidir. Renderer tarafında 50 cm genişlik/derinlik çevresindeki çeşitli yatay rail geometrileri procedural olarak üretilir; fakat tek bir `profile_41_5` production identity'sine bağlı değildir ve geometrik değerler de bağlama göre 39/40.8/42 cm gibi farklı sonuçlar verir.
-
-**Kod zinciri burada bitiyor. Hedef mimari veya entegrasyon tasarımı yapılmadı.**

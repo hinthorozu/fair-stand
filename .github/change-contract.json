@@ -1,39 +1,19 @@
 {
   "schemaVersion": 2,
-  "id": "sunta-board-materials",
+  "id": "profile-material-default-color",
   "kind": "architecture",
-  "summary": "Set the canonical production material to sunta for all 17 verified panel, inner-corner panel, base-top and counter-top Items, refresh their Item documentation, and lock the product decision with regression coverage. Renderer overrides remain unchanged.",
+  "summary": "Make aluminum material and the existing aluminum profile color canonical intrinsic properties of all four production profile Items, refresh their full Item inventories/definitions, and lock the decision with regression coverage while preserving renderer overrides.",
   "owners": [
     "src/productionParts.js",
-    "test/boardMaterialItemContract.test.js",
-    "docs/items/current-system/panel_48_5.md",
-    "docs/items/current-system/panel_98.md",
-    "docs/items/current-system/panel_147_5.md",
-    "docs/items/current-system/panel_197.md",
-    "docs/items/current-system/panel_corner_42_5.md",
-    "docs/items/current-system/panel_corner_92.md",
-    "docs/items/current-system/panel_corner_142_5.md",
-    "docs/items/current-system/panel_corner_192.md",
-    "docs/items/current-system/counter_top_102_60.md",
-    "docs/items/current-system/counter_top_110_60.md",
-    "docs/items/current-system/counter_top_150_60.md",
-    "docs/items/current-system/counter_top_160_60.md",
-    "docs/items/current-system/counter_top_210_60.md",
-    "docs/items/current-system/counter_top_52_60.md",
-    "docs/items/definitions/panel_48_5.md",
-    "docs/items/definitions/panel_98.md",
-    "docs/items/definitions/panel_147_5.md",
-    "docs/items/definitions/panel_197.md",
-    "docs/items/definitions/panel_corner_42_5.md",
-    "docs/items/definitions/panel_corner_92.md",
-    "docs/items/definitions/panel_corner_142_5.md",
-    "docs/items/definitions/panel_corner_192.md",
-    "docs/items/definitions/counter_top_102_60.md",
-    "docs/items/definitions/counter_top_110_60.md",
-    "docs/items/definitions/counter_top_150_60.md",
-    "docs/items/definitions/counter_top_160_60.md",
-    "docs/items/definitions/counter_top_210_60.md",
-    "docs/items/definitions/counter_top_52_60.md"
+    "test/profileIntrinsicProperties.test.js",
+    "docs/items/current-system/profile_41_5.md",
+    "docs/items/current-system/profile_91.md",
+    "docs/items/current-system/profile_140_5.md",
+    "docs/items/current-system/profile_190.md",
+    "docs/items/definitions/profile_41_5.md",
+    "docs/items/definitions/profile_91.md",
+    "docs/items/definitions/profile_140_5.md",
+    "docs/items/definitions/profile_190.md"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
@@ -101,6 +81,7 @@
       "test/panelCorner192ItemContract.test.js",
       "test/profile190ItemContract.test.js",
       "test/profilesItemContract.test.js",
+      "test/profileIntrinsicProperties.test.js",
       "test/rawBomSelectionParser.test.js",
       "test/roadmapProductionSourceOfTruth.test.js",
       "test/separatorPanelsItemContract.test.js",
@@ -233,35 +214,37 @@
     ],
     "relatedFindings": {
       "affected": [],
-      "reviewedNotAffected": ["F-001", "F-003"]
+      "reviewedNotAffected": [
+        "F-001",
+        "F-003"
+      ]
     },
-    "notes": "User product decision: all 17 listed panel/base-top/counter-top Items are manufactured from sunta. Existing base-top material values already match. Eight straight/corner panels and six counter tops receive canonical material metadata. No renderer, placement, state, persistence, relationship or BOM quantity behavior changes. Full-system references are declared for gate review only; no audit remediation is included."
+    "notes": "User product decision: profile_41_5, profile_91, profile_140_5 and profile_190 are aluminum. The current renderer already uses ALUMINUM_PROFILE_COLOR='#D0D3D4'; the canonical Item default is recorded as defaultColor=0xd0d3d4 while theme/scene rendering remains a specialized renderer override. No recipe quantity, state, persistence, placement, behavior, relationship or renderer code changes are included. Full-system references are declared for gate review only; no audit remediation is included."
   },
   "tests": {
     "targeted": [
-      "test/boardMaterialItemContract.test.js",
-      "test/baseTopsItemContract.test.js",
-      "test/counterTopsItemContract.test.js",
-      "test/straightPanelsItemContract.test.js",
-      "test/panel197ItemContract.test.js",
-      "test/cornerPanelsItemContract.test.js",
-      "test/panelCorner192ItemContract.test.js"
+      "test/profileIntrinsicProperties.test.js",
+      "test/profilesItemContract.test.js",
+      "test/profile190ItemContract.test.js",
+      "test/moduleRecipes.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
-      "targeted": ["e2e/f010-module-construction.spec.mjs"],
-      "reason": "The repository change gate classifies BOM-domain metadata changes as browser-impacting, so the existing module-construction E2E is required even though placement/render behavior is unchanged."
+      "targeted": [
+        "e2e/f010-module-construction.spec.mjs"
+      ],
+      "reason": "The repository change gate classifies production Item/BOM metadata changes as browser-impacting, so the existing module-construction E2E is required even though renderer and placement behavior are unchanged."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Adds a verified intrinsic product property without changing quantities, placement, state, persistence or renderer behavior."
+    "notes": "Adds user-confirmed intrinsic profile material/default color metadata and documentation/regression coverage without changing recipe quantities, state, persistence, placement or renderer behavior."
   },
   "migration": {
     "required": false,
     "notes": "No persisted project schema migration is required."
   },
-  "rollback": "Remove material=sunta from the newly updated panel/counter-top Items and restore the previous Item documentation; base-top material remains unchanged."
+  "rollback": "Remove material='alüminyum' and defaultColor=0xd0d3d4 from the four profile Items, remove the profile intrinsic-property regression, and restore the prior profile documentation."
 }
