@@ -91,6 +91,7 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/imageActions.css': frozenDomains('ui'),
   'src/imageAssetReferences.js': frozenDomains('persistence', 'storage'),
   'src/imageFit.js': frozenDomains('renderer'),
+  'src/itemCapabilities.js': frozenDomains('architecture', 'behavior'),
   'src/main.js': frozenDomains(
     'architecture',
     'catalog',

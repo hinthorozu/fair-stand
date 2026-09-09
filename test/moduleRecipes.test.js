@@ -111,11 +111,12 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   const shelfOccurrences = { shelf_100: 0, shelf_150: 0, shelf_200: 0 };
   let glassShelfOccurrences = 0;
   let shelfLegOccurrences = 0;
+  let doorLeafOccurrences = 0;
   for (const recipe of recipes) {
     assert.ok(recipe);
     for (const item of recipe.items) {
       const key = getRecipeItemKey(item);
-      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key in profileOccurrences || key in straightPanelOccurrences || key in baseTopOccurrences || key in counterTopOccurrences || key in separatorPanelOccurrences || key in shelfOccurrences || key === 'glass_shelf' || key === 'shelf_leg') {
+      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key in profileOccurrences || key in straightPanelOccurrences || key in baseTopOccurrences || key in counterTopOccurrences || key in separatorPanelOccurrences || key in shelfOccurrences || key === 'glass_shelf' || key === 'shelf_leg' || key === 'door_leaf_100') {
         if (key === 'connector_start') startOccurrences += 1;
         if (key === 'connector_single') singleOccurrences += 1;
         if (key in uprightOccurrences) uprightOccurrences[key] += 1;
@@ -128,6 +129,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
         if (key in shelfOccurrences) shelfOccurrences[key] += 1;
         if (key === 'glass_shelf') glassShelfOccurrences += 1;
         if (key === 'shelf_leg') shelfLegOccurrences += 1;
+        if (key === 'door_leaf_100') doorLeafOccurrences += 1;
         assert.equal(item.itemKey, key);
         assert.equal(item.partId, undefined);
       } else {
@@ -149,6 +151,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   assert.deepEqual(shelfOccurrences, { shelf_100: 2, shelf_150: 2, shelf_200: 2 });
   assert.equal(glassShelfOccurrences, 2);
   assert.equal(shelfLegOccurrences, 6);
+  assert.equal(doorLeafOccurrences, 1);
 });
 
 test('expanded recipes resolve connector_start metadata through its canonical itemKey', () => {
@@ -170,9 +173,10 @@ test('production part catalog contains all verified panel sizes', () => {
   assert.deepEqual(panelWidths, [42.5, 48.5, 92, 98, 142.5, 147.5, 192, 197]);
 });
 
-test('production part catalog contains the 100 cm door part', () => {
-  assert.equal(getProductionPart('door_100').name, 'Kapı 100 cm');
-  assert.equal(getProductionPart('door_100').unit, 'adet');
+test('production part catalog contains the canonical 100 cm wooden door leaf', () => {
+  assert.equal(getProductionItem('door_100'), null);
+  assert.equal(getProductionItem('door_leaf_100').name, 'Ahşap Kapı Kanadı 100 × 200 cm');
+  assert.equal(getProductionItem('door_leaf_100').unit, 'adet');
 });
 
 test('production part catalog contains shelf sizes and shelf leg', () => {
@@ -223,7 +227,7 @@ test('100 cm door recipe matches verified production data', () => {
     { itemKey: 'panel_98', quantity: 3 },
     { itemKey: 'connector_start', quantity: 2 },
     { itemKey: 'connector_single', quantity: 5 },
-    { partId: 'door_100', quantity: 1 },
+    { itemKey: 'door_leaf_100', quantity: 1 },
   ]);
   assert.equal(getRecipeInnerCornerPanelKey(recipe), 'panel_corner_92');
 });
@@ -311,7 +315,8 @@ test('expanded recipe resolves production part metadata without mutating source 
 
 test('expanded door recipe resolves the door production part', () => {
   const expanded = getExpandedModuleRecipe('door', 100);
-  assert.equal(expanded.items.at(-1).part.name, 'Kapı 100 cm');
+  assert.equal(expanded.items.at(-1).itemKey, 'door_leaf_100');
+  assert.equal(expanded.items.at(-1).part.name, 'Ahşap Kapı Kanadı 100 × 200 cm');
   assert.equal(expanded.items[2].part.dimensions.widthCm, 98);
 });
 

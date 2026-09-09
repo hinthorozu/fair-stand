@@ -1,5 +1,6 @@
 import { resolveModuleCatalogKey } from './catalog.js';
-import { getProductionItem } from './productionParts.js';
+import { getDoorLeafProductionItem, getProductionItem } from './productionParts.js';
+import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 import { getTvDefinition } from './tvConfig.js';
 
 const DEFAULT_PANEL_COLOR = '#ffffff';
@@ -28,6 +29,28 @@ export function createDefaultImageTransform() {
     repeatX: 1,
     repeatY: 1,
     rotation: 0,
+  };
+}
+
+function itemDefaultColorHex(item) {
+  const defaultColor = item?.defaultColor;
+  if (!Number.isInteger(defaultColor)) {
+    throw new TypeError(`Missing canonical defaultColor for ${item?.itemKey ?? 'unknown Item'}.`);
+  }
+  return `#${defaultColor.toString(16).padStart(6, '0')}`;
+}
+
+function createEditableItemSurfaceState(item, stripIndex = null) {
+  const capabilities = getItemSurfaceCapabilities(item);
+  if (!capabilities.color && !capabilities.image) {
+    throw new TypeError(`Editable surface capability is required for ${item?.itemKey ?? 'unknown Item'}.`);
+  }
+  return {
+    id: createId('surface'),
+    itemKey: item.itemKey,
+    stripIndex,
+    ...(capabilities.color ? { color: itemDefaultColorHex(item) } : {}),
+    ...(capabilities.image ? { imageAssetId: null, imageTransform: createDefaultImageTransform() } : {}),
   };
 }
 
@@ -100,18 +123,20 @@ export function createShelfModuleState(widthCm, shelfCount = 2) {
 
 export function createDoorModuleState(widthCm = 100) {
   if (Number(widthCm) !== 100) return null;
+  const doorLeafItem = getDoorLeafProductionItem(widthCm);
+  if (!doorLeafItem) throw new TypeError(`Missing canonical door leaf Item for ${widthCm} cm door module.`);
 
   return {
     id: createId('module'),
     type: 'door',
     widthCm: 100,
-    // Kapı 2 m yüksekliğinde (alt 4 x 50 cm), üstte 3 x 50 cm panel kalır.
+    // Üstte kalan üç duvar paneli parent kapı modülünün ayrı editable surface'leridir.
     strips: Array.from(
       { length: 3 },
       (_, index) => createEditablePanelState(index + 4, DEFAULT_PANEL_COLOR),
     ),
-    // Kapı kanadı tek başına renk ve görsel alabilen bağımsız bir yüzeydir.
-    surface: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+    // Fiziksel ahşap kapı kanadı canonical door_leaf Item kimliği/default'u ile başlar.
+    surface: createEditableItemSurfaceState(doorLeafItem),
   };
 }
 
@@ -385,6 +410,27 @@ export function createModuleStateFromDescriptor(
     state.placement = { ...descriptor.placement };
   }
   return state;
+}
+
+
+/**
+ * Normalizes persisted child Item identity without replacing user overrides.
+ * Legacy door projects did not store the physical leaf itemKey on surface state.
+ */
+export function normalizeModuleItemState(moduleState) {
+  if (!moduleState || moduleState.type !== 'door') return moduleState;
+  const doorLeafItem = getDoorLeafProductionItem(moduleState.widthCm);
+  if (!doorLeafItem) return moduleState;
+  if (!moduleState.surface) {
+    moduleState.surface = createEditableItemSurfaceState(doorLeafItem);
+    return moduleState;
+  }
+  const surface = moduleState.surface;
+  surface.itemKey = doorLeafItem.itemKey;
+  if (!surface.color) surface.color = itemDefaultColorHex(doorLeafItem);
+  if (!Object.hasOwn(surface, 'imageAssetId')) surface.imageAssetId = null;
+  if (!surface.imageTransform) surface.imageTransform = createDefaultImageTransform();
+  return moduleState;
 }
 
 export function duplicateModuleState(moduleState) {

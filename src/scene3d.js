@@ -5,6 +5,7 @@ import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
 import { getProductionItem, getShelfProductionItem } from './productionParts.js';
+import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
@@ -3010,7 +3011,7 @@ export function createStandScene(
     });
 
     meshes.filter((mesh) => !mesh.userData.surfaceState?.fabricGroupId).forEach((mesh) => {
-      if (!mesh?.material) return;
+      if (!mesh?.material || mesh.userData.acceptsColor === false) return;
       const surfaceState = mesh.userData.surfaceState;
       applyColorOverride(surfaceState, hexColor);
 
@@ -6685,6 +6686,11 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
 
   // Alt bölüm: kapalı kapı kanadı. Sahne düzleminden dışarı açılmaz.
   const doorState = moduleState.surface;
+  const doorLeafItem = getProductionItem(doorState?.itemKey);
+  if (!doorLeafItem) {
+    throw new TypeError(`Missing canonical door leaf Item for module ${moduleState.id}.`);
+  }
+  const doorLeafCapabilities = getItemSurfaceCapabilities(doorLeafItem);
   const doorPanelHeight = Math.max(doorHeight - railHeight - 0.018, 0.1);
   const doorBacking = new THREE.Mesh(
     new THREE.BoxGeometry(innerWidth, doorPanelHeight, panelDepth),
@@ -6715,9 +6721,11 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
   doorSurface.add(doorSelectionFrame);
   doorSurface.userData = {
     kind: 'surface',
+    itemKey: doorLeafItem.itemKey,
     moduleType: 'door',
     selectionMode: 'module',
-    acceptsImage: true,
+    acceptsColor: doorLeafCapabilities.color,
+    acceptsImage: doorLeafCapabilities.image,
     moduleIndex,
     moduleId: moduleState.id,
     widthCm,

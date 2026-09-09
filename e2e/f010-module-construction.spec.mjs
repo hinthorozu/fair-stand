@@ -121,3 +121,41 @@ test('F-010 catalog construction persists a module created through the real pick
   expect(replacement.widthCm).toBe(removedModule.widthCm);
   expect(pageErrors).toEqual([]);
 });
+
+
+test('F-010 door catalog construction persists canonical door_leaf_100 child state', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  await createStand(page, { standName: 'Sırt Duvar', projectName: 'F010 Door Leaf Item' });
+  const initialProject = await saveAndReadProject(page);
+  expect(initialProject).not.toBeNull();
+  expect(initialProject.modules.length).toBeGreaterThan(0);
+  const removable = initialProject.modules.slice(0, 2);
+  for (const moduleState of removable) {
+    page.once('dialog', async (dialog) => dialog.accept());
+    await page.evaluate((moduleId) => {
+      window.dispatchEvent(new CustomEvent('fair-stand:delete-selected-module', { detail: { moduleId } }));
+    }, moduleState.id);
+  }
+  const openCatalogButton = page.locator('#open-module-catalog');
+  const modulePanel = page.locator('details', { has: openCatalogButton });
+  await modulePanel.locator(':scope > summary').click();
+  await openCatalogButton.click();
+  const picker = page.locator('.module-picker-backdrop');
+  await expect(picker).toBeVisible();
+  const doorCard = picker.locator('[data-module-key="DOOR_100"]');
+  await expect(doorCard).toBeVisible();
+  await doorCard.click();
+  await picker.locator('.module-picker-add').click();
+  await expect(picker).toBeHidden();
+  const project = await saveAndReadProject(page);
+  const door = project.modules.find((moduleState) => moduleState.catalogKey === 'DOOR_100');
+  expect(door).toBeTruthy();
+  expect(door.type).toBe('door');
+  expect(door.widthCm).toBe(100);
+  expect(door.surface.itemKey).toBe('door_leaf_100');
+  expect(door.surface.color).toBe('#ffffff');
+  expect(door.surface.imageAssetId).toBeNull();
+  expect(door.surface.imageTransform.mode).toBe('single');
+  expect(pageErrors).toEqual([]);
+});

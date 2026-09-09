@@ -14,6 +14,7 @@ import {
 import {
   createModuleStateFromDescriptor,
   duplicateModuleState,
+  normalizeModuleItemState,
   totalWallWidthCm,
   moduleWidths,
 } from './designState.js';
@@ -1323,7 +1324,7 @@ async function restoreProject(project) {
   activeProjectId = project.id;
   activeProjectCreatedAt = Number(project.createdAt) || Date.now();
   setProjectName(project.name || 'Adsız Proje');
-  currentModules = cloneProjectState(project.modules) || [];
+  currentModules = (cloneProjectState(project.modules) || []).map(normalizeModuleItemState);
   currentModules.forEach((moduleState) => {
     const resolvedCatalogKey = resolveModuleCatalogKey(moduleState);
     if (resolvedCatalogKey) moduleState.catalogKey = resolvedCatalogKey;

@@ -143,7 +143,7 @@ connectionMode = straight
 | `panel_98` | Panel 98 × 47 cm | 3 | adet |
 | `connector_start` | Başlangıç Aparatı | 2 | adet |
 | `connector_single` | Tekli Aparat | 5 | adet |
-| `door_100` | Kapı 100 cm | 1 | adet |
+| `door_leaf_100` | Ahşap Kapı Kanadı 100 × 200 cm | 1 | adet |
 
 Recipe metadata'sında ayrıca:
 
