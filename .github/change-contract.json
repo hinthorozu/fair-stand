@@ -1,22 +1,22 @@
 {
   "schemaVersion": 2,
-  "id": "remaining-profiles-item-contract-cutover",
+  "id": "base-tops-item-contract-cutover",
   "kind": "bom-change",
-  "summary": "Migrate profile_41_5, profile_91, and profile_140_5 to canonical itemKey identity across production metadata and all 34 verified parent recipe rows, including verified thicknessCm = 8 metadata, while preserving exact quantities and existing renderer/state separation.",
+  "summary": "Migrate base_top_107_50, base_top_157_50, and base_top_206_50 to canonical itemKey identity across production metadata and all 6 verified parent recipe rows, add verified thicknessCm = 1.8 sunta metadata, and preserve exact ×1 quantities and existing renderer/state separation.",
   "owners": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
-    "docs/items/definitions/profile_41_5.md",
-    "docs/items/definitions/profile_91.md",
-    "docs/items/definitions/profile_140_5.md",
-    "test/profilesItemContract.test.js"
+    "docs/items/definitions/base_top_107_50.md",
+    "docs/items/definitions/base_top_157_50.md",
+    "docs/items/definitions/base_top_206_50.md",
+    "test/baseTopsItemContract.test.js"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
-    "docs/items/current-system/profile_41_5.md",
-    "docs/items/current-system/profile_91.md",
-    "docs/items/current-system/profile_140_5.md"
+    "docs/items/current-system/base_top_107_50.md",
+    "docs/items/current-system/base_top_157_50.md",
+    "docs/items/current-system/base_top_206_50.md"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -74,7 +74,8 @@
       "test/systemModuleCatalogDoc.test.js",
       "test/upright3465ItemContract.test.js",
       "test/upright99And495ItemContract.test.js",
-      "test/cornerPanelsItemContract.test.js"
+      "test/cornerPanelsItemContract.test.js",
+      "test/baseTopsItemContract.test.js"
     ],
     "affectedDocs": [
       "FRESH_REPOSITORY_REVIEW.md",
@@ -181,7 +182,10 @@
       "docs/items/definitions/wall_showcase_100_3.md",
       "docs/items/definitions/panel_corner_142_5.md",
       "docs/items/definitions/panel_corner_42_5.md",
-      "docs/items/definitions/panel_corner_92.md"
+      "docs/items/definitions/panel_corner_92.md",
+      "docs/items/definitions/base_top_107_50.md",
+      "docs/items/definitions/base_top_157_50.md",
+      "docs/items/definitions/base_top_206_50.md"
     ],
     "relatedFindings": {
       "affected": [],
@@ -191,21 +195,14 @@
         "F-014"
       ]
     },
-    "notes": "Full-system review confirms the three target profiles are production leaf Items used only through parent recipes. State, persistence, placement, interaction, and renderer production identity are not applicable. Renderer rail geometry remains procedural and is not made BOM source-of-truth. thicknessCm = 8 is now explicitly verified for all three target profiles and regression-locked as canonical production metadata."
+    "notes": "Full-system review confirms the three target base tops are production leaf Items used only through base/base-wall parent recipes. User product decision verifies 1.8 cm sunta thickness as canonical production metadata. State, persistence, placement, interaction, and renderer production identity remain not applicable. The six active recipe rows migrate partId -> itemKey with exact ×1 quantity parity."
   },
   "tests": {
     "targeted": [
-      "test/profilesItemContract.test.js",
-      "test/profile190ItemContract.test.js",
-      "test/moduleRecipes.test.js",
-      "test/separatorRecipes.test.js",
-      "test/showcaseRecipes.test.js",
-      "test/counterRecipes.test.js",
+      "test/baseTopsItemContract.test.js",
       "test/baseRecipes.test.js",
       "test/baseWallRecipes.test.js",
-      "test/lCounter100Contract.test.js",
-      "test/lCounter150Contract.test.js",
-      "test/lCounter200Contract.test.js"
+      "test/moduleRecipes.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -214,16 +211,16 @@
       "targeted": [
         "e2e/f010-module-construction.spec.mjs"
       ],
-      "reason": "Production recipe identity is a BOM-domain runtime change. Unit tests lock all 34 quantities and canonical identities; existing F-010 Chromium coverage protects real module construction/browser integration."
+      "reason": "Production recipe identity and canonical production dimensions are BOM-domain runtime changes. Unit regressions lock all six ×1 recipe rows and 1.8 cm metadata; existing F-010 Chromium coverage protects real base/base-wall module construction/browser integration."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Thirty-four active recipe rows change identity field from partId to itemKey, and the three target production Items add verified thicknessCm = 8 metadata. Quantities, units, module state, renderer geometry, and persistence remain unchanged and are regression-locked."
+    "notes": "Six active base/base-wall recipe rows change identity field from partId to itemKey and three production definitions gain verified thicknessCm = 1.8. Quantities, units, module state, renderer geometry, and persistence remain unchanged and are regression-locked."
   },
   "migration": {
     "required": true,
-    "notes": "Code/recipe metadata migration only: three production definitions move partId -> itemKey and add verified thicknessCm = 8; 34 recipe rows move partId -> itemKey. No persisted project schema or data migration is required."
+    "notes": "Code/recipe identity + production metadata migration only: three production definitions and six recipe rows move partId -> itemKey, and verified 1.8 cm thickness is added. No persisted project schema or data migration is required."
   },
-  "rollback": "Restore the three production partId identities and the 34 recipe partId fields, then revert profile-family definitions/regressions. No persisted data rollback is required."
+  "rollback": "Restore the three production partId identities, remove the three thicknessCm = 1.8 metadata fields, restore the six recipe partId fields, and revert base-top definitions/regressions. No persisted data rollback is required."
 }

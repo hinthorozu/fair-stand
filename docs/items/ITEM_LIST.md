@@ -52,9 +52,9 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `counter_top_102_60` | `counter-top` | Bekliyor |
 | `counter_top_210_60` | `counter-top` | Bekliyor |
 | `counter_top_150_60` | `counter-top` | Bekliyor |
-| `base_top_107_50` | `base-top` | Bekliyor |
-| `base_top_157_50` | `base-top` | Bekliyor |
-| `base_top_206_50` | `base-top` | Bekliyor |
+| `base_top_107_50` | `base-top` | **Tamam — canonical `itemKey`; `107 × 50 × 1.8 cm`; BASE_100 + wall_base_100 içinde ×1 quantity parity** |
+| `base_top_157_50` | `base-top` | **Tamam — canonical `itemKey`; `157 × 50 × 1.8 cm`; BASE_150 + wall_base_150 içinde ×1 quantity parity** |
+| `base_top_206_50` | `base-top` | **Tamam — canonical `itemKey`; `206 × 50 × 1.8 cm`; BASE_200 + wall_base_200 içinde ×1 quantity parity** |
 
 ## B. Üst seviye / catalog Item envanteri
 
