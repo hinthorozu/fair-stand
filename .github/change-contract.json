@@ -1,19 +1,33 @@
 {
   "schemaVersion": 2,
-  "id": "base-top-item-properties",
-  "kind": "bom-change",
-  "summary": "Complete canonical intrinsic/default metadata for base_top_107_50, base_top_157_50 and base_top_206_50 by adding verified material=sunta and defaultColor=0xffffff, while preserving dimensions, recipe quantities and explicit specialized-renderer override freedom.",
+  "id": "counter-top-checklist-revalidation",
+  "kind": "architecture",
+  "summary": "Re-validate all six counter-top production Items against the strengthened Item checklist, refresh stale current-system inventories and canonical definitions, document existing defaultColor and parent-owned behavior/state/persistence boundaries, and preserve specialized renderer override freedom without runtime changes.",
   "owners": [
-    "src/productionParts.js",
-    "test/baseTopsItemContract.test.js",
-    "docs/items/current-system/base_top_107_50.md",
-    "docs/items/current-system/base_top_157_50.md",
-    "docs/items/current-system/base_top_206_50.md",
-    "docs/items/definitions/base_top_107_50.md",
-    "docs/items/definitions/base_top_157_50.md",
-    "docs/items/definitions/base_top_206_50.md"
+    "docs/items/current-system/counter_top_102_60.md",
+    "docs/items/current-system/counter_top_110_60.md",
+    "docs/items/current-system/counter_top_150_60.md",
+    "docs/items/current-system/counter_top_160_60.md",
+    "docs/items/current-system/counter_top_210_60.md",
+    "docs/items/current-system/counter_top_52_60.md",
+    "docs/items/definitions/counter_top_102_60.md",
+    "docs/items/definitions/counter_top_110_60.md",
+    "docs/items/definitions/counter_top_150_60.md",
+    "docs/items/definitions/counter_top_160_60.md",
+    "docs/items/definitions/counter_top_210_60.md",
+    "docs/items/definitions/counter_top_52_60.md"
   ],
-  "sourceOfTruth": ["src/productionParts.js"],
+  "sourceOfTruth": [
+    "src/productionParts.js",
+    "src/moduleRecipes.js",
+    "src/designState.js",
+    "src/moduleBehavior.js",
+    "src/moduleContextMenu.js",
+    "src/main.js",
+    "src/projectStore.js",
+    "src/rawBomDebug.js",
+    "src/scene3d.js"
+  ],
   "impact": {
     "catalog": "not-applicable",
     "behavior": "not-applicable",
@@ -21,7 +35,7 @@
     "placement": "not-applicable",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
-    "bom": "affected",
+    "bom": "not-applicable",
     "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
@@ -38,9 +52,18 @@
     "affectedFiles": [
       "index.html",
       "scripts/verify-change-contract.mjs",
+      "src/catalog.js",
+      "src/designState.js",
+      "src/main.js",
+      "src/moduleBehavior.js",
+      "src/moduleContextMenu.js",
+      "src/moduleContracts.js",
       "src/moduleRecipes.js",
+      "src/productionParts.js",
+      "src/projectStore.js",
       "src/rawBomDebug.js",
       "src/scene3d.js",
+      "src/selectionFeedback.js",
       "src/systemChangeContract.js"
     ],
     "affectedTests": [
@@ -198,29 +221,33 @@
       "affected": [],
       "reviewedNotAffected": ["F-001", "F-003"]
     },
-    "notes": "The three base-top Items already own canonical width/depth/thickness and recipe identity. This change adds the already documented product material 'sunta' and existing white product default color 0xffffff to canonical Item metadata. Renderer implementation remains unchanged and is an explicit specialized visual override boundary. Full-system reference surfaces were reviewed only for impact declaration; no audit finding remediation is part of this change."
+    "notes": "Documentation revalidation only. Fresh Version2 runtime inspection confirms the six counter-top Items already own canonical width/depth/1.8 cm thickness/defaultColor, recipe itemKey usage and quantity parity. Material has no verified product value and is intentionally not invented. Parent counter owns state, placement/move/rotation/snap/collision, selection/context-menu and persistence. Raw BOM L-counter parsing supports 100/150/200. Specialized renderer values remain explicit visual overrides. No audit remediation or runtime implementation change is included."
   },
   "tests": {
     "targeted": [
-      "test/baseTopsItemContract.test.js",
-      "test/baseRecipes.test.js",
-      "test/baseWallRecipes.test.js"
+      "test/counterTopsItemContract.test.js",
+      "test/counterTopDefaultColor.test.js",
+      "test/counterRecipes.test.js",
+      "test/lCounter100Contract.test.js",
+      "test/lCounter150Contract.test.js",
+      "test/lCounter200Contract.test.js",
+      "test/rawBomSelectionParser.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": ["e2e/f010-module-construction.spec.mjs"],
-      "reason": "Canonical production metadata changes retain existing browser module-construction coverage while the Item regression locks material/defaultColor and recipe expansion."
+      "required": false,
+      "targeted": [],
+      "reason": "This change refreshes Item inventories/definitions after fresh runtime verification; runtime implementation is unchanged. Repository full CI still runs."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Adds canonical metadata and documentation; recipe identities, quantities, module state, persistence and renderer implementation are unchanged."
+    "notes": "Documentation-only alignment with current runtime and strengthened Item checklist; no production behavior, BOM quantity, state, persistence or renderer code changes."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted project migration is required; material and defaultColor are canonical production metadata."
+    "notes": "No persisted data or production metadata migration is required."
   },
-  "rollback": "Remove material/defaultColor from the three base-top Items and restore the previous base-top docs/tests; no persisted-data rollback is required."
+  "rollback": "Restore the previous six counter-top current-system and definition documents; runtime state is unaffected."
 }
