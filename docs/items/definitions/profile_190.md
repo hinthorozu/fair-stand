@@ -1,110 +1,50 @@
 # profile_190 — Item Contract Definition
 
-Bu belge `profile_190` Item'ının canonical Item Contract tanımını kaydeder. Migration öncesi mevcut kod zinciri `docs/items/current-system/profile_190.md` içindedir.
+## 1. Canonical identity
+- `itemKey`: `profile_190`
+- `name`: `Profil 190 cm`
+- `type`: `profile`
+- `unit`: `adet`
+- structure: Tekil Item
+- parametric: hayır
 
-## 1. Kimlik ve sınıflandırma
-
-| Alan | Canonical değer | Durum |
-|---|---|---|
-| `itemKey` | `profile_190` | VAR |
-| `type` | `profile` | VAR |
-| Yapı | Tekil Item | VAR |
-| Parametrik | hayır | UYGULANMIYOR |
-| `unit` | `adet` | VAR |
-| `dimensions.lengthCm` | `190` | VAR |
-| `dimensions.thicknessCm` | `8` | VAR |
-
-`thicknessCm = 8` gerçek ürün ölçüsü olarak migration sırasında doğrulanmıştır. Canonical production kaydı `src/productionParts.js` içindeki `PRODUCTION_PARTS.profile_190` kaydıdır. Legacy `partId` kaldırılmış, paralel ikinci ürün kimliği oluşturulmamıştır.
-
-## 2. Composition / parent recipe kullanımı
-
-`profile_190` başka Item'lardan oluşmaz; kendisi **Tekil Item**dır. Quantity sahibi parent recipe'dir. Tam yedi doğrulanmış parent recipe kullanımı vardır:
-
-| Recipe | Quantity |
-|---|---:|
-| `wall-straight-200` | 2 |
-| `shelf-wall-200-2` | 2 |
-| `shelf-wall-200-3` | 2 |
-| `counter-l-200` | 5 |
-| `counter-200` | 3 |
-| `base-wall-200` | 4 |
-| `base-200` | 4 |
-
-Migration bu miktarların hiçbirini değiştirmez.
-
-## 3. BOM / üretim mapping'i
-
-Canonical production/BOM bilgisi:
-
-```text
-itemKey = profile_190
-quantity = parent recipe'den
-unit = adet
-dimensions = 190 × 8 cm
+## 2. Canonical intrinsic properties
+```js
+{
+  itemKey: 'profile_190',
+  type: 'profile',
+  unit: 'adet',
+  dimensions: { lengthCm: 190, thicknessCm: 8 },
+  material: 'alüminyum',
+  defaultColor: 0xd0d3d4
+}
 ```
+`lengthCm`, `thicknessCm`, `material` ve `defaultColor` canonical product/default property'leridir; owner `src/productionParts.js`dir. Project/runtime override açık bir karar mekanizmasıyla uygulanabilir ve canonical değeri değiştirmez. `src/theme.js`/`scene3d.js` specialized renderer override kullanabilir.
 
-Recipe expansion mevcut `getRecipeItemKey()` → `getProductionItem()` yolunu kullanır. Ayrı quantity resolver veya pricing mantığı eklenmez.
+## 3. Factory / state / persistence
+Bağımsız project instance factory, mutable leaf state veya persisted profile instance yoktur: **UYGULANMIYOR**. Parent module contract'ı korunur.
 
-## 4. Factory / catalog / state / persistence
+## 4. Behavior / interaction
+Placement, move, rotation, snap, collision, selection, drag, context-menu, delete ve duplicate leaf production profile için **UYGULANMIYOR**; parent module/type behavior sahibidir.
 
-- Project-instance factory: **UYGULANMIYOR**.
-- Doğrudan catalog Item kaydı: **UYGULANMIYOR**; parent modüller catalog'dadır.
-- Ayrı mutable instance state / project `id`: **UYGULANMIYOR**.
-- Ayrı persistence entity/schema veya save/load migration: **UYGULANMIYOR**.
+## 5. BOM / composition
+Tekil production Item; 7 doğrulanmış parent recipe (wall/shelf/counter/L-counter/base/base-wall). Recipe identity canonical `itemKey` kullanır, quantity parent recipe sahibidir, expansion metadata'yı `getProductionItem()` üzerinden çözer.
 
-## 5. Behavior / interaction
+## 6. Renderer boundary
+Production ölçü ve metadata business source-of-truth'tur; procedural renderer production profile mesh identity'sine zorla bağlanmaz. `defaultColor=0xd0d3d4` canonical default; mevcut `ALUMINUM_PROFILE_COLOR='#D0D3D4'` render override olarak kalabilir.
 
-Placement, move, snap, rotation, collision, selection, drag, context-menu, duplicate ve delete davranışları `profile_190` production Item'ına ait bağımsız runtime davranışlar değildir. Bu alanların tamamı bu Item için **UYGULANMIYOR**; parent module davranışları korunur.
-
-## 6. Renderer ayrımı
-
-Mevcut procedural renderer `profile_190` production identity'sini tüketmez ve render mesh'leri `profile_190` ile etiketlenmez. Production recipe miktarları ile procedural rail/profile mesh'leri arasında doğrulanmış canonical birebir mapping yoktur.
-
-Bu nedenle migration yalnız identity/BOM cutover yapar; renderer geometrisi production metadata'sına zorla bağlanmaz.
-
-## 7. Pricing
-
-Pricing bu Item zincirinde **UYGULANMIYOR**. Item/BOM gereken Item, quantity ve unit bilgisini taşır; maliyet/fiyatlandırma ayrı sorumluluktur.
-
-## 8. Profile ailesi kimlik durumu
-
-Production profile ailesinin dört doğrulanmış Item'ı da artık canonical `itemKey` kullanır:
-
-```text
-profile_41_5  -> canonical itemKey
-profile_91    -> canonical itemKey
-profile_140_5 -> canonical itemKey
-profile_190   -> canonical itemKey
-```
-
-Bu durum renderer geometrisini production profile identity'sine bağlamaz; her Item'ın doğrulanmış metadata ve parent recipe miktarları bağımsız korunur.
-
-## 9. Regression sözleşmesi
-
-`test/profile190ItemContract.test.js` ve ilgili recipe testleri şunları kilitler:
-
-1. canonical `itemKey = profile_190`; legacy `partId` yoktur,
-2. `type = profile`, `unit = adet`, dimensions `190 × 8` korunur,
-3. tam 7 parent recipe canonical `itemKey` kullanır,
-4. quantity parity `2, 2, 2, 5, 3, 4, 4` olarak korunur,
-5. expanded recipe production metadata'yı canonical kimlikle çözer,
-6. sibling `profile_41_5`, `profile_91`, `profile_140_5` Item'larının da canonical kimlik kullandığı ve `profile_190` contract'ını bozmadığı doğrulanır.
-
-## 10. Açık sistem konuları
-
-Project-level canonical Final BOM eksikliği ve production Item ile procedural renderer geometrisi arasındaki genel mapping konusu bu Tekil Item identity migrationının dışında kalır. Bu migration bu sistem problemlerini gizlice çözmeye çalışmaz.
+## 7. Regression contract
+Regression `itemKey`, `type`, `unit`, `190 × 8 cm`, `material='alüminyum'`, `defaultColor=0xd0d3d4`, 7 parent recipe parity ve canonical expansion'ı korur.
 
 ## Sonuç
-
 ```text
-structure = Tekil Item
-parametric = hayır
-itemKey = profile_190
-type = profile
-unit = adet
-dimensions = 190 × 8 cm
-active parent recipes = 7
-quantities = 2 / 2 / 2 / 5 / 3 / 4 / 4
-state/persistence/behavior/interaction = uygulanmıyor
-renderer cutover = yok
+canonical Item             TAMAM
+intrinsic properties       TAMAM
+material                   alüminyum
+defaultColor               0xd0d3d4
+recipe/BOM                 TAMAM
+leaf state/persistence     UYGULANMIYOR
+leaf behavior/interactions UYGULANMIYOR
+renderer override boundary TAMAM
+regression                 TAMAM
 ```
