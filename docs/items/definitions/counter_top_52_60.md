@@ -1,91 +1,59 @@
 # counter_top_52_60 — Item Contract Definition
 
-Bu belge `counter_top_52_60` Item'ının canonical Item Contract tanımını kaydeder. Migration öncesi mevcut kod zinciri `docs/items/current-system/counter_top_52_60.md` içindedir.
+Canonical source: `PRODUCTION_PARTS.counter_top_52_60`.
 
-## 1. Kimlik ve sınıflandırma
-
-| Alan | Canonical değer | Durum |
+## 1. Canonical Item properties
+| Alan | Değer | Durum |
 |---|---|---|
 | `itemKey` | `counter_top_52_60` | VAR |
 | `type` | `counter-top` | VAR |
-| Yapı | Tekil Item | VAR |
-| Parametrik | hayır | UYGULANMIYOR |
 | `unit` | `adet` | VAR |
+| yapı | tekil, parametrik değil | VAR |
 | `dimensions.widthCm` | `52` | VAR |
 | `dimensions.depthCm` | `60` | VAR |
-| `dimensions.thicknessCm` | `1.8` | VAR — ürün kararıyla doğrulandı |
+| `dimensions.thicknessCm` | `1.8` | VAR — doğrulanmış ürün ölçüsü |
+| `defaultColor` | `0xf8fafc` | VAR — opsiyonel canonical default |
 | `nominalModuleWidthCm` | `100` | VAR |
+| `material` | doğrulanmış değer yok | YOK — uydurulmaz |
 
-Canonical production kaydı `src/productionParts.js` içindeki `PRODUCTION_PARTS.counter_top_52_60` kaydıdır. Legacy `partId` kaldırılır; paralel ikinci ürün kimliği oluşturulmaz.
+Canonical default Item'da kalır; project/runtime veya specialized renderer explicit override uygulayabilir.
 
-Üretim kalınlığı **1.8 cm** olarak doğrulanmıştır. Bu değer renderer geometrisinden türetilmez; canonical production metadata'dır.
+## 2. Factory / state / persistence
+Leaf bağımsız project instance değildir; leaf factory/state/project `id`/ayrı persistence **UYGULANMIYOR**. Parent L100 counter state'i `createCounterModuleState()` ile oluşur ve project `modules` state'inde persist edilir.
 
-## 2. Factory / catalog / state / persistence
+## 3. Behavior / interaction mapping
+Leaf top bağımsız editor behavior taşımaz. Parent L100: `placement=free`, `moveSnapCm=50`, `rotationStepDeg=90`, `defaultRotationDeg=270`, `collision=footprint`, `magneticSnap=standard`, `connectionEndpoint=logical-fixture`, `boundarySnap=stand-edge`.
 
-- Project-instance factory: **UYGULANMIYOR**; bu production leaf Item bağımsız scene/project instance değildir.
-- Doğrudan catalog kaydı: **UYGULANMIYOR**; parent catalog Item banko modülüdür.
-- Ayrı mutable Item state veya project `id`: **UYGULANMIYOR**.
-- Ayrı persistence entity/schema/save-load migration: **UYGULANMIYOR**.
+Selection/drag/context-menu/delete/duplicate/add işlemleri parent counter module seviyesindedir.
 
-Parent counter state generic module state akışında persist edilir; `counter_top_52_60` ayrı production instance olarak saklanmaz.
+## 4. Parent recipe / BOM
+Tek aktif kullanım: `counter-l-100` → `{ itemKey: 'counter_top_52_60', quantity: 1 }`.
+Quantity owner parent recipe'dir; expansion canonical Item metadata'sını tüketir.
 
-## 3. Behavior / interaction / renderer / UI sınırı
+## 5. Raw BOM / UI
+L100 selection feedback → `parseLCounterSelection()` → canonical `counter-l-100` recipe resolver yolu aktiftir. Leaf'e özel UI parser ownership yoktur.
 
-Placement, move, rotation, collision, snap, selection, drag, context-menu ve keyboard davranışları bu production leaf Item için bağımsız runtime davranış değildir: **UYGULANMIYOR**.
+## 6. Renderer / override
+L100 specialized renderer ikinci top'u doğrudan `0.52 × 0.60` geometry ile üretir; `topThicknessM=0.04`, `color=0xf8fafc` kullanır. Bunlar specialized render override'dır; canonical `52 × 60 × 1.8 cm` ve defaultColor Item'da kalır.
 
-Renderer banko geometrisini procedural üretir ve production metadata'yı mesh source-of-truth olarak tüketmez. `1.8 cm` üretim kalınlığı BOM/production metadata'dır; renderer business rule'u olarak ikinci kez tanımlanmaz.
-
-L100 mevcut Raw BOM parser akışında resolve edilebilir.
-
-## 4. Parent recipe kullanımı ve quantity ownership
-
-`counter_top_52_60` tam **1** aktif parent recipe'de kullanılır:
-
-| Recipe | Quantity |
-|---|---:|
-| `counter-l-100` | 1 |
-
-Quantity sahibi parent recipe'dir. Migration miktarı değiştirmez; ilgili satırlar canonical `{ itemKey: 'counter_top_52_60', quantity: 1 }` kimliğine taşınır.
-
-## 5. BOM / composition / pricing
-
-`counter_top_52_60` başka Item'lardan oluşmaz; **Tekil Item**dır. Recipe expansion mevcut `getRecipeItemKey()` → `getProductionItem()` yolunu kullanır.
-
-- Recursive BOM: **UYGULANMIYOR**.
-- Pricing/costing: **UYGULANMIYOR**; Item/BOM gereken Item, miktar ve `adet` birimini üretir.
-- Spatial relationship-derived BOM: **UYGULANMIYOR**.
-
-## 6. Regression sözleşmesi
-
-`test/counterTopsItemContract.test.js` ve mevcut counter/L-counter recipe testleri şunları kilitler:
-
-1. canonical `itemKey = counter_top_52_60`; legacy `partId` yoktur,
-2. `type = counter-top`, `unit = adet`, `52 × 60 × 1.8 cm` metadata korunur,
-3. `nominalModuleWidthCm = 100` korunur,
-4. tam 1 parent recipe canonical kimlik kullanır,
-5. her recipe'de quantity `×1` korunur,
-6. expanded recipe canonical Item metadata'sını çözer,
-7. renderer/state/persistence için yeni bağımsız production-instance davranışı icat edilmez.
+## 7. Regression
+- `test/counterTopsItemContract.test.js`
+- `test/counterTopDefaultColor.test.js`
+- `test/lCounter100Contract.test.js`
+- `test/rawBomSelectionParser.test.js`
 
 ## Checklist sonucu
-
 ```text
-canonical itemKey                       VAR
-production metadata                     VAR
-type/unit/dimensions                    VAR
-verified thicknessCm = 1.8              VAR
-single Item structure                   VAR
-parent recipe BOM usage                 VAR (1)
-canonical recipe identity               VAR
-quantity ownership                      VAR (parent recipe)
-factory/catalog instance                UYGULANMIYOR
-mutable state / project id              UYGULANMIYOR
-persistence                             UYGULANMIYOR
-behavior / interaction                  UYGULANMIYOR
-renderer identity mapping               UYGULANMIYOR
-item-owned Raw BOM UI                    UYGULANMIYOR
-spatial relationship                    UYGULANMIYOR
-recursive BOM                           UYGULANMIYOR
-pricing                                 UYGULANMIYOR
-regression                              VAR
+canonical Item properties               VAR
+verified dimensions/thickness           VAR
+defaultColor                             VAR
+material                                 YOK (doğrulanmış değer yok)
+factory / standalone state               UYGULANMIYOR
+leaf behavior / context menu             UYGULANMIYOR (parent-owned)
+parent behavior mapping                  VAR
+persistence mapping                      VAR (parent-owned)
+parent recipe / quantity                 VAR (1 ×1)
+Raw BOM L100 path                        VAR
+renderer override boundary               VAR
+regression                               VAR
 ```

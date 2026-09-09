@@ -1,58 +1,83 @@
-`counter_top_150_60` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# counter_top_150_60 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Bu belge güncel `Version2` sisteminde `counter_top_150_60` Item'ını Item Contract checklist'ine göre envanterler.
 
-# 1. Gerçek kimlik / tanım
+## 1. Kimlik / sınıflandırma
+- `itemKey = counter_top_150_60`, `type = counter-top`, `unit = adet`.
+- Tekil, parametrik olmayan production/BOM leaf Item'dır.
+- Standalone catalog/project entity değildir; parent kullanım `desk_banko_200_L` / `counter-l-200` içindedir.
 
-`src/productionParts.js:45`:
+## 2. Intrinsic / default Item properties
+Canonical kaynak `src/productionParts.js` → `PRODUCTION_PARTS.counter_top_150_60`.
+- `name = Banko Üstü 150 × 60 cm`
+- `dimensions.widthCm = 150`
+- `dimensions.depthCm = 60`
+- `dimensions.thicknessCm = 1.8`
+- `defaultColor = 0xf8fafc`
+- `nominalModuleWidthCm = 200`
+- `material`: doğrulanmış canonical ürün değeri yok; değer uydurulmaz.
 
-```js
-counter_top_150_60: Object.freeze({ partId: 'counter_top_150_60', name: 'Banko Üstü 150 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 150, depthCm: 60 }), nominalModuleWidthCm: 200 }),
-```
+Canonical default explicit project/runtime veya specialized renderer override ile ezilebilir; canonical sahiplik Item'da kalır.
 
-Gerçek production/BOM kimliği `partId = counter_top_150_60`; lookup `src/productionParts.js:52-54` ile yapılır. Standalone catalog/project entity mevcut runtime kodunda yok.
+## 3. State / default state
+Ayrı leaf project state/id yoktur. Parent L counter state `createCounterModuleState(200,{shape:'L'})` ile `type=counter`, `shape=L`, `widthCm=200`, `depthCm=200`, `heightCm=100` ve editable face state taşır.
 
-# 2. Recipe / BOM
+## 4. Factory / creation
+Bağımsız leaf factory **UYGULANMIYOR**. Leaf production metadata olarak `getProductionItem('counter_top_150_60')` ile resolve edilir.
 
-`src/moduleRecipes.js:65` → `counter-l:200` / `counter-l-200` → `counter_top_150_60 ×1`.
+## 5. Placement
+Leaf bağımsız placement hedefi değildir. Parent L counter `placement=free` behavior kullanır.
 
-Resolver `src/moduleRecipes.js:107-129`: `getModuleRecipe('counter',200,{shape:'L'})` → recipe → `expandRecipe()` → `getProductionPart('counter_top_150_60')`.
+## 6. Move
+Leaf bağımsız move etmez. Parent L counter `moveSnapCm=50` ile taşınır; top parent ile hareket eder.
 
-Module catalog karşılığı `src/catalog.js:210` `desk_banko_200_L` (`shape=L`, 200×200).
+## 7. Rotation
+Leaf rotation capability'si yoktur. Parent L200 `rotationStepDeg=90`, `defaultRotationDeg=270` kullanır.
 
-# 3. State / renderer
+## 8. Snap / collision / connection
+Leaf bağımsız snap/collision taşımaz. Parent counter `collision=footprint`, `magneticSnap=standard`, `connectionEndpoint=logical-fixture`, `boundarySnap=stand-edge` kullanır.
 
-`src/designState.js:109-126` L counter state’i module id/type, shape, width/depth ve 8 editable face state taşır; `counter_top_150_60` partId state içinde yoktur.
+## 9. Selection / sol click / drag
+Leaf top ayrı selectable scene entity değildir. Selection/drag parent counter surface/module seviyesindedir.
 
-`src/scene3d.js:6309+` `createLCounterModule()` L200’ü procedural üretir. `src/scene3d.js:6353-6374` tablo geometri ölçülerini module width/depth ve 2 cm overhang hesabından çıkarır; `counter_top_150_60` production metadata’sını resolve etmez. Mesh/userData üzerinde bu production partId mevcut runtime kodunda yoktur.
+## 10. Sağ click / context menu
+Leaf için ayrı context menu yoktur. Parent menu `Sil`, `Çoğalt Sol/Sağ`, `Ekle Sol/Sağ` lifecycle komutlarını module üzerinde uygular.
 
-# 4. UI/runtime
+## 11. Delete / duplicate / keyboard
+Leaf ayrı instance olmadığı için bağımsız lifecycle **UYGULANMIYOR**; parent lifecycle geçerlidir.
 
-`src/selectionFeedback.js:18-27` `Köşe Banko 200×200` seçim etiketini üretebilir. Ancak `src/rawBomDebug.js:91-94` özel L parser yalnız `Köşe Banko 100×100` eşleşmesini destekler. Bu nedenle `counter_top_150_60` mevcut seçim-metni Raw BOM UI akışında görünmez.
+## 12. Persistence
+Leaf ayrı persist edilmez. Parent counter `modules` state'i project snapshot/save-load akışında saklanır; leaf recipe + canonical Item ile BOM aşamasında resolve edilir.
 
-Recipe resolver kod seviyesinde vardır ve `getExpandedModuleRecipe('counter',200,{shape:'L'})` ile çözülebilir; eksik olan L200 Raw BOM UI parser bağlantısıdır.
+## 13. Relationships / reflow
+Leaf için ayrı relationship/reflow state yoktur; quantity/composition parent recipe ownership'idir.
 
-# 5. Persistence
+## 14. BOM / composition
+Tam 1 aktif parent recipe: `counter-l-200` → `counter_top_150_60 ×1`. Canonical `itemKey` kullanılır; expansion canonical Item metadata'sını tüketir. Leaf tekildir.
 
-Counter module state `src/main.js:1257-1265` snapshot’ına alınır, `src/projectStore.js:39-56` persist eder, restore `src/main.js:1320-1331`. Production top ayrı instance olarak saklanmaz.
+## 15. Renderer / asset / override sınırı
+`createLCounterModule()` L200'ü procedural üretir. Renderer `topThicknessM=0.04`, 2 cm overhang ve `color=0xf8fafc` kullanır; üretim Item ölçüsünü doğrudan tüketmez. Bunlar specialized render override'dır; canonical `150 × 60 × 1.8 cm` ve default renk Item'da kalır. Ayrı asset yoktur.
 
-# 6. Ownership
-
+## 16. Runtime owners
 ```text
-metadata → src/productionParts.js
-recipe/adet → src/moduleRecipes.js
-BOM policy → src/moduleContracts.js:4-7
-state → src/designState.js
-renderer → src/scene3d.js
-Raw BOM UI → src/rawBomDebug.js
+canonical Item metadata → src/productionParts.js
+recipe / quantity       → src/moduleRecipes.js
+parent state            → src/designState.js
+parent behavior         → src/moduleBehavior.js
+selection               → src/selectionFeedback.js
+context menu            → src/moduleContextMenu.js
+parent persistence      → src/main.js + src/projectStore.js
+Raw BOM adapter         → src/rawBomDebug.js
+renderer override       → src/scene3d.js
 ```
 
-# 7. Testler
+## 17. Regression
+`test/counterTopsItemContract.test.js`, `test/counterTopDefaultColor.test.js`, `test/lCounter200Contract.test.js` ve `test/rawBomSelectionParser.test.js` parity'yi korur.
 
-`test/lCounter200Contract.test.js:39-41` exact L200 BOM’da `counter_top_150_60 ×1` ve production width=150 değerini doğrular. Batch hedefli test sonucu **45 test / 45 pass / 0 fail**.
-
-# 8. Sonuç
-
-`counter_top_150_60` yalnız L200 recipe’sinde ×1 kullanılan production/BOM `partId` kimliğidir. Recipe resolver vardır; mevcut Raw BOM özel L parser’ı L200’ü desteklemez. Ayrı state/persistence/render production identity mevcut runtime kodunda yoktur.
-
-**Kod zinciri burada bitiyor. Hedef mimari veya entegrasyon tasarımı yapılmadı.**
+## 18. Açık durum / karar
+- Intrinsic/default property ownership: **VAR**.
+- Canonical BOM consumer cutover: **VAR**.
+- L200 Raw BOM parser bağlantısı: **VAR**; parser 100/150/200 destekler.
+- Renderer override: **VAR ve izinli**.
+- Material: **YOK / doğrulanmış ürün kararı yok**.
+- Ayrı leaf behavior/state/persistence: **UYGULANMIYOR**; gerçek owner parent counter'dır.
