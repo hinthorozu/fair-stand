@@ -39,9 +39,9 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `separator_panel_48_5` | `separator-panel` | **Tamam — canonical `itemKey`; `48.5 × 47 × 0.8 cm`; separator-50 içinde ×1 quantity parity** |
 | `separator_panel_98` | `separator-panel` | **Tamam — canonical `itemKey`; `98 × 47 × 0.8 cm`; separator-50 içinde ×3, separator-100 içinde ×7 quantity parity** |
 | `door_100` | `door` | Bekliyor |
-| `shelf_100` | `shelf` | Bekliyor |
-| `shelf_150` | `shelf` | Bekliyor |
-| `shelf_200` | `shelf` | Bekliyor |
+| `shelf_100` | `shelf` | **Tamam — canonical `itemKey`; `100 × 38 × 1.8 cm`; sunta; beyaz default; 2/3 raf recipe quantity parity** |
+| `shelf_150` | `shelf` | **Tamam — canonical `itemKey`; `150 × 38 × 1.8 cm`; sunta; beyaz default; 2/3 raf recipe quantity parity** |
+| `shelf_200` | `shelf` | **Tamam — canonical `itemKey`; `200 × 38 × 1.8 cm`; sunta; beyaz default; 2/3 raf recipe quantity parity** |
 | `shelf_leg` | `shelf-accessory` | Bekliyor |
 | `showcase_2_100` | `showcase` | Bekliyor |
 | `showcase_3_100` | `showcase` | Bekliyor |

@@ -24,8 +24,6 @@ export const BASE_DIMENSIONS = Object.freeze({
 });
 
 export const SHELF_DIMENSIONS = Object.freeze({
-  projectionCm: 38,
-  thicknessCm: 3,
   widthsCm: Object.freeze([100, 150, 200]),
   heightsByCountCm: Object.freeze({
     2: Object.freeze([100, 150]),

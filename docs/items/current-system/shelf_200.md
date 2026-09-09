@@ -1,58 +1,32 @@
-`shelf_200` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# shelf_200 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Fresh `Version2` runtime doğrulaması ve ürün kararı sonrası güncel durum.
 
-# 1. Gerçek kimlik / tanım
+## Checklist
 
-`src/productionParts.js:33`:
+| # | Alan | Durum | Güncel gerçek / owner |
+|---:|---|---|---|
+| 1 | Identity / type | VAR | `itemKey=shelf_200`, `type=shelf`, `unit=adet`; canonical owner `src/productionParts.js`. |
+| 2 | Intrinsic properties | VAR | `200 × 38 × 1.8 cm`; `material=sunta`; `defaultColor=0xffffff`; nominal module width `200`. `38 cm` mevcut runtime projection değerinden doğrulandı; `1.8 cm`, sunta ve panel_197'nin mevcut default surface görünümüyle aynı beyaz renk kullanıcı ürün kararıdır. |
+| 3 | Default state | UYGULANMIYOR | Leaf production Item ayrı project state taşımaz. Raf levhasının doğrulanmış ürün rengi canonical `defaultColor` olarak Item'dadır; parent shelf module state içindeki `shelfLightingOn` ve duvar strip state'i farklı state sahipliğidir. |
+| 4 | Factory / creation | PARENT-OWNED | Ayrı leaf project factory yok. `createShelfModuleState()` parent `shelf` module instance'ını üretir; BOM expansion canonical Item'ı `itemKey` ile çözer. |
+| 5 | Placement | PARENT-OWNED | `type=shelf` parent module, `src/moduleBehavior.js` içindeki `WALL_BEHAVIOR` placement contract'ını kullanır. |
+| 6 | Move | PARENT-OWNED | Parent shelf module move/continuous-wall akışı `modulePlacement` + `wallReflow` zincirindedir; leaf raf ayrı taşınmaz. |
+| 7 | Rotation | PARENT-OWNED | `shelf` → `WALL_BEHAVIOR`; rotation step/default parent module contract'ıdır. |
+| 8 | Snap / collision / connection | PARENT-OWNED | `WALL_BEHAVIOR`: wall placement, segment collision, standard magnetic snap/segment endpoint; leaf raf için ayrı spatial rule yoktur. |
+| 9 | Selection / drag | PARENT-OWNED | Scene surface/module selection ve catalog/module drag parent shelf module üzerinden çalışır; leaf production Item seçilebilir ayrı scene entity değildir. |
+| 10 | Context menu | PARENT-OWNED | `moduleContextMenu.js`; delete/duplicate yanında shelf module'a özel lighting toggle parent state'i değiştirir. Leaf raf için ayrı menu yoktur. |
+| 11 | Delete / duplicate / keyboard | PARENT-OWNED | `main.js` module işlemleri, `duplicateModuleState()` ve view keyboard zinciri parent module üzerinde çalışır. |
+| 12 | Persistence | PARENT-OWNED | `main.js` + `projectStore.js` parent module state'ini persist/restore eder. Leaf `shelf_200` ayrı persisted entity değildir; canonical product default'ları persistence'a kopyalanmaz. |
+| 13 | Relationships / reflow | PARENT-OWNED | Parent shelf module continuous wall chain/reflow'a katılır. Leaf rafın ayrı persisted Item-to-Item relationship'i yoktur. |
+| 14 | BOM / composition | VAR | Tekil production Item. `shelf_200` iki-raflı `200` recipe'de ×2, üç-raflı recipe'de ×3; shelf leg miktarları sırasıyla ×6/×9. Quantity parent recipe sahibidir. |
+| 15 | Renderer / asset / override boundary | VAR | `createShelfModule()` artık canonical Item'dan `depthCm`, `thicknessCm`, `defaultColor` tüketir. `innerWidthM` parent frame içine görsel/teknik fit override'ıdır; shelf heights `SHELF_DIMENSIONS.heightsByCountCm` type-level layout kuralıdır. Ayrı asset yoktur. |
+| 16 | Runtime owners | VAR | Product: `productionParts.js`; BOM: `moduleRecipes.js`; parent state: `designState.js`; behavior: `moduleBehavior.js`; placement/reflow: `modulePlacement.js` + `wallReflow.js`; context/UI: `moduleContextMenu.js` + `main.js`; persistence: `main.js` + `projectStore.js`; renderer: `scene3d.js`. |
+| 17 | Regression | VAR | `test/shelfItemsItemContract.test.js`, `test/shelfModule.test.js`, `test/moduleRecipes.test.js`, `test/boardMaterialItemContract.test.js` + full suite/E2E. |
+| 18 | Open decisions / completion | KAPALI / CI BEKLİYOR | Açık ürün property kararı yok: sunta, 18 mm, 38 cm depth ve beyaz default doğrulandı. Item ancak PR checks + squash merge + post-merge Version2 CI FULL GREEN sonrası operational olarak complete sayılır. |
 
-```js
-shelf_200: Object.freeze({ partId: 'shelf_200', name: 'Raf 200 cm', type: 'shelf', unit: 'adet', dimensions: Object.freeze({ lengthCm: 200 }), nominalModuleWidthCm: 200 }),
-```
+## Canonical cutover
 
-Gerçek production/BOM kimliği `partId = shelf_200`; lookup `src/productionParts.js:52-54` `getProductionPart(partId)` ile yapılır. Standalone `MODULE_CATALOG` girdisi veya ayrı proje production instance’ı mevcut runtime kodunda yok.
+Eski `partId=shelf_200` recipe kimliği canonical `itemKey=shelf_200` kimliğine taşındı. `src/catalog.js` içindeki `SHELF_DIMENSIONS.projectionCm=38` ve `thicknessCm=3` ürün sabitleri kaldırıldı; renderer canonical Item'ın `depthCm=38` ve gerçek `thicknessCm=1.8` değerini tüketir. Eski renderer raf rengi `0xb8bcc1` kaldırıldı ve canonical `defaultColor=0xffffff` tüketilir.
 
-# 2. Recipe / BOM
-
-- `src/moduleRecipes.js:30` → `shelf:200:2` / `shelf-wall-200-2` → `shelf_200 × 2`
-- `src/moduleRecipes.js:39` → `shelf:200:3` / `shelf-wall-200-3` → `shelf_200 × 3`
-
-Resolver `src/moduleRecipes.js:107-129`: `getModuleRecipe()` → recipe item → `expandRecipe()` → `getProductionPart('shelf_200')`.
-
-İlgili module catalog key’leri: `wall_shelf_2_200`, `wall_shelf_3_200`.
-
-# 3. State / renderer
-
-`src/designState.js:74-89` `createShelfModuleState()` generic shelf module state üretir; `shelf_200` `partId` state içinde yoktur.
-
-`src/scene3d.js:6393-6508` `createShelfModule()` raf geometrisini module width/shelfCount ve `SHELF_DIMENSIONS` ile procedural üretir. Renderer productionParts/moduleRecipes tüketmez; mesh üzerinde `shelf_200` production kimliği mevcut runtime kodunda yok.
-
-# 4. UI/runtime
-
-`src/selectionFeedback.js:62-64` raf seçim metnini üretir. `src/rawBomDebug.js:68-73` 200 cm + 2/3 raf bilgisini parse edip expanded recipe’ye gider; `rawBomDebug.js:35-55` BOM satırlarını gösterir.
-
-# 5. Persistence
-
-`src/main.js:1257-1265`, `src/projectStore.js:39-56`, `src/main.js:1320-1331` module state’i persist/restore eder. `shelf_200` production instance olarak state’te olmadığı için ayrı persisted kayıt yoktur.
-
-# 6. Ownership
-
-```text
-metadata → src/productionParts.js
-recipe/quantity → src/moduleRecipes.js
-BOM policy → src/moduleContracts.js:4-7
-state → src/designState.js
-renderer → src/scene3d.js
-persistence → src/main.js + src/projectStore.js
-Raw BOM UI → src/rawBomDebug.js
-```
-
-# 7. Testler
-
-`test/moduleRecipes.test.js`: `shelf_200` metadata, iki raflı recipe’de ×2 + `shelf_leg ×6`, üç raflı recipe’de ×3 + `shelf_leg ×9`, expanded çözümlemeyi doğrular. Batch sonucu **45 test / 45 pass / 0 fail**.
-
-# 8. Sonuç
-
-`shelf_200` production/BOM `partId` kimliğidir; iki raflı recipe’de ×2, üç raflı recipe’de ×3 kullanılır. Ayrı state/persistence/render identity mevcut runtime kodunda yoktur.
-
-**Kod zinciri burada bitiyor. Hedef mimari veya entegrasyon tasarımı yapılmadı.**
+`panel_197` bu batch'te yeniden açılmadı veya değiştirilmedi; renk referansı yalnız kullanıcı tarafından shelf ürün gerçeğini tarif etmek için verilmiştir.
