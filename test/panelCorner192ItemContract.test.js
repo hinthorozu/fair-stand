@@ -73,20 +73,10 @@ test('inner-corner BOM resolution replaces panel_197 1:1 and preserves all other
   }
 });
 
-test('legacy corner-panel metadata does not activate replacement before that Item migrates', () => {
-  const source = getModuleRecipe('wall', 100);
-  const expanded = getExpandedModuleRecipe('wall', 100, { panelVariant: 'inner-corner' });
-
-  assert.equal(source.variants.innerCornerPanelItemKey, undefined);
-  assert.equal(source.variants.innerCornerPanelPartId, 'panel_corner_92');
-  assert.ok(expanded.items.some((item) => getRecipeItemKey(item) === 'panel_98'));
-  assert.equal(expanded.items.some((item) => getRecipeItemKey(item) === 'panel_corner_92'), false);
-});
-
-test('neighboring corner panel Items remain legacy', () => {
-  for (const itemKey of ['panel_corner_42_5', 'panel_corner_92', 'panel_corner_142_5']) {
+test('all inner-corner panel Items now use canonical identity', () => {
+  for (const itemKey of ['panel_corner_42_5', 'panel_corner_92', 'panel_corner_142_5', 'panel_corner_192']) {
     const item = getProductionItem(itemKey);
-    assert.equal(item.itemKey, undefined, itemKey);
-    assert.equal(item.partId, itemKey);
+    assert.equal(item.itemKey, itemKey);
+    assert.equal(item.partId, undefined, itemKey);
   }
 });

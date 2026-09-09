@@ -53,11 +53,12 @@ test('expanded recipe resolves panel_197 metadata through canonical itemKey', ()
   assert.deepEqual(panel.part.dimensions, { widthCm: 197, heightCm: 47, thicknessCm: 0.8 });
 });
 
-test('panel_197 migration keeps still-legacy corner panel Items isolated', () => {
-  for (const itemKey of ['panel_corner_42_5', 'panel_corner_92', 'panel_corner_142_5']) {
+test('panel_197 remains isolated from the canonical inner-corner panel family', () => {
+  for (const itemKey of ['panel_corner_42_5', 'panel_corner_92', 'panel_corner_142_5', 'panel_corner_192']) {
     const item = getProductionItem(itemKey);
-    assert.equal(item.itemKey, undefined, itemKey);
-    assert.equal(item.partId, itemKey);
+    assert.equal(item.itemKey, itemKey);
+    assert.equal(item.partId, undefined, itemKey);
+    assert.equal(item.panelRole, 'inner-corner', itemKey);
   }
 
   assert.equal(getStraightWallRecipe(200).variants.innerCornerPanelItemKey, 'panel_corner_192');

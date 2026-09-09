@@ -60,7 +60,7 @@ Canonical `innerCornerPanelItemKey = panel_corner_192` referansı tam dört doğ
 | `shelf-wall-200-3` | `panel_197` | 7 | `panel_corner_192 × 7` |
 | `base-wall-200` | `panel_197` | 7 | `panel_corner_192 × 7` |
 
-50/100/150 cm corner panel metadata'sı bu migration kapsamı dışındadır ve legacy `innerCornerPanelPartId` olarak kalır.
+50/100/150 cm sibling corner panel Item'ları da artık canonical `innerCornerPanelItemKey` yolundadır; corner-panel ailesinde legacy `innerCornerPanelPartId` recipe metadata'sı kalmamıştır.
 
 ## 7. BOM resolver ve quantity ownership
 
@@ -102,7 +102,7 @@ Pricing bu Item/BOM zincirinde **UYGULANMIYOR**. Item/BOM yalnız gereken Item, 
 3. tam dört 200 cm recipe canonical `innerCornerPanelItemKey` kullanır,
 4. inner-corner çözümünde `panel_197 × N` tamamen kaldırılır ve `panel_corner_192 × N` aynı miktarla gelir,
 5. diğer recipe kalemlerinin quantity değerleri değişmez,
-6. 50/100/150 cm legacy corner panel Item'ları yanlışlıkla migrate veya aktif replacement edilmez.
+6. sibling 50/100/150 cm corner panel Item'ları da kendi doğrulanmış straight-panel quantity değerlerini 1:1 replacement ile korur.
 
 ## 10. Açık sistem konusu
 
