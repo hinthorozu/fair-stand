@@ -1,30 +1,34 @@
 {
   "schemaVersion": 2,
-  "id": "raw-bom-l-counter-parser-gap",
-  "kind": "bugfix",
-  "summary": "Close the Raw BOM debug selection-parser gap for supported L-counter 150×150 and 200×200 selections while preserving L100 behavior and existing counter recipe/BOM ownership.",
+  "id": "separator-panels-item-contract-cutover",
+  "kind": "bom-change",
+  "summary": "Migrate separator_panel_48_5 and separator_panel_98 production Items to canonical itemKey identity across production metadata and all three verified separator parent recipe rows while preserving 48.5/98 × 47 × 0.8 cm metadata and exact ×1/×3/×7 quantities.",
   "owners": [
-    "src/rawBomDebug.js",
-    "docs/items/definitions/counter_top_102_60.md",
-    "docs/items/definitions/counter_top_150_60.md",
-    "docs/items/definitions/counter_top_160_60.md",
-    "docs/items/definitions/counter_top_210_60.md",
-    "test/rawBomSelectionParser.test.js"
+    "src/productionParts.js",
+    "src/moduleRecipes.js",
+    "docs/items/ITEM_LIST.md",
+    "docs/items/definitions/separator_panel_48_5.md",
+    "docs/items/definitions/separator_panel_98.md",
+    "test/separatorPanelsItemContract.test.js",
+    "test/separatorRecipes.test.js",
+    "test/moduleRecipes.test.js",
+    "test/straightPanelsItemContract.test.js"
   ],
   "sourceOfTruth": [
-    "src/selectionFeedback.js",
-    "src/rawBomDebug.js",
-    "src/moduleRecipes.js"
+    "src/productionParts.js",
+    "src/moduleRecipes.js",
+    "docs/items/current-system/separator_panel_48_5.md",
+    "docs/items/current-system/separator_panel_98.md"
   ],
   "impact": {
     "catalog": "not-applicable",
-    "behavior": "affected",
+    "behavior": "not-applicable",
     "state": "not-applicable",
     "placement": "not-applicable",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "affected",
-    "ui": "affected",
+    "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
@@ -42,8 +46,7 @@
       "scripts/verify-change-contract.mjs",
       "src/moduleContracts.js",
       "src/rawBomDebug.js",
-      "src/systemChangeContract.js",
-      "src/main.js"
+      "src/systemChangeContract.js"
     ],
     "affectedTests": [
       "e2e/f010-module-construction.spec.mjs",
@@ -77,32 +80,7 @@
       "test/baseTopsItemContract.test.js",
       "test/counterTopsItemContract.test.js",
       "test/rawBomSelectionParser.test.js",
-      "e2e/f028-reset-features.spec.mjs",
-      "test/autosaveMainIntegration.test.js",
-      "test/bundleLoadingContract.test.js",
-      "test/colorEditorControllerMainIntegration.test.js",
-      "test/colorEditorMainIntegration.test.js",
-      "test/f028FeatureReset.test.js",
-      "test/helpGuide.test.js",
-      "test/illuminatedFoamModule.test.js",
-      "test/imageAssetDeletion.test.js",
-      "test/imageAssetLiveDelete.test.js",
-      "test/lightboxFabric.test.js",
-      "test/lightboxFabricAppearance.test.js",
-      "test/lightboxFabricLighting.test.js",
-      "test/moduleBehaviorPolicy.test.js",
-      "test/moduleStateConstructionRegistry.test.js",
-      "test/projectAtomicDeletion.test.js",
-      "test/projectDropdownSwitchIntegration.test.js",
-      "test/projectImportFlow.test.js",
-      "test/projectUiMainIntegration.test.js",
-      "test/removedIndoorPlant2.test.js",
-      "test/selectionFeedbackMainIntegration.test.js",
-      "test/shelfLighting.test.js",
-      "test/sidebarControllerMainIntegration.test.js",
-      "test/stageFeedbackMainIntegration.test.js",
-      "test/systemImpactAnalysis.test.js",
-      "test/uiFeedbackMainIntegration.test.js"
+      "test/separatorPanelsItemContract.test.js"
     ],
     "affectedDocs": [
       "FRESH_REPOSITORY_REVIEW.md",
@@ -221,27 +199,26 @@
       "docs/items/definitions/counter_top_150_60.md",
       "RELEASE_HARDENING_ROADMAP.md",
       "audit/FINDINGS.md",
-      "audit/evidence/A10_UI_CONTROLS.md"
+      "audit/evidence/A10_UI_CONTROLS.md",
+      "docs/items/definitions/separator_panel_48_5.md",
+      "docs/items/definitions/separator_panel_98.md"
     ],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": [
         "F-001",
         "F-003",
-        "F-014",
-        "F-025",
-        "F-030"
+        "F-014"
       ]
     },
-    "notes": "Full-system review isolates the defect to the Raw BOM debug adapter: selectionFeedback emits Köşe Banko 100/150/200 square labels, but rawBomDebug previously special-cased only 100×100. The fix generalizes only supported square L-counter widths (100/150/200), rejects unsupported/rectangular labels, and routes the parsed selection through the existing expanded recipe resolver. Counter recipes, quantities, state, renderer geometry, placement, persistence, and production Item identity remain unchanged."
+    "notes": "Full-system review confirms both target separator panels are production leaf Items consumed only by separator parent recipes. Existing 0.8 cm thickness metadata already matches the verified product data and is preserved. Three active recipe rows migrate partId -> itemKey with exact ×1/×3/×7 quantity parity. State, persistence, placement, interaction, and renderer production identity remain unchanged."
   },
   "tests": {
     "targeted": [
-      "test/rawBomSelectionParser.test.js",
-      "test/lCounter100Contract.test.js",
-      "test/lCounter150Contract.test.js",
-      "test/lCounter200Contract.test.js",
-      "test/counterTopsItemContract.test.js"
+      "test/separatorPanelsItemContract.test.js",
+      "test/separatorRecipes.test.js",
+      "test/moduleRecipes.test.js",
+      "test/straightPanelsItemContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -250,16 +227,16 @@
       "targeted": [
         "e2e/f010-module-construction.spec.mjs"
       ],
-      "reason": "Raw BOM debug is browser UI/BOM integration. Pure parser regressions lock the exact L100/L150/L200 selection-to-recipe mapping while existing Chromium construction coverage protects browser integration and the full E2E job guards runtime regressions."
+      "reason": "Production recipe identity is a BOM-domain runtime change. Unit regressions lock canonical identity, exact separator recipe quantities, and metadata; existing Chromium module-construction coverage protects browser integration."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "The change is confined to Raw BOM debug selection parsing. It broadens the existing L-counter branch from only 100×100 to the already-supported square widths 100/150/200 and rejects non-square/unsupported labels. No recipe quantities or module state are changed."
+    "level": "medium",
+    "notes": "Three active separator recipe rows change identity field from partId to itemKey. Quantities, units, dimensions including verified thicknessCm = 0.8, module state, renderer geometry, and persistence remain unchanged and are regression-locked."
   },
   "migration": {
-    "required": false,
-    "notes": "No data/schema migration. This is a runtime debug-UI adapter bugfix only."
+    "required": true,
+    "notes": "Code/recipe identity migration only: two production definitions and three recipe rows move partId -> itemKey. No persisted project schema or data migration is required."
   },
-  "rollback": "Restore the previous 100×100-only Raw BOM L-counter matcher and revert the four canonical integration notes plus parser regression. No persisted data rollback is required."
+  "rollback": "Restore the two separator production partId identities and the three recipe partId fields, then revert separator-panel definitions/regressions. No persisted data rollback is required."
 }
