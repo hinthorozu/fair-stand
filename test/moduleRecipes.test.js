@@ -110,11 +110,12 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   const separatorPanelOccurrences = { separator_panel_48_5: 0, separator_panel_98: 0 };
   const shelfOccurrences = { shelf_100: 0, shelf_150: 0, shelf_200: 0 };
   let glassShelfOccurrences = 0;
+  let shelfLegOccurrences = 0;
   for (const recipe of recipes) {
     assert.ok(recipe);
     for (const item of recipe.items) {
       const key = getRecipeItemKey(item);
-      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key in profileOccurrences || key in straightPanelOccurrences || key in baseTopOccurrences || key in counterTopOccurrences || key in separatorPanelOccurrences || key in shelfOccurrences || key === 'glass_shelf') {
+      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key in profileOccurrences || key in straightPanelOccurrences || key in baseTopOccurrences || key in counterTopOccurrences || key in separatorPanelOccurrences || key in shelfOccurrences || key === 'glass_shelf' || key === 'shelf_leg') {
         if (key === 'connector_start') startOccurrences += 1;
         if (key === 'connector_single') singleOccurrences += 1;
         if (key in uprightOccurrences) uprightOccurrences[key] += 1;
@@ -126,6 +127,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
         if (key in separatorPanelOccurrences) separatorPanelOccurrences[key] += 1;
         if (key in shelfOccurrences) shelfOccurrences[key] += 1;
         if (key === 'glass_shelf') glassShelfOccurrences += 1;
+        if (key === 'shelf_leg') shelfLegOccurrences += 1;
         assert.equal(item.itemKey, key);
         assert.equal(item.partId, undefined);
       } else {
@@ -146,6 +148,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   assert.deepEqual(separatorPanelOccurrences, { separator_panel_48_5: 1, separator_panel_98: 2 });
   assert.deepEqual(shelfOccurrences, { shelf_100: 2, shelf_150: 2, shelf_200: 2 });
   assert.equal(glassShelfOccurrences, 2);
+  assert.equal(shelfLegOccurrences, 6);
 });
 
 test('expanded recipes resolve connector_start metadata through its canonical itemKey', () => {

@@ -42,7 +42,7 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `shelf_100` | `shelf` | **Tamam — canonical `itemKey`; `100 × 38 × 1.8 cm`; sunta; beyaz default; 2/3 raf recipe quantity parity** |
 | `shelf_150` | `shelf` | **Tamam — canonical `itemKey`; `150 × 38 × 1.8 cm`; sunta; beyaz default; 2/3 raf recipe quantity parity** |
 | `shelf_200` | `shelf` | **Tamam — canonical `itemKey`; `200 × 38 × 1.8 cm`; sunta; beyaz default; 2/3 raf recipe quantity parity** |
-| `shelf_leg` | `shelf-accessory` | Bekliyor |
+| `shelf_leg` | `shelf-accessory` | **Tamam — canonical `itemKey`; yalnız doğrulanmış kimlik/ad/type/unit; shelf recipes 4/4/6/6/6/9 quantity parity; dimensions/material/weight/color henüz tanımlı değil** |
 | `showcase_2_100` | `showcase` | Bekliyor |
 | `showcase_3_100` | `showcase` | Bekliyor |
 | `glass_shelf` | `showcase-accessory` | **Tamam — canonical `itemKey`; `87.3 × 28.5 × 0.6 cm`; cam; showcase recipes ×2/×3 quantity parity; renderer canonical ölçü/material tüketimi** |

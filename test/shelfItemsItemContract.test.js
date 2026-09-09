@@ -48,7 +48,7 @@ test('shelf Items use canonical itemKey in exactly six verified parent recipes w
   assert.equal(occurrences, 6);
 });
 
-test('expanded shelf recipes resolve canonical Item metadata without changing shelf-leg ownership', () => {
+test('expanded shelf recipes resolve canonical shelf and shelf-leg Item metadata', () => {
   for (const [itemKey, { widthCm }] of Object.entries(SHELF_CASES)) {
     const expanded = getExpandedModuleRecipe('shelf', widthCm, { shelfCount: 3 });
     const shelf = expanded.items.find((item) => item.itemKey === itemKey);
@@ -62,7 +62,9 @@ test('expanded shelf recipes resolve canonical Item metadata without changing sh
     assert.equal(shelf.part.material, 'sunta');
     assert.equal(shelf.part.defaultColor, EXPECTED_COLOR);
     assert.ok(leg);
-    assert.equal(leg.part.partId, 'shelf_leg');
+    assert.equal(leg.itemKey, 'shelf_leg');
+    assert.equal(leg.part.itemKey, 'shelf_leg');
+    assert.equal(leg.part.partId, undefined);
   }
 });
 

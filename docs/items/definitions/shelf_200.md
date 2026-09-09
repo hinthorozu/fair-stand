@@ -23,7 +23,7 @@ Tekil Item'dır. Parent recipe quantity sahibidir:
 - `shelf-wall-200-2` → `shelf_200 × 2`
 - `shelf-wall-200-3` → `shelf_200 × 3`
 
-`shelf_leg` bu batch'in Item'ı değildir ve legacy kimliğinde kalır.
+`shelf_leg` ayrı canonical Item'dır; ayağın adet kuralı parent shelf recipe tarafından sahiplenilir.
 
 ## Persistence
 
