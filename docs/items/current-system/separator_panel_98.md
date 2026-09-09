@@ -1,106 +1,75 @@
-`separator_panel_98` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# separator_panel_98 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Bu belge güncel `Version2` runtime'ını Item Contract checklist'inin 18 alanına göre kaydeder.
 
-# 1. Gerçek kimlik
+## 1. Identity / type — VAR
+- `itemKey = separator_panel_98`
+- `name = Separatör Paneli 98 × 47 cm`
+- `type = separator-panel`
+- `unit = adet`
+- Canonical source: `src/productionParts.js`.
 
-`src/productionParts.js:22`:
+## 2. Intrinsic properties — VAR
+- `widthCm = 98`
+- `heightCm = 47`
+- `thicknessCm = 0.8`
+- `material = mdf`
+- `defaultColor = 0xc79b63`
+- `nominalModuleWidthCm = 100`
+- MDF product decision is user-confirmed. Separator default color is the existing separator-specific runtime default formerly held by `DEFAULT_SEPARATOR_COLOR`.
 
-```text
-partId = separator_panel_98
-name = Separatör Paneli 98 × 47 cm
-type = separator-panel
-unit = adet
-dimensions = 98 × 47 × 0.8 cm
-nominalModuleWidthCm = 100
-```
+## 3. Default state — VAR / parent-owned
+The leaf production Item has no independent project state. `createSeparatorModuleState(100)` creates the parent separator surface and now derives its initial `#c79b63` color from this canonical Item default.
 
-Lookup `src/productionParts.js:52-54` içindeki `getProductionPart(partId)` ile yapılır. Standalone catalog girdisi, project-state instance'ı veya ayrı runtime module type mevcut kodda yoktur.
+## 4. Factory / creation — UYGULANMIYOR at leaf
+No `separator_panel_98` instance factory exists. Parent `separator` state is created through `createSeparatorModuleState()` / `MODULE_STATE_FACTORIES`.
 
-# 2. Recipe kullanımları
+## 5. Placement — UYGULANMIYOR at leaf
+Placement belongs to the parent `separator` module. `moduleBehavior.js` maps `separator` to `WALL_BEHAVIOR`.
 
-`separator_panel_98` normal BOM `items` kalemi olarak iki recipe'de geçer:
+## 6. Move — UYGULANMIYOR at leaf
+Parent separator uses wall behavior, including the existing wall move snap policy. Leaf Item has no move state.
 
-| Recipe | Miktar | Kaynak |
-|---|---:|---|
-| `separator-50` | 3 | `src/moduleRecipes.js:49-51` |
-| `separator-100` | 7 | `src/moduleRecipes.js:52-54` |
+## 7. Rotation — UYGULANMIYOR at leaf
+Parent separator uses existing wall rotation behavior. Leaf Item has no independent rotation.
 
-İlgili catalog anahtarları: `wall_separator_50`, `wall_separator_50_sarmasik`, `wall_separator_100`, `wall_separator_100_sarmasik`. Bunların state `type='separator'` ve genişlikleri üzerinden aynı recipe resolver kullanılır.
+## 8. Snap / collision / connection — UYGULANMIYOR at leaf
+Owned by parent separator wall behavior (`segment` collision, standard magnetic snap/connection semantics). No production-panel-specific placement logic exists.
 
-# 3. Resolver / production metadata
+## 9. Selection / drag — UYGULANMIYOR at leaf
+Selection and drag operate on module/surface runtime objects, not on a persisted `separator_panel_98` instance.
 
-`src/moduleRecipes.js:107-116` separator için `${moduleType}:${nominalWidthCm}` lookup'ını kullanır. `119-130` normal recipe item'larını `getProductionPart(item.partId)` ile genişletir.
+## 10. Context menu — UYGULANMIYOR at leaf
+Module context-menu actions are parent-module actions. The leaf production Item has no separate context menu.
 
-```text
-separator 50 veya 100
-→ getModuleRecipe('separator', width)
-→ separator_panel_98 × 3 veya ×7
-→ expandRecipe()
-→ getProductionPart('separator_panel_98')
-```
+## 11. Delete / duplicate / keyboard — UYGULANMIYOR at leaf
+Delete/duplicate operate on separator module state. `duplicateModuleState()` duplicates the parent surface state and preserves overrides.
 
-# 4. State
+## 12. Persistence — UYGULANMIYOR as separate entity
+Project persistence stores separator module state including its current surface color. No separate production Item instance is serialized.
 
-`src/designState.js:47-58` separator module state'i `id`, `type`, `widthCm`, `modelFile` ve generic `surface` state taşır. Production `separator_panel_98` partId state içinde yoktur.
+## 13. Relationships / reflow — UYGULANMIYOR at leaf
+Wall insertion/reflow belongs to the parent separator module. No leaf relationship graph is present.
 
-# 5. Renderer
+## 14. BOM / composition — VAR
+- `separator:50` contains `separator_panel_98 × 3`.
+- `separator:100` contains `separator_panel_98 × 7`.
+- Quantity ownership remains in `src/moduleRecipes.js`.
+- Recipe expansion resolves metadata through canonical `itemKey` → `getProductionItem()`.
 
-`src/scene3d.js:6817-6917` `createSeparatorModule()` separator görünümünü procedural olarak iki dikey frame, üst/alt rail ve 36 yatay slat üzerinden kurar. Production 98 × 47 × 0.8 cm metadata renderer tarafından okunmaz. `scene3d.js` productionParts/moduleRecipes import etmez (`1-33`) ve mesh/surface `userData` içinde `separator_panel_98` partId bulunmaz.
+## 15. Renderer / asset / override boundary — VAR
+`createSeparatorModule()` renders procedural rails/slats and consumes `surfaceState.color`. The renderer does not use this Item's dimensions as geometry source-of-truth. Runtime/user color changes are explicit state/render overrides and do not mutate the canonical Item default.
 
-# 6. BOM / UI tüketimi
+## 16. Runtime owners — VAR
+- product metadata/defaults: `src/productionParts.js`
+- parent default state: `src/designState.js` (consumes Item `defaultColor`)
+- behavior: `src/moduleBehavior.js`
+- BOM quantity/composition: `src/moduleRecipes.js`
+- renderer: `src/scene3d.js`
+- persistence: parent project/module state
 
-`src/rawBomDebug.js:84-88` `Separatör 50|100 cm` seçim metnini separator recipe resolver'a yollar; `35-55` expanded recipe satırlarını ekranda gösterir.
+## 17. Regression — VAR
+`test/separatorPanelsItemContract.test.js` verifies identity, exact `98 × 47 × 0.8`, `material = mdf`, `defaultColor = 0xc79b63`, state default-color consumption, both recipe quantities and expanded metadata.
 
-Sonuç olarak:
-
-```text
-Separatör 50 → 3 × Separatör Paneli 98 × 47 cm
-Separatör 100 → 7 × Separatör Paneli 98 × 47 cm
-```
-
-Raw BOM state'i doğrudan okumaz; selection-info metnini regex ile parse eder.
-
-# 7. Persistence
-
-`src/main.js:1263-1264,1326+` generic separator state'i snapshot/restore eder; `src/projectStore.js` proje state'ini saklar. State içinde production partId olmadığı için ayrı `separator_panel_98` instance'ı persistence'a yazılmaz.
-
-# 8. Ownership
-
-`src/moduleContracts.js:4-7` recipe BOM source olarak `src/moduleRecipes.js` tanımlar.
-
-```text
-production metadata → src/productionParts.js
-recipe + quantity   → src/moduleRecipes.js
-BOM policy          → src/moduleContracts.js
-Raw BOM UI          → src/rawBomDebug.js
-renderer            → src/scene3d.js (ayrı procedural sistem)
-```
-
-`src/systemChangeContract.js:110-122` production/recipe dosyalarını BOM, rawBomDebug'ı BOM+UI, scene3d'yi renderer/state domainlerinde sınıflandırır.
-
-# 9. Testler
-
-- `test/separatorRecipes.test.js:7-10` production adı doğrulanır.
-- `12-21` separator50 → `separator_panel_98 × 3`.
-- `23-32` separator100 → `separator_panel_98 × 7`.
-- Aynı test dosyasındaki expanded recipe testi production metadata çözümünü doğrular.
-
-Çalıştırılan ortak hedefli set: **49 test / 49 pass / 0 fail**.
-
-# 10. Sonuç
-
-```text
-production partId                 EVET
-production metadata               EVET
-recipe BOM kalemi                 EVET
-standalone catalog item           HAYIR
-project-state production instance HAYIR
-render mesh partId identity       HAYIR
-persistence production instance   HAYIR
-Raw BOM tüketimi                  EVET
-```
-
-`separator_panel_98` mevcut BOM/production zincirinde aktif bir partId'dir; state/render/persistence tarafında production identity ile doğrudan bağlı değildir.
-
-**Kod zinciri burada bitiyor.**
+## 18. Open state / decisions / completion
+No unresolved Item property remains in this batch. Canonical Item owns verified intrinsic properties/defaults; parent state consumes the canonical default; specialized renderer/state overrides remain allowed.

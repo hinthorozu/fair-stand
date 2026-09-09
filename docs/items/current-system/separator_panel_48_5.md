@@ -1,108 +1,74 @@
-`separator_panel_48_5` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# separator_panel_48_5 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Bu belge güncel `Version2` runtime'ını Item Contract checklist'inin 18 alanına göre kaydeder.
 
-# 1. Gerçek kimlik
+## 1. Identity / type — VAR
+- `itemKey = separator_panel_48_5`
+- `name = Separatör Paneli 48,5 × 47 cm`
+- `type = separator-panel`
+- `unit = adet`
+- Canonical source: `src/productionParts.js`.
 
-`src/productionParts.js:21`:
+## 2. Intrinsic properties — VAR
+- `widthCm = 48.5`
+- `heightCm = 47`
+- `thicknessCm = 0.8`
+- `material = mdf`
+- `defaultColor = 0xc79b63`
+- `nominalModuleWidthCm = 50`
+- MDF product decision is user-confirmed. Separator default color is the existing separator-specific runtime default formerly held by `DEFAULT_SEPARATOR_COLOR`.
 
-```text
-partId = separator_panel_48_5
-name = Separatör Paneli 48,5 × 47 cm
-type = separator-panel
-unit = adet
-dimensions = 48.5 × 47 × 0.8 cm
-nominalModuleWidthCm = 50
-```
+## 3. Default state — VAR / parent-owned
+The leaf production Item has no independent project state. `createSeparatorModuleState(50)` creates the parent separator surface and now derives its initial `#c79b63` color from this canonical Item default.
 
-Lookup `src/productionParts.js:52-54` içindeki `getProductionPart(partId)` ile yapılır. Standalone catalog girdisi, project-state instance'ı veya ayrı runtime module type mevcut kodda yoktur.
+## 4. Factory / creation — UYGULANMIYOR at leaf
+No `separator_panel_48_5` instance factory exists. Parent `separator` state is created through `createSeparatorModuleState()` / `MODULE_STATE_FACTORIES`.
 
-# 2. Recipe kullanımı
+## 5. Placement — UYGULANMIYOR at leaf
+Placement belongs to the parent `separator` module. `moduleBehavior.js` maps `separator` to `WALL_BEHAVIOR`.
 
-`separator_panel_48_5` normal BOM `items` kalemi olarak yalnız `separator-50` recipe'sinde kullanılır:
+## 6. Move — UYGULANMIYOR at leaf
+Parent separator uses wall behavior, including the existing wall move snap policy. Leaf Item has no move state.
 
-`src/moduleRecipes.js:49-51`
+## 7. Rotation — UYGULANMIYOR at leaf
+Parent separator uses existing wall rotation behavior. Leaf Item has no independent rotation.
 
-```text
-separator-50
-profile_41_5 × 2
-upright_346_5 × 2
-separator_panel_48_5 × 1
-separator_panel_98 × 3
-connector_start × 2
-connector_single × 7
-```
+## 8. Snap / collision / connection — UYGULANMIYOR at leaf
+Owned by parent separator wall behavior (`segment` collision, standard magnetic snap/connection semantics). No production-panel-specific placement logic exists.
 
-Resolver girdisi `getModuleRecipe('separator', 50)`'dir. İlgili catalog anahtarları `wall_separator_50` ve `wall_separator_50_sarmasik` olup ikisi de `type='separator', widthCm=50` üzerinden aynı recipe resolver'a gider.
+## 9. Selection / drag — UYGULANMIYOR at leaf
+Selection and drag operate on module/surface runtime objects, not on a persisted `separator_panel_48_5` instance.
 
-# 3. Resolver / production metadata
+## 10. Context menu — UYGULANMIYOR at leaf
+Module context-menu actions are parent-module actions. The leaf production Item has no separate context menu.
 
-`src/moduleRecipes.js:107-116` separator için fallback `${moduleType}:${nominalWidthCm}` anahtarıyla `separator:50` recipe'sini döndürür. `119-130` `separator_panel_48_5` item'ını `getProductionPart()` ile metadata'ya genişletir.
+## 11. Delete / duplicate / keyboard — UYGULANMIYOR at leaf
+Delete/duplicate operate on separator module state. `duplicateModuleState()` duplicates the parent surface state and preserves overrides.
 
-```text
-separator module width 50
-→ getModuleRecipe('separator',50)
-→ { partId:'separator_panel_48_5', quantity:1 }
-→ expandRecipe()
-→ getProductionPart('separator_panel_48_5')
-```
+## 12. Persistence — UYGULANMIYOR as separate entity
+Project persistence stores separator module state including its current surface color. No separate production Item instance is serialized.
 
-# 4. State
+## 13. Relationships / reflow — UYGULANMIYOR at leaf
+Wall insertion/reflow belongs to the parent separator module. No leaf relationship graph is present.
 
-`src/designState.js:47-58` separator state'i yalnız `id`, `type='separator'`, `widthCm`, `modelFile` ve generic `surface` rengi taşır. Production `separator_panel_48_5` partId state'e yazılmaz.
+## 14. BOM / composition — VAR
+- `separator:50` contains `separator_panel_48_5 × 1`.
+- Quantity ownership remains in `src/moduleRecipes.js`.
+- Recipe expansion resolves metadata through canonical `itemKey` → `getProductionItem()`.
 
-# 5. Renderer
+## 15. Renderer / asset / override boundary — VAR
+`createSeparatorModule()` renders procedural rails/slats and consumes `surfaceState.color`. The renderer does not use this Item's dimensions as geometry source-of-truth. Runtime/user color changes are explicit state/render overrides and do not mutate the canonical Item default.
 
-`src/scene3d.js:6817-6917` `createSeparatorModule()` separator geometrisini `STAND_DIMENSIONS`, `widthCm` ve 36 yatay slat ile procedural üretir. `scene3d.js` productionParts/moduleRecipes import etmez (`1-33`). Selector `userData` içinde module/surface bilgileri vardır; `separator_panel_48_5` partId yoktur.
+## 16. Runtime owners — VAR
+- product metadata/defaults: `src/productionParts.js`
+- parent default state: `src/designState.js` (consumes Item `defaultColor`)
+- behavior: `src/moduleBehavior.js`
+- BOM quantity/composition: `src/moduleRecipes.js`
+- renderer: `src/scene3d.js`
+- persistence: parent project/module state
 
-Bu nedenle recipe'deki fiziksel separator panel ile sahnedeki slat geometrisi arasında production identity bağı mevcut runtime kodunda yoktur.
+## 17. Regression — VAR
+`test/separatorPanelsItemContract.test.js` verifies identity, exact `48.5 × 47 × 0.8`, `material = mdf`, `defaultColor = 0xc79b63`, state default-color consumption, recipe quantity parity and expanded metadata.
 
-# 6. BOM / UI tüketimi
-
-`src/rawBomDebug.js:84-88` selection metnindeki `Separatör 50 cm` ifadesini `renderRecipe('separator',50,...)` çağrısına çevirir. `35-55` expanded recipe items'ı `quantity × production part name` biçiminde gösterir.
-
-Desteklenen 50 cm separator seçiminde Raw BOM çıktısında:
-
-```text
-1 × Separatör Paneli 48,5 × 47 cm
-```
-
-satırı oluşabilir.
-
-# 7. Persistence
-
-`src/main.js:1263-1264,1326+` generic separator module state'ini snapshot/restore eder; `src/projectStore.js` proje state'ini saklar. Production partId state içinde olmadığı için ayrı `separator_panel_48_5` instance'ı persistence'a yazılmaz.
-
-# 8. Ownership
-
-```text
-production metadata → src/productionParts.js
-recipe + quantity   → src/moduleRecipes.js
-BOM policy          → src/moduleContracts.js
-Raw BOM UI          → src/rawBomDebug.js
-renderer            → src/scene3d.js (ayrı procedural temsil)
-```
-
-# 9. Testler
-
-- `test/separatorRecipes.test.js:7-10` production adı doğrulanır.
-- `test/separatorRecipes.test.js:12-21` separator50 recipe içinde `separator_panel_48_5 × 1` doğrulanır.
-
-Çalıştırılan ortak hedefli set: **49 test / 49 pass / 0 fail**.
-
-# 10. Sonuç
-
-```text
-production partId                 EVET
-production metadata               EVET
-recipe BOM kalemi                 EVET
-standalone catalog item           HAYIR
-project-state production instance HAYIR
-render mesh partId identity       HAYIR
-persistence production instance   HAYIR
-Raw BOM tüketimi                  EVET
-```
-
-`separator_panel_48_5` BOM/production tarafında aktif, state/render/persistence tarafında ise production identity taşımayan ayrı procedural temsil vardır.
-
-**Kod zinciri burada bitiyor.**
+## 18. Open state / decisions / completion
+No unresolved Item property remains in this batch. Canonical Item owns verified intrinsic properties/defaults; parent state consumes the canonical default; specialized renderer/state overrides remain allowed.

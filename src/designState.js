@@ -1,9 +1,18 @@
 import { resolveModuleCatalogKey } from './catalog.js';
+import { getProductionItem } from './productionParts.js';
 import { getTvDefinition } from './tvConfig.js';
 
 const DEFAULT_PANEL_COLOR = '#ffffff';
-const DEFAULT_SEPARATOR_COLOR = '#c79b63';
 const STRIP_COUNT = 7;
+
+function separatorDefaultColor(widthCm) {
+  const itemKey = Number(widthCm) === 50 ? 'separator_panel_48_5' : 'separator_panel_98';
+  const defaultColor = getProductionItem(itemKey)?.defaultColor;
+  if (!Number.isInteger(defaultColor)) {
+    throw new TypeError(`Missing canonical separator defaultColor for ${itemKey}.`);
+  }
+  return `#${defaultColor.toString(16).padStart(6, '0')}`;
+}
 
 function createId(prefix) {
   const suffix = globalThis.crypto?.randomUUID?.()
@@ -52,7 +61,7 @@ export function createSeparatorModuleState(widthCm, descriptor = {}) {
     modelFile: descriptor.modelFile ?? null,
     surface: {
       id: createId('surface'),
-      color: DEFAULT_SEPARATOR_COLOR,
+      color: separatorDefaultColor(widthCm),
     },
   };
 }

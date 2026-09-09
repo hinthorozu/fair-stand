@@ -9,6 +9,8 @@ const CASES = {
     metadata: {
       name: 'Separatör Paneli 48,5 × 47 cm',
       dimensions: { widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 },
+      material: 'mdf',
+      defaultColor: 0xc79b63,
       nominalModuleWidthCm: 50,
     },
     recipes: [['separator', 50, 1]],
@@ -17,13 +19,15 @@ const CASES = {
     metadata: {
       name: 'Separatör Paneli 98 × 47 cm',
       dimensions: { widthCm: 98, heightCm: 47, thicknessCm: 0.8 },
+      material: 'mdf',
+      defaultColor: 0xc79b63,
       nominalModuleWidthCm: 100,
     },
     recipes: [['separator', 50, 3], ['separator', 100, 7]],
   },
 };
 
-test('separator panel production Items use canonical itemKey with verified 0.8 cm metadata', () => {
+test('separator panel production Items use canonical itemKey with verified 0.8 cm MDF metadata and default color', () => {
   for (const [itemKey, { metadata }] of Object.entries(CASES)) {
     const item = getProductionItem(itemKey);
     assert.equal(item.itemKey, itemKey);
@@ -32,6 +36,8 @@ test('separator panel production Items use canonical itemKey with verified 0.8 c
     assert.equal(item.type, 'separator-panel');
     assert.equal(item.unit, 'adet');
     assert.deepEqual(item.dimensions, metadata.dimensions);
+    assert.equal(item.material, metadata.material);
+    assert.equal(item.defaultColor, metadata.defaultColor);
     assert.equal(item.nominalModuleWidthCm, metadata.nominalModuleWidthCm);
   }
 });
@@ -51,7 +57,7 @@ test('separator panels use canonical itemKey in exactly three verified recipe oc
   assert.equal(total, 3);
 });
 
-test('expanded separator recipes resolve production metadata through canonical itemKey', () => {
+test('expanded separator recipes resolve canonical separator metadata through itemKey', () => {
   for (const width of [50, 100]) {
     const expanded = getExpandedModuleRecipe('separator', width);
     assert.ok(expanded);
@@ -59,6 +65,8 @@ test('expanded separator recipes resolve production metadata through canonical i
       assert.equal(item.part.itemKey, item.itemKey);
       assert.equal(item.part.partId, undefined);
       assert.equal(item.part.dimensions.thicknessCm, 0.8);
+      assert.equal(item.part.material, 'mdf');
+      assert.equal(item.part.defaultColor, 0xc79b63);
       assert.equal(item.part.unit, 'adet');
     }
   }
