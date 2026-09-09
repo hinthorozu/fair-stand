@@ -102,8 +102,8 @@ test('expanded recipes resolve straight panel metadata through canonical itemKey
   }
 });
 
-test('straight panel migration remains isolated from separator Items while corner variants use canonical Item identity', () => {
-  for (const itemKey of ['separator_panel_48_5', 'separator_panel_98']) {
+test('straight panel migration remains isolated from still-legacy production families while corner variants use canonical Item identity', () => {
+  for (const itemKey of ['door_100', 'shelf_100', 'showcase_2_100']) {
     const item = getProductionItem(itemKey);
     assert.equal(item.itemKey, undefined, itemKey);
     assert.equal(item.partId, itemKey);

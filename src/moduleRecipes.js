@@ -47,10 +47,10 @@ const MODULE_RECIPES = Object.freeze({
   ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_92' }) }),
 
   'separator:50': Object.freeze({ recipeId: 'separator-50', moduleType: 'separator', nominalWidthCm: 50, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'separator_panel_48_5', quantity: 1 }), Object.freeze({ partId: 'separator_panel_98', quantity: 3 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 7 }),
+    Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'separator_panel_48_5', quantity: 1 }), Object.freeze({ itemKey: 'separator_panel_98', quantity: 3 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 7 }),
   ]) }),
   'separator:100': Object.freeze({ recipeId: 'separator-100', moduleType: 'separator', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ partId: 'separator_panel_98', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
+    Object.freeze({ itemKey: 'profile_91', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'separator_panel_98', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
   ]) }),
 
   'counter-l:100': Object.freeze({ recipeId: 'counter-l-100', moduleType: 'counter', shape: 'L', nominalWidthCm: 100, items: Object.freeze([
