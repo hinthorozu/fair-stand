@@ -1,28 +1,24 @@
 # panel_197 — Item Contract Definition
 
-## 1. Canonical kimlik ve intrinsic properties
-`PRODUCTION_PARTS.panel_197`: canonical `itemKey`, `type=panel`, `unit=adet`, `197 × 47 × 0.8 cm`, `panelRole=straight`, nominal `200`; Tekil Item. Doğrulanmış material/product defaultColor yoktur; generic `#ffffff` project-surface başlangıcı product default değildir.
+## Canonical Item
 
-## 2. Canonical creation / state / override
-`getProductionItem('panel_197')` resolver'dır. Parent editable surface state project override'larını taşır; ayrı leaf scene/project factory yoktur.
+- `itemKey`: `panel_197`
+- `type`: `panel`
+- `unit`: `adet`
+- dimensions: `197 × 47 × 0.8 cm`
+- `material`: `sunta`
+- `panelRole`: `straight`
+- `nominalModuleWidthCm`: `200`
+- `defaultColor`: ürün default'u doğrulanmadığı için tanımlı değil; editor `#ffffff` değeri override/default-surface katmanıdır.
 
-## 3. Behavior / capability ownership
-Independent leaf placement/move/rotation/snap/collision/context-menu lifecycle'ı yoktur; parent module/type behavior ve surface context geçerlidir.
+## Ownership
 
-## 4. BOM / composition
-`wall-straight-200 ×7`, shelf200 2/3 `×7`, L200 `×4`, counter200 `×2`, base-wall200 `×7`, base200 `×2`. Quantity parent recipe sahibidir.
+Intrinsic ürün gerçeğinin source-of-truth'u `PRODUCTION_PARTS.panel_197` kaydıdır. State, placement, move, rotation, snap, collision, selection, context-menu, delete/duplicate ve persistence parent module/type tarafından uygulanır. Renderer specialized override yapabilir ancak `material` dahil product source-of-truth'u değiştirmez.
 
-## 5. Straight ↔ inner-corner relationship
-Eşleşen `panel_corner_192`; `panel_197 ×N` → `panel_corner_192 ×N` 1:1 replacement.
+## BOM / relationship
 
-## 6. Persistence
-Leaf ayrı persisted entity değildir.
+Tekil Item'dır; quantity parent recipe sahibidir. Inner-corner konfigürasyonunda matching straight panel quantity'si 1:1 canonical corner Item'a aktarılabilir.
 
-## 7. Renderer boundary
-Procedural parent renderer override izinlidir; product/BOM source-of-truth Item metadata'sıdır.
+## Regression
 
-## 8. Regression
-`test/panel197ItemContract.test.js` + `test/panelCorner192ItemContract.test.js`.
-
-## Checklist sonucu
-Identity/dimensions/role **VAR**; material/defaultColor **YOK**; recipe consumer **VAR**; project override state **VAR**; independent behavior/persistence **UYGULANMIYOR**; corner replacement **VAR**; renderer override **izinli**; regression **VAR**.
+Mevcut panel contract testleri + `test/boardMaterialItemContract.test.js`.
