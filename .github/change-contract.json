@@ -1,19 +1,17 @@
 {
   "schemaVersion": 2,
-  "id": "profile-material-default-color",
+  "id": "upright-material-default-color",
   "kind": "architecture",
-  "summary": "Make aluminum material and the existing aluminum profile color canonical intrinsic properties of all four production profile Items, refresh their full Item inventories/definitions, and lock the decision with regression coverage while preserving renderer overrides.",
+  "summary": "Make aluminum material and the existing aluminum frame color canonical intrinsic properties of all three production upright Items, refresh their full Item inventories/definitions, and lock the decision with regression coverage while preserving renderer overrides.",
   "owners": [
     "src/productionParts.js",
-    "test/profileIntrinsicProperties.test.js",
-    "docs/items/current-system/profile_41_5.md",
-    "docs/items/current-system/profile_91.md",
-    "docs/items/current-system/profile_140_5.md",
-    "docs/items/current-system/profile_190.md",
-    "docs/items/definitions/profile_41_5.md",
-    "docs/items/definitions/profile_91.md",
-    "docs/items/definitions/profile_140_5.md",
-    "docs/items/definitions/profile_190.md"
+    "test/uprightIntrinsicProperties.test.js",
+    "docs/items/current-system/upright_346_5.md",
+    "docs/items/current-system/upright_99.md",
+    "docs/items/current-system/upright_49_5.md",
+    "docs/items/definitions/upright_346_5.md",
+    "docs/items/definitions/upright_99.md",
+    "docs/items/definitions/upright_49_5.md"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
@@ -93,7 +91,8 @@
       "test/systemDevelopmentContract.test.js",
       "test/systemModuleCatalogDoc.test.js",
       "test/upright3465ItemContract.test.js",
-      "test/upright99And495ItemContract.test.js"
+      "test/upright99And495ItemContract.test.js",
+      "test/uprightIntrinsicProperties.test.js"
     ],
     "affectedDocs": [
       "FRESH_REPOSITORY_REVIEW.md",
@@ -214,37 +213,32 @@
     ],
     "relatedFindings": {
       "affected": [],
-      "reviewedNotAffected": [
-        "F-001",
-        "F-003"
-      ]
+      "reviewedNotAffected": ["F-001", "F-003"]
     },
-    "notes": "User product decision: profile_41_5, profile_91, profile_140_5 and profile_190 are aluminum. The current renderer already uses ALUMINUM_PROFILE_COLOR='#D0D3D4'; the canonical Item default is recorded as defaultColor=0xd0d3d4 while theme/scene rendering remains a specialized renderer override. No recipe quantity, state, persistence, placement, behavior, relationship or renderer code changes are included. Full-system references are declared for gate review only; no audit remediation is included."
+    "notes": "User product decision: upright_346_5, upright_99 and upright_49_5 are aluminum and use canonical defaultColor=0xd0d3d4. Existing parent-module procedural rendering remains a specialized renderer override. No recipe quantity, state, persistence, placement, behavior, relationship or renderer code changes are included. Full-system references are declared for gate review only; no audit remediation is included."
   },
   "tests": {
     "targeted": [
-      "test/profileIntrinsicProperties.test.js",
-      "test/profilesItemContract.test.js",
-      "test/profile190ItemContract.test.js",
+      "test/uprightIntrinsicProperties.test.js",
+      "test/upright3465ItemContract.test.js",
+      "test/upright99And495ItemContract.test.js",
       "test/moduleRecipes.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
-      "targeted": [
-        "e2e/f010-module-construction.spec.mjs"
-      ],
+      "targeted": ["e2e/f010-module-construction.spec.mjs"],
       "reason": "The repository change gate classifies production Item/BOM metadata changes as browser-impacting, so the existing module-construction E2E is required even though renderer and placement behavior are unchanged."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Adds user-confirmed intrinsic profile material/default color metadata and documentation/regression coverage without changing recipe quantities, state, persistence, placement or renderer behavior."
+    "notes": "Adds user-confirmed intrinsic upright material/default color metadata and documentation/regression coverage without changing recipe quantities, state, persistence, placement or renderer behavior."
   },
   "migration": {
     "required": false,
     "notes": "No persisted project schema migration is required."
   },
-  "rollback": "Remove material='alüminyum' and defaultColor=0xd0d3d4 from the four profile Items, remove the profile intrinsic-property regression, and restore the prior profile documentation."
+  "rollback": "Remove material='alüminyum' and defaultColor=0xd0d3d4 from the three upright Items, remove the upright intrinsic-property regression, and restore the prior upright documentation."
 }

@@ -1,202 +1,55 @@
-`upright_49_5` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# upright_49_5 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+## 1. Identity / type — VAR
+Canonical source `src/productionParts.js`: `itemKey=upright_49_5`, `type=upright`, `unit=adet`, name `Dikme 49,5 cm`.
 
-# 1. Mevcut gerçek kimlik ve tanım
+## 2. Intrinsic properties — VAR
+Canonical Item properties: `lengthCm=49.5`, `thicknessCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Renderer may explicitly override visual representation without changing the Item default.
 
-Kaynak: `src/productionParts.js:4`
+## 3. Default state — UYGULANMIYOR
+No standalone upright project state; base/base-wall parent state owns runtime/editor state.
 
-```js
-upright_49_5: Object.freeze({
-  partId: 'upright_49_5',
-  name: 'Dikme 49,5 cm',
-  type: 'upright',
-  unit: 'adet',
-  dimensions: Object.freeze({ lengthCm: 49.5, thicknessCm: 8 })
-}),
-```
+## 4. Factory / creation — UYGULANMIYOR
+No standalone upright factory; parent base/base-wall modules create runtime state.
 
-Lookup `src/productionParts.js:52-54` içindeki `getProductionPart(partId)` ile yapılır. Bugünkü gerçek kimlik `partId = upright_49_5`'dir.
+## 5. Placement — UYGULANMIYOR
+Leaf upright is not independently placed.
 
-Bağımsız `MODULE_CATALOG` girdisi, proje instance `id`'si veya ayrı runtime module `type` mevcut kodda yoktur.
+## 6. Move — UYGULANMIYOR
+Parent module owns movement.
 
-# 2. Doğrudan recipe kullanımları
+## 7. Rotation — UYGULANMIYOR
+Parent module owns rotation.
 
-`src/` altında exact `upright_49_5` iki dosyada geçer:
+## 8. Snap / collision / connection — UYGULANMIYOR
+Parent module placement/relationship logic owns these concerns.
 
-```text
-src/productionParts.js
-src/moduleRecipes.js
-```
+## 9. Selection / drag — UYGULANMIYOR
+No independent upright selection/drag identity.
 
-`src/moduleRecipes.js` içinde 6 recipe kullanır:
+## 10. Context menu — UYGULANMIYOR
+Context menu operates on parent module instances.
 
-| Recipe | Satır | Miktar |
-|---|---:|---:|
-| `base-wall-100` | 78-80 | 2 |
-| `base-wall-150` | 81-83 | 2 |
-| `base-wall-200` | 84-86 | 2 |
-| `base-100` | 88-90 | 4 |
-| `base-150` | 91-93 | 4 |
-| `base-200` | 94-96 | 4 |
+## 11. Delete / duplicate / keyboard — UYGULANMIYOR
+These actions operate on parent module instances.
 
-# 3. Catalog → resolver → recipe
+## 12. Persistence — UYGULANMIYOR
+Projects persist parent module state; no separate `upright_49_5` instance is persisted.
 
-Katalog girdileri `src/catalog.js:211-216`:
+## 13. Relationships / reflow — UYGULANMIYOR
+No leaf relationship/reflow state; parent module owns relationships.
 
-```text
-BASE_100/150/200      → type=base, heightCm=50
-wall_base_100/150/200 → type=base-wall, heightCm=350, depthCm=50
-```
+## 14. BOM / composition — VAR
+Six verified recipes consume this Item: `base-wall:100/150/200` use quantity `2`; `base:100/150/200` use quantity `4`. Parent recipes own quantity and canonical `itemKey` resolves metadata through `getProductionItem()`.
 
-`getModuleRecipe()` `src/moduleRecipes.js:107-116` bu aileler için fallback key üretir:
+## 15. Renderer / asset / override boundary — VAR
+Base/base-wall renderers create procedural post geometry and do not use `upright_49_5` as mesh identity. Production `49.5 cm / 8 cm` is not forced onto renderer geometry. Visual renderer constants remain explicit specialized render overrides.
 
-```text
-base + width      → MODULE_RECIPES['base:<width>']
-base-wall + width → MODULE_RECIPES['base-wall:<width>']
-```
+## 16. Runtime owners — VAR
+Product metadata: `src/productionParts.js`; quantities/composition: `src/moduleRecipes.js`; state/behavior/persistence: parent module runtime; renderer: `src/scene3d.js`.
 
-Sonra `expandRecipe()` `src/moduleRecipes.js:119-122` her recipe item'ını `getProductionPart(item.partId)` ile production metadata'ya bağlar.
+## 17. Regression — VAR
+`test/upright99And495ItemContract.test.js` protects identity, dimensions and six recipe quantities. `test/uprightIntrinsicProperties.test.js` protects aluminum material and `0xd0d3d4` canonical default color.
 
-Tam zincir:
-
-```text
-BASE_* / wall_base_* catalogKey
-→ module type + width
-→ getModuleRecipe(...)
-→ upright_49_5 × 4 veya × 2
-→ expandRecipe()
-→ getProductionPart('upright_49_5')
-→ Dikme 49,5 cm
-```
-
-# 4. State
-
-`createBaseWallModuleState()` `src/designState.js:129-148`:
-
-```text
-id
-type = base-wall
-widthCm
-depthCm = 50
-heightCm = 350
-strips
-faces
-```
-
-`createBaseModuleState()` `src/designState.js:151-166`:
-
-```text
-id
-type = base
-widthCm
-depthCm = 50
-heightCm = 50
-faces
-```
-
-`createModuleStateFromDescriptor()` `src/designState.js:357-378` module seviyesinde `catalogKey` resolve eder.
-
-Bu state'lerin hiçbirinde `upright_49_5` `partId`'si, production parça instance'ı, `lengthCm=49.5` veya `thicknessCm=8` yoktur.
-
-# 5. Renderer tarafı ayrı temsil
-
-`src/scene3d.js` production part registry veya module recipe dosyasını tüketmez; `upright_49_5` identity'si renderer'da yoktur.
-
-Baza renderer'ı `createBaseModule()` `src/scene3d.js:5969-6128`:
-
-```js
-const heightCm = Number(moduleState.heightCm) || 50;
-const topThicknessM = 0.035;
-const frameHeightM = Math.max(heightM - topThicknessM, profileM * 3);
-```
-
-50 cm baza için procedural post yüksekliği yaklaşık:
-
-```text
-50 - 3.5 = 46.5 cm
-```
-
-`src/scene3d.js:6015-6027` dört corner post mesh'i üretir.
-
-Production tanımı ise:
-
-```text
-upright_49_5 = 49.5 cm
-thicknessCm = 8
-```
-
-Dolayısıyla `BASE_*` BOM'unda `upright_49_5 ×4` ile renderer'daki dört post sayısal olarak aynı sayıda görünse de renderer post uzunluğu production metadata'dan alınmaz ve mesh'lerde partId yoktur.
-
-`base-wall` renderer `src/scene3d.js:1401-1412` içinde `createFlatPanelModule(...) + createBaseModule(...)` bileşimidir. Recipe tarafında `upright_49_5 ×2` bulunmasına rağmen alt `createBaseModule()` procedural olarak dört corner post oluşturur. Bu, production BOM ile render geometrisinin doğrudan bire bir identity eşlemesi olmadığını açıkça gösterir.
-
-# 6. UI / Raw BOM
-
-`src/selectionFeedback.js:30-44` base-wall ve base seçim etiketlerini module type/width üzerinden üretir; `upright_49_5` UI selection identity'si olarak kullanılmaz.
-
-`src/rawBomDebug.js:104-115` hem `Panel Bazalı 100/150/200` hem `Baza 100/150/200` seçimlerini parse edip `getExpandedModuleRecipe()` çağırır. `renderRecipe()` `src/rawBomDebug.js:35-56` ile:
-
-```text
-Panel Bazalı → 2 × Dikme 49,5 cm
-Baza         → 4 × Dikme 49,5 cm
-```
-
-gösterilebilir.
-
-# 7. Persistence
-
-`src/main.js:1257-1265` snapshot'a module state'lerini klonlar; `src/main.js:1320-1331` restore eder ve module `catalogKey`'ini yeniden resolve eder. `src/projectStore.js:39-56` tüm project nesnesini IndexedDB'ye yazar.
-
-Base/base-wall state içinde production `partId` bulunmadığından `upright_49_5` ayrı persistence entity/instance olarak saklanmaz.
-
-# 8. BOM ownership / source-of-truth
-
-`src/moduleContracts.js:4-7` recipe BOM kaynağını `src/moduleRecipes.js` olarak tanımlar. İlgili catalog key'ler `src/moduleContracts.js:114-116,125-127` altında `RECIPE_BOM_POLICY` kullanır.
-
-Mevcut sahiplik:
-
-```text
-metadata        → src/productionParts.js
-recipe/adet     → src/moduleRecipes.js
-BOM policy      → src/moduleContracts.js
-render geometry → src/scene3d.js
-state           → src/designState.js
-persistence     → src/main.js + src/projectStore.js
-```
-
-`src/systemChangeContract.js:114-122` `moduleRecipes.js` ve `productionParts.js` dosyalarını BOM domain'inde; `rawBomDebug.js` dosyasını BOM + UI domain'inde sınıflandırır.
-
-# 9. Testler
-
-Doğrudan test noktaları:
-
-```text
-test/baseRecipes.test.js
-test/baseWallRecipes.test.js
-```
-
-- `test/baseRecipes.test.js:7-8`: production length 49.5 cm.
-- `test/baseRecipes.test.js:32-45`: BASE 100/150/200 → `upright_49_5 ×4`.
-- `test/baseRecipes.test.js:48-51`: expanded recipe `Dikme 49,5 cm` adını resolve eder.
-- `test/baseWallRecipes.test.js:12-29`: wall_base 100/150/200 → `upright_49_5 ×2`, ayrıca tüm recipe item'larının production part'a resolve olduğunu kontrol eder.
-
-Bu çalışma sırasında ortak hedefli test seti çalıştırıldı ve sonuç `49 test / 49 pass / 0 fail` oldu.
-
-# 10. Sonuç
-
-```text
-partId olarak var                       EVET
-production metadata olarak var          EVET
-recipe BOM kalemi olarak var             EVET (6 recipe)
-standalone MODULE_CATALOG girdisi        HAYIR
-ayrı project-state entity/instance       HAYIR
-render mesh partId identity              HAYIR
-persistence upright_49_5 instance        HAYIR
-UI selection identity upright_49_5       HAYIR
-renderer productionParts tüketimi        HAYIR
-renderer moduleRecipes tüketimi          HAYIR
-```
-
-`upright_49_5` mevcut sistemde production/BOM parçasıdır. Base ve base-wall render tarafında kısa dikme işlevine benzeyen procedural post geometrileri vardır; ancak bunların production `partId`/ölçüsüyle doğrudan kod bağı mevcut runtime kodunda yoktur.
-
-**Kod zinciri burada bitiyor. Hedef mimari veya entegrasyon tasarımı yapılmadı.**
+## 18. Open state / decisions / completion — VAR
+Product decision confirmed: upright material is aluminum and canonical default color is `#D0D3D4`. No renderer/state/placement/persistence migration is required for this change.
