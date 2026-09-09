@@ -31,7 +31,7 @@ export const PRODUCTION_PARTS = Object.freeze({
   shelf_100: Object.freeze({ itemKey: 'shelf_100', name: 'Raf 100 cm', type: 'shelf', unit: 'adet', dimensions: Object.freeze({ lengthCm: 100, depthCm: 38, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff, nominalModuleWidthCm: 100 }),
   shelf_150: Object.freeze({ itemKey: 'shelf_150', name: 'Raf 150 cm', type: 'shelf', unit: 'adet', dimensions: Object.freeze({ lengthCm: 150, depthCm: 38, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff, nominalModuleWidthCm: 150 }),
   shelf_200: Object.freeze({ itemKey: 'shelf_200', name: 'Raf 200 cm', type: 'shelf', unit: 'adet', dimensions: Object.freeze({ lengthCm: 200, depthCm: 38, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff, nominalModuleWidthCm: 200 }),
-  shelf_leg: Object.freeze({ partId: 'shelf_leg', name: 'Raf Ayağı', type: 'shelf-accessory', unit: 'adet' }),
+  shelf_leg: Object.freeze({ itemKey: 'shelf_leg', name: 'Raf Ayağı', type: 'shelf-accessory', unit: 'adet' }),
 
   showcase_2_100: Object.freeze({ partId: 'showcase_2_100', name: '2 Gözlü Vitrin 100 cm', type: 'showcase', unit: 'adet', eyeCount: 2, nominalModuleWidthCm: 100 }),
   showcase_3_100: Object.freeze({ partId: 'showcase_3_100', name: '3 Gözlü Vitrin 100 cm', type: 'showcase', unit: 'adet', eyeCount: 3, nominalModuleWidthCm: 100 }),
