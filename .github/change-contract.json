@@ -1,24 +1,24 @@
 {
   "schemaVersion": 2,
-  "id": "shelf-items-canonical-properties",
+  "id": "glass-shelf-canonical-item-and-glass-appearance",
   "kind": "architecture",
-  "summary": "Migrate shelf_100, shelf_150 and shelf_200 to canonical itemKey identity, make their verified sunta dimensions and white default color Item-owned, remove duplicate shelf depth/thickness/color business constants from catalog/renderer, and preserve parent shelf module behavior/BOM quantities with regression coverage.",
+  "summary": "Migrate glass_shelf to canonical itemKey identity with verified 87.3 × 28.5 × 0.6 cm glass properties, preserve showcase BOM quantities, make showcase renderer consume canonical dimensions/material, and centralize normal/table/panel glass appearance while keeping projector optics specialized.",
   "owners": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
-    "src/catalog.js",
+    "src/theme.js",
     "src/scene3d.js",
-    "test/shelfItemsItemContract.test.js",
-    "docs/items/current-system/shelf_100.md",
-    "docs/items/current-system/shelf_150.md",
-    "docs/items/current-system/shelf_200.md",
-    "docs/items/definitions/shelf_100.md",
-    "docs/items/definitions/shelf_150.md",
-    "docs/items/definitions/shelf_200.md"
+    "test/glassShelfItemContract.test.js",
+    "test/materialAppearance.test.js",
+    "test/showcaseRecipes.test.js",
+    "docs/items/current-system/glass_shelf.md",
+    "docs/items/definitions/glass_shelf.md",
+    "docs/items/ITEM_LIST.md"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
     "src/moduleRecipes.js",
+    "src/theme.js",
     "src/moduleBehavior.js",
     "docs/items/contract/ITEM_CONTRACT.md",
     "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md"
@@ -31,7 +31,7 @@
     "renderer": "affected",
     "persistence": "not-applicable",
     "bom": "affected",
-    "ui": "not-applicable",
+    "ui": "affected",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
@@ -72,7 +72,11 @@
       "src/selectionFeedback.js",
       "src/systemChangeContract.js",
       "src/wall.js",
-      "src/wallReflow.js"
+      "src/wallReflow.js",
+      "src/theme.js",
+      "src/colorEditor.css",
+      "src/helpGuide.css",
+      "src/style.css"
     ],
     "affectedTests": [
       "e2e/f010-module-construction.spec.mjs",
@@ -194,7 +198,11 @@
       "test/wallDragStickiness.test.js",
       "test/wallReflow.test.js",
       "tests/autoDepot.test.js",
-      "tests/moduleBehavior.test.js"
+      "tests/moduleBehavior.test.js",
+      "test/glassShelfItemContract.test.js",
+      "test/materialAppearance.test.js",
+      "e2e/f028-reset-features.spec.mjs",
+      "test/selectionFeedback.test.js"
     ],
     "affectedDocs": [
       "ARCHITECTURE_RULES.md",
@@ -352,13 +360,15 @@
       "docs/items/definitions/wall_shelf_3_150.md",
       "docs/items/definitions/wall_shelf_3_200.md",
       "docs/items/definitions/wall_showcase_100_2.md",
-      "docs/items/definitions/wall_showcase_100_3.md"
+      "docs/items/definitions/wall_showcase_100_3.md",
+      "docs/items/definitions/glass_shelf.md"
     ],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": [
         "F-001",
         "F-003",
+        "F-005",
         "F-010",
         "F-011",
         "F-012",
@@ -372,16 +382,16 @@
         "F-045"
       ]
     },
-    "notes": "User product decision: shelf_100, shelf_150 and shelf_200 are 18 mm sunta and use the same white appearance as panel_197. Fresh runtime also verifies the existing 38 cm shelf projection as the leaf shelf depth. Canonical shelf Items now own depthCm=38, thicknessCm=1.8, material=sunta and defaultColor=0xffffff. The old catalog depth/thickness constants and renderer color constant are removed; createShelfModule consumes canonical Item values. Shelf heights remain parent type-level layout, and innerWidthM remains an explicit renderer fit override. Recipe quantities, parent shelf state, placement, rotation, snap/collision/connection, selection, context menu, persistence and reflow semantics are unchanged. Change Gate domains required by scene3d are marked affected for review; findings are review declarations only and no audit remediation is included."
+    "notes": "User product decision: glass_shelf is 87.3 × 28.5 × 0.6 cm (6 mm) and material=cam. Canonical glass_shelf owns those product properties and recipes switch only its identity from legacy partId to itemKey while preserving ×2/×3 quantities. createShowcaseModule consumes canonical dimensions and resolves material=cam through the shared normal glass appearance. Normal glass uses GLASS_APPEARANCE; table glass uses explicit TABLE_GLASS_APPEARANCE physical-render overrides; panel backing remains a panel-only renderer effect; projector lens remains specialized and is not changed. Existing parent showcase state, placement, move, rotation, snap/collision/connection, selection, context menu, persistence and reflow semantics are unchanged. Renderer still creates eyeCount-1 internal divider meshes; BOM quantities remain recipe-owned and are not inferred from renderer mesh count. Change Gate domains required by production/BOM/scene3d/theme changes are declared for review; findings are review declarations only and no audit remediation is included."
   },
   "tests": {
     "targeted": [
-      "test/shelfItemsItemContract.test.js",
-      "test/shelfModule.test.js",
+      "test/glassShelfItemContract.test.js",
+      "test/materialAppearance.test.js",
+      "test/showcaseRecipes.test.js",
+      "test/showcaseDepthDirection.test.js",
       "test/moduleRecipes.test.js",
-      "test/boardMaterialItemContract.test.js",
-      "test/separatorPanelsItemContract.test.js",
-      "test/straightPanelsItemContract.test.js"
+      "test/separatorPanelsItemContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -390,16 +400,16 @@
       "targeted": [
         "e2e/f010-module-construction.spec.mjs"
       ],
-      "reason": "The repository change gate classifies catalog/BOM/renderer changes as browser-impacting, so the existing module-construction E2E is required."
+      "reason": "The repository change gate classifies production/BOM/renderer changes as browser-impacting, so the existing module-construction E2E is required."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Canonicalizes three existing shelf production Items and their verified 38 cm depth plus user-confirmed 18 mm sunta/white product defaults. Renderer thickness changes from the old implicit 3 cm value to the real 1.8 cm Item value; parent module behavior and recipe quantities remain unchanged."
+    "notes": "Canonicalizes one existing showcase leaf Item and corrects its renderer geometry from implicit 87.3 × 26.5 × 1.8 cm fit values to the user-verified 87.3 × 28.5 × 0.6 cm product dimensions. Parent showcase behavior and existing BOM quantities are preserved; glass appearance changes are centralized renderer defaults with explicit table/panel/projector boundaries."
   },
   "migration": {
     "required": false,
-    "notes": "No persisted project schema migration is required; shelf leaf metadata/defaultColor is not duplicated into project state and existing parent shelf module snapshots remain valid."
+    "notes": "No persisted project schema migration is required; glass_shelf is a leaf production Item and canonical product metadata is not copied into project state."
   },
-  "rollback": "Restore shelf_100/shelf_150/shelf_200 legacy partId definitions and recipe entries, restore catalog shelf projection/thickness constants and renderer gray shelf color, remove the shelf Item resolver/docs/tests, and leave parent shelf state/behavior/recipe quantities unchanged."
+  "rollback": "Restore glass_shelf legacy partId definition and recipe entries, restore showcase procedural shelf dimensions/material literals and prior distributed glass appearance literals, remove glass_shelf definition/regression coverage, and leave parent showcase state/behavior/BOM quantities unchanged."
 }

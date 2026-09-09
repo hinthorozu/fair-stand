@@ -28,9 +28,9 @@ test('mesh branda is a separate one-piece cover without lightbox lighting', () =
   assert.match(scene, /Mesh Branda aydınlatılamaz/);
 });
 
-test('lightbox lighting stays fully opaque', () => {
+test('lightbox lighting stays fully opaque while Mesh uses its own opacity constant', () => {
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(scene, /material\.opacity = fabricType === 'mesh' \? GLASS_SURFACE_OPACITY : 1/);
+  assert.match(scene, /material\.opacity = fabricType === 'mesh' \? MESH_FABRIC_OPACITY : 1/);
   assert.match(scene, /material\.transparent = fabricType === 'mesh'/);
   assert.match(scene, /material\.depthWrite = fabricType !== 'mesh'/);
   assert.match(scene, /fabricType = fabricState\.fabricType === 'mesh'/);
