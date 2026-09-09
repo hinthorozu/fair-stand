@@ -180,6 +180,7 @@ test('door state has three upper panels and one independent editable door surfac
   assert.equal(door.widthCm, 100);
   assert.deepEqual(door.strips.map((strip) => strip.stripIndex), [4, 5, 6]);
   assert.equal(door.strips.length, 3);
+  assert.equal(door.surface.itemKey, 'door_leaf_100');
   assert.equal(door.surface.color, '#ffffff');
   assert.equal(door.surface.imageAssetId, null);
   assert.equal(door.surface.imageTransform.mode, 'single');
@@ -196,6 +197,7 @@ test('door surface color and image state is independent from upper panels and su
 
   assert.notEqual(duplicate.id, door.id);
   assert.notEqual(duplicate.surface.id, door.surface.id);
+  assert.equal(duplicate.surface.itemKey, 'door_leaf_100');
   assert.equal(duplicate.surface.imageAssetId, 'door-art');
   assert.equal(duplicate.surface.imageTransform.fit, 'cover');
   assert.equal(duplicate.strips[1].color, '#123456');

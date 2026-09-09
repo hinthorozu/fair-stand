@@ -26,7 +26,7 @@ export const PRODUCTION_PARTS = Object.freeze({
   connector_double: Object.freeze({ itemKey: 'connector_double', name: 'Çiftli Aparat', type: 'connector', unit: 'adet', connectorType: 'double' }),
   connector_corner: Object.freeze({ itemKey: 'connector_corner', name: 'Köşe Aparatı', type: 'connector', unit: 'adet', connectorType: 'corner' }),
 
-  door_100: Object.freeze({ partId: 'door_100', name: 'Kapı 100 cm', type: 'door', unit: 'adet', nominalModuleWidthCm: 100 }),
+  door_leaf_100: Object.freeze({ itemKey: 'door_leaf_100', name: 'Ahşap Kapı Kanadı 100 × 200 cm', type: 'door-leaf', unit: 'adet', dimensions: Object.freeze({ widthCm: 100, heightCm: 200, thicknessCm: 8 }), material: 'ahşap', defaultColor: 0xffffff, nominalModuleWidthCm: 100 }),
 
   shelf_100: Object.freeze({ itemKey: 'shelf_100', name: 'Raf 100 cm', type: 'shelf', unit: 'adet', dimensions: Object.freeze({ lengthCm: 100, depthCm: 38, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff, nominalModuleWidthCm: 100 }),
   shelf_150: Object.freeze({ itemKey: 'shelf_150', name: 'Raf 150 cm', type: 'shelf', unit: 'adet', dimensions: Object.freeze({ lengthCm: 150, depthCm: 38, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff, nominalModuleWidthCm: 150 }),
@@ -60,6 +60,15 @@ export function getShelfProductionItem(nominalModuleWidthCm) {
   )) ?? null;
 }
 
+
+const DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH = Object.freeze({
+  100: 'door_leaf_100',
+});
+
+export function getDoorLeafProductionItem(nominalModuleWidthCm) {
+  const itemKey = DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH[Number(nominalModuleWidthCm)];
+  return itemKey ? getProductionItem(itemKey) : null;
+}
 
 const CONNECTOR_ITEM_KEYS_BY_TYPE = Object.freeze({
   start: 'connector_start',

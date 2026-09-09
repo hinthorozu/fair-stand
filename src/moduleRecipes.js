@@ -17,7 +17,7 @@ const STRAIGHT_WALL_RECIPES = Object.freeze({
 
 const MODULE_RECIPES = Object.freeze({
   'door:100': Object.freeze({ recipeId: 'door-100', moduleType: 'door', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 1 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_98', quantity: 3 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 5 }), Object.freeze({ partId: 'door_100', quantity: 1 }),
+    Object.freeze({ itemKey: 'profile_91', quantity: 1 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_98', quantity: 3 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 5 }), Object.freeze({ itemKey: 'door_leaf_100', quantity: 1 }),
   ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_92' }) }),
 
   'shelf:100:2': Object.freeze({ recipeId: 'shelf-wall-100-2', moduleType: 'shelf', nominalWidthCm: 100, shelfCount: 2, connectionMode: 'straight', items: Object.freeze([
