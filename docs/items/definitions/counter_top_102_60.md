@@ -35,7 +35,7 @@ Placement, move, rotation, collision, snap, selection, drag, context-menu ve key
 
 Renderer banko geometrisini procedural üretir ve production metadata'yı mesh source-of-truth olarak tüketmez. `1.8 cm` üretim kalınlığı BOM/production metadata'dır; renderer business rule'u olarak ikinci kez tanımlanmaz.
 
-L150 için mevcut parent/UI text-parser sınırı vardır. Bu leaf Item kimlik migrasyonunun sahibi değildir.
+L150 selection metni Raw BOM adapter'ında `counter-l-150` recipe'sine resolve edilir. Bu UI bağlantısı parent/debug katmanına aittir; leaf Item quantity ownership değişmez.
 
 ## 4. Parent recipe kullanımı ve quantity ownership
 
