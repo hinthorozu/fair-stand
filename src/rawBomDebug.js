@@ -1,7 +1,25 @@
 import { getExpandedModuleRecipe } from './moduleRecipes.js';
 
-const selectionInfo = document.querySelector('#selection-info');
-const sidebar = document.querySelector('.sidebar');
+const selectionInfo = typeof document !== 'undefined' ? document.querySelector('#selection-info') : null;
+const sidebar = typeof document !== 'undefined' ? document.querySelector('.sidebar') : null;
+
+const SUPPORTED_L_COUNTER_WIDTHS = new Set([100, 150, 200]);
+
+export function parseLCounterSelection(text) {
+  const match = String(text ?? '').match(/Köşe\s+Banko\s+(100|150|200)\s*[×x]\s*(100|150|200)/i);
+  if (!match) return null;
+
+  const widthCm = Number(match[1]);
+  const depthCm = Number(match[2]);
+  if (!SUPPORTED_L_COUNTER_WIDTHS.has(widthCm) || depthCm !== widthCm) return null;
+
+  return {
+    moduleType: 'counter',
+    widthCm,
+    label: `Köşe Banko ${widthCm}×${depthCm}`,
+    options: { shape: 'L' },
+  };
+}
 
 function createPanel() {
   if (!sidebar || document.querySelector('#raw-bom-debug')) return null;
@@ -88,9 +106,14 @@ function syncFromSelection() {
     return;
   }
 
-  const cornerCounterMatch = text.match(/Köşe\s+Banko\s+100[×x]100/i);
-  if (cornerCounterMatch) {
-    renderRecipe('counter', 100, 'Köşe Banko 100×100', { shape: 'L' });
+  const cornerCounterSelection = parseLCounterSelection(text);
+  if (cornerCounterSelection) {
+    renderRecipe(
+      cornerCounterSelection.moduleType,
+      cornerCounterSelection.widthCm,
+      cornerCounterSelection.label,
+      cornerCounterSelection.options,
+    );
     return;
   }
 

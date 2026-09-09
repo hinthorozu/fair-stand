@@ -1,38 +1,30 @@
 {
   "schemaVersion": 2,
-  "id": "counter-tops-item-contract-cutover",
-  "kind": "bom-change",
-  "summary": "Migrate all six counter-top production Items to canonical itemKey identity across production metadata and all 9 verified straight/L-counter parent recipe rows, add verified thicknessCm = 1.8 metadata, and preserve exact ×1 quantities and existing renderer/state separation.",
+  "id": "raw-bom-l-counter-parser-gap",
+  "kind": "bugfix",
+  "summary": "Close the Raw BOM debug selection-parser gap for supported L-counter 150×150 and 200×200 selections while preserving L100 behavior and existing counter recipe/BOM ownership.",
   "owners": [
-    "src/productionParts.js",
-    "src/moduleRecipes.js",
-    "docs/items/definitions/counter_top_110_60.md",
-    "docs/items/definitions/counter_top_52_60.md",
-    "docs/items/definitions/counter_top_160_60.md",
+    "src/rawBomDebug.js",
     "docs/items/definitions/counter_top_102_60.md",
-    "docs/items/definitions/counter_top_210_60.md",
     "docs/items/definitions/counter_top_150_60.md",
-    "test/counterTopsItemContract.test.js"
+    "docs/items/definitions/counter_top_160_60.md",
+    "docs/items/definitions/counter_top_210_60.md",
+    "test/rawBomSelectionParser.test.js"
   ],
   "sourceOfTruth": [
-    "src/productionParts.js",
-    "src/moduleRecipes.js",
-    "docs/items/current-system/counter_top_110_60.md",
-    "docs/items/current-system/counter_top_52_60.md",
-    "docs/items/current-system/counter_top_160_60.md",
-    "docs/items/current-system/counter_top_102_60.md",
-    "docs/items/current-system/counter_top_210_60.md",
-    "docs/items/current-system/counter_top_150_60.md"
+    "src/selectionFeedback.js",
+    "src/rawBomDebug.js",
+    "src/moduleRecipes.js"
   ],
   "impact": {
     "catalog": "not-applicable",
-    "behavior": "not-applicable",
+    "behavior": "affected",
     "state": "not-applicable",
     "placement": "not-applicable",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "affected",
-    "ui": "not-applicable",
+    "ui": "affected",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
@@ -50,7 +42,8 @@
       "scripts/verify-change-contract.mjs",
       "src/moduleContracts.js",
       "src/rawBomDebug.js",
-      "src/systemChangeContract.js"
+      "src/systemChangeContract.js",
+      "src/main.js"
     ],
     "affectedTests": [
       "e2e/f010-module-construction.spec.mjs",
@@ -82,7 +75,34 @@
       "test/upright99And495ItemContract.test.js",
       "test/cornerPanelsItemContract.test.js",
       "test/baseTopsItemContract.test.js",
-      "test/counterTopsItemContract.test.js"
+      "test/counterTopsItemContract.test.js",
+      "test/rawBomSelectionParser.test.js",
+      "e2e/f028-reset-features.spec.mjs",
+      "test/autosaveMainIntegration.test.js",
+      "test/bundleLoadingContract.test.js",
+      "test/colorEditorControllerMainIntegration.test.js",
+      "test/colorEditorMainIntegration.test.js",
+      "test/f028FeatureReset.test.js",
+      "test/helpGuide.test.js",
+      "test/illuminatedFoamModule.test.js",
+      "test/imageAssetDeletion.test.js",
+      "test/imageAssetLiveDelete.test.js",
+      "test/lightboxFabric.test.js",
+      "test/lightboxFabricAppearance.test.js",
+      "test/lightboxFabricLighting.test.js",
+      "test/moduleBehaviorPolicy.test.js",
+      "test/moduleStateConstructionRegistry.test.js",
+      "test/projectAtomicDeletion.test.js",
+      "test/projectDropdownSwitchIntegration.test.js",
+      "test/projectImportFlow.test.js",
+      "test/projectUiMainIntegration.test.js",
+      "test/removedIndoorPlant2.test.js",
+      "test/selectionFeedbackMainIntegration.test.js",
+      "test/shelfLighting.test.js",
+      "test/sidebarControllerMainIntegration.test.js",
+      "test/stageFeedbackMainIntegration.test.js",
+      "test/systemImpactAnalysis.test.js",
+      "test/uiFeedbackMainIntegration.test.js"
     ],
     "affectedDocs": [
       "FRESH_REPOSITORY_REVIEW.md",
@@ -198,26 +218,30 @@
       "docs/items/definitions/counter_top_160_60.md",
       "docs/items/definitions/counter_top_102_60.md",
       "docs/items/definitions/counter_top_210_60.md",
-      "docs/items/definitions/counter_top_150_60.md"
+      "docs/items/definitions/counter_top_150_60.md",
+      "RELEASE_HARDENING_ROADMAP.md",
+      "audit/FINDINGS.md",
+      "audit/evidence/A10_UI_CONTROLS.md"
     ],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": [
         "F-001",
         "F-003",
-        "F-014"
+        "F-014",
+        "F-025",
+        "F-030"
       ]
     },
-    "notes": "Full-system review confirms the six target counter tops are production leaf Items used only through straight/L-counter parent recipes. User product decision verifies 1.8 cm thickness as canonical production metadata. State, persistence, placement, interaction, and renderer production identity remain not applicable. Nine active recipe rows migrate partId -> itemKey with exact ×1 quantity parity. Existing L150/L200 Raw BOM text-parser coverage limitation is a parent/UI integration gap reviewed as outside this leaf Item identity cutover."
+    "notes": "Full-system review isolates the defect to the Raw BOM debug adapter: selectionFeedback emits Köşe Banko 100/150/200 square labels, but rawBomDebug previously special-cased only 100×100. The fix generalizes only supported square L-counter widths (100/150/200), rejects unsupported/rectangular labels, and routes the parsed selection through the existing expanded recipe resolver. Counter recipes, quantities, state, renderer geometry, placement, persistence, and production Item identity remain unchanged."
   },
   "tests": {
     "targeted": [
-      "test/counterTopsItemContract.test.js",
-      "test/counterRecipes.test.js",
+      "test/rawBomSelectionParser.test.js",
       "test/lCounter100Contract.test.js",
       "test/lCounter150Contract.test.js",
       "test/lCounter200Contract.test.js",
-      "test/moduleRecipes.test.js"
+      "test/counterTopsItemContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -226,16 +250,16 @@
       "targeted": [
         "e2e/f010-module-construction.spec.mjs"
       ],
-      "reason": "Production recipe identity and canonical production dimensions are BOM-domain runtime changes. Unit regressions lock all nine ×1 straight/L-counter recipe rows and 1.8 cm metadata; existing F-010 Chromium coverage protects real counter module construction/browser integration."
+      "reason": "Raw BOM debug is browser UI/BOM integration. Pure parser regressions lock the exact L100/L150/L200 selection-to-recipe mapping while existing Chromium construction coverage protects browser integration and the full E2E job guards runtime regressions."
     }
   },
   "risk": {
-    "level": "medium",
-    "notes": "Nine active straight/L-counter recipe rows change identity field from partId to itemKey and six production definitions gain verified thicknessCm = 1.8. Quantities, units, module state, renderer geometry, and persistence remain unchanged and are regression-locked."
+    "level": "low",
+    "notes": "The change is confined to Raw BOM debug selection parsing. It broadens the existing L-counter branch from only 100×100 to the already-supported square widths 100/150/200 and rejects non-square/unsupported labels. No recipe quantities or module state are changed."
   },
   "migration": {
-    "required": true,
-    "notes": "Code/recipe identity + production metadata migration only: six production definitions and nine recipe rows move partId -> itemKey, and verified 1.8 cm thickness is added. No persisted project schema or data migration is required."
+    "required": false,
+    "notes": "No data/schema migration. This is a runtime debug-UI adapter bugfix only."
   },
-  "rollback": "Restore the six production partId identities, remove the six thicknessCm = 1.8 metadata fields, restore the nine recipe partId fields, and revert counter-top definitions/regressions. No persisted data rollback is required."
+  "rollback": "Restore the previous 100×100-only Raw BOM L-counter matcher and revert the four canonical integration notes plus parser regression. No persisted data rollback is required."
 }
