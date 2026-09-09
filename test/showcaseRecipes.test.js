@@ -13,7 +13,7 @@ test('production catalog contains showcase parts and glass shelf', () => {
 test('2-eye showcase 100 recipe matches verified production data', () => {
   const recipe = getModuleRecipe('showcase-2', 100);
   assert.deepEqual(recipe.items, [
-    { partId: 'profile_91', quantity: 4 },
+    { itemKey: 'profile_91', quantity: 4 },
     { itemKey: 'upright_346_5', quantity: 2 },
     { itemKey: 'panel_98', quantity: 5 },
     { itemKey: 'connector_start', quantity: 4 },
@@ -27,7 +27,7 @@ test('2-eye showcase 100 recipe matches verified production data', () => {
 test('3-eye showcase 100 recipe matches verified production data', () => {
   const recipe = getModuleRecipe('showcase-3', 100);
   assert.deepEqual(recipe.items, [
-    { partId: 'profile_91', quantity: 4 },
+    { itemKey: 'profile_91', quantity: 4 },
     { itemKey: 'upright_346_5', quantity: 2 },
     { itemKey: 'panel_98', quantity: 4 },
     { itemKey: 'connector_start', quantity: 4 },

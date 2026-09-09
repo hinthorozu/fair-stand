@@ -59,11 +59,11 @@ test('expanded recipes resolve profile_190 metadata through canonical itemKey', 
   assert.equal(counterProfile.part.name, 'Profil 190 cm');
 });
 
-test('neighboring profile Items remain legacy and migrate independently', () => {
-  for (const itemKey of ['profile_41_5', 'profile_91', 'profile_140_5']) {
+test('the full production profile family now uses canonical Item identity', () => {
+  for (const itemKey of ['profile_41_5', 'profile_91', 'profile_140_5', 'profile_190']) {
     const item = getProductionItem(itemKey);
-    assert.equal(item.itemKey, undefined, itemKey);
-    assert.equal(item.partId, itemKey);
+    assert.equal(item.itemKey, itemKey);
+    assert.equal(item.partId, undefined, itemKey);
     assert.equal(item.type, 'profile');
   }
 });

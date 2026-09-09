@@ -14,8 +14,8 @@ test('production catalog contains verified banko upright and tops', () => {
 test('banko 100 recipe matches verified production data', () => {
   const recipe = getModuleRecipe('counter', 100);
   assert.deepEqual(recipe.items, [
-    { partId: 'profile_91', quantity: 3 },
-    { partId: 'profile_41_5', quantity: 4 },
+    { itemKey: 'profile_91', quantity: 3 },
+    { itemKey: 'profile_41_5', quantity: 4 },
     { itemKey: 'upright_99', quantity: 4 },
     { itemKey: 'panel_98', quantity: 2 },
     { itemKey: 'panel_48_5', quantity: 4 },
