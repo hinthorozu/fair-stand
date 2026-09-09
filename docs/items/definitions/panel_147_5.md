@@ -1,88 +1,28 @@
 # panel_147_5 — Item Contract Definition
 
-Bu belge `panel_147_5` Item'ının canonical Item Contract tanımını kaydeder. Migration öncesi mevcut kod zinciri `docs/items/current-system/panel_147_5.md` içindedir.
+## 1. Canonical kimlik ve intrinsic properties
+`PRODUCTION_PARTS.panel_147_5`: canonical `itemKey`, `type=panel`, `unit=adet`, `147.5 × 47 × 0.8 cm`, `panelRole=straight`, nominal `150`; Tekil Item. Doğrulanmış material/product defaultColor yoktur; generic `#ffffff` editor default'u product default değildir.
 
-## 1. Kimlik ve sınıflandırma
+## 2. Canonical creation / state / override
+`getProductionItem('panel_147_5')` resolver'dır. Parent editable surface state project color/image/imageTransform override'larını taşır; ayrı leaf factory yoktur.
 
-| Alan | Canonical değer | Durum |
-|---|---|---|
-| `itemKey` | `panel_147_5` | VAR |
-| Ad | `Panel 147,5 × 47 cm` | VAR |
-| `type` | `panel` | VAR |
-| Yapı | Tekil Item | VAR |
-| Parametrik | hayır | UYGULANMIYOR |
-| `unit` | `adet` | VAR |
-| `dimensions.widthCm` | `147.5` | VAR |
-| `dimensions.heightCm` | `47` | VAR |
-| `dimensions.thicknessCm` | `0.8` | VAR |
-| `panelRole` | `straight` | VAR |
-| `nominalModuleWidthCm` | `150` | VAR |
+## 3. Behavior / capability ownership
+Independent leaf behavior lifecycle'ı yoktur; parent module/type behavior ve parent surface context geçerlidir.
 
-Canonical production kaydı `src/productionParts.js` içindeki `PRODUCTION_PARTS.panel_147_5` kaydıdır. Legacy `partId` kaldırılmış, paralel ikinci ürün kimliği oluşturulmamıştır.
+## 4. BOM / composition
+`wall-straight-150 ×7`, shelf150 2/3 `×7`, L150 `×4`, counter150 `×2`, base-wall150 `×7`, base150 `×2`; quantity parent recipe sahibidir.
 
-## 2. Composition / parent recipe kullanımı
+## 5. Straight ↔ inner-corner relationship
+Eşleşen `panel_corner_142_5`; `panel_147_5 ×N` → `panel_corner_142_5 ×N` 1:1 replacement.
 
-`panel_147_5` başka Item'lardan oluşmaz; kendisi **Tekil Item**dır. Quantity sahibi parent recipe'dir. Doğrulanmış parent recipe kullanımları:
+## 6. Persistence
+Leaf ayrı entity değildir; parent state persist edilir.
 
-| Recipe | Quantity |
-|---|---:|
-| `wall-straight-150` | 7 |
-| `shelf-wall-150-2` | 7 |
-| `shelf-wall-150-3` | 7 |
-| `counter-l-150` | 4 |
-| `counter-150` | 2 |
-| `base-wall-150` | 7 |
-| `base-150` | 2 |
+## 7. Renderer boundary
+Procedural specialized renderer override izinlidir; product/BOM metadata Item'dadır.
 
-Toplam `7` occurrence vardır. Migration bu miktarların hiçbirini değiştirmez.
+## 8. Regression
+`test/straightPanelsItemContract.test.js` + corner tests.
 
-## 3. BOM / production mapping
-
-Canonical çıktı:
-
-```text
-itemKey = panel_147_5
-quantity = parent recipe'den
-unit = adet
-dimensions = 147.5 × 47 × 0.8 cm
-```
-
-Recipe expansion `getRecipeItemKey()` → `getProductionItem()` canonical compatibility yolunu kullanır. Ayrı pricing, state veya renderer-türevi BOM kuralı eklenmez.
-
-## 4. State / behavior / persistence
-
-Bu production leaf Item için bağımsız project instance, factory, mutable state veya persistence entity'si yoktur. Placement, move, rotation, collision ve interaction davranışları parent module seviyesindedir; bu alanlar bu Item için **UYGULANMIYOR**.
-
-## 5. Renderer ayrımı
-
-Mevcut renderer production Item identity'sini doğrudan tüketmez; procedural module geometrisi ayrı kalır. Bu migration yalnız identity/BOM cutover yapar ve renderer geometrisini değiştirmez.
-
-## 6. Corner/separator izolasyonu
-
-Bu Item'ın kendi migrationı yalnız straight paneli kapsar. Güncel sistemde inner-corner panel ailesi de canonical `itemKey` / `innerCornerPanelItemKey` yoluna taşınmıştır ve caller `panelVariant = inner-corner` verdiğinde doğrulanmış 1:1 replacement çalışır. Separator Item'ları bağımsız migration konusudur ve legacy `partId` üzerinde kalır.
-
-## 7. Regression sözleşmesi
-
-Testler şunları kilitler:
-
-1. `itemKey = panel_147_5` vardır ve own `partId` yoktur,
-2. `type`, `unit`, `dimensions`, `panelRole`, `nominalModuleWidthCm` korunur,
-3. tam `7` parent recipe canonical `itemKey` kullanır,
-4. quantity parity `7 / 7 / 7 / 4 / 2 / 7 / 2` olarak korunur,
-5. expanded recipe production metadata'yı canonical identity üzerinden çözer,
-6. corner/separator komşuları yanlışlıkla migrate edilmez.
-
-## Sonuç
-
-```text
-structure = Tekil Item
-parametric = hayır
-itemKey = panel_147_5
-type = panel
-unit = adet
-dimensions = 147.5 × 47 × 0.8 cm
-panelRole = straight
-nominalModuleWidthCm = 150
-active parent recipes = 7
-renderer cutover = yok
-```
+## Checklist sonucu
+Identity/dimensions/role **VAR**; material/defaultColor **YOK**; recipe consumer **VAR**; project override state **VAR**; independent behavior/persistence **UYGULANMIYOR**; corner replacement **VAR**; renderer override **izinli**; regression **VAR**.

@@ -1,21 +1,25 @@
 {
   "schemaVersion": 2,
-  "id": "counter-top-checklist-revalidation",
+  "id": "panel-items-checklist-revalidation",
   "kind": "architecture",
-  "summary": "Re-validate all six counter-top production Items against the strengthened Item checklist, refresh stale current-system inventories and canonical definitions, document existing defaultColor and parent-owned behavior/state/persistence boundaries, and preserve specialized renderer override freedom without runtime changes.",
+  "summary": "Re-validate four straight panel and four inner-corner panel production Items against the strengthened Item checklist, refresh stale current-system inventories and canonical definitions, distinguish generic project-surface defaults from verified product defaults, and document parent-owned interaction/persistence plus canonical 1:1 corner BOM replacement without runtime changes.",
   "owners": [
-    "docs/items/current-system/counter_top_102_60.md",
-    "docs/items/current-system/counter_top_110_60.md",
-    "docs/items/current-system/counter_top_150_60.md",
-    "docs/items/current-system/counter_top_160_60.md",
-    "docs/items/current-system/counter_top_210_60.md",
-    "docs/items/current-system/counter_top_52_60.md",
-    "docs/items/definitions/counter_top_102_60.md",
-    "docs/items/definitions/counter_top_110_60.md",
-    "docs/items/definitions/counter_top_150_60.md",
-    "docs/items/definitions/counter_top_160_60.md",
-    "docs/items/definitions/counter_top_210_60.md",
-    "docs/items/definitions/counter_top_52_60.md"
+    "docs/items/current-system/panel_48_5.md",
+    "docs/items/current-system/panel_98.md",
+    "docs/items/current-system/panel_147_5.md",
+    "docs/items/current-system/panel_197.md",
+    "docs/items/current-system/panel_corner_42_5.md",
+    "docs/items/current-system/panel_corner_92.md",
+    "docs/items/current-system/panel_corner_142_5.md",
+    "docs/items/current-system/panel_corner_192.md",
+    "docs/items/definitions/panel_48_5.md",
+    "docs/items/definitions/panel_98.md",
+    "docs/items/definitions/panel_147_5.md",
+    "docs/items/definitions/panel_197.md",
+    "docs/items/definitions/panel_corner_42_5.md",
+    "docs/items/definitions/panel_corner_92.md",
+    "docs/items/definitions/panel_corner_142_5.md",
+    "docs/items/definitions/panel_corner_192.md"
   ],
   "sourceOfTruth": [
     "src/productionParts.js",
@@ -25,7 +29,6 @@
     "src/moduleContextMenu.js",
     "src/main.js",
     "src/projectStore.js",
-    "src/rawBomDebug.js",
     "src/scene3d.js"
   ],
   "impact": {
@@ -221,33 +224,31 @@
       "affected": [],
       "reviewedNotAffected": ["F-001", "F-003"]
     },
-    "notes": "Documentation revalidation only. Fresh Version2 runtime inspection confirms the six counter-top Items already own canonical width/depth/1.8 cm thickness/defaultColor, recipe itemKey usage and quantity parity. Material has no verified product value and is intentionally not invented. Parent counter owns state, placement/move/rotation/snap/collision, selection/context-menu and persistence. Raw BOM L-counter parsing supports 100/150/200. Specialized renderer values remain explicit visual overrides. No audit remediation or runtime implementation change is included."
+    "notes": "Documentation revalidation only. Fresh Version2 runtime inspection confirms all eight panel Items already own canonical itemKey, dimensions, panelRole and nominal module metadata, while recipe expansion and inner-corner replacement consume canonical Item identity. No verified material/defaultColor exists for these production Items; designState DEFAULT_PANEL_COLOR=#ffffff is a generic project-surface starting value also used outside panel Items and is not promoted to product metadata. Placement/move/rotation/snap/collision/context-menu/persistence are parent module/project responsibilities for these leaf production Items. Corner replacement is canonical and 1:1 in moduleRecipes; placement-to-panelVariant inference belongs parent/composite Item relationship scope. No audit remediation or runtime implementation change is included."
   },
   "tests": {
     "targeted": [
-      "test/counterTopsItemContract.test.js",
-      "test/counterTopDefaultColor.test.js",
-      "test/counterRecipes.test.js",
-      "test/lCounter100Contract.test.js",
-      "test/lCounter150Contract.test.js",
-      "test/lCounter200Contract.test.js",
-      "test/rawBomSelectionParser.test.js"
+      "test/straightPanelsItemContract.test.js",
+      "test/panel197ItemContract.test.js",
+      "test/cornerPanelsItemContract.test.js",
+      "test/panelCorner192ItemContract.test.js",
+      "test/moduleRecipes.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": false,
       "targeted": [],
-      "reason": "This change refreshes Item inventories/definitions after fresh runtime verification; runtime implementation is unchanged. Repository full CI still runs."
+      "reason": "This batch refreshes Item inventories/definitions after fresh runtime verification; runtime implementation is unchanged. Repository full CI still runs."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Documentation-only alignment with current runtime and strengthened Item checklist; no production behavior, BOM quantity, state, persistence or renderer code changes."
+    "notes": "Documentation-only alignment with the strengthened Item checklist; no production metadata, BOM quantity, project state, persistence or renderer implementation changes."
   },
   "migration": {
     "required": false,
     "notes": "No persisted data or production metadata migration is required."
   },
-  "rollback": "Restore the previous six counter-top current-system and definition documents; runtime state is unaffected."
+  "rollback": "Restore the previous eight panel current-system and definition documents; runtime state is unaffected."
 }

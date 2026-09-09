@@ -1,91 +1,28 @@
 # panel_98 — Item Contract Definition
 
-Bu belge `panel_98` Item'ının canonical Item Contract tanımını kaydeder. Migration öncesi mevcut kod zinciri `docs/items/current-system/panel_98.md` içindedir.
+## 1. Canonical kimlik ve intrinsic properties
+Canonical `PRODUCTION_PARTS.panel_98`: `itemKey=panel_98`, `type=panel`, `unit=adet`, `98 × 47 × 0.8 cm`, `panelRole=straight`, nominal `100`. Tekil Item. Doğrulanmış `material`/product `defaultColor` yoktur; generic `DEFAULT_PANEL_COLOR='#ffffff'` product default'u değildir.
 
-## 1. Kimlik ve sınıflandırma
+## 2. Canonical creation / state / override
+`getProductionItem('panel_98')` production resolver'dır. Ayrı leaf scene/project factory yoktur. Parent editable surface state color/image/imageTransform gibi project override'ları taşır.
 
-| Alan | Canonical değer | Durum |
-|---|---|---|
-| `itemKey` | `panel_98` | VAR |
-| Ad | `Panel 98 × 47 cm` | VAR |
-| `type` | `panel` | VAR |
-| Yapı | Tekil Item | VAR |
-| Parametrik | hayır | UYGULANMIYOR |
-| `unit` | `adet` | VAR |
-| `dimensions.widthCm` | `98` | VAR |
-| `dimensions.heightCm` | `47` | VAR |
-| `dimensions.thicknessCm` | `0.8` | VAR |
-| `panelRole` | `straight` | VAR |
-| `nominalModuleWidthCm` | `100` | VAR |
+## 3. Behavior / capability ownership
+Independent placement/move/rotation/snap/collision lifecycle'ı yoktur; parent module/type behavior geçerlidir. Surface selection/image/color/context-menu parent/project surface context'indedir.
 
-Canonical production kaydı `src/productionParts.js` içindeki `PRODUCTION_PARTS.panel_98` kaydıdır. Legacy `partId` kaldırılmış, paralel ikinci ürün kimliği oluşturulmamıştır.
+## 4. BOM / composition
+Parent recipe quantity sahibidir: `wall-straight-100 ×7`, `door-100 ×3`, shelf 2/3 `×7`, showcase-2 `×5`, showcase-3 `×4`, L100 `×4`, counter100 `×2`, base-wall100 `×7`, base100 `×2`.
 
-## 2. Composition / parent recipe kullanımı
+## 5. Straight ↔ inner-corner relationship
+Eşleşen `panel_corner_92`; `panel_98 ×N` → `panel_corner_92 ×N` canonical 1:1 replacement.
 
-`panel_98` başka Item'lardan oluşmaz; kendisi **Tekil Item**dır. Quantity sahibi parent recipe'dir. Doğrulanmış parent recipe kullanımları:
+## 6. Persistence
+Leaf ayrı persisted entity değildir; parent state persist edilir.
 
-| Recipe | Quantity |
-|---|---:|
-| `wall-straight-100` | 7 |
-| `door-100` | 3 |
-| `shelf-wall-100-2` | 7 |
-| `shelf-wall-100-3` | 7 |
-| `showcase-2-100` | 5 |
-| `showcase-3-100` | 4 |
-| `counter-l-100` | 4 |
-| `counter-100` | 2 |
-| `base-wall-100` | 7 |
-| `base-100` | 2 |
+## 7. Renderer boundary
+Procedural parent renderer specialized override kullanabilir; canonical BOM/product metadata Item'dadır.
 
-Toplam `10` occurrence vardır. Migration bu miktarların hiçbirini değiştirmez.
+## 8. Regression
+`test/straightPanelsItemContract.test.js` + corner/recipe tests.
 
-## 3. BOM / production mapping
-
-Canonical çıktı:
-
-```text
-itemKey = panel_98
-quantity = parent recipe'den
-unit = adet
-dimensions = 98 × 47 × 0.8 cm
-```
-
-Recipe expansion `getRecipeItemKey()` → `getProductionItem()` canonical compatibility yolunu kullanır. Ayrı pricing, state veya renderer-türevi BOM kuralı eklenmez.
-
-## 4. State / behavior / persistence
-
-Bu production leaf Item için bağımsız project instance, factory, mutable state veya persistence entity'si yoktur. Placement, move, rotation, collision ve interaction davranışları parent module seviyesindedir; bu alanlar bu Item için **UYGULANMIYOR**.
-
-## 5. Renderer ayrımı
-
-Mevcut renderer production Item identity'sini doğrudan tüketmez; procedural module geometrisi ayrı kalır. Bu migration yalnız identity/BOM cutover yapar ve renderer geometrisini değiştirmez.
-
-## 6. Corner/separator izolasyonu
-
-Bu Item'ın kendi migrationı yalnız straight paneli kapsar. Güncel sistemde inner-corner panel ailesi de canonical `itemKey` / `innerCornerPanelItemKey` yoluna taşınmıştır ve caller `panelVariant = inner-corner` verdiğinde doğrulanmış 1:1 replacement çalışır. Separator Item'ları bağımsız migration konusudur ve legacy `partId` üzerinde kalır.
-
-## 7. Regression sözleşmesi
-
-Testler şunları kilitler:
-
-1. `itemKey = panel_98` vardır ve own `partId` yoktur,
-2. `type`, `unit`, `dimensions`, `panelRole`, `nominalModuleWidthCm` korunur,
-3. tam `10` parent recipe canonical `itemKey` kullanır,
-4. quantity parity `7 / 3 / 7 / 7 / 5 / 4 / 4 / 2 / 7 / 2` olarak korunur,
-5. expanded recipe production metadata'yı canonical identity üzerinden çözer,
-6. corner/separator komşuları yanlışlıkla migrate edilmez.
-
-## Sonuç
-
-```text
-structure = Tekil Item
-parametric = hayır
-itemKey = panel_98
-type = panel
-unit = adet
-dimensions = 98 × 47 × 0.8 cm
-panelRole = straight
-nominalModuleWidthCm = 100
-active parent recipes = 10
-renderer cutover = yok
-```
+## Checklist sonucu
+Identity/dimensions/role **VAR**; material/defaultColor **YOK**; canonical recipe consumer **VAR**; parent override state **VAR**; independent leaf behavior/persistence **UYGULANMIYOR**; corner replacement **VAR**; renderer override **izinli**; regression **VAR**.

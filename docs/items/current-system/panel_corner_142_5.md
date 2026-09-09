@@ -1,95 +1,57 @@
-`panel_corner_142_5` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# panel_corner_142_5 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Bu belge güncel `Version2` sisteminde `panel_corner_142_5` Item'ını güçlendirilmiş Item Contract checklist'ine göre envanterler.
 
-# 1. Gerçek kimlik
+## 1. Kimlik / sınıflandırma
+Canonical `itemKey = panel_corner_142_5`; `name = İç Köşe Paneli 142,5 × 47 cm`; `type = panel`; `unit = adet`; Tekil Item; `panelRole = inner-corner`; nominal `150`.
 
-`src/productionParts.js:18`:
+## 2. Intrinsic / default Item properties
+Canonical `src/productionParts.js`: `142.5 × 47 × 0.8 cm`. Doğrulanmış material/product defaultColor yoktur; generic `#ffffff` editable-surface başlangıcı product kararı değildir.
 
-```text
-partId = panel_corner_142_5
-name = İç Köşe Paneli 142,5 × 47 cm
-type = panel
-unit = adet
-dimensions = 142.5 × 47 × 0.8 cm
-panelRole = inner-corner
-nominalModuleWidthCm = 150
-```
+## 3. State / default state
+Ayrı leaf project state/id yoktur; parent/project relationship/configuration state geçerlidir.
 
-Lookup `src/productionParts.js:52-54` içindeki `getProductionPart(partId)` ile yapılır. Standalone catalog girdisi veya project-state production instance mevcut runtime kodunda yoktur.
+## 4. Factory / creation
+`getProductionItem('panel_corner_142_5')`; bağımsız scene factory **UYGULANMIYOR**.
 
-# 2. Gerçek recipe referansları
+## 5. Placement
+Bağımsız placement **UYGULANMIYOR**.
 
-`panel_corner_142_5` normal `recipe.items` kalemi değildir; 4 recipe'de `variants.innerCornerPanelPartId` olarak geçer:
+## 6. Move
+Bağımsız move **UYGULANMIYOR**.
 
-| Recipe | Kaynak |
-|---|---|
-| `wall-straight-150` | `src/moduleRecipes.js:10-12` |
-| `shelf-wall-150-2` | `26-28` |
-| `shelf-wall-150-3` | `35-37` |
-| `base-wall-150` | `81-83` |
+## 7. Rotation
+Bağımsız rotation **UYGULANMIYOR**.
 
-İlgili catalog anahtarları: `wall_150`, `wall_shelf_2_150`, `wall_shelf_3_150`, `wall_base_150`.
+## 8. Snap / collision / connection
+Bağımsız leaf snap/collision **UYGULANMIYOR**; BOM variant kararı renderer geometry'den türetilmez.
 
-# 3. Resolver / lookup davranışı
+## 9. Selection / sol click / drag
+Production identity ayrı selectable mesh değildir; parent interaction geçerlidir.
 
-`getModuleRecipe()` `src/moduleRecipes.js:107-116` recipe'yi seçer. `expandRecipe()` `119-122` yalnız `recipe.items` elemanlarını production metadata'ya genişletir. `variants.innerCornerPanelPartId` otomatik çözülmez.
+## 10. Sağ click / context menu
+Ayrı leaf context menu yoktur; parent context geçerlidir.
 
-```text
-variants.innerCornerPanelPartId = panel_corner_142_5
-→ recipe metadata olarak mevcut
-→ expanded.items içinde yok
-→ Raw BOM terminal item'ı değil
-```
+## 11. Delete / duplicate / keyboard
+Bağımsız lifecycle **UYGULANMIYOR**.
 
-# 4. State / renderer
+## 12. Persistence
+Ayrı corner entity persist edilmez.
 
-`src/designState.js` ilgili wall/shelf/base-wall modüllerinde generic `strips` ve `faces` kullanır; production corner partId state'e yazılmaz.
+## 13. Relationships / reflow
+Canonical `panel_147_5 × N → panel_corner_142_5 × N` 1:1 replacement'ı `innerCornerPanelItemKey` + `panelVariant = inner-corner` ile çözülür; quantity korunur. Placement→variant parent/composite relationship scope'udur.
 
-`src/scene3d.js` productionParts/moduleRecipes import etmez (`1-33`). `createFlatPanelModule()` (`6511+`) ve base-wall composition (`1401+`) module ölçülerinden procedural geometri üretir. `innerCornerPanelPartId` alanını renderer/placement tarafında tüketen kod mevcut runtime kodunda yoktur.
+## 14. BOM / composition
+Variant referansları: `wall-straight-150 ×7`, `shelf-wall-150-2 ×7`, `shelf-wall-150-3 ×7`, `base-wall-150 ×7`.
 
-# 5. BOM / UI
+## 15. Renderer / asset / override sınırı
+Renderer ayrı corner production identity kullanmaz; parent geometry procedural. Specialized override izinlidir.
 
-`src/rawBomDebug.js:35-55` yalnız `recipe.items` listesini render eder; `variants` okumaz. Placement'a göre normal `panel_147_5` miktarını azaltıp `panel_corner_142_5` ekleyen runtime BOM resolver bulunmadı.
+## 16. Runtime owners
+`productionParts.js`; `moduleRecipes.js`; `moduleContracts.js`; `designState.js`; `moduleBehavior.js`; `moduleContextMenu.js + main.js`; `projectStore.js`; `scene3d.js`.
 
-Dolayısıyla production registry + variant metadata vardır, fakat Raw BOM terminal satırı olarak kullanılmaz.
+## 17. Regression
+`test/cornerPanelsItemContract.test.js` identity, `142.5 × 47 × 0.8`, four variant refs ve 1:1 replacement'ı kilitler.
 
-# 6. Persistence
-
-`src/main.js:1263-1264,1326+` generic module state snapshot/restore yapar. `panel_corner_142_5` production instance state'te olmadığı için persistence'a ayrı instance yazılmaz.
-
-# 7. Ownership
-
-```text
-production metadata → src/productionParts.js
-variant metadata    → src/moduleRecipes.js
-BOM policy          → src/moduleContracts.js
-Raw BOM UI          → src/rawBomDebug.js (variant tüketmiyor)
-renderer            → src/scene3d.js
-```
-
-# 8. Testler
-
-- `test/moduleRecipes.test.js:54-70` wall150 corner variant.
-- `87-138` shelf150 2/3 raf corner variant.
-- `test/baseWallRecipes.test.js:6-29` base-wall150 corner variant.
-- `test/moduleRecipes.test.js:20-27` 142.5 cm production panel genişliği doğrulanır.
-
-Çalıştırılan ortak hedefli set: **49 test / 49 pass / 0 fail**.
-
-# 9. Sonuç
-
-```text
-production partId                 EVET
-production metadata               EVET
-normal recipe items kalemi        HAYIR
-recipe variant metadata           EVET
-variant runtime BOM substitution  HAYIR
-standalone catalog item           HAYIR
-project-state production instance HAYIR
-render mesh partId identity       HAYIR
-persistence production instance   HAYIR
-Raw BOM terminal satırı           HAYIR
-```
-
-**Kod zinciri burada bitiyor.**
+## 18. Açık durum / karar
+Identity/dimensions/role **VAR**; material/defaultColor **YOK**; canonical relationship BOM **VAR**; independent leaf lifecycle **UYGULANMIYOR — parent-owned**; placement→variant parent/composite Item scope; renderer override **izinli**.

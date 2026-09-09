@@ -1,105 +1,57 @@
-`panel_147_5` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# panel_147_5 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Bu belge güncel `Version2` sisteminde `panel_147_5` Item'ını güçlendirilmiş Item Contract checklist'ine göre envanterler.
 
-# 1. Gerçek kimlik
+## 1. Kimlik / sınıflandırma
+Canonical `itemKey = panel_147_5`; `name = Panel 147,5 × 47 cm`; `type = panel`; `unit = adet`; Tekil Item; `panelRole = straight`; `nominalModuleWidthCm = 150`. Standalone catalog/project module değildir.
 
-`src/productionParts.js:13`:
+## 2. Intrinsic / default Item properties
+Canonical `src/productionParts.js`: `147.5 × 47 × 0.8 cm`, straight, nominal `150`. Doğrulanmış material yoktur. `DEFAULT_PANEL_COLOR = '#ffffff'` generic editable-surface başlangıcıdır; product `defaultColor` kararı değildir.
 
-```text
-partId = panel_147_5
-name = Panel 147,5 × 47 cm
-type = panel
-unit = adet
-dimensions = 147.5 × 47 × 0.8 cm
-panelRole = straight
-nominalModuleWidthCm = 150
-```
+## 3. State / default state
+Ayrı project Item state/id yoktur. Parent module editable surface state'i `color`, `imageAssetId`, `imageTransform` gibi override'ları taşır; production panel instance mapping'i parent ailelerinde birebir garanti değildir.
 
-Lookup `src/productionParts.js:52-54` içindeki `getProductionPart(partId)` ile yapılır. Standalone catalog girdisi veya project-state instance kimliği mevcut runtime kodunda yoktur.
+## 4. Factory / creation
+`getProductionItem('panel_147_5')` production resolver'dır. Bağımsız scene factory **UYGULANMIYOR**; parent factory/state geçerlidir.
 
-# 2. Recipe kullanımları
+## 5. Placement
+Bağımsız placement **UYGULANMIYOR**; parent-owned.
 
-`panel_147_5` normal BOM `items` kalemi olarak 7 recipe'de kullanılır:
+## 6. Move
+Bağımsız move **UYGULANMIYOR**; parent ile hareket eder.
 
-| Recipe | Miktar | Kaynak |
-|---|---:|---|
-| `wall-straight-150` | 7 | `src/moduleRecipes.js:10-12` |
-| `shelf-wall-150-2` | 7 | `26-28` |
-| `shelf-wall-150-3` | 7 | `35-37` |
-| `counter-l-150` | 4 | `60-62` |
-| `counter-150` | 2 | `71-73` |
-| `base-wall-150` | 7 | `81-83` |
-| `base-150` | 2 | `91-93` |
+## 7. Rotation
+Bağımsız rotation **UYGULANMIYOR**; parent behavior geçerlidir.
 
-İlgili catalog anahtarları: `wall_150`, `wall_shelf_2_150`, `wall_shelf_3_150`, `desk_banko_150_L`, `desk_banko_150`, `wall_base_150`, `BASE_150`.
+## 8. Snap / collision / connection
+Bağımsız snap/collision/connection **UYGULANMIYOR**; parent `moduleBehavior.js` owner'dır.
 
-# 3. Resolver / lookup
+## 9. Selection / sol click / drag
+Bazı parent renderer yüzeyleri `selectionMode = panel`, `acceptsImage = true` taşır; runtime identity surface/module seviyesindedir, production `itemKey` mesh'e yazılmaz.
 
-`src/moduleRecipes.js:107-116` module type/genişlik/options ile recipe seçer. `119-130` `recipe.items` içindeki `partId` değerlerini `getProductionPart()` ile genişletir.
+## 10. Sağ click / context menu
+Module/surface context üzerinden çalışır; ayrı leaf context menu yoktur.
 
-```text
-module type + width 150
-→ getModuleRecipe(...)
-→ { partId:'panel_147_5', quantity:N }
-→ expandRecipe()
-→ getProductionPart('panel_147_5')
-```
+## 11. Delete / duplicate / keyboard
+Bağımsız leaf lifecycle **UYGULANMIYOR**; parent-owned.
 
-# 4. State
+## 12. Persistence
+Parent module/surface state persist edilir; `panel_147_5` ayrı entity değildir.
 
-`src/designState.js:35-167` ilgili modüllerde generic `strips` ve `faces` kullanır. `panel_147_5` production partId state'e yazılmaz.
+## 13. Relationships / reflow
+Eşleşen corner Item `panel_corner_142_5`'dır. `innerCornerPanelItemKey` + `panelVariant = inner-corner` canonical 1:1 BOM replacement yapar; placement/reflow parent/project relationship scope'udur.
 
-# 5. Renderer
+## 14. BOM / composition
+Aktif parent recipe'ler: `wall-straight-150 ×7`, `shelf-wall-150-2 ×7`, `shelf-wall-150-3 ×7`, `counter-l-150 ×4`, `counter-150 ×2`, `base-wall-150 ×7`, `base-150 ×2`. Quantity parent recipe sahibidir; expansion canonical Item registry'yi tüketir.
 
-`src/scene3d.js` productionParts/moduleRecipes import etmez (`1-33`). Wall/shelf `createFlatPanelModule()` (`6511+`), counter/L-counter `createCounterModule()` / `createLCounterModule()` (`6131-6390`), base/base-wall procedural geometri üretir. Production `147.5 × 47 × 0.8 cm` ölçüsü renderer tarafından okunmaz ve mesh `userData` içinde `panel_147_5` yoktur.
+## 15. Renderer / asset / override sınırı
+Renderer procedural parent geometry kullanır. Specialized render değerleri override olabilir; BOM/product source-of-truth Item metadata'sıdır.
 
-# 6. BOM / UI
+## 16. Runtime owners
+`productionParts.js` metadata; `moduleRecipes.js` recipe/variant; `moduleContracts.js` BOM; `designState.js` parent state; `moduleBehavior.js` behavior; `moduleContextMenu.js + main.js` interaction; `main.js + projectStore.js` persistence; `scene3d.js` renderer.
 
-`src/rawBomDebug.js:35-55` expanded recipe items'ı ekrana basar. `58-131` selection metnini parse eder. Wall150, shelf150, straight counter150, base-wall150 ve base150 desteklenen akışlarda `panel_147_5` production adıyla Raw BOM'a gelir.
+## 17. Regression
+`test/straightPanelsItemContract.test.js` + corner/recipe testleri identity, `147.5 × 47 × 0.8`, quantity, expansion ve corner replacement parity'sini korur.
 
-L150 recipe kodda vardır; ancak `rawBomDebug.js:91-95` özel L-counter parser yalnız 100×100'ü yakalar. Bu nedenle L150 recipe doğrudan bu özel UI branch'inden tüketilmez.
-
-# 7. Persistence
-
-`src/main.js:1263-1264,1326+` module state snapshot/restore yapar; `src/projectStore.js` proje state'ini saklar. State içinde production partId olmadığı için ayrı `panel_147_5` instance'ı persistence'a yazılmaz.
-
-# 8. Ownership
-
-`src/moduleContracts.js:4-7` recipe BOM source olarak `src/moduleRecipes.js` tanımlar.
-
-```text
-metadata   → src/productionParts.js
-quantity   → src/moduleRecipes.js
-BOM policy → src/moduleContracts.js
-UI debug   → src/rawBomDebug.js
-renderer   → src/scene3d.js (ayrı)
-```
-
-# 9. Testler
-
-- `test/moduleRecipes.test.js:54-72` wall150 → `×7`.
-- `87-138` shelf150 2/3 raf → `×7`.
-- `test/counterRecipes.test.js` counter150 → `×2`.
-- `test/lCounter150Contract.test.js:33-40` L150 → `×4` ve BOM/renderer ayrımını doğrular.
-- `test/baseWallRecipes.test.js` base-wall150 → `×7`.
-- `test/baseRecipes.test.js` base150 → `×2`.
-
-Çalıştırılan ortak hedefli set: **49 test / 49 pass / 0 fail**.
-
-# 10. Sonuç
-
-```text
-production partId                 EVET
-production metadata               EVET
-recipe BOM kalemi                 EVET
-standalone catalog item           HAYIR
-project-state production instance HAYIR
-render mesh partId identity       HAYIR
-persistence production instance   HAYIR
-Raw BOM tüketimi                  EVET (desteklenen seçimlerde)
-```
-
-State/render tarafı generic module state ve procedural geometry ile ayrı temsil edilir; production identity bağı mevcut runtime kodunda yoktur.
-
-**Kod zinciri burada bitiyor.**
+## 18. Açık durum / karar
+Identity/dimensions/role **VAR**; material/defaultColor **YOK — doğrulanmış product değeri yok**; generic `#ffffff` project-surface başlangıcıdır; recipe consumer **VAR**; independent behavior/persistence **UYGULANMIYOR — parent-owned**; renderer override **izinli**.
