@@ -1,5 +1,5 @@
 import { getItem } from './items.js';
-import { getModuleRecipe, getRecipeItemKey } from './moduleRecipes.js';
+import { getExpandedModuleRecipe, getRecipeItemKey } from './moduleRecipes.js';
 
 function positiveQuantity(value, itemKey) {
   const quantity = Number(value);
@@ -9,16 +9,21 @@ function positiveQuantity(value, itemKey) {
   return quantity;
 }
 
-function resolveRecipe(item) {
+function resolveRecipe(item, recipeOptions = {}) {
   const composition = item?.composition;
   if (!composition) return null;
   if (composition.mode !== 'recipe') {
     throw new TypeError(`Unsupported composition mode for ${item.itemKey}: ${composition.mode}.`);
   }
-  const recipe = getModuleRecipe(
+
+  const options = {
+    ...(composition.options ?? {}),
+    ...(recipeOptions ?? {}),
+  };
+  const recipe = getExpandedModuleRecipe(
     composition.moduleType,
     composition.nominalWidthCm,
-    composition.options ?? {},
+    options,
   );
   if (!recipe) {
     throw new TypeError(`Missing canonical recipe for ${item.itemKey}.`);
@@ -26,12 +31,12 @@ function resolveRecipe(item) {
   return recipe;
 }
 
-function resolveLines(itemKey, quantity, stack) {
+function resolveLines(itemKey, quantity, stack, recipeOptions = {}) {
   const item = getItem(itemKey);
   if (!item) throw new TypeError(`Unknown Item: ${itemKey}.`);
 
   const resolvedQuantity = positiveQuantity(quantity, itemKey);
-  const recipe = resolveRecipe(item);
+  const recipe = resolveRecipe(item, recipeOptions);
   if (!recipe) {
     if (!item.unit) throw new TypeError(`Missing canonical unit for leaf Item: ${itemKey}.`);
     return [{ itemKey, quantity: resolvedQuantity, unit: item.unit, item }];
@@ -55,8 +60,8 @@ function resolveLines(itemKey, quantity, stack) {
   });
 }
 
-export function resolveItemBom(itemKey, quantity = 1) {
-  const lines = resolveLines(itemKey, quantity, []);
+export function resolveItemBom(itemKey, quantity = 1, recipeOptions = {}) {
+  const lines = resolveLines(itemKey, quantity, [], recipeOptions);
   const aggregated = new Map();
 
   for (const line of lines) {
