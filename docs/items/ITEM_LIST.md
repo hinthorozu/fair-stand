@@ -46,9 +46,9 @@ Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical producti
 | `showcase_side_94_6_30` | `showcase-board` | **Canonical leaf tamam — `94.6 × 30 × 1.8 cm`; sunta; beyaz default; bireysel renk capability yok; parent `showcase_2_100` recipe/renderer/tek gövde renk override cutover'u parent migrationında** |
 | `showcase_side_143_5_30` | `showcase-board` | **Canonical leaf tamam — `143.5 × 30 × 1.8 cm`; sunta; beyaz default; bireysel renk capability yok; parent `showcase_3_100` recipe/renderer/tek gövde renk override cutover'u parent migrationında** |
 | `showcase_horizontal_87_4_30` | `showcase-board` | **Canonical leaf tamam — `87.4 × 30 × 1.8 cm`; sunta; beyaz default; iki showcase parent'ta ortak üst/alt board; parent cutover parent migrationında** |
-| `showcase_2_100` | `showcase` | Bekliyor |
-| `showcase_3_100` | `showcase` | Bekliyor |
-| `glass_shelf` | `showcase-accessory` | **Tamam — canonical `itemKey`; `87.3 × 28.5 × 0.6 cm`; cam; showcase recipes ×2/×3 quantity parity; renderer canonical ölçü/material tüketimi** |
+| `showcase_2_100` | `showcase-2` | **Tamam — canonical Bileşik Item; gerçek showcase-board ×2+×2 + glass_shelf ×1; grouped body color override; inner-corner recipe** |
+| `showcase_3_100` | `showcase-3` | **Tamam — canonical Bileşik Item; gerçek showcase-board ×2+×2 + glass_shelf ×2; grouped body color override; inner-corner recipe** |
+| `glass_shelf` | `showcase-accessory` | **Tamam — canonical `itemKey`; `87.3 × 28.5 × 0.6 cm`; cam; showcase recipes doğrulanmış ×1/×2 quantity; renderer canonical ölçü/material tüketimi** |
 | `counter_top_110_60` | `counter-top` | **Tamam — canonical `itemKey`; `110 × 60 × 1.8 cm`; düz 100 + L100 içinde ×1 quantity parity** |
 | `counter_top_52_60` | `counter-top` | **Tamam — canonical `itemKey`; `52 × 60 × 1.8 cm`; L100 içinde ×1 quantity parity** |
 | `counter_top_160_60` | `counter-top` | **Tamam — canonical `itemKey`; `160 × 60 × 1.8 cm`; düz 150 + L150 içinde ×1 quantity parity** |
@@ -73,8 +73,8 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 | 6 | `wall_separator_50` | Separatör 50 | `separator` |
 | 7 | `wall_separator_100_sarmasik` | Separatör 100 Sarmaşık | `separator` |
 | 8 | `wall_separator_50_sarmasik` | Separatör 50 Sarmaşık | `separator` |
-| 9 | `wall_showcase_100_3` | 3 Gözlü Vitrin 100 | `showcase-3` |
-| 10 | `wall_showcase_100_2` | 2 Gözlü Vitrin 100 | `showcase-2` |
+| 9 | `showcase_3_100` | 3 Gözlü Vitrin 100 cm | **`showcase-3` · Bileşik Item · Tamam** |
+| 10 | `showcase_2_100` | 2 Gözlü Vitrin 100 cm | **`showcase-2` · Bileşik Item · Tamam** |
 | 11 | `wall_shelf_3_200` | Raf 200 · 3 Raf | `shelf` |
 | 12 | `wall_shelf_3_150` | Raf 150 · 3 Raf | `shelf` |
 | 13 | `wall_shelf_3_100` | Raf 100 · 3 Raf | `shelf` |

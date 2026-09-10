@@ -18,10 +18,10 @@ Intrinsic ürün gerçeğinin source-of-truth'u `PRODUCTION_PARTS.glass_shelf` k
 
 Tekil production Item'dır. Parent recipe quantity sahibidir:
 
-- `showcase-2:100` → `glass_shelf × 2`
-- `showcase-3:100` → `glass_shelf × 3`
+- `showcase-2:100` → `glass_shelf × 1`
+- `showcase-3:100` → `glass_shelf × 2`
 
-Migration mevcut recipe miktarlarını değiştirmez. Renderer yalnız iç yatay divider cam mesh'lerini procedural üretir (`eyeCount - 1`); BOM miktarı renderer mesh adedinden türetilmez.
+Kullanıcı ürün doğrulamasıyla eski ×2/×3 recipe miktarı düzeltilmiştir. Fiziksel ürün kuralı `eyeCount - 1` cam raftır: 2 gözlüde ×1, 3 gözlüde ×2. BOM yine renderer mesh sayısından türetilmez; aynı doğrulanmış ürün gerçeği recipe ve renderer tarafından bağımsız rollerinde tüketilir.
 
 ## Persistence
 

@@ -126,10 +126,17 @@ test('showcase states expose seven editable Maxima panel slots', () => {
   const showcase3 = createShowcaseModuleState('showcase-3', 100);
   const showcase2 = createShowcaseModuleState('showcase-2', 100);
 
+  assert.equal(showcase3.itemKey, 'showcase_3_100');
+  assert.equal(showcase2.itemKey, 'showcase_2_100');
   assert.equal(showcase3.type, 'showcase-3');
   assert.equal(showcase2.type, 'showcase-2');
   assert.equal(showcase3.widthCm, 100);
   assert.equal(showcase2.widthCm, 100);
+  assert.equal(showcase3.eyeCount, 3);
+  assert.equal(showcase2.eyeCount, 2);
+  assert.equal(showcase3.bodySurface.color, '#ffffff');
+  assert.equal(showcase2.bodySurface.color, '#ffffff');
+  assert.equal('imageAssetId' in showcase3.bodySurface, false);
   assert.equal(showcase3.strips.length, 7);
   assert.equal(showcase2.strips.length, 7);
   showcase3.strips.forEach((strip, stripIndex) => {
@@ -167,6 +174,8 @@ test('duplicating a showcase preserves panel design with independent ids', () =>
   assert.equal(duplicate.strips[6].color, '#334455');
   assert.equal(duplicate.strips[4].imageAssetId, 'asset-showcase');
   assert.equal(duplicate.strips[4].imageTransform.fit, 'contain');
+  assert.notEqual(duplicate.bodySurface.id, original.bodySurface.id);
+  assert.equal(duplicate.bodySurface.color, original.bodySurface.color);
   duplicate.strips.forEach((strip, index) => {
     assert.notEqual(strip.id, original.strips[index].id);
   });

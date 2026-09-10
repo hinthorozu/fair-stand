@@ -38,8 +38,8 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `wall_separator_50`
 - `wall_separator_100_sarmasik`
 - `wall_separator_50_sarmasik`
-- `wall_showcase_100_3`
-- `wall_showcase_100_2`
+- `showcase_3_100`
+- `showcase_2_100`
 - `wall_shelf_3_200`
 - `wall_shelf_3_150`
 - `wall_shelf_3_100`
@@ -88,7 +88,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Raf & Vitrin
 
-`wall_showcase_100_3`, `wall_showcase_100_2`, `wall_shelf_3_200`, `wall_shelf_3_150`, `wall_shelf_3_100`, `wall_shelf_2_200`, `wall_shelf_2_150`, `wall_shelf_2_100`
+`showcase_3_100`, `showcase_2_100`, `wall_shelf_3_200`, `wall_shelf_3_150`, `wall_shelf_3_100`, `wall_shelf_2_200`, `wall_shelf_2_150`, `wall_shelf_2_100`
 
 ### Banko & Baza
 

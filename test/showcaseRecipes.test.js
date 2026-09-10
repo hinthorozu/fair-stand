@@ -1,45 +1,83 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem, getProductionPart } from '../src/productionParts.js';
-import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
+import { getItem } from '../src/items.js';
+import { getProductionItem } from '../src/productionParts.js';
+import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
 
-test('production catalog contains showcase parts and glass shelf', () => {
-  assert.equal(getProductionPart('showcase_2_100').name, '2 Gözlü Vitrin 100 cm');
-  assert.equal(getProductionPart('showcase_3_100').name, '3 Gözlü Vitrin 100 cm');
-  assert.equal(getProductionItem('glass_shelf').name, 'Cam Raf');
+const BASE_SHOWCASE_2 = [
+  { itemKey: 'profile_91', quantity: 4 },
+  { itemKey: 'upright_346_5', quantity: 2 },
+  { itemKey: 'panel_98', quantity: 5 },
+  { itemKey: 'connector_start', quantity: 4 },
+  { itemKey: 'connector_single', quantity: 9 },
+  { itemKey: 'showcase_side_94_6_30', quantity: 2 },
+  { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
+  { itemKey: 'glass_shelf', quantity: 1 },
+];
+
+const BASE_SHOWCASE_3 = [
+  { itemKey: 'profile_91', quantity: 4 },
+  { itemKey: 'upright_346_5', quantity: 2 },
+  { itemKey: 'panel_98', quantity: 4 },
+  { itemKey: 'connector_start', quantity: 4 },
+  { itemKey: 'connector_single', quantity: 7 },
+  { itemKey: 'showcase_side_143_5_30', quantity: 2 },
+  { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
+  { itemKey: 'glass_shelf', quantity: 2 },
+];
+
+function compact(items) {
+  return items.map((entry) => ({ itemKey: getRecipeItemKey(entry), quantity: entry.quantity }));
+}
+
+test('showcase parents are canonical composite Items, not legacy production leaf records', () => {
+  assert.equal(getItem('showcase_2_100').itemKey, 'showcase_2_100');
+  assert.equal(getItem('showcase_3_100').itemKey, 'showcase_3_100');
+  assert.equal(getProductionItem('showcase_2_100'), null);
+  assert.equal(getProductionItem('showcase_3_100'), null);
 });
 
-test('2-eye showcase 100 recipe matches verified production data', () => {
+test('2-eye showcase 100 base recipe uses verified body boards and one glass shelf', () => {
   const recipe = getModuleRecipe('showcase-2', 100);
-  assert.deepEqual(recipe.items, [
-    { itemKey: 'profile_91', quantity: 4 },
-    { itemKey: 'upright_346_5', quantity: 2 },
-    { itemKey: 'panel_98', quantity: 5 },
-    { itemKey: 'connector_start', quantity: 4 },
-    { itemKey: 'connector_single', quantity: 9 },
-    { partId: 'showcase_2_100', quantity: 1 },
-    { itemKey: 'glass_shelf', quantity: 2 },
-  ]);
+  assert.deepEqual(recipe.items, BASE_SHOWCASE_2);
   assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_92');
 });
 
-test('3-eye showcase 100 recipe matches verified production data', () => {
+test('3-eye showcase 100 base recipe uses verified body boards and two glass shelves', () => {
   const recipe = getModuleRecipe('showcase-3', 100);
-  assert.deepEqual(recipe.items, [
-    { itemKey: 'profile_91', quantity: 4 },
-    { itemKey: 'upright_346_5', quantity: 2 },
-    { itemKey: 'panel_98', quantity: 4 },
-    { itemKey: 'connector_start', quantity: 4 },
-    { itemKey: 'connector_single', quantity: 7 },
-    { partId: 'showcase_3_100', quantity: 1 },
-    { itemKey: 'glass_shelf', quantity: 3 },
-  ]);
+  assert.deepEqual(recipe.items, BASE_SHOWCASE_3);
   assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_92');
 });
 
-test('expanded showcase recipe resolves showcase and glass shelf parts', () => {
-  const expanded = getExpandedModuleRecipe('showcase-3', 100);
-  assert.equal(expanded.items.at(-2).part.name, '3 Gözlü Vitrin 100 cm');
-  assert.equal(expanded.items.at(-1).part.name, 'Cam Raf');
+test('showcase inner-corner variants preserve panel quantity and use 5 single + 4 corner connectors', () => {
+  for (const [type, panelQuantity] of [['showcase-2', 5], ['showcase-3', 4]]) {
+    const expanded = getExpandedModuleRecipe(type, 100, { panelVariant: 'inner-corner' });
+    const lines = compact(expanded.items);
+    assert.equal(lines.some((line) => line.itemKey === 'panel_98'), false, type);
+    assert.deepEqual(lines.find((line) => line.itemKey === 'panel_corner_92'), {
+      itemKey: 'panel_corner_92',
+      quantity: panelQuantity,
+    });
+    assert.deepEqual(lines.find((line) => line.itemKey === 'connector_start'), {
+      itemKey: 'connector_start', quantity: 4,
+    });
+    assert.deepEqual(lines.find((line) => line.itemKey === 'connector_single'), {
+      itemKey: 'connector_single', quantity: 5,
+    });
+    assert.deepEqual(lines.find((line) => line.itemKey === 'connector_corner'), {
+      itemKey: 'connector_corner', quantity: 4,
+    });
+  }
+});
+
+test('expanded showcase recipes resolve only canonical leaf Items', () => {
+  for (const type of ['showcase-2', 'showcase-3']) {
+    const expanded = getExpandedModuleRecipe(type, 100);
+    expanded.items.forEach((entry) => {
+      assert.ok(entry.itemKey, `${type} recipe entry must use canonical itemKey`);
+      assert.equal(entry.part, getProductionItem(entry.itemKey), entry.itemKey);
+      assert.ok(entry.part, entry.itemKey);
+    });
+  }
 });

@@ -1,34 +1,42 @@
 {
   "schemaVersion": 2,
-  "id": "showcase-body-board-items",
+  "id": "showcase-composite-parent-items",
   "kind": "architecture",
-  "summary": "Add three verified 18 mm sunta showcase body boards as canonical leaf Items with exact dimensions and white product defaults. Keep individual surface capabilities disabled and reserve one shared parent showcase instance color override for the later showcase_2_100/showcase_3_100 composite migration. Parent showcase recipes and procedural renderer remain unchanged in this child-only batch.",
+  "summary": "Migrate showcase_2_100 and showcase_3_100 to canonical composite Items. Cut catalog/state/persistence identity to canonical itemKey, replace legacy package rows with verified showcase-board and glass_shelf composition, add verified inner-corner connector variants, consume canonical body dimensions/defaults in renderer, and persist one grouped body color override for all four sunta boards.",
   "owners": [
-    "src/productionParts.js",
-    "test/showcaseBodyBoardsItemContract.test.js",
-    "docs/items/definitions/showcase_side_94_6_30.md",
-    "docs/items/definitions/showcase_side_143_5_30.md",
-    "docs/items/definitions/showcase_horizontal_87_4_30.md"
+    "src/items.js",
+    "src/showcaseBody.js",
+    "src/catalog.js",
+    "src/designState.js",
+    "src/moduleRecipes.js",
+    "src/scene3d.js",
+    "src/moduleContracts.js",
+    "test/showcaseCompositeItemContract.test.js",
+    "test/showcaseRecipes.test.js",
+    "e2e/showcase-item-contract.spec.mjs"
   ],
   "sourceOfTruth": [
     "docs/items/contract/ITEM_CONTRACT.md",
     "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md",
-    "src/productionParts.js"
+    "src/items.js",
+    "src/productionParts.js",
+    "src/moduleRecipes.js",
+    "src/showcaseBody.js"
   ],
   "impact": {
-    "catalog": "not-applicable",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
-    "placement": "not-applicable",
-    "renderer": "not-applicable",
-    "persistence": "not-applicable",
+    "catalog": "affected",
+    "behavior": "affected",
+    "state": "affected",
+    "placement": "affected",
+    "renderer": "affected",
+    "persistence": "affected",
     "bom": "affected",
-    "ui": "not-applicable",
-    "composition": "not-applicable",
+    "ui": "affected",
+    "composition": "affected",
     "assets": "not-applicable",
     "storage": "not-applicable",
-    "importExport": "not-applicable",
-    "performance": "not-applicable",
+    "importExport": "affected",
+    "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
@@ -98,7 +106,9 @@
       "src/viewCube.js",
       "src/viewKeyboardShortcuts.js",
       "src/wall.js",
-      "src/wallReflow.js"
+      "src/wallReflow.js",
+      "src/showcaseBody.js",
+      "scripts/fix-tv-screen-face.py"
     ],
     "affectedTests": [
       "e2e/f010-module-construction.spec.mjs",
@@ -256,7 +266,9 @@
       "test/wallDragStickiness.test.js",
       "test/wallReflow.test.js",
       "tests/autoDepot.test.js",
-      "tests/moduleBehavior.test.js"
+      "tests/moduleBehavior.test.js",
+      "test/showcaseCompositeItemContract.test.js",
+      "e2e/showcase-item-contract.spec.mjs"
     ],
     "affectedDocs": [
       "AGENTS.md",
@@ -420,7 +432,33 @@
       "docs/items/definitions/wall_shelf_3_200.md",
       "docs/items/definitions/wall_showcase_100_2.md",
       "docs/items/definitions/wall_showcase_100_3.md",
-      "docs/items/door_100_full_system_audit.md"
+      "docs/items/door_100_full_system_audit.md",
+      "docs/items/definitions/showcase_2_100.md",
+      "docs/items/definitions/showcase_3_100.md",
+      "audit/remediation/A02_CLOSURE.md",
+      "audit/remediation/A03_CLOSURE.md",
+      "audit/remediation/A03_F010_CLOSURE.md",
+      "audit/remediation/A03_F011_CLOSURE.md",
+      "audit/remediation/A03_F012_CLOSURE.md",
+      "audit/remediation/A04_F013_CLOSURE.md",
+      "docs/items/definitions/DEPOT_COAT_RACK.md",
+      "docs/items/definitions/DEPOT_KETTLE.md",
+      "docs/items/definitions/DEPOT_MINI_FRIDGE_AVANTI.md",
+      "docs/items/definitions/DEPOT_PLASTIC_TRASH_BIN.md",
+      "docs/items/definitions/EXTRA_INDOOR_PLANT_1.md",
+      "docs/items/definitions/EXTRA_LONG_PLANTER_100.md",
+      "docs/items/definitions/EXTRA_LONG_PLANTER_150.md",
+      "docs/items/definitions/EXTRA_LONG_PLANTER_200.md",
+      "docs/items/definitions/LED_FLOODLIGHT.md",
+      "docs/items/definitions/TV_42.md",
+      "docs/items/definitions/TV_55.md",
+      "docs/items/definitions/TV_65.md",
+      "docs/items/definitions/VIDEO_WALL_2X2.md",
+      "docs/items/definitions/VIDEO_WALL_3X3.md",
+      "docs/items/definitions/furniture_bar_stool_classic.md",
+      "docs/items/definitions/furniture_sofa_set_classic.md",
+      "docs/items/definitions/furniture_table_chair_set_eames.md",
+      "docs/items/definitions/illuminated-foam.md"
     ],
     "relatedFindings": {
       "affected": [],
@@ -431,15 +469,35 @@
         "F-025",
         "F-030",
         "F-031",
-        "F-048"
+        "F-048",
+        "F-010",
+        "F-011",
+        "F-012",
+        "F-013",
+        "F-015",
+        "F-017",
+        "F-018",
+        "F-019",
+        "F-033",
+        "F-045"
       ]
     },
-    "notes": "Full-system review was performed around productionParts Item identity/BOM consumers. This batch only introduces verified showcase body leaf Items and tests/docs. Existing audit findings are reviewedNotAffected; no F-025/F-030 or other audit remediation is entered. Parent showcase composite recipe, renderer cutover, grouped project color override, and corrected glass_shelf quantities are intentionally deferred to the immediately following parent Item migrations."
+    "notes": "Fresh full-system runtime review covered canonical identity/type, intrinsic/default ownership, factory/state, placement/move/rotation/snap/collision, selection/context, persistence, relationships/reflow, BOM/composition, renderer boundary and regression. F-025/F-030 and all audit remediation remain out of scope and are only reviewedNotAffected. Shared relationship -> recipe-context -> Final BOM automatic integration remains the existing deferred cross-Item integration; no showcase-specific corner detector is introduced."
   },
   "tests": {
     "targeted": [
+      "test/showcaseCompositeItemContract.test.js",
+      "test/showcaseRecipes.test.js",
       "test/showcaseBodyBoardsItemContract.test.js",
-      "test/boardMaterialItemContract.test.js"
+      "test/glassShelfItemContract.test.js",
+      "test/showcaseAppearance.test.js",
+      "test/showcaseDepthDirection.test.js",
+      "test/designState.test.js",
+      "test/selectionFeedback.test.js",
+      "test/catalogSingleSource.test.js",
+      "test/moduleStateConstructionRegistry.test.js",
+      "test/systemModuleCatalogDoc.test.js",
+      "e2e/showcase-item-contract.spec.mjs"
     ],
     "fullSuite": true,
     "build": true,

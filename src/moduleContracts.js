@@ -101,8 +101,8 @@ export const MODULE_CONTRACT_ASSIGNMENTS = Object.freeze({
   wall_separator_100_sarmasik: assignment('wall-color-only', RECIPE_BOM_POLICY),
   wall_separator_50_sarmasik: assignment('wall-color-only', RECIPE_BOM_POLICY),
 
-  wall_showcase_100_3: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_showcase_100_2: assignment('wall-editable', RECIPE_BOM_POLICY),
+  showcase_3_100: assignment('wall-editable', RECIPE_BOM_POLICY),
+  showcase_2_100: assignment('wall-editable', RECIPE_BOM_POLICY),
 
   wall_shelf_3_200: assignment('wall-editable', RECIPE_BOM_POLICY),
   wall_shelf_3_150: assignment('wall-editable', RECIPE_BOM_POLICY),

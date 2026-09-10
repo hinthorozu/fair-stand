@@ -1,61 +1,49 @@
-`showcase_2_100` mevcut kod zincirini çıkardım. **Lokal runtime kodunda hiçbir dosyada değişiklik yapmadım.**
+# showcase_2_100 — Current System Inventory
 
-Kaynak çalışma ağacı: `/mnt/data/Version2_local`
+Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararları sonrası güncel durum.
 
-# 1. Gerçek kimlik / tanım
+## Checklist
 
-`src/productionParts.js:36`:
+| Alan | Durum | Güncel gerçek / owner |
+|---|---|---|
+| Identity / type | VAR | `itemKey=showcase_2_100`, `type=showcase-2`, `unit=adet`; canonical parent owner `src/items.js`. |
+| Intrinsic | VAR | `widthCm=100`, `eyeCount=2`. Parent material/defaultColor taşımaz; farklı child Item'ların bileşimidir. |
+| Default / override state | VAR | Factory canonical parent identity üretir. `bodySurface.color` dört showcase-board için tek project override'dır; default canonical child board beyazından gelir. |
+| Factory | VAR | `createShowcaseModuleState('showcase-2', 100)` canonical parent Item + 7 wall-panel strip + tek grouped body surface üretir. |
+| Placement/move/rotation/snap/collision | VAR | Existing shared `WALL_BEHAVIOR`, placement/move/reflow motorları kullanılır; showcase'e özel ikinci engine yoktur. |
+| Selection / context | VAR | Çevre wall panelleri panel surface olarak kalır. Showcase gövdesi tek `showcase-body` color surface'tir; image/glass/lightbox/mesh açılmaz. |
+| Delete/duplicate/keyboard | VAR | Existing parent module akışı. Duplicate grouped body color'ı korur ama yeni surface id üretir. |
+| Persistence | VAR | `itemKey`, `catalogKey=showcase_2_100`, `eyeCount`, strips, `bodySurface` ve placement project state içinde saklanır. Legacy `wall_showcase_100_2` catalogKey restore sırasında canonical key'e alias edilir. |
+| Relationships / reflow | VAR / SHARED FINAL BOM BEKLİYOR | Parent continuous wall reflow'a katılır. Inner-corner recipe variant canonical olarak hazırdır; gerçek relationship → recipe context otomatik Final BOM entegrasyonu shared sonraki katmandır. |
+| BOM / composition | VAR | Parent composite Item `composition.mode=recipe`; base ve inner-corner recipe `src/moduleRecipes.js` sahibidir. |
+| Renderer | VAR | Side/horizontal board ölçü, thickness, depth, material/default ilişkisi canonical child resolver'dan gelir; dört board `bodySurface.color` ile birlikte boyanır. `glass_shelf` canonical ölçü/material kullanır. |
+| Regression | VAR | `test/showcaseCompositeItemContract.test.js`, `test/showcaseRecipes.test.js`, `test/showcaseAppearance.test.js`, `test/showcaseDepthDirection.test.js`, `test/glassShelfItemContract.test.js`, `e2e/showcase-item-contract.spec.mjs` + full suite. |
 
-```js
-showcase_2_100: Object.freeze({ partId: 'showcase_2_100', name: '2 Gözlü Vitrin 100 cm', type: 'showcase', unit: 'adet', eyeCount: 2, nominalModuleWidthCm: 100 }),
-```
-
-Gerçek production/BOM kimliği `partId = showcase_2_100`; lookup `src/productionParts.js:52-54` `getProductionPart(partId)` ile yapılır. Standalone `MODULE_CATALOG.showcase_2_100` yoktur.
-
-# 2. Recipe / BOM
-
-`src/moduleRecipes.js:42-44` içindeki `showcase-2:100` / `showcase-2-100` recipe’si:
-
-```text
-showcase_2_100 ×1
-glass_shelf ×2
-```
-
-ve profil/dikme/panel/connector kalemlerini içerir. Resolver `src/moduleRecipes.js:107-129` → `getModuleRecipe('showcase-2',100)` → `expandRecipe()` → `getProductionPart('showcase_2_100')`.
-
-Module catalog karşılığı `src/catalog.js:122` `wall_showcase_100_2` (`type=showcase-2`, `widthCm=100`). Catalog key production part kimliği değildir.
-
-# 3. State / renderer
-
-`src/designState.js:60-71` `createShowcaseModuleState('showcase-2',100)` generic module id/type/width + 7 editable strip state üretir; production partId state içinde yoktur.
-
-`src/scene3d.js:6949+` `createShowcaseModule()` vitrini procedural üretir. `scene3d.js` productionParts/moduleRecipes import etmez; `showcase_2_100` partId mesh/userData identity’si değildir.
-
-# 4. UI/runtime
-
-`src/selectionFeedback.js:57-59` `2 Gözlü Vitrin 100 cm` seçim metnini üretir. `src/rawBomDebug.js:76-81` eyeCount/width bilgisini parse edip `getExpandedModuleRecipe('showcase-2',100)` yoluna gider; `rawBomDebug.js:35-55` `1 × 2 Gözlü Vitrin 100 cm` dahil recipe satırlarını gösterir.
-
-# 5. Persistence
-
-Module state `src/main.js:1257-1265` snapshot’ına girer ve `src/projectStore.js:39-56` ile persist edilir. `showcase_2_100` ayrı production instance olarak state/persistence’ta tutulmaz.
-
-# 6. Ownership
+## Base BOM
 
 ```text
-metadata → src/productionParts.js
-recipe/adet → src/moduleRecipes.js
-BOM policy → src/moduleContracts.js:4-7
-state → src/designState.js
-renderer → src/scene3d.js
-Raw BOM UI → src/rawBomDebug.js
+profile_91                     ×4
+upright_346_5                  ×2
+panel_98                       ×5
+connector_start                ×4
+connector_single               ×9
+showcase_side_94_6_30          ×2
+showcase_horizontal_87_4_30    ×2
+glass_shelf                    ×1
 ```
 
-# 7. Testler
+## Inner-corner BOM
 
-`test/showcaseRecipes.test.js` production adını, exact recipe’de `showcase_2_100 ×1`, `glass_shelf ×2` ve expanded part çözümünü doğrular. Batch sonucu **45 test / 45 pass / 0 fail**.
+```text
+profile_91                     ×4
+upright_346_5                  ×2
+panel_corner_92                ×5
+connector_start                ×4
+connector_single               ×5
+connector_corner               ×4
+showcase_side_94_6_30          ×2
+showcase_horizontal_87_4_30    ×2
+glass_shelf                    ×1
+```
 
-# 8. Sonuç
-
-`showcase_2_100` production/BOM `partId` kimliğidir ve 2 gözlü vitrin recipe’sinde ×1 kullanılır. Ayrı project-state/persistence/render production identity mevcut runtime kodunda yoktur.
-
-**Kod zinciri burada bitiyor. Hedef mimari veya entegrasyon tasarımı yapılmadı.**
+`panel_98` → `panel_corner_92` miktarı 1:1 korunur. `connector_start ×4` değişmez. İnce ön renderer çerçeve detayları doğrulanmış production Item/BOM kalemi değildir ve bu recipe'ye sokulmaz.

@@ -2,6 +2,7 @@ import { resolveModuleCatalogKey } from './catalog.js';
 import { getItem } from './items.js';
 import { getDoorLeafProductionItem, getProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
+import { getShowcaseBodyDefinition, getShowcaseItemKeyForType } from './showcaseBody.js';
 import { getTvDefinition } from './tvConfig.js';
 
 const DEFAULT_PANEL_COLOR = '#ffffff';
@@ -91,16 +92,29 @@ export function createSeparatorModuleState(widthCm, descriptor = {}) {
 }
 
 export function createShowcaseModuleState(type, widthCm = 100) {
-  if (type !== 'showcase-2' && type !== 'showcase-3') return null;
+  const itemKey = getShowcaseItemKeyForType(type);
+  if (!itemKey) return null;
+  const showcaseItem = getItem(itemKey);
+  const canonicalWidthCm = Number(showcaseItem?.dimensions?.widthCm);
+  if (!showcaseItem || Number(widthCm) !== canonicalWidthCm) return null;
+  const bodyDefinition = getShowcaseBodyDefinition(showcaseItem);
 
   return {
     id: createId('module'),
-    type,
-    widthCm,
+    itemKey: showcaseItem.itemKey,
+    type: showcaseItem.type,
+    widthCm: canonicalWidthCm,
+    eyeCount: Number(showcaseItem.eyeCount),
     strips: Array.from(
       { length: STRIP_COUNT },
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
     ),
+    // Dört fiziksel showcase-board leaf ayrı ayrı editable değildir. Bu tek parent
+    // instance override'ı iki yan + iki yatay suntayı beraber renklendirir.
+    bodySurface: {
+      id: createId('surface'),
+      color: itemDefaultColorHex(bodyDefinition.sideItem),
+    },
   };
 }
 
@@ -422,21 +436,46 @@ export function createModuleStateFromDescriptor(
  * Legacy door projects did not store the physical leaf itemKey on surface state.
  */
 export function normalizeModuleItemState(moduleState) {
-  if (!moduleState || moduleState.type !== 'door') return moduleState;
-  const doorItem = getItem('door_100');
-  if (!doorItem || Number(moduleState.widthCm) !== Number(doorItem.dimensions?.widthCm)) return moduleState;
-  moduleState.itemKey = doorItem.itemKey;
-  const doorLeafItem = getDoorLeafProductionItem(moduleState.widthCm);
-  if (!doorLeafItem) return moduleState;
-  if (!moduleState.surface) {
-    moduleState.surface = createEditableItemSurfaceState(doorLeafItem);
+  if (!moduleState) return moduleState;
+
+  if (moduleState.type === 'door') {
+    const doorItem = getItem('door_100');
+    if (!doorItem || Number(moduleState.widthCm) !== Number(doorItem.dimensions?.widthCm)) return moduleState;
+    moduleState.itemKey = doorItem.itemKey;
+    const doorLeafItem = getDoorLeafProductionItem(moduleState.widthCm);
+    if (!doorLeafItem) return moduleState;
+    if (!moduleState.surface) {
+      moduleState.surface = createEditableItemSurfaceState(doorLeafItem);
+      return moduleState;
+    }
+    const surface = moduleState.surface;
+    surface.itemKey = doorLeafItem.itemKey;
+    if (!surface.color) surface.color = itemDefaultColorHex(doorLeafItem);
+    if (!Object.hasOwn(surface, 'imageAssetId')) surface.imageAssetId = null;
+    if (!surface.imageTransform) surface.imageTransform = createDefaultImageTransform();
     return moduleState;
   }
-  const surface = moduleState.surface;
-  surface.itemKey = doorLeafItem.itemKey;
-  if (!surface.color) surface.color = itemDefaultColorHex(doorLeafItem);
-  if (!Object.hasOwn(surface, 'imageAssetId')) surface.imageAssetId = null;
-  if (!surface.imageTransform) surface.imageTransform = createDefaultImageTransform();
+
+  const showcaseItemKey = getShowcaseItemKeyForType(moduleState.type);
+  if (!showcaseItemKey) return moduleState;
+  const showcaseItem = getItem(showcaseItemKey);
+  if (!showcaseItem || Number(moduleState.widthCm) !== Number(showcaseItem.dimensions?.widthCm)) return moduleState;
+  const bodyDefinition = getShowcaseBodyDefinition(showcaseItem);
+  moduleState.itemKey = showcaseItem.itemKey;
+  moduleState.eyeCount = Number(showcaseItem.eyeCount);
+  if (!moduleState.bodySurface) {
+    moduleState.bodySurface = {
+      id: createId('surface'),
+      color: itemDefaultColorHex(bodyDefinition.sideItem),
+    };
+  } else {
+    if (!moduleState.bodySurface.id) moduleState.bodySurface.id = createId('surface');
+    if (!moduleState.bodySurface.color) {
+      moduleState.bodySurface.color = itemDefaultColorHex(bodyDefinition.sideItem);
+    }
+    delete moduleState.bodySurface.imageAssetId;
+    delete moduleState.bodySurface.imageTransform;
+  }
   return moduleState;
 }
 
@@ -465,6 +504,12 @@ export function duplicateModuleState(moduleState) {
         },
       ]),
     );
+  }
+  if (duplicate.bodySurface) {
+    duplicate.bodySurface = {
+      ...duplicate.bodySurface,
+      id: createId('surface'),
+    };
   }
   if (duplicate.surface) {
     duplicate.surface = {

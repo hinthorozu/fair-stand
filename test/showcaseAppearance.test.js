@@ -7,19 +7,30 @@ const showcaseStart = scene.indexOf('function createShowcaseModule(');
 const showcaseEnd = scene.indexOf('function createSelectionFrame', showcaseStart);
 const showcase = scene.slice(showcaseStart, showcaseEnd);
 
-test('showcase is 30 cm deep and projects behind the panel plane', () => {
-  assert.match(showcase, /const showcaseDepth = 0\.30;/);
-  assert.match(showcase, /const caseFrontZ = depth \/ 2;/);
-  assert.match(showcase, /const caseCenterZ = caseFrontZ - showcaseDepth \/ 2;/);
+test('showcase body uses canonical board dimensions and grouped project color override', () => {
+  assert.match(showcase, /const bodyDefinition = getShowcaseBodyDefinition\(moduleState\.itemKey\);/);
+  assert.match(showcase, /const bodyHeight = Number\(sideDimensions\.lengthCm\) \/ 100;/);
+  assert.match(showcase, /const bodyInnerWidth = Number\(horizontalDimensions\.lengthCm\) \/ 100;/);
+  assert.match(showcase, /const bodyThickness = Number\(sideDimensions\.thicknessCm\) \/ 100;/);
+  assert.match(showcase, /color: bodyColor,/);
+  assert.match(showcase, /colorTargets: bodyColorTargets/);
 });
 
-test('showcase case stays white while rear remains open', () => {
-  assert.match(showcase, /const showcaseWhiteMaterial = new THREE\.MeshStandardMaterial\(\{/);
-  assert.match(showcase, /color: 0xffffff/);
-  assert.doesNotMatch(showcase, /const backPanel = new THREE\.Mesh/);
-  assert.match(showcase, /const capGeometry = new THREE\.BoxGeometry\([\s\S]*?showcaseDepth/);
-  assert.match(showcase, /for \(const y of \[openingBottom, openingTop\]\)/);
-  assert.match(showcase, /frontPostGeometry\.clone\(\), showcaseWhiteMaterial\.clone\(\)/);
-  assert.match(showcase, /frontEdgeGeometry\.clone\(\), showcaseWhiteMaterial\.clone\(\)/);
-  assert.match(showcase, /shelfFrontGeometry\.clone\(\), showcaseWhiteMaterial\.clone\(\)/);
+test('showcase grouped body color targets only the two side and two horizontal canonical boards', () => {
+  assert.match(showcase, /bodyColorTargets\.push\(sidePanel\)/);
+  assert.match(showcase, /bodyColorTargets\.push\(cap\)/);
+  assert.match(showcase, /sidePanel\.userData\.itemKey = bodyDefinition\.sideItem\.itemKey/);
+  assert.match(showcase, /cap\.userData\.itemKey = bodyDefinition\.horizontalItem\.itemKey/);
+  assert.match(showcase, /acceptsImage: false/);
+  assert.match(showcase, /surfaceRole: 'showcase-body'/);
+});
+
+test('unverified thin front showcase details stay renderer-only and out of grouped board targets', () => {
+  assert.match(showcase, /const showcaseDetailMaterial = new THREE\.MeshStandardMaterial/);
+  assert.match(showcase, /const frontPostGeometry/);
+  assert.match(showcase, /const frontEdgeGeometry/);
+  assert.match(showcase, /const shelfFrontGeometry/);
+  assert.doesNotMatch(showcase, /bodyColorTargets\.push\(post\)/);
+  assert.doesNotMatch(showcase, /bodyColorTargets\.push\(edge\)/);
+  assert.doesNotMatch(showcase, /bodyColorTargets\.push\(shelfFront\)/);
 });

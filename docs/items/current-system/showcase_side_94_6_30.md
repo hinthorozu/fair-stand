@@ -8,7 +8,7 @@ Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası g�
 |---:|---|---|---|
 | 1 | Identity / type | VAR | `itemKey=showcase_side_94_6_30`, `type=showcase-board`, `unit=adet`; canonical owner `src/productionParts.js`. |
 | 2 | Intrinsic properties | VAR | `94.6 × 30 × 1.8 cm` (`length × depth × thickness`), `material=sunta`, `defaultColor=0xffffff`; kullanıcı ürün kararı. |
-| 3 | Default state | UYGULANMIYOR | Leaf board ayrı project state taşımaz. Beyaz ürün default'u canonical Item'dadır. Parent showcase instance ileride tek gövde renk override'ı taşıyacaktır. |
+| 3 | Default state | UYGULANMIYOR | Leaf board ayrı project state taşımaz. Beyaz ürün default'u canonical Item'dadır. Parent showcase instance tek `bodySurface.color` gövde override'ı taşır. |
 | 4 | Factory / creation | PARENT-OWNED | Ayrı leaf project factory yok. Parent `showcase_2_100` / showcase module factory instance'ı üretir. |
 | 5 | Placement | PARENT-OWNED | Leaf board ayrı yerleştirilmez; parent showcase wall placement contract'ını kullanır. |
 | 6 | Move | PARENT-OWNED | Parent showcase module ile birlikte taşınır. |
@@ -19,16 +19,16 @@ Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası g�
 | 11 | Delete / duplicate / keyboard | PARENT-OWNED | Parent showcase module üzerinde uygulanır. |
 | 12 | Persistence | PARENT-OWNED | Canonical product metadata snapshot'a kopyalanmaz; parent instance state/override persist edilir. |
 | 13 | Relationships / reflow | PARENT-OWNED | Leaf board ayrı spatial relationship taşımaz; parent showcase continuous-wall ilişkilerine katılır. |
-| 14 | BOM / composition | VAR | Tekil Item; `resolveItemBom()` ile doğrudan canonical BOM satırı üretir. Parent `showcase_2_100` içindeki quantity/cutover bir sonraki parent migrationında tanımlanacaktır. |
-| 15 | Renderer / asset / override boundary | PARENT-OWNED / ENTEGRASYON BEKLİYOR | Ayrı leaf renderer yok. Mevcut procedural showcase renderer yan gövdeyi parent seviyesinde çizer. Canonical board ölçü/defaultColor tüketimi parent showcase migrationında bağlanacaktır. |
+| 14 | BOM / composition | VAR | Tekil Item; `resolveItemBom()` ile doğrudan canonical BOM satırı üretir. Parent `showcase_2_100` içindeki quantity/cutover canonical parent recipe içinde tanımlıdır. |
+| 15 | Renderer / asset / override boundary | PARENT-OWNED / ENTEGRASYON BEKLİYOR | Ayrı leaf renderer yok. Mevcut procedural showcase renderer yan gövdeyi parent seviyesinde çizer. Canonical board ölçü/defaultColor tüketimi canonical parent showcase renderer/factory tarafından tüketilir. |
 | 16 | Runtime owners | VAR | Product: `productionParts.js`; direct BOM: `itemBom.js`; parent state: `designState.js`; parent behavior/placement: shared module runtime; parent renderer: `scene3d.js`. |
 | 17 | Regression | VAR | `test/showcaseBodyBoardsItemContract.test.js`, `test/boardMaterialItemContract.test.js` + full suite/E2E. |
-| 18 | Open decisions / completion | LEAF KAPALI / PARENT ENTEGRASYON BEKLİYOR | Ürün property kararı kapalıdır. Bireysel renk edit'i bilinçli olarak yoktur. Parent recipe, renderer consumption ve tek gövde renk override'ı `showcase_2_100` migrationında tamamlanacaktır. |
+| 18 | Open decisions / completion | KAPALI | Ürün property kararı kapalıdır. Bireysel renk edit'i bilinçli olarak yoktur. Parent recipe, renderer consumption ve tek gövde renk override entegrasyonu tamamlanmıştır. |
 
 ## Canonical cutover
 
 `showcase_side_94_6_30` yeni canonical physical Item olarak tanımlandı. Ölçü, sunta material ve beyaz default artık `PRODUCTION_PARTS` kaydında tek ürün gerçeğidir.
 
-Bu Item bireysel renk-editable değildir. Showcase gövdesine kullanıcı rengi verildiğinde gelecekte parent showcase instance tek bir gövde renk override'ı taşıyacak; override iki yan ve iki yatay suntaya birlikte uygulanacak, `glass_shelf` etkilenmeyecektir.
+Bu Item bireysel renk-editable değildir. Showcase gövdesine kullanıcı rengi verildiğinde parent showcase instance tek bir `bodySurface.color` gövde override'ı taşır; override iki yan ve iki yatay suntaya birlikte uygulanacak, `glass_shelf` etkilenmeyecektir.
 
-Mevcut `showcase_2_100` legacy recipe ve procedural renderer bu child-only batch'te değiştirilmez.
+Canonical showcase parent recipe ve renderer bu leaf Item'ı doğrudan tüketir.

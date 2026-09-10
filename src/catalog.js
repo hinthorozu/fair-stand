@@ -84,6 +84,8 @@ const TV_42_DEFINITION = getTvDefinition(42);
 const TV_55_DEFINITION = getTvDefinition(55);
 const TV_65_DEFINITION = getTvDefinition(65);
 const DOOR_ITEM = getItem('door_100');
+const SHOWCASE_2_ITEM = getItem('showcase_2_100');
+const SHOWCASE_3_ITEM = getItem('showcase_3_100');
 
 function createTvCatalogItem(definition) {
   return Object.freeze({
@@ -118,8 +120,20 @@ export const MODULE_CATALOG = Object.freeze({
   wall_150: { type: 'flat-panel', widthCm: 150, label: 'Düz Panel 150' },
   wall_200: { type: 'flat-panel', widthCm: 200, label: 'Düz Panel 200' },
 
-  wall_showcase_100_3: { type: 'showcase-3', widthCm: 100, label: '3 Gözlü Vitrin 100' },
-  wall_showcase_100_2: { type: 'showcase-2', widthCm: 100, label: '2 Gözlü Vitrin 100' },
+  showcase_3_100: {
+    itemKey: SHOWCASE_3_ITEM.itemKey,
+    type: SHOWCASE_3_ITEM.type,
+    widthCm: SHOWCASE_3_ITEM.dimensions.widthCm,
+    eyeCount: SHOWCASE_3_ITEM.eyeCount,
+    label: SHOWCASE_3_ITEM.name,
+  },
+  showcase_2_100: {
+    itemKey: SHOWCASE_2_ITEM.itemKey,
+    type: SHOWCASE_2_ITEM.type,
+    widthCm: SHOWCASE_2_ITEM.dimensions.widthCm,
+    eyeCount: SHOWCASE_2_ITEM.eyeCount,
+    label: SHOWCASE_2_ITEM.name,
+  },
   wall_shelf_2_100: { type: 'shelf', widthCm: 100, shelfCount: 2, label: 'Raf 100 · 2 Raf' },
   wall_shelf_3_100: { type: 'shelf', widthCm: 100, shelfCount: 3, label: 'Raf 100 · 3 Raf' },
   wall_shelf_2_150: { type: 'shelf', widthCm: 150, shelfCount: 2, label: 'Raf 150 · 2 Raf' },
@@ -236,8 +250,8 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'wall_separator_100_sarmasik',
   'wall_separator_50_sarmasik',
 
-  'wall_showcase_100_3',
-  'wall_showcase_100_2',
+  'showcase_3_100',
+  'showcase_2_100',
 
   'wall_shelf_3_200',
   'wall_shelf_3_150',
@@ -290,7 +304,7 @@ export const MODULE_CATALOG_GROUPS = Object.freeze([
   }),
   Object.freeze({
     label: 'Raf & Vitrin',
-    keys: Object.freeze(['wall_showcase_100_3', 'wall_showcase_100_2', 'wall_shelf_3_200', 'wall_shelf_3_150', 'wall_shelf_3_100', 'wall_shelf_2_200', 'wall_shelf_2_150', 'wall_shelf_2_100']),
+    keys: Object.freeze(['showcase_3_100', 'showcase_2_100', 'wall_shelf_3_200', 'wall_shelf_3_150', 'wall_shelf_3_100', 'wall_shelf_2_200', 'wall_shelf_2_150', 'wall_shelf_2_100']),
   }),
   Object.freeze({
     label: 'Banko & Baza',
@@ -305,6 +319,11 @@ export const MODULE_CATALOG_GROUPS = Object.freeze([
     keys: Object.freeze(['TV_42', 'TV_55', 'VIDEO_WALL_2X2', 'VIDEO_WALL_3X3', 'TV_65', 'LED_FLOODLIGHT']),
   }),
 ]);
+
+const LEGACY_MODULE_CATALOG_KEY_ALIASES = Object.freeze({
+  wall_showcase_100_2: 'showcase_2_100',
+  wall_showcase_100_3: 'showcase_3_100',
+});
 
 function optionalNumber(value) {
   if (value === null || value === undefined || value === '') return null;
@@ -332,7 +351,9 @@ function normalizeCatalogDescriptor(descriptor) {
 
 export function resolveModuleCatalogKey(descriptor) {
   const normalized = normalizeCatalogDescriptor(descriptor);
-  if (normalized.catalogKey && MODULE_CATALOG[normalized.catalogKey]) return normalized.catalogKey;
+  const canonicalCatalogKey = LEGACY_MODULE_CATALOG_KEY_ALIASES[normalized.catalogKey]
+    ?? normalized.catalogKey;
+  if (canonicalCatalogKey && MODULE_CATALOG[canonicalCatalogKey]) return canonicalCatalogKey;
   if (!normalized.type) return null;
 
   const candidates = MODULE_CATALOG_KEYS.filter(

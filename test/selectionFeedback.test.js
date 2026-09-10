@@ -37,6 +37,21 @@ test('single counter selection preserves face and L-counter wording', () => {
   );
 });
 
+test('showcase body selection explains that four sunta boards share one color override', () => {
+  const feedback = describeSurfaceSelection([
+    surface({
+      moduleIndex: 0,
+      widthCm: 100,
+      moduleType: 'showcase-3',
+      surfaceRole: 'showcase-body',
+    }),
+  ]);
+  assert.equal(
+    feedback.message,
+    'Modül 1 · 3 Gözlü Vitrin 100 cm · vitrin gövdesi · 4 sunta birlikte renklendirilir.',
+  );
+});
+
 test('illuminated foam selection exposes only the foam UI state main needs', () => {
   const modules = [{
     id: 'foam-1',
