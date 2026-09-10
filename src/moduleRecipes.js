@@ -65,6 +65,18 @@ const MODULE_RECIPES = Object.freeze({
       { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
       { itemKey: 'glass_shelf', quantity: 1 },
     ]),
+    variants: Object.freeze({
+      innerCornerPanelItemKey: 'panel_corner_92',
+      innerCornerItemReplacements: Object.freeze([
+        Object.freeze({
+          itemKey: 'connector_single',
+          items: Object.freeze([
+            Object.freeze({ itemKey: 'connector_single', quantity: 5 }),
+            Object.freeze({ itemKey: 'connector_corner', quantity: 4 }),
+          ]),
+        }),
+      ]),
+    }),
   }),
   'showcase-3:100': Object.freeze({
     recipeId: 'showcase-3-100',
@@ -81,6 +93,18 @@ const MODULE_RECIPES = Object.freeze({
       { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
       { itemKey: 'glass_shelf', quantity: 2 },
     ]),
+    variants: Object.freeze({
+      innerCornerPanelItemKey: 'panel_corner_92',
+      innerCornerItemReplacements: Object.freeze([
+        Object.freeze({
+          itemKey: 'connector_single',
+          items: Object.freeze([
+            Object.freeze({ itemKey: 'connector_single', quantity: 5 }),
+            Object.freeze({ itemKey: 'connector_corner', quantity: 4 }),
+          ]),
+        }),
+      ]),
+    }),
   }),
 
   'separator:50': Object.freeze({ recipeId: 'separator-50', moduleType: 'separator', nominalWidthCm: 50, connectionMode: 'straight', items: Object.freeze([

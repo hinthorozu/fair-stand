@@ -24,7 +24,7 @@ test('2-eye wall showcase BASE recipe matches verified production data', () => {
     { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
     { itemKey: 'glass_shelf', quantity: 1 },
   ]);
-  assert.equal(recipe.variants, undefined);
+  assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_92');
 });
 
 test('3-eye wall showcase BASE recipe matches verified production data', () => {
@@ -39,7 +39,29 @@ test('3-eye wall showcase BASE recipe matches verified production data', () => {
     { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
     { itemKey: 'glass_shelf', quantity: 2 },
   ]);
-  assert.equal(recipe.variants, undefined);
+  assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_92');
+});
+
+test('wall showcase inner-corner recipes apply verified panel and connector replacements', () => {
+  for (const [type, panelQuantity, baseSingleQuantity] of [
+    ['showcase-2', 5, 9],
+    ['showcase-3', 4, 7],
+  ]) {
+    const normal = getExpandedModuleRecipe(type, 100);
+    const corner = getExpandedModuleRecipe(type, 100, { panelVariant: 'inner-corner' });
+    const normalByKey = new Map(normal.items.map((entry) => [entry.itemKey, entry.quantity]));
+    const cornerByKey = new Map(corner.items.map((entry) => [entry.itemKey, entry.quantity]));
+
+    assert.equal(normalByKey.get('panel_98'), panelQuantity, type);
+    assert.equal(normalByKey.get('connector_single'), baseSingleQuantity, type);
+    assert.equal(normalByKey.has('connector_corner'), false, type);
+
+    assert.equal(cornerByKey.has('panel_98'), false, type);
+    assert.equal(cornerByKey.get('panel_corner_92'), panelQuantity, type);
+    assert.equal(cornerByKey.get('connector_start'), 4, type);
+    assert.equal(cornerByKey.get('connector_single'), 5, type);
+    assert.equal(cornerByKey.get('connector_corner'), 4, type);
+  }
 });
 
 test('expanded showcase recipes resolve only real physical child Items', () => {
