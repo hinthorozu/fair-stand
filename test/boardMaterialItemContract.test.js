@@ -24,10 +24,13 @@ const SUNTA_ITEM_KEYS = Object.freeze([
   'shelf_100',
   'shelf_150',
   'shelf_200',
+  'showcase_side_94_6_30',
+  'showcase_side_143_5_30',
+  'showcase_horizontal_87_4_30',
 ]);
 
 test('all verified board Items use sunta as canonical production material', () => {
-  assert.equal(SUNTA_ITEM_KEYS.length, 20);
+  assert.equal(SUNTA_ITEM_KEYS.length, 23);
   for (const itemKey of SUNTA_ITEM_KEYS) {
     const item = getProductionItem(itemKey);
     assert.ok(item, itemKey);
