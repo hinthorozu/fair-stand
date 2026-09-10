@@ -88,7 +88,7 @@ test('remaining inner-corner panels use canonical itemKey in exactly twelve veri
   assert.equal(totalOccurrences, 12);
 });
 
-test('inner-corner BOM resolution replaces each matching straight panel 1:1 and preserves all other quantities', () => {
+test('inner-corner BOM resolution replaces each matching straight panel 1:1 and applies declared recipe item replacements', () => {
   for (const [itemKey, { metadata, recipes }] of Object.entries(CORNER_PANEL_CASES)) {
     for (const [type, width, options, expectedQuantity] of recipes) {
       const source = getModuleRecipe(type, width, options);
@@ -113,10 +113,21 @@ test('inner-corner BOM resolution replaces each matching straight panel 1:1 and 
       const sourceNonPanel = source.items
         .filter((item) => getRecipeItemKey(item) !== metadata.straightPanelItemKey)
         .map((item) => [getRecipeItemKey(item), item.quantity]);
+      const declaredReplacements = new Map(
+        (source.variants?.innerCornerItemReplacements ?? []).map((replacement) => [replacement.itemKey, replacement.items]),
+      );
+      const expectedCornerNonPanel = sourceNonPanel.flatMap(([sourceItemKey, quantity]) => {
+        const replacementItems = declaredReplacements.get(sourceItemKey);
+        if (!replacementItems) return [[sourceItemKey, quantity]];
+        return replacementItems.map((replacementItem) => [
+          getRecipeItemKey(replacementItem),
+          replacementItem.quantity,
+        ]);
+      });
       const cornerNonPanel = corner.items
         .filter((item) => getRecipeItemKey(item) !== itemKey)
         .map((item) => [getRecipeItemKey(item), item.quantity]);
-      assert.deepEqual(cornerNonPanel, sourceNonPanel, source.recipeId);
+      assert.deepEqual(cornerNonPanel, expectedCornerNonPanel, source.recipeId);
     }
   }
 });

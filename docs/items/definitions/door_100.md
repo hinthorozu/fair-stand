@@ -7,7 +7,7 @@
 - `type`: `door`
 - `unit`: `adet`
 - yapı: **Bileşik Item**
-- parametrik: hayır
+- parametrik: relationship/recipe variant açısından evet; nominal ürün genişliği sabit 100 cm
 
 Eski uppercase katalog kimliği kaldırılmıştır. Yeni runtime/catalog/state kimliği `door_100`dur.
 
@@ -21,24 +21,68 @@ widthCm = 100
 
 Parent kapı kümesine material veya `defaultColor` eklenmez; küme farklı malzemeli child Item'lardan oluşur. Paylaşılan stand yüksekliği/render derinliği de doğrulanmış parent ürün property’si olarak yeniden tanımlanmaz.
 
-## Canonical composition
+## Canonical composition — base
 
 `door_100.composition` mevcut `door:100` recipe’sine bağlanır. Miktarların tek source-of-truth'u `src/moduleRecipes.js`dir:
 
 ```text
-profile_91       ×1
-upright_346_5    ×2
-panel_98         ×3
-connector_start  ×2
-connector_single ×5
-door_leaf_100    ×1
+profile_91            ×1
+upright_346_5         ×2
+panel_98              ×3
+connector_start       ×2
+connector_single      ×5
+door_leaf_100         ×1
 ```
 
 Child miktarları `door_100` Item kartında ikinci kez kopyalanmaz.
 
+## Canonical composition — inner corner
+
+Doğrulanmış relationship-derived ürün kuralı şöyledir:
+
+```text
+profile_91            ×1
+upright_346_5         ×2
+panel_corner_92       ×3
+connector_start       ×2
+connector_single      ×3
+connector_corner      ×2
+door_leaf_100         ×1
+```
+
+Base → inner-corner dönüşümü:
+
+```text
+panel_98 ×3          → panel_corner_92 ×3
+connector_single ×5  → connector_single ×3 + connector_corner ×2
+connector_start ×2   → değişmez
+```
+
+Bu fark `src/moduleRecipes.js` içindeki `door:100` variant metadata'sında tutulur. Unchanged kalemler ikinci kez tam recipe olarak kopyalanmaz; base recipe'den korunur. Böylece door corner BOM için ikinci hardcoded business source-of-truth yaratılmaz.
+
+## Recipe variant API
+
+Canonical expanded recipe:
+
+```js
+getExpandedModuleRecipe('door', 100, { panelVariant: 'inner-corner' })
+```
+
+Canonical recursive Item BOM:
+
+```js
+resolveItemBom('door_100', 1, { panelVariant: 'inner-corner' })
+```
+
+Bu çağrı inner-corner recipe'yi terminal Item'lara kadar recursive açar. Base çağrı `resolveItemBom('door_100')` mevcut düz recipe'yi aynen korur.
+
+`panelVariant` relationship sonucunun recipe/BOM katmanına taşınan context'idir. Runtime placement/relationship motorunun gerçek bir inner-corner ilişkisini bu context'e otomatik dönüştürmesi ayrı relationship integration sorumluluğudur; renderer veya UI tahmini BOM source-of-truth'u olamaz.
+
 ## Recursive BOM
 
-`src/itemBom.js` canonical Item'ı recipe üzerinden child Item'lara açar ve bileşik child Item varsa aynı işlemi recursive sürdürür. `door_100` bugün yukarıdaki altı leaf Item'a çözülür. Nihai her satır canonical `itemKey`, `quantity` ve child Item'ın `unit` değerini taşır.
+`src/itemBom.js` canonical Item'ı expanded recipe üzerinden child Item'lara açar ve bileşik child Item varsa aynı işlemi recursive sürdürür. Nihai her satır canonical `itemKey`, `quantity` ve child Item'ın `unit` değerini taşır.
+
+Caller recipe options yalnız ilgili root composite Item'ın recipe çözümüne uygulanır; child Item'lara körlemesine sızdırılmaz. Child composite varsa kendi canonical composition options'ı ile çözülür.
 
 ## Factory / state / persistence
 
@@ -48,7 +92,7 @@ Child miktarları `door_100` Item kartında ikinci kez kopyalanmaz.
 id         = module-<instance>
 itemKey    = door_100
 type       = door
-catalogKey = door_100   // generic catalog routing field; canonical key ile aynı değer
+catalogKey = door_100
 widthCm    = 100
 ```
 
@@ -73,7 +117,7 @@ Parent `door_100`, `type=door` olduğu için mevcut `WALL_BEHAVIOR` contract'ın
 - wall-capacity participation,
 - module silhouette ghost.
 
-Bu davranışlar Item migration sırasında yeniden yazılmaz. Context menu parent module davranışını sürdürür. Kapı kanadı `selectionMode=module` olduğu için panel-only glass/Lightbox/Mesh komutlarını açmaz; üst `panel_98` yüzeyleri mevcut panel davranışını sürdürür.
+Bu davranışlar Item migration sırasında yeniden yazılmaz. Context menu parent module davranışını sürdürür. Kapı kanadı `selectionMode=module` olduğu için panel-only glass/Lightbox/Mesh komutlarını açmaz; üst `panel_98`/`panel_corner_92` üretim kimlikleri renderer state'inin ikinci BOM kaynağı yapılmaz.
 
 ## Renderer boundary
 

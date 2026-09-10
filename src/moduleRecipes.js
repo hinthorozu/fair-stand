@@ -18,7 +18,18 @@ const STRAIGHT_WALL_RECIPES = Object.freeze({
 const MODULE_RECIPES = Object.freeze({
   'door:100': Object.freeze({ recipeId: 'door-100', moduleType: 'door', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
     Object.freeze({ itemKey: 'profile_91', quantity: 1 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_98', quantity: 3 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 5 }), Object.freeze({ itemKey: 'door_leaf_100', quantity: 1 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_92' }) }),
+  ]), variants: Object.freeze({
+    innerCornerPanelItemKey: 'panel_corner_92',
+    innerCornerItemReplacements: Object.freeze([
+      Object.freeze({
+        itemKey: 'connector_single',
+        items: Object.freeze([
+          Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
+          Object.freeze({ itemKey: 'connector_corner', quantity: 2 }),
+        ]),
+      }),
+    ]),
+  }) }),
 
   'shelf:100:2': Object.freeze({ recipeId: 'shelf-wall-100-2', moduleType: 'shelf', nominalWidthCm: 100, shelfCount: 2, connectionMode: 'straight', items: Object.freeze([
     Object.freeze({ itemKey: 'profile_91', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_98', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }), Object.freeze({ itemKey: 'shelf_100', quantity: 2 }), Object.freeze({ itemKey: 'shelf_leg', quantity: 4 }),
@@ -108,6 +119,34 @@ export function getRecipeInnerCornerPanelKey(recipe) {
   return recipe?.variants?.innerCornerPanelItemKey ?? null;
 }
 
+function applyVariantItemReplacements(items, replacements = [], recipeId = 'unknown') {
+  let resolvedItems = items;
+
+  for (const replacement of replacements) {
+    const sourceItemKey = replacement?.itemKey ?? null;
+    const replacementItems = replacement?.items;
+    if (!sourceItemKey || !Array.isArray(replacementItems) || !replacementItems.length) {
+      throw new TypeError(`Invalid recipe variant replacement in ${recipeId}.`);
+    }
+
+    let replaced = false;
+    resolvedItems = resolvedItems.flatMap((item) => {
+      if (getRecipeItemKey(item) !== sourceItemKey) return [item];
+      if (replaced) {
+        throw new TypeError(`Recipe ${recipeId} contains duplicate variant source Item ${sourceItemKey}.`);
+      }
+      replaced = true;
+      return replacementItems.map((replacementItem) => Object.freeze({ ...replacementItem }));
+    });
+
+    if (!replaced) {
+      throw new TypeError(`Recipe ${recipeId} has no variant source Item ${sourceItemKey}.`);
+    }
+  }
+
+  return resolvedItems;
+}
+
 function resolveRecipeItemsForPanelVariant(recipe, panelVariant = 'straight') {
   if (panelVariant !== 'inner-corner') return recipe.items;
 
@@ -131,10 +170,16 @@ function resolveRecipeItemsForPanelVariant(recipe, panelVariant = 'straight') {
     throw new TypeError(`Recipe ${recipe.recipeId ?? 'unknown'} has no matching straight panel for ${cornerPanelItemKey}.`);
   }
 
-  return recipe.items.map((item, index) => {
+  const panelAdjustedItems = recipe.items.map((item, index) => {
     if (index !== straightPanelIndex) return item;
     return Object.freeze({ itemKey: cornerPanelItemKey, quantity: item.quantity });
   });
+
+  return applyVariantItemReplacements(
+    panelAdjustedItems,
+    recipe?.variants?.innerCornerItemReplacements ?? [],
+    recipe.recipeId ?? 'unknown',
+  );
 }
 
 export function expandRecipe(recipe, options = {}) {

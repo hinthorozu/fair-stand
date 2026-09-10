@@ -8,7 +8,7 @@ import { resolveItemBom } from '../src/itemBom.js';
 import { getItem } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
-import { getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
+import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
 import { getProductionItem } from '../src/productionParts.js';
 
 const EXPECTED_CHILDREN = [
@@ -17,6 +17,16 @@ const EXPECTED_CHILDREN = [
   ['panel_98', 3],
   ['connector_start', 2],
   ['connector_single', 5],
+  ['door_leaf_100', 1],
+];
+
+const EXPECTED_INNER_CORNER_CHILDREN = [
+  ['profile_91', 1],
+  ['upright_346_5', 2],
+  ['panel_corner_92', 3],
+  ['connector_start', 2],
+  ['connector_single', 3],
+  ['connector_corner', 2],
   ['door_leaf_100', 1],
 ];
 
@@ -57,6 +67,15 @@ test('door_100 composition delegates quantities to the existing canonical recipe
   );
 });
 
+test('door_100 inner-corner recipe changes panels and connector composition canonically', () => {
+  const recipe = getExpandedModuleRecipe('door', 100, { panelVariant: 'inner-corner' });
+  assert.ok(recipe);
+  assert.deepEqual(
+    recipe.items.map((entry) => [getRecipeItemKey(entry), entry.quantity]),
+    EXPECTED_INNER_CORNER_CHILDREN,
+  );
+});
+
 test('door_100 recursive BOM resolves to canonical leaf Items with quantities and units', () => {
   const bom = resolveItemBom('door_100');
   assert.deepEqual(
@@ -66,6 +85,14 @@ test('door_100 recursive BOM resolves to canonical leaf Items with quantities an
   bom.forEach((line) => {
     assert.equal(line.item.itemKey ?? line.item.partId, line.itemKey);
   });
+});
+
+test('door_100 recursive BOM resolves the verified inner-corner variant', () => {
+  const bom = resolveItemBom('door_100', 1, { panelVariant: 'inner-corner' });
+  assert.deepEqual(
+    bom.map((line) => [line.itemKey, line.quantity, line.unit]),
+    EXPECTED_INNER_CORNER_CHILDREN.map(([itemKey, quantity]) => [itemKey, quantity, 'adet']),
+  );
 });
 
 test('door_100 factory/persistence identity and child door leaf identity are canonical', () => {
