@@ -36,8 +36,6 @@ export const PRODUCTION_PARTS = Object.freeze({
   showcase_side_94_6_30: Object.freeze({ itemKey: 'showcase_side_94_6_30', name: 'Vitrin Yan Sunta 94,6 × 30 cm', type: 'showcase-board', unit: 'adet', dimensions: Object.freeze({ lengthCm: 94.6, depthCm: 30, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff }),
   showcase_side_143_5_30: Object.freeze({ itemKey: 'showcase_side_143_5_30', name: 'Vitrin Yan Sunta 143,5 × 30 cm', type: 'showcase-board', unit: 'adet', dimensions: Object.freeze({ lengthCm: 143.5, depthCm: 30, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff }),
   showcase_horizontal_87_4_30: Object.freeze({ itemKey: 'showcase_horizontal_87_4_30', name: 'Vitrin Yatay Sunta 87,4 × 30 cm', type: 'showcase-board', unit: 'adet', dimensions: Object.freeze({ lengthCm: 87.4, depthCm: 30, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff }),
-  showcase_2_100: Object.freeze({ partId: 'showcase_2_100', name: '2 Gözlü Vitrin 100 cm', type: 'showcase', unit: 'adet', eyeCount: 2, nominalModuleWidthCm: 100 }),
-  showcase_3_100: Object.freeze({ partId: 'showcase_3_100', name: '3 Gözlü Vitrin 100 cm', type: 'showcase', unit: 'adet', eyeCount: 3, nominalModuleWidthCm: 100 }),
   glass_shelf: Object.freeze({ itemKey: 'glass_shelf', name: 'Cam Raf', type: 'showcase-accessory', unit: 'adet', dimensions: Object.freeze({ lengthCm: 87.3, depthCm: 28.5, thicknessCm: 0.6 }), material: 'cam' }),
 
   counter_top_110_60: Object.freeze({ itemKey: 'counter_top_110_60', name: 'Banko Üstü 110 × 60 cm', type: 'counter-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 110, depthCm: 60, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xf8fafc, nominalModuleWidthCm: 100 }),

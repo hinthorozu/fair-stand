@@ -103,11 +103,8 @@ test('expanded recipes resolve straight panel metadata through canonical itemKey
 });
 
 test('straight panel migration remains isolated from still-legacy production families while corner variants use canonical Item identity', () => {
-  for (const itemKey of ['showcase_2_100']) {
-    const item = getProductionItem(itemKey);
-    assert.equal(item.itemKey, undefined, itemKey);
-    assert.equal(item.partId, itemKey);
-  }
+  assert.equal(getProductionItem('showcase_2_100'), null);
+  assert.equal(getProductionItem('showcase_3_100'), null);
 
   for (const width of [50, 100, 150, 200]) {
     const recipe = getStraightWallRecipe(width);

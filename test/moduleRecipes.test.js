@@ -109,6 +109,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   const counterTopOccurrences = { counter_top_110_60: 0, counter_top_52_60: 0, counter_top_160_60: 0, counter_top_102_60: 0, counter_top_210_60: 0, counter_top_150_60: 0 };
   const separatorPanelOccurrences = { separator_panel_48_5: 0, separator_panel_98: 0 };
   const shelfOccurrences = { shelf_100: 0, shelf_150: 0, shelf_200: 0 };
+  const showcaseBoardOccurrences = { showcase_side_94_6_30: 0, showcase_side_143_5_30: 0, showcase_horizontal_87_4_30: 0 };
   let glassShelfOccurrences = 0;
   let shelfLegOccurrences = 0;
   let doorLeafOccurrences = 0;
@@ -116,7 +117,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
     assert.ok(recipe);
     for (const item of recipe.items) {
       const key = getRecipeItemKey(item);
-      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key in profileOccurrences || key in straightPanelOccurrences || key in baseTopOccurrences || key in counterTopOccurrences || key in separatorPanelOccurrences || key in shelfOccurrences || key === 'glass_shelf' || key === 'shelf_leg' || key === 'door_leaf_100') {
+      if (key === 'connector_start' || key === 'connector_single' || key in uprightOccurrences || key === 'panel_197' || key in profileOccurrences || key in straightPanelOccurrences || key in baseTopOccurrences || key in counterTopOccurrences || key in separatorPanelOccurrences || key in shelfOccurrences || key in showcaseBoardOccurrences || key === 'glass_shelf' || key === 'shelf_leg' || key === 'door_leaf_100') {
         if (key === 'connector_start') startOccurrences += 1;
         if (key === 'connector_single') singleOccurrences += 1;
         if (key in uprightOccurrences) uprightOccurrences[key] += 1;
@@ -127,6 +128,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
         if (key in counterTopOccurrences) counterTopOccurrences[key] += 1;
         if (key in separatorPanelOccurrences) separatorPanelOccurrences[key] += 1;
         if (key in shelfOccurrences) shelfOccurrences[key] += 1;
+        if (key in showcaseBoardOccurrences) showcaseBoardOccurrences[key] += 1;
         if (key === 'glass_shelf') glassShelfOccurrences += 1;
         if (key === 'shelf_leg') shelfLegOccurrences += 1;
         if (key === 'door_leaf_100') doorLeafOccurrences += 1;
@@ -149,6 +151,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   assert.deepEqual(counterTopOccurrences, { counter_top_110_60: 2, counter_top_52_60: 1, counter_top_160_60: 2, counter_top_102_60: 1, counter_top_210_60: 2, counter_top_150_60: 1 });
   assert.deepEqual(separatorPanelOccurrences, { separator_panel_48_5: 1, separator_panel_98: 2 });
   assert.deepEqual(shelfOccurrences, { shelf_100: 2, shelf_150: 2, shelf_200: 2 });
+  assert.deepEqual(showcaseBoardOccurrences, { showcase_side_94_6_30: 1, showcase_side_143_5_30: 1, showcase_horizontal_87_4_30: 2 });
   assert.equal(glassShelfOccurrences, 2);
   assert.equal(shelfLegOccurrences, 6);
   assert.equal(doorLeafOccurrences, 1);

@@ -50,12 +50,38 @@ const MODULE_RECIPES = Object.freeze({
     Object.freeze({ itemKey: 'profile_190', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_197', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }), Object.freeze({ itemKey: 'shelf_200', quantity: 3 }), Object.freeze({ itemKey: 'shelf_leg', quantity: 9 }),
   ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_192' }) }),
 
-  'showcase-2:100': Object.freeze({ recipeId: 'showcase-2-100', moduleType: 'showcase-2', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 4 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_98', quantity: 5 }), Object.freeze({ itemKey: 'connector_start', quantity: 4 }), Object.freeze({ itemKey: 'connector_single', quantity: 9 }), Object.freeze({ partId: 'showcase_2_100', quantity: 1 }), Object.freeze({ itemKey: 'glass_shelf', quantity: 2 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_92' }) }),
-  'showcase-3:100': Object.freeze({ recipeId: 'showcase-3-100', moduleType: 'showcase-3', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 4 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_98', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 4 }), Object.freeze({ itemKey: 'connector_single', quantity: 7 }), Object.freeze({ partId: 'showcase_3_100', quantity: 1 }), Object.freeze({ itemKey: 'glass_shelf', quantity: 3 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_92' }) }),
+  'showcase-2:100': Object.freeze({
+    recipeId: 'showcase-2-100',
+    moduleType: 'showcase-2',
+    nominalWidthCm: 100,
+    connectionMode: 'straight',
+    items: Object.freeze([
+      { itemKey: 'profile_91', quantity: 4 },
+      { itemKey: 'upright_346_5', quantity: 2 },
+      { itemKey: 'panel_98', quantity: 5 },
+      { itemKey: 'connector_start', quantity: 4 },
+      { itemKey: 'connector_single', quantity: 9 },
+      { itemKey: 'showcase_side_94_6_30', quantity: 2 },
+      { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
+      { itemKey: 'glass_shelf', quantity: 1 },
+    ]),
+  }),
+  'showcase-3:100': Object.freeze({
+    recipeId: 'showcase-3-100',
+    moduleType: 'showcase-3',
+    nominalWidthCm: 100,
+    connectionMode: 'straight',
+    items: Object.freeze([
+      { itemKey: 'profile_91', quantity: 4 },
+      { itemKey: 'upright_346_5', quantity: 2 },
+      { itemKey: 'panel_98', quantity: 4 },
+      { itemKey: 'connector_start', quantity: 4 },
+      { itemKey: 'connector_single', quantity: 7 },
+      { itemKey: 'showcase_side_143_5_30', quantity: 2 },
+      { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
+      { itemKey: 'glass_shelf', quantity: 2 },
+    ]),
+  }),
 
   'separator:50': Object.freeze({ recipeId: 'separator-50', moduleType: 'separator', nominalWidthCm: 50, connectionMode: 'straight', items: Object.freeze([
     Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'separator_panel_48_5', quantity: 1 }), Object.freeze({ itemKey: 'separator_panel_98', quantity: 3 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 7 }),

@@ -23,7 +23,7 @@ Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası g�
 | 15 | Renderer / asset / override boundary | VAR | `createShowcaseModule()` artık canonical `lengthCm=87.3`, `depthCm=28.5`, `thicknessCm=0.6` ve `material=cam` tüketir. `material=cam` ortak normal glass appearance standardına çözülür. Masa camı specialized override, panel backing panel-only efekt, projektör lensi specialized optical override'dır. |
 | 16 | Runtime owners | VAR | Product: `productionParts.js`; BOM: `moduleRecipes.js`; parent state: `designState.js`; behavior/placement: module behavior/placement zinciri; persistence: `main.js` + `projectStore.js`; renderer: `scene3d.js`; shared glass appearance: `theme.js`. |
 | 17 | Regression | VAR | `test/glassShelfItemContract.test.js`, `test/showcaseRecipes.test.js`, `test/showcaseDepthDirection.test.js`, `test/materialAppearance.test.js` + full suite/E2E. |
-| 18 | Open decisions / completion | KAPALI / CI BEKLİYOR | Canonical ürün ölçü/material kararı kapalıdır. Existing BOM ×2/×3 korunur; renderer'ın `eyeCount-1` iç divider mesh sayısı BOM kaynağı değildir. Operational completion PR checks + squash merge + post-merge `Version2` CI FULL GREEN sonrası verilir. |
+| 18 | Open decisions / completion | KAPALI / CI BEKLİYOR | Canonical ürün ölçü/material kararı kapalıdır. Existing BOM ×1/×2 korunur; renderer'ın `eyeCount-1` iç divider mesh sayısı BOM kaynağı değildir. Operational completion PR checks + squash merge + post-merge `Version2` CI FULL GREEN sonrası verilir. |
 
 ## Canonical cutover
 

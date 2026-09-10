@@ -84,6 +84,8 @@ const TV_42_DEFINITION = getTvDefinition(42);
 const TV_55_DEFINITION = getTvDefinition(55);
 const TV_65_DEFINITION = getTvDefinition(65);
 const DOOR_ITEM = getItem('door_100');
+const WALL_SHOWCASE_2_ITEM = getItem('wall_showcase_100_2');
+const WALL_SHOWCASE_3_ITEM = getItem('wall_showcase_100_3');
 
 function createTvCatalogItem(definition) {
   return Object.freeze({
@@ -118,8 +120,20 @@ export const MODULE_CATALOG = Object.freeze({
   wall_150: { type: 'flat-panel', widthCm: 150, label: 'Düz Panel 150' },
   wall_200: { type: 'flat-panel', widthCm: 200, label: 'Düz Panel 200' },
 
-  wall_showcase_100_3: { type: 'showcase-3', widthCm: 100, label: '3 Gözlü Vitrin 100' },
-  wall_showcase_100_2: { type: 'showcase-2', widthCm: 100, label: '2 Gözlü Vitrin 100' },
+  wall_showcase_100_3: {
+    itemKey: WALL_SHOWCASE_3_ITEM.itemKey,
+    type: WALL_SHOWCASE_3_ITEM.type,
+    widthCm: WALL_SHOWCASE_3_ITEM.dimensions.widthCm,
+    eyeCount: WALL_SHOWCASE_3_ITEM.eyeCount,
+    label: WALL_SHOWCASE_3_ITEM.name,
+  },
+  wall_showcase_100_2: {
+    itemKey: WALL_SHOWCASE_2_ITEM.itemKey,
+    type: WALL_SHOWCASE_2_ITEM.type,
+    widthCm: WALL_SHOWCASE_2_ITEM.dimensions.widthCm,
+    eyeCount: WALL_SHOWCASE_2_ITEM.eyeCount,
+    label: WALL_SHOWCASE_2_ITEM.name,
+  },
   wall_shelf_2_100: { type: 'shelf', widthCm: 100, shelfCount: 2, label: 'Raf 100 · 2 Raf' },
   wall_shelf_3_100: { type: 'shelf', widthCm: 100, shelfCount: 3, label: 'Raf 100 · 3 Raf' },
   wall_shelf_2_150: { type: 'shelf', widthCm: 150, shelfCount: 2, label: 'Raf 150 · 2 Raf' },

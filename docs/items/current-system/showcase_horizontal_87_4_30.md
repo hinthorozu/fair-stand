@@ -9,7 +9,7 @@ Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası g�
 | 1 | Identity / type | VAR | `itemKey=showcase_horizontal_87_4_30`, `type=showcase-board`, `unit=adet`; canonical owner `src/productionParts.js`. |
 | 2 | Intrinsic properties | VAR | `87.4 × 30 × 1.8 cm` (`length × depth × thickness`), `material=sunta`, `defaultColor=0xffffff`; kullanıcı ürün kararı. |
 | 3 | Default state | UYGULANMIYOR | Leaf board ayrı project state taşımaz. Beyaz ürün default'u canonical Item'dadır. Parent showcase instance ileride tek gövde renk override'ı taşıyacaktır. |
-| 4 | Factory / creation | PARENT-OWNED | Ayrı leaf project factory yok. Ortak üst/alt board parent `showcase_2_100` ve `showcase_3_100` composition'larında kullanılacaktır. |
+| 4 | Factory / creation | PARENT-OWNED | Ayrı leaf project factory yok. Ortak üst/alt board parent `wall_showcase_100_2` ve `wall_showcase_100_3` composition'larında kullanılacaktır. |
 | 5 | Placement | PARENT-OWNED | Leaf board ayrı yerleştirilmez; parent showcase wall placement contract'ını kullanır. |
 | 6 | Move | PARENT-OWNED | Parent showcase module ile birlikte taşınır. |
 | 7 | Rotation | PARENT-OWNED | Parent showcase module behavior contract'ıdır. |
@@ -23,7 +23,7 @@ Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası g�
 | 15 | Renderer / asset / override boundary | PARENT-OWNED / ENTEGRASYON BEKLİYOR | Ayrı leaf renderer yok. Mevcut procedural showcase renderer üst/alt gövdeyi parent seviyesinde çizer. Canonical board ölçü/defaultColor tüketimi parent showcase migrationında bağlanacaktır. |
 | 16 | Runtime owners | VAR | Product: `productionParts.js`; direct BOM: `itemBom.js`; parent state: `designState.js`; parent behavior/placement: shared module runtime; parent renderer: `scene3d.js`. |
 | 17 | Regression | VAR | `test/showcaseBodyBoardsItemContract.test.js`, `test/boardMaterialItemContract.test.js` + full suite/E2E. |
-| 18 | Open decisions / completion | LEAF KAPALI / PARENT ENTEGRASYON BEKLİYOR | Ürün property kararı kapalıdır. Bireysel renk edit'i bilinçli olarak yoktur. Parent recipe, renderer consumption ve tek gövde renk override'ı `showcase_2_100` / `showcase_3_100` migrationında tamamlanacaktır. |
+| 18 | Open decisions / completion | LEAF KAPALI / PARENT ENTEGRASYON BEKLİYOR | Ürün property kararı kapalıdır. Bireysel renk edit'i bilinçli olarak yoktur. Parent recipe, renderer consumption ve tek gövde renk override'ı `wall_showcase_100_2` / `wall_showcase_100_3` migrationında tamamlanacaktır. |
 
 ## Canonical cutover
 
@@ -31,4 +31,4 @@ Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası g�
 
 Bu Item iki vitrinde de üst ve alt yatay sunta olarak ortak kullanılacaktır ve bireysel renk-editable değildir. Showcase gövdesine kullanıcı rengi verildiğinde gelecekte parent showcase instance tek bir gövde renk override'ı taşıyacak; override iki yan ve iki yatay suntaya birlikte uygulanacak, `glass_shelf` etkilenmeyecektir.
 
-Mevcut `showcase_2_100` / `showcase_3_100` legacy recipe ve procedural renderer bu child-only batch'te değiştirilmez.
+Mevcut `wall_showcase_100_2` / `wall_showcase_100_3` legacy recipe ve procedural renderer bu child-only batch'te değiştirilmez.
