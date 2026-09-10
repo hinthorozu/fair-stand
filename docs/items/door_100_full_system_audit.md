@@ -1,207 +1,115 @@
 # door_100 — Full System Audit
 
-**Scope:** `Version2` current runtime and Item Contract architecture  
+**Scope:** `Version2` current runtime + Item Contract architecture  
 **Item:** `door_100`  
-**Related physical child Item:** `door_leaf_100`  
-**Audit mode:** analysis/documentation only; this document does not itself change runtime behavior.
+**Physical child Item:** `door_leaf_100`  
+**Purpose:** canonical system inventory, source-of-truth map, verified BOM behavior and open gaps.
 
 ---
 
 ## 1. Executive summary
 
-`door_100` has been migrated to the new Item system substantially correctly. The current architecture separates the catalog/runtime composite door module from the physical door leaf, uses canonical Item identity for catalog/state/BOM ownership, restores canonical identity on legacy project load, and resolves the base production recipe recursively through the Item BOM layer.
+`door_100` is correctly modeled as the canonical 100 cm **composite door Item**. It is not the physical wooden door leaf. The physical leaf remains the separate canonical child Item `door_leaf_100`.
 
-The core model is now:
-
-```text
-door_100
-= catalog/runtime composite door module
-
-  ├─ profile_91 × 1
-  ├─ upright_346_5 × 2
-  ├─ panel_98 × 3
-  ├─ connector_start × 2
-  ├─ connector_single × 5
-  └─ door_leaf_100 × 1
-```
-
-The physical door leaf is a separate canonical Item:
+The base production recipe is:
 
 ```text
-door_leaf_100
-= physical wooden door leaf
-= 100 × 200 × 8 cm
-= default product color: white
-= unit: adet
+profile_91            ×1
+upright_346_5         ×2
+panel_98              ×3
+connector_start       ×2
+connector_single      ×5
+door_leaf_100         ×1
 ```
 
-The parent/child split, property ownership, catalog cutover, state construction, persistence normalization, renderer boundary and base recursive BOM are all structurally sound.
+A verified product rule also exists for the **inner-corner** case. When the door recipe is resolved with inner-corner relationship context, the final BOM must be:
 
-However, the audit found open gaps that prevent treating the whole identity → relationship → BOM → regression chain as fully closed:
+```text
+profile_91            ×1
+upright_346_5         ×2
+panel_corner_92       ×3
+connector_start       ×2
+connector_single      ×3
+connector_corner      ×2
+door_leaf_100         ×1
+```
 
-1. `moduleContracts.js` resolves `door_100` with `composition.mode = standalone`, while the canonical Item itself is explicitly recipe/composite and creates/owns a child `door_leaf_100` surface relationship. This is a contract-semantics mismatch.
-2. `resolveItemBom('door_100')` resolves the base recipe but has no runtime relationship/variant context, so it cannot by itself express the door recipe's `panel_corner_92` inner-corner variant.
-3. Door-specific browser E2E coverage verifies canonical creation identity but does not cover the full door lifecycle: movement, rotation, side insertion/reflow, relationship/corner behavior, leaf color/image editing, duplication, persistence round-trip and relationship-aware BOM.
-4. Existing `door_100` documentation describes the migrated architecture well but does not explicitly record the two open contract/BOM boundaries above.
+The exact delta is:
 
-**Overall audit status:** `PASS WITH OPEN GAPS`.
+```text
+panel_98 ×3          → panel_corner_92 ×3
+connector_single ×5  → connector_single ×3 + connector_corner ×2
+connector_start ×2   → unchanged
+```
+
+This audit originally described the corner rule only as a panel substitution. That description was incomplete. The connector composition change above is now the canonical verified rule.
+
+The implementation stores this delta inside the existing `door:100` recipe variant metadata in `src/moduleRecipes.js`; it does not duplicate the full recipe or hide door-specific quantities in renderer/UI code. `src/itemBom.js` can resolve the same canonical inner-corner variant recursively when recipe context is supplied.
+
+**Current overall status:** `PASS WITH OPEN INTEGRATION/REGRESSION GAPS`.
 
 ---
 
 ## 2. What `door_100` is
 
-`door_100` is not the physical wooden door leaf. It is the canonical 100 cm composite door module selected and placed by the user.
+`door_100` is the catalog/runtime parent Item selected and placed by the user.
 
-Canonical responsibilities of `door_100`:
+Canonical parent responsibilities:
 
-- canonical `itemKey = door_100`
-- product/module name `Depo Kapısı 100`
-- runtime family `type = door`
-- nominal width `100 cm`
+- `itemKey = door_100`
+- name `Depo Kapısı 100`
+- `type = door`
+- `unit = adet`
+- nominal parent width `100 cm`
 - catalog identity
-- project-instance state root
+- project-instance root state
 - recipe/composition pointer
-- behavior-family participation
-- parent ownership of the door module's editable/project state
-
-The Item-level composition is recipe-backed and points to the canonical door recipe.
+- participation in shared wall behavior
+- ownership of the module's nested project state
 
 Conceptually:
 
 ```text
-Item: door_100
-    ↓
-composition.mode = recipe
-    ↓
-moduleType = door
-nominalWidthCm = 100
-    ↓
-moduleRecipes.js
+door_100
+→ composition.mode = recipe
+→ moduleType = door
+→ nominalWidthCm = 100
+→ src/moduleRecipes.js / door:100
 ```
 
 ---
 
 ## 3. What `door_100` is not
 
-The following physical properties do **not** belong canonically to the parent `door_100` Item:
+`door_100` is not the physical door leaf and must not duplicate the leaf's intrinsic product properties.
 
-| Property | Canonical owner |
+| Property / concern | Canonical owner |
 |---|---|
 | wooden material | `door_leaf_100` |
-| physical leaf width | `door_leaf_100` |
-| physical leaf height | `door_leaf_100` |
-| physical leaf thickness | `door_leaf_100` |
+| physical leaf width/height/thickness | `door_leaf_100` |
 | product default white color | `door_leaf_100` |
-| user-selected leaf color | project instance child surface |
-| user-selected leaf image | project instance child surface |
-| door recipe quantities | `moduleRecipes.js` |
-| move/collision/reflow algorithms | behavior/placement core |
-| procedural mesh implementation | `scene3d.js` |
-| pricing/cost values | pricing/costing layer, not BOM |
-
-This separation is intentional and correct. Copying the door leaf's physical dimensions/material/default color into `door_100` would create a second implicit business source and would violate canonical Item ownership.
+| user-selected leaf color/image | project child surface state |
+| base + inner-corner recipe quantities | `src/moduleRecipes.js` |
+| move/collision/reflow algorithms | shared behavior/placement/reflow core |
+| procedural mesh details | `src/scene3d.js` |
+| pricing/cost | pricing layer, not Item BOM |
 
 ---
 
-## 4. Canonical source-of-truth map
+## 4. `door_leaf_100`
 
-| Concern | Canonical owner | Runtime consumer(s) |
-|---|---|---|
-| `door_100` identity | `src/items.js` | catalog, state, BOM |
-| parent type | `src/items.js` | catalog/state/behavior/renderer |
-| nominal parent width | `src/items.js` | catalog/state/recipe resolution |
-| parent composition pointer | `src/items.js` | `src/itemBom.js` |
-| catalog descriptor | `src/catalog.js` | picker/runtime creation |
-| runtime module instance | `src/designState.js` | project/scene |
-| instance `id` | state creation | project instance identity |
-| placement family | `src/moduleBehavior.js` | placement/move core |
-| move snap | `src/moduleBehavior.js` | movement core |
-| rotation policy | `src/moduleBehavior.js` | placement/runtime |
-| collision strategy | `src/moduleBehavior.js` | placement core |
-| side insertion/reflow | behavior + `wallReflow.js` | runtime layout |
-| production recipe quantities | `src/moduleRecipes.js` | BOM |
-| recursive Item BOM expansion | `src/itemBom.js` | BOM consumer/debug UI |
-| physical leaf properties | `src/productionParts.js` / canonical production Item | state/render/BOM |
-| leaf capabilities | `src/itemCapabilities.js` | context menu/UI |
-| leaf instance appearance | child surface in project state | renderer |
-| context-menu capabilities | context menu + Item capabilities | UI |
-| procedural door geometry | `src/scene3d.js` | Three.js scene |
-| save/load normalization | project restore + `normalizeModuleItemState()` | persistence |
-
-The important architectural result is that catalog and runtime do not need to redefine the parent Item's intrinsic identity/name/type/nominal width as independent business constants.
-
----
-
-## 5. Parent/child state model
-
-A created door module is conceptually structured like this:
+Verified child product meaning:
 
 ```text
-module instance
-├─ id                       project instance identity
-├─ itemKey = door_100       canonical parent Item
-├─ catalogKey = door_100    catalog identity
-├─ type = door
-├─ widthCm = 100
-├─ placement
-├─ strips[]                 editable upper panel surfaces
-└─ surface
-   ├─ itemKey = door_leaf_100
-   ├─ color
-   ├─ imageAssetId
-   └─ imageTransform
+itemKey      = door_leaf_100
+type         = door-leaf
+dimensions   = 100 × 200 × 8 cm
+material     = ahşap
+defaultColor = white
+unit         = adet
 ```
 
-This establishes two distinct identities:
-
-```text
-door_100       = complete composite door module
-
-door_leaf_100  = physical door leaf contained by the module
-```
-
-That distinction is correct and should remain explicit.
-
----
-
-## 6. `door_leaf_100` ownership
-
-The physical child Item owns the verified physical product data.
-
-Expected canonical meaning:
-
-```text
-itemKey: door_leaf_100
-type: door-leaf
-dimensions: 100 × 200 × 8 cm
-material: ahşap
-defaultColor: white
-unit: adet
-```
-
-The parent should not duplicate those properties.
-
-The instance surface may override appearance without mutating the canonical product definition:
-
-```text
-canonical default
-    ↓
-instance surface.color / image
-    ↓
-persisted project override
-    ↓
-renderer
-```
-
-This is the correct canonical-default → project-override → renderer flow.
-
----
-
-## 7. Appearance and capabilities
-
-`door_leaf_100` supports editable leaf appearance through Item capabilities.
-
-Current capability intent:
+Capabilities:
 
 ```text
 color    = true
@@ -211,465 +119,285 @@ lightbox = false
 mesh     = false
 ```
 
-Therefore the leaf can receive user color/image overrides, but should not expose unrelated panel transformations such as glass/lightbox/mesh conversion.
-
-The capability decision belongs to Item/capability ownership, not a second hardcoded `if (door)` business rule in the renderer or menu.
+The project instance may override leaf appearance without changing the canonical product definition.
 
 ---
 
-## 8. Placement, move, rotation, collision and reflow
+## 5. Canonical source-of-truth map
 
-`door_100` participates in the wall behavior family through `type = door`.
-
-Current intended behavior includes:
-
-| Behavior | Door behavior |
+| Concern | Canonical owner |
 |---|---|
-| placement | wall |
-| move snap | 50 cm |
-| rotation step | 90° |
-| default rotation | 0° |
-| collision | segment-based wall logic |
-| magnetic snap | standard wall behavior |
-| wall capacity | consumes continuous wall capacity |
-| side insertion | supported |
-| continuous reflow | supported |
-
-The algorithms are not owned by the Item itself. They are delegated to the behavior/placement/reflow core, which is the correct architectural boundary.
-
-Conceptual chain:
-
-```text
-moduleBehavior.js
-    ↓
-modulePlacement.js
-    ↓
-moduleMove.js
-    ↓
-wallReflow.js
-```
-
-No separate door-only movement/collision engine should be introduced unless the verified product behavior truly requires it.
+| parent identity/name/type/nominal width/composition pointer | `src/items.js` |
+| catalog descriptor | `src/catalog.js` derived from canonical Item |
+| runtime module instance / nested state | `src/designState.js` |
+| behavior family | `src/moduleBehavior.js` |
+| placement | `src/modulePlacement.js` |
+| move | `src/moduleMove.js` |
+| wall relationships / reflow | `src/wallReflow.js` + placement relationship flow |
+| recipe quantities and recipe variants | `src/moduleRecipes.js` |
+| recursive BOM expansion | `src/itemBom.js` |
+| leaf production properties | `src/productionParts.js` |
+| leaf capabilities | `src/itemCapabilities.js` |
+| renderer | `src/scene3d.js` |
+| persistence/restore | project restore + `normalizeModuleItemState()` |
 
 ---
 
-## 9. Renderer boundary
+## 6. Runtime state shape
 
-The renderer recognizes the door runtime family and creates a specialized/procedural door representation.
-
-Conceptually:
+Conceptual door module state:
 
 ```text
-moduleState.type === 'door'
-    ↓
-createDoorModule(...)
+module
+├─ id
+├─ itemKey = door_100
+├─ catalogKey = door_100
+├─ type = door
+├─ widthCm = 100
+├─ placement
+├─ strips[]
+└─ surface
+   ├─ itemKey = door_leaf_100
+   ├─ color
+   ├─ imageAssetId
+   └─ imageTransform
 ```
 
-The renderer must consume canonical/project state but must not become the owner of product/BOM truth.
-
-Important distinction:
-
-- `door_leaf_100` physical dimensions are production/product truth.
-- renderer geometry may use implementation-specific dimensions/transforms to fit the visual frame.
-- renderer mesh values must not silently replace canonical production dimensions.
-
-The current architecture broadly respects this boundary.
+Parent and physical child identities are therefore separate and canonical.
 
 ---
 
-## 10. Persistence and legacy normalization
+## 7. Behavior and renderer boundary
 
-The migrated system supports loading older door states and repairing canonical identity.
+Because `door_100.type = door`, it uses the existing shared wall behavior family:
 
-Conceptual restore path:
+- wall placement
+- 50 cm move snap
+- 90° rotation step
+- segment collision
+- standard magnetic snap
+- wall capacity participation
+- side insertion
+- continuous reflow
 
-```text
-persisted modules
-    ↓
-clone project state
-    ↓
-normalizeModuleItemState()
-    ↓
-legacy door type + width=100 detected
-    ↓
-parent itemKey = door_100
-    ↓
-child surface itemKey = door_leaf_100
-    ↓
-catalog identity resolved
-```
-
-The normalization should add missing canonical identity without overwriting valid user appearance overrides.
-
-This is the correct compatibility strategy: normalize identity and missing canonical structure, preserve user-owned persisted values.
-
-No door-specific active-runtime legacy identity break was identified in this audit.
+The procedural renderer may have technical geometry values but is not the owner of BOM/product truth.
 
 ---
 
-## 11. Canonical production recipe
+## 8. Persistence and migration
 
-The verified base recipe for the 100 cm door is:
-
-| Item | Quantity |
-|---|---:|
-| `profile_91` | 1 |
-| `upright_346_5` | 2 |
-| `panel_98` | 3 |
-| `connector_start` | 2 |
-| `connector_single` | 5 |
-| `door_leaf_100` | 1 |
-
-The recipe also identifies the inner-corner panel variant:
+Legacy project state is normalized so that a 100 cm door receives canonical parent and child identities when missing:
 
 ```text
-innerCornerPanelItemKey = panel_corner_92
+parent itemKey  = door_100
+surface.itemKey = door_leaf_100
 ```
 
-This distinction matters for relationship-derived BOM behavior and is the source of one open gap described below.
+Existing user color/image overrides are preserved. No active-runtime requirement was found for retaining `DOOR_100` as a parallel alias.
 
 ---
 
-## 12. Recursive Item BOM behavior
+## 9. Base recipe and recursive BOM
 
-The new Item BOM path is conceptually:
+Base recipe:
 
 ```text
+profile_91            ×1
+upright_346_5         ×2
+panel_98              ×3
+connector_start       ×2
+connector_single      ×5
+door_leaf_100         ×1
+```
+
+Base recursive Item BOM:
+
+```js
 resolveItemBom('door_100')
-    ↓
-getItem('door_100')
-    ↓
-composition.mode === 'recipe'
-    ↓
-getModuleRecipe('door', 100)
-    ↓
-recipe child identities
-    ↓
-getItem(child)
-    ↓
-recurse if composite
-    ↓
-terminal Item → itemKey + quantity + unit
-    ↓
-aggregate identical lines
 ```
 
-The resolver also rejects cyclic composition.
+The resolver follows the canonical Item composition into the recipe, recursively resolves child Items, validates positive quantities, requires canonical leaf units, aggregates identical leaf lines and rejects cyclic composition.
 
-This means the recursive composite BOM mechanism is real runtime code, not documentation-only architecture.
-
-The base `door_100` recipe resolves correctly through this path.
+Pricing is not performed in this layer.
 
 ---
 
-## 13. BOM and pricing separation
+## 10. Verified inner-corner recipe
 
-The Item BOM layer should emit product requirements, not prices.
+### Product truth
 
-Expected terminal BOM data is limited to concepts such as:
+A door at the verified inner-corner recipe state uses:
 
 ```text
-itemKey
-quantity
-unit
-canonical item metadata
+profile_91            ×1
+upright_346_5         ×2
+panel_corner_92       ×3
+connector_start       ×2
+connector_single      ×3
+connector_corner      ×2
+door_leaf_100         ×1
 ```
 
-Pricing/costing must remain a separate layer.
+### Canonical ownership
 
-The inspected `door_100` path follows that separation.
+`src/moduleRecipes.js` keeps the straight recipe as the base and records only the corner delta:
+
+- existing semantic panel variant replaces `panel_98` with `panel_corner_92` 1:1, preserving quantity 3;
+- recipe variant replacement changes `connector_single ×5` into `connector_single ×3 + connector_corner ×2`;
+- `connector_start ×2` is inherited unchanged from the base recipe.
+
+The unchanged profile, upright, start connector and door leaf are not copied into a second full corner recipe.
+
+### Canonical resolver calls
+
+Expanded recipe:
+
+```js
+getExpandedModuleRecipe('door', 100, { panelVariant: 'inner-corner' })
+```
+
+Recursive Item BOM:
+
+```js
+resolveItemBom('door_100', 1, { panelVariant: 'inner-corner' })
+```
+
+The default call remains backward-compatible and resolves the straight/base BOM.
 
 ---
 
-# OPEN FINDINGS
+## 11. `panel_98` runtime surface concern — not a bug
 
-## F-D100-01 — Module contract composition semantics mismatch
+The editable upper strip state does not need to carry `itemKey=panel_98` as a separate project Item state. Existing panel documentation classifies production panel identity as terminal production/BOM truth while editable surface state remains an editor/render layer.
 
-**Severity:** P1/P2 architecture/contract gap  
-**Runtime currently broken:** not demonstrated  
-**Contract consistency:** incomplete
+This does not justify deriving production BOM from visual strip state.
 
-### Observed state
+---
 
-The canonical Item says:
+# OPEN / RESOLVED FINDINGS
 
-```text
-door_100
-composition.mode = recipe
-```
+## F-D100-01 — Module contract composition semantics
 
-The module contract uses the shared `wall-editable` profile, whose composition policy is:
+**Status:** `OPEN`  
+**Class:** contract-semantic gap; runtime break not demonstrated.
 
-```text
-composition.mode = standalone
-```
-
-The door assignment adds recipe BOM policy but does not override module-contract composition.
-
-Therefore the resolved module contract can effectively say:
+Canonical Item composition is recipe/composite, while the shared resolved module contract can still report:
 
 ```text
 composition.mode = standalone
 bom.mode = recipe
 ```
 
-while the canonical Item is explicitly composite/recipe and creates/owns a `door_leaf_100` child surface relationship.
+This is semantically ambiguous in the new Item architecture. It should eventually be made explicit whether module-contract `composition` means a different runtime orchestration concept or must align with Item composition.
 
-### Why this matters
-
-The system development contract describes composition/dependencies in terms of whether a module creates/contains other Items/modules/components and what parent/child relationships exist.
-
-Under that meaning, `door_100` is not purely standalone.
-
-At minimum, one of the following must eventually be made explicit:
-
-1. `door_100` overrides module composition with an appropriate composite/child policy; or
-2. module-contract `composition` is explicitly redefined as a different concept from Item composition, with a machine-checkable rule that removes the ambiguity.
-
-### Existing test gap
-
-Current generic module-contract regression verifies that `contract.composition.mode` exists, not that it agrees with canonical Item composition/dependency reality.
-
-The door Item contract test verifies the Item recipe and BOM policy but does not currently machine-compare the resolved module-contract composition against the Item's composite relationship.
-
-### Status
-
-`OPEN GAP`
+This change does not alter that contract because it is independent from the newly verified corner BOM product rule.
 
 ---
 
-## F-D100-02 — Relationship/corner-aware BOM context is missing from `resolveItemBom`
+## F-D100-02 — Inner-corner BOM representation
 
-**Severity:** P1/P2 BOM architecture gap  
-**Base BOM:** correct  
-**Relationship-derived BOM:** not fully represented by Item resolver
+**Status:** `RECIPE/BOM RESOLVER PART RESOLVED`
 
-### Observed state
+The previous audit correctly found that the old Item resolver could only return the base recipe, but its description of the desired corner output was incomplete.
 
-The canonical door recipe supports an inner-corner panel variant:
+The verified corner transformation is now represented canonically and tested:
 
 ```text
-base panel: panel_98
-inner-corner panel: panel_corner_92
+panel_98 ×3          → panel_corner_92 ×3
+connector_single ×5  → connector_single ×3 + connector_corner ×2
+connector_start ×2   → unchanged
 ```
 
-The expanded recipe layer can apply panel variants when appropriate context is supplied.
+`resolveItemBom` now accepts root recipe options and can produce the exact terminal inner-corner BOM.
 
-However:
+### Remaining integration boundary
+
+The inspected current runtime still needs one explicit canonical owner for translating an actual project relationship/placement state into:
 
 ```text
-resolveItemBom('door_100')
+panelVariant = inner-corner
 ```
 
-receives only the Item identity/quantity and resolves the canonical base composition. It has no runtime placement/relationship/corner context parameter.
-
-Therefore the Item BOM resolver alone cannot express the `panel_98 → panel_corner_92` relationship-derived substitution.
-
-### Why this matters
-
-The Item Contract checklist explicitly requires variant/relationship-derived BOM to be classified and verified when product composition depends on runtime relationships.
-
-Without relationship context, the new Item BOM path can be correct for the base recipe while still being insufficient for a corner-installed door.
-
-### Required follow-up
-
-Before declaring the BOM migration fully closed, determine the canonical relationship-aware BOM design. The solution should not derive BOM from renderer meshes or ad-hoc UI state.
-
-A proper design should define:
-
-- what relationship/context input the BOM layer receives,
-- which layer owns conversion from project relationships to recipe variant context,
-- how `panel_corner_92` is selected,
-- how the result remains deterministic and testable,
-- how base and relationship-derived BOM are distinguished.
-
-### Status
-
-`OPEN GAP`
+The BOM rule itself is no longer missing; the remaining question is the automatic **relationship → recipe-context** integration. That mapping must not be guessed from renderer meshes or sidebar text.
 
 ---
 
-## F-D100-03 — Door-specific browser E2E coverage is incomplete
+## F-D100-03 — Door-specific browser regression coverage
 
-**Severity:** P2 regression gap
+**Status:** `OPEN`
 
-### Existing browser evidence
+Existing browser coverage verifies picker creation and canonical parent/child identity. Generic unit coverage protects important wall/reflow behavior.
 
-Current browser coverage verifies that adding the door from the picker creates canonical state including parent `door_100` and child `door_leaf_100` identity.
+Door-specific browser scenarios still do not comprehensively cover:
 
-That is valuable but not sufficient to protect the whole migrated lifecycle.
+- move/snap
+- rotation
+- side insertion
+- continuous reflow
+- actual corner relationship
+- collision through UI
+- leaf color/image edit
+- context-menu capability
+- duplicate preserving nested leaf overrides
+- save/reload round-trip
+- relationship-triggered corner BOM
 
-### Missing/insufficient door-specific browser scenarios
+The new unit/contract regression does protect both exact base BOM and exact inner-corner recipe/BOM quantities.
 
-| Scenario | Door-specific E2E status |
-|---|---|
-| picker → canonical create | covered |
-| wall move/snap | missing |
-| rotation | missing |
-| side insertion | missing |
-| continuous reflow | missing |
-| corner relationship | missing |
-| collision through actual UI | missing |
-| leaf color edit | missing |
-| leaf image edit | missing |
-| context-menu capability | missing |
-| duplicate with nested leaf overrides | missing |
-| save → reload appearance/identity round-trip | missing |
-| relationship-aware BOM | missing |
+---
 
-Generic unit tests cover important wall/reflow algorithms, but they do not substitute for a door-specific real-browser flow using the actual canonical door state, menu, persistence and renderer integration.
+## F-D100-04 — Door documentation completeness
 
-### Recommended targeted E2E scope
+**Status:** `RESOLVED FOR VERIFIED CORNER RULE`
 
-A robust door regression should eventually exercise at least:
+`docs/items/current-system/door_100.md`, `docs/items/definitions/door_100.md` and this audit now record the complete verified corner BOM including connector changes and the remaining automatic relationship-context boundary.
+
+---
+
+# Final classification
 
 ```text
-picker create
-→ verify door_100 / door_leaf_100 identity
-→ edit leaf color/image
-→ move/rotate
-→ side insert / reflow
-→ exercise corner relationship
-→ duplicate
-→ save/reload
-→ verify identity + overrides
-→ verify correct base/relationship-aware BOM
+Canonical Item identity              PASS
+Parent / door_leaf separation        PASS
+Canonical property ownership         PASS
+Catalog cutover                      PASS
+Factory / state                      PASS
+Persistence migration                PASS
+Behavior family                      PASS
+Renderer boundary                    PASS
+Base recipe                          PASS
+Base recursive BOM                   PASS
+Inner-corner recipe rule             PASS
+Inner-corner recursive BOM API       PASS
+Pricing separation                   PASS
+
+Module composition semantics         OPEN GAP
+Auto relationship → BOM context      OPEN INTEGRATION GAP
+Door-specific full browser coverage  OPEN REGRESSION GAP
+Door docs for verified corner rule   PASS
+
+Overall                              PASS WITH OPEN INTEGRATION/REGRESSION GAPS
 ```
 
-The exact number of specs may be split for maintainability, but the lifecycle needs explicit coverage.
+## Non-negotiable verified corner BOM
 
-### Status
-
-`OPEN GAP`
-
----
-
-## F-D100-04 — Documentation does not yet record the open semantic/BOM boundaries
-
-**Severity:** P2/P3 documentation gap
-
-Existing files under:
+For future work, the following product rule must not regress:
 
 ```text
-docs/items/current-system/door_100.md
-docs/items/definitions/door_100.md
+NORMAL door_100
+profile_91            ×1
+upright_346_5         ×2
+panel_98              ×3
+connector_start       ×2
+connector_single      ×5
+door_leaf_100         ×1
+
+INNER-CORNER door_100
+profile_91            ×1
+upright_346_5         ×2
+panel_corner_92       ×3
+connector_start       ×2
+connector_single      ×3
+connector_corner      ×2
+door_leaf_100         ×1
 ```
-
-correctly document most of the migrated architecture, including identity, parent/child separation, state, behavior, persistence, recipe, renderer boundary and recursive BOM.
-
-However, they should not imply complete closure without noting:
-
-1. Item composition is recipe/composite while module-contract composition currently resolves through a `standalone` profile.
-2. `resolveItemBom('door_100')` resolves base composition without runtime relationship/corner context.
-3. Door-specific browser regression does not yet protect the full lifecycle.
-
-This audit document records those gaps until the canonical docs/contracts/tests are updated.
-
-### Status
-
-`OPEN GAP`
-
----
-
-## 14. Investigated concern that is **not** a bug: `panel_98` strip state identity
-
-The door contains three editable upper strip surfaces corresponding to production panels in the recipe.
-
-The runtime strip state does not necessarily carry a separate project-instance `itemKey = panel_98` for each surface.
-
-This initially looks like an Item migration omission, but the inspected `panel_98` contract/documentation establishes a deliberate boundary:
-
-- `panel_98` is a canonical production/BOM Item.
-- the editable visual surface is stored inside the parent module state.
-- the surface is not a separate project entity merely because the BOM contains a `panel_98` line.
-- editor initial surface color is not automatically the same concept as a product-level canonical `defaultColor`.
-
-Therefore this is **not** classified as a `door_100` migration bug.
-
----
-
-## 15. Checklist result
-
-| Checklist area | Result | Notes |
-|---|---|---|
-| canonical identity | PASS | `door_100` |
-| parent type | PASS | `door` |
-| canonical nominal width | PASS | 100 cm |
-| project instance identity separation | PASS | instance `id` remains separate |
-| parent/child Item split | PASS | `door_100` / `door_leaf_100` |
-| intrinsic child properties | PASS | owned by `door_leaf_100` |
-| catalog cutover | PASS | canonical Item data consumed |
-| state factory | PASS | canonical parent/leaf identity created |
-| default appearance ownership | PASS | child Item default → instance override |
-| placement | PASS | wall family |
-| move/snap | PASS | behavior family |
-| rotation | PASS | behavior family |
-| collision | PASS | wall/segment core |
-| side insertion | PASS | supported through wall behavior |
-| reflow | PASS at core behavior level | generic wall reflow tested |
-| context menu capability ownership | PASS | Item capability driven |
-| renderer boundary | PASS | renderer consumes state, not BOM owner |
-| persistence | PASS | project state persisted |
-| legacy normalization | PASS | canonical identities repaired |
-| duplicate/delete general ownership | PASS structurally | targeted door browser coverage incomplete |
-| base recipe | PASS | verified quantities |
-| recursive Item BOM | PASS | base recipe resolves recursively |
-| cycle protection | PASS | resolver rejects cyclic composition |
-| pricing separation | PASS | BOM not pricing owner |
-| module composition semantics | **GAP** | standalone vs composite ambiguity |
-| relationship-derived/corner BOM | **GAP** | Item resolver lacks context |
-| door-specific full browser regression | **GAP** | lifecycle coverage incomplete |
-| canonical docs completeness | **PARTIAL** | open gaps not yet reflected |
-
----
-
-## 16. Final audit decision
-
-The migration succeeded in the most important architectural areas:
-
-```text
-canonical parent identity
-+ physical child identity
-+ correct property ownership
-+ catalog/state cutover
-+ compatibility normalization
-+ behavior-family integration
-+ renderer separation
-+ base recursive BOM
-```
-
-No evidence was found that the active runtime still treats `door_100` itself as the physical 100 × 200 × 8 wooden door leaf.
-
-The correct model is:
-
-```text
-door_100
-= user/catalog-selected composite 100 cm door module
-
-door_leaf_100
-= physical wooden leaf contained by that module
-```
-
-The Item should therefore remain classified as successfully migrated at the canonical identity/property level.
-
-It should **not yet be treated as fully closed across the entire Item Contract checklist** until the following are resolved:
-
-1. module-contract composition semantics,
-2. relationship/corner-aware BOM resolution,
-3. targeted full door browser regression,
-4. canonical documentation updates after those decisions.
-
-**Final status:** `PASS WITH OPEN GAPS`.
-
----
-
-## 17. Follow-up order
-
-Recommended order when implementation work is authorized:
-
-1. Decide/fix `door_100` module composition semantics without inventing a second Item truth.
-2. Define canonical relationship-aware Item BOM context and cover `panel_corner_92` substitution.
-3. Add targeted unit/contract regression for the two rules above.
-4. Add door-specific browser E2E lifecycle coverage.
-5. Update `docs/items/current-system/door_100.md` and `docs/items/definitions/door_100.md` to reflect the final resolved architecture.
-6. Re-run the full Item Contract checklist against fresh `Version2` HEAD and only then mark the entire door lifecycle fully closed.
