@@ -1,3 +1,4 @@
+import { getItem } from './items.js';
 import { getTvDefinition } from './tvConfig.js';
 
 export const STAND_DIMENSIONS = Object.freeze({
@@ -82,6 +83,7 @@ export const DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS = Object.freeze({
 const TV_42_DEFINITION = getTvDefinition(42);
 const TV_55_DEFINITION = getTvDefinition(55);
 const TV_65_DEFINITION = getTvDefinition(65);
+const DOOR_ITEM = getItem('door_100');
 
 function createTvCatalogItem(definition) {
   return Object.freeze({
@@ -198,7 +200,12 @@ export const MODULE_CATALOG = Object.freeze({
   }),
   TV_65: createTvCatalogItem(TV_65_DEFINITION),
   LED_FLOODLIGHT: { type: 'led-floodlight', widthCm: 50, depthCm: 20, heightCm: 35, label: 'LED Projektör' },
-  DOOR_100: { type: 'door', widthCm: 100, label: 'Depo Kapısı 100' },
+  door_100: {
+    itemKey: DOOR_ITEM.itemKey,
+    type: DOOR_ITEM.type,
+    widthCm: DOOR_ITEM.dimensions.widthCm,
+    label: DOOR_ITEM.name,
+  },
 
   desk_banko_100: { type: 'counter', widthCm: 100, depthCm: 50, heightCm: 100, label: 'Banko 100' },
   desk_banko_100_L: { type: 'counter', shape: 'L', widthCm: 100, depthCm: 100, heightCm: 100, label: 'Köşe Banko 100×100' },
@@ -244,7 +251,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'wall_base_150',
   'wall_base_100',
 
-  'DOOR_100',
+  'door_100',
 
   'desk_banko_200',
   'desk_banko_150',
@@ -279,7 +286,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
 export const MODULE_CATALOG_GROUPS = Object.freeze([
   Object.freeze({
     label: 'Panel & Duvar',
-    keys: Object.freeze(['wall_200', 'wall_150', 'wall_100', 'wall_50', 'wall_separator_100', 'wall_separator_50', 'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'DOOR_100']),
+    keys: Object.freeze(['wall_200', 'wall_150', 'wall_100', 'wall_50', 'wall_separator_100', 'wall_separator_50', 'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'door_100']),
   }),
   Object.freeze({
     label: 'Raf & Vitrin',

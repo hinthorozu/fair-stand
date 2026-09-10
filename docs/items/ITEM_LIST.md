@@ -81,7 +81,7 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 | 17 | `wall_base_200` | Panel Bazalı 200 | `base-wall` |
 | 18 | `wall_base_150` | Panel Bazalı 150 | `base-wall` |
 | 19 | `wall_base_100` | Panel Bazalı 100 | `base-wall` |
-| 20 | `DOOR_100` | Depo Kapısı 100 | `door` |
+| 20 | `door_100` | Depo Kapısı 100 | **`door` · Bileşik Item · Tamam** |
 | 21 | `desk_banko_200` | Banko 200 | `counter` |
 | 22 | `desk_banko_150` | Banko 150 | `counter` |
 | 23 | `desk_banko_100` | Banko 100 | `counter` |

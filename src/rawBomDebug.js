@@ -1,3 +1,4 @@
+import { resolveItemBom } from './itemBom.js';
 import { getExpandedModuleRecipe } from './moduleRecipes.js';
 
 const selectionInfo = typeof document !== 'undefined' ? document.querySelector('#selection-info') : null;
@@ -73,13 +74,38 @@ function renderRecipe(moduleType, widthCm, label, options = {}) {
   content.appendChild(list);
 }
 
+function renderItemBom(itemKey, label) {
+  if (!status || !content) return;
+
+  let lines;
+  try {
+    lines = resolveItemBom(itemKey);
+  } catch (error) {
+    status.textContent = error?.message || 'Bu Item için üretim reçetesi çözülemedi.';
+    content.innerHTML = '';
+    return;
+  }
+
+  status.textContent = `${label} · Raw BOM`;
+  content.innerHTML = '';
+
+  const list = document.createElement('ul');
+  list.style.cssText = 'margin:8px 0 0;padding-left:18px;display:grid;gap:5px';
+  lines.forEach((line) => {
+    const li = document.createElement('li');
+    li.textContent = `${formatNumber(line.quantity)} × ${line.item?.name ?? line.itemKey}`;
+    list.appendChild(li);
+  });
+  content.appendChild(list);
+}
+
 function syncFromSelection() {
   if (!selectionInfo || !status || !content) return;
   const text = selectionInfo.textContent?.trim() ?? '';
 
   const doorMatch = text.match(/Kapı\s+(100)\s*cm/i);
   if (doorMatch) {
-    renderRecipe('door', Number(doorMatch[1]), `Depo Kapısı ${doorMatch[1]} cm`);
+    renderItemBom('door_100', `Depo Kapısı ${doorMatch[1]} cm`);
     return;
   }
 
