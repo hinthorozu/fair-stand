@@ -373,9 +373,7 @@
   "tests": {
     "targeted": [
       "test/doorCompositeItemContract.test.js",
-      "test/moduleStateConstructionRegistry.test.js",
-      "test/moduleRecipes.test.js",
-      "test/connectorBom.test.js"
+      "test/moduleStateConstructionRegistry.test.js"
     ],
     "fullSuite": true,
     "build": true,
