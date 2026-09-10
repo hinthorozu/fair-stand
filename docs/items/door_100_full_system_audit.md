@@ -320,6 +320,28 @@ panelVariant = inner-corner
 
 The BOM rule itself is no longer missing; the remaining question is the automatic **relationship → recipe-context** integration. That mapping must not be guessed from renderer meshes or sidebar text.
 
+### Deferred architecture decision — resolve once at Final BOM integration
+
+This gap is intentionally deferred until the canonical **Final BOM** integration after the Item-by-Item migration work is complete. It must **not** be solved by adding separate `door_100`-specific relationship detection or per-Item controller/UI adapters during individual Item migrations unless a genuine runtime blocker requires it.
+
+The intended shared flow is:
+
+```text
+Project Items
+→ canonical Item-to-Item relationships
+→ shared relationship resolver
+→ shared recipe/BOM context (for example: inner-corner)
+→ each Item's own canonical recipe variant
+→ recursive Item BOM
+→ Final BOM
+```
+
+The shared layer owns only the relationship/context decision. Each Item continues to own its own production transformation inside its canonical recipe. For example, `door_100` owns the verified connector/panel delta above; the common relationship layer must not duplicate those quantities.
+
+This mechanism is expected to be reusable by every relationship-aware Item family that needs it — including `wall_*`, shelf/raf variants, showcase/vitrin variants and future corner-aware Items — rather than being reimplemented for each Item.
+
+**Migration follow-up rule:** after the new Item system has been migrated across the intended Item set, revisit these Item audit reports together during Final BOM integration and close each remaining `relationship → recipe-context → BOM` gap against the single shared mechanism.
+
 ---
 
 ## F-D100-03 — Door-specific browser regression coverage
