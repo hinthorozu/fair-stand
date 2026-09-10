@@ -49,7 +49,7 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `wall_base_200`
 - `wall_base_150`
 - `wall_base_100`
-- `DOOR_100`
+- `door_100`
 - `desk_banko_200`
 - `desk_banko_150`
 - `desk_banko_100`
@@ -84,7 +84,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Panel & Duvar
 
-`wall_200`, `wall_150`, `wall_100`, `wall_50`, `wall_separator_100`, `wall_separator_50`, `wall_separator_100_sarmasik`, `wall_separator_50_sarmasik`, `wall_base_200`, `wall_base_150`, `wall_base_100`, `DOOR_100`
+`wall_200`, `wall_150`, `wall_100`, `wall_50`, `wall_separator_100`, `wall_separator_50`, `wall_separator_100_sarmasik`, `wall_separator_50_sarmasik`, `wall_base_200`, `wall_base_150`, `wall_base_100`, `door_100`
 
 ### Raf & Vitrin
 

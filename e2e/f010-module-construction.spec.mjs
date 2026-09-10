@@ -143,14 +143,16 @@ test('F-010 door catalog construction persists canonical door_leaf_100 child sta
   await openCatalogButton.click();
   const picker = page.locator('.module-picker-backdrop');
   await expect(picker).toBeVisible();
-  const doorCard = picker.locator('[data-module-key="DOOR_100"]');
+  const doorCard = picker.locator('[data-module-key="door_100"]');
   await expect(doorCard).toBeVisible();
   await doorCard.click();
   await picker.locator('.module-picker-add').click();
   await expect(picker).toBeHidden();
   const project = await saveAndReadProject(page);
-  const door = project.modules.find((moduleState) => moduleState.catalogKey === 'DOOR_100');
+  const door = project.modules.find((moduleState) => moduleState.itemKey === 'door_100');
   expect(door).toBeTruthy();
+  expect(door.itemKey).toBe('door_100');
+  expect(door.catalogKey).toBe('door_100');
   expect(door.type).toBe('door');
   expect(door.widthCm).toBe(100);
   expect(door.surface.itemKey).toBe('door_leaf_100');

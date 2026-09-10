@@ -60,7 +60,8 @@ test('automatic catalog-equivalent descriptors receive canonical catalog identit
   });
 
   assert.equal(wall.catalogKey, 'wall_100');
-  assert.equal(door.catalogKey, 'DOOR_100');
+  assert.equal(door.itemKey, 'door_100');
+  assert.equal(door.catalogKey, 'door_100');
   assert.equal(normalSeparator.catalogKey, 'wall_separator_100');
   assert.equal(vineSeparator.catalogKey, 'wall_separator_100_sarmasik');
 });

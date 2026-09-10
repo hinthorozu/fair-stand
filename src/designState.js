@@ -1,4 +1,5 @@
 import { resolveModuleCatalogKey } from './catalog.js';
+import { getItem } from './items.js';
 import { getDoorLeafProductionItem, getProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 import { getTvDefinition } from './tvConfig.js';
@@ -122,14 +123,17 @@ export function createShelfModuleState(widthCm, shelfCount = 2) {
 }
 
 export function createDoorModuleState(widthCm = 100) {
-  if (Number(widthCm) !== 100) return null;
-  const doorLeafItem = getDoorLeafProductionItem(widthCm);
-  if (!doorLeafItem) throw new TypeError(`Missing canonical door leaf Item for ${widthCm} cm door module.`);
+  const doorItem = getItem('door_100');
+  const canonicalWidthCm = Number(doorItem?.dimensions?.widthCm);
+  if (!doorItem || Number(widthCm) !== canonicalWidthCm) return null;
+  const doorLeafItem = getDoorLeafProductionItem(canonicalWidthCm);
+  if (!doorLeafItem) throw new TypeError(`Missing canonical door leaf Item for ${canonicalWidthCm} cm door module.`);
 
   return {
     id: createId('module'),
-    type: 'door',
-    widthCm: 100,
+    itemKey: doorItem.itemKey,
+    type: doorItem.type,
+    widthCm: canonicalWidthCm,
     // Üstte kalan üç duvar paneli parent kapı modülünün ayrı editable surface'leridir.
     strips: Array.from(
       { length: 3 },
@@ -419,6 +423,9 @@ export function createModuleStateFromDescriptor(
  */
 export function normalizeModuleItemState(moduleState) {
   if (!moduleState || moduleState.type !== 'door') return moduleState;
+  const doorItem = getItem('door_100');
+  if (!doorItem || Number(moduleState.widthCm) !== Number(doorItem.dimensions?.widthCm)) return moduleState;
+  moduleState.itemKey = doorItem.itemKey;
   const doorLeafItem = getDoorLeafProductionItem(moduleState.widthCm);
   if (!doorLeafItem) return moduleState;
   if (!moduleState.surface) {
