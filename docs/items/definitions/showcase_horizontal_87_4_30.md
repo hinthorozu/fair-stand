@@ -19,7 +19,7 @@ Leaf board ayrı project entity değildir. Placement, move, rotation, snap/colli
 
 Canonical ürün rengi beyazdır (`0xffffff`). Bu leaf Item tek başına renk-editable yüzey değildir ve bireysel renk override'ı taşımaz.
 
-Showcase gövdesi renklendirildiğinde renk seçimi parent `showcase_2_100` / `showcase_3_100` project instance'ına ait tek bir gövde renk override'ı olarak çözülecek ve iki yan + iki yatay olmak üzere dört sunta parçaya birlikte uygulanacaktır. Bu project override canonical `defaultColor` değerini değiştirmez. `glass_shelf` bu gövde rengi kapsamına girmez.
+Showcase gövdesi renklendirildiğinde renk seçimi parent `wall_showcase_100_2` / `wall_showcase_100_3` project instance'ına ait tek bir gövde renk override'ı olarak çözülecek ve iki yan + iki yatay olmak üzere dört sunta parçaya birlikte uygulanacaktır. Bu project override canonical `defaultColor` değerini değiştirmez. `glass_shelf` bu gövde rengi kapsamına girmez.
 
 ## BOM / composition
 

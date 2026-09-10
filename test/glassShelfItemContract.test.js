@@ -24,10 +24,10 @@ test('glass_shelf uses canonical identity with verified 87.3 x 28.5 x 0.6 cm gla
   assert.equal(getMaterialAppearance(item.material), GLASS_APPEARANCE);
 });
 
-test('showcase recipes use canonical glass_shelf itemKey while preserving 2/3 quantity parity', () => {
+test('showcase base recipes use canonical glass_shelf itemKey with verified 1/2 quantity parity', () => {
   const cases = [
-    ['showcase-2', 2],
-    ['showcase-3', 3],
+    ['showcase-2', 1],
+    ['showcase-3', 2],
   ];
 
   for (const [type, quantity] of cases) {
@@ -48,19 +48,21 @@ test('showcase recipes use canonical glass_shelf itemKey while preserving 2/3 qu
   }
 });
 
-test('showcase renderer consumes canonical glass_shelf dimensions/material and shared glass appearance', () => {
+test('showcase renderer consumes glass_shelf through the canonical showcase body resolver', () => {
   const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const start = source.indexOf('function createShowcaseModule(');
   const end = source.indexOf('function createSelectionFrame', start);
   const showcase = source.slice(start, end);
 
-  assert.match(showcase, /getProductionItem\('glass_shelf'\)/);
-  assert.match(showcase, /getMaterialAppearance\(glassShelfItem\?\.material\)/);
+  assert.match(showcase, /getShowcaseBodyDefinition\(moduleState\.itemKey\)/);
+  assert.match(showcase, /const glassShelfItem = bodyDefinition\.glassShelfItem/);
+  assert.match(showcase, /getMaterialAppearance\(glassShelfItem\.material\)/);
   assert.match(showcase, /glassShelfItem\.dimensions\.lengthCm \/ 100/);
   assert.match(showcase, /glassShelfItem\.dimensions\.depthCm \/ 100/);
   assert.match(showcase, /glassShelfItem\.dimensions\.thicknessCm \/ 100/);
-  assert.match(showcase, /new THREE\.BoxGeometry\(\s*glassShelfLengthM,\s*glassShelfThicknessM,\s*glassShelfDepthM,/);
+  assert.match(showcase, /const shelfGeometry = new THREE\.BoxGeometry\(glassShelfLengthM, glassShelfThicknessM, glassShelfDepthM\);/);
   assert.match(showcase, /shelf\.userData\.itemKey = glassShelfItem\.itemKey/);
+  assert.doesNotMatch(showcase, /getProductionItem\('glass_shelf'\)/);
   assert.doesNotMatch(showcase, /color:\s*0xb7d5b5/);
   assert.doesNotMatch(showcase, /Math\.max\(innerWidth - 0\.035, 0\.02\)/);
   assert.doesNotMatch(showcase, /Math\.max\(showcaseDepth - 0\.035, 0\.04\)/);

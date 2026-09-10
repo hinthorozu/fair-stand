@@ -56,6 +56,9 @@ export function describeSurfaceSelection(surfaces, modules = []) {
 
     if (moduleType === 'showcase-3' || moduleType === 'showcase-2') {
       const eyeCount = moduleType === 'showcase-3' ? 3 : 2;
+      if (surface.userData.surfaceRole === 'showcase-body') {
+        return result(`Modül ${moduleIndex + 1} · ${eyeCount} Gözlü Vitrin ${widthCm} cm · vitrin gövdesi · 4 sunta birlikte renklendirilir.`);
+      }
       return result(`Modül ${moduleIndex + 1} · ${eyeCount} Gözlü Vitrin ${widthCm} cm · alttan ${stripNumber}. panel · renk + görsel uygulanabilir.`);
     }
 

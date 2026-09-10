@@ -19,15 +19,15 @@ Leaf board ayrı project entity değildir. Placement, move, rotation, snap/colli
 
 Canonical ürün rengi beyazdır (`0xffffff`). Bu leaf Item tek başına renk-editable yüzey değildir ve bireysel renk override'ı taşımaz.
 
-Showcase gövdesi renklendirildiğinde renk seçimi parent `showcase_3_100` project instance'ına ait tek bir gövde renk override'ı olarak çözülecek ve iki yan + iki yatay olmak üzere dört sunta parçaya birlikte uygulanacaktır. Bu project override canonical `defaultColor` değerini değiştirmez. `glass_shelf` bu gövde rengi kapsamına girmez.
+Showcase gövdesi renklendirildiğinde renk seçimi parent `wall_showcase_100_3` project instance'ına ait tek bir gövde renk override'ı olarak çözülecek ve iki yan + iki yatay olmak üzere dört sunta parçaya birlikte uygulanacaktır. Bu project override canonical `defaultColor` değerini değiştirmez. `glass_shelf` bu gövde rengi kapsamına girmez.
 
 ## BOM / composition
 
-Tekil Item'dır; kendi doğrudan BOM çıktısı `showcase_side_143_5_30 × quantity`, birim `adet`tir. `showcase_3_100` içindeki canonical quantity ve parent recipe cutover'u parent showcase migrationında tanımlanacaktır; mevcut legacy parent recipe bu batch'te değiştirilmez.
+Tekil Item'dır; kendi doğrudan BOM çıktısı `showcase_side_143_5_30 × quantity`, birim `adet`tir. `wall_showcase_100_3` içindeki canonical quantity ve parent recipe cutover'u parent showcase migrationında tanımlanacaktır; mevcut legacy parent recipe bu batch'te değiştirilmez.
 
 ## Renderer / persistence
 
-Ayrı leaf renderer veya persisted entity yoktur. Mevcut showcase procedural renderer gövdeyi parent seviyesinde üretmektedir. Canonical board ölçü/defaultColor tüketiminin parent renderer'a bağlanması `showcase_3_100` composite migrationının parçasıdır; leaf Item'ın ürün gerçeği renderer geometrisinden türetilmez.
+Ayrı leaf renderer veya persisted entity yoktur. Mevcut showcase procedural renderer gövdeyi parent seviyesinde üretmektedir. Canonical board ölçü/defaultColor tüketiminin parent renderer'a bağlanması `wall_showcase_100_3` composite migrationının parçasıdır; leaf Item'ın ürün gerçeği renderer geometrisinden türetilmez.
 
 ## Regression
 
