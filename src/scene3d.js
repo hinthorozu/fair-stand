@@ -6988,9 +6988,6 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
 
   const frameMaterial = new THREE.MeshStandardMaterial({ color: FRAME_COLOR, metalness: 0.68, roughness: 0.28 });
   const showcaseBodyMaterial = new THREE.MeshStandardMaterial({ color: bodyColor, metalness: 0, roughness: 0.72 });
-  // Ön ince çerçeve parçaları doğrulanmış BOM Item'ı değildir; renderer detayı olarak kalır.
-  const showcaseDetailMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0, roughness: 0.72 });
-
   const profileGeometry = new THREE.BoxGeometry(PANEL_VERTICAL_PROFILE_WIDTH_M, height, frameDepth);
   for (const side of [-1, 1]) {
     const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
@@ -7106,21 +7103,6 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   surfaces.push(bodySelector);
   onSurfaceReady?.(bodySelector);
 
-  const frontPostGeometry = new THREE.BoxGeometry(0.028, bodyHeight, 0.028);
-  for (const side of [-1, 1]) {
-    const post = new THREE.Mesh(frontPostGeometry.clone(), showcaseDetailMaterial.clone());
-    post.position.set(side * (bodyOuterWidth / 2 - 0.014), openingCenterY, caseFrontZ - 0.014);
-    post.castShadow = true;
-    group.add(post);
-  }
-  const frontEdgeGeometry = new THREE.BoxGeometry(bodyOuterWidth, 0.028, 0.028);
-  for (const y of [bodyBottom, bodyTop]) {
-    const edge = new THREE.Mesh(frontEdgeGeometry.clone(), showcaseDetailMaterial.clone());
-    edge.position.set(0, y, caseFrontZ - 0.014);
-    edge.castShadow = true;
-    group.add(edge);
-  }
-
   const glassShelfItem = bodyDefinition.glassShelfItem;
   const glassAppearance = getMaterialAppearance(glassShelfItem.material);
   if (!glassShelfItem.dimensions || !glassAppearance) throw new Error('glass_shelf canonical product properties are required by showcase renderer.');
@@ -7129,7 +7111,6 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const glassShelfThicknessM = glassShelfItem.dimensions.thicknessCm / 100;
   const glassMaterial = new THREE.MeshStandardMaterial({ ...glassAppearance, side: THREE.DoubleSide });
   const shelfGeometry = new THREE.BoxGeometry(glassShelfLengthM, glassShelfThicknessM, glassShelfDepthM);
-  const shelfFrontGeometry = new THREE.BoxGeometry(bodyInnerWidth, 0.018, 0.024);
   const shelfAreaBottom = bodyBottom + horizontalThickness;
   const shelfAreaHeight = Math.max(bodyHeight - horizontalThickness * 2, 0.02);
   for (let index = 1; index < eyeCount; index += 1) {
@@ -7140,10 +7121,6 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     shelf.castShadow = true;
     shelf.receiveShadow = true;
     group.add(shelf);
-    const shelfFront = new THREE.Mesh(shelfFrontGeometry.clone(), showcaseDetailMaterial.clone());
-    shelfFront.position.set(0, shelfY, caseFrontZ - 0.012);
-    shelfFront.castShadow = true;
-    group.add(shelfFront);
   }
 
   return { group, surfaces };
