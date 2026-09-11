@@ -345,13 +345,18 @@ export function resolveModuleCatalogKey(descriptor) {
 
   const matches = candidates.filter((moduleKey) => {
     const item = MODULE_CATALOG[moduleKey];
-    if (normalized.widthCm !== null && optionalNumber(item.widthCm) !== null && optionalNumber(item.widthCm) !== normalized.widthCm) return false;
+    // Ordinary TVs historically stored a fake 100 cm footprint; placement width now equals
+    // screen width. Do not use widthCm to discriminate tv catalog keys.
+    if (normalized.type !== 'tv') {
+      if (normalized.widthCm !== null && optionalNumber(item.widthCm) !== null && optionalNumber(item.widthCm) !== normalized.widthCm) return false;
+    }
     if (normalized.depthCm !== null && optionalNumber(item.depthCm) !== null && optionalNumber(item.depthCm) !== normalized.depthCm) return false;
     if ((normalized.shape !== null || item.shape != null) && (item.shape ?? null) !== normalized.shape) return false;
     if ((normalized.shelfCount !== null || item.shelfCount != null) && optionalNumber(item.shelfCount) !== normalized.shelfCount) return false;
     if ((normalized.modelFile !== null || item.modelFile != null) && (item.modelFile ?? null) !== normalized.modelFile) return false;
     if (normalized.sizeInch !== null && optionalNumber(item.sizeInch) !== null && optionalNumber(item.sizeInch) !== normalized.sizeInch) return false;
-    if (normalized.type === 'tv' && normalized.sizeInch === null && normalized.screenWidthCm !== null && optionalNumber(item.screenWidthCm) !== normalized.screenWidthCm) return false;
+    if (normalized.type === 'tv' && normalized.screenWidthCm !== null && optionalNumber(item.screenWidthCm) !== null
+      && optionalNumber(item.screenWidthCm) !== normalized.screenWidthCm) return false;
     return true;
   });
 

@@ -30,26 +30,25 @@ export function getCommercialItemForType(type) {
 }
 
 // Wall-mounted media products share the single `tv` behavior family. Ordinary TVs are
-// parametric by verified panel size; video walls are parametric by verified panel size
-// plus their rows x cols grid. Total screen/module metrics derive from those canonical
-// properties, so no second business source-of-truth stores the totals.
+// parametric by verified screen size; widthCm is that same screen width so placement
+// bounds match the rendered box. Video walls derive totals from panel size x grid.
 export const WALL_MEDIA_ITEMS = Object.freeze({
   TV_42: Object.freeze({
     itemKey: 'TV_42', name: 'TV 42"', type: 'tv', sizeInch: 42,
     dimensions: Object.freeze({
-      widthCm: 100, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 93.0, screenHeightCm: 52.3,
+      widthCm: 93.0, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 93.0, screenHeightCm: 52.3,
     }),
   }),
   TV_55: Object.freeze({
     itemKey: 'TV_55', name: 'TV 55"', type: 'tv', sizeInch: 55,
     dimensions: Object.freeze({
-      widthCm: 100, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 121.8, screenHeightCm: 68.5,
+      widthCm: 121.8, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 121.8, screenHeightCm: 68.5,
     }),
   }),
   TV_65: Object.freeze({
     itemKey: 'TV_65', name: 'TV 65"', type: 'tv', sizeInch: 65,
     dimensions: Object.freeze({
-      widthCm: 100, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 143.9, screenHeightCm: 80.9,
+      widthCm: 143.9, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 143.9, screenHeightCm: 80.9,
     }),
   }),
   VIDEO_WALL_2X2: Object.freeze({
@@ -90,10 +89,11 @@ export function resolveWallMediaMetrics(itemOrKey) {
       panelScreenHeightCm,
     });
   }
-  const { widthCm, catalogHeightCm, screenWidthCm, screenHeightCm } = item.dimensions;
+  // Placement footprint must match the rendered screen — same rule as video walls.
+  const { catalogHeightCm, screenWidthCm, screenHeightCm } = item.dimensions;
   return Object.freeze({
     ...base,
-    widthCm,
+    widthCm: screenWidthCm,
     catalogHeightCm,
     screenWidthCm,
     screenHeightCm,

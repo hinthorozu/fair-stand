@@ -52,11 +52,14 @@ for (const item of Object.values(WALL_MEDIA_ITEMS)) {
     assert.equal(contract.bom.source, null);
 
     // Legacy project load: catalogKey -> itemKey hydration resolves the canonical key.
+    // Fake historical footprint widthCm=100 is rewritten to the screen width.
     const legacy = JSON.parse(JSON.stringify(state));
     delete legacy.itemKey;
     delete legacy.catalogKey;
+    legacy.widthCm = 100;
     const restored = normalizeModuleItemState(legacy);
     assert.equal(restored.itemKey, item.itemKey);
+    assert.equal(restored.widthCm, metrics.screenWidthCm);
     assert.equal(resolveModuleCatalogKey(restored), item.itemKey);
 
     // Duplicate is an independent instance carrying the same product identity.
@@ -78,6 +81,15 @@ test('video walls are singular parametric Items whose totals derive from panel x
     const state = createModuleStateFromDescriptor(MODULE_CATALOG[key]);
     assert.equal(state.videoWallRows, item.videoWall.rows);
     assert.equal(state.videoWallCols, item.videoWall.cols);
+  }
+});
+
+test('ordinary and video-wall Items use screen width as placement width', () => {
+  for (const key of Object.keys(WALL_MEDIA_ITEMS)) {
+    const metrics = resolveWallMediaMetrics(key);
+    assert.equal(metrics.widthCm, metrics.screenWidthCm);
+    const state = createModuleStateFromDescriptor(MODULE_CATALOG[key]);
+    assert.equal(state.widthCm, state.screenWidthCm);
   }
 });
 

@@ -453,6 +453,14 @@ export function normalizeModuleItemState(moduleState) {
     const resolvedKey = resolveModuleCatalogKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'tv') {
       moduleState.itemKey = resolvedKey;
+      const metrics = resolveWallMediaMetrics(resolvedKey);
+      if (metrics) {
+        moduleState.widthCm = metrics.widthCm;
+        moduleState.screenWidthCm = metrics.screenWidthCm;
+        moduleState.screenHeightCm = metrics.screenHeightCm;
+        moduleState.heightCm = metrics.screenHeightCm;
+        moduleState.depthCm = metrics.depthCm;
+      }
     }
     return moduleState;
   }

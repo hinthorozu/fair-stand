@@ -12,14 +12,14 @@ test('TV 42 catalog and state use one shared 93.0 x 52.3 screen', () => {
   assert.equal(item.screenWidthCm, 93);
   assert.equal(item.screenHeightCm, 52.3);
   const state = createTvModuleState(42);
-  assert.equal(state.widthCm, 100);
+  assert.equal(state.widthCm, 93);
   assert.equal(state.screenWidthCm, 93);
   assert.equal(state.screenHeightCm, 52.3);
   assert.equal(state.depthCm, 5);
 });
 
 
-test('TV 55 and 65 inherit TV 42 body and override only their screen size identity', () => {
+test('TV 55 and 65 keep shared depth/catalog height and use screen width as placement width', () => {
   const expected = {
     42: [93, 52.3],
     55: [121.8, 68.5],
@@ -35,17 +35,18 @@ test('TV 55 and 65 inherit TV 42 body and override only their screen size identi
     assert.ok(catalogItem);
     assert.ok(state);
     assert.equal(item.type, base.type);
-    assert.equal(item.dimensions.widthCm, base.dimensions.widthCm);
     assert.equal(item.dimensions.depthCm, base.dimensions.depthCm);
     assert.equal(item.dimensions.catalogHeightCm, base.dimensions.catalogHeightCm);
+    assert.equal(item.dimensions.widthCm, expected[sizeInch][0]);
+    assert.equal(item.dimensions.screenWidthCm, expected[sizeInch][0]);
     assert.equal(catalogItem.itemKey, `TV_${sizeInch}`);
     assert.equal(catalogItem.type, base.type);
-    assert.equal(catalogItem.widthCm, base.dimensions.widthCm);
+    assert.equal(catalogItem.widthCm, expected[sizeInch][0]);
     assert.equal(catalogItem.depthCm, 5);
     assert.equal(state.type, base.type);
     assert.equal(state.itemKey, `TV_${sizeInch}`);
     assert.equal(state.catalogKey, `TV_${sizeInch}`);
-    assert.equal(state.widthCm, base.dimensions.widthCm);
+    assert.equal(state.widthCm, expected[sizeInch][0]);
     assert.equal(state.depthCm, 5);
     assert.equal(state.sizeInch, sizeInch);
     assert.equal(state.screenWidthCm, expected[sizeInch][0]);
@@ -147,7 +148,7 @@ test('TV texture loads from a real public JPEG asset', () => {
 test('TV 42 does not inherit flat panel state', () => {
   const tv = createTvModuleState(42);
   assert.equal(tv.type, 'tv');
-  assert.equal(tv.widthCm, 100);
+  assert.equal(tv.widthCm, 93);
   assert.equal(tv.screenWidthCm, 93);
   assert.equal(tv.screenHeightCm, 52.3);
   assert.equal('strips' in tv, false);
