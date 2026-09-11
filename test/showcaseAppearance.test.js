@@ -29,10 +29,12 @@ test('showcase body defaults white but accepts one grouped body color override w
   assert.match(showcase, /const canonicalBodyColor = `#\$\{bodyDefinition\.defaultColor\.toString\(16\)\.padStart\(6, '0'\)\}`;/);
   assert.match(showcase, /const bodyColor = moduleState\.bodySurface\.color \|\| canonicalBodyColor;/);
   assert.match(showcase, /const showcaseBodyMaterial = new THREE\.MeshStandardMaterial\(\{ color: bodyColor,/);
-  assert.match(showcase, /const showcaseDetailMaterial = new THREE\.MeshStandardMaterial\(\{ color: 0xffffff,/);
   assert.doesNotMatch(showcase, /const backPanel = new THREE\.Mesh/);
+  assert.match(showcase, /const sidePanelGeometry = new THREE\.BoxGeometry\(bodyThickness, bodyHeight, showcaseDepth\);/);
   assert.match(showcase, /const capGeometry = new THREE\.BoxGeometry\(bodyInnerWidth, horizontalThickness, showcaseDepth\);/);
-  assert.match(showcase, /frontPostGeometry\.clone\(\), showcaseDetailMaterial\.clone\(\)/);
-  assert.match(showcase, /frontEdgeGeometry\.clone\(\), showcaseDetailMaterial\.clone\(\)/);
-  assert.match(showcase, /shelfFrontGeometry\.clone\(\), showcaseDetailMaterial\.clone\(\)/);
+  assert.match(showcase, /const shelfGeometry = new THREE\.BoxGeometry\(glassShelfLengthM, glassShelfThicknessM, glassShelfDepthM\);/);
+  assert.doesNotMatch(showcase, /showcaseDetailMaterial/);
+  assert.doesNotMatch(showcase, /frontPostGeometry/);
+  assert.doesNotMatch(showcase, /frontEdgeGeometry/);
+  assert.doesNotMatch(showcase, /shelfFrontGeometry/);
 });
