@@ -107,12 +107,13 @@ for (const itemKey of BASE_KEYS) {
   });
 }
 
-test('wall_base parents stay outside BASE composite migration and keep distinct recipes', () => {
+test('wall_base parent Item’ları recipe ailesini BASE’ten ayrı tutar', () => {
   for (const width of [100, 150, 200]) {
     const wallKey = `wall_base_${width}`;
-    assert.equal(getItem(wallKey), null);
+    const wallItem = getItem(wallKey);
+    assert.equal(wallItem?.type, 'base-wall');
     assert.equal(MODULE_CATALOG[wallKey].type, 'base-wall');
-    assert.equal(MODULE_CATALOG[wallKey].itemKey, undefined);
+    assert.equal(MODULE_CATALOG[wallKey].itemKey, wallKey);
 
     const baseRecipe = getModuleRecipe('base', width);
     const wallRecipe = getModuleRecipe('base-wall', width);

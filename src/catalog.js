@@ -63,6 +63,18 @@ function createFlatPanelCatalogItem(itemKey) {
   });
 }
 
+function createBaseWallCatalogItem(itemKey) {
+  const item = getItem(itemKey);
+  return Object.freeze({
+    itemKey: item.itemKey,
+    type: item.type,
+    widthCm: item.dimensions.widthCm,
+    depthCm: item.dimensions.depthCm,
+    heightCm: item.dimensions.heightCm,
+    label: item.name,
+  });
+}
+
 export const SHELF_DIMENSIONS = Object.freeze({
   widthsCm: Object.freeze([100, 150, 200]),
   heightsByCountCm: Object.freeze({
@@ -245,9 +257,9 @@ export const MODULE_CATALOG = Object.freeze({
   BASE_100: createBaseCatalogItem('BASE_100'),
   BASE_150: createBaseCatalogItem('BASE_150'),
   BASE_200: createBaseCatalogItem('BASE_200'),
-  wall_base_100: { type: 'base-wall', widthCm: 100, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 100' },
-  wall_base_150: { type: 'base-wall', widthCm: 150, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 150' },
-  wall_base_200: { type: 'base-wall', widthCm: 200, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 200' },
+  wall_base_100: createBaseWallCatalogItem('wall_base_100'),
+  wall_base_150: createBaseWallCatalogItem('wall_base_150'),
+  wall_base_200: createBaseWallCatalogItem('wall_base_200'),
   wall_separator_100: { type: 'separator', widthCm: 100, label: 'Separatör 100' },
   wall_separator_50: { type: 'separator', widthCm: 50, label: 'Separatör 50' },
   wall_separator_100_sarmasik: { type: 'separator', widthCm: 100, modelFile: 'wall_separator_100_sarmasik.glb', label: 'Separatör 100 Sarmaşık' },

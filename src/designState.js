@@ -232,16 +232,35 @@ export function createCounterModuleState(widthCmOrDescriptor, options = {}) {
   };
 }
 
-export function createBaseWallModuleState(widthCm) {
-  const width = Number(widthCm);
-  if (![100, 150, 200].includes(width)) return null;
+const WALL_BASE_WIDTH_TO_ITEM_KEY = Object.freeze({
+  100: 'wall_base_100',
+  150: 'wall_base_150',
+  200: 'wall_base_200',
+});
+
+function resolveBaseWallItemKey(widthCmOrDescriptor) {
+  if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
+    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    if (explicitKey && getItem(explicitKey)?.type === 'base-wall') return explicitKey;
+    return WALL_BASE_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor.widthCm)] ?? null;
+  }
+  return WALL_BASE_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor)] ?? null;
+}
+
+export function createBaseWallModuleState(widthCmOrDescriptor) {
+  const itemKey = resolveBaseWallItemKey(widthCmOrDescriptor);
+  const item = itemKey ? getItem(itemKey) : null;
+  if (!item || item.type !== 'base-wall') return null;
+  const { widthCm, depthCm, heightCm } = item.dimensions;
 
   return {
     id: createId('module'),
-    type: 'base-wall',
-    widthCm: width,
-    depthCm: 50,
-    heightCm: 350,
+    itemKey: item.itemKey,
+    catalogKey: item.itemKey,
+    type: item.type,
+    widthCm,
+    depthCm,
+    heightCm,
     strips: Array.from(
       { length: STRIP_COUNT },
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
@@ -449,7 +468,7 @@ export function createLedFloodlightModuleState() {
 const MODULE_STATE_FACTORIES = Object.freeze({
   'flat-panel': (descriptor) => createFlatPanelModuleState(descriptor),
   base: (descriptor) => createBaseModuleState(descriptor),
-  'base-wall': (descriptor) => createBaseWallModuleState(descriptor.widthCm),
+  'base-wall': (descriptor) => createBaseWallModuleState(descriptor),
   counter: (descriptor) => createCounterModuleState(descriptor),
   separator: (descriptor) => createSeparatorModuleState(descriptor.widthCm, descriptor),
   shelf: (descriptor) => createShelfModuleState(descriptor.widthCm, descriptor.shelfCount),
@@ -539,6 +558,14 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'flat-panel') {
     const resolvedKey = resolveModuleCatalogKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'flat-panel') {
+      moduleState.itemKey = resolvedKey;
+    }
+    return moduleState;
+  }
+
+  if (moduleState.type === 'base-wall') {
+    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    if (resolvedKey && getItem(resolvedKey)?.type === 'base-wall') {
       moduleState.itemKey = resolvedKey;
     }
     return moduleState;
