@@ -29,6 +29,48 @@ export function getCommercialItemForType(type) {
   return Object.values(COMMERCIAL_ITEMS).find((item) => item.type === type) ?? null;
 }
 
+// Yapay bitki / uzun saksı ailesi. Hepsi type `indoor-plant-1`; ayrım itemKey + ölçü/modelFile.
+// BOM decision-required — composition/recipe uydurulmaz.
+export const INDOOR_PLANT_ITEMS = Object.freeze({
+  EXTRA_INDOOR_PLANT_1: Object.freeze({
+    itemKey: 'EXTRA_INDOOR_PLANT_1',
+    name: 'Yapay Çiçek 1',
+    type: 'indoor-plant-1',
+    dimensions: Object.freeze({ widthCm: 60, depthCm: 60, heightCm: 120 }),
+    // Katalogda modelFile yoktu; factory default runtime `indoor_plants.glb` kullanır.
+    // Item'da modelFile tutulmaz ki catalog resolve width/depth ile tek aday kalsın.
+    modelRotationYDeg: 0,
+    preserveModelScale: false,
+  }),
+  EXTRA_LONG_PLANTER_100: Object.freeze({
+    itemKey: 'EXTRA_LONG_PLANTER_100',
+    name: 'Uzun Saksı 100',
+    type: 'indoor-plant-1',
+    dimensions: Object.freeze({ widthCm: 100, depthCm: 30, heightCm: 30 }),
+    modelFile: 'saksi_bitkili_100x30x30.glb',
+    modelRotationYDeg: 90,
+    preserveModelScale: true,
+  }),
+  EXTRA_LONG_PLANTER_150: Object.freeze({
+    itemKey: 'EXTRA_LONG_PLANTER_150',
+    name: 'Uzun Saksı 150',
+    type: 'indoor-plant-1',
+    dimensions: Object.freeze({ widthCm: 150, depthCm: 30, heightCm: 30 }),
+    modelFile: 'saksi_bitkili_150x30x30.glb',
+    modelRotationYDeg: 90,
+    preserveModelScale: true,
+  }),
+  EXTRA_LONG_PLANTER_200: Object.freeze({
+    itemKey: 'EXTRA_LONG_PLANTER_200',
+    name: 'Uzun Saksı 200',
+    type: 'indoor-plant-1',
+    dimensions: Object.freeze({ widthCm: 200, depthCm: 30, heightCm: 30 }),
+    modelFile: 'saksi_bitkili_200x30x30.glb',
+    modelRotationYDeg: 90,
+    preserveModelScale: true,
+  }),
+});
+
 // Wall-mounted media products share the single `tv` behavior family. Ordinary TVs are
 // parametric by verified screen size; widthCm is that same screen width so placement
 // bounds match the rendered box. Video walls derive totals from panel size x grid.
@@ -512,6 +554,7 @@ export function getShowcaseBodyDefinition(itemOrKey) {
 
 export function getItem(itemKey) {
   return COMMERCIAL_ITEMS[itemKey]
+    ?? INDOOR_PLANT_ITEMS[itemKey]
     ?? WALL_MEDIA_ITEMS[itemKey]
     ?? COMPOSITE_ITEMS[itemKey]
     ?? getProductionItem(itemKey);

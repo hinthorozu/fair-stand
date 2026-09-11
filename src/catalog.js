@@ -194,6 +194,22 @@ function createCommercialCatalogItem(itemKey) {
   return Object.freeze({ ...metadata, ...dimensions, label: name });
 }
 
+function createIndoorPlantCatalogItem(itemKey) {
+  const item = getItem(itemKey);
+  const descriptor = {
+    itemKey: item.itemKey,
+    type: item.type,
+    widthCm: item.dimensions.widthCm,
+    depthCm: item.dimensions.depthCm,
+    heightCm: item.dimensions.heightCm,
+    label: item.name,
+    modelRotationYDeg: item.modelRotationYDeg,
+    preserveModelScale: item.preserveModelScale,
+  };
+  if (item.modelFile) descriptor.modelFile = item.modelFile;
+  return Object.freeze(descriptor);
+}
+
 export const MODULE_CATALOG = Object.freeze({
   wall_50: createFlatPanelCatalogItem('wall_50'),
   wall_100: createFlatPanelCatalogItem('wall_100'),
@@ -227,37 +243,10 @@ export const MODULE_CATALOG = Object.freeze({
   KETTLE: createCommercialCatalogItem('KETTLE'),
   COAT_RACK: createCommercialCatalogItem('COAT_RACK'),
   PLASTIC_TRASH_BIN: createCommercialCatalogItem('PLASTIC_TRASH_BIN'),
-  EXTRA_INDOOR_PLANT_1: { type: 'indoor-plant-1', widthCm: 60, depthCm: 60, heightCm: 120, label: 'Yapay Çiçek 1' },
-  EXTRA_LONG_PLANTER_100: {
-    type: 'indoor-plant-1',
-    widthCm: 100,
-    depthCm: 30,
-    heightCm: 30,
-    modelFile: 'saksi_bitkili_100x30x30.glb',
-    modelRotationYDeg: 90,
-    preserveModelScale: true,
-    label: 'Uzun Saksı 100',
-  },
-  EXTRA_LONG_PLANTER_150: {
-    type: 'indoor-plant-1',
-    widthCm: 150,
-    depthCm: 30,
-    heightCm: 30,
-    modelFile: 'saksi_bitkili_150x30x30.glb',
-    modelRotationYDeg: 90,
-    preserveModelScale: true,
-    label: 'Uzun Saksı 150',
-  },
-  EXTRA_LONG_PLANTER_200: {
-    type: 'indoor-plant-1',
-    widthCm: 200,
-    depthCm: 30,
-    heightCm: 30,
-    modelFile: 'saksi_bitkili_200x30x30.glb',
-    modelRotationYDeg: 90,
-    preserveModelScale: true,
-    label: 'Uzun Saksı 200',
-  },
+  EXTRA_INDOOR_PLANT_1: createIndoorPlantCatalogItem('EXTRA_INDOOR_PLANT_1'),
+  EXTRA_LONG_PLANTER_100: createIndoorPlantCatalogItem('EXTRA_LONG_PLANTER_100'),
+  EXTRA_LONG_PLANTER_150: createIndoorPlantCatalogItem('EXTRA_LONG_PLANTER_150'),
+  EXTRA_LONG_PLANTER_200: createIndoorPlantCatalogItem('EXTRA_LONG_PLANTER_200'),
   TV_42: createWallMediaCatalogItem('TV_42'),
   TV_55: createWallMediaCatalogItem('TV_55'),
   VIDEO_WALL_2X2: createWallMediaCatalogItem('VIDEO_WALL_2X2'),
