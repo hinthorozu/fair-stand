@@ -39,5 +39,5 @@ Bu varyant `wall_showcase_100_3` canonical parent Item'ının aynı recipe zinci
 - `bodySurface` tek project-instance color override'dır; iki yan + iki yatay sunta birlikte renklenir. Child showcase-board Items ayrı ayrı editable değildir.
 - Default body color child Items'dan `0xffffff` gelir.
 - `glass_shelf` bu renk override'ından etkilenmez.
-- Renderer board ölçülerini canonical child Items'dan okur; öndeki ince beyaz dekoratif/renderer parçaları BOM'a alınmamıştır.
+- Renderer board ölçülerini canonical child Items'dan okur ve yalnız canonical gövde board'ları ile `glass_shelf` geometrisini gösterir; BOM'da olmayan sahte beyaz ön kenar/çerçeve mesh'i eklemez.
 - Legacy persisted showcase state load sırasında canonical `wall_showcase_100_3` identity/bodySurface'a normalize edilir.
