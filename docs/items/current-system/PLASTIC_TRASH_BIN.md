@@ -1,3 +1,5 @@
+> Migration öncesi envanterdir; aktif canonical tanım `../definitions/PLASTIC_TRASH_BIN.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
+
 # DEPOT_PLASTIC_TRASH_BIN — Mevcut Sistem Profili
 
 Bu belge `DEPOT_PLASTIC_TRASH_BIN` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction ve persistence akışlarını toplar.
@@ -147,3 +149,16 @@ Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 - `src/moduleContextMenu.js`
 - `src/main.js`
 - `src/autoDepot.js`
+
+## Checklist ek envanteri
+- Yapı: tekil ticari ürün; mevcut sistemde alt Item reçetesi yok. Parametrik BOM yok.
+- Unit: mevcut sistemde YOK; BOM aşamasına geçilmediği için canonical unit tahmin edilmedi.
+- Length/thickness: bu ürünün mevcut business state/descriptor kaynaklarında YOK; üretim paneli ölçüsü uygulanmıyor.
+- Material/defaultColor: bağımsız business metadata YOK. GLB malzemeleri ve sidebar renkleri görsel temsildir; kullanıcı renk/image yetkisi yok.
+- Property owners: catalog + designState + autoDepot ölçüleri migration öncesi tekrarlanıyordu. Renderer fallback ve seçim metni ayrıca tarandı.
+- Factory: createModuleStateFromDescriptor → type factory; ID createId('module'). Placement ve autoDepot flag runtime instance alanlarıdır.
+- Overrides: kayıtlı instance alanları JSON snapshot ile korunur. Trash descriptor ölçü/model ayarları dışında ürün ölçüsü için kullanıcı düzenleme kontrolü yok.
+- Relationships: otomatik depo içerik koordinatlarını planlar; kettle/fridge footprint overlap behavior kaynağındadır. Kettle yükseltmesi görsel olarak fridge yüksekliğindedir; persistent host bağı veya otomatik host takip/reflow yok.
+- Delete/duplicate: generic context menu; seçimi, sürüklemeyi, klavye rotation/move ve side insertion ortak motorlar yönetir.
+- Regression: ilgili ürün testi, commercialItemsContract ve gerçek katalog/depo/persistence E2E kapsamı.
+- Açık bulgular: F-014 mevcut `decision-required` durumuyla korunur; F-019 bu dört ürünün tekrar eden state ölçüleri kapsamında etkilenir.

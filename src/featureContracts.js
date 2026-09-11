@@ -17,7 +17,7 @@ export const FEATURE_CONTRACTS = Object.freeze({
     creates: Object.freeze({
       structuralKinds: Object.freeze(['wall', 'door']),
       contentKinds: Object.freeze(['mini-fridge', 'kettle', 'coat-rack', 'plastic-trash-bin']),
-      contentCatalogKeys: Object.freeze(['DEPOT_PLASTIC_TRASH_BIN']),
+      contentCatalogKeys: Object.freeze(['PLASTIC_TRASH_BIN']),
     }),
     placement: Object.freeze({
       owner: 'src/autoDepot.js',

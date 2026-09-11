@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const mainSource = await readFile(new URL('../src/main.js', import.meta.url), 'utf8');
+const mainSource = (await readFile(new URL('../src/main.js', import.meta.url), 'utf8')).replace(/\r\n/g, '\n');
 
 test('project dropdown change asks for confirmation and opens the selected project', () => {
   assert.match(mainSource, /projectSelect\.addEventListener\('change', async \(\) => \{/);

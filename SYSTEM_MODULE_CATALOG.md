@@ -62,10 +62,10 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `furniture_sofa_set_classic`
 - `furniture_table_chair_set_eames`
 - `furniture_bar_stool_classic`
-- `DEPOT_MINI_FRIDGE_AVANTI`
-- `DEPOT_KETTLE`
-- `DEPOT_COAT_RACK`
-- `DEPOT_PLASTIC_TRASH_BIN`
+- `MINI_FRIDGE_AVANTI`
+- `KETTLE`
+- `COAT_RACK`
+- `PLASTIC_TRASH_BIN`
 - `EXTRA_INDOOR_PLANT_1`
 - `EXTRA_LONG_PLANTER_100`
 - `EXTRA_LONG_PLANTER_150`
@@ -96,7 +96,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Mobilya / Depo / Bitki
 
-`furniture_sofa_set_classic`, `furniture_table_chair_set_eames`, `furniture_bar_stool_classic`, `DEPOT_MINI_FRIDGE_AVANTI`, `DEPOT_KETTLE`, `DEPOT_COAT_RACK`, `DEPOT_PLASTIC_TRASH_BIN`, `EXTRA_INDOOR_PLANT_1`, `EXTRA_LONG_PLANTER_100`, `EXTRA_LONG_PLANTER_150`, `EXTRA_LONG_PLANTER_200`
+`furniture_sofa_set_classic`, `furniture_table_chair_set_eames`, `furniture_bar_stool_classic`, `MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN`, `EXTRA_INDOOR_PLANT_1`, `EXTRA_LONG_PLANTER_100`, `EXTRA_LONG_PLANTER_150`, `EXTRA_LONG_PLANTER_200`
 
 ### Medya / Işık
 

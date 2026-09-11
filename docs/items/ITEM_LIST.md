@@ -95,10 +95,10 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 | 30 | `furniture_sofa_set_classic` | Koltuk Takımı | `sofa-set-classic` |
 | 31 | `furniture_table_chair_set_eames` | Eames Masa Sandalye Takımı | `table-chair-set-eames` |
 | 32 | `furniture_bar_stool_classic` | Bar Taburesi | `bar-stool` |
-| 33 | `DEPOT_MINI_FRIDGE_AVANTI` | Mini Buzdolabı | `mini-fridge` |
-| 34 | `DEPOT_KETTLE` | Kettle | `kettle` |
-| 35 | `DEPOT_COAT_RACK` | Askılık | `coat-rack` |
-| 36 | `DEPOT_PLASTIC_TRASH_BIN` | Çöp Kutusu | `plastic-trash-bin` |
+| 33 | `MINI_FRIDGE_AVANTI` | Mini Buzdolabı | `mini-fridge` |
+| 34 | `KETTLE` | Kettle | `kettle` |
+| 35 | `COAT_RACK` | Askılık | `coat-rack` |
+| 36 | `PLASTIC_TRASH_BIN` | Çöp Kutusu | `plastic-trash-bin` |
 | 37 | `EXTRA_INDOOR_PLANT_1` | Yapay Çiçek 1 | `indoor-plant-1` |
 | 38 | `EXTRA_LONG_PLANTER_100` | Uzun Saksı 100 | `indoor-plant-1` |
 | 39 | `EXTRA_LONG_PLANTER_150` | Uzun Saksı 150 | `indoor-plant-1` |

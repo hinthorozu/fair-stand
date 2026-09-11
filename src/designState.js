@@ -1,5 +1,5 @@
 import { resolveModuleCatalogKey } from './catalog.js';
-import { getItem, getShowcaseBodyDefinition, getShowcaseItemKeyForType } from './items.js';
+import { getCommercialItemForType, getItem, getShowcaseBodyDefinition, getShowcaseItemKeyForType } from './items.js';
 import { getDoorLeafProductionItem, getProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 import { getTvDefinition } from './tvConfig.js';
@@ -259,47 +259,39 @@ export function createBarStoolModuleState() {
   };
 }
 
-export function createMiniFridgeModuleState() {
-  return {
-    id: createId('module'),
-    type: 'mini-fridge',
-    widthCm: 50,
-    depthCm: 50,
-    heightCm: 66,
+function createCommercialModuleState(type, descriptor = {}) {
+  const item = getCommercialItemForType(type);
+  const state = {
+    id: createId('module'), itemKey: item.itemKey, catalogKey: item.itemKey,
+    type: item.type, ...item.dimensions,
   };
+  // This model-configurable family supports explicit descriptor overrides.
+  if (Object.hasOwn(item, 'preserveModelScale')) {
+    for (const field of Object.keys(item.dimensions)) {
+      const value = Number(descriptor[field]);
+      if (Number.isFinite(value) && value > 0) state[field] = value;
+    }
+    state.modelFile = descriptor.modelFile ?? item.modelFile;
+    state.modelRotationYDeg = Number(descriptor.modelRotationYDeg ?? item.modelRotationYDeg) || 0;
+    state.preserveModelScale = Boolean(descriptor.preserveModelScale ?? item.preserveModelScale);
+  }
+  return state;
+}
+
+export function createMiniFridgeModuleState() {
+  return createCommercialModuleState('mini-fridge');
 }
 
 export function createKettleModuleState() {
-  return {
-    id: createId('module'),
-    type: 'kettle',
-    widthCm: 24,
-    depthCm: 19,
-    heightCm: 25,
-  };
+  return createCommercialModuleState('kettle');
 }
 
 export function createCoatRackModuleState() {
-  return {
-    id: createId('module'),
-    type: 'coat-rack',
-    widthCm: 43,
-    depthCm: 43,
-    heightCm: 180,
-  };
+  return createCommercialModuleState('coat-rack');
 }
 
 export function createPlasticTrashBinModuleState(descriptor = {}) {
-  return {
-    id: createId('module'),
-    type: 'plastic-trash-bin',
-    widthCm: Number(descriptor.widthCm),
-    depthCm: Number(descriptor.depthCm),
-    heightCm: Number(descriptor.heightCm),
-    modelFile: descriptor.modelFile,
-    modelRotationYDeg: Number(descriptor.modelRotationYDeg) || 0,
-    preserveModelScale: Boolean(descriptor.preserveModelScale),
-  };
+  return createCommercialModuleState('plastic-trash-bin', descriptor);
 }
 
 export function createIndoorPlantModuleState(descriptor = {}) {

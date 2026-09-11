@@ -6,8 +6,10 @@ import { createCoatRackModuleState, createModuleStateFromDescriptor } from '../s
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
 test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
-  const item = MODULE_CATALOG.DEPOT_COAT_RACK;
+  const item = MODULE_CATALOG.COAT_RACK;
   assert.deepEqual(item, {
+    itemKey: 'COAT_RACK',
+    modelFile: 'coat_rack.glb',
     type: 'coat-rack',
     widthCm: 43,
     depthCm: 43,
@@ -15,7 +17,7 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
     label: 'Askılık',
   });
   const extra = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Extra');
-  assert.ok(extra?.keys.includes('DEPOT_COAT_RACK'));
+  assert.ok(extra?.keys.includes('COAT_RACK'));
 
   const state = createCoatRackModuleState();
   assert.equal(state.type, 'coat-rack');
@@ -23,17 +25,18 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
   assert.equal(state.depthCm, 43);
   assert.equal(state.heightCm, 180);
 
-  const canonicalState = createModuleStateFromDescriptor(item, { catalogKey: 'DEPOT_COAT_RACK' });
+  const canonicalState = createModuleStateFromDescriptor(item, { catalogKey: 'COAT_RACK' });
   assert.ok(canonicalState);
   assert.equal(canonicalState.type, 'coat-rack');
-  assert.equal(canonicalState.catalogKey, 'DEPOT_COAT_RACK');
+  assert.equal(canonicalState.catalogKey, 'COAT_RACK');
 
   const behavior = getModuleBehavior(state);
   assert.equal(behavior.placement, 'free');
   assert.equal(behavior.collision, 'footprint');
 
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(scene, /models\/coat_rack\.glb/);
+  assert.equal(item.modelFile, 'coat_rack.glb');
+  assert.ok(scene.includes("getItem('COAT_RACK').modelFile"));
   assert.match(scene, /function createCoatRackModule\(moduleState, moduleIndex\)/);
   assert.match(scene, /moduleState\.type === 'coat-rack'/);
 });

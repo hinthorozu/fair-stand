@@ -13,7 +13,7 @@ test('every current and future module inherits the lightweight silhouette ghost 
 });
 
 test('scene ghost reuses normal module geometry and one textureless basic material', () => {
-  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
   assert.match(scene, /function createRenderableModule\(moduleState, moduleIndex, onSurfaceReady = null\)/);
   assert.match(scene, /const built = createRenderableModule\(moduleOrWidthCm, -1, null\)/);
   assert.match(scene, /new THREE\.MeshBasicMaterial\(\{[\s\S]*?transparent: true,[\s\S]*?depthWrite: false,[\s\S]*?depthTest: false,[\s\S]*?toneMapped: false,[\s\S]*?fog: false/);
@@ -27,7 +27,7 @@ test('scene ghost reuses normal module geometry and one textureless basic materi
 });
 
 test('placement ghost is a singleton instead of a per-model cache', () => {
-  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
   assert.doesNotMatch(scene, /placementGhostTemplates/);
   assert.match(scene, /if \(placementGhost\?\.key === key\) return placementGhost/);
   assert.match(scene, /destroyPlacementGhost\(\);\n    placementGhost = createPlacementGhost/);

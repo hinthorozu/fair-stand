@@ -7,7 +7,7 @@ import { canModulesOverlapByBehavior, getModuleBehavior } from '../src/moduleBeh
 import { placementsOverlap } from '../src/modulePlacement.js';
 
 test('kettle catalog and state stay aligned', () => {
-  const catalog = MODULE_CATALOG.DEPOT_KETTLE;
+  const catalog = MODULE_CATALOG.KETTLE;
   const state = createKettleModuleState();
   assert.deepEqual([catalog.widthCm, catalog.depthCm, catalog.heightCm], [24, 19, 25]);
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [24, 19, 25]);

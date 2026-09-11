@@ -6,7 +6,7 @@ import { createMiniFridgeModuleState } from '../src/designState.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
 test('mini fridge catalog/state dimensions stay aligned', () => {
-  const catalog = MODULE_CATALOG.DEPOT_MINI_FRIDGE_AVANTI;
+  const catalog = MODULE_CATALOG.MINI_FRIDGE_AVANTI;
   const state = createMiniFridgeModuleState();
   assert.deepEqual(
     [catalog.widthCm, catalog.depthCm, catalog.heightCm],

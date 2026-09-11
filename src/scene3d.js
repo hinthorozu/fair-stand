@@ -6,7 +6,7 @@ import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DI
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
 import { getProductionItem, getShelfProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
-import { getShowcaseBodyDefinition } from './items.js';
+import { getItem, getCommercialItemForType, getShowcaseBodyDefinition } from './items.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
@@ -105,7 +105,7 @@ function loadMiniFridgeModel() {
   if (!miniFridgeModelPromise) {
     const loader = new GLTFLoader();
     miniFridgeModelPromise = loader
-      .loadAsync(import.meta.env.BASE_URL + 'models/80s_avanti_mini_fridge.glb')
+      .loadAsync(import.meta.env.BASE_URL + 'models/' + getItem('MINI_FRIDGE_AVANTI').modelFile)
       .then((gltf) => gltf.scene);
   }
   return miniFridgeModelPromise;
@@ -117,7 +117,7 @@ function loadCoatRackModel() {
   if (!coatRackModelPromise) {
     const loader = new GLTFLoader();
     coatRackModelPromise = loader
-      .loadAsync(import.meta.env.BASE_URL + 'models/coat_rack.glb')
+      .loadAsync(import.meta.env.BASE_URL + 'models/' + getItem('COAT_RACK').modelFile)
       .then((gltf) => gltf.scene);
   }
   return coatRackModelPromise;
@@ -129,7 +129,7 @@ function loadKettleModel() {
   if (!kettleModelPromise) {
     const loader = new GLTFLoader();
     kettleModelPromise = loader
-      .loadAsync(import.meta.env.BASE_URL + 'models/kettle.glb')
+      .loadAsync(import.meta.env.BASE_URL + 'models/' + getItem('KETTLE').modelFile)
       .then((gltf) => gltf.scene);
   }
   return kettleModelPromise;
@@ -1379,7 +1379,7 @@ export function createStandScene(
     // Mini fridge height is 66 cm. Kettle never sits on the floor; its local base
     // is always raised to the refrigerator top plane.
     const fixedElevationM = (group.userData?.type === 'kettle' || group.userData?.moduleState?.type === 'kettle')
-      ? 0.66
+      ? getItem('MINI_FRIDGE_AVANTI').dimensions.heightCm / 100
       : 0;
     const worldYM = logicalZM + fixedElevationM;
     const rotationZDeg = normalizeModuleRotationZDeg(placement.rotationZDeg);
@@ -4913,9 +4913,10 @@ function createPlasticTrashBinTopLabel(heightCm) {
   return label;
 }
 function createMiniFridgeModule(moduleState, moduleIndex) {
-  const widthCm = Number(moduleState.widthCm || 45);
-  const depthCm = Number(moduleState.depthCm || 43);
-  const heightCm = Number(moduleState.heightCm || 66);
+  const defaults = getItem('MINI_FRIDGE_AVANTI').dimensions;
+  const widthCm = Number(moduleState.widthCm || defaults.widthCm);
+  const depthCm = Number(moduleState.depthCm || defaults.depthCm);
+  const heightCm = Number(moduleState.heightCm || defaults.heightCm);
   const group = new THREE.Group();
   const topLabel = createMiniFridgeTopLabel(heightCm);
   if (topLabel) group.add(topLabel);
@@ -4981,11 +4982,11 @@ function createMiniFridgeModule(moduleState, moduleIndex) {
 
 function createIndoorPlantModule(moduleState, moduleIndex) {
   const type = moduleState.type === 'plastic-trash-bin' ? 'plastic-trash-bin' : 'indoor-plant-1';
-  const modelFile = moduleState.modelFile
-    ?? (type === 'plastic-trash-bin' ? 'plastic_trash_bin.glb' : 'indoor_plants.glb');
-  const widthCm = Number(moduleState.widthCm || 60);
-  const depthCm = Number(moduleState.depthCm || 60);
-  const heightCm = Number(moduleState.heightCm || 120);
+  const item = getCommercialItemForType(type);
+  const modelFile = moduleState.modelFile ?? item?.modelFile ?? 'indoor_plants.glb';
+  const widthCm = Number(moduleState.widthCm || item?.dimensions.widthCm || 60);
+  const depthCm = Number(moduleState.depthCm || item?.dimensions.depthCm || 60);
+  const heightCm = Number(moduleState.heightCm || item?.dimensions.heightCm || 120);
   const widthM = widthCm / 100;
   const depthM = depthCm / 100;
   const heightM = heightCm / 100;
@@ -5142,9 +5143,10 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
 }
 
 function createCoatRackModule(moduleState, moduleIndex) {
-  const widthCm = Number(moduleState.widthCm || 43);
-  const depthCm = Number(moduleState.depthCm || 43);
-  const heightCm = Number(moduleState.heightCm || 180);
+  const defaults = getItem('COAT_RACK').dimensions;
+  const widthCm = Number(moduleState.widthCm || defaults.widthCm);
+  const depthCm = Number(moduleState.depthCm || defaults.depthCm);
+  const heightCm = Number(moduleState.heightCm || defaults.heightCm);
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -5207,9 +5209,10 @@ function createCoatRackModule(moduleState, moduleIndex) {
 }
 
 function createKettleModule(moduleState, moduleIndex) {
-  const widthCm = Number(moduleState.widthCm || 24);
-  const depthCm = Number(moduleState.depthCm || 19);
-  const heightCm = Number(moduleState.heightCm || 25);
+  const defaults = getItem('KETTLE').dimensions;
+  const widthCm = Number(moduleState.widthCm || defaults.widthCm);
+  const depthCm = Number(moduleState.depthCm || defaults.depthCm);
+  const heightCm = Number(moduleState.heightCm || defaults.heightCm);
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',

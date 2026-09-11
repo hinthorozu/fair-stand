@@ -1,3 +1,5 @@
+import { getCommercialItemForType } from './items.js';
+
 export const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
 
 function result(message, {
@@ -79,8 +81,11 @@ export function describeSurfaceSelection(surfaces, modules = []) {
       return result('Modül ' + (moduleIndex + 1) + ' · Uzun Saksı ' + (Number(modules[moduleIndex]?.widthCm) || '') + ' · saksı gövdesi · renk uygulanabilir.');
     }
 
-    if (moduleType === 'mini-fridge') {
-      return result('Modül ' + (moduleIndex + 1) + ' · Mini Buzdolabı · 45 × 43 × 66 cm · GLB model.');
+    const commercialItem = getCommercialItemForType(moduleType);
+    if (commercialItem) {
+      const state = modules[moduleIndex] ?? {};
+      const dims = commercialItem.dimensions;
+      return result(`Modül ${moduleIndex + 1} · ${commercialItem.name} · ${state.widthCm ?? dims.widthCm} × ${state.depthCm ?? dims.depthCm} × ${state.heightCm ?? dims.heightCm} cm · GLB model.`);
     }
 
     if (moduleType === 'illuminated-foam') {

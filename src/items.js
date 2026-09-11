@@ -1,5 +1,33 @@
 import { getProductionItem } from './productionParts.js';
 
+// Standalone commercial products own their verified product defaults.
+export const COMMERCIAL_ITEMS = Object.freeze({
+  COAT_RACK: Object.freeze({
+    itemKey: 'COAT_RACK', name: 'Askılık', type: 'coat-rack',
+    dimensions: Object.freeze({ widthCm: 43, depthCm: 43, heightCm: 180 }),
+    modelFile: 'coat_rack.glb',
+  }),
+  KETTLE: Object.freeze({
+    itemKey: 'KETTLE', name: 'Kettle', type: 'kettle',
+    dimensions: Object.freeze({ widthCm: 24, depthCm: 19, heightCm: 25 }),
+    modelFile: 'kettle.glb',
+  }),
+  MINI_FRIDGE_AVANTI: Object.freeze({
+    itemKey: 'MINI_FRIDGE_AVANTI', name: 'Mini Buzdolabı', type: 'mini-fridge',
+    dimensions: Object.freeze({ widthCm: 50, depthCm: 50, heightCm: 66 }),
+    modelFile: '80s_avanti_mini_fridge.glb',
+  }),
+  PLASTIC_TRASH_BIN: Object.freeze({
+    itemKey: 'PLASTIC_TRASH_BIN', name: 'Çöp Kutusu', type: 'plastic-trash-bin',
+    dimensions: Object.freeze({ widthCm: 40, depthCm: 40, heightCm: 60 }),
+    modelFile: 'plastic_trash_bin.glb', preserveModelScale: false, modelRotationYDeg: 0,
+  }),
+});
+
+export function getCommercialItemForType(type) {
+  return Object.values(COMMERCIAL_ITEMS).find((item) => item.type === type) ?? null;
+}
+
 export const COMPOSITE_ITEMS = Object.freeze({
   door_100: Object.freeze({
     itemKey: 'door_100',
@@ -88,7 +116,7 @@ export function getShowcaseBodyDefinition(itemOrKey) {
 }
 
 export function getItem(itemKey) {
-  return COMPOSITE_ITEMS[itemKey] ?? getProductionItem(itemKey);
+  return COMMERCIAL_ITEMS[itemKey] ?? COMPOSITE_ITEMS[itemKey] ?? getProductionItem(itemKey);
 }
 
 export function listCompositeItems() {

@@ -156,24 +156,16 @@ function normalizeDescriptor(moduleOrType) {
   return moduleOrType ?? {};
 }
 
-function isPlasticTrashBin(module) {
-  return module?.catalogKey === 'DEPOT_PLASTIC_TRASH_BIN'
-    || module?.modelFile === 'plastic_trash_bin.glb';
-}
-
 export function hasExplicitModuleBehavior(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
   const type = module.type ?? null;
-  return isPlasticTrashBin(module)
-    || (type !== null && Object.hasOwn(TYPE_BEHAVIORS, type));
+  return type !== null && Object.hasOwn(TYPE_BEHAVIORS, type);
 }
 
 export function getModuleBehavior(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
   const type = module.type ?? null;
-  const declared = isPlasticTrashBin(module)
-    ? PLASTIC_TRASH_BIN_BEHAVIOR
-    : (TYPE_BEHAVIORS[type] ?? DEFAULT_BEHAVIOR);
+  const declared = TYPE_BEHAVIORS[type] ?? DEFAULT_BEHAVIOR;
   const base = declared.ghost
     ? declared
     : { ...declared, ghost: DEFAULT_GHOST_BEHAVIOR };

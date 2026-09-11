@@ -54,7 +54,7 @@ test('mini fridge uses the 50x50x66 nominal footprint in the real catalog drag f
   const modulePanel = page.locator('details', { has: openCatalogButton });
   await modulePanel.locator(':scope > summary').click();
 
-  const fridgeCard = page.locator('.module-drag-card[data-module-key="DEPOT_MINI_FRIDGE_AVANTI"]');
+  const fridgeCard = page.locator('.module-drag-card[data-module-key="MINI_FRIDGE_AVANTI"]');
   const fridgeGroup = page.locator('.module-drag-group', { has: fridgeCard });
   if (!(await fridgeGroup.getAttribute('open'))) {
     await fridgeGroup.locator(':scope > summary').click();
