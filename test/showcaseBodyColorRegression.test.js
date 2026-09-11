@@ -59,3 +59,22 @@ test('wall showcase renderer exposes one color-only body selector for all four b
   assert.match(showcase, /colorTargets: bodyColorTargets/);
   assert.doesNotMatch(showcase, /bodySurfaces/);
 });
+
+test('wall showcase renderer does not add non-BOM white front-detail meshes', () => {
+  const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function createShowcaseModule(');
+  const end = source.indexOf('function createSelectionFrame', start);
+  const showcase = source.slice(start, end);
+
+  assert.doesNotMatch(showcase, /showcaseDetailMaterial/);
+  assert.doesNotMatch(showcase, /frontPostGeometry/);
+  assert.doesNotMatch(showcase, /frontEdgeGeometry/);
+  assert.doesNotMatch(showcase, /shelfFrontGeometry/);
+  assert.doesNotMatch(showcase, /const shelfFront =/);
+
+  // Canonical physical geometry must remain present.
+  assert.match(showcase, /sidePanelGeometry/);
+  assert.match(showcase, /capGeometry/);
+  assert.match(showcase, /const shelfGeometry = new THREE\.BoxGeometry/);
+  assert.match(showcase, /shelf\.userData\.itemKey = glassShelfItem\.itemKey/);
+});
