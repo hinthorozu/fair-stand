@@ -273,6 +273,41 @@ export const COMPOSITE_ITEMS = Object.freeze({
       nominalWidthCm: 200,
     }),
   }),
+  // Panel Bazalı parent'lar (type base-wall). Child miktarları moduleRecipes
+  // base-wall:100|150|200 satırlarında kalır; Raw BOM UI dokunulmaz.
+  wall_base_100: Object.freeze({
+    itemKey: 'wall_base_100',
+    name: 'Panel Bazalı 100',
+    type: 'base-wall',
+    dimensions: Object.freeze({ widthCm: 100, depthCm: 50, heightCm: 350 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'base-wall',
+      nominalWidthCm: 100,
+    }),
+  }),
+  wall_base_150: Object.freeze({
+    itemKey: 'wall_base_150',
+    name: 'Panel Bazalı 150',
+    type: 'base-wall',
+    dimensions: Object.freeze({ widthCm: 150, depthCm: 50, heightCm: 350 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'base-wall',
+      nominalWidthCm: 150,
+    }),
+  }),
+  wall_base_200: Object.freeze({
+    itemKey: 'wall_base_200',
+    name: 'Panel Bazalı 200',
+    type: 'base-wall',
+    dimensions: Object.freeze({ widthCm: 200, depthCm: 50, heightCm: 350 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'base-wall',
+      nominalWidthCm: 200,
+    }),
+  }),
   wall_showcase_100_2: Object.freeze({
     itemKey: 'wall_showcase_100_2',
     name: '2 Gözlü Vitrin 100',

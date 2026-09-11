@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "wall-flat-panel-family-item-migration",
+  "id": "wall-base-family-item-migration",
   "kind": "refactor",
-  "summary": "Migrate wall_50/100/150/200 into COMPOSITE_ITEMS. Catalog and createFlatPanelModuleState derive defaults from getItem; load hydrates catalogKey→itemKey. Straight-wall recipe quantities unchanged; Raw BOM UI untouched; parent unit not invented.",
+  "summary": "wall_base_100/150/200 COMPOSITE_ITEMS’e taşındı. Catalog ve createBaseWallModuleState getItem’dan default alır; load catalogKey→itemKey hydrate eder. base-wall recipe miktarları ve Raw BOM UI değişmedi; parent unit uydurulmadı.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
@@ -67,6 +67,7 @@
       "e2e/mini-fridge-dimensions.spec.mjs",
       "e2e/plastic-trash-bin-module.spec.mjs",
       "e2e/shelf-board-appearance.spec.mjs",
+      "e2e/wall-base-items-contract.spec.mjs",
       "e2e/wall-flat-panel-items-contract.spec.mjs",
       "e2e/wall-showcase-item-contract.spec.mjs",
       "test/autoDepotOrientation.test.js",
@@ -131,7 +132,6 @@
       "test/moduleContextDirection.test.js",
       "test/moduleMove.test.js",
       "test/modulePlacement.test.js",
-      "test/moduleRecipes.test.js",
       "test/moduleRotationPolicy.test.js",
       "test/moduleRotationSingleSourceIntegration.test.js",
       "test/moduleSelectionState.test.js",
@@ -171,6 +171,7 @@
       "test/uiFeedbackMainIntegration.test.js",
       "test/viewKeyboardMainIntegration.test.js",
       "test/wall.test.js",
+      "test/wallBaseItemsContract.test.js",
       "test/wallDragStickiness.test.js",
       "test/wallFlatPanelItemsContract.test.js",
       "test/wallMediaItemsContract.test.js",
@@ -244,6 +245,9 @@
       "docs/items/current-system/wall_150.md",
       "docs/items/current-system/wall_200.md",
       "docs/items/current-system/wall_50.md",
+      "docs/items/current-system/wall_base_100.md",
+      "docs/items/current-system/wall_base_150.md",
+      "docs/items/current-system/wall_base_200.md",
       "docs/items/definitions/BASE_100.md",
       "docs/items/definitions/BASE_150.md",
       "docs/items/definitions/BASE_200.md",
@@ -304,32 +308,34 @@
         "F-045"
       ]
     },
-    "notes": "Four flat-panel wall parents live in COMPOSITE_ITEMS with composition.moduleType=wall matching existing straight-wall recipes. Behavior remains WALL_BEHAVIOR. Recipe quantities and rawBomDebug unchanged. Parent unit omitted."
+    "notes": "Üç base-wall parent COMPOSITE_ITEMS’te; composition.moduleType=base-wall mevcut recipe ile eşleşir. Behavior WALL_BEHAVIOR+wall-backbone. Recipe miktarı ve rawBomDebug aynı. Parent unit yok."
   },
   "tests": {
     "targeted": [
-      "test/wallFlatPanelItemsContract.test.js",
+      "test/wallBaseItemsContract.test.js",
+      "test/baseItemsContract.test.js",
+      "test/baseWallCatalog.test.js",
+      "test/baseWallRecipes.test.js",
       "test/moduleStateConstructionRegistry.test.js",
-      "test/designState.test.js",
-      "test/moduleRecipes.test.js"
+      "test/designState.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/wall-flat-panel-items-contract.spec.mjs"
+        "e2e/wall-base-items-contract.spec.mjs"
       ],
-      "reason": "Four wall catalog cards are browser-visible; E2E adds via picker on a cleared back wall and checks itemKey/catalogKey and strips after save."
+      "reason": "Üç wall_base kartı tarayıcıda görünür; E2E temiz sırt duvarda picker ile ekler, itemKey/catalogKey + strip/face kontrol eder."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Composite cutover for four width variants sharing type flat-panel; auto-stand and depot also construct flat-panel via the same factory."
+    "notes": "Üç genişlik varyantı type=base-wall ile composite cutover."
   },
   "migration": {
     "required": false,
-    "notes": "No alias table. Legacy saves without itemKey hydrate from catalogKey/type+width on load."
+    "notes": "Alias yok. itemKey’siz eski kayıtlar load’da catalogKey/type+width ile hydrate olur."
   },
-  "rollback": "Revert this change set to restore hard-coded wall catalog/state without COMPOSITE_ITEMS identity."
+  "rollback": "Bu change set geri alınırsa wall_base katalog/state COMPOSITE_ITEMS kimliği olmadan eski haline döner."
 }
