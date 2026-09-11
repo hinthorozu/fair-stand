@@ -48,6 +48,11 @@ function ensureStyles() {
     .module-drag-mini-fridge { position:relative; width:38px; height:58px; border:3px solid #6b7280; border-radius:5px; background:#e7e5df; box-shadow:3px 3px 0 #cbd5e1; box-sizing:border-box; }
     .module-drag-mini-fridge::before { content:''; position:absolute; left:2px; right:2px; top:18px; height:2px; background:#8b8f94; }
     .module-drag-mini-fridge::after { content:''; position:absolute; right:4px; top:7px; width:2px; height:8px; border-radius:2px; background:#555b61; box-shadow:0 21px 0 #555b61; }
+    .module-drag-trash-bin { position:relative; width:44px; height:60px; transform:translateY(2px); }
+    .module-drag-trash-bin-handle { position:absolute; left:16px; top:1px; width:12px; height:8px; box-sizing:border-box; border:3px solid #68717a; border-bottom:0; border-radius:5px 5px 0 0; }
+    .module-drag-trash-bin-lid { position:absolute; left:2px; right:2px; top:8px; height:9px; box-sizing:border-box; border:2px solid #68717a; border-radius:4px; background:#e7eaed; box-shadow:0 2px 2px rgba(15,23,42,.12); }
+    .module-drag-trash-bin-body { position:absolute; left:6px; right:6px; top:16px; bottom:2px; box-sizing:border-box; border:3px solid #7b848c; border-radius:2px 2px 8px 8px; background:linear-gradient(90deg,#d9dde1 0%,#f7f8f9 45%,#c9ced3 100%); box-shadow:2px 3px 0 #d5d9dd; }
+    .module-drag-trash-bin-body::before { content:''; position:absolute; inset:5px 6px; border-left:2px solid rgba(104,113,122,.28); border-right:2px solid rgba(104,113,122,.28); }
     .module-drag-kettle { position:relative; width:58px; height:58px; }
     .module-drag-kettle-body { position:absolute; left:17px; top:20px; width:25px; height:27px; box-sizing:border-box; border:3px solid #4b5563; border-radius:7px 7px 12px 12px; background:#f8fafc; }
     .module-drag-kettle-handle { position:absolute; left:6px; top:23px; width:14px; height:21px; box-sizing:border-box; border:3px solid #4b5563; border-right:0; border-radius:13px 0 0 13px; }
@@ -155,11 +160,14 @@ export function createModuleCatalogPreview(module) {
   }
 
   if (module.type === 'plastic-trash-bin') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-panel';
-    body.style.width = `${Math.max(34, previewWidthPx(module.widthCm))}px`;
-    for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
-    preview.appendChild(body);
+    const trashBin = document.createElement('div');
+    trashBin.className = 'module-drag-trash-bin';
+    ['handle', 'lid', 'body'].forEach((part) => {
+      const element = document.createElement('i');
+      element.className = `module-drag-trash-bin-${part}`;
+      trashBin.appendChild(element);
+    });
+    preview.appendChild(trashBin);
     return preview;
   }
 

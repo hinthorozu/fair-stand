@@ -1,8 +1,7 @@
 import { resolveModuleCatalogKey } from './catalog.js';
-import { getCommercialItemForType, getItem, getShowcaseBodyDefinition, getShowcaseItemKeyForType } from './items.js';
+import { getCommercialItemForType, getItem, getShowcaseBodyDefinition, getShowcaseItemKeyForType, resolveWallMediaMetrics } from './items.js';
 import { getDoorLeafProductionItem, getProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
-import { getTvDefinition } from './tvConfig.js';
 
 const DEFAULT_PANEL_COLOR = '#ffffff';
 const STRIP_COUNT = 7;
@@ -326,25 +325,33 @@ export function createIlluminatedFoamModuleState(imageAssetId, descriptor = {}) 
   };
 }
 
-export function createTvModuleState(sizeInch = 42, descriptor = {}) {
+const TV_SIZE_INCH_TO_ITEM_KEY = Object.freeze({ 42: 'TV_42', 55: 'TV_55', 65: 'TV_65' });
 
-  const definition = getTvDefinition(sizeInch);
-  if (!definition) return null;
+function resolveWallMediaItemKey(sizeInch, descriptor) {
+  const explicitKey = descriptor.itemKey ?? descriptor.catalogKey ?? null;
+  if (explicitKey && getItem(explicitKey)?.type === 'tv') return explicitKey;
+  return TV_SIZE_INCH_TO_ITEM_KEY[Number(sizeInch)] ?? null;
+}
+
+export function createTvModuleState(sizeInch = 42, descriptor = {}) {
+  const itemKey = resolveWallMediaItemKey(sizeInch, descriptor);
+  const metrics = itemKey ? resolveWallMediaMetrics(itemKey) : null;
+  if (!metrics) return null;
   return {
     id: createId('module'),
-    type: definition.type,
-    widthCm: definition.widthCm,
-    depthCm: definition.depthCm,
-    heightCm: definition.screenHeightCm,
-    sizeInch: definition.sizeInch,
-    screenWidthCm: Number(descriptor.screenWidthCm) || definition.screenWidthCm,
-    screenHeightCm: Number(descriptor.screenHeightCm) || definition.screenHeightCm,
-    videoWallRows: Math.max(1, Number(descriptor.videoWallRows) || 1),
-    videoWallCols: Math.max(1, Number(descriptor.videoWallCols) || 1),
-    panelScreenWidthCm: Number(descriptor.panelScreenWidthCm) || definition.screenWidthCm,
-    panelScreenHeightCm: Number(descriptor.panelScreenHeightCm) || definition.screenHeightCm,
-    widthCm: Number(descriptor.widthCm) || definition.widthCm,
-    heightCm: Number(descriptor.screenHeightCm) || definition.screenHeightCm,
+    itemKey: metrics.itemKey,
+    catalogKey: metrics.itemKey,
+    type: metrics.type,
+    widthCm: metrics.widthCm,
+    depthCm: metrics.depthCm,
+    heightCm: metrics.screenHeightCm,
+    sizeInch: metrics.sizeInch,
+    screenWidthCm: metrics.screenWidthCm,
+    screenHeightCm: metrics.screenHeightCm,
+    videoWallRows: metrics.videoWallRows,
+    videoWallCols: metrics.videoWallCols,
+    panelScreenWidthCm: metrics.panelScreenWidthCm,
+    panelScreenHeightCm: metrics.panelScreenHeightCm,
   };
 }
 
@@ -422,6 +429,14 @@ export function createModuleStateFromDescriptor(
  */
 export function normalizeModuleItemState(moduleState) {
   if (!moduleState) return moduleState;
+
+  if (moduleState.type === 'tv') {
+    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    if (resolvedKey && getItem(resolvedKey)?.type === 'tv') {
+      moduleState.itemKey = resolvedKey;
+    }
+    return moduleState;
+  }
 
   if (moduleState.type === 'door') {
     const doorItem = getItem('door_100');

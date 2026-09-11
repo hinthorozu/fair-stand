@@ -1,5 +1,4 @@
-import { getItem } from './items.js';
-import { getTvDefinition } from './tvConfig.js';
+import { getItem, resolveWallMediaMetrics } from './items.js';
 
 export const STAND_DIMENSIONS = Object.freeze({
   height: 3.5,
@@ -68,31 +67,44 @@ export const COAT_RACK_DIMENSIONS = getItem('COAT_RACK').dimensions;
 
 export const PLASTIC_TRASH_BIN_DIMENSIONS = getItem('PLASTIC_TRASH_BIN').dimensions;
 
-const TV_42_DEFINITION = getTvDefinition(42);
-const TV_55_DEFINITION = getTvDefinition(55);
-const TV_65_DEFINITION = getTvDefinition(65);
 const DOOR_ITEM = getItem('door_100');
 const WALL_SHOWCASE_2_ITEM = getItem('wall_showcase_100_2');
 const WALL_SHOWCASE_3_ITEM = getItem('wall_showcase_100_3');
 
-function createTvCatalogItem(definition) {
-  return Object.freeze({
-    type: definition.type,
-    widthCm: definition.widthCm,
-    depthCm: definition.depthCm,
-    heightCm: definition.catalogHeightCm,
-    screenWidthCm: definition.screenWidthCm,
-    screenHeightCm: definition.screenHeightCm,
-    sizeInch: definition.sizeInch,
-    label: `TV ${definition.sizeInch}"`,
-  });
+// Wall-media catalog descriptors are projected from the canonical wall-media Item.
+// TV cards keep their 350 cm mounting height; video-wall cards use the derived total
+// screen height. No dimension is fabricated here; every value comes from the Item.
+function createWallMediaCatalogItem(itemKey) {
+  const metrics = resolveWallMediaMetrics(itemKey);
+  const base = {
+    itemKey: metrics.itemKey,
+    type: metrics.type,
+    widthCm: metrics.widthCm,
+    depthCm: metrics.depthCm,
+    heightCm: metrics.catalogHeightCm,
+    screenWidthCm: metrics.screenWidthCm,
+    screenHeightCm: metrics.screenHeightCm,
+    sizeInch: metrics.sizeInch,
+    label: metrics.label,
+  };
+  if (metrics.videoWallRows > 1 || metrics.videoWallCols > 1) {
+    return Object.freeze({
+      ...base,
+      panelScreenWidthCm: metrics.panelScreenWidthCm,
+      panelScreenHeightCm: metrics.panelScreenHeightCm,
+      videoWallRows: metrics.videoWallRows,
+      videoWallCols: metrics.videoWallCols,
+    });
+  }
+  return Object.freeze(base);
 }
 
+const TV_42_METRICS = resolveWallMediaMetrics('TV_42');
 export const TV_42_DIMENSIONS = Object.freeze({
-  moduleWidthCm: TV_42_DEFINITION.widthCm,
-  screenWidthCm: TV_42_DEFINITION.screenWidthCm,
-  screenHeightCm: TV_42_DEFINITION.screenHeightCm,
-  heightCm: TV_42_DEFINITION.catalogHeightCm,
+  moduleWidthCm: TV_42_METRICS.widthCm,
+  screenWidthCm: TV_42_METRICS.screenWidthCm,
+  screenHeightCm: TV_42_METRICS.screenHeightCm,
+  heightCm: TV_42_METRICS.catalogHeightCm,
 });
 
 export const LED_FLOODLIGHT_DIMENSIONS = Object.freeze({
@@ -171,33 +183,11 @@ export const MODULE_CATALOG = Object.freeze({
     preserveModelScale: true,
     label: 'Uzun Saksı 200',
   },
-  TV_42: createTvCatalogItem(TV_42_DEFINITION),
-  TV_55: createTvCatalogItem(TV_55_DEFINITION),
-  VIDEO_WALL_2X2: Object.freeze({
-    ...createTvCatalogItem(TV_55_DEFINITION),
-    widthCm: 108.5 * 2,
-    heightCm: 61 * 2,
-    screenWidthCm: 108.5 * 2,
-    screenHeightCm: 61 * 2,
-    panelScreenWidthCm: 108.5,
-    panelScreenHeightCm: 61,
-    videoWallRows: 2,
-    videoWallCols: 2,
-    label: 'Video Wall 2×2',
-  }),
-  VIDEO_WALL_3X3: Object.freeze({
-    ...createTvCatalogItem(TV_55_DEFINITION),
-    widthCm: 108.5 * 3,
-    heightCm: 61 * 3,
-    screenWidthCm: 108.5 * 3,
-    screenHeightCm: 61 * 3,
-    panelScreenWidthCm: 108.5,
-    panelScreenHeightCm: 61,
-    videoWallRows: 3,
-    videoWallCols: 3,
-    label: 'Video Wall 3×3',
-  }),
-  TV_65: createTvCatalogItem(TV_65_DEFINITION),
+  TV_42: createWallMediaCatalogItem('TV_42'),
+  TV_55: createWallMediaCatalogItem('TV_55'),
+  VIDEO_WALL_2X2: createWallMediaCatalogItem('VIDEO_WALL_2X2'),
+  VIDEO_WALL_3X3: createWallMediaCatalogItem('VIDEO_WALL_3X3'),
+  TV_65: createWallMediaCatalogItem('TV_65'),
   LED_FLOODLIGHT: { type: 'led-floodlight', widthCm: 50, depthCm: 20, heightCm: 35, label: 'LED Projektör' },
   door_100: {
     itemKey: DOOR_ITEM.itemKey,
