@@ -87,6 +87,17 @@ function createSeparatorCatalogItem(itemKey) {
   return Object.freeze(descriptor);
 }
 
+function createShelfCatalogItem(itemKey) {
+  const item = getItem(itemKey);
+  return Object.freeze({
+    itemKey: item.itemKey,
+    type: item.type,
+    widthCm: item.dimensions.widthCm,
+    shelfCount: item.shelfCount,
+    label: item.name,
+  });
+}
+
 export const SHELF_DIMENSIONS = Object.freeze({
   widthsCm: Object.freeze([100, 150, 200]),
   heightsByCountCm: Object.freeze({
@@ -203,12 +214,12 @@ export const MODULE_CATALOG = Object.freeze({
     eyeCount: WALL_SHOWCASE_2_ITEM.eyeCount,
     label: WALL_SHOWCASE_2_ITEM.name,
   },
-  wall_shelf_2_100: { type: 'shelf', widthCm: 100, shelfCount: 2, label: 'Raf 100 · 2 Raf' },
-  wall_shelf_3_100: { type: 'shelf', widthCm: 100, shelfCount: 3, label: 'Raf 100 · 3 Raf' },
-  wall_shelf_2_150: { type: 'shelf', widthCm: 150, shelfCount: 2, label: 'Raf 150 · 2 Raf' },
-  wall_shelf_3_150: { type: 'shelf', widthCm: 150, shelfCount: 3, label: 'Raf 150 · 3 Raf' },
-  wall_shelf_2_200: { type: 'shelf', widthCm: 200, shelfCount: 2, label: 'Raf 200 · 2 Raf' },
-  wall_shelf_3_200: { type: 'shelf', widthCm: 200, shelfCount: 3, label: 'Raf 200 · 3 Raf' },
+  wall_shelf_2_100: createShelfCatalogItem('wall_shelf_2_100'),
+  wall_shelf_3_100: createShelfCatalogItem('wall_shelf_3_100'),
+  wall_shelf_2_150: createShelfCatalogItem('wall_shelf_2_150'),
+  wall_shelf_3_150: createShelfCatalogItem('wall_shelf_3_150'),
+  wall_shelf_2_200: createShelfCatalogItem('wall_shelf_2_200'),
+  wall_shelf_3_200: createShelfCatalogItem('wall_shelf_3_200'),
   furniture_sofa_set_classic: { type: 'sofa-set-classic', widthCm: 150, depthCm: 150, heightCm: 78, label: 'Koltuk Takımı' },
   furniture_table_chair_set_eames: { type: 'table-chair-set-eames', widthCm: 150, depthCm: 150, heightCm: 82, label: 'Eames Masa Sandalye Takımı' },
   furniture_bar_stool_classic: { type: 'bar-stool', widthCm: 60, depthCm: 55, heightCm: 121, label: 'Bar Taburesi' },

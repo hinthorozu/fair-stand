@@ -178,15 +178,49 @@ export function createShowcaseModuleState(type, widthCm = 100) {
   };
 }
 
-export function createShelfModuleState(widthCm, shelfCount = 2) {
-  const width = Number(widthCm);
-  const count = Number(shelfCount);
-  if (![100, 150, 200].includes(width) || ![2, 3].includes(count)) return null;
+function isWallShelfCompositeItem(item) {
+  return item?.type === 'shelf'
+    && item.composition?.mode === 'recipe'
+    && item.composition?.moduleType === 'shelf';
+}
+
+function resolveShelfItemKey(widthCmOrDescriptor, shelfCount = 2) {
+  if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
+    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    if (explicitKey && isWallShelfCompositeItem(getItem(explicitKey))) return explicitKey;
+    const resolvedKey = resolveModuleCatalogKey({
+      type: 'shelf',
+      widthCm: widthCmOrDescriptor.widthCm,
+      shelfCount: widthCmOrDescriptor.shelfCount,
+      catalogKey: widthCmOrDescriptor.catalogKey ?? null,
+      itemKey: widthCmOrDescriptor.itemKey ?? null,
+    });
+    if (resolvedKey && isWallShelfCompositeItem(getItem(resolvedKey))) return resolvedKey;
+    return null;
+  }
+
+  const resolvedKey = resolveModuleCatalogKey({
+    type: 'shelf',
+    widthCm: Number(widthCmOrDescriptor),
+    shelfCount: Number(shelfCount),
+  });
+  if (resolvedKey && isWallShelfCompositeItem(getItem(resolvedKey))) return resolvedKey;
+  return null;
+}
+
+export function createShelfModuleState(widthCmOrDescriptor, shelfCount = 2) {
+  const itemKey = resolveShelfItemKey(widthCmOrDescriptor, shelfCount);
+  const item = itemKey ? getItem(itemKey) : null;
+  if (!isWallShelfCompositeItem(item)) return null;
+  const widthCm = Number(item.dimensions.widthCm);
+  const count = Number(item.shelfCount);
 
   return {
     id: createId('module'),
-    type: 'shelf',
-    widthCm: width,
+    itemKey: item.itemKey,
+    catalogKey: item.itemKey,
+    type: item.type,
+    widthCm,
     shelfCount: count,
     shelfLightingOn: false,
     strips: Array.from(
@@ -512,7 +546,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   'base-wall': (descriptor) => createBaseWallModuleState(descriptor),
   counter: (descriptor) => createCounterModuleState(descriptor),
   separator: (descriptor) => createSeparatorModuleState(descriptor),
-  shelf: (descriptor) => createShelfModuleState(descriptor.widthCm, descriptor.shelfCount),
+  shelf: (descriptor) => createShelfModuleState(descriptor),
   'sofa-set-classic': () => createBeigeSofaSetModuleState(),
   'table-chair-set-eames': () => createEamesTableChairSetModuleState(),
   'bar-stool': () => createBarStoolModuleState(),
@@ -615,6 +649,14 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'separator') {
     const resolvedKey = resolveModuleCatalogKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'separator') {
+      moduleState.itemKey = resolvedKey;
+    }
+    return moduleState;
+  }
+
+  if (moduleState.type === 'shelf') {
+    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    if (resolvedKey && isWallShelfCompositeItem(getItem(resolvedKey))) {
       moduleState.itemKey = resolvedKey;
     }
     return moduleState;
