@@ -20,7 +20,8 @@ export const COMMERCIAL_ITEMS = Object.freeze({
   PLASTIC_TRASH_BIN: Object.freeze({
     itemKey: 'PLASTIC_TRASH_BIN', name: 'Çöp Kutusu', type: 'plastic-trash-bin',
     dimensions: Object.freeze({ widthCm: 40, depthCm: 40, heightCm: 60 }),
-    modelFile: 'plastic_trash_bin.glb', preserveModelScale: false, modelRotationYDeg: 0,
+    modelFile: 'plastic_trash_bin.glb', preserveModelScale: false,
+    modelRotationYDeg: 0, visualRotationYDeg: -90,
   }),
 });
 

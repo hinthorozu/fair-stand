@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { getItem } from '../src/items.js';
 
 test('plastic trash bin owns centered two-line ÇÖP KOVASI top label', () => {
   const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
@@ -13,7 +14,10 @@ test('plastic trash bin owns centered two-line ÇÖP KOVASI top label', () => {
   assert.match(source, /role = 'plastic-trash-bin-top-label'/);
   assert.match(source, /label\.rotation\.z = Math\.PI \/ 2/);
   assert.match(source, /trashVisualGroup\.userData\.role = 'plastic-trash-bin-visual'/);
-  assert.match(source, /trashVisualGroup\.rotation\.y = -Math\.PI \/ 2/);
+  assert.equal(getItem('PLASTIC_TRASH_BIN').visualRotationYDeg, -90);
+  assert.match(source, /moduleState\.visualRotationYDeg \?\? item\.visualRotationYDeg/);
+  assert.match(source, /trashVisualGroup\.rotation\.y = THREE\.MathUtils\.degToRad\(visualRotationYDeg\)/);
+  assert.doesNotMatch(source, /trashVisualGroup\.rotation\.y = -Math\.PI \/ 2/);
   assert.match(source, /topLabel = createPlasticTrashBinTopLabel\(heightCm\)/);
   assert.match(source, /if \(topLabel\) trashVisualGroup\.add\(topLabel\)/);
   assert.match(source, /if \(trashVisualGroup\) trashVisualGroup\.add\(model\)/);
