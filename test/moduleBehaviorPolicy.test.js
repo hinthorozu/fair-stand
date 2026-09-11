@@ -54,12 +54,12 @@ test('F-011 special placement policies are declared by the canonical behavior co
   assert.equal(resolveSideInsertRotationDeg('counter', 90), 90);
 });
 
-test('kettle keeps its pre-F-011 declared contract and runtime collision semantics', () => {
+test('kettle declared contract and runtime collision strategy stay collision-none', () => {
   assert.equal(canModulesOverlapByBehavior({ type: 'kettle' }, { type: 'mini-fridge' }), true);
   assert.equal(canModulesOverlapByBehavior({ type: 'mini-fridge' }, { type: 'kettle' }), true);
   assert.equal(canModulesOverlapByBehavior({ type: 'kettle' }, { type: 'counter' }), false);
   assert.equal(getModuleBehavior('kettle').collision, 'none');
-  assert.equal(getModuleCollisionStrategy('kettle'), 'footprint');
+  assert.equal(getModuleCollisionStrategy('kettle'), 'none');
 });
 
 test('placement core selects F-011 policies through moduleBehavior instead of private type registries', () => {

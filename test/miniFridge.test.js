@@ -18,9 +18,9 @@ test('mini fridge catalog/state dimensions stay aligned', () => {
   );
 });
 
-test('mini fridge is a free footprint module', () => {
+test('mini fridge is a free module without inter-module collision', () => {
   const behavior = getModuleBehavior({ type: 'mini-fridge' });
   assert.equal(behavior.placement, 'free');
-  assert.equal(behavior.collision, 'footprint');
+  assert.equal(behavior.collision, 'none');
   assert.equal(behavior.rotationStepDeg, 90);
 });

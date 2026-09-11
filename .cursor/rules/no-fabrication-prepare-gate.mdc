@@ -1,0 +1,29 @@
+---
+description: Hayal/tahmin yasak; hazırlan≠kod; kullanıcı yakalamasın
+alwaysApply: true
+---
+
+# Fair Stand — Sert agent kapısı
+
+Kullanıcı kural ihlalini yakalamak zorunda değildir. Agent kendi kendini durdurur.
+
+## 1. Kaynak
+Sadece mevcut MD + runtime kod + açık ürün kararı. Hayal, tahmin, uydurma, “muhtemelen”, örnek miktar/unit/ölçü/behavior **yasak**.
+
+## 2. Trigger (kelimeye uy)
+- `hazırlan` / `envanter` / `emin ol` → **sadece** okuma + özet. Write/StrReplace/kod commit **YASAK**.
+- `yapıştır` / `uygula` / `kodla` / `gönder` → implementasyon izni.
+- Belirsizse kod yazma; sor.
+
+## 3. Kod öncesi checkpoint (zorunlu)
+Dosya değiştirmeden önce kullanıcıya tek mesajda:
+1) kanıtlı envanter (dosya+değer),
+2) dokunulmayacaklar,
+3) yapılacaklar.
+Onay yoksa kod yok. “Tamam abi” kendi kendine onay sayılmaz.
+
+## 4. Dil
+MD açıklama, yorum, commit/PR metni **Türkçe**. Kimlikler İngilizce (`itemKey`, method adları).
+
+## 5. Item
+`AGENTS.md` + `ITEM_CONTRACT.md` + `ITEM_MIGRATION_RULES.md` geçerli. Parent unit/recipe miktarı/Raw BOM uydurulmaz.
