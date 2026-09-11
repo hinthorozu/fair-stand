@@ -308,6 +308,54 @@ export const COMPOSITE_ITEMS = Object.freeze({
       nominalWidthCm: 200,
     }),
   }),
+  // Separatör parent'lar (type separator). Child miktarları moduleRecipes
+  // separator:50|100 satırlarında; sarmasık aynı genişlik recipe'sini paylaşır.
+  wall_separator_50: Object.freeze({
+    itemKey: 'wall_separator_50',
+    name: 'Separatör 50',
+    type: 'separator',
+    dimensions: Object.freeze({ widthCm: 50 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'separator',
+      nominalWidthCm: 50,
+    }),
+  }),
+  wall_separator_100: Object.freeze({
+    itemKey: 'wall_separator_100',
+    name: 'Separatör 100',
+    type: 'separator',
+    dimensions: Object.freeze({ widthCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'separator',
+      nominalWidthCm: 100,
+    }),
+  }),
+  wall_separator_50_sarmasik: Object.freeze({
+    itemKey: 'wall_separator_50_sarmasik',
+    name: 'Separatör 50 Sarmaşık',
+    type: 'separator',
+    modelFile: 'wall_separator_50_sarmasik.glb',
+    dimensions: Object.freeze({ widthCm: 50 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'separator',
+      nominalWidthCm: 50,
+    }),
+  }),
+  wall_separator_100_sarmasik: Object.freeze({
+    itemKey: 'wall_separator_100_sarmasik',
+    name: 'Separatör 100 Sarmaşık',
+    type: 'separator',
+    modelFile: 'wall_separator_100_sarmasik.glb',
+    dimensions: Object.freeze({ widthCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'separator',
+      nominalWidthCm: 100,
+    }),
+  }),
   wall_showcase_100_2: Object.freeze({
     itemKey: 'wall_showcase_100_2',
     name: '2 Gözlü Vitrin 100',

@@ -99,12 +99,53 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
   };
 }
 
-export function createSeparatorModuleState(widthCm, descriptor = {}) {
+const SEPARATOR_PLAIN_WIDTH_TO_ITEM_KEY = Object.freeze({
+  50: 'wall_separator_50',
+  100: 'wall_separator_100',
+});
+
+function resolveSeparatorItemKey(widthCmOrDescriptor, descriptor = {}) {
+  if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
+    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    if (explicitKey && getItem(explicitKey)?.type === 'separator') return explicitKey;
+    const resolvedKey = resolveModuleCatalogKey({
+      type: 'separator',
+      widthCm: widthCmOrDescriptor.widthCm,
+      modelFile: widthCmOrDescriptor.modelFile ?? null,
+      catalogKey: widthCmOrDescriptor.catalogKey ?? null,
+      itemKey: widthCmOrDescriptor.itemKey ?? null,
+    });
+    if (resolvedKey && getItem(resolvedKey)?.type === 'separator') return resolvedKey;
+    return null;
+  }
+
+  const modelFile = descriptor.modelFile ?? null;
+  if (modelFile) {
+    const resolvedKey = resolveModuleCatalogKey({
+      type: 'separator',
+      widthCm: Number(widthCmOrDescriptor),
+      modelFile,
+    });
+    if (resolvedKey && getItem(resolvedKey)?.type === 'separator') return resolvedKey;
+    return null;
+  }
+
+  return SEPARATOR_PLAIN_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor)] ?? null;
+}
+
+export function createSeparatorModuleState(widthCmOrDescriptor, descriptor = {}) {
+  const itemKey = resolveSeparatorItemKey(widthCmOrDescriptor, descriptor);
+  const item = itemKey ? getItem(itemKey) : null;
+  if (!item || item.type !== 'separator') return null;
+  const widthCm = Number(item.dimensions.widthCm);
+
   return {
     id: createId('module'),
-    type: 'separator',
+    itemKey: item.itemKey,
+    catalogKey: item.itemKey,
+    type: item.type,
     widthCm,
-    modelFile: descriptor.modelFile ?? null,
+    modelFile: item.modelFile ?? null,
     surface: {
       id: createId('surface'),
       color: separatorDefaultColor(widthCm),
@@ -470,7 +511,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   base: (descriptor) => createBaseModuleState(descriptor),
   'base-wall': (descriptor) => createBaseWallModuleState(descriptor),
   counter: (descriptor) => createCounterModuleState(descriptor),
-  separator: (descriptor) => createSeparatorModuleState(descriptor.widthCm, descriptor),
+  separator: (descriptor) => createSeparatorModuleState(descriptor),
   shelf: (descriptor) => createShelfModuleState(descriptor.widthCm, descriptor.shelfCount),
   'sofa-set-classic': () => createBeigeSofaSetModuleState(),
   'table-chair-set-eames': () => createEamesTableChairSetModuleState(),
@@ -566,6 +607,14 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'base-wall') {
     const resolvedKey = resolveModuleCatalogKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'base-wall') {
+      moduleState.itemKey = resolvedKey;
+    }
+    return moduleState;
+  }
+
+  if (moduleState.type === 'separator') {
+    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    if (resolvedKey && getItem(resolvedKey)?.type === 'separator') {
       moduleState.itemKey = resolvedKey;
     }
     return moduleState;
