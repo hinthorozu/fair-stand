@@ -80,4 +80,6 @@ test('shelf renderer consumes canonical Item depth, thickness and default color 
   assert.match(rendererSource, /color: shelfItem\.defaultColor/);
   assert.match(rendererSource, /new THREE\.BoxGeometry\(innerWidthM, shelfThicknessM, shelfDepthM\)/);
   assert.doesNotMatch(rendererSource, /color:\s*0xb8bcc1/);
+  assert.doesNotMatch(rendererSource, /const frontProfile = new THREE\.Mesh/);
+  assert.doesNotMatch(rendererSource, /new THREE\.BoxGeometry\(innerWidthM, 0\.025, 0\.025\)/);
 });

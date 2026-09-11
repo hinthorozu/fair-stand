@@ -26,6 +26,8 @@ test('shelf renderer adds lights without changing shelf box geometry', () => {
   assert.match(source, /function setShelfLightingVisible\(moduleIndex, enabled\)/);
   assert.match(source, /module\.group\.userData\.moduleIndex = moduleIndex/);
   assert.doesNotMatch(source, /shelf-under-front-glow/);
+  assert.doesNotMatch(source, /const frontProfile = new THREE\.Mesh/);
+  assert.doesNotMatch(source, /new THREE\.BoxGeometry\(innerWidthM, 0\.025, 0\.025\)/);
   assert.match(source, /new THREE\.BoxGeometry\(innerWidthM, shelfThicknessM, shelfDepthM\)/);
 });
 

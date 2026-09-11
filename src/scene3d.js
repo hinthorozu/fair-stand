@@ -6408,11 +6408,6 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
     roughness: 0.78,
     metalness: 0,
   });
-  const frameMaterial = new THREE.MeshStandardMaterial({
-    color: FRAME_COLOR,
-    metalness: 0.68,
-    roughness: 0.28,
-  });
 
   shelfHeightsCm.forEach((heightCm) => {
     const seamHeightM = Number(heightCm) / 100;
@@ -6429,74 +6424,60 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
     shelf.receiveShadow = true;
     built.group.add(shelf);
 
-    const frontProfile = new THREE.Mesh(
-      new THREE.BoxGeometry(innerWidthM, 0.025, 0.025),
-      frameMaterial.clone(),
+    // Raf ışıkları bir kez oluşturulur; aç/kapa sadece visible değiştirir.
+    const ledStripWidthM = Math.max(innerWidthM - 0.04, 0.08);
+    const ledStripDepthM = 0.016;
+    const ledStripThicknessM = 0.006;
+    const shelfBottomY = seamHeightM;
+    const ledCenterZM = wallDepthM / 2 + shelfDepthM * 0.78;
+
+    const ledStrip = new THREE.Mesh(
+      new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
+      new THREE.MeshStandardMaterial({
+        color: 0xfff4df,
+        emissive: 0xffe3bd,
+        emissiveIntensity: 3.2,
+        roughness: 0.28,
+        metalness: 0,
+      }),
     );
-    frontProfile.position.set(
+    ledStrip.position.set(
       0,
-      seamHeightM + 0.0125,
-      wallDepthM / 2 + shelfDepthM + 0.0125,
+      shelfBottomY - ledStripThicknessM / 2 - 0.001,
+      ledCenterZM,
     );
-    frontProfile.castShadow = true;
-    built.group.add(frontProfile);
+    ledStrip.visible = shelfLightingOn;
+    ledStrip.userData.kind = 'decoration';
+    ledStrip.userData.role = 'shelf-under-led-strip';
+    built.group.add(ledStrip);
 
-    {
-      // Raf ışıkları bir kez oluşturulur; aç/kapa sadece visible değiştirir.
-      const ledStripWidthM = Math.max(innerWidthM - 0.04, 0.08);
-      const ledStripDepthM = 0.016;
-      const ledStripThicknessM = 0.006;
-      const shelfBottomY = seamHeightM;
-      const ledCenterZM = wallDepthM / 2 + shelfDepthM * 0.78;
-
-      const ledStrip = new THREE.Mesh(
-        new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
-        new THREE.MeshStandardMaterial({
-          color: 0xfff4df,
-          emissive: 0xffe3bd,
-          emissiveIntensity: 3.2,
-          roughness: 0.28,
-          metalness: 0,
-        }),
+    // Sağ-sol simetrik iki spot; raf genişliğinin çeyrek noktalarına yerleşir.
+    const spotOffsets = [-innerWidthM * 0.25, innerWidthM * 0.25];
+    spotOffsets.forEach((spotX) => {
+      const spot = new THREE.SpotLight(
+        0xfff2dc,
+        14,
+        1.0,
+        0.68,
+        0.82,
+        1.6,
       );
-      ledStrip.position.set(
-        0,
-        shelfBottomY - ledStripThicknessM / 2 - 0.001,
-        ledCenterZM,
+      spot.position.set(
+        spotX,
+        shelfBottomY - 0.018,
+        wallDepthM / 2 + shelfDepthM * 0.76,
       );
-      ledStrip.visible = shelfLightingOn;
-      ledStrip.userData.kind = 'decoration';
-      ledStrip.userData.role = 'shelf-under-led-strip';
-      built.group.add(ledStrip);
-
-      // Sağ-sol simetrik iki spot; raf genişliğinin çeyrek noktalarına yerleşir.
-      const spotOffsets = [-innerWidthM * 0.25, innerWidthM * 0.25];
-      spotOffsets.forEach((spotX) => {
-        const spot = new THREE.SpotLight(
-          0xfff2dc,
-          14,
-          1.0,
-          0.68,
-          0.82,
-          1.6,
-        );
-        spot.position.set(
-          spotX,
-          shelfBottomY - 0.018,
-          wallDepthM / 2 + shelfDepthM * 0.76,
-        );
-        spot.target.position.set(
-          spotX,
-          Math.max(0.04, shelfBottomY - 0.58),
-          wallDepthM / 2 + shelfDepthM * 1.02,
-        );
-        spot.visible = shelfLightingOn;
-        spot.castShadow = false;
-        spot.userData.kind = 'decoration';
-        spot.userData.role = 'shelf-under-light';
-        built.group.add(spot, spot.target);
-      });
-    }
+      spot.target.position.set(
+        spotX,
+        Math.max(0.04, shelfBottomY - 0.58),
+        wallDepthM / 2 + shelfDepthM * 1.02,
+      );
+      spot.visible = shelfLightingOn;
+      spot.castShadow = false;
+      spot.userData.kind = 'decoration';
+      spot.userData.role = 'shelf-under-light';
+      built.group.add(spot, spot.target);
+    });
   });
 
   return built;

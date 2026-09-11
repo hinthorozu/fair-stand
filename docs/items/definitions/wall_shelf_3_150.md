@@ -76,7 +76,7 @@ shelf projection = 38 cm
 shelf thickness = 3 cm
 ```
 
-Her shelf için shelf mesh + front profile yanında bir LED strip ve iki spotlight oluşturulur. Bütün shelf light görünürlüğü tek `moduleState.shelfLightingOn` boolean'ı ile kontrol edilir.
+Her shelf için yalnız canonical sunta shelf mesh'i oluşturulur; renderer ayrı alüminyum front profile eklemez. Her shelf yanında bir LED strip ve iki spotlight oluşturulur. Bütün shelf light görünürlüğü tek `moduleState.shelfLightingOn` boolean'ı ile kontrol edilir.
 
 ## Selection / appearance
 
