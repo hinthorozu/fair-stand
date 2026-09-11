@@ -64,10 +64,33 @@ function createEditablePanelState(stripIndex, color) {
   };
 }
 
-export function createFlatPanelModuleState(widthCm) {
+const WALL_WIDTH_TO_ITEM_KEY = Object.freeze({
+  50: 'wall_50',
+  100: 'wall_100',
+  150: 'wall_150',
+  200: 'wall_200',
+});
+
+function resolveFlatPanelItemKey(widthCmOrDescriptor) {
+  if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
+    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    if (explicitKey && getItem(explicitKey)?.type === 'flat-panel') return explicitKey;
+    return WALL_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor.widthCm)] ?? null;
+  }
+  return WALL_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor)] ?? null;
+}
+
+export function createFlatPanelModuleState(widthCmOrDescriptor) {
+  const itemKey = resolveFlatPanelItemKey(widthCmOrDescriptor);
+  const item = itemKey ? getItem(itemKey) : null;
+  if (!item || item.type !== 'flat-panel') return null;
+  const widthCm = Number(item.dimensions.widthCm);
+
   return {
     id: createId('module'),
-    type: 'flat-panel',
+    itemKey: item.itemKey,
+    catalogKey: item.itemKey,
+    type: item.type,
     widthCm,
     strips: Array.from(
       { length: STRIP_COUNT },
@@ -424,7 +447,7 @@ export function createLedFloodlightModuleState() {
 }
 
 const MODULE_STATE_FACTORIES = Object.freeze({
-  'flat-panel': (descriptor) => createFlatPanelModuleState(descriptor.widthCm),
+  'flat-panel': (descriptor) => createFlatPanelModuleState(descriptor),
   base: (descriptor) => createBaseModuleState(descriptor),
   'base-wall': (descriptor) => createBaseWallModuleState(descriptor.widthCm),
   counter: (descriptor) => createCounterModuleState(descriptor),
@@ -508,6 +531,14 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'counter') {
     const resolvedKey = resolveModuleCatalogKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'counter') {
+      moduleState.itemKey = resolvedKey;
+    }
+    return moduleState;
+  }
+
+  if (moduleState.type === 'flat-panel') {
+    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    if (resolvedKey && getItem(resolvedKey)?.type === 'flat-panel') {
       moduleState.itemKey = resolvedKey;
     }
     return moduleState;
