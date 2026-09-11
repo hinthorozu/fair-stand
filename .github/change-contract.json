@@ -1,38 +1,34 @@
 {
   "schemaVersion": 2,
-  "id": "wall-media-item-migration",
+  "id": "base-family-item-migration",
   "kind": "refactor",
-  "summary": "Migrate the wall-media family (TV_42/TV_55/TV_65 and the singular parametric VIDEO_WALL_2X2/VIDEO_WALL_3X3) into the canonical Item Contract. src/items.js WALL_MEDIA_ITEMS becomes the single source-of-truth; catalog descriptors, the tv state factory and TV_42_DIMENSIONS now derive from getItem/resolveWallMediaMetrics; project load hydrates catalogKey->itemKey. The tvConfig.js second business source-of-truth is removed. Wall-overlay height clamp now uses geometric top/bottom bounds after the shared 10 cm snap so every TV/video-wall screen size can sit flush to the wall edge (TV_55 no longer looks special). The same uncommitted working set also carries the plastic-trash-bin catalog-preview silhouette change in src/moduleDragSidebar.js, so this contract governs those surfaces together.",
+  "summary": "Migrate BASE_100/BASE_150/BASE_200 into COMPOSITE_ITEMS as the canonical composite Item source-of-truth. Catalog descriptors and createBaseModuleState derive defaults from getItem(catalogKey); load hydrates catalogKey→itemKey. Recipe ownership stays in moduleRecipes.js with quantity parity; wall_base_* parents and shared base_top_* recipe rows are untouched.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
-    "src/designState.js",
-    "src/systemChangeContract.js",
-    "src/moduleDragSidebar.js",
-    "src/modulePlacement.js",
-    "src/scene3d.js"
+    "src/designState.js"
   ],
   "sourceOfTruth": [
     "docs/items/contract/ITEM_CONTRACT.md",
     "src/items.js",
+    "src/moduleRecipes.js",
     "src/catalog.js",
-    "src/designState.js",
-    "src/modulePlacement.js"
+    "src/designState.js"
   ],
   "impact": {
     "catalog": "affected",
-    "behavior": "affected",
+    "behavior": "not-applicable",
     "state": "affected",
-    "placement": "affected",
-    "renderer": "affected",
+    "placement": "not-applicable",
+    "renderer": "not-applicable",
     "persistence": "affected",
     "bom": "affected",
-    "ui": "affected",
+    "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
-    "performance": "affected",
+    "performance": "not-applicable",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
@@ -42,10 +38,10 @@
     "mode": "full-system",
     "affectedFiles": [
       ".github/change-contract.json",
+      "fair-stand-base-family-migration-handoff.md",
       "index.html",
       "scripts/add-tv-sizes.py",
       "scripts/add-video-wall-2x2.py",
-      "scripts/fix-tv-screen-face.py",
       "scripts/patch-video-wall-2x2.cjs",
       "scripts/patch-video-wall-single-image.cjs",
       "scripts/verify-change-contract.mjs",
@@ -62,6 +58,7 @@
       "src/moduleDragSidebar.js",
       "src/moduleMove.js",
       "src/modulePlacement.js",
+      "src/moduleRecipes.js",
       "src/rawBomDebug.js",
       "src/scene3d.js",
       "src/selectionFeedback.js",
@@ -71,6 +68,7 @@
       "src/wallReflow.js"
     ],
     "affectedTests": [
+      "e2e/base-items-contract.spec.mjs",
       "e2e/commercial-items-contract.spec.mjs",
       "e2e/f010-module-construction.spec.mjs",
       "e2e/f011-module-behavior.spec.mjs",
@@ -82,8 +80,11 @@
       "test/automaticWall.test.js",
       "test/autosaveMainIntegration.test.js",
       "test/barStool2.test.js",
+      "test/baseItemsContract.test.js",
       "test/baseModule.test.js",
+      "test/baseRecipes.test.js",
       "test/baseRenderStyle.test.js",
+      "test/baseTopsItemContract.test.js",
       "test/baseWallCatalog.test.js",
       "test/baseWallDepthAlignment.test.js",
       "test/baseWallRecipes.test.js",
@@ -234,8 +235,12 @@
       "audit/remediation/A03_F012_CLOSURE.md",
       "audit/remediation/A04_F013_CLOSURE.md",
       "docs/AUTOSAVE_INTEGRATION_NOTES.md",
+      "docs/items/ITEM_MIGRATION_RULES.md",
       "docs/items/contract/ITEM_CONTRACT.md",
       "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md",
+      "docs/items/current-system/BASE_100.md",
+      "docs/items/current-system/BASE_150.md",
+      "docs/items/current-system/BASE_200.md",
       "docs/items/current-system/COAT_RACK.md",
       "docs/items/current-system/KETTLE.md",
       "docs/items/current-system/MINI_FRIDGE_AVANTI.md",
@@ -334,7 +339,8 @@
       "docs/items/definitions/wall_shelf_3_100.md",
       "docs/items/definitions/wall_shelf_3_150.md",
       "docs/items/definitions/wall_shelf_3_200.md",
-      "docs/items/door_100_full_system_audit.md"
+      "docs/items/door_100_full_system_audit.md",
+      "fair-stand-base-family-migration-handoff.md"
     ],
     "relatedFindings": {
       "affected": [
@@ -362,34 +368,33 @@
         "F-045"
       ]
     },
-    "notes": "The wall-media family now resolves its canonical identity, dimensions and grid parameters from src/items.js WALL_MEDIA_ITEMS through resolveWallMediaMetrics. src/catalog.js projects catalog descriptors and TV_42_DIMENSIONS from that resolver; src/designState.js builds tv instance state from the Item and stamps itemKey/catalogKey; normalizeModuleItemState hydrates catalogKey->itemKey on project load. The tvConfig.js source-of-truth and its systemChangeContract mapping are removed. Video walls remain a singular parametric Item (grid + panel size, totals derived) rather than a composite of N x TV_55. Wall-media BOM stays decision-required with source:null. Wall-overlay vertical movement still snaps to 10 cm, but clampWallOverlayZCm / getWallOverlayZBoundsCm now apply geometric top/bottom bounds so every screen height can sit flush to the 350 cm wall instead of stopping early on a snap multiple (the previous TV_55-looking special case). The plastic-trash-bin catalog-preview silhouette change in moduleDragSidebar.js is included in the same uncommitted working set. Token discovery across catalog/state/renderer/BOM/placement dependents is reviewed as identity-routing + height-clamp parity work."
+    "notes": "BASE_100/150/200 now live in COMPOSITE_ITEMS. Catalog and createBaseModuleState resolve defaults through getItem; normalizeModuleItemState hydrates catalogKey→itemKey for type base. moduleRecipes base:100/150/200 quantities and wall_base_* / base-wall recipes are unchanged; shared base_top_* rows keep ×1. Behavior remains type-level free/logical-fixture. Renderer thickness/overhang is not business SoT."
   },
   "tests": {
     "targeted": [
-      "test/tv42Module.test.js",
-      "test/wallMediaItemsContract.test.js",
-      "test/commercialItemsContract.test.js",
-      "test/systemChangeGate.test.js",
-      "test/plasticTrashBinModule.test.js"
+      "test/baseItemsContract.test.js",
+      "test/baseModule.test.js",
+      "test/baseRecipes.test.js",
+      "test/baseTopsItemContract.test.js",
+      "test/baseWallRecipes.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/wall-media-items-contract.spec.mjs",
-        "e2e/plastic-trash-bin-module.spec.mjs"
+        "e2e/base-items-contract.spec.mjs"
       ],
-      "reason": "Catalog drag-drop, runtime state and persistence for the five wall-media cards are browser-visible; the E2E drags each card and verifies the saved project carries the canonical itemKey/catalogKey plus the grid parameters. The same uncommitted working set also carries the plastic-trash-bin catalog-preview silhouette change, whose browser-visible catalog/Add cards are covered by its dedicated spec."
+      "reason": "Catalog drag-drop and persistence of the three BASE cards are browser-visible; E2E verifies itemKey/catalogKey and editable faces survive save."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Central catalog/state/Item source-of-truth refactor. Runtime dimensions, wall-media BOM policy, wall-overlay placement and the TV renderer are held at parity; risk is confined to identity routing and legacy-project itemKey hydration, covered by unit + E2E."
+    "notes": "Composite Item cutover for three width variants sharing one type. Recipe/BOM quantities and wall_base parents are isolation-tested as unchanged."
   },
   "migration": {
     "required": false,
-    "notes": "No stored-shape rewrite is forced. Legacy projects still resolve their canonical catalogKey through resolveModuleCatalogKey and now also hydrate itemKey via normalizeModuleItemState on load; no dual-write and no persisted migration step is required."
+    "notes": "No alias table. Legacy saves without itemKey hydrate from catalogKey/type+width on load."
   },
-  "rollback": "Revert this change set to restore src/tvConfig.js as the wall-media source-of-truth and the previous catalog/state derivation."
+  "rollback": "Revert this change set to restore catalog/state hard-coded BASE dimensions without COMPOSITE_ITEMS identity."
 }
