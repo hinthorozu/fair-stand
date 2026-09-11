@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 
 test('selected module rotation keeps a cursor across invalid intermediate angles', () => {
   assert.match(source, /let keyboardRotationCursor = null/);

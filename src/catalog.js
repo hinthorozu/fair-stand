@@ -62,23 +62,11 @@ export const furniture_bar_stool_classic_DIMENSIONS = Object.freeze({
   heightCm: 121,
 });
 
-export const DEPOT_MINI_FRIDGE_DIMENSIONS = Object.freeze({
-  widthCm: 50,
-  depthCm: 50,
-  heightCm: 66,
-});
+export const MINI_FRIDGE_DIMENSIONS = getItem('MINI_FRIDGE_AVANTI').dimensions;
 
-export const DEPOT_COAT_RACK_DIMENSIONS = Object.freeze({
-  widthCm: 43,
-  depthCm: 43,
-  heightCm: 180,
-});
+export const COAT_RACK_DIMENSIONS = getItem('COAT_RACK').dimensions;
 
-export const DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS = Object.freeze({
-  widthCm: 40,
-  depthCm: 40,
-  heightCm: 60,
-});
+export const PLASTIC_TRASH_BIN_DIMENSIONS = getItem('PLASTIC_TRASH_BIN').dimensions;
 
 const TV_42_DEFINITION = getTvDefinition(42);
 const TV_55_DEFINITION = getTvDefinition(55);
@@ -114,6 +102,11 @@ export const LED_FLOODLIGHT_DIMENSIONS = Object.freeze({
   mountHeightCm: 350,
 });
 
+function createCommercialCatalogItem(itemKey) {
+  const { name, dimensions, ...metadata } = getItem(itemKey);
+  return Object.freeze({ ...metadata, ...dimensions, label: name });
+}
+
 export const MODULE_CATALOG = Object.freeze({
   wall_50: { type: 'flat-panel', widthCm: 50, label: 'Düz Panel 50' },
   wall_100: { type: 'flat-panel', widthCm: 100, label: 'Düz Panel 100' },
@@ -143,18 +136,10 @@ export const MODULE_CATALOG = Object.freeze({
   furniture_sofa_set_classic: { type: 'sofa-set-classic', widthCm: 150, depthCm: 150, heightCm: 78, label: 'Koltuk Takımı' },
   furniture_table_chair_set_eames: { type: 'table-chair-set-eames', widthCm: 150, depthCm: 150, heightCm: 82, label: 'Eames Masa Sandalye Takımı' },
   furniture_bar_stool_classic: { type: 'bar-stool', widthCm: 60, depthCm: 55, heightCm: 121, label: 'Bar Taburesi' },
-  DEPOT_MINI_FRIDGE_AVANTI: { type: 'mini-fridge', widthCm: 50, depthCm: 50, heightCm: 66, label: 'Mini Buzdolabı' },
-  DEPOT_KETTLE: { type: 'kettle', widthCm: 24, depthCm: 19, heightCm: 25, label: 'Kettle' },
-  DEPOT_COAT_RACK: { type: 'coat-rack', widthCm: 43, depthCm: 43, heightCm: 180, label: 'Askılık' },
-  DEPOT_PLASTIC_TRASH_BIN: {
-    type: 'plastic-trash-bin',
-    widthCm: DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS.widthCm,
-    depthCm: DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS.depthCm,
-    heightCm: DEPOT_PLASTIC_TRASH_BIN_DIMENSIONS.heightCm,
-    modelFile: 'plastic_trash_bin.glb',
-    preserveModelScale: false,
-    label: 'Çöp Kutusu',
-  },
+  MINI_FRIDGE_AVANTI: createCommercialCatalogItem('MINI_FRIDGE_AVANTI'),
+  KETTLE: createCommercialCatalogItem('KETTLE'),
+  COAT_RACK: createCommercialCatalogItem('COAT_RACK'),
+  PLASTIC_TRASH_BIN: createCommercialCatalogItem('PLASTIC_TRASH_BIN'),
   EXTRA_INDOOR_PLANT_1: { type: 'indoor-plant-1', widthCm: 60, depthCm: 60, heightCm: 120, label: 'Yapay Çiçek 1' },
   EXTRA_LONG_PLANTER_100: {
     type: 'indoor-plant-1',
@@ -281,10 +266,10 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'furniture_sofa_set_classic',
   'furniture_table_chair_set_eames',
   'furniture_bar_stool_classic',
-  'DEPOT_MINI_FRIDGE_AVANTI',
-  'DEPOT_KETTLE',
-  'DEPOT_COAT_RACK',
-  'DEPOT_PLASTIC_TRASH_BIN',
+  'MINI_FRIDGE_AVANTI',
+  'KETTLE',
+  'COAT_RACK',
+  'PLASTIC_TRASH_BIN',
   'EXTRA_INDOOR_PLANT_1',
   'EXTRA_LONG_PLANTER_100',
   'EXTRA_LONG_PLANTER_150',
@@ -312,7 +297,7 @@ export const MODULE_CATALOG_GROUPS = Object.freeze([
   }),
   Object.freeze({
     label: 'Extra',
-    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic', 'DEPOT_MINI_FRIDGE_AVANTI', 'DEPOT_KETTLE', 'DEPOT_COAT_RACK', 'DEPOT_PLASTIC_TRASH_BIN', 'EXTRA_INDOOR_PLANT_1', 'EXTRA_LONG_PLANTER_100', 'EXTRA_LONG_PLANTER_150', 'EXTRA_LONG_PLANTER_200']),
+    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic', 'MINI_FRIDGE_AVANTI', 'KETTLE', 'COAT_RACK', 'PLASTIC_TRASH_BIN', 'EXTRA_INDOOR_PLANT_1', 'EXTRA_LONG_PLANTER_100', 'EXTRA_LONG_PLANTER_150', 'EXTRA_LONG_PLANTER_200']),
   }),
   Object.freeze({
     label: 'Elektronik & Aydınlatma',

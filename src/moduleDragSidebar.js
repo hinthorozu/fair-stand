@@ -154,6 +154,15 @@ export function createModuleCatalogPreview(module) {
     return preview;
   }
 
+  if (module.type === 'plastic-trash-bin') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-panel';
+    body.style.width = `${Math.max(34, previewWidthPx(module.widthCm))}px`;
+    for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
+    preview.appendChild(body);
+    return preview;
+  }
+
   if (module.type === 'indoor-plant-1' && /^saksi_bitkili_\d+x30x30\.glb$/i.test(module.modelFile ?? '')) {
     const planter = document.createElement('div');
     planter.className = 'module-drag-long-planter';

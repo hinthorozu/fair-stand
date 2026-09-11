@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 
 import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
 import { createModuleStateFromDescriptor, normalizeModuleItemState } from '../src/designState.js';
@@ -138,5 +138,5 @@ test('active door Item surfaces no longer carry the uppercase legacy key', () =>
   assert.doesNotMatch(systemCatalog, /DOOR_100/);
   assert.match(rawBomSource, /import \{ resolveItemBom \} from '\.\/itemBom\.js'/);
   assert.match(rawBomSource, /renderItemBom\('door_100'/);
-  assert.equal(existsSync(new URL('../docs/items/definitions/DOOR_100.md', import.meta.url)), false);
+  assert.equal(readdirSync(new URL('../docs/items/definitions/', import.meta.url)).includes('DOOR_100.md'), false);
 });

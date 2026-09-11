@@ -15,7 +15,7 @@ import {
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { AUTO_DEPOT_SIZES, planAutomaticDepot } from '../src/autoDepot.js';
 
-const KEY = 'DEPOT_PLASTIC_TRASH_BIN';
+const KEY = 'PLASTIC_TRASH_BIN';
 const MODEL_FILE = 'plastic_trash_bin.glb';
 
 function footprint(spec) {
@@ -101,6 +101,7 @@ test('trash bin has an explicit fixed-model contract and remains in F-014 BOM de
   assert.equal(contract.behavior.moveSnapCm, 10);
   assert.equal(contract.behavior.magneticSnap, 'none');
   assert.equal(contract.bom.mode, 'decision-required');
+  assert.equal(contract.bom.source, null);
 });
 
 test('automatic depot adds the trash bin inside every supported depot without floor-fixture overlap', () => {

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const source = fs.readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+const source = fs.readFileSync(new URL('../src/main.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 
 function getSceneSelectionWiring() {
   const start = source.indexOf('const scene3d = createStandScene(');

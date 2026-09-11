@@ -8,7 +8,7 @@ export const AUTO_DEPOT_SIZES = Object.freeze({
   '200x200': Object.freeze({ widthCm: 200, depthCm: 200, label: '2 × 2 m' }),
 });
 
-const PLASTIC_TRASH_BIN_CATALOG_KEY = 'DEPOT_PLASTIC_TRASH_BIN';
+const PLASTIC_TRASH_BIN_CATALOG_KEY = 'PLASTIC_TRASH_BIN';
 const PLASTIC_TRASH_BIN_DESCRIPTOR = MODULE_CATALOG[PLASTIC_TRASH_BIN_CATALOG_KEY];
 
 function wall(widthCm, xCm, yCm, rotationZDeg = 0) {
@@ -73,12 +73,12 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
   addFront(specs, xCm, yCm + size.depthCm, size.widthCm, standType);
 
   if (includeContents) {
-    const fridgeWidth = 50;
-    const fridgeDepth = 50;
-    const rackWidth = 43;
-    const rackDepth = 43;
-    const kettleWidth = 24;
-    const kettleDepth = 19;
+    const fridgeWidth = MODULE_CATALOG.MINI_FRIDGE_AVANTI.widthCm;
+    const fridgeDepth = MODULE_CATALOG.MINI_FRIDGE_AVANTI.depthCm;
+    const rackWidth = MODULE_CATALOG.COAT_RACK.widthCm;
+    const rackDepth = MODULE_CATALOG.COAT_RACK.depthCm;
+    const kettleWidth = MODULE_CATALOG.KETTLE.widthCm;
+    const kettleDepth = MODULE_CATALOG.KETTLE.depthCm;
     const trashBinWidth = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.widthCm);
     const trashBinDepth = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.depthCm);
     const trashBinHeight = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.heightCm);
