@@ -20,7 +20,10 @@ test('showcase styling is isolated to canonical body boards, not the parent modu
   assert.match(showcase, /const sidePanelGeometry = new THREE\.BoxGeometry\(bodyThickness, bodyHeight, showcaseDepth\);/);
   assert.match(showcase, /new THREE\.Mesh\(sidePanelGeometry\.clone\(\), showcaseBodyMaterial\.clone\(\)\)/);
   assert.match(showcase, /const cap = new THREE\.Mesh\(capGeometry\.clone\(\), showcaseBodyMaterial\.clone\(\)\);/);
-  assert.match(showcase, /const showcaseDetailMaterial = new THREE\.MeshStandardMaterial\(\{ color: 0xffffff,/);
+  assert.doesNotMatch(showcase, /showcaseDetailMaterial/);
+  assert.doesNotMatch(showcase, /frontPostGeometry/);
+  assert.doesNotMatch(showcase, /frontEdgeGeometry/);
+  assert.doesNotMatch(showcase, /shelfFrontGeometry/);
   assert.match(showcase, /const glassMaterial = new THREE\.MeshStandardMaterial\(\{ \.\.\.glassAppearance, side: THREE\.DoubleSide \}\);/);
   assert.match(showcase, /const shelf = new THREE\.Mesh\(shelfGeometry\.clone\(\), glassMaterial\.clone\(\)\);/);
 });
