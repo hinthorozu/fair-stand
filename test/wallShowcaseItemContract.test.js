@@ -55,6 +55,22 @@ test('recursive wall showcase BASE BOM expands verified physical children', () =
   }
 });
 
+test('recursive wall showcase inner-corner BOM preserves canonical parent and verified child parity', () => {
+  for (const expected of CASES) {
+    const bom = quantities(resolveItemBom(expected.itemKey, 1, { panelVariant: 'inner-corner' }));
+    assert.equal(bom.has('panel_98'), false);
+    assert.equal(bom.get('panel_corner_92'), expected.panelQuantity);
+    assert.equal(bom.get('connector_start'), 4);
+    assert.equal(bom.get('connector_single'), 5);
+    assert.equal(bom.get('connector_corner'), 4);
+    assert.equal(bom.get(expected.sideItemKey), 2);
+    assert.equal(bom.get('showcase_horizontal_87_4_30'), 2);
+    assert.equal(bom.get('glass_shelf'), expected.glassQuantity);
+    assert.equal(bom.has('showcase_2_100'), false);
+    assert.equal(bom.has('showcase_3_100'), false);
+  }
+});
+
 test('showcase body resolver owns canonical board geometry/default color', () => {
   for (const expected of CASES) {
     const body = getShowcaseBodyDefinition(expected.itemKey);

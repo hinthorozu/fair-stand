@@ -20,7 +20,16 @@
 - `showcase_horizontal_87_4_30 ×2`
 - `glass_shelf ×1`
 
-Bu migration yalnız doğrulanmış normal/BASE reçeteyi kapatır. Inner-corner varyantı bu committe tanımlı değildir; eksik/yarım bir köşe varyantı çalıştırılmaz.
+## Inner-corner composition
+
+`panelVariant: 'inner-corner'` recipe context'i verildiğinde doğrulanmış köşe BOM'u canonical recipe üzerinden çözülür:
+
+- `panel_98 ×5 → panel_corner_92 ×5`
+- `connector_start ×4` değişmez
+- `connector_single ×9 → connector_single ×5 + connector_corner ×4`
+- Diğer BASE child Item miktarları değişmez.
+
+Bu varyant `wall_showcase_100_2` canonical parent Item'ının aynı recipe zinciridir; ayrı `showcase_2_100` aggregate Item oluşturulmaz. Relationship bilgisinden `panelVariant` context'inin otomatik üretilmesi bu Item'a özel olarak eklenmemiştir.
 
 ## Runtime ownership
 
