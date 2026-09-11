@@ -32,7 +32,7 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
 
   const behavior = getModuleBehavior(state);
   assert.equal(behavior.placement, 'free');
-  assert.equal(behavior.collision, 'footprint');
+  assert.equal(behavior.collision, 'none');
 
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.equal(item.modelFile, 'coat_rack.glb');

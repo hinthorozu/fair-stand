@@ -46,7 +46,7 @@ test('kettle may share the mini-fridge footprint at its raised placement', () =>
   assert.equal(placementsOverlap(fridge, kettle), false);
 });
 
-test('kettle keeps pre-F-011 placement collision behavior for unrelated fixtures', () => {
+test('kettle does not collide with unrelated fixtures', () => {
   const kettle = {
     id: 'kettle',
     type: 'kettle',
@@ -63,5 +63,5 @@ test('kettle keeps pre-F-011 placement collision behavior for unrelated fixtures
   };
 
   assert.equal(canModulesOverlapByBehavior(kettle, counter), false);
-  assert.equal(placementsOverlap(kettle, counter), true);
+  assert.equal(placementsOverlap(kettle, counter), false);
 });

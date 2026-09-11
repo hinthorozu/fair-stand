@@ -56,7 +56,7 @@ Default runtime state:
 | Rotation step | `90°` |
 | Default rotation | `0°` |
 | Side insert flag | `true` |
-| Collision contract | `footprint` |
+| Collision contract | `none` |
 | Magnetic snap | `none` |
 | Connection endpoint | `segment` |
 | Collision depth | `physical` |

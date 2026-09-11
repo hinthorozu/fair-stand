@@ -2,6 +2,17 @@
 
 Bu repository üzerinde çalışan insan veya AI agent için aşağıdaki kurallar zorunludur.
 
+## Sert kapı (kullanıcı yakalamak zorunda değildir)
+
+Agent kendi kendini durdurur. “Tamam” demek yeterli değildir.
+
+1. **Hayal / tahmin / uydurma yasak.** Kaynak yalnız mevcut MD + runtime kod + açık ürün kararıdır. Kanıtsız miktar, unit, ölçü, behavior, BOM veya “muhtemelen” üretilemez.
+2. **Trigger:** `hazırlan` / `envanter` / `emin ol` = yalnız okuma + özet (dosya yazma yok). `yapıştır` / `uygula` / `kodla` / `gönder` = implementasyon. Belirsizse kod yazılmaz.
+3. **Kod öncesi checkpoint:** Dosya değiştirmeden önce kanıtlı envanter + dokunulmayacaklar + yapılacaklar kullanıcıya yazılır; açık onay yoksa kod yok.
+4. **Dil:** MD/yorum/commit/PR metni Türkçe; `itemKey` ve method adları İngilizce kalır.
+
+Detaylı Cursor kuralı: `.cursor/rules/no-fabrication-prepare-gate.mdc`.
+
 ## Zorunlu okuma sırası
 
 Her değişiklikten önce işin kapsamına göre aşağıdaki canonical belgeler okunur:

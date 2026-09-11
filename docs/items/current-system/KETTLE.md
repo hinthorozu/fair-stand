@@ -75,7 +75,7 @@ Renderer `public/models/kettle.glb` yükler ve hedef 25 cm yüksekliğe uniform 
 
 Contract appearance alanları ve renderer surface/proxy yapısı birlikte uygulanır. Module-selection yüzeyleri panel-selection olmadığı için glass/Lightbox/Mesh context aksiyonlarını açmaz.
 
-Behavior contract `collision=none`, `magneticSnap=none`, `overlapWithTypes=['mini-fridge']` içerir. Buna karşılık `getModuleCollisionStrategy()` kettle için özel olarak `footprint` döndürür; normal placement collision bu strategy ile çalışır, mini-fridge stacking ise overlap relation ile izinlidir. Automatic depot includeContents akışında kettle mini-fridge üstü x/y konumuna eklenir.
+Behavior contract `collision=none`, `magneticSnap=none`, `overlapWithTypes=['mini-fridge']` içerir. `getModuleCollisionStrategy()` declared değeri olduğu gibi `none` döndürür; modüller arası placement collision'a katılmaz, stand sınırı validation'ı korunur. Automatic depot includeContents akışında kettle mini-fridge üstü x/y konumuna eklenir.
 
 Automatic depot state mappinginde bu içerik `currentModules` içine eklenirken `autoDepot = true` flag'i alır. `FEATURE_CONTRACTS.automaticDepot` contentKinds listesinde bu type yer alır.
 

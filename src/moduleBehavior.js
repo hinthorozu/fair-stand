@@ -73,6 +73,7 @@ function overlayBehavior(overrides = {}) {
 
 const PLASTIC_TRASH_BIN_BEHAVIOR = freeBehavior({
   moveSnapCm: 10,
+  collision: 'none',
   magneticSnap: 'none',
 });
 
@@ -109,6 +110,7 @@ const TYPE_BEHAVIORS = Object.freeze({
   }),
   'mini-fridge': freeBehavior({
     moveSnapCm: 10,
+    collision: 'none',
     magneticSnap: 'none',
     overlapWithTypes: Object.freeze(['kettle']),
   }),
@@ -120,6 +122,7 @@ const TYPE_BEHAVIORS = Object.freeze({
   }),
   'coat-rack': freeBehavior({
     moveSnapCm: 10,
+    collision: 'none',
     magneticSnap: 'none',
   }),
   'plastic-trash-bin': PLASTIC_TRASH_BIN_BEHAVIOR,
@@ -208,11 +211,6 @@ export function getModuleMoveSnapCm(moduleOrType) {
 }
 
 export function getModuleCollisionStrategy(moduleOrType) {
-  const module = normalizeDescriptor(moduleOrType);
-  // Preserve the pre-F-011 runtime semantics: kettle keeps its declared collision:none
-  // contract, while normal placement collision still participates except for the
-  // explicit mini-fridge stacking relationship declared by overlapWithTypes.
-  if (module.type === 'kettle') return 'footprint';
   return getModuleBehavior(moduleOrType).collision ?? 'segment';
 }
 

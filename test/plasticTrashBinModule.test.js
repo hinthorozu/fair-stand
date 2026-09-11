@@ -81,7 +81,7 @@ test('trash bin state and behavior preserve fridge-style movement without overla
   assert.equal(behavior.moveSnapCm, 10);
   assert.equal(behavior.rotationStepDeg, 90);
   assert.equal(behavior.defaultRotationDeg, 0);
-  assert.equal(behavior.collision, 'footprint');
+  assert.equal(behavior.collision, 'none');
   assert.equal(behavior.magneticSnap, 'none');
   assert.deepEqual(behavior.overlapWithTypes, []);
   assert.equal(allowsThinWallEndpointContact(state), false);
