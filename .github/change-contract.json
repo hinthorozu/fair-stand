@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "wall-separator-family-item-migration",
+  "id": "wall-shelf-family-item-migration",
   "kind": "refactor",
-  "summary": "wall_separator_50/100 ve sarmasık varyantları COMPOSITE_ITEMS’e taşındı. Catalog ve createSeparatorModuleState getItem’dan default alır; load catalogKey→itemKey hydrate eder. separator recipe miktarları ve Raw BOM UI değişmedi; parent unit uydurulmadı.",
+  "summary": "wall_shelf_2/3 × 100/150/200 COMPOSITE_ITEMS’e taşındı. Catalog ve createShelfModuleState getItem’dan default alır; load catalogKey→itemKey hydrate eder. shelf recipe miktarları ve Raw BOM UI değişmedi; parent unit uydurulmadı.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
@@ -70,6 +70,7 @@
       "e2e/wall-base-items-contract.spec.mjs",
       "e2e/wall-flat-panel-items-contract.spec.mjs",
       "e2e/wall-separator-items-contract.spec.mjs",
+      "e2e/wall-shelf-items-contract.spec.mjs",
       "e2e/wall-showcase-item-contract.spec.mjs",
       "test/autoDepotOrientation.test.js",
       "test/automaticWall.test.js",
@@ -178,6 +179,7 @@
       "test/wallMediaItemsContract.test.js",
       "test/wallReflow.test.js",
       "test/wallSeparatorItemsContract.test.js",
+      "test/wallShelfItemsContract.test.js",
       "test/wallShowcaseItemContract.test.js",
       "tests/autoDepot.test.js",
       "tests/moduleBehavior.test.js"
@@ -254,6 +256,12 @@
       "docs/items/current-system/wall_separator_100_sarmasik.md",
       "docs/items/current-system/wall_separator_50.md",
       "docs/items/current-system/wall_separator_50_sarmasik.md",
+      "docs/items/current-system/wall_shelf_2_100.md",
+      "docs/items/current-system/wall_shelf_2_150.md",
+      "docs/items/current-system/wall_shelf_2_200.md",
+      "docs/items/current-system/wall_shelf_3_100.md",
+      "docs/items/current-system/wall_shelf_3_150.md",
+      "docs/items/current-system/wall_shelf_3_200.md",
       "docs/items/definitions/BASE_100.md",
       "docs/items/definitions/BASE_150.md",
       "docs/items/definitions/BASE_200.md",
@@ -314,32 +322,33 @@
         "F-045"
       ]
     },
-    "notes": "Dört separator parent COMPOSITE_ITEMS’te. Sarmasık modelFile ile ayrılır; recipe yalnız genişliğe göre. Behavior WALL_BEHAVIOR. Parent unit yok."
+    "notes": "Altı wall_shelf parent COMPOSITE_ITEMS’te; composition.options.shelfCount mevcut recipe ile eşleşir. Production shelf_100 board ayrı itemKey. Parent unit yok."
   },
   "tests": {
     "targeted": [
-      "test/wallSeparatorItemsContract.test.js",
-      "test/designState.test.js",
-      "test/catalogSingleSource.test.js",
-      "test/moduleStateConstructionRegistry.test.js"
+      "test/wallShelfItemsContract.test.js",
+      "test/shelfModule.test.js",
+      "test/shelfItemsItemContract.test.js",
+      "test/moduleStateConstructionRegistry.test.js",
+      "test/designState.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/wall-separator-items-contract.spec.mjs"
+        "e2e/wall-shelf-items-contract.spec.mjs"
       ],
-      "reason": "Dört separator kartı tarayıcıda görünür; E2E temiz sırt duvarda picker ile ekler, itemKey/catalogKey/modelFile kontrol eder."
+      "reason": "Altı raf kartı tarayıcıda görünür; E2E temiz sırt duvarda picker ile ekler, itemKey/shelfCount/strips kontrol eder."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Dört catalog key; aynı type içinde modelFile ile ayrım kritik."
+    "notes": "type=shelf production board ile paylaşılıyor; composite ayrımı composition ile korunur."
   },
   "migration": {
     "required": false,
-    "notes": "Alias yok. itemKey’siz eski kayıtlar load’da type+width+modelFile ile hydrate olur."
+    "notes": "Alias yok. itemKey’siz eski kayıtlar load’da type+width+shelfCount ile hydrate olur."
   },
-  "rollback": "Bu change set geri alınırsa wall_separator katalog/state COMPOSITE_ITEMS kimliği olmadan eski haline döner."
+  "rollback": "Bu change set geri alınırsa wall_shelf katalog/state COMPOSITE_ITEMS kimliği olmadan eski haline döner."
 }
