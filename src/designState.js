@@ -196,16 +196,35 @@ export function createBaseWallModuleState(widthCm) {
   };
 }
 
-export function createBaseModuleState(widthCm) {
-  const width = Number(widthCm);
-  if (![100, 150, 200].includes(width)) return null;
+const BASE_WIDTH_TO_ITEM_KEY = Object.freeze({
+  100: 'BASE_100',
+  150: 'BASE_150',
+  200: 'BASE_200',
+});
+
+function resolveBaseItemKey(widthCmOrDescriptor) {
+  if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
+    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    if (explicitKey && getItem(explicitKey)?.type === 'base') return explicitKey;
+    return BASE_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor.widthCm)] ?? null;
+  }
+  return BASE_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor)] ?? null;
+}
+
+export function createBaseModuleState(widthCmOrDescriptor) {
+  const itemKey = resolveBaseItemKey(widthCmOrDescriptor);
+  const item = itemKey ? getItem(itemKey) : null;
+  if (!item || item.type !== 'base') return null;
+  const { widthCm, depthCm, heightCm } = item.dimensions;
 
   return {
     id: createId('module'),
-    type: 'base',
-    widthCm: width,
-    depthCm: 50,
-    heightCm: 50,
+    itemKey: item.itemKey,
+    catalogKey: item.itemKey,
+    type: item.type,
+    widthCm,
+    depthCm,
+    heightCm,
     faces: {
       front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
       left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
@@ -371,7 +390,7 @@ export function createLedFloodlightModuleState() {
 
 const MODULE_STATE_FACTORIES = Object.freeze({
   'flat-panel': (descriptor) => createFlatPanelModuleState(descriptor.widthCm),
-  base: (descriptor) => createBaseModuleState(descriptor.widthCm),
+  base: (descriptor) => createBaseModuleState(descriptor),
   'base-wall': (descriptor) => createBaseWallModuleState(descriptor.widthCm),
   counter: (descriptor) => createCounterModuleState(descriptor.widthCm, {
     shape: descriptor.shape,
@@ -433,6 +452,14 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'tv') {
     const resolvedKey = resolveModuleCatalogKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'tv') {
+      moduleState.itemKey = resolvedKey;
+    }
+    return moduleState;
+  }
+
+  if (moduleState.type === 'base') {
+    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    if (resolvedKey && getItem(resolvedKey)?.type === 'base') {
       moduleState.itemKey = resolvedKey;
     }
     return moduleState;

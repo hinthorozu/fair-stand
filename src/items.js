@@ -117,6 +117,42 @@ export const COMPOSITE_ITEMS = Object.freeze({
       nominalWidthCm: 100,
     }),
   }),
+  // Free-standing baza parents share type `base` and resolve BOM via moduleRecipes
+  // `base:100|150|200`. Child Item quantities stay in the recipe; wall_base_* parents
+  // are a separate type/recipe family that happens to reuse the same base_top_* keys.
+  BASE_100: Object.freeze({
+    itemKey: 'BASE_100',
+    name: 'Baza 100',
+    type: 'base',
+    dimensions: Object.freeze({ widthCm: 100, depthCm: 50, heightCm: 50 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'base',
+      nominalWidthCm: 100,
+    }),
+  }),
+  BASE_150: Object.freeze({
+    itemKey: 'BASE_150',
+    name: 'Baza 150',
+    type: 'base',
+    dimensions: Object.freeze({ widthCm: 150, depthCm: 50, heightCm: 50 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'base',
+      nominalWidthCm: 150,
+    }),
+  }),
+  BASE_200: Object.freeze({
+    itemKey: 'BASE_200',
+    name: 'Baza 200',
+    type: 'base',
+    dimensions: Object.freeze({ widthCm: 200, depthCm: 50, heightCm: 50 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'base',
+      nominalWidthCm: 200,
+    }),
+  }),
   wall_showcase_100_2: Object.freeze({
     itemKey: 'wall_showcase_100_2',
     name: '2 Gözlü Vitrin 100',

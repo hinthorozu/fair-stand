@@ -18,10 +18,24 @@ export const COUNTER_DIMENSIONS = Object.freeze({
 });
 
 export const BASE_DIMENSIONS = Object.freeze({
-  depthCm: 50,
-  heightCm: 50,
-  widthsCm: Object.freeze([100, 150, 200]),
+  depthCm: getItem('BASE_100').dimensions.depthCm,
+  heightCm: getItem('BASE_100').dimensions.heightCm,
+  widthsCm: Object.freeze([
+    getItem('BASE_100').dimensions.widthCm,
+    getItem('BASE_150').dimensions.widthCm,
+    getItem('BASE_200').dimensions.widthCm,
+  ]),
 });
+
+function createBaseCatalogItem(itemKey) {
+  const item = getItem(itemKey);
+  return Object.freeze({
+    itemKey: item.itemKey,
+    type: item.type,
+    ...item.dimensions,
+    label: item.name,
+  });
+}
 
 export const SHELF_DIMENSIONS = Object.freeze({
   widthsCm: Object.freeze([100, 150, 200]),
@@ -202,9 +216,9 @@ export const MODULE_CATALOG = Object.freeze({
   desk_banko_150_L: { type: 'counter', shape: 'L', widthCm: 150, depthCm: 150, heightCm: 100, label: 'Köşe Banko 150×150' },
   desk_banko_200: { type: 'counter', widthCm: 200, depthCm: 50, heightCm: 100, label: 'Banko 200' },
   desk_banko_200_L: { type: 'counter', shape: 'L', widthCm: 200, depthCm: 200, heightCm: 100, label: 'Köşe Banko 200×200' },
-  BASE_100: { type: 'base', widthCm: 100, depthCm: 50, heightCm: 50, label: 'Baza 100' },
-  BASE_150: { type: 'base', widthCm: 150, depthCm: 50, heightCm: 50, label: 'Baza 150' },
-  BASE_200: { type: 'base', widthCm: 200, depthCm: 50, heightCm: 50, label: 'Baza 200' },
+  BASE_100: createBaseCatalogItem('BASE_100'),
+  BASE_150: createBaseCatalogItem('BASE_150'),
+  BASE_200: createBaseCatalogItem('BASE_200'),
   wall_base_100: { type: 'base-wall', widthCm: 100, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 100' },
   wall_base_150: { type: 'base-wall', widthCm: 150, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 150' },
   wall_base_200: { type: 'base-wall', widthCm: 200, depthCm: 50, heightCm: 350, label: 'Panel Bazalı 200' },
