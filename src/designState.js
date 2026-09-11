@@ -259,21 +259,16 @@ export function createBarStoolModuleState() {
   };
 }
 
-function createCommercialModuleState(type, descriptor = {}) {
+function createCommercialModuleState(type) {
   const item = getCommercialItemForType(type);
   const state = {
     id: createId('module'), itemKey: item.itemKey, catalogKey: item.itemKey,
     type: item.type, ...item.dimensions,
   };
-  // This model-configurable family supports explicit descriptor overrides.
   if (Object.hasOwn(item, 'preserveModelScale')) {
-    for (const field of Object.keys(item.dimensions)) {
-      const value = Number(descriptor[field]);
-      if (Number.isFinite(value) && value > 0) state[field] = value;
-    }
-    state.modelFile = descriptor.modelFile ?? item.modelFile;
-    state.modelRotationYDeg = Number(descriptor.modelRotationYDeg ?? item.modelRotationYDeg) || 0;
-    state.preserveModelScale = Boolean(descriptor.preserveModelScale ?? item.preserveModelScale);
+    state.modelFile = item.modelFile;
+    state.modelRotationYDeg = item.modelRotationYDeg;
+    state.preserveModelScale = item.preserveModelScale;
   }
   return state;
 }
@@ -290,8 +285,8 @@ export function createCoatRackModuleState() {
   return createCommercialModuleState('coat-rack');
 }
 
-export function createPlasticTrashBinModuleState(descriptor = {}) {
-  return createCommercialModuleState('plastic-trash-bin', descriptor);
+export function createPlasticTrashBinModuleState() {
+  return createCommercialModuleState('plastic-trash-bin');
 }
 
 export function createIndoorPlantModuleState(descriptor = {}) {
@@ -382,7 +377,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   'mini-fridge': () => createMiniFridgeModuleState(),
   kettle: () => createKettleModuleState(),
   'coat-rack': () => createCoatRackModuleState(),
-  'plastic-trash-bin': (descriptor) => createPlasticTrashBinModuleState(descriptor),
+  'plastic-trash-bin': () => createPlasticTrashBinModuleState(),
   'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
   tv: (descriptor) => createTvModuleState(descriptor.sizeInch ?? 42, descriptor),
   'led-floodlight': () => createLedFloodlightModuleState(),

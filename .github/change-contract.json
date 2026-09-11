@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "commercial-items-canonical-migration",
+  "id": "commercial-item-properties-internal",
   "kind": "refactor",
-  "summary": "Remove DEPOT_ prefix from four commercial products and integrate canonical Item identity, defaults, state and persistence while preserving their unresolved BOM policy and editor behavior.",
+  "summary": "Prevent external descriptors from overriding PLASTIC_TRASH_BIN dimensions, model file, model rotation or scale policy; all product properties now come from the canonical Item definition.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
@@ -60,6 +60,7 @@
       "src/cornerPlacement.js",
       "src/itemBom.js",
       "src/main.js",
+      "src/moduleContracts.js",
       "src/moduleContextMenu.js",
       "src/moduleDragSidebar.js",
       "src/moduleMove.js",
@@ -352,7 +353,7 @@
         "F-045"
       ]
     },
-    "notes": "Reviewed catalog/state/autoDepot/scene/selection and existing direct tests. Four Items now own identity, dimensions and model metadata. The shared state factory consumes those defaults; automatic depot consumes the catalog projection. Type behavior is retained; model-name trash compatibility routing removed. Their existing BOM policy remains decision-required with null source: no unit, recipe, resolver, Raw BOM or Final BOM policy was introduced. F-014 is reviewedNotAffected; F-019 is affected only for these four products and is not globally closed. Other discovered findings retain existing ownership and behavior. User explicitly waived old-project compatibility: no aliases or legacy migration. Broad main/scene path domains include assets and performance even though no asset bytes change. Build and all 610 unit/integration tests passed after the BOM-scope correction. Existing source-text tests normalize CRLF before matching, and the door filename assertion checks exact directory-entry casing so Windows case-insensitive lookup does not report the canonical lowercase file as a legacy uppercase file. Playwright and Chromium are installed. The full 20-test Chromium suite passed before the BOM-scope correction, including four canonical catalog drag checks, automatic-depot save/open persistence, mini-fridge dimensions, and all plastic-trash-bin catalog/model/persistence/depot checks; the correction only restores the pre-existing non-browser BOM policy. Remote CI remains unverified."
+    "notes": "PLASTIC_TRASH_BIN state construction now ignores descriptor-supplied dimensions, model file, model rotation and scale policy. Those product fields come only from COMMERCIAL_ITEMS.PLASTIC_TRASH_BIN; placement remains instance state. The existing decision-required BOM policy remains unchanged. A regression test passes deliberately conflicting external values and verifies canonical Item values win. All 610 unit/integration tests and the production build passed."
   },
   "tests": {
     "targeted": [

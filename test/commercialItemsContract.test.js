@@ -49,11 +49,22 @@ test('automatic depot resolves all four Items through the shared factory', () =>
   assert.equal(getItem('EXTRA_INDOOR_PLANT_1'), null);
 });
 
-test('trash descriptor overrides are separate from canonical defaults', () => {
+test('trash product properties cannot be overridden by an external descriptor', () => {
   const item = getItem('PLASTIC_TRASH_BIN');
-  const state = createModuleStateFromDescriptor({ ...MODULE_CATALOG.PLASTIC_TRASH_BIN, widthCm: 42, modelRotationYDeg: 90 });
-  assert.equal(state.widthCm, 42);
-  assert.equal(state.modelRotationYDeg, 90);
-  assert.equal(item.dimensions.widthCm, 40);
-  assert.equal(item.modelRotationYDeg, 0);
+  const state = createModuleStateFromDescriptor({
+    ...MODULE_CATALOG.PLASTIC_TRASH_BIN,
+    widthCm: 42,
+    depthCm: 45,
+    heightCm: 70,
+    modelFile: 'external.glb',
+    modelRotationYDeg: 90,
+    preserveModelScale: true,
+  });
+  assert.deepEqual(
+    [state.widthCm, state.depthCm, state.heightCm],
+    [item.dimensions.widthCm, item.dimensions.depthCm, item.dimensions.heightCm],
+  );
+  assert.equal(state.modelFile, item.modelFile);
+  assert.equal(state.modelRotationYDeg, item.modelRotationYDeg);
+  assert.equal(state.preserveModelScale, item.preserveModelScale);
 });

@@ -157,7 +157,7 @@ Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 - Material/defaultColor: bağımsız business metadata YOK. GLB malzemeleri ve sidebar renkleri görsel temsildir; kullanıcı renk/image yetkisi yok.
 - Property owners: catalog + designState + autoDepot ölçüleri migration öncesi tekrarlanıyordu. Renderer fallback ve seçim metni ayrıca tarandı.
 - Factory: createModuleStateFromDescriptor → type factory; ID createId('module'). Placement ve autoDepot flag runtime instance alanlarıdır.
-- Overrides: kayıtlı instance alanları JSON snapshot ile korunur. Trash descriptor ölçü/model ayarları dışında ürün ölçüsü için kullanıcı düzenleme kontrolü yok.
+- Overrides: ürün ölçüleri, model dosyası, model dönüşü ve scale yalnız canonical Item tanımından gelir; dış descriptor bu alanları değiştiremez. Placement ve autoDepot flag gibi instance alanları proje state'inde korunur.
 - Relationships: otomatik depo içerik koordinatlarını planlar; kettle/fridge footprint overlap behavior kaynağındadır. Kettle yükseltmesi görsel olarak fridge yüksekliğindedir; persistent host bağı veya otomatik host takip/reflow yok.
 - Delete/duplicate: generic context menu; seçimi, sürüklemeyi, klavye rotation/move ve side insertion ortak motorlar yönetir.
 - Regression: ilgili ürün testi, commercialItemsContract ve gerçek katalog/depo/persistence E2E kapsamı.
