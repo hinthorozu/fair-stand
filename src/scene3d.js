@@ -17,9 +17,11 @@ import { computeImageFit } from './imageFit.js';
 import { formatPlacementFeedbackMessage, hasPlacementFeedbackPointer } from './placementFeedback.js';
 import { SCENE_SURROUND_M } from './sceneDimensions.js';
 import {
+  clampWallOverlayZCm,
   createModulePlacement,
   getAllowedWallIds,
   getModulePlacementSnapCm,
+  getWallOverlayZBoundsCm,
   isVerticalModuleRotation,
   normalizeModuleRotationZDeg,
   rotateModuleRotationZDeg,
@@ -2286,12 +2288,9 @@ export function createStandScene(
       );
       const hit = pointed.hit.point;
       const heightCm = Math.max(1, Number(moduleState?.screenHeightCm ?? moduleState?.heightCm ?? 52.3));
-      const halfHeightM = heightCm / 200;
       const defaultCenterM = 1.75;
-      const minOffsetCm = Math.ceil(((halfHeightM - defaultCenterM) * 100) / 10) * 10;
-      const maxOffsetCm = Math.floor(((STAND_DIMENSIONS.height - halfHeightM - defaultCenterM) * 100) / 10) * 10;
       const rawOffsetCm = (hit.y - ACTIVE_PLATFORM_HEIGHT_M - defaultCenterM) * 100;
-      const zCm = THREE.MathUtils.clamp(Math.round(rawOffsetCm / 10) * 10, minOffsetCm, maxOffsetCm);
+      const zCm = clampWallOverlayZCm(rawOffsetCm, heightCm);
 
       const supportVertical = isVerticalModuleRotation(supportRotationZDeg);
       // Use the picked surface only for the along-panel coordinate and height.
@@ -2350,12 +2349,9 @@ export function createStandScene(
     const pointerYCm = wallId === 'back' ? 0 : Math.max(0, hit.z * 100);
 
     const heightCm = Math.max(1, Number(moduleState?.screenHeightCm ?? moduleState?.heightCm ?? 52.3));
-    const halfHeightM = heightCm / 200;
     const defaultCenterM = 1.75;
-    const minOffsetCm = Math.ceil(((halfHeightM - defaultCenterM) * 100) / 10) * 10;
-    const maxOffsetCm = Math.floor(((STAND_DIMENSIONS.height - halfHeightM - defaultCenterM) * 100) / 10) * 10;
     const rawOffsetCm = (hit.y - ACTIVE_PLATFORM_HEIGHT_M - defaultCenterM) * 100;
-    const zCm = THREE.MathUtils.clamp(Math.round(rawOffsetCm / 10) * 10, minOffsetCm, maxOffsetCm);
+    const zCm = clampWallOverlayZCm(rawOffsetCm, heightCm);
 
     return { wallId, pointerXCm, pointerYCm, rotationZDeg, zCm };
   }
@@ -4245,10 +4241,7 @@ export function createStandScene(
         const maxHorizontalCm = Math.max(0, horizontalLimitCm - widthCm);
         const currentZCm = Number(moduleState.placement.zCm || 0);
         const heightCm = Math.max(1, Number(moduleState.screenHeightCm ?? moduleState.heightCm ?? 52.3));
-        const halfHeightCm = heightCm / 2;
-        const defaultCenterCm = 175;
-        const minZCm = Math.ceil((halfHeightCm - defaultCenterCm) / stepCm) * stepCm;
-        const maxZCm = Math.floor(((STAND_DIMENSIONS.height * 100) - halfHeightCm - defaultCenterCm) / stepCm) * stepCm;
+        const { minZCm, maxZCm } = getWallOverlayZBoundsCm(heightCm);
 
         const moduleWorldPosition = new THREE.Vector3();
         moduleGroup.getWorldPosition(moduleWorldPosition);

@@ -29,6 +29,81 @@ export function getCommercialItemForType(type) {
   return Object.values(COMMERCIAL_ITEMS).find((item) => item.type === type) ?? null;
 }
 
+// Wall-mounted media products share the single `tv` behavior family. Ordinary TVs are
+// parametric by verified panel size; video walls are parametric by verified panel size
+// plus their rows x cols grid. Total screen/module metrics derive from those canonical
+// properties, so no second business source-of-truth stores the totals.
+export const WALL_MEDIA_ITEMS = Object.freeze({
+  TV_42: Object.freeze({
+    itemKey: 'TV_42', name: 'TV 42"', type: 'tv', sizeInch: 42,
+    dimensions: Object.freeze({
+      widthCm: 100, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 93.0, screenHeightCm: 52.3,
+    }),
+  }),
+  TV_55: Object.freeze({
+    itemKey: 'TV_55', name: 'TV 55"', type: 'tv', sizeInch: 55,
+    dimensions: Object.freeze({
+      widthCm: 100, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 121.8, screenHeightCm: 68.5,
+    }),
+  }),
+  TV_65: Object.freeze({
+    itemKey: 'TV_65', name: 'TV 65"', type: 'tv', sizeInch: 65,
+    dimensions: Object.freeze({
+      widthCm: 100, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 143.9, screenHeightCm: 80.9,
+    }),
+  }),
+  VIDEO_WALL_2X2: Object.freeze({
+    itemKey: 'VIDEO_WALL_2X2', name: 'Video Wall 2×2', type: 'tv', sizeInch: 55,
+    dimensions: Object.freeze({ depthCm: 5 }),
+    videoWall: Object.freeze({ rows: 2, cols: 2, panelScreenWidthCm: 108.5, panelScreenHeightCm: 61 }),
+  }),
+  VIDEO_WALL_3X3: Object.freeze({
+    itemKey: 'VIDEO_WALL_3X3', name: 'Video Wall 3×3', type: 'tv', sizeInch: 55,
+    dimensions: Object.freeze({ depthCm: 5 }),
+    videoWall: Object.freeze({ rows: 3, cols: 3, panelScreenWidthCm: 108.5, panelScreenHeightCm: 61 }),
+  }),
+});
+
+// Canonical resolver for wall-media metrics consumed by catalog, state factory and
+// selection feedback. Video-wall totals are derived from panel size x grid; ordinary
+// TV totals are the verified screen dimensions.
+export function resolveWallMediaMetrics(itemOrKey) {
+  const item = typeof itemOrKey === 'string' ? WALL_MEDIA_ITEMS[itemOrKey] : itemOrKey;
+  if (!item || item.type !== 'tv') return null;
+  const depthCm = Number(item.dimensions?.depthCm);
+  const base = {
+    itemKey: item.itemKey, type: item.type, label: item.name, sizeInch: item.sizeInch, depthCm,
+  };
+  if (item.videoWall) {
+    const { rows, cols, panelScreenWidthCm, panelScreenHeightCm } = item.videoWall;
+    const screenWidthCm = panelScreenWidthCm * cols;
+    const screenHeightCm = panelScreenHeightCm * rows;
+    return Object.freeze({
+      ...base,
+      widthCm: screenWidthCm,
+      catalogHeightCm: screenHeightCm,
+      screenWidthCm,
+      screenHeightCm,
+      videoWallRows: rows,
+      videoWallCols: cols,
+      panelScreenWidthCm,
+      panelScreenHeightCm,
+    });
+  }
+  const { widthCm, catalogHeightCm, screenWidthCm, screenHeightCm } = item.dimensions;
+  return Object.freeze({
+    ...base,
+    widthCm,
+    catalogHeightCm,
+    screenWidthCm,
+    screenHeightCm,
+    videoWallRows: 1,
+    videoWallCols: 1,
+    panelScreenWidthCm: screenWidthCm,
+    panelScreenHeightCm: screenHeightCm,
+  });
+}
+
 export const COMPOSITE_ITEMS = Object.freeze({
   door_100: Object.freeze({
     itemKey: 'door_100',
@@ -117,7 +192,10 @@ export function getShowcaseBodyDefinition(itemOrKey) {
 }
 
 export function getItem(itemKey) {
-  return COMMERCIAL_ITEMS[itemKey] ?? COMPOSITE_ITEMS[itemKey] ?? getProductionItem(itemKey);
+  return COMMERCIAL_ITEMS[itemKey]
+    ?? WALL_MEDIA_ITEMS[itemKey]
+    ?? COMPOSITE_ITEMS[itemKey]
+    ?? getProductionItem(itemKey);
 }
 
 export function listCompositeItems() {

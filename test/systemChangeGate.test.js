@@ -288,7 +288,7 @@ test('high-risk canonical paths derive ownership-appropriate mandatory impact do
   assert.deepEqual(requiredDomainsForFile('src/designState.js').sort(), ['persistence', 'state']);
   assert.deepEqual(requiredDomainsForFile('src/moduleRecipes.js'), ['bom']);
   assert.deepEqual(requiredDomainsForFile('src/autosaveController.js'), ['persistence']);
-  assert.deepEqual(requiredDomainsForFile('src/tvConfig.js').sort(), ['catalog', 'renderer', 'state']);
+  assert.deepEqual(requiredDomainsForFile('src/items.js').sort(), ['architecture', 'bom', 'catalog']);
   assert.deepEqual(requiredDomainsForFile('src/viewKeyboardShortcuts.js').sort(), ['accessibility', 'behavior', 'ui']);
   assert.deepEqual(requiredDomainsForFile('src/wall.js').sort(), ['composition', 'placement']);
   assert.deepEqual(requiredDomainsForFile('src/groundLayout.js').sort(), ['placement', 'renderer']);

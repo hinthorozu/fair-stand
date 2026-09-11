@@ -1,29 +1,23 @@
 {
   "schemaVersion": 2,
-  "id": "commercial-item-properties-internal",
+  "id": "wall-media-item-migration",
   "kind": "refactor",
-  "summary": "Keep PLASTIC_TRASH_BIN product defaults inside its canonical Item while allowing controlled instance-state orientation overrides after construction.",
+  "summary": "Migrate the wall-media family (TV_42/TV_55/TV_65 and the singular parametric VIDEO_WALL_2X2/VIDEO_WALL_3X3) into the canonical Item Contract. src/items.js WALL_MEDIA_ITEMS becomes the single source-of-truth; catalog descriptors, the tv state factory and TV_42_DIMENSIONS now derive from getItem/resolveWallMediaMetrics; project load hydrates catalogKey->itemKey. The tvConfig.js second business source-of-truth is removed. Wall-overlay height clamp now uses geometric top/bottom bounds after the shared 10 cm snap so every TV/video-wall screen size can sit flush to the wall edge (TV_55 no longer looks special). The same uncommitted working set also carries the plastic-trash-bin catalog-preview silhouette change in src/moduleDragSidebar.js, so this contract governs those surfaces together.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
     "src/designState.js",
-    "src/autoDepot.js",
-    "src/moduleContracts.js",
-    "src/featureContracts.js",
-    "src/moduleBehavior.js",
-    "src/scene3d.js",
-    "src/selectionFeedback.js"
+    "src/systemChangeContract.js",
+    "src/moduleDragSidebar.js",
+    "src/modulePlacement.js",
+    "src/scene3d.js"
   ],
   "sourceOfTruth": [
     "docs/items/contract/ITEM_CONTRACT.md",
-    "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md",
     "src/items.js",
     "src/catalog.js",
     "src/designState.js",
-    "src/autoDepot.js",
-    "src/moduleContracts.js",
-    "src/featureContracts.js",
-    "src/moduleBehavior.js"
+    "src/modulePlacement.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -34,10 +28,10 @@
     "persistence": "affected",
     "bom": "affected",
     "ui": "affected",
-    "composition": "affected",
-    "assets": "affected",
-    "storage": "affected",
-    "importExport": "affected",
+    "composition": "not-applicable",
+    "assets": "not-applicable",
+    "storage": "not-applicable",
+    "importExport": "not-applicable",
     "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "affected",
@@ -61,6 +55,7 @@
       "src/cornerPlacement.js",
       "src/designState.js",
       "src/itemBom.js",
+      "src/items.js",
       "src/main.js",
       "src/moduleContracts.js",
       "src/moduleContextMenu.js",
@@ -81,6 +76,7 @@
       "e2e/f011-module-behavior.spec.mjs",
       "e2e/mini-fridge-dimensions.spec.mjs",
       "e2e/plastic-trash-bin-module.spec.mjs",
+      "e2e/wall-media-items-contract.spec.mjs",
       "e2e/wall-showcase-item-contract.spec.mjs",
       "test/autoDepotOrientation.test.js",
       "test/automaticWall.test.js",
@@ -185,6 +181,7 @@
       "test/viewKeyboardMainIntegration.test.js",
       "test/wall.test.js",
       "test/wallDragStickiness.test.js",
+      "test/wallMediaItemsContract.test.js",
       "test/wallReflow.test.js",
       "test/wallShowcaseItemContract.test.js",
       "tests/autoDepot.test.js",
@@ -213,6 +210,7 @@
       "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
       "audit/evidence/A05_MODULE_BEHAVIOR.md",
+      "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
       "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
@@ -242,6 +240,11 @@
       "docs/items/current-system/KETTLE.md",
       "docs/items/current-system/MINI_FRIDGE_AVANTI.md",
       "docs/items/current-system/PLASTIC_TRASH_BIN.md",
+      "docs/items/current-system/TV_42.md",
+      "docs/items/current-system/TV_55.md",
+      "docs/items/current-system/TV_65.md",
+      "docs/items/current-system/VIDEO_WALL_2X2.md",
+      "docs/items/current-system/VIDEO_WALL_3X3.md",
       "docs/items/current-system/base_top_107_50.md",
       "docs/items/current-system/base_top_157_50.md",
       "docs/items/current-system/base_top_206_50.md",
@@ -287,6 +290,7 @@
       "docs/items/definitions/base_top_107_50.md",
       "docs/items/definitions/base_top_157_50.md",
       "docs/items/definitions/base_top_206_50.md",
+      "docs/items/definitions/connector_start.md",
       "docs/items/definitions/desk_banko_100.md",
       "docs/items/definitions/desk_banko_100_L.md",
       "docs/items/definitions/desk_banko_150.md",
@@ -358,11 +362,14 @@
         "F-045"
       ]
     },
-    "notes": "PLASTIC_TRASH_BIN product defaults come from COMMERCIAL_ITEMS.PLASTIC_TRASH_BIN rather than the catalog descriptor. Factory construction copies visualRotationYDeg=-90 from the Item into instance state. Renderer precedence is controlled instance state first, Item default second, preserving the corrected GLB and top-label orientation while allowing a future editor/runtime override. The existing decision-required BOM policy remains unchanged. A regression test passes deliberately conflicting descriptor values, verifies canonical Item defaults win during construction, and verifies the resulting instance field remains mutable."
+    "notes": "The wall-media family now resolves its canonical identity, dimensions and grid parameters from src/items.js WALL_MEDIA_ITEMS through resolveWallMediaMetrics. src/catalog.js projects catalog descriptors and TV_42_DIMENSIONS from that resolver; src/designState.js builds tv instance state from the Item and stamps itemKey/catalogKey; normalizeModuleItemState hydrates catalogKey->itemKey on project load. The tvConfig.js source-of-truth and its systemChangeContract mapping are removed. Video walls remain a singular parametric Item (grid + panel size, totals derived) rather than a composite of N x TV_55. Wall-media BOM stays decision-required with source:null. Wall-overlay vertical movement still snaps to 10 cm, but clampWallOverlayZCm / getWallOverlayZBoundsCm now apply geometric top/bottom bounds so every screen height can sit flush to the 350 cm wall instead of stopping early on a snap multiple (the previous TV_55-looking special case). The plastic-trash-bin catalog-preview silhouette change in moduleDragSidebar.js is included in the same uncommitted working set. Token discovery across catalog/state/renderer/BOM/placement dependents is reviewed as identity-routing + height-clamp parity work."
   },
   "tests": {
     "targeted": [
+      "test/tv42Module.test.js",
+      "test/wallMediaItemsContract.test.js",
       "test/commercialItemsContract.test.js",
+      "test/systemChangeGate.test.js",
       "test/plasticTrashBinModule.test.js"
     ],
     "fullSuite": true,
@@ -370,19 +377,19 @@
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/plastic-trash-bin-module.spec.mjs",
-        "e2e/commercial-items-contract.spec.mjs"
+        "e2e/wall-media-items-contract.spec.mjs",
+        "e2e/plastic-trash-bin-module.spec.mjs"
       ],
-      "reason": "Catalog rename, automatic depot construction, and current-project save/open require browser lifecycle verification."
+      "reason": "Catalog drag-drop, runtime state and persistence for the five wall-media cards are browser-visible; the E2E drags each card and verifies the saved project carries the canonical itemKey/catalogKey plus the grid parameters. The same uncommitted working set also carries the plastic-trash-bin catalog-preview silhouette change, whose browser-visible catalog/Add cards are covered by its dedicated spec."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Direct identity cutover. Old project compatibility explicitly out of scope at user request; current-state lifecycle remains covered."
+    "notes": "Central catalog/state/Item source-of-truth refactor. Runtime dimensions, wall-media BOM policy, wall-overlay placement and the TV renderer are held at parity; risk is confined to identity routing and legacy-project itemKey hydration, covered by unit + E2E."
   },
   "migration": {
     "required": false,
-    "notes": "User explicitly waived compatibility with old projects. Direct canonical rename; no legacy alias or DEPOT_ migration layer."
+    "notes": "No stored-shape rewrite is forced. Legacy projects still resolve their canonical catalogKey through resolveModuleCatalogKey and now also hydrate itemKey via normalizeModuleItemState on load; no dual-write and no persisted migration step is required."
   },
-  "rollback": "Revert this change set; canonical new-key projects require reverse identity mapping before loading with an older application."
+  "rollback": "Revert this change set to restore src/tvConfig.js as the wall-media source-of-truth and the previous catalog/state derivation."
 }

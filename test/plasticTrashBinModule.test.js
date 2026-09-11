@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import {
   MODULE_CATALOG,
   MODULE_CATALOG_GROUPS,
@@ -89,6 +89,19 @@ test('trash bin state and behavior preserve fridge-style movement without overla
   assert.equal(canModulesOverlapByBehavior(state, { type: 'mini-fridge' }), false);
   assert.equal(canModulesOverlapByBehavior(state, { type: 'kettle' }), false);
   assert.equal(canModulesOverlapByBehavior(state, { type: 'coat-rack' }), false);
+});
+
+test('trash catalog preview uses a dedicated bin silhouette instead of panel strips', () => {
+  const source = readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
+  const trashBranch = source.slice(
+    source.indexOf("if (module.type === 'plastic-trash-bin')"),
+    source.indexOf("if (module.type === 'indoor-plant-1'"),
+  );
+  assert.match(trashBranch, /module-drag-trash-bin/);
+  assert.match(trashBranch, /trashBin\.className = 'module-drag-trash-bin'/);
+  assert.match(trashBranch, /\['handle', 'lid', 'body'\]/);
+  assert.match(trashBranch, /module-drag-trash-bin-\$\{part\}/);
+  assert.doesNotMatch(trashBranch, /module-drag-panel/);
 });
 
 test('trash bin has an explicit fixed-model contract and remains in F-014 BOM decision scope', () => {

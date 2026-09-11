@@ -96,9 +96,12 @@ test('trash bin is visible in the catalog, renders its GLB, and persists through
   await expect(trashCard).toBeVisible();
   await expect(trashCard).toHaveAttribute('aria-disabled', 'false');
   await expect(trashCard.locator('.module-drag-plant')).toHaveCount(0);
-  const trashPreview = trashCard.locator('.module-drag-panel');
+  await expect(trashCard.locator('.module-drag-panel')).toHaveCount(0);
+  const trashPreview = trashCard.locator('.module-drag-trash-bin');
   await expect(trashPreview).toBeVisible();
-  await expect(trashPreview).toHaveCSS('width', '34px');
+  await expect(trashPreview.locator('.module-drag-trash-bin-handle')).toHaveCount(1);
+  await expect(trashPreview.locator('.module-drag-trash-bin-lid')).toHaveCount(1);
+  await expect(trashPreview.locator('.module-drag-trash-bin-body')).toHaveCount(1);
 
   const viewport = page.locator('#viewport');
   const viewportBox = await viewport.boundingBox();
@@ -168,7 +171,8 @@ test('trash bin is visible and selectable in the existing Add catalog', async ({
   await expect(trashCard).toBeVisible();
   await expect(trashCard).toHaveAttribute('aria-selected', 'false');
   await expect(trashCard.locator('.module-drag-plant')).toHaveCount(0);
-  await expect(trashCard.locator('.module-drag-panel')).toHaveCSS('width', '34px');
+  await expect(trashCard.locator('.module-drag-panel')).toHaveCount(0);
+  await expect(trashCard.locator('.module-drag-trash-bin')).toBeVisible();
 
   await trashCard.click();
   await expect(trashCard).toHaveAttribute('aria-selected', 'true');

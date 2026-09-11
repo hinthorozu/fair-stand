@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
 import { createTvModuleState } from '../src/designState.js';
-import { getTvDefinition, TV_42_BASE } from '../src/tvConfig.js';
+import { getItem } from '../src/items.js';
 import { getModuleBehavior, getModuleGhostBehavior, isWallOverlayModule } from '../src/moduleBehavior.js';
 
 test('TV 42 catalog and state use one shared 93.0 x 52.3 screen', () => {
@@ -19,29 +19,33 @@ test('TV 42 catalog and state use one shared 93.0 x 52.3 screen', () => {
 });
 
 
-test('TV 55 and 65 inherit TV 42 and override only their screen size identity', () => {
+test('TV 55 and 65 inherit TV 42 body and override only their screen size identity', () => {
   const expected = {
     42: [93, 52.3],
     55: [121.8, 68.5],
     65: [143.9, 80.9],
   };
+  const base = getItem('TV_42');
 
   for (const sizeInch of [42, 55, 65]) {
-    const definition = getTvDefinition(sizeInch);
-    const item = MODULE_CATALOG[`TV_${sizeInch}`];
+    const item = getItem(`TV_${sizeInch}`);
+    const catalogItem = MODULE_CATALOG[`TV_${sizeInch}`];
     const state = createTvModuleState(sizeInch);
-    assert.ok(definition);
     assert.ok(item);
+    assert.ok(catalogItem);
     assert.ok(state);
-    assert.equal(definition.type, TV_42_BASE.type);
-    assert.equal(definition.widthCm, TV_42_BASE.widthCm);
-    assert.equal(definition.depthCm, TV_42_BASE.depthCm);
-    assert.equal(definition.catalogHeightCm, TV_42_BASE.catalogHeightCm);
-    assert.equal(item.type, TV_42_BASE.type);
-    assert.equal(item.widthCm, TV_42_BASE.widthCm);
-    assert.equal(item.depthCm, 5);
-    assert.equal(state.type, TV_42_BASE.type);
-    assert.equal(state.widthCm, TV_42_BASE.widthCm);
+    assert.equal(item.type, base.type);
+    assert.equal(item.dimensions.widthCm, base.dimensions.widthCm);
+    assert.equal(item.dimensions.depthCm, base.dimensions.depthCm);
+    assert.equal(item.dimensions.catalogHeightCm, base.dimensions.catalogHeightCm);
+    assert.equal(catalogItem.itemKey, `TV_${sizeInch}`);
+    assert.equal(catalogItem.type, base.type);
+    assert.equal(catalogItem.widthCm, base.dimensions.widthCm);
+    assert.equal(catalogItem.depthCm, 5);
+    assert.equal(state.type, base.type);
+    assert.equal(state.itemKey, `TV_${sizeInch}`);
+    assert.equal(state.catalogKey, `TV_${sizeInch}`);
+    assert.equal(state.widthCm, base.dimensions.widthCm);
     assert.equal(state.depthCm, 5);
     assert.equal(state.sizeInch, sizeInch);
     assert.equal(state.screenWidthCm, expected[sizeInch][0]);
@@ -171,8 +175,38 @@ test('TV wall overlay drag snaps horizontal and height movement to 10 cm', () =>
   assert.equal(behavior.renderer, 'module-silhouette');
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(source, /function getWallOverlayDragPoint/);
-  assert.match(source, /Math\.round\(rawOffsetCm \/ 10\) \* 10/);
+  assert.match(source, /clampWallOverlayZCm\(/);
+  assert.match(source, /getWallOverlayZBoundsCm\(/);
   assert.match(source, /snap: \{ mode: 'wall-overlay'/);
+});
+
+test('wall-overlay height clamp reaches geometric top for every TV screen size', async () => {
+  const {
+    clampWallOverlayZCm,
+    getWallOverlayZBoundsCm,
+    WALL_OVERLAY_DEFAULT_CENTER_CM,
+  } = await import('../src/modulePlacement.js');
+  const wallHeightCm = 350;
+  const expected = {
+    42: 52.3,
+    55: 68.5,
+    65: 80.9,
+  };
+  for (const [sizeInch, screenHeightCm] of Object.entries(expected)) {
+    const { maxZCm, minZCm } = getWallOverlayZBoundsCm(screenHeightCm, wallHeightCm);
+    const topCm = WALL_OVERLAY_DEFAULT_CENTER_CM + maxZCm + screenHeightCm / 2;
+    const bottomCm = WALL_OVERLAY_DEFAULT_CENTER_CM + minZCm - screenHeightCm / 2;
+    assert.ok(Math.abs(topCm - wallHeightCm) < 1e-9, `TV_${sizeInch} geometric max must sit flush to the wall top`);
+    assert.ok(Math.abs(bottomCm) < 1e-9, `TV_${sizeInch} geometric min must sit flush to the wall bottom`);
+    assert.equal(clampWallOverlayZCm(999, screenHeightCm, 10, wallHeightCm), maxZCm);
+    assert.equal(clampWallOverlayZCm(-999, screenHeightCm, 10, wallHeightCm), minZCm);
+  }
+  // Old snap-aligned ceiling stopped TV_42 at 140; geometric max is higher so it can flush.
+  assert.ok(getWallOverlayZBoundsCm(52.3, 350).maxZCm > 140);
+  assert.equal(
+    clampWallOverlayZCm(150, 52.3, 10, 350),
+    getWallOverlayZBoundsCm(52.3, 350).maxZCm,
+  );
 });
 
 test('TV catalog preview uses a dedicated TV silhouette instead of panel strips', () => {

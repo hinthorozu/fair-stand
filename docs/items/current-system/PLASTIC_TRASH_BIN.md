@@ -80,6 +80,8 @@ Contract appearance alanları ve renderer surface/proxy yapısı birlikte uygula
 
 Automatic depot `includeContents` aktifken çöp kutusu catalog descriptor ölçü/model alanlarıyla depot spec'ine eklenir.
 
+Katalog kartı `moduleDragSidebar.js` içinde özel `module-drag-trash-bin` siluetiyle gösterilir; wall/panel şerit önizlemesini kullanmaz.
+
 Automatic depot state mappinginde bu içerik `currentModules` içine eklenirken `autoDepot = true` flag'i alır. `FEATURE_CONTRACTS.automaticDepot` contentKinds listesinde bu type yer alır.
 
 ## Context menu

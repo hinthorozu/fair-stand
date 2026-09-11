@@ -140,6 +140,33 @@ export function snapCm(value, stepCm = MODULE_PLACEMENT_SNAP_CM) {
   return Math.round(number / step) * step;
 }
 
+// Wall-overlay height uses a fixed visual center (175 cm). Snap stays on the
+// shared step grid, but the final clamp is geometric so every screen size can
+// reach the wall top/bottom flush instead of stopping early on a snap multiple.
+export const WALL_OVERLAY_DEFAULT_CENTER_CM = 175;
+
+export function getWallOverlayZBoundsCm(heightCm, wallHeightCm = STAND_DIMENSIONS.height * 100) {
+  const halfHeightCm = Math.max(1, Number(heightCm) || 52.3) / 2;
+  const wallCm = Number(wallHeightCm);
+  return {
+    minZCm: halfHeightCm - WALL_OVERLAY_DEFAULT_CENTER_CM,
+    maxZCm: wallCm - halfHeightCm - WALL_OVERLAY_DEFAULT_CENTER_CM,
+  };
+}
+
+export function clampWallOverlayZCm(
+  rawOffsetCm,
+  heightCm,
+  stepCm = MODULE_PLACEMENT_SNAP_CM,
+  wallHeightCm = STAND_DIMENSIONS.height * 100,
+) {
+  const { minZCm, maxZCm } = getWallOverlayZBoundsCm(heightCm, wallHeightCm);
+  const snapped = snapCm(rawOffsetCm, stepCm);
+  const value = Number.isFinite(snapped) ? snapped : Number(rawOffsetCm);
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(maxZCm, Math.max(minZCm, value));
+}
+
 export function getModulePlacementSnapCm(moduleType) {
   return getModuleMoveSnapCm(moduleType);
 }

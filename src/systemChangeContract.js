@@ -135,7 +135,6 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/style.css': frozenDomains('ui'),
   'src/systemChangeContract.js': frozenDomains('architecture'),
   'src/theme.js': frozenDomains('ui', 'renderer'),
-  'src/tvConfig.js': frozenDomains('catalog', 'state', 'renderer'),
   'src/uiFeedback.js': frozenDomains('ui', 'accessibility'),
   'src/viewCube.js': frozenDomains('renderer', 'ui'),
   'src/viewKeyboardShortcuts.js': frozenDomains('behavior', 'ui', 'accessibility'),
