@@ -1,48 +1,59 @@
 {
   "schemaVersion": 2,
-  "id": "wall-showcase-body-color-regression",
-  "kind": "bugfix",
-  "summary": "Lock the existing wall showcase single-body color behavior with regression coverage. No production behavior changes: wall_showcase_100_2 and wall_showcase_100_3 keep one grouped bodySurface color override, four physical body boards remain one user-selectable color target, and existing BOM, placement, renderer geometry, persistence and catalog identity stay unchanged.",
+  "id": "wall-showcase-remove-fake-front-details",
+  "kind": "renderer-change",
+  "summary": "Remove the non-BOM white showcase front-detail meshes (front posts, top/bottom front edges and glass-shelf front strips) from wall_showcase_100_2 and wall_showcase_100_3 while preserving canonical body boards, glass shelves, frame geometry, grouped body color behavior, state, persistence, placement, movement, rotation and BOM.",
   "owners": [
-    "src/designState.js",
     "src/scene3d.js",
-    "src/selectionFeedback.js"
+    "test/showcaseBodyColorRegression.test.js",
+    "docs/items/current-system/wall_showcase_100_2.md",
+    "docs/items/current-system/wall_showcase_100_3.md",
+    "docs/items/definitions/wall_showcase_100_2.md",
+    "docs/items/definitions/wall_showcase_100_3.md"
   ],
   "sourceOfTruth": [
     "docs/items/contract/ITEM_CONTRACT.md",
     "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md",
-    "src/designState.js",
-    "src/scene3d.js",
-    "src/items.js"
+    "src/items.js",
+    "src/productionParts.js",
+    "src/scene3d.js"
   ],
   "impact": {
-    "catalog": "not-applicable",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
-    "placement": "not-applicable",
-    "renderer": "not-applicable",
-    "persistence": "not-applicable",
+    "catalog": "affected",
+    "behavior": "affected",
+    "state": "affected",
+    "placement": "affected",
+    "renderer": "affected",
+    "persistence": "affected",
     "bom": "not-applicable",
-    "ui": "not-applicable",
-    "composition": "not-applicable",
-    "assets": "not-applicable",
-    "storage": "not-applicable",
-    "importExport": "not-applicable",
-    "performance": "not-applicable",
+    "ui": "affected",
+    "composition": "affected",
+    "assets": "affected",
+    "storage": "affected",
+    "importExport": "affected",
+    "performance": "affected",
     "accessibility": "not-applicable",
-    "architecture": "not-applicable",
+    "architecture": "affected",
     "security": "not-applicable",
     "tests": "affected"
   },
   "impactAnalysis": {
     "mode": "full-system",
-    "affectedFiles": [],
+    "affectedFiles": [
+      "src/scene3d.js"
+    ],
     "affectedTests": [
       "test/showcaseBodyColorRegression.test.js",
+      "test/wallShowcaseItemContract.test.js",
       "e2e/wall-showcase-item-contract.spec.mjs",
       "e2e/smoke.spec.mjs"
     ],
-    "affectedDocs": [],
+    "affectedDocs": [
+      "docs/items/current-system/wall_showcase_100_2.md",
+      "docs/items/current-system/wall_showcase_100_3.md",
+      "docs/items/definitions/wall_showcase_100_2.md",
+      "docs/items/definitions/wall_showcase_100_3.md"
+    ],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": [
@@ -50,11 +61,12 @@
         "F-030"
       ]
     },
-    "notes": "Fresh Version2 review confirms the requested capability already exists in production: createShowcaseModuleState owns one bodySurface color, createShowcaseModule exposes one acceptsColor selector, and that selector targets both side boards plus top/bottom boards together. This change adds regression coverage only. No Item identity, BOM, placement, move/rotation, renderer geometry, persistence schema, selection behavior, context menu, catalog or relationship logic is modified. F-025/F-030 and audit remediation are reviewedNotAffected only."
+    "notes": "Fresh Version2 review covered canonical identity/type, intrinsic/default ownership, factory/state, placement/move/rotation/snap/collision, selection/drag/context actions, persistence, relationships/reflow, BOM/composition and renderer ownership. The only runtime delta is deletion of renderer-only white meshes that have no canonical Item/BOM ownership: showcaseDetailMaterial/frontPost/frontEdge/shelfFront. The canonical frame, side/horizontal body boards, glass_shelf geometry, one grouped bodySurface color target, state shape, save/load and all placement behavior remain unchanged. Broad scene3d path-required domains are declared affected for Change Gate enforcement; their runtime behavior is explicitly regression-preserved. F-025/F-030 and audit remediation remain out of scope and are reviewedNotAffected only."
   },
   "tests": {
     "targeted": [
-      "test/showcaseBodyColorRegression.test.js"
+      "test/showcaseBodyColorRegression.test.js",
+      "test/wallShowcaseItemContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -64,16 +76,16 @@
         "e2e/wall-showcase-item-contract.spec.mjs",
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "The production behavior is unchanged, but the existing wall-showcase browser lifecycle and smoke suites are retained as end-to-end regression coverage before merge."
+      "reason": "scene3d renderer geometry changes are browser-impacting. Keep canonical showcase lifecycle plus smoke coverage through Chromium before merge."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Regression-only change. No production source file is modified."
+    "notes": "Deletion-only showcase renderer cleanup. No Item, BOM, state schema, placement or persistence implementation changes."
   },
   "migration": {
     "required": false,
-    "notes": "No state shape, storage schema or persisted project migration is introduced."
+    "notes": "No persisted state or storage schema changes."
   },
-  "rollback": "Remove test/showcaseBodyColorRegression.test.js and restore the previous change-contract declaration; production runtime remains untouched."
+  "rollback": "Restore the renderer-only showcaseDetailMaterial frontPost/frontEdge/shelfFront meshes and revert the associated regression/documentation updates."
 }
