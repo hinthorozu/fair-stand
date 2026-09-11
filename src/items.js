@@ -153,6 +153,80 @@ export const COMPOSITE_ITEMS = Object.freeze({
       nominalWidthCm: 200,
     }),
   }),
+  // Free-standing banko parents share type `counter`. Straight and L variants are
+  // separate itemKeys; child quantities stay in moduleRecipes (counter:* / counter-l:*).
+  desk_banko_100: Object.freeze({
+    itemKey: 'desk_banko_100',
+    name: 'Banko 100',
+    type: 'counter',
+    dimensions: Object.freeze({ widthCm: 100, depthCm: 50, heightCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'counter',
+      nominalWidthCm: 100,
+    }),
+  }),
+  desk_banko_150: Object.freeze({
+    itemKey: 'desk_banko_150',
+    name: 'Banko 150',
+    type: 'counter',
+    dimensions: Object.freeze({ widthCm: 150, depthCm: 50, heightCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'counter',
+      nominalWidthCm: 150,
+    }),
+  }),
+  desk_banko_200: Object.freeze({
+    itemKey: 'desk_banko_200',
+    name: 'Banko 200',
+    type: 'counter',
+    dimensions: Object.freeze({ widthCm: 200, depthCm: 50, heightCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'counter',
+      nominalWidthCm: 200,
+    }),
+  }),
+  desk_banko_100_L: Object.freeze({
+    itemKey: 'desk_banko_100_L',
+    name: 'Köşe Banko 100×100',
+    type: 'counter',
+    shape: 'L',
+    dimensions: Object.freeze({ widthCm: 100, depthCm: 100, heightCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'counter',
+      nominalWidthCm: 100,
+      options: Object.freeze({ shape: 'L' }),
+    }),
+  }),
+  desk_banko_150_L: Object.freeze({
+    itemKey: 'desk_banko_150_L',
+    name: 'Köşe Banko 150×150',
+    type: 'counter',
+    shape: 'L',
+    dimensions: Object.freeze({ widthCm: 150, depthCm: 150, heightCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'counter',
+      nominalWidthCm: 150,
+      options: Object.freeze({ shape: 'L' }),
+    }),
+  }),
+  desk_banko_200_L: Object.freeze({
+    itemKey: 'desk_banko_200_L',
+    name: 'Köşe Banko 200×200',
+    type: 'counter',
+    shape: 'L',
+    dimensions: Object.freeze({ widthCm: 200, depthCm: 200, heightCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'counter',
+      nominalWidthCm: 200,
+      options: Object.freeze({ shape: 'L' }),
+    }),
+  }),
   wall_showcase_100_2: Object.freeze({
     itemKey: 'wall_showcase_100_2',
     name: '2 Gözlü Vitrin 100',

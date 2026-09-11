@@ -12,9 +12,13 @@ export const STAND_DIMENSIONS = Object.freeze({
 export const MODULE_WIDTHS_CM = Object.freeze([50, 100, 150, 200]);
 
 export const COUNTER_DIMENSIONS = Object.freeze({
-  depthCm: 50,
-  heightCm: 100,
-  widthsCm: Object.freeze([100, 150, 200]),
+  depthCm: getItem('desk_banko_100').dimensions.depthCm,
+  heightCm: getItem('desk_banko_100').dimensions.heightCm,
+  widthsCm: Object.freeze([
+    getItem('desk_banko_100').dimensions.widthCm,
+    getItem('desk_banko_150').dimensions.widthCm,
+    getItem('desk_banko_200').dimensions.widthCm,
+  ]),
 });
 
 export const BASE_DIMENSIONS = Object.freeze({
@@ -35,6 +39,18 @@ function createBaseCatalogItem(itemKey) {
     ...item.dimensions,
     label: item.name,
   });
+}
+
+function createCounterCatalogItem(itemKey) {
+  const item = getItem(itemKey);
+  const descriptor = {
+    itemKey: item.itemKey,
+    type: item.type,
+    ...item.dimensions,
+    label: item.name,
+  };
+  if (item.shape === 'L') descriptor.shape = 'L';
+  return Object.freeze(descriptor);
 }
 
 export const SHELF_DIMENSIONS = Object.freeze({
@@ -210,12 +226,12 @@ export const MODULE_CATALOG = Object.freeze({
     label: DOOR_ITEM.name,
   },
 
-  desk_banko_100: { type: 'counter', widthCm: 100, depthCm: 50, heightCm: 100, label: 'Banko 100' },
-  desk_banko_100_L: { type: 'counter', shape: 'L', widthCm: 100, depthCm: 100, heightCm: 100, label: 'Köşe Banko 100×100' },
-  desk_banko_150: { type: 'counter', widthCm: 150, depthCm: 50, heightCm: 100, label: 'Banko 150' },
-  desk_banko_150_L: { type: 'counter', shape: 'L', widthCm: 150, depthCm: 150, heightCm: 100, label: 'Köşe Banko 150×150' },
-  desk_banko_200: { type: 'counter', widthCm: 200, depthCm: 50, heightCm: 100, label: 'Banko 200' },
-  desk_banko_200_L: { type: 'counter', shape: 'L', widthCm: 200, depthCm: 200, heightCm: 100, label: 'Köşe Banko 200×200' },
+  desk_banko_100: createCounterCatalogItem('desk_banko_100'),
+  desk_banko_100_L: createCounterCatalogItem('desk_banko_100_L'),
+  desk_banko_150: createCounterCatalogItem('desk_banko_150'),
+  desk_banko_150_L: createCounterCatalogItem('desk_banko_150_L'),
+  desk_banko_200: createCounterCatalogItem('desk_banko_200'),
+  desk_banko_200_L: createCounterCatalogItem('desk_banko_200_L'),
   BASE_100: createBaseCatalogItem('BASE_100'),
   BASE_150: createBaseCatalogItem('BASE_150'),
   BASE_200: createBaseCatalogItem('BASE_200'),
@@ -315,6 +331,15 @@ function optionalNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+// Catalog straight counters omit `shape`; runtime state uses `shape: 'straight'`.
+function shapesMatch(want, have) {
+  const normalizedWant = want === 'L' ? 'L' : (want == null ? null : 'straight');
+  const normalizedHave = have === 'L' ? 'L' : (have == null ? null : 'straight');
+  if (normalizedWant === null) return true;
+  if (normalizedHave === null && normalizedWant === 'straight') return true;
+  return normalizedWant === normalizedHave;
+}
+
 function normalizeCatalogDescriptor(descriptor) {
   const nested = descriptor?.moduleState && typeof descriptor.moduleState === 'object'
     ? descriptor.moduleState
@@ -351,7 +376,8 @@ export function resolveModuleCatalogKey(descriptor) {
       if (normalized.widthCm !== null && optionalNumber(item.widthCm) !== null && optionalNumber(item.widthCm) !== normalized.widthCm) return false;
     }
     if (normalized.depthCm !== null && optionalNumber(item.depthCm) !== null && optionalNumber(item.depthCm) !== normalized.depthCm) return false;
-    if ((normalized.shape !== null || item.shape != null) && (item.shape ?? null) !== normalized.shape) return false;
+    if ((normalized.shape !== null || item.shape != null)
+      && !shapesMatch(normalized.shape, item.shape)) return false;
     if ((normalized.shelfCount !== null || item.shelfCount != null) && optionalNumber(item.shelfCount) !== normalized.shelfCount) return false;
     if ((normalized.modelFile !== null || item.modelFile != null) && (item.modelFile ?? null) !== normalized.modelFile) return false;
     if (normalized.sizeInch !== null && optionalNumber(item.sizeInch) !== null && optionalNumber(item.sizeInch) !== normalized.sizeInch) return false;

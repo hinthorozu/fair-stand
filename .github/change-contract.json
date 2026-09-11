@@ -1,24 +1,25 @@
 {
   "schemaVersion": 2,
-  "id": "tv-placement-width-equals-screen",
-  "kind": "bugfix",
-  "summary": "Ordinary TV wall-media Items no longer use a fake 100 cm placement width. widthCm equals verified screenWidthCm so horizontal move bounds match the rendered screen edge (same rule as video walls).",
+  "id": "desk-banko-family-item-migration",
+  "kind": "refactor",
+  "summary": "Migrate desk_banko_100/150/200 and desk_banko_100_L/150_L/200_L into COMPOSITE_ITEMS. Catalog and createCounterModuleState derive defaults from getItem; load hydrates catalogKey→itemKey. moduleRecipes counter/counter-l quantities unchanged; Raw BOM UI untouched; parent unit not invented.",
   "owners": [
     "src/items.js",
-    "src/designState.js",
-    "src/catalog.js"
+    "src/catalog.js",
+    "src/designState.js"
   ],
   "sourceOfTruth": [
     "docs/items/contract/ITEM_CONTRACT.md",
     "src/items.js",
-    "src/designState.js",
-    "src/catalog.js"
+    "src/moduleRecipes.js",
+    "src/catalog.js",
+    "src/designState.js"
   ],
   "impact": {
     "catalog": "affected",
     "behavior": "not-applicable",
     "state": "affected",
-    "placement": "affected",
+    "placement": "not-applicable",
     "renderer": "not-applicable",
     "persistence": "affected",
     "bom": "affected",
@@ -61,11 +62,11 @@
       "src/wallReflow.js"
     ],
     "affectedTests": [
+      "e2e/desk-banko-items-contract.spec.mjs",
       "e2e/f010-module-construction.spec.mjs",
       "e2e/f011-module-behavior.spec.mjs",
       "e2e/mini-fridge-dimensions.spec.mjs",
       "e2e/plastic-trash-bin-module.spec.mjs",
-      "e2e/wall-media-items-contract.spec.mjs",
       "e2e/wall-showcase-item-contract.spec.mjs",
       "test/autoDepotOrientation.test.js",
       "test/automaticWall.test.js",
@@ -86,12 +87,14 @@
       "test/commercialItemsContract.test.js",
       "test/cornerPlacement.test.js",
       "test/counterModule.test.js",
+      "test/counterRecipes.test.js",
       "test/coverModeExclusivity.test.js",
       "test/ctrlMultiSelect.test.js",
       "test/depotBackWallRecipe.test.js",
       "test/depotFreeDragSnap.test.js",
       "test/depotFrontRecipe.test.js",
       "test/designState.test.js",
+      "test/deskBankoItemsContract.test.js",
       "test/developerEntrypointDocs.test.js",
       "test/doorCompositeItemContract.test.js",
       "test/doorLeafItemContract.test.js",
@@ -214,6 +217,12 @@
       "docs/items/current-system/connector_double.md",
       "docs/items/current-system/connector_single.md",
       "docs/items/current-system/connector_start.md",
+      "docs/items/current-system/desk_banko_100.md",
+      "docs/items/current-system/desk_banko_100_L.md",
+      "docs/items/current-system/desk_banko_150.md",
+      "docs/items/current-system/desk_banko_150_L.md",
+      "docs/items/current-system/desk_banko_200.md",
+      "docs/items/current-system/desk_banko_200_L.md",
       "docs/items/current-system/door_100.md",
       "docs/items/current-system/door_leaf_100.md",
       "docs/items/current-system/glass_shelf.md",
@@ -289,30 +298,34 @@
         "F-045"
       ]
     },
-    "notes": "resolveWallMediaMetrics sets widthCm = screenWidthCm for ordinary TVs. Load hydrate rewrites TV footprint fields from the canonical Item so legacy saves with fake widthCm=100 pick up the screen footprint. Behavior snap stays 10 cm. wall-media BOM remains decision-required / source null."
+    "notes": "Six banko parents live in COMPOSITE_ITEMS. L variants use composition.options.shape=L (existing itemBom/moduleRecipes path). Recipe quantities and rawBomDebug remain unchanged. Parent unit omitted."
   },
   "tests": {
     "targeted": [
-      "test/tv42Module.test.js",
-      "test/wallMediaItemsContract.test.js"
+      "test/deskBankoItemsContract.test.js",
+      "test/counterModule.test.js",
+      "test/counterRecipes.test.js",
+      "test/lCounter100Contract.test.js",
+      "test/lCounter150Contract.test.js",
+      "test/lCounter200Contract.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/wall-media-items-contract.spec.mjs"
+        "e2e/desk-banko-items-contract.spec.mjs"
       ],
-      "reason": "Wall-media catalog drag and saved itemKey/catalogKey remain browser-visible; width change must not break TV card construction."
+      "reason": "Six banko catalog cards are browser-visible; E2E checks itemKey/catalogKey and faces after save."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "Legacy TV instances hydrate widthCm to screenWidthCm on load so move bounds match the rendered edge."
+    "level": "medium",
+    "notes": "Composite cutover for six counter variants sharing type counter; recipe quantities isolated as unchanged."
   },
   "migration": {
     "required": false,
-    "notes": "No alias table. normalizeModuleItemState rewrites TV footprint fields from resolveWallMediaMetrics on load."
+    "notes": "No alias table. Legacy saves without itemKey hydrate from catalogKey/type+width+shape on load."
   },
-  "rollback": "Revert WALL_MEDIA_ITEMS ordinary TV widthCm to 100, restore resolveWallMediaMetrics passthrough of dimensions.widthCm, and remove TV metric rewrite from normalizeModuleItemState."
+  "rollback": "Revert this change set to restore hard-coded banko catalog/state without COMPOSITE_ITEMS identity."
 }

@@ -154,11 +154,36 @@ export function createDoorModuleState(widthCm = 100) {
   };
 }
 
-export function createCounterModuleState(widthCm, options = {}) {
-  const width = Number(widthCm);
-  if (![100, 150, 200].includes(width)) return null;
+const COUNTER_WIDTH_SHAPE_TO_ITEM_KEY = Object.freeze({
+  '100': 'desk_banko_100',
+  '150': 'desk_banko_150',
+  '200': 'desk_banko_200',
+  '100_L': 'desk_banko_100_L',
+  '150_L': 'desk_banko_150_L',
+  '200_L': 'desk_banko_200_L',
+});
+
+function resolveCounterItemKey(widthCmOrDescriptor, options = {}) {
+  if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
+    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    if (explicitKey && getItem(explicitKey)?.type === 'counter') return explicitKey;
+    const width = Number(widthCmOrDescriptor.widthCm);
+    const shape = widthCmOrDescriptor.shape === 'L' || options.shape === 'L' ? 'L' : 'straight';
+    const mapKey = shape === 'L' ? `${width}_L` : String(width);
+    return COUNTER_WIDTH_SHAPE_TO_ITEM_KEY[mapKey] ?? null;
+  }
+  const width = Number(widthCmOrDescriptor);
   const shape = options.shape === 'L' ? 'L' : 'straight';
-  const depthCm = shape === 'L' ? (Number(options.depthCm) || width) : (Number(options.depthCm) || 50);
+  const mapKey = shape === 'L' ? `${width}_L` : String(width);
+  return COUNTER_WIDTH_SHAPE_TO_ITEM_KEY[mapKey] ?? null;
+}
+
+export function createCounterModuleState(widthCmOrDescriptor, options = {}) {
+  const itemKey = resolveCounterItemKey(widthCmOrDescriptor, options);
+  const item = itemKey ? getItem(itemKey) : null;
+  if (!item || item.type !== 'counter') return null;
+  const shape = item.shape === 'L' ? 'L' : 'straight';
+  const { widthCm, depthCm, heightCm } = item.dimensions;
   const faces = {
     frontLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
     frontUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
@@ -171,7 +196,17 @@ export function createCounterModuleState(widthCm, options = {}) {
     faces.returnLower = createEditablePanelState(null, DEFAULT_PANEL_COLOR);
     faces.returnUpper = createEditablePanelState(null, DEFAULT_PANEL_COLOR);
   }
-  return { id: createId('module'), type: 'counter', shape, widthCm: width, depthCm, heightCm: 100, faces };
+  return {
+    id: createId('module'),
+    itemKey: item.itemKey,
+    catalogKey: item.itemKey,
+    type: item.type,
+    shape,
+    widthCm,
+    depthCm,
+    heightCm,
+    faces,
+  };
 }
 
 export function createBaseWallModuleState(widthCm) {
@@ -392,10 +427,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   'flat-panel': (descriptor) => createFlatPanelModuleState(descriptor.widthCm),
   base: (descriptor) => createBaseModuleState(descriptor),
   'base-wall': (descriptor) => createBaseWallModuleState(descriptor.widthCm),
-  counter: (descriptor) => createCounterModuleState(descriptor.widthCm, {
-    shape: descriptor.shape,
-    depthCm: descriptor.depthCm,
-  }),
+  counter: (descriptor) => createCounterModuleState(descriptor),
   separator: (descriptor) => createSeparatorModuleState(descriptor.widthCm, descriptor),
   shelf: (descriptor) => createShelfModuleState(descriptor.widthCm, descriptor.shelfCount),
   'sofa-set-classic': () => createBeigeSofaSetModuleState(),
@@ -468,6 +500,14 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'base') {
     const resolvedKey = resolveModuleCatalogKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'base') {
+      moduleState.itemKey = resolvedKey;
+    }
+    return moduleState;
+  }
+
+  if (moduleState.type === 'counter') {
+    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    if (resolvedKey && getItem(resolvedKey)?.type === 'counter') {
       moduleState.itemKey = resolvedKey;
     }
     return moduleState;
