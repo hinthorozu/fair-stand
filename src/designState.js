@@ -460,18 +460,62 @@ export function createPlasticTrashBinModuleState() {
   return createCommercialModuleState('plastic-trash-bin');
 }
 
+function isIndoorPlantItem(item) {
+  return item?.type === 'indoor-plant-1' && Boolean(item?.itemKey);
+}
+
+function resolveIndoorPlantItemKey(descriptor = {}) {
+  if (descriptor && typeof descriptor === 'object' && !Array.isArray(descriptor)) {
+    const explicitKey = descriptor.itemKey ?? descriptor.catalogKey ?? null;
+    if (explicitKey && isIndoorPlantItem(getItem(explicitKey))) return explicitKey;
+    // Runtime default model `indoor_plants.glb` katalogda modelFile taşımıyordu; resolve'ta yok say.
+    const rawModelFile = descriptor.modelFile ?? null;
+    const modelFile = (!rawModelFile || rawModelFile === 'indoor_plants.glb') ? null : rawModelFile;
+    const resolvedKey = resolveModuleCatalogKey({
+      type: 'indoor-plant-1',
+      widthCm: descriptor.widthCm,
+      depthCm: descriptor.depthCm,
+      heightCm: descriptor.heightCm,
+      modelFile,
+      catalogKey: descriptor.catalogKey ?? null,
+      itemKey: descriptor.itemKey ?? null,
+    });
+    if (resolvedKey && isIndoorPlantItem(getItem(resolvedKey))) return resolvedKey;
+  }
+  return null;
+}
+
 export function createIndoorPlantModuleState(descriptor = {}) {
-  const modelFile = descriptor.modelFile ?? 'indoor_plants.glb';
+  const hasDescriptorFields = descriptor
+    && typeof descriptor === 'object'
+    && !Array.isArray(descriptor)
+    && (
+      descriptor.itemKey
+      || descriptor.catalogKey
+      || descriptor.modelFile
+      || descriptor.widthCm != null
+      || descriptor.depthCm != null
+      || descriptor.heightCm != null
+    );
+  const itemKey = hasDescriptorFields
+    ? resolveIndoorPlantItemKey(descriptor)
+    : 'EXTRA_INDOOR_PLANT_1';
+  const item = itemKey ? getItem(itemKey) : null;
+  if (!isIndoorPlantItem(item)) return null;
+
+  const modelFile = item.modelFile ?? 'indoor_plants.glb';
   const isLongPlanter = /^saksi_bitkili_/i.test(modelFile);
   return {
     id: createId('module'),
-    type: 'indoor-plant-1',
-    widthCm: Number(descriptor.widthCm) || 60,
-    depthCm: Number(descriptor.depthCm) || 60,
-    heightCm: Number(descriptor.heightCm) || 120,
+    itemKey: item.itemKey,
+    catalogKey: item.itemKey,
+    type: item.type,
+    widthCm: Number(item.dimensions.widthCm),
+    depthCm: Number(item.dimensions.depthCm),
+    heightCm: Number(item.dimensions.heightCm),
     modelFile,
-    modelRotationYDeg: Number(descriptor.modelRotationYDeg) || 0,
-    preserveModelScale: Boolean(descriptor.preserveModelScale),
+    modelRotationYDeg: Number(item.modelRotationYDeg) || 0,
+    preserveModelScale: Boolean(item.preserveModelScale),
     ...(isLongPlanter ? {
       surface: {
         id: createId('surface'),
@@ -657,6 +701,14 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'shelf') {
     const resolvedKey = resolveModuleCatalogKey(moduleState);
     if (resolvedKey && isWallShelfCompositeItem(getItem(resolvedKey))) {
+      moduleState.itemKey = resolvedKey;
+    }
+    return moduleState;
+  }
+
+  if (moduleState.type === 'indoor-plant-1') {
+    const resolvedKey = resolveIndoorPlantItemKey(moduleState);
+    if (resolvedKey && isIndoorPlantItem(getItem(resolvedKey))) {
       moduleState.itemKey = resolvedKey;
     }
     return moduleState;

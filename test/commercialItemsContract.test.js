@@ -45,8 +45,6 @@ test('automatic depot resolves all four Items through the shared factory', () =>
     .map((spec) => createModuleStateFromDescriptor({ ...spec, type: spec.kind }, { preservePlacement: true }));
   assert.deepEqual(states.map((state) => state.itemKey).sort(), Object.keys(COMMERCIAL_ITEMS).sort());
   assert.ok(states.every((state) => state.placement));
-  assert.equal(MODULE_CATALOG.EXTRA_INDOOR_PLANT_1.itemKey, undefined);
-  assert.equal(getItem('EXTRA_INDOOR_PLANT_1'), null);
 });
 
 test('trash product properties cannot be overridden by an external descriptor', () => {
