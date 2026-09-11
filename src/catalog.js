@@ -53,6 +53,16 @@ function createCounterCatalogItem(itemKey) {
   return Object.freeze(descriptor);
 }
 
+function createFlatPanelCatalogItem(itemKey) {
+  const item = getItem(itemKey);
+  return Object.freeze({
+    itemKey: item.itemKey,
+    type: item.type,
+    widthCm: item.dimensions.widthCm,
+    label: item.name,
+  });
+}
+
 export const SHELF_DIMENSIONS = Object.freeze({
   widthsCm: Object.freeze([100, 150, 200]),
   heightsByCountCm: Object.freeze({
@@ -150,10 +160,10 @@ function createCommercialCatalogItem(itemKey) {
 }
 
 export const MODULE_CATALOG = Object.freeze({
-  wall_50: { type: 'flat-panel', widthCm: 50, label: 'Düz Panel 50' },
-  wall_100: { type: 'flat-panel', widthCm: 100, label: 'Düz Panel 100' },
-  wall_150: { type: 'flat-panel', widthCm: 150, label: 'Düz Panel 150' },
-  wall_200: { type: 'flat-panel', widthCm: 200, label: 'Düz Panel 200' },
+  wall_50: createFlatPanelCatalogItem('wall_50'),
+  wall_100: createFlatPanelCatalogItem('wall_100'),
+  wall_150: createFlatPanelCatalogItem('wall_150'),
+  wall_200: createFlatPanelCatalogItem('wall_200'),
 
   wall_showcase_100_3: {
     itemKey: WALL_SHOWCASE_3_ITEM.itemKey,

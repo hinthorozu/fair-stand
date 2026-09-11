@@ -227,6 +227,52 @@ export const COMPOSITE_ITEMS = Object.freeze({
       options: Object.freeze({ shape: 'L' }),
     }),
   }),
+  // Straight flat-panel wall parents. Child quantities stay in moduleRecipes
+  // straight-wall entries (50/100/150/200); Raw BOM UI path unchanged.
+  wall_50: Object.freeze({
+    itemKey: 'wall_50',
+    name: 'Düz Panel 50',
+    type: 'flat-panel',
+    dimensions: Object.freeze({ widthCm: 50 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall',
+      nominalWidthCm: 50,
+    }),
+  }),
+  wall_100: Object.freeze({
+    itemKey: 'wall_100',
+    name: 'Düz Panel 100',
+    type: 'flat-panel',
+    dimensions: Object.freeze({ widthCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall',
+      nominalWidthCm: 100,
+    }),
+  }),
+  wall_150: Object.freeze({
+    itemKey: 'wall_150',
+    name: 'Düz Panel 150',
+    type: 'flat-panel',
+    dimensions: Object.freeze({ widthCm: 150 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall',
+      nominalWidthCm: 150,
+    }),
+  }),
+  wall_200: Object.freeze({
+    itemKey: 'wall_200',
+    name: 'Düz Panel 200',
+    type: 'flat-panel',
+    dimensions: Object.freeze({ widthCm: 200 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall',
+      nominalWidthCm: 200,
+    }),
+  }),
   wall_showcase_100_2: Object.freeze({
     itemKey: 'wall_showcase_100_2',
     name: '2 Gözlü Vitrin 100',
