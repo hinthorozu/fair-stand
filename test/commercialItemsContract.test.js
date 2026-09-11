@@ -58,6 +58,7 @@ test('trash product properties cannot be overridden by an external descriptor', 
     heightCm: 70,
     modelFile: 'external.glb',
     modelRotationYDeg: 90,
+    visualRotationYDeg: 45,
     preserveModelScale: true,
   });
   assert.deepEqual(
@@ -67,4 +68,8 @@ test('trash product properties cannot be overridden by an external descriptor', 
   assert.equal(state.modelFile, item.modelFile);
   assert.equal(state.modelRotationYDeg, item.modelRotationYDeg);
   assert.equal(state.preserveModelScale, item.preserveModelScale);
+  assert.equal(item.visualRotationYDeg, -90);
+  assert.equal(state.visualRotationYDeg, item.visualRotationYDeg);
+  state.visualRotationYDeg = 0;
+  assert.equal(state.visualRotationYDeg, 0);
 });

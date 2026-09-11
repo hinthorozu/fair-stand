@@ -72,7 +72,7 @@ Placement `free` ailesindedir. Move/rotation ve boundary değerleri yukarıdaki 
 
 ## Renderer
 
-`plastic-trash-bin`, `createIndoorPlantModule()` renderer yoluna girer ve `plastic_trash_bin.glb` yükler. Visual group Y ekseninde -90° döndürülür; `Sphere_1` adlı node kaldırılır, `Object_5` mesh material'ları beyaza çekilir ve texture map temizlenir. `preserveModelScale=false` olduğu için model hedef 40×40×60 cm box'a fit edilir. Editable color/image surface state'i yoktur.
+`plastic-trash-bin`, `createIndoorPlantModule()` renderer yoluna girer ve `plastic_trash_bin.glb` yükler. Instance `visualRotationYDeg` değeri visual group'u Y ekseninde döndürür; factory başlangıç değerini canonical Item'daki `visualRotationYDeg=-90` defaultundan üretir ve renderer eksik state alanında aynı Item defaultuna döner. `Sphere_1` adlı node kaldırılır, `Object_5` mesh material'ları beyaza çekilir ve texture map temizlenir. `preserveModelScale=false` olduğu için model hedef 40×40×60 cm box'a fit edilir. Editable color/image surface state'i yoktur.
 
 ## Selection / appearance
 
@@ -157,7 +157,7 @@ Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 - Material/defaultColor: bağımsız business metadata YOK. GLB malzemeleri ve sidebar renkleri görsel temsildir; kullanıcı renk/image yetkisi yok.
 - Property owners: catalog + designState + autoDepot ölçüleri migration öncesi tekrarlanıyordu. Renderer fallback ve seçim metni ayrıca tarandı.
 - Factory: createModuleStateFromDescriptor → type factory; ID createId('module'). Placement ve autoDepot flag runtime instance alanlarıdır.
-- Overrides: ürün ölçüleri, model dosyası, model dönüşü ve scale yalnız canonical Item tanımından gelir; dış descriptor bu alanları değiştiremez. Placement ve autoDepot flag gibi instance alanları proje state'inde korunur.
+- Overrides: ürün defaultları canonical Item tanımından gelir; dış descriptor bunların kaynağı olamaz. Factory `visualRotationYDeg` defaultunu instance state'e kopyalar; kontrollü runtime/editor değişikliği bunu daha sonra ezebilir. Placement ve autoDepot flag gibi diğer instance alanları da proje state'inde korunur.
 - Relationships: otomatik depo içerik koordinatlarını planlar; kettle/fridge footprint overlap behavior kaynağındadır. Kettle yükseltmesi görsel olarak fridge yüksekliğindedir; persistent host bağı veya otomatik host takip/reflow yok.
 - Delete/duplicate: generic context menu; seçimi, sürüklemeyi, klavye rotation/move ve side insertion ortak motorlar yönetir.
 - Regression: ilgili ürün testi, commercialItemsContract ve gerçek katalog/depo/persistence E2E kapsamı.

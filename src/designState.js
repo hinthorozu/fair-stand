@@ -268,6 +268,7 @@ function createCommercialModuleState(type) {
   if (Object.hasOwn(item, 'preserveModelScale')) {
     state.modelFile = item.modelFile;
     state.modelRotationYDeg = item.modelRotationYDeg;
+    state.visualRotationYDeg = item.visualRotationYDeg;
     state.preserveModelScale = item.preserveModelScale;
   }
   return state;

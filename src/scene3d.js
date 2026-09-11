@@ -4997,8 +4997,9 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
   if (type === 'plastic-trash-bin') {
     trashVisualGroup = new THREE.Group();
     trashVisualGroup.userData.role = 'plastic-trash-bin-visual';
-    // Top view: rotate the entire trash-bin visual (GLB + label) 90° clockwise together.
-    trashVisualGroup.rotation.y = -Math.PI / 2;
+    // Instance state may override the Item-owned initial visual orientation later.
+    const visualRotationYDeg = Number(moduleState.visualRotationYDeg ?? item.visualRotationYDeg) || 0;
+    trashVisualGroup.rotation.y = THREE.MathUtils.degToRad(visualRotationYDeg);
     group.add(trashVisualGroup);
     topLabel = createPlasticTrashBinTopLabel(heightCm);
     if (topLabel) trashVisualGroup.add(topLabel);

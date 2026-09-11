@@ -4,10 +4,10 @@ Migration öncesi tam envanter: [current-system/PLASTIC_TRASH_BIN](../current-sy
 Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKLIST](../contract/ITEM_CONTRACT_CHECKLIST.md).
 
 ## Identity, properties ve ölçüler
-`src/items.js > COMMERCIAL_ITEMS.PLASTIC_TRASH_BIN` canonical itemKey/name/type/dimensions/modelFile sahibidir. Tekil ticari Item; parametrik veya bileşik değildir. Mevcut sistemde doğrulanmış unit YOK; BOM aşamasına geçilmediği için unit tahmin edilmedi. Width/depth/height mevcut katalog/state değerlerinden taşındı; length/thickness/material/defaultColor için doğrulanmış business metadata YOK, tahmin eklenmedi. Trash modelRotationYDeg/preserveModelScale defaultları aynı Item'dadır.
+`src/items.js > COMMERCIAL_ITEMS.PLASTIC_TRASH_BIN` canonical itemKey/name/type/dimensions/modelFile sahibidir. Tekil ticari Item; parametrik veya bileşik değildir. Mevcut sistemde doğrulanmış unit YOK; BOM aşamasına geçilmediği için unit tahmin edilmedi. Width/depth/height mevcut katalog/state değerlerinden taşındı; length/thickness/material/defaultColor için doğrulanmış business metadata YOK, tahmin eklenmedi. `modelRotationYDeg`, `visualRotationYDeg=-90` ve `preserveModelScale` defaultları aynı Item'dadır.
 
 ## Factory, state ve persistence
-`src/designState.js > createCommercialModuleState` type üzerinden canonical Item'ı çözer. Mevcut public factory girişleri bu tek oluşturma yoluna bağlanır. Instance `id`, itemKey, catalogKey, type ve canonical ölçüler taşır; placement/autoDepot proje alanlarıdır. Catalog kimliği itemKey ile aynıdır. Dış descriptor ölçü, model dosyası, model dönüşü veya scale değerlerini değiştiremez; ürün özelliklerinin tamamı Item tanımından gelir.
+`src/designState.js > createCommercialModuleState` type üzerinden canonical Item'ı çözer. Mevcut public factory girişleri bu tek oluşturma yoluna bağlanır. Instance `id`, itemKey, catalogKey, type, canonical ölçüler ve Item'dan kopyalanan başlangıç görsel dönüşünü taşır; placement/autoDepot proje alanlarıdır. Catalog kimliği itemKey ile aynıdır. Dış descriptor ürün defaultlarını tanımlayamaz. Oluşturulmuş instance'ın `visualRotationYDeg` alanı daha sonra kontrollü bir runtime/editor işlemiyle ezilebilir; renderer alan yoksa Item defaultuna döner.
 JSON snapshot/save/load instance ID ve canonical ürün alanlarını korur; duplicate yeni ID üretir. Renderer/ghost/geçici seçim persist edilmez. Kullanıcı kararı: eski DEPOT_ projeleri için alias veya geriye uyumluluk migrationı yok.
 
 ## Behavior, capabilities ve ilişkiler
@@ -18,7 +18,7 @@ Otomatik depo yeni bir parent Item oluşturmaz; içerik instance'larını planla
 `src/moduleContracts.js` mevcut `decision-required` politikasını ve `source: null` değerini korur. Unit, reçete, resolver, çocuk BOM, Raw BOM veya Final BOM bağlantısı eklenmedi. Bu değişiklik yalnız canonical Item kimliği, özellikleri, state/factory ve runtime tüketicilerini kapsar.
 
 ## Consumer cutover ve renderer sınırı
-Catalog descriptor, shared factory ve autoDepot ölçüleri canonical Item kaynağından gelir. `selectionFeedback.js` gerçek state ölçülerini/defaultları gösterir. `scene3d.js` model path ve ölçü fallbacklarını Item'dan alır. GLB scaling, proxy, sidebar ikon renkleri ve trash gövdesindeki beyaz materyal uygulaması renderer temsilidir; business material/defaultColor değildir.
+Catalog descriptor, shared factory ve autoDepot ölçüleri canonical Item kaynağından gelir. `selectionFeedback.js` gerçek state ölçülerini/defaultları gösterir. `scene3d.js` model path ve ölçü fallbacklarını Item'dan alır; GLB ile üst etiketi birlikte çevirirken instance `visualRotationYDeg` değerini, alan yoksa Item defaultunu kullanır. GLB scaling, proxy, sidebar ikon renkleri ve trash gövdesindeki beyaz materyal uygulaması renderer temsilidir; business material/defaultColor değildir.
 
 ## Regression ve açık kapsam
 `test/commercialItemsContract.test.js`: properties, değişmeyen `decision-required` BOM politikası, state/save-load/duplicate, seçim metni, otomatik depo, dış descriptor ürün alanlarının reddi ve diğer Item'ların migration izolasyonu.
