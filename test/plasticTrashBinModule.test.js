@@ -104,7 +104,7 @@ test('trash catalog preview uses a dedicated bin silhouette instead of panel str
   assert.doesNotMatch(trashBranch, /module-drag-panel/);
 });
 
-test('trash bin has an explicit fixed-model contract and remains in F-014 BOM decision scope', () => {
+test('trash bin has an explicit fixed-model contract and self BOM', () => {
   const contract = resolveModuleContract(KEY);
   assert.ok(contract);
   assert.equal(contract.itemKey, KEY);
@@ -113,8 +113,8 @@ test('trash bin has an explicit fixed-model contract and remains in F-014 BOM de
   assert.equal(contract.renderer.mode, 'model');
   assert.equal(contract.behavior.moveSnapCm, 10);
   assert.equal(contract.behavior.magneticSnap, 'none');
-  assert.equal(contract.bom.mode, 'decision-required');
-  assert.equal(contract.bom.source, null);
+  assert.equal(contract.bom.mode, 'self');
+  assert.equal(contract.bom.source, 'src/itemBom.js');
 });
 
 test('automatic depot adds the trash bin inside every supported depot without floor-fixture overlap', () => {

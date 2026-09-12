@@ -6,6 +6,11 @@ const RECIPE_BOM_POLICY = Object.freeze({
   source: 'src/moduleRecipes.js',
 });
 
+const SELF_BOM_POLICY = Object.freeze({
+  mode: 'self',
+  source: 'src/itemBom.js',
+});
+
 const UNRESOLVED_EXISTING_BOM_POLICY = Object.freeze({
   mode: 'decision-required',
   source: null,
@@ -134,10 +139,10 @@ export const MODULE_CONTRACT_ASSIGNMENTS = Object.freeze({
   chair_eames: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
   glass_table: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
   furniture_bar_stool_classic: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
-  MINI_FRIDGE_AVANTI: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
-  KETTLE: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
-  COAT_RACK: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
-  PLASTIC_TRASH_BIN: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
+  MINI_FRIDGE_AVANTI: assignment('free-model-fixed', SELF_BOM_POLICY),
+  KETTLE: assignment('free-model-fixed', SELF_BOM_POLICY),
+  COAT_RACK: assignment('free-model-fixed', SELF_BOM_POLICY),
+  PLASTIC_TRASH_BIN: assignment('free-model-fixed', SELF_BOM_POLICY),
   EXTRA_INDOOR_PLANT_1: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
   EXTRA_LONG_PLANTER_100: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
   EXTRA_LONG_PLANTER_150: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),

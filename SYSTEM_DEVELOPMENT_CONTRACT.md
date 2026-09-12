@@ -152,6 +152,7 @@ Her fiziksel Item/modül BOM'a nasıl dönüştüğünü canonical olarak tanım
 Mevcut module contract politikaları:
 
 - `recipe`
+- `self`
 - `commercial-item`
 - `excluded`
 

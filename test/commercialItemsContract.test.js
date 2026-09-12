@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { COMMERCIAL_ITEMS, getItem } from '../src/items.js';
+import { resolveItemBom } from '../src/itemBom.js';
 import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
 import { createModuleStateFromDescriptor, duplicateModuleState, normalizeModuleItemState } from '../src/designState.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
@@ -28,9 +29,14 @@ for (const item of Object.values(COMMERCIAL_ITEMS)) {
     const duplicate = duplicateModuleState(restored);
     assert.notEqual(duplicate.id, state.id);
     assert.deepEqual({ ...duplicate, id: state.id }, state);
-    assert.equal(Object.hasOwn(item, 'unit'), false);
-    assert.equal(resolveModuleContract(item.itemKey).bom.mode, 'decision-required');
-    assert.equal(resolveModuleContract(item.itemKey).bom.source, null);
+    assert.equal(item.unit, 'adet');
+    assert.equal(resolveModuleContract(item.itemKey).bom.mode, 'self');
+    assert.equal(resolveModuleContract(item.itemKey).bom.source, 'src/itemBom.js');
+    const bom = resolveItemBom(item.itemKey);
+    assert.equal(bom.length, 1);
+    assert.equal(bom[0].itemKey, item.itemKey);
+    assert.equal(bom[0].quantity, 1);
+    assert.equal(bom[0].unit, 'adet');
     const feedback = describeSurfaceSelection([{ userData: { moduleIndex: 0, moduleType: item.type } }], [state]);
     assert.ok(feedback.message.includes(item.name));
     assert.ok(feedback.message.includes(`${state.widthCm} × ${state.depthCm} × ${state.heightCm}`));
