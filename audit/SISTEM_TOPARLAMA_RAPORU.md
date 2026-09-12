@@ -28,7 +28,7 @@ Sıra: kullanıcıya görünen hata / üretim riski / “yanlış sonraki iş”
 | 5 | Yardım / standart paneli `STAND_DIMENSIONS` kopyası | Kod (açık) | `index.html` “Yükseklik: 350 cm / Derinlik: 10 cm / 7 × 50”; `helpGuide.js` aynı tablo. Kaynak `catalog.js` `STAND_DIMENSIONS`. F-026 gerçek. |
 | 6 | ZIP içe aktarma şema/limit yok | Kod (açık) | `main.js` yalnız `archiveVersion === 1`, `project` nesne, `project.id` string. `stand` / `modules` sözleşmesi, boyut/adet limiti yok. F-036 / F-037 gerçek. |
 | 7 | GLB yükleme hatası sessiz | Kod (açık) | `scene3d.js` `loadAsync` promise modül düzeyinde cache; `.catch` yok. Hata yolları `console.warn`. Kullanıcı yedeği yok. Reddedilen promise cache’de kalır. F-024 gerçek. |
-| 8 | `current-system` gövdesi “şu anki sistem” gibi | Belge | Çoğunda “Migration öncesi” şeridi var; gövde hâlâ `catalogKey`, `DEPOT_COAT_RACK`, `floorType`. `src/` içinde `catalogKey` **eşleşme yok**. |
+| 8 | `current-system` + zemin definition sapması | Belge | 94 `current-system` dosyasının **53**’ünde “Migration öncesi” şeridi var, **41**’inde yok. Gövde `catalogKey` / `DEPOT_*`. Kanonik `definitions/{karolaj,hali,parke-*}.md` hâlâ `currentStand.floorType` yazar; kod `stand.itemKey` yazar ve `floorType` siler. |
 | 9 | Otomatik duvar feature sözleşmesi yok | Kod (açık) | `src/automaticWall.js` çalışıyor. `featureContracts.js` yalnız `automatic-depot`. F-029 gerçek. |
 | 10 | Proje Final BOM toplayıcı yok | Kod + ürün kararı | `resolveItemBom(itemKey)` var. `modules[]` toplayan proje BOM yok. F-030 / F-014 / F-048. Miktar uydurulmaz. |
 
@@ -43,7 +43,7 @@ Bu blok bayat audit cümlelerinin yerine geçer.
 1. **Kimlik.** Persist ürün kimliği `itemKey`. `src/` grep: `catalogKey` sıfır. Load `createModuleStateFromDescriptor` + `resolveItemKey`. Zemin: `items.js` yorumu `stand.itemKey` (eski `floorType`); `main.js` yüklemede `delete next.floorType`; UI select hâlâ `floor-type`.
 2. **Katalog.** `SYSTEM_MODULE_CATALOG.md` test kilitli: **51** anahtar. BOM: **29 recipe / 4 self / 18 decision-required**. Katalog dışı: `illuminated-foam` (contract var, BOM `decision-required`). Zemin Item’ları katalog dışı (`karolaj`, `hali`, `parke-*`).
 3. **Self BOM (bitmiş).** `MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN`: `items.js` `unit: 'adet'`; `moduleContracts.js` `SELF_BOM_POLICY`; `itemBom.js` `resolveItemBom`.
-4. **State.** Tek kayıt `designState.js` `MODULE_STATE_FACTORIES` (type → factory). `createModuleStateFromDescriptor` type ile factory çağırır, sonra `itemKey` yazar. `main.js` gizli type kaydı tutmaz. **F-010 kodda kapalı.**
+4. **State.** Tek kayıt `designState.js` `MODULE_STATE_FACTORIES` (**25** type ailesi). `createModuleStateFromDescriptor` type ile factory çağırır, sonra `itemKey` yazar. `main.js` gizli type kaydı tutmaz. **F-010 kodda kapalı.**
 5. **Davranış.** `moduleBehavior.js` type ailesi. Overlay: TV + ışıklı strafor. Bar taburesi / tekli koltuk `rotationStepDeg: 45`. Yerleşim çekirdeği davranışı okur; **yan ekleme menüsü okumaz.**
 6. **BOM.** Recipe: `moduleRecipes.js` + expansion. Leaf: `itemBom.js`. Tüketici bugün esas `rawBomDebug.js` (seçili modül). Proje düzeyi Final BOM yok. Köşe/connector **reçetede sabit**; komşuluk graph’tan türetilmiyor (F-031).
 7. **Özellik.** `featureContracts.js`: yalnız `automatic-depot`. `creates.contentKinds` dört depo içeriği listeler; `contentCatalogKeys` yalnız `PLASTIC_TRASH_BIN` — alan adı ve liste kodla uyumsuz kalıntı.
@@ -89,7 +89,7 @@ F-001, F-002, F-003, F-004, F-005, F-006, F-007, F-008, F-009, **F-010**, F-011,
 **Davranış / UI / veri**
 
 - **F-015** — overlay yan ekleme bildirimi; menü uygulamıyor.
-- **F-017** — `scene3d.js` `userData.surfaceState` alanlarını yerinde yazar (`imageTransform`, renk, fabric).
+- **F-017** — `scene3d.js` `userData.surfaceState` olarak **aynı** module state nesnesini bağlar (`surfaceState: moduleState.surface` vb.) ve yerinde yazar (`imageTransform`, `fabricColor`, `isGlass`, `imageAssetId`).
 - **F-018** — `STAND_DIMENSIONS.stripCount: 7` (`catalog.js`) ve `STRIP_COUNT = 7` (`designState.js`).
 - **F-021** — snapshot `version: 1`; migration hattı yok.
 - **F-022** — aile `*-items-contract` e2e var; foam dialog / kapı / ZIP gidiş-dönüş tam tablosu yok.
@@ -101,7 +101,7 @@ F-001, F-002, F-003, F-004, F-005, F-006, F-007, F-008, F-009, **F-010**, F-011,
 - **F-031** — ilişki parçası komşuluktan türetilmiyor.
 - **F-032** — iki store, aynı `openDb` şeması.
 - **F-035** — ZIP `archiveVersion: 1` `main.js` içinde.
-- **F-036 / F-037** — import yapı ve limit yok.
+- **F-036 / F-037** — import yalnız `archiveVersion` / `project.id` / asset path. `restoreProject()` `project.modules` ve `project.stand` için şema doğrulamaz.
 - **F-038** — CI’da `npm audit` yok.
 - **F-039** — help dialog kısmi; bağlam menüsü / proje adlandırma / foam form a11y zayıf (foam form `main.js` içinde inline HTML).
 - **F-042** — `install-server.sh` `git pull`, pin yok.
@@ -119,12 +119,13 @@ Bunlar yeni F numarası **uydurulmadı**; toparlama listesine alındı.
 | `ITEM_LIST.md` migration “devam” | Duvar/raf/banko satırları “Tamam” demiyor; `definitions/wall_200.md` recipe Item. Liste geride. |
 | `featureContracts` vs kod | Otomatik duvar yok; depo key listesi eksik. |
 | Foam ölçü dialog | `main.js` inline; max yükseklik `350` sabit. |
+| Kanonik zemin MD `floorType` | `definitions/karolaj.md`, `hali.md`, `parke-acik.md` persist alanı olarak `currentStand.floorType` der. Kod: `assignStandFloorItem` → `itemKey`, `delete next.floorType`. |
 
 ---
 
 ## 5. “Nasıl çalışır” belgeleri — kodla uyumsuz
 
-Güncel kabul: `ITEM_CONTRACT.md`, `AGENTS.md`, `SYSTEM_CHANGE_GATE.md`, `SYSTEM_MODULE_CATALOG.md` (51/29/4/18 testli), `src/*`, `docs/items/definitions/` (Item kartları).
+Güncel kabul: `ITEM_CONTRACT.md`, `AGENTS.md`, `SYSTEM_CHANGE_GATE.md`, `SYSTEM_MODULE_CATALOG.md` (51/29/4/18 testli), `src/*`. `docs/items/definitions/` ticari dörtlü ve duvar kartları güncel; **zemin kartları `floorType` persist iddiasıyla sapıyor.**
 
 | Belge | Sapma |
 |---|---|
@@ -137,7 +138,8 @@ Güncel kabul: `ITEM_CONTRACT.md`, `AGENTS.md`, `SYSTEM_CHANGE_GATE.md`, `SYSTEM
 | `audit/evidence/A12_BOM_RECIPES_PRODUCTION.md` | 17 decision-required. |
 | `audit/evidence/A19_BROWSER_E2E_CRITICAL_FLOWS.md` | Koşum yok iddiası. |
 | `SYSTEM_AUDIT_CHECKLIST.md` | “Canonical tracker”, `IN_PROGRESS`, A03, F-001…009 OPEN, sonraki A03.01. Evidence A24 “25/25 incelendi”. **En tehlikeli ikinci kopya.** |
-| `docs/items/current-system/*.md` (94 dosya) | Birçoğunda “Migration öncesi” şeridi **var**; gövde `catalogKey` / `DEPOT_*` / `floorType` / “runtime itemKey yok”. `definitions/` güncel. |
+| `docs/items/current-system/*.md` (94 dosya) | **53** dosyada “Migration öncesi” şeridi var, **41**’inde yok. Gövde `catalogKey` / `DEPOT_*` / “runtime itemKey yok”. Başlık hâlâ “Mevcut Sistem Profili”. |
+| `docs/items/definitions/{karolaj,hali,parke-*}.md` | `itemKey = floorType` ve `currentStand.floorType`. Persist sahibi kodda `stand.itemKey`. |
 | `docs/items/door_100_full_system_audit.md` | `catalogKey = door_100`. |
 | `fair-stand-base-family-migration-handoff.md` | `catalogKey` hydrate cutover. |
 | `audit/remediation/A03_F010_CLOSURE.md` / `A04_F013_CLOSURE.md` | 45 katalog; F-013 `catalogKey` zorunlu. |
@@ -180,11 +182,13 @@ Kod bu raporda yok. Her madde ayrı change set / ayrı ürün kararı.
 1. `FINDINGS.md` özet + F-000 / F-019 / F-040 satırlarını koda çek; F-044’ü “uzak doğrulanmadı” veya tarihî yap.
 2. `FULL_SWEEP_STATE.md` ve `A24` sayaçlarını **mühürle** (tarihî SHA `e764732`); güncel SHA’ya yeniden yazma ayrı iş.
 3. `SYSTEM_AUDIT_CHECKLIST.md`: “ikinci kopya, kullanma” banner **veya** evidence’a hizala. Bugün yeni oturumu A03.01’e gönderiyor.
-4. `current-system` gövde `catalogKey` / `DEPOT_*` bloklarını tarihî örnek diye etiketle; “Runtime kimliği ile Item-contract kimliğini ayır” cümlelerini `itemKey` ile değiştir **veya** dosyayı salt arşiv say.
-5. `RELEASE_HARDENING_ROADMAP.md`: kapanmış maddeleri işaretle; açık kalan #1 #2 #3 ile F-025/F-026’yı bağla.
-6. Kapanış MD dipnotu: 45 katalog / `catalogKey` zorunlu.
-7. `ITEM_LIST.md` migration durumunu definition/test ile eşle.
-8. `Changelog.md` ya tarihî banner ya kısa güncel özet.
+4. `current-system` gövde `catalogKey` / `DEPOT_*` bloklarını tarihî örnek diye etiketle; 41 şeritsiz dosyaya aynı banner; başlığı “Mevcut Sistem” olmaktan çıkar.
+5. Zemin `definitions/` persist cümlelerini `stand.itemKey` + eski `floorType` hydrate ile eşle.
+6. `RELEASE_HARDENING_ROADMAP.md`: kapanmış maddeleri işaretle; açık kalan #1 #2 #3 ile F-025/F-026’yı bağla.
+7. Kapanış MD dipnotu: 45 katalog / `catalogKey` zorunlu.
+8. `ITEM_LIST.md` migration durumunu definition/test ile eşle.
+9. `Changelog.md` ya tarihî banner ya kısa güncel özet.
+10. `fair-stand-base-family-migration-handoff.md` arşiv şeridi.
 
 Bu adım ürün kararı istemez. Agent’ın “F-000 / F-010 yap” sapmasını keser.
 
@@ -247,8 +251,10 @@ Bu raporda unit/miktar önerilmez.
 | BOM recipe / self / decision-required | 29 / 4 / 18 |
 | Katalog dışı explicit modül | 1 (`illuminated-foam`) |
 | Playwright spec | 25 |
-| `docs/items/current-system` | 94 MD |
-| `docs/items/definitions` | 97 MD |
+| `docs/items/current-system` | 94 MD (53 tarihî şerit / 41 şeritsiz) |
+| `docs/items/definitions` | 97 MD (zemin persist cümleleri sapıyor) |
+| Zemin Item (`FLOOR_ITEMS`) | 5 (`karolaj`, `hali`, `parke-acik`, `parke-sari`, `parke-beton`) |
+| State factory type ailesi | 25 |
 | Ledger CLOSED ve kodda duran (F-041 uzak hariç) | 19 kesin + F-041 kapanış dosyası |
 | Ledger OPEN, kodda kapanmış / iddia yanlış | F-000, F-019, F-040 (yok iddiası), F-047 kısmen |
 | Ledger OPEN, gerçek kod/ürün işi | F-014/015/017/018/021/022/024–026/029–032/034–039/042/043/045/046/048 + F-047 kural |
