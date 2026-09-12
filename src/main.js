@@ -22,7 +22,7 @@ import { deleteImageAsset, loadImageAssets, saveImageAsset, saveImportedImageAss
 import { clearImageAssetReferences, countImageAssetReferences, remapImageAssetReferences } from './imageAssetReferences.js';
 import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject } from './projectStore.js';
 import { describeRectSelection } from './rectSelection.js';
-import { createModuleContextMenu } from './moduleContextMenu.js';
+import { createModuleContextMenu, allowsModuleSideInsert } from './moduleContextMenu.js';
 import { createModuleDragSidebar } from './moduleDragSidebar.js';
 import { createColorEditorController } from './colorEditorController.js';
 import { STAND_TYPE_LABELS, validateStandSetup } from './standSetup.js';
@@ -50,6 +50,17 @@ import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelectio
 import { createSidebarController } from './sidebarController.js';
 import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';
 import { getFloorItem, getFloorSelectLabel, listFloorItems, resolveStandFloorItemKey } from './items.js';
+import { renderStandStandardsList } from './standStandardsCopy.js';
+import {
+  isAllowedImportImageType,
+  isAllowedImportZipFile,
+  validateImportedAssetRecord,
+  validateProjectArchiveManifest,
+} from './projectImportValidation.js';
+
+if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('rawBom')) {
+  import('./rawBomDebug.js');
+}
 
 let jsZipModulePromise = null;
 
@@ -177,10 +188,12 @@ let selectedFoamModuleId = null;
 const assetContextMenu = document.createElement('div');
 assetContextMenu.className = 'module-context-menu asset-context-menu';
 assetContextMenu.hidden = true;
+assetContextMenu.setAttribute('role', 'menu');
+assetContextMenu.setAttribute('aria-label', 'Görsel işlemleri');
 assetContextMenu.innerHTML = `
   <div class="module-context-title">Görsel</div>
-  <button type="button" data-asset-action="illuminated-foam">Işıklı Strafora Dönüştür</button>
-  <button type="button" data-asset-action="delete" class="danger">Sil</button>
+  <button type="button" role="menuitem" data-asset-action="illuminated-foam">Işıklı Strafora Dönüştür</button>
+  <button type="button" role="menuitem" data-asset-action="delete" class="danger">Sil</button>
 `;
 document.body.appendChild(assetContextMenu);
 
@@ -693,6 +706,10 @@ function flushCatalogModuleAdds() {
   }
 
   if ((placementMode === 'left' || placementMode === 'right') && context) {
+    if (!allowsModuleSideInsert(context)) {
+      renderWallResult('Bu modülün yanına ekleme yapılamaz.', true);
+      return;
+    }
     if (isFreeContextInsertion(context)) {
       const visualOrderedStates = placementMode === 'right'
         ? [...moduleStates].reverse()
@@ -1563,16 +1580,40 @@ function getSvgAspectRatioFromText(svgText) {
 
 function requestIlluminatedFoamDimensions(defaultWidthCm, defaultHeightCm) {
   return new Promise((resolve) => {
-    const overlay=document.createElement('div');
-    overlay.style.cssText='position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.48);display:grid;place-items:center;padding:20px';
-    const form=document.createElement('form');
-    form.style.cssText='width:min(360px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
-    form.innerHTML='<strong style="font-size:16px">Işıklı Strafor Ölçüsü</strong><span style="color:#64748b">Gerçek dış ölçüyü cm olarak gir.</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label style="display:grid;gap:5px">X · Genişlik (cm)<input name="width" type="number" min="10" max="5000" step="1" value="'+Math.round(defaultWidthCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label><label style="display:grid;gap:5px">Y · Yükseklik (cm)<input name="height" type="number" min="5" max="350" step="1" value="'+Math.round(defaultHeightCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label></div><span style="color:#64748b">Gövde: 3,5 cm · Duvar boşluğu: 1,5 cm</span><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" data-cancel>İptal</button><button type="submit" class="primary">Yerleştir</button></div>';
-    overlay.appendChild(form); document.body.appendChild(overlay);
-    const finish=(value)=>{ overlay.remove(); resolve(value); };
-    form.querySelector('[data-cancel]').addEventListener('click',()=>finish(null));
-    overlay.addEventListener('pointerdown',(event)=>{ if(event.target===overlay) finish(null); });
-    form.addEventListener('submit',(event)=>{ event.preventDefault(); const data=new FormData(form); const widthCm=Number(data.get('width')); const heightCm=Number(data.get('height')); if(!(widthCm>=10&&widthCm<=5000&&heightCm>=5&&heightCm<=350)) return; finish({widthCm,heightCm}); });
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.48);display:grid;place-items:center;padding:20px';
+    overlay.setAttribute('role', 'presentation');
+    const form = document.createElement('form');
+    form.setAttribute('role', 'dialog');
+    form.setAttribute('aria-modal', 'true');
+    form.setAttribute('aria-labelledby', 'foam-size-title');
+    form.style.cssText = 'width:min(360px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
+    form.innerHTML = '<strong id="foam-size-title" style="font-size:16px">Işıklı Strafor Ölçüsü</strong><span style="color:#64748b">Gerçek dış ölçüyü cm olarak gir.</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label style="display:grid;gap:5px">X · Genişlik (cm)<input name="width" type="number" min="10" max="5000" step="1" value="'+Math.round(defaultWidthCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label><label style="display:grid;gap:5px">Y · Yükseklik (cm)<input name="height" type="number" min="5" max="350" step="1" value="'+Math.round(defaultHeightCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label></div><span style="color:#64748b">Gövde: 3,5 cm · Duvar boşluğu: 1,5 cm</span><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" data-cancel>İptal</button><button type="submit" class="primary">Yerleştir</button></div>';
+    overlay.appendChild(form);
+    document.body.appendChild(overlay);
+    const onKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      finish(null);
+    };
+    const finish = (value) => {
+      document.removeEventListener('keydown', onKeyDown, true);
+      overlay.remove();
+      resolve(value);
+    };
+    form.querySelector('[data-cancel]').addEventListener('click', () => finish(null));
+    overlay.addEventListener('pointerdown', (event) => {
+      if (event.target === overlay) finish(null);
+    });
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const widthCm = Number(data.get('width'));
+      const heightCm = Number(data.get('height'));
+      if (!(widthCm >= 10 && widthCm <= 5000 && heightCm >= 5 && heightCm <= 350)) return;
+      finish({ widthCm, heightCm });
+    });
+    document.addEventListener('keydown', onKeyDown, true);
     form.querySelector('input[name="width"]')?.focus();
   });
 }
@@ -1761,6 +1802,10 @@ imageInput.addEventListener('change', async () => {
   const file = imageInput.files?.[0];
   imageInput.value = '';
   if (!file) return;
+  if (!isAllowedImportImageType(file.type)) {
+    assetStatus.textContent = 'Yalnız image/* görsel dosyası yükle.';
+    return;
+  }
 
   try {
     const asset = await saveImageAsset(activeProjectId, file);
@@ -1875,6 +1920,10 @@ importProjectFileInput.addEventListener('change', async () => {
   const file = importProjectFileInput.files?.[0];
   importProjectFileInput.value = '';
   if (!file) return;
+  if (!isAllowedImportZipFile(file)) {
+    projectStatus.textContent = 'Yalnız ZIP proje paketi içe aktarılır.';
+    return;
+  }
   setButtonBusy(importProjectButton, true, 'Aktarılıyor');
   projectLoading.show('Proje içe aktarılıyor…', 'ZIP paketi ve görseller hazırlanıyor.');
   projectStatus.textContent = 'Proje içe aktarılıyor…';
@@ -1889,15 +1938,8 @@ importProjectFileInput.addEventListener('change', async () => {
     if (!manifestEntry) throw new Error('ZIP içinde project.json bulunamadı.');
 
     const manifest = JSON.parse(await manifestEntry.async('text'));
-    if (manifest?.archiveVersion !== 1 || !manifest?.project || typeof manifest.project !== 'object') {
-      throw new Error('Desteklenmeyen proje paketi.');
-    }
-    if (typeof manifest.project.id !== 'string' || !manifest.project.id.trim()) {
-      throw new Error('Proje kimliği geçersiz.');
-    }
-    if (manifest.assets != null && !Array.isArray(manifest.assets)) {
-      throw new Error('Proje görsel listesi geçersiz.');
-    }
+    const manifestCheck = validateProjectArchiveManifest(manifest);
+    if (!manifestCheck.ok) throw new Error(manifestCheck.message);
 
     const manifestAssets = manifest.assets || [];
     const existing = await listProjects();
@@ -1907,9 +1949,8 @@ importProjectFileInput.addEventListener('change', async () => {
     const idMap = new Map();
     const preparedAssets = [];
     for (const asset of manifestAssets) {
-      if (!asset || typeof asset.id !== 'string' || !asset.id || typeof asset.path !== 'string' || !asset.path) {
-        throw new Error('Proje görsel kaydı geçersiz.');
-      }
+      const assetCheck = validateImportedAssetRecord(asset);
+      if (!assetCheck.ok) throw new Error(assetCheck.message);
       if (idMap.has(asset.id)) throw new Error(`Tekrarlanan asset kimliği: ${asset.id}`);
 
       const entry = zip.file(asset.path);
@@ -2067,4 +2108,5 @@ updateStageCreateState();
 syncColorEditorFromHex(colorInput.value);
 initializeAssetLibrary();
 initHelpGuide();
+renderStandStandardsList(document.querySelector('#stand-standards-list'));
 refreshProjectList().catch((error) => console.warn('Proje listesi açılamadı:', error));

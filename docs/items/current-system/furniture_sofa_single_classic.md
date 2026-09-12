@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/furniture_sofa_single_classic.md` içindedir.
 
-# furniture_sofa_single_classic — Mevcut Sistem Profili
+# furniture_sofa_single_classic — Tarihî envanter profili
 
 Bağımsız katalog Item yoktu. Tekli koltuk `furniture_sofa_set_classic` renderer’ında `beigechair1_tripo_mat_0691346e_0` / `beigechair3_tripo_mat_0691346e_0` mesh’leri olarak duruyordu.
 

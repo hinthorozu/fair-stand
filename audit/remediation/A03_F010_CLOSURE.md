@@ -9,7 +9,7 @@ Durum: **CLOSED / POST-MERGE VERIFIED**
 - `src/designState.js` artık kanonik runtime modül-durumu inşa kaydının ve `createModuleStateFromDescriptor(...)` giriş noktasının sahibidir.
 - `src/main.js` bir modül-tipi → fabrika dağıtıcısı veya doğrudan modül fabrika import'ları sahiplenmek yerine katalog inşasını o kanonik kurucuya devreder.
 - otomatik duvar, otomatik depo ve illuminated-foam inşa yolları, mevcut runtime durum şekillerini ve yerleşim semantiğini koruyarak kanonik kurucuyu kullanır.
-- katalog kimliği `catalogKey` üzerinden eklenebilir ve yerleşim koruması kurucu seçenekleri üzerinden açık kalır.
+- katalog kimliği kapanış anında `catalogKey` diye yazıldı. **Sonraki Item cutover:** runtime kimliği `itemKey`; `src/` içinde `catalogKey` yok. Katalog anahtar sayısı kapanışta 45, güncel 51 (`SYSTEM_MODULE_CATALOG.md`).
 
 ## Regresyon kanıtı
 

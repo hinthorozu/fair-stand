@@ -1,6 +1,6 @@
 ﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_separator_100.md` içindedir.
 
-# wall_separator_100 — Mevcut Sistem Profili
+# wall_separator_100 — Tarihî envanter profili
 
 Bu belge `wall_separator_100` için `Version2` runtime kodunda bulunan davranışı toplar. Yeni davranış/audit yorumu eklemez.
 

@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/illuminated-foam.md` içindedir.
 
-# illuminated-foam — Mevcut Sistem Profili
+# illuminated-foam — Tarihî envanter profili
 
 Bu belge `illuminated-foam` için `Version2` runtime kodunda çalışan non-catalog SVG → Işıklı Strafor akışını toplar.
 

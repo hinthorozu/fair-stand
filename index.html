@@ -117,7 +117,7 @@
         <details class="panel-card collapsible-panel">
           <summary class="panel-summary"><span>Seçili yüzey</span><span class="panel-chevron" aria-hidden="true"></span></summary>
           <div class="panel-card-content">
-          <p id="selection-info" class="status selection-status">Bir panel seç; Ctrl/Cmd + tık ile karşı köşeyi seçip dikdörtgen blok oluştur.</p>
+          <p id="selection-info" class="status selection-status">Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.</p>
           <label for="surface-color">Aktif renk</label>
           <div class="row"><input id="surface-color" type="color" value="#ffffff" /><button id="apply-color">Rengi uygula</button></div>
           <div class="color-editor" aria-label="Renk değerleri">
@@ -144,7 +144,7 @@
 
         <details class="panel-card compact collapsible-panel">
           <summary class="panel-summary"><span>Standartlar</span><span class="panel-chevron" aria-hidden="true"></span></summary>
-          <div class="panel-card-content"><ul><li>Yükseklik: 350 cm</li><li>Derinlik: 10 cm</li><li>Düz panel: 7 × 50 cm yatay bölüm</li><li>Genişlikler: 50 / 100 / 150 / 200 cm</li><li>Zemin grid: 100 × 100 cm</li><li>Stand alanı ölçüleri: 50 cm ve katları</li><li>Stand alanı çevresi: 100 cm pasif gri alan</li><li>Maksimum stand alanı: 5000 × 5000 cm</li><li>Çoklu seçim: yalnızca tam dikdörtgen blok</li></ul></div>
+          <div class="panel-card-content"><ul id="stand-standards-list"></ul></div>
         </details>
       </aside>
 
@@ -157,6 +157,5 @@
     <div id="project-loading-overlay" class="project-loading-overlay" hidden aria-live="polite" aria-busy="true"><div class="project-loading-card"><div class="project-loading-spinner" aria-hidden="true"></div><strong id="project-loading-title">Proje yükleniyor…</strong><span id="project-loading-detail">Görseller ve sahne hazırlanıyor.</span></div></div>
     <script type="module" src="/src/main.js"></script>
     <script type="module" src="/src/projectActionSaveGuard.js"></script>
-    <script type="module" src="/src/rawBomDebug.js"></script>
   </body>
 </html>

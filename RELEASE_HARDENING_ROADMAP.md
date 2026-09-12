@@ -3,6 +3,8 @@
 > Amaç: FAZ 4/5/6 ürün geliştirmesine devam etmeden önce mevcut çalışan ürünü kullanıcı testine ve satışa daha güvenli hale getirmek.
 >
 > Bu dosya yeni feature roadmap'i değildir. Mevcut sistemde doğrulanmış runtime/UI kusurları, production kalıntıları, repository hijyeni ve release güvenlik kapılarını takip eder.
+>
+> Güncel ürün sırası: `audit/SISTEM_MUTABAKAT_RAPORU.md`. GitHub ruleset / dal temizliği ürün kodu değildir (madde 6–7).
 
 ## Başlangıç durumu — 3 Eylül 2026
 
@@ -18,34 +20,11 @@
 
 ## 1. Initial selection-state contract'ını düzelt
 
-Durum: **AÇIK**
-
-Problem:
-
-- `index.html` içindeki başlangıç `#selection-info` metni ile `selectionFeedback.js` içindeki canonical `DEFAULT_SELECTION_HINT` aynı değil.
-- `uiFeedback.js` seçim durumunu metni canonical hint ile karşılaştırarak belirlediği için ilk açılışta yanlış `has-selection` state'i oluşabilir.
-
-Yapılacak:
-
-- Başlangıç selection hint tek source-of-truth ile eşleştirilecek.
-- Regression testi eklenecek.
-- Kullanıcıya görünen seçim davranışı dışında değişiklik yapılmayacak.
+Durum: **KAPANDI** — `index.html` `#selection-info` metni `DEFAULT_SELECTION_HINT` ile aynı; `test/visibleUiContract.test.js` + `e2e/visible-ui-b.spec.mjs`.
 
 ## 2. Production'daki Raw BOM debug panelini kaldır / DEV-only yap
 
-Durum: **AÇIK**
-
-Problem:
-
-- `index.html`, `src/rawBomDebug.js` dosyasını production bundle içinde doğrudan yüklüyor.
-- Kullanıcı arayüzüne `Üretim Listesi · Debug` paneli ekleniyor.
-- Debug kodu gerçek module state contract'ı yerine `selection-info` içindeki Türkçe UI metnini regex ile okuyarak modül/reçete tahmini yapıyor.
-- UI metni değişirse debug BOM sessizce yanlış veya eksik çalışabilir.
-
-Yapılacak:
-
-- Production girişinden çıkarılacak veya açık DEV flag arkasına alınacak.
-- Raw BOM gerçek ürün özelliğine dönüşecekse ileride state/recipe contract'ına doğrudan bağlanacak; UI mesajı parse edilmeyecek.
+Durum: **KAPANDI** — `index.html` `rawBomDebug.js` yüklemez. Panel yalnız `import.meta.env.DEV && ?rawBom`. Production build’de Vite `DEV=false`.
 
 ## 3. Selection feedback ownership sızıntısını kapat
 
@@ -64,12 +43,9 @@ Yapılacak:
 
 ## 4. Critical browser smoke test ekle
 
-Durum: **AÇIK**
+Durum: **KAPANDI (koşum)** — `e2e/` Playwright spec + CI `npm run e2e`. F-040 “E2E yok” iddiası yanlış.
 
-Problem:
-
-- Mevcut testler `node --test` tabanlı ve güçlü regression coverage sağlıyor.
-- Fakat gerçek tarayıcıda temel kullanıcı yolunu otomatik doğrulayan E2E/smoke katmanı yok.
+Kalan: ZIP import/export ve GLB yükleme hatası için hedefli spec yok (`audit/FINDINGS.md` F-040).
 
 Minimum smoke akışı:
 
@@ -103,7 +79,7 @@ Kural:
 
 ## 6. ROG branch protection / required CI
 
-Durum: **AÇIK**
+Durum: **KAPSAM_DIŞI** — GitHub ruleset; ürün kodu değil. `audit/SISTEM_MUTABAKAT_RAPORU.md`.
 
 Mevcut durum:
 
@@ -119,7 +95,7 @@ Hedef:
 
 ## 7. Merge edilmiş branch kalıntılarını temizle
 
-Durum: **AÇIK**
+Durum: **KAPSAM_DIŞI** — GitHub dal hijyeni; ürün kodu değil. Origin head 2026-09-12: `ROG` + `Version2`.
 
 Mevcut durum:
 
@@ -165,7 +141,7 @@ Yapılacak:
 
 ## 10. Stale audit/cleanup dokümanlarını historical hale getir
 
-Durum: **AÇIK**
+Durum: **KISMEN / A uygulandı** — `FRESH_REPOSITORY_REVIEW.md` historical banner; `FINDINGS`/`FULL_SWEEP`/`A24`/checklist 2026-09-12 mühürlendi. `Changelog` bu change set’te tarihî işaretlenir.
 
 Problem:
 
@@ -193,7 +169,7 @@ Karar:
 
 ## 12. Kullanılmayan büyük public assetleri temizle
 
-Durum: **AÇIK**
+Durum: **KISMEN** — `indoor_plants2.glb` ağaçta yok (F-033 kapanışı). Diğer parked asset tarama bu A belgesinde yeniden yapılmadı.
 
 Doğrulanmış/şüpheli örnekler:
 

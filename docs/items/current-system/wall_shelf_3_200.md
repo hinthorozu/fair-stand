@@ -1,6 +1,6 @@
 ﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_shelf_3_200.md` içindedir.
 
-# wall_shelf_3_200 — Mevcut Sistem Profili
+# wall_shelf_3_200 — Tarihî envanter profili
 
 Bu belge `wall_shelf_3_200` için `Version2` runtime kodunda çalışan bütün ana akışları toplar.
 

@@ -1,5 +1,6 @@
 import { resolveItemBom } from './itemBom.js';
 import { getExpandedModuleRecipe } from './moduleRecipes.js';
+import { DEFAULT_SELECTION_HINT } from './selectionFeedback.js';
 
 const selectionInfo = typeof document !== 'undefined' ? document.querySelector('#selection-info') : null;
 const sidebar = typeof document !== 'undefined' ? document.querySelector('.sidebar') : null;
@@ -169,7 +170,7 @@ function syncFromSelection() {
   const widthMatch = text.match(/·\s*(50|100|150|200)\s*cm\s*·/i);
 
   if (!widthMatch || specialModule) {
-    status.textContent = text && text !== 'Bir panel seç; Ctrl/Cmd + tık ile karşı köşeyi seçip dikdörtgen blok oluştur.'
+    status.textContent = text && text !== DEFAULT_SELECTION_HINT
       ? 'Bu modül için üretim reçetesi henüz tanımlı değil.'
       : 'Reçetesi olan bir modül seç.';
     content.innerHTML = '';

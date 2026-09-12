@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/chair_eames.md` içindedir.
 
-# chair_eames — Mevcut Sistem Profili
+# chair_eames — Tarihî envanter profili
 
 Bağımsız katalog Item yoktu. Sandalye `furniture_table_chair_set_eames` renderer’ında `eames_chair.glb` clone ×4 olarak duruyordu. Aşağıdaki değerler set Item ve `createEamesTableChairSetModule` kaynaklıdır.
 

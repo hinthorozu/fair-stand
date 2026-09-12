@@ -1,4 +1,4 @@
-> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/BASE_200.md` içindedir.`n`n# BASE_200 — Mevcut Sistem Profili
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/BASE_200.md` içindedir.`n`n# BASE_200 — Tarihî envanter profili
 
 Bu belge `BASE_200` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction, persistence ve BOM akışlarını toplar.
 

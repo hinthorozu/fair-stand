@@ -1,4 +1,6 @@
-# showcase_horizontal_87_4_30 — Current System Inventory
+> **TARİHÎ ENVANTER.** Güncel sistem değildir. Aktif kanonik tanım `docs/items/definitions/` (veya `src/items.js`). Gövdedeki `catalogKey` / `DEPOT_*` / `floorType` tarihî örnektir; runtime kimliği `itemKey`.
+
+# showcase_horizontal_87_4_30 — Tarihî envanter
 
 Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası güncel durum.
 

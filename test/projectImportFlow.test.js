@@ -10,8 +10,8 @@ test('project import validates and prepares archive before saving', () => {
   assert.ok(handlerStart >= 0 && handlerEnd > handlerStart);
   const handler = source.slice(handlerStart, handlerEnd);
 
-  assert.match(handler, /manifest\.project\.id/);
-  assert.match(handler, /Array\.isArray\(manifest\.assets\)/);
+  assert.match(handler, /validateProjectArchiveManifest/);
+  assert.match(handler, /validateImportedAssetRecord/);
   assert.match(handler, /const preparedAssets = \[\]/);
   assert.match(handler, /entry\.async\('blob'\)/);
   assert.ok(handler.indexOf("entry.async('blob')") < handler.indexOf('await saveProject(importedProject)'));

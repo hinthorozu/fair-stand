@@ -1,4 +1,6 @@
-# door_100 — Current System Inventory
+> **TARİHÎ ENVANTER.** Güncel sistem değildir. Aktif kanonik tanım `docs/items/definitions/` (veya `src/items.js`). Gövdedeki `catalogKey` / `DEPOT_*` / `floorType` tarihî örnektir; runtime kimliği `itemKey`.
+
+# door_100 — Tarihî envanter
 
 `ITEM_CONTRACT.md` ve `ITEM_CONTRACT_CHECKLIST.md` fresh okunarak `Version2` runtime zincirinden çıkarılan Bileşik Item envanteri.
 

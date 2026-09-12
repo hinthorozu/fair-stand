@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/VIDEO_WALL_3X3.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
 
-# VIDEO_WALL_3X3 — Mevcut Sistem Profili
+# VIDEO_WALL_3X3 — Tarihî envanter profili
 
 Bu belge `VIDEO_WALL_3X3` için migration öncesi `Version2` runtime kodunda çalışan TV / wall-overlay akışını toplar. O dönemde katalog kaydı `TV_55` tabanından türetilip toplam ölçü/panel/grid alanları elle override ediliyordu (`src/catalog.js`).
 

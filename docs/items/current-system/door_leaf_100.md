@@ -1,4 +1,6 @@
-# door_leaf_100 — Current System Inventory
+> **TARİHÎ ENVANTER.** Güncel sistem değildir. Aktif kanonik tanım `docs/items/definitions/` (veya `src/items.js`). Gövdedeki `catalogKey` / `DEPOT_*` / `floorType` tarihî örnektir; runtime kimliği `itemKey`.
+
+# door_leaf_100 — Tarihî envanter
 
 `ITEM_CONTRACT.md` ve `ITEM_CONTRACT_CHECKLIST.md` üzerinden fresh runtime doğrulaması sonrası ahşap kapı kanadı envanteri.
 

@@ -1,3 +1,5 @@
+import { getHelpStandardsTableHtml, getStandStandardsFacts } from './standStandardsCopy.js';
+
 const GUIDE_SECTIONS = [
   {
     title: 'Hızlı Başlangıç',
@@ -175,24 +177,12 @@ const GUIDE_SECTIONS = [
   },
   {
     title: 'Stand Oluşturma ve Sistem Standartları',
-    html: `
-      <table><tbody>
-        <tr><th>Sistem yüksekliği</th><td>350 cm</td></tr>
-        <tr><th>Sistem derinliği</th><td>10 cm</td></tr>
-        <tr><th>Düz panel</th><td>7 × 50 cm yatay bölüm</td></tr>
-        <tr><th>Standart genişlikler</th><td>50 / 100 / 150 / 200 cm</td></tr>
-        <tr><th>Zemin grid</th><td>100 × 100 cm</td></tr>
-        <tr><th>Stand ölçü adımı</th><td>50 cm ve katları</td></tr>
-        <tr><th>Pasif çevre alanı</th><td>100 cm gri alan</td></tr>
-        <tr><th>Maksimum stand alanı</th><td>5000 × 5000 cm (50 × 50 m)</td></tr>
-      </tbody></table>
-      <p>Stand tipleri: Sırt Duvar, U Stand, L Stand Sol, L Stand Sağ ve Ada Stand.</p>
-    `,
+    html: getHelpStandardsTableHtml(),
   },
   {
     title: 'Zemin',
     html: `
-      <p>Mevcut seçenekler: Karolaj 100 × 100 cm, Halı, Beyaz Meşe, Sarı Meşe ve Beton Parke.</p>
+      <p>Mevcut seçenekler: Karolaj ${getStandStandardsFacts().gridWidthCm} × ${getStandStandardsFacts().gridDepthCm} cm, Halı, Beyaz Meşe, Sarı Meşe ve Beton Parke.</p>
       <p>Boyanabilir zemin seçiliyse Aktif renk uygulanabilir. Hazır parke tipleri kendi malzemelerini kullanır.</p>
     `,
   },

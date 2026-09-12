@@ -32,7 +32,11 @@ export DEBIAN_FRONTEND=noninteractive
 log "Repo güncelleniyor..."
 cd "${REPO_ROOT}"
 git remote set-url origin git@github.com:hinthorozu/fair-stand.git
-git pull --ff-only
+# Ürün dalı Version2; deploy bu SHA'ya kilitlenir. Geçici override: FAIR_STAND_COMMIT.
+PINNED_COMMIT="${FAIR_STAND_COMMIT:-ed828c30254fed37890c444dea6a857e10a24fc4}"
+git fetch origin
+git checkout --detach "${PINNED_COMMIT}"
+log "Çalışma kopyası sabit commit: $(git rev-parse HEAD)"
 
 log "Temel paketler kuruluyor..."
 apt-get update

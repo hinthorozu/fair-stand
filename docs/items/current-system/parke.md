@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanımlar `../definitions/parke-acik.md`, `../definitions/parke-sari.md`, `../definitions/parke-beton.md` içindedir. ITEM_LIST’teki tek “Parke” satırı üç runtime `floorType` idi.
 
-# parke — Mevcut Sistem Profili
+# parke — Tarihî envanter profili
 
 Bu belge ITEM_LIST'teki **Parke** girdisinin `Version2` runtime kodundaki gerçek karşılığını toplar.
 

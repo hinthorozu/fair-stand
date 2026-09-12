@@ -1,4 +1,6 @@
-# panel_corner_192 — Current System Inventory
+> **TARİHÎ ENVANTER.** Güncel sistem değildir. Aktif kanonik tanım `docs/items/definitions/` (veya `src/items.js`). Gövdedeki `catalogKey` / `DEPOT_*` / `floorType` tarihî örnektir; runtime kimliği `itemKey`.
+
+# panel_corner_192 — Tarihî envanter
 
 Fresh `Version2` doğrulaması ve ürün kararı sonrası güncel durum.
 

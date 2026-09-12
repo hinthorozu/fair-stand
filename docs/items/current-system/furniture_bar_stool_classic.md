@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/furniture_bar_stool_classic.md` içindedir.
 
-# furniture_bar_stool_classic — Mevcut Sistem Profili
+# furniture_bar_stool_classic — Tarihî envanter profili
 
 Bu belge `furniture_bar_stool_classic` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction ve persistence akışlarını toplar.
 

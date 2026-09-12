@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/PLASTIC_TRASH_BIN.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
 
-# DEPOT_PLASTIC_TRASH_BIN — Mevcut Sistem Profili
+# DEPOT_PLASTIC_TRASH_BIN — Tarihî envanter profili
 
 Bu belge `DEPOT_PLASTIC_TRASH_BIN` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction ve persistence akışlarını toplar.
 

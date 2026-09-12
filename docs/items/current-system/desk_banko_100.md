@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/desk_banko_100.md` içindedir.
 
-# desk_banko_100 — Mevcut Sistem Profili
+# desk_banko_100 — Tarihî envanter profili
 
 Bu belge `desk_banko_100` için `Version2` runtime kodunda çalışan state, placement, renderer, interaction, persistence ve BOM akışlarını toplar.
 

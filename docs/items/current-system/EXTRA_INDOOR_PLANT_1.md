@@ -1,6 +1,6 @@
 ﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/EXTRA_INDOOR_PLANT_1.md` içindedir.
 
-# EXTRA_INDOOR_PLANT_1 — Mevcut Sistem Profili
+# EXTRA_INDOOR_PLANT_1 — Tarihî envanter profili
 
 Bu belge `EXTRA_INDOOR_PLANT_1` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction ve persistence akışlarını toplar.
 

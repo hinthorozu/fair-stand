@@ -1,5 +1,7 @@
 # A24 — Nihai kapanış / düzeltme-hazırlık denetimi
 
+> **TARİHÎ MÜHÜR.** Taban ROG `e7647326668ab25c96f3a3139f0d855c03176325`. “46 açık / E2E yok / F-010 sırada” cümleleri o SHA’yadır. Güncel: `audit/SISTEM_MUTABAKAT_RAPORU.md` ve `audit/FINDINGS.md` (25 Playwright spec, F-010 kapalı, katalog 51).
+
 Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
 Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 

@@ -1,6 +1,6 @@
 ﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_base_100.md` içindedir.
 
-# wall_base_100 — Mevcut Sistem Profili
+# wall_base_100 — Tarihî envanter profili
 
 Bu belge `wall_base_100` için `Version2` runtime kodunda çalışan state, behavior, renderer, interaction, persistence ve BOM akışlarını toplar.
 

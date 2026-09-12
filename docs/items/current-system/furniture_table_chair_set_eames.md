@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/furniture_table_chair_set_eames.md` içindedir.
 
-# furniture_table_chair_set_eames — Mevcut Sistem Profili
+# furniture_table_chair_set_eames — Tarihî envanter profili
 
 Bu belge `furniture_table_chair_set_eames` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction ve persistence akışlarını toplar.
 

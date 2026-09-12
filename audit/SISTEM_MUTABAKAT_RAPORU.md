@@ -19,13 +19,13 @@ Sistem çalışıyor. Karmaşa: eski audit / `current-system` / checklist kapanm
 
 | Sıra | Ne | Tür | Kanıt |
 |---:|---|---|---|
-| 1 | Audit defterini koda eşitle | Belge | `FINDINGS` F-000 FIRST; `FULL_SWEEP` “13 kapalı / A04 / 17 modül”; checklist A03 + F-001…009 OPEN. Kodda Item sözleşmesi, F-010 factory, 25 E2E spec var. |
-| 2 | Üretimde Raw BOM debug | Kod | `index.html` koşulsuz `rawBomDebug.js`. Panel: `Üretim Listesi · Debug`. L-banko tahmini `#selection-info` regex. F-025. |
-| 3 | Overlay yan ekleme menüde açık | Kod | `allowSideInsert: false` yalnız `moduleBehavior.js` (tv, ışıklı strafor). `moduleContextMenu.js` herkese Ekle Sol/Sağ; `allowSideInsert` okumaz. F-015. |
-| 4 | İlk seçim metni iki kaynak | Kod | `index.html`: “…dikdörtgen blok oluştur.” `DEFAULT_SELECTION_HINT`: “…panelleri çoklu seç.” |
-| 5 | Standart/yardım ölçü kopyası | Kod | `index.html` + `helpGuide.js` 350 / 10 / 7×50; kaynak `STAND_DIMENSIONS`. F-026. |
+| 1 | Audit defterini koda eşitle | Belge | **A uygulandı.** FINDINGS koda eşit; `FULL_SWEEP` tarihî mühür. |
+| 2 | Üretimde Raw BOM debug | Kod | **B uygulandı.** `index.html` yüklemez; `DEV` + `?rawBom`. F-025 kapalı. |
+| 3 | Overlay yan ekleme menüde açık | Kod | **B uygulandı.** Menü gizler; `flushCatalogModuleAdds` reddeder. F-015 kapalı. |
+| 4 | İlk seçim metni iki kaynak | Kod | **B uygulandı.** `index.html` = `DEFAULT_SELECTION_HINT`. |
+| 5 | Standart/yardım ölçü kopyası | Kod | **B uygulandı.** `standStandardsCopy.js`. F-026 kapalı. |
 | 6 | ZIP import şema/limit yok | Kod | `archiveVersion === 1` + `project.id`. `restoreProject()` `stand`/`modules` doğrulamaz. F-036 / F-037. |
-| 7 | GLB hata sessiz | Kod | `loadAsync` cache, `.catch` yok, `console.warn`. F-024. |
+| 7 | GLB hata sessiz | Kod | **B uygulandı.** `loadGltfScene` cache siler; `#stage-result`. F-024 kapalı. |
 | 8 | Belge gövdesi “şu anki sistem” | Belge | `current-system` 94 dosya: 53 tarihî şerit, 41 şeritsiz; gövde `catalogKey` / `DEPOT_*`. `definitions` zemin kartları `floorType` persist der; kod `stand.itemKey` yazar. |
 | 9 | Otomatik duvar feature contract yok | Kod | `automaticWall.js` var; `featureContracts.js` yalnız `automatic-depot`. F-029. |
 | 10 | Proje Final BOM yok | Kod + ürün kararı | `resolveItemBom(itemKey)` var; `modules[]` toplayıcı yok. F-030 / F-014 / F-048. Miktar uydurulmaz. |
@@ -38,12 +38,12 @@ Sistem çalışıyor. Karmaşa: eski audit / `current-system` / checklist kapanm
 2. Katalog: **51** anahtar (`SYSTEM_MODULE_CATALOG.md` test kilitli). BOM: **29 recipe / 4 self / 18 decision-required**. Katalog dışı: `illuminated-foam` (contract var, BOM `decision-required`). Zemin: 5 Item, katalog dışı, `unit` yok.
 3. Self BOM bitmiş: `COAT_RACK`, `KETTLE`, `MINI_FRIDGE_AVANTI`, `PLASTIC_TRASH_BIN` — `unit: 'adet'`, `resolveItemBom` ×1.
 4. State: `designState.js` `MODULE_STATE_FACTORIES` (25 type). `createModuleStateFromDescriptor`. F-010 kapalı.
-5. Davranış: `moduleBehavior.js`. Overlay tv + foam. Bar taburesi / tekli koltuk 45°. Yan ekleme menüde zorlanmaz.
-6. BOM: recipe `moduleRecipes.js`; leaf `itemBom.js`. Tüketici bugün `rawBomDebug.js`. Proje Final BOM yok. Connector reçetede sabit (F-031).
+5. Davranış: `moduleBehavior.js`. Overlay tv + foam. Bar taburesi / tekli koltuk 45°. Yan ekleme `allowsModuleSideInsert` ile menü ve catalog flush’ta zorlanır.
+6. BOM: recipe `moduleRecipes.js`; leaf `itemBom.js`. Debug tüketici `rawBomDebug.js` yalnız `DEV`+`?rawBom`. Proje Final BOM yok. Connector reçetede sabit (F-031).
 7. Özellik: yalnız `automatic-depot`. `contentCatalogKeys` yalnızca `PLASTIC_TRASH_BIN` (liste eksik, eski ad). Otomatik duvar contractsuz.
 8. Kalıcılık: snapshot `version: 1`. IndexedDB `fair-stand-configurator` v2; `projectStore` + `assetStore` ayrı `openDb`.
-9. Kapı: `npm run contract:verify` + `ci.yml` (Version2 push/PR: gate → test → build → e2e). `package.json` lint/`npm audit` yok. Diskteki `.github/change-contract.json` hâlâ `commercial-items-self-bom` — sonraki gerçek iş bu dosyayı kendi change set’ine yazmalı.
-10. E2E: **25** spec. “E2E yok” yanlış. ZIP ve GLB-fail spec yok.
+9. Kapı: `npm run contract:verify` + `ci.yml` (Version2 push/PR: gate → test → build → e2e). `package.json` lint/`npm audit` yok. Change-contract bu set: `visible-ui-b-with-ledger-a`.
+10. E2E: Playwright spec + CI. “E2E yok” yanlış. ZIP ve GLB-fail spec yok.
 11. `scripts/install-server.sh` repoda: `git pull` + build, SHA pin yok (F-042, düşük öncelik, senin sunucu script’in).
 
 ---
@@ -126,17 +126,17 @@ F-000 Item sözleşmesi; F-010 factory; F-011 davranış merkezi; F-012 `SCENE_S
 2. Checklist: “kullanma, ikinci kopya” veya hizala.
 3. `current-system`: 41 şeritsiz dosyaya tarihî şerit; başlık “mevcut sistem” olmasın; gövde `catalogKey` tarihî örnek.
 4. Zemin `definitions/` persist = `stand.itemKey`.
-5. Hardening: kapanmış maddeleri işaretle; #1/#2 açık kalsın.
+5. Hardening: #1/#2 B ile kapandı.
 6. Kapanış MD 45/`catalogKey` dipnotu.
 7. `ITEM_LIST` + `Changelog` + baza handoff.
 
-### B — Kullanıcıya görünen kod (ayrı onay)
+### B — Kullanıcıya görünen kod
 
-F-025 debug BOM; F-015 menü; seçim hint tek kaynak; F-026; F-024; F-039.
+**Uygulandı:** F-025, F-015, seçim hint, F-026, F-024, F-039. F-040 ZIP/GLB-fail e2e açık.
 
-### C — Veri / hijyen (acele değil)
+### C — Veri / hijyen
 
-F-036/037 import; F-042 install script pin; F-038/046 lint-audit; F-043 LICENSE; F-034 attribution.
+**Uygulandı:** F-036, F-037 (yol/tip; MB uydurulmadı), F-038, F-042. Envanter F-034. **Açık karar:** F-043 LICENSE, F-034 eksik GLB lisansları, F-046 ESLint/format.
 
 ### D — Mimari borç
 
@@ -175,4 +175,5 @@ P0 yeni F yok. Acil: defter, debug BOM, yan ekleme, seçim hint, import, sessiz 
 
 ## 10. Sonraki adım
 
-Onayınla yalnız **A — belge defteri**. Sonra B (görünen UI) veya E (BOM kararı).
+**A uygulandı (bu change set).** Canlı okuma: bu dosya + `audit/FINDINGS.md`.  
+Sonra onayınla **B** (görünen UI) veya **E** (BOM kararı). Checklist/A03.01’e gidilmez.

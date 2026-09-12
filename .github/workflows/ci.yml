@@ -30,6 +30,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Dependency audit
+        run: npm run audit:deps
+
+      - name: Source syntax check
+        run: npm run syntax:check
+
       - name: Test
         run: npm test
 

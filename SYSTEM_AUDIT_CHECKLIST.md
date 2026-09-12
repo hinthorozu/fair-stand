@@ -1,8 +1,8 @@
 # Fair Stand — Full System Audit Checklist
 
-> **Canonical audit tracker.** Bu dosya Fair Stand altyapısının baştan aşağı denetlenmesi için tek ilerleme kaynağıdır.
->
-> Sohbet, oturum veya AI değişse bile çalışma bu dosyadan devam eder. Bir alan kontrol edilmeden `AUDITED_OK` sayılmaz.
+> **İKİNCİ KOPYA — OTURUM BURADAN BAŞLAMAZ.**
+> A00–A24 maddeleri tarihî denetim şablonudur. Güncel durum ve sıra: `audit/SISTEM_MUTABAKAT_RAPORU.md` + `audit/FINDINGS.md`.
+> Resume bloğundaki A03.01 / F-001…009 OPEN / IN_PROGRESS **bayat**; A00–A24 incelendi (`audit/evidence/A24_FINAL_CLOSURE.md`). Bu dosyayı kanonik tracker sanma.
 
 ---
 
@@ -85,22 +85,22 @@ Kullanıcı düzeltme isterse ayrı, küçük PR ile uygulanır. Fix sonrası il
 
 > Yeni başlayan insan/AI **önce bu bloğu okur**. Audit'e başka yerden başlanmaz.
 
-- **Audit status:** `IN_PROGRESS`
-- **Audit baseline branch:** `ROG`
-- **Audit baseline SHA:** `6a702b000ffb3f9977f6e0853e23e840285eb60e`
-- **Current section:** `A03 — Repository architecture / ownership`
-- **Current item:** `A03.01`
-- **Last completed item:** `A02.19`
-- **Next item:** `A03.01`
-- **Last audited SHA:** `dda455183e5c713cb55a24232436cfd39c68ce7b`
-- **Last audit PR:** `#33`
-- **Last audit CI:** `ROG CI #80 / run 33790676809 / success`
-- **Open P0 findings:** `0`
-- **Open P1 findings:** `3`
-- **Open P2 findings:** `6`
+- **Audit status:** `HISTORICAL — A00–A24 tamam; canlı tracker değil`
+- **Audit baseline branch:** `ROG` (tarihî)
+- **Audit baseline SHA:** `6a702b000ffb3f9977f6e0853e23e840285eb60e` (tarihî; A24 tabanı `e764732`)
+- **Current section:** `— kullanma; bak FINDINGS`
+- **Current item:** `—`
+- **Last completed item:** `A24 (tarihî kapanış kanıtı)`
+- **Next item:** `SISTEM_MUTABAKAT_RAPORU.md B veya E; F-000 FIRST değil`
+- **Last audited SHA:** `dda455183e5c713cb55a24232436cfd39c68ce7b` (tarihî A02 notu)
+- **Last audit PR:** `#33` (tarihî)
+- **Last audit CI:** `ROG CI #80 / run 33790676809 / success` (tarihî)
+- **Open P0 findings:** `0` (güncel sayaç FINDINGS)
+- **Open P1 findings:** `güncel: FINDINGS`
+- **Open P2 findings:** `güncel: FINDINGS`
 - **Open P3 findings:** `0`
-- **Decision required count:** `0`
-- **Last update note:** `A02 universal change-gate audit completed against ROG dda4551. Five new gate/governance gaps F-005..F-009 recorded. Next strict item is A03.01.`
+- **Decision required count:** `güncel: FINDINGS (F-014/F-034/F-043)`
+- **Last update note:** `2026-09-12 A belgesi: bu checklist ikinci kopya. A03.01’e gidilmez.`
 
 ### Resume kuralı
 

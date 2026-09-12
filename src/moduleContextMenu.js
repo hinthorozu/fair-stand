@@ -1,5 +1,13 @@
 import { getModuleCatalogLabel, MODULE_CATALOG, MODULE_CATALOG_GROUPS } from './catalog.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
+import { getModuleBehavior } from './moduleBehavior.js';
+
+export function allowsModuleSideInsert(context) {
+  const type = typeof context === 'string'
+    ? context
+    : (context?.type ?? context?.moduleType);
+  return getModuleBehavior({ ...(context && typeof context === 'object' ? context : {}), type }).allowSideInsert !== false;
+}
 
 
 export function resolveModuleSidePlacement(context, visualSide) {
@@ -31,20 +39,22 @@ export function createModuleContextMenu({
   const menu = document.createElement('div');
   menu.className = 'module-context-menu';
   menu.hidden = true;
+  menu.setAttribute('role', 'menu');
+  menu.setAttribute('aria-label', 'Modül işlemleri');
   menu.innerHTML = `
     <div class="module-context-title"></div>
-    <button type="button" data-module-action="delete" class="danger">Sil</button>
-    <button type="button" data-module-action="duplicate-right">Çoğalt Sağ Tarafa</button>
-    <button type="button" data-module-action="duplicate-left">Çoğalt Sol Tarafa</button>
-    <button type="button" data-module-action="resize-foam" hidden>Boyutlandır…</button>
+    <button type="button" role="menuitem" data-module-action="delete" class="danger">Sil</button>
+    <button type="button" role="menuitem" data-module-action="duplicate-right">Çoğalt Sağ Tarafa</button>
+    <button type="button" role="menuitem" data-module-action="duplicate-left">Çoğalt Sol Tarafa</button>
+    <button type="button" role="menuitem" data-module-action="resize-foam" hidden>Boyutlandır…</button>
     <div class="module-context-separator"></div>
-    <button type="button" data-module-action="toggle-glass" hidden>Cam Panele Çevir</button>
-    <button type="button" data-module-action="toggle-fabric" hidden>Lightbox Kumaşa Çevir</button>
-    <button type="button" data-module-action="toggle-mesh" hidden>Mesh (Delikli) Brandaya Çevir</button>
-    <button type="button" data-module-action="toggle-fabric-light" hidden>Lightbox aydınlatmayı aç</button>
-    <button type="button" data-module-action="toggle-shelf-light" hidden>Raf altı aydınlatmayı aç</button>
-    <button type="button" data-module-action="add-right">Ekle Sağ Tarafa…</button>
-    <button type="button" data-module-action="add-left">Ekle Sol Tarafa…</button>
+    <button type="button" role="menuitem" data-module-action="toggle-glass" hidden>Cam Panele Çevir</button>
+    <button type="button" role="menuitem" data-module-action="toggle-fabric" hidden>Lightbox Kumaşa Çevir</button>
+    <button type="button" role="menuitem" data-module-action="toggle-mesh" hidden>Mesh (Delikli) Brandaya Çevir</button>
+    <button type="button" role="menuitem" data-module-action="toggle-fabric-light" hidden>Lightbox aydınlatmayı aç</button>
+    <button type="button" role="menuitem" data-module-action="toggle-shelf-light" hidden>Raf altı aydınlatmayı aç</button>
+    <button type="button" role="menuitem" data-module-action="add-right">Ekle Sağ Tarafa…</button>
+    <button type="button" role="menuitem" data-module-action="add-left">Ekle Sol Tarafa…</button>
   `;
   document.body.appendChild(menu);
 
@@ -85,6 +95,8 @@ export function createModuleContextMenu({
   const fabricLightingButton = menu.querySelector('[data-module-action="toggle-fabric-light"]');
   const shelfLightingButton = menu.querySelector('[data-module-action="toggle-shelf-light"]');
   const foamResizeButton = menu.querySelector('[data-module-action="resize-foam"]');
+  const addRightButton = menu.querySelector('[data-module-action="add-right"]');
+  const addLeftButton = menu.querySelector('[data-module-action="add-left"]');
   const pickerTitle = pickerBackdrop.querySelector('#module-picker-title');
   const pickerContext = pickerBackdrop.querySelector('.module-picker-context');
   const pickerGroups = pickerBackdrop.querySelector('.module-picker-groups');
@@ -409,6 +421,9 @@ export function createModuleContextMenu({
     shelfLightingButton.textContent = shelfLightingOn
       ? 'Raf altı aydınlatmayı kapat'
       : 'Raf altı aydınlatmayı aç';
+    const showSideInsert = allowsModuleSideInsert(context);
+    addRightButton.hidden = !showSideInsert;
+    addLeftButton.hidden = !showSideInsert;
     menu.hidden = false;
 
     const margin = 8;
@@ -479,6 +494,7 @@ export function createModuleContextMenu({
     }
 
     if (action === 'add-right') {
+      if (!allowsModuleSideInsert(context)) return;
       openPicker({
         placement: resolveModuleSidePlacement(context, 'right'),
         displayPlacement: 'right',
@@ -488,6 +504,7 @@ export function createModuleContextMenu({
     }
 
     if (action === 'add-left') {
+      if (!allowsModuleSideInsert(context)) return;
       openPicker({
         placement: resolveModuleSidePlacement(context, 'left'),
         displayPlacement: 'left',
