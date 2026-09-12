@@ -10,11 +10,11 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 ## Özet
 
 - Toplam bulgu: **49** (`F-000` + `F-001` … `F-048`)
-- Kapalı (kod/sözleşme duruyor): **31** — B kapalıları + C: F-036, F-037, F-038, F-042
+- Kapalı (kod/sözleşme duruyor): **30** — C’den F-036, F-037, F-038; F-042 SHA pin geri alındı
 - Kapsam dışı (GitHub ayarı / uzak dal; ürün kodu değil): **F-041 kapanış kaydı durur; F-044 ürün backlog’u değil**
-- Açık ürün bulgusu: **17** (F-044 hariç)
+- Açık ürün bulgusu: **18** (F-044 hariç)
 - Açık P0: **0**
-- Açık P1: **6**
+- Açık P1: **7**
 - Açık P2: **11** (F-044 kapsam dışı)
 - Açık P3: **0**
 - Sonraki ürün işi: `SISTEM_MUTABAKAT_RAPORU.md` D (mimari) veya E (BOM kararı). **C uygulandı (LICENSE/eksik atıf/ESLint açık).**
@@ -67,7 +67,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 | F-039 | P2 | Dinamik modal/bağlam menüsü odak/erişilebilirlik semantiği tutarsız | **CLOSED** — foam dialog + bağlam menüsü `role`/`Escape`; tam odak tuzağı yok |
 | F-040 | P1 | “Tarayıcı E2E yok” iddiası; kalan boşluk ZIP/GLB-fail spec | **OPEN** — Playwright spec + CI var; ZIP ve GLB hata yolu e2e yok |
 | F-041 | P1 | ROG korumasız; yeşil CI/change-gate merge/doğrudan push öncesi zorunlu değil | **CLOSED** — kapanış MD var; GitHub ruleset ürün kodu değil (`SISTEM_MUTABAKAT_RAPORU.md`) |
-| F-042 | P1 | Sunucu deploy yolu commit’e pinli değil ve CI kapısı/test zincirinden zayıf | **CLOSED** — `PINNED_COMMIT` `ed828c3…`; `git pull` yok |
+| F-042 | P1 | Sunucu deploy yolu commit’e pinli değil ve CI kapısı/test zincirinden zayıf | **OPEN** — SHA yok; `origin/Version2` ucu çekilir. CI deploy kapısı yok |
 | F-043 | P2 | Açık repoda kök yazılım lisansı kararı/dosyası yok | OPEN / DECISION_REQUIRED |
 | F-044 | P2 | Birçok merge edilmiş/geçersiz dal duruyor | **KAPSAM_DIŞI** — GitHub dal hijyeni; ürün kodu değil |
 | F-045 | P2 | Tarihî kaynak-yeniden-yazan yama betikleri kanonik araçların yanında duruyor | OPEN |
@@ -81,6 +81,6 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 2. Kalıcılık/import: F-021/F-022/F-032/F-035. F-036/F-037 kapandı.
 3. BOM (E, ürün kararı): F-014/F-029/F-030/F-031/F-048.
 4. Mimari borç: F-017/F-018/F-047 kural.
-5. Hijyen: F-034 kalan lisans, F-043 LICENSE, F-045, F-046 ESLint. F-038/F-042 kapandı. F-044 kapsam dışı.
+5. Hijyen: F-034 kalan lisans, F-043 LICENSE, F-042, F-045, F-046 ESLint. F-038 kapandı. F-044 kapsam dışı.
 
 Bir bulgu ancak uygulama, varsa hedefli regresyon, tam test/build, PR CI ve gerekli merge-sonrası doğrulama kanıtından sonra `CLOSED` olur.

@@ -136,7 +136,7 @@ F-000 Item sözleşmesi; F-010 factory; F-011 davranış merkezi; F-012 `SCENE_S
 
 ### C — Veri / hijyen
 
-**Uygulandı:** F-036, F-037 (yol/tip; MB uydurulmadı), F-038, F-042. Envanter F-034. **Açık karar:** F-043 LICENSE, F-034 eksik GLB lisansları, F-046 ESLint/format.
+**Uygulandı:** F-036, F-037 (yol/tip; MB uydurulmadı), F-038. SHA pin **geri alındı** (F-042 açık). Envanter F-034. **Açık karar:** F-043 LICENSE, F-034 eksik GLB lisansları, F-046 ESLint/format.
 
 ### D — Mimari borç
 
