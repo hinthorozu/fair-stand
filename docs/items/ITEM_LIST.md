@@ -100,10 +100,10 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 | 35 | `chair_eames` | Eames Sandalye | **`chair` · Tekil Item** |
 | 36 | `glass_table` | Cam Masa | **`table-glass` · Tekil Item** |
 | 37 | `furniture_bar_stool_classic` | Bar Taburesi | `bar-stool` |
-| 38 | `MINI_FRIDGE_AVANTI` | Mini Buzdolabı | `mini-fridge` |
-| 39 | `KETTLE` | Kettle | `kettle` |
-| 40 | `COAT_RACK` | Askılık | `coat-rack` |
-| 41 | `PLASTIC_TRASH_BIN` | Çöp Kutusu | `plastic-trash-bin` |
+| 38 | `MINI_FRIDGE_AVANTI` | Mini Buzdolabı | **`mini-fridge` · Tekil Item · Tamam · self BOM `1 adet`** |
+| 39 | `KETTLE` | Kettle | **`kettle` · Tekil Item · Tamam · self BOM `1 adet`** |
+| 40 | `COAT_RACK` | Askılık | **`coat-rack` · Tekil Item · Tamam · self BOM `1 adet`** |
+| 41 | `PLASTIC_TRASH_BIN` | Çöp Kutusu | **`plastic-trash-bin` · Tekil Item · Tamam · self BOM `1 adet`** |
 | 42 | `EXTRA_INDOOR_PLANT_1` | Yapay Çiçek 1 | `indoor-plant-1` |
 | 43 | `EXTRA_LONG_PLANTER_100` | Uzun Saksı 100 | `indoor-plant-1` |
 | 44 | `EXTRA_LONG_PLANTER_150` | Uzun Saksı 150 | `indoor-plant-1` |

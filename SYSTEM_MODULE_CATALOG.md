@@ -19,7 +19,8 @@ Bu snapshot `Version2` üzerindeki `MODULE_CATALOG_KEYS` ve `MODULE_CONTRACT_ASS
 
 - Catalog entries: **51**
 - BOM mode `recipe`: **29**
-- BOM mode `decision-required`: **22**
+- BOM mode `self`: **4**
+- BOM mode `decision-required`: **18**
 - Katalog dışı explicit runtime module: **1** (`illuminated-foam`)
 - Katalog dışı module BOM mode `decision-required`: **1**
 
@@ -113,12 +114,15 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 Duvar/panel, separatör, vitrin, raf, panel bazalı duvar, depo kapısı, düz/L banko ve baza ailelerinin contract'ı `recipe` modundadır. Gerçek recipe çözümü `src/moduleRecipes.js` tarafından yapılır ve contract testleri recipe-backed kayıtların gerçekten resolve olduğunu doğrular.
 
-### `decision-required` — 22 katalog kaydı
+### `self` — 4 katalog kaydı
+
+`MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN` leaf/self BOM Item'dır. Canonical birim `adet`; `src/itemBom.js > resolveItemBom(itemKey)` aynı `itemKey` için `quantity=1` üretir. Child recipe yoktur.
+
+### `decision-required` — 18 katalog kaydı
 
 Şu katalog aileleri için Final BOM sınıflandırması henüz ürün/üretim kararı bekler:
 
 - mobilya setleri / tekli-çiftli koltuk / sehpa / Eames sandalye / cam masa / bar taburesi
-- depo mini buzdolabı / kettle / askılık / çöp kutusu
 - yapay bitki / uzun saksılar
 - TV 42 / 55 / 65
 - Video Wall 2×2 / 3×3

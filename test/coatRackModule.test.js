@@ -11,6 +11,7 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
     itemKey: 'COAT_RACK',
     modelFile: 'coat_rack.glb',
     type: 'coat-rack',
+    unit: 'adet',
     widthCm: 43,
     depthCm: 43,
     heightCm: 180,

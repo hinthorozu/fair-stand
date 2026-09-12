@@ -3,22 +3,22 @@ import { getProductionItem } from './productionParts.js';
 // Bağımsız ticari ürünler, doğrulanmış ürün varsayılanlarının sahibidir.
 export const COMMERCIAL_ITEMS = Object.freeze({
   COAT_RACK: Object.freeze({
-    itemKey: 'COAT_RACK', name: 'Askılık', type: 'coat-rack',
+    itemKey: 'COAT_RACK', name: 'Askılık', type: 'coat-rack', unit: 'adet',
     dimensions: Object.freeze({ widthCm: 43, depthCm: 43, heightCm: 180 }),
     modelFile: 'coat_rack.glb',
   }),
   KETTLE: Object.freeze({
-    itemKey: 'KETTLE', name: 'Kettle', type: 'kettle',
+    itemKey: 'KETTLE', name: 'Kettle', type: 'kettle', unit: 'adet',
     dimensions: Object.freeze({ widthCm: 24, depthCm: 19, heightCm: 25 }),
     modelFile: 'kettle.glb',
   }),
   MINI_FRIDGE_AVANTI: Object.freeze({
-    itemKey: 'MINI_FRIDGE_AVANTI', name: 'Mini Buzdolabı', type: 'mini-fridge',
+    itemKey: 'MINI_FRIDGE_AVANTI', name: 'Mini Buzdolabı', type: 'mini-fridge', unit: 'adet',
     dimensions: Object.freeze({ widthCm: 50, depthCm: 50, heightCm: 66 }),
     modelFile: '80s_avanti_mini_fridge.glb',
   }),
   PLASTIC_TRASH_BIN: Object.freeze({
-    itemKey: 'PLASTIC_TRASH_BIN', name: 'Çöp Kutusu', type: 'plastic-trash-bin',
+    itemKey: 'PLASTIC_TRASH_BIN', name: 'Çöp Kutusu', type: 'plastic-trash-bin', unit: 'adet',
     dimensions: Object.freeze({ widthCm: 40, depthCm: 40, heightCm: 60 }),
     modelFile: 'plastic_trash_bin.glb', preserveModelScale: false,
     modelRotationYDeg: 0, visualRotationYDeg: -90,

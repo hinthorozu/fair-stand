@@ -57,7 +57,7 @@ test('repository agent and architecture entrypoints require the canonical Item c
   assert.match(architectureRules, /ITEM_CONTRACT\.md/);
 
   assert.match(itemContract, /kök sistem `Item`/i);
-  assert.match(itemContract, /canonical `itemKey`/);
+  assert.match(itemContract, /kanonik `itemKey`/);
   assert.match(itemContract, /Item davranışı `type` seviyesinde/);
   assert.match(itemContract, /quantity/);
   assert.match(itemContract, /recursive BOM/);

@@ -29,10 +29,12 @@ test('SYSTEM_MODULE_CATALOG summary counts match module contracts', async () => 
   const source = await readFile(DOC_URL, 'utf8');
   const contracts = MODULE_CATALOG_KEYS.map((key) => resolveModuleContract(key));
   const recipeCount = contracts.filter((contract) => contract?.bom?.mode === 'recipe').length;
+  const selfCount = contracts.filter((contract) => contract?.bom?.mode === 'self').length;
   const decisionRequiredCount = contracts.filter((contract) => contract?.bom?.mode === 'decision-required').length;
 
   assert.equal(readBoldCount(source, 'Catalog entries'), MODULE_CATALOG_KEYS.length);
   assert.equal(readBoldCount(source, 'BOM mode `recipe`'), recipeCount);
+  assert.equal(readBoldCount(source, 'BOM mode `self`'), selfCount);
   assert.equal(readBoldCount(source, 'BOM mode `decision-required`'), decisionRequiredCount);
 
   const illuminatedFoam = resolveModuleContract('illuminated-foam');
