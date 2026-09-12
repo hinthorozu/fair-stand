@@ -12,7 +12,7 @@ for (const item of Object.values(WALL_MEDIA_ITEMS)) {
     const catalog = MODULE_CATALOG[item.itemKey];
     const isVideoWall = Boolean(item.videoWall);
 
-    // Catalog descriptor is projected from the canonical Item.
+    // Katalog tanımı kanonik Item'dan yansıtılır.
     assert.equal(catalog.itemKey, item.itemKey);
     assert.equal(catalog.label, item.name);
     assert.equal(catalog.type, 'tv');
@@ -26,7 +26,7 @@ for (const item of Object.values(WALL_MEDIA_ITEMS)) {
     assert.equal(catalog.videoWallCols, isVideoWall ? item.videoWall.cols : undefined);
     assert.equal(catalog.panelScreenWidthCm, isVideoWall ? item.videoWall.panelScreenWidthCm : undefined);
 
-    // A runtime instance sources every default from the Item.
+    // Runtime örneği her varsayılanı Item'dan alır.
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, item.itemKey);
     assert.equal(state.itemKey, item.itemKey);
@@ -42,17 +42,17 @@ for (const item of Object.values(WALL_MEDIA_ITEMS)) {
     assert.equal(state.panelScreenWidthCm, metrics.panelScreenWidthCm);
     assert.equal(state.panelScreenHeightCm, metrics.panelScreenHeightCm);
 
-    // Shared wall-overlay behavior family; no per-item behavior override.
+    // Ortak wall-overlay davranış ailesi; item bazlı davranış ezmesi yok.
     assert.equal(getModuleBehavior(state).placement, 'wall-overlay');
 
-    // BOM stays decision-required with no fabricated source/unit.
+    // BOM decision-required kalır; kaynak/unit uydurulmaz.
     assert.equal(Object.hasOwn(item, 'unit'), false);
     const contract = resolveModuleContract(item.itemKey);
     assert.equal(contract.bom.mode, 'decision-required');
     assert.equal(contract.bom.source, null);
 
     // itemKey yoksa type + ölçü resolve eder.
-    // Fake historical footprint widthCm=100 is rewritten to the screen width.
+    // Eski sahte oturum widthCm=100 ekran genişliğine yazılır.
     const legacy = JSON.parse(JSON.stringify(state));
     delete legacy.itemKey;
     legacy.widthCm = 100;
@@ -61,7 +61,7 @@ for (const item of Object.values(WALL_MEDIA_ITEMS)) {
     assert.equal(restored.widthCm, metrics.screenWidthCm);
     assert.equal(resolveItemKey(restored), item.itemKey);
 
-    // Duplicate is an independent instance carrying the same product identity.
+    // Duplicate, aynı ürün kimliğini taşıyan bağımsız örnektir.
     const duplicate = duplicateModuleState(state);
     assert.notEqual(duplicate.id, state.id);
     assert.equal(duplicate.itemKey, item.itemKey);
@@ -76,7 +76,7 @@ test('video walls are singular parametric Items whose totals derive from panel x
     assert.equal(metrics.screenWidthCm, item.videoWall.panelScreenWidthCm * item.videoWall.cols);
     assert.equal(metrics.screenHeightCm, item.videoWall.panelScreenHeightCm * item.videoWall.rows);
     assert.equal(metrics.widthCm, metrics.screenWidthCm);
-    // One instance carries the whole grid; it is not a composite of N x TV_55.
+    // Tek örnek tüm ızgarayı taşır; N × TV_55 bileşimi değildir.
     const state = createModuleStateFromDescriptor(MODULE_CATALOG[key]);
     assert.equal(state.videoWallRows, item.videoWall.rows);
     assert.equal(state.videoWallCols, item.videoWall.cols);

@@ -1,6 +1,6 @@
 # wall_showcase_100_2
 
-## Canonical Item
+## Kanonik Item
 
 - `itemKey`: `wall_showcase_100_2`
 - `type`: `showcase-2`
@@ -22,22 +22,22 @@
 
 ## Inner-corner composition
 
-`panelVariant: 'inner-corner'` recipe context'i verildiğinde doğrulanmış köşe BOM'u canonical recipe üzerinden çözülür:
+`panelVariant: 'inner-corner'` recipe context'i verildiğinde doğrulanmış köşe BOM'u kanonik recipe üzerinden çözülür:
 
 - `panel_98 ×5 → panel_corner_92 ×5`
 - `connector_start ×4` değişmez
 - `connector_single ×9 → connector_single ×5 + connector_corner ×4`
 - Diğer BASE child Item miktarları değişmez.
 
-Bu varyant `wall_showcase_100_2` canonical parent Item'ının aynı recipe zinciridir; ayrı `showcase_2_100` aggregate Item oluşturulmaz. Relationship bilgisinden `panelVariant` context'inin otomatik üretilmesi bu Item'a özel olarak eklenmemiştir.
+Bu varyant `wall_showcase_100_2` kanonik parent Item'ının aynı recipe zinciridir; ayrı `showcase_2_100` aggregate Item oluşturulmaz. Relationship bilgisinden `panelVariant` context'inin otomatik üretilmesi bu Item'a özel olarak eklenmemiştir.
 
-## Runtime ownership
+## Runtime sahipliği
 
-- Catalog key ve canonical Item identity aynıdır: `wall_showcase_100_2`.
-- Shared `WALL_BEHAVIOR` placement/move/rotation/snap/collision/reflow motoru korunur.
-- State canonical `itemKey` + `eyeCount` taşır.
-- `bodySurface` tek project-instance color override'dır; iki yan + iki yatay sunta birlikte renklenir. Child showcase-board Items ayrı ayrı editable değildir.
+- Catalog key ve kanonik Item identity aynıdır: `wall_showcase_100_2`.
+- Shared `WALL_BEHAVIOR` yerleşim/move/rotation/snap/collision/reflow motoru korunur.
+- State kanonik `itemKey` + `eyeCount` taşır.
+- `bodySurface` tek project-örnek color ezme'dır; iki yan + iki yatay sunta birlikte renklenir. Alt showcase-board Items ayrı ayrı editable değildir.
 - Default body color child Items'dan `0xffffff` gelir.
-- `glass_shelf` bu renk override'ından etkilenmez.
-- Renderer board ölçülerini canonical child Items'dan okur ve yalnız canonical gövde board'ları ile `glass_shelf` geometrisini gösterir; BOM'da olmayan sahte beyaz ön kenar/çerçeve mesh'i eklemez.
-- Legacy persisted showcase state load sırasında canonical `wall_showcase_100_2` identity/bodySurface'a normalize edilir.
+- `glass_shelf` bu renk ezmesinden etkilenmez.
+- Renderer board ölçülerini kanonik child Items'dan okur ve yalnız kanonik gövde board'ları ile `glass_shelf` geometrisini gösterir; BOM'da olmayan sahte beyaz ön kenar/çerçeve mesh'i eklemez.
+- Eski persisted showcase state load sırasında kanonik `wall_showcase_100_2` identity/bodySurface'a normalize edilir.

@@ -82,9 +82,9 @@ test('mini fridge uses the 50x50x66 nominal footprint in the real catalog drag f
   expect(fridge.placement.wallId).toBe('free');
   expect(Number(fridge.placement.rotationZDeg)).toBe(0);
 
-  // Free-placement xCm is the width-edge origin, while yCm is the footprint centerline
-  // for the default 0-degree orientation. Assert the physical 50x50 footprint edges,
-  // not the center coordinate itself, against the 10 cm grid.
+  // Serbest yerleşimde xCm genişlik kenarı kökeni, yCm varsayılan 0° yönünde
+  // oturum orta çizgisidir. 50x50 oturum kenarlarını 10 cm ızgaraya göre doğrula;
+  // merkez koordinatının kendisini değil.
   const xMin = Number(fridge.placement.xCm);
   const xMax = xMin + Number(fridge.widthCm);
   const yCenter = Number(fridge.placement.yCm);

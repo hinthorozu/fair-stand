@@ -51,9 +51,8 @@ test('wall showcase catalog Items persist canonical identity and grouped body co
   const errors=[]; page.on('pageerror', (error)=>errors.push(error.message));
   await createStand(page);
 
-  // The automatic 500 cm back wall starts fully occupied. Free exactly two
-  // 100 cm module slots through the real delete path before exercising the
-  // catalog add flow, otherwise the picker correctly remains open on capacity failure.
+  // Otomatik 500 cm sırt duvarı baştan dolu. Katalog eklemeden önce gerçek silme
+  // yoluyla tam iki 100 cm slot boşalt; yoksa picker kapasite hatasında açık kalır.
   const initialProject = await saveAndReadProject(page);
   expect(initialProject).not.toBeNull();
   expect(initialProject.modules.length).toBeGreaterThanOrEqual(2);

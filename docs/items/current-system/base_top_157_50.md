@@ -3,13 +3,13 @@
 Bu belge güncel sistemde `base_top_157_50` Item'ını yeni Item Contract checklist'ine göre eksiksiz envanterler.
 
 ## 1. Kimlik / sınıflandırma
-- Canonical kimlik: `itemKey = base_top_157_50`.
+- Kanonik kimlik: `itemKey = base_top_157_50`.
 - `type = base-top`, `unit = adet`.
 - Tekil, parametrik olmayan production/BOM Item'ıdır.
 - Standalone catalog kaydı yoktur; parent catalog Item'ları `BASE_150` ve `wall_base_150`'dır.
 
 ## 2. Intrinsic / default Item properties
-Canonical kaynak `src/productionParts.js` → `PRODUCTION_PARTS.base_top_157_50`.
+Kanonik kaynak `src/productionParts.js` → `PRODUCTION_PARTS.base_top_157_50`.
 
 - `name = Baza Üstü 157 × 50 cm`
 - `dimensions.widthCm = 157`
@@ -19,7 +19,7 @@ Canonical kaynak `src/productionParts.js` → `PRODUCTION_PARTS.base_top_157_50`
 - `defaultColor = 0xffffff`
 - `nominalModuleWidthCm = 150`
 
-`material` ve `defaultColor` bu Item için doğrulanmış canonical default metadata'dır. Explicit proje/runtime veya specialized renderer override bu default'ları ezebilir; canonical Item tanımını değiştirmez.
+`material` ve `defaultColor` bu Item için doğrulanmış kanonik default metadata'dır. Explicit proje/runtime veya specialized renderer override bu default'ları ezebilir; kanonik Item tanımını değiştirmez.
 
 ## 3. State / default state
 Ayrı `base_top_157_50` project instance state'i yoktur. Parent `base` / `base-wall` state'i `src/designState.js` tarafından oluşturulur. Leaf top'un mutable state'i ve ayrı project `id`'si yoktur.
@@ -49,20 +49,20 @@ Leaf top için ayrı context menu yoktur: **UYGULANMIYOR**. Sil/çoğalt/taşı/
 Leaf top ayrı instance olmadığı için bağımsız lifecycle yoktur: **UYGULANMIYOR**.
 
 ## 12. Persistence
-Leaf production top ayrı entity olarak persist edilmez. Parent module state save/load edilir; leaf identity recipe + canonical production Item üzerinden resolve edilir.
+Leaf production top ayrı entity olarak persist edilmez. Parent module state save/load edilir; leaf identity recipe + kanonik production Item üzerinden resolve edilir.
 
 ## 13. Relationships / reflow
-Canonical leaf relationship/reflow state'i yoktur: **UYGULANMIYOR**. Quantity/composition ownership parent recipe'dedir.
+Kanonik leaf relationship/reflow state'i yoktur: **UYGULANMIYOR**. Quantity/composition ownership parent recipe'dedir.
 
 ## 14. BOM / composition
-`base_top_157_50` iki aktif parent recipe'de canonical `itemKey` ile `×1` kullanılır:
+`base_top_157_50` iki aktif parent recipe'de kanonik `itemKey` ile `×1` kullanılır:
 - `base:150` / `base-150`
 - `base-wall:150` / `base-wall-150`
 
-Expansion `getRecipeItemKey()` → `getProductionItem()` ile canonical Item metadata'sını tüketir. Leaf başka Item'lardan oluşmaz.
+Expansion `getRecipeItemKey()` → `getProductionItem()` ile kanonik Item metadata'sını tüketir. Leaf başka Item'lardan oluşmaz.
 
 ## 15. Renderer / asset / override sınırı
-`src/scene3d.js#createBaseModule()` top'u procedural çizer. Renderer'ın kendi kalınlık/overhang ve `color: 0xffffff` değerleri specialized render override'ıdır; canonical production ölçüsü `157 × 50 × 1.8 cm`, malzeme `sunta`, default renk `0xffffff` Item'da kalır. Renderer business/BOM source-of-truth değildir.
+`src/scene3d.js#createBaseModule()` top'u procedural çizer. Renderer'ın kendi kalınlık/overhang ve `color: 0xffffff` değerleri specialized render override'ıdır; kanonik production ölçüsü `157 × 50 × 1.8 cm`, malzeme `sunta`, default renk `0xffffff` Item'da kalır. Renderer business/BOM source-of-truth değildir.
 
 ## 16. Runtime owners
 ```text
@@ -76,10 +76,10 @@ Raw BOM consumer        → src/rawBomDebug.js
 ```
 
 ## 17. Regression
-`test/baseTopsItemContract.test.js`, `test/baseRecipes.test.js` ve `test/baseWallRecipes.test.js` canonical identity, intrinsic metadata, recipe quantity ve expansion parity'sini korur.
+`test/baseTopsItemContract.test.js`, `test/baseRecipes.test.js` ve `test/baseWallRecipes.test.js` kanonik identity, intrinsic metadata, recipe quantity ve expansion parity'sini korur.
 
 ## 18. Açık durum / karar
 - Intrinsic/default property ownership: **VAR**.
-- Canonical BOM consumer cutover: **VAR**.
+- Kanonik BOM consumer cutover: **VAR**.
 - Renderer override: **VAR ve izinli**.
 - Ayrı leaf behavior/state/persistence: **UYGULANMIYOR**.

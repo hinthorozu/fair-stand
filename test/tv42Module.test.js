@@ -202,7 +202,7 @@ test('wall-overlay height clamp reaches geometric top for every TV screen size',
     assert.equal(clampWallOverlayZCm(999, screenHeightCm, 10, wallHeightCm), maxZCm);
     assert.equal(clampWallOverlayZCm(-999, screenHeightCm, 10, wallHeightCm), minZCm);
   }
-  // Old snap-aligned ceiling stopped TV_42 at 140; geometric max is higher so it can flush.
+  // Eski snap tavanı TV_42'yi 140'ta durduruyordu; geometrik max daha yüksek, sıfır bitebilir.
   assert.ok(getWallOverlayZBoundsCm(52.3, 350).maxZCm > 140);
   assert.equal(
     clampWallOverlayZCm(150, 52.3, 10, 350),

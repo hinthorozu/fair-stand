@@ -1,31 +1,31 @@
 # upright_49_5 — Item Contract
 
-## Canonical identity
+## Kanonik kimlik
 - `itemKey`: `upright_49_5`
 - `name`: `Dikme 49,5 cm`
 - `type`: `upright`
 - `unit`: `adet`
-- structure: Tekil Item
+- yapı: Tekil Item
 
-## Canonical intrinsic properties
+## Kanonik ürüne özgü özellikler
 - `dimensions.lengthCm = 49.5`
 - `dimensions.thicknessCm = 8`
 - `material = 'alüminyum'`
 - `defaultColor = 0xd0d3d4`
 
-These values are product defaults owned by the Item. Explicit project/runtime/render overrides may replace presentation where applicable without changing the canonical default.
+Bu değerler Item'ın sahip olduğu ürün varsayılanlarıdır. Açık proje/runtime/render ezmeleri, kanonik varsayılanı değiştirmeden görünümü değiştirebilir.
 
-## Composition / BOM
-Leaf BOM Item. `base-wall:100/150/200` consume quantity `2`; `base:100/150/200` consume quantity `4`. Parent recipes own quantity; Item owns product metadata.
+## Bileşim / BOM
+Yaprak BOM Item. `base-wall:100/150/200` miktar `2`; `base:100/150/200` miktar `4` tüketir. Miktar üst recipe'nindir; ürün üstverisi Item'ındır.
 
-## Behavior / state / persistence
-Standalone placement, move, rotation, snap/collision, selection, context-menu, delete/duplicate, factory, persistence and reflow are `UYGULANMIYOR`. Parent base/base-wall runtime owns those capabilities.
+## Davranış / state / kalıcılık
+Bağımsız yerleşim, move, rotation, snap/collision, selection, context-menu, delete/duplicate, oluşturucu, kalıcılık ve reflow `UYGULANMIYOR`. Bu yetenekler üst baza / baza-duvar runtime'ındadır.
 
-## Renderer override boundary
-Renderer creates procedural base/base-wall posts and does not use `upright_49_5` as mesh identity. Production dimensions/material/defaultColor remain Item truth; specialized renderer geometry/material/color may explicitly override presentation.
+## Renderer ezme sınırı
+Renderer prosedürel baza / baza-duvar dikmeleri üretir; mesh kimliği olarak `upright_49_5` kullanmaz. Üretim ölçü/malzeme/defaultColor Item gerçeğidir; özel renderer geometri/malzeme/renk görünümü açıkça ezebilir.
 
-## Regression contract
-`test/upright99And495ItemContract.test.js` protects canonical identity/dimensions and six recipe quantities. `test/uprightIntrinsicProperties.test.js` protects `material='alüminyum'` and `defaultColor=0xd0d3d4`.
+## Regresyon sözleşmesi
+`test/upright99And495ItemContract.test.js` kanonik kimlik/ölçü ve altı recipe miktarını korur. `test/uprightIntrinsicProperties.test.js` `material='alüminyum'` ve `defaultColor=0xd0d3d4` değerlerini korur.
 
-## Completion
-Canonical product contract is complete for the currently verified system. No renderer/state/persistence migration is introduced by this property decision.
+## Tamamlanma
+Kanonik ürün sözleşmesi, şu an doğrulanmış sistem için tamamdır. Bu özellik kararı renderer/state/kalıcılık migration'ı eklemez.

@@ -1,30 +1,30 @@
-# A01 / F-002 Remediation Closure
+# A01 / F-002 Düzeltme Kapanışı
 
-Finding: `F-002 — historical/progress docs can be mistaken for current truth`
-Severity: P2
-Branch: `remediation/a01-f002-historical-docs`
+Bulgu: `F-002 — Tarihî/repo-ilerleme belgeleri güncel gerçek sanılabilir`
+Önem: P2
+Dal: `remediation/a01-f002-historical-docs`
 PR: `#37`
-Starting ROG: `f24f105d0b5af70b28e9c6f721004e80063d8764`
+Başlangıç ROG: `f24f105d0b5af70b28e9c6f721004e80063d8764`
 
-## Fix
+## Düzeltme
 
-- `FRESH_REPOSITORY_REVIEW.md` now opens with an explicit historical-snapshot warning and redirects to current audit/canonical sources.
-- `REPOSITORY_CLEANUP_PROGRESS.md` now opens with an explicit historical-progress warning and redirects to current remediation/roadmap/process sources.
-- Original historical content remains intact below the banners.
-- `test/historicalDocumentationStatus.test.js` requires the historical markers and current-tracker redirects.
+- `FRESH_REPOSITORY_REVIEW.md` artık açık bir tarihsel-anlık-görüntü uyarısıyla açılır ve güncel denetim/kanonik kaynaklara yönlendirir.
+- `REPOSITORY_CLEANUP_PROGRESS.md` artık açık bir tarihsel-ilerleme uyarısıyla açılır ve güncel düzeltme/yol haritası/süreç kaynaklarına yönlendirir.
+- Orijinal tarihsel içerik başlıkların altında olduğu gibi durur.
+- `test/historicalDocumentationStatus.test.js` tarihsel işaretleri ve güncel-izleyici yönlendirmelerini zorunlu kılar.
 
-## Verification
+## Doğrulama
 
-Implementation head: `84a22aa12e104797c10d4268f0d370b80c0e6b41`
+Uygulama head: `84a22aa12e104797c10d4268f0d370b80c0e6b41`
 PR CI: `#93 / 33799367084`
 
 - change contract gate: passed
 - npm ci: passed
-- npm test: passed (includes historical-document status regression)
+- npm test: passed (tarihsel-belge durum regresyonunu içerir)
 - npm run build: passed
 
-## Result
+## Sonuç
 
 `F-002: CLOSED`
 
-Post-merge ROG CI is required before proceeding to F-003.
+F-003'e geçmeden önce birleştirme sonrası ROG CI gereklidir.

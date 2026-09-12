@@ -1,4 +1,4 @@
-> Migration �ncesi envanterdir; aktif canonical tan�m `../definitions/desk_banko_100.md` i�indedir.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/desk_banko_100.md` içindedir.
 
 # desk_banko_100 — Mevcut Sistem Profili
 
@@ -8,31 +8,31 @@ Bu belge `desk_banko_100` için `Version2` runtime kodunda çalışan state, pla
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `desk_banko_100` |
-| Label | `Banko 100` |
+| Katalog anahtarı | `desk_banko_100` |
+| Etiket | `Banko 100` |
 | Type | `counter` |
 | Shape | `straight` |
-| Width | `100 cm` |
-| Depth | `50 cm` |
-| Height | `100 cm` |
+| Genişlik | `100 cm` |
+| Derinlik | `50 cm` |
+| Yükseklik | `100 cm` |
 | Editable face count | `6` |
 
 Factory straight counter için `frontLower/frontUpper/leftLower/leftUpper/rightLower/rightUpper` olmak üzere 6 editable face oluşturur. L shape ayrıca `returnLower/returnUpper` ekleyerek 8 face oluşturur. Her face default beyaz ve image-editable state taşır.
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `free-editable` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `editable` |
 | Image | `editable` |
-| Renderer policy | `procedural` |
+| Renderer politikası | `procedural` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `recipe` |
-| BOM source | `src/moduleRecipes.js` |
+| Bileşim | `standalone` |
+| BOM kipi | `recipe` |
+| BOM kaynağı | `src/moduleRecipes.js` |
 
 ## Behavior
 
@@ -100,7 +100,7 @@ Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kayd
 
 `Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `desk_banko_100` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 

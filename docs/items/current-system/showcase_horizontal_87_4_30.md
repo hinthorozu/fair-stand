@@ -6,10 +6,10 @@ Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası g�
 
 | # | Alan | Durum | Güncel gerçek / owner |
 |---:|---|---|---|
-| 1 | Identity / type | VAR | `itemKey=showcase_horizontal_87_4_30`, `type=showcase-board`, `unit=adet`; canonical owner `src/productionParts.js`. |
+| 1 | Identity / type | VAR | `itemKey=showcase_horizontal_87_4_30`, `type=showcase-board`, `unit=adet`; kanonik owner `src/productionParts.js`. |
 | 2 | Intrinsic properties | VAR | `87.4 × 30 × 1.8 cm` (`length × depth × thickness`), `material=sunta`, `defaultColor=0xffffff`; kullanıcı ürün kararı. |
-| 3 | Default state | UYGULANMIYOR | Leaf board ayrı project state taşımaz. Beyaz ürün default'u canonical Item'dadır. Parent showcase instance ileride tek gövde renk override'ı taşıyacaktır. |
-| 4 | Factory / creation | PARENT-OWNED | Ayrı leaf project factory yok. Ortak üst/alt board parent `wall_showcase_100_2` ve `wall_showcase_100_3` composition'larında kullanılacaktır. |
+| 3 | Default state | UYGULANMIYOR | Leaf board ayrı project state taşımaz. Beyaz ürün default'u kanonik Item'dadır. Parent showcase instance ileride tek gövde renk override'ı taşıyacaktır. |
+| 4 | Oluşturma | PARENT-OWNED | Ayrı leaf project factory yok. Ortak üst/alt board parent `wall_showcase_100_2` ve `wall_showcase_100_3` composition'larında kullanılacaktır. |
 | 5 | Placement | PARENT-OWNED | Leaf board ayrı yerleştirilmez; parent showcase wall placement contract'ını kullanır. |
 | 6 | Move | PARENT-OWNED | Parent showcase module ile birlikte taşınır. |
 | 7 | Rotation | PARENT-OWNED | Parent showcase module behavior contract'ıdır. |
@@ -17,17 +17,17 @@ Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası g�
 | 9 | Selection / drag | PARENT-OWNED | Leaf board ayrı selectable/drag entity değildir. |
 | 10 | Context menu | PARENT-OWNED | Leaf board için ayrı context menu yoktur. |
 | 11 | Delete / duplicate / keyboard | PARENT-OWNED | Parent showcase module üzerinde uygulanır. |
-| 12 | Persistence | PARENT-OWNED | Canonical product metadata snapshot'a kopyalanmaz; parent instance state/override persist edilir. |
+| 12 | Kalıcılık | PARENT-OWNED | Kanonik product metadata snapshot'a kopyalanmaz; parent instance state/override persist edilir. |
 | 13 | Relationships / reflow | PARENT-OWNED | Leaf board ayrı spatial relationship taşımaz; parent showcase continuous-wall ilişkilerine katılır. |
-| 14 | BOM / composition | VAR | Tekil Item; `resolveItemBom()` ile doğrudan canonical BOM satırı üretir. İki parent showcase içindeki quantity/cutover sonraki parent migrationında tanımlanacaktır. |
-| 15 | Renderer / asset / override boundary | PARENT-OWNED / ENTEGRASYON BEKLİYOR | Ayrı leaf renderer yok. Mevcut procedural showcase renderer üst/alt gövdeyi parent seviyesinde çizer. Canonical board ölçü/defaultColor tüketimi parent showcase migrationında bağlanacaktır. |
+| 14 | BOM / composition | VAR | Tekil Item; `resolveItemBom()` ile doğrudan kanonik BOM satırı üretir. İki parent showcase içindeki quantity/cutover sonraki parent migrationında tanımlanacaktır. |
+| 15 | Renderer / asset / override boundary | PARENT-OWNED / ENTEGRASYON BEKLİYOR | Ayrı leaf renderer yok. Mevcut procedural showcase renderer üst/alt gövdeyi parent seviyesinde çizer. Kanonik board ölçü/defaultColor tüketimi parent showcase migrationında bağlanacaktır. |
 | 16 | Runtime owners | VAR | Product: `productionParts.js`; direct BOM: `itemBom.js`; parent state: `designState.js`; parent behavior/placement: shared module runtime; parent renderer: `scene3d.js`. |
 | 17 | Regression | VAR | `test/showcaseBodyBoardsItemContract.test.js`, `test/boardMaterialItemContract.test.js` + full suite/E2E. |
 | 18 | Open decisions / completion | LEAF KAPALI / PARENT ENTEGRASYON BEKLİYOR | Ürün property kararı kapalıdır. Bireysel renk edit'i bilinçli olarak yoktur. Parent recipe, renderer consumption ve tek gövde renk override'ı `wall_showcase_100_2` / `wall_showcase_100_3` migrationında tamamlanacaktır. |
 
-## Canonical cutover
+## Kanonik cutover
 
-`showcase_horizontal_87_4_30` yeni canonical physical Item olarak tanımlandı. Ölçü, sunta material ve beyaz default artık `PRODUCTION_PARTS` kaydında tek ürün gerçeğidir.
+`showcase_horizontal_87_4_30` yeni kanonik physical Item olarak tanımlandı. Ölçü, sunta material ve beyaz default artık `PRODUCTION_PARTS` kaydında tek ürün gerçeğidir.
 
 Bu Item iki vitrinde de üst ve alt yatay sunta olarak ortak kullanılacaktır ve bireysel renk-editable değildir. Showcase gövdesine kullanıcı rengi verildiğinde gelecekte parent showcase instance tek bir gövde renk override'ı taşıyacak; override iki yan ve iki yatay suntaya birlikte uygulanacak, `glass_shelf` etkilenmeyecektir.
 

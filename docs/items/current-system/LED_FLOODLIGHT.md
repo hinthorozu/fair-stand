@@ -1,4 +1,4 @@
-> Migration öncesi envanterdir; aktif canonical tanım `../definitions/led_floodlight.md` içindedir. Eski katalog anahtarı `LED_FLOODLIGHT` idi.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/led_floodlight.md` içindedir. Eski katalog anahtarı `LED_FLOODLIGHT` idi.
 
 # LED_FLOODLIGHT — Mevcut Sistem Profili
 
@@ -8,32 +8,32 @@ Bu belge `LED_FLOODLIGHT` için `Version2` runtime kodunda bulunan state, top-pl
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `LED_FLOODLIGHT` |
-| Label | `LED Projektör` |
+| Katalog anahtarı | `LED_FLOODLIGHT` |
+| Etiket | `LED Projektör` |
 | Type | `led-floodlight` |
-| Width | `50 cm` |
-| Depth | `20 cm` |
-| Height | `35 cm` |
+| Genişlik | `50 cm` |
+| Derinlik | `20 cm` |
+| Yükseklik | `35 cm` |
 | Mount/top height | `350 cm` |
 
 State `surface.color = #17191c` taşır.
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `top-light` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `state-backed` |
 | Image | `none` |
-| Renderer policy | `procedural` |
+| Renderer politikası | `procedural` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `decision-required` |
-| BOM source | `None` |
+| Bileşim | `standalone` |
+| BOM kipi | `decision-required` |
+| BOM kaynağı | `None` |
 
-## Behavior / placement
+## Davranış / yerleşim
 
 | Alan | Kod değeri |
 |---|---|
@@ -88,7 +88,7 @@ Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kayd
 
 `Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `LED_FLOODLIGHT` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 
@@ -114,7 +114,7 @@ bom.source = None
 
 `moduleContracts.js` içindeki mevcut reason:
 
-> Existing module has no canonical BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
+> Existing module has no kanonik BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
 
 Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 

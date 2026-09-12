@@ -55,7 +55,7 @@ for (const itemKey of keys) {
     page.on('pageerror', (error) => errors.push(error.message));
     await createBackWallStand(page, itemKey);
 
-    // Automatic back wall fills the run; free capacity before catalog add.
+    // Otomatik sırt duvarı dolu; katalog eklemeden önce kapasite aç.
     const initialProject = await saveAndReadProject(page);
     expect(initialProject).not.toBeNull();
     expect(initialProject.modules.length).toBeGreaterThan(0);

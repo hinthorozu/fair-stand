@@ -1,19 +1,19 @@
-# A02 F-008 closure
+# A02 F-008 kapanışı
 
-Finding: **F-008 — targeted regression declaration can be empty; test impact not machine-required**
+Bulgu: **F-008 — Hedefli regresyon bildirimi boş kalabilir; test etkisi makine zorunlu değil**
 
-Status: **CLOSED pending post-merge ROG verification**
+Durum: **CLOSED, birleştirme sonrası ROG doğrulaması bekleniyor**
 
-Remediation:
-- every change contract must mark `impact.tests` as `affected`.
-- `tests.targeted` must contain at least one non-empty targeted regression path.
-- existing `tests.fullSuite = true` and `tests.build = true` requirements remain mandatory.
-- negative regressions reject `tests: not-applicable`, an empty targeted list, and blank targeted entries.
+Düzeltme:
+- her change contract `impact.tests` alanını `affected` olarak işaretlemelidir.
+- `tests.targeted` en az bir boş olmayan hedefli regresyon yolu içermelidir.
+- mevcut `tests.fullSuite = true` ve `tests.build = true` gereksinimleri zorunlu kalır.
+- negatif regresyonlar `tests: not-applicable`, boş hedefli liste ve boş hedefli girişleri reddeder.
 
-Targeted regression:
+Hedefli regresyon:
 - `test/systemChangeGate.test.js`
 
-Validation:
-- implementation PR CI run #122: Change contract gate, install, full test, and build all passed.
-- final branch CI after closure-ledger updates must pass before merge.
-- post-merge ROG CI must pass before F-009 begins.
+Doğrulama:
+- uygulama PR CI çalıştırması #122: Change contract gate, install, full test ve build passed.
+- birleştirmeden önce kapanış-defteri güncellemelerinden sonra son dal CI geçmelidir.
+- F-009 başlamadan önce birleştirme sonrası ROG CI geçmelidir.

@@ -1,39 +1,39 @@
-# A00 Audit Baseline Evidence
+# A00 Denetim Taban Çizgisi Kanıtı
 
-Audit section: `A00 — Audit bootstrap / baseline`
-Audit date: `2026-09-03`
-Baseline branch: `ROG`
-Baseline SHA: `6a702b000ffb3f9977f6e0853e23e840285eb60e`
-Baseline tree SHA: `678de4daa0250dfc9c8f7fc0a80252e0c02fe4a7`
-Audit working branch: `audit/full-system-a00`
+Denetim bölümü: `A00 — Audit bootstrap / baseline`
+Denetim tarihi: `2026-09-03`
+Taban dalı: `ROG`
+Taban SHA: `6a702b000ffb3f9977f6e0853e23e840285eb60e`
+Taban ağaç SHA: `678de4daa0250dfc9c8f7fc0a80252e0c02fe4a7`
+Denetim çalışma dalı: `audit/full-system-a00`
 
-## A00.01 — Frozen baseline
+## A00.01 — Dondurulmuş taban çizgisi
 
-GitHub `ROG` resolved to commit `6a702b000ffb3f9977f6e0853e23e840285eb60e`. The audit baseline is frozen to that commit. Audit conclusions must state the SHA they were checked against.
+GitHub `ROG` dalı `6a702b000ffb3f9977f6e0853e23e840285eb60e` commit'ine çözüldü. Denetim taban çizgisi bu commit'e dondurulmuştur. Denetim sonuçları, kendilerinin kontrol edildiği SHA'yı belirtmelidir.
 
-## A00.02 — Fresh audit branch
+## A00.02 — Taze denetim dalı
 
-`audit/full-system-a00` was created from current `ROG` after resolving the baseline SHA above. No prior audit conclusion is imported from an older branch.
+`audit/full-system-a00`, yukarıdaki taban SHA çözüldükten sonra mevcut `ROG` üzerinden oluşturuldu. Eski bir daldan önceki denetim sonucu aktarılmadı.
 
-## A00.03 — Baseline CI
+## A00.03 — Taban CI
 
-Canonical ROG push CI:
+Kanonik ROG push CI:
 
-- workflow: `CI`
-- run number: `74`
-- run id: `33786201978`
+- iş akışı: `CI`
+- çalıştırma numarası: `74`
+- çalıştırma kimliği: `33786201978`
 - head SHA: `6a702b000ffb3f9977f6e0853e23e840285eb60e`
-- result: `success`
+- sonuç: `success`
 
-The workflow order at baseline is: checkout with `fetch-depth: 0` → Node 22 → change-contract gate → `npm ci` → `npm test` → `npm run build`.
+Taban çizgisindeki iş akışı sırası: `fetch-depth: 0` ile checkout → Node 22 → change-contract kapısı → `npm ci` → `npm test` → `npm run build`.
 
-## A00.04 — Repository snapshot
+## A00.04 — Depo anlık görüntüsü
 
-The baseline recursive Git tree is pinned by tree SHA `678de4daa0250dfc9c8f7fc0a80252e0c02fe4a7`.
+Özyinelemeli Git taban ağacı, ağaç SHA `678de4daa0250dfc9c8f7fc0a80252e0c02fe4a7` ile sabitlenmiştir.
 
-The requested audit roots are present and were snapshotted from ROG:
+İstenen denetim kökleri mevcuttur ve ROG'dan anlık görüntü alınmıştır:
 
-- repository root
+- depo kökü
 - `src/`
 - `test/`
 - `tests/`
@@ -41,47 +41,47 @@ The requested audit roots are present and were snapshotted from ROG:
 - `.github/`
 - `public/`
 
-Important bootstrap observations only (not domain conclusions):
+Yalnızca önemli bootstrap gözlemleri (alan sonuçları değil):
 
-- both `test/` and `tests/` exist;
-- `.github/change-contract.json` and `.github/workflows/ci.yml` exist;
-- `scripts/verify-change-contract.mjs` exists alongside historical/operational scripts;
-- `public/` contains deployable static assets and models.
+- hem `test/` hem `tests/` vardır;
+- `.github/change-contract.json` ve `.github/workflows/ci.yml` vardır;
+- `scripts/verify-change-contract.mjs`, geçmiş/operasyonel betiklerin yanında vardır;
+- `public/` dağıtılabilir statik varlıklar ve modeller içerir.
 
-Classification of those contents belongs to later audit sections; nothing here certifies them as correct or current.
+Bu içeriklerin sınıflandırılması sonraki denetim bölümlerine aittir; burası bunların doğru veya güncel olduğunu belgelemez.
 
-## A00.05 — Package/build snapshot
+## A00.05 — Paket/derleme anlık görüntüsü
 
-`package.json` at baseline:
+Taban çizgisindeki `package.json`:
 
-- package version: `0.1.0`
-- module mode: ESM (`type: module`)
-- scripts:
+- paket sürümü: `0.1.0`
+- modül kipi: ESM (`type: module`)
+- betikler:
   - `dev`: `vite`
   - `contract:verify`: `node scripts/verify-change-contract.mjs`
   - `test`: `node --test`
   - `build`: `vite build`
   - `preview`: `vite preview`
-- runtime dependencies:
+- çalışma zamanı bağımlılıkları:
   - `jszip`: `^3.10.1`
   - `three`: `^0.184.0`
-- dev dependency:
+- geliştirme bağımlılığı:
   - `vite`: `^8.0.16`
-- lockfile version: `3`
-- CI Node major: `22`
+- kilit dosyası sürümü: `3`
+- CI Node ana sürümü: `22`
 
-Exact lockfile state is pinned by blob SHA `f151efd6222152f326718e9fd23bec2b2b2ef768`.
+Tam kilit dosyası durumu, blob SHA `f151efd6222152f326718e9fd23bec2b2b2ef768` ile sabitlenmiştir.
 
-## A00.06 — Historical conclusion isolation
+## A00.06 — Tarihsel sonuç yalıtımı
 
-Bootstrap policy: historical documents, old reviews, old milestones, cleanup notes, previous assistant statements and prior audit conclusions are evidence candidates only. They do not become current audit conclusions unless re-verified against the frozen/current SHA in their relevant section.
+Bootstrap politikası: tarihsel belgeler, eski incelemeler, eski kilometre taşları, temizlik notları, önceki asistan ifadeleri ve önceki denetim sonuçları yalnızca kanıt adayıdır. İlgili bölümde dondurulmuş/güncel SHA'ya karşı yeniden doğrulanmadıkça mevcut denetim sonucu olmazlar.
 
-This specifically prevents bootstrap from inheriting stale conclusions before `A01` and later domain audits execute.
+Bu, özellikle bootstrap'ın `A01` ve sonraki alan denetimleri çalışmadan önce bayat sonuçları devralmasını önler.
 
-## A00.07 — Findings index readiness
+## A00.07 — Bulgular dizini hazırlığı
 
-`SYSTEM_AUDIT_CHECKLIST.md` already contains the canonical Findings Index and finding record format (`F-XXX`, severity, domain, evidence, impact, decision, fix PR, retest). No finding was created during A00 because bootstrap established references only.
+`SYSTEM_AUDIT_CHECKLIST.md` zaten kanonik Bulgular Dizini ve bulgu kayıt biçimini (`F-XXX`, severity, domain, evidence, impact, decision, fix PR, retest) içerir. A00 sırasında bulgu oluşturulmadı çünkü bootstrap yalnızca referansları kurdu.
 
-## A00 result
+## A00 sonucu
 
-`A00` is complete with no finding. Next strict item: `A01.01`.
+`A00` bulgusuz tamamlandı. Sonraki katı madde: `A01.01`.

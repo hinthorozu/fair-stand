@@ -1,6 +1,6 @@
 # panel_197 — Item Contract Definition
 
-## Canonical Item
+## Kanonik Item
 
 - `itemKey`: `panel_197`
 - `type`: `panel`
@@ -9,16 +9,16 @@
 - `material`: `sunta`
 - `panelRole`: `straight`
 - `nominalModuleWidthCm`: `200`
-- `defaultColor`: ürün default'u doğrulanmadığı için tanımlı değil; editor `#ffffff` değeri override/default-surface katmanıdır.
+- `defaultColor`: ürün default'u doğrulanmadığı için tanımlı değil; editor `#ffffff` değeri ezme/default-surface katmanıdır.
 
-## Ownership
+## Sahiplik
 
-Intrinsic ürün gerçeğinin source-of-truth'u `PRODUCTION_PARTS.panel_197` kaydıdır. State, placement, move, rotation, snap, collision, selection, context-menu, delete/duplicate ve persistence parent module/type tarafından uygulanır. Renderer specialized override yapabilir ancak `material` dahil product source-of-truth'u değiştirmez.
+Intrinsic ürün gerçeğinin tek kaynağı `PRODUCTION_PARTS.panel_197` kaydıdır. State, yerleşim, move, rotation, snap, collision, selection, context-menu, delete/duplicate ve kalıcılık parent module/type tarafından uygulanır. Renderer specialized ezme yapabilir ancak `material` dahil product tek kaynağı değiştirmez.
 
-## BOM / relationship
+## BOM / ilişki
 
-Tekil Item'dır; quantity parent recipe sahibidir. Inner-corner konfigürasyonunda matching straight panel quantity'si 1:1 canonical corner Item'a aktarılabilir.
+Tekil Item'dır; quantity parent recipe sahibidir. Inner-corner konfigürasyonunda matching straight panel quantity'si 1:1 kanonik corner Item'a aktarılabilir.
 
-## Regression
+## Regresyon
 
 Mevcut panel contract testleri + `test/boardMaterialItemContract.test.js`.

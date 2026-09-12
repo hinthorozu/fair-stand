@@ -1,4 +1,4 @@
-> Migration öncesi envanterdir; aktif canonical tanım `../definitions/furniture_table_chair_set_eames.md` içindedir.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/furniture_table_chair_set_eames.md` içindedir.
 
 # furniture_table_chair_set_eames — Mevcut Sistem Profili
 
@@ -8,15 +8,15 @@ Bu belge `furniture_table_chair_set_eames` için `Version2` runtime kodunda bulu
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `furniture_table_chair_set_eames` |
-| Label | `Eames Masa Sandalye Takımı` |
+| Katalog anahtarı | `furniture_table_chair_set_eames` |
+| Etiket | `Eames Masa Sandalye Takımı` |
 | Type | `table-chair-set-eames` |
-| Width | `150 cm` |
-| Depth | `150 cm` |
-| Height | `82 cm` |
-| Model file | `None` |
+| Genişlik | `150 cm` |
+| Derinlik | `150 cm` |
+| Yükseklik | `82 cm` |
+| Model dosyası | `None` |
 
-Default runtime state:
+Varsayılan runtime state:
 
 ```text
 {
@@ -34,22 +34,22 @@ Default runtime state:
 }
 ```
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `free-model-color` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `editable` |
 | Image | `none` |
-| Renderer policy | `model` |
+| Renderer politikası | `model` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `decision-required` |
-| BOM source | `None` |
+| Bileşim | `standalone` |
+| BOM kipi | `decision-required` |
+| BOM kaynağı | `None` |
 
-## Behavior / placement
+## Davranış / yerleşim
 
 | Alan | Kod değeri |
 |---|---|
@@ -102,7 +102,7 @@ Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kayd
 
 `Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `furniture_table_chair_set_eames` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 
@@ -128,7 +128,7 @@ bom.source = None
 
 `moduleContracts.js` içindeki mevcut reason:
 
-> Existing module has no canonical BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
+> Existing module has no kanonik BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
 
 Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 

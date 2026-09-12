@@ -1,45 +1,45 @@
-# A00 Remediation Closure
+# A00 Düzeltme Kapanışı
 
-Section: `A00 — Audit bootstrap / baseline`
-Remediation date: `2026-09-03`
-Remediation branch: `remediation/a00-closure`
-Starting ROG SHA: `392e839804e5b0379186af8b950117154b20c195`
+Bölüm: `A00 — Audit bootstrap / baseline`
+Düzeltme tarihi: `2026-09-03`
+Düzeltme dalı: `remediation/a00-closure`
+Başlangıç ROG SHA: `392e839804e5b0379186af8b950117154b20c195`
 
-## Result
+## Sonuç
 
-**CLOSED — NO FIX REQUIRED**
+**CLOSED — DÜZELTME GEREKMİYOR**
 
-A00 is a bootstrap/baseline section. It created no `F-xxx` finding and did not identify a runtime, product, documentation, governance or test defect requiring remediation.
+A00 bir bootstrap/baseline bölümüdür. Hiçbir `F-xxx` bulgusu üretmedi ve düzeltme gerektiren bir runtime, ürün, dokümantasyon, yönetişim veya test kusuru tespit etmedi.
 
-The original A00 evidence remains intentionally frozen at its historical audit baseline SHA `6a702b000ffb3f9977f6e0853e23e840285eb60e`. That evidence is not rewritten to the current ROG head because changing a frozen baseline would destroy audit provenance.
+Orijinal A00 kanıtı, tarihsel denetim baseline SHA'sı `6a702b000ffb3f9977f6e0853e23e840285eb60e` üzerinde kasıtlı olarak dondurulmuş halde durur. Bu kanıt güncel ROG head'e yeniden yazılmaz; dondurulmuş bir baseline'ı değiştirmek denetim kökenini yok eder.
 
-## Revalidation
+## Yeniden doğrulama
 
-A00.01–A00.07 were rechecked for remediation readiness:
+A00.01–A00.07 düzeltmeye hazırlık açısından yeniden kontrol edildi:
 
-- A00.01 frozen baseline exists and is immutable evidence — OK.
-- A00.02 audit branch provenance is recorded — OK.
-- A00.03 baseline CI evidence is recorded — OK.
-- A00.04 repository snapshot/tree SHA is recorded — OK.
-- A00.05 package/build snapshot is recorded — OK.
-- A00.06 historical conclusions are explicitly isolated — OK.
-- A00.07 finding protocol/index readiness was established — OK.
+- A00.01 dondurulmuş baseline mevcuttur ve değiştirilemez kanıttır — OK.
+- A00.02 denetim dalı kökeni kaydedilmiştir — OK.
+- A00.03 baseline CI kanıtı kaydedilmiştir — OK.
+- A00.04 depo anlık görüntüsü/ağaç SHA kaydedilmiştir — OK.
+- A00.05 paket/derleme anlık görüntüsü kaydedilmiştir — OK.
+- A00.06 tarihsel sonuçlar açıkça izole edilmiştir — OK.
+- A00.07 bulgu protokolü/dizin hazırlığı kurulmuştur — OK.
 
-No A00-originated finding exists in `audit/FINDINGS.md`, so there is no finding status to change or retest as fixed.
+`audit/FINDINGS.md` içinde A00 kaynaklı bir bulgu yoktur; bu yüzden değiştirilecek veya düzeltilmiş olarak yeniden test edilecek bir bulgu durumu yoktur.
 
-## Current infrastructure sanity check
+## Mevcut altyapı sağlık kontrolü
 
-The remediation started from current ROG `392e839804e5b0379186af8b950117154b20c195`, which already had successful post-audit CI run #85 / `33797480406` with:
+Düzeltme, o sırada başarılı post-audit CI çalıştırması #85 / `33797480406` bulunan güncel ROG `392e839804e5b0379186af8b950117154b20c195` üzerinden başladı:
 
 - change contract gate — success
 - `npm ci` — success
 - `npm test` — success
 - `npm run build` — success
 
-## Scope control
+## Kapsam kontrolü
 
-No runtime/product source was changed for A00. No A01+ finding was pulled forward into this section.
+A00 için hiçbir runtime/ürün kaynağı değiştirilmedi. Hiçbir A01+ bulgusu bu bölüme öne çekilmedi.
 
-## Next
+## Sonraki
 
-Next remediation section: `A01 — Canonical docs + source-of-truth`, findings `F-001` through `F-004`.
+Sonraki düzeltme bölümü: `A01 — Canonical docs + source-of-truth`, bulgular `F-001` ile `F-004`.

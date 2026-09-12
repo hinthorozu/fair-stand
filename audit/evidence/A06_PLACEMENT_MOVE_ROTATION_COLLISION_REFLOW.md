@@ -1,112 +1,112 @@
-# A06 — Placement / move / rotation / collision / reflow audit
+# A06 — Yerleştirme / taşıma / döndürme / çarpışma / reflow denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Core sources inspected
+## İncelenen çekirdek kaynaklar
 
 - `src/modulePlacement.js`
 - `src/moduleMove.js`
 - `src/wallReflow.js`
 - `src/cornerPlacement.js`
-- placement/move/reflow tests
-- scene drag/drop integration paths
+- yerleştirme/taşıma/reflow testleri
+- sahne sürükle/bırak entegrasyon yolları
 
-## Checklist results
+## Kontrol listesi sonuçları
 
-### A06.01 — coordinate convention
+### A06.01 — koordinat kuralı
 
-Placement state consistently stores `xCm`, `yCm`, `zCm`, `rotationZDeg`, `wallId`. X/Y are plan-ground coordinates and Z is vertical offset. Renderer converts plan Y into Three.js world Z while keeping vertical height in Three.js Y, which is an implementation transform rather than a persisted-coordinate violation.
+Yerleştirme durumu tutarlı olarak `xCm`, `yCm`, `zCm`, `rotationZDeg`, `wallId` saklar. X/Y plan-zemin koordinatlarıdır ve Z dikey ofsettir. Renderer, plan Y'yi Three.js dünya Z'sine dönüştürürken dikey yüksekliği Three.js Y'de tutar; bu, kalıcı-koordinat ihlali değil bir uygulama dönüşümüdür.
 
-**Status:** `AUDITED_OK`.
+**Durum:** `AUDITED_OK`.
 
-### A06.02 — new placement infrastructure
+### A06.02 — yeni yerleştirme altyapısı
 
-Catalog drag/drop and context insertion route through `snapPlacementToStand`, `validatePlacementAgainstModules`, continuous wall insertion or free-side insertion. Automatic wall/depot programmatic paths generate placements through their own planners but preserve the same persisted placement schema.
+Katalog sürükle/bırak ve bağlam ekleme `snapPlacementToStand`, `validatePlacementAgainstModules`, sürekli duvar ekleme veya serbest-yan ekleme üzerinden geçer. Otomatik duvar/depo programatik yolları kendi planlayıcılarıyla yerleştirme üretir ancak aynı kalıcı yerleştirme şemasını korur.
 
-Hidden module-specific selection of special algorithms remains root finding F-011.
+Özel algoritmaların gizli modüle özel seçimi kök bulgu F-011 olarak kalır.
 
-**Status:** `GAP` by F-011.
+**Durum:** F-011 ile `GAP`.
 
-### A06.03 — drag vs programmatic constraints
+### A06.03 — sürükleme vs programatik kısıtlar
 
-Drag preview validates before final drop; final drop reuses preview result. Context/catalog insertion uses placement planners before mutating `currentModules`. Programmatic automatic composition has separate planner contracts and is audited in A11.
+Sürükleme önizlemesi son bırakmadan önce doğrular; son bırakma önizleme sonucunu yeniden kullanır. Bağlam/katalog ekleme, `currentModules` değiştirmeden önce yerleştirme planlayıcılarını kullanır. Programatik otomatik bileşim ayrı planlayıcı sözleşmelerine sahiptir ve A11'de denetlenir.
 
-No direct evidence was found of a current drag path committing a placement that preview rejected.
+Önizlemenin reddettiği bir yerleştirmeyi işleyen güncel bir sürükleme yolunun doğrudan kanıtı bulunmadı.
 
-**Status:** `AUDITED_OK` for current drag/final equivalence; A11 owns composition parity.
+**Durum:** güncel sürükleme/son eşdeğerlik için `AUDITED_OK`; A11 bileşim denkliğini sahiplenir.
 
-### A06.04 — move invariants
+### A06.04 — taşıma değişmezleri
 
-`planContinuousModuleMove()` removes the moving module, validates desired placement, and either commits direct placement or reflows through `planContinuousWallInsertion`. Free movement validation is done by placement core in scene interaction.
+`planContinuousModuleMove()` taşınan modülü kaldırır, istenen yerleştirmeyi doğrular ve ya doğrudan yerleştirmeyi işler ya da `planContinuousWallInsertion` üzerinden reflow eder. Serbest hareket doğrulaması sahne etkileşiminde yerleştirme çekirdeği tarafından yapılır.
 
-**Status:** `AUDITED_OK` for current core, with special-type policy fragmentation under F-011.
+**Durum:** güncel çekirdek için `AUDITED_OK`; özel-tip politika parçalanması F-011 altında.
 
-### A06.05 — rotation invariants
+### A06.05 — döndürme değişmezleri
 
-Rotation helpers normalize to 45° increments and preserve module center. Behavior supplies requested rotation step. Placement tests cover 45° straight counters, cardinal walls, center-preserving rotation and right-wall facing.
+Döndürme yardımcıları 45° artışlara normalize eder ve modül merkezini korur. Davranış istenen döndürme adımını sağlar. Yerleştirme testleri 45° düz bankoları, kardinal duvarları, merkez-koruyan döndürmeyi ve sağ-duvar bakışını kapsar.
 
-**Status:** `AUDITED_OK` for active path.
+**Durum:** aktif yol için `AUDITED_OK`.
 
-### A06.06 — collision preview/final
+### A06.06 — çarpışma önizleme/son
 
-The drag result contains the validated plan/placements used by drop; continuous insertion/move and free validation share `validatePlacementAgainstModules`.
+Sürükleme sonucu, bırakmanın kullandığı doğrulanmış plan/yerleştirmeleri içerir; sürekli ekleme/taşıma ve serbest doğrulama `validatePlacementAgainstModules` paylaşır.
 
-**Status:** `AUDITED_OK`, while special collision/endpoint rules remain F-011.
+**Durum:** `AUDITED_OK`; özel çarpışma/uç nokta kuralları F-011 olarak kalır.
 
-### A06.07 — wall capacity
+### A06.07 — duvar kapasitesi
 
-Continuous wall capacity comes from `getContinuousWallSegments/Capacity`; stage composition has a feature-specific capacity helper. No contradictory active runtime capacity result was found at this stage; A11/A23 cross-checks feature composition against placement capacity.
+Sürekli duvar kapasitesi `getContinuousWallSegments/Capacity` gelir; sahne bileşiminin özellik-özel bir kapasite yardımcısı vardır. Bu aşamada çelişen aktif çalışma zamanı kapasite sonucu bulunmadı; A11/A23 özellik bileşimini yerleştirme kapasitesine karşı çapraz kontrol eder.
 
-**Status:** `AUDITED_OK` provisionally, cross-domain retest A23.
+**Durum:** geçici `AUDITED_OK`, çapraz-alan yeniden test A23.
 
-### A06.08 / A06.09 — deletion gaps and reflow scope
+### A06.08 / A06.09 — silme boşlukları ve reflow kapsamı
 
-Deletion in main removes only the selected module and rebuilds the scene; it does not invoke compact/reflow. Reflow planners only shift the collision chain needed for an insertion/move and keep unaffected modules in place. Existing wall-reflow tests cover forward/backward/local chain behavior.
+Main'de silme yalnızca seçili modülü kaldırır ve sahneyi yeniden kurar; compact/reflow çağırmaz. Reflow planlayıcıları yalnızca bir ekleme/taşıma için gereken çarpışma zincirini kaydırır ve etkilenmeyen modülleri yerinde tutar. Mevcut duvar-reflow testleri ileri/geri/yerel zincir davranışını kapsar.
 
-**Status:** `AUDITED_OK`.
+**Durum:** `AUDITED_OK`.
 
-### A06.10 — corner placement
+### A06.10 — köşe yerleştirme
 
-### F-016 — P2 — stale/conflicting right-wall orientation in `cornerPlacement.js`
+### F-016 — P2 — `cornerPlacement.js` içinde bayat/çelişen sağ-duvar yönelimi
 
-The active canonical placement snap test states that the right wall faces inward at **270°**, and `wallReflow.js:createPlacement()` also creates right-wall placements at 270°.
+Aktif kanonik yerleştirme snap testi, sağ duvarın **270°** içe baktığını belirtir ve `wallReflow.js:createPlacement()` de sağ-duvar yerleştirmelerini 270°'de oluşturur.
 
-`cornerPlacement.js:createWallPlacement()` creates both left and right side-wall placements at **90°**. Its own regression test explicitly expects right-wall corner wrap at 90°.
+`cornerPlacement.js:createWallPlacement()` hem sol hem sağ yan-duvar yerleştirmelerini **90°**'de oluşturur. Kendi regresyon testi açıkça sağ-duvar köşe sarmasını 90° bekler.
 
-Therefore the repository contains two contradictory implementations/tests for the same right-wall orientation rule. Current main flow appears to use wall reflow rather than this helper; A22 will determine whether `cornerPlacement.js` is orphaned/dead. Regardless, it is a conflicting implementation that can mislead future development.
+Bu nedenle depo, aynı sağ-duvar yönelim kuralı için iki çelişen uygulama/test içerir. Güncel ana akış bu yardımcı yerine duvar reflow kullanıyor görünür; A22 `cornerPlacement.js`'nin yetim/ölü olup olmadığını belirleyecektir. Yine de gelecekteki geliştirmeyi yanıltabilecek çelişen bir uygulamadır.
 
-**Status:** `GAP` — F-016.
+**Durum:** `GAP` — F-016.
 
-### A06.11 — free object bounds
+### A06.11 — serbest nesne sınırları
 
-For free modules with meaningful depth, placement uses rotated half-extents; for structural thin segments it validates segment bounds. Current tests cover free-grid placement, strict furniture bounds, magnetic connections and rotations.
+Anlamlı derinliği olan serbest modüller için yerleştirme döndürülmüş yarı-uzanımlar kullanır; yapısal ince segmentler için segment sınırlarını doğrular. Güncel testler serbest-ızgara yerleştirme, katı mobilya sınırları, manyetik bağlantılar ve döndürmeleri kapsar.
 
-**Status:** `AUDITED_OK` for current rules.
+**Durum:** güncel kurallar için `AUDITED_OK`.
 
-### A06.12 — wall-overlay relation
+### A06.12 — wall-overlay ilişkisi
 
-TV/illuminated-foam placements persist `wallId`, plan coordinates, rotation and `zCm`; load rebuild reads those values. Special wall-overlay/free-support behavior is not fully declarative and is captured by F-011. Persistence round-trip details are audited in A08/A09.
+TV/illuminated-foam yerleştirmeleri `wallId`, plan koordinatları, döndürme ve `zCm` kalıcılaştırır; yükleme yeniden kurulum bu değerleri okur. Özel wall-overlay/free-support davranışı tam bildirimsel değildir ve F-011 ile yakalanır. Kalıcılık gidiş-dönüş ayrıntıları A08/A09'da denetlenir.
 
-**Status:** `GAP` by F-011 pending persistence cross-check.
+**Durum:** kalıcılık çapraz kontrolü bekleyen F-011 ile `GAP`.
 
-### A06.13 — numeric invalid transforms
+### A06.13 — sayısal geçersiz dönüşümler
 
-Core placement rejects non-finite/invalid width and stand sizes. State factories constrain current catalog dimensions. `createModulePlacement()` normalizes non-numeric placement fields to zero, which is permissive but does not itself create NaN transforms. Import trust-boundary validation is audited later in A14/A15.
+Çekirdek yerleştirme sonlu-olmayan/geçersiz genişlik ve stand boyutlarını reddeder. Durum fabrikaları güncel katalog ölçülerini kısıtlar. `createModulePlacement()` sayısal-olmayan yerleştirme alanlarını sıfıra normalize eder; bu hoşgörülüdür ancak kendi başına NaN dönüşümler yaratmaz. İçe aktarma güven-sınırı doğrulaması sonra A14/A15'te denetlenir.
 
-**Status:** `AUDITED_OK` for internally-created state; external/import data deferred.
+**Durum:** içerde oluşturulan durum için `AUDITED_OK`; dış/içe aktarma verisi ertelendi.
 
-### A06.14 — deterministic failure reasons
+### A06.14 — belirleyici başarısızlık nedenleri
 
-Placement, move and reflow planners return `{ok:false,message}` with explicit failure causes; UI surfaces those messages.
+Yerleştirme, taşıma ve reflow planlayıcıları açık başarısızlık nedenleriyle `{ok:false,message}` döner; UI bu mesajları gösterir.
 
-**Status:** `AUDITED_OK`.
+**Durum:** `AUDITED_OK`.
 
-## Section conclusion
+## Bölüm sonucu
 
-- New finding: F-016 P2.
-- Root finding reused: F-011 P1.
-- No fixes performed.
+- Yeni bulgu: F-016 P2.
+- Yeniden kullanılan kök bulgu: F-011 P1.
+- Düzeltme yapılmadı.
 
-Section audit status: **GAP**.
-Next audit section: **A07 — State model + factories**.
+Bölüm denetim durumu: **GAP**.
+Sonraki denetim bölümü: **A07 — Durum modeli + fabrikalar**.

@@ -72,7 +72,7 @@ test('wall showcase renderer does not add non-BOM white front-detail meshes', ()
   assert.doesNotMatch(showcase, /shelfFrontGeometry/);
   assert.doesNotMatch(showcase, /const shelfFront =/);
 
-  // Canonical physical geometry must remain present.
+  // Kanonik fiziksel geometri duruyor olmalı.
   assert.match(showcase, /sidePanelGeometry/);
   assert.match(showcase, /capGeometry/);
   assert.match(showcase, /const shelfGeometry = new THREE\.BoxGeometry/);

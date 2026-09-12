@@ -1,53 +1,53 @@
-# A21 F-041 closure
+# A21 F-041 kapanışı
 
-Finding: **F-041 — ROG unprotected; green CI/change gate not enforced before merge/direct push**
+Bulgu: **F-041 — ROG korumasız; yeşil CI/change-gate merge/doğrudan push öncesi zorunlu değil**
 
-Status: **CLOSED / REPOSITORY RULESET VERIFIED**
+Durum: **CLOSED / REPOSITORY RULESET VERIFIED**
 
-## Root cause
+## Kök neden
 
-At the audit baseline, the canonical `ROG` branch did not have an enforced repository rule requiring pull-request flow and green canonical CI before changes could land. That allowed governance to depend on convention instead of an enforced server-side branch rule.
+Denetim baseline'ında kanonik `ROG` dalının, değişikliklerin inmesi için pull-request akışı ve yeşil kanonik CI zorunlu kılan uygulanmış bir depo kuralı yoktu. Bu, yönetişimin sunucu tarafı dal kuralı yerine teamüle dayanmasına izin veriyordu.
 
-## Remediation
+## Düzeltme
 
-GitHub repository ruleset **`Protect ROG`** (ruleset id `22234684`) is now active and targets exactly `refs/heads/ROG`.
+GitHub depo ruleset **`Protect ROG`** (ruleset id `22234684`) artık aktiftir ve tam olarak `refs/heads/ROG` hedefini alır.
 
-The live ruleset enforces:
+Canlı ruleset şunları zorunlu kılar:
 
-- pull requests before changes can land on `ROG`,
-- required status check `verify`,
-- strict required-status-check policy,
-- branch deletion prevention,
-- non-fast-forward update prevention,
-- no bypass actors; current user bypass is `never`.
+- değişikliklerin `ROG`'a inmesi için pull request,
+- zorunlu durum kontrolü `verify`,
+- katı zorunlu-durum-kontrolü politikası,
+- dal silme engeli,
+- fast-forward olmayan güncelleme engeli,
+- bypass aktörü yok; güncel kullanıcı bypass'ı `never`.
 
-The repository branch API also reports `ROG` as protected. Protection is implemented through the repository ruleset rather than relying on the legacy/classic branch-protection configuration.
+Depo dal API'si de `ROG`'u korumalı olarak bildirir. Koruma, eski/klasik dal-koruma yapılandırmasına dayanmak yerine depo ruleset'i üzerinden uygulanır.
 
-No application runtime, persistence, schema, renderer, placement, Item/BOM, catalog, import/export, build output or deployment behavior is changed by this closure bookkeeping.
+Bu kapanış defter işlemi hiçbir uygulama runtime, kalıcılık, şema, renderer, yerleşim, Item/BOM, katalog, içe/dışa aktarma, derleme çıktısı veya dağıtım davranışını değiştirmez.
 
-## Verification
+## Doğrulama
 
-Live GitHub repository configuration was read directly before closure:
+Canlı GitHub depo yapılandırması kapanıştan önce doğrudan okundu:
 
-- ruleset name: `Protect ROG`,
-- ruleset target: branch,
-- enforcement: `active`,
-- included ref: `refs/heads/ROG`,
-- pull-request rule present,
-- required-status-check rule present,
-- required check: `verify`,
-- strict required-status-check policy: `true`,
-- deletion rule present,
-- non-fast-forward rule present,
-- bypass actors: none,
+- ruleset adı: `Protect ROG`,
+- ruleset hedefi: branch,
+- zorunluluk: `active`,
+- dahil edilen ref: `refs/heads/ROG`,
+- pull-request kuralı mevcut,
+- required-status-check kuralı mevcut,
+- zorunlu kontrol: `verify`,
+- katı zorunlu-durum-kontrolü politikası: `true`,
+- silme kuralı mevcut,
+- non-fast-forward kuralı mevcut,
+- bypass aktörleri: yok,
 - `current_user_can_bypass`: `never`.
 
-The closure PR itself must pass the canonical `verify` CI before merge, providing an additional operational check that the protected-branch workflow remains compatible with the repository's current governance chain.
+Kapanış PR'ının kendisi birleştirmeden önce kanonik `verify` CI'sini geçmelidir; bu, korumalı-dal iş akışının deponun güncel yönetişim zinciriyle uyumlu kaldığına dair ek bir operasyonel kontroldür.
 
-## Result
+## Sonuç
 
-`ROG` is no longer an unprotected branch. GitHub now enforces PR-based integration and the canonical green `verify` check at the branch boundary, while also preventing deletion and non-fast-forward updates without bypass actors.
+`ROG` artık korumasız bir dal değildir. GitHub artık dal sınırında PR tabanlı entegrasyonu ve kanonik yeşil `verify` kontrolünü zorunlu kılar; ayrıca bypass aktörü olmadan silmeyi ve fast-forward olmayan güncellemeleri engeller.
 
-A21 remains a broader `GAP` section because F-043, F-044, F-045 and F-046 are separate open repository-hygiene findings.
+A21, F-043, F-044, F-045 ve F-046 ayrı açık depo-hijyen bulguları olduğu için daha geniş bir `GAP` bölümü olarak kalır.
 
 **F-041 is CLOSED.**

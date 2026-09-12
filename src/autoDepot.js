@@ -84,9 +84,9 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
     const trashBinHeight = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.heightCm);
     const gapCm = 6;
 
-    // xCm is the footprint start edge; yCm is the footprint centerline for 0° free fixtures.
-    // Keep fridge + rack in the first row and the trash bin in a second row so even 100x100
-    // depot contents remain inside the depot and floor fixtures never overlap each other.
+    // xCm 0° serbest ürünlerde oturumun başlangıç kenarı; yCm oturum orta çizgisidir.
+    // Buzdolabı + askılık ilk sırada, çöp kutusu ikinci sırada kalsın; 100x100
+    // depoda bile içerik depo içinde kalsın ve zemin ürünleri üst üste binmesin.
     const upperRowWidth = fridgeWidth + gapCm + rackWidth;
     const upperRowDepth = Math.max(fridgeDepth, rackDepth);
     const packedDepth = upperRowDepth + gapCm + trashBinDepth;

@@ -71,9 +71,9 @@ test('F-010 catalog construction persists a module created through the real pick
     projectName: 'F010 Catalog Module',
   });
 
-  // F-027 changed the old clear-wall control into "Sahneyi Sıfırla". Create
-  // capacity for this construction test through the existing module-delete path
-  // instead of depending on the removed clear-all behavior.
+  // F-027 eski duvar temizleme kontrolünü "Sahneyi Sıfırla" yaptı. Bu inşa
+  // testi kapasiteyi mevcut modül-silme yoluyla açar; kaldırılmış hepsini-temizle
+  // davranışına bağlanmaz.
   const initialProject = await saveAndReadProject(page);
   expect(initialProject).not.toBeNull();
   expect(initialProject.modules.length).toBeGreaterThan(0);

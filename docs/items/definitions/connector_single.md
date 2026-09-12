@@ -1,8 +1,8 @@
 # connector_single — Item Contract Migration
 
-Bu belge `docs/items/current-system/connector_single.md` içindeki migration öncesi kod haritasını Item Contract'a map eder ve uygulanan cutover durumunu kaydeder.
+Bu belge `docs/items/current-system/connector_single.md` içindeki migration öncesi kod haritasını Item Contract'a map eder ve uygulanan geçiş durumunu kaydeder.
 
-## 1. Canonical kimlik
+## 1. Kanonik kimlik
 
 | Alan | Değer |
 |---|---|
@@ -13,14 +13,14 @@ Bu belge `docs/items/current-system/connector_single.md` içindeki migration ön
 | Parametrik | Hayır |
 | `unit` | `adet` |
 | Metadata | `connectorType = single` |
-| Project instance | Uygulanmıyor |
-| Renderer / placement identity | Uygulanmıyor |
+| Proje örneği | Uygulanmıyor |
+| Renderer / yerleşim identity | Uygulanmıyor |
 
 Migration öncesi stabil kimlik `partId = connector_single` idi. Cutover ile aynı ürün kimliği `itemKey` alanına taşındı; paralel ikinci ürün kimliği üretilmedi.
 
 ## 2. Mevcut recipe sahipliği
 
-`connector_single` mevcut çalışan sistemde 27 recipe'nin tamamında sabit miktarlı production kalemidir. Miktarların canonical sahibi `src/moduleRecipes.js` olarak korunmuştur.
+`connector_single` mevcut çalışan sistemde 27 recipe'nin tamamında sabit miktarlı production kalemidir. Miktarların kanonik sahibi `src/moduleRecipes.js` olarak korunmuştur.
 
 Migration miktarları değiştirmez; yalnız recipe kimlik alanını `partId` → `itemKey` olarak taşır.
 
@@ -36,28 +36,28 @@ module recipe
 → quantity + unit=adet + production metadata
 ```
 
-`connector_single` için yeni ilişki veya renderer kaynaklı miktar hesabı eklenmez. Mevcut recipe miktarları source of truth olarak korunur.
+`connector_single` için yeni ilişki veya renderer kaynaklı miktar hesabı eklenmez. Mevcut recipe miktarları tek kaynak olarak korunur.
 
-## 4. State / persistence / renderer
+## 4. State / kalıcılık / renderer
 
-Mevcut sistemde bağımsız `connector_single` project instance/state/persistence/mesh identity bulunmadığı için migration bunları icat etmez.
+Mevcut sistemde bağımsız `connector_single` proje örneği/state/kalıcılık/mesh identity bulunmadığı için migration bunları icat etmez.
 
-## 5. Uygulanan cutover
+## 5. Uygulanan geçiş
 
-- `src/productionParts.js`: canonical `itemKey = connector_single`.
+- `src/productionParts.js`: kanonik `itemKey = connector_single`.
 - `src/moduleRecipes.js`: 27/27 recipe kullanımı `itemKey` oldu.
-- `getProductionPart()` legacy lookup compatibility olarak `getProductionItem()` yolunu kullanmaya devam eder.
+- `getProductionPart()` eski lookup compatibility olarak `getProductionItem()` yolunu kullanmaya devam eder.
 - Diğer production Item'lar bu migration nedeniyle topluca `itemKey`e geçirilmez.
-- Recipe quantity parity korunur.
+- Recipe quantity aynı yapı korunur.
 
-## 6. Regression sözleşmesi
+## 6. Regresyon sözleşmesi
 
 Testler şunları doğrular:
 
 - 27 recipe'nin tamamında `connector_single` yalnız `itemKey` ile bulunur.
 - `partId` taşımaz.
 - Miktarlar migration öncesi değerlerle aynıdır.
-- Expanded recipe production metadata'yı çözmeye devam eder.
+- Expanded recipe production üstveriyi çözmeye devam eder.
 - Komşu, henüz migrate edilmemiş recipe Item'ları yanlışlıkla `itemKey`e geçmez.
 
 ## Sonuç

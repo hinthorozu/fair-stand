@@ -1,40 +1,30 @@
-# A04 F-016 closure
+# A04 F-016 kapanışı
 
-Finding: **F-016 — Right-wall corner orientation conflict: 90° helper vs 270° active placement/reflow**
+Bulgu: **F-016 — Right-wall corner orientation conflict: 90° helper vs 270° active placement/reflow**
 
-Status: **CLOSED / POST-MERGE VERIFIED**
+Durum: **CLOSED / POST-MERGE VERIFIED**
 
-## Root cause
+## Kök neden
 
-`src/cornerPlacement.js` still encoded right-wall placement at `90°`, while the active continuous-wall placement/reflow path in `src/wallReflow.js` used the canonical inward-facing right-wall orientation of `270°`. The stale helper had its own regression test that also expected `90°`, so repository tests preserved a rule that no longer matched the active application behavior.
+`src/cornerPlacement.js` hâlâ sağ-duvar yerleşimini `90°` olarak kodluyordu; `src/wallReflow.js` içindeki aktif sürekli-duvar yerleşim/yeniden-akış yolu ise kanonik içe bakan sağ-duvar yönelimi olan `270°` kullanıyordu. Eski yardımcının kendi, `90°` bekleyen regresyon testi de vardı; böylece depo testleri artık aktif uygulama davranışıyla örtüşmeyen bir kuralı koruyordu.
 
-## Remediation
+## Düzeltme
 
-Implementation PR **#65 — Fix F-016 right-wall orientation conflict** aligned the stale helper and tests with the active canonical rule:
+Uygulama PR **#65 — Fix F-016 right-wall orientation conflict** eski yardımcıyı ve testleri aktif kanonik kuralla hizaladı:
 
-- left wall remains `90°`,
-- back wall remains `0°`,
-- right wall is `270°`,
-- stale right-wall fixtures in `test/cornerPlacement.test.js` were updated,
-- `test/rightWallOrientation.test.js` was added to assert that `cornerPlacement` and `wallReflow` agree on the same `270°` right-wall orientation.
+- sol duvar `90°` kalır,
+- arka duvar `0°` kalır,
+- sağ duvar `270°`'dir,
+- `test/cornerPlacement.test.js` içindeki eski sağ-duvar armatürleri güncellendi,
+- `cornerPlacement` ile `wallReflow`'un aynı `270°` sağ-duvar yöneliminde anlaştığını doğrulamak için `test/rightWallOrientation.test.js` eklendi.
 
-The active runtime path already used `270°`; this remediation removed the conflicting alternate rule rather than changing intended product behavior.
+Aktif runtime yolu zaten `270°` kullanıyordu; bu düzeltme amaçlanan ürün davranışını değiştirmek yerine çatışan alternatif kuralı kaldırdı.
 
-## Verification
+## Doğrulama
 
-Final PR head: `f0270a5158469d23977ac8d9ce4eb64b5147c6e5`.
+Son PR head: `f0270a5158469d23977ac8d9ce4eb64b5147c6e5`.
 
-PR CI run **#286 / run `33993408626`** completed successfully:
-
-- change contract gate: success,
-- full unit/integration test suite: success,
-- production build: success,
-- Playwright runner + Chromium install: success,
-- Chromium E2E: success.
-
-PR #65 merged into `ROG` as `e1e37d8211d4a20aa5a4b0575134ee103609d8c0`.
-
-Post-merge `ROG` CI run **#288 / run `33993672871`** completed successfully:
+PR CI çalıştırması **#286 / run `33993408626`** başarıyla tamamlandı:
 
 - change contract gate: success,
 - full unit/integration test suite: success,
@@ -42,8 +32,18 @@ Post-merge `ROG` CI run **#288 / run `33993672871`** completed successfully:
 - Playwright runner + Chromium install: success,
 - Chromium E2E: success.
 
-## Result
+PR #65, `e1e37d8211d4a20aa5a4b0575134ee103609d8c0` olarak `ROG`'a birleştirildi.
 
-The repository no longer carries contradictory right-wall orientation expectations between the alternate corner-placement helper and the active wall-reflow path. Runtime and regression coverage now agree on the canonical `270°` right-wall orientation.
+Birleştirme sonrası `ROG` CI çalıştırması **#288 / run `33993672871`** başarıyla tamamlandı:
+
+- change contract gate: success,
+- full unit/integration test suite: success,
+- production build: success,
+- Playwright runner + Chromium install: success,
+- Chromium E2E: success.
+
+## Sonuç
+
+Depo artık alternatif köşe-yerleşim yardımcısı ile aktif duvar-yeniden-akış yolu arasında çelişen sağ-duvar yönelim beklentileri taşımaz. Runtime ve regresyon kapsamı artık kanonik `270°` sağ-duvar yöneliminde anlaşır.
 
 **F-016 is CLOSED.**

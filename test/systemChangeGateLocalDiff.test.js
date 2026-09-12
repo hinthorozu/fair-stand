@@ -144,14 +144,14 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
     git(cwd, ['add', '.']);
     git(cwd, ['commit', '-qm', 'baseline']);
 
-    // Untracked guarded source without a declaration update must fail locally.
+    // Bildirimsiz, izlenmeyen korumalı kaynak yerel olarak başarısız olmalı.
     writeFileSync(join(cwd, 'src/example.js'), 'export const example = true;\n');
     let result = runVerifier(cwd);
     assert.notEqual(result.status, 0);
     assert.match(result.stdout, /Diff source: local git diff against HEAD \+ staged\/unstaged\/untracked/);
     assert.match(result.stderr, /Guarded files changed but \.github\/change-contract\.json was not updated/);
 
-    // Stage the source and make the declaration an unstaged tracked change; the union must pass.
+    // Kaynağı stage et, bildirimi unstaged tut; birleşim geçmeli.
     git(cwd, ['add', 'src/example.js']);
     appendFileSync(join(cwd, '.github/change-contract.json'), '\n');
     result = runVerifier(cwd);
@@ -160,7 +160,7 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
     assert.match(result.stdout, /Impact sweep:/);
     assert.match(result.stdout, /E2E not required:/);
 
-    // Commit both changes and verify local committed-diff enforcement against an explicit base.
+    // İkisini de commit et; yerel commit-diff denetimini açık base'e karşı doğrula.
     git(cwd, ['add', '.github/change-contract.json']);
     git(cwd, ['commit', '-qm', 'guarded change with declaration']);
     result = runVerifier(cwd, 'HEAD^');

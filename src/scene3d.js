@@ -176,8 +176,8 @@ export function createStandScene(
   scene.background = new THREE.Color(0x5f6265);
   scene.fog = new THREE.Fog(0x5f6265, 55, 90);
 
-  // Keep atmospheric depth outside the editable stand. Fog distances are updated only
-  // when the stage size changes, so this adds no per-frame CPU work or extra draw calls.
+  // Atmosfer derinliğini düzenlenebilir standın dışında tut. Sis mesafeleri yalnız
+  // sahne boyutu değişince güncellenir; kare başına CPU veya ek çizim maliyeti yok.
   function updateStageFog(widthM, depthM) {
     const diagonalM = Math.hypot(Number(widthM) || 0, Number(depthM) || 0);
     const near = Math.max(55, diagonalM * 1.25 + 18);
@@ -394,8 +394,8 @@ export function createStandScene(
   const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
   keyLight.position.set(5, 8, 6);
   keyLight.castShadow = true;
-  // 2K is visually sufficient for the editor and cuts the directional shadow map
-  // memory/fill cost to one quarter of the previous 4K allocation.
+  // 2K editör için yeterli; yönsel gölge haritası bellek/dolgu maliyeti
+  // önceki 4K tahsisinin dörtte birine iner.
   keyLight.shadow.mapSize.set(2048, 2048);
   scene.add(keyLight);
 
@@ -996,7 +996,7 @@ export function createStandScene(
     );
     frame.renderOrder = 1000;
     frame.visible = false;
-    // Selection visuals are display-only and must never become pick targets.
+    // Seçim görselleri yalnızca göstergedir; asla tıklama hedefi olmamalı.
     frame.raycast = () => {};
     frame.userData.isModuleSelectionVisual = true;
     moduleGroup.add(frame);
@@ -1383,8 +1383,8 @@ export function createStandScene(
     const xM = Number(placement.xCm) / 100;
     const logicalYM = Number(placement.yCm) / 100;
     const logicalZM = Number(placement.zCm ?? 0) / 100;
-    // Mini fridge height is 66 cm. Kettle never sits on the floor; its local base
-    // is always raised to the refrigerator top plane.
+    // Mini buzdolabı yüksekliği 66 cm. Kettle asla zemine oturmaz; yerel tabanı
+    // her zaman buzdolabı üst düzlemine kadar yükseltilir.
     const fixedElevationM = (group.userData?.type === 'kettle' || group.userData?.moduleState?.type === 'kettle')
       ? getItem('MINI_FRIDGE_AVANTI').dimensions.heightCm / 100
       : 0;

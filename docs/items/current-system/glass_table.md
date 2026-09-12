@@ -1,4 +1,4 @@
-> Migration öncesi envanterdir; aktif canonical tanım `../definitions/glass_table.md` içindedir.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/glass_table.md` içindedir.
 
 # glass_table — Mevcut Sistem Profili
 

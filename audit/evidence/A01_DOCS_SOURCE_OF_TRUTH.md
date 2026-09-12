@@ -1,30 +1,30 @@
-# A01 Audit Evidence — Canonical Docs + Source of Truth
+# A01 Denetim Kanıtı — Kanonik Belgeler + Doğruluk Kaynağı
 
-Audit section: `A01 — Canonical docs + source-of-truth`
-Audit date: `2026-09-03`
-Checked ROG SHA: `6b9a4400f10d8a1957ffd52dbc6a8da3f0141af5`
-Audit branch: `audit/full-system-a01`
+Denetim bölümü: `A01 — Canonical docs + source-of-truth`
+Denetim tarihi: `2026-09-03`
+Kontrol edilen ROG SHA: `6b9a4400f10d8a1957ffd52dbc6a8da3f0141af5`
+Denetim dalı: `audit/full-system-a01`
 
-## Summary
+## Özet
 
-A01 completed the documentation/source-of-truth audit. Global product and architecture contracts are broadly aligned with current runtime ownership, but four documentation/process drifts were found.
+A01, belgeleme/doğruluk-kaynağı denetimini tamamladı. Küresel ürün ve mimari sözleşmeler mevcut çalışma zamanı sahipliğiyle büyük ölçüde hizalıdır, ancak dört belgeleme/süreç sapması bulundu.
 
-Findings:
+Bulgular:
 
-- `F-001` P1 — `SYSTEM_MODULE_CATALOG.md` is materially stale versus runtime catalog.
-- `F-002` P2 — historical repository review/progress documents are not visibly archived/historical and contain superseded current-state statements.
-- `F-003` P2 — roadmap documents duplicate canonical production numeric values and recipe facts from code.
-- `F-004` P2 — developer entrypoint documentation predates the universal change gate.
+- `F-001` P1 — `SYSTEM_MODULE_CATALOG.md`, çalışma zamanı kataloğuna göre maddi olarak bayattır.
+- `F-002` P2 — tarihsel depo inceleme/ilerleme belgeleri görünür biçimde arşivlenmiş/tarihsel işaretlenmemiştir ve geçersiz kılınmış güncel-durum ifadeleri içerir.
+- `F-003` P2 — yol haritası belgeleri, koddaki kanonik üretim sayısal değerlerini ve reçete olgularını çoğaltır.
+- `F-004` P2 — geliştirici giriş noktası belgelemesi evrensel change gate'den öncesine aittir.
 
-No runtime code was changed or fixed during this audit section.
+Bu denetim bölümünde çalışma zamanı kodu değiştirilmedi veya düzeltilmedi.
 
 ---
 
 ## A01.01 — PROJECT_RULES.md
 
-Status: `AUDITED_OK`
+Durum: `AUDITED_OK`
 
-Evidence:
+Kanıt:
 
 - `PROJECT_RULES.md` blob: `4ce07780206186f2c5b6930af72a9bceb4ce6493`
 - `src/moduleBehavior.js` blob: `d466d8c0d9e08853791ff84bddbb85d6d94a01e3`
@@ -32,23 +32,23 @@ Evidence:
 - `src/catalog.js` blob: `b4514b445e6a70a38dcfb7a8c4d516089b3ce565`
 - `src/productionParts.js` blob: `d86a57c312912e769006f639bd7d038326f7a3dd`
 
-Result:
+Sonuç:
 
-- X/Y ground and Z-height convention remains the documented logical model.
-- Module-specific move/rotation/collision/ghost values are delegated to `moduleBehavior.js`, not globally frozen in the rules document.
-- Placement algorithms remain in placement/core code.
-- Catalog nominal measurements and production/BOM measurements are explicitly separated.
-- Deletion-gap/no-auto-compaction remains a global invariant to be verified later in A06; the document itself no longer contains the old invalid global 90-degree/50-cm behavior assumptions.
+- X/Y zemin ve Z-yükseklik kuralı belgelenmiş mantıksal model olarak durur.
+- Modüle özel taşıma/döndürme/çarpışma/ghost değerleri, kurallar belgesinde küresel olarak dondurulmak yerine `moduleBehavior.js`'e devredilir.
+- Yerleştirme algoritmaları yerleştirme/çekirdek kodunda kalır.
+- Katalog nominal ölçüleri ile üretim/BOM ölçüleri açıkça ayrılmıştır.
+- Silme-boşluğu/otomatik-sıkıştırma-yok, A06'da sonra doğrulanacak küresel bir değişmez olarak durur; belgenin kendisi artık eski geçersiz küresel 90-derece/50-cm davranış varsayımlarını içermez.
 
-No stale global invariant was identified in this document during A01.
+A01 sırasında bu belgede bayat küresel değişmez saptanmadı.
 
 ---
 
 ## A01.02 — ARCHITECTURE_RULES.md
 
-Status: `AUDITED_OK`
+Durum: `AUDITED_OK`
 
-Evidence:
+Kanıt:
 
 - `ARCHITECTURE_RULES.md` blob: `4b378d811cc34f2cb237bedc4bc94d8ed884bd68`
 - `src/moduleBehavior.js`
@@ -57,57 +57,57 @@ Evidence:
 - `src/moduleRecipes.js`
 - `src/productionParts.js`
 
-The documented ownership boundaries correspond to real runtime layers: catalog, behavior, placement/core, state, renderer boundary and recipe/production parts. Whether individual runtime files violate these boundaries is intentionally deferred to A03; A01 confirms the architecture document itself describes the current intended ownership model.
+Belgelenmiş sahiplik sınırları gerçek çalışma zamanı katmanlarına karşılık gelir: katalog, davranış, yerleştirme/çekirdek, durum, renderer sınırı ve reçete/üretim parçaları. Tekil çalışma zamanı dosyalarının bu sınırları ihlal edip etmediği kasıtlı olarak A03'e bırakılır; A01, mimari belgenin kendisinin mevcut hedeflenen sahiplik modelini tanımladığını doğrular.
 
 ---
 
 ## A01.03 — SYSTEM_DEVELOPMENT_CONTRACT.md
 
-Status: `GAP` — see `F-004`.
+Durum: `GAP` — bkz. `F-004`.
 
-The owner references in the document are real and current:
+Belgedeki sahip referansları gerçek ve günceldir:
 
-- catalog → `src/catalog.js`
-- module policy → `src/moduleContracts.js`
-- feature/composition → `src/featureContracts.js`
-- behavior → `src/moduleBehavior.js` + placement core
-- state → `src/designState.js`
-- recipes → `src/moduleRecipes.js`
-- production parts → `src/productionParts.js`
-- automatic depot → `src/autoDepot.js`
-- contract tests → `test/` plus existing `tests/`
+- katalog → `src/catalog.js`
+- modül politikası → `src/moduleContracts.js`
+- özellik/bileşim → `src/featureContracts.js`
+- davranış → `src/moduleBehavior.js` + yerleştirme çekirdeği
+- durum → `src/designState.js`
+- reçeteler → `src/moduleRecipes.js`
+- üretim parçaları → `src/productionParts.js`
+- otomatik depo → `src/autoDepot.js`
+- sözleşme testleri → `test/` artı mevcut `tests/`
 
-However, this document still calls itself the mandatory development contract while its mandatory work sequence does not point the developer to the newer universal `SYSTEM_CHANGE_GATE.md` / `.github/change-contract.json` step. CI enforces the gate, but the human/AI entrypoint documentation is split.
+Ancak bu belge hâlâ kendini zorunlu geliştirme sözleşmesi olarak adlandırırken, zorunlu çalışma sırası geliştiriciyi daha yeni evrensel `SYSTEM_CHANGE_GATE.md` / `.github/change-contract.json` adımına yönlendirmez. CI kapıyı zorlar, fakat insan/AI giriş noktası belgelemesi bölünmüştür.
 
 ---
 
 ## A01.04 — SYSTEM_CHANGE_GATE.md ↔ systemChangeContract.js
 
-Status: `AUDITED_OK`
+Durum: `AUDITED_OK`
 
-Evidence:
+Kanıt:
 
 - `SYSTEM_CHANGE_GATE.md` blob: `c155e2805ad68c4b481ade1a43c7b3ef8381ff37`
 - `src/systemChangeContract.js` blob: `13a6a89d2fe51e6a5d15c10ad5b5e44fa5eda183`
 
-The documented 17 impact domains exactly match `SYSTEM_IMPACT_DOMAINS`:
+Belgelenmiş 17 etki alanı, `SYSTEM_IMPACT_DOMAINS` ile tam olarak eşleşir:
 
 `catalog, behavior, state, placement, renderer, persistence, bom, ui, composition, assets, storage, importExport, performance, accessibility, architecture, security, tests`.
 
-Detailed path coverage quality is not certified here; it is the scope of A02.
+Ayrıntılı yol kapsamı kalitesi burada belgelenmez; bu A02'nin kapsamıdır.
 
 ---
 
 ## A01.05 — MODULE_BEHAVIOR_STANDARD.md
 
-Status: `AUDITED_OK`
+Durum: `AUDITED_OK`
 
-Evidence:
+Kanıt:
 
-- doc blob: `dee718d9ce80b92893c2143cc89492566e83b185`
-- runtime blob: `d466d8c0d9e08853791ff84bddbb85d6d94a01e3`
+- belge blob: `dee718d9ce80b92893c2143cc89492566e83b185`
+- çalışma zamanı blob: `d466d8c0d9e08853791ff84bddbb85d6d94a01e3`
 
-The document matches the current behavior contract fields and concepts:
+Belge, mevcut davranış sözleşmesi alanları ve kavramlarıyla eşleşir:
 
 - placement
 - moveSnapCm
@@ -116,208 +116,208 @@ The document matches the current behavior contract fields and concepts:
 - allowSideInsert
 - collision
 - ghost
-- explicit catalog-type coverage
-- non-catalog fallback
-- wall/free/wall-overlay/top placement modes
-- segment/footprint/none collision strategies
-- descriptor-aware centralized overrides
+- açık katalog-tip kapsamı
+- katalog-dışı yedek
+- wall/free/wall-overlay/top yerleştirme kipleri
+- segment/footprint/none çarpışma stratejileri
+- tanımlayıcı-farkında merkezileştirilmiş override'lar
 
-The documented default ghost `{ kind: silhouette, renderer: module-silhouette, opacity: 0.38 }` also matches code.
+Belgelenmiş varsayılan ghost `{ kind: silhouette, renderer: module-silhouette, opacity: 0.38 }` de kodla eşleşir.
 
 ---
 
 ## A01.06 — SYSTEM_MODULE_CATALOG.md
 
-Status: `GAP` — `F-001`.
+Durum: `GAP` — `F-001`.
 
-### Finding F-001
+### Bulgu F-001
 
-Severity: `P1`
-Domain: `documentation / catalog / BOM source-of-truth`
-Status: `OPEN`
+Önem: `P1`
+Alan: `documentation / catalog / BOM source-of-truth`
+Durum: `OPEN`
 
-Evidence:
+Kanıt:
 
-- stale document blob: `04285925e3ee57a8312468f75084b3ad7f469fa6`
-- current catalog blob: `b4514b445e6a70a38dcfb7a8c4d516089b3ce565`
+- bayat belge blob: `04285925e3ee57a8312468f75084b3ad7f469fa6`
+- güncel katalog blob: `b4514b445e6a70a38dcfb7a8c4d516089b3ce565`
 
-The document explicitly claims:
+Belge açıkça şunu iddia eder:
 
-- total catalog modules = `28`
-- `24` with BOM recipes
-- `4` without BOM
+- toplam katalog modülü = `28`
+- BOM reçeteli `24`
+- BOM'suz `4`
 
-Current `MODULE_CATALOG_KEYS` contains `45` entries.
+Güncel `MODULE_CATALOG_KEYS` `45` girdi içerir.
 
-The stale document also contains superseded identity data, including `furniture_table_chair_set_minyon` / `table-chair-set`, while current catalog uses `furniture_table_chair_set_eames` / `table-chair-set-eames`.
+Bayat belge ayrıca geçersiz kılınmış kimlik verisi içerir; örneğin `furniture_table_chair_set_minyon` / `table-chair-set`, oysa güncel katalog `furniture_table_chair_set_eames` / `table-chair-set-eames` kullanır.
 
-Current runtime catalog includes many entries absent from the document, including ivy separators, L counters, depot fixtures, plants/long planters, TV sizes, video walls and other extras.
+Güncel çalışma zamanı kataloğu belgede olmayan birçok girdi içerir; sarmasık ayırıcılar, L bankolar, depo ekipmanları, bitkiler/uzun saksılar, TV boyutları, video duvarları ve diğer ekstralar.
 
-Impact:
+Etki:
 
-A human or AI can use this document as a supposed current ROG reference and make incorrect catalog/BOM conclusions. In particular, the old `24 / 4` BOM count is not accepted as current audit truth. Current BOM coverage will be independently audited in A12.
+Bir insan veya AI bu belgeyi sözde güncel ROG referansı olarak kullanıp yanlış katalog/BOM sonuçlarına varabilir. Özellikle eski `24 / 4` BOM sayısı güncel denetim gerçeği olarak kabul edilmez. Güncel BOM kapsamı A12'de bağımsız denetlenecektir.
 
-Decision: `fix-now recommended after audit/user instruction`; do not silently edit during audit.
+Karar: `denetim/kullanıcı talimatından sonra şimdi-düzelt önerilir`; denetim sırasında sessizce düzenleme yapılmaz.
 
 ---
 
-## A01.07 — ROADMAP.md active plan truth
+## A01.07 — ROADMAP.md aktif plan gerçeği
 
-Status: `GAP` — `F-003`.
+Durum: `GAP` — `F-003`.
 
-The master roadmap's phase labels are internally coherent with its linked phase-4 plan: FAZ 1/2/3 closed, FAZ 4 active, FAZ 5/6 planned. No old render work is being presented as current FAZ 4.
+Ana yol haritasının faz etiketleri, bağlı faz-4 planıyla içsel olarak tutarlıdır: FAZ 1/2/3 kapalı, FAZ 4 aktif, FAZ 5/6 planlı. Eski render işi güncel FAZ 4 olarak sunulmamaktadır.
 
-However the master roadmap also stores a `Doğrulanmış üretim bilgileri` block containing fixed physical production dimensions and a full 50-cm wall recipe. Those facts already have canonical runtime owners in `productionParts.js` / `moduleRecipes.js`. This violates the intended “roadmap is plan, code is runtime production truth” separation and creates drift risk. See `F-003`.
+Ancak ana yol haritası ayrıca sabit fiziksel üretim ölçüleri ve tam bir 50-cm duvar reçetesi içeren bir `Doğrulanmış üretim bilgileri` bloğu saklar. Bu olguların kanonik çalışma zamanı sahipleri zaten `productionParts.js` / `moduleRecipes.js` içindedir. Bu, hedeflenen “yol haritası plandır, kod çalışma zamanı üretim gerçeğidir” ayrımını ihlal eder ve sapma riski yaratır. Bkz. `F-003`.
 
 ---
 
 ## A01.08 — PRODUCT_FUTURE.md
 
-Status: `AUDITED_OK`
+Durum: `AUDITED_OK`
 
-Evidence blob: `aa1a6940f5957f00b7b98b9a8a4bbd625ac1f832`
+Kanıt blob: `aa1a6940f5957f00b7b98b9a8a4bbd625ac1f832`
 
-The document explicitly classifies itself as future requirements/data needs, directs active priority to roadmap documents, and labels field rules as data requiring validation. It does not claim its unverified rules are current runtime constraints.
+Belge kendini açıkça gelecek gereksinimler/veri ihtiyaçları olarak sınıflandırır, aktif önceliği yol haritası belgelerine yönlendirir ve alan kurallarını doğrulama gerektiren veri olarak etiketler. Doğrulanmamış kurallarının güncel çalışma zamanı kısıtları olduğunu iddia etmez.
 
 ---
 
 ## A01.09 — RENDER_FUTURE_BACKLOG.md
 
-Status: `AUDITED_OK`
+Durum: `AUDITED_OK`
 
-Evidence blob: `f5845e53e77ac6d7f255a64b27232f06066e130e`
+Kanıt blob: `f5845e53e77ac6d7f255a64b27232f06066e130e`
 
-The document explicitly states that the old render “FAZ 4” label is obsolete, current FAZ 4 is recipe/parametric/connection-graph work, and render work is future-only until reactivated through the roadmap.
+Belge açıkça eski render “FAZ 4” etiketinin geçersiz olduğunu, güncel FAZ 4'ün reçete/parametrik/bağlantı-grafiği işi olduğunu ve render işinin yol haritası üzerinden yeniden etkinleştirilene kadar yalnızca gelecek olduğunu belirtir.
 
 ---
 
-## A01.10 — Historical documentation classification
+## A01.10 — Tarihsel belgeleme sınıflandırması
 
-Status: `GAP` — `F-002`.
+Durum: `GAP` — `F-002`.
 
-### Finding F-002
+### Bulgu F-002
 
-Severity: `P2`
-Domain: `documentation / repository history`
-Status: `OPEN`
+Önem: `P2`
+Alan: `documentation / repository history`
+Durum: `OPEN`
 
-Evidence:
+Kanıt:
 
 - `FRESH_REPOSITORY_REVIEW.md` blob `5767e856e75130d76ac3aa6698163c91a08aa238`
 - `REPOSITORY_CLEANUP_PROGRESS.md` blob `13904e826b7f459d1672e28c13d3791fdc2d7b67`
 - `MILESTONES.md` blob `8e0dbcf0fd2355b272e32ad36942b997ad4e708c`
 - `Changelog.md` blob `31769e11fcff59ab908bd9553baef5e788922773`
 
-`MILESTONES.md` is correctly marked as a historical closure record and redirects active phase truth to roadmap files. `Changelog.md` identifies itself as a chronological history.
+`MILESTONES.md` doğru biçimde tarihsel kapanış kaydı olarak işaretlenmiştir ve aktif faz gerçeğini yol haritası dosyalarına yönlendirir. `Changelog.md` kendini kronolojik tarih olarak tanımlar.
 
-By contrast:
+Buna karşılık:
 
-- `FRESH_REPOSITORY_REVIEW.md` is not marked historical and still says current `PROJECT_RULES.md` incorrectly globalizes 90-degree rotation / 50-cm movement, even though the current `PROJECT_RULES.md` was already corrected.
-- `REPOSITORY_CLEANUP_PROGRESS.md` presents itself as the checkpoint for “where we left off / next work” and ends with color-editor controller PR/canonical CI still pending, while many later PRs are already merged.
+- `FRESH_REPOSITORY_REVIEW.md` tarihsel olarak işaretlenmemiştir ve hâlâ güncel `PROJECT_RULES.md`'nin 90-derece döndürme / 50-cm hareketi yanlış biçimde küreselleştirdiğini söyler; oysa güncel `PROJECT_RULES.md` zaten düzeltilmiştir.
+- `REPOSITORY_CLEANUP_PROGRESS.md` kendini “nerede kaldık / sonraki iş” kontrol noktası olarak sunar ve renk-düzenleyici denetleyici PR/kanonik CI'nın hâlâ beklemede olduğuyla biter; oysa birçok sonraki PR zaten birleştirilmiştir.
 
-Impact:
+Etki:
 
-A new AI/human can mistake superseded audit/progress documents for current repository state and reopen already-resolved work.
+Yeni bir AI/insan, geçersiz kılınmış denetim/ilerleme belgelerini güncel depo durumu sanıp zaten çözülmüş işi yeniden açabilir.
 
-Decision: mark/archive/redirect explicitly in a later fix PR.
+Karar: sonraki bir düzeltme PR'ında açıkça işaretle/arşivle/yönlendir.
 
 ---
 
-## A01.11 — LEGACY_TRASH.md isolation
+## A01.11 — LEGACY_TRASH.md yalıtımı
 
-Status: `AUDITED_OK` for documentation/source-of-truth isolation.
+Durum: belgeleme/doğruluk-kaynağı yalıtımı için `AUDITED_OK`.
 
-Evidence:
+Kanıt:
 
 - `LEGACY_TRASH.md` blob `cd86ec48ce560d1cd32087548652f068614bfbc4`
 - `src/standCapacity.js` blob `cfb05f380fea5bc5fe52e464022ba898d72a217e`
-- current catalog/behavior sources
+- güncel katalog/davranış kaynakları
 
-The legacy file explicitly says its unverified field rules must not be coded until validated. No runtime import/reference to `LEGACY_TRASH.md` exists. The current stand-capacity implementation checks actual active stand bounds rather than the legacy approximate 4m/5–6m support rules.
+Eski dosya, doğrulanmamış alan kurallarının doğrulanana kadar kodlanmaması gerektiğini açıkça söyler. `LEGACY_TRASH.md`'ye çalışma zamanı import/referansı yoktur. Güncel stand-kapasitesi uygulaması, eski yaklaşık 4m/5–6m destek kuralları yerine gerçek aktif stand sınırlarını kontrol eder.
 
-The current catalog has explicit shelf variants, but A01 found no canonical runtime rule stating the legacy “maximum 3 shelves” sentence itself is consumed as an unverified global constraint. Deeper behavior/parametric checks remain in their later audit sections.
+Güncel katalogda açık raf varyantları vardır, ancak A01, eski “en fazla 3 raf” cümlesinin kendisinin doğrulanmamış küresel kısıt olarak tüketildiğini söyleyen kanonik bir çalışma zamanı kuralı bulmadı. Daha derin davranış/parametrik kontroller kendi sonraki denetim bölümlerinde kalır.
 
 ---
 
-## A01.12 — Competing duplicated numeric/business rules
+## A01.12 — Yarışan çoğaltılmış sayısal/iş kuralları
 
-Status: `GAP` — `F-001` and `F-003`.
+Durum: `GAP` — `F-001` ve `F-003`.
 
-### Finding F-003
+### Bulgu F-003
 
-Severity: `P2`
-Domain: `documentation / production source-of-truth`
-Status: `OPEN`
+Önem: `P2`
+Alan: `documentation / production source-of-truth`
+Durum: `OPEN`
 
-Evidence:
+Kanıt:
 
 - `ROADMAP.md` blob `8b5afd0e31bc6172cb94cd6d5c5614e7aa61bb3d`
 - `ROADMAP_PHASE_4.md` blob `ef7800f2747d69688206e05491e2a0037a92b493`
 - `src/productionParts.js` blob `d86a57c312912e769006f639bd7d038326f7a3dd`
-- `src/moduleRecipes.js` current ROG
+- `src/moduleRecipes.js` güncel ROG
 
-Examples duplicated in roadmap Markdown and code include:
+Yol haritası Markdown'ında ve kodda çoğaltılan örnekler:
 
-- upright length `346.5 cm` and thickness `8 cm`
-- panel height `47 cm` / thickness `0.8 cm`
-- straight panel widths `48.5 / 98 / 147.5 / 197`
-- inner-corner widths `42.5 / 92 / 142.5 / 192`
-- profile lengths `41.5 / 91 / 140.5 / 190`
-- 50-cm straight-wall recipe quantities and part identities
+- dikme uzunluğu `346.5 cm` ve kalınlık `8 cm`
+- panel yüksekliği `47 cm` / kalınlık `0.8 cm`
+- düz panel genişlikleri `48.5 / 98 / 147.5 / 197`
+- iç-köşe genişlikleri `42.5 / 92 / 142.5 / 192`
+- profil uzunlukları `41.5 / 91 / 140.5 / 190`
+- 50-cm düz-duvar reçete miktarları ve parça kimlikleri
 
-These values currently match code, but matching today does not remove the competing-source risk. `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md` and `SYSTEM_DEVELOPMENT_CONTRACT.md` all establish that runtime values should not be maintained as independent fixed Markdown truth.
+Bu değerler şu anda kodla eşleşir, ancak bugün eşleşmek yarışan-kaynak riskini kaldırmaz. `PROJECT_RULES.md`, `ARCHITECTURE_RULES.md` ve `SYSTEM_DEVELOPMENT_CONTRACT.md` hepsi, çalışma zamanı değerlerinin bağımsız sabit Markdown gerçeği olarak sürdürülmemesi gerektiğini kurar.
 
-Impact:
+Etki:
 
-A production dimension can later change in code while roadmap/reference prose remains silently stale, producing exactly the source-of-truth drift this audit is intended to prevent.
+Bir üretim ölçüsü sonra kodda değişebilirken yol haritası/referans metni sessizce bayat kalabilir; bu denetimin önlemeyi amaçladığı doğruluk-kaynağı sapmasını üretir.
 
-Decision: roadmap should reference canonical part/recipe sources rather than manually reproduce fixed production datasets, unless a generated snapshot mechanism is explicitly adopted.
+Karar: açıkça üretilmiş bir anlık görüntü mekanizması benimsenmedikçe, yol haritası sabit üretim veri kümelerini elle çoğaltmak yerine kanonik parça/reçete kaynaklarına referans vermelidir.
 
 ---
 
-## A01.13 — README / developer entrypoint (audit-discovered checklist item)
+## A01.13 — README / geliştirici giriş noktası (denetimde keşfedilen kontrol listesi maddesi)
 
-Status: `GAP` — `F-004`.
+Durum: `GAP` — `F-004`.
 
-### Finding F-004
+### Bulgu F-004
 
-Severity: `P2`
-Domain: `documentation / development process`
-Status: `OPEN`
+Önem: `P2`
+Alan: `documentation / development process`
+Durum: `OPEN`
 
-Evidence:
+Kanıt:
 
 - `README.md` blob `5a5f4b519c3fd12af182b364848305b65c76a9b6`
 - `SYSTEM_DEVELOPMENT_CONTRACT.md` blob `81d32ed1791cf097587f71abfcf1c1512b45c5c6`
-- `.github/workflows/ci.yml` current ROG
+- `.github/workflows/ci.yml` güncel ROG
 - `SYSTEM_CHANGE_GATE.md` / `src/systemChangeContract.js`
 
-Drift:
+Sapma:
 
-- README command list does not show `npm run contract:verify`.
-- README describes canonical CI as `npm ci → npm test → npm run build`, while current CI executes the change-contract gate before install/test/build.
-- README repository-document map omits `SYSTEM_DEVELOPMENT_CONTRACT.md`, `SYSTEM_CHANGE_GATE.md` and `SYSTEM_AUDIT_CHECKLIST.md`.
-- README “new module” flow does not tell a human/AI to declare the universal change contract first.
-- `SYSTEM_DEVELOPMENT_CONTRACT.md` calls itself the mandatory development contract, but its mandatory sequence does not explicitly hand off to the newer universal change gate/change declaration.
+- README komut listesi `npm run contract:verify` göstermez.
+- README kanonik CI'yı `npm ci → npm test → npm run build` olarak tanımlar; oysa güncel CI, kurulum/test/derlemeden önce change-contract kapısını çalıştırır.
+- README depo-belge haritası `SYSTEM_DEVELOPMENT_CONTRACT.md`, `SYSTEM_CHANGE_GATE.md` ve `SYSTEM_AUDIT_CHECKLIST.md` belgelerini atlar.
+- README “yeni modül” akışı, bir insan/AI'ya evrensel change contract'ı önce bildirmesini söylemez.
+- `SYSTEM_DEVELOPMENT_CONTRACT.md` kendini zorunlu geliştirme sözleşmesi olarak adlandırır, ancak zorunlu sırası açıkça daha yeni evrensel change gate/change bildirimine devretmez.
 
-Impact:
+Etki:
 
-CI still blocks many undeclared code changes, so this is not an enforcement bypass by itself. But a human/AI following the documented entrypoint receives an incomplete process and can waste work before CI rejects it.
+CI hâlâ birçok bildirilmemiş kod değişikliğini durdurur, bu yüzden bu tek başına bir uygulama baypası değildir. Ancak belgelenmiş giriş noktasını izleyen bir insan/AI eksik bir süreç alır ve CI reddetmeden önce iş kaybedebilir.
 
-Decision: update documentation entrypoint in a later fix PR.
+Karar: sonraki bir düzeltme PR'ında belgeleme giriş noktasını güncelle.
 
 ---
 
-# A01 result
+# A01 sonucu
 
-Section status: `GAP` (audit complete, four findings open)
+Bölüm durumu: `GAP` (denetim tamam, dört bulgu açık)
 
-Counts after A01:
+A01 sonrası sayılar:
 
-- Open P0: 0
-- Open P1: 1 (`F-001`)
-- Open P2: 3 (`F-002`, `F-003`, `F-004`)
-- Open P3: 0
-- Decision required: 0
+- Açık P0: 0
+- Açık P1: 1 (`F-001`)
+- Açık P2: 3 (`F-002`, `F-003`, `F-004`)
+- Açık P3: 0
+- Karar gerekli: 0
 
-Next strict audit item: `A02.01`.
+Sonraki katı denetim maddesi: `A02.01`.

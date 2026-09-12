@@ -1,74 +1,74 @@
-# A07 — State model + factories audit
+# A07 — Durum modeli + fabrikalar denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Project-level persisted state inventory
+## Proje düzeyi kalıcı durum envanteri
 
-`buildProjectSnapshot()` persists:
+`buildProjectSnapshot()` kalıcılaştırır:
 
 - `id`
 - `name`
-- `version` (currently literal `1`)
+- `version` (şu anda sabit `1`)
 - `createdAt`
 - `stand`
 - `modules`
 
-Stand state currently carries fields such as:
+Stand durumu şu anda şu alanları taşır:
 
-- stand type and dimensions
-- derived scene dimensions returned by setup
-- floor type / optional floor color
-- automatic depot configuration
+- stand tipi ve ölçüleri
+- kurulumun döndürdüğü türetilmiş sahne ölçüleri
+- zemin tipi / isteğe bağlı zemin rengi
+- otomatik depo yapılandırması
 
-Module state is polymorphic by runtime type. Common fields include module `id`, `type`, dimensions, optional `catalogKey`, optional `placement`; specialized families add editable surfaces/strips/faces, model metadata, lighting, media geometry, illuminated-foam asset/halo data, etc.
+Modül durumu çalışma zamanı tipine göre çok biçimlidir. Ortak alanlar arasında modül `id`, `type`, ölçüler, isteğe bağlı `catalogKey`, isteğe bağlı `placement` vardır; özelleşmiş aileler düzenlenebilir yüzeyler/şeritler/yüzler, model meta verisi, aydınlatma, medya geometrisi, illuminated-foam varlık/hale verisi vb. ekler.
 
-## Findings
+## Bulgular
 
-### F-017 — P2 — renderer owns direct mutations of persistent editable state
+### F-017 — P2 — renderer kalıcı düzenlenebilir durumun doğrudan mutasyonlarını sahiplenir
 
-**Domains:** state, renderer, architecture, persistence
+**Alanlar:** state, renderer, architecture, persistence
 
-Architecture rules say state carries persistent/editable product state and renderer visualizes it rather than becoming the persistent-rule owner.
+Mimari kurallar, durumun kalıcı/düzenlenebilir ürün durumunu taşıdığını ve renderer'ın kalıcı-kural sahibi olmak yerine onu görselleştirdiğini söyler.
 
-Current scene surfaces keep references to state objects (`surfaceState`) and `scene3d` methods directly mutate persistent fields for operations including color, image assignment/removal, glass/fabric/mesh state and related image transforms. Main often calls these renderer methods rather than a state-domain mutation API.
+Güncel sahne yüzeyleri durum nesnelerine (`surfaceState`) referans tutar ve `scene3d` metodları renk, görüntü atama/kaldırma, cam/kumaş/mesh durumu ve ilgili görüntü dönüşümleri dahil işlemler için kalıcı alanları doğrudan değiştirir. Main genellikle bir durum-alanı mutasyon API'si yerine bu renderer metodlarını çağırır.
 
-This works because renderer objects reference the same state objects later serialized by `buildProjectSnapshot()`, but mutation ownership is split between `main.js`, `designState.js` helpers and `scene3d.js`. A renderer refactor can therefore silently change persistence semantics.
+Bu çalışır çünkü renderer nesneleri, sonra `buildProjectSnapshot()` tarafından serileştirilen aynı durum nesnelerine referans verir, ancak mutasyon sahipliği `main.js`, `designState.js` yardımcıları ve `scene3d.js` arasında bölünmüştür. Bir renderer yeniden düzenlemesi bu nedenle kalıcılık semantiğini sessizce değiştirebilir.
 
-This finding is structural/ownership, not evidence that current saved values are lost.
+Bu bulgu yapısal/sahipliktir; güncel kaydedilen değerlerin kaybolduğunun kanıtı değildir.
 
-### F-018 — P2 — structural panel count is duplicated between catalog geometry and state factory
+### F-018 — P2 — yapısal panel sayısı katalog geometrisi ile durum fabrikası arasında çoğaltılmıştır
 
-`catalog.js:STAND_DIMENSIONS.stripCount` is currently 7. `designState.js` independently declares `STRIP_COUNT = 7` and state factories use it for flat panels, shelves, showcases and base-wall strips; door state separately derives its three upper panels by literal indexes 4..6.
+`catalog.js:STAND_DIMENSIONS.stripCount` şu anda 7'dir. `designState.js` bağımsız olarak `STRIP_COUNT = 7` bildirir ve durum fabrikaları bunu düz paneller, raflar, vitrinler ve base-wall şeritleri için kullanır; kapı durumu üç üst panelini ayrı olarak sabit 4..6 dizinlerinden türetir.
 
-Renderer reads `STAND_DIMENSIONS.stripCount/stripHeight` while state factories read their own 7. The values agree today but a future one-sided geometry change can create missing or extra persistent panel state versus rendered panels.
+Renderer `STAND_DIMENSIONS.stripCount/stripHeight` okurken durum fabrikaları kendi 7'sini okur. Değerler bugün uyuşur, ancak gelecekte tek taraflı bir geometri değişikliği, render edilen panellere göre eksik veya fazla kalıcı panel durumu yaratabilir.
 
-### F-019 — P1 — catalog dimensions are duplicated/hard-coded in multiple state factories
+### F-019 — P1 — katalog ölçüleri birden fazla durum fabrikasında çoğaltılmış/sabit kodlanmıştır
 
-Several state factories ignore some/all descriptor dimensions and recreate the same product numbers independently, for example furniture, mini-fridge, kettle, coat-rack, base/base-wall depths/heights and LED floodlight. `createCatalogModuleState()` then calls those fixed factories.
+Birkaç durum fabrikası tanımlayıcı ölçülerinin bir kısmını/tümünü yok sayar ve aynı ürün sayılarını bağımsız yeniden oluşturur; örneğin mobilya, mini-fridge, kettle, coat-rack, base/base-wall derinlik/yükseklikleri ve LED floodlight. `createCatalogModuleState()` sonra bu sabit fabrikaları çağırır.
 
-Consequently changing an authoritative catalog descriptor can leave persisted placement/render state on old factory dimensions. Some families (TV, long planter, separator) already pass descriptor data, demonstrating the safer pattern, but coverage is inconsistent.
+Sonuç olarak yetkili bir katalog tanımlayıcısını değiştirmek, kalıcı yerleştirme/render durumunu eski fabrika ölçülerinde bırakabilir. Bazı aileler (TV, uzun saksı, ayırıcı) zaten tanımlayıcı verisi geçirir ve daha güvenli kalıbı gösterir, ancak kapsam tutarsızdır.
 
-This is distinct from the intentional nominal-vs-physical-vs-BOM distinction: these duplicated values are used as runtime module state dimensions and are not explicitly labeled as a separate physical geometry source.
+Bu, kasıtlı nominal-vs-fiziksel-vs-BOM ayrımından farklıdır: bu çoğaltılmış değerler çalışma zamanı modül durum ölçüleri olarak kullanılır ve ayrı bir fiziksel geometri kaynağı olarak açıkça etiketlenmez.
 
-## Checklist results
+## Kontrol listesi sonuçları
 
-- **A07.01 project fields:** `AUDITED_OK` — inventory above.
-- **A07.02 module fields:** `AUDITED_OK` — all current state families/factories inspected; per-family shapes are explicit in `designState.js`.
-- **A07.03 one owner/default:** `GAP` — F-017, F-018, F-019.
-- **A07.04 complete defaults:** `AUDITED_OK` for internally-created current modules; factories reject unsupported shelf/counter/door sizes and create required editable surface state.
-- **A07.05 runtime-derived persistence:** `GAP/P2 observation` — setup snapshot retains `sceneWidthM/sceneDepthM`, which are derivable from X/Y and surround. This is redundant but not given a separate finding yet; A08/A14 schema audit determines whether normalization/versioning makes it dangerous.
-- **A07.06 renderer refs in JSON:** `AUDITED_OK` — project snapshot deep-clones plain stand/modules; Three.js objects, selected surfaces, object URLs and renderer refs are not serialized.
-- **A07.07 legacy/missing fields:** `GAP` — restoration performs only `catalogKey` repair; no centralized state normalizer/schema migrator exists. Root classification is deferred to A08/A14 where project version/schema is audited.
-- **A07.08 IDs:** `AUDITED_OK` for internal create/duplicate — UUID when available; duplication regenerates module and editable-surface IDs. Import IDs are audited A14.
-- **A07.09 UI text as state:** `AUDITED_OK` — labels/status strings are presentation; primary state uses typed fields/IDs.
-- **A07.10 predictable mutation ownership:** `GAP` — F-017.
+- **A07.01 proje alanları:** `AUDITED_OK` — yukarıdaki envanter.
+- **A07.02 modül alanları:** `AUDITED_OK` — tüm güncel durum aileleri/fabrikaları incelendi; aile başına şekiller `designState.js` içinde açıktır.
+- **A07.03 tek sahip/varsayılan:** `GAP` — F-017, F-018, F-019.
+- **A07.04 tam varsayılanlar:** içerde oluşturulan güncel modüller için `AUDITED_OK`; fabrikalar desteklenmeyen raf/banko/kapı boyutlarını reddeder ve gerekli düzenlenebilir yüzey durumunu oluşturur.
+- **A07.05 çalışma-zamanı-türetilmiş kalıcılık:** `GAP/P2 gözlem` — kurulum anlık görüntüsü X/Y ve çevreden türetilebilir `sceneWidthM/sceneDepthM` tutar. Bu fazladır ancak henüz ayrı bulgu verilmedi; A08/A14 şema denetimi normalizasyon/sürümlendirmenin tehlikeli olup olmadığını belirler.
+- **A07.06 JSON'da renderer referansları:** `AUDITED_OK` — proje anlık görüntüsü düz stand/modülleri derin kopyalar; Three.js nesneleri, seçili yüzeyler, object URL'ler ve renderer referansları serileştirilmez.
+- **A07.07 eski/eksik alanlar:** `GAP` — geri yükleme yalnızca `catalogKey` onarımı yapar; merkezi durum normalleştirici/şema taşıyıcı yoktur. Kök sınıflandırma, proje sürümü/şemasının denetlendiği A08/A14'e bırakılır.
+- **A07.08 ID'ler:** iç oluşturma/çoğaltma için `AUDITED_OK` — varsa UUID; çoğaltma modül ve düzenlenebilir-yüzey ID'lerini yeniden üretir. İçe aktarma ID'leri A14'te denetlenir.
+- **A07.09 durum olarak UI metni:** `AUDITED_OK` — etiketler/durum dizeleri sunumdur; birincil durum tipli alanlar/ID'ler kullanır.
+- **A07.10 öngörülebilir mutasyon sahipliği:** `GAP` — F-017.
 
-## Cross-domain references
+## Çapraz-alan referansları
 
-- Catalog identity attachment outside factories: F-010/F-013.
-- Hidden placement policy: F-011.
-- Project schema/version normalization: A08/A14, do not duplicate here.
+- Fabrikalar dışında katalog kimliği ekleme: F-010/F-013.
+- Gizli yerleştirme politikası: F-011.
+- Proje şema/sürüm normalizasyonu: A08/A14, burada çoğaltma.
 
-Section audit status: **GAP**.
-Next audit section: **A08 — Persistence / autosave / project isolation**.
+Bölüm denetim durumu: **GAP**.
+Sonraki denetim bölümü: **A08 — Kalıcılık / otomatik kayıt / proje yalıtımı**.

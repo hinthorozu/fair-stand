@@ -1,57 +1,57 @@
-# A20 — Build / CI / deploy audit
+# A20 — Derleme / CI / dağıtım denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Current canonical CI
+## Güncel kanonik CI
 
-`.github/workflows/ci.yml` runs on ROG push and PR to ROG with Node 22:
+`.github/workflows/ci.yml` Node 22 ile ROG push ve ROG'a PR üzerinde çalışır:
 
-1. checkout with full history,
+1. tam geçmişle checkout,
 2. `npm run contract:verify`,
 3. `npm ci`,
 4. `npm test`,
 5. `npm run build`.
 
-Latest canonical ROG push run for baseline SHA `e764732...` is run #83 / id `33792514084`; every listed step completed successfully.
+Taban SHA `e764732...` için son kanonik ROG push çalıştırması çalıştırma #83 / id `33792514084`; listelenen her adım başarıyla tamamlandı.
 
-## Findings
+## Bulgular
 
-### F-041 — P1 — ROG is not protected; green CI is not merge/direct-push enforced
+### F-041 — P1 — ROG korumalı değildir; yeşil CI birleştirme/doğrudan-push zorlanmaz
 
-ROG reports `protected:false`. The CI workflow executes and can fail, but repository governance does not currently require the check before a human with write/merge permission updates ROG. Therefore the universal change gate is technically active but not a complete governance wall.
+ROG `protected:false` bildirir. CI iş akışı çalışır ve başarısız olabilir, ancak depo yönetişimi şu anda yazma/birleştirme izni olan bir insanın ROG'u güncellemesinden önce kontrolü gerektirmez. Bu nedenle evrensel change gate teknik olarak aktiftir ancak tam bir yönetişim duvarı değildir.
 
-### F-042 — P1 — server deployment path does not enforce the canonical CI/gate contract and is not commit-pinned
+### F-042 — P1 — sunucu dağıtım yolu kanonik CI/kapı sözleşmesini zorlamaz ve commit-sabitli değildir
 
-`scripts/install-server.sh` runs in whatever branch is checked out on the server, changes origin, then executes `git pull --ff-only`, `npm ci`, and `npm run build` before serving `dist/` through nginx. It does **not**:
+`scripts/install-server.sh` sunucuda hangisi kontrol edilmişse o dalda çalışır, origin'i değiştirir, sonra `dist/` nginx üzerinden sunulmadan önce `git pull --ff-only`, `npm ci` ve `npm run build` çalıştırır. **Şunları yapmaz**:
 
-- explicitly checkout/verify ROG,
-- pin an audited commit SHA,
-- run `npm run contract:verify`,
-- run `npm test` before deployment.
+- açıkça ROG checkout/doğrulama,
+- denetlenmiş bir commit SHA sabitleme,
+- `npm run contract:verify` çalıştırma,
+- dağıtımdan önce `npm test` çalıştırma.
 
-A server checkout on an unintended branch or a direct-pushed commit can therefore be built/deployed through a path weaker than canonical CI.
+İstenmeyen bir daldaki sunucu checkout'u veya doğrudan-push edilmiş bir commit bu nedenle kanonik CI'dan daha zayıf bir yolla derlenebilir/dağıtılabilir.
 
-## Positive controls
+## Olumlu kontroller
 
-- CI uses deterministic `npm ci`.
-- Node 22 is explicit.
-- CI full-history checkout supports diff-aware change gate.
-- test precedes build.
-- server installer uses strict shell flags, validates nginx, handles SSL and uses `npm ci`.
-- Vite config intentionally splits Three.js vendor code.
+- CI belirleyici `npm ci` kullanır.
+- Node 22 açıktır.
+- CI tam-geçmiş checkout, diff-farkında change gate'i destekler.
+- test derlemeden önce gelir.
+- sunucu yükleyici katı kabuk bayrakları kullanır, nginx doğrular, SSL işler ve `npm ci` kullanır.
+- Vite yapılandırması Three.js satıcı kodunu kasıtlı ayırır.
 
-## Checklist results
+## Kontrol listesi sonuçları
 
-- A20.01 deterministic install: `AUDITED_OK` in CI/deploy (`npm ci`).
-- A20.02 test/build order: `AUDITED_OK` in CI.
-- A20.03 change gate before tests: `AUDITED_OK` in CI.
-- A20.04 current baseline CI green: `AUDITED_OK`.
-- A20.05 CI required before merge: `GAP` — F-041.
-- A20.06 direct push bypass prevented: `GAP` — F-041.
-- A20.07 deploy reproducible/pinned: `GAP` — F-042.
-- A20.08 deploy runs same verification chain: `GAP` — F-042.
-- A20.09 build config intentional: `AUDITED_OK` for current Vite config.
-- A20.10 production deploy smoke/rollback automation: `DECISION_REQUIRED`; installer performs HTTPS reachability check but no release artifact/rollback contract is present.
+- A20.01 belirleyici kurulum: CI/dağıtımda `AUDITED_OK` (`npm ci`).
+- A20.02 test/derleme sırası: CI'da `AUDITED_OK`.
+- A20.03 testlerden önce change gate: CI'da `AUDITED_OK`.
+- A20.04 güncel taban CI yeşil: `AUDITED_OK`.
+- A20.05 birleştirmeden önce CI gerekli: `GAP` — F-041.
+- A20.06 doğrudan push baypası engellenmiş: `GAP` — F-041.
+- A20.07 dağıtım yeniden üretilebilir/sabitli: `GAP` — F-042.
+- A20.08 dağıtım aynı doğrulama zincirini çalıştırır: `GAP` — F-042.
+- A20.09 derleme yapılandırması kasıtlı: güncel Vite yapılandırması için `AUDITED_OK`.
+- A20.10 üretim dağıtım duman/geri alma otomasyonu: `DECISION_REQUIRED`; yükleyici HTTPS erişilebilirlik kontrolü yapar ancak sürüm artefaktı/geri alma sözleşmesi yoktur.
 
-Section audit status: **GAP**.
+Bölüm denetim durumu: **GAP**.

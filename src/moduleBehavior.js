@@ -202,13 +202,13 @@ export function getModuleBehavior(moduleOrType) {
     ? declared
     : { ...declared, ghost: DEFAULT_GHOST_BEHAVIOR };
 
-  // Corner Bankos all enter the scene with the verified customer-facing L orientation.
-  // Keep their geometry and 90-degree rotation behavior unchanged.
+  // Köşe bankolar sahneye doğrulanmış müşteri-önü L yönüyle girer.
+  // Geometri ve 90 derece dönüş davranışı değişmez.
   if (type === 'counter' && module.shape === 'L') {
     return { ...base, defaultRotationDeg: 270 };
   }
 
-  // Only the verified straight Banko family (100/150/200) gets 45-degree turns.
+  // Yalnız doğrulanmış düz Banko ailesi (100/150/200) 45 derece döner.
   if (
     type === 'counter'
     && module.shape !== 'L'

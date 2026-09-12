@@ -1,4 +1,4 @@
-﻿> Migration öncesi envanterdir; aktif canonical tanım `../definitions/wall_shelf_3_100.md` içindedir.
+﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_shelf_3_100.md` içindedir.
 
 # wall_shelf_3_100 — Mevcut Sistem Profili
 
@@ -8,15 +8,15 @@ Bu belge `wall_shelf_3_100` için `Version2` runtime kodunda çalışan bütün 
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `wall_shelf_3_100` |
-| Label | `Raf 100 · 3 Raf` |
+| Katalog anahtarı | `wall_shelf_3_100` |
+| Etiket | `Raf 100 · 3 Raf` |
 | Type | `shelf` |
-| Width | `100 cm` |
+| Genişlik | `100 cm` |
 | Shelf count | `3` |
 | Shelf projection | `38 cm` |
 | Shelf thickness | `3 cm` |
 
-Factory state:
+Oluşturma state:
 
 ```text
 id = generated
@@ -28,22 +28,22 @@ strips[0..6] = 7 editable panel state
 catalogKey = wall_shelf_3_100
 ```
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `wall-editable` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `editable` |
 | Image | `editable` |
-| Renderer policy | `procedural-or-specialized` |
+| Renderer politikası | `procedural-or-specialized` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `recipe` |
-| BOM source | `src/moduleRecipes.js` |
+| Bileşim | `standalone` |
+| BOM kipi | `recipe` |
+| BOM kaynağı | `src/moduleRecipes.js` |
 
-## Behavior / placement
+## Davranış / yerleşim
 
 | Alan | Kod değeri |
 |---|---|
@@ -78,7 +78,7 @@ shelf projection = 38 cm
 shelf thickness = 3 cm
 ```
 
-Her shelf için yalnız canonical sunta shelf mesh'i oluşturulur; renderer ayrı alüminyum front profile eklemez. Her shelf yanında bir LED strip ve iki spotlight oluşturulur. Bütün shelf light görünürlüğü tek `moduleState.shelfLightingOn` boolean'ı ile kontrol edilir.
+Her shelf için yalnız kanonik sunta shelf mesh'i oluşturulur; renderer ayrı alüminyum front profile eklemez. Her shelf yanında bir LED strip ve iki spotlight oluşturulur. Bütün shelf light görünürlüğü tek `moduleState.shelfLightingOn` boolean'ı ile kontrol edilir.
 
 ## Selection / appearance
 
@@ -127,7 +127,7 @@ Lightbox/Mesh ownership için scene rebuild sırasında `fabricGroupId` normaliz
 
 Silinen modül multi-module Lightbox/Mesh owner grubunun parçasıysa rebuild sırasında eksik owner yüzey algılandığında kalan fabric ownership de çözülebilir.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `wall_shelf_3_100` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 

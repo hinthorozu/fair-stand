@@ -1,78 +1,78 @@
-# A08 — Persistence / autosave / project isolation audit
+# A08 — Kalıcılık / otomatik kayıt / proje yalıtımı denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Persistence path
+## Kalıcılık yolu
 
-- Project snapshot: `main.js:buildProjectSnapshot()`
-- Project storage: `src/projectStore.js`
-- Asset storage: `src/assetStore.js`
-- Autosave lifecycle: `src/autosaveController.js`
-- Restore/switch: `main.js:restoreProject()` / `openStoredProject()`
+- Proje anlık görüntüsü: `main.js:buildProjectSnapshot()`
+- Proje depolama: `src/projectStore.js`
+- Varlık depolama: `src/assetStore.js`
+- Otomatik kayıt yaşam döngüsü: `src/autosaveController.js`
+- Geri yükleme/değiştirme: `main.js:restoreProject()` / `openStoredProject()`
 
-## Findings
+## Bulgular
 
-### F-020 — P1 — pending autosave can be discarded during project switch/open
+### F-020 — P1 — bekleyen otomatik kayıt proje değiştirme/açma sırasında atılabilir
 
-Autosave observes changes, waits 5 seconds, then persists. `restoreProject()` begins by calling `autosaveController.disable()`, and `disable()` clears the pending timeout.
+Otomatik kayıt değişiklikleri gözler, 5 saniye bekler, sonra kalıcılaştırır. `restoreProject()` `autosaveController.disable()` çağırarak başlar ve `disable()` bekleyen zaman aşımını temizler.
 
-The project dropdown/open flow does **not** flush/persist the currently active project before opening the target project. Therefore a user can:
+Proje açılır menü/açma akışı, hedef projeyi açmadan önce o anda aktif projeyi **flush/persist etmez**. Bu nedenle bir kullanıcı:
 
-1. edit a saved project,
-2. trigger an autosave-pending state,
-3. switch/open another project before the 5-second timer fires,
-4. have the pending save cancelled by `restoreProject()`.
+1. kaydedilmiş bir projeyi düzenleyebilir,
+2. otomatik-kayıt-bekleyen bir durum tetikleyebilir,
+3. 5-saniye zamanlayıcı ateşlenmeden başka bir projeyi değiştirip/açabilir,
+4. bekleyen kaydın `restoreProject()` tarafından iptal edilmesini görebilir.
 
-The switch confirmation currently confirms navigation only; it does not guarantee pending edits are saved. Existing dropdown integration tests check confirm/open wiring but not this durability case.
+Değiştirme onayı şu anda yalnızca gezinmeyi onaylar; bekleyen düzenlemelerin kaydedileceğini garanti etmez. Mevcut açılır menü entegrasyon testleri onay/açma kablolamasını kontrol eder, bu dayanıklılık durumunu değil.
 
-Impact: recent edits to the project being left can be lost from persistent storage.
+Etki: bırakılan projedeki son düzenlemeler kalıcı depolamadan kaybolabilir.
 
-### F-021 — P2 — project `version` exists but no schema validation/migration path consumes it
+### F-021 — P2 — proje `version` vardır ancak hiçbir şema doğrulama/migrasyon yolu onu tüketmez
 
-Snapshots write `version:1`; `saveProject()` preserves any numeric version (or defaults to 1). `restoreProject()` does not inspect project version and has no migration/normalization pipeline before copying `stand`/`modules` into runtime state.
+Anlık görüntüler `version:1` yazar; `saveProject()` herhangi bir sayısal sürümü korur (veya 1'e varsayar). `restoreProject()` proje sürümünü incelemez ve `stand`/`modules` çalışma zamanı durumuna kopyalanmadan önce migrasyon/normalizasyon hattı yoktur.
 
-Thus the version field currently behaves as metadata rather than an enforced compatibility contract. Missing/legacy fields are handled ad hoc by renderer defaults and `catalogKey` repair.
+Böylece sürüm alanı şu anda zorlanmış bir uyumluluk sözleşmesi değil, meta veri gibi davranır. Eksik/eski alanlar renderer varsayılanları ve `catalogKey` onarımıyla ad hoc ele alınır.
 
-This root finding also owns the project-schema compatibility issue in A14; do not duplicate there unless archive-specific behavior is independent.
+Bu kök bulgu A14'teki proje-şema uyumluluk sorununu da sahiplenir; arşive özel davranış bağımsız olmadıkça orada çoğaltma.
 
-### F-022 — P2 — persistence round-trip is not contract-tested across all special module families
+### F-022 — P2 — kalıcılık gidiş-dönüşü tüm özel modül ailelerinde sözleşme-testli değildir
 
-Current unit/integration tests cover state factories, project UI/switch, selected persistence behaviors and asset flows, but there is no table-driven contract proving that every 45+1 module family survives:
+Güncel birim/entegrasyon testleri durum fabrikalarını, proje UI/değiştirmeyi, seçili kalıcılık davranışlarını ve varlık akışlarını kapsar, ancak her 45+1 modül ailesinin şunu yaşadığını kanıtlayan tablo-güdümlü bir sözleşme yoktur:
 
-`factory/current state -> save snapshot -> load -> restore -> equivalent behavior/identity`
+`fabrika/güncel durum -> kaydet anlık görüntü -> yükle -> geri yükle -> eşdeğer davranış/kimlik`
 
-Special fields at risk include model metadata, catalog identity, shelf lighting, video-wall geometry, illuminated-foam asset/halo state, fabric/glass/image transforms and special placement metadata.
+Risk altındaki özel alanlar arasında model meta verisi, katalog kimliği, raf aydınlatması, video-duvar geometrisi, illuminated-foam varlık/hale durumu, kumaş/cam/görüntü dönüşümleri ve özel yerleştirme meta verisi vardır.
 
-This is a test-coverage finding; it does not assert all current round trips are broken.
+Bu bir test-kapsamı bulgusudur; tüm güncel gidiş-dönüşlerin bozuk olduğunu ileri sürmez.
 
-### F-023 — P2 — project deletion is not atomic across project and asset stores
+### F-023 — P2 — proje silme proje ve varlık depoları arasında atomik değildir
 
-Deletion sequence in main is:
+Main'deki silme sırası:
 
 1. `deleteProjectImageAssets(projectId)`
 2. `deleteProject(projectId)`
 
-These are separate IndexedDB transactions/open calls. If asset deletion succeeds and project deletion fails, the project record remains but its referenced assets are gone. The UI catches the error and reports deletion failure, but the surviving project may already be partially destroyed.
+Bunlar ayrı IndexedDB işlemleri/açma çağrılarıdır. Varlık silme başarılı olup proje silme başarısız olursa, proje kaydı kalır ancak referans verdiği varlıklar gitmiştir. UI hatayı yakalar ve silme başarısızlığını bildirir, ancak hayatta kalan proje zaten kısmen yok edilmiş olabilir.
 
-This is an atomicity/isolation gap. Image deletion for a single asset uses the safer opposite ordering (persist references first, then delete blob), but whole-project deletion is not transactional across both stores.
+Bu bir atomiklik/yalıtım boşluğudur. Tek bir varlık için görüntü silme daha güvenli ters sırayı kullanır (önce referansları kalıcılaştır, sonra blob'u sil), ancak tüm-proje silme her iki depo arasında işlemsel değildir.
 
-## Checklist results
+## Kontrol listesi sonuçları
 
-- **A08.01 complete intended state:** `AUDITED_OK` for current snapshot shape; image blobs intentionally live in separate asset store.
-- **A08.02 equivalent runtime behavior:** `GAP` — F-021/F-022 and F-013 for ambiguous catalog identity.
-- **A08.03 autosave deterministic debounce:** `AUDITED_OK` inside controller: one watch interval, one pending timer, explicit clear/disable/markSaved lifecycle.
-- **A08.04 wrong project overwrite:** `GAP` — F-020 is primarily lost-update, not evidence of writing the old state into the new project. Controller does cancel old timer, which protects against cross-project overwrite but currently sacrifices pending edits.
-- **A08.05 clean new project:** `AUDITED_OK` — autosave disabled, new project id/time created, assets cleared, modules reset before new scene composition.
-- **A08.06 switch transient cleanup:** `AUDITED_OK` for inspected paths — menus close, assets/object URLs reset, scene/stage rebuilt, autosave baseline reset. A09/A10 inspect renderer selection/focus details.
-- **A08.07 delete behavior:** `GAP` — F-023.
-- **A08.08 every special module round-trip:** `GAP` — F-022.
-- **A08.09 failure paths:** `GAP` — project delete atomicity F-023; import failure handling is A14.
-- **A08.10 schema/version upgrade:** `GAP` — F-021.
+- **A08.01 tam hedeflenen durum:** güncel anlık görüntü şekli için `AUDITED_OK`; görüntü blob'ları kasıtlı olarak ayrı varlık deposunda yaşar.
+- **A08.02 eşdeğer çalışma zamanı davranışı:** `GAP` — F-021/F-022 ve belirsiz katalog kimliği için F-013.
+- **A08.03 otomatik kayıt belirleyici debounce:** denetleyici içinde `AUDITED_OK`: bir izleme aralığı, bir bekleyen zamanlayıcı, açık clear/disable/markSaved yaşam döngüsü.
+- **A08.04 yanlış proje üzerine yazma:** `GAP` — F-020 öncelikle kayıp-güncellemedir, eski durumun yeni projeye yazıldığının kanıtı değildir. Denetleyici eski zamanlayıcıyı iptal eder; bu çapraz-proje üzerine yazmayı korur ancak şu anda bekleyen düzenlemeleri feda eder.
+- **A08.05 temiz yeni proje:** `AUDITED_OK` — otomatik kayıt kapalı, yeni proje id/zamanı oluşturulur, varlıklar temizlenir, yeni sahne bileşiminden önce modüller sıfırlanır.
+- **A08.06 değiştirme geçici temizleme:** incelenen yollar için `AUDITED_OK` — menüler kapanır, varlıklar/object URL'ler sıfırlanır, sahne/sahne yeniden kurulur, otomatik kayıt tabanı sıfırlanır. A09/A10 renderer seçim/odak ayrıntılarını inceler.
+- **A08.07 silme davranışı:** `GAP` — F-023.
+- **A08.08 her özel modül gidiş-dönüşü:** `GAP` — F-022.
+- **A08.09 başarısızlık yolları:** `GAP` — proje silme atomikliği F-023; içe aktarma başarısızlık işleme A14.
+- **A08.10 şema/sürüm yükseltme:** `GAP` — F-021.
 
-## Storage schema note
+## Depolama şema notu
 
-Project and asset modules duplicate IndexedDB database/version/store constants and each implements its own `openDb()`. They currently agree (`fair-stand-configurator`, DB v2), but this is a drift risk. A13 owns whether to record it separately after storage-layer cross-check.
+Proje ve varlık modülleri IndexedDB veritabanı/sürüm/depo sabitlerini çoğaltır ve her biri kendi `openDb()` uygulamasını yapar. Şu anda uyuşurlar (`fair-stand-configurator`, DB v2), ancak bu bir sapma riskidir. A13, depolama-katmanı çapraz kontrolünden sonra ayrı kaydedilip edilmeyeceğini sahiplenir.
 
-Section audit status: **GAP**.
-Next audit section: **A09 — Renderer / scene / runtime-derived behavior**.
+Bölüm denetim durumu: **GAP**.
+Sonraki denetim bölümü: **A09 — Renderer / sahne / çalışma-zamanı-türetilmiş davranış**.

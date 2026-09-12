@@ -1,57 +1,57 @@
-# A24 — Final closure / remediation-readiness audit
+# A24 — Nihai kapanış / düzeltme-hazırlık denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Audit closure
+## Denetim kapanışı
 
-All sections **A00 through A24 have now been inspected and classified**. No section remains `NOT_AUDITED` or `IN_PROGRESS` in the audit evidence set.
+**A00'dan A24'e tüm bölümler artık incelenmiş ve sınıflandırılmıştır.** Denetim kanıt kümesinde hiçbir bölüm `NOT_AUDITED` veya `IN_PROGRESS` kalmaz.
 
-This means the **audit is complete**. It does **not** mean the product is remediation/release green.
+Bu, **denetimin tamam** olduğu anlamına gelir. Ürünün düzeltme/sürüm yeşili olduğu anlamına **gelmez**.
 
-## Finding count
+## Bulgu sayısı
 
-Canonical audit ledger at closure:
+Kapanıştaki kanonik denetim defteri:
 
-- **46 open findings** (`F-001` … `F-046`)
+- **46 açık bulgu** (`F-001` … `F-046`)
 - **P0: 0**
 - **P1: 20**
 - **P2: 26**
 - **P3: 0**
 
-Several P1 items are product-policy or architecture blockers rather than immediate runtime failures; severity reflects remediation priority/impact, not an assertion that every item currently breaks the editor.
+Birkaç P1 madde acil çalışma zamanı başarısızlığı değil ürün-politikası veya mimari engeldir; önem düzeltme önceliği/etkisini yansıtır, her maddenin şu anda düzenleyiciyi bozduğu iddiası değildir.
 
-## A24 checklist
+## A24 kontrol listesi
 
-- **A24.01 all A00-A23 inspected/classified:** `AUDITED_OK`.
-- **A24.02 duplicate findings merged to root causes:** `AUDITED_OK`; A23 matrix owns cross-domain clustering.
-- **A24.03 each finding has severity/domain/evidence owner:** `AUDITED_OK` in evidence + `audit/FINDINGS.md`.
-- **A24.04 no silent fix during audit:** `AUDITED_OK`; audit branch changes are audit/evidence only.
-- **A24.05 baseline ROG unchanged during A03-A24 sweep:** `AUDITED_OK`; canonical ROG remains `e764732...`.
-- **A24.06 open P0:** `AUDITED_OK` — none found.
-- **A24.07 open P1 none/accepted exception:** `GAP` — 20 P1 findings remain open; no user acceptance/waiver recorded.
-- **A24.08 unresolved product decisions explicitly visible:** `AUDITED_OK` — especially F-014 BOM classifications and provenance/license decisions.
-- **A24.09 browser E2E completely green:** `GAP` — F-040; no browser E2E harness.
-- **A24.10 clean canonical gate/install/test/build:** `AUDITED_OK` for baseline ROG CI run #83 (`33792514084`): contract gate, `npm ci`, test and build all succeeded.
-- **A24.11 GitHub enforcement wall:** `GAP` — F-041; ROG unprotected.
-- **A24.12 deploy uses same verified artifact/commit chain:** `GAP` — F-042.
+- **A24.01 tüm A00-A23 incelendi/sınıflandırıldı:** `AUDITED_OK`.
+- **A24.02 yinelenen bulgular kök nedenlere birleştirildi:** `AUDITED_OK`; A23 matrisi çapraz-alan kümelemeyi sahiplenir.
+- **A24.03 her bulgunun önem/alan/kanıt sahibi vardır:** kanıt + `audit/FINDINGS.md` içinde `AUDITED_OK`.
+- **A24.04 denetim sırasında sessiz düzeltme yok:** `AUDITED_OK`; denetim dalı değişiklikleri yalnızca denetim/kanıttır.
+- **A24.05 A03-A24 taraması sırasında taban ROG değişmedi:** `AUDITED_OK`; kanonik ROG `e764732...` olarak kalır.
+- **A24.06 açık P0:** `AUDITED_OK` — hiçbiri bulunmadı.
+- **A24.07 açık P1 yok/kabul edilmiş istisna:** `GAP` — 20 P1 bulgu açık kalır; kullanıcı kabulü/feragat kaydı yok.
+- **A24.08 çözülmemiş ürün kararları açıkça görünür:** `AUDITED_OK` — özellikle F-014 BOM sınıflandırmaları ve köken/lisans kararları.
+- **A24.09 tarayıcı E2E tamamen yeşil:** `GAP` — F-040; tarayıcı E2E koşum takımı yok.
+- **A24.10 temiz kanonik kapı/kurulum/test/derleme:** taban ROG CI çalıştırma #83 (`33792514084`) için `AUDITED_OK`: sözleşme kapısı, `npm ci`, test ve derleme hepsi başarılı.
+- **A24.11 GitHub zorlama duvarı:** `GAP` — F-041; ROG korumasız.
+- **A24.12 dağıtım aynı doğrulanmış artefakt/commit zincirini kullanır:** `GAP` — F-042.
 
-## Final status
+## Nihai durum
 
-**AUDIT COMPLETE / REMEDIATION REQUIRED**
+**DENETİM TAMAM / DÜZELTME GEREKLİ**
 
-No P0 emergency was discovered. The system has a strong amount of explicit contract/unit regression infrastructure and a green canonical CI baseline, but the open P1 set prevents a defensible statement that all walls are closed or that release hardening is complete.
+P0 acil durum keşfedilmedi. Sistemin güçlü miktarda açık sözleşme/birim regresyon altyapısı ve yeşil bir kanonik CI tabanı vardır, ancak açık P1 kümesi tüm duvarların kapalı veya sürüm sertleştirmesinin tamam olduğu yönünde savunulabilir bir ifadeyi engeller.
 
-## Recommended remediation order after user authorizes fixes
+## Kullanıcı düzeltmeleri yetkilendirdikten sonra önerilen düzeltme sırası
 
-1. Governance wall: F-005/F-006/F-007/F-041/F-042.
-2. User-data safety: F-020/F-021/F-022/F-023/F-032/F-035/F-036/F-037.
-3. Module identity/state construction: F-010/F-013/F-018/F-019.
-4. Behavior/placement enforcement: F-011/F-015/F-016.
-5. Destructive/UI runtime bugs: F-025/F-027/F-028/F-039.
-6. Browser E2E foundation: F-040, then critical-flow regressions.
-7. BOM completion: F-014/F-029/F-030/F-031 (policy decisions must be user-owned where required).
-8. Asset/dependency/repository hygiene: F-033/F-034/F-038/F-043/F-044/F-045/F-046.
-9. Remaining documentation/architecture debt: F-001/F-002/F-003/F-004/F-008/F-009/F-012/F-017/F-024/F-026.
+1. Yönetişim duvarı: F-005/F-006/F-007/F-041/F-042.
+2. Kullanıcı-veri güvenliği: F-020/F-021/F-022/F-023/F-032/F-035/F-036/F-037.
+3. Modül kimliği/durum kurulumu: F-010/F-013/F-018/F-019.
+4. Davranış/yerleştirme zorlaması: F-011/F-015/F-016.
+5. Yıkıcı/UI çalışma zamanı hataları: F-025/F-027/F-028/F-039.
+6. Tarayıcı E2E temeli: F-040, sonra kritik-akış regresyonları.
+7. BOM tamamlama: F-014/F-029/F-030/F-031 (gerekli yerlerde politika kararları kullanıcıya ait olmalıdır).
+8. Varlık/bağımlılık/depo hijyeni: F-033/F-034/F-038/F-043/F-044/F-045/F-046.
+9. Kalan belgeleme/mimari borç: F-001/F-002/F-003/F-004/F-008/F-009/F-012/F-017/F-024/F-026.
 
-No remediation was performed in A24.
+A24'te düzeltme yapılmadı.

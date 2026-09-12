@@ -1,44 +1,44 @@
-# A23 — Cross-domain conflict matrix
+# A23 — Çapraz-alan çatışma matrisi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Purpose
+## Amaç
 
-A23 checks whether apparently separate A00-A22 findings are actually the same root cause, and whether one fix could create a second-domain regression. Duplicate findings are not opened when an earlier root already owns the conflict.
+A23, görünürde ayrı A00-A22 bulgularının aslında aynı kök neden olup olmadığını ve bir düzeltmenin ikinci-alan regresyonu yaratıp yaratamayacağını kontrol eder. Daha önceki bir kök çatışmayı zaten sahiplendiğinde yinelenen bulgu açılmaz.
 
-## Cross-domain matrix
+## Çapraz-alan matrisi
 
-| Root | Domains crossing | Conflict |
+| Kök | Kesişen alanlar | Çatışma |
 |---|---|---|
-| F-005/F-006/F-007 | governance → architecture/docs/tests | change gate cannot force declarations for every canonical governance/test change |
-| F-010 | catalog → state → UI/composition | catalog/contract can be complete while runtime factory dispatcher is omitted |
-| F-011/F-015/F-016 | behavior → placement → UI/renderer | declared behavior and actual insertion/orientation/special geometry policy are not one enforced model |
-| F-013 | catalog identity → persistence → contract/BOM | ambiguous legacy descriptor can lose exact vine-separator identity |
-| F-017/F-019 | catalog/state → renderer → persistence | duplicated dimensions/direct scene mutation allow renderer/state drift after refactor/catalog change |
-| F-020/F-022/F-023/F-032 | UI lifecycle → autosave → IndexedDB | project switching/deletion/schema ownership are not one transactional persistence boundary |
-| F-025/F-030/F-031 | UI → BOM → production | debug selected-module recipe display can look like Final BOM while no project/relationship BOM exists |
-| F-029 | feature contract → composition → persistence/BOM | automatic wall creates coordinated modules without explicit feature contract/impact surface |
-| F-033/F-034 | assets → deploy → performance/legal | public-file placement controls shipped payload; provenance inventory is incomplete |
-| F-035/F-036/F-037 | import schema → state/storage → security/availability | archive version/basic manifest checks do not validate domain state or bound resource usage |
-| F-039/F-040 | UI/accessibility → browser testing | focus/keyboard issues cannot be reliably guarded without browser interaction tests |
-| F-041/F-042 | CI/change gate → repository/deploy governance | CI can be green while merge/direct-push/deploy paths do not require the same checks |
+| F-005/F-006/F-007 | yönetişim → architecture/docs/tests | change gate her kanonik yönetişim/test değişikliği için bildirim zorlayamaz |
+| F-010 | catalog → state → UI/composition | katalog/sözleşme tam olabilirken çalışma zamanı fabrika dağıtıcısı atlanabilir |
+| F-011/F-015/F-016 | behavior → placement → UI/renderer | bildirilmiş davranış ile gerçek ekleme/yönelim/özel geometri politikası tek zorlanmış model değildir |
+| F-013 | katalog kimliği → persistence → sözleşme/BOM | belirsiz eski tanımlayıcı tam sarmasık-ayırıcı kimliğini kaybedebilir |
+| F-017/F-019 | catalog/state → renderer → persistence | çoğaltılmış ölçüler/doğrudan sahne mutasyonu, yeniden düzenleme/katalog değişikliğinden sonra renderer/durum sapmasına izin verir |
+| F-020/F-022/F-023/F-032 | UI yaşam döngüsü → otomatik kayıt → IndexedDB | proje değiştirme/silme/şema sahipliği tek işlemsel kalıcılık sınırı değildir |
+| F-025/F-030/F-031 | UI → BOM → üretim | hata ayıklama seçili-modül reçete gösterimi, proje/ilişki BOM yokken Final BOM gibi görünebilir |
+| F-029 | özellik sözleşmesi → composition → persistence/BOM | otomatik duvar açık özellik sözleşmesi/etki yüzeyi olmadan eşgüdümlü modüller oluşturur |
+| F-033/F-034 | assets → dağıtım → performans/hukuk | public-dosya yerleşimi gönderilen yükü kontrol eder; köken envanteri eksiktir |
+| F-035/F-036/F-037 | içe aktarma şeması → durum/depolama → güvenlik/kullanılabilirlik | arşiv sürümü/temel manifest kontrolleri alan durumunu doğrulamaz veya kaynak kullanımını sınırlamaz |
+| F-039/F-040 | UI/erişilebilirlik → tarayıcı test | odak/klavye sorunları tarayıcı etkileşim testleri olmadan güvenilir korunamaz |
+| F-041/F-042 | CI/change gate → depo/dağıtım yönetişimi | CI yeşil olabilirken birleştirme/doğrudan-push/dağıtım yolları aynı kontrolleri gerektirmez |
 
-## High-risk remediation dependencies
+## Yüksek-risk düzeltme bağımlılıkları
 
-1. **Persistence cluster:** fix F-020/F-021/F-022/F-023/F-032/F-035/F-036 together under an explicit project schema/transaction strategy; isolated patches can create incompatible saves.
-2. **Module identity/factory cluster:** F-010/F-013/F-019 should be solved before adding more catalog families; otherwise new module work increases parallel registries.
-3. **Placement/behavior cluster:** F-011/F-015/F-016 should share one declarative policy extension rather than type-specific UI patches.
-4. **BOM cluster:** F-014/F-030/F-031 must distinguish product policy decisions from algorithm implementation; do not invent commercial/excluded classifications.
-5. **Governance cluster:** F-005/F-006/F-007/F-041/F-042 must be aligned so the code gate, GitHub merge wall and deploy wall enforce the same contract.
-6. **Browser verification cluster:** F-040 should land before claiming fixes to destructive actions, persistence, import/export, focus or model failure are fully closed.
+1. **Kalıcılık kümesi:** F-020/F-021/F-022/F-023/F-032/F-035/F-036'yı açık bir proje şema/işlem stratejisi altında birlikte düzelt; yalıtılmış yamalar uyumsuz kayıtlar yaratabilir.
+2. **Modül kimliği/fabrika kümesi:** F-010/F-013/F-019 daha fazla katalog ailesi eklemeden önce çözülmelidir; aksi halde yeni modül işi paralel kayıtları artırır.
+3. **Yerleştirme/davranış kümesi:** F-011/F-015/F-016 tipe özel UI yamaları yerine tek bir bildirimsel politika uzantısı paylaşmalıdır.
+4. **BOM kümesi:** F-014/F-030/F-031 ürün politikası kararlarını algoritma uygulamasından ayırmalıdır; ticari/dışlanmış sınıflandırma uydurulmaz.
+5. **Yönetişim kümesi:** F-005/F-006/F-007/F-041/F-042 hizalanmalıdır ki kod kapısı, GitHub birleştirme duvarı ve dağıtım duvarı aynı sözleşmeyi zorlasın.
+6. **Tarayıcı doğrulama kümesi:** F-040, yıkıcı eylemler, kalıcılık, içe/dışa aktarma, odak veya model başarısızlığı düzeltmelerinin tam kapandığını iddia etmeden önce inmelidir.
 
-## P0 check
+## P0 kontrolü
 
-No P0/root cause requiring emergency rollback or evidence of current catastrophic data corruption/security compromise was identified. P1 findings remain numerous and block a clean remediation/release sign-off.
+Acil geri alma gerektiren veya güncel felaket veri bozulması/güvenlik ihlali kanıtı olan P0/kök neden saptanmadı. P1 bulgular çoktur ve temiz bir düzeltme/sürüm onayı engeller.
 
-## Checklist result
+## Kontrol listesi sonucu
 
-Every A00-A22 finding was cross-linked to its owning domain/root. No new independent A23 finding was necessary.
+Her A00-A22 bulgusu sahip olduğu alan/köke çapraz bağlandı. Yeni bağımsız A23 bulgusu gerekmedi.
 
-Section audit status: **GAP — cross-domain analysis complete; no fix performed.**
+Bölüm denetim durumu: **GAP — çapraz-alan analizi tamam; düzeltme yapılmadı.**

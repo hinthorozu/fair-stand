@@ -1,38 +1,38 @@
-# A17 — Performance / bundle / render lifecycle audit
+# A17 — Performans / paket / render yaşam döngüsü denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Baseline
+## Taban
 
-- `scene3d.js` is ~259 KB source and remains the largest application source unit.
-- `main.js` is ~77 KB source.
-- `public/` is ~64.91 MiB at baseline.
-- at least ~30.64 MiB of that public footprint is parked/unreferenced deployment payload under F-033.
-- Three.js is intentionally split into a stable `three-vendor` build chunk and Vite chunk warning limit is configured to 650 KB.
-- editor pixel ratio is capped (1.0 coarse pointers, 1.5 otherwise); directional shadow map is 2048².
+- `scene3d.js` yaklaşık 259 KB kaynaktır ve en büyük uygulama kaynak birimi olarak kalır.
+- `main.js` yaklaşık 77 KB kaynaktır.
+- `public/` tabanda yaklaşık 64.91 MiB'dir.
+- o public ayak izinin en az yaklaşık 30.64 MiB'i F-033 altında park edilmiş/referanssız dağıtım yüküdür.
+- Three.js kasıtlı olarak kararlı bir `three-vendor` derleme parçasına ayrılır ve Vite parça uyarı sınırı 650 KB olarak yapılandırılmıştır.
+- düzenleyici piksel oranı sınırlıdır (1.0 kaba işaretçiler, aksi halde 1.5); yönlü gölge haritası 2048²'dir.
 
-## Lifecycle observations
+## Yaşam döngüsü gözlemleri
 
-- scene is created once at application initialization; project switches rebuild stage/wall state rather than creating another top-level renderer.
-- exhibition-hall rebuild explicitly disposes replaced geometry.
-- ground helper disposal removes geometry/materials.
-- fabric image replacement disposes previous texture maps/source textures on inspected paths.
-- model loader promises intentionally cache templates per model/file to avoid repeated GLB fetch/parse.
-- no concrete project-switch duplicate-listener accumulation was identified in the inspected architecture.
+- sahne uygulama başlatmada bir kez oluşturulur; proje değiştirmeleri başka bir üst-düzey renderer oluşturmak yerine sahne/duvar durumunu yeniden kurar.
+- fuar-salonu yeniden kurulumu değiştirilen geometriyi açıkça imha eder.
+- zemin yardımcı imhası geometri/malzemeleri kaldırır.
+- kumaş görüntü değiştirme, incelenen yollarda önceki doku haritalarını/kaynak dokuları imha eder.
+- model yükleyici promise'leri, tekrarlanan GLB getirme/ayrıştırmayı önlemek için kasıtlı olarak model/dosya başına şablon önbellekler.
+- incelenen mimaride somut bir proje-değiştirme yinelenen-dinleyici birikimi saptanmadı.
 
-This audit did not establish a reproducible Three.js leak in add/delete/rebuild paths, so no speculative leak finding is opened. Browser memory profiling is still part of the missing E2E/performance instrumentation gap.
+Bu denetim ekleme/silme/yeniden kurulum yollarında yeniden üretilebilir bir Three.js sızıntısı kurmadı, bu yüzden spekülatif sızıntı bulgusu açılmaz. Tarayıcı bellek profilleme hâlâ eksik E2E/performans enstrümantasyon boşluğunun parçasıdır.
 
-## Checklist results
+## Kontrol listesi sonuçları
 
-- A17.01 build/public footprint baseline: `GAP` — public footprint recorded, but CI does not publish/retain a production build-size budget/report.
-- A17.02 largest JS modules: `AUDITED_OK` inventory-wise; architecture concentration is F-010/F-011/F-017.
-- A17.03 largest public assets: `GAP` — F-033.
-- A17.04 repeated add/delete resource leaks: `DECISION_REQUIRED` — source contains disposal paths; browser memory regression proof is absent.
-- A17.05 project switching handler/object accumulation: `AUDITED_OK` at source architecture level; one scene instance.
-- A17.06 autosave write rate: `AUDITED_OK` for controller debounce/watch design; durability issue is F-020.
-- A17.07 large image/model handling: `GAP` — F-033/F-037.
-- A17.08 render/update loops bounded: `AUDITED_OK` for inspected continuous loop/config choices; no extra per-project renderer loop found.
-- A17.09 measurable performance regression guard: `GAP` — no automated browser perf/memory budget.
+- A17.01 derleme/public ayak izi tabanı: `GAP` — public ayak izi kaydedildi, ancak CI üretim derleme-boyutu bütçesi/raporu yayımlamaz/saklamaz.
+- A17.02 en büyük JS modülleri: envanter olarak `AUDITED_OK`; mimari yoğunlaşma F-010/F-011/F-017.
+- A17.03 en büyük public varlıklar: `GAP` — F-033.
+- A17.04 tekrarlanan ekleme/silme kaynak sızıntıları: `DECISION_REQUIRED` — kaynak imha yolları içerir; tarayıcı bellek regresyon kanıtı yoktur.
+- A17.05 proje değiştirme işleyici/nesne birikimi: kaynak mimari düzeyinde `AUDITED_OK`; bir sahne örneği.
+- A17.06 otomatik kayıt yazma hızı: denetleyici debounce/izleme tasarımı için `AUDITED_OK`; dayanıklılık sorunu F-020.
+- A17.07 büyük görüntü/model işleme: `GAP` — F-033/F-037.
+- A17.08 render/güncelleme döngüleri sınırlı: incelenen sürekli döngü/yapılandırma seçimleri için `AUDITED_OK`; ek proje-başına renderer döngüsü bulunmadı.
+- A17.09 ölçülebilir performans regresyon koruması: `GAP` — otomatik tarayıcı perf/bellek bütçesi yok.
 
-Section audit status: **GAP**.
+Bölüm denetim durumu: **GAP**.

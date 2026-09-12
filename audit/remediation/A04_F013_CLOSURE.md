@@ -1,59 +1,59 @@
-# A04 F-013 closure
+# A04 F-013 kapanışı
 
-Finding: **F-013 — Exact catalog identity ambiguous for normal vs vine separators when `catalogKey` is absent**
+Bulgu: **F-013 — `catalogKey` yokken düz vs sarmaşık separatör katalog kimliği belirsiz**
 
-Status: **CLOSED / POST-MERGE VERIFIED**
+Durum: **CLOSED / POST-MERGE VERIFIED**
 
-## Remediation
+## Düzeltme
 
-- `src/catalog.js` now includes `modelFile` in normalized catalog identity matching.
-- Legacy/keyless separator descriptors can therefore distinguish:
-  - `wall_separator_100` from `wall_separator_100_sarmasik`,
-  - `wall_separator_50` from `wall_separator_50_sarmasik`.
-- `src/designState.js` canonical construction resolves catalog identity from the input descriptor and attaches a valid canonical `catalogKey` whenever the runtime module corresponds to a catalog product.
-- Canonical construction omits `catalogKey` for true non-catalog runtime objects instead of persisting null/undefined identity.
-- `src/main.js` restore normalization repairs missing/invalid catalog identity when it can be resolved and deletes unresolved identity fields.
-- `illuminated-foam` remains the explicit non-catalog runtime object and therefore remains keyless.
-- No catalog dimensions, module factory geometry, placement arithmetic, renderer appearance or BOM classification was intentionally changed by F-013.
+- `src/catalog.js` artık normalize edilmiş katalog kimliği eşlemesine `modelFile` ekler.
+- Eski/anahtarsız ayırıcı tanımlayıcıları bu nedenle şunları ayırt edebilir:
+  - `wall_separator_100` ile `wall_separator_100_sarmasik`,
+  - `wall_separator_50` ile `wall_separator_50_sarmasik`.
+- `src/designState.js` kanonik inşası, katalog kimliğini girdi tanımlayıcısından çözer ve runtime modül bir katalog ürününe karşılık geldiğinde geçerli bir kanonik `catalogKey` ekler.
+- Kanonik inşa, null/undefined kimliği kalıcılaştırmak yerine gerçek katalog dışı runtime nesneleri için `catalogKey` atlar.
+- `src/main.js` geri yükleme normalizasyonu, çözülebildiğinde eksik/geçersiz katalog kimliğini onarır ve çözülemeyen kimlik alanlarını siler.
+- `illuminated-foam` açık katalog dışı runtime nesnesi olarak kalır ve bu nedenle anahtarsız kalır.
+- F-013 tarafından hiçbir katalog ölçüsü, modül fabrika geometrisi, yerleşim aritmetiği, renderer görünümü veya BOM sınıflandırması kasıtlı olarak değiştirilmedi.
 
-## Regression evidence
+## Regresyon kanıtı
 
-Targeted coverage includes:
+Hedefli kapsam şunları içerir:
 
-- `test/catalogSingleSource.test.js` — verifies exact normal versus vine separator resolution through `modelFile`.
-- `test/moduleStateConstructionRegistry.test.js` — verifies all 45 catalog descriptors receive their canonical `catalogKey` without callers explicitly supplying the key; non-catalog illuminated foam has no `catalogKey` property; automatic-equivalent descriptors resolve canonical identity.
-- `e2e/f010-module-construction.spec.mjs` — Chromium verifies persisted automatic-wall modules and real catalog-picker creation carry canonical catalog identity.
+- `test/catalogSingleSource.test.js` — `modelFile` üzerinden tam normal ile sarmaşık ayırıcı çözümlemesini doğrular.
+- `test/moduleStateConstructionRegistry.test.js` — 45 katalog tanımlayıcısının tümünün, çağıranlar key'i açıkça vermeden kanonik `catalogKey` aldığını doğrular; katalog dışı illuminated foam'un `catalogKey` özelliği yoktur; otomatik-eşdeğer tanımlayıcılar kanonik kimliği çözer.
+- `e2e/f010-module-construction.spec.mjs` — Chromium, kalıcı otomatik-duvar modüllerinin ve gerçek katalog-seçici oluşturmanın kanonik katalog kimliği taşıdığını doğrular.
 
-The full unit/integration suite and production build passed on the final PR head and again after merge.
+Tam birim/entegrasyon paketi ve üretim derlemesi son PR head'de ve birleştirmeden sonra yeniden geçti.
 
-## Integration with current ROG
+## Güncel ROG ile entegrasyon
 
-PR #53 was originally prepared before A03/F-012 closure. Before merge it was synchronized with the then-current `ROG` (`d6f9b32e50948b257226e5414074cc95be7246e0`). The only overlapping changed file was `.github/change-contract.json`; A03 runtime changes were preserved unchanged.
+PR #53 ilk olarak A03/F-012 kapanışından önce hazırlandı. Birleştirmeden önce o sıradaki güncel `ROG` (`d6f9b32e50948b257226e5414074cc95be7246e0`) ile senkronize edildi. Örtüşen tek değişen dosya `.github/change-contract.json` idi; A03 runtime değişiklikleri olduğu gibi korundu.
 
-After synchronization, the change gate required two newly reachable A03 review surfaces (`test/sceneSurroundSingleSource.test.js` and `audit/remediation/A03_CLOSURE.md`) to be declared. The declaration was updated and the final PR CI passed completely. This was governance metadata alignment, not a product regression.
+Senkronizasyondan sonra change gate, yeni erişilebilir iki A03 inceleme yüzeyinin (`test/sceneSurroundSingleSource.test.js` ve `audit/remediation/A03_CLOSURE.md`) bildirilmesini istedi. Bildirim güncellendi ve son PR CI tamamen geçti. Bu yönetişim üst veri hizalamasıydı, bir ürün regresyonu değil.
 
-## CI and merge evidence
+## CI ve birleştirme kanıtı
 
-- implementation PR: **#53 — Enforce canonical catalogKey identity**
-- final implementation head: `0f6b95f5163bc30377862882a7e5bf6724b65463`
-- final PR CI: **#225 / run `33976413653` / completed / success**
+- uygulama PR: **#53 — Enforce canonical catalogKey identity**
+- son uygulama head: `0f6b95f5163bc30377862882a7e5bf6724b65463`
+- son PR CI: **#225 / run `33976413653` / completed / success**
   - change contract gate: success
   - full unit/integration test suite: success
   - build: success
   - Playwright runner + Chromium install: success
   - Chromium E2E: success
-- merged to `ROG` as `238c2946d9e09451f22d040dd04a340cde7991a9`
-- post-merge `ROG` CI: **#226 / run `33976491702` / completed / success**
+- `ROG`'a `238c2946d9e09451f22d040dd04a340cde7991a9` olarak birleştirildi
+- birleştirme sonrası `ROG` CI: **#226 / run `33976491702` / completed / success**
   - change contract gate: success
   - full unit/integration test suite: success
   - build: success
   - Playwright runner + Chromium install: success
   - Chromium E2E: success
 
-## Result
+## Sonuç
 
-F-013 satisfies the repository closure rule: implementation, targeted regression, full suite, build, PR CI, merge and post-merge verification are complete.
+F-013 depo kapanış kuralını karşılar: uygulama, hedefli regresyon, tam paket, derleme, PR CI, birleştirme ve birleştirme sonrası doğrulama tamamdır.
 
 **F-013 is CLOSED.**
 
-A04 remains open because **F-014 — 17 active module contracts require final BOM classification** remains `OPEN / DECISION_REQUIRED`.
+A04 açık kalır çünkü **F-014 — 17 active module contracts require final BOM classification** hâlâ `OPEN / DECISION_REQUIRED`'dır.

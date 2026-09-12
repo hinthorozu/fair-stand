@@ -1,6 +1,6 @@
 # parke — Aile notu
 
-ITEM_LIST’teki eski tek “Parke” satırı runtime’da üç `floorType` idi. Canonical Item’lar:
+ITEM_LIST’teki eski tek “Parke” satırı runtime’da üç `floorType` idi. Kanonik Item’lar:
 
 - [parke-acik](parke-acik.md)
 - [parke-sari](parke-sari.md)

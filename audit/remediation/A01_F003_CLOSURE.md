@@ -1,30 +1,30 @@
-# A01 / F-003 Remediation Closure
+# A01 / F-003 Düzeltme Kapanışı
 
-Finding: `F-003 — roadmaps duplicate canonical production dimensions/recipe facts`
-Severity: P2
-Branch: `remediation/a01-f003-roadmap-source-truth`
+Bulgu: `F-003 — roadmaps duplicate canonical production dimensions/recipe facts`
+Önem: P2
+Dal: `remediation/a01-f003-roadmap-source-truth`
 PR: `#38`
-Starting ROG: `d19118d38a8330546fdba4037ebf2bcc56b0b7bf`
+Başlangıç ROG: `d19118d38a8330546fdba4037ebf2bcc56b0b7bf`
 
-## Fix
+## Düzeltme
 
-- Removed duplicated physical production measurements and fixed recipe quantities from `ROADMAP.md`.
-- Removed the duplicated production dataset from `ROADMAP_PHASE_4.md` while preserving planning/status/acceptance intent.
-- Both roadmaps now explicitly point physical production metadata to `src/productionParts.js`, recipe quantities/part references to `src/moduleRecipes.js`, and BOM policy to `src/moduleContracts.js`.
-- Added `test/roadmapProductionSourceOfTruth.test.js` to reject known duplicated production-dataset markers in roadmaps and require canonical owner references.
+- `ROADMAP.md` içinden yinelenen fiziksel üretim ölçüleri ve sabit reçete miktarları kaldırıldı.
+- Planlama/durum/kabul niyeti korunarak `ROADMAP_PHASE_4.md` içinden yinelenen üretim veri seti kaldırıldı.
+- Her iki yol haritası artık fiziksel üretim üst verisini `src/productionParts.js`'e, reçete miktarları/parça referanslarını `src/moduleRecipes.js`'e ve BOM politikasını `src/moduleContracts.js`'e açıkça yönlendirir.
+- Yol haritalarındaki bilinen yinelenen üretim-veri-seti işaretlerini reddetmek ve kanonik sahip referanslarını zorunlu kılmak için `test/roadmapProductionSourceOfTruth.test.js` eklendi.
 
-## Verification
+## Doğrulama
 
-Implementation head: `8775359518c99410b49e03c9d47ef9ee4a6e6b14`
+Uygulama head: `8775359518c99410b49e03c9d47ef9ee4a6e6b14`
 PR CI: `#97 / 33799825728`
 
 - change contract gate: passed
 - npm ci: passed
-- npm test: passed (includes roadmap source-of-truth regression)
+- npm test: passed (yol haritası tek-kaynak regresyonunu içerir)
 - npm run build: passed
 
-## Result
+## Sonuç
 
 `F-003: CLOSED`
 
-Post-merge ROG CI is required before proceeding to F-004.
+F-004'e geçmeden önce birleştirme sonrası ROG CI gereklidir.

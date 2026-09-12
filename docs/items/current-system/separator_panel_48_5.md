@@ -7,7 +7,7 @@ Bu belge güncel `Version2` runtime'ını Item Contract checklist'inin 18 alanı
 - `name = Separatör Paneli 48,5 × 47 cm`
 - `type = separator-panel`
 - `unit = adet`
-- Canonical source: `src/productionParts.js`.
+- Kanonik source: `src/productionParts.js`.
 
 ## 2. Intrinsic properties — VAR
 - `widthCm = 48.5`
@@ -19,7 +19,7 @@ Bu belge güncel `Version2` runtime'ını Item Contract checklist'inin 18 alanı
 - MDF product decision is user-confirmed. Separator default color is the existing separator-specific runtime default formerly held by `DEFAULT_SEPARATOR_COLOR`.
 
 ## 3. Default state — VAR / parent-owned
-The leaf production Item has no independent project state. `createSeparatorModuleState(50)` creates the parent separator surface and now derives its initial `#c79b63` color from this canonical Item default.
+The leaf production Item has no independent project state. `createSeparatorModuleState(50)` creates the parent separator surface and now derives its initial `#c79b63` color from this kanonik Item default.
 
 ## 4. Factory / creation — UYGULANMIYOR at leaf
 No `separator_panel_48_5` instance factory exists. Parent `separator` state is created through `createSeparatorModuleState()` / `MODULE_STATE_FACTORIES`.
@@ -54,10 +54,10 @@ Wall insertion/reflow belongs to the parent separator module. No leaf relationsh
 ## 14. BOM / composition — VAR
 - `separator:50` contains `separator_panel_48_5 × 1`.
 - Quantity ownership remains in `src/moduleRecipes.js`.
-- Recipe expansion resolves metadata through canonical `itemKey` → `getProductionItem()`.
+- Recipe expansion resolves metadata through kanonik `itemKey` → `getProductionItem()`.
 
 ## 15. Renderer / asset / override boundary — VAR
-`createSeparatorModule()` renders procedural rails/slats and consumes `surfaceState.color`. The renderer does not use this Item's dimensions as geometry source-of-truth. Runtime/user color changes are explicit state/render overrides and do not mutate the canonical Item default.
+`createSeparatorModule()` renders procedural rails/slats and consumes `surfaceState.color`. The renderer does not use this Item's dimensions as geometry source-of-truth. Runtime/user color changes are explicit state/render overrides and do not mutate the kanonik Item default.
 
 ## 16. Runtime owners — VAR
 - product metadata/defaults: `src/productionParts.js`
@@ -71,4 +71,4 @@ Wall insertion/reflow belongs to the parent separator module. No leaf relationsh
 `test/separatorPanelsItemContract.test.js` verifies identity, exact `48.5 × 47 × 0.8`, `material = mdf`, `defaultColor = 0xc79b63`, state default-color consumption, recipe quantity parity and expanded metadata.
 
 ## 18. Open state / decisions / completion
-No unresolved Item property remains in this batch. Canonical Item owns verified intrinsic properties/defaults; parent state consumes the canonical default; specialized renderer/state overrides remain allowed.
+No unresolved Item property remains in this batch. Kanonik Item owns verified intrinsic properties/defaults; parent state consumes the kanonik default; specialized renderer/state overrides remain allowed.

@@ -1,4 +1,4 @@
-> Migration �ncesi envanterdir; aktif canonical tan�m `../definitions/wall_200.md` i�indedir.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_200.md` içindedir.
 
 # wall_200 — Mevcut Sistem Profili
 
@@ -10,8 +10,8 @@ Bu belge `wall_200` için mevcut çalışan sistemdeki kimlik, state, davranış
 
 | Alan | Mevcut değer |
 |---|---|
-| Catalog key | `wall_200` |
-| Label | `Düz Panel 200` |
+| Katalog anahtarı | `wall_200` |
+| Etiket | `Düz Panel 200` |
 | Type | `flat-panel` |
 | Nominal genişlik | `200 cm` |
 | Stand yüksekliği | `350 cm` |
@@ -39,7 +39,7 @@ Item-contract karşılığı:
 
 `itemKey` ve `class` bugün runtime state alanı değildir; Item mimarisi seviyesindeki kavramsal kimliktir.
 
-Canonical kaynaklar:
+Kanonik kaynaklar:
 
 - `src/catalog.js`
 - `src/moduleContracts.js`
@@ -122,7 +122,7 @@ Kaynak:
 
 ---
 
-## 4. Canonical behavior
+## 4. Kanonik behavior
 
 `wall_200`, `flat-panel` olduğu için `WALL_BEHAVIOR` kullanır.
 
@@ -170,7 +170,7 @@ Kaynak:
 0° → 90° → 180° → 270° → 0°
 ```
 
-Canonical duvar orientation'ları:
+Kanonik duvar orientation'ları:
 
 ```text
 back  =   0°
@@ -240,7 +240,7 @@ Kaynak:
 
 ## 7. Hareket
 
-Canonical move snap:
+Kanonik move snap:
 
 ```text
 50 cm
@@ -899,7 +899,7 @@ Kaynaklar:
 
 ## 31. Ghost / sürükleme önizlemesi
 
-Canonical ghost:
+Kanonik ghost:
 
 ```text
 kind = silhouette
@@ -1070,7 +1070,7 @@ Kaynak:
 
 ## 37. BOM — normal straight wall_200 recipe
 
-`wall_200` canonical recipe:
+`wall_200` kanonik recipe:
 
 ```text
 recipeId = wall-straight-200
@@ -1123,7 +1123,7 @@ Bu nedenle yalnız metadata'nın mevcut olması şu anlama gelmez:
 runtime Raw BOM gerçek placement ilişkisini okuyup panel_197'yi otomatik panel_corner_192 ile değiştiriyor
 ```
 
-Bu dönüşüm bugün canonical project Final BOM seviyesinde tamamlanmış değildir.
+Bu dönüşüm bugün kanonik project Final BOM seviyesinde tamamlanmış değildir.
 
 Kaynak:
 
@@ -1148,7 +1148,7 @@ Dolayısıyla Raw BOM:
 - normal straight recipe items'ı gösterir,
 - placement graph'ından gerçek köşe ilişkisi türetmez,
 - `innerCornerPanelPartId` metadata'sını otomatik replacement'a çevirmek zorunda değildir,
-- canonical project-level Final BOM değildir.
+- kanonik project-level Final BOM değildir.
 
 Kaynaklar:
 
@@ -1185,7 +1185,7 @@ connector_double
 connector_corner
 ```
 
-adetlerini canonical Final BOM'a dönüştüren tam project-level ilişki resolver'ı henüz yoktur.
+adetlerini kanonik Final BOM'a dönüştüren tam project-level ilişki resolver'ı henüz yoktur.
 
 Kaynaklar:
 
@@ -1247,7 +1247,7 @@ Kaynaklar:
 | Raw BOM recipe | ✅ |
 | Köşe panel varyant metadata'sı | ✅ |
 | Relationship'tan otomatik tam connector BOM | ❌ |
-| Canonical project Final BOM | ❌ |
+| Kanonik project Final BOM | ❌ |
 
 ---
 
@@ -1337,4 +1337,4 @@ imageAssetId        → remap edilir
 fabricImageAssetId  → aynı özel remap yoluna dahil değildir
 ```
 
-Bu belge `wall_200` için mevcut sistemi tanımlar; yeni Item contract implementasyonu yapılırken bu davranışların hangilerinin korunacağı ve hangilerinin canonical hale getirileceği ayrıca kararlaştırılmalıdır.
+Bu belge `wall_200` için mevcut sistemi tanımlar; yeni Item contract implementasyonu yapılırken bu davranışların hangilerinin korunacağı ve hangilerinin kanonik hale getirileceği ayrıca kararlaştırılmalıdır.

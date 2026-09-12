@@ -200,7 +200,7 @@ function applyVariantItemReplacements(items, replacements = [], recipeId = 'unkn
 function resolveRecipeItemsForPanelVariant(recipe, panelVariant = 'straight') {
   if (panelVariant !== 'inner-corner') return recipe.items;
 
-  // Canonical inner-corner Item metadata activates the verified 1:1 panel replacement.
+  // Kanonik iç-köşe Item üstverisi, doğrulanmış 1:1 panel değişimini açar.
   const cornerPanelItemKey = recipe?.variants?.innerCornerPanelItemKey ?? null;
   if (!cornerPanelItemKey) return recipe.items;
 

@@ -1350,8 +1350,8 @@ async function restoreProject(project) {
   moduleContextMenu.close();
   moduleContextMenu.closePicker();
 
-  // Project image URLs must exist before the scene is rebuilt.
-  // Otherwise stored imageAssetId values cannot resolve on the first open.
+  // Sahne yeniden kurulmadan önce proje görsel URL'leri hazır olmalı.
+  // Yoksa kayıtlı imageAssetId ilk açılışta çözülemez.
   await loadAssetsForActiveProject();
 
   if (currentStand) {

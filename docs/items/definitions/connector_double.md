@@ -1,8 +1,8 @@
 # connector_double — Item Contract Migration
 
-Bu belge `docs/items/current-system/connector_double.md` içindeki migration öncesi kod haritasını Item Contract'a map eder ve uygulanmış canonical cutover durumunu kaydeder.
+Bu belge `docs/items/current-system/connector_double.md` içindeki migration öncesi kod haritasını Item Contract'a map eder ve uygulanmış kanonik geçiş durumunu kaydeder.
 
-## 1. Canonical kimlik
+## 1. Kanonik kimlik
 
 | Alan | Değer |
 |---|---|
@@ -13,10 +13,10 @@ Bu belge `docs/items/current-system/connector_double.md` içindeki migration ön
 | Parametrik | Hayır |
 | `unit` | `adet` |
 | Metadata | `connectorType = double` |
-| Project instance | Uygulanmıyor |
+| Proje örneği | Uygulanmıyor |
 | Renderer identity | Uygulanmıyor |
 
-Migration öncesi stabil kimlik `partId = connector_double` idi. Cutover ile aynı ürün kimliği canonical `itemKey = connector_double` alanına taşındı.
+Migration öncesi stabil kimlik `partId = connector_double` idi. Cutover ile aynı ürün kimliği kanonik `itemKey = connector_double` alanına taşındı.
 
 ## 2. Fixed parent recipe kullanımı
 
@@ -24,9 +24,9 @@ Mevcut çalışan sistemde `connector_double` hiçbir sabit `moduleRecipes` pare
 
 Migration mevcut reçetelere tahmini `connector_double` miktarı eklemez.
 
-## 3. Canonical BOM çözümü
+## 3. Kanonik BOM çözümü
 
-`connector_double` canonical Tekil production Item'dır. `src/productionParts.js` içindeki mevcut `resolveConnectorBom()` resolver'ı açıkça verilen `double + quantity` girdisini canonical Item satırına çözer:
+`connector_double` kanonik Tekil production Item'dır. `src/productionParts.js` içindeki mevcut `resolveConnectorBom()` resolver'ı açıkça verilen `double + quantity` girdisini kanonik Item satırına çözer:
 
 ```text
 connectorType = double + quantity
@@ -39,23 +39,23 @@ Bu resolver quantity üretmez veya tahmin etmez; quantity çağıran tarafından
 
 Bu Item'ın migration completion'ı sahnede ayrı mesh olarak görünmesine veya mevcut bir parent reçetede zorunlu olarak kullanılmasına bağlı değildir. Mevcut çalışan kodda olmayan kullanım/quantity kuralı migration sırasında icat edilmez.
 
-## 4. State / persistence / behavior / renderer
+## 4. State / kalıcılık / davranış / renderer
 
-Mevcut sistemde bağımsız `connector_double` project instance/state/persistence/behavior/mesh identity bulunmadığı için bu alanlar **uygulanmıyor**. Migration bunları icat etmez.
+Mevcut sistemde bağımsız `connector_double` proje örneği/state/kalıcılık/behavior/mesh identity bulunmadığı için bu alanlar **uygulanmıyor**. Migration bunları icat etmez.
 
-## 5. Uygulanan cutover
+## 5. Uygulanan geçiş
 
-- `src/productionParts.js`: canonical `itemKey = connector_double`.
-- `connectorType = double` canonical Item kimliğine çözülür.
+- `src/productionParts.js`: kanonik `itemKey = connector_double`.
+- `connectorType = double` kanonik Item kimliğine çözülür.
 - `resolveConnectorBom()` explicit quantity ile `itemKey + quantity + unit` BOM satırı üretir.
 - Fixed parent recipe kullanımı yoktur; bu alan mevcut sistem için uygulanmıyor.
 - Mevcut reçetelere tahmini quantity eklenmez.
 
-## 6. Regression sözleşmesi
+## 6. Regresyon sözleşmesi
 
 Testler şunları doğrular:
 
-- canonical kimlik `itemKey`dir; `partId` yoktur.
+- kanonik kimlik `itemKey`dir; `partId` yoktur.
 - `connectorType = double` doğru Item'a çözülür.
 - resolver explicit quantity ile gerçek `connector_double` BOM satırı üretir.
 - quantity eksik/0 ise fail eder; miktar uydurmaz.

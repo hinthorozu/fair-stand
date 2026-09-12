@@ -1,58 +1,58 @@
-# A09 — Renderer / scene / runtime-derived behavior audit
+# A09 — Renderer / sahne / çalışma-zamanı-türetilmiş davranış denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Renderer architecture observed
+## Gözlenen renderer mimarisi
 
-`scene3d.js` currently owns:
+`scene3d.js` şu anda şunları sahiplenir:
 
-- Three.js scene/cameras/controls/render loop
-- stage/floor/grid/wall guides
-- procedural module renderers
-- GLB model loaders and cached templates
-- TV/media/illuminated-foam renderers
-- selection/raycasting/context-menu context creation
-- drag preview/drop planning integration
-- surface appearance mutation and texture application
-- renderer-side resource disposal
+- Three.js sahne/kameralar/kontroller/render döngüsü
+- sahne/zemin/ızgara/duvar kılavuzları
+- yordamsal modül renderer'ları
+- GLB model yükleyicileri ve önbellekli şablonlar
+- TV/medya/illuminated-foam renderer'ları
+- seçim/ışın izleme/bağlam-menüsü bağlam oluşturma
+- sürükleme önizleme/bırakma planlama entegrasyonu
+- yüzey görünüm mutasyonu ve doku uygulama
+- renderer-yanı kaynak imha
 
-This concentration is functional but creates several cross-domain ownership couplings already tracked in F-011/F-017.
+Bu yoğunlaşma işlevseldir ancak F-011/F-017'de zaten izlenen birkaç çapraz-alan sahiplik bağlanması yaratır.
 
-## Findings
+## Bulgular
 
-### F-024 — P2 — model load failure leaves model-backed modules effectively invisible with console-only failure
+### F-024 — P2 — model yükleme başarısızlığı, model-destekli modülleri yalnızca konsol başarısızlığıyla fiilen görünmez bırakır
 
-Several GLB-backed module renderers create a transparent selection proxy, then asynchronously attach the actual GLB. On load failure the handlers generally only `console.warn(...)`; no visible fallback geometry/status is promoted to the user.
+Birkaç GLB-destekli modül renderer'ı şeffaf bir seçim vekili oluşturur, sonra asıl GLB'yi eşzamansız ekler. Yükleme başarısızlığında işleyiciler genellikle yalnızca `console.warn(...)` yapar; kullanıcıya görünür yedek geometri/durum yükseltilmez.
 
-Examples include indoor plant, coat rack, kettle and other cached GLB families. Because the proxy material is intentionally invisible, a missing/corrupt/unavailable model can leave a persisted module occupying placement/collision space without visible product geometry.
+Örnekler arasında iç mekan bitkisi, coat rack, kettle ve diğer önbellekli GLB aileleri vardır. Vekil malzemesi kasıtlı olarak görünmez olduğu için, eksik/bozuk/erişilemez bir model, görünür ürün geometrisi olmadan yerleştirme/çarpışma alanı kaplayan kalıcı bir modül bırakabilir.
 
-The cached loader promises are also retained after rejection, so a transient first load failure remains a rejected cached promise for subsequent attempts during that page session.
+Önbellekli yükleyici promise'leri reddedildikten sonra da tutulur, böylece geçici bir ilk yükleme başarısızlığı, o sayfa oturumunda sonraki denemeler için reddedilmiş önbellekli promise olarak kalır.
 
-This is a resilience/observability finding, not evidence that committed public assets are currently missing.
+Bu bir dayanıklılık/gözlemlenebilirlik bulgusudur; işlenmiş public varlıkların şu anda eksik olduğunun kanıtı değildir.
 
-## Checklist results
+## Kontrol listesi sonuçları
 
-- **A09.01 state-driven rebuild:** `AUDITED_OK` for current module families. Rebuild consumes module state plus canonical catalog/config values.
-- **A09.02 renderer only visualizes:** `GAP` — F-017; scene3d directly mutates persistent editable surface state.
-- **A09.03 GLB/procedural availability:** `GAP` — committed model paths inspected, but failure fallback/feedback is inadequate (F-024). Asset existence/license is A13/A21.
-- **A09.04 renderer-only appearance hacks:** `GAP` — renderer contains many visual constants appropriately, but module-specific interaction/placement routing is also embedded; F-011. Runtime dimension duplication for LED/model families references F-019.
-- **A09.05 loading failure:** `GAP` — F-024.
-- **A09.06 async race / stale scene:** `GAP/P2 observation` — some async model attach paths check `group.parent` before attaching after load, while others do not. Detached-group attachment is primarily a resource-lifecycle/performance risk; A17 classifies it rather than opening a duplicate here.
-- **A09.07 disposal:** `IN_SCOPE_A17` — explicit disposal helpers exist; full geometry/material/texture/shared-template correctness audited in performance section.
-- **A09.08 repeated stage rebuild:** `AUDITED_OK` at functional level — stage/wall groups and selection are cleared/rebuilt rather than knowingly accumulated. Resource correctness deferred A17.
-- **A09.09 resize/DPR:** `AUDITED_OK` at current code level — renderer pixel ratio is capped (1 coarse / 1.5 otherwise), camera fit uses container aspect, resize logic exists. Browser E2E validates actual resize A19.
-- **A09.10 capture/render:** `AUDITED_OK` at source level — current-view PNG capture temporarily uses requested scale and restores editor dimensions/state; actual browser export is A19.
-- **A09.11 specialized renderers:** `GAP` only where common ownership rules are bypassed: F-011, F-017, F-019. No additional one-off persistent rule was separated into a new finding.
-- **A09.12 runtime-only behavior:** `AUDITED_OK` for current module set — no live clock/timer module currently exists. Shelf/fabric/foam settings that affect future rebuild are intentionally persistent.
+- **A09.01 durum-güdümlü yeniden kurulum:** güncel modül aileleri için `AUDITED_OK`. Yeniden kurulum, modül durumu artı kanonik katalog/yapılandırma değerlerini tüketir.
+- **A09.02 renderer yalnızca görselleştirir:** `GAP` — F-017; scene3d kalıcı düzenlenebilir yüzey durumunu doğrudan değiştirir.
+- **A09.03 GLB/yordamsal kullanılabilirlik:** `GAP` — işlenmiş model yolları incelendi, ancak başarısızlık yedeği/geri bildirimi yetersizdir (F-024). Varlık varlığı/lisans A13/A21.
+- **A09.04 yalnızca-renderer görünüm hack'leri:** `GAP` — renderer birçok görsel sabiti uygun biçimde içerir, ancak modüle özel etkileşim/yerleştirme yönlendirmesi de gömülüdür; F-011. LED/model aileleri için çalışma zamanı ölçü çoğaltması F-019'a referans verir.
+- **A09.05 yükleme başarısızlığı:** `GAP` — F-024.
+- **A09.06 eşzamansız yarış / bayat sahne:** `GAP/P2 gözlem` — bazı eşzamansız model ekleme yolları yüklemeden sonra eklemeden önce `group.parent` kontrol eder, diğerleri etmez. Ayrılmış-grup ekleme öncelikle bir kaynak-yaşam-döngüsü/performans riskidir; A17 burada yinelenen açmak yerine onu sınıflandırır.
+- **A09.07 imha:** `IN_SCOPE_A17` — açık imha yardımcıları vardır; tam geometri/malzeme/doku/paylaşılan-şablon doğruluğu performans bölümünde denetlenir.
+- **A09.08 tekrarlanan sahne yeniden kurulumu:** işlevsel düzeyde `AUDITED_OK` — sahne/duvar grupları ve seçim bilinçli biriktirilmek yerine temizlenir/yeniden kurulur. Kaynak doğruluğu A17'ye bırakıldı.
+- **A09.09 yeniden boyutlandırma/DPR:** güncel kod düzeyinde `AUDITED_OK` — renderer piksel oranı sınırlıdır (1 kaba / aksi halde 1.5), kamera sığdırma kapsayıcı en-boyunu kullanır, yeniden boyutlandırma mantığı vardır. Tarayıcı E2E gerçek yeniden boyutlandırmayı A19'da doğrular.
+- **A09.10 yakalama/render:** kaynak düzeyinde `AUDITED_OK` — güncel-görünüm PNG yakalama geçici olarak istenen ölçeği kullanır ve düzenleyici ölçülerini/durumunu geri yükler; gerçek tarayıcı dışa aktarma A19.
+- **A09.11 özelleşmiş renderer'lar:** `GAP` yalnızca ortak sahiplik kurallarının aşıldığı yerde: F-011, F-017, F-019. Ek tekil kalıcı kural yeni bir bulguya ayrılmadı.
+- **A09.12 yalnızca-çalışma-zamanı davranış:** güncel modül kümesi için `AUDITED_OK` — canlı saat/zamanlayıcı modülü şu anda yoktur. Gelecek yeniden kurulumu etkileyen raf/kumaş/köpük ayarları kasıtlı olarak kalıcıdır.
 
-## Cross-domain conflicts
+## Çapraz-alan çatışmaları
 
-- Scene surround constant duplication: F-012.
-- Placement/type policy in renderer: F-011.
-- Persistent state mutation in renderer: F-017.
-- State/catalog runtime dimensions: F-019.
-- Catalog identity ambiguity can affect renderer labels/contracts but is rooted at F-013.
+- Sahne çevre sabiti çoğaltması: F-012.
+- Renderer'da yerleştirme/tip politikası: F-011.
+- Renderer'da kalıcı durum mutasyonu: F-017.
+- Durum/katalog çalışma zamanı ölçüleri: F-019.
+- Katalog kimliği belirsizliği renderer etiketlerini/sözleşmelerini etkileyebilir ancak kökü F-013'tür.
 
-Section audit status: **GAP**.
-Next audit section: **A10 — UI controls / inputs / menus / shortcuts / feedback**.
+Bölüm denetim durumu: **GAP**.
+Sonraki denetim bölümü: **A10 — UI kontrolleri / girdiler / menüler / kısayollar / geri bildirim**.

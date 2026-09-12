@@ -1,6 +1,6 @@
 # door_100 — Item Contract Definition
 
-## Canonical identity
+## Kanonik kimlik
 
 - `itemKey`: `door_100`
 - `name`: `Depo Kapısı 100`
@@ -11,7 +11,7 @@
 
 Eski uppercase katalog kimliği kaldırılmıştır. Yeni runtime/catalog/state kimliği `door_100`dur.
 
-## Canonical intrinsic/default properties
+## Kanonik ürüne özgü / varsayılan özellikler
 
 Bugün parent Item için doğrulanmış ürün ölçüsü:
 
@@ -21,9 +21,9 @@ widthCm = 100
 
 Parent kapı kümesine material veya `defaultColor` eklenmez; küme farklı malzemeli child Item'lardan oluşur. Paylaşılan stand yüksekliği/render derinliği de doğrulanmış parent ürün property’si olarak yeniden tanımlanmaz.
 
-## Canonical composition — base
+## Kanonik bileşim — baza
 
-`door_100.composition` mevcut `door:100` recipe’sine bağlanır. Miktarların tek source-of-truth'u `src/moduleRecipes.js`dir:
+`door_100.composition` mevcut `door:100` recipe’sine bağlanır. Miktarların tek tek kaynağı `src/moduleRecipes.js`dir:
 
 ```text
 profile_91            ×1
@@ -34,9 +34,9 @@ connector_single      ×5
 door_leaf_100         ×1
 ```
 
-Child miktarları `door_100` Item kartında ikinci kez kopyalanmaz.
+Alt miktarları `door_100` Item kartında ikinci kez kopyalanmaz.
 
-## Canonical composition — inner corner
+## Kanonik bileşim — iç köşe
 
 Doğrulanmış relationship-derived ürün kuralı şöyledir:
 
@@ -58,17 +58,17 @@ connector_single ×5  → connector_single ×3 + connector_corner ×2
 connector_start ×2   → değişmez
 ```
 
-Bu fark `src/moduleRecipes.js` içindeki `door:100` variant metadata'sında tutulur. Unchanged kalemler ikinci kez tam recipe olarak kopyalanmaz; base recipe'den korunur. Böylece door corner BOM için ikinci hardcoded business source-of-truth yaratılmaz.
+Bu fark `src/moduleRecipes.js` içindeki `door:100` variant üstverisinde tutulur. Unchanged kalemler ikinci kez tam recipe olarak kopyalanmaz; base recipe'den korunur. Böylece door corner BOM için ikinci hardcoded business tek kaynak yaratılmaz.
 
-## Recipe variant API
+## Recipe varyant API
 
-Canonical expanded recipe:
+Kanonik expanded recipe:
 
 ```js
 getExpandedModuleRecipe('door', 100, { panelVariant: 'inner-corner' })
 ```
 
-Canonical recursive Item BOM:
+Kanonik recursive Item BOM:
 
 ```js
 resolveItemBom('door_100', 1, { panelVariant: 'inner-corner' })
@@ -76,17 +76,17 @@ resolveItemBom('door_100', 1, { panelVariant: 'inner-corner' })
 
 Bu çağrı inner-corner recipe'yi terminal Item'lara kadar recursive açar. Base çağrı `resolveItemBom('door_100')` mevcut düz recipe'yi aynen korur.
 
-`panelVariant` relationship sonucunun recipe/BOM katmanına taşınan context'idir. Runtime placement/relationship motorunun gerçek bir inner-corner ilişkisini bu context'e otomatik dönüştürmesi ayrı relationship integration sorumluluğudur; renderer veya UI tahmini BOM source-of-truth'u olamaz.
+`panelVariant` relationship sonucunun recipe/BOM katmanına taşınan context'idir. Runtime yerleşim/relationship motorunun gerçek bir inner-corner ilişkisini bu context'e otomatik dönüştürmesi ayrı relationship integration sorumluluğudur; renderer veya UI tahmini BOM tek kaynağı olamaz.
 
-## Recursive BOM
+## Özyinelemeli BOM
 
-`src/itemBom.js` canonical Item'ı expanded recipe üzerinden child Item'lara açar ve bileşik child Item varsa aynı işlemi recursive sürdürür. Nihai her satır canonical `itemKey`, `quantity` ve child Item'ın `unit` değerini taşır.
+`src/itemBom.js` kanonik Item'ı expanded recipe üzerinden child Item'lara açar ve bileşik child Item varsa aynı işlemi recursive sürdürür. Nihai her satır kanonik `itemKey`, `quantity` ve child Item'ın `unit` değerini taşır.
 
-Caller recipe options yalnız ilgili root composite Item'ın recipe çözümüne uygulanır; child Item'lara körlemesine sızdırılmaz. Child composite varsa kendi canonical composition options'ı ile çözülür.
+Caller recipe options yalnız ilgili root composite Item'ın recipe çözümüne uygulanır; child Item'lara körlemesine sızdırılmaz. Alt composite varsa kendi kanonik composition options'ı ile çözülür.
 
-## Factory / state / persistence
+## Oluşturma / state / kalıcılık
 
-`createDoorModuleState()` parent Item'ı `getItem('door_100')` üzerinden çözer ve proje instance'ına şu canonical identity'yi bağlar:
+`createDoorModuleState()` parent Item'ı `getItem('door_100')` üzerinden çözer ve proje örneğina şu kanonik identity'yi bağlar:
 
 ```text
 id         = module-<instance>
@@ -95,19 +95,19 @@ type       = door
 widthCm    = 100
 ```
 
-Kapı kanadı child state'i ayrı canonical Item kimliğini korur:
+Kapı kanadı child state'i ayrı kanonik Item kimliğini korur:
 
 ```text
 surface.itemKey = door_leaf_100
 ```
 
-Renk/görsel override'ları `door_leaf_100` surface state'inde kalır. Parent placement ve nested state proje snapshot'ı içinde saklanır.
+Renk/görsel ezme'ları `door_leaf_100` surface state'inde kalır. Parent yerleşim ve nested state proje snapshot'ı içinde saklanır.
 
-## Behavior / context menu / interaction
+## Davranış / bağlam menüsü / etkileşim
 
 Parent `door_100`, `type=door` olduğu için mevcut `WALL_BEHAVIOR` contract'ını kullanır:
 
-- wall placement,
+- duvar yerleşimi,
 - 50 cm move snap,
 - 90° rotation,
 - segment collision,
@@ -118,10 +118,10 @@ Parent `door_100`, `type=door` olduğu için mevcut `WALL_BEHAVIOR` contract'ın
 
 Bu davranışlar Item migration sırasında yeniden yazılmaz. Context menu parent module davranışını sürdürür. Kapı kanadı `selectionMode=module` olduğu için panel-only glass/Lightbox/Mesh komutlarını açmaz; üst `panel_98`/`panel_corner_92` üretim kimlikleri renderer state'inin ikinci BOM kaynağı yapılmaz.
 
-## Renderer boundary
+## Renderer sınırı
 
-Renderer `type=door` üzerinden mevcut procedural door renderer'ını kullanır. `door_leaf_100` renk/görsel capability’sini kendi Item contract'ından tüketmeye devam eder. Parent Item'ın composition/BOM gerçeği renderer mesh'inden türetilmez.
+Renderer `type=door` üzerinden mevcut prosedürel door renderer'ını kullanır. `door_leaf_100` renk/görsel yetenek’sini kendi Item contract'ından tüketmeye devam eder. Parent Item'ın composition/BOM gerçeği renderer mesh'inden türetilmez.
 
-## Legacy removal
+## Eski alan kaldırma
 
 Eski uppercase katalog kimliği için alias veya compatibility table tutulmaz. Catalog, contract, state, E2E ve aktif Item dokümanları yalnız `door_100` kullanır. Tarihsel audit evidence dosyaları migration runtime kaynağı değildir ve bu Item turunda audit remediation yapılmaz.

@@ -1,4 +1,4 @@
-﻿> Migration öncesi envanterdir; aktif canonical tanım `../definitions/EXTRA_LONG_PLANTER_150.md` içindedir.
+﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/EXTRA_LONG_PLANTER_150.md` içindedir.
 
 # EXTRA_LONG_PLANTER_150 — Mevcut Sistem Profili
 
@@ -8,15 +8,15 @@ Bu belge `EXTRA_LONG_PLANTER_150` için `Version2` runtime kodunda bulunan state
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `EXTRA_LONG_PLANTER_150` |
-| Label | `Uzun Saksı 150` |
+| Katalog anahtarı | `EXTRA_LONG_PLANTER_150` |
+| Etiket | `Uzun Saksı 150` |
 | Type | `indoor-plant-1` |
-| Width | `150 cm` |
-| Depth | `30 cm` |
-| Height | `30 cm` |
-| Model file | `saksi_bitkili_150x30x30.glb` |
+| Genişlik | `150 cm` |
+| Derinlik | `30 cm` |
+| Yükseklik | `30 cm` |
+| Model dosyası | `saksi_bitkili_150x30x30.glb` |
 
-Default runtime state:
+Varsayılan runtime state:
 
 ```text
 {
@@ -36,22 +36,22 @@ Default runtime state:
 }
 ```
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `free-model-color` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `editable` |
 | Image | `none` |
-| Renderer policy | `model` |
+| Renderer politikası | `model` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `decision-required` |
-| BOM source | `None` |
+| Bileşim | `standalone` |
+| BOM kipi | `decision-required` |
+| BOM kaynağı | `None` |
 
-## Behavior / placement
+## Davranış / yerleşim
 
 | Alan | Kod değeri |
 |---|---|
@@ -104,7 +104,7 @@ Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kayd
 
 `Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `EXTRA_LONG_PLANTER_150` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 
@@ -130,7 +130,7 @@ bom.source = None
 
 `moduleContracts.js` içindeki mevcut reason:
 
-> Existing module has no canonical BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
+> Existing module has no kanonik BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
 
 Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 

@@ -1,13 +1,13 @@
-# A05 — Module behavior audit
+# A05 — Modül davranışı denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Behavior registry inventory
+## Davranış kaydı envanteri
 
-Canonical owner: `src/moduleBehavior.js`.
+Kanonik sahip: `src/moduleBehavior.js`.
 
-Current explicit runtime types:
+Güncel açık çalışma zamanı tipleri:
 
 - flat-panel
 - showcase-3
@@ -29,7 +29,7 @@ Current explicit runtime types:
 - tv
 - led-floodlight
 
-Current behavior dimensions:
+Güncel davranış boyutları:
 
 - `placement`
 - `moveSnapCm`
@@ -39,87 +39,87 @@ Current behavior dimensions:
 - `collision`
 - `ghost`
 
-Descriptor-aware overrides:
+Tanımlayıcı-farkında override'lar:
 
-- L counter default rotation = 270°
-- straight 100/150/200 counter rotation step = 45°
+- L banko varsayılan döndürme = 270°
+- düz 100/150/200 banko döndürme adımı = 45°
 
-## Checklist results
+## Kontrol listesi sonuçları
 
-### A05.01 / A05.02 / A05.03 — profiles/types/fallback
+### A05.01 / A05.02 / A05.03 — profiller/tipler/yedek
 
-All 19 current runtime types are explicit in `TYPE_BEHAVIORS`, including `illuminated-foam`. `test/moduleBehaviorContract.test.js` derives unique catalog runtime types and fails if any catalog type is not explicit. Unknown non-catalog types remain distinguishable via `hasExplicitModuleBehavior()`.
+Güncel 19 çalışma zamanı tipinin tümü `TYPE_BEHAVIORS` içinde açıktır; `illuminated-foam` dahil. `test/moduleBehaviorContract.test.js` benzersiz katalog çalışma zamanı tiplerini türetir ve herhangi bir katalog tipi açık değilse başarısız olur. Bilinmeyen katalog-dışı tipler `hasExplicitModuleBehavior()` ile ayırt edilebilir kalır.
 
-**Status:** `AUDITED_OK`.
+**Durum:** `AUDITED_OK`.
 
-### A05.04 — movement snap
+### A05.04 — hareket snap
 
-Snap values are declared centrally and consumed through `getModuleMoveSnapCm()` in placement/move interaction paths. No second module-type snap table was identified.
+Snap değerleri merkezi bildirilir ve yerleştirme/taşıma etkileşim yollarında `getModuleMoveSnapCm()` üzerinden tüketilir. İkinci bir modül-tip snap tablosu saptanmadı.
 
-**Status:** `AUDITED_OK` for canonical values. Hidden special placement algorithms remain under F-011.
+**Durum:** kanonik değerler için `AUDITED_OK`. Gizli özel yerleştirme algoritmaları F-011 altında kalır.
 
-### A05.05 — rotation step/default/limits
+### A05.05 — döndürme adımı/varsayılan/sınırlar
 
-Rotation step/default are centralized in behavior registry, including descriptor-aware counter overrides. Existing rotation regression tests protect special counter/bar-stool behavior.
+Döndürme adımı/varsayılan, tanımlayıcı-farkında banko override'ları dahil davranış kaydında merkezileştirilmiştir. Mevcut döndürme regresyon testleri özel banko/bar-stool davranışını korur.
 
-The current behavior schema has no bounded min/max/direction policy; no current module contract in the 45+1 audited set requires such a bound, so this is not a present bug.
+Güncel davranış şemasında sınırlı min/max/yön politikası yoktur; denetlenen 45+1 kümede hiçbir güncel modül sözleşmesi böyle bir sınır gerektirmez, bu yüzden bu mevcut bir hata değildir.
 
-**Status:** `AUDITED_OK` for current module set.
+**Durum:** güncel modül kümesi için `AUDITED_OK`.
 
-### A05.06 — collision
+### A05.06 — çarpışma
 
-Collision strategy is centrally declared (`segment`, `footprint`, `none`) and placement core reads it. However module-specific geometry/endpoint/stacking rules remain distributed outside the declarative contract; root finding F-011 already covers that ownership gap.
+Çarpışma stratejisi merkezi bildirilir (`segment`, `footprint`, `none`) ve yerleştirme çekirdeği onu okur. Ancak modüle özel geometri/uç nokta/yığma kuralları bildirimsel sözleşmenin dışında dağılmış kalır; kök bulgu F-011 o sahiplik boşluğunu zaten kapsar.
 
-**Status:** `GAP` by F-011, no duplicate finding.
+**Durum:** F-011 ile `GAP`, yinelenen bulgu yok.
 
 ### A05.07 — ghost
 
-All behaviors resolve a ghost (explicit or central default). `scene3d` routes placement ghost creation through `getModuleGhostBehavior()` and builds real module silhouette with fallback box.
+Tüm davranışlar bir ghost çözer (açık veya merkezi varsayılan). `scene3d` yerleştirme ghost oluşturmayı `getModuleGhostBehavior()` üzerinden yönlendirir ve yedek kutu ile gerçek modül silüeti kurar.
 
-**Status:** `AUDITED_OK`.
+**Durum:** `AUDITED_OK`.
 
-### A05.08 — side insertion
+### A05.08 — yan ekleme
 
-### F-015 — P1 — `allowSideInsert` is declared but not enforced
+### F-015 — P1 — `allowSideInsert` bildirilir ancak zorlanmaz
 
-`MODULE_BEHAVIOR_STANDARD.md` explicitly defines:
+`MODULE_BEHAVIOR_STANDARD.md` açıkça tanımlar:
 
-> `allowSideInsert`: whether context left/right insertion is allowed.
+> `allowSideInsert`: bağlam sol/sağ eklemenin izinli olup olmadığı.
 
-Current behavior declares `allowSideInsert:false` for `illuminated-foam` and `tv`.
+Güncel davranış `illuminated-foam` ve `tv` için `allowSideInsert:false` bildirir.
 
-But the context menu always renders and handles:
+Ancak bağlam menüsü her zaman şunları çizer ve işler:
 
 - `add-right`
 - `add-left`
 - `duplicate-right`
 - `duplicate-left`
 
-without reading module behavior or `allowSideInsert`. The main insertion planners likewise do not reject the operation based on this behavior field.
+modül davranışını veya `allowSideInsert` okumadan. Ana ekleme planlayıcıları da işlemi bu davranış alanına göre reddetmez.
 
-Therefore the behavior contract can claim side insertion is forbidden while UI/runtime still offers and attempts it. This is a contract-to-runtime enforcement gap, not merely missing documentation.
+Bu nedenle davranış sözleşmesi yan eklemenin yasak olduğunu iddia ederken UI/çalışma zamanı yine de sunar ve dener. Bu, yalnızca eksik belgeleme değil, sözleşmeden-çalışma-zamanına zorlama boşluğudur.
 
-**Status:** `GAP` — F-015.
+**Durum:** `GAP` — F-015.
 
-### A05.09 — selectability/deleteability
+### A05.09 — seçilebilirlik/silinebilirlik
 
-Select/delete are currently global editor capabilities rather than per-module behavior fields. No current module declares a contradictory module-specific policy. That is acceptable under the existing contract, though A10/A16 will audit interaction/accessibility details.
+Seç/sil şu anda modül başına davranış alanları değil, küresel düzenleyici yetenekleridir. Hiçbir güncel modül çelişen modüle özel politika bildirmez. Bu mevcut sözleşme altında kabul edilebilirdir; A10/A16 etkileşim/erişilebilirlik ayrıntılarını denetleyecektir.
 
-**Status:** `AUDITED_OK` for current declared contract.
+**Durum:** güncel bildirilmiş sözleşme için `AUDITED_OK`.
 
-### A05.10 — hidden behavior overrides
+### A05.10 — gizli davranış override'ları
 
-Type-specific placement/interaction decisions exist in `modulePlacement.js`, `scene3d.js`, and a LED duplication path in `main.js`. These are already grouped under F-011. The specific algorithms will be enumerated again in A06/A09 only as evidence against the same root finding.
+Tipe özel yerleştirme/etkileşim kararları `modulePlacement.js`, `scene3d.js` ve `main.js` içindeki bir LED çoğaltma yolunda vardır. Bunlar zaten F-011 altında gruplanmıştır. Belirli algoritmalar A06/A09'da yalnızca aynı kök bulguya karşı kanıt olarak yeniden numaralandırılacaktır.
 
-**Status:** `GAP` — F-011.
+**Durum:** `GAP` — F-011.
 
-## Section conclusion
+## Bölüm sonucu
 
-A05 inspection is complete.
+A05 incelemesi tamamlandı.
 
-- New finding: F-015 P1.
-- Reused root finding: F-011 P1.
-- No fix performed.
+- Yeni bulgu: F-015 P1.
+- Yeniden kullanılan kök bulgu: F-011 P1.
+- Düzeltme yapılmadı.
 
-Section audit status: **GAP**.
-Next audit section: **A06 — Placement / move / rotation / collision / reflow**.
+Bölüm denetim durumu: **GAP**.
+Sonraki denetim bölümü: **A06 — Yerleştirme / taşıma / döndürme / çarpışma / reflow**.

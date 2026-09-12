@@ -1,4 +1,4 @@
-> Migration öncesi envanterdir; aktif canonical tanım `../definitions/karolaj.md` içindedir.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/karolaj.md` içindedir.
 
 # karolaj — Mevcut Sistem Profili
 
@@ -26,7 +26,7 @@ parke-sari  → Sarı Meşe
 parke-beton → Beton Parke
 ```
 
-`currentStand` proje state'inde `floorType` ve varsa `floorColor` saklanır. Proje restore sırasında `scene3d.setFloorType()` ve uygun color state tekrar uygulanır.
+`currentStand` proje state'inde `floorType` ve varsa `floorColor` saklanır. Proje geri yüklemede `scene3d.setFloorType()` ve uygun renk state'i yeniden uygulanır.
 
 ## Renderer
 
@@ -34,17 +34,17 @@ parke-beton → Beton Parke
 
 ## Selection / color
 
-Floor scene içinde ayrı floor selection yoluna sahiptir; module context menu kullanmaz. `describeFloorSelection()` / `setFloorColor()` üzerinden floor type'a göre paintability belirlenir.
+Zemin sahnede ayrı zemin seçim yoluna sahiptir; modül bağlam menüsü kullanmaz. `describeFloorSelection()` / `setFloorColor()` ile zemin type'ına göre boyanabilirlik belirlenir.
 
-`main.applyActiveColorToSelection()` içinde `floorType === 'parke'` kontrolü vardır; gerçek parke değerleri `parke-acik/parke-sari/parke-beton` olduğu için bu exact equality branch bu üç değeri eşlemez. Sonraki `setFloorColor()` çağrısı parke type'ları için zaten color değişimini reddeder.
+`main.applyActiveColorToSelection()` içinde `floorType === 'parke'` kontrolü vardır; gerçek parke değerleri `parke-acik/parke-sari/parke-beton` olduğu için bu tam eşitlik dalı bu üç değeri eşlemez. Sonraki `setFloorColor()` çağrısı parke type'ları için rengi zaten reddeder.
 
-## Persistence
+## Kalıcılık
 
-Floor module listesinde değil `stand` state'inde saklanır; normal project save/load/autosave ve ZIP project.json içinde stand ile taşınır.
+Zemin modül listesinde değil `stand` state'inde saklanır; normal proje kayıt/yükleme/otomatik kayıt ve ZIP `project.json` içinde stand ile taşınır.
 
 ## BOM
 
-Bu floor girdileri için `moduleRecipes.js` içinde recipe, `moduleContracts.js` içinde module contract veya `productionParts.js` içinde bu floor'u terminal BOM'a dönüştüren kayıt yoktur. `rawBomDebug.js` floor selection için recipe render etmez.
+Bu zemin girdileri için `moduleRecipes.js` içinde recipe, `moduleContracts.js` içinde modül sözleşmesi veya `productionParts.js` içinde bu zemini uç BOM'a çeviren kayıt yoktur. `rawBomDebug.js` zemin seçimi için recipe çizmez.
 
 ## Kod kaynakları
 

@@ -251,7 +251,7 @@ export function createDoorModuleState(widthCm = 100) {
       { length: 3 },
       (_, index) => createEditablePanelState(index + 4, DEFAULT_PANEL_COLOR),
     ),
-    // Fiziksel ahşap kapı kanadı canonical door_leaf Item kimliği/default'u ile başlar.
+    // Fiziksel ahşap kapı kanadı kanonik door_leaf Item kimliği/varsayılanı ile başlar.
     surface: createEditableItemSurfaceState(doorLeafItem),
   };
 }
@@ -654,8 +654,8 @@ export function createModuleStateFromDescriptor(
 
 
 /**
- * Normalizes persisted child Item identity without replacing user overrides.
- * Legacy door projects did not store the physical leaf itemKey on surface state.
+ * Kayıtlı alt Item kimliğini, kullanıcı ezmelerini silmeden düzeltir.
+ * Eski kapı projeleri yüzey state'inde fiziksel kanat itemKey taşımıyordu.
  */
 export function normalizeModuleItemState(moduleState) {
   if (!moduleState) return moduleState;

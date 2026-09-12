@@ -1,61 +1,61 @@
-# A14 — Import / export / archive / project schema audit
+# A14 — İçe aktarma / dışa aktarma / arşiv / proje şema denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Current archive flow
+## Güncel arşiv akışı
 
-Export builds a JSZip archive containing `project.json` plus `assets/<asset-id><ext>`. Import loads the full archive, validates basic manifest presence/shape, prepares all blobs, remaps asset IDs, then persists the imported project and assets. Failure after storage mutation attempts rollback of assets and project.
+Dışa aktarma, `project.json` artı `assets/<asset-id><ext>` içeren bir JSZip arşivi kurar. İçe aktarma tam arşivi yükler, temel manifest varlığını/şeklini doğrular, tüm blob'ları hazırlar, varlık ID'lerini yeniden eşler, sonra içe aktarılan projeyi ve varlıkları kalıcılaştırır. Depolama mutasyonundan sonraki başarısızlık varlıklar ve proje için geri alma dener.
 
-## Findings
+## Bulgular
 
-### F-035 — P2 — archive version/schema has no canonical owner
+### F-035 — P2 — arşiv sürümü/şemasının kanonik sahibi yoktur
 
-`archiveVersion: 1` is written as a literal in the export handler and independently checked as literal `1` in the import handler. There is no shared archive schema/version module or migration registry. This is archive-specific and complements project-schema F-021.
+`archiveVersion: 1` dışa aktarma işleyicisinde sabit olarak yazılır ve içe aktarma işleyicisinde bağımsız olarak sabit `1` olarak kontrol edilir. Paylaşılan arşiv şema/sürüm modülü veya migrasyon kaydı yoktur. Bu arşive özgüdür ve proje-şema F-021'i tamamlar.
 
-### F-036 — P1 — imported project state is persisted without structural domain validation
+### F-036 — P1 — içe aktarılan proje durumu yapısal alan doğrulaması olmadan kalıcılaştırılır
 
-Import validates that `manifest.project` is an object and has a non-empty string id, but then spreads the supplied project object and persists it. It does not validate before storage/restore that:
+İçe aktarma `manifest.project`'in bir nesne olduğunu ve boş-olmayan bir dize id'si olduğunu doğrular, ancak sonra sağlanan proje nesnesini yayar ve kalıcılaştırır. Depolama/geri yüklemeden önce şunları doğrulamaz:
 
-- `stand` matches a supported stand schema/range,
-- `modules` is an array,
-- module types/catalog identities are supported,
-- placement fields are valid,
-- dimensions/rotations are finite and within intended constraints,
-- persisted special fields obey module/state contracts,
-- project version is supported/migratable.
+- `stand` desteklenen bir stand şema/aralığıyla eşleşir,
+- `modules` bir dizidir,
+- modül tipleri/katalog kimlikleri desteklenir,
+- yerleştirme alanları geçerlidir,
+- ölçüler/döndürmeler sonludur ve hedeflenen kısıtlar içindedir,
+- kalıcı özel alanlar modül/durum sözleşmelerine uyar,
+- proje sürümü desteklenir/taşınabilir.
 
-A malformed or future/foreign archive can therefore enter persistent storage before renderer/runtime code encounters it.
+Bozuk veya gelecek/yabancı bir arşiv bu nedenle renderer/çalışma zamanı kodu ona rastlamadan önce kalıcı depolamaya girebilir.
 
-### F-037 — P1 — ZIP/image import paths have no explicit resource limits or content policy
+### F-037 — P1 — ZIP/görüntü içe aktarma yollarının açık kaynak sınırları veya içerik politikası yoktur
 
-The current import path has no configured limit for archive size, asset count, individual uncompressed asset size or total uncompressed bytes. Each manifest asset is expanded via `entry.async('blob')` and retained in `preparedAssets` before persistence. Normal image upload similarly relies on `accept="image/*"` and stores the supplied Blob without a repository-level size/content whitelist.
+Güncel içe aktarma yolunun arşiv boyutu, varlık sayısı, tekil sıkıştırılmamış varlık boyutu veya toplam sıkıştırılmamış bayt için yapılandırılmış sınırı yoktur. Her manifest varlığı `entry.async('blob')` ile genişletilir ve kalıcılıktan önce `preparedAssets` içinde tutulur. Normal görüntü yükleme benzer biçimde `accept="image/*"`e dayanır ve sağlanan Blob'u depo-düzeyi boyut/içerik izin listesi olmadan saklar.
 
-This is primarily an availability/storage-hardening gap, not evidence of remote code execution.
+Bu öncelikle bir kullanılabilirlik/depolama-sertleştirme boşluğudur, uzak kod çalıştırma kanıtı değildir.
 
-## Positive controls
+## Olumlu kontroller
 
-- Required `project.json` is checked before storage mutation.
-- `archiveVersion` is checked.
-- asset list must be an array when present.
-- duplicate manifest asset IDs are rejected.
-- each listed asset path must resolve to a ZIP file entry.
-- imported assets receive fresh IDs and all `imageAssetId` references are recursively remapped.
-- archive is fully prepared before project save.
-- post-save failures trigger cleanup attempts for imported assets + project.
-- current JSZip 3.10.1 is newer than the 3.8.0 path-traversal fix line.
+- Zorunlu `project.json` depolama mutasyonundan önce kontrol edilir.
+- `archiveVersion` kontrol edilir.
+- varlık listesi varsa dizi olmalıdır.
+- yinelenen manifest varlık ID'leri reddedilir.
+- listelenen her varlık yolu bir ZIP dosya girişine çözülmelidir.
+- içe aktarılan varlıklar taze ID alır ve tüm `imageAssetId` referansları özyinelemeli yeniden eşlenir.
+- arşiv proje kaydından önce tam hazırlanır.
+- kayıt-sonrası başarısızlıklar içe aktarılan varlıklar + proje için temizlik dener.
+- güncel JSZip 3.10.1, 3.8.0 yol-dolaşma düzeltme çizgisinden daha yenidir.
 
-## Checklist results
+## Kontrol listesi sonuçları
 
-- A14.01 canonical archive schema/version owner: `GAP` — F-035.
-- A14.02 export intended project/assets: `AUDITED_OK` for current snapshot + owned assets.
-- A14.03 pre-mutation archive/file preparation: `AUDITED_OK` for current basic checks.
-- A14.04 project schema/IDs/paths: `GAP` — F-036.
-- A14.05 failed import cleanup: `AUDITED_OK` at handler contract level; cleanup itself is separate multi-store operations.
-- A14.06 duplicate project ID: `AUDITED_OK` — fresh project ID assigned.
-- A14.07 round-trip fidelity: `GAP` — F-022; no real browser round-trip contract for every module/asset family.
-- A14.08 archive/asset limits: `GAP` — F-037.
-- A14.09 path traversal/weird filenames: `AUDITED_OK` for the library version's path sanitization baseline; application still trusts manifest path-to-entry mapping inside the in-memory ZIP.
-- A14.10 backward compatibility/migration: `GAP` — F-021/F-035.
+- A14.01 kanonik arşiv şema/sürüm sahibi: `GAP` — F-035.
+- A14.02 hedeflenen proje/varlıkları dışa aktar: güncel anlık görüntü + sahip olunan varlıklar için `AUDITED_OK`.
+- A14.03 mutasyon-öncesi arşiv/dosya hazırlığı: güncel temel kontroller için `AUDITED_OK`.
+- A14.04 proje şema/ID'ler/yollar: `GAP` — F-036.
+- A14.05 başarısız içe aktarma temizliği: işleyici sözleşme düzeyinde `AUDITED_OK`; temizliğin kendisi ayrı çok-depo işlemleridir.
+- A14.06 yinelenen proje ID: `AUDITED_OK` — taze proje ID atanır.
+- A14.07 gidiş-dönüş sadakati: `GAP` — F-022; her modül/varlık ailesi için gerçek tarayıcı gidiş-dönüş sözleşmesi yok.
+- A14.08 arşiv/varlık sınırları: `GAP` — F-037.
+- A14.09 yol dolaşma/tuhaf dosya adları: kitaplık sürümünün yol sanitizasyon tabanı için `AUDITED_OK`; uygulama hâlâ bellek-içi ZIP içinde manifest yol-giriş eşlemesine güvenir.
+- A14.10 geriye uyumluluk/migrasyon: `GAP` — F-021/F-035.
 
-Section audit status: **GAP**.
+Bölüm denetim durumu: **GAP**.
