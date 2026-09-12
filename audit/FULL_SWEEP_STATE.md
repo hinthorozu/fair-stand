@@ -1,111 +1,111 @@
-# Fair Stand — A00–A24 Full Audit Sweep State
+# Fair Stand — A00–A24 Tam Audit Tarama Durumu
 
-Audit mode: **AUDIT-FIRST / FIX-LATER**
-Current phase: **REMEDIATION IN PROGRESS**
+Audit modu: **ÖNCE AUDIT / SONRA DÜZELT**
+Güncel faz: **REMEDIASYON DEVAM EDİYOR**
 
-## Governing rule
+## Yöneten kural
 
-1. Audit A00–A24 is complete.
-2. Findings remain canonical in `audit/FINDINGS.md`.
-3. Remediation proceeds section-by-section without silently pulling later findings forward.
-4. A finding closes only after fix + targeted regression + full suite + build + required CI/retest evidence.
-5. A section closes only after all findings it owns are closed/accepted and section revalidation is recorded.
+1. A00–A24 audit’i tamamdır.
+2. Bulgular kanonik olarak `audit/FINDINGS.md` içindedir.
+3. Remediasyon bölüm bölüm ilerler; sonraki bulgular sessizce öne alınmaz.
+4. Bir bulgu ancak düzeltme + hedefli regresyon + tam paket + build + gerekli CI/yeniden test kanıtından sonra kapanır.
+5. Bir bölüm ancak sahip olduğu tüm bulgular kapanır/kabul edilir ve bölüm yeniden doğrulaması kayda geçerse kapanır.
 
-## Resume — READ THIS FIRST
+## Devam — ÖNCE BUNU OKU
 
-- Baseline branch: `ROG`
-- Full-sweep baseline SHA: `e7647326668ab25c96f3a3139f0d855c03176325`
-- Audit status: **COMPLETE — A00–A24 / 25 of 25 inspected**
-- Remediation starting ROG SHA: `392e839804e5b0379186af8b950117154b20c195`
-- Remediation status: **IN PROGRESS**
-- Last fully closed remediation section: `A03 — CLOSED / AUDITED_OK / POST-MERGE VERIFIED`
-- Current remediation section: `A04 — Catalog + module contracts`
-- A00 closure evidence: `audit/remediation/A00_CLOSURE.md`
-- A01 closure evidence: `audit/remediation/A01_CLOSURE.md`
-- A02 closure evidence: `audit/remediation/A02_CLOSURE.md`
-- A03 closure evidence: `audit/remediation/A03_CLOSURE.md`
-- A02 closed findings: `F-005, F-006, F-007, F-008, F-009`
-- A02 final merge SHA: `14b4e5b83b2cefe48aaa8cefc761a73d8e0b82fe`
-- A02 post-merge ROG CI: `#132 / run 33804101800 / success`
-- A03 closed findings: `F-010, F-011, F-012`
-- F-010 closure evidence: `audit/remediation/A03_F010_CLOSURE.md`
-- F-010 implementation PR: `#46`
-- F-010 implementation merge SHA: `f45cbe55030e8bc4361d4e2ce2a4d6a6d86e0a89`
-- F-010 post-merge ROG CI: `#177 / run 33852027783 / success`
-- F-011 closure evidence: `audit/remediation/A03_F011_CLOSURE.md`
-- F-011 implementation PR: `#49`
-- F-011 implementation merge SHA: `934ca39a19453e8660f9cdbae81ce000e91edae1`
-- F-011 post-merge ROG CI: `#212 / run 33953247234 / success`
-- F-012 closure evidence: `audit/remediation/A03_F012_CLOSURE.md`
-- F-012 implementation PR: `#52`
-- F-012 implementation merge SHA: `1ca9f6e386a6cbdb7377ce35bf22a26b75e4ba80`
-- F-012 post-merge ROG CI: `#221 / run 33974468120 / success`
-- A04 closed findings so far: `F-013`
-- F-013 closure evidence: `audit/remediation/A04_F013_CLOSURE.md`
-- F-013 implementation PR: `#53`
-- F-013 implementation merge SHA: `238c2946d9e09451f22d040dd04a340cde7991a9`
-- F-013 post-merge ROG CI: `#226 / run 33976491702 / success`
-- Next finding: `F-014 — 17 active module contracts require final BOM classification`
-- Remaining A03 findings: `none`
-- Remaining A04 findings: `F-014`
-- Finding range: `F-001..F-046`
-- Closed findings: `13`
-- Open findings: `33`
-- Open P0: `0`
-- Open P1: `15`
-- Open P2: `18`
-- Open P3: `0`
-- Canonical finding ledger: `audit/FINDINGS.md`
-- Cross-domain matrix: `audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md`
-- Final audit closure: `audit/evidence/A24_FINAL_CLOSURE.md`
+- Taban dal: `ROG`
+- Tam tarama taban SHA: `e7647326668ab25c96f3a3139f0d855c03176325`
+- Audit durumu: **TAMAM — A00–A24 / 25’te 25 incelendi**
+- Remediasyon başlangıç ROG SHA: `392e839804e5b0379186af8b950117154b20c195`
+- Remediasyon durumu: **DEVAM EDİYOR**
+- Son tam kapanan remediasyon bölümü: `A03 — CLOSED / AUDITED_OK / POST-MERGE VERIFIED`
+- Güncel remediasyon bölümü: `A04 — Katalog + modül sözleşmeleri`
+- A00 kapanış kanıtı: `audit/remediation/A00_CLOSURE.md`
+- A01 kapanış kanıtı: `audit/remediation/A01_CLOSURE.md`
+- A02 kapanış kanıtı: `audit/remediation/A02_CLOSURE.md`
+- A03 kapanış kanıtı: `audit/remediation/A03_CLOSURE.md`
+- A02 kapanan bulgular: `F-005, F-006, F-007, F-008, F-009`
+- A02 son merge SHA: `14b4e5b83b2cefe48aaa8cefc761a73d8e0b82fe`
+- A02 merge-sonrası ROG CI: `#132 / run 33804101800 / success`
+- A03 kapanan bulgular: `F-010, F-011, F-012`
+- F-010 kapanış kanıtı: `audit/remediation/A03_F010_CLOSURE.md`
+- F-010 uygulama PR: `#46`
+- F-010 uygulama merge SHA: `f45cbe55030e8bc4361d4e2ce2a4d6a6d86e0a89`
+- F-010 merge-sonrası ROG CI: `#177 / run 33852027783 / success`
+- F-011 kapanış kanıtı: `audit/remediation/A03_F011_CLOSURE.md`
+- F-011 uygulama PR: `#49`
+- F-011 uygulama merge SHA: `934ca39a19453e8660f9cdbae81ce000e91edae1`
+- F-011 merge-sonrası ROG CI: `#212 / run 33953247234 / success`
+- F-012 kapanış kanıtı: `audit/remediation/A03_F012_CLOSURE.md`
+- F-012 uygulama PR: `#52`
+- F-012 uygulama merge SHA: `1ca9f6e386a6cbdb7377ce35bf22a26b75e4ba80`
+- F-012 merge-sonrası ROG CI: `#221 / run 33974468120 / success`
+- A04 şimdiye kadar kapanan: `F-013`
+- F-013 kapanış kanıtı: `audit/remediation/A04_F013_CLOSURE.md`
+- F-013 uygulama PR: `#53`
+- F-013 uygulama merge SHA: `238c2946d9e09451f22d040dd04a340cde7991a9`
+- F-013 merge-sonrası ROG CI: `#226 / run 33976491702 / success`
+- Sonraki bulgu: `F-014 — 17 aktif modül sözleşmesi nihai BOM sınıflandırması gerektiriyor`
+- Kalan A03 bulguları: `yok`
+- Kalan A04 bulguları: `F-014`
+- Bulgu aralığı: `F-001..F-046`
+- Kapalı bulgu: `13`
+- Açık bulgu: `33`
+- Açık P0: `0`
+- Açık P1: `15`
+- Açık P2: `18`
+- Açık P3: `0`
+- Kanonik bulgu defteri: `audit/FINDINGS.md`
+- Alanlar arası matris: `audit/evidence/A23_CROSS_DOMAIN_CONFLICT_MATRIX.md`
+- Final audit kapanışı: `audit/evidence/A24_FINAL_CLOSURE.md`
 
-## Closed remediation sections
+## Kapanan remediasyon bölümleri
 
-### A00 — Audit bootstrap / baseline
+### A00 — Audit önyükleme / taban
 
-**CLOSED — NO FIX REQUIRED.** A00 originated no finding. Evidence: `audit/remediation/A00_CLOSURE.md`.
+**CLOSED — DÜZELTME GEREKMİYOR.** A00 hiç bulgu üretmedi. Kanıt: `audit/remediation/A00_CLOSURE.md`.
 
-### A01 — Canonical docs + source-of-truth
+### A01 — Kanonik belgeler + tek kaynak
 
-**CLOSED / AUDITED_OK** after closing all four A01 findings:
+**CLOSED / AUDITED_OK** — A01’in dört bulgusu kapandı:
 
-- F-001 — current catalog reference + catalog-doc regression.
-- F-002 — historical review/progress classification + status regression.
-- F-003 — roadmap production dataset deduplication + source-of-truth regression.
-- F-004 — README/development contract universal change-gate onboarding + developer-entrypoint regression.
+- F-001 — güncel katalog referansı + katalog-belge regresyonu.
+- F-002 — tarihî inceleme/ilerleme sınıflandırması + durum regresyonu.
+- F-003 — yol haritası üretim veri kümesi tekilleştirme + tek-kaynak regresyonu.
+- F-004 — README/geliştirme sözleşmesi evrensel change-gate onboarding + geliştirici-giriş regresyonu.
 
-Section revalidation: `audit/remediation/A01_CLOSURE.md`.
+Bölüm yeniden doğrulama: `audit/remediation/A01_CLOSURE.md`.
 
-### A02 — Universal change gate
-
-**CLOSED / AUDITED_OK / POST-MERGE VERIFIED.**
-
-- F-005 — every current source file is explicitly mapped to ownership-derived impact domains; the regression remains responsible for guarding future additions.
-- F-006 — canonical governance/developer-entrypoint Markdown guarded with architecture impact.
-- F-007 — `test/**` and `tests/**` guarded with tests impact.
-- F-008 — all changes require `tests: affected` and a non-empty targeted regression list.
-- F-009 — local verifier enforces committed + staged + unstaged + untracked git diff and fails closed when the base cannot be resolved.
-
-Section revalidation: `audit/remediation/A02_CLOSURE.md`.
-Post-merge verification: ROG `14b4e5b83b2cefe48aaa8cefc761a73d8e0b82fe`, CI #132 / run `33804101800` / success.
-
-### A03 — Repository architecture / ownership
+### A02 — Evrensel change-gate
 
 **CLOSED / AUDITED_OK / POST-MERGE VERIFIED.**
 
-- F-010 — runtime module-state construction centralized in `src/designState.js`.
-- F-011 — module-specific placement/interaction policy selection centralized in `src/moduleBehavior.js`.
-- F-012 — scene surround centralized as `SCENE_SURROUND_M = 1` in `src/sceneDimensions.js`; setup and renderer consume the same canonical value.
+- F-005 — mevcut her kaynak dosya sahiplikten türetilmiş etki alanlarına açıkça eşlenir; regresyon gelecekteki eklemeleri korumaya devam eder.
+- F-006 — kanonik yönetişim/geliştirici-giriş Markdown’ı mimari etki ile korunur.
+- F-007 — `test/**` ve `tests/**` tests etkisi ile korunur.
+- F-008 — tüm değişiklikler `tests: affected` ve boş olmayan hedefli regresyon listesi ister.
+- F-009 — yerel doğrulayıcı commit + staged + unstaged + untracked git diff’i uygular; taban çözülemezse kapalı başarısız olur.
 
-Section revalidation: `audit/remediation/A03_CLOSURE.md`.
-Final A03 implementation verification: ROG `1ca9f6e386a6cbdb7377ce35bf22a26b75e4ba80`, CI #221 / run `33974468120` / success.
+Bölüm yeniden doğrulama: `audit/remediation/A02_CLOSURE.md`.
+Merge-sonrası doğrulama: ROG `14b4e5b83b2cefe48aaa8cefc761a73d8e0b82fe`, CI #132 / run `33804101800` / success.
 
-## Current section — A04 Catalog + module contracts
+### A03 — Repo mimarisi / sahiplik
 
-**F-013 is CLOSED / POST-MERGE VERIFIED.** Canonical catalog identity now distinguishes normal and vine separators during legacy/keyless resolution and canonical construction/restore enforces valid catalog identity for catalog-equivalent runtime modules.
+**CLOSED / AUDITED_OK / POST-MERGE VERIFIED.**
 
-F-013 closure evidence: `audit/remediation/A04_F013_CLOSURE.md`.
+- F-010 — runtime modül-state oluşturma `src/designState.js` içinde merkezileştirildi.
+- F-011 — modüle özel yerleşim/etkileşim politika seçimi `src/moduleBehavior.js` içinde merkezileştirildi.
+- F-012 — sahne çevresi `src/sceneDimensions.js` içinde `SCENE_SURROUND_M = 1` olarak merkezileştirildi; kurulum ve renderer aynı kanonik değeri tüketir.
 
-A04 remains open because **F-014 — 17 active module contracts require final BOM classification** is still `OPEN / DECISION_REQUIRED`.
+Bölüm yeniden doğrulama: `audit/remediation/A03_CLOSURE.md`.
+Son A03 uygulama doğrulaması: ROG `1ca9f6e386a6cbdb7377ce35bf22a26b75e4ba80`, CI #221 / run `33974468120` / success.
 
-Continue remediation in section order with **F-014**. Do not treat later A04+ findings as closed until their own implementation, targeted regression, full suite/build, CI and required post-merge closure evidence are complete.
+## Güncel bölüm — A04 Katalog + modül sözleşmeleri
+
+**F-013 CLOSED / POST-MERGE VERIFIED.** Kanonik katalog kimliği, eski/anahtarsız çözümlemede düz ve sarmaşık separatörleri ayırır; kanonik oluşturma/geri yükleme, katalog-eşdeğer runtime modülleri için geçerli katalog kimliğini zorunlu kılar.
+
+F-013 kapanış kanıtı: `audit/remediation/A04_F013_CLOSURE.md`.
+
+A04 açık kalır çünkü **F-014 — 17 aktif modül sözleşmesi nihai BOM sınıflandırması gerektiriyor** hâlâ `OPEN / DECISION_REQUIRED`.
+
+Remediasyona bölüm sırasıyla **F-014** ile devam et. Sonraki A04+ bulguları, kendi uygulaması, hedefli regresyonu, tam paket/build, CI ve gerekli merge-sonrası kapanış kanıtı tamamlanmadan kapalı sayılmaz.

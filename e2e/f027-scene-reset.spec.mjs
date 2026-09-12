@@ -57,7 +57,7 @@ test('Sahneyi Sıfırla rebuilds from the visible setup controls without creatin
   expect(project.stand.standType).toBe('l-left');
   expect(project.stand.xCm).toBe(900);
   expect(project.stand.yCm).toBe(300);
-  expect(project.stand.floorType).toBe('hali');
+  expect(project.stand.itemKey).toBe('hali');
   expect(project.stand.depot).toEqual({
     enabled: true,
     sizeKey: '200x200',

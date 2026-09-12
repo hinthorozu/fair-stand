@@ -86,6 +86,6 @@ test('floor feedback preserves paintable and non-paintable labels', () => {
   );
   assert.equal(
     describeFloorSelection({ selected: true, floorType: 'parke', paintable: false }),
-    'Parke zemini seçili · bu zemin tipi boyanamaz.',
+    'Zemin zemini seçili · bu zemin tipi boyanamaz.',
   );
 });

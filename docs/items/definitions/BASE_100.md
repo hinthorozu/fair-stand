@@ -1,19 +1,19 @@
-# BASE_100 — Canonical Item
+# BASE_100 — Kanonik Item
 
 Migration öncesi tam envanter: [current-system/BASE_100](../current-system/BASE_100.md).
 Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKLIST](../contract/ITEM_CONTRACT_CHECKLIST.md).
 
-## Identity, properties ve ölçüler
-`src/items.js > COMPOSITE_ITEMS.BASE_100` canonical itemKey/name/type/dimensions sahibidir. Bileşik Item; `catalogKey = itemKey = BASE_100`. Tek type ailesi `base`; genişlik varyantı 100 cm. Doğrulanmış ölçüler: `widthCm=100`, `depthCm=50`, `heightCm=50`. Parent üzerinde unit uydurulmadı; child unit’ler production Item’lardadır.
+## Kimlik, özellikler ve ölçüler
+`src/items.js > COMPOSITE_ITEMS.BASE_100` kanonik itemKey/name/type/dimensions sahibidir. Bileşik Item; `itemKey = BASE_100`. Tek type ailesi `base`; genişlik varyantı 100 cm. Doğrulanmış ölçüler: `widthCm=100`, `depthCm=50`, `heightCm=50`. Üst öğe üzerinde unit uydurulmadı; child unit’ler production Item’lardadır.
 
-## Composition / BOM
-`composition.mode=recipe`, `moduleType=base`, `nominalWidthCm=100`. Miktar SoT: `src/moduleRecipes.js` → `base:100`. Child satırları Item kartında kopyalanmaz. `wall_base_100` ayrı type/recipe (`base-wall:100`); aynı `base_top_107_50` satırını paylaşır — bu migration reçete/quantity değiştirmez.
+## Bileşim / BOM
+`composition.mode=recipe`, `moduleType=base`, `nominalWidthCm=100`. Miktar tek kaynak: `src/moduleRecipes.js` → `base:100`. Alt satırları Item kartında kopyalanmaz. `wall_base_100` ayrı type/recipe (`base-wall:100`); aynı `base_top_107_50` satırını paylaşır — bu migration reçete/quantity değiştirmez.
 
-## Factory, state ve persistence
-`src/designState.js > createBaseModuleState` `getItem(catalogKey|itemKey|BASE_${width})` ile canonical Item’dan default üretir; `itemKey`/`catalogKey` damgalar; `faces.front|left|right` editable parity korunur. `getCommercialItemForType('base')` kullanılmaz. Load’da `normalizeModuleItemState` `catalogKey → itemKey` hydrate eder; alias yok.
+## Oluşturma, state ve kalıcılık
+`src/designState.js > createBaseModuleState` `getItem(itemKey|BASE_${width})` ile kanonik Item’dan default üretir; `itemKey` damgalar; `faces.front|left|right` editable aynı yapı korunur. `getCommercialItemForType('base')` kullanılmaz. Yüklemede `normalizeModuleItemState` `itemKey` doldurur; takma ad yok.
 
-## Behavior ve renderer sınırı
-`moduleBehavior.js > base`: free, 50 cm snap, footprint, `logical-fixture`. Davranış type bazlıdır; itemKey override yok. `createBaseModule()` procedural renderer; top thickness/overhang görsel temsildir, business SoT değildir.
+## Davranış ve renderer sınırı
+`moduleBehavior.js > base`: free, 50 cm snap, oturum alanı, `logical-fixture`. Davranış type bazlıdır; itemKey ezme yok. `createBaseModule()` prosedürel renderer; top thickness/overhang görsel temsildir, iş tek kaynağı değildir.
 
-## Regression
+## Regresyon
 `test/baseItemsContract.test.js`, `test/baseModule.test.js`, `test/baseRecipes.test.js`, `test/baseTopsItemContract.test.js`; E2E `e2e/base-items-contract.spec.mjs`.

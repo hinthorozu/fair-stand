@@ -41,7 +41,7 @@ test('accepts real pointer coordinates including zero', () => {
 
 
 test('feedback timeout stays finite by default', () => {
-  // Regression note: scene feedback defaults to 1800 ms so transient errors
-  // cannot remain stuck on screen until the next pointer movement.
+  // Regresyon: sahne geri bildirimi 1800 ms varsayar; geçici hatalar
+  // sonraki imleç hareketine kadar ekranda takılı kalmamalı.
   assert.equal(1800 > 0, true);
 });

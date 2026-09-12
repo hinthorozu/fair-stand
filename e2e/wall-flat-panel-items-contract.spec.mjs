@@ -55,7 +55,7 @@ for (const itemKey of keys) {
     page.on('pageerror', (error) => errors.push(error.message));
     await createBackWallStand(page, itemKey);
 
-    // Automatic back wall fills the run; free capacity before catalog add.
+    // Otomatik sırt duvarı dolu; katalog eklemeden önce kapasite aç.
     const initialProject = await saveAndReadProject(page);
     expect(initialProject).not.toBeNull();
     expect(initialProject.modules.length).toBeGreaterThan(0);
@@ -68,6 +68,7 @@ for (const itemKey of keys) {
 
     const picker = page.locator('.module-picker-backdrop');
     await expect(picker).toBeVisible();
+    await picker.locator('summary', { hasText: 'Panel & Duvar' }).click();
     await picker.locator(`[data-module-key="${itemKey}"]`).click();
     await picker.locator('.module-picker-add').click();
     await expect(picker).toBeHidden();
@@ -75,7 +76,7 @@ for (const itemKey of keys) {
     const project = await saveAndReadProject(page);
     const item = project.modules.find((module) => module.itemKey === itemKey);
     expect(item).toBeTruthy();
-    expect(item.catalogKey).toBe(itemKey);
+    expect(item.itemKey).toBe(itemKey);
     expect(item.type).toBe('flat-panel');
     expect(item.id).toBeTruthy();
     expect(item.strips?.length).toBe(7);

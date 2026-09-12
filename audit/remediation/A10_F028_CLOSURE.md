@@ -1,54 +1,54 @@
-# A10 F-028 closure
+# A10 F-028 kapanışı
 
-Finding: **F-028 — “Tüm Özellikleri Kaldır” can fail when `illuminated-foam` exists**
+Bulgu: **F-028 — “Tüm Özellikleri Kaldır” `illuminated-foam` varken başarısız olabilir**
 
-Status: **CLOSED / POST-MERGE VERIFIED / USER VERIFIED**
+Durum: **CLOSED / POST-MERGE VERIFIED / USER VERIFIED**
 
-## Root cause
+## Kök neden
 
-The global `Tüm Özellikleri Kaldır` flow previously treated every scene module as a module that should be recreated through the normal reset path. `illuminated-foam` is a special runtime family, so this made the operation vulnerable to failing or retaining behavior that did not match the intended destructive reset semantics.
+Küresel `Tüm Özellikleri Kaldır` akışı daha önce her sahne modülünü normal sıfırlama yolu üzerinden yeniden oluşturulması gereken bir modül olarak işliyordu. `illuminated-foam` özel bir runtime ailesidir; bu da işlemi, amaçlanan yıkıcı sıfırlama semantiğiyle örtüşmeyen davranışın başarısız olmasına veya kalmasına açık hale getiriyordu.
 
-## Remediation
+## Düzeltme
 
-Implementation PR **#81 — fix: remove illuminated foam during feature reset** defines the intended behavior explicitly:
+Uygulama PR **#81 — fix: remove illuminated foam during feature reset** amaçlanan davranışı açıkça tanımlar:
 
-- every `illuminated-foam` module is removed from the scene during `Tüm Özellikleri Kaldır`,
-- all remaining modules are reset through the existing canonical construction/reset path,
-- existing placement is preserved for the remaining modules,
-- unknown module families retain the existing fail-closed behavior,
-- the confirmation text explicitly states when Işıklı Strafor will be removed,
-- the selected illuminated-foam UI state is cleared consistently.
+- `Tüm Özellikleri Kaldır` sırasında her `illuminated-foam` modülü sahneden kaldırılır,
+- kalan tüm modüller mevcut kanonik inşa/sıfırlama yolu üzerinden sıfırlanır,
+- kalan modüller için mevcut yerleşim korunur,
+- bilinmeyen modül aileleri mevcut kapalı-düşme davranışını korur,
+- onay metni Işıklı Strafor'un kaldırılacağını açıkça belirtir,
+- seçili illuminated-foam UI durumu tutarlı biçimde temizlenir.
 
-No catalog dimensions, module default dimensions, placement arithmetic, project schema, IndexedDB schema, BOM policy or import/export format was intentionally changed by F-028.
+F-028 tarafından hiçbir katalog ölçüsü, modül varsayılan ölçüsü, yerleşim aritmetiği, proje şeması, IndexedDB şeması, BOM politikası veya içe/dışa aktarma formatı kasıtlı olarak değiştirilmedi.
 
-## Regression evidence
+## Regresyon kanıtı
 
-Targeted coverage added for the remediation:
+Düzeltme için eklenen hedefli kapsam:
 
-- `test/f028FeatureReset.test.js` — verifies the reset policy removes `illuminated-foam` and resets remaining modules,
-- `e2e/f028-reset-features.spec.mjs` — Chromium coverage verifies the real browser flow removes illuminated foam, preserves the remaining module layout and persists the resulting project state.
+- `test/f028FeatureReset.test.js` — sıfırlama politikasının `illuminated-foam`'u kaldırdığını ve kalan modülleri sıfırladığını doğrular,
+- `e2e/f028-reset-features.spec.mjs` — Chromium kapsamı, gerçek tarayıcı akışının illuminated foam'u kaldırdığını, kalan modül düzenini koruduğunu ve oluşan proje durumunu kalıcılaştırdığını doğrular.
 
-The final implementation PR passed the complete contract gate, all **492/492** unit/integration tests, production build and Chromium E2E suite.
+Son uygulama PR'ı tam sözleşme gate'ini, tüm **492/492** birim/entegrasyon testini, üretim derlemesini ve Chromium E2E paketini geçti.
 
-## CI and merge evidence
+## CI ve birleştirme kanıtı
 
-- implementation PR: **#81 — fix: remove illuminated foam during feature reset**
-- final implementation head: `1f5d615a0c7c8f6bcdd827c5cb660fffc1667c7e`
-- final PR CI: **run #340 / `34000562593` / completed / success**
+- uygulama PR: **#81 — fix: remove illuminated foam during feature reset**
+- son uygulama head: `1f5d615a0c7c8f6bcdd827c5cb660fffc1667c7e`
+- son PR CI: **run #340 / `34000562593` / completed / success**
   - change contract gate: success
   - full unit/integration test suite: 492/492 success
   - production build: success
   - Playwright runner + Chromium install: success
   - Chromium E2E: success
-- merged to `ROG` as `5b6022172a188996b213d69dc9ebefd4d49cf99d`
-- post-merge `ROG` CI: **run #341 / `34000668828` / completed / success**
+- `ROG`'a `5b6022172a188996b213d69dc9ebefd4d49cf99d` olarak birleştirildi
+- birleştirme sonrası `ROG` CI: **run #341 / `34000668828` / completed / success**
   - full canonical CI chain: success
-- post-merge manual product verification: **confirmed by the user**; `Tüm Özellikleri Kaldır` behaved as intended in the tested application flow.
+- birleştirme sonrası manuel ürün doğrulaması: **kullanıcı tarafından onaylandı**; `Tüm Özellikleri Kaldır` test edilen uygulama akışında amaçlandığı gibi davrandı.
 
-## Result
+## Sonuç
 
-F-028 satisfies the repository closure rule: implementation, targeted regression, full suite, build, PR CI, merge, post-merge CI verification and manual user verification are complete.
+F-028 depo kapanış kuralını karşılar: uygulama, hedefli regresyon, tam paket, derleme, PR CI, birleştirme, birleştirme sonrası CI doğrulaması ve manuel kullanıcı doğrulaması tamamdır.
 
 **F-028 is CLOSED.**
 
-A10 remains a broader `GAP` section because F-025 and F-026 remain open UI findings.
+A10, F-025 ve F-026 açık UI bulguları olarak kaldığı için daha geniş bir `GAP` bölümü olarak kalır.

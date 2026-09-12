@@ -45,10 +45,10 @@ Project snapshot parent module state'ini persist eder; ayrı `profile_140_5` ins
 Leaf profile için ayrı spatial relationship/reflow state'i yoktur; kullanım ve quantity parent recipe sahibidir.
 
 ## 15. BOM / composition — VAR
-Tekil Item. 8 doğrulanmış parent recipe (wall/shelf/counter/L-counter/base/base-wall); recipe satırları canonical `itemKey` kullanır, quantity parent recipe'den gelir ve expansion `getProductionItem()` ile metadata çözer.
+Tekil Item. 8 doğrulanmış parent recipe (wall/shelf/counter/L-counter/base/base-wall); recipe satırları kanonik `itemKey` kullanır, quantity parent recipe'den gelir ve expansion `getProductionItem()` ile metadata çözer.
 
 ## 16. Renderer / asset boundary — VAR
-`src/scene3d.js` production profile identity'sini mesh identity olarak tüketmez; bağlama göre 140.8 / 142 cm gibi procedural geometry üretir. Production length renderer'a zorla bağlanmaz. `ALUMINUM_PROFILE_COLOR` specialized renderer/theme override olarak kalabilir; canonical product default `Item.defaultColor=0xd0d3d4` Item'dadır.
+`src/scene3d.js` production profile identity'sini mesh identity olarak tüketmez; bağlama göre 140.8 / 142 cm gibi procedural geometry üretir. Production length renderer'a zorla bağlanmaz. `ALUMINUM_PROFILE_COLOR` specialized renderer/theme override olarak kalabilir; kanonik product default `Item.defaultColor=0xd0d3d4` Item'dadır.
 
 ## 17. Runtime owners — VAR
 Product metadata `src/productionParts.js`; recipe `src/moduleRecipes.js`; BOM policy `src/moduleContracts.js`; state `src/designState.js`; renderer `src/scene3d.js`; render theme `src/theme.js`; persistence `src/main.js` + `src/projectStore.js`; Raw BOM `src/rawBomDebug.js`.

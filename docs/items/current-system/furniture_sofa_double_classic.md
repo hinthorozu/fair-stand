@@ -1,4 +1,4 @@
-> Migration öncesi envanterdir; aktif canonical tanım `../definitions/furniture_sofa_double_classic.md` içindedir.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/furniture_sofa_double_classic.md` içindedir.
 
 # furniture_sofa_double_classic — Mevcut Sistem Profili
 
@@ -9,7 +9,7 @@ Bağımsız katalog Item yoktu. İkili koltuk `furniture_sofa_set_classic` rende
 | Alan | Kod değeri |
 |---|---|
 | Parent catalog key | `furniture_sofa_set_classic` |
-| Width | `150 cm` (`loveseatWidthCm`) |
-| Depth | `45 cm` (`sofaDepthM`) |
-| Height | `78 cm` |
-| Model file | `bej_koltuk_1_ciftli_2_tekli.glb` (renderer hardcode) |
+| Genişlik | `150 cm` (`loveseatWidthCm`) |
+| Derinlik | `45 cm` (`sofaDepthM`) |
+| Yükseklik | `78 cm` |
+| Model dosyası | `bej_koltuk_1_ciftli_2_tekli.glb` (renderer hardcode) |

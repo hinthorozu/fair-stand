@@ -138,7 +138,7 @@ test('trash bin is visible in the catalog, renders its GLB, and persists through
   ).toBe(true);
 
   const project = await saveAndReadProject(page);
-  const trash = project.modules.find((moduleState) => moduleState.catalogKey === TRASH_KEY);
+  const trash = project.modules.find((moduleState) => moduleState.itemKey === TRASH_KEY);
   expect(trash).toBeTruthy();
   expect(trash.type).toBe('plastic-trash-bin');
   expect([trash.widthCm, trash.depthCm, trash.heightCm]).toEqual([40, 40, 60]);
@@ -167,6 +167,7 @@ test('trash bin is visible and selectable in the existing Add catalog', async ({
 
   const picker = page.locator('.module-picker-backdrop');
   await expect(picker).toBeVisible();
+  await picker.locator('summary', { hasText: 'Extra' }).click();
   const trashCard = picker.locator(`[data-module-key="${TRASH_KEY}"]`);
   await expect(trashCard).toBeVisible();
   await expect(trashCard).toHaveAttribute('aria-selected', 'false');
@@ -187,7 +188,7 @@ test('100x100 automatic depot includes trash bin without overlapping floor fixtu
   await createIslandStand(page, 'Trash Bin Auto Depot', { depotContents: true });
   const project = await saveAndReadProject(page);
 
-  const trash = project.modules.find((moduleState) => moduleState.catalogKey === TRASH_KEY);
+  const trash = project.modules.find((moduleState) => moduleState.itemKey === TRASH_KEY);
   const fridge = project.modules.find((moduleState) => moduleState.type === 'mini-fridge');
   const rack = project.modules.find((moduleState) => moduleState.type === 'coat-rack');
   expect(trash).toBeTruthy();

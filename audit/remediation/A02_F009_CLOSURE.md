@@ -1,28 +1,28 @@
-# A02 F-009 closure
+# A02 F-009 kapanışı
 
-Finding: **F-009 — local `contract:verify` can skip diff enforcement outside CI/env input**
+Bulgu: **F-009 — Yerel `contract:verify` CI/env dışında diff denetimini atlayabilir**
 
-Status: **CLOSED pending post-merge ROG verification**
+Durum: **CLOSED, birleştirme sonrası ROG doğrulaması bekleniyor**
 
-Remediation:
-- removed the schema-only success path outside CI.
-- local verification resolves committed changes from a ROG/base merge-base.
-- local verification unions staged, unstaged, and untracked files.
-- `CHANGE_GATE_BASE=<git-ref>` provides an explicit base override.
-- inability to resolve a local base fails closed instead of silently skipping enforcement.
-- output reports the actual diff source used.
+Düzeltme:
+- CI dışındaki yalnızca-şema başarı yolu kaldırıldı.
+- yerel doğrulama, commit'lenmiş değişiklikleri bir ROG/base merge-base'den çözer.
+- yerel doğrulama staged, unstaged ve untracked dosyaları birleştirir.
+- `CHANGE_GATE_BASE=<git-ref>` açık bir taban geçersiz kılması sağlar.
+- yerel taban çözülemediğinde zorunluluk sessizce atlanmak yerine kapalı düşer.
+- çıktı kullanılan gerçek fark kaynağını bildirir.
 
-Targeted regression:
-- `test/systemChangeGateLocalDiff.test.js` creates a real temporary git repository and proves:
-  - an untracked guarded source without contract update is rejected,
-  - staged source + unstaged contract changes are unioned and accepted,
-  - committed guarded changes are enforced against an explicit base.
-- `test/systemChangeGateCiContract.test.js` continues to protect the canonical CI gate ordering.
+Hedefli regresyon:
+- `test/systemChangeGateLocalDiff.test.js` gerçek bir geçici git deposu oluşturur ve şunları kanıtlar:
+  - sözleşme güncellemesi olmadan untracked korumalı bir kaynak reddedilir,
+  - staged kaynak + unstaged sözleşme değişiklikleri birleştirilir ve kabul edilir,
+  - commit'lenmiş korumalı değişiklikler açık bir tabana karşı zorunlu kılınır.
+- `test/systemChangeGateCiContract.test.js` kanonik CI gate sıralamasını korumaya devam eder.
 
-Documentation:
-- `SYSTEM_CHANGE_GATE.md` now documents current F-005..F-009 path coverage, mandatory targeted tests, and local diff behavior.
+Dokümantasyon:
+- `SYSTEM_CHANGE_GATE.md` artık güncel F-005..F-009 yol kapsamını, zorunlu hedefli testleri ve yerel fark davranışını belgeler.
 
-Validation:
-- implementation PR #44 CI run #127: Change contract gate, install, full test, and build all passed.
-- final branch CI after section-closure bookkeeping must pass before merge.
-- post-merge ROG CI must pass before A03 remediation begins.
+Doğrulama:
+- uygulama PR #44 CI çalıştırması #127: Change contract gate, install, full test ve build passed.
+- birleştirmeden önce bölüm-kapanışı defter işlemlerinden sonra son dal CI geçmelidir.
+- A03 düzeltmesi başlamadan önce birleştirme sonrası ROG CI geçmelidir.

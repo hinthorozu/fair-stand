@@ -1,6 +1,6 @@
 import { getProductionItem } from './productionParts.js';
 
-// Standalone commercial products own their verified product defaults.
+// Bağımsız ticari ürünler, doğrulanmış ürün varsayılanlarının sahibidir.
 export const COMMERCIAL_ITEMS = Object.freeze({
   COAT_RACK: Object.freeze({
     itemKey: 'COAT_RACK', name: 'Askılık', type: 'coat-rack',
@@ -168,7 +168,7 @@ export const NON_CATALOG_ITEMS = Object.freeze({
   }),
 });
 
-// Zemin kaplamaları modül değildir; stand.floorType = itemKey. Katalog/recipe yok.
+// Zemin kaplamaları modül değildir; persist alanı stand.itemKey (eski kayıt: floorType). Katalog/recipe yok.
 export const FLOOR_ITEMS = Object.freeze({
   karolaj: Object.freeze({
     itemKey: 'karolaj',
@@ -233,6 +233,27 @@ export function isParquetFloorItem(item) {
   return item?.type === 'floor' && Number(item.dimensions?.lengthCm) > 0;
 }
 
+export function isGridTileFloorItem(item) {
+  return item?.type === 'floor'
+    && Boolean(item.paintable)
+    && Number(item.dimensions?.widthCm) > 0
+    && Number(item.dimensions?.depthCm) > 0
+    && !isParquetFloorItem(item);
+}
+
+export function isCarpetFloorItem(item) {
+  return item?.type === 'floor'
+    && Boolean(item.paintable)
+    && !Number(item.dimensions?.widthCm);
+}
+
+export function resolveStandFloorItemKey(standOrKey) {
+  const raw = typeof standOrKey === 'string'
+    ? standOrKey
+    : (standOrKey?.itemKey ?? standOrKey?.floorType ?? null);
+  return getFloorItem(raw)?.itemKey ?? getFloorItem('karolaj').itemKey;
+}
+
 export function getFurnitureClusterQuantity(item, childItemKey) {
   const entry = item?.composition?.items?.find((row) => row.itemKey === childItemKey);
   return entry == null ? null : Number(entry.quantity);
@@ -280,9 +301,9 @@ export const INDOOR_PLANT_ITEMS = Object.freeze({
   }),
 });
 
-// Wall-mounted media products share the single `tv` behavior family. Ordinary TVs are
-// parametric by verified screen size; widthCm is that same screen width so placement
-// bounds match the rendered box. Video walls derive totals from panel size x grid.
+// Duvara asılan medya ürünleri tek `tv` davranış ailesini paylaşır. Sıradan TV'ler
+// doğrulanmış ekran ölçüsüne göre parametriktir; widthCm aynı ekran genişliğidir ki
+// yerleşim sınırı çizilen kutuya denk gelsin. Video wall toplamları panel × ızgaradan türetilir.
 export const WALL_MEDIA_ITEMS = Object.freeze({
   TV_42: Object.freeze({
     itemKey: 'TV_42', name: 'TV 42"', type: 'tv', sizeInch: 42,
@@ -314,9 +335,8 @@ export const WALL_MEDIA_ITEMS = Object.freeze({
   }),
 });
 
-// Canonical resolver for wall-media metrics consumed by catalog, state factory and
-// selection feedback. Video-wall totals are derived from panel size x grid; ordinary
-// TV totals are the verified screen dimensions.
+// Katalog, state oluşturucu ve seçim geri bildiriminin kullandığı duvar-medya ölçü çözümleyicisi.
+// Video wall toplamları panel × ızgaradan türetilir; sıradan TV toplamları doğrulanmış ekran ölçüsüdür.
 export function resolveWallMediaMetrics(itemOrKey) {
   const item = typeof itemOrKey === 'string' ? WALL_MEDIA_ITEMS[itemOrKey] : itemOrKey;
   if (!item || item.type !== 'tv') return null;
@@ -340,7 +360,7 @@ export function resolveWallMediaMetrics(itemOrKey) {
       panelScreenHeightCm,
     });
   }
-  // Placement footprint must match the rendered screen — same rule as video walls.
+  // Yerleşim oturumu çizilen ekranla aynı olmalı — video wall ile aynı kural.
   const { catalogHeightCm, screenWidthCm, screenHeightCm } = item.dimensions;
   return Object.freeze({
     ...base,
@@ -368,9 +388,9 @@ export const COMPOSITE_ITEMS = Object.freeze({
       nominalWidthCm: 100,
     }),
   }),
-  // Free-standing baza parents share type `base` and resolve BOM via moduleRecipes
-  // `base:100|150|200`. Child Item quantities stay in the recipe; wall_base_* parents
-  // are a separate type/recipe family that happens to reuse the same base_top_* keys.
+  // Serbest baza üst öğeleri type `base` paylaşır; BOM `moduleRecipes`
+  // `base:100|150|200` üzerinden çözülür. Alt Item miktarları recipe'de kalır; wall_base_* üst öğeleri
+  // aynı base_top_* anahtarlarını paylaşan ayrı type/recipe ailesidir.
   BASE_100: Object.freeze({
     itemKey: 'BASE_100',
     name: 'Baza 100',
@@ -404,8 +424,8 @@ export const COMPOSITE_ITEMS = Object.freeze({
       nominalWidthCm: 200,
     }),
   }),
-  // Free-standing banko parents share type `counter`. Straight and L variants are
-  // separate itemKeys; child quantities stay in moduleRecipes (counter:* / counter-l:*).
+  // Serbest banko üst öğeleri type `counter` paylaşır. Düz ve L varyantları
+  // ayrı itemKey'lerdir; alt miktarlar moduleRecipes'te kalır (counter:* / counter-l:*).
   desk_banko_100: Object.freeze({
     itemKey: 'desk_banko_100',
     name: 'Banko 100',
@@ -478,8 +498,8 @@ export const COMPOSITE_ITEMS = Object.freeze({
       options: Object.freeze({ shape: 'L' }),
     }),
   }),
-  // Straight flat-panel wall parents. Child quantities stay in moduleRecipes
-  // straight-wall entries (50/100/150/200); Raw BOM UI path unchanged.
+  // Düz panel duvar üst öğeleri. Alt miktarlar moduleRecipes
+  // straight-wall satırlarında kalır (50/100/150/200); Raw BOM UI yolu değişmez.
   wall_50: Object.freeze({
     itemKey: 'wall_50',
     name: 'Düz Panel 50',

@@ -1,111 +1,111 @@
-# A02 Audit Evidence — Universal Change Gate
+# A02 Denetim Kanıtı — Evrensel Change Gate
 
-Audit section: `A02 — Universal change gate`
-Audit date: `2026-09-03`
-Checked ROG SHA: `dda455183e5c713cb55a24232436cfd39c68ce7b`
-Audit branch: `audit/full-system-a02`
+Denetim bölümü: `A02 — Universal change gate`
+Denetim tarihi: `2026-09-03`
+Kontrol edilen ROG SHA: `dda455183e5c713cb55a24232436cfd39c68ce7b`
+Denetim dalı: `audit/full-system-a02`
 
-## Summary
+## Özet
 
-The universal change gate is real and active in canonical CI, but it is not yet a complete all-surfaces wall.
+Evrensel change gate, kanonik CI'da gerçek ve aktiftir, ancak henüz tüm yüzeyleri kapsayan tam bir duvar değildir.
 
-New findings:
+Yeni bulgular:
 
-- `F-005` P1 — guarded runtime sources can have no path-required domain; 20/51 current `src/` files resolve zero mandatory impact domains, and other files have incomplete/accidental mappings.
-- `F-006` P1 — canonical rule/gate Markdown documents are outside guarded-file detection; the gate's own human-readable contract can change without a change declaration.
-- `F-007` P2 — `test/` and `tests/` are outside guarded-file detection; gate regression tests can be changed/removed without a declaration.
-- `F-008` P2 — targeted regression tests are not machine-required; `tests.targeted: []` is valid and `impact.tests` may be `not-applicable`.
-- `F-009` P2 — local `npm run contract:verify` validates schema only and skips diff enforcement unless CI/event variables or `CHANGE_GATE_FILES` are supplied.
+- `F-005` P1 — korumalı çalışma zamanı kaynaklarının yol-zorunlu alanı olmayabilir; güncel `src/` dosyalarının 20/51'i sıfır zorunlu etki alanı çözer ve diğer dosyalarda eksik/tesadüfi eşlemeler vardır.
+- `F-006` P1 — kanonik kural/kapı Markdown belgeleri korumalı-dosya tespitinin dışındadır; kapının kendi insan-okunur sözleşmesi change bildirimi olmadan değişebilir.
+- `F-007` P2 — `test/` ve `tests/` korumalı-dosya tespitinin dışındadır; kapı regresyon testleri bildirim olmadan değiştirilebilir/kaldırılabilir.
+- `F-008` P2 — hedefli regresyon testleri makine-zorunlu değildir; `tests.targeted: []` geçerlidir ve `impact.tests` `not-applicable` olabilir.
+- `F-009` P2 — yerel `npm run contract:verify` yalnızca şemayı doğrular ve CI/olay değişkenleri veya `CHANGE_GATE_FILES` sağlanmadıkça diff zorlamasını atlar.
 
-Existing findings from A01 remain open: F-001..F-004.
+A01'den mevcut bulgular açık kalır: F-001..F-004.
 
-No gate code was fixed during this audit section.
+Bu denetim bölümünde kapı kodu düzeltilmedi.
 
 ---
 
-## A02.01 — Impact domain schema completeness
+## A02.01 — Etki alanı şema bütünlüğü
 
-Status: `AUDITED_OK`
+Durum: `AUDITED_OK`
 
-Canonical source: `src/systemChangeContract.js` blob `13a6a89d2fe51e6a5d15c10ad5b5e44fa5eda183`.
+Kanonik kaynak: `src/systemChangeContract.js` blob `13a6a89d2fe51e6a5d15c10ad5b5e44fa5eda183`.
 
-`SYSTEM_IMPACT_DOMAINS` contains exactly 17 machine-readable domains:
+`SYSTEM_IMPACT_DOMAINS` tam olarak 17 makine-okunur alan içerir:
 
 `catalog, behavior, state, placement, renderer, persistence, bom, ui, composition, assets, storage, importExport, performance, accessibility, architecture, security, tests`.
 
-`validateSystemChangeContract()` derives missing/unknown decision validation from that same array. `test/systemChangeGate.test.js` explicitly removes `security` and verifies the missing-domain failure.
+`validateSystemChangeContract()` eksik/bilinmeyen karar doğrulamasını aynı diziden türetir. `test/systemChangeGate.test.js` açıkça `security` alanını kaldırır ve eksik-alan başarısızlığını doğrular.
 
-The human-readable list in `SYSTEM_CHANGE_GATE.md` matches this machine list; that correspondence was already checked in A01.04.
+`SYSTEM_CHANGE_GATE.md` içindeki insan-okunur liste bu makine listesiyle eşleşir; bu karşılık A01.04'te zaten kontrol edilmiştir.
 
 ---
 
-## A02.02 — Change kinds and mandatory domains
+## A02.02 — Değişiklik türleri ve zorunlu alanlar
 
-Status: `AUDITED_OK` with the test-policy caveat recorded separately as `F-008`.
+Durum: `AUDITED_OK`, test-politikası uyarısı ayrı olarak `F-008` kaydındadır.
 
-Supported kinds:
+Desteklenen türler:
 
 `module, feature, ui-control, state-change, renderer-change, persistence-change, bom-change, architecture, tooling, bugfix, refactor`.
 
-Machine constraints:
+Makine kısıtları:
 
-- `ui-control` → UI affected
-- `state-change` → state affected
-- `renderer-change` → renderer affected
-- `persistence-change` → persistence affected
-- `bom-change` → BOM affected
-- `architecture/tooling` → architecture affected
-- `module` → at least one of catalog/behavior/state/renderer affected
-- `feature` → at least one of composition/behavior/UI/state affected
-- every valid declaration → at least one impact domain affected
+- `ui-control` → UI etkilenir
+- `state-change` → state etkilenir
+- `renderer-change` → renderer etkilenir
+- `persistence-change` → persistence etkilenir
+- `bom-change` → BOM etkilenir
+- `architecture/tooling` → architecture etkilenir
+- `module` → catalog/behavior/state/renderer alanlarından en az biri etkilenir
+- `feature` → composition/behavior/UI/state alanlarından en az biri etkilenir
+- her geçerli bildirim → en az bir etki alanı etkilenir
 
-File-aware requirements are a second layer and are audited below.
+Dosya-farkında gereksinimler ikinci bir katmandır ve aşağıda denetlenir.
 
 ---
 
-## A02.03 — Guarded-file detection for runtime/delivery entry points
+## A02.03 — Çalışma zamanı/teslimat giriş noktaları için korumalı-dosya tespiti
 
-Status: `AUDITED_OK` for broad runtime/delivery inclusion, with governance/test exclusions tracked by F-006/F-007.
+Durum: geniş çalışma zamanı/teslimat dahilimi için `AUDITED_OK`; yönetişim/test dışlamaları F-006/F-007 ile izlenir.
 
-`isGuardedChangeFile()` includes:
+`isGuardedChangeFile()` şunları içerir:
 
 - `index.html`
 - `package.json`
 - `package-lock.json`
-- all `src/**`
-- all `public/**`
-- all `scripts/**`
+- tüm `src/**`
+- tüm `public/**`
+- tüm `scripts/**`
 - `.github/workflows/**`
 - `vite.config*`
 
-Therefore current product/runtime JS/CSS under `src/`, static public assets and delivery/build surfaces all trigger the requirement that `.github/change-contract.json` change in the same CI diff.
+Bu nedenle `src/` altındaki güncel ürün/çalışma zamanı JS/CSS, statik public varlıklar ve teslimat/derleme yüzeylerinin hepsi, aynı CI diff'inde `.github/change-contract.json` değişikliğini tetikler.
 
-This does **not** mean the correct impact domain is forced; that is the separate F-005 gap.
+Bu, doğru etki alanının zorlandığı anlamına **gelmez**; bu ayrı F-005 boşluğudur.
 
 ---
 
-## A02.04–A02.12 — Path-aware domain coverage
+## A02.04–A02.12 — Yol-farkında alan kapsamı
 
-### Directly mapped areas that are structurally present
+### Yapısal olarak mevcut doğrudan eşlenmiş alanlar
 
-- catalog: `src/catalog.js` → `catalog`
-- behavior/placement core: `moduleBehavior.js`, `moduleMove.js`, `modulePlacement.js`, `wallReflow.js`, `cornerPlacement.js` → `behavior + placement`
-- state: `designState.js` → `state + persistence`
+- katalog: `src/catalog.js` → `catalog`
+- davranış/yerleştirme çekirdeği: `moduleBehavior.js`, `moduleMove.js`, `modulePlacement.js`, `wallReflow.js`, `cornerPlacement.js` → `behavior + placement`
+- durum: `designState.js` → `state + persistence`
 - renderer: `scene3d.js`, `viewCube.js` → `renderer`
-- storage/persistence: `projectStore.js`, `assetStore.js`, `imageAssetReferences.js` → `persistence + storage`
+- depolama/kalıcılık: `projectStore.js`, `assetStore.js`, `imageAssetReferences.js` → `persistence + storage`
 - BOM: `moduleRecipes.js`, `productionParts.js`, `rawBomDebug.js` → `bom`
-- composition: `autoDepot.js`, `automaticWall.js`, `featureContracts.js` → `composition`
-- assets: all `public/**` → `assets`
-- delivery/tooling: package/lock/scripts/workflows/vite config and selected contract files → `architecture`
-- UI: `index.html`, selected UI/controller files and the `Ui|UI|Controller|Feedback` filename pattern → `ui`
+- bileşim: `autoDepot.js`, `automaticWall.js`, `featureContracts.js` → `composition`
+- varlıklar: tüm `public/**` → `assets`
+- teslimat/araçlar: paket/kilit/betikler/iş akışları/vite yapılandırması ve seçili sözleşme dosyaları → `architecture`
+- UI: `index.html`, seçili UI/denetleyici dosyaları ve `Ui|UI|Controller|Feedback` dosya adı kalıbı → `ui`
 
-### Finding F-005 — incomplete path-domain wall
+### Bulgu F-005 — eksik yol-alan duvarı
 
-Severity: `P1`
-Domain: `architecture / change-gate coverage`
-Status: `OPEN`
+Önem: `P1`
+Alan: `architecture / change-gate coverage`
+Durum: `OPEN`
 
-All current `src/**` files are guarded, but `requiredDomainsForFile()` returns zero mandatory domains for **20 of the 51 current source files**:
+Tüm güncel `src/**` dosyaları korumalıdır, ancak `requiredDomainsForFile()` **güncel kaynak dosyalarının 51'inden 20'si** için sıfır zorunlu alan döner:
 
 1. `src/colorEditor.css`
 2. `src/colorEditorInputs.js`
@@ -128,191 +128,191 @@ All current `src/**` files are guarded, but `requiredDomainsForFile()` returns z
 19. `src/viewKeyboardShortcuts.js`
 20. `src/wall.js`
 
-This is not merely naming ambiguity. Fresh source evidence shows these files own meaningful product behavior:
+Bu yalnızca adlandırma belirsizliği değildir. Taze kaynak kanıtı, bu dosyaların anlamlı ürün davranışına sahip olduğunu gösterir:
 
-- `main.js` imports and orchestrates scene rendering, catalog resolution, automatic depot/wall composition, module state factories, asset storage, project storage, placement, wall reflow, behavior, autosave, project switching and UI controls. Yet its path requires no domain.
-- `autosaveController.js` owns persistence timing and persist calls, but the generic `Controller` filename regex makes it require only `ui`; persistence is not path-forced.
-- `tvConfig.js` defines canonical TV size/type/screen dimensions consumed by catalog/render logic, but requires no domain.
-- `standSetup.js` defines stand type labels, valid dimension range/step and scene dimensions, but requires no domain.
-- `standCapacity.js` validates actual stand capacity and failure semantics, but requires no domain.
-- `viewKeyboardShortcuts.js` defines keyboard behavior and editable-target suppression, but requires no UI/accessibility/behavior domain.
-- `colorEditorInputs.js` validates/normalizes user-entered color values, but requires no UI/security/state domain.
-- `groundLayout.js` defines scene grid sizing/positioning, but requires no renderer/placement domain.
-- `wall.js` validates/constructs straight-wall composition, but requires no behavior/composition domain.
+- `main.js` sahne render'ını, katalog çözümlemesini, otomatik depo/duvar bileşimini, modül durum fabrikalarını, varlık depolamayı, proje depolamayı, yerleştirmeyi, duvar reflow'unu, davranışı, otomatik kaydı, proje değiştirmeyi ve UI kontrollerini içe aktarır ve orkestre eder. Yine de yolu hiçbir alan gerektirmez.
+- `autosaveController.js` kalıcılık zamanlamasını ve persist çağrılarını sahiplenir, ancak genel `Controller` dosya adı regex'i yalnızca `ui` gerektirir; persistence yol-zorunlu değildir.
+- `tvConfig.js`, katalog/render mantığının tükettiği kanonik TV boyut/tip/ekran ölçülerini tanımlar, ancak hiçbir alan gerektirmez.
+- `standSetup.js` stand tipi etiketlerini, geçerli ölçü aralığı/adımını ve sahne ölçülerini tanımlar, ancak hiçbir alan gerektirmez.
+- `standCapacity.js` gerçek stand kapasitesini ve başarısızlık semantiğini doğrular, ancak hiçbir alan gerektirmez.
+- `viewKeyboardShortcuts.js` klavye davranışını ve düzenlenebilir-hedef bastırmayı tanımlar, ancak UI/accessibility/behavior alanı gerektirmez.
+- `colorEditorInputs.js` kullanıcının girdiği renk değerlerini doğrular/normalize eder, ancak UI/security/state alanı gerektirmez.
+- `groundLayout.js` sahne ızgara boyutlandırma/konumlandırmasını tanımlar, ancak renderer/placement alanı gerektirmez.
+- `wall.js` düz-duvar bileşimini doğrular/kurar, ancak behavior/composition alanı gerektirmez.
 
-Impact:
+Etki:
 
-For any zero-mapped guarded file, CI still forces `.github/change-contract.json` to be edited, but a developer can mark an unrelated impact domain `affected` and mark the real domain(s) `not-applicable`; the verifier has no path-derived contradiction to reject it. For partially mapped files, a false declaration can similarly omit important secondary impacts.
+Sıfır-eşlemeli herhangi bir korumalı dosya için CI hâlâ `.github/change-contract.json` düzenlenmesini zorlar, ancak bir geliştirici ilgisiz bir etki alanını `affected` işaretleyip gerçek alanı/alanları `not-applicable` işaretleyebilir; doğrulayıcının bunu reddedecek yol-türevli çelişkisi yoktur. Kısmen eşlenmiş dosyalarda, yanlış bir bildirim benzer biçimde önemli ikincil etkileri atlayabilir.
 
-This defeats the intended “false not-applicable is blocked by code” guarantee for a substantial portion of runtime sources.
+Bu, çalışma zamanı kaynaklarının önemli bir kısmı için hedeflenen “yanlış not-applicable kod tarafından engellenir” güvencesini bozar.
 
-Decision: expand path/domain ownership systematically after the audit identifies canonical responsibilities; A03/A22/A23 should feed the final map.
+Karar: denetim kanonik sorumlulukları belirledikten sonra yol/alan sahipliğini sistematik genişlet; A03/A22/A23 nihai haritayı beslemelidir.
 
-Item consequences:
+Madde sonuçları:
 
-- A02.04 catalog path coverage: `GAP` because catalog-adjacent canonical `tvConfig.js` is unmapped.
-- A02.05 behavior/placement coverage: `GAP` because `groundLayout.js`, `standCapacity.js`, `standSetup.js`, `wall.js` and other related sources are not path-forced.
-- A02.06 state/persistence/storage coverage: `GAP` because `autosaveController.js`, `projectSwitch.js` and central orchestration are not correctly forced.
-- A02.07 renderer coverage: `GAP` because image layout/fit and TV config helpers are not mapped.
-- A02.08 UI coverage: `GAP` because CSS, `colorEditorInputs.js`, `viewKeyboardShortcuts.js` and `main.js` are not UI-forced.
-- A02.09 BOM coverage: `AUDITED_OK` for the current canonical BOM sources known at this stage.
-- A02.10 composition coverage: `AUDITED_OK` for current explicit composition owners known at this stage.
-- A02.11 public assets: `AUDITED_OK` — every `public/**` path requires assets.
-- A02.12 build/tooling/delivery: `AUDITED_OK` for package/lock/scripts/workflows/vite configuration.
+- A02.04 katalog yol kapsamı: `GAP` çünkü katalog-komşu kanonik `tvConfig.js` eşlenmemiştir.
+- A02.05 davranış/yerleştirme kapsamı: `GAP` çünkü `groundLayout.js`, `standCapacity.js`, `standSetup.js`, `wall.js` ve diğer ilgili kaynaklar yol-zorunlu değildir.
+- A02.06 durum/kalıcılık/depolama kapsamı: `GAP` çünkü `autosaveController.js`, `projectSwitch.js` ve merkezi orkestrasyon doğru zorlanmaz.
+- A02.07 renderer kapsamı: `GAP` çünkü görüntü yerleşim/sığdırma ve TV yapılandırma yardımcıları eşlenmemiştir.
+- A02.08 UI kapsamı: `GAP` çünkü CSS, `colorEditorInputs.js`, `viewKeyboardShortcuts.js` ve `main.js` UI-zorunlu değildir.
+- A02.09 BOM kapsamı: bu aşamada bilinen güncel kanonik BOM kaynakları için `AUDITED_OK`.
+- A02.10 bileşim kapsamı: bu aşamada bilinen güncel açık bileşim sahipleri için `AUDITED_OK`.
+- A02.11 public varlıklar: `AUDITED_OK` — her `public/**` yolu assets gerektirir.
+- A02.12 derleme/araç/teslimat: paket/kilit/betikler/iş akışları/vite yapılandırması için `AUDITED_OK`.
 
-A23.14 will re-run this mapping after every canonical owner is discovered by later sections.
-
----
-
-## A02.13 — Declaration omission detection in CI diffs
-
-Status: `AUDITED_OK`
-
-Canonical verifier: `scripts/verify-change-contract.mjs` blob `65e2d93d4b4194a8bcb88a1282b1de415782baa4`.
-
-For pull requests, the verifier diffs PR base SHA → HEAD. For pushes, it diffs event before → after. If at least one guarded file changed and `.github/change-contract.json` is not in the changed file set, it exits non-zero.
-
-CI uses checkout `fetch-depth: 0`, so the PR/push diff has the required history. Executable negative-path regression depth will be assessed later in A18.
+A23.14, sonraki bölümlerin her kanonik sahibi keşfetmesinden sonra bu eşlemeyi yeniden çalıştıracaktır.
 
 ---
 
-## A02.14 — False `not-applicable` on mapped high-risk paths
+## A02.13 — CI diff'lerinde bildirim atlama tespiti
 
-Status: `AUDITED_OK` **for paths that have a required-domain mapping**.
+Durum: `AUDITED_OK`
 
-For every changed guarded path, the verifier collects `requiredDomainsForFile(path)`. Every collected domain must be `impact[domain] === 'affected'`; otherwise CI exits non-zero.
+Kanonik doğrulayıcı: `scripts/verify-change-contract.mjs` blob `65e2d93d4b4194a8bcb88a1282b1de415782baa4`.
 
-F-005 documents the important limitation: an unmapped or incompletely mapped file cannot benefit from this second wall.
+Pull request'ler için doğrulayıcı, PR taban SHA → HEAD diff'ini alır. Push'lar için olay before → after diff'ini alır. En az bir korumalı dosya değiştiyse ve `.github/change-contract.json` değişen dosya kümesinde değilse, sıfır-dışı çıkar.
 
----
-
-## A02.15 — Risk / migration / rollback / test declaration validation
-
-Status: `GAP` — `F-008`.
-
-Risk, migration and rollback have machine validation:
-
-- risk level must be low/medium/high and notes non-empty
-- migration required must be boolean and notes non-empty
-- rollback must be non-empty
-- fullSuite must be true
-- build must be true
-
-### Finding F-008 — targeted regression policy is not enforced
-
-Severity: `P2`
-Domain: `tests / change contract`
-Status: `OPEN`
-
-`validateSystemChangeContract()` only checks `Array.isArray(contract.tests.targeted)`. An empty array is valid. It also does not require `impact.tests === 'affected'` for meaningful code changes.
-
-This conflicts with the human contract's mandatory sequence to identify targeted tests before implementation, and weakens the intended “a button/module/feature change must say what regression protects it” rule.
-
-Impact:
-
-A change can pass the universal declaration with zero targeted tests and rely only on the existing full suite/build, even when a new behavior has no specific regression guard.
-
-Decision: later harden schema/policy after deciding exact exceptions for pure docs/tooling changes.
+CI, `fetch-depth: 0` checkout kullanır, böylece PR/push diff'inin gerekli geçmişi vardır. Çalıştırılabilir negatif-yol regresyon derinliği sonra A18'de değerlendirilecektir.
 
 ---
 
-## A02.16 — The gate protects itself
+## A02.14 — Eşlenmiş yüksek-risk yollarda yanlış `not-applicable`
 
-Status: `GAP` — `F-006` + `F-007`.
+Durum: **zorunlu-alan eşlemesi olan yollar için** `AUDITED_OK`.
 
-### Finding F-006 — canonical rule/gate docs are unguarded
+Değişen her korumalı yol için doğrulayıcı `requiredDomainsForFile(path)` toplar. Toplanan her alan `impact[domain] === 'affected'` olmalıdır; aksi halde CI sıfır-dışı çıkar.
 
-Severity: `P1`
-Domain: `architecture / governance`
-Status: `OPEN`
+F-005 önemli sınırlamayı belgeler: eşlenmemiş veya eksik eşlenmiş bir dosya bu ikinci duvardan yararlanamaz.
 
-`isGuardedChangeFile()` does not include root Markdown rule/contract files. Therefore a change only to any of these can pass the change-gate step without modifying `.github/change-contract.json`:
+---
+
+## A02.15 — Risk / migrasyon / geri alma / test bildirimi doğrulaması
+
+Durum: `GAP` — `F-008`.
+
+Risk, migrasyon ve geri almanın makine doğrulaması vardır:
+
+- risk düzeyi low/medium/high olmalı ve notlar boş olmamalı
+- migrasyon gerekli boolean olmalı ve notlar boş olmamalı
+- geri alma boş olmamalı
+- fullSuite true olmalı
+- build true olmalı
+
+### Bulgu F-008 — hedefli regresyon politikası zorlanmıyor
+
+Önem: `P2`
+Alan: `tests / change contract`
+Durum: `OPEN`
+
+`validateSystemChangeContract()` yalnızca `Array.isArray(contract.tests.targeted)` kontrol eder. Boş dizi geçerlidir. Anlamlı kod değişiklikleri için `impact.tests === 'affected'` de gerektirmez.
+
+Bu, insan sözleşmesinin uygulamadan önce hedefli testleri belirleme zorunlu sırasıyla çelişir ve hedeflenen “bir düğme/modül/özellik değişikliği onu neyin koruduğunu söylemeli” kuralını zayıflatır.
+
+Etki:
+
+Bir değişiklik, sıfır hedefli testle evrensel bildirimi geçebilir ve mevcut tam paket/derlemeye dayanabilir; yeni bir davranışın belirli bir regresyon koruması olmasa bile.
+
+Karar: salt belge/araç değişiklikleri için tam istisnalar kararlaştırıldıktan sonra şema/politikayı sonra sertleştir.
+
+---
+
+## A02.16 — Kapı kendini korur
+
+Durum: `GAP` — `F-006` + `F-007`.
+
+### Bulgu F-006 — kanonik kural/kapı belgeleri korumasızdır
+
+Önem: `P1`
+Alan: `architecture / governance`
+Durum: `OPEN`
+
+`isGuardedChangeFile()` kök Markdown kural/sözleşme dosyalarını içermez. Bu nedenle yalnızca şunlardan herhangi birine yapılan bir değişiklik, `.github/change-contract.json` değiştirilmeden change-gate adımını geçebilir:
 
 - `PROJECT_RULES.md`
 - `ARCHITECTURE_RULES.md`
 - `SYSTEM_DEVELOPMENT_CONTRACT.md`
 - `SYSTEM_CHANGE_GATE.md`
 - `MODULE_BEHAVIOR_STANDARD.md`
-- other canonical policy Markdown
+- diğer kanonik politika Markdown
 
-The existing gate test explicitly asserts `README.md` is unguarded, which confirms this is current behavior rather than an ambiguous path match.
+Mevcut kapı testi açıkça `README.md`'nin korumasız olduğunu ileri sürer; bu, belirsiz bir yol eşleşmesi değil, güncel davranış olduğunu doğrular.
 
-Most importantly, `SYSTEM_CHANGE_GATE.md` — the human-readable contract for the gate itself — can be weakened or changed without an architecture-impact declaration.
+En önemlisi, `SYSTEM_CHANGE_GATE.md` — kapının kendisinin insan-okunur sözleşmesi — architecture-etki bildirimi olmadan zayıflatılabilir veya değiştirilebilir.
 
-Impact:
+Etki:
 
-Machine gate code remains protected under `src/` / `scripts/` / workflows, but human/AI rule truth can drift independently from machine enforcement, undermining the “read rules first” model.
+Makine kapı kodu `src/` / `scripts/` / iş akışları altında korumalı kalır, ancak insan/AI kural gerçeği makine zorlamasından bağımsız sapabilir ve “önce kuralları oku” modelini zayıflatır.
 
-Decision: canonical governance docs should become guarded architecture/process surfaces.
+Karar: kanonik yönetişim belgeleri korumalı architecture/süreç yüzeyleri olmalıdır.
 
-### Finding F-007 — gate tests are unguarded
+### Bulgu F-007 — kapı testleri korumasızdır
 
-Severity: `P2`
-Domain: `tests / governance`
-Status: `OPEN`
+Önem: `P2`
+Alan: `tests / governance`
+Durum: `OPEN`
 
-`test/**` and legacy `tests/**` are not guarded by `isGuardedChangeFile()`. Thus `test/systemChangeGate.test.js` and `test/systemChangeGateCiContract.test.js` can be changed or removed in a test-only PR without any change declaration.
+`test/**` ve eski `tests/**` `isGuardedChangeFile()` tarafından korunmaz. Böylece `test/systemChangeGate.test.js` ve `test/systemChangeGateCiContract.test.js` yalnızca-test bir PR'da herhangi bir change bildirimi olmadan değiştirilebilir veya kaldırılabilir.
 
-Impact:
+Etki:
 
-CI still runs the resulting test suite, but weakening/removing the gate's own regression tests does not require an explicit `tests/architecture` impact declaration. The `tests` impact domain therefore does not govern test-only changes.
+CI hâlâ ortaya çıkan test paketini çalıştırır, ancak kapının kendi regresyon testlerini zayıflatmak/kaldırmak açık bir `tests/architecture` etki bildirimi gerektirmez. Bu nedenle `tests` etki alanı yalnızca-test değişikliklerini yönetmez.
 
-Decision: guard test surfaces, with path/domain rules appropriate to test-only changes.
-
----
-
-## A02.17 — Guarded source paths missing path-domain mapping
-
-Status: `GAP` — `F-005`.
-
-Current count: **20 / 51 source files completely unmapped** by `requiredDomainsForFile()` while still guarded by `isGuardedChangeFile()`.
-
-This count is pinned to ROG SHA `dda455183e5c713cb55a24232436cfd39c68ce7b` and must be recomputed after later architecture/file-by-file sections.
+Karar: test yüzeylerini, yalnızca-test değişikliklerine uygun yol/alan kurallarıyla koru.
 
 ---
 
-## A02.18 — Local verifier behavior (audit-discovered item)
+## A02.17 — Yol-alan eşlemesi olmayan korumalı kaynak yolları
 
-Status: `GAP` — `F-009`.
+Durum: `GAP` — `F-005`.
 
-### Finding F-009
+Güncel sayı: `isGuardedChangeFile()` tarafından hâlâ korunurken `requiredDomainsForFile()` ile **tamamen eşlenmemiş 20 / 51 kaynak dosya**.
 
-Severity: `P2`
-Domain: `tooling / developer workflow`
-Status: `OPEN`
+Bu sayı ROG SHA `dda455183e5c713cb55a24232436cfd39c68ce7b` için sabitlenmiştir ve sonraki mimari/dosya-dosya bölümlerinden sonra yeniden hesaplanmalıdır.
 
-`npm run contract:verify` calls `scripts/verify-change-contract.mjs`. When neither `CHANGE_GATE_FILES` nor GitHub event environment variables are present, `changedFilesFromEnvironment()` returns null and the script explicitly prints:
+---
+
+## A02.18 — Yerel doğrulayıcı davranışı (denetimde keşfedilen madde)
+
+Durum: `GAP` — `F-009`.
+
+### Bulgu F-009
+
+Önem: `P2`
+Alan: `tooling / developer workflow`
+Durum: `OPEN`
+
+`npm run contract:verify`, `scripts/verify-change-contract.mjs` çağırır. Ne `CHANGE_GATE_FILES` ne de GitHub olay ortam değişkenleri varken `changedFilesFromEnvironment()` null döner ve betik açıkça şunu yazdırır:
 
 `System change contract schema is valid. Diff enforcement skipped outside CI.`
 
-It exits successfully after schema validation.
+Şema doğrulamasından sonra başarıyla çıkar.
 
-Impact:
+Etki:
 
-A human/AI can modify guarded source files locally, leave the change declaration stale, run the documented verifier and receive a green command. Canonical CI will still catch the omission later, so this is not a production bypass; it is a pre-PR enforcement gap relative to the intended “declare before implementation” workflow.
+Bir insan/AI korumalı kaynak dosyaları yerelde değiştirebilir, change bildirimini bayat bırakabilir, belgelenmiş doğrulayıcıyı çalıştırıp yeşil komut alabilir. Kanonik CI atlamayı sonra yine yakalar, bu yüzden bu bir üretim baypası değildir; hedeflenen “uygulamadan önce bildir” iş akışına göre PR-öncesi zorlama boşluğudur.
 
-Decision: later make the local command derive working-tree/base changes by default or provide a separate explicitly named schema-only mode.
-
----
-
-## A02.19 — Test-only change governance (audit-discovered item)
-
-Status: `GAP` — `F-007` / `F-008`.
-
-The `tests` domain exists in the schema, but test files themselves are unguarded and targeted tests may be empty. Test governance is therefore not yet a closed loop.
+Karar: sonra yerel komutu varsayılan olarak çalışma-ağacı/taban değişikliklerini türetmek üzere yap veya ayrı, açıkça adlandırılmış yalnızca-şema kipi sağla.
 
 ---
 
-# A02 result
+## A02.19 — Yalnızca-test değişiklik yönetişimi (denetimde keşfedilen madde)
 
-Section status: `GAP` (audit complete; five new findings open)
+Durum: `GAP` — `F-007` / `F-008`.
 
-Counts after A02:
+`tests` alanı şemada vardır, ancak test dosyalarının kendisi korumasızdır ve hedefli testler boş olabilir. Test yönetişimi bu nedenle henüz kapalı bir döngü değildir.
 
-- Open P0: 0
-- Open P1: 3 (`F-001`, `F-005`, `F-006`)
-- Open P2: 6 (`F-002`, `F-003`, `F-004`, `F-007`, `F-008`, `F-009`)
-- Open P3: 0
-- Decision required: 0
+---
 
-Next strict audit item: `A03.01`.
+# A02 sonucu
+
+Bölüm durumu: `GAP` (denetim tamam; beş yeni bulgu açık)
+
+A02 sonrası sayılar:
+
+- Açık P0: 0
+- Açık P1: 3 (`F-001`, `F-005`, `F-006`)
+- Açık P2: 6 (`F-002`, `F-003`, `F-004`, `F-007`, `F-008`, `F-009`)
+- Açık P3: 0
+- Karar gerekli: 0
+
+Sonraki katı denetim maddesi: `A03.01`.

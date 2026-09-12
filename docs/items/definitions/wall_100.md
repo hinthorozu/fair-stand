@@ -1,19 +1,19 @@
-# wall_100 — Canonical Item
+# wall_100 — Kanonik Item
 
 Migration öncesi tam envanter: [current-system/wall_100](../current-system/wall_100.md).
 Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKLIST](../contract/ITEM_CONTRACT_CHECKLIST.md).
 
-## Identity, properties ve ölçüler
-`src/items.js > COMPOSITE_ITEMS.wall_100` canonical itemKey/name/type/dimensions sahibidir. Bileşik Item; `catalogKey = itemKey = wall_100`. Type ailesi `flat-panel`; genişlik 100 cm. Parent üzerinde unit uydurulmadı.
+## Kimlik, özellikler ve ölçüler
+`src/items.js > COMPOSITE_ITEMS.wall_100` kanonik itemKey/name/type/dimensions sahibidir. Bileşik Item; `itemKey = wall_100`. Type ailesi `flat-panel`; genişlik 100 cm. Üst öğe üzerinde unit uydurulmadı.
 
-## Composition / BOM
-`composition.mode=recipe`, `moduleType=wall`, `nominalWidthCm=100`. Miktar SoT: `src/moduleRecipes.js` straight-wall `100` (`wall-straight-100`). Mevcut recipe miktarları değişmez. Raw BOM UI dokunulmadı.
+## Bileşim / BOM
+`composition.mode=recipe`, `moduleType=wall`, `nominalWidthCm=100`. Miktar tek kaynak: `src/moduleRecipes.js` straight-wall `100` (`wall-straight-100`). Mevcut recipe miktarları değişmez. Raw BOM UI dokunulmadı.
 
-## Factory, state ve persistence
-`createFlatPanelModuleState` Item’dan default üretir; 7 strip. Load hydrate `catalogKey → itemKey`; alias yok.
+## Oluşturma, state ve kalıcılık
+`createFlatPanelModuleState` Item’dan default üretir; 7 strip. Load hydrate `itemKey`; takma ad yok.
 
-## Behavior ve renderer sınırı
-`WALL_BEHAVIOR`: wall placement, 50 cm snap, 90° rotation. Procedural renderer business SoT değildir.
+## Davranış ve renderer sınırı
+`WALL_BEHAVIOR`: duvar yerleşimi, 50 cm snap, 90° rotation. Prosedürel renderer iş tek kaynağı değildir.
 
-## Regression
+## Regresyon
 `test/wallFlatPanelItemsContract.test.js`; E2E `e2e/wall-flat-panel-items-contract.spec.mjs`.

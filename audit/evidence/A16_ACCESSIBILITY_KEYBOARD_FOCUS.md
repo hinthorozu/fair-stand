@@ -1,39 +1,39 @@
-# A16 — Accessibility / keyboard / focus audit
+# A16 — Erişilebilirlik / klavye / odak denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Findings
+## Bulgular
 
-### F-039 — P2 — dynamic modal/context focus semantics are incomplete and inconsistent
+### F-039 — P2 — dinamik modal/bağlam odak semantiği eksik ve tutarsızdır
 
-The UI uses native buttons/inputs extensively and the module picker declares `role="dialog"` + `aria-modal="true"`, but dynamic overlays do not share a complete focus contract:
+UI yerli düğme/girdileri geniş kullanır ve modül seçici `role="dialog"` + `aria-modal="true"` bildirir, ancak dinamik katmanlar tam bir odak sözleşmesi paylaşmaz:
 
-- module picker opens without explicitly moving focus into the dialog, trapping focus, or returning focus to the invoker;
-- module context menu is a positioned `div` with buttons, without menu/dialog semantics or keyboard roving behavior;
-- project naming overlay focuses the text input, but has no dialog role/aria-modal, focus trap, explicit Escape handler or focus restoration;
-- illuminated-foam size overlay similarly focuses an input but lacks a common modal accessibility/focus lifecycle.
+- modül seçici, odağı açıkça iletişim kutusuna taşımadan, odağı tuzağa düşürmeden veya odağı çağırana döndürmeden açılır;
+- modül bağlam menüsü, menü/iletişim semantiği veya klavye dolaşma davranışı olmayan, düğmeli konumlandırılmış bir `div`'tir;
+- proje adlandırma katmanı metin girdisine odaklanır, ancak dialog rolü/aria-modal, odak tuzağı, açık Escape işleyici veya odak geri yükleme yoktur;
+- illuminated-foam boyut katmanı benzer biçimde bir girdiye odaklanır ancak ortak bir modal erişilebilirlik/odak yaşam döngüsü yoktur.
 
-This is a product accessibility/keyboard consistency gap, not evidence that mouse workflows are broken.
+Bu bir ürün erişilebilirlik/klavye tutarlılık boşluğudur; fare iş akışlarının bozuk olduğunun kanıtı değildir.
 
-## Positive controls
+## Olumlu kontroller
 
-- primary static controls use native `button`, `input`, `select`, `details/summary` semantics.
-- static labels/aria-labels exist for most primary fields.
-- view shortcuts route through `isEditableKeyboardTarget()` and do not intentionally fire while focus is in input/textarea/select/contenteditable.
-- module picker supports Escape close.
-- project loading overlay exposes `aria-live`/`aria-busy` status.
-- feedback is generally textual in addition to color.
+- birincil statik kontroller yerli `button`, `input`, `select`, `details/summary` semantiği kullanır.
+- çoğu birincil alan için statik etiketler/aria-etiketleri vardır.
+- görünüm kısayolları `isEditableKeyboardTarget()` üzerinden geçer ve odak input/textarea/select/contenteditable içindeyken kasıtlı ateşlenmez.
+- modül seçici Escape kapatmayı destekler.
+- proje yükleme katmanı `aria-live`/`aria-busy` durumu açığa çıkarır.
+- geri bildirim genellikle rengin yanı sıra metinseldir.
 
-## Checklist results
+## Kontrol listesi sonuçları
 
-- A16.01 accessible names/labels: `AUDITED_OK` for primary static controls; dynamic semantics gap F-039.
-- A16.02 button semantics: `AUDITED_OK` for primary actions.
-- A16.03 shortcut suppression while editing: `AUDITED_OK` at resolver/integration level.
-- A16.04 modal/context focus lifecycle: `GAP` — F-039.
-- A16.05 Escape/close consistency: `GAP` — F-039.
-- A16.06 hidden/disabled focus: `AUDITED_OK` on inspected native controls.
-- A16.07 non-color-only feedback: `AUDITED_OK` for inspected status/selection flows.
-- A16.08 critical workflows keyboard-operable: `GAP/DECISION_REQUIRED` — 3D pointer placement and dynamic dialogs do not have a complete keyboard-equivalent contract.
+- A16.01 erişilebilir adlar/etiketler: birincil statik kontroller için `AUDITED_OK`; dinamik semantik boşluk F-039.
+- A16.02 düğme semantiği: birincil eylemler için `AUDITED_OK`.
+- A16.03 düzenleme sırasında kısayol bastırma: çözümleyici/entegrasyon düzeyinde `AUDITED_OK`.
+- A16.04 modal/bağlam odak yaşam döngüsü: `GAP` — F-039.
+- A16.05 Escape/kapat tutarlılığı: `GAP` — F-039.
+- A16.06 gizli/devre dışı odak: incelenen yerli kontrollerde `AUDITED_OK`.
+- A16.07 yalnızca-renk-olmayan geri bildirim: incelenen durum/seçim akışları için `AUDITED_OK`.
+- A16.08 kritik iş akışları klavye-işletilebilir: `GAP/DECISION_REQUIRED` — 3B işaretçi yerleştirme ve dinamik iletişim kutularının tam bir klavye-eşdeğer sözleşmesi yoktur.
 
-Section audit status: **GAP**.
+Bölüm denetim durumu: **GAP**.

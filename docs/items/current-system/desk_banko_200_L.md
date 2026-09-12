@@ -1,4 +1,4 @@
-> Migration �ncesi envanterdir; aktif canonical tan�m `../definitions/desk_banko_200_L.md` i�indedir.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/desk_banko_200_L.md` içindedir.
 
 # desk_banko_200_L — Mevcut Sistem Profili
 
@@ -8,31 +8,31 @@ Bu belge `desk_banko_200_L` için `Version2` runtime kodunda çalışan state, p
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `desk_banko_200_L` |
-| Label | `Köşe Banko 200×200` |
+| Katalog anahtarı | `desk_banko_200_L` |
+| Etiket | `Köşe Banko 200×200` |
 | Type | `counter` |
 | Shape | `L` |
-| Width | `200 cm` |
-| Depth | `200 cm` |
-| Height | `100 cm` |
+| Genişlik | `200 cm` |
+| Derinlik | `200 cm` |
+| Yükseklik | `100 cm` |
 | Editable face count | `8` |
 
 Factory straight counter için `frontLower/frontUpper/leftLower/leftUpper/rightLower/rightUpper` olmak üzere 6 editable face oluşturur. L shape ayrıca `returnLower/returnUpper` ekleyerek 8 face oluşturur. Her face default beyaz ve image-editable state taşır.
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `free-editable` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `editable` |
 | Image | `editable` |
-| Renderer policy | `procedural` |
+| Renderer politikası | `procedural` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `recipe` |
-| BOM source | `src/moduleRecipes.js` |
+| Bileşim | `standalone` |
+| BOM kipi | `recipe` |
+| BOM kaynağı | `src/moduleRecipes.js` |
 
 ## Behavior
 
@@ -103,7 +103,7 @@ Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kayd
 
 `Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `desk_banko_200_L` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 

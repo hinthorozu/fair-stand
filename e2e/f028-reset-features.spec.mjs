@@ -97,8 +97,8 @@ test('Tüm Özellikleri Kaldır deletes illuminated foam and preserves other mod
 
   const { projectId, preserved } = await seedIlluminatedFoam(page);
 
-  // Reload clears the active in-memory project so the F-020 preflight save cannot
-  // overwrite the seeded persisted project before the real open flow reads it.
+  // Reload bellek içi aktif projeyi temizler; F-020 ön uçuş kaydı,
+  // gerçek açma akışı okumadan önce tohumlanmış kayıtlı projeyi ezmesin.
   await page.reload();
   const projectSelect = page.locator('#project-select');
   await expect(projectSelect.locator(`option[value="${projectId}"]`)).toHaveCount(1);

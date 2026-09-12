@@ -1,10 +1,10 @@
 # upright_49_5 — Current System Inventory
 
 ## 1. Identity / type — VAR
-Canonical source `src/productionParts.js`: `itemKey=upright_49_5`, `type=upright`, `unit=adet`, name `Dikme 49,5 cm`.
+Kanonik source `src/productionParts.js`: `itemKey=upright_49_5`, `type=upright`, `unit=adet`, name `Dikme 49,5 cm`.
 
 ## 2. Intrinsic properties — VAR
-Canonical Item properties: `lengthCm=49.5`, `thicknessCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Renderer may explicitly override visual representation without changing the Item default.
+Kanonik Item properties: `lengthCm=49.5`, `thicknessCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Renderer may explicitly override visual representation without changing the Item default.
 
 ## 3. Default state — UYGULANMIYOR
 No standalone upright project state; base/base-wall parent state owns runtime/editor state.
@@ -40,7 +40,7 @@ Projects persist parent module state; no separate `upright_49_5` instance is per
 No leaf relationship/reflow state; parent module owns relationships.
 
 ## 14. BOM / composition — VAR
-Six verified recipes consume this Item: `base-wall:100/150/200` use quantity `2`; `base:100/150/200` use quantity `4`. Parent recipes own quantity and canonical `itemKey` resolves metadata through `getProductionItem()`.
+Six verified recipes consume this Item: `base-wall:100/150/200` use quantity `2`; `base:100/150/200` use quantity `4`. Parent recipes own quantity and kanonik `itemKey` resolves metadata through `getProductionItem()`.
 
 ## 15. Renderer / asset / override boundary — VAR
 Base/base-wall renderers create procedural post geometry and do not use `upright_49_5` as mesh identity. Production `49.5 cm / 8 cm` is not forced onto renderer geometry. Visual renderer constants remain explicit specialized render overrides.
@@ -49,7 +49,7 @@ Base/base-wall renderers create procedural post geometry and do not use `upright
 Product metadata: `src/productionParts.js`; quantities/composition: `src/moduleRecipes.js`; state/behavior/persistence: parent module runtime; renderer: `src/scene3d.js`.
 
 ## 17. Regression — VAR
-`test/upright99And495ItemContract.test.js` protects identity, dimensions and six recipe quantities. `test/uprightIntrinsicProperties.test.js` protects aluminum material and `0xd0d3d4` canonical default color.
+`test/upright99And495ItemContract.test.js` protects identity, dimensions and six recipe quantities. `test/uprightIntrinsicProperties.test.js` protects aluminum material and `0xd0d3d4` kanonik default color.
 
 ## 18. Open state / decisions / completion — VAR
-Product decision confirmed: upright material is aluminum and canonical default color is `#D0D3D4`. No renderer/state/placement/persistence migration is required for this change.
+Product decision confirmed: upright material is aluminum and kanonik default color is `#D0D3D4`. No renderer/state/placement/persistence migration is required for this change.

@@ -1,4 +1,4 @@
-> Migration öncesi envanterdir; aktif canonical tanım `../definitions/VIDEO_WALL_2X2.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/VIDEO_WALL_2X2.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
 
 # VIDEO_WALL_2X2 — Mevcut Sistem Profili
 
@@ -8,8 +8,8 @@ Bu belge `VIDEO_WALL_2X2` için migration öncesi `Version2` runtime kodunda ça
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `VIDEO_WALL_2X2` |
-| Label | `Video Wall 2×2` |
+| Katalog anahtarı | `VIDEO_WALL_2X2` |
+| Etiket | `Video Wall 2×2` |
 | Type | `tv` |
 | Catalog width | `217 cm` |
 | Catalog height | `122 cm` |
@@ -22,22 +22,22 @@ Bu belge `VIDEO_WALL_2X2` için migration öncesi `Version2` runtime kodunda ça
 
 Video wall katalog kaydında `heightCm` toplam ekran yüksekliği (122) değeridir; ordinary TV'lerdeki 350 cm mounting height kullanılmaz. Toplam ekran ölçüleri panel `108.5 × 61 cm` × `2 × 2` grid'inden gelir.
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `wall-media` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `fixed` |
 | Image | `renderer-managed` |
-| Renderer policy | `specialized-media` |
+| Renderer politikası | `specialized-media` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `decision-required` |
-| BOM source | `None` |
+| Bileşim | `standalone` |
+| BOM kipi | `decision-required` |
+| BOM kaynağı | `None` |
 
-## Behavior / placement
+## Davranış / yerleşim
 
 | Alan | Kod değeri |
 |---|---|

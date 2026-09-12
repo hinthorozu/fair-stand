@@ -1,4 +1,4 @@
-﻿> Migration öncesi envanterdir; aktif canonical tanım `../definitions/wall_separator_100_sarmasik.md` içindedir.
+﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_separator_100_sarmasik.md` içindedir.
 
 # wall_separator_100_sarmasik — Mevcut Sistem Profili
 
@@ -8,13 +8,13 @@ Bu belge `wall_separator_100_sarmasik` için `Version2` runtime kodunda bulunan 
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `wall_separator_100_sarmasik` |
-| Label | `Separatör 100 Sarmaşık` |
+| Katalog anahtarı | `wall_separator_100_sarmasik` |
+| Etiket | `Separatör 100 Sarmaşık` |
 | Type | `separator` |
-| Width | `100 cm` |
-| Model file | `wall_separator_100_sarmasik.glb` |
+| Genişlik | `100 cm` |
+| Model dosyası | `wall_separator_100_sarmasik.glb` |
 
-Factory state:
+Oluşturma state:
 
 ```text
 id = generated
@@ -28,22 +28,22 @@ catalogKey = wall_separator_100_sarmasik
 
 Separator state'inde `imageAssetId` yoktur.
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `wall-color-only` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `editable` |
 | Image | `none` |
-| Renderer policy | `procedural-or-model` |
+| Renderer politikası | `procedural-or-model` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `recipe` |
-| BOM source | `src/moduleRecipes.js` |
+| Bileşim | `standalone` |
+| BOM kipi | `recipe` |
+| BOM kaynağı | `src/moduleRecipes.js` |
 
-## Behavior / placement
+## Davranış / yerleşim
 
 | Alan | Kod değeri |
 |---|---|
@@ -111,7 +111,7 @@ Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kayd
 
 `Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `wall_separator_100_sarmasik` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 

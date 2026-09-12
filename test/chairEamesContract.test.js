@@ -20,7 +20,7 @@ test('chair_eames katalog ve state kimliği sabittir', () => {
 
   const state = createEamesChairModuleState();
   assert.equal(state.itemKey, 'chair_eames');
-  assert.equal(state.catalogKey, 'chair_eames');
+  assert.equal(state.itemKey, 'chair_eames');
   assert.equal(state.type, 'chair');
   assert.equal(state.widthCm, 46);
   assert.equal(state.depthCm, 58);

@@ -1,17 +1,18 @@
 {
   "schemaVersion": 2,
-  "id": "floor-item-identity",
-  "kind": "module",
-  "summary": "Zemin kaplamaları canonical floor Item: karolaj, hali, parke-acik, parke-sari, parke-beton. Katalog/recipe/unit yok. stand.floorType = itemKey.",
+  "id": "itemkey-only-identity",
+  "kind": "state-change",
+  "summary": "Ürün kimliği yalnız itemKey. catalogKey okunmaz ve yazılmaz. stand.itemKey zemin kimliği (eski floorType hydrate).",
   "owners": [
-    "src/items.js",
     "src/catalog.js",
     "src/designState.js",
+    "src/items.js",
     "src/moduleContracts.js"
   ],
   "sourceOfTruth": [
     "src/items.js",
-    "src/moduleContracts.js",
+    "src/catalog.js",
+    "src/designState.js",
     "src/moduleRecipes.js"
   ],
   "impact": {
@@ -47,6 +48,7 @@
       "src/automaticWall.js",
       "src/colorEditor.css",
       "src/cornerPlacement.js",
+      "src/featureContracts.js",
       "src/helpGuide.css",
       "src/main.js",
       "src/moduleMove.js",
@@ -107,9 +109,9 @@
       "test/doorLeafItemContract.test.js",
       "test/eamesTableChairSetContract.test.js",
       "test/f027SceneReset.test.js",
-      "test/floorItemsContract.test.js",
       "test/f028FeatureReset.test.js",
       "test/fabricModuleOwnership.test.js",
+      "test/floorItemsContract.test.js",
       "test/freePropsCollisionNone.test.js",
       "test/furnitureItemsContract.test.js",
       "test/glassShelfItemContract.test.js",
@@ -199,7 +201,6 @@
     ],
     "affectedDocs": [
       "ARCHITECTURE_RULES.md",
-      "audit/FINDINGS.md",
       "FRESH_REPOSITORY_REVIEW.md",
       "MODULE_BEHAVIOR_STANDARD.md",
       "PROJECT_RULES.md",
@@ -211,7 +212,9 @@
       "SYSTEM_AUDIT_CHECKLIST.md",
       "SYSTEM_CHANGE_GATE.md",
       "SYSTEM_DEVELOPMENT_CONTRACT.md",
+      "SYSTEM_IMPACT_SWEEP.md",
       "SYSTEM_MODULE_CATALOG.md",
+      "audit/FINDINGS.md",
       "audit/FULL_SWEEP_STATE.md",
       "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
       "audit/evidence/A02_CHANGE_GATE.md",
@@ -221,6 +224,7 @@
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
       "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
+      "audit/evidence/A10_UI_CONTROLS.md",
       "audit/evidence/A11_FEATURE_COMPOSITION.md",
       "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
       "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
@@ -275,14 +279,14 @@
       "docs/items/current-system/furniture_sofa_set_classic.md",
       "docs/items/current-system/furniture_table_chair_set_eames.md",
       "docs/items/current-system/glass_shelf.md",
-      "docs/items/current-system/illuminated-foam.md",
       "docs/items/current-system/hali.md",
+      "docs/items/current-system/illuminated-foam.md",
       "docs/items/current-system/karolaj.md",
-      "docs/items/current-system/parke.md",
       "docs/items/current-system/panel_147_5.md",
       "docs/items/current-system/panel_197.md",
       "docs/items/current-system/panel_48_5.md",
       "docs/items/current-system/panel_98.md",
+      "docs/items/current-system/parke.md",
       "docs/items/current-system/profile_140_5.md",
       "docs/items/current-system/profile_190.md",
       "docs/items/current-system/profile_41_5.md",
@@ -389,9 +393,7 @@
       "fair-stand-base-family-migration-handoff.md"
     ],
     "relatedFindings": {
-      "affected": [
-        "F-014"
-      ],
+      "affected": [],
       "reviewedNotAffected": [
         "F-003",
         "F-005",
@@ -399,26 +401,28 @@
         "F-011",
         "F-012",
         "F-013",
+        "F-014",
         "F-015",
         "F-017",
         "F-018",
         "F-019",
+        "F-028",
         "F-029",
         "F-033",
         "F-045",
         "F-047"
       ]
     },
-    "notes": "Katalog anahtarı LED_FLOODLIGHT → led_floodlight. Foam NON_CATALOG kalır. Recipe/unit yok."
+    "notes": "Recipe/unit/BOM miktarı değişmedi. catalogKey hydrate yok."
   },
   "tests": {
     "targeted": [
-      "test/floorItemsContract.test.js",
-      "test/lightingItemsContract.test.js",
-      "test/ledFloodlightModule.test.js",
-      "test/illuminatedFoamModule.test.js",
+      "test/catalogSingleSource.test.js",
       "test/moduleStateConstructionRegistry.test.js",
-      "test/systemModuleCatalogDoc.test.js"
+      "test/lightingItemsContract.test.js",
+      "test/floorItemsContract.test.js",
+      "test/plasticTrashBinModule.test.js",
+      "test/systemDevelopmentContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -426,18 +430,20 @@
       "required": true,
       "targeted": [
         "e2e/floor-items-contract.spec.mjs",
-        "e2e/lighting-items-contract.spec.mjs"
+        "e2e/f010-module-construction.spec.mjs",
+        "e2e/lighting-items-contract.spec.mjs",
+        "e2e/plastic-trash-bin-module.spec.mjs"
       ],
-      "reason": "Zemin select Item kimliği ve led_floodlight katalog drag tarayıcıda doğrulanmalı."
+      "reason": "Katalog drag, kayıt kimliği ve zemin persist tarayıcıda doğrulanmalı."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Eski LED_FLOODLIGHT catalogKey hydrate ile led_floodlight olur. Foam catalogKey silinir."
+    "notes": "catalogKey kimlik olarak kullanılmaz; eski catalogKey-only kayıtlar desteklenmez. stand.floorType hâlâ itemKey’e hydrate edilir."
   },
   "migration": {
-    "required": false,
-    "notes": "Type tekil olduğu için resolveModuleCatalogKey eski LED_FLOODLIGHT anahtarını type ile çözer."
+    "required": true,
+    "notes": "catalogKey hydrate yok. stand.floorType → stand.itemKey. Type+ölçü resolve itemKey yoksa çalışır."
   },
-  "rollback": "Bu change set geri alınırsa katalog anahtarı LED_FLOODLIGHT’a ve itemKey’siz factory’ye döner."
+  "rollback": "Bu change set geri alınırsa catalogKey yeniden yazılır ve stand.floorType alanına dönülür."
 }

@@ -1,4 +1,4 @@
-﻿> Migration öncesi envanterdir; aktif canonical tanım `../definitions/EXTRA_INDOOR_PLANT_1.md` içindedir.
+﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/EXTRA_INDOOR_PLANT_1.md` içindedir.
 
 # EXTRA_INDOOR_PLANT_1 — Mevcut Sistem Profili
 
@@ -8,15 +8,15 @@ Bu belge `EXTRA_INDOOR_PLANT_1` için `Version2` runtime kodunda bulunan state, 
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `EXTRA_INDOOR_PLANT_1` |
-| Label | `Yapay Çiçek 1` |
+| Katalog anahtarı | `EXTRA_INDOOR_PLANT_1` |
+| Etiket | `Yapay Çiçek 1` |
 | Type | `indoor-plant-1` |
-| Width | `60 cm` |
-| Depth | `60 cm` |
-| Height | `120 cm` |
-| Model file | `None` |
+| Genişlik | `60 cm` |
+| Derinlik | `60 cm` |
+| Yükseklik | `120 cm` |
+| Model dosyası | `None` |
 
-Default runtime state:
+Varsayılan runtime state:
 
 ```text
 {
@@ -32,22 +32,22 @@ Default runtime state:
 }
 ```
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `free-model-fixed` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `fixed` |
 | Image | `none` |
-| Renderer policy | `model` |
+| Renderer politikası | `model` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `decision-required` |
-| BOM source | `None` |
+| Bileşim | `standalone` |
+| BOM kipi | `decision-required` |
+| BOM kaynağı | `None` |
 
-## Behavior / placement
+## Davranış / yerleşim
 
 | Alan | Kod değeri |
 |---|---|
@@ -100,7 +100,7 @@ Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kayd
 
 `Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `EXTRA_INDOOR_PLANT_1` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 
@@ -126,7 +126,7 @@ bom.source = None
 
 `moduleContracts.js` içindeki mevcut reason:
 
-> Existing module has no canonical BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
+> Existing module has no kanonik BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
 
 Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 

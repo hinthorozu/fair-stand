@@ -1,4 +1,4 @@
-> Migration öncesi envanterdir; aktif canonical tanım `../definitions/PLASTIC_TRASH_BIN.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/PLASTIC_TRASH_BIN.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
 
 # DEPOT_PLASTIC_TRASH_BIN — Mevcut Sistem Profili
 
@@ -8,15 +8,15 @@ Bu belge `DEPOT_PLASTIC_TRASH_BIN` için `Version2` runtime kodunda bulunan stat
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `DEPOT_PLASTIC_TRASH_BIN` |
-| Label | `Çöp Kutusu` |
+| Katalog anahtarı | `DEPOT_PLASTIC_TRASH_BIN` |
+| Etiket | `Çöp Kutusu` |
 | Type | `plastic-trash-bin` |
-| Width | `40 cm` |
-| Depth | `40 cm` |
-| Height | `60 cm` |
-| Model file | `plastic_trash_bin.glb` |
+| Genişlik | `40 cm` |
+| Derinlik | `40 cm` |
+| Yükseklik | `60 cm` |
+| Model dosyası | `plastic_trash_bin.glb` |
 
-Default runtime state:
+Varsayılan runtime state:
 
 ```text
 {
@@ -32,22 +32,22 @@ Default runtime state:
 }
 ```
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `free-model-fixed` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `fixed` |
 | Image | `none` |
-| Renderer policy | `model` |
+| Renderer politikası | `model` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `decision-required` |
-| BOM source | `None` |
+| Bileşim | `standalone` |
+| BOM kipi | `decision-required` |
+| BOM kaynağı | `None` |
 
-## Behavior / placement
+## Davranış / yerleşim
 
 | Alan | Kod değeri |
 |---|---|
@@ -72,7 +72,7 @@ Placement `free` ailesindedir. Move/rotation ve boundary değerleri yukarıdaki 
 
 ## Renderer
 
-`plastic-trash-bin`, `createIndoorPlantModule()` renderer yoluna girer ve `plastic_trash_bin.glb` yükler. Instance `visualRotationYDeg` değeri visual group'u Y ekseninde döndürür; factory başlangıç değerini canonical Item'daki `visualRotationYDeg=-90` defaultundan üretir ve renderer eksik state alanında aynı Item defaultuna döner. `Sphere_1` adlı node kaldırılır, `Object_5` mesh material'ları beyaza çekilir ve texture map temizlenir. `preserveModelScale=false` olduğu için model hedef 40×40×60 cm box'a fit edilir. Editable color/image surface state'i yoktur.
+`plastic-trash-bin`, `createIndoorPlantModule()` renderer yoluna girer ve `plastic_trash_bin.glb` yükler. Instance `visualRotationYDeg` değeri visual group'u Y ekseninde döndürür; factory başlangıç değerini kanonik Item'daki `visualRotationYDeg=-90` defaultundan üretir ve renderer eksik state alanında aynı Item defaultuna döner. `Sphere_1` adlı node kaldırılır, `Object_5` mesh material'ları beyaza çekilir ve texture map temizlenir. `preserveModelScale=false` olduğu için model hedef 40×40×60 cm box'a fit edilir. Editable color/image surface state'i yoktur.
 
 ## Selection / appearance
 
@@ -106,7 +106,7 @@ Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kayd
 
 `Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `DEPOT_PLASTIC_TRASH_BIN` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 
@@ -132,7 +132,7 @@ bom.source = None
 
 `moduleContracts.js` içindeki mevcut reason:
 
-> Existing module has no canonical BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
+> Existing module has no kanonik BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
 
 Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 
@@ -154,12 +154,12 @@ Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 
 ## Checklist ek envanteri
 - Yapı: tekil ticari ürün; mevcut sistemde alt Item reçetesi yok. Parametrik BOM yok.
-- Unit: mevcut sistemde YOK; BOM aşamasına geçilmediği için canonical unit tahmin edilmedi.
+- Unit: mevcut sistemde YOK; BOM aşamasına geçilmediği için kanonik unit tahmin edilmedi.
 - Length/thickness: bu ürünün mevcut business state/descriptor kaynaklarında YOK; üretim paneli ölçüsü uygulanmıyor.
 - Material/defaultColor: bağımsız business metadata YOK. GLB malzemeleri ve sidebar renkleri görsel temsildir; kullanıcı renk/image yetkisi yok.
 - Property owners: catalog + designState + autoDepot ölçüleri migration öncesi tekrarlanıyordu. Renderer fallback ve seçim metni ayrıca tarandı.
 - Factory: createModuleStateFromDescriptor → type factory; ID createId('module'). Placement ve autoDepot flag runtime instance alanlarıdır.
-- Overrides: ürün defaultları canonical Item tanımından gelir; dış descriptor bunların kaynağı olamaz. Factory `visualRotationYDeg` defaultunu instance state'e kopyalar; kontrollü runtime/editor değişikliği bunu daha sonra ezebilir. Placement ve autoDepot flag gibi diğer instance alanları da proje state'inde korunur.
+- Overrides: ürün defaultları kanonik Item tanımından gelir; dış descriptor bunların kaynağı olamaz. Factory `visualRotationYDeg` defaultunu instance state'e kopyalar; kontrollü runtime/editor değişikliği bunu daha sonra ezebilir. Placement ve autoDepot flag gibi diğer instance alanları da proje state'inde korunur.
 - Relationships: otomatik depo içerik koordinatlarını planlar; kettle/fridge footprint overlap behavior kaynağındadır. Kettle yükseltmesi görsel olarak fridge yüksekliğindedir; persistent host bağı veya otomatik host takip/reflow yok.
 - Delete/duplicate: generic context menu; seçimi, sürüklemeyi, klavye rotation/move ve side insertion ortak motorlar yönetir.
 - Regression: ilgili ürün testi, commercialItemsContract ve gerçek katalog/depo/persistence E2E kapsamı.

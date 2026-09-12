@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, resolveModuleCatalogKey } from '../src/catalog.js';
+import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
 import {
   createModuleStateFromDescriptor,
   createShelfModuleState,
@@ -96,7 +96,7 @@ for (const itemKey of SHELF_KEYS) {
 
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, itemKey);
-    assert.equal(state.catalogKey, itemKey);
+    assert.equal(state.itemKey, itemKey);
     assert.equal(state.type, 'shelf');
     assert.equal(state.widthCm, expected.widthCm);
     assert.equal(state.shelfCount, expected.shelfCount);
@@ -124,10 +124,9 @@ for (const itemKey of SHELF_KEYS) {
 
     const legacy = JSON.parse(JSON.stringify(state));
     delete legacy.itemKey;
-    delete legacy.catalogKey;
     const restored = normalizeModuleItemState(legacy);
     assert.equal(restored.itemKey, itemKey);
-    assert.equal(resolveModuleCatalogKey(restored), itemKey);
+    assert.equal(resolveItemKey(restored), itemKey);
 
     const duplicate = duplicateModuleState(state);
     assert.notEqual(duplicate.id, state.id);

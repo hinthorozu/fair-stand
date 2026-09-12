@@ -1,6 +1,6 @@
 # door_leaf_100 — Item Contract Definition
 
-## Canonical identity
+## Kanonik kimlik
 
 - `itemKey`: `door_leaf_100`
 - `name`: `Ahşap Kapı Kanadı 100 × 200 cm`
@@ -9,7 +9,7 @@
 - yapı: tekil physical child Item
 - parametrik: hayır
 
-## Canonical intrinsic/default properties
+## Kanonik ürüne özgü / varsayılan özellikler
 
 ```text
 widthCm = 100
@@ -20,11 +20,11 @@ defaultColor = 0xffffff
 nominalModuleWidthCm = 100
 ```
 
-Bu değerlerin product/default source-of-truth'u `PRODUCTION_PARTS.door_leaf_100` kaydıdır.
+Bu değerlerin product/default tek kaynağı `PRODUCTION_PARTS.door_leaf_100` kaydıdır.
 
-## Surface capability contract
+## Yüzey yetenek sözleşmesi
 
-`door-leaf` type capability kaynağı `src/itemCapabilities.js`dir:
+`door-leaf` type yetenek kaynağı `src/itemCapabilities.js`dir:
 
 ```text
 color    = true
@@ -36,9 +36,9 @@ mesh     = false
 
 Kapı kanadı `panel` Item değildir. Panel-range selection veya panel-only glass/Lightbox/Mesh davranışına sokulmaz.
 
-## State / override / persistence
+## State / ezme / kalıcılık
 
-Leaf bağımsız top-level project instance değildir; parent door module içinde child `surface` state'i taşır. Yeni state canonical Item kimliğiyle oluşturulur:
+Leaf bağımsız top-level proje örneği değildir; parent door module içinde child `surface` state'i taşır. Yeni state kanonik Item kimliğiyle oluşturulur:
 
 ```text
 surface.itemKey = door_leaf_100
@@ -47,13 +47,13 @@ surface.imageAssetId = null
 surface.imageTransform = canonical image transform default
 ```
 
-`color`, `imageAssetId` ve `imageTransform` project/runtime override alanlarıdır ve save/load ile korunur. Eski persisted door surface state'leri restore sırasında `normalizeModuleItemState()` ile `door_leaf_100` child identity'sine bağlanır; mevcut kullanıcı renk/görsel override'ı korunur.
+`color`, `imageAssetId` ve `imageTransform` project/runtime ezme alanlarıdır ve save/load ile korunur. Eski persisted door surface state'leri restore sırasında `normalizeModuleItemState()` ile `door_leaf_100` child identity'sine bağlanır; mevcut kullanıcı renk/görsel ezme'ı korunur.
 
-## Behavior / interaction ownership
+## Davranış / etkileşim sahipliği
 
-Placement, move, rotation, snap, collision, ghost, side insert, delete ve duplicate top-level leaf davranışı değildir; parent `door` module `WALL_BEHAVIOR` zinciri sahibidir. Leaf surface tekil olarak renk/görsel düzenlemesi için seçilebilir. Sağ click parent module context menüsünü açar; special panel modes bu leaf için kapalıdır.
+Yerleşim, move, rotation, snap, collision, ghost, side insert, delete ve duplicate top-level leaf davranışı değildir; parent `door` module `WALL_BEHAVIOR` zinciri sahibidir. Leaf surface tekil olarak renk/görsel düzenlemesi için seçilebilir. Sağ click parent module context menüsünü açar; special panel modes bu leaf için kapalıdır.
 
-## BOM / relationship
+## BOM / ilişki
 
 `door_leaf_100` nihai fiziksel BOM Item'ıdır ve başka Item'lardan oluşmaz. Parent `door:100` recipe quantity sahibidir:
 
@@ -63,10 +63,10 @@ door:100 → door_leaf_100 × 1 adet
 
 Eski `door_100` production `partId` kimliği kaldırılmıştır; paralel ikinci leaf kimliği tutulmaz.
 
-## Renderer boundary
+## Renderer sınırı
 
-Door renderer child `surface.itemKey` üzerinden canonical Item'ı ve `door-leaf` capability contract'ını çözer. Effective renk/görsel state'ten gelir. Procedural mesh'in stand frame içine fit edilen teknik ölçüsü canonical product dimensions'ın ikinci business source-of-truth'u değildir; specialized renderer temsilidir.
+Door renderer child `surface.itemKey` üzerinden kanonik Item'ı ve `door-leaf` yetenek contract'ını çözer. Effective renk/görsel state'ten gelir. Prosedürel mesh'in stand frame içine fit edilen teknik ölçüsü kanonik product dimensions'ın ikinci business tek kaynağı değildir; specialized renderer temsilidir.
 
-## Regression
+## Regresyon
 
-`test/doorLeafItemContract.test.js`, `test/designState.test.js` ve `test/moduleRecipes.test.js` canonical properties, capability, default consumer, override/persistence migration, BOM identity/quantity ve renderer consumer bağlantısını korur.
+`test/doorLeafItemContract.test.js`, `test/designState.test.js` ve `test/moduleRecipes.test.js` kanonik özellikler, yetenek, default tüketici, ezme/kalıcılık migration, BOM identity/quantity ve renderer tüketici bağlantısını korur.

@@ -69,7 +69,7 @@ test('every declared catalog behavior exposes the complete placement policy sche
 
   for (const moduleKey of MODULE_CATALOG_KEYS) {
     const descriptor = MODULE_CATALOG[moduleKey];
-    const behavior = getModuleBehavior({ ...descriptor, catalogKey: moduleKey });
+    const behavior = getModuleBehavior({ ...descriptor, itemKey: moduleKey });
     for (const key of requiredKeys) {
       assert.equal(Object.hasOwn(behavior, key), true, `${moduleKey}: missing ${key}`);
     }

@@ -1,4 +1,4 @@
-﻿> Migration öncesi envanterdir; aktif canonical tanım `../definitions/wall_base_150.md` içindedir.
+﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_base_150.md` içindedir.
 
 # wall_base_150 — Mevcut Sistem Profili
 
@@ -8,29 +8,29 @@ Bu belge `wall_base_150` için `Version2` runtime kodunda çalışan state, beha
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `wall_base_150` |
-| Label | `Panel Bazalı 150` |
+| Katalog anahtarı | `wall_base_150` |
+| Etiket | `Panel Bazalı 150` |
 | Type | `base-wall` |
-| Width | `150 cm` |
-| Depth | `50 cm` |
-| Height | `350 cm` |
+| Genişlik | `150 cm` |
+| Derinlik | `50 cm` |
+| Yükseklik | `350 cm` |
 
 State 7 wall strip'i + `faces.front/left/right` olmak üzere toplam 10 editable surface state taşır. Bütün editable state default `#ffffff`, `imageAssetId=null`, default single image transform ile oluşturulur.
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `wall-editable` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `editable` |
 | Image | `editable` |
-| Renderer policy | `procedural-or-specialized` |
+| Renderer politikası | `procedural-or-specialized` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `recipe` |
-| BOM source | `src/moduleRecipes.js` |
+| Bileşim | `standalone` |
+| BOM kipi | `recipe` |
+| BOM kaynağı | `src/moduleRecipes.js` |
 
 ## Behavior
 
@@ -109,7 +109,7 @@ Lightbox/Mesh ownership için scene rebuild sırasında `fabricGroupId` normaliz
 
 Silinen modül multi-module Lightbox/Mesh owner grubunun parçasıysa rebuild sırasında eksik owner yüzey algılandığında kalan fabric ownership de çözülebilir.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `wall_base_150` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 

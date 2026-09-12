@@ -140,9 +140,9 @@ export function snapCm(value, stepCm = MODULE_PLACEMENT_SNAP_CM) {
   return Math.round(number / step) * step;
 }
 
-// Wall-overlay height uses a fixed visual center (175 cm). Snap stays on the
-// shared step grid, but the final clamp is geometric so every screen size can
-// reach the wall top/bottom flush instead of stopping early on a snap multiple.
+// Duvar-üst katman yüksekliği sabit görsel merkez kullanır (175 cm). Snap ortak
+// adım ızgarasında kalır, ama son sınır geometriktir; her ekran boyutu snap katına
+// erken takılmadan duvar üst/altına sıfır bitebilir.
 export const WALL_OVERLAY_DEFAULT_CENTER_CM = 175;
 
 export function getWallOverlayZBoundsCm(heightCm, wallHeightCm = STAND_DIMENSIONS.height * 100) {
@@ -1332,7 +1332,7 @@ function createFreeSideFixturePlacement({
   const yLimit = Number(standYCm);
   if (![centerXCm, centerYCm, xLimit, yLimit].every(Number.isFinite)) return null;
 
-  // Keep the side contact, but clamp the perpendicular axis so deeper fixtures remain inside the stand.
+  // Yan teması koru, dik ekseni kısıtla; daha derin ürünler stand içinde kalsın.
   const perpendicular = { x: -right.y, y: right.x };
   const minCenterX = insertedExtents.halfX;
   const maxCenterX = xLimit - insertedExtents.halfX;

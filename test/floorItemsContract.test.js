@@ -6,8 +6,11 @@ import {
   getFloorItem,
   getFloorSelectLabel,
   getItem,
+  isCarpetFloorItem,
+  isGridTileFloorItem,
   isParquetFloorItem,
   listFloorItems,
+  resolveStandFloorItemKey,
 } from '../src/items.js';
 
 const EXPECTED_SELECT = [
@@ -49,4 +52,9 @@ test('floor Items use existing floorType keys and stay off the module catalog', 
   assert.equal(FLOOR_ITEMS['parke-beton'].dimensions.depthCm, 28);
   assert.equal(FLOOR_ITEMS['parke-beton'].paintable, false);
   assert.equal(getFloorItem('parke'), null);
+  assert.equal(isGridTileFloorItem(FLOOR_ITEMS.karolaj), true);
+  assert.equal(isCarpetFloorItem(FLOOR_ITEMS.hali), true);
+  assert.equal(isCarpetFloorItem(FLOOR_ITEMS.karolaj), false);
+  assert.equal(resolveStandFloorItemKey({ floorType: 'hali' }), 'hali');
+  assert.equal(resolveStandFloorItemKey({ itemKey: 'parke-beton', floorType: 'hali' }), 'parke-beton');
 });

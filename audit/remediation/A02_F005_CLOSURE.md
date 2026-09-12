@@ -1,44 +1,44 @@
-# A02 / F-005 Remediation Closure
+# A02 / F-005 Düzeltme Kapanışı
 
-Finding: `F-005` — Change-gate path/domain wall incomplete; 20/51 audited `src/` files had zero mandatory mapping.
-Severity: `P1`
-Status: **CLOSED**
+Bulgu: `F-005` — Change-gate yol/alan duvarı eksik; denetlenen 20/51 `src/` dosyasının zorunlu eşlemesi yoktu.
+Önem: `P1`
+Durum: **CLOSED**
 
-## Fix
+## Düzeltme
 
-- Replaced the partial path rules and filename-pattern fallback in `src/systemChangeContract.js` with `SOURCE_FILE_REQUIRED_DOMAINS`.
-- Explicitly classified all **51 current `src/` files** using the ownership map established by `audit/evidence/A03_ARCHITECTURE.md`.
-- Previously unmapped high-value sources now have mandatory domains, including `main.js`, `tvConfig.js`, `standSetup.js`, `standCapacity.js`, `viewKeyboardShortcuts.js`, `colorEditorInputs.js`, `groundLayout.js`, and `wall.js`.
-- Multi-responsibility orchestration/renderer sources require their known cross-domain impacts instead of a single accidental filename-derived classification.
-- Removed the generic `Controller|Feedback => ui` mapping as the ownership authority; UI/controller files are classified explicitly.
+- `src/systemChangeContract.js` içindeki kısmi yol kuralları ve dosya adı kalıbı yedek yolu `SOURCE_FILE_REQUIRED_DOMAINS` ile değiştirildi.
+- `audit/evidence/A03_ARCHITECTURE.md` tarafından kurulan sahiplik haritası kullanılarak güncel **51 `src/` dosyasının** tümü açıkça sınıflandırıldı.
+- Önceden eşlenmemiş yüksek değerli kaynakların artık zorunlu alanları vardır; bunlar arasında `main.js`, `tvConfig.js`, `standSetup.js`, `standCapacity.js`, `viewKeyboardShortcuts.js`, `colorEditorInputs.js`, `groundLayout.js` ve `wall.js` bulunur.
+- Çok sorumluluklu orkestrasyon/renderer kaynakları, tek bir kazara dosya adı türevli sınıflandırma yerine bilinen çapraz-alan etkilerini gerektirir.
+- Sahiplik otoritesi olarak genel `Controller|Feedback => ui` eşlemesi kaldırıldı; UI/controller dosyaları açıkça sınıflandırılır.
 
-## Regression guard
+## Regresyon koruması
 
-`test/systemChangeGate.test.js` now enumerates the real `src/` directory and asserts:
+`test/systemChangeGate.test.js` artık gerçek `src/` dizinini sayar ve şunları doğrular:
 
-1. every current source file has exactly one explicit map entry,
-2. every entry resolves at least one required impact domain,
-3. every mapped domain belongs to the canonical 17-domain schema,
-4. high-risk sources carry ownership-appropriate domains,
-5. `main.js` cannot silently drop its known cross-domain responsibilities.
+1. her güncel kaynak dosyanın tam olarak bir açık harita girişi vardır,
+2. her giriş en az bir zorunlu etki alanına çözülür,
+3. her eşlenen alan kanonik 17-alan şemasına aittir,
+4. yüksek riskli kaynaklar sahipliğe uygun alanlar taşır,
+5. `main.js` bilinen çapraz-alan sorumluluklarını sessizce düşüremez.
 
-A future `src` file added without classification therefore fails the regression suite.
+Bu nedenle sınıflandırma olmadan eklenen gelecekteki bir `src` dosyası regresyon paketini düşürür.
 
-## Verification
+## Doğrulama
 
 PR: `#40 — Fix F-005 complete source impact-domain mapping`
-Implementation head before closure records: `dc8f654106cc7454042421f3fa217deb610e4143`
-PR CI run: `#107` / `33801523370`
+Kapanış kayıtlarından önceki uygulama head: `dc8f654106cc7454042421f3fa217deb610e4143`
+PR CI çalıştırması: `#107` / `33801523370`
 
-Verified successful steps:
+Doğrulanan başarılı adımlar:
 
 - Change contract gate: passed
 - Install dependencies: passed
-- Full `npm test`: passed, including the new source-map regression
+- Full `npm test`: passed, yeni kaynak-harita regresyonu dahil
 - `npm run build`: passed
 
-No runtime product behavior or stored-project schema was changed.
+Hiçbir runtime ürün davranışı veya saklı-proje şeması değiştirilmedi.
 
-## Result
+## Sonuç
 
-The F-005 condition is removed: current source files can no longer be guarded while carrying zero mandatory impact domains, and new source files cannot enter the repository without an explicit ownership/domain classification.
+F-005 koşulu kaldırıldı: güncel kaynak dosyalar artık sıfır zorunlu etki alanı taşırken korunamaz ve yeni kaynak dosyalar açık bir sahiplik/alan sınıflandırması olmadan depoya giremez.

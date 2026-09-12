@@ -1,4 +1,4 @@
-> Migration öncesi envanterdir; aktif canonical tanım `../definitions/COAT_RACK.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/COAT_RACK.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
 
 # DEPOT_COAT_RACK — Mevcut Sistem Profili
 
@@ -8,15 +8,15 @@ Bu belge `DEPOT_COAT_RACK` için `Version2` runtime kodunda bulunan state, behav
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `DEPOT_COAT_RACK` |
-| Label | `Askılık` |
+| Katalog anahtarı | `DEPOT_COAT_RACK` |
+| Etiket | `Askılık` |
 | Type | `coat-rack` |
-| Width | `43 cm` |
-| Depth | `43 cm` |
-| Height | `180 cm` |
-| Model file | `None` |
+| Genişlik | `43 cm` |
+| Derinlik | `43 cm` |
+| Yükseklik | `180 cm` |
+| Model dosyası | `None` |
 
-Default runtime state:
+Varsayılan runtime state:
 
 ```text
 {
@@ -29,22 +29,22 @@ Default runtime state:
 }
 ```
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `free-model-fixed` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `fixed` |
 | Image | `none` |
-| Renderer policy | `model` |
+| Renderer politikası | `model` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `decision-required` |
-| BOM source | `None` |
+| Bileşim | `standalone` |
+| BOM kipi | `decision-required` |
+| BOM kaynağı | `None` |
 
-## Behavior / placement
+## Davranış / yerleşim
 
 | Alan | Kod değeri |
 |---|---|
@@ -101,7 +101,7 @@ Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kayd
 
 `Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `DEPOT_COAT_RACK` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 
@@ -127,7 +127,7 @@ bom.source = None
 
 `moduleContracts.js` içindeki mevcut reason:
 
-> Existing module has no canonical BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
+> Existing module has no kanonik BOM policy yet; decide recipe, commercial-item, or explicit exclusion before Final BOM integration.
 
 Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 
@@ -149,7 +149,7 @@ Bu dosyada olmayan bir BOM satırı eklenmemiştir.
 
 ## Checklist ek envanteri
 - Yapı: tekil ticari ürün; mevcut sistemde alt Item reçetesi yok. Parametrik BOM yok.
-- Unit: mevcut sistemde YOK; BOM aşamasına geçilmediği için canonical unit tahmin edilmedi.
+- Unit: mevcut sistemde YOK; BOM aşamasına geçilmediği için kanonik unit tahmin edilmedi.
 - Length/thickness: bu ürünün mevcut business state/descriptor kaynaklarında YOK; üretim paneli ölçüsü uygulanmıyor.
 - Material/defaultColor: bağımsız business metadata YOK. GLB malzemeleri ve sidebar renkleri görsel temsildir; kullanıcı renk/image yetkisi yok.
 - Property owners: catalog + designState + autoDepot ölçüleri migration öncesi tekrarlanıyordu. Renderer fallback ve seçim metni ayrıca tarandı.

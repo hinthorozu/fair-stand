@@ -1,8 +1,8 @@
 # connector_corner — Item Contract Migration
 
-Bu belge `docs/items/current-system/connector_corner.md` içindeki migration öncesi kod haritasını Item Contract'a map eder ve uygulanmış canonical cutover durumunu kaydeder.
+Bu belge `docs/items/current-system/connector_corner.md` içindeki migration öncesi kod haritasını Item Contract'a map eder ve uygulanmış kanonik geçiş durumunu kaydeder.
 
-## 1. Canonical kimlik
+## 1. Kanonik kimlik
 
 | Alan | Değer |
 |---|---|
@@ -13,10 +13,10 @@ Bu belge `docs/items/current-system/connector_corner.md` içindeki migration ön
 | Parametrik | Hayır |
 | `unit` | `adet` |
 | Metadata | `connectorType = corner` |
-| Project instance | Uygulanmıyor |
+| Proje örneği | Uygulanmıyor |
 | Renderer identity | Uygulanmıyor |
 
-Migration öncesi stabil kimlik `partId = connector_corner` idi. Cutover ile aynı ürün kimliği canonical `itemKey = connector_corner` alanına taşındı.
+Migration öncesi stabil kimlik `partId = connector_corner` idi. Cutover ile aynı ürün kimliği kanonik `itemKey = connector_corner` alanına taşındı.
 
 ## 2. Fixed parent recipe kullanımı
 
@@ -24,9 +24,9 @@ Mevcut çalışan sistemde `connector_corner` hiçbir sabit `moduleRecipes` pare
 
 Migration mevcut reçetelere tahmini corner quantity eklemez.
 
-## 3. Canonical BOM çözümü
+## 3. Kanonik BOM çözümü
 
-`connector_corner` canonical Tekil production Item'dır. `src/productionParts.js` içindeki mevcut `resolveConnectorBom()` resolver'ı açıkça verilen `corner + quantity` girdisini canonical Item satırına çözer:
+`connector_corner` kanonik Tekil production Item'dır. `src/productionParts.js` içindeki mevcut `resolveConnectorBom()` resolver'ı açıkça verilen `corner + quantity` girdisini kanonik Item satırına çözer:
 
 ```text
 connectorType = corner + quantity
@@ -35,29 +35,29 @@ connectorType = corner + quantity
 → unit = adet
 ```
 
-Resolver quantity veya placement mapping'i tahmin etmez; quantity çağıran tarafından açıkça verilmek zorundadır.
+Resolver quantity veya yerleşim mapping'i tahmin etmez; quantity çağıran tarafından açıkça verilmek zorundadır.
 
-Mevcut placement motorundaki transient `snapKind = corner` geometrik kavramı ayrı bir şeydir. Çalışan kodda bu değer otomatik olarak `connector_corner` quantity'sine çevrilmediği için migration böyle bir kural icat etmez.
+Mevcut yerleşim motorundaki transient `snapKind = corner` geometrik kavramı ayrı bir şeydir. Çalışan kodda bu değer otomatik olarak `connector_corner` quantity'sine çevrilmediği için migration böyle bir kural icat etmez.
 
 Bu Item'ın migration completion'ı sahnede ayrı mesh olarak görünmesine veya mevcut bir parent reçetede zorunlu olarak kullanılmasına bağlı değildir.
 
-## 4. State / persistence / behavior / renderer
+## 4. State / kalıcılık / davranış / renderer
 
-Mevcut sistemde bağımsız `connector_corner` project instance/state/persistence/behavior/mesh identity bulunmadığı için bu alanlar **uygulanmıyor**. Migration bunları icat etmez.
+Mevcut sistemde bağımsız `connector_corner` proje örneği/state/kalıcılık/behavior/mesh identity bulunmadığı için bu alanlar **uygulanmıyor**. Migration bunları icat etmez.
 
-## 5. Uygulanan cutover
+## 5. Uygulanan geçiş
 
-- `src/productionParts.js`: canonical `itemKey = connector_corner`.
-- `connectorType = corner` canonical Item kimliğine çözülür.
+- `src/productionParts.js`: kanonik `itemKey = connector_corner`.
+- `connectorType = corner` kanonik Item kimliğine çözülür.
 - `resolveConnectorBom()` explicit quantity ile `itemKey + quantity + unit` BOM satırı üretir.
 - Fixed parent recipe kullanımı yoktur; bu alan mevcut sistem için uygulanmıyor.
 - Mevcut reçetelere tahmini corner quantity eklenmez.
 
-## 6. Regression sözleşmesi
+## 6. Regresyon sözleşmesi
 
 Testler şunları doğrular:
 
-- canonical kimlik `itemKey`dir; `partId` yoktur.
+- kanonik kimlik `itemKey`dir; `partId` yoktur.
 - `connectorType = corner` doğru Item'a çözülür.
 - resolver explicit quantity ile gerçek `connector_corner` BOM satırı üretir.
 - quantity eksik/0 ise fail eder.

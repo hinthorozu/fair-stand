@@ -1,113 +1,113 @@
-# A10 — UI controls / inputs / menus / shortcuts / feedback audit
+# A10 — UI kontrolleri / girdiler / menüler / kısayollar / geri bildirim denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Static UI inventory
+## Statik UI envanteri
 
-### Global/sidebar
-- sidebar toggle
-- collapsible `<details>` sections
+### Küresel/kenar çubuğu
+- kenar çubuğu aç/kapa
+- daraltılabilir `<details>` bölümleri
 
-### Project
-- rename
-- saved project select
-- save
-- open
-- export ZIP
-- import ZIP + hidden file input
-- delete project
-- project status/loading overlay
+### Proje
+- yeniden adlandır
+- kaydedilmiş proje seç
+- kaydet
+- aç
+- ZIP dışa aktar
+- ZIP içe aktar + gizli dosya girdisi
+- projeyi sil
+- proje durumu/yükleme katmanı
 
-### Stand setup
-- 5 stand type buttons
-- X / Y number inputs
-- floor select
-- auto-depot enabled checkbox
-- depot size select
-- depot contents checkbox
-- create stage
+### Stand kurulumu
+- 5 stand tipi düğmesi
+- X / Y sayı girdileri
+- zemin seçimi
+- otomatik-depo etkin onay kutusu
+- depo boyutu seçimi
+- depo içerikleri onay kutusu
+- sahne oluştur
 
-### Module/editor
-- open module catalog
-- clear wall
-- color picker
-- apply color
-- HEX/RGB/CMYK inputs
-- illuminated-foam halo color
-- image upload
-- asset library tiles
-- image cover/contain/remove
-- reset all module features
-- render current view
+### Modül/düzenleyici
+- modül kataloğunu aç
+- duvarı temizle
+- renk seçici
+- rengi uygula
+- HEX/RGB/CMYK girdileri
+- illuminated-foam hale rengi
+- görüntü yükleme
+- varlık kitaplığı döşemeleri
+- görüntü cover/contain/kaldır
+- tüm modül özelliklerini sıfırla
+- güncel görünümü render et
 
-## Dynamic UI inventory
+## Dinamik UI envanteri
 
-- module context menu: delete, duplicate left/right, resize foam, glass, lightbox fabric, mesh, fabric light, shelf light, add left/right
-- module catalog picker + selection queue/reorder
-- drag-sidebar/catalog preview
-- asset context menu: illuminated foam / delete
-- project naming dialog
-- illuminated-foam dimension dialog
-- help guide
-- view cube / scene interaction controls
-- selection/status feedback observers
-- **raw BOM debug panel** currently injected at runtime
+- modül bağlam menüsü: sil, sola/sağa çoğalt, köpüğü yeniden boyutlandır, cam, lightbox kumaş, mesh, kumaş ışık, raf ışık, sola/sağa ekle
+- modül katalog seçici + seçim kuyruğu/yeniden sıralama
+- sürükleme-kenar-çubuğu/katalog önizleme
+- varlık bağlam menüsü: illuminated foam / sil
+- proje adlandırma iletişim kutusu
+- illuminated-foam ölçü iletişim kutusu
+- yardım kılavuzu
+- görünüm küpü / sahne etkileşim kontrolleri
+- seçim/durum geri bildirim gözlemcileri
+- **ham BOM hata ayıklama paneli** şu anda çalışma zamanında enjekte edilir
 
-## Findings
+## Bulgular
 
-### F-025 — P1 — production entrypoint loads visible raw BOM debug UI
+### F-025 — P1 — üretim giriş noktası görünür ham BOM hata ayıklama UI yükler
 
-`index.html` unconditionally imports `/src/rawBomDebug.js`. That module immediately injects an open sidebar card named **“Üretim Listesi · Debug”** and derives BOM by parsing human-facing `selection-info` text.
+`index.html` koşulsuz `/src/rawBomDebug.js` içe aktarır. O modül hemen **“Üretim Listesi · Debug”** adlı açık bir kenar çubuğu kartı enjekte eder ve BOM'u insan-yüzlü `selection-info` metnini ayrıştırarak türetir.
 
-Consequences:
+Sonuçlar:
 
-- debug UI is part of normal production bundle/runtime,
-- user-facing UI exposes an internal/incomplete BOM surface,
-- behavior depends on parsing presentation strings rather than canonical selected-module identity,
-- debug code can drift independently from actual module selection/contracts.
+- hata ayıklama UI normal üretim paketi/çalışma zamanının parçasıdır,
+- kullanıcı-yüzlü UI iç/eksik bir BOM yüzeyi açığa çıkarır,
+- davranış kanonik seçili-modül kimliği yerine sunum dizelerini ayrıştırmaya bağlıdır,
+- hata ayıklama kodu gerçek modül seçimi/sözleşmelerinden bağımsız sapabilir.
 
-This is not merely dead code; it executes on every normal app load.
+Bu yalnızca ölü kod değildir; her normal uygulama yüklemesinde çalışır.
 
-### F-026 — P2 — user-visible standards/feature facts are duplicated as static HTML text
+### F-026 — P2 — kullanıcıya görünür standartlar/özellik olguları statik HTML metni olarak çoğaltılmıştır
 
-The `Standartlar` panel hard-codes product values already owned by canonical runtime sources (height, depth, strip count/height, widths, grid, stand surround, max dimensions). Auto-depot helper text also hard-codes the generated contents list.
+`Standartlar` paneli, kanonik çalışma zamanı kaynaklarının zaten sahiplendiği ürün değerlerini sabit kodlar (yükseklik, derinlik, şerit sayısı/yüksekliği, genişlikler, ızgara, stand çevre, azami ölçüler). Otomatik-depo yardımcı metni de üretilen içerik listesini sabit kodlar.
 
-These values agree with current runtime, but UI is an independent copy. A canonical change can leave the user reading stale rules while runtime behaves differently.
+Bu değerler güncel çalışma zamanıyla uyuşur, ancak UI bağımsız bir kopyadır. Kanonik bir değişiklik, çalışma zamanı farklı davranırken kullanıcının bayat kurallar okumasını bırakabilir.
 
-This is distinct from F-003 (roadmap/docs duplication): F-026 is active product UI drift.
+Bu F-003'ten (yol haritası/belge çoğaltması) farklıdır: F-026 aktif ürün UI sapmasıdır.
 
-### F-027 — P1 — “Duvarı temizle” action deletes all scene modules, not only the wall
+### F-027 — P1 — “Duvarı temizle” eylemi yalnızca duvarı değil tüm sahne modüllerini siler
 
-UI label: `Duvarı temizle`.
-Confirmation describes deleting the current wall/panel colors/images.
-Implementation performs:
+UI etiketi: `Duvarı temizle`.
+Onay, güncel duvar/panel renklerini/görüntülerini silmeyi tanımlar.
+Uygulama şunu yapar:
 
 `currentModules = []`
 
-then clears the wall scene. Since `currentModules` also contains free furniture, depot equipment, TV/overlays and top fixtures, the control can remove substantially more than its label/confirmation tells the user.
+sonra duvar sahnesini temizler. `currentModules` ayrıca serbest mobilya, depo ekipmanı, TV/overlay'ler ve üst fikstürler içerdiği için kontrol, etiketinin/onayının kullanıcıya söylediğinden önemli ölçüde daha fazlasını kaldırabilir.
 
-This is a destructive-action scope mismatch.
+Bu yıkıcı-eylem kapsam uyumsuzluğudur.
 
-### F-028 — P1 — “Tüm Özellikleri Kaldır” cannot operate when illuminated-foam exists
+### F-028 — P1 — “Tüm Özellikleri Kaldır” illuminated-foam varken çalışamaz
 
-Reset maps every current module through `createCatalogModuleState(module,{preservePlacement:true})` and aborts if any result is null.
+Sıfırlama her güncel modülü `createCatalogModuleState(module,{preservePlacement:true})` üzerinden eşler ve herhangi bir sonuç null ise iptal eder.
 
-`createCatalogModuleState()` handles catalog runtime types but not the non-catalog `illuminated-foam` type. Therefore the presence of an illuminated-foam module causes the entire reset operation to fail with “Bazı modül türleri ... döndürülemedi.”
+`createCatalogModuleState()` katalog çalışma zamanı tiplerini işler, katalog-dışı `illuminated-foam` tipini değil. Bu nedenle bir illuminated-foam modülünün varlığı tüm sıfırlama işleminin “Bazı modül türleri ... döndürülemedi.” ile başarısız olmasına yol açar.
 
-This is a direct consequence of the parallel factory dispatcher root gap F-010, but it is an independent user-visible bug and receives its own finding.
+Bu, paralel fabrika dağıtıcı kök boşluğu F-010'un doğrudan sonucudur, ancak bağımsız kullanıcı-görünür bir hatadır ve kendi bulgusunu alır.
 
-## Other checklist results
+## Diğer kontrol listesi sonuçları
 
-- **DOM control without handler:** no orphan static control identified among current index selectors.
-- **handler without control:** no missing static target identified; dynamic controls are created before binding in their owning modules.
-- **hidden/disabled state:** stage-dependent controls are explicitly enabled/disabled; auto-depot dependent fields synchronize from checkbox/state.
-- **destructive confirmations:** project delete, module delete, clear wall, reset and new-project replacement use confirmation; F-027 identifies incorrect declared scope.
-- **project actions:** busy/loading status exists for save/open/import/export; delete has catch/status.
-- **module context capabilities:** glass/fabric/mesh/shelf/foam controls are conditionally shown by context; side insertion fails behavior enforcement under F-015.
-- **catalog identity across UI paths:** context-picker vs drag-sidebar identity mismatch is F-013.
-- **keyboard interaction:** source-level mapping exists and editable targets are excluded for view shortcuts; full conflict/focus/accessibility audit is A16.
-- **dynamic UI tests:** several controllers have unit/source integration tests, but complete end-user coverage is A18/A19.
+- **İşleyicisiz DOM kontrolü:** güncel index seçicileri arasında yetim statik kontrol saptanmadı.
+- **Kontrolsüz işleyici:** eksik statik hedef saptanmadı; dinamik kontroller kendi sahip modüllerinde bağlamadan önce oluşturulur.
+- **gizli/devre dışı durum:** sahne-bağımlı kontroller açıkça etkinleştirilir/devre dışı bırakılır; otomatik-depo bağımlı alanlar onay kutusu/durumdan senkronize olur.
+- **yıkıcı onaylar:** proje silme, modül silme, duvarı temizle, sıfırlama ve yeni-proje değiştirme onay kullanır; F-027 yanlış bildirilmiş kapsamı belirler.
+- **proje eylemleri:** kaydet/aç/içe aktar/dışa aktar için meşgul/yükleme durumu vardır; silmede catch/durum vardır.
+- **modül bağlam yetenekleri:** cam/kumaş/mesh/raf/köpük kontrolleri bağlama göre koşullu gösterilir; yan ekleme F-015 altında davranış zorlamasını kaçırır.
+- **UI yollarında katalog kimliği:** bağlam-seçici vs sürükleme-kenar-çubuğu kimlik uyumsuzluğu F-013'tür.
+- **klavye etkileşimi:** kaynak-düzeyi eşleme vardır ve düzenlenebilir hedefler görünüm kısayolları için dışlanır; tam çatışma/odak/erişilebilirlik denetimi A16'dır.
+- **dinamik UI testleri:** birkaç denetleyicinin birim/kaynak entegrasyon testleri vardır, ancak tam son-kullanıcı kapsamı A18/A19'dur.
 
-Section audit status: **GAP**.
-Next audit section: **A11 — Feature + scene composition / automation**.
+Bölüm denetim durumu: **GAP**.
+Sonraki denetim bölümü: **A11 — Özellik + sahne bileşimi / otomasyon**.

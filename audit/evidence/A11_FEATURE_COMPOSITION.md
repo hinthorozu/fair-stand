@@ -1,59 +1,59 @@
-# A11 — Feature + scene composition / automation audit
+# A11 — Özellik + sahne bileşimi / otomasyon denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Active composition/features identified
+## Belirlenen aktif bileşim/özellikler
 
-1. **automatic depot** — `src/autoDepot.js`
-2. **automatic stand wall** — `src/automaticWall.js` + `src/wall.js` + `src/wallReflow.js`
-3. **automatic back-wall replacement around depot** — `composeAutomaticBackWallWithDepot()` as depot/stage integration
+1. **otomatik depo** — `src/autoDepot.js`
+2. **otomatik stand duvarı** — `src/automaticWall.js` + `src/wall.js` + `src/wallReflow.js`
+3. **depo çevresinde otomatik arka-duvar değiştirme** — depo/sahne entegrasyonu olarak `composeAutomaticBackWallWithDepot()`
 
-## Automatic depot
+## Otomatik depo
 
-`FEATURE_CONTRACTS.automaticDepot` explicitly declares:
+`FEATURE_CONTRACTS.automaticDepot` açıkça bildirir:
 
-- feature id/kind/owner
-- trigger and input list
-- structural outputs: wall + door
-- optional content: mini-fridge + kettle + coat-rack
-- placement owner/rule
-- persistence mode
-- regression source / test/build requirements
+- özellik id/kind/owner
+- tetikleyici ve girdi listesi
+- yapısal çıktılar: duvar + kapı
+- isteğe bağlı içerik: mini-fridge + kettle + coat-rack
+- yerleştirme sahibi/kuralı
+- kalıcılık kipi
+- regresyon kaynağı / test/derleme gereksinimleri
 
-System contract test compares actual planner content kinds against contract. Legacy `tests/autoDepot.test.js` plus current `test/` orientation/depot front/back tests cover major shape/orientation cases.
+Sistem sözleşme testi gerçek planlayıcı içerik türlerini sözleşmeye karşı karşılaştırır. Eski `tests/autoDepot.test.js` artı güncel `test/` yönelim/depo ön/arka testleri başlıca şekil/yönelim durumlarını kapsar.
 
-**Status:** `AUDITED_OK` at composition-contract level, with runtime factory routing dependency F-010 and BOM decisions F-014 for generated equipment.
+**Durum:** bileşim-sözleşme düzeyinde `AUDITED_OK`; çalışma zamanı fabrika yönlendirme bağımlılığı F-010 ve üretilen ekipman için BOM kararları F-014 ile.
 
-## Finding
+## Bulgu
 
-### F-029 — P1 — automatic stand-wall composition has no explicit feature contract
+### F-029 — P1 — otomatik stand-duvar bileşiminin açık özellik sözleşmesi yoktur
 
-Stage creation automatically composes and places multiple wall modules through `composeAutomaticStandWall()`. This is a multi-module scene composition/automation under the same development-contract definition that requires a feature/composition contract.
+Sahne oluşturma, `composeAutomaticStandWall()` üzerinden birden fazla duvar modülünü otomatik bileştirir ve yerleştirir. Bu, özellik/bileşim sözleşmesi gerektiren aynı geliştirme-sözleşmesi tanımı altında çok-modüllü sahne bileşimi/otomasyondur.
 
-`featureContracts.js` currently contains only `automatic-depot`; there is no explicit `automatic-wall` / `automatic-stand-wall` contract declaring:
+`featureContracts.js` şu anda yalnızca `automatic-depot` içerir; şunları bildiren açık bir `automatic-wall` / `automatic-stand-wall` sözleşmesi yoktur:
 
-- trigger
-- inputs
-- output module family
-- placement owner
-- persistence semantics
-- dependencies on stand type/capacity
-- regression sources
+- tetikleyici
+- girdiler
+- çıktı modül ailesi
+- yerleştirme sahibi
+- kalıcılık semantiği
+- stand tipi/kapasitesine bağımlılıklar
+- regresyon kaynakları
 
-The implementation itself is structured and uses canonical wall/reflow helpers, but the governance contract layer does not describe this active automation. A future change can therefore alter automatic stage wall generation without the domain-specific feature-contract test that automatic depot receives.
+Uygulamanın kendisi yapılandırılmıştır ve kanonik duvar/reflow yardımcılarını kullanır, ancak yönetişim sözleşme katmanı bu aktif otomasyonu tanımlamaz. Gelecekteki bir değişiklik bu nedenle otomatik deponun aldığı alan-özel özellik-sözleşme testi olmadan otomatik sahne duvar üretimini değiştirebilir.
 
-## Checklist results
+## Kontrol listesi sonuçları
 
-- **A11.01 feature inventory:** `AUDITED_OK` — active multi-module composition paths identified above.
-- **A11.02 contract presence:** `GAP` — F-029 for automatic wall.
-- **A11.03 declared inputs:** automatic depot `AUDITED_OK`; automatic wall `GAP` F-029.
-- **A11.04 generated modules/state path:** automatic depot and automatic wall create normal module state and enter `currentModules`; however factory routing is duplicated in `main.js` — F-010.
-- **A11.05 placement core:** automatic wall delegates to wallReflow placement. Auto-depot owns deliberate free-layout geometry; hidden type-specific fixture behavior connects to F-011.
-- **A11.06 persistence:** generated modules are serialized like user-added modules; `currentStand.depot` stores configuration. `AUDITED_OK`, with general schema F-021/F-022.
-- **A11.07 BOM:** generated structural modules use recipe policies; generated depot equipment remains `decision-required` under F-014.
-- **A11.08 regression:** automatic depot has contract + several planner tests; automatic wall has implementation tests (`automaticWall.test.js` etc.) but no feature contract — F-029.
-- **A11.09 failure rollback:** invalid depot plan is rejected before current project reset. Automatic wall/custom depot-back failures occur later in stage creation, but with validated 50cm-step setup and supported depot sizes the current planners’ required divisibility is satisfied. No independently reproducible partial-state bug established here.
+- **A11.01 özellik envanteri:** `AUDITED_OK` — aktif çok-modüllü bileşim yolları yukarıda belirlendi.
+- **A11.02 sözleşme varlığı:** `GAP` — otomatik duvar için F-029.
+- **A11.03 bildirilmiş girdiler:** otomatik depo `AUDITED_OK`; otomatik duvar `GAP` F-029.
+- **A11.04 üretilen modüller/durum yolu:** otomatik depo ve otomatik duvar normal modül durumu oluşturur ve `currentModules`'e girer; ancak fabrika yönlendirmesi `main.js`'te çoğaltılmıştır — F-010.
+- **A11.05 yerleştirme çekirdeği:** otomatik duvar wallReflow yerleştirmesine devreder. Otomatik-depo kasıtlı serbest-yerleşim geometrisini sahiplenir; gizli tipe özel fikstür davranışı F-011'e bağlanır.
+- **A11.06 kalıcılık:** üretilen modüller kullanıcı-eklenen modüller gibi serileştirilir; `currentStand.depot` yapılandırmayı saklar. `AUDITED_OK`, genel şema F-021/F-022 ile.
+- **A11.07 BOM:** üretilen yapısal modüller reçete politikaları kullanır; üretilen depo ekipmanı F-014 altında `decision-required` kalır.
+- **A11.08 regresyon:** otomatik deponun sözleşme + birkaç planlayıcı testi vardır; otomatik duvarın uygulama testleri vardır (`automaticWall.test.js` vb.) ancak özellik sözleşmesi yoktur — F-029.
+- **A11.09 başarısızlık geri alma:** geçersiz depo planı güncel proje sıfırlamasından önce reddedilir. Otomatik duvar/özel depo-arka başarısızlıkları sahne oluşturmada daha sonra olur, ancak doğrulanmış 50cm-adım kurulumu ve desteklenen depo boyutlarıyla güncel planlayıcıların gerekli bölünebilirliği sağlanır. Burada bağımsız yeniden üretilebilir kısmi-durum hatası kurulmadı.
 
-Section audit status: **GAP**.
-Next audit section: **A12 — BOM / recipes / production parts**.
+Bölüm denetim durumu: **GAP**.
+Sonraki denetim bölümü: **A12 — BOM / reçeteler / üretim parçaları**.

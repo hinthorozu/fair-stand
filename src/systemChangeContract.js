@@ -69,8 +69,8 @@ function frozenDomains(...domains) {
   return Object.freeze(domains);
 }
 
-// Explicit ownership-derived map for every current source file. A new src file
-// intentionally has no fallback: the regression suite must classify it before CI can pass.
+// Mevcut her kaynak dosya için sahiplikten türetilmiş açık harita. Yeni bir src dosyasının
+// kasıtlı yedek yolu yoktur: regresyon paketi CI geçmeden önce onu sınıflandırmalıdır.
 export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/assetStore.js': frozenDomains('persistence', 'storage'),
   'src/autoDepot.js': frozenDomains('composition', 'placement'),
@@ -142,8 +142,8 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/wallReflow.js': frozenDomains('behavior', 'placement'),
 });
 
-// Human/AI governance surfaces are themselves part of the architecture contract.
-// They must not be weakened or drift without the same explicit change declaration.
+// İnsan/AI yönetim yüzeyleri de mimari sözleşmenin parçasıdır.
+// Aynı açık değişiklik bildirimi olmadan zayıflatılamaz veya sapamaz.
 export const GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS = Object.freeze({
   'AGENTS.md': frozenDomains('architecture'),
   'ITEM_CONTRACT.md': frozenDomains('architecture'),

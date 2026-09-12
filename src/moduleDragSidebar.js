@@ -486,8 +486,8 @@ export function createModuleDragSidebar({
     if (!isShiftR) return;
     event.preventDefault();
     const deltaDeg = resolveModuleRotationDeltaDeg(activeModuleState, -90);
-    // Catalog drag, existing-module drag and stationary selection share one module rotation policy.
-    // Keep advancing the requested angle even when the current preview is invalid/red.
+    // Katalog sürükleme, mevcut modül sürükleme ve durağan seçim aynı dönüş politikasını paylaşır.
+    // Geçerli önizleme geçersiz/kırmızı olsa bile istenen açıyı ilerletmeye devam et.
     activeRotationZDeg = ((activeRotationZDeg + deltaDeg) % 360 + 360) % 360;
     rotationLocked = true;
     if (Number.isFinite(lastClientX) && Number.isFinite(lastClientY)) {

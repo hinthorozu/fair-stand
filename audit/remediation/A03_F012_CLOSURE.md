@@ -1,56 +1,56 @@
-# A03 F-012 closure
+# A03 F-012 kapanışı
 
-Finding: **F-012 — Stand scene-surround rule duplicated between setup and renderer**
+Bulgu: **F-012 — Stand sahne-çevre kuralı kurulum ile renderer arasında kopyalanmış**
 
-Status: **CLOSED / POST-MERGE VERIFIED**
+Durum: **CLOSED / POST-MERGE VERIFIED**
 
-## Remediation
+## Düzeltme
 
-- `src/sceneDimensions.js` is now the canonical owner of the physical scene surround rule as `SCENE_SURROUND_M = 1`.
-- `src/standSetup.js` consumes `SCENE_SURROUND_M` instead of owning `STAND_SURROUND_M`.
-- `src/scene3d.js` consumes the same `SCENE_SURROUND_M` instead of owning `STAGE_SURROUND_M`.
-- All setup and renderer surround calculations therefore read one named value from one source.
-- The physical value remains exactly **1 metre**. No scene dimension, grid extent, camera framing formula, placement arithmetic or product geometry was intentionally changed.
-- `src/sceneDimensions.js` is classified in the change-gate ownership map so future changes remain impact-reviewed.
+- `src/sceneDimensions.js` artık fiziksel sahne çevre kuralının `SCENE_SURROUND_M = 1` olarak kanonik sahibidir.
+- `src/standSetup.js` `STAND_SURROUND_M` sahiplenmek yerine `SCENE_SURROUND_M` tüketir.
+- `src/scene3d.js` `STAGE_SURROUND_M` sahiplenmek yerine aynı `SCENE_SURROUND_M` değerini tüketir.
+- Tüm kurulum ve renderer çevre hesapları bu nedenle tek kaynaktan tek adlandırılmış değeri okur.
+- Fiziksel değer tam olarak **1 metre** kalır. Hiçbir sahne ölçüsü, ızgara kapsamı, kamera çerçeveleme formülü, yerleşim aritmetiği veya ürün geometrisi kasıtlı olarak değiştirilmedi.
+- `src/sceneDimensions.js` change-gate sahiplik haritasında sınıflandırılır; böylece gelecekteki değişiklikler etki incelemesinde kalır.
 
-## Regression evidence
+## Regresyon kanıtı
 
-Targeted coverage includes:
+Hedefli kapsam şunları içerir:
 
-- `test/sceneSurroundSingleSource.test.js` — verifies one canonical surround constant and protects against reintroducing independent setup/renderer ownership.
-- `test/standSetup.test.js` — protects stand setup scene dimension arithmetic using the unchanged 1 metre surround.
-- `e2e/smoke.spec.mjs` — Chromium stage-creation smoke verifies the renderer import path and real application stage setup continue to load and run.
+- `test/sceneSurroundSingleSource.test.js` — tek kanonik çevre sabitini doğrular ve bağımsız kurulum/renderer sahipliğinin yeniden eklenmesine karşı korur.
+- `test/standSetup.test.js` — değişmeyen 1 metre çevre ile stand kurulum sahne ölçü aritmetiğini korur.
+- `e2e/smoke.spec.mjs` — Chromium sahne-oluşturma smoke'u, renderer import yolunun ve gerçek uygulama sahne kurulumunun yüklenip çalışmaya devam ettiğini doğrular.
 
-The full unit/integration suite and production build also passed before and after merge.
+Tam birim/entegrasyon paketi ve üretim derlemesi birleştirmeden önce ve sonra da geçti.
 
-## Full-system impact review
+## Tam-sistem etki incelemesi
 
-The accepted F-012 change contract ran under schemaVersion 2 full-system impact discovery. Broad dependents of `scene3d.js`, setup, renderer and architecture surfaces were explicitly reviewed.
+Kabul edilen F-012 change contract, schemaVersion 2 tam-sistem etki keşfi altında çalıştı. `scene3d.js`, kurulum, renderer ve mimari yüzeylerin geniş bağımlıları açıkça incelendi.
 
-- F-010 and F-011 remain closed and were not regressed.
-- F-013 and all A04+ findings remain independent; this remediation does not close them.
-- The new canonical file changes ownership only. It does not change the 1 metre physical rule.
+- F-010 ve F-011 kapalı kalır ve gerilemedi.
+- F-013 ve tüm A04+ bulgular bağımsız kalır; bu düzeltme onları kapatmaz.
+- Yeni kanonik dosya yalnızca sahipliği değiştirir. 1 metre fiziksel kuralı değiştirmez.
 
-## CI and merge evidence
+## CI ve birleştirme kanıtı
 
-- implementation PR: **#52 — Close F-012: centralize scene surround constant**
-- final implementation head: `5e4a29b414f5c6b46fa17cc36e2875bdd93b819f`
+- uygulama PR: **#52 — Close F-012: centralize scene surround constant**
+- son uygulama head: `5e4a29b414f5c6b46fa17cc36e2875bdd93b819f`
 - PR CI: **#216 / run `33973111841` / completed / success**
   - change contract gate: success
   - full unit/integration test suite: success
   - build: success
   - Playwright runner + Chromium install: success
   - Chromium E2E: success
-- merged to `ROG` as `1ca9f6e386a6cbdb7377ce35bf22a26b75e4ba80`
-- post-merge `ROG` CI: **#221 / run `33974468120` / completed / success**
+- `ROG`'a `1ca9f6e386a6cbdb7377ce35bf22a26b75e4ba80` olarak birleştirildi
+- birleştirme sonrası `ROG` CI: **#221 / run `33974468120` / completed / success**
   - change contract gate: success
   - full unit/integration test suite: success
   - build: success
   - Playwright runner + Chromium install: success
   - Chromium E2E: success
 
-## Result
+## Sonuç
 
-F-012 satisfies the repository closure rule: implementation, targeted regression, full suite, build, PR CI, merge, and post-merge verification are complete.
+F-012 depo kapanış kuralını karşılar: uygulama, hedefli regresyon, tam paket, derleme, PR CI, birleştirme ve birleştirme sonrası doğrulama tamamdır.
 
-**F-012 is CLOSED.** It was the final A03-owned finding.
+**F-012 is CLOSED.** Son A03-sahipli bulguydu.

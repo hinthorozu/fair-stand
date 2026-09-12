@@ -4,7 +4,7 @@ import './imageActions.css';
 import './helpGuide.css';
 import { createStandScene } from './scene3d.js';
 import { initHelpGuide } from './helpGuide.js';
-import { resolveModuleCatalogKey } from './catalog.js';
+import { resolveItemKey } from './catalog.js';
 import { planAutomaticDepot } from './autoDepot.js';
 import {
   composeAutomaticStandWall,
@@ -49,7 +49,7 @@ import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';
 import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';
 import { createSidebarController } from './sidebarController.js';
 import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';
-import { getFloorItem, getFloorSelectLabel, listFloorItems } from './items.js';
+import { getFloorItem, getFloorSelectLabel, listFloorItems, resolveStandFloorItemKey } from './items.js';
 
 let jsZipModulePromise = null;
 
@@ -487,10 +487,16 @@ function duplicateContextModule(context, side) {
   rebuildWall({ resetView: false });
 }
 
-function createCatalogModuleState(module, { preservePlacement = false, catalogKey = null } = {}) {
+function assignStandFloorItem(stand, itemKey) {
+  const next = { ...stand, itemKey: resolveStandFloorItemKey(itemKey) };
+  delete next.floorType;
+  return next;
+}
+
+function createCatalogModuleState(module, { preservePlacement = false, itemKey = null } = {}) {
   if (!module) return null;
   return createModuleStateFromDescriptor(module, {
-    catalogKey: catalogKey ?? resolveModuleCatalogKey(module),
+    itemKey: itemKey ?? resolveItemKey(module),
     preservePlacement,
   });
 }
@@ -855,7 +861,7 @@ moduleDragSidebar = createModuleDragSidebar({
   anchorButton: openModuleCatalogButton,
   viewport,
   canDrag: () => Boolean(currentStand),
-  createModuleState: (module, moduleKey) => createCatalogModuleState(module, { catalogKey: moduleKey }),
+  createModuleState: (module, moduleKey) => createCatalogModuleState(module, { itemKey: moduleKey }),
   onPreview: (moduleState, clientX, clientY, rotationZDeg, rotationLocked) => (
     scene3d.previewCatalogModuleDrag(
       moduleState,
@@ -1009,7 +1015,7 @@ function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
     return false;
   }
 
-  currentStand = { ...setup, floorType: floorTypeSelect.value, depot: depotConfig };
+  currentStand = assignStandFloorItem({ ...setup, depot: depotConfig }, floorTypeSelect.value);
   scene3d.setFloorType(floorTypeSelect.value);
   viewportEmpty.hidden = true;
   viewportToolbar.hidden = false;
@@ -1124,7 +1130,7 @@ createStageButton.addEventListener('click', async () => {
 
 floorTypeSelect.addEventListener('change', () => {
   if (!currentStand) return;
-  currentStand = { ...currentStand, floorType: floorTypeSelect.value };
+  currentStand = assignStandFloorItem(currentStand, floorTypeSelect.value);
   scene3d.setFloorType(floorTypeSelect.value);
 });
 
@@ -1340,17 +1346,12 @@ async function restoreProject(project) {
   activeProjectCreatedAt = Number(project.createdAt) || Date.now();
   setProjectName(project.name || 'Adsız Proje');
   currentModules = (cloneProjectState(project.modules) || []).map(normalizeModuleItemState);
-  currentModules.forEach((moduleState) => {
-    const resolvedCatalogKey = resolveModuleCatalogKey(moduleState);
-    if (resolvedCatalogKey) moduleState.catalogKey = resolvedCatalogKey;
-    else delete moduleState.catalogKey;
-  });
   currentStand = cloneProjectState(project.stand);
   moduleContextMenu.close();
   moduleContextMenu.closePicker();
 
-  // Project image URLs must exist before the scene is rebuilt.
-  // Otherwise stored imageAssetId values cannot resolve on the first open.
+  // Sahne yeniden kurulmadan önce proje görsel URL'leri hazır olmalı.
+  // Yoksa kayıtlı imageAssetId ilk açılışta çözülemez.
   await loadAssetsForActiveProject();
 
   if (currentStand) {
@@ -1360,10 +1361,8 @@ async function restoreProject(project) {
     });
     standSizeXInput.value = String(currentStand.xCm);
     standSizeYInput.value = String(currentStand.yCm);
-    const resolvedFloor = getFloorItem(currentStand.floorType)?.itemKey ?? getFloorItem('karolaj').itemKey;
-    if (currentStand.floorType !== resolvedFloor) {
-      currentStand = { ...currentStand, floorType: resolvedFloor };
-    }
+    const resolvedFloor = resolveStandFloorItemKey(currentStand);
+    currentStand = assignStandFloorItem(currentStand, resolvedFloor);
     syncFloorTypeSelect(resolvedFloor);
     if (autoDepotEnabledInput) autoDepotEnabledInput.checked = Boolean(currentStand.depot?.enabled);
     if (autoDepotSizeSelect && currentStand.depot?.sizeKey) autoDepotSizeSelect.value = currentStand.depot.sizeKey;
@@ -1376,7 +1375,7 @@ async function restoreProject(project) {
       resetView: true,
     });
     if (!stage.ok) throw new Error(stage.message || 'Proje sahnesi oluşturulamadı.');
-    scene3d.setFloorType(currentStand.floorType || 'karolaj');
+    scene3d.setFloorType(currentStand.itemKey);
     if (currentStand.floorColor) scene3d.setFloorColor(currentStand.floorColor);
     viewportEmpty.hidden = true;
     viewportToolbar.hidden = false;

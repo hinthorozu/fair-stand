@@ -1,35 +1,35 @@
-# A19 — Browser E2E / critical user-flow audit
+# A19 — Tarayıcı E2E / kritik kullanıcı-akışı denetimi
 
-Baseline: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
-Mode: audit-first / fix-later. No runtime/product fix in this evidence commit.
+Taban: ROG `e7647326668ab25c96f3a3139f0d855c03176325`
+Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ürün düzeltmesi yok.
 
-## Result
+## Sonuç
 
-A19 is **inspected and classified**, but it is not green. The repository does not contain a real browser automation harness, so critical flows cannot be claimed end-to-end verified from the current automated test system.
+A19 **incelenmiş ve sınıflandırılmıştır**, ancak yeşil değildir. Depoda gerçek bir tarayıcı otomasyon koşum takımı yoktur, bu yüzden kritik akışlar güncel otomatik test sisteminden uçtan uca doğrulanmış iddia edilemez.
 
-Root finding: **F-040 — P1 — no real browser E2E harness**.
+Kök bulgu: **F-040 — P1 — gerçek tarayıcı E2E koşum takımı yok**.
 
-## Critical-flow classification
+## Kritik-akış sınıflandırması
 
-- A19.01 cold startup/no console exception: `GAP` — no browser smoke.
-- A19.02 create stand for all stand types: `GAP` end-to-end; planners/unit tests exist.
-- A19.03 add each catalog module through user UI: `GAP`; F-013 shows UI paths can already diverge.
-- A19.04 drag/drop/ghost/placement: `GAP`; geometry tests exist, browser interaction proof absent.
-- A19.05 rotate/move/invalid recovery: `GAP`; strong unit/source regressions, no browser sequence proof.
-- A19.06 delete/duplicate/add-side/context actions: `GAP`; F-015/F-027/F-028 are direct UI/runtime findings.
-- A19.07 color/image/glass/fabric/mesh/light controls: `GAP`; source/unit coverage only.
-- A19.08 illuminated-foam creation/resize/halo/save: `GAP`; no full browser persistence flow.
-- A19.09 automatic depot composition: `GAP` end-to-end; planner tests exist.
-- A19.10 save/reload/open project: `GAP`; F-020/F-022.
-- A19.11 project switch with pending autosave: `GAP`; F-020.
-- A19.12 project delete + asset cleanup: `GAP`; F-023.
-- A19.13 export/import round-trip: `GAP`; F-021/F-022/F-035/F-036/F-037.
-- A19.14 model-load failure fallback: `GAP`; F-024.
-- A19.15 keyboard shortcuts while inputs focused: `GAP` at browser level; resolver tests exist.
-- A19.16 dialogs/context focus: `GAP`; F-039.
-- A19.17 render PNG: `GAP`; no browser canvas/download automation.
-- A19.18 repeated project switching/memory: `GAP`; no browser memory instrumentation.
-- A19.19 raw BOM debug not production: `GAP`; F-025 proves opposite.
-- A19.20 console/network/model asset errors in deployed build: `GAP`; no automated deployed smoke.
+- A19.01 soğuk başlatma/konsol istisnası yok: `GAP` — tarayıcı dumanı yok.
+- A19.02 tüm stand tipleri için stand oluştur: uçtan uca `GAP`; planlayıcılar/birim testleri vardır.
+- A19.03 her katalog modülünü kullanıcı UI üzerinden ekle: `GAP`; F-013 UI yollarının zaten sapabileceğini gösterir.
+- A19.04 sürükle/bırak/ghost/yerleştirme: `GAP`; geometri testleri vardır, tarayıcı etkileşim kanıtı yoktur.
+- A19.05 döndür/taşı/geçersiz kurtarma: `GAP`; güçlü birim/kaynak regresyonları, tarayıcı sıra kanıtı yok.
+- A19.06 sil/çoğalt/yan-ekle/bağlam eylemleri: `GAP`; F-015/F-027/F-028 doğrudan UI/çalışma zamanı bulgularıdır.
+- A19.07 renk/görüntü/cam/kumaş/mesh/ışık kontrolleri: `GAP`; yalnızca kaynak/birim kapsamı.
+- A19.08 illuminated-foam oluşturma/yeniden boyutlandırma/hale/kaydet: `GAP`; tam tarayıcı kalıcılık akışı yok.
+- A19.09 otomatik depo bileşimi: uçtan uca `GAP`; planlayıcı testleri vardır.
+- A19.10 projeyi kaydet/yeniden yükle/aç: `GAP`; F-020/F-022.
+- A19.11 bekleyen otomatik kayıtla proje değiştirme: `GAP`; F-020.
+- A19.12 proje silme + varlık temizleme: `GAP`; F-023.
+- A19.13 dışa/içe aktarma gidiş-dönüşü: `GAP`; F-021/F-022/F-035/F-036/F-037.
+- A19.14 model-yükleme başarısızlığı yedeği: `GAP`; F-024.
+- A19.15 girdiler odaklıyken klavye kısayolları: tarayıcı düzeyinde `GAP`; çözümleyici testleri vardır.
+- A19.16 iletişim kutuları/bağlam odak: `GAP`; F-039.
+- A19.17 PNG render: `GAP`; tarayıcı tuval/indirme otomasyonu yok.
+- A19.18 tekrarlanan proje değiştirme/bellek: `GAP`; tarayıcı bellek enstrümantasyonu yok.
+- A19.19 ham BOM hata ayıklama üretim değil: `GAP`; F-025 tersini kanıtlar.
+- A19.20 dağıtılmış derlemede konsol/ağ/model varlık hataları: `GAP`; otomatik dağıtılmış duman yok.
 
-Section audit status: **GAP — inspected, not executable/green under current test architecture**.
+Bölüm denetim durumu: **GAP — incelendi, güncel test mimarisi altında çalıştırılabilir/yeşil değil**.

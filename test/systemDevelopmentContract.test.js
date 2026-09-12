@@ -76,7 +76,7 @@ test('recipe-backed module contracts resolve an actual canonical recipe', () => 
 test('non-catalog runtime modules can also have explicit contracts', () => {
   const contract = resolveModuleContract('illuminated-foam');
   assert.ok(contract);
-  assert.equal(contract.catalogKey, null);
+  assert.equal(contract.itemKey, 'illuminated-foam');
   assert.equal(contract.behavior.placement, 'wall-overlay');
   assert.equal(contract.appearance.image, 'required');
 });

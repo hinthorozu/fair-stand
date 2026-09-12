@@ -8,13 +8,13 @@ import { createModuleStateFromDescriptor } from '../src/designState.js';
 test('canonical state construction registry instantiates every catalog entry', () => {
   assert.equal(MODULE_CATALOG_KEYS.length, 51);
 
-  for (const catalogKey of MODULE_CATALOG_KEYS) {
-    const descriptor = MODULE_CATALOG[catalogKey];
+  for (const itemKey of MODULE_CATALOG_KEYS) {
+    const descriptor = MODULE_CATALOG[itemKey];
     const state = createModuleStateFromDescriptor(descriptor);
-    assert.ok(state, `${catalogKey} must resolve to a runtime module state`);
-    assert.equal(state.type, descriptor.type, `${catalogKey} type must be preserved`);
-    assert.equal(state.catalogKey, catalogKey, `${catalogKey} identity must be attached automatically by the canonical constructor`);
-    assert.notEqual(state.catalogKey, null, `${catalogKey} catalog identity must never be null`);
+    assert.ok(state, `${itemKey} must resolve to a runtime module state`);
+    assert.equal(state.type, descriptor.type, `${itemKey} type must be preserved`);
+    assert.equal(state.itemKey, itemKey, `${itemKey} identity must be attached automatically by the canonical constructor`);
+    assert.equal(Object.hasOwn(state, 'catalogKey'), false, `${itemKey} must not write a second product identity`);
   }
 });
 
@@ -24,11 +24,11 @@ test('canonical state construction preserves placement only when explicitly requ
     placement: { xCm: 100, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
   };
 
-  const fresh = createModuleStateFromDescriptor(descriptor, { catalogKey: 'wall_100' });
+  const fresh = createModuleStateFromDescriptor(descriptor, { itemKey: 'wall_100' });
   assert.equal(fresh.placement, undefined);
 
   const restored = createModuleStateFromDescriptor(descriptor, {
-    catalogKey: 'wall_100',
+    itemKey: 'wall_100',
     preservePlacement: true,
   });
   assert.deepEqual(restored.placement, descriptor.placement);
@@ -60,11 +60,10 @@ test('automatic catalog-equivalent descriptors receive canonical catalog identit
     modelFile: 'wall_separator_100_sarmasik.glb',
   });
 
-  assert.equal(wall.catalogKey, 'wall_100');
+  assert.equal(wall.itemKey, 'wall_100');
   assert.equal(door.itemKey, 'door_100');
-  assert.equal(door.catalogKey, 'door_100');
-  assert.equal(normalSeparator.catalogKey, 'wall_separator_100');
-  assert.equal(vineSeparator.catalogKey, 'wall_separator_100_sarmasik');
+  assert.equal(normalSeparator.itemKey, 'wall_separator_100');
+  assert.equal(vineSeparator.itemKey, 'wall_separator_100_sarmasik');
 });
 
 test('main.js delegates construction instead of owning a parallel type dispatcher', async () => {

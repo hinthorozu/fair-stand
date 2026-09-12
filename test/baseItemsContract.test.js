@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { MODULE_CATALOG, resolveModuleCatalogKey } from '../src/catalog.js';
+import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
 import {
   createBaseModuleState,
   createModuleStateFromDescriptor,
@@ -63,14 +63,14 @@ for (const itemKey of BASE_KEYS) {
 
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, itemKey);
-    assert.equal(state.catalogKey, itemKey);
+    assert.equal(state.itemKey, itemKey);
     assert.equal(state.type, 'base');
     assert.equal(state.widthCm, expected.widthCm);
     assert.deepEqual(Object.keys(state.faces), ['front', 'left', 'right']);
 
     const byWidth = createBaseModuleState(expected.widthCm);
     assert.equal(byWidth.itemKey, itemKey);
-    assert.equal(byWidth.catalogKey, itemKey);
+    assert.equal(byWidth.itemKey, itemKey);
 
     assert.equal(getModuleBehavior(state).placement, 'free');
     assert.equal(getModuleBehavior(state).connectionEndpoint, 'logical-fixture');
@@ -95,10 +95,9 @@ for (const itemKey of BASE_KEYS) {
 
     const legacy = JSON.parse(JSON.stringify(state));
     delete legacy.itemKey;
-    delete legacy.catalogKey;
     const restored = normalizeModuleItemState(legacy);
     assert.equal(restored.itemKey, itemKey);
-    assert.equal(resolveModuleCatalogKey(restored), itemKey);
+    assert.equal(resolveItemKey(restored), itemKey);
 
     const duplicate = duplicateModuleState(state);
     assert.notEqual(duplicate.id, state.id);

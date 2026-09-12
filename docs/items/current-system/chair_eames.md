@@ -1,4 +1,4 @@
-> Migration öncesi envanterdir; aktif canonical tanım `../definitions/chair_eames.md` içindedir.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/chair_eames.md` içindedir.
 
 # chair_eames — Mevcut Sistem Profili
 
@@ -14,13 +14,13 @@ Bağımsız katalog Item yoktu. Sandalye `furniture_table_chair_set_eames` rende
 | Sandalye depth | `58 cm` (`chairDepthCm`) |
 | Yükseklik | `82 cm` (set `heightCm` / `EAMES_CHAIR_TARGET_HEIGHT_M`) |
 | Adet | `chairCount = 4` |
-| Model file | `eames_chair.glb` (renderer hardcode) |
+| Model dosyası | `eames_chair.glb` (renderer hardcode) |
 
 Set default surface rengi `#ffffff`; dört sandalye aynı `surface` state’ini paylaşır. `plastic_wit` gövde rengi alır; `Material1` bacak rengi `#a66b3d`. Seçim parent module seviyesindedir.
 
 Renderer seçim proxy’si `50×56×82` cm’dir; bu Item ölçüsü değildir.
 
-## Contract (parent)
+## Sözleşme (parent)
 
 | Alan | Kod değeri |
 |---|---|

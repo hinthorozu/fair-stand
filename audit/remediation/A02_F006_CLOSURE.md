@@ -1,12 +1,12 @@
-# A02 / F-006 Remediation Closure
+# A02 / F-006 Düzeltme Kapanışı
 
-Finding: `F-006` — Canonical rule/gate Markdown documents were outside guarded-file detection.
-Severity: `P1`
-Status: **CLOSED**
+Bulgu: `F-006` — Kanonik kural/gate Markdown belgeleri korumalı-dosya tespitinin dışındaydı.
+Önem: `P1`
+Durum: **CLOSED**
 
-## Fix
+## Düzeltme
 
-`src/systemChangeContract.js` now declares `GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS` and treats the following files as guarded architecture surfaces:
+`src/systemChangeContract.js` artık `GOVERNANCE_DOCUMENT_REQUIRED_DOMAINS` bildirir ve aşağıdaki dosyaları korumalı architecture yüzeyleri olarak işler:
 
 - `README.md`
 - `PROJECT_RULES.md`
@@ -16,34 +16,34 @@ Status: **CLOSED**
 - `MODULE_BEHAVIOR_STANDARD.md`
 - `SYSTEM_AUDIT_CHECKLIST.md`
 
-Changes to any of these files now require `.github/change-contract.json` in the same guarded diff and require `impact.architecture = affected`.
+Bu dosyalardan herhangi birine yapılan değişiklik artık aynı korumalı farkta `.github/change-contract.json` gerektirir ve `impact.architecture = affected` gerektirir.
 
-Planning/history documents such as `ROADMAP.md` are intentionally not pulled into this governance-specific rule.
+`ROADMAP.md` gibi planlama/tarih belgeleri kasıtlı olarak bu yönetişime özel kurala alınmaz.
 
-## Regression guard
+## Regresyon koruması
 
-`test/systemChangeGate.test.js` verifies:
+`test/systemChangeGate.test.js` şunları doğrular:
 
-1. all seven governance/developer-entrypoint documents are guarded,
-2. each requires the architecture impact domain,
-3. `README.md` and `SYSTEM_CHANGE_GATE.md` can no longer bypass the universal declaration,
-4. non-governance planning Markdown remains outside this specific guard.
+1. yedi yönetişim/geliştirici-giriş-noktası belgesinin tümü korunur,
+2. her biri architecture etki alanını gerektirir,
+3. `README.md` ve `SYSTEM_CHANGE_GATE.md` artık evrensel bildirimi atlayamaz,
+4. yönetişim dışı planlama Markdown'ı bu özel korumanın dışında kalır.
 
-## Verification
+## Doğrulama
 
 PR: `#41 — Fix F-006 guard canonical governance documents`
-Implementation head before closure records: `bbccef67434dbfdf317c8a6e6e2d1a5d8add0397`
-PR CI run: `#112` / `33802087763`
+Kapanış kayıtlarından önceki uygulama head: `bbccef67434dbfdf317c8a6e6e2d1a5d8add0397`
+PR CI çalıştırması: `#112` / `33802087763`
 
-Verified successful steps:
+Doğrulanan başarılı adımlar:
 
 - Change contract gate: passed
 - Install dependencies: passed
 - Full `npm test`: passed
 - `npm run build`: passed
 
-No runtime product behavior or stored-project schema changed.
+Hiçbir runtime ürün davranışı veya saklı-proje şeması değişmedi.
 
-## Result
+## Sonuç
 
-The human/AI governance contract and the machine gate can no longer drift through a docs-only change without an explicit architecture-impact declaration.
+İnsan/AI yönetişim sözleşmesi ile makine gate'i, açık bir architecture-etki bildirimi olmadan yalnızca belgeler üzerinden sapamaz.

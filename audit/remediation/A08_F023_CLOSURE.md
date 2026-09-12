@@ -1,45 +1,33 @@
-# A08 F-023 closure
+# A08 F-023 kapanışı
 
-Finding: **F-023 — Whole-project deletion not atomic across project and asset stores**
+Bulgu: **F-023 — Tüm proje silme, proje ve asset store’lar arasında atomik değil**
 
-Status: **CLOSED / POST-MERGE VERIFIED**
+Durum: **CLOSED / POST-MERGE VERIFIED**
 
-## Root cause
+## Kök neden
 
-Whole-project deletion removed project image assets and the project record through separate IndexedDB transactions. A failure between those operations could therefore leave persistence in a partially deleted state: assets could be removed while the project record survived, or cleanup behavior could otherwise diverge across the two stores.
+Tüm-proje silme, proje görüntü varlıklarını ve proje kaydını ayrı IndexedDB işlemleriyle kaldırıyordu. Bu işlemler arasında bir hata bu yüzden kalıcılığı kısmen silinmiş durumda bırakabilirdi: varlıklar kaldırılıp proje kaydı hayatta kalabilir veya temizlik davranışı iki store arasında başka şekilde sapabilirdi.
 
-## Remediation
+## Düzeltme
 
-Implementation PR **#73 — Fix F-023 atomic whole-project deletion** replaced that split flow with one canonical whole-project deletion operation.
+Uygulama PR **#73 — Fix F-023 atomic whole-project deletion** o bölünmüş akışı tek kanonik tüm-proje silme işlemiyle değiştirdi.
 
-The remediation:
+Düzeltme:
 
-- added `deleteProjectWithAssets(projectId)` in `src/projectStore.js`,
-- opens one `readwrite` transaction spanning both `projects` and `image-assets`,
-- deletes every image asset belonging to the target project and the project record inside that same transaction,
-- makes user-triggered project deletion call that single atomic operation,
-- makes failed-import rollback use the same atomic cleanup path,
-- leaves single-image deletion and existing IndexedDB/schema versions unchanged.
+- `src/projectStore.js` içinde `deleteProjectWithAssets(projectId)` ekledi,
+- hem `projects` hem `image-assets` üzerinde bir `readwrite` işlemi açar,
+- hedef projeye ait her görüntü varlığını ve proje kaydını aynı işlem içinde siler,
+- kullanıcı tetikli proje silmesini o tek atomik işlemi çağırır hale getirir,
+- başarısız-içe-aktarma geri alımını aynı atomik temizlik yolunu kullanır hale getirir,
+- tek-görüntü silmeyi ve mevcut IndexedDB/şema sürümlerini değiştirmeden bırakır.
 
-No Item/BOM, placement, renderer, catalog, project-schema, or archive-format behavior was intentionally changed.
+Hiçbir Item/BOM, yerleşim, renderer, katalog, proje-şeması veya arşiv-formatı davranışı kasıtlı olarak değiştirilmedi.
 
-## Verification
+## Doğrulama
 
-Final implementation PR head: `a78d48ea570873d86899f762e1cf03e32f528349`.
+Son uygulama PR head: `a78d48ea570873d86899f762e1cf03e32f528349`.
 
-PR CI run **#308 / run `33997615392`** completed successfully:
-
-- change contract gate: success,
-- full unit/integration test suite: success,
-- production build: success,
-- Playwright runner + Chromium install: success,
-- Chromium E2E: success.
-
-Targeted coverage proves that whole-project deletion uses one cross-store transaction, the main deletion path and failed-import rollback both use the canonical atomic API, and Chromium removes the target project plus its assets without touching another project's data.
-
-PR #73 merged into `ROG` as `c118c6d4269a335334972bb88e36a3fc7491c9bc`.
-
-Post-merge `ROG` CI run **#309 / run `33997841213`** completed successfully:
+PR CI çalıştırması **#308 / run `33997615392`** başarıyla tamamlandı:
 
 - change contract gate: success,
 - full unit/integration test suite: success,
@@ -47,10 +35,22 @@ Post-merge `ROG` CI run **#309 / run `33997841213`** completed successfully:
 - Playwright runner + Chromium install: success,
 - Chromium E2E: success.
 
-## Result
+Hedefli kapsam, tüm-proje silmenin tek bir store-aşırı işlem kullandığını, ana silme yolunun ve başarısız-içe-aktarma geri alımının her ikisinin kanonik atomik API'yi kullandığını ve Chromium'un başka bir projenin verisine dokunmadan hedef projeyi artı varlıklarını kaldırdığını kanıtlar.
 
-Whole-project deletion is now all-or-nothing across the project record and its image assets at the IndexedDB transaction boundary. If the transaction fails, the database does not commit a partial whole-project deletion.
+PR #73, `c118c6d4269a335334972bb88e36a3fc7491c9bc` olarak `ROG`'a birleştirildi.
 
-A08 remains a broader `GAP` section because F-021 and F-022 are separate open persistence findings.
+Birleştirme sonrası `ROG` CI çalıştırması **#309 / run `33997841213`** başarıyla tamamlandı:
+
+- change contract gate: success,
+- full unit/integration test suite: success,
+- production build: success,
+- Playwright runner + Chromium install: success,
+- Chromium E2E: success.
+
+## Sonuç
+
+Tüm-proje silme artık IndexedDB işlem sınırında proje kaydı ve görüntü varlıkları boyunca hep-ya-da-hiç'tir. İşlem başarısız olursa veritabanı kısmi bir tüm-proje silmeyi commit etmez.
+
+A08, F-021 ve F-022 ayrı açık kalıcılık bulguları olduğu için daha geniş bir `GAP` bölümü olarak kalır.
 
 **F-023 is CLOSED.**

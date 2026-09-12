@@ -1,31 +1,31 @@
-# A01 / F-004 Remediation Closure
+# A01 / F-004 Düzeltme Kapanışı
 
-Finding: `F-004 — README/developer entrypoint predates universal change-gate workflow`
-Severity: P2
-Branch: `remediation/a01-f004-developer-entrypoint`
+Bulgu: `F-004 — README/developer entrypoint predates universal change-gate workflow`
+Önem: P2
+Dal: `remediation/a01-f004-developer-entrypoint`
 PR: `#39`
-Starting ROG: `f19f55358bdfe64e9d6786eb674fb7d85d33f2a6`
+Başlangıç ROG: `f19f55358bdfe64e9d6786eb674fb7d85d33f2a6`
 
-## Fix
+## Düzeltme
 
-- README now documents `npm run contract:verify` and the canonical CI order.
-- README onboarding now includes `SYSTEM_CHANGE_GATE.md`, `.github/change-contract.json`, `SYSTEM_DEVELOPMENT_CONTRACT.md`, `SYSTEM_AUDIT_CHECKLIST.md` and current audit/remediation trackers.
-- New module/feature/core work is documented as beginning with universal impact classification before domain implementation.
-- `SYSTEM_DEVELOPMENT_CONTRACT.md` now explicitly hands off from the universal change gate and requires the same declaration → domain contract → targeted regression → full test/build → PR CI → post-merge ROG CI flow.
-- Added `test/developerEntrypointDocs.test.js` to guard these developer-entrypoint requirements.
+- README artık `npm run contract:verify` ve kanonik CI sırasını belgeler.
+- README onboarding artık `SYSTEM_CHANGE_GATE.md`, `.github/change-contract.json`, `SYSTEM_DEVELOPMENT_CONTRACT.md`, `SYSTEM_AUDIT_CHECKLIST.md` ve güncel denetim/düzeltme izleyicilerini içerir.
+- Yeni modül/özellik/çekirdek iş, alan uygulamasından önce evrensel etki sınıflandırmasıyla başlayacak şekilde belgelendi.
+- `SYSTEM_DEVELOPMENT_CONTRACT.md` artık evrensel change gate'ten açıkça devralır ve aynı declaration → domain contract → targeted regression → full test/build → PR CI → post-merge ROG CI akışını zorunlu kılar.
+- Bu geliştirici-giriş-noktası gereksinimlerini korumak için `test/developerEntrypointDocs.test.js` eklendi.
 
-## Verification
+## Doğrulama
 
-Implementation head: `0b142ee3aad941c7bd0c6beadb988c5e7a1f748a`
+Uygulama head: `0b142ee3aad941c7bd0c6beadb988c5e7a1f748a`
 PR CI: `#101 / 33800264473`
 
 - change contract gate: passed
 - npm ci: passed
-- npm test: passed (includes developer-entrypoint documentation regression)
+- npm test: passed (geliştirici-giriş-noktası dokümantasyon regresyonunu içerir)
 - npm run build: passed
 
-## Result
+## Sonuç
 
 `F-004: CLOSED`
 
-A01 section revalidation is recorded separately in `audit/remediation/A01_CLOSURE.md`. Post-merge ROG CI is required before A01 is considered fully closed.
+A01 bölüm yeniden doğrulaması ayrı olarak `audit/remediation/A01_CLOSURE.md` içinde kaydedilir. A01'in tam kapalı sayılması için birleştirme sonrası ROG CI gereklidir.

@@ -135,9 +135,9 @@ const DOOR_ITEM = getItem('door_100');
 const WALL_SHOWCASE_2_ITEM = getItem('wall_showcase_100_2');
 const WALL_SHOWCASE_3_ITEM = getItem('wall_showcase_100_3');
 
-// Wall-media catalog descriptors are projected from the canonical wall-media Item.
-// TV cards keep their 350 cm mounting height; video-wall cards use the derived total
-// screen height. No dimension is fabricated here; every value comes from the Item.
+// Duvar-medya katalog tanımları kanonik duvar-medya Item'ından yansıtılır.
+// TV kartları 350 cm asma yüksekliğini korur; video-wall kartları türetilmiş toplam
+// ekran yüksekliğini kullanır. Burada ölçü uydurulmaz; her değer Item'dan gelir.
 function createWallMediaCatalogItem(itemKey) {
   const metrics = resolveWallMediaMetrics(itemKey);
   const base = {
@@ -390,7 +390,7 @@ function optionalNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
-// Catalog straight counters omit `shape`; runtime state uses `shape: 'straight'`.
+// Katalogdaki düz bankolarda `shape` yoktur; runtime state `shape: 'straight'` kullanır.
 function shapesMatch(want, have) {
   const normalizedWant = want === 'L' ? 'L' : (want == null ? null : 'straight');
   const normalizedHave = have === 'L' ? 'L' : (have == null ? null : 'straight');
@@ -405,7 +405,7 @@ function normalizeCatalogDescriptor(descriptor) {
     : null;
   const source = nested ?? descriptor ?? {};
   return {
-    catalogKey: source.catalogKey ?? descriptor?.catalogKey ?? null,
+    itemKey: source.itemKey ?? descriptor?.itemKey ?? null,
     type: source.type ?? source.moduleType ?? descriptor?.type ?? descriptor?.moduleType ?? null,
     widthCm: optionalNumber(source.widthCm ?? descriptor?.widthCm),
     depthCm: optionalNumber(source.depthCm ?? descriptor?.depthCm),
@@ -417,9 +417,9 @@ function normalizeCatalogDescriptor(descriptor) {
   };
 }
 
-export function resolveModuleCatalogKey(descriptor) {
+export function resolveItemKey(descriptor) {
   const normalized = normalizeCatalogDescriptor(descriptor);
-  if (normalized.catalogKey && MODULE_CATALOG[normalized.catalogKey]) return normalized.catalogKey;
+  if (normalized.itemKey && MODULE_CATALOG[normalized.itemKey]) return normalized.itemKey;
   if (!normalized.type) return null;
 
   const candidates = MODULE_CATALOG_KEYS.filter(
@@ -429,8 +429,8 @@ export function resolveModuleCatalogKey(descriptor) {
 
   const matches = candidates.filter((moduleKey) => {
     const item = MODULE_CATALOG[moduleKey];
-    // Ordinary TVs historically stored a fake 100 cm footprint; placement width now equals
-    // screen width. Do not use widthCm to discriminate tv catalog keys.
+    // Sıradan TV'ler eskiden sahte 100 cm oturum yazardı; yerleşim genişliği artık
+    // ekran genişliğidir. tv katalog anahtarlarını ayırmak için widthCm kullanma.
     if (normalized.type !== 'tv') {
       if (normalized.widthCm !== null && optionalNumber(item.widthCm) !== null && optionalNumber(item.widthCm) !== normalized.widthCm) return false;
     }
@@ -451,7 +451,7 @@ export function resolveModuleCatalogKey(descriptor) {
 }
 
 export function getModuleCatalogItem(descriptor) {
-  const moduleKey = resolveModuleCatalogKey(descriptor);
+  const moduleKey = resolveItemKey(descriptor);
   return moduleKey ? MODULE_CATALOG[moduleKey] ?? null : null;
 }
 

@@ -172,8 +172,7 @@ export function describeSurfaceSelection(surfaces, modules = []) {
 
 export function describeFloorSelection({ selected, floorType, paintable } = {}) {
   if (!selected) return null;
-  const label = getFloorItem(floorType)?.name
-    ?? (floorType === 'karolaj' ? 'Karolaj' : (floorType === 'hali' ? 'Halı' : 'Parke'));
+  const label = getFloorItem(floorType)?.name ?? 'Zemin';
   return paintable
     ? label + ' zemini seçili · mevcut Aktif renk ile boyanabilir.'
     : label + ' zemini seçili · bu zemin tipi boyanamaz.';

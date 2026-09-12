@@ -6,7 +6,7 @@ import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DI
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
 import { getProductionItem, getShelfProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
-import { getItem, getCommercialItemForType, getFloorItem, getShowcaseBodyDefinition, isParquetFloorItem, listFloorItems } from './items.js';
+import { getItem, getCommercialItemForType, getFloorItem, getShowcaseBodyDefinition, isCarpetFloorItem, isGridTileFloorItem, isParquetFloorItem, listFloorItems } from './items.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
@@ -176,8 +176,8 @@ export function createStandScene(
   scene.background = new THREE.Color(0x5f6265);
   scene.fog = new THREE.Fog(0x5f6265, 55, 90);
 
-  // Keep atmospheric depth outside the editable stand. Fog distances are updated only
-  // when the stage size changes, so this adds no per-frame CPU work or extra draw calls.
+  // Atmosfer derinliğini düzenlenebilir standın dışında tut. Sis mesafeleri yalnız
+  // sahne boyutu değişince güncellenir; kare başına CPU veya ek çizim maliyeti yok.
   function updateStageFog(widthM, depthM) {
     const diagonalM = Math.hypot(Number(widthM) || 0, Number(depthM) || 0);
     const near = Math.max(55, diagonalM * 1.25 + 18);
@@ -394,8 +394,8 @@ export function createStandScene(
   const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
   keyLight.position.set(5, 8, 6);
   keyLight.castShadow = true;
-  // 2K is visually sufficient for the editor and cuts the directional shadow map
-  // memory/fill cost to one quarter of the previous 4K allocation.
+  // 2K editör için yeterli; yönsel gölge haritası bellek/dolgu maliyeti
+  // önceki 4K tahsisinin dörtte birine iner.
   keyLight.shadow.mapSize.set(2048, 2048);
   scene.add(keyLight);
 
@@ -564,20 +564,28 @@ export function createStandScene(
     return [...new Set(cuts.map((value) => Number(value.toFixed(6))))];
   }
 
+  function matchesConcreteParquetVisual(item) {
+    const concrete = getFloorItem('parke-beton');
+    return isParquetFloorItem(item)
+      && Number(item.dimensions?.lengthCm) === Number(concrete.dimensions.lengthCm)
+      && Number(item.dimensions?.depthCm) === Number(concrete.dimensions.depthCm);
+  }
+
   function createFloorPattern(widthM, depthM, floorType) {
     const positions = [];
     const topY = ACTIVE_PLATFORM_HEIGHT_M + FLOOR_TOP_EPSILON_M;
+    const floorItem = getFloorItem(floorType);
 
-    if (floorType === getFloorItem('karolaj').itemKey) {
-      const stepM = Number(getFloorItem('karolaj').dimensions.widthCm) / 100;
+    if (isGridTileFloorItem(floorItem)) {
+      const stepM = Number(floorItem.dimensions.widthCm) / 100;
       collectSurfaceCuts(widthM, stepM).forEach((x) => {
         positions.push(x, topY, 0, x, topY, depthM);
       });
       collectSurfaceCuts(depthM, stepM).forEach((z) => {
         positions.push(0, topY, z, widthM, topY, z);
       });
-    } else if (isParquetFloorItem(getFloorItem(floorType))) {
-      const parquet = getFloorItem(floorType);
+    } else if (isParquetFloorItem(floorItem)) {
+      const parquet = floorItem;
       const plankDepthM = Number(parquet.dimensions.depthCm) / 100;
       const plankLengthM = Number(parquet.dimensions.lengthCm) / 100;
       collectSurfaceCuts(depthM, plankDepthM).forEach((z) => {
@@ -598,8 +606,8 @@ export function createStandScene(
     if (!positions.length) return null;
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    const isConcreteParquetPattern = floorType === getFloorItem('parke-beton').itemKey;
-    const isParquetPattern = isParquetFloorItem(getFloorItem(floorType));
+    const isConcreteParquetPattern = matchesConcreteParquetVisual(floorItem);
+    const isParquetPattern = isParquetFloorItem(floorItem);
     const material = new THREE.LineBasicMaterial({
       // Beton parke derzleri sahne ışığından bağımsız, daha koyu ve net kalsın.
       color: isConcreteParquetPattern
@@ -622,7 +630,7 @@ export function createStandScene(
     const floorItem = getFloorItem(resolved);
 
     const material = activeFloor.material;
-    if (resolved === getFloorItem('hali').itemKey) {
+    if (isCarpetFloorItem(floorItem)) {
       material.color.set(floorColors.hali);
       material.roughness = 1;
       material.metalness = 0;
@@ -643,11 +651,11 @@ export function createStandScene(
       material.bumpMap = null;
       material.bumpScale = 0;
       material.color.set(floorItem.defaultColor);
-      material.roughness = resolved === getFloorItem('parke-beton').itemKey ? 0.98 : 0.78;
+      material.roughness = matchesConcreteParquetVisual(floorItem) ? 0.98 : 0.78;
       material.metalness = 0;
       // Beton parke, güçlü sahne ışığında rengini yıkamadan daha mat ve dengeli kalsın.
-      material.emissive.set(resolved === getFloorItem('parke-beton').itemKey ? floorItem.defaultColor : '#000000');
-      material.emissiveIntensity = resolved === getFloorItem('parke-beton').itemKey ? 0.06 : 0;
+      material.emissive.set(matchesConcreteParquetVisual(floorItem) ? floorItem.defaultColor : '#000000');
+      material.emissiveIntensity = matchesConcreteParquetVisual(floorItem) ? 0.06 : 0;
     } else {
       material.color.set(floorColors.karolaj);
       material.roughness = 0.92;
@@ -988,7 +996,7 @@ export function createStandScene(
     );
     frame.renderOrder = 1000;
     frame.visible = false;
-    // Selection visuals are display-only and must never become pick targets.
+    // Seçim görselleri yalnızca göstergedir; asla tıklama hedefi olmamalı.
     frame.raycast = () => {};
     frame.userData.isModuleSelectionVisual = true;
     moduleGroup.add(frame);
@@ -1375,8 +1383,8 @@ export function createStandScene(
     const xM = Number(placement.xCm) / 100;
     const logicalYM = Number(placement.yCm) / 100;
     const logicalZM = Number(placement.zCm ?? 0) / 100;
-    // Mini fridge height is 66 cm. Kettle never sits on the floor; its local base
-    // is always raised to the refrigerator top plane.
+    // Mini buzdolabı yüksekliği 66 cm. Kettle asla zemine oturmaz; yerel tabanı
+    // her zaman buzdolabı üst düzlemine kadar yükseltilir.
     const fixedElevationM = (group.userData?.type === 'kettle' || group.userData?.moduleState?.type === 'kettle')
       ? getItem('MINI_FRIDGE_AVANTI').dimensions.heightCm / 100
       : 0;
@@ -1781,7 +1789,7 @@ export function createStandScene(
     return {
       moduleIndex: moduleGroup.userData.moduleIndex,
       moduleId: moduleGroup.userData.moduleId,
-      catalogKey: moduleState.catalogKey ?? null,
+      itemKey: moduleState.itemKey ?? null,
       type: moduleState.type ?? moduleGroup.userData.type,
       widthCm: moduleState.widthCm ?? moduleGroup.userData.widthCm,
       depthCm: moduleState.depthCm ?? moduleGroup.userData.depthCm,
@@ -2045,7 +2053,7 @@ export function createStandScene(
     if (label) label.textContent = labelText;
 
     if (previewSlot) {
-      const signature = `${moduleState?.catalogKey ?? ''}|${labelText}|${moduleState?.type ?? ''}|${moduleState?.widthCm ?? ''}|${moduleState?.shelfCount ?? ''}|${moduleState?.sizeInch ?? ''}`;
+      const signature = `${moduleState?.itemKey ?? ''}|${labelText}|${moduleState?.type ?? ''}|${moduleState?.widthCm ?? ''}|${moduleState?.shelfCount ?? ''}|${moduleState?.sizeInch ?? ''}`;
       if (previewSlot.dataset.signature !== signature) {
         previewSlot.dataset.signature = signature;
         previewSlot.innerHTML = '';

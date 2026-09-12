@@ -1,6 +1,6 @@
 # counter_top_210_60 — Item Contract Definition
 
-## Canonical Item
+## Kanonik Item
 
 - `itemKey`: `counter_top_210_60`
 - `type`: `counter-top`
@@ -10,6 +10,6 @@
 - `defaultColor`: `0xf8fafc`
 - `nominalModuleWidthCm`: `200`
 
-Intrinsic/default source-of-truth Item kaydıdır. Parent counter state/behavior/context-menu/persistence zinciri leaf davranışını uygular. Renderer override edebilir; canonical `material` ve default değerleri değiştirmez. Quantity parent counter recipe sahibidir.
+Intrinsic/default tek kaynak Item kaydıdır. Parent counter state/behavior/context-menu/kalıcılık zinciri leaf davranışını uygular. Renderer ezebilir; kanonik `material` ve default değerleri değiştirmez. Quantity parent counter recipe sahibidir.
 
 Regression: counter-top contract/defaultColor testleri + `test/boardMaterialItemContract.test.js`.

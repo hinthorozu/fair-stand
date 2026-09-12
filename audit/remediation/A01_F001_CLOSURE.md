@@ -1,30 +1,30 @@
-# A01 / F-001 Remediation Closure
+# A01 / F-001 Düzeltme Kapanışı
 
-Finding: `F-001 — stale SYSTEM_MODULE_CATALOG.md`
-Severity: P1
-Branch: `remediation/a01-f001-catalog-doc`
+Bulgu: `F-001 — stale SYSTEM_MODULE_CATALOG.md`
+Önem: P1
+Dal: `remediation/a01-f001-catalog-doc`
 PR: `#36`
-Starting ROG: `5b03cc8f7d3ad6f18381803ae76506e1300ae38f`
+Başlangıç ROG: `5b03cc8f7d3ad6f18381803ae76506e1300ae38f`
 
-## Fix
+## Düzeltme
 
-- Replaced the stale 28-module reference with the current 45-key catalog snapshot.
-- Removed duplicated per-module production quantities/dimensions from the document; canonical recipe/part data stays in code owners.
-- Documented current contract-derived BOM policy summary: 29 recipe-backed catalog entries, 16 decision-required catalog entries, plus non-catalog `illuminated-foam` as decision-required.
-- Added `test/systemModuleCatalogDoc.test.js` so catalog key/order and summary-count drift fail the test suite.
+- Eski 28-modül referansı, güncel 45-key katalog anlık görüntüsüyle değiştirildi.
+- Belgeden yinelenen modül başına üretim miktarları/ölçüleri kaldırıldı; kanonik reçete/parça verisi kod sahiplerinde kalır.
+- Güncel sözleşme-türevli BOM politika özeti belgelendi: 29 reçete destekli katalog girişi, 16 karar gerektiren katalog girişi ve katalog dışı `illuminated-foam` karar gerektiren olarak.
+- Katalog key/sıra ve özet-sayı sapmasının test paketini düşürmesi için `test/systemModuleCatalogDoc.test.js` eklendi.
 
-## Verification
+## Doğrulama
 
-PR head implementation commit: `6ffe18264b10f4c8eaae1a9f4ac4925ce329a55f`
-PR CI run: `#89 / 33798955367`
+PR head uygulama commit'i: `6ffe18264b10f4c8eaae1a9f4ac4925ce329a55f`
+PR CI çalıştırması: `#89 / 33798955367`
 
 - Change contract gate: passed
 - npm ci: passed
-- npm test: passed (includes new targeted catalog-document regression)
+- npm test: passed (yeni hedefli katalog-belge regresyonunu içerir)
 - npm run build: passed
 
-## Result
+## Sonuç
 
 `F-001: CLOSED`
 
-Post-merge ROG CI is still required before proceeding to F-002.
+F-002'ye geçmeden önce birleştirme sonrası ROG CI hâlâ gereklidir.

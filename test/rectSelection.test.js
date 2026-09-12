@@ -144,8 +144,8 @@ test('connects a visually joined free-panel corner within panel-depth tolerance'
   const result = createConnectedPanelModulePath([
     { moduleId: 'front-a', axis: 'x', startCm: 100, endCm: 200, crossCm: 300 },
     { moduleId: 'front-b', axis: 'x', startCm: 200, endCm: 300, crossCm: 300 },
-    // The perpendicular row is physically touching the 10 cm wall body, but its
-    // logical center line is offset by 10 cm from the horizontal endpoint.
+    // Dik sıra fiziksel olarak 10 cm duvar gövdesine değiyor, ama
+    // mantıksal orta çizgisi yatay uçtan 10 cm kaymış.
     { moduleId: 'right-a', axis: 'y', startCm: 310, endCm: 410, crossCm: 300 },
   ], 'front-a', 'right-a');
 

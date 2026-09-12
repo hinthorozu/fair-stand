@@ -1,4 +1,4 @@
-> Migration �ncesi envanterdir; aktif canonical tan�m `../definitions/BASE_100.md` i�indedir.`n`n# BASE_100 — Mevcut Sistem Profili
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/BASE_100.md` içindedir.`n`n# BASE_100 — Mevcut Sistem Profili
 
 Bu belge `BASE_100` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction, persistence ve BOM akışlarını toplar.
 
@@ -6,31 +6,31 @@ Bu belge `BASE_100` için `Version2` runtime kodunda bulunan state, behavior, re
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `BASE_100` |
-| Label | `Baza 100` |
+| Katalog anahtarı | `BASE_100` |
+| Etiket | `Baza 100` |
 | Type | `base` |
-| Width | `100 cm` |
-| Depth | `50 cm` |
-| Height | `50 cm` |
+| Genişlik | `100 cm` |
+| Derinlik | `50 cm` |
+| Yükseklik | `50 cm` |
 
 Factory `faces.front`, `faces.left`, `faces.right` olmak üzere 3 editable yüzey state'i üretir. Her biri default beyaz, imageAssetId null ve default single image transform taşır.
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `free-editable` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `editable` |
 | Image | `editable` |
-| Renderer policy | `procedural` |
+| Renderer politikası | `procedural` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `recipe` |
-| BOM source | `src/moduleRecipes.js` |
+| Bileşim | `standalone` |
+| BOM kipi | `recipe` |
+| BOM kaynağı | `src/moduleRecipes.js` |
 
-## Behavior / placement
+## Davranış / yerleşim
 
 | Alan | Kod değeri |
 |---|---|
@@ -88,7 +88,7 @@ Picker `MODULE_CATALOG_KEYS` listesinin tamamını gösterir; aynı katalog kayd
 
 `Sil` aksiyonu hedef modülü `currentModules` listesinden çıkarıp scene'i yeniden kurar. Delete sonrası bütün duvarı otomatik compact eden genel bir çağrı yapılmaz.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `BASE_100` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 

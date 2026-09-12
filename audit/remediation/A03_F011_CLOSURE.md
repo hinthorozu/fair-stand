@@ -1,59 +1,59 @@
-# A03 F-011 closure
+# A03 F-011 kapanışı
 
-Finding: **F-011 — Module-specific placement/interaction policy fragmented outside behavior contract**
+Bulgu: **F-011 — Module-specific placement/interaction policy fragmented outside behavior contract**
 
-Status: **CLOSED / POST-MERGE VERIFIED**
+Durum: **CLOSED / POST-MERGE VERIFIED**
 
-## Remediation
+## Düzeltme
 
-- `src/moduleBehavior.js` is now the canonical declarative owner of module-specific placement/interaction policy selection.
-- `src/modulePlacement.js` consumes behavior selectors for magnetic snap, logical fixture endpoints, base-wall collision depth, thin-wall endpoint contact, wall-inner-face boundary behavior, relationship-specific overlap, side-insert rotation strategy, wall capacity and related placement policy instead of maintaining private module-type registries/selectors.
-- `src/scene3d.js` no longer owns the `freePanelSupportTypes` registry; wall-overlay support selection routes through `supportsWallOverlayMount(...)` while the existing renderer/support geometry remains unchanged.
-- `src/main.js` no longer selects the top-fixture duplicate path through `sourceModule.type === 'led-floodlight'`; it routes through `isTopPlacementModule(...)` while preserving the existing 20 cm side offset, `zCm: 350`, clamp logic and wall-axis geometry.
-- The pre-F-011 kettle declaration remains `collision: 'none'`. The remediation preserves the pre-existing runtime placement collision semantics while expressing the kettle/mini-fridge stacking relationship declaratively through behavior policy.
-- Geometric algorithms remain in placement/rendering core; this finding changed policy ownership, not product geometry or intended interaction semantics.
+- `src/moduleBehavior.js` artık modüle özel yerleşim/etkileşim politika seçiminin kanonik bildirimsel sahibidir.
+- `src/modulePlacement.js` manyetik snap, mantıksal armatür uç noktaları, taban-duvar çarpışma derinliği, ince-duvar uç nokta teması, duvar-iç-yüz sınır davranışı, ilişkiye özel örtüşme, yan-ekleme dönüş stratejisi, duvar kapasitesi ve ilgili yerleşim politikası için davranış seçicilerini tüketir; özel modül-tipi kayıtları/seçicileri tutmaz.
+- `src/scene3d.js` artık `freePanelSupportTypes` kaydının sahibi değildir; duvar-örtü destek seçimi `supportsWallOverlayMount(...)` üzerinden yönlenir, mevcut renderer/destek geometrisi değişmez.
+- `src/main.js` artık üst-armatür çoğaltma yolunu `sourceModule.type === 'led-floodlight'` ile seçmez; mevcut 20 cm yan ofset, `zCm: 350`, clamp mantığı ve duvar-eksen geometrisini koruyarak `isTopPlacementModule(...)` üzerinden yönlendirir.
+- F-011 öncesi kettle bildirimi `collision: 'none'` olarak kalır. Düzeltme, kettle/mini-fridge istifleme ilişkisini davranış politikası üzerinden bildirimsel ifade ederken önceden var olan runtime yerleşim çarpışma semantiğini korur.
+- Geometrik algoritmalar yerleşim/render çekirdeğinde kalır; bu bulgu politika sahipliğini değiştirdi, ürün geometrisini veya amaçlanan etkileşim semantiğini değil.
 
-## Regression evidence
+## Regresyon kanıtı
 
-Targeted unit/integration coverage includes:
+Hedefli birim/entegrasyon kapsamı şunları içerir:
 
-- `test/moduleBehaviorContract.test.js` — protects the expanded canonical behavior contract.
-- `test/moduleBehaviorPolicy.test.js` — verifies F-011 policy selectors, the kettle compatibility contract, removal of private placement registries, the wall-overlay capability, and the `main.js` top-fixture routing boundary.
-- `test/modulePlacement.test.js` and `test/depotFreeDragSnap.test.js` — protect placement/snap behavior through the canonical selectors.
-- `test/kettle.test.js` and `test/miniFridge.test.js` — protect the existing kettle/fridge placement relationship without changing the kettle declaration.
-- `test/baseModule.test.js`, `test/lCounterPlacement.test.js`, `test/indoorPlants.test.js`, `test/ledFloodlightModule.test.js`, and `test/tv42Module.test.js` — protect representative special-policy module families.
-- `test/illuminatedFoamModule.test.js` — validates wall-overlay behavior through the canonical policy API rather than stale implementation-location coupling.
-- `e2e/f011-module-behavior.spec.mjs` — Chromium regression covers representative real catalog free-placement behavior. Its mini-fridge grid assertion validates physical footprint edges, matching the merged 50×50×66 mini-fridge contract.
+- `test/moduleBehaviorContract.test.js` — genişletilmiş kanonik davranış sözleşmesini korur.
+- `test/moduleBehaviorPolicy.test.js` — F-011 politika seçicilerini, kettle uyumluluk sözleşmesini, özel yerleşim kayıtlarının kaldırılmasını, duvar-örtü yeteneğini ve `main.js` üst-armatür yönlendirme sınırını doğrular.
+- `test/modulePlacement.test.js` ve `test/depotFreeDragSnap.test.js` — yerleşim/snap davranışını kanonik seçiciler üzerinden korur.
+- `test/kettle.test.js` ve `test/miniFridge.test.js` — kettle bildirimini değiştirmeden mevcut kettle/fridge yerleşim ilişkisini korur.
+- `test/baseModule.test.js`, `test/lCounterPlacement.test.js`, `test/indoorPlants.test.js`, `test/ledFloodlightModule.test.js` ve `test/tv42Module.test.js` — temsili özel-politika modül ailelerini korur.
+- `test/illuminatedFoamModule.test.js` — duvar-örtü davranışını eski uygulama-konumu bağından değil kanonik politika API'si üzerinden doğrular.
+- `e2e/f011-module-behavior.spec.mjs` — Chromium regresyonu temsili gerçek katalog serbest-yerleşim davranışını kapsar. Mini-fridge ızgara iddiası, birleştirilmiş 50×50×66 mini-fridge sözleşmesine uyan fiziksel taban izi kenarlarını doğrular.
 
-## Full-system impact review
+## Tam-sistem etki incelemesi
 
-The accepted F-011 change contract ran under schemaVersion 2 full-system impact discovery and reviewed the discovered runtime/code dependents, tests, docs/contracts and linked findings.
+Kabul edilen F-011 change contract, schemaVersion 2 tam-sistem etki keşfi altında çalıştı ve keşfedilen runtime/kod bağımlılarını, testleri, belgeler/sözleşmeler ve bağlı bulguları inceledi.
 
-- **F-015 remains OPEN.** Side-insert enforcement is an independent finding; F-011 only centralized the policy selection surfaces it touched.
-- **F-016 remains OPEN.** The right-wall 90°/270° orientation conflict remains an independent finding and was not closed by F-011.
-- **F-012 remains OPEN.** It is the remaining A03 architecture finding and is next in section order.
-- No A04+ finding is closed by this remediation.
+- **F-015 OPEN kalır.** Yan-ekleme zorunluluğu bağımsız bir bulgudur; F-011 yalnızca dokunduğu politika seçim yüzeylerini merkezileştirdi.
+- **F-016 OPEN kalır.** Sağ-duvar 90°/270° yönelim çatışması bağımsız bir bulgu olarak kalır ve F-011 tarafından kapatılmadı.
+- **F-012 OPEN kalır.** Kalan A03 mimari bulgusudur ve bölüm sırasındaki sonrakidir.
+- Hiçbir A04+ bulgusu bu düzeltmeyle kapatılmaz.
 
-## CI and merge evidence
+## CI ve birleştirme kanıtı
 
-- implementation PR: **#49 — Close F-011: centralize module placement policy**
-- final implementation head: `c2bfcd4e1a173bcf463cff8e1e0c1e43378acf5b`
+- uygulama PR: **#49 — Close F-011: centralize module placement policy**
+- son uygulama head: `c2bfcd4e1a173bcf463cff8e1e0c1e43378acf5b`
 - PR CI: **#211 / run `33952651314` / completed / success**
   - change contract gate: success
   - full unit/integration test suite: success
   - build: success
   - Playwright runner + Chromium install: success
   - Chromium E2E: success
-- merged to `ROG` as `934ca39a19453e8660f9cdbae81ce000e91edae1`
-- post-merge `ROG` CI: **#212 / run `33953247234` / completed / success**
+- `ROG`'a `934ca39a19453e8660f9cdbae81ce000e91edae1` olarak birleştirildi
+- birleştirme sonrası `ROG` CI: **#212 / run `33953247234` / completed / success**
   - change contract gate: success
   - full unit/integration test suite: success
   - build: success
   - Playwright runner + Chromium install: success
   - Chromium E2E: success
 
-## Result
+## Sonuç
 
-F-011 satisfies the repository closure rule: implementation, targeted regression, full suite, build, PR CI, merge, and post-merge verification are complete.
+F-011 depo kapanış kuralını karşılar: uygulama, hedefli regresyon, tam paket, derleme, PR CI, birleştirme ve birleştirme sonrası doğrulama tamamdır.
 
-**F-011 is CLOSED.** A03 remains in progress with **F-012** next.
+**F-011 is CLOSED.** A03, sıradaki **F-012** ile devam etmektedir.

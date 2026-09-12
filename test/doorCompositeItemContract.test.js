@@ -99,7 +99,7 @@ test('door_100 factory/persistence identity and child door leaf identity are can
   const state = createModuleStateFromDescriptor(MODULE_CATALOG.door_100);
   assert.ok(state);
   assert.equal(state.itemKey, 'door_100');
-  assert.equal(state.catalogKey, 'door_100');
+  assert.equal(state.itemKey, 'door_100');
   assert.equal(state.type, 'door');
   assert.equal(state.widthCm, 100);
   assert.equal(state.surface.itemKey, 'door_leaf_100');

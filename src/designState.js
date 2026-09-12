@@ -1,4 +1,4 @@
-import { resolveModuleCatalogKey } from './catalog.js';
+import { resolveItemKey } from './catalog.js';
 import {
   getCommercialItemForType,
   getFurnitureClusterQuantity,
@@ -82,7 +82,7 @@ const WALL_WIDTH_TO_ITEM_KEY = Object.freeze({
 
 function resolveFlatPanelItemKey(widthCmOrDescriptor) {
   if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
-    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    const explicitKey = widthCmOrDescriptor.itemKey ?? null;
     if (explicitKey && getItem(explicitKey)?.type === 'flat-panel') return explicitKey;
     return WALL_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor.widthCm)] ?? null;
   }
@@ -98,7 +98,6 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
   return {
     id: createId('module'),
     itemKey: item.itemKey,
-    catalogKey: item.itemKey,
     type: item.type,
     widthCm,
     strips: Array.from(
@@ -115,13 +114,12 @@ const SEPARATOR_PLAIN_WIDTH_TO_ITEM_KEY = Object.freeze({
 
 function resolveSeparatorItemKey(widthCmOrDescriptor, descriptor = {}) {
   if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
-    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    const explicitKey = widthCmOrDescriptor.itemKey ?? null;
     if (explicitKey && getItem(explicitKey)?.type === 'separator') return explicitKey;
-    const resolvedKey = resolveModuleCatalogKey({
+    const resolvedKey = resolveItemKey({
       type: 'separator',
       widthCm: widthCmOrDescriptor.widthCm,
       modelFile: widthCmOrDescriptor.modelFile ?? null,
-      catalogKey: widthCmOrDescriptor.catalogKey ?? null,
       itemKey: widthCmOrDescriptor.itemKey ?? null,
     });
     if (resolvedKey && getItem(resolvedKey)?.type === 'separator') return resolvedKey;
@@ -130,7 +128,7 @@ function resolveSeparatorItemKey(widthCmOrDescriptor, descriptor = {}) {
 
   const modelFile = descriptor.modelFile ?? null;
   if (modelFile) {
-    const resolvedKey = resolveModuleCatalogKey({
+    const resolvedKey = resolveItemKey({
       type: 'separator',
       widthCm: Number(widthCmOrDescriptor),
       modelFile,
@@ -151,7 +149,6 @@ export function createSeparatorModuleState(widthCmOrDescriptor, descriptor = {})
   return {
     id: createId('module'),
     itemKey: item.itemKey,
-    catalogKey: item.itemKey,
     type: item.type,
     widthCm,
     modelFile: item.modelFile ?? null,
@@ -195,20 +192,19 @@ function isWallShelfCompositeItem(item) {
 
 function resolveShelfItemKey(widthCmOrDescriptor, shelfCount = 2) {
   if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
-    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    const explicitKey = widthCmOrDescriptor.itemKey ?? null;
     if (explicitKey && isWallShelfCompositeItem(getItem(explicitKey))) return explicitKey;
-    const resolvedKey = resolveModuleCatalogKey({
+    const resolvedKey = resolveItemKey({
       type: 'shelf',
       widthCm: widthCmOrDescriptor.widthCm,
       shelfCount: widthCmOrDescriptor.shelfCount,
-      catalogKey: widthCmOrDescriptor.catalogKey ?? null,
       itemKey: widthCmOrDescriptor.itemKey ?? null,
     });
     if (resolvedKey && isWallShelfCompositeItem(getItem(resolvedKey))) return resolvedKey;
     return null;
   }
 
-  const resolvedKey = resolveModuleCatalogKey({
+  const resolvedKey = resolveItemKey({
     type: 'shelf',
     widthCm: Number(widthCmOrDescriptor),
     shelfCount: Number(shelfCount),
@@ -227,7 +223,6 @@ export function createShelfModuleState(widthCmOrDescriptor, shelfCount = 2) {
   return {
     id: createId('module'),
     itemKey: item.itemKey,
-    catalogKey: item.itemKey,
     type: item.type,
     widthCm,
     shelfCount: count,
@@ -256,7 +251,7 @@ export function createDoorModuleState(widthCm = 100) {
       { length: 3 },
       (_, index) => createEditablePanelState(index + 4, DEFAULT_PANEL_COLOR),
     ),
-    // Fiziksel ahşap kapı kanadı canonical door_leaf Item kimliği/default'u ile başlar.
+    // Fiziksel ahşap kapı kanadı kanonik door_leaf Item kimliği/varsayılanı ile başlar.
     surface: createEditableItemSurfaceState(doorLeafItem),
   };
 }
@@ -272,7 +267,7 @@ const COUNTER_WIDTH_SHAPE_TO_ITEM_KEY = Object.freeze({
 
 function resolveCounterItemKey(widthCmOrDescriptor, options = {}) {
   if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
-    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    const explicitKey = widthCmOrDescriptor.itemKey ?? null;
     if (explicitKey && getItem(explicitKey)?.type === 'counter') return explicitKey;
     const width = Number(widthCmOrDescriptor.widthCm);
     const shape = widthCmOrDescriptor.shape === 'L' || options.shape === 'L' ? 'L' : 'straight';
@@ -306,7 +301,6 @@ export function createCounterModuleState(widthCmOrDescriptor, options = {}) {
   return {
     id: createId('module'),
     itemKey: item.itemKey,
-    catalogKey: item.itemKey,
     type: item.type,
     shape,
     widthCm,
@@ -324,7 +318,7 @@ const WALL_BASE_WIDTH_TO_ITEM_KEY = Object.freeze({
 
 function resolveBaseWallItemKey(widthCmOrDescriptor) {
   if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
-    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    const explicitKey = widthCmOrDescriptor.itemKey ?? null;
     if (explicitKey && getItem(explicitKey)?.type === 'base-wall') return explicitKey;
     return WALL_BASE_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor.widthCm)] ?? null;
   }
@@ -340,7 +334,6 @@ export function createBaseWallModuleState(widthCmOrDescriptor) {
   return {
     id: createId('module'),
     itemKey: item.itemKey,
-    catalogKey: item.itemKey,
     type: item.type,
     widthCm,
     depthCm,
@@ -365,7 +358,7 @@ const BASE_WIDTH_TO_ITEM_KEY = Object.freeze({
 
 function resolveBaseItemKey(widthCmOrDescriptor) {
   if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
-    const explicitKey = widthCmOrDescriptor.itemKey ?? widthCmOrDescriptor.catalogKey ?? null;
+    const explicitKey = widthCmOrDescriptor.itemKey ?? null;
     if (explicitKey && getItem(explicitKey)?.type === 'base') return explicitKey;
     return BASE_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor.widthCm)] ?? null;
   }
@@ -381,7 +374,6 @@ export function createBaseModuleState(widthCmOrDescriptor) {
   return {
     id: createId('module'),
     itemKey: item.itemKey,
-    catalogKey: item.itemKey,
     type: item.type,
     widthCm,
     depthCm,
@@ -400,7 +392,6 @@ function createFurnitureModuleState(type) {
   const state = {
     id: createId('module'),
     itemKey: item.itemKey,
-    catalogKey: item.itemKey,
     type: item.type,
     widthCm: Number(item.dimensions.widthCm),
     depthCm: Number(item.dimensions.depthCm),
@@ -455,7 +446,7 @@ export function createBarStoolModuleState() {
 function createCommercialModuleState(type) {
   const item = getCommercialItemForType(type);
   const state = {
-    id: createId('module'), itemKey: item.itemKey, catalogKey: item.itemKey,
+    id: createId('module'), itemKey: item.itemKey,
     type: item.type, ...item.dimensions,
   };
   if (Object.hasOwn(item, 'preserveModelScale')) {
@@ -489,18 +480,17 @@ function isIndoorPlantItem(item) {
 
 function resolveIndoorPlantItemKey(descriptor = {}) {
   if (descriptor && typeof descriptor === 'object' && !Array.isArray(descriptor)) {
-    const explicitKey = descriptor.itemKey ?? descriptor.catalogKey ?? null;
+    const explicitKey = descriptor.itemKey ?? null;
     if (explicitKey && isIndoorPlantItem(getItem(explicitKey))) return explicitKey;
     // Runtime default model `indoor_plants.glb` katalogda modelFile taşımıyordu; resolve'ta yok say.
     const rawModelFile = descriptor.modelFile ?? null;
     const modelFile = (!rawModelFile || rawModelFile === 'indoor_plants.glb') ? null : rawModelFile;
-    const resolvedKey = resolveModuleCatalogKey({
+    const resolvedKey = resolveItemKey({
       type: 'indoor-plant-1',
       widthCm: descriptor.widthCm,
       depthCm: descriptor.depthCm,
       heightCm: descriptor.heightCm,
       modelFile,
-      catalogKey: descriptor.catalogKey ?? null,
       itemKey: descriptor.itemKey ?? null,
     });
     if (resolvedKey && isIndoorPlantItem(getItem(resolvedKey))) return resolvedKey;
@@ -514,7 +504,6 @@ export function createIndoorPlantModuleState(descriptor = {}) {
     && !Array.isArray(descriptor)
     && (
       descriptor.itemKey
-      || descriptor.catalogKey
       || descriptor.modelFile
       || descriptor.widthCm != null
       || descriptor.depthCm != null
@@ -531,7 +520,6 @@ export function createIndoorPlantModuleState(descriptor = {}) {
   return {
     id: createId('module'),
     itemKey: item.itemKey,
-    catalogKey: item.itemKey,
     type: item.type,
     widthCm: Number(item.dimensions.widthCm),
     depthCm: Number(item.dimensions.depthCm),
@@ -568,7 +556,7 @@ export function createIlluminatedFoamModuleState(imageAssetId, descriptor = {}) 
 const TV_SIZE_INCH_TO_ITEM_KEY = Object.freeze({ 42: 'TV_42', 55: 'TV_55', 65: 'TV_65' });
 
 function resolveWallMediaItemKey(sizeInch, descriptor) {
-  const explicitKey = descriptor.itemKey ?? descriptor.catalogKey ?? null;
+  const explicitKey = descriptor.itemKey ?? null;
   if (explicitKey && getItem(explicitKey)?.type === 'tv') return explicitKey;
   return TV_SIZE_INCH_TO_ITEM_KEY[Number(sizeInch)] ?? null;
 }
@@ -580,7 +568,6 @@ export function createTvModuleState(sizeInch = 42, descriptor = {}) {
   return {
     id: createId('module'),
     itemKey: metrics.itemKey,
-    catalogKey: metrics.itemKey,
     type: metrics.type,
     widthCm: metrics.widthCm,
     depthCm: metrics.depthCm,
@@ -600,7 +587,6 @@ export function createLedFloodlightModuleState() {
   return {
     id: createId('module'),
     itemKey: item.itemKey,
-    catalogKey: item.itemKey,
     type: item.type,
     widthCm: Number(item.dimensions.widthCm),
     depthCm: Number(item.dimensions.depthCm),
@@ -645,7 +631,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
 
 export function createModuleStateFromDescriptor(
   descriptor,
-  { catalogKey = null, preservePlacement = false, imageAssetId = null } = {},
+  { itemKey = null, preservePlacement = false, imageAssetId = null } = {},
 ) {
   if (!descriptor || typeof descriptor !== 'object' || Array.isArray(descriptor)) return null;
   const factory = MODULE_STATE_FACTORIES[descriptor.type];
@@ -654,12 +640,11 @@ export function createModuleStateFromDescriptor(
   const state = factory(descriptor, { imageAssetId });
   if (!state) return null;
 
-  const resolvedCatalogKey = resolveModuleCatalogKey({
+  const resolvedItemKey = resolveItemKey({
     ...descriptor,
-    catalogKey: catalogKey ?? descriptor.catalogKey ?? null,
+    itemKey: itemKey ?? descriptor.itemKey ?? state.itemKey ?? null,
   });
-  if (resolvedCatalogKey) state.catalogKey = resolvedCatalogKey;
-  else delete state.catalogKey;
+  if (resolvedItemKey) state.itemKey = resolvedItemKey;
 
   if (preservePlacement && descriptor.placement) {
     state.placement = { ...descriptor.placement };
@@ -669,14 +654,14 @@ export function createModuleStateFromDescriptor(
 
 
 /**
- * Normalizes persisted child Item identity without replacing user overrides.
- * Legacy door projects did not store the physical leaf itemKey on surface state.
+ * Kayıtlı alt Item kimliğini, kullanıcı ezmelerini silmeden düzeltir.
+ * Eski kapı projeleri yüzey state'inde fiziksel kanat itemKey taşımıyordu.
  */
 export function normalizeModuleItemState(moduleState) {
   if (!moduleState) return moduleState;
 
   if (moduleState.type === 'tv') {
-    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'tv') {
       moduleState.itemKey = resolvedKey;
       const metrics = resolveWallMediaMetrics(resolvedKey);
@@ -692,7 +677,7 @@ export function normalizeModuleItemState(moduleState) {
   }
 
   if (moduleState.type === 'base') {
-    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'base') {
       moduleState.itemKey = resolvedKey;
     }
@@ -700,7 +685,7 @@ export function normalizeModuleItemState(moduleState) {
   }
 
   if (moduleState.type === 'counter') {
-    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'counter') {
       moduleState.itemKey = resolvedKey;
     }
@@ -708,7 +693,7 @@ export function normalizeModuleItemState(moduleState) {
   }
 
   if (moduleState.type === 'flat-panel') {
-    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'flat-panel') {
       moduleState.itemKey = resolvedKey;
     }
@@ -716,7 +701,7 @@ export function normalizeModuleItemState(moduleState) {
   }
 
   if (moduleState.type === 'base-wall') {
-    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'base-wall') {
       moduleState.itemKey = resolvedKey;
     }
@@ -724,7 +709,7 @@ export function normalizeModuleItemState(moduleState) {
   }
 
   if (moduleState.type === 'separator') {
-    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'separator') {
       moduleState.itemKey = resolvedKey;
     }
@@ -732,7 +717,7 @@ export function normalizeModuleItemState(moduleState) {
   }
 
   if (moduleState.type === 'shelf') {
-    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && isWallShelfCompositeItem(getItem(resolvedKey))) {
       moduleState.itemKey = resolvedKey;
     }
@@ -757,7 +742,7 @@ export function normalizeModuleItemState(moduleState) {
     || moduleState.type === 'table-glass'
     || moduleState.type === 'bar-stool'
   ) {
-    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getFurnitureItemForType(moduleState.type)?.itemKey === resolvedKey) {
       moduleState.itemKey = resolvedKey;
       const item = getItem(resolvedKey);
@@ -770,18 +755,13 @@ export function normalizeModuleItemState(moduleState) {
 
   if (moduleState.type === 'led-floodlight') {
     const item = getTopLightItemForType('led-floodlight');
-    if (item) {
-      moduleState.itemKey = item.itemKey;
-      const resolvedKey = resolveModuleCatalogKey(moduleState);
-      if (resolvedKey === item.itemKey) moduleState.catalogKey = resolvedKey;
-    }
+    if (item) moduleState.itemKey = item.itemKey;
     return moduleState;
   }
 
   if (moduleState.type === 'illuminated-foam') {
     const item = getItem('illuminated-foam');
     if (item) moduleState.itemKey = item.itemKey;
-    delete moduleState.catalogKey;
     return moduleState;
   }
 

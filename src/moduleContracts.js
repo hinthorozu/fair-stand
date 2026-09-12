@@ -1,4 +1,4 @@
-import { MODULE_CATALOG, resolveModuleCatalogKey } from './catalog.js';
+import { MODULE_CATALOG, resolveItemKey } from './catalog.js';
 import { getModuleBehavior } from './moduleBehavior.js';
 
 const RECIPE_BOM_POLICY = Object.freeze({
@@ -181,7 +181,7 @@ export function resolveModuleContract(moduleKeyOrDescriptor) {
     const profile = MODULE_CONTRACT_PROFILES[assignmentRecord.profile];
     return {
       id: moduleKeyOrDescriptor,
-      catalogKey: null,
+      itemKey: moduleKeyOrDescriptor,
       type: moduleKeyOrDescriptor,
       profile: assignmentRecord.profile,
       ...mergeProfile(profile, assignmentRecord),
@@ -189,24 +189,24 @@ export function resolveModuleContract(moduleKeyOrDescriptor) {
     };
   }
 
-  const catalogKey = typeof moduleKeyOrDescriptor === 'string' && MODULE_CATALOG[moduleKeyOrDescriptor]
+  const itemKey = typeof moduleKeyOrDescriptor === 'string' && MODULE_CATALOG[moduleKeyOrDescriptor]
     ? moduleKeyOrDescriptor
-    : resolveModuleCatalogKey(moduleKeyOrDescriptor);
-  if (!catalogKey) return null;
+    : resolveItemKey(moduleKeyOrDescriptor);
+  if (!itemKey) return null;
 
-  const descriptor = MODULE_CATALOG[catalogKey];
-  const assignmentRecord = MODULE_CONTRACT_ASSIGNMENTS[catalogKey];
+  const descriptor = MODULE_CATALOG[itemKey];
+  const assignmentRecord = MODULE_CONTRACT_ASSIGNMENTS[itemKey];
   if (!descriptor || !assignmentRecord) return null;
 
   const profile = MODULE_CONTRACT_PROFILES[assignmentRecord.profile];
   if (!profile) return null;
 
   return {
-    id: catalogKey,
-    catalogKey,
+    id: itemKey,
+    itemKey,
     type: descriptor.type,
     profile: assignmentRecord.profile,
     ...mergeProfile(profile, assignmentRecord),
-    behavior: getModuleBehavior({ ...descriptor, catalogKey }),
+    behavior: getModuleBehavior({ ...descriptor, itemKey }),
   };
 }

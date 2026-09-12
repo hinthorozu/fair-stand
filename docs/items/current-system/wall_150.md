@@ -1,4 +1,4 @@
-> Migration �ncesi envanterdir; aktif canonical tan�m `../definitions/wall_150.md` i�indedir.
+> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_150.md` içindedir.
 
 # wall_150 — Mevcut Sistem Profili
 
@@ -8,8 +8,8 @@ Bu belge `wall_150` için `Version2` runtime kodunda bugün gerçekten bulunan s
 
 | Alan | Kod değeri |
 |---|---|
-| Catalog key | `wall_150` |
-| Label | `Düz Panel 150` |
+| Katalog anahtarı | `wall_150` |
+| Etiket | `Düz Panel 150` |
 | Type | `flat-panel` |
 | Nominal genişlik | `150 cm` |
 | Stand yüksekliği | `350 cm` |
@@ -19,7 +19,7 @@ Bu belge `wall_150` için `Version2` runtime kodunda bugün gerçekten bulunan s
 
 Runtime state'te `itemKey` / `class` alanı yoktur. Kimlik için `catalogKey = wall_150` ve `type = flat-panel` kullanılır.
 
-## Factory / default state
+## Oluşturma / varsayılan state
 
 `createFlatPanelModuleState(150)` temel olarak:
 
@@ -42,20 +42,20 @@ imageTransform = { mode: single, offsetX: 0, offsetY: 0, repeatX: 1, repeatY: 1,
 
 `catalogKey` factory'nin içinde değil, `createModuleStateFromDescriptor()` içindeki `resolveModuleCatalogKey()` sonucuyla state'e eklenir.
 
-## Contract
+## Sözleşme
 
 | Alan | Kod değeri |
 |---|---|
 | Profile | `wall-editable` |
-| State owner | `src/designState.js` |
-| Persistence | `project-state` |
+| State sahibi | `src/designState.js` |
+| Kalıcılık | `project-state` |
 | Color | `editable` |
 | Image | `editable` |
-| Renderer policy | `procedural-or-specialized` |
+| Renderer politikası | `procedural-or-specialized` |
 | Runtime | `static` |
-| Composition | `standalone` |
-| BOM mode | `recipe` |
-| BOM source | `src/moduleRecipes.js` |
+| Bileşim | `standalone` |
+| BOM kipi | `recipe` |
+| BOM kaynağı | `src/moduleRecipes.js` |
 
 ## Behavior
 
@@ -113,7 +113,7 @@ Automatic depot tarafında da wall spec'leri `flat-panel` state'e çevrilir. Bu 
 | Renderer alanı | Kod değeri |
 |---|---:|
 | Nominal width | `150 cm` |
-| Height | `350 cm` |
+| Yükseklik | `350 cm` |
 | Frame depth | `10 cm` |
 | Dikey profil genişliği | `4 cm` |
 | Dikey profil adedi | `2` |
@@ -208,7 +208,7 @@ Lightbox/Mesh ownership için scene rebuild sırasında `fabricGroupId` normaliz
 
 Silinen modül multi-module Lightbox/Mesh owner grubunun parçasıysa rebuild sırasında eksik owner yüzey algılandığında kalan fabric ownership de çözülebilir.
 
-## Persistence / save / load
+## Kalıcılık / kayıt / yükleme
 
 `buildProjectSnapshot()` bütün `currentModules` dizisini JSON clone ile proje snapshot'ındaki `modules` alanına yazar. `wall_150` state'i placement ve nested state alanlarıyla birlikte burada saklanır.
 

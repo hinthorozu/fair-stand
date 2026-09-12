@@ -1,19 +1,19 @@
 # Fair Stand — Item Contract & Validation Checklist
 
-Bu belge Fair Stand içindeki **canonical Item sözleşmesini** ve her Item için uygulanacak **zorunlu doğrulama checklist'ini** tek dosyada toplar.
+Bu belge Fair Stand içindeki **kanonik Item sözleşmesini** ve her Item için uygulanacak **zorunlu doğrulama checklist'ini** tek dosyada toplar.
 
 Amaç:
 
 1. `ITEM_CONTRACT.md` içindeki Item kurallarını eksiksiz korumak.
 2. `ITEM_ANALYSIS_CHECKLIST.md` içindeki kontrol alanlarını aynı sözleşmenin altında açıklamalı hale getirmek.
-3. Her Item incelenirken cevabı tahmin etmek yerine mevcut canonical kod, state, contract, recipe, production-part ve test kaynaklarından çıkarmak.
-4. Item'ı ilgilendiren mevcut ürün/default özelliklerinin canonical Item tanımına taşındığını ve gerçek tüketicilerin bu canonical kaynağı kullandığını zorunlu olarak doğrulamak.
+3. Her Item incelenirken cevabı tahmin etmek yerine mevcut kanonik kod, state, contract, recipe, production-part ve test kaynaklarından çıkarmak.
+4. Item'ı ilgilendiren mevcut ürün/default özelliklerinin kanonik Item tanımına taşındığını ve gerçek tüketicilerin bu kanonik kaynağı kullandığını zorunlu olarak doğrulamak.
 
 Bu belge özel bir Item'a ait sayısal runtime değerlerinin ikinci kopyası değildir. Örneğin dönüş açısı, snap değeri, collision tipi, context-menu komutları veya BOM miktarları ilgili mevcut sistem kaynağından okunur.
 
 ---
 
-# BÖLÜM I — CANONICAL ITEM CONTRACT
+# BÖLÜM I — KANONİK ITEM SÖZLEŞMESİ
 
 ## Zorunlu kapsam
 
@@ -38,9 +38,9 @@ Stand projesinde BOM, üretim veya maliyet hesabına girebilen her fiziksel öğ
 
 ---
 
-## 2. Item kendisini ilgilendiren canonical ürün/default özelliklerinin sahibidir
+## 2. Item kendisini ilgilendiren kanonik ürün/default özelliklerinin sahibidir
 
-Bir Item'ı ürün olarak tanımlayan ve mevcut sistemde gerçek bir değeri bulunan intrinsic/default özellikler canonical Item tanımında tutulur.
+Bir Item'ı ürün olarak tanımlayan ve mevcut sistemde gerçek bir değeri bulunan ürüne özgü/default özellikler kanonik Item tanımında tutulur.
 
 Bu kapsam yalnızca zorunlu bir sabit alan listesi değildir. Item için gerçekten mevcut olan özellikler sistemden çıkarılır ve ilgili Item'a taşınır. Örnekler:
 
@@ -48,18 +48,18 @@ Bu kapsam yalnızca zorunlu bir sabit alan listesi değildir. Item için gerçek
 - `dimensions.widthCm`, `heightCm`, `depthCm`, `lengthCm`, `thicknessCm`,
 - `defaultColor`,
 - `material`,
-- ağırlık, yüzey, ürün ailesine özgü sınıflandırma veya başka intrinsic metadata,
-- Item'ın canonical default state/parametreleri,
-- Item/type behavior ve capability bağlantıları,
-- gerekiyorsa asset/model/reference metadata'sı.
+- ağırlık, yüzey, ürün ailesine özgü sınıflandırma veya başka ürüne özgü üstveri,
+- Item'ın kanonik default state/parametreleri,
+- Item/type behavior ve yetenek bağlantıları,
+- gerekiyorsa asset/model/reference üstverisi.
 
 Bir özellik bütün Item'lar için zorunlu olmak zorunda değildir. Örneğin `defaultColor` bir Item'da olabilir, başka bir Item'da olmayabilir. Ancak mevcut sistemde Item'ın ürün/default özelliği olarak bir değer varsa migration sırasında sessizce dışarıda bırakılamaz.
 
-### Canonical source-of-truth ve tüketim kuralı
+### Kanonik tek kaynak ve tüketim kuralı
 
-Item'a ait canonical intrinsic/default bir özellik başka bir runtime dosyasında bağımsız ikinci business/product source-of-truth olarak tutulmaz. Bu özelliğe ihtiyaç duyan BOM, state factory, UI, behavior, resolver veya başka business tüketicisi canonical Item kaynağından tüketmelidir.
+Item'a ait kanonik ürüne özgü/default bir özellik başka bir runtime dosyasında bağımsız ikinci business/product tek kaynak olarak tutulmaz. Bu özelliğe ihtiyaç duyan BOM, state oluşturucu, UI, behavior, resolver veya başka business tüketicisi kanonik Item kaynağından tüketmelidir.
 
-Renderer veya specialized render kodu görsel/teknik nedenle farklı bir değer kullanabilir. Project instance da kullanıcı/konfigürasyon nedeniyle canonical default'u override edebilir. Override geçerlidir; fakat canonical default değerin Item'daki sahipliğini kaldırmaz ve Item tanımını değiştirmez.
+Renderer veya specialized render kodu görsel/teknik nedenle farklı bir değer kullanabilir. Proje örneği de kullanıcı/konfigürasyon nedeniyle kanonik default'u ezebilir. Ezme geçerlidir; fakat kanonik default değerin Item'daki sahipliğini kaldırmaz ve Item tanımını değiştirmez.
 
 Örnek:
 
@@ -76,13 +76,13 @@ specialized renderer:
   renderThickness = 4 // yalnız görsel/teknik temsil olabilir
 ```
 
-Bu durumda canonical ürün gerçeği Item'da kalır. Override'ın kaynağı, kapsamı ve persistence davranışı ayrıca tanımlanır.
+Bu durumda kanonik ürün gerçeği Item'da kalır. Override'ın kaynağı, kapsamı ve kalıcılık davranışı ayrıca tanımlanır.
 
 ---
 
-## 3. Her Item kendi BOM çıktısının canonical sahibidir
+## 3. Her Item kendi BOM çıktısının kanonik sahibidir
 
-Her `Item`, BOM'a nasıl dönüştüğünü tek bir canonical reçete/resolver üzerinden tanımlar.
+Her `Item`, BOM'a nasıl dönüştüğünü tek bir kanonik reçete/resolver üzerinden tanımlar.
 
 Bir Item:
 
@@ -98,18 +98,18 @@ Aynı BOM kuralı controller, renderer, UI veya başka yardımcı dosyalarda iki
 ## 4. Item tekil veya bileşiktir; ayrıca parametrik olabilir
 
 - **Tekil Item:** sistem açısından başka Item'lardan oluşmayan Item'dır. Örn. kettle, `connector_start`, panel, TV. Başka bir Item'ın reçetesinde kullanılması onu farklı bir sınıfa dönüştürmez; o bağlamda yalnızca parent Item'ın alt Item'ıdır.
-- **Bileşik Item:** başka Item'lardan oluşan Item'dır. Canonical composition/reçetesi hangi alt Item'lardan ve hangi miktarlardan oluştuğunu tanımlar. Örn. `wall_200`; vitrinli bir sistem aynı temel Item'lara ek olarak cam, raf ve vitrine özel başka Item'lar içerebilir.
+- **Bileşik Item:** başka Item'lardan oluşan Item'dır. Kanonik composition/reçetesi hangi alt Item'lardan ve hangi miktarlardan oluştuğunu tanımlar. Örn. `wall_200`; vitrinli bir sistem aynı temel Item'lara ek olarak cam, raf ve vitrine özel başka Item'lar içerebilir.
 - **Parametrik:** ayrı bir üçüncü Item sınıfı değildir. Tekil veya bileşik bir Item'ın ölçü, state veya konfigürasyona göre miktarının/bileşiminin değişebildiğini belirtir.
 
 Bir Item yapısal olarak ya tekil ya bileşiktir; her iki yapı da parametrik olabilir.
 
 ---
 
-## 5. Her Item'ın stabil canonical kimliği vardır
+## 5. Her Item'ın stabil kanonik kimliği vardır
 
-Her Item tanımı tek ve stabil bir canonical `itemKey` taşır.
+Her Item tanımı tek ve stabil bir kanonik `itemKey` taşır.
 
-`itemKey` ürünün tam kimliğidir; `type` davranış ailesidir; proje içindeki `id` ise instance kimliğidir.
+`itemKey` ürünün tam kimliğidir; `type` davranış ailesidir; proje içindeki `id` ise örnek kimliğidir.
 
 Örnek:
 
@@ -119,49 +119,49 @@ type    = tv
 id      = item-<project-instance>
 ```
 
-Mevcut `catalogKey` kimliği yeni `itemKey` modeline taşınırken paralel ikinci bir ürün kimliği yaratılmaz; tek canonical ürün kimliği korunur.
+Mevcut `catalogKey` alanı ürün kimliği değildir; runtime onu okumaz ve yazmaz.
 
 ---
 
-## 6. Canonical Item tanımı ile proje Item instance'ı ayrıdır
+## 6. Kanonik Item tanımı ile proje Item örneği ayrıdır
 
-Canonical tanım varsayılan ürünü/reçeteyi tanımlar. Projedeki instance kendi `id`, ölçü, adet ve konfigürasyonunu taşıyabilir.
+Kanonik tanım varsayılan ürünü/reçeteyi tanımlar. Projedeki örnek kendi `id`, ölçü, adet ve konfigürasyonunu taşıyabilir.
 
-Örneğin standart masa-sandalye seti `1 masa + 4 sandalye` olabilir; belirli projede `1 masa + 2 sandalye` olarak kullanılabilir. Bu proje konfigürasyonu canonical ürün tanımını değiştirmez.
+Örneğin standart masa-sandalye seti `1 masa + 4 sandalye` olabilir; belirli projede `1 masa + 2 sandalye` olarak kullanılabilir. Bu proje konfigürasyonu kanonik ürün tanımını değiştirmez.
 
-Override edilebilir alanlar açıkça tanımlanır. Override uygulanması canonical Item property'sini silmez, kopya source-of-truth yaratmaz; effective value resolver/default→override mantığıyla çözülür.
+Ezilebilir alanlar açıkça tanımlanır. Ezme uygulanması kanonik Item property'sini silmez, kopya tek kaynak yaratmaz; effective value resolver/default→ezme mantığıyla çözülür.
 
 ---
 
-## 6A. Her Item'ın canonical oluşturulma mekanizması tanımlıdır
+## 6A. Her Item'ın kanonik oluşturulma mekanizması tanımlıdır
 
-Bir Item'ın proje instance'ına nasıl dönüştürüldüğü tek ve izlenebilir bir oluşturulma yolu üzerinden tanımlanmalıdır.
+Bir Item'ın proje örneğina nasıl dönüştürüldüğü tek ve izlenebilir bir oluşturulma yolu üzerinden tanımlanmalıdır.
 
-Bu oluşturulma mekanizması factory, resolver, builder veya eşdeğer bir canonical üretim noktası olabilir; isimden bağımsız olarak aynı Item için paralel ve çelişen instance oluşturma kuralları bulunmaz.
+Bu oluşturulma mekanizması oluşturucu, resolver, builder veya eşdeğer bir kanonik üretim noktası olabilir; isimden bağımsız olarak aynı Item için paralel ve çelişen örnek oluşturma kuralları bulunmaz.
 
 Oluşturulma mekanizması en az şu sorumlulukları açıkça çözmelidir:
 
-- canonical `itemKey` ve `type` bilgisinden doğru Item instance'ını üretmek,
-- gerekli default state/ölçü/parametreleri canonical Item'dan uygulamak,
-- izin verilen project/runtime override'larını default değerlerden ayrı çözmek,
-- yeni proje instance `id` değerini üretmek veya bağlamak,
-- Item'a özgü alt state/child state gerekiyorsa bunları canonical kurala göre oluşturmak,
-- catalog veya başka giriş noktalarından gelen tanımı tek canonical Item kimliğine çözmek.
+- kanonik `itemKey` ve `type` bilgisinden doğru Item örneğinı üretmek,
+- gerekli default state/ölçü/parametreleri kanonik Item'dan uygulamak,
+- izin verilen project/runtime ezme'larını default değerlerden ayrı çözmek,
+- yeni proje örnek `id` değerini üretmek veya bağlamak,
+- Item'a özgü alt state/child state gerekiyorsa bunları kanonik kurala göre oluşturmak,
+- catalog veya başka giriş noktalarından gelen tanımı tek kanonik Item kimliğine çözmek.
 
-Factory/oluşturma mantığı UI, renderer veya farklı controller akışlarında ikinci kez kopyalanmaz.
+Oluşturucu/oluşturma mantığı UI, renderer veya farklı controller akışlarında ikinci kez kopyalanmaz.
 
 ---
 
-## 6B. Her Item'ın persistence sözleşmesi tanımlıdır
+## 6B. Her Item'ın kalıcılık sözleşmesi tanımlıdır
 
 Bir Item'ın hangi proje verilerinin kalıcı olduğu ve save/load sonrasında nasıl geri kurulduğu açıkça tanımlanmalıdır.
 
 Persistence sözleşmesi en az şunları belirtmelidir:
 
-- hangi Item state/override alanlarının proje state'ine kaydedildiği,
-- canonical default ile project override'ın nasıl ayrıldığı,
+- hangi Item state/ezme alanlarının proje state'ine kaydedildiği,
+- kanonik default ile project ezmenin nasıl ayrıldığı,
 - hangi alanların runtime/geçici olduğu ve kaydedilmediği,
-- proje yeniden açıldığında canonical Item kimliği ile instance state'in nasıl tekrar eşleştirildiği,
+- proje yeniden açıldığında kanonik Item kimliği ile örnek state'in nasıl tekrar eşleştirildiği,
 - alt Item/alt state/relationship referanslarının nasıl korunduğu,
 - eski veya geçersiz state için validation/migration kuralının nerede olduğu.
 
@@ -171,21 +171,21 @@ Renderer, mesh veya geçici UI state'i persistent business state'in yerine geçm
 
 ## 7. Item davranışı `type` seviyesinde tanımlanır
 
-Placement, move, rotation, side insert, collision, ghost, context-menu capability ve benzeri Item'a özgü editor/runtime davranışları canonical olarak davranış ailesi (`type`) seviyesinde tanımlanır.
+Yerleşim, move, rotation, side insert, collision, ghost, context-menu yetenek ve benzeri Item'a özgü editor/runtime davranışları kanonik olarak davranış ailesi (`type`) seviyesinde tanımlanır.
 
 Aynı davranış ailesindeki Item'lar aynı contract'ı kullanır.
 
-Davranış gerçekten farklıysa yeni bir davranış ailesi/type tanımlanır. Item bazlı dağınık `if (itemKey === ...)` veya sürekli override normal mimari yöntem değildir.
+Davranış gerçekten farklıysa yeni bir davranış ailesi/type tanımlanır. Item bazlı dağınık `if (itemKey === ...)` veya sürekli ezme normal mimari yöntem değildir.
 
-Item tanımı hangi `type` / behavior family / capability contract'ını kullandığını açıkça taşır veya tek canonical resolver üzerinden çözer. UI, context menu ve runtime aynı canonical behavior/capability kaynağını tüketir.
+Item tanımı hangi `type` / behavior family / yetenek contract'ını kullandığını açıkça taşır veya tek kanonik resolver üzerinden çözer. UI, context menu ve runtime aynı kanonik behavior/yetenek kaynağını tüketir.
 
-Mevcut module behavior altyapısında bu sorumluluğun canonical runtime sahibi `src/moduleBehavior.js`, sözleşme belgesi `MODULE_BEHAVIOR_STANDARD.md` dosyasıdır; Item mimarisine geçiş bu tek-kaynak ilkesini bozmaz.
+Mevcut module behavior altyapısında bu sorumluluğun kanonik runtime sahibi `src/moduleBehavior.js`, sözleşme belgesi `MODULE_BEHAVIOR_STANDARD.md` dosyasıdır; Item mimarisine geçiş bu tek-kaynak ilkesini bozmaz.
 
 ---
 
-## 7A. Item-to-Item spatial relationship canonical olarak tanımlanır
+## 7A. Item-to-Item spatial relationship kanonik olarak tanımlanır
 
-Bir Item'ın başka Item'larla sahnedeki fiziksel/uzamsal ilişkisi business rule veya BOM sonucunu etkiliyorsa bu ilişki açık bir canonical relationship modeliyle temsil edilmelidir.
+Bir Item'ın başka Item'larla sahnedeki fiziksel/uzamsal ilişkisi business rule veya BOM sonucunu etkiliyorsa bu ilişki açık bir kanonik relationship modeliyle temsil edilmelidir.
 
 Bu ilişki modeli ihtiyaç oldukça şu tür ilişkileri taşıyabilir:
 
@@ -197,19 +197,19 @@ Bu ilişki modeli ihtiyaç oldukça şu tür ilişkileri taşıyabilir:
 - aynı continuous chain içinde olma,
 - başka bir Item'a göre yön veya konum bağımlılığı.
 
-Relationship bilgisi yalnızca renderer mesh'inden, ekrandaki yakınlıktan veya UI tahmininden türetilen geçici bir bilgi olarak bırakılmaz. Proje state'i ve business kuralları için gerekli olan ilişki canonical veri/resolver üzerinden çözülebilmelidir.
+Relationship bilgisi yalnızca renderer mesh'inden, ekrandaki yakınlıktan veya UI tahmininden türetilen geçici bir bilgi olarak bırakılmaz. Proje state'i ve business kuralları için gerekli olan ilişki kanonik veri/resolver üzerinden çözülebilmelidir.
 
 Bir relationship Item'ın davranışını, konfigürasyonunu veya BOM'unu değiştiriyorsa bu dönüşüm relationship resolver tarafından belirlenir; aynı kural farklı controller veya UI katmanlarında yeniden tanımlanmaz.
 
 ### Relationship-derived reflow / davranış
 
-Bir Item'ın eklenmesi, taşınması, döndürülmesi, silinmesi veya başka Item'la ilişki kurması komşu Item'ların konumunu veya durumunu etkiliyorsa bu etki canonical relationship/behavior kuralları üzerinden çözülmelidir.
+Bir Item'ın eklenmesi, taşınması, döndürülmesi, silinmesi veya başka Item'la ilişki kurması komşu Item'ların konumunu veya durumunu etkiliyorsa bu etki kanonik relationship/behavior kuralları üzerinden çözülmelidir.
 
 Reflow veya benzeri zincir etkileri:
 
 - hangi ilişkide tetiklendiğini,
 - hangi Item'ların etkilenebileceğini,
-- hangi placement/collision/boundary kurallarına uyacağını,
+- hangi yerleşim/collision/boundary kurallarına uyacağını,
 - ilişki kalktığında veya Item silindiğinde ne olacağını
 
 açıkça tanımlamalıdır.
@@ -220,9 +220,9 @@ Relationship-derived davranış ile relationship-derived BOM aynı ilişki bilgi
 
 ## 8. BOM gerçek Item state/ölçü/parametrelerinden hesaplanır
 
-BOM ve üretim hesabının source of truth'u Item'ın canonical özellikleri ile gerçek instance state/override/parametreleri ve konfigürasyonudur.
+BOM ve üretim hesabının tek kaynağı Item'ın kanonik özellikleri ile gerçek örnek state/ezme/parametreleri ve konfigürasyonudur.
 
-Render, mesh, GLB, texture, piksel çözünürlüğü veya ekrandaki görünüm BOM'un canonical kaynağı değildir.
+Render, mesh, GLB, texture, piksel çözünürlüğü veya ekrandaki görünüm BOM'un kanonik kaynağı değildir.
 
 Örneğin altı panelde baskı varsa baskı m²'si panelin gerçek baskı alanından hesaplanır; texture çözünürlüğünden hesaplanmaz.
 
@@ -232,9 +232,9 @@ Render, mesh, GLB, texture, piksel çözünürlüğü veya ekrandaki görünüm 
 
 Her nihai BOM kalemi en az şunları taşır:
 
-- canonical BOM item kimliği,
+- kanonik BOM item kimliği,
 - `quantity`,
-- canonical `unit`.
+- kanonik `unit`.
 
 Örnek birimler: `adet`, `m2`, `mt`, `paket`.
 
@@ -269,7 +269,7 @@ A -> B -> A   // geçersiz
 
 Item/BOM sistemi **ne gerektiğini, ne kadar gerektiğini ve birimini** üretir.
 
-Maliyet/fiyatlandırma sistemi bu canonical BOM çıktısına fiyat uygular.
+Maliyet/fiyatlandırma sistemi bu kanonik BOM çıktısına fiyat uygular.
 
 Birim fiyat değiştiğinde Item'ın BOM reçetesi değişmez.
 
@@ -282,21 +282,21 @@ Yeni bir fiziksel ürün, zemin, malzeme, kombinasyon veya üretilebilir öğe e
 1. `itemKey` nedir?
 2. `type` / davranış ailesi nedir?
 3. Yapısal olarak tekil mi bileşik mi; ayrıca parametrik mi?
-4. Mevcut sistemde Item'ı tanımlayan bütün intrinsic/default özellikler nelerdir ve canonical Item içinde nerede tutulur?
+4. Mevcut sistemde Item'ı tanımlayan bütün ürüne özgü/default özellikler nelerdir ve kanonik Item içinde nerede tutulur?
 5. Ölçülerin bütün gerçek eksenleri ve ürün boyutları (`width/height/depth/length/thickness` ve Item'a özgü diğerleri) eksiksiz mi?
-6. Mevcutsa `defaultColor`, `material` ve diğer ürün/default metadata'sı Item'a taşındı mı?
-7. Her canonical property'nin gerçek business/runtime tüketicisi Item'dan mı okuyor?
-8. Hangi property/state alanları override edilebilir; canonical default ile override nasıl ayrılır?
-9. Hangi behavior/capability contract'ını kullanır?
+6. Mevcutsa `defaultColor`, `material` ve diğer ürün/default üstverisi Item'a taşındı mı?
+7. Her kanonik property'nin gerçek business/runtime tüketicisi Item'dan mı okuyor?
+8. Hangi property/state alanları ezilebilir; kanonik default ile ezme nasıl ayrılır?
+9. Hangi behavior/yetenek contract'ını kullanır?
 10. BOM reçetesi/resolver'ı nedir?
 11. Nihai BOM kalemlerinin birimleri nelerdir?
-12. Render/asset temsili nedir; specialized renderer override'ı canonical Item property ownership'ından nasıl ayrılır?
-13. BOM, behavior, state, persistence ve browser akışı için hangi regression testleri gerekir?
-14. Item'ın canonical factory/oluşturulma mekanizması nedir ve hangi girişleri çözer?
-15. Hangi state/override alanları persistent, hangileri runtime/geçicidir; save/load ve migration nasıl çalışır?
-16. Item'ın parent/child, neighbor, connection, host, corner veya diğer spatial relationship kuralları var mı ve canonical resolver'ı nedir?
+12. Render/asset temsili nedir; specialized renderer ezme'ı kanonik Item property sahiplik'ından nasıl ayrılır?
+13. BOM, behavior, state, kalıcılık ve browser akışı için hangi regression testleri gerekir?
+14. Item'ın kanonik oluşturucu/oluşturulma mekanizması nedir ve hangi girişleri çözer?
+15. Hangi state/ezme alanları persistent, hangileri runtime/geçicidir; save/load ve migration nasıl çalışır?
+16. Item'ın parent/child, neighbor, connection, host, corner veya diğer spatial relationship kuralları var mı ve kanonik resolver'ı nedir?
 17. Relationship değiştiğinde reflow veya başka relationship-derived davranış oluşuyor mu; tetiklenme ve etki kuralları nelerdir?
-18. Canonical property veya davranış başka bir yerde bağımsız ikinci source-of-truth olarak kopyalanmış mı?
+18. Kanonik property veya davranış başka bir yerde bağımsız ikinci tek kaynak olarak kopyalanmış mı?
 
 Bu sorular cevaplanmadan yeni Item işi tamamlanmış sayılamaz.
 
@@ -323,7 +323,7 @@ Project
               -> pricing / costing
 ```
 
-Canonical property tüketimi kuralı:
+Kanonik property tüketimi kuralı:
 
 ```text
 Item canonical property
@@ -335,7 +335,7 @@ specialized renderer override
     -> canonical Item default'unu sahiplenmez
 ```
 
-Bu belge Item semantiğinin, canonical property sahipliğinin ve BOM sahipliğinin canonical sözleşmesidir. Sayısal runtime davranışlarının ikinci kopyası değildir; ayrıntılı runtime değerleri ilgili canonical kod kaynaklarından okunur.
+Bu belge Item semantiğinin, kanonik property sahipliğinin ve BOM sahipliğinin kanonik sözleşmesidir. Sayısal runtime davranışlarının ikinci kopyası değildir; ayrıntılı runtime değerleri ilgili kanonik kod kaynaklarından okunur.
 
 ---
 
@@ -347,16 +347,16 @@ Amaç: Mevcut sistemde Item'ın ne olduğunu, hangi özelliklere sahip olduğunu
 
 Her kontrol için cevap mevcut sistemden çıkarılır. Bir alan Item için geçerli değilse bu da açıkça belirtilir; alan sessizce atlanmaz.
 
-**Hard gate:** Item'ı ilgilendiren mevcut intrinsic/default bir property bulunmuş fakat canonical Item tanımında yoksa veya gerçek business tüketicisi halen bağımsız bir ikinci product/default değerini source-of-truth olarak kullanıyorsa Item migration'ı **TAMAM değildir**. Renderer/specialized görünüm override'ı bu kurala istisna olabilir; istisna açıkça renderer override olarak kaydedilir.
+**Hard gate:** Item'ı ilgilendiren mevcut ürüne özgü/default bir property bulunmuş fakat kanonik Item tanımında yoksa veya gerçek business tüketicisi halen bağımsız bir ikinci product/default değerini tek kaynak olarak kullanıyorsa Item migration'ı **TAMAM değildir**. Renderer/specialized görünüm ezme'ı bu kurala istisna olabilir; istisna açıkça renderer ezme olarak kaydedilir.
 
 ---
 
 # 1. Kimlik ve sınıflandırma
 
-Bu bölüm Item'ın canonical olarak **hangi ürün olduğunu** ve hangi davranış ailesine bağlandığını doğrular.
+Bu bölüm Item'ın kanonik olarak **hangi ürün olduğunu** ve hangi davranış ailesine bağlandığını doğrular.
 
 ### ☐ `itemKey`
-Canonical ürün kimliği nedir?
+Kanonik ürün kimliği nedir?
 
 ### ☐ `type`
 Davranış ailesi nedir?
@@ -365,7 +365,7 @@ Davranış ailesi nedir?
 - ☐ Tekil Item
 - ☐ Bileşik Item
 
-Tekil Item sistem açısından başka Item bileşimi içermez. Bileşik Item canonical alt Item listesi/reçetesi taşır. Bir Item'ın başka bir Item içinde kullanılması onu ayrı bir sınıfa dönüştürmez; o kullanımda parent'ın alt Item'ıdır.
+Tekil Item sistem açısından başka Item bileşimi içermez. Bileşik Item kanonik alt Item listesi/reçetesi taşır. Bir Item'ın başka bir Item içinde kullanılması onu ayrı bir sınıfa dönüştürmez; o kullanımda parent'ın alt Item'ıdır.
 
 ### ☐ Parametrik mi?
 - ☐ Evet
@@ -373,20 +373,20 @@ Tekil Item sistem açısından başka Item bileşimi içermez. Bileşik Item can
 
 Parametrik olmak ayrı bir Item sınıfı değildir; tekil veya bileşik Item'ın ölçü/state/konfigürasyona göre değişebilmesini belirtir.
 
-### ☐ Factory / oluşturulma noktası
-Item instance'ını hangi mevcut factory/resolver/builder oluşturuyor? Default state ve instance kimliği hangi kaynaktan geliyor?
+### ☐ Oluşturucu / oluşturulma noktası
+Item örneğinı hangi mevcut oluşturucu/resolver/builder oluşturuyor? Default state ve örnek kimliği hangi kaynaktan geliyor?
 
 ### ☐ Catalog bağlantısı
-Mevcut catalog tanımı varsa canonical ürün kimliğiyle nasıl eşleşiyor?
+Mevcut catalog tanımı varsa kanonik ürün kimliğiyle nasıl eşleşiyor?
 
 ---
 
-# 2. Canonical Item properties / ürün-default metadata
+# 2. Kanonik Item özellikler / ürün-default üstveri
 
-Bu bölüm **Item'ın kendisini ürün olarak tanımlayan bütün mevcut intrinsic/default özellikleri** zorunlu olarak çıkarır. Sabit bir global şema varsayılmaz; ilgili Item için sistemde bulunan bütün gerçek property'ler taranır.
+Bu bölüm **Item'ın kendisini ürün olarak tanımlayan bütün mevcut ürüne özgü/default özellikleri** zorunlu olarak çıkarır. Sabit bir global şema varsayılmaz; ilgili Item için sistemde bulunan bütün gerçek property'ler taranır.
 
-### ☐ Canonical property envanteri
-Mevcut sistemde bu Item'ı tanımlayan bütün intrinsic/default property'ler nelerdir? Her biri isim + değer + mevcut kaynak dosya ile listelenir.
+### ☐ Kanonik property envanteri
+Mevcut sistemde bu Item'ı tanımlayan bütün ürüne özgü/default property'ler nelerdir? Her biri isim + değer + mevcut kaynak dosya ile listelenir.
 
 ### ☐ Dimensions eksiksizliği
 Item için geçerli olan gerçek fiziksel boyutların her biri tek tek kontrol edilir:
@@ -401,27 +401,27 @@ Item için geçerli olan gerçek fiziksel boyutların her biri tek tek kontrol e
 Geçerli olmayan eksen **UYGULANMIYOR** olarak yazılır; mevcut bir ölçü toplu `dimensions var` denilerek geçilemez.
 
 ### ☐ `defaultColor`
-Mevcut sistemde ürünün/default görünümün tanımlı bir rengi var mı? Varsa canonical Item metadata'sında mı? Yoksa `YOK/UYGULANMIYOR` açıkça yazılır. Bu alan bütün Item'lar için zorunlu değildir.
+Mevcut sistemde ürünün/default görünümün tanımlı bir rengi var mı? Varsa kanonik Item üstverisinde mı? Yoksa `YOK/UYGULANMIYOR` açıkça yazılır. Bu alan bütün Item'lar için zorunlu değildir.
 
 ### ☐ `material`
-Mevcut sistemde ürün malzemesi tanımlı mı? Varsa canonical Item metadata'sında mı? Yoksa tahmin edilmez.
+Mevcut sistemde ürün malzemesi tanımlı mı? Varsa kanonik Item üstverisinde mı? Yoksa tahmin edilmez.
 
-### ☐ Diğer intrinsic metadata
-Ağırlık, yüzey, panel rolü, connector türü, nominal ürün ölçüsü, göz sayısı veya Item ailesine özgü başka ürün özelliği var mı? Varsa canonical Item içinde veya canonical Item'a bağlı tek source-of-truth'ta temsil ediliyor mu?
+### ☐ Diğer ürüne özgü üstveri
+Ağırlık, yüzey, panel rolü, connector türü, nominal ürün ölçüsü, göz sayısı veya Item ailesine özgü başka ürün özelliği var mı? Varsa kanonik Item içinde veya kanonik Item'a bağlı tek tek kaynak'ta temsil ediliyor mu?
 
-### ☐ Canonical owner
-Her intrinsic/default property'nin canonical sahibi gerçekten Item tanımı mı? Item'a ait product/default değeri renderer, UI, controller veya başka yardımcı dosyada bağımsız ikinci canonical değer olarak mı tutuluyor?
+### ☐ Kanonik owner
+Her ürüne özgü/default property'nin kanonik sahibi gerçekten Item tanımı mı? Item'a ait product/default değeri renderer, UI, controller veya başka yardımcı dosyada bağımsız ikinci kanonik değer olarak mı tutuluyor?
 
-### ☐ Gerçek consumer cutover
-Bu property'ye business/runtime olarak ihtiyaç duyan gerçek tüketiciler canonical Item property/resolver yolunu kullanıyor mu? `Item'da da var ama gerçek consumer başka sabiti kullanıyor` durumu varsa migration tamam değildir.
+### ☐ Gerçek tüketici geçiş
+Bu property'ye business/runtime olarak ihtiyaç duyan gerçek tüketiciler kanonik Item property/resolver yolunu kullanıyor mu? `Item'da da var ama gerçek consumer başka sabiti kullanıyor` durumu varsa migration tamam değildir.
 
-Renderer/specialized rendering yalnız görsel/teknik override yapıyorsa bu **renderer override** olarak kaydedilir ve consumer-cutover gap'i sayılmaz; renderer business/product source-of-truth haline gelmemelidir.
+Renderer/specialized rendering yalnız görsel/teknik ezme yapıyorsa bu **renderer ezme** olarak kaydedilir ve tüketici-geçiş gap'i sayılmaz; renderer business/product tek kaynak haline gelmemelidir.
 
-### ☐ Override capability
-Hangi property'ler project instance, kullanıcı tercihi, decision mechanism veya runtime tarafından override edilebilir?
+### ☐ Ezme yetenek
+Hangi property'ler proje örneği, kullanıcı tercihi, decision mechanism veya runtime tarafından ezilebilir?
 
 ### ☐ Effective value çözümü
-Override varsa effective değer nasıl çözülüyor? En azından mantık açık olmalıdır:
+Ezme varsa effective değer nasıl çözülüyor? En azından mantık açık olmalıdır:
 
 ```text
 canonical Item default
@@ -429,13 +429,13 @@ canonical Item default
 → effective business value
 ```
 
-Specialized renderer ayrıca kendi render override'ını uygulayabilir; bu business effective value ile aynı kavram olmak zorunda değildir.
+Specialized renderer ayrıca kendi render ezmesini uygulayabilir; bu business effective value ile aynı kavram olmak zorunda değildir.
 
-### ☐ Override persistence
-Override edilen değer kalıcı mı? Save/load sonrasında korunuyor mu, yoksa runtime/geçici mi?
+### ☐ Ezme kalıcılık
+Ezme edilen değer kalıcı mı? Save/load sonrasında korunuyor mu, yoksa runtime/geçici mi?
 
 ### ☐ Property regression
-Canonical intrinsic/default property'lerin Item içinde bulunduğunu, doğru değerleri taşıdığını ve gerekli gerçek tüketicilerin canonical yolu kullandığını koruyan regression var mı?
+Kanonik ürüne özgü/default property'lerin Item içinde bulunduğunu, doğru değerleri taşıdığını ve gerekli gerçek tüketicilerin kanonik yolu kullandığını koruyan regression var mı?
 
 ---
 
@@ -443,26 +443,26 @@ Canonical intrinsic/default property'lerin Item içinde bulunduğunu, doğru de�
 
 Bu bölüm Item'ın proje içinde **gerçekte hangi verileri taşıdığını** doğrular.
 
-### ☐ Instance state yapısı
-Instance üzerinde hangi alanlar var?
+### ☐ Örnek state yapısı
+Örnek üzerinde hangi alanlar var?
 
 ### ☐ Default değerler
-Yeni instance oluşturulduğunda sistem hangi varsayılanları veriyor? Bu default'ların Item'a ait olanları canonical Item property/default kaynağından mı geliyor?
+Yeni örnek oluşturulduğunda sistem hangi varsayılanları veriyor? Bu default'ların Item'a ait olanları kanonik Item property/default kaynağından mı geliyor?
 
 ### ☐ Ölçüler / geometry bilgileri
-Instance'ta effective olarak kullanılan gerçek genişlik, yükseklik, derinlik veya Item'a özgü diğer ölçüler nelerdir? Canonical Item default ile override ayrımı nedir?
+Instance'ta effective olarak kullanılan gerçek genişlik, yükseklik, derinlik veya Item'a özgü diğer ölçüler nelerdir? Kanonik Item default ile ezme ayrımı nedir?
 
-### ☐ Configurable / override alanlar
-Hangi state/parametreler proje içinde değiştirilebiliyor? Bunlardan hangileri canonical Item default'unu override ediyor?
+### ☐ Configurable / ezme alanlar
+Hangi state/parametreler proje içinde değiştirilebiliyor? Bunlardan hangileri kanonik Item default'unu eziyor?
 
 ### ☐ Persistence
 Hangi alanlar proje state'ine kaydediliyor? Hangi alanlar runtime/geçici?
 
 ### ☐ Save / load ve migration
-Project yeniden açıldığında Item nasıl geri kuruluyor; canonical defaults + persisted overrides nasıl birleştiriliyor; eski/geçersiz state için validation veya migration nerede?
+Project yeniden açıldığında Item nasıl geri kuruluyor; kanonik defaults + persisted ezmes nasıl birleştiriliyor; eski/geçersiz state için validation veya migration nerede?
 
-### ☐ ID üretimi ve instance mantığı
-Project instance `id` nasıl üretiliyor ve canonical `itemKey`'den nasıl ayrılıyor?
+### ☐ ID üretimi ve örnek mantığı
+Proje örneği `id` nasıl üretiliyor ve kanonik `itemKey`'den nasıl ayrılıyor?
 
 ### ☐ Alt state / child state
 Item'ın kendi içinde ayrıca state taşıyan alt yüzeyleri, alt parçaları veya child Item'ları var mı?
@@ -471,13 +471,13 @@ Item'ın kendi içinde ayrıca state taşıyan alt yüzeyleri, alt parçaları v
 
 # 4. Davranış (Behavior)
 
-Bu bölüm Item'ın mevcut runtime/editor davranışını doğrular. Mevcut sistemde behavior ailesinin canonical kaynağı `src/moduleBehavior.js`'dir; Item mimarisine geçişte aynı tek-kaynak ilkesi korunur.
+Bu bölüm Item'ın mevcut runtime/editor davranışını doğrular. Mevcut sistemde behavior ailesinin kanonik kaynağı `src/moduleBehavior.js`'dir; Item mimarisine geçişte aynı tek-kaynak ilkesi korunur.
 
 ### ☐ Behavior kaynağı
-Hangi `type` / behavior family kullanılıyor? Item tanımı bu behavior/capability kaynağına canonical olarak nasıl bağlanıyor? Item'a özel mevcut override varsa ayrıca kaydedilir.
+Hangi `type` / behavior family kullanılıyor? Item tanımı bu behavior/yetenek kaynağına kanonik olarak nasıl bağlanıyor? Item'a özel mevcut ezme varsa ayrıca kaydedilir.
 
-### ☐ Placement tipi
-Mevcut sistemde gerçek placement değeri nedir? Örneğin mevcut runtime'da `wall`, `free`, `wall-overlay`, `top` gibi değerler kullanılır; ilgili Item için gerçek değer kaynaktan okunur.
+### ☐ Yerleşim tipi
+Mevcut sistemde gerçek yerleşim değeri nedir? Örneğin mevcut runtime'da `wall`, `free`, `wall-overlay`, `top` gibi değerler kullanılır; ilgili Item için gerçek değer kaynaktan okunur.
 
 ### ☐ Hareket davranışı
 Item taşınabiliyor mu; hareket serbest mi yoksa wall/host/başka constraint'e bağlı mı?
@@ -513,7 +513,7 @@ Var mı; değeri nedir?
 Bağlantı endpoint modeli nedir?
 
 ### ☐ Side insert
-Yanına Item ekleme capability'si var mı?
+Yanına Item ekleme yetenek'si var mı?
 
 ### ☐ Side insert rotation
 Yan eklemede orientation kuralı nedir?
@@ -521,14 +521,14 @@ Yan eklemede orientation kuralı nedir?
 ### ☐ Overlap kuralları
 Hangi type'larla overlap izinli/yasak?
 
-### ☐ Wall capacity / host capability
-Mevcut behavior'da uygulanıyorsa wall capacity ve wall-overlay host capability değerleri nedir?
+### ☐ Wall capacity / host yetenek
+Mevcut behavior'da uygulanıyorsa wall capacity ve wall-overlay host yetenek değerleri nedir?
 
 ### ☐ Ghost / preview
 Preview davranışı, renderer'ı ve mevcut değerleri nedir?
 
-### ☐ Behavior consumer cutover
-UI, context menu, move/placement ve ilgili runtime tüketicileri aynı canonical behavior/capability kaynağını mı kullanıyor? Paralel ikinci behavior rule varsa açık gap olarak işaretlenir.
+### ☐ Behavior tüketici geçiş
+UI, context menu, move/yerleşim ve ilgili runtime tüketicileri aynı kanonik behavior/yetenek kaynağını mı kullanıyor? Paralel ikinci behavior rule varsa açık gap olarak işaretlenir.
 
 ---
 
@@ -553,7 +553,7 @@ Drag akışında Item'a ait hangi işlem gerçekleşiyor?
 Sağ click hangi interaction/context akışını açıyor?
 
 ### ☐ Context menu içeriği
-Item/type/capability için mevcut sistemde görünen gerçek komutlar nelerdir? Bu capability'ler canonical Item/type davranış kaynağından mı çözülüyor?
+Item/type/yetenek için mevcut sistemde görünen gerçek komutlar nelerdir? Bu yetenek'ler kanonik Item/type davranış kaynağından mı çözülüyor?
 
 ### ☐ Yapılabilir işlemler
 Aşağıdaki işlemler tek tek kontrol edilir; mevcut olmayanlar da açıkça kaydedilir:
@@ -570,7 +570,7 @@ Aşağıdaki işlemler tek tek kontrol edilir; mevcut olmayanlar da açıkça ka
 Item'ı etkileyen mevcut keyboard shortcut veya interaction var mı?
 
 ### ☐ Duplicate davranışı
-Varsa hangi state/override korunuyor, hangi instance/alt-state ID'leri yeniden üretiliyor?
+Varsa hangi state/ezme korunuyor, hangi örnek/alt-state ID'leri yeniden üretiliyor?
 
 ### ☐ Delete davranışı
 Silme yalnız hedef Item'ı mı etkiliyor; relationship/reflow/child-state sonucu var mı?
@@ -579,23 +579,23 @@ Silme yalnız hedef Item'ı mı etkiliyor; relationship/reflow/child-state sonuc
 
 # 6. Görsel / Renderer
 
-Bu bölüm Item'ın görünümünün hangi mevcut state, canonical Item default ve renderer kaynağından geldiğini doğrular.
+Bu bölüm Item'ın görünümünün hangi mevcut state, kanonik Item default ve renderer kaynağından geldiğini doğrular.
 
 ### ☐ Renderer tipi
-- ☐ Procedural
+- ☐ Prosedürel
 - ☐ Model
 - ☐ Specialized
 
 Mevcut contract başka bir mode kullanıyorsa gerçek değer aynen kaydedilir.
 
 ### ☐ Asset bağlantısı
-Model/GLB/image/texture veya başka asset varsa hangi kaynaktan geliyor? Item'a ait canonical asset/reference metadata'sı varsa Item tanımında mı?
+Model/GLB/image/texture veya başka asset varsa hangi kaynaktan geliyor? Item'a ait kanonik asset/reference üstverisi varsa Item tanımında mı?
 
 ### ☐ Renk davranışı
-Canonical `defaultColor` varsa Item'dan mı geliyor? Instance/user color override varsa nerede tutuluyor? Renderer-specific color override varsa ayrıca ve açıkça belirtilir.
+Kanonik `defaultColor` varsa Item'dan mı geliyor? Instance/user color ezme varsa nerede tutuluyor? Renderer-specific color ezme varsa ayrıca ve açıkça belirtilir.
 
 ### ☐ Görsel/image davranışı
-Image capability var mı; state ve renderer bağlantısı nedir?
+Image yetenek var mı; state ve renderer bağlantısı nedir?
 
 ### ☐ Özel görsel modları
 Item için mevcut sistemden tek tek kontrol edilir:
@@ -611,20 +611,20 @@ Birbirini dışlayan veya birlikte çalışan mode'lar varsa gerçek kural nedir
 ### ☐ Ghost / preview davranışı
 Behavior bölümündeki preview görsel olarak nasıl uygulanıyor?
 
-### ☐ Renderer override sınırı
-Renderer canonical Item property'den farklı bir render değeri kullanıyor mu? Kullanıyorsa bu değer yalnız görsel/teknik override mı, yoksa yanlışlıkla product/business source-of-truth haline mi gelmiş?
+### ☐ Renderer ezme sınırı
+Renderer kanonik Item property'den farklı bir render değeri kullanıyor mu? Kullanıyorsa bu değer yalnız görsel/teknik ezme mı, yoksa yanlışlıkla product/business tek kaynak haline mi gelmiş?
 
 ### ☐ Renderer / business-state ayrımı
-Renderer veya mesh business state/BOM kaynağı haline gelmiş mi? Contract gereği canonical business/default property Item'da; effective project state/override ise canonical state katmanında tutulmalıdır.
+Renderer veya mesh business state/BOM kaynağı haline gelmiş mi? Contract gereği kanonik business/default property Item'da; effective project state/ezme ise kanonik state katmanında tutulmalıdır.
 
 ---
 
 # 7. Item ilişkileri
 
-Bu bölüm Item'ın başka Item'larla kurduğu mevcut canonical veya fiili ilişkiyi doğrular.
+Bu bölüm Item'ın başka Item'larla kurduğu mevcut kanonik veya fiili ilişkiyi doğrular.
 
 ### ☐ İçindeki Item'lar
-Bileşik Item ise hangi canonical alt Item'lardan oluşuyor?
+Bileşik Item ise hangi kanonik alt Item'lardan oluşuyor?
 
 ### ☐ Bağlandığı Item'lar
 Connection/mount/host ilişkileri var mı?
@@ -633,7 +633,7 @@ Connection/mount/host ilişkileri var mı?
 Parent ve child rolleri mevcut mu?
 
 ### ☐ Komşuluk ilişkileri
-Neighbor ilişkisi placement, davranış veya BOM'u etkiliyor mu?
+Neighbor ilişkisi yerleşim, davranış veya BOM'u etkiliyor mu?
 
 ### ☐ Köşe / bağlantı kuralları
 Corner veya başka connection durumu var mı?
@@ -645,7 +645,7 @@ Başka Item'a mount olma veya başka Item'a host olma durumu var mı?
 Item mevcut sistemde bir zincir/reflow davranışına katılıyor mu?
 
 ### ☐ Relationship resolver ihtiyacı / kaynağı
-İlişki bugün hangi kaynakta çözülüyor? Canonical resolver eksikse bu açık problem olarak işaretlenir.
+İlişki bugün hangi kaynakta çözülüyor? Kanonik resolver eksikse bu açık problem olarak işaretlenir.
 
 ### ☐ Relationship değişim sonuçları
 Ekleme, taşıma, döndürme veya silme komşu Item'ların konumunu/state'ini etkiliyor mu?
@@ -657,7 +657,7 @@ Ekleme, taşıma, döndürme veya silme komşu Item'ların konumunu/state'ini et
 
 # 8. BOM / Üretim
 
-Bu bölüm Item'ın canonical üretim çıktısını doğrular.
+Bu bölüm Item'ın kanonik üretim çıktısını doğrular.
 
 ### ☐ BOM var mı?
 Mevcut Item/module contract'ında BOM policy tanımlı mı?
@@ -666,19 +666,19 @@ Mevcut Item/module contract'ında BOM policy tanımlı mı?
 Mevcut sistemde kullanılan gerçek policy kaydedilir. Mevcut module contract altyapısında örneğin `recipe` ve `decision-required` durumları vardır; Item için gerçek durum kaynaktan okunur.
 
 ### ☐ Recipe kaynağı
-Recipe kullanılıyorsa canonical sahibi nerede?
+Recipe kullanılıyorsa kanonik sahibi nerede?
 
 ### ☐ BOM resolver kaynağı
 BOM hangi resolver üzerinden çözülüyor?
 
 ### ☐ Alt Item listesi
-Bileşik ise hangi canonical Item'ları içeriyor?
+Bileşik ise hangi kanonik Item'ları içeriyor?
 
 ### ☐ Quantity
 Her nihai BOM kaleminin miktarı nedir?
 
 ### ☐ Unit
-Her nihai BOM kaleminin canonical birimi nedir?
+Her nihai BOM kaleminin kanonik birimi nedir?
 
 ### ☐ Recursive BOM
 Alt Item'ların kendi bileşimi/BOM'u varsa başka Item bileşimi olmayan Item'lara kadar recursive çözüm kuralı var mı?
@@ -695,16 +695,16 @@ Recursive Item zincirinde döngü engelleniyor mu?
 Mevcut sistemde başka gerçek varyant varsa ayrıca kaydedilir.
 
 ### ☐ State/ölçü/parametre kaynaklı BOM
-BOM canonical Item property/default + gerçek Item instance state/override/konfigürasyonundan mı hesaplanıyor?
+BOM kanonik Item property/default + gerçek Item örnek state/ezme/konfigürasyonundan mı hesaplanıyor?
 
 ### ☐ Relationship-derived BOM
-Komşuluk, corner, connection veya başka relationship BOM sonucunu değiştiriyorsa mevcut canonical çözüm durumu nedir?
+Komşuluk, corner, connection veya başka relationship BOM sonucunu değiştiriyorsa mevcut kanonik çözüm durumu nedir?
 
 ### ☐ Final BOM bağlantısı
 Item'ın raw/recipe çıktısı ile project-level Final BOM arasındaki mevcut durum nedir? Eksikse açık problem olarak kaydedilir.
 
-### ☐ Gerçek BOM consumer cutover'ı
-Yeni Item/recipe/resolver yolu yalnız tanımlanmış olmakla tamamlanmış sayılmaz. Raw BOM, Final BOM, debug veya ilgili gerçek tüketici hangi kaynağı kullanıyorsa yeni canonical kimlik/bileşim/property yolunu gerçekten tükettiği doğrulanır. Kullanılmayan resolver veya paralel ikinci BOM yolu tamamlanmış migration sayılmaz.
+### ☐ Gerçek BOM tüketici geçiş'ı
+Yeni Item/recipe/resolver yolu yalnız tanımlanmış olmakla tamamlanmış sayılmaz. Raw BOM, Final BOM, debug veya ilgili gerçek tüketici hangi kaynağı kullanıyorsa yeni kanonik kimlik/bileşim/property yolunu gerçekten tükettiği doğrulanır. Kullanılmayan resolver veya paralel ikinci BOM yolu tamamlanmış migration sayılmaz.
 
 ---
 
@@ -727,20 +727,20 @@ Bu bölüm mevcut davranışın hangi testlerle korunduğunu doğrular.
 ### ☐ Mevcut testler
 Item veya behavior family için hangi testler var?
 
-### ☐ Canonical property testleri
-Intrinsic/default Item property'leri (`dimensions`, `thickness`, varsa `defaultColor`, `material` ve aileye özgü metadata) doğru Item üzerinde ve doğru değerlerle kilitli mi?
+### ☐ Kanonik property testleri
+Intrinsic/default Item property'leri (`dimensions`, `thickness`, varsa `defaultColor`, `material` ve aileye özgü üstveri) doğru Item üzerinde ve doğru değerlerle kilitli mi?
 
-### ☐ Property consumer testleri
-Business/runtime tüketicisinin canonical Item property yolunu kullandığını, eski duplicate/default sabite geri dönemeyeceğini koruyan regression var mı?
+### ☐ Property tüketici testleri
+Business/runtime tüketicisinin kanonik Item property yolunu kullandığını, eski duplicate/default sabite geri dönemeyeceğini koruyan regression var mı?
 
-### ☐ Override testleri
-Override desteklenen property/state için canonical default'un değişmeden kaldığı ve effective override davranışının doğru çalıştığı test ediliyor mu?
+### ☐ Ezme testleri
+Ezme desteklenen property/state için kanonik default'un değişmeden kaldığı ve effective ezme davranışının doğru çalıştığı test ediliyor mu?
 
 ### ☐ State testleri
-Factory/default/state mutation/persistence davranışı test ediliyor mu?
+Oluşturucu/default/state mutation/kalıcılık davranışı test ediliyor mu?
 
 ### ☐ Behavior testleri
-Placement, move, snap, rotation, collision, connection vb. testleri var mı?
+Yerleşim, move, snap, rotation, collision, connection vb. testleri var mı?
 
 ### ☐ Interaction testleri
 Selection, drag, context menu, keyboard veya ilgili browser etkileşimleri test ediliyor mu?
@@ -755,7 +755,7 @@ Recipe/resolver/varyant/recursive BOM testleri var mı?
 Mevcut davranış değişikliğini yakalayacak regression koruması var mı?
 
 ### ☐ Item-by-Item migration izolasyonu
-Yalnız hedef Item'ın yeni canonical kimlik/yola geçtiği; henüz migrate edilmeyen Item'ların mevcut kimlik/yolunda kaldığı test ile doğrulanıyor mu? Bir Item migration'ı komşu Item'ları sessizce toplu migrate etmemelidir.
+Yalnız hedef Item'ın yeni kanonik kimlik/yola geçtiği; henüz migrate edilmeyen Item'ların mevcut kimlik/yolunda kaldığı test ile doğrulanıyor mu? Bir Item migration'ı komşu Item'ları sessizce toplu migrate etmemelidir.
 
 ### ☐ Persistence / migration testleri
 Save/load ve migration davranışı test ediliyor mu?
@@ -775,11 +775,11 @@ Bu bölüm mevcut sistemde Item contract'a göre eksik veya kararsız noktaları
 ### ☐ Audit finding bağlantıları
 Item'ı etkileyen açık finding'ler hangileri?
 
-### ☐ Eksik canonical properties
-Mevcut sistemde Item'a ait olduğu doğrulanan fakat canonical Item tanımına taşınmamış property var mı?
+### ☐ Eksik kanonik özellikler
+Mevcut sistemde Item'a ait olduğu doğrulanan fakat kanonik Item tanımına taşınmamış property var mı?
 
-### ☐ Eksik consumer cutover
-Item property canonical tanımda bulunmasına rağmen gerçek business/runtime consumer hâlâ başka bir product/default sabitinden mi besleniyor?
+### ☐ Eksik tüketici geçiş
+Item property kanonik tanımda bulunmasına rağmen gerçek business/runtime tüketici hâlâ başka bir product/default sabitinden mi besleniyor?
 
 ### ☐ Eksik davranışlar
 Mevcut sistemde tamamlanmamış veya contract'a göre eksik behavior var mı?
@@ -788,13 +788,13 @@ Mevcut sistemde tamamlanmamış veya contract'a göre eksik behavior var mı?
 Ürün/mimari kararı gereken alan var mı? Doğrulanmamış `material`, renk veya ölçü tahmin edilmez; karar bekleyen alan olarak yazılır.
 
 ### ☐ Yeni Item sistemine taşınacak işler
-Legacy module/floor/başka yapıdan canonical Item modeline taşınması gereken noktalar nelerdir?
+Eski module/floor/başka yapıdan kanonik Item modeline taşınması gereken noktalar nelerdir?
 
-### ☐ Duplicate source-of-truth
-Kimlik, intrinsic/default property, ölçü, state, behavior, relationship veya BOM kuralı birden fazla yerde canonical/business source-of-truth olarak kopyalanmış mı?
+### ☐ Duplicate tek kaynak
+Kimlik, ürüne özgü/default property, ölçü, state, behavior, relationship veya BOM kuralı birden fazla yerde canonical/business tek kaynak olarak kopyalanmış mı?
 
-### ☐ Override mı duplicate mı?
-Başka yerde farklı bir değer bulunuyorsa gerçekten izin verilmiş project/runtime/renderer override mı, yoksa yanlışlıkla ikinci canonical product/default değeri mi? Açıkça sınıflandırılır.
+### ☐ Ezme mı duplicate mı?
+Başka yerde farklı bir değer bulunuyorsa gerçekten izin verilmiş project/runtime/renderer ezme mı, yoksa yanlışlıkla ikinci kanonik product/default değeri mi? Açıkça sınıflandırılır.
 
 ---
 
@@ -802,29 +802,29 @@ Başka yerde farklı bir değer bulunuyorsa gerçekten izin verilmiş project/ru
 
 Bir Item ancak aşağıdaki konular sistemden doğrulanıp kayıt altına alındığında tamamlanmış kabul edilir:
 
-1. Canonical `itemKey`, `type`, Item yapısı (tekil/bileşik) ve parametrik durumu.
-2. Mevcut sistemde Item'ı tanımlayan bütün intrinsic/default property'lerin eksiksiz envanteri.
-3. Item için geçerli bütün fiziksel ölçülerin (`width/height/depth/length/thickness` ve aileye özgü diğerleri) canonical Item içinde bulunması.
-4. Mevcutsa `defaultColor`, `material` ve diğer ürün/default metadata'sının canonical Item içinde bulunması; mevcut değilse tahmin edilmeden açıkça `YOK/UYGULANMIYOR` denmesi.
-5. Canonical property'lerin gerçek business/runtime tüketicilerinin Item/resolver kaynağından beslenmesi; bağımsız ikinci product/default source-of-truth kalmaması.
-6. Override edilebilir property/state alanlarının açık olması; canonical default → override → effective value ayrımının tanımlanması.
-7. Override persistence/runtime sınırının doğrulanması.
-8. Factory/oluşturulma noktası ve catalog bağlantısı.
-9. Instance state, default değerler, effective ölçüler ve configurable/override alanlar.
-10. Persistence, save/load, migration ve instance-ID mantığı.
-11. Behavior kaynağı ve Item/type capability bağlantısı.
-12. Placement ve hareket davranışı.
+1. Kanonik `itemKey`, `type`, Item yapısı (tekil/bileşik) ve parametrik durumu.
+2. Mevcut sistemde Item'ı tanımlayan bütün ürüne özgü/default property'lerin eksiksiz envanteri.
+3. Item için geçerli bütün fiziksel ölçülerin (`width/height/depth/length/thickness` ve aileye özgü diğerleri) kanonik Item içinde bulunması.
+4. Mevcutsa `defaultColor`, `material` ve diğer ürün/default üstverisinin kanonik Item içinde bulunması; mevcut değilse tahmin edilmeden açıkça `YOK/UYGULANMIYOR` denmesi.
+5. Kanonik property'lerin gerçek business/runtime tüketicilerinin Item/resolver kaynağından beslenmesi; bağımsız ikinci product/default tek kaynak kalmaması.
+6. Ezilebilir property/state alanlarının açık olması; kanonik default → ezme → effective value ayrımının tanımlanması.
+7. Ezme kalıcılık/runtime sınırının doğrulanması.
+8. Oluşturucu/oluşturulma noktası ve catalog bağlantısı.
+9. Örnek state, default değerler, effective ölçüler ve configurable/ezme alanlar.
+10. Persistence, save/load, migration ve örnek-ID mantığı.
+11. Behavior kaynağı ve Item/type yetenek bağlantısı.
+12. Yerleşim ve hareket davranışı.
 13. Rotation desteği, rotation step, default rotation ve gerçek dönüş interaction'ları.
-14. Collision, snap, boundary, connection, overlap ve ilgili behavior capability'leri.
+14. Collision, snap, boundary, connection, overlap ve ilgili behavior yetenek'leri.
 15. Sol click, selection, drag, sağ click, context menu, keyboard ve diğer gerçek kullanıcı interaction'ları.
-16. Renderer, asset, renk, image ve varsa özel görsel modlar; renderer override ile canonical Item property ayrımı.
+16. Renderer, asset, renk, image ve varsa özel görsel modlar; renderer ezme ile kanonik Item property ayrımı.
 17. Parent/child, neighbor, connection, host, corner veya continuous-chain ilişkileri.
 18. Relationship-derived behavior/reflow sonucu.
 19. BOM policy, recipe/resolver, alt Item'lar, quantity ve unit.
 20. Bileşik Item ise recursive BOM çözümü.
 21. Varyant veya relationship-derived BOM durumu.
 22. BOM ile pricing ayrımı.
-23. Canonical property, consumer cutover, override, state, behavior, interaction, BOM ve persistence için gerekli regression koruması.
+23. Kanonik property, tüketici geçiş, ezme, state, behavior, interaction, BOM ve kalıcılık için gerekli regression koruması.
 24. Build/browser kritik akış sonucu.
 25. Açık audit/migration problemleri.
 
@@ -832,21 +832,21 @@ Bir Item ancak aşağıdaki konular sistemden doğrulanıp kayıt altına alınd
 
 Aşağıdakilerden biri varsa Item **Tamam** olarak işaretlenemez:
 
-- mevcut sistemde doğrulanmış intrinsic/default bir property canonical Item tanımında yoksa,
-- Item için geçerli gerçek bir ölçü (`thickness` dahil) bilindiği halde canonical Item metadata'sında eksikse,
+- mevcut sistemde doğrulanmış ürüne özgü/default bir property kanonik Item tanımında yoksa,
+- Item için geçerli gerçek bir ölçü (`thickness` dahil) bilindiği halde kanonik Item üstverisinde eksikse,
 - mevcut ürün/default renk veya material bilgisi doğrulanmış olduğu halde Item'a taşınmamışsa,
-- canonical Item'da property var fakat gerçek business/runtime tüketici halen bağımsız ikinci product/default değerini source-of-truth olarak kullanıyorsa,
-- duplicate source-of-truth override diye etiketlenmiş fakat gerçek bir override mekanizması/resolver sınırı yoksa,
-- behavior/context-menu/capability mevcut olduğu halde `UYGULANMIYOR` denilerek atlanmışsa,
-- gerekli BOM/consumer/state/persistence/relationship veya regression kontrolü sessizce atlanmışsa.
+- kanonik Item'da property var fakat gerçek business/runtime tüketici halen bağımsız ikinci product/default değerini tek kaynak olarak kullanıyorsa,
+- duplicate tek kaynak ezme diye etiketlenmiş fakat gerçek bir ezme mekanizması/resolver sınırı yoksa,
+- behavior/context-menu/yetenek mevcut olduğu halde `UYGULANMIYOR` denilerek atlanmışsa,
+- gerekli BOM/tüketici/state/kalıcılık/relationship veya regression kontrolü sessizce atlanmışsa.
 
-Specialized renderer'ın görsel/teknik override'ı tek başına hard-fail değildir; ancak renderer değeri business/product source-of-truth olarak kullanılıyorsa hard-fail'dir.
+Specialized renderer'ın görsel/teknik ezme'ı tek başına hard-fail değildir; ancak renderer değeri business/product tek kaynak olarak kullanılıyorsa hard-fail'dir.
 
 Bir alan bu Item için geçerli değilse sonuç **UYGULANMIYOR** olarak açıkça kaydedilir ve neden uygulanmadığı yazılır; kontrol sessizce atlanmaz.
 
 Bir bilgi mevcut sistemde yoksa **YOK** olarak yazılır. Ürün kararı gereken `material`, renk, ölçü veya başka property tahmin edilmez.
 
-Tahmin edilen davranış veya BOM değeri kabul edilmez. Item'a özgü değerler ilgili canonical kod/state/recipe/test kaynağından doğrulanır.
+Tahmin edilen davranış veya BOM değeri kabul edilmez. Item'a özgü değerler ilgili kanonik kod/state/recipe/test kaynağından doğrulanır.
 
 ---
 
@@ -855,21 +855,21 @@ Tahmin edilen davranış veya BOM değeri kabul edilmez. Item'a özgü değerler
 Her `docs/items/current-system/<ITEM>.md` dosyası en az aşağıdaki başlıkların tamamını sistemden çıkararak kayıt altına almalıdır. Başlık geçerli değilse yine açık sonuç yazılır:
 
 1. identity / type / unit / classification
-2. intrinsic/default property envanteri
+2. ürüne özgü/default property envanteri
 3. dimensions: width / height / depth / length / thickness / aileye özgü ölçüler
-4. defaultColor / material / diğer product metadata
-5. factory / creation / catalog bağlantısı
-6. instance state / defaults / configurable-overrides
-7. placement / move / snap
+4. defaultColor / material / diğer product üstveri
+5. oluşturucu / creation / catalog bağlantısı
+6. örnek state / defaults / configurable-ezmes
+7. yerleşim / move / snap
 8. rotation / collision / connection / overlap / ghost
 9. selection / drag / sağ click / context menu / keyboard
-10. delete / duplicate / diğer capabilities
-11. persistence / save-load / migration / instance ID
+10. delete / duplicate / diğer yetenekler
+11. kalıcılık / save-load / migration / örnek ID
 12. relationships / parent-child / host / neighbor / reflow
-13. BOM / recipe / quantity / unit / consumer
-14. renderer / asset / image / specialized override sınırı
-15. canonical property ve behavior tüketicileri / runtime owners
-16. duplicate source-of-truth ve override ayrımı
+13. BOM / recipe / quantity / unit / tüketici
+14. renderer / asset / image / specialized ezme sınırı
+15. kanonik property ve behavior tüketicileri / runtime owners
+16. duplicate tek kaynak ve ezme ayrımı
 17. mevcut regression/test kapsamı
 18. açık gap / karar bekleyen alanlar
 
@@ -877,17 +877,17 @@ Her `docs/items/current-system/<ITEM>.md` dosyası en az aşağıdaki başlıkla
 
 # definitions/<ITEM>.md minimum kapsamı
 
-Her migrated Item'ın `docs/items/definitions/<ITEM>.md` dosyası current-system envanterini canonical modele map etmeli ve en az şunları açıkça kaydetmelidir:
+Her migrated Item'ın `docs/items/definitions/<ITEM>.md` dosyası current-system envanterini kanonik modele map etmeli ve en az şunları açıkça kaydetmelidir:
 
-1. canonical identity/type/unit,
-2. canonical intrinsic/default properties,
-3. canonical dimensions ve varsa defaultColor/material,
-4. hangi property'lerin override edilebilir olduğu,
-5. behavior/capability contract bağlantısı,
-6. state/factory/persistence sınırı,
+1. kanonik identity/type/unit,
+2. kanonik ürüne özgü/default özellikler,
+3. kanonik dimensions ve varsa defaultColor/material,
+4. hangi property'lerin ezilebilir olduğu,
+5. behavior/yetenek contract bağlantısı,
+6. state/oluşturucu/kalıcılık sınırı,
 7. relationships/composition/BOM sahipliği,
-8. renderer/asset override sınırı,
-9. gerçek consumer cutover durumu,
+8. renderer/asset ezme sınırı,
+9. gerçek tüketici geçiş durumu,
 10. regression ve açık gap'ler.
 
 `definitions/<ITEM>.md` içinde `UYGULANMIYOR` yalnız current-system analiziyle gerçekten geçerli olmadığı doğrulanmış alanlar için kullanılabilir.
@@ -899,11 +899,11 @@ Her migrated Item'ın `docs/items/definitions/<ITEM>.md` dosyası current-system
 Bugünkü module tabanlı sistem incelenirken başlıca canonical/aktif kaynaklar şunlardır:
 
 - Kimlik, label, type ve nominal catalog verileri: `src/catalog.js`
-- Contract profile, state owner/persistence, appearance/renderer ve BOM policy: `src/moduleContracts.js`
-- State factory/default/instance verileri: `src/designState.js`
-- Placement/move/rotation/collision/snap/ghost ve diğer behavior: `src/moduleBehavior.js` ve ilgili placement akışı
+- Contract profile, state owner/kalıcılık, appearance/renderer ve BOM policy: `src/moduleContracts.js`
+- State oluşturucu/default/örnek verileri: `src/designState.js`
+- Yerleşim/move/rotation/collision/snap/ghost ve diğer behavior: `src/moduleBehavior.js` ve ilgili yerleşim akışı
 - Recipe BOM: `src/moduleRecipes.js`
-- Tekil üretim kalemleri/production Item metadata'sı, dimensions ve intrinsic/default properties: `src/productionParts.js`
+- Tekil üretim kalemleri/production Item üstverisi, dimensions ve ürüne özgü/default özellikler: `src/productionParts.js`
 - Context menu: `src/moduleContextMenu.js`
 - Scene/selection/render interaction'ları: `src/scene3d.js` ve ilgili interaction dosyaları
 - Theme/default appearance gibi Item'a ait olabilecek mevcut property adayları: `src/theme.js`, state/default kaynakları ve ilgili renderer girişleri

@@ -1,8 +1,8 @@
 # shelf_leg — Current System / Item Contract Mapping
 
-## Canonical identity
+## Kanonik identity
 
-`src/productionParts.js` içinde canonical production Item:
+`src/productionParts.js` içinde kanonik production Item:
 
 ```js
 shelf_leg: Object.freeze({
@@ -13,7 +13,7 @@ shelf_leg: Object.freeze({
 }),
 ```
 
-Doğrulanmış ürün ölçüsü, ağırlık, material veya defaultColor henüz yoktur; bu alanlar tahmin edilmez ve canonical Item'a eklenmez.
+Doğrulanmış ürün ölçüsü, ağırlık, material veya defaultColor henüz yoktur; bu alanlar tahmin edilmez ve kanonik Item'a eklenmez.
 
 ## BOM / recipe kullanımı
 
@@ -26,7 +26,7 @@ Parent shelf recipe quantity sahibidir:
 - `shelf:150:3` → `shelf_leg ×6`
 - `shelf:200:3` → `shelf_leg ×9`
 
-Tüm altı recipe canonical `itemKey: 'shelf_leg'` kullanır. Migration quantity kuralını değiştirmez.
+Tüm altı recipe kanonik `itemKey: 'shelf_leg'` kullanır. Migration quantity kuralını değiştirmez.
 
 ## State / behavior / renderer
 
@@ -36,4 +36,4 @@ Renderer'da `shelf_leg` identity'sine bağlı ayrı mesh yoktur. Bu migration re
 
 ## Regression
 
-`test/shelfLegItemContract.test.js` canonical kimliği, bilinmeyen product metadata'nın eklenmemesini ve altı recipe quantity parity'sini kilitler.
+`test/shelfLegItemContract.test.js` kanonik kimliği, bilinmeyen product metadata'nın eklenmemesini ve altı recipe quantity parity'sini kilitler.
