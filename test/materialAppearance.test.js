@@ -37,7 +37,7 @@ test('table glass extends normal glass with explicit physical-render overrides',
   assert.equal(TABLE_GLASS_APPEARANCE.clearcoat, 0.65);
   assert.equal(Object.isFrozen(TABLE_GLASS_APPEARANCE), true);
   assert.match(scene, /createEamesTableChairSetModule[\s\S]*?\.\.\.TABLE_GLASS_APPEARANCE/);
-  assert.match(scene, /createBeigeSofaSetModule[\s\S]*?\.\.\.TABLE_GLASS_APPEARANCE/);
+  assert.match(scene, /function addClassicCoffeeTable[\s\S]*?\.\.\.TABLE_GLASS_APPEARANCE/);
 });
 
 test('panel backing remains a panel-only render effect', () => {

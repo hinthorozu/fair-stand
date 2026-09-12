@@ -1,4 +1,4 @@
-import { getItem, resolveWallMediaMetrics } from './items.js';
+import { getFurnitureClusterQuantity, getItem, resolveWallMediaMetrics } from './items.js';
 
 export const STAND_DIMENSIONS = Object.freeze({
   height: 3.5,
@@ -107,35 +107,24 @@ export const SHELF_DIMENSIONS = Object.freeze({
 });
 
 
-export const furniture_sofa_set_classic_DIMENSIONS = Object.freeze({
-  widthCm: 150,
-  depthCm: 150,
-  heightCm: 78,
-  loveseatWidthCm: 150,
-  chairWidthCm: 65,
-  tableWidthCm: 60,
-  tableDepthCm: 42,
-  tableHeightCm: 38,
-});
+export const furniture_sofa_set_classic_DIMENSIONS = getItem('furniture_sofa_set_classic').dimensions;
+
+export const furniture_sofa_single_classic_DIMENSIONS = getItem('furniture_sofa_single_classic').dimensions;
+
+export const furniture_sofa_double_classic_DIMENSIONS = getItem('furniture_sofa_double_classic').dimensions;
+
+export const furniture_coffee_table_classic_DIMENSIONS = getItem('furniture_coffee_table_classic').dimensions;
 
 export const furniture_table_chair_set_eames_DIMENSIONS = Object.freeze({
-  widthCm: 150,
-  depthCm: 150,
-  heightCm: 82,
-  chairCount: 4,
-  chairWidthCm: 46,
-  chairDepthCm: 58,
-  tableDiameterCm: 75,
-  tableHeightCm: 74,
+  ...getItem('furniture_table_chair_set_eames').dimensions,
+  chairCount: getFurnitureClusterQuantity(getItem('furniture_table_chair_set_eames'), 'chair_eames'),
 });
 
+export const chair_eames_DIMENSIONS = getItem('chair_eames').dimensions;
 
-export const furniture_bar_stool_classic_DIMENSIONS = Object.freeze({
-  widthCm: 60,
-  depthCm: 55,
-  heightCm: 121,
-});
+export const glass_table_DIMENSIONS = getItem('glass_table').dimensions;
 
+export const furniture_bar_stool_classic_DIMENSIONS = getItem('furniture_bar_stool_classic').dimensions;
 export const MINI_FRIDGE_DIMENSIONS = getItem('MINI_FRIDGE_AVANTI').dimensions;
 
 export const COAT_RACK_DIMENSIONS = getItem('COAT_RACK').dimensions;
@@ -182,12 +171,26 @@ export const TV_42_DIMENSIONS = Object.freeze({
   heightCm: TV_42_METRICS.catalogHeightCm,
 });
 
+const LED_FLOODLIGHT_ITEM = getItem('led_floodlight');
+
 export const LED_FLOODLIGHT_DIMENSIONS = Object.freeze({
-  widthCm: 50,
-  depthCm: 20,
-  heightCm: 35,
-  mountHeightCm: 350,
+  widthCm: LED_FLOODLIGHT_ITEM.dimensions.widthCm,
+  depthCm: LED_FLOODLIGHT_ITEM.dimensions.depthCm,
+  heightCm: LED_FLOODLIGHT_ITEM.dimensions.heightCm,
+  mountHeightCm: LED_FLOODLIGHT_ITEM.dimensions.mountHeightCm,
 });
+
+function createTopLightCatalogItem(itemKey) {
+  const item = getItem(itemKey);
+  return Object.freeze({
+    itemKey: item.itemKey,
+    type: item.type,
+    widthCm: item.dimensions.widthCm,
+    depthCm: item.dimensions.depthCm,
+    heightCm: item.dimensions.heightCm,
+    label: item.name,
+  });
+}
 
 function createCommercialCatalogItem(itemKey) {
   const { name, dimensions, ...metadata } = getItem(itemKey);
@@ -208,6 +211,18 @@ function createIndoorPlantCatalogItem(itemKey) {
   };
   if (item.modelFile) descriptor.modelFile = item.modelFile;
   return Object.freeze(descriptor);
+}
+
+function createFurnitureCatalogItem(itemKey) {
+  const item = getItem(itemKey);
+  return Object.freeze({
+    itemKey: item.itemKey,
+    type: item.type,
+    widthCm: item.dimensions.widthCm,
+    depthCm: item.dimensions.depthCm,
+    heightCm: item.dimensions.heightCm,
+    label: item.name,
+  });
 }
 
 export const MODULE_CATALOG = Object.freeze({
@@ -236,9 +251,14 @@ export const MODULE_CATALOG = Object.freeze({
   wall_shelf_3_150: createShelfCatalogItem('wall_shelf_3_150'),
   wall_shelf_2_200: createShelfCatalogItem('wall_shelf_2_200'),
   wall_shelf_3_200: createShelfCatalogItem('wall_shelf_3_200'),
-  furniture_sofa_set_classic: { type: 'sofa-set-classic', widthCm: 150, depthCm: 150, heightCm: 78, label: 'Koltuk Takımı' },
-  furniture_table_chair_set_eames: { type: 'table-chair-set-eames', widthCm: 150, depthCm: 150, heightCm: 82, label: 'Eames Masa Sandalye Takımı' },
-  furniture_bar_stool_classic: { type: 'bar-stool', widthCm: 60, depthCm: 55, heightCm: 121, label: 'Bar Taburesi' },
+  furniture_sofa_set_classic: createFurnitureCatalogItem('furniture_sofa_set_classic'),
+  furniture_sofa_single_classic: createFurnitureCatalogItem('furniture_sofa_single_classic'),
+  furniture_sofa_double_classic: createFurnitureCatalogItem('furniture_sofa_double_classic'),
+  furniture_coffee_table_classic: createFurnitureCatalogItem('furniture_coffee_table_classic'),
+  furniture_table_chair_set_eames: createFurnitureCatalogItem('furniture_table_chair_set_eames'),
+  chair_eames: createFurnitureCatalogItem('chair_eames'),
+  glass_table: createFurnitureCatalogItem('glass_table'),
+  furniture_bar_stool_classic: createFurnitureCatalogItem('furniture_bar_stool_classic'),
   MINI_FRIDGE_AVANTI: createCommercialCatalogItem('MINI_FRIDGE_AVANTI'),
   KETTLE: createCommercialCatalogItem('KETTLE'),
   COAT_RACK: createCommercialCatalogItem('COAT_RACK'),
@@ -252,7 +272,7 @@ export const MODULE_CATALOG = Object.freeze({
   VIDEO_WALL_2X2: createWallMediaCatalogItem('VIDEO_WALL_2X2'),
   VIDEO_WALL_3X3: createWallMediaCatalogItem('VIDEO_WALL_3X3'),
   TV_65: createWallMediaCatalogItem('TV_65'),
-  LED_FLOODLIGHT: { type: 'led-floodlight', widthCm: 50, depthCm: 20, heightCm: 35, label: 'LED Projektör' },
+  led_floodlight: createTopLightCatalogItem('led_floodlight'),
   door_100: {
     itemKey: DOOR_ITEM.itemKey,
     type: DOOR_ITEM.type,
@@ -318,7 +338,12 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'BASE_150',
   'BASE_100',
   'furniture_sofa_set_classic',
+  'furniture_sofa_single_classic',
+  'furniture_sofa_double_classic',
+  'furniture_coffee_table_classic',
   'furniture_table_chair_set_eames',
+  'chair_eames',
+  'glass_table',
   'furniture_bar_stool_classic',
   'MINI_FRIDGE_AVANTI',
   'KETTLE',
@@ -333,7 +358,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'VIDEO_WALL_2X2',
   'VIDEO_WALL_3X3',
   'TV_65',
-  'LED_FLOODLIGHT',
+  'led_floodlight',
 ]);
 
 export const MODULE_CATALOG_GROUPS = Object.freeze([
@@ -351,11 +376,11 @@ export const MODULE_CATALOG_GROUPS = Object.freeze([
   }),
   Object.freeze({
     label: 'Extra',
-    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_table_chair_set_eames', 'furniture_bar_stool_classic', 'MINI_FRIDGE_AVANTI', 'KETTLE', 'COAT_RACK', 'PLASTIC_TRASH_BIN', 'EXTRA_INDOOR_PLANT_1', 'EXTRA_LONG_PLANTER_100', 'EXTRA_LONG_PLANTER_150', 'EXTRA_LONG_PLANTER_200']),
+    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_sofa_single_classic', 'furniture_sofa_double_classic', 'furniture_coffee_table_classic', 'furniture_table_chair_set_eames', 'chair_eames', 'glass_table', 'furniture_bar_stool_classic', 'MINI_FRIDGE_AVANTI', 'KETTLE', 'COAT_RACK', 'PLASTIC_TRASH_BIN', 'EXTRA_INDOOR_PLANT_1', 'EXTRA_LONG_PLANTER_100', 'EXTRA_LONG_PLANTER_150', 'EXTRA_LONG_PLANTER_200']),
   }),
   Object.freeze({
     label: 'Elektronik & Aydınlatma',
-    keys: Object.freeze(['TV_42', 'TV_55', 'VIDEO_WALL_2X2', 'VIDEO_WALL_3X3', 'TV_65', 'LED_FLOODLIGHT']),
+    keys: Object.freeze(['TV_42', 'TV_55', 'VIDEO_WALL_2X2', 'VIDEO_WALL_3X3', 'TV_65', 'led_floodlight']),
   }),
 ]);
 

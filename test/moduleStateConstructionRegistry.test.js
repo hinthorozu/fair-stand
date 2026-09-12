@@ -6,7 +6,7 @@ import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 
 test('canonical state construction registry instantiates every catalog entry', () => {
-  assert.equal(MODULE_CATALOG_KEYS.length, 46);
+  assert.equal(MODULE_CATALOG_KEYS.length, 51);
 
   for (const catalogKey of MODULE_CATALOG_KEYS) {
     const descriptor = MODULE_CATALOG[catalogKey];
@@ -43,6 +43,7 @@ test('canonical registry includes the active non-catalog illuminated-foam family
 
   assert.ok(state);
   assert.equal(state.type, 'illuminated-foam');
+  assert.equal(state.itemKey, 'illuminated-foam');
   assert.equal(state.imageAssetId, 'asset-1');
   assert.equal(state.widthCm, 180);
   assert.equal(state.heightCm, 45);

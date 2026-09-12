@@ -98,15 +98,44 @@ const TYPE_BEHAVIORS = Object.freeze({
     moveSnapCm: 10,
     boundarySnap: 'wall-inner-face',
   }),
+  'sofa-single-classic': freeBehavior({
+    moveSnapCm: 10,
+    rotationStepDeg: 45,
+    collision: 'none',
+    magneticSnap: 'none',
+  }),
+  'sofa-double-classic': freeBehavior({
+    moveSnapCm: 10,
+    collision: 'none',
+    magneticSnap: 'none',
+  }),
+  'coffee-table-classic': freeBehavior({
+    moveSnapCm: 10,
+    collision: 'none',
+    magneticSnap: 'none',
+  }),
   'table-chair-set-eames': freeBehavior({
     moveSnapCm: 10,
-    boundarySnap: 'wall-inner-face',
+    collision: 'none',
+    magneticSnap: 'none',
+  }),
+  chair: freeBehavior({
+    moveSnapCm: 10,
+    collision: 'none',
+    magneticSnap: 'none',
+  }),
+  'table-glass': freeBehavior({
+    moveSnapCm: 10,
+    collision: 'none',
+    magneticSnap: 'none',
   }),
   'bar-stool': freeBehavior({
     moveSnapCm: 10,
     rotationStepDeg: 45,
     defaultRotationDeg: 270,
     sideInsertRotation: 'default',
+    collision: 'none',
+    magneticSnap: 'none',
   }),
   'mini-fridge': freeBehavior({
     moveSnapCm: 10,

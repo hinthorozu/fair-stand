@@ -49,6 +49,7 @@ import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';
 import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';
 import { createSidebarController } from './sidebarController.js';
 import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';
+import { getFloorItem, getFloorSelectLabel, listFloorItems } from './items.js';
 
 let jsZipModulePromise = null;
 
@@ -70,6 +71,19 @@ const standSizeXInput = document.querySelector('#stand-size-x');
 const standSizeYInput = document.querySelector('#stand-size-y');
 const createStageButton = document.querySelector('#create-stage');
 const floorTypeSelect = document.querySelector('#floor-type');
+
+function syncFloorTypeSelect(selectedKey = floorTypeSelect.value) {
+  const preferred = getFloorItem(selectedKey)?.itemKey ?? getFloorItem('karolaj').itemKey;
+  floorTypeSelect.replaceChildren(...listFloorItems().map((item) => {
+    const option = document.createElement('option');
+    option.value = item.itemKey;
+    option.textContent = getFloorSelectLabel(item);
+    return option;
+  }));
+  floorTypeSelect.value = preferred;
+}
+
+syncFloorTypeSelect();
 const autoDepotEnabledInput = document.querySelector('#auto-depot-enabled');
 const autoDepotSizeSelect = document.querySelector('#auto-depot-size');
 const autoDepotContentsInput = document.querySelector('#auto-depot-contents');
@@ -1177,13 +1191,14 @@ resetModuleFeaturesButton.addEventListener('click', () => {
 function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
   if (scene3d.isFloorSelected()) {
     const floorType = scene3d.getSelectedFloorType();
-    if (floorType === 'parke') {
+    const floorItem = getFloorItem(floorType);
+    if (floorItem && !floorItem.paintable) {
       selectionInfo.textContent = 'Parke zemini boyanamaz; hazır parke seçeneklerinden biri kullanılacak.';
       return false;
     }
     const applied = scene3d.setFloorColor(colorInput.value);
     if (applied) {
-      const label = floorType === 'hali' ? 'Halı' : 'Karolaj';
+      const label = floorItem?.name ?? 'Karolaj';
       if (currentStand) currentStand = { ...currentStand, floorColor: applied };
       selectionInfo.textContent = label + ' zemini · renk ' + applied.toUpperCase() + ' uygulandı.';
       return true;
@@ -1345,7 +1360,11 @@ async function restoreProject(project) {
     });
     standSizeXInput.value = String(currentStand.xCm);
     standSizeYInput.value = String(currentStand.yCm);
-    floorTypeSelect.value = currentStand.floorType || 'karolaj';
+    const resolvedFloor = getFloorItem(currentStand.floorType)?.itemKey ?? getFloorItem('karolaj').itemKey;
+    if (currentStand.floorType !== resolvedFloor) {
+      currentStand = { ...currentStand, floorType: resolvedFloor };
+    }
+    syncFloorTypeSelect(resolvedFloor);
     if (autoDepotEnabledInput) autoDepotEnabledInput.checked = Boolean(currentStand.depot?.enabled);
     if (autoDepotSizeSelect && currentStand.depot?.sizeKey) autoDepotSizeSelect.value = currentStand.depot.sizeKey;
     if (autoDepotContentsInput) autoDepotContentsInput.checked = Boolean(currentStand.depot?.includeContents);

@@ -33,7 +33,9 @@ test('F-011 special placement policies are declared by the canonical behavior co
   assert.equal(allowsThinWallEndpointContact('mini-fridge'), false);
 
   assert.equal(usesWallInnerFaceBoundary('sofa-set-classic'), true);
-  assert.equal(usesWallInnerFaceBoundary('table-chair-set-eames'), true);
+  assert.equal(usesWallInnerFaceBoundary('table-chair-set-eames'), false);
+  assert.equal(usesWallInnerFaceBoundary('chair'), false);
+  assert.equal(usesWallInnerFaceBoundary('table-glass'), false);
   assert.equal(usesWallInnerFaceBoundary('counter'), false);
 
   assert.equal(supportsWallOverlayMount('flat-panel'), true);

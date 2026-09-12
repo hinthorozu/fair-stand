@@ -6,7 +6,7 @@ import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DI
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
 import { getProductionItem, getShelfProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
-import { getItem, getCommercialItemForType, getShowcaseBodyDefinition } from './items.js';
+import { getItem, getCommercialItemForType, getFloorItem, getShowcaseBodyDefinition, isParquetFloorItem, listFloorItems } from './items.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
@@ -52,13 +52,7 @@ const ACTIVE_WALL_GUIDE_THICKNESS_M = 0.045;
 const ACTIVE_WALL_GUIDE_HEIGHT_M = 0.018;
 // Aktif stand zemini fuar salonu zemininden 5 cm yukarıda duran platformdur.
 const ACTIVE_PLATFORM_HEIGHT_M = 0.05;
-const FLOOR_TYPES = Object.freeze(['karolaj', 'hali', 'parke-acik', 'parke-sari', 'parke-beton']);
-const PARQUET_TYPES = new Set(['parke-acik', 'parke-sari', 'parke-beton']);
-const PARQUET_COLORS = Object.freeze({
-  'parke-acik': '#e8dfd1',
-  'parke-sari': '#ddb24f',
-  'parke-beton': '#625f58',
-});
+const FLOOR_TYPES = Object.freeze(listFloorItems().map((item) => item.itemKey));
 const FLOOR_TOP_EPSILON_M = 0.006;
 const SELECTION_COLOR = 0x2563eb;
 const PLACEMENT_VALID_COLOR = 0x16a34a;
@@ -536,11 +530,12 @@ export function createStandScene(
   let activeWallGuides = [];
   let floorPattern = null;
   let stageLayout = null;
-  let currentFloorType = 'karolaj';
-  const floorColors = {
-    karolaj: '#e9edf1',
-    hali: '#8b8f94',
-  };
+  let currentFloorType = getFloorItem('karolaj').itemKey;
+  const floorColors = Object.fromEntries(
+    listFloorItems()
+      .filter((item) => item.paintable)
+      .map((item) => [item.itemKey, item.defaultColor]),
+  );
   let floorSelected = false;
 
   function disposeGroundObject(object) {
@@ -573,18 +568,18 @@ export function createStandScene(
     const positions = [];
     const topY = ACTIVE_PLATFORM_HEIGHT_M + FLOOR_TOP_EPSILON_M;
 
-    if (floorType === 'karolaj') {
-      collectSurfaceCuts(widthM, 1).forEach((x) => {
+    if (floorType === getFloorItem('karolaj').itemKey) {
+      const stepM = Number(getFloorItem('karolaj').dimensions.widthCm) / 100;
+      collectSurfaceCuts(widthM, stepM).forEach((x) => {
         positions.push(x, topY, 0, x, topY, depthM);
       });
-      collectSurfaceCuts(depthM, 1).forEach((z) => {
+      collectSurfaceCuts(depthM, stepM).forEach((z) => {
         positions.push(0, topY, z, widthM, topY, z);
       });
-    } else if (PARQUET_TYPES.has(floorType)) {
-      // Ahşap parkeler ince lamel kalır; beton parke daha geniş ve kısa plakalar kullanır.
-      const isConcreteParquet = floorType === 'parke-beton';
-      const plankDepthM = isConcreteParquet ? 0.28 : 0.16;
-      const plankLengthM = isConcreteParquet ? 1.12 : 1.40;
+    } else if (isParquetFloorItem(getFloorItem(floorType))) {
+      const parquet = getFloorItem(floorType);
+      const plankDepthM = Number(parquet.dimensions.depthCm) / 100;
+      const plankLengthM = Number(parquet.dimensions.lengthCm) / 100;
       collectSurfaceCuts(depthM, plankDepthM).forEach((z) => {
         positions.push(0, topY, z, widthM, topY, z);
       });
@@ -603,16 +598,17 @@ export function createStandScene(
     if (!positions.length) return null;
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    const isConcreteParquetPattern = floorType === 'parke-beton';
+    const isConcreteParquetPattern = floorType === getFloorItem('parke-beton').itemKey;
+    const isParquetPattern = isParquetFloorItem(getFloorItem(floorType));
     const material = new THREE.LineBasicMaterial({
       // Beton parke derzleri sahne ışığından bağımsız, daha koyu ve net kalsın.
       color: isConcreteParquetPattern
         ? 0x3f3d39
-        : (PARQUET_TYPES.has(floorType) ? 0x746f68 : 0x9aa0a6),
+        : (isParquetPattern ? 0x746f68 : 0x9aa0a6),
       transparent: true,
       opacity: isConcreteParquetPattern
         ? 0.62
-        : (PARQUET_TYPES.has(floorType) ? 0.34 : 0.68),
+        : (isParquetPattern ? 0.34 : 0.68),
       toneMapped: !isConcreteParquetPattern,
     });
     const lines = new THREE.LineSegments(geometry, material);
@@ -620,12 +616,13 @@ export function createStandScene(
     return lines;
   }
 
-  function setFloorType(floorType = 'karolaj') {
-    const resolved = FLOOR_TYPES.includes(floorType) ? floorType : 'karolaj';
+  function setFloorType(floorType = getFloorItem('karolaj').itemKey) {
+    const resolved = FLOOR_TYPES.includes(floorType) ? floorType : getFloorItem('karolaj').itemKey;
     currentFloorType = resolved;
+    const floorItem = getFloorItem(resolved);
 
     const material = activeFloor.material;
-    if (resolved === 'hali') {
+    if (resolved === getFloorItem('hali').itemKey) {
       material.color.set(floorColors.hali);
       material.roughness = 1;
       material.metalness = 0;
@@ -641,16 +638,16 @@ export function createStandScene(
         carpetTextures.colorMap.repeat.set(repeatX, repeatY);
         carpetTextures.bumpMap.repeat.set(repeatX, repeatY);
       }
-    } else if (PARQUET_TYPES.has(resolved)) {
+    } else if (isParquetFloorItem(floorItem)) {
       material.map = null;
       material.bumpMap = null;
       material.bumpScale = 0;
-      material.color.set(PARQUET_COLORS[resolved]);
-      material.roughness = resolved === 'parke-beton' ? 0.98 : 0.78;
+      material.color.set(floorItem.defaultColor);
+      material.roughness = resolved === getFloorItem('parke-beton').itemKey ? 0.98 : 0.78;
       material.metalness = 0;
       // Beton parke, güçlü sahne ışığında rengini yıkamadan daha mat ve dengeli kalsın.
-      material.emissive.set(resolved === 'parke-beton' ? PARQUET_COLORS[resolved] : '#000000');
-      material.emissiveIntensity = resolved === 'parke-beton' ? 0.06 : 0;
+      material.emissive.set(resolved === getFloorItem('parke-beton').itemKey ? floorItem.defaultColor : '#000000');
+      material.emissiveIntensity = resolved === getFloorItem('parke-beton').itemKey ? 0.06 : 0;
     } else {
       material.color.set(floorColors.karolaj);
       material.roughness = 0.92;
@@ -674,7 +671,7 @@ export function createStandScene(
   }
 
   function setFloorColor(color) {
-    if (currentFloorType !== 'karolaj' && currentFloorType !== 'hali') return null;
+    if (!getFloorItem(currentFloorType)?.paintable) return null;
     const normalized = String(color ?? '').trim();
     if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) return floorColors[currentFloorType];
     const resolved = normalized.toLowerCase();
@@ -1029,7 +1026,7 @@ export function createStandScene(
     onFloorSelected?.({
       selected: floorSelected,
       floorType: currentFloorType,
-      paintable: currentFloorType === 'karolaj' || currentFloorType === 'hali',
+      paintable: Boolean(getFloorItem(currentFloorType)?.paintable),
       color: floorColors[currentFloorType] ?? null,
     });
   }
@@ -1452,8 +1449,23 @@ export function createStandScene(
     if (moduleState.type === 'sofa-set-classic') {
       return createBeigeSofaSetModule(moduleState, moduleIndex);
     }
+    if (moduleState.type === 'sofa-single-classic') {
+      return createSofaSingleClassicModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'sofa-double-classic') {
+      return createSofaDoubleClassicModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'coffee-table-classic') {
+      return createCoffeeTableClassicModule(moduleState, moduleIndex);
+    }
     if (moduleState.type === 'table-chair-set-eames') {
       return createEamesTableChairSetModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'chair') {
+      return createEamesChairModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'table-glass') {
+      return createGlassTableModule(moduleState, moduleIndex);
     }
     if (moduleState.type === 'bar-stool') {
       return createBarStoolModule(moduleState, moduleIndex);
@@ -3016,7 +3028,11 @@ export function createStandScene(
         ? mesh.userData.colorTargets
         : [mesh];
 
-      if (mesh.userData.moduleType === 'sofa-set-classic') {
+      if (
+        mesh.userData.moduleType === 'sofa-set-classic'
+        || mesh.userData.moduleType === 'sofa-single-classic'
+        || mesh.userData.moduleType === 'sofa-double-classic'
+      ) {
         colorTargets.forEach((target) => applyBeigeSofaBodyColor(target, hexColor));
         return;
       }
@@ -5268,15 +5284,19 @@ function createKettleModule(moduleState, moduleIndex) {
 }
 
 function createLedFloodlightModule(moduleState, moduleIndex) {
+  const item = getItem('led_floodlight');
+  const widthCm = Number(moduleState.widthCm ?? item.dimensions.widthCm);
+  const depthCm = Number(moduleState.depthCm ?? item.dimensions.depthCm);
+  const heightCm = Number(moduleState.heightCm ?? item.dimensions.heightCm);
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
     moduleIndex,
     moduleId: moduleState.id,
-    type: 'led-floodlight',
-    widthCm: 50,
-    depthCm: 20,
-    heightCm: 35,
+    type: item.type,
+    widthCm,
+    depthCm,
+    heightCm,
   };
 
   const bodyMaterial = new THREE.MeshStandardMaterial({
@@ -5463,7 +5483,7 @@ function createLedFloodlightModule(moduleState, moduleIndex) {
     acceptsImage: false,
     moduleIndex,
     moduleId: moduleState.id,
-    widthCm: 50,
+    widthCm,
     stripIndex: null,
     stripNumber: null,
     surfaceRole: 'light',
@@ -5556,6 +5576,167 @@ function createBarStoolModule(moduleState, moduleIndex) {
 }
 
 
+function createEamesChairModule(moduleState, moduleIndex) {
+  const item = getItem('chair_eames');
+  const widthCm = Number(moduleState.widthCm || item.dimensions.widthCm);
+  const depthCm = Number(moduleState.depthCm || item.dimensions.depthCm);
+  const heightCm = Number(moduleState.heightCm || item.dimensions.heightCm);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: 'chair',
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const colorTargets = [];
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(widthCm / 100, heightCm / 100, depthCm / 100),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+  );
+  proxy.position.set(0, heightCm / 200, 0);
+  group.add(proxy);
+
+  const selectionFrame = createSelectionFrame(widthCm / 100, heightCm / 100);
+  selectionFrame.visible = false;
+  proxy.add(selectionFrame);
+  proxy.userData = {
+    kind: 'surface',
+    moduleType: 'chair',
+    selectionMode: 'module',
+    acceptsImage: false,
+    moduleIndex,
+    moduleId: moduleState.id,
+    widthCm,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceRole: 'chair',
+    surfaceId: moduleState.surface?.id,
+    surfaceState: moduleState.surface,
+    selectionFrame,
+    colorTargets,
+  };
+
+  loadEamesChairModel().then((template) => {
+    if (!group.parent) return;
+    const chair = template.clone(true);
+    chair.traverse((object) => {
+      if (!object.isMesh) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+      if (object.material) object.material = object.material.clone();
+      if (object.material?.name === 'plastic_wit') {
+        object.material.color.set(moduleState.surface?.color ?? '#ffffff');
+        colorTargets.push(object);
+      } else if (object.material?.name === 'Material1') {
+        object.material.color.set('#a66b3d');
+        object.material.metalness = 0;
+        object.material.roughness = 0.58;
+      }
+    });
+
+    chair.updateMatrixWorld(true);
+    let box = new THREE.Box3().setFromObject(chair);
+    const size = box.getSize(new THREE.Vector3());
+    const scale = size.y > 0 ? (heightCm / 100) / size.y : 1;
+    chair.scale.multiplyScalar(scale);
+    chair.updateMatrixWorld(true);
+    box = new THREE.Box3().setFromObject(chair);
+    const center = box.getCenter(new THREE.Vector3());
+    chair.position.x -= center.x;
+    chair.position.z -= center.z;
+    chair.position.y -= box.min.y;
+    group.add(chair);
+  }).catch((error) => {
+    console.warn('Eames Sandalye GLB modeli yüklenemedi:', error);
+  });
+
+  return { group, surfaces: [proxy] };
+}
+
+
+function addProceduralGlassTable(group, tableItem) {
+  const diameterCm = Number(tableItem.dimensions.tableDiameterCm ?? tableItem.dimensions.widthCm);
+  const heightCm = Number(tableItem.dimensions.heightCm);
+  const radiusM = diameterCm / 200;
+  const heightM = heightCm / 100;
+
+  const metalMaterial = new THREE.MeshStandardMaterial({ color: 0x30343a, roughness: 0.32, metalness: 0.74 });
+  const tabletopMaterial = new THREE.MeshPhysicalMaterial({
+    ...TABLE_GLASS_APPEARANCE,
+    clearcoatRoughness: 0.08,
+  });
+
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(radiusM, radiusM, 0.018, 64), tabletopMaterial);
+  top.position.set(0, heightM, 0);
+  top.receiveShadow = true;
+  group.add(top);
+
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.70, 20), metalMaterial.clone());
+  stem.position.set(0, 0.37, 0);
+  stem.castShadow = true;
+  group.add(stem);
+
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32), metalMaterial.clone());
+  base.position.set(0, 0.018, 0);
+  base.castShadow = true;
+  base.receiveShadow = true;
+  group.add(base);
+}
+
+
+function createGlassTableModule(moduleState, moduleIndex) {
+  const item = getItem('glass_table');
+  const widthCm = Number(moduleState.widthCm || item.dimensions.widthCm);
+  const depthCm = Number(moduleState.depthCm || item.dimensions.depthCm);
+  const heightCm = Number(moduleState.heightCm || item.dimensions.heightCm);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: 'table-glass',
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  addProceduralGlassTable(group, item);
+
+  const proxy = new THREE.Mesh(
+    new THREE.CylinderGeometry(widthCm / 200, widthCm / 200, heightCm / 100, 32),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+  );
+  proxy.position.set(0, heightCm / 200, 0);
+  group.add(proxy);
+
+  const selectionFrame = createSelectionFrame(widthCm / 100, heightCm / 100);
+  selectionFrame.visible = false;
+  proxy.add(selectionFrame);
+  proxy.userData = {
+    kind: 'surface',
+    moduleType: 'table-glass',
+    selectionMode: 'module',
+    acceptsImage: false,
+    moduleIndex,
+    moduleId: moduleState.id,
+    widthCm,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceRole: 'table',
+    surfaceId: moduleState.id,
+    surfaceState: null,
+    selectionFrame,
+    colorTargets: [],
+  };
+
+  return { group, surfaces: [proxy] };
+}
+
+
 function createEamesTableChairSetModule(moduleState, moduleIndex) {
   const widthCm = Number(moduleState.widthCm || 150);
   const depthCm = Number(moduleState.depthCm || 150);
@@ -5571,27 +5752,7 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
     heightCm,
   };
 
-  const metalMaterial = new THREE.MeshStandardMaterial({ color: 0x30343a, roughness: 0.32, metalness: 0.74 });
-  const tabletopMaterial = new THREE.MeshPhysicalMaterial({
-    ...TABLE_GLASS_APPEARANCE,
-    clearcoatRoughness: 0.08,
-  });
-
-  const top = new THREE.Mesh(new THREE.CylinderGeometry(0.375, 0.375, 0.018, 64), tabletopMaterial);
-  top.position.set(0, 0.74, 0);
-  top.receiveShadow = true;
-  group.add(top);
-
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.70, 20), metalMaterial.clone());
-  stem.position.set(0, 0.37, 0);
-  stem.castShadow = true;
-  group.add(stem);
-
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32), metalMaterial.clone());
-  base.position.set(0, 0.018, 0);
-  base.castShadow = true;
-  base.receiveShadow = true;
-  group.add(base);
+  addProceduralGlassTable(group, getItem('glass_table'));
 
   const colorTargets = [];
   const surfaces = [];
@@ -5798,13 +5959,147 @@ function applyBeigeSofaBodyColor(target, hexColor) {
   });
 }
 
+const BEIGE_SOFA_MESH = Object.freeze({
+  double: 'beigechair2seatsofa_tripo_mat_0691346e_0',
+  singleLeft: 'beigechair1_tripo_mat_0691346e_0',
+  singleRight: 'beigechair3_tripo_mat_0691346e_0',
+});
+
+function addClassicCoffeeTable(group, item, { x = 0, z = 0 } = {}) {
+  const widthM = Number(item.dimensions.widthCm) / 100;
+  const depthM = Number(item.dimensions.depthCm) / 100;
+  const heightM = Number(item.dimensions.heightCm) / 100;
+
+  const tableTop = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, 0.018, depthM),
+    new THREE.MeshPhysicalMaterial({ ...TABLE_GLASS_APPEARANCE, clearcoatRoughness: 0.08 }),
+  );
+  tableTop.position.set(x, heightM, z);
+  tableTop.receiveShadow = true;
+  group.add(tableTop);
+
+  const tableStem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.035, 0.035, 0.35, 20),
+    new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.28 }),
+  );
+  tableStem.position.set(x, 0.19, z);
+  tableStem.castShadow = true;
+  group.add(tableStem);
+
+  const tableBase = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32),
+    new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.30 }),
+  );
+  tableBase.position.set(x, 0.018, z);
+  tableBase.castShadow = true;
+  tableBase.receiveShadow = true;
+  group.add(tableBase);
+}
+
+function attachBeigeSofaMesh(group, template, placement, hexColor, colorTargets) {
+  const source = template.getObjectByName(placement.meshName);
+  if (!source) {
+    console.warn('Bej koltuk GLB mesh bulunamadı:', placement.meshName);
+    return;
+  }
+
+  source.updateWorldMatrix(true, false);
+  const mesh = source.clone(true);
+  mesh.matrixAutoUpdate = true;
+  mesh.position.set(0, 0, 0);
+  mesh.rotation.set(0, 0, 0);
+  mesh.quaternion.identity();
+  mesh.scale.set(1, 1, 1);
+  mesh.updateMatrix();
+  mesh.applyMatrix4(source.matrixWorld);
+
+  mesh.traverse((object) => {
+    if (!object.isMesh) return;
+    object.castShadow = true;
+    object.receiveShadow = true;
+    makeBeigeSofaBodyWhite(object, hexColor);
+    colorTargets.push(object);
+  });
+
+  mesh.updateMatrixWorld(true);
+  let sourceBox = new THREE.Box3().setFromObject(mesh);
+  const sourceCenter = sourceBox.getCenter(new THREE.Vector3());
+  mesh.position.x -= sourceCenter.x;
+  mesh.position.z -= sourceCenter.z;
+  mesh.position.y -= sourceBox.min.y;
+  mesh.updateMatrixWorld(true);
+  sourceBox = new THREE.Box3().setFromObject(mesh);
+
+  const oriented = new THREE.Group();
+  oriented.rotation.y = THREE.MathUtils.degToRad(placement.rotationYDeg);
+  oriented.add(mesh);
+  oriented.updateMatrixWorld(true);
+
+  const orientedBox = new THREE.Box3().setFromObject(oriented);
+  const orientedSize = orientedBox.getSize(new THREE.Vector3());
+  const sourceSize = sourceBox.getSize(new THREE.Vector3());
+  const isLoveseat = placement.meshName === BEIGE_SOFA_MESH.double;
+  const sizeCorrection = isLoveseat ? 1.40 : 1.25;
+  const physicalWidthM = isLoveseat
+    ? orientedSize.x
+    : Math.max(sourceSize.x, sourceSize.z);
+  const uniformScale = physicalWidthM > 0
+    ? (placement.targetWidthM / physicalWidthM) * sizeCorrection
+    : sizeCorrection;
+
+  const fitted = new THREE.Group();
+  fitted.scale.setScalar(uniformScale);
+  fitted.position.set(placement.x, 0, placement.z);
+  fitted.add(oriented);
+  group.add(fitted);
+}
+
+function createBeigeSofaFurnitureProxy(group, moduleState, {
+  type,
+  widthCm,
+  depthCm,
+  heightCm,
+  colorTargets,
+  surfaceRole = 'furniture',
+}) {
+  const proxy = new THREE.Mesh(
+    new THREE.BoxGeometry(widthCm / 100, heightCm / 100, depthCm / 100),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+  );
+  proxy.position.set(0, heightCm / 200, 0);
+  group.add(proxy);
+
+  const selectionFrame = createSelectionFrame(widthCm / 100, heightCm / 100);
+  selectionFrame.visible = false;
+  proxy.add(selectionFrame);
+  proxy.userData = {
+    kind: 'surface',
+    moduleType: type,
+    selectionMode: 'module',
+    acceptsImage: false,
+    moduleIndex: group.userData.moduleIndex,
+    moduleId: moduleState.id,
+    widthCm,
+    stripIndex: null,
+    stripNumber: null,
+    surfaceRole,
+    surfaceId: moduleState.surface?.id ?? moduleState.id,
+    surfaceState: moduleState.surface ?? null,
+    selectionFrame,
+    colorTargets,
+  };
+  return proxy;
+}
+
 function createBeigeSofaSetModule(moduleState, moduleIndex) {
-  const widthCm = Number(moduleState.widthCm || 150);
-  const depthCm = Number(moduleState.depthCm || 150);
-  const heightCm = Number(moduleState.heightCm || 78);
-  const widthM = widthCm / 100;
+  const setItem = getItem('furniture_sofa_set_classic');
+  const doubleItem = getItem('furniture_sofa_double_classic');
+  const singleItem = getItem('furniture_sofa_single_classic');
+  const tableItem = getItem('furniture_coffee_table_classic');
+  const widthCm = Number(moduleState.widthCm || setItem.dimensions.widthCm);
+  const depthCm = Number(moduleState.depthCm || setItem.dimensions.depthCm);
+  const heightCm = Number(moduleState.heightCm || setItem.dimensions.heightCm);
   const depthM = depthCm / 100;
-  const heightM = heightCm / 100;
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -5816,142 +6111,158 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
     heightCm,
   };
 
-  const loveseatWidthM = 1.50;
-  const chairWidthM = 0.65;
-  const sofaDepthM = 0.45;
+  const loveseatWidthM = Number(doubleItem.dimensions.widthCm) / 100;
+  const chairWidthM = Number(singleItem.dimensions.widthCm) / 100;
+  const sofaDepthM = Number(singleItem.dimensions.depthCm) / 100;
   const chairGapM = 0.20;
   const chairCenterOffsetM = (chairWidthM + chairGapM) / 2;
   const backRowZ = -depthM / 2 + sofaDepthM / 2;
   const frontRowZ = depthM / 2 - sofaDepthM / 2;
 
   const colorTargets = [];
-  const proxy = new THREE.Mesh(
-    new THREE.BoxGeometry(widthM, heightM, depthM),
-    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
-  );
-  proxy.position.set(0, heightM / 2, 0);
-  group.add(proxy);
-
-  const selectionFrame = createSelectionFrame(widthM, heightM);
-  selectionFrame.visible = false;
-  proxy.add(selectionFrame);
-  proxy.userData = {
-    kind: 'surface',
-    moduleType: 'sofa-set-classic',
-    selectionMode: 'module',
-    acceptsImage: false,
-    moduleIndex,
-    moduleId: moduleState.id,
+  const proxy = createBeigeSofaFurnitureProxy(group, moduleState, {
+    type: 'sofa-set-classic',
     widthCm,
-    stripIndex: null,
-    stripNumber: null,
-    surfaceRole: 'furniture',
-    surfaceId: moduleState.surface?.id,
-    surfaceState: moduleState.surface,
-    selectionFrame,
+    depthCm,
+    heightCm,
     colorTargets,
-  };
+  });
 
   const placements = Object.freeze([
-    Object.freeze({ meshName: 'beigechair2seatsofa_tripo_mat_0691346e_0', targetWidthM: loveseatWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: 0, z: backRowZ, rotationYDeg: -45 }),
-    Object.freeze({ meshName: 'beigechair1_tripo_mat_0691346e_0', targetWidthM: chairWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: -chairCenterOffsetM, z: frontRowZ, rotationYDeg: 40 }),
-    Object.freeze({ meshName: 'beigechair3_tripo_mat_0691346e_0', targetWidthM: chairWidthM, targetDepthM: sofaDepthM, targetHeightM: heightM, x: chairCenterOffsetM, z: frontRowZ, rotationYDeg: 225 }),
+    Object.freeze({
+      meshName: BEIGE_SOFA_MESH.double,
+      targetWidthM: loveseatWidthM,
+      x: 0,
+      z: backRowZ,
+      rotationYDeg: -45,
+    }),
+    Object.freeze({
+      meshName: BEIGE_SOFA_MESH.singleLeft,
+      targetWidthM: chairWidthM,
+      x: -chairCenterOffsetM,
+      z: frontRowZ,
+      rotationYDeg: 40,
+    }),
+    Object.freeze({
+      meshName: BEIGE_SOFA_MESH.singleRight,
+      targetWidthM: chairWidthM,
+      x: chairCenterOffsetM,
+      z: frontRowZ,
+      rotationYDeg: 225,
+    }),
   ]);
 
   loadBeigeSofaModel().then((template) => {
     if (!group.parent) return;
-
     placements.forEach((placement) => {
-      const source = template.getObjectByName(placement.meshName);
-      if (!source) {
-        console.warn('Bej koltuk GLB mesh bulunamadı:', placement.meshName);
-        return;
-      }
-
-      // Preserve the complete GLB node transform chain. Cloning only the mesh and
-      // detaching it from its parents can lose scale/rotation authored above the mesh.
-      source.updateWorldMatrix(true, false);
-      const mesh = source.clone(true);
-      mesh.matrixAutoUpdate = true;
-      mesh.position.set(0, 0, 0);
-      mesh.rotation.set(0, 0, 0);
-      mesh.quaternion.identity();
-      mesh.scale.set(1, 1, 1);
-      mesh.updateMatrix();
-      mesh.applyMatrix4(source.matrixWorld);
-
-      mesh.traverse((object) => {
-        if (!object.isMesh) return;
-        object.castShadow = true;
-        object.receiveShadow = true;
-        makeBeigeSofaBodyWhite(object, moduleState.surface?.color ?? '#ffffff');
-        colorTargets.push(object);
-      });
-
-      // Normalize around the object's real physical footprint and put its feet on y=0.
-      mesh.updateMatrixWorld(true);
-      let sourceBox = new THREE.Box3().setFromObject(mesh);
-      const sourceCenter = sourceBox.getCenter(new THREE.Vector3());
-      mesh.position.x -= sourceCenter.x;
-      mesh.position.z -= sourceCenter.z;
-      mesh.position.y -= sourceBox.min.y;
-      mesh.updateMatrixWorld(true);
-      sourceBox = new THREE.Box3().setFromObject(mesh);
-
-      const oriented = new THREE.Group();
-      oriented.rotation.y = THREE.MathUtils.degToRad(placement.rotationYDeg);
-      oriented.add(mesh);
-      oriented.updateMatrixWorld(true);
-
-      const orientedBox = new THREE.Box3().setFromObject(oriented);
-      const orientedSize = orientedBox.getSize(new THREE.Vector3());
-      const sourceSize = sourceBox.getSize(new THREE.Vector3());
-      const isLoveseat = placement.meshName === 'beigechair2seatsofa_tripo_mat_0691346e_0';
-
-      // Loveseat is exactly 150 cm wide. Singles keep the requested +25% visual size,
-      // while every axis still uses one uniform scale so the GLB proportions stay intact.
-      const sizeCorrection = isLoveseat ? 1.40 : 1.25;
-      const physicalWidthM = isLoveseat
-        ? orientedSize.x
-        : Math.max(sourceSize.x, sourceSize.z);
-      const uniformScale = physicalWidthM > 0
-        ? (placement.targetWidthM / physicalWidthM) * sizeCorrection
-        : sizeCorrection;
-
-      const fitted = new THREE.Group();
-      fitted.scale.setScalar(uniformScale);
-      fitted.position.set(placement.x, 0, placement.z);
-      fitted.add(oriented);
-      group.add(fitted);
+      attachBeigeSofaMesh(
+        group,
+        template,
+        placement,
+        moduleState.surface?.color ?? '#ffffff',
+        colorTargets,
+      );
     });
   }).catch((error) => {
     console.warn('Bej koltuk takımı GLB modeli yüklenemedi:', error);
   });
 
-  const tableTop = new THREE.Mesh(
-    new THREE.BoxGeometry(0.60, 0.018, 0.42),
-    new THREE.MeshPhysicalMaterial({ ...TABLE_GLASS_APPEARANCE, clearcoatRoughness: 0.08 }),
-  );
-  tableTop.position.set(0, 0.38, 0.10);
-  tableTop.receiveShadow = true;
-  group.add(tableTop);
+  addClassicCoffeeTable(group, tableItem, { x: 0, z: 0.10 });
 
-  const tableStem = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.035, 0.035, 0.35, 20),
-    new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.28 }),
-  );
-  tableStem.position.set(0, 0.19, 0.10);
-  tableStem.castShadow = true;
-  group.add(tableStem);
+  return { group, surfaces: [proxy] };
+}
 
-  const tableBase = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32),
-    new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.30 }),
+function createSofaPieceClassicModule(moduleState, moduleIndex, itemKey, meshName) {
+  const item = getItem(itemKey);
+  const widthCm = Number(moduleState.widthCm || item.dimensions.widthCm);
+  const depthCm = Number(moduleState.depthCm || item.dimensions.depthCm);
+  const heightCm = Number(moduleState.heightCm || item.dimensions.heightCm);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: item.type,
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const colorTargets = [];
+  const proxy = createBeigeSofaFurnitureProxy(group, moduleState, {
+    type: item.type,
+    widthCm,
+    depthCm,
+    heightCm,
+    colorTargets,
+  });
+
+  loadBeigeSofaModel().then((template) => {
+    if (!group.parent) return;
+    attachBeigeSofaMesh(
+      group,
+      template,
+      {
+        meshName,
+        targetWidthM: widthCm / 100,
+        x: 0,
+        z: 0,
+        rotationYDeg: Number(moduleState.visualRotationYDeg ?? item.visualRotationYDeg) || 0,
+      },
+      moduleState.surface?.color ?? '#ffffff',
+      colorTargets,
+    );
+  }).catch((error) => {
+    console.warn('Bej koltuk GLB modeli yüklenemedi:', error);
+  });
+
+  return { group, surfaces: [proxy] };
+}
+
+function createSofaSingleClassicModule(moduleState, moduleIndex) {
+  return createSofaPieceClassicModule(
+    moduleState,
+    moduleIndex,
+    'furniture_sofa_single_classic',
+    BEIGE_SOFA_MESH.singleLeft,
   );
-  tableBase.position.set(0, 0.018, 0.10);
-  tableBase.castShadow = true;
-  tableBase.receiveShadow = true;
-  group.add(tableBase);
+}
+
+function createSofaDoubleClassicModule(moduleState, moduleIndex) {
+  return createSofaPieceClassicModule(
+    moduleState,
+    moduleIndex,
+    'furniture_sofa_double_classic',
+    BEIGE_SOFA_MESH.double,
+  );
+}
+
+function createCoffeeTableClassicModule(moduleState, moduleIndex) {
+  const item = getItem('furniture_coffee_table_classic');
+  const widthCm = Number(moduleState.widthCm || item.dimensions.widthCm);
+  const depthCm = Number(moduleState.depthCm || item.dimensions.depthCm);
+  const heightCm = Number(moduleState.heightCm || item.dimensions.heightCm);
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: 'coffee-table-classic',
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  addClassicCoffeeTable(group, item);
+
+  const proxy = createBeigeSofaFurnitureProxy(group, moduleState, {
+    type: 'coffee-table-classic',
+    widthCm,
+    depthCm,
+    heightCm,
+    colorTargets: [],
+    surfaceRole: 'table',
+  });
 
   return { group, surfaces: [proxy] };
 }

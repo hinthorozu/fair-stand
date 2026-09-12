@@ -1,5 +1,14 @@
 import { resolveModuleCatalogKey } from './catalog.js';
-import { getCommercialItemForType, getItem, getShowcaseBodyDefinition, getShowcaseItemKeyForType, resolveWallMediaMetrics } from './items.js';
+import {
+  getCommercialItemForType,
+  getFurnitureClusterQuantity,
+  getFurnitureItemForType,
+  getItem,
+  getTopLightItemForType,
+  getShowcaseBodyDefinition,
+  getShowcaseItemKeyForType,
+  resolveWallMediaMetrics,
+} from './items.js';
 import { getDoorLeafProductionItem, getProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 
@@ -385,48 +394,62 @@ export function createBaseModuleState(widthCmOrDescriptor) {
   };
 }
 
-export function createBeigeSofaSetModuleState() {
-  return {
+function createFurnitureModuleState(type) {
+  const item = getFurnitureItemForType(type);
+  if (!item) return null;
+  const state = {
     id: createId('module'),
-    type: 'sofa-set-classic',
-    widthCm: 150,
-    depthCm: 150,
-    heightCm: 78,
-    surface: {
-      id: createId('surface'),
-      color: '#ffffff',
-    },
+    itemKey: item.itemKey,
+    catalogKey: item.itemKey,
+    type: item.type,
+    widthCm: Number(item.dimensions.widthCm),
+    depthCm: Number(item.dimensions.depthCm),
+    heightCm: Number(item.dimensions.heightCm),
   };
+  if (type !== 'table-glass' && type !== 'coffee-table-classic') {
+    state.surface = {
+      id: createId('surface'),
+      color: DEFAULT_PANEL_COLOR,
+    };
+  }
+  if (Object.hasOwn(item, 'visualRotationYDeg')) {
+    state.visualRotationYDeg = item.visualRotationYDeg;
+  }
+  const chairCount = getFurnitureClusterQuantity(item, 'chair_eames');
+  if (chairCount != null) state.chairCount = chairCount;
+  return state;
+}
+
+export function createBeigeSofaSetModuleState() {
+  return createFurnitureModuleState('sofa-set-classic');
+}
+
+export function createSofaSingleClassicModuleState() {
+  return createFurnitureModuleState('sofa-single-classic');
+}
+
+export function createSofaDoubleClassicModuleState() {
+  return createFurnitureModuleState('sofa-double-classic');
+}
+
+export function createCoffeeTableClassicModuleState() {
+  return createFurnitureModuleState('coffee-table-classic');
 }
 
 export function createEamesTableChairSetModuleState() {
-  return {
-    id: createId('module'),
-    type: 'table-chair-set-eames',
-    widthCm: 150,
-    depthCm: 150,
-    heightCm: 82,
-    chairCount: 4,
-    surface: {
-      id: createId('surface'),
-      color: DEFAULT_PANEL_COLOR,
-    },
-  };
+  return createFurnitureModuleState('table-chair-set-eames');
 }
 
+export function createEamesChairModuleState() {
+  return createFurnitureModuleState('chair');
+}
+
+export function createGlassTableModuleState() {
+  return createFurnitureModuleState('table-glass');
+}
 
 export function createBarStoolModuleState() {
-  return {
-    id: createId('module'),
-    type: 'bar-stool',
-    widthCm: 60,
-    depthCm: 55,
-    heightCm: 121,
-    surface: {
-      id: createId('surface'),
-      color: DEFAULT_PANEL_COLOR,
-    },
-  };
+  return createFurnitureModuleState('bar-stool');
 }
 
 function createCommercialModuleState(type) {
@@ -526,16 +549,18 @@ export function createIndoorPlantModuleState(descriptor = {}) {
 }
 
 export function createIlluminatedFoamModuleState(imageAssetId, descriptor = {}) {
-  const widthCm = Math.max(10, Number(descriptor.widthCm) || 200);
-  const heightCm = Math.max(5, Number(descriptor.heightCm) || 50);
+  const item = getItem('illuminated-foam');
+  const widthCm = Math.max(10, Number(descriptor.widthCm) || Number(item.dimensions.widthCm));
+  const heightCm = Math.max(5, Number(descriptor.heightCm) || Number(item.dimensions.heightCm));
   return {
     id: createId('module'),
-    type: 'illuminated-foam',
+    itemKey: item.itemKey,
+    type: item.type,
     imageAssetId,
     widthCm,
     heightCm,
-    depthCm: 3.5,
-    wallGapCm: 1.5,
+    depthCm: Number(item.dimensions.depthCm),
+    wallGapCm: Number(item.dimensions.wallGapCm),
     haloColor: /^#[0-9a-fA-F]{6}$/.test(String(descriptor.haloColor ?? '')) ? String(descriptor.haloColor).toLowerCase() : '#ffffff',
   };
 }
@@ -571,12 +596,15 @@ export function createTvModuleState(sizeInch = 42, descriptor = {}) {
 }
 
 export function createLedFloodlightModuleState() {
+  const item = getTopLightItemForType('led-floodlight');
   return {
     id: createId('module'),
-    type: 'led-floodlight',
-    widthCm: 50,
-    depthCm: 20,
-    heightCm: 35,
+    itemKey: item.itemKey,
+    catalogKey: item.itemKey,
+    type: item.type,
+    widthCm: Number(item.dimensions.widthCm),
+    depthCm: Number(item.dimensions.depthCm),
+    heightCm: Number(item.dimensions.heightCm),
     surface: {
       id: createId('surface'),
       color: '#17191c',
@@ -592,7 +620,12 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   separator: (descriptor) => createSeparatorModuleState(descriptor),
   shelf: (descriptor) => createShelfModuleState(descriptor),
   'sofa-set-classic': () => createBeigeSofaSetModuleState(),
+  'sofa-single-classic': () => createSofaSingleClassicModuleState(),
+  'sofa-double-classic': () => createSofaDoubleClassicModuleState(),
+  'coffee-table-classic': () => createCoffeeTableClassicModuleState(),
   'table-chair-set-eames': () => createEamesTableChairSetModuleState(),
+  chair: () => createEamesChairModuleState(),
+  'table-glass': () => createGlassTableModuleState(),
   'bar-stool': () => createBarStoolModuleState(),
   'mini-fridge': () => createMiniFridgeModuleState(),
   kettle: () => createKettleModuleState(),
@@ -711,6 +744,44 @@ export function normalizeModuleItemState(moduleState) {
     if (resolvedKey && isIndoorPlantItem(getItem(resolvedKey))) {
       moduleState.itemKey = resolvedKey;
     }
+    return moduleState;
+  }
+
+  if (
+    moduleState.type === 'sofa-set-classic'
+    || moduleState.type === 'sofa-single-classic'
+    || moduleState.type === 'sofa-double-classic'
+    || moduleState.type === 'coffee-table-classic'
+    || moduleState.type === 'table-chair-set-eames'
+    || moduleState.type === 'chair'
+    || moduleState.type === 'table-glass'
+    || moduleState.type === 'bar-stool'
+  ) {
+    const resolvedKey = resolveModuleCatalogKey(moduleState);
+    if (resolvedKey && getFurnitureItemForType(moduleState.type)?.itemKey === resolvedKey) {
+      moduleState.itemKey = resolvedKey;
+      const item = getItem(resolvedKey);
+      if (Object.hasOwn(item, 'visualRotationYDeg') && !Object.hasOwn(moduleState, 'visualRotationYDeg')) {
+        moduleState.visualRotationYDeg = item.visualRotationYDeg;
+      }
+    }
+    return moduleState;
+  }
+
+  if (moduleState.type === 'led-floodlight') {
+    const item = getTopLightItemForType('led-floodlight');
+    if (item) {
+      moduleState.itemKey = item.itemKey;
+      const resolvedKey = resolveModuleCatalogKey(moduleState);
+      if (resolvedKey === item.itemKey) moduleState.catalogKey = resolvedKey;
+    }
+    return moduleState;
+  }
+
+  if (moduleState.type === 'illuminated-foam') {
+    const item = getItem('illuminated-foam');
+    if (item) moduleState.itemKey = item.itemKey;
+    delete moduleState.catalogKey;
     return moduleState;
   }
 

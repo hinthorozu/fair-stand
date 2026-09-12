@@ -92,24 +92,31 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 | 27 | `BASE_200` | Baza 200 | `base` |
 | 28 | `BASE_150` | Baza 150 | `base` |
 | 29 | `BASE_100` | Baza 100 | `base` |
-| 30 | `furniture_sofa_set_classic` | Koltuk Takımı | `sofa-set-classic` |
-| 31 | `furniture_table_chair_set_eames` | Eames Masa Sandalye Takımı | `table-chair-set-eames` |
-| 32 | `furniture_bar_stool_classic` | Bar Taburesi | `bar-stool` |
-| 33 | `MINI_FRIDGE_AVANTI` | Mini Buzdolabı | `mini-fridge` |
-| 34 | `KETTLE` | Kettle | `kettle` |
-| 35 | `COAT_RACK` | Askılık | `coat-rack` |
-| 36 | `PLASTIC_TRASH_BIN` | Çöp Kutusu | `plastic-trash-bin` |
-| 37 | `EXTRA_INDOOR_PLANT_1` | Yapay Çiçek 1 | `indoor-plant-1` |
-| 38 | `EXTRA_LONG_PLANTER_100` | Uzun Saksı 100 | `indoor-plant-1` |
-| 39 | `EXTRA_LONG_PLANTER_150` | Uzun Saksı 150 | `indoor-plant-1` |
-| 40 | `EXTRA_LONG_PLANTER_200` | Uzun Saksı 200 | `indoor-plant-1` |
-| 41 | `TV_42` | TV 42" | `tv` |
-| 42 | `TV_55` | TV 55" | `tv` |
-| 43 | `VIDEO_WALL_2X2` | Video Wall 2×2 | `tv` |
-| 44 | `VIDEO_WALL_3X3` | Video Wall 3×3 | `tv` |
-| 45 | `TV_65` | TV 65" | `tv` |
-| 46 | `LED_FLOODLIGHT` | LED Projektör | `led-floodlight` |
-| 47 | `illuminated-foam` | Işıklı Strafor / Logo | `illuminated-foam` |
-| 48 | — | Parke | — |
-| 49 | — | Halı | — |
-| 50 | — | Karolaj | — |
+| 30 | `furniture_sofa_set_classic` | Koltuk Takımı | **`sofa-set-classic` · Item kümesi** |
+| 31 | `furniture_sofa_single_classic` | Tekli Koltuk | **`sofa-single-classic` · Tekil Item** |
+| 32 | `furniture_sofa_double_classic` | Çiftli Koltuk | **`sofa-double-classic` · Tekil Item** |
+| 33 | `furniture_coffee_table_classic` | Sehpa | **`coffee-table-classic` · Tekil Item** |
+| 34 | `furniture_table_chair_set_eames` | Eames Masa Sandalye Takımı | **`table-chair-set-eames` · Item kümesi** |
+| 35 | `chair_eames` | Eames Sandalye | **`chair` · Tekil Item** |
+| 36 | `glass_table` | Cam Masa | **`table-glass` · Tekil Item** |
+| 37 | `furniture_bar_stool_classic` | Bar Taburesi | `bar-stool` |
+| 38 | `MINI_FRIDGE_AVANTI` | Mini Buzdolabı | `mini-fridge` |
+| 39 | `KETTLE` | Kettle | `kettle` |
+| 40 | `COAT_RACK` | Askılık | `coat-rack` |
+| 41 | `PLASTIC_TRASH_BIN` | Çöp Kutusu | `plastic-trash-bin` |
+| 42 | `EXTRA_INDOOR_PLANT_1` | Yapay Çiçek 1 | `indoor-plant-1` |
+| 43 | `EXTRA_LONG_PLANTER_100` | Uzun Saksı 100 | `indoor-plant-1` |
+| 44 | `EXTRA_LONG_PLANTER_150` | Uzun Saksı 150 | `indoor-plant-1` |
+| 45 | `EXTRA_LONG_PLANTER_200` | Uzun Saksı 200 | `indoor-plant-1` |
+| 46 | `TV_42` | TV 42" | `tv` |
+| 47 | `TV_55` | TV 55" | `tv` |
+| 48 | `VIDEO_WALL_2X2` | Video Wall 2×2 | `tv` |
+| 49 | `VIDEO_WALL_3X3` | Video Wall 3×3 | `tv` |
+| 50 | `TV_65` | TV 65" | `tv` |
+| 51 | `led_floodlight` | LED Projektör | **`led-floodlight` · Tekil Item** |
+| 52 | `illuminated-foam` | Işıklı Strafor / Logo | **`illuminated-foam` · Tekil Item · katalog dışı** |
+| 53 | `karolaj` | Karolaj | **`floor` · Tekil Item · katalog dışı** |
+| 54 | `hali` | Halı | **`floor` · Tekil Item · katalog dışı** |
+| 55 | `parke-acik` | Beyaz Meşe | **`floor` · Tekil Item · katalog dışı** |
+| 56 | `parke-sari` | Sarı Meşe | **`floor` · Tekil Item · katalog dışı** |
+| 57 | `parke-beton` | Beton Parke | **`floor` · Tekil Item · katalog dışı** |

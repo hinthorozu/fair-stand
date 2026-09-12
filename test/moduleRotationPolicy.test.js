@@ -14,6 +14,8 @@ test('clockwise and counter-clockwise deltas always use the module rotation step
     [{ type: 'counter', widthCm: 150 }, 45],
     [{ type: 'counter', widthCm: 200 }, 45],
     [{ type: 'bar-stool' }, 45],
+    [{ type: 'sofa-single-classic' }, 45],
+    [{ type: 'sofa-double-classic' }, 90],
     [{ type: 'mini-fridge' }, 90],
     [{ type: 'kettle' }, 90],
     [{ type: 'coat-rack' }, 90],
