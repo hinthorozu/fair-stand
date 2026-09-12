@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { WALL_MEDIA_ITEMS, resolveWallMediaMetrics, getItem } from '../src/items.js';
-import { MODULE_CATALOG, resolveModuleCatalogKey } from '../src/catalog.js';
+import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
 import { createModuleStateFromDescriptor, duplicateModuleState, normalizeModuleItemState } from '../src/designState.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
@@ -29,7 +29,7 @@ for (const item of Object.values(WALL_MEDIA_ITEMS)) {
     // A runtime instance sources every default from the Item.
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, item.itemKey);
-    assert.equal(state.catalogKey, item.itemKey);
+    assert.equal(state.itemKey, item.itemKey);
     assert.equal(state.type, 'tv');
     assert.equal(state.sizeInch, item.sizeInch);
     assert.equal(state.widthCm, metrics.widthCm);
@@ -51,16 +51,15 @@ for (const item of Object.values(WALL_MEDIA_ITEMS)) {
     assert.equal(contract.bom.mode, 'decision-required');
     assert.equal(contract.bom.source, null);
 
-    // Legacy project load: catalogKey -> itemKey hydration resolves the canonical key.
+    // itemKey yoksa type + ölçü resolve eder.
     // Fake historical footprint widthCm=100 is rewritten to the screen width.
     const legacy = JSON.parse(JSON.stringify(state));
     delete legacy.itemKey;
-    delete legacy.catalogKey;
     legacy.widthCm = 100;
     const restored = normalizeModuleItemState(legacy);
     assert.equal(restored.itemKey, item.itemKey);
     assert.equal(restored.widthCm, metrics.screenWidthCm);
-    assert.equal(resolveModuleCatalogKey(restored), item.itemKey);
+    assert.equal(resolveItemKey(restored), item.itemKey);
 
     // Duplicate is an independent instance carrying the same product identity.
     const duplicate = duplicateModuleState(state);

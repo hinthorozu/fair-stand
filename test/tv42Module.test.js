@@ -45,7 +45,7 @@ test('TV 55 and 65 keep shared depth/catalog height and use screen width as plac
     assert.equal(catalogItem.depthCm, 5);
     assert.equal(state.type, base.type);
     assert.equal(state.itemKey, `TV_${sizeInch}`);
-    assert.equal(state.catalogKey, `TV_${sizeInch}`);
+    assert.equal(state.itemKey, `TV_${sizeInch}`);
     assert.equal(state.widthCm, expected[sizeInch][0]);
     assert.equal(state.depthCm, 5);
     assert.equal(state.sizeInch, sizeInch);

@@ -92,7 +92,7 @@ Item kapsamındaysa:
 - canonical `itemKey` nedir?
 - runtime `type` / behavior family nedir?
 - project instance `id` canonical ürün kimliğinden nasıl ayrılır?
-- mevcut `catalogKey` ile ilişki nedir; paralel ikinci kimlik yaratılıyor mu?
+- persist edilen ürün kimliği yalnız `itemKey` mı; `catalogKey` okunuyor veya yazılıyor mu?
 
 Module-only kapsamda mevcut catalog identity kuralları korunur.
 

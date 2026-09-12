@@ -92,7 +92,6 @@ Caller recipe options yalnız ilgili root composite Item'ın recipe çözümüne
 id         = module-<instance>
 itemKey    = door_100
 type       = door
-catalogKey = door_100
 widthCm    = 100
 ```
 

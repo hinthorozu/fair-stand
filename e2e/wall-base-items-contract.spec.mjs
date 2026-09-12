@@ -67,6 +67,7 @@ for (const itemKey of keys) {
 
     const picker = page.locator('.module-picker-backdrop');
     await expect(picker).toBeVisible();
+    await picker.locator('summary', { hasText: 'Panel & Duvar' }).click();
     await picker.locator(`[data-module-key="${itemKey}"]`).click();
     await picker.locator('.module-picker-add').click();
     await expect(picker).toBeHidden();
@@ -74,7 +75,7 @@ for (const itemKey of keys) {
     const project = await saveAndReadProject(page);
     const item = project.modules.find((module) => module.itemKey === itemKey);
     expect(item).toBeTruthy();
-    expect(item.catalogKey).toBe(itemKey);
+    expect(item.itemKey).toBe(itemKey);
     expect(item.type).toBe('base-wall');
     expect(item.id).toBeTruthy();
     expect(item.strips?.length).toBe(7);

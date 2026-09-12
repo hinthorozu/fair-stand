@@ -7,7 +7,7 @@ import {
   MODULE_CATALOG,
   MODULE_CATALOG_GROUPS,
   MODULE_CATALOG_KEYS,
-  resolveModuleCatalogKey,
+  resolveItemKey,
 } from '../src/catalog.js';
 
 test('every catalog module belongs to exactly one catalog group', () => {
@@ -21,21 +21,29 @@ test('every catalog module resolves its single-source key and label', () => {
   MODULE_CATALOG_KEYS.forEach((moduleKey) => {
     const module = MODULE_CATALOG[moduleKey];
     assert.ok(module, moduleKey);
-    assert.equal(resolveModuleCatalogKey({ ...module, catalogKey: moduleKey }), moduleKey);
-    assert.equal(getModuleCatalogLabel({ ...module, catalogKey: moduleKey }), module.label);
+    assert.equal(resolveItemKey({ ...module, itemKey: moduleKey }), moduleKey);
+    assert.equal(getModuleCatalogLabel({ ...module, itemKey: moduleKey }), module.label);
   });
 });
 
 test('legacy separators resolve exact normal versus vine catalog identity from modelFile', () => {
-  assert.equal(resolveModuleCatalogKey({ type: 'separator', widthCm: 100 }), 'wall_separator_100');
-  assert.equal(resolveModuleCatalogKey({ type: 'separator', widthCm: 50 }), 'wall_separator_50');
+  assert.equal(resolveItemKey({ type: 'separator', widthCm: 100 }), 'wall_separator_100');
+  assert.equal(resolveItemKey({ type: 'separator', widthCm: 50 }), 'wall_separator_50');
   assert.equal(
-    resolveModuleCatalogKey({ type: 'separator', widthCm: 100, modelFile: 'wall_separator_100_sarmasik.glb' }),
+    resolveItemKey({ type: 'separator', widthCm: 100, modelFile: 'wall_separator_100_sarmasik.glb' }),
     'wall_separator_100_sarmasik',
   );
   assert.equal(
-    resolveModuleCatalogKey({ type: 'separator', widthCm: 50, modelFile: 'wall_separator_50_sarmasik.glb' }),
+    resolveItemKey({ type: 'separator', widthCm: 50, modelFile: 'wall_separator_50_sarmasik.glb' }),
     'wall_separator_50_sarmasik',
+  );
+});
+
+test('catalogKey is not a product identity input', () => {
+  assert.equal(resolveItemKey({ catalogKey: 'wall_100' }), null);
+  assert.equal(
+    resolveItemKey({ type: 'flat-panel', widthCm: 100, catalogKey: 'wall_200' }),
+    'wall_100',
   );
 });
 

@@ -35,11 +35,11 @@ test('only Yapay Çiçek 1 is wired and the removed second GLB stays absent', ()
   assert.equal(existsSync(new URL('../public/models/indoor_plants2.glb', import.meta.url)), false);
 
   const canonicalState = createModuleStateFromDescriptor(MODULE_CATALOG.EXTRA_INDOOR_PLANT_1, {
-    catalogKey: 'EXTRA_INDOOR_PLANT_1',
+    itemKey: 'EXTRA_INDOOR_PLANT_1',
   });
   assert.ok(canonicalState);
   assert.equal(canonicalState.type, 'indoor-plant-1');
-  assert.equal(canonicalState.catalogKey, 'EXTRA_INDOOR_PLANT_1');
+  assert.equal(canonicalState.itemKey, 'EXTRA_INDOOR_PLANT_1');
 
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(scene, /indoor_plants\.glb/);

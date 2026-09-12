@@ -80,7 +80,7 @@ for (const itemKey of Object.keys(expected)) {
     const project = await saveAndReadProject(page);
     const item = project.modules.find((module) => module.itemKey === itemKey);
     expect(item).toBeTruthy();
-    expect(item.catalogKey).toBe(itemKey);
+    expect(item.itemKey).toBe(itemKey);
     expect(item.type).toBe('indoor-plant-1');
     expect(item.widthCm).toBe(expected[itemKey].widthCm);
     expect(item.modelFile).toBe(expected[itemKey].modelFile);

@@ -67,7 +67,7 @@ test('pending edit is saved before project switch cancels the autosave timer', a
       request.onerror = () => reject(request.error);
     });
     db.close();
-    return projects.find((project) => project.name === projectName)?.stand?.floorType ?? null;
+    return projects.find((project) => project.name === projectName)?.stand?.itemKey ?? null;
   }, projectA);
 
   expect(storedFloorType).toBe('hali');

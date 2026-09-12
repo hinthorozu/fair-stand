@@ -58,7 +58,7 @@ test('led_floodlight catalog drag creates a canonical top-light Item', async ({ 
   const project = await saveAndReadProject(page);
   const item = project.modules.find((module) => module.itemKey === 'led_floodlight');
   expect(item).toBeTruthy();
-  expect(item.catalogKey).toBe('led_floodlight');
+  expect(item.itemKey).toBe('led_floodlight');
   expect(item.type).toBe('led-floodlight');
   expect(item.widthCm).toBe(50);
   expect(item.depthCm).toBe(20);

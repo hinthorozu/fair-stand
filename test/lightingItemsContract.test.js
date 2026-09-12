@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS, resolveModuleCatalogKey } from '../src/catalog.js';
+import { MODULE_CATALOG, MODULE_CATALOG_KEYS, resolveItemKey } from '../src/catalog.js';
 import {
   createIlluminatedFoamModuleState,
   createLedFloodlightModuleState,
@@ -32,7 +32,7 @@ test('led_floodlight: canonical identity, catalog and hydrate', () => {
 
   const state = createLedFloodlightModuleState();
   assert.equal(state.itemKey, 'led_floodlight');
-  assert.equal(state.catalogKey, 'led_floodlight');
+  assert.equal(Object.hasOwn(state, 'catalogKey'), false);
   assert.equal(state.type, 'led-floodlight');
   assert.equal(state.widthCm, 50);
   assert.equal(state.depthCm, 20);
@@ -43,7 +43,7 @@ test('led_floodlight: canonical identity, catalog and hydrate', () => {
 
   const fromCatalog = createModuleStateFromDescriptor(catalog);
   assert.equal(fromCatalog.itemKey, 'led_floodlight');
-  assert.equal(fromCatalog.catalogKey, 'led_floodlight');
+  assert.equal(Object.hasOwn(fromCatalog, 'catalogKey'), false);
 
   const behavior = getModuleBehavior(state);
   assert.equal(behavior.placement, 'top');
@@ -56,17 +56,15 @@ test('led_floodlight: canonical identity, catalog and hydrate', () => {
   assert.equal(contract.bom.source, null);
   assert.equal(contract.profile, 'top-light');
 
-  const legacy = {
+  const restored = normalizeModuleItemState({
     type: 'led-floodlight',
     widthCm: 50,
     depthCm: 20,
     heightCm: 35,
-    catalogKey: 'LED_FLOODLIGHT',
-  };
-  const restored = normalizeModuleItemState(legacy);
+  });
   assert.equal(restored.itemKey, 'led_floodlight');
-  assert.equal(restored.catalogKey, 'led_floodlight');
-  assert.equal(resolveModuleCatalogKey(restored), 'led_floodlight');
+  assert.equal(Object.hasOwn(restored, 'catalogKey'), false);
+  assert.equal(resolveItemKey(restored), 'led_floodlight');
 
   const duplicate = duplicateModuleState(state);
   assert.notEqual(duplicate.id, state.id);
@@ -109,7 +107,7 @@ test('illuminated-foam: canonical identity stays off catalog', () => {
   assert.equal(behavior.moveSnapCm, 10);
 
   const contract = resolveModuleContract('illuminated-foam');
-  assert.equal(contract.catalogKey, null);
+  assert.equal(contract.itemKey, 'illuminated-foam');
   assert.equal(contract.bom.mode, 'decision-required');
   assert.equal(contract.bom.source, null);
 

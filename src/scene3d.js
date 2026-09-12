@@ -6,7 +6,7 @@ import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DI
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
 import { getProductionItem, getShelfProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
-import { getItem, getCommercialItemForType, getFloorItem, getShowcaseBodyDefinition, isParquetFloorItem, listFloorItems } from './items.js';
+import { getItem, getCommercialItemForType, getFloorItem, getShowcaseBodyDefinition, isCarpetFloorItem, isGridTileFloorItem, isParquetFloorItem, listFloorItems } from './items.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
@@ -564,20 +564,28 @@ export function createStandScene(
     return [...new Set(cuts.map((value) => Number(value.toFixed(6))))];
   }
 
+  function matchesConcreteParquetVisual(item) {
+    const concrete = getFloorItem('parke-beton');
+    return isParquetFloorItem(item)
+      && Number(item.dimensions?.lengthCm) === Number(concrete.dimensions.lengthCm)
+      && Number(item.dimensions?.depthCm) === Number(concrete.dimensions.depthCm);
+  }
+
   function createFloorPattern(widthM, depthM, floorType) {
     const positions = [];
     const topY = ACTIVE_PLATFORM_HEIGHT_M + FLOOR_TOP_EPSILON_M;
+    const floorItem = getFloorItem(floorType);
 
-    if (floorType === getFloorItem('karolaj').itemKey) {
-      const stepM = Number(getFloorItem('karolaj').dimensions.widthCm) / 100;
+    if (isGridTileFloorItem(floorItem)) {
+      const stepM = Number(floorItem.dimensions.widthCm) / 100;
       collectSurfaceCuts(widthM, stepM).forEach((x) => {
         positions.push(x, topY, 0, x, topY, depthM);
       });
       collectSurfaceCuts(depthM, stepM).forEach((z) => {
         positions.push(0, topY, z, widthM, topY, z);
       });
-    } else if (isParquetFloorItem(getFloorItem(floorType))) {
-      const parquet = getFloorItem(floorType);
+    } else if (isParquetFloorItem(floorItem)) {
+      const parquet = floorItem;
       const plankDepthM = Number(parquet.dimensions.depthCm) / 100;
       const plankLengthM = Number(parquet.dimensions.lengthCm) / 100;
       collectSurfaceCuts(depthM, plankDepthM).forEach((z) => {
@@ -598,8 +606,8 @@ export function createStandScene(
     if (!positions.length) return null;
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    const isConcreteParquetPattern = floorType === getFloorItem('parke-beton').itemKey;
-    const isParquetPattern = isParquetFloorItem(getFloorItem(floorType));
+    const isConcreteParquetPattern = matchesConcreteParquetVisual(floorItem);
+    const isParquetPattern = isParquetFloorItem(floorItem);
     const material = new THREE.LineBasicMaterial({
       // Beton parke derzleri sahne ışığından bağımsız, daha koyu ve net kalsın.
       color: isConcreteParquetPattern
@@ -622,7 +630,7 @@ export function createStandScene(
     const floorItem = getFloorItem(resolved);
 
     const material = activeFloor.material;
-    if (resolved === getFloorItem('hali').itemKey) {
+    if (isCarpetFloorItem(floorItem)) {
       material.color.set(floorColors.hali);
       material.roughness = 1;
       material.metalness = 0;
@@ -643,11 +651,11 @@ export function createStandScene(
       material.bumpMap = null;
       material.bumpScale = 0;
       material.color.set(floorItem.defaultColor);
-      material.roughness = resolved === getFloorItem('parke-beton').itemKey ? 0.98 : 0.78;
+      material.roughness = matchesConcreteParquetVisual(floorItem) ? 0.98 : 0.78;
       material.metalness = 0;
       // Beton parke, güçlü sahne ışığında rengini yıkamadan daha mat ve dengeli kalsın.
-      material.emissive.set(resolved === getFloorItem('parke-beton').itemKey ? floorItem.defaultColor : '#000000');
-      material.emissiveIntensity = resolved === getFloorItem('parke-beton').itemKey ? 0.06 : 0;
+      material.emissive.set(matchesConcreteParquetVisual(floorItem) ? floorItem.defaultColor : '#000000');
+      material.emissiveIntensity = matchesConcreteParquetVisual(floorItem) ? 0.06 : 0;
     } else {
       material.color.set(floorColors.karolaj);
       material.roughness = 0.92;
@@ -1781,7 +1789,7 @@ export function createStandScene(
     return {
       moduleIndex: moduleGroup.userData.moduleIndex,
       moduleId: moduleGroup.userData.moduleId,
-      catalogKey: moduleState.catalogKey ?? null,
+      itemKey: moduleState.itemKey ?? null,
       type: moduleState.type ?? moduleGroup.userData.type,
       widthCm: moduleState.widthCm ?? moduleGroup.userData.widthCm,
       depthCm: moduleState.depthCm ?? moduleGroup.userData.depthCm,
@@ -2045,7 +2053,7 @@ export function createStandScene(
     if (label) label.textContent = labelText;
 
     if (previewSlot) {
-      const signature = `${moduleState?.catalogKey ?? ''}|${labelText}|${moduleState?.type ?? ''}|${moduleState?.widthCm ?? ''}|${moduleState?.shelfCount ?? ''}|${moduleState?.sizeInch ?? ''}`;
+      const signature = `${moduleState?.itemKey ?? ''}|${labelText}|${moduleState?.type ?? ''}|${moduleState?.widthCm ?? ''}|${moduleState?.shelfCount ?? ''}|${moduleState?.sizeInch ?? ''}`;
       if (previewSlot.dataset.signature !== signature) {
         previewSlot.dataset.signature = signature;
         previewSlot.innerHTML = '';

@@ -7,7 +7,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `src/items.js > COMMERCIAL_ITEMS.MINI_FRIDGE_AVANTI` canonical itemKey/name/type/dimensions/modelFile sahibidir. Tekil ticari Item; parametrik veya bileşik değildir. Mevcut sistemde doğrulanmış unit YOK; BOM aşamasına geçilmediği için unit tahmin edilmedi. Width/depth/height mevcut katalog/state değerlerinden taşındı; length/thickness/material/defaultColor için doğrulanmış business metadata YOK, tahmin eklenmedi. Trash modelRotationYDeg/preserveModelScale defaultları aynı Item'dadır.
 
 ## Factory, state, overrides, persistence
-`src/designState.js > createCommercialModuleState` type üzerinden canonical Item'ı çözer. Mevcut public factory girişleri bu tek oluşturma yoluna bağlanır. Instance `id`, itemKey, catalogKey, type ve ölçüler taşır; placement/autoDepot proje alanlarıdır. Catalog kimliği itemKey ile aynıdır. Trash descriptor ölçü/model override'ları açıkça default üzerine uygulanır; diğer üç ürün mevcut sabit factory davranışını korur.
+`src/designState.js > createCommercialModuleState` type üzerinden canonical Item'ı çözer. Mevcut public factory girişleri bu tek oluşturma yoluna bağlanır. Instance `id`, itemKey, type ve ölçüler taşır; placement/autoDepot proje alanlarıdır. Trash descriptor ölçü/model override'ları açıkça default üzerine uygulanır; diğer üç ürün mevcut sabit factory davranışını korur.
 JSON snapshot/save/load instance ID ve mevcut override'ları korur; duplicate yeni ID üretir. Renderer/ghost/geçici seçim persist edilmez. Kullanıcı kararı: eski DEPOT_ projeleri için alias veya geriye uyumluluk migrationı yok.
 
 ## Behavior, capabilities ve ilişkiler

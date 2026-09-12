@@ -4,7 +4,7 @@ Migration öncesi tam envanter: [current-system/wall_separator_100_sarmasik](../
 Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKLIST](../contract/ITEM_CONTRACT_CHECKLIST.md).
 
 ## Identity, properties ve ölçüler
-`src/items.js > COMPOSITE_ITEMS.wall_separator_100_sarmasik` canonical itemKey/name/type/modelFile/dimensions sahibidir. Bileşik Item; `catalogKey = itemKey = wall_separator_100_sarmasik`. Type ailesi `separator`; genişlik 100 cm; `modelFile = wall_separator_100_sarmasik.glb`. Parent üzerinde unit uydurulmadı.
+`src/items.js > COMPOSITE_ITEMS.wall_separator_100_sarmasik` canonical itemKey/name/type/modelFile/dimensions sahibidir. Bileşik Item; `itemKey = wall_separator_100_sarmasik`. Type ailesi `separator`; genişlik 100 cm; `modelFile = wall_separator_100_sarmasik.glb`. Parent üzerinde unit uydurulmadı.
 
 ## Composition / BOM
 `composition.mode=recipe`, `moduleType=separator`, `nominalWidthCm=100`. Miktar SoT: aynı `separator:100` (düz 100 ile paylaşır). Recipe miktarları değişmez. Raw BOM UI dokunulmadı.

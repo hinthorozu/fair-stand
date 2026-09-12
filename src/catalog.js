@@ -405,7 +405,7 @@ function normalizeCatalogDescriptor(descriptor) {
     : null;
   const source = nested ?? descriptor ?? {};
   return {
-    catalogKey: source.catalogKey ?? descriptor?.catalogKey ?? null,
+    itemKey: source.itemKey ?? descriptor?.itemKey ?? null,
     type: source.type ?? source.moduleType ?? descriptor?.type ?? descriptor?.moduleType ?? null,
     widthCm: optionalNumber(source.widthCm ?? descriptor?.widthCm),
     depthCm: optionalNumber(source.depthCm ?? descriptor?.depthCm),
@@ -417,9 +417,9 @@ function normalizeCatalogDescriptor(descriptor) {
   };
 }
 
-export function resolveModuleCatalogKey(descriptor) {
+export function resolveItemKey(descriptor) {
   const normalized = normalizeCatalogDescriptor(descriptor);
-  if (normalized.catalogKey && MODULE_CATALOG[normalized.catalogKey]) return normalized.catalogKey;
+  if (normalized.itemKey && MODULE_CATALOG[normalized.itemKey]) return normalized.itemKey;
   if (!normalized.type) return null;
 
   const candidates = MODULE_CATALOG_KEYS.filter(
@@ -451,7 +451,7 @@ export function resolveModuleCatalogKey(descriptor) {
 }
 
 export function getModuleCatalogItem(descriptor) {
-  const moduleKey = resolveModuleCatalogKey(descriptor);
+  const moduleKey = resolveItemKey(descriptor);
   return moduleKey ? MODULE_CATALOG[moduleKey] ?? null : null;
 }
 

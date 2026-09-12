@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import {
   MODULE_CATALOG,
   MODULE_CATALOG_GROUPS,
-  resolveModuleCatalogKey,
+  resolveItemKey,
 } from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 import {
@@ -58,7 +58,7 @@ test('plastic trash bin is a canonical 40x40x60 fixed-model catalog module', () 
     1,
   );
 
-  assert.equal(resolveModuleCatalogKey({
+  assert.equal(resolveItemKey({
     type: descriptor.type,
     widthCm: 40,
     depthCm: 40,
@@ -68,9 +68,9 @@ test('plastic trash bin is a canonical 40x40x60 fixed-model catalog module', () 
 
 test('trash bin state and behavior preserve fridge-style movement without overlap exceptions', () => {
   const descriptor = MODULE_CATALOG[KEY];
-  const state = createModuleStateFromDescriptor(descriptor, { catalogKey: KEY });
+  const state = createModuleStateFromDescriptor(descriptor, { itemKey: KEY });
   assert.ok(state);
-  assert.equal(state.catalogKey, KEY);
+  assert.equal(state.itemKey, KEY);
   assert.equal(state.type, 'plastic-trash-bin');
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [40, 40, 60]);
   assert.equal(state.modelFile, MODEL_FILE);
@@ -107,7 +107,7 @@ test('trash catalog preview uses a dedicated bin silhouette instead of panel str
 test('trash bin has an explicit fixed-model contract and remains in F-014 BOM decision scope', () => {
   const contract = resolveModuleContract(KEY);
   assert.ok(contract);
-  assert.equal(contract.catalogKey, KEY);
+  assert.equal(contract.itemKey, KEY);
   assert.equal(contract.profile, 'free-model-fixed');
   assert.equal(contract.appearance.color, 'fixed');
   assert.equal(contract.renderer.mode, 'model');
@@ -128,7 +128,7 @@ test('automatic depot adds the trash bin inside every supported depot without fl
     });
     assert.equal(plan.ok, true, sizeKey);
 
-    const trash = plan.specs.find((spec) => spec.catalogKey === KEY);
+    const trash = plan.specs.find((spec) => spec.itemKey === KEY);
     const fridge = plan.specs.find((spec) => spec.kind === 'mini-fridge');
     const rack = plan.specs.find((spec) => spec.kind === 'coat-rack');
     assert.ok(trash, `${sizeKey}: trash bin missing`);

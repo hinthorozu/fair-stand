@@ -4,7 +4,7 @@ Migration öncesi tam envanter: [current-system/EXTRA_LONG_PLANTER_200](../curre
 Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKLIST](../contract/ITEM_CONTRACT_CHECKLIST.md).
 
 ## Identity, properties ve ölçüler
-`src/items.js > INDOOR_PLANT_ITEMS.EXTRA_LONG_PLANTER_200` canonical itemKey/name/type/dimensions/modelFile sahibidir. Tekil Item; `catalogKey = itemKey = EXTRA_LONG_PLANTER_200`. Type ailesi `indoor-plant-1`; ölçü 200×30×30 cm; `modelFile = saksi_bitkili_200x30x30.glb`; `modelRotationYDeg=90`; `preserveModelScale=true`. Parent unit / BOM uydurulmadı.
+`src/items.js > INDOOR_PLANT_ITEMS.EXTRA_LONG_PLANTER_200` canonical itemKey/name/type/dimensions/modelFile sahibidir. Tekil Item; `itemKey = EXTRA_LONG_PLANTER_200`. Type ailesi `indoor-plant-1`; ölçü 200×30×30 cm; `modelFile = saksi_bitkili_200x30x30.glb`; `modelRotationYDeg=90`; `preserveModelScale=true`. Parent unit / BOM uydurulmadı.
 
 ## Factory, state ve persistence
 `createIndoorPlantModuleState` Item'dan default üretir; uzun saksıda `surface.color` vardır (`free-model-color`). Load hydrate; alias yok.

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, resolveModuleCatalogKey } from '../src/catalog.js';
+import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
 import {
   createBarStoolModuleState,
   createBeigeSofaSetModuleState,
@@ -172,7 +172,7 @@ for (const itemKey of Object.keys(FURNITURE_ITEMS)) {
 
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, itemKey);
-    assert.equal(state.catalogKey, itemKey);
+    assert.equal(state.itemKey, itemKey);
     assert.equal(state.type, expected.type);
     assert.equal(state.widthCm, expected.widthCm);
     assert.equal(state.depthCm, expected.depthCm);
@@ -190,7 +190,7 @@ for (const itemKey of Object.keys(FURNITURE_ITEMS)) {
 
     const emptyFactory = expected.factory();
     assert.equal(emptyFactory.itemKey, itemKey);
-    assert.equal(emptyFactory.catalogKey, itemKey);
+    assert.equal(emptyFactory.itemKey, itemKey);
 
     const behavior = getModuleBehavior(state);
     assert.equal(behavior.placement, 'free');
@@ -209,10 +209,9 @@ for (const itemKey of Object.keys(FURNITURE_ITEMS)) {
 
     const legacy = JSON.parse(JSON.stringify(state));
     delete legacy.itemKey;
-    delete legacy.catalogKey;
     const restored = normalizeModuleItemState(legacy);
     assert.equal(restored.itemKey, itemKey);
-    assert.equal(resolveModuleCatalogKey({
+    assert.equal(resolveItemKey({
       type: restored.type,
       widthCm: restored.widthCm,
       depthCm: restored.depthCm,

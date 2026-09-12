@@ -4,7 +4,7 @@ Migration öncesi tam envanter: [current-system/desk_banko_200_L](../current-sys
 Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKLIST](../contract/ITEM_CONTRACT_CHECKLIST.md).
 
 ## Identity, properties ve ölçüler
-`src/items.js > COMPOSITE_ITEMS.desk_banko_200_L` canonical itemKey/name/type/shape/dimensions sahibidir. Bileşik Item; `catalogKey = itemKey = desk_banko_200_L`. Type ailesi `counter`; `shape=L`; ölçü 200×200×100 cm. Parent üzerinde unit uydurulmadı.
+`src/items.js > COMPOSITE_ITEMS.desk_banko_200_L` canonical itemKey/name/type/shape/dimensions sahibidir. Bileşik Item; `itemKey = desk_banko_200_L`. Type ailesi `counter`; `shape=L`; ölçü 200×200×100 cm. Parent üzerinde unit uydurulmadı.
 
 ## Composition / BOM
 `composition.mode=recipe`, `moduleType=counter`, `nominalWidthCm=200`, `options.shape=L`. Miktar SoT: `src/moduleRecipes.js` → `counter-l:200`. Mevcut recipe miktarları değişmez.

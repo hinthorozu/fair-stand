@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { COMMERCIAL_ITEMS, getItem } from '../src/items.js';
-import { MODULE_CATALOG, resolveModuleCatalogKey } from '../src/catalog.js';
+import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
 import { createModuleStateFromDescriptor, duplicateModuleState, normalizeModuleItemState } from '../src/designState.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { describeSurfaceSelection } from '../src/selectionFeedback.js';
@@ -15,7 +15,7 @@ for (const item of Object.values(COMMERCIAL_ITEMS)) {
     assert.equal(catalog.modelFile, item.modelFile);
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, item.itemKey);
-    assert.equal(state.catalogKey, item.itemKey);
+    assert.equal(state.itemKey, item.itemKey);
     for (const [key, value] of Object.entries(item.dimensions)) {
       assert.equal(catalog[key], value);
       assert.equal(state[key], value);
@@ -24,7 +24,7 @@ for (const item of Object.values(COMMERCIAL_ITEMS)) {
     state.widthCm += 1;
     const restored = normalizeModuleItemState(JSON.parse(JSON.stringify(state)));
     assert.deepEqual(restored, state);
-    assert.equal(resolveModuleCatalogKey(restored), item.itemKey);
+    assert.equal(resolveItemKey(restored), item.itemKey);
     const duplicate = duplicateModuleState(restored);
     assert.notEqual(duplicate.id, state.id);
     assert.deepEqual({ ...duplicate, id: state.id }, state);

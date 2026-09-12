@@ -24,7 +24,7 @@ test('furniture_sofa_single_classic katalog ve state kimliği sabittir', () => {
 
   const state = createSofaSingleClassicModuleState();
   assert.equal(state.itemKey, 'furniture_sofa_single_classic');
-  assert.equal(state.catalogKey, 'furniture_sofa_single_classic');
+  assert.equal(state.itemKey, 'furniture_sofa_single_classic');
   assert.equal(state.type, 'sofa-single-classic');
   assert.equal(state.surface.color, '#ffffff');
   assert.equal(item.visualRotationYDeg, -135);

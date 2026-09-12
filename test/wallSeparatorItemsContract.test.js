@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, resolveModuleCatalogKey } from '../src/catalog.js';
+import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
 import {
   createModuleStateFromDescriptor,
   createSeparatorModuleState,
@@ -91,7 +91,7 @@ for (const itemKey of SEPARATOR_KEYS) {
 
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, itemKey);
-    assert.equal(state.catalogKey, itemKey);
+    assert.equal(state.itemKey, itemKey);
     assert.equal(state.type, 'separator');
     assert.equal(state.widthCm, expected.widthCm);
     assert.equal(state.modelFile ?? null, expected.modelFile);
@@ -101,7 +101,7 @@ for (const itemKey of SEPARATOR_KEYS) {
     if (!expected.modelFile) {
       const byWidth = createSeparatorModuleState(expected.widthCm);
       assert.equal(byWidth.itemKey, itemKey);
-      assert.equal(byWidth.catalogKey, itemKey);
+      assert.equal(byWidth.itemKey, itemKey);
     }
 
     const behavior = getModuleBehavior(state);
@@ -121,10 +121,9 @@ for (const itemKey of SEPARATOR_KEYS) {
 
     const legacy = JSON.parse(JSON.stringify(state));
     delete legacy.itemKey;
-    delete legacy.catalogKey;
     const restored = normalizeModuleItemState(legacy);
     assert.equal(restored.itemKey, itemKey);
-    assert.equal(resolveModuleCatalogKey(restored), itemKey);
+    assert.equal(resolveItemKey(restored), itemKey);
 
     const duplicate = duplicateModuleState(state);
     assert.notEqual(duplicate.id, state.id);

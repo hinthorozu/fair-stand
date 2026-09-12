@@ -4,10 +4,10 @@ Migration öncesi tam envanter: [current-system/furniture_coffee_table_classic](
 Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKLIST](../contract/ITEM_CONTRACT_CHECKLIST.md).
 
 ## Identity, properties ve ölçüler
-`src/items.js > FURNITURE_ITEMS.furniture_coffee_table_classic` canonical itemKey/name/type/dimensions sahibidir. Tekil Item; `catalogKey = itemKey = furniture_coffee_table_classic`. Type `coffee-table-classic`; footprint 60×42×38 cm. `glass_table` değildir. ModelFile yok; renderer procedural sehpa. Unit / BOM uydurulmadı (`decision-required`).
+`src/items.js > FURNITURE_ITEMS.furniture_coffee_table_classic` canonical itemKey/name/type/dimensions sahibidir. Tekil Item; `itemKey = furniture_coffee_table_classic`. Type `coffee-table-classic`; footprint 60×42×38 cm. `glass_table` değildir. ModelFile yok; renderer procedural sehpa. Unit / BOM uydurulmadı (`decision-required`).
 
 ## Factory, state ve persistence
-`createCoffeeTableClassicModuleState` Item’dan default üretir; `itemKey`/`catalogKey` damgalar; surface yok (`free-model-fixed`). Load’da `normalizeModuleItemState` hydrate eder; alias yok.
+`createCoffeeTableClassicModuleState` Item’dan default üretir; `itemKey` damgalar; surface yok (`free-model-fixed`). Load’da `normalizeModuleItemState` hydrate eder; alias yok.
 
 ## Behavior ve renderer sınırı
 `moduleBehavior.js > coffee-table-classic`: free, snap 10, rotation step 90°, default rotation 0°, `collision: none`, `magneticSnap: none`, boundary `stand-edge`. Tabla/sap/taban ayrı Item değildir. `furniture_sofa_set_classic` bu Item’ın parent kümesidir (`1 × furniture_sofa_double_classic` + `2 × furniture_sofa_single_classic` + `1 × furniture_coffee_table_classic`).

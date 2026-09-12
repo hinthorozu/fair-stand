@@ -15,7 +15,7 @@ test('LED projektor katalogda 50 cm ust aksesuar olarak tanimlidir', () => {
 test('LED projektor state sabit siyah govde ve ust aksesuar olculerini tasir', () => {
   const light = createLedFloodlightModuleState();
   assert.equal(light.itemKey, 'led_floodlight');
-  assert.equal(light.catalogKey, 'led_floodlight');
+  assert.equal(Object.hasOwn(light, 'catalogKey'), false);
   assert.equal(light.type, 'led-floodlight');
   assert.equal(light.widthCm, 50);
   assert.equal(light.depthCm, 20);

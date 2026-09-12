@@ -65,6 +65,7 @@ test('wall showcase catalog Items persist canonical identity and grouped body co
   await open.click();
   const picker=page.locator('.module-picker-backdrop');
   await expect(picker).toBeVisible();
+  await picker.locator('summary', { hasText: 'Raf & Vitrin' }).click();
   await picker.locator('[data-module-key="wall_showcase_100_2"]').click();
   await picker.locator('[data-module-key="wall_showcase_100_3"]').click();
   await picker.locator('.module-picker-add').click();
@@ -73,8 +74,8 @@ test('wall showcase catalog Items persist canonical identity and grouped body co
   const two=project.modules.find((m)=>m.itemKey==='wall_showcase_100_2');
   const three=project.modules.find((m)=>m.itemKey==='wall_showcase_100_3');
   expect(two).toBeTruthy(); expect(three).toBeTruthy();
-  expect(two.catalogKey).toBe('wall_showcase_100_2');
-  expect(three.catalogKey).toBe('wall_showcase_100_3');
+  expect(two.itemKey).toBe('wall_showcase_100_2');
+  expect(three.itemKey).toBe('wall_showcase_100_3');
   expect(two.bodySurface.color).toBe('#ffffff');
   expect(three.bodySurface.color).toBe('#ffffff');
   expect(two.eyeCount).toBe(2); expect(three.eyeCount).toBe(3);

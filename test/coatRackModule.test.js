@@ -25,10 +25,10 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
   assert.equal(state.depthCm, 43);
   assert.equal(state.heightCm, 180);
 
-  const canonicalState = createModuleStateFromDescriptor(item, { catalogKey: 'COAT_RACK' });
+  const canonicalState = createModuleStateFromDescriptor(item, { itemKey: 'COAT_RACK' });
   assert.ok(canonicalState);
   assert.equal(canonicalState.type, 'coat-rack');
-  assert.equal(canonicalState.catalogKey, 'COAT_RACK');
+  assert.equal(canonicalState.itemKey, 'COAT_RACK');
 
   const behavior = getModuleBehavior(state);
   assert.equal(behavior.placement, 'free');

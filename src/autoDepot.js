@@ -8,8 +8,8 @@ export const AUTO_DEPOT_SIZES = Object.freeze({
   '200x200': Object.freeze({ widthCm: 200, depthCm: 200, label: '2 × 2 m' }),
 });
 
-const PLASTIC_TRASH_BIN_CATALOG_KEY = 'PLASTIC_TRASH_BIN';
-const PLASTIC_TRASH_BIN_DESCRIPTOR = MODULE_CATALOG[PLASTIC_TRASH_BIN_CATALOG_KEY];
+const PLASTIC_TRASH_BIN_ITEM_KEY = 'PLASTIC_TRASH_BIN';
+const PLASTIC_TRASH_BIN_DESCRIPTOR = MODULE_CATALOG[PLASTIC_TRASH_BIN_ITEM_KEY];
 
 function wall(widthCm, xCm, yCm, rotationZDeg = 0) {
   return { kind: 'wall', widthCm, placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }) };
@@ -116,7 +116,7 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
       trashBinY,
       0,
       {
-        catalogKey: PLASTIC_TRASH_BIN_CATALOG_KEY,
+        itemKey: PLASTIC_TRASH_BIN_ITEM_KEY,
         heightCm: trashBinHeight,
         modelFile: PLASTIC_TRASH_BIN_DESCRIPTOR.modelFile,
         preserveModelScale: Boolean(PLASTIC_TRASH_BIN_DESCRIPTOR.preserveModelScale),

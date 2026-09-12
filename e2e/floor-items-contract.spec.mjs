@@ -55,13 +55,13 @@ test('floor select options match canonical floor Items', async ({ page }) => {
   await expect(page.locator(`.module-drag-card[data-module-key="karolaj"]`)).toHaveCount(0);
 });
 
-test('parke-beton stand.floorType persists as the floor Item key', async ({ page }) => {
+test('parke-beton stand.itemKey persists as the floor Item key', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await createIslandStand(page, 'parke-beton');
   await page.locator('#floor-type').selectOption('parke-beton');
   const project = await saveAndReadProject(page);
-  expect(project.stand.floorType).toBe('parke-beton');
+  expect(project.stand.itemKey).toBe('parke-beton');
   expect(project.modules.some((module) => module.itemKey === 'parke-beton')).toBe(false);
   expect(errors).toEqual([]);
 });

@@ -21,7 +21,7 @@ test('glass_table katalog ve state kimliği sabittir', () => {
 
   const state = createGlassTableModuleState();
   assert.equal(state.itemKey, 'glass_table');
-  assert.equal(state.catalogKey, 'glass_table');
+  assert.equal(state.itemKey, 'glass_table');
   assert.equal(state.type, 'table-glass');
   assert.equal(state.widthCm, 75);
   assert.equal(state.depthCm, 75);

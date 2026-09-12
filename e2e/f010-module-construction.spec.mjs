@@ -58,7 +58,7 @@ test('F-010 automatic wall construction reaches persisted runtime state through 
   expect(project).not.toBeNull();
   expect(project.modules.length).toBeGreaterThan(0);
   expect(project.modules.every((moduleState) => moduleState.type === 'flat-panel')).toBe(true);
-  expect(project.modules.every((moduleState) => moduleState.catalogKey === `wall_${moduleState.widthCm}`)).toBe(true);
+  expect(project.modules.every((moduleState) => moduleState.itemKey === `wall_${moduleState.widthCm}`)).toBe(true);
   expect(pageErrors).toEqual([]);
 });
 
@@ -78,7 +78,7 @@ test('F-010 catalog construction persists a module created through the real pick
   expect(initialProject).not.toBeNull();
   expect(initialProject.modules.length).toBeGreaterThan(0);
   const removedModule = initialProject.modules[0];
-  expect(removedModule.catalogKey).toBe(`wall_${removedModule.widthCm}`);
+  expect(removedModule.itemKey).toBe(`wall_${removedModule.widthCm}`);
 
   page.once('dialog', async (dialog) => dialog.accept());
   await page.evaluate((moduleId) => {
@@ -98,8 +98,9 @@ test('F-010 catalog construction persists a module created through the real pick
 
   const picker = page.locator('.module-picker-backdrop');
   await expect(picker).toBeVisible();
+  await picker.locator('summary', { hasText: 'Panel & Duvar' }).click();
 
-  const replacementCard = picker.locator(`[data-module-key="${removedModule.catalogKey}"]`);
+  const replacementCard = picker.locator(`[data-module-key="${removedModule.itemKey}"]`);
   await expect(replacementCard).toBeVisible();
   await replacementCard.click();
 
@@ -113,7 +114,7 @@ test('F-010 catalog construction persists a module created through the real pick
   expect(project.modules).toHaveLength(initialProject.modules.length);
   expect(project.modules.some((moduleState) => moduleState.id === removedModule.id)).toBe(false);
   const replacement = project.modules.find(
-    (moduleState) => moduleState.catalogKey === removedModule.catalogKey
+    (moduleState) => moduleState.itemKey === removedModule.itemKey
       && moduleState.id !== removedModule.id,
   );
   expect(replacement).toBeTruthy();
@@ -143,6 +144,7 @@ test('F-010 door catalog construction persists canonical door_leaf_100 child sta
   await openCatalogButton.click();
   const picker = page.locator('.module-picker-backdrop');
   await expect(picker).toBeVisible();
+  await picker.locator('summary', { hasText: 'Panel & Duvar' }).click();
   const doorCard = picker.locator('[data-module-key="door_100"]');
   await expect(doorCard).toBeVisible();
   await doorCard.click();
@@ -152,7 +154,7 @@ test('F-010 door catalog construction persists canonical door_leaf_100 child sta
   const door = project.modules.find((moduleState) => moduleState.itemKey === 'door_100');
   expect(door).toBeTruthy();
   expect(door.itemKey).toBe('door_100');
-  expect(door.catalogKey).toBe('door_100');
+  expect(door.itemKey).toBe('door_100');
   expect(door.type).toBe('door');
   expect(door.widthCm).toBe(100);
   expect(door.surface.itemKey).toBe('door_leaf_100');

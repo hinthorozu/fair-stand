@@ -74,6 +74,7 @@ for (const itemKey of Object.keys(expected)) {
 
     const picker = page.locator('.module-picker-backdrop');
     await expect(picker).toBeVisible();
+    await picker.locator('summary', { hasText: 'Raf & Vitrin' }).click();
     await picker.locator(`[data-module-key="${itemKey}"]`).click();
     await picker.locator('.module-picker-add').click();
     await expect(picker).toBeHidden();
@@ -81,7 +82,7 @@ for (const itemKey of Object.keys(expected)) {
     const project = await saveAndReadProject(page);
     const item = project.modules.find((module) => module.itemKey === itemKey);
     expect(item).toBeTruthy();
-    expect(item.catalogKey).toBe(itemKey);
+    expect(item.itemKey).toBe(itemKey);
     expect(item.type).toBe('shelf');
     expect(item.widthCm).toBe(expected[itemKey].widthCm);
     expect(item.shelfCount).toBe(expected[itemKey].shelfCount);

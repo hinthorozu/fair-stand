@@ -99,7 +99,7 @@ type    = tv
 id      = item-<project-instance>
 ```
 
-Mevcut `catalogKey` kimliği yeni `itemKey` modeline taşınırken paralel ikinci bir ürün kimliği yaratılmaz; tek canonical ürün kimliği korunur.
+Tek canonical ürün kimliği `itemKey`dır. `catalogKey` ürün kimliği değildir; runtime onu okumaz ve yazmaz.
 
 ---
 

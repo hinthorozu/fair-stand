@@ -168,7 +168,7 @@ export const NON_CATALOG_ITEMS = Object.freeze({
   }),
 });
 
-// Zemin kaplamaları modül değildir; stand.floorType = itemKey. Katalog/recipe yok.
+// Zemin kaplamaları modül değildir; persist alanı stand.itemKey (eski kayıt: floorType). Katalog/recipe yok.
 export const FLOOR_ITEMS = Object.freeze({
   karolaj: Object.freeze({
     itemKey: 'karolaj',
@@ -231,6 +231,27 @@ export function getFloorSelectLabel(item) {
 
 export function isParquetFloorItem(item) {
   return item?.type === 'floor' && Number(item.dimensions?.lengthCm) > 0;
+}
+
+export function isGridTileFloorItem(item) {
+  return item?.type === 'floor'
+    && Boolean(item.paintable)
+    && Number(item.dimensions?.widthCm) > 0
+    && Number(item.dimensions?.depthCm) > 0
+    && !isParquetFloorItem(item);
+}
+
+export function isCarpetFloorItem(item) {
+  return item?.type === 'floor'
+    && Boolean(item.paintable)
+    && !Number(item.dimensions?.widthCm);
+}
+
+export function resolveStandFloorItemKey(standOrKey) {
+  const raw = typeof standOrKey === 'string'
+    ? standOrKey
+    : (standOrKey?.itemKey ?? standOrKey?.floorType ?? null);
+  return getFloorItem(raw)?.itemKey ?? getFloorItem('karolaj').itemKey;
 }
 
 export function getFurnitureClusterQuantity(item, childItemKey) {
