@@ -65,16 +65,31 @@ const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
 const STAGE_HOME_DIRECTION = new THREE.Vector3(1, 1.05, 1).normalize();
 
 const EAMES_CHAIR_TARGET_HEIGHT_M = 0.82;
-let eamesChairModelPromise = null;
+const gltfSceneCache = new Map();
+
+function notifyGltfLoadFailure(url, error) {
+  console.warn('GLB modeli yüklenemedi:', url, error);
+  const el = typeof document !== 'undefined' ? document.querySelector('#stage-result') : null;
+  if (!el) return;
+  el.textContent = '3D model yüklenemedi. Modül yerinde kalır; görünür geometri eksik olabilir.';
+  el.classList.add('error');
+}
+
+function loadGltfScene(url) {
+  const cached = gltfSceneCache.get(url);
+  if (cached) return cached;
+  const loader = new GLTFLoader();
+  const promise = loader.loadAsync(url).then((gltf) => gltf.scene).catch((error) => {
+    gltfSceneCache.delete(url);
+    notifyGltfLoadFailure(url, error);
+    throw error;
+  });
+  gltfSceneCache.set(url, promise);
+  return promise;
+}
 
 function loadEamesChairModel() {
-  if (!eamesChairModelPromise) {
-    const loader = new GLTFLoader();
-    eamesChairModelPromise = loader
-      .loadAsync(import.meta.env.BASE_URL + 'models/eames_chair.glb')
-      .then((gltf) => gltf.scene);
-  }
-  return eamesChairModelPromise;
+  return loadGltfScene(import.meta.env.BASE_URL + 'models/eames_chair.glb');
 }
 
 function createTvScreenTexture() {
@@ -83,78 +98,28 @@ function createTvScreenTexture() {
   return texture;
 }
 
-let barStoolModelPromise = null;
-
 function loadBarStoolModel() {
-  if (!barStoolModelPromise) {
-    const loader = new GLTFLoader();
-    barStoolModelPromise = loader
-      .loadAsync(import.meta.env.BASE_URL + 'models/bar_chair.glb')
-      .then((gltf) => gltf.scene);
-  }
-  return barStoolModelPromise;
+  return loadGltfScene(import.meta.env.BASE_URL + 'models/bar_chair.glb');
 }
-
-let miniFridgeModelPromise = null;
 
 function loadMiniFridgeModel() {
-  if (!miniFridgeModelPromise) {
-    const loader = new GLTFLoader();
-    miniFridgeModelPromise = loader
-      .loadAsync(import.meta.env.BASE_URL + 'models/' + getItem('MINI_FRIDGE_AVANTI').modelFile)
-      .then((gltf) => gltf.scene);
-  }
-  return miniFridgeModelPromise;
+  return loadGltfScene(import.meta.env.BASE_URL + 'models/' + getItem('MINI_FRIDGE_AVANTI').modelFile);
 }
-
-let coatRackModelPromise = null;
 
 function loadCoatRackModel() {
-  if (!coatRackModelPromise) {
-    const loader = new GLTFLoader();
-    coatRackModelPromise = loader
-      .loadAsync(import.meta.env.BASE_URL + 'models/' + getItem('COAT_RACK').modelFile)
-      .then((gltf) => gltf.scene);
-  }
-  return coatRackModelPromise;
+  return loadGltfScene(import.meta.env.BASE_URL + 'models/' + getItem('COAT_RACK').modelFile);
 }
-
-let kettleModelPromise = null;
 
 function loadKettleModel() {
-  if (!kettleModelPromise) {
-    const loader = new GLTFLoader();
-    kettleModelPromise = loader
-      .loadAsync(import.meta.env.BASE_URL + 'models/' + getItem('KETTLE').modelFile)
-      .then((gltf) => gltf.scene);
-  }
-  return kettleModelPromise;
+  return loadGltfScene(import.meta.env.BASE_URL + 'models/' + getItem('KETTLE').modelFile);
 }
-
-
-const indoorPlantModelPromises = new Map();
 
 function loadIndoorPlantModel(modelFile) {
-  if (!indoorPlantModelPromises.has(modelFile)) {
-    const loader = new GLTFLoader();
-    indoorPlantModelPromises.set(
-      modelFile,
-      loader.loadAsync(import.meta.env.BASE_URL + 'models/' + modelFile).then((gltf) => gltf.scene),
-    );
-  }
-  return indoorPlantModelPromises.get(modelFile);
+  return loadGltfScene(import.meta.env.BASE_URL + 'models/' + modelFile);
 }
 
-let beigeSofaModelPromise = null;
-
 function loadBeigeSofaModel() {
-  if (!beigeSofaModelPromise) {
-    const loader = new GLTFLoader();
-    beigeSofaModelPromise = loader
-      .loadAsync(import.meta.env.BASE_URL + 'models/bej_koltuk_1_ciftli_2_tekli.glb')
-      .then((gltf) => gltf.scene);
-  }
-  return beigeSofaModelPromise;
+  return loadGltfScene(import.meta.env.BASE_URL + 'models/bej_koltuk_1_ciftli_2_tekli.glb');
 }
 
 function isFloorFixtureType(type) {

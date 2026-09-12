@@ -1,3 +1,5 @@
+> **Dipnot (2026-09-12):** F-013 kapalı durur. Runtime kimliği artık `itemKey`; `src/` `catalogKey` yazmaz. Kapanış anındaki “45 katalog / zorunlu catalogKey” cümleleri tarihîdir. Güncel katalog 51.
+
 # A04 F-013 kapanışı
 
 Bulgu: **F-013 — `catalogKey` yokken düz vs sarmaşık separatör katalog kimliği belirsiz**

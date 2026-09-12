@@ -1,6 +1,8 @@
 # Changelog
 
-Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan bugüne yapılan geliştirmeleri kronolojik olarak kaydeder.
+> **TARİHÎ GÜNLÜK.** Ağustos 2026 civarında durur; `itemKey` / self BOM / Playwright E2E bu dosyada yoktur. Güncel durum: `audit/SISTEM_MUTABAKAT_RAPORU.md`.
+
+Bu dosya, Fair Stand / Maxima Stand Konfigüratörü projesinde başlangıçtan o tarihe yapılan geliştirmeleri kronolojik olarak kaydeder.
 
 ## Başlangıç ve proje iskeleti
 

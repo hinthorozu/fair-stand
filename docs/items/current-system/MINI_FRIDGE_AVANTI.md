@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/MINI_FRIDGE_AVANTI.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
 
-# DEPOT_MINI_FRIDGE_AVANTI — Mevcut Sistem Profili
+# DEPOT_MINI_FRIDGE_AVANTI — Tarihî envanter profili
 
 Bu belge `DEPOT_MINI_FRIDGE_AVANTI` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction ve persistence akışlarını toplar.
 

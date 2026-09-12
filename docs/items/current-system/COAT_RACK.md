@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/COAT_RACK.md` içindedir. Eski kayıt uyumluluğu kullanıcı kararıyla kapsam dışıdır.
 
-# DEPOT_COAT_RACK — Mevcut Sistem Profili
+# DEPOT_COAT_RACK — Tarihî envanter profili
 
 Bu belge `DEPOT_COAT_RACK` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction ve persistence akışlarını toplar.
 

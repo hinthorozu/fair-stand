@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_200.md` içindedir.
 
-# wall_200 — Mevcut Sistem Profili
+# wall_200 — Tarihî envanter profili
 
 Bu belge `wall_200` için mevcut çalışan sistemdeki kimlik, state, davranış, placement, context menu, panel işlemleri, görünüm, persistence ve BOM gerçeklerini tek yerde toplar.
 

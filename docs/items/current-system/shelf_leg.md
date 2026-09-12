@@ -1,3 +1,5 @@
+> **TARİHÎ ENVANTER.** Güncel sistem değildir. Aktif kanonik tanım `docs/items/definitions/` (veya `src/items.js`). Gövdedeki `catalogKey` / `DEPOT_*` / `floorType` tarihî örnektir; runtime kimliği `itemKey`.
+
 # shelf_leg — Current System / Item Contract Mapping
 
 ## Kanonik identity

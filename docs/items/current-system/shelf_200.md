@@ -1,4 +1,6 @@
-# shelf_200 — Current System Inventory
+> **TARİHÎ ENVANTER.** Güncel sistem değildir. Aktif kanonik tanım `docs/items/definitions/` (veya `src/items.js`). Gövdedeki `catalogKey` / `DEPOT_*` / `floorType` tarihî örnektir; runtime kimliği `itemKey`.
+
+# shelf_200 — Tarihî envanter
 
 Fresh `Version2` runtime doğrulaması ve ürün kararı sonrası güncel durum.
 

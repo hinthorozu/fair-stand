@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/furniture_coffee_table_classic.md` içindedir.
 
-# furniture_coffee_table_classic — Mevcut Sistem Profili
+# furniture_coffee_table_classic — Tarihî envanter profili
 
 Bağımsız katalog Item yoktu. Sehpa `furniture_sofa_set_classic` renderer’ında procedural kutu/silindir olarak duruyordu.
 

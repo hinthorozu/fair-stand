@@ -1,4 +1,6 @@
-# upright_346_5 — Current System Inventory
+> **TARİHÎ ENVANTER.** Güncel sistem değildir. Aktif kanonik tanım `docs/items/definitions/` (veya `src/items.js`). Gövdedeki `catalogKey` / `DEPOT_*` / `floorType` tarihî örnektir; runtime kimliği `itemKey`.
+
+# upright_346_5 — Tarihî envanter
 
 ## 1. Identity / type — VAR
 Kanonik source `src/productionParts.js`: `itemKey=upright_346_5`, `type=upright`, `unit=adet`, name `Dikme 346,5 cm`. Legacy `partId` is not the kanonik identity.

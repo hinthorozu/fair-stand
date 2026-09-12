@@ -1,4 +1,6 @@
-# separator_panel_48_5 — Current System Inventory
+> **TARİHÎ ENVANTER.** Güncel sistem değildir. Aktif kanonik tanım `docs/items/definitions/` (veya `src/items.js`). Gövdedeki `catalogKey` / `DEPOT_*` / `floorType` tarihî örnektir; runtime kimliği `itemKey`.
+
+# separator_panel_48_5 — Tarihî envanter
 
 Bu belge güncel `Version2` runtime'ını Item Contract checklist'inin 18 alanına göre kaydeder.
 

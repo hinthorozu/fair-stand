@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_150.md` içindedir.
 
-# wall_150 — Mevcut Sistem Profili
+# wall_150 — Tarihî envanter profili
 
 Bu belge `wall_150` için `Version2` runtime kodunda bugün gerçekten bulunan state, behavior, placement, interaction, renderer, persistence ve BOM akışlarını toplar. Yeni davranış tanımlamaz; yorum/audit kaynağı kullanmaz.
 

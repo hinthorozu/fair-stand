@@ -629,6 +629,8 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   ),
 });
 
+export const MODULE_STATE_TYPES = Object.freeze(Object.keys(MODULE_STATE_FACTORIES));
+
 export function createModuleStateFromDescriptor(
   descriptor,
   { itemKey = null, preservePlacement = false, imageAssetId = null } = {},

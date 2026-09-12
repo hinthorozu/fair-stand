@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/glass_table.md` içindedir.
 
-# glass_table — Mevcut Sistem Profili
+# glass_table — Tarihî envanter profili
 
 Bağımsız katalog Item yoktu. Cam masa `furniture_table_chair_set_eames` renderer’ında procedural silindir olarak duruyordu.
 

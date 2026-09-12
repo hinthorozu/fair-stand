@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/furniture_sofa_set_classic.md` içindedir.
 
-# furniture_sofa_set_classic — Mevcut Sistem Profili
+# furniture_sofa_set_classic — Tarihî envanter profili
 
 Bu belge `furniture_sofa_set_classic` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction ve persistence akışlarını toplar.
 

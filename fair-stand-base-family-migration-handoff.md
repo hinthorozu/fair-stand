@@ -1,6 +1,8 @@
 # Fair Stand — BASE ailesi Item migration (handoff)
 
-Durum: **implementasyon tamam; commit/push yok.**
+> **TARİHÎ HANDOFF.** Oturum notudur; güncel sistem açıklaması değildir. Runtime kimliği `itemKey`; `catalogKey` hydrate cutover cümleleri bayat. Güncel: `docs/items/definitions/BASE_*.md` ve `audit/SISTEM_MUTABAKAT_RAPORU.md`.
+
+Durum: **implementasyon tamam; commit/push yok.** (tarihî not)
 Local: `contract:verify` ✓ · `npm test` 624 ✓ · `build` ✓ · full E2E `28/28` (`--workers=1`; default parallel lokalında timeout flake).
 
 Repo: `fair-stand` · `Version2` (TV/çöp/overlay flush PR #131 merge edildi).

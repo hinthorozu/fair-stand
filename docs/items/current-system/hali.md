@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/hali.md` içindedir.
 
-# hali — Mevcut Sistem Profili
+# hali — Tarihî envanter profili
 
 Bu belge ITEM_LIST'teki **Hali** girdisinin `Version2` runtime kodundaki gerçek karşılığını toplar.
 

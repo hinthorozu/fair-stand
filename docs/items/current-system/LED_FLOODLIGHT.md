@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/led_floodlight.md` içindedir. Eski katalog anahtarı `LED_FLOODLIGHT` idi.
 
-# LED_FLOODLIGHT — Mevcut Sistem Profili
+# LED_FLOODLIGHT — Tarihî envanter profili
 
 Bu belge `LED_FLOODLIGHT` için `Version2` runtime kodunda bulunan state, top-placement, renderer, interaction ve persistence akışlarını toplar.
 

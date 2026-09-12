@@ -1,4 +1,6 @@
-# profile_41_5 — Current System Inventory
+> **TARİHÎ ENVANTER.** Güncel sistem değildir. Aktif kanonik tanım `docs/items/definitions/` (veya `src/items.js`). Gövdedeki `catalogKey` / `DEPOT_*` / `floorType` tarihî örnektir; runtime kimliği `itemKey`.
+
+# profile_41_5 — Tarihî envanter
 
 Baseline: `Version2`. Bu envanter `ITEM_CONTRACT_CHECKLIST.md` zorunlu kapsamına göre fresh runtime doğrulamasıdır.
 

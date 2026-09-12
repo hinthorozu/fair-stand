@@ -1,6 +1,6 @@
 ﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/wall_separator_50_sarmasik.md` içindedir.
 
-# wall_separator_50_sarmasik — Mevcut Sistem Profili
+# wall_separator_50_sarmasik — Tarihî envanter profili
 
 Bu belge `wall_separator_50_sarmasik` için `Version2` runtime kodunda bulunan davranışı toplar. Yeni davranış/audit yorumu eklemez.
 

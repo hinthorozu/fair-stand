@@ -1,6 +1,6 @@
 > Migration öncesi envanterdir; aktif kanonik tanım `../definitions/karolaj.md` içindedir.
 
-# karolaj — Mevcut Sistem Profili
+# karolaj — Tarihî envanter profili
 
 Bu belge ITEM_LIST'teki **Karolaj** girdisinin `Version2` runtime kodundaki gerçek karşılığını toplar.
 

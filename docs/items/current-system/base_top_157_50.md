@@ -1,4 +1,6 @@
-# base_top_157_50 — Current System Inventory
+> **TARİHÎ ENVANTER.** Güncel sistem değildir. Aktif kanonik tanım `docs/items/definitions/` (veya `src/items.js`). Gövdedeki `catalogKey` / `DEPOT_*` / `floorType` tarihî örnektir; runtime kimliği `itemKey`.
+
+# base_top_157_50 — Tarihî envanter
 
 Bu belge güncel sistemde `base_top_157_50` Item'ını yeni Item Contract checklist'ine göre eksiksiz envanterler.
 

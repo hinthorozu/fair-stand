@@ -2,6 +2,8 @@
 
 Bu belge Item Contract migrationında izlenecek Item envanterini tutar.
 
+> Satırdaki “Tamam” işareti gecikebilir. Güncel kimlik/BOM: `docs/items/definitions/` + `src/items.js` / `src/moduleContracts.js`. Test-kilitli katalog özeti: `SYSTEM_MODULE_CATALOG.md`. Canlı sıra: `audit/SISTEM_MUTABAKAT_RAPORU.md`.
+
 Temel model:
 
 - sistemde BOM, üretim veya maliyet hesabına giren her fiziksel öğe `Item`dır,

@@ -1,6 +1,6 @@
 ﻿> Migration öncesi envanterdir; aktif kanonik tanım `../definitions/EXTRA_LONG_PLANTER_150.md` içindedir.
 
-# EXTRA_LONG_PLANTER_150 — Mevcut Sistem Profili
+# EXTRA_LONG_PLANTER_150 — Tarihî envanter profili
 
 Bu belge `EXTRA_LONG_PLANTER_150` için `Version2` runtime kodunda bulunan state, behavior, renderer, interaction ve persistence akışlarını toplar.
 
