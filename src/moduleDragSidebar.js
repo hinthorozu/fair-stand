@@ -39,9 +39,16 @@ function ensureStyles() {
     .module-drag-sofa { position:relative; width:58px; height:58px; }
     .module-drag-sofa::before { content:''; position:absolute; left:6px; top:4px; width:46px; height:18px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:5px; background:#f8fafc; box-shadow:0 2px 4px rgba(15,23,42,.08); }
     .module-drag-sofa::after { content:''; position:absolute; left:7px; bottom:4px; width:18px; height:25px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:5px; background:#f8fafc; box-shadow:28px 0 0 -2px #f8fafc,28px 0 0 0 ${ALUMINUM_PROFILE_COLOR}; }
+    .module-drag-sofa-single { position:relative; width:28px; height:36px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:6px; background:#f8fafc; }
+    .module-drag-sofa-double { position:relative; width:48px; height:22px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:6px; background:#f8fafc; }
+    .module-drag-coffee-table { position:relative; width:34px; height:24px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:4px; background:rgba(255,255,255,.72); box-shadow:inset 0 0 0 5px rgba(148,163,184,.25); }
     .module-drag-table-chair { position:relative; width:58px; height:58px; }
     .module-drag-table-chair::before { content:''; position:absolute; left:19px; top:19px; width:20px; height:20px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:50%; background:#fff; }
     .module-drag-table-chair::after { content:''; position:absolute; left:4px; top:4px; width:13px; height:13px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:4px; background:#f8fafc; box-shadow:37px 0 0 -2px #f8fafc,37px 0 0 0 ${ALUMINUM_PROFILE_COLOR},0 37px 0 -2px #f8fafc,0 37px 0 0 ${ALUMINUM_PROFILE_COLOR},37px 37px 0 -2px #f8fafc,37px 37px 0 0 ${ALUMINUM_PROFILE_COLOR}; }
+    .module-drag-eames-chair { position:relative; width:28px; height:44px; }
+    .module-drag-eames-chair::before { content:''; position:absolute; left:4px; top:4px; width:20px; height:16px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:6px 6px 4px 4px; background:#f8fafc; }
+    .module-drag-eames-chair::after { content:''; position:absolute; left:8px; top:20px; width:12px; height:20px; border-left:3px solid ${ALUMINUM_PROFILE_COLOR}; border-right:3px solid ${ALUMINUM_PROFILE_COLOR}; border-bottom:3px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:0 0 6px 6px; }
+    .module-drag-glass-table { position:relative; width:36px; height:36px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:50%; background:rgba(255,255,255,.72); box-shadow:inset 0 0 0 6px rgba(148,163,184,.25); }
     .module-drag-bar-stool { position:relative; width:44px; height:58px; }
     .module-drag-bar-stool::before { content:''; position:absolute; left:8px; top:4px; width:28px; height:20px; border:2px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:10px 10px 5px 5px; background:#f8fafc; }
     .module-drag-bar-stool::after { content:''; position:absolute; left:11px; top:24px; width:22px; height:27px; border-left:3px solid ${ALUMINUM_PROFILE_COLOR}; border-right:3px solid ${ALUMINUM_PROFILE_COLOR}; border-bottom:3px solid ${ALUMINUM_PROFILE_COLOR}; border-radius:0 0 10px 10px; }
@@ -131,9 +138,44 @@ export function createModuleCatalogPreview(module) {
     return preview;
   }
 
+  if (module.type === 'sofa-single-classic') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-sofa-single';
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'sofa-double-classic') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-sofa-double';
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'coffee-table-classic') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-coffee-table';
+    preview.appendChild(body);
+    return preview;
+  }
+
   if (module.type === 'table-chair-set-eames') {
     const body = document.createElement('div');
     body.className = 'module-drag-table-chair';
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'chair') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-eames-chair';
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'table-glass') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-glass-table';
     preview.appendChild(body);
     return preview;
   }

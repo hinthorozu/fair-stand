@@ -127,7 +127,12 @@ export const MODULE_CONTRACT_ASSIGNMENTS = Object.freeze({
   BASE_100: assignment('free-editable', RECIPE_BOM_POLICY),
 
   furniture_sofa_set_classic: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
+  furniture_sofa_single_classic: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
+  furniture_sofa_double_classic: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
+  furniture_coffee_table_classic: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
   furniture_table_chair_set_eames: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
+  chair_eames: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
+  glass_table: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
   furniture_bar_stool_classic: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
   MINI_FRIDGE_AVANTI: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
   KETTLE: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
@@ -143,7 +148,7 @@ export const MODULE_CONTRACT_ASSIGNMENTS = Object.freeze({
   VIDEO_WALL_2X2: assignment('wall-media', UNRESOLVED_EXISTING_BOM_POLICY),
   VIDEO_WALL_3X3: assignment('wall-media', UNRESOLVED_EXISTING_BOM_POLICY),
   TV_65: assignment('wall-media', UNRESOLVED_EXISTING_BOM_POLICY),
-  LED_FLOODLIGHT: assignment('top-light', UNRESOLVED_EXISTING_BOM_POLICY),
+  led_floodlight: assignment('top-light', UNRESOLVED_EXISTING_BOM_POLICY),
 });
 
 export const NON_CATALOG_MODULE_CONTRACTS = Object.freeze({

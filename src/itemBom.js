@@ -12,9 +12,7 @@ function positiveQuantity(value, itemKey) {
 function resolveRecipe(item, recipeOptions = {}) {
   const composition = item?.composition;
   if (!composition) return null;
-  if (composition.mode !== 'recipe') {
-    throw new TypeError(`Unsupported composition mode for ${item.itemKey}: ${composition.mode}.`);
-  }
+  if (composition.mode !== 'recipe') return null;
 
   const options = {
     ...(composition.options ?? {}),

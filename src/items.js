@@ -29,6 +29,215 @@ export function getCommercialItemForType(type) {
   return Object.values(COMMERCIAL_ITEMS).find((item) => item.type === type) ?? null;
 }
 
+// Extra furniture. Tekil Item'lar kendi type'ına sahip. Eames ve klasik koltuk takımları child Item kümesidir.
+// BOM decision-required — unit/moduleRecipes uydurulmaz.
+export const FURNITURE_ITEMS = Object.freeze({
+  furniture_sofa_set_classic: Object.freeze({
+    itemKey: 'furniture_sofa_set_classic',
+    name: 'Koltuk Takımı',
+    type: 'sofa-set-classic',
+    dimensions: Object.freeze({
+      widthCm: 150,
+      depthCm: 150,
+      heightCm: 78,
+    }),
+    composition: Object.freeze({
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'furniture_sofa_double_classic', quantity: 1 }),
+        Object.freeze({ itemKey: 'furniture_sofa_single_classic', quantity: 2 }),
+        Object.freeze({ itemKey: 'furniture_coffee_table_classic', quantity: 1 }),
+      ]),
+    }),
+  }),
+  furniture_sofa_single_classic: Object.freeze({
+    itemKey: 'furniture_sofa_single_classic',
+    name: 'Tekli Koltuk',
+    type: 'sofa-single-classic',
+    dimensions: Object.freeze({
+      widthCm: 65,
+      depthCm: 45,
+      heightCm: 78,
+    }),
+    visualRotationYDeg: -135,
+  }),
+  furniture_sofa_double_classic: Object.freeze({
+    itemKey: 'furniture_sofa_double_classic',
+    name: 'Çiftli Koltuk',
+    type: 'sofa-double-classic',
+    dimensions: Object.freeze({
+      widthCm: 150,
+      depthCm: 45,
+      heightCm: 78,
+    }),
+    visualRotationYDeg: -45,
+  }),
+  furniture_coffee_table_classic: Object.freeze({
+    itemKey: 'furniture_coffee_table_classic',
+    name: 'Sehpa',
+    type: 'coffee-table-classic',
+    dimensions: Object.freeze({
+      widthCm: 60,
+      depthCm: 42,
+      heightCm: 38,
+    }),
+  }),
+  furniture_table_chair_set_eames: Object.freeze({
+    itemKey: 'furniture_table_chair_set_eames',
+    name: 'Eames Masa Sandalye Takımı',
+    type: 'table-chair-set-eames',
+    dimensions: Object.freeze({
+      widthCm: 150,
+      depthCm: 150,
+      heightCm: 82,
+    }),
+    composition: Object.freeze({
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'glass_table', quantity: 1 }),
+        Object.freeze({ itemKey: 'chair_eames', quantity: 4 }),
+      ]),
+    }),
+  }),
+  chair_eames: Object.freeze({
+    itemKey: 'chair_eames',
+    name: 'Eames Sandalye',
+    type: 'chair',
+    dimensions: Object.freeze({
+      widthCm: 46,
+      depthCm: 58,
+      heightCm: 82,
+    }),
+  }),
+  glass_table: Object.freeze({
+    itemKey: 'glass_table',
+    name: 'Cam Masa',
+    type: 'table-glass',
+    dimensions: Object.freeze({
+      widthCm: 75,
+      depthCm: 75,
+      heightCm: 74,
+      tableDiameterCm: 75,
+    }),
+  }),
+  furniture_bar_stool_classic: Object.freeze({
+    itemKey: 'furniture_bar_stool_classic',
+    name: 'Bar Taburesi',
+    type: 'bar-stool',
+    dimensions: Object.freeze({
+      widthCm: 60,
+      depthCm: 55,
+      heightCm: 121,
+    }),
+  }),
+});
+
+export function getFurnitureItemForType(type) {
+  return Object.values(FURNITURE_ITEMS).find((item) => item.type === type) ?? null;
+}
+
+// Üst profil LED projektör. Tekil katalog Item. BOM decision-required — unit/recipe uydurulmaz.
+export const TOP_LIGHT_ITEMS = Object.freeze({
+  led_floodlight: Object.freeze({
+    itemKey: 'led_floodlight',
+    name: 'LED Projektör',
+    type: 'led-floodlight',
+    dimensions: Object.freeze({
+      widthCm: 50,
+      depthCm: 20,
+      heightCm: 35,
+      mountHeightCm: 350,
+    }),
+  }),
+});
+
+export function getTopLightItemForType(type) {
+  return Object.values(TOP_LIGHT_ITEMS).find((item) => item.type === type) ?? null;
+}
+
+// Katalog dışı SVG → ışıklı strafor. itemKey type ile aynıdır; MODULE_CATALOG kaydı yoktur.
+export const NON_CATALOG_ITEMS = Object.freeze({
+  'illuminated-foam': Object.freeze({
+    itemKey: 'illuminated-foam',
+    name: 'Işıklı Strafor / Logo',
+    type: 'illuminated-foam',
+    dimensions: Object.freeze({
+      widthCm: 200,
+      heightCm: 50,
+      depthCm: 3.5,
+      wallGapCm: 1.5,
+    }),
+  }),
+});
+
+// Zemin kaplamaları modül değildir; stand.floorType = itemKey. Katalog/recipe yok.
+export const FLOOR_ITEMS = Object.freeze({
+  karolaj: Object.freeze({
+    itemKey: 'karolaj',
+    name: 'Karolaj',
+    type: 'floor',
+    dimensions: Object.freeze({ widthCm: 100, depthCm: 100 }),
+    defaultColor: '#e9edf1',
+    paintable: true,
+  }),
+  hali: Object.freeze({
+    itemKey: 'hali',
+    name: 'Halı',
+    type: 'floor',
+    defaultColor: '#8b8f94',
+    paintable: true,
+  }),
+  'parke-acik': Object.freeze({
+    itemKey: 'parke-acik',
+    name: 'Beyaz Meşe',
+    type: 'floor',
+    dimensions: Object.freeze({ lengthCm: 140, depthCm: 16 }),
+    defaultColor: '#e8dfd1',
+    paintable: false,
+  }),
+  'parke-sari': Object.freeze({
+    itemKey: 'parke-sari',
+    name: 'Sarı Meşe',
+    type: 'floor',
+    dimensions: Object.freeze({ lengthCm: 140, depthCm: 16 }),
+    defaultColor: '#ddb24f',
+    paintable: false,
+  }),
+  'parke-beton': Object.freeze({
+    itemKey: 'parke-beton',
+    name: 'Beton Parke',
+    type: 'floor',
+    dimensions: Object.freeze({ lengthCm: 112, depthCm: 28 }),
+    defaultColor: '#625f58',
+    paintable: false,
+  }),
+});
+
+export function listFloorItems() {
+  return Object.values(FLOOR_ITEMS);
+}
+
+export function getFloorItem(floorType) {
+  return FLOOR_ITEMS[floorType] ?? null;
+}
+
+export function getFloorSelectLabel(item) {
+  if (!item) return '';
+  const widthCm = Number(item.dimensions?.widthCm);
+  const depthCm = Number(item.dimensions?.depthCm);
+  if (item.paintable && Number.isFinite(widthCm) && Number.isFinite(depthCm)) {
+    return `${item.name} · ${widthCm} × ${depthCm} cm`;
+  }
+  return item.name;
+}
+
+export function isParquetFloorItem(item) {
+  return item?.type === 'floor' && Number(item.dimensions?.lengthCm) > 0;
+}
+
+export function getFurnitureClusterQuantity(item, childItemKey) {
+  const entry = item?.composition?.items?.find((row) => row.itemKey === childItemKey);
+  return entry == null ? null : Number(entry.quantity);
+}
+
 // Yapay bitki / uzun saksı ailesi. Hepsi type `indoor-plant-1`; ayrım itemKey + ölçü/modelFile.
 // BOM decision-required — composition/recipe uydurulmaz.
 export const INDOOR_PLANT_ITEMS = Object.freeze({
@@ -554,8 +763,12 @@ export function getShowcaseBodyDefinition(itemOrKey) {
 
 export function getItem(itemKey) {
   return COMMERCIAL_ITEMS[itemKey]
+    ?? FURNITURE_ITEMS[itemKey]
     ?? INDOOR_PLANT_ITEMS[itemKey]
     ?? WALL_MEDIA_ITEMS[itemKey]
+    ?? TOP_LIGHT_ITEMS[itemKey]
+    ?? NON_CATALOG_ITEMS[itemKey]
+    ?? FLOOR_ITEMS[itemKey]
     ?? COMPOSITE_ITEMS[itemKey]
     ?? getProductionItem(itemKey);
 }

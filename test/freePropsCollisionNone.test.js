@@ -15,6 +15,10 @@ const PROP_TYPES = Object.freeze([
   'kettle',
   'coat-rack',
   'plastic-trash-bin',
+  'chair',
+  'table-glass',
+  'table-chair-set-eames',
+  'bar-stool',
 ]);
 
 test('free props declare collision:none and effective strategy none', () => {

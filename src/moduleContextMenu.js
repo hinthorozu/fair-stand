@@ -1,4 +1,4 @@
-import { getModuleCatalogLabel, MODULE_CATALOG, MODULE_CATALOG_KEYS } from './catalog.js';
+import { getModuleCatalogLabel, MODULE_CATALOG, MODULE_CATALOG_GROUPS } from './catalog.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 
 
@@ -61,7 +61,7 @@ export function createModuleContextMenu({
         </div>
         <button type="button" class="module-picker-close" aria-label="Kapat">×</button>
       </div>
-      <div class="module-catalog-grid" role="listbox" aria-label="Modül kataloğu"></div>
+      <div class="module-picker-groups module-drag-groups" role="listbox" aria-label="Modül kataloğu"></div>
       <div class="module-picker-selection" style="margin-top:12px;padding:10px 12px;border:1px solid #e2e7ed;border-radius:12px;background:#f8fafc;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
           <strong style="font-size:12px;color:#374151;">Seçim sırası</strong>
@@ -87,7 +87,7 @@ export function createModuleContextMenu({
   const foamResizeButton = menu.querySelector('[data-module-action="resize-foam"]');
   const pickerTitle = pickerBackdrop.querySelector('#module-picker-title');
   const pickerContext = pickerBackdrop.querySelector('.module-picker-context');
-  const pickerGrid = pickerBackdrop.querySelector('.module-catalog-grid');
+  const pickerGroups = pickerBackdrop.querySelector('.module-picker-groups');
   const pickerAddButton = pickerBackdrop.querySelector('.module-picker-add');
   const pickerSelectionList = pickerBackdrop.querySelector('.module-picker-selection-list');
   const pickerSelectionEmpty = pickerBackdrop.querySelector('.module-picker-selection-empty');
@@ -205,7 +205,7 @@ export function createModuleContextMenu({
   function syncPickerSelection() {
     const counts = getSelectionCounts();
 
-    pickerGrid.querySelectorAll('[data-module-key]').forEach((card) => {
+    pickerGroups.querySelectorAll('[data-module-key]').forEach((card) => {
       const count = counts.get(card.dataset.moduleKey) ?? 0;
       card.classList.toggle('selected', count > 0);
       card.setAttribute('aria-selected', String(count > 0));
@@ -259,46 +259,68 @@ export function createModuleContextMenu({
     });
   }
 
+  function createPickerCard(moduleKey, module) {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'module-catalog-card';
+    card.dataset.moduleKey = moduleKey;
+    card.setAttribute('role', 'option');
+    card.setAttribute('aria-selected', 'false');
+
+    const titleRow = document.createElement('span');
+    titleRow.style.display = 'flex';
+    titleRow.style.alignItems = 'center';
+    titleRow.style.justifyContent = 'space-between';
+    titleRow.style.gap = '8px';
+
+    const cardTitle = document.createElement('strong');
+    cardTitle.className = 'module-catalog-card-title';
+    cardTitle.textContent = module.label;
+
+    const countBadge = document.createElement('span');
+    countBadge.className = 'module-catalog-card-count';
+    countBadge.hidden = true;
+    countBadge.style.flex = '0 0 auto';
+    countBadge.style.padding = '2px 6px';
+    countBadge.style.borderRadius = '999px';
+    countBadge.style.background = '#f97316';
+    countBadge.style.color = '#ffffff';
+    countBadge.style.fontSize = '10px';
+    countBadge.style.fontWeight = '800';
+
+    titleRow.append(cardTitle, countBadge);
+    card.append(titleRow, createModuleCatalogPreview(module));
+    card.addEventListener('click', () => addModuleToSelection(moduleKey));
+    return card;
+  }
+
+  function collapsePickerGroups() {
+    pickerGroups.querySelectorAll('.module-drag-group').forEach((details) => {
+      details.open = false;
+    });
+  }
+
   function renderPickerCatalog() {
-    pickerGrid.innerHTML = '';
+    pickerGroups.innerHTML = '';
 
-    MODULE_CATALOG_KEYS.forEach((moduleKey) => {
-      const module = MODULE_CATALOG[moduleKey];
-      if (!module) return;
+    MODULE_CATALOG_GROUPS.forEach((group) => {
+      const details = document.createElement('details');
+      details.className = 'module-drag-group';
+      details.open = false;
 
-      const card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'module-catalog-card';
-      card.dataset.moduleKey = moduleKey;
-      card.setAttribute('role', 'option');
-      card.setAttribute('aria-selected', 'false');
+      const summary = document.createElement('summary');
+      summary.textContent = group.label;
 
-      const titleRow = document.createElement('span');
-      titleRow.style.display = 'flex';
-      titleRow.style.alignItems = 'center';
-      titleRow.style.justifyContent = 'space-between';
-      titleRow.style.gap = '8px';
+      const grid = document.createElement('div');
+      grid.className = 'module-drag-grid';
+      group.keys.forEach((moduleKey) => {
+        const module = MODULE_CATALOG[moduleKey];
+        if (!module) return;
+        grid.appendChild(createPickerCard(moduleKey, module));
+      });
 
-      const cardTitle = document.createElement('strong');
-      cardTitle.className = 'module-catalog-card-title';
-      cardTitle.textContent = module.label;
-
-      const countBadge = document.createElement('span');
-      countBadge.className = 'module-catalog-card-count';
-      countBadge.hidden = true;
-      countBadge.style.flex = '0 0 auto';
-      countBadge.style.padding = '2px 6px';
-      countBadge.style.borderRadius = '999px';
-      countBadge.style.background = '#f97316';
-      countBadge.style.color = '#ffffff';
-      countBadge.style.fontSize = '10px';
-      countBadge.style.fontWeight = '800';
-
-      titleRow.append(cardTitle, countBadge);
-      card.append(titleRow, createModuleCatalogPreview(module));
-      card.addEventListener('click', () => addModuleToSelection(moduleKey));
-
-      pickerGrid.appendChild(card);
+      details.append(summary, grid);
+      pickerGroups.appendChild(details);
     });
   }
 
@@ -340,6 +362,7 @@ export function createModuleContextMenu({
 
     menu.hidden = true;
     pickerBackdrop.hidden = false;
+    collapsePickerGroups();
     syncPickerSelection();
   }
 

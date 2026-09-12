@@ -1,52 +1,16 @@
-# karolaj — Mevcut Sistem Profili
+# karolaj — Canonical Item
 
-Bu belge ITEM_LIST'teki **Karolaj** girdisinin `Version2` runtime kodundaki gerçek karşılığını toplar.
+Migration öncesi tam envanter: [current-system/karolaj](../current-system/karolaj.md).
+Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKLIST](../contract/ITEM_CONTRACT_CHECKLIST.md).
 
-## Item/module kimliği
+## Identity, properties ve ölçüler
+`src/items.js > FLOOR_ITEMS.karolaj` canonical itemKey/name/type sahibidir. Tekil Item. `itemKey = floorType = karolaj`. Type `floor`. Katalog kartı yoktur. Karo ızgarası `100 × 100 cm` (UI + 1 m grid). `defaultColor=#e9edf1`. `paintable=true`. Unit / BOM uydurulmadı.
 
-Bu floor girdisinin `MODULE_CATALOG` içinde `catalogKey` kaydı ve `module type` state'i yoktur. Floor, module listesine eklenen bir Item state'i değil; `currentStand.floorType` / `floorColor` ve `scene3d` floor renderer üzerinden yönetilir.
+## Factory, state ve persistence
+Zemin `currentModules` içinde değildir. `currentStand.floorType` Item `itemKey` taşır; varsa `floorColor` instance override’dır. Load’da bilinmeyen `floorType` `karolaj`e düşer.
 
-```text
-catalogKey = yok
-module type = yok
-runtime floorType = karolaj
-```
+## Behavior ve renderer sınırı
+Floor selection / `setFloorColor` Item `paintable` alanını kullanır. Material roughness ve grid çizgi rengi renderer temsilidir.
 
-## UI / state
-
-`index.html` floor select seçenekleri:
-
-```text
-karolaj    → Karolaj · 100 × 100 cm
-hali        → Halı
-parke-acik  → Beyaz Meşe
-parke-sari  → Sarı Meşe
-parke-beton → Beton Parke
-```
-
-`currentStand` proje state'inde `floorType` ve varsa `floorColor` saklanır. Proje restore sırasında `scene3d.setFloorType()` ve uygun color state tekrar uygulanır.
-
-## Renderer
-
-`currentFloorType` başlangıç değeri `karolaj`dır. Material roughness `0.92` kullanır. Pattern aktif stand alanında 1 metre grid çizgileri oluşturur. `setFloorColor()` karolaj için renk değişikliğine izin verir; default floor color `#e9edf1`dir.
-
-## Selection / color
-
-Floor scene içinde ayrı floor selection yoluna sahiptir; module context menu kullanmaz. `describeFloorSelection()` / `setFloorColor()` üzerinden floor type'a göre paintability belirlenir.
-
-`main.applyActiveColorToSelection()` içinde `floorType === 'parke'` kontrolü vardır; gerçek parke değerleri `parke-acik/parke-sari/parke-beton` olduğu için bu exact equality branch bu üç değeri eşlemez. Sonraki `setFloorColor()` çağrısı parke type'ları için zaten color değişimini reddeder.
-
-## Persistence
-
-Floor module listesinde değil `stand` state'inde saklanır; normal project save/load/autosave ve ZIP project.json içinde stand ile taşınır.
-
-## BOM
-
-Bu floor girdileri için `moduleRecipes.js` içinde recipe, `moduleContracts.js` içinde module contract veya `productionParts.js` içinde bu floor'u terminal BOM'a dönüştüren kayıt yoktur. `rawBomDebug.js` floor selection için recipe render etmez.
-
-## Kod kaynakları
-
-- `index.html`
-- `src/main.js`
-- `src/scene3d.js`
-- `src/projectStore.js`
+## Regression
+`test/floorItemsContract.test.js`; E2E `e2e/floor-items-contract.spec.mjs`.

@@ -1,4 +1,4 @@
-import { getCommercialItemForType } from './items.js';
+import { getCommercialItemForType, getFloorItem, getFurnitureClusterQuantity, getFurnitureItemForType, getItem } from './items.js';
 
 export const DEFAULT_SELECTION_HINT = 'Bir panel seç; Ctrl/Cmd + tık ile panelleri çoklu seç.';
 
@@ -69,8 +69,37 @@ export function describeSurfaceSelection(surfaces, modules = []) {
       return result('Modül ' + (moduleIndex + 1) + ' · Raf ' + widthCm + ' cm · ' + shelfCount + ' raflı · alttan ' + stripNumber + '. panel · renk + görsel uygulanabilir.');
     }
 
+    if (moduleType === 'sofa-set-classic') {
+      const item = getFurnitureItemForType('sofa-set-classic');
+      const doubleItem = getItem('furniture_sofa_double_classic');
+      const singleItem = getItem('furniture_sofa_single_classic');
+      const doubleQty = getFurnitureClusterQuantity(item, doubleItem.itemKey);
+      const singleQty = getFurnitureClusterQuantity(item, singleItem.itemKey);
+      return result('Modül ' + (moduleIndex + 1) + ' · ' + item.name + ' · ' + doubleQty + ' ' + doubleItem.name + ' · ' + singleQty + ' ' + singleItem.name + ' · koltuk gövde rengi değiştirilebilir · sehpa sabittir.');
+    }
+
+    if (moduleType === 'sofa-single-classic' || moduleType === 'sofa-double-classic') {
+      const item = getFurnitureItemForType(moduleType);
+      return result('Modül ' + (moduleIndex + 1) + ' · ' + item.name + ' · koltuk gövde rengi değiştirilebilir.');
+    }
+
+    if (moduleType === 'coffee-table-classic') {
+      const item = getFurnitureItemForType('coffee-table-classic');
+      return result('Modül ' + (moduleIndex + 1) + ' · ' + item.name + ' · sehpa sabittir.');
+    }
+
     if (moduleType === 'table-chair-set-eames') {
       return result('Modül ' + (moduleIndex + 1) + ' · Eames Masa Sandalye Takımı · 4 Eames sandalye · sandalye gövde rengi değiştirilebilir · cam masa sabittir.');
+    }
+
+    if (moduleType === 'chair') {
+      const item = getFurnitureItemForType('chair');
+      return result('Modül ' + (moduleIndex + 1) + ' · ' + item.name + ' · sandalye gövde rengi değiştirilebilir.');
+    }
+
+    if (moduleType === 'table-glass') {
+      const item = getFurnitureItemForType('table-glass');
+      return result('Modül ' + (moduleIndex + 1) + ' · ' + item.name + ' · cam masa sabittir.');
     }
 
     if (moduleType === 'bar-stool') {
@@ -110,7 +139,8 @@ export function describeSurfaceSelection(surfaces, modules = []) {
     }
 
     if (moduleType === 'led-floodlight') {
-      return result('Modül ' + (moduleIndex + 1) + ' · LED Projektör · 350 cm üst profile bağlı aydınlatma.');
+      const lightItem = getItem('led_floodlight');
+      return result(`Modül ${moduleIndex + 1} · ${lightItem.name} · ${lightItem.dimensions.mountHeightCm} cm üst profile bağlı aydınlatma.`);
     }
 
     return result(`Modül ${moduleIndex + 1} · ${widthCm} cm · alttan ${stripNumber}. panel · Ctrl/Cmd + tık ile çoklu seç.`);
@@ -142,7 +172,8 @@ export function describeSurfaceSelection(surfaces, modules = []) {
 
 export function describeFloorSelection({ selected, floorType, paintable } = {}) {
   if (!selected) return null;
-  const label = floorType === 'karolaj' ? 'Karolaj' : (floorType === 'hali' ? 'Halı' : 'Parke');
+  const label = getFloorItem(floorType)?.name
+    ?? (floorType === 'karolaj' ? 'Karolaj' : (floorType === 'hali' ? 'Halı' : 'Parke'));
   return paintable
     ? label + ' zemini seçili · mevcut Aktif renk ile boyanabilir.'
     : label + ' zemini seçili · bu zemin tipi boyanamaz.';
