@@ -885,25 +885,16 @@ export function getShowcaseBodyDefinition(itemOrKey) {
   });
 }
 
-const ITEM_KEY_ALIASES = Object.freeze({
-  wall_200_shot_2: 'wall_200_short_up_2',
-});
-
-export function resolveCanonicalItemKey(itemKey) {
-  return ITEM_KEY_ALIASES[itemKey] ?? itemKey;
-}
-
 export function getItem(itemKey) {
-  const resolvedKey = resolveCanonicalItemKey(itemKey);
-  return COMMERCIAL_ITEMS[resolvedKey]
-    ?? FURNITURE_ITEMS[resolvedKey]
-    ?? INDOOR_PLANT_ITEMS[resolvedKey]
-    ?? WALL_MEDIA_ITEMS[resolvedKey]
-    ?? TOP_LIGHT_ITEMS[resolvedKey]
-    ?? NON_CATALOG_ITEMS[resolvedKey]
-    ?? FLOOR_ITEMS[resolvedKey]
-    ?? COMPOSITE_ITEMS[resolvedKey]
-    ?? getProductionItem(resolvedKey);
+  return COMMERCIAL_ITEMS[itemKey]
+    ?? FURNITURE_ITEMS[itemKey]
+    ?? INDOOR_PLANT_ITEMS[itemKey]
+    ?? WALL_MEDIA_ITEMS[itemKey]
+    ?? TOP_LIGHT_ITEMS[itemKey]
+    ?? NON_CATALOG_ITEMS[itemKey]
+    ?? FLOOR_ITEMS[itemKey]
+    ?? COMPOSITE_ITEMS[itemKey]
+    ?? getProductionItem(itemKey);
 }
 
 export function listCompositeItems() {

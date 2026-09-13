@@ -228,13 +228,6 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_1)) {
   });
 }
 
-test('legacy wall_200_shot_2 alias still resolves to wall_200_short_up_2', () => {
-  assert.equal(
-    resolveItemKey({ itemKey: 'wall_200_shot_2', type: 'flat-panel', widthCm: 200 }),
-    'wall_200_short_up_2',
-  );
-});
-
 test('wall_200_short_up_2 skips floor collisions but keeps wall snap policy', () => {
   const hanging = {
     id: 'shot',
