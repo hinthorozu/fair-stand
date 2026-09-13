@@ -81,6 +81,7 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/colorEditorController.js': frozenDomains('ui'),
   'src/colorEditorInputs.js': frozenDomains('ui'),
   'src/colorUtils.js': frozenDomains('ui'),
+  'src/configuratorDb.js': frozenDomains('persistence', 'storage'),
   'src/cornerPlacement.js': frozenDomains('behavior', 'placement'),
   'src/designState.js': frozenDomains('state', 'persistence'),
   'src/featureContracts.js': frozenDomains('architecture', 'composition'),
