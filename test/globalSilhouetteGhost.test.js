@@ -33,3 +33,14 @@ test('placement ghost is a singleton instead of a per-model cache', () => {
   assert.match(scene, /destroyPlacementGhost\(\);\n    placementGhost = createPlacementGhost/);
   assert.match(scene, /function disposePlacementGhost\(\) \{\n    if \(!placementGhost\) return;\n    placementGhost\.root\.visible = false/);
 });
+
+test('placement ghost key distinguishes occupancy so hanging strip variants are not reused', () => {
+  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  const start = scene.indexOf('function getPlacementGhostKey');
+  const end = scene.indexOf('function createSilhouetteGhostMaterial', start);
+  assert.ok(start >= 0 && end > start);
+  const fn = scene.slice(start, end);
+  assert.match(fn, /resolveModuleStripOccupancy\(moduleOrWidthCm\)/);
+  assert.match(fn, /moduleOrWidthCm\.itemKey/);
+  assert.match(fn, /occupancy\?\.stripCount/);
+});

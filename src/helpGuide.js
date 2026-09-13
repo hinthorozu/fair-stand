@@ -145,7 +145,7 @@ const GUIDE_SECTIONS = [
   {
     title: 'Lightbox Kumaş / Mesh Branda',
     html: `
-      <p>Lightbox Kumaş veya Mesh Branda oluşturmak için en az iki panel seçilmeli; seçim eksiksiz dikdörtgen ve aynı düzlemde olmalıdır.</p>
+      <p>Lightbox Kumaş veya Mesh Branda tek panelde de oluşturulabilir; birden fazla panelde seçim eksiksiz dikdörtgen ve aynı düzlemde olmalıdır.</p>
       <ul>
         <li>Her iki kaplamaya da renk ve görsel uygulanabilir.</li>
         <li>Doldur ve Sığdır seçenekleri kullanılabilir.</li>

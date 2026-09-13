@@ -1,3 +1,7 @@
+import { STAND_DIMENSIONS } from './catalog.js';
+import { getItem } from './items.js';
+import { getStripOccupancyHeightRangeCm, resolveModuleStripOccupancy } from './stripOccupancy.js';
+
 const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
   kind: 'silhouette',
   renderer: 'module-silhouette',
@@ -22,6 +26,7 @@ const WALL_BEHAVIOR = Object.freeze({
   overlapWithTypes: NO_OVERLAP_TYPES,
   supportsWallOverlayMount: true,
   wallCapacity: 'include',
+  collisionHeight: 'full',
   ghost: DEFAULT_GHOST_BEHAVIOR,
 });
 
@@ -44,6 +49,7 @@ function freeBehavior(overrides = {}) {
     overlapWithTypes: NO_OVERLAP_TYPES,
     supportsWallOverlayMount: false,
     wallCapacity: 'include',
+    collisionHeight: 'full',
     ghost: DEFAULT_GHOST_BEHAVIOR,
     ...overrides,
   });
@@ -66,6 +72,7 @@ function overlayBehavior(overrides = {}) {
     overlapWithTypes: NO_OVERLAP_TYPES,
     supportsWallOverlayMount: false,
     wallCapacity: 'include',
+    collisionHeight: 'full',
     ghost: DEFAULT_GHOST_BEHAVIOR,
     ...overrides,
   });
@@ -177,6 +184,7 @@ const TYPE_BEHAVIORS = Object.freeze({
     overlapWithTypes: NO_OVERLAP_TYPES,
     supportsWallOverlayMount: false,
     wallCapacity: 'exclude',
+    collisionHeight: 'full',
     ghost: DEFAULT_GHOST_BEHAVIOR,
   }),
 });
@@ -198,9 +206,12 @@ export function getModuleBehavior(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
   const type = module.type ?? null;
   const declared = TYPE_BEHAVIORS[type] ?? DEFAULT_BEHAVIOR;
-  const base = declared.ghost
+  const withGhost = declared.ghost
     ? declared
     : { ...declared, ghost: DEFAULT_GHOST_BEHAVIOR };
+  const base = Object.hasOwn(withGhost, 'collisionHeight')
+    ? withGhost
+    : { ...withGhost, collisionHeight: 'full' };
 
   // Köşe bankolar sahneye doğrulanmış müşteri-önü L yönüyle girer.
   // Geometri ve 90 derece dönüş davranışı değişmez.
@@ -241,6 +252,25 @@ export function getModuleMoveSnapCm(moduleOrType) {
 
 export function getModuleCollisionStrategy(moduleOrType) {
   return getModuleBehavior(moduleOrType).collision ?? 'segment';
+}
+
+export function getModuleCollisionHeightRangeCm(moduleOrType) {
+  const module = normalizeDescriptor(moduleOrType);
+  const occupancy = resolveModuleStripOccupancy(module);
+  if (occupancy) return getStripOccupancyHeightRangeCm(occupancy);
+
+  const fullHeightCm = Math.round(STAND_DIMENSIONS.height * 100);
+  const explicitHeightCm = Number(module.heightCm);
+  if (Number.isFinite(explicitHeightCm) && explicitHeightCm > 0) {
+    return Object.freeze({ minCm: 0, maxCm: explicitHeightCm });
+  }
+
+  const itemHeightCm = Number(getItem(module.itemKey)?.dimensions?.heightCm);
+  if (Number.isFinite(itemHeightCm) && itemHeightCm > 0) {
+    return Object.freeze({ minCm: 0, maxCm: itemHeightCm });
+  }
+
+  return Object.freeze({ minCm: 0, maxCm: fullHeightCm });
 }
 
 export function getModuleMagneticSnapStrategy(moduleOrType) {

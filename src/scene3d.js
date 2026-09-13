@@ -7,6 +7,7 @@ import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL
 import { getProductionItem, getShelfProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 import { getItem, getCommercialItemForType, getFloorItem, getShowcaseBodyDefinition, isCarpetFloorItem, isGridTileFloorItem, isParquetFloorItem, listFloorItems } from './items.js';
+import { getOccupiedStripLayout, resolveModuleStripOccupancy } from './stripOccupancy.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
@@ -1852,7 +1853,9 @@ export function createStandScene(
     if (!moduleOrWidthCm || typeof moduleOrWidthCm !== 'object') {
       return ['generic', dimensions.widthCm, dimensions.depthM, dimensions.heightM].join(':');
     }
+    const occupancy = resolveModuleStripOccupancy(moduleOrWidthCm);
     return [
+      moduleOrWidthCm.itemKey ?? '',
       moduleOrWidthCm.type ?? 'generic',
       dimensions.widthCm,
       dimensions.depthM,
@@ -1862,6 +1865,9 @@ export function createStandScene(
       moduleOrWidthCm.sizeInch ?? '',
       moduleOrWidthCm.screenWidthCm ?? '',
       moduleOrWidthCm.screenHeightCm ?? '',
+      occupancy?.align ?? '',
+      occupancy?.stripCount ?? '',
+      Array.isArray(moduleOrWidthCm.strips) ? moduleOrWidthCm.strips.length : '',
     ].join(':');
   }
 
@@ -2225,6 +2231,8 @@ export function createStandScene(
       depthCm: moduleState.depthCm,
       moduleId: moduleState.id,
       moduleType: moduleState.type,
+      itemKey: moduleState.itemKey,
+      heightCm: moduleState.heightCm,
       shape: moduleState.shape,
       modules: getRenderedModuleStates(),
       standType: stageLayout.standType,
@@ -2534,6 +2542,8 @@ export function createStandScene(
     const magneticSnap = snapPlacementToModules({
       moduleId: moduleState.id,
       moduleType: moduleState.type,
+      itemKey: moduleState.itemKey,
+      heightCm: moduleState.heightCm,
       shape: moduleState.shape,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
@@ -2556,6 +2566,8 @@ export function createStandScene(
         depthCm: moduleState.depthCm,
         moduleId: moduleState.id,
         moduleType: moduleState.type,
+        itemKey: moduleState.itemKey,
+        heightCm: moduleState.heightCm,
       shape: moduleState.shape,
         modules: renderedModules,
         standType: stageLayout.standType,
@@ -2878,6 +2890,8 @@ export function createStandScene(
     const magneticSnap = snapPlacementToModules({
       moduleId: moduleState.id,
       moduleType: moduleState.type,
+      itemKey: moduleState.itemKey,
+      heightCm: moduleState.heightCm,
       shape: moduleState.shape,
       widthCm: moduleState.widthCm,
       depthCm: moduleState.depthCm,
@@ -2900,6 +2914,8 @@ export function createStandScene(
         depthCm: moduleState.depthCm,
         moduleId: moduleState.id,
         moduleType: moduleState.type,
+        itemKey: moduleState.itemKey,
+        heightCm: moduleState.heightCm,
       shape: moduleState.shape,
         modules: renderedModules,
         standType: stageLayout.standType,
@@ -3342,7 +3358,7 @@ export function createStandScene(
     if (!groups.size) return;
 
     groups.forEach((surfaces, groupId) => {
-      if (surfaces.length < 2) return;
+      if (!surfaces.length) return;
       const groupFabricType = surfaces[0]?.userData?.surfaceState?.fabricType === 'mesh'
         ? 'mesh'
         : 'lightbox';
@@ -3474,8 +3490,8 @@ export function createStandScene(
     const fabricLabel = resolvedFabricType === 'mesh' ? 'Mesh Branda' : 'Lightbox Kumaş';
 
     if (fabric) {
-      if (meshes.length < 2) {
-        return { ok: false, message: `Ctrl ile en az 2 panel seç; ${fabricLabel} tek parça blok olarak oluşturulur.` };
+      if (!meshes.length) {
+        return { ok: false, message: `${fabricLabel} için panel seç.` };
       }
 
       const moduleIndices = meshes.map((mesh) => Number(mesh.userData.moduleIndex));
@@ -4362,6 +4378,8 @@ export function createStandScene(
         depthCm: moduleState.depthCm,
         moduleId: moduleState.id,
         moduleType: moduleState.type,
+        itemKey: moduleState.itemKey,
+        heightCm: moduleState.heightCm,
         shape: moduleState.shape,
         modules: renderedModules,
         standType: stageLayout.standType,
@@ -6792,6 +6810,20 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
   return built;
 }
 
+function resolveOccupiedStripLayout(moduleState, stripCount, stripHeight) {
+  const occupancy = resolveModuleStripOccupancy(moduleState);
+  const layout = getOccupiedStripLayout(occupancy, { stripCount, stripHeight });
+  if (layout) return layout;
+  const storedCount = Array.isArray(moduleState?.strips) ? moduleState.strips.length : 0;
+  if (storedCount > 0 && storedCount < Number(stripCount)) {
+    return getOccupiedStripLayout(
+      { align: 'top', stripCount: storedCount },
+      { stripCount, stripHeight },
+    );
+  }
+  return null;
+}
+
 function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   const {
     height,
@@ -6801,6 +6833,11 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     frameWidth,
     frameDepth,
   } = STAND_DIMENSIONS;
+
+  const occupied = resolveOccupiedStripLayout(moduleState, stripCount, stripHeight);
+  const visibleStripCount = occupied ? occupied.visibleCount : stripCount;
+  const frameBottomY = occupied ? occupied.frameBottomY : 0;
+  const frameHeight = occupied ? occupied.frameHeight : height;
 
   const widthCm = moduleState.widthCm;
   const widthM = widthCm / 100;
@@ -6819,10 +6856,14 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     roughness: 0.28,
   });
 
-  const profileGeometry = new THREE.BoxGeometry(PANEL_VERTICAL_PROFILE_WIDTH_M, height, frameDepth);
+  const profileGeometry = new THREE.BoxGeometry(PANEL_VERTICAL_PROFILE_WIDTH_M, frameHeight, frameDepth);
   for (const side of [-1, 1]) {
     const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
-    profile.position.set(side * (widthM / 2 - PANEL_VERTICAL_PROFILE_WIDTH_M / 2), height / 2, 0);
+    profile.position.set(
+      side * (widthM / 2 - PANEL_VERTICAL_PROFILE_WIDTH_M / 2),
+      frameBottomY + frameHeight / 2,
+      0,
+    );
     profile.castShadow = true;
     group.add(profile);
   }
@@ -6835,7 +6876,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   );
 
   // Ara yatay profiller yok; panel grubunda yalnız en alt ve en üst profil kalır.
-  for (const y of [0, stripCount * stripHeight]) {
+  for (const y of [frameBottomY, frameBottomY + frameHeight]) {
     const rail = new THREE.Mesh(railGeometry.clone(), frameMaterial.clone());
     rail.position.set(0, y, 0);
     rail.castShadow = true;
@@ -6847,8 +6888,10 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   const panelHeight = stripHeight - railHeight - PANEL_VERTICAL_CLEARANCE_M;
   const panelDepth = Math.max(depth - 0.026, 0.035);
 
-  for (let stripIndex = 0; stripIndex < stripCount; stripIndex += 1) {
-    const centerY = stripIndex * stripHeight + stripHeight / 2;
+  for (let visibleIndex = 0; visibleIndex < visibleStripCount; visibleIndex += 1) {
+    const stripIndex = occupied ? occupied.startIndex + visibleIndex : visibleIndex;
+    const visualRow = occupied ? occupied.skipCount + visibleIndex : visibleIndex;
+    const centerY = visualRow * stripHeight + stripHeight / 2;
     const surfaceState = moduleState.strips?.[stripIndex];
     if (!surfaceState) {
       console.warn('Eksik panel strip state atlandı:', moduleState.type, moduleState.id, stripIndex);

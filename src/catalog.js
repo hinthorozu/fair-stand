@@ -1,4 +1,4 @@
-import { getFurnitureClusterQuantity, getItem, resolveWallMediaMetrics } from './items.js';
+import { getFurnitureClusterQuantity, getItem, resolveCanonicalItemKey, resolveWallMediaMetrics } from './items.js';
 
 export const STAND_DIMENSIONS = Object.freeze({
   height: 3.5,
@@ -55,12 +55,15 @@ function createCounterCatalogItem(itemKey) {
 
 function createFlatPanelCatalogItem(itemKey) {
   const item = getItem(itemKey);
-  return Object.freeze({
+  const descriptor = {
     itemKey: item.itemKey,
     type: item.type,
     widthCm: item.dimensions.widthCm,
     label: item.name,
-  });
+  };
+  if (item.variant) descriptor.variant = item.variant;
+  if (item.stripOccupancy) descriptor.stripOccupancy = item.stripOccupancy;
+  return Object.freeze(descriptor);
 }
 
 function createBaseWallCatalogItem(itemKey) {
@@ -230,6 +233,14 @@ export const MODULE_CATALOG = Object.freeze({
   wall_100: createFlatPanelCatalogItem('wall_100'),
   wall_150: createFlatPanelCatalogItem('wall_150'),
   wall_200: createFlatPanelCatalogItem('wall_200'),
+  wall_200_short_up_2: createFlatPanelCatalogItem('wall_200_short_up_2'),
+  wall_150_short_up_2: createFlatPanelCatalogItem('wall_150_short_up_2'),
+  wall_100_short_up_2: createFlatPanelCatalogItem('wall_100_short_up_2'),
+  wall_50_short_up_2: createFlatPanelCatalogItem('wall_50_short_up_2'),
+  wall_200_short_up_1: createFlatPanelCatalogItem('wall_200_short_up_1'),
+  wall_150_short_up_1: createFlatPanelCatalogItem('wall_150_short_up_1'),
+  wall_100_short_up_1: createFlatPanelCatalogItem('wall_100_short_up_1'),
+  wall_50_short_up_1: createFlatPanelCatalogItem('wall_50_short_up_1'),
 
   wall_showcase_100_3: {
     itemKey: WALL_SHOWCASE_3_ITEM.itemKey,
@@ -300,9 +311,17 @@ export const MODULE_CATALOG = Object.freeze({
 
 export const MODULE_CATALOG_KEYS = Object.freeze([
   'wall_200',
+  'wall_200_short_up_2',
+  'wall_200_short_up_1',
   'wall_150',
+  'wall_150_short_up_2',
+  'wall_150_short_up_1',
   'wall_100',
+  'wall_100_short_up_2',
+  'wall_100_short_up_1',
   'wall_50',
+  'wall_50_short_up_2',
+  'wall_50_short_up_1',
 
   'wall_separator_100',
   'wall_separator_50',
@@ -364,7 +383,7 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
 export const MODULE_CATALOG_GROUPS = Object.freeze([
   Object.freeze({
     label: 'Panel & Duvar',
-    keys: Object.freeze(['wall_200', 'wall_150', 'wall_100', 'wall_50', 'wall_separator_100', 'wall_separator_50', 'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'door_100']),
+    keys: Object.freeze(['wall_200', 'wall_200_short_up_2', 'wall_200_short_up_1', 'wall_150', 'wall_150_short_up_2', 'wall_150_short_up_1', 'wall_100', 'wall_100_short_up_2', 'wall_100_short_up_1', 'wall_50', 'wall_50_short_up_2', 'wall_50_short_up_1', 'wall_separator_100', 'wall_separator_50', 'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'door_100']),
   }),
   Object.freeze({
     label: 'Raf & Vitrin',
@@ -414,12 +433,15 @@ function normalizeCatalogDescriptor(descriptor) {
     modelFile: source.modelFile ?? descriptor?.modelFile ?? null,
     sizeInch: optionalNumber(source.sizeInch ?? descriptor?.sizeInch),
     screenWidthCm: optionalNumber(source.screenWidthCm ?? descriptor?.screenWidthCm),
+    variant: source.variant ?? descriptor?.variant ?? null,
   };
 }
 
 export function resolveItemKey(descriptor) {
   const normalized = normalizeCatalogDescriptor(descriptor);
   if (normalized.itemKey && MODULE_CATALOG[normalized.itemKey]) return normalized.itemKey;
+  const aliasedKey = resolveCanonicalItemKey(normalized.itemKey);
+  if (aliasedKey && MODULE_CATALOG[aliasedKey]) return aliasedKey;
   if (!normalized.type) return null;
 
   const candidates = MODULE_CATALOG_KEYS.filter(
@@ -442,6 +464,7 @@ export function resolveItemKey(descriptor) {
     if (normalized.sizeInch !== null && optionalNumber(item.sizeInch) !== null && optionalNumber(item.sizeInch) !== normalized.sizeInch) return false;
     if (normalized.type === 'tv' && normalized.screenWidthCm !== null && optionalNumber(item.screenWidthCm) !== null
       && optionalNumber(item.screenWidthCm) !== normalized.screenWidthCm) return false;
+    if ((normalized.variant != null || item.variant != null) && (item.variant ?? null) !== (normalized.variant ?? null)) return false;
     return true;
   });
 

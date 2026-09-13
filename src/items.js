@@ -544,6 +544,110 @@ export const COMPOSITE_ITEMS = Object.freeze({
       nominalWidthCm: 200,
     }),
   }),
+  wall_200_short_up_2: Object.freeze({
+    itemKey: 'wall_200_short_up_2',
+    name: 'Düz Panel 200 Short Up 2',
+    type: 'flat-panel',
+    variant: 'short-up-2',
+    stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
+    dimensions: Object.freeze({ widthCm: 200 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall-short-up-2',
+      nominalWidthCm: 200,
+    }),
+  }),
+  wall_150_short_up_2: Object.freeze({
+    itemKey: 'wall_150_short_up_2',
+    name: 'Düz Panel 150 Short Up 2',
+    type: 'flat-panel',
+    variant: 'short-up-2',
+    stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
+    dimensions: Object.freeze({ widthCm: 150 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall-short-up-2',
+      nominalWidthCm: 150,
+    }),
+  }),
+  wall_100_short_up_2: Object.freeze({
+    itemKey: 'wall_100_short_up_2',
+    name: 'Düz Panel 100 Short Up 2',
+    type: 'flat-panel',
+    variant: 'short-up-2',
+    stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
+    dimensions: Object.freeze({ widthCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall-short-up-2',
+      nominalWidthCm: 100,
+    }),
+  }),
+  wall_50_short_up_2: Object.freeze({
+    itemKey: 'wall_50_short_up_2',
+    name: 'Düz Panel 50 Short Up 2',
+    type: 'flat-panel',
+    variant: 'short-up-2',
+    stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
+    dimensions: Object.freeze({ widthCm: 50 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall-short-up-2',
+      nominalWidthCm: 50,
+    }),
+  }),
+  wall_200_short_up_1: Object.freeze({
+    itemKey: 'wall_200_short_up_1',
+    name: 'Düz Panel 200 Short Up 1',
+    type: 'flat-panel',
+    variant: 'short-up-1',
+    stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
+    dimensions: Object.freeze({ widthCm: 200 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall-short-up-1',
+      nominalWidthCm: 200,
+    }),
+  }),
+  wall_150_short_up_1: Object.freeze({
+    itemKey: 'wall_150_short_up_1',
+    name: 'Düz Panel 150 Short Up 1',
+    type: 'flat-panel',
+    variant: 'short-up-1',
+    stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
+    dimensions: Object.freeze({ widthCm: 150 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall-short-up-1',
+      nominalWidthCm: 150,
+    }),
+  }),
+  wall_100_short_up_1: Object.freeze({
+    itemKey: 'wall_100_short_up_1',
+    name: 'Düz Panel 100 Short Up 1',
+    type: 'flat-panel',
+    variant: 'short-up-1',
+    stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
+    dimensions: Object.freeze({ widthCm: 100 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall-short-up-1',
+      nominalWidthCm: 100,
+    }),
+  }),
+  wall_50_short_up_1: Object.freeze({
+    itemKey: 'wall_50_short_up_1',
+    name: 'Düz Panel 50 Short Up 1',
+    type: 'flat-panel',
+    variant: 'short-up-1',
+    stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
+    dimensions: Object.freeze({ widthCm: 50 }),
+    composition: Object.freeze({
+      mode: 'recipe',
+      moduleType: 'wall-short-up-1',
+      nominalWidthCm: 50,
+    }),
+  }),
   // Panel Bazalı parent'lar (type base-wall). Child miktarları moduleRecipes
   // base-wall:100|150|200 satırlarında kalır; Raw BOM UI dokunulmaz.
   wall_base_100: Object.freeze({
@@ -781,16 +885,25 @@ export function getShowcaseBodyDefinition(itemOrKey) {
   });
 }
 
+const ITEM_KEY_ALIASES = Object.freeze({
+  wall_200_shot_2: 'wall_200_short_up_2',
+});
+
+export function resolveCanonicalItemKey(itemKey) {
+  return ITEM_KEY_ALIASES[itemKey] ?? itemKey;
+}
+
 export function getItem(itemKey) {
-  return COMMERCIAL_ITEMS[itemKey]
-    ?? FURNITURE_ITEMS[itemKey]
-    ?? INDOOR_PLANT_ITEMS[itemKey]
-    ?? WALL_MEDIA_ITEMS[itemKey]
-    ?? TOP_LIGHT_ITEMS[itemKey]
-    ?? NON_CATALOG_ITEMS[itemKey]
-    ?? FLOOR_ITEMS[itemKey]
-    ?? COMPOSITE_ITEMS[itemKey]
-    ?? getProductionItem(itemKey);
+  const resolvedKey = resolveCanonicalItemKey(itemKey);
+  return COMMERCIAL_ITEMS[resolvedKey]
+    ?? FURNITURE_ITEMS[resolvedKey]
+    ?? INDOOR_PLANT_ITEMS[resolvedKey]
+    ?? WALL_MEDIA_ITEMS[resolvedKey]
+    ?? TOP_LIGHT_ITEMS[resolvedKey]
+    ?? NON_CATALOG_ITEMS[resolvedKey]
+    ?? FLOOR_ITEMS[resolvedKey]
+    ?? COMPOSITE_ITEMS[resolvedKey]
+    ?? getProductionItem(resolvedKey);
 }
 
 export function listCompositeItems() {

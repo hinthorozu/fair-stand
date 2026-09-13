@@ -9,7 +9,7 @@ test('panel systems keep only bottom and top horizontal profiles', () => {
   assert.doesNotMatch(scene, /for \(let index = 0; index <= stripCount; index \+= 1\)/);
   assert.equal(
     (scene.match(/for \(const y of \[0, stripCount \* stripHeight\]\)/g) ?? []).length,
-    2,
+    1,
   );
 });
 

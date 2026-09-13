@@ -135,6 +135,7 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/standCapacity.js': frozenDomains('placement', 'composition'),
   'src/standSetup.js': frozenDomains('placement', 'composition', 'renderer'),
   'src/standStandardsCopy.js': frozenDomains('ui', 'catalog'),
+  'src/stripOccupancy.js': frozenDomains('architecture', 'behavior', 'placement', 'renderer'),
   'src/surfaceStateBinding.js': frozenDomains('state', 'renderer', 'persistence'),
   'src/style.css': frozenDomains('ui'),
   'src/systemChangeContract.js': frozenDomains('architecture'),

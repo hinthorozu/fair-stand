@@ -17,8 +17,8 @@ Bu dosya insan/AI için **okunabilir katalog indeksi**dir. Runtime source-of-tru
 
 Bu snapshot `Version2` üzerindeki `MODULE_CATALOG_KEYS` ve `MODULE_CONTRACT_ASSIGNMENTS` ile eşleşmek zorundadır; `test/systemModuleCatalogDoc.test.js` drift olduğunda CI'yi kırar.
 
-- Catalog entries: **51**
-- BOM mode `recipe`: **29**
+- Catalog entries: **59**
+- BOM mode `recipe`: **37**
 - BOM mode `self`: **4**
 - BOM mode `decision-required`: **18**
 - Katalog dışı explicit runtime module: **1** (`illuminated-foam`)
@@ -32,9 +32,17 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 
 <!-- catalog-keys:start -->
 - `wall_200`
+- `wall_200_short_up_2`
+- `wall_200_short_up_1`
 - `wall_150`
+- `wall_150_short_up_2`
+- `wall_150_short_up_1`
 - `wall_100`
+- `wall_100_short_up_2`
+- `wall_100_short_up_1`
 - `wall_50`
+- `wall_50_short_up_2`
+- `wall_50_short_up_1`
 - `wall_separator_100`
 - `wall_separator_50`
 - `wall_separator_100_sarmasik`
@@ -90,7 +98,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Panel & Duvar
 
-`wall_200`, `wall_150`, `wall_100`, `wall_50`, `wall_separator_100`, `wall_separator_50`, `wall_separator_100_sarmasik`, `wall_separator_50_sarmasik`, `wall_base_200`, `wall_base_150`, `wall_base_100`, `door_100`
+`wall_200`, `wall_200_short_up_2`, `wall_200_short_up_1`, `wall_150`, `wall_150_short_up_2`, `wall_150_short_up_1`, `wall_100`, `wall_100_short_up_2`, `wall_100_short_up_1`, `wall_50`, `wall_50_short_up_2`, `wall_50_short_up_1`, `wall_separator_100`, `wall_separator_50`, `wall_separator_100_sarmasik`, `wall_separator_50_sarmasik`, `wall_base_200`, `wall_base_150`, `wall_base_100`, `door_100`
 
 ### Raf & Vitrin
 
@@ -110,7 +118,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ## BOM politika özeti
 
-### `recipe` — 29 katalog kaydı
+### `recipe` — 37 katalog kaydı
 
 Duvar/panel, separatör, vitrin, raf, panel bazalı duvar, depo kapısı, düz/L banko ve baza ailelerinin contract'ı `recipe` modundadır. Gerçek recipe çözümü `src/moduleRecipes.js` tarafından yapılır ve contract testleri recipe-backed kayıtların gerçekten resolve olduğunu doğrular.
 

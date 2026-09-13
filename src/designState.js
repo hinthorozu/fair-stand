@@ -1,4 +1,5 @@
 import { resolveItemKey } from './catalog.js';
+import { normalizeStripOccupancy } from './stripOccupancy.js';
 import {
   getCommercialItemForType,
   getFurnitureClusterQuantity,
@@ -94,14 +95,17 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'flat-panel') return null;
   const widthCm = Number(item.dimensions.widthCm);
+  const occupancy = normalizeStripOccupancy(item.stripOccupancy);
+  const stripCount = occupancy?.stripCount ?? STRIP_COUNT;
 
   return {
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
     widthCm,
+    ...(occupancy ? { stripOccupancy: occupancy } : {}),
     strips: Array.from(
-      { length: STRIP_COUNT },
+      { length: stripCount },
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
     ),
   };
@@ -695,9 +699,12 @@ export function normalizeModuleItemState(moduleState) {
   }
 
   if (moduleState.type === 'flat-panel') {
-    const resolvedKey = resolveItemKey(moduleState);
-    if (resolvedKey && getItem(resolvedKey)?.type === 'flat-panel') {
-      moduleState.itemKey = resolvedKey;
+    const resolvedKey = resolveItemKey(moduleState) ?? moduleState.itemKey;
+    const item = resolvedKey ? getItem(resolvedKey) : null;
+    if (item?.type === 'flat-panel') {
+      moduleState.itemKey = item.itemKey;
+      const occupancy = normalizeStripOccupancy(item.stripOccupancy);
+      if (occupancy) moduleState.stripOccupancy = occupancy;
     }
     return moduleState;
   }

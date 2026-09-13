@@ -47,7 +47,7 @@ async function removeModules(page, modules) {
   }
 }
 
-const keys = ['wall_50', 'wall_100', 'wall_150', 'wall_200'];
+const keys = ['wall_50', 'wall_100', 'wall_150', 'wall_200', 'wall_50_short_up_1', 'wall_100_short_up_1', 'wall_150_short_up_1', 'wall_200_short_up_1'];
 
 for (const itemKey of keys) {
   test(`${itemKey} catalog add creates a canonical flat-panel Item with strips`, async ({ page }) => {
@@ -79,7 +79,7 @@ for (const itemKey of keys) {
     expect(item.itemKey).toBe(itemKey);
     expect(item.type).toBe('flat-panel');
     expect(item.id).toBeTruthy();
-    expect(item.strips?.length).toBe(7);
+    expect(item.strips?.length).toBe(itemKey.endsWith('_short_up_1') ? 1 : 7);
     expect(item.strips[0].color).toBeTruthy();
     expect(errors).toEqual([]);
   });
