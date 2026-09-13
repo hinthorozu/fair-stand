@@ -11,6 +11,13 @@ import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
+import {
+  applyGlassOverride,
+  bindRendererSurfaceState,
+  clearFabricFields,
+  cloneSurfaceStateForRenderer,
+  syncRendererSurfaceState,
+} from './surfaceStateBinding.js';
 import { createViewCube } from './viewCube.js';
 import { isEditableKeyboardTarget, resolveViewKeyboardShortcut } from './viewKeyboardShortcuts.js';
 import { computeImageFit } from './imageFit.js';
@@ -831,9 +838,34 @@ export function createStandScene(
   let rebuildTextureTransfer = null;
 
   function getRebuildTextureKey(mesh) {
-    const surfaceState = mesh?.userData?.surfaceState;
-    if (surfaceState && typeof surfaceState === 'object') return surfaceState;
-    return mesh?.userData?.surfaceId ?? null;
+    return mesh?.userData?.surfaceId
+      ?? mesh?.userData?.persistentSurfaceState?.id
+      ?? null;
+  }
+
+  function syncRendererCopies(persistent) {
+    if (!persistent) return;
+    surfaceMeshes.forEach((mesh) => {
+      if (mesh?.userData?.persistentSurfaceState !== persistent) return;
+      if (!mesh.userData.surfaceState) {
+        mesh.userData.surfaceState = cloneSurfaceStateForRenderer(persistent);
+        return;
+      }
+      syncRendererSurfaceState(mesh.userData.surfaceState, persistent);
+    });
+  }
+
+  function writePersistentSurface(mesh, mutator) {
+    const persistent = mesh?.userData?.persistentSurfaceState;
+    if (!persistent) {
+      if (mesh?.userData?.surfaceState) {
+        throw new TypeError('Kalıcı yüzey durumu bağlanmamış.');
+      }
+      return null;
+    }
+    mutator(persistent);
+    syncRendererCopies(persistent);
+    return persistent;
   }
 
   function retainWallTexturesForRebuild() {
@@ -2971,11 +3003,6 @@ export function createStandScene(
     return [meshOrMeshes];
   }
 
-  function resetImageTransform(surfaceState) {
-    if (!surfaceState) return;
-    surfaceState.imageTransform = createDefaultImageTransform();
-  }
-
   function applyColor(meshOrMeshes, hexColor) {
     const meshes = normalizeMeshes(meshOrMeshes);
     const fabricGroupIds = new Set(
@@ -2983,19 +3010,22 @@ export function createStandScene(
     );
     fabricGroupIds.forEach((groupId) => {
       surfaceMeshes.forEach((surface) => {
-        const state = surface.userData.surfaceState;
-        if (state?.fabricGroupId !== groupId) return;
-        state.fabricColor = hexColor;
-        state.fabricImageAssetId = null;
-        state.fabricImageFit = 'cover';
-        state.fabricLightingOn = false;
+        if (surface.userData.surfaceState?.fabricGroupId !== groupId) return;
+        writePersistentSurface(surface, (state) => {
+          state.fabricColor = hexColor;
+          state.fabricImageAssetId = null;
+          state.fabricImageFit = 'cover';
+          state.fabricLightingOn = false;
+        });
       });
     });
 
     meshes.filter((mesh) => !mesh.userData.surfaceState?.fabricGroupId).forEach((mesh) => {
       if (!mesh?.material || mesh.userData.acceptsColor === false) return;
+      writePersistentSurface(mesh, (surfaceState) => {
+        applyColorOverride(surfaceState, hexColor);
+      });
       const surfaceState = mesh.userData.surfaceState;
-      applyColorOverride(surfaceState, hexColor);
 
       const colorTargets = mesh.userData.colorTargets?.length
         ? mesh.userData.colorTargets
@@ -3071,16 +3101,10 @@ export function createStandScene(
 
 
   function clearFabricState(surface, { restore = true } = {}) {
-    const state = surface?.userData?.surfaceState;
-    if (!state) return;
-    delete state.fabricGroupId;
-    delete state.fabricColor;
-    delete state.fabricImageAssetId;
-    delete state.fabricImageFit;
-    delete state.fabricLightingOn;
-    delete state.fabricType;
-    delete state.fabricOwnerSurfaceIds;
-    delete state.fabricOwnerModuleIds;
+    if (!surface?.userData?.surfaceState) return;
+    writePersistentSurface(surface, (state) => {
+      clearFabricFields(state);
+    });
     if (restore) restoreFabricSurface(surface);
   }
 
@@ -3131,9 +3155,10 @@ export function createStandScene(
         ownedSurfaces.map((surface) => surface.userData?.moduleId).filter(Boolean),
       )];
       ownedSurfaces.forEach((surface) => {
-        const state = surface.userData.surfaceState;
-        state.fabricOwnerSurfaceIds = [...ownerSurfaceIds];
-        state.fabricOwnerModuleIds = [...ownerModuleIds];
+        writePersistentSurface(surface, (state) => {
+          state.fabricOwnerSurfaceIds = [...ownerSurfaceIds];
+          state.fabricOwnerModuleIds = [...ownerModuleIds];
+        });
       });
     });
   }
@@ -3500,14 +3525,9 @@ export function createStandScene(
         surfaceMeshes.forEach((surface) => {
           if (!replacedGroupIds.has(surface.userData.surfaceState?.fabricGroupId)) return;
           replacedSurfaces.push(surface);
-          delete surface.userData.surfaceState.fabricGroupId;
-          delete surface.userData.surfaceState.fabricColor;
-          delete surface.userData.surfaceState.fabricImageAssetId;
-          delete surface.userData.surfaceState.fabricImageFit;
-          delete surface.userData.surfaceState.fabricLightingOn;
-          delete surface.userData.surfaceState.fabricType;
-          delete surface.userData.surfaceState.fabricOwnerSurfaceIds;
-          delete surface.userData.surfaceState.fabricOwnerModuleIds;
+          writePersistentSurface(surface, (state) => {
+            clearFabricFields(state);
+          });
         });
         replacedSurfaces.forEach(restoreFabricSurface);
       }
@@ -3521,15 +3541,16 @@ export function createStandScene(
         meshes.map((mesh) => mesh.userData.moduleId).filter(Boolean),
       )];
       meshes.forEach((mesh) => {
-        const state = mesh.userData.surfaceState;
-        state.fabricGroupId = groupId;
-        state.fabricType = resolvedFabricType;
-        state.fabricColor = initialFabricColor;
-        state.fabricImageAssetId = null;
-        state.fabricImageFit = 'cover';
-        state.fabricLightingOn = false;
-        state.fabricOwnerSurfaceIds = [...fabricOwnerSurfaceIds];
-        state.fabricOwnerModuleIds = [...fabricOwnerModuleIds];
+        writePersistentSurface(mesh, (state) => {
+          state.fabricGroupId = groupId;
+          state.fabricType = resolvedFabricType;
+          state.fabricColor = initialFabricColor;
+          state.fabricImageAssetId = null;
+          state.fabricImageFit = 'cover';
+          state.fabricLightingOn = false;
+          state.fabricOwnerSurfaceIds = [...fabricOwnerSurfaceIds];
+          state.fabricOwnerModuleIds = [...fabricOwnerModuleIds];
+        });
       });
       meshes.forEach((mesh) => suspendFabricSurface(mesh, resolvedFabricType));
       rebuildFabricOverlays();
@@ -3552,14 +3573,9 @@ export function createStandScene(
     surfaceMeshes.forEach((surface) => {
       if (groupIds.has(surface.userData.surfaceState?.fabricGroupId)) {
         restoredSurfaces.push(surface);
-        delete surface.userData.surfaceState.fabricGroupId;
-        delete surface.userData.surfaceState.fabricColor;
-        delete surface.userData.surfaceState.fabricImageAssetId;
-        delete surface.userData.surfaceState.fabricImageFit;
-        delete surface.userData.surfaceState.fabricLightingOn;
-        delete surface.userData.surfaceState.fabricType;
-        delete surface.userData.surfaceState.fabricOwnerSurfaceIds;
-        delete surface.userData.surfaceState.fabricOwnerModuleIds;
+        writePersistentSurface(surface, (state) => {
+          clearFabricFields(state);
+        });
       }
     });
     restoredSurfaces.forEach(restoreFabricSurface);
@@ -3590,7 +3606,9 @@ export function createStandScene(
     }
     const lightingOn = Boolean(enabled);
     groupSurfaces.forEach((surface) => {
-      surface.userData.surfaceState.fabricLightingOn = lightingOn;
+      writePersistentSurface(surface, (state) => {
+        state.fabricLightingOn = lightingOn;
+      });
     });
 
     fabricOverlayMeshes
@@ -3624,7 +3642,9 @@ export function createStandScene(
       const surfaceState = mesh.userData.surfaceState;
       if (!surfaceState) return;
 
-      surfaceState.isGlass = glass;
+      writePersistentSurface(mesh, (persistent) => {
+        applyGlassOverride(persistent, glass);
+      });
       const hasImage = Boolean(mesh.material.map);
       mesh.material.transparent = glass;
       mesh.material.opacity = glass ? GLASS_APPEARANCE.opacity : 1;
@@ -3839,14 +3859,13 @@ export function createStandScene(
     if (!assetId) return;
     normalizeMeshes(meshOrMeshes).forEach((mesh) => {
       if (!mesh?.material || mesh.userData.acceptsImage === false) return;
-      const surfaceState = mesh.userData.surfaceState;
-      if (surfaceState) {
+      writePersistentSurface(mesh, (surfaceState) => {
         surfaceState.imageAssetId = assetId;
-        resetImageTransform(surfaceState);
+        surfaceState.imageTransform = createDefaultImageTransform();
         if (fit === 'cover' || fit === 'contain') {
           surfaceState.imageTransform.fit = fit;
         }
-      }
+      });
       loadSingleImageOnSurface(mesh, assetId);
     });
   }
@@ -3876,14 +3895,15 @@ export function createStandScene(
     if (!layout.ok) return layout;
 
     layout.entries.forEach((entry) => {
-      const surfaceState = entry.mesh.userData.surfaceState;
-      surfaceState.imageAssetId = assetId;
-      surfaceState.imageTransform = {
-        mode: 'horizontal-group',
-        groupAspect: layout.groupAspect,
-        regionStart: entry.regionStart,
-        regionWidth: entry.regionWidth,
-      };
+      writePersistentSurface(entry.mesh, (surfaceState) => {
+        surfaceState.imageAssetId = assetId;
+        surfaceState.imageTransform = {
+          mode: 'horizontal-group',
+          groupAspect: layout.groupAspect,
+          regionStart: entry.regionStart,
+          regionWidth: entry.regionWidth,
+        };
+      });
       loadGroupedImageOnSurface(entry.mesh, assetId, 'horizontal-group');
     });
 
@@ -3912,9 +3932,10 @@ export function createStandScene(
         (surface) => surface.userData.surfaceState?.fabricGroupId === groupId,
       );
       groupSurfaces.forEach((surface) => {
-        const state = surface.userData.surfaceState;
-        state.fabricImageAssetId = assetId;
-        state.fabricImageFit = fit === 'contain' ? 'contain' : 'cover';
+        writePersistentSurface(surface, (state) => {
+          state.fabricImageAssetId = assetId;
+          state.fabricImageFit = fit === 'contain' ? 'contain' : 'cover';
+        });
       });
       rebuildFabricOverlays();
       return {
@@ -3955,17 +3976,18 @@ export function createStandScene(
     if (!layout.ok) return layout;
 
     layout.entries.forEach((entry) => {
-      const surfaceState = entry.mesh.userData.surfaceState;
-      surfaceState.imageAssetId = assetId;
-      surfaceState.imageTransform = {
-        mode: 'rect-group',
-        fit: normalizedFit,
-        groupAspect: layout.groupAspect,
-        regionStartX: entry.regionStartX,
-        regionStartY: entry.regionStartY,
-        regionWidth: entry.regionWidth,
-        regionHeight: entry.regionHeight,
-      };
+      writePersistentSurface(entry.mesh, (surfaceState) => {
+        surfaceState.imageAssetId = assetId;
+        surfaceState.imageTransform = {
+          mode: 'rect-group',
+          fit: normalizedFit,
+          groupAspect: layout.groupAspect,
+          regionStartX: entry.regionStartX,
+          regionStartY: entry.regionStartY,
+          regionWidth: entry.regionWidth,
+          regionHeight: entry.regionHeight,
+        };
+      });
       loadGroupedImageOnSurface(entry.mesh, assetId, 'rect-group');
     });
 
@@ -3986,20 +4008,23 @@ export function createStandScene(
     );
     fabricGroupIds.forEach((groupId) => {
       surfaceMeshes.forEach((surface) => {
-        const state = surface.userData.surfaceState;
-        if (state?.fabricGroupId !== groupId) return;
-        state.fabricImageAssetId = null;
-        state.fabricImageFit = 'cover';
+        if (surface.userData.surfaceState?.fabricGroupId !== groupId) return;
+        writePersistentSurface(surface, (state) => {
+          state.fabricImageAssetId = null;
+          state.fabricImageFit = 'cover';
+        });
       });
     });
 
     meshes.filter((mesh) => !mesh.userData.surfaceState?.fabricGroupId).forEach((mesh) => {
       if (!mesh?.material || mesh.userData.acceptsImage === false) return;
+      writePersistentSurface(mesh, (surfaceState) => {
+        if ('imageAssetId' in surfaceState) {
+          surfaceState.imageAssetId = null;
+          surfaceState.imageTransform = createDefaultImageTransform();
+        }
+      });
       const surfaceState = mesh.userData.surfaceState;
-      if (surfaceState) {
-        surfaceState.imageAssetId = null;
-        resetImageTransform(surfaceState);
-      }
       mesh.material.map?.dispose?.();
       mesh.material.map = null;
       mesh.material.color.set(
@@ -5019,7 +5044,7 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
       ? 'trash-bin'
       : (moduleState.surface ? 'planter-body' : 'plant'),
     surfaceId: moduleState.surface?.id ?? null,
-    surfaceState: moduleState.surface ?? null,
+    ...bindRendererSurfaceState(moduleState.surface),
     selectionFrame: null,
     colorTargets: [],
   };
@@ -5461,7 +5486,7 @@ function createLedFloodlightModule(moduleState, moduleIndex) {
     stripNumber: null,
     surfaceRole: 'light',
     surfaceId: moduleState.surface?.id,
-    surfaceState: moduleState.surface,
+    ...bindRendererSurfaceState(moduleState.surface),
     selectionFrame,
     colorTargets: [],
   };
@@ -5508,7 +5533,7 @@ function createBarStoolModule(moduleState, moduleIndex) {
     stripNumber: null,
     surfaceRole: 'chair',
     surfaceId: moduleState.surface?.id,
-    surfaceState: moduleState.surface,
+    ...bindRendererSurfaceState(moduleState.surface),
     selectionFrame,
     colorTargets,
   };
@@ -5588,7 +5613,7 @@ function createEamesChairModule(moduleState, moduleIndex) {
     stripNumber: null,
     surfaceRole: 'chair',
     surfaceId: moduleState.surface?.id,
-    surfaceState: moduleState.surface,
+    ...bindRendererSurfaceState(moduleState.surface),
     selectionFrame,
     colorTargets,
   };
@@ -5701,7 +5726,7 @@ function createGlassTableModule(moduleState, moduleIndex) {
     stripNumber: null,
     surfaceRole: 'table',
     surfaceId: moduleState.id,
-    surfaceState: null,
+    ...bindRendererSurfaceState(null),
     selectionFrame,
     colorTargets: [],
   };
@@ -5763,7 +5788,7 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
       stripNumber: null,
       surfaceRole: 'chair',
       surfaceId: index === 0 ? moduleState.surface?.id : moduleState.surface?.id + '-' + index,
-      surfaceState: moduleState.surface,
+      ...bindRendererSurfaceState(moduleState.surface),
       selectionFrame,
       colorTargets,
     };
@@ -6057,7 +6082,7 @@ function createBeigeSofaFurnitureProxy(group, moduleState, {
     stripNumber: null,
     surfaceRole,
     surfaceId: moduleState.surface?.id ?? moduleState.id,
-    surfaceState: moduleState.surface ?? null,
+    ...bindRendererSurfaceState(moduleState.surface),
     selectionFrame,
     colorTargets,
   };
@@ -6381,7 +6406,7 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
       stripNumber: null,
       surfaceRole,
       surfaceId: surfaceState.id,
-      surfaceState,
+      ...bindRendererSurfaceState(surfaceState),
       selectionFrame,
       backing,
     };
@@ -6555,7 +6580,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
       surfaceRole,
       panelLevel,
       surfaceId: surfaceState.id,
-      surfaceState,
+      ...bindRendererSurfaceState(surfaceState),
       selectionFrame,
       backing,
     };
@@ -6654,7 +6679,7 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     const backing=new THREE.Mesh(new THREE.BoxGeometry(faceWidthM,panelHeightM,0.012),new THREE.MeshStandardMaterial({color:PANEL_BACK_COLOR,roughness:0.74,metalness:0})); backing.position.copy(position); backing.rotation.y=rotationY; backing.castShadow=true; backing.receiveShadow=true; group.add(backing);
     const surface=new THREE.Mesh(new THREE.PlaneGeometry(faceWidthM,panelHeightM),new THREE.MeshStandardMaterial({color:surfaceState.imageAssetId?0xffffff:surfaceState.color,roughness:0.72,metalness:0,side:THREE.DoubleSide,emissive:0x000000,emissiveIntensity:0})); surface.position.copy(position); surface.rotation.y=rotationY; if(Math.abs(Math.sin(rotationY))<0.01)surface.position.z+=0.007*outward;else surface.position.x+=0.007*outward;
     const selectionFrame=createSelectionFrame(faceWidthM,panelHeightM); selectionFrame.visible=false; surface.add(selectionFrame);
-    surface.userData={kind:'surface',moduleType:'counter',counterShape:'L',selectionMode:'module',acceptsImage:true,moduleIndex,moduleId:moduleState.id,widthCm,depthCm,stripIndex:panelLevel==='lower'?0:1,stripNumber:panelLevel==='lower'?1:2,surfaceRole,panelLevel,surfaceId:surfaceState.id,surfaceState,selectionFrame,backing}; group.add(surface); surfaces.push(surface); onSurfaceReady?.(surface);
+    surface.userData={kind:'surface',moduleType:'counter',counterShape:'L',selectionMode:'module',acceptsImage:true,moduleIndex,moduleId:moduleState.id,widthCm,depthCm,stripIndex:panelLevel==='lower'?0:1,stripNumber:panelLevel==='lower'?1:2,surfaceRole,panelLevel,surfaceId:surfaceState.id,...bindRendererSurfaceState(surfaceState),selectionFrame,backing}; group.add(surface); surfaces.push(surface); onSurfaceReady?.(surface);
   };
   const lowerY=stripHeightM/2, upperY=stripHeightM+stripHeightM/2;
   addFace('front','lower',moduleState.faces?.frontLower,frontPanelM,new THREE.Vector3(0,lowerY,-depthM/2),Math.PI,-1); addFace('front','upper',moduleState.faces?.frontUpper,frontPanelM,new THREE.Vector3(0,upperY,-depthM/2),Math.PI,-1);
@@ -6879,7 +6904,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
       stripIndex,
       stripNumber: stripIndex + 1,
       surfaceId: surfaceState.id,
-      surfaceState,
+      ...bindRendererSurfaceState(surfaceState),
       selectionFrame,
       backing,
     };
@@ -6996,7 +7021,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     stripNumber: null,
     surfaceRole: 'door',
     surfaceId: doorState.id,
-    surfaceState: doorState,
+    ...bindRendererSurfaceState(doorState),
     selectionFrame: doorSelectionFrame,
     backing: doorBacking,
   };
@@ -7068,7 +7093,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
       stripNumber: index + 1,
       surfaceRole: 'upper-panel',
       surfaceId: surfaceState.id,
-      surfaceState,
+      ...bindRendererSurfaceState(surfaceState),
       selectionFrame,
       backing,
     };
@@ -7177,7 +7202,7 @@ function createSeparatorModule(moduleState, moduleIndex) {
     stripIndex: null,
     stripNumber: null,
     surfaceId: surfaceState.id,
-    surfaceState,
+    ...bindRendererSurfaceState(surfaceState),
     selectionFrame,
     colorTargets,
   };
@@ -7307,8 +7332,8 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     surface.userData = {
       kind: 'surface', moduleType: moduleState.type, shape: moduleState.shape,
       selectionMode: 'panel', acceptsImage: true, moduleIndex, moduleId: moduleState.id,
-      widthCm, stripIndex, stripNumber: stripIndex + 1, surfaceId: surfaceState.id,
-      surfaceState, selectionFrame, backing,
+      widthCm, stripIndex, stripNumber: stripIndex + 1,       surfaceId: surfaceState.id,
+      ...bindRendererSurfaceState(surfaceState), selectionFrame, backing,
     };
     group.add(surface);
     surfaces.push(surface);
@@ -7358,7 +7383,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     kind: 'surface', moduleType: moduleState.type, selectionMode: 'module',
     acceptsColor: true, acceptsImage: false, moduleIndex, moduleId: moduleState.id, widthCm,
     stripIndex: null, stripNumber: null, surfaceRole: 'showcase-body',
-    surfaceId: moduleState.bodySurface.id, surfaceState: moduleState.bodySurface,
+    surfaceId: moduleState.bodySurface.id, ...bindRendererSurfaceState(moduleState.bodySurface),
     selectionFrame: bodySelectionFrame, colorTargets: bodyColorTargets,
   };
   group.add(bodySelector);
