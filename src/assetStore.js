@@ -1,47 +1,17 @@
-const DB_NAME = 'fair-stand-configurator';
-const DB_VERSION = 2;
-const STORE_NAME = 'image-assets';
-const PROJECT_STORE_NAME = 'projects';
-const PROJECT_INDEX = 'projectId';
+import {
+  ASSET_PROJECT_INDEX,
+  ASSET_STORE_NAME,
+  openConfiguratorDb,
+} from './configuratorDb.js';
 
 function createId() {
   return globalThis.crypto?.randomUUID?.()
     ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
 
-function openDb() {
-  return new Promise((resolve, reject) => {
-    if (!('indexedDB' in globalThis)) {
-      reject(new Error('IndexedDB desteklenmiyor.'));
-      return;
-    }
-
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      let assetStore;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        assetStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      } else {
-        assetStore = request.transaction.objectStore(STORE_NAME);
-      }
-      if (!assetStore.indexNames.contains(PROJECT_INDEX)) {
-        assetStore.createIndex(PROJECT_INDEX, PROJECT_INDEX, { unique: false });
-      }
-      if (!db.objectStoreNames.contains(PROJECT_STORE_NAME)) {
-        db.createObjectStore(PROJECT_STORE_NAME, { keyPath: 'id' });
-      }
-    };
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
 export async function saveImageAsset(projectId, file) {
   if (!projectId) throw new Error('Görsel kaydı için projectId gerekli.');
-  const db = await openDb();
+  const db = await openConfiguratorDb();
   const asset = {
     id: createId(),
     projectId,
@@ -52,8 +22,8 @@ export async function saveImageAsset(projectId, file) {
   };
 
   await new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite');
-    transaction.objectStore(STORE_NAME).put(asset);
+    const transaction = db.transaction(ASSET_STORE_NAME, 'readwrite');
+    transaction.objectStore(ASSET_STORE_NAME).put(asset);
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
   });
@@ -64,11 +34,11 @@ export async function saveImageAsset(projectId, file) {
 
 export async function loadImageAssets(projectId) {
   if (!projectId) return [];
-  const db = await openDb();
+  const db = await openConfiguratorDb();
   const assets = await new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.index(PROJECT_INDEX).getAll(projectId);
+    const transaction = db.transaction(ASSET_STORE_NAME, 'readonly');
+    const store = transaction.objectStore(ASSET_STORE_NAME);
+    const request = store.index(ASSET_PROJECT_INDEX).getAll(projectId);
     request.onsuccess = () => resolve(request.result ?? []);
     request.onerror = () => reject(request.error);
   });
@@ -79,10 +49,10 @@ export async function loadImageAssets(projectId) {
 
 export async function deleteImageAsset(projectId, assetId) {
   if (!projectId || !assetId) return false;
-  const db = await openDb();
+  const db = await openConfiguratorDb();
   const deleted = await new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
+    const transaction = db.transaction(ASSET_STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(ASSET_STORE_NAME);
     let removed = false;
     const request = store.get(assetId);
 
@@ -104,10 +74,10 @@ export async function deleteImageAsset(projectId, assetId) {
 
 export async function deleteProjectImageAssets(projectId) {
   if (!projectId) return;
-  const db = await openDb();
+  const db = await openConfiguratorDb();
   await new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite');
-    const index = transaction.objectStore(STORE_NAME).index(PROJECT_INDEX);
+    const transaction = db.transaction(ASSET_STORE_NAME, 'readwrite');
+    const index = transaction.objectStore(ASSET_STORE_NAME).index(ASSET_PROJECT_INDEX);
     const request = index.openCursor(IDBKeyRange.only(projectId));
     request.onsuccess = () => {
       const cursor = request.result;
@@ -124,7 +94,7 @@ export async function deleteProjectImageAssets(projectId) {
 export async function saveImportedImageAsset(projectId, asset) {
   if (!projectId) throw new Error('İçe aktarılan görsel için projectId gerekli.');
   if (!asset?.id || !asset?.blob) throw new Error('İçe aktarılan görsel geçersiz.');
-  const db = await openDb();
+  const db = await openConfiguratorDb();
   const stored = {
     id: asset.id,
     projectId,
@@ -134,8 +104,8 @@ export async function saveImportedImageAsset(projectId, asset) {
     createdAt: Number(asset.createdAt) || Date.now(),
   };
   await new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite');
-    transaction.objectStore(STORE_NAME).put(stored);
+    const transaction = db.transaction(ASSET_STORE_NAME, 'readwrite');
+    transaction.objectStore(ASSET_STORE_NAME).put(stored);
     transaction.oncomplete = resolve;
     transaction.onerror = () => reject(transaction.error);
   });

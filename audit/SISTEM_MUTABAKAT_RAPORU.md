@@ -140,7 +140,7 @@ F-000 Item sözleşmesi; F-010 factory; F-011 davranış merkezi; F-012 `SCENE_S
 
 ### D — Mimari borç
 
-F-017, F-018, F-021/032/035, F-029 + `contentCatalogKeys`, F-022, F-045.
+**Uygulandı (bu dal):** F-032 — IndexedDB `openDb` tek `configuratorDb.js`. Kalan: F-017 (ayrı PR), F-018, F-021/035, F-029 + `contentCatalogKeys`, F-022, F-045.
 
 ### E — Item / BOM (ürün kararı, uydurma yok)
 

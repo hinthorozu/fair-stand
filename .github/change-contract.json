@@ -1,14 +1,15 @@
 {
   "schemaVersion": 2,
-  "id": "revert-install-server-sha-pin",
-  "kind": "bugfix",
-  "summary": "install-server.sh SHA pinini kaldırır; her kurulumda origin/Version2 ucunu çeker.",
+  "id": "f032-configurator-db-owner",
+  "kind": "architecture",
+  "summary": "F-032: IndexedDB şema ve open tek configuratorDb.js sahibinde; ad/sürüm/depo değişmez.",
   "owners": [
-    "scripts/install-server.sh",
-    "audit/FINDINGS.md"
+    "src/configuratorDb.js",
+    "src/projectStore.js",
+    "src/assetStore.js"
   ],
   "sourceOfTruth": [
-    "scripts/install-server.sh"
+    "src/configuratorDb.js"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -16,12 +17,12 @@
     "state": "not-applicable",
     "placement": "not-applicable",
     "renderer": "not-applicable",
-    "persistence": "not-applicable",
+    "persistence": "affected",
     "bom": "not-applicable",
     "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
-    "storage": "not-applicable",
+    "storage": "affected",
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
@@ -32,45 +33,130 @@
   "impactAnalysis": {
     "mode": "full-system",
     "affectedFiles": [
-      "scripts/install-server.sh"
+      "src/configuratorDb.js",
+      "src/projectStore.js",
+      "src/assetStore.js",
+      "src/systemChangeContract.js",
+      "index.html",
+      "scripts/verify-change-contract.mjs",
+      "src/main.js"
     ],
     "affectedTests": [
-      "test/hygieneGates.test.js"
+      "test/f032ConfiguratorDb.test.js",
+      "test/projectAtomicDeletion.test.js",
+      "test/imageAssetDeletion.test.js",
+      "test/systemChangeGate.test.js",
+      "e2e/f023-atomic-project-delete.spec.mjs",
+      "e2e/f020-save-before-project-actions.spec.mjs",
+      "test/autosaveMainIntegration.test.js",
+      "test/bundleLoadingContract.test.js",
+      "test/colorEditorControllerMainIntegration.test.js",
+      "test/colorEditorMainIntegration.test.js",
+      "test/developerEntrypointDocs.test.js",
+      "test/f027SceneReset.test.js",
+      "test/f028FeatureReset.test.js",
+      "test/helpGuide.test.js",
+      "test/illuminatedFoamModule.test.js",
+      "test/imageAssetLiveDelete.test.js",
+      "test/lightboxFabric.test.js",
+      "test/lightboxFabricAppearance.test.js",
+      "test/lightboxFabricLighting.test.js",
+      "test/moduleBehaviorPolicy.test.js",
+      "test/moduleStateConstructionRegistry.test.js",
+      "test/projectDropdownSwitchIntegration.test.js",
+      "test/projectImportFlow.test.js",
+      "test/projectUiMainIntegration.test.js",
+      "test/removedIndoorPlant2.test.js",
+      "test/selectionFeedbackMainIntegration.test.js",
+      "test/shelfLighting.test.js",
+      "test/sidebarControllerMainIntegration.test.js",
+      "test/stageFeedbackMainIntegration.test.js",
+      "test/systemChangeGateLocalDiff.test.js",
+      "test/systemImpactAnalysis.test.js",
+      "test/uiFeedbackMainIntegration.test.js",
+      "test/visibleUiContract.test.js"
     ],
     "affectedDocs": [
       "audit/FINDINGS.md",
-      "audit/SISTEM_MUTABAKAT_RAPORU.md"
+      "audit/SISTEM_MUTABAKAT_RAPORU.md",
+      "audit/remediation/A13_F032_CLOSURE.md",
+      "PROJECT_RULES.md",
+      "README.md",
+      "SYSTEM_AUDIT_CHECKLIST.md",
+      "SYSTEM_CHANGE_GATE.md",
+      "SYSTEM_DEVELOPMENT_CONTRACT.md",
+      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
+      "audit/evidence/A02_CHANGE_GATE.md",
+      "audit/evidence/A03_ARCHITECTURE.md",
+      "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
+      "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
+      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
+      "audit/remediation/A02_CLOSURE.md",
+      "audit/remediation/A02_F005_CLOSURE.md",
+      "audit/remediation/A02_F006_CLOSURE.md",
+      "audit/remediation/A08_F023_CLOSURE.md",
+      "docs/items/current-system/base_top_107_50.md",
+      "docs/items/current-system/base_top_157_50.md",
+      "docs/items/current-system/base_top_206_50.md",
+      "docs/items/current-system/connector_corner.md",
+      "docs/items/current-system/connector_double.md",
+      "docs/items/current-system/connector_single.md",
+      "docs/items/current-system/connector_start.md",
+      "docs/items/current-system/glass_shelf.md",
+      "docs/items/current-system/hali.md",
+      "docs/items/current-system/illuminated-foam.md",
+      "docs/items/current-system/karolaj.md",
+      "docs/items/current-system/parke.md",
+      "docs/items/current-system/profile_140_5.md",
+      "docs/items/current-system/profile_190.md",
+      "docs/items/current-system/profile_41_5.md",
+      "docs/items/current-system/profile_91.md",
+      "docs/items/current-system/shelf_100.md",
+      "docs/items/current-system/shelf_150.md",
+      "docs/items/current-system/shelf_200.md",
+      "docs/items/current-system/wall_200.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-042"
+        "F-032"
       ],
       "reviewedNotAffected": [
-        "F-038",
-        "F-046"
+        "F-021",
+        "F-023",
+        "F-035",
+        "F-017",
+        "F-018",
+        "F-004",
+        "F-005",
+        "F-006"
       ]
     },
-    "notes": "Ürün sahibi SHA pin istemedi. Deploy her seferinde origin/Version2 ucunu alır."
+    "notes": "Şema v2 ve depo adları aynı. Yalnız open/upgrade tek dosyada."
   },
   "tests": {
     "targeted": [
-      "test/hygieneGates.test.js"
+      "test/f032ConfiguratorDb.test.js",
+      "test/projectAtomicDeletion.test.js",
+      "test/imageAssetDeletion.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "Browser domain yok; yalnız sunucu kurulum scripti ve defter."
+      "required": true,
+      "targeted": [
+        "e2e/f023-atomic-project-delete.spec.mjs",
+        "e2e/f020-save-before-project-actions.spec.mjs"
+      ],
+      "reason": "persistence/storage tarayıcı IndexedDB kaydet/sil yollarını doğrular."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "Sunucu kurulumunda yine dalın ucu çekilir; eski SHA’ya kilit kalkar."
+    "level": "medium",
+    "notes": "Açık yol aynı; sıraya bağlı çift upgrade riski kalkar."
   },
   "migration": {
     "required": false,
-    "notes": "Proje state yok."
+    "notes": "DB sürümü 2 kaldı; mevcut tarayıcı DB’si taşınmaz."
   },
-  "rollback": "PINNED_COMMIT bloğu geri konur."
+  "rollback": "openDb kopyalarını projectStore ve assetStore’a geri koy."
 }
