@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/productionParts.js';
+import { getProductionItem } from '../src/items.js';
 
 const UPRIGHT_KEYS = ['upright_346_5', 'upright_99', 'upright_49_5'];
 

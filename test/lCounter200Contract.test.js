@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
 import { createCounterModuleState } from '../src/designState.js';
 import { getModuleRecipe } from '../src/moduleRecipes.js';
-import { getProductionPart } from '../src/productionParts.js';
+import { getProductionPart } from '../src/items.js';
 
 test('desk_banko_200_L is a 200 x 200 catalog module', () => {
   assert.deepEqual(MODULE_CATALOG.desk_banko_200_L, {

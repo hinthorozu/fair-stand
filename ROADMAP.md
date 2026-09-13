@@ -4,7 +4,7 @@
 >
 > Roadmap maddeleri yalnız isim benzerliğine göre tamamlandı sayılmaz. Durum işaretleri repository source code + regression testleriyle doğrulanır.
 >
-> **Production dataset kuralı:** Fiziksel parça ölçüleri, part ID'leri ve recipe miktarları roadmap içinde ikinci bir canonical veri seti olarak tutulmaz. Bu verilerin canonical sahipleri `src/productionParts.js` ve `src/moduleRecipes.js`; BOM politika sahibi `src/moduleContracts.js`'dir.
+> **Production dataset kuralı:** Fiziksel parça ölçüleri, part ID'leri ve recipe miktarları roadmap içinde ikinci bir canonical veri seti olarak tutulmaz. Bu verilerin canonical sahipleri `src/items.js` ve `src/moduleRecipes.js`; BOM politika sahibi `src/moduleContracts.js`'dir.
 
 ## Proje durumu
 
@@ -19,7 +19,7 @@
 
 FAZ 4 tamamen sıfırdan başlamıyor. Repository incelemesinde şu altyapılar **mevcut ve testli** olarak doğrulandı:
 
-- `src/productionParts.js` içinde stabil `partId` kullanan fiziksel parça sözlüğü mevcut.
+- `src/items.js` içinde stabil `partId` kullanan fiziksel parça sözlüğü mevcut.
 - Standart panel/profil/dikme/connector ailelerinin production metadata'sı canonical production-part katmanında mevcut.
 - `src/moduleRecipes.js` içinde standart duvar ve çeşitli mevcut modül reçeteleri mevcut.
 - Recipe'lerin production-part metadata ile genişletilebildiği API mevcut.
@@ -124,7 +124,7 @@ Detay: `ROADMAP_PHASE_5_6.md`
 
 Roadmap, üretim veri tablosu değildir. Güncel üretim gerçekleri aşağıdaki canonical kaynaklardan okunur:
 
-- `src/productionParts.js` — stabil production part kimlikleri, kategoriler, birimler ve fiziksel metadata,
+- `src/items.js` — stabil production part kimlikleri, kategoriler, birimler ve fiziksel metadata,
 - `src/moduleRecipes.js` — module recipe miktarları, part referansları ve varyant çözümü,
 - `src/moduleContracts.js` — modülün BOM politikası (`recipe`, `decision-required` vb.),
 - `test/moduleRecipes.test.js` ve ilgili contract testleri — bu veri/ilişkilerin regresyon güvencesi.

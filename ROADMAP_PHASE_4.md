@@ -4,7 +4,7 @@
 >
 > Checkbox'lar yalnız source code ve regression testleriyle doğrulanmış mevcut implementasyonu gösterir. Kısmi altyapı varsa madde tamamlandı sayılmaz; açıklama notuyla belirtilir.
 >
-> **Production dataset kuralı:** Fiziksel parça ölçüleri ve recipe adetleri bu roadmap içinde kopyalanmaz. Canonical üretim verisi `src/productionParts.js`, canonical recipe verisi `src/moduleRecipes.js`, BOM politika sahibi `src/moduleContracts.js`'dir.
+> **Production dataset kuralı:** Fiziksel parça ölçüleri ve recipe adetleri bu roadmap içinde kopyalanmaz. Canonical üretim verisi `src/items.js`, canonical recipe verisi `src/moduleRecipes.js`, BOM politika sahibi `src/moduleContracts.js`'dir.
 
 ## FAZ 4 ana hedefi
 
@@ -22,7 +22,7 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
 ## 3 Eylül 2026 doğrulanmış mevcut temel
 
-- `src/productionParts.js` stabil `partId` kullanan bağımsız production-part sözlüğü içeriyor.
+- `src/items.js` stabil `partId` kullanan bağımsız production-part sözlüğü içeriyor.
 - Panel, profil, dikme ve connector production-part aileleri canonical kodda tanımlı.
 - `src/moduleRecipes.js` standart duvar reçetelerini ve çeşitli mevcut modül reçetelerini içeriyor.
 - `test/moduleRecipes.test.js` production-part ve standart duvar recipe ilişkilerini doğruluyor.
@@ -59,7 +59,7 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
 Bu roadmap fiziksel ölçü tablosu tutmaz.
 
-- Production part kimliği, birimi ve fiziksel metadata: `src/productionParts.js`
+- Production part kimliği, birimi ve fiziksel metadata: `src/items.js`
 - Modülün hangi part'ı hangi miktarda kullandığı: `src/moduleRecipes.js`
 - Bu ilişkilerin regression doğrulaması: `test/moduleRecipes.test.js` ve ilgili contract testleri
 
@@ -76,7 +76,7 @@ Bağlantı aparatlarının gerçek sahne kullanım adedi yalnız module recipe v
 
 ## 1.4 — Standart duvar recipe contract'ı
 
-Standart duvar recipe tanımları canonical olarak `src/moduleRecipes.js` içindedir. Fiziksel parça metadata'sı `src/productionParts.js` üzerinden çözülür.
+Standart duvar recipe tanımları canonical olarak `src/moduleRecipes.js` içindedir. Fiziksel parça metadata'sı `src/items.js` üzerinden çözülür.
 
 **Implementasyon durumu:** Standart duvar recipe aileleri kodda mevcut ve regression testleriyle doğrulanıyor.
 

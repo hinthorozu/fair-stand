@@ -1,4 +1,4 @@
-import { getProductionItem } from './productionParts.js';
+import { getProductionItem } from './items.js';
 
 const ITEM_SURFACE_CAPABILITIES_BY_TYPE = Object.freeze({
   'door-leaf': Object.freeze({

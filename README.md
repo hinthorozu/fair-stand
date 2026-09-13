@@ -142,7 +142,7 @@ State construction'ın canonical sahibi `src/designState.js` ve ilgili state fac
 
 ### Production / BOM
 
-- `src/productionParts.js` — production part kimliği ve fiziksel metadata.
+- `src/items.js` — Item registry: leaf/production metadata, commercial, wall-media ve composite parents.
 - `src/moduleRecipes.js` — module recipe/part miktarı ilişkileri.
 - `src/moduleContracts.js` — modülün BOM policy'si.
 

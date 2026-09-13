@@ -15,7 +15,7 @@ Temel model:
 
 ## A. Production / alt Item envanteri
 
-Aşağıdaki Item'lar bugün `src/productionParts.js` içinde canonical production metadata olarak bulunan ve bileşik Item reçetelerinde kullanılabilen fiziksel Item'lardır.
+Aşağıdaki Item'lar bugün `src/items.js` içinde `LEAF_ITEMS` olarak canonical production metadata bulunan ve bileşik Item reçetelerinde kullanılabilen fiziksel Item'lardır.
 
 | Item key | Type / rol | Migration notu |
 |---|---|---|
@@ -85,9 +85,9 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 | 18 | `wall_base_150` | Panel Bazalı 150 | `base-wall` |
 | 19 | `wall_base_100` | Panel Bazalı 100 | `base-wall` |
 | 20 | `door_100` | Depo Kapısı 100 | **`door` · Bileşik Item · Tamam** |
-| 21 | `desk_banko_200` | Banko 200 | `counter` |
-| 22 | `desk_banko_150` | Banko 150 | `counter` |
-| 23 | `desk_banko_100` | Banko 100 | `counter` |
+| 21 | `desk_banko_200` | Banko 200 | **`counter` · Bileşik Item · Tamam** |
+| 22 | `desk_banko_150` | Banko 150 | **`counter` · Bileşik Item · Tamam** |
+| 23 | `desk_banko_100` | Banko 100 | **`counter` · Bileşik Item · Tamam** |
 | 24 | `desk_banko_200_L` | Köşe Banko 200×200 | `counter` |
 | 25 | `desk_banko_150_L` | Köşe Banko 150×150 | `counter` |
 | 26 | `desk_banko_100_L` | Köşe Banko 100×100 | `counter` |

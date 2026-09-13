@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getConnectorItemKey, resolveConnectorBom } from '../src/productionParts.js';
+import { getConnectorItemKey, resolveConnectorBom } from '../src/items.js';
 
 test('all four connector types resolve to canonical Item keys', () => {
   assert.equal(getConnectorItemKey('start'), 'connector_start');

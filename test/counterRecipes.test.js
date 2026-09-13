@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionPart } from '../src/productionParts.js';
+import { getProductionPart } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
 
 test('production catalog contains verified banko upright and tops', () => {

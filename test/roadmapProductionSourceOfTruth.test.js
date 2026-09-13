@@ -21,7 +21,7 @@ test('roadmaps point to canonical production/recipe owners instead of copying th
   for (const roadmapUrl of ROADMAPS) {
     const source = await readFile(roadmapUrl, 'utf8');
 
-    assert.match(source, /src\/productionParts\.js/);
+    assert.match(source, /src\/items\.js/);
     assert.match(source, /src\/moduleRecipes\.js/);
     assert.match(source, /Production dataset kuralı/);
 

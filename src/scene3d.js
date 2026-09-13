@@ -4,9 +4,19 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
-import { getProductionItem, getShelfProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
-import { getItem, getCommercialItemForType, getFloorItem, getShowcaseBodyDefinition, isCarpetFloorItem, isGridTileFloorItem, isParquetFloorItem, listFloorItems } from './items.js';
+import {
+  getCommercialItemForType,
+  getFloorItem,
+  getItem,
+  getProductionItem,
+  getShelfProductionItem,
+  getShowcaseBodyDefinition,
+  isCarpetFloorItem,
+  isGridTileFloorItem,
+  isParquetFloorItem,
+  listFloorItems,
+} from './items.js';
 import { getOccupiedStripLayout, resolveModuleStripOccupancy } from './stripOccupancy.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
