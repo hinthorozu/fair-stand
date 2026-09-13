@@ -10,14 +10,14 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 ## Özet
 
 - Toplam bulgu: **49** (`F-000` + `F-001` … `F-048`)
-- Kapalı (kod/sözleşme duruyor): **30** — C’den F-036, F-037, F-038; F-042 SHA pin geri alındı
+- Kapalı (kod/sözleşme duruyor): **31** — D’den F-017; C’den F-036, F-037, F-038; F-042 SHA pin geri alındı
 - Kapsam dışı (GitHub ayarı / uzak dal; ürün kodu değil): **F-041 kapanış kaydı durur; F-044 ürün backlog’u değil**
-- Açık ürün bulgusu: **18** (F-044 hariç)
+- Açık ürün bulgusu: **17** (F-044 hariç)
 - Açık P0: **0**
 - Açık P1: **7**
-- Açık P2: **11** (F-044 kapsam dışı)
+- Açık P2: **10** (F-044 kapsam dışı)
 - Açık P3: **0**
-- Sonraki ürün işi: `SISTEM_MUTABAKAT_RAPORU.md` D (mimari) veya E (BOM kararı). **C uygulandı (LICENSE/eksik atıf/ESLint açık).**
+- Sonraki ürün işi: `SISTEM_MUTABAKAT_RAPORU.md` D (kalan mimari) veya E (BOM kararı). **C uygulandı (LICENSE/eksik atıf/ESLint açık).**
 - F-014 hâlâ `decision-required` (18 katalog + foam). Self dörtlü F-014’ten çıktı; finding kapanmaz.
 
 ## Bulgular
@@ -42,7 +42,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 | F-015 | P1 | `allowSideInsert:false` bildirilmiş ama bağlam/runtime eklemede uygulanmıyor | **CLOSED** — menü gizler; `flushCatalogModuleAdds` reddeder |
 | F-016 | P2 | Sağ duvar köşe yön çatışması: 90° yardımcı vs 270° aktif yerleşim/reflow | **CLOSED** — `audit/remediation/A04_F016_CLOSURE.md` |
 | F-016 | P2 | Sağ duvar köşe yön çatışması: 90° yardımcı vs 270° aktif yerleşim/reflow | **CLOSED** — `audit/remediation/A04_F016_CLOSURE.md` |
-| F-017 | P2 | Renderer kalıcı düzenlenebilir state’i doğrudan değiştiriyor | OPEN |
+| F-017 | P2 | Renderer kalıcı düzenlenebilir state’i doğrudan değiştiriyor | **CLOSED** — kopya `surfaceState`; yazı `persistentSurfaceState` / `designState` |
 | F-018 | P2 | Yapısal strip/panel sayısı katalog ile state oluşturucuları arasında kopyalı | OPEN |
 | F-019 | P1 | Katalog/runtime ölçüler state oluşturucularında kopyalı/hard-coded | **CLOSED** — ölçü sahibi Item (`items.js`); şerit `7` kopyası F-018 |
 | F-020 | P1 | Bekleyen otomatik kayıt proje değiştir/aç sırasında iptal/kayıp olabilir | **CLOSED** — `audit/remediation/A08_F020_CLOSURE.md` |
@@ -80,7 +80,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 1. Kullanıcıya görünen (B): **uygulandı** — F-015, F-025, F-026, F-024, F-039. F-040 kalan ZIP/GLB e2e.
 2. Kalıcılık/import: F-021/F-022/F-032/F-035. F-036/F-037 kapandı.
 3. BOM (E, ürün kararı): F-014/F-029/F-030/F-031/F-048.
-4. Mimari borç: F-017/F-018/F-047 kural.
+4. Mimari borç: F-018/F-047 kural. F-017 kapandı.
 5. Hijyen: F-034 kalan lisans, F-043 LICENSE, F-042, F-045, F-046 ESLint. F-038 kapandı. F-044 kapsam dışı.
 
 Bir bulgu ancak uygulama, varsa hedefli regresyon, tam test/build, PR CI ve gerekli merge-sonrası doğrulama kanıtından sonra `CLOSED` olur.

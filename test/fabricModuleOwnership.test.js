@@ -24,6 +24,6 @@ test('multi-module one-piece fabric blocks individual movement', () => {
 });
 
 test('fabric ownership metadata is cleared when fabric is removed', () => {
-  assert.match(scene, /delete state\.fabricOwnerSurfaceIds/);
-  assert.match(scene, /delete state\.fabricOwnerModuleIds/);
+  assert.match(scene, /clearFabricFields/);
+  assert.match(scene, /function clearFabricState\(surface/);
 });
