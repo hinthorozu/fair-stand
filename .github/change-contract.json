@@ -1,20 +1,14 @@
 {
   "schemaVersion": 2,
-  "id": "wall-short-up-hanging-family",
-  "kind": "module",
-  "summary": "Tavan hizalı short_up_1/2 duvar ailesi, occupancy ghost ayrımı ve tek panel Lightbox/Mesh ışığı.",
+  "id": "remove-unrequested-shot-2-alias",
+  "kind": "bugfix",
+  "summary": "Ürün kararı olmayan wall_200_shot_2 itemKey alias tablosunu kaldırır; kanonik wall_200_short_up_2 durur.",
   "owners": [
     "src/items.js",
-    "src/catalog.js",
-    "src/moduleRecipes.js",
-    "src/stripOccupancy.js",
-    "src/scene3d.js"
+    "src/catalog.js"
   ],
   "sourceOfTruth": [
-    "src/items.js",
-    "src/catalog.js",
-    "src/moduleRecipes.js",
-    "src/stripOccupancy.js"
+    "src/items.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -466,14 +460,12 @@
         "F-045"
       ]
     },
-    "notes": "Version2 ucundaki F-017 yüzey bağı korunur. Short-up occupancy, ghost anahtarı ve tek panel fabric overlay eklenir. F-030/F-031 ilişki BOM yok."
+    "notes": "Katalog kartı ve reçete aynı. Yalnız uydurma alias ve resolveCanonicalItemKey kalkar."
   },
   "tests": {
     "targeted": [
       "test/wallFlatPanelItemsContract.test.js",
-      "test/stripOccupancy.test.js",
-      "test/lightboxFabric.test.js",
-      "test/globalSilhouetteGhost.test.js"
+      "test/stripOccupancy.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -482,16 +474,16 @@
       "targeted": [
         "e2e/wall-flat-panel-items-contract.spec.mjs"
       ],
-      "reason": "Katalog ve renderer tarayıcıda panel ekleme ve Lightbox menüsü ile doğrulanır."
+      "reason": "items.js catalog+bom tarayıcıda düz panel/short-up kartlarını doğrular."
     }
   },
   "risk": {
-    "level": "medium",
-    "notes": "scene3d F-017 ile birleşti; kalıcı yüzey bağı aynı kalmalı, occupancy yalnız görünür şerit geometrisini keser."
+    "level": "low",
+    "notes": "Hiçbir UI yolu shot_2 yazmıyordu; getItem doğrudan itemKey kullanır."
   },
   "migration": {
     "required": false,
-    "notes": "Yeni itemKey; eski projelerde yok."
+    "notes": "Kayıtlı projede shot_2 üretilmedi; migration yok."
   },
-  "rollback": "short_up item/recipe/catalog kayıtları, stripOccupancy ve fabric 1-panel overlay değişimi geri alınır."
+  "rollback": "ITEM_KEY_ALIASES satırı geri konur."
 }

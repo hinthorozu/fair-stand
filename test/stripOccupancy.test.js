@@ -37,13 +37,9 @@ test('strip occupancy is the shared hanging-panel contract', () => {
   assert.equal(getOccupiedStripLayout(null), null);
 });
 
-test('canonical Item occupancy wins and legacy shot_2 keys still hang from the top', () => {
+test('canonical Item occupancy wins and hanging short-up stays top-aligned', () => {
   assert.deepEqual(
     resolveModuleStripOccupancy({ itemKey: 'wall_200_short_up_2', stripOccupancy: { align: 'bottom', stripCount: 2 } }),
-    { align: 'top', stripCount: 2 },
-  );
-  assert.deepEqual(
-    resolveModuleStripOccupancy({ itemKey: 'wall_200_shot_2', type: 'flat-panel' }),
     { align: 'top', stripCount: 2 },
   );
   assert.deepEqual(

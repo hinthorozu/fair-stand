@@ -1,4 +1,4 @@
-import { getFurnitureClusterQuantity, getItem, resolveCanonicalItemKey, resolveWallMediaMetrics } from './items.js';
+import { getFurnitureClusterQuantity, getItem, resolveWallMediaMetrics } from './items.js';
 
 export const STAND_DIMENSIONS = Object.freeze({
   height: 3.5,
@@ -440,8 +440,6 @@ function normalizeCatalogDescriptor(descriptor) {
 export function resolveItemKey(descriptor) {
   const normalized = normalizeCatalogDescriptor(descriptor);
   if (normalized.itemKey && MODULE_CATALOG[normalized.itemKey]) return normalized.itemKey;
-  const aliasedKey = resolveCanonicalItemKey(normalized.itemKey);
-  if (aliasedKey && MODULE_CATALOG[aliasedKey]) return aliasedKey;
   if (!normalized.type) return null;
 
   const candidates = MODULE_CATALOG_KEYS.filter(
