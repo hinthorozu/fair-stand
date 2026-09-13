@@ -1,28 +1,27 @@
 {
   "schemaVersion": 2,
-  "id": "f032-configurator-db-owner",
+  "id": "f029-automatic-wall-contract",
   "kind": "architecture",
-  "summary": "F-032: IndexedDB şema ve open tek configuratorDb.js sahibinde; ad/sürüm/depo değişmez.",
+  "summary": "F-029: automatic-wall özellik sözleşmesi; depo contentCatalogKeys dört ticari Item.",
   "owners": [
-    "src/configuratorDb.js",
-    "src/projectStore.js",
-    "src/assetStore.js"
+    "src/featureContracts.js",
+    "src/automaticWall.js"
   ],
   "sourceOfTruth": [
-    "src/configuratorDb.js"
+    "src/featureContracts.js"
   ],
   "impact": {
     "catalog": "not-applicable",
     "behavior": "not-applicable",
     "state": "not-applicable",
-    "placement": "not-applicable",
+    "placement": "affected",
     "renderer": "not-applicable",
-    "persistence": "affected",
+    "persistence": "not-applicable",
     "bom": "not-applicable",
     "ui": "not-applicable",
-    "composition": "not-applicable",
+    "composition": "affected",
     "assets": "not-applicable",
-    "storage": "affected",
+    "storage": "not-applicable",
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
@@ -33,54 +32,23 @@
   "impactAnalysis": {
     "mode": "full-system",
     "affectedFiles": [
-      "src/configuratorDb.js",
-      "src/projectStore.js",
-      "src/assetStore.js",
+      "src/featureContracts.js",
       "src/systemChangeContract.js",
-      "index.html",
-      "scripts/verify-change-contract.mjs",
-      "src/main.js"
+      "scripts/verify-change-contract.mjs"
     ],
     "affectedTests": [
-      "test/f032ConfiguratorDb.test.js",
-      "test/projectAtomicDeletion.test.js",
-      "test/imageAssetDeletion.test.js",
-      "test/systemChangeGate.test.js",
-      "e2e/f023-atomic-project-delete.spec.mjs",
-      "e2e/f020-save-before-project-actions.spec.mjs",
-      "test/autosaveMainIntegration.test.js",
-      "test/bundleLoadingContract.test.js",
-      "test/colorEditorControllerMainIntegration.test.js",
-      "test/colorEditorMainIntegration.test.js",
+      "test/systemDevelopmentContract.test.js",
+      "test/automaticWall.test.js",
       "test/developerEntrypointDocs.test.js",
-      "test/f027SceneReset.test.js",
-      "test/f028FeatureReset.test.js",
-      "test/helpGuide.test.js",
-      "test/illuminatedFoamModule.test.js",
-      "test/imageAssetLiveDelete.test.js",
-      "test/lightboxFabric.test.js",
-      "test/lightboxFabricAppearance.test.js",
-      "test/lightboxFabricLighting.test.js",
-      "test/moduleBehaviorPolicy.test.js",
-      "test/moduleStateConstructionRegistry.test.js",
-      "test/projectDropdownSwitchIntegration.test.js",
-      "test/projectImportFlow.test.js",
-      "test/projectUiMainIntegration.test.js",
-      "test/removedIndoorPlant2.test.js",
-      "test/selectionFeedbackMainIntegration.test.js",
-      "test/shelfLighting.test.js",
-      "test/sidebarControllerMainIntegration.test.js",
-      "test/stageFeedbackMainIntegration.test.js",
+      "test/systemChangeGate.test.js",
       "test/systemChangeGateLocalDiff.test.js",
-      "test/systemImpactAnalysis.test.js",
-      "test/uiFeedbackMainIntegration.test.js",
-      "test/visibleUiContract.test.js"
+      "e2e/f010-module-construction.spec.mjs",
+      "e2e/commercial-items-contract.spec.mjs"
     ],
     "affectedDocs": [
       "audit/FINDINGS.md",
       "audit/SISTEM_MUTABAKAT_RAPORU.md",
-      "audit/remediation/A13_F032_CLOSURE.md",
-      "PROJECT_RULES.md",
+      "audit/remediation/A11_F029_CLOSURE.md",
       "README.md",
       "SYSTEM_AUDIT_CHECKLIST.md",
       "SYSTEM_CHANGE_GATE.md",
@@ -88,75 +56,45 @@
       "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
       "audit/evidence/A02_CHANGE_GATE.md",
       "audit/evidence/A03_ARCHITECTURE.md",
-      "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
-      "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
-      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
-      "audit/remediation/A02_CLOSURE.md",
-      "audit/remediation/A02_F005_CLOSURE.md",
-      "audit/remediation/A02_F006_CLOSURE.md",
-      "audit/remediation/A08_F023_CLOSURE.md",
-      "docs/items/current-system/base_top_107_50.md",
-      "docs/items/current-system/base_top_157_50.md",
-      "docs/items/current-system/base_top_206_50.md",
-      "docs/items/current-system/connector_corner.md",
-      "docs/items/current-system/connector_double.md",
-      "docs/items/current-system/connector_single.md",
-      "docs/items/current-system/connector_start.md",
-      "docs/items/current-system/glass_shelf.md",
-      "docs/items/current-system/hali.md",
-      "docs/items/current-system/illuminated-foam.md",
-      "docs/items/current-system/karolaj.md",
-      "docs/items/current-system/parke.md",
-      "docs/items/current-system/profile_140_5.md",
-      "docs/items/current-system/profile_190.md",
-      "docs/items/current-system/profile_41_5.md",
-      "docs/items/current-system/profile_91.md",
-      "docs/items/current-system/shelf_100.md",
-      "docs/items/current-system/shelf_150.md",
-      "docs/items/current-system/shelf_200.md",
-      "docs/items/current-system/wall_200.md"
+      "audit/evidence/A11_FEATURE_COMPOSITION.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-032"
+        "F-029"
       ],
       "reviewedNotAffected": [
-        "F-021",
-        "F-023",
-        "F-035",
+        "F-010",
+        "F-014",
         "F-017",
         "F-018",
-        "F-004",
-        "F-005",
-        "F-006"
+        "F-032"
       ]
     },
-    "notes": "Şema v2 ve depo adları aynı. Yalnız open/upgrade tek dosyada."
+    "notes": "Yalnız sözleşme kaydı ve depo Item kimlik listesi. Planner/BOM değişmedi. featureContracts composition+architecture; automaticWall path placement ister."
   },
   "tests": {
     "targeted": [
-      "test/f032ConfiguratorDb.test.js",
-      "test/projectAtomicDeletion.test.js",
-      "test/imageAssetDeletion.test.js"
+      "test/systemDevelopmentContract.test.js",
+      "test/automaticWall.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/f023-atomic-project-delete.spec.mjs",
-        "e2e/f020-save-before-project-actions.spec.mjs"
+        "e2e/f010-module-construction.spec.mjs",
+        "e2e/commercial-items-contract.spec.mjs"
       ],
-      "reason": "persistence/storage tarayıcı IndexedDB kaydet/sil yollarını doğrular."
+      "reason": "composition/placement tarayıcıda otomatik duvar ve depo içerik yollarını doğrular."
     }
   },
   "risk": {
-    "level": "medium",
-    "notes": "Açık yol aynı; sıraya bağlı çift upgrade riski kalkar."
+    "level": "low",
+    "notes": "Runtime planner aynı; sözleşme koddaki girdileri kaydeder."
   },
   "migration": {
     "required": false,
-    "notes": "DB sürümü 2 kaldı; mevcut tarayıcı DB’si taşınmaz."
+    "notes": "Proje şeması yok."
   },
-  "rollback": "openDb kopyalarını projectStore ve assetStore’a geri koy."
+  "rollback": "automaticWall kaydı ve contentCatalogKeys tek PLASTIC_TRASH_BIN listesi geri konur."
 }
