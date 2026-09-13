@@ -10,6 +10,7 @@ import {
   getModuleCollisionHeightRangeCm,
   getModuleCollisionStrategy,
   getModuleMagneticSnapStrategy,
+  isUprightJointSnapTarget,
   isTopPlacementModule,
   resolveSideInsertRotationDeg,
   supportsWallOverlayMount,
@@ -24,6 +25,14 @@ test('F-011 special placement policies are declared by the canonical behavior co
   }
 
   assert.equal(getModuleMagneticSnapStrategy('upright'), 'short-up-joint');
+  assert.equal(getModuleMagneticSnapStrategy('profile'), 'standard');
+  assert.equal(isUprightJointSnapTarget({ type: 'profile', itemKey: 'profile_190' }), true);
+  assert.equal(isUprightJointSnapTarget({ type: 'counter', itemKey: 'desk_banko_200' }), true);
+  assert.equal(isUprightJointSnapTarget({ type: 'flat-panel', itemKey: 'wall_200' }), false);
+  assert.equal(canModulesOverlapByBehavior({ type: 'upright' }, { type: 'profile' }), true);
+  assert.equal(canModulesOverlapByBehavior({ type: 'upright' }, { type: 'counter' }), true);
+  assert.equal(canModulesOverlapByBehavior({ type: 'profile' }, { type: 'separator' }), true);
+  assert.equal(canModulesOverlapByBehavior({ type: 'profile' }, { type: 'flat-panel' }), false);
 
   assert.equal(usesLogicalFixtureEndpoint('counter'), true);
   assert.equal(usesLogicalFixtureEndpoint('base'), true);
@@ -80,6 +89,7 @@ test('placement core selects F-011 policies through moduleBehavior instead of pr
 
   for (const helper of [
     'getModuleMagneticSnapStrategy',
+    'isUprightJointSnapTarget',
     'usesLogicalFixtureEndpoint',
     'usesWallBackboneCollisionDepth',
     'allowsThinWallEndpointContact',

@@ -22,13 +22,13 @@
 `lengthCm`, `thicknessCm`, `material` ve `defaultColor` kanonik product/default property'leridir; owner `src/productionParts.js`dir. Project/runtime ezme açık bir karar mekanizmasıyla uygulanabilir ve kanonik değeri değiştirmez. `src/theme.js`/`scene3d.js` specialized renderer ezme kullanabilir.
 
 ## 3. Oluşturma / state / kalıcılık
-Bağımsız proje örneği oluşturucu, mutable leaf state veya persisted profile örnek yoktur: **UYGULANMIYOR**. Parent module contract'ı korunur.
+Sahaya katalogdan konan her örnek ayrı instance'dır (`createProfileModuleState`). Parent reçete satırları ayrı kalır; persist parent module ile birlikte `itemKey` taşır.
 
 ## 4. Davranış / etkileşim
-Yerleşim, move, rotation, snap, collision, selection, drag, context-menu, delete ve duplicate leaf production profile için **UYGULANMIYOR**; parent module/type behavior sahibidir.
+Katalog grubu `Panel Ek Modül`. Saha davranışı `wall_200` ile aynıdır (`WALL_BEHAVIOR`: taşıma, döndürme, uç uca/köşe snap). Duvar gövdesinin içine girmez. Aynı duvar yuvasındaki `separator` (ahşap slat) üst rayı engellemez (`overlapWithTypes: separator`). Saha dikmesi (`upright`) profil uçlarına `short-up-joint` ile snap olur.
 
 ## 5. BOM / composition
-Tekil production Item; 8 doğrulanmış parent recipe (wall/shelf/counter/L-counter/base/base-wall). Recipe identity kanonik `itemKey` kullanır, quantity parent recipe sahibidir, expansion üstveriyi `getProductionItem()` üzerinden çözer.
+Tekil production Item; 8 doğrulanmış parent recipe (wall/shelf/counter/L-counter/base/base-wall). Recipe identity kanonik `itemKey` kullanır, quantity parent recipe sahibidir, expansion üstveriyi `getProductionItem()` üzerinden çözer. Saha örneği `resolveItemBom` ile `profile_140_5 × 1 adet` üretir; parent reçetelere otomatik eklenmez.
 
 ## 6. Renderer sınırı
 Production ölçü ve üstveri business tek kaynak'tur; prosedürel renderer production profile mesh identity'sine zorla bağlanmaz. `defaultColor=0xd0d3d4` kanonik default; mevcut `ALUMINUM_PROFILE_COLOR='#D0D3D4'` render ezme olarak kalabilir.

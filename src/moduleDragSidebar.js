@@ -24,6 +24,9 @@ function ensureStyles() {
     .module-drag-card.is-disabled { opacity:.45; cursor:not-allowed; }
     .module-drag-card.is-dragging { opacity:.55; border-color:#f97316; box-shadow:0 0 0 2px rgba(249,115,22,.14); }
     .module-drag-card strong { overflow:hidden; font-size:10px; line-height:1.25; text-overflow:ellipsis; white-space:nowrap; }
+    .module-drag-upright { width:6px; height:62px; box-sizing:border-box; border-radius:1px; background:${ALUMINUM_PROFILE_COLOR}; box-shadow:inset 1px 0 0 rgba(255,255,255,.4), inset -1px 0 0 rgba(15,23,42,.18), 0 1px 3px rgba(15,23,42,.08); }
+    .module-drag-upright { width:10px; height:68px; border-radius:1px; background:${ALUMINUM_PROFILE_COLOR}; box-shadow:inset 1px 0 0 rgba(255,255,255,.35), inset -1px 0 0 rgba(15,23,42,.2), 0 1px 3px rgba(15,23,42,.08); }
+    .module-drag-profile { height:12px; box-sizing:border-box; border-radius:1px; background:${ALUMINUM_PROFILE_COLOR}; box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(15,23,42,.18), 0 1px 3px rgba(15,23,42,.08); }
     .module-drag-preview { display:flex; height:78px; align-items:center; justify-content:center; overflow:hidden; border-radius:7px; background:#fff; }
     .module-drag-panel { display:flex; height:68px; flex-direction:column; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-panel span { flex:1; border-bottom:1px solid #c4c9ce; }
@@ -275,6 +278,21 @@ export function createModuleCatalogPreview(module) {
   if (module.type === 'led-floodlight') {
     const body = document.createElement('div');
     body.className = 'module-drag-floodlight';
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'upright') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-upright';
+    preview.appendChild(body);
+    return preview;
+  }
+
+  if (module.type === 'profile') {
+    const body = document.createElement('div');
+    body.className = 'module-drag-profile';
+    body.style.width = `${previewWidthPx(module.widthCm)}px`;
     preview.appendChild(body);
     return preview;
   }

@@ -1,4 +1,4 @@
-import { resolveItemKey } from './catalog.js';
+import { resolveItemKey, STAND_DIMENSIONS } from './catalog.js';
 import { normalizeStripOccupancy } from './stripOccupancy.js';
 import {
   getCommercialItemForType,
@@ -10,6 +10,7 @@ import {
   getShowcaseItemKeyForType,
   resolveWallMediaMetrics,
 } from './items.js';
+import { getStraightWallNominalWidthForProfileItem } from './moduleRecipes.js';
 import { getDoorLeafProductionItem, getProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 
@@ -487,6 +488,22 @@ export function createUprightModuleState() {
   };
 }
 
+export function createProfileModuleState(descriptor = {}) {
+  const itemKey = descriptor.itemKey ?? resolveItemKey(descriptor);
+  const item = itemKey ? getItem(itemKey) : null;
+  if (!item || item.type !== 'profile') return null;
+  const widthCm = Number(getStraightWallNominalWidthForProfileItem(item.itemKey));
+  const thicknessCm = Number(item.dimensions.thicknessCm);
+  return {
+    id: createId('module'),
+    itemKey: item.itemKey,
+    type: item.type,
+    widthCm,
+    depthCm: thicknessCm,
+    heightCm: Math.round(STAND_DIMENSIONS.height * 100),
+  };
+}
+
 export function createPlasticTrashBinModuleState() {
   return createCommercialModuleState('plastic-trash-bin');
 }
@@ -634,6 +651,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   kettle: () => createKettleModuleState(),
   'coat-rack': () => createCoatRackModuleState(),
   upright: () => createUprightModuleState(),
+  profile: (descriptor) => createProfileModuleState(descriptor),
   'plastic-trash-bin': () => createPlasticTrashBinModuleState(),
   'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
   tv: (descriptor) => createTvModuleState(descriptor.sizeInch ?? 42, descriptor),
@@ -785,6 +803,19 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'illuminated-foam') {
     const item = getItem('illuminated-foam');
     if (item) moduleState.itemKey = item.itemKey;
+    return moduleState;
+  }
+
+  if (moduleState.type === 'profile') {
+    const resolvedKey = resolveItemKey(moduleState) ?? moduleState.itemKey;
+    const item = resolvedKey ? getItem(resolvedKey) : null;
+    if (item?.type === 'profile') {
+      moduleState.itemKey = item.itemKey;
+      const spanCm = getStraightWallNominalWidthForProfileItem(item.itemKey);
+      if (Number.isFinite(spanCm)) moduleState.widthCm = spanCm;
+      moduleState.depthCm = Number(item.dimensions.thicknessCm);
+      moduleState.heightCm = Math.round(STAND_DIMENSIONS.height * 100);
+    }
     return moduleState;
   }
 

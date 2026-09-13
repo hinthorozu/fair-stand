@@ -26,7 +26,7 @@ test('Panel Ek Modül holds short-up family and field upright_346_5', () => {
   const extraPanel = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Panel Ek Modül');
   assert.ok(panelWall);
   assert.ok(extraPanel);
-  assert.deepEqual(extraPanel.keys, [...SHORT_UP_KEYS, 'upright_346_5']);
+  assert.deepEqual(extraPanel.keys, [...SHORT_UP_KEYS, 'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5']);
   for (const key of SHORT_UP_KEYS) {
     assert.equal(panelWall.keys.includes(key), false);
     assert.equal(MODULE_CATALOG_KEYS.includes(key), true);
@@ -51,7 +51,7 @@ test('field upright_346_5 is self BOM ×1 and does not change parent wall recipe
   assert.equal(parent.quantity, 2);
 });
 
-test('upright snaps only to short-up joints, not to düz wall_200', () => {
+test('upright snaps to short-up, profile and banko joints, not to düz wall_200', () => {
   const upright = createModuleStateFromDescriptor(MODULE_CATALOG.upright_346_5);
   assert.equal(upright.type, 'upright');
   assert.equal(requiresShortUpJointSnap(upright), true);
@@ -127,12 +127,81 @@ test('upright snaps only to short-up joints, not to düz wall_200', () => {
     standYCm: 500,
   });
   assert.equal(missEmpty, null);
+
+  const fieldProfile = {
+    id: 'profile-1',
+    itemKey: 'profile_190',
+    type: 'profile',
+    widthCm: 200,
+    placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+  };
+  const hitProfile = snapPlacementToModules({
+    moduleId: upright.id,
+    moduleType: upright.type,
+    itemKey: upright.itemKey,
+    heightCm: upright.heightCm,
+    widthCm: upright.widthCm,
+    depthCm: upright.depthCm,
+    pointerXCm: 0,
+    pointerYCm: 0,
+    rotationZDeg: 0,
+    modules: [fieldProfile],
+    standType: 'island',
+    standXCm: 500,
+    standYCm: 500,
+  });
+  assert.equal(hitProfile?.ok, true);
+  assert.equal(hitProfile.snapKind, 'short-up-joint');
+  assert.equal(hitProfile.placement.wallId, 'free');
+
+  const banko = createModuleStateFromDescriptor(MODULE_CATALOG.desk_banko_200);
+  banko.id = 'banko-1';
+  banko.placement = { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'free' };
+  const hitBanko = snapPlacementToModules({
+    moduleId: upright.id,
+    moduleType: upright.type,
+    itemKey: upright.itemKey,
+    heightCm: upright.heightCm,
+    widthCm: upright.widthCm,
+    depthCm: upright.depthCm,
+    pointerXCm: 0,
+    pointerYCm: 0,
+    rotationZDeg: 0,
+    modules: [banko],
+    standType: 'island',
+    standXCm: 500,
+    standYCm: 500,
+  });
+  assert.equal(hitBanko?.ok, true);
+  assert.equal(hitBanko.snapKind, 'short-up-joint');
+
+  const underProfile = {
+    ...fieldProfile,
+    id: 'profile-over-banko',
+  };
+  const hitThroughBanko = snapPlacementToModules({
+    moduleId: upright.id,
+    moduleType: upright.type,
+    itemKey: upright.itemKey,
+    heightCm: upright.heightCm,
+    widthCm: upright.widthCm,
+    depthCm: upright.depthCm,
+    pointerXCm: 0,
+    pointerYCm: 0,
+    rotationZDeg: 0,
+    modules: [underProfile, banko],
+    standType: 'island',
+    standXCm: 500,
+    standYCm: 500,
+  });
+  assert.equal(hitThroughBanko?.ok, true);
+  assert.equal(hitThroughBanko.snapKind, 'short-up-joint');
 });
 
 test('field upright renderer uses a square wall-depth column, not an L', async () => {
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  const fn = source.slice(source.indexOf('function createUprightModule'), source.indexOf('function createKettleModule'));
+  const fn = source.slice(source.indexOf('function createUprightModule'), source.indexOf('function createProfileModule'));
   assert.match(fn, /STAND_DIMENSIONS/);
   assert.match(fn, /BoxGeometry\(frameDepth, frameHeight, frameDepth\)/);
   assert.match(fn, /FRAME_COLOR/);
@@ -142,4 +211,12 @@ test('field upright renderer uses a square wall-depth column, not an L', async (
   assert.doesNotMatch(fn, /postAlongWall/);
   assert.doesNotMatch(fn, /thicknessCm \/ 100/);
   assert.doesNotMatch(fn, /item\.defaultColor/);
+});
+
+test('catalog preview for upright is a solid post, not a 7-strip panel', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const source = await readFile(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
+  assert.match(source, /module\.type === 'upright'/);
+  assert.match(source, /module-drag-upright/);
+  assert.match(source, /width:6px/);
 });

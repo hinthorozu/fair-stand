@@ -1,5 +1,5 @@
 import { STAND_DIMENSIONS } from './catalog.js';
-import { getItem, isShortUpFamilyDescriptor } from './items.js';
+import { getItem } from './items.js';
 import {
   allowsThinWallEndpointContact,
   canModulesOverlapByBehavior,
@@ -8,6 +8,7 @@ import {
   getModuleCollisionStrategy,
   getModuleMagneticSnapStrategy,
   getModuleMoveSnapCm,
+  isUprightJointSnapTarget,
   resolveSideInsertRotationDeg,
   usesLogicalFixtureEndpoint,
   usesWallBackboneCollisionDepth,
@@ -632,6 +633,37 @@ function inferPlacementWallId({ placement, standType, standXCm } = {}) {
   return 'free';
 }
 
+export function inferStandEdgeWallId(placement, standType, standXCm) {
+  if (!placement) return 'free';
+  if (placement.wallId && placement.wallId !== 'free') return placement.wallId;
+  const allowedWalls = getAllowedWallIds(standType);
+  const vertical = isVerticalModuleRotation(placement.rotationZDeg);
+  const xCm = Number(placement.xCm);
+  const yCm = Number(placement.yCm);
+  const xLimit = Number(standXCm);
+  const snap = MODULE_WALL_SNAP_DISTANCE_CM;
+  if (!vertical && allowedWalls.includes('back') && Math.abs(yCm) <= snap) return 'back';
+  if (vertical && allowedWalls.includes('left') && Math.abs(xCm) <= snap) return 'left';
+  if (
+    vertical
+    && allowedWalls.includes('right')
+    && Number.isFinite(xLimit)
+    && Math.abs(xCm - xLimit) <= snap
+  ) return 'right';
+  return 'free';
+}
+
+export function withStandEdgeWallIds(modules = [], standType, standXCm) {
+  return modules.map((module) => {
+    const wallId = inferStandEdgeWallId(module?.placement, standType, standXCm);
+    if (!module?.placement || wallId === 'free' || wallId === module.placement.wallId) return module;
+    return {
+      ...module,
+      placement: { ...module.placement, wallId },
+    };
+  });
+}
+
 function getSegmentSnapCoordinates(segment) {
   const coordinates = [];
   for (
@@ -698,14 +730,16 @@ function snapUprightToShortUpJoints({
   const candidates = [];
   modules.forEach((targetModule) => {
     if (!targetModule?.placement || targetModule.id === moduleId) return;
-    if (!isShortUpFamilyDescriptor(targetModule)) return;
-    const target = getGroundSegment(targetModule);
-    if (!target) return;
-
+    if (!isUprightJointSnapTarget(targetModule)) return;
+    const targetSegments = isLCounterModule(targetModule)
+      ? getLCounterCollisionSegments(targetModule).map((entry) => entry.segment)
+      : [getGroundSegment(targetModule)].filter(Boolean);
     const targetRotation = normalizeModuleRotationZDeg(targetModule.placement.rotationZDeg);
     const xLimit = Number(standXCm);
     const yLimit = Number(standYCm);
-    [target.startCm, target.endCm].forEach((endpointCm) => {
+    targetSegments.forEach((target) => {
+      if (!target) return;
+      [target.startCm, target.endCm].forEach((endpointCm) => {
       const jointXCm = target.axis === 'x' ? endpointCm : target.fixedCm;
       const jointYCm = target.axis === 'y' ? endpointCm : target.fixedCm;
       const placement = placementFromCenterCm({
@@ -747,6 +781,7 @@ function snapUprightToShortUpJoints({
         snapKind: 'short-up-joint',
         priority: 0,
         distanceCm,
+      });
       });
     });
   });

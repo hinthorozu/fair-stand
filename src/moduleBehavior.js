@@ -1,5 +1,5 @@
 import { STAND_DIMENSIONS } from './catalog.js';
-import { getItem } from './items.js';
+import { getItem, isShortUpFamilyDescriptor } from './items.js';
 import { getStripOccupancyHeightRangeCm, resolveModuleStripOccupancy } from './stripOccupancy.js';
 
 const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
@@ -168,7 +168,11 @@ const TYPE_BEHAVIORS = Object.freeze({
     magneticSnap: 'short-up-joint',
     supportsWallOverlayMount: false,
     wallCapacity: 'exclude',
-    overlapWithTypes: Object.freeze(['flat-panel']),
+    overlapWithTypes: Object.freeze(['flat-panel', 'profile', 'counter']),
+  }),
+  profile: Object.freeze({
+    ...WALL_BEHAVIOR,
+    overlapWithTypes: Object.freeze(['separator']),
   }),
   'indoor-plant-1': freeBehavior({
     moveSnapCm: 10,
@@ -287,6 +291,12 @@ export function getModuleMagneticSnapStrategy(moduleOrType) {
 
 export function requiresShortUpJointSnap(moduleOrType) {
   return getModuleMagneticSnapStrategy(moduleOrType) === 'short-up-joint';
+}
+
+export function isUprightJointSnapTarget(moduleOrType) {
+  const module = normalizeDescriptor(moduleOrType);
+  if (module.type === 'profile' || module.type === 'counter') return true;
+  return isShortUpFamilyDescriptor(module);
 }
 
 export function usesLogicalFixtureEndpoint(moduleOrType) {
