@@ -198,7 +198,7 @@ export const FLOOR_ITEMS = Object.freeze({
     name: 'Sarı Meşe',
     type: 'floor',
     dimensions: Object.freeze({ lengthCm: 140, depthCm: 16 }),
-    defaultColor: '#ddb24f',
+    defaultColor: '#c4a480',
     paintable: false,
   }),
   'parke-beton': Object.freeze({

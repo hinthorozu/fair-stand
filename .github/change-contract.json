@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "field-profile-wall-behavior",
-  "kind": "module",
-  "summary": "Dört yatay profilü sahaya katalogdan ekler; davranış ve dıştan dışa boy eşleşen wall_xxxx ile aynıdır, görsel yalnız kalın üst raydır. Separator ile aynı yuvada çarpışmaz. BOM dokunulmaz.",
+  "id": "parke-sari-color-c4a480",
+  "kind": "bugfix",
+  "summary": "Sarı Meşe defaultColor değerini #ddb24f yerine #c4a480 yapar.",
   "owners": [
     "src/catalog.js",
     "src/items.js",
@@ -73,6 +73,7 @@
     "affectedTests": [
       "e2e/f010-module-construction.spec.mjs",
       "e2e/f011-module-behavior.spec.mjs",
+      "e2e/floor-items-contract.spec.mjs",
       "e2e/free-props-collision-none.spec.mjs",
       "e2e/mini-fridge-dimensions.spec.mjs",
       "e2e/plastic-trash-bin-module.spec.mjs",
@@ -405,6 +406,7 @@
       "docs/items/definitions/illuminated-foam.md",
       "docs/items/definitions/karolaj.md",
       "docs/items/definitions/led_floodlight.md",
+      "docs/items/definitions/parke-sari.md",
       "docs/items/definitions/profile_140_5.md",
       "docs/items/definitions/profile_190.md",
       "docs/items/definitions/profile_41_5.md",
@@ -455,14 +457,11 @@
         "F-045"
       ]
     },
-    "notes": "Düz wall_50/100/150/200 kimliği ve parent upright ×2 reçetesi değişmez. Snap variant short-up-1/2 ile süzülür."
+    "notes": "Yalnız parke-sari defaultColor #c4a480."
   },
   "tests": {
     "targeted": [
-      "test/profileFieldPlacement.test.js",
-      "test/uprightFieldPlacement.test.js",
-      "test/moduleBehaviorPolicy.test.js",
-      "test/systemModuleCatalogDoc.test.js"
+      "test/floorItemsContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -470,18 +469,19 @@
       "required": true,
       "targeted": [
         "e2e/f011-module-behavior.spec.mjs",
+        "e2e/floor-items-contract.spec.mjs",
         "e2e/wall-flat-panel-items-contract.spec.mjs"
       ],
-      "reason": "Katalog, UI ve main.js (assets domain) değişti; panel grup e2e ve davranış spec zorunlu."
+      "reason": "items.js catalog domain; zemin rengi görünür."
     }
   },
   "risk": {
-    "level": "medium",
-    "notes": "Yanlış snap düz duvara bağlanırsa ürün kararı bozulur; test düz wall_200 hedefini reddeder."
+    "level": "low",
+    "notes": "Yalnız Sarı Meşe zemin rengi."
   },
   "migration": {
     "required": false,
-    "notes": "Yeni saha instance; eski projelerde yok."
+    "notes": "Yeni alan yok."
   },
-  "rollback": "Katalog grubu, upright factory/renderer ve short-up-joint snap geri alınır."
+  "rollback": "defaultColor #ddb24f yapılır."
 }
