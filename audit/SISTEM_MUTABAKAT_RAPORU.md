@@ -27,7 +27,7 @@ Sistem çalışıyor. Karmaşa: eski audit / `current-system` / checklist kapanm
 | 6 | ZIP import şema/limit yok | Kod | `archiveVersion === 1` + `project.id`. `restoreProject()` `stand`/`modules` doğrulamaz. F-036 / F-037. |
 | 7 | GLB hata sessiz | Kod | **B uygulandı.** `loadGltfScene` cache siler; `#stage-result`. F-024 kapalı. |
 | 8 | Belge gövdesi “şu anki sistem” | Belge | `current-system` 94 dosya: 53 tarihî şerit, 41 şeritsiz; gövde `catalogKey` / `DEPOT_*`. `definitions` zemin kartları `floorType` persist der; kod `stand.itemKey` yazar. |
-| 9 | Otomatik duvar feature contract yok | Kod | `automaticWall.js` var; `featureContracts.js` yalnız `automatic-depot`. F-029. |
+| 9 | Otomatik duvar feature contract yok | Kod | **D uygulandı.** `FEATURE_CONTRACTS.automaticWall`. F-029 kapalı. |
 | 10 | Proje Final BOM yok | Kod + ürün kararı | `resolveItemBom(itemKey)` var; `modules[]` toplayıcı yok. F-030 / F-014 / F-048. Miktar uydurulmaz. |
 
 ---
@@ -40,7 +40,7 @@ Sistem çalışıyor. Karmaşa: eski audit / `current-system` / checklist kapanm
 4. State: `designState.js` `MODULE_STATE_FACTORIES` (25 type). `createModuleStateFromDescriptor`. F-010 kapalı.
 5. Davranış: `moduleBehavior.js`. Overlay tv + foam. Bar taburesi / tekli koltuk 45°. Yan ekleme `allowsModuleSideInsert` ile menü ve catalog flush’ta zorlanır.
 6. BOM: recipe `moduleRecipes.js`; leaf `itemBom.js`. Debug tüketici `rawBomDebug.js` yalnız `DEV`+`?rawBom`. Proje Final BOM yok. Connector reçetede sabit (F-031).
-7. Özellik: yalnız `automatic-depot`. `contentCatalogKeys` yalnızca `PLASTIC_TRASH_BIN` (liste eksik, eski ad). Otomatik duvar contractsuz.
+7. Özellik: `automatic-depot` + `automatic-wall`. Depo `contentCatalogKeys` dört ticari Item.
 8. Kalıcılık: snapshot `version: 1`. IndexedDB `fair-stand-configurator` v2; `projectStore` + `assetStore` ayrı `openDb`.
 9. Kapı: `npm run contract:verify` + `ci.yml` (Version2 push/PR: gate → test → build → e2e). `package.json` lint/`npm audit` yok. Change-contract bu set: `visible-ui-b-with-ledger-a`.
 10. E2E: Playwright spec + CI. “E2E yok” yanlış. ZIP ve GLB-fail spec yok.
@@ -75,12 +75,11 @@ F-041 / F-044: GitHub ayarı / uzak dal. Bu raporda yok.
 
 Ürün kararı: F-014 (18 katalog + foam `decision-required`), F-034 (4 attribution txt, tam envanter değil), F-043 (kök `LICENSE` yok — lisans dosyası, ruleset değil), F-048 (evrensel BOM kapısı yok).
 
-Kod/UI: F-015, F-017 (`surfaceState` aynı nesne referansı), F-018, F-021, F-022 (foam/kapı/ZIP e2e eksik), F-024, F-025, F-026, F-029, F-030, F-031, F-032, F-035, F-036/037, F-038, F-039, F-042, F-045, F-046.
+Kod/UI: F-015, F-017 (`surfaceState` aynı nesne referansı), F-018, F-021, F-022 (foam/kapı/ZIP e2e eksik), F-024, F-025, F-026, F-030, F-031, F-032, F-035, F-036/037, F-038, F-039, F-042, F-045, F-046. F-029 kapandı.
 
 ### Ledger’de numarasız sapmalar
 
 - Seçim hint çift kaynak.
-- `featureContracts.contentCatalogKeys` kalıntısı.
 - `ITEM_LIST.md` birçok bileşik Item’ı “Tamam” demiyor; definition + recipe test var.
 - Foam ölçü dialog `main.js` inline, max yükseklik 350 sabit.
 - Kanonik zemin MD `floorType`.
@@ -140,7 +139,7 @@ F-000 Item sözleşmesi; F-010 factory; F-011 davranış merkezi; F-012 `SCENE_S
 
 ### D — Mimari borç
 
-F-017, F-018, F-021/032/035, F-029 + `contentCatalogKeys`, F-022, F-045.
+**Uygulandı (bu dal):** F-029 `automatic-wall` sözleşmesi; depo `contentCatalogKeys` = MINI_FRIDGE_AVANTI, KETTLE, COAT_RACK, PLASTIC_TRASH_BIN. Kalan: F-017, F-018, F-021/032/035, F-022, F-045.
 
 ### E — Item / BOM (ürün kararı, uydurma yok)
 

@@ -1,25 +1,25 @@
 {
   "schemaVersion": 2,
-  "id": "revert-install-server-sha-pin",
-  "kind": "bugfix",
-  "summary": "install-server.sh SHA pinini kaldırır; her kurulumda origin/Version2 ucunu çeker.",
+  "id": "f029-automatic-wall-contract",
+  "kind": "architecture",
+  "summary": "F-029: automatic-wall özellik sözleşmesi; depo contentCatalogKeys dört ticari Item.",
   "owners": [
-    "scripts/install-server.sh",
-    "audit/FINDINGS.md"
+    "src/featureContracts.js",
+    "src/automaticWall.js"
   ],
   "sourceOfTruth": [
-    "scripts/install-server.sh"
+    "src/featureContracts.js"
   ],
   "impact": {
     "catalog": "not-applicable",
     "behavior": "not-applicable",
     "state": "not-applicable",
-    "placement": "not-applicable",
+    "placement": "affected",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "not-applicable",
     "ui": "not-applicable",
-    "composition": "not-applicable",
+    "composition": "affected",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
@@ -32,45 +32,69 @@
   "impactAnalysis": {
     "mode": "full-system",
     "affectedFiles": [
-      "scripts/install-server.sh"
+      "src/featureContracts.js",
+      "src/systemChangeContract.js",
+      "scripts/verify-change-contract.mjs"
     ],
     "affectedTests": [
-      "test/hygieneGates.test.js"
+      "test/systemDevelopmentContract.test.js",
+      "test/automaticWall.test.js",
+      "test/developerEntrypointDocs.test.js",
+      "test/systemChangeGate.test.js",
+      "test/systemChangeGateLocalDiff.test.js",
+      "e2e/f010-module-construction.spec.mjs",
+      "e2e/commercial-items-contract.spec.mjs"
     ],
     "affectedDocs": [
       "audit/FINDINGS.md",
-      "audit/SISTEM_MUTABAKAT_RAPORU.md"
+      "audit/SISTEM_MUTABAKAT_RAPORU.md",
+      "audit/remediation/A11_F029_CLOSURE.md",
+      "README.md",
+      "SYSTEM_AUDIT_CHECKLIST.md",
+      "SYSTEM_CHANGE_GATE.md",
+      "SYSTEM_DEVELOPMENT_CONTRACT.md",
+      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
+      "audit/evidence/A02_CHANGE_GATE.md",
+      "audit/evidence/A03_ARCHITECTURE.md",
+      "audit/evidence/A11_FEATURE_COMPOSITION.md"
     ],
     "relatedFindings": {
       "affected": [
-        "F-042"
+        "F-029"
       ],
       "reviewedNotAffected": [
-        "F-038",
-        "F-046"
+        "F-010",
+        "F-014",
+        "F-017",
+        "F-018",
+        "F-032"
       ]
     },
-    "notes": "Ürün sahibi SHA pin istemedi. Deploy her seferinde origin/Version2 ucunu alır."
+    "notes": "Yalnız sözleşme kaydı ve depo Item kimlik listesi. Planner/BOM değişmedi. featureContracts composition+architecture; automaticWall path placement ister."
   },
   "tests": {
     "targeted": [
-      "test/hygieneGates.test.js"
+      "test/systemDevelopmentContract.test.js",
+      "test/automaticWall.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "Browser domain yok; yalnız sunucu kurulum scripti ve defter."
+      "required": true,
+      "targeted": [
+        "e2e/f010-module-construction.spec.mjs",
+        "e2e/commercial-items-contract.spec.mjs"
+      ],
+      "reason": "composition/placement tarayıcıda otomatik duvar ve depo içerik yollarını doğrular."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Sunucu kurulumunda yine dalın ucu çekilir; eski SHA’ya kilit kalkar."
+    "notes": "Runtime planner aynı; sözleşme koddaki girdileri kaydeder."
   },
   "migration": {
     "required": false,
-    "notes": "Proje state yok."
+    "notes": "Proje şeması yok."
   },
-  "rollback": "PINNED_COMMIT bloğu geri konur."
+  "rollback": "automaticWall kaydı ve contentCatalogKeys tek PLASTIC_TRASH_BIN listesi geri konur."
 }
