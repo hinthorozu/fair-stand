@@ -1,4 +1,5 @@
 import { STAND_DIMENSIONS } from './catalog.js';
+import { getItem, isShortUpFamilyDescriptor } from './items.js';
 import {
   allowsThinWallEndpointContact,
   canModulesOverlapByBehavior,
@@ -672,6 +673,100 @@ function createEndpointConnectionPlacement({
   return placement;
 }
 
+function snapUprightToShortUpJoints({
+  moduleId = null,
+  widthCm,
+  depthCm = null,
+  pointerXCm,
+  pointerYCm,
+  modules = [],
+  standType,
+  standXCm,
+  standYCm,
+  snapDistanceCm = MODULE_NEIGHBOR_SNAP_DISTANCE_CM,
+} = {}) {
+  const width = Number(widthCm);
+  const pointerX = Number(pointerXCm);
+  const pointerY = Number(pointerYCm);
+  const threshold = Number(snapDistanceCm);
+  if (
+    ![width, pointerX, pointerY, threshold].every(Number.isFinite)
+    || width <= 0
+    || threshold < 0
+  ) return null;
+
+  const candidates = [];
+  modules.forEach((targetModule) => {
+    if (!targetModule?.placement || targetModule.id === moduleId) return;
+    if (!isShortUpFamilyDescriptor(targetModule)) return;
+    const target = getGroundSegment(targetModule);
+    if (!target) return;
+
+    const targetRotation = normalizeModuleRotationZDeg(targetModule.placement.rotationZDeg);
+    const xLimit = Number(standXCm);
+    const yLimit = Number(standYCm);
+    [target.startCm, target.endCm].forEach((endpointCm) => {
+      const jointXCm = target.axis === 'x' ? endpointCm : target.fixedCm;
+      const jointYCm = target.axis === 'y' ? endpointCm : target.fixedCm;
+      const placement = placementFromCenterCm({
+        centerXCm: jointXCm,
+        centerYCm: jointYCm,
+        widthCm: width,
+        rotationZDeg: targetRotation,
+        template: { zCm: 0, wallId: 'free' },
+      });
+      const vertical = isVerticalModuleRotation(targetRotation);
+      placement.xCm = vertical
+        ? clamp(Number(placement.xCm), 0, xLimit)
+        : clamp(Number(placement.xCm), 0, xLimit - width);
+      placement.yCm = vertical
+        ? clamp(Number(placement.yCm), 0, yLimit - width)
+        : clamp(Number(placement.yCm), 0, yLimit);
+      placement.wallId = 'free';
+      const distanceCm = Math.hypot(jointXCm - pointerX, jointYCm - pointerY);
+      if (distanceCm > threshold + EPSILON_CM) return;
+
+      const validation = validatePlacementAgainstModules({
+        placement,
+        widthCm: width,
+        depthCm,
+        moduleId,
+        moduleType: 'upright',
+        itemKey: 'upright_346_5',
+        heightCm: Number(getItem('upright_346_5').dimensions.lengthCm),
+        modules,
+        standType,
+        standXCm,
+        standYCm,
+      });
+      if (!validation.ok) return;
+
+      candidates.push({
+        placement,
+        targetModuleId: targetModule.id,
+        snapKind: 'short-up-joint',
+        priority: 0,
+        distanceCm,
+      });
+    });
+  });
+
+  if (!candidates.length) return null;
+  candidates.sort((a, b) => (
+    a.distanceCm - b.distanceCm
+    || String(a.targetModuleId).localeCompare(String(b.targetModuleId))
+  ));
+  const best = candidates[0];
+  return {
+    ok: true,
+    mode: 'module-snap',
+    placement: { ...best.placement },
+    targetModuleId: best.targetModuleId,
+    snapKind: best.snapKind,
+    distanceCm: best.distanceCm,
+  };
+}
+
 export function snapPlacementToModules({
   moduleId = null,
   moduleType = null,
@@ -691,6 +786,20 @@ export function snapPlacementToModules({
 } = {}) {
   const movingDescriptor = { type: moduleType, itemKey, heightCm, shape, widthCm, depthCm };
   if (getModuleMagneticSnapStrategy(movingDescriptor) === 'none') return null;
+  if (getModuleMagneticSnapStrategy(movingDescriptor) === 'short-up-joint') {
+    return snapUprightToShortUpJoints({
+      moduleId,
+      widthCm,
+      depthCm,
+      pointerXCm,
+      pointerYCm,
+      modules,
+      standType,
+      standXCm,
+      standYCm,
+      snapDistanceCm,
+    });
+  }
 
   const width = Number(widthCm);
   const pointerX = Number(pointerXCm);

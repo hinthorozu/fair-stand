@@ -68,7 +68,7 @@ for (const itemKey of keys) {
 
     const picker = page.locator('.module-picker-backdrop');
     await expect(picker).toBeVisible();
-    await picker.locator('summary', { hasText: 'Panel & Duvar' }).click();
+    await picker.locator('summary', { hasText: itemKey.includes('short_up') ? 'Panel Ek Modül' : 'Panel & Duvar' }).click();
     await picker.locator(`[data-module-key="${itemKey}"]`).click();
     await picker.locator('.module-picker-add').click();
     await expect(picker).toBeHidden();

@@ -897,6 +897,11 @@ export function getItem(itemKey) {
     ?? getProductionItem(itemKey);
 }
 
+export function isShortUpFamilyDescriptor(descriptor) {
+  const variant = descriptor?.variant ?? getItem(descriptor?.itemKey)?.variant;
+  return variant === 'short-up-1' || variant === 'short-up-2';
+}
+
 export function listCompositeItems() {
   return Object.values(COMPOSITE_ITEMS);
 }

@@ -23,6 +23,8 @@ test('F-011 special placement policies are declared by the canonical behavior co
     assert.equal(getModuleMagneticSnapStrategy(type), 'none', type);
   }
 
+  assert.equal(getModuleMagneticSnapStrategy('upright'), 'short-up-joint');
+
   assert.equal(usesLogicalFixtureEndpoint('counter'), true);
   assert.equal(usesLogicalFixtureEndpoint('base'), true);
   assert.equal(usesLogicalFixtureEndpoint('flat-panel'), false);

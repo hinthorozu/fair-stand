@@ -1,14 +1,19 @@
 {
   "schemaVersion": 2,
-  "id": "remove-unrequested-shot-2-alias",
-  "kind": "bugfix",
-  "summary": "Ürün kararı olmayan wall_200_shot_2 itemKey alias tablosunu kaldırır; kanonik wall_200_short_up_2 durur.",
+  "id": "upright-346-5-short-up-field",
+  "kind": "module",
+  "summary": "upright_346_5 saha örneğini Panel Ek Modül grubuna alır; snap yalnız short-up uç/köşe.",
   "owners": [
+    "src/catalog.js",
     "src/items.js",
-    "src/catalog.js"
+    "src/moduleBehavior.js",
+    "src/modulePlacement.js",
+    "src/scene3d.js"
   ],
   "sourceOfTruth": [
-    "src/items.js"
+    "src/productionParts.js",
+    "src/catalog.js",
+    "src/moduleBehavior.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -20,7 +25,7 @@
     "bom": "affected",
     "ui": "affected",
     "composition": "affected",
-    "assets": "affected",
+    "assets": "not-applicable",
     "storage": "affected",
     "importExport": "affected",
     "performance": "affected",
@@ -54,28 +59,23 @@
       "src/moduleDragSidebar.js",
       "src/moduleMove.js",
       "src/modulePlacement.js",
-      "src/moduleRecipes.js",
       "src/projectImportValidation.js",
       "src/rawBomDebug.js",
       "src/scene3d.js",
       "src/selectionFeedback.js",
       "src/standStandardsCopy.js",
       "src/stripOccupancy.js",
-      "src/surfaceStateBinding.js",
       "src/systemChangeContract.js",
-      "src/viewCube.js",
       "src/wall.js",
       "src/wallReflow.js"
     ],
     "affectedTests": [
       "e2e/f010-module-construction.spec.mjs",
       "e2e/f011-module-behavior.spec.mjs",
-      "e2e/f020-save-before-project-actions.spec.mjs",
       "e2e/free-props-collision-none.spec.mjs",
       "e2e/mini-fridge-dimensions.spec.mjs",
       "e2e/plastic-trash-bin-module.spec.mjs",
       "e2e/shelf-board-appearance.spec.mjs",
-      "e2e/smoke.spec.mjs",
       "e2e/visible-ui-b.spec.mjs",
       "e2e/wall-base-items-contract.spec.mjs",
       "e2e/wall-flat-panel-items-contract.spec.mjs",
@@ -88,9 +88,7 @@
       "test/barStool2.test.js",
       "test/baseItemsContract.test.js",
       "test/baseModule.test.js",
-      "test/baseRecipes.test.js",
       "test/baseRenderStyle.test.js",
-      "test/baseTopsItemContract.test.js",
       "test/baseWallCatalog.test.js",
       "test/baseWallDepthAlignment.test.js",
       "test/baseWallRecipes.test.js",
@@ -102,11 +100,8 @@
       "test/colorEditorControllerMainIntegration.test.js",
       "test/colorEditorMainIntegration.test.js",
       "test/commercialItemsContract.test.js",
-      "test/cornerPanelsItemContract.test.js",
       "test/cornerPlacement.test.js",
       "test/counterModule.test.js",
-      "test/counterRecipes.test.js",
-      "test/counterTopsItemContract.test.js",
       "test/coverModeExclusivity.test.js",
       "test/ctrlMultiSelect.test.js",
       "test/depotBackWallRecipe.test.js",
@@ -160,19 +155,14 @@
       "test/moduleContextDirection.test.js",
       "test/moduleMove.test.js",
       "test/modulePlacement.test.js",
-      "test/moduleRecipes.test.js",
       "test/moduleRotationPolicy.test.js",
       "test/moduleRotationSingleSourceIntegration.test.js",
       "test/moduleSelectionState.test.js",
       "test/moduleSelectionVisual.test.js",
       "test/moduleStateConstructionRegistry.test.js",
-      "test/panel197ItemContract.test.js",
-      "test/panelCorner192ItemContract.test.js",
       "test/panelMultiSelectRule.test.js",
       "test/plasticTrashBinModule.test.js",
       "test/plasticTrashBinTopLabel.test.js",
-      "test/profile190ItemContract.test.js",
-      "test/profilesItemContract.test.js",
       "test/projectAtomicDeletion.test.js",
       "test/projectDropdownSwitchIntegration.test.js",
       "test/projectImportFlow.test.js",
@@ -187,10 +177,7 @@
       "test/selectedModuleRotationCursor.test.js",
       "test/selectionFeedback.test.js",
       "test/selectionFeedbackMainIntegration.test.js",
-      "test/separatorPanelsItemContract.test.js",
-      "test/separatorRecipes.test.js",
       "test/shelfItemsItemContract.test.js",
-      "test/shelfLegItemContract.test.js",
       "test/shelfLighting.test.js",
       "test/shelfModule.test.js",
       "test/showcaseAppearance.test.js",
@@ -201,7 +188,6 @@
       "test/sidebarControllerMainIntegration.test.js",
       "test/sofaClassicPiecesContract.test.js",
       "test/stageFeedbackMainIntegration.test.js",
-      "test/straightPanelsItemContract.test.js",
       "test/stripOccupancy.test.js",
       "test/surfaceStateBinding.test.js",
       "test/systemChangeGate.test.js",
@@ -212,7 +198,7 @@
       "test/tv42Module.test.js",
       "test/uiFeedbackMainIntegration.test.js",
       "test/upright3465ItemContract.test.js",
-      "test/upright99And495ItemContract.test.js",
+      "test/uprightFieldPlacement.test.js",
       "test/viewKeyboardMainIntegration.test.js",
       "test/visibleUiContract.test.js",
       "test/wall.test.js",
@@ -251,26 +237,18 @@
       "audit/evidence/A05_MODULE_BEHAVIOR.md",
       "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
-      "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
-      "audit/evidence/A11_FEATURE_COMPOSITION.md",
-      "audit/evidence/A12_BOM_RECIPES_PRODUCTION.md",
       "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
       "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
       "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
       "audit/remediation/A01_F003_CLOSURE.md",
       "audit/remediation/A02_CLOSURE.md",
-      "audit/remediation/A02_F005_CLOSURE.md",
-      "audit/remediation/A02_F006_CLOSURE.md",
       "audit/remediation/A03_CLOSURE.md",
       "audit/remediation/A03_F010_CLOSURE.md",
       "audit/remediation/A03_F011_CLOSURE.md",
       "audit/remediation/A03_F012_CLOSURE.md",
       "audit/remediation/A04_F013_CLOSURE.md",
-      "audit/remediation/A07_F017_CLOSURE.md",
-      "audit/remediation/A11_F029_CLOSURE.md",
-      "docs/AUTOSAVE_INTEGRATION_NOTES.md",
       "docs/assets/PUBLIC_MODEL_ATTRIBUTION.md",
       "docs/items/ITEM_LIST.md",
       "docs/items/contract/ITEM_CONTRACT.md",
@@ -384,7 +362,6 @@
       "docs/items/definitions/base_top_157_50.md",
       "docs/items/definitions/base_top_206_50.md",
       "docs/items/definitions/chair_eames.md",
-      "docs/items/definitions/connector_single.md",
       "docs/items/definitions/connector_start.md",
       "docs/items/definitions/desk_banko_100.md",
       "docs/items/definitions/desk_banko_100_L.md",
@@ -392,8 +369,6 @@
       "docs/items/definitions/desk_banko_150_L.md",
       "docs/items/definitions/desk_banko_200.md",
       "docs/items/definitions/desk_banko_200_L.md",
-      "docs/items/definitions/door_100.md",
-      "docs/items/definitions/door_leaf_100.md",
       "docs/items/definitions/furniture_bar_stool_classic.md",
       "docs/items/definitions/furniture_coffee_table_classic.md",
       "docs/items/definitions/furniture_sofa_double_classic.md",
@@ -411,6 +386,7 @@
       "docs/items/definitions/profile_91.md",
       "docs/items/definitions/separator_panel_48_5.md",
       "docs/items/definitions/separator_panel_98.md",
+      "docs/items/definitions/upright_346_5.md",
       "docs/items/definitions/wall_100.md",
       "docs/items/definitions/wall_150.md",
       "docs/items/definitions/wall_200.md",
@@ -429,17 +405,12 @@
       "docs/items/definitions/wall_shelf_3_150.md",
       "docs/items/definitions/wall_shelf_3_200.md",
       "docs/items/door_100_full_system_audit.md",
-      "fair-stand-base-family-migration-handoff.md",
-      "src/helpGuide.js"
+      "fair-stand-base-family-migration-handoff.md"
     ],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": [
-        "F-001",
         "F-003",
-        "F-004",
-        "F-005",
-        "F-006",
         "F-010",
         "F-011",
         "F-012",
@@ -449,9 +420,6 @@
         "F-017",
         "F-018",
         "F-019",
-        "F-021",
-        "F-022",
-        "F-024",
         "F-029",
         "F-030",
         "F-031",
@@ -460,12 +428,13 @@
         "F-045"
       ]
     },
-    "notes": "Katalog kartı ve reçete aynı. Yalnız uydurma alias ve resolveCanonicalItemKey kalkar."
+    "notes": "Düz wall_50/100/150/200 kimliği ve parent upright ×2 reçetesi değişmez. Snap variant short-up-1/2 ile süzülür."
   },
   "tests": {
     "targeted": [
-      "test/wallFlatPanelItemsContract.test.js",
-      "test/stripOccupancy.test.js"
+      "test/uprightFieldPlacement.test.js",
+      "test/upright3465ItemContract.test.js",
+      "test/systemModuleCatalogDoc.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -474,16 +443,16 @@
       "targeted": [
         "e2e/wall-flat-panel-items-contract.spec.mjs"
       ],
-      "reason": "items.js catalog+bom tarayıcıda düz panel/short-up kartlarını doğrular."
+      "reason": "Short-up katalog grubu Panel Ek Modül altına taşındı; düz panel e2e grup etiketini kullanır."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "Hiçbir UI yolu shot_2 yazmıyordu; getItem doğrudan itemKey kullanır."
+    "level": "medium",
+    "notes": "Yanlış snap düz duvara bağlanırsa ürün kararı bozulur; test düz wall_200 hedefini reddeder."
   },
   "migration": {
     "required": false,
-    "notes": "Kayıtlı projede shot_2 üretilmedi; migration yok."
+    "notes": "Yeni saha instance; eski projelerde yok."
   },
-  "rollback": "ITEM_KEY_ALIASES satırı geri konur."
+  "rollback": "Katalog grubu, upright factory/renderer ve short-up-joint snap geri alınır."
 }

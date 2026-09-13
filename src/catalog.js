@@ -66,6 +66,20 @@ function createFlatPanelCatalogItem(itemKey) {
   return Object.freeze(descriptor);
 }
 
+function createUprightCatalogItem(itemKey) {
+  const item = getItem(itemKey);
+  const thicknessCm = Number(item.dimensions.thicknessCm);
+  const lengthCm = Number(item.dimensions.lengthCm);
+  return Object.freeze({
+    itemKey: item.itemKey,
+    type: item.type,
+    widthCm: thicknessCm,
+    depthCm: thicknessCm,
+    heightCm: lengthCm,
+    label: item.name,
+  });
+}
+
 function createBaseWallCatalogItem(itemKey) {
   const item = getItem(itemKey);
   return Object.freeze({
@@ -241,6 +255,7 @@ export const MODULE_CATALOG = Object.freeze({
   wall_150_short_up_1: createFlatPanelCatalogItem('wall_150_short_up_1'),
   wall_100_short_up_1: createFlatPanelCatalogItem('wall_100_short_up_1'),
   wall_50_short_up_1: createFlatPanelCatalogItem('wall_50_short_up_1'),
+  upright_346_5: createUprightCatalogItem('upright_346_5'),
 
   wall_showcase_100_3: {
     itemKey: WALL_SHOWCASE_3_ITEM.itemKey,
@@ -311,17 +326,9 @@ export const MODULE_CATALOG = Object.freeze({
 
 export const MODULE_CATALOG_KEYS = Object.freeze([
   'wall_200',
-  'wall_200_short_up_2',
-  'wall_200_short_up_1',
   'wall_150',
-  'wall_150_short_up_2',
-  'wall_150_short_up_1',
   'wall_100',
-  'wall_100_short_up_2',
-  'wall_100_short_up_1',
   'wall_50',
-  'wall_50_short_up_2',
-  'wall_50_short_up_1',
 
   'wall_separator_100',
   'wall_separator_50',
@@ -344,6 +351,16 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'wall_base_100',
 
   'door_100',
+
+  'wall_200_short_up_2',
+  'wall_150_short_up_2',
+  'wall_100_short_up_2',
+  'wall_50_short_up_2',
+  'wall_200_short_up_1',
+  'wall_150_short_up_1',
+  'wall_100_short_up_1',
+  'wall_50_short_up_1',
+  'upright_346_5',
 
   'desk_banko_200',
   'desk_banko_150',
@@ -383,7 +400,21 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
 export const MODULE_CATALOG_GROUPS = Object.freeze([
   Object.freeze({
     label: 'Panel & Duvar',
-    keys: Object.freeze(['wall_200', 'wall_200_short_up_2', 'wall_200_short_up_1', 'wall_150', 'wall_150_short_up_2', 'wall_150_short_up_1', 'wall_100', 'wall_100_short_up_2', 'wall_100_short_up_1', 'wall_50', 'wall_50_short_up_2', 'wall_50_short_up_1', 'wall_separator_100', 'wall_separator_50', 'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'door_100']),
+    keys: Object.freeze(['wall_200', 'wall_150', 'wall_100', 'wall_50', 'wall_separator_100', 'wall_separator_50', 'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'door_100']),
+  }),
+  Object.freeze({
+    label: 'Panel Ek Modül',
+    keys: Object.freeze([
+      'wall_200_short_up_2',
+      'wall_150_short_up_2',
+      'wall_100_short_up_2',
+      'wall_50_short_up_2',
+      'wall_200_short_up_1',
+      'wall_150_short_up_1',
+      'wall_100_short_up_1',
+      'wall_50_short_up_1',
+      'upright_346_5',
+    ]),
   }),
   Object.freeze({
     label: 'Raf & Vitrin',
