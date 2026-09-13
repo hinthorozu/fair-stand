@@ -10,12 +10,12 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 ## Özet
 
 - Toplam bulgu: **49** (`F-000` + `F-001` … `F-048`)
-- Kapalı (kod/sözleşme duruyor): **31** — D’den F-029; C’den F-036, F-037, F-038; F-042 SHA pin geri alındı
+- Kapalı (kod/sözleşme duruyor): **32** — D’den F-029, F-032; C’den F-036, F-037, F-038; F-042 SHA pin geri alındı
 - Kapsam dışı (GitHub ayarı / uzak dal; ürün kodu değil): **F-041 kapanış kaydı durur; F-044 ürün backlog’u değil**
-- Açık ürün bulgusu: **17** (F-044 hariç)
+- Açık ürün bulgusu: **16** (F-044 hariç)
 - Açık P0: **0**
 - Açık P1: **6**
-- Açık P2: **11** (F-044 kapsam dışı)
+- Açık P2: **10** (F-044 kapsam dışı)
 - Açık P3: **0**
 - Sonraki ürün işi: `SISTEM_MUTABAKAT_RAPORU.md` D (mimari) veya E (BOM kararı). **C uygulandı (LICENSE/eksik atıf/ESLint açık).**
 - F-014 hâlâ `decision-required` (18 katalog + foam). Self dörtlü F-014’ten çıktı; finding kapanmaz.
@@ -57,7 +57,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 | F-029 | P1 | Aktif otomatik-duvar bileşiminin açık özellik sözleşmesi yok | **CLOSED** — `FEATURE_CONTRACTS.automaticWall`; depo `contentCatalogKeys` dört Item |
 | F-030 | P1 | Kanonik proje düzeyi Final BOM üreteci yok | OPEN |
 | F-031 | P1 | İlişki/köşe bağlantı parçaları proje ilişkilerinden türetilmiyor | OPEN |
-| F-032 | P2 | IndexedDB şema/migration sahipliği store’lar arasında kopyalı | OPEN |
+| F-032 | P2 | IndexedDB şema/migration sahipliği store’lar arasında kopyalı | **CLOSED** — `configuratorDb.js` tek open/upgrade |
 | F-033 | P2 | `public/` altında ~30.64 MiB park edilmiş/atıfta bulunulmayan varlık üretimle gidiyor | **CLOSED** — `audit/remediation/A13_F033_CLOSURE.md` |
 | F-034 | P2 | Genel model/varlık kökeni ve lisans envanteri eksik | **OPEN / DECISION_REQUIRED** — envanter `docs/assets/PUBLIC_MODEL_ATTRIBUTION.md`; 9 GLB’de atıf yok |
 | F-035 | P2 | ZIP arşiv sürüm/şemasının ortak kanonik sahibi/migration kaydı yok | OPEN |
@@ -78,7 +78,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 ## Alanlar arası remediasyon kümeleri
 
 1. Kullanıcıya görünen (B): **uygulandı** — F-015, F-025, F-026, F-024, F-039. F-040 kalan ZIP/GLB e2e.
-2. Kalıcılık/import: F-021/F-022/F-032/F-035. F-036/F-037 kapandı.
+2. Kalıcılık/import: F-021/F-022/F-035. F-032/F-036/F-037 kapandı.
 3. BOM (E, ürün kararı): F-014/F-030/F-031/F-048. F-029 kapandı (özellik sözleşmesi).
 4. Mimari borç: F-017/F-018/F-047 kural.
 5. Hijyen: F-034 kalan lisans, F-043 LICENSE, F-042, F-045, F-046 ESLint. F-038 kapandı. F-044 kapsam dışı.

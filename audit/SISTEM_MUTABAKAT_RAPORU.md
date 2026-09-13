@@ -41,7 +41,7 @@ Sistem çalışıyor. Karmaşa: eski audit / `current-system` / checklist kapanm
 5. Davranış: `moduleBehavior.js`. Overlay tv + foam. Bar taburesi / tekli koltuk 45°. Yan ekleme `allowsModuleSideInsert` ile menü ve catalog flush’ta zorlanır.
 6. BOM: recipe `moduleRecipes.js`; leaf `itemBom.js`. Debug tüketici `rawBomDebug.js` yalnız `DEV`+`?rawBom`. Proje Final BOM yok. Connector reçetede sabit (F-031).
 7. Özellik: `automatic-depot` + `automatic-wall`. Depo `contentCatalogKeys` dört ticari Item.
-8. Kalıcılık: snapshot `version: 1`. IndexedDB `fair-stand-configurator` v2; `projectStore` + `assetStore` ayrı `openDb`.
+8. Kalıcılık: snapshot `version: 1`. IndexedDB `fair-stand-configurator` v2; `openDb` sahibi `configuratorDb.js`.
 9. Kapı: `npm run contract:verify` + `ci.yml` (Version2 push/PR: gate → test → build → e2e). `package.json` lint/`npm audit` yok. Change-contract bu set: `visible-ui-b-with-ledger-a`.
 10. E2E: Playwright spec + CI. “E2E yok” yanlış. ZIP ve GLB-fail spec yok.
 11. `scripts/install-server.sh` repoda: `git pull` + build, SHA pin yok (F-042, düşük öncelik, senin sunucu script’in).
@@ -75,7 +75,7 @@ F-041 / F-044: GitHub ayarı / uzak dal. Bu raporda yok.
 
 Ürün kararı: F-014 (18 katalog + foam `decision-required`), F-034 (4 attribution txt, tam envanter değil), F-043 (kök `LICENSE` yok — lisans dosyası, ruleset değil), F-048 (evrensel BOM kapısı yok).
 
-Kod/UI: F-015, F-017 (`surfaceState` aynı nesne referansı), F-018, F-021, F-022 (foam/kapı/ZIP e2e eksik), F-024, F-025, F-026, F-030, F-031, F-032, F-035, F-036/037, F-038, F-039, F-042, F-045, F-046. F-029 kapandı.
+Kod/UI: F-015, F-017 (`surfaceState` aynı nesne referansı), F-018, F-021, F-022 (foam/kapı/ZIP e2e eksik), F-024, F-025, F-026, F-030, F-031, F-035, F-036/037, F-038, F-039, F-042, F-045, F-046. F-029 ve F-032 kapandı.
 
 ### Ledger’de numarasız sapmalar
 
@@ -139,7 +139,7 @@ F-000 Item sözleşmesi; F-010 factory; F-011 davranış merkezi; F-012 `SCENE_S
 
 ### D — Mimari borç
 
-**Uygulandı (bu dal):** F-029 `automatic-wall` sözleşmesi; depo `contentCatalogKeys` = MINI_FRIDGE_AVANTI, KETTLE, COAT_RACK, PLASTIC_TRASH_BIN. Kalan: F-017, F-018, F-021/032/035, F-022, F-045.
+**Uygulandı:** F-029 `automatic-wall` + depo dört Item; F-032 IndexedDB `configuratorDb.js`. Kalan: F-017, F-018, F-021/035, F-022, F-045.
 
 ### E — Item / BOM (ürün kararı, uydurma yok)
 
