@@ -42,7 +42,7 @@ import {
   planContinuousModuleInsert,
   planContinuousModuleMove,
 } from './moduleMove.js';
-import { getModuleGhostBehavior, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule, resolveModuleRotationDeltaDeg, supportsWallOverlayMount } from './moduleBehavior.js';
+import { getModuleGhostBehavior, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule, requiresShortUpJointSnap, resolveModuleRotationDeltaDeg, supportsWallOverlayMount } from './moduleBehavior.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
@@ -1485,6 +1485,9 @@ export function createStandScene(
     if (moduleState.type === 'coat-rack') {
       return createCoatRackModule(moduleState, moduleIndex);
     }
+    if (moduleState.type === 'upright') {
+      return createUprightModule(moduleState, moduleIndex);
+    }
     if (moduleState.type === 'indoor-plant-1' || moduleState.type === 'plastic-trash-bin') {
       return createIndoorPlantModule(moduleState, moduleIndex);
     }
@@ -2556,6 +2559,15 @@ export function createStandScene(
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
     });
+    if (requiresShortUpJointSnap(moduleState) && !magneticSnap) {
+      disposePlacementGhost();
+      const message = 'Yalnız short-up birleşimine veya köşesine yerleştirilir.';
+      showPlacementFeedback(message, { clientX, clientY });
+      return {
+        ok: false,
+        message,
+      };
+    }
     const desiredPlacement = magneticSnap?.placement ?? snapped.placement;
 
     let plan;
@@ -2904,6 +2916,19 @@ export function createStandScene(
       standXCm: stageLayout.widthCm,
       standYCm: stageLayout.depthCm,
     });
+    if (requiresShortUpJointSnap(moduleState) && !magneticSnap) {
+      disposePlacementGhost();
+      const message = 'Yalnız short-up birleşimine veya köşesine yerleştirilir.';
+      showPlacementFeedback(message, { clientX: event.clientX, clientY: event.clientY });
+      dragSession.preview = {
+        placement: snapped.placement,
+        valid: false,
+        message,
+        plan: { ok: false, message, placements: new Map() },
+        snap: null,
+      };
+      return;
+    }
     const desiredPlacement = magneticSnap?.placement ?? snapped.placement;
 
     let plan;
@@ -5232,6 +5257,55 @@ function createCoatRackModule(moduleState, moduleIndex) {
   });
 
   return { group, surfaces: [proxy] };
+}
+
+function createUprightModule(moduleState, moduleIndex) {
+  const item = getItem('upright_346_5');
+  const thicknessCm = Number(moduleState.widthCm || item.dimensions.thicknessCm);
+  const depthCm = Number(moduleState.depthCm || item.dimensions.thicknessCm);
+  const heightCm = Number(moduleState.heightCm || item.dimensions.lengthCm);
+  // Görsel ezme: iki wall_200 köşesinin kare silüeti (10×10 cm). Üretim 346.5/8 değişmez.
+  const {
+    height: frameHeight,
+    depth: frameDepth,
+  } = STAND_DIMENSIONS;
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    moduleType: 'upright',
+    type: 'upright',
+    widthCm: thicknessCm,
+    depthCm,
+    heightCm,
+  };
+
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(frameDepth, frameHeight, frameDepth),
+    new THREE.MeshStandardMaterial({
+      color: FRAME_COLOR,
+      metalness: 0.68,
+      roughness: 0.28,
+    }),
+  );
+  mesh.position.y = frameHeight / 2;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.userData = {
+    kind: 'surface',
+    surfaceId: `${moduleState.id}:upright`,
+    moduleId: moduleState.id,
+    moduleType: 'upright',
+    moduleIndex,
+    selectionMode: 'module',
+    acceptsImage: false,
+    widthCm: thicknessCm,
+    depthCm,
+    heightCm,
+  };
+  group.add(mesh);
+  return { group, surfaces: [mesh] };
 }
 
 function createKettleModule(moduleState, moduleIndex) {

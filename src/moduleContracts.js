@@ -105,6 +105,7 @@ export const MODULE_CONTRACT_ASSIGNMENTS = Object.freeze({
   wall_150_short_up_1: assignment('wall-editable', RECIPE_BOM_POLICY),
   wall_100_short_up_1: assignment('wall-editable', RECIPE_BOM_POLICY),
   wall_50_short_up_1: assignment('wall-editable', RECIPE_BOM_POLICY),
+  upright_346_5: assignment('free-editable', SELF_BOM_POLICY),
   wall_150: assignment('wall-editable', RECIPE_BOM_POLICY),
   wall_100: assignment('wall-editable', RECIPE_BOM_POLICY),
   wall_50: assignment('wall-editable', RECIPE_BOM_POLICY),

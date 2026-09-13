@@ -474,6 +474,19 @@ export function createCoatRackModuleState() {
   return createCommercialModuleState('coat-rack');
 }
 
+export function createUprightModuleState() {
+  const item = getItem('upright_346_5');
+  const thicknessCm = Number(item.dimensions.thicknessCm);
+  return {
+    id: createId('module'),
+    itemKey: item.itemKey,
+    type: item.type,
+    widthCm: thicknessCm,
+    depthCm: thicknessCm,
+    heightCm: Number(item.dimensions.lengthCm),
+  };
+}
+
 export function createPlasticTrashBinModuleState() {
   return createCommercialModuleState('plastic-trash-bin');
 }
@@ -620,6 +633,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   'mini-fridge': () => createMiniFridgeModuleState(),
   kettle: () => createKettleModuleState(),
   'coat-rack': () => createCoatRackModuleState(),
+  upright: () => createUprightModuleState(),
   'plastic-trash-bin': () => createPlasticTrashBinModuleState(),
   'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
   tv: (descriptor) => createTvModuleState(descriptor.sizeInch ?? 42, descriptor),

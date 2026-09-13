@@ -162,6 +162,14 @@ const TYPE_BEHAVIORS = Object.freeze({
     magneticSnap: 'none',
   }),
   'plastic-trash-bin': PLASTIC_TRASH_BIN_BEHAVIOR,
+  upright: freeBehavior({
+    allowSideInsert: false,
+    collision: 'footprint',
+    magneticSnap: 'short-up-joint',
+    supportsWallOverlayMount: false,
+    wallCapacity: 'exclude',
+    overlapWithTypes: Object.freeze(['flat-panel']),
+  }),
   'indoor-plant-1': freeBehavior({
     moveSnapCm: 10,
     endpointContact: 'thin-wall-endpoint',
@@ -275,6 +283,10 @@ export function getModuleCollisionHeightRangeCm(moduleOrType) {
 
 export function getModuleMagneticSnapStrategy(moduleOrType) {
   return getModuleBehavior(moduleOrType).magneticSnap ?? 'standard';
+}
+
+export function requiresShortUpJointSnap(moduleOrType) {
+  return getModuleMagneticSnapStrategy(moduleOrType) === 'short-up-joint';
 }
 
 export function usesLogicalFixtureEndpoint(moduleOrType) {

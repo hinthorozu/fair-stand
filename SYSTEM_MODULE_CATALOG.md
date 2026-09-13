@@ -17,9 +17,9 @@ Bu dosya insan/AI için **okunabilir katalog indeksi**dir. Runtime source-of-tru
 
 Bu snapshot `Version2` üzerindeki `MODULE_CATALOG_KEYS` ve `MODULE_CONTRACT_ASSIGNMENTS` ile eşleşmek zorundadır; `test/systemModuleCatalogDoc.test.js` drift olduğunda CI'yi kırar.
 
-- Catalog entries: **59**
+- Catalog entries: **60**
 - BOM mode `recipe`: **37**
-- BOM mode `self`: **4**
+- BOM mode `self`: **5**
 - BOM mode `decision-required`: **18**
 - Katalog dışı explicit runtime module: **1** (`illuminated-foam`)
 - Katalog dışı module BOM mode `decision-required`: **1**
@@ -32,17 +32,9 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 
 <!-- catalog-keys:start -->
 - `wall_200`
-- `wall_200_short_up_2`
-- `wall_200_short_up_1`
 - `wall_150`
-- `wall_150_short_up_2`
-- `wall_150_short_up_1`
 - `wall_100`
-- `wall_100_short_up_2`
-- `wall_100_short_up_1`
 - `wall_50`
-- `wall_50_short_up_2`
-- `wall_50_short_up_1`
 - `wall_separator_100`
 - `wall_separator_50`
 - `wall_separator_100_sarmasik`
@@ -59,6 +51,15 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `wall_base_150`
 - `wall_base_100`
 - `door_100`
+- `wall_200_short_up_2`
+- `wall_150_short_up_2`
+- `wall_100_short_up_2`
+- `wall_50_short_up_2`
+- `wall_200_short_up_1`
+- `wall_150_short_up_1`
+- `wall_100_short_up_1`
+- `wall_50_short_up_1`
+- `upright_346_5`
 - `desk_banko_200`
 - `desk_banko_150`
 - `desk_banko_100`
@@ -98,7 +99,11 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Panel & Duvar
 
-`wall_200`, `wall_200_short_up_2`, `wall_200_short_up_1`, `wall_150`, `wall_150_short_up_2`, `wall_150_short_up_1`, `wall_100`, `wall_100_short_up_2`, `wall_100_short_up_1`, `wall_50`, `wall_50_short_up_2`, `wall_50_short_up_1`, `wall_separator_100`, `wall_separator_50`, `wall_separator_100_sarmasik`, `wall_separator_50_sarmasik`, `wall_base_200`, `wall_base_150`, `wall_base_100`, `door_100`
+`wall_200`, `wall_150`, `wall_100`, `wall_50`, `wall_separator_100`, `wall_separator_50`, `wall_separator_100_sarmasik`, `wall_separator_50_sarmasik`, `wall_base_200`, `wall_base_150`, `wall_base_100`, `door_100`
+
+### Panel Ek Modül
+
+`wall_200_short_up_2`, `wall_150_short_up_2`, `wall_100_short_up_2`, `wall_50_short_up_2`, `wall_200_short_up_1`, `wall_150_short_up_1`, `wall_100_short_up_1`, `wall_50_short_up_1`, `upright_346_5`
 
 ### Raf & Vitrin
 
@@ -122,9 +127,9 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 Duvar/panel, separatör, vitrin, raf, panel bazalı duvar, depo kapısı, düz/L banko ve baza ailelerinin contract'ı `recipe` modundadır. Gerçek recipe çözümü `src/moduleRecipes.js` tarafından yapılır ve contract testleri recipe-backed kayıtların gerçekten resolve olduğunu doğrular.
 
-### `self` — 4 katalog kaydı
+### `self` — 5 katalog kaydı
 
-`MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN` leaf/self BOM Item'dır. Canonical birim `adet`; `src/itemBom.js > resolveItemBom(itemKey)` aynı `itemKey` için `quantity=1` üretir. Child recipe yoktur.
+`MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN`, `upright_346_5` leaf/self BOM Item'dır. Canonical birim `adet`; `src/itemBom.js > resolveItemBom(itemKey)` aynı `itemKey` için `quantity=1` üretir. Child recipe yoktur. Parent duvar reçetelerindeki `upright_346_5 ×2` bu saha örneğinden ayrıdır.
 
 ### `decision-required` — 18 katalog kaydı
 
