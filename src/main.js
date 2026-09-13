@@ -658,6 +658,8 @@ function assignPlannedPlacements(moduleStates, { placementMode = 'append', conte
       depthCm: moduleState.depthCm,
       moduleId: moduleState.id,
       moduleType: moduleState.type,
+      itemKey: moduleState.itemKey,
+      heightCm: moduleState.heightCm,
       shape: moduleState.shape,
       modules: [...currentModules, ...planned],
       standType: currentStand.standType,

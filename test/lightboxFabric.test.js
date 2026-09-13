@@ -36,10 +36,11 @@ test('lightbox lighting stays fully opaque while Mesh uses its own opacity const
   assert.match(scene, /fabricType = fabricState\.fabricType === 'mesh'/);
 });
 
-test('fabric conversion requires a rectangular multi-panel block and renders one overlay', () => {
+test('fabric conversion allows a rectangular panel block and renders one overlay', () => {
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(scene, /function applyFabricMode\(meshOrMeshes, enabled\)/);
-  assert.match(scene, /meshes\.length < 2/);
+  assert.match(scene, /if \(!meshes\.length\)/);
+  assert.match(scene, /if \(!surfaces\.length\) return;/);
   assert.match(scene, /createRectSelection\(/);
   assert.match(scene, /fabricGroupId/);
   assert.match(scene, /function rebuildFabricOverlays\(\)/);

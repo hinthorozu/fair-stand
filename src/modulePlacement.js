@@ -3,6 +3,7 @@ import {
   allowsThinWallEndpointContact,
   canModulesOverlapByBehavior,
   countsTowardWallCapacity,
+  getModuleCollisionHeightRangeCm,
   getModuleCollisionStrategy,
   getModuleMagneticSnapStrategy,
   getModuleMoveSnapCm,
@@ -521,11 +522,19 @@ function orientedFootprintsOverlap(moduleA, moduleB) {
   });
 }
 
+function collisionHeightsOverlap(moduleA, moduleB) {
+  const rangeA = getModuleCollisionHeightRangeCm(moduleA);
+  const rangeB = getModuleCollisionHeightRangeCm(moduleB);
+  return rangeA.minCm < rangeB.maxCm - EPSILON_CM
+    && rangeB.minCm < rangeA.maxCm - EPSILON_CM;
+}
+
 export function placementsOverlap(moduleA, moduleB) {
   if (canModulesOverlapByBehavior(moduleA, moduleB)) return false;
   if (getModuleCollisionStrategy(moduleA) === 'none' || getModuleCollisionStrategy(moduleB) === 'none') {
     return false;
   }
+  if (!collisionHeightsOverlap(moduleA, moduleB)) return false;
   const angleA = normalizeModuleRotationZDeg(moduleA?.placement?.rotationZDeg);
   const angleB = normalizeModuleRotationZDeg(moduleB?.placement?.rotationZDeg);
   if (!isLCounterModule(moduleA) && !isLCounterModule(moduleB) && (!isCardinalModuleRotation(angleA) || !isCardinalModuleRotation(angleB))) {
@@ -549,13 +558,15 @@ export function validatePlacementAgainstModules({
   depthCm = null,
   moduleId = null,
   moduleType = null,
+  itemKey = null,
+  heightCm = null,
   shape = null,
   modules = [],
   standType,
   standXCm,
   standYCm,
 } = {}) {
-  const moduleDescriptor = { type: moduleType, shape, widthCm, depthCm };
+  const moduleDescriptor = { type: moduleType, itemKey, heightCm, shape, widthCm, depthCm };
   const effectiveDepthCm = usesWallBackboneCollisionDepth(moduleDescriptor)
     ? MODULE_COLLISION_DEPTH_CM
     : depthCm;
@@ -572,6 +583,8 @@ export function validatePlacementAgainstModules({
   const candidate = {
     id: moduleId,
     type: moduleType,
+    itemKey,
+    heightCm,
     shape,
     widthCm,
     depthCm: effectiveDepthCm,
@@ -662,6 +675,8 @@ function createEndpointConnectionPlacement({
 export function snapPlacementToModules({
   moduleId = null,
   moduleType = null,
+  itemKey = null,
+  heightCm = null,
   shape = null,
   widthCm,
   depthCm = null,
@@ -674,7 +689,7 @@ export function snapPlacementToModules({
   standYCm,
   snapDistanceCm = MODULE_NEIGHBOR_SNAP_DISTANCE_CM,
 } = {}) {
-  const movingDescriptor = { type: moduleType, shape, widthCm, depthCm };
+  const movingDescriptor = { type: moduleType, itemKey, heightCm, shape, widthCm, depthCm };
   if (getModuleMagneticSnapStrategy(movingDescriptor) === 'none') return null;
 
   const width = Number(widthCm);
@@ -734,6 +749,8 @@ export function snapPlacementToModules({
       depthCm,
       moduleId,
       moduleType,
+      itemKey,
+      heightCm,
       shape,
       modules,
       standType,
@@ -1416,6 +1433,8 @@ export function planFreeSideInsertion({
       depthCm: module.depthCm,
       moduleId: module.id,
       moduleType: module.type,
+      itemKey: module.itemKey,
+      heightCm: module.heightCm,
       shape: module.shape,
       modules: [...modules, ...plannedModules],
       standType,

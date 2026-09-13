@@ -39,6 +39,7 @@ test('unknown module types remain distinguishable from declared catalog behavior
     overlapWithTypes: [],
     supportsWallOverlayMount: true,
     wallCapacity: 'include',
+    collisionHeight: 'full',
     ghost: {
       kind: 'silhouette',
       renderer: 'module-silhouette',
@@ -64,6 +65,7 @@ test('every declared catalog behavior exposes the complete placement policy sche
     'overlapWithTypes',
     'supportsWallOverlayMount',
     'wallCapacity',
+    'collisionHeight',
     'ghost',
   ];
 

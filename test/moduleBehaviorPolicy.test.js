@@ -7,6 +7,7 @@ import {
   canModulesOverlapByBehavior,
   countsTowardWallCapacity,
   getModuleBehavior,
+  getModuleCollisionHeightRangeCm,
   getModuleCollisionStrategy,
   getModuleMagneticSnapStrategy,
   isTopPlacementModule,
@@ -82,6 +83,7 @@ test('placement core selects F-011 policies through moduleBehavior instead of pr
     'allowsThinWallEndpointContact',
     'usesWallInnerFaceBoundary',
     'canModulesOverlapByBehavior',
+    'getModuleCollisionHeightRangeCm',
     'resolveSideInsertRotationDeg',
   ]) {
     assert.match(source, new RegExp(helper), helper);

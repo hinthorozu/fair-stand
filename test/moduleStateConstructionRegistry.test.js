@@ -6,7 +6,7 @@ import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 
 test('canonical state construction registry instantiates every catalog entry', () => {
-  assert.equal(MODULE_CATALOG_KEYS.length, 51);
+  assert.equal(MODULE_CATALOG_KEYS.length, 59);
 
   for (const itemKey of MODULE_CATALOG_KEYS) {
     const descriptor = MODULE_CATALOG[itemKey];

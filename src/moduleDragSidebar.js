@@ -1,4 +1,5 @@
 import { MODULE_CATALOG, MODULE_CATALOG_GROUPS, MODULE_CATALOG_KEYS } from './catalog.js';
+import { normalizeStripOccupancy, getStandStripMetrics } from './stripOccupancy.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { getModuleDefaultRotationDeg, resolveModuleRotationDeltaDeg } from './moduleBehavior.js';
 
@@ -27,6 +28,10 @@ function ensureStyles() {
     .module-drag-panel { display:flex; height:68px; flex-direction:column; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-panel span { flex:1; border-bottom:1px solid #c4c9ce; }
     .module-drag-panel span:last-child { border-bottom:0; }
+    .module-drag-panel.is-hanging-top { justify-content:flex-start; border-color:transparent; background:transparent; box-shadow:none; }
+    .module-drag-hanging-frame { display:flex; height:calc(68px * 2 / 7); flex-direction:column; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); box-sizing:border-box; }
+    .module-drag-hanging-frame span { flex:1; border-bottom:1px solid #c4c9ce; }
+    .module-drag-hanging-frame span:last-child { border-bottom:0; }
     .module-drag-separator { position:relative; height:68px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:repeating-linear-gradient(to bottom,#c79b63 0 2px,#eef2f6 2px 4px); box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-separator.is-vine::after { content:''; position:absolute; inset:1px; pointer-events:none; background:radial-gradient(ellipse at 25% 10%,#527d50 0 2px,transparent 2.5px),radial-gradient(ellipse at 70% 20%,#6b9865 0 2px,transparent 2.5px),radial-gradient(ellipse at 30% 34%,#5c8958 0 2px,transparent 2.5px),radial-gradient(ellipse at 72% 47%,#527d50 0 2px,transparent 2.5px),radial-gradient(ellipse at 27% 61%,#6b9865 0 2px,transparent 2.5px),radial-gradient(ellipse at 68% 74%,#5c8958 0 2px,transparent 2.5px),radial-gradient(ellipse at 30% 88%,#527d50 0 2px,transparent 2.5px),linear-gradient(82deg,transparent 42%,#4d784b 44% 48%,transparent 50%),linear-gradient(98deg,transparent 50%,#5c8757 52% 56%,transparent 58%); opacity:1; }
     .module-drag-showcase { position:relative; height:68px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
@@ -328,7 +333,18 @@ export function createModuleCatalogPreview(module) {
   const body = document.createElement('div');
   body.className = 'module-drag-panel';
   body.style.width = `${previewWidthPx(module.widthCm)}px`;
-  for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
+  const occupancy = normalizeStripOccupancy(module.stripOccupancy);
+  if (occupancy?.align === 'top') {
+    const stand = getStandStripMetrics();
+    body.classList.add('is-hanging-top');
+    const frame = document.createElement('div');
+    frame.className = 'module-drag-hanging-frame';
+    frame.style.height = `${Math.max(8, Math.round(68 * occupancy.stripCount / stand.stripCount))}px`;
+    for (let index = 0; index < occupancy.stripCount; index += 1) frame.appendChild(document.createElement('span'));
+    body.appendChild(frame);
+  } else {
+    for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
+  }
   preview.appendChild(body);
   return preview;
 }
