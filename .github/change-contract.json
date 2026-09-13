@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "upright-346-5-short-up-field",
   "kind": "module",
-  "summary": "upright_346_5 saha örneğini Panel Ek Modül grubuna alır; snap yalnız short-up uç/köşe.",
+  "summary": "Dört yatay profilü sahaya katalogdan ekler; davranış ve dıştan dışa boy eşleşen wall_xxxx ile aynıdır, görsel yalnız kalın üst raydır. Separator ile aynı yuvada çarpışmaz. BOM dokunulmaz.",
   "owners": [
     "src/catalog.js",
     "src/items.js",

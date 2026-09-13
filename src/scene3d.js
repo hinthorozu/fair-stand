@@ -12,6 +12,7 @@ import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
+import { getStraightWallNominalWidthForProfileItem } from './moduleRecipes.js';
 import {
   applyGlassOverride,
   bindRendererSurfaceState,
@@ -1488,6 +1489,9 @@ export function createStandScene(
     if (moduleState.type === 'upright') {
       return createUprightModule(moduleState, moduleIndex);
     }
+    if (moduleState.type === 'profile') {
+      return createProfileModule(moduleState, moduleIndex);
+    }
     if (moduleState.type === 'indoor-plant-1' || moduleState.type === 'plastic-trash-bin') {
       return createIndoorPlantModule(moduleState, moduleIndex);
     }
@@ -2561,7 +2565,7 @@ export function createStandScene(
     });
     if (requiresShortUpJointSnap(moduleState) && !magneticSnap) {
       disposePlacementGhost();
-      const message = 'Yalnız short-up birleşimine veya köşesine yerleştirilir.';
+      const message = 'Yalnız short-up, profil veya banko birleşimine yerleştirilir.';
       showPlacementFeedback(message, { clientX, clientY });
       return {
         ok: false,
@@ -2918,7 +2922,7 @@ export function createStandScene(
     });
     if (requiresShortUpJointSnap(moduleState) && !magneticSnap) {
       disposePlacementGhost();
-      const message = 'Yalnız short-up birleşimine veya köşesine yerleştirilir.';
+      const message = 'Yalnız short-up, profil veya banko birleşimine yerleştirilir.';
       showPlacementFeedback(message, { clientX: event.clientX, clientY: event.clientY });
       dragSession.preview = {
         placement: snapped.placement,
@@ -5302,6 +5306,56 @@ function createUprightModule(moduleState, moduleIndex) {
     acceptsImage: false,
     widthCm: thicknessCm,
     depthCm,
+    heightCm,
+  };
+  group.add(mesh);
+  return { group, surfaces: [mesh] };
+}
+
+function createProfileModule(moduleState, moduleIndex) {
+  const item = getItem(moduleState.itemKey);
+  const lengthCm = Number(getStraightWallNominalWidthForProfileItem(moduleState.itemKey) || moduleState.widthCm);
+  const thicknessCm = Number(moduleState.depthCm || item?.dimensions?.thicknessCm);
+  const heightCm = Number(moduleState.heightCm);
+  const widthM = lengthCm / 100;
+  // Görsel ezme: yalnız üst kare ray. Panel ve dikey çerçeve yok. Üretim length/thickness değişmez.
+  const {
+    height: frameHeight,
+    depth: frameDepth,
+  } = STAND_DIMENSIONS;
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    moduleType: 'profile',
+    type: 'profile',
+    widthCm: lengthCm,
+    depthCm: thicknessCm,
+    heightCm,
+  };
+
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, frameDepth, frameDepth),
+    new THREE.MeshStandardMaterial({
+      color: FRAME_COLOR,
+      metalness: 0.68,
+      roughness: 0.28,
+    }),
+  );
+  mesh.position.y = frameHeight - frameDepth / 2;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.userData = {
+    kind: 'surface',
+    surfaceId: `${moduleState.id}:profile`,
+    moduleId: moduleState.id,
+    moduleType: 'profile',
+    moduleIndex,
+    selectionMode: 'module',
+    acceptsImage: false,
+    widthCm: lengthCm,
+    depthCm: thicknessCm,
     heightCm,
   };
   group.add(mesh);

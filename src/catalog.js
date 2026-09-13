@@ -1,4 +1,5 @@
 import { getFurnitureClusterQuantity, getItem, resolveWallMediaMetrics } from './items.js';
+import { getStraightWallNominalWidthForProfileItem } from './moduleRecipes.js';
 
 export const STAND_DIMENSIONS = Object.freeze({
   height: 3.5,
@@ -76,6 +77,20 @@ function createUprightCatalogItem(itemKey) {
     widthCm: thicknessCm,
     depthCm: thicknessCm,
     heightCm: lengthCm,
+    label: item.name,
+  });
+}
+
+function createProfileCatalogItem(itemKey) {
+  const item = getItem(itemKey);
+  const thicknessCm = Number(item.dimensions.thicknessCm);
+  const widthCm = Number(getStraightWallNominalWidthForProfileItem(itemKey));
+  return Object.freeze({
+    itemKey: item.itemKey,
+    type: item.type,
+    widthCm,
+    depthCm: thicknessCm,
+    heightCm: thicknessCm,
     label: item.name,
   });
 }
@@ -256,6 +271,10 @@ export const MODULE_CATALOG = Object.freeze({
   wall_100_short_up_1: createFlatPanelCatalogItem('wall_100_short_up_1'),
   wall_50_short_up_1: createFlatPanelCatalogItem('wall_50_short_up_1'),
   upright_346_5: createUprightCatalogItem('upright_346_5'),
+  profile_190: createProfileCatalogItem('profile_190'),
+  profile_140_5: createProfileCatalogItem('profile_140_5'),
+  profile_91: createProfileCatalogItem('profile_91'),
+  profile_41_5: createProfileCatalogItem('profile_41_5'),
 
   wall_showcase_100_3: {
     itemKey: WALL_SHOWCASE_3_ITEM.itemKey,
@@ -361,6 +380,10 @@ export const MODULE_CATALOG_KEYS = Object.freeze([
   'wall_100_short_up_1',
   'wall_50_short_up_1',
   'upright_346_5',
+  'profile_190',
+  'profile_140_5',
+  'profile_91',
+  'profile_41_5',
 
   'desk_banko_200',
   'desk_banko_150',
@@ -414,6 +437,10 @@ export const MODULE_CATALOG_GROUPS = Object.freeze([
       'wall_100_short_up_1',
       'wall_50_short_up_1',
       'upright_346_5',
+      'profile_190',
+      'profile_140_5',
+      'profile_91',
+      'profile_41_5',
     ]),
   }),
   Object.freeze({

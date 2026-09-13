@@ -32,8 +32,10 @@ import {
   getWallAxis,
   getWallExtentCm,
   getWallUsedCm,
+  inferStandEdgeWallId,
   planFreeSideInsertion,
   validatePlacementAgainstModules,
+  withStandEdgeWallIds,
 } from './modulePlacement.js';
 import { getContinuousWallSegments, planContinuousWallInsertion } from './wallReflow.js';
 import { getModuleDefaultRotationDeg, isTopPlacementModule } from './moduleBehavior.js';
@@ -366,6 +368,11 @@ function normalizeContinuousSide(context, side) {
   return side === 'left' ? 'right' : 'left';
 }
 
+function resolveContextEdgeWallId(module) {
+  if (!currentStand) return module?.placement?.wallId ?? 'free';
+  return inferStandEdgeWallId(module?.placement, currentStand.standType, currentStand.xCm);
+}
+
 function planContextContinuousInsertion(insertedModules, context, side) {
   if (!currentStand) return { ok: false, message: 'Önce stand alanını oluştur.' };
   const index = findContextModuleIndex(context);
@@ -378,11 +385,21 @@ function planContextContinuousInsertion(insertedModules, context, side) {
     return { ok: false, message: 'Hedef modülün yerleşim bilgisi bulunamadı.' };
   }
 
+  const edgeWallId = resolveContextEdgeWallId(sourceModule);
+  const modules = withStandEdgeWallIds(
+    currentModules,
+    currentStand.standType,
+    currentStand.xCm,
+  );
+
   return planContinuousWallInsertion({
-    modules: currentModules,
+    modules,
     insertedModules,
     targetModuleId: sourceModule.id,
-    side: normalizeContinuousSide(context, side),
+    side: normalizeContinuousSide({
+      ...context,
+      placement: { ...sourceModule.placement, wallId: edgeWallId },
+    }, side),
     standType: currentStand.standType,
     standXCm: currentStand.xCm,
     standYCm: currentStand.yCm,
@@ -424,7 +441,8 @@ function applyFreeInsertionPlan(plan, insertedModules, context, side) {
 
 function isFreeContextInsertion(context) {
   const index = findContextModuleIndex(context);
-  return index >= 0 && currentModules[index]?.placement?.wallId === 'free';
+  if (index < 0) return false;
+  return resolveContextEdgeWallId(currentModules[index]) === 'free';
 }
 
 function applyContinuousInsertionPlan(plan, insertedModules) {
@@ -476,7 +494,7 @@ function duplicateContextModule(context, side) {
     return;
   }
 
-  if (sourceModule.placement && sourceModule.placement.wallId !== 'free') {
+  if (resolveContextEdgeWallId(sourceModule) !== 'free') {
     const plan = planContextContinuousInsertion([duplicate], context, side);
     if (!plan.ok) {
       renderWallResult(plan.message, true);
