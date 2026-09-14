@@ -30,7 +30,7 @@ for (const size of [100, 150, 200]) {
     assert.equal(placementsOverlap(counter, panelOnReturnArm), true);
   });
 
-  test(`Düz Panel 50 snaps flush to exposed short side of Köşe Banko ${size}`, () => {
+  test(`Panel 50 snaps flush to exposed short side of Köşe Banko ${size}`, () => {
     const frontArmCenterY = 400 - size / 2 + 25;
     const counter = {
       id: `l-counter-${size}`,

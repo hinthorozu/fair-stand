@@ -65,18 +65,18 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 
 | # | Item key | Adı | Type / Not |
 |---:|---|---|---|
-| 1 | `wall_200` | Düz Panel 200 | `flat-panel` |
-| 2 | `wall_150` | Düz Panel 150 | `flat-panel` |
-| 3 | `wall_100` | Düz Panel 100 | `flat-panel` |
-| 4 | `wall_50` | Düz Panel 50 | `flat-panel` |
-| 5 | `wall_200_short_up_2` | Düz Panel 200 Short Up 2 | `flat-panel` · `short-up-2` |
-| 6 | `wall_150_short_up_2` | Düz Panel 150 Short Up 2 | `flat-panel` · `short-up-2` |
-| 7 | `wall_100_short_up_2` | Düz Panel 100 Short Up 2 | `flat-panel` · `short-up-2` |
-| 8 | `wall_50_short_up_2` | Düz Panel 50 Short Up 2 | `flat-panel` · `short-up-2` |
-| 9 | `wall_200_short_up_1` | Düz Panel 200 Short Up 1 | `flat-panel` · `short-up-1` |
-| 10 | `wall_150_short_up_1` | Düz Panel 150 Short Up 1 | `flat-panel` · `short-up-1` |
-| 11 | `wall_100_short_up_1` | Düz Panel 100 Short Up 1 | `flat-panel` · `short-up-1` |
-| 12 | `wall_50_short_up_1` | Düz Panel 50 Short Up 1 | `flat-panel` · `short-up-1` |
+| 1 | `wall_200` | Panel 200 | `flat-panel` |
+| 2 | `wall_150` | Panel 150 | `flat-panel` |
+| 3 | `wall_100` | Panel 100 | `flat-panel` |
+| 4 | `wall_50` | Panel 50 | `flat-panel` |
+| 5 | `wall_200_short_up_2` | Panel 200 Short Up 2 | `flat-panel` · `short-up-2` |
+| 6 | `wall_150_short_up_2` | Panel 150 Short Up 2 | `flat-panel` · `short-up-2` |
+| 7 | `wall_100_short_up_2` | Panel 100 Short Up 2 | `flat-panel` · `short-up-2` |
+| 8 | `wall_50_short_up_2` | Panel 50 Short Up 2 | `flat-panel` · `short-up-2` |
+| 9 | `wall_200_short_up_1` | Panel 200 Short Up 1 | `flat-panel` · `short-up-1` |
+| 10 | `wall_150_short_up_1` | Panel 150 Short Up 1 | `flat-panel` · `short-up-1` |
+| 11 | `wall_100_short_up_1` | Panel 100 Short Up 1 | `flat-panel` · `short-up-1` |
+| 12 | `wall_50_short_up_1` | Panel 50 Short Up 1 | `flat-panel` · `short-up-1` |
 | 13 | `wall_separator_100` | Separatör 100 | `separator` |
 | 14 | `wall_separator_50` | Separatör 50 | `separator` |
 | 15 | `wall_separator_100_sarmasik` | Separatör 100 Sarmaşık | `separator` |

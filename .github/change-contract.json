@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "item-docs-runtime-alignment",
+  "id": "flat-panel-display-name",
   "kind": "architecture",
-  "summary": "Item tanım ve current-system metinlerini mevcut runtime'a hizalar: sahip src/items.js, lookup getItem(), leaf map LEAF_ITEMS. Eski productionParts / getProductionItem sahibi cümleleri kalkar. Runtime kodu değişmez.",
+  "summary": "flat-panel katalog adı Düz Panel XXXX yerine Panel XXXX olur. itemKey, type, recipe ve davranış aynıdır.",
   "owners": [
     "src/items.js"
   ],
@@ -12,13 +12,13 @@
     "src/items.js"
   ],
   "impact": {
-    "catalog": "not-applicable",
-    "behavior": "not-applicable",
+    "catalog": "affected",
+    "behavior": "affected",
     "state": "not-applicable",
-    "placement": "not-applicable",
+    "placement": "affected",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
-    "bom": "not-applicable",
+    "bom": "affected",
     "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
@@ -267,6 +267,7 @@
       "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
       "audit/evidence/A05_MODULE_BEHAVIOR.md",
+      "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
       "audit/evidence/A12_BOM_RECIPES_PRODUCTION.md",
@@ -469,27 +470,30 @@
         "F-045"
       ]
     },
-    "notes": "Yalnız tanım/current-system/audit metni ve regresyon testi. Runtime, recipe miktarı ve itemKey değişmedi. Discovery eski productionParts token'larını hâlâ anan tarihî audit yüzeylerini gösterebilir; bunlar tarihî kayıt olarak gözden geçirildi."
+    "notes": "Yalnız görünen ad. itemKey, recipe miktarı, type ve placement kuralı aynı. Katalog etiketi item.name okur."
   },
   "tests": {
     "targeted": [
-      "test/itemDocsRuntimeAlignment.test.js"
+      "test/wallFlatPanelItemsContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "Guarded değişen yüzey yalnız test/itemDocsRuntimeAlignment.test.js. Browser-impact domain yok; runtime/src değişmedi."
+      "required": true,
+      "targeted": [
+        "e2e/wall-flat-panel-items-contract.spec.mjs",
+        "e2e/smoke.spec.mjs"
+      ],
+      "reason": "items.js catalog adı ve modulePlacement yorumu catalog/behavior/placement/bom domain'lerini etkiler. Düz panel katalog E2E itemKey ile ekler; smoke sahne kurulumunu doğrular."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Metin hizası. Ürün kaydı, BOM miktarı ve editor davranışı aynı."
+    "notes": "Görünen ad değişir. Kimlik ve BOM aynı."
   },
   "migration": {
     "required": false,
-    "notes": "Kalıcılık ve runtime şekli değişmedi."
+    "notes": "Kalıcılık itemKey kullanır; kayıtlı projeler ad alanına bağlı değildir."
   },
-  "rollback": "Tanım metinleri önceki productionParts / getProductionItem sahibi cümlelerine döner; test silinir."
+  "rollback": "COMPOSITE_ITEMS name alanları Düz Panel XXXX metnine döner."
 }

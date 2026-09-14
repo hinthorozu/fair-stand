@@ -266,10 +266,10 @@ Her satır ancak şu alt kontroller tamamlandıktan sonra `AUDITED_OK` olabilir:
 
 | ID | Catalog key | Label | Status | Finding/Evidence |
 |---|---|---|---|---|
-| M001 | `wall_200` | Düz Panel 200 | `NOT_AUDITED` | — |
-| M002 | `wall_150` | Düz Panel 150 | `NOT_AUDITED` | — |
-| M003 | `wall_100` | Düz Panel 100 | `NOT_AUDITED` | — |
-| M004 | `wall_50` | Düz Panel 50 | `NOT_AUDITED` | — |
+| M001 | `wall_200` | Panel 200 | `NOT_AUDITED` | — |
+| M002 | `wall_150` | Panel 150 | `NOT_AUDITED` | — |
+| M003 | `wall_100` | Panel 100 | `NOT_AUDITED` | — |
+| M004 | `wall_50` | Panel 50 | `NOT_AUDITED` | — |
 | M005 | `wall_separator_100` | Separatör 100 | `NOT_AUDITED` | — |
 | M006 | `wall_separator_50` | Separatör 50 | `NOT_AUDITED` | — |
 | M007 | `wall_separator_100_sarmasik` | Separatör 100 Sarmaşık | `NOT_AUDITED` | — |

@@ -613,11 +613,11 @@ export const COMPOSITE_ITEMS = Object.freeze({
       options: Object.freeze({ shape: 'L' }),
     }),
   }),
-  // Düz panel duvar üst öğeleri. Alt miktarlar moduleRecipes
+  // Panel duvar üst öğeleri. Alt miktarlar moduleRecipes
   // straight-wall satırlarında kalır (50/100/150/200); Raw BOM UI yolu değişmez.
   wall_50: Object.freeze({
     itemKey: 'wall_50',
-    name: 'Düz Panel 50',
+    name: 'Panel 50',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 50 }),
     composition: Object.freeze({
@@ -628,7 +628,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_100: Object.freeze({
     itemKey: 'wall_100',
-    name: 'Düz Panel 100',
+    name: 'Panel 100',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 100 }),
     composition: Object.freeze({
@@ -639,7 +639,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_150: Object.freeze({
     itemKey: 'wall_150',
-    name: 'Düz Panel 150',
+    name: 'Panel 150',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 150 }),
     composition: Object.freeze({
@@ -650,7 +650,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_200: Object.freeze({
     itemKey: 'wall_200',
-    name: 'Düz Panel 200',
+    name: 'Panel 200',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 200 }),
     composition: Object.freeze({
@@ -661,7 +661,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_200_short_up_2: Object.freeze({
     itemKey: 'wall_200_short_up_2',
-    name: 'Düz Panel 200 Short Up 2',
+    name: 'Panel 200 Short Up 2',
     type: 'flat-panel',
     variant: 'short-up-2',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
@@ -674,7 +674,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_150_short_up_2: Object.freeze({
     itemKey: 'wall_150_short_up_2',
-    name: 'Düz Panel 150 Short Up 2',
+    name: 'Panel 150 Short Up 2',
     type: 'flat-panel',
     variant: 'short-up-2',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
@@ -687,7 +687,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_100_short_up_2: Object.freeze({
     itemKey: 'wall_100_short_up_2',
-    name: 'Düz Panel 100 Short Up 2',
+    name: 'Panel 100 Short Up 2',
     type: 'flat-panel',
     variant: 'short-up-2',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
@@ -700,7 +700,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_50_short_up_2: Object.freeze({
     itemKey: 'wall_50_short_up_2',
-    name: 'Düz Panel 50 Short Up 2',
+    name: 'Panel 50 Short Up 2',
     type: 'flat-panel',
     variant: 'short-up-2',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
@@ -713,7 +713,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_200_short_up_1: Object.freeze({
     itemKey: 'wall_200_short_up_1',
-    name: 'Düz Panel 200 Short Up 1',
+    name: 'Panel 200 Short Up 1',
     type: 'flat-panel',
     variant: 'short-up-1',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
@@ -726,7 +726,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_150_short_up_1: Object.freeze({
     itemKey: 'wall_150_short_up_1',
-    name: 'Düz Panel 150 Short Up 1',
+    name: 'Panel 150 Short Up 1',
     type: 'flat-panel',
     variant: 'short-up-1',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
@@ -739,7 +739,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_100_short_up_1: Object.freeze({
     itemKey: 'wall_100_short_up_1',
-    name: 'Düz Panel 100 Short Up 1',
+    name: 'Panel 100 Short Up 1',
     type: 'flat-panel',
     variant: 'short-up-1',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
@@ -752,7 +752,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
   wall_50_short_up_1: Object.freeze({
     itemKey: 'wall_50_short_up_1',
-    name: 'Düz Panel 50 Short Up 1',
+    name: 'Panel 50 Short Up 1',
     type: 'flat-panel',
     variant: 'short-up-1',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
