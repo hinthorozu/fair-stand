@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
 import { createCounterModuleState } from '../src/designState.js';
 import { getModuleRecipe } from '../src/moduleRecipes.js';
-import { getProductionPart } from '../src/items.js';
+import { getItem } from '../src/items.js';
 
 test('desk_banko_200_L is a 200 x 200 catalog module', () => {
   assert.deepEqual(MODULE_CATALOG.desk_banko_200_L, {
@@ -39,5 +39,5 @@ test('200 L counter BOM remains separate from renderer geometry', () => {
     ['panel_197', 4], ['panel_48_5', 4], ['connector_start', 8], ['connector_single', 16],
     ['counter_top_210_60', 1], ['counter_top_150_60', 1],
   ]);
-  assert.equal(getProductionPart('counter_top_150_60').dimensions.widthCm, 150);
+  assert.equal(getItem('counter_top_150_60').dimensions.widthCm, 150);
 });

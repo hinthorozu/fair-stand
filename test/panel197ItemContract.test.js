@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey, getStraightWallRecipe } from '../src/moduleRecipes.js';
 
 const RECIPE_CASES = [
@@ -15,7 +15,7 @@ const RECIPE_CASES = [
 ];
 
 test('panel_197 is a canonical single production Item', () => {
-  const item = getProductionItem('panel_197');
+  const item = getItem('panel_197');
 
   assert.equal(item.itemKey, 'panel_197');
   assert.equal(item.partId, undefined);
@@ -55,7 +55,7 @@ test('expanded recipe resolves panel_197 metadata through canonical itemKey', ()
 
 test('panel_197 remains isolated from the canonical inner-corner panel family', () => {
   for (const itemKey of ['panel_corner_42_5', 'panel_corner_92', 'panel_corner_142_5', 'panel_corner_192']) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined, itemKey);
     assert.equal(item.panelRole, 'inner-corner', itemKey);

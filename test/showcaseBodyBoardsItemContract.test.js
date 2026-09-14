@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import { resolveItemBom } from '../src/itemBom.js';
 import { getItemSurfaceCapabilities } from '../src/itemCapabilities.js';
 
@@ -21,7 +21,7 @@ const NO_INDIVIDUAL_SURFACE_CAPABILITIES = Object.freeze({
 
 test('showcase body boards own canonical dimensions, sunta material, and white default', () => {
   for (const expected of CASES) {
-    const item = getProductionItem(expected.itemKey);
+    const item = getItem(expected.itemKey);
     assert.ok(item, expected.itemKey);
     assert.equal(item.itemKey, expected.itemKey);
     assert.equal(item.type, 'showcase-board');
@@ -45,7 +45,7 @@ test('showcase body boards resolve directly as leaf BOM Items', () => {
     assert.equal(lines[0].itemKey, expected.itemKey);
     assert.equal(lines[0].quantity, 2);
     assert.equal(lines[0].unit, 'adet');
-    assert.equal(lines[0].item, getProductionItem(expected.itemKey));
+    assert.equal(lines[0].item, getItem(expected.itemKey));
   }
 });
 

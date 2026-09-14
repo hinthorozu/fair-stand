@@ -8,7 +8,7 @@ import { getModuleBehavior, getModuleMagneticSnapStrategy } from '../src/moduleB
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { placementsOverlap, snapPlacementToModules } from '../src/modulePlacement.js';
 import { getExpandedStraightWallRecipe } from '../src/moduleRecipes.js';
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 
 const PROFILE_KEYS = ['profile_190', 'profile_140_5', 'profile_91', 'profile_41_5'];
 
@@ -37,10 +37,10 @@ test('field profiles are self BOM ×1 and do not change parent wall recipe ×2',
   assert.equal(bom[0].unit, 'adet');
   const parent = getExpandedStraightWallRecipe(200).items.find((item) => item.itemKey === 'profile_190');
   assert.equal(parent.quantity, 2);
-  assert.equal(getProductionItem('profile_190').dimensions.lengthCm, 190);
-  assert.equal(getProductionItem('profile_140_5').dimensions.lengthCm, 140.5);
-  assert.equal(getProductionItem('profile_91').dimensions.lengthCm, 91);
-  assert.equal(getProductionItem('profile_41_5').dimensions.lengthCm, 41.5);
+  assert.equal(getItem('profile_190').dimensions.lengthCm, 190);
+  assert.equal(getItem('profile_140_5').dimensions.lengthCm, 140.5);
+  assert.equal(getItem('profile_91').dimensions.lengthCm, 91);
+  assert.equal(getItem('profile_41_5').dimensions.lengthCm, 41.5);
 });
 
 test('profile uses wall_200 move/rotate/snap contract and does not nest into a neighbor wall', () => {

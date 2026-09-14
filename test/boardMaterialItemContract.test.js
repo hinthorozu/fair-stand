@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 
 const SUNTA_ITEM_KEYS = Object.freeze([
   'panel_147_5',
@@ -32,7 +32,7 @@ const SUNTA_ITEM_KEYS = Object.freeze([
 test('all verified board Items use sunta as canonical production material', () => {
   assert.equal(SUNTA_ITEM_KEYS.length, 23);
   for (const itemKey of SUNTA_ITEM_KEYS) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.ok(item, itemKey);
     assert.equal(item.material, 'sunta', itemKey);
   }

@@ -5,11 +5,10 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
 import { createModuleStateFromDescriptor, normalizeModuleItemState } from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
-import { getItem } from '../src/items.js';
+import { getItem, LEAF_ITEMS } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
-import { getProductionItem } from '../src/items.js';
 
 const EXPECTED_CHILDREN = [
   ['profile_91', 1],
@@ -43,7 +42,8 @@ test('door_100 is the single canonical composite Item identity', () => {
     moduleType: 'door',
     nominalWidthCm: 100,
   });
-  assert.equal(getProductionItem('door_100'), null, 'composite parent must not masquerade as a production leaf');
+  assert.equal(getItem('door_100').itemKey, 'door_100');
+  assert.equal(LEAF_ITEMS.door_100, undefined, 'bileşik parent leaf map içinde durmaz');
 });
 
 test('legacy uppercase DOOR_100 catalog identity is removed', () => {

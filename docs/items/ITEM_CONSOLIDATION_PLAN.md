@@ -8,7 +8,7 @@ Kanonik Item kimliği tek runtime dosyadadır: `src/items.js`.
 
 | Grup | Rol | `getItem()` |
 |---|---|---|
-| `LEAF_ITEMS` | Üretim / BOM leaf kayıtları | evet, `getProductionItem()` üzerinden |
+| `LEAF_ITEMS` | Üretim / BOM leaf kayıtları | evet |
 | `COMMERCIAL_ITEMS` | Bağımsız ticari ürünler | evet |
 | `FURNITURE_ITEMS` | Mobilya / mobilya kümeleri | evet |
 | `INDOOR_PLANT_ITEMS` | Bitki ailesi | evet |
@@ -18,9 +18,17 @@ Kanonik Item kimliği tek runtime dosyadadır: `src/items.js`.
 | `FLOOR_ITEMS` | Zemin kaplamaları | evet |
 | `COMPOSITE_ITEMS` | Reçete parent'ları (duvar, banko, baza, raf, short-up, …) | evet |
 
-`getProductionItem()` yalnız leaf döner; bileşik parent üretim leaf'i gibi görünmez.
+Tek lookup `getItem()`dır. Leaf width helper'ları `getShelfLeafItem` / `getDoorLeafItem` kalır. `LEAF_ITEMS` map'i leaf kimliğini tutar; bileşik parent orada durmaz.
 
 `listRegisteredItems()` beyan edilen her kaydı döner.
+
+## Faz 2 — tek lookup API
+
+- `getProductionItem`, `getProductionPart`, `listProductionParts` ve `PRODUCTION_PARTS` export'ları kaldırıldı.
+- Tek kayıt lookup `getItem()`dır. Leaf ve bileşik aynı fonksiyondan döner.
+- `getRecipeItemKey()` yalnız `item.itemKey` okur; `partId` düşümü yoktur.
+- Width helper adları `getShelfLeafItem` / `getDoorLeafItem` oldu; ikisi de `getItem` / `LEAF_ITEMS` üzerinden çözülür.
+- `LEAF_ITEMS.door_100` yoktur; `getItem('door_100')` bileşik parent döner.
 
 ## Faz 0 — ölü kod temizliği
 

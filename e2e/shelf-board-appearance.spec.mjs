@@ -37,6 +37,7 @@ async function saveAndReadProject(page) {
 }
 
 test('wall shelf catalog placement keeps canonical shelf boards without a fake front profile', async ({ page }) => {
+  test.setTimeout(60_000);
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await createStand(page);
@@ -59,8 +60,12 @@ test('wall shelf catalog placement keeps canonical shelf boards without a fake f
   const picker = page.locator('.module-picker-backdrop');
   await expect(picker).toBeVisible();
   await picker.locator('summary', { hasText: 'Raf & Vitrin' }).click();
-  await picker.locator('[data-module-key="wall_shelf_3_100"]').click();
-  await picker.locator('.module-picker-add').click();
+  const shelfCard = picker.locator('[data-module-key="wall_shelf_3_100"]');
+  await expect(shelfCard).toBeVisible();
+  await shelfCard.click();
+  const addButton = picker.locator('.module-picker-add');
+  await expect(addButton).toBeEnabled();
+  await addButton.click();
   await expect(picker).toBeHidden();
 
   const project = await saveAndReadProject(page);

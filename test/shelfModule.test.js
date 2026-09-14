@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { MODULE_CATALOG, SHELF_DIMENSIONS } from '../src/catalog.js';
 import { createShelfModuleState, duplicateModuleState } from '../src/designState.js';
 import { snapPlacementToStand } from '../src/modulePlacement.js';
-import { getShelfProductionItem } from '../src/items.js';
+import { getShelfLeafItem } from '../src/items.js';
 
 test('shelf catalog exposes 100 150 200 cm widths in 2 and 3 shelf variants', () => {
   const variants = [
@@ -21,7 +21,7 @@ test('shelf catalog exposes 100 150 200 cm widths in 2 and 3 shelf variants', ()
 test('shelf heights sit on Maxima 50 cm panel seams', () => {
   assert.deepEqual(SHELF_DIMENSIONS.heightsByCountCm[2], [100, 150]);
   assert.deepEqual(SHELF_DIMENSIONS.heightsByCountCm[3], [100, 150, 200]);
-  assert.equal(getShelfProductionItem(100).dimensions.depthCm, 38);
+  assert.equal(getShelfLeafItem(100).dimensions.depthCm, 38);
   assert.equal('projectionCm' in SHELF_DIMENSIONS, false);
   assert.equal('thicknessCm' in SHELF_DIMENSIONS, false);
 });

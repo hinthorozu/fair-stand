@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionPart } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
 
 test('production catalog contains separator panel parts', () => {
-  assert.equal(getProductionPart('separator_panel_48_5').name, 'Separatör Paneli 48,5 × 47 cm');
-  assert.equal(getProductionPart('separator_panel_98').name, 'Separatör Paneli 98 × 47 cm');
+  assert.equal(getItem('separator_panel_48_5').name, 'Separatör Paneli 48,5 × 47 cm');
+  assert.equal(getItem('separator_panel_98').name, 'Separatör Paneli 98 × 47 cm');
 });
 
 test('separator 50 recipe matches verified production data', () => {

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { getShelfProductionItem, getProductionItem } from '../src/items.js';
+import { getShelfLeafItem, getItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
 
 const SHELF_CASES = Object.freeze({
@@ -15,7 +15,7 @@ const EXPECTED_COLOR = 0xffffff;
 
 test('shelf production Items use canonical identity and verified sunta dimensions/default color', () => {
   for (const [itemKey, { widthCm }] of Object.entries(SHELF_CASES)) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined);
     assert.equal(item.name, `Raf ${widthCm} cm`);
@@ -25,10 +25,10 @@ test('shelf production Items use canonical identity and verified sunta dimension
     assert.equal(item.material, 'sunta');
     assert.equal(item.defaultColor, EXPECTED_COLOR);
     assert.equal(item.nominalModuleWidthCm, widthCm);
-    assert.equal(getShelfProductionItem(widthCm), item);
+    assert.equal(getShelfLeafItem(widthCm), item);
   }
 
-  assert.equal(getShelfProductionItem(50), null);
+  assert.equal(getShelfLeafItem(50), null);
 });
 
 test('shelf Items use canonical itemKey in exactly six verified parent recipes with quantity parity', () => {
@@ -74,7 +74,7 @@ test('shelf renderer consumes canonical Item depth, thickness and default color 
 
   assert.doesNotMatch(catalogSource, /projectionCm:\s*38/);
   assert.doesNotMatch(catalogSource, /thicknessCm:\s*3/);
-  assert.match(rendererSource, /const shelfItem = getShelfProductionItem\(moduleState\.widthCm\)/);
+  assert.match(rendererSource, /const shelfItem = getShelfLeafItem\(moduleState\.widthCm\)/);
   assert.match(rendererSource, /shelfItem\.dimensions\.depthCm/);
   assert.match(rendererSource, /shelfItem\.dimensions\.thicknessCm/);
   assert.match(rendererSource, /color: shelfItem\.defaultColor/);

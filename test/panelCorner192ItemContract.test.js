@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import {
   getExpandedModuleRecipe,
   getModuleRecipe,
@@ -17,7 +17,7 @@ const CORNER_RECIPE_CASES = [
 ];
 
 test('panel_corner_192 is a canonical single production Item', () => {
-  const item = getProductionItem('panel_corner_192');
+  const item = getItem('panel_corner_192');
 
   assert.equal(item.itemKey, 'panel_corner_192');
   assert.equal(item.partId, undefined);
@@ -75,7 +75,7 @@ test('inner-corner BOM resolution replaces panel_197 1:1 and preserves all other
 
 test('all inner-corner panel Items now use canonical identity', () => {
   for (const itemKey of ['panel_corner_42_5', 'panel_corner_92', 'panel_corner_142_5', 'panel_corner_192']) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined, itemKey);
   }

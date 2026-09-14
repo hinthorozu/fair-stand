@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem, getProductionPart, listProductionParts } from '../src/items.js';
+import { getItem, LEAF_ITEMS, listLeafItems } from '../src/items.js';
 import {
   getExpandedModuleRecipe,
   getExpandedStraightWallRecipe,
@@ -13,15 +13,15 @@ import {
 } from '../src/moduleRecipes.js';
 
 test('production part catalog contains the verified connector names', () => {
-  assert.equal(getProductionPart('connector_start').name, 'Başlangıç Aparatı');
-  assert.equal(getProductionPart('connector_single').name, 'Tekli Aparat');
-  assert.equal(getProductionPart('connector_double').name, 'Çiftli Aparat');
-  assert.equal(getProductionPart('connector_corner').name, 'Köşe Aparatı');
+  assert.equal(getItem('connector_start').name, 'Başlangıç Aparatı');
+  assert.equal(getItem('connector_single').name, 'Tekli Aparat');
+  assert.equal(getItem('connector_double').name, 'Çiftli Aparat');
+  assert.equal(getItem('connector_corner').name, 'Köşe Aparatı');
 });
 
 
 test('connector_start remains a canonical single Item', () => {
-  const item = getProductionItem('connector_start');
+  const item = getItem('connector_start');
 
   assert.equal(item.itemKey, 'connector_start');
   assert.equal(item.partId, undefined);
@@ -40,7 +40,7 @@ test('all four connector production definitions use canonical itemKey identity',
   };
 
   for (const [itemKey, connectorType] of Object.entries(expectedTypes)) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined);
     assert.equal(item.type, 'connector');
@@ -168,7 +168,7 @@ test('expanded recipes resolve connector_start metadata through its canonical it
 });
 
 test('production part catalog contains all verified panel sizes', () => {
-  const panelWidths = listProductionParts()
+  const panelWidths = listLeafItems()
     .filter((part) => part.type === 'panel')
     .map((part) => part.dimensions.widthCm)
     .sort((a, b) => a - b);
@@ -177,16 +177,17 @@ test('production part catalog contains all verified panel sizes', () => {
 });
 
 test('production part catalog contains the canonical 100 cm wooden door leaf', () => {
-  assert.equal(getProductionItem('door_100'), null);
-  assert.equal(getProductionItem('door_leaf_100').name, 'Ahşap Kapı Kanadı 100 × 200 cm');
-  assert.equal(getProductionItem('door_leaf_100').unit, 'adet');
+  assert.equal(getItem('door_100').itemKey, 'door_100');
+  assert.equal(LEAF_ITEMS.door_100, undefined);
+  assert.equal(getItem('door_leaf_100').name, 'Ahşap Kapı Kanadı 100 × 200 cm');
+  assert.equal(getItem('door_leaf_100').unit, 'adet');
 });
 
 test('production part catalog contains shelf sizes and shelf leg', () => {
-  assert.equal(getProductionPart('shelf_100').name, 'Raf 100 cm');
-  assert.equal(getProductionPart('shelf_150').dimensions.lengthCm, 150);
-  assert.equal(getProductionPart('shelf_200').dimensions.lengthCm, 200);
-  assert.equal(getProductionPart('shelf_leg').name, 'Raf Ayağı');
+  assert.equal(getItem('shelf_100').name, 'Raf 100 cm');
+  assert.equal(getItem('shelf_150').dimensions.lengthCm, 150);
+  assert.equal(getItem('shelf_200').dimensions.lengthCm, 200);
+  assert.equal(getItem('shelf_leg').name, 'Raf Ayağı');
 });
 
 test('50 cm straight wall recipe matches the verified production recipe', () => {

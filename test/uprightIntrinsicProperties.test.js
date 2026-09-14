@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 
 const UPRIGHT_KEYS = ['upright_346_5', 'upright_99', 'upright_49_5'];
 
 test('all production upright Items keep canonical aluminum material and default color', () => {
   for (const itemKey of UPRIGHT_KEYS) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.ok(item, itemKey);
     assert.equal(item.type, 'upright', itemKey);
     assert.equal(item.material, 'alüminyum', itemKey);

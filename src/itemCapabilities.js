@@ -1,4 +1,4 @@
-import { getProductionItem } from './items.js';
+import { getItem } from './items.js';
 
 const ITEM_SURFACE_CAPABILITIES_BY_TYPE = Object.freeze({
   'door-leaf': Object.freeze({
@@ -19,6 +19,6 @@ const NO_SURFACE_CAPABILITIES = Object.freeze({
 });
 
 export function getItemSurfaceCapabilities(itemOrKey) {
-  const item = typeof itemOrKey === 'string' ? getProductionItem(itemOrKey) : itemOrKey;
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
   return ITEM_SURFACE_CAPABILITIES_BY_TYPE[item?.type] ?? NO_SURFACE_CAPABILITIES;
 }

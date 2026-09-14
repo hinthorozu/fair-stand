@@ -6,8 +6,7 @@ import {
   getFurnitureItemForType,
   getItem,
   getTopLightItemForType,
-  getDoorLeafProductionItem,
-  getProductionItem,
+  getDoorLeafItem,
   getShowcaseBodyDefinition,
   getShowcaseItemKeyForType,
   resolveWallMediaMetrics,
@@ -20,7 +19,7 @@ const STRIP_COUNT = 7;
 
 function separatorDefaultColor(widthCm) {
   const itemKey = Number(widthCm) === 50 ? 'separator_panel_48_5' : 'separator_panel_98';
-  const defaultColor = getProductionItem(itemKey)?.defaultColor;
+  const defaultColor = getItem(itemKey)?.defaultColor;
   if (!Number.isInteger(defaultColor)) {
     throw new TypeError(`Missing canonical separator defaultColor for ${itemKey}.`);
   }
@@ -244,7 +243,7 @@ export function createDoorModuleState(widthCm = 100) {
   const doorItem = getItem('door_100');
   const canonicalWidthCm = Number(doorItem?.dimensions?.widthCm);
   if (!doorItem || Number(widthCm) !== canonicalWidthCm) return null;
-  const doorLeafItem = getDoorLeafProductionItem(canonicalWidthCm);
+  const doorLeafItem = getDoorLeafItem(canonicalWidthCm);
   if (!doorLeafItem) throw new TypeError(`Missing canonical door leaf Item for ${canonicalWidthCm} cm door module.`);
 
   return {
@@ -824,7 +823,7 @@ export function normalizeModuleItemState(moduleState) {
     const doorItem = getItem('door_100');
     if (!doorItem || Number(moduleState.widthCm) !== Number(doorItem.dimensions?.widthCm)) return moduleState;
     moduleState.itemKey = doorItem.itemKey;
-    const doorLeafItem = getDoorLeafProductionItem(moduleState.widthCm);
+    const doorLeafItem = getDoorLeafItem(moduleState.widthCm);
     if (!doorLeafItem) return moduleState;
     if (!moduleState.surface) {
       moduleState.surface = createEditableItemSurfaceState(doorLeafItem);

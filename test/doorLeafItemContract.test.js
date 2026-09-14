@@ -5,10 +5,10 @@ import { readFileSync } from 'node:fs';
 import { getItemSurfaceCapabilities } from '../src/itemCapabilities.js';
 import { createDoorModuleState, normalizeModuleItemState } from '../src/designState.js';
 import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
-import { getDoorLeafProductionItem, getProductionItem } from '../src/items.js';
+import { getDoorLeafItem, getItem, LEAF_ITEMS } from '../src/items.js';
 
 test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
-  const item = getProductionItem('door_leaf_100');
+  const item = getItem('door_leaf_100');
   assert.equal(item.itemKey, 'door_leaf_100');
   assert.equal(item.partId, undefined);
   assert.equal(item.name, 'Ahşap Kapı Kanadı 100 × 200 cm');
@@ -18,9 +18,10 @@ test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
   assert.equal(item.material, 'ahşap');
   assert.equal(item.defaultColor, 0xffffff);
   assert.equal(item.nominalModuleWidthCm, 100);
-  assert.equal(getDoorLeafProductionItem(100), item);
-  assert.equal(getDoorLeafProductionItem(150), null);
-  assert.equal(getProductionItem('door_100'), null);
+  assert.equal(getDoorLeafItem(100), item);
+  assert.equal(getDoorLeafItem(150), null);
+  assert.equal(getItem('door_100').itemKey, 'door_100');
+  assert.equal(LEAF_ITEMS.door_100, undefined);
 });
 
 test('door-leaf type capability contract allows color and image only', () => {
@@ -75,7 +76,7 @@ test('door recipe consumes canonical door_leaf_100 once and expanded BOM resolve
 
 test('door renderer consumes Item-linked color/image capabilities while special panel modes remain disabled', () => {
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(scene, /const doorLeafItem = getProductionItem\(doorState\?\.itemKey\)/);
+  assert.match(scene, /const doorLeafItem = getItem\(doorState\?\.itemKey\)/);
   assert.match(scene, /const doorLeafCapabilities = getItemSurfaceCapabilities\(doorLeafItem\)/);
   assert.match(scene, /itemKey: doorLeafItem\.itemKey/);
   assert.match(scene, /acceptsColor: doorLeafCapabilities\.color/);
