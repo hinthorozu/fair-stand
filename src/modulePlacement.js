@@ -403,7 +403,7 @@ export function validateModulePlacement({
 }
 
 function getModuleCollisionDepthCm(module) {
-  // Panel Bazalı fiziksel olarak 50 cm baza taşır ama bağlantı omurgası Düz Panel'dir.
+  // Panel Bazalı fiziksel olarak 50 cm baza taşır ama bağlantı omurgası Panel'dir.
   // Corner/T/snap hesabında baza çıkıntısını değil 10 cm Maxima duvar hattını kullan.
   if (usesWallBackboneCollisionDepth(module)) return MODULE_COLLISION_DEPTH_CM;
   const explicitDepthCm = Number(module?.depthCm);

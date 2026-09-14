@@ -9,7 +9,7 @@ Bu belge `wall_50` için `Version2` runtime kodunda bugün gerçekten bulunan st
 | Alan | Kod değeri |
 |---|---|
 | Katalog anahtarı | `wall_50` |
-| Etiket | `Düz Panel 50` |
+| Etiket | `Panel 50` |
 | Type | `flat-panel` |
 | Nominal genişlik | `50 cm` |
 | Stand yüksekliği | `350 cm` |

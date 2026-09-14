@@ -11,7 +11,7 @@ Bu belge `wall_200` için mevcut çalışan sistemdeki kimlik, state, davranış
 | Alan | Mevcut değer |
 |---|---|
 | Katalog anahtarı | `wall_200` |
-| Etiket | `Düz Panel 200` |
+| Etiket | `Panel 200` |
 | Type | `flat-panel` |
 | Nominal genişlik | `200 cm` |
 | Stand yüksekliği | `350 cm` |
@@ -22,7 +22,7 @@ Bu belge `wall_200` için mevcut çalışan sistemdeki kimlik, state, davranış
 Katalog tanımı:
 
 ```js
-wall_200: { type: 'flat-panel', widthCm: 200, label: 'Düz Panel 200' }
+wall_200: { type: 'flat-panel', widthCm: 200, label: 'Panel 200' }
 ```
 
 Runtime kimliği ile Item-contract kimliğini ayırmak gerekir:

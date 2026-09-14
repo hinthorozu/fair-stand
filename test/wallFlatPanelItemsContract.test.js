@@ -17,6 +17,7 @@ const WALL_KEYS = ['wall_50', 'wall_100', 'wall_150', 'wall_200'];
 
 const EXPECTED = {
   wall_50: {
+    name: 'Panel 50',
     widthCm: 50,
     recipeQuantities: {
       profile_41_5: 2, upright_346_5: 2, panel_48_5: 7, connector_start: 2, connector_single: 13,
@@ -24,6 +25,7 @@ const EXPECTED = {
     cornerPanel: 'panel_corner_42_5',
   },
   wall_100: {
+    name: 'Panel 100',
     widthCm: 100,
     recipeQuantities: {
       profile_91: 2, upright_346_5: 2, panel_98: 7, connector_start: 2, connector_single: 13,
@@ -31,6 +33,7 @@ const EXPECTED = {
     cornerPanel: 'panel_corner_92',
   },
   wall_150: {
+    name: 'Panel 150',
     widthCm: 150,
     recipeQuantities: {
       profile_140_5: 2, upright_346_5: 2, panel_147_5: 7, connector_start: 2, connector_single: 13,
@@ -38,6 +41,7 @@ const EXPECTED = {
     cornerPanel: 'panel_corner_142_5',
   },
   wall_200: {
+    name: 'Panel 200',
     widthCm: 200,
     recipeQuantities: {
       profile_190: 2, upright_346_5: 2, panel_197: 7, connector_start: 2, connector_single: 13,
@@ -53,6 +57,7 @@ for (const itemKey of WALL_KEYS) {
     const catalog = MODULE_CATALOG[itemKey];
 
     assert.equal(item.itemKey, itemKey);
+    assert.equal(item.name, expected.name);
     assert.equal(item.type, 'flat-panel');
     assert.equal(item.composition?.mode, 'recipe');
     assert.equal(item.composition?.moduleType, 'wall');
@@ -142,6 +147,7 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_2)) {
     const catalog = MODULE_CATALOG[itemKey];
 
     assert.equal(item.itemKey, itemKey);
+    assert.equal(item.name, `Panel ${expected.widthCm} Short Up 2`);
     assert.equal(item.type, 'flat-panel');
     assert.equal(item.variant, 'short-up-2');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 2 });
@@ -204,6 +210,7 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_1)) {
     const catalog = MODULE_CATALOG[itemKey];
 
     assert.equal(item.itemKey, itemKey);
+    assert.equal(item.name, `Panel ${expected.widthCm} Short Up 1`);
     assert.equal(item.type, 'flat-panel');
     assert.equal(item.variant, 'short-up-1');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 1 });

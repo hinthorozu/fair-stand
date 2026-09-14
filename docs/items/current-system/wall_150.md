@@ -9,7 +9,7 @@ Bu belge `wall_150` için `Version2` runtime kodunda bugün gerçekten bulunan s
 | Alan | Kod değeri |
 |---|---|
 | Katalog anahtarı | `wall_150` |
-| Etiket | `Düz Panel 150` |
+| Etiket | `Panel 150` |
 | Type | `flat-panel` |
 | Nominal genişlik | `150 cm` |
 | Stand yüksekliği | `350 cm` |

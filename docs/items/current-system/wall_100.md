@@ -9,7 +9,7 @@ Bu belge `wall_100` için `Version2` runtime kodunda bugün gerçekten bulunan s
 | Alan | Kod değeri |
 |---|---|
 | Katalog anahtarı | `wall_100` |
-| Etiket | `Düz Panel 100` |
+| Etiket | `Panel 100` |
 | Type | `flat-panel` |
 | Nominal genişlik | `100 cm` |
 | Stand yüksekliği | `350 cm` |
