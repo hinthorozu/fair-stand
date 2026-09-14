@@ -1,4 +1,4 @@
-// Canonical Item registry. Leaf/production metadata lives here.
+// Kanonik Item registry. Leaf / üretim üstverisi burada durur.
 export const LEAF_ITEMS = Object.freeze({
   upright_346_5: Object.freeze({ itemKey: 'upright_346_5', name: 'Dikme 346,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 346.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_99: Object.freeze({ itemKey: 'upright_99', name: 'Dikme 99 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 99, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
@@ -91,11 +91,11 @@ function normalizePositiveQuantity(value) {
 }
 
 /**
- * Canonical connector BOM resolver.
+ * Kanonik connector BOM çözümleyici.
  *
- * Quantity/classification ownership stays with the caller (recipe or canonical
- * relationship resolver). This layer never guesses connector quantities from
- * renderer geometry, proximity, or transient placement snap kinds.
+ * Miktar / sınıflandırma sahibi çağırandır (recipe veya kanonik ilişki
+ * çözümleyici). Bu katman aparat miktarını renderer geometrisinden,
+ * yakınlıktan veya geçici placement snap türünden tahmin etmez.
  */
 export function resolveConnectorBom(requirements = []) {
   const quantities = new Map();
@@ -121,7 +121,7 @@ export function resolveConnectorBom(requirements = []) {
   });
 }
 
-// Legacy production-part lookup retained while remaining production items migrate item-by-item.
+// Eski production-part lookup; kalan üretim Item'ları tek tek göçene kadar durur.
 export function getProductionPart(partId) {
   return getProductionItem(partId);
 }

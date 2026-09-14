@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "item-registry-consolidation",
   "kind": "architecture",
-  "summary": "Consolidate leaf/production Item metadata into src/items.js and delete the parallel productionParts.js registry. getProductionItem stays leaf-only; catalog parents remain getItem-resolved. Removes the duplicate short-up recipe overwrite.",
+  "summary": "Leaf / üretim Item üstverisini src/items.js içinde birleştirir; paralel productionParts.js registry'sini siler. getProductionItem leaf-only kalır; katalog parent'ları getItem ile çözülür. Tekrar short-up recipe üzerine yazması kaldırılır.",
   "owners": [
     "src/items.js"
   ],
@@ -462,7 +462,7 @@
         "F-045"
       ]
     },
-    "notes": "Lookup file moved from productionParts.js to items.js. designState.js and scene3d.js are import retargets only; leaf records, recipe quantities, catalog cards, and getProductionItem leaf-only semantics are unchanged. Duplicate short-up recipe overwrite removed. Dependent files/tests/docs were reviewed because discovery tokens still mention productionParts and the moved Item helpers."
+    "notes": "Lookup dosyası productionParts.js'den items.js'e taşındı. designState.js ve scene3d.js yalnız import hedefi değişti; leaf kayıtları, recipe miktarları, katalog kartları ve getProductionItem leaf-only semantiği aynı. Tekrar short-up recipe üzerine yazması silindi. Discovery token'ları hâlâ productionParts ve taşınan Item helper'larını andığı için bağımlı dosya/test/doc gözden geçirildi."
   },
   "tests": {
     "targeted": [
@@ -480,16 +480,16 @@
         "e2e/smoke.spec.mjs",
         "e2e/commercial-items-contract.spec.mjs"
       ],
-      "reason": "Catalog/BOM/browser domains are affected because the Item registry owner moved; smoke plus commercial catalog drag must still resolve Items."
+      "reason": "Item registry sahibi taşındığı için catalog/BOM/browser domain'leri affected; smoke ve ticari katalog sürükleme hâlâ Item çözmeli."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Import retarget only. getProductionItem stays leaf-only; composite parents still do not masquerade as leaves."
+    "notes": "Yalnız import hedefi değişti. getProductionItem leaf-only kalır; bileşik parent leaf gibi görünmez."
   },
   "migration": {
     "required": false,
-    "notes": "No persistence shape change. getProductionItem stays leaf-only; catalog parents stay getItem-resolved."
+    "notes": "Kalıcılık şekli değişmedi. getProductionItem leaf-only kalır; katalog parent'ları getItem ile çözülür."
   },
-  "rollback": "Restore src/productionParts.js and retarget imports if the single-file registry needs to be split again."
+  "rollback": "Tek dosya registry tekrar bölünecekse src/productionParts.js geri gelir ve import'lar o dosyaya döner."
 }

@@ -1,38 +1,40 @@
-# Item Consolidation Plan
+# Item birleştirme planı
 
-Canonical Item identity lives in a single runtime file: `src/items.js`.
+Kanonik Item kimliği tek runtime dosyadadır: `src/items.js`.
 
-`src/productionParts.js` and `src/leafItems.js` are not owners. Recipes stay in `src/moduleRecipes.js`. Catalog descriptors stay in `src/catalog.js`.
+`src/productionParts.js` ve `src/leafItems.js` sahip değildir. Reçeteler `src/moduleRecipes.js` içinde kalır. Katalog kartları `src/catalog.js` içinde kalır.
 
-## Registry groups in `src/items.js`
+## `src/items.js` içindeki registry grupları
 
-| Group | Role | `getItem()` |
+| Grup | Rol | `getItem()` |
 |---|---|---|
-| `LEAF_ITEMS` | Production / BOM leaves | yes, via `getProductionItem()` |
-| `COMMERCIAL_ITEMS` | Standalone commercial products | yes |
-| `FURNITURE_ITEMS` | Furniture / furniture clusters | yes |
-| `INDOOR_PLANT_ITEMS` | Plant family | yes |
-| `WALL_MEDIA_ITEMS` | TV / video-wall family | yes |
-| `TOP_LIGHT_ITEMS` | Top lights | yes |
-| `NON_CATALOG_ITEMS` | Runtime-only (illuminated-foam) | yes |
-| `FLOOR_ITEMS` | Floor finishes | yes |
-| `COMPOSITE_ITEMS` | Recipe parents (walls, banko, baza, raf, short-up, …) | yes |
+| `LEAF_ITEMS` | Üretim / BOM leaf kayıtları | evet, `getProductionItem()` üzerinden |
+| `COMMERCIAL_ITEMS` | Bağımsız ticari ürünler | evet |
+| `FURNITURE_ITEMS` | Mobilya / mobilya kümeleri | evet |
+| `INDOOR_PLANT_ITEMS` | Bitki ailesi | evet |
+| `WALL_MEDIA_ITEMS` | TV / video-wall ailesi | evet |
+| `TOP_LIGHT_ITEMS` | Üst ışıklar | evet |
+| `NON_CATALOG_ITEMS` | Yalnız runtime (illuminated-foam) | evet |
+| `FLOOR_ITEMS` | Zemin kaplamaları | evet |
+| `COMPOSITE_ITEMS` | Reçete parent'ları (duvar, banko, baza, raf, short-up, …) | evet |
 
-`getProductionItem()` remains leaf-only so a composite parent cannot masquerade as a production leaf.
+`getProductionItem()` yalnız leaf döner; bileşik parent üretim leaf'i gibi görünmez.
 
-`listRegisteredItems()` returns every declared record.
+`listRegisteredItems()` beyan edilen her kaydı döner.
 
-## Faz 0 — dead-code cleanup
+## Faz 0 — ölü kod temizliği
 
-- Removed the parallel leaf registry (`src/productionParts.js`).
-- Did not introduce an intermediate `src/leafItems.js`.
-- Removed the duplicate `wall-short-up-1/*` and `wall-short-up-2/*` recipe block in `src/moduleRecipes.js`. The second copy was identical dead overwrite of the first.
+- Paralel leaf registry kaldırıldı (`src/productionParts.js`).
+- Ara `src/leafItems.js` açılmadı.
+- `src/moduleRecipes.js` içindeki ikinci `wall-short-up-1/*` ve `wall-short-up-2/*` recipe bloğu silindi. İkinci kopya, birincinin birebir ölü üzerine yazmasıydı.
+- `src/moduleContracts.js` içindeki tekrar `wall_*_short_up_*` atamaları silindi.
+- Sekiz short-up `itemKey` `docs/items/ITEM_LIST.md` envanterine yazıldı.
 
-## Owners after consolidation
+## Birleştirme sonrası sahipler
 
-| Concern | Owner |
+| Konu | Sahip |
 |---|---|
-| Item identity / leaf metadata | `src/items.js` |
-| Recipe quantities / variants | `src/moduleRecipes.js` |
-| Module BOM policy | `src/moduleContracts.js` |
-| Catalog cards / resolve key | `src/catalog.js` |
+| Item kimliği / leaf üstveri | `src/items.js` |
+| Reçete miktarları / variant | `src/moduleRecipes.js` |
+| Modül BOM politikası | `src/moduleContracts.js` |
+| Katalog kartı / resolve key | `src/catalog.js` |

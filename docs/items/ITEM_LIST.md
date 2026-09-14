@@ -69,56 +69,64 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 | 2 | `wall_150` | Düz Panel 150 | `flat-panel` |
 | 3 | `wall_100` | Düz Panel 100 | `flat-panel` |
 | 4 | `wall_50` | Düz Panel 50 | `flat-panel` |
-| 5 | `wall_separator_100` | Separatör 100 | `separator` |
-| 6 | `wall_separator_50` | Separatör 50 | `separator` |
-| 7 | `wall_separator_100_sarmasik` | Separatör 100 Sarmaşık | `separator` |
-| 8 | `wall_separator_50_sarmasik` | Separatör 50 Sarmaşık | `separator` |
-| 9 | `wall_showcase_100_3` | 3 Gözlü Vitrin 100 | **`showcase-3` · Bileşik Item · BASE + inner-corner BOM tamam** |
-| 10 | `wall_showcase_100_2` | 2 Gözlü Vitrin 100 | **`showcase-2` · Bileşik Item · BASE + inner-corner BOM tamam** |
-| 11 | `wall_shelf_3_200` | Raf 200 · 3 Raf | `shelf` |
-| 12 | `wall_shelf_3_150` | Raf 150 · 3 Raf | `shelf` |
-| 13 | `wall_shelf_3_100` | Raf 100 · 3 Raf | `shelf` |
-| 14 | `wall_shelf_2_200` | Raf 200 · 2 Raf | `shelf` |
-| 15 | `wall_shelf_2_150` | Raf 150 · 2 Raf | `shelf` |
-| 16 | `wall_shelf_2_100` | Raf 100 · 2 Raf | `shelf` |
-| 17 | `wall_base_200` | Panel Bazalı 200 | `base-wall` |
-| 18 | `wall_base_150` | Panel Bazalı 150 | `base-wall` |
-| 19 | `wall_base_100` | Panel Bazalı 100 | `base-wall` |
-| 20 | `door_100` | Depo Kapısı 100 | **`door` · Bileşik Item · Tamam** |
-| 21 | `desk_banko_200` | Banko 200 | **`counter` · Bileşik Item · Tamam** |
-| 22 | `desk_banko_150` | Banko 150 | **`counter` · Bileşik Item · Tamam** |
-| 23 | `desk_banko_100` | Banko 100 | **`counter` · Bileşik Item · Tamam** |
-| 24 | `desk_banko_200_L` | Köşe Banko 200×200 | `counter` |
-| 25 | `desk_banko_150_L` | Köşe Banko 150×150 | `counter` |
-| 26 | `desk_banko_100_L` | Köşe Banko 100×100 | `counter` |
-| 27 | `BASE_200` | Baza 200 | `base` |
-| 28 | `BASE_150` | Baza 150 | `base` |
-| 29 | `BASE_100` | Baza 100 | `base` |
-| 30 | `furniture_sofa_set_classic` | Koltuk Takımı | **`sofa-set-classic` · Item kümesi** |
-| 31 | `furniture_sofa_single_classic` | Tekli Koltuk | **`sofa-single-classic` · Tekil Item** |
-| 32 | `furniture_sofa_double_classic` | Çiftli Koltuk | **`sofa-double-classic` · Tekil Item** |
-| 33 | `furniture_coffee_table_classic` | Sehpa | **`coffee-table-classic` · Tekil Item** |
-| 34 | `furniture_table_chair_set_eames` | Eames Masa Sandalye Takımı | **`table-chair-set-eames` · Item kümesi** |
-| 35 | `chair_eames` | Eames Sandalye | **`chair` · Tekil Item** |
-| 36 | `glass_table` | Cam Masa | **`table-glass` · Tekil Item** |
-| 37 | `furniture_bar_stool_classic` | Bar Taburesi | `bar-stool` |
-| 38 | `MINI_FRIDGE_AVANTI` | Mini Buzdolabı | **`mini-fridge` · Tekil Item · Tamam · self BOM `1 adet`** |
-| 39 | `KETTLE` | Kettle | **`kettle` · Tekil Item · Tamam · self BOM `1 adet`** |
-| 40 | `COAT_RACK` | Askılık | **`coat-rack` · Tekil Item · Tamam · self BOM `1 adet`** |
-| 41 | `PLASTIC_TRASH_BIN` | Çöp Kutusu | **`plastic-trash-bin` · Tekil Item · Tamam · self BOM `1 adet`** |
-| 42 | `EXTRA_INDOOR_PLANT_1` | Yapay Çiçek 1 | `indoor-plant-1` |
-| 43 | `EXTRA_LONG_PLANTER_100` | Uzun Saksı 100 | `indoor-plant-1` |
-| 44 | `EXTRA_LONG_PLANTER_150` | Uzun Saksı 150 | `indoor-plant-1` |
-| 45 | `EXTRA_LONG_PLANTER_200` | Uzun Saksı 200 | `indoor-plant-1` |
-| 46 | `TV_42` | TV 42" | `tv` |
-| 47 | `TV_55` | TV 55" | `tv` |
-| 48 | `VIDEO_WALL_2X2` | Video Wall 2×2 | `tv` |
-| 49 | `VIDEO_WALL_3X3` | Video Wall 3×3 | `tv` |
-| 50 | `TV_65` | TV 65" | `tv` |
-| 51 | `led_floodlight` | LED Projektör | **`led-floodlight` · Tekil Item** |
-| 52 | `illuminated-foam` | Işıklı Strafor / Logo | **`illuminated-foam` · Tekil Item · katalog dışı** |
-| 53 | `karolaj` | Karolaj | **`floor` · Tekil Item · katalog dışı** |
-| 54 | `hali` | Halı | **`floor` · Tekil Item · katalog dışı** |
-| 55 | `parke-acik` | Beyaz Meşe | **`floor` · Tekil Item · katalog dışı** |
-| 56 | `parke-sari` | Sarı Meşe | **`floor` · Tekil Item · katalog dışı** |
-| 57 | `parke-beton` | Beton Parke | **`floor` · Tekil Item · katalog dışı** |
+| 5 | `wall_200_short_up_2` | Düz Panel 200 Short Up 2 | `flat-panel` · `short-up-2` |
+| 6 | `wall_150_short_up_2` | Düz Panel 150 Short Up 2 | `flat-panel` · `short-up-2` |
+| 7 | `wall_100_short_up_2` | Düz Panel 100 Short Up 2 | `flat-panel` · `short-up-2` |
+| 8 | `wall_50_short_up_2` | Düz Panel 50 Short Up 2 | `flat-panel` · `short-up-2` |
+| 9 | `wall_200_short_up_1` | Düz Panel 200 Short Up 1 | `flat-panel` · `short-up-1` |
+| 10 | `wall_150_short_up_1` | Düz Panel 150 Short Up 1 | `flat-panel` · `short-up-1` |
+| 11 | `wall_100_short_up_1` | Düz Panel 100 Short Up 1 | `flat-panel` · `short-up-1` |
+| 12 | `wall_50_short_up_1` | Düz Panel 50 Short Up 1 | `flat-panel` · `short-up-1` |
+| 13 | `wall_separator_100` | Separatör 100 | `separator` |
+| 14 | `wall_separator_50` | Separatör 50 | `separator` |
+| 15 | `wall_separator_100_sarmasik` | Separatör 100 Sarmaşık | `separator` |
+| 16 | `wall_separator_50_sarmasik` | Separatör 50 Sarmaşık | `separator` |
+| 17 | `wall_showcase_100_3` | 3 Gözlü Vitrin 100 | **`showcase-3` · Bileşik Item · BASE + inner-corner BOM tamam** |
+| 18 | `wall_showcase_100_2` | 2 Gözlü Vitrin 100 | **`showcase-2` · Bileşik Item · BASE + inner-corner BOM tamam** |
+| 19 | `wall_shelf_3_200` | Raf 200 · 3 Raf | `shelf` |
+| 20 | `wall_shelf_3_150` | Raf 150 · 3 Raf | `shelf` |
+| 21 | `wall_shelf_3_100` | Raf 100 · 3 Raf | `shelf` |
+| 22 | `wall_shelf_2_200` | Raf 200 · 2 Raf | `shelf` |
+| 23 | `wall_shelf_2_150` | Raf 150 · 2 Raf | `shelf` |
+| 24 | `wall_shelf_2_100` | Raf 100 · 2 Raf | `shelf` |
+| 25 | `wall_base_200` | Panel Bazalı 200 | `base-wall` |
+| 26 | `wall_base_150` | Panel Bazalı 150 | `base-wall` |
+| 27 | `wall_base_100` | Panel Bazalı 100 | `base-wall` |
+| 28 | `door_100` | Depo Kapısı 100 | **`door` · Bileşik Item · Tamam** |
+| 29 | `desk_banko_200` | Banko 200 | **`counter` · Bileşik Item · Tamam** |
+| 30 | `desk_banko_150` | Banko 150 | **`counter` · Bileşik Item · Tamam** |
+| 31 | `desk_banko_100` | Banko 100 | **`counter` · Bileşik Item · Tamam** |
+| 32 | `desk_banko_200_L` | Köşe Banko 200×200 | `counter` |
+| 33 | `desk_banko_150_L` | Köşe Banko 150×150 | `counter` |
+| 34 | `desk_banko_100_L` | Köşe Banko 100×100 | `counter` |
+| 35 | `BASE_200` | Baza 200 | `base` |
+| 36 | `BASE_150` | Baza 150 | `base` |
+| 37 | `BASE_100` | Baza 100 | `base` |
+| 38 | `furniture_sofa_set_classic` | Koltuk Takımı | **`sofa-set-classic` · Item kümesi** |
+| 39 | `furniture_sofa_single_classic` | Tekli Koltuk | **`sofa-single-classic` · Tekil Item** |
+| 40 | `furniture_sofa_double_classic` | Çiftli Koltuk | **`sofa-double-classic` · Tekil Item** |
+| 41 | `furniture_coffee_table_classic` | Sehpa | **`coffee-table-classic` · Tekil Item** |
+| 42 | `furniture_table_chair_set_eames` | Eames Masa Sandalye Takımı | **`table-chair-set-eames` · Item kümesi** |
+| 43 | `chair_eames` | Eames Sandalye | **`chair` · Tekil Item** |
+| 44 | `glass_table` | Cam Masa | **`table-glass` · Tekil Item** |
+| 45 | `furniture_bar_stool_classic` | Bar Taburesi | `bar-stool` |
+| 46 | `MINI_FRIDGE_AVANTI` | Mini Buzdolabı | **`mini-fridge` · Tekil Item · Tamam · self BOM `1 adet`** |
+| 47 | `KETTLE` | Kettle | **`kettle` · Tekil Item · Tamam · self BOM `1 adet`** |
+| 48 | `COAT_RACK` | Askılık | **`coat-rack` · Tekil Item · Tamam · self BOM `1 adet`** |
+| 49 | `PLASTIC_TRASH_BIN` | Çöp Kutusu | **`plastic-trash-bin` · Tekil Item · Tamam · self BOM `1 adet`** |
+| 50 | `EXTRA_INDOOR_PLANT_1` | Yapay Çiçek 1 | `indoor-plant-1` |
+| 51 | `EXTRA_LONG_PLANTER_100` | Uzun Saksı 100 | `indoor-plant-1` |
+| 52 | `EXTRA_LONG_PLANTER_150` | Uzun Saksı 150 | `indoor-plant-1` |
+| 53 | `EXTRA_LONG_PLANTER_200` | Uzun Saksı 200 | `indoor-plant-1` |
+| 54 | `TV_42` | TV 42" | `tv` |
+| 55 | `TV_55` | TV 55" | `tv` |
+| 56 | `VIDEO_WALL_2X2` | Video Wall 2×2 | `tv` |
+| 57 | `VIDEO_WALL_3X3` | Video Wall 3×3 | `tv` |
+| 58 | `TV_65` | TV 65" | `tv` |
+| 59 | `led_floodlight` | LED Projektör | **`led-floodlight` · Tekil Item** |
+| 60 | `illuminated-foam` | Işıklı Strafor / Logo | **`illuminated-foam` · Tekil Item · katalog dışı** |
+| 61 | `karolaj` | Karolaj | **`floor` · Tekil Item · katalog dışı** |
+| 62 | `hali` | Halı | **`floor` · Tekil Item · katalog dışı** |
+| 63 | `parke-acik` | Beyaz Meşe | **`floor` · Tekil Item · katalog dışı** |
+| 64 | `parke-sari` | Sarı Meşe | **`floor` · Tekil Item · katalog dışı** |
+| 65 | `parke-beton` | Beton Parke | **`floor` · Tekil Item · katalog dışı** |
