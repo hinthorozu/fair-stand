@@ -24,7 +24,7 @@ Fresh `Version2` doğrulaması ve ürün kararı sonrası güncel durum.
 | 14 | Relationships / reflow | PARENT-OWNED | Straight/L counter composition tarafından belirlenir. |
 | 15 | BOM / composition | VAR | Tekil Item; quantity parent counter recipe sahibidir. |
 | 16 | Renderer / asset | OVERRIDE | Specialized counter renderer görsel override yapabilir. |
-| 17 | Runtime owners | VAR | `productionParts.js`, `moduleRecipes.js`, counter state/behavior/context/persistence/renderer. |
+| 17 | Runtime owners | VAR | `items.js`, `moduleRecipes.js`, counter state/behavior/context/persistence/renderer. |
 | 18 | Regression | VAR | Counter-top contract/defaultColor testleri + `boardMaterialItemContract.test.js`. |
 
 Kanonik üretim malzemesi `material: 'sunta'`dır.

@@ -20,7 +20,7 @@ defaultColor = 0xffffff
 nominalModuleWidthCm = 100
 ```
 
-Bu değerlerin product/default tek kaynağı `PRODUCTION_PARTS.door_leaf_100` kaydıdır.
+Bu değerlerin product/default tek kaynağı `LEAF_ITEMS.door_leaf_100` kaydıdır.
 
 ## Yüzey yetenek sözleşmesi
 

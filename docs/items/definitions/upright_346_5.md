@@ -18,7 +18,7 @@ These values are product defaults owned by the Item. Explicit project/runtime/re
 Katalog/saha yerleşimi `thicknessCm` değerini `widthCm`/`depthCm`, `lengthCm` değerini `heightCm` olarak okur; ikinci bir ölçü kaynağı değildir.
 
 ## Bileşim / BOM
-The Item is a leaf BOM component. It is consumed by 18 doğrulanmış parent recipes, quantity `2` in each. Parent recipes own quantity; `src/productionParts.js` owns product üstveri.
+The Item is a leaf BOM component. It is consumed by 18 doğrulanmış parent recipes, quantity `2` in each. Parent recipes own quantity; `src/items.js` owns product üstveri.
 
 Sahaya elle konan her örnek ayrı instance'dır. Seçilince `resolveItemBom('upright_346_5')` `upright_346_5 × 1 adet` üretir. Parent reçetelere otomatik eklenmez.
 

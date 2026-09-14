@@ -24,7 +24,7 @@ Fresh `Version2` doğrulaması ve ürün kararı sonrası güncel durum.
 | 14 | Relationships / reflow | VAR | Straight panel, doğrulanmış inner-corner seçiminde 1:1 değiştirilebilir. |
 | 15 | BOM / composition | VAR | Tekil Item; quantity parent recipe sahibidir. |
 | 16 | Renderer / asset | OVERRIDE | Procedural renderer ayrı kalır; render değeri product source-of-truth değildir. |
-| 17 | Runtime owners | VAR | `productionParts.js`, `moduleRecipes.js`, parent state/behavior/context/persistence/renderer zinciri. |
+| 17 | Runtime owners | VAR | `items.js`, `moduleRecipes.js`, parent state/behavior/context/persistence/renderer zinciri. |
 | 18 | Regression | VAR | Panel Item Contract testleri + `boardMaterialItemContract.test.js`. |
 
 `#ffffff` editor surface başlangıç rengi product `defaultColor` olarak kabul edilmez. Üretim malzemesi için kanonik gerçek artık `material: 'sunta'`dır.

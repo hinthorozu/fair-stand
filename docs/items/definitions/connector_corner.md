@@ -26,7 +26,7 @@ Migration mevcut reçetelere tahmini corner quantity eklemez.
 
 ## 3. Kanonik BOM çözümü
 
-`connector_corner` kanonik Tekil production Item'dır. `src/productionParts.js` içindeki mevcut `resolveConnectorBom()` resolver'ı açıkça verilen `corner + quantity` girdisini kanonik Item satırına çözer:
+`connector_corner` kanonik Tekil production Item'dır. `src/items.js` içindeki mevcut `resolveConnectorBom()` resolver'ı açıkça verilen `corner + quantity` girdisini kanonik Item satırına çözer:
 
 ```text
 connectorType = corner + quantity
@@ -47,7 +47,7 @@ Mevcut sistemde bağımsız `connector_corner` proje örneği/state/kalıcılık
 
 ## 5. Uygulanan geçiş
 
-- `src/productionParts.js`: kanonik `itemKey = connector_corner`.
+- `src/items.js`: kanonik `itemKey = connector_corner`.
 - `connectorType = corner` kanonik Item kimliğine çözülür.
 - `resolveConnectorBom()` explicit quantity ile `itemKey + quantity + unit` BOM satırı üretir.
 - Fixed parent recipe kullanımı yoktur; bu alan mevcut sistem için uygulanmıyor.

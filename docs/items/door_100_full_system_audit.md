@@ -136,7 +136,7 @@ The project instance may override leaf appearance without changing the canonical
 | wall relationships / reflow | `src/wallReflow.js` + placement relationship flow |
 | recipe quantities and recipe variants | `src/moduleRecipes.js` |
 | recursive BOM expansion | `src/itemBom.js` |
-| leaf production properties | `src/productionParts.js` |
+| leaf production properties | `src/items.js` |
 | leaf capabilities | `src/itemCapabilities.js` |
 | renderer | `src/scene3d.js` |
 | persistence/restore | project restore + `normalizeModuleItemState()` |

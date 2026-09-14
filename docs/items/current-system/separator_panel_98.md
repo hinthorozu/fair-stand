@@ -9,7 +9,7 @@ Bu belge güncel `Version2` runtime'ını Item Contract checklist'inin 18 alanı
 - `name = Separatör Paneli 98 × 47 cm`
 - `type = separator-panel`
 - `unit = adet`
-- Kanonik source: `src/productionParts.js`.
+- Kanonik source: `src/items.js`.
 
 ## 2. Intrinsic properties — VAR
 - `widthCm = 98`
@@ -57,13 +57,13 @@ Wall insertion/reflow belongs to the parent separator module. No leaf relationsh
 - `separator:50` contains `separator_panel_98 × 3`.
 - `separator:100` contains `separator_panel_98 × 7`.
 - Quantity ownership remains in `src/moduleRecipes.js`.
-- Recipe expansion resolves metadata through kanonik `itemKey` → `getProductionItem()`.
+- Recipe expansion resolves metadata through kanonik `itemKey` → `getItem()`.
 
 ## 15. Renderer / asset / override boundary — VAR
 `createSeparatorModule()` renders procedural rails/slats and consumes `surfaceState.color`. The renderer does not use this Item's dimensions as geometry source-of-truth. Runtime/user color changes are explicit state/render overrides and do not mutate the kanonik Item default.
 
 ## 16. Runtime owners — VAR
-- product metadata/defaults: `src/productionParts.js`
+- product metadata/defaults: `src/items.js`
 - parent default state: `src/designState.js` (consumes Item `defaultColor`)
 - behavior: `src/moduleBehavior.js`
 - BOM quantity/composition: `src/moduleRecipes.js`

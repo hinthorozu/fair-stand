@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "item-api-unification",
+  "id": "item-docs-runtime-alignment",
   "kind": "architecture",
-  "summary": "Item lookup tek getItem() olur. getProductionItem / getProductionPart / listProductionParts / PRODUCTION_PARTS kalkar. getRecipeItemKey yalnız itemKey okur. Raf/kapı width helper adları getShelfLeafItem / getDoorLeafItem olur.",
+  "summary": "Item tanım ve current-system metinlerini mevcut runtime'a hizalar: sahip src/items.js, lookup getItem(), leaf map LEAF_ITEMS. Eski productionParts / getProductionItem sahibi cümleleri kalkar. Runtime kodu değişmez.",
   "owners": [
     "src/items.js"
   ],
@@ -12,19 +12,19 @@
     "src/items.js"
   ],
   "impact": {
-    "catalog": "affected",
-    "behavior": "affected",
-    "state": "affected",
-    "placement": "affected",
-    "renderer": "affected",
-    "persistence": "affected",
-    "bom": "affected",
+    "catalog": "not-applicable",
+    "behavior": "not-applicable",
+    "state": "not-applicable",
+    "placement": "not-applicable",
+    "renderer": "not-applicable",
+    "persistence": "not-applicable",
+    "bom": "not-applicable",
     "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
-    "performance": "affected",
+    "performance": "not-applicable",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
@@ -129,6 +129,7 @@
       "test/developerEntrypointDocs.test.js",
       "test/doorCompositeItemContract.test.js",
       "test/doorLeafItemContract.test.js",
+      "test/itemDocsRuntimeAlignment.test.js",
       "test/eamesTableChairSetContract.test.js",
       "test/f017RendererSurfacePersist.test.js",
       "test/f027SceneReset.test.js",
@@ -468,36 +469,27 @@
         "F-045"
       ]
     },
-    "notes": "Tek lookup getItem(). Eski production lookup export'ları silindi. designState / scene3d / moduleRecipes / itemCapabilities çağrıları getItem veya getShelfLeafItem / getDoorLeafItem kullanır. Recipe miktarları, itemKey dizeleri ve kalıcılık şekli aynı. Discovery, silinen getProductionItem / PRODUCTION_PARTS token'larını hâlâ anan doc/test yüzeylerini gösterir; Faz 3 tanım metinleri bu PR'da yeniden yazılmaz."
+    "notes": "Yalnız tanım/current-system/audit metni ve regresyon testi. Runtime, recipe miktarı ve itemKey değişmedi. Discovery eski productionParts token'larını hâlâ anan tarihî audit yüzeylerini gösterebilir; bunlar tarihî kayıt olarak gözden geçirildi."
   },
   "tests": {
     "targeted": [
-      "test/moduleRecipes.test.js",
-      "test/doorLeafItemContract.test.js",
-      "test/doorCompositeItemContract.test.js",
-      "test/shelfItemsItemContract.test.js",
-      "test/showcaseRecipes.test.js"
+      "test/itemDocsRuntimeAlignment.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": [
-        "e2e/smoke.spec.mjs",
-        "e2e/commercial-items-contract.spec.mjs",
-        "e2e/f010-module-construction.spec.mjs",
-        "e2e/shelf-board-appearance.spec.mjs"
-      ],
-      "reason": "items.js / designState / scene3d / moduleRecipes catalog-behavior-state-placement-renderer-persistence-bom domain'lerini etkiler. Smoke, ticari katalog, kapı leaf state ve raf tahtası E2E getItem / getDoorLeafItem / getShelfLeafItem yollarını doğrular."
+      "required": false,
+      "targeted": [],
+      "reason": "Guarded değişen yüzey yalnız test/itemDocsRuntimeAlignment.test.js. Browser-impact domain yok; runtime/src değişmedi."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Kayıtlar aynı map'tedir. Lookup adı birleşir; getItem artık bileşik parent da döner. LEAF_ITEMS hâlâ leaf-only'dir."
+    "notes": "Metin hizası. Ürün kaydı, BOM miktarı ve editor davranışı aynı."
   },
   "migration": {
     "required": false,
-    "notes": "Kalıcılık şekli değişmedi. Recipe satırları zaten itemKey taşır; partId düşümü kullanılmıyordu."
+    "notes": "Kalıcılık ve runtime şekli değişmedi."
   },
-  "rollback": "getProductionItem / getProductionPart / listProductionParts / PRODUCTION_PARTS ve eski helper adları src/items.js'e geri konur; çağıranlar o isimlere döner."
+  "rollback": "Tanım metinleri önceki productionParts / getProductionItem sahibi cümlelerine döner; test silinir."
 }

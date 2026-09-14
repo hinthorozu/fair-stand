@@ -6,11 +6,11 @@ Kaynak çalışma ağacı: `/mnt/data/Version2_local`
 
 # 1. Mevcut gerçek kimlik ve tanım
 
-Kaynak: `src/productionParts.js:24`
+Kaynak: `src/items.js:24`
 
 ```js
 connector_start: Object.freeze({
-  partId: 'connector_start',
+  itemKey: 'connector_start',
   name: 'Başlangıç Aparatı',
   type: 'connector',
   unit: 'adet',
@@ -18,15 +18,13 @@ connector_start: Object.freeze({
 }),
 ```
 
-Lookup: `src/productionParts.js:52-54`
+Lookup: `src/items.js` içindeki `getItem()`.
 
 ```js
-export function getProductionPart(partId) {
-  return PRODUCTION_PARTS[partId] ?? null;
-}
+getItem('connector_start')
 ```
 
-Bugünkü gerçek kimlik `partId = connector_start`'tır. Production metadata sahibi `src/productionParts.js` dosyasıdır.
+Bugünkü gerçek kimlik `itemKey = connector_start`'tır. Production metadata sahibi `src/items.js` dosyasıdır.
 
 Mevcut runtime kodunda bağımsız `catalogKey`, module `id`, module `type` veya project-state instance'ı yoktur.
 
@@ -35,7 +33,7 @@ Mevcut runtime kodunda bağımsız `catalogKey`, module `id`, module `type` veya
 `src/` altında `connector_start` yalnızca:
 
 ```text
-src/productionParts.js
+src/items.js
 src/moduleRecipes.js
 ```
 
@@ -68,16 +66,16 @@ Katalog tarafında recipe BOM policy kullanan 29 katalog anahtarı vardır; `wal
 ```text
 module type + nominal width + options
 → getModuleRecipe(...)
-→ recipe item { partId: 'connector_start', quantity: N }
+→ recipe item { itemKey: 'connector_start', quantity: N }
 → expandRecipe(...)
-→ getProductionPart('connector_start')
-→ PRODUCTION_PARTS.connector_start
+→ getItem('connector_start')
+→ LEAF_ITEMS.connector_start
 → "Başlangıç Aparatı"
 ```
 
 `expandRecipe()` `src/moduleRecipes.js:119-122` içinde her recipe item'ını production metadata ile genişletir.
 
-Miktarın source-of-truth'u `src/moduleRecipes.js`; isim/type/unit/connectorType metadata'sının source-of-truth'u `src/productionParts.js`'dir.
+Miktarın source-of-truth'u `src/moduleRecipes.js`; isim/type/unit/connectorType metadata'sının source-of-truth'u `src/items.js`'dir.
 
 # 5. Module contract / BOM ownership
 
@@ -148,7 +146,7 @@ catalog module descriptor
 → moduleRecipes.js
 → connector_start × sabit recipe miktarı
 → expandRecipe()
-→ productionParts.js
+→ items.js
 → "Başlangıç Aparatı"
 → rawBomDebug.js
 → Raw BOM UI

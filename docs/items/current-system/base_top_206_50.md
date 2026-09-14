@@ -11,7 +11,7 @@ Bu belge güncel sistemde `base_top_206_50` Item'ını yeni Item Contract checkl
 - Standalone catalog kaydı yoktur; parent catalog Item'ları `BASE_200` ve `wall_base_200`'dır.
 
 ## 2. Intrinsic / default Item properties
-Kanonik kaynak `src/productionParts.js` → `PRODUCTION_PARTS.base_top_206_50`.
+Kanonik kaynak `src/items.js` → `LEAF_ITEMS.base_top_206_50`.
 
 - `name = Baza Üstü 206 × 50 cm`
 - `dimensions.widthCm = 206`
@@ -27,7 +27,7 @@ Kanonik kaynak `src/productionParts.js` → `PRODUCTION_PARTS.base_top_206_50`.
 Ayrı `base_top_206_50` project instance state'i yoktur. Parent `base` / `base-wall` state'i `src/designState.js` tarafından oluşturulur. Leaf top'un mutable state'i ve ayrı project `id`'si yoktur.
 
 ## 4. Factory / creation
-Bağımsız leaf factory **UYGULANMIYOR**. Item `getProductionItem('base_top_206_50')` ile resolve edilir; parent instance ilgili base/base-wall factory/state yolundan oluşur.
+Bağımsız leaf factory **UYGULANMIYOR**. Item `getItem('base_top_206_50')` ile resolve edilir; parent instance ilgili base/base-wall factory/state yolundan oluşur.
 
 ## 5. Placement
 Leaf production top bağımsız placement hedefi değildir: **UYGULANMIYOR**. Placement parent base/base-wall seviyesindedir.
@@ -61,14 +61,14 @@ Kanonik leaf relationship/reflow state'i yoktur: **UYGULANMIYOR**. Quantity/comp
 - `base:200` / `base-200`
 - `base-wall:200` / `base-wall-200`
 
-Expansion `getRecipeItemKey()` → `getProductionItem()` ile kanonik Item metadata'sını tüketir. Leaf başka Item'lardan oluşmaz.
+Expansion `getRecipeItemKey()` → `getItem()` ile kanonik Item metadata'sını tüketir. Leaf başka Item'lardan oluşmaz.
 
 ## 15. Renderer / asset / override sınırı
 `src/scene3d.js#createBaseModule()` top'u procedural çizer. Renderer'ın kendi kalınlık/overhang ve `color: 0xffffff` değerleri specialized render override'ıdır; kanonik production ölçüsü `206 × 50 × 1.8 cm`, malzeme `sunta`, default renk `0xffffff` Item'da kalır. Renderer business/BOM source-of-truth değildir.
 
 ## 16. Runtime owners
 ```text
-canonical Item metadata → src/productionParts.js
+canonical Item metadata → src/items.js
 recipe / quantity       → src/moduleRecipes.js
 BOM policy              → src/moduleContracts.js
 parent state            → src/designState.js

@@ -6,11 +6,11 @@ Kaynak çalışma ağacı: `/mnt/data/Version2_local`
 
 # 1. Mevcut gerçek kimlik ve tanım
 
-Kaynak: `src/productionParts.js:27`
+Kaynak: `src/items.js:27`
 
 ```js
 connector_corner: Object.freeze({
-  partId: 'connector_corner',
+  itemKey: 'connector_corner',
   name: 'Köşe Aparatı',
   type: 'connector',
   unit: 'adet',
@@ -18,19 +18,17 @@ connector_corner: Object.freeze({
 }),
 ```
 
-Lookup: `src/productionParts.js:52-54`
+Lookup: `src/items.js` içindeki `getItem()`.
 
 ```js
-export function getProductionPart(partId) {
-  return PRODUCTION_PARTS[partId] ?? null;
-}
+getItem('connector_corner')
 ```
 
-Bugünkü gerçek kimlik `partId = connector_corner`'dır.
+Bugünkü gerçek kimlik `itemKey = connector_corner`'dır.
 
 # 2. Doğrudan runtime referansları
 
-`src/` altında `connector_corner` **yalnızca `src/productionParts.js` tanımında** geçer.
+`src/` altında `connector_corner` **yalnızca `src/items.js` tanımında** geçer.
 
 `moduleRecipes.js`, `rawBomDebug.js`, `designState.js`, `scene3d.js`, `modulePlacement.js`, `cornerPlacement.js`, `main.js` ve `projectStore.js` bu `partId`yi doğrudan kullanmaz.
 
@@ -39,8 +37,8 @@ Bugünkü gerçek kimlik `partId = connector_corner`'dır.
 Genel production lookup çalışır:
 
 ```text
-getProductionPart('connector_corner')
-→ PRODUCTION_PARTS.connector_corner
+getItem('connector_corner')
+→ LEAF_ITEMS.connector_corner
 → {
     name: 'Köşe Aparatı',
     type: 'connector',
@@ -64,7 +62,7 @@ Raw BOM UI satırı yok
 module placement'tan connector_corner üretimi yok
 ```
 
-Production metadata sahibi `src/productionParts.js` olsa da aktif miktar/source-of-truth tanımı yoktur; çünkü parça hiçbir recipe'ye dahil edilmemiştir.
+Production metadata sahibi `src/items.js` olsa da aktif miktar/source-of-truth tanımı yoktur; çünkü parça hiçbir recipe'ye dahil edilmemiştir.
 
 # 5. Köşe placement kavramıyla kritik ayrım
 
@@ -91,7 +89,7 @@ Bu nedenle iki ayrı kavram vardır:
 
 ```text
 production metadata:
-  partId = connector_corner
+  itemKey = connector_corner
   connectorType = corner
 
 placement runtime:
@@ -117,7 +115,7 @@ Doğrudan test:
 `test/moduleRecipes.test.js:13-18`
 
 ```js
-assert.equal(getProductionPart('connector_corner').name, 'Köşe Aparatı');
+assert.equal(getItem('connector_corner').name, 'Köşe Aparatı');
 ```
 
 Bu test yalnız production registry/lookup adını doğrular. `connector_corner` recipe miktarı, corner placement mapping'i, state, persistence veya renderer bağlantısı için mevcut test bulunmadı.
@@ -128,7 +126,7 @@ Bu test yalnız production registry/lookup adını doğrular. `connector_corner`
 
 ```text
 PRODUCTION
-src/productionParts.js
+src/items.js
 → connector_corner
 → connectorType = corner
 

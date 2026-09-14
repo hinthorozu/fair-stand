@@ -174,5 +174,5 @@ variants.innerCornerPanelItemKey = panel_corner_92
 - `src/moduleContextMenu.js`
 - `src/main.js`
 - `src/moduleRecipes.js`
-- `src/productionParts.js`
+- `src/items.js`
 

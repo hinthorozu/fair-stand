@@ -30,6 +30,18 @@ Tek lookup `getItem()`dır. Leaf width helper'ları `getShelfLeafItem` / `getDoo
 - Width helper adları `getShelfLeafItem` / `getDoorLeafItem` oldu; ikisi de `getItem` / `LEAF_ITEMS` üzerinden çözülür.
 - `LEAF_ITEMS.door_100` yoktur; `getItem('door_100')` bileşik parent döner.
 
+## Faz 3 — tanım metinleri
+
+`docs/items/definitions`, `docs/items/current-system` ve `docs/items/door_100_full_system_audit.md` runtime ile hizalandı:
+
+- Kanonik sahip `src/items.js`; lookup `getItem()`.
+- Leaf map adı `LEAF_ITEMS`.
+- Width helper adları `getShelfLeafItem` / `getDoorLeafItem`.
+- `getProductionPart` / `getProductionItem` compatibility cümleleri kaldırıldı; çözüm `getItem()`dır.
+- `partId` yalnız migration öncesi kimlik olarak kalır; bugünkü kimlik `itemKey`dır.
+
+Audit evidence ve migration kural metinleri tarihî kayıt olarak durur.
+
 ## Faz 0 — ölü kod temizliği
 
 - Paralel leaf registry kaldırıldı (`src/productionParts.js`).

@@ -8,7 +8,7 @@ Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası g�
 
 | # | Alan | Durum | Güncel gerçek / owner |
 |---:|---|---|---|
-| 1 | Identity / type | VAR | `itemKey=showcase_side_94_6_30`, `type=showcase-board`, `unit=adet`; kanonik owner `src/productionParts.js`. |
+| 1 | Identity / type | VAR | `itemKey=showcase_side_94_6_30`, `type=showcase-board`, `unit=adet`; kanonik owner `src/items.js`. |
 | 2 | Intrinsic properties | VAR | `94.6 × 30 × 1.8 cm` (`length × depth × thickness`), `material=sunta`, `defaultColor=0xffffff`; kullanıcı ürün kararı. |
 | 3 | Default state | UYGULANMIYOR | Leaf board ayrı project state taşımaz. Beyaz ürün default'u kanonik Item'dadır. Parent showcase instance ileride tek gövde renk override'ı taşıyacaktır. |
 | 4 | Oluşturma | PARENT-OWNED | Ayrı leaf project factory yok. Parent `wall_showcase_100_2` / showcase module factory instance'ı üretir. |
@@ -23,13 +23,13 @@ Fresh `Version2` runtime doğrulaması ve kullanıcı ürün kararı sonrası g�
 | 13 | Relationships / reflow | PARENT-OWNED | Leaf board ayrı spatial relationship taşımaz; parent showcase continuous-wall ilişkilerine katılır. |
 | 14 | BOM / composition | VAR | Tekil Item; `resolveItemBom()` ile doğrudan kanonik BOM satırı üretir. Parent `wall_showcase_100_2` içindeki quantity/cutover bir sonraki parent migrationında tanımlanacaktır. |
 | 15 | Renderer / asset / override boundary | PARENT-OWNED / ENTEGRASYON BEKLİYOR | Ayrı leaf renderer yok. Mevcut procedural showcase renderer yan gövdeyi parent seviyesinde çizer. Kanonik board ölçü/defaultColor tüketimi parent showcase migrationında bağlanacaktır. |
-| 16 | Runtime owners | VAR | Product: `productionParts.js`; direct BOM: `itemBom.js`; parent state: `designState.js`; parent behavior/placement: shared module runtime; parent renderer: `scene3d.js`. |
+| 16 | Runtime owners | VAR | Product: `items.js`; direct BOM: `itemBom.js`; parent state: `designState.js`; parent behavior/placement: shared module runtime; parent renderer: `scene3d.js`. |
 | 17 | Regression | VAR | `test/showcaseBodyBoardsItemContract.test.js`, `test/boardMaterialItemContract.test.js` + full suite/E2E. |
 | 18 | Open decisions / completion | LEAF KAPALI / PARENT ENTEGRASYON BEKLİYOR | Ürün property kararı kapalıdır. Bireysel renk edit'i bilinçli olarak yoktur. Parent recipe, renderer consumption ve tek gövde renk override'ı `wall_showcase_100_2` migrationında tamamlanacaktır. |
 
 ## Kanonik cutover
 
-`showcase_side_94_6_30` yeni kanonik physical Item olarak tanımlandı. Ölçü, sunta material ve beyaz default artık `PRODUCTION_PARTS` kaydında tek ürün gerçeğidir.
+`showcase_side_94_6_30` yeni kanonik physical Item olarak tanımlandı. Ölçü, sunta material ve beyaz default artık `LEAF_ITEMS` kaydında tek ürün gerçeğidir.
 
 Bu Item bireysel renk-editable değildir. Showcase gövdesine kullanıcı rengi verildiğinde gelecekte parent showcase instance tek bir gövde renk override'ı taşıyacak; override iki yan ve iki yatay suntaya birlikte uygulanacak, `glass_shelf` etkilenmeyecektir.
 

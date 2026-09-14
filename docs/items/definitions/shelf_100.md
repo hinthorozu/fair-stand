@@ -12,7 +12,7 @@
 
 ## Sahiplik
 
-Intrinsic ürün gerçeğinin tek kaynağı `PRODUCTION_PARTS.shelf_100` kaydıdır. Leaf raf ayrı project entity değildir; yerleşim, move, rotation, snap/collision/connection, selection/drag, context menu, delete/duplicate/keyboard, kalıcılık ve reflow parent `shelf` module/type tarafından uygulanır.
+Intrinsic ürün gerçeğinin tek kaynağı `LEAF_ITEMS.shelf_100` kaydıdır. Leaf raf ayrı project entity değildir; yerleşim, move, rotation, snap/collision/connection, selection/drag, context menu, delete/duplicate/keyboard, kalıcılık ve reflow parent `shelf` module/type tarafından uygulanır.
 
 `createShelfModule()` kanonik Item'dan `depthCm`, `thicknessCm` ve `defaultColor` tüketir. Renderer'ın `innerWidthM` ile frame içine oturtması explicit render/fit ezme boundary'sidir ve kanonik production `lengthCm=100` değerini değiştirmez. Raf seviyeleri parent shelf type layout kuralıdır, leaf Item ürüne özgü property'si değildir.
 

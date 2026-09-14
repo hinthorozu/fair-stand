@@ -4,7 +4,7 @@
 
 ## Kanonik identity
 
-`src/productionParts.js` içinde kanonik production Item:
+`src/items.js` içinde kanonik production Item:
 
 ```js
 shelf_leg: Object.freeze({

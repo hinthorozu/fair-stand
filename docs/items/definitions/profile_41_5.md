@@ -19,7 +19,7 @@
   defaultColor: 0xd0d3d4
 }
 ```
-`lengthCm`, `thicknessCm`, `material` ve `defaultColor` kanonik product/default property'leridir; owner `src/productionParts.js`dir. Project/runtime ezme açık bir karar mekanizmasıyla uygulanabilir ve kanonik değeri değiştirmez. `src/theme.js`/`scene3d.js` specialized renderer ezme kullanabilir.
+`lengthCm`, `thicknessCm`, `material` ve `defaultColor` kanonik product/default property'leridir; owner `src/items.js`dir. Project/runtime ezme açık bir karar mekanizmasıyla uygulanabilir ve kanonik değeri değiştirmez. `src/theme.js`/`scene3d.js` specialized renderer ezme kullanabilir.
 
 ## 3. Oluşturma / state / kalıcılık
 Sahaya katalogdan konan her örnek ayrı instance'dır (`createProfileModuleState`). Parent reçete satırları ayrı kalır; persist parent module ile birlikte `itemKey` taşır.
@@ -28,7 +28,7 @@ Sahaya katalogdan konan her örnek ayrı instance'dır (`createProfileModuleStat
 Katalog grubu `Panel Ek Modül`. Saha davranışı `wall_200` ile aynıdır (`WALL_BEHAVIOR`: taşıma, döndürme, uç uca/köşe snap). Duvar gövdesinin içine girmez. Aynı duvar yuvasındaki `separator` (ahşap slat) üst rayı engellemez (`overlapWithTypes: separator`). Saha dikmesi (`upright`) profil uçlarına `short-up-joint` ile snap olur.
 
 ## 5. BOM / composition
-Tekil production Item; 14 doğrulanmış parent recipe (wall/separator/counter/L-counter/base/base-wall). Recipe identity kanonik `itemKey` kullanır, quantity parent recipe sahibidir, expansion üstveriyi `getProductionItem()` üzerinden çözer. Saha örneği `resolveItemBom` ile `profile_41_5 × 1 adet` üretir; parent reçetelere otomatik eklenmez.
+Tekil production Item; 14 doğrulanmış parent recipe (wall/separator/counter/L-counter/base/base-wall). Recipe identity kanonik `itemKey` kullanır, quantity parent recipe sahibidir, expansion üstveriyi `getItem()` üzerinden çözer. Saha örneği `resolveItemBom` ile `profile_41_5 × 1 adet` üretir; parent reçetelere otomatik eklenmez.
 
 ## 6. Renderer sınırı
 Production ölçü ve üstveri business tek kaynak'tur; prosedürel renderer production profile mesh identity'sine zorla bağlanmaz. `defaultColor=0xd0d3d4` kanonik default; mevcut `ALUMINUM_PROFILE_COLOR='#D0D3D4'` render ezme olarak kalabilir.

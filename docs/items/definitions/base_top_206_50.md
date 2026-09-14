@@ -8,7 +8,7 @@
 - parametrik: hayır
 
 ## 2. Kanonik ürüne özgü / varsayılan özellikler
-Kanonik source: `src/productionParts.js`.
+Kanonik source: `src/items.js`.
 
 ```text
 name                      Baza Üstü 206 × 50 cm
@@ -23,7 +23,7 @@ nominalModuleWidthCm      200
 Bu değerler Item'ın ürün tanımıdır. `material` ve `defaultColor` genel Item şemasında zorunlu değildir; bu Item için doğrulandıkları için tanımlıdır. Explicit project/runtime veya specialized renderer ezme uygulanabilir; ezme kanonik default'u değiştirmez.
 
 ## 3. Oluşturma / katalog / state / kalıcılık
-Bağımsız leaf proje örneği oluşturucu, mutable state, project `id` ve kalıcılık entity'si **UYGULANMIYOR**. Parent catalog Item'ları `BASE_200` ve `wall_base_200`'dır. Leaf production identity recipe + `getProductionItem()` üzerinden çözülür.
+Bağımsız leaf proje örneği oluşturucu, mutable state, project `id` ve kalıcılık entity'si **UYGULANMIYOR**. Parent catalog Item'ları `BASE_200` ve `wall_base_200`'dır. Leaf production identity recipe + `getItem()` üzerinden çözülür.
 
 ## 4. Davranış / etkileşim yetenekleri
 Leaf top ayrı scene Item örneği olmadığı için yerleşim, move, rotation, snap, collision, selection, drag, context-menu, delete, duplicate ve keyboard yetenek'leri **UYGULANMIYOR**. Bu interaction'lar parent base/base-wall seviyesindedir.
@@ -36,10 +36,10 @@ Tam iki parent recipe kanonik Item'ı `×1` tüketir:
 - `base-200`
 - `base-wall-200`
 
-Recipe satırı `{ itemKey: 'base_top_206_50', quantity: 1 }` biçimindedir. Expansion `getRecipeItemKey()` → `getProductionItem()` üzerinden kanonik üstveriyi tüketir. Recursive composition **UYGULANMIYOR**.
+Recipe satırı `{ itemKey: 'base_top_206_50', quantity: 1 }` biçimindedir. Expansion `getRecipeItemKey()` → `getItem()` üzerinden kanonik üstveriyi tüketir. Recursive composition **UYGULANMIYOR**.
 
 ## 7. Renderer / ezme politikası
-Renderer prosedürel ve specialized temsil kullanabilir. `src/scene3d.js` içindeki render kalınlığı/overhang/rengi kanonik production property değildir. Renderer görsel amaçla ezebilir; BOM/business tek kaynak `PRODUCTION_PARTS.base_top_206_50` olarak kalır.
+Renderer prosedürel ve specialized temsil kullanabilir. `src/scene3d.js` içindeki render kalınlığı/overhang/rengi kanonik production property değildir. Renderer görsel amaçla ezebilir; BOM/business tek kaynak `LEAF_ITEMS.base_top_206_50` olarak kalır.
 
 ## 8. Regresyon sözleşmesi
 `test/baseTopsItemContract.test.js` şu hard gate'leri kilitler:

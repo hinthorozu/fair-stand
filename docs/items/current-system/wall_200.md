@@ -1101,7 +1101,7 @@ Production part değerleri:
 Kaynaklar:
 
 - `src/moduleRecipes.js`
-- `src/productionParts.js`
+- `src/items.js`
 
 ---
 
@@ -1189,7 +1189,7 @@ adetlerini kanonik Final BOM'a dönüştüren tam project-level ilişki resolver
 
 Kaynaklar:
 
-- `src/productionParts.js`
+- `src/items.js`
 - `src/moduleRecipes.js`
 - `audit/FINDINGS.md`
 

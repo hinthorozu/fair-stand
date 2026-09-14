@@ -197,5 +197,5 @@ shelf_leg × 4
 - `src/moduleContextMenu.js`
 - `src/main.js`
 - `src/moduleRecipes.js`
-- `src/productionParts.js`
+- `src/items.js`
 
