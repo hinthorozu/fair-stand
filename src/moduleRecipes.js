@@ -1,4 +1,4 @@
-import { getProductionItem } from './items.js';
+import { getItem } from './items.js';
 
 const STRAIGHT_WALL_RECIPES = Object.freeze({
   50: Object.freeze({ recipeId: 'wall-straight-50', moduleType: 'wall', nominalWidthCm: 50, connectionMode: 'straight', items: Object.freeze([
@@ -197,7 +197,7 @@ export function getModuleRecipe(moduleType, nominalWidthCm, options = {}) {
   if (moduleType === 'counter' && options.shape === 'L') return MODULE_RECIPES[`counter-l:${nominalWidthCm}`] ?? null;
   return MODULE_RECIPES[`${moduleType}:${nominalWidthCm}`] ?? null;
 }
-export function getRecipeItemKey(item) { return item?.itemKey ?? item?.partId ?? null; }
+export function getRecipeItemKey(item) { return item?.itemKey ?? null; }
 
 export function getRecipeInnerCornerPanelKey(recipe) {
   return recipe?.variants?.innerCornerPanelItemKey ?? null;
@@ -238,13 +238,13 @@ function resolveRecipeItemsForPanelVariant(recipe, panelVariant = 'straight') {
   const cornerPanelItemKey = recipe?.variants?.innerCornerPanelItemKey ?? null;
   if (!cornerPanelItemKey) return recipe.items;
 
-  const cornerPanel = getProductionItem(cornerPanelItemKey);
+  const cornerPanel = getItem(cornerPanelItemKey);
   if (!cornerPanel || cornerPanel.type !== 'panel' || cornerPanel.panelRole !== 'inner-corner') {
     throw new TypeError(`Invalid inner-corner panel Item: ${cornerPanelItemKey}.`);
   }
 
   const straightPanelIndex = recipe.items.findIndex((item) => {
-    const productionItem = getProductionItem(getRecipeItemKey(item));
+    const productionItem = getItem(getRecipeItemKey(item));
     return productionItem?.type === 'panel'
       && productionItem.panelRole === 'straight'
       && productionItem.nominalModuleWidthCm === cornerPanel.nominalModuleWidthCm;
@@ -269,7 +269,7 @@ function resolveRecipeItemsForPanelVariant(recipe, panelVariant = 'straight') {
 export function expandRecipe(recipe, options = {}) {
   if (!recipe) return null;
   const items = resolveRecipeItemsForPanelVariant(recipe, options.panelVariant);
-  return { ...recipe, items: items.map((item) => ({ ...item, part: getProductionItem(getRecipeItemKey(item)) })) };
+  return { ...recipe, items: items.map((item) => ({ ...item, part: getItem(getRecipeItemKey(item)) })) };
 }
 export function getExpandedStraightWallRecipe(nominalWidthCm, options = {}) {
   return expandRecipe(getStraightWallRecipe(nominalWidthCm), options);

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import {
   getExpandedModuleRecipe,
   getModuleRecipe,
@@ -56,7 +56,7 @@ const CORNER_PANEL_CASES = {
 
 test('remaining inner-corner panels are canonical single production Items with metadata parity', () => {
   for (const [itemKey, { metadata }] of Object.entries(CORNER_PANEL_CASES)) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined, itemKey);
     assert.equal(item.name, metadata.name);

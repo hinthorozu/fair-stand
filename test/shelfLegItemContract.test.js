@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
 
 const CASES = Object.freeze([
@@ -13,7 +13,7 @@ const CASES = Object.freeze([
 ]);
 
 test('shelf_leg is canonical without invented product metadata', () => {
-  const item = getProductionItem('shelf_leg');
+  const item = getItem('shelf_leg');
   assert.deepEqual(item, { itemKey: 'shelf_leg', name: 'Raf Ayağı', type: 'shelf-accessory', unit: 'adet' });
   assert.equal(item.partId, undefined);
 });

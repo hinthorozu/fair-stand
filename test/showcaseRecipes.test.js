@@ -2,12 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { getItem } from '../src/items.js';
-import { getProductionItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
 
 test('fake aggregate showcase production parts are removed', () => {
-  assert.equal(getProductionItem('showcase_2_100'), null);
-  assert.equal(getProductionItem('showcase_3_100'), null);
+  assert.equal(getItem('showcase_2_100'), null);
+  assert.equal(getItem('showcase_3_100'), null);
   assert.equal(getItem('wall_showcase_100_2').itemKey, 'wall_showcase_100_2');
   assert.equal(getItem('wall_showcase_100_3').itemKey, 'wall_showcase_100_3');
 });

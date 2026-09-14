@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import {
   getExpandedStraightWallRecipe,
   getModuleRecipe,
@@ -41,7 +41,7 @@ function listAllVerifiedRecipes() {
 }
 
 test('upright_346_5 is a canonical single production Item', () => {
-  const item = getProductionItem('upright_346_5');
+  const item = getItem('upright_346_5');
 
   assert.equal(item.itemKey, 'upright_346_5');
   assert.equal(item.partId, undefined);
@@ -67,7 +67,7 @@ test('upright_346_5 uses canonical itemKey in all 18 verified parent recipes and
 
 test('upright_346_5 remains canonical while neighboring upright Items migrate independently', () => {
   for (const itemKey of ['upright_346_5', 'upright_99', 'upright_49_5']) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined);
     assert.equal(item.type, 'upright');

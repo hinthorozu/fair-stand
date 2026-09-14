@@ -9,8 +9,7 @@ import {
   getCommercialItemForType,
   getFloorItem,
   getItem,
-  getProductionItem,
-  getShelfProductionItem,
+  getShelfLeafItem,
   getShowcaseBodyDefinition,
   isCarpetFloorItem,
   isGridTileFloorItem,
@@ -6849,7 +6848,7 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
   const built = createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady);
   const widthM = Number(moduleState.widthCm) / 100;
   const shelfCount = Number(moduleState.shelfCount) === 3 ? 3 : 2;
-  const shelfItem = getShelfProductionItem(moduleState.widthCm);
+  const shelfItem = getShelfLeafItem(moduleState.widthCm);
   if (!shelfItem) {
     throw new TypeError(`Missing canonical shelf Item for ${moduleState.widthCm} cm module.`);
   }
@@ -7155,7 +7154,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
 
   // Alt bölüm: kapalı kapı kanadı. Sahne düzleminden dışarı açılmaz.
   const doorState = moduleState.surface;
-  const doorLeafItem = getProductionItem(doorState?.itemKey);
+  const doorLeafItem = getItem(doorState?.itemKey);
   if (!doorLeafItem) {
     throw new TypeError(`Missing canonical door leaf Item for module ${moduleState.id}.`);
   }

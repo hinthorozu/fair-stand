@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import {
   getExpandedModuleRecipe,
   getModuleRecipe,
@@ -28,7 +28,7 @@ const BASE_TOP_CASES = {
 
 test('base tops are canonical single Items with complete intrinsic defaults', () => {
   for (const [itemKey, expected] of Object.entries(BASE_TOP_CASES)) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.ok(item, itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined, itemKey);

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 
 const PROFILE_ITEM_KEYS = Object.freeze([
   'profile_41_5',
@@ -12,7 +12,7 @@ const PROFILE_ITEM_KEYS = Object.freeze([
 
 test('all production profiles keep canonical aluminum material and default color', () => {
   for (const itemKey of PROFILE_ITEM_KEYS) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.ok(item, itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.type, 'profile');

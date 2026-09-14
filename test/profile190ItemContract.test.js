@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import {
   getExpandedModuleRecipe,
   getExpandedStraightWallRecipe,
@@ -21,7 +21,7 @@ const CASES = [
 ];
 
 test('profile_190 is a canonical single production Item with verified 190 x 8 cm dimensions', () => {
-  const item = getProductionItem('profile_190');
+  const item = getItem('profile_190');
 
   assert.equal(item.itemKey, 'profile_190');
   assert.equal(item.partId, undefined);
@@ -61,7 +61,7 @@ test('expanded recipes resolve profile_190 metadata through canonical itemKey', 
 
 test('the full production profile family now uses canonical Item identity', () => {
   for (const itemKey of ['profile_41_5', 'profile_91', 'profile_140_5', 'profile_190']) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined, itemKey);
     assert.equal(item.type, 'profile');

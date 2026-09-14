@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import {
   getExpandedModuleRecipe,
   getModuleRecipe,
@@ -65,7 +65,7 @@ const PROFILE_CASES = {
 
 test('remaining production profiles are canonical single Items with verified metadata parity', () => {
   for (const [itemKey, expected] of Object.entries(PROFILE_CASES)) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined, itemKey);
     assert.equal(item.name, expected.name);
@@ -112,7 +112,7 @@ test('expanded recipes resolve all migrated profile metadata through canonical I
 });
 
 test('profile family cutover preserves the already canonical profile_190 contract', () => {
-  const profile190 = getProductionItem('profile_190');
+  const profile190 = getItem('profile_190');
   assert.equal(profile190.itemKey, 'profile_190');
   assert.equal(profile190.partId, undefined);
   assert.equal(profile190.type, 'profile');

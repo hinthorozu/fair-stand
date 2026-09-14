@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
 
 const CASES = {
@@ -29,7 +29,7 @@ const CASES = {
 
 test('separator panel production Items use canonical itemKey with verified 0.8 cm MDF metadata and default color', () => {
   for (const [itemKey, { metadata }] of Object.entries(CASES)) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined);
     assert.equal(item.name, metadata.name);
@@ -73,6 +73,6 @@ test('expanded separator recipes resolve canonical separator metadata through it
 });
 
 test('separator panel migration remains isolated from still-legacy production families', () => {
-  assert.equal(getProductionItem('showcase_2_100'), null);
-  assert.equal(getProductionItem('showcase_3_100'), null);
+  assert.equal(getItem('showcase_2_100'), null);
+  assert.equal(getItem('showcase_3_100'), null);
 });

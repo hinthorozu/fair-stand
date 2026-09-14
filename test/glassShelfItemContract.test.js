@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
 import { GLASS_APPEARANCE, getMaterialAppearance } from '../src/theme.js';
 
@@ -13,7 +13,7 @@ const EXPECTED_DIMENSIONS = Object.freeze({
 });
 
 test('glass_shelf uses canonical identity with verified 87.3 x 28.5 x 0.6 cm glass metadata', () => {
-  const item = getProductionItem('glass_shelf');
+  const item = getItem('glass_shelf');
   assert.equal(item.itemKey, 'glass_shelf');
   assert.equal(item.partId, undefined);
   assert.equal(item.name, 'Cam Raf');
@@ -62,7 +62,7 @@ test('showcase renderer consumes glass_shelf through the canonical showcase body
   assert.match(showcase, /glassShelfItem\.dimensions\.thicknessCm \/ 100/);
   assert.match(showcase, /const shelfGeometry = new THREE\.BoxGeometry\(glassShelfLengthM, glassShelfThicknessM, glassShelfDepthM\);/);
   assert.match(showcase, /shelf\.userData\.itemKey = glassShelfItem\.itemKey/);
-  assert.doesNotMatch(showcase, /getProductionItem\('glass_shelf'\)/);
+  assert.doesNotMatch(showcase, /getItem\('glass_shelf'\)/);
   assert.doesNotMatch(showcase, /color:\s*0xb7d5b5/);
   assert.doesNotMatch(showcase, /Math\.max\(innerWidth - 0\.035, 0\.02\)/);
   assert.doesNotMatch(showcase, /Math\.max\(showcaseDepth - 0\.035, 0\.04\)/);

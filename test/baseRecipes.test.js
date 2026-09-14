@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
 
 test('production catalog contains verified baza upright and tops', () => {
-  assert.equal(getProductionItem('upright_49_5').dimensions.lengthCm, 49.5);
-  assert.deepEqual(getProductionItem('base_top_107_50').dimensions, { widthCm: 107, depthCm: 50, thicknessCm: 1.8 });
-  assert.deepEqual(getProductionItem('base_top_157_50').dimensions, { widthCm: 157, depthCm: 50, thicknessCm: 1.8 });
-  assert.deepEqual(getProductionItem('base_top_206_50').dimensions, { widthCm: 206, depthCm: 50, thicknessCm: 1.8 });
+  assert.equal(getItem('upright_49_5').dimensions.lengthCm, 49.5);
+  assert.deepEqual(getItem('base_top_107_50').dimensions, { widthCm: 107, depthCm: 50, thicknessCm: 1.8 });
+  assert.deepEqual(getItem('base_top_157_50').dimensions, { widthCm: 157, depthCm: 50, thicknessCm: 1.8 });
+  assert.deepEqual(getItem('base_top_206_50').dimensions, { widthCm: 206, depthCm: 50, thicknessCm: 1.8 });
 });
 
 const expectedRecipes = {

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
 
 const expected = Object.freeze({
@@ -24,7 +24,7 @@ const recipes = [
 
 test('all six counter tops are canonical 1.8 cm production Items', () => {
   for (const [itemKey, meta] of Object.entries(expected)) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined);
     assert.equal(item.type, 'counter-top');

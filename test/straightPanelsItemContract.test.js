@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey, getStraightWallRecipe } from '../src/moduleRecipes.js';
 
 const PANEL_CASES = {
@@ -54,7 +54,7 @@ const PANEL_CASES = {
 
 test('straight panel production Items use canonical itemKey with verified metadata', () => {
   for (const [itemKey, { metadata }] of Object.entries(PANEL_CASES)) {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined);
     assert.equal(item.name, metadata.name);
@@ -103,8 +103,8 @@ test('expanded recipes resolve straight panel metadata through canonical itemKey
 });
 
 test('straight panel migration remains isolated from still-legacy production families while corner variants use canonical Item identity', () => {
-  assert.equal(getProductionItem('showcase_2_100'), null);
-  assert.equal(getProductionItem('showcase_3_100'), null);
+  assert.equal(getItem('showcase_2_100'), null);
+  assert.equal(getItem('showcase_3_100'), null);
 
   for (const width of [50, 100, 150, 200]) {
     const recipe = getStraightWallRecipe(width);

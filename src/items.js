@@ -51,13 +51,7 @@ export const LEAF_ITEMS = Object.freeze({
   base_top_206_50: Object.freeze({ itemKey: 'base_top_206_50', name: 'Baza Üstü 206 × 50 cm', type: 'base-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 206, depthCm: 50, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff, nominalModuleWidthCm: 200 }),
 });
 
-export const PRODUCTION_PARTS = LEAF_ITEMS;
-
-export function getProductionItem(itemKey) {
-  return LEAF_ITEMS[itemKey] ?? null;
-}
-
-export function getShelfProductionItem(nominalModuleWidthCm) {
+export function getShelfLeafItem(nominalModuleWidthCm) {
   const width = Number(nominalModuleWidthCm);
   return Object.values(LEAF_ITEMS).find((item) => (
     item?.type === 'shelf' && Number(item.nominalModuleWidthCm) === width
@@ -69,9 +63,9 @@ const DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH = Object.freeze({
   100: 'door_leaf_100',
 });
 
-export function getDoorLeafProductionItem(nominalModuleWidthCm) {
+export function getDoorLeafItem(nominalModuleWidthCm) {
   const itemKey = DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH[Number(nominalModuleWidthCm)];
-  return itemKey ? getProductionItem(itemKey) : null;
+  return itemKey ? getItem(itemKey) : null;
 }
 
 const CONNECTOR_ITEM_KEYS_BY_TYPE = Object.freeze({
@@ -102,7 +96,7 @@ export function resolveConnectorBom(requirements = []) {
 
   for (const requirement of requirements) {
     const itemKey = requirement?.itemKey ?? getConnectorItemKey(requirement?.connectorType);
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     if (!item || item.type !== 'connector') {
       throw new TypeError(`Unknown connector Item: ${itemKey ?? requirement?.connectorType ?? 'unknown'}.`);
     }
@@ -116,18 +110,9 @@ export function resolveConnectorBom(requirements = []) {
   }
 
   return Array.from(quantities, ([itemKey, quantity]) => {
-    const item = getProductionItem(itemKey);
+    const item = getItem(itemKey);
     return Object.freeze({ itemKey, quantity, unit: item.unit, item });
   });
-}
-
-// Eski production-part lookup; kalan üretim Item'ları tek tek göçene kadar durur.
-export function getProductionPart(partId) {
-  return getProductionItem(partId);
-}
-
-export function listProductionParts() {
-  return Object.values(LEAF_ITEMS);
 }
 
 // Bağımsız ticari ürünler, doğrulanmış ürün varsayılanlarının sahibidir.
@@ -993,9 +978,9 @@ export function getShowcaseBodyDefinition(itemOrKey) {
   const expectedItemKey = getShowcaseItemKeyForType(item?.type);
   if (!item || !expectedItemKey || item.itemKey !== expectedItemKey) return null;
 
-  const sideItem = getProductionItem(item.bodyItems?.sideItemKey);
-  const horizontalItem = getProductionItem(item.bodyItems?.horizontalItemKey);
-  const glassShelfItem = getProductionItem(item.bodyItems?.glassShelfItemKey);
+  const sideItem = getItem(item.bodyItems?.sideItemKey);
+  const horizontalItem = getItem(item.bodyItems?.horizontalItemKey);
+  const glassShelfItem = getItem(item.bodyItems?.glassShelfItemKey);
   if (!sideItem?.dimensions || !horizontalItem?.dimensions || !glassShelfItem?.dimensions) {
     throw new TypeError(`Canonical showcase body Items are incomplete for ${item.itemKey}.`);
   }
@@ -1024,7 +1009,8 @@ export function getItem(itemKey) {
     ?? NON_CATALOG_ITEMS[itemKey]
     ?? FLOOR_ITEMS[itemKey]
     ?? COMPOSITE_ITEMS[itemKey]
-    ?? getProductionItem(itemKey);
+    ?? LEAF_ITEMS[itemKey]
+    ?? null;
 }
 
 export function isShortUpFamilyDescriptor(descriptor) {
