@@ -3,7 +3,7 @@
 # upright_99 — Tarihî envanter
 
 ## 1. Identity / type — VAR
-Kanonik source `src/productionParts.js`: `itemKey=upright_99`, `type=upright`, `unit=adet`, name `Dikme 99 cm`.
+Kanonik source `src/items.js`: `itemKey=upright_99`, `type=upright`, `unit=adet`, name `Dikme 99 cm`.
 
 ## 2. Intrinsic properties — VAR
 Kanonik Item properties: `lengthCm=99`, `thicknessCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Renderer may explicitly override visual representation without changing the Item default.
@@ -42,13 +42,13 @@ Projects persist parent counter state; no separate `upright_99` instance is pers
 No leaf relationship/reflow state; parent module owns relationships.
 
 ## 14. BOM / composition — VAR
-Six verified recipes consume this Item: straight `counter:100/150/200` use quantity `4`; `counter-l:100/150/200` use quantity `5`. Parent recipes own quantity and kanonik `itemKey` resolves metadata through `getProductionItem()`.
+Six verified recipes consume this Item: straight `counter:100/150/200` use quantity `4`; `counter-l:100/150/200` use quantity `5`. Parent recipes own quantity and kanonik `itemKey` resolves metadata through `getItem()`.
 
 ## 15. Renderer / asset / override boundary — VAR
 Counter renderers create procedural posts and do not use `upright_99` as mesh identity. Production `99 cm / 8 cm` is not forced onto renderer geometry. Visual renderer constants remain explicit specialized render overrides.
 
 ## 16. Runtime owners — VAR
-Product metadata: `src/productionParts.js`; quantities/composition: `src/moduleRecipes.js`; state/behavior/persistence: parent counter runtime; renderer: `src/scene3d.js`.
+Product metadata: `src/items.js`; quantities/composition: `src/moduleRecipes.js`; state/behavior/persistence: parent counter runtime; renderer: `src/scene3d.js`.
 
 ## 17. Regression — VAR
 `test/upright99And495ItemContract.test.js` protects identity, dimensions and six recipe quantities. `test/uprightIntrinsicProperties.test.js` protects aluminum material and `0xd0d3d4` kanonik default color.

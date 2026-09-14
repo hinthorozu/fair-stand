@@ -1,0 +1,48 @@
+import assert from 'node:assert/strict';
+import { readdirSync, readFileSync } from 'node:fs';
+import { describe, test } from 'node:test';
+
+const STALE_TOKENS = [
+  'productionParts.js',
+  'PRODUCTION_PARTS',
+  'getDoorLeafProductionItem',
+  'getShelfProductionItem',
+  'listProductionParts',
+];
+
+function collectMarkdown(relativeDir) {
+  const dir = new URL(`../${relativeDir}/`, import.meta.url);
+  return readdirSync(dir)
+    .filter((name) => name.endsWith('.md'))
+    .map((name) => ({
+      path: `${relativeDir}/${name}`,
+      text: readFileSync(new URL(name, dir), 'utf8'),
+    }));
+}
+
+describe('Item tanım metinleri runtime sahibi ile hizalıdır', () => {
+  const files = [
+    ...collectMarkdown('docs/items/definitions'),
+    ...collectMarkdown('docs/items/current-system'),
+    {
+      path: 'docs/items/door_100_full_system_audit.md',
+      text: readFileSync(new URL('../docs/items/door_100_full_system_audit.md', import.meta.url), 'utf8'),
+    },
+  ];
+
+  test('tanım ve current-system dosyaları eski productionParts sahibini yazmaz', () => {
+    const hits = [];
+    for (const file of files) {
+      for (const token of STALE_TOKENS) {
+        if (file.text.includes(token)) hits.push(`${file.path}: ${token}`);
+      }
+    }
+    assert.deepEqual(hits, []);
+  });
+
+  test('en az bir tanım dosyası src/items.js ve getItem() yazar', () => {
+    const definitions = files.filter((file) => file.path.startsWith('docs/items/definitions/'));
+    assert.equal(definitions.some((file) => file.text.includes('src/items.js')), true);
+    assert.equal(definitions.some((file) => file.text.includes('getItem()')), true);
+  });
+});

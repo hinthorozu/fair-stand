@@ -6,11 +6,11 @@ Kaynak çalışma ağacı: `/mnt/data/Version2_local`
 
 # 1. Mevcut gerçek kimlik ve tanım
 
-Kaynak: `src/productionParts.js:26`
+Kaynak: `src/items.js:26`
 
 ```js
 connector_double: Object.freeze({
-  partId: 'connector_double',
+  itemKey: 'connector_double',
   name: 'Çiftli Aparat',
   type: 'connector',
   unit: 'adet',
@@ -18,19 +18,17 @@ connector_double: Object.freeze({
 }),
 ```
 
-Lookup: `src/productionParts.js:52-54`
+Lookup: `src/items.js` içindeki `getItem()`.
 
 ```js
-export function getProductionPart(partId) {
-  return PRODUCTION_PARTS[partId] ?? null;
-}
+getItem('connector_double')
 ```
 
-Bugünkü gerçek kimlik `partId = connector_double`'dır.
+Bugünkü gerçek kimlik `itemKey = connector_double`'dır.
 
 # 2. Doğrudan runtime referansları
 
-`src/` altında `connector_double` **yalnızca `src/productionParts.js` tanımında** geçer.
+`src/` altında `connector_double` **yalnızca `src/items.js` tanımında** geçer.
 
 Özellikle:
 
@@ -47,18 +45,18 @@ Dolayısıyla mevcut çalışan kodda tanım sonrası otomatik çağrı zinciri 
 
 # 3. Resolver durumu
 
-`getProductionPart('connector_double')` çağrılırsa production kaydı döner:
+`getItem('connector_double')` çağrılırsa production kaydı döner:
 
 ```text
 connector_double
-→ getProductionPart(...)
-→ PRODUCTION_PARTS.connector_double
+→ getItem(...)
+→ LEAF_ITEMS.connector_double
 → Çiftli Aparat
 ```
 
 Ancak mevcut `src/` runtime kodunda bu çağrıyı `connector_double` için yapan bir tüketici bulunmadı.
 
-`listProductionParts()` (`src/productionParts.js:56-58`) genel katalog listesine bu kaydı da dahil eder; mevcut runtime `src/` içinde `listProductionParts()` kullanan bir tüketici yoktur.
+`listLeafItems()` (`src/items.js`) genel katalog listesine bu kaydı da dahil eder; mevcut runtime `src/` içinde `listLeafItems()` kullanan bir tüketici yoktur.
 
 # 4. BOM / recipe durumu
 
@@ -107,7 +105,7 @@ Doğrudan test:
 `test/moduleRecipes.test.js:13-18`
 
 ```js
-assert.equal(getProductionPart('connector_double').name, 'Çiftli Aparat');
+assert.equal(getItem('connector_double').name, 'Çiftli Aparat');
 ```
 
 Bu test production registry tanımını/lookup'ını doğrular. `connector_double` miktarı, recipe entegrasyonu, state, persistence veya renderer bağlantısını test eden mevcut test bulunmadı.
@@ -117,9 +115,9 @@ Bu test production registry tanımını/lookup'ını doğrular. `connector_doubl
 # Mevcut zincirin özeti
 
 ```text
-src/productionParts.js
-→ PRODUCTION_PARTS.connector_double
-→ getProductionPart('connector_double') çağrılırsa metadata döner
+src/items.js
+→ LEAF_ITEMS.connector_double
+→ getItem('connector_double') çağrılırsa metadata döner
 
 moduleRecipes.js   → kullanım yok
 rawBomDebug.js     → kullanım yok

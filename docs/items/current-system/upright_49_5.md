@@ -3,7 +3,7 @@
 # upright_49_5 — Tarihî envanter
 
 ## 1. Identity / type — VAR
-Kanonik source `src/productionParts.js`: `itemKey=upright_49_5`, `type=upright`, `unit=adet`, name `Dikme 49,5 cm`.
+Kanonik source `src/items.js`: `itemKey=upright_49_5`, `type=upright`, `unit=adet`, name `Dikme 49,5 cm`.
 
 ## 2. Intrinsic properties — VAR
 Kanonik Item properties: `lengthCm=49.5`, `thicknessCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Renderer may explicitly override visual representation without changing the Item default.
@@ -42,13 +42,13 @@ Projects persist parent module state; no separate `upright_49_5` instance is per
 No leaf relationship/reflow state; parent module owns relationships.
 
 ## 14. BOM / composition — VAR
-Six verified recipes consume this Item: `base-wall:100/150/200` use quantity `2`; `base:100/150/200` use quantity `4`. Parent recipes own quantity and kanonik `itemKey` resolves metadata through `getProductionItem()`.
+Six verified recipes consume this Item: `base-wall:100/150/200` use quantity `2`; `base:100/150/200` use quantity `4`. Parent recipes own quantity and kanonik `itemKey` resolves metadata through `getItem()`.
 
 ## 15. Renderer / asset / override boundary — VAR
 Base/base-wall renderers create procedural post geometry and do not use `upright_49_5` as mesh identity. Production `49.5 cm / 8 cm` is not forced onto renderer geometry. Visual renderer constants remain explicit specialized render overrides.
 
 ## 16. Runtime owners — VAR
-Product metadata: `src/productionParts.js`; quantities/composition: `src/moduleRecipes.js`; state/behavior/persistence: parent module runtime; renderer: `src/scene3d.js`.
+Product metadata: `src/items.js`; quantities/composition: `src/moduleRecipes.js`; state/behavior/persistence: parent module runtime; renderer: `src/scene3d.js`.
 
 ## 17. Regression — VAR
 `test/upright99And495ItemContract.test.js` protects identity, dimensions and six recipe quantities. `test/uprightIntrinsicProperties.test.js` protects aluminum material and `0xd0d3d4` kanonik default color.

@@ -24,7 +24,7 @@ Fresh `Version2` doğrulaması ve ürün kararı sonrası güncel durum.
 | 14 | Relationships / reflow | VAR | `innerCornerPanelItemKey`; matching straight paneli 1:1 değiştirir. |
 | 15 | BOM / composition | VAR | Tekil Item; quantity matching parent recipe satırından korunur. |
 | 16 | Renderer / asset | OVERRIDE | Renderer product material source-of-truth değildir. |
-| 17 | Runtime owners | VAR | `productionParts.js`, `moduleRecipes.js` + parent relationship/behavior zinciri. |
+| 17 | Runtime owners | VAR | `items.js`, `moduleRecipes.js` + parent relationship/behavior zinciri. |
 | 18 | Regression | VAR | Corner panel contract testleri + `boardMaterialItemContract.test.js`. |
 
 Kanonik üretim malzemesi `material: 'sunta'`dır.

@@ -21,7 +21,7 @@ Bu belge yeni behavior, relationship, quantity veya renderer kuralı icat etmez.
 
 Migration öncesi gerçek production kimliği `partId = connector_start` idi. Migration ile aynı ürün kanonik `itemKey = connector_start` kimliğine taşındı; paralel ikinci ürün kimliği oluşturulmadı.
 
-Kanonik runtime tanımı `src/productionParts.js` içindedir:
+Kanonik runtime tanımı `src/items.js` içindedir:
 
 ```js
 connector_start: Object.freeze({
@@ -47,7 +47,7 @@ Bu nedenle checklist karşılıkları:
 - Persistent state: **uygulanmıyor**.
 - Save/load migration: **uygulanmıyor**; connector ayrı state olarak kaydedilmez.
 
-Production üstveri `src/productionParts.js`; miktar state'i ise parent recipe içinde `src/moduleRecipes.js` tarafından tutulur.
+Production üstveri `src/items.js`; miktar state'i ise parent recipe içinde `src/moduleRecipes.js` tarafından tutulur.
 
 ## 3. Behavior
 
@@ -119,7 +119,7 @@ Mevcut doğrulanmış sistemde:
 Kanonik üstveri sahibi:
 
 ```text
-src/productionParts.js
+src/items.js
 ```
 
 Kanonik parent quantity sahibi:
@@ -134,7 +134,7 @@ Aktif recipe yolu:
 parent module recipe
 → { itemKey: 'connector_start', quantity: N }
 → expandRecipe()
-→ getProductionItem('connector_start')
+→ getItem('connector_start')
 → quantity + unit=adet + production metadata
 ```
 
@@ -161,7 +161,7 @@ BOM checklist karşılıkları:
 - BOM var mı?: **Evet**.
 - BOM policy: parent module tarafında `mode = recipe`.
 - Recipe kaynağı: `src/moduleRecipes.js`.
-- Production lookup: `getProductionItem()` / `src/productionParts.js`.
+- Production lookup: `getItem()` / `src/items.js`.
 - Alt Item listesi: **yok**; Tekil Item.
 - Quantity: parent recipe tarafından açıkça verilir.
 - Unit: `adet`.
@@ -184,10 +184,10 @@ Bu migration pricing sistemi eklemez.
 
 ## 9. Uygulanan geçiş
 
-- `src/productionParts.js`: `partId` kaldırıldı; kanonik `itemKey = connector_start` oldu.
+- `src/items.js`: `partId` kaldırıldı; kanonik `itemKey = connector_start` oldu.
 - `src/moduleRecipes.js`: 27/27 recipe kullanımı `{ itemKey: 'connector_start', quantity: N }` oldu.
-- `getProductionItem()` kanonik lookup olarak kullanılır.
-- `getProductionPart()` incremental migration süresince eski compatibility wrapper olarak korunur.
+- `getItem()` kanonik lookup olarak kullanılır.
+- Tek kayıt lookup `getItem()`dır; `getProductionPart` / `getProductionItem` yoktur.
 - Existing recipe quantity'leri değiştirilmedi.
 - State, kalıcılık, behavior, interaction ve renderer'a yeni connector örnek mantığı eklenmedi.
 - Yerleşim geometry'den connector quantity tahmin edilmedi.
@@ -215,7 +215,7 @@ Browser tarafında Raw BOM mevcut expanded recipe yolunu tüketmeye devam eder; 
 - `connector_start` miktarı mevcut sistemde parent recipe içinde sabittir; gerçek scene adjacency'den türetilmez.
 - Yerleşim snap ilişkisi ile production connector quantity arasında kanonik relationship mapping yoktur.
 - Project-level kanonik Final BOM sistemi bu Item definition'ın kapsamı değildir.
-- `getProductionPart()` compatibility yolu, diğer production Item migrationları tamamlanana kadar bilinçli olarak korunmaktadır; zero eski usage doğrulanmadan silinmez.
+- Eski `getProductionPart()` / `getProductionItem()` yolu kaldırıldı; çözüm `getItem()`dır.
 
 Bunlar migration sırasında tahminle kapatılmaz.
 
@@ -231,7 +231,7 @@ unit = adet
 recipe identity cutover = 27/27
 legacy recipe partId occurrence = 0
 quantity ownership = src/moduleRecipes.js
-production metadata ownership = src/productionParts.js
+production metadata ownership = src/items.js
 project instance/state/persistence = uygulanmıyor
 behavior/interaction/renderer identity = uygulanmıyor
 relationship-derived quantity = yok; tahmin edilmez

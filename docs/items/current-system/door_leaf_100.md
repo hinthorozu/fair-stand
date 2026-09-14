@@ -11,7 +11,7 @@
 | 1 | Identity / type | VAR | `itemKey=door_leaf_100`, `type=door-leaf`, `unit=adet`; eski `door_100 partId` kaldırılır. |
 | 2 | Intrinsic properties | VAR | `100 × 200 × 8 cm`, `material=ahşap`, `defaultColor=0xffffff`, `nominalModuleWidthCm=100`. |
 | 3 | Default state | VAR | Parent door state içindeki child surface `itemKey=door_leaf_100`, kanonik beyazdan başlar. |
-| 4 | Oluşturma | VAR | `createDoorModuleState(100)` → `getDoorLeafProductionItem(100)` → child editable surface. |
+| 4 | Oluşturma | VAR | `createDoorModuleState(100)` → `getDoorLeafItem(100)` → child editable surface. |
 | 5 | Placement | PARENT-OWNED | Ahşap kanat bağımsız yerleştirilmez; parent `door` module placement sahibidir. |
 | 6 | Move | PARENT-OWNED | Leaf bağımsız taşınmaz; parent module move zinciri uygulanır. |
 | 7 | Rotation | PARENT-OWNED | Leaf bağımsız dönmez; parent `door` WALL behavior dönüşü uygulanır. |
@@ -24,7 +24,7 @@
 | 14 | Relationships / reflow | VAR | `door_leaf_100`, 100 cm door module'ünün fiziksel child/BOM Item'ıdır; bağımsız reflow yoktur. |
 | 15 | BOM / composition | VAR | Parent `door:100` recipe `door_leaf_100 ×1`; unit kanonik Item'dan `adet`. |
 | 16 | Renderer / asset | VAR | Procedural door surface effective `color/imageAssetId` state'ini tüketir; image capability type-level Item capability resolver'dan gelir. Product dimensions renderer mesh ölçüsü için zorunlu source değildir; procedural fit specialized renderer sınırıdır. |
-| 17 | Runtime owners | VAR | `productionParts.js`, `itemCapabilities.js`, `designState.js`, `moduleRecipes.js`, parent door behavior/context/persistence, `scene3d.js`. |
+| 17 | Runtime owners | VAR | `items.js`, `itemCapabilities.js`, `designState.js`, `moduleRecipes.js`, parent door behavior/context/persistence, `scene3d.js`. |
 | 18 | Regression / gaps | VAR | `doorLeafItemContract`, `designState`, `moduleRecipes` testleri identity, dimensions/default, capability, state migration, BOM ve renderer consumer bağını kilitler. |
 
 ## Effective value akışı

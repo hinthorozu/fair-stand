@@ -26,7 +26,7 @@ Migration mevcut reçetelere tahmini `connector_double` miktarı eklemez.
 
 ## 3. Kanonik BOM çözümü
 
-`connector_double` kanonik Tekil production Item'dır. `src/productionParts.js` içindeki mevcut `resolveConnectorBom()` resolver'ı açıkça verilen `double + quantity` girdisini kanonik Item satırına çözer:
+`connector_double` kanonik Tekil production Item'dır. `src/items.js` içindeki mevcut `resolveConnectorBom()` resolver'ı açıkça verilen `double + quantity` girdisini kanonik Item satırına çözer:
 
 ```text
 connectorType = double + quantity
@@ -45,7 +45,7 @@ Mevcut sistemde bağımsız `connector_double` proje örneği/state/kalıcılık
 
 ## 5. Uygulanan geçiş
 
-- `src/productionParts.js`: kanonik `itemKey = connector_double`.
+- `src/items.js`: kanonik `itemKey = connector_double`.
 - `connectorType = double` kanonik Item kimliğine çözülür.
 - `resolveConnectorBom()` explicit quantity ile `itemKey + quantity + unit` BOM satırı üretir.
 - Fixed parent recipe kullanımı yoktur; bu alan mevcut sistem için uygulanmıyor.

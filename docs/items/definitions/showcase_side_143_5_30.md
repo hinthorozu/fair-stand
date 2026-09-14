@@ -11,7 +11,7 @@
 
 ## Sahiplik
 
-Intrinsic ürün gerçeğinin tek kaynağı `PRODUCTION_PARTS.showcase_side_143_5_30` kaydıdır. Bu Item 3 gözlü showcase gövdesinin iki yan suntasından biridir; orientation/yerleşim parent showcase composition/renderer sorumluluğudur.
+Intrinsic ürün gerçeğinin tek kaynağı `LEAF_ITEMS.showcase_side_143_5_30` kaydıdır. Bu Item 3 gözlü showcase gövdesinin iki yan suntasından biridir; orientation/yerleşim parent showcase composition/renderer sorumluluğudur.
 
 Leaf board ayrı project entity değildir. Yerleşim, move, rotation, snap/collision/connection, selection/drag, context menu, delete/duplicate/keyboard, kalıcılık ve reflow parent showcase module/type tarafından uygulanır.
 

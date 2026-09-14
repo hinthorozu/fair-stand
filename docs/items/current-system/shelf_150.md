@@ -8,7 +8,7 @@ Fresh `Version2` runtime doğrulaması ve ürün kararı sonrası güncel durum.
 
 | # | Alan | Durum | Güncel gerçek / owner |
 |---:|---|---|---|
-| 1 | Identity / type | VAR | `itemKey=shelf_150`, `type=shelf`, `unit=adet`; kanonik owner `src/productionParts.js`. |
+| 1 | Identity / type | VAR | `itemKey=shelf_150`, `type=shelf`, `unit=adet`; kanonik owner `src/items.js`. |
 | 2 | Intrinsic properties | VAR | `150 × 38 × 1.8 cm`; `material=sunta`; `defaultColor=0xffffff`; nominal module width `150`. `38 cm` mevcut runtime projection değerinden doğrulandı; `1.8 cm`, sunta ve panel_197'nin mevcut default surface görünümüyle aynı beyaz renk kullanıcı ürün kararıdır. |
 | 3 | Default state | UYGULANMIYOR | Leaf production Item ayrı project state taşımaz. Raf levhasının doğrulanmış ürün rengi kanonik `defaultColor` olarak Item'dadır; parent shelf module state içindeki `shelfLightingOn` ve duvar strip state'i farklı state sahipliğidir. |
 | 4 | Oluşturma | PARENT-OWNED | Ayrı leaf project factory yok. `createShelfModuleState()` parent `shelf` module instance'ını üretir; BOM expansion kanonik Item'ı `itemKey` ile çözer. |
@@ -23,7 +23,7 @@ Fresh `Version2` runtime doğrulaması ve ürün kararı sonrası güncel durum.
 | 13 | Relationships / reflow | PARENT-OWNED | Parent shelf module continuous wall chain/reflow'a katılır. Leaf rafın ayrı persisted Item-to-Item relationship'i yoktur. |
 | 14 | BOM / composition | VAR | Tekil production Item. `shelf_150` iki-raflı `150` recipe'de ×2, üç-raflı recipe'de ×3; shelf leg miktarları sırasıyla ×4/×6. Quantity parent recipe sahibidir. |
 | 15 | Renderer / asset / override boundary | VAR | `createShelfModule()` artık kanonik Item'dan `depthCm`, `thicknessCm`, `defaultColor` tüketir. `innerWidthM` parent frame içine görsel/teknik fit override'ıdır; shelf heights `SHELF_DIMENSIONS.heightsByCountCm` type-level layout kuralıdır. Ayrı asset yoktur. Renderer ayrı alüminyum front profile üretmez. |
-| 16 | Runtime owners | VAR | Product: `productionParts.js`; BOM: `moduleRecipes.js`; parent state: `designState.js`; behavior: `moduleBehavior.js`; placement/reflow: `modulePlacement.js` + `wallReflow.js`; context/UI: `moduleContextMenu.js` + `main.js`; persistence: `main.js` + `projectStore.js`; renderer: `scene3d.js`. |
+| 16 | Runtime owners | VAR | Product: `items.js`; BOM: `moduleRecipes.js`; parent state: `designState.js`; behavior: `moduleBehavior.js`; placement/reflow: `modulePlacement.js` + `wallReflow.js`; context/UI: `moduleContextMenu.js` + `main.js`; persistence: `main.js` + `projectStore.js`; renderer: `scene3d.js`. |
 | 17 | Regression | VAR | `test/shelfItemsItemContract.test.js`, `test/shelfModule.test.js`, `test/moduleRecipes.test.js`, `test/boardMaterialItemContract.test.js` + full suite/E2E. |
 | 18 | Open decisions / completion | KAPALI / CI BEKLİYOR | Açık ürün property kararı yok: sunta, 18 mm, 38 cm depth ve beyaz default doğrulandı. Item ancak PR checks + squash merge + post-merge Version2 CI FULL GREEN sonrası operational olarak complete sayılır. |
 

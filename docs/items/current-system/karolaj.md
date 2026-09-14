@@ -44,7 +44,7 @@ Zemin modül listesinde değil `stand` state'inde saklanır; normal proje kayıt
 
 ## BOM
 
-Bu zemin girdileri için `moduleRecipes.js` içinde recipe, `moduleContracts.js` içinde modül sözleşmesi veya `productionParts.js` içinde bu zemini uç BOM'a çeviren kayıt yoktur. `rawBomDebug.js` zemin seçimi için recipe çizmez.
+Bu zemin girdileri için `moduleRecipes.js` içinde recipe, `moduleContracts.js` içinde modül sözleşmesi veya `items.js` içinde bu zemini uç BOM'a çeviren kayıt yoktur. `rawBomDebug.js` zemin seçimi için recipe çizmez.
 
 ## Kod kaynakları
 

@@ -6,11 +6,11 @@ Kaynak çalışma ağacı: `/mnt/data/Version2_local`
 
 # 1. Mevcut gerçek kimlik ve tanım
 
-Kaynak: `src/productionParts.js:25`
+Kaynak: `src/items.js:25`
 
 ```js
 connector_single: Object.freeze({
-  partId: 'connector_single',
+  itemKey: 'connector_single',
   name: 'Tekli Aparat',
   type: 'connector',
   unit: 'adet',
@@ -18,21 +18,19 @@ connector_single: Object.freeze({
 }),
 ```
 
-Lookup: `src/productionParts.js:52-54`
+Lookup: `src/items.js` içindeki `getItem()`.
 
 ```js
-export function getProductionPart(partId) {
-  return PRODUCTION_PARTS[partId] ?? null;
-}
+getItem('connector_single')
 ```
 
-Bugünkü gerçek kimlik `partId = connector_single`'dır. Production metadata sahibi `src/productionParts.js` dosyasıdır.
+Bugünkü gerçek kimlik `itemKey = connector_single`'dır. Production metadata sahibi `src/items.js` dosyasıdır.
 
 Mevcut runtime kodunda bağımsız `catalogKey`, module `id`, module `type` veya project-state instance'ı yoktur.
 
 # 2. Doğrudan runtime referansları
 
-`src/` altında `connector_single` yalnızca `src/productionParts.js` ve `src/moduleRecipes.js` dosyalarında doğrudan geçer.
+`src/` altında `connector_single` yalnızca `src/items.js` ve `src/moduleRecipes.js` dosyalarında doğrudan geçer.
 
 Renderer, state, persistence ve placement kodu bu `partId`yi doğrudan okumaz.
 
@@ -65,10 +63,10 @@ Toplam: **27 recipe**.
 ```text
 module type + nominal width + options
 → getModuleRecipe(...)
-→ recipe item { partId: 'connector_single', quantity: N }
+→ recipe item { itemKey: 'connector_single', quantity: N }
 → expandRecipe(...)
-→ getProductionPart('connector_single')
-→ PRODUCTION_PARTS.connector_single
+→ getItem('connector_single')
+→ LEAF_ITEMS.connector_single
 → "Tekli Aparat"
 ```
 
@@ -78,7 +76,7 @@ Ownership ayrımı:
 
 ```text
 quantity / recipe owner = src/moduleRecipes.js
-production metadata     = src/productionParts.js
+production metadata     = src/items.js
 module BOM policy       = src/moduleRecipes.js (moduleContracts üzerinden)
 ```
 
@@ -136,7 +134,7 @@ catalog module descriptor
 → moduleRecipes.js
 → connector_single × sabit recipe miktarı
 → expandRecipe()
-→ productionParts.js
+→ items.js
 → "Tekli Aparat"
 → rawBomDebug.js
 → Raw BOM UI

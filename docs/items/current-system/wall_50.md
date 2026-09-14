@@ -273,6 +273,6 @@ Flat-panel selection feedback width ve strip numarasını gösterir; Ctrl/Cmd il
 - `src/moduleContextMenu.js`
 - `src/main.js`
 - `src/moduleRecipes.js`
-- `src/productionParts.js`
+- `src/items.js`
 - `src/rawBomDebug.js`
 - `src/imageAssetReferences.js`

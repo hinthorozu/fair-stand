@@ -32,7 +32,7 @@ Aktif recipe yolu:
 module recipe
 → { itemKey: 'connector_single', quantity: N }
 → expandRecipe()
-→ getProductionItem('connector_single')
+→ getItem('connector_single')
 → quantity + unit=adet + production metadata
 ```
 
@@ -44,9 +44,9 @@ Mevcut sistemde bağımsız `connector_single` proje örneği/state/kalıcılık
 
 ## 5. Uygulanan geçiş
 
-- `src/productionParts.js`: kanonik `itemKey = connector_single`.
+- `src/items.js`: kanonik `itemKey = connector_single`.
 - `src/moduleRecipes.js`: 27/27 recipe kullanımı `itemKey` oldu.
-- `getProductionPart()` eski lookup compatibility olarak `getProductionItem()` yolunu kullanmaya devam eder.
+- Tek kayıt lookup `getItem()`dır; eski `getProductionPart` / `getProductionItem` yoktur.
 - Diğer production Item'lar bu migration nedeniyle topluca `itemKey`e geçirilmez.
 - Recipe quantity aynı yapı korunur.
 

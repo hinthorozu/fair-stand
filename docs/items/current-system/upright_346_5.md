@@ -3,7 +3,7 @@
 # upright_346_5 — Tarihî envanter
 
 ## 1. Identity / type — VAR
-Kanonik source `src/productionParts.js`: `itemKey=upright_346_5`, `type=upright`, `unit=adet`, name `Dikme 346,5 cm`. Legacy `partId` is not the kanonik identity.
+Kanonik source `src/items.js`: `itemKey=upright_346_5`, `type=upright`, `unit=adet`, name `Dikme 346,5 cm`. Legacy `partId` is not the kanonik identity.
 
 ## 2. Intrinsic properties — VAR
 Kanonik Item properties: `lengthCm=346.5`, `thicknessCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Material/color are product defaults; specialized renderer values may explicitly override them without changing the Item default.
@@ -42,13 +42,13 @@ Projects persist parent module state; no separate `upright_346_5` instance is pe
 No independent leaf relationship/reflow state. Parent modules own relationships.
 
 ## 14. BOM / composition — VAR
-`upright_346_5` is a leaf BOM Item used in 18 verified parent recipes, quantity `2` in every occurrence. Parent recipes own quantity; recipe expansion resolves metadata through kanonik `itemKey` → `getProductionItem()`.
+`upright_346_5` is a leaf BOM Item used in 18 verified parent recipes, quantity `2` in every occurrence. Parent recipes own quantity; recipe expansion resolves metadata through kanonik `itemKey` → `getItem()`.
 
 ## 15. Renderer / asset / override boundary — VAR
 Renderer builds procedural parent-module frame/post meshes and does not use `upright_346_5` as mesh identity. Production `346.5 cm / 8 cm` is not forced onto renderer geometry. Visual renderer constants remain explicit specialized render overrides; they are not a second product source of truth.
 
 ## 16. Runtime owners — VAR
-Product metadata: `src/productionParts.js`; quantity/composition: `src/moduleRecipes.js`; module behavior/state/persistence: parent module runtime; renderer: `src/scene3d.js`.
+Product metadata: `src/items.js`; quantity/composition: `src/moduleRecipes.js`; module behavior/state/persistence: parent module runtime; renderer: `src/scene3d.js`.
 
 ## 17. Regression — VAR
 `test/upright3465ItemContract.test.js` protects identity, dimensions and 18 recipe quantities. `test/uprightIntrinsicProperties.test.js` protects `material='alüminyum'` and `defaultColor=0xd0d3d4` for the upright family.
