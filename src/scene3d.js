@@ -1838,9 +1838,22 @@ export function createStandScene(
     };
   }
 
+  function syncPlacementGhostDom() {
+    const canvas = renderer.domElement;
+    if (!canvas?.dataset) return;
+    if (!placementGhost?.root?.visible) {
+      canvas.dataset.placementGhost = 'hidden';
+      return;
+    }
+    canvas.dataset.placementGhost = placementGhost.colorHex === PLACEMENT_VALID_COLOR
+      ? 'valid'
+      : 'invalid';
+  }
+
   function disposePlacementGhost() {
     if (!placementGhost) return;
     placementGhost.root.visible = false;
+    syncPlacementGhostDom();
   }
 
   function destroyPlacementGhost() {
@@ -1848,6 +1861,7 @@ export function createStandScene(
     scene.remove(placementGhost.root);
     placementGhost.material?.dispose?.();
     placementGhost = null;
+    syncPlacementGhostDom();
   }
 
   function getPlacementGhostDimensions(moduleOrWidthCm) {
@@ -2029,6 +2043,7 @@ export function createStandScene(
     }
     applyPlacementToGroup(ghost.root, placement, ghost.widthCm);
     ghost.root.visible = true;
+    syncPlacementGhostDom();
   }
 
   function disposeDragBadge() {
@@ -2573,12 +2588,13 @@ export function createStandScene(
       standYCm: stageLayout.depthCm,
     });
     if (requiresShortUpJointSnap(moduleState) && !magneticSnap) {
-      disposePlacementGhost();
       const message = 'Yalnız short-up, profil veya banko birleşimine yerleştirilir.';
+      showPlacementGhost(moduleState, snapped.placement, false);
       showPlacementFeedback(message, { clientX, clientY });
       return {
         ok: false,
         message,
+        placement: { ...snapped.placement },
       };
     }
     const desiredPlacement = magneticSnap?.placement ?? snapped.placement;
@@ -2930,8 +2946,8 @@ export function createStandScene(
       standYCm: stageLayout.depthCm,
     });
     if (requiresShortUpJointSnap(moduleState) && !magneticSnap) {
-      disposePlacementGhost();
       const message = 'Yalnız short-up, profil veya banko birleşimine yerleştirilir.';
+      showPlacementGhost(moduleState, snapped.placement, false);
       showPlacementFeedback(message, { clientX: event.clientX, clientY: event.clientY });
       dragSession.preview = {
         placement: snapped.placement,

@@ -1,30 +1,30 @@
 {
   "schemaVersion": 2,
-  "id": "flat-panel-display-name",
-  "kind": "architecture",
-  "summary": "flat-panel katalog adı Düz Panel XXXX yerine Panel XXXX olur. itemKey, type, recipe ve davranış aynıdır.",
+  "id": "invalid-placement-ghost-visible",
+  "kind": "bugfix",
+  "summary": "Pointer için placement pozisyonu varken ghost her Item'da görünür; geçersiz kırmızı, geçerli yeşil. upright_346_5 short-up-joint kaçırınca ghost artık gizlenmez.",
   "owners": [
-    "src/items.js"
+    "src/scene3d.js"
   ],
   "sourceOfTruth": [
-    "docs/items/ITEM_CONSOLIDATION_PLAN.md",
-    "docs/items/contract/ITEM_CONTRACT.md",
-    "src/items.js"
+    "MODULE_BEHAVIOR_STANDARD.md",
+    "src/moduleBehavior.js",
+    "src/scene3d.js"
   ],
   "impact": {
-    "catalog": "affected",
+    "catalog": "not-applicable",
     "behavior": "affected",
-    "state": "not-applicable",
+    "state": "affected",
     "placement": "affected",
-    "renderer": "not-applicable",
+    "renderer": "affected",
     "persistence": "not-applicable",
-    "bom": "affected",
-    "ui": "not-applicable",
+    "bom": "not-applicable",
+    "ui": "affected",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
-    "performance": "not-applicable",
+    "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
@@ -34,6 +34,7 @@
     "mode": "full-system",
     "affectedFiles": [
       ".github/change-contract.json",
+      "MODULE_BEHAVIOR_STANDARD.md",
       "README.md",
       "ROADMAP.md",
       "ROADMAP_PHASE_4.md",
@@ -42,6 +43,8 @@
       "docs/items/ITEM_CONSOLIDATION_PLAN.md",
       "docs/items/ITEM_LIST.md",
       "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md",
+      "docs/items/definitions/upright_346_5.md",
+      "e2e/invalid-placement-ghost.spec.mjs",
       "index.html",
       "scripts/add-tv-sizes.py",
       "scripts/add-video-wall-2x2.py",
@@ -74,13 +77,15 @@
       "src/stripOccupancy.js",
       "src/systemChangeContract.js",
       "src/wall.js",
-      "src/wallReflow.js"
+      "src/wallReflow.js",
+      "test/globalSilhouetteGhost.test.js"
     ],
     "affectedTests": [
       "e2e/commercial-items-contract.spec.mjs",
       "e2e/f010-module-construction.spec.mjs",
-      "e2e/free-props-collision-none.spec.mjs",
       "e2e/f011-module-behavior.spec.mjs",
+      "e2e/free-props-collision-none.spec.mjs",
+      "e2e/invalid-placement-ghost.spec.mjs",
       "e2e/mini-fridge-dimensions.spec.mjs",
       "e2e/plastic-trash-bin-module.spec.mjs",
       "e2e/shelf-board-appearance.spec.mjs",
@@ -113,12 +118,12 @@
       "test/colorEditorMainIntegration.test.js",
       "test/commercialItemsContract.test.js",
       "test/connectorBom.test.js",
+      "test/cornerPanelsItemContract.test.js",
       "test/cornerPlacement.test.js",
       "test/counterModule.test.js",
       "test/counterRecipes.test.js",
       "test/counterTopDefaultColor.test.js",
       "test/counterTopsItemContract.test.js",
-      "test/cornerPanelsItemContract.test.js",
       "test/coverModeExclusivity.test.js",
       "test/ctrlMultiSelect.test.js",
       "test/depotBackWallRecipe.test.js",
@@ -129,7 +134,6 @@
       "test/developerEntrypointDocs.test.js",
       "test/doorCompositeItemContract.test.js",
       "test/doorLeafItemContract.test.js",
-      "test/itemDocsRuntimeAlignment.test.js",
       "test/eamesTableChairSetContract.test.js",
       "test/f017RendererSurfacePersist.test.js",
       "test/f027SceneReset.test.js",
@@ -140,8 +144,8 @@
       "test/furnitureItemsContract.test.js",
       "test/glassShelfItemContract.test.js",
       "test/glassTableContract.test.js",
-      "test/gltfLoadCache.test.js",
       "test/globalSilhouetteGhost.test.js",
+      "test/gltfLoadCache.test.js",
       "test/helpGuide.test.js",
       "test/historicalDocumentationStatus.test.js",
       "test/horizontalPanelRails.test.js",
@@ -151,6 +155,7 @@
       "test/imageAssetLiveDelete.test.js",
       "test/indoorPlantItemsContract.test.js",
       "test/indoorPlants.test.js",
+      "test/itemDocsRuntimeAlignment.test.js",
       "test/kettle.test.js",
       "test/lCounter100Contract.test.js",
       "test/lCounter150Contract.test.js",
@@ -159,11 +164,11 @@
       "test/lCounterPlacement.test.js",
       "test/lCounterSideGeometry.test.js",
       "test/ledFloodlightModule.test.js",
-      "test/lightingItemsContract.test.js",
       "test/lightboxFabric.test.js",
       "test/lightboxFabricAppearance.test.js",
       "test/lightboxFabricLighting.test.js",
       "test/lightboxFabricPerformance.test.js",
+      "test/lightingItemsContract.test.js",
       "test/materialAppearance.test.js",
       "test/miniFridge.test.js",
       "test/miniFridgeTopLabel.test.js",
@@ -333,7 +338,6 @@
       "docs/items/current-system/hali.md",
       "docs/items/current-system/illuminated-foam.md",
       "docs/items/current-system/karolaj.md",
-      "docs/items/current-system/parke.md",
       "docs/items/current-system/panel_147_5.md",
       "docs/items/current-system/panel_197.md",
       "docs/items/current-system/panel_48_5.md",
@@ -342,6 +346,7 @@
       "docs/items/current-system/panel_corner_192.md",
       "docs/items/current-system/panel_corner_42_5.md",
       "docs/items/current-system/panel_corner_92.md",
+      "docs/items/current-system/parke.md",
       "docs/items/current-system/profile_140_5.md",
       "docs/items/current-system/profile_190.md",
       "docs/items/current-system/profile_41_5.md",
@@ -397,10 +402,10 @@
       "docs/items/definitions/base_top_107_50.md",
       "docs/items/definitions/base_top_157_50.md",
       "docs/items/definitions/base_top_206_50.md",
+      "docs/items/definitions/chair_eames.md",
       "docs/items/definitions/connector_corner.md",
       "docs/items/definitions/connector_double.md",
       "docs/items/definitions/connector_single.md",
-      "docs/items/definitions/chair_eames.md",
       "docs/items/definitions/connector_start.md",
       "docs/items/definitions/desk_banko_100.md",
       "docs/items/definitions/desk_banko_100_L.md",
@@ -470,30 +475,30 @@
         "F-045"
       ]
     },
-    "notes": "Yalnız görünen ad. itemKey, recipe miktarı, type ve placement kuralı aynı. Katalog etiketi item.name okur."
+    "notes": "Yalnız invalid-preview ghost görünürlüğü. Snap kuralı, BOM, itemKey ve bırakma reddi aynı. Ghost gizleme yalnız pozisyon yokken kalır."
   },
   "tests": {
     "targeted": [
-      "test/wallFlatPanelItemsContract.test.js"
+      "test/globalSilhouetteGhost.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/wall-flat-panel-items-contract.spec.mjs",
+        "e2e/invalid-placement-ghost.spec.mjs",
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "items.js catalog adı ve modulePlacement yorumu catalog/behavior/placement/bom domain'lerini etkiler. Düz panel katalog E2E itemKey ile ekler; smoke sahne kurulumunu doğrular."
+      "reason": "behavior/placement/renderer/ui domain'leri canvas ghost görünürlüğünü etkiler. upright_346_5 geçersiz kırmızı ghost ve buzdolabı geçerli yeşil ghost tarayıcıda doğrulanır."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Görünen ad değişir. Kimlik ve BOM aynı."
+    "notes": "Bırakma hâlâ snap ister. Değişen yalnız geçersiz önizlemede ghost'un kırmızı kalmasıdır."
   },
   "migration": {
     "required": false,
-    "notes": "Kalıcılık itemKey kullanır; kayıtlı projeler ad alanına bağlı değildir."
+    "notes": "Kalıcılık ve Item kimliği değişmez."
   },
-  "rollback": "COMPOSITE_ITEMS name alanları Düz Panel XXXX metnine döner."
+  "rollback": "scene3d.js short-up-joint kaçırınca disposePlacementGhost() çağrısına döner."
 }
