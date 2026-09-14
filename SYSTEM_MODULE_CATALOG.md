@@ -7,7 +7,7 @@ Bu dosya insan/AI için **okunabilir katalog indeksi**dir. Runtime source-of-tru
 - Katalog kimliği, label, type ve nominal ölçüler: `src/catalog.js`
 - Modül contract/profile/BOM politikası: `src/moduleContracts.js`
 - Gerçek BOM reçeteleri: `src/moduleRecipes.js`
-- Üretim parçaları ve gerçek üretim ölçüleri: `src/productionParts.js`
+- Üretim parçaları ve gerçek üretim ölçüleri: `src/items.js`
 - State factory/defaultları: `src/designState.js`
 - Placement/behavior: `src/moduleBehavior.js` + placement core
 

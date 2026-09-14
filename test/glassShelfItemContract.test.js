@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { getProductionItem } from '../src/productionParts.js';
+import { getProductionItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
 import { GLASS_APPEARANCE, getMaterialAppearance } from '../src/theme.js';
 

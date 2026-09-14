@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem, getProductionPart, listProductionParts } from '../src/productionParts.js';
+import { getProductionItem, getProductionPart, listProductionParts } from '../src/items.js';
 import {
   getExpandedModuleRecipe,
   getExpandedStraightWallRecipe,

@@ -903,7 +903,7 @@ Bugünkü module tabanlı sistem incelenirken başlıca canonical/aktif kaynakla
 - State oluşturucu/default/örnek verileri: `src/designState.js`
 - Yerleşim/move/rotation/collision/snap/ghost ve diğer behavior: `src/moduleBehavior.js` ve ilgili yerleşim akışı
 - Recipe BOM: `src/moduleRecipes.js`
-- Tekil üretim kalemleri/production Item üstverisi, dimensions ve ürüne özgü/default özellikler: `src/productionParts.js`
+- Tekil üretim kalemleri/production Item metadata'sı, dimensions ve intrinsic/default properties: `src/items.js`
 - Context menu: `src/moduleContextMenu.js`
 - Scene/selection/render interaction'ları: `src/scene3d.js` ve ilgili interaction dosyaları
 - Theme/default appearance gibi Item'a ait olabilecek mevcut property adayları: `src/theme.js`, state/default kaynakları ve ilgili renderer girişleri

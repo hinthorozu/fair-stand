@@ -37,7 +37,7 @@ Universal gate gerçek etki alanını ve bağımlılıkları bulur; `ITEM_CONTRA
 | Placement / move snap / rotation / collision / ghost | `src/moduleBehavior.js` + placement core |
 | Runtime module state construction | `src/designState.js` |
 | Üretim reçetesi | `src/moduleRecipes.js` |
-| Üretim parçası | `src/productionParts.js` |
+| Üretim parçası / Item registry | `src/items.js` |
 | Otomatik depo planı | `src/autoDepot.js` |
 | Unit/integration regression | `test/` ve mevcut legacy `tests/` |
 | Real-browser regression | `e2e/` + `playwright.config.mjs` |

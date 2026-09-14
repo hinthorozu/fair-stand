@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { getShelfProductionItem, getProductionItem } from '../src/productionParts.js';
+import { getShelfProductionItem, getProductionItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
 
 const SHELF_CASES = Object.freeze({

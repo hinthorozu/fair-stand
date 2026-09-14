@@ -117,7 +117,6 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/modulePlacement.js': frozenDomains('behavior', 'placement'),
   'src/moduleRecipes.js': frozenDomains('bom'),
   'src/placementFeedback.js': frozenDomains('ui', 'placement'),
-  'src/productionParts.js': frozenDomains('bom'),
   'src/projectActionSaveGuard.js': frozenDomains('ui', 'persistence', 'storage', 'importExport'),
   'src/projectNaming.js': frozenDomains('ui'),
   'src/projectImportValidation.js': frozenDomains('importExport', 'persistence', 'state'),

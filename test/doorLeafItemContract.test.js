@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { getItemSurfaceCapabilities } from '../src/itemCapabilities.js';
 import { createDoorModuleState, normalizeModuleItemState } from '../src/designState.js';
 import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
-import { getDoorLeafProductionItem, getProductionItem } from '../src/productionParts.js';
+import { getDoorLeafProductionItem, getProductionItem } from '../src/items.js';
 
 test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
   const item = getProductionItem('door_leaf_100');

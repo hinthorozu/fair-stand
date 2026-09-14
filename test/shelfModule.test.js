@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { MODULE_CATALOG, SHELF_DIMENSIONS } from '../src/catalog.js';
 import { createShelfModuleState, duplicateModuleState } from '../src/designState.js';
 import { snapPlacementToStand } from '../src/modulePlacement.js';
-import { getShelfProductionItem } from '../src/productionParts.js';
+import { getShelfProductionItem } from '../src/items.js';
 
 test('shelf catalog exposes 100 150 200 cm widths in 2 and 3 shelf variants', () => {
   const variants = [

@@ -6,12 +6,13 @@ import {
   getFurnitureItemForType,
   getItem,
   getTopLightItemForType,
+  getDoorLeafProductionItem,
+  getProductionItem,
   getShowcaseBodyDefinition,
   getShowcaseItemKeyForType,
   resolveWallMediaMetrics,
 } from './items.js';
 import { getStraightWallNominalWidthForProfileItem } from './moduleRecipes.js';
-import { getDoorLeafProductionItem, getProductionItem } from './productionParts.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 
 const DEFAULT_PANEL_COLOR = '#ffffff';

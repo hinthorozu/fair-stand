@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { getItem } from '../src/items.js';
-import { getProductionItem } from '../src/productionParts.js';
+import { getProductionItem } from '../src/items.js';
 import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
 
 test('fake aggregate showcase production parts are removed', () => {

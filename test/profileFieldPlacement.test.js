@@ -8,7 +8,7 @@ import { getModuleBehavior, getModuleMagneticSnapStrategy } from '../src/moduleB
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { placementsOverlap, snapPlacementToModules } from '../src/modulePlacement.js';
 import { getExpandedStraightWallRecipe } from '../src/moduleRecipes.js';
-import { getProductionItem } from '../src/productionParts.js';
+import { getProductionItem } from '../src/items.js';
 
 const PROFILE_KEYS = ['profile_190', 'profile_140_5', 'profile_91', 'profile_41_5'];
 

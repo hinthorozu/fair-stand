@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getProductionItem } from '../src/productionParts.js';
+import { getProductionItem } from '../src/items.js';
 
 const COUNTER_TOP_KEYS = [
   'counter_top_110_60',
