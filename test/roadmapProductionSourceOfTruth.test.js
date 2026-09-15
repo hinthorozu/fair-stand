@@ -17,6 +17,11 @@ const FORBIDDEN_DUPLICATED_DATASET_MARKERS = [
   '13 × tekli/düz bağlantı aparatı',
 ];
 
+const FORBIDDEN_STALE_IDENTITY_MARKERS = [
+  'partId kullanan',
+  'bağımsız production-part sözlüğü',
+];
+
 test('roadmaps point to canonical production/recipe owners instead of copying the dataset', async () => {
   for (const roadmapUrl of ROADMAPS) {
     const source = await readFile(roadmapUrl, 'utf8');
@@ -24,12 +29,21 @@ test('roadmaps point to canonical production/recipe owners instead of copying th
     assert.match(source, /src\/items\.js/);
     assert.match(source, /src\/moduleRecipes\.js/);
     assert.match(source, /Production dataset kuralı/);
+    assert.match(source, /itemKey/);
 
     for (const marker of FORBIDDEN_DUPLICATED_DATASET_MARKERS) {
       assert.equal(
         source.includes(marker),
         false,
         `${roadmapUrl.pathname} duplicates canonical production data via: ${marker}`,
+      );
+    }
+
+    for (const marker of FORBIDDEN_STALE_IDENTITY_MARKERS) {
+      assert.equal(
+        source.includes(marker),
+        false,
+        `${roadmapUrl.pathname} still claims stale partId / production-part identity: ${marker}`,
       );
     }
   }

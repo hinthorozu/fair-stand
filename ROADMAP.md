@@ -4,7 +4,7 @@
 >
 > Roadmap maddeleri yalnız isim benzerliğine göre tamamlandı sayılmaz. Durum işaretleri repository source code + regression testleriyle doğrulanır.
 >
-> **Production dataset kuralı:** Fiziksel parça ölçüleri, part ID'leri ve recipe miktarları roadmap içinde ikinci bir canonical veri seti olarak tutulmaz. Bu verilerin canonical sahipleri `src/items.js` ve `src/moduleRecipes.js`; BOM politika sahibi `src/moduleContracts.js`'dir.
+> **Production dataset kuralı:** Fiziksel parça ölçüleri, `itemKey` kimlikleri ve recipe miktarları roadmap içinde ikinci bir canonical veri seti olarak tutulmaz. Bu verilerin canonical sahipleri `src/items.js` ve `src/moduleRecipes.js`; BOM politika sahibi `src/moduleContracts.js`'dir.
 
 ## Proje durumu
 
@@ -19,11 +19,11 @@
 
 FAZ 4 tamamen sıfırdan başlamıyor. Repository incelemesinde şu altyapılar **mevcut ve testli** olarak doğrulandı:
 
-- `src/items.js` içinde stabil `partId` kullanan fiziksel parça sözlüğü mevcut.
-- Standart panel/profil/dikme/connector ailelerinin production metadata'sı canonical production-part katmanında mevcut.
+- `src/items.js` kanonik Item kaydını tutar; kimlik `itemKey`'dir. Item kaydında `partId` yoktur.
+- Standart panel / profil / dikme / connector leaf aileleri `LEAF_ITEMS` ve `getItem()` ile tanımlıdır.
 - `src/moduleRecipes.js` içinde standart duvar ve çeşitli mevcut modül reçeteleri mevcut.
-- Recipe'lerin production-part metadata ile genişletilebildiği API mevcut.
-- `test/moduleRecipes.test.js` canonical production-part / recipe davranışını doğruluyor.
+- Reçete satırları `itemKey` taşır; `expandRecipe` child kaydı `getItem()` ile bağlar.
+- `test/moduleRecipes.test.js` `itemKey` kimliğini ve standart duvar reçetelerini doğrular.
 
 Buna karşılık aşağıdakiler **henüz tamamlandı kabul edilmez**:
 
@@ -124,8 +124,8 @@ Detay: `ROADMAP_PHASE_5_6.md`
 
 Roadmap, üretim veri tablosu değildir. Güncel üretim gerçekleri aşağıdaki canonical kaynaklardan okunur:
 
-- `src/items.js` — stabil production part kimlikleri, kategoriler, birimler ve fiziksel metadata,
-- `src/moduleRecipes.js` — module recipe miktarları, part referansları ve varyant çözümü,
+- `src/items.js` — kanonik `itemKey` kimlikleri, type, birim ve fiziksel metadata,
+- `src/moduleRecipes.js` — module recipe miktarları, `itemKey` referansları ve varyant çözümü,
 - `src/moduleContracts.js` — modülün BOM politikası (`recipe`, `decision-required` vb.),
 - `test/moduleRecipes.test.js` ve ilgili contract testleri — bu veri/ilişkilerin regresyon güvencesi.
 
