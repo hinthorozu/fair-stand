@@ -11,9 +11,9 @@ test('package exposes universal change-gate and Playwright E2E commands', () => 
   assert.equal(packageJson.scripts.e2e, 'playwright test');
 });
 
-test('canonical CI targets Version2 for pull requests and post-merge pushes', () => {
-  assert.match(ciWorkflow, /push:\s*\n\s*branches: \[Version2\]/);
-  assert.match(ciWorkflow, /pull_request:\s*\n\s*branches: \[Version2\]/);
+test('canonical CI targets RefactorItem for pull requests and post-merge pushes', () => {
+  assert.match(ciWorkflow, /push:\s*\n\s*branches: \[RefactorItem\]/);
+  assert.match(ciWorkflow, /pull_request:\s*\n\s*branches: \[RefactorItem\]/);
   assert.doesNotMatch(ciWorkflow, /branches: \[ROG\]/);
 });
 
