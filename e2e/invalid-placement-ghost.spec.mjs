@@ -54,6 +54,11 @@ async function previewCatalogDrag(page, itemKey, xRatio, yRatio) {
   }, { key: itemKey, xr: xRatio, yr: yRatio });
 }
 
+function scenePlacementCanvas(page) {
+  // Sahne canvas'ı #viewport'un doğrudan çocuğudur; ViewCube iç içe ikinci canvas'tır.
+  return page.locator('#viewport > canvas');
+}
+
 async function saveAndReadProject(page) {
   const saveButton = page.locator('#save-project');
   await saveButton.click();
@@ -86,7 +91,7 @@ test('upright_346_5 keeps a red ghost when short-up-joint snap misses', async ({
   await expect(viewport).toBeVisible();
   await previewCatalogDrag(page, 'upright_346_5', 0.52, 0.72);
 
-  await expect(page.locator('#viewport canvas')).toHaveAttribute('data-placement-ghost', 'invalid');
+  await expect(scenePlacementCanvas(page)).toHaveAttribute('data-placement-ghost', 'invalid');
   await expect(page.locator('body')).toContainText('Yalnız short-up, profil veya banko birleşimine yerleştirilir.');
 
   const box = await viewport.boundingBox();
@@ -107,6 +112,6 @@ test('valid free-floor catalog preview keeps a green ghost', async ({ page }) =>
   await createIslandStand(page, 'Valid Ghost Fridge');
   await openCatalogCard(page, 'MINI_FRIDGE_AVANTI');
   await previewCatalogDrag(page, 'MINI_FRIDGE_AVANTI', 0.52, 0.82);
-  await expect(page.locator('#viewport canvas')).toHaveAttribute('data-placement-ghost', 'valid');
+  await expect(scenePlacementCanvas(page)).toHaveAttribute('data-placement-ghost', 'valid');
   expect(pageErrors).toEqual([]);
 });
