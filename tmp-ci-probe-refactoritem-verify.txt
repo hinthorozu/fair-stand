@@ -1,0 +1,1 @@
+Geçici CI probe. Mevcut çalışan koda dokunmaz. RefactorItem hedefli PR'da verify check'inin otomatik çalışıp çalışmadığını ve merge'ün tamamlanmadan engellenip engellenmediğini gözlemek için eklendi.
