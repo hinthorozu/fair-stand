@@ -61,6 +61,8 @@ For modules that need a specific real-model or custom preview, declare the behav
 
 `scene3d.js` must route ghost creation through `getModuleGhostBehavior()` and the declared renderer strategy.
 
+Catalog drag ve sahnedeki taşıma sırasında pointer için bir placement pozisyonu varsa ghost görünür. Geçerli konum yeşil, geçersiz konum kırmızıdır. Ghost yalnız pozisyon yokken gizlenir: stand yok, zemin/duvar noktası yok veya sürükleme bitti. `short-up-joint` kaçırılması (ör. `upright_346_5`) bırakmayı reddeder ama kırmızı ghost'u kapatmaz.
+
 ## Placement contract
 
 Placement mode expresses editor intent:

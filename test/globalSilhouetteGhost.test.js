@@ -34,6 +34,21 @@ test('placement ghost is a singleton instead of a per-model cache', () => {
   assert.match(scene, /function disposePlacementGhost\(\) \{\n    if \(!placementGhost\) return;\n    placementGhost\.root\.visible = false/);
 });
 
+test('invalid short-up-joint miss keeps a red ghost instead of hiding it', () => {
+  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  assert.match(scene, /function syncPlacementGhostDom\(\)/);
+  assert.match(scene, /canvas\.dataset\.placementGhost = 'hidden'/);
+  assert.match(scene, /canvas\.dataset\.placementGhost = placementGhost\.colorHex === PLACEMENT_VALID_COLOR/);
+  assert.equal(
+    (scene.match(/if \(requiresShortUpJointSnap\(moduleState\) && !magneticSnap\) \{\n      const message = 'Yalnız short-up, profil veya banko birleşimine yerleştirilir\.';\n      showPlacementGhost\(moduleState, snapped\.placement, false\);/g) || []).length,
+    2,
+  );
+  assert.doesNotMatch(
+    scene,
+    /if \(requiresShortUpJointSnap\(moduleState\) && !magneticSnap\) \{\n      disposePlacementGhost\(\);/,
+  );
+});
+
 test('placement ghost key distinguishes occupancy so hanging strip variants are not reused', () => {
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
   const start = scene.indexOf('function getPlacementGhostKey');
