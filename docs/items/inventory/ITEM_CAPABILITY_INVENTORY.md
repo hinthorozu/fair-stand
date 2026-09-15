@@ -491,24 +491,35 @@ Resolve alias: `moduleType`, `counterShape` (`normalizeCatalogDescriptor`).
 
 ## 11. Delik kontrolü
 
-Tarama token’ları satıra bağlandı. Ek kanıt:
+Aşağıdaki token’lar taranan dosyada geçiyor ve **ayrı yetenek satırı değil**; kanıt:
 
-- `src/stripOccupancy.js`: `align` ∈ `{top, bottom}` — Item kaydında yalnız `top`; `bottom` kabulü bölüm 1 notunda.
-- `getModuleCollisionHeightRangeCm`: `collisionHeight` alanını okumaz; davranış kaydında değer yine `full`.
+| token | nerede görüldü | neden satır değil |
+|---|---|---|
+| `kind: 'surface'` / `'decoration'` | `src/scene3d.js` `userData.kind` | renderer mesh sınıfları; Item kutusu alanı değil |
+| `stripNumber` | `pickModuleContext`, menü başlığı, `describeSurfaceSelection` | `stripIndex` görünen 1-tabanlı etiket |
+| `moduleIndex`, `moduleId`, `moduleType` | `src/scene3d.js` `userData` | proje örnek kimliği / type kopyası |
+| `surfaceId` | `src/scene3d.js` | yüzey `id` kopyası |
+| `backing`, `selectionFrame`, `colorTargets` | `src/scene3d.js` | renderer yardımcı mesh |
+| `GLASS_APPEARANCE`, `MESH_FABRIC_OPACITY` | `src/scene3d.js` | malzeme sabiti; yetenek adı değil |
+| `overlay.userData.fabricState` | `src/scene3d.js` | kılıf state kopyası (`FABRIC_KEYS` satırda) |
+| `createId('module'/'surface')` | `src/designState.js` | uuid üretimi |
+| `WALL_WIDTH_TO_ITEM_KEY` vb. resolver map | `src/designState.js` | `itemKey` çözüm tablosu; yeni alan değil |
+| `module-picker-*` DOM | `src/moduleContextMenu.js` | `add-right`/`add-left` katalog seçici UI |
+| reçete `items[].quantity` sayıları | `src/moduleRecipes.js` | alan satırda; sayı kopyası uydurma yasağı |
+| `self` / `decision-required` string | `src/itemBom.js` içinde **yok** | yalnız `src/moduleContracts.js` policy |
+| `floorType` / `depot` factory | `src/designState.js` içinde **yok** | stand `index.html` / `scene3d.setFloorType` |
+| `#load-project` | `index.html` içinde **yok** | `#open-project` |
+| `parseHexInput` | `src/colorEditorInputs.js` içinde **yok** | `syncFromHex` |
+| `canApplyColorToSelection` | `src/selectionFeedback.js` içinde **yok** | `describeSurfaceSelection` |
+| `collisionHeight` okuma dalı | `getModuleCollisionHeightRangeCm` içinde **yok** | alan yine `WALL_BEHAVIOR` kaydında `full` |
+| `bodySurfaces` | runtime **yok** | test anti-alan |
+| `ROG` | bu tur taranmadı | dokunulmadı |
+
+Ek kanıt:
+
+- `src/stripOccupancy.js`: `align` ∈ `{top, bottom}` — Item kaydında yalnız `top`.
 - `ITEM_SURFACE_CAPABILITIES_BY_TYPE` tek type: `door-leaf`. Cam/lightbox panel yolu `selectionMode === 'panel'`.
-- `itemBom.js` içinde `self` / `decision-required` string yok; sözleşme `moduleContracts.js`.
-- `designState.js` içinde `floorType` / `automaticWall` / `depot` state factory yok (stand `index.html` / `main.js` / `scene3d.setFloorType`).
-- `#load-project` yok; açma `#open-project`.
-- `colorEditorInputs.js` `parseHexInput` yok; hex `syncFromHex`.
-- `selectionFeedback.js` `canApplyColorToSelection` yok; `describeSurfaceSelection`.
-- Tahmin yazılmadı: snap 25, 210°, “5 yüz UI” kodda yok. Banko yüz anahtarları koddaki isimler.
-
-Bilinçli satır **yapılmayan** (yetenek adı değil veya tarama dışı):
-
-- Three.js iç değişkenleri (`MeshStandardMaterial`, `GLASS_APPEARANCE`, `MESH_FABRIC_OPACITY`).
-- Reçete `quantity` sayılarının ikinci kopyası (alan satırda; değer uydurulmaz).
-- `createId` / `crypto.randomUUID`.
-- `ROG` — dokunulmadı.
+- Tahmin yazılmadı: snap 25, 210°, “5 yüz UI” kodda yok.
 
 Satıra **bilinçli bağlanan ama Item formu olmayan**: bölüm 9 (`stand-proje`) + `STAND_DIMENSIONS` + kamera kısayolları.
 
