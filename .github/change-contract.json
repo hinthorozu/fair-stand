@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "invalid-placement-ghost-e2e-canvas-locator",
   "kind": "bugfix",
-  "summary": "invalid-placement-ghost E2E, ViewCube canvas yüzünden #viewport canvas strict-mode fail veriyordu; locator sahne canvas'ına (#viewport > canvas) indirgendi. Ürün/placement davranışı değişmedi.",
+  "summary": "invalid-placement-ghost E2E: sahne canvas locator'ı ViewCube'dan ayrıldı; geçerli yeşil ghost önizlemesi CI kadrajında activeFloor isabeti için sağlamlaştırıldı. Ürün/placement davranışı değişmedi.",
   "owners": [
     "e2e/invalid-placement-ghost.spec.mjs"
   ],
@@ -42,7 +42,7 @@
       "affected": [],
       "reviewedNotAffected": []
     },
-    "notes": "Yalnız E2E locator. CI logunda sahne canvas'ında data-placement-ghost=invalid/valid zaten vardı; ikinci eşleşme ViewCube canvas'ıydı. Snap, ghost rengi, bırakma reddi ve itemKey değişmez."
+    "notes": "Yalnız E2E. Locator #viewport > canvas (ViewCube hariç). Geçerli yeşil ghost CI kadrajında 0.52/0.82 activeFloor'u kaçırıyordu; stand içi oran + yedek dragover eklendi. Snap, ghost rengi, bırakma reddi ve itemKey değişmez."
   },
   "tests": {
     "targeted": [
@@ -55,7 +55,7 @@
       "targeted": [
         "e2e/invalid-placement-ghost.spec.mjs"
       ],
-      "reason": "Version2 CI'daki iki fail bu spec'in #viewport canvas locator'ındadır. Hedefli Playwright koşusu ViewCube ile sahne canvas'ını ayırdığını doğrular."
+      "reason": "Version2 CI fail'leri bu spec'tedir: ViewCube locator çakışması ve CI kadrajında activeFloor kaçırma. Hedefli Playwright kırmızı/yeşil ghost attribute'unu doğrular."
     }
   },
   "risk": {
