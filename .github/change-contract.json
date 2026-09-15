@@ -1,16 +1,18 @@
 {
   "schemaVersion": 2,
-  "id": "invalid-placement-ghost-e2e-canvas-locator",
+  "id": "roadmap-itemkey-identity-alignment",
   "kind": "bugfix",
-  "summary": "invalid-placement-ghost E2E: sahne canvas locator'ı ViewCube'dan ayrıldı; geçerli yeşil ghost önizlemesi CI kadrajında activeFloor isabeti için sağlamlaştırıldı. Ürün/placement davranışı değişmedi.",
+  "summary": "ROADMAP.md ve ROADMAP_PHASE_4.md, items.js kimliğini partId / production-part sözlüğü olarak yazmayı bırakır; kanonik kimlik itemKey / getItem() olarak hizalanır. FAZ 4 kapanış kapsamı değişmez.",
   "owners": [
-    "e2e/invalid-placement-ghost.spec.mjs"
+    "ROADMAP.md",
+    "ROADMAP_PHASE_4.md",
+    "src/items.js"
   ],
   "sourceOfTruth": [
-    "SYSTEM_CHANGE_GATE.md",
-    "SYSTEM_IMPACT_SWEEP.md",
-    "src/scene3d.js",
-    "src/viewCube.js"
+    "src/items.js",
+    "src/moduleRecipes.js",
+    "docs/items/ITEM_CONSOLIDATION_PLAN.md",
+    "test/roadmapProductionSourceOfTruth.test.js"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -35,36 +37,37 @@
     "mode": "full-system",
     "affectedFiles": [],
     "affectedTests": [
-      "e2e/invalid-placement-ghost.spec.mjs"
+      "test/roadmapProductionSourceOfTruth.test.js"
     ],
-    "affectedDocs": [],
+    "affectedDocs": [
+      "ROADMAP.md",
+      "ROADMAP_PHASE_4.md"
+    ],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": []
     },
-    "notes": "Yalnız E2E. Locator #viewport > canvas (ViewCube hariç). Geçerli yeşil ghost CI kadrajında 0.52/0.82 activeFloor'u kaçırıyordu; stand içi oran + yedek dragover eklendi. Snap, ghost rengi, bırakma reddi ve itemKey değişmez."
+    "notes": "Yalnız roadmap kimlik cümleleri ve roadmap source-of-truth testi. Runtime Item/BOM/recipe değişmez."
   },
   "tests": {
     "targeted": [
-      "e2e/invalid-placement-ghost.spec.mjs"
+      "test/roadmapProductionSourceOfTruth.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": [
-        "e2e/invalid-placement-ghost.spec.mjs"
-      ],
-      "reason": "Version2 CI fail'leri bu spec'tedir: ViewCube locator çakışması ve CI kadrajında activeFloor kaçırma. Hedefli Playwright kırmızı/yeşil ghost attribute'unu doğrular."
+      "required": false,
+      "targeted": [],
+      "reason": "Browser-impact domain yok. Değişen yüzey markdown roadmap + unit test assertion; sahne/UI yok."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Ürün kodu yok. Locator yalnız doğrudan çocuk sahne canvas'ını seçer."
+    "notes": "Doküman kimlik dili. FAZ 4 sprint kapanışı işaretlenmedi."
   },
   "migration": {
     "required": false,
-    "notes": "Kalıcılık ve Item kimliği değişmez."
+    "notes": "Kalıcılık ve Item kaydı değişmez."
   },
-  "rollback": "e2e/invalid-placement-ghost.spec.mjs locator'ını #viewport canvas haline geri al."
+  "rollback": "ROADMAP.md / ROADMAP_PHASE_4.md 3 Eylül partId cümlelerini ve test yasak marker'larını geri al."
 }

@@ -13,7 +13,7 @@ FAZ 4'ün görevi yalnız parametrik geometri üretmek değildir. Önce modülle
 FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
 - Hangi fiziksel parçalardan oluşuyor?
-- Hangi production part kimliklerini kullanıyor?
+- Hangi kanonik `itemKey` kimliklerini kullanıyor?
 - Hangi başlangıç / tekli / köşe / çiftli bağlantı semantiğine sahip?
 - Parametre değişirse kendi Raw BOM / module recipe çıktısı nasıl değişiyor?
 - Sahnedeki başka modüllere nereden ve nasıl bağlı?
@@ -22,10 +22,10 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
 ## 3 Eylül 2026 doğrulanmış mevcut temel
 
-- `src/items.js` stabil `partId` kullanan bağımsız production-part sözlüğü içeriyor.
-- Panel, profil, dikme ve connector production-part aileleri canonical kodda tanımlı.
+- `src/items.js` kanonik Item kaydını tutar; kimlik `itemKey`'dir. Item kaydında `partId` yoktur.
+- Panel, profil, dikme ve connector leaf aileleri `LEAF_ITEMS` ve `getItem()` ile tanımlıdır.
 - `src/moduleRecipes.js` standart duvar reçetelerini ve çeşitli mevcut modül reçetelerini içeriyor.
-- `test/moduleRecipes.test.js` production-part ve standart duvar recipe ilişkilerini doğruluyor.
+- `test/moduleRecipes.test.js` `itemKey` kimliğini ve standart duvar recipe ilişkilerini doğruluyor.
 - Bu mevcut temel **scene instance Raw BOM**, parametrik config, custom definition ve connection graph anlamına gelmez; ilgili maddeler açık kalır.
 
 ---
@@ -48,9 +48,9 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
 ## 1.1 — Part / Material Definition
 
-- [ ] Stabil `partId` / `materialId` modeli. — **Kısmi:** stabil `partId` mevcut; `materialId` contract'ı doğrulanmadı.
+- [ ] Stabil kimlik / `materialId` modeli. — **Kısmi:** kanonik kimlik `itemKey`; Item kaydında `partId` yok; `materialId` contract'ı doğrulanmadı.
 - [ ] Parça kategorileri en az: `panel`, `upright`, `profile`, `connector`, `shelf`, `lighting`. — **Kısmi:** temel üretim kategorileri mevcut; tüm hedef kategori seti tamamlandı sayılmıyor.
-- [ ] Birimler: en az `adet`, `m`, `m²`, `set`. — **Kısmi:** mevcut production parts ağırlıklı `adet` kullanıyor.
+- [ ] Birimler: en az `adet`, `m`, `m²`, `set`. — **Kısmi:** mevcut leaf Item kayıtları ağırlıklı `adet` kullanıyor.
 - [x] Gerçek fiziksel ölçüler canonical production metadata olarak tutulur.
 - [ ] Opsiyonel `catalogRef` alanı ileride Fair CRM eşlemesi için hazır olur.
 - [x] Üretim parçası kimliği Three.js implementation'ından bağımsızdır.
@@ -63,14 +63,14 @@ Bu roadmap fiziksel ölçü tablosu tutmaz.
 - Modülün hangi part'ı hangi miktarda kullandığı: `src/moduleRecipes.js`
 - Bu ilişkilerin regression doğrulaması: `test/moduleRecipes.test.js` ve ilgili contract testleri
 
-**Kabul kriteri:** Standart üretim ailelerinin ihtiyaç duyduğu fiziksel metadata canonical production-part katmanından çözülebilmeli ve recipe katmanı aynı part ID'lerini kullanmalıdır. Roadmap'te bunların ikinci bir sabit sayı tablosu bulunmamalıdır.
+**Kabul kriteri:** Standart üretim ailelerinin ihtiyaç duyduğu fiziksel metadata `src/items.js` / `getItem()` üzerinden çözülebilmeli ve recipe katmanı aynı `itemKey` kimliklerini kullanmalıdır. Roadmap'te bunların ikinci bir sabit sayı tablosu bulunmamalıdır.
 
 ## 1.3 — Aparat sözlüğü
 
-- [x] Başlangıç aparatı production-part sözlüğünde tanımlı.
-- [x] Tekli / düz bağlantı aparatı production-part sözlüğünde tanımlı.
-- [x] Köşe bağlantı aparatı production-part sözlüğünde tanımlı.
-- [x] Çiftli bağlantı aparatı production-part sözlüğünde tanımlı.
+- [x] Başlangıç aparatı `LEAF_ITEMS` / `getItem('connector_start')` ile tanımlı.
+- [x] Tekli / düz bağlantı aparatı `getItem('connector_single')` ile tanımlı.
+- [x] Köşe bağlantı aparatı `getItem('connector_corner')` ile tanımlı.
+- [x] Çiftli bağlantı aparatı `getItem('connector_double')` ile tanımlı.
 
 Bağlantı aparatlarının gerçek sahne kullanım adedi yalnız module recipe ve ileride connection graph / Final BOM semantiğinden türetilir. Roadmap bu adetleri veya üretim formülünü ikinci kez tanımlamaz.
 
@@ -92,13 +92,13 @@ Standart duvar recipe tanımları canonical olarak `src/moduleRecipes.js` içind
 
 - [x] `ModuleRecipeDefinition` / eşdeğer model. — Mevcut implementation registry/object tabanlı recipe tanımı kullanıyor.
 - [ ] Sabit adet + parametrik formül desteği. — Sabit/variant reçeteler mevcut; genel parametrik formül contract'ı tamamlandı sayılmıyor.
-- [ ] Recipe çıktısı en az `partId`, `quantity`, `unit`, `dimensions`, `catalogRef` alanlarını taşıyabilir. — `partId`, `quantity` ve expanded production metadata mevcut; `catalogRef` hedefi tamamlanmadı.
+- [ ] Recipe çıktısı en az `itemKey`, `quantity`, `unit`, `dimensions`, `catalogRef` alanlarını taşıyabilir. — `itemKey`, `quantity` ve `expandRecipe` ile `part: getItem(...)` mevcut; `catalogRef` hedefi tamamlanmadı.
 - [ ] Her scene instance bağımsız **Raw BOM** üretebilir.
 - [ ] Raw BOM hangi instance/recipe'den geldiğini izlenebilir tutar.
 - [ ] Parametre değişince Raw BOM otomatik değişir.
 - [ ] Geometry ve Raw BOM aynı parametrik config'ten türetilir.
 - [ ] Aynı input aynı geometry + aynı Raw BOM çıktısını verir.
-- [ ] Unit testler. — Recipe/production-part testleri mevcut; Raw BOM pipeline testleri henüz bu sprint maddesini kapatacak kapsamda değil.
+- [ ] Unit testler. — Recipe / Item contract testleri mevcut; Raw BOM pipeline testleri henüz bu sprint maddesini kapatacak kapsamda değil.
 
 **Sprint çıkışı:** Bir modülü sahneye koymadan bile `bu modül = şu parçalar` sonucu deterministik alınabilir.
 
@@ -235,7 +235,7 @@ Bir modül ve bir proje için sistem aşağıdakileri kayıpsız ve deterministi
 
 - modül/instance kimlikleri,
 - parametrik config,
-- canonical production part referansları,
+- kanonik `itemKey` referansları,
 - modül seviyesinde doğru Raw BOM / recipe,
 - `sourceAnchor -> targetAnchor` connection graph,
 - `INNER_CORNER`, `INLINE_JOIN` gibi üretim semantiği,
