@@ -1,18 +1,14 @@
 {
   "schemaVersion": 2,
-  "id": "roadmap-itemkey-identity-alignment",
-  "kind": "bugfix",
-  "summary": "ROADMAP.md ve ROADMAP_PHASE_4.md, items.js kimliğini partId / production-part sözlüğü olarak yazmayı bırakır; kanonik kimlik itemKey / getItem() olarak hizalanır. FAZ 4 kapanış kapsamı değişmez.",
+  "id": "ci-trigger-refactoritem",
+  "kind": "architecture",
+  "summary": "Canonical CI on.push ve on.pull_request tetikleyicisi Version2 yerine yalnız RefactorItem olur. verify job, test, build ve E2E adımları değişmez.",
   "owners": [
-    "ROADMAP.md",
-    "ROADMAP_PHASE_4.md",
-    "src/items.js"
+    ".github/workflows/ci.yml"
   ],
   "sourceOfTruth": [
-    "src/items.js",
-    "src/moduleRecipes.js",
-    "docs/items/ITEM_CONSOLIDATION_PLAN.md",
-    "test/roadmapProductionSourceOfTruth.test.js"
+    ".github/workflows/ci.yml",
+    "test/systemChangeGateCiContract.test.js"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -29,7 +25,7 @@
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "not-applicable",
+    "architecture": "affected",
     "security": "not-applicable",
     "tests": "affected"
   },
@@ -37,37 +33,47 @@
     "mode": "full-system",
     "affectedFiles": [],
     "affectedTests": [
-      "test/roadmapProductionSourceOfTruth.test.js"
+      "test/historicalDocumentationStatus.test.js",
+      "test/hygieneGates.test.js",
+      "test/systemChangeGate.test.js",
+      "test/systemChangeGateCiContract.test.js"
     ],
     "affectedDocs": [
-      "ROADMAP.md",
-      "ROADMAP_PHASE_4.md"
+      "FRESH_REPOSITORY_REVIEW.md",
+      "REPOSITORY_CLEANUP_PROGRESS.md",
+      "audit/SISTEM_MUTABAKAT_RAPORU.md",
+      "audit/evidence/A00_BASELINE.md",
+      "audit/evidence/A01_DOCS_SOURCE_OF_TRUTH.md",
+      "audit/evidence/A20_BUILD_CI_DEPLOY.md",
+      "audit/evidence/A22_FILE_BY_FILE_SWEEP.md"
     ],
     "relatedFindings": {
       "affected": [],
-      "reviewedNotAffected": []
+      "reviewedNotAffected": [
+        "F-004"
+      ]
     },
-    "notes": "Yalnız roadmap kimlik cümleleri ve roadmap source-of-truth testi. Runtime Item/BOM/recipe değişmez."
+    "notes": "Yalnız CI branch tetikleyicisi. Discovery ci.yml yolunu okuyan test/audit yüzeylerini buldu; job sırası ve README/F-004 change-gate metni değişmez. Runtime Item/BOM/recipe değişmez."
   },
   "tests": {
     "targeted": [
-      "test/roadmapProductionSourceOfTruth.test.js"
+      "test/systemChangeGateCiContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": false,
       "targeted": [],
-      "reason": "Browser-impact domain yok. Değişen yüzey markdown roadmap + unit test assertion; sahne/UI yok."
+      "reason": "Browser-impact domain yok. Değişen yüzey yalnız GitHub Actions branch filtresi; sahne/UI yok."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Doküman kimlik dili. FAZ 4 sprint kapanışı işaretlenmedi."
+    "notes": "Version2 push/PR artık canonical CI çalıştırmaz. RefactorItem korumalı dalı verify beklemeye devam eder."
   },
   "migration": {
     "required": false,
     "notes": "Kalıcılık ve Item kaydı değişmez."
   },
-  "rollback": "ROADMAP.md / ROADMAP_PHASE_4.md 3 Eylül partId cümlelerini ve test yasak marker'larını geri al."
+  "rollback": "ci.yml branches satırlarını ve systemChangeGateCiContract.test.js assertionlarını Version2'ye geri al."
 }

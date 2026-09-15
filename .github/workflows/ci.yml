@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [Version2]
+    branches: [RefactorItem]
   pull_request:
-    branches: [Version2]
+    branches: [RefactorItem]
 
 permissions:
   contents: read
