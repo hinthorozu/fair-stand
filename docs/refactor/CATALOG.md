@@ -2,6 +2,8 @@
 
 Fair Stand katalog mekanizmasının canonical teknik sözleşmesi. Audit dökümü değildir.
 
+Item tarafındaki üç alanın kısa kaydı: `docs/refactor/ITEMS.md`. Bu dosya Catalog’un nasıl çalıştığını anlatır; Item şemasını kopyalamaz.
+
 Bu belgede **mevcut durum** ve **hedef durum** ayrı işaretlenir. Hedef, henüz yazılmamış kodu “var” göstermez.
 
 ---

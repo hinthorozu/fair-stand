@@ -2,7 +2,8 @@
 
 Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit dökümü değildir; yalnız gerçekten uygulanan adımlar ve o adımdan sonra geçerli kurallar yazılır.
 
-Katalog mekanizmasının canonical sözleşmesi: `docs/refactor/CATALOG.md`.
+- Item modeli: `docs/refactor/ITEMS.md`
+- Katalog mekanizması: `docs/refactor/CATALOG.md`
 
 ---
 
@@ -94,3 +95,35 @@ Katalog mekanizmasını kalıcı tek belgede sabitlemek ve refactor günlüğün
 ### Sonraki adım
 
 `listCatalogItems` / `listCatalogGroups` eklemek ve UI’yı bu API’den okutmak. Bu adım henüz yapılmaz.
+
+---
+
+## 2026-09-16 — Item canonical sözleşmesi
+
+### Amaç
+
+Yeni Item modelinin yaşayan teknik sözleşmesini `docs/refactor/ITEMS.md` altında tutmak. Audit dökümü değildir; yalnız onaylanmış alanlar yazılır.
+
+### Yapılan değişiklikler
+
+- Eklenen: `docs/refactor/ITEMS.md`
+- Onaylı şemaya alınan Item alanları: `itemKey`, `catalogVisible`, `catalogCategory`, `catalogItemIndex`
+- Eski 188 property / type / registry alanları şemaya taşınmadı
+- Catalog ayrıntısı `CATALOG.md`’de kalır; ITEMS.md yalnız config bağlantısını tutar
+- Etkilenen dosyalar: `docs/refactor/ITEMS.md`, `docs/refactor/REFACTOR.md`, `docs/REFACTOR.md`, `test/itemCatalogFields.test.js`
+
+### Yeni kural
+
+- Item modelinin tek güncel cevabı `docs/refactor/ITEMS.md`
+- Yeni Item alanı/config aynı commit içinde ITEMS.md’ye yazılır
+- Gerçekleşmemiş method veya config gerçekleşmiş gibi yazılmaz
+- Rotation / color / image / lighting / delete mekanizmaları henüz belirlenmedi
+
+### Doğrulama
+
+- `test/itemCatalogFields.test.js` ITEMS.md katalog alanlarını ve “henüz yok” kaydını doğrular
+- Katalog UI değişmez
+
+### Sonraki adım
+
+`listCatalogItems` / `listCatalogGroups` eklemek. ITEMS.md bağlantı satırı o commit’te “mevcut” yapılır.

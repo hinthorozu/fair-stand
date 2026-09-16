@@ -326,3 +326,17 @@ test('CATALOG.md canonical category tablosu canlı gruplarla örtüşür; listCa
     assert.equal(getItem(group.keys[0]).catalogCategory, categoryKey, group.keys[0]);
   });
 });
+
+test('ITEMS.md yalnız onaylı katalog şemasını taşır; gerçekleşmemiş method yazmaz', () => {
+  const itemsDoc = readFileSync(new URL('../docs/refactor/ITEMS.md', import.meta.url), 'utf8');
+
+  assert.match(itemsDoc, /# Item/);
+  assert.match(itemsDoc, /### catalogVisible/);
+  assert.match(itemsDoc, /### catalogCategory/);
+  assert.match(itemsDoc, /### catalogItemIndex/);
+  assert.match(itemsDoc, /# Canonical Mechanism Connections/);
+  assert.match(itemsDoc, /# Item Schema/);
+  assert.match(itemsDoc, /# Architectural Rules/);
+  assert.match(itemsDoc, /hedef; henüz yok/);
+  assert.doesNotMatch(itemsDoc, /`listCatalogItems` \/ `listCatalogGroups` \| mevcut/);
+});

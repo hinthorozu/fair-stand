@@ -2,15 +2,17 @@
   "schemaVersion": 2,
   "id": "item-catalog-metadata-fields",
   "kind": "architecture",
-  "summary": "104 Item kaydına catalogVisible, catalogCategory ve catalogItemIndex eklenir. Değerler canlı MODULE_CATALOG_GROUPS üyeliği ve sırasından yazılır; katalog UI bu turda yeni alanları okumaz. Katalog sözleşmesi docs/refactor/CATALOG.md olur.",
+  "summary": "104 Item kaydına catalogVisible, catalogCategory ve catalogItemIndex eklenir. Katalog UI bu turda yeni alanları okumaz. Item sözleşmesi docs/refactor/ITEMS.md, katalog ayrıntısı docs/refactor/CATALOG.md.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
-    "docs/refactor/CATALOG.md"
+    "docs/refactor/CATALOG.md",
+    "docs/refactor/ITEMS.md"
   ],
   "sourceOfTruth": [
     "src/items.js",
     "src/catalog.js",
+    "docs/refactor/ITEMS.md",
     "docs/refactor/CATALOG.md",
     "docs/refactor/REFACTOR.md"
   ],
@@ -250,6 +252,7 @@
       "audit/remediation/A04_F013_CLOSURE.md",
       "docs/REFACTOR.md",
       "docs/refactor/CATALOG.md",
+      "docs/refactor/ITEMS.md",
       "docs/refactor/REFACTOR.md",
       "docs/assets/PUBLIC_MODEL_ATTRIBUTION.md",
       "docs/items/ITEM_CONSOLIDATION_PLAN.md",
@@ -646,7 +649,7 @@
         "F-045"
       ]
     },
-    "notes": "104 Item kaydına catalogVisible/catalogCategory/catalogItemIndex yazıldı. createCommercialCatalogItem bu üç alanı MODULE_CATALOG descriptor'ına kopyalamaz; sidebar hâlâ MODULE_CATALOG_GROUPS okur. Katalog sözleşmesi docs/refactor/CATALOG.md; günlük docs/refactor/REFACTOR.md. Discovery token'ları items.js ve catalog.js olduğu için mevcut getItem/katalog tüketicileri, audit dokümanları ve F-013/F-014/F-018/F-045 aday olarak geldi; katalog kimliği, BOM sınıflandırması, TV/video-wall ve hygiene finding'leri bu turda değişmez. BOM miktarı ve katalog UI sırası aynı kalır. listCatalogItems/listCatalogGroups henüz yoktur."
+    "notes": "104 Item kaydına catalogVisible/catalogCategory/catalogItemIndex yazıldı. createCommercialCatalogItem bu üç alanı MODULE_CATALOG descriptor'ına kopyalamaz; sidebar hâlâ MODULE_CATALOG_GROUPS okur. Item sözleşmesi docs/refactor/ITEMS.md; katalog ayrıntısı docs/refactor/CATALOG.md; günlük docs/refactor/REFACTOR.md. Discovery token'ları items.js ve catalog.js olduğu için mevcut getItem/katalog tüketicileri, audit dokümanları ve F-013/F-014/F-018/F-045 aday olarak geldi; katalog kimliği, BOM sınıflandırması, TV/video-wall ve hygiene finding'leri bu turda değişmez. BOM miktarı ve katalog UI sırası aynı kalır. listCatalogItems/listCatalogGroups henüz yoktur."
   },
   "tests": {
     "targeted": [
