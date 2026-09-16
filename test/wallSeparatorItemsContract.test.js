@@ -78,7 +78,7 @@ for (const itemKey of SEPARATOR_KEYS) {
     assert.equal(item.type, 'separator');
     assert.equal(item.composition?.mode, 'recipe');
     assert.equal(item.composition?.moduleType, 'separator');
-    assert.equal(item.composition?.nominalWidthCm, expected.widthCm);
+    assert.equal(item.dimensions.widthCm, expected.widthCm);
     assert.equal(Object.hasOwn(item, 'unit'), false);
     assert.deepEqual(item.dimensions, { widthCm: expected.widthCm });
     assert.equal(item.modelFile ?? null, expected.modelFile);
@@ -136,7 +136,7 @@ test('sarmasık ve düz separator aynı genişlikte aynı recipe’yi paylaşır
   for (const width of [50, 100]) {
     const plain = getItem(`wall_separator_${width}`);
     const vine = getItem(`wall_separator_${width}_sarmasik`);
-    assert.equal(plain.composition.nominalWidthCm, vine.composition.nominalWidthCm);
+    assert.equal(plain.dimensions.widthCm, vine.dimensions.widthCm);
     assert.equal(plain.composition.moduleType, vine.composition.moduleType);
     assert.notEqual(plain.modelFile ?? null, vine.modelFile);
   }

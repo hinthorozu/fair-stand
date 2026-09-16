@@ -235,7 +235,6 @@ export const FURNITURE_ITEMS = Object.freeze({
       widthCm: 75,
       depthCm: 75,
       heightCm: 74,
-      tableDiameterCm: 75,
     }),
   }),
   furniture_bar_stool_classic: Object.freeze({
@@ -284,6 +283,15 @@ export const NON_CATALOG_ITEMS = Object.freeze({
       heightCm: 50,
       depthCm: 3.5,
       wallGapCm: 1.5,
+    }),
+  }),
+  VIDEO_WALL_PANEL: Object.freeze({
+    itemKey: 'VIDEO_WALL_PANEL', catalogVisible: false, catalogCategory: null, catalogItemIndex: null,
+    name: 'Video Wall Panel',
+    type: 'video-wall-panel',
+    dimensions: Object.freeze({
+      widthCm: 108.5,
+      heightCm: 61,
     }),
   }),
 });
@@ -422,81 +430,81 @@ export const INDOOR_PLANT_ITEMS = Object.freeze({
 });
 
 // Duvara asılan medya ürünleri tek `tv` davranış ailesini paylaşır. Sıradan TV'ler
-// doğrulanmış ekran ölçüsüne göre parametriktir; widthCm aynı ekran genişliğidir ki
-// yerleşim sınırı çizilen kutuya denk gelsin. Video wall toplamları panel × ızgaradan türetilir.
+// doğrulanmış ekran ölçüsüne göre parametriktir; widthCm/heightCm görünür ekrandır.
+// Video wall panel ölçüsü VIDEO_WALL_PANEL Item'ındadır; ızgara rows/cols parent'ta kalır.
 export const WALL_MEDIA_ITEMS = Object.freeze({
   TV_42: Object.freeze({
-    itemKey: 'TV_42', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 1, catalogPreview: 'tv', name: 'TV 42"', type: 'tv', sizeInch: 42,
+    itemKey: 'TV_42', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 1, catalogPreview: 'tv', name: 'TV 42"', type: 'tv',
     dimensions: Object.freeze({
-      widthCm: 93.0, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 93.0, screenHeightCm: 52.3,
+      widthCm: 93.0, depthCm: 5, heightCm: 52.3,
     }),
     sceneDimensions: Object.freeze({ heightCm: 52.3 }),
   }),
   TV_55: Object.freeze({
-    itemKey: 'TV_55', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 2, catalogPreview: 'tv', name: 'TV 55"', type: 'tv', sizeInch: 55,
+    itemKey: 'TV_55', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 2, catalogPreview: 'tv', name: 'TV 55"', type: 'tv',
     dimensions: Object.freeze({
-      widthCm: 121.8, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 121.8, screenHeightCm: 68.5,
+      widthCm: 121.8, depthCm: 5, heightCm: 68.5,
     }),
     sceneDimensions: Object.freeze({ heightCm: 68.5 }),
   }),
   TV_65: Object.freeze({
-    itemKey: 'TV_65', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 5, catalogPreview: 'tv', name: 'TV 65"', type: 'tv', sizeInch: 65,
+    itemKey: 'TV_65', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 5, catalogPreview: 'tv', name: 'TV 65"', type: 'tv',
     dimensions: Object.freeze({
-      widthCm: 143.9, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 143.9, screenHeightCm: 80.9,
+      widthCm: 143.9, depthCm: 5, heightCm: 80.9,
     }),
     sceneDimensions: Object.freeze({ heightCm: 80.9 }),
   }),
   VIDEO_WALL_2X2: Object.freeze({
-    itemKey: 'VIDEO_WALL_2X2', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 3, catalogPreview: 'video-wall', name: 'Video Wall 2×2', type: 'tv', sizeInch: 55,
+    itemKey: 'VIDEO_WALL_2X2', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 3, catalogPreview: 'video-wall', name: 'Video Wall 2×2', type: 'tv',
     dimensions: Object.freeze({ depthCm: 5 }),
     sceneDimensions: Object.freeze({ widthCm: 217, heightCm: 122 }),
-    videoWall: Object.freeze({ rows: 2, cols: 2, panelScreenWidthCm: 108.5, panelScreenHeightCm: 61 }),
+    videoWall: Object.freeze({ rows: 2, cols: 2, panelItemKey: 'VIDEO_WALL_PANEL' }),
   }),
   VIDEO_WALL_3X3: Object.freeze({
-    itemKey: 'VIDEO_WALL_3X3', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 4, catalogPreview: 'video-wall', name: 'Video Wall 3×3', type: 'tv', sizeInch: 55,
+    itemKey: 'VIDEO_WALL_3X3', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 4, catalogPreview: 'video-wall', name: 'Video Wall 3×3', type: 'tv',
     dimensions: Object.freeze({ depthCm: 5 }),
     sceneDimensions: Object.freeze({ widthCm: 325.5, heightCm: 183 }),
-    videoWall: Object.freeze({ rows: 3, cols: 3, panelScreenWidthCm: 108.5, panelScreenHeightCm: 61 }),
+    videoWall: Object.freeze({ rows: 3, cols: 3, panelItemKey: 'VIDEO_WALL_PANEL' }),
   }),
 });
 
+function resolveVideoWallPanelItem(item) {
+  const panelItemKey = item?.videoWall?.panelItemKey ?? null;
+  return panelItemKey ? getItem(panelItemKey) : null;
+}
+
 // Katalog, state oluşturucu ve seçim geri bildiriminin kullandığı duvar-medya ölçü çözümleyicisi.
-// Video wall toplamları panel × ızgaradan türetilir; sıradan TV toplamları doğrulanmış ekran ölçüsüdür.
+// Video wall toplamları VIDEO_WALL_PANEL × ızgaradan okunur; sıradan TV canonical dimensions kullanır.
 export function resolveWallMediaMetrics(itemOrKey) {
-  const item = typeof itemOrKey === 'string' ? WALL_MEDIA_ITEMS[itemOrKey] : itemOrKey;
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
   if (!item || item.type !== 'tv') return null;
+  const scene = resolveSceneDimensions(item);
   const depthCm = Number(item.dimensions?.depthCm);
   const base = {
-    itemKey: item.itemKey, type: item.type, label: item.name, sizeInch: item.sizeInch, depthCm,
+    itemKey: item.itemKey, type: item.type, label: item.name, depthCm,
+    widthCm: scene.widthCm,
+    heightCm: scene.heightCm,
   };
   if (item.videoWall) {
-    const { rows, cols, panelScreenWidthCm, panelScreenHeightCm } = item.videoWall;
-    const screenWidthCm = panelScreenWidthCm * cols;
-    const screenHeightCm = panelScreenHeightCm * rows;
+    const panel = resolveVideoWallPanelItem(item);
+    const panelWidthCm = Number(panel?.dimensions?.widthCm);
+    const panelHeightCm = Number(panel?.dimensions?.heightCm);
+    if (!Number.isFinite(panelWidthCm) || !Number.isFinite(panelHeightCm)) {
+      throw new TypeError(`Missing VIDEO_WALL_PANEL dimensions for ${item.itemKey}.`);
+    }
     return Object.freeze({
       ...base,
-      widthCm: screenWidthCm,
-      catalogHeightCm: screenHeightCm,
-      screenWidthCm,
-      screenHeightCm,
-      videoWallRows: rows,
-      videoWallCols: cols,
-      panelScreenWidthCm,
-      panelScreenHeightCm,
+      widthCm: panelWidthCm * item.videoWall.cols,
+      heightCm: panelHeightCm * item.videoWall.rows,
+      videoWallRows: item.videoWall.rows,
+      videoWallCols: item.videoWall.cols,
+      panelItemKey: item.videoWall.panelItemKey,
     });
   }
-  // Yerleşim oturumu çizilen ekranla aynı olmalı — video wall ile aynı kural.
-  const { catalogHeightCm, screenWidthCm, screenHeightCm } = item.dimensions;
   return Object.freeze({
     ...base,
-    widthCm: screenWidthCm,
-    catalogHeightCm,
-    screenWidthCm,
-    screenHeightCm,
     videoWallRows: 1,
     videoWallCols: 1,
-    panelScreenWidthCm: screenWidthCm,
-    panelScreenHeightCm: screenHeightCm,
   });
 }
 
@@ -511,7 +519,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'door',
-      nominalWidthCm: 100,
     }),
   }),
   // Serbest baza üst öğeleri type `base` paylaşır; BOM `moduleRecipes`
@@ -525,7 +532,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'base',
-      nominalWidthCm: 100,
     }),
   }),
   BASE_150: Object.freeze({
@@ -536,7 +542,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'base',
-      nominalWidthCm: 150,
     }),
   }),
   BASE_200: Object.freeze({
@@ -547,7 +552,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'base',
-      nominalWidthCm: 200,
     }),
   }),
   // Serbest banko üst öğeleri type `counter` paylaşır. Düz ve L varyantları
@@ -560,7 +564,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
-      nominalWidthCm: 100,
     }),
   }),
   desk_banko_150: Object.freeze({
@@ -571,7 +574,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
-      nominalWidthCm: 150,
     }),
   }),
   desk_banko_200: Object.freeze({
@@ -582,7 +584,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
-      nominalWidthCm: 200,
     }),
   }),
   desk_banko_100_L: Object.freeze({
@@ -594,7 +595,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
-      nominalWidthCm: 100,
       options: Object.freeze({ shape: 'L' }),
     }),
   }),
@@ -607,7 +607,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
-      nominalWidthCm: 150,
       options: Object.freeze({ shape: 'L' }),
     }),
   }),
@@ -620,7 +619,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
-      nominalWidthCm: 200,
       options: Object.freeze({ shape: 'L' }),
     }),
   }),
@@ -635,7 +633,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
-      nominalWidthCm: 50,
     }),
   }),
   wall_100: Object.freeze({
@@ -647,7 +644,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
-      nominalWidthCm: 100,
     }),
   }),
   wall_150: Object.freeze({
@@ -659,7 +655,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
-      nominalWidthCm: 150,
     }),
   }),
   wall_200: Object.freeze({
@@ -671,7 +666,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
-      nominalWidthCm: 200,
     }),
   }),
   wall_200_short_up_2: Object.freeze({
@@ -685,7 +679,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
-      nominalWidthCm: 200,
     }),
   }),
   wall_150_short_up_2: Object.freeze({
@@ -699,7 +692,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
-      nominalWidthCm: 150,
     }),
   }),
   wall_100_short_up_2: Object.freeze({
@@ -713,7 +705,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
-      nominalWidthCm: 100,
     }),
   }),
   wall_50_short_up_2: Object.freeze({
@@ -727,7 +718,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
-      nominalWidthCm: 50,
     }),
   }),
   wall_200_short_up_1: Object.freeze({
@@ -741,7 +731,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
-      nominalWidthCm: 200,
     }),
   }),
   wall_150_short_up_1: Object.freeze({
@@ -755,7 +744,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
-      nominalWidthCm: 150,
     }),
   }),
   wall_100_short_up_1: Object.freeze({
@@ -769,7 +757,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
-      nominalWidthCm: 100,
     }),
   }),
   wall_50_short_up_1: Object.freeze({
@@ -783,7 +770,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
-      nominalWidthCm: 50,
     }),
   }),
   // Panel Bazalı parent'lar (type base-wall). Child miktarları moduleRecipes
@@ -796,7 +782,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'base-wall',
-      nominalWidthCm: 100,
     }),
   }),
   wall_base_150: Object.freeze({
@@ -807,7 +792,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'base-wall',
-      nominalWidthCm: 150,
     }),
   }),
   wall_base_200: Object.freeze({
@@ -818,7 +802,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'base-wall',
-      nominalWidthCm: 200,
     }),
   }),
   // Separatör parent'lar (type separator). Child miktarları moduleRecipes
@@ -832,7 +815,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
-      nominalWidthCm: 50,
     }),
   }),
   wall_separator_100: Object.freeze({
@@ -844,7 +826,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
-      nominalWidthCm: 100,
     }),
   }),
   wall_separator_50_sarmasik: Object.freeze({
@@ -857,7 +838,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
-      nominalWidthCm: 50,
     }),
   }),
   wall_separator_100_sarmasik: Object.freeze({
@@ -870,7 +850,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
-      nominalWidthCm: 100,
     }),
   }),
   // Raflı duvar parent'lar (type shelf). Child miktarları moduleRecipes
@@ -885,7 +864,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
-      nominalWidthCm: 100,
       options: Object.freeze({ shelfCount: 2 }),
     }),
   }),
@@ -899,7 +877,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
-      nominalWidthCm: 150,
       options: Object.freeze({ shelfCount: 2 }),
     }),
   }),
@@ -913,7 +890,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
-      nominalWidthCm: 200,
       options: Object.freeze({ shelfCount: 2 }),
     }),
   }),
@@ -927,7 +903,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
-      nominalWidthCm: 100,
       options: Object.freeze({ shelfCount: 3 }),
     }),
   }),
@@ -941,7 +916,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
-      nominalWidthCm: 150,
       options: Object.freeze({ shelfCount: 3 }),
     }),
   }),
@@ -955,7 +929,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
-      nominalWidthCm: 200,
       options: Object.freeze({ shelfCount: 3 }),
     }),
   }),
@@ -975,7 +948,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'showcase-2',
-      nominalWidthCm: 100,
     }),
   }),
   wall_showcase_100_3: Object.freeze({
@@ -994,7 +966,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'showcase-3',
-      nominalWidthCm: 100,
     }),
   }),
 });
@@ -1136,31 +1107,13 @@ function normalizeItemDescriptor(descriptor) {
     shape: source.shape ?? source.counterShape ?? descriptor?.shape ?? descriptor?.counterShape ?? null,
     shelfCount: optionalNumber(source.shelfCount ?? descriptor?.shelfCount),
     modelFile: source.modelFile ?? descriptor?.modelFile ?? null,
-    sizeInch: optionalNumber(source.sizeInch ?? descriptor?.sizeInch),
-    screenWidthCm: optionalNumber(source.screenWidthCm ?? descriptor?.screenWidthCm),
     variant: source.variant ?? descriptor?.variant ?? null,
   };
 }
 
 // Catalog projection'ı taklit etmez; Item master + resolveSceneDimensions okur.
 function getItemIdentityFields(item) {
-  const media = resolveWallMediaMetrics(item);
   const scene = resolveSceneDimensions(item);
-
-  if (media) {
-    return {
-      type: item.type,
-      widthCm: optionalNumber(scene.widthCm),
-      depthCm: optionalNumber(scene.depthCm),
-      shape: item.shape ?? null,
-      shelfCount: item.shelfCount ?? null,
-      modelFile: item.modelFile ?? null,
-      sizeInch: optionalNumber(media.sizeInch ?? item.sizeInch),
-      screenWidthCm: optionalNumber(media.screenWidthCm),
-      variant: item.variant ?? null,
-    };
-  }
-
   return {
     type: item.type,
     widthCm: optionalNumber(scene.widthCm),
@@ -1168,8 +1121,6 @@ function getItemIdentityFields(item) {
     shape: item.shape ?? null,
     shelfCount: item.shelfCount ?? null,
     modelFile: item.modelFile ?? null,
-    sizeInch: optionalNumber(item.sizeInch),
-    screenWidthCm: null,
     variant: item.variant ?? null,
   };
 }
@@ -1185,19 +1136,12 @@ export function resolveItemKey(descriptor) {
 
   const matches = candidates.filter((item) => {
     const fields = getItemIdentityFields(item);
-    // Sıradan TV'ler eskiden sahte 100 cm oturum yazardı; yerleşim genişliği artık
-    // ekran genişliğidir. tv katalog anahtarlarını ayırmak için widthCm kullanma.
-    if (normalized.type !== 'tv') {
-      if (normalized.widthCm !== null && optionalNumber(fields.widthCm) !== null && optionalNumber(fields.widthCm) !== normalized.widthCm) return false;
-    }
+    if (normalized.widthCm !== null && optionalNumber(fields.widthCm) !== null && optionalNumber(fields.widthCm) !== normalized.widthCm) return false;
     if (normalized.depthCm !== null && optionalNumber(fields.depthCm) !== null && optionalNumber(fields.depthCm) !== normalized.depthCm) return false;
     if ((normalized.shape !== null || fields.shape != null)
       && !shapesMatch(normalized.shape, fields.shape)) return false;
     if ((normalized.shelfCount !== null || fields.shelfCount != null) && optionalNumber(fields.shelfCount) !== normalized.shelfCount) return false;
     if ((normalized.modelFile !== null || fields.modelFile != null) && (fields.modelFile ?? null) !== normalized.modelFile) return false;
-    if (normalized.sizeInch !== null && optionalNumber(fields.sizeInch) !== null && optionalNumber(fields.sizeInch) !== normalized.sizeInch) return false;
-    if (normalized.type === 'tv' && normalized.screenWidthCm !== null && optionalNumber(fields.screenWidthCm) !== null
-      && optionalNumber(fields.screenWidthCm) !== normalized.screenWidthCm) return false;
     if ((normalized.variant != null || fields.variant != null) && (fields.variant ?? null) !== (normalized.variant ?? null)) return false;
     return true;
   });

@@ -7,7 +7,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `src/items.js > COMPOSITE_ITEMS.wall_separator_100_sarmasik` kanonik itemKey/name/type/modelFile/dimensions sahibidir. Bileşik Item; `itemKey = wall_separator_100_sarmasik`. Type ailesi `separator`; genişlik 100 cm; `modelFile = wall_separator_100_sarmasik.glb`. Üst öğe üzerinde unit uydurulmadı.
 
 ## Bileşim / BOM
-`composition.mode=recipe`, `moduleType=separator`, `nominalWidthCm=100`. Miktar tek kaynak: aynı `separator:100` (düz 100 ile paylaşır). Recipe miktarları değişmez. Raw BOM UI dokunulmadı.
+`composition.mode=recipe`, `moduleType=separator`; recipe lookup `item.dimensions.widthCm=100`. Miktar tek kaynak: aynı `separator:100` (düz 100 ile paylaşır). Recipe miktarları değişmez. Raw BOM UI dokunulmadı.
 
 ## Oluşturma, state ve kalıcılık
 `createSeparatorModuleState` Item’dan default üretir; `modelFile` damgalanır. Catalog ayrımı `modelFile` ile. Yüklemede hydrate; takma ad yok.

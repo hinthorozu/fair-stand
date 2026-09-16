@@ -9,54 +9,50 @@ import { getModuleBehavior, getModuleGhostBehavior, isWallOverlayModule } from '
 test('TV 42 catalog and state use one shared 93.0 x 52.3 screen', () => {
   const item = MODULE_CATALOG.TV_42;
   assert.equal(item.type, 'tv');
-  assert.equal(item.screenWidthCm, 93);
-  assert.equal(item.screenHeightCm, 52.3);
-  const state = createTvModuleState(42);
+  assert.equal(item.widthCm, 93);
+  assert.equal(item.heightCm, 52.3);
+  const state = createTvModuleState({ itemKey: 'TV_42' });
   assert.equal(state.widthCm, 93);
-  assert.equal(state.screenWidthCm, 93);
-  assert.equal(state.screenHeightCm, 52.3);
+  assert.equal(state.heightCm, 52.3);
   assert.equal(state.depthCm, 5);
 });
 
 
-test('TV 55 and 65 keep shared depth/catalog height and use screen width as placement width', () => {
+test('TV 55 and 65 keep shared depth and use screen width as placement width', () => {
   const expected = {
-    42: [93, 52.3],
-    55: [121.8, 68.5],
-    65: [143.9, 80.9],
+    TV_42: [93, 52.3],
+    TV_55: [121.8, 68.5],
+    TV_65: [143.9, 80.9],
   };
   const base = getItem('TV_42');
 
-  for (const sizeInch of [42, 55, 65]) {
-    const item = getItem(`TV_${sizeInch}`);
-    const catalogItem = MODULE_CATALOG[`TV_${sizeInch}`];
-    const state = createTvModuleState(sizeInch);
+  for (const itemKey of Object.keys(expected)) {
+    const item = getItem(itemKey);
+    const catalogItem = MODULE_CATALOG[itemKey];
+    const state = createTvModuleState({ itemKey });
     assert.ok(item);
     assert.ok(catalogItem);
     assert.ok(state);
     assert.equal(item.type, base.type);
     assert.equal(item.dimensions.depthCm, base.dimensions.depthCm);
-    assert.equal(item.dimensions.catalogHeightCm, base.dimensions.catalogHeightCm);
-    assert.equal(item.dimensions.widthCm, expected[sizeInch][0]);
-    assert.equal(item.dimensions.screenWidthCm, expected[sizeInch][0]);
-    assert.equal(catalogItem.itemKey, `TV_${sizeInch}`);
+    assert.equal(item.dimensions.widthCm, expected[itemKey][0]);
+    assert.equal(item.dimensions.heightCm, expected[itemKey][1]);
+    assert.equal(catalogItem.itemKey, itemKey);
     assert.equal(catalogItem.type, base.type);
-    assert.equal(catalogItem.widthCm, expected[sizeInch][0]);
+    assert.equal(catalogItem.widthCm, expected[itemKey][0]);
+    assert.equal(catalogItem.heightCm, expected[itemKey][1]);
     assert.equal(catalogItem.depthCm, 5);
     assert.equal(state.type, base.type);
-    assert.equal(state.itemKey, `TV_${sizeInch}`);
-    assert.equal(state.itemKey, `TV_${sizeInch}`);
-    assert.equal(state.widthCm, expected[sizeInch][0]);
+    assert.equal(state.itemKey, itemKey);
+    assert.equal(state.widthCm, expected[itemKey][0]);
+    assert.equal(state.heightCm, expected[itemKey][1]);
     assert.equal(state.depthCm, 5);
-    assert.equal(state.sizeInch, sizeInch);
-    assert.equal(state.screenWidthCm, expected[sizeInch][0]);
-    assert.equal(state.screenHeightCm, expected[sizeInch][1]);
   }
 
   assert.ok(MODULE_CATALOG_KEYS.includes('TV_42'));
   assert.ok(MODULE_CATALOG_KEYS.includes('TV_55'));
   assert.ok(MODULE_CATALOG_KEYS.includes('TV_65'));
-  assert.equal(createTvModuleState(50), null);
+  assert.equal(createTvModuleState({ itemKey: 'missing_tv' }), null);
 });
 
 test('TV uses the central silhouette ghost contract', () => {
@@ -106,8 +102,8 @@ test('TV 42 55 and 65 selection bounds follow the real rendered screen box', () 
   const finish = source.indexOf('\n}', start) + 2;
   const tvSource = source.slice(start, finish);
 
-  assert.match(tvSource, /const widthM = Number\(moduleState\.screenWidthCm \|\| 93\) \/ 100/);
-  assert.match(tvSource, /const heightM = Number\(moduleState\.screenHeightCm \|\| 52\.3\) \/ 100/);
+  assert.match(tvSource, /const widthM = Number\(moduleState\.widthCm\) \/ 100/);
+  assert.match(tvSource, /const heightM = Number\(moduleState\.heightCm\) \/ 100/);
   assert.match(tvSource, /group\.userData\.selectionBounds = Object\.freeze\(\{/);
   assert.match(tvSource, /widthM,\s+heightM,\s+depthM,/);
   assert.match(tvSource, /centerX: tv\.position\.x/);
@@ -115,15 +111,15 @@ test('TV 42 55 and 65 selection bounds follow the real rendered screen box', () 
   assert.match(tvSource, /centerZ: tv\.position\.z/);
 
   const expected = {
-    42: [0.93, 0.523],
-    55: [1.218, 0.685],
-    65: [1.439, 0.809],
+    TV_42: [0.93, 0.523],
+    TV_55: [1.218, 0.685],
+    TV_65: [1.439, 0.809],
   };
-  for (const sizeInch of [42, 55, 65]) {
-    const state = createTvModuleState(sizeInch);
+  for (const itemKey of Object.keys(expected)) {
+    const state = createTvModuleState({ itemKey });
     assert.deepEqual(
-      [state.screenWidthCm / 100, state.screenHeightCm / 100],
-      expected[sizeInch],
+      [state.widthCm / 100, state.heightCm / 100],
+      expected[itemKey],
     );
   }
 });
@@ -146,11 +142,10 @@ test('TV texture loads from a real public JPEG asset', () => {
 });
 
 test('TV 42 does not inherit flat panel state', () => {
-  const tv = createTvModuleState(42);
+  const tv = createTvModuleState({ itemKey: 'TV_42' });
   assert.equal(tv.type, 'tv');
   assert.equal(tv.widthCm, 93);
-  assert.equal(tv.screenWidthCm, 93);
-  assert.equal(tv.screenHeightCm, 52.3);
+  assert.equal(tv.heightCm, 52.3);
   assert.equal('strips' in tv, false);
   assert.equal('faces' in tv, false);
 });
@@ -189,18 +184,18 @@ test('wall-overlay height clamp reaches geometric top for every TV screen size',
   } = await import('../src/modulePlacement.js');
   const wallHeightCm = 350;
   const expected = {
-    42: 52.3,
-    55: 68.5,
-    65: 80.9,
+    TV_42: 52.3,
+    TV_55: 68.5,
+    TV_65: 80.9,
   };
-  for (const [sizeInch, screenHeightCm] of Object.entries(expected)) {
-    const { maxZCm, minZCm } = getWallOverlayZBoundsCm(screenHeightCm, wallHeightCm);
-    const topCm = WALL_OVERLAY_DEFAULT_CENTER_CM + maxZCm + screenHeightCm / 2;
-    const bottomCm = WALL_OVERLAY_DEFAULT_CENTER_CM + minZCm - screenHeightCm / 2;
-    assert.ok(Math.abs(topCm - wallHeightCm) < 1e-9, `TV_${sizeInch} geometric max must sit flush to the wall top`);
-    assert.ok(Math.abs(bottomCm) < 1e-9, `TV_${sizeInch} geometric min must sit flush to the wall bottom`);
-    assert.equal(clampWallOverlayZCm(999, screenHeightCm, 10, wallHeightCm), maxZCm);
-    assert.equal(clampWallOverlayZCm(-999, screenHeightCm, 10, wallHeightCm), minZCm);
+  for (const [itemKey, heightCm] of Object.entries(expected)) {
+    const { maxZCm, minZCm } = getWallOverlayZBoundsCm(heightCm, wallHeightCm);
+    const topCm = WALL_OVERLAY_DEFAULT_CENTER_CM + maxZCm + heightCm / 2;
+    const bottomCm = WALL_OVERLAY_DEFAULT_CENTER_CM + minZCm - heightCm / 2;
+    assert.ok(Math.abs(topCm - wallHeightCm) < 1e-9, `${itemKey} geometric max must sit flush to the wall top`);
+    assert.ok(Math.abs(bottomCm) < 1e-9, `${itemKey} geometric min must sit flush to the wall bottom`);
+    assert.equal(clampWallOverlayZCm(999, heightCm, 10, wallHeightCm), maxZCm);
+    assert.equal(clampWallOverlayZCm(-999, heightCm, 10, wallHeightCm), minZCm);
   }
   // Eski snap tavanı TV_42'yi 140'ta durduruyordu; geometrik max daha yüksek, sıfır bitebilir.
   assert.ok(getWallOverlayZBoundsCm(52.3, 350).maxZCm > 140);

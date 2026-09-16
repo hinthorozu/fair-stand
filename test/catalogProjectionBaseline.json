@@ -711,22 +711,16 @@
       "label": "TV 42\"",
       "widthCm": 93,
       "depthCm": 5,
-      "heightCm": 350,
-      "type": "tv",
-      "sizeInch": 42,
-      "screenWidthCm": 93,
-      "screenHeightCm": 52.3
+      "heightCm": 52.3,
+      "type": "tv"
     },
     {
       "itemKey": "TV_55",
       "label": "TV 55\"",
       "widthCm": 121.8,
       "depthCm": 5,
-      "heightCm": 350,
-      "type": "tv",
-      "sizeInch": 55,
-      "screenWidthCm": 121.8,
-      "screenHeightCm": 68.5
+      "heightCm": 68.5,
+      "type": "tv"
     },
     {
       "itemKey": "VIDEO_WALL_2X2",
@@ -735,11 +729,6 @@
       "depthCm": 5,
       "heightCm": 122,
       "type": "tv",
-      "sizeInch": 55,
-      "screenWidthCm": 217,
-      "screenHeightCm": 122,
-      "panelScreenWidthCm": 108.5,
-      "panelScreenHeightCm": 61,
       "videoWallRows": 2,
       "videoWallCols": 2
     },
@@ -750,11 +739,6 @@
       "depthCm": 5,
       "heightCm": 183,
       "type": "tv",
-      "sizeInch": 55,
-      "screenWidthCm": 325.5,
-      "screenHeightCm": 183,
-      "panelScreenWidthCm": 108.5,
-      "panelScreenHeightCm": 61,
       "videoWallRows": 3,
       "videoWallCols": 3
     },
@@ -763,11 +747,8 @@
       "label": "TV 65\"",
       "widthCm": 143.9,
       "depthCm": 5,
-      "heightCm": 350,
-      "type": "tv",
-      "sizeInch": 65,
-      "screenWidthCm": 143.9,
-      "screenHeightCm": 80.9
+      "heightCm": 80.9,
+      "type": "tv"
     },
     {
       "itemKey": "led_floodlight",

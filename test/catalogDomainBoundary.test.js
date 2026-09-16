@@ -77,7 +77,7 @@ test('catalogVisible yalnız Catalog üyeliği içindir; src runtime domainleri 
 });
 
 test('catalogVisible=false Item runtime’da yok demek değildir', () => {
-  const hiddenKeys = ['panel_197', 'upright_99', 'illuminated-foam', 'shelf_100'];
+  const hiddenKeys = ['panel_197', 'upright_99', 'illuminated-foam', 'shelf_100', 'VIDEO_WALL_PANEL'];
   for (const itemKey of hiddenKeys) {
     const item = getItem(itemKey);
     assert.ok(item, itemKey);
@@ -86,7 +86,7 @@ test('catalogVisible=false Item runtime’da yok demek değildir', () => {
     assert.equal(resolveItemKey({ itemKey }), itemKey, itemKey);
   }
 
-  assert.equal(listRegisteredItems().length, 104);
+  assert.equal(listRegisteredItems().length, 105);
   assert.equal(listRegisteredItems().filter((item) => item.catalogVisible === true).length, 64);
   assert.equal(listCatalogItems().length, 64);
   assert.equal(MODULE_CATALOG_KEYS.length, 64);

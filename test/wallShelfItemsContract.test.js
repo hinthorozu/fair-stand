@@ -83,7 +83,7 @@ for (const itemKey of SHELF_KEYS) {
     assert.equal(item.shelfCount, expected.shelfCount);
     assert.equal(item.composition?.mode, 'recipe');
     assert.equal(item.composition?.moduleType, 'shelf');
-    assert.equal(item.composition?.nominalWidthCm, expected.widthCm);
+    assert.equal(item.dimensions.widthCm, expected.widthCm);
     assert.equal(item.composition?.options?.shelfCount, expected.shelfCount);
     assert.equal(Object.hasOwn(item, 'unit'), false);
     assert.deepEqual(item.dimensions, { widthCm: expected.widthCm });

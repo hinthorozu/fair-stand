@@ -134,9 +134,9 @@ Item master ürünün gerçek özelliğidir (`src/items.js`). Catalog projection
 |---|---|
 | `label` | `item.name` |
 | `catalogPreview` | `item.catalogPreview` |
-| `widthCm` / `depthCm` / `heightCm` | `resolveSceneDimensions(item)` — `sceneDimensions.field ?? dimensions.field`. Catalog ölçü üretmez; Recipe/type/itemKey/catalogWidthCm okumaz. TV Catalog kart yüksekliği UI-only `catalogHeightCm` (media metrics) olarak kalır |
+| `widthCm` / `depthCm` / `heightCm` | `resolveSceneDimensions(item)` — `sceneDimensions.field ?? dimensions.field`. Catalog ölçü üretmez; Recipe/type/itemKey/catalogWidthCm okumaz. TV kart CSS sabit px silüettir; descriptor `heightCm` canonical resolved height’tir |
 | `modelFile` / `variant` / `stripOccupancy` / `shelfCount` / `eyeCount` / `shape` | Item root, varsa |
-| `sizeInch` / ekran / video-wall | `resolveWallMediaMetrics` |
+| `videoWallRows` / `videoWallCols` | `item.videoWall.rows` / `item.videoWall.cols`, varsa |
 | `type` | `item.type` — **Catalog UI preview seçmez.** Yalnız `createModuleStateFromDescriptor` factory uyumu (sahneye sürükleme). |
 
 Yeni görünen Item için `MODULE_CATALOG.my_item = ...` yazılmaz.
@@ -154,7 +154,7 @@ Yeni görünen Item için `MODULE_CATALOG.my_item = ...` yazılmaz.
 | `extra` | Extra | 5 | 16 |
 | `electronics-lighting` | Elektronik & Aydınlatma | 6 | 6 |
 
-Toplam görünür Item: **64**. Kayıtlı Item: **104**.
+Toplam görünür Item: **64**. Kayıtlı Item: **105**.
 
 ---
 
@@ -282,7 +282,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 | `test/catalogPreviewConfig.test.js` | 64/64 `catalogPreview`; type branch yok; CSS kök sınıf regression |
 | `test/catalogDomainBoundary.test.js` | Catalog/AutoDepot/ModuleContract katman sınırı; `catalogVisible=false` ≠ Item yok |
 | `test/catalogCategories.test.js` | Catalog modeli, key eşleşmesi, sıra/label/adet regression |
-| `test/itemCatalogFields.test.js` | 104/104 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
+| `test/itemCatalogFields.test.js` | 105/105 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
 | `test/itemSceneDimensions.test.js` | dimensions / sceneDimensions same-field fallback; catalogWidthCm yok; Recipe/Catalog dimension fallback yok |
 | `test/catalogSingleSource.test.js` | Her katalog Item tam bir grupta |
 | `test/systemModuleCatalogDoc.test.js` | `SYSTEM_MODULE_CATALOG.md` key snapshot |

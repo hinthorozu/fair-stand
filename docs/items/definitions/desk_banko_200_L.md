@@ -7,7 +7,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `src/items.js > COMPOSITE_ITEMS.desk_banko_200_L` kanonik itemKey/name/type/shape/dimensions sahibidir. Bileşik Item; `itemKey = desk_banko_200_L`. Type ailesi `counter`; `shape=L`; ölçü 200×200×100 cm. Üst öğe üzerinde unit uydurulmadı.
 
 ## Bileşim / BOM
-`composition.mode=recipe`, `moduleType=counter`, `nominalWidthCm=200`, `options.shape=L`. Miktar tek kaynak: `src/moduleRecipes.js` → `counter-l:200`. Mevcut recipe miktarları değişmez.
+`composition.mode=recipe`, `moduleType=counter`; recipe lookup `item.dimensions.widthCm=200`, `options.shape=L`. Miktar tek kaynak: `src/moduleRecipes.js` → `counter-l:200`. Mevcut recipe miktarları değişmez.
 
 ## Oluşturma, state ve kalıcılık
 `createCounterModuleState` Item’dan default üretir; 8 face. Load hydrate; takma ad yok.

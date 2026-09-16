@@ -40,7 +40,6 @@ test('door_100 is the single canonical composite Item identity', () => {
   assert.deepEqual(item.composition, {
     mode: 'recipe',
     moduleType: 'door',
-    nominalWidthCm: 100,
   });
   assert.equal(getItem('door_100').itemKey, 'door_100');
   assert.equal(LEAF_ITEMS.door_100, undefined, 'bileşik parent leaf map içinde durmaz');

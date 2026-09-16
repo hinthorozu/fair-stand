@@ -149,9 +149,9 @@ test('mevcut katalog Item listesi ve grup sırası değişmemiştir', () => {
   });
 });
 
-test('104 Item katalog metadata alanlarını taşır ve canlı katalog üyeliğiyle birebir örtüşür', () => {
+test('105 Item katalog metadata alanlarını taşır ve canlı katalog üyeliğiyle birebir örtüşür', () => {
   const items = listRegisteredItems();
-  assert.equal(items.length, 104);
+  assert.equal(items.length, 105);
 
   let visibleCount = 0;
   let missingVisible = 0;

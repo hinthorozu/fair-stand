@@ -26,11 +26,6 @@ const COMPARE_FIELDS = Object.freeze([
   'modelRotationYDeg',
   'visualRotationYDeg',
   'preserveModelScale',
-  'sizeInch',
-  'screenWidthCm',
-  'screenHeightCm',
-  'panelScreenWidthCm',
-  'panelScreenHeightCm',
   'videoWallRows',
   'videoWallCols',
   'eyeCount',
@@ -55,7 +50,7 @@ test('listCatalogItems 64 görünür Item’ı Item kaydından üretir; hardcode
   const projected = listCatalogItems();
   const catalogSource = readFileSync(new URL('../src/catalog.js', import.meta.url), 'utf8');
 
-  assert.equal(items.length, 104);
+  assert.equal(items.length, 105);
   assert.equal(visible.length, 64);
   assert.equal(projected.length, 64);
   assert.equal(new Set(projected.map((item) => item.itemKey)).size, 64);

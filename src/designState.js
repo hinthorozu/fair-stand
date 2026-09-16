@@ -11,7 +11,6 @@ import {
   getShowcaseItemKeyForType,
   requireSceneDimension,
   resolveSceneDimensions,
-  resolveWallMediaMetrics,
 } from './items.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 
@@ -572,30 +571,16 @@ export function createIlluminatedFoamModuleState(imageAssetId, descriptor = {}) 
   };
 }
 
-const TV_SIZE_INCH_TO_ITEM_KEY = Object.freeze({ 42: 'TV_42', 55: 'TV_55', 65: 'TV_65' });
-
-function resolveWallMediaItemKey(sizeInch, descriptor) {
-  const explicitKey = descriptor.itemKey ?? null;
-  if (explicitKey && getItem(explicitKey)?.type === 'tv') return explicitKey;
-  return TV_SIZE_INCH_TO_ITEM_KEY[Number(sizeInch)] ?? null;
-}
-
-export function createTvModuleState(sizeInch = 42, descriptor = {}) {
-  const itemKey = resolveWallMediaItemKey(sizeInch, descriptor);
+export function createTvModuleState(descriptor = {}) {
+  const itemKey = descriptor?.itemKey ?? resolveItemKey(descriptor);
   const item = itemKey ? getItem(itemKey) : null;
-  const metrics = item ? resolveWallMediaMetrics(item) : null;
-  if (!item || !metrics) return null;
+  if (item?.type !== 'tv') return null;
   const state = {
     id: createId('module'),
-    itemKey: metrics.itemKey,
-    type: metrics.type,
-    sizeInch: metrics.sizeInch,
-    screenWidthCm: metrics.screenWidthCm,
-    screenHeightCm: metrics.screenHeightCm,
-    videoWallRows: metrics.videoWallRows,
-    videoWallCols: metrics.videoWallCols,
-    panelScreenWidthCm: metrics.panelScreenWidthCm,
-    panelScreenHeightCm: metrics.panelScreenHeightCm,
+    itemKey: item.itemKey,
+    type: item.type,
+    videoWallRows: item.videoWall?.rows ?? 1,
+    videoWallCols: item.videoWall?.cols ?? 1,
   };
   return applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
 }
@@ -635,7 +620,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   profile: (descriptor) => createProfileModuleState(descriptor),
   'plastic-trash-bin': () => createPlasticTrashBinModuleState(),
   'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
-  tv: (descriptor) => createTvModuleState(descriptor.sizeInch ?? 42, descriptor),
+  tv: (descriptor) => createTvModuleState(descriptor),
   'led-floodlight': () => createLedFloodlightModuleState(),
   door: (descriptor) => createDoorModuleState(descriptor.widthCm),
   'showcase-2': (descriptor) => createShowcaseModuleState(descriptor.type, descriptor.widthCm),
@@ -684,12 +669,9 @@ export function normalizeModuleItemState(moduleState) {
     const item = resolvedKey ? getItem(resolvedKey) : null;
     if (item?.type === 'tv') {
       moduleState.itemKey = item.itemKey;
-      const metrics = resolveWallMediaMetrics(item);
-      if (metrics) {
-        moduleState.screenWidthCm = metrics.screenWidthCm;
-        moduleState.screenHeightCm = metrics.screenHeightCm;
-        applySceneFootprint(moduleState, item, ['widthCm', 'depthCm', 'heightCm']);
-      }
+      moduleState.videoWallRows = item.videoWall?.rows ?? 1;
+      moduleState.videoWallCols = item.videoWall?.cols ?? 1;
+      applySceneFootprint(moduleState, item, ['widthCm', 'depthCm', 'heightCm']);
     }
     return moduleState;
   }

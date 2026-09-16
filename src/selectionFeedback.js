@@ -132,10 +132,11 @@ export function describeSurfaceSelection(surfaces, modules = []) {
 
     if (moduleType === 'tv') {
       const tvState = modules[moduleIndex];
-      const sizeInch = Number(tvState?.sizeInch) || 42;
-      const screenWidthCm = Number(tvState?.screenWidthCm) || 93;
-      const screenHeightCm = Number(tvState?.screenHeightCm) || 52.3;
-      return result(`Modül ${moduleIndex + 1} · TV ${sizeInch}" · ${screenWidthCm} × ${screenHeightCm} cm ekran.`);
+      const tvItem = getItem(tvState?.itemKey);
+      const widthCm = Number(tvState?.widthCm);
+      const heightCm = Number(tvState?.heightCm);
+      const label = tvItem?.name ?? 'TV';
+      return result(`Modül ${moduleIndex + 1} · ${label} · ${widthCm} × ${heightCm} cm ekran.`);
     }
 
     if (moduleType === 'led-floodlight') {
