@@ -185,7 +185,7 @@ Kart descriptor’ı Item kaydından türetilir. Hardcoded Item key listesi yokt
 
 UI okur: `listCatalogGroups()` + `group.catalogName` + `getCatalogItem(itemKey)`.
 
-`resolveItemKey` Item identity helper’dır (`src/items.js`); Catalog üyeliği kontrol etmez. `src/catalog.js` test uyumu için re-export eder.
+`resolveItemKey` Item identity helper’dır (`src/items.js`); Catalog üyeliği kontrol etmez. `src/catalog.js` test ve mevcut runtime import uyumu için re-export eder (`src/designState.js`, `src/main.js`). Bu turda `designState.js` frozen state/persistence yüzeyi açılmadı.
 
 Catalog UI yardımcıları: `getModuleCatalogItem`, `getModuleCatalogLabel` — görünür Catalog projection döner. Drag badge (`src/scene3d.js`) katalog kart önizlemesi için bunları okur.
 

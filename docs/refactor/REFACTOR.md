@@ -23,7 +23,7 @@ Catalog, Item runtime repository’si haline gelmişti. AutoDepot ölçüleri `g
 
 - AutoDepot: `getItem('MINI_FRIDGE_AVANTI' | 'COAT_RACK' | 'KETTLE' | 'PLASTIC_TRASH_BIN')` → `item.dimensions.widthCm/depthCm/heightCm`
 - ModuleContracts: `getItem(itemKey)` Item master varlığı; descriptor gelirse `resolveItemKey` (Item identity, Catalog üyeliği değil)
-- `resolveItemKey` Catalog’dan `src/items.js` Item-domain helper’ına taşındı. `catalogVisible` kontrolü identity çözümlemesine girmez. `src/catalog.js` test uyumu için re-export eder
+- `resolveItemKey` Catalog’dan `src/items.js` Item-domain helper’ına taşındı. `catalogVisible` kontrolü identity çözümlemesine girmez. `src/catalog.js` test ve mevcut `designState` / `main` import uyumu için re-export eder; bu turda frozen `designState.js` import yüzeyi açılmadı
 
 ### Yeni Item alanı
 

@@ -55,6 +55,17 @@ test('CATALOG.md Catalog’un runtime repository olmadığını kilitler', () =>
   assert.match(catalogDoc, /ModuleContract → Catalog/);
 });
 
+test('catalog.js Recipe/BOM’dan Item özelliği öğrenmez; resolveItemKey Item identity re-export’tur', () => {
+  const itemsSource = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(CATALOG_SOURCE, /moduleRecipes/);
+  assert.doesNotMatch(CATALOG_SOURCE, /getStraightWallNominalWidthForProfileItem/);
+  assert.match(CATALOG_SOURCE, /catalogWidthCm/);
+  assert.match(CATALOG_SOURCE, /export \{ resolveItemKey \}/);
+  assert.match(itemsSource, /export function resolveItemKey/);
+  assert.match(itemsSource, /Item identity çözümlemesi Catalog üyeliğine bağlı değildir/);
+  assert.doesNotMatch(CATALOG_SOURCE, /normalized\.itemKey && getCatalogItem/);
+});
+
 test('catalogVisible yalnız Catalog üyeliği içindir; src runtime domainleri okumaz', () => {
   const offenders = [];
   for (const file of listSrcJsFiles()) {
