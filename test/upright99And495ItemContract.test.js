@@ -50,7 +50,7 @@ for (const { itemKey, name, dimensions, recipes } of CASES) {
       assert.deepEqual(match, { itemKey, quantity });
       occurrences += 1;
     }
-    assert.equal(occurrences, 6);
+    assert.equal(occurrences, recipes.length);
   });
 
   test(`${itemKey} expanded recipe resolves metadata through canonical itemKey`, () => {
