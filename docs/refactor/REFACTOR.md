@@ -55,6 +55,11 @@ Yasak: AutoDepot → Catalog, ModuleContract → Catalog, BOM → Catalog, Recip
 - `catalogVisible=false` ≠ Item runtime’da yok
 - AutoDepot includeContents konum/ölçü regression’ı birebir
 - architecture boundary: `test/catalogDomainBoundary.test.js`
+- targeted: catalogItemProjection / catalogCategories / itemCatalogFields / catalogSingleSource / catalogDomainBoundary / autoDepotOrientation / tests/autoDepot — geçti
+- `npm test`: 749 pass / 0 fail
+- `npm run build`: geçti
+- `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
+- targeted E2E `e2e/smoke.spec.mjs`: geçti
 
 ### Sonraki adım
 
