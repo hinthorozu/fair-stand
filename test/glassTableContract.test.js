@@ -11,7 +11,8 @@ test('glass_table katalog ve state kimliği sabittir', () => {
   assert.equal(item.itemKey, 'glass_table');
   assert.equal(item.type, 'table-glass');
   assert.equal(item.name, 'Cam Masa');
-  assert.equal(item.dimensions.tableDiameterCm, 75);
+  assert.equal(item.dimensions.widthCm, 75);
+  assert.equal(item.dimensions.depthCm, 75);
   assert.equal(catalog.type, 'table-glass');
   assert.equal(catalog.label, 'Cam Masa');
   assert.equal(catalog.widthCm, 75);
@@ -34,5 +35,5 @@ test('glass_table renderer uses the canonical Item diameter', () => {
   assert.match(source, /function createGlassTableModule/);
   assert.match(source, /moduleState\.type === 'table-glass'/);
   assert.match(source, /function addProceduralGlassTable/);
-  assert.match(source, /getItem\('glass_table'\)/);
+  assert.match(source, /tableItem\.dimensions\.widthCm/);
 });

@@ -192,8 +192,8 @@ test('17. same-field dışında cross-remap yok', () => {
   }
 });
 
-test('18. 104 Item registry korunuyor', () => {
-  assert.equal(listRegisteredItems().length, 104);
+test('18. 105 Item registry korunuyor', () => {
+  assert.equal(listRegisteredItems().length, 105);
 });
 
 test('19. 64 visible Catalog Item korunuyor', () => {

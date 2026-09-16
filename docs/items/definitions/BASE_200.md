@@ -7,7 +7,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `src/items.js > COMPOSITE_ITEMS.BASE_200` kanonik itemKey/name/type/dimensions sahibidir. Bileşik Item; `itemKey = BASE_200`. Tek type ailesi `base`; genişlik varyantı 200 cm. Doğrulanmış ölçüler: `widthCm=200`, `depthCm=50`, `heightCm=50`. Üst öğe üzerinde unit uydurulmadı.
 
 ## Bileşim / BOM
-`composition.mode=recipe`, `moduleType=base`, `nominalWidthCm=200`. Miktar tek kaynak: `src/moduleRecipes.js` → `base:200`. `wall_base_200` ayrı type/recipe (`base-wall:200`); aynı `base_top_206_50` satırını paylaşır — reçete/quantity bu migration’da değişmez.
+`composition.mode=recipe`, `moduleType=base`; recipe lookup `item.dimensions.widthCm=200`. Miktar tek kaynak: `src/moduleRecipes.js` → `base:200`. `wall_base_200` ayrı type/recipe (`base-wall:200`); aynı `base_top_206_50` satırını paylaşır — reçete/quantity bu migration’da değişmez.
 
 ## Oluşturma, state ve kalıcılık
 `createBaseModuleState` Item’dan default üretir; `itemKey` damgalar; üç editable face aynı yapı korunur. Load hydrate: `itemKey`. Alias yok. `getCommercialItemForType('base')` yok.

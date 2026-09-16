@@ -20,7 +20,7 @@ function resolveRecipe(item, recipeOptions = {}) {
   };
   const recipe = getExpandedModuleRecipe(
     composition.moduleType,
-    composition.nominalWidthCm,
+    item.dimensions?.widthCm,
     options,
   );
   if (!recipe) {

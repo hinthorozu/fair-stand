@@ -1809,8 +1809,6 @@ export function createStandScene(
       depthCm: moduleState.depthCm ?? moduleGroup.userData.depthCm,
       shape: moduleState.shape ?? null,
       shelfCount: moduleState.shelfCount ?? null,
-      sizeInch: moduleState.sizeInch ?? null,
-      screenWidthCm: moduleState.screenWidthCm ?? null,
       placement: moduleGroup.userData.moduleState?.placement
         ? { ...moduleGroup.userData.moduleState.placement }
         : null,
@@ -1898,9 +1896,6 @@ export function createStandScene(
       dimensions.heightM,
       moduleOrWidthCm.shape ?? '',
       moduleOrWidthCm.shelfCount ?? '',
-      moduleOrWidthCm.sizeInch ?? '',
-      moduleOrWidthCm.screenWidthCm ?? '',
-      moduleOrWidthCm.screenHeightCm ?? '',
       occupancy?.align ?? '',
       occupancy?.stripCount ?? '',
       Array.isArray(moduleOrWidthCm.strips) ? moduleOrWidthCm.strips.length : '',
@@ -2093,7 +2088,7 @@ export function createStandScene(
     if (label) label.textContent = labelText;
 
     if (previewSlot) {
-      const signature = `${moduleState?.itemKey ?? ''}|${labelText}|${moduleState?.type ?? ''}|${moduleState?.widthCm ?? ''}|${moduleState?.shelfCount ?? ''}|${moduleState?.sizeInch ?? ''}`;
+      const signature = `${moduleState?.itemKey ?? ''}|${labelText}|${moduleState?.type ?? ''}|${moduleState?.widthCm ?? ''}|${moduleState?.shelfCount ?? ''}`;
       if (previewSlot.dataset.signature !== signature) {
         previewSlot.dataset.signature = signature;
         previewSlot.innerHTML = '';
@@ -2349,7 +2344,7 @@ export function createStandScene(
         supportRotationZDeg + (cameraSide < 0 ? 180 : 0),
       );
       const hit = pointed.hit.point;
-      const heightCm = Math.max(1, Number(moduleState?.screenHeightCm ?? moduleState?.heightCm ?? 52.3));
+      const heightCm = Math.max(1, Number(moduleState?.heightCm));
       const defaultCenterM = 1.75;
       const rawOffsetCm = (hit.y - ACTIVE_PLATFORM_HEIGHT_M - defaultCenterM) * 100;
       const zCm = clampWallOverlayZCm(rawOffsetCm, heightCm);
@@ -2410,7 +2405,7 @@ export function createStandScene(
     const pointerXCm = wallId === 'right' ? stageLayout.widthCm : Math.max(0, hit.x * 100);
     const pointerYCm = wallId === 'back' ? 0 : Math.max(0, hit.z * 100);
 
-    const heightCm = Math.max(1, Number(moduleState?.screenHeightCm ?? moduleState?.heightCm ?? 52.3));
+    const heightCm = Math.max(1, Number(moduleState?.heightCm));
     const defaultCenterM = 1.75;
     const rawOffsetCm = (hit.y - ACTIVE_PLATFORM_HEIGHT_M - defaultCenterM) * 100;
     const zCm = clampWallOverlayZCm(rawOffsetCm, heightCm);
@@ -4330,7 +4325,7 @@ export function createStandScene(
         const currentHorizontalCm = Number(moduleState.placement[horizontalAxis + 'Cm'] || 0);
         const maxHorizontalCm = Math.max(0, horizontalLimitCm - widthCm);
         const currentZCm = Number(moduleState.placement.zCm || 0);
-        const heightCm = Math.max(1, Number(moduleState.screenHeightCm ?? moduleState.heightCm ?? 52.3));
+        const heightCm = Math.max(1, Number(moduleState.heightCm));
         const { minZCm, maxZCm } = getWallOverlayZBoundsCm(heightCm);
 
         const moduleWorldPosition = new THREE.Vector3();
@@ -4830,12 +4825,21 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
 }
 
 function createTvModule(moduleState, moduleIndex) {
-  const rows = Math.max(1, Math.round(Number(moduleState.videoWallRows) || 1));
-  const cols = Math.max(1, Math.round(Number(moduleState.videoWallCols) || 1));
-  const widthM = Number(moduleState.screenWidthCm || 93) / 100;
-  const heightM = Number(moduleState.screenHeightCm || 52.3) / 100;
-  const panelWidthM = Number(moduleState.panelScreenWidthCm || moduleState.screenWidthCm || 93) / 100;
-  const panelHeightM = Number(moduleState.panelScreenHeightCm || moduleState.screenHeightCm || 52.3) / 100;
+  const item = getItem(moduleState.itemKey);
+  const rows = Math.max(1, Math.round(Number(item?.videoWall?.rows ?? moduleState.videoWallRows ?? 1)));
+  const cols = Math.max(1, Math.round(Number(item?.videoWall?.cols ?? moduleState.videoWallCols ?? 1)));
+  const widthM = Number(moduleState.widthCm) / 100;
+  const heightM = Number(moduleState.heightCm) / 100;
+  let panelWidthM = widthM;
+  let panelHeightM = heightM;
+  if (item?.videoWall?.panelItemKey) {
+    const panelItem = getItem(item.videoWall.panelItemKey);
+    panelWidthM = Number(panelItem?.dimensions?.widthCm) / 100;
+    panelHeightM = Number(panelItem?.dimensions?.heightCm) / 100;
+    if (!Number.isFinite(panelWidthM) || !Number.isFinite(panelHeightM)) {
+      throw new TypeError(`Missing VIDEO_WALL_PANEL dimensions for ${item.itemKey}.`);
+    }
+  }
   const depthM = Number(moduleState.depthCm || 5) / 100;
   const centerYM = 1.75;
   const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
@@ -5838,7 +5842,7 @@ function createEamesChairModule(moduleState, moduleIndex) {
 
 
 function addProceduralGlassTable(group, tableItem) {
-  const diameterCm = Number(tableItem.dimensions.tableDiameterCm ?? tableItem.dimensions.widthCm);
+  const diameterCm = Number(tableItem.dimensions.widthCm);
   const heightCm = Number(tableItem.dimensions.heightCm);
   const radiusM = diameterCm / 200;
   const heightM = heightCm / 100;

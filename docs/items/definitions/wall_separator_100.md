@@ -7,7 +7,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `src/items.js > COMPOSITE_ITEMS.wall_separator_100` kanonik itemKey/name/type/dimensions sahibidir. Bileşik Item; `itemKey = wall_separator_100`. Type ailesi `separator`; genişlik 100 cm; `modelFile` yok. Üst öğe üzerinde unit uydurulmadı.
 
 ## Bileşim / BOM
-`composition.mode=recipe`, `moduleType=separator`, `nominalWidthCm=100`. Miktar tek kaynak: `src/moduleRecipes.js` `separator:100`. Alt satırları Item kartında kopyalanmaz; mevcut recipe miktarları değişmez. Raw BOM UI dokunulmadı.
+`composition.mode=recipe`, `moduleType=separator`; recipe lookup `item.dimensions.widthCm=100`. Miktar tek kaynak: `src/moduleRecipes.js` `separator:100`. Alt satırları Item kartında kopyalanmaz; mevcut recipe miktarları değişmez. Raw BOM UI dokunulmadı.
 
 ## Oluşturma, state ve kalıcılık
 `createSeparatorModuleState` Item’dan default üretir; `itemKey` damgalar; tek `surface.color` (image yok). Default renk child `separator_panel_98` üzerinden. Yüklemede hydrate; takma ad yok.

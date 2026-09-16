@@ -7,6 +7,37 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-16 — Tekrarlayan özel ölçü alanlarının canonical dimensions’a indirgenmesi
+
+### Kaldırılan Item alanları
+
+| Eski alan | Yeni kaynak |
+|---|---|
+| `dimensions.screenWidthCm` | `dimensions.widthCm` |
+| `dimensions.screenHeightCm` | `dimensions.heightCm` |
+| `dimensions.catalogHeightCm` | Catalog/runtime `resolveSceneDimensions(item).heightCm`; yeni field yok. TV kart CSS (`module-drag-tv`) değişmedi |
+| `dimensions.tableDiameterCm` | `dimensions.widthCm` |
+| `videoWall.panelScreenWidthCm` | `VIDEO_WALL_PANEL.dimensions.widthCm` |
+| `videoWall.panelScreenHeightCm` | `VIDEO_WALL_PANEL.dimensions.heightCm` |
+| `sizeInch` | kimlik `itemKey` (`TV_42` / `TV_55` / `TV_65`); görünen ad `TV 42"` / `TV 55"` / `TV 65"` |
+| `composition.nominalWidthCm` | `item.dimensions.widthCm` (`itemBom.resolveRecipe` recipe lookup) |
+
+### Yeni Item
+
+`VIDEO_WALL_PANEL` — `catalogVisible: false`, `name: Video Wall Panel`, `dimensions.widthCm: 108.5`, `dimensions.heightCm: 61`. `depthCm` mevcut kaynakta yok; yazılmadı. `VIDEO_WALL_2X2` / `VIDEO_WALL_3X3` `videoWall.panelItemKey: 'VIDEO_WALL_PANEL'` ile paneli okur. `rows` / `cols` kaldı.
+
+### Dokunulmayanlar
+
+`mountHeightCm`, `wallGapCm`, `nominalModuleWidthCm`, `composition.moduleType`, `Recipe.nominalWidthCm`, `videoWall.rows` / `videoWall.cols`, `sceneDimensions` şeması.
+
+### Doğrulama
+
+- kayıtlı Item 105; catalogVisible=true 64
+- `test/canonicalDimensionDedup.test.js` src runtime eski field yasakları + `wall_200` BOM `dimensions.widthCm`
+- `npm test` / `npm run build` / `contract:verify`
+
+---
+
 ## 2026-09-16 — Item physical dimensions ve sceneDimensions override ayrımı
 
 ### Neden yapıldı

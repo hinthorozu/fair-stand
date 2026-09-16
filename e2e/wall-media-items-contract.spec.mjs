@@ -40,11 +40,11 @@ async function saveAndReadProject(page) {
 }
 
 const expected = {
-  TV_42: { sizeInch: 42, videoWallRows: 1, videoWallCols: 1 },
-  TV_55: { sizeInch: 55, videoWallRows: 1, videoWallCols: 1 },
-  TV_65: { sizeInch: 65, videoWallRows: 1, videoWallCols: 1 },
-  VIDEO_WALL_2X2: { sizeInch: 55, videoWallRows: 2, videoWallCols: 2 },
-  VIDEO_WALL_3X3: { sizeInch: 55, videoWallRows: 3, videoWallCols: 3 },
+  TV_42: { videoWallRows: 1, videoWallCols: 1 },
+  TV_55: { videoWallRows: 1, videoWallCols: 1 },
+  TV_65: { videoWallRows: 1, videoWallCols: 1 },
+  VIDEO_WALL_2X2: { videoWallRows: 2, videoWallCols: 2 },
+  VIDEO_WALL_3X3: { videoWallRows: 3, videoWallCols: 3 },
 };
 
 for (const itemKey of Object.keys(expected)) {
@@ -69,7 +69,6 @@ for (const itemKey of Object.keys(expected)) {
     expect(item.itemKey).toBe(itemKey);
     expect(item.id).toBeTruthy();
     expect(item.type).toBe('tv');
-    expect(item.sizeInch).toBe(expected[itemKey].sizeInch);
     expect(item.videoWallRows).toBe(expected[itemKey].videoWallRows);
     expect(item.videoWallCols).toBe(expected[itemKey].videoWallCols);
     expect(item.placement).toBeTruthy();

@@ -2,7 +2,7 @@
 
 Bu belge Item Contract migrationında izlenecek Item envanterini tutar.
 
-> Satırdaki “Tamam” işareti gecikebilir. Güncel kimlik/BOM: `docs/items/definitions/` + `src/items.js` / `src/moduleContracts.js`. Test-kilitli katalog özeti: `SYSTEM_MODULE_CATALOG.md`. Canlı sıra: `audit/SISTEM_MUTABAKAT_RAPORU.md`. A–Z özellik haritası (104 item × keşfedilen sütunlar): `docs/items/audit/README.md`.
+> Satırdaki “Tamam” işareti gecikebilir. Güncel kimlik/BOM: `docs/items/definitions/` + `src/items.js` / `src/moduleContracts.js`. Test-kilitli katalog özeti: `SYSTEM_MODULE_CATALOG.md`. Canlı sıra: `audit/SISTEM_MUTABAKAT_RAPORU.md`. A–Z özellik haritası: `docs/items/audit/README.md`. Kayıtlı Item: 105 (`VIDEO_WALL_PANEL` katalog dışı).
 
 Temel model:
 
@@ -122,6 +122,7 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 | 55 | `TV_55` | TV 55" | `tv` |
 | 56 | `VIDEO_WALL_2X2` | Video Wall 2×2 | `tv` |
 | 57 | `VIDEO_WALL_3X3` | Video Wall 3×3 | `tv` |
+| — | `VIDEO_WALL_PANEL` | Video Wall Panel | `video-wall-panel` · tekil panel Item · katalog dışı; `videoWall.panelItemKey` |
 | 58 | `TV_65` | TV 65" | `tv` |
 | 59 | `led_floodlight` | LED Projektör | **`led-floodlight` · Tekil Item** |
 | 60 | `illuminated-foam` | Işıklı Strafor / Logo | **`illuminated-foam` · Tekil Item · katalog dışı** |

@@ -1,4 +1,4 @@
-import { getFurnitureClusterQuantity, getItem, listRegisteredItems, resolveItemKey, resolveSceneDimensions, resolveWallMediaMetrics } from './items.js';
+import { getFurnitureClusterQuantity, getItem, listRegisteredItems, resolveItemKey, resolveSceneDimensions } from './items.js';
 
 export { resolveItemKey };
 
@@ -66,12 +66,11 @@ export const COAT_RACK_DIMENSIONS = getItem('COAT_RACK').dimensions;
 
 export const PLASTIC_TRASH_BIN_DIMENSIONS = getItem('PLASTIC_TRASH_BIN').dimensions;
 
-const TV_42_METRICS = resolveWallMediaMetrics('TV_42');
+const TV_42_ITEM = getItem('TV_42');
+const TV_42_SCENE = resolveSceneDimensions(TV_42_ITEM);
 export const TV_42_DIMENSIONS = Object.freeze({
-  moduleWidthCm: TV_42_METRICS.widthCm,
-  screenWidthCm: TV_42_METRICS.screenWidthCm,
-  screenHeightCm: TV_42_METRICS.screenHeightCm,
-  heightCm: TV_42_METRICS.catalogHeightCm,
+  moduleWidthCm: TV_42_SCENE.widthCm,
+  heightCm: TV_42_SCENE.heightCm,
 });
 
 const LED_FLOODLIGHT_ITEM = getItem('led_floodlight');
@@ -158,23 +157,10 @@ function projectCatalogItem(item) {
     catalogPreview: item.catalogPreview,
   };
 
-  // Duvar-medya ölçüleri Item üzerindeki screen/catalogHeight/videoWall alanlarından türetilir.
-  const media = resolveWallMediaMetrics(item);
-  if (media) {
-    descriptor.widthCm = media.widthCm;
-    descriptor.depthCm = media.depthCm;
-    descriptor.heightCm = media.catalogHeightCm;
-    descriptor.screenWidthCm = media.screenWidthCm;
-    descriptor.screenHeightCm = media.screenHeightCm;
-    descriptor.sizeInch = media.sizeInch;
-    if (media.videoWallRows > 1 || media.videoWallCols > 1) {
-      descriptor.panelScreenWidthCm = media.panelScreenWidthCm;
-      descriptor.panelScreenHeightCm = media.panelScreenHeightCm;
-      descriptor.videoWallRows = media.videoWallRows;
-      descriptor.videoWallCols = media.videoWallCols;
-    }
-  } else {
-    assignCatalogFootprint(descriptor, item);
+  assignCatalogFootprint(descriptor, item);
+  if (item.videoWall) {
+    descriptor.videoWallRows = item.videoWall.rows;
+    descriptor.videoWallCols = item.videoWall.cols;
   }
 
   if (item.variant) descriptor.variant = item.variant;
@@ -185,7 +171,6 @@ function projectCatalogItem(item) {
   if (item.modelFile) descriptor.modelFile = item.modelFile;
   if (item.modelRotationYDeg != null) descriptor.modelRotationYDeg = item.modelRotationYDeg;
   if (item.preserveModelScale != null) descriptor.preserveModelScale = item.preserveModelScale;
-  if (item.sizeInch != null && descriptor.sizeInch == null) descriptor.sizeInch = item.sizeInch;
   // unit / visualRotationYDeg yalnız modelFile taşıyan Item'da eski commercial projection'da vardı.
   if (item.modelFile) {
     if (item.unit != null) descriptor.unit = item.unit;

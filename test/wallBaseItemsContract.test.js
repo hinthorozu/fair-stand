@@ -72,7 +72,7 @@ for (const itemKey of WALL_BASE_KEYS) {
     assert.equal(item.type, 'base-wall');
     assert.equal(item.composition?.mode, 'recipe');
     assert.equal(item.composition?.moduleType, 'base-wall');
-    assert.equal(item.composition?.nominalWidthCm, expected.widthCm);
+    assert.equal(item.dimensions.widthCm, expected.widthCm);
     assert.equal(Object.hasOwn(item, 'unit'), false);
     assert.deepEqual(item.dimensions, {
       widthCm: expected.widthCm,

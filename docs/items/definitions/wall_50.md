@@ -7,7 +7,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `src/items.js > COMPOSITE_ITEMS.wall_50` kanonik itemKey/name/type/dimensions sahibidir. Bileşik Item; `itemKey = wall_50`. Type ailesi `flat-panel`; genişlik 50 cm. Üst öğe üzerinde unit uydurulmadı.
 
 ## Bileşim / BOM
-`composition.mode=recipe`, `moduleType=wall`, `nominalWidthCm=50`. Miktar tek kaynak: `src/moduleRecipes.js` straight-wall `50` (`wall-straight-50`). Alt satırları Item kartında kopyalanmaz; mevcut recipe miktarları bu migration’da değişmez. Raw BOM UI dokunulmadı.
+`composition.mode=recipe`, `moduleType=wall`; recipe lookup `item.dimensions.widthCm=50`. Miktar tek kaynak: `src/moduleRecipes.js` straight-wall `50` (`wall-straight-50`). Alt satırları Item kartında kopyalanmaz; mevcut recipe miktarları bu migration’da değişmez. Raw BOM UI dokunulmadı.
 
 ## Oluşturma, state ve kalıcılık
 `createFlatPanelModuleState` `getItem(itemKey|width)` ile Item’dan default üretir; `itemKey` damgalar; 7 strip aynı yapı korunur. Yüklemede `normalizeModuleItemState` `itemKey` doldurur; takma ad yok.
