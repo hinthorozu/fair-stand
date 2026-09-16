@@ -59,6 +59,7 @@ Projection `type` alanı `createModuleStateFromDescriptor` factory uyumu için d
 - `npm run build`: geçti
 - `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
 - targeted E2E `e2e/smoke.spec.mjs`: geçti
+- GitHub CI `verify` (`b8ff36b`): geçti
 
 ### Sonraki adım
 
