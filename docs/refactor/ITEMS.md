@@ -24,6 +24,8 @@ Tekil kimlik `itemKey`’dir. Label, GLB dosya adı, renderer node adı veya kat
 
 Item, davranış algoritmasını içermez. Item, canonical mechanism’in okuduğu master veriyi ve config parametrelerini taşır.
 
+Item master Catalog’dan bağımsızdır. Bir Item’ın `getItem(itemKey)` ile var olması katalogda görünmesi değildir. `catalogVisible=false` Item’ı AutoDepot, Module Contract, BOM, renderer veya placement’tan kaldırmaz.
+
 ---
 
 ## Zorunlu temel alanlar
@@ -43,7 +45,11 @@ Yeni mimaride şu ana kadar onaylanan zorunlu alanlar:
 
 ## Opsiyonel alanlar
 
-Yeni mimaride henüz onaylanmış opsiyonel Item alanı yoktur.
+| Alan | Tip | Kapsam |
+|---|---|---|
+| `catalogWidthCm` | number (cm) | Item master — Catalog config |
+
+`catalogWidthCm` yalnız katalog kartı yerleşim genişliği fiziksel `dimensions.widthCm` / `lengthCm`’den farklıysa yazılır. Şu an dört profil Item’ında vardır. Fiziksel profil boyu değildir.
 
 Eski kayıtlardaki `name`, `type`, `dimensions`, `unit`, `composition` vb. runtime’da durur; bu şemaya otomatik alınmadı.
 
@@ -70,6 +76,7 @@ Ayrıntı: `docs/refactor/CATALOG.md`.
 - **Canonical method:** `listCatalogItems()` / `listCatalogGroups()` — mevcut
 - **Method parametresi:** üyelik filtresi (`true` görünür)
 - **Runtime behavior üretmez**
+- **Başka mekanizmada varlık/kullanılabilirlik üretmez**
 - **Kullanıcı değiştirir mi:** hayır
 - **Project instance override:** hayır
 - **Persistence:** Item master (bugün `src/items.js`); proje blob’una yazılmaz
@@ -109,6 +116,22 @@ Ayrıntı: `docs/refactor/CATALOG.md`.
 - **Validation:** görünürken `1..N` kesintisiz, kategoride unique; gizliyken `null`
 - **Örnek:** `wall_200` → `1`; `panel_197` → `null`
 
+### catalogWidthCm
+
+- **Type:** number (cm)
+- **Required:** no — yalnız katalog kart genişliği fiziksel ölçüden farklıysa
+- **Scope:** Item master — Catalog config
+- **Default:** yok; alan yoksa Catalog `dimensions` veya dikme oturumunu kullanır
+- **Amaç:** Katalog kartı yerleşim genişliği. Profil fiziksel `lengthCm` (41,5 / 91 / 140,5 / 190) ile kart genişliği (50 / 100 / 150 / 200) ayrı kavramlardır
+- **Canonical consumer:** Catalog projection
+- **Canonical method:** `getCatalogItem` / `listCatalogItems` — mevcut
+- **Recipe/BOM’dan türetilmez**
+- **Kullanıcı değiştirir mi:** hayır
+- **Project instance override:** hayır
+- **Persistence:** Item master
+- **Validation:** varsa sonlu pozitif sayı; fiziksel `lengthCm` ile eşit olmak zorunda değil
+- **Örnek:** `profile_41_5` → `50`; `profile_91` → `100`; `profile_140_5` → `150`; `profile_190` → `200`
+
 ---
 
 ## Canonical Mechanism Connections
@@ -118,7 +141,8 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 | Item config | Canonical mechanism | Canonical method | Durum |
 |---|---|---|---|
 | `catalogVisible` / `catalogCategory` / `catalogItemIndex` | Catalog | `listCatalogCategories` / `listCatalogItems` / `getCatalogItem` / `listCatalogGroups` | mevcut |
-| `itemKey` | Item identity | `getItem` / `listRegisteredItems` | mevcut |
+| `catalogWidthCm` | Catalog | `getCatalogItem` / `listCatalogItems` (profil kart genişliği) | mevcut |
+| `itemKey` | Item identity | `getItem` / `listRegisteredItems` / `resolveItemKey` | mevcut |
 | rotation | Rotation | henüz belirlenmedi | yapılmadı |
 | color | Color | henüz belirlenmedi | yapılmadı |
 | image | Image | henüz belirlenmedi | yapılmadı |
@@ -127,7 +151,7 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 
 Catalog satırı: UI `listCatalogGroups()` + `getCatalogItem()`. Kart descriptor’ı Item master’dan türetilir (`label` = `name`). `listCatalogItems()` mevcuttur.
 
-Item master ile Catalog projection ayrıdır. Projection alias’ları (`label`, kök `widthCm`) Item alanı değildir.
+Item master ile Catalog projection ayrıdır. Projection alias’ları (`label`, kök `widthCm`) Item alanı değildir. Item master Catalog’dan bağımsızdır.
 
 `ROTATION.md` vb. yokken bu satırlar yer tutucudur; config şeması değildir.
 
@@ -144,6 +168,7 @@ Item {
   catalogVisible: boolean
   catalogCategory: string | null    // Catalog.catalogKey
   catalogItemIndex: integer | null  // kategori içi sıra; Catalog.catalogIndex değil
+  catalogWidthCm?: number           // opsiyonel; katalog kart genişliği, fiziksel length değil
 }
 ```
 
@@ -157,6 +182,8 @@ Item {
 - Item davranışı `type` tarafından belirlenmez.
 - Registry grubu Item davranışı belirlemez.
 - Catalog category Item davranışı belirlemez.
+- Catalog, Item runtime repository değildir.
+- `catalogVisible=false` Item’ı yok etmez.
 - Item config davranışın parametrelerini taşır.
 - Algoritma / canonical mechanism kodda bulunur.
 - Aynı davranış için ikinci implementasyon oluşturulmaz.
@@ -171,6 +198,8 @@ Item {
 - Her Item `catalogVisible`, `catalogCategory`, `catalogItemIndex` alanını taşır
 - `catalogVisible=true` → category ve index dolu
 - `catalogVisible=false` → category ve index `null`
+- `catalogVisible=false` → Item `getItem` ile durur; `getCatalogItem` null döner
+- `catalogWidthCm` yalnız profil Item’larında; değerler 50/100/150/200
 - Aynı kategoride duplicate `catalogItemIndex` yasak
 - Index her kategoride `1..N` kesintisiz
 

@@ -2,9 +2,10 @@
   "schemaVersion": 2,
   "id": "catalog-item-projection",
   "kind": "architecture",
-  "summary": "MODULE_CATALOG hardcoded 64 Item listesi kaldırılır. Katalog kartı listRegisteredItems + catalogVisible üzerinden getCatalogItem/listCatalogItems ile Item'dan türetilir. MODULE_CATALOG derived compatibility export olarak kalır.",
+  "summary": "Catalog yalnız UI projection’dır. AutoDepot ve ModuleContracts Item master (getItem) okur; Catalog Recipe’den profil genişliği öğrenmez. catalogWidthCm dört profil Item’ına yazılır. resolveItemKey Item identity helper’ına taşınır.",
   "owners": [
     "src/catalog.js",
+    "src/items.js",
     "src/moduleDragSidebar.js",
     "src/moduleContextMenu.js",
     "src/moduleContracts.js",
@@ -95,6 +96,7 @@
       "test/boardMaterialItemContract.test.js",
       "test/bundleLoadingContract.test.js",
       "test/catalogCategories.test.js",
+      "test/catalogDomainBoundary.test.js",
       "test/catalogDragKeyboardIntegration.test.js",
       "test/catalogItemProjection.test.js",
       "test/catalogSingleSource.test.js",
@@ -692,14 +694,17 @@
         "F-045"
       ]
     },
-    "notes": "MODULE_CATALOG hardcoded 64 Item listesi kaldırıldı. getCatalogItem/listCatalogItems Item kaydından catalog descriptor üretir. MODULE_CATALOG derived compatibility export olarak kalır. Sidebar/picker/autoDepot/moduleContracts getCatalogItem okur. Item'a yeni alan eklenmedi. Profil widthCm reçeteden, dikme thickness/length oturumundan, TV resolveWallMediaMetrics'ten türetilir. moduleContextMenu.js frozen behavior, autoDepot.js frozen composition/placement, moduleContracts.js frozen bom işaretini gerektirir; rotation/collision/BOM miktarı bu turda değişmez. 64/64 descriptor regression kilitlenir."
+    "notes": "Catalog UI projection Item master’dan türetilir. AutoDepot ve moduleContracts getCatalogItem okumaz; getItem + dimensions / Item identity kullanır. Catalog moduleRecipes import etmez. Dört profil Item’ına catalogWidthCm yazıldı (50/100/150/200). resolveItemKey src/items.js’tedir; catalogVisible identity’ye girmez. MODULE_CATALOG derived compatibility export olarak kalır. moduleContextMenu.js frozen behavior, autoDepot.js frozen composition/placement, moduleContracts.js frozen bom işaretini gerektirir; rotation/collision/BOM miktarı bu turda değişmez. 64/64 descriptor regression ve catalogDomainBoundary kilitlenir."
   },
   "tests": {
     "targeted": [
       "test/catalogItemProjection.test.js",
       "test/catalogCategories.test.js",
       "test/itemCatalogFields.test.js",
-      "test/catalogSingleSource.test.js"
+      "test/catalogSingleSource.test.js",
+      "test/catalogDomainBoundary.test.js",
+      "test/autoDepotOrientation.test.js",
+      "tests/autoDepot.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -713,11 +718,11 @@
   },
   "risk": {
     "level": "low",
-    "notes": "Kart descriptor'ı Item'dan türetilir. Yanlış projection katalog kartı/oturum ölçüsünü bozar; catalogItemProjection baseline 64 descriptor'ı kilitler."
+    "notes": "Kart descriptor'ı Item'dan türetilir. AutoDepot ölçüleri Item.dimensions; yanlış kaynak catalogVisible ile içeriği kaybettirirdi. catalogItemProjection 64 descriptor’ı, catalogDomainBoundary katman sınırını kilitler."
   },
   "migration": {
     "required": false,
     "notes": "Alanlar kod tablosundadır. Persist/project blob ve SQLite yok."
   },
-  "rollback": "src/catalog.js generic projection'ı eski MODULE_CATALOG literal listesine, sidebar/picker/autoDepot/moduleContracts getCatalogItem okumasını ve catalogItemProjection testini geri al."
+  "rollback": "AutoDepot/moduleContracts getCatalogItem okumasına, catalog.js Recipe profil genişliğine, resolveItemKey Catalog üyeliğine ve dört profil catalogWidthCm alanına dönüş; catalogDomainBoundary testini geri al."
 }

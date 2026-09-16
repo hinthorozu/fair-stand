@@ -12,6 +12,48 @@ Modül Kataloğu, sahneye sürüklenebilir / eklenebilir Item’ların kullanıc
 
 Katalog yalnız UI organizasyonudur. Placement, collision, BOM, recipe, rotation, color, image veya renderer davranışı tanımlamaz.
 
+**Catalog bir Item runtime repository değildir.**
+
+`catalogVisible=false` yalnız Catalog UI görünürlüğünü etkiler; Item’ın başka mekanizmalardaki varlığını veya kullanılabilirliğini etkilemez.
+
+---
+
+## Domain sınırı
+
+Catalog yalnız şunlardan sorumludur:
+
+- Item katalogda görünsün mü?
+- Hangi `catalogCategory` altında görünsün?
+- Kategori kaçıncı sırada?
+- Item kategori içinde kaçıncı sırada?
+- Katalog kartı UI projection’ı nasıl üretilir?
+
+Catalog şunların veri kaynağı değildir: AutoDepot, Item Contract, BOM, Recipe, Placement, runtime Item lookup.
+
+```text
+Item master
+    ↓
+Catalog projection
+    ↓
+Catalog UI
+
+Item master → AutoDepot
+Item master → Module Contract
+Item master → Recipe / BOM
+```
+
+Yasak:
+
+```text
+AutoDepot → Catalog
+ModuleContract → Catalog
+BOM → Catalog
+Recipe → Catalog
+Catalog → Recipe
+```
+
+Canonical API (`getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `listCatalogCategories`, `getCatalogCategory`) Catalog/UI içindir.
+
 ---
 
 ## UI karşılığı
@@ -77,7 +119,7 @@ Item master ürünün gerçek özelliğidir (`src/items.js`). Catalog projection
 | Projection alanı | Kaynak |
 |---|---|
 | `label` | `item.name` |
-| `widthCm` / `depthCm` / `heightCm` | `item.dimensions` veya türetilmiş oturum (dikme/profil/TV) |
+| `widthCm` / `depthCm` / `heightCm` | `item.dimensions`; profilde `item.catalogWidthCm` (fiziksel `lengthCm` değil); dikmede thickness/length oturumu; TV’de `resolveWallMediaMetrics` |
 | `modelFile` / `variant` / `stripOccupancy` / `shelfCount` / `eyeCount` / `shape` | Item root, varsa |
 | `sizeInch` / ekran / video-wall | `resolveWallMediaMetrics` |
 
@@ -143,7 +185,9 @@ Kart descriptor’ı Item kaydından türetilir. Hardcoded Item key listesi yokt
 
 UI okur: `listCatalogGroups()` + `group.catalogName` + `getCatalogItem(itemKey)`.
 
-Kimlik yardımcıları (üyelik listesi değildir): `resolveItemKey`, `getModuleCatalogItem`, `getModuleCatalogLabel`.
+`resolveItemKey` Item identity helper’dır (`src/items.js`); Catalog üyeliği kontrol etmez. `src/catalog.js` test uyumu için re-export eder.
+
+Catalog UI yardımcıları: `getModuleCatalogItem`, `getModuleCatalogLabel` — görünür Catalog projection döner. Drag badge (`src/scene3d.js`) katalog kart önizlemesi için bunları okur.
 
 ---
 
@@ -153,6 +197,7 @@ Kimlik yardımcıları (üyelik listesi değildir): `resolveItemKey`, `getModule
 - Registry grubundan belirlenmez
 - Item Contract üzerinden belirlenmez
 - `catalogVisible` üyelik, `catalogCategory` grup, `catalogItemIndex` sıra belirler
+- `catalogVisible=false` Item’ı AutoDepot / ModuleContract / BOM / renderer / placement’tan silmez
 - `catalogCategory` rotation / color / image / collision / renderer / placement belirlemez
 - Kategori adı yalnız `catalogName`
 - Kategori sırası yalnız `catalogIndex`
@@ -201,7 +246,10 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 - catalog projection Item: 64
 - hardcoded katalog Item key listesi: 0
 - `catalogVisible=false` → category/index null
+- `catalogVisible=false` → `getCatalogItem` null; `getItem` dolu
 - Aynı kategoride duplicate `catalogItemIndex` yasak
+- Catalog Recipe import etmez
+- AutoDepot / moduleContracts Catalog import etmez
 
 ---
 
@@ -210,6 +258,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 | Test | Ne doğrular |
 |---|---|
 | `test/catalogItemProjection.test.js` | 64/64 Item-driven projection, eski descriptor regression |
+| `test/catalogDomainBoundary.test.js` | Catalog/AutoDepot/ModuleContract katman sınırı; `catalogVisible=false` ≠ Item yok |
 | `test/catalogCategories.test.js` | Catalog modeli, key eşleşmesi, sıra/label/adet regression |
 | `test/itemCatalogFields.test.js` | 104/104 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
 | `test/catalogSingleSource.test.js` | Her katalog Item tam bir grupta |
@@ -221,9 +270,10 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 ## Kaynak dosyalar
 
 - `src/catalog.js` — `CATALOG_CATEGORIES`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`; derived `MODULE_CATALOG` / `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS`
-- `src/items.js` — Item katalog alanları
+- `src/items.js` — Item master; `catalogWidthCm`; `resolveItemKey`
 - `src/moduleDragSidebar.js` — sol katalog UI
 - `src/moduleContextMenu.js` — picker katalog UI
+- `src/scene3d.js` — drag badge katalog önizlemesi (`getModuleCatalogItem` / `getModuleCatalogLabel`)
 - `src/main.js` — `#open-module-catalog` bağlama
 - `docs/refactor/CATALOG.md` — bu sözleşme
 - `docs/refactor/ITEMS.md` — Item şeması

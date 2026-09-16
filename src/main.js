@@ -4,7 +4,7 @@ import './imageActions.css';
 import './helpGuide.css';
 import { createStandScene } from './scene3d.js';
 import { initHelpGuide } from './helpGuide.js';
-import { resolveItemKey } from './catalog.js';
+import { resolveItemKey } from './items.js';
 import { planAutomaticDepot } from './autoDepot.js';
 import {
   composeAutomaticStandWall,

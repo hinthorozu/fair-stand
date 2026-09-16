@@ -1,15 +1,17 @@
 // catalogVisible / catalogCategory / catalogItemIndex her Item'ın kendi katalog görünüm verisidir.
+// catalogWidthCm yalnız katalog kartı yerleşim genişliği fiziksel widthCm'den farklıysa yazılır.
 // catalogCategory yalnız UI gruplamasıdır; type, Item Contract veya registry grubundan türetilmez.
+// Catalog, Item runtime repository değildir; catalogVisible=false Item'ı yok etmez.
 // Kanonik Item registry. Leaf / üretim üstverisi burada durur.
 export const LEAF_ITEMS = Object.freeze({
   upright_346_5: Object.freeze({ itemKey: 'upright_346_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 9, name: 'Dikme 346,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 346.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_99: Object.freeze({ itemKey: 'upright_99', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Dikme 99 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 99, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_49_5: Object.freeze({ itemKey: 'upright_49_5', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Dikme 49,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 49.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
 
-  profile_41_5: Object.freeze({ itemKey: 'profile_41_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 13, name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
-  profile_91: Object.freeze({ itemKey: 'profile_91', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 12, name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
-  profile_140_5: Object.freeze({ itemKey: 'profile_140_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 11, name: 'Profil 140,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 140.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
-  profile_190: Object.freeze({ itemKey: 'profile_190', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 10, name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_41_5: Object.freeze({ itemKey: 'profile_41_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 13, catalogWidthCm: 50, name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_91: Object.freeze({ itemKey: 'profile_91', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 12, catalogWidthCm: 100, name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_140_5: Object.freeze({ itemKey: 'profile_140_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 11, catalogWidthCm: 150, name: 'Profil 140,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 140.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_190: Object.freeze({ itemKey: 'profile_190', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 10, catalogWidthCm: 200, name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
 
   panel_48_5: Object.freeze({ itemKey: 'panel_48_5', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Panel 48,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }), material: 'sunta', panelRole: 'straight', nominalModuleWidthCm: 50 }),
   panel_98: Object.freeze({ itemKey: 'panel_98', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Panel 98 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), material: 'sunta', panelRole: 'straight', nominalModuleWidthCm: 100 }),
@@ -1040,4 +1042,116 @@ export function listRegisteredItems() {
     ...Object.values(FLOOR_ITEMS),
     ...Object.values(COMPOSITE_ITEMS),
   ]);
+}
+
+function optionalNumber(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+// Katalogdaki düz bankolarda `shape` yoktur; runtime state `shape: 'straight'` kullanır.
+function shapesMatch(want, have) {
+  const normalizedWant = want === 'L' ? 'L' : (want == null ? null : 'straight');
+  const normalizedHave = have === 'L' ? 'L' : (have == null ? null : 'straight');
+  if (normalizedWant === null) return true;
+  if (normalizedHave === null && normalizedWant === 'straight') return true;
+  return normalizedWant === normalizedHave;
+}
+
+function normalizeItemDescriptor(descriptor) {
+  const nested = descriptor?.moduleState && typeof descriptor.moduleState === 'object'
+    ? descriptor.moduleState
+    : null;
+  const source = nested ?? descriptor ?? {};
+  return {
+    itemKey: source.itemKey ?? descriptor?.itemKey ?? null,
+    type: source.type ?? source.moduleType ?? descriptor?.type ?? descriptor?.moduleType ?? null,
+    widthCm: optionalNumber(source.widthCm ?? descriptor?.widthCm),
+    depthCm: optionalNumber(source.depthCm ?? descriptor?.depthCm),
+    shape: source.shape ?? source.counterShape ?? descriptor?.shape ?? descriptor?.counterShape ?? null,
+    shelfCount: optionalNumber(source.shelfCount ?? descriptor?.shelfCount),
+    modelFile: source.modelFile ?? descriptor?.modelFile ?? null,
+    sizeInch: optionalNumber(source.sizeInch ?? descriptor?.sizeInch),
+    screenWidthCm: optionalNumber(source.screenWidthCm ?? descriptor?.screenWidthCm),
+    variant: source.variant ?? descriptor?.variant ?? null,
+  };
+}
+
+// Catalog projection'ı taklit etmez; Item master + opsiyonel catalogWidthCm okur.
+function getItemIdentityFields(item) {
+  const media = resolveWallMediaMetrics(item);
+  const dimensions = item.dimensions ?? {};
+  const thicknessCm = Number(dimensions.thicknessCm);
+  const lengthCm = Number(dimensions.lengthCm);
+  const hasBarStock = Number.isFinite(thicknessCm)
+    && Number.isFinite(lengthCm)
+    && dimensions.widthCm == null;
+
+  if (media) {
+    return {
+      type: item.type,
+      widthCm: optionalNumber(media.widthCm),
+      depthCm: optionalNumber(media.depthCm),
+      shape: item.shape ?? null,
+      shelfCount: item.shelfCount ?? null,
+      modelFile: item.modelFile ?? null,
+      sizeInch: optionalNumber(media.sizeInch ?? item.sizeInch),
+      screenWidthCm: optionalNumber(media.screenWidthCm),
+      variant: item.variant ?? null,
+    };
+  }
+
+  let widthCm = optionalNumber(dimensions.widthCm);
+  let depthCm = optionalNumber(dimensions.depthCm);
+  if (widthCm == null) widthCm = optionalNumber(item.catalogWidthCm);
+  if (hasBarStock) {
+    if (widthCm == null) widthCm = thicknessCm;
+    if (depthCm == null) depthCm = thicknessCm;
+  }
+
+  return {
+    type: item.type,
+    widthCm,
+    depthCm,
+    shape: item.shape ?? null,
+    shelfCount: item.shelfCount ?? null,
+    modelFile: item.modelFile ?? null,
+    sizeInch: optionalNumber(item.sizeInch),
+    screenWidthCm: null,
+    variant: item.variant ?? null,
+  };
+}
+
+// Item identity çözümlemesi Catalog üyeliğine bağlı değildir.
+export function resolveItemKey(descriptor) {
+  const normalized = normalizeItemDescriptor(descriptor);
+  if (normalized.itemKey && getItem(normalized.itemKey)) return normalized.itemKey;
+  if (!normalized.type) return null;
+
+  const candidates = listRegisteredItems().filter((item) => item.type === normalized.type);
+  if (!candidates.length) return null;
+
+  const matches = candidates.filter((item) => {
+    const fields = getItemIdentityFields(item);
+    // Sıradan TV'ler eskiden sahte 100 cm oturum yazardı; yerleşim genişliği artık
+    // ekran genişliğidir. tv katalog anahtarlarını ayırmak için widthCm kullanma.
+    if (normalized.type !== 'tv') {
+      if (normalized.widthCm !== null && optionalNumber(fields.widthCm) !== null && optionalNumber(fields.widthCm) !== normalized.widthCm) return false;
+    }
+    if (normalized.depthCm !== null && optionalNumber(fields.depthCm) !== null && optionalNumber(fields.depthCm) !== normalized.depthCm) return false;
+    if ((normalized.shape !== null || fields.shape != null)
+      && !shapesMatch(normalized.shape, fields.shape)) return false;
+    if ((normalized.shelfCount !== null || fields.shelfCount != null) && optionalNumber(fields.shelfCount) !== normalized.shelfCount) return false;
+    if ((normalized.modelFile !== null || fields.modelFile != null) && (fields.modelFile ?? null) !== normalized.modelFile) return false;
+    if (normalized.sizeInch !== null && optionalNumber(fields.sizeInch) !== null && optionalNumber(fields.sizeInch) !== normalized.sizeInch) return false;
+    if (normalized.type === 'tv' && normalized.screenWidthCm !== null && optionalNumber(fields.screenWidthCm) !== null
+      && optionalNumber(fields.screenWidthCm) !== normalized.screenWidthCm) return false;
+    if ((normalized.variant != null || fields.variant != null) && (fields.variant ?? null) !== (normalized.variant ?? null)) return false;
+    return true;
+  });
+
+  if (matches.length === 1) return matches[0].itemKey;
+  if (candidates.length === 1) return candidates[0].itemKey;
+  return null;
 }

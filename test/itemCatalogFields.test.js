@@ -222,6 +222,24 @@ test('104 Item katalog metadata alanlarını taşır ve canlı katalog üyeliği
   assert.equal(getItem('panel_197').catalogItemIndex, null);
 });
 
+test('catalogWidthCm yalnız profil katalog kart genişliğidir; fiziksel lengthCm değildir', () => {
+  const expected = Object.freeze({
+    profile_41_5: 50,
+    profile_91: 100,
+    profile_140_5: 150,
+    profile_190: 200,
+  });
+
+  for (const item of listRegisteredItems()) {
+    if (Object.hasOwn(expected, item.itemKey)) {
+      assert.equal(item.catalogWidthCm, expected[item.itemKey], item.itemKey);
+      assert.notEqual(item.catalogWidthCm, item.dimensions.lengthCm, item.itemKey);
+      continue;
+    }
+    assert.equal(Object.hasOwn(item, 'catalogWidthCm'), false, item.itemKey);
+  }
+});
+
 test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullanır', () => {
   const sidebar = readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
   const contextMenu = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');
@@ -273,6 +291,7 @@ test('ITEMS.md yalnız onaylı katalog şemasını taşır; gerçekleşmemiş me
   assert.match(itemsDoc, /### catalogVisible/);
   assert.match(itemsDoc, /### catalogCategory/);
   assert.match(itemsDoc, /### catalogItemIndex/);
+  assert.match(itemsDoc, /### catalogWidthCm/);
   assert.match(itemsDoc, /# Canonical Mechanism Connections/);
   assert.match(itemsDoc, /# Item Schema/);
   assert.match(itemsDoc, /# Architectural Rules/);

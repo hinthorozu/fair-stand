@@ -1,5 +1,6 @@
-import { getFurnitureClusterQuantity, getItem, listRegisteredItems, resolveWallMediaMetrics } from './items.js';
-import { getStraightWallNominalWidthForProfileItem } from './moduleRecipes.js';
+import { getFurnitureClusterQuantity, getItem, listRegisteredItems, resolveItemKey, resolveWallMediaMetrics } from './items.js';
+
+export { resolveItemKey };
 
 export const STAND_DIMENSIONS = Object.freeze({
   height: 3.5,
@@ -111,14 +112,12 @@ function assignCatalogFootprint(descriptor, item) {
     && Number.isFinite(lengthCm)
     && dimensions.widthCm == null;
 
-  // Profil yerleşim genişliği Item.dimensions'da yoktur; düz duvar reçetesindeki
-  // nominalWidthCm'den türetilir. Aynı ölçü çiftine sahip dikme kare oturum kullanır.
+  // Profil katalog kart genişliği fiziksel lengthCm değildir; Item.catalogWidthCm.
+  // Dikme kare oturum: thickness × thickness, yükseklik lengthCm.
   if (hasBarStock) {
-    const recipeWidthCm = item.type === 'profile'
-      ? getStraightWallNominalWidthForProfileItem(item.itemKey)
-      : null;
-    if (recipeWidthCm != null) {
-      descriptor.widthCm = Number(recipeWidthCm);
+    const catalogWidthCm = optionalNumber(item.catalogWidthCm);
+    if (catalogWidthCm != null) {
+      descriptor.widthCm = catalogWidthCm;
       descriptor.depthCm = thicknessCm;
       descriptor.heightCm = thicknessCm;
       return;
@@ -239,68 +238,6 @@ function optionalNumber(value) {
   if (value === null || value === undefined || value === '') return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
-}
-
-// Katalogdaki düz bankolarda `shape` yoktur; runtime state `shape: 'straight'` kullanır.
-function shapesMatch(want, have) {
-  const normalizedWant = want === 'L' ? 'L' : (want == null ? null : 'straight');
-  const normalizedHave = have === 'L' ? 'L' : (have == null ? null : 'straight');
-  if (normalizedWant === null) return true;
-  if (normalizedHave === null && normalizedWant === 'straight') return true;
-  return normalizedWant === normalizedHave;
-}
-
-function normalizeCatalogDescriptor(descriptor) {
-  const nested = descriptor?.moduleState && typeof descriptor.moduleState === 'object'
-    ? descriptor.moduleState
-    : null;
-  const source = nested ?? descriptor ?? {};
-  return {
-    itemKey: source.itemKey ?? descriptor?.itemKey ?? null,
-    type: source.type ?? source.moduleType ?? descriptor?.type ?? descriptor?.moduleType ?? null,
-    widthCm: optionalNumber(source.widthCm ?? descriptor?.widthCm),
-    depthCm: optionalNumber(source.depthCm ?? descriptor?.depthCm),
-    shape: source.shape ?? source.counterShape ?? descriptor?.shape ?? descriptor?.counterShape ?? null,
-    shelfCount: optionalNumber(source.shelfCount ?? descriptor?.shelfCount),
-    modelFile: source.modelFile ?? descriptor?.modelFile ?? null,
-    sizeInch: optionalNumber(source.sizeInch ?? descriptor?.sizeInch),
-    screenWidthCm: optionalNumber(source.screenWidthCm ?? descriptor?.screenWidthCm),
-    variant: source.variant ?? descriptor?.variant ?? null,
-  };
-}
-
-export function resolveItemKey(descriptor) {
-  const normalized = normalizeCatalogDescriptor(descriptor);
-  if (normalized.itemKey && getCatalogItem(normalized.itemKey)) return normalized.itemKey;
-  if (!normalized.type) return null;
-
-  const candidates = MODULE_CATALOG_KEYS.filter(
-    (moduleKey) => getCatalogItem(moduleKey)?.type === normalized.type,
-  );
-  if (!candidates.length) return null;
-
-  const matches = candidates.filter((moduleKey) => {
-    const item = getCatalogItem(moduleKey);
-    // Sıradan TV'ler eskiden sahte 100 cm oturum yazardı; yerleşim genişliği artık
-    // ekran genişliğidir. tv katalog anahtarlarını ayırmak için widthCm kullanma.
-    if (normalized.type !== 'tv') {
-      if (normalized.widthCm !== null && optionalNumber(item.widthCm) !== null && optionalNumber(item.widthCm) !== normalized.widthCm) return false;
-    }
-    if (normalized.depthCm !== null && optionalNumber(item.depthCm) !== null && optionalNumber(item.depthCm) !== normalized.depthCm) return false;
-    if ((normalized.shape !== null || item.shape != null)
-      && !shapesMatch(normalized.shape, item.shape)) return false;
-    if ((normalized.shelfCount !== null || item.shelfCount != null) && optionalNumber(item.shelfCount) !== normalized.shelfCount) return false;
-    if ((normalized.modelFile !== null || item.modelFile != null) && (item.modelFile ?? null) !== normalized.modelFile) return false;
-    if (normalized.sizeInch !== null && optionalNumber(item.sizeInch) !== null && optionalNumber(item.sizeInch) !== normalized.sizeInch) return false;
-    if (normalized.type === 'tv' && normalized.screenWidthCm !== null && optionalNumber(item.screenWidthCm) !== null
-      && optionalNumber(item.screenWidthCm) !== normalized.screenWidthCm) return false;
-    if ((normalized.variant != null || item.variant != null) && (item.variant ?? null) !== (normalized.variant ?? null)) return false;
-    return true;
-  });
-
-  if (matches.length === 1) return matches[0];
-  if (candidates.length === 1) return candidates[0];
-  return null;
 }
 
 export function getModuleCatalogItem(descriptor) {

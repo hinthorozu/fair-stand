@@ -1,4 +1,4 @@
-import { resolveItemKey, STAND_DIMENSIONS } from './catalog.js';
+import { STAND_DIMENSIONS } from './catalog.js';
 import { normalizeStripOccupancy } from './stripOccupancy.js';
 import {
   getCommercialItemForType,
@@ -9,6 +9,7 @@ import {
   getDoorLeafItem,
   getShowcaseBodyDefinition,
   getShowcaseItemKeyForType,
+  resolveItemKey,
   resolveWallMediaMetrics,
 } from './items.js';
 import { getStraightWallNominalWidthForProfileItem } from './moduleRecipes.js';

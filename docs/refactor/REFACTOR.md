@@ -7,6 +7,61 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-16 — Catalog domain sınırının runtime mekanizmalarından ayrılması
+
+### Neden yapıldı
+
+Catalog, Item runtime repository’si haline gelmişti. AutoDepot ölçüleri `getCatalogItem` + `catalogVisible` üzerinden okunuyordu. ModuleContracts Item varlığını Catalog projection’a bağlıyordu. Catalog profil kart genişliğini Recipe’den öğreniyordu.
+
+### Kaldırılan bağımlılıklar
+
+- AutoDepot → Catalog: `getCatalogItem` / `MODULE_CATALOG` / `catalogVisible` kaldırıldı
+- ModuleContracts → Catalog: `getCatalogItem` kaldırıldı; string `itemKey` `getItem` ile doğrulanır
+- Catalog → Recipe: `getStraightWallNominalWidthForProfileItem` kaldırıldı
+
+### Yeni veri kaynakları
+
+- AutoDepot: `getItem('MINI_FRIDGE_AVANTI' | 'COAT_RACK' | 'KETTLE' | 'PLASTIC_TRASH_BIN')` → `item.dimensions.widthCm/depthCm/heightCm`
+- ModuleContracts: `getItem(itemKey)` Item master varlığı; descriptor gelirse `resolveItemKey` (Item identity, Catalog üyeliği değil)
+- `resolveItemKey` Catalog’dan `src/items.js` Item-domain helper’ına taşındı. `catalogVisible` kontrolü identity çözümlemesine girmez. `src/catalog.js` test uyumu için re-export eder
+
+### Yeni Item alanı
+
+`catalogWidthCm` — yalnız dört profil Item’ında:
+
+- `profile_41_5` → 50
+- `profile_91` → 100
+- `profile_140_5` → 150
+- `profile_190` → 200
+
+Fiziksel `dimensions.lengthCm` değildir. Katalog kartı / serbest profil oturum genişliğidir. Recipe’den türetilmez.
+
+### Dependency yönü
+
+```text
+Item → Catalog
+Item → AutoDepot
+Item → ModuleContract
+Item → Recipe/BOM
+```
+
+Yasak: AutoDepot → Catalog, ModuleContract → Catalog, BOM → Catalog, Recipe → Catalog, Catalog → Recipe.
+
+### Doğrulama
+
+- kayıtlı Item 104; catalogVisible=true 64; projection 64
+- hardcoded katalog Item key listesi: 0
+- 64/64 catalog descriptor regression korundu
+- `catalogVisible=false` ≠ Item runtime’da yok
+- AutoDepot includeContents konum/ölçü regression’ı birebir
+- architecture boundary: `test/catalogDomainBoundary.test.js`
+
+### Sonraki adım
+
+Rotation / color / image / lighting / delete / collision / placement / Item Contract mimari refactor / Recipe-BOM refactor / registry temizliği / SQLite bu turda yok.
+
+---
+
 ## 2026-09-16 — MODULE_CATALOG Item tekrarının kaldırılması
 
 ### Eski yapı
