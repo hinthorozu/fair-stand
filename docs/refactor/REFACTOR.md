@@ -60,9 +60,13 @@ Aynı field adı yoksa fallback yoktur. `lengthCm` width olmaz. `thicknessCm` de
 ### Doğrulama
 
 - kayıtlı Item 104; catalogVisible=true 64; projection 64
+- physical `dimensions` 98; `sceneDimensions` 35; MISSING_PHYSICAL 6
 - `test/itemSceneDimensions.test.js` same-field / cross-remap / catalogWidthCm / Recipe yasakları
-- targeted dimension + catalog + profile/upright contract testleri
-- `npm test` / `npm run build` / `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify` / `e2e/smoke.spec.mjs`
+- targeted dimension + catalog + profile/upright/shelf contract testleri: geçti
+- `npm test`: 775 pass / 0 fail
+- `npm run build`: geçti
+- `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
+- targeted E2E `e2e/smoke.spec.mjs`: geçti
 
 ### Sonraki adım
 
