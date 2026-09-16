@@ -32,7 +32,8 @@ test('shelf state keeps seven editable wall panels and its shelf count', () => {
   assert.equal(shelf.widthCm, 150);
   assert.equal(shelf.shelfCount, 3);
   assert.equal(shelf.strips.length, 7);
-  assert.equal('depthCm' in shelf, false);
+  assert.equal(shelf.depthCm, 10);
+  assert.equal(shelf.heightCm, 350);
   assert.equal(createShelfModuleState(50, 2), null);
   assert.equal(createShelfModuleState(100, 4), null);
 });
