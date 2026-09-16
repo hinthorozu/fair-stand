@@ -305,3 +305,24 @@ test('katalog UI hâlâ MODULE_CATALOG_GROUPS okur; yeni Item alanlarından tür
     assert.equal(Object.hasOwn(MODULE_CATALOG[itemKey], 'catalogItemIndex'), false, itemKey);
   }
 });
+
+test('CATALOG.md canonical category tablosu canlı gruplarla örtüşür; listCatalog API henüz yoktur', () => {
+  const catalogDoc = readFileSync(new URL('../docs/refactor/CATALOG.md', import.meta.url), 'utf8');
+  const itemsSource = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
+  const catalogSource = readFileSync(new URL('../src/catalog.js', import.meta.url), 'utf8');
+
+  assert.match(catalogDoc, /# Catalog/);
+  assert.match(catalogDoc, /henüz implement edilmedi/i);
+  assert.doesNotMatch(catalogDoc, /listCatalogItems\(\)[^\n]*implement edildi/i);
+  assert.doesNotMatch(itemsSource, /export function listCatalog(Items|Groups)/);
+  assert.doesNotMatch(catalogSource, /export function listCatalog(Items|Groups)/);
+
+  EXPECTED_CATALOG_GROUPS.forEach((group) => {
+    const categoryKey = CATALOG_CATEGORY_KEYS_BY_LABEL[group.label];
+    const row = new RegExp(
+      `\\| \`${categoryKey}\` \\| ${group.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\| ${group.keys.length} \\|`,
+    );
+    assert.match(catalogDoc, row, categoryKey);
+    assert.equal(getItem(group.keys[0]).catalogCategory, categoryKey, group.keys[0]);
+  });
+});
