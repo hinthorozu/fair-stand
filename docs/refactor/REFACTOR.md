@@ -122,6 +122,7 @@ Yeni Item modelinin yaşayan teknik sözleşmesini `docs/refactor/ITEMS.md` alt�
 ### Doğrulama
 
 - `test/itemCatalogFields.test.js` ITEMS.md katalog alanlarını ve “henüz yok” kaydını doğrular
+- `npm test`: 734 pass / 0 fail
 - Katalog UI değişmez
 
 ### Sonraki adım
