@@ -20,3 +20,4 @@ Mevcut çalışan sistemin dökümü. Refactor / yeni mimari yok.
 | [FINAL_OZET.md](FINAL_OZET.md) | sayılar + ikinci tur |
 | [properties/](properties/README.md) | 188 özellik sözlüğü |
 | [items/](items/) | item başı döküm |
+| [report/](report/README.md) | okunabilir HTML/Markdown/CSV rapor |
