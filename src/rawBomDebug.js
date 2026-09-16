@@ -143,13 +143,6 @@ function syncFromSelection() {
     return;
   }
 
-  const baseWallMatch = text.match(/Panel\s+Bazalı\s+(100|150|200)(?:\s*cm)?/i);
-  if (baseWallMatch) {
-    const widthCm = Number(baseWallMatch[1]);
-    renderRecipe('base-wall', widthCm, `Panel Bazalı ${widthCm} cm`);
-    return;
-  }
-
   const baseMatch = text.match(/Baza\s+(100|150|200)\s*cm/i);
   if (baseMatch) {
     const widthCm = Number(baseMatch[1]);

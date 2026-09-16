@@ -42,38 +42,34 @@ test('base tops are canonical single Items with complete intrinsic defaults', ()
   }
 });
 
-test('base tops use canonical itemKey in exactly six active parent recipe rows with ×1 parity', () => {
+test('base tops use canonical itemKey in exactly three active parent recipe rows with ×1 parity', () => {
   let occurrences = 0;
 
   for (const [itemKey, expected] of Object.entries(BASE_TOP_CASES)) {
-    for (const moduleType of ['base', 'base-wall']) {
-      const recipe = getModuleRecipe(moduleType, expected.nominalModuleWidthCm);
-      assert.ok(recipe, `${moduleType}:${expected.nominalModuleWidthCm}`);
-      const matches = recipe.items.filter((item) => getRecipeItemKey(item) === itemKey);
-      assert.equal(matches.length, 1, recipe.recipeId);
-      assert.deepEqual(matches[0], { itemKey, quantity: 1 }, recipe.recipeId);
-      assert.equal(matches[0].partId, undefined, recipe.recipeId);
-      occurrences += 1;
-    }
+    const recipe = getModuleRecipe('base', expected.nominalModuleWidthCm);
+    assert.ok(recipe, `base:${expected.nominalModuleWidthCm}`);
+    const matches = recipe.items.filter((item) => getRecipeItemKey(item) === itemKey);
+    assert.equal(matches.length, 1, recipe.recipeId);
+    assert.deepEqual(matches[0], { itemKey, quantity: 1 }, recipe.recipeId);
+    assert.equal(matches[0].partId, undefined, recipe.recipeId);
+    occurrences += 1;
   }
 
-  assert.equal(occurrences, 6);
+  assert.equal(occurrences, 3);
 });
 
-test('expanded base/base-wall recipes resolve canonical base-top metadata and intrinsic defaults', () => {
+test('expanded base recipes resolve canonical base-top metadata and intrinsic defaults', () => {
   for (const [itemKey, expected] of Object.entries(BASE_TOP_CASES)) {
-    for (const moduleType of ['base', 'base-wall']) {
-      const expanded = getExpandedModuleRecipe(moduleType, expected.nominalModuleWidthCm);
-      const top = expanded.items.find((item) => getRecipeItemKey(item) === itemKey);
-      assert.ok(top, `${moduleType}:${expected.nominalModuleWidthCm}:${itemKey}`);
-      assert.equal(top.quantity, 1, expanded.recipeId);
-      assert.equal(top.part.itemKey, itemKey, expanded.recipeId);
-      assert.equal(top.part.partId, undefined, expanded.recipeId);
-      assert.equal(top.part.type, 'base-top', expanded.recipeId);
-      assert.equal(top.part.unit, 'adet', expanded.recipeId);
-      assert.deepEqual(top.part.dimensions, expected.dimensions, expanded.recipeId);
-      assert.equal(top.part.material, 'sunta', expanded.recipeId);
-      assert.equal(top.part.defaultColor, 0xffffff, expanded.recipeId);
-    }
+    const expanded = getExpandedModuleRecipe('base', expected.nominalModuleWidthCm);
+    const top = expanded.items.find((item) => getRecipeItemKey(item) === itemKey);
+    assert.ok(top, `base:${expected.nominalModuleWidthCm}:${itemKey}`);
+    assert.equal(top.quantity, 1, expanded.recipeId);
+    assert.equal(top.part.itemKey, itemKey, expanded.recipeId);
+    assert.equal(top.part.partId, undefined, expanded.recipeId);
+    assert.equal(top.part.type, 'base-top', expanded.recipeId);
+    assert.equal(top.part.unit, 'adet', expanded.recipeId);
+    assert.deepEqual(top.part.dimensions, expected.dimensions, expanded.recipeId);
+    assert.equal(top.part.material, 'sunta', expanded.recipeId);
+    assert.equal(top.part.defaultColor, 0xffffff, expanded.recipeId);
   }
 });

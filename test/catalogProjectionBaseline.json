@@ -9,9 +9,6 @@
     "wall_separator_50",
     "wall_separator_100_sarmasik",
     "wall_separator_50_sarmasik",
-    "wall_base_200",
-    "wall_base_150",
-    "wall_base_100",
     "door_100",
     "wall_200_short_up_2",
     "wall_150_short_up_2",
@@ -74,9 +71,6 @@
         "wall_separator_50",
         "wall_separator_100_sarmasik",
         "wall_separator_50_sarmasik",
-        "wall_base_200",
-        "wall_base_150",
-        "wall_base_100",
         "door_100"
       ]
     },
@@ -228,30 +222,6 @@
       "heightCm": 350,
       "type": "separator",
       "modelFile": "wall_separator_50_sarmasik.glb"
-    },
-    {
-      "itemKey": "wall_base_200",
-      "label": "Panel Bazalı 200",
-      "widthCm": 200,
-      "depthCm": 50,
-      "heightCm": 350,
-      "type": "base-wall"
-    },
-    {
-      "itemKey": "wall_base_150",
-      "label": "Panel Bazalı 150",
-      "widthCm": 150,
-      "depthCm": 50,
-      "heightCm": 350,
-      "type": "base-wall"
-    },
-    {
-      "itemKey": "wall_base_100",
-      "label": "Panel Bazalı 100",
-      "widthCm": 100,
-      "depthCm": 50,
-      "heightCm": 350,
-      "type": "base-wall"
     },
     {
       "itemKey": "door_100",

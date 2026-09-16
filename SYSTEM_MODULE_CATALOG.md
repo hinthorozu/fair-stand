@@ -17,8 +17,8 @@ Bu dosya insan/AI için **okunabilir katalog indeksi**dir. Runtime source-of-tru
 
 Bu snapshot `Version2` üzerindeki `MODULE_CATALOG_KEYS` ve `MODULE_CONTRACT_ASSIGNMENTS` ile eşleşmek zorundadır; `test/systemModuleCatalogDoc.test.js` drift olduğunda CI'yi kırar.
 
-- Catalog entries: **58**
-- BOM mode `recipe`: **31**
+- Catalog entries: **55**
+- BOM mode `recipe`: **28**
 - BOM mode `self`: **9**
 - BOM mode `decision-required`: **18**
 - Katalog dışı explicit runtime module: **1** (`illuminated-foam`)
@@ -39,9 +39,6 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `wall_separator_50`
 - `wall_separator_100_sarmasik`
 - `wall_separator_50_sarmasik`
-- `wall_base_200`
-- `wall_base_150`
-- `wall_base_100`
 - `door_100`
 - `wall_200_short_up_2`
 - `wall_150_short_up_2`
@@ -97,7 +94,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Panel & Duvar
 
-`wall_200`, `wall_150`, `wall_100`, `wall_50`, `wall_separator_100`, `wall_separator_50`, `wall_separator_100_sarmasik`, `wall_separator_50_sarmasik`, `wall_base_200`, `wall_base_150`, `wall_base_100`, `door_100`
+`wall_200`, `wall_150`, `wall_100`, `wall_50`, `wall_separator_100`, `wall_separator_50`, `wall_separator_100_sarmasik`, `wall_separator_50_sarmasik`, `door_100`
 
 ### Panel Ek Modül
 
@@ -121,9 +118,9 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ## BOM politika özeti
 
-### `recipe` — 31 katalog kaydı
+### `recipe` — 28 katalog kaydı
 
-Duvar/panel, separatör, vitrin, panel bazalı duvar, depo kapısı, düz/L banko ve baza ailelerinin contract'ı `recipe` modundadır. Gerçek recipe çözümü `src/moduleRecipes.js` tarafından yapılır ve contract testleri recipe-backed kayıtların gerçekten resolve olduğunu doğrular.
+Duvar/panel, separatör, vitrin, depo kapısı, düz/L banko ve baza ailelerinin contract'ı `recipe` modundadır. Gerçek recipe çözümü `src/moduleRecipes.js` tarafından yapılır ve contract testleri recipe-backed kayıtların gerçekten resolve olduğunu doğrular.
 
 ### `self` — 9 katalog kaydı
 

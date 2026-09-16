@@ -23,7 +23,7 @@ nominalModuleWidthCm      200
 Bu değerler Item'ın ürün tanımıdır. `material` ve `defaultColor` genel Item şemasında zorunlu değildir; bu Item için doğrulandıkları için tanımlıdır. Explicit project/runtime veya specialized renderer ezme uygulanabilir; ezme kanonik default'u değiştirmez.
 
 ## 3. Oluşturma / katalog / state / kalıcılık
-Bağımsız leaf proje örneği oluşturucu, mutable state, project `id` ve kalıcılık entity'si **UYGULANMIYOR**. Parent catalog Item'ları `BASE_200` ve `wall_base_200`'dır. Leaf production identity recipe + `getItem()` üzerinden çözülür.
+Bağımsız leaf proje örneği oluşturucu, mutable state, project `id` ve kalıcılık entity'si **UYGULANMIYOR**. Parent catalog Item'ı `BASE_200`'dır. Leaf production identity recipe + `getItem()` üzerinden çözülür.
 
 ## 4. Davranış / etkileşim yetenekleri
 Leaf top ayrı scene Item örneği olmadığı için yerleşim, move, rotation, snap, collision, selection, drag, context-menu, delete, duplicate ve keyboard yetenek'leri **UYGULANMIYOR**. Bu interaction'lar parent base/base-wall seviyesindedir.
@@ -32,9 +32,8 @@ Leaf top ayrı scene Item örneği olmadığı için yerleşim, move, rotation, 
 Leaf için ayrı kanonik relationship/reflow state'i **UYGULANMIYOR**. Parent composition sahiplik recipe'dedir.
 
 ## 6. BOM / bileşim
-Tam iki parent recipe kanonik Item'ı `×1` tüketir:
+Tam bir parent recipe kanonik Item'ı `×1` tüketir:
 - `base-200`
-- `base-wall-200`
 
 Recipe satırı `{ itemKey: 'base_top_206_50', quantity: 1 }` biçimindedir. Expansion `getRecipeItemKey()` → `getItem()` üzerinden kanonik üstveriyi tüketir. Recursive composition **UYGULANMIYOR**.
 
@@ -48,7 +47,7 @@ Renderer prosedürel ve specialized temsil kullanabilir. `src/scene3d.js` içind
 3. `material = sunta`,
 4. `defaultColor = 0xffffff`,
 5. `nominalModuleWidthCm = 200`,
-6. tam iki kanonik parent recipe ve `×1` eşyapı,
+6. tam bir kanonik parent recipe ve `×1` eşyapı,
 7. expanded recipe'nin aynı kanonik Item üstverisinı resolve etmesi.
 
 ## Tamamlanma

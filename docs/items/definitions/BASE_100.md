@@ -7,7 +7,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `src/items.js > COMPOSITE_ITEMS.BASE_100` kanonik itemKey/name/type/dimensions sahibidir. Bileşik Item; `itemKey = BASE_100`. Tek type ailesi `base`; genişlik varyantı 100 cm. Doğrulanmış ölçüler: `widthCm=100`, `depthCm=50`, `heightCm=50`. Üst öğe üzerinde unit uydurulmadı; child unit’ler production Item’lardadır.
 
 ## Bileşim / BOM
-`composition.mode=recipe`, `moduleType=base`; recipe lookup `item.dimensions.widthCm=100`. Miktar tek kaynak: `src/moduleRecipes.js` → `base:100`. Alt satırları Item kartında kopyalanmaz. `wall_base_100` ayrı type/recipe (`base-wall:100`); aynı `base_top_107_50` satırını paylaşır — bu migration reçete/quantity değiştirmez.
+`composition.mode=recipe`, `moduleType=base`; recipe lookup `item.dimensions.widthCm=100`. Miktar tek kaynak: `src/moduleRecipes.js` → `base:100`. Alt satırları Item kartında kopyalanmaz. `base_top_107_50` bu recipe’de ×1 tüketilir.
 
 ## Oluşturma, state ve kalıcılık
 `src/designState.js > createBaseModuleState` `getItem(itemKey|BASE_${width})` ile kanonik Item’dan default üretir; `itemKey` damgalar; `faces.front|left|right` editable aynı yapı korunur. `getCommercialItemForType('base')` kullanılmaz. Yüklemede `normalizeModuleItemState` `itemKey` doldurur; takma ad yok.

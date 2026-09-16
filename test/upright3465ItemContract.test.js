@@ -24,9 +24,6 @@ function listAllVerifiedRecipes() {
       ['counter', 100],
       ['counter', 150],
       ['counter', 200],
-      ['base-wall', 100],
-      ['base-wall', 150],
-      ['base-wall', 200],
       ['base', 100],
       ['base', 150],
       ['base', 200],
@@ -44,7 +41,7 @@ test('upright_346_5 is a canonical single production Item', () => {
   assert.deepEqual(item.dimensions, { lengthCm: 346.5, thicknessCm: 8 });
 });
 
-test('upright_346_5 uses canonical itemKey in all 12 verified parent recipes and keeps quantity 2', () => {
+test('upright_346_5 uses canonical itemKey in all 9 verified parent recipes and keeps quantity 2', () => {
   let occurrences = 0;
 
   for (const recipe of listAllVerifiedRecipes()) {
@@ -56,7 +53,7 @@ test('upright_346_5 uses canonical itemKey in all 12 verified parent recipes and
     }
   }
 
-  assert.equal(occurrences, 12);
+  assert.equal(occurrences, 9);
 });
 
 test('upright_346_5 remains canonical while neighboring upright Items migrate independently', () => {

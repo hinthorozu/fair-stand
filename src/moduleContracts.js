@@ -122,9 +122,6 @@ export const MODULE_CONTRACT_ASSIGNMENTS = Object.freeze({
   wall_showcase_100_3: assignment('wall-editable', RECIPE_BOM_POLICY),
   wall_showcase_100_2: assignment('wall-editable', RECIPE_BOM_POLICY),
 
-  wall_base_200: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_base_150: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_base_100: assignment('wall-editable', RECIPE_BOM_POLICY),
   door_100: assignment('wall-editable', RECIPE_BOM_POLICY),
 
   desk_banko_200: assignment('free-editable', RECIPE_BOM_POLICY),

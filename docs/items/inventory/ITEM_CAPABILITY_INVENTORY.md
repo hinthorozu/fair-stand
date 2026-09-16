@@ -25,7 +25,7 @@ Kaldırılan Item alanları → yeni kaynak:
 | `sizeInch` | kimlik `itemKey` (`TV_42` / `TV_55` / `TV_65`) |
 | `composition.nominalWidthCm` | `item.dimensions.widthCm` (`itemBom.resolveRecipe`) |
 
-Yeni Item: `VIDEO_WALL_PANEL` (`catalogVisible=false`). `listRegisteredItems()` = 99 (ölçü dedup sonrası 105; 6 wall_shelf silindi). `Recipe.nominalWidthCm` durur.
+Yeni Item: `VIDEO_WALL_PANEL` (`catalogVisible=false`). `listRegisteredItems()` = 96 (ölçü dedup sonrası 105; 6 wall_shelf + 3 wall_base silindi). `Recipe.nominalWidthCm` durur.
 
 ## Tarama
 
@@ -35,14 +35,14 @@ Yeni Item: `VIDEO_WALL_PANEL` (`catalogVisible=false`). `listRegisteredItems()` 
 
 | # | dosya | unique alan / aksiyon (bu tur satır kaynağı) |
 |---|---|---|
-| 1 | `src/items.js` | üst anahtarlar + `dimensions.*` + `composition.*` + `bodyItems.*` + `videoWall.rows/cols/panelItemKey` + `stripOccupancy.*`; 9 map; `listRegisteredItems()` = 99 |
+| 1 | `src/items.js` | üst anahtarlar + `dimensions.*` + `composition.*` + `bodyItems.*` + `videoWall.rows/cols/panelItemKey` + `stripOccupancy.*`; 9 map; `listRegisteredItems()` = 96 |
 | 2 | `src/moduleBehavior.js` | davranış kaydı alanları + `TYPE_BEHAVIORS` 27 type anahtarı + ghost |
 | 3 | `MODULE_BEHAVIOR_STANDARD.md` | sözleşme alan adları (kodla aynı küme; `collisionHeight` belgede yok, kodda var) |
 | 4 | `src/moduleContextMenu.js` | 10 `data-module-action` + görünme koşulları |
 | 5 | `src/itemCapabilities.js` | type `door-leaf` + 5 bayrak |
 | 6 | `src/surfaceStateBinding.js` | 8 `FABRIC_KEYS` + `isGlass` |
 | 7 | `src/scene3d.js` | `selectionMode`, `surfaceRole`, kılıf / `acceptsColor` / `acceptsImage` |
-| 8 | `src/designState.js` | `MODULE_STATE_FACTORIES` 26 anahtar + factory çıktı alanları |
+| 8 | `src/designState.js` | `MODULE_STATE_FACTORIES` 25 anahtar + factory çıktı alanları |
 | 9 | `index.html` | editor + sahne/depo/proje kontrolleri |
 | 10 | `src/main.js` | `#apply-color`, `#reset-module-features`, `data-asset-action` |
 | 11 | `src/colorEditorController.js` | hex/RGB/CMYK senkron |
@@ -50,7 +50,7 @@ Yeni Item: `VIDEO_WALL_PANEL` (`catalogVisible=false`). `listRegisteredItems()` 
 | 13 | `src/imageFit.js` | `cover` / `contain` |
 | 14 | `src/horizontalImageLayout.js` | yatay birleşik layout |
 | 15 | `src/rectImageLayout.js` | dikdörtgen birleşik layout |
-| 16 | `src/catalog.js` | 22 kart alanı; 58 `itemKey`; `STAND_DIMENSIONS` |
+| 16 | `src/catalog.js` | 22 kart alanı; 55 `itemKey`; `STAND_DIMENSIONS` |
 | 17 | `src/moduleRecipes.js` | reçete alanları + `panelVariant` |
 | 18 | `src/itemBom.js` | `composition.mode === 'recipe'` vs leaf `unit` |
 | 19 | `src/moduleContracts.js` | profil + `appearance` + BOM policy |
@@ -69,15 +69,15 @@ Yeni Item: `VIDEO_WALL_PANEL` (`catalogVisible=false`). `listRegisteredItems()` 
 
 ## 1. Item tanım alanları (`src/items.js`)
 
-Map sayıları: `LEAF_ITEMS` 39, `COMMERCIAL_ITEMS` 4, `FURNITURE_ITEMS` 8, `TOP_LIGHT_ITEMS` 1, `NON_CATALOG_ITEMS` 2, `FLOOR_ITEMS` 5, `INDOOR_PLANT_ITEMS` 4, `WALL_MEDIA_ITEMS` 5, `COMPOSITE_ITEMS` 31. `listRegisteredItems()` = 99.
+Map sayıları: `LEAF_ITEMS` 39, `COMMERCIAL_ITEMS` 4, `FURNITURE_ITEMS` 8, `TOP_LIGHT_ITEMS` 1, `NON_CATALOG_ITEMS` 2, `FLOOR_ITEMS` 5, `INDOOR_PLANT_ITEMS` 4, `WALL_MEDIA_ITEMS` 5, `COMPOSITE_ITEMS` 28. `listRegisteredItems()` = 96.
 
 Üst unique key’ler (script): `bodyItems`, `composition`, `connectorType`, `defaultColor`, `dimensions`, `eyeCount`, `itemKey`, `material`, `modelFile`, `modelRotationYDeg`, `name`, `nominalModuleWidthCm`, `paintable`, `panelRole`, `preserveModelScale`, `shape`, `stripOccupancy`, `type`, `unit`, `variant`, `videoWall`, `visualRotationYDeg`.
 
 | alan / aksiyon | kod adı | kanıtlı değerler (yalnız kodda görülen) | sahip dosya | sınıf | not |
 |---|---|---|---|---|---|
-| ürün kimliği | `itemKey` | 99 kayıt (9 map) | `src/items.js` | `item-tanim` | asıl sahip |
+| ürün kimliği | `itemKey` | 96 kayıt (9 map) | `src/items.js` | `item-tanim` | asıl sahip |
 | görünen ad | `name` | string | `src/items.js` | `item-tanim` | asıl sahip |
-| type | `type` | `upright`, `profile`, `panel`, `separator-panel`, `connector`, `door-leaf`, `shelf`, `shelf-accessory`, `showcase-board`, `showcase-accessory`, `counter-top`, `base-top`, `coat-rack`, `kettle`, `mini-fridge`, `plastic-trash-bin`, `sofa-set-classic`, `sofa-single-classic`, `sofa-double-classic`, `coffee-table-classic`, `table-chair-set-eames`, `chair`, `table-glass`, `bar-stool`, `indoor-plant-1`, `tv`, `led-floodlight`, `illuminated-foam`, `video-wall-panel`, `floor`, `door`, `base`, `counter`, `flat-panel`, `base-wall`, `separator`, `showcase-2`, `showcase-3` | `src/items.js` | `item-tanim` | asıl sahip; `video-wall-panel` factory/behavior yok |
+| type | `type` | `upright`, `profile`, `panel`, `separator-panel`, `connector`, `door-leaf`, `shelf`, `shelf-accessory`, `showcase-board`, `showcase-accessory`, `counter-top`, `base-top`, `coat-rack`, `kettle`, `mini-fridge`, `plastic-trash-bin`, `sofa-set-classic`, `sofa-single-classic`, `sofa-double-classic`, `coffee-table-classic`, `table-chair-set-eames`, `chair`, `table-glass`, `bar-stool`, `indoor-plant-1`, `tv`, `led-floodlight`, `illuminated-foam`, `video-wall-panel`, `floor`, `door`, `base`, `counter`, `flat-panel`, `separator`, `showcase-2`, `showcase-3` | `src/items.js` | `item-tanim` | asıl sahip; `video-wall-panel` factory/behavior yok; `base-wall` type Item kaydı yok, `TYPE_BEHAVIORS` anahtarı durur |
 | ölçü çantası | `dimensions` | nesne | `src/items.js` | `item-tanim` | asıl sahip |
 | genişlik cm | `dimensions.widthCm` | 24, 40, 42.5, 43, 46, 48.5, 50, 52, 60, 65, 75, 92, 93, 98, 100, 102, 107, 108.5, 110, 121.8, 142.5, 143.9, 147.5, 150, 157, 160, 192, 197, 200, 206, 210 | `src/items.js` | `item-tanim` | asıl sahip; TV ekran ve cam masa çapı bu alan |
 | yükseklik cm | `dimensions.heightCm` | 25, 30, 35, 38, 47, 50, 52.3, 60, 61, 66, 68.5, 74, 78, 80.9, 82, 100, 120, 121, 180, 200, 350 | `src/items.js` | `item-tanim` | asıl sahip; TV/panel ekran yüksekliği bu alan |
@@ -112,7 +112,7 @@ Map sayıları: `LEAF_ITEMS` 39, `COMMERCIAL_ITEMS` 4, `FURNITURE_ITEMS` 8, `TOP
 | bileşim satırları | `composition.items` | `furniture_sofa_set_classic`, `furniture_table_chair_set_eames` | `src/items.js` | `item-tanim` | asıl sahip; `itemBom.js` yalnız `mode === 'recipe'` okur |
 | bileşim child | `composition.items.itemKey` | `furniture_sofa_double_classic`, `furniture_sofa_single_classic`, `furniture_coffee_table_classic`, `glass_table`, `chair_eames` | `src/items.js` | `item-tanim` | asıl sahip |
 | bileşim miktarı | `composition.items.quantity` | sayı (alan var; bu tur değer kopyalanmaz) | `src/items.js` | `item-tanim` | asıl sahip |
-| bileşim modül tipi | `composition.moduleType` | `door`, `base`, `counter`, `wall`, `wall-short-up-2`, `wall-short-up-1`, `base-wall`, `separator`, `showcase-2`, `showcase-3` | `src/items.js` | `item-tanim` | asıl sahip |
+| bileşim modül tipi | `composition.moduleType` | `door`, `base`, `counter`, `wall`, `wall-short-up-2`, `wall-short-up-1`, `separator`, `showcase-2`, `showcase-3` | `src/items.js` | `item-tanim` | asıl sahip |
 | bileşim seçenek | `composition.options` | nesne | `src/items.js` | `item-tanim` | asıl sahip |
 | bileşim şekil | `composition.options.shape` | `L` | `src/items.js` | `item-tanim` | asıl sahip |
 | video duvar | `videoWall` | nesne | `src/items.js` | `item-tanim` | asıl sahip |
@@ -323,7 +323,7 @@ Shelf `shelfLightingOn` renderer/context-menu (`createShelfModule`, `toggle-shel
 
 Counter `faces` anahtarları: `frontLower`, `frontUpper`, `leftLower`, `leftUpper`, `rightLower`, `rightUpper`; `shape === 'L'` iken `returnLower`, `returnUpper`. Runtime `shape`: `L` veya `straight`.
 
-Base / base-wall `faces`: `front`, `left`, `right`. Base-wall ayrıca `strips` 7.
+Base `faces`: `front`, `left`, `right`. `TYPE_BEHAVIORS['base-wall']` durur; Item factory/`strips` yazımı yoktur.
 
 Furniture `surface` (renk) `table-glass` ve `coffee-table-classic` dışındaki type’larda. `chairCount` yalnız `composition.items` içinde `chair_eames` varsa.
 
@@ -331,18 +331,18 @@ Foam: `haloColor` default `'#ffffff'`; `widthCm` `Math.max(10, …)`; `heightCm`
 
 LED floodlight `surface.color` `'#17191c'`.
 
-`MODULE_STATE_FACTORIES` 26 anahtar: `flat-panel`, `base`, `base-wall`, `counter`, `separator`, `sofa-set-classic`, `sofa-single-classic`, `sofa-double-classic`, `coffee-table-classic`, `table-chair-set-eames`, `chair`, `table-glass`, `bar-stool`, `mini-fridge`, `kettle`, `coat-rack`, `upright`, `profile`, `plastic-trash-bin`, `indoor-plant-1`, `tv`, `led-floodlight`, `door`, `showcase-2`, `showcase-3`, `illuminated-foam`.
+`MODULE_STATE_FACTORIES` 25 anahtar: `flat-panel`, `base`, `counter`, `separator`, `sofa-set-classic`, `sofa-single-classic`, `sofa-double-classic`, `coffee-table-classic`, `table-chair-set-eames`, `chair`, `table-glass`, `bar-stool`, `mini-fridge`, `kettle`, `coat-rack`, `upright`, `profile`, `plastic-trash-bin`, `indoor-plant-1`, `tv`, `led-floodlight`, `door`, `showcase-2`, `showcase-3`, `illuminated-foam`.
 
 | alan / aksiyon | kod adı | kanıtlı değerler (yalnız kodda görülen) | sahip dosya | sınıf | not |
 |---|---|---|---|---|---|
-| şerit dizisi | `strips` | `flat-panel`, `showcase-2`/`showcase-3`, `base-wall`, `door` (3 şerit) | `src/designState.js` | `ornek-state` | uydurma çanta |
+| şerit dizisi | `strips` | `flat-panel`, `showcase-2`/`showcase-3`, `door` (3 şerit) | `src/designState.js` | `ornek-state` | uydurma çanta |
 | şerit id | `strips[].id` | `createId('surface')` | `src/designState.js` | `ornek-state` | uydurma çanta |
 | şerit index | `strips[].stripIndex` | 0…; kapıda 4…6 | `src/designState.js` | `ornek-state` | uydurma çanta |
 | şerit renk | `strips[].color` | `#ffffff` | `src/designState.js` | `ornek-state` | uydurma çanta |
 | şerit görsel | `strips[].imageAssetId` | `null` | `src/designState.js` | `ornek-state` | uydurma çanta |
 | gövde yüzey | `bodySurface` | `{id, color}` | `src/designState.js` | `ornek-state` | uydurma çanta; asıl renk leaf `defaultColor` |
 | gövde yüzey renk | `bodySurface.color` | leaf hex | `src/designState.js` | `ornek-state` | uydurma çanta |
-| yüz nesnesi | `faces` | counter / base / base-wall | `src/designState.js` | `ornek-state` | uydurma çanta |
+| yüz nesnesi | `faces` | counter / base | `src/designState.js` | `ornek-state` | uydurma çanta |
 | yüz anahtarı (banko) | `faces.frontLower` vb. | `frontLower`, `frontUpper`, `leftLower`, `leftUpper`, `rightLower`, `rightUpper`, `returnLower`, `returnUpper` | `src/designState.js` | `ornek-state` | uydurma çanta |
 | yüz anahtarı (baza) | `faces.front` | `front`, `left`, `right` | `src/designState.js` | `ornek-state` | uydurma çanta |
 | tek yüzey | `surface` | separator, door, furniture (istisna iki masa), uzun saksı, led-floodlight | `src/designState.js` | `ornek-state` | uydurma çanta |
@@ -360,7 +360,7 @@ LED floodlight `surface.color` `'#17191c'`.
 | şerit occupancy state | `stripOccupancy` | normalize edilmiş `{align, stripCount}` | `src/designState.js` | `ornek-state` | tanım kopyası |
 | video rows state | `videoWallRows` | Item `videoWall.rows` (`1` sıradan TV; `2`/`3` wall) | `src/designState.js` | `ornek-state` | |
 | video cols state | `videoWallCols` | Item `videoWall.cols` | `src/designState.js` | `ornek-state` | |
-| factory kaydı | `MODULE_STATE_FACTORIES` | 26 type | `src/designState.js` | `ornek-state` | asıl sahip |
+| factory kaydı | `MODULE_STATE_FACTORIES` | 25 type | `src/designState.js` | `ornek-state` | asıl sahip |
 | ortak instance | `id`, `type`, `itemKey`, `widthCm` (+ aileye göre `depthCm`/`heightCm`) | factory | `src/designState.js` | `ornek-state` | proje örneği |
 | yerleşim ezmesi | `placement` | `preservePlacement` ile kopyalanır | `src/designState.js` | `ornek-state` | sahne oturumu |
 | yerleşim duvar | `placement.wallId` | `back`, `left`, `right`, `free` (`scene3d.js`) | `src/scene3d.js` | `ornek-state` | proje örneği |
@@ -385,7 +385,7 @@ LED floodlight `surface.color` `'#17191c'`.
 | BOM policy self | `mode: 'self'` | `source: 'src/itemBom.js'` | `src/moduleContracts.js` | `bom-recipe` | self örnek atama: `upright_346_5`, `profile_*`, `MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN` |
 | BOM policy karar | `mode: 'decision-required'` | `source: null` | `src/moduleContracts.js` | `bom-recipe` | mobilya/bitki/TV/foam/led |
 | reçete id | `recipeId` | örn. `wall-straight-100`, `showcase-2-100` | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
-| reçete modül tipi | `moduleType` | `wall`, `wall-short-up-2`, `wall-short-up-1`, `separator`, `door`, `showcase-2`, `showcase-3`, `counter`, `base-wall`, `base` | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
+| reçete modül tipi | `moduleType` | `wall`, `wall-short-up-2`, `wall-short-up-1`, `separator`, `door`, `showcase-2`, `showcase-3`, `counter`, `base` | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
 | reçete genişlik | `nominalWidthCm` | 50, 100, 150, 200 | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
 | bağlantı kipi | `connectionMode` | `straight` | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
 | reçete şekil | `shape` | `L` (`counter-l:*`) | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
@@ -400,13 +400,13 @@ LED floodlight `surface.color` `'#17191c'`.
 
 ## 8. Katalog
 
-`MODULE_CATALOG` 58 `itemKey`. Unique kart alanları: `depthCm`, `eyeCount`, `heightCm`, `itemKey`, `label`, `modelFile`, `modelRotationYDeg`, `preserveModelScale`, `shape`, `stripOccupancy`, `type`, `unit`, `variant`, `videoWallCols`, `videoWallRows`, `visualRotationYDeg`, `widthCm`.
+`MODULE_CATALOG` 55 `itemKey`. Unique kart alanları: `depthCm`, `eyeCount`, `heightCm`, `itemKey`, `label`, `modelFile`, `modelRotationYDeg`, `preserveModelScale`, `shape`, `stripOccupancy`, `type`, `unit`, `variant`, `videoWallCols`, `videoWallRows`, `visualRotationYDeg`, `widthCm`.
 
 Resolve alias: `moduleType`, `counterShape` (`normalizeCatalogDescriptor`).
 
 | alan / aksiyon | kod adı | kanıtlı değerler (yalnız kodda görülen) | sahip dosya | sınıf | not |
 |---|---|---|---|---|---|
-| katalog kimliği | `itemKey` | 58 kart | `src/catalog.js` | `katalog` | `items.js` ile çift satır |
+| katalog kimliği | `itemKey` | 55 kart | `src/catalog.js` | `katalog` | `items.js` ile çift satır |
 | kart etiketi | `label` | Item `name` | `src/catalog.js` | `katalog` | asıl sahip (kart) |
 | kart type | `type` | katalog type kümesi (script) | `src/catalog.js` | `katalog` | kopya |
 | kart genişlik | `widthCm` | | `src/catalog.js` | `katalog` | kopya / düz |

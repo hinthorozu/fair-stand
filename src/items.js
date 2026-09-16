@@ -510,7 +510,7 @@ export function resolveWallMediaMetrics(itemOrKey) {
 
 export const COMPOSITE_ITEMS = Object.freeze({
   door_100: Object.freeze({
-    itemKey: 'door_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 12, catalogPreview: 'door',
+    itemKey: 'door_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 9, catalogPreview: 'door',
     name: 'Depo Kapısı 100',
     type: 'door',
     unit: 'adet',
@@ -522,8 +522,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   // Serbest baza üst öğeleri type `base` paylaşır; BOM `moduleRecipes`
-  // `base:100|150|200` üzerinden çözülür. Alt Item miktarları recipe'de kalır; wall_base_* üst öğeleri
-  // aynı base_top_* anahtarlarını paylaşan ayrı type/recipe ailesidir.
+  // `base:100|150|200` üzerinden çözülür. Alt Item miktarları recipe'de kalır.
   BASE_100: Object.freeze({
     itemKey: 'BASE_100', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 9, catalogPreview: 'base',
     name: 'Baza 100',
@@ -770,38 +769,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
-    }),
-  }),
-  // Panel Bazalı parent'lar (type base-wall). Child miktarları moduleRecipes
-  // base-wall:100|150|200 satırlarında kalır; Raw BOM UI dokunulmaz.
-  wall_base_100: Object.freeze({
-    itemKey: 'wall_base_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 11, catalogPreview: 'base-wall',
-    name: 'Panel Bazalı 100',
-    type: 'base-wall',
-    dimensions: Object.freeze({ widthCm: 100, depthCm: 50, heightCm: 350 }),
-    composition: Object.freeze({
-      mode: 'recipe',
-      moduleType: 'base-wall',
-    }),
-  }),
-  wall_base_150: Object.freeze({
-    itemKey: 'wall_base_150', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 10, catalogPreview: 'base-wall',
-    name: 'Panel Bazalı 150',
-    type: 'base-wall',
-    dimensions: Object.freeze({ widthCm: 150, depthCm: 50, heightCm: 350 }),
-    composition: Object.freeze({
-      mode: 'recipe',
-      moduleType: 'base-wall',
-    }),
-  }),
-  wall_base_200: Object.freeze({
-    itemKey: 'wall_base_200', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 9, catalogPreview: 'base-wall',
-    name: 'Panel Bazalı 200',
-    type: 'base-wall',
-    dimensions: Object.freeze({ widthCm: 200, depthCm: 50, heightCm: 350 }),
-    composition: Object.freeze({
-      mode: 'recipe',
-      moduleType: 'base-wall',
     }),
   }),
   // Separatör parent'lar (type separator). Child miktarları moduleRecipes
