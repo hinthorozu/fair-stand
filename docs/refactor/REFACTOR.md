@@ -51,9 +51,14 @@ Projection `type` alanı `createModuleStateFromDescriptor` factory uyumu için d
 ### Doğrulama
 
 - kayıtlı Item 104; catalogVisible=true 64; projection 64
-- 64/64 `catalogPreview` mevcut
+- 64/64 `catalogPreview` mevcut; gizli 40’ta alan yok
 - `test/catalogPreviewConfig.test.js`: type branch yok; 64 kök CSS sınıf regression
-- mevcut catalogItemProjection / catalogDomainBoundary / itemCatalogFields bozulmamalı
+- catalogItemProjection / catalogDomainBoundary / itemCatalogFields korundu
+- targeted catalog + ilgili preview contract testleri: geçti
+- `npm test`: 753 pass / 0 fail
+- `npm run build`: geçti
+- `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
+- targeted E2E `e2e/smoke.spec.mjs`: geçti
 
 ### Sonraki adım
 

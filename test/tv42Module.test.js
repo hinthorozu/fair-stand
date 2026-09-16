@@ -213,6 +213,6 @@ test('wall-overlay height clamp reaches geometric top for every TV screen size',
 test('TV catalog preview uses a dedicated TV silhouette instead of panel strips', () => {
   const source = fs.readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
   assert.match(source, /module-drag-tv/);
-  assert.match(source, /module\.type === 'tv'/);
-  assert.match(source, /body\.className = 'module-drag-tv'/);
+  assert.match(source, /tv\(preview\) \{ appendSimple\(preview, 'module-drag-tv'\)/);
+  assert.doesNotMatch(source, /module\.type === 'tv'/);
 });

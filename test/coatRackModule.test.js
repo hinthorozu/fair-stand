@@ -9,13 +9,14 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
   const item = MODULE_CATALOG.COAT_RACK;
   assert.deepEqual(item, {
     itemKey: 'COAT_RACK',
-    modelFile: 'coat_rack.glb',
     type: 'coat-rack',
-    unit: 'adet',
+    label: 'Askılık',
+    catalogPreview: 'coat-rack',
     widthCm: 43,
     depthCm: 43,
     heightCm: 180,
-    label: 'Askılık',
+    modelFile: 'coat_rack.glb',
+    unit: 'adet',
   });
   const extra = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Extra');
   assert.ok(extra?.keys.includes('COAT_RACK'));

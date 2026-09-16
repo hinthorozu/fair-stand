@@ -161,7 +161,7 @@ test('field profile renderer is a thick top rail, not a 4mm line or a 7-strip pa
 test('catalog preview for profile is a horizontal bar', async () => {
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
-  assert.match(source, /module\.type === 'profile'/);
+  assert.match(source, /profile\(preview, module\) \{ appendWidthBox\(preview, 'module-drag-profile'/);
   assert.match(source, /module-drag-profile/);
   assert.match(source, /\.module-drag-profile \{ height:12px/);
 });
