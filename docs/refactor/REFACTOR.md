@@ -60,6 +60,7 @@ Yasak: AutoDepot → Catalog, ModuleContract → Catalog, BOM → Catalog, Recip
 - `npm run build`: geçti
 - `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
 - targeted E2E `e2e/smoke.spec.mjs`: geçti
+- GitHub CI `verify` (`efec8e1`): geçti
 
 ### Sonraki adım
 
