@@ -1,17 +1,18 @@
 // catalogVisible / catalogCategory / catalogItemIndex her Item'ın kendi katalog görünüm verisidir.
+// catalogPreview görünür Item'da Catalog kart renderer key'idir; type üzerinden seçilmez.
 // catalogWidthCm yalnız katalog kartı yerleşim genişliği fiziksel widthCm'den farklıysa yazılır.
 // catalogCategory yalnız UI gruplamasıdır; type, Item Contract veya registry grubundan türetilmez.
 // Catalog, Item runtime repository değildir; catalogVisible=false Item'ı yok etmez.
 // Kanonik Item registry. Leaf / üretim üstverisi burada durur.
 export const LEAF_ITEMS = Object.freeze({
-  upright_346_5: Object.freeze({ itemKey: 'upright_346_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 9, name: 'Dikme 346,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 346.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  upright_346_5: Object.freeze({ itemKey: 'upright_346_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 9, catalogPreview: 'upright', name: 'Dikme 346,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 346.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_99: Object.freeze({ itemKey: 'upright_99', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Dikme 99 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 99, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_49_5: Object.freeze({ itemKey: 'upright_49_5', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Dikme 49,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 49.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
 
-  profile_41_5: Object.freeze({ itemKey: 'profile_41_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 13, catalogWidthCm: 50, name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
-  profile_91: Object.freeze({ itemKey: 'profile_91', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 12, catalogWidthCm: 100, name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
-  profile_140_5: Object.freeze({ itemKey: 'profile_140_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 11, catalogWidthCm: 150, name: 'Profil 140,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 140.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
-  profile_190: Object.freeze({ itemKey: 'profile_190', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 10, catalogWidthCm: 200, name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_41_5: Object.freeze({ itemKey: 'profile_41_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 13, catalogPreview: 'profile', catalogWidthCm: 50, name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_91: Object.freeze({ itemKey: 'profile_91', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 12, catalogPreview: 'profile', catalogWidthCm: 100, name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_140_5: Object.freeze({ itemKey: 'profile_140_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 11, catalogPreview: 'profile', catalogWidthCm: 150, name: 'Profil 140,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 140.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_190: Object.freeze({ itemKey: 'profile_190', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 10, catalogPreview: 'profile', catalogWidthCm: 200, name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
 
   panel_48_5: Object.freeze({ itemKey: 'panel_48_5', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Panel 48,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }), material: 'sunta', panelRole: 'straight', nominalModuleWidthCm: 50 }),
   panel_98: Object.freeze({ itemKey: 'panel_98', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Panel 98 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), material: 'sunta', panelRole: 'straight', nominalModuleWidthCm: 100 }),
@@ -122,22 +123,22 @@ export function resolveConnectorBom(requirements = []) {
 // Bağımsız ticari ürünler, doğrulanmış ürün varsayılanlarının sahibidir.
 export const COMMERCIAL_ITEMS = Object.freeze({
   COAT_RACK: Object.freeze({
-    itemKey: 'COAT_RACK', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 11, name: 'Askılık', type: 'coat-rack', unit: 'adet',
+    itemKey: 'COAT_RACK', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 11, catalogPreview: 'coat-rack', name: 'Askılık', type: 'coat-rack', unit: 'adet',
     dimensions: Object.freeze({ widthCm: 43, depthCm: 43, heightCm: 180 }),
     modelFile: 'coat_rack.glb',
   }),
   KETTLE: Object.freeze({
-    itemKey: 'KETTLE', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 10, name: 'Kettle', type: 'kettle', unit: 'adet',
+    itemKey: 'KETTLE', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 10, catalogPreview: 'kettle', name: 'Kettle', type: 'kettle', unit: 'adet',
     dimensions: Object.freeze({ widthCm: 24, depthCm: 19, heightCm: 25 }),
     modelFile: 'kettle.glb',
   }),
   MINI_FRIDGE_AVANTI: Object.freeze({
-    itemKey: 'MINI_FRIDGE_AVANTI', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 9, name: 'Mini Buzdolabı', type: 'mini-fridge', unit: 'adet',
+    itemKey: 'MINI_FRIDGE_AVANTI', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 9, catalogPreview: 'mini-fridge', name: 'Mini Buzdolabı', type: 'mini-fridge', unit: 'adet',
     dimensions: Object.freeze({ widthCm: 50, depthCm: 50, heightCm: 66 }),
     modelFile: '80s_avanti_mini_fridge.glb',
   }),
   PLASTIC_TRASH_BIN: Object.freeze({
-    itemKey: 'PLASTIC_TRASH_BIN', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 12, name: 'Çöp Kutusu', type: 'plastic-trash-bin', unit: 'adet',
+    itemKey: 'PLASTIC_TRASH_BIN', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 12, catalogPreview: 'plastic-trash-bin', name: 'Çöp Kutusu', type: 'plastic-trash-bin', unit: 'adet',
     dimensions: Object.freeze({ widthCm: 40, depthCm: 40, heightCm: 60 }),
     modelFile: 'plastic_trash_bin.glb', preserveModelScale: false,
     modelRotationYDeg: 0, visualRotationYDeg: -90,
@@ -152,7 +153,7 @@ export function getCommercialItemForType(type) {
 // BOM decision-required — unit/moduleRecipes uydurulmaz.
 export const FURNITURE_ITEMS = Object.freeze({
   furniture_sofa_set_classic: Object.freeze({
-    itemKey: 'furniture_sofa_set_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 1,
+    itemKey: 'furniture_sofa_set_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 1, catalogPreview: 'sofa-set',
     name: 'Koltuk Takımı',
     type: 'sofa-set-classic',
     dimensions: Object.freeze({
@@ -169,7 +170,7 @@ export const FURNITURE_ITEMS = Object.freeze({
     }),
   }),
   furniture_sofa_single_classic: Object.freeze({
-    itemKey: 'furniture_sofa_single_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 2,
+    itemKey: 'furniture_sofa_single_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 2, catalogPreview: 'sofa-single',
     name: 'Tekli Koltuk',
     type: 'sofa-single-classic',
     dimensions: Object.freeze({
@@ -180,7 +181,7 @@ export const FURNITURE_ITEMS = Object.freeze({
     visualRotationYDeg: -135,
   }),
   furniture_sofa_double_classic: Object.freeze({
-    itemKey: 'furniture_sofa_double_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 3,
+    itemKey: 'furniture_sofa_double_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 3, catalogPreview: 'sofa-double',
     name: 'Çiftli Koltuk',
     type: 'sofa-double-classic',
     dimensions: Object.freeze({
@@ -191,7 +192,7 @@ export const FURNITURE_ITEMS = Object.freeze({
     visualRotationYDeg: -45,
   }),
   furniture_coffee_table_classic: Object.freeze({
-    itemKey: 'furniture_coffee_table_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 4,
+    itemKey: 'furniture_coffee_table_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 4, catalogPreview: 'coffee-table',
     name: 'Sehpa',
     type: 'coffee-table-classic',
     dimensions: Object.freeze({
@@ -201,7 +202,7 @@ export const FURNITURE_ITEMS = Object.freeze({
     }),
   }),
   furniture_table_chair_set_eames: Object.freeze({
-    itemKey: 'furniture_table_chair_set_eames', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 5,
+    itemKey: 'furniture_table_chair_set_eames', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 5, catalogPreview: 'table-chair-set',
     name: 'Eames Masa Sandalye Takımı',
     type: 'table-chair-set-eames',
     dimensions: Object.freeze({
@@ -217,7 +218,7 @@ export const FURNITURE_ITEMS = Object.freeze({
     }),
   }),
   chair_eames: Object.freeze({
-    itemKey: 'chair_eames', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 6,
+    itemKey: 'chair_eames', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 6, catalogPreview: 'chair',
     name: 'Eames Sandalye',
     type: 'chair',
     dimensions: Object.freeze({
@@ -227,7 +228,7 @@ export const FURNITURE_ITEMS = Object.freeze({
     }),
   }),
   glass_table: Object.freeze({
-    itemKey: 'glass_table', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 7,
+    itemKey: 'glass_table', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 7, catalogPreview: 'glass-table',
     name: 'Cam Masa',
     type: 'table-glass',
     dimensions: Object.freeze({
@@ -238,7 +239,7 @@ export const FURNITURE_ITEMS = Object.freeze({
     }),
   }),
   furniture_bar_stool_classic: Object.freeze({
-    itemKey: 'furniture_bar_stool_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 8,
+    itemKey: 'furniture_bar_stool_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 8, catalogPreview: 'bar-stool',
     name: 'Bar Taburesi',
     type: 'bar-stool',
     dimensions: Object.freeze({
@@ -256,7 +257,7 @@ export function getFurnitureItemForType(type) {
 // Üst profil LED projektör. Tekil katalog Item. BOM decision-required — unit/recipe uydurulmaz.
 export const TOP_LIGHT_ITEMS = Object.freeze({
   led_floodlight: Object.freeze({
-    itemKey: 'led_floodlight', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 6,
+    itemKey: 'led_floodlight', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 6, catalogPreview: 'floodlight',
     name: 'LED Projektör',
     type: 'led-floodlight',
     dimensions: Object.freeze({
@@ -382,7 +383,7 @@ export function getFurnitureClusterQuantity(item, childItemKey) {
 // BOM decision-required — composition/recipe uydurulmaz.
 export const INDOOR_PLANT_ITEMS = Object.freeze({
   EXTRA_INDOOR_PLANT_1: Object.freeze({
-    itemKey: 'EXTRA_INDOOR_PLANT_1', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 13,
+    itemKey: 'EXTRA_INDOOR_PLANT_1', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 13, catalogPreview: 'indoor-plant',
     name: 'Yapay Çiçek 1',
     type: 'indoor-plant-1',
     dimensions: Object.freeze({ widthCm: 60, depthCm: 60, heightCm: 120 }),
@@ -392,7 +393,7 @@ export const INDOOR_PLANT_ITEMS = Object.freeze({
     preserveModelScale: false,
   }),
   EXTRA_LONG_PLANTER_100: Object.freeze({
-    itemKey: 'EXTRA_LONG_PLANTER_100', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 14,
+    itemKey: 'EXTRA_LONG_PLANTER_100', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 14, catalogPreview: 'long-planter',
     name: 'Uzun Saksı 100',
     type: 'indoor-plant-1',
     dimensions: Object.freeze({ widthCm: 100, depthCm: 30, heightCm: 30 }),
@@ -401,7 +402,7 @@ export const INDOOR_PLANT_ITEMS = Object.freeze({
     preserveModelScale: true,
   }),
   EXTRA_LONG_PLANTER_150: Object.freeze({
-    itemKey: 'EXTRA_LONG_PLANTER_150', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 15,
+    itemKey: 'EXTRA_LONG_PLANTER_150', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 15, catalogPreview: 'long-planter',
     name: 'Uzun Saksı 150',
     type: 'indoor-plant-1',
     dimensions: Object.freeze({ widthCm: 150, depthCm: 30, heightCm: 30 }),
@@ -410,7 +411,7 @@ export const INDOOR_PLANT_ITEMS = Object.freeze({
     preserveModelScale: true,
   }),
   EXTRA_LONG_PLANTER_200: Object.freeze({
-    itemKey: 'EXTRA_LONG_PLANTER_200', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 16,
+    itemKey: 'EXTRA_LONG_PLANTER_200', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 16, catalogPreview: 'long-planter',
     name: 'Uzun Saksı 200',
     type: 'indoor-plant-1',
     dimensions: Object.freeze({ widthCm: 200, depthCm: 30, heightCm: 30 }),
@@ -425,30 +426,30 @@ export const INDOOR_PLANT_ITEMS = Object.freeze({
 // yerleşim sınırı çizilen kutuya denk gelsin. Video wall toplamları panel × ızgaradan türetilir.
 export const WALL_MEDIA_ITEMS = Object.freeze({
   TV_42: Object.freeze({
-    itemKey: 'TV_42', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 1, name: 'TV 42"', type: 'tv', sizeInch: 42,
+    itemKey: 'TV_42', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 1, catalogPreview: 'tv', name: 'TV 42"', type: 'tv', sizeInch: 42,
     dimensions: Object.freeze({
       widthCm: 93.0, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 93.0, screenHeightCm: 52.3,
     }),
   }),
   TV_55: Object.freeze({
-    itemKey: 'TV_55', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 2, name: 'TV 55"', type: 'tv', sizeInch: 55,
+    itemKey: 'TV_55', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 2, catalogPreview: 'tv', name: 'TV 55"', type: 'tv', sizeInch: 55,
     dimensions: Object.freeze({
       widthCm: 121.8, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 121.8, screenHeightCm: 68.5,
     }),
   }),
   TV_65: Object.freeze({
-    itemKey: 'TV_65', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 5, name: 'TV 65"', type: 'tv', sizeInch: 65,
+    itemKey: 'TV_65', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 5, catalogPreview: 'tv', name: 'TV 65"', type: 'tv', sizeInch: 65,
     dimensions: Object.freeze({
       widthCm: 143.9, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 143.9, screenHeightCm: 80.9,
     }),
   }),
   VIDEO_WALL_2X2: Object.freeze({
-    itemKey: 'VIDEO_WALL_2X2', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 3, name: 'Video Wall 2×2', type: 'tv', sizeInch: 55,
+    itemKey: 'VIDEO_WALL_2X2', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 3, catalogPreview: 'video-wall', name: 'Video Wall 2×2', type: 'tv', sizeInch: 55,
     dimensions: Object.freeze({ depthCm: 5 }),
     videoWall: Object.freeze({ rows: 2, cols: 2, panelScreenWidthCm: 108.5, panelScreenHeightCm: 61 }),
   }),
   VIDEO_WALL_3X3: Object.freeze({
-    itemKey: 'VIDEO_WALL_3X3', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 4, name: 'Video Wall 3×3', type: 'tv', sizeInch: 55,
+    itemKey: 'VIDEO_WALL_3X3', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 4, catalogPreview: 'video-wall', name: 'Video Wall 3×3', type: 'tv', sizeInch: 55,
     dimensions: Object.freeze({ depthCm: 5 }),
     videoWall: Object.freeze({ rows: 3, cols: 3, panelScreenWidthCm: 108.5, panelScreenHeightCm: 61 }),
   }),
@@ -496,7 +497,7 @@ export function resolveWallMediaMetrics(itemOrKey) {
 
 export const COMPOSITE_ITEMS = Object.freeze({
   door_100: Object.freeze({
-    itemKey: 'door_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 12,
+    itemKey: 'door_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 12, catalogPreview: 'door',
     name: 'Depo Kapısı 100',
     type: 'door',
     unit: 'adet',
@@ -511,7 +512,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   // `base:100|150|200` üzerinden çözülür. Alt Item miktarları recipe'de kalır; wall_base_* üst öğeleri
   // aynı base_top_* anahtarlarını paylaşan ayrı type/recipe ailesidir.
   BASE_100: Object.freeze({
-    itemKey: 'BASE_100', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 9,
+    itemKey: 'BASE_100', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 9, catalogPreview: 'base',
     name: 'Baza 100',
     type: 'base',
     dimensions: Object.freeze({ widthCm: 100, depthCm: 50, heightCm: 50 }),
@@ -522,7 +523,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   BASE_150: Object.freeze({
-    itemKey: 'BASE_150', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 8,
+    itemKey: 'BASE_150', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 8, catalogPreview: 'base',
     name: 'Baza 150',
     type: 'base',
     dimensions: Object.freeze({ widthCm: 150, depthCm: 50, heightCm: 50 }),
@@ -533,7 +534,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   BASE_200: Object.freeze({
-    itemKey: 'BASE_200', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 7,
+    itemKey: 'BASE_200', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 7, catalogPreview: 'base',
     name: 'Baza 200',
     type: 'base',
     dimensions: Object.freeze({ widthCm: 200, depthCm: 50, heightCm: 50 }),
@@ -546,7 +547,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   // Serbest banko üst öğeleri type `counter` paylaşır. Düz ve L varyantları
   // ayrı itemKey'lerdir; alt miktarlar moduleRecipes'te kalır (counter:* / counter-l:*).
   desk_banko_100: Object.freeze({
-    itemKey: 'desk_banko_100', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 3,
+    itemKey: 'desk_banko_100', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 3, catalogPreview: 'counter',
     name: 'Banko 100',
     type: 'counter',
     dimensions: Object.freeze({ widthCm: 100, depthCm: 50, heightCm: 100 }),
@@ -557,7 +558,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   desk_banko_150: Object.freeze({
-    itemKey: 'desk_banko_150', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 2,
+    itemKey: 'desk_banko_150', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 2, catalogPreview: 'counter',
     name: 'Banko 150',
     type: 'counter',
     dimensions: Object.freeze({ widthCm: 150, depthCm: 50, heightCm: 100 }),
@@ -568,7 +569,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   desk_banko_200: Object.freeze({
-    itemKey: 'desk_banko_200', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 1,
+    itemKey: 'desk_banko_200', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 1, catalogPreview: 'counter',
     name: 'Banko 200',
     type: 'counter',
     dimensions: Object.freeze({ widthCm: 200, depthCm: 50, heightCm: 100 }),
@@ -579,7 +580,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   desk_banko_100_L: Object.freeze({
-    itemKey: 'desk_banko_100_L', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 6,
+    itemKey: 'desk_banko_100_L', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 6, catalogPreview: 'counter',
     name: 'Köşe Banko 100×100',
     type: 'counter',
     shape: 'L',
@@ -592,7 +593,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   desk_banko_150_L: Object.freeze({
-    itemKey: 'desk_banko_150_L', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 5,
+    itemKey: 'desk_banko_150_L', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 5, catalogPreview: 'counter',
     name: 'Köşe Banko 150×150',
     type: 'counter',
     shape: 'L',
@@ -605,7 +606,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   desk_banko_200_L: Object.freeze({
-    itemKey: 'desk_banko_200_L', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 4,
+    itemKey: 'desk_banko_200_L', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 4, catalogPreview: 'counter',
     name: 'Köşe Banko 200×200',
     type: 'counter',
     shape: 'L',
@@ -620,7 +621,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   // Panel duvar üst öğeleri. Alt miktarlar moduleRecipes
   // straight-wall satırlarında kalır (50/100/150/200); Raw BOM UI yolu değişmez.
   wall_50: Object.freeze({
-    itemKey: 'wall_50', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 4,
+    itemKey: 'wall_50', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 4, catalogPreview: 'flat-panel',
     name: 'Panel 50',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 50 }),
@@ -631,7 +632,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_100: Object.freeze({
-    itemKey: 'wall_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 3,
+    itemKey: 'wall_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 3, catalogPreview: 'flat-panel',
     name: 'Panel 100',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 100 }),
@@ -642,7 +643,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_150: Object.freeze({
-    itemKey: 'wall_150', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 2,
+    itemKey: 'wall_150', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 2, catalogPreview: 'flat-panel',
     name: 'Panel 150',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 150 }),
@@ -653,7 +654,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_200: Object.freeze({
-    itemKey: 'wall_200', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 1,
+    itemKey: 'wall_200', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 1, catalogPreview: 'flat-panel',
     name: 'Panel 200',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 200 }),
@@ -664,7 +665,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_200_short_up_2: Object.freeze({
-    itemKey: 'wall_200_short_up_2', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 1,
+    itemKey: 'wall_200_short_up_2', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 1, catalogPreview: 'flat-panel',
     name: 'Panel 200 Short Up 2',
     type: 'flat-panel',
     variant: 'short-up-2',
@@ -677,7 +678,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_150_short_up_2: Object.freeze({
-    itemKey: 'wall_150_short_up_2', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 2,
+    itemKey: 'wall_150_short_up_2', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 2, catalogPreview: 'flat-panel',
     name: 'Panel 150 Short Up 2',
     type: 'flat-panel',
     variant: 'short-up-2',
@@ -690,7 +691,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_100_short_up_2: Object.freeze({
-    itemKey: 'wall_100_short_up_2', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 3,
+    itemKey: 'wall_100_short_up_2', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 3, catalogPreview: 'flat-panel',
     name: 'Panel 100 Short Up 2',
     type: 'flat-panel',
     variant: 'short-up-2',
@@ -703,7 +704,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_50_short_up_2: Object.freeze({
-    itemKey: 'wall_50_short_up_2', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 4,
+    itemKey: 'wall_50_short_up_2', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 4, catalogPreview: 'flat-panel',
     name: 'Panel 50 Short Up 2',
     type: 'flat-panel',
     variant: 'short-up-2',
@@ -716,7 +717,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_200_short_up_1: Object.freeze({
-    itemKey: 'wall_200_short_up_1', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 5,
+    itemKey: 'wall_200_short_up_1', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 5, catalogPreview: 'flat-panel',
     name: 'Panel 200 Short Up 1',
     type: 'flat-panel',
     variant: 'short-up-1',
@@ -729,7 +730,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_150_short_up_1: Object.freeze({
-    itemKey: 'wall_150_short_up_1', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 6,
+    itemKey: 'wall_150_short_up_1', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 6, catalogPreview: 'flat-panel',
     name: 'Panel 150 Short Up 1',
     type: 'flat-panel',
     variant: 'short-up-1',
@@ -742,7 +743,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_100_short_up_1: Object.freeze({
-    itemKey: 'wall_100_short_up_1', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 7,
+    itemKey: 'wall_100_short_up_1', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 7, catalogPreview: 'flat-panel',
     name: 'Panel 100 Short Up 1',
     type: 'flat-panel',
     variant: 'short-up-1',
@@ -755,7 +756,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_50_short_up_1: Object.freeze({
-    itemKey: 'wall_50_short_up_1', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 8,
+    itemKey: 'wall_50_short_up_1', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 8, catalogPreview: 'flat-panel',
     name: 'Panel 50 Short Up 1',
     type: 'flat-panel',
     variant: 'short-up-1',
@@ -770,7 +771,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   // Panel Bazalı parent'lar (type base-wall). Child miktarları moduleRecipes
   // base-wall:100|150|200 satırlarında kalır; Raw BOM UI dokunulmaz.
   wall_base_100: Object.freeze({
-    itemKey: 'wall_base_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 11,
+    itemKey: 'wall_base_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 11, catalogPreview: 'base-wall',
     name: 'Panel Bazalı 100',
     type: 'base-wall',
     dimensions: Object.freeze({ widthCm: 100, depthCm: 50, heightCm: 350 }),
@@ -781,7 +782,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_base_150: Object.freeze({
-    itemKey: 'wall_base_150', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 10,
+    itemKey: 'wall_base_150', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 10, catalogPreview: 'base-wall',
     name: 'Panel Bazalı 150',
     type: 'base-wall',
     dimensions: Object.freeze({ widthCm: 150, depthCm: 50, heightCm: 350 }),
@@ -792,7 +793,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_base_200: Object.freeze({
-    itemKey: 'wall_base_200', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 9,
+    itemKey: 'wall_base_200', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 9, catalogPreview: 'base-wall',
     name: 'Panel Bazalı 200',
     type: 'base-wall',
     dimensions: Object.freeze({ widthCm: 200, depthCm: 50, heightCm: 350 }),
@@ -805,7 +806,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   // Separatör parent'lar (type separator). Child miktarları moduleRecipes
   // separator:50|100 satırlarında; sarmasık aynı genişlik recipe'sini paylaşır.
   wall_separator_50: Object.freeze({
-    itemKey: 'wall_separator_50', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 6,
+    itemKey: 'wall_separator_50', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 6, catalogPreview: 'separator',
     name: 'Separatör 50',
     type: 'separator',
     dimensions: Object.freeze({ widthCm: 50 }),
@@ -816,7 +817,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_separator_100: Object.freeze({
-    itemKey: 'wall_separator_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 5,
+    itemKey: 'wall_separator_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 5, catalogPreview: 'separator',
     name: 'Separatör 100',
     type: 'separator',
     dimensions: Object.freeze({ widthCm: 100 }),
@@ -827,7 +828,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_separator_50_sarmasik: Object.freeze({
-    itemKey: 'wall_separator_50_sarmasik', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 8,
+    itemKey: 'wall_separator_50_sarmasik', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 8, catalogPreview: 'separator-vine',
     name: 'Separatör 50 Sarmaşık',
     type: 'separator',
     modelFile: 'wall_separator_50_sarmasik.glb',
@@ -839,7 +840,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_separator_100_sarmasik: Object.freeze({
-    itemKey: 'wall_separator_100_sarmasik', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 7,
+    itemKey: 'wall_separator_100_sarmasik', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 7, catalogPreview: 'separator-vine',
     name: 'Separatör 100 Sarmaşık',
     type: 'separator',
     modelFile: 'wall_separator_100_sarmasik.glb',
@@ -853,7 +854,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
   // Raflı duvar parent'lar (type shelf). Child miktarları moduleRecipes
   // shelf:{width}:{shelfCount} satırlarında kalır; Raw BOM UI dokunulmaz.
   wall_shelf_2_100: Object.freeze({
-    itemKey: 'wall_shelf_2_100', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 8,
+    itemKey: 'wall_shelf_2_100', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 8, catalogPreview: 'shelf',
     name: 'Raf 100 · 2 Raf',
     type: 'shelf',
     shelfCount: 2,
@@ -866,7 +867,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_shelf_2_150: Object.freeze({
-    itemKey: 'wall_shelf_2_150', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 7,
+    itemKey: 'wall_shelf_2_150', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 7, catalogPreview: 'shelf',
     name: 'Raf 150 · 2 Raf',
     type: 'shelf',
     shelfCount: 2,
@@ -879,7 +880,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_shelf_2_200: Object.freeze({
-    itemKey: 'wall_shelf_2_200', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 6,
+    itemKey: 'wall_shelf_2_200', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 6, catalogPreview: 'shelf',
     name: 'Raf 200 · 2 Raf',
     type: 'shelf',
     shelfCount: 2,
@@ -892,7 +893,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_shelf_3_100: Object.freeze({
-    itemKey: 'wall_shelf_3_100', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 5,
+    itemKey: 'wall_shelf_3_100', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 5, catalogPreview: 'shelf',
     name: 'Raf 100 · 3 Raf',
     type: 'shelf',
     shelfCount: 3,
@@ -905,7 +906,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_shelf_3_150: Object.freeze({
-    itemKey: 'wall_shelf_3_150', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 4,
+    itemKey: 'wall_shelf_3_150', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 4, catalogPreview: 'shelf',
     name: 'Raf 150 · 3 Raf',
     type: 'shelf',
     shelfCount: 3,
@@ -918,7 +919,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_shelf_3_200: Object.freeze({
-    itemKey: 'wall_shelf_3_200', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 3,
+    itemKey: 'wall_shelf_3_200', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 3, catalogPreview: 'shelf',
     name: 'Raf 200 · 3 Raf',
     type: 'shelf',
     shelfCount: 3,
@@ -931,7 +932,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_showcase_100_2: Object.freeze({
-    itemKey: 'wall_showcase_100_2', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 2,
+    itemKey: 'wall_showcase_100_2', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 2, catalogPreview: 'showcase',
     name: '2 Gözlü Vitrin 100',
     type: 'showcase-2',
     unit: 'adet',
@@ -949,7 +950,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     }),
   }),
   wall_showcase_100_3: Object.freeze({
-    itemKey: 'wall_showcase_100_3', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 1,
+    itemKey: 'wall_showcase_100_3', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 1, catalogPreview: 'showcase',
     name: '3 Gözlü Vitrin 100',
     type: 'showcase-3',
     unit: 'adet',

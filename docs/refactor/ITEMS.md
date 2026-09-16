@@ -41,6 +41,8 @@ Yeni mimaride şu ana kadar onaylanan zorunlu alanlar:
 
 `itemKey` her Item’da dolu string’dir. Üç katalog alanı her Item’da **alan olarak** zorunludur; görünmeyen Item’da category/index değeri `null` olur.
 
+Görünür Item (`catalogVisible=true`) ek zorunlu Catalog alanı: `catalogPreview`. Gizli Item’da bu alan yoktur.
+
 ---
 
 ## Opsiyonel alanlar
@@ -64,6 +66,16 @@ Yeni mimaride onaylı tek config bloğu **Catalog Configuration**’dır.
 ## Catalog Configuration
 
 Ayrıntı: `docs/refactor/CATALOG.md`.
+
+| Field | Amaç |
+|---|---|
+| `catalogVisible` | Catalog UI’da görünürlük |
+| `catalogCategory` | kategori key |
+| `catalogItemIndex` | kategori içi sıra |
+| `catalogPreview` | Catalog kart preview renderer key |
+| `catalogWidthCm` | yalnız fiziksel width’den farklı Catalog preview/footprint genişliği gerekiyorsa |
+
+Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview renderer seçimi yalnız `Item.catalogPreview` üzerinden yapılır.
 
 ### catalogVisible
 
@@ -116,6 +128,23 @@ Ayrıntı: `docs/refactor/CATALOG.md`.
 - **Validation:** görünürken `1..N` kesintisiz, kategoride unique; gizliyken `null`
 - **Örnek:** `wall_200` → `1`; `panel_197` → `null`
 
+### catalogPreview
+
+- **Type:** string
+- **Required:** `catalogVisible=true` Item’da yes; gizli Item’da alan yok
+- **Scope:** Item master — Catalog config
+- **Default:** yok; type fallback yoktur
+- **Amaç:** Catalog kart preview renderer key. Asset/icon dosya yolu değildir; CSS/DOM silüet seçer
+- **Canonical consumer:** Catalog UI (`CATALOG_PREVIEW_RENDERERS`)
+- **Canonical method:** `getCatalogItem` / `listCatalogItems` projection → `createModuleCatalogPreview`
+- **Catalog görünümü `Item.type` üzerinden belirlenmez**
+- **Catalog preview renderer seçimi yalnız `Item.catalogPreview` üzerinden yapılır**
+- **Kullanıcı değiştirir mi:** hayır
+- **Project instance override:** hayır
+- **Persistence:** Item master
+- **Validation:** görünürken `CATALOG_PREVIEWS` üyesi; yok/bilinmiyor → fail-fast; gizlide alan yok
+- **Örnek:** `KETTLE` → `"kettle"`; `TV_42` → `"tv"`; `VIDEO_WALL_2X2` → `"video-wall"`; `wall_200` → `"flat-panel"`; `profile_190` → `"profile"`
+
 ### catalogWidthCm
 
 - **Type:** number (cm)
@@ -141,6 +170,7 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 | Item config | Canonical mechanism | Canonical method | Durum |
 |---|---|---|---|
 | `catalogVisible` / `catalogCategory` / `catalogItemIndex` | Catalog | `listCatalogCategories` / `listCatalogItems` / `getCatalogItem` / `listCatalogGroups` | mevcut |
+| `catalogPreview` | Catalog | `getCatalogItem` / `listCatalogItems` → `CATALOG_PREVIEW_RENDERERS` | mevcut |
 | `catalogWidthCm` | Catalog | `getCatalogItem` / `listCatalogItems` (profil kart genişliği) | mevcut |
 | `itemKey` | Item identity | `getItem` / `listRegisteredItems` / `resolveItemKey` | mevcut |
 | rotation | Rotation | henüz belirlenmedi | yapılmadı |
@@ -168,11 +198,12 @@ Item {
   catalogVisible: boolean
   catalogCategory: string | null    // Catalog.catalogKey
   catalogItemIndex: integer | null  // kategori içi sıra; Catalog.catalogIndex değil
+  catalogPreview?: string           // catalogVisible=true ise zorunlu renderer key; gizlide yok
   catalogWidthCm?: number           // opsiyonel; katalog kart genişliği, fiziksel length değil
 }
 ```
 
-104 kayıtlı Item bu şemayı taşır. Katalogda görünen 64 kayıt `catalogVisible=true` ve dolu category/index taşır.
+104 kayıtlı Item bu şemayı taşır. Katalogda görünen 64 kayıt `catalogVisible=true`, dolu category/index ve `catalogPreview` taşır.
 
 ---
 
@@ -197,7 +228,9 @@ Item {
 - Her Item `itemKey` taşır
 - Her Item `catalogVisible`, `catalogCategory`, `catalogItemIndex` alanını taşır
 - `catalogVisible=true` → category ve index dolu
+- `catalogVisible=true` → `catalogPreview` dolu ve `CATALOG_PREVIEWS` üyesi
 - `catalogVisible=false` → category ve index `null`
+- `catalogVisible=false` → `catalogPreview` alanı yok
 - `catalogVisible=false` → Item `getItem` ile durur; `getCatalogItem` null döner
 - `catalogWidthCm` yalnız profil Item’larında; değerler 50/100/150/200
 - Aynı kategoride duplicate `catalogItemIndex` yasak

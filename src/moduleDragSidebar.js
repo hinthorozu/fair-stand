@@ -119,12 +119,33 @@ function previewWidthPx(widthCm) {
   return Math.max(12, Math.round((width / 350) * 68));
 }
 
-export function createModuleCatalogPreview(module) {
-  ensureStyles();
-  const preview = document.createElement('div');
-  preview.className = 'module-drag-preview';
+function appendSimple(preview, className) {
+  const body = document.createElement('div');
+  body.className = className;
+  preview.appendChild(body);
+}
 
-  if (module.type === 'shelf') {
+function appendParts(preview, rootClass, parts, classPrefix) {
+  const root = document.createElement('div');
+  root.className = rootClass;
+  parts.forEach((part) => {
+    const element = document.createElement('i');
+    element.className = `${classPrefix}-${part}`;
+    root.appendChild(element);
+  });
+  preview.appendChild(root);
+}
+
+function appendWidthBox(preview, className, widthCm, minWidthPx = 0) {
+  const body = document.createElement('div');
+  body.className = className;
+  body.style.width = `${Math.max(minWidthPx, previewWidthPx(widthCm))}px`;
+  preview.appendChild(body);
+  return body;
+}
+
+export const CATALOG_PREVIEW_RENDERERS = Object.freeze({
+  shelf(preview, module) {
     const body = document.createElement('div');
     body.className = 'module-drag-panel module-drag-shelf';
     body.style.width = previewWidthPx(module.widthCm) + 'px';
@@ -136,234 +157,103 @@ export function createModuleCatalogPreview(module) {
       body.appendChild(shelf);
     });
     preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'sofa-set-classic') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-sofa';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'sofa-single-classic') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-sofa-single';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'sofa-double-classic') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-sofa-double';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'coffee-table-classic') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-coffee-table';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'table-chair-set-eames') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-table-chair';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'chair') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-eames-chair';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'table-glass') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-glass-table';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'bar-stool') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-bar-stool';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'mini-fridge') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-mini-fridge';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'coat-rack') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-coat-rack';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'plastic-trash-bin') {
-    const trashBin = document.createElement('div');
-    trashBin.className = 'module-drag-trash-bin';
-    ['handle', 'lid', 'body'].forEach((part) => {
-      const element = document.createElement('i');
-      element.className = `module-drag-trash-bin-${part}`;
-      trashBin.appendChild(element);
-    });
-    preview.appendChild(trashBin);
-    return preview;
-  }
-
-  if (module.type === 'indoor-plant-1' && /^saksi_bitkili_\d+x30x30\.glb$/i.test(module.modelFile ?? '')) {
-    const planter = document.createElement('div');
-    planter.className = 'module-drag-long-planter';
-    ['pot', 'soil', 'leaves'].forEach((part) => {
-      const element = document.createElement('i');
-      element.className = `module-drag-long-planter-${part}`;
-      planter.appendChild(element);
-    });
-    preview.appendChild(planter);
-    return preview;
-  }
-
-  if (module.type === 'indoor-plant-1') {
+  },
+  'sofa-set'(preview) { appendSimple(preview, 'module-drag-sofa'); },
+  'sofa-single'(preview) { appendSimple(preview, 'module-drag-sofa-single'); },
+  'sofa-double'(preview) { appendSimple(preview, 'module-drag-sofa-double'); },
+  'coffee-table'(preview) { appendSimple(preview, 'module-drag-coffee-table'); },
+  'table-chair-set'(preview) { appendSimple(preview, 'module-drag-table-chair'); },
+  chair(preview) { appendSimple(preview, 'module-drag-eames-chair'); },
+  'glass-table'(preview) { appendSimple(preview, 'module-drag-glass-table'); },
+  'bar-stool'(preview) { appendSimple(preview, 'module-drag-bar-stool'); },
+  'mini-fridge'(preview) { appendSimple(preview, 'module-drag-mini-fridge'); },
+  'coat-rack'(preview) { appendSimple(preview, 'module-drag-coat-rack'); },
+  'plastic-trash-bin'(preview) {
+    appendParts(preview, 'module-drag-trash-bin', ['handle', 'lid', 'body'], 'module-drag-trash-bin');
+  },
+  'long-planter'(preview) {
+    appendParts(preview, 'module-drag-long-planter', ['pot', 'soil', 'leaves'], 'module-drag-long-planter');
+  },
+  'indoor-plant'(preview) {
     const plant = document.createElement('div');
     plant.className = 'module-drag-plant module-drag-plant-1';
-
     ['pot', 'stem'].forEach((part) => {
       const element = document.createElement('i');
       element.className = `module-drag-plant-${part}`;
       plant.appendChild(element);
     });
-
     ['a', 'b'].forEach((leafName) => {
       const leaf = document.createElement('i');
       leaf.className = `module-drag-plant-leaf leaf-${leafName}`;
       plant.appendChild(leaf);
     });
-
     preview.appendChild(plant);
-    return preview;
-  }
-
-  if (module.type === 'kettle') {
-    const kettle = document.createElement('div');
-    kettle.className = 'module-drag-kettle';
-    ['body', 'handle', 'spout', 'lid', 'knob'].forEach((part) => {
-      const element = document.createElement('i');
-      element.className = `module-drag-kettle-${part}`;
-      kettle.appendChild(element);
-    });
-    preview.appendChild(kettle);
-    return preview;
-  }
-
-
-  if (module.type === 'tv') {
+  },
+  kettle(preview) {
+    appendParts(preview, 'module-drag-kettle', ['body', 'handle', 'spout', 'lid', 'knob'], 'module-drag-kettle');
+  },
+  tv(preview) { appendSimple(preview, 'module-drag-tv'); },
+  'video-wall'(preview, module) {
     const body = document.createElement('div');
     body.className = 'module-drag-tv';
-    if (Number(module.videoWallRows) > 1 || Number(module.videoWallCols) > 1) body.classList.add('is-video-wall');
-    if (Number(module.videoWallRows) === 3 && Number(module.videoWallCols) === 3) body.classList.add('is-video-wall-3x3');
+    body.classList.add('is-video-wall');
+    if (Number(module.videoWallRows) === 3 && Number(module.videoWallCols) === 3) {
+      body.classList.add('is-video-wall-3x3');
+    }
     preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'led-floodlight') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-floodlight';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'upright') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-upright';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'profile') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-profile';
-    body.style.width = `${previewWidthPx(module.widthCm)}px`;
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'base-wall') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-base-wall';
-    body.style.width = Math.max(34, previewWidthPx(module.widthCm)) + 'px';
+  },
+  floodlight(preview) { appendSimple(preview, 'module-drag-floodlight'); },
+  upright(preview) { appendSimple(preview, 'module-drag-upright'); },
+  profile(preview, module) { appendWidthBox(preview, 'module-drag-profile', module.widthCm); },
+  'base-wall'(preview, module) {
+    const body = appendWidthBox(preview, 'module-drag-base-wall', module.widthCm, 34);
     for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'base') {
+  },
+  base(preview, module) { appendWidthBox(preview, 'module-drag-base', module.widthCm, 34); },
+  counter(preview, module) { appendWidthBox(preview, 'module-drag-counter', module.widthCm, 34); },
+  separator(preview, module) { appendWidthBox(preview, 'module-drag-separator', module.widthCm); },
+  'separator-vine'(preview, module) {
+    const body = appendWidthBox(preview, 'module-drag-separator', module.widthCm);
+    body.classList.add('is-vine');
+  },
+  door(preview, module) { appendWidthBox(preview, 'module-drag-door', module.widthCm); },
+  showcase(preview, module) {
+    const body = appendWidthBox(preview, 'module-drag-showcase', module.widthCm);
+    body.dataset.eyes = Number(module.eyeCount) === 3 ? '3' : '2';
+  },
+  'flat-panel'(preview, module) {
     const body = document.createElement('div');
-    body.className = 'module-drag-base';
-    body.style.width = Math.max(34, previewWidthPx(module.widthCm)) + 'px';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'counter') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-counter';
-    body.style.width = Math.max(34, previewWidthPx(module.widthCm)) + 'px';
-    preview.appendChild(body);
-    return preview;
-  }
-
-  if (module.type === 'separator') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-separator';
-    if (module.modelFile) body.classList.add('is-vine');
+    body.className = 'module-drag-panel';
     body.style.width = `${previewWidthPx(module.widthCm)}px`;
+    const occupancy = normalizeStripOccupancy(module.stripOccupancy);
+    if (occupancy?.align === 'top') {
+      const stand = getStandStripMetrics();
+      body.classList.add('is-hanging-top');
+      const frame = document.createElement('div');
+      frame.className = 'module-drag-hanging-frame';
+      frame.style.height = `${Math.max(8, Math.round(68 * occupancy.stripCount / stand.stripCount))}px`;
+      for (let index = 0; index < occupancy.stripCount; index += 1) frame.appendChild(document.createElement('span'));
+      body.appendChild(frame);
+    } else {
+      for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
+    }
     preview.appendChild(body);
+  },
+});
+
+export function createModuleCatalogPreview(module) {
+  ensureStyles();
+  const preview = document.createElement('div');
+  preview.className = 'module-drag-preview';
+  const catalogPreview = module?.catalogPreview;
+  if (typeof catalogPreview !== 'string' || catalogPreview === '') {
     return preview;
   }
-
-  if (module.type === 'door') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-door';
-    body.style.width = `${previewWidthPx(module.widthCm)}px`;
-    preview.appendChild(body);
-    return preview;
+  const renderer = CATALOG_PREVIEW_RENDERERS[catalogPreview];
+  if (!renderer) {
+    throw new TypeError(`Unknown catalogPreview "${catalogPreview}" for ${module?.itemKey ?? 'module'}.`);
   }
-
-  if (module.type === 'showcase-2' || module.type === 'showcase-3') {
-    const body = document.createElement('div');
-    body.className = 'module-drag-showcase';
-    body.dataset.eyes = module.type === 'showcase-3' ? '3' : '2';
-    body.style.width = `${previewWidthPx(module.widthCm)}px`;
-    preview.appendChild(body);
-    return preview;
-  }
-
-  const body = document.createElement('div');
-  body.className = 'module-drag-panel';
-  body.style.width = `${previewWidthPx(module.widthCm)}px`;
-  const occupancy = normalizeStripOccupancy(module.stripOccupancy);
-  if (occupancy?.align === 'top') {
-    const stand = getStandStripMetrics();
-    body.classList.add('is-hanging-top');
-    const frame = document.createElement('div');
-    frame.className = 'module-drag-hanging-frame';
-    frame.style.height = `${Math.max(8, Math.round(68 * occupancy.stripCount / stand.stripCount))}px`;
-    for (let index = 0; index < occupancy.stripCount; index += 1) frame.appendChild(document.createElement('span'));
-    body.appendChild(frame);
-  } else {
-    for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
-  }
-  preview.appendChild(body);
+  renderer(preview, module);
   return preview;
 }
 

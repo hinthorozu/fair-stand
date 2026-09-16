@@ -7,6 +7,60 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-16 — Catalog preview seçiminin type’tan Item config’e taşınması
+
+### Eski yapı
+
+`createModuleCatalogPreview()` Catalog kart silüetini `module.type` zinciriyle seçiyordu:
+
+- `if (module.type === 'shelf' | sofa-set-classic | sofa-single-classic | sofa-double-classic | coffee-table-classic | table-chair-set-eames | chair | table-glass | bar-stool | mini-fridge | coat-rack | plastic-trash-bin | indoor-plant-1 | kettle | tv | led-floodlight | upright | profile | base-wall | base | counter | separator | door | showcase-2 | showcase-3)`
+- `indoor-plant-1` + `modelFile` regex → long planter
+- `separator` + `modelFile` → vine CSS
+- `tv` + `videoWallRows/Cols` → video-wall CSS
+- `showcase-2` / `showcase-3` → `dataset.eyes`
+- eşleşmeyen her şey → flat-panel (sessiz type fallback)
+
+Catalog UI “type neymiş?” diye kart tipi, ikon ve CSS kararı veriyordu.
+
+### Yeni yapı
+
+64 görünür Item’a `catalogPreview` yazıldı. Renderer map:
+
+```text
+CATALOG_PREVIEW_RENDERERS[item.catalogPreview]
+```
+
+Item kendi Catalog görünümünü tarif eder. Catalog yalnız okur ve gösterir.
+
+Güncellenen Item: **64 / 64** görünür. Gizli 40 Item’da `catalogPreview` alanı yok.
+
+Dağılım: `flat-panel` 12, `counter` 6, `shelf` 6, `profile` 4, `tv` 3, `base` 3, `base-wall` 3, `long-planter` 3, `video-wall` 2, `separator` 2, `separator-vine` 2, `showcase` 2; kalan 16 key tek Item (`upright`, `door`, `kettle`, `coat-rack`, `mini-fridge`, `plastic-trash-bin`, `sofa-set`, `sofa-single`, `sofa-double`, `coffee-table`, `table-chair-set`, `chair`, `glass-table`, `bar-stool`, `indoor-plant`, `floodlight`).
+
+### Kaldırılan fallback
+
+- `type` → preview
+- `type` → CSS class
+- `itemKey` hardcode preview map
+- registry group → preview
+- görünür Item’da eksik `catalogPreview` için sessiz type fallback
+
+`catalogVisible === true` ve `catalogPreview` yok/bilinmiyor → `getCatalogItem` / `listCatalogItems` fail-fast.
+
+Projection `type` alanı `createModuleStateFromDescriptor` factory uyumu için durur; Catalog UI preview seçiminde kullanılmaz. Global `type` kaldırılmaz.
+
+### Doğrulama
+
+- kayıtlı Item 104; catalogVisible=true 64; projection 64
+- 64/64 `catalogPreview` mevcut
+- `test/catalogPreviewConfig.test.js`: type branch yok; 64 kök CSS sınıf regression
+- mevcut catalogItemProjection / catalogDomainBoundary / itemCatalogFields bozulmamalı
+
+### Sonraki adım
+
+Rotation / color / image / lighting / delete / collision / placement / Item Contract mimari refactor / Recipe-BOM refactor / global `type` kaldırma / SQLite bu turda yok.
+
+---
+
 ## 2026-09-16 — Catalog domain sınırının runtime mekanizmalarından ayrılması
 
 ### Neden yapıldı

@@ -2,7 +2,7 @@
 
 Fair Stand katalog mekanizmasının canonical teknik sözleşmesi. Audit dökümü değildir.
 
-Item tarafındaki üç alanın kısa kaydı: `docs/refactor/ITEMS.md`. Bu dosya Catalog’un nasıl çalıştığını anlatır; Item şemasını kopyalamaz.
+Item tarafındaki Catalog config alanlarının kısa kaydı: `docs/refactor/ITEMS.md`. Bu dosya Catalog’un nasıl çalıştığını anlatır; Item şemasını kopyalamaz.
 
 ---
 
@@ -102,13 +102,26 @@ Catalog {
 
 ## Item bağlantısı
 
+Catalog UI yalnız Item’ın Catalog config’ini okur.
+
 ```text
 Item.catalogVisible          → kategoride gösterilsin mi
 Item.catalogCategory         → Catalog.catalogKey
 Item.catalogItemIndex        → kategori içi 1 tabanlı sıra
+Item.catalogPreview          → Catalog kart preview renderer key
+Item.catalogWidthCm          → yalnız fiziksel width’den farklı Catalog kart genişliği (profiller)
+Item.name                    → kart label
 ```
 
 `catalogCategory` görünen label saklamaz. Ad yalnız `catalogName` üzerinden gelir.
+
+**Catalog görünümü Item.type üzerinden belirlenmez.**
+
+**Catalog preview renderer seçimi yalnız Item.catalogPreview üzerinden yapılır.**
+
+`catalogPreview` asset/icon dosya yolu değildir. Mevcut UI CSS/DOM silüet çizer; renderer map anahtarıdır (`CATALOG_PREVIEW_RENDERERS`). `catalogIcon` bu turda yoktur.
+
+Görünür Item’da `catalogPreview` yoksa veya `CATALOG_PREVIEWS` dışında ise projection fail-fast atar. `type` fallback, registry grubu fallback, `itemKey` hardcode map yoktur.
 
 ---
 
@@ -119,9 +132,11 @@ Item master ürünün gerçek özelliğidir (`src/items.js`). Catalog projection
 | Projection alanı | Kaynak |
 |---|---|
 | `label` | `item.name` |
+| `catalogPreview` | `item.catalogPreview` |
 | `widthCm` / `depthCm` / `heightCm` | `item.dimensions`; profilde `item.catalogWidthCm` (fiziksel `lengthCm` değil); dikmede thickness/length oturumu; TV’de `resolveWallMediaMetrics` |
 | `modelFile` / `variant` / `stripOccupancy` / `shelfCount` / `eyeCount` / `shape` | Item root, varsa |
 | `sizeInch` / ekran / video-wall | `resolveWallMediaMetrics` |
+| `type` | `item.type` — **Catalog UI preview seçmez.** Yalnız `createModuleStateFromDescriptor` factory uyumu (sahneye sürükleme). |
 
 Yeni görünen Item için `MODULE_CATALOG.my_item = ...` yazılmaz.
 
@@ -152,19 +167,18 @@ Toplam görünür Item: **64**. Kayıtlı Item: **104**.
 ## Çalışma akışı
 
 ```text
-listRegisteredItems()
-      ↓
-catalogVisible=true
-      ↓
-generic Catalog Item projection  (getCatalogItem / listCatalogItems)
-      ↓
+ITEM
+  ↓
+catalogVisible
 catalogCategory
-      ↓
 catalogItemIndex
-      ↓
-listCatalogGroups()
-      ↓
-UI
+catalogPreview
+catalogWidthCm   // yalnız gerçekten gerekirse
+name
+  ↓
+Catalog projection  (getCatalogItem / listCatalogItems)
+  ↓
+Catalog UI  (CATALOG_PREVIEW_RENDERERS[catalogPreview])
 ```
 
 Kart descriptor’ı Item kaydından türetilir. Hardcoded Item key listesi yoktur.
@@ -194,9 +208,12 @@ Catalog UI yardımcıları: `getModuleCatalogItem`, `getModuleCatalogLabel` — 
 ## Kesin mimari kurallar
 
 - Katalog üyeliği `type` üzerinden belirlenmez
+- Catalog görünümü `Item.type` üzerinden belirlenmez
+- Catalog preview renderer seçimi yalnız `Item.catalogPreview` üzerinden yapılır
+- `if (item.type === ...)`, `switch(type)`, `type` → CSS/icon/kart tipi Catalog UI’da yasaktır
 - Registry grubundan belirlenmez
 - Item Contract üzerinden belirlenmez
-- `catalogVisible` üyelik, `catalogCategory` grup, `catalogItemIndex` sıra belirler
+- `catalogVisible` üyelik, `catalogCategory` grup, `catalogItemIndex` sıra, `catalogPreview` kart silüeti belirler
 - `catalogVisible=false` Item’ı AutoDepot / ModuleContract / BOM / renderer / placement’tan silmez
 - `catalogCategory` rotation / color / image / collision / renderer / placement belirlemez
 - Kategori adı yalnız `catalogName`
@@ -215,7 +232,8 @@ Dokümantasyon örneği; bu `itemKey`’ler kayıtlı ürün değildir.
   "itemKey": "example_item",
   "catalogVisible": true,
   "catalogCategory": "panel-wall",
-  "catalogItemIndex": 3
+  "catalogItemIndex": 3,
+  "catalogPreview": "flat-panel"
 }
 ```
 
@@ -228,7 +246,7 @@ Dokümantasyon örneği; bu `itemKey`’ler kayıtlı ürün değildir.
 }
 ```
 
-Yeni görünen Item yalnız Item kaydına yazılır (`catalogVisible=true` + `catalogCategory` + `catalogItemIndex`). `MODULE_CATALOG` satırı eklenmez.
+Yeni görünen Item yalnız Item kaydına yazılır (`catalogVisible=true` + `catalogCategory` + `catalogItemIndex` + `catalogPreview`). `MODULE_CATALOG` satırı eklenmez. `catalogPreview` `CATALOG_PREVIEWS` üyesi olmalıdır.
 
 Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `catalogName` / `catalogIndex` eklenir.
 
@@ -244,7 +262,9 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 - `catalogIndex` 1..N kesintisiz
 - `catalogVisible=true` ve geçersiz `catalogCategory`: 0
 - catalog projection Item: 64
+- `catalogVisible=true` ve `catalogPreview` yok/bilinmiyor: fail-fast
 - hardcoded katalog Item key listesi: 0
+- Catalog UI preview `type` branch: 0
 - `catalogVisible=false` → category/index null
 - `catalogVisible=false` → `getCatalogItem` null; `getItem` dolu
 - Aynı kategoride duplicate `catalogItemIndex` yasak
@@ -258,6 +278,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 | Test | Ne doğrular |
 |---|---|
 | `test/catalogItemProjection.test.js` | 64/64 Item-driven projection, eski descriptor regression |
+| `test/catalogPreviewConfig.test.js` | 64/64 `catalogPreview`; type branch yok; CSS kök sınıf regression |
 | `test/catalogDomainBoundary.test.js` | Catalog/AutoDepot/ModuleContract katman sınırı; `catalogVisible=false` ≠ Item yok |
 | `test/catalogCategories.test.js` | Catalog modeli, key eşleşmesi, sıra/label/adet regression |
 | `test/itemCatalogFields.test.js` | 104/104 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
@@ -269,9 +290,9 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 
 ## Kaynak dosyalar
 
-- `src/catalog.js` — `CATALOG_CATEGORIES`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`; derived `MODULE_CATALOG` / `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS`
-- `src/items.js` — Item master; `catalogWidthCm`; `resolveItemKey`
-- `src/moduleDragSidebar.js` — sol katalog UI
+- `src/catalog.js` — `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`; derived `MODULE_CATALOG` / `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS`
+- `src/items.js` — Item master; `catalogPreview`; `catalogWidthCm`; `resolveItemKey`
+- `src/moduleDragSidebar.js` — sol katalog UI; `CATALOG_PREVIEW_RENDERERS[catalogPreview]`
 - `src/moduleContextMenu.js` — picker katalog UI
 - `src/scene3d.js` — drag badge katalog önizlemesi (`getModuleCatalogItem` / `getModuleCatalogLabel`)
 - `src/main.js` — `#open-module-catalog` bağlama

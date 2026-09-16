@@ -104,6 +104,37 @@ export function getCatalogCategory(catalogKey) {
   return CATALOG_CATEGORIES.find((category) => category.catalogKey === catalogKey) ?? null;
 }
 
+export const CATALOG_PREVIEWS = Object.freeze([
+  'bar-stool',
+  'base',
+  'base-wall',
+  'chair',
+  'coat-rack',
+  'coffee-table',
+  'counter',
+  'door',
+  'flat-panel',
+  'floodlight',
+  'glass-table',
+  'indoor-plant',
+  'kettle',
+  'long-planter',
+  'mini-fridge',
+  'plastic-trash-bin',
+  'profile',
+  'separator',
+  'separator-vine',
+  'shelf',
+  'showcase',
+  'sofa-double',
+  'sofa-set',
+  'sofa-single',
+  'table-chair-set',
+  'tv',
+  'upright',
+  'video-wall',
+]);
+
 function assignCatalogFootprint(descriptor, item) {
   const dimensions = item.dimensions ?? {};
   const thicknessCm = Number(dimensions.thicknessCm);
@@ -134,10 +165,19 @@ function assignCatalogFootprint(descriptor, item) {
 }
 
 function projectCatalogItem(item) {
+  if (typeof item.catalogPreview !== 'string' || item.catalogPreview === '') {
+    throw new TypeError(`Item ${item.itemKey} is catalogVisible without catalogPreview.`);
+  }
+  if (!CATALOG_PREVIEWS.includes(item.catalogPreview)) {
+    throw new TypeError(`Item ${item.itemKey} has unknown catalogPreview: ${item.catalogPreview}.`);
+  }
+
   const descriptor = {
     itemKey: item.itemKey,
+    // type Catalog UI preview seçmez; createModuleStateFromDescriptor factory uyumu için kalır.
     type: item.type,
     label: item.name,
+    catalogPreview: item.catalogPreview,
   };
 
   // Duvar-medya ölçüleri Item üzerindeki screen/catalogHeight/videoWall alanlarından türetilir.

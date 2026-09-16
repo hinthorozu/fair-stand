@@ -217,6 +217,7 @@ test('104 Item katalog metadata alanlarını taşır ve canlı katalog üyeliği
   assert.equal(getItem('wall_200').catalogVisible, true);
   assert.equal(getItem('wall_200').catalogCategory, 'panel-wall');
   assert.equal(getItem('wall_200').catalogItemIndex, 1);
+  assert.equal(getItem('wall_200').catalogPreview, 'flat-panel');
   assert.equal(getItem('panel_197').catalogVisible, false);
   assert.equal(getItem('panel_197').catalogCategory, null);
   assert.equal(getItem('panel_197').catalogItemIndex, null);
@@ -262,6 +263,7 @@ test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullan
     assert.equal(Object.hasOwn(MODULE_CATALOG[itemKey], 'catalogVisible'), false, itemKey);
     assert.equal(Object.hasOwn(MODULE_CATALOG[itemKey], 'catalogCategory'), false, itemKey);
     assert.equal(Object.hasOwn(MODULE_CATALOG[itemKey], 'catalogItemIndex'), false, itemKey);
+    assert.equal(typeof MODULE_CATALOG[itemKey].catalogPreview, 'string', itemKey);
   }
 });
 
@@ -291,6 +293,7 @@ test('ITEMS.md yalnız onaylı katalog şemasını taşır; gerçekleşmemiş me
   assert.match(itemsDoc, /### catalogVisible/);
   assert.match(itemsDoc, /### catalogCategory/);
   assert.match(itemsDoc, /### catalogItemIndex/);
+  assert.match(itemsDoc, /### catalogPreview/);
   assert.match(itemsDoc, /### catalogWidthCm/);
   assert.match(itemsDoc, /# Canonical Mechanism Connections/);
   assert.match(itemsDoc, /# Item Schema/);
