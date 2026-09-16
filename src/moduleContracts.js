@@ -1,4 +1,4 @@
-import { MODULE_CATALOG, resolveItemKey } from './catalog.js';
+import { getCatalogItem, resolveItemKey } from './catalog.js';
 import { getModuleBehavior } from './moduleBehavior.js';
 
 const RECIPE_BOM_POLICY = Object.freeze({
@@ -207,12 +207,12 @@ export function resolveModuleContract(moduleKeyOrDescriptor) {
     };
   }
 
-  const itemKey = typeof moduleKeyOrDescriptor === 'string' && MODULE_CATALOG[moduleKeyOrDescriptor]
+  const itemKey = typeof moduleKeyOrDescriptor === 'string' && getCatalogItem(moduleKeyOrDescriptor)
     ? moduleKeyOrDescriptor
     : resolveItemKey(moduleKeyOrDescriptor);
   if (!itemKey) return null;
 
-  const descriptor = MODULE_CATALOG[itemKey];
+  const descriptor = getCatalogItem(itemKey);
   const assignmentRecord = MODULE_CONTRACT_ASSIGNMENTS[itemKey];
   if (!descriptor || !assignmentRecord) return null;
 

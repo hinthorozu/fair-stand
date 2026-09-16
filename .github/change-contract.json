@@ -1,13 +1,14 @@
 {
   "schemaVersion": 2,
-  "id": "catalog-category-model",
+  "id": "catalog-item-projection",
   "kind": "architecture",
-  "summary": "104 Item kaydına catalogVisible, catalogCategory ve catalogItemIndex eklenir. Katalog kategorileri CATALOG_CATEGORIES (catalogKey, catalogName, catalogIndex) tek kaynağına alınır. UI listCatalogGroups ve catalogName okur. Item.catalogCategory yalnız catalogKey saklar.",
+  "summary": "MODULE_CATALOG hardcoded 64 Item listesi kaldırılır. Katalog kartı listRegisteredItems + catalogVisible üzerinden getCatalogItem/listCatalogItems ile Item'dan türetilir. MODULE_CATALOG derived compatibility export olarak kalır.",
   "owners": [
-    "src/items.js",
     "src/catalog.js",
     "src/moduleDragSidebar.js",
     "src/moduleContextMenu.js",
+    "src/moduleContracts.js",
+    "src/autoDepot.js",
     "docs/refactor/CATALOG.md",
     "docs/refactor/ITEMS.md"
   ],
@@ -22,12 +23,12 @@
     "catalog": "affected",
     "behavior": "affected",
     "state": "not-applicable",
-    "placement": "not-applicable",
+    "placement": "affected",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "affected",
     "ui": "affected",
-    "composition": "not-applicable",
+    "composition": "affected",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
@@ -54,6 +55,7 @@
       "src/catalog.js",
       "src/cornerPlacement.js",
       "src/designState.js",
+      "src/featureContracts.js",
       "src/helpGuide.js",
       "src/itemBom.js",
       "src/itemCapabilities.js",
@@ -94,6 +96,7 @@
       "test/bundleLoadingContract.test.js",
       "test/catalogCategories.test.js",
       "test/catalogDragKeyboardIntegration.test.js",
+      "test/catalogItemProjection.test.js",
       "test/catalogSingleSource.test.js",
       "test/chairEamesContract.test.js",
       "test/coatRackModule.test.js",
@@ -241,6 +244,7 @@
       "ROADMAP.md",
       "ROADMAP_PHASE_4.md",
       "SYSTEM_AUDIT_CHECKLIST.md",
+      "SYSTEM_CHANGE_GATE.md",
       "SYSTEM_DEVELOPMENT_CONTRACT.md",
       "SYSTEM_MODULE_CATALOG.md",
       "audit/FINDINGS.md",
@@ -250,7 +254,9 @@
       "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
+      "audit/evidence/A11_FEATURE_COMPOSITION.md",
       "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
+      "audit/remediation/A01_F003_CLOSURE.md",
       "audit/remediation/A02_CLOSURE.md",
       "audit/remediation/A04_F013_CLOSURE.md",
       "docs/REFACTOR.md",
@@ -406,6 +412,18 @@
       "docs/items/audit/properties/properties/catalog.videoWallRows.md",
       "docs/items/audit/properties/properties/catalog.visualRotationYDeg.md",
       "docs/items/audit/properties/properties/catalog.widthCm.md",
+      "docs/items/audit/properties/properties/contract.appearance.color.md",
+      "docs/items/audit/properties/properties/contract.appearance.image.md",
+      "docs/items/audit/properties/properties/contract.bom.mode.md",
+      "docs/items/audit/properties/properties/contract.bom.reason.md",
+      "docs/items/audit/properties/properties/contract.bom.source.md",
+      "docs/items/audit/properties/properties/contract.composition.mode.md",
+      "docs/items/audit/properties/properties/contract.present.md",
+      "docs/items/audit/properties/properties/contract.profile.md",
+      "docs/items/audit/properties/properties/contract.renderer.mode.md",
+      "docs/items/audit/properties/properties/contract.runtime.mode.md",
+      "docs/items/audit/properties/properties/contract.state.owner.md",
+      "docs/items/audit/properties/properties/contract.state.persistence.md",
       "docs/items/audit/properties/properties/itemKey.md",
       "docs/items/audit/properties/properties/media.screenHeightCm.md",
       "docs/items/audit/properties/properties/media.screenWidthCm.md",
@@ -502,6 +520,7 @@
       "docs/items/audit/properties/properties/ui.editable.floorSelect.md",
       "docs/items/audit/properties/properties/ui.editable.foamResize.md",
       "docs/items/audit/properties/properties/ui.editable.glass.md",
+      "docs/items/audit/properties/properties/ui.editable.placement.md",
       "docs/items/audit/properties/properties/ui.editable.rotation.md",
       "docs/items/audit/properties/properties/ui.editable.shelfLight.md",
       "docs/items/audit/properties/properties/ui.sidebar.md",
@@ -666,20 +685,21 @@
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": [
+        "F-003",
         "F-013",
         "F-014",
         "F-018",
         "F-045"
       ]
     },
-    "notes": "104 Item kaydına catalogVisible/catalogCategory/catalogItemIndex yazıldı. Katalog kategorileri CATALOG_CATEGORIES tek kaynağıdır; MODULE_CATALOG_GROUPS/KEYS türetilir. Sidebar ve picker listCatalogGroups + catalogName okur; kategori sırası catalogIndex, kategori içi sıra catalogItemIndex. createCommercialCatalogItem katalog metadata alanlarını descriptor'a kopyalamaz. Item sözleşmesi docs/refactor/ITEMS.md; katalog ayrıntısı docs/refactor/CATALOG.md; günlük docs/refactor/REFACTOR.md. moduleContextMenu.js frozen domain yüzünden behavior affected işaretlenir; bu turda rotation/collision/placement algoritması değişmez, yalnız picker katalog kaynağı değişir. Discovery token'ları items.js ve catalog.js olduğu için mevcut getItem/katalog tüketicileri, audit dokümanları ve F-013/F-014/F-018/F-045 aday olarak geldi; BOM sınıflandırması, TV/video-wall ve hygiene finding'leri bu turda değişmez. UI kategori adı/sırası ve kategori içi Item sırası aynı kalır. listCatalogItems henüz yoktur."
+    "notes": "MODULE_CATALOG hardcoded 64 Item listesi kaldırıldı. getCatalogItem/listCatalogItems Item kaydından catalog descriptor üretir. MODULE_CATALOG derived compatibility export olarak kalır. Sidebar/picker/autoDepot/moduleContracts getCatalogItem okur. Item'a yeni alan eklenmedi. Profil widthCm reçeteden, dikme thickness/length oturumundan, TV resolveWallMediaMetrics'ten türetilir. moduleContextMenu.js frozen behavior, autoDepot.js frozen composition/placement, moduleContracts.js frozen bom işaretini gerektirir; rotation/collision/BOM miktarı bu turda değişmez. 64/64 descriptor regression kilitlenir."
   },
   "tests": {
     "targeted": [
+      "test/catalogItemProjection.test.js",
       "test/catalogCategories.test.js",
       "test/itemCatalogFields.test.js",
-      "test/catalogSingleSource.test.js",
-      "test/systemModuleCatalogDoc.test.js"
+      "test/catalogSingleSource.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -688,16 +708,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "catalog ve ui domain'leri affected. smoke #open-module-catalog düğmesini doğrular; kategori adı/sırası unit testte kilitlenir."
+      "reason": "catalog, ui, composition ve placement domain'leri affected. smoke #open-module-catalog düğmesini doğrular; 64 descriptor unit regression ile kilitlenir."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Kategori modeli tek kaynağa alındı; UI aynı ad/sıra/üyeliği listCatalogGroups üzerinden okur. Yanlış catalogKey görünür Item'ı düşürür veya listCatalogGroups throw eder; catalogCategories ve itemCatalogFields testleri sıra/label/üyeliği kilitler."
+    "notes": "Kart descriptor'ı Item'dan türetilir. Yanlış projection katalog kartı/oturum ölçüsünü bozar; catalogItemProjection baseline 64 descriptor'ı kilitler."
   },
   "migration": {
     "required": false,
     "notes": "Alanlar kod tablosundadır. Persist/project blob ve SQLite yok."
   },
-  "rollback": "src/items.js katalog alanlarını, src/catalog.js CATALOG_CATEGORIES/listCatalogGroups modelini ve eski MODULE_CATALOG_GROUPS/KEYS literalini, sidebar/picker okumasını, test/catalogCategories.test.js ile itemCatalogFields.test.js ve docs/refactor/ katalog belgelerini geri al."
+  "rollback": "src/catalog.js generic projection'ı eski MODULE_CATALOG literal listesine, sidebar/picker/autoDepot/moduleContracts getCatalogItem okumasını ve catalogItemProjection testini geri al."
 }

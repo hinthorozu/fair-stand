@@ -7,6 +7,49 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-16 — MODULE_CATALOG Item tekrarının kaldırılması
+
+### Eski yapı
+
+64 katalog kartı `src/catalog.js` içinde `MODULE_CATALOG` hardcoded key listesi + `create*CatalogItem` builder’ları ile ikinci kez tanımlanıyordu. Item kaydı varken kart descriptor’ı ayrı tutuluyordu.
+
+### Kaldırılan duplicate kaynak
+
+- `MODULE_CATALOG = { wall_200: createFlatPanelCatalogItem('wall_200'), ... }` literal 64 key
+- `createFlatPanelCatalogItem`, `createUprightCatalogItem`, `createProfileCatalogItem`, `createShelfCatalogItem`, `createCounterCatalogItem`, `createBaseCatalogItem`, `createBaseWallCatalogItem`, `createSeparatorCatalogItem`, `createWallMediaCatalogItem`, `createTopLightCatalogItem`, `createCommercialCatalogItem`, `createIndoorPlantCatalogItem`, `createFurnitureCatalogItem`
+
+### Yeni canonical method
+
+- `getCatalogItem(itemKey)` — `catalogVisible=true` Item’dan catalog descriptor
+- `listCatalogItems()` — görünür Item’lar, kategori `catalogIndex` + `catalogItemIndex` sırası
+- `listCatalogGroups()` aynı üyelik alanlarını okur; UI `getCatalogItem` ile kart üretir
+
+### Item’a taşınan gerçek alanlar
+
+Yok. Descriptor alanları zaten Item’da duruyordu (`name`, `dimensions`, `modelFile`, `eyeCount`, `sizeInch`, `videoWall`, `stripOccupancy`, `shape`, `shelfCount`, `variant`, rotation metadata). Projection alias’ı Item’a kopyalanmadı (`label` = `name`; kök `widthCm` = `dimensions.widthCm` veya türetilmiş oturum).
+
+Profil kart `widthCm` Item’da yoktur; düz duvar reçetesi `nominalWidthCm` türevidir. Dikme `thicknessCm`/`lengthCm` → kare oturum. TV/video-wall `resolveWallMediaMetrics` türevidir.
+
+### Compatibility export
+
+`MODULE_CATALOG` / `MODULE_CATALOG_KEYS` / `MODULE_CATALOG_GROUPS` kaldı; hardcoded liste değildir, `listCatalogItems` / `listCatalogGroups` türevidir. Mevcut testler bu export’u okumaya devam eder.
+
+### Doğrulama
+
+- kayıtlı Item 104; catalogVisible=true 64; projection 64
+- hardcoded katalog Item key listesi: 0
+- 64/64 descriptor regression: itemKey/label/widthCm/depthCm/heightCm/type/modelFile/eyeCount/shelfCount/shape/variant/stripOccupancy/unit/TV alanları birebir
+- kategori sayısı/sırası/adları/üye sayısı/Item sırası değişmedi
+- `npm test`: 740 pass / 0 fail
+- `npm run build`: geçti
+- `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
+
+### Sonraki adım
+
+SQLite/API yok. Rotation/color/image bu turda yok.
+
+---
+
 ## 2026-09-16 — Catalog category modelinin merkezileştirilmesi
 
 ### Neden yapıldı

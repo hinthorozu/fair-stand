@@ -70,6 +70,21 @@ Item.catalogItemIndex        → kategori içi 1 tabanlı sıra
 
 ---
 
+## Item master vs Catalog projection
+
+Item master ürünün gerçek özelliğidir (`src/items.js`). Catalog projection Item’dan UI için türetilen görünümdür; ikinci source-of-truth değildir.
+
+| Projection alanı | Kaynak |
+|---|---|
+| `label` | `item.name` |
+| `widthCm` / `depthCm` / `heightCm` | `item.dimensions` veya türetilmiş oturum (dikme/profil/TV) |
+| `modelFile` / `variant` / `stripOccupancy` / `shelfCount` / `eyeCount` / `shape` | Item root, varsa |
+| `sizeInch` / ekran / video-wall | `resolveWallMediaMetrics` |
+
+Yeni görünen Item için `MODULE_CATALOG.my_item = ...` yazılmaz.
+
+---
+
 ## Kategoriler
 
 | catalogKey | catalogName | catalogIndex | Item sayısı |
@@ -95,28 +110,24 @@ Toplam görünür Item: **64**. Kayıtlı Item: **104**.
 ## Çalışma akışı
 
 ```text
-Catalog definitions (CATALOG_CATEGORIES)
-        ↓ catalogIndex sıralama
-Catalog categories
-        ↓
-catalogVisible=true Item'lar
-        ↓ catalogCategory ile eşleşme (catalogKey)
-Kategori
-        ↓ catalogItemIndex sıralama
-Item listesi
-        ↓
-Modül Ekle UI
+listRegisteredItems()
+      ↓
+catalogVisible=true
+      ↓
+generic Catalog Item projection  (getCatalogItem / listCatalogItems)
+      ↓
+catalogCategory
+      ↓
+catalogItemIndex
+      ↓
+listCatalogGroups()
+      ↓
+UI
 ```
 
-Canonical method karşılığı: `listCatalogCategories()` → `listCatalogGroups()` → UI `catalogName` + `keys`.
+Kart descriptor’ı Item kaydından türetilir. Hardcoded Item key listesi yoktur.
 
-`MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS` bu listeden türetilir; ikinci hardcoded kategori tablosu değildir. `label` alanı `catalogName` kopyasıdır (eski test uyumu).
-
-Kart descriptor’ı hâlâ `MODULE_CATALOG` (`create*CatalogItem`).
-
-### Kalan hedef
-
-`listCatalogItems()` henüz ayrı export değildir. Kart ölçü/etiket descriptor’ı hâlâ `MODULE_CATALOG` üzerinden okunur.
+`MODULE_CATALOG` / `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS` derived compatibility export’tur; ikinci source-of-truth değildir.
 
 ---
 
@@ -126,10 +137,11 @@ Kart descriptor’ı hâlâ `MODULE_CATALOG` (`create*CatalogItem`).
 |---|---|
 | `listCatalogCategories()` | mevcut — kategoriler, `catalogIndex` sırası |
 | `getCatalogCategory(catalogKey)` | mevcut |
+| `getCatalogItem(itemKey)` | mevcut — görünür Item’dan catalog descriptor |
+| `listCatalogItems()` | mevcut — `catalogVisible=true` Item projection listesi |
 | `listCatalogGroups()` | mevcut — kategori + Item key listesi (`catalogItemIndex` sırası) |
-| `listCatalogItems()` | henüz yok |
 
-UI okur: `listCatalogGroups()` + `group.catalogName` + `group.keys`.
+UI okur: `listCatalogGroups()` + `group.catalogName` + `getCatalogItem(itemKey)`.
 
 Kimlik yardımcıları (üyelik listesi değildir): `resolveItemKey`, `getModuleCatalogItem`, `getModuleCatalogLabel`.
 
@@ -171,6 +183,8 @@ Dokümantasyon örneği; bu `itemKey`’ler kayıtlı ürün değildir.
 }
 ```
 
+Yeni görünen Item yalnız Item kaydına yazılır (`catalogVisible=true` + `catalogCategory` + `catalogItemIndex`). `MODULE_CATALOG` satırı eklenmez.
+
 Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `catalogName` / `catalogIndex` eklenir.
 
 ---
@@ -184,6 +198,8 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 - duplicate `catalogIndex`: 0
 - `catalogIndex` 1..N kesintisiz
 - `catalogVisible=true` ve geçersiz `catalogCategory`: 0
+- catalog projection Item: 64
+- hardcoded katalog Item key listesi: 0
 - `catalogVisible=false` → category/index null
 - Aynı kategoride duplicate `catalogItemIndex` yasak
 
@@ -193,6 +209,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 
 | Test | Ne doğrular |
 |---|---|
+| `test/catalogItemProjection.test.js` | 64/64 Item-driven projection, eski descriptor regression |
 | `test/catalogCategories.test.js` | Catalog modeli, key eşleşmesi, sıra/label/adet regression |
 | `test/itemCatalogFields.test.js` | 104/104 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
 | `test/catalogSingleSource.test.js` | Her katalog Item tam bir grupta |
@@ -203,7 +220,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 
 ## Kaynak dosyalar
 
-- `src/catalog.js` — `CATALOG_CATEGORIES`, `listCatalogCategories`, `listCatalogGroups`, türetilmiş `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS`
+- `src/catalog.js` — `CATALOG_CATEGORIES`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`; derived `MODULE_CATALOG` / `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS`
 - `src/items.js` — Item katalog alanları
 - `src/moduleDragSidebar.js` — sol katalog UI
 - `src/moduleContextMenu.js` — picker katalog UI

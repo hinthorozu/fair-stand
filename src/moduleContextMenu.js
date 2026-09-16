@@ -1,4 +1,4 @@
-import { getModuleCatalogLabel, listCatalogGroups, MODULE_CATALOG } from './catalog.js';
+import { getCatalogItem, getModuleCatalogLabel, listCatalogGroups } from './catalog.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 import { getModuleBehavior } from './moduleBehavior.js';
 
@@ -141,7 +141,7 @@ export function createModuleContextMenu({
     pickerSelectionClear.disabled = selectedModuleKeys.length === 0;
 
     selectedModuleKeys.forEach((moduleKey, index) => {
-      const module = MODULE_CATALOG[moduleKey];
+      const module = getCatalogItem(moduleKey);
       if (!module) return;
 
       const chip = document.createElement('button');
@@ -237,7 +237,7 @@ export function createModuleContextMenu({
   }
 
   function addModuleToSelection(moduleKey) {
-    if (!MODULE_CATALOG[moduleKey]) return;
+    if (!getCatalogItem(moduleKey)) return;
     selectedModuleKeys.push(moduleKey);
     syncPickerSelection();
   }
@@ -246,7 +246,7 @@ export function createModuleContextMenu({
     if (!selectedModuleKeys.length || !pickerRequest) return;
 
     const entries = selectedModuleKeys
-      .map((moduleKey) => ({ moduleKey, module: MODULE_CATALOG[moduleKey] }))
+      .map((moduleKey) => ({ moduleKey, module: getCatalogItem(moduleKey) }))
       .filter((entry) => entry.module);
     if (!entries.length) return;
 
@@ -326,7 +326,7 @@ export function createModuleContextMenu({
       const grid = document.createElement('div');
       grid.className = 'module-drag-grid';
       group.keys.forEach((moduleKey) => {
-        const module = MODULE_CATALOG[moduleKey];
+        const module = getCatalogItem(moduleKey);
         if (!module) return;
         grid.appendChild(createPickerCard(moduleKey, module));
       });

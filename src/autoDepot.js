@@ -1,4 +1,4 @@
-import { MODULE_CATALOG } from './catalog.js';
+import { getCatalogItem } from './catalog.js';
 import { createModulePlacement } from './modulePlacement.js';
 
 export const AUTO_DEPOT_SIZES = Object.freeze({
@@ -9,7 +9,7 @@ export const AUTO_DEPOT_SIZES = Object.freeze({
 });
 
 const PLASTIC_TRASH_BIN_ITEM_KEY = 'PLASTIC_TRASH_BIN';
-const PLASTIC_TRASH_BIN_DESCRIPTOR = MODULE_CATALOG[PLASTIC_TRASH_BIN_ITEM_KEY];
+const PLASTIC_TRASH_BIN_DESCRIPTOR = getCatalogItem(PLASTIC_TRASH_BIN_ITEM_KEY);
 
 function wall(widthCm, xCm, yCm, rotationZDeg = 0) {
   return { kind: 'wall', widthCm, placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }) };
@@ -73,12 +73,12 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
   addFront(specs, xCm, yCm + size.depthCm, size.widthCm, standType);
 
   if (includeContents) {
-    const fridgeWidth = MODULE_CATALOG.MINI_FRIDGE_AVANTI.widthCm;
-    const fridgeDepth = MODULE_CATALOG.MINI_FRIDGE_AVANTI.depthCm;
-    const rackWidth = MODULE_CATALOG.COAT_RACK.widthCm;
-    const rackDepth = MODULE_CATALOG.COAT_RACK.depthCm;
-    const kettleWidth = MODULE_CATALOG.KETTLE.widthCm;
-    const kettleDepth = MODULE_CATALOG.KETTLE.depthCm;
+    const fridgeWidth = getCatalogItem('MINI_FRIDGE_AVANTI').widthCm;
+    const fridgeDepth = getCatalogItem('MINI_FRIDGE_AVANTI').depthCm;
+    const rackWidth = getCatalogItem('COAT_RACK').widthCm;
+    const rackDepth = getCatalogItem('COAT_RACK').depthCm;
+    const kettleWidth = getCatalogItem('KETTLE').widthCm;
+    const kettleDepth = getCatalogItem('KETTLE').depthCm;
     const trashBinWidth = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.widthCm);
     const trashBinDepth = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.depthCm);
     const trashBinHeight = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.heightCm);

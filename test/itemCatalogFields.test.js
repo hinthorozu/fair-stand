@@ -229,10 +229,14 @@ test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullan
 
   assert.match(sidebar, /listCatalogGroups/);
   assert.match(contextMenu, /listCatalogGroups/);
+  assert.match(sidebar, /getCatalogItem/);
+  assert.match(contextMenu, /getCatalogItem/);
   assert.match(sidebar, /catalogName/);
   assert.match(contextMenu, /catalogName/);
   assert.doesNotMatch(sidebar, /MODULE_CATALOG_GROUPS/);
   assert.doesNotMatch(contextMenu, /MODULE_CATALOG_GROUPS/);
+  assert.doesNotMatch(sidebar, /MODULE_CATALOG\[/);
+  assert.doesNotMatch(contextMenu, /MODULE_CATALOG\[/);
   assert.match(items, /catalogVisible: true/);
   assert.match(items, /catalogCategory: 'panel-wall'/);
 
@@ -249,6 +253,8 @@ test('CATALOG.md catalogKey tablosu canlı kategorilerle örtüşür', () => {
   assert.match(catalogDoc, /# Catalog/);
   assert.match(catalogDoc, /listCatalogGroups/);
   assert.match(catalogDoc, /listCatalogCategories/);
+  assert.match(catalogDoc, /listCatalogItems/);
+  assert.match(catalogDoc, /getCatalogItem/);
 
   EXPECTED_CATALOG_GROUPS.forEach((group, index) => {
     const categoryKey = CATALOG_CATEGORY_KEYS_BY_LABEL[group.label];
@@ -272,5 +278,6 @@ test('ITEMS.md yalnız onaylı katalog şemasını taşır; gerçekleşmemiş me
   assert.match(itemsDoc, /# Architectural Rules/);
   assert.match(itemsDoc, /listCatalogCategories/);
   assert.match(itemsDoc, /listCatalogGroups/);
-  assert.doesNotMatch(itemsDoc, /listCatalogItems\(\)[^\n]*mevcut/);
+  assert.match(itemsDoc, /listCatalogItems/);
+  assert.match(itemsDoc, /getCatalogItem/);
 });

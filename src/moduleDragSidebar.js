@@ -1,4 +1,4 @@
-import { listCatalogGroups, MODULE_CATALOG } from './catalog.js';
+import { getCatalogItem, listCatalogGroups } from './catalog.js';
 import { normalizeStripOccupancy, getStandStripMetrics } from './stripOccupancy.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { getModuleDefaultRotationDeg, resolveModuleRotationDeltaDeg } from './moduleBehavior.js';
@@ -430,7 +430,7 @@ export function createModuleDragSidebar({
 
   const cards = groupDefinitions
     .flatMap((group) => group.keys)
-    .map((moduleKey) => ({ moduleKey, module: MODULE_CATALOG[moduleKey] }))
+    .map((moduleKey) => ({ moduleKey, module: getCatalogItem(moduleKey) }))
     .filter((entry) => entry.module)
     .map(({ moduleKey, module }) => {
       const card = document.createElement('div');

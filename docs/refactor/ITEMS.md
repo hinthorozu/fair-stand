@@ -67,7 +67,7 @@ Ayrıntı: `docs/refactor/CATALOG.md`.
 - **Default:** yok; her Item açık değer taşır
 - **Amaç:** Item’ın Modül Kataloğu’nda gösterilip gösterilmeyeceğini belirler
 - **Canonical consumer:** Catalog mechanism
-- **Canonical method:** `listCatalogGroups()` — mevcut. `listCatalogItems()` henüz yok
+- **Canonical method:** `listCatalogItems()` / `listCatalogGroups()` — mevcut
 - **Method parametresi:** üyelik filtresi (`true` görünür)
 - **Runtime behavior üretmez**
 - **Kullanıcı değiştirir mi:** hayır
@@ -117,7 +117,7 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 
 | Item config | Canonical mechanism | Canonical method | Durum |
 |---|---|---|---|
-| `catalogVisible` / `catalogCategory` / `catalogItemIndex` | Catalog | `listCatalogCategories` / `listCatalogGroups` | mevcut |
+| `catalogVisible` / `catalogCategory` / `catalogItemIndex` | Catalog | `listCatalogCategories` / `listCatalogItems` / `getCatalogItem` / `listCatalogGroups` | mevcut |
 | `itemKey` | Item identity | `getItem` / `listRegisteredItems` | mevcut |
 | rotation | Rotation | henüz belirlenmedi | yapılmadı |
 | color | Color | henüz belirlenmedi | yapılmadı |
@@ -125,7 +125,9 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 | lighting | Lighting | henüz belirlenmedi | yapılmadı |
 | delete | Delete | henüz belirlenmedi | yapılmadı |
 
-Catalog satırı: UI `listCatalogGroups()` ve `catalogName` okur. `listCatalogItems()` henüz yoktur.
+Catalog satırı: UI `listCatalogGroups()` + `getCatalogItem()`. Kart descriptor’ı Item master’dan türetilir (`label` = `name`). `listCatalogItems()` mevcuttur.
+
+Item master ile Catalog projection ayrıdır. Projection alias’ları (`label`, kök `widthCm`) Item alanı değildir.
 
 `ROTATION.md` vb. yokken bu satırlar yer tutucudur; config şeması değildir.
 
