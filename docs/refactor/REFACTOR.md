@@ -43,6 +43,7 @@ Profil kart `widthCm` Item’da yoktur; düz duvar reçetesi `nominalWidthCm` t�
 - `npm test`: 740 pass / 0 fail
 - `npm run build`: geçti
 - `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
+- targeted E2E `e2e/smoke.spec.mjs`: geçti
 
 ### Sonraki adım
 
