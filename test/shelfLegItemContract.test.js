@@ -14,7 +14,15 @@ const CASES = Object.freeze([
 
 test('shelf_leg is canonical without invented product metadata', () => {
   const item = getItem('shelf_leg');
-  assert.deepEqual(item, { itemKey: 'shelf_leg', name: 'Raf Ayağı', type: 'shelf-accessory', unit: 'adet' });
+  assert.deepEqual(item, {
+    itemKey: 'shelf_leg',
+    catalogVisible: false,
+    catalogCategory: null,
+    catalogItemIndex: null,
+    name: 'Raf Ayağı',
+    type: 'shelf-accessory',
+    unit: 'adet',
+  });
   assert.equal(item.partId, undefined);
 });
 

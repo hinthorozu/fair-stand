@@ -52,7 +52,7 @@ test('left catalog, context catalog and drag badge share catalog presentation so
   const contextMenu = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
 
-  assert.match(sidebar, /MODULE_CATALOG_GROUPS/);
+  assert.match(sidebar, /listCatalogGroups/);
   assert.match(contextMenu, /createModuleCatalogPreview/);
   assert.match(contextMenu, /getModuleCatalogLabel/);
   assert.match(scene, /createModuleCatalogPreview/);

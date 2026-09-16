@@ -1,4 +1,4 @@
-import { getFurnitureClusterQuantity, getItem, resolveWallMediaMetrics } from './items.js';
+import { getFurnitureClusterQuantity, getItem, listRegisteredItems, resolveWallMediaMetrics } from './items.js';
 import { getStraightWallNominalWidthForProfileItem } from './moduleRecipes.js';
 
 export const STAND_DIMENSIONS = Object.freeze({
@@ -225,7 +225,14 @@ function createTopLightCatalogItem(itemKey) {
 }
 
 function createCommercialCatalogItem(itemKey) {
-  const { name, dimensions, ...metadata } = getItem(itemKey);
+  const {
+    name,
+    dimensions,
+    catalogVisible: _catalogVisible,
+    catalogCategory: _catalogCategory,
+    catalogItemIndex: _catalogItemIndex,
+    ...metadata
+  } = getItem(itemKey);
   return Object.freeze({ ...metadata, ...dimensions, label: name });
 }
 
@@ -343,123 +350,60 @@ export const MODULE_CATALOG = Object.freeze({
   wall_separator_50_sarmasik: createSeparatorCatalogItem('wall_separator_50_sarmasik'),
 });
 
-export const MODULE_CATALOG_KEYS = Object.freeze([
-  'wall_200',
-  'wall_150',
-  'wall_100',
-  'wall_50',
-
-  'wall_separator_100',
-  'wall_separator_50',
-  'wall_separator_100_sarmasik',
-  'wall_separator_50_sarmasik',
-
-  'wall_showcase_100_3',
-  'wall_showcase_100_2',
-
-  'wall_shelf_3_200',
-  'wall_shelf_3_150',
-  'wall_shelf_3_100',
-
-  'wall_shelf_2_200',
-  'wall_shelf_2_150',
-  'wall_shelf_2_100',
-
-  'wall_base_200',
-  'wall_base_150',
-  'wall_base_100',
-
-  'door_100',
-
-  'wall_200_short_up_2',
-  'wall_150_short_up_2',
-  'wall_100_short_up_2',
-  'wall_50_short_up_2',
-  'wall_200_short_up_1',
-  'wall_150_short_up_1',
-  'wall_100_short_up_1',
-  'wall_50_short_up_1',
-  'upright_346_5',
-  'profile_190',
-  'profile_140_5',
-  'profile_91',
-  'profile_41_5',
-
-  'desk_banko_200',
-  'desk_banko_150',
-  'desk_banko_100',
-
-  'desk_banko_200_L',
-  'desk_banko_150_L',
-  'desk_banko_100_L',
-
-  'BASE_200',
-  'BASE_150',
-  'BASE_100',
-  'furniture_sofa_set_classic',
-  'furniture_sofa_single_classic',
-  'furniture_sofa_double_classic',
-  'furniture_coffee_table_classic',
-  'furniture_table_chair_set_eames',
-  'chair_eames',
-  'glass_table',
-  'furniture_bar_stool_classic',
-  'MINI_FRIDGE_AVANTI',
-  'KETTLE',
-  'COAT_RACK',
-  'PLASTIC_TRASH_BIN',
-  'EXTRA_INDOOR_PLANT_1',
-  'EXTRA_LONG_PLANTER_100',
-  'EXTRA_LONG_PLANTER_150',
-  'EXTRA_LONG_PLANTER_200',
-  'TV_42',
-  'TV_55',
-  'VIDEO_WALL_2X2',
-  'VIDEO_WALL_3X3',
-  'TV_65',
-  'led_floodlight',
+// Canonical Catalog kategorileri. catalogKey Item.catalogCategory ile eşleşir.
+// catalogName UI label'dır. catalogIndex 1 tabanlı kategori sırasıdır.
+// Key'ler önceki turda Item kayıtlarına yazılan catalogCategory değerleridir; yeni key uydurulmaz.
+export const CATALOG_CATEGORIES = Object.freeze([
+  Object.freeze({ catalogKey: 'panel-wall', catalogName: 'Panel & Duvar', catalogIndex: 1 }),
+  Object.freeze({ catalogKey: 'panel-addon', catalogName: 'Panel Ek Modül', catalogIndex: 2 }),
+  Object.freeze({ catalogKey: 'shelf-showcase', catalogName: 'Raf & Vitrin', catalogIndex: 3 }),
+  Object.freeze({ catalogKey: 'counter-base', catalogName: 'Banko & Baza', catalogIndex: 4 }),
+  Object.freeze({ catalogKey: 'extra', catalogName: 'Extra', catalogIndex: 5 }),
+  Object.freeze({ catalogKey: 'electronics-lighting', catalogName: 'Elektronik & Aydınlatma', catalogIndex: 6 }),
 ]);
 
-export const MODULE_CATALOG_GROUPS = Object.freeze([
-  Object.freeze({
-    label: 'Panel & Duvar',
-    keys: Object.freeze(['wall_200', 'wall_150', 'wall_100', 'wall_50', 'wall_separator_100', 'wall_separator_50', 'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik', 'wall_base_200', 'wall_base_150', 'wall_base_100', 'door_100']),
-  }),
-  Object.freeze({
-    label: 'Panel Ek Modül',
-    keys: Object.freeze([
-      'wall_200_short_up_2',
-      'wall_150_short_up_2',
-      'wall_100_short_up_2',
-      'wall_50_short_up_2',
-      'wall_200_short_up_1',
-      'wall_150_short_up_1',
-      'wall_100_short_up_1',
-      'wall_50_short_up_1',
-      'upright_346_5',
-      'profile_190',
-      'profile_140_5',
-      'profile_91',
-      'profile_41_5',
-    ]),
-  }),
-  Object.freeze({
-    label: 'Raf & Vitrin',
-    keys: Object.freeze(['wall_showcase_100_3', 'wall_showcase_100_2', 'wall_shelf_3_200', 'wall_shelf_3_150', 'wall_shelf_3_100', 'wall_shelf_2_200', 'wall_shelf_2_150', 'wall_shelf_2_100']),
-  }),
-  Object.freeze({
-    label: 'Banko & Baza',
-    keys: Object.freeze(['desk_banko_200', 'desk_banko_150', 'desk_banko_100', 'desk_banko_200_L', 'desk_banko_150_L', 'desk_banko_100_L', 'BASE_200', 'BASE_150', 'BASE_100']),
-  }),
-  Object.freeze({
-    label: 'Extra',
-    keys: Object.freeze(['furniture_sofa_set_classic', 'furniture_sofa_single_classic', 'furniture_sofa_double_classic', 'furniture_coffee_table_classic', 'furniture_table_chair_set_eames', 'chair_eames', 'glass_table', 'furniture_bar_stool_classic', 'MINI_FRIDGE_AVANTI', 'KETTLE', 'COAT_RACK', 'PLASTIC_TRASH_BIN', 'EXTRA_INDOOR_PLANT_1', 'EXTRA_LONG_PLANTER_100', 'EXTRA_LONG_PLANTER_150', 'EXTRA_LONG_PLANTER_200']),
-  }),
-  Object.freeze({
-    label: 'Elektronik & Aydınlatma',
-    keys: Object.freeze(['TV_42', 'TV_55', 'VIDEO_WALL_2X2', 'VIDEO_WALL_3X3', 'TV_65', 'led_floodlight']),
-  }),
-]);
+export function listCatalogCategories() {
+  return Object.freeze(
+    [...CATALOG_CATEGORIES].sort((left, right) => left.catalogIndex - right.catalogIndex),
+  );
+}
+
+export function getCatalogCategory(catalogKey) {
+  return CATALOG_CATEGORIES.find((category) => category.catalogKey === catalogKey) ?? null;
+}
+
+export function listCatalogGroups() {
+  const categories = listCatalogCategories();
+  const membersByKey = new Map(categories.map((category) => [category.catalogKey, []]));
+
+  for (const item of listRegisteredItems()) {
+    if (item.catalogVisible !== true) continue;
+    const bucket = membersByKey.get(item.catalogCategory);
+    if (!bucket) {
+      throw new TypeError(
+        `Item ${item.itemKey} catalogCategory is not a catalogKey: ${item.catalogCategory}.`,
+      );
+    }
+    bucket.push(item);
+  }
+
+  return Object.freeze(categories.map((category) => {
+    const members = [...membersByKey.get(category.catalogKey)]
+      .sort((left, right) => left.catalogItemIndex - right.catalogItemIndex);
+    return Object.freeze({
+      catalogKey: category.catalogKey,
+      catalogName: category.catalogName,
+      catalogIndex: category.catalogIndex,
+      label: category.catalogName,
+      keys: Object.freeze(members.map((item) => item.itemKey)),
+    });
+  }));
+}
+
+export const MODULE_CATALOG_GROUPS = listCatalogGroups();
+export const MODULE_CATALOG_KEYS = Object.freeze(
+  MODULE_CATALOG_GROUPS.flatMap((group) => group.keys),
+);
 
 function optionalNumber(value) {
   if (value === null || value === undefined || value === '') return null;
