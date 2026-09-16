@@ -22,3 +22,4 @@ Mevcut çalışan sistemin dökümü. Refactor / yeni mimari yok.
 | [items/](items/) | item başı döküm |
 | [report/](report/README.md) | okunabilir HTML/Markdown/CSV rapor |
 | [report/MEKANIZMA_PARAMETRE.html](report/MEKANIZMA_PARAMETRE.html) | 188 property → 21 mekanizma, kodda gerçek parametre değerleri |
+| [hedef/ATOMIK_MEKANIZMA.html](hedef/ATOMIK_MEKANIZMA.html) | atomik canonical method hedefi (188 sınıflı, src yok) |
