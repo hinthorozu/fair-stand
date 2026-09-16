@@ -1,4 +1,4 @@
-import { resolveItemKey, STAND_DIMENSIONS } from './catalog.js';
+import { resolveItemKey } from './catalog.js';
 import { normalizeStripOccupancy } from './stripOccupancy.js';
 import {
   getCommercialItemForType,
@@ -9,9 +9,10 @@ import {
   getDoorLeafItem,
   getShowcaseBodyDefinition,
   getShowcaseItemKeyForType,
+  requireSceneDimension,
+  resolveSceneDimensions,
   resolveWallMediaMetrics,
 } from './items.js';
-import { getStraightWallNominalWidthForProfileItem } from './moduleRecipes.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 
 const DEFAULT_PANEL_COLOR = '#ffffff';
@@ -30,6 +31,17 @@ function createId(prefix) {
   const suffix = globalThis.crypto?.randomUUID?.()
     ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
   return `${prefix}-${suffix}`;
+}
+
+function applySceneFootprint(state, item, requiredFields = []) {
+  const scene = resolveSceneDimensions(item);
+  for (const field of requiredFields) {
+    requireSceneDimension(item, field);
+  }
+  if (scene.widthCm != null) state.widthCm = scene.widthCm;
+  if (scene.depthCm != null) state.depthCm = scene.depthCm;
+  if (scene.heightCm != null) state.heightCm = scene.heightCm;
+  return state;
 }
 
 export function createDefaultImageTransform() {
@@ -95,21 +107,20 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
   const itemKey = resolveFlatPanelItemKey(widthCmOrDescriptor);
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'flat-panel') return null;
-  const widthCm = Number(item.dimensions.widthCm);
   const occupancy = normalizeStripOccupancy(item.stripOccupancy);
   const stripCount = occupancy?.stripCount ?? STRIP_COUNT;
 
-  return {
+  const state = {
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    widthCm,
     ...(occupancy ? { stripOccupancy: occupancy } : {}),
     strips: Array.from(
       { length: stripCount },
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
     ),
   };
+  return applySceneFootprint(state, item, ['widthCm']);
 }
 
 const SEPARATOR_PLAIN_WIDTH_TO_ITEM_KEY = Object.freeze({
@@ -149,19 +160,18 @@ export function createSeparatorModuleState(widthCmOrDescriptor, descriptor = {})
   const itemKey = resolveSeparatorItemKey(widthCmOrDescriptor, descriptor);
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'separator') return null;
-  const widthCm = Number(item.dimensions.widthCm);
 
-  return {
+  const state = {
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    widthCm,
     modelFile: item.modelFile ?? null,
     surface: {
       id: createId('surface'),
-      color: separatorDefaultColor(widthCm),
+      color: separatorDefaultColor(requireSceneDimension(item, 'widthCm')),
     },
   };
+  return applySceneFootprint(state, item, ['widthCm']);
 }
 
 export function createShowcaseModuleState(type, widthCm = 100) {
@@ -172,11 +182,10 @@ export function createShowcaseModuleState(type, widthCm = 100) {
   if (!showcaseItem || Number(widthCm) !== canonicalWidthCm) return null;
   const bodyDefinition = getShowcaseBodyDefinition(showcaseItem);
 
-  return {
+  const state = {
     id: createId('module'),
     itemKey: showcaseItem.itemKey,
     type: showcaseItem.type,
-    widthCm: canonicalWidthCm,
     eyeCount: Number(showcaseItem.eyeCount),
     strips: Array.from(
       { length: STRIP_COUNT },
@@ -187,6 +196,7 @@ export function createShowcaseModuleState(type, widthCm = 100) {
       color: itemDefaultColorHex(bodyDefinition.sideItem),
     },
   };
+  return applySceneFootprint(state, showcaseItem, ['widthCm']);
 }
 
 function isWallShelfCompositeItem(item) {
@@ -222,14 +232,12 @@ export function createShelfModuleState(widthCmOrDescriptor, shelfCount = 2) {
   const itemKey = resolveShelfItemKey(widthCmOrDescriptor, shelfCount);
   const item = itemKey ? getItem(itemKey) : null;
   if (!isWallShelfCompositeItem(item)) return null;
-  const widthCm = Number(item.dimensions.widthCm);
   const count = Number(item.shelfCount);
 
-  return {
+  const state = {
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    widthCm,
     shelfCount: count,
     shelfLightingOn: false,
     strips: Array.from(
@@ -237,6 +245,7 @@ export function createShelfModuleState(widthCmOrDescriptor, shelfCount = 2) {
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
     ),
   };
+  return applySceneFootprint(state, item, ['widthCm']);
 }
 
 export function createDoorModuleState(widthCm = 100) {
@@ -246,11 +255,10 @@ export function createDoorModuleState(widthCm = 100) {
   const doorLeafItem = getDoorLeafItem(canonicalWidthCm);
   if (!doorLeafItem) throw new TypeError(`Missing canonical door leaf Item for ${canonicalWidthCm} cm door module.`);
 
-  return {
+  return applySceneFootprint({
     id: createId('module'),
     itemKey: doorItem.itemKey,
     type: doorItem.type,
-    widthCm: canonicalWidthCm,
     // Üstte kalan üç duvar paneli parent kapı modülünün ayrı editable surface'leridir.
     strips: Array.from(
       { length: 3 },
@@ -258,7 +266,7 @@ export function createDoorModuleState(widthCm = 100) {
     ),
     // Fiziksel ahşap kapı kanadı kanonik door_leaf Item kimliği/varsayılanı ile başlar.
     surface: createEditableItemSurfaceState(doorLeafItem),
-  };
+  }, doorItem, ['widthCm']);
 }
 
 const COUNTER_WIDTH_SHAPE_TO_ITEM_KEY = Object.freeze({
@@ -290,7 +298,6 @@ export function createCounterModuleState(widthCmOrDescriptor, options = {}) {
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'counter') return null;
   const shape = item.shape === 'L' ? 'L' : 'straight';
-  const { widthCm, depthCm, heightCm } = item.dimensions;
   const faces = {
     frontLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
     frontUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
@@ -303,16 +310,13 @@ export function createCounterModuleState(widthCmOrDescriptor, options = {}) {
     faces.returnLower = createEditablePanelState(null, DEFAULT_PANEL_COLOR);
     faces.returnUpper = createEditablePanelState(null, DEFAULT_PANEL_COLOR);
   }
-  return {
+  return applySceneFootprint({
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
     shape,
-    widthCm,
-    depthCm,
-    heightCm,
     faces,
-  };
+  }, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
 const WALL_BASE_WIDTH_TO_ITEM_KEY = Object.freeze({
@@ -334,15 +338,11 @@ export function createBaseWallModuleState(widthCmOrDescriptor) {
   const itemKey = resolveBaseWallItemKey(widthCmOrDescriptor);
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'base-wall') return null;
-  const { widthCm, depthCm, heightCm } = item.dimensions;
 
-  return {
+  return applySceneFootprint({
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    widthCm,
-    depthCm,
-    heightCm,
     strips: Array.from(
       { length: STRIP_COUNT },
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
@@ -352,7 +352,7 @@ export function createBaseWallModuleState(widthCmOrDescriptor) {
       left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
       right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
     },
-  };
+  }, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
 const BASE_WIDTH_TO_ITEM_KEY = Object.freeze({
@@ -374,21 +374,17 @@ export function createBaseModuleState(widthCmOrDescriptor) {
   const itemKey = resolveBaseItemKey(widthCmOrDescriptor);
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'base') return null;
-  const { widthCm, depthCm, heightCm } = item.dimensions;
 
-  return {
+  return applySceneFootprint({
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    widthCm,
-    depthCm,
-    heightCm,
     faces: {
       front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
       left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
       right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
     },
-  };
+  }, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
 function createFurnitureModuleState(type) {
@@ -398,10 +394,8 @@ function createFurnitureModuleState(type) {
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    widthCm: Number(item.dimensions.widthCm),
-    depthCm: Number(item.dimensions.depthCm),
-    heightCm: Number(item.dimensions.heightCm),
   };
+  applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
   if (type !== 'table-glass' && type !== 'coffee-table-classic') {
     state.surface = {
       id: createId('surface'),
@@ -452,8 +446,9 @@ function createCommercialModuleState(type) {
   const item = getCommercialItemForType(type);
   const state = {
     id: createId('module'), itemKey: item.itemKey,
-    type: item.type, ...item.dimensions,
+    type: item.type,
   };
+  applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
   if (Object.hasOwn(item, 'preserveModelScale')) {
     state.modelFile = item.modelFile;
     state.modelRotationYDeg = item.modelRotationYDeg;
@@ -477,31 +472,22 @@ export function createCoatRackModuleState() {
 
 export function createUprightModuleState() {
   const item = getItem('upright_346_5');
-  const thicknessCm = Number(item.dimensions.thicknessCm);
-  return {
+  return applySceneFootprint({
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    widthCm: thicknessCm,
-    depthCm: thicknessCm,
-    heightCm: Number(item.dimensions.lengthCm),
-  };
+  }, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
 export function createProfileModuleState(descriptor = {}) {
   const itemKey = descriptor.itemKey ?? resolveItemKey(descriptor);
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'profile') return null;
-  const widthCm = Number(getStraightWallNominalWidthForProfileItem(item.itemKey));
-  const thicknessCm = Number(item.dimensions.thicknessCm);
-  return {
+  return applySceneFootprint({
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    widthCm,
-    depthCm: thicknessCm,
-    heightCm: Math.round(STAND_DIMENSIONS.height * 100),
-  };
+  }, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
 export function createPlasticTrashBinModuleState() {
@@ -551,13 +537,10 @@ export function createIndoorPlantModuleState(descriptor = {}) {
 
   const modelFile = item.modelFile ?? 'indoor_plants.glb';
   const isLongPlanter = /^saksi_bitkili_/i.test(modelFile);
-  return {
+  const state = {
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    widthCm: Number(item.dimensions.widthCm),
-    depthCm: Number(item.dimensions.depthCm),
-    heightCm: Number(item.dimensions.heightCm),
     modelFile,
     modelRotationYDeg: Number(item.modelRotationYDeg) || 0,
     preserveModelScale: Boolean(item.preserveModelScale),
@@ -568,12 +551,14 @@ export function createIndoorPlantModuleState(descriptor = {}) {
       },
     } : {}),
   };
+  return applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
 export function createIlluminatedFoamModuleState(imageAssetId, descriptor = {}) {
   const item = getItem('illuminated-foam');
-  const widthCm = Math.max(10, Number(descriptor.widthCm) || Number(item.dimensions.widthCm));
-  const heightCm = Math.max(5, Number(descriptor.heightCm) || Number(item.dimensions.heightCm));
+  const scene = resolveSceneDimensions(item);
+  const widthCm = Math.max(10, Number(descriptor.widthCm) || scene.widthCm);
+  const heightCm = Math.max(5, Number(descriptor.heightCm) || scene.heightCm);
   return {
     id: createId('module'),
     itemKey: item.itemKey,
@@ -581,7 +566,7 @@ export function createIlluminatedFoamModuleState(imageAssetId, descriptor = {}) 
     imageAssetId,
     widthCm,
     heightCm,
-    depthCm: Number(item.dimensions.depthCm),
+    depthCm: requireSceneDimension(item, 'depthCm'),
     wallGapCm: Number(item.dimensions.wallGapCm),
     haloColor: /^#[0-9a-fA-F]{6}$/.test(String(descriptor.haloColor ?? '')) ? String(descriptor.haloColor).toLowerCase() : '#ffffff',
   };
@@ -597,15 +582,13 @@ function resolveWallMediaItemKey(sizeInch, descriptor) {
 
 export function createTvModuleState(sizeInch = 42, descriptor = {}) {
   const itemKey = resolveWallMediaItemKey(sizeInch, descriptor);
-  const metrics = itemKey ? resolveWallMediaMetrics(itemKey) : null;
-  if (!metrics) return null;
-  return {
+  const item = itemKey ? getItem(itemKey) : null;
+  const metrics = item ? resolveWallMediaMetrics(item) : null;
+  if (!item || !metrics) return null;
+  const state = {
     id: createId('module'),
     itemKey: metrics.itemKey,
     type: metrics.type,
-    widthCm: metrics.widthCm,
-    depthCm: metrics.depthCm,
-    heightCm: metrics.screenHeightCm,
     sizeInch: metrics.sizeInch,
     screenWidthCm: metrics.screenWidthCm,
     screenHeightCm: metrics.screenHeightCm,
@@ -614,22 +597,20 @@ export function createTvModuleState(sizeInch = 42, descriptor = {}) {
     panelScreenWidthCm: metrics.panelScreenWidthCm,
     panelScreenHeightCm: metrics.panelScreenHeightCm,
   };
+  return applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
 export function createLedFloodlightModuleState() {
   const item = getTopLightItemForType('led-floodlight');
-  return {
+  return applySceneFootprint({
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    widthCm: Number(item.dimensions.widthCm),
-    depthCm: Number(item.dimensions.depthCm),
-    heightCm: Number(item.dimensions.heightCm),
     surface: {
       id: createId('surface'),
       color: '#17191c',
     },
-  };
+  }, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
 const MODULE_STATE_FACTORIES = Object.freeze({
@@ -700,15 +681,14 @@ export function normalizeModuleItemState(moduleState) {
 
   if (moduleState.type === 'tv') {
     const resolvedKey = resolveItemKey(moduleState);
-    if (resolvedKey && getItem(resolvedKey)?.type === 'tv') {
-      moduleState.itemKey = resolvedKey;
-      const metrics = resolveWallMediaMetrics(resolvedKey);
+    const item = resolvedKey ? getItem(resolvedKey) : null;
+    if (item?.type === 'tv') {
+      moduleState.itemKey = item.itemKey;
+      const metrics = resolveWallMediaMetrics(item);
       if (metrics) {
-        moduleState.widthCm = metrics.widthCm;
         moduleState.screenWidthCm = metrics.screenWidthCm;
         moduleState.screenHeightCm = metrics.screenHeightCm;
-        moduleState.heightCm = metrics.screenHeightCm;
-        moduleState.depthCm = metrics.depthCm;
+        applySceneFootprint(moduleState, item, ['widthCm', 'depthCm', 'heightCm']);
       }
     }
     return moduleState;
@@ -737,6 +717,7 @@ export function normalizeModuleItemState(moduleState) {
       moduleState.itemKey = item.itemKey;
       const occupancy = normalizeStripOccupancy(item.stripOccupancy);
       if (occupancy) moduleState.stripOccupancy = occupancy;
+      applySceneFootprint(moduleState, item, ['widthCm']);
     }
     return moduleState;
   }
@@ -753,6 +734,7 @@ export function normalizeModuleItemState(moduleState) {
     const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'separator') {
       moduleState.itemKey = resolvedKey;
+      applySceneFootprint(moduleState, getItem(resolvedKey), ['widthCm']);
     }
     return moduleState;
   }
@@ -761,6 +743,7 @@ export function normalizeModuleItemState(moduleState) {
     const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && isWallShelfCompositeItem(getItem(resolvedKey))) {
       moduleState.itemKey = resolvedKey;
+      applySceneFootprint(moduleState, getItem(resolvedKey), ['widthCm']);
     }
     return moduleState;
   }
@@ -811,10 +794,7 @@ export function normalizeModuleItemState(moduleState) {
     const item = resolvedKey ? getItem(resolvedKey) : null;
     if (item?.type === 'profile') {
       moduleState.itemKey = item.itemKey;
-      const spanCm = getStraightWallNominalWidthForProfileItem(item.itemKey);
-      if (Number.isFinite(spanCm)) moduleState.widthCm = spanCm;
-      moduleState.depthCm = Number(item.dimensions.thicknessCm);
-      moduleState.heightCm = Math.round(STAND_DIMENSIONS.height * 100);
+      applySceneFootprint(moduleState, item, ['widthCm', 'depthCm', 'heightCm']);
     }
     return moduleState;
   }
@@ -823,6 +803,7 @@ export function normalizeModuleItemState(moduleState) {
     const doorItem = getItem('door_100');
     if (!doorItem || Number(moduleState.widthCm) !== Number(doorItem.dimensions?.widthCm)) return moduleState;
     moduleState.itemKey = doorItem.itemKey;
+    applySceneFootprint(moduleState, doorItem, ['widthCm']);
     const doorLeafItem = getDoorLeafItem(moduleState.widthCm);
     if (!doorLeafItem) return moduleState;
     if (!moduleState.surface) {
@@ -844,6 +825,7 @@ export function normalizeModuleItemState(moduleState) {
   const bodyDefinition = getShowcaseBodyDefinition(showcaseItem);
   moduleState.itemKey = showcaseItem.itemKey;
   moduleState.eyeCount = Number(showcaseItem.eyeCount);
+  applySceneFootprint(moduleState, showcaseItem, ['widthCm']);
   if (!moduleState.bodySurface) {
     moduleState.bodySurface = {
       id: createId('surface'),

@@ -59,7 +59,8 @@ test('catalog.js Recipe/BOM’dan Item özelliği öğrenmez; resolveItemKey Ite
   const itemsSource = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
   assert.doesNotMatch(CATALOG_SOURCE, /moduleRecipes/);
   assert.doesNotMatch(CATALOG_SOURCE, /getStraightWallNominalWidthForProfileItem/);
-  assert.match(CATALOG_SOURCE, /catalogWidthCm/);
+  assert.doesNotMatch(CATALOG_SOURCE, /catalogWidthCm/);
+  assert.match(CATALOG_SOURCE, /resolveSceneDimensions/);
   assert.match(CATALOG_SOURCE, /export \{ resolveItemKey \}/);
   assert.match(itemsSource, /export function resolveItemKey/);
   assert.match(itemsSource, /Item identity çözümlemesi Catalog üyeliğine bağlı değildir/);

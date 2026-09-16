@@ -109,7 +109,6 @@ Item.catalogVisible          → kategoride gösterilsin mi
 Item.catalogCategory         → Catalog.catalogKey
 Item.catalogItemIndex        → kategori içi 1 tabanlı sıra
 Item.catalogPreview          → Catalog kart preview renderer key
-Item.catalogWidthCm          → yalnız fiziksel width’den farklı Catalog kart genişliği (profiller)
 Item.name                    → kart label
 ```
 
@@ -129,11 +128,13 @@ Görünür Item’da `catalogPreview` yoksa veya `CATALOG_PREVIEWS` dışında i
 
 Item master ürünün gerçek özelliğidir (`src/items.js`). Catalog projection Item’dan UI için türetilen görünümdür; ikinci source-of-truth değildir.
 
+**Catalog ölçülerin sahibi değildir.** Catalog yalnız Item’daki physical / effective scene ölçülerini okur. `catalogWidthCm` kaldırıldı.
+
 | Projection alanı | Kaynak |
 |---|---|
 | `label` | `item.name` |
 | `catalogPreview` | `item.catalogPreview` |
-| `widthCm` / `depthCm` / `heightCm` | `item.dimensions`; profilde `item.catalogWidthCm` (fiziksel `lengthCm` değil); dikmede thickness/length oturumu; TV’de `resolveWallMediaMetrics` |
+| `widthCm` / `depthCm` / `heightCm` | `resolveSceneDimensions(item)` — `sceneDimensions.field ?? dimensions.field`. Catalog ölçü üretmez; Recipe/type/itemKey/catalogWidthCm okumaz. TV Catalog kart yüksekliği UI-only `catalogHeightCm` (media metrics) olarak kalır |
 | `modelFile` / `variant` / `stripOccupancy` / `shelfCount` / `eyeCount` / `shape` | Item root, varsa |
 | `sizeInch` / ekran / video-wall | `resolveWallMediaMetrics` |
 | `type` | `item.type` — **Catalog UI preview seçmez.** Yalnız `createModuleStateFromDescriptor` factory uyumu (sahneye sürükleme). |
@@ -173,7 +174,6 @@ catalogVisible
 catalogCategory
 catalogItemIndex
 catalogPreview
-catalogWidthCm   // yalnız gerçekten gerekirse
 name
   ↓
 Catalog projection  (getCatalogItem / listCatalogItems)
@@ -269,6 +269,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 - `catalogVisible=false` → `getCatalogItem` null; `getItem` dolu
 - Aynı kategoride duplicate `catalogItemIndex` yasak
 - Catalog Recipe import etmez
+- Catalog ölçülerin sahibi değildir; physical / effective scene ölçülerini Item’dan okur
 - AutoDepot / moduleContracts Catalog import etmez
 
 ---
@@ -282,6 +283,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 | `test/catalogDomainBoundary.test.js` | Catalog/AutoDepot/ModuleContract katman sınırı; `catalogVisible=false` ≠ Item yok |
 | `test/catalogCategories.test.js` | Catalog modeli, key eşleşmesi, sıra/label/adet regression |
 | `test/itemCatalogFields.test.js` | 104/104 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
+| `test/itemSceneDimensions.test.js` | dimensions / sceneDimensions same-field fallback; catalogWidthCm yok; Recipe/Catalog dimension fallback yok |
 | `test/catalogSingleSource.test.js` | Her katalog Item tam bir grupta |
 | `test/systemModuleCatalogDoc.test.js` | `SYSTEM_MODULE_CATALOG.md` key snapshot |
 | `e2e/smoke.spec.mjs` | `#open-module-catalog` |
@@ -291,7 +293,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 ## Kaynak dosyalar
 
 - `src/catalog.js` — `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`; derived `MODULE_CATALOG` / `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS`
-- `src/items.js` — Item master; `catalogPreview`; `catalogWidthCm`; `resolveItemKey`
+- `src/items.js` — Item master; `catalogPreview`; `dimensions` / `sceneDimensions`; `resolveSceneDimensions`; `resolveItemKey`
 - `src/moduleDragSidebar.js` — sol katalog UI; `CATALOG_PREVIEW_RENDERERS[catalogPreview]`
 - `src/moduleContextMenu.js` — picker katalog UI
 - `src/scene3d.js` — drag badge katalog önizlemesi (`getModuleCatalogItem` / `getModuleCatalogLabel`)

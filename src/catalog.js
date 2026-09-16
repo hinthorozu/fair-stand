@@ -1,4 +1,4 @@
-import { getFurnitureClusterQuantity, getItem, listRegisteredItems, resolveItemKey, resolveWallMediaMetrics } from './items.js';
+import { getFurnitureClusterQuantity, getItem, listRegisteredItems, resolveItemKey, resolveSceneDimensions, resolveWallMediaMetrics } from './items.js';
 
 export { resolveItemKey };
 
@@ -136,32 +136,10 @@ export const CATALOG_PREVIEWS = Object.freeze([
 ]);
 
 function assignCatalogFootprint(descriptor, item) {
-  const dimensions = item.dimensions ?? {};
-  const thicknessCm = Number(dimensions.thicknessCm);
-  const lengthCm = Number(dimensions.lengthCm);
-  const hasBarStock = Number.isFinite(thicknessCm)
-    && Number.isFinite(lengthCm)
-    && dimensions.widthCm == null;
-
-  // Profil katalog kart genişliği fiziksel lengthCm değildir; Item.catalogWidthCm.
-  // Dikme kare oturum: thickness × thickness, yükseklik lengthCm.
-  if (hasBarStock) {
-    const catalogWidthCm = optionalNumber(item.catalogWidthCm);
-    if (catalogWidthCm != null) {
-      descriptor.widthCm = catalogWidthCm;
-      descriptor.depthCm = thicknessCm;
-      descriptor.heightCm = thicknessCm;
-      return;
-    }
-    descriptor.widthCm = thicknessCm;
-    descriptor.depthCm = thicknessCm;
-    descriptor.heightCm = lengthCm;
-    return;
-  }
-
-  if (dimensions.widthCm != null) descriptor.widthCm = dimensions.widthCm;
-  if (dimensions.depthCm != null) descriptor.depthCm = dimensions.depthCm;
-  if (dimensions.heightCm != null) descriptor.heightCm = dimensions.heightCm;
+  const scene = resolveSceneDimensions(item);
+  if (scene.widthCm != null) descriptor.widthCm = scene.widthCm;
+  if (scene.depthCm != null) descriptor.depthCm = scene.depthCm;
+  if (scene.heightCm != null) descriptor.heightCm = scene.heightCm;
 }
 
 function projectCatalogItem(item) {
@@ -273,12 +251,6 @@ export const MODULE_CATALOG_KEYS = Object.freeze(
 export const MODULE_CATALOG = Object.freeze(
   Object.fromEntries(listCatalogItems().map((item) => [item.itemKey, item])),
 );
-
-function optionalNumber(value) {
-  if (value === null || value === undefined || value === '') return null;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-}
 
 export function getModuleCatalogItem(descriptor) {
   const moduleKey = resolveItemKey(descriptor);

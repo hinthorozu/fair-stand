@@ -2,10 +2,11 @@
   "schemaVersion": 2,
   "id": "catalog-item-projection",
   "kind": "architecture",
-    "summary": "Catalog kart görünümü Item.catalogPreview üzerinden seçilir; type/icon/CSS branch kaldırılır. 64 görünür Item’a catalogPreview yazılır. catalogVisible=true ve catalogPreview yoksa fail-fast. AutoDepot/ModuleContracts Item master okur; Catalog Recipe’den öğrenmez.",
+    "summary": "Item ölçü source-of-truth: dimensions fiziksel, sceneDimensions same-field runtime override. resolveSceneDimensions(item) = scene.field ?? dimensions.field ?? MISSING. catalogWidthCm kalkar. Catalog/profile factory Recipe ve çapraz remap okumaz. Catalog kart preview Item.catalogPreview üzerinden seçilir.",
   "owners": [
     "src/catalog.js",
     "src/items.js",
+    "src/designState.js",
     "src/moduleDragSidebar.js",
     "src/moduleContextMenu.js",
     "src/moduleContracts.js",
@@ -23,9 +24,9 @@
   "impact": {
     "catalog": "affected",
     "behavior": "affected",
-    "state": "not-applicable",
+    "state": "affected",
     "placement": "affected",
-    "renderer": "not-applicable",
+    "renderer": "affected",
     "persistence": "not-applicable",
     "bom": "affected",
     "ui": "affected",
@@ -158,6 +159,7 @@
       "test/indoorPlantItemsContract.test.js",
       "test/indoorPlants.test.js",
       "test/itemCatalogFields.test.js",
+      "test/itemSceneDimensions.test.js",
       "test/itemDocsRuntimeAlignment.test.js",
       "test/kettle.test.js",
       "test/lCounter100Contract.test.js",
@@ -716,7 +718,7 @@
         "F-045"
       ]
     },
-    "notes": "Catalog kart preview Item.catalogPreview → CATALOG_PREVIEW_RENDERERS. type/icon/CSS branch yok. 64 görünür Item catalogPreview taşır; gizli Item’da alan yok. catalogVisible=true ve catalogPreview yoksa fail-fast. Projection type yalnız createModuleStateFromDescriptor factory uyumu içindir; Catalog UI preview seçmez. AutoDepot ve moduleContracts getCatalogItem okumaz. Catalog moduleRecipes import etmez. Dört profil Item’ına catalogWidthCm yazıldı. resolveItemKey src/items.js’tedir. MODULE_CATALOG derived compatibility export olarak kalır. moduleContextMenu.js frozen behavior, autoDepot.js frozen composition/placement, moduleContracts.js frozen bom işaretini gerektirir; rotation/collision/BOM miktarı bu turda değişmez. 64/64 descriptor ve catalogPreview CSS regression kilitlenir."
+    "notes": "Item dimensions fiziksel, sceneDimensions same-field runtime override. resolveSceneDimensions çapraz remap/Recipe/Catalog/type/itemKey yok. catalogWidthCm kaldırıldı. Profile factory ve Catalog footprint Item scene okur. Catalog kart preview Item.catalogPreview → CATALOG_PREVIEW_RENDERERS. AutoDepot ve moduleContracts getCatalogItem okumaz. moduleContextMenu.js frozen behavior, autoDepot.js frozen composition/placement, moduleContracts.js frozen bom. 104/64/64 korunur."
   },
   "tests": {
     "targeted": [
@@ -724,6 +726,7 @@
       "test/catalogItemProjection.test.js",
       "test/catalogCategories.test.js",
       "test/itemCatalogFields.test.js",
+      "test/itemSceneDimensions.test.js",
       "test/catalogSingleSource.test.js",
       "test/catalogDomainBoundary.test.js",
       "test/plasticTrashBinModule.test.js",
@@ -749,11 +752,11 @@
   },
   "risk": {
     "level": "low",
-    "notes": "Kart silüeti catalogPreview ile seçilir. type fallback sessizce yanlış kart çizerdi. catalogPreviewConfig 64/64 preview ve CSS kök sınıfını, catalogItemProjection eski descriptor’ı kilitler."
+    "notes": "Scene ölçü Item’dan okunur. catalogWidthCm ve Recipe profil genişliği sessizce yanlış footprint üretirdi. itemSceneDimensions same-field/cross-remap yasaklarını, catalogItemProjection 64 descriptor’ı kilitler."
   },
   "migration": {
     "required": false,
-    "notes": "Alanlar kod tablosundadır. Persist/project blob ve SQLite yok."
+    "notes": "Alanlar kod tablosundadır. Eski kayıtlarda wall depth/height yoksa normalize/resolver doldurur. Persist/project blob ve SQLite yok."
   },
-  "rollback": "createModuleCatalogPreview type zincirine, 64 Item’dan catalogPreview alanına, projection fail-fast’e dönüş. AutoDepot/moduleContracts getCatalogItem okumasına ve Recipe profil genişliğine dönüş ayrı bir önceki adımdır."
+  "rollback": "resolveSceneDimensions ve sceneDimensions katmanına, catalogWidthCm ve Recipe profil genişliğine, Catalog bar-stock remap’e dönüş. Catalog preview type zinciri ayrı bir önceki adımdır."
 }

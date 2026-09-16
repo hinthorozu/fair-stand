@@ -7,6 +7,69 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-16 — Item physical dimensions ve sceneDimensions override ayrımı
+
+### Neden yapıldı
+
+Item ölçüleri dağınıktı. Profil sahne genişliği Recipe `nominalWidthCm` ve `catalogWidthCm` üzerinden okunuyordu. Dikme oturumu thickness→width/depth, length→height çapraz remap ile üretiliyordu. Catalog kendi footprint’ini bar-stock kuralıyla yazıyordu.
+
+### Yeni kural
+
+Her Item kendi ölçü bilgisinin canonical kaynağıdır. İki katman, aynı field seti:
+
+```text
+dimensions        = gerçek/fiziksel ürün ölçüleri
+sceneDimensions   = scene/runtime override
+
+canonical fields: widthCm, depthCm, heightCm, lengthCm, thicknessCm
+
+effective scene field:
+  sceneDimensions.field ?? dimensions.field ?? MISSING
+```
+
+Aynı field adı yoksa fallback yoktur. `lengthCm` width olmaz. `thicknessCm` depth olmaz.
+
+### Kaldırılan kaynaklar
+
+- `catalogWidthCm` (dört profil Item’ından silindi)
+- `createProfileModuleState` / `normalizeModuleItemState` / `createProfileModule` → `getStraightWallNominalWidthForProfileItem`
+- Catalog `assignCatalogFootprint` bar-stock remap ve `catalogWidthCm`
+- `getItemIdentityFields` `catalogWidthCm` ve thickness/length remap
+
+### Yazılan sceneDimensions (mevcut runtime davranışına göre)
+
+- dört profil: `{ widthCm: 50|100|150|200, depthCm: 8, heightCm: 350 }`
+- `upright_346_5`: `{ widthCm: 8, depthCm: 8, heightCm: 346.5 }` — renderer 10×10×350 görsel zarfı ayrı kavramdır
+- tam boy wall/separator/shelf/showcase/door: `{ depthCm: 10, heightCm: 350 }` (width physical’dan)
+- short_up: `{ depthCm: 10 }` — height occupancy’dedir, 350 yazılmaz
+- TV: `{ heightCm: screenHeightCm }`; video wall: `{ widthCm, heightCm }` panel × ızgara
+- `wall_base_*` physical  width×50×350 ile aynı; sceneDimensions yazılmadı
+
+### Canonical method
+
+`resolveSceneDimensions(item)` — consumer’lar ayrı fallback yazmaz.
+
+### Bilinçli sınırlar / LEGACY
+
+- Özel physical alanlar (`screenWidthCm`, `catalogHeightCm`, `mountHeightCm`, `tableDiameterCm`, `wallGapCm`) bu turda 5 alana zorla taşınmadı
+- TV Catalog kart yüksekliği UI-only `catalogHeightCm=350` (media metrics); runtime scene height ekrandır
+- Ghost numeric-width yolu ve Item scene height MISSING (short_up occupancy) STAND zarfına düşebilir — Item-specific SOT değildir
+- `MODULE_COLLISION_DEPTH_CM` wall_base omurga ve genel stand standardı olarak kalır
+- 6 Item physical dimensions eksik: `connector_start`, `connector_single`, `connector_double`, `connector_corner`, `shelf_leg`, `hali` — tahmin yazılmadı
+
+### Doğrulama
+
+- kayıtlı Item 104; catalogVisible=true 64; projection 64
+- `test/itemSceneDimensions.test.js` same-field / cross-remap / catalogWidthCm / Recipe yasakları
+- targeted dimension + catalog + profile/upright contract testleri
+- `npm test` / `npm run build` / `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify` / `e2e/smoke.spec.mjs`
+
+### Sonraki adım
+
+Rotation / color / image / lighting / delete / global `type` kaldırma / SQLite / BOM composition redesign / Catalog preview redesign / renderer architecture bu turda yok.
+
+---
+
 ## 2026-09-16 — Catalog preview seçiminin type’tan Item config’e taşınması
 
 ### Eski yapı

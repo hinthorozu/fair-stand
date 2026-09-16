@@ -49,11 +49,12 @@ Görünür Item (`catalogVisible=true`) ek zorunlu Catalog alanı: `catalogPrevi
 
 | Alan | Tip | Kapsam |
 |---|---|---|
-| `catalogWidthCm` | number (cm) | Item master — Catalog config |
+| `dimensions` | object | Item master — fiziksel ürün ölçüleri |
+| `sceneDimensions` | object \| yok | Item master — aynı field setinin runtime override katmanı |
 
-`catalogWidthCm` yalnız katalog kartı yerleşim genişliği fiziksel `dimensions.widthCm` / `lengthCm`’den farklıysa yazılır. Şu an dört profil Item’ında vardır. Fiziksel profil boyu değildir.
+`dimensions` Item’ın gerçek/fiziksel ölçülerini taşır. `sceneDimensions` sahne/runtime’da farklı bir değer gerekiyorsa aynı field adıyla override yazar. İkisi de şu canonical 5 alanı destekler: `widthCm`, `depthCm`, `heightCm`, `lengthCm`, `thicknessCm`. Aynı değerleri iki kere yazmak zorunlu değildir. Effective scene field: `sceneDimensions.field ?? dimensions.field ?? MISSING`. Aynı field adı yoksa fallback yoktur.
 
-Eski kayıtlardaki `name`, `type`, `dimensions`, `unit`, `composition` vb. runtime’da durur; bu şemaya otomatik alınmadı.
+Eski kayıtlardaki `name`, `type`, `unit`, `composition` vb. runtime’da durur; bu şemaya otomatik alınmadı.
 
 ---
 
@@ -73,7 +74,6 @@ Ayrıntı: `docs/refactor/CATALOG.md`.
 | `catalogCategory` | kategori key |
 | `catalogItemIndex` | kategori içi sıra |
 | `catalogPreview` | Catalog kart preview renderer key |
-| `catalogWidthCm` | yalnız fiziksel width’den farklı Catalog preview/footprint genişliği gerekiyorsa |
 
 Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview renderer seçimi yalnız `Item.catalogPreview` üzerinden yapılır.
 
@@ -145,21 +145,35 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 - **Validation:** görünürken `CATALOG_PREVIEWS` üyesi; yok/bilinmiyor → fail-fast; gizlide alan yok
 - **Örnek:** `KETTLE` → `"kettle"`; `TV_42` → `"tv"`; `VIDEO_WALL_2X2` → `"video-wall"`; `wall_200` → `"flat-panel"`; `profile_190` → `"profile"`
 
-### catalogWidthCm
+### dimensions
 
-- **Type:** number (cm)
-- **Required:** no — yalnız katalog kart genişliği fiziksel ölçüden farklıysa
-- **Scope:** Item master — Catalog config
-- **Default:** yok; alan yoksa Catalog `dimensions` veya dikme oturumunu kullanır
-- **Amaç:** Katalog kartı yerleşim genişliği. Profil fiziksel `lengthCm` (41,5 / 91 / 140,5 / 190) ile kart genişliği (50 / 100 / 150 / 200) ayrı kavramlardır
-- **Canonical consumer:** Catalog projection
-- **Canonical method:** `getCatalogItem` / `listCatalogItems` — mevcut
-- **Recipe/BOM’dan türetilmez**
-- **Kullanıcı değiştirir mi:** hayır
-- **Project instance override:** hayır
+- **Type:** object (`widthCm?`, `depthCm?`, `heightCm?`, `lengthCm?`, `thicknessCm?` ve mevcut özel alanlar)
+- **Required:** no — güvenilir fiziksel kaynak yoksa alan yazılmaz
+- **Scope:** Item master — gerçek/fiziksel ürün ölçüleri
+- **Default:** yok; tahmin/`0`/`1`/GLB bbox yasak
+- **Amaç:** Ürünün fiziksel ölçüsü. Catalog, Recipe, type veya itemKey bu katmanı üretmez
+- **Canonical consumer:** `resolveSceneDimensions` (same-field fallback), BOM/üretim okuyucuları, Catalog projection (okur, sahip olmaz)
+- **Canonical method:** `item.dimensions` / `resolveSceneDimensions(item)`
+- **Çapraz remap yok:** `lengthCm` width olmaz; `thicknessCm` depth olmaz
+- **Kullanıcı değiştirir mi:** hayır (Item master)
+- **Project instance override:** hayır; sahne ezmesi `sceneDimensions`’tadır
 - **Persistence:** Item master
-- **Validation:** varsa sonlu pozitif sayı; fiziksel `lengthCm` ile eşit olmak zorunda değil
-- **Örnek:** `profile_41_5` → `50`; `profile_91` → `100`; `profile_140_5` → `150`; `profile_190` → `200`
+- **Örnek:** `profile_190` → `{ lengthCm: 190, thicknessCm: 8 }`
+
+### sceneDimensions
+
+- **Type:** object (`widthCm?`, `depthCm?`, `heightCm?`, `lengthCm?`, `thicknessCm?`)
+- **Required:** no — physical ile aynı field aynı değerdeyse yazılmaz
+- **Scope:** Item master — scene/runtime override
+- **Default:** yok; `null`, `{}` ve `{ field: null }` override yok demektir
+- **Amaç:** Sahnede kullanılacak ölçü. Yalnız physical’dan farklıysa veya scene’in ihtiyaç duyduğu field physical’da aynı isimle yoksa yazılır
+- **Canonical consumer:** factory, identity, Catalog footprint, collision/ghost
+- **Canonical method:** `resolveSceneDimensions(item)`
+- **Effective field:** `sceneDimensions.field ?? dimensions.field ?? MISSING`
+- **Recipe/Catalog/type/itemKey/STAND Item-specific scene source değildir**
+- **Kullanıcı değiştirir mi:** hayır (Item master)
+- **Persistence:** Item master
+- **Örnek:** `profile_190` → `{ widthCm: 200, depthCm: 8, heightCm: 350 }`
 
 ---
 
@@ -171,7 +185,7 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 |---|---|---|---|
 | `catalogVisible` / `catalogCategory` / `catalogItemIndex` | Catalog | `listCatalogCategories` / `listCatalogItems` / `getCatalogItem` / `listCatalogGroups` | mevcut |
 | `catalogPreview` | Catalog | `getCatalogItem` / `listCatalogItems` → `CATALOG_PREVIEW_RENDERERS` | mevcut |
-| `catalogWidthCm` | Catalog | `getCatalogItem` / `listCatalogItems` (profil kart genişliği) | mevcut |
+| `dimensions` / `sceneDimensions` | Item ölçü | `resolveSceneDimensions` | mevcut |
 | `itemKey` | Item identity | `getItem` / `listRegisteredItems` / `resolveItemKey` | mevcut |
 | rotation | Rotation | henüz belirlenmedi | yapılmadı |
 | color | Color | henüz belirlenmedi | yapılmadı |
@@ -199,7 +213,20 @@ Item {
   catalogCategory: string | null    // Catalog.catalogKey
   catalogItemIndex: integer | null  // kategori içi sıra; Catalog.catalogIndex değil
   catalogPreview?: string           // catalogVisible=true ise zorunlu renderer key; gizlide yok
-  catalogWidthCm?: number           // opsiyonel; katalog kart genişliği, fiziksel length değil
+  dimensions?: {
+    widthCm?: number
+    depthCm?: number
+    heightCm?: number
+    lengthCm?: number
+    thicknessCm?: number
+  }
+  sceneDimensions?: {
+    widthCm?: number
+    depthCm?: number
+    heightCm?: number
+    lengthCm?: number
+    thicknessCm?: number
+  }
 }
 ```
 
@@ -232,8 +259,9 @@ Item {
 - `catalogVisible=false` → category ve index `null`
 - `catalogVisible=false` → `catalogPreview` alanı yok
 - `catalogVisible=false` → Item `getItem` ile durur; `getCatalogItem` null döner
-- `catalogWidthCm` yalnız profil Item’larında; değerler 50/100/150/200
+- `catalogWidthCm` yoktur
+- Effective scene field yalnız same-field: `sceneDimensions.field ?? dimensions.field ?? MISSING`
 - Aynı kategoride duplicate `catalogItemIndex` yasak
 - Index her kategoride `1..N` kesintisiz
 
-Test: `test/itemCatalogFields.test.js`
+Test: `test/itemCatalogFields.test.js`, `test/itemSceneDimensions.test.js`

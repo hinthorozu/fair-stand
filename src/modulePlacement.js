@@ -1,5 +1,5 @@
 import { STAND_DIMENSIONS } from './catalog.js';
-import { getItem } from './items.js';
+import { getItem, resolveSceneDimensions } from './items.js';
 import {
   allowsThinWallEndpointContact,
   canModulesOverlapByBehavior,
@@ -408,6 +408,9 @@ function getModuleCollisionDepthCm(module) {
   if (usesWallBackboneCollisionDepth(module)) return MODULE_COLLISION_DEPTH_CM;
   const explicitDepthCm = Number(module?.depthCm);
   if (Number.isFinite(explicitDepthCm) && explicitDepthCm > 0) return explicitDepthCm;
+  const sceneDepthCm = resolveSceneDimensions(getItem(module?.itemKey)).depthCm;
+  if (sceneDepthCm != null) return sceneDepthCm;
+  // LEGACY: Item scene depth MISSING ise genel stand omurga derinliği.
   return MODULE_COLLISION_DEPTH_CM;
 }
 

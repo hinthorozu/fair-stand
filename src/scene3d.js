@@ -15,13 +15,13 @@ import {
   isGridTileFloorItem,
   isParquetFloorItem,
   listFloorItems,
+  resolveSceneDimensions,
 } from './items.js';
 import { getOccupiedStripLayout, resolveModuleStripOccupancy } from './stripOccupancy.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
-import { getStraightWallNominalWidthForProfileItem } from './moduleRecipes.js';
 import {
   applyGlassOverride,
   bindRendererSurfaceState,
@@ -1866,10 +1866,16 @@ export function createStandScene(
 
   function getPlacementGhostDimensions(moduleOrWidthCm) {
     if (typeof moduleOrWidthCm === 'object' && moduleOrWidthCm) {
+      const item = moduleOrWidthCm.itemKey ? getItem(moduleOrWidthCm.itemKey) : null;
+      const scene = item ? resolveSceneDimensions(item) : {};
+      const widthCm = Number(moduleOrWidthCm.widthCm ?? scene.widthCm);
+      const depthCm = Number(moduleOrWidthCm.depthCm ?? scene.depthCm);
+      const heightCm = Number(moduleOrWidthCm.heightCm ?? scene.heightCm);
       return {
-        widthCm: Number(moduleOrWidthCm.widthCm),
-        depthM: Math.max(Number(moduleOrWidthCm.depthCm ?? (STAND_DIMENSIONS.depth * 100)) / 100, 0.02),
-        heightM: Math.max(Number(moduleOrWidthCm.heightCm ?? (STAND_DIMENSIONS.height * 100)) / 100, 0.02),
+        widthCm,
+        // LEGACY: itemKey yoksa veya scene depth/height MISSING ise STAND renderer ghost zarfı.
+        depthM: Math.max((Number.isFinite(depthCm) ? depthCm : (STAND_DIMENSIONS.depth * 100)) / 100, 0.02),
+        heightM: Math.max((Number.isFinite(heightCm) ? heightCm : (STAND_DIMENSIONS.height * 100)) / 100, 0.02),
       };
     }
     return {
@@ -5339,9 +5345,13 @@ function createUprightModule(moduleState, moduleIndex) {
 
 function createProfileModule(moduleState, moduleIndex) {
   const item = getItem(moduleState.itemKey);
-  const lengthCm = Number(getStraightWallNominalWidthForProfileItem(moduleState.itemKey) || moduleState.widthCm);
-  const thicknessCm = Number(moduleState.depthCm || item?.dimensions?.thicknessCm);
-  const heightCm = Number(moduleState.heightCm);
+  const scene = resolveSceneDimensions(item);
+  const lengthCm = Number(moduleState.widthCm ?? scene.widthCm);
+  const thicknessCm = Number(moduleState.depthCm ?? scene.depthCm);
+  const heightCm = Number(moduleState.heightCm ?? scene.heightCm);
+  if (!Number.isFinite(lengthCm) || lengthCm <= 0) {
+    throw new TypeError(`Item ${moduleState.itemKey ?? 'unknown'} is missing scene dimension widthCm.`);
+  }
   const widthM = lengthCm / 100;
   // Görsel ezme: yalnız üst kare ray. Panel ve dikey çerçeve yok. Üretim length/thickness değişmez.
   const {

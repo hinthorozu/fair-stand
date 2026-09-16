@@ -1,18 +1,18 @@
 // catalogVisible / catalogCategory / catalogItemIndex her Item'ın kendi katalog görünüm verisidir.
 // catalogPreview görünür Item'da Catalog kart renderer key'idir; type üzerinden seçilmez.
-// catalogWidthCm yalnız katalog kartı yerleşim genişliği fiziksel widthCm'den farklıysa yazılır.
+// dimensions fiziksel ürün ölçüsüdür; sceneDimensions aynı field setinin runtime override katmanıdır.
 // catalogCategory yalnız UI gruplamasıdır; type, Item Contract veya registry grubundan türetilmez.
 // Catalog, Item runtime repository değildir; catalogVisible=false Item'ı yok etmez.
 // Kanonik Item registry. Leaf / üretim üstverisi burada durur.
 export const LEAF_ITEMS = Object.freeze({
-  upright_346_5: Object.freeze({ itemKey: 'upright_346_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 9, catalogPreview: 'upright', name: 'Dikme 346,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 346.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  upright_346_5: Object.freeze({ itemKey: 'upright_346_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 9, catalogPreview: 'upright', name: 'Dikme 346,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 346.5, thicknessCm: 8 }), sceneDimensions: Object.freeze({ widthCm: 8, depthCm: 8, heightCm: 346.5 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_99: Object.freeze({ itemKey: 'upright_99', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Dikme 99 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 99, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_49_5: Object.freeze({ itemKey: 'upright_49_5', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Dikme 49,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 49.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
 
-  profile_41_5: Object.freeze({ itemKey: 'profile_41_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 13, catalogPreview: 'profile', catalogWidthCm: 50, name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
-  profile_91: Object.freeze({ itemKey: 'profile_91', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 12, catalogPreview: 'profile', catalogWidthCm: 100, name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
-  profile_140_5: Object.freeze({ itemKey: 'profile_140_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 11, catalogPreview: 'profile', catalogWidthCm: 150, name: 'Profil 140,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 140.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
-  profile_190: Object.freeze({ itemKey: 'profile_190', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 10, catalogPreview: 'profile', catalogWidthCm: 200, name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_41_5: Object.freeze({ itemKey: 'profile_41_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 13, catalogPreview: 'profile', name: 'Profil 41,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 41.5, thicknessCm: 8 }), sceneDimensions: Object.freeze({ widthCm: 50, depthCm: 8, heightCm: 350 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_91: Object.freeze({ itemKey: 'profile_91', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 12, catalogPreview: 'profile', name: 'Profil 91 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 91, thicknessCm: 8 }), sceneDimensions: Object.freeze({ widthCm: 100, depthCm: 8, heightCm: 350 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_140_5: Object.freeze({ itemKey: 'profile_140_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 11, catalogPreview: 'profile', name: 'Profil 140,5 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 140.5, thicknessCm: 8 }), sceneDimensions: Object.freeze({ widthCm: 150, depthCm: 8, heightCm: 350 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
+  profile_190: Object.freeze({ itemKey: 'profile_190', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 10, catalogPreview: 'profile', name: 'Profil 190 cm', type: 'profile', unit: 'adet', dimensions: Object.freeze({ lengthCm: 190, thicknessCm: 8 }), sceneDimensions: Object.freeze({ widthCm: 200, depthCm: 8, heightCm: 350 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
 
   panel_48_5: Object.freeze({ itemKey: 'panel_48_5', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Panel 48,5 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }), material: 'sunta', panelRole: 'straight', nominalModuleWidthCm: 50 }),
   panel_98: Object.freeze({ itemKey: 'panel_98', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Panel 98 × 47 cm', type: 'panel', unit: 'adet', dimensions: Object.freeze({ widthCm: 98, heightCm: 47, thicknessCm: 0.8 }), material: 'sunta', panelRole: 'straight', nominalModuleWidthCm: 100 }),
@@ -430,27 +430,32 @@ export const WALL_MEDIA_ITEMS = Object.freeze({
     dimensions: Object.freeze({
       widthCm: 93.0, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 93.0, screenHeightCm: 52.3,
     }),
+    sceneDimensions: Object.freeze({ heightCm: 52.3 }),
   }),
   TV_55: Object.freeze({
     itemKey: 'TV_55', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 2, catalogPreview: 'tv', name: 'TV 55"', type: 'tv', sizeInch: 55,
     dimensions: Object.freeze({
       widthCm: 121.8, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 121.8, screenHeightCm: 68.5,
     }),
+    sceneDimensions: Object.freeze({ heightCm: 68.5 }),
   }),
   TV_65: Object.freeze({
     itemKey: 'TV_65', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 5, catalogPreview: 'tv', name: 'TV 65"', type: 'tv', sizeInch: 65,
     dimensions: Object.freeze({
       widthCm: 143.9, depthCm: 5, catalogHeightCm: 350, screenWidthCm: 143.9, screenHeightCm: 80.9,
     }),
+    sceneDimensions: Object.freeze({ heightCm: 80.9 }),
   }),
   VIDEO_WALL_2X2: Object.freeze({
     itemKey: 'VIDEO_WALL_2X2', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 3, catalogPreview: 'video-wall', name: 'Video Wall 2×2', type: 'tv', sizeInch: 55,
     dimensions: Object.freeze({ depthCm: 5 }),
+    sceneDimensions: Object.freeze({ widthCm: 217, heightCm: 122 }),
     videoWall: Object.freeze({ rows: 2, cols: 2, panelScreenWidthCm: 108.5, panelScreenHeightCm: 61 }),
   }),
   VIDEO_WALL_3X3: Object.freeze({
     itemKey: 'VIDEO_WALL_3X3', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 4, catalogPreview: 'video-wall', name: 'Video Wall 3×3', type: 'tv', sizeInch: 55,
     dimensions: Object.freeze({ depthCm: 5 }),
+    sceneDimensions: Object.freeze({ widthCm: 325.5, heightCm: 183 }),
     videoWall: Object.freeze({ rows: 3, cols: 3, panelScreenWidthCm: 108.5, panelScreenHeightCm: 61 }),
   }),
 });
@@ -502,6 +507,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'door',
     unit: 'adet',
     dimensions: Object.freeze({ widthCm: 100 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'door',
@@ -625,6 +631,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     name: 'Panel 50',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 50 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
@@ -636,6 +643,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     name: 'Panel 100',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 100 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
@@ -647,6 +655,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     name: 'Panel 150',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 150 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
@@ -658,6 +667,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     name: 'Panel 200',
     type: 'flat-panel',
     dimensions: Object.freeze({ widthCm: 200 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
@@ -671,6 +681,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     variant: 'short-up-2',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
     dimensions: Object.freeze({ widthCm: 200 }),
+    sceneDimensions: Object.freeze({ depthCm: 10 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
@@ -684,6 +695,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     variant: 'short-up-2',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
     dimensions: Object.freeze({ widthCm: 150 }),
+    sceneDimensions: Object.freeze({ depthCm: 10 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
@@ -697,6 +709,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     variant: 'short-up-2',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
     dimensions: Object.freeze({ widthCm: 100 }),
+    sceneDimensions: Object.freeze({ depthCm: 10 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
@@ -710,6 +723,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     variant: 'short-up-2',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 2 }),
     dimensions: Object.freeze({ widthCm: 50 }),
+    sceneDimensions: Object.freeze({ depthCm: 10 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
@@ -723,6 +737,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     variant: 'short-up-1',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
     dimensions: Object.freeze({ widthCm: 200 }),
+    sceneDimensions: Object.freeze({ depthCm: 10 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
@@ -736,6 +751,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     variant: 'short-up-1',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
     dimensions: Object.freeze({ widthCm: 150 }),
+    sceneDimensions: Object.freeze({ depthCm: 10 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
@@ -749,6 +765,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     variant: 'short-up-1',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
     dimensions: Object.freeze({ widthCm: 100 }),
+    sceneDimensions: Object.freeze({ depthCm: 10 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
@@ -762,6 +779,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     variant: 'short-up-1',
     stripOccupancy: Object.freeze({ align: 'top', stripCount: 1 }),
     dimensions: Object.freeze({ widthCm: 50 }),
+    sceneDimensions: Object.freeze({ depthCm: 10 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
@@ -810,6 +828,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     name: 'Separatör 50',
     type: 'separator',
     dimensions: Object.freeze({ widthCm: 50 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
@@ -821,6 +840,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     name: 'Separatör 100',
     type: 'separator',
     dimensions: Object.freeze({ widthCm: 100 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
@@ -833,6 +853,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'separator',
     modelFile: 'wall_separator_50_sarmasik.glb',
     dimensions: Object.freeze({ widthCm: 50 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
@@ -845,6 +866,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'separator',
     modelFile: 'wall_separator_100_sarmasik.glb',
     dimensions: Object.freeze({ widthCm: 100 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
@@ -859,6 +881,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'shelf',
     shelfCount: 2,
     dimensions: Object.freeze({ widthCm: 100 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
@@ -872,6 +895,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'shelf',
     shelfCount: 2,
     dimensions: Object.freeze({ widthCm: 150 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
@@ -885,6 +909,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'shelf',
     shelfCount: 2,
     dimensions: Object.freeze({ widthCm: 200 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
@@ -898,6 +923,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'shelf',
     shelfCount: 3,
     dimensions: Object.freeze({ widthCm: 100 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
@@ -911,6 +937,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'shelf',
     shelfCount: 3,
     dimensions: Object.freeze({ widthCm: 150 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
@@ -924,6 +951,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'shelf',
     shelfCount: 3,
     dimensions: Object.freeze({ widthCm: 200 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'shelf',
@@ -937,6 +965,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'showcase-2',
     unit: 'adet',
     dimensions: Object.freeze({ widthCm: 100 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     eyeCount: 2,
     bodyItems: Object.freeze({
       sideItemKey: 'showcase_side_94_6_30',
@@ -955,6 +984,7 @@ export const COMPOSITE_ITEMS = Object.freeze({
     type: 'showcase-3',
     unit: 'adet',
     dimensions: Object.freeze({ widthCm: 100 }),
+    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
     eyeCount: 3,
     bodyItems: Object.freeze({
       sideItemKey: 'showcase_side_143_5_30',
@@ -1051,6 +1081,39 @@ function optionalNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+export const SCENE_DIMENSION_FIELDS = Object.freeze([
+  'widthCm',
+  'depthCm',
+  'heightCm',
+  'lengthCm',
+  'thicknessCm',
+]);
+
+function readDimensionField(layer, field) {
+  if (!layer || typeof layer !== 'object') return null;
+  return optionalNumber(layer[field]);
+}
+
+// Scene/runtime ölçü: aynı field adı için sceneDimensions ?? dimensions ?? MISSING.
+// length→width, thickness→depth, Recipe/Catalog/type/itemKey/STAND çapraz remap yoktur.
+export function resolveSceneDimensions(item) {
+  const resolved = {};
+  for (const field of SCENE_DIMENSION_FIELDS) {
+    resolved[field] = readDimensionField(item?.sceneDimensions, field)
+      ?? readDimensionField(item?.dimensions, field)
+      ?? null;
+  }
+  return Object.freeze(resolved);
+}
+
+export function requireSceneDimension(item, field) {
+  const value = resolveSceneDimensions(item)[field];
+  if (value == null) {
+    throw new TypeError(`Item ${item?.itemKey ?? 'unknown'} is missing scene dimension ${field}.`);
+  }
+  return value;
+}
+
 // Katalogdaki düz bankolarda `shape` yoktur; runtime state `shape: 'straight'` kullanır.
 function shapesMatch(want, have) {
   const normalizedWant = want === 'L' ? 'L' : (want == null ? null : 'straight');
@@ -1079,21 +1142,16 @@ function normalizeItemDescriptor(descriptor) {
   };
 }
 
-// Catalog projection'ı taklit etmez; Item master + opsiyonel catalogWidthCm okur.
+// Catalog projection'ı taklit etmez; Item master + resolveSceneDimensions okur.
 function getItemIdentityFields(item) {
   const media = resolveWallMediaMetrics(item);
-  const dimensions = item.dimensions ?? {};
-  const thicknessCm = Number(dimensions.thicknessCm);
-  const lengthCm = Number(dimensions.lengthCm);
-  const hasBarStock = Number.isFinite(thicknessCm)
-    && Number.isFinite(lengthCm)
-    && dimensions.widthCm == null;
+  const scene = resolveSceneDimensions(item);
 
   if (media) {
     return {
       type: item.type,
-      widthCm: optionalNumber(media.widthCm),
-      depthCm: optionalNumber(media.depthCm),
+      widthCm: optionalNumber(scene.widthCm),
+      depthCm: optionalNumber(scene.depthCm),
       shape: item.shape ?? null,
       shelfCount: item.shelfCount ?? null,
       modelFile: item.modelFile ?? null,
@@ -1103,18 +1161,10 @@ function getItemIdentityFields(item) {
     };
   }
 
-  let widthCm = optionalNumber(dimensions.widthCm);
-  let depthCm = optionalNumber(dimensions.depthCm);
-  if (widthCm == null) widthCm = optionalNumber(item.catalogWidthCm);
-  if (hasBarStock) {
-    if (widthCm == null) widthCm = thicknessCm;
-    if (depthCm == null) depthCm = thicknessCm;
-  }
-
   return {
     type: item.type,
-    widthCm,
-    depthCm,
+    widthCm: optionalNumber(scene.widthCm),
+    depthCm: optionalNumber(scene.depthCm),
     shape: item.shape ?? null,
     shelfCount: item.shelfCount ?? null,
     modelFile: item.modelFile ?? null,

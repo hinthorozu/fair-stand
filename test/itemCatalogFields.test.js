@@ -223,7 +223,7 @@ test('104 Item katalog metadata alanlarını taşır ve canlı katalog üyeliği
   assert.equal(getItem('panel_197').catalogItemIndex, null);
 });
 
-test('catalogWidthCm yalnız profil katalog kart genişliğidir; fiziksel lengthCm değildir', () => {
+test('profil sceneDimensions Catalog kart genişliğini taşır; catalogWidthCm yoktur', () => {
   const expected = Object.freeze({
     profile_41_5: 50,
     profile_91: 100,
@@ -232,12 +232,10 @@ test('catalogWidthCm yalnız profil katalog kart genişliğidir; fiziksel length
   });
 
   for (const item of listRegisteredItems()) {
-    if (Object.hasOwn(expected, item.itemKey)) {
-      assert.equal(item.catalogWidthCm, expected[item.itemKey], item.itemKey);
-      assert.notEqual(item.catalogWidthCm, item.dimensions.lengthCm, item.itemKey);
-      continue;
-    }
     assert.equal(Object.hasOwn(item, 'catalogWidthCm'), false, item.itemKey);
+    if (!Object.hasOwn(expected, item.itemKey)) continue;
+    assert.equal(item.sceneDimensions.widthCm, expected[item.itemKey], item.itemKey);
+    assert.notEqual(item.sceneDimensions.widthCm, item.dimensions.lengthCm, item.itemKey);
   }
 });
 
@@ -294,7 +292,8 @@ test('ITEMS.md yalnız onaylı katalog şemasını taşır; gerçekleşmemiş me
   assert.match(itemsDoc, /### catalogCategory/);
   assert.match(itemsDoc, /### catalogItemIndex/);
   assert.match(itemsDoc, /### catalogPreview/);
-  assert.match(itemsDoc, /### catalogWidthCm/);
+  assert.match(itemsDoc, /### dimensions/);
+  assert.match(itemsDoc, /### sceneDimensions/);
   assert.match(itemsDoc, /# Canonical Mechanism Connections/);
   assert.match(itemsDoc, /# Item Schema/);
   assert.match(itemsDoc, /# Architectural Rules/);
