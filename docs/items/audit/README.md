@@ -18,4 +18,5 @@ Mevcut çalışan sistemin dökümü. Refactor / yeni mimari yok.
 | [OZEL_DURUMLAR.md](OZEL_DURUMLAR.md) | sapmalar |
 | [IKINCI_TUR.md](IKINCI_TUR.md) | sayı/delik ikinci geçiş |
 | [FINAL_OZET.md](FINAL_OZET.md) | sayılar + ikinci tur |
+| [properties/](properties/README.md) | 188 özellik sözlüğü |
 | [items/](items/) | item başı döküm |
