@@ -108,6 +108,7 @@
       "test/baseWallRecipes.test.js",
       "test/boardMaterialItemContract.test.js",
       "test/bundleLoadingContract.test.js",
+      "test/canonicalDimensionDedup.test.js",
       "test/catalogCategories.test.js",
       "test/catalogDomainBoundary.test.js",
       "test/catalogDragKeyboardIntegration.test.js",
@@ -683,6 +684,7 @@
       "docs/items/definitions/TV_65.md",
       "docs/items/definitions/VIDEO_WALL_2X2.md",
       "docs/items/definitions/VIDEO_WALL_3X3.md",
+      "docs/items/definitions/VIDEO_WALL_PANEL.md",
       "docs/items/definitions/base_top_107_50.md",
       "docs/items/definitions/base_top_157_50.md",
       "docs/items/definitions/base_top_206_50.md",
@@ -769,7 +771,9 @@
       "test/catalogCategories.test.js",
       "test/itemCatalogFields.test.js",
       "test/itemSceneDimensions.test.js",
-      "test/systemModuleCatalogDoc.test.js"
+      "test/systemModuleCatalogDoc.test.js",
+      "test/canonicalDimensionDedup.test.js",
+      "test/wallMediaItemsContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -778,9 +782,11 @@
       "targeted": [
         "e2e/smoke.spec.mjs",
         "e2e/wall-showcase-item-contract.spec.mjs",
-        "e2e/wall-flat-panel-items-contract.spec.mjs"
+        "e2e/wall-flat-panel-items-contract.spec.mjs",
+        "e2e/wall-media-items-contract.spec.mjs",
+        "e2e/furniture-items-contract.spec.mjs"
       ],
-      "reason": "catalog, ui, state, renderer, placement ve behavior browser-impact domain. smoke katalog açılışını, showcase kalan shelf-showcase kartlarını, wall-flat-panel genel duvar yerleşimini doğrular. Silinen wall-shelf E2E spec’leri kaldırıldı."
+      "reason": "catalog, ui, state, renderer, placement ve behavior browser-impact domain. smoke katalog açılışını, showcase kalan shelf-showcase kartlarını, wall-flat-panel genel duvar yerleşimini, #174 wall-media/furniture regression’ını doğrular. Silinen wall-shelf E2E spec’leri kaldırıldı."
     }
   },
   "risk": {
