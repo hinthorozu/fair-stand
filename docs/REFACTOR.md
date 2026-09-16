@@ -54,6 +54,7 @@ Canonical `catalogCategory` key'leri (mevcut 6 grup, yeni grup yok):
 - Katalog grup sırası, grup içi Item sırası ve görünen Item sayısı değişmedi
 - `npm test`: 732 pass / 0 fail
 - `npm run build`: geçti
+- targeted E2E `e2e/smoke.spec.mjs`: geçti
 
 ### Sonraki adım
 
