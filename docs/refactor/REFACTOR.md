@@ -32,9 +32,12 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ### Doğrulama
 
-- kayıtlı Item 105; catalogVisible=true 64
+- kayıtlı Item 105; catalogVisible=true 64; gizli 41 (`VIDEO_WALL_PANEL` dahil)
 - `test/canonicalDimensionDedup.test.js` src runtime eski field yasakları + `wall_200` BOM `dimensions.widthCm`
-- `npm test` / `npm run build` / `contract:verify`
+- `npm test`: 776 pass / 0 fail
+- `npm run build`: geçti
+- `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`canonical-dimension-dedup`)
+- targeted E2E: `e2e/wall-media-items-contract.spec.mjs`, `e2e/furniture-items-contract.spec.mjs`, `e2e/smoke.spec.mjs`, `e2e/wall-flat-panel-items-contract.spec.mjs` — 22 passed
 
 ---
 

@@ -754,6 +754,7 @@
       "test/tv42Module.test.js",
       "test/glassTableContract.test.js",
       "test/catalogItemProjection.test.js",
+      "test/catalogPreviewConfig.test.js",
       "test/itemCatalogFields.test.js",
       "test/itemSceneDimensions.test.js",
       "test/catalogDomainBoundary.test.js",
