@@ -21,3 +21,4 @@ Mevcut çalışan sistemin dökümü. Refactor / yeni mimari yok.
 | [properties/](properties/README.md) | 188 özellik sözlüğü |
 | [items/](items/) | item başı döküm |
 | [report/](report/README.md) | okunabilir HTML/Markdown/CSV rapor |
+| [report/MEKANIZMA_PARAMETRE.html](report/MEKANIZMA_PARAMETRE.html) | 188 property → 21 mekanizma, kodda gerçek parametre değerleri |
