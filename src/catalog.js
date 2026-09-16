@@ -225,7 +225,14 @@ function createTopLightCatalogItem(itemKey) {
 }
 
 function createCommercialCatalogItem(itemKey) {
-  const { name, dimensions, ...metadata } = getItem(itemKey);
+  const {
+    name,
+    dimensions,
+    catalogVisible: _catalogVisible,
+    catalogCategory: _catalogCategory,
+    catalogItemIndex: _catalogItemIndex,
+    ...metadata
+  } = getItem(itemKey);
   return Object.freeze({ ...metadata, ...dimensions, label: name });
 }
 
