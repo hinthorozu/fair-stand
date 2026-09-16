@@ -69,6 +69,7 @@ Bu turda yeni key uydurulmadı. Key’ler önceki turda Item kayıtlarına yazı
 - `npm test`: 737 pass / 0 fail
 - `npm run build`: geçti
 - `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-category-model`)
+- targeted E2E `e2e/smoke.spec.mjs`: geçti
 
 ### Sonraki adım
 
