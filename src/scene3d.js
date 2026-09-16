@@ -1808,7 +1808,6 @@ export function createStandScene(
       widthCm: moduleState.widthCm ?? moduleGroup.userData.widthCm,
       depthCm: moduleState.depthCm ?? moduleGroup.userData.depthCm,
       shape: moduleState.shape ?? null,
-      shelfCount: moduleState.shelfCount ?? null,
       placement: moduleGroup.userData.moduleState?.placement
         ? { ...moduleGroup.userData.moduleState.placement }
         : null,
@@ -1895,7 +1894,6 @@ export function createStandScene(
       dimensions.depthM,
       dimensions.heightM,
       moduleOrWidthCm.shape ?? '',
-      moduleOrWidthCm.shelfCount ?? '',
       occupancy?.align ?? '',
       occupancy?.stripCount ?? '',
       Array.isArray(moduleOrWidthCm.strips) ? moduleOrWidthCm.strips.length : '',
@@ -2088,7 +2086,7 @@ export function createStandScene(
     if (label) label.textContent = labelText;
 
     if (previewSlot) {
-      const signature = `${moduleState?.itemKey ?? ''}|${labelText}|${moduleState?.type ?? ''}|${moduleState?.widthCm ?? ''}|${moduleState?.shelfCount ?? ''}`;
+      const signature = `${moduleState?.itemKey ?? ''}|${labelText}|${moduleState?.type ?? ''}|${moduleState?.widthCm ?? ''}`;
       if (previewSlot.dataset.signature !== signature) {
         previewSlot.dataset.signature = signature;
         previewSlot.innerHTML = '';
@@ -6877,7 +6875,6 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
 function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
   const built = createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady);
   const widthM = Number(moduleState.widthCm) / 100;
-  const shelfCount = Number(moduleState.shelfCount) === 3 ? 3 : 2;
   const shelfItem = getShelfLeafItem(moduleState.widthCm);
   if (!shelfItem) {
     throw new TypeError(`Missing canonical shelf Item for ${moduleState.widthCm} cm module.`);
@@ -6886,15 +6883,13 @@ function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
   const shelfThicknessM = Number(shelfItem.dimensions.thicknessCm) / 100;
   const wallDepthM = Number(STAND_DIMENSIONS.depth);
   const innerWidthM = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
-  const shelfHeightsCm = SHELF_DIMENSIONS.heightsByCountCm[shelfCount] ?? [];
+  const shelfHeightsCm = SHELF_DIMENSIONS.heightsByCountCm[2] ?? [];
   const shelfLightingOn = Boolean(moduleState.shelfLightingOn);
 
   built.group.userData.type = 'shelf';
-  built.group.userData.shelfCount = shelfCount;
   built.group.userData.shelfLightingOn = shelfLightingOn;
   built.surfaces.forEach((surface) => {
     surface.userData.moduleType = 'shelf';
-    surface.userData.shelfCount = shelfCount;
   });
 
   const shelfMaterial = new THREE.MeshStandardMaterial({

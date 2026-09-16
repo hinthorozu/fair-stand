@@ -198,55 +198,6 @@ export function createShowcaseModuleState(type, widthCm = 100) {
   return applySceneFootprint(state, showcaseItem, ['widthCm']);
 }
 
-function isWallShelfCompositeItem(item) {
-  return item?.type === 'shelf'
-    && item.composition?.mode === 'recipe'
-    && item.composition?.moduleType === 'shelf';
-}
-
-function resolveShelfItemKey(widthCmOrDescriptor, shelfCount = 2) {
-  if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
-    const explicitKey = widthCmOrDescriptor.itemKey ?? null;
-    if (explicitKey && isWallShelfCompositeItem(getItem(explicitKey))) return explicitKey;
-    const resolvedKey = resolveItemKey({
-      type: 'shelf',
-      widthCm: widthCmOrDescriptor.widthCm,
-      shelfCount: widthCmOrDescriptor.shelfCount,
-      itemKey: widthCmOrDescriptor.itemKey ?? null,
-    });
-    if (resolvedKey && isWallShelfCompositeItem(getItem(resolvedKey))) return resolvedKey;
-    return null;
-  }
-
-  const resolvedKey = resolveItemKey({
-    type: 'shelf',
-    widthCm: Number(widthCmOrDescriptor),
-    shelfCount: Number(shelfCount),
-  });
-  if (resolvedKey && isWallShelfCompositeItem(getItem(resolvedKey))) return resolvedKey;
-  return null;
-}
-
-export function createShelfModuleState(widthCmOrDescriptor, shelfCount = 2) {
-  const itemKey = resolveShelfItemKey(widthCmOrDescriptor, shelfCount);
-  const item = itemKey ? getItem(itemKey) : null;
-  if (!isWallShelfCompositeItem(item)) return null;
-  const count = Number(item.shelfCount);
-
-  const state = {
-    id: createId('module'),
-    itemKey: item.itemKey,
-    type: item.type,
-    shelfCount: count,
-    shelfLightingOn: false,
-    strips: Array.from(
-      { length: STRIP_COUNT },
-      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
-    ),
-  };
-  return applySceneFootprint(state, item, ['widthCm']);
-}
-
 export function createDoorModuleState(widthCm = 100) {
   const doorItem = getItem('door_100');
   const canonicalWidthCm = Number(doorItem?.dimensions?.widthCm);
@@ -604,7 +555,6 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   'base-wall': (descriptor) => createBaseWallModuleState(descriptor),
   counter: (descriptor) => createCounterModuleState(descriptor),
   separator: (descriptor) => createSeparatorModuleState(descriptor),
-  shelf: (descriptor) => createShelfModuleState(descriptor),
   'sofa-set-classic': () => createBeigeSofaSetModuleState(),
   'sofa-single-classic': () => createSofaSingleClassicModuleState(),
   'sofa-double-classic': () => createSofaDoubleClassicModuleState(),
@@ -715,15 +665,6 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'separator') {
     const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'separator') {
-      moduleState.itemKey = resolvedKey;
-      applySceneFootprint(moduleState, getItem(resolvedKey), ['widthCm']);
-    }
-    return moduleState;
-  }
-
-  if (moduleState.type === 'shelf') {
-    const resolvedKey = resolveItemKey(moduleState);
-    if (resolvedKey && isWallShelfCompositeItem(getItem(resolvedKey))) {
       moduleState.itemKey = resolvedKey;
       applySceneFootprint(moduleState, getItem(resolvedKey), ['widthCm']);
     }

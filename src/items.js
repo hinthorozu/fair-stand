@@ -852,86 +852,6 @@ export const COMPOSITE_ITEMS = Object.freeze({
       moduleType: 'separator',
     }),
   }),
-  // Raflı duvar parent'lar (type shelf). Child miktarları moduleRecipes
-  // shelf:{width}:{shelfCount} satırlarında kalır; Raw BOM UI dokunulmaz.
-  wall_shelf_2_100: Object.freeze({
-    itemKey: 'wall_shelf_2_100', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 8, catalogPreview: 'shelf',
-    name: 'Raf 100 · 2 Raf',
-    type: 'shelf',
-    shelfCount: 2,
-    dimensions: Object.freeze({ widthCm: 100 }),
-    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
-    composition: Object.freeze({
-      mode: 'recipe',
-      moduleType: 'shelf',
-      options: Object.freeze({ shelfCount: 2 }),
-    }),
-  }),
-  wall_shelf_2_150: Object.freeze({
-    itemKey: 'wall_shelf_2_150', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 7, catalogPreview: 'shelf',
-    name: 'Raf 150 · 2 Raf',
-    type: 'shelf',
-    shelfCount: 2,
-    dimensions: Object.freeze({ widthCm: 150 }),
-    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
-    composition: Object.freeze({
-      mode: 'recipe',
-      moduleType: 'shelf',
-      options: Object.freeze({ shelfCount: 2 }),
-    }),
-  }),
-  wall_shelf_2_200: Object.freeze({
-    itemKey: 'wall_shelf_2_200', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 6, catalogPreview: 'shelf',
-    name: 'Raf 200 · 2 Raf',
-    type: 'shelf',
-    shelfCount: 2,
-    dimensions: Object.freeze({ widthCm: 200 }),
-    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
-    composition: Object.freeze({
-      mode: 'recipe',
-      moduleType: 'shelf',
-      options: Object.freeze({ shelfCount: 2 }),
-    }),
-  }),
-  wall_shelf_3_100: Object.freeze({
-    itemKey: 'wall_shelf_3_100', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 5, catalogPreview: 'shelf',
-    name: 'Raf 100 · 3 Raf',
-    type: 'shelf',
-    shelfCount: 3,
-    dimensions: Object.freeze({ widthCm: 100 }),
-    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
-    composition: Object.freeze({
-      mode: 'recipe',
-      moduleType: 'shelf',
-      options: Object.freeze({ shelfCount: 3 }),
-    }),
-  }),
-  wall_shelf_3_150: Object.freeze({
-    itemKey: 'wall_shelf_3_150', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 4, catalogPreview: 'shelf',
-    name: 'Raf 150 · 3 Raf',
-    type: 'shelf',
-    shelfCount: 3,
-    dimensions: Object.freeze({ widthCm: 150 }),
-    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
-    composition: Object.freeze({
-      mode: 'recipe',
-      moduleType: 'shelf',
-      options: Object.freeze({ shelfCount: 3 }),
-    }),
-  }),
-  wall_shelf_3_200: Object.freeze({
-    itemKey: 'wall_shelf_3_200', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 3, catalogPreview: 'shelf',
-    name: 'Raf 200 · 3 Raf',
-    type: 'shelf',
-    shelfCount: 3,
-    dimensions: Object.freeze({ widthCm: 200 }),
-    sceneDimensions: Object.freeze({ depthCm: 10, heightCm: 350 }),
-    composition: Object.freeze({
-      mode: 'recipe',
-      moduleType: 'shelf',
-      options: Object.freeze({ shelfCount: 3 }),
-    }),
-  }),
   wall_showcase_100_2: Object.freeze({
     itemKey: 'wall_showcase_100_2', catalogVisible: true, catalogCategory: 'shelf-showcase', catalogItemIndex: 2, catalogPreview: 'showcase',
     name: '2 Gözlü Vitrin 100',
@@ -1105,7 +1025,6 @@ function normalizeItemDescriptor(descriptor) {
     widthCm: optionalNumber(source.widthCm ?? descriptor?.widthCm),
     depthCm: optionalNumber(source.depthCm ?? descriptor?.depthCm),
     shape: source.shape ?? source.counterShape ?? descriptor?.shape ?? descriptor?.counterShape ?? null,
-    shelfCount: optionalNumber(source.shelfCount ?? descriptor?.shelfCount),
     modelFile: source.modelFile ?? descriptor?.modelFile ?? null,
     variant: source.variant ?? descriptor?.variant ?? null,
   };
@@ -1119,7 +1038,6 @@ function getItemIdentityFields(item) {
     widthCm: optionalNumber(scene.widthCm),
     depthCm: optionalNumber(scene.depthCm),
     shape: item.shape ?? null,
-    shelfCount: item.shelfCount ?? null,
     modelFile: item.modelFile ?? null,
     variant: item.variant ?? null,
   };
@@ -1140,7 +1058,6 @@ export function resolveItemKey(descriptor) {
     if (normalized.depthCm !== null && optionalNumber(fields.depthCm) !== null && optionalNumber(fields.depthCm) !== normalized.depthCm) return false;
     if ((normalized.shape !== null || fields.shape != null)
       && !shapesMatch(normalized.shape, fields.shape)) return false;
-    if ((normalized.shelfCount !== null || fields.shelfCount != null) && optionalNumber(fields.shelfCount) !== normalized.shelfCount) return false;
     if ((normalized.modelFile !== null || fields.modelFile != null) && (fields.modelFile ?? null) !== normalized.modelFile) return false;
     if ((normalized.variant != null || fields.variant != null) && (fields.variant ?? null) !== (normalized.variant ?? null)) return false;
     return true;

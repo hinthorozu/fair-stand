@@ -6,8 +6,6 @@ import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey, getStraight
 
 const RECIPE_CASES = [
   ['wall', 200, {}, 7],
-  ['shelf', 200, { shelfCount: 2 }, 7],
-  ['shelf', 200, { shelfCount: 3 }, 7],
   ['counter', 200, { shape: 'L' }, 4],
   ['counter', 200, {}, 2],
   ['base-wall', 200, {}, 7],
@@ -27,7 +25,7 @@ test('panel_197 is a canonical single production Item', () => {
   assert.equal(item.nominalModuleWidthCm, 200);
 });
 
-test('panel_197 uses canonical itemKey in exactly seven verified parent recipes with quantity parity', () => {
+test('panel_197 uses canonical itemKey in exactly five verified parent recipes with quantity parity', () => {
   let occurrences = 0;
 
   for (const [type, width, options, quantity] of RECIPE_CASES) {
@@ -39,7 +37,7 @@ test('panel_197 uses canonical itemKey in exactly seven verified parent recipes 
     occurrences += matches.length;
   }
 
-  assert.equal(occurrences, 7);
+  assert.equal(occurrences, 5);
 });
 
 test('expanded recipe resolves panel_197 metadata through canonical itemKey', () => {

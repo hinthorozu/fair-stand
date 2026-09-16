@@ -110,14 +110,6 @@ function syncFromSelection() {
     return;
   }
 
-  const shelfMatch = text.match(/Raf\s+(100|150|200)\s*cm\s*·\s*(2|3)\s*raflı/i);
-  if (shelfMatch) {
-    const widthCm = Number(shelfMatch[1]);
-    const shelfCount = Number(shelfMatch[2]);
-    renderRecipe('shelf', widthCm, `Raflı Duvar ${widthCm} · ${shelfCount} Raf`, { shelfCount });
-    return;
-  }
-
   const showcaseMatch = text.match(/(2|3)\s*Gözlü\s+Vitrin\s+(100)\s*cm/i);
   if (showcaseMatch) {
     const eyeCount = Number(showcaseMatch[1]);

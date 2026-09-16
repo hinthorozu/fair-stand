@@ -92,10 +92,10 @@ function serializeNode(node) {
   };
 }
 
-test('64 görünür Item catalogPreview taşır; gizli Item zorunlu değildir', () => {
+test('58 görünür Item catalogPreview taşır; gizli Item zorunlu değildir', () => {
   const visible = listRegisteredItems().filter((item) => item.catalogVisible === true);
   const hidden = listRegisteredItems().filter((item) => item.catalogVisible !== true);
-  assert.equal(visible.length, 64);
+  assert.equal(visible.length, 58);
   assert.equal(hidden.length, 41);
 
   for (const item of visible) {
@@ -138,7 +138,7 @@ test('Catalog preview renderer yalnız catalogPreview key ile seçilir; type bra
   assert.match(catalogDoc, /Catalog preview renderer seçimi yalnız Item\.catalogPreview üzerinden yapılır/);
 });
 
-test('64 Item catalogPreview dağılımı kilitlidir', () => {
+test('58 Item catalogPreview dağılımı kilitlidir', () => {
   const counts = {};
   for (const item of listCatalogItems()) {
     counts[item.catalogPreview] = (counts[item.catalogPreview] ?? 0) + 1;
@@ -163,7 +163,6 @@ test('64 Item catalogPreview dağılımı kilitlidir', () => {
     profile: 4,
     separator: 2,
     'separator-vine': 2,
-    shelf: 6,
     showcase: 2,
     'sofa-double': 1,
     'sofa-set': 1,
@@ -175,10 +174,10 @@ test('64 Item catalogPreview dağılımı kilitlidir', () => {
   });
 });
 
-test('64 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
+test('58 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
   installDocument();
   const projected = listCatalogItems();
-  assert.equal(projected.length, 64);
+  assert.equal(projected.length, 58);
 
   for (const module of projected) {
     const tree = serializeNode(createModuleCatalogPreview(module));
@@ -225,8 +224,8 @@ test('64 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
   assert.match(hanging.children[0].className, /is-hanging-top/);
   assert.equal(hanging.children[0].children[0].className, 'module-drag-hanging-frame');
 
-  const shelf3 = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_shelf_3_100')));
-  assert.equal(shelf3.children[0].children.filter((child) => child.tag === 'I').length, 3);
+  const shelfPreview = serializeNode(createModuleCatalogPreview({ catalogPreview: 'shelf', widthCm: 100 }));
+  assert.equal(shelfPreview.children[0].children.filter((child) => child.tag === 'I').length, 2);
 
   const empty = serializeNode(createModuleCatalogPreview({ itemKey: 'illuminated-foam' }));
   assert.equal(empty.children.length, 0);

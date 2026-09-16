@@ -1,15 +1,14 @@
 {
   "schemaVersion": 2,
-  "id": "canonical-dimension-dedup",
-  "kind": "architecture",
-  "summary": "Tekrarlayan özel ölçü alanlarını sil: screenWidthCm/screenHeightCm/catalogHeightCm/tableDiameterCm/videoWall.panelScreenWidthCm/HeightCm/sizeInch/composition.nominalWidthCm. Canonical dimensions + VIDEO_WALL_PANEL Item + itemKey kimliği. Recipe.nominalWidthCm, mountHeightCm, wallGapCm, nominalModuleWidthCm, videoWall.rows/cols ve sceneDimensions şeması durur.",
+  "id": "remove-wall-shelf-items",
+  "kind": "refactor",
+  "summary": "wall_shelf_2_100/150/200 ve wall_shelf_3_100/150/200 composite Item’ları ile shelfCount alanı kaldırıldı. Leaf shelf_100/150/200, wall_showcase_*, eyeCount, stripOccupancy, nominalModuleWidthCm, composition.moduleType, Recipe.nominalWidthCm ve sceneDimensions/dimensions şeması durur. Catalog 58, kayıtlı Item 99.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
     "src/designState.js",
-    "src/itemBom.js",
-    "src/scene3d.js",
-    "src/selectionFeedback.js",
+    "src/moduleRecipes.js",
+    "src/moduleContracts.js",
     "docs/refactor/ITEMS.md",
     "docs/refactor/CATALOG.md",
     "docs/refactor/REFACTOR.md"
@@ -17,7 +16,7 @@
   "sourceOfTruth": [
     "src/items.js",
     "src/catalog.js",
-    "src/itemBom.js",
+    "src/moduleRecipes.js",
     "docs/refactor/ITEMS.md",
     "docs/refactor/CATALOG.md",
     "docs/refactor/REFACTOR.md"
@@ -86,18 +85,14 @@
       "e2e/f010-module-construction.spec.mjs",
       "e2e/f011-module-behavior.spec.mjs",
       "e2e/free-props-collision-none.spec.mjs",
-      "e2e/furniture-items-contract.spec.mjs",
       "e2e/invalid-placement-ghost.spec.mjs",
       "e2e/mini-fridge-dimensions.spec.mjs",
       "e2e/plastic-trash-bin-module.spec.mjs",
-      "e2e/shelf-board-appearance.spec.mjs",
       "e2e/smoke.spec.mjs",
       "e2e/visible-ui-b.spec.mjs",
       "e2e/wall-base-items-contract.spec.mjs",
       "e2e/wall-flat-panel-items-contract.spec.mjs",
-      "e2e/wall-media-items-contract.spec.mjs",
       "e2e/wall-separator-items-contract.spec.mjs",
-      "e2e/wall-shelf-items-contract.spec.mjs",
       "e2e/wall-showcase-item-contract.spec.mjs",
       "test/autoDepotOrientation.test.js",
       "test/automaticWall.test.js",
@@ -113,12 +108,12 @@
       "test/baseWallRecipes.test.js",
       "test/boardMaterialItemContract.test.js",
       "test/bundleLoadingContract.test.js",
-      "test/canonicalDimensionDedup.test.js",
       "test/catalogCategories.test.js",
       "test/catalogDomainBoundary.test.js",
       "test/catalogDragKeyboardIntegration.test.js",
       "test/catalogItemProjection.test.js",
       "test/catalogPreviewConfig.test.js",
+      "test/catalogProjectionBaseline.json",
       "test/catalogSingleSource.test.js",
       "test/chairEamesContract.test.js",
       "test/coatRackModule.test.js",
@@ -270,6 +265,7 @@
       "ROADMAP.md",
       "ROADMAP_PHASE_4.md",
       "SYSTEM_AUDIT_CHECKLIST.md",
+      "SYSTEM_CHANGE_GATE.md",
       "SYSTEM_DEVELOPMENT_CONTRACT.md",
       "SYSTEM_MODULE_CATALOG.md",
       "audit/FINDINGS.md",
@@ -282,10 +278,13 @@
       "audit/evidence/A05_MODULE_BEHAVIOR.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
+      "audit/evidence/A10_UI_CONTROLS.md",
+      "audit/evidence/A12_BOM_RECIPES_PRODUCTION.md",
       "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
       "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
       "audit/evidence/A21_REPOSITORY_HYGIENE_GOVERNANCE.md",
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
+      "audit/remediation/A01_F003_CLOSURE.md",
       "audit/remediation/A02_CLOSURE.md",
       "audit/remediation/A03_CLOSURE.md",
       "audit/remediation/A03_F010_CLOSURE.md",
@@ -409,6 +408,7 @@
       "docs/items/audit/properties/DEFAULT_OVERRIDE_CHAINS.md",
       "docs/items/audit/properties/FINAL_PROPERTY_AUDIT.md",
       "docs/items/audit/properties/PROPERTY_INDEX.md",
+      "docs/items/audit/properties/properties/behavior.defaultRotationDeg.md",
       "docs/items/audit/properties/properties/behavior.ghost.kind.md",
       "docs/items/audit/properties/properties/behavior.magneticSnap.md",
       "docs/items/audit/properties/properties/behavior.placement.md",
@@ -451,8 +451,18 @@
       "docs/items/audit/properties/properties/catalog.videoWallRows.md",
       "docs/items/audit/properties/properties/catalog.visualRotationYDeg.md",
       "docs/items/audit/properties/properties/catalog.widthCm.md",
+      "docs/items/audit/properties/properties/contract.appearance.color.md",
+      "docs/items/audit/properties/properties/contract.appearance.image.md",
+      "docs/items/audit/properties/properties/contract.bom.mode.md",
+      "docs/items/audit/properties/properties/contract.bom.reason.md",
       "docs/items/audit/properties/properties/contract.bom.source.md",
+      "docs/items/audit/properties/properties/contract.composition.mode.md",
+      "docs/items/audit/properties/properties/contract.present.md",
+      "docs/items/audit/properties/properties/contract.profile.md",
+      "docs/items/audit/properties/properties/contract.renderer.mode.md",
+      "docs/items/audit/properties/properties/contract.runtime.mode.md",
       "docs/items/audit/properties/properties/contract.state.owner.md",
+      "docs/items/audit/properties/properties/contract.state.persistence.md",
       "docs/items/audit/properties/properties/factory.fn.md",
       "docs/items/audit/properties/properties/factory.ok.md",
       "docs/items/audit/properties/properties/factory.reason.md",
@@ -465,7 +475,9 @@
       "docs/items/audit/properties/properties/media.widthCm.md",
       "docs/items/audit/properties/properties/name.md",
       "docs/items/audit/properties/properties/parents.cluster.md",
+      "docs/items/audit/properties/properties/parents.innerCorner.md",
       "docs/items/audit/properties/properties/parents.recipe.md",
+      "docs/items/audit/properties/properties/parents.replacement.md",
       "docs/items/audit/properties/properties/parents.showcaseBody.md",
       "docs/items/audit/properties/properties/persist.path.md",
       "docs/items/audit/properties/properties/profile.catalogWidthCm.md",
@@ -671,7 +683,6 @@
       "docs/items/definitions/TV_65.md",
       "docs/items/definitions/VIDEO_WALL_2X2.md",
       "docs/items/definitions/VIDEO_WALL_3X3.md",
-      "docs/items/definitions/VIDEO_WALL_PANEL.md",
       "docs/items/definitions/base_top_107_50.md",
       "docs/items/definitions/base_top_157_50.md",
       "docs/items/definitions/base_top_206_50.md",
@@ -716,21 +727,17 @@
       "docs/items/definitions/wall_separator_100_sarmasik.md",
       "docs/items/definitions/wall_separator_50.md",
       "docs/items/definitions/wall_separator_50_sarmasik.md",
-      "docs/items/definitions/wall_shelf_2_100.md",
-      "docs/items/definitions/wall_shelf_2_150.md",
-      "docs/items/definitions/wall_shelf_2_200.md",
-      "docs/items/definitions/wall_shelf_3_100.md",
-      "docs/items/definitions/wall_shelf_3_150.md",
-      "docs/items/definitions/wall_shelf_3_200.md",
       "docs/items/door_100_full_system_audit.md",
       "docs/items/inventory/ITEM_CAPABILITY_INVENTORY.md",
       "docs/refactor/CATALOG.md",
       "docs/refactor/ITEMS.md",
-      "docs/refactor/REFACTOR.md"
+      "docs/refactor/REFACTOR.md",
+      "fair-stand-base-family-migration-handoff.md"
     ],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": [
+        "F-001",
         "F-003",
         "F-010",
         "F-011",
@@ -741,46 +748,48 @@
         "F-017",
         "F-018",
         "F-019",
+        "F-025",
+        "F-030",
         "F-033",
         "F-045"
       ]
     },
-    "notes": "Özel ölçü kopyaları silindi. TV kimliği itemKey; catalog/runtime height resolveSceneDimensions.heightCm; cam masa çapı dimensions.widthCm; video wall panel VIDEO_WALL_PANEL Item + panelItemKey; recipe lookup item.dimensions.widthCm. Recipe.nominalWidthCm, mountHeightCm, wallGapCm, nominalModuleWidthCm, composition.moduleType, videoWall.rows/cols, sceneDimensions şeması durur. moduleContextMenu.js frozen behavior, autoDepot.js frozen composition/placement, moduleContracts.js frozen bom bu turda durur. designState.js frozen state/persistence, scene3d.js frozen renderer/placement/behavior/performance, catalog.js frozen catalog, itemBom.js frozen bom Item ölçü SOT için açıldı. 105 kayıt / 64 catalogVisible."
+    "notes": "Altı wall_shelf composite Item ve shelfCount runtime alanı silindi. isWallShelfCompositeItem / resolveShelfItemKey / createShelfModuleState / MODULE_STATE_FACTORIES.shelf / normalize shelf dalı / altı shelf recipe / getModuleRecipe shelf dalı / rawBomDebug raflı dalı dead code kanıtı ile kaldırıldı. createShelfModule, TYPE_BEHAVIORS.shelf, CATALOG_PREVIEW_RENDERERS.shelf, getShelfLeafItem, toggle-shelf-light durur. docs/items/audit/** ve current-system/wall_shelf_*.md regenerate edilmedi."
   },
   "tests": {
     "targeted": [
-      "test/canonicalDimensionDedup.test.js",
-      "test/wallMediaItemsContract.test.js",
-      "test/tv42Module.test.js",
-      "test/glassTableContract.test.js",
+      "test/wallShelfItemsContract.test.js",
+      "test/shelfModule.test.js",
+      "test/shelfLighting.test.js",
+      "test/shelfItemsItemContract.test.js",
+      "test/shelfLegItemContract.test.js",
+      "test/moduleRecipes.test.js",
       "test/catalogItemProjection.test.js",
       "test/catalogPreviewConfig.test.js",
+      "test/catalogCategories.test.js",
       "test/itemCatalogFields.test.js",
       "test/itemSceneDimensions.test.js",
-      "test/catalogDomainBoundary.test.js",
-      "test/baseItemsContract.test.js",
-      "test/doorCompositeItemContract.test.js"
+      "test/systemModuleCatalogDoc.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/wall-media-items-contract.spec.mjs",
-        "e2e/furniture-items-contract.spec.mjs",
         "e2e/smoke.spec.mjs",
+        "e2e/wall-showcase-item-contract.spec.mjs",
         "e2e/wall-flat-panel-items-contract.spec.mjs"
       ],
-      "reason": "catalog, state, renderer, ui, composition, placement, persistence ve bom domain'leri affected. TV/video-wall drag, cam masa çapı, panel 200 BOM genişliği ve katalog açılışı targeted E2E ile doğrulanır."
+      "reason": "catalog, ui, state, renderer, placement ve behavior browser-impact domain. smoke katalog açılışını, showcase kalan shelf-showcase kartlarını, wall-flat-panel genel duvar yerleşimini doğrular. Silinen wall-shelf E2E spec’leri kaldırıldı."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "Silinen alanlar canonical dimensions veya VIDEO_WALL_PANEL ile aynı sayısal değeri taşıyordu. TV catalog CSS (module-drag-tv) değişmedi. Recipe.nominalWidthCm durur."
+    "level": "medium",
+    "notes": "Katalogdan 6 görünür Item ve shelfCount kalkar. Eski projede wall_shelf module state varsa getItem null ve factory yok; import type:shelf MODULE_STATE_TYPES dışında kalır. Leaf shelf_* ve vitrin durur."
   },
   "migration": {
     "required": false,
-    "notes": "Alanlar kod tablosundadır. Eski kayıtlarda sizeInch/screen* varsa normalizeModuleItemState itemKey + scene footprint yazar; legacy alias eklenmedi. Persist/project blob ve SQLite yok."
+    "notes": "Alan kod tablosundaydı. Persist/project blob ve SQLite yok. Eski wall_shelf kayıtları için yeni Item veya shelfCount yerine alan üretilmedi."
   },
-  "rollback": "Silinen özel ölçü alanlarını Item/catalog/state'e geri yazmak; VIDEO_WALL_PANEL kaydını kaldırmak; itemBom recipe lookup'ı composition.nominalWidthCm'e döndürmek."
+  "rollback": "Altı COMPOSITE_ITEMS kaydı, shelfCount identity/projection/factory/recipe ve wall_shelf catalog/contract satırlarına dönüş."
 }

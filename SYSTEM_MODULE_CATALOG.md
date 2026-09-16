@@ -17,8 +17,8 @@ Bu dosya insan/AI için **okunabilir katalog indeksi**dir. Runtime source-of-tru
 
 Bu snapshot `Version2` üzerindeki `MODULE_CATALOG_KEYS` ve `MODULE_CONTRACT_ASSIGNMENTS` ile eşleşmek zorundadır; `test/systemModuleCatalogDoc.test.js` drift olduğunda CI'yi kırar.
 
-- Catalog entries: **64**
-- BOM mode `recipe`: **37**
+- Catalog entries: **58**
+- BOM mode `recipe`: **31**
 - BOM mode `self`: **9**
 - BOM mode `decision-required`: **18**
 - Katalog dışı explicit runtime module: **1** (`illuminated-foam`)
@@ -58,12 +58,6 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `profile_41_5`
 - `wall_showcase_100_3`
 - `wall_showcase_100_2`
-- `wall_shelf_3_200`
-- `wall_shelf_3_150`
-- `wall_shelf_3_100`
-- `wall_shelf_2_200`
-- `wall_shelf_2_150`
-- `wall_shelf_2_100`
 - `desk_banko_200`
 - `desk_banko_150`
 - `desk_banko_100`
@@ -111,7 +105,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Raf & Vitrin
 
-`wall_showcase_100_3`, `wall_showcase_100_2`, `wall_shelf_3_200`, `wall_shelf_3_150`, `wall_shelf_3_100`, `wall_shelf_2_200`, `wall_shelf_2_150`, `wall_shelf_2_100`
+`wall_showcase_100_3`, `wall_showcase_100_2`
 
 ### Banko & Baza
 
@@ -127,9 +121,9 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ## BOM politika özeti
 
-### `recipe` — 37 katalog kaydı
+### `recipe` — 31 katalog kaydı
 
-Duvar/panel, separatör, vitrin, raf, panel bazalı duvar, depo kapısı, düz/L banko ve baza ailelerinin contract'ı `recipe` modundadır. Gerçek recipe çözümü `src/moduleRecipes.js` tarafından yapılır ve contract testleri recipe-backed kayıtların gerçekten resolve olduğunu doğrular.
+Duvar/panel, separatör, vitrin, panel bazalı duvar, depo kapısı, düz/L banko ve baza ailelerinin contract'ı `recipe` modundadır. Gerçek recipe çözümü `src/moduleRecipes.js` tarafından yapılır ve contract testleri recipe-backed kayıtların gerçekten resolve olduğunu doğrular.
 
 ### `self` — 9 katalog kaydı
 

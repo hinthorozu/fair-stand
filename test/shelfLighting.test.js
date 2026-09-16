@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createShelfModuleState } from '../src/designState.js';
+import { createModuleStateFromDescriptor } from '../src/designState.js';
 
-test('shelf under-lighting is persisted and off by default', () => {
-  const state = createShelfModuleState(100, 2);
-  assert.equal(state.type, 'shelf');
-  assert.equal(state.shelfLightingOn, false);
+test('wall_shelf factory kaldırıldı; leaf shelf state üretmez', () => {
+  assert.equal(createModuleStateFromDescriptor({ type: 'shelf', widthCm: 100 }), null);
+  const factorySource = readFileSync(new URL('../src/designState.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(factorySource, /createShelfModuleState/);
+  assert.doesNotMatch(factorySource, /shelfCount/);
 });
 
 test('shelf renderer adds lights without changing shelf box geometry', () => {

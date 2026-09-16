@@ -122,13 +122,6 @@ export const MODULE_CONTRACT_ASSIGNMENTS = Object.freeze({
   wall_showcase_100_3: assignment('wall-editable', RECIPE_BOM_POLICY),
   wall_showcase_100_2: assignment('wall-editable', RECIPE_BOM_POLICY),
 
-  wall_shelf_3_200: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_shelf_3_150: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_shelf_3_100: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_shelf_2_200: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_shelf_2_150: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_shelf_2_100: assignment('wall-editable', RECIPE_BOM_POLICY),
-
   wall_base_200: assignment('wall-editable', RECIPE_BOM_POLICY),
   wall_base_150: assignment('wall-editable', RECIPE_BOM_POLICY),
   wall_base_100: assignment('wall-editable', RECIPE_BOM_POLICY),
@@ -230,7 +223,6 @@ export function resolveModuleContract(moduleKeyOrDescriptor) {
       type: item.type,
       shape: item.shape,
       widthCm: item.dimensions?.widthCm,
-      shelfCount: item.shelfCount,
       variant: item.variant,
     }),
   };

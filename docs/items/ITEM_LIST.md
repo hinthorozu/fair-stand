@@ -2,7 +2,7 @@
 
 Bu belge Item Contract migrationında izlenecek Item envanterini tutar.
 
-> Satırdaki “Tamam” işareti gecikebilir. Güncel kimlik/BOM: `docs/items/definitions/` + `src/items.js` / `src/moduleContracts.js`. Test-kilitli katalog özeti: `SYSTEM_MODULE_CATALOG.md`. Canlı sıra: `audit/SISTEM_MUTABAKAT_RAPORU.md`. A–Z özellik haritası: `docs/items/audit/README.md`. Kayıtlı Item: 105 (`VIDEO_WALL_PANEL` katalog dışı).
+> Satırdaki “Tamam” işareti gecikebilir. Güncel kimlik/BOM: `docs/items/definitions/` + `src/items.js` / `src/moduleContracts.js`. Test-kilitli katalog özeti: `SYSTEM_MODULE_CATALOG.md`. Canlı sıra: `audit/SISTEM_MUTABAKAT_RAPORU.md`. A–Z özellik haritası (tarihsel audit snapshot; regenerate edilmedi): `docs/items/audit/README.md`. Kayıtlı Item: 99 (`VIDEO_WALL_PANEL` katalog dışı).
 
 Temel model:
 
@@ -83,12 +83,6 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 | 16 | `wall_separator_50_sarmasik` | Separatör 50 Sarmaşık | `separator` |
 | 17 | `wall_showcase_100_3` | 3 Gözlü Vitrin 100 | **`showcase-3` · Bileşik Item · BASE + inner-corner BOM tamam** |
 | 18 | `wall_showcase_100_2` | 2 Gözlü Vitrin 100 | **`showcase-2` · Bileşik Item · BASE + inner-corner BOM tamam** |
-| 19 | `wall_shelf_3_200` | Raf 200 · 3 Raf | `shelf` |
-| 20 | `wall_shelf_3_150` | Raf 150 · 3 Raf | `shelf` |
-| 21 | `wall_shelf_3_100` | Raf 100 · 3 Raf | `shelf` |
-| 22 | `wall_shelf_2_200` | Raf 200 · 2 Raf | `shelf` |
-| 23 | `wall_shelf_2_150` | Raf 150 · 2 Raf | `shelf` |
-| 24 | `wall_shelf_2_100` | Raf 100 · 2 Raf | `shelf` |
 | 25 | `wall_base_200` | Panel Bazalı 200 | `base-wall` |
 | 26 | `wall_base_150` | Panel Bazalı 150 | `base-wall` |
 | 27 | `wall_base_100` | Panel Bazalı 100 | `base-wall` |

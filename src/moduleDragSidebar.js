@@ -150,7 +150,7 @@ export const CATALOG_PREVIEW_RENDERERS = Object.freeze({
     body.className = 'module-drag-panel module-drag-shelf';
     body.style.width = previewWidthPx(module.widthCm) + 'px';
     for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
-    const tops = Number(module.shelfCount) === 3 ? [47, 37, 27] : [47, 37];
+    const tops = [47, 37];
     tops.forEach((top) => {
       const shelf = document.createElement('i');
       shelf.style.top = top + 'px';
