@@ -67,7 +67,7 @@ Ayrıntı: `docs/refactor/CATALOG.md`.
 - **Default:** yok; her Item açık değer taşır
 - **Amaç:** Item’ın Modül Kataloğu’nda gösterilip gösterilmeyeceğini belirler
 - **Canonical consumer:** Catalog mechanism
-- **Canonical method:** hedef `listCatalogItems` / `listCatalogGroups` — **henüz yok**. Mevcut UI bu alanı okumaz
+- **Canonical method:** `listCatalogGroups()` — mevcut. `listCatalogItems()` henüz yok
 - **Method parametresi:** üyelik filtresi (`true` görünür)
 - **Runtime behavior üretmez**
 - **Kullanıcı değiştirir mi:** hayır
@@ -82,10 +82,10 @@ Ayrıntı: `docs/refactor/CATALOG.md`.
 - **Required:** yes (alan zorunlu; görünmeyende değer `null`)
 - **Scope:** Item master
 - **Default:** yok
-- **Amaç:** `catalogVisible=true` Item’ın hangi katalog grubunda duracağını belirler
+- **Amaç:** `catalogVisible=true` Item’ın hangi katalog grubunda duracağını belirler. Değer `Catalog.catalogKey` ile eşleşir; UI label saklamaz
 - **Canonical consumer:** Catalog mechanism
-- **Canonical method:** hedef `listCatalogGroups` — **henüz yok**
-- **Method parametresi:** grup key
+- **Canonical method:** `listCatalogGroups()` — mevcut
+- **Method parametresi:** `catalogKey`
 - **Davranış / type belirlemez**
 - **Kullanıcı değiştirir mi:** hayır
 - **Project instance override:** hayır
@@ -101,7 +101,7 @@ Ayrıntı: `docs/refactor/CATALOG.md`.
 - **Default:** yok
 - **Amaç:** Item’ın kendi katalog kategorisi içindeki 1 tabanlı sırasını belirler
 - **Canonical consumer:** Catalog mechanism
-- **Canonical method:** hedef `listCatalogGroups` — **henüz yok**
+- **Canonical method:** `listCatalogGroups()` — mevcut
 - **Method parametresi:** kategori içi sıra
 - **Kullanıcı değiştirir mi:** hayır
 - **Project instance override:** hayır
@@ -117,7 +117,7 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 
 | Item config | Canonical mechanism | Canonical method | Durum |
 |---|---|---|---|
-| `catalogVisible` / `catalogCategory` / `catalogItemIndex` | Catalog | `listCatalogItems` / `listCatalogGroups` | hedef; henüz yok |
+| `catalogVisible` / `catalogCategory` / `catalogItemIndex` | Catalog | `listCatalogCategories` / `listCatalogGroups` | mevcut |
 | `itemKey` | Item identity | `getItem` / `listRegisteredItems` | mevcut |
 | rotation | Rotation | henüz belirlenmedi | yapılmadı |
 | color | Color | henüz belirlenmedi | yapılmadı |
@@ -125,7 +125,7 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 | lighting | Lighting | henüz belirlenmedi | yapılmadı |
 | delete | Delete | henüz belirlenmedi | yapılmadı |
 
-Catalog satırı: mevcut UI `MODULE_CATALOG_GROUPS` okur; Item katalog alanlarını henüz tüketmez.
+Catalog satırı: UI `listCatalogGroups()` ve `catalogName` okur. `listCatalogItems()` henüz yoktur.
 
 `ROTATION.md` vb. yokken bu satırlar yer tutucudur; config şeması değildir.
 
@@ -140,8 +140,8 @@ Item {
   itemKey: string
 
   catalogVisible: boolean
-  catalogCategory: string | null
-  catalogItemIndex: integer | null
+  catalogCategory: string | null    // Catalog.catalogKey
+  catalogItemIndex: integer | null  // kategori içi sıra; Catalog.catalogIndex değil
 }
 ```
 

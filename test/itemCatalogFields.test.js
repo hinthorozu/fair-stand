@@ -18,73 +18,6 @@ const CATALOG_CATEGORY_KEYS_BY_LABEL = Object.freeze({
   'Elektronik & Aydınlatma': 'electronics-lighting',
 });
 
-const EXPECTED_CATALOG_KEYS = Object.freeze([
-  'wall_200',
-  'wall_150',
-  'wall_100',
-  'wall_50',
-  'wall_separator_100',
-  'wall_separator_50',
-  'wall_separator_100_sarmasik',
-  'wall_separator_50_sarmasik',
-  'wall_showcase_100_3',
-  'wall_showcase_100_2',
-  'wall_shelf_3_200',
-  'wall_shelf_3_150',
-  'wall_shelf_3_100',
-  'wall_shelf_2_200',
-  'wall_shelf_2_150',
-  'wall_shelf_2_100',
-  'wall_base_200',
-  'wall_base_150',
-  'wall_base_100',
-  'door_100',
-  'wall_200_short_up_2',
-  'wall_150_short_up_2',
-  'wall_100_short_up_2',
-  'wall_50_short_up_2',
-  'wall_200_short_up_1',
-  'wall_150_short_up_1',
-  'wall_100_short_up_1',
-  'wall_50_short_up_1',
-  'upright_346_5',
-  'profile_190',
-  'profile_140_5',
-  'profile_91',
-  'profile_41_5',
-  'desk_banko_200',
-  'desk_banko_150',
-  'desk_banko_100',
-  'desk_banko_200_L',
-  'desk_banko_150_L',
-  'desk_banko_100_L',
-  'BASE_200',
-  'BASE_150',
-  'BASE_100',
-  'furniture_sofa_set_classic',
-  'furniture_sofa_single_classic',
-  'furniture_sofa_double_classic',
-  'furniture_coffee_table_classic',
-  'furniture_table_chair_set_eames',
-  'chair_eames',
-  'glass_table',
-  'furniture_bar_stool_classic',
-  'MINI_FRIDGE_AVANTI',
-  'KETTLE',
-  'COAT_RACK',
-  'PLASTIC_TRASH_BIN',
-  'EXTRA_INDOOR_PLANT_1',
-  'EXTRA_LONG_PLANTER_100',
-  'EXTRA_LONG_PLANTER_150',
-  'EXTRA_LONG_PLANTER_200',
-  'TV_42',
-  'TV_55',
-  'VIDEO_WALL_2X2',
-  'VIDEO_WALL_3X3',
-  'TV_65',
-  'led_floodlight',
-]);
-
 const EXPECTED_CATALOG_GROUPS = Object.freeze([
   Object.freeze({
     label: 'Panel & Duvar',
@@ -181,6 +114,8 @@ const EXPECTED_CATALOG_GROUPS = Object.freeze([
     ]),
   }),
 ]);
+
+const EXPECTED_CATALOG_KEYS = Object.freeze(EXPECTED_CATALOG_GROUPS.flatMap((group) => group.keys));
 
 function expectedFieldsForItemKey(itemKey) {
   for (const group of EXPECTED_CATALOG_GROUPS) {
@@ -287,15 +222,17 @@ test('104 Item katalog metadata alanlarını taşır ve canlı katalog üyeliği
   assert.equal(getItem('panel_197').catalogItemIndex, null);
 });
 
-test('katalog UI hâlâ MODULE_CATALOG_GROUPS okur; yeni Item alanlarından türetilmez', () => {
+test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullanır', () => {
   const sidebar = readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
   const contextMenu = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');
   const items = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
 
-  assert.match(sidebar, /MODULE_CATALOG_GROUPS/);
-  assert.match(contextMenu, /MODULE_CATALOG_GROUPS/);
-  assert.doesNotMatch(sidebar, /catalogVisible|catalogCategory|catalogItemIndex/);
-  assert.doesNotMatch(contextMenu, /catalogVisible|catalogCategory|catalogItemIndex/);
+  assert.match(sidebar, /listCatalogGroups/);
+  assert.match(contextMenu, /listCatalogGroups/);
+  assert.match(sidebar, /catalogName/);
+  assert.match(contextMenu, /catalogName/);
+  assert.doesNotMatch(sidebar, /MODULE_CATALOG_GROUPS/);
+  assert.doesNotMatch(contextMenu, /MODULE_CATALOG_GROUPS/);
   assert.match(items, /catalogVisible: true/);
   assert.match(items, /catalogCategory: 'panel-wall'/);
 
@@ -306,21 +243,17 @@ test('katalog UI hâlâ MODULE_CATALOG_GROUPS okur; yeni Item alanlarından tür
   }
 });
 
-test('CATALOG.md canonical category tablosu canlı gruplarla örtüşür; listCatalog API henüz yoktur', () => {
+test('CATALOG.md catalogKey tablosu canlı kategorilerle örtüşür', () => {
   const catalogDoc = readFileSync(new URL('../docs/refactor/CATALOG.md', import.meta.url), 'utf8');
-  const itemsSource = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
-  const catalogSource = readFileSync(new URL('../src/catalog.js', import.meta.url), 'utf8');
 
   assert.match(catalogDoc, /# Catalog/);
-  assert.match(catalogDoc, /henüz implement edilmedi/i);
-  assert.doesNotMatch(catalogDoc, /listCatalogItems\(\)[^\n]*implement edildi/i);
-  assert.doesNotMatch(itemsSource, /export function listCatalog(Items|Groups)/);
-  assert.doesNotMatch(catalogSource, /export function listCatalog(Items|Groups)/);
+  assert.match(catalogDoc, /listCatalogGroups/);
+  assert.match(catalogDoc, /listCatalogCategories/);
 
-  EXPECTED_CATALOG_GROUPS.forEach((group) => {
+  EXPECTED_CATALOG_GROUPS.forEach((group, index) => {
     const categoryKey = CATALOG_CATEGORY_KEYS_BY_LABEL[group.label];
     const row = new RegExp(
-      `\\| \`${categoryKey}\` \\| ${group.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\| ${group.keys.length} \\|`,
+      `\\| \`${categoryKey}\` \\| ${group.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\| ${index + 1} \\| ${group.keys.length} \\|`,
     );
     assert.match(catalogDoc, row, categoryKey);
     assert.equal(getItem(group.keys[0]).catalogCategory, categoryKey, group.keys[0]);
@@ -337,6 +270,7 @@ test('ITEMS.md yalnız onaylı katalog şemasını taşır; gerçekleşmemiş me
   assert.match(itemsDoc, /# Canonical Mechanism Connections/);
   assert.match(itemsDoc, /# Item Schema/);
   assert.match(itemsDoc, /# Architectural Rules/);
-  assert.match(itemsDoc, /hedef; henüz yok/);
-  assert.doesNotMatch(itemsDoc, /`listCatalogItems` \/ `listCatalogGroups` \| mevcut/);
+  assert.match(itemsDoc, /listCatalogCategories/);
+  assert.match(itemsDoc, /listCatalogGroups/);
+  assert.doesNotMatch(itemsDoc, /listCatalogItems\(\)[^\n]*mevcut/);
 });

@@ -7,6 +7,75 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-16 — Catalog category modelinin merkezileştirilmesi
+
+### Neden yapıldı
+
+Modül Kataloğu kategori yapısı hardcoded `MODULE_CATALOG_GROUPS` (yalnız `label` + `keys`) olarak duruyordu. Kategori kimliği, UI adı ve yukarıdan aşağıya sıra ayrı canonical alanlar değildi. Item.catalogCategory key’leri vardı ama kategori tanımı merkezi Catalog modelinde açık değildi.
+
+### Hangi eski yapı değişti
+
+- Kaldırılan hardcoded kaynak: `src/catalog.js` içindeki `MODULE_CATALOG_GROUPS` literal listesi (`label` + `keys`)
+- Kaldırılan ikinci hardcoded üyelik listesi: ayrı `MODULE_CATALOG_KEYS` literal dizisi
+- Sidebar / picker artık `MODULE_CATALOG_GROUPS` sabitini okumaz; `listCatalogGroups()` ve `group.catalogName` okur
+
+### Yeni alanlar
+
+Catalog (canonical kaynak `CATALOG_CATEGORIES`):
+
+- `catalogKey` — stabil kategori kimliği; Item.catalogCategory bu değere bağlanır
+- `catalogName` — Modül Ekle panelindeki kategori adı
+- `catalogIndex` — kategorilerin 1 tabanlı yukarıdan aşağıya sırası
+
+Item bağlantısı değişmedi: `catalogVisible`, `catalogCategory` → `catalogKey`, `catalogItemIndex` (kategori içi sıra).
+
+Yeni method’lar: `listCatalogCategories()`, `getCatalogCategory(catalogKey)`, `listCatalogGroups()`.
+
+### Gerçek catalogKey’ler
+
+Bu turda yeni key uydurulmadı. Key’ler önceki turda Item kayıtlarına yazılan `catalogCategory` değerleridir.
+
+| catalogKey | catalogName | catalogIndex | Item sayısı |
+|---|---|---|---|
+| `panel-wall` | Panel & Duvar | 1 | 12 |
+| `panel-addon` | Panel Ek Modül | 2 | 13 |
+| `shelf-showcase` | Raf & Vitrin | 3 | 8 |
+| `counter-base` | Banko & Baza | 4 | 9 |
+| `extra` | Extra | 5 | 16 |
+| `electronics-lighting` | Elektronik & Aydınlatma | 6 | 6 |
+
+`MODULE_CATALOG_KEYS` artık `listCatalogGroups().flatMap(keys)` türevidir. Global snapshot sırası kategori sırasına hizalandı (eski literal KEYS listesinde raf/vitrin, `wall_base` / `door_100` satırlarından önce duruyordu). Modül Ekle UI kategori sırası, kategori adları ve kategori içi Item sırası değişmedi.
+
+### Yeni kural
+
+- Katalog yalnız UI organizasyonudur
+- Kategori adı yalnız `catalogName`
+- Kategori sırası yalnız `catalogIndex`
+- `catalogCategory` yalnız `catalogKey` saklar; label saklamaz
+- `type` / Item Contract / registry grubu kategori belirlemez
+- `catalogCategory` rotation / color / image / collision / renderer / placement belirlemez
+
+### Doğrulama
+
+- Catalog category sayısı: 6 (önceki grup sayısıyla aynı)
+- `catalogKey` benzersiz: %100
+- `catalogName` boş: 0
+- `catalogIndex` null: 0
+- duplicate `catalogIndex`: 0
+- `catalogIndex` sırası: 1..6 kesintisiz
+- geçersiz `catalogKey` bakan Item: 0
+- `catalogVisible=true` ve geçersiz category: 0
+- kategori UI sırası / adları / kategori içi Item sırası / görünen Item sayısı (64): değişmedi
+- `npm test`: 737 pass / 0 fail
+- `npm run build`: geçti
+- `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-category-model`)
+
+### Sonraki adım
+
+`listCatalogItems()` henüz ayrı export değildir. Kart descriptor’ı hâlâ `MODULE_CATALOG` üzerindendir. SQLite/API bu turda yoktur.
+
+---
+
 ## 2026-09-16 — Item katalog metadata alanları
 
 ### Amaç

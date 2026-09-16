@@ -1,4 +1,4 @@
-import { getModuleCatalogLabel, MODULE_CATALOG, MODULE_CATALOG_GROUPS } from './catalog.js';
+import { getModuleCatalogLabel, listCatalogGroups, MODULE_CATALOG } from './catalog.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 import { getModuleBehavior } from './moduleBehavior.js';
 
@@ -315,13 +315,13 @@ export function createModuleContextMenu({
   function renderPickerCatalog() {
     pickerGroups.innerHTML = '';
 
-    MODULE_CATALOG_GROUPS.forEach((group) => {
+    listCatalogGroups().forEach((group) => {
       const details = document.createElement('details');
       details.className = 'module-drag-group';
       details.open = false;
 
       const summary = document.createElement('summary');
-      summary.textContent = group.label;
+      summary.textContent = group.catalogName;
 
       const grid = document.createElement('div');
       grid.className = 'module-drag-grid';

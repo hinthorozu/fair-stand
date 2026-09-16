@@ -1,4 +1,4 @@
-import { MODULE_CATALOG, MODULE_CATALOG_GROUPS, MODULE_CATALOG_KEYS } from './catalog.js';
+import { listCatalogGroups, MODULE_CATALOG } from './catalog.js';
 import { normalizeStripOccupancy, getStandStripMetrics } from './stripOccupancy.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { getModuleDefaultRotationDeg, resolveModuleRotationDeltaDeg } from './moduleBehavior.js';
@@ -391,16 +391,16 @@ export function createModuleDragSidebar({
   root.append(hint, groupsRoot);
   anchorButton.parentElement.insertBefore(root, anchorButton);
 
-  const groupDefinitions = MODULE_CATALOG_GROUPS;
+  const groupDefinitions = listCatalogGroups();
 
   const groupGridByKey = new Map();
-  groupDefinitions.forEach((group, index) => {
+  groupDefinitions.forEach((group) => {
     const details = document.createElement('details');
     details.className = 'module-drag-group';
     details.open = false;
 
     const summary = document.createElement('summary');
-    summary.textContent = group.label;
+    summary.textContent = group.catalogName;
 
     const grid = document.createElement('div');
     grid.className = 'module-drag-grid';
@@ -428,7 +428,8 @@ export function createModuleDragSidebar({
     lastClientY = null;
   }
 
-  const cards = MODULE_CATALOG_KEYS
+  const cards = groupDefinitions
+    .flatMap((group) => group.keys)
     .map((moduleKey) => ({ moduleKey, module: MODULE_CATALOG[moduleKey] }))
     .filter((entry) => entry.module)
     .map(({ moduleKey, module }) => {

@@ -1,11 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "item-catalog-metadata-fields",
+  "id": "catalog-category-model",
   "kind": "architecture",
-  "summary": "104 Item kaydına catalogVisible, catalogCategory ve catalogItemIndex eklenir. Katalog UI bu turda yeni alanları okumaz. Item sözleşmesi docs/refactor/ITEMS.md, katalog ayrıntısı docs/refactor/CATALOG.md.",
+  "summary": "104 Item kaydına catalogVisible, catalogCategory ve catalogItemIndex eklenir. Katalog kategorileri CATALOG_CATEGORIES (catalogKey, catalogName, catalogIndex) tek kaynağına alınır. UI listCatalogGroups ve catalogName okur. Item.catalogCategory yalnız catalogKey saklar.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
+    "src/moduleDragSidebar.js",
+    "src/moduleContextMenu.js",
     "docs/refactor/CATALOG.md",
     "docs/refactor/ITEMS.md"
   ],
@@ -18,13 +20,13 @@
   ],
   "impact": {
     "catalog": "affected",
-    "behavior": "not-applicable",
+    "behavior": "affected",
     "state": "not-applicable",
     "placement": "not-applicable",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "affected",
-    "ui": "not-applicable",
+    "ui": "affected",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
@@ -90,6 +92,7 @@
       "test/baseWallRecipes.test.js",
       "test/boardMaterialItemContract.test.js",
       "test/bundleLoadingContract.test.js",
+      "test/catalogCategories.test.js",
       "test/catalogDragKeyboardIntegration.test.js",
       "test/catalogSingleSource.test.js",
       "test/chairEamesContract.test.js",
@@ -370,6 +373,12 @@
       "docs/items/audit/properties/DEFAULT_OVERRIDE_CHAINS.md",
       "docs/items/audit/properties/FINAL_PROPERTY_AUDIT.md",
       "docs/items/audit/properties/PROPERTY_INDEX.md",
+      "docs/items/audit/properties/properties/behavior.allowSideInsert.md",
+      "docs/items/audit/properties/properties/behavior.defaultRotationDeg.md",
+      "docs/items/audit/properties/properties/behavior.rotationStepDeg.md",
+      "docs/items/audit/properties/properties/capabilities.glass.md",
+      "docs/items/audit/properties/properties/capabilities.lightbox.md",
+      "docs/items/audit/properties/properties/capabilities.mesh.md",
       "docs/items/audit/properties/properties/catalog.depthCm.md",
       "docs/items/audit/properties/properties/catalog.eyeCount.md",
       "docs/items/audit/properties/properties/catalog.groups.md",
@@ -409,9 +418,12 @@
       "docs/items/audit/properties/properties/persist.path.md",
       "docs/items/audit/properties/properties/profile.catalogWidthCm.md",
       "docs/items/audit/properties/properties/registry.md",
+      "docs/items/audit/properties/properties/state.bodySurface.md",
       "docs/items/audit/properties/properties/state.chairCount.md",
       "docs/items/audit/properties/properties/state.depthCm.md",
       "docs/items/audit/properties/properties/state.eyeCount.md",
+      "docs/items/audit/properties/properties/state.faces.md",
+      "docs/items/audit/properties/properties/state.haloColor.md",
       "docs/items/audit/properties/properties/state.heightCm.md",
       "docs/items/audit/properties/properties/state.itemKey.md",
       "docs/items/audit/properties/properties/state.modelFile.md",
@@ -423,10 +435,13 @@
       "docs/items/audit/properties/properties/state.screenWidthCm.md",
       "docs/items/audit/properties/properties/state.shape.md",
       "docs/items/audit/properties/properties/state.shelfCount.md",
+      "docs/items/audit/properties/properties/state.shelfLightingOn.md",
       "docs/items/audit/properties/properties/state.sizeInch.md",
       "docs/items/audit/properties/properties/state.stripOccupancy.align.md",
       "docs/items/audit/properties/properties/state.stripOccupancy.md",
       "docs/items/audit/properties/properties/state.stripOccupancy.stripCount.md",
+      "docs/items/audit/properties/properties/state.strips.md",
+      "docs/items/audit/properties/properties/state.surface.md",
       "docs/items/audit/properties/properties/state.type.md",
       "docs/items/audit/properties/properties/state.videoWallCols.md",
       "docs/items/audit/properties/properties/state.videoWallRows.md",
@@ -480,8 +495,15 @@
       "docs/items/audit/properties/properties/tests.srcHits.md",
       "docs/items/audit/properties/properties/tests.unitHits.md",
       "docs/items/audit/properties/properties/type.md",
+      "docs/items/audit/properties/properties/ui.contextMenu.add.md",
+      "docs/items/audit/properties/properties/ui.contextMenu.delete.md",
+      "docs/items/audit/properties/properties/ui.contextMenu.duplicate.md",
+      "docs/items/audit/properties/properties/ui.editable.fabric.md",
       "docs/items/audit/properties/properties/ui.editable.floorSelect.md",
       "docs/items/audit/properties/properties/ui.editable.foamResize.md",
+      "docs/items/audit/properties/properties/ui.editable.glass.md",
+      "docs/items/audit/properties/properties/ui.editable.rotation.md",
+      "docs/items/audit/properties/properties/ui.editable.shelfLight.md",
       "docs/items/audit/properties/properties/ui.sidebar.md",
       "docs/items/audit/report/ITEM_SYSTEM_AUDIT.md",
       "docs/items/audit/report/MEKANIZMA_PARAMETRE.md",
@@ -529,6 +551,7 @@
       "docs/items/current-system/furniture_table_chair_set_eames.md",
       "docs/items/current-system/glass_shelf.md",
       "docs/items/current-system/hali.md",
+      "docs/items/current-system/illuminated-foam.md",
       "docs/items/current-system/karolaj.md",
       "docs/items/current-system/panel_147_5.md",
       "docs/items/current-system/panel_197.md",
@@ -649,11 +672,14 @@
         "F-045"
       ]
     },
-    "notes": "104 Item kaydına catalogVisible/catalogCategory/catalogItemIndex yazıldı. createCommercialCatalogItem bu üç alanı MODULE_CATALOG descriptor'ına kopyalamaz; sidebar hâlâ MODULE_CATALOG_GROUPS okur. Item sözleşmesi docs/refactor/ITEMS.md; katalog ayrıntısı docs/refactor/CATALOG.md; günlük docs/refactor/REFACTOR.md. Discovery token'ları items.js ve catalog.js olduğu için mevcut getItem/katalog tüketicileri, audit dokümanları ve F-013/F-014/F-018/F-045 aday olarak geldi; katalog kimliği, BOM sınıflandırması, TV/video-wall ve hygiene finding'leri bu turda değişmez. BOM miktarı ve katalog UI sırası aynı kalır. listCatalogItems/listCatalogGroups henüz yoktur."
+    "notes": "104 Item kaydına catalogVisible/catalogCategory/catalogItemIndex yazıldı. Katalog kategorileri CATALOG_CATEGORIES tek kaynağıdır; MODULE_CATALOG_GROUPS/KEYS türetilir. Sidebar ve picker listCatalogGroups + catalogName okur; kategori sırası catalogIndex, kategori içi sıra catalogItemIndex. createCommercialCatalogItem katalog metadata alanlarını descriptor'a kopyalamaz. Item sözleşmesi docs/refactor/ITEMS.md; katalog ayrıntısı docs/refactor/CATALOG.md; günlük docs/refactor/REFACTOR.md. moduleContextMenu.js frozen domain yüzünden behavior affected işaretlenir; bu turda rotation/collision/placement algoritması değişmez, yalnız picker katalog kaynağı değişir. Discovery token'ları items.js ve catalog.js olduğu için mevcut getItem/katalog tüketicileri, audit dokümanları ve F-013/F-014/F-018/F-045 aday olarak geldi; BOM sınıflandırması, TV/video-wall ve hygiene finding'leri bu turda değişmez. UI kategori adı/sırası ve kategori içi Item sırası aynı kalır. listCatalogItems henüz yoktur."
   },
   "tests": {
     "targeted": [
-      "test/itemCatalogFields.test.js"
+      "test/catalogCategories.test.js",
+      "test/itemCatalogFields.test.js",
+      "test/catalogSingleSource.test.js",
+      "test/systemModuleCatalogDoc.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -662,16 +688,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "items.js catalog domain'ine bağlıdır. Katalog UI hâlâ MODULE_CATALOG_GROUPS okur; smoke katalog düğmesinin varlığını doğrular."
+      "reason": "catalog ve ui domain'leri affected. smoke #open-module-catalog düğmesini doğrular; kategori adı/sırası unit testte kilitlenir."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Yeni alanlar Item kaydına yazılır ama bu turda runtime/UI okunmaz. Yanlış üyelik sonraki turda katalog UI'ya taşınırsa görünürlüğü bozar; bu turda canlı grup sırası test ile kilitlenir."
+    "notes": "Kategori modeli tek kaynağa alındı; UI aynı ad/sıra/üyeliği listCatalogGroups üzerinden okur. Yanlış catalogKey görünür Item'ı düşürür veya listCatalogGroups throw eder; catalogCategories ve itemCatalogFields testleri sıra/label/üyeliği kilitler."
   },
   "migration": {
     "required": false,
     "notes": "Alanlar kod tablosundadır. Persist/project blob ve SQLite yok."
   },
-  "rollback": "src/items.js katalog alanlarını, src/catalog.js commercial omit'ini, test/itemCatalogFields.test.js ve docs/refactor/ katalog belgelerini geri al."
+  "rollback": "src/items.js katalog alanlarını, src/catalog.js CATALOG_CATEGORIES/listCatalogGroups modelini ve eski MODULE_CATALOG_GROUPS/KEYS literalini, sidebar/picker okumasını, test/catalogCategories.test.js ile itemCatalogFields.test.js ve docs/refactor/ katalog belgelerini geri al."
 }

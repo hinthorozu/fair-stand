@@ -4,23 +4,13 @@ Fair Stand katalog mekanizmasının canonical teknik sözleşmesi. Audit döküm
 
 Item tarafındaki üç alanın kısa kaydı: `docs/refactor/ITEMS.md`. Bu dosya Catalog’un nasıl çalıştığını anlatır; Item şemasını kopyalamaz.
 
-Bu belgede **mevcut durum** ve **hedef durum** ayrı işaretlenir. Hedef, henüz yazılmamış kodu “var” göstermez.
-
 ---
 
 ## Amaç
 
 Modül Kataloğu, sahneye sürüklenebilir / eklenebilir Item’ların kullanıcıya gösterilen listesidir.
 
-Katalog:
-
-- hangi Item’ın görüneceğini,
-- hangi grupta duracağını,
-- grup içinde kaçıncı sırada duracağını
-
-tanımlar.
-
-Katalog, placement, collision, BOM, recipe veya renderer davranışı tanımlamaz.
+Katalog yalnız UI organizasyonudur. Placement, collision, BOM, recipe, rotation, color, image veya renderer davranışı tanımlamaz.
 
 ---
 
@@ -28,59 +18,68 @@ Katalog, placement, collision, BOM, recipe veya renderer davranışı tanımlama
 
 Sol paneldeki **Modül Ekle** düğmesi (`#open-module-catalog`, `index.html`) katalog girişidir. Düğmenin hemen üstüne `createModuleDragSidebar` kart ızgarasını basar.
 
-Bu yüzey “Modül Kataloğu”dur. Sağ tık **Modül Ekle** picker’ı (`moduleContextMenu.js`) aynı grup/Item kümesini ikinci bir katalog yüzeyi olarak gösterir.
+Bu yüzey “Modül Kataloğu”dur. Sağ tık **Modül Ekle** picker’ı (`renderPickerCatalog`) aynı `listCatalogGroups()` sonucunu kullanır.
 
 ---
 
-## Item alanları
+## Catalog modeli
 
-Her kayıtlı Item bu üç alanı taşır. Alanlar Item’ın kendisine aittir. Ayrı assignment tablosu yoktur.
+Canonical kaynak: `src/catalog.js` `CATALOG_CATEGORIES`.
 
-### `catalogVisible`
+```text
+Catalog {
+  catalogKey: string
+  catalogName: string
+  catalogIndex: integer
+}
+```
 
-- **Veri tipi:** boolean
-- **Zorunluluk:** zorunlu alan; değer `true` veya `false`
-- **Ne işe yarar:** Item sol katalogda (ve aynı katalog picker’ında) gösterilecek mi
-- **Geçerli değer:** `true` | `false`
-- **null davranışı:** alan `null` olmaz. Katalogda yoksa `false` yazılır
-- **Örnek:** `wall_200` → `true`; `panel_197` → `false`
+### catalogKey
 
-### `catalogCategory`
+- Stabil kategori kimliği
+- Benzersiz
+- UI label değildir
+- Item.catalogCategory bu değere bağlanır
+- Mevcut key’ler önceki turda Item’lara yazılan `catalogCategory` değerleridir; bu turda yeni key uydurulmadı
 
-- **Veri tipi:** string veya `null`
-- **Zorunluluk:** alan zorunlu; değer görünür Item’da category key, görünmeyende `null`
-- **Ne işe yarar:** görünür Item’ın katalog grubu. UI label’ı değil, stabil key
-- **Geçerli değer:** aşağıdaki canonical key’lerden biri, veya `null`
-- **null davranışı:** `catalogVisible=false` ise `null`. `true` iken `null` yasak
-- **Örnek:** `wall_200` → `"panel-wall"`; `panel_197` → `null`
+### catalogName
 
-`catalogCategory` yalnız UI gruplamasıdır. Runtime behavior, type, snap, BOM veya factory seçmez.
+- Modül Ekle panelinde görünen kategori adı
+- Boş olamaz
 
-### `catalogItemIndex`
+### catalogIndex
 
-- **Veri tipi:** number veya `null`
-- **Zorunluluk:** alan zorunlu; değer görünür Item’da 1 tabanlı tam sayı, görünmeyende `null`
-- **Ne işe yarar:** Item’ın **kendi** `catalogCategory` grubu içindeki sırası
-- **Geçerli değer:** `1..N` (N = o kategorideki görünür Item sayısı), veya `null`
-- **null davranışı:** `catalogVisible=false` ise `null`. `true` iken `null` yasak
-- **Örnek:** `wall_200` → `1` (Panel & Duvar grubunun ilk kartı); `panel_197` → `null`
+- Kategorilerin yukarıdan aşağıya 1 tabanlı sırası
+- 1 = en üst kategori
+- Duplicate yok; `1..N` kesintisiz
+- `catalogItemIndex` ile karıştırılmaz
 
-`catalogItemIndex` global katalog sırası değildir. Başka kategorideki Item’ları saymaz.
+`catalogItemIndex` = Item’ın **kendi kategorisi** içindeki sırası.
 
 ---
 
-## Catalog Category
+## Item bağlantısı
 
-Kaynak: canlı `MODULE_CATALOG_GROUPS` label’ları + her grubun üyesi Item’daki `catalogCategory`. Yeni grup uydurulmaz.
+```text
+Item.catalogVisible          → kategoride gösterilsin mi
+Item.catalogCategory         → Catalog.catalogKey
+Item.catalogItemIndex        → kategori içi 1 tabanlı sıra
+```
 
-| Canonical key | UI label | Item sayısı |
-|---|---|---|
-| `panel-wall` | Panel & Duvar | 12 |
-| `panel-addon` | Panel Ek Modül | 13 |
-| `shelf-showcase` | Raf & Vitrin | 8 |
-| `counter-base` | Banko & Baza | 9 |
-| `extra` | Extra | 16 |
-| `electronics-lighting` | Elektronik & Aydınlatma | 6 |
+`catalogCategory` görünen label saklamaz. Ad yalnız `catalogName` üzerinden gelir.
+
+---
+
+## Kategoriler
+
+| catalogKey | catalogName | catalogIndex | Item sayısı |
+|---|---|---|---|
+| `panel-wall` | Panel & Duvar | 1 | 12 |
+| `panel-addon` | Panel Ek Modül | 2 | 13 |
+| `shelf-showcase` | Raf & Vitrin | 3 | 8 |
+| `counter-base` | Banko & Baza | 4 | 9 |
+| `extra` | Extra | 5 | 16 |
+| `electronics-lighting` | Elektronik & Aydınlatma | 6 | 6 |
 
 Toplam görünür Item: **64**. Kayıtlı Item: **104**.
 
@@ -88,121 +87,71 @@ Toplam görünür Item: **64**. Kayıtlı Item: **104**.
 
 ## Sıralama
 
-İki ayrı sıra vardır.
-
-1. **Kategori sırası** — grupların soldan/yukarıdan dizilişi.
-2. **Kategori içi Item sırası** — bir grubun kart sırası. Sahibi `catalogItemIndex` (1 = ilk kart).
-
-### Mevcut durum
-
-Kategori sırası `MODULE_CATALOG_GROUPS` dizi sırasıdır:
-
-1. Panel & Duvar
-2. Panel Ek Modül
-3. Raf & Vitrin
-4. Banko & Baza
-5. Extra
-6. Elektronik & Aydınlatma
-
-Sol sidebar kart basımı `MODULE_CATALOG_KEYS` sırasıyla gride ekler. Picker `group.keys` sırasını kullanır. Bugün bu iki liste her grupta aynıdır ve Item’daki `catalogItemIndex` ile örtüşür. UI henüz `catalogItemIndex` okumaz.
-
-### Hedef durum
-
-Kategori sırası sabit canonical key sırasıdır (yukarıdaki tablo sırası).  
-Kategori içi sıra yalnız `catalogItemIndex` artan sıradır.  
-UI kendi key listesini hardcode etmez.
+1. **Kategori sırası** = `Catalog.catalogIndex`
+2. **Kategori içi Item sırası** = `Item.catalogItemIndex`
 
 ---
 
 ## Çalışma akışı
 
-### Mevcut durum
-
 ```text
-src/items.js  (getItem / listRegisteredItems)
+Catalog definitions (CATALOG_CATEGORIES)
+        ↓ catalogIndex sıralama
+Catalog categories
         ↓
-src/catalog.js  create*CatalogItem → MODULE_CATALOG
-        ↓
-MODULE_CATALOG_KEYS  +  MODULE_CATALOG_GROUPS  (üyelik ve sıra burada ayrı listelenir)
-        ↓
-main.js → createModuleDragSidebar  /  moduleContextMenu.renderPickerCatalog
+catalogVisible=true Item'lar
+        ↓ catalogCategory ile eşleşme (catalogKey)
+Kategori
+        ↓ catalogItemIndex sıralama
+Item listesi
         ↓
 Modül Ekle UI
 ```
 
-Uygulama açılınca `main.js` `#open-module-catalog` yanına sidebar kurar. Grup başlıkları `MODULE_CATALOG_GROUPS[].label`, kartlar `MODULE_CATALOG[moduleKey]`. Item’daki `catalogVisible` / `catalogCategory` / `catalogItemIndex` bu turda UI’ya bağlanmamıştır.
+Canonical method karşılığı: `listCatalogCategories()` → `listCatalogGroups()` → UI `catalogName` + `keys`.
 
-### Hedef durum
+`MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS` bu listeden türetilir; ikinci hardcoded kategori tablosu değildir. `label` alanı `catalogName` kopyasıdır (eski test uyumu).
 
-```text
-Item kaynağı  (bugün JS; ileride SQLite/API)
-        ↓
-catalogVisible === true
-        ↓
-catalogCategory ile gruplama
-        ↓
-catalogItemIndex ile sıralama
-        ↓
-canonical katalog API
-        ↓
-Modül Kataloğu UI
-```
+Kart descriptor’ı hâlâ `MODULE_CATALOG` (`create*CatalogItem`).
+
+### Kalan hedef
+
+`listCatalogItems()` henüz ayrı export değildir. Kart ölçü/etiket descriptor’ı hâlâ `MODULE_CATALOG` üzerinden okunur.
 
 ---
 
 ## Canonical API / Method
 
-Katalog listelemenin tek merkezi giriş noktası olmalıdır.
+| Method | Durum |
+|---|---|
+| `listCatalogCategories()` | mevcut — kategoriler, `catalogIndex` sırası |
+| `getCatalogCategory(catalogKey)` | mevcut |
+| `listCatalogGroups()` | mevcut — kategori + Item key listesi (`catalogItemIndex` sırası) |
+| `listCatalogItems()` | henüz yok |
 
-### Mevcut çalışma noktası
+UI okur: `listCatalogGroups()` + `group.catalogName` + `group.keys`.
 
-Merkezi membership listesi yoktur. UI doğrudan şunları okur:
-
-- `MODULE_CATALOG_GROUPS` — grup label + `keys`
-- `MODULE_CATALOG_KEYS` — sidebar kart basım sırası
-- `MODULE_CATALOG` — kart descriptor’ı (`create*CatalogItem`)
-
-Kimlik/etiket yardımcıları (üyelik listesi değildir):
-
-- `resolveItemKey(descriptor)`
-- `getModuleCatalogItem(descriptor)`
-- `getModuleCatalogLabel(descriptor)`
-
-Item koleksiyon kalıbı `src/items.js` içindedir: `listRegisteredItems`, `listLeafItems`, `listCompositeItems`, `listFloorItems`. `getCatalogItems` / `listCatalogItems` **yoktur**.
-
-### Hedef (IMPLEMENT EDİLMEDİ)
-
-Durum: henüz implement edilmedi.
-
-Mevcut `list*` kalıbına uyum:
-
-- `listCatalogItems()` — `catalogVisible=true` Item’lar; `catalogCategory`, sonra `catalogItemIndex` sırası
-- `listCatalogGroups()` — canonical key sırasıyla gruplar; her grupta aynı sıradaki Item’lar ve UI label
-
-Bu iki fonksiyon katalog UI’nın tek okuma noktası olur. `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS` membership kaynağı olmaktan çıkar. Bu turda yazılmadı.
+Kimlik yardımcıları (üyelik listesi değildir): `resolveItemKey`, `getModuleCatalogItem`, `getModuleCatalogLabel`.
 
 ---
 
 ## Kesin mimari kurallar
 
-- Katalog üyeliği `type` üzerinden belirlenmez.
-- Registry grubundan (`LEAF_ITEMS`, `COMPOSITE_ITEMS`, …) belirlenmez.
-- Item Contract üzerinden belirlenmez.
-- Item’ın `catalogVisible` alanı belirler.
-- Kategori Item’ın `catalogCategory` alanından gelir.
-- Kategori içi sıra `catalogItemIndex` alanından gelir.
-- Katalog kategorisi Item davranışını belirlemez.
-- Aynı katalog bilgisini ikinci bir tabloda tutmak hedef mimaride yasaktır.
-- UI kendi başına Item listesi hardcode etmez.
-- Katalog için alternatif ikinci kaynak oluşturulmaz.
+- Katalog üyeliği `type` üzerinden belirlenmez
+- Registry grubundan belirlenmez
+- Item Contract üzerinden belirlenmez
+- `catalogVisible` üyelik, `catalogCategory` grup, `catalogItemIndex` sıra belirler
+- `catalogCategory` rotation / color / image / collision / renderer / placement belirlemez
+- Kategori adı yalnız `catalogName`
+- Kategori sırası yalnız `catalogIndex`
+- Aynı kategori tanımı ikinci hardcoded listede tutulmaz
+- UI kendi başına kategori listesi hardcode etmez
 
 ---
 
 ## Yeni Item ekleme örneği
 
 Dokümantasyon örneği; bu `itemKey`’ler kayıtlı ürün değildir.
-
-Katalogda görünen:
 
 ```json
 {
@@ -213,8 +162,6 @@ Katalogda görünen:
 }
 ```
 
-Katalogda görünmeyen (leaf / child / zemin vb.):
-
 ```json
 {
   "itemKey": "example_child",
@@ -224,38 +171,21 @@ Katalogda görünmeyen (leaf / child / zemin vb.):
 }
 ```
 
-Canlı kayıt örnekleri:
-
-```json
-{
-  "itemKey": "wall_200",
-  "catalogVisible": true,
-  "catalogCategory": "panel-wall",
-  "catalogItemIndex": 1
-}
-```
-
-```json
-{
-  "itemKey": "panel_197",
-  "catalogVisible": false,
-  "catalogCategory": null,
-  "catalogItemIndex": null
-}
-```
-
-Yeni görünür Item eklerken: mevcut kategorilerden bir key seçilir, o kategorideki `1..N` kesintisiz kalacak şekilde index verilir, yeni kategori uydurulmaz.
+Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `catalogName` / `catalogIndex` eklenir.
 
 ---
 
 ## Validation
 
-- `catalogVisible=true` → `catalogCategory` zorunlu (null değil)
-- `catalogVisible=true` → `catalogItemIndex` zorunlu (null değil)
-- `catalogVisible=false` → `catalogCategory === null`
-- `catalogVisible=false` → `catalogItemIndex === null`
+- Catalog category sayısı: 6
+- `catalogKey` benzersiz
+- `catalogName` boş: 0
+- `catalogIndex` null: 0
+- duplicate `catalogIndex`: 0
+- `catalogIndex` 1..N kesintisiz
+- `catalogVisible=true` ve geçersiz `catalogCategory`: 0
+- `catalogVisible=false` → category/index null
 - Aynı kategoride duplicate `catalogItemIndex` yasak
-- Index her kategoride `1..N` kesintisiz
 
 ---
 
@@ -263,42 +193,29 @@ Yeni görünür Item eklerken: mevcut kategorilerden bir key seçilir, o kategor
 
 | Test | Ne doğrular |
 |---|---|
-| `test/itemCatalogFields.test.js` | 104/104 alan, 64 görünür, null kuralları, duplicate/gap yok, grup/Item sırası `MODULE_CATALOG_GROUPS` ile aynı, UI henüz yeni alanları okumaz, bu belgedeki category key tablosu canlı gruplarla örtüşür |
-| `test/catalogSingleSource.test.js` | Her katalog Item tam bir grupta; `resolveItemKey` / label tek kaynak |
-| `test/systemModuleCatalogDoc.test.js` | `SYSTEM_MODULE_CATALOG.md` key snapshot’ı `MODULE_CATALOG_KEYS` ile aynı (BOM/indeks dokümanı; bu sözleşme değil) |
-| `test/catalogDragKeyboardIntegration.test.js` | Katalog sürükleme / Shift+R |
-| `e2e/smoke.spec.mjs` | `#open-module-catalog` görünür ve sahne sonrası aktif |
+| `test/catalogCategories.test.js` | Catalog modeli, key eşleşmesi, sıra/label/adet regression |
+| `test/itemCatalogFields.test.js` | 104/104 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
+| `test/catalogSingleSource.test.js` | Her katalog Item tam bir grupta |
+| `test/systemModuleCatalogDoc.test.js` | `SYSTEM_MODULE_CATALOG.md` key snapshot |
+| `e2e/smoke.spec.mjs` | `#open-module-catalog` |
 
 ---
 
 ## Kaynak dosyalar
 
-Katalog mekanizmasına dokunan gerçek dosyalar:
-
-- `src/items.js` — Item kaydı ve üç katalog alanı
-- `src/catalog.js` — `MODULE_CATALOG`, `MODULE_CATALOG_KEYS`, `MODULE_CATALOG_GROUPS`, `resolveItemKey`, `getModuleCatalogItem`, `getModuleCatalogLabel`
-- `src/moduleDragSidebar.js` — sol katalog UI; `createModuleDragSidebar`, `createModuleCatalogPreview`
-- `src/moduleContextMenu.js` — picker katalog UI; `renderPickerCatalog`
+- `src/catalog.js` — `CATALOG_CATEGORIES`, `listCatalogCategories`, `listCatalogGroups`, türetilmiş `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS`
+- `src/items.js` — Item katalog alanları
+- `src/moduleDragSidebar.js` — sol katalog UI
+- `src/moduleContextMenu.js` — picker katalog UI
 - `src/main.js` — `#open-module-catalog` bağlama
-- `src/scene3d.js` — sürükleme önizleme etiketi (`getModuleCatalogLabel`)
-- `src/moduleContracts.js` — katalog descriptor üzerinden contract çözümleme
-- `src/autoDepot.js` — ticari Item ölçülerini `MODULE_CATALOG`’dan okur
-- `src/helpGuide.js` — “Modül Ekleme ve Katalog”
-- `src/style.css` — katalog kart stilleri
-- `index.html` — Modül Ekle düğmesi
 - `docs/refactor/CATALOG.md` — bu sözleşme
-- `docs/refactor/REFACTOR.md` — değişiklik günlüğü
-
-`SYSTEM_MODULE_CATALOG.md` okunabilir key/BOM indeksidir; katalog membership kaynağı değildir.
+- `docs/refactor/ITEMS.md` — Item şeması
+- `docs/refactor/REFACTOR.md` — günlük
 
 ---
 
 ## Gelecek DB/API geçişi
 
-Bugün Item verisi JS kaynağından gelir (`src/items.js`).
+Bugün Item ve Catalog JS kaynağındandır. Gelecekte SQLite / API / PostgreSQL.
 
-Gelecekte SQLite / API / PostgreSQL üzerinden gelecek.
-
-Katalog UI ve canonical katalog mekanizması değişmemelidir.
-
-Yalnız Item repository / data source değişmelidir. `listCatalogItems` / `listCatalogGroups` aynı Item alanlarını (`catalogVisible`, `catalogCategory`, `catalogItemIndex`) okumaya devam eder.
+Katalog UI ve canonical method’lar değişmemelidir. Yalnız repository / data source değişir.
