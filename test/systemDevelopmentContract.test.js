@@ -67,7 +67,6 @@ test('recipe-backed module contracts resolve an actual canonical recipe', () => 
 
     const descriptor = MODULE_CATALOG[moduleKey];
     const recipe = getModuleRecipe(descriptor.type, descriptor.widthCm, {
-      shelfCount: descriptor.shelfCount,
       shape: descriptor.shape,
     });
 

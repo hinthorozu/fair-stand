@@ -135,7 +135,7 @@ Item master ürünün gerçek özelliğidir (`src/items.js`). Catalog projection
 | `label` | `item.name` |
 | `catalogPreview` | `item.catalogPreview` |
 | `widthCm` / `depthCm` / `heightCm` | `resolveSceneDimensions(item)` — `sceneDimensions.field ?? dimensions.field`. Catalog ölçü üretmez; Recipe/type/itemKey/catalogWidthCm okumaz. TV kart CSS sabit px silüettir; descriptor `heightCm` canonical resolved height’tir |
-| `modelFile` / `variant` / `stripOccupancy` / `shelfCount` / `eyeCount` / `shape` | Item root, varsa |
+| `modelFile` / `variant` / `stripOccupancy` / `eyeCount` / `shape` | Item root, varsa |
 | `videoWallRows` / `videoWallCols` | `item.videoWall.rows` / `item.videoWall.cols`, varsa |
 | `type` | `item.type` — **Catalog UI preview seçmez.** Yalnız `createModuleStateFromDescriptor` factory uyumu (sahneye sürükleme). |
 
@@ -149,12 +149,12 @@ Yeni görünen Item için `MODULE_CATALOG.my_item = ...` yazılmaz.
 |---|---|---|---|
 | `panel-wall` | Panel & Duvar | 1 | 12 |
 | `panel-addon` | Panel Ek Modül | 2 | 13 |
-| `shelf-showcase` | Raf & Vitrin | 3 | 8 |
+| `shelf-showcase` | Raf & Vitrin | 3 | 2 |
 | `counter-base` | Banko & Baza | 4 | 9 |
 | `extra` | Extra | 5 | 16 |
 | `electronics-lighting` | Elektronik & Aydınlatma | 6 | 6 |
 
-Toplam görünür Item: **64**. Kayıtlı Item: **105**.
+Toplam görünür Item: **58**. Kayıtlı Item: **99**.
 
 ---
 
@@ -261,7 +261,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 - duplicate `catalogIndex`: 0
 - `catalogIndex` 1..N kesintisiz
 - `catalogVisible=true` ve geçersiz `catalogCategory`: 0
-- catalog projection Item: 64
+- catalog projection Item: 58
 - `catalogVisible=true` ve `catalogPreview` yok/bilinmiyor: fail-fast
 - hardcoded katalog Item key listesi: 0
 - Catalog UI preview `type` branch: 0
@@ -278,11 +278,11 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 
 | Test | Ne doğrular |
 |---|---|
-| `test/catalogItemProjection.test.js` | 64/64 Item-driven projection, eski descriptor regression |
-| `test/catalogPreviewConfig.test.js` | 64/64 `catalogPreview`; type branch yok; CSS kök sınıf regression |
+| `test/catalogItemProjection.test.js` | 58/58 Item-driven projection, eski descriptor regression |
+| `test/catalogPreviewConfig.test.js` | 58/58 `catalogPreview`; type branch yok; CSS kök sınıf regression |
 | `test/catalogDomainBoundary.test.js` | Catalog/AutoDepot/ModuleContract katman sınırı; `catalogVisible=false` ≠ Item yok |
 | `test/catalogCategories.test.js` | Catalog modeli, key eşleşmesi, sıra/label/adet regression |
-| `test/itemCatalogFields.test.js` | 105/105 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
+| `test/itemCatalogFields.test.js` | 99/99 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
 | `test/itemSceneDimensions.test.js` | dimensions / sceneDimensions same-field fallback; catalogWidthCm yok; Recipe/Catalog dimension fallback yok |
 | `test/catalogSingleSource.test.js` | Her katalog Item tam bir grupta |
 | `test/systemModuleCatalogDoc.test.js` | `SYSTEM_MODULE_CATALOG.md` key snapshot |

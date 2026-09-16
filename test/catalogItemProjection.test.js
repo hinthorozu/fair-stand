@@ -29,7 +29,6 @@ const COMPARE_FIELDS = Object.freeze([
   'videoWallRows',
   'videoWallCols',
   'eyeCount',
-  'shelfCount',
   'shape',
   'variant',
   'stripOccupancy',
@@ -44,16 +43,16 @@ function pickComparable(descriptor) {
   return picked;
 }
 
-test('listCatalogItems 64 görünür Item’ı Item kaydından üretir; hardcoded key listesi yoktur', () => {
+test('listCatalogItems 58 görünür Item’ı Item kaydından üretir; hardcoded key listesi yoktur', () => {
   const items = listRegisteredItems();
   const visible = items.filter((item) => item.catalogVisible === true);
   const projected = listCatalogItems();
   const catalogSource = readFileSync(new URL('../src/catalog.js', import.meta.url), 'utf8');
 
-  assert.equal(items.length, 105);
-  assert.equal(visible.length, 64);
-  assert.equal(projected.length, 64);
-  assert.equal(new Set(projected.map((item) => item.itemKey)).size, 64);
+  assert.equal(items.length, 99);
+  assert.equal(visible.length, 58);
+  assert.equal(projected.length, 58);
+  assert.equal(new Set(projected.map((item) => item.itemKey)).size, 58);
   assert.deepEqual(projected.map((item) => item.itemKey), BASELINE.keys);
 
   const projectedKeys = new Set(projected.map((item) => item.itemKey));
@@ -84,7 +83,7 @@ test('yeni catalog projection eski MODULE_CATALOG descriptor alanlarını birebi
     compared += 1;
   }
 
-  assert.equal(compared, 64);
+  assert.equal(compared, 58);
   assert.deepEqual([...MODULE_CATALOG_KEYS], BASELINE.keys);
 });
 

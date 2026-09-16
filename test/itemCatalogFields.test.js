@@ -59,12 +59,6 @@ const EXPECTED_CATALOG_GROUPS = Object.freeze([
     keys: Object.freeze([
       'wall_showcase_100_3',
       'wall_showcase_100_2',
-      'wall_shelf_3_200',
-      'wall_shelf_3_150',
-      'wall_shelf_3_100',
-      'wall_shelf_2_200',
-      'wall_shelf_2_150',
-      'wall_shelf_2_100',
     ]),
   }),
   Object.freeze({
@@ -149,9 +143,9 @@ test('mevcut katalog Item listesi ve grup sırası değişmemiştir', () => {
   });
 });
 
-test('105 Item katalog metadata alanlarını taşır ve canlı katalog üyeliğiyle birebir örtüşür', () => {
+test('99 Item katalog metadata alanlarını taşır ve canlı katalog üyeliğiyle birebir örtüşür', () => {
   const items = listRegisteredItems();
-  assert.equal(items.length, 105);
+  assert.equal(items.length, 99);
 
   let visibleCount = 0;
   let missingVisible = 0;

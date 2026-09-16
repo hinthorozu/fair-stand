@@ -37,7 +37,6 @@ export const SHELF_DIMENSIONS = Object.freeze({
   widthsCm: Object.freeze([100, 150, 200]),
   heightsByCountCm: Object.freeze({
     2: Object.freeze([100, 150]),
-    3: Object.freeze([100, 150, 200]),
   }),
 });
 
@@ -165,7 +164,6 @@ function projectCatalogItem(item) {
 
   if (item.variant) descriptor.variant = item.variant;
   if (item.stripOccupancy) descriptor.stripOccupancy = item.stripOccupancy;
-  if (item.shelfCount != null) descriptor.shelfCount = item.shelfCount;
   if (item.eyeCount != null) descriptor.eyeCount = item.eyeCount;
   if (item.shape === 'L') descriptor.shape = 'L';
   if (item.modelFile) descriptor.modelFile = item.modelFile;

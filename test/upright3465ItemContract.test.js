@@ -14,12 +14,6 @@ function listAllVerifiedRecipes() {
     ...listStraightWallRecipes(),
     ...[
       ['door', 100],
-      ['shelf', 100, { shelfCount: 2 }],
-      ['shelf', 150, { shelfCount: 2 }],
-      ['shelf', 200, { shelfCount: 2 }],
-      ['shelf', 100, { shelfCount: 3 }],
-      ['shelf', 150, { shelfCount: 3 }],
-      ['shelf', 200, { shelfCount: 3 }],
       ['showcase-2', 100],
       ['showcase-3', 100],
       ['separator', 50],
@@ -50,7 +44,7 @@ test('upright_346_5 is a canonical single production Item', () => {
   assert.deepEqual(item.dimensions, { lengthCm: 346.5, thicknessCm: 8 });
 });
 
-test('upright_346_5 uses canonical itemKey in all 18 verified parent recipes and keeps quantity 2', () => {
+test('upright_346_5 uses canonical itemKey in all 12 verified parent recipes and keeps quantity 2', () => {
   let occurrences = 0;
 
   for (const recipe of listAllVerifiedRecipes()) {
@@ -62,7 +56,7 @@ test('upright_346_5 uses canonical itemKey in all 18 verified parent recipes and
     }
   }
 
-  assert.equal(occurrences, 18);
+  assert.equal(occurrences, 12);
 });
 
 test('upright_346_5 remains canonical while neighboring upright Items migrate independently', () => {

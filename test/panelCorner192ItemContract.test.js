@@ -11,8 +11,6 @@ import {
 
 const CORNER_RECIPE_CASES = [
   ['wall', 200, {}, 7],
-  ['shelf', 200, { shelfCount: 2 }, 7],
-  ['shelf', 200, { shelfCount: 3 }, 7],
   ['base-wall', 200, {}, 7],
 ];
 
@@ -29,7 +27,7 @@ test('panel_corner_192 is a canonical single production Item', () => {
   assert.equal(item.nominalModuleWidthCm, 200);
 });
 
-test('panel_corner_192 uses canonical itemKey in exactly four verified 200 cm recipe variants', () => {
+test('panel_corner_192 uses canonical itemKey in exactly two verified 200 cm recipe variants', () => {
   let occurrences = 0;
 
   for (const [type, width, options] of CORNER_RECIPE_CASES) {
@@ -41,7 +39,7 @@ test('panel_corner_192 uses canonical itemKey in exactly four verified 200 cm re
     occurrences += 1;
   }
 
-  assert.equal(occurrences, 4);
+  assert.equal(occurrences, 2);
 });
 
 test('inner-corner BOM resolution replaces panel_197 1:1 and preserves all other recipe quantities', () => {

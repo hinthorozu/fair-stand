@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 import { getShelfLeafItem, getItem } from '../src/items.js';
-import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
+import { getModuleRecipe } from '../src/moduleRecipes.js';
 
 const SHELF_CASES = Object.freeze({
-  shelf_100: Object.freeze({ widthCm: 100, quantities: Object.freeze([2, 3]) }),
-  shelf_150: Object.freeze({ widthCm: 150, quantities: Object.freeze([2, 3]) }),
-  shelf_200: Object.freeze({ widthCm: 200, quantities: Object.freeze([2, 3]) }),
+  shelf_100: Object.freeze({ widthCm: 100 }),
+  shelf_150: Object.freeze({ widthCm: 150 }),
+  shelf_200: Object.freeze({ widthCm: 200 }),
 });
 
 const EXPECTED_COLOR = 0xffffff;
@@ -31,40 +31,11 @@ test('shelf production Items use canonical identity and verified sunta dimension
   assert.equal(getShelfLeafItem(50), null);
 });
 
-test('shelf Items use canonical itemKey in exactly six verified parent recipes with quantity parity', () => {
-  let occurrences = 0;
-
-  for (const [itemKey, { widthCm, quantities }] of Object.entries(SHELF_CASES)) {
-    for (const quantity of quantities) {
-      const recipe = getModuleRecipe('shelf', widthCm, { shelfCount: quantity });
-      assert.ok(recipe);
-      const matches = recipe.items.filter((item) => getRecipeItemKey(item) === itemKey);
-      assert.equal(matches.length, 1, `${recipe.recipeId}:${itemKey}`);
-      assert.deepEqual(matches[0], { itemKey, quantity });
-      occurrences += matches.length;
-    }
-  }
-
-  assert.equal(occurrences, 6);
-});
-
-test('expanded shelf recipes resolve canonical shelf and shelf-leg Item metadata', () => {
-  for (const [itemKey, { widthCm }] of Object.entries(SHELF_CASES)) {
-    const expanded = getExpandedModuleRecipe('shelf', widthCm, { shelfCount: 3 });
-    const shelf = expanded.items.find((item) => item.itemKey === itemKey);
-    const leg = expanded.items.find((item) => getRecipeItemKey(item) === 'shelf_leg');
-
-    assert.ok(shelf, itemKey);
-    assert.equal(shelf.part.itemKey, itemKey);
-    assert.equal(shelf.part.partId, undefined);
-    assert.equal(shelf.part.dimensions.depthCm, 38);
-    assert.equal(shelf.part.dimensions.thicknessCm, 1.8);
-    assert.equal(shelf.part.material, 'sunta');
-    assert.equal(shelf.part.defaultColor, EXPECTED_COLOR);
-    assert.ok(leg);
-    assert.equal(leg.itemKey, 'shelf_leg');
-    assert.equal(leg.part.itemKey, 'shelf_leg');
-    assert.equal(leg.part.partId, undefined);
+test('silinen wall_shelf parent recipes leaf shelf_* Item’lara artık bağlanmaz', () => {
+  for (const { widthCm } of Object.values(SHELF_CASES)) {
+    assert.equal(getModuleRecipe('shelf', widthCm, { shelfCount: 2 }), null);
+    assert.equal(getModuleRecipe('shelf', widthCm, { shelfCount: 3 }), null);
+    assert.equal(getModuleRecipe('shelf', widthCm), null);
   }
 });
 

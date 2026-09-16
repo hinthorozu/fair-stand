@@ -35,8 +35,6 @@ const PROFILE_CASES = {
     recipes: [
       ['wall', 100, {}, 2],
       ['door', 100, {}, 1],
-      ['shelf', 100, { shelfCount: 2 }, 2],
-      ['shelf', 100, { shelfCount: 3 }, 2],
       ['showcase-2', 100, {}, 4],
       ['showcase-3', 100, {}, 4],
       ['separator', 100, {}, 2],
@@ -52,8 +50,6 @@ const PROFILE_CASES = {
     dimensions: { lengthCm: 140.5, thicknessCm: 8 },
     recipes: [
       ['wall', 150, {}, 2],
-      ['shelf', 150, { shelfCount: 2 }, 2],
-      ['shelf', 150, { shelfCount: 3 }, 2],
       ['counter', 150, { shape: 'L' }, 5],
       ['counter', 200, { shape: 'L' }, 1],
       ['counter', 150, {}, 3],
@@ -75,7 +71,7 @@ test('remaining production profiles are canonical single Items with verified met
   }
 });
 
-test('remaining production profiles use canonical itemKey in exactly 34 verified parent recipe rows with quantity parity', () => {
+test('remaining production profiles use canonical itemKey in exactly 30 verified parent recipe rows with quantity parity', () => {
   let totalOccurrences = 0;
 
   for (const [itemKey, expected] of Object.entries(PROFILE_CASES)) {
@@ -93,7 +89,7 @@ test('remaining production profiles use canonical itemKey in exactly 34 verified
     totalOccurrences += occurrences;
   }
 
-  assert.equal(totalOccurrences, 34);
+  assert.equal(totalOccurrences, 30);
 });
 
 test('expanded recipes resolve all migrated profile metadata through canonical Item identity', () => {

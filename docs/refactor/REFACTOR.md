@@ -7,6 +7,40 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-16 — wall_shelf composite Item ve shelfCount kaldırıldı
+
+### Kapsam
+
+Silinen Item: `wall_shelf_2_100`, `wall_shelf_2_150`, `wall_shelf_2_200`, `wall_shelf_3_100`, `wall_shelf_3_150`, `wall_shelf_3_200`.
+
+Silinen alan: `shelfCount` (Item, composition.options, Catalog projection, identity, factory, recipe, renderer userData). Yerine yeni field veya duplicate metadata yazılmadı. Yeni wall_shelf Item üretilmedi.
+
+Dokunulmayan: leaf `shelf_100` / `shelf_150` / `shelf_200`, `wall_showcase_*`, `eyeCount`, `stripOccupancy`, `nominalModuleWidthCm`, `composition.moduleType` alanı, `Recipe.nominalWidthCm`, `sceneDimensions`/`dimensions` şeması.
+
+### Dead code (yalnız bu 6 Item’a hizmet ediyordu)
+
+- `isWallShelfCompositeItem`, `resolveShelfItemKey`, `createShelfModuleState`, `MODULE_STATE_FACTORIES.shelf`, `normalizeModuleItemState` shelf dalı
+- altı `shelf:{width}:{count}` recipe + `getModuleRecipe` shelf dalı
+- `rawBomDebug` “N raflı” recipe dalı
+
+### Kalan shelf mekanizması
+
+- leaf `shelf_*` + `getShelfLeafItem`
+- `createShelfModule` renderer (`SHELF_DIMENSIONS.heightsByCountCm[2]`)
+- `TYPE_BEHAVIORS.shelf`
+- `CATALOG_PREVIEW_RENDERERS.shelf` (catalogPreview `'shelf'` artık görünür Item’da yok)
+- context-menu `toggle-shelf-light` / `shelfLightingOn`
+
+### Sayılar
+
+kayıtlı Item 99; catalogVisible=true 58; gizli 41 (`VIDEO_WALL_PANEL` dahil); projection 58; COMPOSITE_ITEMS 31; BOM recipe 31; shelf-showcase 2.
+
+### Tarihsel audit
+
+`docs/items/audit/**` ve `docs/items/current-system/wall_shelf_*.md` regenerate edilmedi.
+
+---
+
 ## 2026-09-16 — Tekrarlayan özel ölçü alanlarının canonical dimensions’a indirgenmesi
 
 ### Kaldırılan Item alanları

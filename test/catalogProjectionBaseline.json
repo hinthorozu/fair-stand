@@ -28,12 +28,6 @@
     "profile_41_5",
     "wall_showcase_100_3",
     "wall_showcase_100_2",
-    "wall_shelf_3_200",
-    "wall_shelf_3_150",
-    "wall_shelf_3_100",
-    "wall_shelf_2_200",
-    "wall_shelf_2_150",
-    "wall_shelf_2_100",
     "desk_banko_200",
     "desk_banko_150",
     "desk_banko_100",
@@ -112,13 +106,7 @@
       "catalogIndex": 3,
       "keys": [
         "wall_showcase_100_3",
-        "wall_showcase_100_2",
-        "wall_shelf_3_200",
-        "wall_shelf_3_150",
-        "wall_shelf_3_100",
-        "wall_shelf_2_200",
-        "wall_shelf_2_150",
-        "wall_shelf_2_100"
+        "wall_showcase_100_2"
       ]
     },
     {
@@ -426,60 +414,6 @@
       "heightCm": 350,
       "type": "showcase-2",
       "eyeCount": 2
-    },
-    {
-      "itemKey": "wall_shelf_3_200",
-      "label": "Raf 200 · 3 Raf",
-      "widthCm": 200,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "shelf",
-      "shelfCount": 3
-    },
-    {
-      "itemKey": "wall_shelf_3_150",
-      "label": "Raf 150 · 3 Raf",
-      "widthCm": 150,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "shelf",
-      "shelfCount": 3
-    },
-    {
-      "itemKey": "wall_shelf_3_100",
-      "label": "Raf 100 · 3 Raf",
-      "widthCm": 100,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "shelf",
-      "shelfCount": 3
-    },
-    {
-      "itemKey": "wall_shelf_2_200",
-      "label": "Raf 200 · 2 Raf",
-      "widthCm": 200,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "shelf",
-      "shelfCount": 2
-    },
-    {
-      "itemKey": "wall_shelf_2_150",
-      "label": "Raf 150 · 2 Raf",
-      "widthCm": 150,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "shelf",
-      "shelfCount": 2
-    },
-    {
-      "itemKey": "wall_shelf_2_100",
-      "label": "Raf 100 · 2 Raf",
-      "widthCm": 100,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "shelf",
-      "shelfCount": 2
     },
     {
       "itemKey": "desk_banko_200",

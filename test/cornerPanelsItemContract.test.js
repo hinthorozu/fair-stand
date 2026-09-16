@@ -31,8 +31,6 @@ const CORNER_PANEL_CASES = {
     recipes: [
       ['wall', 100, {}, 7],
       ['door', 100, {}, 3],
-      ['shelf', 100, { shelfCount: 2 }, 7],
-      ['shelf', 100, { shelfCount: 3 }, 7],
       ['showcase-2', 100, {}, 5],
       ['showcase-3', 100, {}, 4],
       ['base-wall', 100, {}, 7],
@@ -47,8 +45,6 @@ const CORNER_PANEL_CASES = {
     },
     recipes: [
       ['wall', 150, {}, 7],
-      ['shelf', 150, { shelfCount: 2 }, 7],
-      ['shelf', 150, { shelfCount: 3 }, 7],
       ['base-wall', 150, {}, 7],
     ],
   },
@@ -68,7 +64,7 @@ test('remaining inner-corner panels are canonical single production Items with m
   }
 });
 
-test('remaining inner-corner panels use canonical itemKey in exactly twelve active recipe variants', () => {
+test('remaining inner-corner panels use canonical itemKey in exactly eight active recipe variants', () => {
   let totalOccurrences = 0;
 
   for (const [itemKey, { recipes }] of Object.entries(CORNER_PANEL_CASES)) {
@@ -85,7 +81,7 @@ test('remaining inner-corner panels use canonical itemKey in exactly twelve acti
     totalOccurrences += occurrences;
   }
 
-  assert.equal(totalOccurrences, 12);
+  assert.equal(totalOccurrences, 8);
 });
 
 test('inner-corner BOM resolution replaces each matching straight panel 1:1 and applies declared recipe item replacements', () => {

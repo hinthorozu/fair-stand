@@ -15,7 +15,7 @@ import { getItem, listRegisteredItems } from '../src/items.js';
 const EXPECTED_CATEGORIES = Object.freeze([
   Object.freeze({ catalogKey: 'panel-wall', catalogName: 'Panel & Duvar', catalogIndex: 1, itemCount: 12 }),
   Object.freeze({ catalogKey: 'panel-addon', catalogName: 'Panel Ek Modül', catalogIndex: 2, itemCount: 13 }),
-  Object.freeze({ catalogKey: 'shelf-showcase', catalogName: 'Raf & Vitrin', catalogIndex: 3, itemCount: 8 }),
+  Object.freeze({ catalogKey: 'shelf-showcase', catalogName: 'Raf & Vitrin', catalogIndex: 3, itemCount: 2 }),
   Object.freeze({ catalogKey: 'counter-base', catalogName: 'Banko & Baza', catalogIndex: 4, itemCount: 9 }),
   Object.freeze({ catalogKey: 'extra', catalogName: 'Extra', catalogIndex: 5, itemCount: 16 }),
   Object.freeze({ catalogKey: 'electronics-lighting', catalogName: 'Elektronik & Aydınlatma', catalogIndex: 6, itemCount: 6 }),
@@ -35,8 +35,6 @@ const EXPECTED_GROUP_KEYS = Object.freeze({
   ]),
   'shelf-showcase': Object.freeze([
     'wall_showcase_100_3', 'wall_showcase_100_2',
-    'wall_shelf_3_200', 'wall_shelf_3_150', 'wall_shelf_3_100',
-    'wall_shelf_2_200', 'wall_shelf_2_150', 'wall_shelf_2_100',
   ]),
   'counter-base': Object.freeze([
     'desk_banko_200', 'desk_banko_150', 'desk_banko_100',
@@ -139,7 +137,7 @@ test('listCatalogGroups kategori sırası, adı ve Item sırasını korur', () =
     });
   });
 
-  assert.equal(visibleTotal, 64);
-  assert.equal(MODULE_CATALOG_KEYS.length, 64);
+  assert.equal(visibleTotal, 58);
+  assert.equal(MODULE_CATALOG_KEYS.length, 58);
   assert.deepEqual([...MODULE_CATALOG_KEYS], groups.flatMap((group) => group.keys));
 });
