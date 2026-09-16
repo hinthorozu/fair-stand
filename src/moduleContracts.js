@@ -1,4 +1,4 @@
-import { MODULE_CATALOG, resolveItemKey } from './catalog.js';
+import { getItem, resolveItemKey } from './items.js';
 import { getModuleBehavior } from './moduleBehavior.js';
 
 const RECIPE_BOM_POLICY = Object.freeze({
@@ -207,14 +207,14 @@ export function resolveModuleContract(moduleKeyOrDescriptor) {
     };
   }
 
-  const itemKey = typeof moduleKeyOrDescriptor === 'string' && MODULE_CATALOG[moduleKeyOrDescriptor]
+  const itemKey = typeof moduleKeyOrDescriptor === 'string' && getItem(moduleKeyOrDescriptor)
     ? moduleKeyOrDescriptor
     : resolveItemKey(moduleKeyOrDescriptor);
   if (!itemKey) return null;
 
-  const descriptor = MODULE_CATALOG[itemKey];
+  const item = getItem(itemKey);
   const assignmentRecord = MODULE_CONTRACT_ASSIGNMENTS[itemKey];
-  if (!descriptor || !assignmentRecord) return null;
+  if (!item || !assignmentRecord) return null;
 
   const profile = MODULE_CONTRACT_PROFILES[assignmentRecord.profile];
   if (!profile) return null;
@@ -222,9 +222,16 @@ export function resolveModuleContract(moduleKeyOrDescriptor) {
   return {
     id: itemKey,
     itemKey,
-    type: descriptor.type,
+    type: item.type,
     profile: assignmentRecord.profile,
     ...mergeProfile(profile, assignmentRecord),
-    behavior: getModuleBehavior({ ...descriptor, itemKey }),
+    behavior: getModuleBehavior({
+      itemKey,
+      type: item.type,
+      shape: item.shape,
+      widthCm: item.dimensions?.widthCm,
+      shelfCount: item.shelfCount,
+      variant: item.variant,
+    }),
   };
 }

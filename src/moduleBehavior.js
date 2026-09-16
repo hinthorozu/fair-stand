@@ -1,5 +1,5 @@
 import { STAND_DIMENSIONS } from './catalog.js';
-import { getItem, isShortUpFamilyDescriptor } from './items.js';
+import { getItem, isShortUpFamilyDescriptor, resolveSceneDimensions } from './items.js';
 import { getStripOccupancyHeightRangeCm, resolveModuleStripOccupancy } from './stripOccupancy.js';
 
 const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
@@ -271,17 +271,19 @@ export function getModuleCollisionHeightRangeCm(moduleOrType) {
   const occupancy = resolveModuleStripOccupancy(module);
   if (occupancy) return getStripOccupancyHeightRangeCm(occupancy);
 
-  const fullHeightCm = Math.round(STAND_DIMENSIONS.height * 100);
   const explicitHeightCm = Number(module.heightCm);
   if (Number.isFinite(explicitHeightCm) && explicitHeightCm > 0) {
     return Object.freeze({ minCm: 0, maxCm: explicitHeightCm });
   }
 
-  const itemHeightCm = Number(getItem(module.itemKey)?.dimensions?.heightCm);
-  if (Number.isFinite(itemHeightCm) && itemHeightCm > 0) {
-    return Object.freeze({ minCm: 0, maxCm: itemHeightCm });
+  const sceneHeightCm = resolveSceneDimensions(getItem(module.itemKey)).heightCm;
+  if (sceneHeightCm != null) {
+    return Object.freeze({ minCm: 0, maxCm: sceneHeightCm });
   }
 
+  // LEGACY: occupancy yok, module.heightCm yok, Item scene height MISSING.
+  // Item-specific footprint STAND_DIMENSIONS'tan türetilmez; yalnız genel stand zarfı kalır.
+  const fullHeightCm = Math.round(STAND_DIMENSIONS.height * 100);
   return Object.freeze({ minCm: 0, maxCm: fullHeightCm });
 }
 

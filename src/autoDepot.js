@@ -1,4 +1,4 @@
-import { MODULE_CATALOG } from './catalog.js';
+import { getItem } from './items.js';
 import { createModulePlacement } from './modulePlacement.js';
 
 export const AUTO_DEPOT_SIZES = Object.freeze({
@@ -8,8 +8,18 @@ export const AUTO_DEPOT_SIZES = Object.freeze({
   '200x200': Object.freeze({ widthCm: 200, depthCm: 200, label: '2 × 2 m' }),
 });
 
-const PLASTIC_TRASH_BIN_ITEM_KEY = 'PLASTIC_TRASH_BIN';
-const PLASTIC_TRASH_BIN_DESCRIPTOR = MODULE_CATALOG[PLASTIC_TRASH_BIN_ITEM_KEY];
+function requireItem(itemKey) {
+  const item = getItem(itemKey);
+  if (!item?.dimensions) {
+    throw new TypeError(`Missing Item master dimensions for ${itemKey}.`);
+  }
+  return item;
+}
+
+const MINI_FRIDGE_ITEM = requireItem('MINI_FRIDGE_AVANTI');
+const COAT_RACK_ITEM = requireItem('COAT_RACK');
+const KETTLE_ITEM = requireItem('KETTLE');
+const PLASTIC_TRASH_BIN_ITEM = requireItem('PLASTIC_TRASH_BIN');
 
 function wall(widthCm, xCm, yCm, rotationZDeg = 0) {
   return { kind: 'wall', widthCm, placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }) };
@@ -73,15 +83,15 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
   addFront(specs, xCm, yCm + size.depthCm, size.widthCm, standType);
 
   if (includeContents) {
-    const fridgeWidth = MODULE_CATALOG.MINI_FRIDGE_AVANTI.widthCm;
-    const fridgeDepth = MODULE_CATALOG.MINI_FRIDGE_AVANTI.depthCm;
-    const rackWidth = MODULE_CATALOG.COAT_RACK.widthCm;
-    const rackDepth = MODULE_CATALOG.COAT_RACK.depthCm;
-    const kettleWidth = MODULE_CATALOG.KETTLE.widthCm;
-    const kettleDepth = MODULE_CATALOG.KETTLE.depthCm;
-    const trashBinWidth = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.widthCm);
-    const trashBinDepth = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.depthCm);
-    const trashBinHeight = Number(PLASTIC_TRASH_BIN_DESCRIPTOR.heightCm);
+    const fridgeWidth = Number(MINI_FRIDGE_ITEM.dimensions.widthCm);
+    const fridgeDepth = Number(MINI_FRIDGE_ITEM.dimensions.depthCm);
+    const rackWidth = Number(COAT_RACK_ITEM.dimensions.widthCm);
+    const rackDepth = Number(COAT_RACK_ITEM.dimensions.depthCm);
+    const kettleWidth = Number(KETTLE_ITEM.dimensions.widthCm);
+    const kettleDepth = Number(KETTLE_ITEM.dimensions.depthCm);
+    const trashBinWidth = Number(PLASTIC_TRASH_BIN_ITEM.dimensions.widthCm);
+    const trashBinDepth = Number(PLASTIC_TRASH_BIN_ITEM.dimensions.depthCm);
+    const trashBinHeight = Number(PLASTIC_TRASH_BIN_ITEM.dimensions.heightCm);
     const gapCm = 6;
 
     // xCm 0° serbest ürünlerde oturumun başlangıç kenarı; yCm oturum orta çizgisidir.
@@ -109,17 +119,17 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
     specs.push(fixture('kettle', kettleWidth, kettleDepth, kettleX, kettleY));
     specs.push(fixture('coat-rack', rackWidth, rackDepth, rackX, rackY));
     specs.push(fixture(
-      PLASTIC_TRASH_BIN_DESCRIPTOR.type,
+      PLASTIC_TRASH_BIN_ITEM.type,
       trashBinWidth,
       trashBinDepth,
       trashBinX,
       trashBinY,
       0,
       {
-        itemKey: PLASTIC_TRASH_BIN_ITEM_KEY,
+        itemKey: PLASTIC_TRASH_BIN_ITEM.itemKey,
         heightCm: trashBinHeight,
-        modelFile: PLASTIC_TRASH_BIN_DESCRIPTOR.modelFile,
-        preserveModelScale: Boolean(PLASTIC_TRASH_BIN_DESCRIPTOR.preserveModelScale),
+        modelFile: PLASTIC_TRASH_BIN_ITEM.modelFile,
+        preserveModelScale: Boolean(PLASTIC_TRASH_BIN_ITEM.preserveModelScale),
       },
     ));
   }

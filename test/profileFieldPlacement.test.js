@@ -28,7 +28,7 @@ test('field profiles are self BOM ×1 and do not change parent wall recipe ×2',
   assert.equal(MODULE_CATALOG.profile_91.widthCm, 100);
   assert.equal(MODULE_CATALOG.profile_41_5.widthCm, 50);
   assert.equal(MODULE_CATALOG.profile_190.depthCm, 8);
-  assert.equal(MODULE_CATALOG.profile_190.heightCm, 8);
+  assert.equal(MODULE_CATALOG.profile_190.heightCm, 350);
   assert.equal(resolveModuleContract('profile_190').bom.mode, 'self');
   const bom = resolveItemBom('profile_190');
   assert.equal(bom.length, 1);
@@ -149,7 +149,8 @@ test('field profile renderer is a thick top rail, not a 4mm line or a 7-strip pa
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const fn = source.slice(source.indexOf('function createProfileModule'), source.indexOf('function createKettleModule'));
-  assert.match(fn, /getStraightWallNominalWidthForProfileItem/);
+  assert.match(fn, /resolveSceneDimensions/);
+  assert.doesNotMatch(fn, /getStraightWallNominalWidthForProfileItem/);
   assert.match(fn, /BoxGeometry\(widthM, frameDepth, frameDepth\)/);
   assert.match(fn, /frameHeight - frameDepth \/ 2/);
   assert.match(fn, /FRAME_COLOR/);
@@ -161,7 +162,7 @@ test('field profile renderer is a thick top rail, not a 4mm line or a 7-strip pa
 test('catalog preview for profile is a horizontal bar', async () => {
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
-  assert.match(source, /module\.type === 'profile'/);
+  assert.match(source, /profile\(preview, module\) \{ appendWidthBox\(preview, 'module-drag-profile'/);
   assert.match(source, /module-drag-profile/);
   assert.match(source, /\.module-drag-profile \{ height:12px/);
 });

@@ -1,0 +1,781 @@
+{
+  "generatedFrom": "listCatalogItems after sceneDimensions",
+  "keys": [
+    "wall_200",
+    "wall_150",
+    "wall_100",
+    "wall_50",
+    "wall_separator_100",
+    "wall_separator_50",
+    "wall_separator_100_sarmasik",
+    "wall_separator_50_sarmasik",
+    "wall_base_200",
+    "wall_base_150",
+    "wall_base_100",
+    "door_100",
+    "wall_200_short_up_2",
+    "wall_150_short_up_2",
+    "wall_100_short_up_2",
+    "wall_50_short_up_2",
+    "wall_200_short_up_1",
+    "wall_150_short_up_1",
+    "wall_100_short_up_1",
+    "wall_50_short_up_1",
+    "upright_346_5",
+    "profile_190",
+    "profile_140_5",
+    "profile_91",
+    "profile_41_5",
+    "wall_showcase_100_3",
+    "wall_showcase_100_2",
+    "wall_shelf_3_200",
+    "wall_shelf_3_150",
+    "wall_shelf_3_100",
+    "wall_shelf_2_200",
+    "wall_shelf_2_150",
+    "wall_shelf_2_100",
+    "desk_banko_200",
+    "desk_banko_150",
+    "desk_banko_100",
+    "desk_banko_200_L",
+    "desk_banko_150_L",
+    "desk_banko_100_L",
+    "BASE_200",
+    "BASE_150",
+    "BASE_100",
+    "furniture_sofa_set_classic",
+    "furniture_sofa_single_classic",
+    "furniture_sofa_double_classic",
+    "furniture_coffee_table_classic",
+    "furniture_table_chair_set_eames",
+    "chair_eames",
+    "glass_table",
+    "furniture_bar_stool_classic",
+    "MINI_FRIDGE_AVANTI",
+    "KETTLE",
+    "COAT_RACK",
+    "PLASTIC_TRASH_BIN",
+    "EXTRA_INDOOR_PLANT_1",
+    "EXTRA_LONG_PLANTER_100",
+    "EXTRA_LONG_PLANTER_150",
+    "EXTRA_LONG_PLANTER_200",
+    "TV_42",
+    "TV_55",
+    "VIDEO_WALL_2X2",
+    "VIDEO_WALL_3X3",
+    "TV_65",
+    "led_floodlight"
+  ],
+  "groups": [
+    {
+      "catalogKey": "panel-wall",
+      "catalogName": "Panel & Duvar",
+      "catalogIndex": 1,
+      "keys": [
+        "wall_200",
+        "wall_150",
+        "wall_100",
+        "wall_50",
+        "wall_separator_100",
+        "wall_separator_50",
+        "wall_separator_100_sarmasik",
+        "wall_separator_50_sarmasik",
+        "wall_base_200",
+        "wall_base_150",
+        "wall_base_100",
+        "door_100"
+      ]
+    },
+    {
+      "catalogKey": "panel-addon",
+      "catalogName": "Panel Ek Modül",
+      "catalogIndex": 2,
+      "keys": [
+        "wall_200_short_up_2",
+        "wall_150_short_up_2",
+        "wall_100_short_up_2",
+        "wall_50_short_up_2",
+        "wall_200_short_up_1",
+        "wall_150_short_up_1",
+        "wall_100_short_up_1",
+        "wall_50_short_up_1",
+        "upright_346_5",
+        "profile_190",
+        "profile_140_5",
+        "profile_91",
+        "profile_41_5"
+      ]
+    },
+    {
+      "catalogKey": "shelf-showcase",
+      "catalogName": "Raf & Vitrin",
+      "catalogIndex": 3,
+      "keys": [
+        "wall_showcase_100_3",
+        "wall_showcase_100_2",
+        "wall_shelf_3_200",
+        "wall_shelf_3_150",
+        "wall_shelf_3_100",
+        "wall_shelf_2_200",
+        "wall_shelf_2_150",
+        "wall_shelf_2_100"
+      ]
+    },
+    {
+      "catalogKey": "counter-base",
+      "catalogName": "Banko & Baza",
+      "catalogIndex": 4,
+      "keys": [
+        "desk_banko_200",
+        "desk_banko_150",
+        "desk_banko_100",
+        "desk_banko_200_L",
+        "desk_banko_150_L",
+        "desk_banko_100_L",
+        "BASE_200",
+        "BASE_150",
+        "BASE_100"
+      ]
+    },
+    {
+      "catalogKey": "extra",
+      "catalogName": "Extra",
+      "catalogIndex": 5,
+      "keys": [
+        "furniture_sofa_set_classic",
+        "furniture_sofa_single_classic",
+        "furniture_sofa_double_classic",
+        "furniture_coffee_table_classic",
+        "furniture_table_chair_set_eames",
+        "chair_eames",
+        "glass_table",
+        "furniture_bar_stool_classic",
+        "MINI_FRIDGE_AVANTI",
+        "KETTLE",
+        "COAT_RACK",
+        "PLASTIC_TRASH_BIN",
+        "EXTRA_INDOOR_PLANT_1",
+        "EXTRA_LONG_PLANTER_100",
+        "EXTRA_LONG_PLANTER_150",
+        "EXTRA_LONG_PLANTER_200"
+      ]
+    },
+    {
+      "catalogKey": "electronics-lighting",
+      "catalogName": "Elektronik & Aydınlatma",
+      "catalogIndex": 6,
+      "keys": [
+        "TV_42",
+        "TV_55",
+        "VIDEO_WALL_2X2",
+        "VIDEO_WALL_3X3",
+        "TV_65",
+        "led_floodlight"
+      ]
+    }
+  ],
+  "descriptors": [
+    {
+      "itemKey": "wall_200",
+      "label": "Panel 200",
+      "widthCm": 200,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "flat-panel"
+    },
+    {
+      "itemKey": "wall_150",
+      "label": "Panel 150",
+      "widthCm": 150,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "flat-panel"
+    },
+    {
+      "itemKey": "wall_100",
+      "label": "Panel 100",
+      "widthCm": 100,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "flat-panel"
+    },
+    {
+      "itemKey": "wall_50",
+      "label": "Panel 50",
+      "widthCm": 50,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "flat-panel"
+    },
+    {
+      "itemKey": "wall_separator_100",
+      "label": "Separatör 100",
+      "widthCm": 100,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "separator"
+    },
+    {
+      "itemKey": "wall_separator_50",
+      "label": "Separatör 50",
+      "widthCm": 50,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "separator"
+    },
+    {
+      "itemKey": "wall_separator_100_sarmasik",
+      "label": "Separatör 100 Sarmaşık",
+      "widthCm": 100,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "separator",
+      "modelFile": "wall_separator_100_sarmasik.glb"
+    },
+    {
+      "itemKey": "wall_separator_50_sarmasik",
+      "label": "Separatör 50 Sarmaşık",
+      "widthCm": 50,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "separator",
+      "modelFile": "wall_separator_50_sarmasik.glb"
+    },
+    {
+      "itemKey": "wall_base_200",
+      "label": "Panel Bazalı 200",
+      "widthCm": 200,
+      "depthCm": 50,
+      "heightCm": 350,
+      "type": "base-wall"
+    },
+    {
+      "itemKey": "wall_base_150",
+      "label": "Panel Bazalı 150",
+      "widthCm": 150,
+      "depthCm": 50,
+      "heightCm": 350,
+      "type": "base-wall"
+    },
+    {
+      "itemKey": "wall_base_100",
+      "label": "Panel Bazalı 100",
+      "widthCm": 100,
+      "depthCm": 50,
+      "heightCm": 350,
+      "type": "base-wall"
+    },
+    {
+      "itemKey": "door_100",
+      "label": "Depo Kapısı 100",
+      "widthCm": 100,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "door"
+    },
+    {
+      "itemKey": "wall_200_short_up_2",
+      "label": "Panel 200 Short Up 2",
+      "widthCm": 200,
+      "depthCm": 10,
+      "type": "flat-panel",
+      "variant": "short-up-2",
+      "stripOccupancy": {
+        "align": "top",
+        "stripCount": 2
+      }
+    },
+    {
+      "itemKey": "wall_150_short_up_2",
+      "label": "Panel 150 Short Up 2",
+      "widthCm": 150,
+      "depthCm": 10,
+      "type": "flat-panel",
+      "variant": "short-up-2",
+      "stripOccupancy": {
+        "align": "top",
+        "stripCount": 2
+      }
+    },
+    {
+      "itemKey": "wall_100_short_up_2",
+      "label": "Panel 100 Short Up 2",
+      "widthCm": 100,
+      "depthCm": 10,
+      "type": "flat-panel",
+      "variant": "short-up-2",
+      "stripOccupancy": {
+        "align": "top",
+        "stripCount": 2
+      }
+    },
+    {
+      "itemKey": "wall_50_short_up_2",
+      "label": "Panel 50 Short Up 2",
+      "widthCm": 50,
+      "depthCm": 10,
+      "type": "flat-panel",
+      "variant": "short-up-2",
+      "stripOccupancy": {
+        "align": "top",
+        "stripCount": 2
+      }
+    },
+    {
+      "itemKey": "wall_200_short_up_1",
+      "label": "Panel 200 Short Up 1",
+      "widthCm": 200,
+      "depthCm": 10,
+      "type": "flat-panel",
+      "variant": "short-up-1",
+      "stripOccupancy": {
+        "align": "top",
+        "stripCount": 1
+      }
+    },
+    {
+      "itemKey": "wall_150_short_up_1",
+      "label": "Panel 150 Short Up 1",
+      "widthCm": 150,
+      "depthCm": 10,
+      "type": "flat-panel",
+      "variant": "short-up-1",
+      "stripOccupancy": {
+        "align": "top",
+        "stripCount": 1
+      }
+    },
+    {
+      "itemKey": "wall_100_short_up_1",
+      "label": "Panel 100 Short Up 1",
+      "widthCm": 100,
+      "depthCm": 10,
+      "type": "flat-panel",
+      "variant": "short-up-1",
+      "stripOccupancy": {
+        "align": "top",
+        "stripCount": 1
+      }
+    },
+    {
+      "itemKey": "wall_50_short_up_1",
+      "label": "Panel 50 Short Up 1",
+      "widthCm": 50,
+      "depthCm": 10,
+      "type": "flat-panel",
+      "variant": "short-up-1",
+      "stripOccupancy": {
+        "align": "top",
+        "stripCount": 1
+      }
+    },
+    {
+      "itemKey": "upright_346_5",
+      "label": "Dikme 346,5 cm",
+      "widthCm": 8,
+      "depthCm": 8,
+      "heightCm": 346.5,
+      "type": "upright"
+    },
+    {
+      "itemKey": "profile_190",
+      "label": "Profil 190 cm",
+      "widthCm": 200,
+      "depthCm": 8,
+      "heightCm": 350,
+      "type": "profile"
+    },
+    {
+      "itemKey": "profile_140_5",
+      "label": "Profil 140,5 cm",
+      "widthCm": 150,
+      "depthCm": 8,
+      "heightCm": 350,
+      "type": "profile"
+    },
+    {
+      "itemKey": "profile_91",
+      "label": "Profil 91 cm",
+      "widthCm": 100,
+      "depthCm": 8,
+      "heightCm": 350,
+      "type": "profile"
+    },
+    {
+      "itemKey": "profile_41_5",
+      "label": "Profil 41,5 cm",
+      "widthCm": 50,
+      "depthCm": 8,
+      "heightCm": 350,
+      "type": "profile"
+    },
+    {
+      "itemKey": "wall_showcase_100_3",
+      "label": "3 Gözlü Vitrin 100",
+      "widthCm": 100,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "showcase-3",
+      "eyeCount": 3
+    },
+    {
+      "itemKey": "wall_showcase_100_2",
+      "label": "2 Gözlü Vitrin 100",
+      "widthCm": 100,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "showcase-2",
+      "eyeCount": 2
+    },
+    {
+      "itemKey": "wall_shelf_3_200",
+      "label": "Raf 200 · 3 Raf",
+      "widthCm": 200,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "shelf",
+      "shelfCount": 3
+    },
+    {
+      "itemKey": "wall_shelf_3_150",
+      "label": "Raf 150 · 3 Raf",
+      "widthCm": 150,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "shelf",
+      "shelfCount": 3
+    },
+    {
+      "itemKey": "wall_shelf_3_100",
+      "label": "Raf 100 · 3 Raf",
+      "widthCm": 100,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "shelf",
+      "shelfCount": 3
+    },
+    {
+      "itemKey": "wall_shelf_2_200",
+      "label": "Raf 200 · 2 Raf",
+      "widthCm": 200,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "shelf",
+      "shelfCount": 2
+    },
+    {
+      "itemKey": "wall_shelf_2_150",
+      "label": "Raf 150 · 2 Raf",
+      "widthCm": 150,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "shelf",
+      "shelfCount": 2
+    },
+    {
+      "itemKey": "wall_shelf_2_100",
+      "label": "Raf 100 · 2 Raf",
+      "widthCm": 100,
+      "depthCm": 10,
+      "heightCm": 350,
+      "type": "shelf",
+      "shelfCount": 2
+    },
+    {
+      "itemKey": "desk_banko_200",
+      "label": "Banko 200",
+      "widthCm": 200,
+      "depthCm": 50,
+      "heightCm": 100,
+      "type": "counter"
+    },
+    {
+      "itemKey": "desk_banko_150",
+      "label": "Banko 150",
+      "widthCm": 150,
+      "depthCm": 50,
+      "heightCm": 100,
+      "type": "counter"
+    },
+    {
+      "itemKey": "desk_banko_100",
+      "label": "Banko 100",
+      "widthCm": 100,
+      "depthCm": 50,
+      "heightCm": 100,
+      "type": "counter"
+    },
+    {
+      "itemKey": "desk_banko_200_L",
+      "label": "Köşe Banko 200×200",
+      "widthCm": 200,
+      "depthCm": 200,
+      "heightCm": 100,
+      "type": "counter",
+      "shape": "L"
+    },
+    {
+      "itemKey": "desk_banko_150_L",
+      "label": "Köşe Banko 150×150",
+      "widthCm": 150,
+      "depthCm": 150,
+      "heightCm": 100,
+      "type": "counter",
+      "shape": "L"
+    },
+    {
+      "itemKey": "desk_banko_100_L",
+      "label": "Köşe Banko 100×100",
+      "widthCm": 100,
+      "depthCm": 100,
+      "heightCm": 100,
+      "type": "counter",
+      "shape": "L"
+    },
+    {
+      "itemKey": "BASE_200",
+      "label": "Baza 200",
+      "widthCm": 200,
+      "depthCm": 50,
+      "heightCm": 50,
+      "type": "base"
+    },
+    {
+      "itemKey": "BASE_150",
+      "label": "Baza 150",
+      "widthCm": 150,
+      "depthCm": 50,
+      "heightCm": 50,
+      "type": "base"
+    },
+    {
+      "itemKey": "BASE_100",
+      "label": "Baza 100",
+      "widthCm": 100,
+      "depthCm": 50,
+      "heightCm": 50,
+      "type": "base"
+    },
+    {
+      "itemKey": "furniture_sofa_set_classic",
+      "label": "Koltuk Takımı",
+      "widthCm": 150,
+      "depthCm": 150,
+      "heightCm": 78,
+      "type": "sofa-set-classic"
+    },
+    {
+      "itemKey": "furniture_sofa_single_classic",
+      "label": "Tekli Koltuk",
+      "widthCm": 65,
+      "depthCm": 45,
+      "heightCm": 78,
+      "type": "sofa-single-classic"
+    },
+    {
+      "itemKey": "furniture_sofa_double_classic",
+      "label": "Çiftli Koltuk",
+      "widthCm": 150,
+      "depthCm": 45,
+      "heightCm": 78,
+      "type": "sofa-double-classic"
+    },
+    {
+      "itemKey": "furniture_coffee_table_classic",
+      "label": "Sehpa",
+      "widthCm": 60,
+      "depthCm": 42,
+      "heightCm": 38,
+      "type": "coffee-table-classic"
+    },
+    {
+      "itemKey": "furniture_table_chair_set_eames",
+      "label": "Eames Masa Sandalye Takımı",
+      "widthCm": 150,
+      "depthCm": 150,
+      "heightCm": 82,
+      "type": "table-chair-set-eames"
+    },
+    {
+      "itemKey": "chair_eames",
+      "label": "Eames Sandalye",
+      "widthCm": 46,
+      "depthCm": 58,
+      "heightCm": 82,
+      "type": "chair"
+    },
+    {
+      "itemKey": "glass_table",
+      "label": "Cam Masa",
+      "widthCm": 75,
+      "depthCm": 75,
+      "heightCm": 74,
+      "type": "table-glass"
+    },
+    {
+      "itemKey": "furniture_bar_stool_classic",
+      "label": "Bar Taburesi",
+      "widthCm": 60,
+      "depthCm": 55,
+      "heightCm": 121,
+      "type": "bar-stool"
+    },
+    {
+      "itemKey": "MINI_FRIDGE_AVANTI",
+      "label": "Mini Buzdolabı",
+      "widthCm": 50,
+      "depthCm": 50,
+      "heightCm": 66,
+      "type": "mini-fridge",
+      "modelFile": "80s_avanti_mini_fridge.glb",
+      "unit": "adet"
+    },
+    {
+      "itemKey": "KETTLE",
+      "label": "Kettle",
+      "widthCm": 24,
+      "depthCm": 19,
+      "heightCm": 25,
+      "type": "kettle",
+      "modelFile": "kettle.glb",
+      "unit": "adet"
+    },
+    {
+      "itemKey": "COAT_RACK",
+      "label": "Askılık",
+      "widthCm": 43,
+      "depthCm": 43,
+      "heightCm": 180,
+      "type": "coat-rack",
+      "modelFile": "coat_rack.glb",
+      "unit": "adet"
+    },
+    {
+      "itemKey": "PLASTIC_TRASH_BIN",
+      "label": "Çöp Kutusu",
+      "widthCm": 40,
+      "depthCm": 40,
+      "heightCm": 60,
+      "type": "plastic-trash-bin",
+      "modelFile": "plastic_trash_bin.glb",
+      "modelRotationYDeg": 0,
+      "visualRotationYDeg": -90,
+      "preserveModelScale": false,
+      "unit": "adet"
+    },
+    {
+      "itemKey": "EXTRA_INDOOR_PLANT_1",
+      "label": "Yapay Çiçek 1",
+      "widthCm": 60,
+      "depthCm": 60,
+      "heightCm": 120,
+      "type": "indoor-plant-1",
+      "modelRotationYDeg": 0,
+      "preserveModelScale": false
+    },
+    {
+      "itemKey": "EXTRA_LONG_PLANTER_100",
+      "label": "Uzun Saksı 100",
+      "widthCm": 100,
+      "depthCm": 30,
+      "heightCm": 30,
+      "type": "indoor-plant-1",
+      "modelFile": "saksi_bitkili_100x30x30.glb",
+      "modelRotationYDeg": 90,
+      "preserveModelScale": true
+    },
+    {
+      "itemKey": "EXTRA_LONG_PLANTER_150",
+      "label": "Uzun Saksı 150",
+      "widthCm": 150,
+      "depthCm": 30,
+      "heightCm": 30,
+      "type": "indoor-plant-1",
+      "modelFile": "saksi_bitkili_150x30x30.glb",
+      "modelRotationYDeg": 90,
+      "preserveModelScale": true
+    },
+    {
+      "itemKey": "EXTRA_LONG_PLANTER_200",
+      "label": "Uzun Saksı 200",
+      "widthCm": 200,
+      "depthCm": 30,
+      "heightCm": 30,
+      "type": "indoor-plant-1",
+      "modelFile": "saksi_bitkili_200x30x30.glb",
+      "modelRotationYDeg": 90,
+      "preserveModelScale": true
+    },
+    {
+      "itemKey": "TV_42",
+      "label": "TV 42\"",
+      "widthCm": 93,
+      "depthCm": 5,
+      "heightCm": 350,
+      "type": "tv",
+      "sizeInch": 42,
+      "screenWidthCm": 93,
+      "screenHeightCm": 52.3
+    },
+    {
+      "itemKey": "TV_55",
+      "label": "TV 55\"",
+      "widthCm": 121.8,
+      "depthCm": 5,
+      "heightCm": 350,
+      "type": "tv",
+      "sizeInch": 55,
+      "screenWidthCm": 121.8,
+      "screenHeightCm": 68.5
+    },
+    {
+      "itemKey": "VIDEO_WALL_2X2",
+      "label": "Video Wall 2×2",
+      "widthCm": 217,
+      "depthCm": 5,
+      "heightCm": 122,
+      "type": "tv",
+      "sizeInch": 55,
+      "screenWidthCm": 217,
+      "screenHeightCm": 122,
+      "panelScreenWidthCm": 108.5,
+      "panelScreenHeightCm": 61,
+      "videoWallRows": 2,
+      "videoWallCols": 2
+    },
+    {
+      "itemKey": "VIDEO_WALL_3X3",
+      "label": "Video Wall 3×3",
+      "widthCm": 325.5,
+      "depthCm": 5,
+      "heightCm": 183,
+      "type": "tv",
+      "sizeInch": 55,
+      "screenWidthCm": 325.5,
+      "screenHeightCm": 183,
+      "panelScreenWidthCm": 108.5,
+      "panelScreenHeightCm": 61,
+      "videoWallRows": 3,
+      "videoWallCols": 3
+    },
+    {
+      "itemKey": "TV_65",
+      "label": "TV 65\"",
+      "widthCm": 143.9,
+      "depthCm": 5,
+      "heightCm": 350,
+      "type": "tv",
+      "sizeInch": 65,
+      "screenWidthCm": 143.9,
+      "screenHeightCm": 80.9
+    },
+    {
+      "itemKey": "led_floodlight",
+      "label": "LED Projektör",
+      "widthCm": 50,
+      "depthCm": 20,
+      "heightCm": 35,
+      "type": "led-floodlight"
+    }
+  ]
+}

@@ -7,6 +7,238 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-16 — Item physical dimensions ve sceneDimensions override ayrımı
+
+### Neden yapıldı
+
+Item ölçüleri dağınıktı. Profil sahne genişliği Recipe `nominalWidthCm` ve `catalogWidthCm` üzerinden okunuyordu. Dikme oturumu thickness→width/depth, length→height çapraz remap ile üretiliyordu. Catalog kendi footprint’ini bar-stock kuralıyla yazıyordu.
+
+### Yeni kural
+
+Her Item kendi ölçü bilgisinin canonical kaynağıdır. İki katman, aynı field seti:
+
+```text
+dimensions        = gerçek/fiziksel ürün ölçüleri
+sceneDimensions   = scene/runtime override
+
+canonical fields: widthCm, depthCm, heightCm, lengthCm, thicknessCm
+
+effective scene field:
+  sceneDimensions.field ?? dimensions.field ?? MISSING
+```
+
+Aynı field adı yoksa fallback yoktur. `lengthCm` width olmaz. `thicknessCm` depth olmaz.
+
+### Kaldırılan kaynaklar
+
+- `catalogWidthCm` (dört profil Item’ından silindi)
+- `createProfileModuleState` / `normalizeModuleItemState` / `createProfileModule` → `getStraightWallNominalWidthForProfileItem`
+- Catalog `assignCatalogFootprint` bar-stock remap ve `catalogWidthCm`
+- `getItemIdentityFields` `catalogWidthCm` ve thickness/length remap
+
+### Yazılan sceneDimensions (mevcut runtime davranışına göre)
+
+- dört profil: `{ widthCm: 50|100|150|200, depthCm: 8, heightCm: 350 }`
+- `upright_346_5`: `{ widthCm: 8, depthCm: 8, heightCm: 346.5 }` — renderer 10×10×350 görsel zarfı ayrı kavramdır
+- tam boy wall/separator/shelf/showcase/door: `{ depthCm: 10, heightCm: 350 }` (width physical’dan)
+- short_up: `{ depthCm: 10 }` — height occupancy’dedir, 350 yazılmaz
+- TV: `{ heightCm: screenHeightCm }`; video wall: `{ widthCm, heightCm }` panel × ızgara
+- `wall_base_*` physical  width×50×350 ile aynı; sceneDimensions yazılmadı
+
+### Canonical method
+
+`resolveSceneDimensions(item)` — consumer’lar ayrı fallback yazmaz.
+
+### Bilinçli sınırlar / LEGACY
+
+- Özel physical alanlar (`screenWidthCm`, `catalogHeightCm`, `mountHeightCm`, `tableDiameterCm`, `wallGapCm`) bu turda 5 alana zorla taşınmadı
+- TV Catalog kart yüksekliği UI-only `catalogHeightCm=350` (media metrics); runtime scene height ekrandır
+- Ghost numeric-width yolu ve Item scene height MISSING (short_up occupancy) STAND zarfına düşebilir — Item-specific SOT değildir
+- `MODULE_COLLISION_DEPTH_CM` wall_base omurga ve genel stand standardı olarak kalır
+- 6 Item physical dimensions eksik: `connector_start`, `connector_single`, `connector_double`, `connector_corner`, `shelf_leg`, `hali` — tahmin yazılmadı
+
+### Doğrulama
+
+- kayıtlı Item 104; catalogVisible=true 64; projection 64
+- physical `dimensions` 98; `sceneDimensions` 35; MISSING_PHYSICAL 6
+- `test/itemSceneDimensions.test.js` same-field / cross-remap / catalogWidthCm / Recipe yasakları
+- targeted dimension + catalog + profile/upright/shelf contract testleri: geçti
+- `npm test`: 775 pass / 0 fail
+- `npm run build`: geçti
+- `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
+- targeted E2E `e2e/smoke.spec.mjs`: geçti
+
+### Sonraki adım
+
+Rotation / color / image / lighting / delete / global `type` kaldırma / SQLite / BOM composition redesign / Catalog preview redesign / renderer architecture bu turda yok.
+
+---
+
+## 2026-09-16 — Catalog preview seçiminin type’tan Item config’e taşınması
+
+### Eski yapı
+
+`createModuleCatalogPreview()` Catalog kart silüetini `module.type` zinciriyle seçiyordu:
+
+- `if (module.type === 'shelf' | sofa-set-classic | sofa-single-classic | sofa-double-classic | coffee-table-classic | table-chair-set-eames | chair | table-glass | bar-stool | mini-fridge | coat-rack | plastic-trash-bin | indoor-plant-1 | kettle | tv | led-floodlight | upright | profile | base-wall | base | counter | separator | door | showcase-2 | showcase-3)`
+- `indoor-plant-1` + `modelFile` regex → long planter
+- `separator` + `modelFile` → vine CSS
+- `tv` + `videoWallRows/Cols` → video-wall CSS
+- `showcase-2` / `showcase-3` → `dataset.eyes`
+- eşleşmeyen her şey → flat-panel (sessiz type fallback)
+
+Catalog UI “type neymiş?” diye kart tipi, ikon ve CSS kararı veriyordu.
+
+### Yeni yapı
+
+64 görünür Item’a `catalogPreview` yazıldı. Renderer map:
+
+```text
+CATALOG_PREVIEW_RENDERERS[item.catalogPreview]
+```
+
+Item kendi Catalog görünümünü tarif eder. Catalog yalnız okur ve gösterir.
+
+Güncellenen Item: **64 / 64** görünür. Gizli 40 Item’da `catalogPreview` alanı yok.
+
+Dağılım: `flat-panel` 12, `counter` 6, `shelf` 6, `profile` 4, `tv` 3, `base` 3, `base-wall` 3, `long-planter` 3, `video-wall` 2, `separator` 2, `separator-vine` 2, `showcase` 2; kalan 16 key tek Item (`upright`, `door`, `kettle`, `coat-rack`, `mini-fridge`, `plastic-trash-bin`, `sofa-set`, `sofa-single`, `sofa-double`, `coffee-table`, `table-chair-set`, `chair`, `glass-table`, `bar-stool`, `indoor-plant`, `floodlight`).
+
+### Kaldırılan fallback
+
+- `type` → preview
+- `type` → CSS class
+- `itemKey` hardcode preview map
+- registry group → preview
+- görünür Item’da eksik `catalogPreview` için sessiz type fallback
+
+`catalogVisible === true` ve `catalogPreview` yok/bilinmiyor → `getCatalogItem` / `listCatalogItems` fail-fast.
+
+Projection `type` alanı `createModuleStateFromDescriptor` factory uyumu için durur; Catalog UI preview seçiminde kullanılmaz. Global `type` kaldırılmaz.
+
+### Doğrulama
+
+- kayıtlı Item 104; catalogVisible=true 64; projection 64
+- 64/64 `catalogPreview` mevcut; gizli 40’ta alan yok
+- `test/catalogPreviewConfig.test.js`: type branch yok; 64 kök CSS sınıf regression
+- catalogItemProjection / catalogDomainBoundary / itemCatalogFields korundu
+- targeted catalog + ilgili preview contract testleri: geçti
+- `npm test`: 753 pass / 0 fail
+- `npm run build`: geçti
+- `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
+- targeted E2E `e2e/smoke.spec.mjs`: geçti
+- GitHub CI `verify` (`b8ff36b`): geçti
+
+### Sonraki adım
+
+Rotation / color / image / lighting / delete / collision / placement / Item Contract mimari refactor / Recipe-BOM refactor / global `type` kaldırma / SQLite bu turda yok.
+
+---
+
+## 2026-09-16 — Catalog domain sınırının runtime mekanizmalarından ayrılması
+
+### Neden yapıldı
+
+Catalog, Item runtime repository’si haline gelmişti. AutoDepot ölçüleri `getCatalogItem` + `catalogVisible` üzerinden okunuyordu. ModuleContracts Item varlığını Catalog projection’a bağlıyordu. Catalog profil kart genişliğini Recipe’den öğreniyordu.
+
+### Kaldırılan bağımlılıklar
+
+- AutoDepot → Catalog: `getCatalogItem` / `MODULE_CATALOG` / `catalogVisible` kaldırıldı
+- ModuleContracts → Catalog: `getCatalogItem` kaldırıldı; string `itemKey` `getItem` ile doğrulanır
+- Catalog → Recipe: `getStraightWallNominalWidthForProfileItem` kaldırıldı
+
+### Yeni veri kaynakları
+
+- AutoDepot: `getItem('MINI_FRIDGE_AVANTI' | 'COAT_RACK' | 'KETTLE' | 'PLASTIC_TRASH_BIN')` → `item.dimensions.widthCm/depthCm/heightCm`
+- ModuleContracts: `getItem(itemKey)` Item master varlığı; descriptor gelirse `resolveItemKey` (Item identity, Catalog üyeliği değil)
+- `resolveItemKey` Catalog’dan `src/items.js` Item-domain helper’ına taşındı. `catalogVisible` kontrolü identity çözümlemesine girmez. `src/catalog.js` test ve mevcut `designState` / `main` import uyumu için re-export eder; bu turda frozen `designState.js` import yüzeyi açılmadı
+
+### Yeni Item alanı
+
+`catalogWidthCm` — yalnız dört profil Item’ında:
+
+- `profile_41_5` → 50
+- `profile_91` → 100
+- `profile_140_5` → 150
+- `profile_190` → 200
+
+Fiziksel `dimensions.lengthCm` değildir. Katalog kartı / serbest profil oturum genişliğidir. Recipe’den türetilmez.
+
+### Dependency yönü
+
+```text
+Item → Catalog
+Item → AutoDepot
+Item → ModuleContract
+Item → Recipe/BOM
+```
+
+Yasak: AutoDepot → Catalog, ModuleContract → Catalog, BOM → Catalog, Recipe → Catalog, Catalog → Recipe.
+
+### Doğrulama
+
+- kayıtlı Item 104; catalogVisible=true 64; projection 64
+- hardcoded katalog Item key listesi: 0
+- 64/64 catalog descriptor regression korundu
+- `catalogVisible=false` ≠ Item runtime’da yok
+- AutoDepot includeContents konum/ölçü regression’ı birebir
+- architecture boundary: `test/catalogDomainBoundary.test.js`
+- targeted: catalogItemProjection / catalogCategories / itemCatalogFields / catalogSingleSource / catalogDomainBoundary / autoDepotOrientation / tests/autoDepot — geçti
+- `npm test`: 749 pass / 0 fail
+- `npm run build`: geçti
+- `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
+- targeted E2E `e2e/smoke.spec.mjs`: geçti
+- GitHub CI `verify` (`efec8e1`): geçti
+
+### Sonraki adım
+
+Rotation / color / image / lighting / delete / collision / placement / Item Contract mimari refactor / Recipe-BOM refactor / registry temizliği / SQLite bu turda yok.
+
+---
+
+## 2026-09-16 — MODULE_CATALOG Item tekrarının kaldırılması
+
+### Eski yapı
+
+64 katalog kartı `src/catalog.js` içinde `MODULE_CATALOG` hardcoded key listesi + `create*CatalogItem` builder’ları ile ikinci kez tanımlanıyordu. Item kaydı varken kart descriptor’ı ayrı tutuluyordu.
+
+### Kaldırılan duplicate kaynak
+
+- `MODULE_CATALOG = { wall_200: createFlatPanelCatalogItem('wall_200'), ... }` literal 64 key
+- `createFlatPanelCatalogItem`, `createUprightCatalogItem`, `createProfileCatalogItem`, `createShelfCatalogItem`, `createCounterCatalogItem`, `createBaseCatalogItem`, `createBaseWallCatalogItem`, `createSeparatorCatalogItem`, `createWallMediaCatalogItem`, `createTopLightCatalogItem`, `createCommercialCatalogItem`, `createIndoorPlantCatalogItem`, `createFurnitureCatalogItem`
+
+### Yeni canonical method
+
+- `getCatalogItem(itemKey)` — `catalogVisible=true` Item’dan catalog descriptor
+- `listCatalogItems()` — görünür Item’lar, kategori `catalogIndex` + `catalogItemIndex` sırası
+- `listCatalogGroups()` aynı üyelik alanlarını okur; UI `getCatalogItem` ile kart üretir
+
+### Item’a taşınan gerçek alanlar
+
+Yok. Descriptor alanları zaten Item’da duruyordu (`name`, `dimensions`, `modelFile`, `eyeCount`, `sizeInch`, `videoWall`, `stripOccupancy`, `shape`, `shelfCount`, `variant`, rotation metadata). Projection alias’ı Item’a kopyalanmadı (`label` = `name`; kök `widthCm` = `dimensions.widthCm` veya türetilmiş oturum).
+
+Profil kart `widthCm` Item’da yoktur; düz duvar reçetesi `nominalWidthCm` türevidir. Dikme `thicknessCm`/`lengthCm` → kare oturum. TV/video-wall `resolveWallMediaMetrics` türevidir.
+
+### Compatibility export
+
+`MODULE_CATALOG` / `MODULE_CATALOG_KEYS` / `MODULE_CATALOG_GROUPS` kaldı; hardcoded liste değildir, `listCatalogItems` / `listCatalogGroups` türevidir. Mevcut testler bu export’u okumaya devam eder.
+
+### Doğrulama
+
+- kayıtlı Item 104; catalogVisible=true 64; projection 64
+- hardcoded katalog Item key listesi: 0
+- 64/64 descriptor regression: itemKey/label/widthCm/depthCm/heightCm/type/modelFile/eyeCount/shelfCount/shape/variant/stripOccupancy/unit/TV alanları birebir
+- kategori sayısı/sırası/adları/üye sayısı/Item sırası değişmedi
+- `npm test`: 740 pass / 0 fail
+- `npm run build`: geçti
+- `CHANGE_GATE_BASE=origin/RefactorItem npm run contract:verify`: geçti (`catalog-item-projection`)
+- targeted E2E `e2e/smoke.spec.mjs`: geçti
+
+### Sonraki adım
+
+SQLite/API yok. Rotation/color/image bu turda yok.
+
+---
+
 ## 2026-09-16 — Catalog category modelinin merkezileştirilmesi
 
 ### Neden yapıldı

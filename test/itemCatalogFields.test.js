@@ -217,9 +217,26 @@ test('104 Item katalog metadata alanlarını taşır ve canlı katalog üyeliği
   assert.equal(getItem('wall_200').catalogVisible, true);
   assert.equal(getItem('wall_200').catalogCategory, 'panel-wall');
   assert.equal(getItem('wall_200').catalogItemIndex, 1);
+  assert.equal(getItem('wall_200').catalogPreview, 'flat-panel');
   assert.equal(getItem('panel_197').catalogVisible, false);
   assert.equal(getItem('panel_197').catalogCategory, null);
   assert.equal(getItem('panel_197').catalogItemIndex, null);
+});
+
+test('profil sceneDimensions Catalog kart genişliğini taşır; catalogWidthCm yoktur', () => {
+  const expected = Object.freeze({
+    profile_41_5: 50,
+    profile_91: 100,
+    profile_140_5: 150,
+    profile_190: 200,
+  });
+
+  for (const item of listRegisteredItems()) {
+    assert.equal(Object.hasOwn(item, 'catalogWidthCm'), false, item.itemKey);
+    if (!Object.hasOwn(expected, item.itemKey)) continue;
+    assert.equal(item.sceneDimensions.widthCm, expected[item.itemKey], item.itemKey);
+    assert.notEqual(item.sceneDimensions.widthCm, item.dimensions.lengthCm, item.itemKey);
+  }
 });
 
 test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullanır', () => {
@@ -229,10 +246,14 @@ test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullan
 
   assert.match(sidebar, /listCatalogGroups/);
   assert.match(contextMenu, /listCatalogGroups/);
+  assert.match(sidebar, /getCatalogItem/);
+  assert.match(contextMenu, /getCatalogItem/);
   assert.match(sidebar, /catalogName/);
   assert.match(contextMenu, /catalogName/);
   assert.doesNotMatch(sidebar, /MODULE_CATALOG_GROUPS/);
   assert.doesNotMatch(contextMenu, /MODULE_CATALOG_GROUPS/);
+  assert.doesNotMatch(sidebar, /MODULE_CATALOG\[/);
+  assert.doesNotMatch(contextMenu, /MODULE_CATALOG\[/);
   assert.match(items, /catalogVisible: true/);
   assert.match(items, /catalogCategory: 'panel-wall'/);
 
@@ -240,6 +261,7 @@ test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullan
     assert.equal(Object.hasOwn(MODULE_CATALOG[itemKey], 'catalogVisible'), false, itemKey);
     assert.equal(Object.hasOwn(MODULE_CATALOG[itemKey], 'catalogCategory'), false, itemKey);
     assert.equal(Object.hasOwn(MODULE_CATALOG[itemKey], 'catalogItemIndex'), false, itemKey);
+    assert.equal(typeof MODULE_CATALOG[itemKey].catalogPreview, 'string', itemKey);
   }
 });
 
@@ -249,6 +271,8 @@ test('CATALOG.md catalogKey tablosu canlı kategorilerle örtüşür', () => {
   assert.match(catalogDoc, /# Catalog/);
   assert.match(catalogDoc, /listCatalogGroups/);
   assert.match(catalogDoc, /listCatalogCategories/);
+  assert.match(catalogDoc, /listCatalogItems/);
+  assert.match(catalogDoc, /getCatalogItem/);
 
   EXPECTED_CATALOG_GROUPS.forEach((group, index) => {
     const categoryKey = CATALOG_CATEGORY_KEYS_BY_LABEL[group.label];
@@ -267,10 +291,14 @@ test('ITEMS.md yalnız onaylı katalog şemasını taşır; gerçekleşmemiş me
   assert.match(itemsDoc, /### catalogVisible/);
   assert.match(itemsDoc, /### catalogCategory/);
   assert.match(itemsDoc, /### catalogItemIndex/);
+  assert.match(itemsDoc, /### catalogPreview/);
+  assert.match(itemsDoc, /### dimensions/);
+  assert.match(itemsDoc, /### sceneDimensions/);
   assert.match(itemsDoc, /# Canonical Mechanism Connections/);
   assert.match(itemsDoc, /# Item Schema/);
   assert.match(itemsDoc, /# Architectural Rules/);
   assert.match(itemsDoc, /listCatalogCategories/);
   assert.match(itemsDoc, /listCatalogGroups/);
-  assert.doesNotMatch(itemsDoc, /listCatalogItems\(\)[^\n]*mevcut/);
+  assert.match(itemsDoc, /listCatalogItems/);
+  assert.match(itemsDoc, /getCatalogItem/);
 });

@@ -94,14 +94,14 @@ test('trash bin state and behavior preserve fridge-style movement without overla
 test('trash catalog preview uses a dedicated bin silhouette instead of panel strips', () => {
   const source = readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
   const trashBranch = source.slice(
-    source.indexOf("if (module.type === 'plastic-trash-bin')"),
-    source.indexOf("if (module.type === 'indoor-plant-1'"),
+    source.indexOf("'plastic-trash-bin'(preview)"),
+    source.indexOf("'long-planter'(preview)"),
   );
   assert.match(trashBranch, /module-drag-trash-bin/);
-  assert.match(trashBranch, /trashBin\.className = 'module-drag-trash-bin'/);
+  assert.match(trashBranch, /appendParts\(preview, 'module-drag-trash-bin'/);
   assert.match(trashBranch, /\['handle', 'lid', 'body'\]/);
-  assert.match(trashBranch, /module-drag-trash-bin-\$\{part\}/);
   assert.doesNotMatch(trashBranch, /module-drag-panel/);
+  assert.doesNotMatch(source, /if \(module\.type === 'plastic-trash-bin'\)/);
 });
 
 test('trash bin has an explicit fixed-model contract and self BOM', () => {

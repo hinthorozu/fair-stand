@@ -9,7 +9,8 @@ import { getItem } from '../src/items.js';
 test('desk_banko_150_L is a 150 x 150 catalog module', () => {
   assert.deepEqual(MODULE_CATALOG.desk_banko_150_L, {
     itemKey: 'desk_banko_150_L',
-    type: 'counter', shape: 'L', widthCm: 150, depthCm: 150, heightCm: 100, label: 'Köşe Banko 150×150',
+    type: 'counter', label: 'Köşe Banko 150×150', catalogPreview: 'counter',
+    shape: 'L', widthCm: 150, depthCm: 150, heightCm: 100,
   });
   assert.ok(MODULE_CATALOG_KEYS.includes('desk_banko_150_L'));
 });
