@@ -1,14 +1,15 @@
 {
   "schemaVersion": 2,
-  "id": "remove-getshelfleafitem",
-  "kind": "tooling",
-  "summary": "Kullanılmayan getShelfLeafItem kaldırıldı. Raf lookup getItem(itemKey). getDoorLeafItem durur.",
+  "id": "catalog-dead-dimension-aliases",
+  "kind": "bugfix",
+  "summary": "catalog.js ölü Item ölçü alias’ları ve flatPanelKey silindi. Ölçü getItem. Catalog projection değişmedi.",
   "owners": [
-    "src/items.js",
-    "test/shelfItemsItemContract.test.js"
+    "src/catalog.js",
+    "docs/refactor/CATALOG.md"
   ],
   "sourceOfTruth": [
-    "src/items.js"
+    "src/catalog.js",
+    "docs/refactor/CATALOG.md"
   ],
   "impact": {
     "catalog": "affected",
@@ -17,7 +18,7 @@
     "placement": "not-applicable",
     "renderer": "not-applicable",
     "persistence": "not-applicable",
-    "bom": "affected",
+    "bom": "not-applicable",
     "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
@@ -769,30 +770,32 @@
         "F-045"
       ]
     },
-    "notes": "Dead export. Runtime zaten getItem(itemKey). Width tahmini yok. Audit property dump tarihî; regenerate edilmedi."
+    "notes": "Ölü catalog.js export. STAND_DIMENSIONS / MODULE_WIDTHS_CM durur. Audit dump tarihî; regenerate edilmedi."
   },
   "tests": {
     "targeted": [
-      "test/shelfItemsItemContract.test.js",
-      "test/shelfCatalogPanelSeam.test.js"
+      "test/catalogDomainBoundary.test.js",
+      "test/baseModule.test.js",
+      "test/ledFloodlightModule.test.js",
+      "test/shelfModule.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/shelf-items-contract.spec.mjs"
+        "e2e/smoke.spec.mjs"
       ],
-      "reason": "items.js catalog/bom zorunlu domain; Catalog raf kartı browser-impact. Davranış değişmez; targeted shelf E2E."
+      "reason": "src/catalog.js catalog zorunlu domain. Projection/UI değişmez; smoke #open-module-catalog."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Ürün yolu getItem. Yalnız test/doc helper adı."
+    "notes": "Runtime src *_DIMENSIONS import etmiyordu. Testler getItem."
   },
   "migration": {
     "required": false,
     "notes": "Persist/schema yok."
   },
-  "rollback": "getShelfLeafItem fonksiyonunu items.js’e geri koymak."
+  "rollback": "Silinen export’ları catalog.js’e geri koymak."
 }

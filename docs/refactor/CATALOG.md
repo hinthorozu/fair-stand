@@ -292,7 +292,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 
 ## Kaynak dosyalar
 
-- `src/catalog.js` — `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`; derived `MODULE_CATALOG` / `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS`
+- `src/catalog.js` — `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`; derived `MODULE_CATALOG` / `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS`. Item ölçü alias’ı (`*_DIMENSIONS`) ve `flatPanelKey` yok.
 - `src/items.js` — Item master; `catalogPreview`; `dimensions` / `sceneDimensions`; `resolveSceneDimensions`; `resolveItemKey`
 - `src/moduleDragSidebar.js` — sol katalog UI; `CATALOG_PREVIEW_RENDERERS[catalogPreview]`
 - `src/moduleContextMenu.js` — picker katalog UI
@@ -301,6 +301,20 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 - `docs/refactor/CATALOG.md` — bu sözleşme
 - `docs/refactor/ITEMS.md` — Item şeması
 - `docs/refactor/REFACTOR.md` — günlük
+
+---
+
+## `src/catalog.js` dosya sınırı (2026-09-17)
+
+Catalog işi: kategori tablosu + görünür Item projection + UI helper.
+
+**Kalan Catalog yüzeyi:** `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `listCatalogCategories`, `getCatalogCategory`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getModuleCatalogItem`, `getModuleCatalogLabel`, derived `MODULE_CATALOG*`.
+
+**Kalan ama Catalog tablosu değil (sonraki temizlik):** `STAND_DIMENSIONS`, `MODULE_WIDTHS_CM`, `resolveItemKey` re-export.
+
+**Silinen ölü export (runtime çağıran yoktu):** `COUNTER_DIMENSIONS`, furniture/TV/mini-fridge/coat-rack/trash `*_DIMENSIONS`, `flatPanelKey`, `getFurnitureClusterQuantity` catalog import.
+
+**Silinen test alias:** `BASE_DIMENSIONS`, `LED_FLOODLIGHT_DIMENSIONS`, `SHELF_DIMENSIONS`. Ölçü `getItem(itemKey).dimensions`. `createShelfModule` `SHELF_DIMENSIONS` okumaz.
 
 ---
 

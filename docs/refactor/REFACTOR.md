@@ -7,6 +7,27 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-17 — catalog.js ölü ölçü alias’ları
+
+### Kapsam
+
+`src/catalog.js` içindeki Item ölçü kopyaları ve çağrılmayan `flatPanelKey` silindi. Catalog projection API değişmedi.
+
+Dokunulmayan: `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `getCatalogItem` / `listCatalogItems` / `listCatalogGroups`, `MODULE_CATALOG*`, `STAND_DIMENSIONS`, `MODULE_WIDTHS_CM`, `resolveItemKey` re-export, Item satırları, recipe/BOM, UI.
+
+### Silinen
+
+- `COUNTER_DIMENSIONS`, furniture `*_DIMENSIONS`, `MINI_FRIDGE_DIMENSIONS`, `COAT_RACK_DIMENSIONS`, `PLASTIC_TRASH_BIN_DIMENSIONS`, `TV_42_DIMENSIONS`, `flatPanelKey`, `getFurnitureClusterQuantity` catalog import
+- `BASE_DIMENSIONS`, `LED_FLOODLIGHT_DIMENSIONS`, `SHELF_DIMENSIONS` (testler `getItem`)
+
+### Düzeltme
+
+2026-09-16 kaydı `createShelfModule` için `SHELF_DIMENSIONS.heightsByCountCm[2]` yazıyordu; renderer Item `dimensions` okur. Export yok.
+
+Sözleşme: `docs/refactor/CATALOG.md` — `src/catalog.js` dosya sınırı.
+
+---
+
 ## 2026-09-17 — leaf shelf Catalog + panel-seam overlay
 
 ### Kapsam
@@ -86,7 +107,7 @@ Dokunulmayan: leaf `shelf_100` / `shelf_150` / `shelf_200`, `wall_showcase_*`, `
 ### Kalan shelf mekanizması
 
 - leaf `shelf_*` + `getItem(itemKey)`
-- `createShelfModule` renderer (`SHELF_DIMENSIONS.heightsByCountCm[2]`)
+- `createShelfModule` renderer (Item `dimensions`; `SHELF_DIMENSIONS` yok)
 - `TYPE_BEHAVIORS.shelf`
 - `CATALOG_PREVIEW_RENDERERS.shelf` (catalogPreview `'shelf'` artık görünür Item’da yok)
 - context-menu `toggle-shelf-light` / `shelfLightingOn`

@@ -1,4 +1,4 @@
-import { getFurnitureClusterQuantity, getItem, listRegisteredItems, resolveItemKey, resolveSceneDimensions } from './items.js';
+import { getItem, listRegisteredItems, resolveItemKey, resolveSceneDimensions } from './items.js';
 
 export { resolveItemKey };
 
@@ -12,74 +12,6 @@ export const STAND_DIMENSIONS = Object.freeze({
 });
 
 export const MODULE_WIDTHS_CM = Object.freeze([50, 100, 150, 200]);
-
-export const COUNTER_DIMENSIONS = Object.freeze({
-  depthCm: getItem('desk_banko_100').dimensions.depthCm,
-  heightCm: getItem('desk_banko_100').dimensions.heightCm,
-  widthsCm: Object.freeze([
-    getItem('desk_banko_100').dimensions.widthCm,
-    getItem('desk_banko_150').dimensions.widthCm,
-    getItem('desk_banko_200').dimensions.widthCm,
-  ]),
-});
-
-export const BASE_DIMENSIONS = Object.freeze({
-  depthCm: getItem('BASE_100').dimensions.depthCm,
-  heightCm: getItem('BASE_100').dimensions.heightCm,
-  widthsCm: Object.freeze([
-    getItem('BASE_100').dimensions.widthCm,
-    getItem('BASE_150').dimensions.widthCm,
-    getItem('BASE_200').dimensions.widthCm,
-  ]),
-});
-
-export const SHELF_DIMENSIONS = Object.freeze({
-  widthsCm: Object.freeze([100, 150, 200]),
-  heightsByCountCm: Object.freeze({
-    2: Object.freeze([100, 150]),
-  }),
-});
-
-
-export const furniture_sofa_set_classic_DIMENSIONS = getItem('furniture_sofa_set_classic').dimensions;
-
-export const furniture_sofa_single_classic_DIMENSIONS = getItem('furniture_sofa_single_classic').dimensions;
-
-export const furniture_sofa_double_classic_DIMENSIONS = getItem('furniture_sofa_double_classic').dimensions;
-
-export const furniture_coffee_table_classic_DIMENSIONS = getItem('furniture_coffee_table_classic').dimensions;
-
-export const furniture_table_chair_set_eames_DIMENSIONS = Object.freeze({
-  ...getItem('furniture_table_chair_set_eames').dimensions,
-  chairCount: getFurnitureClusterQuantity(getItem('furniture_table_chair_set_eames'), 'chair_eames'),
-});
-
-export const chair_eames_DIMENSIONS = getItem('chair_eames').dimensions;
-
-export const glass_table_DIMENSIONS = getItem('glass_table').dimensions;
-
-export const furniture_bar_stool_classic_DIMENSIONS = getItem('furniture_bar_stool_classic').dimensions;
-export const MINI_FRIDGE_DIMENSIONS = getItem('MINI_FRIDGE_AVANTI').dimensions;
-
-export const COAT_RACK_DIMENSIONS = getItem('COAT_RACK').dimensions;
-
-export const PLASTIC_TRASH_BIN_DIMENSIONS = getItem('PLASTIC_TRASH_BIN').dimensions;
-
-const TV_42_ITEM = getItem('TV_42');
-const TV_42_SCENE = resolveSceneDimensions(TV_42_ITEM);
-export const TV_42_DIMENSIONS = Object.freeze({
-  moduleWidthCm: TV_42_SCENE.widthCm,
-  heightCm: TV_42_SCENE.heightCm,
-});
-
-const LED_FLOODLIGHT_ITEM = getItem('led_floodlight');
-
-export const LED_FLOODLIGHT_DIMENSIONS = Object.freeze({
-  widthCm: LED_FLOODLIGHT_ITEM.dimensions.widthCm,
-  depthCm: LED_FLOODLIGHT_ITEM.dimensions.depthCm,
-  heightCm: LED_FLOODLIGHT_ITEM.dimensions.heightCm,
-  mountHeightCm: LED_FLOODLIGHT_ITEM.dimensions.mountHeightCm,
-});
 
 // Canonical Catalog kategorileri. catalogKey Item.catalogCategory ile eşleşir.
 // catalogName UI label'dır. catalogIndex 1 tabanlı kategori sırasıdır.
@@ -244,8 +176,4 @@ export function getModuleCatalogLabel(descriptor) {
   return getModuleCatalogItem(descriptor)?.label
     ?? (typeof descriptor?.label === 'string' ? descriptor.label : null)
     ?? 'Modül';
-}
-
-export function flatPanelKey(widthCm) {
-  return `wall_${widthCm}`;
 }

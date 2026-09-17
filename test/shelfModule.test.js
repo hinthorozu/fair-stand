@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, SHELF_DIMENSIONS } from '../src/catalog.js';
+import { MODULE_CATALOG } from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 import { snapPlacementToStand } from '../src/modulePlacement.js';
 import { getItem } from '../src/items.js';
@@ -25,11 +25,15 @@ test('wall_shelf catalog kayıtları yoktur; leaf shelf_* durur', () => {
 });
 
 test('shelf heights sit on Maxima 50 cm panel seams', () => {
-  assert.deepEqual(SHELF_DIMENSIONS.heightsByCountCm[2], [100, 150]);
-  assert.equal(Object.hasOwn(SHELF_DIMENSIONS.heightsByCountCm, '3'), false);
-  assert.equal(getItem('shelf_100').dimensions.depthCm, 38);
-  assert.equal('projectionCm' in SHELF_DIMENSIONS, false);
-  assert.equal('thicknessCm' in SHELF_DIMENSIONS, false);
+  const shelf100 = getItem('shelf_100');
+  const shelf150 = getItem('shelf_150');
+  const shelf200 = getItem('shelf_200');
+  assert.equal(shelf100.dimensions.lengthCm, 100);
+  assert.equal(shelf150.dimensions.lengthCm, 150);
+  assert.equal(shelf200.dimensions.lengthCm, 200);
+  assert.equal(shelf100.dimensions.depthCm, 38);
+  assert.equal(shelf100.dimensions.thicknessCm, 1.8);
+  assert.equal('projectionCm' in shelf100.dimensions, false);
 });
 
 test('shelf module uses normal wall placement instead of floor-fixture depth rules', () => {

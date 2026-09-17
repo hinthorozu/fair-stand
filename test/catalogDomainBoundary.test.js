@@ -65,6 +65,13 @@ test('catalog.js Recipe/BOM’dan Item özelliği öğrenmez; resolveItemKey Ite
   assert.match(itemsSource, /export function resolveItemKey/);
   assert.match(itemsSource, /Item identity çözümlemesi Catalog üyeliğine bağlı değildir/);
   assert.doesNotMatch(CATALOG_SOURCE, /normalized\.itemKey && getCatalogItem/);
+  assert.doesNotMatch(CATALOG_SOURCE, /getFurnitureClusterQuantity/);
+  assert.doesNotMatch(CATALOG_SOURCE, /COUNTER_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /BASE_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /SHELF_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /LED_FLOODLIGHT_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /TV_42_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /flatPanelKey/);
 });
 
 test('catalogVisible yalnız Catalog üyeliği içindir; src runtime domainleri okumaz', () => {

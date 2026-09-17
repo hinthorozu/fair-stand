@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BASE_DIMENSIONS, MODULE_CATALOG } from '../src/catalog.js';
+import { MODULE_CATALOG } from '../src/catalog.js';
 import { createBaseModuleState, duplicateModuleState } from '../src/designState.js';
+import { getItem } from '../src/items.js';
 import {
   rotateModulePlacementAroundCenter,
   snapPlacementToModules,
@@ -10,9 +11,15 @@ import {
 } from '../src/modulePlacement.js';
 
 test('baza catalog exposes 100 150 200 cm sizes at 50 x 50 cm depth and height', () => {
-  assert.deepEqual(BASE_DIMENSIONS.widthsCm, [100, 150, 200]);
-  assert.equal(BASE_DIMENSIONS.depthCm, 50);
-  assert.equal(BASE_DIMENSIONS.heightCm, 50);
+  const base100 = getItem('BASE_100');
+  const base150 = getItem('BASE_150');
+  const base200 = getItem('BASE_200');
+  assert.deepEqual(
+    [base100.dimensions.widthCm, base150.dimensions.widthCm, base200.dimensions.widthCm],
+    [100, 150, 200],
+  );
+  assert.equal(base100.dimensions.depthCm, 50);
+  assert.equal(base100.dimensions.heightCm, 50);
   assert.equal(MODULE_CATALOG.BASE_100.label, 'Baza 100');
   assert.equal(MODULE_CATALOG.BASE_150.label, 'Baza 150');
   assert.equal(MODULE_CATALOG.BASE_200.label, 'Baza 200');
