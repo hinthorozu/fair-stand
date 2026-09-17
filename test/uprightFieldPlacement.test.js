@@ -12,7 +12,9 @@ import { isShortUpFamilyDescriptor, getItem, resolveSceneDimensions } from '../s
 import { getModuleMagneticSnapStrategy, requiresShortUpJointSnap } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { snapPlacementToModules } from '../src/modulePlacement.js';
-import { getExpandedStraightWallRecipe } from '../src/moduleRecipes.js';
+import {
+  getExpandedStraightWallRecipe,
+} from './recipeParentItemKey.js';
 
 const SHORT_UP_KEYS = [
   'wall_200_short_up_2',

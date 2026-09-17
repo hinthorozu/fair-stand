@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "recipe-parent-composition-items",
+  "id": "item-composition-inner-corner",
   "kind": "architecture",
-  "summary": "28 recipe parent Item composition.items taşır (mevcut moduleRecipes child kopyası). itemBom tabanı Item items; iç-köşe expandRecipe’de kalır.",
+  "summary": "Düz child listesi ve iç-köşe verisi tek kaynak Item composition.items / innerCorner. moduleRecipes ürün tablosu silindi; expand ve resolveItemBom kodda kaldı. rawBomDebug type+width yolları resolveItemBom(itemKey).",
   "owners": [
     "src/items.js",
     "src/itemBom.js",
@@ -21,7 +21,7 @@
     "renderer": "not-applicable",
     "persistence": "not-applicable",
     "bom": "affected",
-    "ui": "not-applicable",
+    "ui": "affected",
     "composition": "affected",
     "assets": "not-applicable",
     "storage": "not-applicable",
@@ -206,6 +206,7 @@
       "test/raisedPlatform.test.js",
       "test/rawBomSelectionParser.test.js",
       "test/recipeCompositionItemsContract.test.js",
+      "test/recipeParentItemKey.js",
       "test/removedIndoorPlant2.test.js",
       "test/rightWallOrientation.test.js",
       "test/roadmapProductionSourceOfTruth.test.js",
@@ -791,14 +792,16 @@
         "F-045"
       ]
     },
-    "notes": "Child miktarları mevcut recipe satırlarından kopyalandı. Catalog/factory/UI değişmedi. moduleRecipes iç-köşe ve nominal genişlik için duruyor."
+    "notes": "Child miktarları değişmedi. Recipe items+variants tabloları silindi; innerCorner Item’a taşındı. Furniture kümeleri BOM’a açılmadı. Catalog/factory/persist itemKey dokunulmadı."
   },
   "tests": {
     "targeted": [
       "test/recipeCompositionItemsContract.test.js",
       "test/doorCompositeItemContract.test.js",
       "test/wallShowcaseItemContract.test.js",
-      "test/moduleRecipes.test.js"
+      "test/moduleRecipes.test.js",
+      "test/canonicalDimensionDedup.test.js",
+      "test/rawBomSelectionParser.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -807,16 +810,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "items.js ve itemBom değişti; BOM domain browser E2E kapısı."
+      "reason": "rawBomDebug UI BOM paneli itemKey resolveItemBom’a geçti; BOM/UI/composition browser E2E kapısı."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "İki kopya child listesi (Item + recipe). Test eşitliği kilitler. Varyant expandRecipe’de."
+    "notes": "İç-köşe expand aynı panelRole/nominalModuleWidthCm kuralı. Test helper type+width → mevcut parent itemKey; src BOM kaynağı değil."
   },
   "migration": {
     "required": false,
-    "notes": "Persist/schema yok. itemKey ve miktarlar aynı."
+    "notes": "Persist/schema yok. itemKey ve miktarlar aynı. innerCorner yeni alan; proje blob’una yazılmaz."
   },
-  "rollback": "composition.items satırlarını recipe parent’lardan silmek; itemBom’u getExpandedModuleRecipe’ye döndürmek."
+  "rollback": "composition.innerCorner satırlarını silmek; moduleRecipes ürün tablolarını geri koymak; itemBom fallback’ini catalogRecipe.items yapmak."
 }

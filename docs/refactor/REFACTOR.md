@@ -7,6 +7,20 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-17 — Düz child listesi ve iç-köşe Item’da
+
+### Kapsam
+
+Düz BOM child listesi ve iç-köşe verisi tek kaynak `src/items.js`. `moduleRecipes.js` ikinci ürün tablosu değil; yalnız `expandRecipe` / panelRole eşlemesi kalır. `itemBom` `getItem(parent).composition.items` zorunlu; `catalogRecipe.items` fallback yok.
+
+28 recipe parent `composition.items` (miktar değişmedi). İç-köşe `composition.innerCorner` (recipe.variants birebir): düz wall 50/100/150/200, short-up-1/2 aynı genişlikte aynı köşe paneli, `door_100` / `wall_showcase_100_2` / `wall_showcase_100_3` (`panel_corner_92` + `itemReplacements`). BASE, desk_banko, separator: innerCorner yok.
+
+Raw BOM debug kapı dışındaki type+width yolları `resolveItemBom(itemKey)`. Furniture kümeleri BOM’a açılmaz. `getStraightWallNominalWidthForProfileItem` silindi (src caller yoktu).
+
+Dokunulmayan: Catalog projection, factory/UI, persist `itemKey`, 28 düz listedeki quantity’ler, `composition.mode` / `moduleType` sadeleştirme, VIDEO_WALL, shelf/base-wall recipe (zaten null).
+
+---
+
 ## 2026-09-17 — Recipe parent `composition.items`
 
 ### Kapsam

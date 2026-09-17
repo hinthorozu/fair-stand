@@ -10,7 +10,13 @@ import { resolveItemBom } from '../src/itemBom.js';
 import { getItem } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
-import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
+import {
+  getRecipeItemKey,
+} from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 
 const EXPECTED_CHILDREN = [
   ['profile_91', 1],

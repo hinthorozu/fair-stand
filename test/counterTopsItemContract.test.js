@@ -2,7 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { getItem } from '../src/items.js';
-import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
+import {
+  getRecipeItemKey,
+} from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 
 const expected = Object.freeze({
   counter_top_110_60: { widthCm: 110, depthCm: 60, thicknessCm: 1.8, nominalModuleWidthCm: 100, occurrences: 2 },

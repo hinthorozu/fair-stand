@@ -30,10 +30,11 @@ test('src runtime deleted duplicate dimension fields are gone except Recipe.nomi
   const itemsSource = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
   assert.doesNotMatch(itemsSource, /nominalWidthCm/);
   const bomSource = readFileSync(new URL('../src/itemBom.js', import.meta.url), 'utf8');
-  assert.match(bomSource, /item\.dimensions\?\.widthCm/);
+  assert.match(bomSource, /composition\.items/);
+  assert.doesNotMatch(bomSource, /item\.dimensions\?\.widthCm/);
 });
 
-test('itemBom recipe lookup uses dimensions.widthCm for wall_200 and door_100', () => {
+test('itemBom recipe BOM uses composition.items for wall_200 and door_100', () => {
   const wall = getItem('wall_200');
   assert.equal(wall.composition.nominalWidthCm, undefined);
   assert.equal(wall.dimensions.widthCm, 200);

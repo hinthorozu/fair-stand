@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 import {
   getCatalogItem,
 } from '../src/catalog.js';

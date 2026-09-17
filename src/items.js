@@ -344,10 +344,22 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_single', quantity: 5 }),
         Object.freeze({ itemKey: 'door_leaf_100', quantity: 1 }),
       ]),
+      innerCorner: Object.freeze({
+        panelItemKey: 'panel_corner_92',
+        itemReplacements: Object.freeze([
+          Object.freeze({
+            itemKey: 'connector_single',
+            items: Object.freeze([
+              Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
+              Object.freeze({ itemKey: 'connector_corner', quantity: 2 }),
+            ]),
+          }),
+        ]),
+      }),
     }),
   }),
-  // Serbest baza üst öğeleri type `base` paylaşır. Child listesi `composition.items`;
-  // iç-köşe varyantı `moduleRecipes` `base:100|150|200` üzerinden genişler.
+  // Serbest baza üst öğeleri type `base` paylaşır. Child listesi `composition.items`.
+  // İç-köşe variants yok; uydurulmaz.
   BASE_100: Object.freeze({
     itemKey: 'BASE_100', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 9, catalogPreview: 'base',
     name: 'Baza 100',
@@ -409,7 +421,7 @@ export const ITEMS = Object.freeze({
     }),
   }),
   // Serbest banko üst öğeleri type `counter` paylaşır. Düz ve L varyantları
-  // ayrı itemKey'lerdir; child listesi `composition.items` (counter:* / counter-l:* kopyası).
+  // ayrı itemKey'lerdir; child listesi `composition.items`. İç-köşe variants yok; uydurulmaz.
   desk_banko_100: Object.freeze({
     itemKey: 'desk_banko_100', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 3, catalogPreview: 'counter',
     name: 'Banko 100',
@@ -541,8 +553,8 @@ export const ITEMS = Object.freeze({
       ]),
     }),
   }),
-  // Panel duvar üst öğeleri. Child listesi `composition.items` (straight-wall 50/100/150/200 kopyası).
-  // İç-köşe panel değişimi recipe varyantında kalır; Raw BOM UI yolu değişmez.
+  // Panel duvar üst öğeleri. Child listesi `composition.items`.
+  // İç-köşe `composition.innerCorner` (recipe.variants birebir kopya).
   wall_50: Object.freeze({
     itemKey: 'wall_50', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 4, catalogPreview: 'flat-panel',
     name: 'Panel 50',
@@ -559,6 +571,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_42_5' }),
     }),
   }),
   wall_100: Object.freeze({
@@ -577,6 +590,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_92' }),
     }),
   }),
   wall_150: Object.freeze({
@@ -595,6 +609,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_142_5' }),
     }),
   }),
   wall_200: Object.freeze({
@@ -613,6 +628,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_192' }),
     }),
   }),
   wall_200_short_up_2: Object.freeze({
@@ -633,6 +649,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_192' }),
     }),
   }),
   wall_150_short_up_2: Object.freeze({
@@ -653,6 +670,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_142_5' }),
     }),
   }),
   wall_100_short_up_2: Object.freeze({
@@ -673,6 +691,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_92' }),
     }),
   }),
   wall_50_short_up_2: Object.freeze({
@@ -693,6 +712,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_42_5' }),
     }),
   }),
   wall_200_short_up_1: Object.freeze({
@@ -713,6 +733,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_192' }),
     }),
   }),
   wall_150_short_up_1: Object.freeze({
@@ -733,6 +754,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_142_5' }),
     }),
   }),
   wall_100_short_up_1: Object.freeze({
@@ -753,6 +775,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_92' }),
     }),
   }),
   wall_50_short_up_1: Object.freeze({
@@ -773,6 +796,7 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
         Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
       ]),
+      innerCorner: Object.freeze({ panelItemKey: 'panel_corner_42_5' }),
     }),
   }),
   // Separatör parent'lar (type separator). Child listesi `composition.items`.
@@ -879,6 +903,18 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'showcase_horizontal_87_4_30', quantity: 2 }),
         Object.freeze({ itemKey: 'glass_shelf', quantity: 1 }),
       ]),
+      innerCorner: Object.freeze({
+        panelItemKey: 'panel_corner_92',
+        itemReplacements: Object.freeze([
+          Object.freeze({
+            itemKey: 'connector_single',
+            items: Object.freeze([
+              Object.freeze({ itemKey: 'connector_single', quantity: 5 }),
+              Object.freeze({ itemKey: 'connector_corner', quantity: 4 }),
+            ]),
+          }),
+        ]),
+      }),
     }),
   }),
   wall_showcase_100_3: Object.freeze({
@@ -907,6 +943,18 @@ export const ITEMS = Object.freeze({
         Object.freeze({ itemKey: 'showcase_horizontal_87_4_30', quantity: 2 }),
         Object.freeze({ itemKey: 'glass_shelf', quantity: 2 }),
       ]),
+      innerCorner: Object.freeze({
+        panelItemKey: 'panel_corner_92',
+        itemReplacements: Object.freeze([
+          Object.freeze({
+            itemKey: 'connector_single',
+            items: Object.freeze([
+              Object.freeze({ itemKey: 'connector_single', quantity: 5 }),
+              Object.freeze({ itemKey: 'connector_corner', quantity: 4 }),
+            ]),
+          }),
+        ]),
+      }),
     }),
   }),
 

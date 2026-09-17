@@ -6,7 +6,9 @@ import {
   listCatalogItems,
 } from '../src/catalog.js';
 import { createCounterModuleState } from '../src/designState.js';
-import { getExpandedModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+} from './recipeParentItemKey.js';
 
 test('desk_banko_100_L catalog contract',()=>{const item=getCatalogItem('desk_banko_100_L');assert.equal(item.itemKey,'desk_banko_100_L');assert.equal(item.label,'Köşe Banko 100×100');assert.equal(item.catalogPreview,'counter');assert.equal(Object.hasOwn(item,'type'),false);assert.ok(getCatalogItem('desk_banko_100_L') != null);});
 test('L counter editable state',()=>{const state=createCounterModuleState(100,{shape:'L',depthCm:100});assert.equal(state.type,'counter');assert.equal(state.itemKey,'desk_banko_100_L');assert.equal(state.shape,'L');assert.equal(state.depthCm,100);assert.equal(Object.keys(state.faces).length,8);Object.values(state.faces).forEach(face=>assert.ok('imageAssetId' in face));});

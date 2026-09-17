@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 import { getItem, listRegisteredItems } from '../src/items.js';
-import { getModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 
 const SHELF_CASES = Object.freeze({
   shelf_100: Object.freeze({ widthCm: 100 }),

@@ -12,7 +12,9 @@ import {
 import { getItem, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
-import { getExpandedModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+} from './recipeParentItemKey.js';
 
 const BANKO_KEYS = [
   'desk_banko_100',

@@ -4,7 +4,10 @@ import { readFileSync } from 'node:fs';
 
 import { getItemSurfaceCapabilities } from '../src/itemCapabilities.js';
 import { createDoorModuleState, normalizeModuleItemState } from '../src/designState.js';
-import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 import { getDoorLeafItem, getItem } from '../src/items.js';
 
 test('door_leaf_100 owns canonical wooden door leaf product properties', () => {

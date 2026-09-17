@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 
 import { getItem } from '../src/items.js';
 import {
+  getRecipeItemKey,
+} from '../src/moduleRecipes.js';
+import {
   getExpandedModuleRecipe,
   getExpandedStraightWallRecipe,
   getModuleRecipe,
-  getRecipeItemKey,
   getStraightWallRecipe,
-} from '../src/moduleRecipes.js';
+} from './recipeParentItemKey.js';
 
 const CASES = [
   [getStraightWallRecipe(200), 2],

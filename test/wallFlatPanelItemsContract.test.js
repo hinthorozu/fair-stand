@@ -13,7 +13,9 @@ import { getItem, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior, getModuleCollisionHeightRangeCm } from '../src/moduleBehavior.js';
 import { placementsOverlap } from '../src/modulePlacement.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
-import { getModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 
 const WALL_KEYS = ['wall_50', 'wall_100', 'wall_150', 'wall_200'];
 

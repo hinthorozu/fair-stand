@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getExpandedModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+} from './recipeParentItemKey.js';
 import { parseLCounterSelection } from '../src/rawBomDebug.js';
 import { describeSurfaceSelection } from '../src/selectionFeedback.js';
 
@@ -19,9 +21,9 @@ function lCounterSelectionMessage(widthCm, surfaceRole = 'front') {
 }
 
 const CASES = [
-  [100, 'counter-l-100'],
-  [150, 'counter-l-150'],
-  [200, 'counter-l-200'],
+  [100, 'desk_banko_100_L'],
+  [150, 'desk_banko_150_L'],
+  [200, 'desk_banko_200_L'],
 ];
 
 test('selection feedback -> Raw BOM parser -> expanded recipe resolves all supported L counters', () => {

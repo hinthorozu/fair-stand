@@ -1,5 +1,5 @@
 import { getItem } from './items.js';
-import { expandRecipe, getModuleRecipe, getRecipeItemKey } from './moduleRecipes.js';
+import { expandRecipe, getRecipeItemKey } from './moduleRecipes.js';
 
 function positiveQuantity(value, itemKey) {
   const quantity = Number(value);
@@ -14,20 +14,10 @@ function resolveRecipe(item, recipeOptions = {}) {
   if (!composition) return null;
   if (composition.mode !== 'recipe') return null;
 
-  const options = {
-    ...(composition.options ?? {}),
-    ...(recipeOptions ?? {}),
-  };
-  const catalogRecipe = getModuleRecipe(
-    composition.moduleType,
-    item.dimensions?.widthCm,
-    options,
-  );
-  if (!catalogRecipe) {
-    throw new TypeError(`Missing canonical recipe for ${item.itemKey}.`);
+  if (!Array.isArray(composition.items)) {
+    throw new TypeError(`Missing composition.items for ${item.itemKey}.`);
   }
-  const items = composition.items ?? catalogRecipe.items;
-  return expandRecipe({ ...catalogRecipe, items }, options);
+  return expandRecipe(item, recipeOptions);
 }
 
 function resolveLines(itemKey, quantity, stack, recipeOptions = {}) {

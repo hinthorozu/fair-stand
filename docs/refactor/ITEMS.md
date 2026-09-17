@@ -10,7 +10,7 @@ Fair Stand yeni Item modelinin yaşayan canonical sözleşmesi. Audit dökümü 
 
 Kaynak: `src/items.js` taraması (2026-09-17). N = kaç Item’da path var.
 
-Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision hâlâ `type` → `TYPE_BEHAVIORS`; recipe BOM `composition.items` tabanı + `moduleRecipes` iç-köşe varyantı.
+Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision hâlâ `type` → `TYPE_BEHAVIORS`; recipe BOM `composition.items` tabanı + `composition.innerCorner` (expand kodda).
 
 | Field | N | Src’de ne işe yarıyor |
 |---|---|---|
@@ -36,14 +36,15 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `sceneDimensions.heightCm` | 24 | Effective scene height. |
 | `defaultColor` | 30 | Varsayılan renk (hex sayı veya zemin string). |
 | `material` | 34 | Üretim malzemesi metni. Vitrin gövde `sunta` kilidi. |
-| `nominalModuleWidthCm` | 23 | 50/100/150/200. Src okuyan: `moduleRecipes` iç-köşe panel eşlemesi. Diğer satırlarda alan duruyor. |
+| `nominalModuleWidthCm` | 23 | 50/100/150/200. Src okuyan: `moduleRecipes` expand iç-köşe panel eşlemesi. Diğer satırlarda alan duruyor. |
 | `panelRole` | 8 | `straight` / `inner-corner`. İç köşe BOM panel değişimi. |
 | `connectorType` | 4 | `start`/`single`/`double`/`corner` → `getConnectorItemKey`. |
 | `composition` | 30 | Bileşik yapı. |
 | `composition.mode` | 28 | `recipe` → `resolveItemBom`. |
 | `composition.moduleType` | 28 | Recipe anahtarı (`wall`, `counter`, …). |
 | `composition.options.shape` | 3 | L banko recipe `'L'`. |
-| `composition.items` | 30 | Çocuk listesi `{itemKey, quantity}`. 28 recipe parent + 2 mobilya kümesi. |
+| `composition.items` | 30 | Çocuk listesi `{itemKey, quantity}`. 28 recipe parent + 2 mobilya kümesi. Recipe tablosu kopyası değil; tek kaynak Item. |
+| `composition.innerCorner` | 15 | `{ panelItemKey, itemReplacements? }`. Düz wall / short-up / door / showcase. Yoksa iç-köşe yok. |
 | `shape` | 3 | Kök `'L'` (köşe banko). |
 | `variant` | 8 | `short-up-1` / `short-up-2`. |
 | `stripOccupancy.align` | 8 | Short-up `'top'`. |
