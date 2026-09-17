@@ -56,14 +56,6 @@ export const LEAF_ITEMS = Object.freeze({
   base_top_206_50: Object.freeze({ itemKey: 'base_top_206_50', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Baza Üstü 206 × 50 cm', type: 'base-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 206, depthCm: 50, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff, nominalModuleWidthCm: 200 }),
 });
 
-export function getShelfLeafItem(nominalModuleWidthCm) {
-  const width = Number(nominalModuleWidthCm);
-  return Object.values(LEAF_ITEMS).find((item) => (
-    item?.type === 'shelf' && Number(item.nominalModuleWidthCm) === width
-  )) ?? null;
-}
-
-
 const DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH = Object.freeze({
   100: 'door_leaf_100',
 });

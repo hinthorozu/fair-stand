@@ -85,7 +85,7 @@ Dokunulmayan: leaf `shelf_100` / `shelf_150` / `shelf_200`, `wall_showcase_*`, `
 
 ### Kalan shelf mekanizması
 
-- leaf `shelf_*` + `getShelfLeafItem`
+- leaf `shelf_*` + `getItem(itemKey)`
 - `createShelfModule` renderer (`SHELF_DIMENSIONS.heightsByCountCm[2]`)
 - `TYPE_BEHAVIORS.shelf`
 - `CATALOG_PREVIEW_RENDERERS.shelf` (catalogPreview `'shelf'` artık görünür Item’da yok)

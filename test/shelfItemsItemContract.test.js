@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { getShelfLeafItem, getItem } from '../src/items.js';
+import { getItem, listRegisteredItems } from '../src/items.js';
 import { getModuleRecipe } from '../src/moduleRecipes.js';
 
 const SHELF_CASES = Object.freeze({
@@ -26,10 +26,12 @@ test('shelf production Items use canonical identity and verified sunta dimension
     assert.equal(item.material, 'sunta');
     assert.equal(item.defaultColor, EXPECTED_COLOR);
     assert.equal(item.nominalModuleWidthCm, widthCm);
-    assert.equal(getShelfLeafItem(widthCm), item);
   }
 
-  assert.equal(getShelfLeafItem(50), null);
+  assert.equal(
+    listRegisteredItems().find((item) => item.type === 'shelf' && Number(item.nominalModuleWidthCm) === 50),
+    undefined,
+  );
 });
 
 test('silinen wall_shelf parent recipes leaf shelf_* Item’lara artık bağlanmaz', () => {
@@ -42,6 +44,7 @@ test('silinen wall_shelf parent recipes leaf shelf_* Item’lara artık bağlanm
 
 test('shelf renderer consumes canonical Item depth, thickness and default color while retaining explicit fit override', () => {
   const catalogSource = readFileSync(new URL('../src/catalog.js', import.meta.url), 'utf8');
+  const itemsSource = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
   const rendererSource = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const shelfRenderer = rendererSource.slice(
     rendererSource.indexOf('function createShelfModule'),
@@ -51,6 +54,7 @@ test('shelf renderer consumes canonical Item depth, thickness and default color 
   assert.doesNotMatch(catalogSource, /projectionCm:\s*38/);
   assert.doesNotMatch(catalogSource, /thicknessCm:\s*3/);
   assert.match(shelfRenderer, /const item = getItem\(moduleState\.itemKey\);/);
+  assert.doesNotMatch(itemsSource, /export function getShelfLeafItem/);
   assert.doesNotMatch(shelfRenderer, /getShelfLeafItem/);
   assert.match(shelfRenderer, /item\.dimensions\.depthCm/);
   assert.match(shelfRenderer, /item\.dimensions\.thicknessCm/);
