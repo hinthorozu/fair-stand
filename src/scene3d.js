@@ -5,7 +5,7 @@ import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { getModuleCatalogItem, getModuleCatalogLabel } from './catalog.js';
 import { STAND_DIMENSIONS } from './standDimensions.js';
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
-import { getItemSurfaceCapabilities } from './itemCapabilities.js';
+import { getItemSurfaceCapabilities, itemSurfaceAcceptsImage } from './itemCapabilities.js';
 import {
   getCommercialItemForType,
   getFloorItem,
@@ -5012,7 +5012,7 @@ function createTvModule(moduleState, moduleIndex) {
   tv.userData.moduleId = moduleState.id;
   tv.userData.moduleType = 'tv';
   tv.userData.moduleIndex = moduleIndex;
-  tv.userData.acceptsImage = false;
+  tv.userData.acceptsImage = itemSurfaceAcceptsImage(moduleState.itemKey);
   tv.userData.selectionMode = 'module';
   group.add(tv);
 
@@ -6714,7 +6714,7 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'base',
       selectionMode: 'module',
-      acceptsImage: true,
+      acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -6887,7 +6887,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'counter',
       selectionMode: 'module',
-      acceptsImage: true,
+      acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -6995,7 +6995,7 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     const backing=new THREE.Mesh(new THREE.BoxGeometry(faceWidthM,panelHeightM,0.012),new THREE.MeshStandardMaterial({color:PANEL_BACK_COLOR,roughness:0.74,metalness:0})); backing.position.copy(position); backing.rotation.y=rotationY; backing.castShadow=true; backing.receiveShadow=true; group.add(backing);
     const surface=new THREE.Mesh(new THREE.PlaneGeometry(faceWidthM,panelHeightM),new THREE.MeshStandardMaterial({color:surfaceState.imageAssetId?0xffffff:surfaceState.color,roughness:0.72,metalness:0,side:THREE.DoubleSide,emissive:0x000000,emissiveIntensity:0})); surface.position.copy(position); surface.rotation.y=rotationY; if(Math.abs(Math.sin(rotationY))<0.01)surface.position.z+=0.007*outward;else surface.position.x+=0.007*outward;
     const selectionFrame=createSelectionFrame(faceWidthM,panelHeightM); selectionFrame.visible=false; surface.add(selectionFrame);
-    surface.userData={kind:'surface',moduleType:'counter',counterShape:'L',selectionMode:'module',acceptsImage:true,moduleIndex,moduleId:moduleState.id,widthCm,depthCm,stripIndex:panelLevel==='lower'?0:1,stripNumber:panelLevel==='lower'?1:2,surfaceRole,panelLevel,surfaceId:surfaceState.id,...bindRendererSurfaceState(surfaceState),selectionFrame,backing}; group.add(surface); surfaces.push(surface); onSurfaceReady?.(surface);
+    surface.userData={kind:'surface',moduleType:'counter',counterShape:'L',selectionMode:'module',acceptsImage:itemSurfaceAcceptsImage(moduleState.itemKey),moduleIndex,moduleId:moduleState.id,widthCm,depthCm,stripIndex:panelLevel==='lower'?0:1,stripNumber:panelLevel==='lower'?1:2,surfaceRole,panelLevel,surfaceId:surfaceState.id,...bindRendererSurfaceState(surfaceState),selectionFrame,backing}; group.add(surface); surfaces.push(surface); onSurfaceReady?.(surface);
   };
   const lowerY=stripHeightM/2, upperY=stripHeightM+stripHeightM/2;
   addFace('front','lower',moduleState.faces?.frontLower,frontPanelM,new THREE.Vector3(0,lowerY,-depthM/2),Math.PI,-1); addFace('front','upper',moduleState.faces?.frontUpper,frontPanelM,new THREE.Vector3(0,upperY,-depthM/2),Math.PI,-1);
@@ -7252,7 +7252,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'flat-panel',
       selectionMode: 'panel',
-      acceptsImage: true,
+      acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -7440,7 +7440,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'door',
       selectionMode: 'panel',
-      acceptsImage: true,
+      acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -7550,7 +7550,7 @@ function createSeparatorModule(moduleState, moduleIndex) {
     kind: 'surface',
     moduleType: 'separator',
     selectionMode: 'module',
-    acceptsImage: false,
+    acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey),
     moduleIndex,
     moduleId: moduleState.id,
     widthCm,
@@ -7686,7 +7686,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     surface.add(selectionFrame);
     surface.userData = {
       kind: 'surface', moduleType: moduleState.type, shape: moduleState.shape,
-      selectionMode: 'panel', acceptsImage: true, moduleIndex, moduleId: moduleState.id,
+      selectionMode: 'panel', acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey), moduleIndex, moduleId: moduleState.id,
       widthCm, stripIndex, stripNumber: stripIndex + 1,       surfaceId: surfaceState.id,
       ...bindRendererSurfaceState(surfaceState), selectionFrame, backing,
     };
@@ -7736,7 +7736,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   bodySelector.add(bodySelectionFrame);
   bodySelector.userData = {
     kind: 'surface', moduleType: moduleState.type, selectionMode: 'module',
-    acceptsColor: true, acceptsImage: false, moduleIndex, moduleId: moduleState.id, widthCm,
+    acceptsColor: true, acceptsImage: itemSurfaceAcceptsImage(bodyDefinition.sideItem), moduleIndex, moduleId: moduleState.id, widthCm,
     stripIndex: null, stripNumber: null, surfaceRole: 'showcase-body',
     surfaceId: moduleState.bodySurface.id, ...bindRendererSurfaceState(moduleState.bodySurface),
     selectionFrame: bodySelectionFrame, colorTargets: bodyColorTargets,

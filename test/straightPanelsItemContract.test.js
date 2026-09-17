@@ -106,7 +106,8 @@ test('straight panel migration remains isolated from still-legacy production fam
 
   for (const width of [50, 100, 150, 200]) {
     const recipe = getStraightWallRecipe(width);
-    assert.ok(recipe.variants.innerCornerPanelItemKey);
+    assert.ok(recipe.composition.innerCorner.panelItemKey);
+    assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey);
     assert.equal(recipe.variants.innerCornerPanelPartId, undefined);
   }
 });

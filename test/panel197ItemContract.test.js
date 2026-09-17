@@ -65,6 +65,8 @@ test('panel_197 remains isolated from the canonical inner-corner panel family', 
     assert.equal(item.panelRole, 'inner-corner', itemKey);
   }
 
-  assert.equal(getStraightWallRecipe(200).variants.innerCornerPanelItemKey, 'panel_corner_192');
-  assert.equal(getStraightWallRecipe(200).variants.innerCornerPanelPartId, undefined);
+  const wall200 = getStraightWallRecipe(200);
+  assert.equal(wall200.composition.innerCorner.panelItemKey, 'panel_corner_192');
+  assert.equal(wall200.variants.innerCornerPanelItemKey, wall200.composition.innerCorner.panelItemKey);
+  assert.equal(wall200.variants.innerCornerPanelPartId, undefined);
 });

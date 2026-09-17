@@ -1,4 +1,10 @@
+/**
+ * TEST_SUPPORT zemin ızgara modeli. Production sahne ızgarası
+ * `src/scene3d.js` `createRectangularGrid(widthM, depthM)` kullanır.
+ * Bu fonksiyon runtime’a bağlı değildir ve sahne SoT’si değildir.
+ */
 const DEFAULT_GRID_SIZE_M = 30;
+
 const GRID_PADDING_M = 5;
 const GRID_GROWTH_STEP_M = 10;
 

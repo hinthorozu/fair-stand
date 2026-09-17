@@ -26,7 +26,8 @@ test('2-eye wall showcase BASE recipe matches verified production data', () => {
     { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
     { itemKey: 'glass_shelf', quantity: 1 },
   ]);
-  assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_92');
+  assert.equal(recipe.composition.innerCorner.panelItemKey, 'panel_corner_92');
+  assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey);
 });
 
 test('3-eye wall showcase BASE recipe matches verified production data', () => {
@@ -41,7 +42,8 @@ test('3-eye wall showcase BASE recipe matches verified production data', () => {
     { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
     { itemKey: 'glass_shelf', quantity: 2 },
   ]);
-  assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_92');
+  assert.equal(recipe.composition.innerCorner.panelItemKey, 'panel_corner_92');
+  assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey);
 });
 
 test('wall showcase inner-corner recipes apply verified panel and connector replacements', () => {

@@ -1,3 +1,8 @@
+/**
+ * TEST_SUPPORT yerleşim yardımcısı. Production insert/reflow yolu
+ * `src/wallReflow.js` (`planContinuousWallInsertion` / `planContinuousWallLayout`).
+ * Bu dosya runtime consumer taşımaz; production davranışını temsil etmez.
+ */
 import {
   createModulePlacement,
   getAllowedWallIds,

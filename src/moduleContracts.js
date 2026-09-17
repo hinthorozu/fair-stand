@@ -1,4 +1,10 @@
+/**
+ * GOVERNANCE / spec katmanı. Runtime BOM `src/itemBom.js`, davranış
+ * `src/moduleBehavior.js`. Production planner/renderer bu dosyayı import etmez.
+ * `test/systemDevelopmentContract.test.js` katalog atamasını zorlar.
+ */
 import { getItem, resolveItemKey } from './items.js';
+
 import { getModuleBehavior } from './moduleBehavior.js';
 
 const RECIPE_BOM_POLICY = Object.freeze({

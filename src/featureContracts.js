@@ -1,3 +1,8 @@
+/**
+ * GOVERNANCE katmanı. Otomatik depo/duvar planner’ları (`autoDepot.js`,
+ * `automaticWall.js`) bu registry’yi runtime’da okumaz; testler planner
+ * çıktısını sözleşmeyle karşılaştırır.
+ */
 export const FEATURE_CONTRACTS = Object.freeze({
   automaticDepot: Object.freeze({
     id: 'automatic-depot',
@@ -33,7 +38,7 @@ export const FEATURE_CONTRACTS = Object.freeze({
     }),
     tests: Object.freeze({
       contract: 'required',
-      regressionFiles: Object.freeze(['tests/autoDepot.test.js', 'test/plasticTrashBinModule.test.js']),
+      regressionFiles: Object.freeze(['test/autoDepot.test.js', 'test/plasticTrashBinModule.test.js']),
       fullSuite: 'required',
       build: 'required',
     }),

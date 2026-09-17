@@ -193,7 +193,7 @@ test('50 cm straight wall recipe matches the verified production recipe', () => 
     { itemKey: 'connector_start', quantity: 2 },
     { itemKey: 'connector_single', quantity: 13 },
   ]);
-  assert.equal(getRecipeInnerCornerPanelKey(recipe), 'panel_corner_42_5');
+  assert.equal(getRecipeInnerCornerPanelKey(getItem('wall_50')), 'panel_corner_42_5');
 });
 
 test('100/150/200 cm straight wall recipes preserve quantities and change verified sizes', () => {
@@ -212,7 +212,7 @@ test('100/150/200 cm straight wall recipes preserve quantities and change verifi
     assert.equal(quantities[panelPartId], 7);
     assert.equal(quantities.connector_start, 2);
     assert.equal(quantities.connector_single, 13);
-    assert.equal(getRecipeInnerCornerPanelKey(recipe), cornerPanelPartId);
+    assert.equal(getRecipeInnerCornerPanelKey(getItem(`wall_${width}`)), cornerPanelPartId);
   }
 });
 
@@ -226,7 +226,7 @@ test('100 cm door recipe matches verified production data', () => {
     { itemKey: 'connector_single', quantity: 5 },
     { itemKey: 'door_leaf_100', quantity: 1 },
   ]);
-  assert.equal(getRecipeInnerCornerPanelKey(recipe), 'panel_corner_92');
+  assert.equal(getRecipeInnerCornerPanelKey(getItem('door_100')), 'panel_corner_92');
 });
 
 test('recipe lookup rejects unsupported nominal wall widths', () => {
