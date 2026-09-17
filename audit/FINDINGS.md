@@ -67,7 +67,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 | F-039 | P2 | Dinamik modal/bağlam menüsü odak/erişilebilirlik semantiği tutarsız | **CLOSED** — foam dialog + bağlam menüsü `role`/`Escape`; tam odak tuzağı yok |
 | F-040 | P1 | “Tarayıcı E2E yok” iddiası; kalan boşluk ZIP/GLB-fail spec | **OPEN** — Playwright spec + CI var; ZIP ve GLB hata yolu e2e yok |
 | F-041 | P1 | ROG korumasız; yeşil CI/change-gate merge/doğrudan push öncesi zorunlu değil | **CLOSED** — kapanış MD var; GitHub ruleset ürün kodu değil (`SISTEM_MUTABAKAT_RAPORU.md`) |
-| F-042 | P1 | Sunucu deploy yolu commit’e pinli değil ve CI kapısı/test zincirinden zayıf | **OPEN** — SHA yok; `origin/Version2` ucu çekilir. CI deploy kapısı yok |
+| F-042 | P1 | Sunucu deploy yolu commit’e pinli değil ve CI kapısı/test zincirinden zayıf | **OPEN** — SHA yok; origin default (`origin/HEAD`) ucu çekilir. CI deploy kapısı yok |
 | F-043 | P2 | Açık repoda kök yazılım lisansı kararı/dosyası yok | OPEN / DECISION_REQUIRED |
 | F-044 | P2 | Birçok merge edilmiş/geçersiz dal duruyor | **KAPSAM_DIŞI** — GitHub dal hijyeni; ürün kodu değil |
 | F-045 | P2 | Tarihî kaynak-yeniden-yazan yama betikleri kanonik araçların yanında duruyor | OPEN |

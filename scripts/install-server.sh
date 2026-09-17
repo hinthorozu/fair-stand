@@ -32,9 +32,13 @@ export DEBIAN_FRONTEND=noninteractive
 log "Repo güncelleniyor..."
 cd "${REPO_ROOT}"
 git remote set-url origin git@github.com:hinthorozu/fair-stand.git
-git fetch origin Version2
-git checkout Version2
-git pull --ff-only origin Version2
+git remote set-head origin --auto
+default_branch="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || true)"
+default_branch="${default_branch#origin/}"
+[[ -n "${default_branch}" ]] || fail "origin default dalı çözülemedi."
+git fetch origin "${default_branch}"
+git checkout "${default_branch}"
+git pull --ff-only origin "${default_branch}"
 log "Çalışma kopyası: $(git rev-parse --abbrev-ref HEAD) $(git rev-parse --short HEAD)"
 
 log "Temel paketler kuruluyor..."
