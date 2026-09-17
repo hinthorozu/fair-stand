@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { getItemSurfaceCapabilities } from '../src/itemCapabilities.js';
 import { createDoorModuleState, normalizeModuleItemState } from '../src/designState.js';
 import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
-import { getDoorLeafItem, getItem, LEAF_ITEMS } from '../src/items.js';
+import { getDoorLeafItem, getItem } from '../src/items.js';
 
 test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
   const item = getItem('door_leaf_100');
@@ -21,7 +21,8 @@ test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
   assert.equal(getDoorLeafItem(100), item);
   assert.equal(getDoorLeafItem(150), null);
   assert.equal(getItem('door_100').itemKey, 'door_100');
-  assert.equal(LEAF_ITEMS.door_100, undefined);
+  assert.equal(getItem('door_100').composition.mode, 'recipe');
+  assert.equal(Object.hasOwn(getItem('door_leaf_100'), 'composition'), false);
 });
 
 test('door-leaf type capability contract allows color and image only', () => {

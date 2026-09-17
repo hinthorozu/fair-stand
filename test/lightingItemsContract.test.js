@@ -11,12 +11,12 @@ import {
   duplicateModuleState,
   normalizeModuleItemState,
 } from '../src/designState.js';
-import { getItem, NON_CATALOG_ITEMS, TOP_LIGHT_ITEMS, resolveItemKey } from '../src/items.js';
+import { getItem, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 
 test('led_floodlight: canonical identity, catalog and hydrate', () => {
-  const item = TOP_LIGHT_ITEMS.led_floodlight;
+  const item = getItem('led_floodlight');
   assert.equal(getItem('led_floodlight'), item);
   assert.equal(getItem('LED_FLOODLIGHT'), null);
 
@@ -76,7 +76,7 @@ test('led_floodlight: canonical identity, catalog and hydrate', () => {
 });
 
 test('illuminated-foam: canonical identity stays off catalog', () => {
-  const item = NON_CATALOG_ITEMS['illuminated-foam'];
+  const item = getItem('illuminated-foam');
   assert.equal(getItem('illuminated-foam'), item);
   assert.equal(item.name, 'Işıklı Strafor / Logo');
   assert.equal(item.dimensions.widthCm, 200);

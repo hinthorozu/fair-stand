@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getItem, LEAF_ITEMS, listLeafItems } from '../src/items.js';
+import { getItem, listRegisteredItems } from '../src/items.js';
 import {
   getExpandedModuleRecipe,
   getExpandedStraightWallRecipe,
@@ -159,7 +159,7 @@ test('expanded recipes resolve connector_start metadata through its canonical it
 });
 
 test('production part catalog contains all verified panel sizes', () => {
-  const panelWidths = listLeafItems()
+  const panelWidths = listRegisteredItems()
     .filter((part) => part.type === 'panel')
     .map((part) => part.dimensions.widthCm)
     .sort((a, b) => a - b);
@@ -169,7 +169,7 @@ test('production part catalog contains all verified panel sizes', () => {
 
 test('production part catalog contains the canonical 100 cm wooden door leaf', () => {
   assert.equal(getItem('door_100').itemKey, 'door_100');
-  assert.equal(LEAF_ITEMS.door_100, undefined);
+  assert.equal(getItem('door_100').composition.mode, 'recipe');
   assert.equal(getItem('door_leaf_100').name, 'Ahşap Kapı Kanadı 100 × 200 cm');
   assert.equal(getItem('door_leaf_100').unit, 'adet');
 });

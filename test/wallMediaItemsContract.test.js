@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { WALL_MEDIA_ITEMS, resolveWallMediaMetrics, getItem, resolveSceneDimensions, resolveItemKey } from '../src/items.js';
+import { resolveWallMediaMetrics, getItem, listRegisteredItems, resolveSceneDimensions, resolveItemKey } from '../src/items.js';
 import {
   getCatalogItem,
 } from '../src/catalog.js';
@@ -8,7 +8,7 @@ import { createModuleStateFromDescriptor, duplicateModuleState, normalizeModuleI
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
-for (const item of Object.values(WALL_MEDIA_ITEMS)) {
+for (const item of listRegisteredItems().filter((entry) => entry.type === 'tv')) {
   test(`${item.itemKey}: canonical wall-media identity, state and BOM policy`, () => {
     const metrics = resolveWallMediaMetrics(item.itemKey);
     const catalog = getCatalogItem(item.itemKey);

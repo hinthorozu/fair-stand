@@ -7,6 +7,36 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-17 — Kovalar boşaldı; satırlar ITEMS içinde
+
+### Kapsam
+
+`LEAF_ITEMS` … `COMPOSITE_ITEMS` yok. 96 satır `export const ITEMS` bloğunda. `getItem` / `listFloorItems` / type helper’lar `ITEMS` okur.
+
+Dokunulmayan: 96 Item satırı, Catalog projection, recipe/BOM miktarları, factory/UI davranışı.
+
+---
+
+## 2026-09-17 — Tek ITEMS registry
+
+### Kapsam
+
+Dokuz kova (`LEAF_ITEMS` … `COMPOSITE_ITEMS`) public export değil. Tek tablo `ITEMS`. `getItem` / `listRegisteredItems` bu tablodan okur. `listLeafItems` / `listCompositeItems` kalktı. Testler `getItem` / `listRegisteredItems` / `EXPECTED` key listeleri.
+
+Dokunulmayan: 96 Item satırı, Catalog projection, recipe/BOM miktarları, factory/UI davranışı.
+
+---
+
+## 2026-09-17 — ITEMS.md runtime field kuyruğu
+
+### Kapsam
+
+`docs/refactor/ITEMS.md` en üstüne `src/items.js` 96 satır taraması kondu. Tablo onaylı şema değil; alanlar zamanla ayrı kararla şemaya alınacak. Item satırları ve runtime kod değişmedi.
+
+Dokunulmayan: `src/items.js`, Catalog, recipe/BOM, factory.
+
+---
+
 ## 2026-09-17 — Catalog kartı ince projection
 
 ### Kapsam

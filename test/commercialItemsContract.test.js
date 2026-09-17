@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { COMMERCIAL_ITEMS, getItem, resolveItemKey } from '../src/items.js';
+import { getItem, resolveItemKey } from '../src/items.js';
+
+const COMMERCIAL_ITEM_KEYS = Object.freeze([
+  'COAT_RACK',
+  'KETTLE',
+  'MINI_FRIDGE_AVANTI',
+  'PLASTIC_TRASH_BIN',
+]);
 import { resolveItemBom } from '../src/itemBom.js';
 import {
   getCatalogItem,
@@ -10,7 +17,7 @@ import { resolveModuleContract } from '../src/moduleContracts.js';
 import { describeSurfaceSelection } from '../src/selectionFeedback.js';
 import { planAutomaticDepot } from '../src/autoDepot.js';
 
-for (const item of Object.values(COMMERCIAL_ITEMS)) {
+for (const item of COMMERCIAL_ITEM_KEYS.map((itemKey) => getItem(itemKey))) {
   test(`${item.itemKey}: canonical properties and instance lifecycle`, () => {
     const catalog = getCatalogItem(item.itemKey);
     assert.equal(catalog.itemKey, item.itemKey);
@@ -50,9 +57,10 @@ for (const item of Object.values(COMMERCIAL_ITEMS)) {
 
 test('automatic depot resolves all four Items through the shared factory', () => {
   const plan = planAutomaticDepot({ standType: 'island', standXCm: 500, standYCm: 500, includeContents: true });
-  const states = plan.specs.filter((spec) => Object.values(COMMERCIAL_ITEMS).some((item) => item.type === spec.kind))
+  const commercialTypes = new Set(COMMERCIAL_ITEM_KEYS.map((itemKey) => getItem(itemKey).type));
+  const states = plan.specs.filter((spec) => commercialTypes.has(spec.kind))
     .map((spec) => createModuleStateFromDescriptor({ ...spec, type: spec.kind }, { preservePlacement: true }));
-  assert.deepEqual(states.map((state) => state.itemKey).sort(), Object.keys(COMMERCIAL_ITEMS).sort());
+  assert.deepEqual(states.map((state) => state.itemKey).sort(), [...COMMERCIAL_ITEM_KEYS].sort());
   assert.ok(states.every((state) => state.placement));
 });
 
