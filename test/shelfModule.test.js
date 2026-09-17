@@ -18,7 +18,9 @@ test('wall_shelf catalog kayıtları yoktur; leaf shelf_* durur', () => {
   assert.equal(getShelfLeafItem(100).itemKey, 'shelf_100');
   assert.equal(getShelfLeafItem(150).itemKey, 'shelf_150');
   assert.equal(getShelfLeafItem(200).itemKey, 'shelf_200');
-  assert.equal(createModuleStateFromDescriptor({ type: 'shelf', widthCm: 100 }), null);
+  const state = createModuleStateFromDescriptor({ type: 'shelf', widthCm: 100 });
+  assert.equal(state.itemKey, 'shelf_100');
+  assert.equal(state.type, 'shelf');
 });
 
 test('shelf heights sit on Maxima 50 cm panel seams', () => {

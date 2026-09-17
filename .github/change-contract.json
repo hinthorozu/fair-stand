@@ -1,22 +1,25 @@
 {
   "schemaVersion": 2,
-  "id": "remove-wall-base-items",
-  "kind": "refactor",
-  "summary": "wall_base_100/150/200 composite Item’ları, base-wall:100/150/200 recipe’leri ve üç contract assignment kaldırıldı. BASE_*, base_top_*, leaf profile/upright/panel/connector, shelf tarafı ve genel base-wall type/renderer/preview durur. Catalog 55, kayıtlı Item 96.",
+  "id": "shelf-catalog-panel-seam",
+  "kind": "feature",
+  "summary": "Mevcut leaf Item shelf_100/150/200 Catalog’da Raf & Vitrin altında görünür. Standalone tek raf renderer, panel internal seam overlay snap, wall capacity exclude. wall_shelf_* geri getirilmedi. Catalog 58, kayıtlı Item 96, self BOM 12.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
     "src/designState.js",
-    "src/moduleRecipes.js",
+    "src/moduleBehavior.js",
+    "src/modulePlacement.js",
+    "src/scene3d.js",
     "src/moduleContracts.js",
-    "docs/refactor/ITEMS.md",
     "docs/refactor/CATALOG.md",
     "docs/refactor/REFACTOR.md"
   ],
   "sourceOfTruth": [
     "src/items.js",
     "src/catalog.js",
-    "src/moduleRecipes.js",
+    "src/moduleBehavior.js",
+    "src/modulePlacement.js",
+    "src/stripOccupancy.js",
     "docs/refactor/ITEMS.md",
     "docs/refactor/CATALOG.md",
     "docs/refactor/REFACTOR.md"
@@ -89,6 +92,7 @@
       "e2e/invalid-placement-ghost.spec.mjs",
       "e2e/mini-fridge-dimensions.spec.mjs",
       "e2e/plastic-trash-bin-module.spec.mjs",
+      "e2e/shelf-items-contract.spec.mjs",
       "e2e/smoke.spec.mjs",
       "e2e/visible-ui-b.spec.mjs",
       "e2e/wall-base-items-contract.spec.mjs",
@@ -217,6 +221,7 @@
       "test/selectionFeedbackMainIntegration.test.js",
       "test/separatorPanelsItemContract.test.js",
       "test/separatorRecipes.test.js",
+      "test/shelfCatalogPanelSeam.test.js",
       "test/shelfItemsItemContract.test.js",
       "test/shelfLegItemContract.test.js",
       "test/shelfLighting.test.js",
@@ -279,6 +284,7 @@
       "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
       "audit/evidence/A05_MODULE_BEHAVIOR.md",
+      "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
       "audit/evidence/A10_UI_CONTROLS.md",
@@ -411,13 +417,28 @@
       "docs/items/audit/properties/DEFAULT_OVERRIDE_CHAINS.md",
       "docs/items/audit/properties/FINAL_PROPERTY_AUDIT.md",
       "docs/items/audit/properties/PROPERTY_INDEX.md",
+      "docs/items/audit/properties/properties/behavior.allowSideInsert.md",
+      "docs/items/audit/properties/properties/behavior.boundarySnap.md",
+      "docs/items/audit/properties/properties/behavior.collision.md",
+      "docs/items/audit/properties/properties/behavior.collisionDepth.md",
+      "docs/items/audit/properties/properties/behavior.collisionHeight.md",
+      "docs/items/audit/properties/properties/behavior.collisionHeightRange.md",
+      "docs/items/audit/properties/properties/behavior.connectionEndpoint.md",
       "docs/items/audit/properties/properties/behavior.defaultRotationDeg.md",
+      "docs/items/audit/properties/properties/behavior.endpointContact.md",
+      "docs/items/audit/properties/properties/behavior.explicitTypeEntry.md",
       "docs/items/audit/properties/properties/behavior.ghost.kind.md",
+      "docs/items/audit/properties/properties/behavior.ghost.opacity.md",
+      "docs/items/audit/properties/properties/behavior.ghost.renderer.md",
       "docs/items/audit/properties/properties/behavior.magneticSnap.md",
+      "docs/items/audit/properties/properties/behavior.moveSnapCm.md",
+      "docs/items/audit/properties/properties/behavior.overlapWithTypes.md",
       "docs/items/audit/properties/properties/behavior.placement.md",
       "docs/items/audit/properties/properties/behavior.rotationStepDeg.md",
+      "docs/items/audit/properties/properties/behavior.sideInsertRotation.md",
       "docs/items/audit/properties/properties/behavior.stripOccupancyResolved.md",
       "docs/items/audit/properties/properties/behavior.supportsWallOverlayMount.md",
+      "docs/items/audit/properties/properties/behavior.wallCapacity.md",
       "docs/items/audit/properties/properties/bom.error.md",
       "docs/items/audit/properties/properties/bom.lineCount.md",
       "docs/items/audit/properties/properties/bom.lines.md",
@@ -580,6 +601,7 @@
       "docs/items/audit/properties/properties/ui.sidebar.md",
       "docs/items/audit/report/ITEM_SYSTEM_AUDIT.md",
       "docs/items/audit/report/MEKANIZMA_PARAMETRE.md",
+      "docs/items/contract/ITEM_CONTRACT.md",
       "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md",
       "docs/items/current-system/BASE_100.md",
       "docs/items/current-system/BASE_150.md",
@@ -719,6 +741,9 @@
       "docs/items/definitions/profile_91.md",
       "docs/items/definitions/separator_panel_48_5.md",
       "docs/items/definitions/separator_panel_98.md",
+      "docs/items/definitions/shelf_100.md",
+      "docs/items/definitions/shelf_150.md",
+      "docs/items/definitions/shelf_200.md",
       "docs/items/definitions/upright_346_5.md",
       "docs/items/definitions/wall_100.md",
       "docs/items/definitions/wall_150.md",
@@ -758,45 +783,44 @@
         "F-045"
       ]
     },
-    "notes": "Üç wall_base composite Item, base-wall:100/150/200 recipe, üç contract assignment ve yalnız bu Item’lara özel factory/normalize/rawBomDebug zinciri silindi. TYPE_BEHAVIORS['base-wall'], createBaseWallModule, CATALOG_PREVIEW_RENDERERS['base-wall'] ve usesWallBackboneCollisionDepth durur. docs/items/audit/** ve current-system/wall_base_*.md regenerate edilmedi."
+    "notes": "shelf_100/150/200 catalogVisible=true, sceneDimensions width/height, MODULE_STATE_FACTORIES.shelf, overlaySnap panel-seam, standalone createShelfModule. Geçerli seam getStandInternalSeamHeightsCm() (50..300). wall_shelf_* yok. wall_showcase_* ve glass_shelf dokunulmadı. Shelf lighting mekanizması korundu."
   },
   "tests": {
     "targeted": [
-      "test/wallBaseItemsContract.test.js",
-      "test/baseWallCatalog.test.js",
-      "test/baseWallRecipes.test.js",
-      "test/baseItemsContract.test.js",
-      "test/baseTopsItemContract.test.js",
-      "test/moduleRecipes.test.js",
+      "test/shelfCatalogPanelSeam.test.js",
+      "test/shelfItemsItemContract.test.js",
+      "test/shelfModule.test.js",
+      "test/shelfLighting.test.js",
+      "test/wallShelfItemsContract.test.js",
+      "test/moduleBehaviorPolicy.test.js",
       "test/catalogItemProjection.test.js",
       "test/catalogPreviewConfig.test.js",
       "test/catalogCategories.test.js",
       "test/itemCatalogFields.test.js",
       "test/itemSceneDimensions.test.js",
       "test/systemModuleCatalogDoc.test.js",
-      "test/moduleStateConstructionRegistry.test.js"
+      "test/moduleStateConstructionRegistry.test.js",
+      "test/glassShelfItemContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/smoke.spec.mjs",
+        "e2e/shelf-items-contract.spec.mjs",
         "e2e/wall-showcase-item-contract.spec.mjs",
-        "e2e/wall-flat-panel-items-contract.spec.mjs",
-        "e2e/wall-media-items-contract.spec.mjs",
-        "e2e/furniture-items-contract.spec.mjs"
+        "e2e/smoke.spec.mjs"
       ],
-      "reason": "catalog, ui, state, renderer, placement ve behavior browser-impact domain. smoke katalog açılışını ve panel-wall kalan kartları doğrular. Silinen wall-base E2E spec kaldırıldı; fullSuite zorunlu."
+      "reason": "Catalog drag, overlay placement, renderer ve UI browser-impact. Full E2E zorunlu. Showcase regression E2E durur."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Katalogdan 3 görünür wall_base Item kalkar. Eski projede type:base-wall module state varsa getItem null ve factory yok. BASE_* ve leaf base_top_* durur."
+    "notes": "Yeni Catalog drag overlay. Drop yalnız geçerli panel seam’de. Eski wall_shelf composite geri gelmez. Eski projede type:shelf wall composite state varsa standalone renderer tek tahta çizer."
   },
   "migration": {
     "required": false,
-    "notes": "Persist/project blob ve SQLite yok. Eski wall_base kayıtları için yeni Item üretilmedi."
+    "notes": "Yeni Item yok. Persist şeması değişmedi; leaf shelf state itemKey/type/placement taşır."
   },
-  "rollback": "Üç COMPOSITE_ITEMS kaydı, base-wall:100/150/200 recipe, üç contract assignment ve createBaseWallModuleState factory zincirine dönüş."
+  "rollback": "catalogVisible=false, factory/overlaySnap kaldırma ve createShelfModule’ü eski wall+2 raf haline döndürme. wall_shelf_* geri getirilmez."
 }

@@ -56,6 +56,9 @@ const EXPECTED_CATALOG_GROUPS = Object.freeze([
     keys: Object.freeze([
       'wall_showcase_100_3',
       'wall_showcase_100_2',
+      'shelf_100',
+      'shelf_150',
+      'shelf_200',
     ]),
   }),
   Object.freeze({

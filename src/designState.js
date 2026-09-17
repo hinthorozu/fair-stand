@@ -500,6 +500,19 @@ export function createTvModuleState(descriptor = {}) {
   return applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
+export function createShelfModuleState(descriptor = {}) {
+  const itemKey = descriptor?.itemKey ?? resolveItemKey(descriptor);
+  const item = itemKey ? getItem(itemKey) : null;
+  if (item?.type !== 'shelf') return null;
+  const state = {
+    id: createId('module'),
+    itemKey: item.itemKey,
+    type: item.type,
+    shelfLightingOn: Boolean(descriptor.shelfLightingOn),
+  };
+  return applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
+}
+
 export function createLedFloodlightModuleState() {
   const item = getTopLightItemForType('led-floodlight');
   return applySceneFootprint({
@@ -534,6 +547,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   'plastic-trash-bin': () => createPlasticTrashBinModuleState(),
   'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
   tv: (descriptor) => createTvModuleState(descriptor),
+  shelf: (descriptor) => createShelfModuleState(descriptor),
   'led-floodlight': () => createLedFloodlightModuleState(),
   door: (descriptor) => createDoorModuleState(descriptor.widthCm),
   'showcase-2': (descriptor) => createShowcaseModuleState(descriptor.type, descriptor.widthCm),
@@ -584,6 +598,19 @@ export function normalizeModuleItemState(moduleState) {
       moduleState.itemKey = item.itemKey;
       moduleState.videoWallRows = item.videoWall?.rows ?? 1;
       moduleState.videoWallCols = item.videoWall?.cols ?? 1;
+      applySceneFootprint(moduleState, item, ['widthCm', 'depthCm', 'heightCm']);
+    }
+    return moduleState;
+  }
+
+  if (moduleState.type === 'shelf') {
+    const resolvedKey = resolveItemKey(moduleState) ?? moduleState.itemKey;
+    const item = resolvedKey ? getItem(resolvedKey) : null;
+    if (item?.type === 'shelf') {
+      moduleState.itemKey = item.itemKey;
+      if (!Object.hasOwn(moduleState, 'shelfLightingOn')) {
+        moduleState.shelfLightingOn = false;
+      }
       applySceneFootprint(moduleState, item, ['widthCm', 'depthCm', 'heightCm']);
     }
     return moduleState;

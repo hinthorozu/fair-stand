@@ -149,12 +149,12 @@ Yeni görünen Item için `MODULE_CATALOG.my_item = ...` yazılmaz.
 |---|---|---|---|
 | `panel-wall` | Panel & Duvar | 1 | 9 |
 | `panel-addon` | Panel Ek Modül | 2 | 13 |
-| `shelf-showcase` | Raf & Vitrin | 3 | 2 |
+| `shelf-showcase` | Raf & Vitrin | 3 | 5 |
 | `counter-base` | Banko & Baza | 4 | 9 |
 | `extra` | Extra | 5 | 16 |
 | `electronics-lighting` | Elektronik & Aydınlatma | 6 | 6 |
 
-Toplam görünür Item: **55**. Kayıtlı Item: **96**.
+Toplam görünür Item: **58**. Kayıtlı Item: **96**.
 
 ---
 
@@ -261,7 +261,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 - duplicate `catalogIndex`: 0
 - `catalogIndex` 1..N kesintisiz
 - `catalogVisible=true` ve geçersiz `catalogCategory`: 0
-- catalog projection Item: 55
+- catalog projection Item: 58
 - `catalogVisible=true` ve `catalogPreview` yok/bilinmiyor: fail-fast
 - hardcoded katalog Item key listesi: 0
 - Catalog UI preview `type` branch: 0
@@ -278,8 +278,8 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 
 | Test | Ne doğrular |
 |---|---|
-| `test/catalogItemProjection.test.js` | 55/55 Item-driven projection, eski descriptor regression |
-| `test/catalogPreviewConfig.test.js` | 55/55 `catalogPreview`; type branch yok; CSS kök sınıf regression |
+| `test/catalogItemProjection.test.js` | 58/58 Item-driven projection, eski descriptor regression |
+| `test/catalogPreviewConfig.test.js` | 58/58 `catalogPreview`; type branch yok; CSS kök sınıf regression |
 | `test/catalogDomainBoundary.test.js` | Catalog/AutoDepot/ModuleContract katman sınırı; `catalogVisible=false` ≠ Item yok |
 | `test/catalogCategories.test.js` | Catalog modeli, key eşleşmesi, sıra/label/adet regression |
 | `test/itemCatalogFields.test.js` | 96/96 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |

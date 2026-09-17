@@ -1,0 +1,237 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+import {
+  getCatalogItem,
+  listCatalogGroups,
+  listCatalogItems,
+  MODULE_CATALOG,
+} from '../src/catalog.js';
+import {
+  createModuleStateFromDescriptor,
+  MODULE_STATE_TYPES,
+} from '../src/designState.js';
+import { getItem, resolveSceneDimensions } from '../src/items.js';
+import { resolveItemBom } from '../src/itemBom.js';
+import { countsTowardWallCapacity, usesPanelSeamOverlaySnap } from '../src/moduleBehavior.js';
+import { resolveModuleContract } from '../src/moduleContracts.js';
+import {
+  getWallUsedCm,
+  listInternalSeamsInOccupancyRange,
+  overlayZCmFromSeamHeight,
+  snapPanelSeamOverlayPlacement,
+  WALL_OVERLAY_DEFAULT_CENTER_CM,
+} from '../src/modulePlacement.js';
+import { getModuleRecipe } from '../src/moduleRecipes.js';
+import { getStandInternalSeamHeightsCm, getStandStripMetrics } from '../src/stripOccupancy.js';
+
+const SHELF_KEYS = Object.freeze(['shelf_100', 'shelf_150', 'shelf_200']);
+const REMOVED_WALL_SHELF_KEYS = Object.freeze([
+  'wall_shelf_2_100',
+  'wall_shelf_2_150',
+  'wall_shelf_2_200',
+  'wall_shelf_3_100',
+  'wall_shelf_3_150',
+  'wall_shelf_3_200',
+]);
+
+function wallModule(itemKey, xCm = 0) {
+  const state = createModuleStateFromDescriptor({ itemKey, type: 'flat-panel' });
+  state.placement = {
+    xCm,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  };
+  return state;
+}
+
+test('A-C catalog: shelf_100/150/200 görünür, Raf & Vitrin, vitrinlerden sonra', () => {
+  for (const itemKey of SHELF_KEYS) {
+    const item = getItem(itemKey);
+    assert.equal(item.catalogVisible, true, itemKey);
+    assert.equal(item.catalogCategory, 'shelf-showcase', itemKey);
+    assert.ok(getCatalogItem(itemKey), itemKey);
+  }
+
+  const group = listCatalogGroups().find((entry) => entry.catalogKey === 'shelf-showcase');
+  assert.deepEqual([...group.keys], [
+    'wall_showcase_100_3',
+    'wall_showcase_100_2',
+    'shelf_100',
+    'shelf_150',
+    'shelf_200',
+  ]);
+  assert.deepEqual(
+    listCatalogItems()
+      .filter((item) => item.catalogPreview === 'shelf' || item.itemKey.startsWith('wall_showcase_'))
+      .map((item) => item.itemKey),
+    ['wall_showcase_100_3', 'wall_showcase_100_2', 'shelf_100', 'shelf_150', 'shelf_200'],
+  );
+});
+
+test('D-E Catalog descriptor exact itemKey ile state ve scene width üretir', () => {
+  assert.equal(MODULE_STATE_TYPES.includes('shelf'), true);
+  const expected = Object.freeze({
+    shelf_100: 100,
+    shelf_150: 150,
+    shelf_200: 200,
+  });
+
+  for (const [itemKey, widthCm] of Object.entries(expected)) {
+    const descriptor = MODULE_CATALOG[itemKey];
+    const state = createModuleStateFromDescriptor(descriptor);
+    assert.ok(state, itemKey);
+    assert.equal(state.itemKey, itemKey);
+    assert.equal(state.type, 'shelf');
+    assert.equal(state.widthCm, widthCm);
+    assert.equal(state.depthCm, 38);
+    assert.equal(state.heightCm, 1.8);
+    assert.equal(state.shelfLightingOn, false);
+    assert.equal(usesPanelSeamOverlaySnap(state), true);
+    assert.equal(countsTowardWallCapacity(state), false);
+
+    const item = getItem(itemKey);
+    assert.deepEqual(item.dimensions, { lengthCm: widthCm, depthCm: 38, thicknessCm: 1.8 });
+    const scene = resolveSceneDimensions(item);
+    assert.equal(scene.widthCm, widthCm);
+    assert.equal(scene.heightCm, 1.8);
+    assert.equal(scene.depthCm, 38);
+  }
+});
+
+test('F standalone renderer tek raf tahtası çizer; wall/panel üretmez', () => {
+  const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function createShelfModule');
+  const end = source.indexOf('function resolveOccupiedStripLayout');
+  const renderer = source.slice(start, end);
+  assert.match(renderer, /new THREE\.BoxGeometry\(widthM, thicknessM, depthM\)/);
+  assert.equal((renderer.match(/new THREE\.BoxGeometry/g) ?? []).length, 2);
+  assert.doesNotMatch(renderer, /createFlatPanelModule/);
+  assert.doesNotMatch(renderer, /heightsByCountCm/);
+  assert.doesNotMatch(renderer, /stripCount/);
+  assert.doesNotMatch(renderer, /PANEL_VERTICAL_PROFILE_WIDTH_M/);
+});
+
+test('G-I panel internal seam snap: geçerli birleşim, orta ve dış sınır reddi', () => {
+  const metrics = getStandStripMetrics();
+  const seams = getStandInternalSeamHeightsCm();
+  assert.equal(metrics.stripCount, 7);
+  assert.equal(metrics.stripHeightCm, 50);
+  assert.deepEqual([...seams], [50, 100, 150, 200, 250, 300]);
+  assert.equal(seams.includes(0), false);
+  assert.equal(seams.includes(350), false);
+
+  const wall = wallModule('wall_100', 0);
+  const shelf = createModuleStateFromDescriptor({ itemKey: 'shelf_100', type: 'shelf' });
+  const occupancySeams = listInternalSeamsInOccupancyRange({ minCm: 0, maxCm: 350 });
+  assert.deepEqual([...occupancySeams], [...seams]);
+
+  const valid = snapPanelSeamOverlayPlacement({
+    moduleState: shelf,
+    wallPoint: {
+      wallId: 'back',
+      pointerXCm: 50,
+      pointerYCm: 0,
+      rotationZDeg: 0,
+      absoluteHeightCm: 100,
+    },
+    modules: [wall],
+  });
+  assert.equal(valid.ok, true);
+  assert.equal(valid.seamHeightCm, 100);
+  assert.equal(valid.placement.xCm, 0);
+  assert.equal(valid.placement.wallId, 'back');
+  assert.equal(
+    valid.placement.zCm,
+    overlayZCmFromSeamHeight(100, 1.8),
+  );
+  assert.equal(valid.placement.zCm, 100 + 1.8 / 2 - WALL_OVERLAY_DEFAULT_CENTER_CM);
+
+  const midPanel = snapPanelSeamOverlayPlacement({
+    moduleState: shelf,
+    wallPoint: {
+      wallId: 'back',
+      pointerXCm: 50,
+      pointerYCm: 0,
+      rotationZDeg: 0,
+      absoluteHeightCm: 75,
+    },
+    modules: [wall],
+  });
+  assert.equal(midPanel.ok, false);
+  assert.equal(midPanel.seamHeightCm, null);
+
+  const floorEdge = snapPanelSeamOverlayPlacement({
+    moduleState: shelf,
+    wallPoint: {
+      wallId: 'back',
+      pointerXCm: 50,
+      pointerYCm: 0,
+      rotationZDeg: 0,
+      absoluteHeightCm: 0,
+    },
+    modules: [wall],
+  });
+  assert.equal(floorEdge.ok, false);
+
+  const topEdge = snapPanelSeamOverlayPlacement({
+    moduleState: shelf,
+    wallPoint: {
+      wallId: 'back',
+      pointerXCm: 50,
+      pointerYCm: 0,
+      rotationZDeg: 0,
+      absoluteHeightCm: 350,
+    },
+    modules: [wall],
+  });
+  assert.equal(topEdge.ok, false);
+});
+
+test('J shelf wall capacity’ye 100/150/200 cm eklemez', () => {
+  const wall = wallModule('wall_200', 0);
+  const shelf = createModuleStateFromDescriptor({ itemKey: 'shelf_200', type: 'shelf' });
+  shelf.placement = {
+    xCm: 0,
+    yCm: 0,
+    zCm: overlayZCmFromSeamHeight(150, 1.8),
+    rotationZDeg: 0,
+    wallId: 'back',
+  };
+  assert.equal(getWallUsedCm([wall], 'back'), 200);
+  assert.equal(getWallUsedCm([wall, shelf], 'back'), 200);
+  assert.equal(countsTowardWallCapacity(shelf), false);
+});
+
+test('K wall_shelf_* Item’ları hâlâ yok', () => {
+  for (const itemKey of REMOVED_WALL_SHELF_KEYS) {
+    assert.equal(getItem(itemKey), null, itemKey);
+    assert.equal(MODULE_CATALOG[itemKey], undefined, itemKey);
+    assert.equal(resolveModuleContract(itemKey), null, itemKey);
+  }
+});
+
+test('L wall_showcase_* ve glass_shelf regression bozulmaz', () => {
+  assert.equal(getItem('wall_showcase_100_2').catalogVisible, true);
+  assert.equal(getItem('wall_showcase_100_3').catalogVisible, true);
+  assert.equal(getItem('glass_shelf').type, 'showcase-accessory');
+  assert.equal(getItem('glass_shelf').catalogVisible, false);
+  assert.ok(getModuleRecipe('showcase-2', 100));
+  assert.ok(getModuleRecipe('showcase-3', 100));
+  assert.equal(getModuleRecipe('shelf', 100), null);
+  assert.equal(resolveModuleContract('wall_showcase_100_2').bom.mode, 'recipe');
+  assert.equal(resolveModuleContract('shelf_100').bom.mode, 'self');
+});
+
+test('shelf self BOM 1 adet fiziksel raftır; wall_shelf recipe yoktur', () => {
+  for (const itemKey of SHELF_KEYS) {
+    const bom = resolveItemBom(itemKey);
+    assert.equal(bom.length, 1, itemKey);
+    assert.equal(bom[0].itemKey, itemKey);
+    assert.equal(bom[0].quantity, 1);
+    assert.equal(bom[0].unit, 'adet');
+  }
+});

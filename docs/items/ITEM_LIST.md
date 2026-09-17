@@ -41,9 +41,9 @@ Aşağıdaki Item'lar bugün `src/items.js` içinde `LEAF_ITEMS` olarak canonica
 | `separator_panel_48_5` | `separator-panel` | **Tamam — canonical `itemKey`; `48.5 × 47 × 0.8 cm`; separator-50 içinde ×1 quantity parity** |
 | `separator_panel_98` | `separator-panel` | **Tamam — canonical `itemKey`; `98 × 47 × 0.8 cm`; separator-50 içinde ×3, separator-100 içinde ×7 quantity parity** |
 | `door_leaf_100` | `door-leaf` | **Tamam — canonical ahşap kapı kanadı; `100 × 200 × 8 cm`; beyaz default; renk + görsel override; door recipe ×1** |
-| `shelf_100` | `shelf` | **Tamam — canonical `itemKey`; `100 × 38 × 1.8 cm`; sunta; beyaz default; 2/3 raf recipe quantity parity** |
-| `shelf_150` | `shelf` | **Tamam — canonical `itemKey`; `150 × 38 × 1.8 cm`; sunta; beyaz default; 2/3 raf recipe quantity parity** |
-| `shelf_200` | `shelf` | **Tamam — canonical `itemKey`; `200 × 38 × 1.8 cm`; sunta; beyaz default; 2/3 raf recipe quantity parity** |
+| `shelf_100` | `shelf` | **Tamam — canonical `itemKey`; `100 × 38 × 1.8 cm`; sunta; beyaz default; Catalog `shelf-showcase`; self BOM `1 adet`** |
+| `shelf_150` | `shelf` | **Tamam — canonical `itemKey`; `150 × 38 × 1.8 cm`; sunta; beyaz default; Catalog `shelf-showcase`; self BOM `1 adet`** |
+| `shelf_200` | `shelf` | **Tamam — canonical `itemKey`; `200 × 38 × 1.8 cm`; sunta; beyaz default; Catalog `shelf-showcase`; self BOM `1 adet`** |
 | `shelf_leg` | `shelf-accessory` | **Tamam — canonical `itemKey`; yalnız doğrulanmış kimlik/ad/type/unit; shelf recipes 4/4/6/6/6/9 quantity parity; dimensions/material/weight/color henüz tanımlı değil** |
 | `showcase_side_94_6_30` | `showcase-board` | **Canonical leaf tamam — `94.6 × 30 × 1.8 cm`; sunta; beyaz default; bireysel renk capability yok; parent `wall_showcase_100_2` recipe/renderer/tek gövde renk override cutover'u tamam** |
 | `showcase_side_143_5_30` | `showcase-board` | **Canonical leaf tamam — `143.5 × 30 × 1.8 cm`; sunta; beyaz default; bireysel renk capability yok; parent `wall_showcase_100_3` recipe/renderer/tek gövde renk override cutover'u tamam** |

@@ -77,7 +77,7 @@ test('catalogVisible yalnız Catalog üyeliği içindir; src runtime domainleri 
 });
 
 test('catalogVisible=false Item runtime’da yok demek değildir', () => {
-  const hiddenKeys = ['panel_197', 'upright_99', 'illuminated-foam', 'shelf_100', 'VIDEO_WALL_PANEL'];
+  const hiddenKeys = ['panel_197', 'upright_99', 'illuminated-foam', 'VIDEO_WALL_PANEL'];
   for (const itemKey of hiddenKeys) {
     const item = getItem(itemKey);
     assert.ok(item, itemKey);
@@ -87,14 +87,17 @@ test('catalogVisible=false Item runtime’da yok demek değildir', () => {
   }
 
   assert.equal(listRegisteredItems().length, 96);
-  assert.equal(listRegisteredItems().filter((item) => item.catalogVisible === true).length, 55);
-  assert.equal(listCatalogItems().length, 55);
-  assert.equal(MODULE_CATALOG_KEYS.length, 55);
+  assert.equal(listRegisteredItems().filter((item) => item.catalogVisible === true).length, 58);
+  assert.equal(listCatalogItems().length, 58);
+  assert.equal(MODULE_CATALOG_KEYS.length, 58);
 
   const hiddenItem = getItem('panel_197');
   assert.ok(hiddenItem);
   assert.equal(getCatalogItem('panel_197'), null);
   assert.notEqual(Boolean(hiddenItem), Boolean(getCatalogItem('panel_197')));
+
+  assert.equal(getItem('shelf_100').catalogVisible, true);
+  assert.ok(getCatalogItem('shelf_100'));
 });
 
 test('gizli Item’ın contract yokluğu Catalog gizliliğinden değil assignment yokluğundandır', () => {

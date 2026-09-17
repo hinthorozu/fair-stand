@@ -19,7 +19,7 @@ const PREVIEW_FN = SIDEBAR_SOURCE.slice(
 );
 
 const ROOT_CLASS_BY_PREVIEW = Object.freeze({
-  shelf: 'module-drag-panel module-drag-shelf',
+  shelf: 'module-drag-shelf',
   'sofa-set': 'module-drag-sofa',
   'sofa-single': 'module-drag-sofa-single',
   'sofa-double': 'module-drag-sofa-double',
@@ -92,11 +92,11 @@ function serializeNode(node) {
   };
 }
 
-test('55 görünür Item catalogPreview taşır; gizli Item zorunlu değildir', () => {
+test('58 görünür Item catalogPreview taşır; gizli Item zorunlu değildir', () => {
   const visible = listRegisteredItems().filter((item) => item.catalogVisible === true);
   const hidden = listRegisteredItems().filter((item) => item.catalogVisible !== true);
-  assert.equal(visible.length, 55);
-  assert.equal(hidden.length, 41);
+  assert.equal(visible.length, 58);
+  assert.equal(hidden.length, 38);
 
   for (const item of visible) {
     assert.equal(typeof item.catalogPreview, 'string', item.itemKey);
@@ -138,7 +138,7 @@ test('Catalog preview renderer yalnız catalogPreview key ile seçilir; type bra
   assert.match(catalogDoc, /Catalog preview renderer seçimi yalnız Item\.catalogPreview üzerinden yapılır/);
 });
 
-test('55 Item catalogPreview dağılımı kilitlidir', () => {
+test('58 Item catalogPreview dağılımı kilitlidir', () => {
   const counts = {};
   for (const item of listCatalogItems()) {
     counts[item.catalogPreview] = (counts[item.catalogPreview] ?? 0) + 1;
@@ -163,6 +163,7 @@ test('55 Item catalogPreview dağılımı kilitlidir', () => {
     separator: 2,
     'separator-vine': 2,
     showcase: 2,
+    shelf: 3,
     'sofa-double': 1,
     'sofa-set': 1,
     'sofa-single': 1,
@@ -173,10 +174,10 @@ test('55 Item catalogPreview dağılımı kilitlidir', () => {
   });
 });
 
-test('55 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
+test('58 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
   installDocument();
   const projected = listCatalogItems();
-  assert.equal(projected.length, 55);
+  assert.equal(projected.length, 58);
 
   for (const module of projected) {
     const tree = serializeNode(createModuleCatalogPreview(module));
@@ -224,7 +225,9 @@ test('55 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
   assert.equal(hanging.children[0].children[0].className, 'module-drag-hanging-frame');
 
   const shelfPreview = serializeNode(createModuleCatalogPreview({ catalogPreview: 'shelf', widthCm: 100 }));
-  assert.equal(shelfPreview.children[0].children.filter((child) => child.tag === 'I').length, 2);
+  assert.equal(shelfPreview.children[0].className, 'module-drag-shelf');
+  assert.equal(shelfPreview.children[0].children.filter((child) => child.tag === 'I').length, 0);
+  assert.equal(shelfPreview.children[0].children.filter((child) => child.tag === 'SPAN').length, 0);
 
   const empty = serializeNode(createModuleCatalogPreview({ itemKey: 'illuminated-foam' }));
   assert.equal(empty.children.length, 0);
