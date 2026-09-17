@@ -1,9 +1,5 @@
 import { getItem, listRegisteredItems, resolveItemKey, resolveSceneDimensions } from './items.js';
 
-export { resolveItemKey };
-
-export const MODULE_WIDTHS_CM = Object.freeze([50, 100, 150, 200]);
-
 // Canonical Catalog kategorileri. catalogKey Item.catalogCategory ile eşleşir.
 // catalogName UI label'dır. catalogIndex 1 tabanlı kategori sırasıdır.
 export const CATALOG_CATEGORIES = Object.freeze([
@@ -148,15 +144,6 @@ export function listCatalogGroups() {
     });
   }));
 }
-
-// Derived compatibility: hardcoded Item key listesi yoktur; listCatalogItems'tan üretilir.
-export const MODULE_CATALOG_GROUPS = listCatalogGroups();
-export const MODULE_CATALOG_KEYS = Object.freeze(
-  MODULE_CATALOG_GROUPS.flatMap((group) => group.keys),
-);
-export const MODULE_CATALOG = Object.freeze(
-  Object.fromEntries(listCatalogItems().map((item) => [item.itemKey, item])),
-);
 
 export function getModuleCatalogItem(descriptor) {
   const moduleKey = resolveItemKey(descriptor);

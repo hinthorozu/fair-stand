@@ -7,6 +7,38 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-17 — MODULE_CATALOG snapshot export kalktı
+
+### Kapsam
+
+`MODULE_CATALOG` / `MODULE_CATALOG_KEYS` / `MODULE_CATALOG_GROUPS` `src/catalog.js` export değil. Testler `getCatalogItem` / `listCatalogItems` / `listCatalogGroups`. Kart içeriği, 58 üye ve kategori sırası değişmedi.
+
+Dokunulmayan: Catalog projection gövdesi, `getModuleCatalogItem` / `getModuleCatalogLabel`, Item satırları, recipe/BOM, UI.
+
+---
+
+## 2026-09-17 — MODULE_WIDTHS_CM catalog.js’ten çıktı
+
+### Kapsam
+
+Düz duvar compose genişlikleri `src/standDimensions.js` `MODULE_WIDTHS_CM`. `STAND_DIMENSIONS` objesine gömülmedi. Caller: `wall.js` `composeStraightWall`, `standStandardsCopy.js`. `src/catalog.js` export etmez.
+
+Değerler aynı: `[50, 100, 150, 200]` (cm).
+
+Dokunulmayan: Catalog projection API, `STAND_DIMENSIONS` değerleri, Item satırları, recipe/BOM, `validateWallLength` hardcoded 50, `designState` persist alanları.
+
+---
+
+## 2026-09-17 — resolveItemKey Catalog re-export kalktı
+
+### Kapsam
+
+`resolveItemKey` yalnız `src/items.js`. `src/catalog.js` `export { resolveItemKey }` yok. `designState.js` / `main.js` ve testler `items.js`’ten okur. Fonksiyon gövdesi değişmedi.
+
+Dokunulmayan: Catalog projection, `MODULE_WIDTHS_CM`, `STAND_DIMENSIONS`, Item satırları, recipe/BOM, `designState` persist alanları.
+
+---
+
 ## 2026-09-17 — STAND_DIMENSIONS catalog.js’ten çıktı
 
 ### Kapsam
@@ -15,7 +47,7 @@ Stand zarfı sabiti `src/standDimensions.js`. Caller’lar oradan okur. `src/cat
 
 Değerler aynı: height 3.5, depth 0.1, stripCount 7, stripHeight 0.5, frameWidth 0.055, frameDepth 0.1 (metre).
 
-Dokunulmayan: Catalog projection API, `MODULE_WIDTHS_CM`, `resolveItemKey` re-export, Item satırları, `designState` `STRIP_COUNT = 7`.
+Dokunulmayan: Catalog projection API, `MODULE_WIDTHS_CM`, Item satırları, `designState` `STRIP_COUNT = 7`.
 
 ---
 
@@ -311,7 +343,7 @@ Catalog, Item runtime repository’si haline gelmişti. AutoDepot ölçüleri `g
 
 - AutoDepot: `getItem('MINI_FRIDGE_AVANTI' | 'COAT_RACK' | 'KETTLE' | 'PLASTIC_TRASH_BIN')` → `item.dimensions.widthCm/depthCm/heightCm`
 - ModuleContracts: `getItem(itemKey)` Item master varlığı; descriptor gelirse `resolveItemKey` (Item identity, Catalog üyeliği değil)
-- `resolveItemKey` Catalog’dan `src/items.js` Item-domain helper’ına taşındı. `catalogVisible` kontrolü identity çözümlemesine girmez. `src/catalog.js` test ve mevcut `designState` / `main` import uyumu için re-export eder; bu turda frozen `designState.js` import yüzeyi açılmadı
+- `resolveItemKey` Catalog’dan `src/items.js` Item-domain helper’ına taşındı. `catalogVisible` kontrolü identity çözümlemesine girmez. Catalog re-export yoktur.
 
 ### Yeni Item alanı
 

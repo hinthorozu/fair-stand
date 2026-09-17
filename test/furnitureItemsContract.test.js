@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import {
   createBarStoolModuleState,
   createBeigeSofaSetModuleState,
@@ -14,7 +16,7 @@ import {
   duplicateModuleState,
   normalizeModuleItemState,
 } from '../src/designState.js';
-import { FURNITURE_ITEMS, getItem } from '../src/items.js';
+import { FURNITURE_ITEMS, getItem, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 
@@ -147,7 +149,7 @@ for (const itemKey of Object.keys(FURNITURE_ITEMS)) {
   test(`${itemKey}: canonical furniture identity and state parity`, () => {
     const item = getItem(itemKey);
     const expected = EXPECTED[itemKey];
-    const catalog = MODULE_CATALOG[itemKey];
+    const catalog = getCatalogItem(itemKey);
 
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.type, expected.type);

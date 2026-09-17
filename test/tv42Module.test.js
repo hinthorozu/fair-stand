@@ -1,13 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import { createTvModuleState } from '../src/designState.js';
 import { getItem } from '../src/items.js';
 import { getModuleBehavior, getModuleGhostBehavior, isWallOverlayModule } from '../src/moduleBehavior.js';
 
 test('TV 42 catalog and state use one shared 93.0 x 52.3 screen', () => {
-  const item = MODULE_CATALOG.TV_42;
+  const item = getCatalogItem('TV_42');
   assert.equal(item.type, 'tv');
   assert.equal(item.widthCm, 93);
   assert.equal(item.heightCm, 52.3);
@@ -28,7 +31,7 @@ test('TV 55 and 65 keep shared depth and use screen width as placement width', (
 
   for (const itemKey of Object.keys(expected)) {
     const item = getItem(itemKey);
-    const catalogItem = MODULE_CATALOG[itemKey];
+    const catalogItem = getCatalogItem(itemKey);
     const state = createTvModuleState({ itemKey });
     assert.ok(item);
     assert.ok(catalogItem);
@@ -49,9 +52,9 @@ test('TV 55 and 65 keep shared depth and use screen width as placement width', (
     assert.equal(state.depthCm, 5);
   }
 
-  assert.ok(MODULE_CATALOG_KEYS.includes('TV_42'));
-  assert.ok(MODULE_CATALOG_KEYS.includes('TV_55'));
-  assert.ok(MODULE_CATALOG_KEYS.includes('TV_65'));
+  assert.ok(getCatalogItem('TV_42') != null);
+  assert.ok(getCatalogItem('TV_55') != null);
+  assert.ok(getCatalogItem('TV_65') != null);
   assert.equal(createTvModuleState({ itemKey: 'missing_tv' }), null);
 });
 

@@ -425,7 +425,7 @@ Resolve alias: `moduleType`, `counterShape` (`normalizeCatalogDescriptor`).
 | kart birim | `unit` | `adet` (bazı kartlar) | `src/catalog.js` | `katalog` | kopya |
 | video cols kart | `videoWallCols` | `2`, `3` | `src/catalog.js` | `katalog` | düz alan (`items.js` `videoWall.cols`) |
 | video rows kart | `videoWallRows` | `2`, `3` | `src/catalog.js` | `katalog` | düz alan |
-| katalog genişlik listesi | `MODULE_WIDTHS_CM` | 50, 100, 150, 200 | `src/catalog.js` | `katalog` | |
+| düz duvar compose genişlikleri | `MODULE_WIDTHS_CM` | 50, 100, 150, 200 | `src/standDimensions.js` | `stand-proje` | Catalog kart listesi değil; `composeStraightWall` + standart metin |
 | stand ölçü sabiti | `STAND_DIMENSIONS` | `height` 3.5, `depth` 0.1, `stripCount` 7, `stripHeight` 0.5, `frameWidth` 0.055, `frameDepth` 0.1 | `src/standDimensions.js` | `stand-proje` | Item kutusu değil; şerit/ghost yükseklik kaynağı |
 
 ---

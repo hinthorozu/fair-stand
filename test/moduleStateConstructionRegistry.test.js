@@ -1,15 +1,17 @@
-import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import assert from 'node:assert/strict';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 
 test('canonical state construction registry instantiates every catalog entry', () => {
-  assert.equal(MODULE_CATALOG_KEYS.length, 58);
+  assert.equal(listCatalogItems().map((item) => item.itemKey).length, 58);
 
-  for (const itemKey of MODULE_CATALOG_KEYS) {
-    const descriptor = MODULE_CATALOG[itemKey];
+  for (const itemKey of listCatalogItems().map((item) => item.itemKey)) {
+    const descriptor = getCatalogItem(itemKey);
     const state = createModuleStateFromDescriptor(descriptor);
     assert.ok(state, `${itemKey} must resolve to a runtime module state`);
     assert.equal(state.type, descriptor.type, `${itemKey} type must be preserved`);
@@ -20,7 +22,7 @@ test('canonical state construction registry instantiates every catalog entry', (
 
 test('canonical state construction preserves placement only when explicitly requested', () => {
   const descriptor = {
-    ...MODULE_CATALOG.wall_100,
+    ...getCatalogItem('wall_100'),
     placement: { xCm: 100, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
   };
 

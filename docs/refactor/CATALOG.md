@@ -139,7 +139,7 @@ Item master ürünün gerçek özelliğidir (`src/items.js`). Catalog projection
 | `videoWallRows` / `videoWallCols` | `item.videoWall.rows` / `item.videoWall.cols`, varsa |
 | `type` | `item.type` — **Catalog UI preview seçmez.** Yalnız `createModuleStateFromDescriptor` factory uyumu (sahneye sürükleme). |
 
-Yeni görünen Item için `MODULE_CATALOG.my_item = ...` yazılmaz.
+Yeni görünen Item için Catalog içine kart satırı yazılmaz.
 
 ---
 
@@ -181,9 +181,7 @@ Catalog projection  (getCatalogItem / listCatalogItems)
 Catalog UI  (CATALOG_PREVIEW_RENDERERS[catalogPreview])
 ```
 
-Kart descriptor’ı Item kaydından türetilir. Hardcoded Item key listesi yoktur.
-
-`MODULE_CATALOG` / `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS` derived compatibility export’tur; ikinci source-of-truth değildir.
+Kart descriptor’ı Item kaydından türetilir. Hardcoded Item key listesi yoktur. Snapshot alias `MODULE_CATALOG` / `MODULE_CATALOG_KEYS` / `MODULE_CATALOG_GROUPS` yoktur; okuyucu `getCatalogItem` / `listCatalogItems` / `listCatalogGroups`.
 
 ---
 
@@ -199,7 +197,7 @@ Kart descriptor’ı Item kaydından türetilir. Hardcoded Item key listesi yokt
 
 UI okur: `listCatalogGroups()` + `group.catalogName` + `getCatalogItem(itemKey)`.
 
-`resolveItemKey` Item identity helper’dır (`src/items.js`); Catalog üyeliği kontrol etmez. `src/catalog.js` test ve mevcut runtime import uyumu için re-export eder (`src/designState.js`, `src/main.js`). Bu turda `designState.js` frozen state/persistence yüzeyi açılmadı.
+`resolveItemKey` Item identity helper’dır (`src/items.js`); Catalog üyeliği kontrol etmez. `src/catalog.js` re-export etmez. `src/designState.js` ve `src/main.js` `items.js`’ten okur. Catalog `getModuleCatalogItem` aynı fonksiyonu `items.js` import’u ile kullanır.
 
 Catalog UI yardımcıları: `getModuleCatalogItem`, `getModuleCatalogLabel` — görünür Catalog projection döner. Drag badge (`src/scene3d.js`) katalog kart önizlemesi için bunları okur.
 
@@ -246,7 +244,7 @@ Dokümantasyon örneği; bu `itemKey`’ler kayıtlı ürün değildir.
 }
 ```
 
-Yeni görünen Item yalnız Item kaydına yazılır (`catalogVisible=true` + `catalogCategory` + `catalogItemIndex` + `catalogPreview`). `MODULE_CATALOG` satırı eklenmez. `catalogPreview` `CATALOG_PREVIEWS` üyesi olmalıdır.
+Yeni görünen Item yalnız Item kaydına yazılır (`catalogVisible=true` + `catalogCategory` + `catalogItemIndex` + `catalogPreview`). Catalog’a ayrı kart satırı eklenmez. `catalogPreview` `CATALOG_PREVIEWS` üyesi olmalıdır.
 
 Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `catalogName` / `catalogIndex` eklenir.
 
@@ -292,7 +290,7 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 
 ## Kaynak dosyalar
 
-- `src/catalog.js` — `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`; derived `MODULE_CATALOG` / `MODULE_CATALOG_GROUPS` / `MODULE_CATALOG_KEYS`. Item ölçü alias’ı (`*_DIMENSIONS`) ve `flatPanelKey` yok.
+- `src/catalog.js` — `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getModuleCatalogItem`, `getModuleCatalogLabel`. Item ölçü alias’ı (`*_DIMENSIONS`) ve `flatPanelKey` yok.
 - `src/items.js` — Item master; `catalogPreview`; `dimensions` / `sceneDimensions`; `resolveSceneDimensions`; `resolveItemKey`
 - `src/moduleDragSidebar.js` — sol katalog UI; `CATALOG_PREVIEW_RENDERERS[catalogPreview]`
 - `src/moduleContextMenu.js` — picker katalog UI
@@ -308,11 +306,9 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 
 Catalog işi: kategori tablosu + görünür Item projection + UI helper.
 
-**Kalan Catalog yüzeyi:** `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `listCatalogCategories`, `getCatalogCategory`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getModuleCatalogItem`, `getModuleCatalogLabel`, derived `MODULE_CATALOG*`.
+**Kalan Catalog yüzeyi:** `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `listCatalogCategories`, `getCatalogCategory`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getModuleCatalogItem`, `getModuleCatalogLabel`.
 
-**Kalan ama Catalog tablosu değil (sonraki temizlik):** `MODULE_WIDTHS_CM`, `resolveItemKey` re-export.
-
-**Stand zarfı:** `STAND_DIMENSIONS` `src/standDimensions.js`. Catalog export etmez.
+**Stand zarfı / düz duvar genişlikleri:** `STAND_DIMENSIONS` ve `MODULE_WIDTHS_CM` `src/standDimensions.js`. Catalog export etmez. Katalog kart listesi `MODULE_WIDTHS_CM` okumaz.
 
 **Silinen ölü export (runtime çağıran yoktu):** `COUNTER_DIMENSIONS`, furniture/TV/mini-fridge/coat-rack/trash `*_DIMENSIONS`, `flatPanelKey`, `getFurnitureClusterQuantity` catalog import.
 

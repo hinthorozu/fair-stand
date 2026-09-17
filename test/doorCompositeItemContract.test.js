@@ -1,8 +1,10 @@
+import { readdirSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync } from 'node:fs';
-
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import { createModuleStateFromDescriptor, normalizeModuleItemState } from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
 import { getItem, LEAF_ITEMS } from '../src/items.js';
@@ -46,11 +48,11 @@ test('door_100 is the single canonical composite Item identity', () => {
 });
 
 test('legacy uppercase DOOR_100 catalog identity is removed', () => {
-  assert.equal(MODULE_CATALOG.DOOR_100, undefined);
-  assert.equal(MODULE_CATALOG_KEYS.includes('DOOR_100'), false);
-  assert.equal(MODULE_CATALOG_KEYS.includes('door_100'), true);
+  assert.equal(getCatalogItem('DOOR_100'), null);
+  assert.equal(getCatalogItem('DOOR_100') != null, false);
+  assert.equal(getCatalogItem('door_100') != null, true);
 
-  const catalogItem = MODULE_CATALOG.door_100;
+  const catalogItem = getCatalogItem('door_100');
   assert.equal(catalogItem.itemKey, 'door_100');
   assert.equal(catalogItem.type, 'door');
   assert.equal(catalogItem.widthCm, 100);
@@ -95,7 +97,7 @@ test('door_100 recursive BOM resolves the verified inner-corner variant', () => 
 });
 
 test('door_100 factory/persistence identity and child door leaf identity are canonical', () => {
-  const state = createModuleStateFromDescriptor(MODULE_CATALOG.door_100);
+  const state = createModuleStateFromDescriptor(getCatalogItem('door_100'));
   assert.ok(state);
   assert.equal(state.itemKey, 'door_100');
   assert.equal(state.itemKey, 'door_100');

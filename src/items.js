@@ -264,7 +264,7 @@ export function getTopLightItemForType(type) {
   return Object.values(TOP_LIGHT_ITEMS).find((item) => item.type === type) ?? null;
 }
 
-// Katalog dışı SVG → ışıklı strafor. itemKey type ile aynıdır; MODULE_CATALOG kaydı yoktur.
+// Katalog dışı SVG → ışıklı strafor. itemKey type ile aynıdır; Catalog kartı yoktur.
 export const NON_CATALOG_ITEMS = Object.freeze({
   'illuminated-foam': Object.freeze({
     itemKey: 'illuminated-foam', catalogVisible: false, catalogCategory: null, catalogItemIndex: null,

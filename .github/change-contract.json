@@ -1,14 +1,15 @@
 {
   "schemaVersion": 2,
-  "id": "stand-dimensions-own-file",
+  "id": "module-catalog-snapshot-export-removed",
   "kind": "architecture",
-  "summary": "STAND_DIMENSIONS src/standDimensions.js’e taşındı. Catalog re-export yok. Değerler aynı. STRIP_COUNT birleştirilmedi.",
+  "summary": "MODULE_CATALOG / KEYS / GROUPS export kalktı. Testler getCatalogItem / listCatalogItems / listCatalogGroups. MODULE_WIDTHS_CM standDimensions. resolveItemKey items.js.",
   "owners": [
+    "src/catalog.js",
     "src/standDimensions.js",
-    "src/catalog.js"
+    "src/items.js"
   ],
   "sourceOfTruth": [
-    "src/standDimensions.js"
+    "src/catalog.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -16,13 +17,13 @@
     "state": "affected",
     "placement": "affected",
     "renderer": "affected",
-    "persistence": "not-applicable",
-    "bom": "not-applicable",
+    "persistence": "affected",
+    "bom": "affected",
     "ui": "affected",
-    "composition": "not-applicable",
-    "assets": "not-applicable",
-    "storage": "not-applicable",
-    "importExport": "not-applicable",
+    "composition": "affected",
+    "assets": "affected",
+    "storage": "affected",
+    "importExport": "affected",
     "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "affected",
@@ -68,6 +69,7 @@
       "src/standStandardsCopy.js",
       "src/stripOccupancy.js",
       "src/systemChangeContract.js",
+      "src/viewCube.js",
       "src/wall.js",
       "src/wallReflow.js"
     ],
@@ -273,8 +275,10 @@
       "audit/evidence/A05_MODULE_BEHAVIOR.md",
       "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
+      "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
       "audit/evidence/A10_UI_CONTROLS.md",
+      "audit/evidence/A11_FEATURE_COMPOSITION.md",
       "audit/evidence/A12_BOM_RECIPES_PRODUCTION.md",
       "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
       "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
@@ -289,6 +293,8 @@
       "audit/remediation/A03_F011_CLOSURE.md",
       "audit/remediation/A03_F012_CLOSURE.md",
       "audit/remediation/A04_F013_CLOSURE.md",
+      "audit/remediation/A11_F029_CLOSURE.md",
+      "docs/AUTOSAVE_INTEGRATION_NOTES.md",
       "docs/assets/PUBLIC_MODEL_ATTRIBUTION.md",
       "docs/items/ITEM_CONSOLIDATION_PLAN.md",
       "docs/items/ITEM_LIST.md",
@@ -494,6 +500,7 @@
       "docs/items/audit/properties/properties/parents.replacement.md",
       "docs/items/audit/properties/properties/parents.showcaseBody.md",
       "docs/items/audit/properties/properties/persist.path.md",
+      "docs/items/audit/properties/properties/persist.projectBlob.md",
       "docs/items/audit/properties/properties/profile.catalogWidthCm.md",
       "docs/items/audit/properties/properties/recipe.connectionMode.md",
       "docs/items/audit/properties/properties/recipe.id.md",
@@ -754,9 +761,7 @@
       "fair-stand-base-family-migration-handoff.md"
     ],
     "relatedFindings": {
-      "affected": [
-        "F-026"
-      ],
+      "affected": [],
       "reviewedNotAffected": [
         "F-001",
         "F-003",
@@ -773,18 +778,21 @@
         "F-018",
         "F-019",
         "F-025",
+        "F-026",
+        "F-029",
         "F-030",
         "F-033",
         "F-045"
       ]
     },
-    "notes": "Import yolu. Değer aynı. designState STRIP_COUNT ayrı durur. Audit property dump regenerate edilmedi."
+    "notes": "Catalog snapshot alias kalktı. Kart projection aynı. MODULE_WIDTHS_CM ve resolveItemKey import yolu bu sette."
   },
   "tests": {
     "targeted": [
       "test/catalogDomainBoundary.test.js",
-      "test/visibleUiContract.test.js",
-      "test/systemChangeGate.test.js"
+      "test/catalogItemProjection.test.js",
+      "test/catalogSingleSource.test.js",
+      "test/visibleUiContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -794,16 +802,16 @@
         "e2e/smoke.spec.mjs",
         "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "catalog/behavior/placement/renderer/ui browser-impact. Stand zarf değeri değişmedi; smoke + visible-ui-b."
+      "reason": "catalog/ui/composition frozen. Değer değişmedi; smoke + visible-ui-b."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Aynı freeze obje; yalnız dosya yolu."
+    "notes": "Snapshot alias ve import yolu; kart/compose değerleri aynı."
   },
   "migration": {
     "required": false,
-    "notes": "Persist/schema yok."
+    "notes": "Persist/schema yok. Değer değişmedi."
   },
-  "rollback": "STAND_DIMENSIONS’ı catalog.js’e geri koymak ve import’ları çevirmek."
+  "rollback": "MODULE_CATALOG* derived export’u ve Catalog re-export resolveItemKey / MODULE_WIDTHS_CM’i geri koymak."
 }

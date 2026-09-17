@@ -1,13 +1,15 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { MODULE_CATALOG } from '../src/catalog.js';
+import {
+  listCatalogItems,
+} from '../src/catalog.js';
 import { getModuleGhostBehavior } from '../src/moduleBehavior.js';
 
 test('every current and future module inherits the lightweight silhouette ghost rule', () => {
   const expected = { kind: 'silhouette', renderer: 'module-silhouette', opacity: 0.38 };
   assert.deepEqual(getModuleGhostBehavior('future-module-without-explicit-ghost'), expected);
-  for (const module of Object.values(MODULE_CATALOG)) {
+  for (const module of listCatalogItems()) {
     assert.deepEqual(getModuleGhostBehavior(module), expected);
   }
 });

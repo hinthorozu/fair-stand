@@ -1,12 +1,10 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-
 import {
-  getCatalogItem,
   listCatalogGroups,
   listCatalogItems,
-  MODULE_CATALOG,
+  getCatalogItem,
 } from '../src/catalog.js';
 import {
   createModuleStateFromDescriptor,
@@ -82,7 +80,7 @@ test('D-E Catalog descriptor exact itemKey ile state ve scene width üretir', ()
   });
 
   for (const [itemKey, widthCm] of Object.entries(expected)) {
-    const descriptor = MODULE_CATALOG[itemKey];
+    const descriptor = getCatalogItem(itemKey);
     const state = createModuleStateFromDescriptor(descriptor);
     assert.ok(state, itemKey);
     assert.equal(state.itemKey, itemKey);
@@ -250,7 +248,7 @@ test('J shelf wall capacity’ye 100/150/200 cm eklemez', () => {
 test('K wall_shelf_* Item’ları hâlâ yok', () => {
   for (const itemKey of REMOVED_WALL_SHELF_KEYS) {
     assert.equal(getItem(itemKey), null, itemKey);
-    assert.equal(MODULE_CATALOG[itemKey], undefined, itemKey);
+    assert.equal(getCatalogItem(itemKey), null, itemKey);
     assert.equal(resolveModuleContract(itemKey), null, itemKey);
   }
 });

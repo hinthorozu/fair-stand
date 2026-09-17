@@ -1,13 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import { createEamesTableChairSetModuleState } from '../src/designState.js';
 
 test('Eames is the only table-chair set in the catalog', () => {
-  const eames = MODULE_CATALOG.furniture_table_chair_set_eames;
-  assert.equal(MODULE_CATALOG.furniture_table_chair_set_minyon, undefined);
-  assert.equal(MODULE_CATALOG_KEYS.includes('furniture_table_chair_set_minyon'), false);
+  const eames = getCatalogItem('furniture_table_chair_set_eames');
+  assert.equal(getCatalogItem('furniture_table_chair_set_minyon'), null);
+  assert.equal(getCatalogItem('furniture_table_chair_set_minyon') != null, false);
   assert.equal(eames.type, 'table-chair-set-eames');
   assert.equal(eames.widthCm, 150);
   assert.equal(eames.depthCm, 150);

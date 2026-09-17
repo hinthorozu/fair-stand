@@ -1,12 +1,9 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-
 import {
-  getCatalogItem,
   listCatalogItems,
-  MODULE_CATALOG,
-  MODULE_CATALOG_KEYS,
+  getCatalogItem,
 } from '../src/catalog.js';
 import {
   createProfileModuleState,
@@ -202,8 +199,8 @@ test('19. 58 visible Catalog Item korunuyor', () => {
 
 test('20. 58 Catalog projection korunuyor', () => {
   assert.equal(listCatalogItems().length, 58);
-  assert.equal(MODULE_CATALOG_KEYS.length, 58);
-  assert.equal(Object.keys(MODULE_CATALOG).length, 58);
+  assert.equal(listCatalogItems().map((item) => item.itemKey).length, 58);
+  assert.equal(listCatalogItems().length, 58);
 });
 
 test('upright_346_5 sceneDimensions placement 8×8×346.5; length→height remap yok', () => {

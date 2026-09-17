@@ -1,8 +1,11 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-
-import { CATALOG_PREVIEWS, getCatalogItem, listCatalogItems } from '../src/catalog.js';
+import {
+  CATALOG_PREVIEWS,
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import { getItem, listRegisteredItems } from '../src/items.js';
 import {
   CATALOG_PREVIEW_RENDERERS,

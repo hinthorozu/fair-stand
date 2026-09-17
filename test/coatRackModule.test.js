@@ -1,12 +1,15 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { MODULE_CATALOG, MODULE_CATALOG_GROUPS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogGroups,
+} from '../src/catalog.js';
 import { createCoatRackModuleState, createModuleStateFromDescriptor } from '../src/designState.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
 test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
-  const item = MODULE_CATALOG.COAT_RACK;
+  const item = getCatalogItem('COAT_RACK');
   assert.deepEqual(item, {
     itemKey: 'COAT_RACK',
     type: 'coat-rack',
@@ -18,7 +21,7 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
     modelFile: 'coat_rack.glb',
     unit: 'adet',
   });
-  const extra = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Extra');
+  const extra = listCatalogGroups().find((group) => group.label === 'Extra');
   assert.ok(extra?.keys.includes('COAT_RACK'));
 
   const state = createCoatRackModuleState();

@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import { planAutomaticDepot } from '../src/autoDepot.js';
 import { getModuleRecipe } from '../src/moduleRecipes.js';
 import {
@@ -26,15 +29,15 @@ const REQUIRED_CONTRACT_SECTIONS = Object.freeze([
 ]);
 
 test('every catalog item has an explicit module contract assignment', () => {
-  const missing = MODULE_CATALOG_KEYS.filter((moduleKey) => !hasExplicitModuleContract(moduleKey));
-  const stale = Object.keys(MODULE_CONTRACT_ASSIGNMENTS).filter((moduleKey) => !MODULE_CATALOG[moduleKey]);
+  const missing = listCatalogItems().map((item) => item.itemKey).filter((moduleKey) => !hasExplicitModuleContract(moduleKey));
+  const stale = Object.keys(MODULE_CONTRACT_ASSIGNMENTS).filter((moduleKey) => !getCatalogItem(moduleKey));
 
   assert.deepEqual(missing, [], `Catalog items missing module contract: ${missing.join(', ')}`);
   assert.deepEqual(stale, [], `Module contracts reference missing catalog items: ${stale.join(', ')}`);
 });
 
 test('every catalog module contract resolves all required policy sections', () => {
-  for (const moduleKey of MODULE_CATALOG_KEYS) {
+  for (const moduleKey of listCatalogItems().map((item) => item.itemKey)) {
     const contract = resolveModuleContract(moduleKey);
     assert.ok(contract, `Module contract did not resolve: ${moduleKey}`);
     assert.ok(MODULE_CONTRACT_PROFILES[contract.profile], `Unknown profile for ${moduleKey}: ${contract.profile}`);
@@ -61,11 +64,11 @@ test('every catalog module contract resolves all required policy sections', () =
 });
 
 test('recipe-backed module contracts resolve an actual canonical recipe', () => {
-  for (const moduleKey of MODULE_CATALOG_KEYS) {
+  for (const moduleKey of listCatalogItems().map((item) => item.itemKey)) {
     const contract = resolveModuleContract(moduleKey);
     if (contract?.bom?.mode !== 'recipe') continue;
 
-    const descriptor = MODULE_CATALOG[moduleKey];
+    const descriptor = getCatalogItem(moduleKey);
     const recipe = getModuleRecipe(descriptor.type, descriptor.widthCm, {
       shape: descriptor.shape,
     });

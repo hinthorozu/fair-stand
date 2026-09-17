@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { WALL_MEDIA_ITEMS, resolveWallMediaMetrics, getItem, resolveSceneDimensions } from '../src/items.js';
-import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
+import { WALL_MEDIA_ITEMS, resolveWallMediaMetrics, getItem, resolveSceneDimensions, resolveItemKey } from '../src/items.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import { createModuleStateFromDescriptor, duplicateModuleState, normalizeModuleItemState } from '../src/designState.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
@@ -9,7 +11,7 @@ import { getModuleBehavior } from '../src/moduleBehavior.js';
 for (const item of Object.values(WALL_MEDIA_ITEMS)) {
   test(`${item.itemKey}: canonical wall-media identity, state and BOM policy`, () => {
     const metrics = resolveWallMediaMetrics(item.itemKey);
-    const catalog = MODULE_CATALOG[item.itemKey];
+    const catalog = getCatalogItem(item.itemKey);
     const scene = resolveSceneDimensions(item);
     const isVideoWall = Boolean(item.videoWall);
 
@@ -75,7 +77,7 @@ test('video walls read panel size from VIDEO_WALL_PANEL and keep rows/cols on th
     assert.equal(Object.hasOwn(item.videoWall, 'panelScreenWidthCm'), false);
     assert.equal(metrics.widthCm, panel.dimensions.widthCm * item.videoWall.cols);
     assert.equal(metrics.heightCm, panel.dimensions.heightCm * item.videoWall.rows);
-    const state = createModuleStateFromDescriptor(MODULE_CATALOG[key]);
+    const state = createModuleStateFromDescriptor(getCatalogItem(key));
     assert.equal(state.videoWallRows, item.videoWall.rows);
     assert.equal(state.videoWallCols, item.videoWall.cols);
   }
@@ -87,8 +89,8 @@ test('ordinary TV Items use canonical dimensions as catalog and scene height', (
     const item = getItem(key);
     const scene = resolveSceneDimensions(item);
     assert.equal(item.dimensions.heightCm, expectedHeight[key]);
-    assert.equal(MODULE_CATALOG[key].heightCm, scene.heightCm);
-    const state = createModuleStateFromDescriptor(MODULE_CATALOG[key]);
+    assert.equal(getCatalogItem(key).heightCm, scene.heightCm);
+    const state = createModuleStateFromDescriptor(getCatalogItem(key));
     assert.equal(state.heightCm, item.dimensions.heightCm);
     assert.notEqual(state.heightCm, 350);
   }

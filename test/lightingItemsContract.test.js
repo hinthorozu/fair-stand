@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS, resolveItemKey } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import {
   createIlluminatedFoamModuleState,
   createLedFloodlightModuleState,
@@ -8,7 +11,7 @@ import {
   duplicateModuleState,
   normalizeModuleItemState,
 } from '../src/designState.js';
-import { getItem, NON_CATALOG_ITEMS, TOP_LIGHT_ITEMS } from '../src/items.js';
+import { getItem, NON_CATALOG_ITEMS, TOP_LIGHT_ITEMS, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 
@@ -17,7 +20,7 @@ test('led_floodlight: canonical identity, catalog and hydrate', () => {
   assert.equal(getItem('led_floodlight'), item);
   assert.equal(getItem('LED_FLOODLIGHT'), null);
 
-  const catalog = MODULE_CATALOG.led_floodlight;
+  const catalog = getCatalogItem('led_floodlight');
   assert.equal(catalog.itemKey, 'led_floodlight');
   assert.equal(catalog.label, 'LED Projektör');
   assert.equal(catalog.type, 'led-floodlight');
@@ -25,10 +28,10 @@ test('led_floodlight: canonical identity, catalog and hydrate', () => {
   assert.equal(catalog.depthCm, 20);
   assert.equal(catalog.heightCm, 35);
   assert.equal(Object.hasOwn(catalog, 'mountHeightCm'), false);
-  assert.equal(MODULE_CATALOG.LED_FLOODLIGHT, undefined);
-  assert.equal(MODULE_CATALOG_KEYS.includes('led_floodlight'), true);
-  assert.equal(MODULE_CATALOG_KEYS.includes('LED_FLOODLIGHT'), false);
-  assert.equal(MODULE_CATALOG_KEYS.includes('illuminated-foam'), false);
+  assert.equal(getCatalogItem('LED_FLOODLIGHT'), null);
+  assert.equal(getCatalogItem('led_floodlight') != null, true);
+  assert.equal(getCatalogItem('LED_FLOODLIGHT') != null, false);
+  assert.equal(getCatalogItem('illuminated-foam') != null, false);
 
   const state = createLedFloodlightModuleState();
   assert.equal(state.itemKey, 'led_floodlight');
@@ -80,7 +83,7 @@ test('illuminated-foam: canonical identity stays off catalog', () => {
   assert.equal(item.dimensions.depthCm, 3.5);
   assert.equal(item.dimensions.wallGapCm, 1.5);
   assert.equal(Object.hasOwn(item, 'unit'), false);
-  assert.equal(MODULE_CATALOG['illuminated-foam'], undefined);
+  assert.equal(getCatalogItem('illuminated-foam'), null);
 
   const state = createIlluminatedFoamModuleState('asset-1');
   assert.equal(state.itemKey, 'illuminated-foam');

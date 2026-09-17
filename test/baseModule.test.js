@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG } from '../src/catalog.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import { createBaseModuleState, duplicateModuleState } from '../src/designState.js';
 import { getItem } from '../src/items.js';
 import {
@@ -20,9 +22,9 @@ test('baza catalog exposes 100 150 200 cm sizes at 50 x 50 cm depth and height',
   );
   assert.equal(base100.dimensions.depthCm, 50);
   assert.equal(base100.dimensions.heightCm, 50);
-  assert.equal(MODULE_CATALOG.BASE_100.label, 'Baza 100');
-  assert.equal(MODULE_CATALOG.BASE_150.label, 'Baza 150');
-  assert.equal(MODULE_CATALOG.BASE_200.label, 'Baza 200');
+  assert.equal(getCatalogItem('BASE_100').label, 'Baza 100');
+  assert.equal(getCatalogItem('BASE_150').label, 'Baza 150');
+  assert.equal(getCatalogItem('BASE_200').label, 'Baza 200');
 });
 
 test('baza state has independent front left and right editable panels', () => {

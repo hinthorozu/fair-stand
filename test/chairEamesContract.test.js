@@ -1,12 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import { createEamesChairModuleState, createEamesTableChairSetModuleState } from '../src/designState.js';
 import { getItem } from '../src/items.js';
 
 test('chair_eames katalog ve state kimliği sabittir', () => {
-  const catalog = MODULE_CATALOG.chair_eames;
+  const catalog = getCatalogItem('chair_eames');
   const item = getItem('chair_eames');
   assert.equal(item.itemKey, 'chair_eames');
   assert.equal(item.type, 'chair');
@@ -16,7 +19,7 @@ test('chair_eames katalog ve state kimliği sabittir', () => {
   assert.equal(catalog.widthCm, 46);
   assert.equal(catalog.depthCm, 58);
   assert.equal(catalog.heightCm, 82);
-  assert.ok(MODULE_CATALOG_KEYS.includes('chair_eames'));
+  assert.ok(getCatalogItem('chair_eames') != null);
 
   const state = createEamesChairModuleState();
   assert.equal(state.itemKey, 'chair_eames');

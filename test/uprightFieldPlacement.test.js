@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { MODULE_CATALOG, MODULE_CATALOG_GROUPS, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+  listCatalogGroups,
+} from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
 import { isShortUpFamilyDescriptor } from '../src/items.js';
@@ -22,25 +26,25 @@ const SHORT_UP_KEYS = [
 ];
 
 test('Panel Ek Modül holds short-up family and field upright_346_5', () => {
-  const panelWall = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Panel & Duvar');
-  const extraPanel = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Panel Ek Modül');
+  const panelWall = listCatalogGroups().find((group) => group.label === 'Panel & Duvar');
+  const extraPanel = listCatalogGroups().find((group) => group.label === 'Panel Ek Modül');
   assert.ok(panelWall);
   assert.ok(extraPanel);
   assert.deepEqual(extraPanel.keys, [...SHORT_UP_KEYS, 'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5']);
   for (const key of SHORT_UP_KEYS) {
     assert.equal(panelWall.keys.includes(key), false);
-    assert.equal(MODULE_CATALOG_KEYS.includes(key), true);
+    assert.equal(getCatalogItem(key) != null, true);
   }
   assert.equal(panelWall.keys.includes('wall_200'), true);
   assert.equal(panelWall.keys.includes('upright_346_5'), false);
 });
 
 test('field upright_346_5 is self BOM ×1 and does not change parent wall recipe ×2', () => {
-  assert.equal(MODULE_CATALOG.upright_346_5.itemKey, 'upright_346_5');
-  assert.equal(MODULE_CATALOG.upright_346_5.type, 'upright');
-  assert.equal(MODULE_CATALOG.upright_346_5.widthCm, 8);
-  assert.equal(MODULE_CATALOG.upright_346_5.depthCm, 8);
-  assert.equal(MODULE_CATALOG.upright_346_5.heightCm, 346.5);
+  assert.equal(getCatalogItem('upright_346_5').itemKey, 'upright_346_5');
+  assert.equal(getCatalogItem('upright_346_5').type, 'upright');
+  assert.equal(getCatalogItem('upright_346_5').widthCm, 8);
+  assert.equal(getCatalogItem('upright_346_5').depthCm, 8);
+  assert.equal(getCatalogItem('upright_346_5').heightCm, 346.5);
   assert.equal(resolveModuleContract('upright_346_5').bom.mode, 'self');
   const bom = resolveItemBom('upright_346_5');
   assert.equal(bom.length, 1);
@@ -52,7 +56,7 @@ test('field upright_346_5 is self BOM ×1 and does not change parent wall recipe
 });
 
 test('upright snaps to short-up, profile and banko joints, not to düz wall_200', () => {
-  const upright = createModuleStateFromDescriptor(MODULE_CATALOG.upright_346_5);
+  const upright = createModuleStateFromDescriptor(getCatalogItem('upright_346_5'));
   assert.equal(upright.type, 'upright');
   assert.equal(requiresShortUpJointSnap(upright), true);
   assert.equal(getModuleMagneticSnapStrategy(upright), 'short-up-joint');
@@ -154,7 +158,7 @@ test('upright snaps to short-up, profile and banko joints, not to düz wall_200'
   assert.equal(hitProfile.snapKind, 'short-up-joint');
   assert.equal(hitProfile.placement.wallId, 'free');
 
-  const banko = createModuleStateFromDescriptor(MODULE_CATALOG.desk_banko_200);
+  const banko = createModuleStateFromDescriptor(getCatalogItem('desk_banko_200'));
   banko.id = 'banko-1';
   banko.placement = { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'free' };
   const hitBanko = snapPlacementToModules({

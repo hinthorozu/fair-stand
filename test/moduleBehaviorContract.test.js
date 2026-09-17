@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import {
   getModuleBehavior,
   hasExplicitModuleBehavior,
@@ -9,7 +12,7 @@ import {
 
 test('every catalog module type has an explicit behavior contract', () => {
   const catalogTypes = [...new Set(
-    MODULE_CATALOG_KEYS.map((moduleKey) => MODULE_CATALOG[moduleKey]?.type),
+    listCatalogItems().map((item) => item.itemKey).map((moduleKey) => getCatalogItem(moduleKey)?.type),
   )].filter(Boolean);
 
   const missingTypes = catalogTypes.filter((type) => !hasExplicitModuleBehavior(type));
@@ -69,8 +72,8 @@ test('every declared catalog behavior exposes the complete placement policy sche
     'ghost',
   ];
 
-  for (const moduleKey of MODULE_CATALOG_KEYS) {
-    const descriptor = MODULE_CATALOG[moduleKey];
+  for (const moduleKey of listCatalogItems().map((item) => item.itemKey)) {
+    const descriptor = getCatalogItem(moduleKey);
     const behavior = getModuleBehavior({ ...descriptor, itemKey: moduleKey });
     for (const key of requiredKeys) {
       assert.equal(Object.hasOwn(behavior, key), true, `${moduleKey}: missing ${key}`);

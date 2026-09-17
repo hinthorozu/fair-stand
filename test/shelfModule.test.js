@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG } from '../src/catalog.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 import { snapPlacementToStand } from '../src/modulePlacement.js';
 import { getItem } from '../src/items.js';
@@ -11,7 +13,7 @@ test('wall_shelf catalog kayıtları yoktur; leaf shelf_* durur', () => {
     'wall_shelf_2_150', 'wall_shelf_3_150',
     'wall_shelf_2_200', 'wall_shelf_3_200',
   ]) {
-    assert.equal(MODULE_CATALOG[itemKey], undefined, itemKey);
+    assert.equal(getCatalogItem(itemKey), null, itemKey);
     assert.equal(getItem(itemKey), null, itemKey);
   }
 

@@ -1,12 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import { createGlassTableModuleState } from '../src/designState.js';
 import { getItem } from '../src/items.js';
 
 test('glass_table katalog ve state kimliği sabittir', () => {
-  const catalog = MODULE_CATALOG.glass_table;
+  const catalog = getCatalogItem('glass_table');
   const item = getItem('glass_table');
   assert.equal(item.itemKey, 'glass_table');
   assert.equal(item.type, 'table-glass');
@@ -18,7 +21,7 @@ test('glass_table katalog ve state kimliği sabittir', () => {
   assert.equal(catalog.widthCm, 75);
   assert.equal(catalog.depthCm, 75);
   assert.equal(catalog.heightCm, 74);
-  assert.ok(MODULE_CATALOG_KEYS.includes('glass_table'));
+  assert.ok(getCatalogItem('glass_table') != null);
 
   const state = createGlassTableModuleState();
   assert.equal(state.itemKey, 'glass_table');

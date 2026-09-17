@@ -1,14 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import {
   createBaseModuleState,
   createModuleStateFromDescriptor,
   duplicateModuleState,
   normalizeModuleItemState,
 } from '../src/designState.js';
-import { getItem } from '../src/items.js';
+import { getItem, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { getModuleRecipe } from '../src/moduleRecipes.js';
@@ -40,7 +42,7 @@ for (const itemKey of BASE_KEYS) {
   test(`${itemKey}: canonical composite identity, state and recipe parity`, () => {
     const item = getItem(itemKey);
     const expected = EXPECTED_RECIPE[itemKey];
-    const catalog = MODULE_CATALOG[itemKey];
+    const catalog = getCatalogItem(itemKey);
 
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.type, 'base');
@@ -110,7 +112,7 @@ test('silinen wall_base Item’ları BASE recipe ailesinden ayrı durur ve kayı
   for (const width of [100, 150, 200]) {
     const wallKey = `wall_base_${width}`;
     assert.equal(getItem(wallKey), null, wallKey);
-    assert.equal(MODULE_CATALOG[wallKey], undefined, wallKey);
+    assert.equal(getCatalogItem(wallKey), null, wallKey);
     assert.equal(getModuleRecipe('base-wall', width), null, wallKey);
 
     const baseRecipe = getModuleRecipe('base', width);
