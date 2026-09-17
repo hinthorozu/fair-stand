@@ -72,6 +72,17 @@ test('catalog.js Recipe/BOM’dan Item özelliği öğrenmez; resolveItemKey Ite
   assert.doesNotMatch(CATALOG_SOURCE, /LED_FLOODLIGHT_DIMENSIONS/);
   assert.doesNotMatch(CATALOG_SOURCE, /TV_42_DIMENSIONS/);
   assert.doesNotMatch(CATALOG_SOURCE, /flatPanelKey/);
+  assert.doesNotMatch(CATALOG_SOURCE, /STAND_DIMENSIONS/);
+});
+
+test('STAND_DIMENSIONS sahibi src/standDimensions.js; Catalog re-export yok', () => {
+  const owner = readFileSync(new URL('../src/standDimensions.js', import.meta.url), 'utf8');
+  assert.match(owner, /export const STAND_DIMENSIONS = Object\.freeze/);
+  for (const file of listSrcJsFiles()) {
+    if (file.name === 'standDimensions.js') continue;
+    if (!file.source.includes('STAND_DIMENSIONS')) continue;
+    assert.match(file.source, /from ['"]\.\/standDimensions\.js['"]/, file.name);
+  }
 });
 
 test('catalogVisible yalnız Catalog üyeliği içindir; src runtime domainleri okumaz', () => {

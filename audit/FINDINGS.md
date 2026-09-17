@@ -51,7 +51,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 | F-023 | P2 | Tüm proje silme, proje ve asset store’lar arasında atomik değil | **CLOSED** — `audit/remediation/A08_F023_CLOSURE.md` |
 | F-024 | P2 | Model yükleme hatası görünmez modül bırakabilir; reddedilen loader promise’leri önbellekte kalır | **CLOSED** — `loadGltfScene` reddinde cache siler; `#stage-result` |
 | F-025 | P1 | Üretim giriş noktası görünür `rawBomDebug.js` UI yükler | **CLOSED** — `index.html` yüklemez; yalnız `DEV` + `?rawBom` |
-| F-026 | P2 | Kullanıcıya görünen standart/özellik gerçekleri statik HTML metin olarak kopyalı | **CLOSED** — `standStandardsCopy.js` ← `STAND_DIMENSIONS` / `standSetup` / karolaj |
+| F-026 | P2 | Kullanıcıya görünen standart/özellik gerçekleri statik HTML metin olarak kopyalı | **CLOSED** — `standStandardsCopy.js` ← `STAND_DIMENSIONS` (`src/standDimensions.js`) / `standSetup` / karolaj |
 | F-027 | P1 | “Duvarı temizle” etiket/onay kapsamının ötesinde tüm modülleri siler | **CLOSED** — `audit/remediation/A10_F027_CLOSURE.md` |
 | F-028 | P1 | “Tüm Özellikleri Kaldır” `illuminated-foam` varken başarısız olabilir | **CLOSED** — `audit/remediation/A10_F028_CLOSURE.md` |
 | F-029 | P1 | Aktif otomatik-duvar bileşiminin açık özellik sözleşmesi yok | **CLOSED** — `FEATURE_CONTRACTS.automaticWall`; depo `contentCatalogKeys` dört Item |

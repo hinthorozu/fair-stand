@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { MODULE_WIDTHS_CM, STAND_DIMENSIONS } from '../src/catalog.js';
+import { MODULE_WIDTHS_CM } from '../src/catalog.js';
+import { STAND_DIMENSIONS } from '../src/standDimensions.js';
 import { SCENE_SURROUND_M } from '../src/sceneDimensions.js';
 import { MAX_STAND_DIMENSION_CM } from '../src/standSetup.js';
 import { DEFAULT_SELECTION_HINT } from '../src/selectionFeedback.js';

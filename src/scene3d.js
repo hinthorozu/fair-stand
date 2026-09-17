@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
-import { getModuleCatalogItem, getModuleCatalogLabel, STAND_DIMENSIONS } from './catalog.js';
+import { getModuleCatalogItem, getModuleCatalogLabel } from './catalog.js';
+import { STAND_DIMENSIONS } from './standDimensions.js';
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 import {

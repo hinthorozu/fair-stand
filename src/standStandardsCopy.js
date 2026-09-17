@@ -1,4 +1,5 @@
-import { MODULE_WIDTHS_CM, STAND_DIMENSIONS } from './catalog.js';
+import { MODULE_WIDTHS_CM } from './catalog.js';
+import { STAND_DIMENSIONS } from './standDimensions.js';
 import { getFloorItem } from './items.js';
 import { SCENE_SURROUND_M } from './sceneDimensions.js';
 import {

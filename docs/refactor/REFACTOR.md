@@ -7,6 +7,18 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-17 — STAND_DIMENSIONS catalog.js’ten çıktı
+
+### Kapsam
+
+Stand zarfı sabiti `src/standDimensions.js`. Caller’lar oradan okur. `src/catalog.js` `STAND_DIMENSIONS` export etmez.
+
+Değerler aynı: height 3.5, depth 0.1, stripCount 7, stripHeight 0.5, frameWidth 0.055, frameDepth 0.1 (metre).
+
+Dokunulmayan: Catalog projection API, `MODULE_WIDTHS_CM`, `resolveItemKey` re-export, Item satırları, `designState` `STRIP_COUNT = 7`.
+
+---
+
 ## 2026-09-17 — catalog.js ölü ölçü alias’ları
 
 ### Kapsam

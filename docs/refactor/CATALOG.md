@@ -310,7 +310,9 @@ Catalog işi: kategori tablosu + görünür Item projection + UI helper.
 
 **Kalan Catalog yüzeyi:** `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `listCatalogCategories`, `getCatalogCategory`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getModuleCatalogItem`, `getModuleCatalogLabel`, derived `MODULE_CATALOG*`.
 
-**Kalan ama Catalog tablosu değil (sonraki temizlik):** `STAND_DIMENSIONS`, `MODULE_WIDTHS_CM`, `resolveItemKey` re-export.
+**Kalan ama Catalog tablosu değil (sonraki temizlik):** `MODULE_WIDTHS_CM`, `resolveItemKey` re-export.
+
+**Stand zarfı:** `STAND_DIMENSIONS` `src/standDimensions.js`. Catalog export etmez.
 
 **Silinen ölü export (runtime çağıran yoktu):** `COUNTER_DIMENSIONS`, furniture/TV/mini-fridge/coat-rack/trash `*_DIMENSIONS`, `flatPanelKey`, `getFurnitureClusterQuantity` catalog import.
 

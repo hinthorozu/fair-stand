@@ -1,30 +1,29 @@
 {
   "schemaVersion": 2,
-  "id": "catalog-dead-dimension-aliases",
-  "kind": "bugfix",
-  "summary": "catalog.js ölü Item ölçü alias’ları ve flatPanelKey silindi. Ölçü getItem. Catalog projection değişmedi.",
+  "id": "stand-dimensions-own-file",
+  "kind": "architecture",
+  "summary": "STAND_DIMENSIONS src/standDimensions.js’e taşındı. Catalog re-export yok. Değerler aynı. STRIP_COUNT birleştirilmedi.",
   "owners": [
-    "src/catalog.js",
-    "docs/refactor/CATALOG.md"
+    "src/standDimensions.js",
+    "src/catalog.js"
   ],
   "sourceOfTruth": [
-    "src/catalog.js",
-    "docs/refactor/CATALOG.md"
+    "src/standDimensions.js"
   ],
   "impact": {
     "catalog": "affected",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
-    "placement": "not-applicable",
-    "renderer": "not-applicable",
+    "behavior": "affected",
+    "state": "affected",
+    "placement": "affected",
+    "renderer": "affected",
     "persistence": "not-applicable",
     "bom": "not-applicable",
-    "ui": "not-applicable",
+    "ui": "affected",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
-    "performance": "not-applicable",
+    "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
@@ -65,6 +64,7 @@
       "src/rawBomDebug.js",
       "src/scene3d.js",
       "src/selectionFeedback.js",
+      "src/standDimensions.js",
       "src/standStandardsCopy.js",
       "src/stripOccupancy.js",
       "src/systemChangeContract.js",
@@ -282,6 +282,8 @@
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
       "audit/remediation/A01_F003_CLOSURE.md",
       "audit/remediation/A02_CLOSURE.md",
+      "audit/remediation/A02_F005_CLOSURE.md",
+      "audit/remediation/A02_F006_CLOSURE.md",
       "audit/remediation/A03_CLOSURE.md",
       "audit/remediation/A03_F010_CLOSURE.md",
       "audit/remediation/A03_F011_CLOSURE.md",
@@ -478,6 +480,7 @@
       "docs/items/audit/properties/properties/factory.ok.md",
       "docs/items/audit/properties/properties/factory.reason.md",
       "docs/items/audit/properties/properties/factory.stateKeys.md",
+      "docs/items/audit/properties/properties/featureContracts.md",
       "docs/items/audit/properties/properties/itemKey.md",
       "docs/items/audit/properties/properties/media.screenHeightCm.md",
       "docs/items/audit/properties/properties/media.screenWidthCm.md",
@@ -751,10 +754,15 @@
       "fair-stand-base-family-migration-handoff.md"
     ],
     "relatedFindings": {
-      "affected": [],
+      "affected": [
+        "F-026"
+      ],
       "reviewedNotAffected": [
         "F-001",
         "F-003",
+        "F-004",
+        "F-005",
+        "F-006",
         "F-010",
         "F-011",
         "F-012",
@@ -770,32 +778,32 @@
         "F-045"
       ]
     },
-    "notes": "Ölü catalog.js export. STAND_DIMENSIONS / MODULE_WIDTHS_CM durur. Audit dump tarihî; regenerate edilmedi."
+    "notes": "Import yolu. Değer aynı. designState STRIP_COUNT ayrı durur. Audit property dump regenerate edilmedi."
   },
   "tests": {
     "targeted": [
       "test/catalogDomainBoundary.test.js",
-      "test/baseModule.test.js",
-      "test/ledFloodlightModule.test.js",
-      "test/shelfModule.test.js"
+      "test/visibleUiContract.test.js",
+      "test/systemChangeGate.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/smoke.spec.mjs"
+        "e2e/smoke.spec.mjs",
+        "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "src/catalog.js catalog zorunlu domain. Projection/UI değişmez; smoke #open-module-catalog."
+      "reason": "catalog/behavior/placement/renderer/ui browser-impact. Stand zarf değeri değişmedi; smoke + visible-ui-b."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Runtime src *_DIMENSIONS import etmiyordu. Testler getItem."
+    "notes": "Aynı freeze obje; yalnız dosya yolu."
   },
   "migration": {
     "required": false,
     "notes": "Persist/schema yok."
   },
-  "rollback": "Silinen export’ları catalog.js’e geri koymak."
+  "rollback": "STAND_DIMENSIONS’ı catalog.js’e geri koymak ve import’ları çevirmek."
 }
