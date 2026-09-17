@@ -43066,7 +43066,7 @@ Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste süt
 - unit/integration (2): `test/wallMediaItemsContract.test.js`, `test/tv42Module.test.js`
 - e2e (1): `e2e/wall-media-items-contract.spec.mjs`
 - docs (6): 6 dosya
-- ui/other: `SYSTEM_AUDIT_CHECKLIST.md`, `SYSTEM_MODULE_CATALOG.md`, `audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md`, `scripts/add-video-wall-2x2.py`, `scripts/patch-video-wall-2x2.cjs`, `scripts/add-tv-sizes.py`
+- ui/other: `SYSTEM_AUDIT_CHECKLIST.md`, `SYSTEM_MODULE_CATALOG.md`, `audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md`, `scripts/archive/add-video-wall-2x2.py`, `scripts/archive/add-tv-sizes.py`
 
 ## 12. Belirsiz / sınır
 
@@ -43247,7 +43247,7 @@ Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste süt
 - unit/integration (2): `test/wallMediaItemsContract.test.js`, `test/tv42Module.test.js`
 - e2e (1): `e2e/wall-media-items-contract.spec.mjs`
 - docs (8): 8 dosya
-- ui/other: `audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md`, `SYSTEM_AUDIT_CHECKLIST.md`, `SYSTEM_MODULE_CATALOG.md`, `scripts/add-video-wall-2x2.py`, `scripts/patch-video-wall-2x2.cjs`, `scripts/add-tv-sizes.py`
+- ui/other: `audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md`, `SYSTEM_AUDIT_CHECKLIST.md`, `SYSTEM_MODULE_CATALOG.md`, `scripts/archive/add-video-wall-2x2.py`, `scripts/archive/add-tv-sizes.py`
 
 ## 12. Belirsiz / sınır
 
@@ -43428,7 +43428,7 @@ Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste süt
 - unit/integration (2): `test/wallMediaItemsContract.test.js`, `test/tv42Module.test.js`
 - e2e (1): `e2e/wall-media-items-contract.spec.mjs`
 - docs (4): 4 dosya
-- ui/other: `SYSTEM_AUDIT_CHECKLIST.md`, `SYSTEM_MODULE_CATALOG.md`, `audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md`, `scripts/add-video-wall-2x2.py`, `scripts/patch-video-wall-2x2.cjs`, `scripts/add-tv-sizes.py`
+- ui/other: `SYSTEM_AUDIT_CHECKLIST.md`, `SYSTEM_MODULE_CATALOG.md`, `audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md`, `scripts/archive/add-video-wall-2x2.py`, `scripts/archive/add-tv-sizes.py`
 
 ## 12. Belirsiz / sınır
 
@@ -43613,8 +43613,7 @@ Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste süt
 - unit/integration (1): `test/wallMediaItemsContract.test.js`
 - e2e (1): `e2e/wall-media-items-contract.spec.mjs`
 - docs (4): 4 dosya
-- ui/other: `SYSTEM_AUDIT_CHECKLIST.md`, `SYSTEM_MODULE_CATALOG.md`, `audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md`, `scripts/add-video-wall-2x2.py`, `scripts/patch-video-wall-2x2.cjs`
-
+- ui/other: `SYSTEM_AUDIT_CHECKLIST.md`, `SYSTEM_MODULE_CATALOG.md`, `audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md`, `scripts/archive/add-video-wall-2x2.py`
 ## 12. Belirsiz / sınır
 
 - Persistence alan whitelist'i yok; hangi factory alanının gerçekten yazıldığı `saveProject` ile tüm project nesnesinin kopyalanmasına bağlı (`src/projectStore.js` `saveProject`). Snapshot içeriği `src/main.js` `buildProjectSnapshot`.

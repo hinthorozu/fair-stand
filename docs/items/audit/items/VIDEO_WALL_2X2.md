@@ -167,7 +167,7 @@ Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste süt
 - unit/integration (1): `test/wallMediaItemsContract.test.js`
 - e2e (1): `e2e/wall-media-items-contract.spec.mjs`
 - docs (4): 4 dosya
-- ui/other: `SYSTEM_AUDIT_CHECKLIST.md`, `SYSTEM_MODULE_CATALOG.md`, `audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md`, `scripts/add-video-wall-2x2.py`, `scripts/patch-video-wall-2x2.cjs`
+- ui/other: `SYSTEM_AUDIT_CHECKLIST.md`, `SYSTEM_MODULE_CATALOG.md`, `audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md`, `scripts/archive/add-video-wall-2x2.py`
 
 ## 12. Belirsiz / sınır
 

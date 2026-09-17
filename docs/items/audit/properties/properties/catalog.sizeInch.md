@@ -1,5 +1,7 @@
 # `catalog.sizeInch`
 
+> **STALE.** Katalog descriptor’da `sizeInch` alanı yok. TV inç bilgisi `item.itemKey` (`TV_42` / `TV_55` / `TV_65`) ve `item.dimensions` / wall-media metrikleridir. Aşağıdaki grep satırları audit türevidir.
+
 **Özellik ID:** `catalog.sizeInch`
 **İnsan tarafından anlaşılır adı:** Katalog descriptor: sizeInch
 **Kategori:** katalog

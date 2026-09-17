@@ -205,7 +205,7 @@ Audit aşağıdaki sırada ilerler. Bir bölüm bitmeden sonraki bölüm `IN_PRO
 - [x] **A02.01** All 17 impact domains are defined once and validator requires all decisions. | status: `AUDITED_OK` | evidence: `systemChangeContract.js`; explicit missing-domain regression in `test/systemChangeGate.test.js`; see A02 evidence
 - [x] **A02.02** All supported change kinds have correct mandatory domains. | status: `AUDITED_OK` | evidence: kind constraints validated; targeted-test policy gap tracked separately as F-008
 - [x] **A02.03** Guarded-file detection covers all product/runtime entry points. | status: `AUDITED_OK` | evidence: index/package/lock/all src/public/scripts/workflows/vite config guarded; governance/test exclusions are F-006/F-007
-- [x] **A02.04** Path-aware rules cover catalog files. | status: `GAP` | evidence: `catalog.js` mapped, but catalog-defining `tvConfig.js` has zero mapping; `F-005`
+- [x] **A02.04** Path-aware rules cover catalog files. | status: `AUDITED_OK` | evidence: `src/catalog.js` mapped; `src/tvConfig.js` this tree'de yok; TV SoT `src/items.js` WALL_MEDIA. F-005 kapanışındaki tvConfig path STALE.
 - [x] **A02.05** Path-aware rules cover behavior/placement files. | status: `GAP` | evidence: core files mapped, but `groundLayout`, `standCapacity`, `standSetup`, `wall` and related sources are unmapped; `F-005`
 - [x] **A02.06** Path-aware rules cover state/persistence/storage files. | status: `GAP` | evidence: canonical stores mapped, but autosave/project-switch/orchestration coverage is incomplete; `F-005`
 - [x] **A02.07** Path-aware rules cover renderer files. | status: `GAP` | evidence: scene3d/viewCube mapped; image layout/fit and TV config helpers unmapped; `F-005`

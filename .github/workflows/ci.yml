@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [RefactorItem]
+    branches: [RefactorItem, Version2]
   pull_request:
-    branches: [RefactorItem]
+    branches: [RefactorItem, Version2]
 
 permissions:
   contents: read
@@ -24,7 +24,12 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Fetch Version2 change-gate base
+        run: git fetch origin Version2:refs/remotes/origin/Version2
+
       - name: Change contract gate
+        env:
+          CHANGE_GATE_BASE: refs/remotes/origin/Version2
         run: npm run contract:verify
 
       - name: Install dependencies

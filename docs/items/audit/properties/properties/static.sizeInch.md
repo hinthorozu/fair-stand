@@ -1,5 +1,7 @@
 # `static.sizeInch`
 
+> **STALE.** `static.sizeInch` bir JS Item alanı değildir. TV ölçüleri `item.dimensions` ve wall-media kaydındadır; ayrı `sizeInch` property src’de yoktur.
+
 **Özellik ID:** `static.sizeInch`
 **İnsan tarafından anlaşılır adı:** Ekran inç
 **Kategori:** kanonik-kayit

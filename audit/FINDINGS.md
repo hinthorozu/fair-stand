@@ -70,7 +70,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 | F-042 | P1 | Sunucu deploy yolu commit’e pinli değil ve CI kapısı/test zincirinden zayıf | **OPEN** — SHA yok; origin default (`origin/HEAD`) ucu çekilir. CI deploy kapısı yok |
 | F-043 | P2 | Açık repoda kök yazılım lisansı kararı/dosyası yok | OPEN / DECISION_REQUIRED |
 | F-044 | P2 | Birçok merge edilmiş/geçersiz dal duruyor | **KAPSAM_DIŞI** — GitHub dal hijyeni; ürün kodu değil |
-| F-045 | P2 | Tarihî kaynak-yeniden-yazan yama betikleri kanonik araçların yanında duruyor | OPEN |
+| F-045 | P2 | Tarihî kaynak-yeniden-yazan yama betikleri kanonik araçların yanında duruyor | **CLOSED** — DECISION-07 ARCHIVE; `scripts/archive/` + README; npm/CI yok |
 | F-046 | P2 | Kanonik CI zincirinde lint/format/statik-kalite kapısı yok | **OPEN** — `syntax:check` eklendi; ESLint/format yok |
 | F-047 | P2 | Katalog-dışı runtime nesne genişlemesinin açık kanonik kabul/sözleşme kuralı yok; güncel örnek `illuminated-foam` (ışıklı strafor/logo) | **OPEN** — foam’un `NON_CATALOG_MODULE_CONTRACTS` kaydı var; yeni katalog-dışı nesne kapısı yok |
 | F-048 | P1 | Hiçbir modül veya sistemin eklediği öğe, açık kanonik BOM politikası/sınıflandırması olmadan var olamaz | OPEN |
@@ -81,6 +81,6 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 2. Kalıcılık/import: F-021/F-022/F-035. F-032/F-036/F-037 kapandı.
 3. BOM (E, ürün kararı): F-014/F-030/F-031/F-048. F-029 kapandı (özellik sözleşmesi).
 4. Mimari borç: F-018/F-047 kural. F-017 kapandı.
-5. Hijyen: F-034 kalan lisans, F-043 LICENSE, F-042, F-045, F-046 ESLint. F-038 kapandı. F-044 kapsam dışı.
+5. Hijyen: F-034 kalan lisans, F-043 LICENSE, F-042, F-046 ESLint. F-045 arşivlendi. F-038 kapandı. F-044 kapsam dışı.
 
 Bir bulgu ancak uygulama, varsa hedefli regresyon, tam test/build, PR CI ve gerekli merge-sonrası doğrulama kanıtından sonra `CLOSED` olur.

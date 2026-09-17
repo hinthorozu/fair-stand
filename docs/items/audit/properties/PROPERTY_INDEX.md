@@ -1,5 +1,7 @@
 # Property indeksi
 
+`static.shelfCount` ve `static.sizeInch` / `catalog.sizeInch` STALE’dir. `static.composition.moduleType` ve `static.composition.options.shape` DEPRECATED SCHEMA_ONLY’dir (Item’da durur, production okumaz). `static.composition.options.shelfCount` STALE/DEPRECATED’dir (Item’da alan yok).
+
 | # | id | ad | kategori | CRUD | TSV dolu | src hit | src dosya | owner dosya |
 |---:|---|---|---|---|---:|---:|---:|---|
 | 1 | [`itemKey`](properties/itemKey.md) | Kanonik Item kimliği | kimlik | ITEM_READONLY | 104 | 252 | 16 | `src/items.js` |

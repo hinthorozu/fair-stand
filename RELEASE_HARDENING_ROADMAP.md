@@ -109,35 +109,23 @@ Yapılacak:
 
 ## 8. Legacy patch / trigger scriptlerini sınıflandır ve temizle
 
-Durum: **AÇIK**
+Durum: **UYGULANDI (DECISION-07 ARCHIVE)** — Üç Python yama betiği `scripts/archive/` altına taşındı; `scripts/archive/README.md` aktif tooling olmadıklarını yazar. `package.json`/CI çalıştırmaz. F-045 kapatıldı. `scripts/video-wall-build-trigger.txt` **SCRIPT_ONLY_STALE** durur (`SAFE_TO_REMOVE = 0`). **Çalıştırmayın.**
 
-Doğrulanacak örnekler:
+Doğrulanmış kalıntılar:
 
-- `scripts/add-tv-sizes.py`
-- `scripts/add-video-wall-2x2.py`
-- `scripts/fix-tv-screen-face.py`
-- `scripts/patch-video-wall-2x2.cjs`
-- `scripts/patch-video-wall-single-image.cjs`
-- `scripts/video-wall-build-trigger.txt`
+- `scripts/archive/add-tv-sizes.py` — arşiv; aktif `scripts/` yüzeyi değil
+- `scripts/archive/add-video-wall-2x2.py` — arşiv
+- `scripts/archive/fix-tv-screen-face.py` — arşiv
+- `scripts/video-wall-build-trigger.txt` — SCRIPT_ONLY_STALE; roadmap referansı var, silinmedi
 
 Not:
 
 - `scripts/install-server.sh` gerçek operasyon/deploy scriptidir; legacy patch dosyalarıyla aynı şekilde ele alınmayacak.
-- Tarihsel değer varsa Git history zaten korur; runtime/release tree'sinde gereksiz kalıntı bırakılmayacak.
+- Tarihsel değer varsa Git history zaten korur.
 
 ## 9. Test klasörü standardını tekleştir
 
-Durum: **AÇIK**
-
-Mevcut durum:
-
-- Hem `test/` hem `tests/` klasörü bulunuyor.
-
-Yapılacak:
-
-- İçerikler duplicate mi yoksa ayrı contract mı doğrulanacak.
-- Tek canonical test klasörü standardına taşınacak.
-- `npm test` coverage kaybetmeden devam edecek.
+Durum: **A uygulandı (kısmi)** — `tests/autoDepot.test.js` ve `tests/moduleBehavior.test.js` `test/` altına taşındı. `FEATURE_CONTRACTS.automaticDepot.tests.regressionFiles` güncellendi. `src/groundLayout.js` / `src/cornerPlacement.js` TEST_SUPPORT olarak duruyor (DECISION-04/05).
 
 ## 10. Stale audit/cleanup dokümanlarını historical hale getir
 
