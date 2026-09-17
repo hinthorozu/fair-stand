@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-async function createBackWallStand(page, projectName) {
+async function createBackWallStand(page, projectName, widthCm = 500) {
   await page.goto('/');
   const setup = page.locator('details.stand-setup-card');
   await setup.locator('summary').click();
   await setup.getByRole('button', { name: 'Sırt Duvar' }).click();
-  await page.locator('#stand-size-x').fill('500');
+  await page.locator('#stand-size-x').fill(String(widthCm));
   await page.locator('#stand-size-y').fill('500');
   await page.locator('#create-stage').click();
   const input = page.locator('form input[name="projectName"]');
@@ -36,22 +36,64 @@ async function saveAndReadProject(page) {
   });
 }
 
-async function openShelfGroup(page) {
+async function openSidebarCard(page, itemKey) {
   const open = page.locator('#open-module-catalog');
   await page.locator('details', { has: open }).locator(':scope > summary').click();
-  await open.click();
-  const group = page.locator('.module-drag-group', { hasText: 'Raf & Vitrin' });
+  const card = page.locator(`.module-drag-card[data-module-key="${itemKey}"]`).first();
+  const group = page.locator('.module-drag-group', { has: card });
   if (!(await group.getAttribute('open'))) {
     await group.locator(':scope > summary').click();
   }
-  return group;
+  await card.scrollIntoViewIfNeeded();
+  await expect(card).toBeVisible();
+  return { card, group };
+}
+
+async function dragShelfOntoValidSeam(page, itemKey) {
+  await page.evaluate((key) => {
+    const card = document.querySelector(`.module-drag-card[data-module-key="${key}"]`);
+    const viewport = document.querySelector('#viewport');
+    const canvas = viewport?.querySelector(':scope > canvas');
+    if (!card || !viewport || !canvas) throw new Error('katalog kartı veya viewport yok');
+    const dataTransfer = new DataTransfer();
+    card.dispatchEvent(new DragEvent('dragstart', {
+      bubbles: true,
+      cancelable: true,
+      dataTransfer,
+    }));
+
+    const fire = (type, xRatio, yRatio) => {
+      const rect = viewport.getBoundingClientRect();
+      viewport.dispatchEvent(new DragEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer,
+        clientX: rect.left + rect.width * xRatio,
+        clientY: rect.top + rect.height * yRatio,
+      }));
+    };
+
+    let dropped = false;
+    for (let x = 0.28; x <= 0.78 && !dropped; x += 0.06) {
+      for (let y = 0.22; y <= 0.72 && !dropped; y += 0.04) {
+        fire('dragover', x, y);
+        if (canvas.dataset.placementGhost === 'valid') {
+          fire('drop', x, y);
+          dropped = true;
+        }
+      }
+    }
+    if (!dropped) {
+      throw new Error(`geçerli panel-seam ghost bulunamadı: ${canvas.dataset.placementGhost ?? 'yok'}`);
+    }
+  }, itemKey);
 }
 
 test('shelf_100/150/200 Catalog’da Raf & Vitrin altında vitrinlerden sonra görünür', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await createBackWallStand(page, 'Shelf Catalog Order');
-  const group = await openShelfGroup(page);
+  const { group } = await openSidebarCard(page, 'shelf_100');
   const keys = await group.locator('.module-drag-card').evaluateAll((cards) => (
     cards.map((card) => card.getAttribute('data-module-key'))
   ));
@@ -72,23 +114,19 @@ for (const itemKey of ['shelf_100', 'shelf_150', 'shelf_200']) {
   test(`${itemKey} catalog drag matching wall span’ine overlay olarak eklenir`, async ({ page }) => {
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await createBackWallStand(page, itemKey);
+    const standWidthByShelf = Object.freeze({
+      shelf_100: 500,
+      shelf_150: 350,
+      shelf_200: 500,
+    });
+    await createBackWallStand(page, itemKey, standWidthByShelf[itemKey]);
     const initial = await saveAndReadProject(page);
     const wallUsedBefore = (initial.modules ?? [])
       .filter((module) => module.placement?.wallId === 'back' && module.type !== 'shelf')
       .reduce((sum, module) => sum + Number(module.widthCm || 0), 0);
 
-    const open = page.locator('#open-module-catalog');
-    await page.locator('details', { has: open }).locator(':scope > summary').click();
-    const card = page.locator(`.module-drag-card[data-module-key="${itemKey}"]`);
-    await page.locator('.module-drag-group', { has: card }).locator(':scope > summary').click();
-    await expect(card).toBeVisible();
-
-    const viewport = page.locator('#viewport');
-    const box = await viewport.boundingBox();
-    await card.dragTo(viewport, {
-      targetPosition: { x: Math.round(box.width * 0.50), y: Math.round(box.height * 0.42) },
-    });
+    await openSidebarCard(page, itemKey);
+    await dragShelfOntoValidSeam(page, itemKey);
 
     const project = await saveAndReadProject(page);
     const shelf = project.modules.find((module) => module.itemKey === itemKey);
