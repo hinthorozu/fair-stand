@@ -1,25 +1,24 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-
 import {
+  getCatalogItem,
   getModuleCatalogLabel,
-  MODULE_CATALOG,
-  MODULE_CATALOG_GROUPS,
-  MODULE_CATALOG_KEYS,
-  resolveItemKey,
+  listCatalogItems,
+  listCatalogGroups,
 } from '../src/catalog.js';
+import { resolveItemKey } from '../src/items.js';
 
 test('every catalog module belongs to exactly one catalog group', () => {
-  const groupedKeys = MODULE_CATALOG_GROUPS.flatMap((group) => group.keys);
-  assert.equal(groupedKeys.length, MODULE_CATALOG_KEYS.length);
-  assert.deepEqual([...groupedKeys].sort(), [...MODULE_CATALOG_KEYS].sort());
+  const groupedKeys = listCatalogGroups().flatMap((group) => group.keys);
+  assert.equal(groupedKeys.length, listCatalogItems().map((item) => item.itemKey).length);
+  assert.deepEqual([...groupedKeys].sort(), [...listCatalogItems().map((item) => item.itemKey)].sort());
   assert.equal(new Set(groupedKeys).size, groupedKeys.length);
 });
 
 test('every catalog module resolves its single-source key and label', () => {
-  MODULE_CATALOG_KEYS.forEach((moduleKey) => {
-    const module = MODULE_CATALOG[moduleKey];
+  listCatalogItems().map((item) => item.itemKey).forEach((moduleKey) => {
+    const module = getCatalogItem(moduleKey);
     assert.ok(module, moduleKey);
     assert.equal(resolveItemKey({ ...module, itemKey: moduleKey }), moduleKey);
     assert.equal(getModuleCatalogLabel({ ...module, itemKey: moduleKey }), module.label);

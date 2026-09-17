@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { COMMERCIAL_ITEMS, getItem } from '../src/items.js';
+import { COMMERCIAL_ITEMS, getItem, resolveItemKey } from '../src/items.js';
 import { resolveItemBom } from '../src/itemBom.js';
-import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import { createModuleStateFromDescriptor, duplicateModuleState, normalizeModuleItemState } from '../src/designState.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { describeSurfaceSelection } from '../src/selectionFeedback.js';
@@ -10,7 +12,7 @@ import { planAutomaticDepot } from '../src/autoDepot.js';
 
 for (const item of Object.values(COMMERCIAL_ITEMS)) {
   test(`${item.itemKey}: canonical properties and instance lifecycle`, () => {
-    const catalog = MODULE_CATALOG[item.itemKey];
+    const catalog = getCatalogItem(item.itemKey);
     assert.equal(catalog.itemKey, item.itemKey);
     assert.equal(catalog.label, item.name);
     assert.equal(catalog.modelFile, item.modelFile);
@@ -41,7 +43,7 @@ for (const item of Object.values(COMMERCIAL_ITEMS)) {
     assert.ok(feedback.message.includes(item.name));
     assert.ok(feedback.message.includes(`${state.widthCm} × ${state.depthCm} × ${state.heightCm}`));
     assert.equal(getItem(`DEPOT_${item.itemKey}`), null);
-    assert.equal(MODULE_CATALOG[`DEPOT_${item.itemKey}`], undefined);
+    assert.equal(getCatalogItem(`DEPOT_${item.itemKey}`), null);
   });
 }
 
@@ -56,7 +58,7 @@ test('automatic depot resolves all four Items through the shared factory', () =>
 test('trash product properties cannot be overridden by an external descriptor', () => {
   const item = getItem('PLASTIC_TRASH_BIN');
   const state = createModuleStateFromDescriptor({
-    ...MODULE_CATALOG.PLASTIC_TRASH_BIN,
+    ...getCatalogItem('PLASTIC_TRASH_BIN'),
     widthCm: 42,
     depthCm: 45,
     heightCm: 70,

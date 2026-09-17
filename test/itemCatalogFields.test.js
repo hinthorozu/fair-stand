@@ -1,11 +1,10 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-
 import {
-  MODULE_CATALOG,
-  MODULE_CATALOG_GROUPS,
-  MODULE_CATALOG_KEYS,
+  getCatalogItem,
+  listCatalogItems,
+  listCatalogGroups,
 } from '../src/catalog.js';
 import { getItem, listRegisteredItems } from '../src/items.js';
 
@@ -129,16 +128,16 @@ function expectedFieldsForItemKey(itemKey) {
 }
 
 test('mevcut katalog Item listesi ve grup sırası değişmemiştir', () => {
-  assert.deepEqual([...MODULE_CATALOG_KEYS], [...EXPECTED_CATALOG_KEYS]);
-  assert.equal(Object.keys(MODULE_CATALOG).length, EXPECTED_CATALOG_KEYS.length);
+  assert.deepEqual([...listCatalogItems().map((item) => item.itemKey)], [...EXPECTED_CATALOG_KEYS]);
+  assert.equal(listCatalogItems().length, EXPECTED_CATALOG_KEYS.length);
   assert.deepEqual(
-    MODULE_CATALOG_GROUPS.map((group) => ({ label: group.label, keys: [...group.keys] })),
+    listCatalogGroups().map((group) => ({ label: group.label, keys: [...group.keys] })),
     EXPECTED_CATALOG_GROUPS.map((group) => ({ label: group.label, keys: [...group.keys] })),
   );
 
   EXPECTED_CATALOG_GROUPS.forEach((group) => {
     const groupSet = new Set(group.keys);
-    const uiOrder = MODULE_CATALOG_KEYS.filter((itemKey) => groupSet.has(itemKey));
+    const uiOrder = listCatalogItems().map((item) => item.itemKey).filter((itemKey) => groupSet.has(itemKey));
     assert.deepEqual(uiOrder, [...group.keys], group.label);
   });
 });
@@ -251,11 +250,11 @@ test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullan
   assert.match(items, /catalogVisible: true/);
   assert.match(items, /catalogCategory: 'panel-wall'/);
 
-  for (const itemKey of MODULE_CATALOG_KEYS) {
-    assert.equal(Object.hasOwn(MODULE_CATALOG[itemKey], 'catalogVisible'), false, itemKey);
-    assert.equal(Object.hasOwn(MODULE_CATALOG[itemKey], 'catalogCategory'), false, itemKey);
-    assert.equal(Object.hasOwn(MODULE_CATALOG[itemKey], 'catalogItemIndex'), false, itemKey);
-    assert.equal(typeof MODULE_CATALOG[itemKey].catalogPreview, 'string', itemKey);
+  for (const itemKey of listCatalogItems().map((item) => item.itemKey)) {
+    assert.equal(Object.hasOwn(getCatalogItem(itemKey), 'catalogVisible'), false, itemKey);
+    assert.equal(Object.hasOwn(getCatalogItem(itemKey), 'catalogCategory'), false, itemKey);
+    assert.equal(Object.hasOwn(getCatalogItem(itemKey), 'catalogItemIndex'), false, itemKey);
+    assert.equal(typeof getCatalogItem(itemKey).catalogPreview, 'string', itemKey);
   }
 });
 

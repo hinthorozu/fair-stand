@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { MODULE_CATALOG, MODULE_CATALOG_GROUPS, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+  listCatalogGroups,
+} from '../src/catalog.js';
 import { createModuleStateFromDescriptor, normalizeModuleItemState } from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
 import { getModuleBehavior, getModuleMagneticSnapStrategy } from '../src/moduleBehavior.js';
@@ -13,22 +17,22 @@ import { getItem } from '../src/items.js';
 const PROFILE_KEYS = ['profile_190', 'profile_140_5', 'profile_91', 'profile_41_5'];
 
 test('Panel Ek Modül holds field profiles after upright_346_5', () => {
-  const extraPanel = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Panel Ek Modül');
+  const extraPanel = listCatalogGroups().find((group) => group.label === 'Panel Ek Modül');
   assert.ok(extraPanel);
   for (const key of PROFILE_KEYS) {
     assert.equal(extraPanel.keys.includes(key), true);
-    assert.equal(MODULE_CATALOG_KEYS.includes(key), true);
-    assert.equal(MODULE_CATALOG[key].type, 'profile');
+    assert.equal(getCatalogItem(key) != null, true);
+    assert.equal(getCatalogItem(key).type, 'profile');
   }
 });
 
 test('field profiles are self BOM ×1 and do not change parent wall recipe ×2', () => {
-  assert.equal(MODULE_CATALOG.profile_190.widthCm, 200);
-  assert.equal(MODULE_CATALOG.profile_140_5.widthCm, 150);
-  assert.equal(MODULE_CATALOG.profile_91.widthCm, 100);
-  assert.equal(MODULE_CATALOG.profile_41_5.widthCm, 50);
-  assert.equal(MODULE_CATALOG.profile_190.depthCm, 8);
-  assert.equal(MODULE_CATALOG.profile_190.heightCm, 350);
+  assert.equal(getCatalogItem('profile_190').widthCm, 200);
+  assert.equal(getCatalogItem('profile_140_5').widthCm, 150);
+  assert.equal(getCatalogItem('profile_91').widthCm, 100);
+  assert.equal(getCatalogItem('profile_41_5').widthCm, 50);
+  assert.equal(getCatalogItem('profile_190').depthCm, 8);
+  assert.equal(getCatalogItem('profile_190').heightCm, 350);
   assert.equal(resolveModuleContract('profile_190').bom.mode, 'self');
   const bom = resolveItemBom('profile_190');
   assert.equal(bom.length, 1);
@@ -44,7 +48,7 @@ test('field profiles are self BOM ×1 and do not change parent wall recipe ×2',
 });
 
 test('profile uses wall_200 move/rotate/snap contract and does not nest into a neighbor wall', () => {
-  const profile = createModuleStateFromDescriptor(MODULE_CATALOG.profile_190);
+  const profile = createModuleStateFromDescriptor(getCatalogItem('profile_190'));
   const behavior = getModuleBehavior(profile);
   assert.equal(profile.type, 'profile');
   assert.equal(profile.widthCm, 200);
@@ -96,10 +100,10 @@ test('profile uses wall_200 move/rotate/snap contract and does not nest into a n
 });
 
 test('field profile spans the same wall slot as a separator without collision', () => {
-  const profile = createModuleStateFromDescriptor(MODULE_CATALOG.profile_190);
+  const profile = createModuleStateFromDescriptor(getCatalogItem('profile_190'));
   profile.id = 'profile-span';
   profile.placement = { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' };
-  const slat = createModuleStateFromDescriptor(MODULE_CATALOG.wall_separator_100);
+  const slat = createModuleStateFromDescriptor(getCatalogItem('wall_separator_100'));
   slat.id = 'separator-mid';
   slat.placement = { xCm: 100, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' };
   assert.equal(slat.type, 'separator');
@@ -107,10 +111,10 @@ test('field profile spans the same wall slot as a separator without collision', 
 });
 
 test('two field profiles snap end-to-end on the wall slot with no gap', () => {
-  const first = createModuleStateFromDescriptor(MODULE_CATALOG.profile_190);
+  const first = createModuleStateFromDescriptor(getCatalogItem('profile_190'));
   first.id = 'profile-a';
   first.placement = { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' };
-  const second = createModuleStateFromDescriptor(MODULE_CATALOG.profile_190);
+  const second = createModuleStateFromDescriptor(getCatalogItem('profile_190'));
   const hit = snapPlacementToModules({
     moduleId: second.id,
     moduleType: second.type,

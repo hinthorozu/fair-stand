@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import {
   FLOOR_ITEMS,
   getFloorItem,
@@ -24,7 +27,7 @@ const EXPECTED_SELECT = [
 test('floor Items use existing floorType keys and stay off the module catalog', () => {
   const items = listFloorItems();
   assert.deepEqual(items.map((item) => item.itemKey), EXPECTED_SELECT.map(([key]) => key));
-  assert.equal(MODULE_CATALOG_KEYS.length, 58);
+  assert.equal(listCatalogItems().map((item) => item.itemKey).length, 58);
 
   for (const [itemKey, selectLabel] of EXPECTED_SELECT) {
     const item = getFloorItem(itemKey);
@@ -32,8 +35,8 @@ test('floor Items use existing floorType keys and stay off the module catalog', 
     assert.equal(item.type, 'floor');
     assert.equal(getFloorSelectLabel(item), selectLabel);
     assert.equal(Object.hasOwn(item, 'unit'), false);
-    assert.equal(MODULE_CATALOG[itemKey], undefined);
-    assert.equal(MODULE_CATALOG_KEYS.includes(itemKey), false);
+    assert.equal(getCatalogItem(itemKey), null);
+    assert.equal(getCatalogItem(itemKey) != null, false);
   }
 
   assert.equal(FLOOR_ITEMS.karolaj.dimensions.widthCm, 100);

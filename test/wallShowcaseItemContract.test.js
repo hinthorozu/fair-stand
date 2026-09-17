@@ -1,8 +1,9 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-
-import { MODULE_CATALOG } from '../src/catalog.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import { applyColorOverride, createShowcaseModuleState, duplicateModuleState, normalizeModuleItemState } from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
 import { getItem, getShowcaseBodyDefinition } from '../src/items.js';
@@ -29,14 +30,14 @@ test('wall_showcase parents own canonical cluster identity and child roles', () 
 
 test('catalog keeps wall_showcase keys and derives canonical descriptor facts', () => {
   for (const expected of CASES) {
-    const descriptor = MODULE_CATALOG[expected.itemKey];
+    const descriptor = getCatalogItem(expected.itemKey);
     assert.equal(descriptor.itemKey, expected.itemKey);
     assert.equal(descriptor.type, expected.type);
     assert.equal(descriptor.widthCm, 100);
     assert.equal(descriptor.eyeCount, expected.eyeCount);
   }
-  assert.equal(MODULE_CATALOG.showcase_2_100, undefined);
-  assert.equal(MODULE_CATALOG.showcase_3_100, undefined);
+  assert.equal(getCatalogItem('showcase_2_100'), null);
+  assert.equal(getCatalogItem('showcase_3_100'), null);
 });
 
 test('recursive wall showcase BASE BOM expands verified physical children', () => {

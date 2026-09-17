@@ -1,13 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import {
   createCounterModuleState,
   createModuleStateFromDescriptor,
   duplicateModuleState,
   normalizeModuleItemState,
 } from '../src/designState.js';
-import { getItem } from '../src/items.js';
+import { getItem, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { getExpandedModuleRecipe } from '../src/moduleRecipes.js';
@@ -70,7 +72,7 @@ for (const itemKey of BANKO_KEYS) {
   test(`${itemKey}: canonical composite identity, state and recipe parity`, () => {
     const item = getItem(itemKey);
     const expected = EXPECTED[itemKey];
-    const catalog = MODULE_CATALOG[itemKey];
+    const catalog = getCatalogItem(itemKey);
     const isL = expected.shape === 'L';
 
     assert.equal(item.itemKey, itemKey);

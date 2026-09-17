@@ -1,4 +1,3 @@
-import { resolveItemKey } from './catalog.js';
 import { normalizeStripOccupancy } from './stripOccupancy.js';
 import {
   getCommercialItemForType,
@@ -10,6 +9,7 @@ import {
   getShowcaseBodyDefinition,
   getShowcaseItemKeyForType,
   requireSceneDimension,
+  resolveItemKey,
   resolveSceneDimensions,
 } from './items.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';

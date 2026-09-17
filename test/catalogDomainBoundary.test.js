@@ -1,12 +1,10 @@
+import { extname } from 'node:path';
+import { readFileSync, readdirSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync } from 'node:fs';
-import { extname } from 'node:path';
-
 import {
-  getCatalogItem,
   listCatalogItems,
-  MODULE_CATALOG_KEYS,
+  getCatalogItem,
 } from '../src/catalog.js';
 import { planAutomaticDepot } from '../src/autoDepot.js';
 import { getItem, listRegisteredItems, resolveItemKey } from '../src/items.js';
@@ -55,16 +53,47 @@ test('CATALOG.md Catalog’un runtime repository olmadığını kilitler', () =>
   assert.match(catalogDoc, /ModuleContract → Catalog/);
 });
 
-test('catalog.js Recipe/BOM’dan Item özelliği öğrenmez; resolveItemKey Item identity re-export’tur', () => {
+test('catalog.js Recipe/BOM’dan Item özelliği öğrenmez; resolveItemKey Catalog re-export etmez', () => {
   const itemsSource = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
   assert.doesNotMatch(CATALOG_SOURCE, /moduleRecipes/);
   assert.doesNotMatch(CATALOG_SOURCE, /getStraightWallNominalWidthForProfileItem/);
   assert.doesNotMatch(CATALOG_SOURCE, /catalogWidthCm/);
   assert.match(CATALOG_SOURCE, /resolveSceneDimensions/);
-  assert.match(CATALOG_SOURCE, /export \{ resolveItemKey \}/);
+  assert.doesNotMatch(CATALOG_SOURCE, /export \{ resolveItemKey \}/);
   assert.match(itemsSource, /export function resolveItemKey/);
   assert.match(itemsSource, /Item identity çözümlemesi Catalog üyeliğine bağlı değildir/);
   assert.doesNotMatch(CATALOG_SOURCE, /normalized\.itemKey && getCatalogItem/);
+  assert.doesNotMatch(CATALOG_SOURCE, /getFurnitureClusterQuantity/);
+  assert.doesNotMatch(CATALOG_SOURCE, /COUNTER_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /BASE_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /SHELF_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /LED_FLOODLIGHT_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /TV_42_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /flatPanelKey/);
+  assert.doesNotMatch(CATALOG_SOURCE, /STAND_DIMENSIONS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /MODULE_WIDTHS_CM/);
+  assert.doesNotMatch(CATALOG_SOURCE, /export const MODULE_CATALOG/);
+  assert.doesNotMatch(CATALOG_SOURCE, /MODULE_CATALOG_KEYS/);
+  assert.doesNotMatch(CATALOG_SOURCE, /MODULE_CATALOG_GROUPS/);
+});
+
+test('STAND_DIMENSIONS ve MODULE_WIDTHS_CM sahibi src/standDimensions.js; Catalog re-export yok', () => {
+  const owner = readFileSync(new URL('../src/standDimensions.js', import.meta.url), 'utf8');
+  assert.match(owner, /export const STAND_DIMENSIONS = Object\.freeze/);
+  assert.match(owner, /export const MODULE_WIDTHS_CM = Object\.freeze\(\[50, 100, 150, 200\]\)/);
+  for (const file of listSrcJsFiles()) {
+    if (file.name === 'standDimensions.js') continue;
+    if (!file.source.includes('STAND_DIMENSIONS') && !file.source.includes('MODULE_WIDTHS_CM')) continue;
+    assert.match(file.source, /from ['"]\.\/standDimensions\.js['"]/, file.name);
+  }
+});
+
+test('resolveItemKey src caller’ları items.js’ten okur', () => {
+  for (const file of listSrcJsFiles()) {
+    if (file.name === 'items.js') continue;
+    if (!file.source.includes('resolveItemKey')) continue;
+    assert.match(file.source, /from ['"]\.\/items\.js['"]/, file.name);
+  }
 });
 
 test('catalogVisible yalnız Catalog üyeliği içindir; src runtime domainleri okumaz', () => {
@@ -89,7 +118,7 @@ test('catalogVisible=false Item runtime’da yok demek değildir', () => {
   assert.equal(listRegisteredItems().length, 96);
   assert.equal(listRegisteredItems().filter((item) => item.catalogVisible === true).length, 58);
   assert.equal(listCatalogItems().length, 58);
-  assert.equal(MODULE_CATALOG_KEYS.length, 58);
+  assert.equal(listCatalogItems().map((item) => item.itemKey).length, 58);
 
   const hiddenItem = getItem('panel_197');
   assert.ok(hiddenItem);

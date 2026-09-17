@@ -1,11 +1,11 @@
+import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
 import {
-  MODULE_CATALOG,
-  MODULE_CATALOG_GROUPS,
-  resolveItemKey,
+  getCatalogItem,
+  listCatalogGroups,
 } from '../src/catalog.js';
+import { resolveItemKey } from '../src/items.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 import {
   allowsThinWallEndpointContact,
@@ -39,7 +39,7 @@ function overlaps(a, b) {
 }
 
 test('plastic trash bin is a canonical 40x40x60 fixed-model catalog module', () => {
-  const descriptor = MODULE_CATALOG[KEY];
+  const descriptor = getCatalogItem(KEY);
   assert.ok(descriptor);
   assert.equal(descriptor.label, 'Çöp Kutusu');
   assert.equal(descriptor.type, 'plastic-trash-bin');
@@ -51,10 +51,10 @@ test('plastic trash bin is a canonical 40x40x60 fixed-model catalog module', () 
   assert.equal(descriptor.preserveModelScale, false);
   assert.equal(existsSync(new URL(`../public/models/${MODEL_FILE}`, import.meta.url)), true);
 
-  const extraGroup = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Extra');
+  const extraGroup = listCatalogGroups().find((group) => group.label === 'Extra');
   assert.ok(extraGroup?.keys.includes(KEY));
   assert.equal(
-    MODULE_CATALOG_GROUPS.flatMap((group) => group.keys).filter((key) => key === KEY).length,
+    listCatalogGroups().flatMap((group) => group.keys).filter((key) => key === KEY).length,
     1,
   );
 
@@ -67,7 +67,7 @@ test('plastic trash bin is a canonical 40x40x60 fixed-model catalog module', () 
 });
 
 test('trash bin state and behavior preserve fridge-style movement without overlap exceptions', () => {
-  const descriptor = MODULE_CATALOG[KEY];
+  const descriptor = getCatalogItem(KEY);
   const state = createModuleStateFromDescriptor(descriptor, { itemKey: KEY });
   assert.ok(state);
   assert.equal(state.itemKey, KEY);

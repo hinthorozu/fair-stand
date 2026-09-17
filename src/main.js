@@ -4,7 +4,6 @@ import './imageActions.css';
 import './helpGuide.css';
 import { createStandScene } from './scene3d.js';
 import { initHelpGuide } from './helpGuide.js';
-import { resolveItemKey } from './catalog.js';
 import { planAutomaticDepot } from './autoDepot.js';
 import {
   composeAutomaticStandWall,
@@ -51,7 +50,7 @@ import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';
 import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';
 import { createSidebarController } from './sidebarController.js';
 import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';
-import { getFloorItem, getFloorSelectLabel, listFloorItems, resolveStandFloorItemKey } from './items.js';
+import { getFloorItem, getFloorSelectLabel, listFloorItems, resolveItemKey, resolveStandFloorItemKey } from './items.js';
 import { renderStandStandardsList } from './standStandardsCopy.js';
 import {
   isAllowedImportImageType,

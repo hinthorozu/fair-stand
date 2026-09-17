@@ -1,11 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import {
   createModuleStateFromDescriptor,
   MODULE_STATE_TYPES,
 } from '../src/designState.js';
-import { getItem } from '../src/items.js';
+import { getItem, resolveItemKey } from '../src/items.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { getModuleRecipe } from '../src/moduleRecipes.js';
 
@@ -18,7 +20,7 @@ const REMOVED_WALL_BASE_KEYS = Object.freeze([
 test('silinen wall_base composite Item, catalog, contract ve recipe kayıtları yoktur', () => {
   for (const itemKey of REMOVED_WALL_BASE_KEYS) {
     assert.equal(getItem(itemKey), null, itemKey);
-    assert.equal(MODULE_CATALOG[itemKey], undefined, itemKey);
+    assert.equal(getCatalogItem(itemKey), null, itemKey);
     assert.equal(resolveModuleContract(itemKey), null, itemKey);
   }
 

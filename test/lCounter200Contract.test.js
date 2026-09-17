@@ -1,18 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { MODULE_CATALOG, MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogItems,
+} from '../src/catalog.js';
 import { createCounterModuleState } from '../src/designState.js';
 import { getModuleRecipe } from '../src/moduleRecipes.js';
 import { getItem } from '../src/items.js';
 
 test('desk_banko_200_L is a 200 x 200 catalog module', () => {
-  assert.deepEqual(MODULE_CATALOG.desk_banko_200_L, {
+  assert.deepEqual(getCatalogItem('desk_banko_200_L'), {
     itemKey: 'desk_banko_200_L',
     type: 'counter', label: 'Köşe Banko 200×200', catalogPreview: 'counter',
     shape: 'L', widthCm: 200, depthCm: 200, heightCm: 100,
   });
-  assert.ok(MODULE_CATALOG_KEYS.includes('desk_banko_200_L'));
+  assert.ok(getCatalogItem('desk_banko_200_L') != null);
 });
 
 test('200 L counter state keeps 200 cm physical depth and eight editable faces', () => {

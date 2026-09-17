@@ -1,8 +1,9 @@
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-
-import { MODULE_CATALOG_KEYS } from '../src/catalog.js';
+import {
+  listCatalogItems,
+} from '../src/catalog.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 
 const DOC_URL = new URL('../SYSTEM_MODULE_CATALOG.md', import.meta.url);
@@ -22,17 +23,17 @@ function readCatalogKeySnapshot(source) {
 
 test('SYSTEM_MODULE_CATALOG key snapshot matches runtime catalog exactly', async () => {
   const source = await readFile(DOC_URL, 'utf8');
-  assert.deepEqual(readCatalogKeySnapshot(source), [...MODULE_CATALOG_KEYS]);
+  assert.deepEqual(readCatalogKeySnapshot(source), [...listCatalogItems().map((item) => item.itemKey)]);
 });
 
 test('SYSTEM_MODULE_CATALOG summary counts match module contracts', async () => {
   const source = await readFile(DOC_URL, 'utf8');
-  const contracts = MODULE_CATALOG_KEYS.map((key) => resolveModuleContract(key));
+  const contracts = listCatalogItems().map((item) => item.itemKey).map((key) => resolveModuleContract(key));
   const recipeCount = contracts.filter((contract) => contract?.bom?.mode === 'recipe').length;
   const selfCount = contracts.filter((contract) => contract?.bom?.mode === 'self').length;
   const decisionRequiredCount = contracts.filter((contract) => contract?.bom?.mode === 'decision-required').length;
 
-  assert.equal(readBoldCount(source, 'Catalog entries'), MODULE_CATALOG_KEYS.length);
+  assert.equal(readBoldCount(source, 'Catalog entries'), listCatalogItems().map((item) => item.itemKey).length);
   assert.equal(readBoldCount(source, 'BOM mode `recipe`'), recipeCount);
   assert.equal(readBoldCount(source, 'BOM mode `self`'), selfCount);
   assert.equal(readBoldCount(source, 'BOM mode `decision-required`'), decisionRequiredCount);

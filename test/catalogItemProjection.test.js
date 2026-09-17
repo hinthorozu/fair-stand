@@ -1,13 +1,10 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-
 import {
-  getCatalogItem,
   listCatalogGroups,
   listCatalogItems,
-  MODULE_CATALOG,
-  MODULE_CATALOG_KEYS,
+  getCatalogItem,
 } from '../src/catalog.js';
 import { listRegisteredItems } from '../src/items.js';
 
@@ -64,7 +61,7 @@ test('listCatalogItems 58 görünür Item’ı Item kaydından üretir; hardcode
   assert.doesNotMatch(catalogSource, /createFlatPanelCatalogItem/);
   assert.doesNotMatch(catalogSource, /createCommercialCatalogItem/);
   assert.doesNotMatch(catalogSource, /wall_200:\s*create/);
-  assert.doesNotMatch(catalogSource, /export const MODULE_CATALOG = Object\.freeze\(\{/);
+  assert.doesNotMatch(catalogSource, /export const MODULE_CATALOG/);
   assert.match(catalogSource, /listRegisteredItems\(\)/);
   assert.match(catalogSource, /export function listCatalogItems/);
   assert.match(catalogSource, /export function getCatalogItem/);
@@ -79,12 +76,11 @@ test('yeni catalog projection eski MODULE_CATALOG descriptor alanlarını birebi
     assert.ok(expected, item.itemKey);
     assert.deepEqual(pickComparable(item), pickComparable(expected), item.itemKey);
     assert.deepEqual(pickComparable(getCatalogItem(item.itemKey)), pickComparable(expected), item.itemKey);
-    assert.deepEqual(pickComparable(MODULE_CATALOG[item.itemKey]), pickComparable(expected), item.itemKey);
     compared += 1;
   }
 
   assert.equal(compared, 58);
-  assert.deepEqual([...MODULE_CATALOG_KEYS], BASELINE.keys);
+  assert.deepEqual([...listCatalogItems().map((item) => item.itemKey)], BASELINE.keys);
 });
 
 test('kategori sırası, adı, üye sayısı ve Item sırası değişmez', () => {

@@ -1,4 +1,4 @@
-import { MODULE_WIDTHS_CM } from './catalog.js';
+import { MODULE_WIDTHS_CM } from './standDimensions.js';
 
 export function validateWallLength(lengthCm) {
   if (!Number.isFinite(lengthCm) || lengthCm < 50) {

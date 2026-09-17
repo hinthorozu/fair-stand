@@ -6,9 +6,8 @@ import {
   getCatalogCategory,
   listCatalogCategories,
   listCatalogGroups,
-  MODULE_CATALOG,
-  MODULE_CATALOG_GROUPS,
-  MODULE_CATALOG_KEYS,
+  getCatalogItem,
+  listCatalogItems,
 } from '../src/catalog.js';
 import { getItem, listRegisteredItems } from '../src/items.js';
 
@@ -94,7 +93,7 @@ test('görünür Item catalogCategory değerleri geçerli catalogKey ile eşleş
     }
   }
 
-  assert.equal(visibleCount, MODULE_CATALOG_KEYS.length);
+  assert.equal(visibleCount, listCatalogItems().map((item) => item.itemKey).length);
   assert.equal(invalidVisible, 0);
   assert.equal(invalidHidden, 0);
   assert.equal(getItem('wall_200').catalogCategory, 'panel-wall');
@@ -105,7 +104,7 @@ test('listCatalogGroups kategori sırası, adı ve Item sırasını korur', () =
   const groups = listCatalogGroups();
   assert.equal(groups.length, EXPECTED_CATEGORIES.length);
   assert.deepEqual(
-    MODULE_CATALOG_GROUPS.map((group) => ({
+    listCatalogGroups().map((group) => ({
       catalogKey: group.catalogKey,
       catalogName: group.catalogName,
       catalogIndex: group.catalogIndex,
@@ -134,11 +133,11 @@ test('listCatalogGroups kategori sırası, adı ve Item sırasını korur', () =
       assert.equal(item.catalogVisible, true, itemKey);
       assert.equal(item.catalogCategory, group.catalogKey, itemKey);
       assert.equal(item.catalogItemIndex, itemIndex + 1, itemKey);
-      assert.ok(MODULE_CATALOG[itemKey], itemKey);
+      assert.ok(getCatalogItem(itemKey), itemKey);
     });
   });
 
   assert.equal(visibleTotal, 58);
-  assert.equal(MODULE_CATALOG_KEYS.length, 58);
-  assert.deepEqual([...MODULE_CATALOG_KEYS], groups.flatMap((group) => group.keys));
+  assert.equal(listCatalogItems().map((item) => item.itemKey).length, 58);
+  assert.deepEqual([...listCatalogItems().map((item) => item.itemKey)], groups.flatMap((group) => group.keys));
 });

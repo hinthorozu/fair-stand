@@ -1,29 +1,30 @@
 {
   "schemaVersion": 2,
-  "id": "remove-getshelfleafitem",
-  "kind": "tooling",
-  "summary": "Kullanılmayan getShelfLeafItem kaldırıldı. Raf lookup getItem(itemKey). getDoorLeafItem durur.",
+  "id": "module-catalog-snapshot-export-removed",
+  "kind": "architecture",
+  "summary": "MODULE_CATALOG / KEYS / GROUPS export kalktı. Testler getCatalogItem / listCatalogItems / listCatalogGroups. MODULE_WIDTHS_CM standDimensions. resolveItemKey items.js.",
   "owners": [
-    "src/items.js",
-    "test/shelfItemsItemContract.test.js"
+    "src/catalog.js",
+    "src/standDimensions.js",
+    "src/items.js"
   ],
   "sourceOfTruth": [
-    "src/items.js"
+    "src/catalog.js"
   ],
   "impact": {
     "catalog": "affected",
-    "behavior": "not-applicable",
-    "state": "not-applicable",
-    "placement": "not-applicable",
-    "renderer": "not-applicable",
-    "persistence": "not-applicable",
+    "behavior": "affected",
+    "state": "affected",
+    "placement": "affected",
+    "renderer": "affected",
+    "persistence": "affected",
     "bom": "affected",
-    "ui": "not-applicable",
-    "composition": "not-applicable",
-    "assets": "not-applicable",
-    "storage": "not-applicable",
-    "importExport": "not-applicable",
-    "performance": "not-applicable",
+    "ui": "affected",
+    "composition": "affected",
+    "assets": "affected",
+    "storage": "affected",
+    "importExport": "affected",
+    "performance": "affected",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
@@ -64,9 +65,11 @@
       "src/rawBomDebug.js",
       "src/scene3d.js",
       "src/selectionFeedback.js",
+      "src/standDimensions.js",
       "src/standStandardsCopy.js",
       "src/stripOccupancy.js",
       "src/systemChangeContract.js",
+      "src/viewCube.js",
       "src/wall.js",
       "src/wallReflow.js"
     ],
@@ -272,8 +275,10 @@
       "audit/evidence/A05_MODULE_BEHAVIOR.md",
       "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
+      "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
       "audit/evidence/A10_UI_CONTROLS.md",
+      "audit/evidence/A11_FEATURE_COMPOSITION.md",
       "audit/evidence/A12_BOM_RECIPES_PRODUCTION.md",
       "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
       "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
@@ -281,11 +286,15 @@
       "audit/evidence/A22_FILE_BY_FILE_SWEEP.md",
       "audit/remediation/A01_F003_CLOSURE.md",
       "audit/remediation/A02_CLOSURE.md",
+      "audit/remediation/A02_F005_CLOSURE.md",
+      "audit/remediation/A02_F006_CLOSURE.md",
       "audit/remediation/A03_CLOSURE.md",
       "audit/remediation/A03_F010_CLOSURE.md",
       "audit/remediation/A03_F011_CLOSURE.md",
       "audit/remediation/A03_F012_CLOSURE.md",
       "audit/remediation/A04_F013_CLOSURE.md",
+      "audit/remediation/A11_F029_CLOSURE.md",
+      "docs/AUTOSAVE_INTEGRATION_NOTES.md",
       "docs/assets/PUBLIC_MODEL_ATTRIBUTION.md",
       "docs/items/ITEM_CONSOLIDATION_PLAN.md",
       "docs/items/ITEM_LIST.md",
@@ -477,6 +486,7 @@
       "docs/items/audit/properties/properties/factory.ok.md",
       "docs/items/audit/properties/properties/factory.reason.md",
       "docs/items/audit/properties/properties/factory.stateKeys.md",
+      "docs/items/audit/properties/properties/featureContracts.md",
       "docs/items/audit/properties/properties/itemKey.md",
       "docs/items/audit/properties/properties/media.screenHeightCm.md",
       "docs/items/audit/properties/properties/media.screenWidthCm.md",
@@ -490,6 +500,7 @@
       "docs/items/audit/properties/properties/parents.replacement.md",
       "docs/items/audit/properties/properties/parents.showcaseBody.md",
       "docs/items/audit/properties/properties/persist.path.md",
+      "docs/items/audit/properties/properties/persist.projectBlob.md",
       "docs/items/audit/properties/properties/profile.catalogWidthCm.md",
       "docs/items/audit/properties/properties/recipe.connectionMode.md",
       "docs/items/audit/properties/properties/recipe.id.md",
@@ -754,6 +765,9 @@
       "reviewedNotAffected": [
         "F-001",
         "F-003",
+        "F-004",
+        "F-005",
+        "F-006",
         "F-010",
         "F-011",
         "F-012",
@@ -764,35 +778,40 @@
         "F-018",
         "F-019",
         "F-025",
+        "F-026",
+        "F-029",
         "F-030",
         "F-033",
         "F-045"
       ]
     },
-    "notes": "Dead export. Runtime zaten getItem(itemKey). Width tahmini yok. Audit property dump tarihî; regenerate edilmedi."
+    "notes": "Catalog snapshot alias kalktı. Kart projection aynı. MODULE_WIDTHS_CM ve resolveItemKey import yolu bu sette."
   },
   "tests": {
     "targeted": [
-      "test/shelfItemsItemContract.test.js",
-      "test/shelfCatalogPanelSeam.test.js"
+      "test/catalogDomainBoundary.test.js",
+      "test/catalogItemProjection.test.js",
+      "test/catalogSingleSource.test.js",
+      "test/visibleUiContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/shelf-items-contract.spec.mjs"
+        "e2e/smoke.spec.mjs",
+        "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "items.js catalog/bom zorunlu domain; Catalog raf kartı browser-impact. Davranış değişmez; targeted shelf E2E."
+      "reason": "catalog/ui/composition frozen. Değer değişmedi; smoke + visible-ui-b."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Ürün yolu getItem. Yalnız test/doc helper adı."
+    "notes": "Snapshot alias ve import yolu; kart/compose değerleri aynı."
   },
   "migration": {
     "required": false,
-    "notes": "Persist/schema yok."
+    "notes": "Persist/schema yok. Değer değişmedi."
   },
-  "rollback": "getShelfLeafItem fonksiyonunu items.js’e geri koymak."
+  "rollback": "MODULE_CATALOG* derived export’u ve Catalog re-export resolveItemKey / MODULE_WIDTHS_CM’i geri koymak."
 }

@@ -1,4 +1,4 @@
-import { STAND_DIMENSIONS } from './catalog.js';
+import { STAND_DIMENSIONS } from './standDimensions.js';
 import { getItem } from './items.js';
 
 export function getStandStripMetrics() {

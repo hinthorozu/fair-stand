@@ -1,12 +1,15 @@
+import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
-import { MODULE_CATALOG, MODULE_CATALOG_GROUPS } from '../src/catalog.js';
+import {
+  getCatalogItem,
+  listCatalogGroups,
+} from '../src/catalog.js';
 import { createIndoorPlantModuleState, createModuleStateFromDescriptor } from '../src/designState.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
 test('Yapay Çiçek 1 is the only active artificial plant inside Extra', () => {
-  assert.deepEqual(MODULE_CATALOG.EXTRA_INDOOR_PLANT_1, {
+  assert.deepEqual(getCatalogItem('EXTRA_INDOOR_PLANT_1'), {
     itemKey: 'EXTRA_INDOOR_PLANT_1',
     type: 'indoor-plant-1',
     label: 'Yapay Çiçek 1',
@@ -17,8 +20,8 @@ test('Yapay Çiçek 1 is the only active artificial plant inside Extra', () => {
     modelRotationYDeg: 0,
     preserveModelScale: false,
   });
-  assert.equal(MODULE_CATALOG.EXTRA_INDOOR_PLANT_2, undefined);
-  const extra = MODULE_CATALOG_GROUPS.find((group) => group.label === 'Extra');
+  assert.equal(getCatalogItem('EXTRA_INDOOR_PLANT_2'), null);
+  const extra = listCatalogGroups().find((group) => group.label === 'Extra');
   assert.ok(extra?.keys.includes('EXTRA_INDOOR_PLANT_1'));
   assert.equal(extra?.keys.includes('EXTRA_INDOOR_PLANT_2'), false);
 });
@@ -35,7 +38,7 @@ test('only Yapay Çiçek 1 is wired and the removed second GLB stays absent', ()
   assert.ok(existsSync(new URL('../public/models/indoor_plants.glb', import.meta.url)));
   assert.equal(existsSync(new URL('../public/models/indoor_plants2.glb', import.meta.url)), false);
 
-  const canonicalState = createModuleStateFromDescriptor(MODULE_CATALOG.EXTRA_INDOOR_PLANT_1, {
+  const canonicalState = createModuleStateFromDescriptor(getCatalogItem('EXTRA_INDOOR_PLANT_1'), {
     itemKey: 'EXTRA_INDOOR_PLANT_1',
   });
   assert.ok(canonicalState);

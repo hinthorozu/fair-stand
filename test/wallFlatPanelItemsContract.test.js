@@ -1,13 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import {
   createFlatPanelModuleState,
   createModuleStateFromDescriptor,
   duplicateModuleState,
   normalizeModuleItemState,
 } from '../src/designState.js';
-import { getItem } from '../src/items.js';
+import { getItem, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior, getModuleCollisionHeightRangeCm } from '../src/moduleBehavior.js';
 import { placementsOverlap } from '../src/modulePlacement.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
@@ -54,7 +56,7 @@ for (const itemKey of WALL_KEYS) {
   test(`${itemKey}: canonical composite identity, state and recipe parity`, () => {
     const item = getItem(itemKey);
     const expected = EXPECTED[itemKey];
-    const catalog = MODULE_CATALOG[itemKey];
+    const catalog = getCatalogItem(itemKey);
 
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.name, expected.name);
@@ -144,7 +146,7 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_2)) {
   test(`${itemKey} is a hanging two-panel Item that does not replace ${expected.parentKey}`, () => {
     const item = getItem(itemKey);
     const parent = getItem(expected.parentKey);
-    const catalog = MODULE_CATALOG[itemKey];
+    const catalog = getCatalogItem(itemKey);
 
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.name, `Panel ${expected.widthCm} Short Up 2`);
@@ -207,7 +209,7 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_1)) {
   test(`${itemKey} is a hanging one-panel Item that does not replace ${expected.parentKey}`, () => {
     const item = getItem(itemKey);
     const parent = getItem(expected.parentKey);
-    const catalog = MODULE_CATALOG[itemKey];
+    const catalog = getCatalogItem(itemKey);
 
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.name, `Panel ${expected.widthCm} Short Up 1`);

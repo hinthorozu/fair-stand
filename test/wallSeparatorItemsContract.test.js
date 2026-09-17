@@ -1,13 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODULE_CATALOG, resolveItemKey } from '../src/catalog.js';
+import {
+  getCatalogItem,
+} from '../src/catalog.js';
 import {
   createModuleStateFromDescriptor,
   createSeparatorModuleState,
   duplicateModuleState,
   normalizeModuleItemState,
 } from '../src/designState.js';
-import { getItem } from '../src/items.js';
+import { getItem, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { getModuleRecipe } from '../src/moduleRecipes.js';
@@ -72,7 +74,7 @@ for (const itemKey of SEPARATOR_KEYS) {
   test(`${itemKey}: canonical composite identity, state and recipe parity`, () => {
     const item = getItem(itemKey);
     const expected = EXPECTED[itemKey];
-    const catalog = MODULE_CATALOG[itemKey];
+    const catalog = getCatalogItem(itemKey);
 
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.type, 'separator');
