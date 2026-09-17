@@ -7,6 +7,16 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-17 — Kovalar boşaldı; satırlar ITEMS içinde
+
+### Kapsam
+
+`LEAF_ITEMS` … `COMPOSITE_ITEMS` yok. 96 satır `export const ITEMS` bloğunda. `getItem` / `listFloorItems` / type helper’lar `ITEMS` okur.
+
+Dokunulmayan: 96 Item satırı, Catalog projection, recipe/BOM miktarları, factory/UI davranışı.
+
+---
+
 ## 2026-09-17 — Tek ITEMS registry
 
 ### Kapsam

@@ -6,7 +6,7 @@ Kanonik Item kimliği tek runtime dosyadadır: `src/items.js`.
 
 ## `src/items.js` kaydı
 
-Tek public tablo `ITEMS`. Lookup `getItem(itemKey)`. `listRegisteredItems()` bütün satırları döner. Dosya içi yazım bölümleri (`LEAF_ITEMS` vb.) export değildir; ürün kimliği değildir.
+Tek tablo `ITEMS`. Bütün Item satırları `export const ITEMS` içindedir. Lookup `getItem(itemKey)`. `listRegisteredItems()` bütün satırları döner. Kova map yoktur.
 
 Raf kimliği exact `itemKey` + `getItem()`; width helper `getShelfLeafItem` yoktur. Kapı kanadı `getDoorLeafItem` kalır. `door_100` recipe parent’tır; `door_leaf_100` ayrı Item’dır.
 

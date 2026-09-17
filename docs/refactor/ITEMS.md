@@ -88,9 +88,7 @@ Item master Catalog’dan bağımsızdır. Bir Item’ın `getItem(itemKey)` ile
 
 ## Kayıt
 
-Tek public tablo `export const ITEMS` (`src/items.js`). Lookup `getItem(itemKey)` = `ITEMS[itemKey] ?? null`. `listRegisteredItems()` = `Object.values(ITEMS)`.
-
-Dosyadaki yazım bölümleri ürün kimliği değildir ve export edilmez. Item satırı `itemKey` ile durur.
+Tek tablo `export const ITEMS` (`src/items.js`). Bütün Item satırları bu bloğun içindedir. Lookup `getItem(itemKey)` = `ITEMS[itemKey] ?? null`. `listRegisteredItems()` = `Object.values(ITEMS)`. Kova map (`LEAF_ITEMS` vb.) yoktur.
 
 ---
 

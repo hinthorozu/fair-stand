@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "items-single-registry",
   "kind": "architecture",
-  "summary": "Dokuz kova export kalktı. Tek public tablo ITEMS; getItem ve listRegisteredItems buradan okur.",
+  "summary": "Dokuz kova map yok. 96 Item satırı export const ITEMS içinde; getItem ve listRegisteredItems bu tablodan okur.",
   "owners": [
     "src/items.js",
     "docs/refactor/ITEMS.md"
@@ -301,6 +301,7 @@
       "docs/items/ITEM_CONSOLIDATION_PLAN.md",
       "docs/items/ITEM_LIST.md",
       "docs/items/audit/DEFAULT_OVERRIDE_HARITASI.md",
+      "docs/items/audit/FINAL_OZET.md",
       "docs/items/audit/ITEM_OZELLIK_MATRISI.md",
       "docs/items/audit/OZELLIK_KATALOGU.md",
       "docs/items/audit/OZEL_DURUMLAR.md",
@@ -787,7 +788,7 @@
         "F-045"
       ]
     },
-    "notes": "Lookup aynı 96 satır. Public kova yok. Catalog kartı ve recipe miktarı değişmedi."
+    "notes": "96 satır yalnız ITEMS içinde. Kova map yok. Catalog kartı ve recipe miktarı değişmedi."
   },
   "tests": {
     "targeted": [

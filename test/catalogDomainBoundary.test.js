@@ -93,7 +93,7 @@ test('public Item registry tek ITEMS tablosudur; kova export yoktur', () => {
     'FLOOR_ITEMS',
     'COMPOSITE_ITEMS',
   ]) {
-    assert.doesNotMatch(itemsSource, new RegExp(`export const ${bucket}`), bucket);
+    assert.doesNotMatch(itemsSource, new RegExp(bucket), bucket);
   }
   assert.doesNotMatch(itemsSource, /export function listLeafItems/);
   assert.doesNotMatch(itemsSource, /export function listCompositeItems/);

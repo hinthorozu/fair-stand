@@ -3,8 +3,8 @@
 // dimensions fiziksel ürün ölçüsüdür; sceneDimensions aynı field setinin runtime override katmanıdır.
 // catalogCategory yalnız UI gruplamasıdır; type, Item Contract veya registry grubundan türetilmez.
 // Catalog, Item runtime repository değildir; catalogVisible=false Item'ı yok etmez.
-// Kanonik public registry `ITEMS`. Aşağıdaki nesneler yalnız dosya yazım bölümüdür; ürün kimliği veya export kova değildir.
-const LEAF_ITEMS = Object.freeze({
+// Kanonik Item tablosu. Satır = Item (`itemKey`). Kova map yoktur.
+export const ITEMS = Object.freeze({
   upright_346_5: Object.freeze({ itemKey: 'upright_346_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 9, catalogPreview: 'upright', name: 'Dikme 346,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 346.5, thicknessCm: 8 }), sceneDimensions: Object.freeze({ widthCm: 8, depthCm: 8, heightCm: 346.5 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_99: Object.freeze({ itemKey: 'upright_99', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Dikme 99 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 99, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_49_5: Object.freeze({ itemKey: 'upright_49_5', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Dikme 49,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 49.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
@@ -54,66 +54,8 @@ const LEAF_ITEMS = Object.freeze({
   base_top_107_50: Object.freeze({ itemKey: 'base_top_107_50', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Baza Üstü 107 × 50 cm', type: 'base-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 107, depthCm: 50, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff, nominalModuleWidthCm: 100 }),
   base_top_157_50: Object.freeze({ itemKey: 'base_top_157_50', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Baza Üstü 157 × 50 cm', type: 'base-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 157, depthCm: 50, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff, nominalModuleWidthCm: 150 }),
   base_top_206_50: Object.freeze({ itemKey: 'base_top_206_50', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Baza Üstü 206 × 50 cm', type: 'base-top', unit: 'adet', dimensions: Object.freeze({ widthCm: 206, depthCm: 50, thicknessCm: 1.8 }), material: 'sunta', defaultColor: 0xffffff, nominalModuleWidthCm: 200 }),
-});
 
-const DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH = Object.freeze({
-  100: 'door_leaf_100',
-});
 
-export function getDoorLeafItem(nominalModuleWidthCm) {
-  const itemKey = DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH[Number(nominalModuleWidthCm)];
-  return itemKey ? getItem(itemKey) : null;
-}
-
-const CONNECTOR_ITEM_KEYS_BY_TYPE = Object.freeze({
-  start: 'connector_start',
-  single: 'connector_single',
-  double: 'connector_double',
-  corner: 'connector_corner',
-});
-
-export function getConnectorItemKey(connectorType) {
-  return CONNECTOR_ITEM_KEYS_BY_TYPE[connectorType] ?? null;
-}
-
-function normalizePositiveQuantity(value) {
-  const quantity = Number(value);
-  return Number.isFinite(quantity) && quantity > 0 ? quantity : null;
-}
-
-/**
- * Kanonik connector BOM çözümleyici.
- *
- * Miktar / sınıflandırma sahibi çağırandır (recipe veya kanonik ilişki
- * çözümleyici). Bu katman aparat miktarını renderer geometrisinden,
- * yakınlıktan veya geçici placement snap türünden tahmin etmez.
- */
-export function resolveConnectorBom(requirements = []) {
-  const quantities = new Map();
-
-  for (const requirement of requirements) {
-    const itemKey = requirement?.itemKey ?? getConnectorItemKey(requirement?.connectorType);
-    const item = getItem(itemKey);
-    if (!item || item.type !== 'connector') {
-      throw new TypeError(`Unknown connector Item: ${itemKey ?? requirement?.connectorType ?? 'unknown'}.`);
-    }
-
-    const quantity = normalizePositiveQuantity(requirement?.quantity);
-    if (quantity === null) {
-      throw new TypeError(`Connector quantity is required for ${itemKey}.`);
-    }
-
-    quantities.set(itemKey, (quantities.get(itemKey) ?? 0) + quantity);
-  }
-
-  return Array.from(quantities, ([itemKey, quantity]) => {
-    const item = getItem(itemKey);
-    return Object.freeze({ itemKey, quantity, unit: item.unit, item });
-  });
-}
-
-// Bağımsız ticari ürünler, doğrulanmış ürün varsayılanlarının sahibidir.
-const COMMERCIAL_ITEMS = Object.freeze({
   COAT_RACK: Object.freeze({
     itemKey: 'COAT_RACK', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 11, catalogPreview: 'coat-rack', name: 'Askılık', type: 'coat-rack', unit: 'adet',
     dimensions: Object.freeze({ widthCm: 43, depthCm: 43, heightCm: 180 }),
@@ -135,15 +77,8 @@ const COMMERCIAL_ITEMS = Object.freeze({
     modelFile: 'plastic_trash_bin.glb', preserveModelScale: false,
     modelRotationYDeg: 0, visualRotationYDeg: -90,
   }),
-});
 
-export function getCommercialItemForType(type) {
-  return Object.values(COMMERCIAL_ITEMS).find((item) => item.type === type) ?? null;
-}
 
-// Extra furniture. Tekil Item'lar kendi type'ına sahip. Eames ve klasik koltuk takımları child Item kümesidir.
-// BOM decision-required — unit/moduleRecipes uydurulmaz.
-const FURNITURE_ITEMS = Object.freeze({
   furniture_sofa_set_classic: Object.freeze({
     itemKey: 'furniture_sofa_set_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 1, catalogPreview: 'sofa-set',
     name: 'Koltuk Takımı',
@@ -239,14 +174,8 @@ const FURNITURE_ITEMS = Object.freeze({
       heightCm: 121,
     }),
   }),
-});
 
-export function getFurnitureItemForType(type) {
-  return Object.values(FURNITURE_ITEMS).find((item) => item.type === type) ?? null;
-}
 
-// Üst profil LED projektör. Tekil katalog Item. BOM decision-required — unit/recipe uydurulmaz.
-const TOP_LIGHT_ITEMS = Object.freeze({
   led_floodlight: Object.freeze({
     itemKey: 'led_floodlight', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 6, catalogPreview: 'floodlight',
     name: 'LED Projektör',
@@ -258,14 +187,8 @@ const TOP_LIGHT_ITEMS = Object.freeze({
       mountHeightCm: 350,
     }),
   }),
-});
 
-export function getTopLightItemForType(type) {
-  return Object.values(TOP_LIGHT_ITEMS).find((item) => item.type === type) ?? null;
-}
 
-// Katalog dışı SVG → ışıklı strafor. itemKey type ile aynıdır; Catalog kartı yoktur.
-const NON_CATALOG_ITEMS = Object.freeze({
   'illuminated-foam': Object.freeze({
     itemKey: 'illuminated-foam', catalogVisible: false, catalogCategory: null, catalogItemIndex: null,
     name: 'Işıklı Strafor / Logo',
@@ -286,10 +209,8 @@ const NON_CATALOG_ITEMS = Object.freeze({
       heightCm: 61,
     }),
   }),
-});
 
-// Zemin kaplamaları modül değildir; persist alanı stand.itemKey (eski kayıt: floorType). Katalog/recipe yok.
-const FLOOR_ITEMS = Object.freeze({
+
   karolaj: Object.freeze({
     itemKey: 'karolaj', catalogVisible: false, catalogCategory: null, catalogItemIndex: null,
     name: 'Karolaj',
@@ -329,59 +250,8 @@ const FLOOR_ITEMS = Object.freeze({
     defaultColor: '#625f58',
     paintable: false,
   }),
-});
 
-export function listFloorItems() {
-  return Object.values(FLOOR_ITEMS);
-}
 
-export function getFloorItem(floorType) {
-  return FLOOR_ITEMS[floorType] ?? null;
-}
-
-export function getFloorSelectLabel(item) {
-  if (!item) return '';
-  const widthCm = Number(item.dimensions?.widthCm);
-  const depthCm = Number(item.dimensions?.depthCm);
-  if (item.paintable && Number.isFinite(widthCm) && Number.isFinite(depthCm)) {
-    return `${item.name} · ${widthCm} × ${depthCm} cm`;
-  }
-  return item.name;
-}
-
-export function isParquetFloorItem(item) {
-  return item?.type === 'floor' && Number(item.dimensions?.lengthCm) > 0;
-}
-
-export function isGridTileFloorItem(item) {
-  return item?.type === 'floor'
-    && Boolean(item.paintable)
-    && Number(item.dimensions?.widthCm) > 0
-    && Number(item.dimensions?.depthCm) > 0
-    && !isParquetFloorItem(item);
-}
-
-export function isCarpetFloorItem(item) {
-  return item?.type === 'floor'
-    && Boolean(item.paintable)
-    && !Number(item.dimensions?.widthCm);
-}
-
-export function resolveStandFloorItemKey(standOrKey) {
-  const raw = typeof standOrKey === 'string'
-    ? standOrKey
-    : (standOrKey?.itemKey ?? standOrKey?.floorType ?? null);
-  return getFloorItem(raw)?.itemKey ?? getFloorItem('karolaj').itemKey;
-}
-
-export function getFurnitureClusterQuantity(item, childItemKey) {
-  const entry = item?.composition?.items?.find((row) => row.itemKey === childItemKey);
-  return entry == null ? null : Number(entry.quantity);
-}
-
-// Yapay bitki / uzun saksı ailesi. Hepsi type `indoor-plant-1`; ayrım itemKey + ölçü/modelFile.
-// BOM decision-required — composition/recipe uydurulmaz.
-const INDOOR_PLANT_ITEMS = Object.freeze({
   EXTRA_INDOOR_PLANT_1: Object.freeze({
     itemKey: 'EXTRA_INDOOR_PLANT_1', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 13, catalogPreview: 'indoor-plant',
     name: 'Yapay Çiçek 1',
@@ -419,12 +289,8 @@ const INDOOR_PLANT_ITEMS = Object.freeze({
     modelRotationYDeg: 90,
     preserveModelScale: true,
   }),
-});
 
-// Duvara asılan medya ürünleri tek `tv` davranış ailesini paylaşır. Sıradan TV'ler
-// doğrulanmış ekran ölçüsüne göre parametriktir; widthCm/heightCm görünür ekrandır.
-// Video wall panel ölçüsü VIDEO_WALL_PANEL Item'ındadır; ızgara rows/cols parent'ta kalır.
-const WALL_MEDIA_ITEMS = Object.freeze({
+
   TV_42: Object.freeze({
     itemKey: 'TV_42', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 1, catalogPreview: 'tv', name: 'TV 42"', type: 'tv',
     dimensions: Object.freeze({
@@ -458,49 +324,8 @@ const WALL_MEDIA_ITEMS = Object.freeze({
     sceneDimensions: Object.freeze({ widthCm: 325.5, heightCm: 183 }),
     videoWall: Object.freeze({ rows: 3, cols: 3, panelItemKey: 'VIDEO_WALL_PANEL' }),
   }),
-});
 
-function resolveVideoWallPanelItem(item) {
-  const panelItemKey = item?.videoWall?.panelItemKey ?? null;
-  return panelItemKey ? getItem(panelItemKey) : null;
-}
 
-// Katalog, state oluşturucu ve seçim geri bildiriminin kullandığı duvar-medya ölçü çözümleyicisi.
-// Video wall toplamları VIDEO_WALL_PANEL × ızgaradan okunur; sıradan TV canonical dimensions kullanır.
-export function resolveWallMediaMetrics(itemOrKey) {
-  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
-  if (!item || item.type !== 'tv') return null;
-  const scene = resolveSceneDimensions(item);
-  const depthCm = Number(item.dimensions?.depthCm);
-  const base = {
-    itemKey: item.itemKey, type: item.type, label: item.name, depthCm,
-    widthCm: scene.widthCm,
-    heightCm: scene.heightCm,
-  };
-  if (item.videoWall) {
-    const panel = resolveVideoWallPanelItem(item);
-    const panelWidthCm = Number(panel?.dimensions?.widthCm);
-    const panelHeightCm = Number(panel?.dimensions?.heightCm);
-    if (!Number.isFinite(panelWidthCm) || !Number.isFinite(panelHeightCm)) {
-      throw new TypeError(`Missing VIDEO_WALL_PANEL dimensions for ${item.itemKey}.`);
-    }
-    return Object.freeze({
-      ...base,
-      widthCm: panelWidthCm * item.videoWall.cols,
-      heightCm: panelHeightCm * item.videoWall.rows,
-      videoWallRows: item.videoWall.rows,
-      videoWallCols: item.videoWall.cols,
-      panelItemKey: item.videoWall.panelItemKey,
-    });
-  }
-  return Object.freeze({
-    ...base,
-    videoWallRows: 1,
-    videoWallCols: 1,
-  });
-}
-
-const COMPOSITE_ITEMS = Object.freeze({
   door_100: Object.freeze({
     itemKey: 'door_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 9, catalogPreview: 'door',
     name: 'Depo Kapısı 100',
@@ -847,19 +672,195 @@ const COMPOSITE_ITEMS = Object.freeze({
       moduleType: 'showcase-3',
     }),
   }),
+
 });
 
-export const ITEMS = Object.freeze({
-  ...LEAF_ITEMS,
-  ...COMMERCIAL_ITEMS,
-  ...FURNITURE_ITEMS,
-  ...INDOOR_PLANT_ITEMS,
-  ...WALL_MEDIA_ITEMS,
-  ...TOP_LIGHT_ITEMS,
-  ...NON_CATALOG_ITEMS,
-  ...FLOOR_ITEMS,
-  ...COMPOSITE_ITEMS,
+
+const DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH = Object.freeze({
+  100: 'door_leaf_100',
 });
+
+export function getDoorLeafItem(nominalModuleWidthCm) {
+  const itemKey = DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH[Number(nominalModuleWidthCm)];
+  return itemKey ? getItem(itemKey) : null;
+}
+
+const CONNECTOR_ITEM_KEYS_BY_TYPE = Object.freeze({
+  start: 'connector_start',
+  single: 'connector_single',
+  double: 'connector_double',
+  corner: 'connector_corner',
+});
+
+export function getConnectorItemKey(connectorType) {
+  return CONNECTOR_ITEM_KEYS_BY_TYPE[connectorType] ?? null;
+}
+
+function normalizePositiveQuantity(value) {
+  const quantity = Number(value);
+  return Number.isFinite(quantity) && quantity > 0 ? quantity : null;
+}
+
+/**
+ * Kanonik connector BOM çözümleyici.
+ *
+ * Miktar / sınıflandırma sahibi çağırandır (recipe veya kanonik ilişki
+ * çözümleyici). Bu katman aparat miktarını renderer geometrisinden,
+ * yakınlıktan veya geçici placement snap türünden tahmin etmez.
+ */
+export function resolveConnectorBom(requirements = []) {
+  const quantities = new Map();
+
+  for (const requirement of requirements) {
+    const itemKey = requirement?.itemKey ?? getConnectorItemKey(requirement?.connectorType);
+    const item = getItem(itemKey);
+    if (!item || item.type !== 'connector') {
+      throw new TypeError(`Unknown connector Item: ${itemKey ?? requirement?.connectorType ?? 'unknown'}.`);
+    }
+
+    const quantity = normalizePositiveQuantity(requirement?.quantity);
+    if (quantity === null) {
+      throw new TypeError(`Connector quantity is required for ${itemKey}.`);
+    }
+
+    quantities.set(itemKey, (quantities.get(itemKey) ?? 0) + quantity);
+  }
+
+  return Array.from(quantities, ([itemKey, quantity]) => {
+    const item = getItem(itemKey);
+    return Object.freeze({ itemKey, quantity, unit: item.unit, item });
+  });
+}
+
+// Bağımsız ticari ürünler, doğrulanmış ürün varsayılanlarının sahibidir.
+
+
+export function getCommercialItemForType(type) {
+  return Object.values(ITEMS).find((item) => item.type === type) ?? null;
+}
+
+// Extra furniture. Tekil Item'lar kendi type'ına sahip. Eames ve klasik koltuk takımları child Item kümesidir.
+// BOM decision-required — unit/moduleRecipes uydurulmaz.
+
+
+export function getFurnitureItemForType(type) {
+  return Object.values(ITEMS).find((item) => item.type === type) ?? null;
+}
+
+// Üst profil LED projektör. Tekil katalog Item. BOM decision-required — unit/recipe uydurulmaz.
+
+
+export function getTopLightItemForType(type) {
+  return Object.values(ITEMS).find((item) => item.type === type) ?? null;
+}
+
+// Katalog dışı SVG → ışıklı strafor. itemKey type ile aynıdır; Catalog kartı yoktur.
+
+
+// Zemin kaplamaları modül değildir; persist alanı stand.itemKey (eski kayıt: floorType). Katalog/recipe yok.
+
+
+export function listFloorItems() {
+  return Object.values(ITEMS).filter((item) => item.type === 'floor');
+}
+
+export function getFloorItem(floorType) {
+  const item = ITEMS[floorType];
+  return item?.type === 'floor' ? item : null;
+}
+
+export function getFloorSelectLabel(item) {
+  if (!item) return '';
+  const widthCm = Number(item.dimensions?.widthCm);
+  const depthCm = Number(item.dimensions?.depthCm);
+  if (item.paintable && Number.isFinite(widthCm) && Number.isFinite(depthCm)) {
+    return `${item.name} · ${widthCm} × ${depthCm} cm`;
+  }
+  return item.name;
+}
+
+export function isParquetFloorItem(item) {
+  return item?.type === 'floor' && Number(item.dimensions?.lengthCm) > 0;
+}
+
+export function isGridTileFloorItem(item) {
+  return item?.type === 'floor'
+    && Boolean(item.paintable)
+    && Number(item.dimensions?.widthCm) > 0
+    && Number(item.dimensions?.depthCm) > 0
+    && !isParquetFloorItem(item);
+}
+
+export function isCarpetFloorItem(item) {
+  return item?.type === 'floor'
+    && Boolean(item.paintable)
+    && !Number(item.dimensions?.widthCm);
+}
+
+export function resolveStandFloorItemKey(standOrKey) {
+  const raw = typeof standOrKey === 'string'
+    ? standOrKey
+    : (standOrKey?.itemKey ?? standOrKey?.floorType ?? null);
+  return getFloorItem(raw)?.itemKey ?? getFloorItem('karolaj').itemKey;
+}
+
+export function getFurnitureClusterQuantity(item, childItemKey) {
+  const entry = item?.composition?.items?.find((row) => row.itemKey === childItemKey);
+  return entry == null ? null : Number(entry.quantity);
+}
+
+// Yapay bitki / uzun saksı ailesi. Hepsi type `indoor-plant-1`; ayrım itemKey + ölçü/modelFile.
+// BOM decision-required — composition/recipe uydurulmaz.
+
+
+// Duvara asılan medya ürünleri tek `tv` davranış ailesini paylaşır. Sıradan TV'ler
+// doğrulanmış ekran ölçüsüne göre parametriktir; widthCm/heightCm görünür ekrandır.
+// Video wall panel ölçüsü VIDEO_WALL_PANEL Item'ındadır; ızgara rows/cols parent'ta kalır.
+
+
+function resolveVideoWallPanelItem(item) {
+  const panelItemKey = item?.videoWall?.panelItemKey ?? null;
+  return panelItemKey ? getItem(panelItemKey) : null;
+}
+
+// Katalog, state oluşturucu ve seçim geri bildiriminin kullandığı duvar-medya ölçü çözümleyicisi.
+// Video wall toplamları VIDEO_WALL_PANEL × ızgaradan okunur; sıradan TV canonical dimensions kullanır.
+export function resolveWallMediaMetrics(itemOrKey) {
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  if (!item || item.type !== 'tv') return null;
+  const scene = resolveSceneDimensions(item);
+  const depthCm = Number(item.dimensions?.depthCm);
+  const base = {
+    itemKey: item.itemKey, type: item.type, label: item.name, depthCm,
+    widthCm: scene.widthCm,
+    heightCm: scene.heightCm,
+  };
+  if (item.videoWall) {
+    const panel = resolveVideoWallPanelItem(item);
+    const panelWidthCm = Number(panel?.dimensions?.widthCm);
+    const panelHeightCm = Number(panel?.dimensions?.heightCm);
+    if (!Number.isFinite(panelWidthCm) || !Number.isFinite(panelHeightCm)) {
+      throw new TypeError(`Missing VIDEO_WALL_PANEL dimensions for ${item.itemKey}.`);
+    }
+    return Object.freeze({
+      ...base,
+      widthCm: panelWidthCm * item.videoWall.cols,
+      heightCm: panelHeightCm * item.videoWall.rows,
+      videoWallRows: item.videoWall.rows,
+      videoWallCols: item.videoWall.cols,
+      panelItemKey: item.videoWall.panelItemKey,
+    });
+  }
+  return Object.freeze({
+    ...base,
+    videoWallRows: 1,
+    videoWallCols: 1,
+  });
+}
+
+
+
+
 
 const SHOWCASE_ITEM_KEYS_BY_TYPE = Object.freeze({
   'showcase-2': 'wall_showcase_100_2',
