@@ -13,7 +13,9 @@ import {
 import { getItem, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
-import { getModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 
 const BASE_KEYS = ['BASE_100', 'BASE_150', 'BASE_200'];
 

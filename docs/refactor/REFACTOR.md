@@ -7,6 +7,40 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-17 — Kapı kanadı width helper kalktı
+
+### Kapsam
+
+`DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH` ve `getDoorLeafItem` silindi. Factory ve `normalizeModuleItemState` kapı kanadını `getItem('door_leaf_100')` ile çözer. Tek kapı `door_100`; 100 dışı `createDoorModuleState` zaten `null`. `surface.itemKey` aynı `door_leaf_100`.
+
+Dokunulmayan: `door_100` / `door_leaf_100` satırları, BOM miktarları, persist schema, renderer `getItem(surface.itemKey)`.
+
+---
+
+## 2026-09-17 — Düz child listesi ve iç-köşe Item’da
+
+### Kapsam
+
+Düz BOM child listesi ve iç-köşe verisi tek kaynak `src/items.js`. `moduleRecipes.js` ikinci ürün tablosu değil; yalnız `expandRecipe` / panelRole eşlemesi kalır. `itemBom` `getItem(parent).composition.items` zorunlu; `catalogRecipe.items` fallback yok.
+
+28 recipe parent `composition.items` (miktar değişmedi). İç-köşe `composition.innerCorner` (recipe.variants birebir): düz wall 50/100/150/200, short-up-1/2 aynı genişlikte aynı köşe paneli, `door_100` / `wall_showcase_100_2` / `wall_showcase_100_3` (`panel_corner_92` + `itemReplacements`). BASE, desk_banko, separator: innerCorner yok.
+
+Raw BOM debug kapı dışındaki type+width yolları `resolveItemBom(itemKey)`. Furniture kümeleri BOM’a açılmaz. `getStraightWallNominalWidthForProfileItem` silindi (src caller yoktu).
+
+Dokunulmayan: Catalog projection, factory/UI, persist `itemKey`, 28 düz listedeki quantity’ler, `composition.mode` / `moduleType` sadeleştirme, VIDEO_WALL, shelf/base-wall recipe (zaten null).
+
+---
+
+## 2026-09-17 — Recipe parent `composition.items`
+
+### Kapsam
+
+28 `composition.mode === 'recipe'` parent, `furniture_sofa_set_classic` gibi `composition.items` taşır. Satırlar mevcut `moduleRecipes` child listesinin kopyasıdır; miktar uydurulmadı. `itemBom` tabanı Item `items`; `expandRecipe` iç-köşe panel/connector varyantını uygular.
+
+Dokunulmayan: 96 `itemKey`, Catalog projection, factory/UI, inner-corner kuralları, `moduleRecipes.js` sahipliği (nominal genişlik / varyant).
+
+---
+
 ## 2026-09-17 — Kovalar boşaldı; satırlar ITEMS içinde
 
 ### Kapsam

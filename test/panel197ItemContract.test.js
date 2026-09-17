@@ -2,7 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { getItem } from '../src/items.js';
-import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey, getStraightWallRecipe } from '../src/moduleRecipes.js';
+import {
+  getRecipeItemKey,
+} from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+  getModuleRecipe,
+  getStraightWallRecipe,
+} from './recipeParentItemKey.js';
 
 const RECIPE_CASES = [
   ['wall', 200, {}, 7],

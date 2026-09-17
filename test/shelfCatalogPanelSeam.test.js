@@ -22,7 +22,9 @@ import {
   snapPanelSeamOverlayPlacement,
   WALL_OVERLAY_DEFAULT_CENTER_CM,
 } from '../src/modulePlacement.js';
-import { getModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 import { getStandInternalSeamHeightsCm, getStandStripMetrics } from '../src/stripOccupancy.js';
 
 const SHELF_KEYS = Object.freeze(['shelf_100', 'shelf_150', 'shelf_200']);

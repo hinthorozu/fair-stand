@@ -5,7 +5,6 @@ import {
   getFurnitureItemForType,
   getItem,
   getTopLightItemForType,
-  getDoorLeafItem,
   getShowcaseBodyDefinition,
   getShowcaseItemKeyForType,
   requireSceneDimension,
@@ -227,8 +226,8 @@ export function createDoorModuleState(widthCm = 100) {
   const doorItem = getItem('door_100');
   const canonicalWidthCm = Number(doorItem?.dimensions?.widthCm);
   if (!doorItem || Number(widthCm) !== canonicalWidthCm) return null;
-  const doorLeafItem = getDoorLeafItem(canonicalWidthCm);
-  if (!doorLeafItem) throw new TypeError(`Missing canonical door leaf Item for ${canonicalWidthCm} cm door module.`);
+  const doorLeafItem = getItem('door_leaf_100');
+  if (!doorLeafItem) throw new TypeError('Missing canonical door leaf Item door_leaf_100.');
 
   return applySceneFootprint({
     id: createId('module'),
@@ -742,7 +741,7 @@ export function normalizeModuleItemState(moduleState) {
     if (!doorItem || Number(moduleState.widthCm) !== Number(doorItem.dimensions?.widthCm)) return moduleState;
     moduleState.itemKey = doorItem.itemKey;
     applySceneFootprint(moduleState, doorItem, ['widthCm']);
-    const doorLeafItem = getDoorLeafItem(moduleState.widthCm);
+    const doorLeafItem = getItem('door_leaf_100');
     if (!doorLeafItem) return moduleState;
     if (!moduleState.surface) {
       moduleState.surface = createEditableItemSurfaceState(doorLeafItem);

@@ -3,11 +3,13 @@ import assert from 'node:assert/strict';
 
 import { getItem } from '../src/items.js';
 import {
+  getRecipeItemKey,
+} from '../src/moduleRecipes.js';
+import {
   getExpandedStraightWallRecipe,
   getModuleRecipe,
-  getRecipeItemKey,
   listStraightWallRecipes,
-} from '../src/moduleRecipes.js';
+} from './recipeParentItemKey.js';
 
 function listAllVerifiedRecipes() {
   return [

@@ -1,176 +1,11 @@
 import { getItem } from './items.js';
 
-const STRAIGHT_WALL_RECIPES = Object.freeze({
-  50: Object.freeze({ recipeId: 'wall-straight-50', moduleType: 'wall', nominalWidthCm: 50, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_42_5' }) }),
-  100: Object.freeze({ recipeId: 'wall-straight-100', moduleType: 'wall', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_98', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_92' }) }),
-  150: Object.freeze({ recipeId: 'wall-straight-150', moduleType: 'wall', nominalWidthCm: 150, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_140_5', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_147_5', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_142_5' }) }),
-  200: Object.freeze({ recipeId: 'wall-straight-200', moduleType: 'wall', nominalWidthCm: 200, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_190', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_197', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_192' }) }),
-});
-
-const MODULE_RECIPES = Object.freeze({
-  'door:100': Object.freeze({ recipeId: 'door-100', moduleType: 'door', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 1 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_98', quantity: 3 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 5 }), Object.freeze({ itemKey: 'door_leaf_100', quantity: 1 }),
-  ]), variants: Object.freeze({
-    innerCornerPanelItemKey: 'panel_corner_92',
-    innerCornerItemReplacements: Object.freeze([
-      Object.freeze({
-        itemKey: 'connector_single',
-        items: Object.freeze([
-          Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
-          Object.freeze({ itemKey: 'connector_corner', quantity: 2 }),
-        ]),
-      }),
-    ]),
-  }) }),
-
-  'showcase-2:100': Object.freeze({
-    recipeId: 'showcase-2-100',
-    moduleType: 'showcase-2',
-    nominalWidthCm: 100,
-    connectionMode: 'straight',
-    items: Object.freeze([
-      { itemKey: 'profile_91', quantity: 4 },
-      { itemKey: 'upright_346_5', quantity: 2 },
-      { itemKey: 'panel_98', quantity: 5 },
-      { itemKey: 'connector_start', quantity: 4 },
-      { itemKey: 'connector_single', quantity: 9 },
-      { itemKey: 'showcase_side_94_6_30', quantity: 2 },
-      { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
-      { itemKey: 'glass_shelf', quantity: 1 },
-    ]),
-    variants: Object.freeze({
-      innerCornerPanelItemKey: 'panel_corner_92',
-      innerCornerItemReplacements: Object.freeze([
-        Object.freeze({
-          itemKey: 'connector_single',
-          items: Object.freeze([
-            Object.freeze({ itemKey: 'connector_single', quantity: 5 }),
-            Object.freeze({ itemKey: 'connector_corner', quantity: 4 }),
-          ]),
-        }),
-      ]),
-    }),
-  }),
-  'showcase-3:100': Object.freeze({
-    recipeId: 'showcase-3-100',
-    moduleType: 'showcase-3',
-    nominalWidthCm: 100,
-    connectionMode: 'straight',
-    items: Object.freeze([
-      { itemKey: 'profile_91', quantity: 4 },
-      { itemKey: 'upright_346_5', quantity: 2 },
-      { itemKey: 'panel_98', quantity: 4 },
-      { itemKey: 'connector_start', quantity: 4 },
-      { itemKey: 'connector_single', quantity: 7 },
-      { itemKey: 'showcase_side_143_5_30', quantity: 2 },
-      { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
-      { itemKey: 'glass_shelf', quantity: 2 },
-    ]),
-    variants: Object.freeze({
-      innerCornerPanelItemKey: 'panel_corner_92',
-      innerCornerItemReplacements: Object.freeze([
-        Object.freeze({
-          itemKey: 'connector_single',
-          items: Object.freeze([
-            Object.freeze({ itemKey: 'connector_single', quantity: 5 }),
-            Object.freeze({ itemKey: 'connector_corner', quantity: 4 }),
-          ]),
-        }),
-      ]),
-    }),
-  }),
-
-  'wall-short-up-2:200': Object.freeze({ recipeId: 'wall-short-up-2-200', moduleType: 'wall-short-up-2', nominalWidthCm: 200, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_190', quantity: 2 }), Object.freeze({ itemKey: 'upright_99', quantity: 2 }), Object.freeze({ itemKey: 'panel_197', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_192' }) }),
-  'wall-short-up-2:150': Object.freeze({ recipeId: 'wall-short-up-2-150', moduleType: 'wall-short-up-2', nominalWidthCm: 150, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_140_5', quantity: 2 }), Object.freeze({ itemKey: 'upright_99', quantity: 2 }), Object.freeze({ itemKey: 'panel_147_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_142_5' }) }),
-  'wall-short-up-2:100': Object.freeze({ recipeId: 'wall-short-up-2-100', moduleType: 'wall-short-up-2', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 2 }), Object.freeze({ itemKey: 'upright_99', quantity: 2 }), Object.freeze({ itemKey: 'panel_98', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_92' }) }),
-  'wall-short-up-2:50': Object.freeze({ recipeId: 'wall-short-up-2-50', moduleType: 'wall-short-up-2', nominalWidthCm: 50, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }), Object.freeze({ itemKey: 'upright_99', quantity: 2 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_42_5' }) }),
-  'wall-short-up-1:200': Object.freeze({ recipeId: 'wall-short-up-1-200', moduleType: 'wall-short-up-1', nominalWidthCm: 200, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_190', quantity: 2 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_197', quantity: 1 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_192' }) }),
-  'wall-short-up-1:150': Object.freeze({ recipeId: 'wall-short-up-1-150', moduleType: 'wall-short-up-1', nominalWidthCm: 150, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_140_5', quantity: 2 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_147_5', quantity: 1 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_142_5' }) }),
-  'wall-short-up-1:100': Object.freeze({ recipeId: 'wall-short-up-1-100', moduleType: 'wall-short-up-1', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 2 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_98', quantity: 1 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_92' }) }),
-  'wall-short-up-1:50': Object.freeze({ recipeId: 'wall-short-up-1-50', moduleType: 'wall-short-up-1', nominalWidthCm: 50, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 1 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
-  ]), variants: Object.freeze({ innerCornerPanelItemKey: 'panel_corner_42_5' }) }),
-
-  'separator:50': Object.freeze({ recipeId: 'separator-50', moduleType: 'separator', nominalWidthCm: 50, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'separator_panel_48_5', quantity: 1 }), Object.freeze({ itemKey: 'separator_panel_98', quantity: 3 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 7 }),
-  ]) }),
-  'separator:100': Object.freeze({ recipeId: 'separator-100', moduleType: 'separator', nominalWidthCm: 100, connectionMode: 'straight', items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 2 }), Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }), Object.freeze({ itemKey: 'separator_panel_98', quantity: 7 }), Object.freeze({ itemKey: 'connector_start', quantity: 2 }), Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
-  ]) }),
-
-  'counter-l:100': Object.freeze({ recipeId: 'counter-l-100', moduleType: 'counter', shape: 'L', nominalWidthCm: 100, items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 5 }), Object.freeze({ itemKey: 'profile_41_5', quantity: 5 }), Object.freeze({ itemKey: 'upright_99', quantity: 5 }), Object.freeze({ itemKey: 'panel_98', quantity: 4 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 16 }), Object.freeze({ itemKey: 'counter_top_110_60', quantity: 1 }), Object.freeze({ itemKey: 'counter_top_52_60', quantity: 1 }),
-  ]) }),
-  'counter-l:150': Object.freeze({ recipeId: 'counter-l-150', moduleType: 'counter', shape: 'L', nominalWidthCm: 150, items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_140_5', quantity: 5 }), Object.freeze({ itemKey: 'profile_91', quantity: 1 }), Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_99', quantity: 5 }), Object.freeze({ itemKey: 'panel_147_5', quantity: 4 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 16 }), Object.freeze({ itemKey: 'counter_top_160_60', quantity: 1 }), Object.freeze({ itemKey: 'counter_top_102_60', quantity: 1 }),
-  ]) }),
-  'counter-l:200': Object.freeze({ recipeId: 'counter-l-200', moduleType: 'counter', shape: 'L', nominalWidthCm: 200, items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_190', quantity: 5 }), Object.freeze({ itemKey: 'profile_140_5', quantity: 1 }), Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_99', quantity: 5 }), Object.freeze({ itemKey: 'panel_197', quantity: 4 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 16 }), Object.freeze({ itemKey: 'counter_top_210_60', quantity: 1 }), Object.freeze({ itemKey: 'counter_top_150_60', quantity: 1 }),
-  ]) }),
-
-  'counter:100': Object.freeze({ recipeId: 'counter-100', moduleType: 'counter', nominalWidthCm: 100, items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 3 }), Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_99', quantity: 4 }), Object.freeze({ itemKey: 'panel_98', quantity: 2 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 12 }), Object.freeze({ itemKey: 'counter_top_110_60', quantity: 1 }),
-  ]) }),
-  'counter:150': Object.freeze({ recipeId: 'counter-150', moduleType: 'counter', nominalWidthCm: 150, items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_140_5', quantity: 3 }), Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_99', quantity: 4 }), Object.freeze({ itemKey: 'panel_147_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 12 }), Object.freeze({ itemKey: 'counter_top_160_60', quantity: 1 }),
-  ]) }),
-  'counter:200': Object.freeze({ recipeId: 'counter-200', moduleType: 'counter', nominalWidthCm: 200, items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_190', quantity: 3 }), Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_99', quantity: 4 }), Object.freeze({ itemKey: 'panel_197', quantity: 2 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }), Object.freeze({ itemKey: 'connector_start', quantity: 6 }), Object.freeze({ itemKey: 'connector_single', quantity: 12 }), Object.freeze({ itemKey: 'counter_top_210_60', quantity: 1 }),
-  ]) }),
-
-  'base:100': Object.freeze({ recipeId: 'base-100', moduleType: 'base', nominalWidthCm: 100, items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_91', quantity: 4 }), Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 4 }), Object.freeze({ itemKey: 'panel_98', quantity: 2 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 8 }), Object.freeze({ itemKey: 'base_top_107_50', quantity: 1 }),
-  ]) }),
-  'base:150': Object.freeze({ recipeId: 'base-150', moduleType: 'base', nominalWidthCm: 150, items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_140_5', quantity: 4 }), Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 4 }), Object.freeze({ itemKey: 'panel_147_5', quantity: 2 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 8 }), Object.freeze({ itemKey: 'base_top_157_50', quantity: 1 }),
-  ]) }),
-  'base:200': Object.freeze({ recipeId: 'base-200', moduleType: 'base', nominalWidthCm: 200, items: Object.freeze([
-    Object.freeze({ itemKey: 'profile_190', quantity: 4 }), Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }), Object.freeze({ itemKey: 'upright_49_5', quantity: 4 }), Object.freeze({ itemKey: 'panel_197', quantity: 2 }), Object.freeze({ itemKey: 'panel_48_5', quantity: 2 }), Object.freeze({ itemKey: 'connector_start', quantity: 8 }), Object.freeze({ itemKey: 'connector_single', quantity: 8 }), Object.freeze({ itemKey: 'base_top_206_50', quantity: 1 }),
-  ]) }),
-});
-
-export function getStraightWallRecipe(nominalWidthCm) { return STRAIGHT_WALL_RECIPES[nominalWidthCm] ?? null; }
-
-export function getStraightWallNominalWidthForProfileItem(itemKey) {
-  for (const recipe of Object.values(STRAIGHT_WALL_RECIPES)) {
-    if (recipe.items.some((item) => item.itemKey === itemKey)) {
-      return recipe.nominalWidthCm;
-    }
-  }
-  return null;
+export function getRecipeItemKey(item) {
+  return item?.itemKey ?? null;
 }
-export function listStraightWallRecipes() { return Object.values(STRAIGHT_WALL_RECIPES); }
-export function getModuleRecipe(moduleType, nominalWidthCm, options = {}) {
-  if (moduleType === 'wall' || moduleType === 'flat-panel') return getStraightWallRecipe(nominalWidthCm);
-  if (moduleType === 'counter' && options.shape === 'L') return MODULE_RECIPES[`counter-l:${nominalWidthCm}`] ?? null;
-  return MODULE_RECIPES[`${moduleType}:${nominalWidthCm}`] ?? null;
-}
-export function getRecipeItemKey(item) { return item?.itemKey ?? null; }
 
-export function getRecipeInnerCornerPanelKey(recipe) {
-  return recipe?.variants?.innerCornerPanelItemKey ?? null;
+export function getRecipeInnerCornerPanelKey(item) {
+  return item?.composition?.innerCorner?.panelItemKey ?? null;
 }
 
 function applyVariantItemReplacements(items, replacements = [], recipeId = 'unknown') {
@@ -201,49 +36,47 @@ function applyVariantItemReplacements(items, replacements = [], recipeId = 'unkn
   return resolvedItems;
 }
 
-function resolveRecipeItemsForPanelVariant(recipe, panelVariant = 'straight') {
-  if (panelVariant !== 'inner-corner') return recipe.items;
+function resolveRecipeItemsForPanelVariant(item, panelVariant = 'straight') {
+  const items = item.composition.items;
+  if (panelVariant !== 'inner-corner') return items;
 
-  // Kanonik iç-köşe Item üstverisi, doğrulanmış 1:1 panel değişimini açar.
-  const cornerPanelItemKey = recipe?.variants?.innerCornerPanelItemKey ?? null;
-  if (!cornerPanelItemKey) return recipe.items;
+  const cornerPanelItemKey = item.composition.innerCorner?.panelItemKey ?? null;
+  if (!cornerPanelItemKey) return items;
 
   const cornerPanel = getItem(cornerPanelItemKey);
   if (!cornerPanel || cornerPanel.type !== 'panel' || cornerPanel.panelRole !== 'inner-corner') {
     throw new TypeError(`Invalid inner-corner panel Item: ${cornerPanelItemKey}.`);
   }
 
-  const straightPanelIndex = recipe.items.findIndex((item) => {
-    const productionItem = getItem(getRecipeItemKey(item));
+  const straightPanelIndex = items.findIndex((entry) => {
+    const productionItem = getItem(getRecipeItemKey(entry));
     return productionItem?.type === 'panel'
       && productionItem.panelRole === 'straight'
       && productionItem.nominalModuleWidthCm === cornerPanel.nominalModuleWidthCm;
   });
 
   if (straightPanelIndex < 0) {
-    throw new TypeError(`Recipe ${recipe.recipeId ?? 'unknown'} has no matching straight panel for ${cornerPanelItemKey}.`);
+    throw new TypeError(`Recipe ${item.itemKey ?? 'unknown'} has no matching straight panel for ${cornerPanelItemKey}.`);
   }
 
-  const panelAdjustedItems = recipe.items.map((item, index) => {
-    if (index !== straightPanelIndex) return item;
-    return Object.freeze({ itemKey: cornerPanelItemKey, quantity: item.quantity });
+  const panelAdjustedItems = items.map((entry, index) => {
+    if (index !== straightPanelIndex) return entry;
+    return Object.freeze({ itemKey: cornerPanelItemKey, quantity: entry.quantity });
   });
 
   return applyVariantItemReplacements(
     panelAdjustedItems,
-    recipe?.variants?.innerCornerItemReplacements ?? [],
-    recipe.recipeId ?? 'unknown',
+    item.composition.innerCorner?.itemReplacements ?? [],
+    item.itemKey ?? 'unknown',
   );
 }
 
-export function expandRecipe(recipe, options = {}) {
-  if (!recipe) return null;
-  const items = resolveRecipeItemsForPanelVariant(recipe, options.panelVariant);
-  return { ...recipe, items: items.map((item) => ({ ...item, part: getItem(getRecipeItemKey(item)) })) };
-}
-export function getExpandedStraightWallRecipe(nominalWidthCm, options = {}) {
-  return expandRecipe(getStraightWallRecipe(nominalWidthCm), options);
-}
-export function getExpandedModuleRecipe(moduleType, nominalWidthCm, options = {}) {
-  return expandRecipe(getModuleRecipe(moduleType, nominalWidthCm, options), options);
+export function expandRecipe(item, options = {}) {
+  if (!item) return null;
+  if (!Array.isArray(item.composition?.items)) return null;
+  const items = resolveRecipeItemsForPanelVariant(item, options.panelVariant);
+  return {
+    recipeId: item.itemKey,
+    items: items.map((entry) => ({ ...entry, part: getItem(getRecipeItemKey(entry)) })),
+  };
 }

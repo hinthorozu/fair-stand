@@ -3,14 +3,16 @@ import assert from 'node:assert/strict';
 
 import { getItem, listRegisteredItems } from '../src/items.js';
 import {
+  getRecipeItemKey,
+} from '../src/moduleRecipes.js';
+import {
   getExpandedModuleRecipe,
   getExpandedStraightWallRecipe,
   getModuleRecipe,
   getRecipeInnerCornerPanelKey,
-  getRecipeItemKey,
   getStraightWallRecipe,
   listStraightWallRecipes,
-} from '../src/moduleRecipes.js';
+} from './recipeParentItemKey.js';
 
 test('production part catalog contains the verified connector names', () => {
   assert.equal(getItem('connector_start').name, 'Başlangıç Aparatı');

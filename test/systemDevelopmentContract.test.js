@@ -6,14 +6,13 @@ import {
   listCatalogItems,
 } from '../src/catalog.js';
 import { planAutomaticDepot } from '../src/autoDepot.js';
-import { getModuleRecipe } from '../src/moduleRecipes.js';
 import {
   MODULE_CONTRACT_ASSIGNMENTS,
   MODULE_CONTRACT_PROFILES,
   hasExplicitModuleContract,
   resolveModuleContract,
 } from '../src/moduleContracts.js';
-import { getCommercialItemForType, getItem, resolveSceneDimensions } from '../src/items.js';
+import { getCommercialItemForType, getItem } from '../src/items.js';
 import { composeAutomaticStandWall } from '../src/automaticWall.js';
 import { FEATURE_CONTRACTS, getFeatureContract } from '../src/featureContracts.js';
 
@@ -69,12 +68,10 @@ test('recipe-backed module contracts resolve an actual canonical recipe', () => 
     if (contract?.bom?.mode !== 'recipe') continue;
 
     const item = getItem(moduleKey);
-    const scene = resolveSceneDimensions(item);
-    const recipe = getModuleRecipe(item.type, scene.widthCm, {
-      shape: item.shape,
-    });
-
-    assert.ok(recipe, `${moduleKey} declares recipe BOM but no canonical recipe resolves`);
+    assert.ok(
+      Array.isArray(item.composition?.items) && item.composition.items.length > 0,
+      `${moduleKey} declares recipe BOM but composition.items is missing`,
+    );
   }
 });
 

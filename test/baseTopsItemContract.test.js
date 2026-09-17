@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 
 import { getItem } from '../src/items.js';
 import {
-  getExpandedModuleRecipe,
-  getModuleRecipe,
   getRecipeItemKey,
 } from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 
 const BASE_TOP_CASES = {
   base_top_107_50: {

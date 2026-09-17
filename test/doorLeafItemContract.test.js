@@ -4,11 +4,16 @@ import { readFileSync } from 'node:fs';
 
 import { getItemSurfaceCapabilities } from '../src/itemCapabilities.js';
 import { createDoorModuleState, normalizeModuleItemState } from '../src/designState.js';
-import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
-import { getDoorLeafItem, getItem } from '../src/items.js';
+import {
+  getExpandedModuleRecipe,
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
+import { getItem } from '../src/items.js';
 
 test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
   const item = getItem('door_leaf_100');
+  const itemsSource = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
+  const designStateSource = readFileSync(new URL('../src/designState.js', import.meta.url), 'utf8');
   assert.equal(item.itemKey, 'door_leaf_100');
   assert.equal(item.partId, undefined);
   assert.equal(item.name, 'Ahşap Kapı Kanadı 100 × 200 cm');
@@ -18,8 +23,9 @@ test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
   assert.equal(item.material, 'ahşap');
   assert.equal(item.defaultColor, 0xffffff);
   assert.equal(item.nominalModuleWidthCm, 100);
-  assert.equal(getDoorLeafItem(100), item);
-  assert.equal(getDoorLeafItem(150), null);
+  assert.doesNotMatch(itemsSource, /DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH/);
+  assert.doesNotMatch(itemsSource, /export function getDoorLeafItem/);
+  assert.doesNotMatch(designStateSource, /getDoorLeafItem/);
   assert.equal(getItem('door_100').itemKey, 'door_100');
   assert.equal(getItem('door_100').composition.mode, 'recipe');
   assert.equal(Object.hasOwn(getItem('door_leaf_100'), 'composition'), false);

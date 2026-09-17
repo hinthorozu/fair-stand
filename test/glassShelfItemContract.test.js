@@ -3,7 +3,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 import { getItem } from '../src/items.js';
-import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
+import {
+  getRecipeItemKey,
+} from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 import { GLASS_APPEARANCE, getMaterialAppearance } from '../src/theme.js';
 
 const EXPECTED_DIMENSIONS = Object.freeze({

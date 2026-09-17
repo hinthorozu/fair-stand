@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { getItem } from '../src/items.js';
-import { getModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 
 test('shelf_leg is canonical without invented product metadata', () => {
   const item = getItem('shelf_leg');

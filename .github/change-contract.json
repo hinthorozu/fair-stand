@@ -1,26 +1,29 @@
 {
   "schemaVersion": 2,
-  "id": "items-single-registry",
+  "id": "item-composition-inner-corner",
   "kind": "architecture",
-  "summary": "Dokuz kova map yok. 96 Item satırı export const ITEMS içinde; getItem ve listRegisteredItems bu tablodan okur.",
+  "summary": "Düz child listesi ve iç-köşe verisi tek kaynak Item composition.items / innerCorner. moduleRecipes ürün tablosu silindi; expand ve resolveItemBom kodda kaldı. rawBomDebug type+width yolları resolveItemBom(itemKey). Kapı kanadı width helper getDoorLeafItem silindi; factory/normalize getItem('door_leaf_100').",
   "owners": [
     "src/items.js",
+    "src/itemBom.js",
+    "src/designState.js",
     "docs/refactor/ITEMS.md"
   ],
   "sourceOfTruth": [
     "src/items.js",
+    "src/itemBom.js",
     "docs/refactor/ITEMS.md"
   ],
   "impact": {
     "catalog": "affected",
     "behavior": "not-applicable",
-    "state": "not-applicable",
+    "state": "affected",
     "placement": "not-applicable",
     "renderer": "not-applicable",
-    "persistence": "not-applicable",
+    "persistence": "affected",
     "bom": "affected",
-    "ui": "not-applicable",
-    "composition": "not-applicable",
+    "ui": "affected",
+    "composition": "affected",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
@@ -203,6 +206,8 @@
       "test/projectUiMainIntegration.test.js",
       "test/raisedPlatform.test.js",
       "test/rawBomSelectionParser.test.js",
+      "test/recipeCompositionItemsContract.test.js",
+      "test/recipeParentItemKey.js",
       "test/removedIndoorPlant2.test.js",
       "test/rightWallOrientation.test.js",
       "test/roadmapProductionSourceOfTruth.test.js",
@@ -788,20 +793,17 @@
         "F-045"
       ]
     },
-    "notes": "96 satır yalnız ITEMS içinde. Kova map yok. Catalog kartı ve recipe miktarı değişmedi."
+    "notes": "Child miktarları değişmedi. Recipe items+variants tabloları silindi; innerCorner Item’a taşındı. Furniture kümeleri BOM’a açılmadı. Catalog persist itemKey dokunulmadı. getDoorLeafItem silindi; surface.itemKey hâlâ door_leaf_100."
   },
   "tests": {
     "targeted": [
-      "test/catalogDomainBoundary.test.js",
-      "test/commercialItemsContract.test.js",
+      "test/recipeCompositionItemsContract.test.js",
       "test/doorCompositeItemContract.test.js",
       "test/doorLeafItemContract.test.js",
-      "test/floorItemsContract.test.js",
-      "test/furnitureItemsContract.test.js",
-      "test/lightingItemsContract.test.js",
+      "test/wallShowcaseItemContract.test.js",
       "test/moduleRecipes.test.js",
-      "test/wallMediaItemsContract.test.js",
-      "test/itemCatalogFields.test.js"
+      "test/canonicalDimensionDedup.test.js",
+      "test/rawBomSelectionParser.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -810,16 +812,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "items.js catalog/bom domain; kart ve factory değeri aynı. smoke."
+      "reason": "rawBomDebug UI BOM paneli itemKey resolveItemBom’a geçti; BOM/UI/composition browser E2E kapısı."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "Aynı 96 Item; yalnız lookup tablosu birleşti."
+    "level": "medium",
+    "notes": "İç-köşe expand aynı panelRole/nominalModuleWidthCm kuralı. Test helper type+width → mevcut parent itemKey; src BOM kaynağı değil. Kapı factory 100 dışı zaten null; leaf lookup getItem('door_leaf_100')."
   },
   "migration": {
     "required": false,
-    "notes": "Persist/schema yok. itemKey değerleri aynı."
+    "notes": "Persist/schema yok. itemKey ve miktarlar aynı. innerCorner yeni alan; proje blob’una yazılmaz. Kapı surface.itemKey hâlâ door_leaf_100."
   },
-  "rollback": "Kova export’larını ve getItem zincirini geri koymak."
+  "rollback": "composition.innerCorner satırlarını silmek; moduleRecipes ürün tablolarını geri koymak; itemBom fallback’ini catalogRecipe.items yapmak; getDoorLeafItem’ı geri koymak."
 }

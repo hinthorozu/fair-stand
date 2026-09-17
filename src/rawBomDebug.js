@@ -1,11 +1,45 @@
 import { resolveItemBom } from './itemBom.js';
-import { getExpandedModuleRecipe } from './moduleRecipes.js';
 import { DEFAULT_SELECTION_HINT } from './selectionFeedback.js';
 
 const selectionInfo = typeof document !== 'undefined' ? document.querySelector('#selection-info') : null;
 const sidebar = typeof document !== 'undefined' ? document.querySelector('.sidebar') : null;
 
 const SUPPORTED_L_COUNTER_WIDTHS = new Set([100, 150, 200]);
+
+const L_COUNTER_ITEM_KEYS = Object.freeze({
+  100: 'desk_banko_100_L',
+  150: 'desk_banko_150_L',
+  200: 'desk_banko_200_L',
+});
+
+const SHOWCASE_ITEM_KEYS = Object.freeze({
+  2: 'wall_showcase_100_2',
+  3: 'wall_showcase_100_3',
+});
+
+const SEPARATOR_ITEM_KEYS = Object.freeze({
+  50: 'wall_separator_50',
+  100: 'wall_separator_100',
+});
+
+const COUNTER_ITEM_KEYS = Object.freeze({
+  100: 'desk_banko_100',
+  150: 'desk_banko_150',
+  200: 'desk_banko_200',
+});
+
+const BASE_ITEM_KEYS = Object.freeze({
+  100: 'BASE_100',
+  150: 'BASE_150',
+  200: 'BASE_200',
+});
+
+const WALL_ITEM_KEYS = Object.freeze({
+  50: 'wall_50',
+  100: 'wall_100',
+  150: 'wall_150',
+  200: 'wall_200',
+});
 
 export function parseLCounterSelection(text) {
   const match = String(text ?? '').match(/Köşe\s+Banko\s+(100|150|200)\s*[×x]\s*(100|150|200)/i);
@@ -52,29 +86,6 @@ function formatNumber(value) {
   return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 }).format(Number(value));
 }
 
-function renderRecipe(moduleType, widthCm, label, options = {}) {
-  const recipe = getExpandedModuleRecipe(moduleType, widthCm, options);
-  if (!status || !content) return;
-
-  if (!recipe) {
-    status.textContent = 'Bu modül için üretim reçetesi henüz tanımlı değil.';
-    content.innerHTML = '';
-    return;
-  }
-
-  status.textContent = `${label} · Raw BOM`;
-  content.innerHTML = '';
-
-  const list = document.createElement('ul');
-  list.style.cssText = 'margin:8px 0 0;padding-left:18px;display:grid;gap:5px';
-  recipe.items.forEach((item) => {
-    const li = document.createElement('li');
-    li.textContent = `${formatNumber(item.quantity)} × ${item.part?.name ?? item.itemKey ?? item.partId}`;
-    list.appendChild(li);
-  });
-  content.appendChild(list);
-}
-
 function renderItemBom(itemKey, label) {
   if (!status || !content) return;
 
@@ -114,24 +125,22 @@ function syncFromSelection() {
   if (showcaseMatch) {
     const eyeCount = Number(showcaseMatch[1]);
     const widthCm = Number(showcaseMatch[2]);
-    renderRecipe(`showcase-${eyeCount}`, widthCm, `${eyeCount} Gözlü Vitrin ${widthCm} cm`);
+    renderItemBom(SHOWCASE_ITEM_KEYS[eyeCount], `${eyeCount} Gözlü Vitrin ${widthCm} cm`);
     return;
   }
 
   const separatorMatch = text.match(/Separatör\s+(50|100)\s*cm/i);
   if (separatorMatch) {
     const widthCm = Number(separatorMatch[1]);
-    renderRecipe('separator', widthCm, `Separatör ${widthCm} cm`);
+    renderItemBom(SEPARATOR_ITEM_KEYS[widthCm], `Separatör ${widthCm} cm`);
     return;
   }
 
   const cornerCounterSelection = parseLCounterSelection(text);
   if (cornerCounterSelection) {
-    renderRecipe(
-      cornerCounterSelection.moduleType,
-      cornerCounterSelection.widthCm,
+    renderItemBom(
+      L_COUNTER_ITEM_KEYS[cornerCounterSelection.widthCm],
       cornerCounterSelection.label,
-      cornerCounterSelection.options,
     );
     return;
   }
@@ -139,14 +148,14 @@ function syncFromSelection() {
   const counterMatch = text.match(/Banko\s+(100|150|200)\s*cm/i);
   if (counterMatch) {
     const widthCm = Number(counterMatch[1]);
-    renderRecipe('counter', widthCm, `Banko ${widthCm} cm`);
+    renderItemBom(COUNTER_ITEM_KEYS[widthCm], `Banko ${widthCm} cm`);
     return;
   }
 
   const baseMatch = text.match(/Baza\s+(100|150|200)\s*cm/i);
   if (baseMatch) {
     const widthCm = Number(baseMatch[1]);
-    renderRecipe('base', widthCm, `Baza ${widthCm} cm`);
+    renderItemBom(BASE_ITEM_KEYS[widthCm], `Baza ${widthCm} cm`);
     return;
   }
 
@@ -162,7 +171,8 @@ function syncFromSelection() {
     return;
   }
 
-  renderRecipe('wall', Number(widthMatch[1]), `${widthMatch[1]} cm düz duvar`);
+  const widthCm = Number(widthMatch[1]);
+  renderItemBom(WALL_ITEM_KEYS[widthCm], `${widthCm} cm düz duvar`);
 }
 
 if (selectionInfo && panel) {

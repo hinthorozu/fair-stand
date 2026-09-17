@@ -9,7 +9,9 @@ import {
 } from '../src/designState.js';
 import { getItem, resolveItemKey } from '../src/items.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
-import { getModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 
 const REMOVED_WALL_SHELF_KEYS = Object.freeze([
   'wall_shelf_2_100',

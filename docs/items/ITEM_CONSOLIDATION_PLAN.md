@@ -8,14 +8,14 @@ Kanonik Item kimliği tek runtime dosyadadır: `src/items.js`.
 
 Tek tablo `ITEMS`. Bütün Item satırları `export const ITEMS` içindedir. Lookup `getItem(itemKey)`. `listRegisteredItems()` bütün satırları döner. Kova map yoktur.
 
-Raf kimliği exact `itemKey` + `getItem()`; width helper `getShelfLeafItem` yoktur. Kapı kanadı `getDoorLeafItem` kalır. `door_100` recipe parent’tır; `door_leaf_100` ayrı Item’dır.
+Raf kimliği exact `itemKey` + `getItem()`; width helper `getShelfLeafItem` yoktur. Kapı kanadı da exact `itemKey` + `getItem('door_leaf_100')`; width helper `getDoorLeafItem` yoktur. `door_100` recipe parent’tır; child listesi `composition.items` içindedir (`door_leaf_100` ayrı Item’dır).
 
 ## Faz 2 — tek lookup API
 
 - `getProductionItem`, `getProductionPart`, `listProductionParts` ve `PRODUCTION_PARTS` export'ları kaldırıldı.
 - Tek kayıt lookup `getItem()`dır. Leaf ve bileşik aynı fonksiyondan döner.
 - `getRecipeItemKey()` yalnız `item.itemKey` okur; `partId` düşümü yoktur.
-- Raf width helper `getShelfLeafItem` kaldırıldı; çözüm `getItem(itemKey)`. Kapı `getDoorLeafItem` `getItem` üzerinden çözülür.
+- Raf width helper `getShelfLeafItem` kaldırıldı; çözüm `getItem(itemKey)`. Kapı width helper `getDoorLeafItem` kaldırıldı; çözüm `getItem('door_leaf_100')`.
 - `door_100` recipe parent’tır; `getItem('door_100')` onu döner.
 
 ## Faz 3 — tanım metinleri
@@ -24,7 +24,7 @@ Raf kimliği exact `itemKey` + `getItem()`; width helper `getShelfLeafItem` yokt
 
 - Kanonik sahip `src/items.js`; lookup `getItem()`.
 - Public kayıt `ITEMS`.
-- Raf lookup `getItem(itemKey)`. Kapı width helper `getDoorLeafItem`.
+- Raf lookup `getItem(itemKey)`. Kapı lookup `getItem('door_leaf_100')`.
 - `getProductionPart` / `getProductionItem` compatibility cümleleri kaldırıldı; çözüm `getItem()`dır.
 - `partId` yalnız migration öncesi kimlik olarak kalır; bugünkü kimlik `itemKey`dır.
 

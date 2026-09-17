@@ -3,11 +3,13 @@ import assert from 'node:assert/strict';
 
 import { getItem } from '../src/items.js';
 import {
+  getRecipeItemKey,
+} from '../src/moduleRecipes.js';
+import {
   getExpandedModuleRecipe,
   getModuleRecipe,
   getRecipeInnerCornerPanelKey,
-  getRecipeItemKey,
-} from '../src/moduleRecipes.js';
+} from './recipeParentItemKey.js';
 
 const CORNER_PANEL_CASES = {
   panel_corner_42_5: {

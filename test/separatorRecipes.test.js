@@ -2,7 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { getItem } from '../src/items.js';
-import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 
 test('production catalog contains separator panel parts', () => {
   assert.equal(getItem('separator_panel_48_5').name, 'Separatör Paneli 48,5 × 47 cm');

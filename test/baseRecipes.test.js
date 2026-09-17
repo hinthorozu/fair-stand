@@ -2,7 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { getItem } from '../src/items.js';
-import { getExpandedModuleRecipe, getModuleRecipe } from '../src/moduleRecipes.js';
+import {
+  getExpandedModuleRecipe,
+  getModuleRecipe,
+} from './recipeParentItemKey.js';
 
 test('production catalog contains verified baza upright and tops', () => {
   assert.equal(getItem('upright_49_5').dimensions.lengthCm, 49.5);
