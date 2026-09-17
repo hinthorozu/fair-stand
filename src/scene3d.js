@@ -2,14 +2,13 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
-import { getModuleCatalogItem, getModuleCatalogLabel, SHELF_DIMENSIONS, STAND_DIMENSIONS } from './catalog.js';
+import { getModuleCatalogItem, getModuleCatalogLabel, STAND_DIMENSIONS } from './catalog.js';
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 import {
   getCommercialItemForType,
   getFloorItem,
   getItem,
-  getShelfLeafItem,
   getShowcaseBodyDefinition,
   isCarpetFloorItem,
   isGridTileFloorItem,
@@ -35,6 +34,7 @@ import { computeImageFit } from './imageFit.js';
 import { formatPlacementFeedbackMessage, hasPlacementFeedbackPointer } from './placementFeedback.js';
 import { SCENE_SURROUND_M } from './sceneDimensions.js';
 import {
+  WALL_OVERLAY_DEFAULT_CENTER_CM,
   clampWallOverlayZCm,
   createModulePlacement,
   getAllowedWallIds,
@@ -44,15 +44,17 @@ import {
   normalizeModuleRotationZDeg,
   rotateModuleRotationZDeg,
   rotateModulePlacementAroundCenter,
+  snapPanelSeamOverlayPlacement,
   snapPlacementToStand,
   snapPlacementToModules,
+  stepPanelSeamOverlayPlacement,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
 import {
   planContinuousModuleInsert,
   planContinuousModuleMove,
 } from './moduleMove.js';
-import { getModuleGhostBehavior, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule, requiresShortUpJointSnap, resolveModuleRotationDeltaDeg, supportsWallOverlayMount } from './moduleBehavior.js';
+import { getModuleGhostBehavior, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule, requiresShortUpJointSnap, resolveModuleRotationDeltaDeg, supportsWallOverlayMount, usesPanelSeamOverlaySnap } from './moduleBehavior.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
@@ -1514,7 +1516,7 @@ export function createStandScene(
       return createLedFloodlightModule(moduleState, moduleIndex);
     }
     if (moduleState.type === 'shelf') {
-      return createShelfModule(moduleState, moduleIndex, onSurfaceReady);
+      return createShelfModule(moduleState, moduleIndex);
     }
     if (moduleState.type === 'door') {
       return createDoorModule(moduleState, moduleIndex, onSurfaceReady);
@@ -2343,7 +2345,8 @@ export function createStandScene(
       );
       const hit = pointed.hit.point;
       const heightCm = Math.max(1, Number(moduleState?.heightCm));
-      const defaultCenterM = 1.75;
+      const defaultCenterM = WALL_OVERLAY_DEFAULT_CENTER_CM / 100;
+      const absoluteHeightCm = (hit.y - ACTIVE_PLATFORM_HEIGHT_M) * 100;
       const rawOffsetCm = (hit.y - ACTIVE_PLATFORM_HEIGHT_M - defaultCenterM) * 100;
       const zCm = clampWallOverlayZCm(rawOffsetCm, heightCm);
 
@@ -2362,6 +2365,7 @@ export function createStandScene(
         pointerYCm: supportVertical ? hit.z * 100 : supportCenterYCm,
         rotationZDeg,
         zCm,
+        absoluteHeightCm,
         freePanelSupport: true,
         supportModuleId: pointedModuleState.id,
       };
@@ -2404,11 +2408,51 @@ export function createStandScene(
     const pointerYCm = wallId === 'back' ? 0 : Math.max(0, hit.z * 100);
 
     const heightCm = Math.max(1, Number(moduleState?.heightCm));
-    const defaultCenterM = 1.75;
+    const defaultCenterM = WALL_OVERLAY_DEFAULT_CENTER_CM / 100;
+    const absoluteHeightCm = (hit.y - ACTIVE_PLATFORM_HEIGHT_M) * 100;
     const rawOffsetCm = (hit.y - ACTIVE_PLATFORM_HEIGHT_M - defaultCenterM) * 100;
     const zCm = clampWallOverlayZCm(rawOffsetCm, heightCm);
 
-    return { wallId, pointerXCm, pointerYCm, rotationZDeg, zCm };
+    return { wallId, pointerXCm, pointerYCm, rotationZDeg, zCm, absoluteHeightCm };
+  }
+
+  function previewPanelSeamOverlayDrag(moduleState, clientX, clientY, preferredWallId = null) {
+    const wallPoint = getWallOverlayDragPoint(clientX, clientY, preferredWallId, moduleState);
+    if (!wallPoint) {
+      disposePlacementGhost();
+      const message = 'Rafı duvar veya panel üzerine bırak.';
+      showPlacementFeedback(message, { clientX, clientY });
+      return { ok: false, message };
+    }
+
+    const snapped = snapPanelSeamOverlayPlacement({
+      moduleState,
+      wallPoint,
+      modules: getRenderedModuleStates(),
+    });
+    showPlacementGhost(moduleState, snapped.placement, snapped.ok);
+    if (snapped.ok) clearPlacementFeedback();
+    else {
+      showPlacementFeedback(snapped.message ?? 'Rafı iki panel arasındaki birleşime bırak.', {
+        clientX,
+        clientY,
+      });
+    }
+
+    return {
+      ok: snapped.ok,
+      placement: { ...snapped.placement },
+      message: snapped.message ?? null,
+      plan: {
+        ok: snapped.ok,
+        message: snapped.message ?? null,
+        movingPlacement: { ...snapped.placement },
+        placements: snapped.ok
+          ? new Map([[moduleState.id, { ...snapped.placement }]])
+          : new Map(),
+      },
+      snap: { mode: 'wall-overlay', wallId: wallPoint.wallId, overlaySnap: 'panel-seam' },
+    };
   }
 
   function previewCatalogModuleDrag(
@@ -2419,6 +2463,13 @@ export function createStandScene(
     rotationLocked = false,
   ) {
     if (isWallOverlayModule(moduleState.type)) {
+      if (usesPanelSeamOverlaySnap(moduleState)) {
+        const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
+        const preferredWallId = ['back', 'left', 'right'].includes(pointedModule?.placement?.wallId)
+          ? pointedModule.placement.wallId
+          : null;
+        return previewPanelSeamOverlayDrag(moduleState, clientX, clientY, preferredWallId);
+      }
       const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
       const pointedOnWall = ['back', 'left', 'right'].includes(pointedModule?.placement?.wallId);
       if (!pointedOnWall) {
@@ -2698,6 +2749,29 @@ export function createStandScene(
     const moduleState = dragSession.moduleState;
 
     if (isWallOverlayModule(moduleState.type)) {
+      if (usesPanelSeamOverlaySnap(moduleState)) {
+        const currentWallId = ['back', 'left', 'right'].includes(dragSession.preview?.placement?.wallId)
+          ? dragSession.preview.placement.wallId
+          : (['back', 'left', 'right'].includes(moduleState.placement?.wallId) ? moduleState.placement.wallId : null);
+        const result = previewPanelSeamOverlayDrag(
+          moduleState,
+          event.clientX,
+          event.clientY,
+          currentWallId,
+        );
+        if (!result.placement) {
+          dragSession.preview = null;
+          return;
+        }
+        dragSession.preview = {
+          placement: result.placement,
+          valid: result.ok,
+          message: result.message ?? null,
+          plan: result.plan,
+          snap: result.snap,
+        };
+        return;
+      }
       const currentWallId = ['back', 'left', 'right'].includes(dragSession.preview?.placement?.wallId)
         ? dragSession.preview.placement.wallId
         : (['back', 'left', 'right'].includes(moduleState.placement?.wallId) ? moduleState.placement.wallId : null);
@@ -4309,6 +4383,64 @@ export function createStandScene(
         return;
       }
       if (isWallOverlayModule(moduleState.type)) {
+        if (usesPanelSeamOverlaySnap(moduleState)) {
+          const moduleWorldPosition = new THREE.Vector3();
+          moduleGroup.getWorldPosition(moduleWorldPosition);
+          const projectedOrigin = moduleWorldPosition.clone().project(camera);
+          const probeStepM = 0.5;
+          const probeCandidates = [
+            { kind: 'horizontal', delta: 1, world: new THREE.Vector3(probeStepM, 0, 0) },
+            { kind: 'horizontal', delta: -1, world: new THREE.Vector3(-probeStepM, 0, 0) },
+            { kind: 'vertical', delta: 1, world: new THREE.Vector3(0, probeStepM, 0) },
+            { kind: 'vertical', delta: -1, world: new THREE.Vector3(0, -probeStepM, 0) },
+          ];
+          const bestArrowMove = probeCandidates
+            .map((candidate) => {
+              const projectedTarget = moduleWorldPosition.clone().add(candidate.world).project(camera);
+              const screenDelta = new THREE.Vector2(
+                projectedTarget.x - projectedOrigin.x,
+                projectedTarget.y - projectedOrigin.y,
+              );
+              const lengthSq = screenDelta.lengthSq();
+              const score = lengthSq > 1e-12
+                ? screenDelta.normalize().dot(arrowScreenDirection)
+                : -Infinity;
+              return { ...candidate, score };
+            })
+            .sort((a, b) => b.score - a.score)[0];
+          if (!bestArrowMove || !Number.isFinite(bestArrowMove.score)) return;
+          if (bestArrowMove.kind === 'vertical') {
+            const nextPlacement = stepPanelSeamOverlayPlacement({
+              moduleState,
+              modules: getRenderedModuleStates(),
+              seamDelta: bestArrowMove.delta,
+            });
+            if (!nextPlacement) {
+              showPlacementFeedback('Raf bu yönde panel birleşimine ulaştı.', { durationMs: 900 });
+              return;
+            }
+            moduleState.placement = { ...nextPlacement };
+            moduleGroup.userData.placement = { ...nextPlacement };
+            applyPlacementToGroup(moduleGroup, nextPlacement, moduleState.widthCm);
+            clearPlacementFeedback();
+            return;
+          }
+          const stepCm = getModulePlacementSnapCm(moduleState.type);
+          const nextPlacement = stepPanelSeamOverlayPlacement({
+            moduleState,
+            modules: getRenderedModuleStates(),
+            horizontalDeltaCm: bestArrowMove.delta * stepCm,
+          });
+          if (!nextPlacement) {
+            showPlacementFeedback('Raf bu yönde duvar açıklığı sınırına ulaştı.', { durationMs: 900 });
+            return;
+          }
+          moduleState.placement = { ...nextPlacement };
+          moduleGroup.userData.placement = { ...nextPlacement };
+          applyPlacementToGroup(moduleGroup, nextPlacement, moduleState.widthCm);
+          clearPlacementFeedback();
+          return;
+        }
         const stepCm = getModulePlacementSnapCm(moduleState.type);
         const wallId = moduleState.placement.wallId ?? 'free';
         const rotationZDeg = normalizeModuleRotationZDeg(moduleState.placement.rotationZDeg);
@@ -6872,104 +7004,121 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   return {group,surfaces};
 }
 
-function createShelfModule(moduleState, moduleIndex, onSurfaceReady) {
-  const built = createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady);
-  const widthM = Number(moduleState.widthCm) / 100;
-  const shelfItem = getShelfLeafItem(moduleState.widthCm);
-  if (!shelfItem) {
-    throw new TypeError(`Missing canonical shelf Item for ${moduleState.widthCm} cm module.`);
+function createShelfModule(moduleState, moduleIndex) {
+  const item = getItem(moduleState.itemKey);
+  if (!item || item.type !== 'shelf') {
+    throw new TypeError(`Missing canonical shelf Item for ${moduleState.itemKey}.`);
   }
-  const shelfDepthM = Number(shelfItem.dimensions.depthCm) / 100;
-  const shelfThicknessM = Number(shelfItem.dimensions.thicknessCm) / 100;
-  const wallDepthM = Number(STAND_DIMENSIONS.depth);
-  const innerWidthM = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
-  const shelfHeightsCm = SHELF_DIMENSIONS.heightsByCountCm[2] ?? [];
+
+  const widthM = Number(moduleState.widthCm) / 100;
+  const depthM = Number(item.dimensions.depthCm) / 100;
+  const thicknessM = Number(item.dimensions.thicknessCm) / 100;
+  if (![widthM, depthM, thicknessM].every(Number.isFinite) || widthM <= 0 || depthM <= 0 || thicknessM <= 0) {
+    throw new TypeError(`Missing canonical shelf dimensions for ${item.itemKey}.`);
+  }
+
+  const centerYM = WALL_OVERLAY_DEFAULT_CENTER_CM / 100;
+  const wallFrontM = STAND_DIMENSIONS.depth / 2 + 0.0015;
+  const centerZM = wallFrontM + depthM / 2;
   const shelfLightingOn = Boolean(moduleState.shelfLightingOn);
 
-  built.group.userData.type = 'shelf';
-  built.group.userData.shelfLightingOn = shelfLightingOn;
-  built.surfaces.forEach((surface) => {
-    surface.userData.moduleType = 'shelf';
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: 'shelf',
+    moduleType: 'shelf',
+    widthCm: Number(moduleState.widthCm),
+    depthCm: Number(item.dimensions.depthCm),
+    heightCm: Number(item.dimensions.thicknessCm),
+    shelfLightingOn,
+  };
+
+  const shelf = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, thicknessM, depthM),
+    new THREE.MeshStandardMaterial({
+      color: item.defaultColor,
+      roughness: 0.78,
+      metalness: 0,
+    }),
+  );
+  shelf.position.set(0, centerYM, centerZM);
+  shelf.castShadow = true;
+  shelf.receiveShadow = true;
+  shelf.userData = {
+    kind: 'surface',
+    moduleType: 'shelf',
+    moduleIndex,
+    moduleId: moduleState.id,
+    selectionMode: 'module',
+    acceptsImage: false,
+  };
+  group.add(shelf);
+
+  const shelfBottomY = centerYM - thicknessM / 2;
+  const ledStripWidthM = Math.max(widthM - 0.04, 0.08);
+  const ledStripDepthM = 0.016;
+  const ledStripThicknessM = 0.006;
+  const ledCenterZM = wallFrontM + depthM * 0.78;
+
+  const ledStrip = new THREE.Mesh(
+    new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
+    new THREE.MeshStandardMaterial({
+      color: 0xfff4df,
+      emissive: 0xffe3bd,
+      emissiveIntensity: 3.2,
+      roughness: 0.28,
+      metalness: 0,
+    }),
+  );
+  ledStrip.position.set(
+    0,
+    shelfBottomY - ledStripThicknessM / 2 - 0.001,
+    ledCenterZM,
+  );
+  ledStrip.visible = shelfLightingOn;
+  ledStrip.userData.kind = 'decoration';
+  ledStrip.userData.role = 'shelf-under-led-strip';
+  group.add(ledStrip);
+
+  const spotOffsets = [-widthM * 0.25, widthM * 0.25];
+  spotOffsets.forEach((spotX) => {
+    const spot = new THREE.SpotLight(
+      0xfff2dc,
+      14,
+      1.0,
+      0.68,
+      0.82,
+      1.6,
+    );
+    spot.position.set(
+      spotX,
+      shelfBottomY - 0.018,
+      wallFrontM + depthM * 0.76,
+    );
+    spot.target.position.set(
+      spotX,
+      Math.max(0.04, shelfBottomY - 0.58),
+      wallFrontM + depthM * 1.02,
+    );
+    spot.visible = shelfLightingOn;
+    spot.castShadow = false;
+    spot.userData.kind = 'decoration';
+    spot.userData.role = 'shelf-under-light';
+    group.add(spot, spot.target);
   });
 
-  const shelfMaterial = new THREE.MeshStandardMaterial({
-    color: shelfItem.defaultColor,
-    roughness: 0.78,
-    metalness: 0,
+  group.userData.selectionBounds = Object.freeze({
+    widthM,
+    heightM: thicknessM,
+    depthM,
+    centerX: shelf.position.x,
+    centerY: shelf.position.y,
+    centerZ: shelf.position.z,
   });
 
-  shelfHeightsCm.forEach((heightCm) => {
-    const seamHeightM = Number(heightCm) / 100;
-    const shelf = new THREE.Mesh(
-      new THREE.BoxGeometry(innerWidthM, shelfThicknessM, shelfDepthM),
-      shelfMaterial.clone(),
-    );
-    shelf.position.set(
-      0,
-      seamHeightM + shelfThicknessM / 2,
-      wallDepthM / 2 + shelfDepthM / 2,
-    );
-    shelf.castShadow = true;
-    shelf.receiveShadow = true;
-    built.group.add(shelf);
-
-    // Raf ışıkları bir kez oluşturulur; aç/kapa sadece visible değiştirir.
-    const ledStripWidthM = Math.max(innerWidthM - 0.04, 0.08);
-    const ledStripDepthM = 0.016;
-    const ledStripThicknessM = 0.006;
-    const shelfBottomY = seamHeightM;
-    const ledCenterZM = wallDepthM / 2 + shelfDepthM * 0.78;
-
-    const ledStrip = new THREE.Mesh(
-      new THREE.BoxGeometry(ledStripWidthM, ledStripThicknessM, ledStripDepthM),
-      new THREE.MeshStandardMaterial({
-        color: 0xfff4df,
-        emissive: 0xffe3bd,
-        emissiveIntensity: 3.2,
-        roughness: 0.28,
-        metalness: 0,
-      }),
-    );
-    ledStrip.position.set(
-      0,
-      shelfBottomY - ledStripThicknessM / 2 - 0.001,
-      ledCenterZM,
-    );
-    ledStrip.visible = shelfLightingOn;
-    ledStrip.userData.kind = 'decoration';
-    ledStrip.userData.role = 'shelf-under-led-strip';
-    built.group.add(ledStrip);
-
-    // Sağ-sol simetrik iki spot; raf genişliğinin çeyrek noktalarına yerleşir.
-    const spotOffsets = [-innerWidthM * 0.25, innerWidthM * 0.25];
-    spotOffsets.forEach((spotX) => {
-      const spot = new THREE.SpotLight(
-        0xfff2dc,
-        14,
-        1.0,
-        0.68,
-        0.82,
-        1.6,
-      );
-      spot.position.set(
-        spotX,
-        shelfBottomY - 0.018,
-        wallDepthM / 2 + shelfDepthM * 0.76,
-      );
-      spot.target.position.set(
-        spotX,
-        Math.max(0.04, shelfBottomY - 0.58),
-        wallDepthM / 2 + shelfDepthM * 1.02,
-      );
-      spot.visible = shelfLightingOn;
-      spot.castShadow = false;
-      spot.userData.kind = 'decoration';
-      spot.userData.role = 'shelf-under-light';
-      built.group.add(spot, spot.target);
-    });
-  });
-
-  return built;
+  return { group, surfaces: [shelf] };
 }
 
 function resolveOccupiedStripLayout(moduleState, stripCount, stripHeight) {

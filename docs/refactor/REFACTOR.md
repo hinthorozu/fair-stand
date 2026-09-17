@@ -7,6 +7,33 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-17 — leaf shelf Catalog + panel-seam overlay
+
+### Kapsam
+
+Mevcut leaf Item `shelf_100` / `shelf_150` / `shelf_200` Catalog’da `shelf-showcase` (Raf & Vitrin) altında görünür. Sahnede tek fiziksel raf tahtasıdır. Duvar/panel overlay attachment; Z snap panel internal seam.
+
+Geri getirilmeyen: `wall_shelf_*` composite Item, yeni wall_shelf parent, `SHELF_WIDTH_TO_ITEM_KEY`, `lengthCm→widthCm` cross-field fallback.
+
+Dokunulmayan: `wall_showcase_100_2` / `wall_showcase_100_3`, `glass_shelf`, vitrin recipe/BOM, shelf lighting mekanizması (korundu).
+
+### Davranış
+
+- `sceneDimensions.widthCm` 100/150/200; `heightCm=1.8`; `depthCm` fiziksel 38
+- `MODULE_STATE_FACTORIES.shelf` exact `itemKey`
+- `TYPE_BEHAVIORS.shelf`: `wall-overlay`, `wallCapacity: exclude`, `overlaySnap: panel-seam`
+- Geçerli seam: `getStandInternalSeamHeightsCm()` = strip index 1..stripCount-1 (50..300). 0 ve 350 yok.
+- Raf alt yüzeyi seam’de; overlay merkez = seam + thickness/2
+- Identity: exact `itemKey` → `getItem`; type/width/shelfCount tahmini yok
+- Yatay: wall-overlay pointer placement; raf sığdığı wall/panel support span içinde kalır (`shelf.widthCm <= host.widthCm`); host başlangıcına zorlanmaz
+- Drop yalnız geçerli seam’de
+
+### Sayılar
+
+kayıtlı Item 96; catalogVisible=true 58; gizli 38 (`VIDEO_WALL_PANEL` dahil); projection 58; COMPOSITE_ITEMS 28; BOM recipe 28; self BOM 12; shelf-showcase 5.
+
+---
+
 ## 2026-09-16 — wall_base composite Item kaldırıldı
 
 ### Kapsam

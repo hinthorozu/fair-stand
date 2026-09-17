@@ -22,6 +22,7 @@ test('shelf production Items use canonical identity and verified sunta dimension
     assert.equal(item.type, 'shelf');
     assert.equal(item.unit, 'adet');
     assert.deepEqual(item.dimensions, { lengthCm: widthCm, depthCm: 38, thicknessCm: 1.8 });
+    assert.deepEqual(item.sceneDimensions, { widthCm, heightCm: 1.8 });
     assert.equal(item.material, 'sunta');
     assert.equal(item.defaultColor, EXPECTED_COLOR);
     assert.equal(item.nominalModuleWidthCm, widthCm);
@@ -42,15 +43,21 @@ test('silinen wall_shelf parent recipes leaf shelf_* Item’lara artık bağlanm
 test('shelf renderer consumes canonical Item depth, thickness and default color while retaining explicit fit override', () => {
   const catalogSource = readFileSync(new URL('../src/catalog.js', import.meta.url), 'utf8');
   const rendererSource = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  const shelfRenderer = rendererSource.slice(
+    rendererSource.indexOf('function createShelfModule'),
+    rendererSource.indexOf('function resolveOccupiedStripLayout'),
+  );
 
   assert.doesNotMatch(catalogSource, /projectionCm:\s*38/);
   assert.doesNotMatch(catalogSource, /thicknessCm:\s*3/);
-  assert.match(rendererSource, /const shelfItem = getShelfLeafItem\(moduleState\.widthCm\)/);
-  assert.match(rendererSource, /shelfItem\.dimensions\.depthCm/);
-  assert.match(rendererSource, /shelfItem\.dimensions\.thicknessCm/);
-  assert.match(rendererSource, /color: shelfItem\.defaultColor/);
-  assert.match(rendererSource, /new THREE\.BoxGeometry\(innerWidthM, shelfThicknessM, shelfDepthM\)/);
-  assert.doesNotMatch(rendererSource, /color:\s*0xb8bcc1/);
-  assert.doesNotMatch(rendererSource, /const frontProfile = new THREE\.Mesh/);
-  assert.doesNotMatch(rendererSource, /new THREE\.BoxGeometry\(innerWidthM, 0\.025, 0\.025\)/);
+  assert.match(shelfRenderer, /const item = getItem\(moduleState\.itemKey\);/);
+  assert.doesNotMatch(shelfRenderer, /getShelfLeafItem/);
+  assert.match(shelfRenderer, /item\.dimensions\.depthCm/);
+  assert.match(shelfRenderer, /item\.dimensions\.thicknessCm/);
+  assert.match(shelfRenderer, /color: item\.defaultColor/);
+  assert.match(shelfRenderer, /new THREE\.BoxGeometry\(widthM, thicknessM, depthM\)/);
+  assert.doesNotMatch(shelfRenderer, /color:\s*0xb8bcc1/);
+  assert.doesNotMatch(shelfRenderer, /const frontProfile = new THREE\.Mesh/);
+  assert.doesNotMatch(shelfRenderer, /new THREE\.BoxGeometry\(innerWidthM, 0\.025, 0\.025\)/);
+  assert.doesNotMatch(shelfRenderer, /createFlatPanelModule/);
 });

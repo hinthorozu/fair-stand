@@ -40,8 +40,7 @@ function ensureStyles() {
     .module-drag-showcase { position:relative; height:68px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:#f7f7f5; box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-showcase::before { content:''; position:absolute; left:3px; right:3px; top:21px; bottom:10px; border:1px solid #9fbfa5; background:rgba(205,232,209,.5); }
     .module-drag-showcase[data-eyes='3']::after { content:''; position:absolute; left:4px; right:4px; top:42px; height:1px; background:#9fbfa5; }
-    .module-drag-shelf { position:relative; }
-    .module-drag-shelf i { position:absolute; left:-3px; right:-9px; height:4px; border:1px solid ${ALUMINUM_PROFILE_COLOR}; background:#fff; box-shadow:2px 2px 2px rgba(15,23,42,.14); pointer-events:none; }
+    .module-drag-shelf { height:8px; box-sizing:border-box; border:1px solid ${ALUMINUM_PROFILE_COLOR}; background:#fff; box-shadow:2px 2px 2px rgba(15,23,42,.14); border-radius:1px; }
     .module-drag-door { position:relative; height:68px; border:3px solid ${ALUMINUM_PROFILE_COLOR}; background:linear-gradient(to bottom,#f7f7f5 0 13%,#c4c9ce 13% 14%,#f7f7f5 14% 27%,#c4c9ce 27% 28%,#f7f7f5 28% 42%,${ALUMINUM_PROFILE_COLOR} 42% 45%,#e5e7eb 45% 100%); box-shadow:0 2px 5px rgba(15,23,42,.08); }
     .module-drag-door::after { content:''; position:absolute; right:3px; bottom:19px; width:3px; height:3px; border-radius:50%; background:#4b5563; }
     .module-drag-sofa { position:relative; width:58px; height:58px; }
@@ -146,17 +145,7 @@ function appendWidthBox(preview, className, widthCm, minWidthPx = 0) {
 
 export const CATALOG_PREVIEW_RENDERERS = Object.freeze({
   shelf(preview, module) {
-    const body = document.createElement('div');
-    body.className = 'module-drag-panel module-drag-shelf';
-    body.style.width = previewWidthPx(module.widthCm) + 'px';
-    for (let index = 0; index < 7; index += 1) body.appendChild(document.createElement('span'));
-    const tops = [47, 37];
-    tops.forEach((top) => {
-      const shelf = document.createElement('i');
-      shelf.style.top = top + 'px';
-      body.appendChild(shelf);
-    });
-    preview.appendChild(body);
+    appendWidthBox(preview, 'module-drag-shelf', module.widthCm);
   },
   'sofa-set'(preview) { appendSimple(preview, 'module-drag-sofa'); },
   'sofa-single'(preview) { appendSimple(preview, 'module-drag-sofa-single'); },

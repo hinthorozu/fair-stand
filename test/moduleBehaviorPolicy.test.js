@@ -17,6 +17,7 @@ import {
   usesLogicalFixtureEndpoint,
   usesWallBackboneCollisionDepth,
   usesWallInnerFaceBoundary,
+  usesPanelSeamOverlaySnap,
 } from '../src/moduleBehavior.js';
 
 test('F-011 special placement policies are declared by the canonical behavior contract', () => {
@@ -52,7 +53,7 @@ test('F-011 special placement policies are declared by the canonical behavior co
 
   assert.equal(supportsWallOverlayMount('flat-panel'), true);
   assert.equal(supportsWallOverlayMount('base-wall'), true);
-  assert.equal(supportsWallOverlayMount('shelf'), true);
+  assert.equal(supportsWallOverlayMount('shelf'), false);
   assert.equal(supportsWallOverlayMount('door'), true);
   assert.equal(supportsWallOverlayMount('showcase-2'), true);
   assert.equal(supportsWallOverlayMount('showcase-3'), true);
@@ -60,9 +61,14 @@ test('F-011 special placement policies are declared by the canonical behavior co
   assert.equal(supportsWallOverlayMount('counter'), false);
 
   assert.equal(countsTowardWallCapacity('led-floodlight'), false);
+  assert.equal(countsTowardWallCapacity('shelf'), false);
   assert.equal(countsTowardWallCapacity('flat-panel'), true);
   assert.equal(isTopPlacementModule('led-floodlight'), true);
   assert.equal(isTopPlacementModule('flat-panel'), false);
+  assert.equal(usesPanelSeamOverlaySnap('shelf'), true);
+  assert.equal(usesPanelSeamOverlaySnap('tv'), false);
+  assert.equal(getModuleBehavior('shelf').placement, 'wall-overlay');
+  assert.equal(getModuleBehavior('shelf').overlaySnap, 'panel-seam');
 
   assert.equal(resolveSideInsertRotationDeg('bar-stool', 90), 270);
   assert.equal(resolveSideInsertRotationDeg('counter', 90), 90);

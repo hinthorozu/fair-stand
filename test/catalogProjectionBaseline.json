@@ -1,5 +1,5 @@
 {
-  "generatedFrom": "listCatalogItems after sceneDimensions",
+  "generatedFrom": "listCatalogItems after shelf catalog-visible",
   "keys": [
     "wall_200",
     "wall_150",
@@ -25,6 +25,9 @@
     "profile_41_5",
     "wall_showcase_100_3",
     "wall_showcase_100_2",
+    "shelf_100",
+    "shelf_150",
+    "shelf_200",
     "desk_banko_200",
     "desk_banko_150",
     "desk_banko_100",
@@ -100,7 +103,10 @@
       "catalogIndex": 3,
       "keys": [
         "wall_showcase_100_3",
-        "wall_showcase_100_2"
+        "wall_showcase_100_2",
+        "shelf_100",
+        "shelf_150",
+        "shelf_200"
       ]
     },
     {
@@ -384,6 +390,30 @@
       "heightCm": 350,
       "type": "showcase-2",
       "eyeCount": 2
+    },
+    {
+      "itemKey": "shelf_100",
+      "label": "Raf 100 cm",
+      "widthCm": 100,
+      "depthCm": 38,
+      "heightCm": 1.8,
+      "type": "shelf"
+    },
+    {
+      "itemKey": "shelf_150",
+      "label": "Raf 150 cm",
+      "widthCm": 150,
+      "depthCm": 38,
+      "heightCm": 1.8,
+      "type": "shelf"
+    },
+    {
+      "itemKey": "shelf_200",
+      "label": "Raf 200 cm",
+      "widthCm": 200,
+      "depthCm": 38,
+      "heightCm": 1.8,
+      "type": "shelf"
     },
     {
       "itemKey": "desk_banko_200",

@@ -14,6 +14,7 @@ import {
   usesWallBackboneCollisionDepth,
   usesWallInnerFaceBoundary,
 } from './moduleBehavior.js';
+import { getStandInternalSeamHeightsCm, getStandStripMetrics } from './stripOccupancy.js';
 
 export const MODULE_PLACEMENT_SNAP_CM = 50;
 export const MODULE_PLACEMENT_ROTATIONS = Object.freeze([0, 45, 90, 135, 180, 225, 270, 315]);
@@ -168,6 +169,242 @@ export function clampWallOverlayZCm(
   const value = Number.isFinite(snapped) ? snapped : Number(rawOffsetCm);
   if (!Number.isFinite(value)) return 0;
   return Math.min(maxZCm, Math.max(minZCm, value));
+}
+
+export function getPanelSeamSnapWindowCm() {
+  return getStandStripMetrics().stripHeightCm / 4;
+}
+
+export function overlayZCmFromSeamHeight(seamHeightCm, thicknessCm) {
+  return Number(seamHeightCm) + Number(thicknessCm) / 2 - WALL_OVERLAY_DEFAULT_CENTER_CM;
+}
+
+export function listInternalSeamsInOccupancyRange(occupancyRange) {
+  const minCm = Number(occupancyRange?.minCm);
+  const maxCm = Number(occupancyRange?.maxCm);
+  return getStandInternalSeamHeightsCm().filter((seam) => (
+    Number.isFinite(minCm)
+    && Number.isFinite(maxCm)
+    && seam > minCm
+    && seam < maxCm
+  ));
+}
+
+function listFittingWallCapacityHosts({
+  modules = [],
+  widthCm,
+  wallId,
+  supportModuleId = null,
+} = {}) {
+  const width = Number(widthCm);
+  if (!Number.isFinite(width) || width <= 0) return [];
+  return modules.filter((module) => {
+    if (!countsTowardWallCapacity(module)) return false;
+    const hostWidth = Number(module.widthCm);
+    if (!Number.isFinite(hostWidth) || hostWidth + EPSILON_CM < width) return false;
+    if (supportModuleId) return module.id === supportModuleId;
+    return module?.placement?.wallId === wallId;
+  });
+}
+
+function pointerOnHostSpan(wallPoint, host) {
+  const hostInterval = getPlacementInterval(host?.placement, host?.widthCm);
+  if (!hostInterval) return false;
+  const pointerCm = hostInterval.axis === 'y'
+    ? Number(wallPoint?.pointerYCm)
+    : Number(wallPoint?.pointerXCm);
+  if (!Number.isFinite(pointerCm)) return false;
+  return pointerCm >= hostInterval.startCm - EPSILON_CM
+    && pointerCm <= hostInterval.endCm + EPSILON_CM;
+}
+
+function clampPlacementToHost(placement, widthCm, host) {
+  const interval = getPlacementInterval(placement, widthCm);
+  const hostInterval = getPlacementInterval(host?.placement, host?.widthCm);
+  if (!interval || !hostInterval || interval.axis !== hostInterval.axis) return null;
+  const maxStart = hostInterval.endCm - Number(widthCm);
+  if (maxStart + EPSILON_CM < hostInterval.startCm) return null;
+  const nextStart = clamp(interval.startCm, hostInterval.startCm, maxStart);
+  return createModulePlacement({
+    ...placement,
+    xCm: interval.axis === 'x' ? nextStart : placement.xCm,
+    yCm: interval.axis === 'y' ? nextStart : placement.yCm,
+  });
+}
+
+function placementFitsHost(placement, widthCm, host) {
+  const inner = getPlacementInterval(placement, widthCm);
+  const outer = getPlacementInterval(host?.placement, host?.widthCm);
+  if (!inner || !outer || inner.axis !== outer.axis) return false;
+  return inner.startCm >= outer.startCm - EPSILON_CM
+    && inner.endCm <= outer.endCm + EPSILON_CM;
+}
+
+function pointerDistanceToHostCm(wallPoint, host) {
+  const center = getPlacementCenterCm(host.placement, host.widthCm);
+  if (!center) return Number.POSITIVE_INFINITY;
+  const pointerX = Number(wallPoint?.pointerXCm);
+  const pointerY = Number(wallPoint?.pointerYCm);
+  if (![pointerX, pointerY].every(Number.isFinite)) return Number.POSITIVE_INFINITY;
+  return Math.hypot(pointerX - center.xCm, pointerY - center.yCm);
+}
+
+function overlayPlacementFromPointer(moduleState, wallPoint) {
+  const widthCm = Number(moduleState?.widthCm);
+  const heightCm = Number(moduleState?.heightCm);
+  const pointerX = Number(wallPoint?.pointerXCm);
+  const pointerY = Number(wallPoint?.pointerYCm);
+  const rotationZDeg = Number(wallPoint?.rotationZDeg) || 0;
+  const vertical = isVerticalModuleRotation(rotationZDeg);
+  const hitHeightCm = Number(wallPoint?.absoluteHeightCm);
+  const zCm = Number.isFinite(hitHeightCm)
+    ? hitHeightCm - WALL_OVERLAY_DEFAULT_CENTER_CM
+    : Number(wallPoint?.zCm) || 0;
+  return createModulePlacement({
+    xCm: vertical ? pointerX : pointerX - widthCm / 2,
+    yCm: vertical ? pointerY - widthCm / 2 : pointerY,
+    zCm,
+    rotationZDeg,
+    wallId: wallPoint?.wallId ?? 'back',
+  });
+}
+
+export function snapPanelSeamOverlayPlacement({
+  moduleState,
+  wallPoint,
+  modules = [],
+} = {}) {
+  const widthCm = Number(moduleState?.widthCm);
+  const heightCm = Number(moduleState?.heightCm);
+  const hitHeightCm = Number(wallPoint?.absoluteHeightCm);
+  const fallback = overlayPlacementFromPointer(moduleState, wallPoint);
+  const invalidMessage = 'Rafı iki panel arasındaki birleşime bırak.';
+  const missingHostMessage = 'Rafı sığdığı duvar veya panel üzerine bırak.';
+
+  if (
+    !wallPoint
+    || !Number.isFinite(widthCm)
+    || widthCm <= 0
+    || !Number.isFinite(heightCm)
+    || heightCm <= 0
+  ) {
+    return { ok: false, placement: fallback, seamHeightCm: null, message: missingHostMessage };
+  }
+
+  const hosts = listFittingWallCapacityHosts({
+    modules,
+    widthCm,
+    wallId: wallPoint.wallId,
+    supportModuleId: wallPoint.supportModuleId ?? null,
+  });
+  let target = null;
+  let bestHostDistance = Number.POSITIVE_INFINITY;
+  for (const host of hosts) {
+    if (!pointerOnHostSpan(wallPoint, host)) continue;
+    const distance = pointerDistanceToHostCm(wallPoint, host);
+    if (distance < bestHostDistance) {
+      bestHostDistance = distance;
+      target = host;
+    }
+  }
+
+  const clamped = target ? clampPlacementToHost(fallback, widthCm, target) : null;
+  if (!target?.placement || !clamped) {
+    return { ok: false, placement: fallback, seamHeightCm: null, message: missingHostMessage };
+  }
+
+  const occupancyRange = getModuleCollisionHeightRangeCm(target);
+  const validSeams = listInternalSeamsInOccupancyRange(occupancyRange);
+
+  let seamHeightCm = null;
+  let seamDistanceCm = Number.POSITIVE_INFINITY;
+  if (Number.isFinite(hitHeightCm)) {
+    for (const seam of validSeams) {
+      const distance = Math.abs(hitHeightCm - seam);
+      if (distance < seamDistanceCm) {
+        seamDistanceCm = distance;
+        seamHeightCm = seam;
+      }
+    }
+  }
+
+  const windowCm = getPanelSeamSnapWindowCm();
+  const snapped = Boolean(
+    seamHeightCm != null
+    && Number.isFinite(seamDistanceCm)
+    && seamDistanceCm <= windowCm,
+  );
+
+  const placement = createModulePlacement({
+    ...clamped,
+    zCm: snapped
+      ? overlayZCmFromSeamHeight(seamHeightCm, heightCm)
+      : (Number.isFinite(hitHeightCm)
+        ? hitHeightCm - WALL_OVERLAY_DEFAULT_CENTER_CM
+        : overlayZCmFromSeamHeight(validSeams[0] ?? 0, heightCm)),
+  });
+
+  return {
+    ok: snapped,
+    placement,
+    seamHeightCm: snapped ? seamHeightCm : null,
+    message: snapped ? null : invalidMessage,
+  };
+}
+
+export function stepPanelSeamOverlayPlacement({
+  moduleState,
+  modules = [],
+  seamDelta = 0,
+  horizontalDeltaCm = 0,
+} = {}) {
+  const widthCm = Number(moduleState?.widthCm);
+  const heightCm = Number(moduleState?.heightCm);
+  const placement = moduleState?.placement;
+  if (!placement || !Number.isFinite(widthCm) || !Number.isFinite(heightCm)) return null;
+
+  const hosts = listFittingWallCapacityHosts({
+    modules,
+    widthCm,
+    wallId: placement.wallId,
+    supportModuleId: placement.supportModuleId ?? null,
+  });
+  const target = hosts.find((host) => placementFitsHost(placement, widthCm, host)) ?? null;
+  if (!target) return null;
+
+  if (Number(horizontalDeltaCm)) {
+    const interval = getPlacementInterval(placement, widthCm);
+    const hostInterval = getPlacementInterval(target.placement, target.widthCm);
+    if (!interval || !hostInterval || interval.axis !== hostInterval.axis) return null;
+    const maxStart = hostInterval.endCm - widthCm;
+    const nextStart = clamp(interval.startCm + Number(horizontalDeltaCm), hostInterval.startCm, maxStart);
+    if (!Number.isFinite(nextStart) || nearlyEqual(nextStart, interval.startCm)) return null;
+    return createModulePlacement({
+      ...placement,
+      xCm: interval.axis === 'x' ? nextStart : placement.xCm,
+      yCm: interval.axis === 'y' ? nextStart : placement.yCm,
+    });
+  }
+
+  const validSeams = listInternalSeamsInOccupancyRange(getModuleCollisionHeightRangeCm(target));
+  if (!validSeams.length) return null;
+
+  const currentBottomCm = Number(placement.zCm) + WALL_OVERLAY_DEFAULT_CENTER_CM - heightCm / 2;
+  let index = validSeams.findIndex((seam) => nearlyEqual(seam, currentBottomCm));
+  if (index < 0) {
+    index = validSeams.reduce((bestIndex, seam, seamIndex) => (
+      Math.abs(seam - currentBottomCm) < Math.abs(validSeams[bestIndex] - currentBottomCm)
+        ? seamIndex
+        : bestIndex
+    ), 0);
+  }
+  const nextIndex = index + Number(seamDelta);
+  if (nextIndex < 0 || nextIndex >= validSeams.length) return null;
+
+  return createModulePlacement({
+    ...placement,
+    zCm: overlayZCmFromSeamHeight(validSeams[nextIndex], heightCm),
+  });
 }
 
 export function getModulePlacementSnapCm(moduleType) {

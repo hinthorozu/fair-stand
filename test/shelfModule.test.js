@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { MODULE_CATALOG, SHELF_DIMENSIONS } from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 import { snapPlacementToStand } from '../src/modulePlacement.js';
-import { getShelfLeafItem, getItem } from '../src/items.js';
+import { getItem } from '../src/items.js';
 
 test('wall_shelf catalog kayıtları yoktur; leaf shelf_* durur', () => {
   for (const itemKey of [
@@ -15,16 +15,19 @@ test('wall_shelf catalog kayıtları yoktur; leaf shelf_* durur', () => {
     assert.equal(getItem(itemKey), null, itemKey);
   }
 
-  assert.equal(getShelfLeafItem(100).itemKey, 'shelf_100');
-  assert.equal(getShelfLeafItem(150).itemKey, 'shelf_150');
-  assert.equal(getShelfLeafItem(200).itemKey, 'shelf_200');
+  assert.equal(getItem('shelf_100').itemKey, 'shelf_100');
+  assert.equal(getItem('shelf_150').itemKey, 'shelf_150');
+  assert.equal(getItem('shelf_200').itemKey, 'shelf_200');
   assert.equal(createModuleStateFromDescriptor({ type: 'shelf', widthCm: 100 }), null);
+  const state = createModuleStateFromDescriptor({ itemKey: 'shelf_100', type: 'shelf' });
+  assert.equal(state.itemKey, 'shelf_100');
+  assert.equal(state.type, 'shelf');
 });
 
 test('shelf heights sit on Maxima 50 cm panel seams', () => {
   assert.deepEqual(SHELF_DIMENSIONS.heightsByCountCm[2], [100, 150]);
   assert.equal(Object.hasOwn(SHELF_DIMENSIONS.heightsByCountCm, '3'), false);
-  assert.equal(getShelfLeafItem(100).dimensions.depthCm, 38);
+  assert.equal(getItem('shelf_100').dimensions.depthCm, 38);
   assert.equal('projectionCm' in SHELF_DIMENSIONS, false);
   assert.equal('thicknessCm' in SHELF_DIMENSIONS, false);
 });

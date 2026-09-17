@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 
-test('wall_shelf factory kaldırıldı; leaf shelf state üretmez', () => {
-  assert.equal(createModuleStateFromDescriptor({ type: 'shelf', widthCm: 100 }), null);
+test('shelf lighting toggle remains on standalone leaf shelf state', () => {
+  const state = createModuleStateFromDescriptor({ itemKey: 'shelf_100', type: 'shelf' });
+  assert.equal(state.shelfLightingOn, false);
   const factorySource = readFileSync(new URL('../src/designState.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(factorySource, /createShelfModuleState/);
+  assert.match(factorySource, /createShelfModuleState/);
   assert.doesNotMatch(factorySource, /shelfCount/);
 });
 
@@ -14,7 +15,7 @@ test('shelf renderer adds lights without changing shelf box geometry', () => {
   const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(source, /const shelfLightingOn = Boolean\(moduleState\.shelfLightingOn\)/);
   assert.match(source, /new THREE\.SpotLight\(/);
-  assert.match(source, /const spotOffsets = \[-innerWidthM \* 0\.25, innerWidthM \* 0\.25\]/);
+  assert.match(source, /const spotOffsets = \[-widthM \* 0\.25, widthM \* 0\.25\]/);
   assert.match(source, /spotOffsets\.forEach\(\(spotX\) =>/);
   assert.match(source, /shelf-under-led-strip/);
   assert.match(source, /emissive: 0xffe3bd/);
@@ -29,7 +30,7 @@ test('shelf renderer adds lights without changing shelf box geometry', () => {
   assert.doesNotMatch(source, /shelf-under-front-glow/);
   assert.doesNotMatch(source, /const frontProfile = new THREE\.Mesh/);
   assert.doesNotMatch(source, /new THREE\.BoxGeometry\(innerWidthM, 0\.025, 0\.025\)/);
-  assert.match(source, /new THREE\.BoxGeometry\(innerWidthM, shelfThicknessM, shelfDepthM\)/);
+  assert.match(source, /new THREE\.BoxGeometry\(widthM, thicknessM, depthM\)/);
 });
 
 test('shelf lighting toggle is available only from shelf context', () => {

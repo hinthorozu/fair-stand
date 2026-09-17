@@ -10,6 +10,15 @@ export function getStandStripMetrics() {
   });
 }
 
+export function getStandInternalSeamHeightsCm() {
+  const { stripCount, stripHeightCm } = getStandStripMetrics();
+  const seams = [];
+  for (let index = 1; index < stripCount; index += 1) {
+    seams.push(index * stripHeightCm);
+  }
+  return Object.freeze(seams);
+}
+
 export function normalizeStripOccupancy(occupancy) {
   if (!occupancy || typeof occupancy !== 'object') return null;
   const stripCount = Number(occupancy.stripCount);

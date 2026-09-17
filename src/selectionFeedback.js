@@ -65,7 +65,7 @@ export function describeSurfaceSelection(surfaces, modules = []) {
     }
 
     if (moduleType === 'shelf') {
-      return result('Modül ' + (moduleIndex + 1) + ' · Raf ' + widthCm + ' cm · alttan ' + stripNumber + '. panel · renk + görsel uygulanabilir.');
+      return result('Modül ' + (moduleIndex + 1) + ' · Raf ' + widthCm + ' cm.');
     }
 
     if (moduleType === 'sofa-set-classic') {

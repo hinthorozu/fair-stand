@@ -88,7 +88,10 @@ const TYPE_BEHAVIORS = Object.freeze({
   'flat-panel': WALL_BEHAVIOR,
   'showcase-3': WALL_BEHAVIOR,
   'showcase-2': WALL_BEHAVIOR,
-  shelf: WALL_BEHAVIOR,
+  shelf: overlayBehavior({
+    wallCapacity: 'exclude',
+    overlaySnap: 'panel-seam',
+  }),
   door: WALL_BEHAVIOR,
   'base-wall': Object.freeze({
     ...WALL_BEHAVIOR,
@@ -355,4 +358,8 @@ export function isTopPlacementModule(moduleOrType) {
 
 export function isWallOverlayModule(moduleOrType) {
   return getModuleBehavior(moduleOrType).placement === 'wall-overlay';
+}
+
+export function usesPanelSeamOverlaySnap(moduleOrType) {
+  return getModuleBehavior(moduleOrType).overlaySnap === 'panel-seam';
 }
