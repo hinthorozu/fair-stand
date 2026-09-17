@@ -8,7 +8,7 @@ import {
 } from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
-import { isShortUpFamilyDescriptor } from '../src/items.js';
+import { isShortUpFamilyDescriptor, getItem, resolveSceneDimensions } from '../src/items.js';
 import { getModuleMagneticSnapStrategy, requiresShortUpJointSnap } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { snapPlacementToModules } from '../src/modulePlacement.js';
@@ -41,10 +41,11 @@ test('Panel Ek Modül holds short-up family and field upright_346_5', () => {
 
 test('field upright_346_5 is self BOM ×1 and does not change parent wall recipe ×2', () => {
   assert.equal(getCatalogItem('upright_346_5').itemKey, 'upright_346_5');
-  assert.equal(getCatalogItem('upright_346_5').type, 'upright');
-  assert.equal(getCatalogItem('upright_346_5').widthCm, 8);
-  assert.equal(getCatalogItem('upright_346_5').depthCm, 8);
-  assert.equal(getCatalogItem('upright_346_5').heightCm, 346.5);
+  assert.equal(getItem('upright_346_5').type, 'upright');
+  const uprightScene = resolveSceneDimensions(getItem('upright_346_5'));
+  assert.equal(uprightScene.widthCm, 8);
+  assert.equal(uprightScene.depthCm, 8);
+  assert.equal(uprightScene.heightCm, 346.5);
   assert.equal(resolveModuleContract('upright_346_5').bom.mode, 'self');
   const bom = resolveItemBom('upright_346_5');
   assert.equal(bom.length, 1);

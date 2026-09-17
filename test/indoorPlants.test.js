@@ -11,14 +11,8 @@ import { getModuleBehavior } from '../src/moduleBehavior.js';
 test('Yapay Çiçek 1 is the only active artificial plant inside Extra', () => {
   assert.deepEqual(getCatalogItem('EXTRA_INDOOR_PLANT_1'), {
     itemKey: 'EXTRA_INDOOR_PLANT_1',
-    type: 'indoor-plant-1',
     label: 'Yapay Çiçek 1',
     catalogPreview: 'indoor-plant',
-    widthCm: 60,
-    depthCm: 60,
-    heightCm: 120,
-    modelRotationYDeg: 0,
-    preserveModelScale: false,
   });
   assert.equal(getCatalogItem('EXTRA_INDOOR_PLANT_2'), null);
   const extra = listCatalogGroups().find((group) => group.label === 'Extra');

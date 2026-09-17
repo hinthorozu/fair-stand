@@ -42,13 +42,10 @@ test('plastic trash bin is a canonical 40x40x60 fixed-model catalog module', () 
   const descriptor = getCatalogItem(KEY);
   assert.ok(descriptor);
   assert.equal(descriptor.label, 'Çöp Kutusu');
-  assert.equal(descriptor.type, 'plastic-trash-bin');
-  assert.deepEqual(
-    [descriptor.widthCm, descriptor.depthCm, descriptor.heightCm],
-    [40, 40, 60],
-  );
-  assert.equal(descriptor.modelFile, MODEL_FILE);
-  assert.equal(descriptor.preserveModelScale, false);
+  assert.equal(descriptor.catalogPreview, 'plastic-trash-bin');
+  assert.equal(Object.hasOwn(descriptor, 'type'), false);
+  assert.equal(Object.hasOwn(descriptor, 'widthCm'), false);
+  assert.equal(Object.hasOwn(descriptor, 'modelFile'), false);
   assert.equal(existsSync(new URL(`../public/models/${MODEL_FILE}`, import.meta.url)), true);
 
   const extraGroup = listCatalogGroups().find((group) => group.label === 'Extra');
@@ -59,7 +56,7 @@ test('plastic trash bin is a canonical 40x40x60 fixed-model catalog module', () 
   );
 
   assert.equal(resolveItemKey({
-    type: descriptor.type,
+    type: 'plastic-trash-bin',
     widthCm: 40,
     depthCm: 40,
     modelFile: MODEL_FILE,

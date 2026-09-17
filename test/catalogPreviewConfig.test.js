@@ -188,10 +188,11 @@ test('58 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
     const root = tree.children[0];
     assert.ok(root, module.itemKey);
     let expected = ROOT_CLASS_BY_PREVIEW[module.catalogPreview];
-    if (module.catalogPreview === 'flat-panel' && module.stripOccupancy?.align === 'top') {
+    const item = getItem(module.itemKey);
+    if (module.catalogPreview === 'flat-panel' && item.stripOccupancy?.align === 'top') {
       expected = 'module-drag-panel is-hanging-top';
     }
-    if (module.catalogPreview === 'video-wall' && Number(module.videoWallRows) === 3) {
+    if (module.catalogPreview === 'video-wall' && Number(item.videoWall?.rows) === 3) {
       expected = 'module-drag-tv is-video-wall is-video-wall-3x3';
     }
     assert.equal(root.className, expected, module.itemKey);

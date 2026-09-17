@@ -13,7 +13,7 @@ import {
   hasExplicitModuleContract,
   resolveModuleContract,
 } from '../src/moduleContracts.js';
-import { getCommercialItemForType } from '../src/items.js';
+import { getCommercialItemForType, getItem, resolveSceneDimensions } from '../src/items.js';
 import { composeAutomaticStandWall } from '../src/automaticWall.js';
 import { FEATURE_CONTRACTS, getFeatureContract } from '../src/featureContracts.js';
 
@@ -68,9 +68,10 @@ test('recipe-backed module contracts resolve an actual canonical recipe', () => 
     const contract = resolveModuleContract(moduleKey);
     if (contract?.bom?.mode !== 'recipe') continue;
 
-    const descriptor = getCatalogItem(moduleKey);
-    const recipe = getModuleRecipe(descriptor.type, descriptor.widthCm, {
-      shape: descriptor.shape,
+    const item = getItem(moduleKey);
+    const scene = resolveSceneDimensions(item);
+    const recipe = getModuleRecipe(item.type, scene.widthCm, {
+      shape: item.shape,
     });
 
     assert.ok(recipe, `${moduleKey} declares recipe BOM but no canonical recipe resolves`);

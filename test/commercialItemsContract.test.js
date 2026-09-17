@@ -15,12 +15,13 @@ for (const item of Object.values(COMMERCIAL_ITEMS)) {
     const catalog = getCatalogItem(item.itemKey);
     assert.equal(catalog.itemKey, item.itemKey);
     assert.equal(catalog.label, item.name);
-    assert.equal(catalog.modelFile, item.modelFile);
+    assert.equal(catalog.catalogPreview, item.catalogPreview);
+    assert.equal(Object.hasOwn(catalog, 'modelFile'), false);
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, item.itemKey);
     assert.equal(state.itemKey, item.itemKey);
     for (const [key, value] of Object.entries(item.dimensions)) {
-      assert.equal(catalog[key], value);
+      assert.equal(Object.hasOwn(catalog, key), false);
       assert.equal(state[key], value);
     }
     state.placement = { xCm: 80, yCm: 90, zCm: 0, rotationZDeg: 90, wallId: 'free' };

@@ -9,11 +9,9 @@ import { createBarStoolModuleState } from '../src/designState.js';
 test('Bar Taburesi katalog ve state kimliği sabittir', () => {
   const item = getCatalogItem('furniture_bar_stool_classic');
   assert.ok(item);
-  assert.equal(item.type, 'bar-stool');
   assert.equal(item.label, 'Bar Taburesi');
-  assert.equal(item.widthCm, 60);
-  assert.equal(item.depthCm, 55);
-  assert.equal(item.heightCm, 121);
+  assert.equal(item.catalogPreview, 'bar-stool');
+  assert.equal(Object.hasOwn(item, 'type'), false);
   assert.ok(getCatalogItem('furniture_bar_stool_classic') != null);
 
   const state = createBarStoolModuleState();

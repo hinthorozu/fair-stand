@@ -7,6 +7,16 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-17 — Catalog kartı ince projection
+
+### Kapsam
+
+`getCatalogItem` / `listCatalogItems` yalnız `{ itemKey, label, catalogPreview }` döner. Factory DTO Catalog’da yoktur. `createModuleStateFromDescriptor` Item’ı `resolveItemKey` + `getItem` ile çözer; sahne ölçüleri `resolveSceneDimensions`. Catalog preview silüeti `moduleDragSidebar.js` içinde Item’dan hydrate edilir.
+
+Dokunulmayan: `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS` allowlist, 58 üye ve kategori sırası, Item satırları, recipe/BOM, `STAND_DIMENSIONS` / `MODULE_WIDTHS_CM`.
+
+---
+
 ## 2026-09-17 — MODULE_CATALOG snapshot export kalktı
 
 ### Kapsam

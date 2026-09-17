@@ -54,9 +54,9 @@ test('legacy uppercase DOOR_100 catalog identity is removed', () => {
 
   const catalogItem = getCatalogItem('door_100');
   assert.equal(catalogItem.itemKey, 'door_100');
-  assert.equal(catalogItem.type, 'door');
-  assert.equal(catalogItem.widthCm, 100);
   assert.equal(catalogItem.label, 'Depo Kapısı 100');
+  assert.equal(getItem('door_100').type, 'door');
+  assert.equal(getItem('door_100').dimensions.widthCm, 100);
 });
 
 test('door_100 composition delegates quantities to the existing canonical recipe', () => {

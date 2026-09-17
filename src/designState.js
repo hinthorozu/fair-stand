@@ -32,6 +32,31 @@ function createId(prefix) {
   return `${prefix}-${suffix}`;
 }
 
+function factoryDescriptorFromItem(item) {
+  const scene = resolveSceneDimensions(item);
+  const descriptor = {
+    itemKey: item.itemKey,
+    type: item.type,
+  };
+  if (scene.widthCm != null) descriptor.widthCm = scene.widthCm;
+  if (scene.depthCm != null) descriptor.depthCm = scene.depthCm;
+  if (scene.heightCm != null) descriptor.heightCm = scene.heightCm;
+  if (item.videoWall) {
+    descriptor.videoWallRows = item.videoWall.rows;
+    descriptor.videoWallCols = item.videoWall.cols;
+  }
+  if (item.variant) descriptor.variant = item.variant;
+  if (item.stripOccupancy) descriptor.stripOccupancy = item.stripOccupancy;
+  if (item.eyeCount != null) descriptor.eyeCount = item.eyeCount;
+  if (item.shape === 'L') descriptor.shape = 'L';
+  if (item.modelFile) descriptor.modelFile = item.modelFile;
+  if (item.modelRotationYDeg != null) descriptor.modelRotationYDeg = item.modelRotationYDeg;
+  if (item.preserveModelScale != null) descriptor.preserveModelScale = item.preserveModelScale;
+  if (item.unit != null) descriptor.unit = item.unit;
+  if (item.visualRotationYDeg != null) descriptor.visualRotationYDeg = item.visualRotationYDeg;
+  return descriptor;
+}
+
 function applySceneFootprint(state, item, requiredFields = []) {
   const scene = resolveSceneDimensions(item);
   for (const field of requiredFields) {
@@ -565,17 +590,26 @@ export function createModuleStateFromDescriptor(
   { itemKey = null, preservePlacement = false, imageAssetId = null } = {},
 ) {
   if (!descriptor || typeof descriptor !== 'object' || Array.isArray(descriptor)) return null;
-  const factory = MODULE_STATE_FACTORIES[descriptor.type];
-  if (!factory) return null;
-
-  const state = factory(descriptor, { imageAssetId });
-  if (!state) return null;
 
   const resolvedItemKey = resolveItemKey({
     ...descriptor,
-    itemKey: itemKey ?? descriptor.itemKey ?? state.itemKey ?? null,
+    itemKey: itemKey ?? descriptor.itemKey ?? null,
   });
-  if (resolvedItemKey) state.itemKey = resolvedItemKey;
+  const item = resolvedItemKey ? getItem(resolvedItemKey) : null;
+  const merged = item
+    ? Object.assign({}, factoryDescriptorFromItem(item), descriptor, {
+      itemKey: item.itemKey,
+      type: item.type,
+    })
+    : { ...descriptor };
+
+  const factory = MODULE_STATE_FACTORIES[merged.type];
+  if (!factory) return null;
+
+  const state = factory(merged, { imageAssetId });
+  if (!state) return null;
+
+  if (item) state.itemKey = item.itemKey;
 
   if (preservePlacement && descriptor.placement) {
     state.placement = { ...descriptor.placement };

@@ -9,10 +9,11 @@ import {
   getModuleBehavior,
   hasExplicitModuleBehavior,
 } from '../src/moduleBehavior.js';
+import { getItem } from '../src/items.js';
 
 test('every catalog module type has an explicit behavior contract', () => {
   const catalogTypes = [...new Set(
-    listCatalogItems().map((item) => item.itemKey).map((moduleKey) => getCatalogItem(moduleKey)?.type),
+    listCatalogItems().map((item) => item.itemKey).map((moduleKey) => getItem(moduleKey)?.type),
   )].filter(Boolean);
 
   const missingTypes = catalogTypes.filter((type) => !hasExplicitModuleBehavior(type));
@@ -73,8 +74,8 @@ test('every declared catalog behavior exposes the complete placement policy sche
   ];
 
   for (const moduleKey of listCatalogItems().map((item) => item.itemKey)) {
-    const descriptor = getCatalogItem(moduleKey);
-    const behavior = getModuleBehavior({ ...descriptor, itemKey: moduleKey });
+    const item = getItem(moduleKey);
+    const behavior = getModuleBehavior({ itemKey: moduleKey, type: item.type });
     for (const key of requiredKeys) {
       assert.equal(Object.hasOwn(behavior, key), true, `${moduleKey}: missing ${key}`);
     }

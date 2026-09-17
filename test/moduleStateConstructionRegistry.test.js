@@ -6,6 +6,7 @@ import {
   listCatalogItems,
 } from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
+import { getItem } from '../src/items.js';
 
 test('canonical state construction registry instantiates every catalog entry', () => {
   assert.equal(listCatalogItems().map((item) => item.itemKey).length, 58);
@@ -14,7 +15,7 @@ test('canonical state construction registry instantiates every catalog entry', (
     const descriptor = getCatalogItem(itemKey);
     const state = createModuleStateFromDescriptor(descriptor);
     assert.ok(state, `${itemKey} must resolve to a runtime module state`);
-    assert.equal(state.type, descriptor.type, `${itemKey} type must be preserved`);
+    assert.equal(state.type, getItem(itemKey).type, `${itemKey} type must come from Item`);
     assert.equal(state.itemKey, itemKey, `${itemKey} identity must be attached automatically by the canonical constructor`);
     assert.equal(Object.hasOwn(state, 'catalogKey'), false, `${itemKey} must not write a second product identity`);
   }

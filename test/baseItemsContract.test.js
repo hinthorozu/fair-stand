@@ -58,10 +58,9 @@ for (const itemKey of BASE_KEYS) {
 
     assert.equal(catalog.itemKey, itemKey);
     assert.equal(catalog.label, item.name);
-    assert.equal(catalog.type, 'base');
-    assert.equal(catalog.widthCm, expected.widthCm);
-    assert.equal(catalog.depthCm, 50);
-    assert.equal(catalog.heightCm, 50);
+    assert.equal(catalog.catalogPreview, item.catalogPreview);
+    assert.equal(Object.hasOwn(catalog, 'type'), false);
+    assert.equal(Object.hasOwn(catalog, 'widthCm'), false);
 
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, itemKey);

@@ -1,12 +1,12 @@
 {
   "schemaVersion": 2,
-  "id": "module-catalog-snapshot-export-removed",
+  "id": "catalog-thin-projection",
   "kind": "architecture",
-  "summary": "MODULE_CATALOG / KEYS / GROUPS export kalktı. Testler getCatalogItem / listCatalogItems / listCatalogGroups. MODULE_WIDTHS_CM standDimensions. resolveItemKey items.js.",
+  "summary": "Catalog kartı yalnız itemKey / label / catalogPreview. Factory ve preview silüeti Item + resolveSceneDimensions.",
   "owners": [
     "src/catalog.js",
-    "src/standDimensions.js",
-    "src/items.js"
+    "src/designState.js",
+    "src/moduleDragSidebar.js"
   ],
   "sourceOfTruth": [
     "src/catalog.js"
