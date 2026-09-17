@@ -16,11 +16,11 @@ test('glass_table katalog ve state kimliği sabittir', () => {
   assert.equal(item.name, 'Cam Masa');
   assert.equal(item.dimensions.widthCm, 75);
   assert.equal(item.dimensions.depthCm, 75);
-  assert.equal(catalog.type, 'table-glass');
+  assert.equal(catalog.type, undefined);
   assert.equal(catalog.label, 'Cam Masa');
-  assert.equal(catalog.widthCm, 75);
-  assert.equal(catalog.depthCm, 75);
-  assert.equal(catalog.heightCm, 74);
+  assert.equal(item.dimensions.widthCm, 75);
+  assert.equal(item.dimensions.depthCm, 75);
+  assert.equal(item.dimensions.heightCm, 74);
   assert.ok(getCatalogItem('glass_table') != null);
 
   const state = createGlassTableModuleState();

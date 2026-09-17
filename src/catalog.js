@@ -1,4 +1,4 @@
-import { getItem, listRegisteredItems, resolveItemKey, resolveSceneDimensions } from './items.js';
+import { getItem, listRegisteredItems, resolveItemKey } from './items.js';
 
 // Canonical Catalog kategorileri. catalogKey Item.catalogCategory ile eşleşir.
 // catalogName UI label'dır. catalogIndex 1 tabanlı kategori sırasıdır.
@@ -52,13 +52,6 @@ export const CATALOG_PREVIEWS = Object.freeze([
   'video-wall',
 ]);
 
-function assignCatalogFootprint(descriptor, item) {
-  const scene = resolveSceneDimensions(item);
-  if (scene.widthCm != null) descriptor.widthCm = scene.widthCm;
-  if (scene.depthCm != null) descriptor.depthCm = scene.depthCm;
-  if (scene.heightCm != null) descriptor.heightCm = scene.heightCm;
-}
-
 function projectCatalogItem(item) {
   if (typeof item.catalogPreview !== 'string' || item.catalogPreview === '') {
     throw new TypeError(`Item ${item.itemKey} is catalogVisible without catalogPreview.`);
@@ -67,34 +60,11 @@ function projectCatalogItem(item) {
     throw new TypeError(`Item ${item.itemKey} has unknown catalogPreview: ${item.catalogPreview}.`);
   }
 
-  const descriptor = {
+  return Object.freeze({
     itemKey: item.itemKey,
-    // type Catalog UI preview seçmez; createModuleStateFromDescriptor factory uyumu için kalır.
-    type: item.type,
     label: item.name,
     catalogPreview: item.catalogPreview,
-  };
-
-  assignCatalogFootprint(descriptor, item);
-  if (item.videoWall) {
-    descriptor.videoWallRows = item.videoWall.rows;
-    descriptor.videoWallCols = item.videoWall.cols;
-  }
-
-  if (item.variant) descriptor.variant = item.variant;
-  if (item.stripOccupancy) descriptor.stripOccupancy = item.stripOccupancy;
-  if (item.eyeCount != null) descriptor.eyeCount = item.eyeCount;
-  if (item.shape === 'L') descriptor.shape = 'L';
-  if (item.modelFile) descriptor.modelFile = item.modelFile;
-  if (item.modelRotationYDeg != null) descriptor.modelRotationYDeg = item.modelRotationYDeg;
-  if (item.preserveModelScale != null) descriptor.preserveModelScale = item.preserveModelScale;
-  // unit / visualRotationYDeg yalnız modelFile taşıyan Item'da eski commercial projection'da vardı.
-  if (item.modelFile) {
-    if (item.unit != null) descriptor.unit = item.unit;
-    if (item.visualRotationYDeg != null) descriptor.visualRotationYDeg = item.visualRotationYDeg;
-  }
-
-  return Object.freeze(descriptor);
+  });
 }
 
 export function getCatalogItem(itemKey) {

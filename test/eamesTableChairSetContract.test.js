@@ -11,9 +11,8 @@ test('Eames is the only table-chair set in the catalog', () => {
   const eames = getCatalogItem('furniture_table_chair_set_eames');
   assert.equal(getCatalogItem('furniture_table_chair_set_minyon'), null);
   assert.equal(getCatalogItem('furniture_table_chair_set_minyon') != null, false);
-  assert.equal(eames.type, 'table-chair-set-eames');
-  assert.equal(eames.widthCm, 150);
-  assert.equal(eames.depthCm, 150);
+  assert.equal(eames.itemKey, 'furniture_table_chair_set_eames');
+  assert.equal(eames.catalogPreview, 'table-chair-set');
 });
 
 test('Eames set contains four chairs', () => {

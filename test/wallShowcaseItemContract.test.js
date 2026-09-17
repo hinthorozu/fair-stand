@@ -32,9 +32,11 @@ test('catalog keeps wall_showcase keys and derives canonical descriptor facts', 
   for (const expected of CASES) {
     const descriptor = getCatalogItem(expected.itemKey);
     assert.equal(descriptor.itemKey, expected.itemKey);
-    assert.equal(descriptor.type, expected.type);
-    assert.equal(descriptor.widthCm, 100);
-    assert.equal(descriptor.eyeCount, expected.eyeCount);
+    assert.equal(descriptor.label, getItem(expected.itemKey).name);
+    assert.equal(descriptor.catalogPreview, getItem(expected.itemKey).catalogPreview);
+    assert.equal(Object.hasOwn(descriptor, 'type'), false);
+    assert.equal(Object.hasOwn(descriptor, 'widthCm'), false);
+    assert.equal(Object.hasOwn(descriptor, 'eyeCount'), false);
   }
   assert.equal(getCatalogItem('showcase_2_100'), null);
   assert.equal(getCatalogItem('showcase_3_100'), null);

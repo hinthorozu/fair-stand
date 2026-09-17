@@ -95,11 +95,10 @@ for (const itemKey of BANKO_KEYS) {
 
     assert.equal(catalog.itemKey, itemKey);
     assert.equal(catalog.label, item.name);
-    assert.equal(catalog.type, 'counter');
-    assert.equal(catalog.widthCm, expected.widthCm);
-    assert.equal(catalog.depthCm, expected.depthCm);
-    assert.equal(catalog.heightCm, expected.heightCm);
-    if (isL) assert.equal(catalog.shape, 'L');
+    assert.equal(catalog.catalogPreview, item.catalogPreview);
+    assert.equal(Object.hasOwn(catalog, 'type'), false);
+    assert.equal(Object.hasOwn(catalog, 'widthCm'), false);
+    assert.equal(Object.hasOwn(catalog, 'shape'), false);
 
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, itemKey);

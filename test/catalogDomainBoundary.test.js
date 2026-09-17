@@ -58,7 +58,7 @@ test('catalog.js Recipe/BOM’dan Item özelliği öğrenmez; resolveItemKey Cat
   assert.doesNotMatch(CATALOG_SOURCE, /moduleRecipes/);
   assert.doesNotMatch(CATALOG_SOURCE, /getStraightWallNominalWidthForProfileItem/);
   assert.doesNotMatch(CATALOG_SOURCE, /catalogWidthCm/);
-  assert.match(CATALOG_SOURCE, /resolveSceneDimensions/);
+  assert.doesNotMatch(CATALOG_SOURCE, /resolveSceneDimensions/);
   assert.doesNotMatch(CATALOG_SOURCE, /export \{ resolveItemKey \}/);
   assert.match(itemsSource, /export function resolveItemKey/);
   assert.match(itemsSource, /Item identity çözümlemesi Catalog üyeliğine bağlı değildir/);

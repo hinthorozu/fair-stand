@@ -12,7 +12,7 @@ import { getModuleBehavior, getModuleMagneticSnapStrategy } from '../src/moduleB
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { placementsOverlap, snapPlacementToModules } from '../src/modulePlacement.js';
 import { getExpandedStraightWallRecipe } from '../src/moduleRecipes.js';
-import { getItem } from '../src/items.js';
+import { getItem, resolveSceneDimensions } from '../src/items.js';
 
 const PROFILE_KEYS = ['profile_190', 'profile_140_5', 'profile_91', 'profile_41_5'];
 
@@ -22,17 +22,17 @@ test('Panel Ek Modül holds field profiles after upright_346_5', () => {
   for (const key of PROFILE_KEYS) {
     assert.equal(extraPanel.keys.includes(key), true);
     assert.equal(getCatalogItem(key) != null, true);
-    assert.equal(getCatalogItem(key).type, 'profile');
+    assert.equal(getItem(key).type, 'profile');
   }
 });
 
 test('field profiles are self BOM ×1 and do not change parent wall recipe ×2', () => {
-  assert.equal(getCatalogItem('profile_190').widthCm, 200);
-  assert.equal(getCatalogItem('profile_140_5').widthCm, 150);
-  assert.equal(getCatalogItem('profile_91').widthCm, 100);
-  assert.equal(getCatalogItem('profile_41_5').widthCm, 50);
-  assert.equal(getCatalogItem('profile_190').depthCm, 8);
-  assert.equal(getCatalogItem('profile_190').heightCm, 350);
+  assert.equal(resolveSceneDimensions(getItem('profile_190')).widthCm, 200);
+  assert.equal(resolveSceneDimensions(getItem('profile_140_5')).widthCm, 150);
+  assert.equal(resolveSceneDimensions(getItem('profile_91')).widthCm, 100);
+  assert.equal(resolveSceneDimensions(getItem('profile_41_5')).widthCm, 50);
+  assert.equal(resolveSceneDimensions(getItem('profile_190')).depthCm, 8);
+  assert.equal(resolveSceneDimensions(getItem('profile_190')).heightCm, 350);
   assert.equal(resolveModuleContract('profile_190').bom.mode, 'self');
   const bom = resolveItemBom('profile_190');
   assert.equal(bom.length, 1);

@@ -5,13 +5,16 @@ import {
   getCatalogItem,
 } from '../src/catalog.js';
 import { createMiniFridgeModuleState } from '../src/designState.js';
+import { getItem } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
 test('mini fridge catalog/state dimensions stay aligned', () => {
   const catalog = getCatalogItem('MINI_FRIDGE_AVANTI');
+  const item = getItem('MINI_FRIDGE_AVANTI');
   const state = createMiniFridgeModuleState();
+  assert.equal(catalog.itemKey, 'MINI_FRIDGE_AVANTI');
   assert.deepEqual(
-    [catalog.widthCm, catalog.depthCm, catalog.heightCm],
+    [item.dimensions.widthCm, item.dimensions.depthCm, item.dimensions.heightCm],
     [50, 50, 66],
   );
   assert.deepEqual(

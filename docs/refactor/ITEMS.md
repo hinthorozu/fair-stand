@@ -152,7 +152,7 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 - **Scope:** Item master — gerçek/fiziksel ürün ölçüleri
 - **Default:** yok; tahmin/`0`/`1`/GLB bbox yasak
 - **Amaç:** Ürünün fiziksel ölçüsü. Catalog, Recipe, type veya itemKey bu katmanı üretmez
-- **Canonical consumer:** `resolveSceneDimensions` (same-field fallback), BOM/üretim okuyucuları, Catalog projection (okur, sahip olmaz)
+- **Canonical consumer:** `resolveSceneDimensions` (same-field fallback), BOM/üretim okuyucuları, factory (`createModuleStateFromDescriptor`)
 - **Canonical method:** `item.dimensions` / `resolveSceneDimensions(item)`
 - **Çapraz remap yok:** `lengthCm` width olmaz; `thicknessCm` depth olmaz
 - **Kullanıcı değiştirir mi:** hayır (Item master)
@@ -167,7 +167,7 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 - **Scope:** Item master — scene/runtime override
 - **Default:** yok; `null`, `{}` ve `{ field: null }` override yok demektir
 - **Amaç:** Sahnede kullanılacak ölçü. Yalnız physical’dan farklıysa veya scene’in ihtiyaç duyduğu field physical’da aynı isimle yoksa yazılır
-- **Canonical consumer:** factory, identity, Catalog footprint, collision/ghost
+- **Canonical consumer:** factory, identity, collision/ghost, Catalog preview hydrate
 - **Canonical method:** `resolveSceneDimensions(item)`
 - **Effective field:** `sceneDimensions.field ?? dimensions.field ?? MISSING`
 - **Recipe/Catalog/type/itemKey/STAND Item-specific scene source değildir**

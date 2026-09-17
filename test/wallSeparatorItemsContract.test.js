@@ -87,9 +87,10 @@ for (const itemKey of SEPARATOR_KEYS) {
 
     assert.equal(catalog.itemKey, itemKey);
     assert.equal(catalog.label, item.name);
-    assert.equal(catalog.type, 'separator');
-    assert.equal(catalog.widthCm, expected.widthCm);
-    assert.equal(catalog.modelFile ?? null, expected.modelFile);
+    assert.equal(catalog.catalogPreview, item.catalogPreview);
+    assert.equal(Object.hasOwn(catalog, 'type'), false);
+    assert.equal(Object.hasOwn(catalog, 'widthCm'), false);
+    assert.equal(Object.hasOwn(catalog, 'modelFile'), false);
 
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, itemKey);

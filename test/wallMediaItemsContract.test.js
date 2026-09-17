@@ -17,12 +17,13 @@ for (const item of Object.values(WALL_MEDIA_ITEMS)) {
 
     assert.equal(catalog.itemKey, item.itemKey);
     assert.equal(catalog.label, item.name);
-    assert.equal(catalog.type, 'tv');
-    assert.equal(catalog.widthCm, scene.widthCm);
-    assert.equal(catalog.depthCm, scene.depthCm);
-    assert.equal(catalog.heightCm, scene.heightCm);
-    assert.equal(catalog.videoWallRows, isVideoWall ? item.videoWall.rows : undefined);
-    assert.equal(catalog.videoWallCols, isVideoWall ? item.videoWall.cols : undefined);
+    assert.equal(catalog.catalogPreview, item.catalogPreview);
+    assert.equal(Object.hasOwn(catalog, 'type'), false);
+    assert.equal(Object.hasOwn(catalog, 'widthCm'), false);
+    assert.equal(Object.hasOwn(catalog, 'depthCm'), false);
+    assert.equal(Object.hasOwn(catalog, 'heightCm'), false);
+    assert.equal(Object.hasOwn(catalog, 'videoWallRows'), false);
+    assert.equal(Object.hasOwn(catalog, 'videoWallCols'), false);
     assert.equal(Object.hasOwn(catalog, 'sizeInch'), false);
     assert.equal(Object.hasOwn(catalog, 'screenWidthCm'), false);
     assert.equal(Object.hasOwn(catalog, 'panelScreenWidthCm'), false);
@@ -89,7 +90,8 @@ test('ordinary TV Items use canonical dimensions as catalog and scene height', (
     const item = getItem(key);
     const scene = resolveSceneDimensions(item);
     assert.equal(item.dimensions.heightCm, expectedHeight[key]);
-    assert.equal(getCatalogItem(key).heightCm, scene.heightCm);
+    assert.equal(getCatalogItem(key).itemKey, key);
+    assert.equal(scene.heightCm, expectedHeight[key]);
     const state = createModuleStateFromDescriptor(getCatalogItem(key));
     assert.equal(state.heightCm, item.dimensions.heightCm);
     assert.notEqual(state.heightCm, 350);

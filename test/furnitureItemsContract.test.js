@@ -167,10 +167,9 @@ for (const itemKey of Object.keys(FURNITURE_ITEMS)) {
 
     assert.equal(catalog.itemKey, itemKey);
     assert.equal(catalog.label, item.name);
-    assert.equal(catalog.type, expected.type);
-    assert.equal(catalog.widthCm, expected.widthCm);
-    assert.equal(catalog.depthCm, expected.depthCm);
-    assert.equal(catalog.heightCm, expected.heightCm);
+    assert.equal(catalog.catalogPreview, item.catalogPreview);
+    assert.equal(Object.hasOwn(catalog, 'type'), false);
+    assert.equal(Object.hasOwn(catalog, 'widthCm'), false);
 
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, itemKey);

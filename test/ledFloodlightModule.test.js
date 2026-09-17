@@ -8,8 +8,8 @@ import { getItem } from '../src/items.js';
 import { getWallUsedCm, placementsOverlap } from '../src/modulePlacement.js';
 
 test('LED projektor katalogda 50 cm ust aksesuar olarak tanimlidir', () => {
-  assert.equal(getCatalogItem('led_floodlight').type, 'led-floodlight');
   assert.equal(getCatalogItem('led_floodlight').itemKey, 'led_floodlight');
+  assert.equal(getItem('led_floodlight').type, 'led-floodlight');
   const light = getItem('led_floodlight');
   assert.equal(light.dimensions.widthCm, 50);
   assert.equal(light.dimensions.depthCm, 20);

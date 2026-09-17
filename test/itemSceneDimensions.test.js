@@ -112,10 +112,12 @@ test('9. profile factory Recipe’den scene width okumaz', () => {
 
 test('10. Catalog profile width catalogWidthCm okumaz', () => {
   assert.doesNotMatch(CATALOG_SOURCE, /catalogWidthCm/);
-  assert.match(CATALOG_SOURCE, /resolveSceneDimensions/);
-  assert.equal(getCatalogItem('profile_190').widthCm, 200);
-  assert.equal(getCatalogItem('profile_190').depthCm, 8);
-  assert.equal(getCatalogItem('profile_190').heightCm, 350);
+  assert.doesNotMatch(CATALOG_SOURCE, /resolveSceneDimensions/);
+  const scene = resolveSceneDimensions(getItem('profile_190'));
+  assert.equal(getCatalogItem('profile_190').itemKey, 'profile_190');
+  assert.equal(scene.widthCm, 200);
+  assert.equal(scene.depthCm, 8);
+  assert.equal(scene.heightCm, 350);
 });
 
 test('11. catalogWidthCm canonical Item field olarak kalmaz', () => {

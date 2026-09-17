@@ -20,9 +20,9 @@ test('furniture_sofa_single_classic katalog ve state kimliği sabittir', () => {
   assert.equal(item.type, 'sofa-single-classic');
   assert.equal(item.name, 'Tekli Koltuk');
   assert.equal(catalog.label, 'Tekli Koltuk');
-  assert.equal(catalog.widthCm, 65);
-  assert.equal(catalog.depthCm, 45);
-  assert.equal(catalog.heightCm, 78);
+  assert.equal(item.dimensions.widthCm, 65);
+  assert.equal(item.dimensions.depthCm, 45);
+  assert.equal(item.dimensions.heightCm, 78);
   assert.ok(getCatalogItem('furniture_sofa_single_classic') != null);
 
   const state = createSofaSingleClassicModuleState();
@@ -40,9 +40,9 @@ test('furniture_sofa_double_classic katalog ve state kimliği sabittir', () => {
   assert.equal(item.itemKey, 'furniture_sofa_double_classic');
   assert.equal(item.type, 'sofa-double-classic');
   assert.equal(item.name, 'Çiftli Koltuk');
-  assert.equal(catalog.widthCm, 150);
-  assert.equal(catalog.depthCm, 45);
-  assert.equal(catalog.heightCm, 78);
+  assert.equal(item.dimensions.widthCm, 150);
+  assert.equal(item.dimensions.depthCm, 45);
+  assert.equal(item.dimensions.heightCm, 78);
   assert.ok(getCatalogItem('furniture_sofa_double_classic') != null);
 
   const state = createSofaDoubleClassicModuleState();
@@ -59,9 +59,9 @@ test('furniture_coffee_table_classic katalog ve state kimliği sabittir', () => 
   assert.equal(item.itemKey, 'furniture_coffee_table_classic');
   assert.equal(item.type, 'coffee-table-classic');
   assert.equal(item.name, 'Sehpa');
-  assert.equal(catalog.widthCm, 60);
-  assert.equal(catalog.depthCm, 42);
-  assert.equal(catalog.heightCm, 38);
+  assert.equal(item.dimensions.widthCm, 60);
+  assert.equal(item.dimensions.depthCm, 42);
+  assert.equal(item.dimensions.heightCm, 38);
   assert.ok(getCatalogItem('furniture_coffee_table_classic') != null);
 
   const state = createCoffeeTableClassicModuleState();

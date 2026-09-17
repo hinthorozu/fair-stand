@@ -10,10 +10,12 @@ import { getItem } from '../src/items.js';
 import { getModuleBehavior, getModuleGhostBehavior, isWallOverlayModule } from '../src/moduleBehavior.js';
 
 test('TV 42 catalog and state use one shared 93.0 x 52.3 screen', () => {
-  const item = getCatalogItem('TV_42');
+  const catalog = getCatalogItem('TV_42');
+  const item = getItem('TV_42');
+  assert.equal(catalog.itemKey, 'TV_42');
   assert.equal(item.type, 'tv');
-  assert.equal(item.widthCm, 93);
-  assert.equal(item.heightCm, 52.3);
+  assert.equal(item.dimensions.widthCm, 93);
+  assert.equal(item.dimensions.heightCm, 52.3);
   const state = createTvModuleState({ itemKey: 'TV_42' });
   assert.equal(state.widthCm, 93);
   assert.equal(state.heightCm, 52.3);
@@ -41,10 +43,8 @@ test('TV 55 and 65 keep shared depth and use screen width as placement width', (
     assert.equal(item.dimensions.widthCm, expected[itemKey][0]);
     assert.equal(item.dimensions.heightCm, expected[itemKey][1]);
     assert.equal(catalogItem.itemKey, itemKey);
-    assert.equal(catalogItem.type, base.type);
-    assert.equal(catalogItem.widthCm, expected[itemKey][0]);
-    assert.equal(catalogItem.heightCm, expected[itemKey][1]);
-    assert.equal(catalogItem.depthCm, 5);
+    assert.equal(Object.hasOwn(catalogItem, 'type'), false);
+    assert.equal(Object.hasOwn(catalogItem, 'widthCm'), false);
     assert.equal(state.type, base.type);
     assert.equal(state.itemKey, itemKey);
     assert.equal(state.widthCm, expected[itemKey][0]);

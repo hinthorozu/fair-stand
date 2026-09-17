@@ -1,5 +1,5 @@
 {
-  "generatedFrom": "listCatalogItems after shelf catalog-visible",
+  "generatedFrom": "thin catalog cards itemKey label catalogPreview",
   "keys": [
     "wall_200",
     "wall_150",
@@ -166,531 +166,292 @@
     {
       "itemKey": "wall_200",
       "label": "Panel 200",
-      "widthCm": 200,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "flat-panel"
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_150",
       "label": "Panel 150",
-      "widthCm": 150,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "flat-panel"
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_100",
       "label": "Panel 100",
-      "widthCm": 100,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "flat-panel"
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_50",
       "label": "Panel 50",
-      "widthCm": 50,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "flat-panel"
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_separator_100",
       "label": "Separatör 100",
-      "widthCm": 100,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "separator"
+      "catalogPreview": "separator"
     },
     {
       "itemKey": "wall_separator_50",
       "label": "Separatör 50",
-      "widthCm": 50,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "separator"
+      "catalogPreview": "separator"
     },
     {
       "itemKey": "wall_separator_100_sarmasik",
       "label": "Separatör 100 Sarmaşık",
-      "widthCm": 100,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "separator",
-      "modelFile": "wall_separator_100_sarmasik.glb"
+      "catalogPreview": "separator-vine"
     },
     {
       "itemKey": "wall_separator_50_sarmasik",
       "label": "Separatör 50 Sarmaşık",
-      "widthCm": 50,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "separator",
-      "modelFile": "wall_separator_50_sarmasik.glb"
+      "catalogPreview": "separator-vine"
     },
     {
       "itemKey": "door_100",
       "label": "Depo Kapısı 100",
-      "widthCm": 100,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "door"
+      "catalogPreview": "door"
     },
     {
       "itemKey": "wall_200_short_up_2",
       "label": "Panel 200 Short Up 2",
-      "widthCm": 200,
-      "depthCm": 10,
-      "type": "flat-panel",
-      "variant": "short-up-2",
-      "stripOccupancy": {
-        "align": "top",
-        "stripCount": 2
-      }
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_150_short_up_2",
       "label": "Panel 150 Short Up 2",
-      "widthCm": 150,
-      "depthCm": 10,
-      "type": "flat-panel",
-      "variant": "short-up-2",
-      "stripOccupancy": {
-        "align": "top",
-        "stripCount": 2
-      }
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_100_short_up_2",
       "label": "Panel 100 Short Up 2",
-      "widthCm": 100,
-      "depthCm": 10,
-      "type": "flat-panel",
-      "variant": "short-up-2",
-      "stripOccupancy": {
-        "align": "top",
-        "stripCount": 2
-      }
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_50_short_up_2",
       "label": "Panel 50 Short Up 2",
-      "widthCm": 50,
-      "depthCm": 10,
-      "type": "flat-panel",
-      "variant": "short-up-2",
-      "stripOccupancy": {
-        "align": "top",
-        "stripCount": 2
-      }
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_200_short_up_1",
       "label": "Panel 200 Short Up 1",
-      "widthCm": 200,
-      "depthCm": 10,
-      "type": "flat-panel",
-      "variant": "short-up-1",
-      "stripOccupancy": {
-        "align": "top",
-        "stripCount": 1
-      }
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_150_short_up_1",
       "label": "Panel 150 Short Up 1",
-      "widthCm": 150,
-      "depthCm": 10,
-      "type": "flat-panel",
-      "variant": "short-up-1",
-      "stripOccupancy": {
-        "align": "top",
-        "stripCount": 1
-      }
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_100_short_up_1",
       "label": "Panel 100 Short Up 1",
-      "widthCm": 100,
-      "depthCm": 10,
-      "type": "flat-panel",
-      "variant": "short-up-1",
-      "stripOccupancy": {
-        "align": "top",
-        "stripCount": 1
-      }
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "wall_50_short_up_1",
       "label": "Panel 50 Short Up 1",
-      "widthCm": 50,
-      "depthCm": 10,
-      "type": "flat-panel",
-      "variant": "short-up-1",
-      "stripOccupancy": {
-        "align": "top",
-        "stripCount": 1
-      }
+      "catalogPreview": "flat-panel"
     },
     {
       "itemKey": "upright_346_5",
       "label": "Dikme 346,5 cm",
-      "widthCm": 8,
-      "depthCm": 8,
-      "heightCm": 346.5,
-      "type": "upright"
+      "catalogPreview": "upright"
     },
     {
       "itemKey": "profile_190",
       "label": "Profil 190 cm",
-      "widthCm": 200,
-      "depthCm": 8,
-      "heightCm": 350,
-      "type": "profile"
+      "catalogPreview": "profile"
     },
     {
       "itemKey": "profile_140_5",
       "label": "Profil 140,5 cm",
-      "widthCm": 150,
-      "depthCm": 8,
-      "heightCm": 350,
-      "type": "profile"
+      "catalogPreview": "profile"
     },
     {
       "itemKey": "profile_91",
       "label": "Profil 91 cm",
-      "widthCm": 100,
-      "depthCm": 8,
-      "heightCm": 350,
-      "type": "profile"
+      "catalogPreview": "profile"
     },
     {
       "itemKey": "profile_41_5",
       "label": "Profil 41,5 cm",
-      "widthCm": 50,
-      "depthCm": 8,
-      "heightCm": 350,
-      "type": "profile"
+      "catalogPreview": "profile"
     },
     {
       "itemKey": "wall_showcase_100_3",
       "label": "3 Gözlü Vitrin 100",
-      "widthCm": 100,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "showcase-3",
-      "eyeCount": 3
+      "catalogPreview": "showcase"
     },
     {
       "itemKey": "wall_showcase_100_2",
       "label": "2 Gözlü Vitrin 100",
-      "widthCm": 100,
-      "depthCm": 10,
-      "heightCm": 350,
-      "type": "showcase-2",
-      "eyeCount": 2
+      "catalogPreview": "showcase"
     },
     {
       "itemKey": "shelf_100",
       "label": "Raf 100 cm",
-      "widthCm": 100,
-      "depthCm": 38,
-      "heightCm": 1.8,
-      "type": "shelf"
+      "catalogPreview": "shelf"
     },
     {
       "itemKey": "shelf_150",
       "label": "Raf 150 cm",
-      "widthCm": 150,
-      "depthCm": 38,
-      "heightCm": 1.8,
-      "type": "shelf"
+      "catalogPreview": "shelf"
     },
     {
       "itemKey": "shelf_200",
       "label": "Raf 200 cm",
-      "widthCm": 200,
-      "depthCm": 38,
-      "heightCm": 1.8,
-      "type": "shelf"
+      "catalogPreview": "shelf"
     },
     {
       "itemKey": "desk_banko_200",
       "label": "Banko 200",
-      "widthCm": 200,
-      "depthCm": 50,
-      "heightCm": 100,
-      "type": "counter"
+      "catalogPreview": "counter"
     },
     {
       "itemKey": "desk_banko_150",
       "label": "Banko 150",
-      "widthCm": 150,
-      "depthCm": 50,
-      "heightCm": 100,
-      "type": "counter"
+      "catalogPreview": "counter"
     },
     {
       "itemKey": "desk_banko_100",
       "label": "Banko 100",
-      "widthCm": 100,
-      "depthCm": 50,
-      "heightCm": 100,
-      "type": "counter"
+      "catalogPreview": "counter"
     },
     {
       "itemKey": "desk_banko_200_L",
       "label": "Köşe Banko 200×200",
-      "widthCm": 200,
-      "depthCm": 200,
-      "heightCm": 100,
-      "type": "counter",
-      "shape": "L"
+      "catalogPreview": "counter"
     },
     {
       "itemKey": "desk_banko_150_L",
       "label": "Köşe Banko 150×150",
-      "widthCm": 150,
-      "depthCm": 150,
-      "heightCm": 100,
-      "type": "counter",
-      "shape": "L"
+      "catalogPreview": "counter"
     },
     {
       "itemKey": "desk_banko_100_L",
       "label": "Köşe Banko 100×100",
-      "widthCm": 100,
-      "depthCm": 100,
-      "heightCm": 100,
-      "type": "counter",
-      "shape": "L"
+      "catalogPreview": "counter"
     },
     {
       "itemKey": "BASE_200",
       "label": "Baza 200",
-      "widthCm": 200,
-      "depthCm": 50,
-      "heightCm": 50,
-      "type": "base"
+      "catalogPreview": "base"
     },
     {
       "itemKey": "BASE_150",
       "label": "Baza 150",
-      "widthCm": 150,
-      "depthCm": 50,
-      "heightCm": 50,
-      "type": "base"
+      "catalogPreview": "base"
     },
     {
       "itemKey": "BASE_100",
       "label": "Baza 100",
-      "widthCm": 100,
-      "depthCm": 50,
-      "heightCm": 50,
-      "type": "base"
+      "catalogPreview": "base"
     },
     {
       "itemKey": "furniture_sofa_set_classic",
       "label": "Koltuk Takımı",
-      "widthCm": 150,
-      "depthCm": 150,
-      "heightCm": 78,
-      "type": "sofa-set-classic"
+      "catalogPreview": "sofa-set"
     },
     {
       "itemKey": "furniture_sofa_single_classic",
       "label": "Tekli Koltuk",
-      "widthCm": 65,
-      "depthCm": 45,
-      "heightCm": 78,
-      "type": "sofa-single-classic"
+      "catalogPreview": "sofa-single"
     },
     {
       "itemKey": "furniture_sofa_double_classic",
       "label": "Çiftli Koltuk",
-      "widthCm": 150,
-      "depthCm": 45,
-      "heightCm": 78,
-      "type": "sofa-double-classic"
+      "catalogPreview": "sofa-double"
     },
     {
       "itemKey": "furniture_coffee_table_classic",
       "label": "Sehpa",
-      "widthCm": 60,
-      "depthCm": 42,
-      "heightCm": 38,
-      "type": "coffee-table-classic"
+      "catalogPreview": "coffee-table"
     },
     {
       "itemKey": "furniture_table_chair_set_eames",
       "label": "Eames Masa Sandalye Takımı",
-      "widthCm": 150,
-      "depthCm": 150,
-      "heightCm": 82,
-      "type": "table-chair-set-eames"
+      "catalogPreview": "table-chair-set"
     },
     {
       "itemKey": "chair_eames",
       "label": "Eames Sandalye",
-      "widthCm": 46,
-      "depthCm": 58,
-      "heightCm": 82,
-      "type": "chair"
+      "catalogPreview": "chair"
     },
     {
       "itemKey": "glass_table",
       "label": "Cam Masa",
-      "widthCm": 75,
-      "depthCm": 75,
-      "heightCm": 74,
-      "type": "table-glass"
+      "catalogPreview": "glass-table"
     },
     {
       "itemKey": "furniture_bar_stool_classic",
       "label": "Bar Taburesi",
-      "widthCm": 60,
-      "depthCm": 55,
-      "heightCm": 121,
-      "type": "bar-stool"
+      "catalogPreview": "bar-stool"
     },
     {
       "itemKey": "MINI_FRIDGE_AVANTI",
       "label": "Mini Buzdolabı",
-      "widthCm": 50,
-      "depthCm": 50,
-      "heightCm": 66,
-      "type": "mini-fridge",
-      "modelFile": "80s_avanti_mini_fridge.glb",
-      "unit": "adet"
+      "catalogPreview": "mini-fridge"
     },
     {
       "itemKey": "KETTLE",
       "label": "Kettle",
-      "widthCm": 24,
-      "depthCm": 19,
-      "heightCm": 25,
-      "type": "kettle",
-      "modelFile": "kettle.glb",
-      "unit": "adet"
+      "catalogPreview": "kettle"
     },
     {
       "itemKey": "COAT_RACK",
       "label": "Askılık",
-      "widthCm": 43,
-      "depthCm": 43,
-      "heightCm": 180,
-      "type": "coat-rack",
-      "modelFile": "coat_rack.glb",
-      "unit": "adet"
+      "catalogPreview": "coat-rack"
     },
     {
       "itemKey": "PLASTIC_TRASH_BIN",
       "label": "Çöp Kutusu",
-      "widthCm": 40,
-      "depthCm": 40,
-      "heightCm": 60,
-      "type": "plastic-trash-bin",
-      "modelFile": "plastic_trash_bin.glb",
-      "modelRotationYDeg": 0,
-      "visualRotationYDeg": -90,
-      "preserveModelScale": false,
-      "unit": "adet"
+      "catalogPreview": "plastic-trash-bin"
     },
     {
       "itemKey": "EXTRA_INDOOR_PLANT_1",
       "label": "Yapay Çiçek 1",
-      "widthCm": 60,
-      "depthCm": 60,
-      "heightCm": 120,
-      "type": "indoor-plant-1",
-      "modelRotationYDeg": 0,
-      "preserveModelScale": false
+      "catalogPreview": "indoor-plant"
     },
     {
       "itemKey": "EXTRA_LONG_PLANTER_100",
       "label": "Uzun Saksı 100",
-      "widthCm": 100,
-      "depthCm": 30,
-      "heightCm": 30,
-      "type": "indoor-plant-1",
-      "modelFile": "saksi_bitkili_100x30x30.glb",
-      "modelRotationYDeg": 90,
-      "preserveModelScale": true
+      "catalogPreview": "long-planter"
     },
     {
       "itemKey": "EXTRA_LONG_PLANTER_150",
       "label": "Uzun Saksı 150",
-      "widthCm": 150,
-      "depthCm": 30,
-      "heightCm": 30,
-      "type": "indoor-plant-1",
-      "modelFile": "saksi_bitkili_150x30x30.glb",
-      "modelRotationYDeg": 90,
-      "preserveModelScale": true
+      "catalogPreview": "long-planter"
     },
     {
       "itemKey": "EXTRA_LONG_PLANTER_200",
       "label": "Uzun Saksı 200",
-      "widthCm": 200,
-      "depthCm": 30,
-      "heightCm": 30,
-      "type": "indoor-plant-1",
-      "modelFile": "saksi_bitkili_200x30x30.glb",
-      "modelRotationYDeg": 90,
-      "preserveModelScale": true
+      "catalogPreview": "long-planter"
     },
     {
       "itemKey": "TV_42",
       "label": "TV 42\"",
-      "widthCm": 93,
-      "depthCm": 5,
-      "heightCm": 52.3,
-      "type": "tv"
+      "catalogPreview": "tv"
     },
     {
       "itemKey": "TV_55",
       "label": "TV 55\"",
-      "widthCm": 121.8,
-      "depthCm": 5,
-      "heightCm": 68.5,
-      "type": "tv"
+      "catalogPreview": "tv"
     },
     {
       "itemKey": "VIDEO_WALL_2X2",
       "label": "Video Wall 2×2",
-      "widthCm": 217,
-      "depthCm": 5,
-      "heightCm": 122,
-      "type": "tv",
-      "videoWallRows": 2,
-      "videoWallCols": 2
+      "catalogPreview": "video-wall"
     },
     {
       "itemKey": "VIDEO_WALL_3X3",
       "label": "Video Wall 3×3",
-      "widthCm": 325.5,
-      "depthCm": 5,
-      "heightCm": 183,
-      "type": "tv",
-      "videoWallRows": 3,
-      "videoWallCols": 3
+      "catalogPreview": "video-wall"
     },
     {
       "itemKey": "TV_65",
       "label": "TV 65\"",
-      "widthCm": 143.9,
-      "depthCm": 5,
-      "heightCm": 80.9,
-      "type": "tv"
+      "catalogPreview": "tv"
     },
     {
       "itemKey": "led_floodlight",
       "label": "LED Projektör",
-      "widthCm": 50,
-      "depthCm": 20,
-      "heightCm": 35,
-      "type": "led-floodlight"
+      "catalogPreview": "floodlight"
     }
   ]
 }

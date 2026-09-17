@@ -15,21 +15,7 @@ const BASELINE = JSON.parse(
 const COMPARE_FIELDS = Object.freeze([
   'itemKey',
   'label',
-  'widthCm',
-  'depthCm',
-  'heightCm',
-  'type',
-  'modelFile',
-  'modelRotationYDeg',
-  'visualRotationYDeg',
-  'preserveModelScale',
-  'videoWallRows',
-  'videoWallCols',
-  'eyeCount',
-  'shape',
-  'variant',
-  'stripOccupancy',
-  'unit',
+  'catalogPreview',
 ]);
 
 function pickComparable(descriptor) {
@@ -67,13 +53,14 @@ test('listCatalogItems 58 görünür Item’ı Item kaydından üretir; hardcode
   assert.match(catalogSource, /export function getCatalogItem/);
 });
 
-test('yeni catalog projection eski MODULE_CATALOG descriptor alanlarını birebir korur', () => {
+test('yeni catalog projection yalnız itemKey / label / catalogPreview taşır', () => {
   const byKey = new Map(BASELINE.descriptors.map((descriptor) => [descriptor.itemKey, descriptor]));
   let compared = 0;
 
   for (const item of listCatalogItems()) {
     const expected = byKey.get(item.itemKey);
     assert.ok(expected, item.itemKey);
+    assert.deepEqual(Object.keys(item).sort(), ['catalogPreview', 'itemKey', 'label'], item.itemKey);
     assert.deepEqual(pickComparable(item), pickComparable(expected), item.itemKey);
     assert.deepEqual(pickComparable(getCatalogItem(item.itemKey)), pickComparable(expected), item.itemKey);
     compared += 1;

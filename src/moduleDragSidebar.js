@@ -1,4 +1,5 @@
 import { getCatalogItem, listCatalogGroups } from './catalog.js';
+import { getItem, resolveSceneDimensions } from './items.js';
 import { normalizeStripOccupancy, getStandStripMetrics } from './stripOccupancy.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { getModuleDefaultRotationDeg, resolveModuleRotationDeltaDeg } from './moduleBehavior.js';
@@ -234,15 +235,28 @@ export function createModuleCatalogPreview(module) {
   ensureStyles();
   const preview = document.createElement('div');
   preview.className = 'module-drag-preview';
-  const catalogPreview = module?.catalogPreview;
+  const item = module?.itemKey ? getItem(module.itemKey) : null;
+  const scene = item ? resolveSceneDimensions(item) : {};
+  const previewModule = item
+    ? {
+      ...module,
+      catalogPreview: module.catalogPreview ?? item.catalogPreview,
+      widthCm: scene.widthCm ?? module.widthCm,
+      stripOccupancy: item.stripOccupancy ?? module.stripOccupancy,
+      eyeCount: item.eyeCount ?? module.eyeCount,
+      videoWallRows: item.videoWall?.rows ?? module.videoWallRows,
+      videoWallCols: item.videoWall?.cols ?? module.videoWallCols,
+    }
+    : module;
+  const catalogPreview = previewModule?.catalogPreview;
   if (typeof catalogPreview !== 'string' || catalogPreview === '') {
     return preview;
   }
   const renderer = CATALOG_PREVIEW_RENDERERS[catalogPreview];
   if (!renderer) {
-    throw new TypeError(`Unknown catalogPreview "${catalogPreview}" for ${module?.itemKey ?? 'module'}.`);
+    throw new TypeError(`Unknown catalogPreview "${catalogPreview}" for ${previewModule?.itemKey ?? 'module'}.`);
   }
-  renderer(preview, module);
+  renderer(preview, previewModule);
   return preview;
 }
 

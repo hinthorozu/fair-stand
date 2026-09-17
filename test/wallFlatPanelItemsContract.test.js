@@ -69,8 +69,9 @@ for (const itemKey of WALL_KEYS) {
 
     assert.equal(catalog.itemKey, itemKey);
     assert.equal(catalog.label, item.name);
-    assert.equal(catalog.type, 'flat-panel');
-    assert.equal(catalog.widthCm, expected.widthCm);
+    assert.equal(catalog.catalogPreview, item.catalogPreview);
+    assert.equal(Object.hasOwn(catalog, 'type'), false);
+    assert.equal(Object.hasOwn(catalog, 'widthCm'), false);
 
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, itemKey);
@@ -157,8 +158,8 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_2)) {
     assert.deepEqual(item.dimensions, { widthCm: expected.widthCm });
     assert.equal(parent.composition.moduleType, 'wall');
     assert.equal(parent.stripOccupancy, undefined);
-    assert.equal(catalog.variant, 'short-up-2');
-    assert.deepEqual(catalog.stripOccupancy, { align: 'top', stripCount: 2 });
+    assert.equal(item.variant, 'short-up-2');
+    assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 2 });
     assert.equal(resolveItemKey({ type: 'flat-panel', widthCm: expected.widthCm }), expected.parentKey);
     assert.equal(resolveItemKey(catalog), itemKey);
 
@@ -220,8 +221,8 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_1)) {
     assert.deepEqual(item.dimensions, { widthCm: expected.widthCm });
     assert.equal(parent.composition.moduleType, 'wall');
     assert.equal(parent.stripOccupancy, undefined);
-    assert.equal(catalog.variant, 'short-up-1');
-    assert.deepEqual(catalog.stripOccupancy, { align: 'top', stripCount: 1 });
+    assert.equal(item.variant, 'short-up-1');
+    assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 1 });
     assert.equal(resolveItemKey({ type: 'flat-panel', widthCm: expected.widthCm }), expected.parentKey);
     assert.equal(resolveItemKey(catalog), itemKey);
 

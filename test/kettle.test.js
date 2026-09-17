@@ -5,13 +5,16 @@ import {
   getCatalogItem,
 } from '../src/catalog.js';
 import { createKettleModuleState } from '../src/designState.js';
+import { getItem } from '../src/items.js';
 import { canModulesOverlapByBehavior, getModuleBehavior } from '../src/moduleBehavior.js';
 import { placementsOverlap } from '../src/modulePlacement.js';
 
 test('kettle catalog and state stay aligned', () => {
   const catalog = getCatalogItem('KETTLE');
+  const item = getItem('KETTLE');
   const state = createKettleModuleState();
-  assert.deepEqual([catalog.widthCm, catalog.depthCm, catalog.heightCm], [24, 19, 25]);
+  assert.equal(catalog.itemKey, 'KETTLE');
+  assert.deepEqual([item.dimensions.widthCm, item.dimensions.depthCm, item.dimensions.heightCm], [24, 19, 25]);
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [24, 19, 25]);
 });
 

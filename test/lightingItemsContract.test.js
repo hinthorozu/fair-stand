@@ -23,10 +23,11 @@ test('led_floodlight: canonical identity, catalog and hydrate', () => {
   const catalog = getCatalogItem('led_floodlight');
   assert.equal(catalog.itemKey, 'led_floodlight');
   assert.equal(catalog.label, 'LED Projektör');
-  assert.equal(catalog.type, 'led-floodlight');
-  assert.equal(catalog.widthCm, 50);
-  assert.equal(catalog.depthCm, 20);
-  assert.equal(catalog.heightCm, 35);
+  assert.equal(catalog.catalogPreview, item.catalogPreview);
+  assert.equal(Object.hasOwn(catalog, 'type'), false);
+  assert.equal(Object.hasOwn(catalog, 'widthCm'), false);
+  assert.equal(Object.hasOwn(catalog, 'depthCm'), false);
+  assert.equal(Object.hasOwn(catalog, 'heightCm'), false);
   assert.equal(Object.hasOwn(catalog, 'mountHeightCm'), false);
   assert.equal(getCatalogItem('LED_FLOODLIGHT'), null);
   assert.equal(getCatalogItem('led_floodlight') != null, true);
