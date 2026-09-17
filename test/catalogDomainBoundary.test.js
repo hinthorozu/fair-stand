@@ -7,7 +7,7 @@ import {
   getCatalogItem,
 } from '../src/catalog.js';
 import { planAutomaticDepot } from '../src/autoDepot.js';
-import { getItem, listRegisteredItems, resolveItemKey } from '../src/items.js';
+import { ITEMS, getItem, listRegisteredItems, resolveItemKey } from '../src/items.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 
 const SRC_DIR = new URL('../src/', import.meta.url);
@@ -75,6 +75,31 @@ test('catalog.js Recipe/BOM’dan Item özelliği öğrenmez; resolveItemKey Cat
   assert.doesNotMatch(CATALOG_SOURCE, /export const MODULE_CATALOG/);
   assert.doesNotMatch(CATALOG_SOURCE, /MODULE_CATALOG_KEYS/);
   assert.doesNotMatch(CATALOG_SOURCE, /MODULE_CATALOG_GROUPS/);
+});
+
+test('public Item registry tek ITEMS tablosudur; kova export yoktur', () => {
+  const itemsSource = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
+  assert.match(itemsSource, /export const ITEMS/);
+  assert.match(itemsSource, /export function getItem/);
+  assert.match(itemsSource, /export function listRegisteredItems/);
+  for (const bucket of [
+    'LEAF_ITEMS',
+    'COMMERCIAL_ITEMS',
+    'FURNITURE_ITEMS',
+    'INDOOR_PLANT_ITEMS',
+    'WALL_MEDIA_ITEMS',
+    'TOP_LIGHT_ITEMS',
+    'NON_CATALOG_ITEMS',
+    'FLOOR_ITEMS',
+    'COMPOSITE_ITEMS',
+  ]) {
+    assert.doesNotMatch(itemsSource, new RegExp(`export const ${bucket}`), bucket);
+  }
+  assert.doesNotMatch(itemsSource, /export function listLeafItems/);
+  assert.doesNotMatch(itemsSource, /export function listCompositeItems/);
+  assert.equal(Object.keys(ITEMS).length, 96);
+  assert.equal(listRegisteredItems().length, 96);
+  assert.equal(new Set(Object.keys(ITEMS)).size, 96);
 });
 
 test('STAND_DIMENSIONS ve MODULE_WIDTHS_CM sahibi src/standDimensions.js; Catalog re-export yok', () => {

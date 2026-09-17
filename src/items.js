@@ -3,8 +3,8 @@
 // dimensions fiziksel ürün ölçüsüdür; sceneDimensions aynı field setinin runtime override katmanıdır.
 // catalogCategory yalnız UI gruplamasıdır; type, Item Contract veya registry grubundan türetilmez.
 // Catalog, Item runtime repository değildir; catalogVisible=false Item'ı yok etmez.
-// Kanonik Item registry. Leaf / üretim üstverisi burada durur.
-export const LEAF_ITEMS = Object.freeze({
+// Kanonik public registry `ITEMS`. Aşağıdaki nesneler yalnız dosya yazım bölümüdür; ürün kimliği veya export kova değildir.
+const LEAF_ITEMS = Object.freeze({
   upright_346_5: Object.freeze({ itemKey: 'upright_346_5', catalogVisible: true, catalogCategory: 'panel-addon', catalogItemIndex: 9, catalogPreview: 'upright', name: 'Dikme 346,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 346.5, thicknessCm: 8 }), sceneDimensions: Object.freeze({ widthCm: 8, depthCm: 8, heightCm: 346.5 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_99: Object.freeze({ itemKey: 'upright_99', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Dikme 99 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 99, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
   upright_49_5: Object.freeze({ itemKey: 'upright_49_5', catalogVisible: false, catalogCategory: null, catalogItemIndex: null, name: 'Dikme 49,5 cm', type: 'upright', unit: 'adet', dimensions: Object.freeze({ lengthCm: 49.5, thicknessCm: 8 }), material: 'alüminyum', defaultColor: 0xd0d3d4 }),
@@ -113,7 +113,7 @@ export function resolveConnectorBom(requirements = []) {
 }
 
 // Bağımsız ticari ürünler, doğrulanmış ürün varsayılanlarının sahibidir.
-export const COMMERCIAL_ITEMS = Object.freeze({
+const COMMERCIAL_ITEMS = Object.freeze({
   COAT_RACK: Object.freeze({
     itemKey: 'COAT_RACK', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 11, catalogPreview: 'coat-rack', name: 'Askılık', type: 'coat-rack', unit: 'adet',
     dimensions: Object.freeze({ widthCm: 43, depthCm: 43, heightCm: 180 }),
@@ -143,7 +143,7 @@ export function getCommercialItemForType(type) {
 
 // Extra furniture. Tekil Item'lar kendi type'ına sahip. Eames ve klasik koltuk takımları child Item kümesidir.
 // BOM decision-required — unit/moduleRecipes uydurulmaz.
-export const FURNITURE_ITEMS = Object.freeze({
+const FURNITURE_ITEMS = Object.freeze({
   furniture_sofa_set_classic: Object.freeze({
     itemKey: 'furniture_sofa_set_classic', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 1, catalogPreview: 'sofa-set',
     name: 'Koltuk Takımı',
@@ -246,7 +246,7 @@ export function getFurnitureItemForType(type) {
 }
 
 // Üst profil LED projektör. Tekil katalog Item. BOM decision-required — unit/recipe uydurulmaz.
-export const TOP_LIGHT_ITEMS = Object.freeze({
+const TOP_LIGHT_ITEMS = Object.freeze({
   led_floodlight: Object.freeze({
     itemKey: 'led_floodlight', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 6, catalogPreview: 'floodlight',
     name: 'LED Projektör',
@@ -265,7 +265,7 @@ export function getTopLightItemForType(type) {
 }
 
 // Katalog dışı SVG → ışıklı strafor. itemKey type ile aynıdır; Catalog kartı yoktur.
-export const NON_CATALOG_ITEMS = Object.freeze({
+const NON_CATALOG_ITEMS = Object.freeze({
   'illuminated-foam': Object.freeze({
     itemKey: 'illuminated-foam', catalogVisible: false, catalogCategory: null, catalogItemIndex: null,
     name: 'Işıklı Strafor / Logo',
@@ -289,7 +289,7 @@ export const NON_CATALOG_ITEMS = Object.freeze({
 });
 
 // Zemin kaplamaları modül değildir; persist alanı stand.itemKey (eski kayıt: floorType). Katalog/recipe yok.
-export const FLOOR_ITEMS = Object.freeze({
+const FLOOR_ITEMS = Object.freeze({
   karolaj: Object.freeze({
     itemKey: 'karolaj', catalogVisible: false, catalogCategory: null, catalogItemIndex: null,
     name: 'Karolaj',
@@ -381,7 +381,7 @@ export function getFurnitureClusterQuantity(item, childItemKey) {
 
 // Yapay bitki / uzun saksı ailesi. Hepsi type `indoor-plant-1`; ayrım itemKey + ölçü/modelFile.
 // BOM decision-required — composition/recipe uydurulmaz.
-export const INDOOR_PLANT_ITEMS = Object.freeze({
+const INDOOR_PLANT_ITEMS = Object.freeze({
   EXTRA_INDOOR_PLANT_1: Object.freeze({
     itemKey: 'EXTRA_INDOOR_PLANT_1', catalogVisible: true, catalogCategory: 'extra', catalogItemIndex: 13, catalogPreview: 'indoor-plant',
     name: 'Yapay Çiçek 1',
@@ -424,7 +424,7 @@ export const INDOOR_PLANT_ITEMS = Object.freeze({
 // Duvara asılan medya ürünleri tek `tv` davranış ailesini paylaşır. Sıradan TV'ler
 // doğrulanmış ekran ölçüsüne göre parametriktir; widthCm/heightCm görünür ekrandır.
 // Video wall panel ölçüsü VIDEO_WALL_PANEL Item'ındadır; ızgara rows/cols parent'ta kalır.
-export const WALL_MEDIA_ITEMS = Object.freeze({
+const WALL_MEDIA_ITEMS = Object.freeze({
   TV_42: Object.freeze({
     itemKey: 'TV_42', catalogVisible: true, catalogCategory: 'electronics-lighting', catalogItemIndex: 1, catalogPreview: 'tv', name: 'TV 42"', type: 'tv',
     dimensions: Object.freeze({
@@ -500,7 +500,7 @@ export function resolveWallMediaMetrics(itemOrKey) {
   });
 }
 
-export const COMPOSITE_ITEMS = Object.freeze({
+const COMPOSITE_ITEMS = Object.freeze({
   door_100: Object.freeze({
     itemKey: 'door_100', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 9, catalogPreview: 'door',
     name: 'Depo Kapısı 100',
@@ -849,6 +849,18 @@ export const COMPOSITE_ITEMS = Object.freeze({
   }),
 });
 
+export const ITEMS = Object.freeze({
+  ...LEAF_ITEMS,
+  ...COMMERCIAL_ITEMS,
+  ...FURNITURE_ITEMS,
+  ...INDOOR_PLANT_ITEMS,
+  ...WALL_MEDIA_ITEMS,
+  ...TOP_LIGHT_ITEMS,
+  ...NON_CATALOG_ITEMS,
+  ...FLOOR_ITEMS,
+  ...COMPOSITE_ITEMS,
+});
+
 const SHOWCASE_ITEM_KEYS_BY_TYPE = Object.freeze({
   'showcase-2': 'wall_showcase_100_2',
   'showcase-3': 'wall_showcase_100_3',
@@ -886,16 +898,7 @@ export function getShowcaseBodyDefinition(itemOrKey) {
 }
 
 export function getItem(itemKey) {
-  return COMMERCIAL_ITEMS[itemKey]
-    ?? FURNITURE_ITEMS[itemKey]
-    ?? INDOOR_PLANT_ITEMS[itemKey]
-    ?? WALL_MEDIA_ITEMS[itemKey]
-    ?? TOP_LIGHT_ITEMS[itemKey]
-    ?? NON_CATALOG_ITEMS[itemKey]
-    ?? FLOOR_ITEMS[itemKey]
-    ?? COMPOSITE_ITEMS[itemKey]
-    ?? LEAF_ITEMS[itemKey]
-    ?? null;
+  return ITEMS[itemKey] ?? null;
 }
 
 export function isShortUpFamilyDescriptor(descriptor) {
@@ -903,26 +906,8 @@ export function isShortUpFamilyDescriptor(descriptor) {
   return variant === 'short-up-1' || variant === 'short-up-2';
 }
 
-export function listCompositeItems() {
-  return Object.values(COMPOSITE_ITEMS);
-}
-
-export function listLeafItems() {
-  return Object.values(LEAF_ITEMS);
-}
-
 export function listRegisteredItems() {
-  return Object.freeze([
-    ...Object.values(LEAF_ITEMS),
-    ...Object.values(COMMERCIAL_ITEMS),
-    ...Object.values(FURNITURE_ITEMS),
-    ...Object.values(INDOOR_PLANT_ITEMS),
-    ...Object.values(WALL_MEDIA_ITEMS),
-    ...Object.values(TOP_LIGHT_ITEMS),
-    ...Object.values(NON_CATALOG_ITEMS),
-    ...Object.values(FLOOR_ITEMS),
-    ...Object.values(COMPOSITE_ITEMS),
-  ]);
+  return Object.freeze(Object.values(ITEMS));
 }
 
 function optionalNumber(value) {

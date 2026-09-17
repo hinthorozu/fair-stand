@@ -5,7 +5,6 @@ import {
   listCatalogItems,
 } from '../src/catalog.js';
 import {
-  FLOOR_ITEMS,
   getFloorItem,
   getFloorSelectLabel,
   getItem,
@@ -39,25 +38,27 @@ test('floor Items use existing floorType keys and stay off the module catalog', 
     assert.equal(getCatalogItem(itemKey) != null, false);
   }
 
-  assert.equal(FLOOR_ITEMS.karolaj.dimensions.widthCm, 100);
-  assert.equal(FLOOR_ITEMS.karolaj.dimensions.depthCm, 100);
-  assert.equal(FLOOR_ITEMS.karolaj.defaultColor, '#e9edf1');
-  assert.equal(FLOOR_ITEMS.karolaj.paintable, true);
-  assert.equal(FLOOR_ITEMS.hali.defaultColor, '#8b8f94');
-  assert.equal(FLOOR_ITEMS.hali.paintable, true);
-  assert.equal(Object.hasOwn(FLOOR_ITEMS.hali, 'dimensions'), false);
+  const karolaj = getItem('karolaj');
+  const hali = getItem('hali');
+  assert.equal(karolaj.dimensions.widthCm, 100);
+  assert.equal(karolaj.dimensions.depthCm, 100);
+  assert.equal(karolaj.defaultColor, '#e9edf1');
+  assert.equal(karolaj.paintable, true);
+  assert.equal(hali.defaultColor, '#8b8f94');
+  assert.equal(hali.paintable, true);
+  assert.equal(Object.hasOwn(hali, 'dimensions'), false);
 
-  assert.equal(isParquetFloorItem(FLOOR_ITEMS['parke-acik']), true);
-  assert.equal(FLOOR_ITEMS['parke-acik'].dimensions.lengthCm, 140);
-  assert.equal(FLOOR_ITEMS['parke-acik'].dimensions.depthCm, 16);
-  assert.equal(FLOOR_ITEMS['parke-sari'].dimensions.lengthCm, 140);
-  assert.equal(FLOOR_ITEMS['parke-beton'].dimensions.lengthCm, 112);
-  assert.equal(FLOOR_ITEMS['parke-beton'].dimensions.depthCm, 28);
-  assert.equal(FLOOR_ITEMS['parke-beton'].paintable, false);
+  assert.equal(isParquetFloorItem(getItem('parke-acik')), true);
+  assert.equal(getItem('parke-acik').dimensions.lengthCm, 140);
+  assert.equal(getItem('parke-acik').dimensions.depthCm, 16);
+  assert.equal(getItem('parke-sari').dimensions.lengthCm, 140);
+  assert.equal(getItem('parke-beton').dimensions.lengthCm, 112);
+  assert.equal(getItem('parke-beton').dimensions.depthCm, 28);
+  assert.equal(getItem('parke-beton').paintable, false);
   assert.equal(getFloorItem('parke'), null);
-  assert.equal(isGridTileFloorItem(FLOOR_ITEMS.karolaj), true);
-  assert.equal(isCarpetFloorItem(FLOOR_ITEMS.hali), true);
-  assert.equal(isCarpetFloorItem(FLOOR_ITEMS.karolaj), false);
+  assert.equal(isGridTileFloorItem(karolaj), true);
+  assert.equal(isCarpetFloorItem(hali), true);
+  assert.equal(isCarpetFloorItem(karolaj), false);
   assert.equal(resolveStandFloorItemKey({ floorType: 'hali' }), 'hali');
   assert.equal(resolveStandFloorItemKey({ itemKey: 'parke-beton', floorType: 'hali' }), 'parke-beton');
 });

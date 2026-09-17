@@ -2,7 +2,65 @@
 
 Fair Stand yeni Item modelinin yaşayan canonical sözleşmesi. Audit dökümü değildir.
 
-Bu belgede yalnız **yeni mimaride karar verilmiş** alanlar durur. Eski sistemdeki property envanteri buraya taşınmaz. Bir alan ancak bir refactor adımında Item modeline kabul edilmişse şemaya girer.
+---
+
+## Runtime field kuyruğu (şemaya henüz alınmadı)
+
+`listRegisteredItems()` 96 satırında duran alanlar. Bu tablo **onaylı şema değildir**. Zamanla, her alan ayrı kararla aşağıdaki “Zorunlu / opsiyonel / Catalog” bölümlerine alınır.
+
+Kaynak: `src/items.js` taraması (2026-09-17). N = kaç Item’da path var.
+
+Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision hâlâ `type` → `TYPE_BEHAVIORS`; recipe BOM `composition.moduleType` + `moduleRecipes`.
+
+| Field | N | Src’de ne işe yarıyor |
+|---|---|---|
+| `itemKey` | 96 | Ürün kimliği. `getItem` / `resolveItemKey`. **Şemada onaylı.** |
+| `name` | 96 | İnsan adı. Catalog `label`, seçim metni, zemin select. |
+| `type` | 96 | Factory, `TYPE_BEHAVIORS`, recipe lookup, `resolveItemKey` adayı. Catalog kart tipi değil. |
+| `catalogVisible` | 96 | Katalogda görünsün mü. **Şemada onaylı.** |
+| `catalogCategory` | 96 | Katalog grubu key veya `null`. **Şemada onaylı.** |
+| `catalogItemIndex` | 96 | Grup içi sıra veya `null`. **Şemada onaylı.** |
+| `catalogPreview` | 58 | Kart silüet key. Yalnız görünür Item. **Şemada onaylı.** |
+| `unit` | 46 | BOM satır birimi. Recipe’siz Item’da `itemBom` zorunlu sayar. 50 Item’da yok. |
+| `dimensions` | 90 | Fiziksel ölçü. 6 Item’da yok (4 connector, `shelf_leg`, `hali`). **Şemada onaylı (opsiyonel).** |
+| `dimensions.widthCm` | 71 | Genişlik cm. Recipe parent genişliği. |
+| `dimensions.depthCm` | 52 | Derinlik cm. |
+| `dimensions.heightCm` | 42 | Yükseklik cm. |
+| `dimensions.lengthCm` | 17 | Üretim boyu. Width’e remap yok. |
+| `dimensions.thicknessCm` | 34 | Kalınlık. Depth’e remap yok. |
+| `dimensions.mountHeightCm` | 1 | `led_floodlight` montaj yüksekliği 350. |
+| `dimensions.wallGapCm` | 1 | `illuminated-foam` duvar boşluğu. |
+| `sceneDimensions` | 32 | Aynı field adıyla sahne override. **Şemada onaylı (opsiyonel).** |
+| `sceneDimensions.widthCm` | 10 | Effective scene width. |
+| `sceneDimensions.depthCm` | 24 | Effective scene depth. |
+| `sceneDimensions.heightCm` | 24 | Effective scene height. |
+| `defaultColor` | 30 | Varsayılan renk (hex sayı veya zemin string). |
+| `material` | 34 | Üretim malzemesi metni. Vitrin gövde `sunta` kilidi. |
+| `nominalModuleWidthCm` | 23 | 50/100/150/200. Src okuyan: `moduleRecipes` iç-köşe panel eşlemesi. Diğer satırlarda alan duruyor. |
+| `panelRole` | 8 | `straight` / `inner-corner`. İç köşe BOM panel değişimi. |
+| `connectorType` | 4 | `start`/`single`/`double`/`corner` → `getConnectorItemKey`. |
+| `composition` | 30 | Bileşik yapı. |
+| `composition.mode` | 28 | `recipe` → `resolveItemBom`. |
+| `composition.moduleType` | 28 | Recipe anahtarı (`wall`, `counter`, …). |
+| `composition.options.shape` | 3 | L banko recipe `'L'`. |
+| `composition.items` | 2 | Koltuk/Eames çocuk listesi `{itemKey, quantity}`. |
+| `shape` | 3 | Kök `'L'` (köşe banko). |
+| `variant` | 8 | `short-up-1` / `short-up-2`. |
+| `stripOccupancy.align` | 8 | Short-up `'top'`. |
+| `stripOccupancy.stripCount` | 8 | 1 veya 2 şerit. |
+| `modelFile` | 9 | GLB adı. |
+| `modelRotationYDeg` | 5 | Model Y dönüşü. |
+| `preserveModelScale` | 5 | GLB ölçek ezilmesin mi. |
+| `visualRotationYDeg` | 3 | Çöp/koltuk görsel Y. |
+| `eyeCount` | 2 | Vitrin 2/3 göz. |
+| `bodyItems.sideItemKey` | 2 | Vitrin yan sunta. |
+| `bodyItems.horizontalItemKey` | 2 | Vitrin yatay sunta. |
+| `bodyItems.glassShelfItemKey` | 2 | Cam raf Item. |
+| `videoWall.rows` / `videoWall.cols` | 2 | Video wall ızgara. |
+| `videoWall.panelItemKey` | 2 | `VIDEO_WALL_PANEL`. |
+| `paintable` | 5 | Zemin boyanır mı. |
+
+Aşağıdaki bölümler yalnız **karar verilmiş** şemadır. Kuyruktaki bir alan ancak ayrı refactor adımında kabul edilirse oraya geçer.
 
 Ayrıntılı mekanizma sözleşmeleri ayrı dosyadadır. ITEMS.md o dosyaları kopyalamaz; Item config’in hangi mekanizmaya bağlandığını gösterir.
 
@@ -25,6 +83,14 @@ Tekil kimlik `itemKey`’dir. Label, GLB dosya adı, renderer node adı veya kat
 Item, davranış algoritmasını içermez. Item, canonical mechanism’in okuduğu master veriyi ve config parametrelerini taşır.
 
 Item master Catalog’dan bağımsızdır. Bir Item’ın `getItem(itemKey)` ile var olması katalogda görünmesi değildir. `catalogVisible=false` Item’ı AutoDepot, Module Contract, BOM, renderer veya placement’tan kaldırmaz.
+
+---
+
+## Kayıt
+
+Tek public tablo `export const ITEMS` (`src/items.js`). Lookup `getItem(itemKey)` = `ITEMS[itemKey] ?? null`. `listRegisteredItems()` = `Object.values(ITEMS)`.
+
+Dosyadaki yazım bölümleri ürün kimliği değildir ve export edilmez. Item satırı `itemKey` ile durur.
 
 ---
 

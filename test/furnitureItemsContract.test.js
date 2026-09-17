@@ -16,7 +16,7 @@ import {
   duplicateModuleState,
   normalizeModuleItemState,
 } from '../src/designState.js';
-import { FURNITURE_ITEMS, getItem, resolveItemKey } from '../src/items.js';
+import { getItem, resolveItemKey } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 
@@ -145,7 +145,7 @@ const EXPECTED = {
   },
 };
 
-for (const itemKey of Object.keys(FURNITURE_ITEMS)) {
+for (const itemKey of Object.keys(EXPECTED)) {
   test(`${itemKey}: canonical furniture identity and state parity`, () => {
     const item = getItem(itemKey);
     const expected = EXPECTED[itemKey];

@@ -1,30 +1,30 @@
 {
   "schemaVersion": 2,
-  "id": "catalog-thin-projection",
+  "id": "items-single-registry",
   "kind": "architecture",
-  "summary": "Catalog kartı yalnız itemKey / label / catalogPreview. Factory ve preview silüeti Item + resolveSceneDimensions.",
+  "summary": "Dokuz kova export kalktı. Tek public tablo ITEMS; getItem ve listRegisteredItems buradan okur.",
   "owners": [
-    "src/catalog.js",
-    "src/designState.js",
-    "src/moduleDragSidebar.js"
+    "src/items.js",
+    "docs/refactor/ITEMS.md"
   ],
   "sourceOfTruth": [
-    "src/catalog.js"
+    "src/items.js",
+    "docs/refactor/ITEMS.md"
   ],
   "impact": {
     "catalog": "affected",
-    "behavior": "affected",
-    "state": "affected",
-    "placement": "affected",
-    "renderer": "affected",
-    "persistence": "affected",
+    "behavior": "not-applicable",
+    "state": "not-applicable",
+    "placement": "not-applicable",
+    "renderer": "not-applicable",
+    "persistence": "not-applicable",
     "bom": "affected",
-    "ui": "affected",
-    "composition": "affected",
-    "assets": "affected",
-    "storage": "affected",
-    "importExport": "affected",
-    "performance": "affected",
+    "ui": "not-applicable",
+    "composition": "not-applicable",
+    "assets": "not-applicable",
+    "storage": "not-applicable",
+    "importExport": "not-applicable",
+    "performance": "not-applicable",
     "accessibility": "not-applicable",
     "architecture": "affected",
     "security": "not-applicable",
@@ -38,8 +38,10 @@
       "docs/items/audit/report/MEKANIZMA_PARAMETRE.html",
       "docs/items/audit/report/audit-data.json",
       "index.html",
+      "items-export.js",
       "scripts/add-tv-sizes.py",
       "scripts/add-video-wall-2x2.py",
+      "scripts/export-items-excel.mjs",
       "scripts/fix-tv-screen-face.py",
       "scripts/patch-video-wall-2x2.cjs",
       "scripts/patch-video-wall-single-image.cjs",
@@ -785,33 +787,38 @@
         "F-045"
       ]
     },
-    "notes": "Catalog snapshot alias kalktı. Kart projection aynı. MODULE_WIDTHS_CM ve resolveItemKey import yolu bu sette."
+    "notes": "Lookup aynı 96 satır. Public kova yok. Catalog kartı ve recipe miktarı değişmedi."
   },
   "tests": {
     "targeted": [
       "test/catalogDomainBoundary.test.js",
-      "test/catalogItemProjection.test.js",
-      "test/catalogSingleSource.test.js",
-      "test/visibleUiContract.test.js"
+      "test/commercialItemsContract.test.js",
+      "test/doorCompositeItemContract.test.js",
+      "test/doorLeafItemContract.test.js",
+      "test/floorItemsContract.test.js",
+      "test/furnitureItemsContract.test.js",
+      "test/lightingItemsContract.test.js",
+      "test/moduleRecipes.test.js",
+      "test/wallMediaItemsContract.test.js",
+      "test/itemCatalogFields.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/smoke.spec.mjs",
-        "e2e/visible-ui-b.spec.mjs"
+        "e2e/smoke.spec.mjs"
       ],
-      "reason": "catalog/ui/composition frozen. Değer değişmedi; smoke + visible-ui-b."
+      "reason": "items.js catalog/bom domain; kart ve factory değeri aynı. smoke."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Snapshot alias ve import yolu; kart/compose değerleri aynı."
+    "notes": "Aynı 96 Item; yalnız lookup tablosu birleşti."
   },
   "migration": {
     "required": false,
-    "notes": "Persist/schema yok. Değer değişmedi."
+    "notes": "Persist/schema yok. itemKey değerleri aynı."
   },
-  "rollback": "MODULE_CATALOG* derived export’u ve Catalog re-export resolveItemKey / MODULE_WIDTHS_CM’i geri koymak."
+  "rollback": "Kova export’larını ve getItem zincirini geri koymak."
 }

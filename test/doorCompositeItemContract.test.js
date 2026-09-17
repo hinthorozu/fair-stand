@@ -7,7 +7,7 @@ import {
 } from '../src/catalog.js';
 import { createModuleStateFromDescriptor, normalizeModuleItemState } from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
-import { getItem, LEAF_ITEMS } from '../src/items.js';
+import { getItem } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { getExpandedModuleRecipe, getModuleRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
@@ -44,7 +44,8 @@ test('door_100 is the single canonical composite Item identity', () => {
     moduleType: 'door',
   });
   assert.equal(getItem('door_100').itemKey, 'door_100');
-  assert.equal(LEAF_ITEMS.door_100, undefined, 'bileşik parent leaf map içinde durmaz');
+  assert.equal(getItem('door_100').composition.mode, 'recipe');
+  assert.equal(Object.hasOwn(getItem('door_leaf_100'), 'composition'), false);
 });
 
 test('legacy uppercase DOOR_100 catalog identity is removed', () => {
