@@ -735,7 +735,15 @@ export function resolveConnectorBom(requirements = []) {
 // Bağımsız ticari ürünler, doğrulanmış ürün varsayılanlarının sahibidir.
 
 
+const COMMERCIAL_TYPES = Object.freeze(new Set([
+  'coat-rack',
+  'kettle',
+  'mini-fridge',
+  'plastic-trash-bin',
+]));
+
 export function getCommercialItemForType(type) {
+  if (!COMMERCIAL_TYPES.has(type)) return null;
   return Object.values(ITEMS).find((item) => item.type === type) ?? null;
 }
 
@@ -743,7 +751,19 @@ export function getCommercialItemForType(type) {
 // BOM decision-required — unit/moduleRecipes uydurulmaz.
 
 
+const FURNITURE_TYPES = Object.freeze(new Set([
+  'sofa-set-classic',
+  'sofa-single-classic',
+  'sofa-double-classic',
+  'coffee-table-classic',
+  'table-chair-set-eames',
+  'chair',
+  'table-glass',
+  'bar-stool',
+]));
+
 export function getFurnitureItemForType(type) {
+  if (!FURNITURE_TYPES.has(type)) return null;
   return Object.values(ITEMS).find((item) => item.type === type) ?? null;
 }
 
@@ -751,7 +771,9 @@ export function getFurnitureItemForType(type) {
 
 
 export function getTopLightItemForType(type) {
-  return Object.values(ITEMS).find((item) => item.type === type) ?? null;
+  if (type !== 'led-floodlight') return null;
+  const item = getItem('led_floodlight');
+  return item?.type === type ? item : null;
 }
 
 // Katalog dışı SVG → ışıklı strafor. itemKey type ile aynıdır; Catalog kartı yoktur.
