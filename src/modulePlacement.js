@@ -207,6 +207,31 @@ function listFittingWallCapacityHosts({
   });
 }
 
+function pointerOnHostSpan(wallPoint, host) {
+  const hostInterval = getPlacementInterval(host?.placement, host?.widthCm);
+  if (!hostInterval) return false;
+  const pointerCm = hostInterval.axis === 'y'
+    ? Number(wallPoint?.pointerYCm)
+    : Number(wallPoint?.pointerXCm);
+  if (!Number.isFinite(pointerCm)) return false;
+  return pointerCm >= hostInterval.startCm - EPSILON_CM
+    && pointerCm <= hostInterval.endCm + EPSILON_CM;
+}
+
+function clampPlacementToHost(placement, widthCm, host) {
+  const interval = getPlacementInterval(placement, widthCm);
+  const hostInterval = getPlacementInterval(host?.placement, host?.widthCm);
+  if (!interval || !hostInterval || interval.axis !== hostInterval.axis) return null;
+  const maxStart = hostInterval.endCm - Number(widthCm);
+  if (maxStart + EPSILON_CM < hostInterval.startCm) return null;
+  const nextStart = clamp(interval.startCm, hostInterval.startCm, maxStart);
+  return createModulePlacement({
+    ...placement,
+    xCm: interval.axis === 'x' ? nextStart : placement.xCm,
+    yCm: interval.axis === 'y' ? nextStart : placement.yCm,
+  });
+}
+
 function placementFitsHost(placement, widthCm, host) {
   const inner = getPlacementInterval(placement, widthCm);
   const outer = getPlacementInterval(host?.placement, host?.widthCm);
@@ -275,6 +300,7 @@ export function snapPanelSeamOverlayPlacement({
   let target = null;
   let bestHostDistance = Number.POSITIVE_INFINITY;
   for (const host of hosts) {
+    if (!pointerOnHostSpan(wallPoint, host)) continue;
     const distance = pointerDistanceToHostCm(wallPoint, host);
     if (distance < bestHostDistance) {
       bestHostDistance = distance;
@@ -282,11 +308,8 @@ export function snapPanelSeamOverlayPlacement({
     }
   }
 
-  if (!target?.placement) {
-    return { ok: false, placement: fallback, seamHeightCm: null, message: missingHostMessage };
-  }
-
-  if (!placementFitsHost(fallback, widthCm, target)) {
+  const clamped = target ? clampPlacementToHost(fallback, widthCm, target) : null;
+  if (!target?.placement || !clamped) {
     return { ok: false, placement: fallback, seamHeightCm: null, message: missingHostMessage };
   }
 
@@ -313,7 +336,7 @@ export function snapPanelSeamOverlayPlacement({
   );
 
   const placement = createModulePlacement({
-    ...fallback,
+    ...clamped,
     zCm: snapped
       ? overlayZCmFromSeamHeight(seamHeightCm, heightCm)
       : (Number.isFinite(hitHeightCm)

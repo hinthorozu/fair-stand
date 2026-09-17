@@ -167,10 +167,17 @@ test('B-D raf sığdığı wall/panel support span’e bağlanır; taşarsa inva
   assert.equal(shelf100On200.seamHeightCm, 100);
   assert.equal(shelf100On200.placement.xCm, 30);
 
+  const shelf200On200 = snapShelf('shelf_200', 'wall_200', 80);
+  assert.equal(shelf200On200.ok, true);
+  assert.equal(shelf200On200.seamHeightCm, 100);
+  assert.equal(shelf200On200.placement.xCm, 0);
+
   assert.equal(snapShelf('shelf_150', 'wall_100', 50).ok, false);
   assert.equal(snapShelf('shelf_200', 'wall_100', 50).ok, false);
   assert.equal(snapShelf('shelf_200', 'wall_150', 75).ok, false);
-  assert.equal(snapShelf('shelf_100', 'wall_200', 10).ok, false);
+  const shelf100On200Edge = snapShelf('shelf_100', 'wall_200', 10);
+  assert.equal(shelf100On200Edge.ok, true);
+  assert.equal(shelf100On200Edge.placement.xCm, 0);
 });
 
 test('G-I panel internal seam snap: geçerli birleşim, orta ve dış sınır reddi', () => {
