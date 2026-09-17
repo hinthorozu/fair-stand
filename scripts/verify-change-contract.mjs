@@ -91,6 +91,12 @@ function changedFilesFromEnvironment() {
     };
   }
 
+  // Explicit base overrides GitHub push/PR windows. CI uses this so a RefactorItem
+  // push cannot hide the accumulated Version2 merge-base behind before..after.
+  if (process.env.CHANGE_GATE_BASE?.trim()) {
+    return changedFilesFromLocalGit();
+  }
+
   const eventName = process.env.GITHUB_EVENT_NAME;
   const eventPath = process.env.GITHUB_EVENT_PATH;
 

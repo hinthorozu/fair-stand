@@ -4,10 +4,6 @@ export function getRecipeItemKey(item) {
   return item?.itemKey ?? null;
 }
 
-export function getRecipeInnerCornerPanelKey(item) {
-  return item?.composition?.innerCorner?.panelItemKey ?? null;
-}
-
 function applyVariantItemReplacements(items, replacements = [], recipeId = 'unknown') {
   let resolvedItems = items;
 

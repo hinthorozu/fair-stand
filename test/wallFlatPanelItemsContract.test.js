@@ -99,7 +99,8 @@ for (const itemKey of WALL_KEYS) {
       recipe.items.map((entry) => [entry.itemKey ?? entry.partId, entry.quantity]),
     );
     assert.deepEqual(quantities, expected.recipeQuantities);
-    assert.equal(recipe.variants.innerCornerPanelItemKey, expected.cornerPanel);
+    assert.equal(recipe.composition.innerCorner.panelItemKey, expected.cornerPanel);
+    assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey);
 
     const legacy = JSON.parse(JSON.stringify(state));
     delete legacy.itemKey;

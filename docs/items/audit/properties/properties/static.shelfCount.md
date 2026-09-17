@@ -1,5 +1,7 @@
 # `static.shelfCount`
 
+> **STALE.** `static.shelfCount` bir JS Item alanı değildir. `src/items.js` kayıtlarında `shelfCount` yok. Raf adedi `itemKey` (`wall_shelf_2_*` / `wall_shelf_3_*`) ve factory `state.shelfCount` üzerinden gider. Aşağıdaki grep satırları audit türevidir; `item.shelfCount` production okuması değildir.
+
 **Özellik ID:** `static.shelfCount`
 **İnsan tarafından anlaşılır adı:** Raf adedi (item kaydı)
 **Kategori:** kanonik-kayit

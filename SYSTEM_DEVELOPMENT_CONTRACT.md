@@ -32,14 +32,17 @@ Universal gate gerçek etki alanını ve bağımlılıkları bulur; `ITEM_CONTRA
 | Global ürün invariantları | `PROJECT_RULES.md` |
 | Mimari sınırlar | `ARCHITECTURE_RULES.md` |
 | Katalog kimliği / nominal descriptor | `src/catalog.js` |
-| Modül contract profile ve politika ataması | `src/moduleContracts.js` |
-| Feature / composition contract | `src/featureContracts.js` |
-| Placement / move snap / rotation / collision / ghost | `src/moduleBehavior.js` + placement core |
+| Modül contract profile / politika ataması (GOVERNANCE spec; runtime SoT değil) | `src/moduleContracts.js` |
+| Feature / composition contract (GOVERNANCE; planner runtime okumaz) | `src/featureContracts.js` |
+| Placement / move snap / rotation / collision / ghost | `src/moduleBehavior.js` + placement core (`wallReflow.js` production insert) |
 | Runtime module state construction | `src/designState.js` |
-| Üretim reçetesi | `src/moduleRecipes.js` |
+| Üretim reçetesi / runtime BOM | `src/moduleRecipes.js` + `src/itemBom.js` |
 | Üretim parçası / Item registry | `src/items.js` |
-| Otomatik depo planı | `src/autoDepot.js` |
-| Unit/integration regression | `test/` ve mevcut legacy `tests/` |
+| Item yüzey image/color yeteneği | `src/itemCapabilities.js` (`scene3d` `acceptsImage` türevi) |
+| Otomatik depo planı (runtime) | `src/autoDepot.js` |
+| Otomatik duvar planı (runtime) | `src/automaticWall.js` |
+| BOM kullanıcı UI | Yok (DEV `?rawBom` debug; production UI ertelendi) |
+| Unit/integration regression | `test/` |
 | Real-browser regression | `e2e/` + `playwright.config.mjs` |
 
 **Kural:** Bir runtime değeri canonical kod kaynağında varsa Markdown içine ikinci sabit kaynak olarak kopyalanmaz.
@@ -198,12 +201,16 @@ Save/load etkileniyorsa persistence round-trip; BOM etkileniyorsa Item/recipe/BO
 
 # 5. Enforced module gate
 
-`src/moduleContracts.js` iki katman kullanır:
+`src/moduleContracts.js` **GOVERNANCE / spec** katmanıdır; runtime BOM veya behavior source-of-truth değildir.
+
+İki katman kullanır:
 
 1. `MODULE_CONTRACT_PROFILES`
 2. `MODULE_CONTRACT_ASSIGNMENTS`
 
-`test/systemDevelopmentContract.test.js` katalog öğelerinin explicit contract ataması taşımasını, gerekli policy bölümlerini resolve etmesini, recipe-backed modüllerin gerçek recipe çözmesini ve katalog dışı runtime modüllerinin explicit contract taşımasını zorlar.
+`test/systemDevelopmentContract.test.js` katalog öğelerinin explicit contract ataması taşımasını, gerekli policy bölümlerini resolve etmesini, recipe-backed modüllerin gerçek Item `composition.items` reçetesini çözmesini ve katalog dışı runtime modüllerinin explicit contract taşımasını zorlar.
+
+Production `src/itemBom.js` ve `src/moduleBehavior.js` `moduleContracts.js` import etmez. Contract registry runtime’ın ikinci implementasyonu yapılmaz.
 
 Bu module gate universal change gate'in veya `ITEM_CONTRACT.md` kapsamındaki Item gate'in yerine geçmez; onların altında domain-specific enforcement katmanıdır.
 
@@ -211,7 +218,9 @@ Bu module gate universal change gate'in veya `ITEM_CONTRACT.md` kapsamındaki It
 
 # 6. Feature / composition gate
 
-Bir işlem tek modül davranışından fazlasını yönetiyorsa `src/featureContracts.js` kullanılır.
+`src/featureContracts.js` **GOVERNANCE** katmanıdır. `autoDepot.js` / `automaticWall.js` planner’ları registry’yi runtime’da okumaz.
+
+Bir işlem tek modül davranışından fazlasını yönetiyorsa feature contract kaydı tutulur; testler planner çıktısını bu sözleşmeyle karşılaştırır.
 
 Mevcut `automatic-depot` feature contract'ı structural output ve içerik ailelerini açıkça tanımlar. Planner ile contract drift ederse regression kırılmalıdır.
 

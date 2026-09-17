@@ -9,6 +9,7 @@ import {
   getExpandedModuleRecipe,
   getModuleRecipe,
   getRecipeInnerCornerPanelKey,
+  recipeParentItem,
 } from './recipeParentItemKey.js';
 
 const CORNER_PANEL_CASES = {
@@ -72,9 +73,10 @@ test('remaining inner-corner panels use canonical itemKey in exactly six active 
     for (const [type, width, options] of recipes) {
       const recipe = getModuleRecipe(type, width, options);
       assert.ok(recipe);
-      assert.equal(recipe.variants.innerCornerPanelItemKey, itemKey, recipe.recipeId);
+      assert.equal(recipe.composition.innerCorner.panelItemKey, itemKey, recipe.recipeId);
+      assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey, recipe.recipeId);
       assert.equal(recipe.variants.innerCornerPanelPartId, undefined, recipe.recipeId);
-      assert.equal(getRecipeInnerCornerPanelKey(recipe), itemKey, recipe.recipeId);
+      assert.equal(getRecipeInnerCornerPanelKey(recipeParentItem(type, width, options)), itemKey, recipe.recipeId);
       occurrences += 1;
     }
     assert.equal(occurrences, recipes.length, itemKey);

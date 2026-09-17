@@ -967,6 +967,11 @@ const CONNECTOR_ITEM_KEYS_BY_TYPE = Object.freeze({
   corner: 'connector_corner',
 });
 
+/**
+ * TEST_ONLY connector type→itemKey yardımcısı.
+ * Production BOM child satırları `composition.items` içindeki `itemKey` taşır;
+ * `resolveItemBom` / `expandRecipe` bu API’yi çağırmaz.
+ */
 export function getConnectorItemKey(connectorType) {
   return CONNECTOR_ITEM_KEYS_BY_TYPE[connectorType] ?? null;
 }

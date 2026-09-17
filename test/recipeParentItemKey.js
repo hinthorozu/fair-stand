@@ -26,6 +26,10 @@ function recipeView(item) {
   return {
     recipeId: item.itemKey,
     items: item.composition.items,
+    composition: {
+      innerCorner: inner ?? null,
+    },
+    // TEST_PROJECTION: değer kopyası. Production JS path `composition.innerCorner.panelItemKey`.
     variants: inner
       ? {
         innerCornerPanelItemKey: inner.panelItemKey,
@@ -55,10 +59,8 @@ export function getExpandedStraightWallRecipe(widthCm, options = {}) {
   return expandRecipe(getItem(`wall_${widthCm}`), options);
 }
 
-export function getRecipeInnerCornerPanelKey(itemOrView) {
-  return itemOrView?.composition?.innerCorner?.panelItemKey
-    ?? itemOrView?.variants?.innerCornerPanelItemKey
-    ?? null;
+export function getRecipeInnerCornerPanelKey(item) {
+  return item?.composition?.innerCorner?.panelItemKey ?? null;
 }
 
 export { expandRecipe, getRecipeItemKey };

@@ -220,7 +220,9 @@ Bu gate mevcut contract'ların yerine geçmez.
 
 ## CI
 
-PR veya Version2 push'unda verifier değişen dosyaları GitHub event SHA'larından çözer ve şunları denetler:
+`CHANGE_GATE_BASE` set ise verifier GitHub `push` `before..after` penceresini kullanmaz; local merge-base + working tree kullanır. Canonical CI `CHANGE_GATE_BASE=refs/remotes/origin/Version2` verir ki RefactorItem push'u birikmiş Version2 yüzeyini gizlemesin.
+
+`CHANGE_GATE_BASE` yoksa PR/Version2 push GitHub event SHA'larından çözülür ve şunları denetler:
 
 1. Guarded dosya değişmişse `.github/change-contract.json` aynı diff içinde değişmiş mi?
 2. Contract schema eksiksiz mi?

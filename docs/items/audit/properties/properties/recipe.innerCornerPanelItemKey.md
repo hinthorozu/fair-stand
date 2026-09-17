@@ -1,5 +1,7 @@
 # `recipe.innerCornerPanelItemKey`
 
+> **STALE / TEST_PROJECTION.** Bu audit id bir JS alanı değildir. Production path: `item.composition.innerCorner.panelItemKey` (`src/moduleRecipes.js` `expandRecipe`). `recipeView.variants.innerCornerPanelItemKey` yalnız test kopyasıdır. `src/getRecipeInnerCornerPanelKey` yoktur; test helper `test/recipeParentItemKey.js` Item composition path okur.
+
 **Özellik ID:** `recipe.innerCornerPanelItemKey`
 **İnsan tarafından anlaşılır adı:** İç köşe panel replacement anahtarı
 **Kategori:** bom-recipe
@@ -23,7 +25,7 @@ Parent composition recipe üstverisi.
 
 ## Okuyan yerler
 
-- `src/moduleRecipes.js` `getRecipeInnerCornerPanelKey` :203 [read]
+- `src/moduleRecipes.js` `item.composition.innerCorner?.panelItemKey` (expandRecipe)
 - `test/cornerPanelsItemContract.test.js` `for` :79 [test]
 - `test/panel197ItemContract.test.js` `for` :64 [test]
 - `test/panelCorner192ItemContract.test.js` `for` :38 [test]
@@ -107,9 +109,7 @@ Bu sütun runtime Item alanı değil; audit/çözümleyici görünümüdür veya
 - src dosya sayısı (unique): **1**
 - src dosyaları: `src/moduleRecipes.js`
 
-- `src/moduleRecipes.js` (dosya düzeyi) :6 [write-or-literal]
-- `src/moduleRecipes.js` `getRecipeInnerCornerPanelKey` :203 [read]
-- `src/moduleRecipes.js` `resolveRecipeItemsForPanelVariant` :238 [write]
+- `src/moduleRecipes.js` `item.composition.innerCorner.panelItemKey` (ITEMS kaydı; expandRecipe okur)
 - `test/cornerPanelsItemContract.test.js` `for` :79 [test]
 - `test/panel197ItemContract.test.js` `for` :64 [test]
 - `test/panelCorner192ItemContract.test.js` `for` :38 [test]

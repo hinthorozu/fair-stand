@@ -39,7 +39,7 @@ Yeni Item: `VIDEO_WALL_PANEL` (`catalogVisible=false`). `listRegisteredItems()` 
 | 2 | `src/moduleBehavior.js` | davranış kaydı alanları + `TYPE_BEHAVIORS` 27 type anahtarı + ghost |
 | 3 | `MODULE_BEHAVIOR_STANDARD.md` | sözleşme alan adları (kodla aynı küme; `collisionHeight` belgede yok, kodda var) |
 | 4 | `src/moduleContextMenu.js` | 10 `data-module-action` + görünme koşulları |
-| 5 | `src/itemCapabilities.js` | type `door-leaf` + 5 bayrak |
+| 5 | `src/itemCapabilities.js` | type image/color haritası + `itemSurfaceAcceptsImage` |
 | 6 | `src/surfaceStateBinding.js` | 8 `FABRIC_KEYS` + `isGlass` |
 | 7 | `src/scene3d.js` | `selectionMode`, `surfaceRole`, kılıf / `acceptsColor` / `acceptsImage` |
 | 8 | `src/designState.js` | `MODULE_STATE_FACTORIES` 25 anahtar + factory çıktı alanları |
@@ -112,9 +112,9 @@ Map sayıları: `LEAF_ITEMS` 39, `COMMERCIAL_ITEMS` 4, `FURNITURE_ITEMS` 8, `TOP
 | bileşim satırları | `composition.items` | `furniture_sofa_set_classic`, `furniture_table_chair_set_eames` | `src/items.js` | `item-tanim` | asıl sahip; `itemBom.js` yalnız `mode === 'recipe'` okur |
 | bileşim child | `composition.items.itemKey` | `furniture_sofa_double_classic`, `furniture_sofa_single_classic`, `furniture_coffee_table_classic`, `glass_table`, `chair_eames` | `src/items.js` | `item-tanim` | asıl sahip |
 | bileşim miktarı | `composition.items.quantity` | sayı (alan var; bu tur değer kopyalanmaz) | `src/items.js` | `item-tanim` | asıl sahip |
-| bileşim modül tipi | `composition.moduleType` | `door`, `base`, `counter`, `wall`, `wall-short-up-2`, `wall-short-up-1`, `separator`, `showcase-2`, `showcase-3` | `src/items.js` | `item-tanim` | asıl sahip |
-| bileşim seçenek | `composition.options` | nesne | `src/items.js` | `item-tanim` | asıl sahip |
-| bileşim şekil | `composition.options.shape` | `L` | `src/items.js` | `item-tanim` | asıl sahip |
+| bileşim modül tipi | `composition.moduleType` | `door`, `base`, `counter`, `wall`, `wall-short-up-2`, `wall-short-up-1`, `separator`, `showcase-2`, `showcase-3` | `src/items.js` | `item-tanim` | DEPRECATED SCHEMA_ONLY; production okumaz |
+| bileşim seçenek | `composition.options` | nesne | `src/items.js` | `item-tanim` | DEPRECATED SCHEMA_ONLY |
+| bileşim şekil | `composition.options.shape` | `L` | `src/items.js` | `item-tanim` | DEPRECATED SCHEMA_ONLY; canlı `item.shape` |
 | video duvar | `videoWall` | nesne | `src/items.js` | `item-tanim` | asıl sahip |
 | video sütun | `videoWall.cols` | `2` (`VIDEO_WALL_2X2`), `3` (`VIDEO_WALL_3X3`) | `src/items.js` | `item-tanim` | asıl sahip |
 | video satır | `videoWall.rows` | `2`, `3` | `src/items.js` | `item-tanim` | asıl sahip |
@@ -215,11 +215,11 @@ Görülen `overlapWithTypes`: `['kettle']`, `['mini-fridge']`, `['flat-panel','p
 
 ## 4. Yüzey kılıfı
 
-`ITEM_SURFACE_CAPABILITIES_BY_TYPE` yalnız type `door-leaf`. Cam/lightbox/mesh panel yolu `selectionMode === 'panel'`.
+`ITEM_SURFACE_CAPABILITIES_BY_TYPE` image/color: `door-leaf`, `flat-panel`, `base`, `counter`, `door`, `showcase-2`, `showcase-3`. Cam/lightbox/mesh bayrakları false kalır. `scene3d` mesh `acceptsImage` `itemSurfaceAcceptsImage` / `getItemSurfaceCapabilities` türevidir.
 
 | alan / aksiyon | kod adı | kanıtlı değerler (yalnız kodda görülen) | sahip dosya | sınıf | not |
 |---|---|---|---|---|---|
-| yüzey yetenek haritası | `ITEM_SURFACE_CAPABILITIES_BY_TYPE` | yalnız `'door-leaf'` | `src/itemCapabilities.js` | `item-tanim` | type anahtarı; `itemKey` değil |
+| yüzey yetenek haritası | `ITEM_SURFACE_CAPABILITIES_BY_TYPE` | `door-leaf`, `flat-panel`, `base`, `counter`, `door`, `showcase-2`, `showcase-3` | `src/itemCapabilities.js` | `item-tanim` | type anahtarı; `scene3d.acceptsImage` türevi |
 | kapı kanadı renk | `.color` | `true` | `src/itemCapabilities.js` | `item-tanim` | asıl sahip |
 | kapı kanadı görsel | `.image` | `true` | `src/itemCapabilities.js` | `item-tanim` | asıl sahip |
 | kapı kanadı cam | `.glass` | `false` | `src/itemCapabilities.js` | `item-tanim` | asıl sahip |
@@ -375,7 +375,7 @@ LED floodlight `surface.color` `'#17191c'`.
 
 ## 7. BOM / composition
 
-`src/itemBom.js`: `composition.mode === 'recipe'` ise `getExpandedModuleRecipe(composition.moduleType, item.dimensions.widthCm, options)`; aksi halde leaf satır (`item.unit` zorunlu). `mode: 'self'` / `decision-required` bu dosyada string olarak yok; `src/moduleContracts.js` BOM policy.
+`src/itemBom.js`: `composition.mode === 'recipe'` ise `expandRecipe(item)`; aksi halde leaf satır (`item.unit` zorunlu). `composition.moduleType` production BOM’da okunmaz (DEPRECATED SCHEMA_ONLY). `mode: 'self'` / `decision-required` bu dosyada string olarak yok; `src/moduleContracts.js` GOVERNANCE BOM policy.
 
 | alan / aksiyon | kod adı | kanıtlı değerler (yalnız kodda görülen) | sahip dosya | sınıf | not |
 |---|---|---|---|---|---|
@@ -391,8 +391,8 @@ LED floodlight `surface.color` `'#17191c'`.
 | reçete şekil | `shape` | `L` (`counter-l:*`) | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
 | reçete satır item | `items[].itemKey` | | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
 | reçete satır miktar | `items[].quantity` | sayı (alan var; değer bu tur kopyalanmaz) | `src/moduleRecipes.js` | `bom-recipe` | |
-| iç köşe panel | `variants.innerCornerPanelItemKey` | `panel_corner_42_5`, `panel_corner_92`, `panel_corner_142_5`, `panel_corner_192` | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
-| iç köşe replacement | `variants.innerCornerItemReplacements` | `{ itemKey, items: [{itemKey, quantity}] }` (showcase) | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
+| iç köşe panel | `composition.innerCorner.panelItemKey` | `panel_corner_42_5`, `panel_corner_92`, `panel_corner_142_5`, `panel_corner_192` | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
+| iç köşe replacement | `composition.innerCorner.itemReplacements` | `{ itemKey, items: [{itemKey, quantity}] }` (showcase) | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
 | panel varyant context | `options.panelVariant` | `straight` (default), `inner-corner` | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
 | küme BOM (mode yok) | `composition.items` | sofa/eames set | `src/items.js` | `bom-recipe` | `itemBom` recipe dalına girmez |
 
@@ -511,7 +511,7 @@ Aşağıdaki token’lar taranan dosyada geçiyor ve **ayrı yetenek satırı de
 Ek kanıt:
 
 - `src/stripOccupancy.js`: `align` ∈ `{top, bottom}` — Item kaydında yalnız `top`.
-- `ITEM_SURFACE_CAPABILITIES_BY_TYPE` tek type: `door-leaf`. Cam/lightbox panel yolu `selectionMode === 'panel'`.
+- `ITEM_SURFACE_CAPABILITIES_BY_TYPE` image/color type’ları: `door-leaf`, `flat-panel`, `base`, `counter`, `door`, `showcase-2`, `showcase-3`. `acceptsImage` türetilir.
 - Tahmin yazılmadı: snap 25, 210°, “5 yüz UI” kodda yok.
 
 Satıra **bilinçli bağlanan ama Item formu olmayan**: bölüm 9 (`stand-proje`) + `STAND_DIMENSIONS` + kamera kısayolları.

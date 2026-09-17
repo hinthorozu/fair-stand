@@ -1,5 +1,7 @@
 # `static.composition.options.shape`
 
+> **DEPRECATED (SCHEMA_ONLY).** 3 L-banko kaydında `{ shape: 'L' }` durur; production `src/` `composition.options` okumaz. Canlı kimlik `item.shape`. Fiziksel silme yok (DECISION-06).
+
 **Özellik ID:** `static.composition.options.shape`
 **İnsan tarafından anlaşılır adı:** Kanonik composition: options.shape
 **Kategori:** kanonik-kayit

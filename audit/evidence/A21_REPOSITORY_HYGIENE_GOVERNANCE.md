@@ -24,7 +24,9 @@ Dal envanteri hâlâ çok sayıda eski birleştirilmiş/geçersiz kılınmış `
 
 ### F-045 — P2 — tek-seferlik kaynak-yeniden-yazan yama betikleri kanonik araçların yanında kalır
 
-`scripts/` dize değiştirme kullanarak kanonik kaynak dosyaları doğrudan yeniden yazan tarihsel tek-seferlik yama/ekle/düzelt betikleri içerir. Örnek: `patch-video-wall-2x2.cjs` `catalog.js`, `designState.js`, `main.js` ve `scene3d.js` düzenler. Bu betikler paket yaşam döngüsü komutları değildir ve güncel migrasyon olarak bildirilmez. Modern kaynağa karşı elle yeniden çalıştırma normal mimari kararları atlayabilir veya eski kodu yeniden sokabilir.
+**CLOSED (DECISION-07 ARCHIVE).** Betikler `scripts/archive/` altındadır; `scripts/archive/README.md` aktif tooling olmadıklarını belirtir. Ayrıntı: `audit/remediation/A21_F045_CLOSURE.md`.
+
+`scripts/` dize değiştirme kullanarak kanonik kaynak dosyaları doğrudan yeniden yazan tarihsel tek-seferlik yama/ekle/düzelt betikleri içerirdi. Örnek: `add-video-wall-2x2.py` ve `add-tv-sizes.py`. Bu betikler paket yaşam döngüsü komutları değildir.
 
 ### F-046 — P2 — kanonik komut zincirinde lint/biçim/statik-kalite kapısı yoktur
 
@@ -41,7 +43,7 @@ Dal envanteri hâlâ çok sayıda eski birleştirilmiş/geçersiz kılınmış `
 
 - A21.01 açık PR/issue envanteri: `AUDITED_OK`.
 - A21.02 bayat/geçersiz kılınmış dallar: `GAP` — F-044.
-- A21.03 tek-seferlik betikler: `GAP` — F-045.
+- A21.03 tek-seferlik betikler: `CLOSED` — F-045 arşiv (`scripts/archive/`).
 - A21.04 belgeleme durum sapması: `GAP` — F-001/F-002/F-003/F-004.
 - A21.05 depo lisansı/public karar: `GAP` — F-043.
 - A21.06 üçüncü-taraf varlık atıfı: `GAP/DECISION_REQUIRED` — F-034.

@@ -133,6 +133,8 @@ Bu yalnızca adlandırma belirsizliği değildir. Taze kaynak kanıtı, bu dosya
 - `main.js` sahne render'ını, katalog çözümlemesini, otomatik depo/duvar bileşimini, modül durum fabrikalarını, varlık depolamayı, proje depolamayı, yerleştirmeyi, duvar reflow'unu, davranışı, otomatik kaydı, proje değiştirmeyi ve UI kontrollerini içe aktarır ve orkestre eder. Yine de yolu hiçbir alan gerektirmez.
 - `autosaveController.js` kalıcılık zamanlamasını ve persist çağrılarını sahiplenir, ancak genel `Controller` dosya adı regex'i yalnızca `ui` gerektirir; persistence yol-zorunlu değildir.
 - `tvConfig.js`, katalog/render mantığının tükettiği kanonik TV boyut/tip/ekran ölçülerini tanımlar, ancak hiçbir alan gerektirmez.
+
+> 2026-09-17 remediation: `src/tvConfig.js` bu ağaçta yoktur (ghost path). Katalog path-zorunluluğu `src/catalog.js`; TV ölçü SoT `src/items.js` WALL_MEDIA. A02.04 bu ghost dosyaya bağlı GAP değildir.
 - `standSetup.js` stand tipi etiketlerini, geçerli ölçü aralığı/adımını ve sahne ölçülerini tanımlar, ancak hiçbir alan gerektirmez.
 - `standCapacity.js` gerçek stand kapasitesini ve başarısızlık semantiğini doğrular, ancak hiçbir alan gerektirmez.
 - `viewKeyboardShortcuts.js` klavye davranışını ve düzenlenebilir-hedef bastırmayı tanımlar, ancak UI/accessibility/behavior alanı gerektirmez.
@@ -150,7 +152,7 @@ Karar: denetim kanonik sorumlulukları belirledikten sonra yol/alan sahipliğini
 
 Madde sonuçları:
 
-- A02.04 katalog yol kapsamı: `GAP` çünkü katalog-komşu kanonik `tvConfig.js` eşlenmemiştir.
+- A02.04 katalog yol kapsamı: `AUDITED_OK` (2026-09-17) — `catalog.js` eşlenir; `tvConfig.js` bu ağaçta yoktur.
 - A02.05 davranış/yerleştirme kapsamı: `GAP` çünkü `groundLayout.js`, `standCapacity.js`, `standSetup.js`, `wall.js` ve diğer ilgili kaynaklar yol-zorunlu değildir.
 - A02.06 durum/kalıcılık/depolama kapsamı: `GAP` çünkü `autosaveController.js`, `projectSwitch.js` ve merkezi orkestrasyon doğru zorlanmaz.
 - A02.07 renderer kapsamı: `GAP` çünkü görüntü yerleşim/sığdırma ve TV yapılandırma yardımcıları eşlenmemiştir.

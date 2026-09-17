@@ -461,3 +461,192 @@ test('wall overlays do not consume continuous wall capacity', () => {
   assert.equal(result.placements.has('tv'), false);
   assert.ok(result.orderedModuleIds.includes('tv'));
 });
+
+test('right insertion stays on the same back wall when the remaining segment fits', () => {
+  const source = module('source', 200, {
+    xCm: 100,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const inserted = module('inserted', 100, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [source],
+    insertedModules: [inserted],
+    targetModuleId: source.id,
+    side: 'right',
+    standType: 'back-wall',
+    standXCm: 500,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.placements.get('inserted'), {
+    xCm: 300,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+});
+
+test('right insertion wraps from the back wall onto the right wall at 270 degrees', () => {
+  const source = module('source', 200, {
+    xCm: 300,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const inserted = module('inserted', 200, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [source],
+    insertedModules: [inserted],
+    targetModuleId: source.id,
+    side: 'right',
+    standType: 'u-stand',
+    standXCm: 500,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.placements.get('inserted'), {
+    xCm: 500,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 270,
+    wallId: 'right',
+  });
+});
+
+test('left insertion wraps from the back wall onto the left wall when that wall is active', () => {
+  const source = module('source', 200, {
+    xCm: 0,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const inserted = module('inserted', 150, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [source],
+    insertedModules: [inserted],
+    targetModuleId: source.id,
+    side: 'left',
+    standType: 'l-left',
+    standXCm: 500,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.placements.get('inserted').wallId, 'left');
+  assert.equal(result.placements.get('inserted').rotationZDeg, 90);
+});
+
+test('L-left insertion never places a module on a right wall segment', () => {
+  const source = module('source', 100, {
+    xCm: 400,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  });
+  const inserted = module('inserted', 150, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [source],
+    insertedModules: [inserted],
+    targetModuleId: source.id,
+    side: 'right',
+    standType: 'l-left',
+    standXCm: 500,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  for (const placement of result.placements.values()) {
+    assert.notEqual(placement.wallId, 'right');
+  }
+});
+
+test('left insertion from the left wall wraps onto the back wall', () => {
+  const source = module('source', 200, {
+    xCm: 0,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 90,
+    wallId: 'left',
+  });
+  const inserted = module('inserted', 100, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [source],
+    insertedModules: [inserted],
+    targetModuleId: source.id,
+    side: 'left',
+    standType: 'u-stand',
+    standXCm: 500,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.placements.get('inserted').wallId, 'back');
+  assert.equal(result.placements.get('inserted').rotationZDeg, 0);
+});
+
+test('left insertion beside a right-wall module keeps canonical 270 degree right-wall orientation', () => {
+  const source = module('source', 200, {
+    xCm: 500,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 270,
+    wallId: 'right',
+  });
+  const inserted = module('inserted', 100, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [source],
+    insertedModules: [inserted],
+    targetModuleId: source.id,
+    side: 'left',
+    standType: 'u-stand',
+    standXCm: 500,
+    standYCm: 400,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.placements.get('inserted').wallId, 'right');
+  assert.equal(result.placements.get('inserted').rotationZDeg, 270);
+});
+
+test('insertion toward the open front of a U stand does not invent a missing wall segment', () => {
+  const source = module('source', 150, {
+    xCm: 0,
+    yCm: 250,
+    zCm: 0,
+    rotationZDeg: 90,
+    wallId: 'left',
+  });
+  const inserted = module('inserted', 100, null);
+
+  const result = planContinuousWallInsertion({
+    modules: [source],
+    insertedModules: [inserted],
+    targetModuleId: source.id,
+    side: 'right',
+    standType: 'u-stand',
+    standXCm: 500,
+    standYCm: 400,
+  });
+
+  if (result.ok) {
+    assert.notEqual(result.placements.get('inserted')?.wallId, 'front');
+    assert.ok(['left', 'back', 'right'].includes(result.placements.get('inserted').wallId));
+  } else {
+    assert.match(result.message, /alan yok|duvar/i);
+  }
+});

@@ -1,5 +1,7 @@
 # `static.composition.options.shelfCount`
 
+> **STALE / DEPRECATED.** `item.composition.options.shelfCount` Item kaydında yoktur. Raf sayısı `itemKey` ve `state.shelfCount` ile taşınır. `composition.options` yalnız 3 L-banko `{ shape: 'L' }` yazar (SCHEMA_ONLY / DEPRECATE; production kimlik `item.shape`). Yeni consumer eklenmez (DECISION-06).
+
 **Özellik ID:** `static.composition.options.shelfCount`
 **İnsan tarafından anlaşılır adı:** Kanonik composition: options.shelfCount
 **Kategori:** kanonik-kayit

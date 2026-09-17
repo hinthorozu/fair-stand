@@ -1,5 +1,7 @@
 # `static.composition.moduleType`
 
+> **DEPRECATED (SCHEMA_ONLY).** Alan Item kaydında durur; production `src/` bu path’i okumaz. Runtime BOM `composition.mode` + `composition.items` + `expandRecipe`. Testler hâlâ değeri assert eder. Fiziksel silme yok (DECISION-06). Production kimlik `item.type`.
+
 **Özellik ID:** `static.composition.moduleType`
 **İnsan tarafından anlaşılır adı:** Kanonik composition: moduleType
 **Kategori:** kanonik-kayit

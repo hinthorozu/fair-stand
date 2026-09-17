@@ -36,6 +36,24 @@ function runVerifier(cwd, base = 'HEAD') {
   });
 }
 
+function runVerifierWithGithubPushEvent(cwd, event, base = 'HEAD') {
+  const eventPath = join(cwd, 'github-event.json');
+  writeFileSync(eventPath, `${JSON.stringify(event)}\n`);
+  const env = {
+    ...process.env,
+    CHANGE_GATE_BASE: base,
+    GITHUB_EVENT_NAME: 'push',
+    GITHUB_EVENT_PATH: eventPath,
+  };
+  delete env.CHANGE_GATE_FILES;
+
+  return spawnSync(process.execPath, ['scripts/verify-change-contract.mjs'], {
+    cwd,
+    env,
+    encoding: 'utf8',
+  });
+}
+
 function runVerifierWithDefaultBase(cwd) {
   const env = { ...process.env };
   delete env.CHANGE_GATE_BASE;
@@ -216,6 +234,52 @@ test('local verifier uses Version2 as the default integration base for feature b
     const result = runVerifierWithDefaultBase(cwd);
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /Diff source: local git diff against Version2 \+ staged\/unstaged\/untracked/);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test('CHANGE_GATE_BASE overrides GitHub push before..after so accumulated Version2 surface is not hidden', () => {
+  const cwd = mkdtempSync(join(tmpdir(), 'fair-stand-change-gate-base-override-'));
+
+  try {
+    mkdirSync(join(cwd, '.github'), { recursive: true });
+    mkdirSync(join(cwd, 'scripts'), { recursive: true });
+    mkdirSync(join(cwd, 'src'), { recursive: true });
+    mkdirSync(join(cwd, 'test'), { recursive: true });
+
+    writeFileSync(
+      join(cwd, '.github/change-contract.json'),
+      `${JSON.stringify(createFixtureContract(), null, 2)}\n`,
+    );
+    copyFileSync(
+      new URL('../scripts/verify-change-contract.mjs', import.meta.url),
+      join(cwd, 'scripts/verify-change-contract.mjs'),
+    );
+    copyFileSync(
+      new URL('../scripts/change-impact-analysis.mjs', import.meta.url),
+      join(cwd, 'scripts/change-impact-analysis.mjs'),
+    );
+    copyFileSync(
+      new URL('../src/systemChangeContract.js', import.meta.url),
+      join(cwd, 'src/systemChangeContract.js'),
+    );
+    writeFileSync(join(cwd, 'package.json'), '{"type":"module"}\n');
+    writeFileSync(join(cwd, 'test/example.test.js'), 'export {};\n');
+
+    git(cwd, ['init', '-q']);
+    git(cwd, ['config', 'user.email', 'change-gate-test@example.invalid']);
+    git(cwd, ['config', 'user.name', 'Change Gate Test']);
+    git(cwd, ['add', '.']);
+    git(cwd, ['commit', '-qm', 'baseline']);
+
+    const headSha = git(cwd, ['rev-parse', 'HEAD']).trim();
+    writeFileSync(join(cwd, 'src/example.js'), 'export const example = true;\n');
+
+    const result = runVerifierWithGithubPushEvent(cwd, { before: headSha, after: headSha });
+    assert.notEqual(result.status, 0, result.stdout);
+    assert.match(result.stdout, /Diff source: local git diff against HEAD \+ staged\/unstaged\/untracked/);
+    assert.match(result.stderr, /Guarded files changed but \.github\/change-contract\.json was not updated/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

@@ -66,7 +66,7 @@ bom.source = None
 ## Migration öncesi kod kaynakları
 
 - `src/catalog.js`
-- `src/tvConfig.js`
+- `src/items.js` (güncel TV SoT; `src/tvConfig.js` bu ağaçta yok)
 - `src/designState.js`
 - `src/moduleContracts.js`
 - `src/moduleBehavior.js`

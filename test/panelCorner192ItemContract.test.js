@@ -9,6 +9,7 @@ import {
   getExpandedModuleRecipe,
   getModuleRecipe,
   getRecipeInnerCornerPanelKey,
+  recipeParentItem,
 } from './recipeParentItemKey.js';
 
 const CORNER_RECIPE_CASES = [
@@ -34,9 +35,10 @@ test('panel_corner_192 uses canonical itemKey in exactly one verified 200 cm rec
   for (const [type, width, options] of CORNER_RECIPE_CASES) {
     const recipe = getModuleRecipe(type, width, options);
     assert.ok(recipe);
-    assert.equal(recipe.variants.innerCornerPanelItemKey, 'panel_corner_192', recipe.recipeId);
+    assert.equal(recipe.composition.innerCorner.panelItemKey, 'panel_corner_192', recipe.recipeId);
+    assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey, recipe.recipeId);
     assert.equal(recipe.variants.innerCornerPanelPartId, undefined, recipe.recipeId);
-    assert.equal(getRecipeInnerCornerPanelKey(recipe), 'panel_corner_192', recipe.recipeId);
+    assert.equal(getRecipeInnerCornerPanelKey(recipeParentItem(type, width, options)), 'panel_corner_192', recipe.recipeId);
     occurrences += 1;
   }
 

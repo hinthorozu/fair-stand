@@ -1,5 +1,7 @@
 # `static.connectorType`
 
+> **STATUS QUO (DECISION-08).** Item `connectorType` data canlıdır. `getConnectorItemKey` / `resolveConnectorBom` TEST_ONLY API’dir; production BOM `composition.items` `itemKey` taşır. Bu turda silinmedi, UI’ye bağlanmadı.
+
 **Özellik ID:** `static.connectorType`
 **İnsan tarafından anlaşılır adı:** Aparat sınıfı
 **Kategori:** kanonik-kayit
