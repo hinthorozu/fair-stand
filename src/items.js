@@ -336,10 +336,18 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'door',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 1 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_98', quantity: 3 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 5 }),
+        Object.freeze({ itemKey: 'door_leaf_100', quantity: 1 }),
+      ]),
     }),
   }),
-  // Serbest baza üst öğeleri type `base` paylaşır; BOM `moduleRecipes`
-  // `base:100|150|200` üzerinden çözülür. Alt Item miktarları recipe'de kalır.
+  // Serbest baza üst öğeleri type `base` paylaşır. Child listesi `composition.items`;
+  // iç-köşe varyantı `moduleRecipes` `base:100|150|200` üzerinden genişler.
   BASE_100: Object.freeze({
     itemKey: 'BASE_100', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 9, catalogPreview: 'base',
     name: 'Baza 100',
@@ -348,6 +356,16 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'base',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 4 }),
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'upright_49_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'panel_98', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 8 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 8 }),
+        Object.freeze({ itemKey: 'base_top_107_50', quantity: 1 }),
+      ]),
     }),
   }),
   BASE_150: Object.freeze({
@@ -358,6 +376,16 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'base',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_140_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'upright_49_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'panel_147_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 8 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 8 }),
+        Object.freeze({ itemKey: 'base_top_157_50', quantity: 1 }),
+      ]),
     }),
   }),
   BASE_200: Object.freeze({
@@ -368,10 +396,20 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'base',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_190', quantity: 4 }),
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'upright_49_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'panel_197', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 8 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 8 }),
+        Object.freeze({ itemKey: 'base_top_206_50', quantity: 1 }),
+      ]),
     }),
   }),
   // Serbest banko üst öğeleri type `counter` paylaşır. Düz ve L varyantları
-  // ayrı itemKey'lerdir; alt miktarlar moduleRecipes'te kalır (counter:* / counter-l:*).
+  // ayrı itemKey'lerdir; child listesi `composition.items` (counter:* / counter-l:* kopyası).
   desk_banko_100: Object.freeze({
     itemKey: 'desk_banko_100', catalogVisible: true, catalogCategory: 'counter-base', catalogItemIndex: 3, catalogPreview: 'counter',
     name: 'Banko 100',
@@ -380,6 +418,16 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 3 }),
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'upright_99', quantity: 4 }),
+        Object.freeze({ itemKey: 'panel_98', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 6 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 12 }),
+        Object.freeze({ itemKey: 'counter_top_110_60', quantity: 1 }),
+      ]),
     }),
   }),
   desk_banko_150: Object.freeze({
@@ -390,6 +438,16 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_140_5', quantity: 3 }),
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'upright_99', quantity: 4 }),
+        Object.freeze({ itemKey: 'panel_147_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 6 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 12 }),
+        Object.freeze({ itemKey: 'counter_top_160_60', quantity: 1 }),
+      ]),
     }),
   }),
   desk_banko_200: Object.freeze({
@@ -400,6 +458,16 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_190', quantity: 3 }),
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'upright_99', quantity: 4 }),
+        Object.freeze({ itemKey: 'panel_197', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 6 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 12 }),
+        Object.freeze({ itemKey: 'counter_top_210_60', quantity: 1 }),
+      ]),
     }),
   }),
   desk_banko_100_L: Object.freeze({
@@ -412,6 +480,17 @@ export const ITEMS = Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
       options: Object.freeze({ shape: 'L' }),
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 5 }),
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 5 }),
+        Object.freeze({ itemKey: 'upright_99', quantity: 5 }),
+        Object.freeze({ itemKey: 'panel_98', quantity: 4 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 8 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 16 }),
+        Object.freeze({ itemKey: 'counter_top_110_60', quantity: 1 }),
+        Object.freeze({ itemKey: 'counter_top_52_60', quantity: 1 }),
+      ]),
     }),
   }),
   desk_banko_150_L: Object.freeze({
@@ -424,6 +503,18 @@ export const ITEMS = Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
       options: Object.freeze({ shape: 'L' }),
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_140_5', quantity: 5 }),
+        Object.freeze({ itemKey: 'profile_91', quantity: 1 }),
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'upright_99', quantity: 5 }),
+        Object.freeze({ itemKey: 'panel_147_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 8 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 16 }),
+        Object.freeze({ itemKey: 'counter_top_160_60', quantity: 1 }),
+        Object.freeze({ itemKey: 'counter_top_102_60', quantity: 1 }),
+      ]),
     }),
   }),
   desk_banko_200_L: Object.freeze({
@@ -436,10 +527,22 @@ export const ITEMS = Object.freeze({
       mode: 'recipe',
       moduleType: 'counter',
       options: Object.freeze({ shape: 'L' }),
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_190', quantity: 5 }),
+        Object.freeze({ itemKey: 'profile_140_5', quantity: 1 }),
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'upright_99', quantity: 5 }),
+        Object.freeze({ itemKey: 'panel_197', quantity: 4 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 4 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 8 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 16 }),
+        Object.freeze({ itemKey: 'counter_top_210_60', quantity: 1 }),
+        Object.freeze({ itemKey: 'counter_top_150_60', quantity: 1 }),
+      ]),
     }),
   }),
-  // Panel duvar üst öğeleri. Alt miktarlar moduleRecipes
-  // straight-wall satırlarında kalır (50/100/150/200); Raw BOM UI yolu değişmez.
+  // Panel duvar üst öğeleri. Child listesi `composition.items` (straight-wall 50/100/150/200 kopyası).
+  // İç-köşe panel değişimi recipe varyantında kalır; Raw BOM UI yolu değişmez.
   wall_50: Object.freeze({
     itemKey: 'wall_50', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 4, catalogPreview: 'flat-panel',
     name: 'Panel 50',
@@ -449,6 +552,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 7 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
+      ]),
     }),
   }),
   wall_100: Object.freeze({
@@ -460,6 +570,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_98', quantity: 7 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
+      ]),
     }),
   }),
   wall_150: Object.freeze({
@@ -471,6 +588,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_140_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_147_5', quantity: 7 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
+      ]),
     }),
   }),
   wall_200: Object.freeze({
@@ -482,6 +606,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_190', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_197', quantity: 7 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
+      ]),
     }),
   }),
   wall_200_short_up_2: Object.freeze({
@@ -495,6 +626,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_190', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_99', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_197', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
+      ]),
     }),
   }),
   wall_150_short_up_2: Object.freeze({
@@ -508,6 +646,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_140_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_99', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_147_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
+      ]),
     }),
   }),
   wall_100_short_up_2: Object.freeze({
@@ -521,6 +666,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_99', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_98', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
+      ]),
     }),
   }),
   wall_50_short_up_2: Object.freeze({
@@ -534,6 +686,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-2',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_99', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
+      ]),
     }),
   }),
   wall_200_short_up_1: Object.freeze({
@@ -547,6 +706,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_190', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_197', quantity: 1 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
+      ]),
     }),
   }),
   wall_150_short_up_1: Object.freeze({
@@ -560,6 +726,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_140_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_147_5', quantity: 1 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
+      ]),
     }),
   }),
   wall_100_short_up_1: Object.freeze({
@@ -573,6 +746,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_98', quantity: 1 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
+      ]),
     }),
   }),
   wall_50_short_up_1: Object.freeze({
@@ -586,10 +766,17 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'wall-short-up-1',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_49_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_48_5', quantity: 1 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 3 }),
+      ]),
     }),
   }),
-  // Separatör parent'lar (type separator). Child miktarları moduleRecipes
-  // separator:50|100 satırlarında; sarmasık aynı genişlik recipe'sini paylaşır.
+  // Separatör parent'lar (type separator). Child listesi `composition.items`.
+  // Sarmasık aynı genişlikteki düz separator child listesini paylaşır.
   wall_separator_50: Object.freeze({
     itemKey: 'wall_separator_50', catalogVisible: true, catalogCategory: 'panel-wall', catalogItemIndex: 6, catalogPreview: 'separator',
     name: 'Separatör 50',
@@ -599,6 +786,14 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'separator_panel_48_5', quantity: 1 }),
+        Object.freeze({ itemKey: 'separator_panel_98', quantity: 3 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 7 }),
+      ]),
     }),
   }),
   wall_separator_100: Object.freeze({
@@ -610,6 +805,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'separator_panel_98', quantity: 7 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
+      ]),
     }),
   }),
   wall_separator_50_sarmasik: Object.freeze({
@@ -622,6 +824,14 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_41_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'separator_panel_48_5', quantity: 1 }),
+        Object.freeze({ itemKey: 'separator_panel_98', quantity: 3 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 7 }),
+      ]),
     }),
   }),
   wall_separator_100_sarmasik: Object.freeze({
@@ -634,6 +844,13 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'separator',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 2 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'separator_panel_98', quantity: 7 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 2 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 13 }),
+      ]),
     }),
   }),
   wall_showcase_100_2: Object.freeze({
@@ -652,6 +869,16 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'showcase-2',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 4 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_98', quantity: 5 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 4 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 9 }),
+        Object.freeze({ itemKey: 'showcase_side_94_6_30', quantity: 2 }),
+        Object.freeze({ itemKey: 'showcase_horizontal_87_4_30', quantity: 2 }),
+        Object.freeze({ itemKey: 'glass_shelf', quantity: 1 }),
+      ]),
     }),
   }),
   wall_showcase_100_3: Object.freeze({
@@ -670,6 +897,16 @@ export const ITEMS = Object.freeze({
     composition: Object.freeze({
       mode: 'recipe',
       moduleType: 'showcase-3',
+      items: Object.freeze([
+        Object.freeze({ itemKey: 'profile_91', quantity: 4 }),
+        Object.freeze({ itemKey: 'upright_346_5', quantity: 2 }),
+        Object.freeze({ itemKey: 'panel_98', quantity: 4 }),
+        Object.freeze({ itemKey: 'connector_start', quantity: 4 }),
+        Object.freeze({ itemKey: 'connector_single', quantity: 7 }),
+        Object.freeze({ itemKey: 'showcase_side_143_5_30', quantity: 2 }),
+        Object.freeze({ itemKey: 'showcase_horizontal_87_4_30', quantity: 2 }),
+        Object.freeze({ itemKey: 'glass_shelf', quantity: 2 }),
+      ]),
     }),
   }),
 
@@ -748,7 +985,7 @@ export function getCommercialItemForType(type) {
 }
 
 // Extra furniture. Tekil Item'lar kendi type'ına sahip. Eames ve klasik koltuk takımları child Item kümesidir.
-// BOM decision-required — unit/moduleRecipes uydurulmaz.
+// BOM decision-required — unit / composition.items / moduleRecipes uydurulmaz.
 
 
 const FURNITURE_TYPES = Object.freeze(new Set([

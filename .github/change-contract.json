@@ -1,14 +1,16 @@
 {
   "schemaVersion": 2,
-  "id": "items-single-registry",
+  "id": "recipe-parent-composition-items",
   "kind": "architecture",
-  "summary": "Dokuz kova map yok. 96 Item satırı export const ITEMS içinde; getItem ve listRegisteredItems bu tablodan okur.",
+  "summary": "28 recipe parent Item composition.items taşır (mevcut moduleRecipes child kopyası). itemBom tabanı Item items; iç-köşe expandRecipe’de kalır.",
   "owners": [
     "src/items.js",
+    "src/itemBom.js",
     "docs/refactor/ITEMS.md"
   ],
   "sourceOfTruth": [
     "src/items.js",
+    "src/itemBom.js",
     "docs/refactor/ITEMS.md"
   ],
   "impact": {
@@ -20,7 +22,7 @@
     "persistence": "not-applicable",
     "bom": "affected",
     "ui": "not-applicable",
-    "composition": "not-applicable",
+    "composition": "affected",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
@@ -203,6 +205,7 @@
       "test/projectUiMainIntegration.test.js",
       "test/raisedPlatform.test.js",
       "test/rawBomSelectionParser.test.js",
+      "test/recipeCompositionItemsContract.test.js",
       "test/removedIndoorPlant2.test.js",
       "test/rightWallOrientation.test.js",
       "test/roadmapProductionSourceOfTruth.test.js",
@@ -788,20 +791,14 @@
         "F-045"
       ]
     },
-    "notes": "96 satır yalnız ITEMS içinde. Kova map yok. Catalog kartı ve recipe miktarı değişmedi."
+    "notes": "Child miktarları mevcut recipe satırlarından kopyalandı. Catalog/factory/UI değişmedi. moduleRecipes iç-köşe ve nominal genişlik için duruyor."
   },
   "tests": {
     "targeted": [
-      "test/catalogDomainBoundary.test.js",
-      "test/commercialItemsContract.test.js",
+      "test/recipeCompositionItemsContract.test.js",
       "test/doorCompositeItemContract.test.js",
-      "test/doorLeafItemContract.test.js",
-      "test/floorItemsContract.test.js",
-      "test/furnitureItemsContract.test.js",
-      "test/lightingItemsContract.test.js",
-      "test/moduleRecipes.test.js",
-      "test/wallMediaItemsContract.test.js",
-      "test/itemCatalogFields.test.js"
+      "test/wallShowcaseItemContract.test.js",
+      "test/moduleRecipes.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -810,16 +807,16 @@
       "targeted": [
         "e2e/smoke.spec.mjs"
       ],
-      "reason": "items.js catalog/bom domain; kart ve factory değeri aynı. smoke."
+      "reason": "items.js ve itemBom değişti; BOM domain browser E2E kapısı."
     }
   },
   "risk": {
-    "level": "low",
-    "notes": "Aynı 96 Item; yalnız lookup tablosu birleşti."
+    "level": "medium",
+    "notes": "İki kopya child listesi (Item + recipe). Test eşitliği kilitler. Varyant expandRecipe’de."
   },
   "migration": {
     "required": false,
-    "notes": "Persist/schema yok. itemKey değerleri aynı."
+    "notes": "Persist/schema yok. itemKey ve miktarlar aynı."
   },
-  "rollback": "Kova export’larını ve getItem zincirini geri koymak."
+  "rollback": "composition.items satırlarını recipe parent’lardan silmek; itemBom’u getExpandedModuleRecipe’ye döndürmek."
 }

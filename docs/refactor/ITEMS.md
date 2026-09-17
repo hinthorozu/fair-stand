@@ -10,7 +10,7 @@ Fair Stand yeni Item modelinin yaşayan canonical sözleşmesi. Audit dökümü 
 
 Kaynak: `src/items.js` taraması (2026-09-17). N = kaç Item’da path var.
 
-Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision hâlâ `type` → `TYPE_BEHAVIORS`; recipe BOM `composition.moduleType` + `moduleRecipes`.
+Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision hâlâ `type` → `TYPE_BEHAVIORS`; recipe BOM `composition.items` tabanı + `moduleRecipes` iç-köşe varyantı.
 
 | Field | N | Src’de ne işe yarıyor |
 |---|---|---|
@@ -43,7 +43,7 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `composition.mode` | 28 | `recipe` → `resolveItemBom`. |
 | `composition.moduleType` | 28 | Recipe anahtarı (`wall`, `counter`, …). |
 | `composition.options.shape` | 3 | L banko recipe `'L'`. |
-| `composition.items` | 2 | Koltuk/Eames çocuk listesi `{itemKey, quantity}`. |
+| `composition.items` | 30 | Çocuk listesi `{itemKey, quantity}`. 28 recipe parent + 2 mobilya kümesi. |
 | `shape` | 3 | Kök `'L'` (köşe banko). |
 | `variant` | 8 | `short-up-1` / `short-up-2`. |
 | `stripOccupancy.align` | 8 | Short-up `'top'`. |

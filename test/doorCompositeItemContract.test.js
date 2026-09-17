@@ -39,10 +39,12 @@ test('door_100 is the single canonical composite Item identity', () => {
   assert.equal(item.type, 'door');
   assert.equal(item.unit, 'adet');
   assert.deepEqual(item.dimensions, { widthCm: 100 });
-  assert.deepEqual(item.composition, {
-    mode: 'recipe',
-    moduleType: 'door',
-  });
+  assert.equal(item.composition.mode, 'recipe');
+  assert.equal(item.composition.moduleType, 'door');
+  assert.deepEqual(
+    item.composition.items.map((entry) => [entry.itemKey, entry.quantity]),
+    EXPECTED_CHILDREN,
+  );
   assert.equal(getItem('door_100').itemKey, 'door_100');
   assert.equal(getItem('door_100').composition.mode, 'recipe');
   assert.equal(Object.hasOwn(getItem('door_leaf_100'), 'composition'), false);

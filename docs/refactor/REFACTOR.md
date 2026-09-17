@@ -7,6 +7,16 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-17 — Recipe parent `composition.items`
+
+### Kapsam
+
+28 `composition.mode === 'recipe'` parent, `furniture_sofa_set_classic` gibi `composition.items` taşır. Satırlar mevcut `moduleRecipes` child listesinin kopyasıdır; miktar uydurulmadı. `itemBom` tabanı Item `items`; `expandRecipe` iç-köşe panel/connector varyantını uygular.
+
+Dokunulmayan: 96 `itemKey`, Catalog projection, factory/UI, inner-corner kuralları, `moduleRecipes.js` sahipliği (nominal genişlik / varyant).
+
+---
+
 ## 2026-09-17 — Kovalar boşaldı; satırlar ITEMS içinde
 
 ### Kapsam

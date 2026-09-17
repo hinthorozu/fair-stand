@@ -1,5 +1,5 @@
 import { getItem } from './items.js';
-import { getExpandedModuleRecipe, getRecipeItemKey } from './moduleRecipes.js';
+import { expandRecipe, getModuleRecipe, getRecipeItemKey } from './moduleRecipes.js';
 
 function positiveQuantity(value, itemKey) {
   const quantity = Number(value);
@@ -18,15 +18,16 @@ function resolveRecipe(item, recipeOptions = {}) {
     ...(composition.options ?? {}),
     ...(recipeOptions ?? {}),
   };
-  const recipe = getExpandedModuleRecipe(
+  const catalogRecipe = getModuleRecipe(
     composition.moduleType,
     item.dimensions?.widthCm,
     options,
   );
-  if (!recipe) {
+  if (!catalogRecipe) {
     throw new TypeError(`Missing canonical recipe for ${item.itemKey}.`);
   }
-  return recipe;
+  const items = composition.items ?? catalogRecipe.items;
+  return expandRecipe({ ...catalogRecipe, items }, options);
 }
 
 function resolveLines(itemKey, quantity, stack, recipeOptions = {}) {
