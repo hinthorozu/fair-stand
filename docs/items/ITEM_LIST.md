@@ -2,7 +2,7 @@
 
 Bu belge Item Contract migrationında izlenecek Item envanterini tutar.
 
-> Satırdaki “Tamam” işareti gecikebilir. Güncel kimlik/BOM: `docs/items/definitions/` + `src/items.js` / `src/moduleContracts.js`. Test-kilitli katalog özeti: `SYSTEM_MODULE_CATALOG.md`. Canlı sıra: `audit/SISTEM_MUTABAKAT_RAPORU.md`. A–Z özellik haritası (tarihsel audit snapshot; regenerate edilmedi): `docs/items/audit/README.md`. Kayıtlı Item: 99 (`VIDEO_WALL_PANEL` katalog dışı).
+> Satırdaki “Tamam” işareti gecikebilir. Güncel kimlik/BOM: `docs/items/definitions/` + `src/items.js` / `src/moduleContracts.js`. Test-kilitli katalog özeti: `SYSTEM_MODULE_CATALOG.md`. Canlı sıra: `audit/SISTEM_MUTABAKAT_RAPORU.md`. A–Z özellik haritası (tarihsel audit snapshot; regenerate edilmedi): `docs/items/audit/README.md`. Kayıtlı Item: 96 (`VIDEO_WALL_PANEL` katalog dışı).
 
 Temel model:
 
@@ -25,7 +25,7 @@ Aşağıdaki Item'lar bugün `src/items.js` içinde `LEAF_ITEMS` olarak canonica
 | `connector_corner` | `connector` | **Tamam — canonical `itemKey` + explicit connector BOM resolver; fixed parent recipe kullanımı bugün uygulanmıyor, quantity uydurulmaz** |
 | `upright_346_5` | `upright` | **Tamam — canonical `itemKey`; 18 aktif recipe içinde ×2** |
 | `upright_99` | `upright` | **Tamam — canonical `itemKey`; 3 düz bankoda ×4, 3 L bankoda ×5** |
-| `upright_49_5` | `upright` | **Tamam — canonical `itemKey`; 3 base-wall içinde ×2, 3 base içinde ×4** |
+| `upright_49_5` | `upright` | **Tamam — canonical `itemKey`; 3 base içinde ×4** |
 | `profile_41_5` | `profile` | **Tamam — canonical `itemKey`; 14 doğrulanmış parent recipe quantity parity korunur; `lengthCm=41.5`, `thicknessCm=8`; saha katalog self ×1** |
 | `profile_91` | `profile` | **Tamam — canonical `itemKey`; 12 doğrulanmış parent recipe quantity parity korunur; `lengthCm=91`, `thicknessCm=8`; saha katalog self ×1** |
 | `profile_140_5` | `profile` | **Tamam — canonical `itemKey`; 8 doğrulanmış parent recipe quantity parity korunur; `lengthCm=140.5`, `thicknessCm=8`; saha katalog self ×1** |
@@ -55,9 +55,9 @@ Aşağıdaki Item'lar bugün `src/items.js` içinde `LEAF_ITEMS` olarak canonica
 | `counter_top_102_60` | `counter-top` | **Tamam — canonical `itemKey`; `102 × 60 × 1.8 cm`; L150 içinde ×1 quantity parity** |
 | `counter_top_210_60` | `counter-top` | **Tamam — canonical `itemKey`; `210 × 60 × 1.8 cm`; düz 200 + L200 içinde ×1 quantity parity** |
 | `counter_top_150_60` | `counter-top` | **Tamam — canonical `itemKey`; `150 × 60 × 1.8 cm`; L200 içinde ×1 quantity parity** |
-| `base_top_107_50` | `base-top` | **Tamam — canonical `itemKey`; `107 × 50 × 1.8 cm`; BASE_100 + wall_base_100 içinde ×1 quantity parity** |
-| `base_top_157_50` | `base-top` | **Tamam — canonical `itemKey`; `157 × 50 × 1.8 cm`; BASE_150 + wall_base_150 içinde ×1 quantity parity** |
-| `base_top_206_50` | `base-top` | **Tamam — canonical `itemKey`; `206 × 50 × 1.8 cm`; BASE_200 + wall_base_200 içinde ×1 quantity parity** |
+| `base_top_107_50` | `base-top` | **Tamam — canonical `itemKey`; `107 × 50 × 1.8 cm`; BASE_100 içinde ×1 quantity parity** |
+| `base_top_157_50` | `base-top` | **Tamam — canonical `itemKey`; `157 × 50 × 1.8 cm`; BASE_150 içinde ×1 quantity parity** |
+| `base_top_206_50` | `base-top` | **Tamam — canonical `itemKey`; `206 × 50 × 1.8 cm`; BASE_200 içinde ×1 quantity parity** |
 
 ## B. Üst seviye / catalog Item envanteri
 
@@ -83,9 +83,6 @@ Aşağıdaki mevcut liste korunur. Bu Item'ların Tekil/Bileşik ve parametrik d
 | 16 | `wall_separator_50_sarmasik` | Separatör 50 Sarmaşık | `separator` |
 | 17 | `wall_showcase_100_3` | 3 Gözlü Vitrin 100 | **`showcase-3` · Bileşik Item · BASE + inner-corner BOM tamam** |
 | 18 | `wall_showcase_100_2` | 2 Gözlü Vitrin 100 | **`showcase-2` · Bileşik Item · BASE + inner-corner BOM tamam** |
-| 25 | `wall_base_200` | Panel Bazalı 200 | `base-wall` |
-| 26 | `wall_base_150` | Panel Bazalı 150 | `base-wall` |
-| 27 | `wall_base_100` | Panel Bazalı 100 | `base-wall` |
 | 28 | `door_100` | Depo Kapısı 100 | **`door` · Bileşik Item · Tamam** |
 | 29 | `desk_banko_200` | Banko 200 | **`counter` · Bileşik Item · Tamam** |
 | 30 | `desk_banko_150` | Banko 150 | **`counter` · Bileşik Item · Tamam** |

@@ -14,7 +14,6 @@ const CASES = [
   [getStraightWallRecipe(200), 2],
   [getModuleRecipe('counter', 200, { shape: 'L' }), 5],
   [getModuleRecipe('counter', 200), 3],
-  [getModuleRecipe('base-wall', 200), 4],
   [getModuleRecipe('base', 200), 4],
 ];
 
@@ -29,7 +28,7 @@ test('profile_190 is a canonical single production Item with verified 190 x 8 cm
   assert.deepEqual(item.dimensions, { lengthCm: 190, thicknessCm: 8 });
 });
 
-test('profile_190 uses canonical itemKey in all 5 verified parent recipes and preserves quantities', () => {
+test('profile_190 uses canonical itemKey in all 4 verified parent recipes and preserves quantities', () => {
   const quantities = [];
 
   for (const [recipe, expectedQuantity] of CASES) {
@@ -40,7 +39,7 @@ test('profile_190 uses canonical itemKey in all 5 verified parent recipes and pr
     quantities.push(expectedQuantity);
   }
 
-  assert.deepEqual(quantities, [2, 5, 3, 4, 4]);
+  assert.deepEqual(quantities, [2, 5, 3, 4]);
 });
 
 test('expanded recipes resolve profile_190 metadata through canonical itemKey', () => {

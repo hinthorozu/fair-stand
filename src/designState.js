@@ -269,42 +269,6 @@ export function createCounterModuleState(widthCmOrDescriptor, options = {}) {
   }, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
-const WALL_BASE_WIDTH_TO_ITEM_KEY = Object.freeze({
-  100: 'wall_base_100',
-  150: 'wall_base_150',
-  200: 'wall_base_200',
-});
-
-function resolveBaseWallItemKey(widthCmOrDescriptor) {
-  if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
-    const explicitKey = widthCmOrDescriptor.itemKey ?? null;
-    if (explicitKey && getItem(explicitKey)?.type === 'base-wall') return explicitKey;
-    return WALL_BASE_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor.widthCm)] ?? null;
-  }
-  return WALL_BASE_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor)] ?? null;
-}
-
-export function createBaseWallModuleState(widthCmOrDescriptor) {
-  const itemKey = resolveBaseWallItemKey(widthCmOrDescriptor);
-  const item = itemKey ? getItem(itemKey) : null;
-  if (!item || item.type !== 'base-wall') return null;
-
-  return applySceneFootprint({
-    id: createId('module'),
-    itemKey: item.itemKey,
-    type: item.type,
-    strips: Array.from(
-      { length: STRIP_COUNT },
-      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
-    ),
-    faces: {
-      front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-    },
-  }, item, ['widthCm', 'depthCm', 'heightCm']);
-}
-
 const BASE_WIDTH_TO_ITEM_KEY = Object.freeze({
   100: 'BASE_100',
   150: 'BASE_150',
@@ -552,7 +516,6 @@ export function createLedFloodlightModuleState() {
 const MODULE_STATE_FACTORIES = Object.freeze({
   'flat-panel': (descriptor) => createFlatPanelModuleState(descriptor),
   base: (descriptor) => createBaseModuleState(descriptor),
-  'base-wall': (descriptor) => createBaseWallModuleState(descriptor),
   counter: (descriptor) => createCounterModuleState(descriptor),
   separator: (descriptor) => createSeparatorModuleState(descriptor),
   'sofa-set-classic': () => createBeigeSofaSetModuleState(),
@@ -650,14 +613,6 @@ export function normalizeModuleItemState(moduleState) {
       const occupancy = normalizeStripOccupancy(item.stripOccupancy);
       if (occupancy) moduleState.stripOccupancy = occupancy;
       applySceneFootprint(moduleState, item, ['widthCm']);
-    }
-    return moduleState;
-  }
-
-  if (moduleState.type === 'base-wall') {
-    const resolvedKey = resolveItemKey(moduleState);
-    if (resolvedKey && getItem(resolvedKey)?.type === 'base-wall') {
-      moduleState.itemKey = resolvedKey;
     }
     return moduleState;
   }

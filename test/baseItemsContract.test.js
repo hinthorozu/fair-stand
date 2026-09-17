@@ -106,28 +106,19 @@ for (const itemKey of BASE_KEYS) {
   });
 }
 
-test('wall_base parent Item’ları recipe ailesini BASE’ten ayrı tutar', () => {
+test('silinen wall_base Item’ları BASE recipe ailesinden ayrı durur ve kayıtlı değildir', () => {
   for (const width of [100, 150, 200]) {
     const wallKey = `wall_base_${width}`;
-    const wallItem = getItem(wallKey);
-    assert.equal(wallItem?.type, 'base-wall');
-    assert.equal(MODULE_CATALOG[wallKey].type, 'base-wall');
-    assert.equal(MODULE_CATALOG[wallKey].itemKey, wallKey);
+    assert.equal(getItem(wallKey), null, wallKey);
+    assert.equal(MODULE_CATALOG[wallKey], undefined, wallKey);
+    assert.equal(getModuleRecipe('base-wall', width), null, wallKey);
 
     const baseRecipe = getModuleRecipe('base', width);
-    const wallRecipe = getModuleRecipe('base-wall', width);
     const baseTop = EXPECTED_RECIPE[`BASE_${width}`].top;
     const baseQty = Object.fromEntries(baseRecipe.items.map((entry) => [entry.itemKey, entry.quantity]));
-    const wallQty = Object.fromEntries(wallRecipe.items.map((entry) => [entry.itemKey, entry.quantity]));
-
     assert.equal(baseQty[baseTop], 1);
-    assert.equal(wallQty[baseTop], 1);
     assert.equal(baseQty.upright_49_5, 4);
-    assert.equal(wallQty.upright_49_5, 2);
     assert.equal(baseQty.connector_start, 8);
-    assert.equal(wallQty.connector_start, 6);
-    assert.equal(wallQty.upright_346_5, 2);
-    assert.equal(baseQty.upright_346_5, undefined);
   }
 });
 

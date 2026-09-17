@@ -230,7 +230,7 @@ Item {
 }
 ```
 
-99 kayıtlı Item bu şemayı taşır. Katalogda görünen 58 kayıt `catalogVisible=true`, dolu category/index ve `catalogPreview` taşır. `VIDEO_WALL_PANEL` katalog dışıdır (`catalogVisible=false`).
+96 kayıtlı Item bu şemayı taşır. Katalogda görünen 55 kayıt `catalogVisible=true`, dolu category/index ve `catalogPreview` taşır. `VIDEO_WALL_PANEL` katalog dışıdır (`catalogVisible=false`).
 
 ---
 

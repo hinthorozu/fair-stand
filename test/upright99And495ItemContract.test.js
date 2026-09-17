@@ -23,9 +23,6 @@ const CASES = [
     name: 'Dikme 49,5 cm',
     dimensions: { lengthCm: 49.5, thicknessCm: 8 },
     recipes: [
-      ['base-wall', 100, {}, 2],
-      ['base-wall', 150, {}, 2],
-      ['base-wall', 200, {}, 2],
       ['base', 100, {}, 4],
       ['base', 150, {}, 4],
       ['base', 200, {}, 4],
@@ -53,7 +50,7 @@ for (const { itemKey, name, dimensions, recipes } of CASES) {
       assert.deepEqual(match, { itemKey, quantity });
       occurrences += 1;
     }
-    assert.equal(occurrences, 6);
+    assert.equal(occurrences, recipes.length);
   });
 
   test(`${itemKey} expanded recipe resolves metadata through canonical itemKey`, () => {

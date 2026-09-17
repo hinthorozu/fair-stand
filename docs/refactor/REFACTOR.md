@@ -7,6 +7,39 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-16 — wall_base composite Item kaldırıldı
+
+### Kapsam
+
+Silinen Item: `wall_base_100`, `wall_base_150`, `wall_base_200` (Panel Bazalı 100 / 150 / 200).
+
+Dokunulmayan: `BASE_100` / `BASE_150` / `BASE_200`, leaf `base_top_107_50` / `base_top_157_50` / `base_top_206_50`, `profile_*` / `upright_*` / `panel_*` / `connector_*`, shelf tarafı, genel `base-wall` type/renderer/preview.
+
+### Dead code (yalnız bu 3 Item’a hizmet ediyordu)
+
+- `WALL_BASE_WIDTH_TO_ITEM_KEY`, `resolveBaseWallItemKey`, `createBaseWallModuleState`, `MODULE_STATE_FACTORIES['base-wall']`, `normalizeModuleItemState` type `base-wall` dalı
+- `base-wall:100` / `base-wall:150` / `base-wall:200` recipe
+- üç `MODULE_CONTRACT_ASSIGNMENTS` kaydı
+- `rawBomDebug` Panel Bazalı recipe dalı
+
+### Kalan base-wall mekanizması
+
+- `TYPE_BEHAVIORS['base-wall']`
+- `createBaseWallModule` renderer + `scene3d` type dispatch
+- `CATALOG_PREVIEWS` / `CATALOG_PREVIEW_RENDERERS['base-wall']` / CSS `.module-drag-base-wall`
+- `selectionFeedback` type `base-wall` metni
+- `usesWallBackboneCollisionDepth` (type-level)
+
+### Sayılar
+
+kayıtlı Item 96; catalogVisible=true 55; gizli 41 (`VIDEO_WALL_PANEL` dahil); projection 55; COMPOSITE_ITEMS 28; BOM recipe 28; panel-wall 9.
+
+### Tarihsel audit
+
+`docs/items/audit/**` ve `docs/items/current-system/wall_base_*.md` regenerate edilmedi.
+
+---
+
 ## 2026-09-16 — wall_shelf composite Item ve shelfCount kaldırıldı
 
 ### Kapsam

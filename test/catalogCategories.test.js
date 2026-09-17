@@ -13,7 +13,7 @@ import {
 import { getItem, listRegisteredItems } from '../src/items.js';
 
 const EXPECTED_CATEGORIES = Object.freeze([
-  Object.freeze({ catalogKey: 'panel-wall', catalogName: 'Panel & Duvar', catalogIndex: 1, itemCount: 12 }),
+  Object.freeze({ catalogKey: 'panel-wall', catalogName: 'Panel & Duvar', catalogIndex: 1, itemCount: 9 }),
   Object.freeze({ catalogKey: 'panel-addon', catalogName: 'Panel Ek Modül', catalogIndex: 2, itemCount: 13 }),
   Object.freeze({ catalogKey: 'shelf-showcase', catalogName: 'Raf & Vitrin', catalogIndex: 3, itemCount: 2 }),
   Object.freeze({ catalogKey: 'counter-base', catalogName: 'Banko & Baza', catalogIndex: 4, itemCount: 9 }),
@@ -26,7 +26,7 @@ const EXPECTED_GROUP_KEYS = Object.freeze({
     'wall_200', 'wall_150', 'wall_100', 'wall_50',
     'wall_separator_100', 'wall_separator_50',
     'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik',
-    'wall_base_200', 'wall_base_150', 'wall_base_100', 'door_100',
+    'door_100',
   ]),
   'panel-addon': Object.freeze([
     'wall_200_short_up_2', 'wall_150_short_up_2', 'wall_100_short_up_2', 'wall_50_short_up_2',
@@ -137,7 +137,7 @@ test('listCatalogGroups kategori sırası, adı ve Item sırasını korur', () =
     });
   });
 
-  assert.equal(visibleTotal, 58);
-  assert.equal(MODULE_CATALOG_KEYS.length, 58);
+  assert.equal(visibleTotal, 55);
+  assert.equal(MODULE_CATALOG_KEYS.length, 55);
   assert.deepEqual([...MODULE_CATALOG_KEYS], groups.flatMap((group) => group.keys));
 });

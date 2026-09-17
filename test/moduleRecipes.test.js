@@ -84,9 +84,6 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
       ['counter', 100],
       ['counter', 150],
       ['counter', 200],
-      ['base-wall', 100],
-      ['base-wall', 150],
-      ['base-wall', 200],
       ['base', 100],
       ['base', 150],
       ['base', 200],
@@ -135,13 +132,13 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
     }
   }
 
-  assert.equal(startOccurrences, 21);
-  assert.equal(singleOccurrences, 21);
-  assert.deepEqual(uprightOccurrences, { upright_346_5: 12, upright_99: 6, upright_49_5: 6 });
-  assert.equal(panel197Occurrences, 5);
-  assert.deepEqual(profileOccurrences, { profile_41_5: 14, profile_91: 10, profile_140_5: 6, profile_190: 5 });
-  assert.deepEqual(straightPanelOccurrences, { panel_48_5: 13, panel_98: 8, panel_147_5: 5 });
-  assert.deepEqual(baseTopOccurrences, { base_top_107_50: 2, base_top_157_50: 2, base_top_206_50: 2 });
+  assert.equal(startOccurrences, 18);
+  assert.equal(singleOccurrences, 18);
+  assert.deepEqual(uprightOccurrences, { upright_346_5: 9, upright_99: 6, upright_49_5: 3 });
+  assert.equal(panel197Occurrences, 4);
+  assert.deepEqual(profileOccurrences, { profile_41_5: 11, profile_91: 9, profile_140_5: 5, profile_190: 4 });
+  assert.deepEqual(straightPanelOccurrences, { panel_48_5: 10, panel_98: 7, panel_147_5: 4 });
+  assert.deepEqual(baseTopOccurrences, { base_top_107_50: 1, base_top_157_50: 1, base_top_206_50: 1 });
   assert.deepEqual(counterTopOccurrences, { counter_top_110_60: 2, counter_top_52_60: 1, counter_top_160_60: 2, counter_top_102_60: 1, counter_top_210_60: 2, counter_top_150_60: 1 });
   assert.deepEqual(separatorPanelOccurrences, { separator_panel_48_5: 1, separator_panel_98: 2 });
   assert.deepEqual(shelfOccurrences, { shelf_100: 0, shelf_150: 0, shelf_200: 0 });
@@ -264,7 +261,6 @@ test('double and corner connectors are BOM-capable Items and are not baked into 
     ...[100, 150, 200].flatMap((width) => [
       getModuleRecipe('counter', width, { shape: 'L' }),
       getModuleRecipe('counter', width),
-      getModuleRecipe('base-wall', width),
       getModuleRecipe('base', width),
     ]),
     getModuleRecipe('showcase-2', 100),

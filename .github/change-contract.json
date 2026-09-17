@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "remove-wall-shelf-items",
+  "id": "remove-wall-base-items",
   "kind": "refactor",
-  "summary": "wall_shelf_2_100/150/200 ve wall_shelf_3_100/150/200 composite Item’ları ile shelfCount alanı kaldırıldı. Leaf shelf_100/150/200, wall_showcase_*, eyeCount, stripOccupancy, nominalModuleWidthCm, composition.moduleType, Recipe.nominalWidthCm ve sceneDimensions/dimensions şeması durur. Catalog 58, kayıtlı Item 99.",
+  "summary": "wall_base_100/150/200 composite Item’ları, base-wall:100/150/200 recipe’leri ve üç contract assignment kaldırıldı. BASE_*, base_top_*, leaf profile/upright/panel/connector, shelf tarafı ve genel base-wall type/renderer/preview durur. Catalog 55, kayıtlı Item 96.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
@@ -758,15 +758,15 @@
         "F-045"
       ]
     },
-    "notes": "Altı wall_shelf composite Item ve shelfCount runtime alanı silindi. isWallShelfCompositeItem / resolveShelfItemKey / createShelfModuleState / MODULE_STATE_FACTORIES.shelf / normalize shelf dalı / altı shelf recipe / getModuleRecipe shelf dalı / rawBomDebug raflı dalı dead code kanıtı ile kaldırıldı. createShelfModule, TYPE_BEHAVIORS.shelf, CATALOG_PREVIEW_RENDERERS.shelf, getShelfLeafItem, toggle-shelf-light durur. docs/items/audit/** ve current-system/wall_shelf_*.md regenerate edilmedi."
+    "notes": "Üç wall_base composite Item, base-wall:100/150/200 recipe, üç contract assignment ve yalnız bu Item’lara özel factory/normalize/rawBomDebug zinciri silindi. TYPE_BEHAVIORS['base-wall'], createBaseWallModule, CATALOG_PREVIEW_RENDERERS['base-wall'] ve usesWallBackboneCollisionDepth durur. docs/items/audit/** ve current-system/wall_base_*.md regenerate edilmedi."
   },
   "tests": {
     "targeted": [
-      "test/wallShelfItemsContract.test.js",
-      "test/shelfModule.test.js",
-      "test/shelfLighting.test.js",
-      "test/shelfItemsItemContract.test.js",
-      "test/shelfLegItemContract.test.js",
+      "test/wallBaseItemsContract.test.js",
+      "test/baseWallCatalog.test.js",
+      "test/baseWallRecipes.test.js",
+      "test/baseItemsContract.test.js",
+      "test/baseTopsItemContract.test.js",
       "test/moduleRecipes.test.js",
       "test/catalogItemProjection.test.js",
       "test/catalogPreviewConfig.test.js",
@@ -774,8 +774,7 @@
       "test/itemCatalogFields.test.js",
       "test/itemSceneDimensions.test.js",
       "test/systemModuleCatalogDoc.test.js",
-      "test/canonicalDimensionDedup.test.js",
-      "test/wallMediaItemsContract.test.js"
+      "test/moduleStateConstructionRegistry.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -788,16 +787,16 @@
         "e2e/wall-media-items-contract.spec.mjs",
         "e2e/furniture-items-contract.spec.mjs"
       ],
-      "reason": "catalog, ui, state, renderer, placement ve behavior browser-impact domain. smoke katalog açılışını, showcase kalan shelf-showcase kartlarını, wall-flat-panel genel duvar yerleşimini, #174 wall-media/furniture regression’ını doğrular. Silinen wall-shelf E2E spec’leri kaldırıldı."
+      "reason": "catalog, ui, state, renderer, placement ve behavior browser-impact domain. smoke katalog açılışını ve panel-wall kalan kartları doğrular. Silinen wall-base E2E spec kaldırıldı; fullSuite zorunlu."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Katalogdan 6 görünür Item ve shelfCount kalkar. Eski projede wall_shelf module state varsa getItem null ve factory yok; import type:shelf MODULE_STATE_TYPES dışında kalır. Leaf shelf_* ve vitrin durur."
+    "notes": "Katalogdan 3 görünür wall_base Item kalkar. Eski projede type:base-wall module state varsa getItem null ve factory yok. BASE_* ve leaf base_top_* durur."
   },
   "migration": {
     "required": false,
-    "notes": "Alan kod tablosundaydı. Persist/project blob ve SQLite yok. Eski wall_shelf kayıtları için yeni Item veya shelfCount yerine alan üretilmedi."
+    "notes": "Persist/project blob ve SQLite yok. Eski wall_base kayıtları için yeni Item üretilmedi."
   },
-  "rollback": "Altı COMPOSITE_ITEMS kaydı, shelfCount identity/projection/factory/recipe ve wall_shelf catalog/contract satırlarına dönüş."
+  "rollback": "Üç COMPOSITE_ITEMS kaydı, base-wall:100/150/200 recipe, üç contract assignment ve createBaseWallModuleState factory zincirine dönüş."
 }

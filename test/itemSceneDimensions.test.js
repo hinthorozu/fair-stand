@@ -192,18 +192,18 @@ test('17. same-field dışında cross-remap yok', () => {
   }
 });
 
-test('18. 99 Item registry korunuyor', () => {
-  assert.equal(listRegisteredItems().length, 99);
+test('18. 96 Item registry korunuyor', () => {
+  assert.equal(listRegisteredItems().length, 96);
 });
 
-test('19. 58 visible Catalog Item korunuyor', () => {
-  assert.equal(listRegisteredItems().filter((item) => item.catalogVisible === true).length, 58);
+test('19. 55 visible Catalog Item korunuyor', () => {
+  assert.equal(listRegisteredItems().filter((item) => item.catalogVisible === true).length, 55);
 });
 
-test('20. 58 Catalog projection korunuyor', () => {
-  assert.equal(listCatalogItems().length, 58);
-  assert.equal(MODULE_CATALOG_KEYS.length, 58);
-  assert.equal(Object.keys(MODULE_CATALOG).length, 58);
+test('20. 55 Catalog projection korunuyor', () => {
+  assert.equal(listCatalogItems().length, 55);
+  assert.equal(MODULE_CATALOG_KEYS.length, 55);
+  assert.equal(Object.keys(MODULE_CATALOG).length, 55);
 });
 
 test('upright_346_5 sceneDimensions placement 8×8×346.5; length→height remap yok', () => {

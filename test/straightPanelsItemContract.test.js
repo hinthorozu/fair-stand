@@ -15,9 +15,6 @@ const PANEL_CASES = {
       ['counter', 100, {}, 4],
       ['counter', 150, {}, 4],
       ['counter', 200, {}, 4],
-      ['base-wall', 100, {}, 2],
-      ['base-wall', 150, {}, 2],
-      ['base-wall', 200, {}, 2],
       ['base', 100, {}, 2],
       ['base', 150, {}, 2],
       ['base', 200, {}, 2],
@@ -32,7 +29,6 @@ const PANEL_CASES = {
       ['showcase-3', 100, {}, 4],
       ['counter', 100, { shape: 'L' }, 4],
       ['counter', 100, {}, 2],
-      ['base-wall', 100, {}, 7],
       ['base', 100, {}, 2],
     ],
   },
@@ -42,7 +38,6 @@ const PANEL_CASES = {
       ['wall', 150, {}, 7],
       ['counter', 150, { shape: 'L' }, 4],
       ['counter', 150, {}, 2],
-      ['base-wall', 150, {}, 7],
       ['base', 150, {}, 2],
     ],
   },
@@ -62,7 +57,7 @@ test('straight panel production Items use canonical itemKey with verified metada
   }
 });
 
-test('straight panels use canonical itemKey in exactly 26 verified recipe occurrences with quantity parity', () => {
+test('straight panels use canonical itemKey in exactly 21 verified recipe occurrences with quantity parity', () => {
   let total = 0;
   for (const [itemKey, { recipes }] of Object.entries(PANEL_CASES)) {
     let occurrences = 0;
@@ -77,7 +72,7 @@ test('straight panels use canonical itemKey in exactly 26 verified recipe occurr
     assert.equal(occurrences, recipes.length, itemKey);
     total += occurrences;
   }
-  assert.equal(total, 26);
+  assert.equal(total, 21);
 });
 
 test('expanded recipes resolve straight panel metadata through canonical itemKey', () => {
