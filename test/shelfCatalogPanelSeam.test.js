@@ -11,8 +11,9 @@ import {
 import {
   createModuleStateFromDescriptor,
   MODULE_STATE_TYPES,
+  normalizeModuleItemState,
 } from '../src/designState.js';
-import { getItem, resolveSceneDimensions } from '../src/items.js';
+import { getItem, resolveItemKey, resolveSceneDimensions } from '../src/items.js';
 import { resolveItemBom } from '../src/itemBom.js';
 import { countsTowardWallCapacity, usesPanelSeamOverlaySnap } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
@@ -113,6 +114,63 @@ test('F standalone renderer tek raf tahtası çizer; wall/panel üretmez', () =>
   assert.doesNotMatch(renderer, /heightsByCountCm/);
   assert.doesNotMatch(renderer, /stripCount/);
   assert.doesNotMatch(renderer, /PANEL_VERTICAL_PROFILE_WIDTH_M/);
+  assert.match(renderer, /const item = getItem\(moduleState\.itemKey\);/);
+  assert.doesNotMatch(renderer, /getShelfLeafItem/);
+});
+
+function seamWallPoint(pointerXCm, absoluteHeightCm = 100) {
+  return {
+    wallId: 'back',
+    pointerXCm,
+    pointerYCm: 0,
+    rotationZDeg: 0,
+    absoluteHeightCm,
+  };
+}
+
+function snapShelf(itemKey, hostKey, pointerXCm, absoluteHeightCm = 100) {
+  return snapPanelSeamOverlayPlacement({
+    moduleState: createModuleStateFromDescriptor({ itemKey, type: 'shelf' }),
+    wallPoint: seamWallPoint(pointerXCm, absoluteHeightCm),
+    modules: [wallModule(hostKey, 0)],
+  });
+}
+
+test('A shelf_150 exact itemKey ile state olur; width/type/shelfCount identity üretmez', () => {
+  const state = createModuleStateFromDescriptor({ itemKey: 'shelf_150', type: 'shelf' });
+  assert.equal(state.itemKey, 'shelf_150');
+  assert.equal(state.type, 'shelf');
+  assert.equal(state.widthCm, 150);
+  assert.equal(createModuleStateFromDescriptor({ type: 'shelf', widthCm: 150 }), null);
+  assert.equal(createModuleStateFromDescriptor({ type: 'shelf', widthCm: 100, shelfCount: 2 }), null);
+  assert.equal(resolveItemKey({ type: 'shelf', widthCm: 100 }), null);
+  assert.equal(resolveItemKey({ type: 'shelf', widthCm: 100, shelfCount: 2 }), null);
+  assert.equal(resolveItemKey({ itemKey: 'shelf_150' }), 'shelf_150');
+  const inferred = { type: 'shelf', widthCm: 100 };
+  normalizeModuleItemState(inferred);
+  assert.equal(inferred.itemKey, undefined);
+});
+
+test('B-D raf sığdığı wall/panel support span’e bağlanır; taşarsa invalid', () => {
+  const shelf150On200 = snapShelf('shelf_150', 'wall_200', 100, 150);
+  assert.equal(shelf150On200.ok, true);
+  assert.equal(shelf150On200.seamHeightCm, 150);
+  assert.equal(shelf150On200.placement.xCm, 25);
+
+  const shelf100On150 = snapShelf('shelf_100', 'wall_150', 75);
+  assert.equal(shelf100On150.ok, true);
+  assert.equal(shelf100On150.seamHeightCm, 100);
+  assert.equal(shelf100On150.placement.xCm, 25);
+
+  const shelf100On200 = snapShelf('shelf_100', 'wall_200', 80);
+  assert.equal(shelf100On200.ok, true);
+  assert.equal(shelf100On200.seamHeightCm, 100);
+  assert.equal(shelf100On200.placement.xCm, 30);
+
+  assert.equal(snapShelf('shelf_150', 'wall_100', 50).ok, false);
+  assert.equal(snapShelf('shelf_200', 'wall_100', 50).ok, false);
+  assert.equal(snapShelf('shelf_200', 'wall_150', 75).ok, false);
+  assert.equal(snapShelf('shelf_100', 'wall_200', 10).ok, false);
 });
 
 test('G-I panel internal seam snap: geçerli birleşim, orta ve dış sınır reddi', () => {
@@ -131,13 +189,7 @@ test('G-I panel internal seam snap: geçerli birleşim, orta ve dış sınır re
 
   const valid = snapPanelSeamOverlayPlacement({
     moduleState: shelf,
-    wallPoint: {
-      wallId: 'back',
-      pointerXCm: 50,
-      pointerYCm: 0,
-      rotationZDeg: 0,
-      absoluteHeightCm: 100,
-    },
+    wallPoint: seamWallPoint(50, 100),
     modules: [wall],
   });
   assert.equal(valid.ok, true);
@@ -152,13 +204,7 @@ test('G-I panel internal seam snap: geçerli birleşim, orta ve dış sınır re
 
   const midPanel = snapPanelSeamOverlayPlacement({
     moduleState: shelf,
-    wallPoint: {
-      wallId: 'back',
-      pointerXCm: 50,
-      pointerYCm: 0,
-      rotationZDeg: 0,
-      absoluteHeightCm: 75,
-    },
+    wallPoint: seamWallPoint(50, 75),
     modules: [wall],
   });
   assert.equal(midPanel.ok, false);
@@ -166,26 +212,14 @@ test('G-I panel internal seam snap: geçerli birleşim, orta ve dış sınır re
 
   const floorEdge = snapPanelSeamOverlayPlacement({
     moduleState: shelf,
-    wallPoint: {
-      wallId: 'back',
-      pointerXCm: 50,
-      pointerYCm: 0,
-      rotationZDeg: 0,
-      absoluteHeightCm: 0,
-    },
+    wallPoint: seamWallPoint(50, 0),
     modules: [wall],
   });
   assert.equal(floorEdge.ok, false);
 
   const topEdge = snapPanelSeamOverlayPlacement({
     moduleState: shelf,
-    wallPoint: {
-      wallId: 'back',
-      pointerXCm: 50,
-      pointerYCm: 0,
-      rotationZDeg: 0,
-      absoluteHeightCm: 350,
-    },
+    wallPoint: seamWallPoint(50, 350),
     modules: [wall],
   });
   assert.equal(topEdge.ok, false);

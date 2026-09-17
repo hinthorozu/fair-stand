@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "shelf-catalog-panel-seam",
   "kind": "feature",
-  "summary": "Mevcut leaf Item shelf_100/150/200 Catalog’da Raf & Vitrin altında görünür. Standalone tek raf renderer, panel internal seam overlay snap, wall capacity exclude. wall_shelf_* geri getirilmedi. Catalog 58, kayıtlı Item 96, self BOM 12.",
+  "summary": "Mevcut leaf Item shelf_100/150/200 Catalog’da Raf & Vitrin altında görünür. Standalone tek raf renderer, panel internal seam overlay snap, sığdığı wall/panel support span, exact itemKey identity, wall capacity exclude. wall_shelf_* geri getirilmedi. Catalog 58, kayıtlı Item 96, self BOM 12.",
   "owners": [
     "src/items.js",
     "src/catalog.js",
@@ -783,7 +783,7 @@
         "F-045"
       ]
     },
-    "notes": "shelf_100/150/200 catalogVisible=true, sceneDimensions width/height, MODULE_STATE_FACTORIES.shelf, overlaySnap panel-seam, standalone createShelfModule. Geçerli seam getStandInternalSeamHeightsCm() (50..300). wall_shelf_* yok. wall_showcase_* ve glass_shelf dokunulmadı. Shelf lighting mekanizması korundu."
+    "notes": "shelf_100/150/200 catalogVisible=true, sceneDimensions width/height, MODULE_STATE_FACTORIES.shelf exact itemKey, overlaySnap panel-seam, standalone createShelfModule. Raf sığdığı wall/panel support span’e bağlanır (shelf.widthCm <= host.widthCm). Geçerli seam getStandInternalSeamHeightsCm() (50..300). wall_shelf_* yok. wall_showcase_* ve glass_shelf dokunulmadı. Shelf lighting mekanizması korundu."
   },
   "tests": {
     "targeted": [

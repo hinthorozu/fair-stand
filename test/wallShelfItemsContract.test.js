@@ -37,7 +37,10 @@ test('silinen wall_shelf composite Item, catalog, contract ve recipe kayıtları
 test('shelf factory ve shelfCount identity alanı kaldırıldı; leaf shelf_* durur', () => {
   assert.equal(MODULE_STATE_TYPES.includes('shelf'), true);
   assert.equal(createModuleStateFromDescriptor({ itemKey: 'wall_shelf_2_100', type: 'shelf' }), null);
-  assert.equal(resolveItemKey({ type: 'shelf', widthCm: 100, shelfCount: 2 }), 'shelf_100');
+  assert.equal(resolveItemKey({ type: 'shelf', widthCm: 100, shelfCount: 2 }), null);
+  assert.equal(resolveItemKey({ type: 'shelf', widthCm: 100 }), null);
+  assert.equal(createModuleStateFromDescriptor({ type: 'shelf', widthCm: 100 }), null);
+  assert.equal(resolveItemKey({ itemKey: 'shelf_100' }), 'shelf_100');
 
   const board = getItem('shelf_100');
   assert.equal(board.itemKey, 'shelf_100');

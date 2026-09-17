@@ -50,7 +50,8 @@ test('shelf renderer consumes canonical Item depth, thickness and default color 
 
   assert.doesNotMatch(catalogSource, /projectionCm:\s*38/);
   assert.doesNotMatch(catalogSource, /thicknessCm:\s*3/);
-  assert.match(shelfRenderer, /const item = getItem\(moduleState\.itemKey\) \?\? getShelfLeafItem\(moduleState\.widthCm\)/);
+  assert.match(shelfRenderer, /const item = getItem\(moduleState\.itemKey\);/);
+  assert.doesNotMatch(shelfRenderer, /getShelfLeafItem/);
   assert.match(shelfRenderer, /item\.dimensions\.depthCm/);
   assert.match(shelfRenderer, /item\.dimensions\.thicknessCm/);
   assert.match(shelfRenderer, /color: item\.defaultColor/);

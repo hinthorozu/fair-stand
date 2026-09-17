@@ -501,7 +501,7 @@ export function createTvModuleState(descriptor = {}) {
 }
 
 export function createShelfModuleState(descriptor = {}) {
-  const itemKey = descriptor?.itemKey ?? resolveItemKey(descriptor);
+  const itemKey = descriptor?.itemKey;
   const item = itemKey ? getItem(itemKey) : null;
   if (item?.type !== 'shelf') return null;
   const state = {
@@ -604,8 +604,7 @@ export function normalizeModuleItemState(moduleState) {
   }
 
   if (moduleState.type === 'shelf') {
-    const resolvedKey = resolveItemKey(moduleState) ?? moduleState.itemKey;
-    const item = resolvedKey ? getItem(resolvedKey) : null;
+    const item = moduleState.itemKey ? getItem(moduleState.itemKey) : null;
     if (item?.type === 'shelf') {
       moduleState.itemKey = item.itemKey;
       if (!Object.hasOwn(moduleState, 'shelfLightingOn')) {

@@ -1015,6 +1015,8 @@ export function resolveItemKey(descriptor) {
   const normalized = normalizeItemDescriptor(descriptor);
   if (normalized.itemKey && getItem(normalized.itemKey)) return normalized.itemKey;
   if (!normalized.type) return null;
+  // shelf identity yalnız exact itemKey; type/width/shelfCount tahmini yok
+  if (normalized.type === 'shelf') return null;
 
   const candidates = listRegisteredItems().filter((item) => item.type === normalized.type);
   if (!candidates.length) return null;

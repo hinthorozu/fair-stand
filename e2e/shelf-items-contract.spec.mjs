@@ -111,15 +111,10 @@ test('shelf_100/150/200 Catalog’da Raf & Vitrin altında vitrinlerden sonra g�
 });
 
 for (const itemKey of ['shelf_100', 'shelf_150', 'shelf_200']) {
-  test(`${itemKey} catalog drag matching wall span’ine overlay olarak eklenir`, async ({ page }) => {
+  test(`${itemKey} catalog drag sığdığı wall/panel support span’ine overlay olarak eklenir`, async ({ page }) => {
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    const standWidthByShelf = Object.freeze({
-      shelf_100: 500,
-      shelf_150: 350,
-      shelf_200: 500,
-    });
-    await createBackWallStand(page, itemKey, standWidthByShelf[itemKey]);
+    await createBackWallStand(page, itemKey, 500);
     const initial = await saveAndReadProject(page);
     const wallUsedBefore = (initial.modules ?? [])
       .filter((module) => module.placement?.wallId === 'back' && module.type !== 'shelf')

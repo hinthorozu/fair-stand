@@ -24,7 +24,8 @@ Dokunulmayan: `wall_showcase_100_2` / `wall_showcase_100_3`, `glass_shelf`, vitr
 - `TYPE_BEHAVIORS.shelf`: `wall-overlay`, `wallCapacity: exclude`, `overlaySnap: panel-seam`
 - Geçerli seam: `getStandInternalSeamHeightsCm()` = strip index 1..stripCount-1 (50..300). 0 ve 350 yok.
 - Raf alt yüzeyi seam’de; overlay merkez = seam + thickness/2
-- Yatay: aynı `widthCm` wall-capacity host’un başlangıcına hizalı; stretch yok
+- Identity: exact `itemKey` → `getItem`; type/width/shelfCount tahmini yok
+- Yatay: wall-overlay pointer placement; raf sığdığı wall/panel support span içinde kalır (`shelf.widthCm <= host.widthCm`); host başlangıcına zorlanmaz
 - Drop yalnız geçerli seam’de
 
 ### Sayılar

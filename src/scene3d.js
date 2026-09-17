@@ -9,7 +9,6 @@ import {
   getCommercialItemForType,
   getFloorItem,
   getItem,
-  getShelfLeafItem,
   getShowcaseBodyDefinition,
   isCarpetFloorItem,
   isGridTileFloorItem,
@@ -4426,7 +4425,20 @@ export function createStandScene(
             clearPlacementFeedback();
             return;
           }
-          showPlacementFeedback('Raf yatayda bağlı duvar açıklığına kilitlidir.', { durationMs: 900 });
+          const stepCm = getModulePlacementSnapCm(moduleState.type);
+          const nextPlacement = stepPanelSeamOverlayPlacement({
+            moduleState,
+            modules: getRenderedModuleStates(),
+            horizontalDeltaCm: bestArrowMove.delta * stepCm,
+          });
+          if (!nextPlacement) {
+            showPlacementFeedback('Raf bu yönde duvar açıklığı sınırına ulaştı.', { durationMs: 900 });
+            return;
+          }
+          moduleState.placement = { ...nextPlacement };
+          moduleGroup.userData.placement = { ...nextPlacement };
+          applyPlacementToGroup(moduleGroup, nextPlacement, moduleState.widthCm);
+          clearPlacementFeedback();
           return;
         }
         const stepCm = getModulePlacementSnapCm(moduleState.type);
@@ -6993,9 +7005,9 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
 }
 
 function createShelfModule(moduleState, moduleIndex) {
-  const item = getItem(moduleState.itemKey) ?? getShelfLeafItem(moduleState.widthCm);
+  const item = getItem(moduleState.itemKey);
   if (!item || item.type !== 'shelf') {
-    throw new TypeError(`Missing canonical shelf Item for ${moduleState.itemKey ?? moduleState.widthCm}.`);
+    throw new TypeError(`Missing canonical shelf Item for ${moduleState.itemKey}.`);
   }
 
   const widthM = Number(moduleState.widthCm) / 100;

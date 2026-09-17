@@ -190,7 +190,7 @@ export function listInternalSeamsInOccupancyRange(occupancyRange) {
   ));
 }
 
-function listSameWidthWallCapacityHosts({
+function listFittingWallCapacityHosts({
   modules = [],
   widthCm,
   wallId,
@@ -200,10 +200,19 @@ function listSameWidthWallCapacityHosts({
   if (!Number.isFinite(width) || width <= 0) return [];
   return modules.filter((module) => {
     if (!countsTowardWallCapacity(module)) return false;
-    if (Number(module.widthCm) !== width) return false;
+    const hostWidth = Number(module.widthCm);
+    if (!Number.isFinite(hostWidth) || hostWidth + EPSILON_CM < width) return false;
     if (supportModuleId) return module.id === supportModuleId;
     return module?.placement?.wallId === wallId;
   });
+}
+
+function placementFitsHost(placement, widthCm, host) {
+  const inner = getPlacementInterval(placement, widthCm);
+  const outer = getPlacementInterval(host?.placement, host?.widthCm);
+  if (!inner || !outer || inner.axis !== outer.axis) return false;
+  return inner.startCm >= outer.startCm - EPSILON_CM
+    && inner.endCm <= outer.endCm + EPSILON_CM;
 }
 
 function pointerDistanceToHostCm(wallPoint, host) {
@@ -245,7 +254,7 @@ export function snapPanelSeamOverlayPlacement({
   const hitHeightCm = Number(wallPoint?.absoluteHeightCm);
   const fallback = overlayPlacementFromPointer(moduleState, wallPoint);
   const invalidMessage = 'Rafı iki panel arasındaki birleşime bırak.';
-  const missingHostMessage = 'Rafı aynı genişlikteki duvar veya panel üzerine bırak.';
+  const missingHostMessage = 'Rafı sığdığı duvar veya panel üzerine bırak.';
 
   if (
     !wallPoint
@@ -257,7 +266,7 @@ export function snapPanelSeamOverlayPlacement({
     return { ok: false, placement: fallback, seamHeightCm: null, message: missingHostMessage };
   }
 
-  const hosts = listSameWidthWallCapacityHosts({
+  const hosts = listFittingWallCapacityHosts({
     modules,
     widthCm,
     wallId: wallPoint.wallId,
@@ -277,10 +286,10 @@ export function snapPanelSeamOverlayPlacement({
     return { ok: false, placement: fallback, seamHeightCm: null, message: missingHostMessage };
   }
 
-  const hostPlacement = createModulePlacement({
-    ...target.placement,
-    wallId: wallPoint.wallId ?? target.placement.wallId,
-  });
+  if (!placementFitsHost(fallback, widthCm, target)) {
+    return { ok: false, placement: fallback, seamHeightCm: null, message: missingHostMessage };
+  }
+
   const occupancyRange = getModuleCollisionHeightRangeCm(target);
   const validSeams = listInternalSeamsInOccupancyRange(occupancyRange);
 
@@ -304,7 +313,7 @@ export function snapPanelSeamOverlayPlacement({
   );
 
   const placement = createModulePlacement({
-    ...hostPlacement,
+    ...fallback,
     zCm: snapped
       ? overlayZCmFromSeamHeight(seamHeightCm, heightCm)
       : (Number.isFinite(hitHeightCm)
@@ -324,25 +333,35 @@ export function stepPanelSeamOverlayPlacement({
   moduleState,
   modules = [],
   seamDelta = 0,
+  horizontalDeltaCm = 0,
 } = {}) {
   const widthCm = Number(moduleState?.widthCm);
   const heightCm = Number(moduleState?.heightCm);
   const placement = moduleState?.placement;
   if (!placement || !Number.isFinite(widthCm) || !Number.isFinite(heightCm)) return null;
 
-  const hosts = listSameWidthWallCapacityHosts({
+  const hosts = listFittingWallCapacityHosts({
     modules,
     widthCm,
     wallId: placement.wallId,
     supportModuleId: placement.supportModuleId ?? null,
   });
-  const target = hosts.find((host) => {
-    const hostPlacement = host.placement;
-    if (!hostPlacement) return false;
-    return nearlyEqual(hostPlacement.xCm, placement.xCm)
-      && nearlyEqual(hostPlacement.yCm, placement.yCm);
-  }) ?? hosts[0];
+  const target = hosts.find((host) => placementFitsHost(placement, widthCm, host)) ?? null;
   if (!target) return null;
+
+  if (Number(horizontalDeltaCm)) {
+    const interval = getPlacementInterval(placement, widthCm);
+    const hostInterval = getPlacementInterval(target.placement, target.widthCm);
+    if (!interval || !hostInterval || interval.axis !== hostInterval.axis) return null;
+    const maxStart = hostInterval.endCm - widthCm;
+    const nextStart = clamp(interval.startCm + Number(horizontalDeltaCm), hostInterval.startCm, maxStart);
+    if (!Number.isFinite(nextStart) || nearlyEqual(nextStart, interval.startCm)) return null;
+    return createModulePlacement({
+      ...placement,
+      xCm: interval.axis === 'x' ? nextStart : placement.xCm,
+      yCm: interval.axis === 'y' ? nextStart : placement.yCm,
+    });
+  }
 
   const validSeams = listInternalSeamsInOccupancyRange(getModuleCollisionHeightRangeCm(target));
   if (!validSeams.length) return null;
@@ -360,7 +379,7 @@ export function stepPanelSeamOverlayPlacement({
   if (nextIndex < 0 || nextIndex >= validSeams.length) return null;
 
   return createModulePlacement({
-    ...target.placement,
+    ...placement,
     zCm: overlayZCmFromSeamHeight(validSeams[nextIndex], heightCm),
   });
 }
