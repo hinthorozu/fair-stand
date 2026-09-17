@@ -960,16 +960,6 @@ export const ITEMS = Object.freeze({
 
 });
 
-
-const DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH = Object.freeze({
-  100: 'door_leaf_100',
-});
-
-export function getDoorLeafItem(nominalModuleWidthCm) {
-  const itemKey = DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH[Number(nominalModuleWidthCm)];
-  return itemKey ? getItem(itemKey) : null;
-}
-
 const CONNECTOR_ITEM_KEYS_BY_TYPE = Object.freeze({
   start: 'connector_start',
   single: 'connector_single',

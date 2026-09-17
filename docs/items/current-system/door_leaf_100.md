@@ -11,7 +11,7 @@
 | 1 | Identity / type | VAR | `itemKey=door_leaf_100`, `type=door-leaf`, `unit=adet`; eski `door_100 partId` kaldırılır. |
 | 2 | Intrinsic properties | VAR | `100 × 200 × 8 cm`, `material=ahşap`, `defaultColor=0xffffff`, `nominalModuleWidthCm=100`. |
 | 3 | Default state | VAR | Parent door state içindeki child surface `itemKey=door_leaf_100`, kanonik beyazdan başlar. |
-| 4 | Oluşturma | VAR | `createDoorModuleState(100)` → `getDoorLeafItem(100)` → child editable surface. |
+| 4 | Oluşturma | VAR | `createDoorModuleState(100)` → `getItem('door_leaf_100')` → child editable surface. |
 | 5 | Placement | PARENT-OWNED | Ahşap kanat bağımsız yerleştirilmez; parent `door` module placement sahibidir. |
 | 6 | Move | PARENT-OWNED | Leaf bağımsız taşınmaz; parent module move zinciri uygulanır. |
 | 7 | Rotation | PARENT-OWNED | Leaf bağımsız dönmez; parent `door` WALL behavior dönüşü uygulanır. |

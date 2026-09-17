@@ -2,10 +2,11 @@
   "schemaVersion": 2,
   "id": "item-composition-inner-corner",
   "kind": "architecture",
-  "summary": "Düz child listesi ve iç-köşe verisi tek kaynak Item composition.items / innerCorner. moduleRecipes ürün tablosu silindi; expand ve resolveItemBom kodda kaldı. rawBomDebug type+width yolları resolveItemBom(itemKey).",
+  "summary": "Düz child listesi ve iç-köşe verisi tek kaynak Item composition.items / innerCorner. moduleRecipes ürün tablosu silindi; expand ve resolveItemBom kodda kaldı. rawBomDebug type+width yolları resolveItemBom(itemKey). Kapı kanadı width helper getDoorLeafItem silindi; factory/normalize getItem('door_leaf_100').",
   "owners": [
     "src/items.js",
     "src/itemBom.js",
+    "src/designState.js",
     "docs/refactor/ITEMS.md"
   ],
   "sourceOfTruth": [
@@ -16,10 +17,10 @@
   "impact": {
     "catalog": "affected",
     "behavior": "not-applicable",
-    "state": "not-applicable",
+    "state": "affected",
     "placement": "not-applicable",
     "renderer": "not-applicable",
-    "persistence": "not-applicable",
+    "persistence": "affected",
     "bom": "affected",
     "ui": "affected",
     "composition": "affected",
@@ -792,12 +793,13 @@
         "F-045"
       ]
     },
-    "notes": "Child miktarları değişmedi. Recipe items+variants tabloları silindi; innerCorner Item’a taşındı. Furniture kümeleri BOM’a açılmadı. Catalog/factory/persist itemKey dokunulmadı."
+    "notes": "Child miktarları değişmedi. Recipe items+variants tabloları silindi; innerCorner Item’a taşındı. Furniture kümeleri BOM’a açılmadı. Catalog persist itemKey dokunulmadı. getDoorLeafItem silindi; surface.itemKey hâlâ door_leaf_100."
   },
   "tests": {
     "targeted": [
       "test/recipeCompositionItemsContract.test.js",
       "test/doorCompositeItemContract.test.js",
+      "test/doorLeafItemContract.test.js",
       "test/wallShowcaseItemContract.test.js",
       "test/moduleRecipes.test.js",
       "test/canonicalDimensionDedup.test.js",
@@ -815,11 +817,11 @@
   },
   "risk": {
     "level": "medium",
-    "notes": "İç-köşe expand aynı panelRole/nominalModuleWidthCm kuralı. Test helper type+width → mevcut parent itemKey; src BOM kaynağı değil."
+    "notes": "İç-köşe expand aynı panelRole/nominalModuleWidthCm kuralı. Test helper type+width → mevcut parent itemKey; src BOM kaynağı değil. Kapı factory 100 dışı zaten null; leaf lookup getItem('door_leaf_100')."
   },
   "migration": {
     "required": false,
-    "notes": "Persist/schema yok. itemKey ve miktarlar aynı. innerCorner yeni alan; proje blob’una yazılmaz."
+    "notes": "Persist/schema yok. itemKey ve miktarlar aynı. innerCorner yeni alan; proje blob’una yazılmaz. Kapı surface.itemKey hâlâ door_leaf_100."
   },
-  "rollback": "composition.innerCorner satırlarını silmek; moduleRecipes ürün tablolarını geri koymak; itemBom fallback’ini catalogRecipe.items yapmak."
+  "rollback": "composition.innerCorner satırlarını silmek; moduleRecipes ürün tablolarını geri koymak; itemBom fallback’ini catalogRecipe.items yapmak; getDoorLeafItem’ı geri koymak."
 }
