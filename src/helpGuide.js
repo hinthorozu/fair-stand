@@ -1,7 +1,8 @@
 import { getHelpStandardsTableHtml, getStandStandardsFacts } from './standStandardsCopy.js';
 import { getFairStandHostDocument } from './hostDocument.js';
 
-const GUIDE_SECTIONS = [
+function listGuideSections() {
+  return [
   {
     title: 'Hızlı Başlangıç',
     open: true,
@@ -222,7 +223,8 @@ const GUIDE_SECTIONS = [
       </ul>
     `,
   },
-];
+  ];
+}
 
 function createGuideSection(section) {
   const document = getFairStandHostDocument();
@@ -273,7 +275,7 @@ export function initHelpGuide() {
   `;
 
   const content = backdrop.querySelector('.help-guide-content');
-  GUIDE_SECTIONS.forEach((section) => content.appendChild(createGuideSection(section)));
+  listGuideSections().forEach((section) => content.appendChild(createGuideSection(section)));
 
   document.body.append(button, backdrop);
 
