@@ -36,7 +36,7 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
 
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.equal(getItem('COAT_RACK').modelFile, 'coat_rack.glb');
-  assert.ok(scene.includes("getItem('COAT_RACK').modelFile"));
+  assert.match(scene, /loadItemModel\('COAT_RACK'\)/);
   assert.match(scene, /function createCoatRackModule\(moduleState, moduleIndex\)/);
   assert.match(scene, /moduleState\.type === 'coat-rack'/);
 });

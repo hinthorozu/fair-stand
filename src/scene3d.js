@@ -110,38 +110,22 @@ function loadGltfScene(url) {
   return promise;
 }
 
-function loadEamesChairModel() {
-  return loadGltfScene(import.meta.env.BASE_URL + 'models/eames_chair.glb');
+function loadItemModel(itemOrKey) {
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  if (!item?.modelFile) {
+    throw new TypeError(`Missing canonical model asset for ${item?.itemKey ?? 'unknown'}.`);
+  }
+  return loadGltfScene(import.meta.env.BASE_URL + 'models/' + item.modelFile);
 }
 
-function createTvScreenTexture() {
-  const texture = new THREE.TextureLoader().load(import.meta.env.BASE_URL + 'tv-screen.jpg');
+function createTvScreenTexture(itemOrKey) {
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  if (!item?.defaultScreenFile) {
+    throw new TypeError(`Missing canonical default screen asset for ${item?.itemKey ?? 'unknown'}.`);
+  }
+  const texture = new THREE.TextureLoader().load(import.meta.env.BASE_URL + item.defaultScreenFile);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
-}
-
-function loadBarStoolModel() {
-  return loadGltfScene(import.meta.env.BASE_URL + 'models/bar_chair.glb');
-}
-
-function loadMiniFridgeModel() {
-  return loadGltfScene(import.meta.env.BASE_URL + 'models/' + getItem('MINI_FRIDGE_AVANTI').modelFile);
-}
-
-function loadCoatRackModel() {
-  return loadGltfScene(import.meta.env.BASE_URL + 'models/' + getItem('COAT_RACK').modelFile);
-}
-
-function loadKettleModel() {
-  return loadGltfScene(import.meta.env.BASE_URL + 'models/' + getItem('KETTLE').modelFile);
-}
-
-function loadIndoorPlantModel(modelFile) {
-  return loadGltfScene(import.meta.env.BASE_URL + 'models/' + modelFile);
-}
-
-function loadBeigeSofaModel() {
-  return loadGltfScene(import.meta.env.BASE_URL + 'models/bej_koltuk_1_ciftli_2_tekli.glb');
 }
 
 function isFloorFixtureType(type) {
@@ -5011,7 +4995,7 @@ function createTvModule(moduleState, moduleIndex) {
     metalness: 0.05,
   });
 
-  const screenTexture = createTvScreenTexture();
+  const screenTexture = createTvScreenTexture(item);
   const tv = new THREE.Mesh(
     new THREE.BoxGeometry(widthM, heightM, depthM),
     [
@@ -5186,7 +5170,7 @@ function createMiniFridgeModule(moduleState, moduleIndex) {
   };
   group.add(proxy);
 
-  loadMiniFridgeModel().then((template) => {
+  loadItemModel('MINI_FRIDGE_AVANTI').then((template) => {
     const model = template.clone(true);
     model.traverse((object) => {
       if (!object.isMesh) return;
@@ -5219,7 +5203,7 @@ function createMiniFridgeModule(moduleState, moduleIndex) {
 function createIndoorPlantModule(moduleState, moduleIndex) {
   const type = moduleState.type === 'plastic-trash-bin' ? 'plastic-trash-bin' : 'indoor-plant-1';
   const item = getCommercialItemForType(type);
-  const modelFile = moduleState.modelFile ?? item?.modelFile ?? 'indoor_plants.glb';
+  const modelFile = moduleState.modelFile ?? item?.modelFile;
   const widthCm = Number(moduleState.widthCm || item?.dimensions.widthCm || 60);
   const depthCm = Number(moduleState.depthCm || item?.dimensions.depthCm || 60);
   const heightCm = Number(moduleState.heightCm || item?.dimensions.heightCm || 120);
@@ -5279,7 +5263,7 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
   };
   group.add(proxy);
 
-  loadIndoorPlantModel(modelFile).then((template) => {
+  loadItemModel({ modelFile }).then((template) => {
     if (!group.parent) return;
     const model = template.clone(true);
     const removedNodes = [];
@@ -5415,7 +5399,7 @@ function createCoatRackModule(moduleState, moduleIndex) {
   };
   group.add(proxy);
 
-  loadCoatRackModel().then((template) => {
+  loadItemModel('COAT_RACK').then((template) => {
     if (!group.parent) return;
     const model = template.clone(true);
     model.traverse((object) => {
@@ -5584,7 +5568,7 @@ function createKettleModule(moduleState, moduleIndex) {
   };
   group.add(proxy);
 
-  loadKettleModel().then((template) => {
+  loadItemModel('KETTLE').then((template) => {
     const model = template.clone(true);
     model.traverse((object) => {
       if (!object.isMesh) return;
@@ -5870,7 +5854,7 @@ function createBarStoolModule(moduleState, moduleIndex) {
     colorTargets,
   };
 
-  loadBarStoolModel().then((template) => {
+  loadItemModel('furniture_bar_stool_classic').then((template) => {
     if (!group.parent) return;
     const chair = template.clone(true);
     chair.traverse((object) => {
@@ -5950,7 +5934,7 @@ function createEamesChairModule(moduleState, moduleIndex) {
     colorTargets,
   };
 
-  loadEamesChairModel().then((template) => {
+  loadItemModel('chair_eames').then((template) => {
     if (!group.parent) return;
     const chair = template.clone(true);
     chair.traverse((object) => {
@@ -6127,7 +6111,7 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
     surfaces.push(proxy);
   });
 
-  loadEamesChairModel().then((template) => {
+  loadItemModel('chair_eames').then((template) => {
     if (!group.parent) return;
 
     chairPlacements.forEach(([x, z, rotationY]) => {
@@ -6482,7 +6466,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
     }),
   ]);
 
-  loadBeigeSofaModel().then((template) => {
+  loadItemModel('furniture_sofa_single_classic').then((template) => {
     if (!group.parent) return;
     placements.forEach((placement) => {
       attachBeigeSofaMesh(
@@ -6527,7 +6511,7 @@ function createSofaPieceClassicModule(moduleState, moduleIndex, itemKey, meshNam
     colorTargets,
   });
 
-  loadBeigeSofaModel().then((template) => {
+  loadItemModel('furniture_sofa_single_classic').then((template) => {
     if (!group.parent) return;
     attachBeigeSofaMesh(
       group,
@@ -7580,7 +7564,7 @@ function createSeparatorModule(moduleState, moduleIndex) {
   group.add(selector);
 
   if (moduleState.modelFile) {
-    loadIndoorPlantModel(moduleState.modelFile).then((template) => {
+    loadItemModel({ modelFile: moduleState.modelFile }).then((template) => {
       if (!group.parent) return;
       const model = template.clone(true);
       let visibleVineCount = 0;

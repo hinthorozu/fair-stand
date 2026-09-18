@@ -42,9 +42,9 @@ test('floor Items use existing floorType keys and stay off the module catalog', 
   const hali = getItem('hali');
   assert.equal(karolaj.dimensions.widthCm, 100);
   assert.equal(karolaj.dimensions.depthCm, 100);
-  assert.equal(karolaj.defaultColor, '#e9edf1');
+  assert.equal(karolaj.defaultColor, 0xe9edf1);
   assert.equal(karolaj.paintable, true);
-  assert.equal(hali.defaultColor, '#8b8f94');
+  assert.equal(hali.defaultColor, 0x8b8f94);
   assert.equal(hali.paintable, true);
   assert.equal(Object.hasOwn(hali, 'dimensions'), false);
 

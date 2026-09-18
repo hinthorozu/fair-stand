@@ -235,7 +235,6 @@ test('profil sceneDimensions Catalog kart genişliğini taşır; catalogWidthCm 
 test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullanır', () => {
   const sidebar = readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
   const contextMenu = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');
-  const items = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
 
   assert.match(sidebar, /listCatalogGroups/);
   assert.match(contextMenu, /listCatalogGroups/);
@@ -247,8 +246,9 @@ test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullan
   assert.doesNotMatch(contextMenu, /MODULE_CATALOG_GROUPS/);
   assert.doesNotMatch(sidebar, /MODULE_CATALOG\[/);
   assert.doesNotMatch(contextMenu, /MODULE_CATALOG\[/);
-  assert.match(items, /catalogVisible: true/);
-  assert.match(items, /catalogCategory: 'panel-wall'/);
+  const fixture = readFileSync(new URL('./fixtures/itemCatalogSeed.json', import.meta.url), 'utf8');
+  assert.match(fixture, /"catalog_visible":\s*true/);
+  assert.match(fixture, /"catalog_key":\s*"panel-wall"/);
 
   for (const itemKey of listCatalogItems().map((item) => item.itemKey)) {
     assert.equal(Object.hasOwn(getCatalogItem(itemKey), 'catalogVisible'), false, itemKey);

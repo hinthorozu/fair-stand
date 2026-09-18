@@ -57,13 +57,42 @@ import {
   validateProjectArchiveManifest,
 } from './projectImportValidation.js';
 import { getFairStandHostDocument, getFairStandHostWindow } from './hostDocument.js';
-import { bindProjectActionSaveGuard } from './projectActionSaveGuard.js';
+import { bootstrapFairStandCatalog } from './catalogBootstrap.js';
 
 if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('rawBom')) {
   import('./rawBomDebug.js');
 }
 
 export function startFairStandConfigurator() {
+  let cancelled = false;
+  let stopRuntime = () => {};
+
+  const boot = bootstrapFairStandCatalog()
+    .then(() => {
+      if (cancelled) return;
+      stopRuntime = startFairStandConfiguratorRuntime();
+    })
+    .catch((error) => {
+      console.error('Fair Stand Item catalog bootstrap failed:', error);
+      const host = getFairStandHostDocument();
+      if (host?.body) {
+        host.body.replaceChildren();
+        const message = host.createElement('p');
+        message.setAttribute('data-testid', 'fair-stand-bootstrap-error');
+        message.textContent = 'Fair Stand ürün kataloğu yüklenemedi. Configurator başlatılmadı.';
+        host.body.append(message);
+      }
+    });
+
+  return function stopFairStandConfigurator() {
+    cancelled = true;
+    void boot;
+    stopRuntime();
+  };
+}
+
+function startFairStandConfiguratorRuntime() {
+
   const document = getFairStandHostDocument();
   const window = getFairStandHostWindow();
   if (!document?.querySelector) {

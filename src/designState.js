@@ -440,9 +440,8 @@ function resolveIndoorPlantItemKey(descriptor = {}) {
   if (descriptor && typeof descriptor === 'object' && !Array.isArray(descriptor)) {
     const explicitKey = descriptor.itemKey ?? null;
     if (explicitKey && isIndoorPlantItem(getItem(explicitKey))) return explicitKey;
-    // Runtime default model `indoor_plants.glb` katalogda modelFile taşımıyordu; resolve'ta yok say.
     const rawModelFile = descriptor.modelFile ?? null;
-    const modelFile = (!rawModelFile || rawModelFile === 'indoor_plants.glb') ? null : rawModelFile;
+    const modelFile = rawModelFile || null;
     const resolvedKey = resolveItemKey({
       type: 'indoor-plant-1',
       widthCm: descriptor.widthCm,
@@ -473,8 +472,8 @@ export function createIndoorPlantModuleState(descriptor = {}) {
   const item = itemKey ? getItem(itemKey) : null;
   if (!isIndoorPlantItem(item)) return null;
 
-  const modelFile = item.modelFile ?? 'indoor_plants.glb';
-  const isLongPlanter = /^saksi_bitkili_/i.test(modelFile);
+  const modelFile = item.modelFile;
+  const isLongPlanter = item.preserveModelScale === true;
   const state = {
     id: createId('module'),
     itemKey: item.itemKey,

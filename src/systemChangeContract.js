@@ -77,6 +77,7 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/automaticWall.js': frozenDomains('composition', 'placement'),
   'src/autosaveController.js': frozenDomains('persistence'),
   'src/catalog.js': frozenDomains('catalog'),
+  'src/catalogBootstrap.js': frozenDomains('catalog', 'architecture'),
   'src/colorEditor.css': frozenDomains('ui'),
   'src/colorEditorController.js': frozenDomains('ui'),
   'src/colorEditorInputs.js': frozenDomains('ui'),

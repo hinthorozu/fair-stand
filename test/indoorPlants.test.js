@@ -6,6 +6,7 @@ import {
   listCatalogGroups,
 } from '../src/catalog.js';
 import { createIndoorPlantModuleState, createModuleStateFromDescriptor } from '../src/designState.js';
+import { getItem } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
 test('Yapay Çiçek 1 is the only active artificial plant inside Extra', () => {
@@ -39,8 +40,9 @@ test('only Yapay Çiçek 1 is wired and the removed second GLB stays absent', ()
   assert.equal(canonicalState.type, 'indoor-plant-1');
   assert.equal(canonicalState.itemKey, 'EXTRA_INDOOR_PLANT_1');
 
+  assert.equal(getItem('EXTRA_INDOOR_PLANT_1').modelFile, 'indoor_plants.glb');
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(scene, /indoor_plants\.glb/);
+  assert.doesNotMatch(scene, /indoor_plants\.glb/);
   assert.doesNotMatch(scene, /indoor_plants2\.glb/);
   assert.doesNotMatch(scene, /indoor-plant-2/);
   assert.match(scene, /function createIndoorPlantModule\(moduleState, moduleIndex\)/);
