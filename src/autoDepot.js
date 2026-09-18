@@ -16,11 +16,6 @@ function requireItem(itemKey) {
   return item;
 }
 
-const MINI_FRIDGE_ITEM = requireItem('MINI_FRIDGE_AVANTI');
-const COAT_RACK_ITEM = requireItem('COAT_RACK');
-const KETTLE_ITEM = requireItem('KETTLE');
-const PLASTIC_TRASH_BIN_ITEM = requireItem('PLASTIC_TRASH_BIN');
-
 function wall(widthCm, xCm, yCm, rotationZDeg = 0) {
   return { kind: 'wall', widthCm, placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }) };
 }
@@ -83,6 +78,10 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
   addFront(specs, xCm, yCm + size.depthCm, size.widthCm, standType);
 
   if (includeContents) {
+    const MINI_FRIDGE_ITEM = requireItem('MINI_FRIDGE_AVANTI');
+    const COAT_RACK_ITEM = requireItem('COAT_RACK');
+    const KETTLE_ITEM = requireItem('KETTLE');
+    const PLASTIC_TRASH_BIN_ITEM = requireItem('PLASTIC_TRASH_BIN');
     const fridgeWidth = Number(MINI_FRIDGE_ITEM.dimensions.widthCm);
     const fridgeDepth = Number(MINI_FRIDGE_ITEM.dimensions.depthCm);
     const rackWidth = Number(COAT_RACK_ITEM.dimensions.widthCm);
