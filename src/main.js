@@ -1418,6 +1418,17 @@ async function restoreProject(project) {
     setStandEditingEnabled(true);
     rebuildWall({ resetView: true });
     updateStageCreateState();
+    const restoredSetup = validateStandSetup({
+      standType: currentStand.standType,
+      xCm: currentStand.xCm,
+      yCm: currentStand.yCm,
+    });
+    if (restoredSetup.ok) {
+      const label = STAND_TYPE_LABELS[restoredSetup.standType];
+      renderStageResult(
+        `${label} · ${restoredSetup.xCm} × ${restoredSetup.yCm} cm aktif alan · ${restoredSetup.sceneWidthM} × ${restoredSetup.sceneDepthM} m toplam sahne`,
+      );
+    }
   } else {
     currentModules = [];
     selectedStandType = null;
