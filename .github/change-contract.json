@@ -1,17 +1,19 @@
 {
   "schemaVersion": 2,
-  "id": "crm-shell-mount",
+  "id": "db-item-source",
   "kind": "architecture",
-  "summary": "Fair Stand configurator CRM shell mount/unmount boundary. Existing 3D/catalog/item/BOM domain stays in Fair Stand; host document + iframe adapter only.",
+  "summary": "Cut Fair Stand Item/Category source of truth from static JS masters to CRM-hosted relational catalog API bootstrap. No items.js/CATALOG_CATEGORIES dual master; fail-closed if bootstrap fails.",
   "owners": [
-    "src/mountFairStand.js",
+    "src/catalogBootstrap.js",
+    "src/items.js",
+    "src/catalog.js",
     "src/main.js",
-    "src/hostDocument.js"
+    "src/mountFairStand.js"
   ],
   "sourceOfTruth": [
-    "src/mountFairStand.js",
-    "src/main.js",
-    "src/hostDocument.js"
+    "src/catalogBootstrap.js",
+    "src/items.js",
+    "src/catalog.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -53,6 +55,7 @@
       "scripts/verify-change-contract.mjs",
       "src/autoDepot.js",
       "src/automaticWall.js",
+      "src/catalogBootstrap.js",
       "src/catalog.js",
       "src/configuratorMarkup.js",
       "src/configuratorStyles.js",
@@ -290,6 +293,10 @@
     ],
     "affectedDocs": [
       "ARCHITECTURE_RULES.md",
+      "Changelog.md",
+      "audit/evidence/A18_TEST_REGRESSION_ARCHITECTURE.md",
+      "docs/items/definitions/parke-acik.md",
+      "scripts/archive/README.md",
       "CODE_ATLAS/00_OVERVIEW.md",
       "CODE_ATLAS/01_ENTRY_POINTS.md",
       "CODE_ATLAS/02_MODULE_MAP.md",
@@ -910,10 +917,12 @@
         "F-026",
         "F-029",
         "F-030",
-        "F-033"
+        "F-033",
+        "F-040",
+        "F-046"
       ]
     },
-    "notes": "UI mount adapter for Fair CRM embed. No catalog/item/BOM/persist migration. startFairStandConfigurator wraps existing boot; scene3d.dispose stops the renderer loop on unmount. Placement drag pointermove/up/cancel bind to the Fair Stand host window so iframe and Playwright capture-loss cannot drop a canvas move. Catalog drop rehydrates module state from Item master itemKey and rolls currentModules back if rebuild throws, so a missing shelf itemKey cannot poison the scene."
+    "notes": "Item/Category master cutover: Fair Stand bootstraps a frozen in-memory registry from CRM-hosted /api/v1/fair-stand/catalog/bootstrap using host catalogHeaders. Static ITEMS/CATALOG_CATEGORIES masters are removed. defaultColor is integer RGB with runtime hex adapters. IndexedDB project instance state is unchanged. CODE_ATLAS/audit hits are impact-sweep acknowledgements, not live architecture docs."
   },
   "tests": {
     "targeted": [
@@ -959,8 +968,8 @@
     "notes": "Host-document shadowing and iframe CSS isolation can miss a global document call. Unmount must dispose WebGL to avoid duplicate canvases."
   },
   "migration": {
-    "required": false,
-    "notes": "No database or persist schema change. Standalone index.html still boots via #app auto-start."
+    "required": true,
+    "notes": "Canonical Item/Category master is Fair CRM PostgreSQL fair_stand_* tables. Fair Stand runtime bootstraps from /api/v1/fair-stand/catalog/bootstrap. IndexedDB project instance state is unchanged."
   },
-  "rollback": "Remove mountFairStand/hostDocument adapter and revert main.js boot wrap; restore index.html dual scripts if needed."
+  "rollback": "Do not restore a static ITEMS or CATALOG_CATEGORIES master. Revert Fair Stand bootstrap consumers only together with the CRM-hosted catalog API."
 }

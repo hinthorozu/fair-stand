@@ -25,7 +25,7 @@ const EXPECTED = {
     widthCm: 60,
     depthCm: 60,
     heightCm: 120,
-    modelFile: null,
+    modelFile: 'indoor_plants.glb',
     runtimeModelFile: 'indoor_plants.glb',
     modelRotationYDeg: 0,
     preserveModelScale: false,
@@ -118,7 +118,7 @@ for (const itemKey of PLANT_KEYS) {
       type: restored.type,
       widthCm: restored.widthCm,
       depthCm: restored.depthCm,
-      modelFile: restored.modelFile === 'indoor_plants.glb' ? null : restored.modelFile,
+      modelFile: restored.modelFile,
     }), itemKey);
 
     const duplicate = duplicateModuleState(state);

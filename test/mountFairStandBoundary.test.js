@@ -6,7 +6,7 @@ const mountSource = readFileSync(new URL('../src/mountFairStand.js', import.meta
 const mainSource = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
 
 test('Fair Stand exposes a mount/unmount boundary without rewriting the configurator', () => {
-  assert.match(mountSource, /export function mountFairStand\(container\)/);
+  assert.match(mountSource, /export function mountFairStand\(container, options = \{\}\)/);
   assert.match(mountSource, /startFairStandConfigurator/);
   assert.match(mountSource, /unmountFairStand/);
   assert.match(mountSource, /setFairStandHostDocument/);

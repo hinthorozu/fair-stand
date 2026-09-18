@@ -90,7 +90,7 @@ for (const itemKey of BANKO_KEYS) {
     });
     if (isL) {
       assert.equal(item.shape, 'L');
-      assert.equal(item.composition?.options?.shape, 'L');
+      assert.equal(Object.hasOwn(item.composition ?? {}, 'options'), false);
     } else {
       assert.equal(item.shape, undefined);
     }

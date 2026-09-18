@@ -19,7 +19,9 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run dev -- --host 127.0.0.1 --port 4173',
+    command: process.platform === 'win32'
+      ? 'set FAIR_STAND_E2E_CATALOG=1&& npm run dev -- --host 127.0.0.1 --port 4173'
+      : 'FAIR_STAND_E2E_CATALOG=1 npm run dev -- --host 127.0.0.1 --port 4173',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

@@ -49,7 +49,7 @@ const TRASH_BIN_PREVIEW_CSS = `
 }
 `;
 
-export function mountFairStand(container) {
+export function mountFairStand(container, options = {}) {
   if (!container) {
     throw new Error('Fair Stand mount container is required.');
   }
@@ -87,6 +87,10 @@ export function mountFairStand(container) {
   hostDocument.close();
 
   setFairStandHostDocument(hostDocument);
+  if (options.catalogHeaders) {
+    iframe.contentWindow.__FAIR_STAND_CATALOG_HEADERS__ = options.catalogHeaders;
+    globalThis.__FAIR_STAND_CATALOG_HEADERS__ = options.catalogHeaders;
+  }
   const stop = startFairStandConfigurator();
 
   return function unmountFairStand() {

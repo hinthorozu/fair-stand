@@ -1,24 +1,32 @@
 import { getItem, listRegisteredItems, resolveItemKey } from './items.js';
 
-// Canonical Catalog kategorileri. catalogKey Item.catalogCategory ile eşleşir.
-// catalogName UI label'dır. catalogIndex 1 tabanlı kategori sırasıdır.
-export const CATALOG_CATEGORIES = Object.freeze([
-  Object.freeze({ catalogKey: 'panel-wall', catalogName: 'Panel & Duvar', catalogIndex: 1 }),
-  Object.freeze({ catalogKey: 'panel-addon', catalogName: 'Panel Ek Modül', catalogIndex: 2 }),
-  Object.freeze({ catalogKey: 'shelf-showcase', catalogName: 'Raf & Vitrin', catalogIndex: 3 }),
-  Object.freeze({ catalogKey: 'counter-base', catalogName: 'Banko & Baza', catalogIndex: 4 }),
-  Object.freeze({ catalogKey: 'extra', catalogName: 'Extra', catalogIndex: 5 }),
-  Object.freeze({ catalogKey: 'electronics-lighting', catalogName: 'Elektronik & Aydınlatma', catalogIndex: 6 }),
-]);
+let catalogCategories = Object.freeze([]);
+
+export function initializeCatalogCategories(categories) {
+  if (!Array.isArray(categories) || categories.length === 0) {
+    throw new TypeError('Fair Stand Category catalog bootstrap returned no categories.');
+  }
+  catalogCategories = Object.freeze(
+    categories.map((category) => Object.freeze({
+      catalogKey: category.catalogKey,
+      catalogName: category.catalogName,
+      catalogIndex: category.catalogIndex,
+    })),
+  );
+}
+
+export function resetCatalogCategories() {
+  catalogCategories = Object.freeze([]);
+}
 
 export function listCatalogCategories() {
   return Object.freeze(
-    [...CATALOG_CATEGORIES].sort((left, right) => left.catalogIndex - right.catalogIndex),
+    [...catalogCategories].sort((left, right) => left.catalogIndex - right.catalogIndex),
   );
 }
 
 export function getCatalogCategory(catalogKey) {
-  return CATALOG_CATEGORIES.find((category) => category.catalogKey === catalogKey) ?? null;
+  return catalogCategories.find((category) => category.catalogKey === catalogKey) ?? null;
 }
 
 export const CATALOG_PREVIEWS = Object.freeze([
@@ -78,10 +86,11 @@ export function listCatalogItems() {
     listRegisteredItems()
       .filter((item) => item.catalogVisible === true)
       .sort((left, right) => {
-        const leftIndex = getCatalogCategory(left.catalogCategory)?.catalogIndex ?? Number.POSITIVE_INFINITY;
-        const rightIndex = getCatalogCategory(right.catalogCategory)?.catalogIndex ?? Number.POSITIVE_INFINITY;
-        if (leftIndex !== rightIndex) return leftIndex - rightIndex;
-        return left.catalogItemIndex - right.catalogItemIndex;
+        const leftCategory = getCatalogCategory(left.catalogCategory);
+        const rightCategory = getCatalogCategory(right.catalogCategory);
+        const categoryDelta = (leftCategory?.catalogIndex ?? 0) - (rightCategory?.catalogIndex ?? 0);
+        if (categoryDelta !== 0) return categoryDelta;
+        return Number(left.catalogItemIndex) - Number(right.catalogItemIndex);
       })
       .map(projectCatalogItem),
   );

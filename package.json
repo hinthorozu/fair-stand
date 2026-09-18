@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "contract:verify": "node scripts/verify-change-contract.mjs",
-    "test": "node --test",
+  "test": "node --import ./test/registerCanonicalItemCatalog.mjs --test",
     "build": "vite build",
     "preview": "vite preview",
     "e2e:deps": "npm install --no-save --no-package-lock @playwright/test@1.62.1",

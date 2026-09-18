@@ -38,6 +38,7 @@ test('TV 55 and 65 keep shared depth and use screen width as placement width', (
     assert.ok(item);
     assert.ok(catalogItem);
     assert.ok(state);
+    assert.equal(item.defaultScreenFile, 'tv-screen.jpg');
     assert.equal(item.type, base.type);
     assert.equal(item.dimensions.depthCm, base.dimensions.depthCm);
     assert.equal(item.dimensions.widthCm, expected[itemKey][0]);
@@ -74,7 +75,7 @@ test('TV renderer is one 5 cm BoxGeometry with the supplied image only on its fr
   const tvSource = source.slice(start, finish);
   assert.match(tvSource, /const depthM = Number\(moduleState\.depthCm \|\| 5\) \/ 100/);
   assert.match(tvSource, /new THREE\.BoxGeometry\(widthM, heightM, depthM\)/);
-  assert.match(tvSource, /createTvScreenTexture\(\)/);
+  assert.match(tvSource, /createTvScreenTexture\(item\)/);
   assert.doesNotMatch(tvSource, /getTvScreenTexture\(\)\.clone\(\)/);
   assert.match(tvSource, /map: screenTexture/);
   assert.doesNotMatch(tvSource, /createSelectionFrame\(widthM, heightM\)/);
@@ -137,7 +138,8 @@ test('scene keeps the shared textureLoader for normal panel images', () => {
 
 test('TV texture loads from a real public JPEG asset', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
-  assert.match(source, /load\(import\.meta\.env\.BASE_URL \+ 'tv-screen\.jpg'\)/);
+  assert.match(source, /function createTvScreenTexture/);
+  assert.match(source, /item\.defaultScreenFile/);
   assert.match(source, /texture\.colorSpace = THREE\.SRGBColorSpace/);
   assert.doesNotMatch(source, /atob\(/);
   assert.doesNotMatch(source, /TV_SCREEN_DATA_URL/);

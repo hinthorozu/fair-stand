@@ -53,6 +53,7 @@ const EXPECTED = {
     profile: 'free-model-color',
     hasSurface: true,
     visualRotationYDeg: -135,
+    modelFile: 'bej_koltuk_1_ciftli_2_tekli.glb',
   },
   furniture_sofa_double_classic: {
     type: 'sofa-double-classic',
@@ -68,6 +69,7 @@ const EXPECTED = {
     profile: 'free-model-color',
     hasSurface: true,
     visualRotationYDeg: -45,
+    modelFile: 'bej_koltuk_1_ciftli_2_tekli.glb',
   },
   furniture_coffee_table_classic: {
     type: 'coffee-table-classic',
@@ -114,6 +116,7 @@ const EXPECTED = {
     factory: createEamesChairModuleState,
     profile: 'free-model-color',
     hasSurface: true,
+    modelFile: 'eames_chair.glb',
   },
   glass_table: {
     type: 'table-glass',
@@ -142,6 +145,7 @@ const EXPECTED = {
     factory: createBarStoolModuleState,
     profile: 'free-model-color',
     hasSurface: true,
+    modelFile: 'bar_chair.glb',
   },
 };
 
@@ -155,7 +159,7 @@ for (const itemKey of Object.keys(EXPECTED)) {
     assert.equal(item.type, expected.type);
     assert.equal(Object.hasOwn(item, 'unit'), false);
     assert.equal(Object.hasOwn(item, 'chairCount'), false);
-    assert.equal(Object.hasOwn(item, 'modelFile'), false);
+    assert.equal(item.modelFile ?? null, expected.modelFile ?? null);
     if (expected.composition) {
       assert.deepEqual(item.composition.items, expected.composition);
     } else {

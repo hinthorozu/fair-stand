@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  CATALOG_CATEGORIES,
   getCatalogCategory,
   listCatalogCategories,
   listCatalogGroups,
@@ -56,7 +55,6 @@ const EXPECTED_GROUP_KEYS = Object.freeze({
 test('Catalog kategorileri key/name/index taşır; sıra 1..N kesintisiz ve benzersizdir', () => {
   const categories = listCatalogCategories();
   assert.equal(categories.length, EXPECTED_CATEGORIES.length);
-  assert.equal(CATALOG_CATEGORIES.length, EXPECTED_CATEGORIES.length);
 
   const keys = categories.map((category) => category.catalogKey);
   const names = categories.map((category) => category.catalogName);
@@ -73,7 +71,7 @@ test('Catalog kategorileri key/name/index taşır; sıra 1..N kesintisiz ve benz
     assert.equal(category.catalogKey, expected.catalogKey);
     assert.equal(category.catalogName, expected.catalogName);
     assert.equal(category.catalogIndex, expected.catalogIndex);
-    assert.deepEqual(getCatalogCategory(expected.catalogKey), CATALOG_CATEGORIES[index]);
+    assert.deepEqual(getCatalogCategory(expected.catalogKey), categories[index]);
   });
 });
 

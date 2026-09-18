@@ -35,8 +35,9 @@ test('chair renderer loads the shared Eames GLB once as type chair', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(source, /function createEamesChairModule/);
   assert.match(source, /moduleState\.type === 'chair'/);
-  assert.match(source, /models\/eames_chair\.glb/);
+  assert.match(source, /loadItemModel\('chair_eames'\)/);
   assert.match(source, /plastic_wit/);
+  assert.equal(getItem('chair_eames').modelFile, 'eames_chair.glb');
 });
 
 test('Eames set is a cluster of one glass table and four chairs', () => {

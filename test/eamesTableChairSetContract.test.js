@@ -26,7 +26,7 @@ test('Eames set contains four chairs', () => {
 test('Eames renderer loads the original GLB once and clones four chairs', () => {
   const source = fs.readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(source, /GLTFLoader/);
-  assert.match(source, /models\/eames_chair\.glb/);
+  assert.match(source, /loadItemModel\('chair_eames'\)/);
   assert.match(source, /template\.clone\(true\)/);
   assert.match(source, /chairPlacements\.forEach/);
 });
