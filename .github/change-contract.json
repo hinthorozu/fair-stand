@@ -922,7 +922,7 @@
         "F-046"
       ]
     },
-    "notes": "Item/Category master cutover: Fair Stand bootstraps a frozen in-memory registry from CRM-hosted /api/v1/fair-stand/catalog/bootstrap. Static ITEMS/CATALOG_CATEGORIES masters are removed. defaultColor is integer RGB with runtime hex adapters. IndexedDB project instance state is unchanged."
+    "notes": "Item/Category master cutover: Fair Stand bootstraps a frozen in-memory registry from CRM-hosted /api/v1/fair-stand/catalog/bootstrap using host catalogHeaders. Static ITEMS/CATALOG_CATEGORIES masters are removed. defaultColor is integer RGB with runtime hex adapters. IndexedDB project instance state is unchanged. CODE_ATLAS/audit hits are impact-sweep acknowledgements, not live architecture docs."
   },
   "tests": {
     "targeted": [
@@ -971,5 +971,5 @@
     "required": true,
     "notes": "Canonical Item/Category master is Fair CRM PostgreSQL fair_stand_* tables. Fair Stand runtime bootstraps from /api/v1/fair-stand/catalog/bootstrap. IndexedDB project instance state is unchanged."
   },
-  "rollback": "Remove mountFairStand/hostDocument adapter and revert main.js boot wrap; restore index.html dual scripts if needed."
+  "rollback": "Do not restore a static ITEMS or CATALOG_CATEGORIES master. Revert Fair Stand bootstrap consumers only together with the CRM-hosted catalog API."
 }

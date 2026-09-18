@@ -89,6 +89,7 @@ export function mountFairStand(container, options = {}) {
   setFairStandHostDocument(hostDocument);
   if (options.catalogHeaders) {
     iframe.contentWindow.__FAIR_STAND_CATALOG_HEADERS__ = options.catalogHeaders;
+    globalThis.__FAIR_STAND_CATALOG_HEADERS__ = options.catalogHeaders;
   }
   const stop = startFairStandConfigurator();
 

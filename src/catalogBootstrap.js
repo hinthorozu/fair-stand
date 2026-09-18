@@ -1,4 +1,5 @@
 import { initializeCatalogCategories } from './catalog.js';
+import { getFairStandHostWindow } from './hostDocument.js';
 import { initializeItemRegistry } from './items.js';
 
 function catalogBootstrapUrl() {
@@ -6,7 +7,8 @@ function catalogBootstrapUrl() {
 }
 
 function catalogBootstrapHeaders() {
-  const headers = globalThis.__FAIR_STAND_CATALOG_HEADERS__;
+  const hostWindow = getFairStandHostWindow();
+  const headers = hostWindow?.__FAIR_STAND_CATALOG_HEADERS__ || globalThis.__FAIR_STAND_CATALOG_HEADERS__;
   return headers && typeof headers === 'object' ? headers : {};
 }
 
