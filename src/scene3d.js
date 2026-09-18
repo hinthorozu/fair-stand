@@ -74,7 +74,9 @@ const ACTIVE_WALL_GUIDE_THICKNESS_M = 0.045;
 const ACTIVE_WALL_GUIDE_HEIGHT_M = 0.018;
 // Aktif stand zemini fuar salonu zemininden 5 cm yukarıda duran platformdur.
 const ACTIVE_PLATFORM_HEIGHT_M = 0.05;
-const FLOOR_TYPES = Object.freeze(listFloorItems().map((item) => item.itemKey));
+function listFloorTypeKeys() {
+  return listFloorItems().map((item) => item.itemKey);
+}
 const FLOOR_TOP_EPSILON_M = 0.006;
 const SELECTION_COLOR = 0x2563eb;
 const PLACEMENT_VALID_COLOR = 0x16a34a;
@@ -600,7 +602,7 @@ export function createStandScene(
   }
 
   function setFloorType(floorType = getFloorItem('karolaj').itemKey) {
-    const resolved = FLOOR_TYPES.includes(floorType) ? floorType : getFloorItem('karolaj').itemKey;
+    const resolved = listFloorTypeKeys().includes(floorType) ? floorType : getFloorItem('karolaj').itemKey;
     currentFloorType = resolved;
     const floorItem = getFloorItem(resolved);
 
