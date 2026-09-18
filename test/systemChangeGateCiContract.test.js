@@ -11,12 +11,13 @@ test('package exposes universal change-gate and Playwright E2E commands', () => 
   assert.equal(packageJson.scripts.e2e, 'playwright test');
 });
 
-test('canonical CI targets RefactorItem and Version2 with Version2 merge-base', () => {
-  assert.match(ciWorkflow, /push:\s*\n\s*branches: \[RefactorItem, Version2\]/);
-  assert.match(ciWorkflow, /pull_request:\s*\n\s*branches: \[RefactorItem, Version2\]/);
-  assert.match(ciWorkflow, /git fetch origin Version2:refs\/remotes\/origin\/Version2/);
-  assert.match(ciWorkflow, /CHANGE_GATE_BASE: refs\/remotes\/origin\/Version2/);
+test('canonical CI targets main with GitHub PR/push change-gate windows', () => {
+  assert.match(ciWorkflow, /push:\s*\n\s*branches: \[main\]/);
+  assert.match(ciWorkflow, /pull_request:\s*\n\s*branches: \[main\]/);
+  assert.doesNotMatch(ciWorkflow, /git fetch origin Version2/);
+  assert.doesNotMatch(ciWorkflow, /CHANGE_GATE_BASE:/);
   assert.doesNotMatch(ciWorkflow, /branches: \[ROG\]/);
+  assert.doesNotMatch(ciWorkflow, /branches: \[RefactorItem, Version2\]/);
 });
 
 test('canonical CI enforces gate, unit tests, build and real-browser E2E in order', () => {

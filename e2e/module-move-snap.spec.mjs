@@ -50,6 +50,25 @@ async function saveAndReadProject(page) {
   });
 }
 
+async function dragPlacedModuleOnCanvas(page, from, to) {
+  const canvas = page.locator('#viewport canvas').first();
+  await expect(canvas).toBeVisible();
+  const box = await canvas.boundingBox();
+  expect(box).not.toBeNull();
+  const start = {
+    x: box.x + Math.round(box.width * from.x),
+    y: box.y + Math.round(box.height * from.y),
+  };
+  const end = {
+    x: box.x + Math.round(box.width * to.x),
+    y: box.y + Math.round(box.height * to.y),
+  };
+  await page.mouse.move(start.x, start.y);
+  await page.mouse.down();
+  await page.mouse.move(end.x, end.y, { steps: 16 });
+  await page.mouse.up();
+}
+
 test('yerleşik free prop canvas sürüklemede taşınır ve 10 cm grid’e oturur', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -70,14 +89,7 @@ test('yerleşik free prop canvas sürüklemede taşınır ve 10 cm grid’e otur
   expect(fridgeBefore).toBeTruthy();
   expect(fridgeBefore.placement.wallId).toBe('free');
 
-  const canvas = page.locator('#viewport > canvas');
-  await expect(canvas).toBeVisible();
-  const originX = box.x + start.x;
-  const originY = box.y + start.y;
-  await page.mouse.move(originX, originY);
-  await page.mouse.down();
-  await page.mouse.move(box.x + Math.round(box.width * 0.68), originY, { steps: 8 });
-  await page.mouse.up();
+  await dragPlacedModuleOnCanvas(page, { x: 0.52, y: 0.82 }, { x: 0.72, y: 0.82 });
 
   const after = await saveAndReadProject(page);
   const fridgeAfter = after.modules.find((moduleState) => moduleState.id === fridgeBefore.id);

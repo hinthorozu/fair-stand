@@ -1,4 +1,5 @@
 import { getHelpStandardsTableHtml, getStandStandardsFacts } from './standStandardsCopy.js';
+import { getFairStandHostDocument } from './hostDocument.js';
 
 const GUIDE_SECTIONS = [
   {
@@ -224,6 +225,7 @@ const GUIDE_SECTIONS = [
 ];
 
 function createGuideSection(section) {
+  const document = getFairStandHostDocument();
   const details = document.createElement('details');
   details.className = 'help-guide-section';
   details.open = Boolean(section.open);
@@ -240,6 +242,7 @@ function createGuideSection(section) {
 }
 
 export function initHelpGuide() {
+  const document = getFairStandHostDocument();
   if (document.querySelector('#help-guide-button')) return;
 
   const button = document.createElement('button');

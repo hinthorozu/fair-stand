@@ -141,5 +141,3 @@ export function bindProjectActionSaveGuard({
     documentRef.removeEventListener('change', onChange, true);
   };
 }
-
-bindProjectActionSaveGuard();

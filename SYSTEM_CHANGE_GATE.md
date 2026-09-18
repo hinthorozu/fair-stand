@@ -220,9 +220,9 @@ Bu gate mevcut contract'ların yerine geçmez.
 
 ## CI
 
-`CHANGE_GATE_BASE` set ise verifier GitHub `push` `before..after` penceresini kullanmaz; local merge-base + working tree kullanır. Canonical CI `CHANGE_GATE_BASE=refs/remotes/origin/Version2` verir ki RefactorItem push'u birikmiş Version2 yüzeyini gizlemesin.
+`CHANGE_GATE_BASE` set ise verifier GitHub `push` `before..after` penceresini kullanmaz; local merge-base + working tree kullanır. Canonical CI bu değişkeni set etmez: `pull_request` GitHub PR base SHA'sını, `push` `before..after` penceresini kullanır.
 
-`CHANGE_GATE_BASE` yoksa PR/Version2 push GitHub event SHA'larından çözülür ve şunları denetler:
+`CHANGE_GATE_BASE` yoksa PR/`main` push GitHub event SHA'larından çözülür ve şunları denetler:
 
 1. Guarded dosya değişmişse `.github/change-contract.json` aynı diff içinde değişmiş mi?
 2. Contract schema eksiksiz mi?
@@ -255,8 +255,8 @@ CI environment değişkenleri yoksa `npm run contract:verify` diff enforcement'�
 
 Verifier:
 
-- feature branch'te `Version2` veya `origin/Version2` ile merge-base üzerinden committed farkı bulur,
-- mevcut `Version2` branch'inde mümkünse `origin/Version2` ile local commit farkını karşılaştırır,
+- feature branch'te `main` veya `origin/main` ile merge-base üzerinden committed farkı bulur,
+- mevcut `main` branch'inde mümkünse `origin/main` ile local commit farkını karşılaştırır,
 - staged değişiklikleri ekler,
 - unstaged değişiklikleri ekler,
 - untracked dosyaları ekler,
@@ -272,7 +272,7 @@ E2E'yi local çalıştırmak için Playwright runner bir kez `npm run e2e:deps` 
 
 Gerekirse base açıkça `CHANGE_GATE_BASE=<git-ref> npm run contract:verify` ile verilebilir.
 
-Local base çözülemiyorsa verifier sessizce schema-only success vermez; **fail-closed** olur ve `CHANGE_GATE_BASE` veya `Version2` ref'i ister.
+Local base çözülemiyorsa verifier sessizce schema-only success vermez; **fail-closed** olur ve `CHANGE_GATE_BASE` veya `main` ref'i ister.
 
 ---
 

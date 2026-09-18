@@ -37,6 +37,7 @@ const CREATE_STAND_SCENE_PUBLIC_METHODS = Object.freeze([
   'isFloorSelected',
   'getSelectedFloorType',
   'setIlluminatedFoamHaloColor',
+  'dispose',
 ]);
 
 function extractCreateStandSceneReturnKeys(source) {
@@ -69,4 +70,20 @@ test('createStandScene public façade keeps the production methods main.js calls
       `main.js scene3d.${name} createStandScene dönüşünde yok`,
     );
   }
+});
+
+test('placement drag pointer move/up bind to the host window so capture loss cannot drop the gesture', () => {
+  assert.match(scene3dSource, /const hostWindow = getFairStandHostWindow\(\);/);
+  assert.match(
+    scene3dSource,
+    /hostWindow\.addEventListener\('pointermove'/,
+  );
+  assert.match(
+    scene3dSource,
+    /hostWindow\.addEventListener\('pointerup'/,
+  );
+  assert.doesNotMatch(
+    scene3dSource,
+    /renderer\.domElement\.addEventListener\('pointermove'/,
+  );
 });

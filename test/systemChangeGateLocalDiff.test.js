@@ -190,8 +190,8 @@ test('local verifier enforces committed, staged, unstaged and untracked git chan
   }
 });
 
-test('local verifier uses Version2 as the default integration base for feature branches', () => {
-  const cwd = mkdtempSync(join(tmpdir(), 'fair-stand-version2-base-'));
+test('local verifier uses main as the default integration base for feature branches', () => {
+  const cwd = mkdtempSync(join(tmpdir(), 'fair-stand-main-base-'));
 
   try {
     mkdirSync(join(cwd, '.github'), { recursive: true });
@@ -223,8 +223,8 @@ test('local verifier uses Version2 as the default integration base for feature b
     git(cwd, ['config', 'user.name', 'Change Gate Test']);
     git(cwd, ['add', '.']);
     git(cwd, ['commit', '-qm', 'baseline']);
-    git(cwd, ['branch', '-M', 'Version2']);
-    git(cwd, ['checkout', '-qb', 'feature/version2-base']);
+    git(cwd, ['branch', '-M', 'main']);
+    git(cwd, ['checkout', '-qb', 'feature/main-base']);
 
     appendFileSync(join(cwd, 'test/example.test.js'), 'export const changed = true;\n');
     appendFileSync(join(cwd, '.github/change-contract.json'), '\n');
@@ -233,13 +233,13 @@ test('local verifier uses Version2 as the default integration base for feature b
 
     const result = runVerifierWithDefaultBase(cwd);
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /Diff source: local git diff against Version2 \+ staged\/unstaged\/untracked/);
+    assert.match(result.stdout, /Diff source: local git diff against main \+ staged\/unstaged\/untracked/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
 });
 
-test('CHANGE_GATE_BASE overrides GitHub push before..after so accumulated Version2 surface is not hidden', () => {
+test('CHANGE_GATE_BASE overrides GitHub push before..after so an explicit merge-base is not hidden', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'fair-stand-change-gate-base-override-'));
 
   try {

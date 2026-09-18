@@ -67,17 +67,17 @@ function resolveLocalBaseRef() {
 
   const currentBranch = gitText(['branch', '--show-current'], { allowFailure: true }) ?? '';
 
-  if (currentBranch === 'Version2') {
-    if (gitRefExists('refs/remotes/origin/Version2')) return 'refs/remotes/origin/Version2';
+  if (currentBranch === 'main') {
+    if (gitRefExists('refs/remotes/origin/main')) return 'refs/remotes/origin/main';
     return 'HEAD';
   }
 
-  for (const candidate of ['Version2', 'refs/remotes/origin/Version2']) {
+  for (const candidate of ['main', 'refs/remotes/origin/main']) {
     if (gitRefExists(candidate)) return candidate;
   }
 
   throw new Error(
-    'Unable to resolve a local change-gate base. Fetch/create Version2 or set CHANGE_GATE_BASE explicitly.',
+    'Unable to resolve a local change-gate base. Fetch/create main or set CHANGE_GATE_BASE explicitly.',
   );
 }
 
@@ -91,8 +91,8 @@ function changedFilesFromEnvironment() {
     };
   }
 
-  // Explicit base overrides GitHub push/PR windows. CI uses this so a RefactorItem
-  // push cannot hide the accumulated Version2 merge-base behind before..after.
+  // Explicit base overrides GitHub push/PR windows. Canonical CI leaves this unset
+  // so pull_request uses the PR base SHA and push uses before..after.
   if (process.env.CHANGE_GATE_BASE?.trim()) {
     return changedFilesFromLocalGit();
   }

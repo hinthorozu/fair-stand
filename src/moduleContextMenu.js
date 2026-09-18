@@ -1,6 +1,7 @@
 import { getCatalogItem, getModuleCatalogLabel, listCatalogGroups } from './catalog.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 import { getModuleBehavior } from './moduleBehavior.js';
+import { getFairStandHostDocument, getFairStandHostWindow } from './hostDocument.js';
 
 export function allowsModuleSideInsert(context) {
   const type = typeof context === 'string'
@@ -30,6 +31,8 @@ export function createModuleContextMenu({
   getShelfLightingState,
   onShelfLightingChange,
 }) {
+  const document = getFairStandHostDocument();
+  const window = getFairStandHostWindow();
   let activeContext = null;
   let pickerRequest = null;
   let selectedModuleKeys = [];
