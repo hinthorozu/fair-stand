@@ -3,11 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const mainSource = fs.readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+const styleEntry = fs.readFileSync(new URL('../src/configuratorStyles.js', import.meta.url), 'utf8');
 const guideSource = fs.readFileSync(new URL('../src/helpGuide.js', import.meta.url), 'utf8');
 const guideCss = fs.readFileSync(new URL('../src/helpGuide.css', import.meta.url), 'utf8');
+const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
 test('in-app help guide is wired into the application', () => {
-  assert.match(mainSource, /import '\.\/helpGuide\.css';/);
+  assert.match(styleEntry, /import '\.\/helpGuide\.css';/);
+  assert.match(html, /src="\/src\/configuratorStyles\.js"/);
   assert.match(mainSource, /import \{ initHelpGuide \} from '\.\/helpGuide\.js';/);
   assert.match(mainSource, /initHelpGuide\(\);/);
 });

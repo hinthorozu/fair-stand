@@ -138,5 +138,40 @@ for (const itemKey of ['shelf_100', 'shelf_150', 'shelf_200']) {
       .reduce((sum, module) => sum + Number(module.widthCm || 0), 0);
     expect(wallUsedAfter).toBe(wallUsedBefore);
     expect(errors).toEqual([]);
+    expect(errors.some((message) => message.includes('Missing canonical shelf Item'))).toBe(false);
   });
 }
+
+test('shelf_100 drop sonrası ikinci serbest modül eklenir ve sahne rebuild zinciri bozulmaz', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await createBackWallStand(page, 'Shelf Then Fridge', 500);
+  await openSidebarCard(page, 'shelf_100');
+  await dragShelfOntoValidSeam(page, 'shelf_100');
+
+  const afterShelf = await saveAndReadProject(page);
+  expect(afterShelf.modules.find((module) => module.itemKey === 'shelf_100')?.itemKey).toBe('shelf_100');
+
+  const fridgeCard = page.locator('.module-drag-card[data-module-key="MINI_FRIDGE_AVANTI"]').first();
+  const fridgeGroup = page.locator('.module-drag-group', { has: fridgeCard });
+  if (!(await fridgeGroup.evaluate((el) => el.open))) {
+    await fridgeGroup.locator(':scope > summary').click();
+  }
+  await fridgeCard.scrollIntoViewIfNeeded();
+  await expect(fridgeCard).toBeVisible();
+  const viewport = page.locator('#viewport');
+  const box = await viewport.boundingBox();
+  expect(box).not.toBeNull();
+  await fridgeCard.dragTo(viewport, {
+    targetPosition: {
+      x: Math.round(box.width * 0.52),
+      y: Math.round(box.height * 0.82),
+    },
+  });
+
+  const afterFridge = await saveAndReadProject(page);
+  expect(afterFridge.modules.find((module) => module.itemKey === 'shelf_100')?.itemKey).toBe('shelf_100');
+  expect(afterFridge.modules.find((module) => module.itemKey === 'MINI_FRIDGE_AVANTI')?.itemKey).toBe('MINI_FRIDGE_AVANTI');
+  expect(afterFridge.modules.every((module) => Boolean(module.itemKey))).toBe(true);
+  expect(errors).toEqual([]);
+});

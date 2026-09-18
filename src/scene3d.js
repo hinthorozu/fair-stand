@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { getFairStandHostDocument, getFairStandHostWindow } from './hostDocument.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
@@ -90,7 +91,7 @@ const gltfSceneCache = new Map();
 
 function notifyGltfLoadFailure(url, error) {
   console.warn('GLB modeli yüklenemedi:', url, error);
-  const el = typeof document !== 'undefined' ? document.querySelector('#stage-result') : null;
+  const el = getFairStandHostDocument()?.querySelector('#stage-result') ?? null;
   if (!el) return;
   el.textContent = '3D model yüklenemedi. Modül yerinde kalır; görünür geometri eksik olabilir.';
   el.classList.add('error');
@@ -158,6 +159,10 @@ export function createStandScene(
   onModuleContextMenu = () => {},
   onFloorSelected = () => {},
 ) {
+  const document = getFairStandHostDocument();
+  const window = getFairStandHostWindow();
+  const sceneAbort = new AbortController();
+  const { signal } = sceneAbort;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x5f6265);
   scene.fog = new THREE.Fog(0x5f6265, 55, 90);
@@ -371,8 +376,8 @@ export function createStandScene(
     return cameraMode;
   }
 
-  projectionButtons.get('perspective').addEventListener('click', () => setCameraMode('perspective'));
-  projectionButtons.get('orthographic').addEventListener('click', () => setCameraMode('orthographic'));
+  projectionButtons.get('perspective').addEventListener('click', () => setCameraMode('perspective'), { signal });
+  projectionButtons.get('orthographic').addEventListener('click', () => setCameraMode('orthographic'), { signal });
   styleProjectionButtons();
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x7f8790, 2.1));
@@ -4349,12 +4354,13 @@ export function createStandScene(
     event.preventDefault();
   });
 
-  renderer.domElement.addEventListener('pointermove', (event) => {
+  const hostWindow = getFairStandHostWindow();
+  hostWindow.addEventListener('pointermove', (event) => {
     if (!dragSession || event.pointerId !== dragSession.pointerId) return;
     updatePlacementDrag(event);
-  });
+  }, { signal });
 
-  window.addEventListener('keydown', (event) => {
+  hostWindow.addEventListener('keydown', (event) => {
     const pressedKey = String(event.key).toLowerCase();
 
     const arrowScreenDirection = {
@@ -4663,7 +4669,7 @@ export function createStandScene(
     if (rotationResult.handled) event.preventDefault();
   });
 
-  renderer.domElement.addEventListener('pointerup', (event) => {
+  hostWindow.addEventListener('pointerup', (event) => {
     if (!dragSession || event.pointerId !== dragSession.pointerId) return;
     const startClientX = dragSession.startClientX;
     const startClientY = dragSession.startClientY;
@@ -4672,12 +4678,12 @@ export function createStandScene(
     if (!wasDragging) {
       handleSurfaceSelectionAt(startClientX, startClientY, false, clickedModuleId);
     }
-  });
+  }, { signal });
 
-  renderer.domElement.addEventListener('pointercancel', (event) => {
+  hostWindow.addEventListener('pointercancel', (event) => {
     if (!dragSession || event.pointerId !== dragSession.pointerId) return;
     clearPlacementDrag();
-  });
+  }, { signal });
 
   function resize() {
     const width = Math.max(container.clientWidth, 1);
@@ -4829,6 +4835,16 @@ export function createStandScene(
         if(object.material?.color){ object.material.color.set(normalized); object.material.needsUpdate=true; changed=true; }
       });
       return changed;
+    },
+    dispose() {
+      sceneAbort.abort();
+      resizeObserver.disconnect();
+      renderer.setAnimationLoop(null);
+      controls.dispose?.();
+      renderer.dispose();
+      renderer.domElement.remove();
+      placementFeedback?.remove?.();
+      dragBadge?.remove?.();
     },
   };
 }

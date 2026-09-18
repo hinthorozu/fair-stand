@@ -3,9 +3,12 @@ import { getItem, resolveSceneDimensions } from './items.js';
 import { normalizeStripOccupancy, getStandStripMetrics } from './stripOccupancy.js';
 import { ALUMINUM_PROFILE_COLOR } from './theme.js';
 import { getModuleDefaultRotationDeg, resolveModuleRotationDeltaDeg } from './moduleBehavior.js';
+import { getFairStandHostDocument, getFairStandHostWindow } from './hostDocument.js';
 
 
 function ensureStyles() {
+  const document = getFairStandHostDocument();
+  if (!document?.querySelector) return;
   if (document.querySelector('#module-drag-sidebar-styles')) return;
   const style = document.createElement('style');
   style.id = 'module-drag-sidebar-styles';
@@ -269,6 +272,8 @@ export function createModuleDragSidebar({
   onDrop,
   onCancel,
 } = {}) {
+  const document = getFairStandHostDocument();
+  const window = getFairStandHostWindow();
   if (!anchorButton?.parentElement || !viewport) return null;
   ensureStyles();
 
@@ -345,7 +350,7 @@ export function createModuleDragSidebar({
         }
 
         const state = createModuleState?.(module, moduleKey);
-        if (!state) {
+        if (!state || state.itemKey !== moduleKey) {
           event.preventDefault();
           return;
         }
@@ -394,8 +399,9 @@ export function createModuleDragSidebar({
     const state = activeModuleState;
     const rotationZDeg = activeRotationZDeg;
     const isRotationLocked = rotationLocked;
+    const catalogKey = activeCard?.dataset.moduleKey ?? state?.itemKey ?? null;
     resetDragState();
-    onDrop?.(state, event.clientX, event.clientY, rotationZDeg, isRotationLocked);
+    onDrop?.(state, event.clientX, event.clientY, rotationZDeg, isRotationLocked, catalogKey);
   });
 
   viewport.addEventListener('dragleave', (event) => {

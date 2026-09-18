@@ -609,11 +609,29 @@ export function createModuleStateFromDescriptor(
   if (!state) return null;
 
   if (item) state.itemKey = item.itemKey;
+  if (state.type === 'shelf' && !hasCanonicalModuleItemKey(state)) return null;
 
   if (preservePlacement && descriptor.placement) {
     state.placement = { ...descriptor.placement };
   }
   return state;
+}
+
+export function createModuleStateFromCatalogKey(moduleKey, options = {}) {
+  const item = typeof moduleKey === 'string' && moduleKey ? getItem(moduleKey) : null;
+  if (!item) return null;
+  return createModuleStateFromDescriptor(item, {
+    ...options,
+    itemKey: item.itemKey,
+  });
+}
+
+export function hasCanonicalModuleItemKey(moduleState) {
+  if (!moduleState || typeof moduleState !== 'object') return false;
+  const item = moduleState.itemKey ? getItem(moduleState.itemKey) : null;
+  if (!item) return false;
+  if (moduleState.type && item.type !== moduleState.type) return false;
+  return true;
 }
 
 

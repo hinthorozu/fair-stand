@@ -1,7 +1,3 @@
-import './style.css';
-import './colorEditor.css';
-import './imageActions.css';
-import './helpGuide.css';
 import { createStandScene } from './scene3d.js';
 import { initHelpGuide } from './helpGuide.js';
 import { planAutomaticDepot } from './autoDepot.js';
@@ -11,8 +7,10 @@ import {
   getAutomaticWallCapacityCm,
 } from './automaticWall.js';
 import {
+  createModuleStateFromCatalogKey,
   createModuleStateFromDescriptor,
   duplicateModuleState,
+  hasCanonicalModuleItemKey,
   normalizeModuleItemState,
   totalWallWidthCm,
   moduleWidths,
@@ -58,11 +56,20 @@ import {
   validateImportedAssetRecord,
   validateProjectArchiveManifest,
 } from './projectImportValidation.js';
+import { getFairStandHostDocument, getFairStandHostWindow } from './hostDocument.js';
+import { bindProjectActionSaveGuard } from './projectActionSaveGuard.js';
 
 if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('rawBom')) {
   import('./rawBomDebug.js');
 }
 
+export function startFairStandConfigurator() {
+  const document = getFairStandHostDocument();
+  const window = getFairStandHostWindow();
+  if (!document?.querySelector) {
+    throw new Error('Fair Stand host document is not available.');
+  }
+  const unbindProjectActionSaveGuard = bindProjectActionSaveGuard({ documentRef: document });
 let jsZipModulePromise = null;
 
 async function loadJSZip() {
@@ -525,10 +532,48 @@ function assignStandFloorItem(stand, itemKey) {
 
 function createCatalogModuleState(module, { preservePlacement = false, itemKey = null } = {}) {
   if (!module) return null;
-  return createModuleStateFromDescriptor(module, {
-    itemKey: itemKey ?? resolveItemKey(module),
-    preservePlacement,
+  const canonicalKey = itemKey || module.itemKey || resolveItemKey(module);
+  const state = createModuleStateFromCatalogKey(canonicalKey)
+    ?? createModuleStateFromDescriptor(module, { itemKey: canonicalKey });
+  if (!state) return null;
+  if (preservePlacement && module.placement) {
+    state.placement = { ...module.placement };
+  }
+  return state;
+}
+
+function commitDroppedCatalogModule(moduleState, dropResult, catalogKey = null) {
+  if (!dropResult?.ok || !dropResult.placement) {
+    return { ok: false, message: dropResult?.message ?? 'Modül bu konuma bırakılamadı.' };
+  }
+
+  const canonical = createCatalogModuleState(moduleState, {
+    itemKey: catalogKey || moduleState?.itemKey,
   });
+  if (!canonical || !hasCanonicalModuleItemKey(canonical)) {
+    return { ok: false, message: 'Katalog Item kimliği kaybolduğu için modül sahneye eklenmedi.' };
+  }
+  if (moduleState?.id) canonical.id = moduleState.id;
+
+  const previousModules = currentModules.slice();
+  try {
+    if (dropResult.plan?.placements instanceof Map && dropResult.plan?.orderedModuleIds?.length) {
+      applyContinuousInsertionPlan(dropResult.plan, [canonical]);
+    } else {
+      canonical.placement = { ...dropResult.placement };
+      currentModules.push(canonical);
+    }
+    rebuildWall({ resetView: false });
+  } catch (error) {
+    currentModules = previousModules;
+    rebuildWall({ resetView: false });
+    return {
+      ok: false,
+      message: error?.message || 'Modül sahneye eklenirken durduruldu; önceki sahne korundu.',
+    };
+  }
+
+  return { ok: true, moduleState: canonical };
 }
 
 function getRequestWallId({ context = null } = {}) {
@@ -907,7 +952,7 @@ moduleDragSidebar = createModuleDragSidebar({
       rotationLocked,
     )
   ),
-  onDrop: (moduleState, clientX, clientY, rotationZDeg, rotationLocked) => {
+  onDrop: (moduleState, clientX, clientY, rotationZDeg, rotationLocked, catalogKey) => {
     const result = scene3d.dropCatalogModuleDrag(
       moduleState,
       clientX,
@@ -915,18 +960,10 @@ moduleDragSidebar = createModuleDragSidebar({
       rotationZDeg,
       rotationLocked,
     );
-    if (!result.ok || !result.placement) {
-      renderWallResult(result.message ?? 'Modül bu konuma bırakılamadı.', true);
-      return;
+    const committed = commitDroppedCatalogModule(moduleState, result, catalogKey);
+    if (!committed.ok) {
+      renderWallResult(committed.message ?? 'Modül bu konuma bırakılamadı.', true);
     }
-
-    if (result.plan?.placements instanceof Map && result.plan?.orderedModuleIds?.length) {
-      applyContinuousInsertionPlan(result.plan, [moduleState]);
-    } else {
-      moduleState.placement = { ...result.placement };
-      currentModules.push(moduleState);
-    }
-    rebuildWall({ resetView: false });
   },
   onCancel: () => scene3d.clearCatalogModuleDrag(),
 });
@@ -2140,3 +2177,14 @@ initializeAssetLibrary();
 initHelpGuide();
 renderStandStandardsList(document.querySelector('#stand-standards-list'));
 refreshProjectList().catch((error) => console.warn('Proje listesi açılamadı:', error));
+  return function stopFairStandConfigurator() {
+    autosaveController?.disable?.();
+    scene3d?.dispose?.();
+    unbindProjectActionSaveGuard?.();
+  };
+}
+
+const standaloneRoot = typeof document !== 'undefined' ? document.getElementById('app') : null;
+if (standaloneRoot) {
+  startFairStandConfigurator();
+}
