@@ -58,6 +58,7 @@ import {
 } from './projectImportValidation.js';
 import { getFairStandHostDocument, getFairStandHostWindow } from './hostDocument.js';
 import { bootstrapFairStandCatalog } from './catalogBootstrap.js';
+import { bindProjectActionSaveGuard } from './projectActionSaveGuard.js';
 
 if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('rawBom')) {
   import('./rawBomDebug.js');
