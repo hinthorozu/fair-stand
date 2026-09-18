@@ -226,7 +226,7 @@ Historical dosyalardaki “mevcut / sıradaki iş” ifadeleri current Version2 
 Standart akış:
 
 ```text
-fresh Version2
+fresh main
 → branch
 → SYSTEM_CHANGE_GATE domain declaration
 → SYSTEM_IMPACT_SWEEP dependency/test/finding discovery
@@ -241,7 +241,7 @@ fresh Version2
 → PR
 → canonical CI
 → merge
-→ post-merge Version2 CI
+→ post-merge main CI
 ```
 
 Core placement, behavior, catalog, persistence, renderer, BOM veya başka bir domain değişiyorsa ilgili regression aynı PR içinde eklenmeli/güncellenmelidir. Browser-visible etkisi olan değişiklik kendi Playwright E2E akışını da aynı PR içinde taşır.
