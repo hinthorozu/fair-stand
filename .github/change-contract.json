@@ -81,6 +81,7 @@
       "src/standDimensions.js",
       "src/standStandardsCopy.js",
       "src/stripOccupancy.js",
+      "src/style.css",
       "src/surfaceStateBinding.js",
       "src/systemChangeContract.js",
       "src/viewCube.js",
