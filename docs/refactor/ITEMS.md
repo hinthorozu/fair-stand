@@ -21,9 +21,9 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `name` | 96 | İnsan adı. Catalog `label`, seçim metni, zemin select. |
 | `type` | 96 | Factory, `TYPE_BEHAVIORS`, recipe lookup, `resolveItemKey` adayı. Catalog kart tipi değil. |
 | `catalogVisible` | 96 | Katalogda görünsün mü. **Şemada onaylı.** |
-| `catalogCategory` | 96 | Katalog grubu key veya `null`. **Şemada onaylı.** |
+| `categoryId` | 96 | Katalog grubu integer id veya `null`. **Şemada onaylı.** |
 | `catalogItemIndex` | 96 | Grup içi sıra veya `null`. **Şemada onaylı.** |
-| `catalogPreview` | 58 | Kart silüet key. Yalnız görünür Item. **Şemada onaylı.** |
+| `previewId` | 58 | Kart silüet key. Yalnız görünür Item. **Şemada onaylı.** |
 | `unit` | 46 | BOM satır birimi. Recipe’siz Item’da `itemBom` zorunlu sayar. 50 Item’da yok. |
 | `dimensions` | 90 | Fiziksel ölçü. 6 Item’da yok (4 connector, `shelf_leg`, `hali`). **Şemada onaylı (opsiyonel).** |
 | `dimensions.widthCm` | 71 | Genişlik cm. Recipe parent genişliği. |
@@ -104,12 +104,12 @@ Yeni mimaride şu ana kadar onaylanan zorunlu alanlar:
 |---|---|---|
 | `itemKey` | string | Item master — kanonik ürün kimliği |
 | `catalogVisible` | boolean | Item master — Catalog config |
-| `catalogCategory` | string \| null | Item master — Catalog config |
+| `categoryId` | integer \| null | Item master — Catalog config |
 | `catalogItemIndex` | integer \| null | Item master — Catalog config |
 
 `itemKey` her Item’da dolu string’dir. Üç katalog alanı her Item’da **alan olarak** zorunludur; görünmeyen Item’da category/index değeri `null` olur.
 
-Görünür Item (`catalogVisible=true`) ek zorunlu Catalog alanı: `catalogPreview`. Gizli Item’da bu alan yoktur.
+Görünür Item (`catalogVisible=true`) ek zorunlu Catalog alanı: `previewId`. Gizli Item’da bu alan yoktur.
 
 ---
 
@@ -139,11 +139,11 @@ Ayrıntı: `docs/refactor/CATALOG.md`.
 | Field | Amaç |
 |---|---|
 | `catalogVisible` | Catalog UI’da görünürlük |
-| `catalogCategory` | kategori key |
+| `categoryId` | kategori id |
 | `catalogItemIndex` | kategori içi sıra |
-| `catalogPreview` | Catalog kart preview renderer key |
+| `previewId` | Catalog kart preview renderer key |
 
-Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview renderer seçimi yalnız `Item.catalogPreview` üzerinden yapılır.
+Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview renderer seçimi yalnız `Item.previewId` üzerinden yapılır.
 
 ### catalogVisible
 
@@ -163,22 +163,22 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 - **Validation:** `true` veya `false`; `null` yasak
 - **Örnek:** `wall_200` → `true`; `panel_197` → `false`
 
-### catalogCategory
+### categoryId
 
-- **Type:** string \| null
+- **Type:** integer \| null
 - **Required:** yes (alan zorunlu; görünmeyende değer `null`)
 - **Scope:** Item master
 - **Default:** yok
-- **Amaç:** `catalogVisible=true` Item’ın hangi katalog grubunda duracağını belirler. Değer `Catalog.catalogKey` ile eşleşir; UI label saklamaz
+- **Amaç:** `catalogVisible=true` Item’ın hangi katalog grubunda duracağını belirler. Değer `Catalog.id` ile eşleşir; UI label saklamaz
 - **Canonical consumer:** Catalog mechanism
 - **Canonical method:** `listCatalogGroups()` — mevcut
-- **Method parametresi:** `catalogKey`
+- **Method parametresi:** `categoryId`
 - **Davranış / type belirlemez**
 - **Kullanıcı değiştirir mi:** hayır
 - **Project instance override:** hayır
 - **Persistence:** Item master
-- **Validation:** görünürken canonical key; gizliyken `null`
-- **Örnek:** `wall_200` → `"panel-wall"`; `panel_197` → `null`
+- **Validation:** görünürken canonical integer id; gizliyken `null`
+- **Örnek:** `wall_200` → `1`; `panel_197` → `null`
 
 ### catalogItemIndex
 
@@ -196,22 +196,22 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 - **Validation:** görünürken `1..N` kesintisiz, kategoride unique; gizliyken `null`
 - **Örnek:** `wall_200` → `1`; `panel_197` → `null`
 
-### catalogPreview
+### previewId
 
-- **Type:** string
+- **Type:** integer
 - **Required:** `catalogVisible=true` Item’da yes; gizli Item’da alan yok
 - **Scope:** Item master — Catalog config
 - **Default:** yok; type fallback yoktur
-- **Amaç:** Catalog kart preview renderer key. Asset/icon dosya yolu değildir; CSS/DOM silüet seçer
-- **Canonical consumer:** Catalog UI (`CATALOG_PREVIEW_RENDERERS`)
+- **Amaç:** Catalog kart preview tanımı. DB-generated integer id; markup/CSS bootstrap `previewKinds` kaydından gelir
+- **Canonical consumer:** Catalog UI (`getCatalogPreview` → generic renderer)
 - **Canonical method:** `getCatalogItem` / `listCatalogItems` projection → `createModuleCatalogPreview`
 - **Catalog görünümü `Item.type` üzerinden belirlenmez**
-- **Catalog preview renderer seçimi yalnız `Item.catalogPreview` üzerinden yapılır**
+- **Catalog preview renderer seçimi yalnız `Item.previewId` üzerinden yapılır**
 - **Kullanıcı değiştirir mi:** hayır
 - **Project instance override:** hayır
 - **Persistence:** Item master
-- **Validation:** görünürken `CATALOG_PREVIEWS` üyesi; yok/bilinmiyor → fail-fast; gizlide alan yok
-- **Örnek:** `KETTLE` → `"kettle"`; `TV_42` → `"tv"`; `VIDEO_WALL_2X2` → `"video-wall"`; `wall_200` → `"flat-panel"`; `profile_190` → `"profile"`
+- **Validation:** görünürken bootstrap preview id listesi üyesi; yok/bilinmiyor → fail-fast; gizlide alan yok
+- **Örnek:** `KETTLE` → `13`; `TV_42` → `26`; `VIDEO_WALL_2X2` → `28`; `wall_200` → `9`; `profile_190` → `17`
 
 ### dimensions
 
@@ -251,8 +251,8 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 
 | Item config | Canonical mechanism | Canonical method | Durum |
 |---|---|---|---|
-| `catalogVisible` / `catalogCategory` / `catalogItemIndex` | Catalog | `listCatalogCategories` / `listCatalogItems` / `getCatalogItem` / `listCatalogGroups` | mevcut |
-| `catalogPreview` | Catalog | `getCatalogItem` / `listCatalogItems` → `CATALOG_PREVIEW_RENDERERS` | mevcut |
+| `catalogVisible` / `categoryId` / `catalogItemIndex` | Catalog | `listCatalogCategories` / `listCatalogItems` / `getCatalogItem` / `listCatalogGroups` | mevcut |
+| `previewId` | Catalog | `getCatalogItem` / `listCatalogItems` → `CATALOG_PREVIEW_RENDERERS` | mevcut |
 | `dimensions` / `sceneDimensions` | Item ölçü | `resolveSceneDimensions` | mevcut |
 | `itemKey` | Item identity | `getItem` / `listRegisteredItems` / `resolveItemKey` | mevcut |
 | rotation | Rotation | henüz belirlenmedi | yapılmadı |
@@ -278,9 +278,9 @@ Item {
   itemKey: string
 
   catalogVisible: boolean
-  catalogCategory: string | null    // Catalog.catalogKey
+  categoryId: number | null    // Catalog.id
   catalogItemIndex: integer | null  // kategori içi sıra; Catalog.catalogIndex değil
-  catalogPreview?: string           // catalogVisible=true ise zorunlu renderer key; gizlide yok
+  previewId?: number           // catalogVisible=true ise zorunlu integer id; gizlide yok
   dimensions?: {
     widthCm?: number
     depthCm?: number
@@ -298,7 +298,7 @@ Item {
 }
 ```
 
-96 kayıtlı Item bu şemayı taşır. Katalogda görünen 58 kayıt `catalogVisible=true`, dolu category/index ve `catalogPreview` taşır. `VIDEO_WALL_PANEL` katalog dışıdır (`catalogVisible=false`).
+96 kayıtlı Item bu şemayı taşır. Katalogda görünen 58 kayıt `catalogVisible=true`, dolu category/index ve `previewId` taşır. `VIDEO_WALL_PANEL` katalog dışıdır (`catalogVisible=false`).
 
 ---
 
@@ -321,11 +321,11 @@ Item {
 ## Validation (onaylı şema)
 
 - Her Item `itemKey` taşır
-- Her Item `catalogVisible`, `catalogCategory`, `catalogItemIndex` alanını taşır
+- Her Item `catalogVisible`, `categoryId`, `catalogItemIndex` alanını taşır
 - `catalogVisible=true` → category ve index dolu
-- `catalogVisible=true` → `catalogPreview` dolu ve `CATALOG_PREVIEWS` üyesi
+- `catalogVisible=true` → `previewId` dolu ve `CATALOG_PREVIEWS` üyesi
 - `catalogVisible=false` → category ve index `null`
-- `catalogVisible=false` → `catalogPreview` alanı yok
+- `catalogVisible=false` → `previewId` alanı yok
 - `catalogVisible=false` → Item `getItem` ile durur; `getCatalogItem` null döner
 - `catalogWidthCm` yoktur
 - Effective scene field yalnız same-field: `sceneDimensions.field ?? dimensions.field ?? MISSING`

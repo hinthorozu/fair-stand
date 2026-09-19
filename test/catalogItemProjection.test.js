@@ -15,7 +15,7 @@ const BASELINE = JSON.parse(
 const COMPARE_FIELDS = Object.freeze([
   'itemKey',
   'label',
-  'catalogPreview',
+  'previewId',
 ]);
 
 function pickComparable(descriptor) {
@@ -60,7 +60,7 @@ test('yeni catalog projection yalnız itemKey / label / catalogPreview taşır',
   for (const item of listCatalogItems()) {
     const expected = byKey.get(item.itemKey);
     assert.ok(expected, item.itemKey);
-    assert.deepEqual(Object.keys(item).sort(), ['catalogPreview', 'itemKey', 'label'], item.itemKey);
+    assert.deepEqual(Object.keys(item).sort(), ['itemKey', 'label', 'previewId'], item.itemKey);
     assert.deepEqual(pickComparable(item), pickComparable(expected), item.itemKey);
     assert.deepEqual(pickComparable(getCatalogItem(item.itemKey)), pickComparable(expected), item.itemKey);
     compared += 1;
@@ -75,7 +75,7 @@ test('kategori sırası, adı, üye sayısı ve Item sırası değişmez', () =>
   assert.equal(groups.length, BASELINE.groups.length);
   groups.forEach((group, index) => {
     const expected = BASELINE.groups[index];
-    assert.equal(group.catalogKey, expected.catalogKey);
+    assert.equal(group.id, expected.id);
     assert.equal(group.catalogName, expected.catalogName);
     assert.equal(group.catalogIndex, expected.catalogIndex);
     assert.deepEqual([...group.keys], expected.keys);

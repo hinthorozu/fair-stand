@@ -1,8 +1,16 @@
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { listRegisteredItems } from '../src/items.js';
-import { CATALOG_CATEGORIES, CATALOG_PREVIEWS } from '../src/catalog.js';
+import { CATALOG_PREVIEW_KIND_FIXTURE } from '../test/fixtures/catalogPreviewKinds.mjs';
+
+const seed = JSON.parse(readFileSync(new URL('../test/fixtures/itemCatalogSeed.json', import.meta.url), 'utf8'));
+const CATALOG_CATEGORIES = seed.categories.map((category) => ({
+  id: category.catalog_index,
+  catalogName: category.catalog_name,
+  catalogIndex: category.catalog_index,
+}));
+const CATALOG_PREVIEW_IDS = CATALOG_PREVIEW_KIND_FIXTURE.map((preview) => preview.id);
 
 function colorToInt(value) {
   if (value == null) return null;
@@ -45,13 +53,11 @@ function py(value, indent = 0) {
 const items = listRegisteredItems();
 const payload = {
   categories: CATALOG_CATEGORIES.map((category) => ({
-    catalog_key: category.catalogKey,
     catalog_name: category.catalogName,
     catalog_index: category.catalogIndex,
   })),
-  preview_kinds: CATALOG_PREVIEWS.map((previewKey, index) => ({
-    preview_key: previewKey,
-    sort_index: index + 1,
+  preview_kinds: CATALOG_PREVIEW_IDS.map((previewId) => ({
+    sort_index: previewId,
   })),
   items: items.map((item) => {
     const assets = [];
@@ -67,9 +73,9 @@ const payload = {
       item_type: item.type,
       unit: item.unit ?? null,
       catalog_visible: item.catalogVisible === true,
-      catalog_key: item.catalogVisible ? item.catalogCategory : null,
+      category_index: item.catalogVisible ? item.categoryId : null,
       catalog_item_index: item.catalogVisible ? item.catalogItemIndex : null,
-      catalog_preview_key: item.catalogVisible ? item.catalogPreview : null,
+      preview_id: item.catalogVisible ? item.previewId : null,
       material: item.material ?? null,
       default_color: colorToInt(item.defaultColor ?? null),
       panel_role: item.panelRole ?? null,

@@ -222,8 +222,8 @@ test('field upright renderer uses a square wall-depth column, not an L', async (
 
 test('catalog preview for upright is a solid post, not a 7-strip panel', async () => {
   const { readFile } = await import('node:fs/promises');
-  const source = await readFile(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
-  assert.match(source, /upright\(preview\) \{ appendSimple\(preview, 'module-drag-upright'\)/);
-  assert.match(source, /module-drag-upright/);
-  assert.match(source, /width:6px/);
+  const fixture = await readFile(new URL('./fixtures/catalogPreviewKinds.mjs', import.meta.url), 'utf8');
+  assert.match(fixture, /id: 27/);
+  assert.match(fixture, /module-drag-upright/);
+  assert.match(fixture, /markup: '<div class="module-drag-upright"><\/div>'/);
 });

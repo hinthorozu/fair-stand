@@ -53,11 +53,11 @@ test('A-C catalog: shelf_100/150/200 görünür, Raf & Vitrin, vitrinlerden sonr
   for (const itemKey of SHELF_KEYS) {
     const item = getItem(itemKey);
     assert.equal(item.catalogVisible, true, itemKey);
-    assert.equal(item.catalogCategory, 'shelf-showcase', itemKey);
+    assert.equal(item.categoryId, 3, itemKey);
     assert.ok(getCatalogItem(itemKey), itemKey);
   }
 
-  const group = listCatalogGroups().find((entry) => entry.catalogKey === 'shelf-showcase');
+  const group = listCatalogGroups().find((entry) => entry.id === 3);
   assert.deepEqual([...group.keys], [
     'wall_showcase_100_3',
     'wall_showcase_100_2',
@@ -67,7 +67,7 @@ test('A-C catalog: shelf_100/150/200 görünür, Raf & Vitrin, vitrinlerden sonr
   ]);
   assert.deepEqual(
     listCatalogItems()
-      .filter((item) => item.catalogPreview === 'shelf' || item.itemKey.startsWith('wall_showcase_'))
+      .filter((item) => item.previewId === 20 || item.itemKey.startsWith('wall_showcase_'))
       .map((item) => item.itemKey),
     ['wall_showcase_100_3', 'wall_showcase_100_2', 'shelf_100', 'shelf_150', 'shelf_200'],
   );

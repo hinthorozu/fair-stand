@@ -1,4 +1,4 @@
-import { initializeCatalogCategories } from './catalog.js';
+import { initializeCatalogCategories, initializeCatalogPreviews } from './catalog.js';
 import { getFairStandHostWindow } from './hostDocument.js';
 import { initializeItemRegistry } from './items.js';
 
@@ -21,10 +21,11 @@ export async function bootstrapFairStandCatalog() {
     throw new Error(`Fair Stand Item catalog bootstrap failed (${response.status}).`);
   }
   const payload = await response.json();
-  if (!payload || !Array.isArray(payload.items) || !Array.isArray(payload.categories)) {
+  if (!payload || !Array.isArray(payload.items) || !Array.isArray(payload.categories) || !Array.isArray(payload.previewKinds)) {
     throw new TypeError('Fair Stand Item catalog bootstrap payload is invalid.');
   }
   initializeCatalogCategories(payload.categories);
+  initializeCatalogPreviews(payload.previewKinds);
   initializeItemRegistry(payload.items);
   return payload.revision ?? null;
 }

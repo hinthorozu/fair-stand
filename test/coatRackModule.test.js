@@ -14,7 +14,7 @@ test('coat rack is an Extra catalog module backed by the supplied GLB', () => {
   assert.deepEqual(item, {
     itemKey: 'COAT_RACK',
     label: 'Askılık',
-    catalogPreview: 'coat-rack',
+    previewId: 5,
   });
   const extra = listCatalogGroups().find((group) => group.label === 'Extra');
   assert.ok(extra?.keys.includes('COAT_RACK'));

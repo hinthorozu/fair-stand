@@ -8,13 +8,13 @@ import {
 } from '../src/catalog.js';
 import { getItem, listRegisteredItems } from '../src/items.js';
 
-const CATALOG_CATEGORY_KEYS_BY_LABEL = Object.freeze({
-  'Panel & Duvar': 'panel-wall',
-  'Panel Ek Modül': 'panel-addon',
-  'Raf & Vitrin': 'shelf-showcase',
-  'Banko & Baza': 'counter-base',
-  Extra: 'extra',
-  'Elektronik & Aydınlatma': 'electronics-lighting',
+const CATALOG_CATEGORY_IDS_BY_LABEL = Object.freeze({
+  'Panel & Duvar': 1,
+  'Panel Ek Modül': 2,
+  'Raf & Vitrin': 3,
+  'Banko & Baza': 4,
+  Extra: 5,
+  'Elektronik & Aydınlatma': 6,
 });
 
 const EXPECTED_CATALOG_GROUPS = Object.freeze([
@@ -116,13 +116,13 @@ function expectedFieldsForItemKey(itemKey) {
     if (index === -1) continue;
     return {
       catalogVisible: true,
-      catalogCategory: CATALOG_CATEGORY_KEYS_BY_LABEL[group.label],
+      categoryId: CATALOG_CATEGORY_IDS_BY_LABEL[group.label],
       catalogItemIndex: index + 1,
     };
   }
   return {
     catalogVisible: false,
-    catalogCategory: null,
+    categoryId: null,
     catalogItemIndex: null,
   };
 }
@@ -158,24 +158,24 @@ test('96 Item katalog metadata alanlarını taşır ve canlı katalog üyeliğiy
 
   for (const item of items) {
     if (!Object.hasOwn(item, 'catalogVisible')) missingVisible += 1;
-    if (!Object.hasOwn(item, 'catalogCategory')) missingCategory += 1;
+    if (!Object.hasOwn(item, 'categoryId')) missingCategory += 1;
     if (!Object.hasOwn(item, 'catalogItemIndex')) missingIndex += 1;
 
     const expected = expectedFieldsForItemKey(item.itemKey);
     assert.equal(item.catalogVisible, expected.catalogVisible, item.itemKey);
-    assert.equal(item.catalogCategory, expected.catalogCategory, item.itemKey);
+    assert.equal(item.categoryId, expected.categoryId, item.itemKey);
     assert.equal(item.catalogItemIndex, expected.catalogItemIndex, item.itemKey);
     assert.deepEqual(getItem(item.itemKey), item, item.itemKey);
 
     if (item.catalogVisible === true) {
       visibleCount += 1;
-      if (item.catalogCategory == null) visibleNullCategory += 1;
+      if (item.categoryId == null) visibleNullCategory += 1;
       if (item.catalogItemIndex == null) visibleNullIndex += 1;
-      const rows = byCategory.get(item.catalogCategory) ?? [];
+      const rows = byCategory.get(item.categoryId) ?? [];
       rows.push(item);
-      byCategory.set(item.catalogCategory, rows);
+      byCategory.set(item.categoryId, rows);
     } else {
-      if (item.catalogCategory != null) hiddenNonNullCategory += 1;
+      if (item.categoryId != null) hiddenNonNullCategory += 1;
       if (item.catalogItemIndex != null) hiddenNonNullIndex += 1;
     }
   }
@@ -192,9 +192,9 @@ test('96 Item katalog metadata alanlarını taşır ve canlı katalog üyeliğiy
   let duplicateIndex = 0;
   let gapIndex = 0;
   for (const group of EXPECTED_CATALOG_GROUPS) {
-    const categoryKey = CATALOG_CATEGORY_KEYS_BY_LABEL[group.label];
-    const rows = byCategory.get(categoryKey) ?? [];
-    assert.equal(rows.length, group.keys.length, categoryKey);
+    const categoryId = CATALOG_CATEGORY_IDS_BY_LABEL[group.label];
+    const rows = byCategory.get(categoryId) ?? [];
+    assert.equal(rows.length, group.keys.length, categoryId);
     const indexes = rows.map((item) => item.catalogItemIndex).sort((a, b) => a - b);
     if (new Set(indexes).size !== indexes.length) duplicateIndex += 1;
     const expectedIndexes = group.keys.map((_, index) => index + 1);
@@ -202,17 +202,17 @@ test('96 Item katalog metadata alanlarını taşır ve canlı katalog üyeliğiy
     const orderedKeys = [...rows]
       .sort((a, b) => a.catalogItemIndex - b.catalogItemIndex)
       .map((item) => item.itemKey);
-    assert.deepEqual(orderedKeys, [...group.keys], categoryKey);
+    assert.deepEqual(orderedKeys, [...group.keys], categoryId);
   }
   assert.equal(duplicateIndex, 0);
   assert.equal(gapIndex, 0);
 
   assert.equal(getItem('wall_200').catalogVisible, true);
-  assert.equal(getItem('wall_200').catalogCategory, 'panel-wall');
+  assert.equal(getItem('wall_200').categoryId, 1);
   assert.equal(getItem('wall_200').catalogItemIndex, 1);
-  assert.equal(getItem('wall_200').catalogPreview, 'flat-panel');
+  assert.equal(getItem('wall_200').previewId, 9);
   assert.equal(getItem('panel_197').catalogVisible, false);
-  assert.equal(getItem('panel_197').catalogCategory, null);
+  assert.equal(getItem('panel_197').categoryId, null);
   assert.equal(getItem('panel_197').catalogItemIndex, null);
 });
 
@@ -248,17 +248,17 @@ test('katalog UI listCatalogGroups üzerinden catalogName ve catalogIndex kullan
   assert.doesNotMatch(contextMenu, /MODULE_CATALOG\[/);
   const fixture = readFileSync(new URL('./fixtures/itemCatalogSeed.json', import.meta.url), 'utf8');
   assert.match(fixture, /"catalog_visible":\s*true/);
-  assert.match(fixture, /"catalog_key":\s*"panel-wall"/);
+  assert.match(fixture, /"category_index":\s*1/);
 
   for (const itemKey of listCatalogItems().map((item) => item.itemKey)) {
     assert.equal(Object.hasOwn(getCatalogItem(itemKey), 'catalogVisible'), false, itemKey);
-    assert.equal(Object.hasOwn(getCatalogItem(itemKey), 'catalogCategory'), false, itemKey);
+    assert.equal(Object.hasOwn(getCatalogItem(itemKey), 'categoryId'), false, itemKey);
     assert.equal(Object.hasOwn(getCatalogItem(itemKey), 'catalogItemIndex'), false, itemKey);
-    assert.equal(typeof getCatalogItem(itemKey).catalogPreview, 'string', itemKey);
+    assert.equal(typeof getCatalogItem(itemKey).previewId, 'number', itemKey);
   }
 });
 
-test('CATALOG.md catalogKey tablosu canlı kategorilerle örtüşür', () => {
+test('CATALOG.md category id tablosu canlı kategorilerle örtüşür', () => {
   const catalogDoc = readFileSync(new URL('../docs/refactor/CATALOG.md', import.meta.url), 'utf8');
 
   assert.match(catalogDoc, /# Catalog/);
@@ -268,12 +268,12 @@ test('CATALOG.md catalogKey tablosu canlı kategorilerle örtüşür', () => {
   assert.match(catalogDoc, /getCatalogItem/);
 
   EXPECTED_CATALOG_GROUPS.forEach((group, index) => {
-    const categoryKey = CATALOG_CATEGORY_KEYS_BY_LABEL[group.label];
+    const categoryId = CATALOG_CATEGORY_IDS_BY_LABEL[group.label];
     const row = new RegExp(
-      `\\| \`${categoryKey}\` \\| ${group.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\| ${index + 1} \\| ${group.keys.length} \\|`,
+      `\\| ${categoryId} \\| ${group.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\| ${index + 1} \\| ${group.keys.length} \\|`,
     );
-    assert.match(catalogDoc, row, categoryKey);
-    assert.equal(getItem(group.keys[0]).catalogCategory, categoryKey, group.keys[0]);
+    assert.match(catalogDoc, row, String(categoryId));
+    assert.equal(getItem(group.keys[0]).categoryId, categoryId, group.keys[0]);
   });
 });
 
@@ -282,9 +282,9 @@ test('ITEMS.md yalnız onaylı katalog şemasını taşır; gerçekleşmemiş me
 
   assert.match(itemsDoc, /# Item/);
   assert.match(itemsDoc, /### catalogVisible/);
-  assert.match(itemsDoc, /### catalogCategory/);
+  assert.match(itemsDoc, /### categoryId/);
   assert.match(itemsDoc, /### catalogItemIndex/);
-  assert.match(itemsDoc, /### catalogPreview/);
+  assert.match(itemsDoc, /### previewId/);
   assert.match(itemsDoc, /### dimensions/);
   assert.match(itemsDoc, /### sceneDimensions/);
   assert.match(itemsDoc, /# Canonical Mechanism Connections/);

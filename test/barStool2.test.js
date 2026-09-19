@@ -10,7 +10,7 @@ test('Bar Taburesi katalog ve state kimliği sabittir', () => {
   const item = getCatalogItem('furniture_bar_stool_classic');
   assert.ok(item);
   assert.equal(item.label, 'Bar Taburesi');
-  assert.equal(item.catalogPreview, 'bar-stool');
+  assert.equal(item.previewId, 1);
   assert.equal(Object.hasOwn(item, 'type'), false);
   assert.ok(getCatalogItem('furniture_bar_stool_classic') != null);
 

@@ -171,7 +171,7 @@ for (const itemKey of Object.keys(EXPECTED)) {
 
     assert.equal(catalog.itemKey, itemKey);
     assert.equal(catalog.label, item.name);
-    assert.equal(catalog.catalogPreview, item.catalogPreview);
+    assert.equal(catalog.previewId, item.previewId);
     assert.equal(Object.hasOwn(catalog, 'type'), false);
     assert.equal(Object.hasOwn(catalog, 'widthCm'), false);
 
