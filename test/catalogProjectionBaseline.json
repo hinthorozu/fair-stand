@@ -1,5 +1,5 @@
 {
-  "generatedFrom": "thin catalog cards itemKey label catalogPreview",
+  "generatedFrom": "thin catalog cards itemKey label previewId",
   "keys": [
     "wall_200",
     "wall_150",
@@ -62,7 +62,7 @@
   ],
   "groups": [
     {
-      "catalogKey": "panel-wall",
+      "id": 1,
       "catalogName": "Panel & Duvar",
       "catalogIndex": 1,
       "keys": [
@@ -78,8 +78,8 @@
       ]
     },
     {
-      "catalogKey": "panel-addon",
-      "catalogName": "Panel Ek Modül",
+      "id": 2,
+      "catalogName": "Panel Ek Mod\u00fcl",
       "catalogIndex": 2,
       "keys": [
         "wall_200_short_up_2",
@@ -98,7 +98,7 @@
       ]
     },
     {
-      "catalogKey": "shelf-showcase",
+      "id": 3,
       "catalogName": "Raf & Vitrin",
       "catalogIndex": 3,
       "keys": [
@@ -110,7 +110,7 @@
       ]
     },
     {
-      "catalogKey": "counter-base",
+      "id": 4,
       "catalogName": "Banko & Baza",
       "catalogIndex": 4,
       "keys": [
@@ -126,7 +126,7 @@
       ]
     },
     {
-      "catalogKey": "extra",
+      "id": 5,
       "catalogName": "Extra",
       "catalogIndex": 5,
       "keys": [
@@ -149,8 +149,8 @@
       ]
     },
     {
-      "catalogKey": "electronics-lighting",
-      "catalogName": "Elektronik & Aydınlatma",
+      "id": 6,
+      "catalogName": "Elektronik & Ayd\u0131nlatma",
       "catalogIndex": 6,
       "keys": [
         "TV_42",
@@ -166,292 +166,292 @@
     {
       "itemKey": "wall_200",
       "label": "Panel 200",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_150",
       "label": "Panel 150",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_100",
       "label": "Panel 100",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_50",
       "label": "Panel 50",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_separator_100",
-      "label": "Separatör 100",
-      "catalogPreview": "separator"
+      "label": "Separat\u00f6r 100",
+      "previewId": 18
     },
     {
       "itemKey": "wall_separator_50",
-      "label": "Separatör 50",
-      "catalogPreview": "separator"
+      "label": "Separat\u00f6r 50",
+      "previewId": 18
     },
     {
       "itemKey": "wall_separator_100_sarmasik",
-      "label": "Separatör 100 Sarmaşık",
-      "catalogPreview": "separator-vine"
+      "label": "Separat\u00f6r 100 Sarma\u015f\u0131k",
+      "previewId": 19
     },
     {
       "itemKey": "wall_separator_50_sarmasik",
-      "label": "Separatör 50 Sarmaşık",
-      "catalogPreview": "separator-vine"
+      "label": "Separat\u00f6r 50 Sarma\u015f\u0131k",
+      "previewId": 19
     },
     {
       "itemKey": "door_100",
-      "label": "Depo Kapısı 100",
-      "catalogPreview": "door"
+      "label": "Depo Kap\u0131s\u0131 100",
+      "previewId": 8
     },
     {
       "itemKey": "wall_200_short_up_2",
       "label": "Panel 200 Short Up 2",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_150_short_up_2",
       "label": "Panel 150 Short Up 2",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_100_short_up_2",
       "label": "Panel 100 Short Up 2",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_50_short_up_2",
       "label": "Panel 50 Short Up 2",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_200_short_up_1",
       "label": "Panel 200 Short Up 1",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_150_short_up_1",
       "label": "Panel 150 Short Up 1",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_100_short_up_1",
       "label": "Panel 100 Short Up 1",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "wall_50_short_up_1",
       "label": "Panel 50 Short Up 1",
-      "catalogPreview": "flat-panel"
+      "previewId": 9
     },
     {
       "itemKey": "upright_346_5",
       "label": "Dikme 346,5 cm",
-      "catalogPreview": "upright"
+      "previewId": 27
     },
     {
       "itemKey": "profile_190",
       "label": "Profil 190 cm",
-      "catalogPreview": "profile"
+      "previewId": 17
     },
     {
       "itemKey": "profile_140_5",
       "label": "Profil 140,5 cm",
-      "catalogPreview": "profile"
+      "previewId": 17
     },
     {
       "itemKey": "profile_91",
       "label": "Profil 91 cm",
-      "catalogPreview": "profile"
+      "previewId": 17
     },
     {
       "itemKey": "profile_41_5",
       "label": "Profil 41,5 cm",
-      "catalogPreview": "profile"
+      "previewId": 17
     },
     {
       "itemKey": "wall_showcase_100_3",
-      "label": "3 Gözlü Vitrin 100",
-      "catalogPreview": "showcase"
+      "label": "3 G\u00f6zl\u00fc Vitrin 100",
+      "previewId": 21
     },
     {
       "itemKey": "wall_showcase_100_2",
-      "label": "2 Gözlü Vitrin 100",
-      "catalogPreview": "showcase"
+      "label": "2 G\u00f6zl\u00fc Vitrin 100",
+      "previewId": 21
     },
     {
       "itemKey": "shelf_100",
       "label": "Raf 100 cm",
-      "catalogPreview": "shelf"
+      "previewId": 20
     },
     {
       "itemKey": "shelf_150",
       "label": "Raf 150 cm",
-      "catalogPreview": "shelf"
+      "previewId": 20
     },
     {
       "itemKey": "shelf_200",
       "label": "Raf 200 cm",
-      "catalogPreview": "shelf"
+      "previewId": 20
     },
     {
       "itemKey": "desk_banko_200",
       "label": "Banko 200",
-      "catalogPreview": "counter"
+      "previewId": 7
     },
     {
       "itemKey": "desk_banko_150",
       "label": "Banko 150",
-      "catalogPreview": "counter"
+      "previewId": 7
     },
     {
       "itemKey": "desk_banko_100",
       "label": "Banko 100",
-      "catalogPreview": "counter"
+      "previewId": 7
     },
     {
       "itemKey": "desk_banko_200_L",
-      "label": "Köşe Banko 200×200",
-      "catalogPreview": "counter"
+      "label": "K\u00f6\u015fe Banko 200\u00d7200",
+      "previewId": 7
     },
     {
       "itemKey": "desk_banko_150_L",
-      "label": "Köşe Banko 150×150",
-      "catalogPreview": "counter"
+      "label": "K\u00f6\u015fe Banko 150\u00d7150",
+      "previewId": 7
     },
     {
       "itemKey": "desk_banko_100_L",
-      "label": "Köşe Banko 100×100",
-      "catalogPreview": "counter"
+      "label": "K\u00f6\u015fe Banko 100\u00d7100",
+      "previewId": 7
     },
     {
       "itemKey": "BASE_200",
       "label": "Baza 200",
-      "catalogPreview": "base"
+      "previewId": 2
     },
     {
       "itemKey": "BASE_150",
       "label": "Baza 150",
-      "catalogPreview": "base"
+      "previewId": 2
     },
     {
       "itemKey": "BASE_100",
       "label": "Baza 100",
-      "catalogPreview": "base"
+      "previewId": 2
     },
     {
       "itemKey": "furniture_sofa_set_classic",
-      "label": "Koltuk Takımı",
-      "catalogPreview": "sofa-set"
+      "label": "Koltuk Tak\u0131m\u0131",
+      "previewId": 23
     },
     {
       "itemKey": "furniture_sofa_single_classic",
       "label": "Tekli Koltuk",
-      "catalogPreview": "sofa-single"
+      "previewId": 24
     },
     {
       "itemKey": "furniture_sofa_double_classic",
-      "label": "Çiftli Koltuk",
-      "catalogPreview": "sofa-double"
+      "label": "\u00c7iftli Koltuk",
+      "previewId": 22
     },
     {
       "itemKey": "furniture_coffee_table_classic",
       "label": "Sehpa",
-      "catalogPreview": "coffee-table"
+      "previewId": 6
     },
     {
       "itemKey": "furniture_table_chair_set_eames",
-      "label": "Eames Masa Sandalye Takımı",
-      "catalogPreview": "table-chair-set"
+      "label": "Eames Masa Sandalye Tak\u0131m\u0131",
+      "previewId": 25
     },
     {
       "itemKey": "chair_eames",
       "label": "Eames Sandalye",
-      "catalogPreview": "chair"
+      "previewId": 4
     },
     {
       "itemKey": "glass_table",
       "label": "Cam Masa",
-      "catalogPreview": "glass-table"
+      "previewId": 11
     },
     {
       "itemKey": "furniture_bar_stool_classic",
       "label": "Bar Taburesi",
-      "catalogPreview": "bar-stool"
+      "previewId": 1
     },
     {
       "itemKey": "MINI_FRIDGE_AVANTI",
-      "label": "Mini Buzdolabı",
-      "catalogPreview": "mini-fridge"
+      "label": "Mini Buzdolab\u0131",
+      "previewId": 15
     },
     {
       "itemKey": "KETTLE",
       "label": "Kettle",
-      "catalogPreview": "kettle"
+      "previewId": 13
     },
     {
       "itemKey": "COAT_RACK",
-      "label": "Askılık",
-      "catalogPreview": "coat-rack"
+      "label": "Ask\u0131l\u0131k",
+      "previewId": 5
     },
     {
       "itemKey": "PLASTIC_TRASH_BIN",
-      "label": "Çöp Kutusu",
-      "catalogPreview": "plastic-trash-bin"
+      "label": "\u00c7\u00f6p Kutusu",
+      "previewId": 16
     },
     {
       "itemKey": "EXTRA_INDOOR_PLANT_1",
-      "label": "Yapay Çiçek 1",
-      "catalogPreview": "indoor-plant"
+      "label": "Yapay \u00c7i\u00e7ek 1",
+      "previewId": 12
     },
     {
       "itemKey": "EXTRA_LONG_PLANTER_100",
-      "label": "Uzun Saksı 100",
-      "catalogPreview": "long-planter"
+      "label": "Uzun Saks\u0131 100",
+      "previewId": 14
     },
     {
       "itemKey": "EXTRA_LONG_PLANTER_150",
-      "label": "Uzun Saksı 150",
-      "catalogPreview": "long-planter"
+      "label": "Uzun Saks\u0131 150",
+      "previewId": 14
     },
     {
       "itemKey": "EXTRA_LONG_PLANTER_200",
-      "label": "Uzun Saksı 200",
-      "catalogPreview": "long-planter"
+      "label": "Uzun Saks\u0131 200",
+      "previewId": 14
     },
     {
       "itemKey": "TV_42",
       "label": "TV 42\"",
-      "catalogPreview": "tv"
+      "previewId": 26
     },
     {
       "itemKey": "TV_55",
       "label": "TV 55\"",
-      "catalogPreview": "tv"
+      "previewId": 26
     },
     {
       "itemKey": "VIDEO_WALL_2X2",
-      "label": "Video Wall 2×2",
-      "catalogPreview": "video-wall"
+      "label": "Video Wall 2\u00d72",
+      "previewId": 28
     },
     {
       "itemKey": "VIDEO_WALL_3X3",
-      "label": "Video Wall 3×3",
-      "catalogPreview": "video-wall"
+      "label": "Video Wall 3\u00d73",
+      "previewId": 28
     },
     {
       "itemKey": "TV_65",
       "label": "TV 65\"",
-      "catalogPreview": "tv"
+      "previewId": 26
     },
     {
       "itemKey": "led_floodlight",
-      "label": "LED Projektör",
-      "catalogPreview": "floodlight"
+      "label": "LED Projekt\u00f6r",
+      "previewId": 10
     }
   ]
 }

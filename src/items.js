@@ -1,7 +1,7 @@
-// catalogVisible / catalogCategory / catalogItemIndex her Item'ın kendi katalog görünüm verisidir.
-// catalogPreview görünür Item'da Catalog kart renderer key'idir; type üzerinden seçilmez.
+// catalogVisible / categoryId / catalogItemIndex her Item'ın kendi katalog görünüm verisidir.
+// previewId görünür Item'da Catalog kart silüet tanımıdır; type üzerinden seçilmez.
 // dimensions fiziksel ürün ölçüsüdür; sceneDimensions aynı field setinin runtime override katmanıdır.
-// catalogCategory yalnız UI gruplamasıdır; type, Item Contract veya registry grubundan türetilmez.
+// categoryId yalnız UI gruplamasıdır; type, Item Contract veya registry grubundan türetilmez.
 // Catalog, Item runtime repository değildir; catalogVisible=false Item'ı yok etmez.
 // Kanonik Item tablosu. Satır = Item (`itemKey`). Kova map yoktur.
 

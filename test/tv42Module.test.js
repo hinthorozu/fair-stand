@@ -211,8 +211,9 @@ test('wall-overlay height clamp reaches geometric top for every TV screen size',
 });
 
 test('TV catalog preview uses a dedicated TV silhouette instead of panel strips', () => {
-  const source = fs.readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
-  assert.match(source, /module-drag-tv/);
-  assert.match(source, /tv\(preview\) \{ appendSimple\(preview, 'module-drag-tv'\)/);
+  const source = fs.readFileSync(new URL('../src/catalogPreviewRenderer.js', import.meta.url), 'utf8');
+  const fixture = fs.readFileSync(new URL('./fixtures/catalogPreviewKinds.mjs', import.meta.url), 'utf8');
+  assert.match(fixture, /id: 26/);
+  assert.match(fixture, /module-drag-tv/);
   assert.doesNotMatch(source, /module\.type === 'tv'/);
 });

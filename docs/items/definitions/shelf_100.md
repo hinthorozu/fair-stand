@@ -10,7 +10,7 @@
 - `material`: `sunta`
 - `defaultColor`: `0xffffff`
 - `nominalModuleWidthCm`: `100`
-- Catalog: `catalogVisible=true`, `catalogCategory=shelf-showcase`, `catalogItemIndex=3`, `catalogPreview=shelf`
+- Catalog: `catalogVisible=true`, `categoryId=3`, `catalogItemIndex=3`, `catalogPreview=shelf`
 
 ## Sahiplik
 

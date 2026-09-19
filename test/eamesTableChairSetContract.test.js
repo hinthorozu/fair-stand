@@ -12,7 +12,7 @@ test('Eames is the only table-chair set in the catalog', () => {
   assert.equal(getCatalogItem('furniture_table_chair_set_minyon'), null);
   assert.equal(getCatalogItem('furniture_table_chair_set_minyon') != null, false);
   assert.equal(eames.itemKey, 'furniture_table_chair_set_eames');
-  assert.equal(eames.catalogPreview, 'table-chair-set');
+  assert.equal(eames.previewId, 25);
 });
 
 test('Eames set contains four chairs', () => {

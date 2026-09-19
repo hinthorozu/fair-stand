@@ -10,7 +10,7 @@ test('shelf_leg is canonical without invented product metadata', () => {
   assert.deepEqual(item, {
     itemKey: 'shelf_leg',
     catalogVisible: false,
-    catalogCategory: null,
+    categoryId: null,
     catalogItemIndex: null,
     name: 'Raf Ayağı',
     type: 'shelf-accessory',

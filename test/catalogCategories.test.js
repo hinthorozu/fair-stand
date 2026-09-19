@@ -11,56 +11,56 @@ import {
 import { getItem, listRegisteredItems } from '../src/items.js';
 
 const EXPECTED_CATEGORIES = Object.freeze([
-  Object.freeze({ catalogKey: 'panel-wall', catalogName: 'Panel & Duvar', catalogIndex: 1, itemCount: 9 }),
-  Object.freeze({ catalogKey: 'panel-addon', catalogName: 'Panel Ek Modül', catalogIndex: 2, itemCount: 13 }),
-  Object.freeze({ catalogKey: 'shelf-showcase', catalogName: 'Raf & Vitrin', catalogIndex: 3, itemCount: 5 }),
-  Object.freeze({ catalogKey: 'counter-base', catalogName: 'Banko & Baza', catalogIndex: 4, itemCount: 9 }),
-  Object.freeze({ catalogKey: 'extra', catalogName: 'Extra', catalogIndex: 5, itemCount: 16 }),
-  Object.freeze({ catalogKey: 'electronics-lighting', catalogName: 'Elektronik & Aydınlatma', catalogIndex: 6, itemCount: 6 }),
+  Object.freeze({ id: 1, catalogName: 'Panel & Duvar', catalogIndex: 1, itemCount: 9 }),
+  Object.freeze({ id: 2, catalogName: 'Panel Ek Modül', catalogIndex: 2, itemCount: 13 }),
+  Object.freeze({ id: 3, catalogName: 'Raf & Vitrin', catalogIndex: 3, itemCount: 5 }),
+  Object.freeze({ id: 4, catalogName: 'Banko & Baza', catalogIndex: 4, itemCount: 9 }),
+  Object.freeze({ id: 5, catalogName: 'Extra', catalogIndex: 5, itemCount: 16 }),
+  Object.freeze({ id: 6, catalogName: 'Elektronik & Aydınlatma', catalogIndex: 6, itemCount: 6 }),
 ]);
 
 const EXPECTED_GROUP_KEYS = Object.freeze({
-  'panel-wall': Object.freeze([
+  1: Object.freeze([
     'wall_200', 'wall_150', 'wall_100', 'wall_50',
     'wall_separator_100', 'wall_separator_50',
     'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik',
     'door_100',
   ]),
-  'panel-addon': Object.freeze([
+  2: Object.freeze([
     'wall_200_short_up_2', 'wall_150_short_up_2', 'wall_100_short_up_2', 'wall_50_short_up_2',
     'wall_200_short_up_1', 'wall_150_short_up_1', 'wall_100_short_up_1', 'wall_50_short_up_1',
     'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5',
   ]),
-  'shelf-showcase': Object.freeze([
+  3: Object.freeze([
     'wall_showcase_100_3', 'wall_showcase_100_2',
     'shelf_100', 'shelf_150', 'shelf_200',
   ]),
-  'counter-base': Object.freeze([
+  4: Object.freeze([
     'desk_banko_200', 'desk_banko_150', 'desk_banko_100',
     'desk_banko_200_L', 'desk_banko_150_L', 'desk_banko_100_L',
     'BASE_200', 'BASE_150', 'BASE_100',
   ]),
-  extra: Object.freeze([
+  5: Object.freeze([
     'furniture_sofa_set_classic', 'furniture_sofa_single_classic', 'furniture_sofa_double_classic',
     'furniture_coffee_table_classic', 'furniture_table_chair_set_eames', 'chair_eames',
     'glass_table', 'furniture_bar_stool_classic', 'MINI_FRIDGE_AVANTI', 'KETTLE',
     'COAT_RACK', 'PLASTIC_TRASH_BIN', 'EXTRA_INDOOR_PLANT_1',
     'EXTRA_LONG_PLANTER_100', 'EXTRA_LONG_PLANTER_150', 'EXTRA_LONG_PLANTER_200',
   ]),
-  'electronics-lighting': Object.freeze([
+  6: Object.freeze([
     'TV_42', 'TV_55', 'VIDEO_WALL_2X2', 'VIDEO_WALL_3X3', 'TV_65', 'led_floodlight',
   ]),
 });
 
-test('Catalog kategorileri key/name/index taşır; sıra 1..N kesintisiz ve benzersizdir', () => {
+test('Catalog kategorileri id/name/index taşır; sıra 1..N kesintisiz ve benzersizdir', () => {
   const categories = listCatalogCategories();
   assert.equal(categories.length, EXPECTED_CATEGORIES.length);
 
-  const keys = categories.map((category) => category.catalogKey);
+  const ids = categories.map((category) => category.id);
   const names = categories.map((category) => category.catalogName);
   const indexes = categories.map((category) => category.catalogIndex);
 
-  assert.equal(new Set(keys).size, keys.length);
+  assert.equal(new Set(ids).size, ids.length);
   assert.equal(names.filter((name) => !name).length, 0);
   assert.equal(indexes.filter((index) => index == null).length, 0);
   assert.equal(new Set(indexes).size, indexes.length);
@@ -68,15 +68,15 @@ test('Catalog kategorileri key/name/index taşır; sıra 1..N kesintisiz ve benz
 
   EXPECTED_CATEGORIES.forEach((expected, index) => {
     const category = categories[index];
-    assert.equal(category.catalogKey, expected.catalogKey);
+    assert.equal(category.id, expected.id);
     assert.equal(category.catalogName, expected.catalogName);
     assert.equal(category.catalogIndex, expected.catalogIndex);
-    assert.deepEqual(getCatalogCategory(expected.catalogKey), categories[index]);
+    assert.deepEqual(getCatalogCategory(expected.id), categories[index]);
   });
 });
 
-test('görünür Item catalogCategory değerleri geçerli catalogKey ile eşleşir', () => {
-  const catalogKeys = new Set(listCatalogCategories().map((category) => category.catalogKey));
+test('görünür Item categoryId değerleri geçerli category id ile eşleşir', () => {
+  const categoryIds = new Set(listCatalogCategories().map((category) => category.id));
   let invalidVisible = 0;
   let invalidHidden = 0;
   let visibleCount = 0;
@@ -84,9 +84,9 @@ test('görünür Item catalogCategory değerleri geçerli catalogKey ile eşleş
   for (const item of listRegisteredItems()) {
     if (item.catalogVisible === true) {
       visibleCount += 1;
-      if (!catalogKeys.has(item.catalogCategory)) invalidVisible += 1;
+      if (!categoryIds.has(item.categoryId)) invalidVisible += 1;
       if (item.catalogItemIndex == null) invalidVisible += 1;
-    } else if (item.catalogCategory != null && !catalogKeys.has(item.catalogCategory)) {
+    } else if (item.categoryId != null && !categoryIds.has(item.categoryId)) {
       invalidHidden += 1;
     }
   }
@@ -94,8 +94,8 @@ test('görünür Item catalogCategory değerleri geçerli catalogKey ile eşleş
   assert.equal(visibleCount, listCatalogItems().map((item) => item.itemKey).length);
   assert.equal(invalidVisible, 0);
   assert.equal(invalidHidden, 0);
-  assert.equal(getItem('wall_200').catalogCategory, 'panel-wall');
-  assert.equal(getItem('panel_197').catalogCategory, null);
+  assert.equal(getItem('wall_200').categoryId, 1);
+  assert.equal(getItem('panel_197').categoryId, null);
 });
 
 test('listCatalogGroups kategori sırası, adı ve Item sırasını korur', () => {
@@ -103,13 +103,13 @@ test('listCatalogGroups kategori sırası, adı ve Item sırasını korur', () =
   assert.equal(groups.length, EXPECTED_CATEGORIES.length);
   assert.deepEqual(
     listCatalogGroups().map((group) => ({
-      catalogKey: group.catalogKey,
+      id: group.id,
       catalogName: group.catalogName,
       catalogIndex: group.catalogIndex,
       keys: [...group.keys],
     })),
     groups.map((group) => ({
-      catalogKey: group.catalogKey,
+      id: group.id,
       catalogName: group.catalogName,
       catalogIndex: group.catalogIndex,
       keys: [...group.keys],
@@ -119,17 +119,17 @@ test('listCatalogGroups kategori sırası, adı ve Item sırasını korur', () =
   let visibleTotal = 0;
   groups.forEach((group, index) => {
     const expected = EXPECTED_CATEGORIES[index];
-    assert.equal(group.catalogKey, expected.catalogKey);
+    assert.equal(group.id, expected.id);
     assert.equal(group.catalogName, expected.catalogName);
     assert.equal(group.catalogIndex, expected.catalogIndex);
     assert.equal(group.label, expected.catalogName);
     assert.equal(group.keys.length, expected.itemCount);
-    assert.deepEqual([...group.keys], [...EXPECTED_GROUP_KEYS[expected.catalogKey]]);
+    assert.deepEqual([...group.keys], [...EXPECTED_GROUP_KEYS[expected.id]]);
     visibleTotal += group.keys.length;
     group.keys.forEach((itemKey, itemIndex) => {
       const item = getItem(itemKey);
       assert.equal(item.catalogVisible, true, itemKey);
-      assert.equal(item.catalogCategory, group.catalogKey, itemKey);
+      assert.equal(item.categoryId, group.id, itemKey);
       assert.equal(item.catalogItemIndex, itemIndex + 1, itemKey);
       assert.ok(getCatalogItem(itemKey), itemKey);
     });

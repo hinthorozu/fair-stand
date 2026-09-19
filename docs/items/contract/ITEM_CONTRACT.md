@@ -103,7 +103,7 @@ type    = tv
 id      = item-<project-instance>
 ```
 
-Tek kanonik ürün kimliği `itemKey`dır. `catalogKey` ürün kimliği değildir; runtime onu okumaz ve yazmaz.
+Tek kanonik ürün kimliği `itemKey`dır. Category integer `id` ürün kimliği değildir; runtime onu Item kimliği olarak okumaz ve yazmaz.
 
 ---
 

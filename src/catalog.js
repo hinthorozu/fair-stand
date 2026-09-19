@@ -1,22 +1,78 @@
 import { getItem, listRegisteredItems, resolveItemKey } from './items.js';
 
 let catalogCategories = Object.freeze([]);
+let catalogPreviews = Object.freeze([]);
+
+function toCategoryId(value) {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+function toPreviewId(value) {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
 
 export function initializeCatalogCategories(categories) {
   if (!Array.isArray(categories) || categories.length === 0) {
     throw new TypeError('Fair Stand Category catalog bootstrap returned no categories.');
   }
   catalogCategories = Object.freeze(
-    categories.map((category) => Object.freeze({
-      catalogKey: category.catalogKey,
-      catalogName: category.catalogName,
-      catalogIndex: category.catalogIndex,
-    })),
+    categories.map((category) => {
+      const id = toCategoryId(category.id);
+      if (id == null) {
+        throw new TypeError('Fair Stand Category bootstrap row is missing integer id.');
+      }
+      return Object.freeze({
+        id,
+        catalogName: category.catalogName,
+        catalogIndex: category.catalogIndex,
+      });
+    }),
   );
 }
 
 export function resetCatalogCategories() {
   catalogCategories = Object.freeze([]);
+}
+
+export function initializeCatalogPreviews(previews) {
+  if (!Array.isArray(previews) || previews.length === 0) {
+    throw new TypeError('Fair Stand Catalog preview bootstrap returned no preview kinds.');
+  }
+  catalogPreviews = Object.freeze(
+    previews.map((preview) => {
+      const id = toPreviewId(preview.id);
+      if (id == null) {
+        throw new TypeError('Fair Stand Catalog preview bootstrap row is missing integer id.');
+      }
+      return Object.freeze({
+        id,
+        displayName: preview.displayName,
+        markup: preview.markup,
+        cssCode: preview.cssCode ?? '',
+        sortIndex: Number(preview.sortIndex ?? 0),
+        isActive: preview.isActive !== false,
+      });
+    }),
+  );
+}
+
+export function resetCatalogPreviews() {
+  catalogPreviews = Object.freeze([]);
+}
+
+export function listCatalogPreviews() {
+  return catalogPreviews;
+}
+
+export function getCatalogPreview(previewId) {
+  const id = toPreviewId(previewId);
+  return catalogPreviews.find((preview) => preview.id === id) ?? null;
+}
+
+export function listCatalogPreviewIds() {
+  return catalogPreviews.map((preview) => preview.id);
 }
 
 export function listCatalogCategories() {
@@ -25,53 +81,24 @@ export function listCatalogCategories() {
   );
 }
 
-export function getCatalogCategory(catalogKey) {
-  return catalogCategories.find((category) => category.catalogKey === catalogKey) ?? null;
+export function getCatalogCategory(categoryId) {
+  const id = toCategoryId(categoryId);
+  return catalogCategories.find((category) => category.id === id) ?? null;
 }
 
-export const CATALOG_PREVIEWS = Object.freeze([
-  'bar-stool',
-  'base',
-  'base-wall',
-  'chair',
-  'coat-rack',
-  'coffee-table',
-  'counter',
-  'door',
-  'flat-panel',
-  'floodlight',
-  'glass-table',
-  'indoor-plant',
-  'kettle',
-  'long-planter',
-  'mini-fridge',
-  'plastic-trash-bin',
-  'profile',
-  'separator',
-  'separator-vine',
-  'shelf',
-  'showcase',
-  'sofa-double',
-  'sofa-set',
-  'sofa-single',
-  'table-chair-set',
-  'tv',
-  'upright',
-  'video-wall',
-]);
-
 function projectCatalogItem(item) {
-  if (typeof item.catalogPreview !== 'string' || item.catalogPreview === '') {
-    throw new TypeError(`Item ${item.itemKey} is catalogVisible without catalogPreview.`);
+  const previewId = toPreviewId(item.previewId);
+  if (previewId == null) {
+    throw new TypeError(`Item ${item.itemKey} is catalogVisible without previewId.`);
   }
-  if (!CATALOG_PREVIEWS.includes(item.catalogPreview)) {
-    throw new TypeError(`Item ${item.itemKey} has unknown catalogPreview: ${item.catalogPreview}.`);
+  if (!listCatalogPreviewIds().includes(previewId)) {
+    throw new TypeError(`Item ${item.itemKey} has unknown previewId: ${item.previewId}.`);
   }
 
   return Object.freeze({
     itemKey: item.itemKey,
     label: item.name,
-    catalogPreview: item.catalogPreview,
+    previewId,
   });
 }
 
@@ -86,8 +113,8 @@ export function listCatalogItems() {
     listRegisteredItems()
       .filter((item) => item.catalogVisible === true)
       .sort((left, right) => {
-        const leftCategory = getCatalogCategory(left.catalogCategory);
-        const rightCategory = getCatalogCategory(right.catalogCategory);
+        const leftCategory = getCatalogCategory(left.categoryId);
+        const rightCategory = getCatalogCategory(right.categoryId);
         const categoryDelta = (leftCategory?.catalogIndex ?? 0) - (rightCategory?.catalogIndex ?? 0);
         if (categoryDelta !== 0) return categoryDelta;
         return Number(left.catalogItemIndex) - Number(right.catalogItemIndex);
@@ -98,24 +125,24 @@ export function listCatalogItems() {
 
 export function listCatalogGroups() {
   const categories = listCatalogCategories();
-  const membersByKey = new Map(categories.map((category) => [category.catalogKey, []]));
+  const membersById = new Map(categories.map((category) => [category.id, []]));
 
   for (const item of listRegisteredItems()) {
     if (item.catalogVisible !== true) continue;
-    const bucket = membersByKey.get(item.catalogCategory);
+    const bucket = membersById.get(toCategoryId(item.categoryId));
     if (!bucket) {
       throw new TypeError(
-        `Item ${item.itemKey} catalogCategory is not a catalogKey: ${item.catalogCategory}.`,
+        `Item ${item.itemKey} categoryId is not a catalog category id: ${item.categoryId}.`,
       );
     }
     bucket.push(item);
   }
 
   return Object.freeze(categories.map((category) => {
-    const members = [...membersByKey.get(category.catalogKey)]
+    const members = [...membersById.get(category.id)]
       .sort((left, right) => left.catalogItemIndex - right.catalogItemIndex);
     return Object.freeze({
-      catalogKey: category.catalogKey,
+      id: category.id,
       catalogName: category.catalogName,
       catalogIndex: category.catalogIndex,
       label: category.catalogName,

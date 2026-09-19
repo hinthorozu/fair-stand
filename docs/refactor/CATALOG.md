@@ -23,7 +23,7 @@ Katalog yalnız UI organizasyonudur. Placement, collision, BOM, recipe, rotation
 Catalog yalnız şunlardan sorumludur:
 
 - Item katalogda görünsün mü?
-- Hangi `catalogCategory` altında görünsün?
+- Hangi `categoryId` altında görünsün?
 - Kategori kaçıncı sırada?
 - Item kategori içinde kaçıncı sırada?
 - Katalog kartı UI projection’ı nasıl üretilir?
@@ -70,19 +70,20 @@ Canonical kaynak: `src/catalog.js` `CATALOG_CATEGORIES`.
 
 ```text
 Catalog {
-  catalogKey: string
+  id: integer
   catalogName: string
   catalogIndex: integer
 }
 ```
 
-### catalogKey
+### id
 
 - Stabil kategori kimliği
-- Benzersiz
+- Veritabanı üretir (INTEGER)
+- Kullanıcı üretmez / görmek zorunda değildir / değiştirmez
 - UI label değildir
-- Item.catalogCategory bu değere bağlanır
-- Mevcut key’ler önceki turda Item’lara yazılan `catalogCategory` değerleridir; bu turda yeni key uydurulmadı
+- Item.categoryId bu değere bağlanır
+- String key / slug / UUID yoktur
 
 ### catalogName
 
@@ -106,21 +107,21 @@ Catalog UI yalnız Item’ın Catalog config’ini okur.
 
 ```text
 Item.catalogVisible          → kategoride gösterilsin mi
-Item.catalogCategory         → Catalog.catalogKey
+Item.categoryId              → Catalog.id
 Item.catalogItemIndex        → kategori içi 1 tabanlı sıra
-Item.catalogPreview          → Catalog kart preview renderer key
+Item.previewId               → Catalog kart preview tanımı (integer id)
 Item.name                    → kart label
 ```
 
-`catalogCategory` görünen label saklamaz. Ad yalnız `catalogName` üzerinden gelir.
+`categoryId` görünen label saklamaz. Ad yalnız `catalogName` üzerinden gelir.
 
 **Catalog görünümü Item.type üzerinden belirlenmez.**
 
-**Catalog preview renderer seçimi yalnız Item.catalogPreview üzerinden yapılır.**
+**Catalog preview renderer seçimi yalnız Item.previewId üzerinden yapılır.**
 
-`catalogPreview` asset/icon dosya yolu değildir. Mevcut UI CSS/DOM silüet çizer; renderer map anahtarıdır (`CATALOG_PREVIEW_RENDERERS`). `catalogIcon` bu turda yoktur.
+`previewId` asset/icon dosya yolu değildir. Generic renderer bootstrap `previewKinds` kaydındaki markup/CSS ile DOM silüet çizer. Key-specific JS renderer map yoktur.
 
-Görünür Item’da `catalogPreview` yoksa veya `CATALOG_PREVIEWS` dışında ise projection fail-fast atar. `type` fallback, registry grubu fallback, `itemKey` hardcode map yoktur.
+Görünür Item’da `previewId` yoksa veya bootstrap preview id listesinde değilse projection fail-fast atar. `type` fallback, registry grubu fallback, `itemKey` hardcode map yoktur.
 
 ---
 
@@ -134,7 +135,7 @@ Item master ürünün gerçek özelliğidir (`src/items.js`). Catalog projection
 |---|---|
 | `itemKey` | `item.itemKey` |
 | `label` | `item.name` |
-| `catalogPreview` | `item.catalogPreview` |
+| `previewId` | `item.previewId` |
 
 Yeni görünen Item için Catalog içine kart satırı yazılmaz.
 
@@ -142,14 +143,14 @@ Yeni görünen Item için Catalog içine kart satırı yazılmaz.
 
 ## Kategoriler
 
-| catalogKey | catalogName | catalogIndex | Item sayısı |
+| id | catalogName | catalogIndex | Item sayısı |
 |---|---|---|---|
-| `panel-wall` | Panel & Duvar | 1 | 9 |
-| `panel-addon` | Panel Ek Modül | 2 | 13 |
-| `shelf-showcase` | Raf & Vitrin | 3 | 5 |
-| `counter-base` | Banko & Baza | 4 | 9 |
-| `extra` | Extra | 5 | 16 |
-| `electronics-lighting` | Elektronik & Aydınlatma | 6 | 6 |
+| 1 | Panel & Duvar | 1 | 9 |
+| 2 | Panel Ek Modül | 2 | 13 |
+| 3 | Raf & Vitrin | 3 | 5 |
+| 4 | Banko & Baza | 4 | 9 |
+| 5 | Extra | 5 | 16 |
+| 6 | Elektronik & Aydınlatma | 6 | 6 |
 
 Toplam görünür Item: **58**. Kayıtlı Item: **96**.
 
@@ -168,14 +169,14 @@ Toplam görünür Item: **58**. Kayıtlı Item: **96**.
 ITEM
   ↓
 catalogVisible
-catalogCategory
+categoryId
 catalogItemIndex
-catalogPreview
+previewId
 name
   ↓
 Catalog projection  (getCatalogItem / listCatalogItems)
   ↓
-Catalog UI  (CATALOG_PREVIEW_RENDERERS[catalogPreview])
+Catalog UI  (getCatalogPreview(previewId) → generic renderer)
 ```
 
 Kart descriptor’ı Item kaydından türetilir. Hardcoded Item key listesi yoktur. Snapshot alias `MODULE_CATALOG` / `MODULE_CATALOG_KEYS` / `MODULE_CATALOG_GROUPS` yoktur; okuyucu `getCatalogItem` / `listCatalogItems` / `listCatalogGroups`.
@@ -187,7 +188,7 @@ Kart descriptor’ı Item kaydından türetilir. Hardcoded Item key listesi yokt
 | Method | Durum |
 |---|---|
 | `listCatalogCategories()` | mevcut — kategoriler, `catalogIndex` sırası |
-| `getCatalogCategory(catalogKey)` | mevcut |
+| `getCatalogCategory(categoryId)` | mevcut |
 | `getCatalogItem(itemKey)` | mevcut — görünür Item’dan catalog descriptor |
 | `listCatalogItems()` | mevcut — `catalogVisible=true` Item projection listesi |
 | `listCatalogGroups()` | mevcut — kategori + Item key listesi (`catalogItemIndex` sırası) |
@@ -204,13 +205,13 @@ Catalog UI yardımcıları: `getModuleCatalogItem`, `getModuleCatalogLabel` — 
 
 - Katalog üyeliği `type` üzerinden belirlenmez
 - Catalog görünümü `Item.type` üzerinden belirlenmez
-- Catalog preview renderer seçimi yalnız `Item.catalogPreview` üzerinden yapılır
+- Catalog preview renderer seçimi yalnız `Item.previewId` üzerinden yapılır
 - `if (item.type === ...)`, `switch(type)`, `type` → CSS/icon/kart tipi Catalog UI’da yasaktır
 - Registry grubundan belirlenmez
 - Item Contract üzerinden belirlenmez
-- `catalogVisible` üyelik, `catalogCategory` grup, `catalogItemIndex` sıra, `catalogPreview` kart silüeti belirler
+- `catalogVisible` üyelik, `categoryId` grup, `catalogItemIndex` sıra, `previewId` kart silüeti belirler
 - `catalogVisible=false` Item’ı AutoDepot / ModuleContract / BOM / renderer / placement’tan silmez
-- `catalogCategory` rotation / color / image / collision / renderer / placement belirlemez
+- `categoryId` rotation / color / image / collision / renderer / placement belirlemez
 - Kategori adı yalnız `catalogName`
 - Kategori sırası yalnız `catalogIndex`
 - Aynı kategori tanımı ikinci hardcoded listede tutulmaz
@@ -226,9 +227,9 @@ Dokümantasyon örneği; bu `itemKey`’ler kayıtlı ürün değildir.
 {
   "itemKey": "example_item",
   "catalogVisible": true,
-  "catalogCategory": "panel-wall",
+  "categoryId": 1,
   "catalogItemIndex": 3,
-  "catalogPreview": "flat-panel"
+  "previewId": "flat-panel"
 }
 ```
 
@@ -236,35 +237,35 @@ Dokümantasyon örneği; bu `itemKey`’ler kayıtlı ürün değildir.
 {
   "itemKey": "example_child",
   "catalogVisible": false,
-  "catalogCategory": null,
+  "categoryId": null,
   "catalogItemIndex": null
 }
 ```
 
-Yeni görünen Item yalnız Item kaydına yazılır (`catalogVisible=true` + `catalogCategory` + `catalogItemIndex` + `catalogPreview`). Catalog’a ayrı kart satırı eklenmez. `catalogPreview` `CATALOG_PREVIEWS` üyesi olmalıdır.
+Yeni görünen Item yalnız Item kaydına yazılır (`catalogVisible=true` + `categoryId` + `catalogItemIndex` + `previewId`). Catalog’a ayrı kart satırı eklenmez. `previewId` `CATALOG_PREVIEWS` üyesi olmalıdır.
 
-Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `catalogName` / `catalogIndex` eklenir.
+Yeni kategori gerekirse Admin Catalog CRUD ile `catalogName` / `catalogIndex` eklenir; `id` veritabanı üretir.
 
 ---
 
 ## Validation
 
 - Catalog category sayısı: 6
-- `catalogKey` benzersiz
+- `id` benzersiz integer
 - `catalogName` boş: 0
 - `catalogIndex` null: 0
 - duplicate `catalogIndex`: 0
 - `catalogIndex` 1..N kesintisiz
-- `catalogVisible=true` ve geçersiz `catalogCategory`: 0
+- `catalogVisible=true` ve geçersiz `categoryId`: 0
 - catalog projection Item: 58
-- `catalogVisible=true` ve `catalogPreview` yok/bilinmiyor: fail-fast
+- `catalogVisible=true` ve `previewId` yok/bilinmiyor: fail-fast
 - hardcoded katalog Item key listesi: 0
 - Catalog UI preview `type` branch: 0
 - `catalogVisible=false` → category/index null
 - `catalogVisible=false` → `getCatalogItem` null; `getItem` dolu
 - Aynı kategoride duplicate `catalogItemIndex` yasak
 - Catalog Recipe import etmez
-- Catalog ölçülerin sahibi değildir; kart yalnız `itemKey` / `label` / `catalogPreview` taşır
+- Catalog ölçülerin sahibi değildir; kart yalnız `itemKey` / `label` / `previewId` taşır
 - Factory / preview silüet ölçüleri Item’dan `resolveSceneDimensions` okur; Catalog DTO’dan değil
 - AutoDepot / moduleContracts Catalog import etmez
 
@@ -274,8 +275,8 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 
 | Test | Ne doğrular |
 |---|---|
-| `test/catalogItemProjection.test.js` | 58/58 Item-driven thin kart (`itemKey` / `label` / `catalogPreview`) |
-| `test/catalogPreviewConfig.test.js` | 58/58 `catalogPreview`; type branch yok; CSS kök sınıf regression |
+| `test/catalogItemProjection.test.js` | 58/58 Item-driven thin kart (`itemKey` / `label` / `previewId`) |
+| `test/previewIdConfig.test.js` | 58/58 `previewId`; type branch yok; CSS kök sınıf regression |
 | `test/catalogDomainBoundary.test.js` | Catalog/AutoDepot/ModuleContract katman sınırı; `catalogVisible=false` ≠ Item yok |
 | `test/catalogCategories.test.js` | Catalog modeli, key eşleşmesi, sıra/label/adet regression |
 | `test/itemCatalogFields.test.js` | 96/96 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
@@ -289,9 +290,9 @@ Yeni kategori gerekirse yalnız `CATALOG_CATEGORIES` içine `catalogKey` / `cata
 ## Kaynak dosyalar
 
 - `src/catalog.js` — `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getModuleCatalogItem`, `getModuleCatalogLabel`. İnce kart; `resolveSceneDimensions` yok.
-- `src/items.js` — Item master; `catalogPreview`; `dimensions` / `sceneDimensions`; `resolveSceneDimensions`; `resolveItemKey`
+- `src/items.js` — Item master; `previewId`; `dimensions` / `sceneDimensions`; `resolveSceneDimensions`; `resolveItemKey`
 - `src/designState.js` — `createModuleStateFromDescriptor` Item’dan factory descriptor üretir
-- `src/moduleDragSidebar.js` — sol katalog UI; `CATALOG_PREVIEW_RENDERERS[catalogPreview]`; silüet ölçüleri `getItem`
+- `src/moduleDragSidebar.js` — sol katalog UI; `CATALOG_PREVIEW_RENDERERS[previewId]`; silüet ölçüleri `getItem`
 - `src/moduleContextMenu.js` — picker katalog UI
 - `src/scene3d.js` — drag badge katalog önizlemesi (`getModuleCatalogItem` / `getModuleCatalogLabel`)
 - `src/main.js` — `#open-module-catalog` bağlama

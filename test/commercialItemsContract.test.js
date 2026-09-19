@@ -22,7 +22,7 @@ for (const item of COMMERCIAL_ITEM_KEYS.map((itemKey) => getItem(itemKey))) {
     const catalog = getCatalogItem(item.itemKey);
     assert.equal(catalog.itemKey, item.itemKey);
     assert.equal(catalog.label, item.name);
-    assert.equal(catalog.catalogPreview, item.catalogPreview);
+    assert.equal(catalog.previewId, item.previewId);
     assert.equal(Object.hasOwn(catalog, 'modelFile'), false);
     const state = createModuleStateFromDescriptor(catalog);
     assert.equal(state.itemKey, item.itemKey);

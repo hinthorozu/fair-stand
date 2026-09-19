@@ -1,11 +1,14 @@
+import { CATALOG_PREVIEW_KIND_FIXTURE } from './fixtures/catalogPreviewKinds.mjs';
+
 export function mapCatalogSeedToBootstrap(seed) {
   return {
     revision: 'e2e-fixture',
     categories: seed.categories.map((category) => ({
-      catalogKey: category.catalog_key,
+      id: category.catalog_index,
       catalogName: category.catalog_name,
       catalogIndex: category.catalog_index,
     })),
+    previewKinds: CATALOG_PREVIEW_KIND_FIXTURE,
     items: seed.items.map(mapItem),
   };
 }
@@ -16,14 +19,14 @@ function mapItem(row) {
     name: row.name,
     type: row.item_type,
     catalogVisible: row.catalog_visible,
-    catalogCategory: row.catalog_key ?? null,
+    categoryId: row.category_index ?? null,
     catalogItemIndex: row.catalog_item_index ?? null,
   };
   const assign = (key, value) => {
     if (value != null) item[key] = value;
   };
   assign('unit', row.unit);
-  assign('catalogPreview', row.catalog_preview_key);
+  assign('previewId', row.preview_id);
   assign('material', row.material);
   assign('defaultColor', row.default_color);
   assign('panelRole', row.panel_role);

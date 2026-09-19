@@ -42,7 +42,7 @@ test('plastic trash bin is a canonical 40x40x60 fixed-model catalog module', () 
   const descriptor = getCatalogItem(KEY);
   assert.ok(descriptor);
   assert.equal(descriptor.label, 'Çöp Kutusu');
-  assert.equal(descriptor.catalogPreview, 'plastic-trash-bin');
+  assert.equal(descriptor.previewId, 16);
   assert.equal(Object.hasOwn(descriptor, 'type'), false);
   assert.equal(Object.hasOwn(descriptor, 'widthCm'), false);
   assert.equal(Object.hasOwn(descriptor, 'modelFile'), false);
@@ -89,15 +89,11 @@ test('trash bin state and behavior preserve fridge-style movement without overla
 });
 
 test('trash catalog preview uses a dedicated bin silhouette instead of panel strips', () => {
-  const source = readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
-  const trashBranch = source.slice(
-    source.indexOf("'plastic-trash-bin'(preview)"),
-    source.indexOf("'long-planter'(preview)"),
-  );
-  assert.match(trashBranch, /module-drag-trash-bin/);
-  assert.match(trashBranch, /appendParts\(preview, 'module-drag-trash-bin'/);
-  assert.match(trashBranch, /\['handle', 'lid', 'body'\]/);
-  assert.doesNotMatch(trashBranch, /module-drag-panel/);
+  const source = readFileSync(new URL('../src/catalogPreviewRenderer.js', import.meta.url), 'utf8');
+  const fixture = readFileSync(new URL('./fixtures/catalogPreviewKinds.mjs', import.meta.url), 'utf8');
+  assert.match(fixture, /id: 16/);
+  assert.match(fixture, /module-drag-trash-bin/);
+  assert.match(fixture, /module-drag-trash-bin-handle/);
   assert.doesNotMatch(source, /if \(module\.type === 'plastic-trash-bin'\)/);
 });
 

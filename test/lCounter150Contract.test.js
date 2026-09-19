@@ -15,7 +15,7 @@ test('desk_banko_150_L is a 150 x 150 catalog module', () => {
   assert.deepEqual(getCatalogItem('desk_banko_150_L'), {
     itemKey: 'desk_banko_150_L',
     label: 'Köşe Banko 150×150',
-    catalogPreview: 'counter',
+    previewId: 7,
   });
   assert.ok(getCatalogItem('desk_banko_150_L') != null);
 });

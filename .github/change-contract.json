@@ -1,19 +1,22 @@
 {
   "schemaVersion": 2,
-  "id": "db-item-source",
+  "id": "db-preview-integer-id",
   "kind": "architecture",
-  "summary": "Cut Fair Stand Item/Category source of truth from static JS masters to CRM-hosted relational catalog API bootstrap. No items.js/CATALOG_CATEGORIES dual master; fail-closed if bootstrap fails.",
+  "summary": "Preview identity is database-generated integer id. preview_key, catalog_preview_key, and catalogPreview are removed from current schema, API, Admin CRUD, bootstrap, and Fair Stand lookup. Visual markup/css remains DB-driven.",
   "owners": [
     "src/catalogBootstrap.js",
     "src/items.js",
     "src/catalog.js",
+    "src/catalogPreviewRenderer.js",
+    "src/moduleDragSidebar.js",
     "src/main.js",
     "src/mountFairStand.js"
   ],
   "sourceOfTruth": [
     "src/catalogBootstrap.js",
     "src/items.js",
-    "src/catalog.js"
+    "src/catalog.js",
+    "src/catalogPreviewRenderer.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -31,7 +34,7 @@
     "performance": "affected",
     "accessibility": "affected",
     "architecture": "affected",
-    "security": "not-applicable",
+    "security": "affected",
     "tests": "affected"
   },
   "impactAnalysis": {
@@ -55,8 +58,9 @@
       "scripts/verify-change-contract.mjs",
       "src/autoDepot.js",
       "src/automaticWall.js",
-      "src/catalogBootstrap.js",
       "src/catalog.js",
+      "src/catalogBootstrap.js",
+      "src/catalogPreviewRenderer.js",
       "src/configuratorMarkup.js",
       "src/configuratorStyles.js",
       "src/cornerPlacement.js",
@@ -89,7 +93,10 @@
       "src/systemChangeContract.js",
       "src/viewCube.js",
       "src/wall.js",
-      "src/wallReflow.js"
+      "src/wallReflow.js",
+      "test/fixtures/catalogPreviewKinds.mjs",
+      "scripts/export-catalog-seed.mjs",
+      "vite.config.js"
     ],
     "affectedTests": [
       "e2e/color-image-capability.spec.mjs",
