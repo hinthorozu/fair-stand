@@ -14,8 +14,8 @@ function toPreviewId(value) {
 }
 
 export function initializeCatalogCategories(categories) {
-  if (!Array.isArray(categories) || categories.length === 0) {
-    throw new TypeError('Fair Stand Category catalog bootstrap returned no categories.');
+  if (!Array.isArray(categories)) {
+    throw new TypeError('Fair Stand Category catalog bootstrap categories must be an array.');
   }
   catalogCategories = Object.freeze(
     categories.map((category) => {
@@ -37,8 +37,8 @@ export function resetCatalogCategories() {
 }
 
 export function initializeCatalogPreviews(previews) {
-  if (!Array.isArray(previews) || previews.length === 0) {
-    throw new TypeError('Fair Stand Catalog preview bootstrap returned no preview kinds.');
+  if (!Array.isArray(previews)) {
+    throw new TypeError('Fair Stand Catalog preview bootstrap preview kinds must be an array.');
   }
   catalogPreviews = Object.freeze(
     previews.map((preview) => {
