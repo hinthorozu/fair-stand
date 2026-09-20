@@ -17,7 +17,6 @@ depthCm                   50
 thicknessCm               1.8
 material                  sunta
 defaultColor              0xffffff
-nominalModuleWidthCm      200
 ```
 
 Bu değerler Item'ın ürün tanımıdır. `material` ve `defaultColor` genel Item şemasında zorunlu değildir; bu Item için doğrulandıkları için tanımlıdır. Explicit project/runtime veya specialized renderer ezme uygulanabilir; ezme kanonik default'u değiştirmez.
@@ -46,9 +45,8 @@ Renderer prosedürel ve specialized temsil kullanabilir. `src/scene3d.js` içind
 2. `206 × 50 × 1.8 cm`,
 3. `material = sunta`,
 4. `defaultColor = 0xffffff`,
-5. `nominalModuleWidthCm = 200`,
-6. tam bir kanonik parent recipe ve `×1` eşyapı,
-7. expanded recipe'nin aynı kanonik Item üstverisinı resolve etmesi.
+5. tam bir kanonik parent recipe ve `×1` eşyapı,
+6. expanded recipe'nin aynı kanonik Item üstverisinı resolve etmesi.
 
 ## Tamamlanma
 Intrinsic/default property sahiplik **VAR**; kanonik BOM tüketici geçiş **VAR**; renderer ezme sınırı **VAR ve izinli**. Ayrı leaf state/behavior/kalıcılık **UYGULANMIYOR**.

@@ -8,7 +8,6 @@
 - dimensions: `92 × 47 × 0.8 cm`
 - `material`: `sunta`
 - `panelRole`: `inner-corner`
-- `nominalModuleWidthCm`: `100`
 
 ## Sahiplik / davranış
 

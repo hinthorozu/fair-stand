@@ -1,15 +1,16 @@
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { getItem, listRegisteredItems } from '../src/items.js';
 import {
+  expandRecipe,
   getRecipeItemKey,
 } from '../src/moduleRecipes.js';
 import {
   getExpandedModuleRecipe,
   getExpandedStraightWallRecipe,
   getModuleRecipe,
-  getRecipeInnerCornerPanelKey,
   getStraightWallRecipe,
   listStraightWallRecipes,
 } from './recipeParentItemKey.js';
@@ -193,17 +194,16 @@ test('50 cm straight wall recipe matches the verified production recipe', () => 
     { itemKey: 'connector_start', quantity: 2 },
     { itemKey: 'connector_single', quantity: 13 },
   ]);
-  assert.equal(getRecipeInnerCornerPanelKey(getItem('wall_50')), 'panel_corner_42_5');
 });
 
 test('100/150/200 cm straight wall recipes preserve quantities and change verified sizes', () => {
   const expected = {
-    100: ['profile_91', 'panel_98', 'panel_corner_92'],
-    150: ['profile_140_5', 'panel_147_5', 'panel_corner_142_5'],
-    200: ['profile_190', 'panel_197', 'panel_corner_192'],
+    100: ['profile_91', 'panel_98'],
+    150: ['profile_140_5', 'panel_147_5'],
+    200: ['profile_190', 'panel_197'],
   };
 
-  for (const [width, [profilePartId, panelPartId, cornerPanelPartId]] of Object.entries(expected)) {
+  for (const [width, [profilePartId, panelPartId]] of Object.entries(expected)) {
     const recipe = getStraightWallRecipe(Number(width));
     const quantities = Object.fromEntries(recipe.items.map((item) => [item.itemKey ?? item.partId, item.quantity]));
 
@@ -212,7 +212,6 @@ test('100/150/200 cm straight wall recipes preserve quantities and change verifi
     assert.equal(quantities[panelPartId], 7);
     assert.equal(quantities.connector_start, 2);
     assert.equal(quantities.connector_single, 13);
-    assert.equal(getRecipeInnerCornerPanelKey(getItem(`wall_${width}`)), cornerPanelPartId);
   }
 });
 
@@ -226,7 +225,6 @@ test('100 cm door recipe matches verified production data', () => {
     { itemKey: 'connector_single', quantity: 5 },
     { itemKey: 'door_leaf_100', quantity: 1 },
   ]);
-  assert.equal(getRecipeInnerCornerPanelKey(getItem('door_100')), 'panel_corner_92');
 });
 
 test('recipe lookup rejects unsupported nominal wall widths', () => {
@@ -254,6 +252,26 @@ test('expanded door recipe resolves the door production part', () => {
 test('silinen wall_shelf recipes getModuleRecipe shelf dalından çözülmez', () => {
   assert.equal(getModuleRecipe('shelf', 150, { shelfCount: 3 }), null);
   assert.equal(getExpandedModuleRecipe('shelf', 150, { shelfCount: 3 }), null);
+});
+
+test('expandRecipe does not read nominalModuleWidthCm or inner-corner variant machinery', () => {
+  const source = readFileSync(new URL('../src/moduleRecipes.js', import.meta.url), 'utf8');
+  assert.equal(source.includes('nominalModuleWidthCm'), false);
+  assert.equal(source.includes('innerCorner'), false);
+  assert.equal(source.includes('panelVariant'), false);
+  assert.equal(source.includes('inner-corner'), false);
+});
+
+test('legacy panelVariant option does not change composition.items BOM', () => {
+  const item = getItem('wall_200');
+  const normal = expandRecipe(item);
+  const inner = expandRecipe(item, { panelVariant: 'inner-corner' });
+  assert.deepEqual(
+    inner.items.map((entry) => [entry.itemKey, entry.quantity]),
+    normal.items.map((entry) => [entry.itemKey, entry.quantity]),
+  );
+  assert.equal(inner.items.find((entry) => entry.itemKey === 'panel_197').quantity, 7);
+  assert.equal(inner.items.find((entry) => entry.itemKey === 'panel_corner_192'), undefined);
 });
 
 test('double and corner connectors are BOM-capable Items and are not baked into fixed module recipes', () => {

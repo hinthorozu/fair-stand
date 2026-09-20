@@ -51,7 +51,7 @@ Yeni Item: `VIDEO_WALL_PANEL` (`catalogVisible=false`). `listRegisteredItems()` 
 | 14 | `src/horizontalImageLayout.js` | yatay birleşik layout |
 | 15 | `src/rectImageLayout.js` | dikdörtgen birleşik layout |
 | 16 | `src/catalog.js` | Catalog projection; `STAND_DIMENSIONS` yok |
-| 17 | `src/moduleRecipes.js` | reçete alanları + `panelVariant` |
+| 17 | `src/moduleRecipes.js` | `composition.items` expansion |
 | 18 | `src/itemBom.js` | `composition.mode === 'recipe'` vs leaf `unit` |
 | 19 | `src/moduleContracts.js` | profil + `appearance` + BOM policy |
 | 20 | `src/modulePlacement.js` | `rotationLocked` oturumu |
@@ -71,7 +71,7 @@ Yeni Item: `VIDEO_WALL_PANEL` (`catalogVisible=false`). `listRegisteredItems()` 
 
 Map sayıları: `LEAF_ITEMS` 39, `COMMERCIAL_ITEMS` 4, `FURNITURE_ITEMS` 8, `TOP_LIGHT_ITEMS` 1, `NON_CATALOG_ITEMS` 2, `FLOOR_ITEMS` 5, `INDOOR_PLANT_ITEMS` 4, `WALL_MEDIA_ITEMS` 5, `COMPOSITE_ITEMS` 28. `listRegisteredItems()` = 96.
 
-Üst unique key’ler (script): `bodyItems`, `composition`, `connectorType`, `defaultColor`, `dimensions`, `eyeCount`, `itemKey`, `material`, `modelFile`, `modelRotationYDeg`, `name`, `nominalModuleWidthCm`, `paintable`, `panelRole`, `preserveModelScale`, `shape`, `stripOccupancy`, `type`, `unit`, `variant`, `videoWall`, `visualRotationYDeg`.
+Üst unique key’ler (script): `bodyItems`, `composition`, `connectorType`, `defaultColor`, `dimensions`, `eyeCount`, `itemKey`, `material`, `modelFile`, `modelRotationYDeg`, `name`, `paintable`, `panelRole`, `preserveModelScale`, `shape`, `stripOccupancy`, `type`, `unit`, `variant`, `videoWall`, `visualRotationYDeg`.
 
 | alan / aksiyon | kod adı | kanıtlı değerler (yalnız kodda görülen) | sahip dosya | sınıf | not |
 |---|---|---|---|---|---|
@@ -102,7 +102,6 @@ Map sayıları: `LEAF_ITEMS` 39, `COMMERCIAL_ITEMS` 4, `FURNITURE_ITEMS` 8, `TOP
 | görsel Y dönüş (tanım) | `visualRotationYDeg` | `-90`, `-135`, `-45` | `src/items.js` | `item-tanim` | asıl sahip |
 | boyanabilir | `paintable` | `true`, `false` (`FLOOR_ITEMS`) | `src/items.js` | `item-tanim` | asıl sahip |
 | birim | `unit` | yalnız `adet` (46 kayıtta var; 52 kayıtta alan yok) | `src/items.js` | `item-tanim` | asıl sahip |
-| nominal modül genişliği | `nominalModuleWidthCm` | 50, 100, 150, 200 (panel/raf/banko-üstü/baza-üstü) | `src/items.js` | `item-tanim` | asıl sahip |
 | gövde child çantası | `bodyItems` | nesne | `src/items.js` | `item-tanim` | asıl sahip (küme child kimlikleri) |
 | yan gövde item | `bodyItems.sideItemKey` | `showcase_side_94_6_30`, `showcase_side_143_5_30` | `src/items.js` | `item-tanim` | asıl sahip |
 | yatay gövde item | `bodyItems.horizontalItemKey` | `showcase_horizontal_87_4_30` | `src/items.js` | `item-tanim` | asıl sahip |
@@ -391,9 +390,6 @@ LED floodlight `surface.color` `'#17191c'`.
 | reçete şekil | `shape` | `L` (`counter-l:*`) | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
 | reçete satır item | `items[].itemKey` | | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
 | reçete satır miktar | `items[].quantity` | sayı (alan var; değer bu tur kopyalanmaz) | `src/moduleRecipes.js` | `bom-recipe` | |
-| iç köşe panel | `composition.innerCorner.panelItemKey` | `panel_corner_42_5`, `panel_corner_92`, `panel_corner_142_5`, `panel_corner_192` | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
-| iç köşe replacement | `composition.innerCorner.itemReplacements` | `{ itemKey, items: [{itemKey, quantity}] }` (showcase) | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
-| panel varyant context | `options.panelVariant` | `straight` (default), `inner-corner` | `src/moduleRecipes.js` | `bom-recipe` | asıl sahip |
 | küme BOM (mode yok) | `composition.items` | sofa/eames set | `src/items.js` | `bom-recipe` | `itemBom` recipe dalına girmez |
 
 ---
@@ -478,7 +474,6 @@ Resolve alias: `moduleType`, `counterShape` (`normalizeCatalogDescriptor`).
 | gövde renk regress | `defaultColor` | `0xffffff` → `#ffffff` | `test/showcaseBodyColorRegression.test.js` | `item-tanim` | asıl sahip leaf |
 | Item kimlik ayrımı | `itemKey` / `type` / `id` | belge | `docs/items/contract/ITEM_CONTRACT.md` | `item-tanim` | yeni kural yok |
 | vitrin tanım MD | `wall_showcase_100_2` | `type` `showcase-2`, `unit` `adet`, `eyeCount` `2`, `bodySurface` ezme | `docs/items/definitions/wall_showcase_100_2.md` | `item-tanim` | |
-| inner-corner MD | `panelVariant: 'inner-corner'` | belge | `docs/items/definitions/wall_showcase_100_2.md` | `bom-recipe` | reçete ile çift satır |
 
 ---
 

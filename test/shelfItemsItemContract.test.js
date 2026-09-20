@@ -27,11 +27,10 @@ test('shelf production Items use canonical identity and verified sunta dimension
     assert.deepEqual(item.sceneDimensions, { widthCm, heightCm: 1.8 });
     assert.equal(item.material, 'sunta');
     assert.equal(item.defaultColor, EXPECTED_COLOR);
-    assert.equal(item.nominalModuleWidthCm, widthCm);
   }
 
   assert.equal(
-    listRegisteredItems().find((item) => item.type === 'shelf' && Number(item.nominalModuleWidthCm) === 50),
+    listRegisteredItems().find((item) => item.type === 'shelf' && item.itemKey === 'shelf_50'),
     undefined,
   );
 });

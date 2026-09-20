@@ -30,7 +30,6 @@ function mapItem(row) {
   assign('material', row.material);
   assign('defaultColor', row.default_color);
   assign('panelRole', row.panel_role);
-  assign('nominalModuleWidthCm', row.nominal_module_width_cm);
   assign('connectorType', row.connector_type);
   assign('preserveModelScale', row.preserve_model_scale);
   assign('modelRotationYDeg', row.model_rotation_y_deg);
@@ -77,7 +76,7 @@ function mapItem(row) {
   if (model) item.modelFile = model.relative_path;
   const screen = (row.assets || []).find((asset) => asset.asset_role === 'default_screen');
   if (screen) item.defaultScreenFile = screen.relative_path;
-  if ((row.components || []).length || row.composition_mode || row.inner_corner) {
+  if ((row.components || []).length || row.composition_mode) {
     const composition = {};
     if (row.composition_mode != null) composition.mode = row.composition_mode;
     if (row.composition_module_type != null) composition.moduleType = row.composition_module_type;
@@ -86,18 +85,6 @@ function mapItem(row) {
         itemKey: component.child_item_key,
         quantity: component.quantity,
       }));
-    }
-    if (row.inner_corner) {
-      composition.innerCorner = { panelItemKey: row.inner_corner.panel_item_key };
-      if ((row.inner_corner.replacements || []).length) {
-        composition.innerCorner.itemReplacements = row.inner_corner.replacements.map((replacement) => ({
-          itemKey: replacement.replaced_item_key,
-          items: replacement.members.map((member) => ({
-            itemKey: member.child_item_key,
-            quantity: member.quantity,
-          })),
-        }));
-      }
     }
     item.composition = composition;
   }

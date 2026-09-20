@@ -22,20 +22,10 @@ export function recipeParentItem(moduleType, widthCm, options = {}) {
 
 function recipeView(item) {
   if (!item?.composition?.items) return null;
-  const inner = item.composition.innerCorner;
   return {
     recipeId: item.itemKey,
     items: item.composition.items,
-    composition: {
-      innerCorner: inner ?? null,
-    },
-    // TEST_PROJECTION: değer kopyası. Production JS path `composition.innerCorner.panelItemKey`.
-    variants: inner
-      ? {
-        innerCornerPanelItemKey: inner.panelItemKey,
-        innerCornerItemReplacements: inner.itemReplacements,
-      }
-      : undefined,
+    composition: item.composition,
   };
 }
 
@@ -57,10 +47,6 @@ export function listStraightWallRecipes() {
 
 export function getExpandedStraightWallRecipe(widthCm, options = {}) {
   return expandRecipe(getItem(`wall_${widthCm}`), options);
-}
-
-export function getRecipeInnerCornerPanelKey(item) {
-  return item?.composition?.innerCorner?.panelItemKey ?? null;
 }
 
 export { expandRecipe, getRecipeItemKey };

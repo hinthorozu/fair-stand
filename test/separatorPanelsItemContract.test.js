@@ -17,7 +17,6 @@ const CASES = {
       dimensions: { widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 },
       material: 'mdf',
       defaultColor: 0xc79b63,
-      nominalModuleWidthCm: 50,
     },
     recipes: [['separator', 50, 1]],
   },
@@ -27,7 +26,6 @@ const CASES = {
       dimensions: { widthCm: 98, heightCm: 47, thicknessCm: 0.8 },
       material: 'mdf',
       defaultColor: 0xc79b63,
-      nominalModuleWidthCm: 100,
     },
     recipes: [['separator', 50, 3], ['separator', 100, 7]],
   },
@@ -44,7 +42,6 @@ test('separator panel production Items use canonical itemKey with verified 0.8 c
     assert.deepEqual(item.dimensions, metadata.dimensions);
     assert.equal(item.material, metadata.material);
     assert.equal(item.defaultColor, metadata.defaultColor);
-    assert.equal(item.nominalModuleWidthCm, metadata.nominalModuleWidthCm);
   }
 });
 

@@ -22,7 +22,6 @@ test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
   assert.deepEqual(item.dimensions, { widthCm: 100, heightCm: 200, thicknessCm: 8 });
   assert.equal(item.material, 'ahşap');
   assert.equal(item.defaultColor, 0xffffff);
-  assert.equal(item.nominalModuleWidthCm, 100);
   assert.doesNotMatch(itemsSource, /DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH/);
   assert.doesNotMatch(itemsSource, /export function getDoorLeafItem/);
   assert.doesNotMatch(designStateSource, /getDoorLeafItem/);

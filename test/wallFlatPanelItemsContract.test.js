@@ -26,7 +26,6 @@ const EXPECTED = {
     recipeQuantities: {
       profile_41_5: 2, upright_346_5: 2, panel_48_5: 7, connector_start: 2, connector_single: 13,
     },
-    cornerPanel: 'panel_corner_42_5',
   },
   wall_100: {
     name: 'Panel 100',
@@ -34,7 +33,6 @@ const EXPECTED = {
     recipeQuantities: {
       profile_91: 2, upright_346_5: 2, panel_98: 7, connector_start: 2, connector_single: 13,
     },
-    cornerPanel: 'panel_corner_92',
   },
   wall_150: {
     name: 'Panel 150',
@@ -42,7 +40,6 @@ const EXPECTED = {
     recipeQuantities: {
       profile_140_5: 2, upright_346_5: 2, panel_147_5: 7, connector_start: 2, connector_single: 13,
     },
-    cornerPanel: 'panel_corner_142_5',
   },
   wall_200: {
     name: 'Panel 200',
@@ -50,7 +47,6 @@ const EXPECTED = {
     recipeQuantities: {
       profile_190: 2, upright_346_5: 2, panel_197: 7, connector_start: 2, connector_single: 13,
     },
-    cornerPanel: 'panel_corner_192',
   },
 };
 
@@ -99,8 +95,6 @@ for (const itemKey of WALL_KEYS) {
       recipe.items.map((entry) => [entry.itemKey ?? entry.partId, entry.quantity]),
     );
     assert.deepEqual(quantities, expected.recipeQuantities);
-    assert.equal(recipe.composition.innerCorner.panelItemKey, expected.cornerPanel);
-    assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey);
 
     const legacy = JSON.parse(JSON.stringify(state));
     delete legacy.itemKey;

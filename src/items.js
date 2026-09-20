@@ -22,6 +22,16 @@ export function isItemCatalogReady() {
   return catalogReady === true;
 }
 
+function sanitizeBootstrappedItem(item) {
+  const next = structuredClone(item);
+  delete next.nominalModuleWidthCm;
+  if (next.composition && Object.hasOwn(next.composition, 'innerCorner')) {
+    const { innerCorner: _removed, ...composition } = next.composition;
+    next.composition = composition;
+  }
+  return next;
+}
+
 export function initializeItemRegistry(items) {
   if (!Array.isArray(items) || items.length === 0) {
     throw new TypeError('Fair Stand Item catalog bootstrap returned no Items.');
@@ -29,7 +39,7 @@ export function initializeItemRegistry(items) {
   const next = Object.create(null);
   for (const item of items) {
     if (!item?.itemKey) throw new TypeError('Bootstrapped Item is missing itemKey.');
-    next[item.itemKey] = freezeDeep(structuredClone(item));
+    next[item.itemKey] = freezeDeep(sanitizeBootstrappedItem(item));
   }
   itemByKey = Object.freeze(next);
   catalogReady = true;

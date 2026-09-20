@@ -13,7 +13,7 @@ import {
 
 const PANEL_CASES = {
   panel_48_5: {
-    metadata: { name: 'Panel 48,5 × 47 cm', dimensions: { widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 }, nominalModuleWidthCm: 50 },
+    metadata: { name: 'Panel 48,5 × 47 cm', dimensions: { widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 } },
     recipes: [
       ['wall', 50, {}, 7],
       ['counter', 100, { shape: 'L' }, 4],
@@ -28,7 +28,7 @@ const PANEL_CASES = {
     ],
   },
   panel_98: {
-    metadata: { name: 'Panel 98 × 47 cm', dimensions: { widthCm: 98, heightCm: 47, thicknessCm: 0.8 }, nominalModuleWidthCm: 100 },
+    metadata: { name: 'Panel 98 × 47 cm', dimensions: { widthCm: 98, heightCm: 47, thicknessCm: 0.8 } },
     recipes: [
       ['wall', 100, {}, 7],
       ['door', 100, {}, 3],
@@ -40,7 +40,7 @@ const PANEL_CASES = {
     ],
   },
   panel_147_5: {
-    metadata: { name: 'Panel 147,5 × 47 cm', dimensions: { widthCm: 147.5, heightCm: 47, thicknessCm: 0.8 }, nominalModuleWidthCm: 150 },
+    metadata: { name: 'Panel 147,5 × 47 cm', dimensions: { widthCm: 147.5, heightCm: 47, thicknessCm: 0.8 } },
     recipes: [
       ['wall', 150, {}, 7],
       ['counter', 150, { shape: 'L' }, 4],
@@ -60,7 +60,7 @@ test('straight panel production Items use canonical itemKey with verified metada
     assert.equal(item.unit, 'adet');
     assert.deepEqual(item.dimensions, metadata.dimensions);
     assert.equal(item.panelRole, 'straight');
-    assert.equal(item.nominalModuleWidthCm, metadata.nominalModuleWidthCm);
+    assert.equal(item.nominalModuleWidthCm, undefined);
   }
 });
 
@@ -100,14 +100,16 @@ test('expanded recipes resolve straight panel metadata through canonical itemKey
   }
 });
 
-test('straight panel migration remains isolated from still-legacy production families while corner variants use canonical Item identity', () => {
+test('straight panel recipes keep composition.items only and corner panels remain standalone Items', () => {
   assert.equal(getItem('showcase_2_100'), null);
   assert.equal(getItem('showcase_3_100'), null);
 
   for (const width of [50, 100, 150, 200]) {
     const recipe = getStraightWallRecipe(width);
-    assert.ok(recipe.composition.innerCorner.panelItemKey);
-    assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey);
-    assert.equal(recipe.variants.innerCornerPanelPartId, undefined);
+    assert.equal(recipe.composition.innerCorner, undefined);
+    assert.equal(recipe.variants, undefined);
+  }
+  for (const itemKey of ['panel_corner_42_5', 'panel_corner_92', 'panel_corner_142_5', 'panel_corner_192']) {
+    assert.equal(getItem(itemKey).itemKey, itemKey);
   }
 });
