@@ -26,8 +26,6 @@ test('2-eye wall showcase BASE recipe matches verified production data', () => {
     { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
     { itemKey: 'glass_shelf', quantity: 1 },
   ]);
-  assert.equal(recipe.composition.innerCorner.panelItemKey, 'panel_corner_92');
-  assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey);
 });
 
 test('3-eye wall showcase BASE recipe matches verified production data', () => {
@@ -42,29 +40,25 @@ test('3-eye wall showcase BASE recipe matches verified production data', () => {
     { itemKey: 'showcase_horizontal_87_4_30', quantity: 2 },
     { itemKey: 'glass_shelf', quantity: 2 },
   ]);
-  assert.equal(recipe.composition.innerCorner.panelItemKey, 'panel_corner_92');
-  assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey);
 });
 
-test('wall showcase inner-corner recipes apply verified panel and connector replacements', () => {
+test('wall showcase expand ignores legacy inner-corner panelVariant', () => {
   for (const [type, panelQuantity, baseSingleQuantity] of [
     ['showcase-2', 5, 9],
     ['showcase-3', 4, 7],
   ]) {
     const normal = getExpandedModuleRecipe(type, 100);
     const corner = getExpandedModuleRecipe(type, 100, { panelVariant: 'inner-corner' });
+    assert.deepEqual(
+      corner.items.map((entry) => [entry.itemKey, entry.quantity]),
+      normal.items.map((entry) => [entry.itemKey, entry.quantity]),
+      type,
+    );
     const normalByKey = new Map(normal.items.map((entry) => [entry.itemKey, entry.quantity]));
-    const cornerByKey = new Map(corner.items.map((entry) => [entry.itemKey, entry.quantity]));
-
     assert.equal(normalByKey.get('panel_98'), panelQuantity, type);
     assert.equal(normalByKey.get('connector_single'), baseSingleQuantity, type);
     assert.equal(normalByKey.has('connector_corner'), false, type);
-
-    assert.equal(cornerByKey.has('panel_98'), false, type);
-    assert.equal(cornerByKey.get('panel_corner_92'), panelQuantity, type);
-    assert.equal(cornerByKey.get('connector_start'), 4, type);
-    assert.equal(cornerByKey.get('connector_single'), 5, type);
-    assert.equal(cornerByKey.get('connector_corner'), 4, type);
+    assert.equal(normalByKey.has('panel_corner_92'), false, type);
   }
 });
 

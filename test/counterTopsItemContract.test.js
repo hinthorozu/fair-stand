@@ -11,12 +11,12 @@ import {
 } from './recipeParentItemKey.js';
 
 const expected = Object.freeze({
-  counter_top_110_60: { widthCm: 110, depthCm: 60, thicknessCm: 1.8, nominalModuleWidthCm: 100, occurrences: 2 },
-  counter_top_52_60: { widthCm: 52, depthCm: 60, thicknessCm: 1.8, nominalModuleWidthCm: 100, occurrences: 1 },
-  counter_top_160_60: { widthCm: 160, depthCm: 60, thicknessCm: 1.8, nominalModuleWidthCm: 150, occurrences: 2 },
-  counter_top_102_60: { widthCm: 102, depthCm: 60, thicknessCm: 1.8, nominalModuleWidthCm: 150, occurrences: 1 },
-  counter_top_210_60: { widthCm: 210, depthCm: 60, thicknessCm: 1.8, nominalModuleWidthCm: 200, occurrences: 2 },
-  counter_top_150_60: { widthCm: 150, depthCm: 60, thicknessCm: 1.8, nominalModuleWidthCm: 200, occurrences: 1 },
+  counter_top_110_60: { widthCm: 110, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 100, occurrences: 2 },
+  counter_top_52_60: { widthCm: 52, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 100, occurrences: 1 },
+  counter_top_160_60: { widthCm: 160, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 150, occurrences: 2 },
+  counter_top_102_60: { widthCm: 102, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 150, occurrences: 1 },
+  counter_top_210_60: { widthCm: 210, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 200, occurrences: 2 },
+  counter_top_150_60: { widthCm: 150, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 200, occurrences: 1 },
 });
 
 const recipes = [
@@ -36,7 +36,6 @@ test('all six counter tops are canonical 1.8 cm production Items', () => {
     assert.equal(item.type, 'counter-top');
     assert.equal(item.unit, 'adet');
     assert.deepEqual(item.dimensions, { widthCm: meta.widthCm, depthCm: meta.depthCm, thicknessCm: 1.8 });
-    assert.equal(item.nominalModuleWidthCm, meta.nominalModuleWidthCm);
   }
 });
 

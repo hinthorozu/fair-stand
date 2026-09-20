@@ -28,7 +28,7 @@ test('panel_197 is a canonical single production Item', () => {
   assert.equal(item.unit, 'adet');
   assert.deepEqual(item.dimensions, { widthCm: 197, heightCm: 47, thicknessCm: 0.8 });
   assert.equal(item.panelRole, 'straight');
-  assert.equal(item.nominalModuleWidthCm, 200);
+  assert.equal(item.nominalModuleWidthCm, undefined);
 });
 
 test('panel_197 uses canonical itemKey in exactly four verified parent recipes with quantity parity', () => {
@@ -66,7 +66,7 @@ test('panel_197 remains isolated from the canonical inner-corner panel family', 
   }
 
   const wall200 = getStraightWallRecipe(200);
-  assert.equal(wall200.composition.innerCorner.panelItemKey, 'panel_corner_192');
-  assert.equal(wall200.variants.innerCornerPanelItemKey, wall200.composition.innerCorner.panelItemKey);
-  assert.equal(wall200.variants.innerCornerPanelPartId, undefined);
+  assert.equal(wall200.composition.innerCorner, undefined);
+  assert.equal(wall200.variants, undefined);
+  assert.ok(wall200.items.find((item) => getRecipeItemKey(item) === 'panel_197'));
 });

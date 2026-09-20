@@ -9,7 +9,6 @@
 - `sceneDimensions`: `widthCm=100`, `heightCm=1.8` (thickness karşılığı); `depthCm` fiziksel `dimensions.depthCm=38`
 - `material`: `sunta`
 - `defaultColor`: `0xffffff`
-- `nominalModuleWidthCm`: `100`
 - Catalog: `catalogVisible=true`, `categoryId=3`, `catalogItemIndex=3`, `catalogPreview=shelf`
 
 ## Sahiplik

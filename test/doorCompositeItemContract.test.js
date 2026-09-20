@@ -27,16 +27,6 @@ const EXPECTED_CHILDREN = [
   ['door_leaf_100', 1],
 ];
 
-const EXPECTED_INNER_CORNER_CHILDREN = [
-  ['profile_91', 1],
-  ['upright_346_5', 2],
-  ['panel_corner_92', 3],
-  ['connector_start', 2],
-  ['connector_single', 3],
-  ['connector_corner', 2],
-  ['door_leaf_100', 1],
-];
-
 test('door_100 is the single canonical composite Item identity', () => {
   const item = getItem('door_100');
 
@@ -77,12 +67,12 @@ test('door_100 composition delegates quantities to the existing canonical recipe
   );
 });
 
-test('door_100 inner-corner recipe changes panels and connector composition canonically', () => {
+test('door_100 expand ignores legacy inner-corner panelVariant', () => {
   const recipe = getExpandedModuleRecipe('door', 100, { panelVariant: 'inner-corner' });
   assert.ok(recipe);
   assert.deepEqual(
     recipe.items.map((entry) => [getRecipeItemKey(entry), entry.quantity]),
-    EXPECTED_INNER_CORNER_CHILDREN,
+    EXPECTED_CHILDREN,
   );
 });
 
@@ -97,11 +87,11 @@ test('door_100 recursive BOM resolves to canonical leaf Items with quantities an
   });
 });
 
-test('door_100 recursive BOM resolves the verified inner-corner variant', () => {
+test('door_100 recursive BOM ignores legacy inner-corner panelVariant', () => {
   const bom = resolveItemBom('door_100', 1, { panelVariant: 'inner-corner' });
   assert.deepEqual(
     bom.map((line) => [line.itemKey, line.quantity, line.unit]),
-    EXPECTED_INNER_CORNER_CHILDREN.map(([itemKey, quantity]) => [itemKey, quantity, 'adet']),
+    EXPECTED_CHILDREN.map(([itemKey, quantity]) => [itemKey, quantity, 'adet']),
   );
 });
 

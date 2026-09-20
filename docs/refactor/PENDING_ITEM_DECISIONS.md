@@ -38,6 +38,6 @@ Bu dosya Item refactor sırasında henüz çözülmemiş veya bilinçli olarak e
 
 ## 6. `nominalModuleWidthCm`
 
-- **Durum:** TEKRAR DEĞERLENDİRİLECEK
-- **Karar:** Item / composition temizliğinden sonra yeniden bakılacak.
-- **Yasak:** Şu aşamada değiştirilmez.
+- **Durum:** KALDIRILDI
+- **Karar:** Legacy `nominalModuleWidthCm` / `nominal_module_width_cm` ve `composition.innerCorner` / `panelVariant: 'inner-corner'` recipe mekanizması tüm katmanlardan kaldırıldı. Köşe paneli Item’ları (`panel_corner_*`) korundu. Yeni köşe-duyarlı BOM henüz yok.
+- **Yasak:** `itemKey` rakamlarından yeni bir nominal/eşleme alanı üretilmez. Item kayıtları silinmez.

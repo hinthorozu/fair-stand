@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveItemBom } from '../src/itemBom.js';
 import { getItem, listRegisteredItems } from '../src/items.js';
-import { expandRecipe, getRecipeItemKey } from '../src/moduleRecipes.js';
 
 function childTuples(entries) {
   return (entries ?? []).map((entry) => [entry.itemKey, entry.quantity]);
@@ -39,24 +38,6 @@ const EXPECTED_RECIPE_ITEMS = Object.freeze({
   wall_showcase_100_3: [['profile_91', 4], ['upright_346_5', 2], ['panel_98', 4], ['connector_start', 4], ['connector_single', 7], ['showcase_side_143_5_30', 2], ['showcase_horizontal_87_4_30', 2], ['glass_shelf', 2]],
 });
 
-const EXPECTED_INNER_CORNER = Object.freeze({
-  door_100: { panelItemKey: 'panel_corner_92', replacements: true },
-  wall_50: { panelItemKey: 'panel_corner_42_5' },
-  wall_100: { panelItemKey: 'panel_corner_92' },
-  wall_150: { panelItemKey: 'panel_corner_142_5' },
-  wall_200: { panelItemKey: 'panel_corner_192' },
-  wall_50_short_up_1: { panelItemKey: 'panel_corner_42_5' },
-  wall_100_short_up_1: { panelItemKey: 'panel_corner_92' },
-  wall_150_short_up_1: { panelItemKey: 'panel_corner_142_5' },
-  wall_200_short_up_1: { panelItemKey: 'panel_corner_192' },
-  wall_50_short_up_2: { panelItemKey: 'panel_corner_42_5' },
-  wall_100_short_up_2: { panelItemKey: 'panel_corner_92' },
-  wall_150_short_up_2: { panelItemKey: 'panel_corner_142_5' },
-  wall_200_short_up_2: { panelItemKey: 'panel_corner_192' },
-  wall_showcase_100_2: { panelItemKey: 'panel_corner_92', replacements: true },
-  wall_showcase_100_3: { panelItemKey: 'panel_corner_92', replacements: true },
-});
-
 test('recipe parents keep composition.items equal to the proven former recipe copy', () => {
   const parents = listRegisteredItems().filter((item) => item.composition?.mode === 'recipe');
   assert.equal(parents.length, 28);
@@ -68,19 +49,10 @@ test('recipe parents keep composition.items equal to the proven former recipe co
   }
 });
 
-test('innerCorner lives on Item for the former recipe.variants parents only', () => {
+test('legacy innerCorner is stripped from recipe and cluster Items', () => {
   for (const item of listRegisteredItems().filter((entry) => entry.composition?.mode === 'recipe')) {
-    const expected = EXPECTED_INNER_CORNER[item.itemKey];
-    if (!expected) {
-      assert.equal(item.composition.innerCorner, undefined, item.itemKey);
-      continue;
-    }
-    assert.equal(item.composition.innerCorner.panelItemKey, expected.panelItemKey, item.itemKey);
-    if (expected.replacements) {
-      assert.ok(Array.isArray(item.composition.innerCorner.itemReplacements), item.itemKey);
-    } else {
-      assert.equal(item.composition.innerCorner.itemReplacements, undefined, item.itemKey);
-    }
+    assert.equal(item.composition.innerCorner, undefined, item.itemKey);
+    assert.equal(item.nominalModuleWidthCm, undefined, item.itemKey);
   }
 });
 
@@ -104,15 +76,12 @@ test('furniture clusters are not opened by resolveItemBom', () => {
   }
 });
 
-test('inner-corner BOM is resolveItemBom(itemKey, 1, { panelVariant: inner-corner })', () => {
-  for (const itemKey of Object.keys(EXPECTED_INNER_CORNER)) {
-    const item = getItem(itemKey);
-    const expanded = expandRecipe(item, { panelVariant: 'inner-corner' });
-    const bom = resolveItemBom(itemKey, 1, { panelVariant: 'inner-corner' });
-    assert.deepEqual(
-      bom.map((line) => [line.itemKey, line.quantity]),
-      expanded.items.map((entry) => [getRecipeItemKey(entry), entry.quantity]),
-      itemKey,
-    );
-  }
+test('legacy panelVariant does not change resolveItemBom', () => {
+  const normal = resolveItemBom('wall_200');
+  const ignored = resolveItemBom('wall_200', 1, { panelVariant: 'inner-corner' });
+  assert.deepEqual(
+    ignored.map((line) => [line.itemKey, line.quantity]),
+    normal.map((line) => [line.itemKey, line.quantity]),
+  );
+  assert.equal(normal.find((line) => line.itemKey === 'panel_197').quantity, 7);
 });

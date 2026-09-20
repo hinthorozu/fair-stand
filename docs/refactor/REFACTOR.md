@@ -7,6 +7,14 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-20 — Legacy inner-corner + nominalModuleWidthCm kaldırıldı
+
+`nominalModuleWidthCm` / `nominal_module_width_cm` runtime, seed, API ve DB kolonundan silindi. `composition.innerCorner`, `panelVariant: 'inner-corner'` ve inner-corner replacement tabloları kaldırıldı. `expandRecipe` yalnız `composition.items` döner. Eski bootstrap payload’da bu alanlar görülürse registry onları düşürür; BOM değişmez.
+
+Korunan: 96 `itemKey`, `panel_corner_*` Item kayıtları, `panelRole`, fiziksel `dimensions` / `sceneDimensions`, normal `wall_200` → `panel_197` × 7. Yeni köşe-duyarlı BOM eklenmedi.
+
+---
+
 ## 2026-09-17 — Kapı kanadı width helper kalktı
 
 ### Kapsam
@@ -14,6 +22,14 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 `DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH` ve `getDoorLeafItem` silindi. Factory ve `normalizeModuleItemState` kapı kanadını `getItem('door_leaf_100')` ile çözer. Tek kapı `door_100`; 100 dışı `createDoorModuleState` zaten `null`. `surface.itemKey` aynı `door_leaf_100`.
 
 Dokunulmayan: `door_100` / `door_leaf_100` satırları, BOM miktarları, persist schema, renderer `getItem(surface.itemKey)`.
+
+---
+
+## 2026-09-20 — İç-köşe expand ölçü kullanmaz
+
+`expandRecipe` inner-corner’da `nominalModuleWidthCm` okumaz. Inner yoksa (`composition.innerCorner` / `panelItemKey` yok) düz reçete döner, throw yok. Inner varsa reçetedeki tek `panelRole=straight` satırı `innerCorner.panelItemKey` ile değişir; ek satırlar `itemReplacements`.
+
+Dokunulmayan: `composition.items` miktarları, `innerCorner.panelItemKey` değerleri, Item kaydındaki `nominalModuleWidthCm` alanı.
 
 ---
 

@@ -79,7 +79,6 @@ const payload = {
       material: item.material ?? null,
       default_color: colorToInt(item.defaultColor ?? null),
       panel_role: item.panelRole ?? null,
-      nominal_module_width_cm: num(item.nominalModuleWidthCm),
       connector_type: item.connectorType ?? null,
       preserve_model_scale: Object.hasOwn(item, 'preserveModelScale') ? Boolean(item.preserveModelScale) : null,
       model_rotation_y_deg: num(item.modelRotationYDeg),
@@ -116,20 +115,6 @@ const payload = {
         quantity: row.quantity,
         sort_order: index,
       })),
-      inner_corner: composition?.innerCorner
-        ? {
-            panel_item_key: composition.innerCorner.panelItemKey,
-            replacements: (composition.innerCorner.itemReplacements || []).map((replacement, index) => ({
-              replaced_item_key: replacement.itemKey,
-              sort_order: index,
-              members: (replacement.items || []).map((member, memberIndex) => ({
-                child_item_key: member.itemKey,
-                quantity: member.quantity,
-                sort_order: memberIndex,
-              })),
-            })),
-          }
-        : null,
       video_wall: item.videoWall
         ? {
             rows: item.videoWall.rows,
@@ -169,8 +154,6 @@ console.log(JSON.stringify({
   visible: payload.items.filter((item) => item.catalog_visible).length,
   components: componentCount,
   assets: assetCount,
-  inner: payload.items.filter((item) => item.inner_corner).length,
-  replacements: payload.items.reduce((sum, item) => sum + (item.inner_corner?.replacements.length || 0), 0),
   videoWalls: payload.items.filter((item) => item.video_wall).length,
   bodyParents: payload.items.filter((item) => item.body_parts.length).length,
 }, null, 2));

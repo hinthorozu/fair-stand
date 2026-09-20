@@ -8,7 +8,6 @@
 - dimensions: `147.5 × 47 × 0.8 cm`
 - `material`: `sunta`
 - `panelRole`: `straight`
-- `nominalModuleWidthCm`: `150`
 - `defaultColor`: ürün default'u doğrulanmadığı için tanımlı değil; editor `#ffffff` değeri ezme/default-surface katmanıdır.
 
 ## Sahiplik

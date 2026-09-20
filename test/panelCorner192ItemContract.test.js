@@ -8,13 +8,7 @@ import {
 import {
   getExpandedModuleRecipe,
   getModuleRecipe,
-  getRecipeInnerCornerPanelKey,
-  recipeParentItem,
 } from './recipeParentItemKey.js';
-
-const CORNER_RECIPE_CASES = [
-  ['wall', 200, {}, 7],
-];
 
 test('panel_corner_192 is a canonical single production Item', () => {
   const item = getItem('panel_corner_192');
@@ -26,58 +20,23 @@ test('panel_corner_192 is a canonical single production Item', () => {
   assert.equal(item.unit, 'adet');
   assert.deepEqual(item.dimensions, { widthCm: 192, heightCm: 47, thicknessCm: 0.8 });
   assert.equal(item.panelRole, 'inner-corner');
-  assert.equal(item.nominalModuleWidthCm, 200);
+  assert.equal(item.nominalModuleWidthCm, undefined);
 });
 
-test('panel_corner_192 uses canonical itemKey in exactly one verified 200 cm recipe variant', () => {
-  let occurrences = 0;
-
-  for (const [type, width, options] of CORNER_RECIPE_CASES) {
-    const recipe = getModuleRecipe(type, width, options);
-    assert.ok(recipe);
-    assert.equal(recipe.composition.innerCorner.panelItemKey, 'panel_corner_192', recipe.recipeId);
-    assert.equal(recipe.variants.innerCornerPanelItemKey, recipe.composition.innerCorner.panelItemKey, recipe.recipeId);
-    assert.equal(recipe.variants.innerCornerPanelPartId, undefined, recipe.recipeId);
-    assert.equal(getRecipeInnerCornerPanelKey(recipeParentItem(type, width, options)), 'panel_corner_192', recipe.recipeId);
-    occurrences += 1;
-  }
-
-  assert.equal(occurrences, 1);
+test('panel_corner_192 is not selected by wall_200 recipe expansion', () => {
+  const recipe = getModuleRecipe('wall', 200);
+  const expanded = getExpandedModuleRecipe('wall', 200, { panelVariant: 'inner-corner' });
+  assert.ok(recipe.items.find((item) => getRecipeItemKey(item) === 'panel_197'));
+  assert.equal(recipe.items.find((item) => getRecipeItemKey(item) === 'panel_corner_192'), undefined);
+  assert.equal(expanded.items.find((item) => item.itemKey === 'panel_197').quantity, 7);
+  assert.equal(expanded.items.find((item) => item.itemKey === 'panel_corner_192'), undefined);
 });
 
-test('inner-corner BOM resolution replaces panel_197 1:1 and preserves all other recipe quantities', () => {
-  for (const [type, width, options, expectedQuantity] of CORNER_RECIPE_CASES) {
-    const source = getModuleRecipe(type, width, options);
-    const normal = getExpandedModuleRecipe(type, width, options);
-    const corner = getExpandedModuleRecipe(type, width, { ...options, panelVariant: 'inner-corner' });
-
-    const sourceStraight = source.items.find((item) => getRecipeItemKey(item) === 'panel_197');
-    const normalStraight = normal.items.find((item) => getRecipeItemKey(item) === 'panel_197');
-    const cornerStraight = corner.items.find((item) => getRecipeItemKey(item) === 'panel_197');
-    const cornerPanel = corner.items.find((item) => getRecipeItemKey(item) === 'panel_corner_192');
-
-    assert.equal(sourceStraight.quantity, expectedQuantity, source.recipeId);
-    assert.equal(normalStraight.quantity, expectedQuantity, source.recipeId);
-    assert.equal(cornerStraight, undefined, source.recipeId);
-    assert.ok(cornerPanel, source.recipeId);
-    assert.equal(cornerPanel.quantity, expectedQuantity, source.recipeId);
-    assert.equal(cornerPanel.part.itemKey, 'panel_corner_192', source.recipeId);
-    assert.equal(cornerPanel.part.unit, 'adet', source.recipeId);
-
-    const sourceNonPanel = source.items
-      .filter((item) => getRecipeItemKey(item) !== 'panel_197')
-      .map((item) => [getRecipeItemKey(item), item.quantity]);
-    const cornerNonPanel = corner.items
-      .filter((item) => getRecipeItemKey(item) !== 'panel_corner_192')
-      .map((item) => [getRecipeItemKey(item), item.quantity]);
-    assert.deepEqual(cornerNonPanel, sourceNonPanel, source.recipeId);
-  }
-});
-
-test('all inner-corner panel Items now use canonical identity', () => {
+test('all inner-corner panel Items remain canonical identities', () => {
   for (const itemKey of ['panel_corner_42_5', 'panel_corner_92', 'panel_corner_142_5', 'panel_corner_192']) {
     const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined, itemKey);
+    assert.equal(item.panelRole, 'inner-corner', itemKey);
   }
 });

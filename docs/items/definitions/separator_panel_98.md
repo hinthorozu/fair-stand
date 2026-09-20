@@ -17,7 +17,6 @@ heightCm = 47
 thicknessCm = 0.8
 material = mdf
 defaultColor = 0xc79b63
-nominalModuleWidthCm = 100
 ```
 
 `material = mdf` ürün kararı kullanıcı tarafından doğrulanmıştır. `defaultColor = 0xc79b63`, mevcut separator-specific runtime default renginin kanonik Item karşılığıdır.

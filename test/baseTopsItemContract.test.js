@@ -14,17 +14,17 @@ const BASE_TOP_CASES = {
   base_top_107_50: {
     name: 'Baza Üstü 107 × 50 cm',
     dimensions: { widthCm: 107, depthCm: 50, thicknessCm: 1.8 },
-    nominalModuleWidthCm: 100,
+    moduleWidthCm: 100,
   },
   base_top_157_50: {
     name: 'Baza Üstü 157 × 50 cm',
     dimensions: { widthCm: 157, depthCm: 50, thicknessCm: 1.8 },
-    nominalModuleWidthCm: 150,
+    moduleWidthCm: 150,
   },
   base_top_206_50: {
     name: 'Baza Üstü 206 × 50 cm',
     dimensions: { widthCm: 206, depthCm: 50, thicknessCm: 1.8 },
-    nominalModuleWidthCm: 200,
+    moduleWidthCm: 200,
   },
 };
 
@@ -40,7 +40,6 @@ test('base tops are canonical single Items with complete intrinsic defaults', ()
     assert.deepEqual(item.dimensions, expected.dimensions);
     assert.equal(item.material, 'sunta', itemKey);
     assert.equal(item.defaultColor, 0xffffff, itemKey);
-    assert.equal(item.nominalModuleWidthCm, expected.nominalModuleWidthCm);
   }
 });
 
@@ -48,8 +47,8 @@ test('base tops use canonical itemKey in exactly three active parent recipe rows
   let occurrences = 0;
 
   for (const [itemKey, expected] of Object.entries(BASE_TOP_CASES)) {
-    const recipe = getModuleRecipe('base', expected.nominalModuleWidthCm);
-    assert.ok(recipe, `base:${expected.nominalModuleWidthCm}`);
+    const recipe = getModuleRecipe('base', expected.moduleWidthCm);
+    assert.ok(recipe, `base:${expected.moduleWidthCm}`);
     const matches = recipe.items.filter((item) => getRecipeItemKey(item) === itemKey);
     assert.equal(matches.length, 1, recipe.recipeId);
     assert.deepEqual(matches[0], { itemKey, quantity: 1 }, recipe.recipeId);
@@ -62,9 +61,9 @@ test('base tops use canonical itemKey in exactly three active parent recipe rows
 
 test('expanded base recipes resolve canonical base-top metadata and intrinsic defaults', () => {
   for (const [itemKey, expected] of Object.entries(BASE_TOP_CASES)) {
-    const expanded = getExpandedModuleRecipe('base', expected.nominalModuleWidthCm);
+    const expanded = getExpandedModuleRecipe('base', expected.moduleWidthCm);
     const top = expanded.items.find((item) => getRecipeItemKey(item) === itemKey);
-    assert.ok(top, `base:${expected.nominalModuleWidthCm}:${itemKey}`);
+    assert.ok(top, `base:${expected.moduleWidthCm}:${itemKey}`);
     assert.equal(top.quantity, 1, expanded.recipeId);
     assert.equal(top.part.itemKey, itemKey, expanded.recipeId);
     assert.equal(top.part.partId, undefined, expanded.recipeId);

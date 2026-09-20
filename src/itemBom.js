@@ -9,7 +9,7 @@ function positiveQuantity(value, itemKey) {
   return quantity;
 }
 
-function resolveRecipe(item, recipeOptions = {}) {
+function resolveRecipe(item) {
   const composition = item?.composition;
   if (!composition) return null;
   if (composition.mode !== 'recipe') return null;
@@ -17,15 +17,15 @@ function resolveRecipe(item, recipeOptions = {}) {
   if (!Array.isArray(composition.items)) {
     throw new TypeError(`Missing composition.items for ${item.itemKey}.`);
   }
-  return expandRecipe(item, recipeOptions);
+  return expandRecipe(item);
 }
 
-function resolveLines(itemKey, quantity, stack, recipeOptions = {}) {
+function resolveLines(itemKey, quantity, stack) {
   const item = getItem(itemKey);
   if (!item) throw new TypeError(`Unknown Item: ${itemKey}.`);
 
   const resolvedQuantity = positiveQuantity(quantity, itemKey);
-  const recipe = resolveRecipe(item, recipeOptions);
+  const recipe = resolveRecipe(item);
   if (!recipe) {
     if (!item.unit) throw new TypeError(`Missing canonical unit for leaf Item: ${itemKey}.`);
     return [{ itemKey, quantity: resolvedQuantity, unit: item.unit, item }];
@@ -49,8 +49,8 @@ function resolveLines(itemKey, quantity, stack, recipeOptions = {}) {
   });
 }
 
-export function resolveItemBom(itemKey, quantity = 1, recipeOptions = {}) {
-  const lines = resolveLines(itemKey, quantity, [], recipeOptions);
+export function resolveItemBom(itemKey, quantity = 1) {
+  const lines = resolveLines(itemKey, quantity, []);
   const aggregated = new Map();
 
   for (const line of lines) {

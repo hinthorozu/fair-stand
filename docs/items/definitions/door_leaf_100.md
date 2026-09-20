@@ -17,7 +17,6 @@ heightCm = 200
 thicknessCm = 8
 material = ahşap
 defaultColor = 0xffffff
-nominalModuleWidthCm = 100
 ```
 
 Bu değerlerin product/default tek kaynağı `LEAF_ITEMS.door_leaf_100` kaydıdır.
