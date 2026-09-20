@@ -1,0 +1,19 @@
+[Unit]
+Description=Fair Stand API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__DEPLOY_SERVICE_USER__
+Group=__DEPLOY_SERVICE_USER__
+WorkingDirectory=__FAIR_STAND_DIR__/backend
+Environment=PYTHONPATH=__FAIR_STAND_DIR__/backend
+UnsetEnvironment=DATABASE_URL
+EnvironmentFile=-__FAIR_STAND_DIR__/backend/.env
+ExecStart=__FAIR_STAND_DIR__/backend/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8002
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

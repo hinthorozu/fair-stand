@@ -28,7 +28,9 @@ Repository ilk MVP taslağının ötesindedir. Mevcut uygulama aşağıdaki ana 
 - JavaScript ES Modules
 - Three.js
 - Vite
+- FastAPI catalog API (`:8002`) + PostgreSQL `fair_stand`
 - Node.js built-in test runner (`node --test`)
+- pytest (backend catalog API)
 - Playwright + Chromium E2E
 - JSZip
 - GitHub Actions
@@ -50,6 +52,7 @@ Vite geliştirme sunucusunun verdiği local adresi tarayıcıda açın.
 npm run dev              # local development server
 npm run contract:verify  # schema + diff + full-system impact verification
 npm test                 # unit/integration regression suite
+cd backend && pytest     # catalog API tests (Fair Stand FastAPI)
 npm run build            # production build
 npm run e2e:deps         # pinned Playwright test runner'ı local node_modules'a kur
 npm run e2e:install      # Chromium browser binary'sini kur
@@ -80,6 +83,7 @@ checkout (full git history)
 → npm run contract:verify
 → npm ci
 → npm test
+→ python -m pytest (backend/)
 → npm run build
 → Playwright runner kurulumu
 → Chromium kurulumu

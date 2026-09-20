@@ -245,7 +245,7 @@ Bu gate mevcut contract'ların yerine geçmez.
 
 Ardından canonical CI sırası:
 
-`contract gate → npm ci → npm test → npm run build → Playwright runner → Chromium → npm run e2e`
+`contract gate → npm ci → npm test → python -m pytest → npm run build → Playwright runner → Chromium → npm run e2e`
 
 E2E failure olursa `playwright-report/` ve `test-results/` trace/screenshot/video kanıtı GitHub Actions artifact olarak saklanır.
 

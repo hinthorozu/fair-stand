@@ -218,8 +218,10 @@ test('architecture changes must declare architecture impact', () => {
   assert.ok(errors.some((error) => error.includes('architecture changes must mark architecture as affected')));
 });
 
-test('guarded paths cover runtime, UI, assets, unit tests, E2E, governance docs and delivery infrastructure', () => {
+test('guarded paths cover runtime, UI, assets, unit tests, E2E, governance docs, catalog API and delivery infrastructure', () => {
   assert.equal(isGuardedChangeFile('src/main.js'), true);
+  assert.equal(isGuardedChangeFile('backend/app/main.py'), true);
+  assert.equal(isGuardedChangeFile('backend/tests/test_health.py'), true);
   assert.equal(isGuardedChangeFile('index.html'), true);
   assert.equal(isGuardedChangeFile('public/models/example.glb'), true);
   assert.equal(isGuardedChangeFile('scripts/install-server.sh'), true);
@@ -243,6 +245,14 @@ test('all test surfaces require explicit tests impact', () => {
     assert.deepEqual(requiredDomainsForFile(path), ['tests'], `${path} must require tests impact`);
   }
   assert.deepEqual(requiredDomainsForFile('playwright.config.mjs').sort(), ['architecture', 'tests']);
+  assert.deepEqual(
+    requiredDomainsForFile('backend/tests/test_health.py').sort(),
+    ['architecture', 'tests'],
+  );
+  assert.deepEqual(
+    requiredDomainsForFile('backend/app/main.py').sort(),
+    ['architecture', 'security', 'tests'],
+  );
 });
 
 test('canonical governance documents are guarded architecture surfaces', () => {
