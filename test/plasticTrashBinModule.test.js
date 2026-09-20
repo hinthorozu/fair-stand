@@ -60,7 +60,8 @@ test('plastic trash bin is a canonical 40x40x60 fixed-model catalog module', () 
     widthCm: 40,
     depthCm: 40,
     modelFile: MODEL_FILE,
-  }), KEY);
+  }), null);
+  assert.equal(resolveItemKey({ itemKey: KEY }), KEY);
 });
 
 test('trash bin state and behavior preserve fridge-style movement without overlap exceptions', () => {

@@ -76,12 +76,3 @@ test('furniture clusters are not opened by resolveItemBom', () => {
   }
 });
 
-test('legacy panelVariant does not change resolveItemBom', () => {
-  const normal = resolveItemBom('wall_200');
-  const ignored = resolveItemBom('wall_200', 1, { panelVariant: 'inner-corner' });
-  assert.deepEqual(
-    ignored.map((line) => [line.itemKey, line.quantity]),
-    normal.map((line) => [line.itemKey, line.quantity]),
-  );
-  assert.equal(normal.find((line) => line.itemKey === 'panel_197').quantity, 7);
-});

@@ -25,25 +25,24 @@ test('every catalog module resolves its single-source key and label', () => {
   });
 });
 
-test('legacy separators resolve exact normal versus vine catalog identity from modelFile', () => {
-  assert.equal(resolveItemKey({ type: 'separator', widthCm: 100 }), 'wall_separator_100');
-  assert.equal(resolveItemKey({ type: 'separator', widthCm: 50 }), 'wall_separator_50');
+test('separator identity is itemKey, not type/width/modelFile guess', () => {
+  assert.equal(resolveItemKey({ type: 'separator', widthCm: 100 }), null);
+  assert.equal(resolveItemKey({ type: 'separator', widthCm: 50 }), null);
   assert.equal(
     resolveItemKey({ type: 'separator', widthCm: 100, modelFile: 'wall_separator_100_sarmasik.glb' }),
-    'wall_separator_100_sarmasik',
+    null,
   );
-  assert.equal(
-    resolveItemKey({ type: 'separator', widthCm: 50, modelFile: 'wall_separator_50_sarmasik.glb' }),
-    'wall_separator_50_sarmasik',
-  );
+  assert.equal(resolveItemKey({ itemKey: 'wall_separator_100' }), 'wall_separator_100');
+  assert.equal(resolveItemKey({ itemKey: 'wall_separator_100_sarmasik' }), 'wall_separator_100_sarmasik');
 });
 
 test('catalogKey is not a product identity input', () => {
   assert.equal(resolveItemKey({ catalogKey: 'wall_100' }), null);
   assert.equal(
     resolveItemKey({ type: 'flat-panel', widthCm: 100, catalogKey: 'wall_200' }),
-    'wall_100',
+    null,
   );
+  assert.equal(resolveItemKey({ itemKey: 'wall_100' }), 'wall_100');
 });
 
 test('left catalog, context catalog and drag badge share catalog presentation source', () => {

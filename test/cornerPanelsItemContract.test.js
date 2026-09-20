@@ -60,15 +60,15 @@ test('remaining inner-corner panels are canonical single production Items with m
   }
 });
 
-test('legacy inner-corner recipe expansion no longer replaces straight panels', () => {
+test('recipe expansion keeps straight panels and does not inject corner panel Items', () => {
   for (const [itemKey, { metadata, recipes }] of Object.entries(CORNER_PANEL_CASES)) {
     for (const [type, width, options, expectedQuantity] of recipes) {
       const source = getModuleRecipe(type, width, options);
-      const corner = getExpandedModuleRecipe(type, width, { ...options, panelVariant: 'inner-corner' });
+      const expanded = getExpandedModuleRecipe(type, width, options);
       const sourceStraight = source.items.find((item) => getRecipeItemKey(item) === metadata.straightPanelItemKey);
       assert.equal(sourceStraight.quantity, expectedQuantity, source.recipeId);
-      assert.equal(corner.items.find((item) => item.itemKey === metadata.straightPanelItemKey).quantity, expectedQuantity);
-      assert.equal(corner.items.find((item) => item.itemKey === itemKey), undefined, source.recipeId);
+      assert.equal(expanded.items.find((item) => item.itemKey === metadata.straightPanelItemKey).quantity, expectedQuantity);
+      assert.equal(expanded.items.find((item) => item.itemKey === itemKey), undefined, source.recipeId);
     }
   }
 });

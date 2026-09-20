@@ -61,20 +61,6 @@ test('recursive wall showcase BASE BOM expands verified physical children', () =
   }
 });
 
-test('recursive wall showcase BOM stays on composition.items when a legacy panelVariant is passed', () => {
-  for (const expected of CASES) {
-    const bom = quantities(resolveItemBom(expected.itemKey, 1, { panelVariant: 'inner-corner' }));
-    assert.equal(bom.get('panel_98'), expected.panelQuantity);
-    assert.equal(bom.has('panel_corner_92'), false);
-    assert.equal(bom.get('connector_start'), 4);
-    assert.equal(bom.get('connector_single'), expected.singleQuantity);
-    assert.equal(bom.has('connector_corner'), false);
-    assert.equal(bom.get(expected.sideItemKey), 2);
-    assert.equal(bom.get('showcase_horizontal_87_4_30'), 2);
-    assert.equal(bom.get('glass_shelf'), expected.glassQuantity);
-  }
-});
-
 test('showcase body resolver owns canonical board geometry/default color', () => {
   for (const expected of CASES) {
     const body = getShowcaseBodyDefinition(expected.itemKey);
@@ -102,10 +88,10 @@ test('factory/persistence use wall_showcase identity and one grouped color-only 
     assert.notEqual(duplicate.bodySurface.id, state.bodySurface.id);
   }
 
-  const legacy = { id: 'legacy-showcase', type: 'showcase-2', widthCm: 100, strips: [] };
-  normalizeModuleItemState(legacy);
-  assert.equal(legacy.itemKey, 'wall_showcase_100_2');
-  assert.equal(legacy.bodySurface.color, '#ffffff');
+  const persisted = { id: 'showcase-persisted', itemKey: 'wall_showcase_100_2', type: 'showcase-2', widthCm: 100, strips: [] };
+  normalizeModuleItemState(persisted);
+  assert.equal(persisted.itemKey, 'wall_showcase_100_2');
+  assert.equal(persisted.bodySurface.color, '#ffffff');
 });
 
 test('renderer reads canonical board facts and one selector targets exactly four body boards', () => {

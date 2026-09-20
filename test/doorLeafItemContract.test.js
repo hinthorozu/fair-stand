@@ -48,9 +48,10 @@ test('door module factory binds the child leaf Item and consumes its canonical d
   assert.equal(door.surface.imageTransform.mode, 'single');
 });
 
-test('legacy persisted door surface is migrated without losing user color or image override', () => {
-  const legacy = {
+test('persisted door surface keeps user color and image when parent itemKey is present', () => {
+  const persisted = {
     id: 'module-old-door',
+    itemKey: 'door_100',
     type: 'door',
     widthCm: 100,
     strips: [],
@@ -61,7 +62,7 @@ test('legacy persisted door surface is migrated without losing user color or ima
       imageTransform: { mode: 'single', fit: 'cover' },
     },
   };
-  const normalized = normalizeModuleItemState(legacy);
+  const normalized = normalizeModuleItemState(persisted);
   assert.equal(normalized.surface.itemKey, 'door_leaf_100');
   assert.equal(normalized.surface.color, '#123456');
   assert.equal(normalized.surface.imageAssetId, 'asset-door');

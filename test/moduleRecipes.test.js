@@ -262,18 +262,6 @@ test('expandRecipe does not read nominalModuleWidthCm or inner-corner variant ma
   assert.equal(source.includes('inner-corner'), false);
 });
 
-test('legacy panelVariant option does not change composition.items BOM', () => {
-  const item = getItem('wall_200');
-  const normal = expandRecipe(item);
-  const inner = expandRecipe(item, { panelVariant: 'inner-corner' });
-  assert.deepEqual(
-    inner.items.map((entry) => [entry.itemKey, entry.quantity]),
-    normal.items.map((entry) => [entry.itemKey, entry.quantity]),
-  );
-  assert.equal(inner.items.find((entry) => entry.itemKey === 'panel_197').quantity, 7);
-  assert.equal(inner.items.find((entry) => entry.itemKey === 'panel_corner_192'), undefined);
-});
-
 test('double and corner connectors are BOM-capable Items and are not baked into fixed module recipes', () => {
   const recipes = [
     ...listStraightWallRecipes(),

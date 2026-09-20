@@ -47,12 +47,12 @@ for (const item of listRegisteredItems().filter((entry) => entry.type === 'tv'))
     assert.equal(contract.bom.mode, 'decision-required');
     assert.equal(contract.bom.source, null);
 
-    const legacy = JSON.parse(JSON.stringify(state));
-    delete legacy.itemKey;
-    const restored = normalizeModuleItemState(legacy);
-    assert.equal(restored.itemKey, item.itemKey);
-    assert.equal(restored.widthCm, scene.widthCm);
-    assert.equal(resolveItemKey(restored), item.itemKey);
+    assert.equal(resolveItemKey(state), item.itemKey);
+    const missingKey = JSON.parse(JSON.stringify(state));
+    delete missingKey.itemKey;
+    assert.equal(resolveItemKey(missingKey), null);
+    assert.equal(normalizeModuleItemState(missingKey).itemKey, undefined);
+    assert.equal(missingKey.widthCm, scene.widthCm);
 
     const duplicate = duplicateModuleState(state);
     assert.notEqual(duplicate.id, state.id);

@@ -155,25 +155,12 @@ function resolveSeparatorItemKey(widthCmOrDescriptor, descriptor = {}) {
   if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
     const explicitKey = widthCmOrDescriptor.itemKey ?? null;
     if (explicitKey && getItem(explicitKey)?.type === 'separator') return explicitKey;
-    const resolvedKey = resolveItemKey({
-      type: 'separator',
-      widthCm: widthCmOrDescriptor.widthCm,
-      modelFile: widthCmOrDescriptor.modelFile ?? null,
-      itemKey: widthCmOrDescriptor.itemKey ?? null,
-    });
-    if (resolvedKey && getItem(resolvedKey)?.type === 'separator') return resolvedKey;
-    return null;
+    if (widthCmOrDescriptor.modelFile) return null;
+    return SEPARATOR_PLAIN_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor.widthCm)] ?? null;
   }
 
-  const modelFile = descriptor.modelFile ?? null;
-  if (modelFile) {
-    const resolvedKey = resolveItemKey({
-      type: 'separator',
-      widthCm: Number(widthCmOrDescriptor),
-      modelFile,
-    });
-    if (resolvedKey && getItem(resolvedKey)?.type === 'separator') return resolvedKey;
-    return null;
+  if (descriptor.itemKey && getItem(descriptor.itemKey)?.type === 'separator') {
+    return descriptor.itemKey;
   }
 
   return SEPARATOR_PLAIN_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor)] ?? null;
@@ -418,7 +405,7 @@ export function createUprightModuleState() {
 }
 
 export function createProfileModuleState(descriptor = {}) {
-  const itemKey = descriptor.itemKey ?? resolveItemKey(descriptor);
+  const itemKey = descriptor.itemKey ?? null;
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'profile') return null;
   return applySceneFootprint({
@@ -440,17 +427,6 @@ function resolveIndoorPlantItemKey(descriptor = {}) {
   if (descriptor && typeof descriptor === 'object' && !Array.isArray(descriptor)) {
     const explicitKey = descriptor.itemKey ?? null;
     if (explicitKey && isIndoorPlantItem(getItem(explicitKey))) return explicitKey;
-    const rawModelFile = descriptor.modelFile ?? null;
-    const modelFile = rawModelFile || null;
-    const resolvedKey = resolveItemKey({
-      type: 'indoor-plant-1',
-      widthCm: descriptor.widthCm,
-      depthCm: descriptor.depthCm,
-      heightCm: descriptor.heightCm,
-      modelFile,
-      itemKey: descriptor.itemKey ?? null,
-    });
-    if (resolvedKey && isIndoorPlantItem(getItem(resolvedKey))) return resolvedKey;
   }
   return null;
 }
@@ -510,7 +486,7 @@ export function createIlluminatedFoamModuleState(imageAssetId, descriptor = {}) 
 }
 
 export function createTvModuleState(descriptor = {}) {
-  const itemKey = descriptor?.itemKey ?? resolveItemKey(descriptor);
+  const itemKey = descriptor?.itemKey ?? null;
   const item = itemKey ? getItem(itemKey) : null;
   if (item?.type !== 'tv') return null;
   const state = {
@@ -754,10 +730,9 @@ export function normalizeModuleItemState(moduleState) {
   }
 
   if (moduleState.type === 'door') {
-    const doorItem = getItem('door_100');
-    if (!doorItem || Number(moduleState.widthCm) !== Number(doorItem.dimensions?.widthCm)) return moduleState;
-    moduleState.itemKey = doorItem.itemKey;
-    applySceneFootprint(moduleState, doorItem, ['widthCm']);
+  const doorItem = moduleState.itemKey ? getItem(moduleState.itemKey) : null;
+  if (doorItem?.type !== 'door') return moduleState;
+  applySceneFootprint(moduleState, doorItem, ['widthCm']);
     const doorLeafItem = getItem('door_leaf_100');
     if (!doorLeafItem) return moduleState;
     if (!moduleState.surface) {
@@ -772,10 +747,8 @@ export function normalizeModuleItemState(moduleState) {
     return moduleState;
   }
 
-  const showcaseItemKey = getShowcaseItemKeyForType(moduleState.type);
-  if (!showcaseItemKey) return moduleState;
-  const showcaseItem = getItem(showcaseItemKey);
-  if (!showcaseItem || Number(moduleState.widthCm) !== Number(showcaseItem.dimensions?.widthCm)) return moduleState;
+  const showcaseItem = moduleState.itemKey ? getItem(moduleState.itemKey) : null;
+  if (showcaseItem?.type !== 'showcase-2' && showcaseItem?.type !== 'showcase-3') return moduleState;
   const bodyDefinition = getShowcaseBodyDefinition(showcaseItem);
   moduleState.itemKey = showcaseItem.itemKey;
   moduleState.eyeCount = Number(showcaseItem.eyeCount);
