@@ -4,7 +4,7 @@ export function getRecipeItemKey(item) {
   return item?.itemKey ?? null;
 }
 
-export function expandRecipe(item, _ignoredOptions = {}) {
+export function expandRecipe(item) {
   if (!item) return null;
   if (!Array.isArray(item.composition?.items)) return null;
   const items = item.composition.items;

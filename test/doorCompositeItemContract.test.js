@@ -67,15 +67,6 @@ test('door_100 composition delegates quantities to the existing canonical recipe
   );
 });
 
-test('door_100 expand ignores legacy inner-corner panelVariant', () => {
-  const recipe = getExpandedModuleRecipe('door', 100, { panelVariant: 'inner-corner' });
-  assert.ok(recipe);
-  assert.deepEqual(
-    recipe.items.map((entry) => [getRecipeItemKey(entry), entry.quantity]),
-    EXPECTED_CHILDREN,
-  );
-});
-
 test('door_100 recursive BOM resolves to canonical leaf Items with quantities and units', () => {
   const bom = resolveItemBom('door_100');
   assert.deepEqual(
@@ -85,14 +76,6 @@ test('door_100 recursive BOM resolves to canonical leaf Items with quantities an
   bom.forEach((line) => {
     assert.equal(line.item.itemKey ?? line.item.partId, line.itemKey);
   });
-});
-
-test('door_100 recursive BOM ignores legacy inner-corner panelVariant', () => {
-  const bom = resolveItemBom('door_100', 1, { panelVariant: 'inner-corner' });
-  assert.deepEqual(
-    bom.map((line) => [line.itemKey, line.quantity, line.unit]),
-    EXPECTED_CHILDREN.map(([itemKey, quantity]) => [itemKey, quantity, 'adet']),
-  );
 });
 
 test('door_100 factory/persistence identity and child door leaf identity are canonical', () => {

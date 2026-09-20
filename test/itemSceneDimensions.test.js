@@ -127,15 +127,14 @@ test('11. catalogWidthCm canonical Item field olarak kalmaz', () => {
   assert.doesNotMatch(ITEMS_SOURCE, /catalogWidthCm/);
 });
 
-test('12. resolveItemKey catalogWidthCm kullanmaz', () => {
+test('12. resolveItemKey catalogWidthCm kullanmaz ve type/width tahmin etmez', () => {
   const identitySource = ITEMS_SOURCE.slice(
-    ITEMS_SOURCE.indexOf('function getItemIdentityFields'),
     ITEMS_SOURCE.indexOf('export function resolveItemKey'),
   );
   assert.doesNotMatch(identitySource, /catalogWidthCm/);
-  assert.match(identitySource, /resolveSceneDimensions/);
-  assert.equal(resolveItemKey({ type: 'profile', widthCm: 200 }), 'profile_190');
+  assert.equal(resolveItemKey({ type: 'profile', widthCm: 200 }), null);
   assert.equal(resolveItemKey({ type: 'profile', widthCm: 190 }), null);
+  assert.equal(resolveItemKey({ itemKey: 'profile_190' }), 'profile_190');
 });
 
 test('13. scene dimension için type fallback yok', () => {

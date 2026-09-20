@@ -96,11 +96,11 @@ for (const itemKey of BASE_KEYS) {
     assert.equal(quantities.connector_single, 8);
     assert.equal(quantities[expected.top], 1);
 
-    const legacy = JSON.parse(JSON.stringify(state));
-    delete legacy.itemKey;
-    const restored = normalizeModuleItemState(legacy);
-    assert.equal(restored.itemKey, itemKey);
-    assert.equal(resolveItemKey(restored), itemKey);
+    assert.equal(resolveItemKey(state), itemKey);
+    const missingKey = JSON.parse(JSON.stringify(state));
+    delete missingKey.itemKey;
+    assert.equal(resolveItemKey(missingKey), null);
+    assert.equal(normalizeModuleItemState(missingKey).itemKey, undefined);
 
     const duplicate = duplicateModuleState(state);
     assert.notEqual(duplicate.id, state.id);

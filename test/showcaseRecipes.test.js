@@ -42,18 +42,12 @@ test('3-eye wall showcase BASE recipe matches verified production data', () => {
   ]);
 });
 
-test('wall showcase expand ignores legacy inner-corner panelVariant', () => {
+test('wall showcase expand stays on composition.items', () => {
   for (const [type, panelQuantity, baseSingleQuantity] of [
     ['showcase-2', 5, 9],
     ['showcase-3', 4, 7],
   ]) {
     const normal = getExpandedModuleRecipe(type, 100);
-    const corner = getExpandedModuleRecipe(type, 100, { panelVariant: 'inner-corner' });
-    assert.deepEqual(
-      corner.items.map((entry) => [entry.itemKey, entry.quantity]),
-      normal.items.map((entry) => [entry.itemKey, entry.quantity]),
-      type,
-    );
     const normalByKey = new Map(normal.items.map((entry) => [entry.itemKey, entry.quantity]));
     assert.equal(normalByKey.get('panel_98'), panelQuantity, type);
     assert.equal(normalByKey.get('connector_single'), baseSingleQuantity, type);

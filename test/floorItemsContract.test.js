@@ -59,6 +59,7 @@ test('floor Items use existing floorType keys and stay off the module catalog', 
   assert.equal(isGridTileFloorItem(karolaj), true);
   assert.equal(isCarpetFloorItem(hali), true);
   assert.equal(isCarpetFloorItem(karolaj), false);
-  assert.equal(resolveStandFloorItemKey({ floorType: 'hali' }), 'hali');
+  assert.equal(resolveStandFloorItemKey({ floorType: 'hali' }), 'karolaj');
   assert.equal(resolveStandFloorItemKey({ itemKey: 'parke-beton', floorType: 'hali' }), 'parke-beton');
+  assert.equal(resolveStandFloorItemKey({ itemKey: 'hali' }), 'hali');
 });

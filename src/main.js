@@ -555,9 +555,7 @@ function duplicateContextModule(context, side) {
 }
 
 function assignStandFloorItem(stand, itemKey) {
-  const next = { ...stand, itemKey: resolveStandFloorItemKey(itemKey) };
-  delete next.floorType;
-  return next;
+  return { ...stand, itemKey: resolveStandFloorItemKey(itemKey) };
 }
 
 function createCatalogModuleState(module, { preservePlacement = false, itemKey = null } = {}) {

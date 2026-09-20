@@ -96,11 +96,11 @@ for (const itemKey of WALL_KEYS) {
     );
     assert.deepEqual(quantities, expected.recipeQuantities);
 
-    const legacy = JSON.parse(JSON.stringify(state));
-    delete legacy.itemKey;
-    const restored = normalizeModuleItemState(legacy);
-    assert.equal(restored.itemKey, itemKey);
-    assert.equal(resolveItemKey(restored), itemKey);
+    assert.equal(resolveItemKey(state), itemKey);
+    const missingKey = JSON.parse(JSON.stringify(state));
+    delete missingKey.itemKey;
+    assert.equal(resolveItemKey(missingKey), null);
+    assert.equal(normalizeModuleItemState(missingKey).itemKey, undefined);
 
     const duplicate = duplicateModuleState(state);
     assert.notEqual(duplicate.id, state.id);
@@ -157,7 +157,8 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_2)) {
     assert.equal(parent.stripOccupancy, undefined);
     assert.equal(item.variant, 'short-up-2');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 2 });
-    assert.equal(resolveItemKey({ type: 'flat-panel', widthCm: expected.widthCm }), expected.parentKey);
+    assert.equal(resolveItemKey({ type: 'flat-panel', widthCm: expected.widthCm }), null);
+    assert.equal(resolveItemKey({ itemKey: expected.parentKey }), expected.parentKey);
     assert.equal(resolveItemKey(catalog), itemKey);
 
     const state = createModuleStateFromDescriptor(catalog);
@@ -220,7 +221,8 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_1)) {
     assert.equal(parent.stripOccupancy, undefined);
     assert.equal(item.variant, 'short-up-1');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 1 });
-    assert.equal(resolveItemKey({ type: 'flat-panel', widthCm: expected.widthCm }), expected.parentKey);
+    assert.equal(resolveItemKey({ type: 'flat-panel', widthCm: expected.widthCm }), null);
+    assert.equal(resolveItemKey({ itemKey: expected.parentKey }), expected.parentKey);
     assert.equal(resolveItemKey(catalog), itemKey);
 
     const state = createModuleStateFromDescriptor(catalog);

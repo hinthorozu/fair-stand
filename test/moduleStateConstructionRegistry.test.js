@@ -58,6 +58,10 @@ test('automatic catalog-equivalent descriptors receive canonical catalog identit
   const door = createModuleStateFromDescriptor({ type: 'door', widthCm: 100 });
   const normalSeparator = createModuleStateFromDescriptor({ type: 'separator', widthCm: 100 });
   const vineSeparator = createModuleStateFromDescriptor({
+    itemKey: 'wall_separator_100_sarmasik',
+    type: 'separator',
+  });
+  const guessedVine = createModuleStateFromDescriptor({
     type: 'separator',
     widthCm: 100,
     modelFile: 'wall_separator_100_sarmasik.glb',
@@ -67,6 +71,7 @@ test('automatic catalog-equivalent descriptors receive canonical catalog identit
   assert.equal(door.itemKey, 'door_100');
   assert.equal(normalSeparator.itemKey, 'wall_separator_100');
   assert.equal(vineSeparator.itemKey, 'wall_separator_100_sarmasik');
+  assert.equal(guessedVine, null);
 });
 
 test('main.js delegates construction instead of owning a parallel type dispatcher', async () => {

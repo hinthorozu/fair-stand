@@ -22,16 +22,6 @@ export function isItemCatalogReady() {
   return catalogReady === true;
 }
 
-function sanitizeBootstrappedItem(item) {
-  const next = structuredClone(item);
-  delete next.nominalModuleWidthCm;
-  if (next.composition && Object.hasOwn(next.composition, 'innerCorner')) {
-    const { innerCorner: _removed, ...composition } = next.composition;
-    next.composition = composition;
-  }
-  return next;
-}
-
 export function initializeItemRegistry(items) {
   if (!Array.isArray(items)) {
     throw new TypeError('Fair Stand Item catalog bootstrap items must be an array.');
@@ -39,7 +29,7 @@ export function initializeItemRegistry(items) {
   const next = Object.create(null);
   for (const item of items) {
     if (!item?.itemKey) throw new TypeError('Bootstrapped Item is missing itemKey.');
-    next[item.itemKey] = freezeDeep(sanitizeBootstrappedItem(item));
+    next[item.itemKey] = freezeDeep(structuredClone(item));
   }
   itemByKey = Object.freeze(next);
   catalogReady = true;
@@ -158,15 +148,15 @@ export function getTopLightItemForType(type) {
 // Katalog dışı SVG → ışıklı strafor. itemKey type ile aynıdır; Catalog kartı yoktur.
 
 
-// Zemin kaplamaları modül değildir; persist alanı stand.itemKey (eski kayıt: floorType). Katalog/recipe yok.
+// Zemin kaplamaları modül değildir; persist alanı stand.itemKey. Katalog/recipe yok.
 
 
 export function listFloorItems() {
   return Object.values(requireRegistry()).filter((item) => item.type === 'floor');
 }
 
-export function getFloorItem(floorType) {
-  const item = requireRegistry()[floorType];
+export function getFloorItem(itemKey) {
+  const item = requireRegistry()[itemKey];
   return item?.type === 'floor' ? item : null;
 }
 
@@ -201,7 +191,7 @@ export function isCarpetFloorItem(item) {
 export function resolveStandFloorItemKey(standOrKey) {
   const raw = typeof standOrKey === 'string'
     ? standOrKey
-    : (standOrKey?.itemKey ?? standOrKey?.floorType ?? null);
+    : (standOrKey?.itemKey ?? null);
   return getFloorItem(raw)?.itemKey ?? getFloorItem('karolaj').itemKey;
 }
 
@@ -210,7 +200,7 @@ export function getFurnitureClusterQuantity(item, childItemKey) {
   return entry == null ? null : Number(entry.quantity);
 }
 
-// Yapay bitki / uzun saksı ailesi. Hepsi type `indoor-plant-1`; ayrım itemKey + ölçü/modelFile.
+// Yapay bitki / uzun saksı ailesi. Hepsi type `indoor-plant-1`; ayrım kayıtlı itemKey.
 // BOM decision-required — composition/recipe uydurulmaz.
 
 
@@ -351,67 +341,12 @@ export function requireSceneDimension(item, field) {
   return value;
 }
 
-// Katalogdaki düz bankolarda `shape` yoktur; runtime state `shape: 'straight'` kullanır.
-function shapesMatch(want, have) {
-  const normalizedWant = want === 'L' ? 'L' : (want == null ? null : 'straight');
-  const normalizedHave = have === 'L' ? 'L' : (have == null ? null : 'straight');
-  if (normalizedWant === null) return true;
-  if (normalizedHave === null && normalizedWant === 'straight') return true;
-  return normalizedWant === normalizedHave;
-}
-
-function normalizeItemDescriptor(descriptor) {
-  const nested = descriptor?.moduleState && typeof descriptor.moduleState === 'object'
-    ? descriptor.moduleState
-    : null;
-  const source = nested ?? descriptor ?? {};
-  return {
-    itemKey: source.itemKey ?? descriptor?.itemKey ?? null,
-    type: source.type ?? source.moduleType ?? descriptor?.type ?? descriptor?.moduleType ?? null,
-    widthCm: optionalNumber(source.widthCm ?? descriptor?.widthCm),
-    depthCm: optionalNumber(source.depthCm ?? descriptor?.depthCm),
-    shape: source.shape ?? source.counterShape ?? descriptor?.shape ?? descriptor?.counterShape ?? null,
-    modelFile: source.modelFile ?? descriptor?.modelFile ?? null,
-    variant: source.variant ?? descriptor?.variant ?? null,
-  };
-}
-
 // Catalog projection'ı taklit etmez; Item master + resolveSceneDimensions okur.
-function getItemIdentityFields(item) {
-  const scene = resolveSceneDimensions(item);
-  return {
-    type: item.type,
-    widthCm: optionalNumber(scene.widthCm),
-    depthCm: optionalNumber(scene.depthCm),
-    shape: item.shape ?? null,
-    modelFile: item.modelFile ?? null,
-    variant: item.variant ?? null,
-  };
-}
-
 // Item identity çözümlemesi Catalog üyeliğine bağlı değildir.
+// Item kimliği yalnız kayıtlı itemKey'dir; type/ölçü/shape/modelFile tahmini yoktur.
 export function resolveItemKey(descriptor) {
-  const normalized = normalizeItemDescriptor(descriptor);
-  if (normalized.itemKey && getItem(normalized.itemKey)) return normalized.itemKey;
-  if (!normalized.type) return null;
-  // shelf identity yalnız exact itemKey; type/width/shelfCount tahmini yok
-  if (normalized.type === 'shelf') return null;
-
-  const candidates = listRegisteredItems().filter((item) => item.type === normalized.type);
-  if (!candidates.length) return null;
-
-  const matches = candidates.filter((item) => {
-    const fields = getItemIdentityFields(item);
-    if (normalized.widthCm !== null && optionalNumber(fields.widthCm) !== null && optionalNumber(fields.widthCm) !== normalized.widthCm) return false;
-    if (normalized.depthCm !== null && optionalNumber(fields.depthCm) !== null && optionalNumber(fields.depthCm) !== normalized.depthCm) return false;
-    if ((normalized.shape !== null || fields.shape != null)
-      && !shapesMatch(normalized.shape, fields.shape)) return false;
-    if ((normalized.modelFile !== null || fields.modelFile != null) && (fields.modelFile ?? null) !== normalized.modelFile) return false;
-    if ((normalized.variant != null || fields.variant != null) && (fields.variant ?? null) !== (normalized.variant ?? null)) return false;
-    return true;
-  });
-
-  if (matches.length === 1) return matches[0].itemKey;
-  if (candidates.length === 1) return candidates[0].itemKey;
-  return null;
+  const itemKey = typeof descriptor === 'string'
+    ? descriptor
+    : (descriptor?.itemKey ?? descriptor?.moduleState?.itemKey ?? null);
+  return itemKey && getItem(itemKey) ? itemKey : null;
 }

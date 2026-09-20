@@ -34,7 +34,7 @@ export function getModuleRecipe(moduleType, widthCm, options = {}) {
 }
 
 export function getExpandedModuleRecipe(moduleType, widthCm, options = {}) {
-  return expandRecipe(recipeParentItem(moduleType, widthCm, options), options);
+  return expandRecipe(recipeParentItem(moduleType, widthCm, options));
 }
 
 export function getStraightWallRecipe(widthCm) {
@@ -45,8 +45,8 @@ export function listStraightWallRecipes() {
   return [50, 100, 150, 200].map((widthCm) => getStraightWallRecipe(widthCm));
 }
 
-export function getExpandedStraightWallRecipe(widthCm, options = {}) {
-  return expandRecipe(getItem(`wall_${widthCm}`), options);
+export function getExpandedStraightWallRecipe(widthCm) {
+  return expandRecipe(getItem(`wall_${widthCm}`));
 }
 
 export { expandRecipe, getRecipeItemKey };

@@ -110,16 +110,16 @@ for (const itemKey of PLANT_KEYS) {
     assert.equal(contract.profile, expected.profile);
     assert.equal(contract.bom.mode, 'decision-required');
 
-    const legacy = JSON.parse(JSON.stringify(state));
-    delete legacy.itemKey;
-    const restored = normalizeModuleItemState(legacy);
-    assert.equal(restored.itemKey, itemKey);
+    assert.equal(resolveItemKey(state), itemKey);
+    const missingKey = JSON.parse(JSON.stringify(state));
+    delete missingKey.itemKey;
     assert.equal(resolveItemKey({
-      type: restored.type,
-      widthCm: restored.widthCm,
-      depthCm: restored.depthCm,
-      modelFile: restored.modelFile,
-    }), itemKey);
+      type: missingKey.type,
+      widthCm: missingKey.widthCm,
+      depthCm: missingKey.depthCm,
+      modelFile: missingKey.modelFile,
+    }), null);
+    assert.equal(normalizeModuleItemState(missingKey).itemKey, undefined);
 
     const duplicate = duplicateModuleState(state);
     assert.notEqual(duplicate.id, state.id);

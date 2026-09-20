@@ -212,15 +212,15 @@ for (const itemKey of Object.keys(EXPECTED)) {
     assert.equal(contract.bom.mode, 'decision-required');
     assert.equal(contract.bom.source, null);
 
-    const legacy = JSON.parse(JSON.stringify(state));
-    delete legacy.itemKey;
-    const restored = normalizeModuleItemState(legacy);
-    assert.equal(restored.itemKey, itemKey);
+    assert.equal(resolveItemKey(state), itemKey);
+    const missingKey = JSON.parse(JSON.stringify(state));
+    delete missingKey.itemKey;
     assert.equal(resolveItemKey({
-      type: restored.type,
-      widthCm: restored.widthCm,
-      depthCm: restored.depthCm,
-    }), itemKey);
+      type: missingKey.type,
+      widthCm: missingKey.widthCm,
+      depthCm: missingKey.depthCm,
+    }), null);
+    assert.equal(normalizeModuleItemState(missingKey).itemKey, undefined);
 
     const duplicate = duplicateModuleState(state);
     assert.notEqual(duplicate.id, state.id);

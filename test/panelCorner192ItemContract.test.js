@@ -25,7 +25,7 @@ test('panel_corner_192 is a canonical single production Item', () => {
 
 test('panel_corner_192 is not selected by wall_200 recipe expansion', () => {
   const recipe = getModuleRecipe('wall', 200);
-  const expanded = getExpandedModuleRecipe('wall', 200, { panelVariant: 'inner-corner' });
+  const expanded = getExpandedModuleRecipe('wall', 200);
   assert.ok(recipe.items.find((item) => getRecipeItemKey(item) === 'panel_197'));
   assert.equal(recipe.items.find((item) => getRecipeItemKey(item) === 'panel_corner_192'), undefined);
   assert.equal(expanded.items.find((item) => item.itemKey === 'panel_197').quantity, 7);
