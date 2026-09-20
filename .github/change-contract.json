@@ -35,6 +35,7 @@
   "impactAnalysis": {
     "mode": "full-system",
     "affectedFiles": [
+      "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
       "docs/items/audit/hedef/ATOMIK_MEKANIZMA.html",
       "docs/items/audit/report/ITEM_SYSTEM_AUDIT.html",
       "docs/items/audit/report/MEKANIZMA_PARAMETRE.html",
@@ -68,6 +69,7 @@
       "src/selectionFeedback.js",
       "src/standStandardsCopy.js",
       "src/stripOccupancy.js",
+      "src/systemChangeContract.js",
       "src/wallReflow.js"
     ],
     "affectedTests": [
@@ -224,6 +226,7 @@
       "test/straightPanelsItemContract.test.js",
       "test/stripOccupancy.test.js",
       "test/surfaceStateBinding.test.js",
+      "test/systemChangeGate.test.js",
       "test/systemChangeGateLocalDiff.test.js",
       "test/systemDevelopmentContract.test.js",
       "test/systemImpactAnalysis.test.js",
@@ -289,10 +292,12 @@
       "CODE_ATLAS/REMEDIATION/FINAL_REMEDIATION_REPORT.md",
       "FRESH_REPOSITORY_REVIEW.md",
       "PROJECT_RULES.md",
+      "README.md",
       "REPOSITORY_CLEANUP_PROGRESS.md",
       "ROADMAP.md",
       "ROADMAP_PHASE_4.md",
       "SYSTEM_AUDIT_CHECKLIST.md",
+      "SYSTEM_DEVELOPMENT_CONTRACT.md",
       "SYSTEM_MODULE_CATALOG.md",
       "audit/FINDINGS.md",
       "audit/SISTEM_MUTABAKAT_RAPORU.md",
