@@ -19,6 +19,8 @@ fail() {
   exit 1
 }
 
+fail "Fair Stand is not a second public site. Configurator ships with Fair CRM. Bring up Core+CRM+Stand with sudo bash /opt/fair-crm/scripts/server/deploy-all.sh. Catalog API only: sudo bash /opt/fair-stand/scripts/server/deploy.sh"
+
 if [[ "${EUID}" -ne 0 ]]; then
   fail "Bu script root olarak çalıştırılmalı: sudo bash scripts/install-server.sh"
 fi

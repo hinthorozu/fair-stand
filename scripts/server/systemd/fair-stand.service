@@ -1,7 +1,7 @@
 [Unit]
 Description=Fair Stand API
-After=network-online.target
-Wants=network-online.target
+After=network-online.target kyrox-core.service docker.service
+Wants=network-online.target kyrox-core.service
 
 [Service]
 Type=simple
