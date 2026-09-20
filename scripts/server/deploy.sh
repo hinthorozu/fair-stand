@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Independent Fair Stand API deploy. Does not build or restart Core, CRM, or mail worker.
+# Independent Fair Stand API deploy (pip, alembic, fair-stand.service, :8002 health).
+# Integrated Core+CRM+Stand bring-up is Fair CRM scripts/server/deploy-all.sh.
 # Configurator UI continues to ship with the CRM frontend (@fair-stand alias).
 set -euo pipefail
 FAIR_STAND_DIR="${FAIR_STAND_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"

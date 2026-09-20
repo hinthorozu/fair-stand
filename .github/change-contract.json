@@ -39,6 +39,7 @@
       "docs/items/audit/report/audit-data.json",
       "scripts/server/deploy.sh",
       "scripts/server/systemd/fair-stand.service",
+      "scripts/install-server.sh",
       "scripts/verify-change-contract.mjs",
       "src/systemChangeContract.js",
       "test/systemChangeGateCiContract.test.js"
