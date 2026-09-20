@@ -33,8 +33,8 @@ function sanitizeBootstrappedItem(item) {
 }
 
 export function initializeItemRegistry(items) {
-  if (!Array.isArray(items) || items.length === 0) {
-    throw new TypeError('Fair Stand Item catalog bootstrap returned no Items.');
+  if (!Array.isArray(items)) {
+    throw new TypeError('Fair Stand Item catalog bootstrap items must be an array.');
   }
   const next = Object.create(null);
   for (const item of items) {
