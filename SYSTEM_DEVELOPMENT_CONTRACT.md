@@ -276,11 +276,12 @@ Depo içeriği değişirse yalnız renderer içine obje eklenmez.
 11. Yeni bulunan caller/test/doc/finding yüzeylerini review edip contract'ı güncelle.
 12. Targeted regressionları çalıştır.
 13. `npm test` çalıştır.
-14. `npm run build` çalıştır.
-15. Playwright/Chromium hazır değilse local runner/browser dependency'lerini kur.
-16. `npm run e2e` çalıştır.
-17. PR aç; canonical CI'nın `contract:verify → npm ci → npm test → npm run build → Chromium → npm run e2e` zinciri yeşil olmalı.
-18. Merge sonrası post-merge main CI yeşil olmadan finding/iş tamamlandı sayılmaz.
+14. `cd backend && python -m pytest` çalıştır.
+15. `npm run build` çalıştır.
+16. Playwright/Chromium hazır değilse local runner/browser dependency'lerini kur.
+17. `npm run e2e` çalıştır.
+18. PR aç; canonical CI'nın `contract:verify → npm ci → npm test → python -m pytest → npm run build → Chromium → npm run e2e` zinciri yeşil olmalı.
+19. Merge sonrası post-merge main CI yeşil olmadan finding/iş tamamlandı sayılmaz.
 
 ---
 

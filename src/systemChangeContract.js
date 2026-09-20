@@ -377,7 +377,8 @@ export function isGuardedChangeFile(path) {
     || path.startsWith('e2e/')
     || path.startsWith('.github/workflows/')
     || path.startsWith('vite.config')
-    || path.startsWith('playwright.config');
+    || path.startsWith('playwright.config')
+    || path.startsWith('backend/');
 }
 
 export function requiredDomainsForFile(path) {
@@ -388,7 +389,9 @@ export function requiredDomainsForFile(path) {
 
   if (path === 'index.html') required.add('ui');
   if (path.startsWith('public/')) required.add('assets');
-  if (path.startsWith('test/') || path.startsWith('tests/') || path.startsWith('e2e/')) required.add('tests');
+  if (path.startsWith('test/') || path.startsWith('tests/') || path.startsWith('e2e/') || path.startsWith('backend/tests/')) {
+    required.add('tests');
+  }
 
   if (
     path === 'package.json'
@@ -397,8 +400,14 @@ export function requiredDomainsForFile(path) {
     || path.startsWith('.github/workflows/')
     || path.startsWith('vite.config')
     || path.startsWith('playwright.config')
+    || path.startsWith('backend/')
   ) {
     required.add('architecture');
+  }
+
+  if (path.startsWith('backend/') && !path.startsWith('backend/tests/')) {
+    required.add('security');
+    required.add('tests');
   }
 
   if (path.startsWith('playwright.config')) required.add('tests');

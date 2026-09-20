@@ -1,0 +1,146 @@
+from collections.abc import Sequence
+from uuid import UUID
+
+import httpx
+from fastapi import Depends, Header, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.orm import Session
+
+from app.db.session import get_db
+from app.integrations.kyrox_core.auth import AuthContext
+from app.integrations.kyrox_core.client import HttpAuthorizationAdapter, KyroxCoreHttpClient
+from app.integrations.kyrox_core.dev_bypass import (
+    AllowAllAuthorizationAdapter,
+    dev_bypass_enabled,
+    resolve_auth_context,
+)
+from app.integrations.kyrox_core.ports import AuthorizationPort
+from app.modules.fair_stand.application.admin_catalog import AdminCatalogService
+from app.modules.fair_stand.application.get_catalog_bootstrap import GetCatalogBootstrapUseCase
+from app.modules.fair_stand.application.get_item import GetItemUseCase
+from app.modules.fair_stand.infrastructure.catalog_repository import SqlAlchemyFairStandCatalogRepository
+
+bearer_scheme = HTTPBearer(auto_error=False)
+
+PERMISSION_CATALOG_READ = "fair_crm.admin.fair_stand.catalog.read"
+PERMISSION_CATALOG_CREATE = "fair_crm.admin.fair_stand.catalog.create"
+PERMISSION_CATALOG_UPDATE = "fair_crm.admin.fair_stand.catalog.update"
+PERMISSION_CATALOG_ARCHIVE = "fair_crm.admin.fair_stand.catalog.archive"
+PERMISSION_PREVIEWS_READ = "fair_crm.admin.fair_stand.previews.read"
+PERMISSION_PREVIEWS_CREATE = "fair_crm.admin.fair_stand.previews.create"
+PERMISSION_PREVIEWS_UPDATE = "fair_crm.admin.fair_stand.previews.update"
+PERMISSION_PREVIEWS_ARCHIVE = "fair_crm.admin.fair_stand.previews.archive"
+
+
+def get_catalog_repository(db: Session = Depends(get_db)) -> SqlAlchemyFairStandCatalogRepository:
+    return SqlAlchemyFairStandCatalogRepository(db)
+
+
+def get_catalog_bootstrap_use_case(
+    repository: SqlAlchemyFairStandCatalogRepository = Depends(get_catalog_repository),
+) -> GetCatalogBootstrapUseCase:
+    return GetCatalogBootstrapUseCase(repository)
+
+
+def get_item_use_case(
+    repository: SqlAlchemyFairStandCatalogRepository = Depends(get_catalog_repository),
+) -> GetItemUseCase:
+    return GetItemUseCase(repository)
+
+
+def get_admin_catalog_service(
+    db: Session = Depends(get_db),
+    repository: SqlAlchemyFairStandCatalogRepository = Depends(get_catalog_repository),
+) -> AdminCatalogService:
+    return AdminCatalogService(session=db, repository=repository)
+
+
+def get_core_http_client() -> KyroxCoreHttpClient:
+    return KyroxCoreHttpClient()
+
+
+def get_auth_context(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    organization_id: UUID = Header(..., alias="X-Organization-Id"),
+    dev_user_id: UUID | None = Header(default=None, alias="X-Dev-User-Id"),
+) -> AuthContext:
+    try:
+        return resolve_auth_context(credentials, organization_id, dev_user_id=dev_user_id)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated") from exc
+
+
+def require_fair_stand_catalog_access(
+    auth: AuthContext = Depends(get_auth_context),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    core_http: KyroxCoreHttpClient = Depends(get_core_http_client),
+) -> AuthContext:
+    if dev_bypass_enabled():
+        return auth
+    if credentials is None or not credentials.credentials:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    try:
+        response = core_http.request(
+            "GET",
+            f"/api/v1/organizations/{auth.organization_id}/access/verify",
+            access_token=credentials.credentials,
+            organization_id=auth.organization_id,
+        )
+    except httpx.RequestError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Organization access service unavailable",
+        ) from exc
+    if response.status_code == status.HTTP_401_UNAUTHORIZED:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    if response.status_code == status.HTTP_403_FORBIDDEN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Organization access denied")
+    if response.status_code >= 400:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Organization access check failed",
+        )
+    return auth
+
+
+def get_authorization_adapter() -> AuthorizationPort:
+    if dev_bypass_enabled():
+        return AllowAllAuthorizationAdapter()
+    return HttpAuthorizationAdapter()
+
+
+def _require_any_permission(permission_codes: Sequence[str]):
+    def dependency(
+        auth: AuthContext = Depends(get_auth_context),
+        authorization: AuthorizationPort = Depends(get_authorization_adapter),
+        credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    ) -> AuthContext:
+        if dev_bypass_enabled():
+            return auth
+        if credentials is None or not credentials.credentials:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+        if not any(
+            authorization.check_permission(
+                organization_id=auth.organization_id,
+                user_id=auth.user_id,
+                permission_code=permission_code,
+                access_token=credentials.credentials,
+            )
+            for permission_code in permission_codes
+        ):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+        return auth
+
+    return dependency
+
+
+def require_permission(permission_code: str):
+    return _require_any_permission((permission_code,))
+
+
+def require_any_permission(*permission_codes: str):
+    if not permission_codes:
+        raise ValueError("At least one permission code is required")
+    return _require_any_permission(permission_codes)
