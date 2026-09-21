@@ -124,11 +124,11 @@ Module type'a göre değişen editor davranışlarının canonical kaynağıdır
 
 - placement mode,
 - move snap,
-- rotation step,
-- default rotation,
 - side insertion,
 - collision strategy,
 - ghost strategy.
+
+Sahne Z dönüş adımı / varsayılan / yan ek Item kolonlarıdır: `docs/refactor/ROTATION.md`. `TYPE_BEHAVIORS` rotation taşımaz. Getter'lar `src/moduleBehavior.js` içindedir.
 
 Katalogdaki her mevcut runtime type explicit behavior coverage taşımak zorundadır.
 

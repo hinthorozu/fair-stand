@@ -16,12 +16,11 @@ Kanıtlı zincir. Yeni mimari önerisi yok.
 
 ## Type ailesi davranış
 
-`TYPE_BEHAVIORS` 27 anahtar. Item-level davranış override yalnız:
+`TYPE_BEHAVIORS` 27 anahtar. Rotation Item kolonudur (`docs/refactor/ROTATION.md`); type override yoktur.
 
-1. `counter` + `shape==='L'` → `defaultRotationDeg: 270` — `getModuleBehavior`
-2. `counter` + düz + width 100/150/200 → `rotationStepDeg: 45` — `getModuleBehavior`
-3. `bar-stool` type kaydı: `rotationStepDeg: 45`, `defaultRotationDeg: 270`, `sideInsertRotation: 'default'`
-4. `base-wall` type kaydı: `collisionDepth: 'wall-backbone'`
+Kalan type-level ezme:
+
+1. `base-wall` type kaydı: `collisionDepth: 'wall-backbone'`
 
 ## Profil sözleşmesi
 

@@ -63,7 +63,7 @@ Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste süt
 | `collisionDepth` | physical | TYPE_BEHAVIORS[type] + item descriptor override |
 | `collisionHeight` | full | TYPE_BEHAVIORS[type] + item descriptor override |
 | `connectionEndpoint` | segment | TYPE_BEHAVIORS[type] + item descriptor override |
-| `defaultRotationDeg` | 0 | TYPE_BEHAVIORS[type] + item descriptor override |
+| `defaultRotationDeg` | 0 | Item kolon (`docs/refactor/ROTATION.md`) |
 | `endpointContact` | standard | TYPE_BEHAVIORS[type] + item descriptor override |
 | `ghost.kind` | silhouette | TYPE_BEHAVIORS[type] + item descriptor override |
 | `ghost.opacity` | 0.38 | TYPE_BEHAVIORS[type] + item descriptor override |
@@ -72,8 +72,8 @@ Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste süt
 | `moveSnapCm` | 50 | TYPE_BEHAVIORS[type] + item descriptor override |
 | `overlapWithTypes` | [] | TYPE_BEHAVIORS[type] + item descriptor override |
 | `placement` | wall | TYPE_BEHAVIORS[type] + item descriptor override |
-| `rotationStepDeg` | 90 | TYPE_BEHAVIORS[type] + item descriptor override |
-| `sideInsertRotation` | inherit | TYPE_BEHAVIORS[type] + item descriptor override |
+| `rotationStepDeg` | 90 | Item kolon (`docs/refactor/ROTATION.md`) |
+| `sideInsertRotation` | inherit | Item kolon (`docs/refactor/ROTATION.md`) |
 | `supportsWallOverlayMount` | evet | TYPE_BEHAVIORS[type] + item descriptor override |
 | `wallCapacity` | include | TYPE_BEHAVIORS[type] + item descriptor override |
 | collisionHeightRange | `{"minCm":0,"maxCm":350}` | `getModuleCollisionHeightRangeCm` |

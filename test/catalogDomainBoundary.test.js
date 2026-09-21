@@ -120,6 +120,10 @@ test('ROTATION.md Item rotation sözleşmesidir; TYPE_BEHAVIORS rotation taşım
   const behavior = readFileSync(new URL('../src/moduleBehavior.js', import.meta.url), 'utf8');
   assert.match(rotationDoc, /rotationStepDeg/);
   assert.match(itemsDoc, /docs\/refactor\/ROTATION\.md/);
+  assert.doesNotMatch(itemsDoc, /\| rotation \| Rotation \| henüz belirlenmedi \| yapılmadı \|/);
+  const behaviorStandard = readFileSync(new URL('../MODULE_BEHAVIOR_STANDARD.md', import.meta.url), 'utf8');
+  assert.match(behaviorStandard, /docs\/refactor\/ROTATION\.md/);
+  assert.doesNotMatch(behaviorStandard, /rotationStepDeg`: R \/ Shift\+R/);
   assert.match(behavior, /resolveRotationItem/);
   assert.doesNotMatch(behavior, /STRAIGHT_COUNTER_WIDTHS_CM/);
 });

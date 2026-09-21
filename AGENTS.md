@@ -23,7 +23,7 @@ Her değişiklikten önce işin kapsamına göre aşağıdaki canonical belgeler
 4. `PROJECT_RULES.md`
 5. `ARCHITECTURE_RULES.md`
 6. **`ITEM_CONTRACT.md`** — fiziksel ürün, zemin, malzeme, BOM, üretim, maliyet, katalog, runtime item/module, context-menu behavior veya item state ile ilgili her işte zorunludur.
-7. `MODULE_BEHAVIOR_STANDARD.md` — type bazlı editor/runtime davranışı etkileniyorsa zorunludur.
+7. `MODULE_BEHAVIOR_STANDARD.md` — type bazlı editor/runtime davranışı etkileniyorsa zorunludur. Sahne Z dönüşü için ayrıca `docs/refactor/ROTATION.md`.
 
 ## Item gate
 

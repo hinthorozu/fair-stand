@@ -10,7 +10,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `createEamesChairModuleState` Item’dan default üretir; `itemKey` damgalar; editable `surface` korunur (`free-model-color`). Yüklemede `normalizeModuleItemState` doldurur; takma ad yok.
 
 ## Davranış ve renderer sınırı
-`moduleBehavior.js > chair`: free, snap 10, rotation step 90°, default rotation 0°, `collision: none`, `magneticSnap: none`, boundary `stand-edge`. GLB/material hedefi iş tek kaynağı değildir. `furniture_table_chair_set_eames` bu Item’ın parent kümesidir (`1 × glass_table` + `4 × chair_eames`).
+`moduleBehavior.js > chair`: free, snap 10, `collision: none`, `magneticSnap: none`, boundary `stand-edge`. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`). GLB/material hedefi iş tek kaynağı değildir. `furniture_table_chair_set_eames` bu Item’ın parent kümesidir (`1 × glass_table` + `4 × chair_eames`).
 
 ## Regresyon
 `test/furnitureItemsContract.test.js`; `test/chairEamesContract.test.js`; E2E `e2e/furniture-items-contract.spec.mjs`.

@@ -73,8 +73,8 @@ Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste süt
 | `moveSnapCm` | 50 | TYPE_BEHAVIORS[type] + item descriptor override |
 | `overlapWithTypes` | [] | TYPE_BEHAVIORS[type] + item descriptor override |
 | `placement` | free | TYPE_BEHAVIORS[type] + item descriptor override |
-| `rotationStepDeg` | 90 | TYPE_BEHAVIORS[type] + item descriptor override |
-| `sideInsertRotation` | inherit | TYPE_BEHAVIORS[type] + item descriptor override |
+| `rotationStepDeg` | 90 | Item kolon (`docs/refactor/ROTATION.md`) |
+| `sideInsertRotation` | inherit | Item kolon (`docs/refactor/ROTATION.md`) |
 | `supportsWallOverlayMount` | hayır | TYPE_BEHAVIORS[type] + item descriptor override |
 | `wallCapacity` | include | TYPE_BEHAVIORS[type] + item descriptor override |
 | collisionHeightRange | `{"minCm":0,"maxCm":100}` | `getModuleCollisionHeightRangeCm` |

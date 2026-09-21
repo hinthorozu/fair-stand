@@ -30,6 +30,8 @@ Leaf (panel, connector, zemin, kapak, `VIDEO_WALL_PANEL`…) üçü `null`. Sahn
 
 Sistemde kalan: `placement.rotationZDeg`, merkez dönüş, normalize, `rotationLocked`, 90/270 dikey duvar, kardinal manyetik snap.
 
+`docs/items/current-system/` ve `audit/evidence/` tarihsel envanterdir; rotation sahibi değildir. Yaşayan sözleşme bu dosya.
+
 ---
 
 ## Seed (bugünkü sahne)

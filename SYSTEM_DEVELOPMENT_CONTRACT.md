@@ -34,7 +34,8 @@ Universal gate gerçek etki alanını ve bağımlılıkları bulur; `ITEM_CONTRA
 | Katalog kimliği / nominal descriptor | `src/catalog.js` |
 | Modül contract profile / politika ataması (GOVERNANCE spec; runtime SoT değil) | `src/moduleContracts.js` |
 | Feature / composition contract (GOVERNANCE; planner runtime okumaz) | `src/featureContracts.js` |
-| Placement / move snap / rotation / collision / ghost | `src/moduleBehavior.js` + placement core (`wallReflow.js` production insert) |
+| Placement / move snap / collision / ghost | `src/moduleBehavior.js` + placement core (`wallReflow.js` production insert) |
+| Sahne Z rotation (step / default / sideInsert) | Item kolonları → `docs/refactor/ROTATION.md`; getter `src/moduleBehavior.js` |
 | Runtime module state construction | `src/designState.js` |
 | Üretim reçetesi / runtime BOM | `src/moduleRecipes.js` + `src/itemBom.js` |
 | Üretim parçası / Item registry | `src/items.js` |
@@ -118,7 +119,7 @@ Module-only kapsamda mevcut catalog identity kuralları korunur.
 
 - placement mode nedir?
 - move snap nedir?
-- rotation step/default/limit nedir?
+- rotation step/default/sideInsert nedir? (`docs/refactor/ROTATION.md`; Item kolonları, `TYPE_BEHAVIORS` değil)
 - collision strategy nedir?
 - side insert var mı?
 - ghost nasıl davranır?

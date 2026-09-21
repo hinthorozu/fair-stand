@@ -10,7 +10,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `createLedFloodlightModuleState` Item’dan default üretir; `itemKey` damgalar; `surface.color=#17191c` korunur. Yüklemede `normalizeModuleItemState` type `led-floodlight` için doldurur. Recipe yok.
 
 ## Davranış ve renderer sınırı
-`moduleBehavior.js > led-floodlight`: yerleşim `top`, snap `20 cm`, rotation `90°`, `collision: none`, `wallCapacity: exclude`. Prosedürel gövde/45 LED noktası/spotlight renderer temsilidir; BOM değildir. Mesh metre ölçüleri değiştirilmedi.
+`moduleBehavior.js > led-floodlight`: yerleşim `top`, snap `20 cm`, `collision: none`, `wallCapacity: exclude`. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`). Prosedürel gövde/45 LED noktası/spotlight renderer temsilidir; BOM değildir. Mesh metre ölçüleri değiştirilmedi.
 
 ## Regresyon
 `test/lightingItemsContract.test.js`; `test/ledFloodlightModule.test.js`; E2E `e2e/lighting-items-contract.spec.mjs`.

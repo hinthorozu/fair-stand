@@ -109,7 +109,7 @@ Parent `door_100`, `type=door` olduğu için mevcut `WALL_BEHAVIOR` contract'ın
 
 - duvar yerleşimi,
 - 50 cm move snap,
-- 90° rotation,
+- sahne Z Item kolonları (`docs/refactor/ROTATION.md`),
 - segment collision,
 - standard magnetic snap,
 - side insert,

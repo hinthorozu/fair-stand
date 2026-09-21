@@ -265,7 +265,7 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 | `previewId` | Catalog | `getCatalogItem` / `listCatalogItems` → `CATALOG_PREVIEW_RENDERERS` | mevcut |
 | `dimensions` / `sceneDimensions` | Item ölçü | `resolveSceneDimensions` | mevcut |
 | `itemKey` | Item identity | `getItem` / `listRegisteredItems` / `resolveItemKey` | mevcut |
-| rotation | Rotation | henüz belirlenmedi | yapılmadı |
+| `rotationStepDeg` / `defaultRotationDeg` / `sideInsertRotation` | Rotation | `getModuleRotationStepDeg` / `getModuleDefaultRotationDeg` / `resolveSideInsertRotationDeg` | mevcut (`docs/refactor/ROTATION.md`) |
 | color | Color | henüz belirlenmedi | yapılmadı |
 | image | Image | henüz belirlenmedi | yapılmadı |
 | lighting | Lighting | henüz belirlenmedi | yapılmadı |
@@ -275,7 +275,7 @@ Catalog satırı: UI `listCatalogGroups()` + `getCatalogItem()`. Kart descriptor
 
 Item master ile Catalog projection ayrıdır. Projection alias’ları (`label`, kök `widthCm`) Item alanı değildir. Item master Catalog’dan bağımsızdır.
 
-`ROTATION.md` vb. yokken bu satırlar yer tutucudur; config şeması değildir.
+Color / image / lighting / delete satırları yer tutucudur; config şeması değildir. Rotation sözleşmesi `docs/refactor/ROTATION.md`.
 
 ---
 
@@ -305,6 +305,9 @@ Item {
     lengthCm?: number
     thicknessCm?: number
   }
+  rotationStepDeg?: number
+  defaultRotationDeg?: number
+  sideInsertRotation?: 'inherit' | 'default'
 }
 ```
 
@@ -341,5 +344,7 @@ Item {
 - Effective scene field yalnız same-field: `sceneDimensions.field ?? dimensions.field ?? MISSING`
 - Aynı kategoride duplicate `catalogItemIndex` yasak
 - Index her kategoride `1..N` kesintisiz
+- Yerleşen 61 Item: `rotationStepDeg`, `defaultRotationDeg`, `sideInsertRotation` birlikte dolu
+- Leaf 35 Item: üç rotation alanı yok (null / omit)
 
-Test: `test/itemCatalogFields.test.js`, `test/itemSceneDimensions.test.js`
+Test: `test/itemCatalogFields.test.js`, `test/itemSceneDimensions.test.js`, `test/itemRotation.test.js`
