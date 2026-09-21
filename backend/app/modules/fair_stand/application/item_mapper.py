@@ -199,8 +199,16 @@ def stand_dimensions_payload(dimensions: StandDimensions) -> dict:
 
 
 def map_runtime_settings(row) -> RuntimeSettings:
-    return RuntimeSettings(max_image_upload_mb=int(row.max_image_upload_mb))
+    return RuntimeSettings(
+        max_image_upload_mb=int(row.max_image_upload_mb),
+        export_button_visible=bool(row.export_button_visible),
+        import_button_visible=bool(row.import_button_visible),
+    )
 
 
 def runtime_settings_payload(settings: RuntimeSettings) -> dict:
-    return {"maxImageUploadMb": settings.max_image_upload_mb}
+    return {
+        "maxImageUploadMb": settings.max_image_upload_mb,
+        "exportButtonVisible": settings.export_button_visible,
+        "importButtonVisible": settings.import_button_visible,
+    }

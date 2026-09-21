@@ -60,7 +60,7 @@ import {
   IMAGE_UPLOAD_TYPE_MESSAGE,
   isImageUploadWithinSizeLimit,
 } from './imageOptimize.js';
-import { formatImageUploadTooLargeMessage } from './runtimeSettings.js';
+import { formatImageUploadTooLargeMessage, applyArchiveButtonVisibility } from './runtimeSettings.js';
 import { getFairStandHostDocument, getFairStandHostWindow } from './hostDocument.js';
 import { bootstrapFairStandCatalog } from './catalogBootstrap.js';
 import { bindProjectActionSaveGuard } from './projectActionSaveGuard.js';
@@ -105,6 +105,7 @@ function startFairStandConfiguratorRuntime() {
     throw new Error('Fair Stand host document is not available.');
   }
   const unbindProjectActionSaveGuard = bindProjectActionSaveGuard({ documentRef: document });
+  applyArchiveButtonVisibility(document);
 let jsZipModulePromise = null;
 
 async function loadJSZip() {

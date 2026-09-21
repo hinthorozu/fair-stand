@@ -1,17 +1,17 @@
 {
   "schemaVersion": 2,
-  "id": "image-upload-mb-from-db",
+  "id": "archive-button-visibility-settings",
   "kind": "feature",
-  "summary": "Image upload MB cap comes from fair_stand_settings via catalog bootstrap. Oversize files open a popup instead of the sidebar status line. JS no longer hardcodes 5 MB.",
+  "summary": "Export and import project buttons are shown or hidden from fair_stand_settings via catalog bootstrap. Markup starts hidden so the controls never flash before settings arrive.",
   "owners": [
     "src/runtimeSettings.js",
-    "src/imageOptimize.js",
     "src/main.js",
     "backend/app/modules/fair_stand/infrastructure/models.py"
   ],
   "sourceOfTruth": [
     "src/runtimeSettings.js",
-    "backend/app/modules/fair_stand/infrastructure/models.py"
+    "backend/app/modules/fair_stand/infrastructure/models.py",
+    "docs/refactor/DATABASE.md"
   ],
   "impact": {
     "catalog": "affected",
@@ -36,7 +36,12 @@
     "mode": "full-system",
     "affectedFiles": [
       "backend/alembic/data/0002_fair_stand_catalog_dump.json",
+      "backend/alembic/versions/0011_archive_button_visibility.py",
+      "backend/app/modules/fair_stand/application/item_mapper.py",
+      "backend/app/modules/fair_stand/domain/entities.py",
       "backend/app/modules/fair_stand/infrastructure/catalog_preview_css.py",
+      "backend/app/modules/fair_stand/infrastructure/models.py",
+      "backend/app/modules/fair_stand/infrastructure/runtime_settings_seed.py",
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
       "docs/items/audit/hedef/ATOMIK_MEKANIZMA.html",
       "docs/items/audit/report/ITEM_SYSTEM_AUDIT.html",
@@ -47,6 +52,7 @@
       "scripts/archive/add-video-wall-2x2.py",
       "scripts/archive/fix-tv-screen-face.py",
       "scripts/export-catalog-seed.mjs",
+      "scripts/install-server.sh",
       "scripts/verify-change-contract.mjs",
       "src/assetStore.js",
       "src/autoDepot.js",
@@ -112,6 +118,7 @@
       "e2e/module-move-snap.spec.mjs",
       "e2e/plastic-trash-bin-module.spec.mjs",
       "e2e/project-import-export-roundtrip.spec.mjs",
+      "e2e/project-import-validation.spec.mjs",
       "e2e/rapid-actions-responsive.spec.mjs",
       "e2e/reload-restore.spec.mjs",
       "e2e/stage-result-after-restore.spec.mjs",
@@ -186,6 +193,7 @@
       "test/helpGuide.test.js",
       "test/historicalDocumentationStatus.test.js",
       "test/horizontalPanelRails.test.js",
+      "test/hygieneGates.test.js",
       "test/illuminatedFoamInteraction.test.js",
       "test/illuminatedFoamModule.test.js",
       "test/imageAssetDeletion.test.js",
@@ -331,6 +339,7 @@
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
       "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
+      "audit/evidence/A10_UI_CONTROLS.md",
       "audit/evidence/A11_FEATURE_COMPOSITION.md",
       "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
       "audit/evidence/A17_PERFORMANCE_BUNDLE_RENDER_LIFECYCLE.md",
@@ -466,6 +475,7 @@
       "docs/items/audit/properties/DEFAULT_OVERRIDE_CHAINS.md",
       "docs/items/audit/properties/FINAL_PROPERTY_AUDIT.md",
       "docs/items/audit/properties/PROPERTY_INDEX.md",
+      "docs/items/audit/properties/README.md",
       "docs/items/audit/properties/properties/behavior.allowSideInsert.md",
       "docs/items/audit/properties/properties/behavior.boundarySnap.md",
       "docs/items/audit/properties/properties/behavior.collision.md",
@@ -815,37 +825,36 @@
         "F-018",
         "F-019",
         "F-020",
+        "F-025",
         "F-029",
         "F-032",
         "F-033"
       ]
     },
-    "notes": "ZIP import still stores archive blobs unchanged. Cap applies to library file picker uploads."
+    "notes": "UI visibility only. ZIP contents unchanged. Buttons stay hidden in HTML until applyArchiveButtonVisibility after catalog bootstrap."
   },
   "tests": {
     "targeted": [
       "test/runtimeSettings.test.js",
-      "test/imageOptimize.test.js",
-      "test/catalogDomainBoundary.test.js",
-      "test/systemChangeGate.test.js"
+      "test/catalogDomainBoundary.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/color-image-capability.spec.mjs"
+        "e2e/project-import-export-roundtrip.spec.mjs"
       ],
-      "reason": "Oversize upload now raises a browser dialog from the file input."
+      "reason": "Default seed keeps export/import visible; roundtrip clicks those buttons after bootstrap."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Existing IndexedDB assets unchanged. Local Postgres needs alembic 0010."
+    "notes": "Seed true preserves current chrome. False only hides buttons; archive format is the same."
   },
   "migration": {
     "required": true,
-    "notes": "Alembic 0010_fair_stand_settings seeds max_image_upload_mb=5. Catalog bootstrap fails without the row."
+    "notes": "Alembic 0011 adds export_button_visible and import_button_visible, default true, on fair_stand_settings id=1."
   },
-  "rollback": "Revert the commit and alembic downgrade 0010."
+  "rollback": "Revert the commit and alembic downgrade 0011_archive_button_visibility."
 }
