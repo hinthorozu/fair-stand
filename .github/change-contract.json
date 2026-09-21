@@ -1,17 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "image-upload-mb-from-db",
-  "kind": "feature",
-  "summary": "Image upload MB cap comes from fair_stand_settings via catalog bootstrap. Oversize files open a popup instead of the sidebar status line. JS no longer hardcodes 5 MB.",
+  "id": "fridge-e2e-viewport-drag",
+  "kind": "bugfix",
+  "summary": "Placed-module Playwright drag uses #viewport fractions, matching catalog drop, so the mini-fridge move assertion is not missed after the sidebar offset.",
   "owners": [
-    "src/runtimeSettings.js",
-    "src/imageOptimize.js",
-    "src/main.js",
-    "backend/app/modules/fair_stand/infrastructure/models.py"
+    "e2e/module-move-snap.spec.mjs"
   ],
   "sourceOfTruth": [
-    "src/runtimeSettings.js",
-    "backend/app/modules/fair_stand/infrastructure/models.py"
+    "e2e/module-move-snap.spec.mjs"
   ],
   "impact": {
     "catalog": "affected",
@@ -820,13 +816,10 @@
         "F-033"
       ]
     },
-    "notes": "ZIP import still stores archive blobs unchanged. Cap applies to library file picker uploads."
+    "notes": "Spec-only coordinate-space fix. Product moduleMove.js is unchanged."
   },
   "tests": {
     "targeted": [
-      "test/runtimeSettings.test.js",
-      "test/imageOptimize.test.js",
-      "test/catalogDomainBoundary.test.js",
       "test/systemChangeGate.test.js"
     ],
     "fullSuite": true,
@@ -834,18 +827,18 @@
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/color-image-capability.spec.mjs"
+        "e2e/module-move-snap.spec.mjs"
       ],
-      "reason": "Oversize upload now raises a browser dialog from the file input."
+      "reason": "Fridge move assertion failed because drag used canvas space while drop used viewport space."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Existing IndexedDB assets unchanged. Local Postgres needs alembic 0010."
+    "notes": "Playwright helper only. No catalog, persistence, or renderer change."
   },
   "migration": {
-    "required": true,
-    "notes": "Alembic 0010_fair_stand_settings seeds max_image_upload_mb=5. Catalog bootstrap fails without the row."
+    "required": false,
+    "notes": "No schema or seed change."
   },
-  "rollback": "Revert the commit and alembic downgrade 0010."
+  "rollback": "Revert the commit."
 }
