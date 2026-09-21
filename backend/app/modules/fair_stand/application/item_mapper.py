@@ -2,7 +2,13 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from app.modules.fair_stand.domain.entities import CatalogCategory, CatalogPreview, ItemAggregate, StandDimensions
+from app.modules.fair_stand.domain.entities import (
+    CatalogCategory,
+    CatalogPreview,
+    ItemAggregate,
+    RuntimeSettings,
+    StandDimensions,
+)
 
 
 def _num(value: Decimal | None) -> float | None:
@@ -190,3 +196,11 @@ def stand_dimensions_payload(dimensions: StandDimensions) -> dict:
         "frameWidth": dimensions.frame_width,
         "frameDepth": dimensions.frame_depth,
     }
+
+
+def map_runtime_settings(row) -> RuntimeSettings:
+    return RuntimeSettings(max_image_upload_mb=int(row.max_image_upload_mb))
+
+
+def runtime_settings_payload(settings: RuntimeSettings) -> dict:
+    return {"maxImageUploadMb": settings.max_image_upload_mb}

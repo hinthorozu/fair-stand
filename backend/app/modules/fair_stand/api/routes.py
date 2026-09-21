@@ -22,7 +22,7 @@ from app.modules.fair_stand.api.dependencies import (
 )
 from app.modules.fair_stand.application.admin_catalog import AdminCatalogService, CatalogAdminError
 from app.modules.fair_stand.application.get_catalog_bootstrap import GetCatalogBootstrapUseCase
-from app.modules.fair_stand.application.item_mapper import stand_dimensions_payload
+from app.modules.fair_stand.application.item_mapper import runtime_settings_payload, stand_dimensions_payload
 from app.modules.fair_stand.application.get_item import GetItemUseCase
 
 router = APIRouter(prefix="/fair-stand", tags=["fair-stand"])
@@ -103,6 +103,7 @@ def get_catalog_bootstrap(
         "items": [item.payload for item in snapshot.items],
         "previewKinds": [_preview_kind_payload(preview) for preview in snapshot.preview_kinds],
         "standDimensions": stand_dimensions_payload(snapshot.stand_dimensions),
+        "settings": runtime_settings_payload(snapshot.settings),
     }
 
 

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.modules.fair_stand.application.cycle_validation import assert_acyclic_components
 from app.modules.fair_stand.infrastructure.catalog_seed_data import CATALOG_SEED
 from app.modules.fair_stand.infrastructure.preview_kind_definitions import all_preview_kind_rows
+from app.modules.fair_stand.infrastructure.runtime_settings_seed import ensure_runtime_settings
 from app.modules.fair_stand.infrastructure.stand_dimensions_seed import ensure_stand_dimensions
 from app.modules.fair_stand.infrastructure.models import (
     FairStandCatalogPreviewKindModel,
@@ -210,4 +211,5 @@ def seed_fair_stand_catalog(session: Session) -> None:
 
     assert_acyclic_components(edges)
     ensure_stand_dimensions(session)
+    ensure_runtime_settings(session)
     session.flush()

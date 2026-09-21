@@ -379,3 +379,16 @@ class FairStandDimensionsModel(Base):
     frame_depth_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class FairStandSettingsModel(Base):
+    __tablename__ = "fair_stand_settings"
+    __table_args__ = (
+        CheckConstraint("id = 1", name="ck_fair_stand_settings_singleton"),
+        CheckConstraint("max_image_upload_mb > 0", name="ck_fair_stand_settings_max_image_upload_mb"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    max_image_upload_mb: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

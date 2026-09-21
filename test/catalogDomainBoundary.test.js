@@ -114,7 +114,25 @@ test('STAND_DIMENSIONS runtime kaydı ve MODULE_WIDTHS_CM sahibi src/standDimens
   }
 });
 
-test('DATABASE.md 12 fair_stand tablosunun envanteridir', () => {
+test('maxImageUploadMb sahibi src/runtimeSettings.js; Catalog re-export yok', () => {
+  const owner = readFileSync(new URL('../src/runtimeSettings.js', import.meta.url), 'utf8');
+  assert.match(owner, /export function initializeRuntimeSettings/);
+  assert.match(owner, /export function getMaxImageUploadMb/);
+  for (const file of listSrcJsFiles()) {
+    if (file.name === 'runtimeSettings.js') continue;
+    if (
+      !file.source.includes('initializeRuntimeSettings')
+      && !file.source.includes('getMaxImageUploadMb')
+      && !file.source.includes('getMaxImageUploadBytes')
+      && !file.source.includes('formatImageUploadTooLargeMessage')
+    ) {
+      continue;
+    }
+    assert.match(file.source, /from ['"]\.\/runtimeSettings\.js['"]/, file.name);
+  }
+});
+
+test('DATABASE.md 13 fair_stand tablosunun envanteridir', () => {
   const doc = readFileSync(new URL('../docs/refactor/DATABASE.md', import.meta.url), 'utf8');
   const itemsDoc = readFileSync(new URL('../docs/refactor/ITEMS.md', import.meta.url), 'utf8');
   for (const table of [
@@ -130,11 +148,12 @@ test('DATABASE.md 12 fair_stand tablosunun envanteridir', () => {
     'fair_stand_item_video_walls',
     'fair_stand_item_body_parts',
     'fair_stand_dimensions',
+    'fair_stand_settings',
   ]) {
     assert.match(doc, new RegExp(`\`${table}\``), table);
   }
   assert.match(doc, /rotation_step_deg/);
-  assert.match(doc, /default_z_cm/);
+  assert.match(doc, /max_image_upload_mb/);
   assert.match(itemsDoc, /docs\/refactor\/DATABASE\.md/);
 });
 
