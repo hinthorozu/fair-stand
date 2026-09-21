@@ -1,6 +1,7 @@
 import { initializeCatalogCategories, initializeCatalogPreviews } from './catalog.js';
 import { getFairStandHostWindow } from './hostDocument.js';
 import { initializeItemRegistry } from './items.js';
+import { initializeStandDimensions } from './standDimensions.js';
 
 function catalogBootstrapUrl() {
   return import.meta.env.VITE_FAIR_STAND_CATALOG_URL || '/api/v1/fair-stand/catalog/bootstrap';
@@ -21,9 +22,16 @@ export async function bootstrapFairStandCatalog() {
     throw new Error(`Fair Stand Item catalog bootstrap failed (${response.status}).`);
   }
   const payload = await response.json();
-  if (!payload || !Array.isArray(payload.items) || !Array.isArray(payload.categories) || !Array.isArray(payload.previewKinds)) {
+  if (
+    !payload
+    || !Array.isArray(payload.items)
+    || !Array.isArray(payload.categories)
+    || !Array.isArray(payload.previewKinds)
+    || !payload.standDimensions
+  ) {
     throw new TypeError('Fair Stand Item catalog bootstrap payload is invalid.');
   }
+  initializeStandDimensions(payload.standDimensions);
   initializeCatalogCategories(payload.categories);
   initializeCatalogPreviews(payload.previewKinds);
   initializeItemRegistry(payload.items);

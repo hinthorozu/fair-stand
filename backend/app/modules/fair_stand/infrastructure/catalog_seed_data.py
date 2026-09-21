@@ -4957,3 +4957,8 @@ CATALOG_SEED = {
         },
     ],
 }
+
+from app.modules.fair_stand.infrastructure.item_rotation_seed import apply_item_rotation_fields
+
+for _item in CATALOG_SEED["items"]:
+    apply_item_rotation_fields(_item)

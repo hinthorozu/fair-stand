@@ -8,7 +8,7 @@ import {
 } from '../src/catalog.js';
 import { createModuleStateFromDescriptor, normalizeModuleItemState } from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
-import { getModuleBehavior, getModuleMagneticSnapStrategy } from '../src/moduleBehavior.js';
+import { getModuleBehavior, getModuleMagneticSnapStrategy, getModuleRotationStepDeg } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { placementsOverlap, snapPlacementToModules } from '../src/modulePlacement.js';
 import {
@@ -59,7 +59,7 @@ test('profile uses wall_200 move/rotate/snap contract and does not nest into a n
   assert.equal(behavior.magneticSnap, 'standard');
   assert.equal(behavior.collision, 'segment');
   assert.equal(behavior.moveSnapCm, 50);
-  assert.equal(behavior.rotationStepDeg, 90);
+  assert.equal(getModuleRotationStepDeg(profile), 90);
   assert.equal(getModuleMagneticSnapStrategy(profile), 'standard');
   assert.deepEqual(behavior.overlapWithTypes, ['separator']);
 

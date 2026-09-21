@@ -4,6 +4,20 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 - Item modeli: `docs/refactor/ITEMS.md`
 - Katalog mekanizması: `docs/refactor/CATALOG.md`
+- Stand zarfı: `docs/refactor/STAND_DIMENSIONS.md`
+- Rotation: `docs/refactor/ROTATION.md`
+
+---
+
+## 2026-09-21 — Item rotation DB
+
+`rotationStepDeg`, `defaultRotationDeg`, `sideInsertRotation` Item kolonları. Canonical: `docs/refactor/ROTATION.md`. `TYPE_BEHAVIORS` ve banko width/shape rotation ezmesi kalktı.
+
+---
+
+## 2026-09-20 — Stand zarfı `fair_stand_dimensions`
+
+JS sabiti kalktı. Canonical: `docs/refactor/STAND_DIMENSIONS.md`.
 
 ---
 

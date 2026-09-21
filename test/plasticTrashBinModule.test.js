@@ -11,6 +11,8 @@ import {
   allowsThinWallEndpointContact,
   canModulesOverlapByBehavior,
   getModuleBehavior,
+  getModuleDefaultRotationDeg,
+  getModuleRotationStepDeg,
 } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { AUTO_DEPOT_SIZES, planAutomaticDepot } from '../src/autoDepot.js';
@@ -77,8 +79,8 @@ test('trash bin state and behavior preserve fridge-style movement without overla
   const behavior = getModuleBehavior(state);
   assert.equal(behavior.placement, 'free');
   assert.equal(behavior.moveSnapCm, 10);
-  assert.equal(behavior.rotationStepDeg, 90);
-  assert.equal(behavior.defaultRotationDeg, 0);
+  assert.equal(getModuleRotationStepDeg(state), 90);
+  assert.equal(getModuleDefaultRotationDeg(state), 0);
   assert.equal(behavior.collision, 'none');
   assert.equal(behavior.magneticSnap, 'none');
   assert.deepEqual(behavior.overlapWithTypes, []);

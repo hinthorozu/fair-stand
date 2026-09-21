@@ -996,11 +996,11 @@ getStraightWallNominalWidthForProfileItem: düz duvar recipe içindeki profil �
 
 profile_41_5 lengthCm=41.5 catalogWidthCm=50; profile_91 lengthCm=91 catalogWidthCm=100; profile_140_5 lengthCm=140.5 catalogWidthCm=150; profile_190 lengthCm=190 catalogWidthCm=200
 
-### designState STRIP_COUNT sabiti
+### designState şerit sayısı
 
-src/designState.js const STRIP_COUNT = 7 — STAND_DIMENSIONS.stripCount ile aynı sayı, ayrı sabit
+Tam boy şerit `STAND_DIMENSIONS.stripCount` — `fair_stand_dimensions` bootstrap kaydı. Ayrı `STRIP_COUNT` sabiti yok.
 
-STRIP_COUNT=7; STAND_DIMENSIONS.stripCount=7
+STAND_DIMENSIONS.stripCount=7 (seed)
 
 ### Factory tablosunda olmayan kayıtlı type
 

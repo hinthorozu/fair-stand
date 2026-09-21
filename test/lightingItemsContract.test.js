@@ -12,7 +12,7 @@ import {
   normalizeModuleItemState,
 } from '../src/designState.js';
 import { getItem, resolveItemKey } from '../src/items.js';
-import { getModuleBehavior } from '../src/moduleBehavior.js';
+import { getModuleBehavior, getModuleRotationStepDeg } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 
 test('led_floodlight: canonical identity, catalog and hydrate', () => {
@@ -53,7 +53,7 @@ test('led_floodlight: canonical identity, catalog and hydrate', () => {
   assert.equal(behavior.placement, 'top');
   assert.equal(behavior.wallCapacity, 'exclude');
   assert.equal(behavior.moveSnapCm, 20);
-  assert.equal(behavior.rotationStepDeg, 90);
+  assert.equal(getModuleRotationStepDeg(state), 90);
 
   const contract = resolveModuleContract('led_floodlight');
   assert.equal(contract.bom.mode, 'decision-required');

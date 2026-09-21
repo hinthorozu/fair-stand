@@ -2,6 +2,10 @@
 
 Fair Stand yeni Item modelinin yaşayan canonical sözleşmesi. Audit dökümü değildir.
 
+Stand zarfı Item değildir: `docs/refactor/STAND_DIMENSIONS.md`.
+Catalog: `docs/refactor/CATALOG.md`.
+Rotation: `docs/refactor/ROTATION.md`.
+
 ---
 
 ## Runtime field kuyruğu (şemaya henüz alınmadı)
@@ -13,7 +17,7 @@ Fair Stand yeni Item modelinin yaşayan canonical sözleşmesi. Audit dökümü 
 
 Kaynak: `src/items.js` taraması (2026-09-17). N = kaç Item’da path var.
 
-Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision hâlâ `type` → `TYPE_BEHAVIORS`; recipe BOM yalnız `composition.items`.
+Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision hâlâ `type` → `TYPE_BEHAVIORS`; rotation Item; recipe BOM yalnız `composition.items`.
 
 | Field | N | Src’de ne işe yarıyor |
 |---|---|---|
@@ -61,6 +65,9 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `videoWall.rows` / `videoWall.cols` | 2 | Video wall ızgara. |
 | `videoWall.panelItemKey` | 2 | `VIDEO_WALL_PANEL`. |
 | `paintable` | 5 | Zemin boyanır mı. |
+| `rotationStepDeg` | 61 | Shift+R adımı. Leaf’te yok. **Şemada onaylı (opsiyonel / nullable).** |
+| `defaultRotationDeg` | 61 | İlk sahne Z. Leaf’te yok. **Şemada onaylı (opsiyonel / nullable).** |
+| `sideInsertRotation` | 61 | `inherit` / `default`. Leaf’te yok. **Şemada onaylı (opsiyonel / nullable).** |
 
 Aşağıdaki bölümler yalnız **karar verilmiş** şemadır. Kuyruktaki bir alan ancak ayrı refactor adımında kabul edilirse oraya geçer.
 
@@ -71,6 +78,8 @@ Ayrıntılı mekanizma sözleşmeleri ayrı dosyadadır. ITEMS.md o dosyaları k
 | `docs/refactor/REFACTOR.md` | Kronolojik değişiklik günlüğü |
 | `docs/refactor/ITEMS.md` | Item modelinin güncel canonical sözleşmesi |
 | `docs/refactor/CATALOG.md` | Catalog mekanizmasının ayrıntılı sözleşmesi |
+| `docs/refactor/ROTATION.md` | Sahne Z dönüş Item parametreleri |
+| `docs/refactor/STAND_DIMENSIONS.md` | Stand zarfı |
 
 İleride `ROTATION.md`, `COLOR.md`, `IMAGE.md`, `LIGHTING.md`, `DELETE.md` vb. eklendiğinde bu belge yalnız bağlantı satırını tutar.
 
@@ -117,6 +126,9 @@ Görünür Item (`catalogVisible=true`) ek zorunlu Catalog alanı: `previewId`. 
 |---|---|---|
 | `dimensions` | object | Item master — fiziksel ürün ölçüleri |
 | `sceneDimensions` | object \| yok | Item master — aynı field setinin runtime override katmanı |
+| `rotationStepDeg` | number \| yok | Item master — sahne Z adımı; `ROTATION.md` |
+| `defaultRotationDeg` | number \| yok | Item master — ilk Z; `ROTATION.md` |
+| `sideInsertRotation` | `inherit` \| `default` \| yok | Item master — yana ek; `ROTATION.md` |
 
 `dimensions` Item’ın gerçek/fiziksel ölçülerini taşır. `sceneDimensions` sahne/runtime’da farklı bir değer gerekiyorsa aynı field adıyla override yazar. İkisi de şu canonical 5 alanı destekler: `widthCm`, `depthCm`, `heightCm`, `lengthCm`, `thicknessCm`. Aynı değerleri iki kere yazmak zorunlu değildir. Effective scene field: `sceneDimensions.field ?? dimensions.field ?? MISSING`. Aynı field adı yoksa fallback yoktur.
 

@@ -46,6 +46,17 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     showcase = next(item for item in body["items"] if item["itemKey"] == "wall_showcase_100_2")
     assert showcase["bodyItems"]["glassShelfItemKey"] == "glass_shelf"
     wall_200 = next(item for item in body["items"] if item["itemKey"] == "wall_200")
+    assert wall_200["rotationStepDeg"] == 90
+    assert wall_200["defaultRotationDeg"] == 0
+    assert wall_200["sideInsertRotation"] == "inherit"
+    banko = next(item for item in body["items"] if item["itemKey"] == "desk_banko_150")
+    assert banko["rotationStepDeg"] == 45
+    stool = next(item for item in body["items"] if item["itemKey"] == "furniture_bar_stool_classic")
+    assert stool["defaultRotationDeg"] == 270
+    assert stool["sideInsertRotation"] == "default"
+    l_banko = next(item for item in body["items"] if item["itemKey"] == "desk_banko_100_L")
+    assert l_banko["defaultRotationDeg"] == 270
+    assert l_banko["rotationStepDeg"] == 90
     assert "innerCorner" not in wall_200.get("composition", {})
     assert "nominalModuleWidthCm" not in wall_200
     corner = next(item for item in body["items"] if item["itemKey"] == "panel_corner_192")
@@ -56,6 +67,14 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     assert "FairStandItemModel" not in body
     assert "SQLAlchemy" not in body
     assert len(body["previewKinds"]) == 28
+    assert body["standDimensions"] == {
+        "height": 3.5,
+        "depth": 0.1,
+        "stripCount": 7,
+        "stripHeight": 0.5,
+        "frameWidth": 0.055,
+        "frameDepth": 0.1,
+    }
     shelf_preview = next(kind for kind in body["previewKinds"] if kind["id"] == 20)
     assert "previewKey" not in shelf_preview
     assert all("previewKey" not in kind for kind in body["previewKinds"])
@@ -71,6 +90,9 @@ def test_hidden_item_is_not_catalog_visible(client, db_session, auth_headers):
     panel = next(item for item in response.json()["items"] if item["itemKey"] == "panel_48_5")
     assert panel["catalogVisible"] is False
     assert panel.get("previewId") is None
+    assert "rotationStepDeg" not in panel
+    assert "defaultRotationDeg" not in panel
+    assert "sideInsertRotation" not in panel
     assert "catalogPreview" not in panel
 
 

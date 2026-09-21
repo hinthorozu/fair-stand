@@ -7,7 +7,7 @@ Kanıtlı zincir. Yeni mimari önerisi yok.
 | anahtar | değer | sahip |
 |---|---|---|
 | `DEFAULT_PANEL_COLOR` | `#ffffff` | `src/designState.js` |
-| `STRIP_COUNT` | `7` | `src/designState.js` + `STAND_DIMENSIONS.stripCount` `src/standDimensions.js` |
+| `STAND_DIMENSIONS.stripCount` | DB seed `7` | `fair_stand_dimensions` → bootstrap → `src/standDimensions.js` |
 | `DEFAULT_BEHAVIOR` | `WALL_BEHAVIOR` | `src/moduleBehavior.js` |
 | `DEFAULT_GHOST_BEHAVIOR` | kind=silhouette, renderer=module-silhouette, opacity=0.38 | `src/moduleBehavior.js` |
 | `NO_SURFACE_CAPABILITIES` | color/image/glass/lightbox/mesh false | `src/itemCapabilities.js` |

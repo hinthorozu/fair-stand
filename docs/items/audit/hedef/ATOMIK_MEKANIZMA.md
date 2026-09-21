@@ -1071,7 +1071,7 @@ Hedef akış: `Item/instance config → canonical method → runtime/renderer`.
 | `src/scene3d.js supportsGlass` | selectionMode === 'panel'; capability.glass hep false | glass.enabled + surface role config |
 | `src/itemCapabilities.js` | Yalnız door-leaf color+image true | color/image enabled Item config |
 | `src/designState.js createUprightModuleState` | getItem('upright_346_5') sabit | instantiate(itemKey) |
-| `src/designState.js STRIP_COUNT = 7` | STAND_DIMENSIONS.stripCount ile çift sabit | stand config tek kaynak |
+| `src/designState.js tam boy şerit` | `STAND_DIMENSIONS.stripCount` (DB zarf) | stand config tek kaynak |
 | `src/designState.js separatorDefaultColor` | width 50 → separator_panel_48_5 else 98 | child Item defaultColor |
 | `src/designState.js led surface.color` | #17191c | item defaultColor / surface config |
 | `src/designState.js foam Math.max` | min widthCm 10, heightCm 5 | resize.min Item config (yalnız bu Item) |

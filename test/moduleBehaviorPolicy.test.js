@@ -70,8 +70,8 @@ test('F-011 special placement policies are declared by the canonical behavior co
   assert.equal(getModuleBehavior('shelf').placement, 'wall-overlay');
   assert.equal(getModuleBehavior('shelf').overlaySnap, 'panel-seam');
 
-  assert.equal(resolveSideInsertRotationDeg('bar-stool', 90), 270);
-  assert.equal(resolveSideInsertRotationDeg('counter', 90), 90);
+  assert.equal(resolveSideInsertRotationDeg('furniture_bar_stool_classic', 90), 270);
+  assert.equal(resolveSideInsertRotationDeg({ itemKey: 'desk_banko_150' }, 90), 90);
 });
 
 test('kettle declared contract and runtime collision strategy stay collision-none', () => {

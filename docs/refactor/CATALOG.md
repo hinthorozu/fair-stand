@@ -2,7 +2,7 @@
 
 Fair Stand katalog mekanizmasının canonical teknik sözleşmesi. Audit dökümü değildir.
 
-Item tarafındaki Catalog config alanlarının kısa kaydı: `docs/refactor/ITEMS.md`. Bu dosya Catalog’un nasıl çalıştığını anlatır; Item şemasını kopyalamaz.
+Item tarafındaki Catalog config alanlarının kısa kaydı: `docs/refactor/ITEMS.md`. Stand zarfı: `docs/refactor/STAND_DIMENSIONS.md`. Bu dosya Catalog’un nasıl çalıştığını anlatır; Item şemasını ve stand zarfını kopyalamaz.
 
 ---
 
@@ -308,7 +308,7 @@ Catalog işi: kategori tablosu + görünür Item projection + UI helper.
 
 **Kalan Catalog yüzeyi:** `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `listCatalogCategories`, `getCatalogCategory`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getModuleCatalogItem`, `getModuleCatalogLabel`.
 
-**Stand zarfı / düz duvar genişlikleri:** `STAND_DIMENSIONS` ve `MODULE_WIDTHS_CM` `src/standDimensions.js`. Catalog export etmez. Katalog kart listesi `MODULE_WIDTHS_CM` okumaz.
+**Stand zarfı / düz duvar genişlikleri:** Catalog’un işi değildir. `docs/refactor/STAND_DIMENSIONS.md`.
 
 **Silinen ölü export (runtime çağıran yoktu):** `COUNTER_DIMENSIONS`, furniture/TV/mini-fridge/coat-rack/trash `*_DIMENSIONS`, `flatPanelKey`, `getFurnitureClusterQuantity` catalog import.
 
@@ -318,6 +318,4 @@ Catalog işi: kategori tablosu + görünür Item projection + UI helper.
 
 ## Gelecek DB/API geçişi
 
-Bugün Item ve Catalog JS kaynağındandır. Gelecekte SQLite / API / PostgreSQL.
-
-Katalog UI ve canonical method’lar değişmemelidir. Yalnız repository / data source değişir.
+Katalog UI ve canonical method’lar değişmemelidir. Item / Category / Preview kaynağı Fair Stand API bootstrap’tır; Catalog yine yalnız projeksiyondur.

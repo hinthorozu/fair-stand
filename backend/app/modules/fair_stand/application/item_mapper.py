@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from app.modules.fair_stand.domain.entities import CatalogCategory, CatalogPreview, ItemAggregate
+from app.modules.fair_stand.domain.entities import CatalogCategory, CatalogPreview, ItemAggregate, StandDimensions
 
 
 def _num(value: Decimal | None) -> float | None:
@@ -58,6 +58,12 @@ def map_item(row) -> ItemAggregate:
         payload["modelRotationYDeg"] = _num(row.model_rotation_y_deg)
     if row.visual_rotation_y_deg is not None:
         payload["visualRotationYDeg"] = _num(row.visual_rotation_y_deg)
+    if row.rotation_step_deg is not None:
+        payload["rotationStepDeg"] = _num(row.rotation_step_deg)
+    if row.default_rotation_deg is not None:
+        payload["defaultRotationDeg"] = _num(row.default_rotation_deg)
+    if row.side_insert_rotation is not None:
+        payload["sideInsertRotation"] = row.side_insert_rotation
     if row.paintable is not None:
         payload["paintable"] = row.paintable
     if row.shape is not None:
@@ -152,3 +158,25 @@ def map_item(row) -> ItemAggregate:
         }
 
     return ItemAggregate(payload=payload)
+
+
+def map_stand_dimensions(row) -> StandDimensions:
+    return StandDimensions(
+        height=_num(row.height_m),
+        depth=_num(row.depth_m),
+        strip_count=int(row.strip_count),
+        strip_height=_num(row.strip_height_m),
+        frame_width=_num(row.frame_width_m),
+        frame_depth=_num(row.frame_depth_m),
+    )
+
+
+def stand_dimensions_payload(dimensions: StandDimensions) -> dict:
+    return {
+        "height": dimensions.height,
+        "depth": dimensions.depth,
+        "stripCount": dimensions.strip_count,
+        "stripHeight": dimensions.strip_height,
+        "frameWidth": dimensions.frame_width,
+        "frameDepth": dimensions.frame_depth,
+    }

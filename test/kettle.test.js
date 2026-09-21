@@ -6,7 +6,7 @@ import {
 } from '../src/catalog.js';
 import { createKettleModuleState } from '../src/designState.js';
 import { getItem } from '../src/items.js';
-import { canModulesOverlapByBehavior, getModuleBehavior } from '../src/moduleBehavior.js';
+import { canModulesOverlapByBehavior, getModuleBehavior, getModuleRotationStepDeg } from '../src/moduleBehavior.js';
 import { placementsOverlap } from '../src/modulePlacement.js';
 
 test('kettle catalog and state stay aligned', () => {
@@ -23,7 +23,7 @@ test('kettle keeps its declared free-positioned collision contract', () => {
   assert.equal(behavior.placement, 'free');
   assert.equal(behavior.collision, 'none');
   assert.equal(behavior.magneticSnap, 'none');
-  assert.equal(behavior.rotationStepDeg, 90);
+  assert.equal(getModuleRotationStepDeg({ itemKey: 'KETTLE' }), 90);
   assert.deepEqual(behavior.overlapWithTypes, ['mini-fridge']);
 });
 

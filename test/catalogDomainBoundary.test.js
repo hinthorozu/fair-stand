@@ -102,15 +102,26 @@ test('public Item registry tek bootstrapped catalog’dur; kova export yoktur', 
   assert.equal(new Set(listRegisteredItems().map((item) => item.itemKey)).size, 96);
 });
 
-test('STAND_DIMENSIONS ve MODULE_WIDTHS_CM sahibi src/standDimensions.js; Catalog re-export yok', () => {
+test('STAND_DIMENSIONS runtime kaydı ve MODULE_WIDTHS_CM sahibi src/standDimensions.js; Catalog re-export yok', () => {
   const owner = readFileSync(new URL('../src/standDimensions.js', import.meta.url), 'utf8');
-  assert.match(owner, /export const STAND_DIMENSIONS = Object\.freeze/);
+  assert.match(owner, /export function initializeStandDimensions/);
+  assert.match(owner, /export function getStandDimensions/);
   assert.match(owner, /export const MODULE_WIDTHS_CM = Object\.freeze\(\[50, 100, 150, 200\]\)/);
   for (const file of listSrcJsFiles()) {
     if (file.name === 'standDimensions.js') continue;
     if (!file.source.includes('STAND_DIMENSIONS') && !file.source.includes('MODULE_WIDTHS_CM')) continue;
     assert.match(file.source, /from ['"]\.\/standDimensions\.js['"]/, file.name);
   }
+});
+
+test('ROTATION.md Item rotation sözleşmesidir; TYPE_BEHAVIORS rotation taşımaz', () => {
+  const rotationDoc = readFileSync(new URL('../docs/refactor/ROTATION.md', import.meta.url), 'utf8');
+  const itemsDoc = readFileSync(new URL('../docs/refactor/ITEMS.md', import.meta.url), 'utf8');
+  const behavior = readFileSync(new URL('../src/moduleBehavior.js', import.meta.url), 'utf8');
+  assert.match(rotationDoc, /rotationStepDeg/);
+  assert.match(itemsDoc, /docs\/refactor\/ROTATION\.md/);
+  assert.match(behavior, /resolveRotationItem/);
+  assert.doesNotMatch(behavior, /STRAIGHT_COUNTER_WIDTHS_CM/);
 });
 
 test('resolveItemKey src caller’ları items.js’ten okur', () => {

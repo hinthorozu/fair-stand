@@ -10,7 +10,7 @@ import {
   normalizeModuleItemState,
 } from '../src/designState.js';
 import { getItem, resolveItemKey } from '../src/items.js';
-import { getModuleBehavior } from '../src/moduleBehavior.js';
+import { getModuleBehavior, getModuleRotationStepDeg } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import {
   getModuleRecipe,
@@ -112,7 +112,7 @@ for (const itemKey of SEPARATOR_KEYS) {
     const behavior = getModuleBehavior(state);
     assert.equal(behavior.placement, 'wall');
     assert.equal(behavior.moveSnapCm, 50);
-    assert.equal(behavior.rotationStepDeg, 90);
+    assert.equal(getModuleRotationStepDeg(state), 90);
 
     const contract = resolveModuleContract(itemKey);
     assert.equal(contract.bom.mode, 'recipe');

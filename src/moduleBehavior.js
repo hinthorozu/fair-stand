@@ -13,8 +13,6 @@ const NO_OVERLAP_TYPES = Object.freeze([]);
 const WALL_BEHAVIOR = Object.freeze({
   placement: 'wall',
   moveSnapCm: 50,
-  rotationStepDeg: 90,
-  defaultRotationDeg: 0,
   allowSideInsert: true,
   collision: 'segment',
   magneticSnap: 'standard',
@@ -22,7 +20,6 @@ const WALL_BEHAVIOR = Object.freeze({
   collisionDepth: 'physical',
   endpointContact: 'standard',
   boundarySnap: 'stand-edge',
-  sideInsertRotation: 'inherit',
   overlapWithTypes: NO_OVERLAP_TYPES,
   supportsWallOverlayMount: true,
   wallCapacity: 'include',
@@ -36,8 +33,6 @@ function freeBehavior(overrides = {}) {
   return Object.freeze({
     placement: 'free',
     moveSnapCm: 50,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
     allowSideInsert: true,
     collision: 'footprint',
     magneticSnap: 'standard',
@@ -45,7 +40,6 @@ function freeBehavior(overrides = {}) {
     collisionDepth: 'physical',
     endpointContact: 'standard',
     boundarySnap: 'stand-edge',
-    sideInsertRotation: 'inherit',
     overlapWithTypes: NO_OVERLAP_TYPES,
     supportsWallOverlayMount: false,
     wallCapacity: 'include',
@@ -59,8 +53,6 @@ function overlayBehavior(overrides = {}) {
   return Object.freeze({
     placement: 'wall-overlay',
     moveSnapCm: 10,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
     allowSideInsert: false,
     collision: 'none',
     magneticSnap: 'none',
@@ -68,7 +60,6 @@ function overlayBehavior(overrides = {}) {
     collisionDepth: 'physical',
     endpointContact: 'standard',
     boundarySnap: 'stand-edge',
-    sideInsertRotation: 'inherit',
     overlapWithTypes: NO_OVERLAP_TYPES,
     supportsWallOverlayMount: false,
     wallCapacity: 'include',
@@ -110,7 +101,6 @@ const TYPE_BEHAVIORS = Object.freeze({
   }),
   'sofa-single-classic': freeBehavior({
     moveSnapCm: 10,
-    rotationStepDeg: 45,
     collision: 'none',
     magneticSnap: 'none',
   }),
@@ -141,9 +131,6 @@ const TYPE_BEHAVIORS = Object.freeze({
   }),
   'bar-stool': freeBehavior({
     moveSnapCm: 10,
-    rotationStepDeg: 45,
-    defaultRotationDeg: 270,
-    sideInsertRotation: 'default',
     collision: 'none',
     magneticSnap: 'none',
   }),
@@ -186,8 +173,6 @@ const TYPE_BEHAVIORS = Object.freeze({
   'led-floodlight': Object.freeze({
     placement: 'top',
     moveSnapCm: 20,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
     allowSideInsert: true,
     collision: 'none',
     magneticSnap: 'none',
@@ -195,7 +180,6 @@ const TYPE_BEHAVIORS = Object.freeze({
     collisionDepth: 'physical',
     endpointContact: 'standard',
     boundarySnap: 'stand-edge',
-    sideInsertRotation: 'inherit',
     overlapWithTypes: NO_OVERLAP_TYPES,
     supportsWallOverlayMount: false,
     wallCapacity: 'exclude',
@@ -204,11 +188,23 @@ const TYPE_BEHAVIORS = Object.freeze({
   }),
 });
 
-const STRAIGHT_COUNTER_WIDTHS_CM = new Set([100, 150, 200]);
-
 function normalizeDescriptor(moduleOrType) {
   if (typeof moduleOrType === 'string') return { type: moduleOrType };
   return moduleOrType ?? {};
+}
+
+function resolveRotationItem(moduleOrType) {
+  const module = normalizeDescriptor(moduleOrType);
+  const itemKey = module.itemKey
+    ?? (typeof moduleOrType === 'string' ? moduleOrType : null);
+  if (!itemKey) {
+    throw new TypeError('Module rotation requires itemKey.');
+  }
+  const item = getItem(itemKey);
+  if (!item) {
+    throw new TypeError(`Unknown Item for rotation: ${itemKey}.`);
+  }
+  return item;
 }
 
 export function hasExplicitModuleBehavior(moduleOrType) {
@@ -228,26 +224,15 @@ export function getModuleBehavior(moduleOrType) {
     ? withGhost
     : { ...withGhost, collisionHeight: 'full' };
 
-  // Köşe bankolar sahneye doğrulanmış müşteri-önü L yönüyle girer.
-  // Geometri ve 90 derece dönüş davranışı değişmez.
-  if (type === 'counter' && module.shape === 'L') {
-    return { ...base, defaultRotationDeg: 270 };
-  }
-
-  // Yalnız doğrulanmış düz Banko ailesi (100/150/200) 45 derece döner.
-  if (
-    type === 'counter'
-    && module.shape !== 'L'
-    && STRAIGHT_COUNTER_WIDTHS_CM.has(Number(module.widthCm))
-  ) {
-    return { ...base, rotationStepDeg: 45 };
-  }
-
   return base;
 }
 
 export function getModuleRotationStepDeg(moduleOrType) {
-  return Number(getModuleBehavior(moduleOrType).rotationStepDeg) || 90;
+  const value = Number(resolveRotationItem(moduleOrType).rotationStepDeg);
+  if (!Number.isFinite(value)) {
+    throw new TypeError('Item rotationStepDeg is missing.');
+  }
+  return value;
 }
 
 export function resolveModuleRotationDeltaDeg(moduleOrType, requestedDeltaDeg) {
@@ -258,7 +243,11 @@ export function resolveModuleRotationDeltaDeg(moduleOrType, requestedDeltaDeg) {
 }
 
 export function getModuleDefaultRotationDeg(moduleOrType) {
-  return Number(getModuleBehavior(moduleOrType).defaultRotationDeg) || 0;
+  const value = Number(resolveRotationItem(moduleOrType).defaultRotationDeg);
+  if (!Number.isFinite(value)) {
+    throw new TypeError('Item defaultRotationDeg is missing.');
+  }
+  return value;
 }
 
 export function getModuleMoveSnapCm(moduleOrType) {
@@ -321,8 +310,11 @@ export function usesWallInnerFaceBoundary(moduleOrType) {
 }
 
 export function resolveSideInsertRotationDeg(moduleOrType, inheritedRotationDeg = 0) {
-  const behavior = getModuleBehavior(moduleOrType);
-  return behavior.sideInsertRotation === 'default'
+  const mode = resolveRotationItem(moduleOrType).sideInsertRotation;
+  if (mode == null) {
+    throw new TypeError('Item sideInsertRotation is missing.');
+  }
+  return mode === 'default'
     ? getModuleDefaultRotationDeg(moduleOrType)
     : Number(inheritedRotationDeg) || 0;
 }

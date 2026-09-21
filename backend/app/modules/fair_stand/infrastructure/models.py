@@ -76,6 +76,15 @@ class FairStandItemModel(Base):
             "NOT catalog_visible OR (category_id IS NOT NULL AND catalog_item_index IS NOT NULL AND preview_id IS NOT NULL)",
             name="ck_fair_stand_items_catalog_visible",
         ),
+        CheckConstraint(
+            "side_insert_rotation IS NULL OR side_insert_rotation IN ('inherit', 'default')",
+            name="ck_fair_stand_items_side_insert_rotation",
+        ),
+        CheckConstraint(
+            "(rotation_step_deg IS NULL) = (default_rotation_deg IS NULL) "
+            "AND (rotation_step_deg IS NULL) = (side_insert_rotation IS NULL)",
+            name="ck_fair_stand_items_rotation_trio",
+        ),
         Index("ix_fair_stand_items_item_type", "item_type"),
         Index("ix_fair_stand_items_category_id", "category_id"),
         Index("ix_fair_stand_items_preview_id", "preview_id"),
@@ -113,6 +122,9 @@ class FairStandItemModel(Base):
     preserve_model_scale: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     model_rotation_y_deg: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     visual_rotation_y_deg: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+    rotation_step_deg: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+    default_rotation_deg: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+    side_insert_rotation: Mapped[str | None] = mapped_column(String(16), nullable=True)
     composition_mode: Mapped[str | None] = mapped_column(String(16), nullable=True)
     composition_module_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
     paintable: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
@@ -316,3 +328,30 @@ class FairStandItemBodyPartModel(Base):
         back_populates="body_parts",
         foreign_keys=[parent_item_key],
     )
+
+
+class FairStandDimensionsModel(Base):
+    __tablename__ = "fair_stand_dimensions"
+    __table_args__ = (
+        CheckConstraint("id = 1", name="ck_fair_stand_dimensions_singleton"),
+        CheckConstraint("strip_count > 0", name="ck_fair_stand_dimensions_strip_count"),
+        CheckConstraint("height_m > 0", name="ck_fair_stand_dimensions_height"),
+        CheckConstraint("depth_m > 0", name="ck_fair_stand_dimensions_depth"),
+        CheckConstraint("strip_height_m > 0", name="ck_fair_stand_dimensions_strip_height"),
+        CheckConstraint("frame_width_m > 0", name="ck_fair_stand_dimensions_frame_width"),
+        CheckConstraint("frame_depth_m > 0", name="ck_fair_stand_dimensions_frame_depth"),
+        CheckConstraint(
+            "height_m = strip_count * strip_height_m",
+            name="ck_fair_stand_dimensions_height_strips",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    height_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
+    depth_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
+    strip_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    strip_height_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
+    frame_width_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
+    frame_depth_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

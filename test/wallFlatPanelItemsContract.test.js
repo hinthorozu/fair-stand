@@ -10,7 +10,7 @@ import {
   normalizeModuleItemState,
 } from '../src/designState.js';
 import { getItem, resolveItemKey } from '../src/items.js';
-import { getModuleBehavior, getModuleCollisionHeightRangeCm } from '../src/moduleBehavior.js';
+import { getModuleBehavior, getModuleCollisionHeightRangeCm, getModuleRotationStepDeg } from '../src/moduleBehavior.js';
 import { placementsOverlap } from '../src/modulePlacement.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import {
@@ -84,7 +84,7 @@ for (const itemKey of WALL_KEYS) {
 
     assert.equal(getModuleBehavior(state).placement, 'wall');
     assert.equal(getModuleBehavior(state).moveSnapCm, 50);
-    assert.equal(getModuleBehavior(state).rotationStepDeg, 90);
+    assert.equal(getModuleRotationStepDeg(state), 90);
 
     const contract = resolveModuleContract(itemKey);
     assert.equal(contract.bom.mode, 'recipe');

@@ -21,3 +21,13 @@ class CatalogPreview:
 @dataclass(frozen=True)
 class ItemAggregate:
     payload: dict
+
+
+@dataclass(frozen=True)
+class StandDimensions:
+    height: float
+    depth: float
+    strip_count: int
+    strip_height: float
+    frame_width: float
+    frame_depth: float
