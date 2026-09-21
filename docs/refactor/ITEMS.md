@@ -79,6 +79,7 @@ Ayrıntılı mekanizma sözleşmeleri ayrı dosyadadır. ITEMS.md o dosyaları k
 | `docs/refactor/ITEMS.md` | Item modelinin güncel canonical sözleşmesi |
 | `docs/refactor/CATALOG.md` | Catalog mekanizmasının ayrıntılı sözleşmesi |
 | `docs/refactor/ROTATION.md` | Sahne Z dönüş Item parametreleri |
+| `docs/refactor/SCENE_POSE.md` | Gövde, kot Z, profil snap (hedef sözleşme) |
 | `docs/refactor/STAND_DIMENSIONS.md` | Stand zarfı |
 
 İleride `ROTATION.md`, `COLOR.md`, `IMAGE.md`, `LIGHTING.md`, `DELETE.md` vb. eklendiğinde bu belge yalnız bağlantı satırını tutar.
