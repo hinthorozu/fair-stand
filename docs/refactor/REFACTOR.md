@@ -10,6 +10,12 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-21 — Archive buton görünürlüğü
+
+`fair_stand_settings.export_button_visible` / `import_button_visible`. Catalog bootstrap. Markup `hidden`; runtime ayar `true` ise açar. Canonical: `docs/refactor/DATABASE.md`.
+
+---
+
 ## 2026-09-21 — DB tablo/kolon envanteri
 
 Canonical: `docs/refactor/DATABASE.md`. 13 tablo; her kolon nedir / neden / nerede. Çapraz: `models.py` + `item_mapper.py` + production `src/` + `ITEMS.md` / `CATALOG.md` / `ROTATION.md` / `SCENE_POSE.md` / `STAND_DIMENSIONS.md`. Production okumayan kolonlar (`panel_role`, `connector_type` BOM yolu, `composition_module_type`, kullanılmayan asset rolleri) açık yazılır. Değer kopyası değil.

@@ -9,6 +9,8 @@ from app.modules.fair_stand.infrastructure.models import FairStandSettingsModel
 
 STAND_SETTINGS_ID = 1
 MAX_IMAGE_UPLOAD_MB = 5
+EXPORT_BUTTON_VISIBLE = True
+IMPORT_BUTTON_VISIBLE = True
 
 
 def ensure_runtime_settings(session: Session) -> FairStandSettingsModel:
@@ -18,6 +20,8 @@ def ensure_runtime_settings(session: Session) -> FairStandSettingsModel:
         row = FairStandSettingsModel(
             id=STAND_SETTINGS_ID,
             max_image_upload_mb=MAX_IMAGE_UPLOAD_MB,
+            export_button_visible=EXPORT_BUTTON_VISIBLE,
+            import_button_visible=IMPORT_BUTTON_VISIBLE,
             created_at=now,
             updated_at=now,
         )

@@ -12,6 +12,8 @@ def test_runtime_settings_singleton_is_seeded(db_session):
     row = rows[0]
     assert row.id == 1
     assert row.max_image_upload_mb == 5
+    assert row.export_button_visible is True
+    assert row.import_button_visible is True
 
 
 def test_fair_stand_settings_table_exists(test_engine):

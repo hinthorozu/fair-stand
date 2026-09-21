@@ -4,7 +4,7 @@ Lokal / sunucu PostgreSQL `fair_stand` şemasının yaşayan envanteri. “Üç 
 
 **Doğrulama (2026-09-21, lokal Postgres `fair_stand` + `models.py` + `item_mapper.py` + `src/`):**
 
-1. Canlı `information_schema` — 13 tablo; kolon adları `models.py` ile aynı. Alembic head: `0010_fair_stand_settings`.
+1. Canlı `information_schema` — 13 tablo; kolon adları `models.py` ile aynı. Alembic head: `0011_archive_button_visibility`.
 2. `item_mapper.py` — her ürün kolonu JSON anahtarına (veya “bootstrap’a girmez”) bağlandı.
 3. Production `src/` grep — “Nerede” hücresi gerçek okuyucu dosyadır; okunmayan kolon **DATA / TEST_ONLY / SCHEMA_ONLY** yazılır.
 4. `ITEMS.md` (alan kuyruğu + onaylı şema), `CATALOG.md`, `ROTATION.md`, `SCENE_POSE.md`, `STAND_DIMENSIONS.md` — değer kopyalanmaz; işaret edilir.
@@ -50,7 +50,7 @@ Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; lokal head `0010_fair_stand_settings` |
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; lokal head `0011_archive_button_visibility` |
 
 ---
 
@@ -286,15 +286,17 @@ Lokal canlı (2026-09-21): `id=1`, `height_m=3.5`, `depth_m=0.1`, `strip_count=7
 
 Tek satır `id = 1`. Item değildir. Stand zarfı değildir.
 
-Kaynak: PostgreSQL `fair_stand_settings` → catalog bootstrap `settings` → `initializeRuntimeSettings` → `getMaxImageUploadMb()` / `getMaxImageUploadBytes()`.
+Kaynak: PostgreSQL `fair_stand_settings` → catalog bootstrap `settings` → `initializeRuntimeSettings` → `getMaxImageUploadMb()` / `applyArchiveButtonVisibility`.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
 | `id` | — | Singleton; CHECK `id = 1` | İkinci ayar satırı yok | CHECK `ck_fair_stand_settings_singleton` |
 | `max_image_upload_mb` | `maxImageUploadMb` | Görsel arşiv yükleme tavanı (MB) | JS sabiti yok; aşım popup | `src/runtimeSettings.js` → `imageOptimize.js` / `main.js` |
+| `export_button_visible` | `exportButtonVisible` | Dışarı Aktar butonu | Zip günlük vitrin değil; DB kapatır | `applyArchiveButtonVisibility` → `#export-project` |
+| `import_button_visible` | `importButtonVisible` | İçe Aktar butonu | Ayrı kapı | `applyArchiveButtonVisibility` → `#import-project` |
 | `created_at` / `updated_at` | yok | Audit | — | DB |
 
-Seed: `5`. Admin kolon değerini değiştirince tarayıcı tavanı bootstrap ile gelir.
+Seed: MB `5`; butonlar `true` (mevcut davranış). Markup’ta butonlar `hidden` başlar; bootstrap sonrası ayar `true` ise açılır (flash yok). UI kilidi; zip endpoint güvenlik değildir.
 
 ---
 

@@ -3,6 +3,13 @@
 
 let runtimeSettings = null;
 
+function requireBoolean(raw, key) {
+  if (raw[key] !== true && raw[key] !== false) {
+    throw new TypeError(`Fair Stand settings.${key} must be a boolean.`);
+  }
+  return raw[key];
+}
+
 export function initializeRuntimeSettings(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     throw new TypeError('Fair Stand settings bootstrap payload is invalid.');
@@ -11,7 +18,11 @@ export function initializeRuntimeSettings(raw) {
   if (!Number.isInteger(maxImageUploadMb) || maxImageUploadMb <= 0) {
     throw new TypeError('Fair Stand settings.maxImageUploadMb must be a positive integer.');
   }
-  runtimeSettings = Object.freeze({ maxImageUploadMb });
+  runtimeSettings = Object.freeze({
+    maxImageUploadMb,
+    exportButtonVisible: requireBoolean(raw, 'exportButtonVisible'),
+    importButtonVisible: requireBoolean(raw, 'importButtonVisible'),
+  });
 }
 
 export function resetRuntimeSettings() {
@@ -35,4 +46,23 @@ export function getMaxImageUploadBytes() {
 
 export function formatImageUploadTooLargeMessage() {
   return `Görsel en fazla ${getMaxImageUploadMb()} MB olabilir.`;
+}
+
+export function isExportButtonVisible() {
+  return getRuntimeSettings().exportButtonVisible === true;
+}
+
+export function isImportButtonVisible() {
+  return getRuntimeSettings().importButtonVisible === true;
+}
+
+/** Markup starts hidden; call after bootstrap so buttons never flash then vanish. */
+export function applyArchiveButtonVisibility(documentRef) {
+  const exportButton = documentRef?.querySelector?.('#export-project');
+  const importButton = documentRef?.querySelector?.('#import-project');
+  if (!exportButton || !importButton) {
+    throw new Error('Fair Stand archive buttons are missing from the document.');
+  }
+  exportButton.hidden = !isExportButtonVisible();
+  importButton.hidden = !isImportButtonVisible();
 }

@@ -154,6 +154,8 @@ test('DATABASE.md 13 fair_stand tablosunun envanteridir', () => {
   }
   assert.match(doc, /rotation_step_deg/);
   assert.match(doc, /max_image_upload_mb/);
+  assert.match(doc, /export_button_visible/);
+  assert.match(doc, /import_button_visible/);
   assert.match(itemsDoc, /docs\/refactor\/DATABASE\.md/);
 });
 

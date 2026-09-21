@@ -10,3 +10,5 @@ playwright-report/
 test-results/
 .DS_Store
 *.log
+docs/box-250-100-200.png
+docs/fair-stand-front-xyz.png
