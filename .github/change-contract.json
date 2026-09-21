@@ -29,7 +29,7 @@
     "storage": "affected",
     "importExport": "affected",
     "performance": "affected",
-    "accessibility": "not-applicable",
+    "accessibility": "affected",
     "architecture": "affected",
     "security": "affected",
     "tests": "affected"
@@ -37,6 +37,8 @@
   "impactAnalysis": {
     "mode": "full-system",
     "affectedFiles": [
+      "backend/alembic/data/0002_fair_stand_catalog_dump.json",
+      "backend/app/modules/fair_stand/infrastructure/catalog_preview_css.py",
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
       "docs/items/audit/hedef/ATOMIK_MEKANIZMA.html",
       "docs/items/audit/report/ITEM_SYSTEM_AUDIT.html",
@@ -53,10 +55,14 @@
       "src/catalog.js",
       "src/catalogBootstrap.js",
       "src/catalogPreviewRenderer.js",
+      "src/colorEditor.css",
+      "src/configuratorMarkup.js",
+      "src/configuratorStyles.js",
       "src/cornerPlacement.js",
       "src/designState.js",
       "src/featureContracts.js",
       "src/groundLayout.js",
+      "src/helpGuide.css",
       "src/helpGuide.js",
       "src/itemBom.js",
       "src/itemCapabilities.js",
@@ -71,12 +77,14 @@
       "src/modulePlacement.js",
       "src/moduleRecipes.js",
       "src/mountFairStand.js",
+      "src/projectActionSaveGuard.js",
       "src/projectImportValidation.js",
       "src/rawBomDebug.js",
       "src/scene3d.js",
       "src/selectionFeedback.js",
       "src/standStandardsCopy.js",
       "src/stripOccupancy.js",
+      "src/style.css",
       "src/surfaceStateBinding.js",
       "src/systemChangeContract.js",
       "src/viewCube.js",
@@ -86,11 +94,14 @@
     "affectedTests": [
       "backend/tests/modules/fair_stand/test_catalog_api.py",
       "backend/tests/modules/fair_stand/test_item_default_z.py",
-      "backend/tests/modules/fair_stand/test_item_snap.py",
       "backend/tests/modules/fair_stand/test_item_scene_pose.py",
+      "backend/tests/modules/fair_stand/test_item_snap.py",
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
+      "e2e/commercial-items-contract.spec.mjs",
       "e2e/f010-module-construction.spec.mjs",
       "e2e/f011-module-behavior.spec.mjs",
+      "e2e/f023-atomic-project-delete.spec.mjs",
+      "e2e/f028-reset-features.spec.mjs",
       "e2e/free-props-collision-none.spec.mjs",
       "e2e/invalid-placement-ghost.spec.mjs",
       "e2e/lighting-items-contract.spec.mjs",
@@ -109,6 +120,7 @@
       "test/autoDepot.test.js",
       "test/autoDepotOrientation.test.js",
       "test/automaticWall.test.js",
+      "test/autosaveController.test.js",
       "test/autosaveMainIntegration.test.js",
       "test/barStool2.test.js",
       "test/baseItemsContract.test.js",
@@ -157,6 +169,8 @@
       "test/f027SceneReset.test.js",
       "test/f028FeatureReset.test.js",
       "test/fabricModuleOwnership.test.js",
+      "test/fixtures/catalogPreviewCss.mjs",
+      "test/fixtures/catalogPreviewKinds.mjs",
       "test/floorItemsContract.test.js",
       "test/freePropsCollisionNone.test.js",
       "test/furnitureItemsContract.test.js",
@@ -196,6 +210,7 @@
       "test/lightboxFabricLighting.test.js",
       "test/lightboxFabricPerformance.test.js",
       "test/lightingItemsContract.test.js",
+      "test/mapCatalogSeed.mjs",
       "test/materialAppearance.test.js",
       "test/miniFridge.test.js",
       "test/miniFridgeTopLabel.test.js",
@@ -222,6 +237,7 @@
       "test/profileFieldPlacement.test.js",
       "test/profileIntrinsicProperties.test.js",
       "test/profilesItemContract.test.js",
+      "test/projectActionSaveGuard.test.js",
       "test/projectAtomicDeletion.test.js",
       "test/projectDropdownSwitchIntegration.test.js",
       "test/projectImportFlow.test.js",
@@ -297,7 +313,6 @@
       "SYSTEM_CHANGE_GATE.md",
       "SYSTEM_DEVELOPMENT_CONTRACT.md",
       "SYSTEM_MODULE_CATALOG.md",
-      "fair-stand-base-family-migration-handoff.md",
       "audit/FINDINGS.md",
       "audit/FULL_SWEEP_STATE.md",
       "audit/SISTEM_MUTABAKAT_RAPORU.md",
@@ -335,6 +350,7 @@
       "docs/items/audit/OZEL_DURUMLAR.md",
       "docs/items/audit/README.md",
       "docs/items/audit/hedef/ATOMIK_MEKANIZMA.md",
+      "docs/items/audit/hedef/FAIR_STAND_104_ITEM_GRUPLARI.md",
       "docs/items/audit/items/BASE_100.md",
       "docs/items/audit/items/BASE_150.md",
       "docs/items/audit/items/BASE_200.md",
@@ -631,6 +647,7 @@
       "docs/items/current-system/base_top_107_50.md",
       "docs/items/current-system/base_top_157_50.md",
       "docs/items/current-system/base_top_206_50.md",
+      "docs/items/current-system/chair_eames.md",
       "docs/items/current-system/connector_corner.md",
       "docs/items/current-system/connector_double.md",
       "docs/items/current-system/connector_single.md",
@@ -743,6 +760,10 @@
       "docs/items/definitions/illuminated-foam.md",
       "docs/items/definitions/karolaj.md",
       "docs/items/definitions/led_floodlight.md",
+      "docs/items/definitions/panel_147_5.md",
+      "docs/items/definitions/panel_197.md",
+      "docs/items/definitions/panel_48_5.md",
+      "docs/items/definitions/panel_98.md",
       "docs/items/definitions/profile_140_5.md",
       "docs/items/definitions/profile_190.md",
       "docs/items/definitions/profile_41_5.md",
@@ -761,11 +782,13 @@
       "docs/items/door_100_full_system_audit.md",
       "docs/items/inventory/ITEM_CAPABILITY_INVENTORY.md",
       "docs/refactor/CATALOG.md",
+      "docs/refactor/DATABASE.md",
       "docs/refactor/ITEMS.md",
       "docs/refactor/REFACTOR.md",
       "docs/refactor/ROTATION.md",
       "docs/refactor/SCENE_POSE.md",
       "docs/refactor/STAND_DIMENSIONS.md",
+      "fair-stand-base-family-migration-handoff.md",
       "scripts/archive/README.md"
     ],
     "relatedFindings": {
@@ -784,6 +807,7 @@
         "F-017",
         "F-018",
         "F-019",
+        "F-020",
         "F-029",
         "F-033"
       ]
@@ -802,7 +826,10 @@
       "test/profileFieldPlacement.test.js",
       "test/uprightFieldPlacement.test.js",
       "test/wallFlatPanelItemsContract.test.js",
-      "test/itemSceneDimensions.test.js"
+      "test/itemSceneDimensions.test.js",
+      "test/projectAtomicDeletion.test.js",
+      "test/kettle.test.js",
+      "test/catalogDomainBoundary.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -810,7 +837,9 @@
       "required": true,
       "targeted": [
         "e2e/f011-module-behavior.spec.mjs",
-        "e2e/lighting-items-contract.spec.mjs"
+        "e2e/lighting-items-contract.spec.mjs",
+        "e2e/f023-atomic-project-delete.spec.mjs",
+        "e2e/commercial-items-contract.spec.mjs"
       ],
       "reason": "Wall panel glass/lightbox/mesh and lighting still run in the browser; gates now follow item flags."
     }
@@ -821,7 +850,7 @@
   },
   "migration": {
     "required": true,
-    "notes": "Alembic 0008 fills profile scene height 8 + default_z 342 and short-up height/Z. 0003–0007 still required."
+    "notes": "Alembic 0009 sets KETTLE default_z_cm=66. 0008 fills profile/short-up pose. 0003–0007 still required."
   },
   "rollback": "Revert the PR, downgrade alembic to 0002, and restore JS STAND_DIMENSIONS constants plus TYPE_BEHAVIORS rotation."
 }

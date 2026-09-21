@@ -19,6 +19,9 @@ test('drop Z comes from item.defaultZCm for every Item, not stand ceiling or typ
   assert.equal(getItem('led_floodlight').dimensions.mountHeightCm, 350);
   assert.equal(resolveItemDefaultZCm('wall_200'), 0);
   assert.equal(getItem('wall_200').defaultZCm, 0);
+  assert.equal(getItem('KETTLE').defaultZCm, 66);
+  assert.equal(resolveItemDefaultZCm('KETTLE'), 66);
+  assert.equal(createModulePlacement({ xCm: 10, itemKey: 'KETTLE' }).zCm, 66);
   assert.equal(resolveItemDefaultZCm('profile_190'), 342);
   assert.equal(resolveItemDefaultZCm('wall_200_short_up_2'), 250);
   assert.equal(resolveItemDefaultZCm('wall_200_short_up_1'), 300);
@@ -46,6 +49,8 @@ test('drop Z comes from item.defaultZCm for every Item, not stand ceiling or typ
   assert.match(SCENE_SOURCE, /applyItemPlacementZCm/);
   assert.match(SCENE_SOURCE, /function withItemZ\(/);
   assert.doesNotMatch(SCENE_SOURCE, /zCm: Math\.round\(STAND_DIMENSIONS\.height \* 100\)/);
+  assert.doesNotMatch(SCENE_SOURCE, /fixedElevationM/);
+  assert.doesNotMatch(SCENE_SOURCE, /Kettle asla zemine oturmaz/);
   assert.doesNotMatch(MAIN_SOURCE, /zCm: 350/);
   assert.match(MAIN_SOURCE, /itemKey: moduleState\.itemKey/);
 });

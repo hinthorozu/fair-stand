@@ -1635,6 +1635,7 @@ CATALOG_SEED = {
             "item_key": "KETTLE",
             "name": "Kettle",
             "item_type": "kettle",
+            "default_z_cm": 66,
             "unit": "adet",
             "catalog_visible": True,
             "category_index": 5,

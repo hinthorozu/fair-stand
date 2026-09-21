@@ -5,6 +5,7 @@ Fair Stand yeni Item modelinin yaşayan canonical sözleşmesi. Audit dökümü 
 Stand zarfı Item değildir: `docs/refactor/STAND_DIMENSIONS.md`.
 Catalog: `docs/refactor/CATALOG.md`.
 Rotation: `docs/refactor/ROTATION.md`.
+PostgreSQL tabloları: `docs/refactor/DATABASE.md`.
 
 ---
 
@@ -41,7 +42,7 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `sceneDimensions.widthCm` | 10 | Effective scene width. |
 | `sceneDimensions.depthCm` | 24 | Effective scene depth. |
 | `sceneDimensions.heightCm` | 24 | Effective scene height. |
-| `defaultColor` | 30 | Varsayılan renk (hex sayı veya zemin string). |
+| `defaultColor` | 30 | Varsayılan renk (integer hex; DB `default_color`). Zemin de aynı, string değil. |
 | `material` | 34 | Üretim malzemesi metni. Vitrin gövde `sunta` kilidi. |
 | `panelRole` | 8 | `straight` / `inner-corner`. Item sınıflandırması; BOM panel değiştirme yok. |
 | `connectorType` | 4 | Data ACTIVE. `getConnectorItemKey` / `resolveConnectorBom` TEST_ONLY (DECISION-08 STATUS QUO). Production BOM `composition.items[].itemKey`. |
@@ -204,9 +205,9 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 - **Type:** number (cm)
 - **Required:** yes (`0` geçerli)
 - **Scope:** Item master (`fair_stand_items.default_z_cm`)
-- **Default:** `0`; seed `dimensions.mount_height_cm` varsa onu kopyalar (`led_floodlight` 350). Profil ray: `342` (gövde 8, üst kenar 350). Short-up-2: `250` (gövde 100).
+- **Default:** `0`; seed `dimensions.mount_height_cm` varsa onu kopyalar (`led_floodlight` 350). Profil ray: `342` (gövde 8, üst kenar 350). Short-up-2: `250` (gövde 100). `KETTLE`: `66` (buzdolabı üst kotu; renderer type istisnası yok).
 - **Amaç:** Katalog drop’ta instance `placement.zCm`. Gövde boyu değil; yerden kot
-- **`true` örnek:** floodlight 350. Profil 342 (ray gövdesi 8 cm). Tam boy duvar 0.
+- **`true` örnek:** floodlight 350. Profil 342 (ray gövdesi 8 cm). Tam boy duvar 0. Kettle 66.
 - Stand tavanı (`STAND_DIMENSIONS.height`) bu alanı ezmez
 - Instance override: kullanıcı Z−/Z+ / overlay sürükleme `placement.zCm` yazar; yeni drop yine master default
 - **Canonical consumer:** `applyItemPlacementZCm` / `resolveItemDefaultZCm` — her item drop; overlay mouse ve instance Z ezer
@@ -229,7 +230,7 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 
 ### Yüzey yetenekleri (`accepts*`)
 
-Hepsi boolean, zorunlu, `null` yasak. Item satırı; `item_type` map’i değil. Bugün `src/itemCapabilities.js` type’a göre `color/image/glass/lightbox/mesh` basıyor — hedef bu kolonlar.
+Hepsi boolean, zorunlu, `null` yasak. Item satırı; `item_type` map’i değil. `src/itemCapabilities.js` `item.acceptsColor` / `acceptsImage` / `acceptsGlass` / `acceptsLightbox` / `acceptsMesh` okur.
 
 | Alan | DB kolon (örn.) | Soru |
 |---|---|---|

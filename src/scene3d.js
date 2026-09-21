@@ -1392,12 +1392,7 @@ export function createStandScene(
     const xM = Number(placement.xCm) / 100;
     const logicalYM = Number(placement.yCm) / 100;
     const logicalZM = Number(placement.zCm ?? 0) / 100;
-    // Mini buzdolabı yüksekliği 66 cm. Kettle asla zemine oturmaz; yerel tabanı
-    // her zaman buzdolabı üst düzlemine kadar yükseltilir.
-    const fixedElevationM = (group.userData?.type === 'kettle' || group.userData?.moduleState?.type === 'kettle')
-      ? getItem('MINI_FRIDGE_AVANTI').dimensions.heightCm / 100
-      : 0;
-    const worldYM = logicalZM + fixedElevationM;
+    const worldYM = logicalZM;
     const rotationZDeg = normalizeModuleRotationZDeg(placement.rotationZDeg);
     const vertical = isVerticalModuleRotation(rotationZDeg);
 

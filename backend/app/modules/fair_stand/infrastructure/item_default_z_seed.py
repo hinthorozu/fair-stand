@@ -32,3 +32,10 @@ def fill_item_default_z_columns(bind) -> None:
             "), 0)"
         )
     )
+    fill_kettle_default_z_column(bind)
+
+
+def fill_kettle_default_z_column(bind) -> None:
+    bind.execute(
+        sa.text("UPDATE fair_stand_items SET default_z_cm = 66 WHERE item_key = 'KETTLE'")
+    )

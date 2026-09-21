@@ -5,6 +5,7 @@ Fair Stand sahne Z dönüşünün Item parametreleri. Catalog kartı ve stand za
 - Item: `docs/refactor/ITEMS.md`
 - Catalog: `docs/refactor/CATALOG.md`
 - Stand zarfı: `docs/refactor/STAND_DIMENSIONS.md`
+- PostgreSQL envanter: `docs/refactor/DATABASE.md`
 - Kod: `src/moduleBehavior.js` `getModuleRotationStepDeg` / `getModuleDefaultRotationDeg` / `resolveSideInsertRotationDeg`
 - Tablo: `fair_stand_items` (`rotation_step_deg`, `default_rotation_deg`, `side_insert_rotation`)
 

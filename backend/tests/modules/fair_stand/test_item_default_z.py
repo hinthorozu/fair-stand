@@ -8,6 +8,7 @@ def test_floodlight_default_z_copies_mount_height():
         "dimensions": {"mount_height_cm": 350},
     })) == 350
     assert float(default_z_cm_for_row({"item_key": "wall_200", "dimensions": {"width_cm": 200}})) == 0
+    assert float(default_z_cm_for_row({"item_key": "KETTLE", "default_z_cm": 66})) == 66
 
 
 def test_bootstrap_default_z_cm(client, db_session, auth_headers):
@@ -18,6 +19,7 @@ def test_bootstrap_default_z_cm(client, db_session, auth_headers):
     assert by_key["led_floodlight"]["defaultZCm"] == 350
     assert by_key["wall_200"]["defaultZCm"] == 0
     assert by_key["panel_197"]["defaultZCm"] == 0
+    assert by_key["KETTLE"]["defaultZCm"] == 66
     assert by_key["profile_190"]["defaultZCm"] == 342
     assert by_key["wall_200_short_up_2"]["defaultZCm"] == 250
     assert by_key["wall_200_short_up_1"]["defaultZCm"] == 300

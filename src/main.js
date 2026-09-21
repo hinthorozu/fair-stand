@@ -1512,6 +1512,41 @@ async function restoreProject(project) {
   projectStatus.textContent = 'Açıldı: ' + (project.name || 'Adsız Proje');
 }
 
+function resetToFirstOpenState() {
+  autosaveController.disable();
+  moduleContextMenu.close();
+  moduleContextMenu.closePicker();
+  scene3d.clearCatalogModuleDrag();
+  scene3d.clearWall({ resetView: true });
+  scene3d.clearSelection();
+
+  currentModules = [];
+  currentStand = null;
+  selectedStandType = null;
+  selectedFoamModuleId = null;
+  pendingCatalogAdds = [];
+  standTypeButtons.forEach((button) => button.setAttribute('aria-pressed', 'false'));
+  standSizeXInput.value = '';
+  standSizeYInput.value = '';
+  if (autoDepotEnabledInput) autoDepotEnabledInput.checked = false;
+  syncAutoDepotControls();
+  syncFloorTypeSelect();
+  if (foamLightControls) foamLightControls.hidden = true;
+
+  activeProjectId = createProjectId();
+  activeProjectCreatedAt = Date.now();
+  setProjectName('Adsız Proje');
+  clearRegisteredAssets();
+
+  viewportEmpty.hidden = false;
+  viewportToolbar.hidden = true;
+  setStandEditingEnabled(false);
+  updateStageCreateState();
+  syncColorEditorFromHex('#ffffff');
+  selectionInfo.textContent = DEFAULT_SELECTION_HINT;
+  projectStatus.textContent = 'Aktif proje henüz kaydedilmedi.';
+}
+
 function registerAsset(asset) {
   const previous = imageAssets.get(asset.id);
   if (previous?.url) URL.revokeObjectURL(previous.url);
@@ -2169,10 +2204,11 @@ deleteProjectButton.addEventListener('click', async () => {
   const confirmed = window.confirm((project?.name || 'Proje') + ' ve bu projeye ait tüm görseller silinecek. Devam edilsin mi?');
   if (!confirmed) return;
   try {
+    const deletingActive = projectId === activeProjectId;
     await deleteProjectWithAssets(projectId);
-    if (projectId === activeProjectId) { window.location.reload(); return; }
+    if (deletingActive) resetToFirstOpenState();
     await refreshProjectList();
-    projectStatus.textContent = 'Proje silindi.';
+    if (!deletingActive) projectStatus.textContent = 'Proje silindi.';
   } catch (error) { console.warn('Proje silinemedi:', error); projectStatus.textContent = 'Proje silinemedi.'; }
 });
 

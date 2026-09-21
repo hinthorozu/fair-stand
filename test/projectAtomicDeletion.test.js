@@ -35,4 +35,22 @@ test('main uses the atomic whole-project delete for user deletion and import rol
   const deleteHandler = mainSource.slice(deleteHandlerStart, deleteHandlerEnd);
   assert.match(deleteHandler, /await deleteProjectWithAssets\(projectId\)/);
   assert.doesNotMatch(deleteHandler, /await deleteProject\(projectId\)/);
+  assert.doesNotMatch(deleteHandler, /location\.reload/);
+  assert.match(deleteHandler, /resetToFirstOpenState\(\)/);
+});
+
+test('active project delete resets to first-open empty scene instead of reloading the host page', () => {
+  const resetStart = mainSource.indexOf('function resetToFirstOpenState');
+  const resetEnd = mainSource.indexOf('function registerAsset', resetStart);
+  assert.ok(resetStart >= 0 && resetEnd > resetStart);
+  const resetSource = mainSource.slice(resetStart, resetEnd);
+
+  assert.match(resetSource, /autosaveController\.disable\(\)/);
+  assert.match(resetSource, /activeProjectId = createProjectId\(\)/);
+  assert.match(resetSource, /setProjectName\('Adsız Proje'\)/);
+  assert.match(resetSource, /viewportEmpty\.hidden = false/);
+  assert.match(resetSource, /viewportToolbar\.hidden = true/);
+  assert.match(resetSource, /setStandEditingEnabled\(false\)/);
+  assert.match(resetSource, /Aktif proje henüz kaydedilmedi/);
+  assert.doesNotMatch(mainSource, /window\.location\.reload/);
 });

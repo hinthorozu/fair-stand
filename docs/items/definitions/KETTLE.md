@@ -12,7 +12,7 @@ JSON snapshot/save/load örnek ID ve mevcut ezme'ları korur; duplicate yeni ID 
 
 ## Davranış, yetenekler ve ilişkiler
 `src/moduleBehavior.js` placement/snap/collision type ailesidir: serbest yerleşim, move/snap, `collision: none` (yalnız stand sınırı), ghost ve kettle-fridge overlap. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`). UI selection, drag, sağ click, silme, sağ/sol duplicate/insert ve klavye yolları ortak modül akışındadır. Fixed-model profile renk/image düzenlemeyi kapalı tutar.
-Otomatik depo yeni bir parent Item oluşturmaz; içerik örnek'larını planlar. Persistent host/child/neighbor ilişkisi ve host takip reflow'u yok. Kettle mevcut sabit yükseltilmiş görünümünü fridge Item yüksekliğinden alır; bu migration yeni stacking davranışı eklemez.
+Otomatik depo yeni bir parent Item oluşturmaz; içerik örnek'larını planlar. Persistent host/child/neighbor ilişkisi ve host takip reflow'u yok. Kettle sahne kotu `defaultZCm` (katalog 66); `scene3d` type'a göre yükseltmez.
 
 ## BOM ve tüketiciler
 Kullanıcı kararıyla bu Item canonical leaf/self BOM'dur: `unit=adet`, `quantity=1`. `src/itemBom.js > resolveItemBom('KETTLE')` tek satır `KETTLE ×1 adet` üretir. `src/moduleContracts.js` BOM politikasını `mode: self`, `source: src/itemBom.js` olarak ilan eder. Child recipe/composition yoktur.

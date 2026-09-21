@@ -2,7 +2,7 @@
 
 Fair Stand katalog mekanizmasının canonical teknik sözleşmesi. Audit dökümü değildir.
 
-Item tarafındaki Catalog config alanlarının kısa kaydı: `docs/refactor/ITEMS.md`. Stand zarfı: `docs/refactor/STAND_DIMENSIONS.md`. Bu dosya Catalog’un nasıl çalıştığını anlatır; Item şemasını ve stand zarfını kopyalamaz.
+Item tarafındaki Catalog config alanlarının kısa kaydı: `docs/refactor/ITEMS.md`. Stand zarfı: `docs/refactor/STAND_DIMENSIONS.md`. PostgreSQL: `docs/refactor/DATABASE.md`. Bu dosya Catalog’un nasıl çalıştığını anlatır; Item şemasını, stand zarfını ve tablo envanterini kopyalamaz.
 
 ---
 

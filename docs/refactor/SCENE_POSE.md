@@ -2,6 +2,7 @@
 
 Item gövdesi, sahne kotu, snap. Stand zarfı değildir (`STAND_DIMENSIONS.md`).
 Rotation ayrı: `ROTATION.md`.
+Kolon envanteri: `DATABASE.md`.
 
 Bu belge hedef sözleşmedir. Aşağıdaki “hedef” satırları henüz kodda tam uygulanmış değildir.
 
@@ -103,7 +104,7 @@ Kod henüz yoktu; sıra bu. **1–6** uygulandı.
 1. Item kolonları: `is_render`, `accepts_*`. Seed. **Done.**
 2. Yüzey kapısı item `accepts*` (type map / `selectionMode==='panel'` kapısı). **Done (menü/uygula).** Ctrl çoklu seçim hâlâ şerit `selectionMode` (geometri).
 3. `isRender`: false → sahne factory yok. **Done** (`createModuleStateFromDescriptor` / catalog key).
-4. `defaultZCm` / `mount_height` → drop `placement.zCm`. **Done** (`resolveItemDefaultZCm`; floodlight 350 literal yok).
+4. `defaultZCm` / `mount_height` → drop `placement.zCm`. **Done** (`resolveItemDefaultZCm`; floodlight 350 literal yok). Kettle sahne kotu da item `defaultZCm`; renderer buzdolabı yüksekliği eklemez.
 5. `snap_target_item_type` + `snap_anchor` (`top`/`bottom`/`left`/`right`). **Done** (kolon + generic `snapPlacementToItemAnchor`; floodlight Z host top).
 6. Duvar tavanı bırak; `wall_200_100`; şerit occupancy yok; panel boşluğu standart. **Done (mesh + kot).** Profil ray `height=8` + `defaultZCm=342`. Dikme item `scene_dimensions`. Düz panel `frameHeight` item `heightCm`. Short-up kot `defaultZCm` + gövde; collision occupancy×stand değil. Occupancy JSON hâlâ katalogda (strip adedi / test); renderer ve collision kotu okumaz. `wall_200_100` yeni SKU yok (adım 8). Panel boşluğu hâlâ `PANEL_RAIL_HEIGHT_M` 0.4 cm — cm seed’de yazılmadı.
 7. Ortak kutu primitive (asılı lightbox). **Örnekti; sistemde böyle bir primitive yok. Atlandı.**
