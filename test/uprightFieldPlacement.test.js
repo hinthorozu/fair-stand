@@ -209,14 +209,14 @@ test('field upright renderer uses a square wall-depth column, not an L', async (
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const fn = source.slice(source.indexOf('function createUprightModule'), source.indexOf('function createProfileModule'));
-  assert.match(fn, /STAND_DIMENSIONS/);
-  assert.match(fn, /BoxGeometry\(frameDepth, frameHeight, frameDepth\)/);
+  assert.match(fn, /BoxGeometry\(thicknessM, heightM, depthM\)/);
+  assert.doesNotMatch(fn, /STAND_DIMENSIONS/);
   assert.match(fn, /FRAME_COLOR/);
   assert.match(fn, /metalness: 0\.68/);
   assert.match(fn, /roughness: 0\.28/);
   assert.doesNotMatch(fn, /rotation\.y = Math\.PI \/ 2/);
   assert.doesNotMatch(fn, /postAlongWall/);
-  assert.doesNotMatch(fn, /thicknessCm \/ 100/);
+  assert.doesNotMatch(fn, /getItem\('upright_346_5'\)/);
   assert.doesNotMatch(fn, /item\.defaultColor/);
 });
 

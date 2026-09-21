@@ -48,7 +48,7 @@ import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';
 import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';
 import { createSidebarController } from './sidebarController.js';
 import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';
-import { getFloorItem, getFloorSelectLabel, listFloorItems, resolveItemKey, resolveStandFloorItemKey } from './items.js';
+import { getFloorItem, getFloorSelectLabel, listFloorItems, resolveItemDefaultZCm, resolveItemKey, resolveStandFloorItemKey } from './items.js';
 import { renderStandStandardsList } from './standStandardsCopy.js';
 import {
   isAllowedImportImageType,
@@ -506,7 +506,10 @@ function duplicateContextModule(context, side) {
 
   if (isTopPlacementModule(sourceModule) && sourceModule.placement) {
     const sourcePlacement = sourceModule.placement;
-    const placement = { ...sourcePlacement, zCm: 350 };
+    const placement = { ...sourcePlacement };
+    if (!Number.isFinite(Number(placement.zCm))) {
+      placement.zCm = resolveItemDefaultZCm(sourceModule);
+    }
     const deltaCm = side === 'left' ? -20 : 20;
     const widthCm = Number(duplicate.widthCm) || 50;
 
@@ -737,9 +740,9 @@ function assignPlannedPlacements(moduleStates, { placementMode = 'append', conte
     const placement = createModulePlacement({
       xCm: cursorCm,
       yCm: 0,
-      zCm: 0,
       rotationZDeg: getModuleDefaultRotationDeg(moduleState),
       wallId: 'back',
+      itemKey: moduleState.itemKey,
     });
 
     const validation = validatePlacementAgainstModules({
@@ -876,10 +879,10 @@ function changeContextShelfLighting(context, enabled) {
 }
 
 function changeContextFabricMode(context, enabled) {
-  if (!context?.supportsFabric) return;
+  if (!(context?.supportsLightbox ?? context?.supportsFabric)) return;
 
   const selectedPanels = scene3d.getSelectedSurfaces().filter(
-    (surface) => surface.userData.selectionMode === 'panel',
+    (surface) => surface.userData.acceptsLightbox === true,
   );
   const result = scene3d.applyFabricMode(selectedPanels, enabled);
   if (!result?.ok) {
@@ -893,10 +896,10 @@ function changeContextFabricMode(context, enabled) {
 }
 
 function changeContextMeshMode(context, enabled) {
-  if (!context?.supportsFabric) return;
+  if (!(context?.supportsMesh ?? context?.supportsFabric)) return;
 
   const selectedPanels = scene3d.getSelectedSurfaces().filter(
-    (surface) => surface.userData.selectionMode === 'panel',
+    (surface) => surface.userData.acceptsMesh === true,
   );
   const result = scene3d.applyMeshMode(selectedPanels, enabled);
   if (!result?.ok) {
@@ -913,7 +916,7 @@ function changeContextFabricLighting(context, enabled) {
   if (!context?.isLightboxFabric) return;
 
   const selectedPanels = scene3d.getSelectedSurfaces().filter(
-    (surface) => surface.userData.selectionMode === 'panel',
+    (surface) => surface.userData.acceptsLightbox === true,
   );
   const result = scene3d.setFabricLighting(selectedPanels, enabled);
   if (!result?.ok) {
@@ -930,7 +933,7 @@ function changeContextPanelGlassMode(context, isGlass) {
   if (!context?.supportsGlass) return;
 
   const selectedPanels = scene3d.getSelectedSurfaces().filter(
-    (surface) => surface.userData.selectionMode === 'panel',
+    (surface) => surface.userData.acceptsGlass === true,
   );
   if (!selectedPanels.length) return;
 
@@ -1507,6 +1510,41 @@ async function restoreProject(project) {
   await refreshProjectList(activeProjectId);
   autosaveController.enableFromCurrentState();
   projectStatus.textContent = 'Açıldı: ' + (project.name || 'Adsız Proje');
+}
+
+function resetToFirstOpenState() {
+  autosaveController.disable();
+  moduleContextMenu.close();
+  moduleContextMenu.closePicker();
+  scene3d.clearCatalogModuleDrag();
+  scene3d.clearWall({ resetView: true });
+  scene3d.clearSelection();
+
+  currentModules = [];
+  currentStand = null;
+  selectedStandType = null;
+  selectedFoamModuleId = null;
+  pendingCatalogAdds = [];
+  standTypeButtons.forEach((button) => button.setAttribute('aria-pressed', 'false'));
+  standSizeXInput.value = '';
+  standSizeYInput.value = '';
+  if (autoDepotEnabledInput) autoDepotEnabledInput.checked = false;
+  syncAutoDepotControls();
+  syncFloorTypeSelect();
+  if (foamLightControls) foamLightControls.hidden = true;
+
+  activeProjectId = createProjectId();
+  activeProjectCreatedAt = Date.now();
+  setProjectName('Adsız Proje');
+  clearRegisteredAssets();
+
+  viewportEmpty.hidden = false;
+  viewportToolbar.hidden = true;
+  setStandEditingEnabled(false);
+  updateStageCreateState();
+  syncColorEditorFromHex('#ffffff');
+  selectionInfo.textContent = DEFAULT_SELECTION_HINT;
+  projectStatus.textContent = 'Aktif proje henüz kaydedilmedi.';
 }
 
 function registerAsset(asset) {
@@ -2166,10 +2204,11 @@ deleteProjectButton.addEventListener('click', async () => {
   const confirmed = window.confirm((project?.name || 'Proje') + ' ve bu projeye ait tüm görseller silinecek. Devam edilsin mi?');
   if (!confirmed) return;
   try {
+    const deletingActive = projectId === activeProjectId;
     await deleteProjectWithAssets(projectId);
-    if (projectId === activeProjectId) { window.location.reload(); return; }
+    if (deletingActive) resetToFirstOpenState();
     await refreshProjectList();
-    projectStatus.textContent = 'Proje silindi.';
+    if (!deletingActive) projectStatus.textContent = 'Proje silindi.';
   } catch (error) { console.warn('Proje silinemedi:', error); projectStatus.textContent = 'Proje silinemedi.'; }
 });
 

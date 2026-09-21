@@ -15,6 +15,7 @@ test('kettle catalog and state stay aligned', () => {
   const state = createKettleModuleState();
   assert.equal(catalog.itemKey, 'KETTLE');
   assert.deepEqual([item.dimensions.widthCm, item.dimensions.depthCm, item.dimensions.heightCm], [24, 19, 25]);
+  assert.equal(item.defaultZCm, 66);
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [24, 19, 25]);
 });
 

@@ -243,7 +243,7 @@ test('wall_200_short_up_2 skips floor collisions but keeps wall snap policy', ()
     itemKey: 'wall_200_short_up_2',
     type: 'flat-panel',
     widthCm: 200,
-    placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+    placement: { xCm: 0, yCm: 0, zCm: 250, rotationZDeg: 0, wallId: 'back' },
   };
   const counter = {
     id: 'counter',

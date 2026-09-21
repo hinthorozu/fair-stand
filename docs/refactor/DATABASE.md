@@ -1,0 +1,313 @@
+# Fair Stand veritabanı
+
+Lokal / sunucu PostgreSQL `fair_stand` şemasının yaşayan envanteri. “Üç ay sonra bunu niye koyduk?” cevabı buradadır.
+
+**Doğrulama (2026-09-21, lokal Postgres `fair_stand` + `models.py` + `item_mapper.py` + `src/`):**
+
+1. Canlı `information_schema` — 12 tablo; kolon adları `models.py` ile aynı. Alembic head: `0009_kettle_default_z`.
+2. `item_mapper.py` — her ürün kolonu JSON anahtarına (veya “bootstrap’a girmez”) bağlandı.
+3. Production `src/` grep — “Nerede” hücresi gerçek okuyucu dosyadır; okunmayan kolon **DATA / TEST_ONLY / SCHEMA_ONLY** yazılır.
+4. `ITEMS.md` (alan kuyruğu + onaylı şema), `CATALOG.md`, `ROTATION.md`, `SCENE_POSE.md`, `STAND_DIMENSIONS.md` — değer kopyalanmaz; işaret edilir.
+
+Satır sayıları bu makinedeki canlı DB (aşağıdaki tabloda). Başka dump’ta adet değişebilir; kolon yok olamaz. Değer SoT bu dosya değildir.
+
+- Model: `backend/app/modules/fair_stand/infrastructure/models.py`
+- Mapper (DB → bootstrap JSON): `backend/app/modules/fair_stand/application/item_mapper.py`
+- Migrasyon: `backend/alembic/versions/`
+- Okuma: catalog bootstrap → `initializeItemRegistry` / `initializeStandDimensions`
+
+Yeni kolon aynı PR’da bu dosyaya yazılır. Kolon yoksa “var” yazılmaz.
+
+---
+
+## Neden 12 tablo?
+
+Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 / 1:N parçalar ayrı, Catalog ayrı, stand zarfı Item değil.
+
+| Tablo | Canlı satır | Neden ayrı |
+|---|---|---|
+| `alembic_version` | 1 | Alembic head. Ürün değil. |
+| `fair_stand_categories` | 7 (6 `is_active=true`; 1 pasif yerel satır) | Katalog grupları. Item’dan bağımsız id. Bootstrap yalnız aktif. |
+| `fair_stand_catalog_preview_kinds` | 28 (hepsi aktif) | Kart silüeti HTML/CSS. Item davranışını tanımlamaz. |
+| `fair_stand_items` | 96 (58 `catalog_visible`, 62 `is_render`) | Ürün kimliği + Catalog üyeliği + davranış bayrakları. |
+| `fair_stand_item_dimensions` | 90 / 96 Item | Fiziksel / BOM ölçü. 6 Item’da satır yok (`connector_*`, `shelf_leg`, `hali`). |
+| `fair_stand_item_scene_dimensions` | 34 | Sahne kutusu override. Yoksa aynı adlı `dimensions` alanı. |
+| `fair_stand_item_strip_occupancy` | 8, hepsi `align=top` (4× strip 1, 4× strip 2) | Short-up şerit bandı. |
+| `fair_stand_item_assets` | 19 (14 `model` + 5 `default_screen`) | GLB / TV ekran yolu. CHECK beş rol izin verir; seed ve mapper yalnız bu iki rolü doldurur/okur. |
+| `fair_stand_item_components` | 186 | Recipe BOM child (`composition.items`). |
+| `fair_stand_item_video_walls` | 2 | `VIDEO_WALL_2X2` / `3X3`. |
+| `fair_stand_item_body_parts` | 6 (2 parent × 3 rol) | Vitrin gövde child `itemKey`. |
+| `fair_stand_dimensions` | 1 (`id=1`) | Stand zarfı. Item kutusu değil. |
+
+Akış: PostgreSQL → Fair Stand API bootstrap → CRM proxy → tarayıcı registry. CRM/Core kendi DB’lerinde bu tablolar yok.
+
+---
+
+## `alembic_version`
+
+Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; lokal head `0009_kettle_default_z` |
+
+---
+
+## `fair_stand_categories`
+
+Katalog sol menü grupları. `docs/refactor/CATALOG.md`. Canlı: 6 aktif grup (`id` 1–6); 7. satır pasif yerel (`is_active=false`) — bootstrap’a girmez.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | `categoryId` | Tam sayı grup kimliği | İsim değişse Item satırı kopmasın | `fair_stand_items.category_id` FK; `listCatalogGroups` |
+| `catalog_name` | `catalogName` | UI başlık | Kullanıcı dili | Katalog UI |
+| `catalog_index` | `catalogIndex` | Grup sırası (`> 0`, unique) | Sürükle sırası | `listCatalogGroups` sort |
+| `is_active` | bootstrap’a girmez (repo `is_active=true` filtreler) | Soft delete | Grubu silmeden gizle | `catalog_repository.list_active_categories`; admin |
+| `created_at` / `updated_at` | yok | Audit | Kim ne zaman | DB only |
+
+---
+
+## `fair_stand_catalog_preview_kinds`
+
+Katalog kartı çizimi. Placement/BOM değildir.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | `previewId` | Kart tipi id | Item `preview_id` FK | Görünür Item zorunlu |
+| `display_name` | preview `displayName` | Admin adı | İnsan | Catalog admin |
+| `markup` | `markup` | Kart HTML | Silüet | Catalog kart renderer |
+| `css_code` | `cssCode` | Kart CSS | Silüet stil | Catalog kart renderer |
+| `sort_index` | `sortIndex` | Admin sıra | Liste | Catalog admin |
+| `is_active` | `isActive` | Soft delete | Kullanımdan kaldır | Bootstrap preview listesi |
+| `created_at` / `updated_at` | yok | Audit | — | DB only |
+
+---
+
+## `fair_stand_items`
+
+Kök Item. PK `item_key`. Gizli Item (`catalog_visible=false`) yine `getItem` ile durur.
+
+Aşağıdaki `###` başlıkları (Kimlik, Catalog, Rotation, Duruş/snap…) **ayrı veritabanı tablosu değildir.** Hepsi bu tablonun kolon gruplarıdır. DBeaver’da `fair_stand_items` kolon listesinde görünürler. 1:1 / 1:N uydular sonraki `## fair_stand_item_*` bölümleridir.
+
+### Kimlik (`fair_stand_items`)
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `item_key` | `itemKey` | Canonical ürün id | Tek kimlik | Tüm FK, factory, BOM, persist |
+| `name` | `name` | İnsan adı | Catalog `label`, UI | Katalog, seçim metni |
+| `item_type` | `type` | Davranış ailesi adı | Placement/collision hâlâ `TYPE_BEHAVIORS[type]` | `moduleBehavior.js`, recipe lookup adayı |
+| `unit` | `unit` | BOM birimi | `adet` vb. | `itemBom` |
+| `is_active` | item listesine girmez (`is_active=true` filtre) | Soft delete | Satırı yok etmeden kapat | `catalog_repository` item query; lokal seed hepsi true |
+| `created_at` / `updated_at` | yok | Audit | — | DB only |
+
+### Catalog üyeliği (`fair_stand_items`)
+
+Sözleşme: `CATALOG.md`. `catalog_visible=true` ⇒ `category_id` + `catalog_item_index` + `preview_id` dolu (CHECK).
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `catalog_visible` | `catalogVisible` | Katalogda görünsün mü | Leaf/BOM parçayı listeden sakla | yalnız `catalog.js` |
+| `category_id` | `categoryId` | Grup FK / null | Hangi menü | Catalog UI |
+| `catalog_item_index` | `catalogItemIndex` | Grup içi sıra | Kart sırası; görünürlerde unique | Catalog UI |
+| `preview_id` | `previewId` | Kart silüet FK / gizlide yok | Kart çizimi | Catalog kart |
+
+### Üretim / görünüm üstveri (`fair_stand_items`)
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `material` | `material` | Üretim malzemesi metni | Vitrin yan/yatay `sunta` zorunlu | `getShowcaseBodyDefinition`; cam raf `getMaterialAppearance` |
+| `default_color` | `defaultColor` | Integer hex (örn. `16777215` = beyaz). String değil. | İlk yüzey rengi; zemin de aynı kolon + `paintable` | `designState.js` hex; `scene3d.js` floor `item.defaultColor`; vitrin yan=yatay kilit |
+| `panel_role` | `panelRole` | `straight` / `inner-corner` | Panel sınıf etiketi; BOM child değiştirmez | **DATA + item contract test.** Production `src/` okumaz. |
+| `connector_type` | `connectorType` | `start` / `single` / `double` / `corner` | Aparat türü kaydı | **DATA.** Production BOM `composition.items[].itemKey`. `getConnectorItemKey` TEST_ONLY. |
+| `preserve_model_scale` | `preserveModelScale` | GLB ölçeğini ezme | Fit istemeyen saksı/çöp | `scene3d.js` model load; `designState.js` |
+| `model_rotation_y_deg` | `modelRotationYDeg` | Mesh Y ofset | GLB eksen | `scene3d.js`; `designState.js` |
+| `visual_rotation_y_deg` | `visualRotationYDeg` | Görsel Y ofset | Koltuk sırt / çöp | `scene3d.js` (sahne Z değil) |
+| `paintable` | `paintable` | Zemin boyanır mı | Zemin select | `scene3d.js`, `main.js`, `items.js` floor |
+| `shape` | `shape` | `L` | L-banko kimliği | `designState.js`, `scene3d.js` `createLCounterModule` |
+| `variant` | `variant` | Short-up / sarmasık etiketi | Aile içi ayrım (behavior type değil) | `designState.js` descriptor; `items.js` / `moduleContracts.js` |
+| `eye_count` | `eyeCount` | Vitrin 2 / 3 | Açıklık şerit + raf sayısı | `scene3d.js` showcase; `designState.js` |
+
+### Sahne Z dönüşü (`fair_stand_items`)
+
+Üçlü birlikte dolu veya birlikte NULL (CHECK). Yerleşen 61 dolu; leaf 35 null. `ROTATION.md`. Ayrı rotation tablosu yok.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `rotation_step_deg` | `rotationStepDeg` | Shift+R adımı | Type tablosu ezmesin | `src/moduleBehavior.js` `getModuleRotationStepDeg` |
+| `default_rotation_deg` | `defaultRotationDeg` | İlk `placement.rotationZDeg` | İlk bakış | `getModuleDefaultRotationDeg` |
+| `side_insert_rotation` | `sideInsertRotation` | `inherit` / `default` | Yana ek açı kipi | `resolveSideInsertRotationDeg` |
+
+### Duruş / snap / yüzey (`fair_stand_items`)
+
+Ayrı `duruş` / `snap` tablosu **yok**. `default_z_cm`, `snap_target_item_type`, `snap_anchor` bu tablonun kolonlarıdır (ekrandaki liste). Sözleşme: `SCENE_POSE.md`. Snap okuma: `src/itemSnap.js` + `src/items.js`.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `default_z_cm` | `defaultZCm` | Yerden kot (cm), NOT NULL default 0 | Tavan item’ı ezmesin | `items.js` `resolveItemDefaultZCm` / `applyItemPlacementZCm`. Seed: floodlight 350, profil 342, short-up-1/2 300/250, `KETTLE` 66 |
+| `snap_target_item_type` | `snapTargetItemType` | Yapışılacak `item.type` | Host listesi Item’da | `itemSnap.js` + `items.js` `getItemSnapSpec`. Canlı dolu: `led_floodlight`→`profile`+`top`; `shelf_100/150/200`→`panel`+`top` |
+| `snap_anchor` | `snapAnchor` | `top`/`bottom`/`left`/`right` | Hedef kenar | aynı |
+| `is_render` | `isRender` | Kendi sahne gövdesi var mı | Leaf/BOM çizmeyen SKU | `items.js` `itemHasSceneRender` → factory |
+| `accepts_color` | `acceptsColor` | Renk atanır mı | Mesh userData | `itemCapabilities.js` → `scene3d.js` |
+| `accepts_image` | `acceptsImage` | Yüzey görseli | aynı | aynı |
+| `accepts_lightbox` | `acceptsLightbox` | Işıklı kumaş | aynı | aynı |
+| `accepts_glass` | `acceptsGlass` | Cam görünüm | aynı | `scene3d.js` `acceptsGlass` |
+| `accepts_mesh` | `acceptsMesh` | Delikli branda | aynı | `itemCapabilities.js` |
+
+CHECK: `is_render=false` iken tüm `accepts_*` false.
+
+### Bileşim başlığı (`fair_stand_items`; child satırlar `fair_stand_item_components`)
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `composition_mode` | `composition.mode` | Yalnız `recipe` (CHECK) | BOM expand kapısı | `itemBom.js` `resolveRecipe` |
+| `composition_module_type` | `composition.moduleType` | Eski recipe type etiketi | **DEPRECATED (SCHEMA_ONLY)** — `ITEMS.md` DECISION-06; production `src/` okumaz | mapper + seed dump |
+
+---
+
+## `fair_stand_item_dimensions`
+
+Fiziksel gövde. En az bir ölçü NOT NULL (CHECK). JSON `dimensions.*`.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `item_key` | — | FK/PK | 1:1 | cascade delete |
+| `width_cm` | `widthCm` | Genişlik | Placement / kart / BOM | `resolveSceneDimensions`; factory; AutoDepot |
+| `depth_cm` | `depthCm` | Derinlik | Footprint | aynı |
+| `height_cm` | `heightCm` | Yükseklik | Mesh / şerit aralığı | aynı; collision type tablosu hâlâ ayrı |
+| `length_cm` | `lengthCm` | Üretim boyu | Width’e **remap yok** | profil/raf/vitrin board; `scene3d` showcase |
+| `thickness_cm` | `thicknessCm` | Kalınlık | Depth’e **remap yok** | panel/raf/vitrin |
+| `mount_height_cm` | `mountHeightCm` | Legacy montaj (floodlight 350) | Seed tarihi; drop asıl `default_z_cm`. Fallback: `resolveItemDefaultZCm` hâlâ okur | `led_floodlight`; `selectionFeedback.js` metin |
+| `wall_gap_cm` | `wallGapCm` | Strafor–duvar boşluğu | Overlay öne | `designState.js` → `scene3d.js` foam |
+
+`resolveSceneDimensions`: aynı field `sceneDimensions ?? dimensions ?? MISSING`. `length`→`width` yok.
+
+---
+
+## `fair_stand_item_scene_dimensions`
+
+Sahne kutusu. Örn. `profile_190` üretim 190, sahne width 200. Width/depth/height’ten en az biri dolu.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `item_key` | — | FK/PK | 1:1 | — |
+| `width_cm` / `depth_cm` / `height_cm` | `sceneDimensions.*` | Slot | Üretim ≠ sahne | `resolveSceneDimensions` |
+
+---
+
+## `fair_stand_item_strip_occupancy`
+
+Short-up duvarın kaç üst şeridi kestiği. `align` bugün yalnız `top`.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `item_key` | — | FK/PK | — | — |
+| `align` | `stripOccupancy.align` | Bant hizası (CHECK yalnız `top`) | Tavan şeritleri | `src/stripOccupancy.js`; `catalogPreviewRenderer.js` |
+| `strip_count` | `stripOccupancy.stripCount` | Şerit adedi (`> 0`) | 1 veya 2 short-up | aynı + `designState.js` |
+
+Stand `strip_count` (7) ile karışmaz. O zarf tablosunda.
+
+---
+
+## `fair_stand_item_assets`
+
+Dosya yolları. `(item_key, asset_role)` unique.
+
+| Kolon | JSON (role’e göre) | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | yok | UUID PK | Çok asset | DB |
+| `item_key` | — | FK | — | — |
+| `asset_role` | — | CHECK: `model` / `default_screen` / `catalog_image` / `thumbnail` / `texture`. Canlı seed: yalnız `model` ve `default_screen`. | Rol ayrımı | mapper yalnız `model`→`modelFile`, `default_screen`→`defaultScreenFile`. Diğer üç rol şemada durur, JSON’a yazılmaz. |
+| `relative_path` | `modelFile` (`model`) veya `defaultScreenFile` (`default_screen`) | Repo-relative path | GLB / TV ekran | `scene3d.js` `loadItemModel` / TV texture |
+| `is_active` | mapper yalnız aktif | Soft delete | Eski dosyayı tut | mapper |
+
+---
+
+## `fair_stand_item_components`
+
+Recipe child listesi → JSON `composition.items[]`. Parent ≠ child. `quantity > 0`.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | yok | UUID | Aynı child iki kez (farklı sıra) | DB |
+| `parent_item_key` | — | Parent Item | Bileşik | `resolveItemBom` |
+| `child_item_key` | `items[].itemKey` | Child Item | Gerçek parça | BOM recursive |
+| `quantity` | `items[].quantity` | Adet | Üretim | BOM |
+| `sort_order` | sıra | Liste sırası | Deterministik dump | mapper sort |
+
+---
+
+## `fair_stand_item_video_walls`
+
+`VIDEO_WALL_2X2` / `3X3`. PK parent.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `parent_item_key` | — | Parent | — | — |
+| `rows` / `cols` | `videoWall.rows` / `cols` | Panel ızgara | Seam mesh | `scene3d.js` TV wall; `designState.js` |
+| `panel_item_key` | `videoWall.panelItemKey` | `VIDEO_WALL_PANEL` | Gizli panel SKU | `items.js` video-wall ölçü |
+
+---
+
+## `fair_stand_item_body_parts`
+
+Vitrin gövde. PK `(parent, body_role)`. Role: `side` / `horizontal` / `glass_shelf`.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `parent_item_key` | — | Showcase parent | — | — |
+| `body_role` | `bodyItems.sideItemKey` / `horizontalItemKey` / `glassShelfItemKey` | Hangi parça | Tek child Key | mapper üçlüyü zorunlu okur |
+| `child_item_key` | karşılık | Leaf board/cam | BOM + renk | `getShowcaseBodyDefinition`; `scene3d.js` boards |
+
+---
+
+## `fair_stand_dimensions`
+
+Tek satır `id = 1`. Item değildir. `STAND_DIMENSIONS.md`.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | — | Singleton; CHECK `id = 1`. (Postgres sequence default var, ikinci satır CHECK’ten geçmez.) | İkinci zarf yok | CHECK `ck_fair_stand_dimensions_singleton` |
+| `height_m` | `height` | Tavan (m) | Stand iskeleti | `src/standDimensions.js` |
+| `depth_m` | `depth` | Duvar kalınlığı | Omurga / overlay | same |
+| `strip_count` | `stripCount` | Tam boy şerit | 7×50 panel ızgarası | `stripOccupancy.js` + designState |
+| `strip_height_m` | `stripHeight` | Bir şerit (m) | CHECK: `height_m = strip_count × strip_height_m` | seam |
+| `frame_width_m` | `frameWidth` | Dikey profil kesit | Görsel iskelet | renderer via standDimensions |
+| `frame_depth_m` | `frameDepth` | Profil derinlik | Ray kalınlığı | aynı |
+| `created_at` / `updated_at` | yok | Audit | — | DB |
+
+`MODULE_WIDTHS_CM` (50/100/150/200) hâlâ JS; bu tabloda yok.
+
+Lokal canlı (2026-09-21): `id=1`, `height_m=3.5`, `depth_m=0.1`, `strip_count=7`, `strip_height_m=0.5`, `frame_width_m=0.055`, `frame_depth_m=0.1`. Alembic head: `0009_kettle_default_z`.
+
+---
+
+## Production `src/` bu kolonları okumaz
+
+Kayıt durur; mapper bootstrap’a yazar (asset unused rolleri hariç).
+
+| Kolon | Durum |
+|---|---|
+| `fair_stand_items.panel_role` | DATA + contract test |
+| `fair_stand_items.connector_type` | DATA; BOM `composition.items` |
+| `fair_stand_items.composition_module_type` | SCHEMA_ONLY |
+| asset `catalog_image` / `thumbnail` / `texture` | CHECK izin; seed/mapper yok |
+
+---
+
+## Bilerek burada olmayanlar
+
+Collision / magneticSnap / moveSnapCm / ghost: hâlâ `TYPE_BEHAVIORS` (`type`). Item kolon değil.
+
+Runtime instance: `placement.xCm/yCm/zCm/rotationZDeg`, `rotationLocked` — proje kaydı, catalog DB değil.
+
+Catalog projection alias (`label`, kök `widthCm`): Item/DB alanı değil.
+
+---
+
+## Yeni kolon checklist
+
+1. Model + Alembic + mapper (null omit kuralı).
+2. Bu dosyada tablo/kolon satırı (nedir / neden / nerede).
+3. Konu dosyası varsa oraya pointer (`ROTATION.md` gibi); değer kopyalama.
+4. Test: seed + getter fail-fast.
+5. `ITEMS.md` şemaya alındıysa oraya da.

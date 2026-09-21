@@ -84,10 +84,8 @@ test('door recipe consumes canonical door_leaf_100 once and expanded BOM resolve
 test('door renderer consumes Item-linked color/image capabilities while special panel modes remain disabled', () => {
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.match(scene, /const doorLeafItem = getItem\(doorState\?\.itemKey\)/);
-  assert.match(scene, /const doorLeafCapabilities = getItemSurfaceCapabilities\(doorLeafItem\)/);
   assert.match(scene, /itemKey: doorLeafItem\.itemKey/);
-  assert.match(scene, /acceptsColor: doorLeafCapabilities\.color/);
+  assert.match(scene, /surfaceCapabilityUserData\(doorLeafItem\)/);
   assert.match(scene, /mesh\.userData\.acceptsColor === false/);
-  assert.match(scene, /acceptsImage: doorLeafCapabilities\.image/);
   assert.match(scene, /surfaceRole: 'door'[\s\S]*?selectionMode: 'module'/);
 });

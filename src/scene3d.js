@@ -6,7 +6,7 @@ import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { getModuleCatalogItem, getModuleCatalogLabel } from './catalog.js';
 import { STAND_DIMENSIONS } from './standDimensions.js';
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
-import { getItemSurfaceCapabilities, itemSurfaceAcceptsImage } from './itemCapabilities.js';
+import { surfaceCapabilityUserData } from './itemCapabilities.js';
 import {
   getCommercialItemForType,
   getFloorItem,
@@ -16,8 +16,11 @@ import {
   isGridTileFloorItem,
   isParquetFloorItem,
   listFloorItems,
+  applyItemPlacementZCm,
+  resolveItemDefaultZCm,
   resolveSceneDimensions,
 } from './items.js';
+import { snapPlacementToItemAnchor } from './itemSnap.js';
 import { getOccupiedStripLayout, resolveModuleStripOccupancy } from './stripOccupancy.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
@@ -136,6 +139,10 @@ function isFloorFixtureType(type) {
 
 function isTopFixtureType(type) {
   return isTopPlacementModule(type);
+}
+
+function withItemZ(moduleState, placement, overlayZCm = null) {
+  return applyItemPlacementZCm(moduleState, placement, { overlayZCm });
 }
 
 export function createStandScene(
@@ -1385,12 +1392,7 @@ export function createStandScene(
     const xM = Number(placement.xCm) / 100;
     const logicalYM = Number(placement.yCm) / 100;
     const logicalZM = Number(placement.zCm ?? 0) / 100;
-    // Mini buzdolabı yüksekliği 66 cm. Kettle asla zemine oturmaz; yerel tabanı
-    // her zaman buzdolabı üst düzlemine kadar yükseltilir.
-    const fixedElevationM = (group.userData?.type === 'kettle' || group.userData?.moduleState?.type === 'kettle')
-      ? getItem('MINI_FRIDGE_AVANTI').dimensions.heightCm / 100
-      : 0;
-    const worldYM = logicalZM + fixedElevationM;
+    const worldYM = logicalZM;
     const rotationZDeg = normalizeModuleRotationZDeg(placement.rotationZDeg);
     const vertical = isVerticalModuleRotation(rotationZDeg);
 
@@ -1553,9 +1555,9 @@ export function createStandScene(
         placement = createModulePlacement({
           xCm: Math.round(cursorX * 100),
           yCm: 0,
-          zCm: 0,
           rotationZDeg: 0,
           wallId: 'back',
+          itemKey: moduleState.itemKey,
         });
         moduleState.placement = placement;
       }
@@ -1698,15 +1700,16 @@ export function createStandScene(
     };
   }
 
-  function getTopFixtureDragPoint(clientX, clientY, preferredWallId = 'back') {
+  function getTopFixtureDragPoint(clientX, clientY, preferredWallId = 'back', zCm = 0) {
     if (!stageLayout) return null;
     setPointerFromClient(clientX, clientY);
     raycaster.setFromCamera(pointer, camera);
 
-    // Projektörü 350 cm üst kotunda serbestçe gezdir. Duvara yaklaşınca üst profile snap et.
+    const planeYm = Number(zCm) / 100;
+    // Projektörü item defaultZCm kotunda gezdir. Profile snap adım 5.
     const topPlane = new THREE.Plane(
       new THREE.Vector3(0, 1, 0),
-      -Number(STAND_DIMENSIONS.height),
+      -planeYm,
     );
     const topPoint = new THREE.Vector3();
     const topHit = raycaster.ray.intersectPlane(topPlane, topPoint);
@@ -1792,7 +1795,10 @@ export function createStandScene(
 
     const { moduleGroup, hit } = picked;
     const surface = hit.object.userData?.kind === 'surface' ? hit.object : null;
-    const supportsGlass = surface?.userData.selectionMode === 'panel';
+    const supportsGlass = surface?.userData.acceptsGlass === true;
+    const supportsLightbox = surface?.userData.acceptsLightbox === true;
+    const supportsMesh = surface?.userData.acceptsMesh === true;
+    const supportsFabric = supportsLightbox || supportsMesh;
     const moduleState = moduleGroup.userData.moduleState ?? {};
     return {
       moduleIndex: moduleGroup.userData.moduleIndex,
@@ -1805,23 +1811,25 @@ export function createStandScene(
       placement: moduleGroup.userData.moduleState?.placement
         ? { ...moduleGroup.userData.moduleState.placement }
         : null,
-      surfaceId: supportsGlass ? surface.userData.surfaceId : null,
-      stripIndex: supportsGlass ? surface.userData.stripIndex : null,
-      stripNumber: supportsGlass ? surface.userData.stripNumber : null,
+      surfaceId: surface?.userData.surfaceId ?? null,
+      stripIndex: surface?.userData.stripIndex ?? null,
+      stripNumber: surface?.userData.stripNumber ?? null,
       supportsGlass,
       isGlass: supportsGlass ? Boolean(surface.userData.surfaceState?.isGlass) : false,
-      supportsFabric: supportsGlass,
-      isFabric: supportsGlass ? Boolean(surface.userData.surfaceState?.fabricGroupId) : false,
-      fabricType: supportsGlass && surface.userData.surfaceState?.fabricGroupId
+      supportsFabric,
+      supportsLightbox,
+      supportsMesh,
+      isFabric: supportsFabric ? Boolean(surface.userData.surfaceState?.fabricGroupId) : false,
+      fabricType: supportsFabric && surface.userData.surfaceState?.fabricGroupId
         ? (surface.userData.surfaceState?.fabricType === 'mesh' ? 'mesh' : 'lightbox')
         : null,
-      isLightboxFabric: supportsGlass
+      isLightboxFabric: supportsLightbox
         ? Boolean(surface.userData.surfaceState?.fabricGroupId && surface.userData.surfaceState?.fabricType !== 'mesh')
         : false,
-      isMeshFabric: supportsGlass
+      isMeshFabric: supportsMesh
         ? Boolean(surface.userData.surfaceState?.fabricGroupId && surface.userData.surfaceState?.fabricType === 'mesh')
         : false,
-      fabricLightingOn: supportsGlass
+      fabricLightingOn: supportsLightbox
         ? Boolean(surface.userData.surfaceState?.fabricLightingOn && surface.userData.surfaceState?.fabricType !== 'mesh')
         : false,
       clientX: event.clientX,
@@ -2113,10 +2121,10 @@ export function createStandScene(
       .filter(Boolean);
   }
 
-  function snapTopFixturePlacement(basePlacement, ground, widthCm) {
+  function snapTopFixturePlacement(basePlacement, ground, widthCm, moduleState) {
     const placement = {
       ...basePlacement,
-      zCm: Math.round(STAND_DIMENSIONS.height * 100),
+      zCm: resolveItemDefaultZCm(moduleState),
     };
     if (!stageLayout || !ground) return placement;
 
@@ -2136,7 +2144,7 @@ export function createStandScene(
         Math.max(0, Number(stageLayout.depthCm) - width),
         Math.max(0, snap20(ground.yCm)),
       );
-    } else if (placement.wallId === 'right') {
+    } else     if (placement.wallId === 'right') {
       placement.xCm = Number(stageLayout.widthCm);
       placement.yCm = Math.min(
         Math.max(0, Number(stageLayout.depthCm) - width),
@@ -2144,6 +2152,9 @@ export function createStandScene(
       );
     }
 
+    const anchored = snapPlacementToItemAnchor(moduleState, placement, getRenderedModuleStates());
+    if (anchored) return anchored;
+    placement.zCm = resolveItemDefaultZCm(moduleState);
     return placement;
   }
 
@@ -2302,11 +2313,10 @@ export function createStandScene(
       rotationLocked: true,
     });
     if (!snapped.ok || !snapped.placement) return null;
-    return {
+    return withItemZ(moduleState, {
       ...snapped.placement,
       wallId: 'free',
-      zCm: Number(moduleState.placement?.zCm ?? 0),
-    };
+    });
   }
 
   function getWallOverlayDragPoint(clientX, clientY, preferredWallId = null, moduleState = null) {
@@ -2515,7 +2525,7 @@ export function createStandScene(
         showPlacementFeedback(message, { clientX, clientY });
         return { ok: false, message };
       }
-      const placement = { ...snapped.placement, zCm: wallPoint.zCm };
+      const placement = withItemZ(moduleState, { ...snapped.placement }, wallPoint.zCm);
       const plan = {
         ok: true,
         message: null,
@@ -2573,7 +2583,7 @@ export function createStandScene(
     }
 
     if (isWallOverlayModule(moduleState.type)) {
-      const placement = { ...snapped.placement };
+      const placement = withItemZ(moduleState, { ...snapped.placement });
       showPlacementGhost(moduleState, placement, true);
       clearPlacementFeedback();
       return {
@@ -2591,10 +2601,14 @@ export function createStandScene(
 
     if (isTopFixtureType(moduleState.type)) {
       const isFreeTopFixture = snapped.placement.wallId === 'free';
-      const placement = snapTopFixturePlacement(
+      const placement = withItemZ(
+        moduleState,
+        snapTopFixturePlacement(
         snapped.placement,
         ground,
         moduleState.widthCm,
+        moduleState,
+        ),
       );
       showPlacementGhost(moduleState, placement, true);
       clearPlacementFeedback();
@@ -2636,10 +2650,10 @@ export function createStandScene(
       return {
         ok: false,
         message,
-        placement: { ...snapped.placement },
+        placement: withItemZ(moduleState, { ...snapped.placement }),
       };
     }
-    const desiredPlacement = magneticSnap?.placement ?? snapped.placement;
+    const desiredPlacement = withItemZ(moduleState, magneticSnap?.placement ?? snapped.placement);
 
     let plan;
     if (desiredPlacement.wallId === 'free') {
@@ -2827,7 +2841,7 @@ export function createStandScene(
         });
         return;
       }
-      const placement = { ...snapped.placement, zCm: wallPoint.zCm };
+      const placement = withItemZ(moduleState, { ...snapped.placement }, wallPoint.zCm);
       dragSession.preview = {
         placement,
         valid: true,
@@ -2848,7 +2862,12 @@ export function createStandScene(
       const currentWallId = dragSession.preview?.placement?.wallId
         ?? moduleState.placement?.wallId
         ?? 'back';
-      const wallPoint = getTopFixtureDragPoint(event.clientX, event.clientY, currentWallId);
+      const wallPoint = getTopFixtureDragPoint(
+        event.clientX,
+        event.clientY,
+        currentWallId,
+        resolveItemDefaultZCm(moduleState),
+      );
       if (!wallPoint) {
         disposePlacementGhost();
         dragSession.preview = null;
@@ -2877,19 +2896,27 @@ export function createStandScene(
         const snap20 = (value) => Math.round(Number(value) / stepCm) * stepCm;
         const maxX = Math.max(0, Number(stageLayout.widthCm) - (vertical ? 0 : widthCm));
         const maxY = Math.max(0, Number(stageLayout.depthCm) - (vertical ? widthCm : 0));
-        placement = {
+        const candidate = {
           ...basePlacement,
           xCm: Math.min(maxX, Math.max(0, snap20(wallPoint.xCm))),
           yCm: Math.min(maxY, Math.max(0, snap20(wallPoint.yCm))),
-          zCm: Math.round(STAND_DIMENSIONS.height * 100),
           wallId: 'free',
         };
+        placement = withItemZ(
+          moduleState,
+          snapPlacementToItemAnchor(moduleState, candidate, getRenderedModuleStates())
+            ?? { ...candidate, zCm: resolveItemDefaultZCm(moduleState) },
+        );
       } else {
         dragSession.preferredRotationZDeg = wallRotationZDeg;
-        placement = snapTopFixturePlacement(
+        placement = withItemZ(
+          moduleState,
+          snapTopFixturePlacement(
           basePlacement,
           wallPoint,
           moduleState.widthCm,
+          moduleState,
+          ),
         );
       }
       dragSession.preview = {
@@ -2953,7 +2980,7 @@ export function createStandScene(
     }
 
     if (isWallOverlayModule(moduleState.type)) {
-      const placement = { ...snapped.placement };
+      const placement = withItemZ(moduleState, { ...snapped.placement });
       dragSession.preview = {
         placement,
         valid: true,
@@ -2971,10 +2998,14 @@ export function createStandScene(
     }
 
     if (isTopFixtureType(moduleState.type)) {
-      const placement = snapTopFixturePlacement(
+      const placement = withItemZ(
+        moduleState,
+        snapTopFixturePlacement(
         snapped.placement,
         ground,
         moduleState.widthCm,
+        moduleState,
+        ),
       );
       dragSession.preview = {
         placement,
@@ -3015,7 +3046,7 @@ export function createStandScene(
       showPlacementGhost(moduleState, snapped.placement, false);
       showPlacementFeedback(message, { clientX: event.clientX, clientY: event.clientY });
       dragSession.preview = {
-        placement: snapped.placement,
+        placement: withItemZ(moduleState, snapped.placement),
         valid: false,
         message,
         plan: { ok: false, message, placements: new Map() },
@@ -3023,7 +3054,7 @@ export function createStandScene(
       };
       return;
     }
-    const desiredPlacement = magneticSnap?.placement ?? snapped.placement;
+    const desiredPlacement = withItemZ(moduleState, magneticSnap?.placement ?? snapped.placement);
 
     let plan;
     if (desiredPlacement.wallId === 'free') {
@@ -3597,11 +3628,12 @@ export function createStandScene(
   }
 
   function applyFabricCoverMode(meshOrMeshes, enabled, fabricType = 'lightbox') {
+    const resolvedFabricType = fabricType === 'mesh' ? 'mesh' : 'lightbox';
+    const capabilityKey = resolvedFabricType === 'mesh' ? 'acceptsMesh' : 'acceptsLightbox';
     const meshes = normalizeMeshes(meshOrMeshes).filter(
-      (mesh) => mesh?.userData?.selectionMode === 'panel' && mesh.userData.surfaceState,
+      (mesh) => mesh?.userData?.[capabilityKey] === true && mesh.userData.surfaceState,
     );
     const fabric = Boolean(enabled);
-    const resolvedFabricType = fabricType === 'mesh' ? 'mesh' : 'lightbox';
 
     if (fabric) {
       applyGlassMode(meshes, false);
@@ -3720,7 +3752,7 @@ export function createStandScene(
 
   function setFabricLighting(meshOrMeshes, enabled) {
     const meshes = normalizeMeshes(meshOrMeshes).filter(
-      (mesh) => mesh?.userData?.selectionMode === 'panel' && mesh.userData.surfaceState?.fabricGroupId,
+      (mesh) => mesh?.userData?.acceptsLightbox === true && mesh.userData.surfaceState?.fabricGroupId,
     );
     const groupIds = new Set(
       meshes.map((mesh) => mesh.userData.surfaceState.fabricGroupId).filter(Boolean),
@@ -3756,7 +3788,7 @@ export function createStandScene(
   function applyGlassMode(meshOrMeshes, isGlass) {
     const glass = Boolean(isGlass);
     const glassMeshes = normalizeMeshes(meshOrMeshes).filter(
-      (mesh) => mesh?.userData?.selectionMode === 'panel' && mesh.userData.surfaceState,
+      (mesh) => mesh?.userData?.acceptsGlass === true && mesh.userData.surfaceState,
     );
 
     if (glass) {
@@ -3773,7 +3805,7 @@ export function createStandScene(
     }
 
     glassMeshes.forEach((mesh) => {
-      if (!mesh?.material || mesh.userData.selectionMode !== 'panel') return;
+      if (!mesh?.material || mesh.userData.acceptsGlass !== true) return;
       const surfaceState = mesh.userData.surfaceState;
       if (!surfaceState) return;
 
@@ -5014,7 +5046,7 @@ function createTvModule(moduleState, moduleIndex) {
   tv.userData.moduleId = moduleState.id;
   tv.userData.moduleType = 'tv';
   tv.userData.moduleIndex = moduleIndex;
-  tv.userData.acceptsImage = itemSurfaceAcceptsImage(moduleState.itemKey);
+  Object.assign(tv.userData, surfaceCapabilityUserData(moduleState.itemKey));
   tv.userData.selectionMode = 'module';
   group.add(tv);
 
@@ -5432,15 +5464,17 @@ function createCoatRackModule(moduleState, moduleIndex) {
 }
 
 function createUprightModule(moduleState, moduleIndex) {
-  const item = getItem('upright_346_5');
-  const thicknessCm = Number(moduleState.widthCm || item.dimensions.thicknessCm);
-  const depthCm = Number(moduleState.depthCm || item.dimensions.thicknessCm);
-  const heightCm = Number(moduleState.heightCm || item.dimensions.lengthCm);
-  // Görsel ezme: iki wall_200 köşesinin kare silüeti (10×10 cm). Üretim 346.5/8 değişmez.
-  const {
-    height: frameHeight,
-    depth: frameDepth,
-  } = STAND_DIMENSIONS;
+  const item = getItem(moduleState.itemKey);
+  const scene = resolveSceneDimensions(item);
+  const thicknessCm = Number(moduleState.widthCm ?? scene.widthCm);
+  const depthCm = Number(moduleState.depthCm ?? scene.depthCm);
+  const heightCm = Number(moduleState.heightCm ?? scene.heightCm);
+  if (!Number.isFinite(thicknessCm) || thicknessCm <= 0 || !Number.isFinite(heightCm) || heightCm <= 0) {
+    throw new TypeError(`Item ${moduleState.itemKey ?? 'unknown'} is missing scene dimensions for upright.`);
+  }
+  const thicknessM = thicknessCm / 100;
+  const depthM = (Number.isFinite(depthCm) && depthCm > 0 ? depthCm : thicknessCm) / 100;
+  const heightM = heightCm / 100;
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -5449,19 +5483,19 @@ function createUprightModule(moduleState, moduleIndex) {
     moduleType: 'upright',
     type: 'upright',
     widthCm: thicknessCm,
-    depthCm,
+    depthCm: Number.isFinite(depthCm) ? depthCm : thicknessCm,
     heightCm,
   };
 
   const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(frameDepth, frameHeight, frameDepth),
+    new THREE.BoxGeometry(thicknessM, heightM, depthM),
     new THREE.MeshStandardMaterial({
       color: FRAME_COLOR,
       metalness: 0.68,
       roughness: 0.28,
     }),
   );
-  mesh.position.y = frameHeight / 2;
+  mesh.position.y = heightM / 2;
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   mesh.userData = {
@@ -5473,7 +5507,7 @@ function createUprightModule(moduleState, moduleIndex) {
     selectionMode: 'module',
     acceptsImage: false,
     widthCm: thicknessCm,
-    depthCm,
+    depthCm: Number.isFinite(depthCm) ? depthCm : thicknessCm,
     heightCm,
   };
   group.add(mesh);
@@ -5490,11 +5524,8 @@ function createProfileModule(moduleState, moduleIndex) {
     throw new TypeError(`Item ${moduleState.itemKey ?? 'unknown'} is missing scene dimension widthCm.`);
   }
   const widthM = lengthCm / 100;
-  // Görsel ezme: yalnız üst kare ray. Panel ve dikey çerçeve yok. Üretim length/thickness değişmez.
-  const {
-    height: frameHeight,
-    depth: frameDepth,
-  } = STAND_DIMENSIONS;
+  const thicknessM = (Number.isFinite(thicknessCm) && thicknessCm > 0 ? thicknessCm : 8) / 100;
+  const railHeightM = (Number.isFinite(heightCm) && heightCm > 0 ? heightCm : thicknessM * 100) / 100;
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -5508,14 +5539,14 @@ function createProfileModule(moduleState, moduleIndex) {
   };
 
   const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(widthM, frameDepth, frameDepth),
+    new THREE.BoxGeometry(widthM, railHeightM, thicknessM),
     new THREE.MeshStandardMaterial({
       color: FRAME_COLOR,
       metalness: 0.68,
       roughness: 0.28,
     }),
   );
-  mesh.position.y = frameHeight - frameDepth / 2;
+  mesh.position.y = railHeightM / 2;
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   mesh.userData = {
@@ -6716,7 +6747,7 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'base',
       selectionMode: 'module',
-      acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey),
+      ...surfaceCapabilityUserData(moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -6889,7 +6920,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'counter',
       selectionMode: 'module',
-      acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey),
+      ...surfaceCapabilityUserData(moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -6997,7 +7028,7 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     const backing=new THREE.Mesh(new THREE.BoxGeometry(faceWidthM,panelHeightM,0.012),new THREE.MeshStandardMaterial({color:PANEL_BACK_COLOR,roughness:0.74,metalness:0})); backing.position.copy(position); backing.rotation.y=rotationY; backing.castShadow=true; backing.receiveShadow=true; group.add(backing);
     const surface=new THREE.Mesh(new THREE.PlaneGeometry(faceWidthM,panelHeightM),new THREE.MeshStandardMaterial({color:surfaceState.imageAssetId?0xffffff:surfaceState.color,roughness:0.72,metalness:0,side:THREE.DoubleSide,emissive:0x000000,emissiveIntensity:0})); surface.position.copy(position); surface.rotation.y=rotationY; if(Math.abs(Math.sin(rotationY))<0.01)surface.position.z+=0.007*outward;else surface.position.x+=0.007*outward;
     const selectionFrame=createSelectionFrame(faceWidthM,panelHeightM); selectionFrame.visible=false; surface.add(selectionFrame);
-    surface.userData={kind:'surface',moduleType:'counter',counterShape:'L',selectionMode:'module',acceptsImage:itemSurfaceAcceptsImage(moduleState.itemKey),moduleIndex,moduleId:moduleState.id,widthCm,depthCm,stripIndex:panelLevel==='lower'?0:1,stripNumber:panelLevel==='lower'?1:2,surfaceRole,panelLevel,surfaceId:surfaceState.id,...bindRendererSurfaceState(surfaceState),selectionFrame,backing}; group.add(surface); surfaces.push(surface); onSurfaceReady?.(surface);
+    surface.userData={kind:'surface',moduleType:'counter',counterShape:'L',selectionMode:'module',...surfaceCapabilityUserData(moduleState.itemKey),moduleIndex,moduleId:moduleState.id,widthCm,depthCm,stripIndex:panelLevel==='lower'?0:1,stripNumber:panelLevel==='lower'?1:2,surfaceRole,panelLevel,surfaceId:surfaceState.id,...bindRendererSurfaceState(surfaceState),selectionFrame,backing}; group.add(surface); surfaces.push(surface); onSurfaceReady?.(surface);
   };
   const lowerY=stripHeightM/2, upperY=stripHeightM+stripHeightM/2;
   addFace('front','lower',moduleState.faces?.frontLower,frontPanelM,new THREE.Vector3(0,lowerY,-depthM/2),Math.PI,-1); addFace('front','upper',moduleState.faces?.frontUpper,frontPanelM,new THREE.Vector3(0,upperY,-depthM/2),Math.PI,-1);
@@ -7140,18 +7171,18 @@ function resolveOccupiedStripLayout(moduleState, stripCount, stripHeight) {
 
 function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   const {
-    height,
     depth,
-    stripCount,
     stripHeight,
-    frameWidth,
     frameDepth,
   } = STAND_DIMENSIONS;
 
-  const occupied = resolveOccupiedStripLayout(moduleState, stripCount, stripHeight);
-  const visibleStripCount = occupied ? occupied.visibleCount : stripCount;
-  const frameBottomY = occupied ? occupied.frameBottomY : 0;
-  const frameHeight = occupied ? occupied.frameHeight : height;
+  const heightM = Number(moduleState.heightCm) / 100;
+  const height = Number.isFinite(heightM) && heightM > 0 ? heightM : STAND_DIMENSIONS.height;
+  const storedCount = Array.isArray(moduleState?.strips) ? moduleState.strips.length : 0;
+  const stripCount = storedCount > 0 ? storedCount : Math.max(1, Math.round(height / stripHeight));
+  const visibleStripCount = stripCount;
+  const frameBottomY = 0;
+  const frameHeight = height;
 
   const widthCm = moduleState.widthCm;
   const widthM = widthCm / 100;
@@ -7203,9 +7234,8 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   const panelDepth = Math.max(depth - 0.026, 0.035);
 
   for (let visibleIndex = 0; visibleIndex < visibleStripCount; visibleIndex += 1) {
-    const stripIndex = occupied ? occupied.startIndex + visibleIndex : visibleIndex;
-    const visualRow = occupied ? occupied.skipCount + visibleIndex : visibleIndex;
-    const centerY = visualRow * stripHeight + stripHeight / 2;
+    const stripIndex = visibleIndex;
+    const centerY = visibleIndex * stripHeight + stripHeight / 2;
     const surfaceState = moduleState.strips?.[stripIndex];
     if (!surfaceState) {
       console.warn('Eksik panel strip state atlandı:', moduleState.type, moduleState.id, stripIndex);
@@ -7254,7 +7284,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'flat-panel',
       selectionMode: 'panel',
-      acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey),
+      ...surfaceCapabilityUserData(moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -7335,7 +7365,6 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
   if (!doorLeafItem) {
     throw new TypeError(`Missing canonical door leaf Item for module ${moduleState.id}.`);
   }
-  const doorLeafCapabilities = getItemSurfaceCapabilities(doorLeafItem);
   const doorPanelHeight = Math.max(doorHeight - railHeight - 0.018, 0.1);
   const doorBacking = new THREE.Mesh(
     new THREE.BoxGeometry(innerWidth, doorPanelHeight, panelDepth),
@@ -7369,8 +7398,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     itemKey: doorLeafItem.itemKey,
     moduleType: 'door',
     selectionMode: 'module',
-    acceptsColor: doorLeafCapabilities.color,
-    acceptsImage: doorLeafCapabilities.image,
+    ...surfaceCapabilityUserData(doorLeafItem),
     moduleIndex,
     moduleId: moduleState.id,
     widthCm,
@@ -7442,7 +7470,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'door',
       selectionMode: 'panel',
-      acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey),
+      ...surfaceCapabilityUserData(moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -7552,7 +7580,7 @@ function createSeparatorModule(moduleState, moduleIndex) {
     kind: 'surface',
     moduleType: 'separator',
     selectionMode: 'module',
-    acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey),
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     moduleIndex,
     moduleId: moduleState.id,
     widthCm,
@@ -7688,7 +7716,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     surface.add(selectionFrame);
     surface.userData = {
       kind: 'surface', moduleType: moduleState.type, shape: moduleState.shape,
-      selectionMode: 'panel', acceptsImage: itemSurfaceAcceptsImage(moduleState.itemKey), moduleIndex, moduleId: moduleState.id,
+      selectionMode: 'panel', ...surfaceCapabilityUserData(moduleState.itemKey), moduleIndex, moduleId: moduleState.id,
       widthCm, stripIndex, stripNumber: stripIndex + 1,       surfaceId: surfaceState.id,
       ...bindRendererSurfaceState(surfaceState), selectionFrame, backing,
     };
@@ -7738,7 +7766,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   bodySelector.add(bodySelectionFrame);
   bodySelector.userData = {
     kind: 'surface', moduleType: moduleState.type, selectionMode: 'module',
-    acceptsColor: true, acceptsImage: itemSurfaceAcceptsImage(bodyDefinition.sideItem), moduleIndex, moduleId: moduleState.id, widthCm,
+    ...surfaceCapabilityUserData(bodyDefinition.sideItem), acceptsColor: true, moduleIndex, moduleId: moduleState.id, widthCm,
     stripIndex: null, stripNumber: null, surfaceRole: 'showcase-body',
     surfaceId: moduleState.bodySurface.id, ...bindRendererSurfaceState(moduleState.bodySurface),
     selectionFrame: bodySelectionFrame, colorTargets: bodyColorTargets,

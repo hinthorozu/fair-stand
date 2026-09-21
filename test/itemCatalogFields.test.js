@@ -284,7 +284,8 @@ test('ITEMS.md yalnız onaylı katalog şemasını taşır; gerçekleşmemiş me
   assert.match(itemsDoc, /### catalogVisible/);
   assert.match(itemsDoc, /### categoryId/);
   assert.match(itemsDoc, /### catalogItemIndex/);
-  assert.match(itemsDoc, /### previewId/);
+  assert.match(itemsDoc, /### isRender/);
+  assert.match(itemsDoc, /### defaultZCm/);
   assert.match(itemsDoc, /### dimensions/);
   assert.match(itemsDoc, /### sceneDimensions/);
   assert.match(itemsDoc, /# Canonical Mechanism Connections/);

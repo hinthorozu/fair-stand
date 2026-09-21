@@ -200,7 +200,7 @@ function listGuideSections() {
         <li><strong>Aç:</strong> Dropdown'da seçili kayıtlı projeyi görselleriyle birlikte yükler. Dropdown üzerinden onaylı geçiş ile aynı proje açma akışını kullanır.</li>
         <li><strong>Dışarı Aktar:</strong> Proje ve görselleri ZIP dosyasına paketler.</li>
         <li><strong>İçe Aktar:</strong> Uyumlu proje ZIP paketini sisteme alır.</li>
-        <li><strong>Sil:</strong> Projeyi ve projeye ait görselleri onay sonrası kaldırır.</li>
+        <li><strong>Sil:</strong> Projeyi ve projeye ait görselleri onay sonrası kaldırır. Silinen proje açıksa sayfa yenilenmez; sahne ilk açılıştaki boş duruma döner.</li>
       </ul>
     `,
   },

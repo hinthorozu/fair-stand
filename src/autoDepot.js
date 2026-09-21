@@ -28,7 +28,13 @@ function fixture(kind, widthCm, depthCm, xCm, yCm, rotationZDeg = 0, descriptor 
     widthCm,
     depthCm,
     ...descriptor,
-    placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }),
+    placement: createModulePlacement({
+      xCm,
+      yCm,
+      rotationZDeg,
+      wallId: 'free',
+      itemKey: descriptor.itemKey ?? null,
+    }),
   };
 }
 
@@ -110,13 +116,18 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
     const trashBinX = xCm + (size.widthCm - trashBinWidth) / 2;
     const trashBinY = packStartY + upperRowDepth + gapCm + trashBinDepth / 2;
 
-    // Kettle buzdolabının üstünde render edilir; mevcut yerleşim davranışını koru.
     const kettleX = fridgeX + (fridgeWidth - kettleWidth) / 2;
     const kettleY = fridgeY + (fridgeDepth - kettleDepth) / 2;
 
-    specs.push(fixture('mini-fridge', fridgeWidth, fridgeDepth, fridgeX, fridgeY));
-    specs.push(fixture('kettle', kettleWidth, kettleDepth, kettleX, kettleY));
-    specs.push(fixture('coat-rack', rackWidth, rackDepth, rackX, rackY));
+    specs.push(fixture('mini-fridge', fridgeWidth, fridgeDepth, fridgeX, fridgeY, 0, {
+      itemKey: MINI_FRIDGE_ITEM.itemKey,
+    }));
+    specs.push(fixture('kettle', kettleWidth, kettleDepth, kettleX, kettleY, 0, {
+      itemKey: KETTLE_ITEM.itemKey,
+    }));
+    specs.push(fixture('coat-rack', rackWidth, rackDepth, rackX, rackY, 0, {
+      itemKey: COAT_RACK_ITEM.itemKey,
+    }));
     specs.push(fixture(
       PLASTIC_TRASH_BIN_ITEM.type,
       trashBinWidth,

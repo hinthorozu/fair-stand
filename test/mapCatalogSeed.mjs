@@ -1,5 +1,8 @@
 import { CATALOG_PREVIEW_KIND_FIXTURE } from './fixtures/catalogPreviewKinds.mjs';
 import { applyItemRotationFields } from './itemRotationSeed.mjs';
+import { applyItemSurfaceFlags } from './itemSurfaceFlagsSeed.mjs';
+import { applyItemSnapFields } from './itemSnapSeed.mjs';
+import { applyItemScenePose } from './itemScenePoseSeed.mjs';
 
 export const CANONICAL_STAND_DIMENSIONS = Object.freeze({
   height: 3.5,
@@ -118,5 +121,21 @@ function mapItem(row) {
   assign('defaultRotationDeg', row.default_rotation_deg);
   assign('sideInsertRotation', row.side_insert_rotation);
   applyItemRotationFields(item);
+  if (row.is_render != null) {
+    item.isRender = Boolean(row.is_render);
+    item.acceptsColor = Boolean(row.accepts_color);
+    item.acceptsImage = Boolean(row.accepts_image);
+    item.acceptsLightbox = Boolean(row.accepts_lightbox);
+    item.acceptsGlass = Boolean(row.accepts_glass);
+    item.acceptsMesh = Boolean(row.accepts_mesh);
+  } else {
+    applyItemSurfaceFlags(item);
+  }
+  const defaultZ = Number(row.default_z_cm ?? item.dimensions?.mountHeightCm);
+  item.defaultZCm = Number.isFinite(defaultZ) ? defaultZ : 0;
+  assign('snapTargetItemType', row.snap_target_item_type);
+  assign('snapAnchor', row.snap_anchor);
+  applyItemSnapFields(item);
+  applyItemScenePose(item);
   return item;
 }

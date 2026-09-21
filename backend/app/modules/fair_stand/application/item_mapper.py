@@ -72,6 +72,16 @@ def map_item(row) -> ItemAggregate:
         payload["variant"] = row.variant
     if row.eye_count is not None:
         payload["eyeCount"] = int(row.eye_count)
+    payload["isRender"] = bool(row.is_render)
+    payload["acceptsColor"] = bool(row.accepts_color)
+    payload["acceptsImage"] = bool(row.accepts_image)
+    payload["acceptsLightbox"] = bool(row.accepts_lightbox)
+    payload["acceptsGlass"] = bool(row.accepts_glass)
+    payload["acceptsMesh"] = bool(row.accepts_mesh)
+    payload["defaultZCm"] = _num(row.default_z_cm) if row.default_z_cm is not None else 0
+    if row.snap_target_item_type:
+        payload["snapTargetItemType"] = row.snap_target_item_type
+        payload["snapAnchor"] = row.snap_anchor
 
     if row.dimensions is not None:
         dimensions = {}

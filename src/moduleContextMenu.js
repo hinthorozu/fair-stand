@@ -400,12 +400,12 @@ export function createModuleContextMenu({
     const isLightboxFabric = Boolean(context.isFabric && context.fabricType !== 'mesh');
     const isMeshFabric = Boolean(context.isFabric && context.fabricType === 'mesh');
 
-    fabricModeButton.hidden = !context.supportsFabric || isMeshFabric;
+    fabricModeButton.hidden = !(context.supportsLightbox ?? context.supportsFabric) || isMeshFabric;
     fabricModeButton.textContent = isLightboxFabric
       ? 'Lightbox Kumaştan Çıkar'
       : 'Lightbox Kumaşa Çevir';
 
-    meshModeButton.hidden = !context.supportsFabric || isLightboxFabric;
+    meshModeButton.hidden = !(context.supportsMesh ?? context.supportsFabric) || isLightboxFabric;
     meshModeButton.textContent = isMeshFabric
       ? 'Mesh Brandadan Çıkar'
       : 'Mesh (Delikli) Brandaya Çevir';
@@ -471,13 +471,13 @@ export function createModuleContextMenu({
       return;
     }
 
-    if (action === 'toggle-fabric' && context.supportsFabric && context.fabricType !== 'mesh') {
+    if (action === 'toggle-fabric' && (context.supportsLightbox ?? context.supportsFabric) && context.fabricType !== 'mesh') {
       close();
       onFabricModeChange?.(context, !(context.isFabric && context.fabricType !== 'mesh'));
       return;
     }
 
-    if (action === 'toggle-mesh' && context.supportsFabric && context.fabricType !== 'lightbox') {
+    if (action === 'toggle-mesh' && (context.supportsMesh ?? context.supportsFabric) && context.fabricType !== 'lightbox') {
       close();
       onMeshModeChange?.(context, !(context.isFabric && context.fabricType === 'mesh'));
       return;

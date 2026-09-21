@@ -114,6 +114,30 @@ test('STAND_DIMENSIONS runtime kaydı ve MODULE_WIDTHS_CM sahibi src/standDimens
   }
 });
 
+test('DATABASE.md 12 fair_stand tablosunun envanteridir', () => {
+  const doc = readFileSync(new URL('../docs/refactor/DATABASE.md', import.meta.url), 'utf8');
+  const itemsDoc = readFileSync(new URL('../docs/refactor/ITEMS.md', import.meta.url), 'utf8');
+  for (const table of [
+    'alembic_version',
+    'fair_stand_categories',
+    'fair_stand_catalog_preview_kinds',
+    'fair_stand_items',
+    'fair_stand_item_dimensions',
+    'fair_stand_item_scene_dimensions',
+    'fair_stand_item_strip_occupancy',
+    'fair_stand_item_assets',
+    'fair_stand_item_components',
+    'fair_stand_item_video_walls',
+    'fair_stand_item_body_parts',
+    'fair_stand_dimensions',
+  ]) {
+    assert.match(doc, new RegExp(`\`${table}\``), table);
+  }
+  assert.match(doc, /rotation_step_deg/);
+  assert.match(doc, /default_z_cm/);
+  assert.match(itemsDoc, /docs\/refactor\/DATABASE\.md/);
+});
+
 test('ROTATION.md Item rotation sözleşmesidir; TYPE_BEHAVIORS rotation taşımaz', () => {
   const rotationDoc = readFileSync(new URL('../docs/refactor/ROTATION.md', import.meta.url), 'utf8');
   const itemsDoc = readFileSync(new URL('../docs/refactor/ITEMS.md', import.meta.url), 'utf8');
@@ -210,6 +234,8 @@ test('AutoDepot includeContents çıktısı Item.dimensions regression’ı ile 
   assert.deepEqual([fridgeSpec.widthCm, fridgeSpec.depthCm], [fridge.widthCm, fridge.depthCm]);
   assert.deepEqual([rackSpec.widthCm, rackSpec.depthCm], [rack.widthCm, rack.depthCm]);
   assert.deepEqual([kettleSpec.widthCm, kettleSpec.depthCm], [kettle.widthCm, kettle.depthCm]);
+  assert.equal(kettleSpec.itemKey, 'KETTLE');
+  assert.equal(kettleSpec.placement.zCm, getItem('KETTLE').defaultZCm);
   assert.deepEqual(
     [trashSpec.widthCm, trashSpec.depthCm, trashSpec.heightCm],
     [trash.dimensions.widthCm, trash.dimensions.depthCm, trash.dimensions.heightCm],

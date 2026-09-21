@@ -4,6 +4,7 @@ Fair Stand stand zarfının canonical sözleşmesi. Item şeması ve Catalog pro
 
 - Item: `docs/refactor/ITEMS.md`
 - Catalog: `docs/refactor/CATALOG.md`
+- PostgreSQL envanter: `docs/refactor/DATABASE.md`
 - Kod: `src/standDimensions.js`
 - Tablo: `fair_stand_dimensions`
 

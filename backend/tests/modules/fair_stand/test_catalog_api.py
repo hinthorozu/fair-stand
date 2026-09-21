@@ -49,6 +49,13 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     assert wall_200["rotationStepDeg"] == 90
     assert wall_200["defaultRotationDeg"] == 0
     assert wall_200["sideInsertRotation"] == "inherit"
+    assert wall_200["isRender"] is True
+    assert wall_200["acceptsColor"] is True
+    assert wall_200["acceptsImage"] is True
+    assert wall_200["acceptsGlass"] is True
+    assert wall_200["acceptsLightbox"] is True
+    assert wall_200["acceptsMesh"] is True
+    assert wall_200["defaultZCm"] == 0
     banko = next(item for item in body["items"] if item["itemKey"] == "desk_banko_150")
     assert banko["rotationStepDeg"] == 45
     stool = next(item for item in body["items"] if item["itemKey"] == "furniture_bar_stool_classic")
@@ -93,6 +100,12 @@ def test_hidden_item_is_not_catalog_visible(client, db_session, auth_headers):
     assert "rotationStepDeg" not in panel
     assert "defaultRotationDeg" not in panel
     assert "sideInsertRotation" not in panel
+    assert panel["isRender"] is False
+    assert panel["acceptsColor"] is False
+    assert panel["acceptsImage"] is False
+    assert panel["acceptsGlass"] is False
+    assert panel["acceptsLightbox"] is False
+    assert panel["acceptsMesh"] is False
     assert "catalogPreview" not in panel
 
 

@@ -1,6 +1,5 @@
 import { STAND_DIMENSIONS } from './standDimensions.js';
-import { getItem, isShortUpFamilyDescriptor, resolveSceneDimensions } from './items.js';
-import { getStripOccupancyHeightRangeCm, resolveModuleStripOccupancy } from './stripOccupancy.js';
+import { getItem, isShortUpFamilyDescriptor, resolveItemDefaultZCm, resolveSceneDimensions } from './items.js';
 
 const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
   kind: 'silhouette',
@@ -260,23 +259,14 @@ export function getModuleCollisionStrategy(moduleOrType) {
 
 export function getModuleCollisionHeightRangeCm(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
-  const occupancy = resolveModuleStripOccupancy(module);
-  if (occupancy) return getStripOccupancyHeightRangeCm(occupancy);
-
   const explicitHeightCm = Number(module.heightCm);
-  if (Number.isFinite(explicitHeightCm) && explicitHeightCm > 0) {
-    return Object.freeze({ minCm: 0, maxCm: explicitHeightCm });
-  }
-
   const sceneHeightCm = resolveSceneDimensions(getItem(module.itemKey)).heightCm;
-  if (sceneHeightCm != null) {
-    return Object.freeze({ minCm: 0, maxCm: sceneHeightCm });
-  }
-
-  // LEGACY: occupancy yok, module.heightCm yok, Item scene height MISSING.
-  // Item-specific footprint STAND_DIMENSIONS'tan türetilmez; yalnız genel stand zarfı kalır.
-  const fullHeightCm = Math.round(STAND_DIMENSIONS.height * 100);
-  return Object.freeze({ minCm: 0, maxCm: fullHeightCm });
+  const heightCm = Number.isFinite(explicitHeightCm) && explicitHeightCm > 0
+    ? explicitHeightCm
+    : (sceneHeightCm != null ? Number(sceneHeightCm) : Math.round(STAND_DIMENSIONS.height * 100));
+  const placementZ = Number(module.placement?.zCm);
+  const originCm = Number.isFinite(placementZ) ? placementZ : resolveItemDefaultZCm(module);
+  return Object.freeze({ minCm: originCm, maxCm: originCm + heightCm });
 }
 
 export function getModuleMagneticSnapStrategy(moduleOrType) {

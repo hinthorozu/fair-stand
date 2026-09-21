@@ -115,3 +115,36 @@ test('deleting a project removes its record and assets without touching another 
   expect(stored.assetIds).toContain('f023-survivor-asset');
   expect(pageErrors).toEqual([]);
 });
+
+test('deleting the open project returns to the first-open empty scene without a page reload', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+
+  await page.goto('/');
+  const standSetup = page.locator('details.stand-setup-card');
+  await standSetup.locator('summary').click();
+  await standSetup.getByRole('button', { name: 'Ada Stand' }).click();
+  await page.locator('#stand-size-x').fill('500');
+  await page.locator('#stand-size-y').fill('500');
+  await page.locator('#create-stage').click();
+  await page.locator('form input[name="projectName"]').fill('F023 Open Delete');
+  await page.getByRole('button', { name: 'Projeyi Oluştur' }).click();
+  await expect(page.locator('#viewport-toolbar')).toBeVisible();
+  await expect(page.locator('#project-status')).toContainText('Oluşturuldu ve kaydedildi');
+
+  let loadCount = 0;
+  page.on('load', () => {
+    loadCount += 1;
+  });
+
+  page.once('dialog', async (dialog) => dialog.accept());
+  await page.locator('#delete-project').click();
+
+  await expect(page.locator('#viewport-empty')).toBeVisible();
+  await expect(page.locator('#viewport-toolbar')).toBeHidden();
+  await expect(page.locator('#project-name-display')).toHaveText('Adsız Proje');
+  await expect(page.locator('#project-status')).toHaveText('Aktif proje henüz kaydedilmedi.');
+  await expect(page.locator('#create-stage')).toBeDisabled();
+  expect(loadCount).toBe(0);
+  expect(pageErrors).toEqual([]);
+});
