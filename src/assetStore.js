@@ -3,6 +3,7 @@ import {
   ASSET_STORE_NAME,
   openConfiguratorDb,
 } from './configuratorDb.js';
+import { prepareUploadedImage } from './imageOptimize.js';
 
 function createId() {
   return globalThis.crypto?.randomUUID?.()
@@ -11,13 +12,14 @@ function createId() {
 
 export async function saveImageAsset(projectId, file) {
   if (!projectId) throw new Error('Görsel kaydı için projectId gerekli.');
+  const prepared = await prepareUploadedImage(file);
   const db = await openConfiguratorDb();
   const asset = {
     id: createId(),
     projectId,
     name: file.name,
-    type: file.type,
-    blob: file,
+    type: prepared.type,
+    blob: prepared.blob,
     createdAt: Date.now(),
   };
 

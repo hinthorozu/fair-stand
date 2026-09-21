@@ -1,19 +1,15 @@
 {
   "schemaVersion": 2,
-  "id": "item-scene-pose-unglue",
-  "kind": "architecture",
-  "summary": "Step 6: profile/upright/flat-panel mesh and short-up collision use item height + defaultZCm, not STAND_DIMENSIONS.height occupancy lift. Profile rail 8cm at z 342. No wall_200_100 SKU.",
+  "id": "image-upload-5mb-optimize",
+  "kind": "feature",
+  "summary": "User image upload rejects files over 5 MB, then downscales and re-encodes for the scene. Transparent pixels stay PNG/WebP with alpha; SVG is not rasterized. IndexedDB stores only the prepared blob and keeps the original filename as the library label.",
   "owners": [
-    "docs/refactor/ITEMS.md",
-    "docs/refactor/SCENE_POSE.md",
-    "src/designState.js",
-    "src/moduleBehavior.js",
-    "src/scene3d.js"
+    "src/imageOptimize.js",
+    "src/assetStore.js",
+    "src/main.js"
   ],
   "sourceOfTruth": [
-    "docs/refactor/ITEMS.md",
-    "docs/refactor/SCENE_POSE.md",
-    "docs/items/contract/ITEM_CONTRACT.md"
+    "src/imageOptimize.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -22,7 +18,7 @@
     "placement": "affected",
     "renderer": "affected",
     "persistence": "affected",
-    "bom": "affected",
+    "bom": "not-applicable",
     "ui": "affected",
     "composition": "affected",
     "assets": "affected",
@@ -50,6 +46,7 @@
       "scripts/archive/fix-tv-screen-face.py",
       "scripts/export-catalog-seed.mjs",
       "scripts/verify-change-contract.mjs",
+      "src/assetStore.js",
       "src/autoDepot.js",
       "src/automaticWall.js",
       "src/catalog.js",
@@ -64,6 +61,7 @@
       "src/groundLayout.js",
       "src/helpGuide.css",
       "src/helpGuide.js",
+      "src/imageOptimize.js",
       "src/itemBom.js",
       "src/itemCapabilities.js",
       "src/itemSnap.js",
@@ -97,6 +95,7 @@
       "backend/tests/modules/fair_stand/test_item_scene_pose.py",
       "backend/tests/modules/fair_stand/test_item_snap.py",
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
+      "e2e/color-image-capability.spec.mjs",
       "e2e/commercial-items-contract.spec.mjs",
       "e2e/f010-module-construction.spec.mjs",
       "e2e/f011-module-behavior.spec.mjs",
@@ -168,6 +167,7 @@
       "test/f017RendererSurfacePersist.test.js",
       "test/f027SceneReset.test.js",
       "test/f028FeatureReset.test.js",
+      "test/f032ConfiguratorDb.test.js",
       "test/fabricModuleOwnership.test.js",
       "test/fixtures/catalogPreviewCss.mjs",
       "test/fixtures/catalogPreviewKinds.mjs",
@@ -186,6 +186,7 @@
       "test/illuminatedFoamModule.test.js",
       "test/imageAssetDeletion.test.js",
       "test/imageAssetLiveDelete.test.js",
+      "test/imageOptimize.test.js",
       "test/indoorPlantItemsContract.test.js",
       "test/indoorPlants.test.js",
       "test/itemCatalogFields.test.js",
@@ -340,6 +341,7 @@
       "audit/remediation/A04_F016_CLOSURE.md",
       "audit/remediation/A07_F017_CLOSURE.md",
       "audit/remediation/A11_F029_CLOSURE.md",
+      "audit/remediation/A13_F032_CLOSURE.md",
       "docs/AUTOSAVE_INTEGRATION_NOTES.md",
       "docs/assets/PUBLIC_MODEL_ATTRIBUTION.md",
       "docs/items/ITEM_CONSOLIDATION_PLAN.md",
@@ -809,48 +811,34 @@
         "F-019",
         "F-020",
         "F-029",
+        "F-032",
         "F-033"
       ]
     },
-    "notes": "Step 6: unglue profile/upright/wall mesh from stand ceiling. Occupancy JSON remains; renderer/collision use item height+Z. Panel gap still 0.4cm until seed cm. No wall_200_100 SKU."
+    "notes": "Upload-only. ZIP import still stores archive blobs unchanged. SVG stays vector for illuminated foam."
   },
   "tests": {
     "targeted": [
-      "backend/tests/modules/fair_stand/test_item_scene_pose.py",
-      "backend/tests/modules/fair_stand/test_item_default_z.py",
-      "backend/tests/modules/fair_stand/test_item_snap.py",
-      "backend/tests/modules/fair_stand/test_catalog_api.py",
-      "test/itemScenePose.test.js",
-      "test/itemSnapAnchor.test.js",
-      "test/itemDefaultZCm.test.js",
-      "test/profileFieldPlacement.test.js",
-      "test/uprightFieldPlacement.test.js",
-      "test/wallFlatPanelItemsContract.test.js",
-      "test/itemSceneDimensions.test.js",
-      "test/projectAtomicDeletion.test.js",
-      "test/kettle.test.js",
-      "test/catalogDomainBoundary.test.js"
+      "test/imageOptimize.test.js",
+      "test/systemChangeGate.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/f011-module-behavior.spec.mjs",
-        "e2e/lighting-items-contract.spec.mjs",
-        "e2e/f023-atomic-project-delete.spec.mjs",
-        "e2e/commercial-items-contract.spec.mjs"
+        "e2e/color-image-capability.spec.mjs"
       ],
-      "reason": "Wall panel glass/lightbox/mesh and lighting still run in the browser; gates now follow item flags."
+      "reason": "Library upload and 5 MB rejection are browser file-input behavior."
     }
   },
   "risk": {
-    "level": "medium",
-    "notes": "Wrong seed rotation or missing standDimensions bootstrap fails catalog init. Alembic 0003/0004 must run on deploy."
+    "level": "low",
+    "notes": "Existing small PNG uploads still show the original filename. Oversize files never enter IndexedDB."
   },
   "migration": {
-    "required": true,
-    "notes": "Alembic 0009 sets KETTLE default_z_cm=66. 0008 fills profile/short-up pose. 0003–0007 still required."
+    "required": false,
+    "notes": "Already stored assets are unchanged. Policy applies to new uploads."
   },
-  "rollback": "Revert the PR, downgrade alembic to 0002, and restore JS STAND_DIMENSIONS constants plus TYPE_BEHAVIORS rotation."
+  "rollback": "Revert the commit to restore unlimited upload of the original file blob."
 }
