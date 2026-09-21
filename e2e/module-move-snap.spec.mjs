@@ -51,9 +51,9 @@ async function saveAndReadProject(page) {
 }
 
 async function dragPlacedModuleOnCanvas(page, from, to) {
-  const canvas = page.locator('#viewport canvas').first();
-  await expect(canvas).toBeVisible();
-  const box = await canvas.boundingBox();
+  const viewport = page.locator('#viewport');
+  await expect(viewport).toBeVisible();
+  const box = await viewport.boundingBox();
   expect(box).not.toBeNull();
   const start = {
     x: box.x + Math.round(box.width * from.x),
