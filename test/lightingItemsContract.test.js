@@ -29,6 +29,7 @@ test('led_floodlight: canonical identity, catalog and hydrate', () => {
   assert.equal(Object.hasOwn(catalog, 'depthCm'), false);
   assert.equal(Object.hasOwn(catalog, 'heightCm'), false);
   assert.equal(Object.hasOwn(catalog, 'mountHeightCm'), false);
+  assert.equal(Object.hasOwn(catalog, 'defaultZCm'), false);
   assert.equal(getCatalogItem('LED_FLOODLIGHT'), null);
   assert.equal(getCatalogItem('led_floodlight') != null, true);
   assert.equal(getCatalogItem('LED_FLOODLIGHT') != null, false);

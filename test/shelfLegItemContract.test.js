@@ -15,6 +15,13 @@ test('shelf_leg is canonical without invented product metadata', () => {
     name: 'Raf Ayağı',
     type: 'shelf-accessory',
     unit: 'adet',
+    isRender: false,
+    acceptsColor: false,
+    acceptsImage: false,
+    acceptsLightbox: false,
+    acceptsGlass: false,
+    acceptsMesh: false,
+    defaultZCm: 0,
   });
   assert.equal(item.partId, undefined);
 });

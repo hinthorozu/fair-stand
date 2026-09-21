@@ -114,8 +114,15 @@ Yeni mimaride şu ana kadar onaylanan zorunlu alanlar:
 | `catalogVisible` | boolean | Item master — Catalog config |
 | `categoryId` | integer \| null | Item master — Catalog config |
 | `catalogItemIndex` | integer \| null | Item master — Catalog config |
+| `isRender` | boolean | Item master — bu SKU’nun kendi sahne gövdesi var mı |
+| `acceptsColor` | boolean | Item master — renklenebilir mi |
+| `acceptsImage` | boolean | Item master — yüzey görseli atanır mı |
+| `acceptsLightbox` | boolean | Item master — lightbox / ışıklı kumaş |
+| `acceptsGlass` | boolean | Item master — cama çevrilebilir mi |
+| `acceptsMesh` | boolean | Item master — delikli branda / mesh kumaş |
+| `defaultZCm` | number | Item master — drop `placement.zCm` (yerden kot) |
 
-`itemKey` her Item’da dolu string’dir. Üç katalog alanı her Item’da **alan olarak** zorunludur; görünmeyen Item’da category/index değeri `null` olur.
+`itemKey` her Item’da dolu string’dir. Üç katalog alanı her Item’da **alan olarak** zorunludur; görünmeyen Item’da category/index değeri `null` olur. `isRender` ve yüzey yetenekleri her Item’da açık `true`/`false`; `null` yok. `isRender=false` ise beş yüzey bayrağı da `false`. `defaultZCm` her Item’da sayı (yerden cm); yoksa 0.
 
 Görünür Item (`catalogVisible=true`) ek zorunlu Catalog alanı: `previewId`. Gizli Item’da bu alan yoktur.
 
@@ -173,6 +180,71 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 - **Persistence:** Item master (bugün `src/items.js`); proje blob’una yazılmaz
 - **Validation:** `true` veya `false`; `null` yasak
 - **Örnek:** `wall_200` → `true`; `panel_197` → `false`
+
+### isRender
+
+- **Type:** boolean
+- **Required:** yes
+- **Scope:** Item master (`fair_stand_items`; kolon örn. `is_render`)
+- **Default:** yok; her Item açık değer taşır
+- **Amaç:** Bu Item kendi sahne mesh/modülüne sahip mi, yoksa yalnız BOM/sanal mı
+- **`true`:** kendi render’ı var — `wall_200`, `profile_190`, lightbox. Drop/placement bu satırdan.
+- **`false`:** kayıt ve reçete adedi var; **bu Item sahneye çizilmez** — `connector_*`. `panel_197` bugün `false` (duvar kendi mesh’ini çizer, panel instance değil).
+- **`catalogVisible` ayrıdır:** kart görünsün mü. Connector ikisi `false`. Profil ikisi `true`. Sahnede durup katalogda gizlenmek serbest (`isRender true`, `catalogVisible false`).
+- Duvar sınıfı / `item_type` listesi değildir. Motor bu kolona bakar.
+- Reçete çocuk `isRender false` kalabilir; parent `true` kendi gövdesini çizer. Paneli gerçek yapmak = aynı satırda `isRender` (ve gerekirse katalog) açmak.
+- **Canonical consumer:** sahne / SCENE_POSE (hedef); BOM her iki değerde de child sayabilir
+- **Kullanıcı değiştirir mi:** hayır (admin master)
+- **Project instance override:** hayır
+- **Validation:** `true` veya `false`; `null` yasak
+- **Kod:** `itemHasSceneRender` / `createModuleStateFromDescriptor` — `isRender !== true` ise modül state yok. `catalogVisible` bu kapıyı etkilemez. Adım 3.
+
+### defaultZCm
+
+- **Type:** number (cm)
+- **Required:** yes (`0` geçerli)
+- **Scope:** Item master (`fair_stand_items.default_z_cm`)
+- **Default:** `0`; seed `dimensions.mount_height_cm` varsa onu kopyalar (`led_floodlight` 350). Profil ray: `342` (gövde 8, üst kenar 350). Short-up-2: `250` (gövde 100).
+- **Amaç:** Katalog drop’ta instance `placement.zCm`. Gövde boyu değil; yerden kot
+- **`true` örnek:** floodlight 350. Profil 342 (ray gövdesi 8 cm). Tam boy duvar 0.
+- Stand tavanı (`STAND_DIMENSIONS.height`) bu alanı ezmez
+- Instance override: kullanıcı Z−/Z+ / overlay sürükleme `placement.zCm` yazar; yeni drop yine master default
+- **Canonical consumer:** `applyItemPlacementZCm` / `resolveItemDefaultZCm` — her item drop; overlay mouse ve instance Z ezer
+- **Kullanıcı değiştirir mi:** hayır (admin master)
+- **Project instance override:** evet (`placement.zCm`)
+- **Validation:** sonlu sayı; `null` yok
+- **Kod:** adım 4. Snap hedefi adım 5.
+
+### snapTargetItemType / snapAnchor
+
+- **Type:** string \| yok (`snapAnchor`: `top` \| `bottom` \| `left` \| `right`)
+- **Required:** no (ikisi birlikte null veya ikisi dolu)
+- **Scope:** Item master — sürülen SKU
+- **Amaç:** Kime / hangi kenara yapışır. JS type listesi yok
+- **Örnek:** `led_floodlight` → `profile` + `top`. Raf → `panel` + `top`
+- Motor: sahnede `item.type === snapTargetItemType` gövde; yoksa reçetede o type çocuk (parent kotu)
+- `center` yok
+- **Canonical consumer:** `getItemSnapSpec` / `snapPlacementToItemAnchor`
+- **Kod:** adım 5
+
+### Yüzey yetenekleri (`accepts*`)
+
+Hepsi boolean, zorunlu, `null` yasak. Item satırı; `item_type` map’i değil. Bugün `src/itemCapabilities.js` type’a göre `color/image/glass/lightbox/mesh` basıyor — hedef bu kolonlar.
+
+| Alan | DB kolon (örn.) | Soru |
+|---|---|---|
+| `acceptsColor` | `accepts_color` | Renk atanır mı? |
+| `acceptsImage` | `accepts_image` | Resim / yüzey görseli atanır mı? |
+| `acceptsLightbox` | `accepts_lightbox` | Lightbox (ışıklı kumaş) atanır mı? |
+| `acceptsGlass` | `accepts_glass` | Cama çevrilebilir mi? |
+| `acceptsMesh` | `accepts_mesh` | Delikli branda (mesh) çevrilebilir mi? |
+
+- `isRender=false` (sanal/BOM) → beşinin `false` (connector). Sahne UI’si yok.
+- `isRender=true` → her bayrak bağımsız. Örn. profil renk var resim yok; duvar paneli beşine açık olabilir; asılı lightbox kutusu renk+görsel, cam yok.
+- Katalog kartı (`catalogVisible`) bunlardan bağımsız.
+- Instance: kullanıcı sahnede renk/görsel/cam **seçer**; yetki master’da. Master `false` ise o araç görünmez.
+- Motor `TYPE_BEHAVIORS` / `selectionMode==='panel'` ile cam açmaz; item kolonunu okur.
+- **Kod:** kolon + bootstrap + sahne menü/`apply*` item `accepts*` okur. Ctrl çoklu seçim hâlâ `selectionMode === 'panel'`.
 
 ### categoryId
 
@@ -252,7 +324,7 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 - **Recipe/Catalog/type/itemKey/STAND Item-specific scene source değildir**
 - **Kullanıcı değiştirir mi:** hayır (Item master)
 - **Persistence:** Item master
-- **Örnek:** `profile_190` → `{ widthCm: 200, depthCm: 8, heightCm: 350 }`
+- **Örnek:** `profile_190` → `{ widthCm: 200, depthCm: 8, heightCm: 8 }` (ray gövdesi; kot `defaultZCm`)
 
 ---
 

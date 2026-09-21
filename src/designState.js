@@ -7,6 +7,7 @@ import {
   getTopLightItemForType,
   getShowcaseBodyDefinition,
   getShowcaseItemKeyForType,
+  itemHasSceneRender,
   requireSceneDimension,
   resolveItemKey,
   resolveSceneDimensions,
@@ -131,7 +132,9 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'flat-panel') return null;
   const occupancy = normalizeStripOccupancy(item.stripOccupancy);
-  const stripCount = occupancy?.stripCount ?? STAND_DIMENSIONS.stripCount;
+  const heightCm = requireSceneDimension(item, 'heightCm');
+  const pitchCm = Math.round(Number(STAND_DIMENSIONS.stripHeight) * 100);
+  const stripCount = Math.max(1, Math.round(Number(heightCm) / pitchCm));
 
   const state = {
     id: createId('module'),
@@ -143,7 +146,7 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
     ),
   };
-  return applySceneFootprint(state, item, ['widthCm']);
+  return applySceneFootprint(state, item, ['widthCm', 'heightCm']);
 }
 
 const SEPARATOR_PLAIN_WIDTH_TO_ITEM_KEY = Object.freeze({
@@ -395,8 +398,10 @@ export function createCoatRackModuleState() {
   return createCommercialModuleState('coat-rack');
 }
 
-export function createUprightModuleState() {
-  const item = getItem('upright_346_5');
+export function createUprightModuleState(descriptor = {}) {
+  const itemKey = descriptor.itemKey ?? 'upright_346_5';
+  const item = getItem(itemKey);
+  if (!item || item.type !== 'upright') return null;
   return applySceneFootprint({
     id: createId('module'),
     itemKey: item.itemKey,
@@ -541,7 +546,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   'mini-fridge': () => createMiniFridgeModuleState(),
   kettle: () => createKettleModuleState(),
   'coat-rack': () => createCoatRackModuleState(),
-  upright: () => createUprightModuleState(),
+  upright: (descriptor) => createUprightModuleState(descriptor),
   profile: (descriptor) => createProfileModuleState(descriptor),
   'plastic-trash-bin': () => createPlasticTrashBinModuleState(),
   'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
@@ -570,6 +575,7 @@ export function createModuleStateFromDescriptor(
     itemKey: itemKey ?? descriptor.itemKey ?? null,
   });
   const item = resolvedItemKey ? getItem(resolvedItemKey) : null;
+  if (item && !itemHasSceneRender(item)) return null;
   const merged = item
     ? Object.assign({}, factoryDescriptorFromItem(item), descriptor, {
       itemKey: item.itemKey,
@@ -594,7 +600,7 @@ export function createModuleStateFromDescriptor(
 
 export function createModuleStateFromCatalogKey(moduleKey, options = {}) {
   const item = typeof moduleKey === 'string' && moduleKey ? getItem(moduleKey) : null;
-  if (!item) return null;
+  if (!itemHasSceneRender(item)) return null;
   return createModuleStateFromDescriptor(item, {
     ...options,
     itemKey: item.itemKey,
@@ -664,7 +670,7 @@ export function normalizeModuleItemState(moduleState) {
       moduleState.itemKey = item.itemKey;
       const occupancy = normalizeStripOccupancy(item.stripOccupancy);
       if (occupancy) moduleState.stripOccupancy = occupancy;
-      applySceneFootprint(moduleState, item, ['widthCm']);
+      applySceneFootprint(moduleState, item, ['widthCm', 'heightCm']);
     }
     return moduleState;
   }

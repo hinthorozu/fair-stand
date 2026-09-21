@@ -92,6 +92,9 @@ const payload = {
       shape: item.shape ?? null,
       variant: item.variant ?? null,
       eye_count: item.eyeCount ?? null,
+      default_z_cm: Number.isFinite(Number(item.defaultZCm)) ? num(item.defaultZCm) : 0,
+      snap_target_item_type: item.snapTargetItemType ?? null,
+      snap_anchor: item.snapAnchor ?? null,
       dimensions: item.dimensions
         ? {
             width_cm: num(item.dimensions.widthCm),

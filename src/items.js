@@ -293,6 +293,51 @@ export function getItem(itemKey) {
   return requireRegistry()[itemKey] ?? null;
 }
 
+/** Item master `isRender`: own scene module/mesh. Virtual/BOM rows stay out of factory. */
+export function itemHasSceneRender(itemOrKey) {
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  return item?.isRender === true;
+}
+
+function readCm(value) {
+  if (value == null || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+/** Catalog drop kotu (yerden cm). Instance `placement.zCm`; tavan değil. */
+export function resolveItemDefaultZCm(itemOrKey) {
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  return readCm(item?.defaultZCm) ?? readCm(item?.dimensions?.mountHeightCm) ?? 0;
+}
+
+export const SNAP_ANCHORS = Object.freeze(['top', 'bottom', 'left', 'right']);
+
+export function getItemSnapSpec(itemOrKey) {
+  const item = typeof itemOrKey === 'string'
+    ? getItem(itemOrKey)
+    : (itemOrKey?.itemKey ? getItem(itemOrKey.itemKey) ?? itemOrKey : itemOrKey);
+  const targetItemType = typeof item?.snapTargetItemType === 'string'
+    ? item.snapTargetItemType.trim()
+    : '';
+  const anchor = item?.snapAnchor;
+  if (!targetItemType || !SNAP_ANCHORS.includes(anchor)) return null;
+  return Object.freeze({ targetItemType, anchor });
+}
+
+/** Overlay mouse Z ezer. Snap spec varsa placement.zCm (motor) kalır. Yoksa instance / defaultZCm. */
+export function applyItemPlacementZCm(moduleState, placement, { overlayZCm = null } = {}) {
+  if (!placement) return placement;
+  const overlay = readCm(overlayZCm);
+  if (overlay != null) return { ...placement, zCm: overlay };
+  if (getItemSnapSpec(moduleState) && readCm(placement.zCm) != null) {
+    return { ...placement, zCm: readCm(placement.zCm) };
+  }
+  const existing = readCm(moduleState?.placement?.zCm);
+  if (moduleState?.placement && existing != null) return { ...placement, zCm: existing };
+  return { ...placement, zCm: resolveItemDefaultZCm(moduleState?.itemKey ?? moduleState) };
+}
+
 export function isShortUpFamilyDescriptor(descriptor) {
   const variant = descriptor?.variant ?? getItem(descriptor?.itemKey)?.variant;
   return variant === 'short-up-1' || variant === 'short-up-2';

@@ -1,4 +1,5 @@
 import { createModulePlacement } from './modulePlacement.js';
+import { applyItemPlacementZCm } from './items.js';
 import { getModuleBehavior } from './moduleBehavior.js';
 
 const EPSILON_CM = 0.001;
@@ -188,7 +189,7 @@ function planForwardInsertion({
       };
     }
 
-    placements.set(module.id, next.placement);
+    placements.set(module.id, applyItemPlacementZCm(module, next.placement));
     currentCursorCm = next.nextCursorCm;
   }
 
@@ -212,7 +213,7 @@ function planForwardInsertion({
       };
     }
 
-    placements.set(entry.module.id, next.placement);
+    placements.set(entry.module.id, applyItemPlacementZCm(entry.module, next.placement));
     currentCursorCm = next.nextCursorCm;
   }
 
@@ -249,7 +250,7 @@ function tryPlanBackwardInsertion({
     );
     if (!previous) return { ok: false };
 
-    placements.set(module.id, previous.placement);
+    placements.set(module.id, applyItemPlacementZCm(module, previous.placement));
     currentCursorEndCm = previous.previousCursorCm;
   }
 
@@ -271,7 +272,7 @@ function tryPlanBackwardInsertion({
     );
     if (!previous) return { ok: false };
 
-    placements.set(entry.module.id, previous.placement);
+    placements.set(entry.module.id, applyItemPlacementZCm(entry.module, previous.placement));
     currentCursorEndCm = previous.previousCursorCm;
   }
 
@@ -308,7 +309,7 @@ function tryPlanBackwardEdgeInsertion({
     );
     if (!previous) return { ok: false };
 
-    placements.set(module.id, previous.placement);
+    placements.set(module.id, applyItemPlacementZCm(module, previous.placement));
     currentCursorEndCm = previous.previousCursorCm;
   }
 
@@ -328,7 +329,7 @@ function tryPlanBackwardEdgeInsertion({
     );
     if (!previous) return { ok: false };
 
-    placements.set(entry.module.id, previous.placement);
+    placements.set(entry.module.id, applyItemPlacementZCm(entry.module, previous.placement));
     currentCursorEndCm = previous.previousCursorCm;
   }
 
@@ -363,7 +364,7 @@ export function planContinuousWallLayout({
       };
     }
 
-    placements.set(module.id, next.placement);
+    placements.set(module.id, applyItemPlacementZCm(module, next.placement));
     cursorCm = next.nextCursorCm;
   }
 

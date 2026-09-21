@@ -7,69 +7,43 @@ import {
   getItemSurfaceCapabilities,
   itemSurfaceAcceptsImage,
 } from '../src/itemCapabilities.js';
+import { surfaceFlagsForItem } from './itemSurfaceFlagsSeed.mjs';
 
-const IMAGE_CAPABLE_TYPES = new Set([
-  'door-leaf',
-  'flat-panel',
-  'base',
-  'counter',
-  'door',
-  'showcase-2',
-  'showcase-3',
-]);
+test('itemCapabilities reads Item accepts* columns, not type maps', () => {
+  const source = readFileSync(new URL('../src/itemCapabilities.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /ITEM_SURFACE_CAPABILITIES_BY_TYPE/);
+  assert.match(source, /item\.acceptsColor === true/);
+  assert.match(source, /item\.acceptsGlass === true/);
 
-const COLOR_AND_IMAGE = Object.freeze({
-  color: true,
-  image: true,
-  glass: false,
-  lightbox: false,
-  mesh: false,
-});
-
-const NO_SURFACE = Object.freeze({
-  color: false,
-  image: false,
-  glass: false,
-  lightbox: false,
-  mesh: false,
-});
-
-test('itemCapabilities image flag matches production mesh families after compatibility mapping', () => {
-  const byType = new Map();
   for (const item of listRegisteredItems()) {
+    const expected = surfaceFlagsForItem(item.itemKey, item.type);
     const capabilities = getItemSurfaceCapabilities(item);
-    const expected = IMAGE_CAPABLE_TYPES.has(item.type) ? COLOR_AND_IMAGE : NO_SURFACE;
-    assert.deepEqual(capabilities, expected, item.itemKey);
-    assert.equal(itemSurfaceAcceptsImage(item), IMAGE_CAPABLE_TYPES.has(item.type), item.itemKey);
-    byType.set(item.type, capabilities.image);
+    assert.equal(item.isRender, expected.isRender, item.itemKey);
+    assert.deepEqual(capabilities, {
+      color: expected.acceptsColor,
+      image: expected.acceptsImage,
+      glass: expected.acceptsGlass,
+      lightbox: expected.acceptsLightbox,
+      mesh: expected.acceptsMesh,
+    }, item.itemKey);
+    assert.equal(itemSurfaceAcceptsImage(item), expected.acceptsImage, item.itemKey);
   }
 
-  assert.equal(byType.get('door-leaf'), true);
-  assert.equal(byType.get('flat-panel'), true);
-  assert.equal(byType.get('base'), true);
-  assert.equal(byType.get('counter'), true);
-  assert.equal(byType.get('door'), true);
-  assert.equal(byType.get('showcase-2'), true);
-  assert.equal(byType.get('showcase-3'), true);
-  assert.equal(byType.get('panel'), false);
-  assert.equal(byType.get('showcase-board'), false);
-  assert.equal(byType.get('separator'), false);
-  assert.equal(byType.get('tv'), false);
-});
-
-test('scene3d derives mesh acceptsImage from itemCapabilities instead of hardcoded true', () => {
-  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
-  assert.doesNotMatch(scene, /acceptsImage:\s*true/);
-  assert.match(scene, /acceptsImage: itemSurfaceAcceptsImage\(moduleState\.itemKey\)/);
-  assert.match(scene, /acceptsImage: doorLeafCapabilities\.image/);
-  assert.match(scene, /acceptsImage: itemSurfaceAcceptsImage\(bodyDefinition\.sideItem\)/);
-  assert.match(scene, /tv\.userData\.acceptsImage = itemSurfaceAcceptsImage\(moduleState\.itemKey\)/);
   assert.equal(itemSurfaceAcceptsImage(getItem('wall_100')), true);
-  assert.equal(itemSurfaceAcceptsImage(getItem('BASE_100')), true);
+  assert.equal(getItemSurfaceCapabilities(getItem('wall_100')).glass, true);
   assert.equal(itemSurfaceAcceptsImage(getItem('desk_banko_100')), true);
-  assert.equal(itemSurfaceAcceptsImage(getItem('door_100')), true);
-  assert.equal(itemSurfaceAcceptsImage(getItem('wall_showcase_100_2')), true);
+  assert.equal(getItemSurfaceCapabilities(getItem('desk_banko_100')).glass, false);
   assert.equal(itemSurfaceAcceptsImage(getItem('showcase_side_94_6_30')), false);
   assert.equal(itemSurfaceAcceptsImage(getItem('TV_42')), false);
-  assert.equal(itemSurfaceAcceptsImage(getItem('wall_separator_100')), false);
+  assert.equal(getItemSurfaceCapabilities(getItem('connector_start')).color, false);
+  assert.equal(getItemSurfaceCapabilities(getItem('door_leaf_100')).image, true);
+  assert.equal(getItemSurfaceCapabilities(getItem('door_leaf_100')).glass, false);
+});
+
+test('scene3d binds mesh accepts* from item capabilities', () => {
+  const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  assert.match(scene, /surfaceCapabilityUserData\(moduleState\.itemKey\)/);
+  assert.match(scene, /surfaceCapabilityUserData\(doorLeafItem\)/);
+  assert.match(scene, /acceptsGlass === true/);
+  assert.doesNotMatch(scene, /const supportsGlass = surface\?\.userData\.selectionMode === 'panel'/);
 });

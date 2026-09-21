@@ -15,6 +15,7 @@ from sqlalchemy import (
     Text as sa_text,
     UniqueConstraint,
     Uuid,
+    false as sa_false,
     text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -85,6 +86,20 @@ class FairStandItemModel(Base):
             "AND (rotation_step_deg IS NULL) = (side_insert_rotation IS NULL)",
             name="ck_fair_stand_items_rotation_trio",
         ),
+        CheckConstraint(
+            "is_render OR ("
+            "NOT accepts_color AND NOT accepts_image AND NOT accepts_lightbox "
+            "AND NOT accepts_glass AND NOT accepts_mesh)",
+            name="ck_fair_stand_items_render_surface",
+        ),
+        CheckConstraint(
+            "(snap_target_item_type IS NULL) = (snap_anchor IS NULL)",
+            name="ck_fair_stand_items_snap_pair",
+        ),
+        CheckConstraint(
+            "snap_anchor IS NULL OR snap_anchor IN ('top', 'bottom', 'left', 'right')",
+            name="ck_fair_stand_items_snap_anchor",
+        ),
         Index("ix_fair_stand_items_item_type", "item_type"),
         Index("ix_fair_stand_items_category_id", "category_id"),
         Index("ix_fair_stand_items_preview_id", "preview_id"),
@@ -131,6 +146,15 @@ class FairStandItemModel(Base):
     shape: Mapped[str | None] = mapped_column(String(16), nullable=True)
     variant: Mapped[str | None] = mapped_column(String(64), nullable=True)
     eye_count: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    default_z_cm: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False, default=Decimal("0"), server_default="0")
+    snap_target_item_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    snap_anchor: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    is_render: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
+    accepts_color: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
+    accepts_image: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
+    accepts_lightbox: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
+    accepts_glass: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
+    accepts_mesh: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

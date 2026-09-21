@@ -14,6 +14,7 @@ test('LED projektor katalogda 50 cm ust aksesuar olarak tanimlidir', () => {
   assert.equal(light.dimensions.widthCm, 50);
   assert.equal(light.dimensions.depthCm, 20);
   assert.equal(light.dimensions.mountHeightCm, 350);
+  assert.equal(light.defaultZCm, 350);
 });
 
 test('LED projektor state sabit siyah govde ve ust aksesuar olculerini tasir', () => {

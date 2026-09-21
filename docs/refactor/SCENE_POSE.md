@@ -47,7 +47,7 @@ Eklenecek (hedef; rotation üçlüsü gibi item’da):
 |---|---|
 | `defaultZCm` (veya kullanılan `mount_height_cm`) | Katalog drop’ta `placement.zCm`. Profil ray kotu. Tavan 500 olsa da 450 durur |
 | `snap_target_item_type` | Sürülen item üzerinde. Floodlight seed: `'profile'`. Raf seed: `'panel'`. JS yalnız bu string’i okur |
-| `snap_anchor` | Hedefin neresi: `top` / `bottom` / `left` / `right` / `center`. Raf: `'top'`. Floodlight örn. profil `'top'` |
+| `snap_anchor` | Hedefin neresi: `top` / `bottom` / `left` / `right`. Raf: `'top'`. Floodlight profil `'top'` |
 
 X/Y default şart değil; pointer + duvar snap. Z default şart.
 
@@ -96,13 +96,28 @@ Motor (generic):
 
 ---
 
-## Sıra (uygulama henüz yok)
+## Uygulama sırası (unutma)
+
+Kod henüz yoktu; sıra bu. **1–6** uygulandı.
+
+1. Item kolonları: `is_render`, `accepts_*`. Seed. **Done.**
+2. Yüzey kapısı item `accepts*` (type map / `selectionMode==='panel'` kapısı). **Done (menü/uygula).** Ctrl çoklu seçim hâlâ şerit `selectionMode` (geometri).
+3. `isRender`: false → sahne factory yok. **Done** (`createModuleStateFromDescriptor` / catalog key).
+4. `defaultZCm` / `mount_height` → drop `placement.zCm`. **Done** (`resolveItemDefaultZCm`; floodlight 350 literal yok).
+5. `snap_target_item_type` + `snap_anchor` (`top`/`bottom`/`left`/`right`). **Done** (kolon + generic `snapPlacementToItemAnchor`; floodlight Z host top).
+6. Duvar tavanı bırak; `wall_200_100`; şerit occupancy yok; panel boşluğu standart. **Done (mesh + kot).** Profil ray `height=8` + `defaultZCm=342`. Dikme item `scene_dimensions`. Düz panel `frameHeight` item `heightCm`. Short-up kot `defaultZCm` + gövde; collision occupancy×stand değil. Occupancy JSON hâlâ katalogda (strip adedi / test); renderer ve collision kotu okumaz. `wall_200_100` yeni SKU yok (adım 8). Panel boşluğu hâlâ `PANEL_RAIL_HEIGHT_M` 0.4 cm — cm seed’de yazılmadı.
+7. Ortak kutu primitive (asılı lightbox). **Örnekti; sistemde böyle bir primitive yok. Atlandı.**
+8. Admin item üretimi (Stand API; CRM form sonra). Mevcut `item_type` + ölçü/kot/snap/`accepts*` satırı. Yeni sahne factory doğmaz.
+
+Connector’ı gerçek yapmak ve `panel_197` drop sonra. CRM sahne yok.
+
+## Sıra (eski pose maddeleri, 4–6 ile birleşir)
 
 1. Item default Z kolonu (veya `mount_height_cm`’i profile/floodlight için gerçekten oku).
 2. Drop: `placement.zCm = defaultZCm`.
-3. Profil/dikme mesh’i stand tavanından kopar.
-4. Floodlight snap: `snap_target_item_type` + reçetedeki aynı type çocukların üst/alt rayı. `profile` / `350` literal yok.
-5. Short-up yüksekliği occupancy×stand yerine item ölçü + Z.
+3. Profil/dikme mesh’i stand tavanından kopar. **Done.**
+4. Floodlight snap: `snap_target_item_type` + reçetedeki aynı type çocukların üst/alt rayı. `profile` / `350` literal yok. **Done (adım 5).**
+5. Short-up yüksekliği occupancy×stand yerine item ölçü + Z. **Done (adım 6).**
 
 Bittikten sonra tavan 350→500 item kotlarını oynatmaz.
 
@@ -119,8 +134,18 @@ Bittikten sonra tavan 350→500 item kotlarını oynatmaz.
 
 - Stand tavanı **üst sınır** kalır (ör. 500). Kamera, overlay clamp, “sahne dışına çıkma”.
 - Her item **kendi** `dimensions` / `scene_dimensions` (ve çocuk parçaları) ile çizilir. Mesh `STAND_DIMENSIONS.height` / `stripCount` okumaz.
-- `wall_200` bugün scene height 350; 500’lük tavan onu büyütmez. `wall_200_500` ayrı item, kendi 500’ü.
-- **Şerit yok.** `strip_occupancy`, 7×50 panel ızgarası, short-up “üstten N şerit” kalkar. Yükseklik çocuklardan: profil + dikme + panel adedi × panel boyu.
+- Duvar SKU yükseklik taşır: `wall_200_100` → sahne yüksekliği **100 cm**. Tavan 350→500 olsa da 100 kalır; tavana hizalanmaz, şişmez, “üstten N şerit” olmaz. `wall_200_350` / `wall_200_500` ayrı item’lar.
+- `height = stripCount × stripHeight` **duvar şekli değildir.** O eşitlik (varsa) yalnız zarf satırının kendi aritmetiğidir; `wall_*` okumaz.
+- **Şerit occupancy yok.** 7×50 ızgara, short-up “üstten N şerit”, `align: top` kalkar.
+
+### İki panel arası (standart, tavan değil)
+
+Panel boyu child item’dır (`panel_197` üretim **47 cm**). İki panel arasındaki boşluk/ray **tek standart** (zarf veya pose sabiti; item’a göre değişmez, tavanla çarpılmaz).
+
+Duvar yüksekliği ≈ alt/üst profil + N×panel boyu + (N−1)×panel boşluğu. `wall_200_100` bu toplamı 100’e kilitleyen katalog kaydıdır; ızgara tavanı 100’e “kesmez”.
+
+Bugünkü sapma (uygulanmayacak): renderer ray `0.4 cm` (`PANEL_RAIL_HEIGHT_M`); şerit pitch 50. Hedefte tek boşluk sayısı — 50−47=3 cm ürün pitch’i aday; kesin cm seed’de yazılır.
+
 - Raf: şerit dikişi yok. Snap = hedef item’ın **kenarı** (aşağıda).
 
 
@@ -131,5 +156,8 @@ Profil kopyaları yine TV gibi kendi `zCm`. Tavan yalnız max.
 
 - Placement Z-up (Max). Motor Y-up çevirisi DB’de yok.
 - Katalog `category_id` snap grubu değil. Snap = sürülen item’daki `snap_target_item_type`.
-- `mount_height_cm` floodlight’ta 350; profil okumuyor.
+- `mount_height_cm` floodlight’ta 350; profil `default_z_cm` 342 (gövde 8).
 - Kod bu belgeden sonra yazılacak; uygulama henüz yok.
+- Arayüzden `wall_200_100` = 200×100 item; tavan onu hareket ettirmez.
+- Item `isRender` (DB `is_render`): `true` = kendi sahne render’ı; `false` = sanal/BOM, sahneye çizilmez. Duvar tipi değil; `catalogVisible` ayrı. Ayrıntı `ITEMS.md`.
+- Item yüzey yetenekleri (hepsi item kolonu, type map değil): `acceptsColor`, `acceptsImage`, `acceptsLightbox`, `acceptsGlass`, `acceptsMesh`. `isRender=false` → hepsi `false`.

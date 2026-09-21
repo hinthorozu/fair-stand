@@ -82,11 +82,11 @@ test('7. scene thickness null ise physical thickness kullanılır', () => {
 test('8. profile_190 physical length/thickness ve scene width/depth/height', () => {
   const item = getItem('profile_190');
   assert.deepEqual(item.dimensions, { lengthCm: 190, thicknessCm: 8 });
-  assert.deepEqual(item.sceneDimensions, { widthCm: 200, depthCm: 8, heightCm: 350 });
+  assert.deepEqual(item.sceneDimensions, { widthCm: 200, depthCm: 8, heightCm: 8 });
   assert.deepEqual(resolveSceneDimensions(item), Object.freeze({
     widthCm: 200,
     depthCm: 8,
-    heightCm: 350,
+    heightCm: 8,
     lengthCm: 190,
     thicknessCm: 8,
   }));
@@ -98,14 +98,14 @@ test('9. profile factory Recipe’den scene width okumaz', () => {
   const profile = createProfileModuleState({ itemKey: 'profile_190' });
   assert.equal(profile.widthCm, 200);
   assert.equal(profile.depthCm, 8);
-  assert.equal(profile.heightCm, 350);
+  assert.equal(profile.heightCm, 8);
   const stale = normalizeModuleItemState({
     id: 'stale',
     itemKey: 'profile_190',
     type: 'profile',
     widthCm: 190,
     depthCm: 8,
-    heightCm: 350,
+    heightCm: 8,
   });
   assert.equal(stale.widthCm, 200);
 });
@@ -117,7 +117,7 @@ test('10. Catalog profile width catalogWidthCm okumaz', () => {
   assert.equal(getCatalogItem('profile_190').itemKey, 'profile_190');
   assert.equal(scene.widthCm, 200);
   assert.equal(scene.depthCm, 8);
-  assert.equal(scene.heightCm, 350);
+  assert.equal(scene.heightCm, 8);
 });
 
 test('11. catalogWidthCm canonical Item field olarak kalmaz', () => {

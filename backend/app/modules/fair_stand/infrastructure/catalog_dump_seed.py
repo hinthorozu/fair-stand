@@ -67,11 +67,37 @@ def seed_catalog_if_empty(bind) -> None:
             {column.name: _coerce(column, row.get(column.name)) for column in table.columns}
             for row in rows
         ]
+        if name == "fair_stand_items":
+            for item in coerced:
+                for flag in (
+                    "is_render",
+                    "accepts_color",
+                    "accepts_image",
+                    "accepts_lightbox",
+                    "accepts_glass",
+                    "accepts_mesh",
+                ):
+                    if item.get(flag) is None:
+                        item[flag] = False
+                if item.get("default_z_cm") is None:
+                    item["default_z_cm"] = 0
         bind.execute(insert(table), coerced)
 
     from app.modules.fair_stand.infrastructure.item_rotation_seed import fill_item_rotation_columns
 
     fill_item_rotation_columns(bind)
+    from app.modules.fair_stand.infrastructure.item_surface_flags_seed import fill_item_surface_flag_columns
+
+    fill_item_surface_flag_columns(bind)
+    from app.modules.fair_stand.infrastructure.item_default_z_seed import fill_item_default_z_columns
+
+    fill_item_default_z_columns(bind)
+    from app.modules.fair_stand.infrastructure.item_snap_seed import fill_item_snap_columns
+
+    fill_item_snap_columns(bind)
+    from app.modules.fair_stand.infrastructure.item_scene_pose_seed import fill_item_scene_pose_columns
+
+    fill_item_scene_pose_columns(bind)
 
     if bind.dialect.name == "postgresql":
         for name in SERIAL_TABLES:

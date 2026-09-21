@@ -34,7 +34,7 @@ test('field profiles are self BOM ×1 and do not change parent wall recipe ×2',
   assert.equal(resolveSceneDimensions(getItem('profile_91')).widthCm, 100);
   assert.equal(resolveSceneDimensions(getItem('profile_41_5')).widthCm, 50);
   assert.equal(resolveSceneDimensions(getItem('profile_190')).depthCm, 8);
-  assert.equal(resolveSceneDimensions(getItem('profile_190')).heightCm, 350);
+  assert.equal(resolveSceneDimensions(getItem('profile_190')).heightCm, 8);
   assert.equal(resolveModuleContract('profile_190').bom.mode, 'self');
   const bom = resolveItemBom('profile_190');
   assert.equal(bom.length, 1);
@@ -54,7 +54,7 @@ test('profile uses wall_200 move/rotate/snap contract and does not nest into a n
   const behavior = getModuleBehavior(profile);
   assert.equal(profile.type, 'profile');
   assert.equal(profile.widthCm, 200);
-  assert.equal(profile.heightCm, 350);
+  assert.equal(profile.heightCm, 8);
   assert.equal(behavior.placement, 'wall');
   assert.equal(behavior.magneticSnap, 'standard');
   assert.equal(behavior.collision, 'segment');
@@ -146,7 +146,7 @@ test('two field profiles snap end-to-end on the wall slot with no gap', () => {
     type: 'profile',
     widthCm: 190,
     depthCm: 8,
-    heightCm: 350,
+    heightCm: 8,
   });
   assert.equal(stale.widthCm, 200);
 });
@@ -157,8 +157,9 @@ test('field profile renderer is a thick top rail, not a 4mm line or a 7-strip pa
   const fn = source.slice(source.indexOf('function createProfileModule'), source.indexOf('function createKettleModule'));
   assert.match(fn, /resolveSceneDimensions/);
   assert.doesNotMatch(fn, /getStraightWallNominalWidthForProfileItem/);
-  assert.match(fn, /BoxGeometry\(widthM, frameDepth, frameDepth\)/);
-  assert.match(fn, /frameHeight - frameDepth \/ 2/);
+  assert.match(fn, /BoxGeometry\(widthM, railHeightM, thicknessM\)/);
+  assert.match(fn, /mesh\.position\.y = railHeightM \/ 2/);
+  assert.doesNotMatch(fn, /STAND_DIMENSIONS/);
   assert.match(fn, /FRAME_COLOR/);
   assert.doesNotMatch(fn, /PANEL_RAIL_HEIGHT_M/);
   assert.doesNotMatch(fn, /stripCount/);

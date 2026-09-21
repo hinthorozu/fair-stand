@@ -1,5 +1,5 @@
 import { STAND_DIMENSIONS } from './standDimensions.js';
-import { getItem, resolveSceneDimensions } from './items.js';
+import { getItem, resolveItemDefaultZCm, resolveSceneDimensions } from './items.js';
 import {
   allowsThinWallEndpointContact,
   canModulesOverlapByBehavior,
@@ -422,14 +422,17 @@ export function getWallAxis(wallId) {
 export function createModulePlacement({
   xCm = 0,
   yCm = 0,
-  zCm = 0,
+  zCm,
   rotationZDeg = 0,
   wallId = 'back',
+  itemKey = null,
 } = {}) {
   return {
     xCm: Number(xCm) || 0,
     yCm: Number(yCm) || 0,
-    zCm: Number(zCm) || 0,
+    zCm: zCm === undefined || zCm === null
+      ? resolveItemDefaultZCm(itemKey)
+      : (Number(zCm) || 0),
     rotationZDeg: normalizeModuleRotationZDeg(rotationZDeg),
     wallId,
   };
