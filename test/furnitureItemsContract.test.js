@@ -17,7 +17,7 @@ import {
   normalizeModuleItemState,
 } from '../src/designState.js';
 import { getItem, resolveItemKey } from '../src/items.js';
-import { getModuleBehavior } from '../src/moduleBehavior.js';
+import { getModuleBehavior, getModuleDefaultRotationDeg, getModuleRotationStepDeg } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 
 const EXPECTED = {
@@ -200,8 +200,8 @@ for (const itemKey of Object.keys(EXPECTED)) {
     const behavior = getModuleBehavior(state);
     assert.equal(behavior.placement, 'free');
     assert.equal(behavior.moveSnapCm, 10);
-    assert.equal(behavior.rotationStepDeg, expected.rotationStepDeg);
-    assert.equal(behavior.defaultRotationDeg, expected.defaultRotationDeg);
+    assert.equal(getModuleRotationStepDeg(state), expected.rotationStepDeg);
+    assert.equal(getModuleDefaultRotationDeg(state), expected.defaultRotationDeg);
     assert.equal(behavior.boundarySnap, expected.boundarySnap);
     if (expected.collision) {
       assert.equal(behavior.collision, expected.collision);

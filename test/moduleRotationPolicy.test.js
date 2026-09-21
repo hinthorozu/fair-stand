@@ -6,23 +6,23 @@ import {
   resolveModuleRotationDeltaDeg,
 } from '../src/moduleBehavior.js';
 
-test('clockwise and counter-clockwise deltas always use the module rotation step', () => {
+test('clockwise and counter-clockwise deltas always use the Item rotation step', () => {
   const cases = [
-    [{ type: 'flat-panel' }, 90],
-    [{ type: 'counter', shape: 'L', widthCm: 100 }, 90],
-    [{ type: 'counter', widthCm: 100 }, 45],
-    [{ type: 'counter', widthCm: 150 }, 45],
-    [{ type: 'counter', widthCm: 200 }, 45],
-    [{ type: 'bar-stool' }, 45],
-    [{ type: 'sofa-single-classic' }, 45],
-    [{ type: 'sofa-double-classic' }, 90],
-    [{ type: 'mini-fridge' }, 90],
-    [{ type: 'kettle' }, 90],
-    [{ type: 'coat-rack' }, 90],
-    [{ type: 'indoor-plant-1' }, 90],
-    [{ type: 'illuminated-foam' }, 90],
-    [{ type: 'tv' }, 90],
-    [{ type: 'led-floodlight' }, 90],
+    [{ itemKey: 'wall_200' }, 90],
+    [{ itemKey: 'desk_banko_100_L' }, 90],
+    [{ itemKey: 'desk_banko_100' }, 45],
+    [{ itemKey: 'desk_banko_150' }, 45],
+    [{ itemKey: 'desk_banko_200' }, 45],
+    [{ itemKey: 'furniture_bar_stool_classic' }, 45],
+    [{ itemKey: 'furniture_sofa_single_classic' }, 45],
+    [{ itemKey: 'furniture_sofa_double_classic' }, 90],
+    [{ itemKey: 'MINI_FRIDGE_AVANTI' }, 90],
+    [{ itemKey: 'KETTLE' }, 90],
+    [{ itemKey: 'COAT_RACK' }, 90],
+    [{ itemKey: 'EXTRA_INDOOR_PLANT_1' }, 90],
+    [{ itemKey: 'illuminated-foam' }, 90],
+    [{ itemKey: 'TV_42' }, 90],
+    [{ itemKey: 'led_floodlight' }, 90],
   ];
 
   for (const [moduleState, expectedStep] of cases) {
@@ -33,5 +33,5 @@ test('clockwise and counter-clockwise deltas always use the module rotation step
 });
 
 test('zero requested rotation remains zero', () => {
-  assert.equal(resolveModuleRotationDeltaDeg({ type: 'bar-stool' }, 0), 0);
+  assert.equal(resolveModuleRotationDeltaDeg({ itemKey: 'furniture_bar_stool_classic' }, 0), 0);
 });

@@ -4,7 +4,7 @@ Bu dosya yalnızca **ürün genelinde geçerli, modül tipinden bağımsız inva
 
 BOM, üretim veya maliyet hesabına girebilen fiziksel öğelerin kök semantiği `Item`dır. Bu sahipliğin canonical sözleşmesi `ITEM_CONTRACT.md` dosyasıdır. Yeni fiziksel ürün, zemin, malzeme, kombinasyon veya runtime öğesi bu sözleşmeye göre sınıflandırılmadan sisteme eklenmez.
 
-Modül tipine göre değişen rotation, move snap, placement, collision, side-insert ve ghost davranışları burada tekrar edilmez. Bu davranışların canonical runtime kaynağı `src/moduleBehavior.js`, sözleşme dokümanı ise `MODULE_BEHAVIOR_STANDARD.md` dosyasıdır.
+Modül tipine göre değişen move snap, placement, collision, side-insert ve ghost davranışları burada tekrar edilmez. Canonical runtime: `src/moduleBehavior.js`, sözleşme: `MODULE_BEHAVIOR_STANDARD.md`. Sahne Z dönüşü Item kolonlarıdır: `docs/refactor/ROTATION.md`.
 
 ## 1. Koordinat sistemi
 
@@ -36,7 +36,8 @@ Modül tipine göre değişen rotation, move snap, placement, collision, side-in
 ## 5. Source of truth sınırları
 
 - Item kök semantiği, canonical kimlik/BOM sahipliği ve yeni Item gate'i: `ITEM_CONTRACT.md`
-- Module-type editor davranışları: `src/moduleBehavior.js`
+- Module-type editor davranışları (placement/snap/collision): `src/moduleBehavior.js`
+- Sahne Z rotation: `docs/refactor/ROTATION.md`
 - Placement, snap, collision ve bağlantı algoritmaları: ilgili placement/core dosyaları ve regresyon testleri
 - Katalog kimliği ve nominal ölçüler: `src/catalog.js`
 - Runtime state construction: `src/designState.js`

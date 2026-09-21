@@ -1,4 +1,14 @@
 import { CATALOG_PREVIEW_KIND_FIXTURE } from './fixtures/catalogPreviewKinds.mjs';
+import { applyItemRotationFields } from './itemRotationSeed.mjs';
+
+export const CANONICAL_STAND_DIMENSIONS = Object.freeze({
+  height: 3.5,
+  depth: 0.1,
+  stripCount: 7,
+  stripHeight: 0.5,
+  frameWidth: 0.055,
+  frameDepth: 0.1,
+});
 
 export function mapCatalogSeedToBootstrap(seed) {
   return {
@@ -10,6 +20,7 @@ export function mapCatalogSeedToBootstrap(seed) {
     })),
     previewKinds: CATALOG_PREVIEW_KIND_FIXTURE,
     items: seed.items.map(mapItem),
+    standDimensions: seed.standDimensions ?? CANONICAL_STAND_DIMENSIONS,
   };
 }
 
@@ -103,5 +114,9 @@ function mapItem(row) {
       glassShelfItemKey: body.glass_shelf,
     };
   }
+  assign('rotationStepDeg', row.rotation_step_deg);
+  assign('defaultRotationDeg', row.default_rotation_deg);
+  assign('sideInsertRotation', row.side_insert_rotation);
+  applyItemRotationFields(item);
   return item;
 }

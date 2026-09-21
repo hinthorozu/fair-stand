@@ -13,7 +13,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `createSeparatorModuleState` Item’dan default üretir; `modelFile` damgalanır. Catalog ayrımı `modelFile` ile. Yüklemede hydrate; takma ad yok.
 
 ## Davranış ve renderer sınırı
-`WALL_BEHAVIOR`. GLB vine mesh’leri renderer detayıdır; iş tek kaynağı değildir.
+`WALL_BEHAVIOR`. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`). GLB vine mesh’leri renderer detayıdır; iş tek kaynağı değildir.
 
 ## Regresyon
 `test/wallSeparatorItemsContract.test.js`; E2E `e2e/wall-separator-items-contract.spec.mjs`.

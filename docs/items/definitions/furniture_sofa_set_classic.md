@@ -10,7 +10,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `createBeigeSofaSetModuleState` Item’dan default üretir; `itemKey` damgalar; editable `surface` korunur (`free-model-color`). Yüklemede `normalizeModuleItemState` doldurur; takma ad yok. Sahne tek modül kalır.
 
 ## Davranış ve renderer sınırı
-`moduleBehavior.js > sofa-set-classic`: free, snap 10, boundary `wall-inner-face`. Takım yerleşim açıları mevcut renderer yerleşims’tır; parça Item’ların tekil `visualRotationYDeg` değeri takımı değiştirmez. GLB/material hedefi iş tek kaynağı değildir.
+`moduleBehavior.js > sofa-set-classic`: free, snap 10, boundary `wall-inner-face`. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`). Takım yerleşim açıları mevcut renderer yerleşims’tır; parça Item’ların tekil `visualRotationYDeg` değeri takımı değiştirmez. GLB/material hedefi iş tek kaynağı değildir.
 
 ## Regresyon
 `test/furnitureItemsContract.test.js`; `test/sofaClassicPiecesContract.test.js`; E2E `e2e/furniture-items-contract.spec.mjs`.

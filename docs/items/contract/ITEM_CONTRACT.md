@@ -38,6 +38,7 @@ Bunlar Item'a göre değişebilir. Örnekler:
 - ağırlık, yüzey, ürün ailesine özel sınıflandırma ve diğer ürüne özgü üstveri,
 - kanonik default state/parametreler,
 - Item/type behavior ve yetenek bağlantıları,
+- `rotationStepDeg`, `defaultRotationDeg`, `sideInsertRotation` (yerleşen Item; leaf’te yok; `docs/refactor/ROTATION.md`),
 - gerekiyorsa asset/model/reference üstverisi.
 
 Bu alanların tamamı bütün Item'lar için zorunlu değildir. Örneğin `defaultColor` bir Item'da olabilir, başka bir Item'da olmayabilir. Ancak mevcut sistemde Item'ın ürün/default özelliği olarak doğrulanmış bir değer varsa migration sırasında sessizce dışarıda bırakılamaz.
@@ -119,7 +120,9 @@ Ezilebilir alanlar açıkça tanımlanır. Ezme kanonik Item property'sini silme
 
 ## 7. Item davranışı `type` seviyesinde tanımlanır
 
-Yerleşim, move, rotation, side insert, collision, ghost, context-menu yetenek ve benzeri Item'a özgü editor/runtime davranışları kanonik olarak davranış ailesi (`type`) seviyesinde tanımlanır.
+Yerleşim, move, side insert, collision, ghost, context-menu yetenek ve benzeri Item'a özgü editor/runtime davranışları kanonik olarak davranış ailesi (`type`) seviyesinde tanımlanır.
+
+Sahne Z dönüşü (`rotationStepDeg`, `defaultRotationDeg`, `sideInsertRotation`) Item kolonlarıdır; sözleşme `docs/refactor/ROTATION.md`. `TYPE_BEHAVIORS` rotation taşımaz.
 
 Aynı davranış ailesindeki Item'lar aynı contract'ı kullanır.
 

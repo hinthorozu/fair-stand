@@ -13,7 +13,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `createCounterModuleState` Item’dan default üretir; 8 face. Load hydrate; takma ad yok.
 
 ## Davranış ve renderer sınırı
-Type `counter` + shape L: default rotation 270°, step 90°. Prosedürel L renderer iş tek kaynağı değildir.
+Type `counter` placement/snap. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`). Prosedürel L renderer iş tek kaynağı değildir.
 
 ## Regresyon
 `test/deskBankoItemsContract.test.js`, `test/lCounter200Contract.test.js`; E2E `e2e/desk-banko-items-contract.spec.mjs`.

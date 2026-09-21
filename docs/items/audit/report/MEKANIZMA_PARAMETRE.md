@@ -205,20 +205,17 @@ Property listesi:
 
 **Sade açıklama:** Modülün sahneye nasıl konduğu: duvar mı serbest mi, kaç cm kaydığı, kaç derece döndüğü, çarpışıp çarpışmadığı.
 
-**Nerede:** `src/moduleBehavior.js` `TYPE_BEHAVIORS` / `getModuleBehavior`. Tüketici: `src/modulePlacement.js`, `src/viewKeyboardShortcuts.js` (Shift+R), `src/moduleContextMenu.js`.
+**Nerede:** Placement/snap/collision: `src/moduleBehavior.js` `TYPE_BEHAVIORS` / `getModuleBehavior`. Sahne Z: Item kolonları, `docs/refactor/ROTATION.md`, getter `getModuleRotationStepDeg` / `getModuleDefaultRotationDeg`. Tüketici: `src/modulePlacement.js`, `src/viewKeyboardShortcuts.js` (Shift+R), `src/moduleContextMenu.js`.
 
-**Owner:** `src/moduleBehavior.js`
+**Owner:** placement/collision `src/moduleBehavior.js`; rotation Item + `docs/refactor/ROTATION.md`
 
 | parametre | kodda gerçek değer |
 |---|---|
 | `placement (factory type tablosu)` | free / top / wall / wall-overlay |
-| `rotationStepDeg (type kaydı)` | 45° / 90° |
-| `45° type kaydı` | sofa-single-classic, bar-stool |
-| `90° type kaydı` | flat-panel, base, base-wall, counter, separator, shelf, sofa-set-classic, sofa-double-classic, coffee-table-classic, table-chair-set-eames, chair, table-glass, mini-fridge, kettle, coat-rack, upright, profile, plastic-trash-bin, indoor-plant-1, tv, led-floodlight, door, showcase-2, showcase-3, illuminated-foam |
-| `düz banko 45° genişlik kümesi` | 100, 150, 200 cm (STRAIGHT_COUNTER_WIDTHS_CM) |
-| `getModuleRotationStepDeg counter` | straight 50→90°; straight 100→45°; straight 150→45°; straight 200→45°; L 100→90° |
-| `izinli açılar MODULE_PLACEMENT_ROTATIONS` | 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315° |
-| `defaultRotationDeg örnekleri` | type kaydı: bar-stool=270°; diğer factory type=0. Runtime override: counter L → 270° |
+| `rotationStepDeg` | Item kolonu; type kaydı yok. Çoğu yerleşen 90; 45: düz banko 100/150/200, sofa-single, bar-stool. Sözleşme `ROTATION.md`. |
+| `defaultRotationDeg` | Item kolonu. Çoğu 0; L-banko ve bar-stool 270. |
+| `sideInsertRotation` | Item kolonu `inherit` / `default`. Leaf 35 satırda trio yok. |
+| `izinli açılar MODULE_PLACEMENT_ROTATIONS` | 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315° (normalize ızgarası; Item adımı serbest sayı) |
 | `moveSnapCm (type kaydı)` | 10 cm → sofa-set-classic, sofa-single-classic, sofa-double-classic, coffee-table-classic, table-chair-set-eames, chair, table-glass, bar-stool, mini-fridge, kettle, coat-rack, plastic-trash-bin, indoor-plant-1, tv, illuminated-foam · 20 cm → led-floodlight · 50 cm → flat-panel, base, base-wall, counter, separator, shelf, upright, profile, door, showcase-2, showcase-3 |
 | `MODULE_PLACEMENT_SNAP_CM` | 50 cm |
 | `duvar manyetik mesafe` | 50 cm |
@@ -237,7 +234,7 @@ Property listesi:
 - `behavior.collisionDepth`
 - `behavior.collisionHeight`
 - `behavior.connectionEndpoint`
-- `behavior.defaultRotationDeg`
+- `item.defaultRotationDeg`
 - `behavior.endpointContact`
 - `behavior.ghost.kind`
 - `behavior.ghost.opacity`
@@ -246,8 +243,8 @@ Property listesi:
 - `behavior.moveSnapCm`
 - `behavior.overlapWithTypes`
 - `behavior.placement`
-- `behavior.rotationStepDeg`
-- `behavior.sideInsertRotation`
+- `item.rotationStepDeg`
+- `item.sideInsertRotation`
 - `behavior.supportsWallOverlayMount`
 - `behavior.wallCapacity`
 - `behavior.explicitTypeEntry`
@@ -836,7 +833,7 @@ Property listesi:
 | `behavior.collisionDepth` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
 | `behavior.collisionHeight` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
 | `behavior.connectionEndpoint` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
-| `behavior.defaultRotationDeg` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
+| `item.defaultRotationDeg` | Sahne Z (`docs/refactor/ROTATION.md`) |
 | `behavior.endpointContact` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
 | `behavior.ghost.kind` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
 | `behavior.ghost.opacity` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
@@ -845,8 +842,8 @@ Property listesi:
 | `behavior.moveSnapCm` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
 | `behavior.overlapWithTypes` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
 | `behavior.placement` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
-| `behavior.rotationStepDeg` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
-| `behavior.sideInsertRotation` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
+| `item.rotationStepDeg` | Sahne Z (`docs/refactor/ROTATION.md`) |
+| `item.sideInsertRotation` | Sahne Z (`docs/refactor/ROTATION.md`) |
 | `behavior.supportsWallOverlayMount` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
 | `behavior.wallCapacity` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
 | `behavior.explicitTypeEntry` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) (`modul-davranis`) |
@@ -944,21 +941,17 @@ kayıtlı dikmeler: upright_346_5=346.5; upright_99=99; upright_49_5=49.5. Facto
 
 ### Düz banko 45° yalnız 100/150/200
 
-src/moduleBehavior.js STRAIGHT_COUNTER_WIDTHS_CM = Set([100, 150, 200]); shape L ise defaultRotationDeg 270, adım type kaydındaki 90
-
-counter straight 50→90°; 100→45°; 150→45°; 200→45°; L 100 adım→90°, defaultRotation→270°
+Item seed (`docs/refactor/ROTATION.md`): `desk_banko_100/150/200` step 45; `desk_banko_*_L` step 90 default 270. `STRAIGHT_COUNTER_WIDTHS_CM` ve type ezmesi yok.
 
 ### bar-stool ve tekli koltuk 45°
 
-TYPE_BEHAVIORS bar-stool / sofa-single-classic rotationStepDeg: 45
-
-bar-stool step 45°, defaultRotation 270°, moveSnapCm 10; sofa-single-classic step 45°, moveSnapCm 10
+Item seed (`docs/refactor/ROTATION.md`): `furniture_bar_stool_classic` 45/270/default; `furniture_sofa_single_classic` 45/0/inherit. TYPE_BEHAVIORS rotation yok.
 
 ### LED tavan yerleşimi
 
 TYPE_BEHAVIORS led-floodlight; TOP_LIGHT_ITEMS.led_floodlight dimensions
 
-placement=top, moveSnapCm=20, wallCapacity=exclude, rotationStepDeg=90; ölçü width/depth/height/mountHeightCm = 50/20/35/350; surface.color=#17191c
+placement=top, moveSnapCm=20, wallCapacity=exclude; sahne Z Item (`led_floodlight` step 90). ölçü width/depth/height/mountHeightCm = 50/20/35/350; surface.color=#17191c
 
 ### plastic-trash-bin renderer dalı indoor-plant ile ortak
 
@@ -996,11 +989,11 @@ getStraightWallNominalWidthForProfileItem: düz duvar recipe içindeki profil �
 
 profile_41_5 lengthCm=41.5 catalogWidthCm=50; profile_91 lengthCm=91 catalogWidthCm=100; profile_140_5 lengthCm=140.5 catalogWidthCm=150; profile_190 lengthCm=190 catalogWidthCm=200
 
-### designState STRIP_COUNT sabiti
+### designState şerit sayısı
 
-src/designState.js const STRIP_COUNT = 7 — STAND_DIMENSIONS.stripCount ile aynı sayı, ayrı sabit
+Tam boy şerit `STAND_DIMENSIONS.stripCount` — `fair_stand_dimensions` bootstrap kaydı. Ayrı `STRIP_COUNT` sabiti yok.
 
-STRIP_COUNT=7; STAND_DIMENSIONS.stripCount=7
+STAND_DIMENSIONS.stripCount=7 (seed)
 
 ### Factory tablosunda olmayan kayıtlı type
 

@@ -39,7 +39,7 @@ Bu bulgu yapısal/sahipliktir; güncel kaydedilen değerlerin kaybolduğunun kan
 
 ### F-018 — P2 — yapısal panel sayısı katalog geometrisi ile durum fabrikası arasında çoğaltılmıştır
 
-`catalog.js:STAND_DIMENSIONS.stripCount` şu anda 7'dir. `designState.js` bağımsız olarak `STRIP_COUNT = 7` bildirir ve durum fabrikaları bunu düz paneller, raflar, vitrinler ve base-wall şeritleri için kullanır; kapı durumu üç üst panelini ayrı olarak sabit 4..6 dizinlerinden türetir.
+`fair_stand_dimensions.strip_count` (bootstrap `STAND_DIMENSIONS.stripCount`) şu anda 7'dir. `designState.js` tam boy panel şeritlerini bu zarftan okur; düz paneller, raflar, vitrinler ve base-wall şeritleri için kullanır; kapı durumu üç üst panelini ayrı olarak sabit 4..6 dizinlerinden türetir.
 
 Renderer `STAND_DIMENSIONS.stripCount/stripHeight` okurken durum fabrikaları kendi 7'sini okur. Değerler bugün uyuşur, ancak gelecekte tek taraflı bir geometri değişikliği, render edilen panellere göre eksik veya fazla kalıcı panel durumu yaratabilir.
 

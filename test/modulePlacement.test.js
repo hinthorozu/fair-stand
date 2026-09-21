@@ -774,6 +774,7 @@ test('free left batch keeps visual order while placing nearest module last in th
 test('free-side insertion supports strict-depth fixtures without throwing', () => {
   const source = {
     id: 'counter-source',
+    itemKey: 'desk_banko_100',
     type: 'counter',
     widthCm: 100,
     depthCm: 50,
@@ -781,6 +782,7 @@ test('free-side insertion supports strict-depth fixtures without throwing', () =
   };
   const stool = {
     id: 'stool-new',
+    itemKey: 'furniture_bar_stool_classic',
     type: 'bar-stool',
     widthCm: 60,
     depthCm: 55,

@@ -7,13 +7,16 @@ from app.modules.fair_stand.application.item_mapper import (
     CatalogCategory,
     CatalogPreview,
     ItemAggregate,
+    StandDimensions,
     map_category,
     map_item,
     map_preview,
+    map_stand_dimensions,
 )
 from app.modules.fair_stand.infrastructure.models import (
     FairStandCatalogPreviewKindModel,
     FairStandCategoryModel,
+    FairStandDimensionsModel,
     FairStandItemModel,
 )
 
@@ -83,6 +86,10 @@ class SqlAlchemyFairStandCatalogRepository:
 
     def get_preview(self, preview_id: int) -> FairStandCatalogPreviewKindModel | None:
         return self._session.get(FairStandCatalogPreviewKindModel, int(preview_id))
+
+    def get_stand_dimensions(self) -> StandDimensions | None:
+        row = self._session.get(FairStandDimensionsModel, 1)
+        return map_stand_dimensions(row) if row is not None else None
 
     def list_item_catalog_rows(self) -> list[FairStandItemModel]:
         return list(

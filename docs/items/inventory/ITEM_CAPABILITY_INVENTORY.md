@@ -133,10 +133,7 @@ Görülen `placement`: `wall` (`WALL_BEHAVIOR`), `free` (`freeBehavior`), `wall-
 
 Görülen `moveSnapCm`: `50` (`WALL_BEHAVIOR` ve `freeBehavior` taban), `10` (çoğu free override + `overlayBehavior` + `PLASTIC_TRASH_BIN_BEHAVIOR`), `20` (`led-floodlight`).
 
-Görülen `rotationStepDeg`: `90` (taban); `45` (`sofa-single-classic`, `bar-stool`; ayrıca düz `counter` ve `widthCm` ∈ {100,150,200} override).
-
-Görülen `defaultRotationDeg`: `0`; `270` (`bar-stool`; `counter` + `shape === 'L'` override).
-
+Sahne Z dönüşü Item: `docs/refactor/ROTATION.md`. `TYPE_BEHAVIORS` rotation taşımaz.
 Görülen `collision`: `segment`, `footprint`, `none`.
 
 Görülen `magneticSnap`: `standard`, `none`, `short-up-joint`.
@@ -163,8 +160,8 @@ Görülen `overlapWithTypes`: `['kettle']`, `['mini-fridge']`, `['flat-panel','p
 |---|---|---|---|---|---|
 | yerleştirme ailesi | `placement` | `wall`, `free`, `wall-overlay`, `top` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
 | hareket ızgarası cm | `moveSnapCm` | `50`, `10`, `20` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
-| dönüş adımı derece | `rotationStepDeg` | `90`, `45` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
-| varsayılan dönüş derece | `defaultRotationDeg` | `0`, `270` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
+| dönüş adımı derece | `rotationStepDeg` | Item | `docs/refactor/ROTATION.md` | `item-tanim` | asıl sahip |
+| varsayılan dönüş derece | `defaultRotationDeg` | Item | `docs/refactor/ROTATION.md` | `item-tanim` | asıl sahip |
 | yan ekleme | `allowSideInsert` | `true`, `false` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
 | çarpışma modeli | `collision` | `segment`, `footprint`, `none` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
 | manyetik çıtçıt | `magneticSnap` | `standard`, `none`, `short-up-joint` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
@@ -172,7 +169,7 @@ Görülen `overlapWithTypes`: `['kettle']`, `['mini-fridge']`, `['flat-panel','p
 | çarpışma derinliği | `collisionDepth` | `physical`, `wall-backbone` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
 | uç teması | `endpointContact` | `standard`, `thin-wall-endpoint` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
 | sınır snap | `boundarySnap` | `stand-edge`, `wall-inner-face` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
-| yan ek dönüş kipi | `sideInsertRotation` | `inherit`, `default` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
+| yan ek dönüş kipi | `sideInsertRotation` | Item | `docs/refactor/ROTATION.md` | `item-tanim` | asıl sahip |
 | overlay bindirme type | `overlapWithTypes` | yukarıdaki diziler | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
 | overlay montaj | `supportsWallOverlayMount` | `true` (`WALL_BEHAVIOR`), `false` (overlay/upright/top/free taban) | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
 | duvar kapasitesi | `wallCapacity` | `include`, `exclude` (`upright`, `led-floodlight`) | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
@@ -182,7 +179,7 @@ Görülen `overlapWithTypes`: `['kettle']`, `['mini-fridge']`, `['flat-panel','p
 | ghost opaklık | `ghost.opacity` | `0.38` | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
 | type davranış tablosu | `TYPE_BEHAVIORS` | 27 anahtar | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
 | çarpışma yükseklik aralığı | `getModuleCollisionHeightRangeCm` | strip occupancy aralığı; yoksa `heightCm` / Item `dimensions.heightCm` / stand yüksekliği | `src/moduleBehavior.js` | `type-davranis` | `collisionHeight` dalı bu fonksiyonda yok |
-| dönüş adımı okuma | `getModuleRotationStepDeg` | davranış değeri; yoksa 90 | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
+| dönüş adımı okuma | `getModuleRotationStepDeg` | Item `rotationStepDeg`; yoksa fail-fast | `src/moduleBehavior.js` | `item-tanim` | `ROTATION.md` |
 | dönüş kilit oturumu | `rotationLocked` | `true`/`false` (parametre varsayılan `false`) | `src/modulePlacement.js` | `type-davranis` | type kaydı değil; yerleştirme oturumu |
 | dönüş kilit oturumu (sidebar) | `rotationLocked` | Shift+R sonrası `true` | `src/moduleDragSidebar.js` | `editor-arac` | çift satır; asıl UI |
 | kısa dikme hedef | `isUprightJointSnapTarget` | type `profile` veya `counter` veya short-up variant | `src/moduleBehavior.js` | `type-davranis` | asıl sahip |
@@ -310,7 +307,7 @@ Sözleşme görünüm (`src/moduleContracts.js`):
 
 ## 6. Aile aile uydurma state
 
-`STRIP_COUNT = 7`. `DEFAULT_PANEL_COLOR = '#ffffff'`. `createDefaultImageTransform()`: `mode` `single`, `offsetX`/`offsetY` `0`, `repeatX`/`repeatY` `1`, `rotation` `0`.
+`DEFAULT_PANEL_COLOR = '#ffffff'`. Tam boy şerit sayısı stand zarfındandır (`docs/refactor/STAND_DIMENSIONS.md`). `createDefaultImageTransform()`: `mode` `single`, `offsetX`/`offsetY` `0`, `repeatX`/`repeatY` `1`, `rotation` `0`.
 
 `createEditablePanelState`: `id`, `stripIndex`, `color`, `imageAssetId` `null`, `imageTransform`.
 
@@ -422,7 +419,7 @@ Resolve alias: `moduleType`, `counterShape` (`normalizeCatalogDescriptor`).
 | video cols kart | `videoWallCols` | `2`, `3` | `src/catalog.js` | `katalog` | düz alan (`items.js` `videoWall.cols`) |
 | video rows kart | `videoWallRows` | `2`, `3` | `src/catalog.js` | `katalog` | düz alan |
 | düz duvar compose genişlikleri | `MODULE_WIDTHS_CM` | 50, 100, 150, 200 | `src/standDimensions.js` | `stand-proje` | Catalog kart listesi değil; `composeStraightWall` + standart metin |
-| stand ölçü sabiti | `STAND_DIMENSIONS` | `height` 3.5, `depth` 0.1, `stripCount` 7, `stripHeight` 0.5, `frameWidth` 0.055, `frameDepth` 0.1 | `src/standDimensions.js` | `stand-proje` | Item kutusu değil; şerit/ghost yükseklik kaynağı |
+| stand ölçü zarfı | `STAND_DIMENSIONS` | (Item formu değil) | `docs/refactor/STAND_DIMENSIONS.md` | `stand-proje` | Item kutusu değil |
 
 ---
 
@@ -509,7 +506,7 @@ Ek kanıt:
 - `ITEM_SURFACE_CAPABILITIES_BY_TYPE` image/color type’ları: `door-leaf`, `flat-panel`, `base`, `counter`, `door`, `showcase-2`, `showcase-3`. `acceptsImage` türetilir.
 - Tahmin yazılmadı: snap 25, 210°, “5 yüz UI” kodda yok.
 
-Satıra **bilinçli bağlanan ama Item formu olmayan**: bölüm 9 (`stand-proje`) + `STAND_DIMENSIONS` + kamera kısayolları.
+Satıra **bilinçli bağlanan ama Item formu olmayan**: bölüm 9 (`stand-proje`) + kamera kısayolları. Stand zarfı: `docs/refactor/STAND_DIMENSIONS.md`.
 
 ---
 

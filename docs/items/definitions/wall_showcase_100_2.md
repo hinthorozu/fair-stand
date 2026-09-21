@@ -34,7 +34,7 @@ Bu varyant `wall_showcase_100_2` kanonik parent Item'ının aynı recipe zinciri
 ## Runtime sahipliği
 
 - Catalog key ve kanonik Item identity aynıdır: `wall_showcase_100_2`.
-- Shared `WALL_BEHAVIOR` yerleşim/move/rotation/snap/collision/reflow motoru korunur.
+- Shared `WALL_BEHAVIOR` yerleşim/move/snap/collision/reflow motoru korunur. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`).
 - State kanonik `itemKey` + `eyeCount` taşır.
 - `bodySurface` tek project-örnek color ezme'dır; iki yan + iki yatay sunta birlikte renklenir. Alt showcase-board Items ayrı ayrı editable değildir.
 - Default body color child Items'dan `0xffffff` gelir.

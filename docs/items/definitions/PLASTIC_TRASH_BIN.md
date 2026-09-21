@@ -11,7 +11,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 JSON snapshot/save/load örnek ID ve kanonik ürün alanlarını korur; duplicate yeni ID üretir. Renderer/ghost/geçici seçim persist edilmez. Kullanıcı kararı: eski DEPOT_ projeleri için alias veya geriye uyumluluk migrationı yok.
 
 ## Davranış, yetenekler ve ilişkiler
-`src/moduleBehavior.js` type kaynağıdır: serbest yerleşim, move/snap/rotation, `collision: none` (yalnız stand sınırı), ghost ve kettle-fridge overlap aynı ortak motorlarda kalır. Davranış itemKey/model adına göre seçilmez. UI selection, drag, sağ click, silme, sağ/sol duplicate/insert ve klavye yolları ortak modül akışındadır. Fixed-model profile renk/image düzenlemeyi kapalı tutar.
+`src/moduleBehavior.js` placement/snap/collision type ailesidir: serbest yerleşim, move/snap, `collision: none` (yalnız stand sınırı), ghost ve kettle-fridge overlap. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`). UI selection, drag, sağ click, silme, sağ/sol duplicate/insert ve klavye yolları ortak modül akışındadır. Fixed-model profile renk/image düzenlemeyi kapalı tutar.
 Otomatik depo yeni bir parent Item oluşturmaz; içerik örnek'larını planlar. Persistent host/child/neighbor ilişkisi ve host takip reflow'u yok. Kettle mevcut sabit yükseltilmiş görünümünü fridge Item yüksekliğinden alır; bu migration yeni stacking davranışı eklemez.
 
 ## BOM ve tüketiciler

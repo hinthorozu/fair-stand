@@ -173,7 +173,7 @@ Because `door_100.type = door`, it uses the existing shared wall behavior family
 
 - wall placement
 - 50 cm move snap
-- 90° rotation step
+- sahne Z Item kolonları (`docs/refactor/ROTATION.md`)
 - segment collision
 - standard magnetic snap
 - wall capacity participation

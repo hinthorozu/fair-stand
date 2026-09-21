@@ -10,7 +10,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `createIndoorPlantModuleState` Item'dan default üretir; `itemKey` damgalar; editable surface yoktur (`free-model-fixed`). Load hydrate; takma ad yok.
 
 ## Davranış ve renderer sınırı
-`moduleBehavior.js > indoor-plant-1`: free, snap 10, oturum alanı, thin-wall-endpoint. GLB fit iş tek kaynağı değildir.
+`moduleBehavior.js > indoor-plant-1`: free, snap 10, oturum alanı, thin-wall-endpoint. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`). GLB fit iş tek kaynağı değildir.
 
 ## Regresyon
 `test/indoorPlantItemsContract.test.js`; E2E `e2e/indoor-plant-items-contract.spec.mjs`.

@@ -10,7 +10,11 @@ import {
   normalizeModuleItemState,
 } from '../src/designState.js';
 import { getItem, resolveItemKey } from '../src/items.js';
-import { getModuleBehavior } from '../src/moduleBehavior.js';
+import {
+  getModuleBehavior,
+  getModuleDefaultRotationDeg,
+  getModuleRotationStepDeg,
+} from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import {
   getExpandedModuleRecipe,
@@ -117,10 +121,10 @@ for (const itemKey of BANKO_KEYS) {
     assert.equal(getModuleBehavior(state).placement, 'free');
     assert.equal(getModuleBehavior(state).moveSnapCm, 50);
     if (isL) {
-      assert.equal(getModuleBehavior(state).defaultRotationDeg, 270);
-      assert.equal(getModuleBehavior(state).rotationStepDeg, 90);
+      assert.equal(getModuleDefaultRotationDeg(state), 270);
+      assert.equal(getModuleRotationStepDeg(state), 90);
     } else {
-      assert.equal(getModuleBehavior(state).rotationStepDeg, 45);
+      assert.equal(getModuleRotationStepDeg(state), 45);
     }
 
     const contract = resolveModuleContract(itemKey);

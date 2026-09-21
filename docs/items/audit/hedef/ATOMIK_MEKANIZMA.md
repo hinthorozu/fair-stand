@@ -55,8 +55,8 @@ Hedef akış: `Item/instance config → canonical method → runtime/renderer`.
 |---|---|---|---|
 | Cam / kumaş yetkisi | capability tablosu + ayrı cam-kumas UI audit | wall parent gruplarında glass/lightbox/mesh var; capability’den bahsetmez | Kod MD+HTML ikisini de doğrular: UI panel seçimi, capability.glass false. Hedef config.glass, type if değil. |
 | Raf ışığı | ayrı aile (2 property) | yalnız raflı wall grubunun sahne özelliği | Kod type===shelf. Hedef shelfLight.enabled on wall_shelf_* Item. |
-| Düz banko 45° | hardcode + behavior tablosunda counter hâlâ 90 | grup 23 step 45, grup 24 L 90 + default 270 | getModuleRotationStepDeg: 100/150/200 straight 45; 50 ve L 90. HTML tablo type kaydını gösterir, override ayrı. MD doğru. |
-| Leaf panel rotation 90 | behavior.* 104 item doldurulmuş gibi | panel_197 için fallback, gerçek özellik değil | TYPE_BEHAVIORS’ta panel yok → WALL_BEHAVIOR. MD doğru; HTML aile şişmesi. Hedef: place.mode=none leaf’te. |
+| Düz banko 45° | Item seed ROTATION.md | grup 23 step 45, grup 24 L 90 + default 270 | Item kolonları; STRAIGHT_COUNTER_WIDTHS_CM yok. |
+| Leaf panel rotation | trio null | panel fallback değil | Leaf 35 satır rotation kolonunu omit eder; WALL smear yok. |
 | BOM / recipe | 30 property tek aile | grup 1–6 recipe-only + parent composition | Recipe sınıfı yok. resolveChildren(itemKey). |
 | Image upright/profile | contract appearance.image editable | grup 7 image açık; hedef karar ayrı | Kod free-editable. MD uyarı doğru; config.image.enabled ayrıca karar. |
 | TV color/image | tv-video-wall ölçü ailesi; color başka aile | kullanıcı color/image atamaz, renderer yönetir | contract wall-media color fixed, image renderer-managed. MD doğru. |
@@ -710,7 +710,7 @@ Hedef akış: `Item/instance config → canonical method → runtime/renderer`.
 | `behavior.collisionDepth` | CONFIG_SHOULD_BE_ITEM | `collide` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
 | `behavior.collisionHeight` | CONFIG_SHOULD_BE_ITEM | `collide` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
 | `behavior.connectionEndpoint` | CONFIG_SHOULD_BE_ITEM | `collide` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
-| `behavior.defaultRotationDeg` | CONFIG_SHOULD_BE_ITEM | `rotate` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
+| `behavior.defaultRotationDeg` | ITEM_DATA | `rotate` | Sahne Z | Item kolon `defaultRotationDeg`; `docs/refactor/ROTATION.md`. TYPE smear yok. |
 | `behavior.endpointContact` | CONFIG_SHOULD_BE_ITEM | `collide` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
 | `behavior.ghost.kind` | CONFIG_SHOULD_BE_ITEM | `ghost` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
 | `behavior.ghost.opacity` | CONFIG_SHOULD_BE_ITEM | `ghost` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
@@ -719,8 +719,8 @@ Hedef akış: `Item/instance config → canonical method → runtime/renderer`.
 | `behavior.moveSnapCm` | CONFIG_SHOULD_BE_ITEM | `move` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
 | `behavior.overlapWithTypes` | CONFIG_SHOULD_BE_ITEM | `collide` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
 | `behavior.placement` | CONFIG_SHOULD_BE_ITEM | `place` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
-| `behavior.rotationStepDeg` | CONFIG_SHOULD_BE_ITEM | `rotate` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
-| `behavior.sideInsertRotation` | CONFIG_SHOULD_BE_ITEM | `rotate` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
+| `behavior.rotationStepDeg` | ITEM_DATA | `rotate` | Sahne Z | Item kolon `rotationStepDeg`; `docs/refactor/ROTATION.md`. |
+| `behavior.sideInsertRotation` | ITEM_DATA | `rotate` | Sahne Z | Item kolon `sideInsertRotation`; leaf trio null. |
 | `behavior.supportsWallOverlayMount` | CONFIG_SHOULD_BE_ITEM | `collide` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
 | `behavior.wallCapacity` | CONFIG_SHOULD_BE_ITEM | `collide` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) | TYPE_BEHAVIORS type tablosu; leaf Item’lara DEFAULT_BEHAVIOR=WALL_BEHAVIOR bulaşır. MD: bu fallback gerçek özellik değil. |
 | `behavior.explicitTypeEntry` | CONFIG_SHOULD_BE_ITEM | `place` | Modül davranışı (yerleşim, dönüş, çarpışma, ghost) |  |
@@ -1065,13 +1065,13 @@ Hedef akış: `Item/instance config → canonical method → runtime/renderer`.
 
 | yer | ne | hedef |
 |---|---|---|
-| `src/moduleBehavior.js TYPE_BEHAVIORS` | Davranış type adına bağlı; DEFAULT_BEHAVIOR = WALL_BEHAVIOR | Item config place/move/rotate/collide |
-| `src/moduleBehavior.js STRAIGHT_COUNTER_WIDTHS_CM` | Düz banko 100/150/200 → rotationStepDeg 45; 50 ve L kalır 90; L defaultRotation 270 | rotate.stepDeg / defaultDeg Item+instance config |
+| `src/moduleBehavior.js TYPE_BEHAVIORS` | Davranış type adına bağlı; DEFAULT_BEHAVIOR = WALL_BEHAVIOR. Rotation Item’da. | Item config place/move/collide |
+| `src/moduleBehavior.js` rotation getters | Item `rotationStepDeg` / `defaultRotationDeg` / `sideInsertRotation`; fail-fast | `docs/refactor/ROTATION.md` |
 | `src/moduleContextMenu.js` | isShelf = moduleType === 'shelf'; isFoam = illuminated-foam | shelfLight.enabled / resize.enabled |
 | `src/scene3d.js supportsGlass` | selectionMode === 'panel'; capability.glass hep false | glass.enabled + surface role config |
 | `src/itemCapabilities.js` | Yalnız door-leaf color+image true | color/image enabled Item config |
 | `src/designState.js createUprightModuleState` | getItem('upright_346_5') sabit | instantiate(itemKey) |
-| `src/designState.js STRIP_COUNT = 7` | STAND_DIMENSIONS.stripCount ile çift sabit | stand config tek kaynak |
+| `src/designState.js tam boy şerit` | `STAND_DIMENSIONS.stripCount` (DB zarf) | stand config tek kaynak |
 | `src/designState.js separatorDefaultColor` | width 50 → separator_panel_48_5 else 98 | child Item defaultColor |
 | `src/designState.js led surface.color` | #17191c | item defaultColor / surface config |
 | `src/designState.js foam Math.max` | min widthCm 10, heightCm 5 | resize.min Item config (yalnız bu Item) |

@@ -51,14 +51,14 @@ Aşağıdaki kararlar mümkün olduğunca behavior registry üzerinden verilmeli
 
 - placement mode,
 - movement snap,
-- rotation step,
-- default rotation,
 - side insertion capability,
 - collision strategy,
 - ghost strategy,
 - context-menu action capability.
 
-Davranış gerçekten farklıysa ayrı bir behavior family / `type` tanımlanır; item-level override normal genişleme yolu değildir.
+Sahne Z dönüşü Item kolonlarıdır (`docs/refactor/ROTATION.md`); type tablosunda rotation alanı yoktur.
+
+Davranış gerçekten farklıysa ayrı bir behavior family / `type` tanımlanır; item-level override normal genişleme yolu değildir. Rotation değerleri Item satırındadır, type `if` ezmesi değildir.
 
 Detaylı sözleşme `MODULE_BEHAVIOR_STANDARD.md` dosyasındadır. Item seviyesindeki ownership ilkeleri `ITEM_CONTRACT.md` tarafından belirlenir.
 

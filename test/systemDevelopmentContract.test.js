@@ -58,7 +58,7 @@ test('every catalog module contract resolves all required policy sections', () =
 
     assert.ok(contract.behavior.placement, `${moduleKey} placement behavior is missing`);
     assert.ok(Number.isFinite(Number(contract.behavior.moveSnapCm)), `${moduleKey} move snap is missing`);
-    assert.ok(Number.isFinite(Number(contract.behavior.rotationStepDeg)), `${moduleKey} rotation step is missing`);
+    assert.ok(Number.isFinite(Number(getItem(moduleKey).rotationStepDeg)), `${moduleKey} rotation step is missing`);
     assert.ok(contract.behavior.collision, `${moduleKey} collision behavior is missing`);
   }
 });

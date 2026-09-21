@@ -12,9 +12,9 @@ import {
   resolveSceneDimensions,
 } from './items.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
+import { STAND_DIMENSIONS } from './standDimensions.js';
 
 const DEFAULT_PANEL_COLOR = '#ffffff';
-const STRIP_COUNT = 7;
 
 function separatorDefaultColor(widthCm) {
   const itemKey = Number(widthCm) === 50 ? 'separator_panel_48_5' : 'separator_panel_98';
@@ -131,7 +131,7 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'flat-panel') return null;
   const occupancy = normalizeStripOccupancy(item.stripOccupancy);
-  const stripCount = occupancy?.stripCount ?? STRIP_COUNT;
+  const stripCount = occupancy?.stripCount ?? STAND_DIMENSIONS.stripCount;
 
   const state = {
     id: createId('module'),
@@ -198,7 +198,7 @@ export function createShowcaseModuleState(type, widthCm = 100) {
     type: showcaseItem.type,
     eyeCount: Number(showcaseItem.eyeCount),
     strips: Array.from(
-      { length: STRIP_COUNT },
+      { length: STAND_DIMENSIONS.stripCount },
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
     ),
     bodySurface: {

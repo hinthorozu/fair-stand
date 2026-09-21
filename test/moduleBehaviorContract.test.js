@@ -30,8 +30,6 @@ test('unknown module types remain distinguishable from declared catalog behavior
   assert.deepEqual(getModuleBehavior('__unknown-module-type__'), {
     placement: 'wall',
     moveSnapCm: 50,
-    rotationStepDeg: 90,
-    defaultRotationDeg: 0,
     allowSideInsert: true,
     collision: 'segment',
     magneticSnap: 'standard',
@@ -39,7 +37,6 @@ test('unknown module types remain distinguishable from declared catalog behavior
     collisionDepth: 'physical',
     endpointContact: 'standard',
     boundarySnap: 'stand-edge',
-    sideInsertRotation: 'inherit',
     overlapWithTypes: [],
     supportsWallOverlayMount: true,
     wallCapacity: 'include',
@@ -56,8 +53,6 @@ test('every declared catalog behavior exposes the complete placement policy sche
   const requiredKeys = [
     'placement',
     'moveSnapCm',
-    'rotationStepDeg',
-    'defaultRotationDeg',
     'allowSideInsert',
     'collision',
     'magneticSnap',
@@ -65,7 +60,6 @@ test('every declared catalog behavior exposes the complete placement policy sche
     'collisionDepth',
     'endpointContact',
     'boundarySnap',
-    'sideInsertRotation',
     'overlapWithTypes',
     'supportsWallOverlayMount',
     'wallCapacity',

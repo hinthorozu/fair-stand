@@ -171,7 +171,9 @@ Renderer, mesh veya geçici UI state'i persistent business state'in yerine geçm
 
 ## 7. Item davranışı `type` seviyesinde tanımlanır
 
-Yerleşim, move, rotation, side insert, collision, ghost, context-menu yetenek ve benzeri Item'a özgü editor/runtime davranışları kanonik olarak davranış ailesi (`type`) seviyesinde tanımlanır.
+Yerleşim, move, side insert, collision, ghost, context-menu yetenek ve benzeri Item'a özgü editor/runtime davranışları kanonik olarak davranış ailesi (`type`) seviyesinde tanımlanır.
+
+Sahne Z dönüşü (`rotationStepDeg`, `defaultRotationDeg`, `sideInsertRotation`) Item kolonlarıdır; sözleşme `docs/refactor/ROTATION.md`. `TYPE_BEHAVIORS` rotation taşımaz.
 
 Aynı davranış ailesindeki Item'lar aynı contract'ı kullanır.
 
@@ -901,7 +903,8 @@ Bugünkü module tabanlı sistem incelenirken başlıca canonical/aktif kaynakla
 - Kimlik, label, type ve nominal catalog verileri: `src/catalog.js`
 - Contract profile, state owner/kalıcılık, appearance/renderer ve BOM policy: `src/moduleContracts.js`
 - State oluşturucu/default/örnek verileri: `src/designState.js`
-- Yerleşim/move/rotation/collision/snap/ghost ve diğer behavior: `src/moduleBehavior.js` ve ilgili yerleşim akışı
+- Yerleşim/move/collision/snap/ghost: `src/moduleBehavior.js` ve ilgili yerleşim akışı
+- Sahne Z rotation: Item kolonları, `docs/refactor/ROTATION.md`
 - Recipe BOM: `src/moduleRecipes.js`
 - Tekil üretim kalemleri/production Item metadata'sı, dimensions ve intrinsic/default properties: `src/items.js`
 - Context menu: `src/moduleContextMenu.js`

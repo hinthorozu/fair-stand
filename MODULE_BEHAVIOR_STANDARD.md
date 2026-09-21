@@ -1,6 +1,6 @@
 # Module Behavior Standard
 
-`src/moduleBehavior.js` is the single source of truth for editor behavior that differs by module type.
+`src/moduleBehavior.js` is the single source of truth for editor behavior that differs by module type, except sahne Z rotation parameters. Those live on Item (`docs/refactor/ROTATION.md`); `TYPE_BEHAVIORS` does not carry `rotationStepDeg`, `defaultRotationDeg`, or `sideInsertRotation`.
 
 Every new module must use this contract instead of adding scattered type checks for placement behavior.
 
@@ -10,8 +10,6 @@ The behavior contract currently covers:
 
 - `placement`: `wall`, `free`, `wall-overlay`, or `top`
 - `moveSnapCm`: movement/grid step in centimetres
-- `rotationStepDeg`: R / Shift+R rotation step
-- `defaultRotationDeg`: initial facing
 - `allowSideInsert`: whether context left/right insertion is allowed
 - `collision`: declared collision contract
 - `magneticSnap`: normal module-to-module magnetic snap or an explicit opt-out
@@ -19,13 +17,12 @@ The behavior contract currently covers:
 - `collisionDepth`: physical depth or a declared logical wall-backbone depth
 - `endpointContact`: standard contact or a declared thin-wall endpoint exception
 - `boundarySnap`: normal stand-edge snap or a declared wall-inner-face boundary strategy
-- `sideInsertRotation`: inherit the source rotation or use the inserted module default
 - `overlapWithTypes`: explicit relationship-specific overlap exceptions
 - `supportsWallOverlayMount`: whether the module can act as a free-standing wall-overlay support
 - `wallCapacity`: whether the module consumes wall-chain capacity
 - `ghost`: placement preview strategy
 
-These values are **not global constants**. Different module types may intentionally use different snap distances, rotation steps, placement modes, collision strategies, connection strategies, or support capabilities.
+These values are **not global constants**. Different module types may intentionally use different snap distances, placement modes, collision strategies, connection strategies, or support capabilities. Rotation step/default/side-insert are Item columns, not type-table fields.
 
 Policy selection belongs here; the geometric algorithms implementing those strategies remain in the placement/core layer.
 
@@ -41,7 +38,7 @@ This prevents a newly added catalog type from silently inheriting fallback behav
 
 Unknown or undeclared non-catalog module types still fall back to the default behavior defined in `src/moduleBehavior.js`.
 
-The current default behavior is wall placement with the default movement/rotation/collision/connection contract declared in code. Documentation should not duplicate those numeric defaults as a separate source of truth.
+The current default behavior is wall placement with the default movement/collision/connection contract declared in code. Documentation should not duplicate those numeric defaults as a separate source of truth. Leaf Item rotation columns stay null; placeable rows must carry the trio.
 
 Fallback remains useful as a defensive runtime behavior, but catalog entries must not depend on it implicitly.
 
@@ -92,16 +89,16 @@ Do not duplicate module-specific collision decisions in unrelated editor/control
 
 ## Rotation and snap contract
 
+Sahne Z: Item `rotationStepDeg` / `defaultRotationDeg` / `sideInsertRotation` via `getItem(itemKey)`. Canonical: `docs/refactor/ROTATION.md`. Missing `itemKey` or null trio on a placeable module is fail-fast. There is no type fallback and no `STRAIGHT_COUNTER_WIDTHS_CM` / L-shape rotation override.
+
 Do not assume all modules rotate in 90° steps or move on a 50 cm grid.
 
-Call the behavior helpers instead of hard-coding module-specific values:
+Call the helpers instead of hard-coding module-specific values:
 
 - `getModuleRotationStepDeg()`
 - `getModuleDefaultRotationDeg()`
 - `getModuleMoveSnapCm()`
-- `getModuleBehavior()`
-
-Descriptor-aware overrides are allowed when a family needs behavior based on module metadata such as shape or verified nominal size. Such overrides must stay centralized in `moduleBehavior.js` and be covered by regression tests.
+- `getModuleBehavior()` (placement/snap/collision; not rotation fields)
 
 ## New module checklist
 

@@ -6,7 +6,7 @@ import {
 } from '../src/catalog.js';
 import { createMiniFridgeModuleState } from '../src/designState.js';
 import { getItem } from '../src/items.js';
-import { getModuleBehavior } from '../src/moduleBehavior.js';
+import { getModuleBehavior, getModuleRotationStepDeg } from '../src/moduleBehavior.js';
 
 test('mini fridge catalog/state dimensions stay aligned', () => {
   const catalog = getCatalogItem('MINI_FRIDGE_AVANTI');
@@ -27,5 +27,5 @@ test('mini fridge is a free module without inter-module collision', () => {
   const behavior = getModuleBehavior({ type: 'mini-fridge' });
   assert.equal(behavior.placement, 'free');
   assert.equal(behavior.collision, 'none');
-  assert.equal(behavior.rotationStepDeg, 90);
+  assert.equal(getModuleRotationStepDeg({ itemKey: 'MINI_FRIDGE_AVANTI' }), 90);
 });

@@ -8,7 +8,7 @@ import {
 import { createModuleStateFromDescriptor, normalizeModuleItemState } from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
 import { getItem } from '../src/items.js';
-import { getModuleBehavior } from '../src/moduleBehavior.js';
+import { getModuleBehavior, getModuleRotationStepDeg } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import {
   getRecipeItemKey,
@@ -98,7 +98,7 @@ test('door_100 preserves the existing door behavior/contract family', () => {
   const behavior = getModuleBehavior(getItem('door_100'));
   assert.equal(behavior.placement, 'wall');
   assert.equal(behavior.moveSnapCm, 50);
-  assert.equal(behavior.rotationStepDeg, 90);
+  assert.equal(getModuleRotationStepDeg(getItem('door_100')), 90);
   assert.equal(behavior.collision, 'segment');
   assert.equal(behavior.allowSideInsert, true);
 

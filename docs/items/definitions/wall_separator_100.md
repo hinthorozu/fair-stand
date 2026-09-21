@@ -13,7 +13,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 `createSeparatorModuleState` Item’dan default üretir; `itemKey` damgalar; tek `surface.color` (image yok). Default renk child `separator_panel_98` üzerinden. Yüklemede hydrate; takma ad yok.
 
 ## Davranış ve renderer sınırı
-`moduleBehavior.js > separator`: `WALL_BEHAVIOR`. Prosedürel renderer / GLB iş tek kaynağı değildir.
+`moduleBehavior.js > separator`: `WALL_BEHAVIOR`. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`). Prosedürel renderer / GLB iş tek kaynağı değildir.
 
 ## Regresyon
 `test/wallSeparatorItemsContract.test.js`; E2E `e2e/wall-separator-items-contract.spec.mjs`.

@@ -69,6 +69,10 @@ def seed_catalog_if_empty(bind) -> None:
         ]
         bind.execute(insert(table), coerced)
 
+    from app.modules.fair_stand.infrastructure.item_rotation_seed import fill_item_rotation_columns
+
+    fill_item_rotation_columns(bind)
+
     if bind.dialect.name == "postgresql":
         for name in SERIAL_TABLES:
             bind.execute(

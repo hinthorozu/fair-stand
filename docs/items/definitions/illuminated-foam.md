@@ -10,7 +10,7 @@ Sözleşme: [ITEM_CONTRACT](../contract/ITEM_CONTRACT.md), [ITEM_CONTRACT_CHECKL
 Oluşturma yolu SVG asset sağ tık `Işıklı Strafora Dönüştür`. `createIlluminatedFoamModuleState` Item defaultlarını ve `itemKey` damgasını yazar. `imageAssetId` zorunludur. `haloColor` default `#ffffff`. Load hydrate `itemKey` doldurur. `Tüm Özellikleri Kaldır` bu type’ı sahneden çıkarır.
 
 ## Davranış ve renderer sınırı
-`overlayBehavior()`: `wall-overlay`, snap `10 cm`, rotation `90°`. SVG extrude + halo renderer temsilidir.
+`overlayBehavior()`: `wall-overlay`, snap `10 cm`. Sahne Z Item kolonlarıdır (`docs/refactor/ROTATION.md`). SVG extrude + halo renderer temsilidir.
 
 ## Regresyon
 `test/lightingItemsContract.test.js`; `test/illuminatedFoamModule.test.js`; `test/moduleStateConstructionRegistry.test.js`; E2E `e2e/lighting-items-contract.spec.mjs` (katalogda olmadığını doğrular) ve mevcut `e2e/f028-reset-features.spec.mjs`.
