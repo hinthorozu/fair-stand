@@ -1,17 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "archive-button-visibility-settings",
-  "kind": "feature",
-  "summary": "Export and import project buttons are shown or hidden from fair_stand_settings via catalog bootstrap. Markup starts hidden so the controls never flash before settings arrive.",
+  "id": "pcf-shadow-map",
+  "kind": "renderer-change",
+  "summary": "Stand scene uses THREE.PCFShadowMap instead of PCFSoftShadowMap so shadow edges stay sharp on the floor and modules.",
   "owners": [
-    "src/runtimeSettings.js",
-    "src/main.js",
-    "backend/app/modules/fair_stand/infrastructure/models.py"
+    "src/scene3d.js"
   ],
   "sourceOfTruth": [
-    "src/runtimeSettings.js",
-    "backend/app/modules/fair_stand/infrastructure/models.py",
-    "docs/refactor/DATABASE.md"
+    "src/scene3d.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -26,7 +22,7 @@
     "assets": "affected",
     "storage": "affected",
     "importExport": "affected",
-    "performance": "not-applicable",
+    "performance": "affected",
     "accessibility": "affected",
     "architecture": "affected",
     "security": "affected",
@@ -831,30 +827,29 @@
         "F-033"
       ]
     },
-    "notes": "UI visibility only. ZIP contents unchanged. Buttons stay hidden in HTML until applyArchiveButtonVisibility after catalog bootstrap."
+    "notes": "One renderer.shadowMap.type change. Lighting, cameras, and module meshes are unchanged."
   },
   "tests": {
     "targeted": [
-      "test/runtimeSettings.test.js",
-      "test/catalogDomainBoundary.test.js"
+      "test/scene3dPublicContract.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/project-import-export-roundtrip.spec.mjs"
+        "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "Default seed keeps export/import visible; roundtrip clicks those buttons after bootstrap."
+      "reason": "Renderer domain is affected; visible-ui loads the live scene after bootstrap."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Seed true preserves current chrome. False only hides buttons; archive format is the same."
+    "notes": "Harder PCF filtering only. No catalog, persistence, or placement math change."
   },
   "migration": {
-    "required": true,
-    "notes": "Alembic 0011 adds export_button_visible and import_button_visible, default true, on fair_stand_settings id=1."
+    "required": false,
+    "notes": "No schema or seed change."
   },
-  "rollback": "Revert the commit and alembic downgrade 0011_archive_button_visibility."
+  "rollback": "Revert the commit."
 }
