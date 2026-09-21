@@ -1,6 +1,7 @@
 import { initializeCatalogCategories, initializeCatalogPreviews } from './catalog.js';
 import { getFairStandHostWindow } from './hostDocument.js';
 import { initializeItemRegistry } from './items.js';
+import { initializeRuntimeSettings } from './runtimeSettings.js';
 import { initializeStandDimensions } from './standDimensions.js';
 
 function catalogBootstrapUrl() {
@@ -28,10 +29,12 @@ export async function bootstrapFairStandCatalog() {
     || !Array.isArray(payload.categories)
     || !Array.isArray(payload.previewKinds)
     || !payload.standDimensions
+    || !payload.settings
   ) {
     throw new TypeError('Fair Stand Item catalog bootstrap payload is invalid.');
   }
   initializeStandDimensions(payload.standDimensions);
+  initializeRuntimeSettings(payload.settings);
   initializeCatalogCategories(payload.categories);
   initializeCatalogPreviews(payload.previewKinds);
   initializeItemRegistry(payload.items);

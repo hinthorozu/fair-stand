@@ -1,15 +1,17 @@
 {
   "schemaVersion": 2,
-  "id": "image-upload-5mb-optimize",
+  "id": "image-upload-mb-from-db",
   "kind": "feature",
-  "summary": "User image upload rejects files over 5 MB, then downscales and re-encodes for the scene. Transparent pixels stay PNG/WebP with alpha; SVG is not rasterized. IndexedDB stores only the prepared blob and keeps the original filename as the library label.",
+  "summary": "Image upload MB cap comes from fair_stand_settings via catalog bootstrap. Oversize files open a popup instead of the sidebar status line. JS no longer hardcodes 5 MB.",
   "owners": [
+    "src/runtimeSettings.js",
     "src/imageOptimize.js",
-    "src/assetStore.js",
-    "src/main.js"
+    "src/main.js",
+    "backend/app/modules/fair_stand/infrastructure/models.py"
   ],
   "sourceOfTruth": [
-    "src/imageOptimize.js"
+    "src/runtimeSettings.js",
+    "backend/app/modules/fair_stand/infrastructure/models.py"
   ],
   "impact": {
     "catalog": "affected",
@@ -24,7 +26,7 @@
     "assets": "affected",
     "storage": "affected",
     "importExport": "affected",
-    "performance": "affected",
+    "performance": "not-applicable",
     "accessibility": "affected",
     "architecture": "affected",
     "security": "affected",
@@ -78,6 +80,7 @@
       "src/projectActionSaveGuard.js",
       "src/projectImportValidation.js",
       "src/rawBomDebug.js",
+      "src/runtimeSettings.js",
       "src/scene3d.js",
       "src/selectionFeedback.js",
       "src/standStandardsCopy.js",
@@ -95,6 +98,7 @@
       "backend/tests/modules/fair_stand/test_item_scene_pose.py",
       "backend/tests/modules/fair_stand/test_item_snap.py",
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
+      "backend/tests/modules/fair_stand/test_runtime_settings.py",
       "e2e/color-image-capability.spec.mjs",
       "e2e/commercial-items-contract.spec.mjs",
       "e2e/f010-module-construction.spec.mjs",
@@ -254,6 +258,7 @@
       "test/removedIndoorPlant2.test.js",
       "test/rightWallOrientation.test.js",
       "test/roadmapProductionSourceOfTruth.test.js",
+      "test/runtimeSettings.test.js",
       "test/scene3dPublicContract.test.js",
       "test/sceneSurroundSingleSource.test.js",
       "test/selectedModuleRotationCursor.test.js",
@@ -815,11 +820,13 @@
         "F-033"
       ]
     },
-    "notes": "Upload-only. ZIP import still stores archive blobs unchanged. SVG stays vector for illuminated foam."
+    "notes": "ZIP import still stores archive blobs unchanged. Cap applies to library file picker uploads."
   },
   "tests": {
     "targeted": [
+      "test/runtimeSettings.test.js",
       "test/imageOptimize.test.js",
+      "test/catalogDomainBoundary.test.js",
       "test/systemChangeGate.test.js"
     ],
     "fullSuite": true,
@@ -829,16 +836,16 @@
       "targeted": [
         "e2e/color-image-capability.spec.mjs"
       ],
-      "reason": "Library upload and 5 MB rejection are browser file-input behavior."
+      "reason": "Oversize upload now raises a browser dialog from the file input."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Existing small PNG uploads still show the original filename. Oversize files never enter IndexedDB."
+    "notes": "Existing IndexedDB assets unchanged. Local Postgres needs alembic 0010."
   },
   "migration": {
-    "required": false,
-    "notes": "Already stored assets are unchanged. Policy applies to new uploads."
+    "required": true,
+    "notes": "Alembic 0010_fair_stand_settings seeds max_image_upload_mb=5. Catalog bootstrap fails without the row."
   },
-  "rollback": "Revert the commit to restore unlimited upload of the original file blob."
+  "rollback": "Revert the commit and alembic downgrade 0010."
 }

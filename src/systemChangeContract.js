@@ -133,6 +133,7 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/projectUi.js': frozenDomains('ui'),
   'src/rawBomDebug.js': frozenDomains('bom', 'ui'),
   'src/rectImageLayout.js': frozenDomains('renderer', 'state'),
+  'src/runtimeSettings.js': frozenDomains('architecture', 'catalog', 'assets', 'security'),
   'src/rectSelection.js': frozenDomains('ui'),
   'src/scene3d.js': frozenDomains('renderer', 'state', 'placement', 'behavior', 'performance'),
   'src/sceneDimensions.js': frozenDomains('architecture', 'renderer', 'placement', 'composition'),

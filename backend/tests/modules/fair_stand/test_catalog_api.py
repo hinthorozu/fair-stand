@@ -82,6 +82,7 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
         "frameWidth": 0.055,
         "frameDepth": 0.1,
     }
+    assert body["settings"] == {"maxImageUploadMb": 5}
     shelf_preview = next(kind for kind in body["previewKinds"] if kind["id"] == 20)
     assert "previewKey" not in shelf_preview
     assert all("previewKey" not in kind for kind in body["previewKinds"])

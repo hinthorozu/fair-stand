@@ -1,17 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  IMAGE_UPLOAD_TOO_LARGE_MESSAGE,
   IMAGE_UPLOAD_TYPE_MESSAGE,
   MAX_IMAGE_LONG_EDGE_PX,
-  MAX_IMAGE_UPLOAD_BYTES,
   assertImageUploadAllowed,
   chooseOptimizedImageType,
+  formatImageUploadTooLargeMessage,
+  getMaxImageUploadBytes,
   isImageUploadWithinSizeLimit,
   prepareUploadedImage,
   sampleHasTransparency,
   scaleToMaxLongEdge,
 } from '../src/imageOptimize.js';
+import { initializeRuntimeSettings } from '../src/runtimeSettings.js';
+import { loadCanonicalItemCatalog } from './registerCanonicalItemCatalog.mjs';
 
 function imageDataFromAlpha(alphas) {
   const data = new Uint8ClampedArray(alphas.length * 4);
@@ -24,18 +26,26 @@ function imageDataFromAlpha(alphas) {
   return { data, width: alphas.length, height: 1 };
 }
 
-test('5 MB tavanı byte olarak kilitler', () => {
-  assert.equal(MAX_IMAGE_UPLOAD_BYTES, 5 * 1024 * 1024);
-  assert.equal(isImageUploadWithinSizeLimit(MAX_IMAGE_UPLOAD_BYTES), true);
-  assert.equal(isImageUploadWithinSizeLimit(MAX_IMAGE_UPLOAD_BYTES + 1), false);
+test('görsel tavanı bootstrapped MB değerini byte olarak kullanır', () => {
+  const maxBytes = getMaxImageUploadBytes();
+  assert.equal(maxBytes, 5 * 1024 * 1024);
+  assert.equal(isImageUploadWithinSizeLimit(maxBytes), true);
+  assert.equal(isImageUploadWithinSizeLimit(maxBytes + 1), false);
   assert.throws(
-    () => assertImageUploadAllowed({ type: 'image/png', size: MAX_IMAGE_UPLOAD_BYTES + 1 }),
-    (error) => error.message === IMAGE_UPLOAD_TOO_LARGE_MESSAGE,
+    () => assertImageUploadAllowed({ type: 'image/png', size: maxBytes + 1 }),
+    (error) => error.message === formatImageUploadTooLargeMessage(),
   );
   assert.throws(
     () => assertImageUploadAllowed({ type: 'application/pdf', size: 12 }),
     (error) => error.message === IMAGE_UPLOAD_TYPE_MESSAGE,
   );
+  try {
+    initializeRuntimeSettings({ maxImageUploadMb: 2 });
+    assert.equal(getMaxImageUploadBytes(), 2 * 1024 * 1024);
+    assert.equal(formatImageUploadTooLargeMessage(), 'Görsel en fazla 2 MB olabilir.');
+  } finally {
+    loadCanonicalItemCatalog();
+  }
 });
 
 test('uzun kenar 1536 üstünü orantılı küçültür', () => {

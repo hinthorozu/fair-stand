@@ -1,5 +1,6 @@
 import { getHelpStandardsTableHtml, getStandStandardsFacts } from './standStandardsCopy.js';
 import { getFairStandHostDocument } from './hostDocument.js';
+import { getMaxImageUploadMb } from './runtimeSettings.js';
 
 function listGuideSections() {
   return [
@@ -101,7 +102,7 @@ function listGuideSections() {
     title: 'Görsel Kütüphanesi ve Görsel Uygulama',
     html: `
       <ul>
-        <li><strong>Dosya Seç:</strong> Görseli aktif projenin görsel arşivine ekler. En fazla 5 MB. Büyük görseller sahne için küçültülür; şeffaf arka plan korunur. SVG olduğu gibi kalır.</li>
+        <li><strong>Dosya Seç:</strong> Görseli aktif projenin görsel arşivine ekler. En fazla ${getMaxImageUploadMb()} MB; aşıldığında popup uyarır. Büyük görseller sahne için küçültülür; şeffaf arka plan korunur. SVG olduğu gibi kalır.</li>
         <li><strong>Doldur:</strong> Alanı tamamen kaplar; gerekirse görüntüyü kırpar.</li>
         <li><strong>Sığdır:</strong> Görselin tamamını seçili alana sığdırır.</li>
         <li><strong>Kaldır:</strong> Görseli panel/bez üzerinden kaldırır; kütüphaneden silmez.</li>

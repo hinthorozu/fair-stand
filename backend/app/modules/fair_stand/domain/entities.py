@@ -31,3 +31,8 @@ class StandDimensions:
     strip_height: float
     frame_width: float
     frame_depth: float
+
+
+@dataclass(frozen=True)
+class RuntimeSettings:
+    max_image_upload_mb: int

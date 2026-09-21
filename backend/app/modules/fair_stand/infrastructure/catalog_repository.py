@@ -7,10 +7,12 @@ from app.modules.fair_stand.application.item_mapper import (
     CatalogCategory,
     CatalogPreview,
     ItemAggregate,
+    RuntimeSettings,
     StandDimensions,
     map_category,
     map_item,
     map_preview,
+    map_runtime_settings,
     map_stand_dimensions,
 )
 from app.modules.fair_stand.infrastructure.models import (
@@ -18,6 +20,7 @@ from app.modules.fair_stand.infrastructure.models import (
     FairStandCategoryModel,
     FairStandDimensionsModel,
     FairStandItemModel,
+    FairStandSettingsModel,
 )
 
 
@@ -90,6 +93,10 @@ class SqlAlchemyFairStandCatalogRepository:
     def get_stand_dimensions(self) -> StandDimensions | None:
         row = self._session.get(FairStandDimensionsModel, 1)
         return map_stand_dimensions(row) if row is not None else None
+
+    def get_runtime_settings(self) -> RuntimeSettings | None:
+        row = self._session.get(FairStandSettingsModel, 1)
+        return map_runtime_settings(row) if row is not None else None
 
     def list_item_catalog_rows(self) -> list[FairStandItemModel]:
         return list(

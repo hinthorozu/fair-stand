@@ -13,6 +13,10 @@ export const CANONICAL_STAND_DIMENSIONS = Object.freeze({
   frameDepth: 0.1,
 });
 
+export const CANONICAL_RUNTIME_SETTINGS = Object.freeze({
+  maxImageUploadMb: 5,
+});
+
 export function mapCatalogSeedToBootstrap(seed) {
   return {
     revision: 'e2e-fixture',
@@ -24,6 +28,7 @@ export function mapCatalogSeedToBootstrap(seed) {
     previewKinds: CATALOG_PREVIEW_KIND_FIXTURE,
     items: seed.items.map(mapItem),
     standDimensions: seed.standDimensions ?? CANONICAL_STAND_DIMENSIONS,
+    settings: seed.settings ?? CANONICAL_RUNTIME_SETTINGS,
   };
 }
 

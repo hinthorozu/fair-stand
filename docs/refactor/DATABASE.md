@@ -4,7 +4,7 @@ Lokal / sunucu PostgreSQL `fair_stand` şemasının yaşayan envanteri. “Üç 
 
 **Doğrulama (2026-09-21, lokal Postgres `fair_stand` + `models.py` + `item_mapper.py` + `src/`):**
 
-1. Canlı `information_schema` — 12 tablo; kolon adları `models.py` ile aynı. Alembic head: `0009_kettle_default_z`.
+1. Canlı `information_schema` — 13 tablo; kolon adları `models.py` ile aynı. Alembic head: `0010_fair_stand_settings`.
 2. `item_mapper.py` — her ürün kolonu JSON anahtarına (veya “bootstrap’a girmez”) bağlandı.
 3. Production `src/` grep — “Nerede” hücresi gerçek okuyucu dosyadır; okunmayan kolon **DATA / TEST_ONLY / SCHEMA_ONLY** yazılır.
 4. `ITEMS.md` (alan kuyruğu + onaylı şema), `CATALOG.md`, `ROTATION.md`, `SCENE_POSE.md`, `STAND_DIMENSIONS.md` — değer kopyalanmaz; işaret edilir.
@@ -14,13 +14,13 @@ Satır sayıları bu makinedeki canlı DB (aşağıdaki tabloda). Başka dump’
 - Model: `backend/app/modules/fair_stand/infrastructure/models.py`
 - Mapper (DB → bootstrap JSON): `backend/app/modules/fair_stand/application/item_mapper.py`
 - Migrasyon: `backend/alembic/versions/`
-- Okuma: catalog bootstrap → `initializeItemRegistry` / `initializeStandDimensions`
+- Okuma: catalog bootstrap → `initializeItemRegistry` / `initializeStandDimensions` / `initializeRuntimeSettings`
 
 Yeni kolon aynı PR’da bu dosyaya yazılır. Kolon yoksa “var” yazılmaz.
 
 ---
 
-## Neden 12 tablo?
+## Neden 13 tablo?
 
 Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 / 1:N parçalar ayrı, Catalog ayrı, stand zarfı Item değil.
 
@@ -38,6 +38,7 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 | `fair_stand_item_video_walls` | 2 | `VIDEO_WALL_2X2` / `3X3`. |
 | `fair_stand_item_body_parts` | 6 (2 parent × 3 rol) | Vitrin gövde child `itemKey`. |
 | `fair_stand_dimensions` | 1 (`id=1`) | Stand zarfı. Item kutusu değil. |
+| `fair_stand_settings` | 1 (`id=1`) | Runtime tavanlar. Item kutusu değil. |
 
 Akış: PostgreSQL → Fair Stand API bootstrap → CRM proxy → tarayıcı registry. CRM/Core kendi DB’lerinde bu tablolar yok.
 
@@ -49,7 +50,7 @@ Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; lokal head `0009_kettle_default_z` |
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; lokal head `0010_fair_stand_settings` |
 
 ---
 
@@ -277,7 +278,23 @@ Tek satır `id = 1`. Item değildir. `STAND_DIMENSIONS.md`.
 
 `MODULE_WIDTHS_CM` (50/100/150/200) hâlâ JS; bu tabloda yok.
 
-Lokal canlı (2026-09-21): `id=1`, `height_m=3.5`, `depth_m=0.1`, `strip_count=7`, `strip_height_m=0.5`, `frame_width_m=0.055`, `frame_depth_m=0.1`. Alembic head: `0009_kettle_default_z`.
+Lokal canlı (2026-09-21): `id=1`, `height_m=3.5`, `depth_m=0.1`, `strip_count=7`, `strip_height_m=0.5`, `frame_width_m=0.055`, `frame_depth_m=0.1`.
+
+---
+
+## `fair_stand_settings`
+
+Tek satır `id = 1`. Item değildir. Stand zarfı değildir.
+
+Kaynak: PostgreSQL `fair_stand_settings` → catalog bootstrap `settings` → `initializeRuntimeSettings` → `getMaxImageUploadMb()` / `getMaxImageUploadBytes()`.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | — | Singleton; CHECK `id = 1` | İkinci ayar satırı yok | CHECK `ck_fair_stand_settings_singleton` |
+| `max_image_upload_mb` | `maxImageUploadMb` | Görsel arşiv yükleme tavanı (MB) | JS sabiti yok; aşım popup | `src/runtimeSettings.js` → `imageOptimize.js` / `main.js` |
+| `created_at` / `updated_at` | yok | Audit | — | DB |
+
+Seed: `5`. Admin kolon değerini değiştirince tarayıcı tavanı bootstrap ile gelir.
 
 ---
 

@@ -57,10 +57,10 @@ import {
   validateProjectArchiveManifest,
 } from './projectImportValidation.js';
 import {
-  IMAGE_UPLOAD_TOO_LARGE_MESSAGE,
   IMAGE_UPLOAD_TYPE_MESSAGE,
   isImageUploadWithinSizeLimit,
 } from './imageOptimize.js';
+import { formatImageUploadTooLargeMessage } from './runtimeSettings.js';
 import { getFairStandHostDocument, getFairStandHostWindow } from './hostDocument.js';
 import { bootstrapFairStandCatalog } from './catalogBootstrap.js';
 import { bindProjectActionSaveGuard } from './projectActionSaveGuard.js';
@@ -1945,7 +1945,7 @@ imageInput.addEventListener('change', async () => {
     return;
   }
   if (!isImageUploadWithinSizeLimit(file.size)) {
-    assetStatus.textContent = IMAGE_UPLOAD_TOO_LARGE_MESSAGE;
+    window.alert(formatImageUploadTooLargeMessage());
     return;
   }
 
@@ -1958,7 +1958,12 @@ imageInput.addEventListener('change', async () => {
     if (selected.length) applyActiveImageToSelection('cover');
   } catch (error) {
     console.warn('Görsel kaydedilemedi:', error);
-    assetStatus.textContent = error?.message || 'Görsel arşive kaydedilemedi.';
+    const message = error?.message || 'Görsel arşive kaydedilemedi.';
+    if (message === formatImageUploadTooLargeMessage()) {
+      window.alert(message);
+      return;
+    }
+    assetStatus.textContent = message;
   }
 });
 

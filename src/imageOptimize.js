@@ -1,16 +1,19 @@
 import { isAllowedImportImageType } from './projectImportValidation.js';
+import {
+  formatImageUploadTooLargeMessage,
+  getMaxImageUploadBytes,
+} from './runtimeSettings.js';
 
-export const MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024;
 export const MAX_IMAGE_LONG_EDGE_PX = 1536;
 export const IMAGE_ENCODE_QUALITY = 0.75;
-export const IMAGE_UPLOAD_TOO_LARGE_MESSAGE = 'Görsel en fazla 5 MB olabilir.';
 export const IMAGE_UPLOAD_TYPE_MESSAGE = 'Yalnız image/* görsel dosyası yükle.';
 export const IMAGE_OPTIMIZE_FAILED_MESSAGE = 'Görsel küçültülemedi.';
+export { formatImageUploadTooLargeMessage, getMaxImageUploadBytes };
 
 const SVG_TYPE = 'image/svg+xml';
 
 export function isImageUploadWithinSizeLimit(byteLength) {
-  return Number(byteLength) <= MAX_IMAGE_UPLOAD_BYTES;
+  return Number(byteLength) <= getMaxImageUploadBytes();
 }
 
 export function scaleToMaxLongEdge(width, height, maxEdge = MAX_IMAGE_LONG_EDGE_PX) {
@@ -48,7 +51,7 @@ export function assertImageUploadAllowed(file) {
     throw new Error(IMAGE_UPLOAD_TYPE_MESSAGE);
   }
   if (!isImageUploadWithinSizeLimit(file.size)) {
-    throw new Error(IMAGE_UPLOAD_TOO_LARGE_MESSAGE);
+    throw new Error(formatImageUploadTooLargeMessage());
   }
 }
 
