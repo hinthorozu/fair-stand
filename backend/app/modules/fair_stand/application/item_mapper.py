@@ -54,10 +54,6 @@ def map_item(row) -> ItemAggregate:
         payload["material"] = row.material
     if row.default_color is not None:
         payload["defaultColor"] = int(row.default_color)
-    if row.panel_role is not None:
-        payload["panelRole"] = row.panel_role
-    if row.connector_type is not None:
-        payload["connectorType"] = row.connector_type
     if row.preserve_model_scale is not None:
         payload["preserveModelScale"] = row.preserve_model_scale
     if row.model_rotation_y_deg is not None:
@@ -144,13 +140,11 @@ def map_item(row) -> ItemAggregate:
     if default_screen:
         payload["defaultScreenFile"] = default_screen
 
-    components = sorted(row.components, key=lambda component: component.sort_order)
+    components = sorted(row.components, key=lambda component: component.child_item_key)
     if components or row.composition_mode:
         composition: dict = {}
         if row.composition_mode is not None:
             composition["mode"] = row.composition_mode
-        if row.composition_module_type is not None:
-            composition["moduleType"] = row.composition_module_type
         if components:
             composition["items"] = [
                 {"itemKey": component.child_item_key, "quantity": _num(component.quantity)}

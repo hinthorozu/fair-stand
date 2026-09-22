@@ -23,10 +23,10 @@ export const TV_65_DIMENSIONS = Object.freeze({
   ...TV_DIMENSIONS[65],
   heightCm: 350,
 });""")
-s = s.replace("  TV_42: { type: 'tv', widthCm: 100, heightCm: 350, screenWidthCm: 93.0, screenHeightCm: 52.3, sizeInch: 42, label: 'TV 42\\\"' },", """  TV_42: { type: 'tv', widthCm: 100, heightCm: 350, screenWidthCm: 93.0, screenHeightCm: 52.3, sizeInch: 42, label: 'TV 42\\"' },
-  TV_55: { type: 'tv', widthCm: 130, heightCm: 350, screenWidthCm: 121.8, screenHeightCm: 68.5, sizeInch: 55, label: 'TV 55\\"' },
-  TV_65: { type: 'tv', widthCm: 150, heightCm: 350, screenWidthCm: 143.9, screenHeightCm: 80.9, sizeInch: 65, label: 'TV 65\\"' },""")
-s = s.replace("  'TV_42',\n  'LED_FLOODLIGHT',", "  'TV_42',\n  'TV_55',\n  'TV_65',\n  'LED_FLOODLIGHT',")
+s = s.replace("  tv_42: { type: 'tv', widthCm: 100, heightCm: 350, screenWidthCm: 93.0, screenHeightCm: 52.3, sizeInch: 42, label: 'TV 42\\\"' },", """  tv_42: { type: 'tv', widthCm: 100, heightCm: 350, screenWidthCm: 93.0, screenHeightCm: 52.3, sizeInch: 42, label: 'TV 42\\"' },
+  tv_55: { type: 'tv', widthCm: 130, heightCm: 350, screenWidthCm: 121.8, screenHeightCm: 68.5, sizeInch: 55, label: 'TV 55\\"' },
+  tv_65: { type: 'tv', widthCm: 150, heightCm: 350, screenWidthCm: 143.9, screenHeightCm: 80.9, sizeInch: 65, label: 'TV 65\\"' },""")
+s = s.replace("  'tv_42',\n  'LED_FLOODLIGHT',", "  'tv_42',\n  'tv_55',\n  'tv_65',\n  'LED_FLOODLIGHT',")
 p.write_text(s)
 
 # designState.js
@@ -82,8 +82,8 @@ s = p.read_text()
 insert = """
 
 test('TV 55 and 65 catalog/state dimensions are available', () => {
-  const tv55 = MODULE_CATALOG.TV_55;
-  const tv65 = MODULE_CATALOG.TV_65;
+  const tv55 = MODULE_CATALOG.tv_55;
+  const tv65 = MODULE_CATALOG.tv_65;
   assert.deepEqual(
     [tv55.widthCm, tv55.screenWidthCm, tv55.screenHeightCm, tv55.sizeInch],
     [130, 121.8, 68.5, 55],

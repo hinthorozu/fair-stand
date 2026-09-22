@@ -37,22 +37,22 @@ async function saveAndReadProject(page) {
 }
 
 const expected = {
-  EXTRA_INDOOR_PLANT_1: {
+  extra_indoor_plant_1: {
     modelFile: 'indoor_plants.glb',
     hasSurface: false,
     widthCm: 60,
   },
-  EXTRA_LONG_PLANTER_100: {
+  extra_long_planter_100: {
     modelFile: 'saksi_bitkili_100x30x30.glb',
     hasSurface: true,
     widthCm: 100,
   },
-  EXTRA_LONG_PLANTER_150: {
+  extra_long_planter_150: {
     modelFile: 'saksi_bitkili_150x30x30.glb',
     hasSurface: true,
     widthCm: 150,
   },
-  EXTRA_LONG_PLANTER_200: {
+  extra_long_planter_200: {
     modelFile: 'saksi_bitkili_200x30x30.glb',
     hasSurface: true,
     widthCm: 200,

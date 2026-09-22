@@ -27,7 +27,6 @@ test('panel_197 is a canonical single production Item', () => {
   assert.equal(item.type, 'panel');
   assert.equal(item.unit, 'adet');
   assert.deepEqual(item.dimensions, { widthCm: 197, heightCm: 47, thicknessCm: 0.8 });
-  assert.equal(item.panelRole, 'straight');
   assert.equal(item.nominalModuleWidthCm, undefined);
 });
 
@@ -62,7 +61,7 @@ test('panel_197 remains isolated from the canonical inner-corner panel family', 
     const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined, itemKey);
-    assert.equal(item.panelRole, 'inner-corner', itemKey);
+    assert.equal(item.type, 'panel', itemKey);
   }
 
   const wall200 = getStraightWallRecipe(200);

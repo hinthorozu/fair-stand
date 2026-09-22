@@ -61,12 +61,12 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `desk_banko_200`
 - `desk_banko_150`
 - `desk_banko_100`
-- `desk_banko_200_L`
-- `desk_banko_150_L`
-- `desk_banko_100_L`
-- `BASE_200`
-- `BASE_150`
-- `BASE_100`
+- `desk_banko_200_l`
+- `desk_banko_150_l`
+- `desk_banko_100_l`
+- `base_200`
+- `base_150`
+- `base_100`
 - `furniture_sofa_set_classic`
 - `furniture_sofa_single_classic`
 - `furniture_sofa_double_classic`
@@ -75,19 +75,19 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `chair_eames`
 - `glass_table`
 - `furniture_bar_stool_classic`
-- `MINI_FRIDGE_AVANTI`
-- `KETTLE`
-- `COAT_RACK`
-- `PLASTIC_TRASH_BIN`
-- `EXTRA_INDOOR_PLANT_1`
-- `EXTRA_LONG_PLANTER_100`
-- `EXTRA_LONG_PLANTER_150`
-- `EXTRA_LONG_PLANTER_200`
-- `TV_42`
-- `TV_55`
-- `VIDEO_WALL_2X2`
-- `VIDEO_WALL_3X3`
-- `TV_65`
+- `mini_fridge_avanti`
+- `kettle`
+- `coat_rack`
+- `plastic_trash_bin`
+- `extra_indoor_plant_1`
+- `extra_long_planter_100`
+- `extra_long_planter_150`
+- `extra_long_planter_200`
+- `tv_42`
+- `tv_55`
+- `video_wall_2x2`
+- `video_wall_3x3`
+- `tv_65`
 - `led_floodlight`
 <!-- catalog-keys:end -->
 
@@ -109,15 +109,15 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Banko & Baza
 
-`desk_banko_200`, `desk_banko_150`, `desk_banko_100`, `desk_banko_200_L`, `desk_banko_150_L`, `desk_banko_100_L`, `BASE_200`, `BASE_150`, `BASE_100`
+`desk_banko_200`, `desk_banko_150`, `desk_banko_100`, `desk_banko_200_l`, `desk_banko_150_l`, `desk_banko_100_l`, `base_200`, `base_150`, `base_100`
 
 ### Mobilya / Depo / Bitki
 
-`furniture_sofa_set_classic`, `furniture_sofa_single_classic`, `furniture_sofa_double_classic`, `furniture_coffee_table_classic`, `furniture_table_chair_set_eames`, `chair_eames`, `glass_table`, `furniture_bar_stool_classic`, `MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN`, `EXTRA_INDOOR_PLANT_1`, `EXTRA_LONG_PLANTER_100`, `EXTRA_LONG_PLANTER_150`, `EXTRA_LONG_PLANTER_200`
+`furniture_sofa_set_classic`, `furniture_sofa_single_classic`, `furniture_sofa_double_classic`, `furniture_coffee_table_classic`, `furniture_table_chair_set_eames`, `chair_eames`, `glass_table`, `furniture_bar_stool_classic`, `mini_fridge_avanti`, `kettle`, `coat_rack`, `plastic_trash_bin`, `extra_indoor_plant_1`, `extra_long_planter_100`, `extra_long_planter_150`, `extra_long_planter_200`
 
 ### Medya / Işık
 
-`TV_42`, `TV_55`, `VIDEO_WALL_2X2`, `VIDEO_WALL_3X3`, `TV_65`, `led_floodlight`
+`tv_42`, `tv_55`, `video_wall_2x2`, `video_wall_3x3`, `tv_65`, `led_floodlight`
 
 ## BOM politika özeti
 
@@ -127,7 +127,7 @@ Duvar/panel, separatör, vitrin, depo kapısı, düz/L banko ve baza ailelerinin
 
 ### `self` — 12 katalog kaydı
 
-`MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN`, `upright_346_5`, `profile_190`, `profile_140_5`, `profile_91`, `profile_41_5`, `shelf_100`, `shelf_150`, `shelf_200` leaf/self BOM Item'dır. Canonical birim `adet`; `src/itemBom.js > resolveItemBom(itemKey)` aynı `itemKey` için `quantity=1` üretir. Child recipe yoktur. Parent duvar reçetelerindeki `upright_346_5 ×2` ve `profile_*` parent miktarları bu saha örneğinden ayrıdır.
+`mini_fridge_avanti`, `kettle`, `coat_rack`, `plastic_trash_bin`, `upright_346_5`, `profile_190`, `profile_140_5`, `profile_91`, `profile_41_5`, `shelf_100`, `shelf_150`, `shelf_200` leaf/self BOM Item'dır. Canonical birim `adet`; `src/itemBom.js > resolveItemBom(itemKey)` aynı `itemKey` için `quantity=1` üretir. Child recipe yoktur. Parent duvar reçetelerindeki `upright_346_5 ×2` ve `profile_*` parent miktarları bu saha örneğinden ayrıdır.
 
 ### `decision-required` — 18 katalog kaydı
 

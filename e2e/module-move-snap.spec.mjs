@@ -74,7 +74,7 @@ test('yerleşik free prop canvas sürüklemede taşınır ve 10 cm grid’e otur
   page.on('pageerror', (error) => pageErrors.push(error.message));
   await createIslandStand(page, 'E2E Module Move');
 
-  const card = await openCatalogCard(page, 'MINI_FRIDGE_AVANTI');
+  const card = await openCatalogCard(page, 'mini_fridge_avanti');
   const viewport = page.locator('#viewport');
   const box = await viewport.boundingBox();
   expect(box).not.toBeNull();
@@ -85,7 +85,7 @@ test('yerleşik free prop canvas sürüklemede taşınır ve 10 cm grid’e otur
   await card.dragTo(viewport, { targetPosition: start });
 
   const before = await saveAndReadProject(page);
-  const fridgeBefore = before.modules.find((moduleState) => moduleState.itemKey === 'MINI_FRIDGE_AVANTI');
+  const fridgeBefore = before.modules.find((moduleState) => moduleState.itemKey === 'mini_fridge_avanti');
   expect(fridgeBefore).toBeTruthy();
   expect(fridgeBefore.placement.wallId).toBe('free');
 

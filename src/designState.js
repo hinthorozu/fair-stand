@@ -237,9 +237,9 @@ const COUNTER_WIDTH_SHAPE_TO_ITEM_KEY = Object.freeze({
   '100': 'desk_banko_100',
   '150': 'desk_banko_150',
   '200': 'desk_banko_200',
-  '100_L': 'desk_banko_100_L',
-  '150_L': 'desk_banko_150_L',
-  '200_L': 'desk_banko_200_L',
+  '100_L': 'desk_banko_100_l',
+  '150_L': 'desk_banko_150_l',
+  '200_L': 'desk_banko_200_l',
 });
 
 function resolveCounterItemKey(widthCmOrDescriptor, options = {}) {
@@ -284,9 +284,9 @@ export function createCounterModuleState(widthCmOrDescriptor, options = {}) {
 }
 
 const BASE_WIDTH_TO_ITEM_KEY = Object.freeze({
-  100: 'BASE_100',
-  150: 'BASE_150',
-  200: 'BASE_200',
+  100: 'base_100',
+  150: 'base_150',
+  200: 'base_200',
 });
 
 function resolveBaseItemKey(widthCmOrDescriptor) {
@@ -449,7 +449,7 @@ export function createIndoorPlantModuleState(descriptor = {}) {
     );
   const itemKey = hasDescriptorFields
     ? resolveIndoorPlantItemKey(descriptor)
-    : 'EXTRA_INDOOR_PLANT_1';
+    : 'extra_indoor_plant_1';
   const item = itemKey ? getItem(itemKey) : null;
   if (!isIndoorPlantItem(item)) return null;
 

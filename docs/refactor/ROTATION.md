@@ -42,6 +42,6 @@ Sistemde kalan: `placement.rotationZDeg`, merkez dönüş, normalize, `rotationL
 | itemKey | step | default | yan ek |
 |---|---|---|---|
 | `desk_banko_100` `150` `200` | 45 | 0 | inherit |
-| `desk_banko_*_L` | 90 | 270 | inherit |
+| `desk_banko_*_l` | 90 | 270 | inherit |
 | `furniture_sofa_single_classic` | 45 | 0 | inherit |
 | `furniture_bar_stool_classic` | 45 | 270 | default |

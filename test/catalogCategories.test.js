@@ -37,18 +37,18 @@ const EXPECTED_GROUP_KEYS = Object.freeze({
   ]),
   4: Object.freeze([
     'desk_banko_200', 'desk_banko_150', 'desk_banko_100',
-    'desk_banko_200_L', 'desk_banko_150_L', 'desk_banko_100_L',
-    'BASE_200', 'BASE_150', 'BASE_100',
+    'desk_banko_200_l', 'desk_banko_150_l', 'desk_banko_100_l',
+    'base_200', 'base_150', 'base_100',
   ]),
   5: Object.freeze([
     'furniture_sofa_set_classic', 'furniture_sofa_single_classic', 'furniture_sofa_double_classic',
     'furniture_coffee_table_classic', 'furniture_table_chair_set_eames', 'chair_eames',
-    'glass_table', 'furniture_bar_stool_classic', 'MINI_FRIDGE_AVANTI', 'KETTLE',
-    'COAT_RACK', 'PLASTIC_TRASH_BIN', 'EXTRA_INDOOR_PLANT_1',
-    'EXTRA_LONG_PLANTER_100', 'EXTRA_LONG_PLANTER_150', 'EXTRA_LONG_PLANTER_200',
+    'glass_table', 'furniture_bar_stool_classic', 'mini_fridge_avanti', 'kettle',
+    'coat_rack', 'plastic_trash_bin', 'extra_indoor_plant_1',
+    'extra_long_planter_100', 'extra_long_planter_150', 'extra_long_planter_200',
   ]),
   6: Object.freeze([
-    'TV_42', 'TV_55', 'VIDEO_WALL_2X2', 'VIDEO_WALL_3X3', 'TV_65', 'led_floodlight',
+    'tv_42', 'tv_55', 'video_wall_2x2', 'video_wall_3x3', 'tv_65', 'led_floodlight',
   ]),
 });
 

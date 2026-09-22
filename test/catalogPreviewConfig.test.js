@@ -196,7 +196,7 @@ test('58 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
     assert.equal(root.className, expected, module.itemKey);
   }
 
-  const kettle = serializeNode(createModuleCatalogPreview(getCatalogItem('KETTLE')));
+  const kettle = serializeNode(createModuleCatalogPreview(getCatalogItem('kettle')));
   assert.deepEqual(kettle.children[0].children.map((child) => child.className), [
     'module-drag-kettle-body',
     'module-drag-kettle-handle',
@@ -205,7 +205,7 @@ test('58 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
     'module-drag-kettle-knob',
   ]);
 
-  const trash = serializeNode(createModuleCatalogPreview(getCatalogItem('PLASTIC_TRASH_BIN')));
+  const trash = serializeNode(createModuleCatalogPreview(getCatalogItem('plastic_trash_bin')));
   assert.deepEqual(trash.children[0].children.map((child) => child.className), [
     'module-drag-trash-bin-handle',
     'module-drag-trash-bin-lid',
@@ -240,7 +240,7 @@ test('58 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
   );
 
   assert.equal(getItem('wall_200').previewId, 9);
-  assert.equal(getItem('KETTLE').previewId, 13);
-  assert.equal(getItem('VIDEO_WALL_2X2').previewId, 28);
+  assert.equal(getItem('kettle').previewId, 13);
+  assert.equal(getItem('video_wall_2x2').previewId, 28);
   assert.equal(getItem('profile_190').previewId, 17);
 });

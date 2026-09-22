@@ -49,58 +49,6 @@ function requireRegistry() {
 
 
 
-const CONNECTOR_ITEM_KEYS_BY_TYPE = Object.freeze({
-  start: 'connector_start',
-  single: 'connector_single',
-  double: 'connector_double',
-  corner: 'connector_corner',
-});
-
-/**
- * TEST_ONLY connector type→itemKey yardımcısı.
- * Production BOM child satırları `composition.items` içindeki `itemKey` taşır;
- * `resolveItemBom` / `expandRecipe` bu API’yi çağırmaz.
- */
-export function getConnectorItemKey(connectorType) {
-  return CONNECTOR_ITEM_KEYS_BY_TYPE[connectorType] ?? null;
-}
-
-function normalizePositiveQuantity(value) {
-  const quantity = Number(value);
-  return Number.isFinite(quantity) && quantity > 0 ? quantity : null;
-}
-
-/**
- * Kanonik connector BOM çözümleyici.
- *
- * Miktar / sınıflandırma sahibi çağırandır (recipe veya kanonik ilişki
- * çözümleyici). Bu katman aparat miktarını renderer geometrisinden,
- * yakınlıktan veya geçici placement snap türünden tahmin etmez.
- */
-export function resolveConnectorBom(requirements = []) {
-  const quantities = new Map();
-
-  for (const requirement of requirements) {
-    const itemKey = requirement?.itemKey ?? getConnectorItemKey(requirement?.connectorType);
-    const item = getItem(itemKey);
-    if (!item || item.type !== 'connector') {
-      throw new TypeError(`Unknown connector Item: ${itemKey ?? requirement?.connectorType ?? 'unknown'}.`);
-    }
-
-    const quantity = normalizePositiveQuantity(requirement?.quantity);
-    if (quantity === null) {
-      throw new TypeError(`Connector quantity is required for ${itemKey}.`);
-    }
-
-    quantities.set(itemKey, (quantities.get(itemKey) ?? 0) + quantity);
-  }
-
-  return Array.from(quantities, ([itemKey, quantity]) => {
-    const item = getItem(itemKey);
-    return Object.freeze({ itemKey, quantity, unit: item.unit, item });
-  });
-}
-
 // Bağımsız ticari ürünler, doğrulanmış ürün varsayılanlarının sahibidir.
 
 
@@ -206,7 +154,7 @@ export function getFurnitureClusterQuantity(item, childItemKey) {
 
 // Duvara asılan medya ürünleri tek `tv` davranış ailesini paylaşır. Sıradan TV'ler
 // doğrulanmış ekran ölçüsüne göre parametriktir; widthCm/heightCm görünür ekrandır.
-// Video wall panel ölçüsü VIDEO_WALL_PANEL Item'ındadır; ızgara rows/cols parent'ta kalır.
+// Video wall panel ölçüsü video_wall_panel Item'ındadır; ızgara rows/cols parent'ta kalır.
 
 
 function resolveVideoWallPanelItem(item) {
@@ -215,7 +163,7 @@ function resolveVideoWallPanelItem(item) {
 }
 
 // Katalog, state oluşturucu ve seçim geri bildiriminin kullandığı duvar-medya ölçü çözümleyicisi.
-// Video wall toplamları VIDEO_WALL_PANEL × ızgaradan okunur; sıradan TV canonical dimensions kullanır.
+// Video wall toplamları video_wall_panel × ızgaradan okunur; sıradan TV canonical dimensions kullanır.
 export function resolveWallMediaMetrics(itemOrKey) {
   const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
   if (!item || item.type !== 'tv') return null;
@@ -231,7 +179,7 @@ export function resolveWallMediaMetrics(itemOrKey) {
     const panelWidthCm = Number(panel?.dimensions?.widthCm);
     const panelHeightCm = Number(panel?.dimensions?.heightCm);
     if (!Number.isFinite(panelWidthCm) || !Number.isFinite(panelHeightCm)) {
-      throw new TypeError(`Missing VIDEO_WALL_PANEL dimensions for ${item.itemKey}.`);
+      throw new TypeError(`Missing video_wall_panel dimensions for ${item.itemKey}.`);
     }
     return Object.freeze({
       ...base,

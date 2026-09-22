@@ -23,10 +23,10 @@ export const FEATURE_CONTRACTS = Object.freeze({
       structuralKinds: Object.freeze(['wall', 'door']),
       contentKinds: Object.freeze(['mini-fridge', 'kettle', 'coat-rack', 'plastic-trash-bin']),
       contentCatalogKeys: Object.freeze([
-        'MINI_FRIDGE_AVANTI',
-        'KETTLE',
-        'COAT_RACK',
-        'PLASTIC_TRASH_BIN',
+        'mini_fridge_avanti',
+        'kettle',
+        'coat_rack',
+        'plastic_trash_bin',
       ]),
     }),
     placement: Object.freeze({

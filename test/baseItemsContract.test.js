@@ -17,22 +17,22 @@ import {
   getModuleRecipe,
 } from './recipeParentItemKey.js';
 
-const BASE_KEYS = ['BASE_100', 'BASE_150', 'BASE_200'];
+const BASE_KEYS = ['base_100', 'base_150', 'base_200'];
 
 const EXPECTED_RECIPE = {
-  BASE_100: {
+  base_100: {
     widthCm: 100,
     top: 'base_top_107_50',
     profile: 'profile_91',
     panel: 'panel_98',
   },
-  BASE_150: {
+  base_150: {
     widthCm: 150,
     top: 'base_top_157_50',
     profile: 'profile_140_5',
     panel: 'panel_147_5',
   },
-  BASE_200: {
+  base_200: {
     widthCm: 200,
     top: 'base_top_206_50',
     profile: 'profile_190',
@@ -49,7 +49,7 @@ for (const itemKey of BASE_KEYS) {
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.type, 'base');
     assert.equal(item.composition?.mode, 'recipe');
-    assert.equal(item.composition?.moduleType, 'base');
+    assert.equal(item.composition?.moduleType, undefined);
     assert.equal(item.dimensions.widthCm, expected.widthCm);
     assert.equal(Object.hasOwn(item, 'unit'), false);
     assert.deepEqual(item.dimensions, {
@@ -117,7 +117,7 @@ test('silinen wall_base Item’ları BASE recipe ailesinden ayrı durur ve kayı
     assert.equal(getModuleRecipe('base-wall', width), null, wallKey);
 
     const baseRecipe = getModuleRecipe('base', width);
-    const baseTop = EXPECTED_RECIPE[`BASE_${width}`].top;
+    const baseTop = EXPECTED_RECIPE[`base_${width}`].top;
     const baseQty = Object.fromEntries(baseRecipe.items.map((entry) => [entry.itemKey, entry.quantity]));
     assert.equal(baseQty[baseTop], 1);
     assert.equal(baseQty.upright_49_5, 4);

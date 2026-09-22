@@ -126,8 +126,6 @@ Sözleşme: `CATALOG.md`. `catalog_visible=true` ⇒ `category_id` + `catalog_it
 |---|---|---|---|---|
 | `material` | `material` | Üretim malzemesi metni | Vitrin yan/yatay `sunta` zorunlu | `getShowcaseBodyDefinition`; cam raf `getMaterialAppearance` |
 | `default_color` | `defaultColor` | Integer hex (örn. `16777215` = beyaz). String değil. | İlk yüzey rengi; zemin de aynı kolon + `paintable` | `designState.js` hex; `scene3d.js` floor `item.defaultColor`; vitrin yan=yatay kilit |
-| `panel_role` | `panelRole` | `straight` / `inner-corner` | Panel sınıf etiketi; BOM child değiştirmez | **DATA + item contract test.** Production `src/` okumaz. |
-| `connector_type` | `connectorType` | `start` / `single` / `double` / `corner` | Aparat türü kaydı | **DATA.** Production BOM `composition.items[].itemKey`. `getConnectorItemKey` TEST_ONLY. |
 | `preserve_model_scale` | `preserveModelScale` | GLB ölçeğini ezme | Fit istemeyen saksı/çöp | `scene3d.js` model load; `designState.js` |
 | `model_rotation_y_deg` | `modelRotationYDeg` | Mesh Y ofset | GLB eksen | `scene3d.js`; `designState.js` |
 | `visual_rotation_y_deg` | `visualRotationYDeg` | Görsel Y ofset | Koltuk sırt / çöp | `scene3d.js` (sahne Z değil) |
@@ -169,7 +167,6 @@ CHECK: `is_render=false` iken tüm `accepts_*` false.
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
 | `composition_mode` | `composition.mode` | Yalnız `recipe` (CHECK) | BOM expand kapısı | `itemBom.js` `resolveRecipe` |
-| `composition_module_type` | `composition.moduleType` | Eski recipe type etiketi | **DEPRECATED (SCHEMA_ONLY)** — `ITEMS.md` DECISION-06; production `src/` okumaz | mapper + seed dump |
 
 ---
 
@@ -253,7 +250,7 @@ Recipe child listesi → JSON `composition.items[]`. Parent ≠ child. `quantity
 |---|---|---|---|---|
 | `parent_item_key` | — | Parent | — | — |
 | `rows` / `cols` | `videoWall.rows` / `cols` | Panel ızgara | Seam mesh | `scene3d.js` TV wall; `designState.js` |
-| `panel_item_key` | `videoWall.panelItemKey` | `VIDEO_WALL_PANEL` | Gizli panel SKU | `items.js` video-wall ölçü |
+| `panel_item_key` | `videoWall.panelItemKey` | `video_wall_panel` | Gizli panel SKU | `items.js` video-wall ölçü |
 
 ---
 
@@ -355,16 +352,15 @@ Kayıt durur; mapper bootstrap’a yazar (asset unused rolleri hariç).
 
 | Kolon | Durum |
 |---|---|
-| `fair_stand_items.panel_role` | DATA + contract test |
-| `fair_stand_items.connector_type` | DATA; BOM `composition.items` |
-| `fair_stand_items.composition_module_type` | SCHEMA_ONLY |
 | asset `catalog_image` / `thumbnail` / `texture` | CHECK izin; seed/mapper yok |
 
 ---
 
 ## Bilerek burada olmayanlar
 
-Collision / magneticSnap / moveSnapCm / ghost: hâlâ `TYPE_BEHAVIORS` (`type`). Item kolon değil.
+Ertelenmiş kararlar, tavan/şerit kaldırma sırası, Item property backlog: `PENDING_ITEM_DECISIONS.md`.
+
+Collision / magneticSnap / moveSnapCm / ghost: hâlâ `TYPE_BEHAVIORS` (`type`). Item kolon değil — taşıma kuyruğu aynı dosyada § C.3.
 
 Runtime instance alanları (`placement.xCm/yCm/zCm/rotationZDeg`, `rotationLocked`, yüzey ezmeleri): catalog Item kolonu değil; **`fair_stand_projects.payload` JSONB** içinde yaşar (SoT sunucu). IndexedDB aynı blob’un önbelleğidir.
 

@@ -14,7 +14,7 @@ test('plastic trash bin owns centered two-line ÇÖP KOVASI top label', () => {
   assert.match(source, /role = 'plastic-trash-bin-top-label'/);
   assert.match(source, /label\.rotation\.z = Math\.PI \/ 2/);
   assert.match(source, /trashVisualGroup\.userData\.role = 'plastic-trash-bin-visual'/);
-  assert.equal(getItem('PLASTIC_TRASH_BIN').visualRotationYDeg, -90);
+  assert.equal(getItem('plastic_trash_bin').visualRotationYDeg, -90);
   assert.match(source, /moduleState\.visualRotationYDeg \?\? item\.visualRotationYDeg/);
   assert.match(source, /trashVisualGroup\.rotation\.y = THREE\.MathUtils\.degToRad\(visualRotationYDeg\)/);
   assert.doesNotMatch(source, /trashVisualGroup\.rotation\.y = -Math\.PI \/ 2/);

@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.integrations.kyrox_core.auth import AuthContext
@@ -9,6 +9,10 @@ from app.modules.fair_stand.api.dependencies import (
     PERMISSION_CATALOG_CREATE,
     PERMISSION_CATALOG_READ,
     PERMISSION_CATALOG_UPDATE,
+    PERMISSION_ITEMS_ARCHIVE,
+    PERMISSION_ITEMS_CREATE,
+    PERMISSION_ITEMS_READ,
+    PERMISSION_ITEMS_UPDATE,
     PERMISSION_PREVIEWS_ARCHIVE,
     PERMISSION_PREVIEWS_CREATE,
     PERMISSION_PREVIEWS_READ,
@@ -16,6 +20,7 @@ from app.modules.fair_stand.api.dependencies import (
     PERMISSION_SETTINGS_READ,
     PERMISSION_SETTINGS_UPDATE,
     get_admin_catalog_service,
+    get_admin_items_service,
     get_admin_settings_service,
     get_catalog_bootstrap_use_case,
     get_item_use_case,
@@ -24,6 +29,7 @@ from app.modules.fair_stand.api.dependencies import (
     require_permission,
 )
 from app.modules.fair_stand.application.admin_catalog import AdminCatalogService, CatalogAdminError
+from app.modules.fair_stand.application.admin_items import AdminItemsService, ItemAdminError
 from app.modules.fair_stand.application.admin_settings import AdminSettingsService, SettingsAdminError
 from app.modules.fair_stand.application.get_catalog_bootstrap import GetCatalogBootstrapUseCase
 from app.modules.fair_stand.application.item_mapper import runtime_settings_payload, stand_dimensions_payload
@@ -100,7 +106,7 @@ def _preview_kind_payload(preview) -> dict[str, Any]:
     }
 
 
-def _raise_admin(exc: CatalogAdminError | SettingsAdminError) -> None:
+def _raise_admin(exc: CatalogAdminError | SettingsAdminError | ItemAdminError) -> None:
     raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
 
 
@@ -371,5 +377,104 @@ def admin_update_runtime_settings(
             import_button_visible=body.import_button_visible,
         )
     except SettingsAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.get("/admin/item-records")
+def admin_list_item_records(
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_READ)),
+    service: AdminItemsService = Depends(get_admin_items_service),
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100, alias="pageSize")] = 25,
+    search: Annotated[str | None, Query()] = None,
+    sort_by: Annotated[str | None, Query(alias="sort_by")] = None,
+    sort_order: Annotated[str | None, Query(alias="sort_order")] = None,
+    status_filter: Annotated[str | None, Query(alias="status")] = None,
+    catalog: Annotated[str | None, Query()] = None,
+    render: Annotated[str | None, Query()] = None,
+    item_type: Annotated[str | None, Query(alias="type")] = None,
+) -> dict[str, Any]:
+    _ = auth
+    return service.list_item_records(
+        page=page,
+        page_size=page_size,
+        search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        status=status_filter,
+        catalog=catalog,
+        render=render,
+        item_type=item_type,
+    )
+
+
+@router.get("/admin/item-records/{item_key}")
+def admin_get_item_record(
+    item_key: str,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_READ)),
+    service: AdminItemsService = Depends(get_admin_items_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.get_item(item_key)
+    except ItemAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/item-records", status_code=status.HTTP_201_CREATED)
+def admin_create_item_record(
+    body: dict[str, Any],
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_CREATE)),
+    service: AdminItemsService = Depends(get_admin_items_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.create_item(body)
+    except ItemAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.put("/admin/item-records/{item_key}")
+def admin_update_item_record(
+    item_key: str,
+    body: dict[str, Any],
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_UPDATE)),
+    service: AdminItemsService = Depends(get_admin_items_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.update_item(item_key, body)
+    except ItemAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/item-records/{item_key}/archive")
+def admin_archive_item_record(
+    item_key: str,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_ARCHIVE)),
+    service: AdminItemsService = Depends(get_admin_items_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.archive_item(item_key)
+    except ItemAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/item-records/{item_key}/restore")
+def admin_restore_item_record(
+    item_key: str,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_ARCHIVE)),
+    service: AdminItemsService = Depends(get_admin_items_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.restore_item(item_key)
+    except ItemAdminError as exc:
         _raise_admin(exc)
         raise

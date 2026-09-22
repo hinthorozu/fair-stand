@@ -10,10 +10,10 @@ import { canModulesOverlapByBehavior, getModuleBehavior, getModuleRotationStepDe
 import { placementsOverlap } from '../src/modulePlacement.js';
 
 test('kettle catalog and state stay aligned', () => {
-  const catalog = getCatalogItem('KETTLE');
-  const item = getItem('KETTLE');
+  const catalog = getCatalogItem('kettle');
+  const item = getItem('kettle');
   const state = createKettleModuleState();
-  assert.equal(catalog.itemKey, 'KETTLE');
+  assert.equal(catalog.itemKey, 'kettle');
   assert.deepEqual([item.dimensions.widthCm, item.dimensions.depthCm, item.dimensions.heightCm], [24, 19, 25]);
   assert.equal(item.defaultZCm, 66);
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [24, 19, 25]);
@@ -24,7 +24,7 @@ test('kettle keeps its declared free-positioned collision contract', () => {
   assert.equal(behavior.placement, 'free');
   assert.equal(behavior.collision, 'none');
   assert.equal(behavior.magneticSnap, 'none');
-  assert.equal(getModuleRotationStepDeg({ itemKey: 'KETTLE' }), 90);
+  assert.equal(getModuleRotationStepDeg({ itemKey: 'kettle' }), 90);
   assert.deepEqual(behavior.overlapWithTypes, ['mini-fridge']);
 });
 

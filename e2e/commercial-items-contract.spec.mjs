@@ -46,7 +46,7 @@ async function saveAndReadProject(page) {
 }
 
 
-const keys = ['COAT_RACK', 'KETTLE', 'MINI_FRIDGE_AVANTI', 'PLASTIC_TRASH_BIN'];
+const keys = ['coat_rack', 'kettle', 'mini_fridge_avanti', 'plastic_trash_bin'];
 for (const itemKey of keys) {
   test(`${itemKey} catalog drag creates a canonical Item`, async ({ page }) => {
     const errors = [];

@@ -59,7 +59,6 @@ test('straight panel production Items use canonical itemKey with verified metada
     assert.equal(item.type, 'panel');
     assert.equal(item.unit, 'adet');
     assert.deepEqual(item.dimensions, metadata.dimensions);
-    assert.equal(item.panelRole, 'straight');
     assert.equal(item.nominalModuleWidthCm, undefined);
   }
 });
@@ -96,7 +95,7 @@ test('expanded recipes resolve straight panel metadata through canonical itemKey
     assert.equal(panel.part.itemKey, itemKey);
     assert.equal(panel.part.partId, undefined);
     assert.equal(panel.part.type, 'panel');
-    assert.equal(panel.part.panelRole, 'straight');
+    assert.deepEqual(panel.part.dimensions, getItem(itemKey).dimensions);
   }
 });
 

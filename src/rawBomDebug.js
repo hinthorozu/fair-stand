@@ -7,9 +7,9 @@ const sidebar = typeof document !== 'undefined' ? document.querySelector('.sideb
 const SUPPORTED_L_COUNTER_WIDTHS = new Set([100, 150, 200]);
 
 const L_COUNTER_ITEM_KEYS = Object.freeze({
-  100: 'desk_banko_100_L',
-  150: 'desk_banko_150_L',
-  200: 'desk_banko_200_L',
+  100: 'desk_banko_100_l',
+  150: 'desk_banko_150_l',
+  200: 'desk_banko_200_l',
 });
 
 const SHOWCASE_ITEM_KEYS = Object.freeze({
@@ -29,9 +29,9 @@ const COUNTER_ITEM_KEYS = Object.freeze({
 });
 
 const BASE_ITEM_KEYS = Object.freeze({
-  100: 'BASE_100',
-  150: 'BASE_150',
-  200: 'BASE_200',
+  100: 'base_100',
+  150: 'base_150',
+  200: 'base_200',
 });
 
 const WALL_ITEM_KEYS = Object.freeze({

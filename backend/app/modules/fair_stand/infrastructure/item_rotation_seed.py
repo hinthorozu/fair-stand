@@ -41,9 +41,9 @@ _SPECIAL = {
     "desk_banko_100": (45, 0, "inherit"),
     "desk_banko_150": (45, 0, "inherit"),
     "desk_banko_200": (45, 0, "inherit"),
-    "desk_banko_100_L": (90, 270, "inherit"),
-    "desk_banko_150_L": (90, 270, "inherit"),
-    "desk_banko_200_L": (90, 270, "inherit"),
+    "desk_banko_100_l": (90, 270, "inherit"),
+    "desk_banko_150_l": (90, 270, "inherit"),
+    "desk_banko_200_l": (90, 270, "inherit"),
     "furniture_sofa_single_classic": (45, 0, "inherit"),
     "furniture_bar_stool_classic": (45, 270, "default"),
 }

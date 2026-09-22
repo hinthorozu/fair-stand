@@ -7,9 +7,9 @@ export function recipeParentItemKey(moduleType, widthCm, options = {}) {
   if (moduleType === 'showcase-2') return 'wall_showcase_100_2';
   if (moduleType === 'showcase-3') return 'wall_showcase_100_3';
   if (moduleType === 'separator') return `wall_separator_${widthCm}`;
-  if (moduleType === 'counter' && options.shape === 'L') return `desk_banko_${widthCm}_L`;
+  if (moduleType === 'counter' && options.shape === 'L') return `desk_banko_${widthCm}_l`;
   if (moduleType === 'counter') return `desk_banko_${widthCm}`;
-  if (moduleType === 'base') return `BASE_${widthCm}`;
+  if (moduleType === 'base') return `base_${widthCm}`;
   if (moduleType === 'wall-short-up-1') return `wall_${widthCm}_short_up_1`;
   if (moduleType === 'wall-short-up-2') return `wall_${widthCm}_short_up_2`;
   return null;

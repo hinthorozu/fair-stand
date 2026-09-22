@@ -55,7 +55,7 @@ test('Kaydet → tarayıcı yenile → Aç önceki item identity ve placement’
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
   await createIslandStand(page, 'E2E Reload Restore');
-  const card = await openCatalogCard(page, 'MINI_FRIDGE_AVANTI');
+  const card = await openCatalogCard(page, 'mini_fridge_avanti');
   const viewport = page.locator('#viewport');
   const box = await viewport.boundingBox();
   await card.dragTo(viewport, {
@@ -67,7 +67,7 @@ test('Kaydet → tarayıcı yenile → Aç önceki item identity ve placement’
 
   const before = await saveAndReadProject(page);
   expect(before).not.toBeNull();
-  const fridgeBefore = before.modules.find((moduleState) => moduleState.itemKey === 'MINI_FRIDGE_AVANTI');
+  const fridgeBefore = before.modules.find((moduleState) => moduleState.itemKey === 'mini_fridge_avanti');
   expect(fridgeBefore).toBeTruthy();
   expect(fridgeBefore.placement.wallId).toBe('free');
 

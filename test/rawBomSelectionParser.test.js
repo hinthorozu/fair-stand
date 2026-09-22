@@ -21,9 +21,9 @@ function lCounterSelectionMessage(widthCm, surfaceRole = 'front') {
 }
 
 const CASES = [
-  [100, 'desk_banko_100_L'],
-  [150, 'desk_banko_150_L'],
-  [200, 'desk_banko_200_L'],
+  [100, 'desk_banko_100_l'],
+  [150, 'desk_banko_150_l'],
+  [200, 'desk_banko_200_l'],
 ];
 
 test('selection feedback -> Raw BOM parser -> expanded recipe resolves all supported L counters', () => {

@@ -29,25 +29,21 @@ test('connector_start remains a canonical single Item', () => {
   assert.equal(item.itemKey, 'connector_start');
   assert.equal(item.partId, undefined);
   assert.equal(item.type, 'connector');
-  assert.equal(item.connectorType, 'start');
   assert.equal(item.unit, 'adet');
 });
 
 
 test('all four connector production definitions use canonical itemKey identity', () => {
-  const expectedTypes = {
-    connector_start: 'start',
-    connector_single: 'single',
-    connector_double: 'double',
-    connector_corner: 'corner',
-  };
-
-  for (const [itemKey, connectorType] of Object.entries(expectedTypes)) {
+  for (const itemKey of [
+    'connector_start',
+    'connector_single',
+    'connector_double',
+    'connector_corner',
+  ]) {
     const item = getItem(itemKey);
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.partId, undefined);
     assert.equal(item.type, 'connector');
-    assert.equal(item.connectorType, connectorType);
     assert.equal(item.unit, 'adet');
   }
 });

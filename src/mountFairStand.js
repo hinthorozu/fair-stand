@@ -7,8 +7,8 @@ import { setFairStandHostDocument } from './hostDocument.js';
 import { startFairStandConfigurator } from './main.js';
 
 const TRASH_BIN_PREVIEW_CSS = `
-.module-drag-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel,
-.module-catalog-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel {
+.module-drag-card[data-module-key="plastic_trash_bin"] .module-drag-panel,
+.module-catalog-card[data-module-key="plastic_trash_bin"] .module-drag-panel {
   position: relative;
   display: block;
   width: 34px !important;
@@ -19,12 +19,12 @@ const TRASH_BIN_PREVIEW_CSS = `
   box-sizing: border-box;
   box-shadow: 3px 3px 0 #b8c0c9;
 }
-.module-drag-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel span,
-.module-catalog-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel span {
+.module-drag-card[data-module-key="plastic_trash_bin"] .module-drag-panel span,
+.module-catalog-card[data-module-key="plastic_trash_bin"] .module-drag-panel span {
   display: none;
 }
-.module-drag-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel::before,
-.module-catalog-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel::before {
+.module-drag-card[data-module-key="plastic_trash_bin"] .module-drag-panel::before,
+.module-catalog-card[data-module-key="plastic_trash_bin"] .module-drag-panel::before {
   content: '';
   position: absolute;
   left: -5px;
@@ -36,8 +36,8 @@ const TRASH_BIN_PREVIEW_CSS = `
   background: #aeb6c0;
   box-sizing: border-box;
 }
-.module-drag-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel::after,
-.module-catalog-card[data-module-key="DEPOT_PLASTIC_TRASH_BIN"] .module-drag-panel::after {
+.module-drag-card[data-module-key="plastic_trash_bin"] .module-drag-panel::after,
+.module-catalog-card[data-module-key="plastic_trash_bin"] .module-drag-panel::after {
   content: '';
   position: absolute;
   left: 6px;

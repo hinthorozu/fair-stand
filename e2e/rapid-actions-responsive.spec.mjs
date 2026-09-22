@@ -69,12 +69,12 @@ test('art arda ekle / sil / ekle state’i bozmaz', async ({ page }) => {
   page.on('pageerror', (error) => pageErrors.push(error.message));
   await createIslandStand(page, 'E2E Rapid Add Delete');
 
-  await dragToViewport(page, 'MINI_FRIDGE_AVANTI', 0.52, 0.82);
-  await dragToViewport(page, 'COAT_RACK', 0.52, 0.82);
+  await dragToViewport(page, 'mini_fridge_avanti', 0.52, 0.82);
+  await dragToViewport(page, 'coat_rack', 0.52, 0.82);
 
   let project = await saveAndReadProject(page);
-  const fridge = project.modules.find((moduleState) => moduleState.itemKey === 'MINI_FRIDGE_AVANTI');
-  const rack = project.modules.find((moduleState) => moduleState.itemKey === 'COAT_RACK');
+  const fridge = project.modules.find((moduleState) => moduleState.itemKey === 'mini_fridge_avanti');
+  const rack = project.modules.find((moduleState) => moduleState.itemKey === 'coat_rack');
   expect(fridge).toBeTruthy();
   expect(rack).toBeTruthy();
 
@@ -89,9 +89,9 @@ test('art arda ekle / sil / ekle state’i bozmaz', async ({ page }) => {
   expect(project.modules.some((moduleState) => moduleState.id === fridge.id)).toBe(false);
   expect(project.modules.some((moduleState) => moduleState.id === rack.id)).toBe(true);
 
-  await dragToViewport(page, 'MINI_FRIDGE_AVANTI', 0.44, 0.80);
+  await dragToViewport(page, 'mini_fridge_avanti', 0.44, 0.80);
   project = await saveAndReadProject(page);
-  expect(project.modules.filter((moduleState) => moduleState.itemKey === 'MINI_FRIDGE_AVANTI')).toHaveLength(1);
+  expect(project.modules.filter((moduleState) => moduleState.itemKey === 'mini_fridge_avanti')).toHaveLength(1);
   expect(project.modules.some((moduleState) => moduleState.id === rack.id)).toBe(true);
   await expect(page.locator('#viewport > canvas')).toHaveCount(1);
   expect(pageErrors).toEqual([]);
@@ -101,15 +101,15 @@ test('Sahneyi Sıfırla sonrası yeni item eklenebilir', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
   await createIslandStand(page, 'E2E Reset Then Add');
-  await dragToViewport(page, 'KETTLE', 0.52, 0.82);
+  await dragToViewport(page, 'kettle', 0.52, 0.82);
 
   await page.locator('#clear-wall').click();
   await expect(page.locator('#stage-result')).toContainText('Ada Stand · 500 × 500 cm');
 
-  await dragToViewport(page, 'MINI_FRIDGE_AVANTI', 0.52, 0.82);
+  await dragToViewport(page, 'mini_fridge_avanti', 0.52, 0.82);
   const project = await saveAndReadProject(page);
-  expect(project.modules.some((moduleState) => moduleState.itemKey === 'MINI_FRIDGE_AVANTI')).toBe(true);
-  expect(project.modules.some((moduleState) => moduleState.itemKey === 'KETTLE')).toBe(false);
+  expect(project.modules.some((moduleState) => moduleState.itemKey === 'mini_fridge_avanti')).toBe(true);
+  expect(project.modules.some((moduleState) => moduleState.itemKey === 'kettle')).toBe(false);
   expect(pageErrors).toEqual([]);
 });
 

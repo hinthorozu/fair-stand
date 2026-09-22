@@ -10,14 +10,14 @@ import { getItem } from '../src/items.js';
 import { getModuleBehavior } from '../src/moduleBehavior.js';
 
 test('Yapay Çiçek 1 is the only active artificial plant inside Extra', () => {
-  assert.deepEqual(getCatalogItem('EXTRA_INDOOR_PLANT_1'), {
-    itemKey: 'EXTRA_INDOOR_PLANT_1',
+  assert.deepEqual(getCatalogItem('extra_indoor_plant_1'), {
+    itemKey: 'extra_indoor_plant_1',
     label: 'Yapay Çiçek 1',
     previewId: 12,
   });
   assert.equal(getCatalogItem('EXTRA_INDOOR_PLANT_2'), null);
   const extra = listCatalogGroups().find((group) => group.label === 'Extra');
-  assert.ok(extra?.keys.includes('EXTRA_INDOOR_PLANT_1'));
+  assert.ok(extra?.keys.includes('extra_indoor_plant_1'));
   assert.equal(extra?.keys.includes('EXTRA_INDOOR_PLANT_2'), false);
 });
 
@@ -33,14 +33,14 @@ test('only Yapay Çiçek 1 is wired and the removed second GLB stays absent', ()
   assert.ok(existsSync(new URL('../public/models/indoor_plants.glb', import.meta.url)));
   assert.equal(existsSync(new URL('../public/models/indoor_plants2.glb', import.meta.url)), false);
 
-  const canonicalState = createModuleStateFromDescriptor(getCatalogItem('EXTRA_INDOOR_PLANT_1'), {
-    itemKey: 'EXTRA_INDOOR_PLANT_1',
+  const canonicalState = createModuleStateFromDescriptor(getCatalogItem('extra_indoor_plant_1'), {
+    itemKey: 'extra_indoor_plant_1',
   });
   assert.ok(canonicalState);
   assert.equal(canonicalState.type, 'indoor-plant-1');
-  assert.equal(canonicalState.itemKey, 'EXTRA_INDOOR_PLANT_1');
+  assert.equal(canonicalState.itemKey, 'extra_indoor_plant_1');
 
-  assert.equal(getItem('EXTRA_INDOOR_PLANT_1').modelFile, 'indoor_plants.glb');
+  assert.equal(getItem('extra_indoor_plant_1').modelFile, 'indoor_plants.glb');
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   assert.doesNotMatch(scene, /indoor_plants\.glb/);
   assert.doesNotMatch(scene, /indoor_plants2\.glb/);

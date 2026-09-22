@@ -191,7 +191,7 @@ test('catalogVisible yalnız Catalog üyeliği içindir; src runtime domainleri 
 });
 
 test('catalogVisible=false Item runtime’da yok demek değildir', () => {
-  const hiddenKeys = ['panel_197', 'upright_99', 'illuminated-foam', 'VIDEO_WALL_PANEL'];
+  const hiddenKeys = ['panel_197', 'upright_99', 'illuminated-foam', 'video_wall_panel'];
   for (const itemKey of hiddenKeys) {
     const item = getItem(itemKey);
     assert.ok(item, itemKey);
@@ -231,10 +231,10 @@ test('gizli Item’ın contract yokluğu Catalog gizliliğinden değil assignmen
 });
 
 test('AutoDepot includeContents çıktısı Item.dimensions regression’ı ile birebir aynıdır', () => {
-  const fridge = getItem('MINI_FRIDGE_AVANTI').dimensions;
-  const rack = getItem('COAT_RACK').dimensions;
-  const kettle = getItem('KETTLE').dimensions;
-  const trash = getItem('PLASTIC_TRASH_BIN');
+  const fridge = getItem('mini_fridge_avanti').dimensions;
+  const rack = getItem('coat_rack').dimensions;
+  const kettle = getItem('kettle').dimensions;
+  const trash = getItem('plastic_trash_bin');
 
   const plan = planAutomaticDepot({
     standType: 'island',
@@ -250,13 +250,13 @@ test('AutoDepot includeContents çıktısı Item.dimensions regression’ı ile 
   const fridgeSpec = plan.specs.find((spec) => spec.kind === 'mini-fridge');
   const rackSpec = plan.specs.find((spec) => spec.kind === 'coat-rack');
   const kettleSpec = plan.specs.find((spec) => spec.kind === 'kettle');
-  const trashSpec = plan.specs.find((spec) => spec.itemKey === 'PLASTIC_TRASH_BIN');
+  const trashSpec = plan.specs.find((spec) => spec.itemKey === 'plastic_trash_bin');
 
   assert.deepEqual([fridgeSpec.widthCm, fridgeSpec.depthCm], [fridge.widthCm, fridge.depthCm]);
   assert.deepEqual([rackSpec.widthCm, rackSpec.depthCm], [rack.widthCm, rack.depthCm]);
   assert.deepEqual([kettleSpec.widthCm, kettleSpec.depthCm], [kettle.widthCm, kettle.depthCm]);
-  assert.equal(kettleSpec.itemKey, 'KETTLE');
-  assert.equal(kettleSpec.placement.zCm, getItem('KETTLE').defaultZCm);
+  assert.equal(kettleSpec.itemKey, 'kettle');
+  assert.equal(kettleSpec.placement.zCm, getItem('kettle').defaultZCm);
   assert.deepEqual(
     [trashSpec.widthCm, trashSpec.depthCm, trashSpec.heightCm],
     [trash.dimensions.widthCm, trash.dimensions.depthCm, trash.dimensions.heightCm],

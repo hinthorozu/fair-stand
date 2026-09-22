@@ -34,7 +34,7 @@ test('itemCapabilities reads Item accepts* columns, not type maps', () => {
   assert.equal(itemSurfaceAcceptsImage(getItem('desk_banko_100')), true);
   assert.equal(getItemSurfaceCapabilities(getItem('desk_banko_100')).glass, false);
   assert.equal(itemSurfaceAcceptsImage(getItem('showcase_side_94_6_30')), false);
-  assert.equal(itemSurfaceAcceptsImage(getItem('TV_42')), false);
+  assert.equal(itemSurfaceAcceptsImage(getItem('tv_42')), false);
   assert.equal(getItemSurfaceCapabilities(getItem('connector_start')).color, false);
   assert.equal(getItemSurfaceCapabilities(getItem('door_leaf_100')).image, true);
   assert.equal(getItemSurfaceCapabilities(getItem('door_leaf_100')).glass, false);

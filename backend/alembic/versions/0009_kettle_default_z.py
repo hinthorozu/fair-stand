@@ -21,4 +21,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     from sqlalchemy import text
 
-    op.get_bind().execute(text("UPDATE fair_stand_items SET default_z_cm = 0 WHERE item_key = 'KETTLE'"))
+    op.get_bind().execute(text("UPDATE fair_stand_items SET default_z_cm = 0 WHERE item_key = 'kettle'"))

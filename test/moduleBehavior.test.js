@@ -19,7 +19,7 @@ test('straight 100/150/200 counters use 45 degree rotation steps', () => {
   for (const widthCm of [100, 150, 200]) {
     assert.equal(getModuleRotationStepDeg({ itemKey: `desk_banko_${widthCm}` }), 45);
   }
-  assert.equal(getModuleRotationStepDeg({ itemKey: 'desk_banko_150_L' }), 90);
+  assert.equal(getModuleRotationStepDeg({ itemKey: 'desk_banko_150_l' }), 90);
 });
 
 test('Bar Taburesi standard keeps 10 cm snap, 45 degree turns and 270 default', () => {

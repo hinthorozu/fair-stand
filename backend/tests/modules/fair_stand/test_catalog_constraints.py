@@ -142,7 +142,6 @@ def test_self_component_rejected(db_session):
             parent_item_key="self_parent",
             child_item_key="self_parent",
             quantity=Decimal("1"),
-            sort_order=0,
         )
     )
     with pytest.raises(IntegrityError):
@@ -158,7 +157,6 @@ def test_quantity_must_be_positive(db_session):
             parent_item_key="parent_a",
             child_item_key="child_b",
             quantity=Decimal("0"),
-            sort_order=0,
         )
     )
     with pytest.raises(IntegrityError):

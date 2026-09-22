@@ -11,13 +11,13 @@ import {
 } from './recipeParentItemKey.js';
 import { getItem } from '../src/items.js';
 
-test('desk_banko_200_L is a 200 x 200 catalog module', () => {
-  assert.deepEqual(getCatalogItem('desk_banko_200_L'), {
-    itemKey: 'desk_banko_200_L',
+test('desk_banko_200_l is a 200 x 200 catalog module', () => {
+  assert.deepEqual(getCatalogItem('desk_banko_200_l'), {
+    itemKey: 'desk_banko_200_l',
     label: 'Köşe Banko 200×200',
     previewId: 7,
   });
-  assert.ok(getCatalogItem('desk_banko_200_L') != null);
+  assert.ok(getCatalogItem('desk_banko_200_l') != null);
 });
 
 test('200 L counter state keeps 200 cm physical depth and eight editable faces', () => {
@@ -39,7 +39,7 @@ test('200 L renderer is 200 x 200 with a 50 cm arm and 150 cm return extension',
 
 test('200 L counter BOM remains separate from renderer geometry', () => {
   const recipe = getModuleRecipe('counter', 200, { shape: 'L' });
-  assert.equal(recipe.recipeId, 'desk_banko_200_L');
+  assert.equal(recipe.recipeId, 'desk_banko_200_l');
   assert.deepEqual(recipe.items.map((item) => [item.itemKey ?? item.partId, item.quantity]), [
     ['profile_190', 5], ['profile_140_5', 1], ['profile_41_5', 4], ['upright_99', 5],
     ['panel_197', 4], ['panel_48_5', 4], ['connector_start', 8], ['connector_single', 16],

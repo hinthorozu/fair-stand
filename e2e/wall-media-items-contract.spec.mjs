@@ -40,11 +40,11 @@ async function saveAndReadProject(page) {
 }
 
 const expected = {
-  TV_42: { videoWallRows: 1, videoWallCols: 1 },
-  TV_55: { videoWallRows: 1, videoWallCols: 1 },
-  TV_65: { videoWallRows: 1, videoWallCols: 1 },
-  VIDEO_WALL_2X2: { videoWallRows: 2, videoWallCols: 2 },
-  VIDEO_WALL_3X3: { videoWallRows: 3, videoWallCols: 3 },
+  tv_42: { videoWallRows: 1, videoWallCols: 1 },
+  tv_55: { videoWallRows: 1, videoWallCols: 1 },
+  tv_65: { videoWallRows: 1, videoWallCols: 1 },
+  video_wall_2x2: { videoWallRows: 2, videoWallCols: 2 },
+  video_wall_3x3: { videoWallRows: 3, videoWallCols: 3 },
 };
 
 for (const itemKey of Object.keys(expected)) {

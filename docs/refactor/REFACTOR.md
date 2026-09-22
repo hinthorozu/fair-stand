@@ -7,6 +7,7 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 - Stand zarfı: `docs/refactor/STAND_DIMENSIONS.md`
 - Rotation: `docs/refactor/ROTATION.md`
 - PostgreSQL tabloları: `docs/refactor/DATABASE.md`
+- Ertelenmiş kararlar / backlog (tavan–şerit kaldırma sırası, Item property, TYPE_BEHAVIORS kuyruğu): `docs/refactor/PENDING_ITEM_DECISIONS.md`
 
 ---
 
@@ -24,7 +25,19 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ## 2026-09-21 — DB tablo/kolon envanteri
 
-Canonical: `docs/refactor/DATABASE.md`. 13 tablo; her kolon nedir / neden / nerede. Çapraz: `models.py` + `item_mapper.py` + production `src/` + `ITEMS.md` / `CATALOG.md` / `ROTATION.md` / `SCENE_POSE.md` / `STAND_DIMENSIONS.md`. Production okumayan kolonlar (`panel_role`, `connector_type` BOM yolu, `composition_module_type`, kullanılmayan asset rolleri) açık yazılır. Değer kopyası değil.
+Canonical: `docs/refactor/DATABASE.md`. 13 tablo; her kolon nedir / neden / nerede. Çapraz: `models.py` + `item_mapper.py` + production `src/` + `ITEMS.md` / `CATALOG.md` / `ROTATION.md` / `SCENE_POSE.md` / `STAND_DIMENSIONS.md`. Production okumayan kolonlar (kullanılmayan asset rolleri) açık yazılır. Değer kopyası değil.
+
+---
+
+## 2026-09-22 — `connector_type` kaldırıldı
+
+`fair_stand_items.connector_type` / JSON `connectorType` silindi (migration `0016_drop_connector_type`). TEST_ONLY `getConnectorItemKey` / `resolveConnectorBom` ve `test/connectorBom.test.js` de kalktı (katalog kolonunu okumuyorlardı; sabit map). Production BOM zaten `composition.items[].itemKey` (`connector_start` vb.). Dört connector Item kimliği durur.
+
+---
+
+## 2026-09-22 — `panel_role` kaldırıldı
+
+`fair_stand_items.panel_role` / JSON `panelRole` silindi (migration `0015_drop_panel_role`). Eski inner-corner BOM swap etiketiydi; production `src/` okumuyordu. Seed, mapper, admin UI, contract assert’leri temizlendi. `panel_corner_*` Item kimlikleri durur.
 
 ---
 
@@ -44,7 +57,7 @@ JS sabiti kalktı. Canonical: `docs/refactor/STAND_DIMENSIONS.md`.
 
 `nominalModuleWidthCm` / `nominal_module_width_cm` runtime, seed, API ve DB kolonundan silindi. `composition.innerCorner`, `panelVariant: 'inner-corner'` ve inner-corner replacement tabloları kaldırıldı. `expandRecipe` yalnız `composition.items` döner. Eski bootstrap payload’da bu alanlar görülürse registry onları düşürür; BOM değişmez.
 
-Korunan: 96 `itemKey`, `panel_corner_*` Item kayıtları, `panelRole`, fiziksel `dimensions` / `sceneDimensions`, normal `wall_200` → `panel_197` × 7. Yeni köşe-duyarlı BOM eklenmedi.
+Korunan: 96 `itemKey`, `panel_corner_*` Item kayıtları, fiziksel `dimensions` / `sceneDimensions`, normal `wall_200` → `panel_197` × 7. Yeni köşe-duyarlı BOM eklenmedi.
 
 ---
 
@@ -228,7 +241,7 @@ kayıtlı Item 96; catalogVisible=true 58; gizli 38 (`VIDEO_WALL_PANEL` dahil); 
 
 Silinen Item: `wall_base_100`, `wall_base_150`, `wall_base_200` (Panel Bazalı 100 / 150 / 200).
 
-Dokunulmayan: `BASE_100` / `BASE_150` / `BASE_200`, leaf `base_top_107_50` / `base_top_157_50` / `base_top_206_50`, `profile_*` / `upright_*` / `panel_*` / `connector_*`, shelf tarafı, genel `base-wall` type/renderer/preview.
+Dokunulmayan: `base_100` / `base_150` / `base_200`, leaf `base_top_107_50` / `base_top_157_50` / `base_top_206_50`, `profile_*` / `upright_*` / `panel_*` / `connector_*`, shelf tarafı, genel `base-wall` type/renderer/preview.
 
 ### Dead code (yalnız bu 3 Item’a hizmet ediyordu)
 

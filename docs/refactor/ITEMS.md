@@ -11,7 +11,9 @@ PostgreSQL tabloları: `docs/refactor/DATABASE.md`.
 
 ## Runtime field kuyruğu (şemaya henüz alınmadı)
 
-`listRegisteredItems()` 96 satırında duran alanlar. Bu tablo **onaylı şema değildir**. Zamanla, her alan ayrı kararla aşağıdaki “Zorunlu / opsiyonel / Catalog” bölümlerine alınır.
+Karar verilmiş / ertelenmiş maddeler: `docs/refactor/PENDING_ITEM_DECISIONS.md` (§ B Item, § D kuyruk özeti, § A tavan–şerit sırası).
+
+`listRegisteredItems()` 96 satırında duran alanlar. Bu tablo **onaylı şema değildir**. Zamanla, her alan ayrı kararla aşağıdaki “Zorunlu / opsiyonel / Catalog” bölümlerine alınır veya PENDING’de kapatılır.
 
 `composition.moduleType` ve `composition.options` / `composition.options.shape` **DEPRECATED (SCHEMA_ONLY)** — kayıt durur, production `src/` okumaz, silinmedi (DECISION-06).
 
@@ -44,8 +46,6 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `sceneDimensions.heightCm` | 24 | Effective scene height. |
 | `defaultColor` | 30 | Varsayılan renk (integer hex; DB `default_color`). Zemin de aynı, string değil. |
 | `material` | 34 | Üretim malzemesi metni. Vitrin gövde `sunta` kilidi. |
-| `panelRole` | 8 | `straight` / `inner-corner`. Item sınıflandırması; BOM panel değiştirme yok. |
-| `connectorType` | 4 | Data ACTIVE. `getConnectorItemKey` / `resolveConnectorBom` TEST_ONLY (DECISION-08 STATUS QUO). Production BOM `composition.items[].itemKey`. |
 | `composition` | 30 | Bileşik yapı. |
 | `composition.mode` | 28 | `recipe` → `resolveItemBom`. |
 | `composition.moduleType` | 28 | **DEPRECATED (SCHEMA_ONLY).** Recipe etiket; production okumaz. |
@@ -91,7 +91,7 @@ Ayrıntılı mekanizma sözleşmeleri ayrı dosyadadır. ITEMS.md o dosyaları k
 
 BOM, üretim veya maliyet hesabına girebilen her fiziksel ürün/parça bir **Item**’dır.
 
-Tekil kimlik `itemKey`’dir. Label, GLB dosya adı, renderer node adı veya katalog grubu ürün kimliği değildir.
+Tekil kimlik `itemKey`’dir. Label, GLB dosya adı, renderer node adı veya katalog grubu ürün kimliği değildir. `itemKey` / DB `item_key` **her zaman lowercase** (`snake_case` veya mevcut kebab örneği); uppercase SKU yok.
 
 Item, davranış algoritmasını içermez. Item, canonical mechanism’in okuduğu master veriyi ve config parametrelerini taşır.
 

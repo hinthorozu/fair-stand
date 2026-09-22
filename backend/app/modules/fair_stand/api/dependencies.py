@@ -17,6 +17,7 @@ from app.integrations.kyrox_core.dev_bypass import (
 )
 from app.integrations.kyrox_core.ports import AuthorizationPort
 from app.modules.fair_stand.application.admin_catalog import AdminCatalogService
+from app.modules.fair_stand.application.admin_items import AdminItemsService
 from app.modules.fair_stand.application.admin_settings import AdminSettingsService
 from app.modules.fair_stand.application.get_catalog_bootstrap import GetCatalogBootstrapUseCase
 from app.modules.fair_stand.application.get_item import GetItemUseCase
@@ -35,6 +36,10 @@ PERMISSION_PREVIEWS_UPDATE = "fair_crm.admin.fair_stand.previews.update"
 PERMISSION_PREVIEWS_ARCHIVE = "fair_crm.admin.fair_stand.previews.archive"
 PERMISSION_SETTINGS_READ = "fair_crm.admin.fair_stand.settings.read"
 PERMISSION_SETTINGS_UPDATE = "fair_crm.admin.fair_stand.settings.update"
+PERMISSION_ITEMS_READ = "fair_crm.admin.fair_stand.items.read"
+PERMISSION_ITEMS_CREATE = "fair_crm.admin.fair_stand.items.create"
+PERMISSION_ITEMS_UPDATE = "fair_crm.admin.fair_stand.items.update"
+PERMISSION_ITEMS_ARCHIVE = "fair_crm.admin.fair_stand.items.archive"
 PERMISSION_PROJECTS_READ = "fair_crm.fair_stand.projects.read"
 PERMISSION_PROJECTS_CREATE = "fair_crm.fair_stand.projects.create"
 PERMISSION_PROJECTS_UPDATE = "fair_crm.fair_stand.projects.update"
@@ -67,6 +72,10 @@ def get_admin_catalog_service(
 
 def get_admin_settings_service(db: Session = Depends(get_db)) -> AdminSettingsService:
     return AdminSettingsService(db)
+
+
+def get_admin_items_service(db: Session = Depends(get_db)) -> AdminItemsService:
+    return AdminItemsService(db)
 
 
 def get_project_service(db: Session = Depends(get_db)) -> ProjectService:
