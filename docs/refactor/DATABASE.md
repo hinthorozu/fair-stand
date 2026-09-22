@@ -2,27 +2,31 @@
 
 Lokal / sunucu PostgreSQL `fair_stand` şemasının yaşayan envanteri. “Üç ay sonra bunu niye koyduk?” cevabı buradadır.
 
-**Doğrulama (2026-09-21, lokal Postgres `fair_stand` + `models.py` + `item_mapper.py` + `src/`):**
+**Doğrulama (2026-09-22, `models.py` + Alembic `0012_fair_stand_projects` + `item_mapper.py` + `src/`):**
 
-1. Canlı `information_schema` — 13 tablo; kolon adları `models.py` ile aynı. Alembic head: `0011_archive_button_visibility`.
+1. Şema — 15 tablo; kolon adları `models.py` ile aynı. Alembic head: `0012_fair_stand_projects`.
 2. `item_mapper.py` — her ürün kolonu JSON anahtarına (veya “bootstrap’a girmez”) bağlandı.
 3. Production `src/` grep — “Nerede” hücresi gerçek okuyucu dosyadır; okunmayan kolon **DATA / TEST_ONLY / SCHEMA_ONLY** yazılır.
 4. `ITEMS.md` (alan kuyruğu + onaylı şema), `CATALOG.md`, `ROTATION.md`, `SCENE_POSE.md`, `STAND_DIMENSIONS.md` — değer kopyalanmaz; işaret edilir.
+5. Proje SoT — `fair_stand_projects` / `fair_stand_project_assets` + disk asset kökü; tarayıcı IndexedDB yalnız önbellek (`src/projectRemote.js`).
 
-Satır sayıları bu makinedeki canlı DB (aşağıdaki tabloda). Başka dump’ta adet değişebilir; kolon yok olamaz. Değer SoT bu dosya değildir.
+Satır sayıları (catalog tabloları) bu makinedeki canlı DB envanterinden (2026-09-21). Başka dump’ta adet değişebilir; kolon yok olamaz. Değer SoT bu dosya değildir.
 
 - Model: `backend/app/modules/fair_stand/infrastructure/models.py`
 - Mapper (DB → bootstrap JSON): `backend/app/modules/fair_stand/application/item_mapper.py`
+- Proje servisi: `backend/app/modules/fair_stand/application/projects.py`
+- Asset disk I/O: `backend/app/modules/fair_stand/infrastructure/asset_storage.py`
 - Migrasyon: `backend/alembic/versions/`
-- Okuma: catalog bootstrap → `initializeItemRegistry` / `initializeStandDimensions` / `initializeRuntimeSettings`
+- Okuma (catalog): bootstrap → `initializeItemRegistry` / `initializeStandDimensions` / `initializeRuntimeSettings`
+- Okuma/yazma (proje): `/api/v1/fair-stand/projects` → `projectRemote.js` → IndexedDB cache
 
 Yeni kolon aynı PR’da bu dosyaya yazılır. Kolon yoksa “var” yazılmaz.
 
 ---
 
-## Neden 13 tablo?
+## Neden 15 tablo?
 
-Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 / 1:N parçalar ayrı, Catalog ayrı, stand zarfı Item değil.
+Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 / 1:N parçalar ayrı, Catalog ayrı, stand zarfı Item değil, **müşteri proje örneği** catalog’dan ayrı.
 
 | Tablo | Canlı satır | Neden ayrı |
 |---|---|---|
@@ -39,8 +43,12 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 | `fair_stand_item_body_parts` | 6 (2 parent × 3 rol) | Vitrin gövde child `itemKey`. |
 | `fair_stand_dimensions` | 1 (`id=1`) | Stand zarfı. Item kutusu değil. |
 | `fair_stand_settings` | 1 (`id=1`) | Runtime tavanlar. Item kutusu değil. |
+| `fair_stand_projects` | org başına değişken | Müşteri stand projesi SoT (tek JSONB payload). Catalog Item tablolarından ayrı. |
+| `fair_stand_project_assets` | proje başına değişken | Proje yüzey görsellerinin meta kaydı; binary diskte. |
 
-Akış: PostgreSQL → Fair Stand API bootstrap → CRM proxy → tarayıcı registry. CRM/Core kendi DB’lerinde bu tablolar yok.
+Akış (catalog): PostgreSQL → Fair Stand API bootstrap → CRM proxy → tarayıcı registry.  
+Akış (proje): PostgreSQL + disk assets → Fair Stand projects API → CRM proxy → `projectRemote` → IndexedDB cache.  
+CRM/Core kendi DB’lerinde bu tablolar yok; `organization_id` Core org UUID’sidir (FK yok). Yetki Core permission kodları: `fair_crm.fair_stand.projects.{read,create,update,delete,execute}`.
 
 ---
 
@@ -50,7 +58,7 @@ Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; lokal head `0011_archive_button_visibility` |
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0012_fair_stand_projects` |
 
 ---
 
@@ -300,6 +308,47 @@ Seed: MB `5`; butonlar `true` (mevcut davranış). Markup’ta butonlar `hidden`
 
 ---
 
+## `fair_stand_projects`
+
+Müşteri stand **proje örneği** SoT. Catalog Item satırı değildir. Eski tarayıcı-only IndexedDB artık otorite değil; lokal store önbellek + dirty sync içindir (`src/projectRemote.js`, `src/projectStore.js`).
+
+Auth: org-scoped Core verify; `X-Organization-Id` + Bearer. API: `backend/app/modules/fair_stand/api/project_routes.py`.
+
+| Kolon | JSON / API | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | `id` | Proje UUID PK | İstemci ve asset path aynı id | `projectRemote`, asset `storage_key` |
+| `organization_id` | `organizationId` | Core org UUID (FK yok) | Çok kiracılı izolasyon | list/get filtre; disk `{org}/…` |
+| `name` | `name` | Görünen ad (trim, boş değil) | Liste / başlık | UI proje listesi |
+| `version` | `version` | Optimistic / sıra (`> 0`) | İstemci sürüm bilinci | API response |
+| `payload` | `payload` (+ düz `stand` / `modules`) | JSONB proje gövdesi | Tek blob; kolon patlatma yok | `ProjectService`; `buildProjectSnapshot` şekli |
+| `created_by` | — | Oluşturan kullanıcı UUID / null | Audit | DB / create |
+| `created_at` / `updated_at` | `createdAt` / `updatedAt` | Zaman damgası | Liste sırası (`updated_at` desc) | API |
+
+`payload` zorunlu şekil (servis normalize): `{ stand: object, modules: array, … }`. Ek anahtarlar korunur. Catalog bootstrap JSON’u değildir.
+
+---
+
+## `fair_stand_project_assets`
+
+Proje yüzey görseli **meta** satırı. Binary PostgreSQL’de değil; disk kökünde `storage_key` yolu.
+
+Yüklemede sunucu optimize eder (tercihen WebP). Path: `{organization_id}/{project_id}/{asset_id}.webp` (`build_storage_key` / `asset_storage.py`). Proje silinince satırlar CASCADE + klasör silinir.
+
+| Kolon | JSON / API | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | `id` | Asset UUID PK | Payload `imageAssetId` ile aynı | upload/get/delete |
+| `organization_id` | — | Org UUID (denormalize) | Org filtre / güvenlik | index; path |
+| `project_id` | — | FK → `fair_stand_projects` CASCADE | Proje ağacı | relationship |
+| `name` | `name` | Orijinal / gösterim adı | UI | asset list |
+| `mime_type` | `mimeType` | Örn. `image/webp` | Content-Type | download |
+| `byte_size` | `byteSize` | Byte (`>= 0`) | Kota / debug | API |
+| `storage_key` | `storageKey` | Kök-relative path; unique | Disk adresi | `asset_storage` |
+| `created_at` | — | Zaman | Audit | DB |
+
+Catalog `fair_stand_item_assets` (GLB/TV seed) ile karışmaz.
+
+---
+
 ## Production `src/` bu kolonları okumaz
 
 Kayıt durur; mapper bootstrap’a yazar (asset unused rolleri hariç).
@@ -317,9 +366,11 @@ Kayıt durur; mapper bootstrap’a yazar (asset unused rolleri hariç).
 
 Collision / magneticSnap / moveSnapCm / ghost: hâlâ `TYPE_BEHAVIORS` (`type`). Item kolon değil.
 
-Runtime instance: `placement.xCm/yCm/zCm/rotationZDeg`, `rotationLocked` — proje kaydı, catalog DB değil.
+Runtime instance alanları (`placement.xCm/yCm/zCm/rotationZDeg`, `rotationLocked`, yüzey ezmeleri): catalog Item kolonu değil; **`fair_stand_projects.payload` JSONB** içinde yaşar (SoT sunucu). IndexedDB aynı blob’un önbelleğidir.
 
 Catalog projection alias (`label`, kök `widthCm`): Item/DB alanı değil.
+
+Core `role_permissions` / permission lifecycle: Fair Stand DB’sinde yok; yetki Core’da. Stand yalnız permission kodunu verify eder.
 
 ---
 

@@ -49,7 +49,7 @@ Item'a ait kanonik ürüne özgü/default bir özellik başka bir runtime dosyas
 
 Renderer veya özel render kodu görsel/teknik nedenle farklı bir değer kullanabilir. Proje örneği de kullanıcı/konfigürasyon/karar mekanizması nedeniyle kanonik varsayılanı ezebilir. Ezme geçerlidir; fakat kanonik varsayılan değerin Item'daki sahipliğini kaldırmaz.
 
-Kanonik Item ürün/default veri otoritesi, Fair Stand ilişkisel Item store’udur; bu store kanonik catalog API / bootstrap üzerinden açılır. Static JS Item master kanonik otorite değildir. `items.js` repository / facade / yardımcı olabilir; 96 Item’lık static master olamaz. Catalog yalnız projeksiyondur. Item’ın kanonik asset referansı Item verisine aittir; GLB/JPG gibi fiziksel binary static storage’da kalabilir. Proje örneği state’i (IndexedDB instance, yerleşim, yüzey ezmesi, `imageAssetId`) kanonik Item master değildir.
+Kanonik Item ürün/default veri otoritesi, Fair Stand ilişkisel Item store’udur; bu store kanonik catalog API / bootstrap üzerinden açılır. Static JS Item master kanonik otorite değildir. `items.js` repository / facade / yardımcı olabilir; 96 Item’lık static master olamaz. Catalog yalnız projeksiyondur. Item’ın kanonik asset referansı Item verisine aittir; GLB/JPG gibi fiziksel binary static storage’da kalabilir. Proje örneği state’i (yerleşim, yüzey ezmesi, `imageAssetId`) kanonik Item master değildir; otoritesi `fair_stand_projects` / `fair_stand_project_assets` (+ disk) olup tarayıcı IndexedDB yalnız önbellektir — bkz. `docs/refactor/DATABASE.md`.
 
 Fiziksel tablo/API as-built anlatımı `kyrox-platform/projects/fair-stand/ITEM_CATALOG_ARCHITECTURE.md` dosyasındadır.
 

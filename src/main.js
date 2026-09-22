@@ -17,7 +17,7 @@ import {
 } from './designState.js';
 import { deleteImageAsset, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
 import { clearImageAssetReferences, countImageAssetReferences, remapImageAssetReferences } from './imageAssetReferences.js';
-import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject } from './projectStore.js';
+import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty } from './projectRemote.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu, allowsModuleSideInsert } from './moduleContextMenu.js';
 import { createModuleDragSidebar } from './moduleDragSidebar.js';
@@ -1622,6 +1622,11 @@ async function requestDeleteImageAsset(assetId) {
       autosaveController.markSavedState();
     }
 
+    // Sunucu SoT önce (orphan kalmasın); 404 = henüz upload edilmemiş, local silmeye devam.
+    if (isProjectRemoteEnabled()) {
+      await deleteProjectAsset(activeProjectId, assetId);
+    }
+
     const deleted = await deleteImageAsset(activeProjectId, assetId);
     if (!deleted) throw new Error('Görsel kaydı bulunamadı veya bu projeye ait değil.');
 
@@ -1634,6 +1639,19 @@ async function requestDeleteImageAsset(assetId) {
         .at(-1)?.id ?? null;
     }
     renderAssetLibrary();
+
+    if (currentStand || autosaveController.isEnabled()) {
+      try {
+        autosaveController.clearPending();
+        await persistActiveProject({ quiet: true });
+        autosaveController.enableFromCurrentState();
+      } catch (persistError) {
+        console.warn('Görsel silindi ama otomatik kayıt başarısız:', persistError);
+        assetStatus.textContent = 'Görsel silindi · otomatik kayıt başarısız.';
+        return true;
+      }
+    }
+
     assetStatus.textContent = usageCount > 0
       ? 'Görsel silindi · atandığı yerlerden de kaldırıldı.'
       : 'Görsel silindi.';
@@ -1952,11 +1970,23 @@ imageInput.addEventListener('change', async () => {
 
   try {
     const asset = await saveImageAsset(activeProjectId, file);
+    markAssetDirty(activeProjectId, asset.id);
     registerAsset(asset);
     setActiveAsset(asset.id);
 
     const selected = scene3d.getSelectedSurfaces();
     if (selected.length) applyActiveImageToSelection('cover');
+
+    if (currentStand || autosaveController.isEnabled()) {
+      try {
+        autosaveController.clearPending();
+        await persistActiveProject({ quiet: true });
+        autosaveController.enableFromCurrentState();
+      } catch (persistError) {
+        console.warn('Görsel eklendi ama otomatik kayıt başarısız:', persistError);
+        assetStatus.textContent = 'Görsel eklendi · otomatik kayıt başarısız.';
+      }
+    }
   } catch (error) {
     console.warn('Görsel kaydedilemedi:', error);
     const message = error?.message || 'Görsel arşive kaydedilemedi.';
@@ -2020,40 +2050,57 @@ exportProjectButton.addEventListener('click', async () => {
   projectStatus.textContent = 'Proje ZIP hazırlanıyor…';
   try {
     if (projectId === activeProjectId) await persistActiveProject({ quiet: true });
-    const project = await loadProject(projectId);
-    if (!project) throw new Error('Dışarı aktarılacak proje bulunamadı.');
-    const assets = await loadImageAssets(projectId);
-    const JSZip = await loadJSZip();
-    const zip = new JSZip();
-    const manifestAssets = [];
-    for (const asset of assets) {
-      const ext = (asset.name?.match(/\.[a-zA-Z0-9]+$/)?.[0] || '') || '';
-      const path = `assets/${asset.id}${ext}`;
-      zip.file(path, asset.blob);
-      manifestAssets.push({
-        id: asset.id,
-        name: asset.name,
-        type: asset.type,
-        createdAt: asset.createdAt,
-        path,
-      });
+    let blob;
+    let assetCount = 0;
+    if (isProjectRemoteEnabled()) {
+      blob = await exportProjectZip(projectId);
+      const project = await loadProject(projectId);
+      assetCount = (await loadImageAssets(projectId)).length;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${safeArchiveName(project?.name)}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } else {
+      const project = await loadProject(projectId);
+      if (!project) throw new Error('Dışarı aktarılacak proje bulunamadı.');
+      const assets = await loadImageAssets(projectId);
+      assetCount = assets.length;
+      const JSZip = await loadJSZip();
+      const zip = new JSZip();
+      const manifestAssets = [];
+      for (const asset of assets) {
+        const ext = (asset.name?.match(/\.[a-zA-Z0-9]+$/)?.[0] || '') || '';
+        const path = `assets/${asset.id}${ext}`;
+        zip.file(path, asset.blob);
+        manifestAssets.push({
+          id: asset.id,
+          name: asset.name,
+          type: asset.type,
+          createdAt: asset.createdAt,
+          path,
+        });
+      }
+      zip.file('project.json', JSON.stringify({
+        archiveVersion: 1,
+        exportedAt: Date.now(),
+        project,
+        assets: manifestAssets,
+      }, null, 2));
+      blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${safeArchiveName(project.name)}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-    zip.file('project.json', JSON.stringify({
-      archiveVersion: 1,
-      exportedAt: Date.now(),
-      project,
-      assets: manifestAssets,
-    }, null, 2));
-    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${safeArchiveName(project.name)}.zip`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    projectStatus.textContent = `Dışarı aktarıldı · ${assets.length} görsel`;
+    projectStatus.textContent = `Dışarı aktarıldı · ${assetCount} görsel`;
   } catch (error) {
     console.warn('Proje dışarı aktarılamadı:', error);
     projectStatus.textContent = 'Proje dışarı aktarılamadı.';
@@ -2125,12 +2172,14 @@ importProjectFileInput.addEventListener('change', async () => {
       updatedAt: Date.now(),
     }, idMap);
 
-    await saveProject(importedProject);
+    // Asset'ler önce IndexedDB'ye yazılır; saveProject (remote) loadImageAssets ile
+    // sunucuya yükler. Tersi olursa proje SoT'a boş asset listesiyle gider.
     importStorageTouched = true;
-
     for (const asset of preparedAssets) {
       await saveImportedImageAsset(importedProjectId, asset);
+      markAssetDirty(importedProjectId, asset.id);
     }
+    await saveProject(importedProject);
 
     await refreshProjectList(importedProjectId);
     const project = await loadProject(importedProjectId);
