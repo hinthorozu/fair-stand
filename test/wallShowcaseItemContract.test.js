@@ -25,7 +25,7 @@ test('wall_showcase parents own canonical cluster identity and child roles', () 
     assert.equal(item.eyeCount, expected.eyeCount);
     assert.deepEqual(item.bodyItems, { sideItemKey: expected.sideItemKey, horizontalItemKey: 'showcase_horizontal_87_4_30', glassShelfItemKey: 'glass_shelf' });
     assert.equal(item.composition.mode, 'recipe');
-    assert.equal(item.composition.moduleType, expected.type);
+    assert.equal(item.composition.moduleType, undefined);
     assert.ok(Array.isArray(item.composition.items));
     assert.equal(item.composition.items.length > 0, true);
   }

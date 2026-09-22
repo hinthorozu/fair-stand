@@ -84,7 +84,7 @@ for (const itemKey of BANKO_KEYS) {
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.type, 'counter');
     assert.equal(item.composition?.mode, 'recipe');
-    assert.equal(item.composition?.moduleType, 'counter');
+    assert.equal(item.composition?.moduleType, undefined);
     assert.equal(item.dimensions.widthCm, expected.widthCm);
     assert.equal(Object.hasOwn(item, 'unit'), false);
     assert.deepEqual(item.dimensions, {

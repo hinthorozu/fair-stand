@@ -49,7 +49,7 @@ for (const itemKey of BASE_KEYS) {
     assert.equal(item.itemKey, itemKey);
     assert.equal(item.type, 'base');
     assert.equal(item.composition?.mode, 'recipe');
-    assert.equal(item.composition?.moduleType, 'base');
+    assert.equal(item.composition?.moduleType, undefined);
     assert.equal(item.dimensions.widthCm, expected.widthCm);
     assert.equal(Object.hasOwn(item, 'unit'), false);
     assert.deepEqual(item.dimensions, {

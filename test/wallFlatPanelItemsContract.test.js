@@ -60,7 +60,7 @@ for (const itemKey of WALL_KEYS) {
     assert.equal(item.name, expected.name);
     assert.equal(item.type, 'flat-panel');
     assert.equal(item.composition?.mode, 'recipe');
-    assert.equal(item.composition?.moduleType, 'wall');
+    assert.equal(item.composition?.moduleType, undefined);
     assert.equal(item.dimensions.widthCm, expected.widthCm);
     assert.equal(Object.hasOwn(item, 'unit'), false);
     assert.deepEqual(item.dimensions, { widthCm: expected.widthCm });
@@ -151,9 +151,9 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_2)) {
     assert.equal(item.type, 'flat-panel');
     assert.equal(item.variant, 'short-up-2');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 2 });
-    assert.equal(item.composition.moduleType, 'wall-short-up-2');
+    assert.equal(item.composition.moduleType, undefined);
     assert.deepEqual(item.dimensions, { widthCm: expected.widthCm });
-    assert.equal(parent.composition.moduleType, 'wall');
+    assert.equal(parent.composition.moduleType, undefined);
     assert.equal(parent.stripOccupancy, undefined);
     assert.equal(item.variant, 'short-up-2');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 2 });
@@ -215,9 +215,9 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_1)) {
     assert.equal(item.type, 'flat-panel');
     assert.equal(item.variant, 'short-up-1');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 1 });
-    assert.equal(item.composition.moduleType, 'wall-short-up-1');
+    assert.equal(item.composition.moduleType, undefined);
     assert.deepEqual(item.dimensions, { widthCm: expected.widthCm });
-    assert.equal(parent.composition.moduleType, 'wall');
+    assert.equal(parent.composition.moduleType, undefined);
     assert.equal(parent.stripOccupancy, undefined);
     assert.equal(item.variant, 'short-up-1');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 1 });
