@@ -78,8 +78,6 @@ const payload = {
       preview_id: item.catalogVisible ? item.previewId : null,
       material: item.material ?? null,
       default_color: colorToInt(item.defaultColor ?? null),
-      panel_role: item.panelRole ?? null,
-      connector_type: item.connectorType ?? null,
       preserve_model_scale: Object.hasOwn(item, 'preserveModelScale') ? Boolean(item.preserveModelScale) : null,
       model_rotation_y_deg: num(item.modelRotationYDeg),
       visual_rotation_y_deg: num(item.visualRotationYDeg),
@@ -87,7 +85,6 @@ const payload = {
       default_rotation_deg: Object.hasOwn(item, 'defaultRotationDeg') ? num(item.defaultRotationDeg) : null,
       side_insert_rotation: item.sideInsertRotation ?? null,
       composition_mode: composition?.mode ?? null,
-      composition_module_type: composition?.moduleType ?? null,
       paintable: Object.hasOwn(item, 'paintable') ? Boolean(item.paintable) : null,
       shape: item.shape ?? null,
       variant: item.variant ?? null,
@@ -116,10 +113,9 @@ const payload = {
       strip_occupancy: item.stripOccupancy
         ? { align: item.stripOccupancy.align, strip_count: item.stripOccupancy.stripCount }
         : null,
-      components: (composition?.items || []).map((row, index) => ({
+      components: (composition?.items || []).map((row) => ({
         child_item_key: row.itemKey,
         quantity: row.quantity,
-        sort_order: index,
       })),
       video_wall: item.videoWall
         ? {

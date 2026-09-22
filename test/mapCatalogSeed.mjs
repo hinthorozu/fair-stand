@@ -50,8 +50,6 @@ function mapItem(row) {
   assign('previewId', row.preview_id);
   assign('material', row.material);
   assign('defaultColor', row.default_color);
-  assign('panelRole', row.panel_role);
-  assign('connectorType', row.connector_type);
   assign('preserveModelScale', row.preserve_model_scale);
   assign('modelRotationYDeg', row.model_rotation_y_deg);
   assign('visualRotationYDeg', row.visual_rotation_y_deg);
@@ -100,7 +98,6 @@ function mapItem(row) {
   if ((row.components || []).length || row.composition_mode) {
     const composition = {};
     if (row.composition_mode != null) composition.mode = row.composition_mode;
-    if (row.composition_module_type != null) composition.moduleType = row.composition_module_type;
     if ((row.components || []).length) {
       composition.items = row.components.map((component) => ({
         itemKey: component.child_item_key,

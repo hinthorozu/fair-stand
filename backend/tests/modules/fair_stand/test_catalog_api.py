@@ -67,7 +67,7 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     assert "innerCorner" not in wall_200.get("composition", {})
     assert "nominalModuleWidthCm" not in wall_200
     corner = next(item for item in body["items"] if item["itemKey"] == "panel_corner_192")
-    assert corner["panelRole"] == "inner-corner"
+    assert corner["type"] == "panel"
     assert "nominalModuleWidthCm" not in corner
     assert all("nominalModuleWidthCm" not in item for item in body["items"])
     assert all("innerCorner" not in item.get("composition", {}) for item in body["items"])
@@ -137,6 +137,7 @@ def test_corner_panel_item_lookup(client, db_session, auth_headers):
     assert response.status_code == 200
     body = response.json()
     assert body["itemKey"] == "panel_corner_192"
-    assert body["panelRole"] == "inner-corner"
+    assert body["type"] == "panel"
+    assert "panelRole" not in body
     assert "nominalModuleWidthCm" not in body
     assert "innerCorner" not in body.get("composition", {})

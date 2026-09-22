@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
@@ -18,6 +18,16 @@ from app.modules.fair_stand.infrastructure.models import (
     FairStandItemStripOccupancyModel,
     FairStandItemVideoWallModel,
 )
+
+_ITEM_LIST_SORT_FIELDS: dict[str, object] = {
+    "itemKey": FairStandItemModel.item_key,
+    "name": FairStandItemModel.name,
+    "type": FairStandItemModel.item_type,
+    "catalogVisible": FairStandItemModel.catalog_visible,
+    "isRender": FairStandItemModel.is_render,
+    "status": FairStandItemModel.is_active,
+    "isActive": FairStandItemModel.is_active,
+}
 
 
 class ItemAdminError(ValueError):
@@ -43,7 +53,7 @@ def _optional_decimal(value: object | None) -> Decimal | None:
     try:
         return Decimal(str(value))
     except (InvalidOperation, TypeError, ValueError) as exc:
-        raise ItemAdminError("numeric field must be a number") from exc
+        raise ItemAdminError("Sayısal alan geçerli bir sayı olmalıdır.") from exc
 
 
 def _optional_bool(value: object | None) -> bool | None:
@@ -57,6 +67,27 @@ def _optional_str(value: object | None) -> str | None:
         return None
     text = str(value).strip()
     return text or None
+
+
+def _integrity_error_message(exc: IntegrityError) -> str:
+    orig = str(getattr(exc, "orig", exc)).lower()
+    if "uq_fair_stand_item_assets_role" in orig:
+        return "Aynı asset rolü bir item altında birden fazla kullanılamaz."
+    if "uq_fair_stand_items_catalog_order" in orig:
+        return "Bu kategori içinde aynı katalog sırası zaten kullanılıyor."
+    if "fair_stand_items_pkey" in orig or (
+        "item_key" in orig and ("already exists" in orig or "duplicate" in orig)
+    ):
+        return "Bu item key zaten kayıtlı."
+    if "uq_fair_stand_item_body_parts_role" in orig or "fair_stand_item_body_parts_pkey" in orig or (
+        "body_role" in orig and ("already exists" in orig or "duplicate" in orig)
+    ):
+        return "Aynı body role bir item altında birden fazla kullanılamaz."
+    if "foreign key" in orig or "fk_" in orig:
+        return "Bağlantılı kayıt bulunamadı (alt item, kategori veya preview geçersiz olabilir)."
+    if "ck_fair_stand" in orig or "check constraint" in orig:
+        return "Girilen değerlerden biri geçersiz."
+    return "Kayıt kaydedilemedi: veri kısıtı ihlal edildi."
 
 
 def _item_load_options():
@@ -118,16 +149,23 @@ def _components_payload(rows: list[FairStandItemComponentModel]) -> list[dict]:
         {
             "id": str(row.id),
             "childItemKey": row.child_item_key,
+            "childName": None,
+            "childType": None,
             "quantity": _num(row.quantity),
-            "sortOrder": int(row.sort_order),
         }
-        for row in sorted(rows, key=lambda item: item.sort_order)
+        for row in sorted(rows, key=lambda item: item.child_item_key)
     ]
 
 
 def _body_parts_payload(rows: list[FairStandItemBodyPartModel]) -> list[dict]:
     return [
-        {"bodyRole": row.body_role, "childItemKey": row.child_item_key}
+        {
+            "id": str(row.id),
+            "bodyRole": row.body_role,
+            "childItemKey": row.child_item_key,
+            "childName": None,
+            "childType": None,
+        }
         for row in sorted(rows, key=lambda item: item.body_role)
     ]
 
@@ -155,8 +193,6 @@ def _item_admin_payload(row: FairStandItemModel) -> dict:
         "previewId": int(row.preview_id) if row.preview_id is not None else None,
         "material": row.material,
         "defaultColor": int(row.default_color) if row.default_color is not None else None,
-        "panelRole": row.panel_role,
-        "connectorType": row.connector_type,
         "preserveModelScale": row.preserve_model_scale,
         "modelRotationYDeg": _num(row.model_rotation_y_deg),
         "visualRotationYDeg": _num(row.visual_rotation_y_deg),
@@ -164,7 +200,6 @@ def _item_admin_payload(row: FairStandItemModel) -> dict:
         "defaultRotationDeg": _num(row.default_rotation_deg),
         "sideInsertRotation": row.side_insert_rotation,
         "compositionMode": row.composition_mode,
-        "compositionModuleType": row.composition_module_type,
         "paintable": row.paintable,
         "shape": row.shape,
         "variant": row.variant,
@@ -213,6 +248,7 @@ class AdminItemsService:
         self._session = session
 
     def list_items(self) -> list[dict]:
+        """Full list (legacy). Prefer list_item_records for admin UI."""
         rows = self._session.scalars(
             select(FairStandItemModel)
             .options(*_item_load_options())
@@ -220,22 +256,203 @@ class AdminItemsService:
         ).all()
         return [_item_list_payload(row) for row in rows]
 
+    def list_item_records(
+        self,
+        *,
+        page: int = 1,
+        page_size: int = 25,
+        search: str | None = None,
+        sort_by: str | None = None,
+        sort_order: str | None = None,
+        status: str | None = None,
+        catalog: str | None = None,
+        render: str | None = None,
+        item_type: str | None = None,
+    ) -> dict:
+        page = max(1, int(page))
+        page_size = min(100, max(1, int(page_size)))
+        search_text = (search or "").strip()
+        status_filter = (status or "").strip().lower()
+        catalog_filter = (catalog or "").strip().lower()
+        render_filter = (render or "").strip().lower()
+        type_filter = (item_type or "").strip()
+        if status_filter in {"", "all"}:
+            status_filter = ""
+        if catalog_filter in {"", "all"}:
+            catalog_filter = ""
+        if render_filter in {"", "all"}:
+            render_filter = ""
+        if type_filter.lower() in {"", "all"}:
+            type_filter = ""
+
+        component_count = (
+            select(func.count())
+            .select_from(FairStandItemComponentModel)
+            .where(FairStandItemComponentModel.parent_item_key == FairStandItemModel.item_key)
+            .correlate(FairStandItemModel)
+            .scalar_subquery()
+        )
+        asset_count = (
+            select(func.count())
+            .select_from(FairStandItemAssetModel)
+            .where(FairStandItemAssetModel.item_key == FairStandItemModel.item_key)
+            .correlate(FairStandItemModel)
+            .scalar_subquery()
+        )
+
+        filters = []
+        if search_text:
+            like = f"%{search_text}%"
+            filters.append(
+                or_(
+                    FairStandItemModel.item_key.ilike(like),
+                    FairStandItemModel.name.ilike(like),
+                    FairStandItemModel.item_type.ilike(like),
+                )
+            )
+        if status_filter == "active":
+            filters.append(FairStandItemModel.is_active.is_(True))
+        elif status_filter == "inactive":
+            filters.append(FairStandItemModel.is_active.is_(False))
+        if catalog_filter == "visible":
+            filters.append(FairStandItemModel.catalog_visible.is_(True))
+        elif catalog_filter == "hidden":
+            filters.append(FairStandItemModel.catalog_visible.is_(False))
+        if render_filter in {"yes", "true", "1", "render"}:
+            filters.append(FairStandItemModel.is_render.is_(True))
+        elif render_filter in {"no", "false", "0"}:
+            filters.append(FairStandItemModel.is_render.is_(False))
+        if type_filter:
+            filters.append(FairStandItemModel.item_type == type_filter)
+
+        sort_field = sort_by if sort_by in _ITEM_LIST_SORT_FIELDS or sort_by in {
+            "componentCount",
+            "assetCount",
+        } else "itemKey"
+        direction = "desc" if (sort_order or "").lower() == "desc" else "asc"
+        if sort_field == "componentCount":
+            order_expr = component_count
+        elif sort_field == "assetCount":
+            order_expr = asset_count
+        else:
+            order_expr = _ITEM_LIST_SORT_FIELDS.get(sort_field, FairStandItemModel.item_key)
+        order_clause = order_expr.desc() if direction == "desc" else order_expr.asc()
+
+        count_stmt = select(func.count()).select_from(FairStandItemModel)
+        if filters:
+            count_stmt = count_stmt.where(*filters)
+        total = int(self._session.scalar(count_stmt) or 0)
+        total_pages = max(1, (total + page_size - 1) // page_size) if total else 0
+        if total_pages and page > total_pages:
+            page = total_pages
+
+        list_stmt = select(FairStandItemModel).options(*_item_load_options())
+        if filters:
+            list_stmt = list_stmt.where(*filters)
+        list_stmt = (
+            list_stmt.order_by(order_clause, FairStandItemModel.item_key.asc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        rows = self._session.scalars(list_stmt).all()
+
+        item_types = list(
+            self._session.scalars(
+                select(FairStandItemModel.item_type)
+                .distinct()
+                .order_by(FairStandItemModel.item_type.asc())
+            ).all()
+        )
+
+        return {
+            "items": [_item_list_payload(row) for row in rows],
+            "pagination": {
+                "page": page,
+                "pageSize": page_size,
+                "totalItems": total,
+                "totalPages": total_pages,
+                "hasNext": total_pages > 0 and page < total_pages,
+                "hasPrevious": page > 1,
+            },
+            "sorting": {"field": sort_field, "direction": direction},
+            "filters": {
+                "status": status_filter or "all",
+                "catalog": catalog_filter or "all",
+                "render": render_filter or "all",
+                "type": type_filter or "all",
+            },
+            "filterOptions": {
+                "types": item_types,
+                **self._field_option_values(),
+            },
+        }
+
+    def _field_option_values(self) -> dict[str, list[str]]:
+        def distinct_values(column) -> list[str]:
+            values = self._session.scalars(
+                select(column)
+                .where(column.is_not(None))
+                .where(column != "")
+                .distinct()
+                .order_by(column.asc())
+            ).all()
+            return [str(value) for value in values if str(value).strip()]
+
+        return {
+            "units": distinct_values(FairStandItemModel.unit),
+            "materials": distinct_values(FairStandItemModel.material),
+            "shapes": distinct_values(FairStandItemModel.shape),
+            "variants": distinct_values(FairStandItemModel.variant),
+            "compositionModes": distinct_values(FairStandItemModel.composition_mode),
+            "sideInsertRotations": distinct_values(FairStandItemModel.side_insert_rotation),
+            "snapTargetItemTypes": distinct_values(FairStandItemModel.snap_target_item_type),
+            "snapAnchors": distinct_values(FairStandItemModel.snap_anchor),
+        }
+
     def get_item(self, item_key: str) -> dict:
         row = self._get(item_key)
-        return _item_admin_payload(row)
+        return self._enrich_child_refs(_item_admin_payload(row))
+
+    def _enrich_child_refs(self, payload: dict) -> dict:
+        keys: set[str] = set()
+        for component in payload.get("components") or []:
+            key = component.get("childItemKey")
+            if key:
+                keys.add(str(key))
+        for part in payload.get("bodyParts") or []:
+            key = part.get("childItemKey")
+            if key:
+                keys.add(str(key))
+        if not keys:
+            return payload
+        children = {
+            child.item_key: child
+            for child in self._session.scalars(
+                select(FairStandItemModel).where(FairStandItemModel.item_key.in_(keys))
+            ).all()
+        }
+        for component in payload.get("components") or []:
+            child = children.get(str(component.get("childItemKey") or ""))
+            component["childName"] = child.name if child is not None else None
+            component["childType"] = child.item_type if child is not None else None
+        for part in payload.get("bodyParts") or []:
+            child = children.get(str(part.get("childItemKey") or ""))
+            part["childName"] = child.name if child is not None else None
+            part["childType"] = child.item_type if child is not None else None
+        return payload
 
     def create_item(self, payload: dict) -> dict:
-        item_key = str(payload.get("item_key") or "").strip()
+        item_key = str(payload.get("item_key") or "").strip().lower()
         name = str(payload.get("name") or "").strip()
         item_type = str(payload.get("item_type") or "").strip()
         if not item_key:
-            raise ItemAdminError("item_key is required")
+            raise ItemAdminError("Item key zorunludur.")
         if not name:
-            raise ItemAdminError("name is required")
+            raise ItemAdminError("Ad zorunludur.")
         if not item_type:
-            raise ItemAdminError("item_type is required")
+            raise ItemAdminError("Item tipi zorunludur.")
         if self._session.get(FairStandItemModel, item_key) is not None:
-            raise ItemAdminError("item_key already exists", status_code=409)
+            raise ItemAdminError("Bu item key zaten kayıtlı.", status_code=409)
 
         now = _now()
         row = FairStandItemModel(
@@ -249,8 +466,6 @@ class AdminItemsService:
             preview_id=payload.get("preview_id"),
             material=_optional_str(payload.get("material")),
             default_color=payload.get("default_color"),
-            panel_role=_optional_str(payload.get("panel_role")),
-            connector_type=_optional_str(payload.get("connector_type")),
             preserve_model_scale=_optional_bool(payload.get("preserve_model_scale")),
             model_rotation_y_deg=_optional_decimal(payload.get("model_rotation_y_deg")),
             visual_rotation_y_deg=_optional_decimal(payload.get("visual_rotation_y_deg")),
@@ -258,7 +473,6 @@ class AdminItemsService:
             default_rotation_deg=_optional_decimal(payload.get("default_rotation_deg")),
             side_insert_rotation=_optional_str(payload.get("side_insert_rotation")),
             composition_mode=_optional_str(payload.get("composition_mode")),
-            composition_module_type=_optional_str(payload.get("composition_module_type")),
             paintable=_optional_bool(payload.get("paintable")),
             shape=_optional_str(payload.get("shape")),
             variant=_optional_str(payload.get("variant")),
@@ -286,22 +500,19 @@ class AdminItemsService:
         if "name" in payload and payload["name"] is not None:
             name = str(payload["name"]).strip()
             if not name:
-                raise ItemAdminError("name is required")
+                raise ItemAdminError("Ad zorunludur.")
             row.name = name
         if "item_type" in payload and payload["item_type"] is not None:
             item_type = str(payload["item_type"]).strip()
             if not item_type:
-                raise ItemAdminError("item_type is required")
+                raise ItemAdminError("Item tipi zorunludur.")
             row.item_type = item_type
 
         scalar_map = {
             "unit": _optional_str,
             "material": _optional_str,
-            "panel_role": _optional_str,
-            "connector_type": _optional_str,
             "side_insert_rotation": _optional_str,
             "composition_mode": _optional_str,
-            "composition_module_type": _optional_str,
             "shape": _optional_str,
             "variant": _optional_str,
             "snap_target_item_type": _optional_str,
@@ -359,21 +570,21 @@ class AdminItemsService:
         row.is_active = False
         row.updated_at = _now()
         self._flush()
-        return _item_admin_payload(row)
+        return self._enrich_child_refs(_item_admin_payload(row))
 
     def restore_item(self, item_key: str) -> dict:
         row = self._get(item_key)
         row.is_active = True
         row.updated_at = _now()
         self._flush()
-        return _item_admin_payload(row)
+        return self._enrich_child_refs(_item_admin_payload(row))
 
     def _get(self, item_key: str) -> FairStandItemModel:
         row = self._session.scalars(
             select(FairStandItemModel).options(*_item_load_options()).where(FairStandItemModel.item_key == item_key)
         ).first()
         if row is None:
-            raise ItemAdminError("Item not found", status_code=404)
+            raise ItemAdminError("Item bulunamadı.", status_code=404)
         return row
 
     def _apply_satellites(self, row: FairStandItemModel, payload: dict, *, replace: bool) -> None:
@@ -427,7 +638,7 @@ class AdminItemsService:
                 dims.wall_gap_cm,
             )
         ):
-            raise ItemAdminError("dimensions require at least one measure")
+            raise ItemAdminError("Ölçüler için en az bir değer girilmelidir.")
         if row.dimensions is None:
             self._session.add(dims)
             row.dimensions = dims
@@ -443,7 +654,7 @@ class AdminItemsService:
         dims.depth_cm = _optional_decimal(data.get("depth_cm", data.get("depthCm")))
         dims.height_cm = _optional_decimal(data.get("height_cm", data.get("heightCm")))
         if dims.width_cm is None and dims.depth_cm is None and dims.height_cm is None:
-            raise ItemAdminError("scene_dimensions require at least one measure")
+            raise ItemAdminError("Sahne ölçüleri için en az bir değer girilmelidir.")
         if row.scene_dimensions is None:
             self._session.add(dims)
             row.scene_dimensions = dims
@@ -457,7 +668,7 @@ class AdminItemsService:
         align = str(data.get("align") or "top")
         strip_count = int(data.get("strip_count", data.get("stripCount") or 0))
         if strip_count <= 0:
-            raise ItemAdminError("strip_count must be greater than 0")
+            raise ItemAdminError("Şerit sayısı 0’dan büyük olmalıdır.")
         strip = row.strip_occupancy or FairStandItemStripOccupancyModel(item_key=row.item_key)
         strip.align = align
         strip.strip_count = strip_count
@@ -473,7 +684,7 @@ class AdminItemsService:
             role = str(asset.get("asset_role", asset.get("assetRole") or "")).strip()
             path = str(asset.get("relative_path", asset.get("relativePath") or "")).strip()
             if not role or not path:
-                raise ItemAdminError("asset_role and relative_path are required")
+                raise ItemAdminError("Asset rolü ve relative path zorunludur.")
             row.assets.append(
                 FairStandItemAssetModel(
                     id=uuid4(),
@@ -488,25 +699,23 @@ class AdminItemsService:
         for existing in list(row.components or []):
             self._session.delete(existing)
         row.components = []
-        for index, component in enumerate(components):
+        for component in components:
             child = str(
                 component.get("child_item_key", component.get("childItemKey") or "")
-            ).strip()
+            ).strip().lower()
             if not child:
-                raise ItemAdminError("components.child_item_key is required")
+                raise ItemAdminError("Alt item key zorunludur.")
             if child == row.item_key:
-                raise ItemAdminError("component cannot reference itself")
+                raise ItemAdminError("Alt item kendisine bağlanamaz.")
             quantity = _optional_decimal(component.get("quantity"))
             if quantity is None or quantity <= 0:
-                raise ItemAdminError("components.quantity must be greater than 0")
-            sort_order = int(component.get("sort_order", component.get("sortOrder", index)))
+                raise ItemAdminError("Alt item miktarı 0’dan büyük olmalıdır.")
             row.components.append(
                 FairStandItemComponentModel(
                     id=uuid4(),
                     parent_item_key=row.item_key,
                     child_item_key=child,
                     quantity=quantity,
-                    sort_order=sort_order,
                 )
             )
 
@@ -514,13 +723,18 @@ class AdminItemsService:
         for existing in list(row.body_parts or []):
             self._session.delete(existing)
         row.body_parts = []
+        seen_roles: set[str] = set()
         for part in parts:
             role = str(part.get("body_role", part.get("bodyRole") or "")).strip()
-            child = str(part.get("child_item_key", part.get("childItemKey") or "")).strip()
+            child = str(part.get("child_item_key", part.get("childItemKey") or "")).strip().lower()
             if not role or not child:
-                raise ItemAdminError("body_role and child_item_key are required")
+                raise ItemAdminError("Body role ve alt item key zorunludur.")
+            if role in seen_roles:
+                raise ItemAdminError("Aynı body role bir item altında birden fazla kullanılamaz.")
+            seen_roles.add(role)
             row.body_parts.append(
                 FairStandItemBodyPartModel(
+                    id=uuid4(),
                     parent_item_key=row.item_key,
                     body_role=role,
                     child_item_key=child,
@@ -533,11 +747,11 @@ class AdminItemsService:
                 self._session.delete(row.video_wall)
                 row.video_wall = None
             return
-        panel = str(data.get("panel_item_key", data.get("panelItemKey") or "")).strip()
+        panel = str(data.get("panel_item_key", data.get("panelItemKey") or "")).strip().lower()
         rows = int(data.get("rows") or 0)
         cols = int(data.get("cols") or 0)
         if not panel or rows <= 0 or cols <= 0:
-            raise ItemAdminError("video_wall requires rows, cols, panel_item_key")
+            raise ItemAdminError("Video wall için satır, sütun ve panel item key zorunludur.")
         wall = row.video_wall or FairStandItemVideoWallModel(parent_item_key=row.item_key)
         wall.rows = rows
         wall.cols = cols
@@ -550,4 +764,4 @@ class AdminItemsService:
         try:
             self._session.flush()
         except IntegrityError as exc:
-            raise ItemAdminError(f"Item constraint failed: {exc.orig}", status_code=409) from exc
+            raise ItemAdminError(_integrity_error_message(exc), status_code=409) from exc

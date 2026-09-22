@@ -43,14 +43,61 @@ def test_admin_item_records_list_and_get(client, db_session, auth_headers):
     _allow(client, {PERMISSION_ITEMS_READ})
     listed = client.get("/api/v1/fair-stand/admin/item-records", headers=auth_headers)
     assert listed.status_code == 200
-    assert len(listed.json()) >= 90
+    body = listed.json()
+    assert "items" in body
+    assert body["pagination"]["page"] == 1
+    assert body["pagination"]["pageSize"] == 25
+    assert body["pagination"]["totalItems"] >= 90
+    assert len(body["items"]) == 25
+    assert body["sorting"]["field"] == "itemKey"
     detail = client.get("/api/v1/fair-stand/admin/item-records/wall_200", headers=auth_headers)
     assert detail.status_code == 200
-    body = detail.json()
-    assert body["itemKey"] == "wall_200"
-    assert body["dimensions"] is not None
-    assert isinstance(body["components"], list)
-    assert isinstance(body["assets"], list)
+    detail_body = detail.json()
+    assert detail_body["itemKey"] == "wall_200"
+    assert detail_body["dimensions"] is not None
+    assert isinstance(detail_body["components"], list)
+    assert isinstance(detail_body["assets"], list)
+    if detail_body["components"]:
+        component = detail_body["components"][0]
+        assert "childItemKey" in component
+        assert "childName" in component
+        assert "childType" in component
+        assert component["childName"]
+        assert component["childType"]
+
+
+def test_admin_item_records_list_search_filter_and_page(client, db_session, auth_headers):
+    seed_fair_stand_catalog(db_session)
+    db_session.flush()
+    _allow(client, {PERMISSION_ITEMS_READ})
+    response = client.get(
+        "/api/v1/fair-stand/admin/item-records",
+        headers=auth_headers,
+        params={
+            "page": 1,
+            "pageSize": 10,
+            "search": "wall_200",
+            "status": "active",
+            "catalog": "visible",
+            "render": "yes",
+            "type": "flat-panel",
+            "sort_by": "name",
+            "sort_order": "asc",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["pagination"]["pageSize"] == 10
+    assert body["pagination"]["totalItems"] >= 1
+    assert any(item["itemKey"] == "wall_200" for item in body["items"])
+    assert body["filters"]["status"] == "active"
+    assert body["filters"]["catalog"] == "visible"
+    assert body["filters"]["render"] == "yes"
+    assert body["filters"]["type"] == "flat-panel"
+    assert body["sorting"]["field"] == "name"
+    assert "flat-panel" in body["filterOptions"]["types"]
+    assert isinstance(body["filterOptions"].get("units"), list)
+    assert isinstance(body["filterOptions"].get("materials"), list)
 
 
 def test_admin_item_records_update_dimensions_and_components(client, db_session, auth_headers):
@@ -63,7 +110,7 @@ def test_admin_item_records_update_dimensions_and_components(client, db_session,
         json={
             "name": "Shelf 100 Updated",
             "dimensions": {"width_cm": 100, "depth_cm": 30, "height_cm": 4},
-            "components": [{"child_item_key": "shelf_leg", "quantity": 2, "sort_order": 0}],
+            "components": [{"child_item_key": "shelf_leg", "quantity": 2}],
         },
     )
     assert response.status_code == 200
@@ -71,6 +118,8 @@ def test_admin_item_records_update_dimensions_and_components(client, db_session,
     assert body["name"] == "Shelf 100 Updated"
     assert body["dimensions"]["widthCm"] == 100
     assert body["components"][0]["childItemKey"] == "shelf_leg"
+    assert body["components"][0]["childName"]
+    assert body["components"][0]["childType"]
 
 
 def test_admin_item_records_create_minimal(client, db_session, auth_headers):

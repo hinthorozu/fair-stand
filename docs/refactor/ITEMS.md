@@ -44,8 +44,6 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `sceneDimensions.heightCm` | 24 | Effective scene height. |
 | `defaultColor` | 30 | Varsayılan renk (integer hex; DB `default_color`). Zemin de aynı, string değil. |
 | `material` | 34 | Üretim malzemesi metni. Vitrin gövde `sunta` kilidi. |
-| `panelRole` | 8 | `straight` / `inner-corner`. Item sınıflandırması; BOM panel değiştirme yok. |
-| `connectorType` | 4 | Data ACTIVE. `getConnectorItemKey` / `resolveConnectorBom` TEST_ONLY (DECISION-08 STATUS QUO). Production BOM `composition.items[].itemKey`. |
 | `composition` | 30 | Bileşik yapı. |
 | `composition.mode` | 28 | `recipe` → `resolveItemBom`. |
 | `composition.moduleType` | 28 | **DEPRECATED (SCHEMA_ONLY).** Recipe etiket; production okumaz. |

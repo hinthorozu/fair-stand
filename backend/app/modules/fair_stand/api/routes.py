@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.integrations.kyrox_core.auth import AuthContext
@@ -385,9 +385,28 @@ def admin_update_runtime_settings(
 def admin_list_item_records(
     auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_READ)),
     service: AdminItemsService = Depends(get_admin_items_service),
-) -> list[dict[str, Any]]:
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100, alias="pageSize")] = 25,
+    search: Annotated[str | None, Query()] = None,
+    sort_by: Annotated[str | None, Query(alias="sort_by")] = None,
+    sort_order: Annotated[str | None, Query(alias="sort_order")] = None,
+    status_filter: Annotated[str | None, Query(alias="status")] = None,
+    catalog: Annotated[str | None, Query()] = None,
+    render: Annotated[str | None, Query()] = None,
+    item_type: Annotated[str | None, Query(alias="type")] = None,
+) -> dict[str, Any]:
     _ = auth
-    return service.list_items()
+    return service.list_item_records(
+        page=page,
+        page_size=page_size,
+        search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        status=status_filter,
+        catalog=catalog,
+        render=render,
+        item_type=item_type,
+    )
 
 
 @router.get("/admin/item-records/{item_key}")

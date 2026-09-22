@@ -55,7 +55,6 @@ test('remaining inner-corner panels are canonical single production Items with m
     assert.equal(item.type, 'panel');
     assert.equal(item.unit, 'adet');
     assert.deepEqual(item.dimensions, metadata.dimensions);
-    assert.equal(item.panelRole, 'inner-corner');
     assert.equal(item.nominalModuleWidthCm, undefined);
   }
 });
