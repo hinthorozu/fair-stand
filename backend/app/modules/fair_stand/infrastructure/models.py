@@ -18,7 +18,12 @@ from sqlalchemy import (
     false as sa_false,
     text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.types import JSON
+
+# JSONB on Postgres; plain JSON for SQLite unit tests.
+PayloadJSON = JSON().with_variant(JSONB(astext_type=sa_text()), "postgresql")
 
 from app.db.base import Base
 
@@ -394,3 +399,48 @@ class FairStandSettingsModel(Base):
     import_button_visible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class FairStandProjectModel(Base):
+    __tablename__ = "fair_stand_projects"
+    __table_args__ = (
+        Index("ix_fair_stand_projects_organization_id_updated_at", "organization_id", "updated_at"),
+        CheckConstraint("version > 0", name="ck_fair_stand_projects_version"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    organization_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    payload: Mapped[dict] = mapped_column(PayloadJSON, nullable=False)
+    created_by: Mapped[UUID | None] = mapped_column(Uuid, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    assets: Mapped[list["FairStandProjectAssetModel"]] = relationship(
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
+
+class FairStandProjectAssetModel(Base):
+    __tablename__ = "fair_stand_project_assets"
+    __table_args__ = (
+        Index("ix_fair_stand_project_assets_project_id", "project_id"),
+        Index("ix_fair_stand_project_assets_organization_id", "organization_id"),
+        UniqueConstraint("storage_key", name="uq_fair_stand_project_assets_storage_key"),
+        CheckConstraint("byte_size >= 0", name="ck_fair_stand_project_assets_byte_size"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    organization_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    project_id: Mapped[UUID] = mapped_column(
+        Uuid,
+        ForeignKey("fair_stand_projects.id", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+    )
+    name: Mapped[str] = mapped_column(String(512), nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(128), nullable=False)
+    byte_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    storage_key: Mapped[str] = mapped_column(String(1024), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    project: Mapped[FairStandProjectModel] = relationship(back_populates="assets")

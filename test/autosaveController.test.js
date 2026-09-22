@@ -41,8 +41,8 @@ function createFakeClock() {
   };
 }
 
-test('autosave constants preserve the current 5s debounce / 1s watch contract', () => {
-  assert.equal(DEFAULT_AUTOSAVE_DELAY_MS, 5000);
+test('autosave constants preserve the current 30s debounce / 1s watch contract', () => {
+  assert.equal(DEFAULT_AUTOSAVE_DELAY_MS, 30000);
   assert.equal(DEFAULT_AUTOSAVE_WATCH_INTERVAL_MS, 1000);
 });
 
@@ -103,8 +103,8 @@ test('changed state schedules one debounce and a later change replaces it', () =
   assert.notEqual(firstTimerId, secondTimerId);
   assert.deepEqual(clock.clearedTimeouts, [firstTimerId]);
   assert.equal(clock.timeouts.size, 1);
-  assert.equal([...clock.timeouts.values()][0].delay, 5000);
-  assert.equal(statuses.at(-1), 'Değişiklik var · 5 sn içinde otomatik kaydedilecek…');
+  assert.equal([...clock.timeouts.values()][0].delay, 30000);
+  assert.equal(statuses.at(-1), 'Değişiklik var · 30 sn içinde otomatik kaydedilecek…');
 });
 
 test('scheduled persist uses quiet mode and marks the persisted signature as observed', async () => {

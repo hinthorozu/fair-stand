@@ -6,6 +6,7 @@ from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.db.session import get_db
 from app.integrations.kyrox_core.auth import AuthContext
 from app.integrations.kyrox_core.client import HttpAuthorizationAdapter, KyroxCoreHttpClient
@@ -18,6 +19,7 @@ from app.integrations.kyrox_core.ports import AuthorizationPort
 from app.modules.fair_stand.application.admin_catalog import AdminCatalogService
 from app.modules.fair_stand.application.get_catalog_bootstrap import GetCatalogBootstrapUseCase
 from app.modules.fair_stand.application.get_item import GetItemUseCase
+from app.modules.fair_stand.application.projects import ProjectService
 from app.modules.fair_stand.infrastructure.catalog_repository import SqlAlchemyFairStandCatalogRepository
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -30,6 +32,11 @@ PERMISSION_PREVIEWS_READ = "fair_crm.admin.fair_stand.previews.read"
 PERMISSION_PREVIEWS_CREATE = "fair_crm.admin.fair_stand.previews.create"
 PERMISSION_PREVIEWS_UPDATE = "fair_crm.admin.fair_stand.previews.update"
 PERMISSION_PREVIEWS_ARCHIVE = "fair_crm.admin.fair_stand.previews.archive"
+PERMISSION_PROJECTS_READ = "fair_crm.fair_stand.projects.read"
+PERMISSION_PROJECTS_CREATE = "fair_crm.fair_stand.projects.create"
+PERMISSION_PROJECTS_UPDATE = "fair_crm.fair_stand.projects.update"
+PERMISSION_PROJECTS_DELETE = "fair_crm.fair_stand.projects.delete"
+PERMISSION_PROJECTS_EXECUTE = "fair_crm.fair_stand.projects.execute"
 
 
 def get_catalog_repository(db: Session = Depends(get_db)) -> SqlAlchemyFairStandCatalogRepository:
@@ -53,6 +60,10 @@ def get_admin_catalog_service(
     repository: SqlAlchemyFairStandCatalogRepository = Depends(get_catalog_repository),
 ) -> AdminCatalogService:
     return AdminCatalogService(session=db, repository=repository)
+
+
+def get_project_service(db: Session = Depends(get_db)) -> ProjectService:
+    return ProjectService(db, asset_root=get_settings().project_asset_root)
 
 
 def get_core_http_client() -> KyroxCoreHttpClient:

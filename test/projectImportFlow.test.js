@@ -15,6 +15,12 @@ test('project import validates and prepares archive before saving', () => {
   assert.match(handler, /const preparedAssets = \[\]/);
   assert.match(handler, /entry\.async\('blob'\)/);
   assert.ok(handler.indexOf("entry.async('blob')") < handler.indexOf('await saveProject(importedProject)'));
+  // Remote SoT: local assets must exist before saveProject so dirty sync can upload them.
+  assert.ok(
+    handler.indexOf('await saveImportedImageAsset(importedProjectId, asset)')
+      < handler.indexOf('await saveProject(importedProject)'),
+  );
+  assert.match(handler, /markAssetDirty\(importedProjectId, asset\.id\)/);
 });
 
 test('failed import rolls back project and assets atomically', () => {
