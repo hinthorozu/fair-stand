@@ -19,9 +19,9 @@ test('drop Z comes from item.defaultZCm for every Item, not stand ceiling or typ
   assert.equal(getItem('led_floodlight').dimensions.mountHeightCm, 350);
   assert.equal(resolveItemDefaultZCm('wall_200'), 0);
   assert.equal(getItem('wall_200').defaultZCm, 0);
-  assert.equal(getItem('KETTLE').defaultZCm, 66);
-  assert.equal(resolveItemDefaultZCm('KETTLE'), 66);
-  assert.equal(createModulePlacement({ xCm: 10, itemKey: 'KETTLE' }).zCm, 66);
+  assert.equal(getItem('kettle').defaultZCm, 66);
+  assert.equal(resolveItemDefaultZCm('kettle'), 66);
+  assert.equal(createModulePlacement({ xCm: 10, itemKey: 'kettle' }).zCm, 66);
   assert.equal(resolveItemDefaultZCm('profile_190'), 342);
   assert.equal(resolveItemDefaultZCm('wall_200_short_up_2'), 250);
   assert.equal(resolveItemDefaultZCm('wall_200_short_up_1'), 300);
@@ -41,7 +41,7 @@ test('drop Z comes from item.defaultZCm for every Item, not stand ceiling or typ
     { xCm: 20, yCm: 0, zCm: 0 },
   ).zCm, 45);
   assert.equal(applyItemPlacementZCm(
-    { itemKey: 'TV_42', placement: { zCm: 10 } },
+    { itemKey: 'tv_42', placement: { zCm: 10 } },
     { xCm: 0, yCm: 0, zCm: 0 },
     { overlayZCm: 120 },
   ).zCm, 120);

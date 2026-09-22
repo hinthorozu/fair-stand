@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const TRASH_KEY = 'PLASTIC_TRASH_BIN';
+const TRASH_KEY = 'plastic_trash_bin';
 
 async function createIslandStand(page, projectName, { depotContents = false } = {}) {
   await page.goto('/');

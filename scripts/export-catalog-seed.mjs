@@ -31,7 +31,7 @@ const EXTRA_MODELS = {
   furniture_bar_stool_classic: 'bar_chair.glb',
   furniture_sofa_single_classic: 'bej_koltuk_1_ciftli_2_tekli.glb',
   furniture_sofa_double_classic: 'bej_koltuk_1_ciftli_2_tekli.glb',
-  EXTRA_INDOOR_PLANT_1: 'indoor_plants.glb',
+  extra_indoor_plant_1: 'indoor_plants.glb',
 };
 
 function py(value, indent = 0) {

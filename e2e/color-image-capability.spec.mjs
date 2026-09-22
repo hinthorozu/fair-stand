@@ -91,8 +91,8 @@ test('katalog image-capable wall ve non-image TV kartlarını birlikte sunar', a
   await modulePanel.locator(':scope > summary').click();
 
   const wallCard = page.locator('.module-drag-card[data-module-key="wall_100"]');
-  const tvCard = page.locator('.module-drag-card[data-module-key="TV_42"]');
-  const fridgeCard = page.locator('.module-drag-card[data-module-key="MINI_FRIDGE_AVANTI"]');
+  const tvCard = page.locator('.module-drag-card[data-module-key="tv_42"]');
+  const fridgeCard = page.locator('.module-drag-card[data-module-key="mini_fridge_avanti"]');
 
   for (const card of [wallCard, tvCard, fridgeCard]) {
     const group = page.locator('.module-drag-group', { has: card });

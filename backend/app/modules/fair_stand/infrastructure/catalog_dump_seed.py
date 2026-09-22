@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import sqlalchemy as sa
 from sqlalchemy import DateTime, Numeric, Uuid, insert
@@ -81,6 +81,10 @@ def seed_catalog_if_empty(bind) -> None:
                         item[flag] = False
                 if item.get("default_z_cm") is None:
                     item["default_z_cm"] = 0
+        if name == "fair_stand_item_body_parts":
+            for part in coerced:
+                if part.get("id") is None:
+                    part["id"] = uuid4()
         bind.execute(insert(table), coerced)
 
     from app.modules.fair_stand.infrastructure.item_rotation_seed import fill_item_rotation_columns

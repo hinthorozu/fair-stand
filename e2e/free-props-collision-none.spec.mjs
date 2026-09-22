@@ -91,8 +91,8 @@ test('mini-fridge and coat-rack may occupy the same free footprint in Chromium',
     y: Math.round(viewportBox.height * 0.82),
   };
 
-  await dragCatalogCard(page, 'MINI_FRIDGE_AVANTI', drop);
-  await dragCatalogCard(page, 'COAT_RACK', drop);
+  await dragCatalogCard(page, 'mini_fridge_avanti', drop);
+  await dragCatalogCard(page, 'coat_rack', drop);
 
   const project = await saveAndReadProject(page);
   expect(project).not.toBeNull();

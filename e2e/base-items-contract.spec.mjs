@@ -36,7 +36,7 @@ async function saveAndReadProject(page) {
   });
 }
 
-const keys = ['BASE_100', 'BASE_150', 'BASE_200'];
+const keys = ['base_100', 'base_150', 'base_200'];
 
 for (const itemKey of keys) {
   test(`${itemKey} catalog drag creates a canonical base Item with faces`, async ({ page }) => {

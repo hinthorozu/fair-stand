@@ -13,18 +13,18 @@ import {
 } from '../src/modulePlacement.js';
 
 test('baza catalog exposes 100 150 200 cm sizes at 50 x 50 cm depth and height', () => {
-  const base100 = getItem('BASE_100');
-  const base150 = getItem('BASE_150');
-  const base200 = getItem('BASE_200');
+  const base100 = getItem('base_100');
+  const base150 = getItem('base_150');
+  const base200 = getItem('base_200');
   assert.deepEqual(
     [base100.dimensions.widthCm, base150.dimensions.widthCm, base200.dimensions.widthCm],
     [100, 150, 200],
   );
   assert.equal(base100.dimensions.depthCm, 50);
   assert.equal(base100.dimensions.heightCm, 50);
-  assert.equal(getCatalogItem('BASE_100').label, 'Baza 100');
-  assert.equal(getCatalogItem('BASE_150').label, 'Baza 150');
-  assert.equal(getCatalogItem('BASE_200').label, 'Baza 200');
+  assert.equal(getCatalogItem('base_100').label, 'Baza 100');
+  assert.equal(getCatalogItem('base_150').label, 'Baza 150');
+  assert.equal(getCatalogItem('base_200').label, 'Baza 200');
 });
 
 test('baza state has independent front left and right editable panels', () => {

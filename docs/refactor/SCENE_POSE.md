@@ -6,6 +6,8 @@ Kolon envanteri: `DATABASE.md`.
 
 Bu belge hedef sözleşmedir. Aşağıdaki “hedef” satırları henüz kodda tam uygulanmış değildir.
 
+**Backlog / kaldırma sırası / ertelenen property’ler:** `PENDING_ITEM_DECISIONS.md` (canonical iş sırası § A).
+
 ---
 
 ## Üç kural

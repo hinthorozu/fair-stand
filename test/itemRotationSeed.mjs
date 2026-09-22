@@ -31,9 +31,9 @@ const SPECIAL = Object.freeze({
   desk_banko_100: Object.freeze({ rotationStepDeg: 45, defaultRotationDeg: 0, sideInsertRotation: 'inherit' }),
   desk_banko_150: Object.freeze({ rotationStepDeg: 45, defaultRotationDeg: 0, sideInsertRotation: 'inherit' }),
   desk_banko_200: Object.freeze({ rotationStepDeg: 45, defaultRotationDeg: 0, sideInsertRotation: 'inherit' }),
-  desk_banko_100_L: Object.freeze({ rotationStepDeg: 90, defaultRotationDeg: 270, sideInsertRotation: 'inherit' }),
-  desk_banko_150_L: Object.freeze({ rotationStepDeg: 90, defaultRotationDeg: 270, sideInsertRotation: 'inherit' }),
-  desk_banko_200_L: Object.freeze({ rotationStepDeg: 90, defaultRotationDeg: 270, sideInsertRotation: 'inherit' }),
+  desk_banko_100_l: Object.freeze({ rotationStepDeg: 90, defaultRotationDeg: 270, sideInsertRotation: 'inherit' }),
+  desk_banko_150_l: Object.freeze({ rotationStepDeg: 90, defaultRotationDeg: 270, sideInsertRotation: 'inherit' }),
+  desk_banko_200_l: Object.freeze({ rotationStepDeg: 90, defaultRotationDeg: 270, sideInsertRotation: 'inherit' }),
   furniture_sofa_single_classic: Object.freeze({
     rotationStepDeg: 45,
     defaultRotationDeg: 0,

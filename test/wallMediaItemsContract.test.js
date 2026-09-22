@@ -63,18 +63,18 @@ for (const item of listRegisteredItems().filter((entry) => entry.type === 'tv'))
   });
 }
 
-test('video walls read panel size from VIDEO_WALL_PANEL and keep rows/cols on the parent', () => {
-  const panel = getItem('VIDEO_WALL_PANEL');
+test('video walls read panel size from video_wall_panel and keep rows/cols on the parent', () => {
+  const panel = getItem('video_wall_panel');
   assert.equal(panel.catalogVisible, false);
   assert.equal(panel.name, 'Video Wall Panel');
   assert.deepEqual(panel.dimensions, { widthCm: 108.5, heightCm: 61 });
   assert.equal(Object.hasOwn(panel.dimensions, 'depthCm'), false);
 
-  for (const key of ['VIDEO_WALL_2X2', 'VIDEO_WALL_3X3']) {
+  for (const key of ['video_wall_2x2', 'video_wall_3x3']) {
     const item = getItem(key);
     const metrics = resolveWallMediaMetrics(key);
     assert.ok(item.videoWall);
-    assert.equal(item.videoWall.panelItemKey, 'VIDEO_WALL_PANEL');
+    assert.equal(item.videoWall.panelItemKey, 'video_wall_panel');
     assert.equal(Object.hasOwn(item.videoWall, 'panelScreenWidthCm'), false);
     assert.equal(metrics.widthCm, panel.dimensions.widthCm * item.videoWall.cols);
     assert.equal(metrics.heightCm, panel.dimensions.heightCm * item.videoWall.rows);
@@ -85,8 +85,8 @@ test('video walls read panel size from VIDEO_WALL_PANEL and keep rows/cols on th
 });
 
 test('ordinary TV Items use canonical dimensions as catalog and scene height', () => {
-  const expectedHeight = { TV_42: 52.3, TV_55: 68.5, TV_65: 80.9 };
-  for (const key of ['TV_42', 'TV_55', 'TV_65']) {
+  const expectedHeight = { tv_42: 52.3, tv_55: 68.5, tv_65: 80.9 };
+  for (const key of ['tv_42', 'tv_55', 'tv_65']) {
     const item = getItem(key);
     const scene = resolveSceneDimensions(item);
     assert.equal(item.dimensions.heightCm, expectedHeight[key]);

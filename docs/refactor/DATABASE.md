@@ -250,7 +250,7 @@ Recipe child listesi → JSON `composition.items[]`. Parent ≠ child. `quantity
 |---|---|---|---|---|
 | `parent_item_key` | — | Parent | — | — |
 | `rows` / `cols` | `videoWall.rows` / `cols` | Panel ızgara | Seam mesh | `scene3d.js` TV wall; `designState.js` |
-| `panel_item_key` | `videoWall.panelItemKey` | `VIDEO_WALL_PANEL` | Gizli panel SKU | `items.js` video-wall ölçü |
+| `panel_item_key` | `videoWall.panelItemKey` | `video_wall_panel` | Gizli panel SKU | `items.js` video-wall ölçü |
 
 ---
 
@@ -358,7 +358,9 @@ Kayıt durur; mapper bootstrap’a yazar (asset unused rolleri hariç).
 
 ## Bilerek burada olmayanlar
 
-Collision / magneticSnap / moveSnapCm / ghost: hâlâ `TYPE_BEHAVIORS` (`type`). Item kolon değil.
+Ertelenmiş kararlar, tavan/şerit kaldırma sırası, Item property backlog: `PENDING_ITEM_DECISIONS.md`.
+
+Collision / magneticSnap / moveSnapCm / ghost: hâlâ `TYPE_BEHAVIORS` (`type`). Item kolon değil — taşıma kuyruğu aynı dosyada § C.3.
 
 Runtime instance alanları (`placement.xCm/yCm/zCm/rotationZDeg`, `rotationLocked`, yüzey ezmeleri): catalog Item kolonu değil; **`fair_stand_projects.payload` JSONB** içinde yaşar (SoT sunucu). IndexedDB aynı blob’un önbelleğidir.
 

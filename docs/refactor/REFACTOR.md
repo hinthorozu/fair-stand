@@ -7,6 +7,7 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 - Stand zarfı: `docs/refactor/STAND_DIMENSIONS.md`
 - Rotation: `docs/refactor/ROTATION.md`
 - PostgreSQL tabloları: `docs/refactor/DATABASE.md`
+- Ertelenmiş kararlar / backlog (tavan–şerit kaldırma sırası, Item property, TYPE_BEHAVIORS kuyruğu): `docs/refactor/PENDING_ITEM_DECISIONS.md`
 
 ---
 
@@ -240,7 +241,7 @@ kayıtlı Item 96; catalogVisible=true 58; gizli 38 (`VIDEO_WALL_PANEL` dahil); 
 
 Silinen Item: `wall_base_100`, `wall_base_150`, `wall_base_200` (Panel Bazalı 100 / 150 / 200).
 
-Dokunulmayan: `BASE_100` / `BASE_150` / `BASE_200`, leaf `base_top_107_50` / `base_top_157_50` / `base_top_206_50`, `profile_*` / `upright_*` / `panel_*` / `connector_*`, shelf tarafı, genel `base-wall` type/renderer/preview.
+Dokunulmayan: `base_100` / `base_150` / `base_200`, leaf `base_top_107_50` / `base_top_157_50` / `base_top_206_50`, `profile_*` / `upright_*` / `panel_*` / `connector_*`, shelf tarafı, genel `base-wall` type/renderer/preview.
 
 ### Dead code (yalnız bu 3 Item’a hizmet ediyordu)
 

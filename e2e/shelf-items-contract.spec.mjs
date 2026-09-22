@@ -152,7 +152,7 @@ test('shelf_100 drop sonrası ikinci serbest modül eklenir ve sahne rebuild zin
   const afterShelf = await saveAndReadProject(page);
   expect(afterShelf.modules.find((module) => module.itemKey === 'shelf_100')?.itemKey).toBe('shelf_100');
 
-  const fridgeCard = page.locator('.module-drag-card[data-module-key="MINI_FRIDGE_AVANTI"]').first();
+  const fridgeCard = page.locator('.module-drag-card[data-module-key="mini_fridge_avanti"]').first();
   const fridgeGroup = page.locator('.module-drag-group', { has: fridgeCard });
   if (!(await fridgeGroup.evaluate((el) => el.open))) {
     await fridgeGroup.locator(':scope > summary').click();
@@ -171,7 +171,7 @@ test('shelf_100 drop sonrası ikinci serbest modül eklenir ve sahne rebuild zin
 
   const afterFridge = await saveAndReadProject(page);
   expect(afterFridge.modules.find((module) => module.itemKey === 'shelf_100')?.itemKey).toBe('shelf_100');
-  expect(afterFridge.modules.find((module) => module.itemKey === 'MINI_FRIDGE_AVANTI')?.itemKey).toBe('MINI_FRIDGE_AVANTI');
+  expect(afterFridge.modules.find((module) => module.itemKey === 'mini_fridge_avanti')?.itemKey).toBe('mini_fridge_avanti');
   expect(afterFridge.modules.every((module) => Boolean(module.itemKey))).toBe(true);
   expect(errors).toEqual([]);
 });

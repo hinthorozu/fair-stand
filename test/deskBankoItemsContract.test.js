@@ -24,9 +24,9 @@ const BANKO_KEYS = [
   'desk_banko_100',
   'desk_banko_150',
   'desk_banko_200',
-  'desk_banko_100_L',
-  'desk_banko_150_L',
-  'desk_banko_200_L',
+  'desk_banko_100_l',
+  'desk_banko_150_l',
+  'desk_banko_200_l',
 ];
 
 const EXPECTED = {
@@ -51,21 +51,21 @@ const EXPECTED = {
       connector_start: 6, connector_single: 12, counter_top_210_60: 1,
     },
   },
-  desk_banko_100_L: {
+  desk_banko_100_l: {
     widthCm: 100, depthCm: 100, heightCm: 100, shape: 'L', faceCount: 8,
     recipeQuantities: {
       profile_91: 5, profile_41_5: 5, upright_99: 5, panel_98: 4, panel_48_5: 4,
       connector_start: 8, connector_single: 16, counter_top_110_60: 1, counter_top_52_60: 1,
     },
   },
-  desk_banko_150_L: {
+  desk_banko_150_l: {
     widthCm: 150, depthCm: 150, heightCm: 100, shape: 'L', faceCount: 8,
     recipeQuantities: {
       profile_140_5: 5, profile_91: 1, profile_41_5: 4, upright_99: 5, panel_147_5: 4, panel_48_5: 4,
       connector_start: 8, connector_single: 16, counter_top_160_60: 1, counter_top_102_60: 1,
     },
   },
-  desk_banko_200_L: {
+  desk_banko_200_l: {
     widthCm: 200, depthCm: 200, heightCm: 100, shape: 'L', faceCount: 8,
     recipeQuantities: {
       profile_190: 5, profile_140_5: 1, profile_41_5: 4, upright_99: 5, panel_197: 4, panel_48_5: 4,

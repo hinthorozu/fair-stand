@@ -40,9 +40,9 @@ const keys = [
   'desk_banko_100',
   'desk_banko_150',
   'desk_banko_200',
-  'desk_banko_100_L',
-  'desk_banko_150_L',
-  'desk_banko_200_L',
+  'desk_banko_100_l',
+  'desk_banko_150_l',
+  'desk_banko_200_l',
 ];
 
 for (const itemKey of keys) {
@@ -73,7 +73,7 @@ for (const itemKey of keys) {
     expect(item.faces?.frontUpper).toBeTruthy();
     expect(item.faces.frontLower.color).toBeTruthy();
     expect(item.placement?.wallId).toBe('free');
-    if (itemKey.endsWith('_L')) {
+    if (itemKey.endsWith('_l')) {
       expect(item.shape).toBe('L');
       expect(item.faces?.returnLower).toBeTruthy();
     } else {

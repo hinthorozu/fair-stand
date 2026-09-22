@@ -67,7 +67,7 @@ test('geçerli ZIP içe aktarılır ve ada stand + free fridge state korunur', a
       modules: [{
         id: 'e2e-valid-fridge',
         type: 'mini-fridge',
-        itemKey: 'MINI_FRIDGE_AVANTI',
+        itemKey: 'mini_fridge_avanti',
         placement: {
           wallId: 'free',
           xCm: 200,
@@ -90,7 +90,7 @@ test('geçerli ZIP içe aktarılır ve ada stand + free fridge state korunur', a
   expect(project.stand.standType).toBe('island');
   expect(project.stand.xCm).toBe(500);
   expect(project.stand.yCm).toBe(500);
-  const fridge = project.modules.find((moduleState) => moduleState.itemKey === 'MINI_FRIDGE_AVANTI');
+  const fridge = project.modules.find((moduleState) => moduleState.itemKey === 'mini_fridge_avanti');
   expect(fridge).toBeTruthy();
   expect(fridge.placement.wallId).toBe('free');
   expect(fridge.placement.xCm).toBe(200);

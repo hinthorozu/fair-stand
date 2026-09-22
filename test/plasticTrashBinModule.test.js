@@ -17,7 +17,7 @@ import {
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { AUTO_DEPOT_SIZES, planAutomaticDepot } from '../src/autoDepot.js';
 
-const KEY = 'PLASTIC_TRASH_BIN';
+const KEY = 'plastic_trash_bin';
 const MODEL_FILE = 'plastic_trash_bin.glb';
 
 function footprint(spec) {

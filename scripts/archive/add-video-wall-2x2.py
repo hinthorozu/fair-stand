@@ -10,14 +10,14 @@ def replace_once(path, old, new):
 
 # Catalog
 replace_once('src/catalog.js',
-"  TV_55: createTvCatalogItem(TV_55_DEFINITION),\n  TV_65: createTvCatalogItem(TV_65_DEFINITION),",
-"  TV_55: createTvCatalogItem(TV_55_DEFINITION),\n  VIDEO_WALL_2X2: Object.freeze({\n    ...createTvCatalogItem(TV_55_DEFINITION),\n    widthCm: TV_55_DEFINITION.screenWidthCm * 2,\n    heightCm: TV_55_DEFINITION.screenHeightCm * 2,\n    screenWidthCm: TV_55_DEFINITION.screenWidthCm * 2,\n    screenHeightCm: TV_55_DEFINITION.screenHeightCm * 2,\n    panelScreenWidthCm: TV_55_DEFINITION.screenWidthCm,\n    panelScreenHeightCm: TV_55_DEFINITION.screenHeightCm,\n    videoWallRows: 2,\n    videoWallCols: 2,\n    label: 'Video Wall 2×2 · 4×55-inch',\n  }),\n  TV_65: createTvCatalogItem(TV_65_DEFINITION),")
+"  tv_55: createTvCatalogItem(TV_55_DEFINITION),\n  tv_65: createTvCatalogItem(TV_65_DEFINITION),",
+"  tv_55: createTvCatalogItem(TV_55_DEFINITION),\n  video_wall_2x2: Object.freeze({\n    ...createTvCatalogItem(TV_55_DEFINITION),\n    widthCm: TV_55_DEFINITION.screenWidthCm * 2,\n    heightCm: TV_55_DEFINITION.screenHeightCm * 2,\n    screenWidthCm: TV_55_DEFINITION.screenWidthCm * 2,\n    screenHeightCm: TV_55_DEFINITION.screenHeightCm * 2,\n    panelScreenWidthCm: TV_55_DEFINITION.screenWidthCm,\n    panelScreenHeightCm: TV_55_DEFINITION.screenHeightCm,\n    videoWallRows: 2,\n    videoWallCols: 2,\n    label: 'Video Wall 2×2 · 4×55-inch',\n  }),\n  tv_65: createTvCatalogItem(TV_65_DEFINITION),")
 replace_once('src/catalog.js',
-"  'TV_42',\n  'TV_55',\n  'TV_65',",
-"  'TV_42',\n  'TV_55',\n  'VIDEO_WALL_2X2',\n  'TV_65',")
+"  'tv_42',\n  'tv_55',\n  'tv_65',",
+"  'tv_42',\n  'tv_55',\n  'video_wall_2x2',\n  'tv_65',")
 replace_once('src/catalog.js',
-"keys: Object.freeze(['TV_42', 'TV_55', 'TV_65', 'LED_FLOODLIGHT'])",
-"keys: Object.freeze(['TV_42', 'TV_55', 'VIDEO_WALL_2X2', 'TV_65', 'LED_FLOODLIGHT'])")
+"keys: Object.freeze(['tv_42', 'tv_55', 'tv_65', 'LED_FLOODLIGHT'])",
+"keys: Object.freeze(['tv_42', 'tv_55', 'video_wall_2x2', 'tv_65', 'LED_FLOODLIGHT'])")
 
 # TV state inheritance
 replace_once('src/designState.js',

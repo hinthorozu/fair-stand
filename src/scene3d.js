@@ -5002,7 +5002,7 @@ function createTvModule(moduleState, moduleIndex) {
     panelWidthM = Number(panelItem?.dimensions?.widthCm) / 100;
     panelHeightM = Number(panelItem?.dimensions?.heightCm) / 100;
     if (!Number.isFinite(panelWidthM) || !Number.isFinite(panelHeightM)) {
-      throw new TypeError(`Missing VIDEO_WALL_PANEL dimensions for ${item.itemKey}.`);
+      throw new TypeError(`Missing video_wall_panel dimensions for ${item.itemKey}.`);
     }
   }
   const depthM = Number(moduleState.depthCm || 5) / 100;
@@ -5167,7 +5167,7 @@ function createPlasticTrashBinTopLabel(heightCm) {
   return label;
 }
 function createMiniFridgeModule(moduleState, moduleIndex) {
-  const defaults = getItem('MINI_FRIDGE_AVANTI').dimensions;
+  const defaults = getItem('mini_fridge_avanti').dimensions;
   const widthCm = Number(moduleState.widthCm || defaults.widthCm);
   const depthCm = Number(moduleState.depthCm || defaults.depthCm);
   const heightCm = Number(moduleState.heightCm || defaults.heightCm);
@@ -5204,7 +5204,7 @@ function createMiniFridgeModule(moduleState, moduleIndex) {
   };
   group.add(proxy);
 
-  loadItemModel('MINI_FRIDGE_AVANTI').then((template) => {
+  loadItemModel('mini_fridge_avanti').then((template) => {
     const model = template.clone(true);
     model.traverse((object) => {
       if (!object.isMesh) return;
@@ -5398,7 +5398,7 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
 }
 
 function createCoatRackModule(moduleState, moduleIndex) {
-  const defaults = getItem('COAT_RACK').dimensions;
+  const defaults = getItem('coat_rack').dimensions;
   const widthCm = Number(moduleState.widthCm || defaults.widthCm);
   const depthCm = Number(moduleState.depthCm || defaults.depthCm);
   const heightCm = Number(moduleState.heightCm || defaults.heightCm);
@@ -5433,7 +5433,7 @@ function createCoatRackModule(moduleState, moduleIndex) {
   };
   group.add(proxy);
 
-  loadItemModel('COAT_RACK').then((template) => {
+  loadItemModel('coat_rack').then((template) => {
     if (!group.parent) return;
     const model = template.clone(true);
     model.traverse((object) => {
@@ -5566,7 +5566,7 @@ function createProfileModule(moduleState, moduleIndex) {
 }
 
 function createKettleModule(moduleState, moduleIndex) {
-  const defaults = getItem('KETTLE').dimensions;
+  const defaults = getItem('kettle').dimensions;
   const widthCm = Number(moduleState.widthCm || defaults.widthCm);
   const depthCm = Number(moduleState.depthCm || defaults.depthCm);
   const heightCm = Number(moduleState.heightCm || defaults.heightCm);
@@ -5601,7 +5601,7 @@ function createKettleModule(moduleState, moduleIndex) {
   };
   group.add(proxy);
 
-  loadItemModel('KETTLE').then((template) => {
+  loadItemModel('kettle').then((template) => {
     const model = template.clone(true);
     model.traverse((object) => {
       if (!object.isMesh) return;

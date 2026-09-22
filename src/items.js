@@ -154,7 +154,7 @@ export function getFurnitureClusterQuantity(item, childItemKey) {
 
 // Duvara asılan medya ürünleri tek `tv` davranış ailesini paylaşır. Sıradan TV'ler
 // doğrulanmış ekran ölçüsüne göre parametriktir; widthCm/heightCm görünür ekrandır.
-// Video wall panel ölçüsü VIDEO_WALL_PANEL Item'ındadır; ızgara rows/cols parent'ta kalır.
+// Video wall panel ölçüsü video_wall_panel Item'ındadır; ızgara rows/cols parent'ta kalır.
 
 
 function resolveVideoWallPanelItem(item) {
@@ -163,7 +163,7 @@ function resolveVideoWallPanelItem(item) {
 }
 
 // Katalog, state oluşturucu ve seçim geri bildiriminin kullandığı duvar-medya ölçü çözümleyicisi.
-// Video wall toplamları VIDEO_WALL_PANEL × ızgaradan okunur; sıradan TV canonical dimensions kullanır.
+// Video wall toplamları video_wall_panel × ızgaradan okunur; sıradan TV canonical dimensions kullanır.
 export function resolveWallMediaMetrics(itemOrKey) {
   const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
   if (!item || item.type !== 'tv') return null;
@@ -179,7 +179,7 @@ export function resolveWallMediaMetrics(itemOrKey) {
     const panelWidthCm = Number(panel?.dimensions?.widthCm);
     const panelHeightCm = Number(panel?.dimensions?.heightCm);
     if (!Number.isFinite(panelWidthCm) || !Number.isFinite(panelHeightCm)) {
-      throw new TypeError(`Missing VIDEO_WALL_PANEL dimensions for ${item.itemKey}.`);
+      throw new TypeError(`Missing video_wall_panel dimensions for ${item.itemKey}.`);
     }
     return Object.freeze({
       ...base,

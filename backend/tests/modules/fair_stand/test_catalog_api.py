@@ -29,7 +29,7 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     assert "catalogPreview" not in shelf
     chair = next(item for item in body["items"] if item["itemKey"] == "chair_eames")
     assert chair["modelFile"] == "eames_chair.glb"
-    plant = next(item for item in body["items"] if item["itemKey"] == "EXTRA_INDOOR_PLANT_1")
+    plant = next(item for item in body["items"] if item["itemKey"] == "extra_indoor_plant_1")
     assert plant["modelFile"] == "indoor_plants.glb"
     sofa = next(item for item in body["items"] if item["itemKey"] == "furniture_sofa_single_classic")
     assert sofa["modelFile"] == "bej_koltuk_1_ciftli_2_tekli.glb"
@@ -41,8 +41,8 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     kit = next(item for item in body["items"] if item["itemKey"] == "furniture_sofa_set_classic")
     assert "mode" not in kit["composition"]
     assert len(kit["composition"]["items"]) == 3
-    vw = next(item for item in body["items"] if item["itemKey"] == "VIDEO_WALL_2X2")
-    assert vw["videoWall"]["panelItemKey"] == "VIDEO_WALL_PANEL"
+    vw = next(item for item in body["items"] if item["itemKey"] == "video_wall_2x2")
+    assert vw["videoWall"]["panelItemKey"] == "video_wall_panel"
     showcase = next(item for item in body["items"] if item["itemKey"] == "wall_showcase_100_2")
     assert showcase["bodyItems"]["glassShelfItemKey"] == "glass_shelf"
     wall_200 = next(item for item in body["items"] if item["itemKey"] == "wall_200")
@@ -61,7 +61,7 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     stool = next(item for item in body["items"] if item["itemKey"] == "furniture_bar_stool_classic")
     assert stool["defaultRotationDeg"] == 270
     assert stool["sideInsertRotation"] == "default"
-    l_banko = next(item for item in body["items"] if item["itemKey"] == "desk_banko_100_L")
+    l_banko = next(item for item in body["items"] if item["itemKey"] == "desk_banko_100_l")
     assert l_banko["defaultRotationDeg"] == 270
     assert l_banko["rotationStepDeg"] == 90
     assert "innerCorner" not in wall_200.get("composition", {})

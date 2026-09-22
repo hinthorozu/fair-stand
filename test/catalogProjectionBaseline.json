@@ -31,12 +31,12 @@
     "desk_banko_200",
     "desk_banko_150",
     "desk_banko_100",
-    "desk_banko_200_L",
-    "desk_banko_150_L",
-    "desk_banko_100_L",
-    "BASE_200",
-    "BASE_150",
-    "BASE_100",
+    "desk_banko_200_l",
+    "desk_banko_150_l",
+    "desk_banko_100_l",
+    "base_200",
+    "base_150",
+    "base_100",
     "furniture_sofa_set_classic",
     "furniture_sofa_single_classic",
     "furniture_sofa_double_classic",
@@ -45,19 +45,19 @@
     "chair_eames",
     "glass_table",
     "furniture_bar_stool_classic",
-    "MINI_FRIDGE_AVANTI",
-    "KETTLE",
-    "COAT_RACK",
-    "PLASTIC_TRASH_BIN",
-    "EXTRA_INDOOR_PLANT_1",
-    "EXTRA_LONG_PLANTER_100",
-    "EXTRA_LONG_PLANTER_150",
-    "EXTRA_LONG_PLANTER_200",
-    "TV_42",
-    "TV_55",
-    "VIDEO_WALL_2X2",
-    "VIDEO_WALL_3X3",
-    "TV_65",
+    "mini_fridge_avanti",
+    "kettle",
+    "coat_rack",
+    "plastic_trash_bin",
+    "extra_indoor_plant_1",
+    "extra_long_planter_100",
+    "extra_long_planter_150",
+    "extra_long_planter_200",
+    "tv_42",
+    "tv_55",
+    "video_wall_2x2",
+    "video_wall_3x3",
+    "tv_65",
     "led_floodlight"
   ],
   "groups": [
@@ -117,12 +117,12 @@
         "desk_banko_200",
         "desk_banko_150",
         "desk_banko_100",
-        "desk_banko_200_L",
-        "desk_banko_150_L",
-        "desk_banko_100_L",
-        "BASE_200",
-        "BASE_150",
-        "BASE_100"
+        "desk_banko_200_l",
+        "desk_banko_150_l",
+        "desk_banko_100_l",
+        "base_200",
+        "base_150",
+        "base_100"
       ]
     },
     {
@@ -138,14 +138,14 @@
         "chair_eames",
         "glass_table",
         "furniture_bar_stool_classic",
-        "MINI_FRIDGE_AVANTI",
-        "KETTLE",
-        "COAT_RACK",
-        "PLASTIC_TRASH_BIN",
-        "EXTRA_INDOOR_PLANT_1",
-        "EXTRA_LONG_PLANTER_100",
-        "EXTRA_LONG_PLANTER_150",
-        "EXTRA_LONG_PLANTER_200"
+        "mini_fridge_avanti",
+        "kettle",
+        "coat_rack",
+        "plastic_trash_bin",
+        "extra_indoor_plant_1",
+        "extra_long_planter_100",
+        "extra_long_planter_150",
+        "extra_long_planter_200"
       ]
     },
     {
@@ -153,11 +153,11 @@
       "catalogName": "Elektronik & Ayd\u0131nlatma",
       "catalogIndex": 6,
       "keys": [
-        "TV_42",
-        "TV_55",
-        "VIDEO_WALL_2X2",
-        "VIDEO_WALL_3X3",
-        "TV_65",
+        "tv_42",
+        "tv_55",
+        "video_wall_2x2",
+        "video_wall_3x3",
+        "tv_65",
         "led_floodlight"
       ]
     }
@@ -314,32 +314,32 @@
       "previewId": 7
     },
     {
-      "itemKey": "desk_banko_200_L",
+      "itemKey": "desk_banko_200_l",
       "label": "K\u00f6\u015fe Banko 200\u00d7200",
       "previewId": 7
     },
     {
-      "itemKey": "desk_banko_150_L",
+      "itemKey": "desk_banko_150_l",
       "label": "K\u00f6\u015fe Banko 150\u00d7150",
       "previewId": 7
     },
     {
-      "itemKey": "desk_banko_100_L",
+      "itemKey": "desk_banko_100_l",
       "label": "K\u00f6\u015fe Banko 100\u00d7100",
       "previewId": 7
     },
     {
-      "itemKey": "BASE_200",
+      "itemKey": "base_200",
       "label": "Baza 200",
       "previewId": 2
     },
     {
-      "itemKey": "BASE_150",
+      "itemKey": "base_150",
       "label": "Baza 150",
       "previewId": 2
     },
     {
-      "itemKey": "BASE_100",
+      "itemKey": "base_100",
       "label": "Baza 100",
       "previewId": 2
     },
@@ -384,67 +384,67 @@
       "previewId": 1
     },
     {
-      "itemKey": "MINI_FRIDGE_AVANTI",
+      "itemKey": "mini_fridge_avanti",
       "label": "Mini Buzdolab\u0131",
       "previewId": 15
     },
     {
-      "itemKey": "KETTLE",
+      "itemKey": "kettle",
       "label": "Kettle",
       "previewId": 13
     },
     {
-      "itemKey": "COAT_RACK",
+      "itemKey": "coat_rack",
       "label": "Ask\u0131l\u0131k",
       "previewId": 5
     },
     {
-      "itemKey": "PLASTIC_TRASH_BIN",
+      "itemKey": "plastic_trash_bin",
       "label": "\u00c7\u00f6p Kutusu",
       "previewId": 16
     },
     {
-      "itemKey": "EXTRA_INDOOR_PLANT_1",
+      "itemKey": "extra_indoor_plant_1",
       "label": "Yapay \u00c7i\u00e7ek 1",
       "previewId": 12
     },
     {
-      "itemKey": "EXTRA_LONG_PLANTER_100",
+      "itemKey": "extra_long_planter_100",
       "label": "Uzun Saks\u0131 100",
       "previewId": 14
     },
     {
-      "itemKey": "EXTRA_LONG_PLANTER_150",
+      "itemKey": "extra_long_planter_150",
       "label": "Uzun Saks\u0131 150",
       "previewId": 14
     },
     {
-      "itemKey": "EXTRA_LONG_PLANTER_200",
+      "itemKey": "extra_long_planter_200",
       "label": "Uzun Saks\u0131 200",
       "previewId": 14
     },
     {
-      "itemKey": "TV_42",
+      "itemKey": "tv_42",
       "label": "TV 42\"",
       "previewId": 26
     },
     {
-      "itemKey": "TV_55",
+      "itemKey": "tv_55",
       "label": "TV 55\"",
       "previewId": 26
     },
     {
-      "itemKey": "VIDEO_WALL_2X2",
+      "itemKey": "video_wall_2x2",
       "label": "Video Wall 2\u00d72",
       "previewId": 28
     },
     {
-      "itemKey": "VIDEO_WALL_3X3",
+      "itemKey": "video_wall_3x3",
       "label": "Video Wall 3\u00d73",
       "previewId": 28
     },
     {
-      "itemKey": "TV_65",
+      "itemKey": "tv_65",
       "label": "TV 65\"",
       "previewId": 26
     },

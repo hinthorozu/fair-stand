@@ -128,8 +128,8 @@ test('valid free-floor catalog preview keeps a green ghost', async ({ page }) =>
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
   await createIslandStand(page, 'Valid Ghost Fridge');
-  await openCatalogCard(page, 'MINI_FRIDGE_AVANTI');
-  await previewCatalogDrag(page, 'MINI_FRIDGE_AVANTI', 0.52, 0.82);
+  await openCatalogCard(page, 'mini_fridge_avanti');
+  await previewCatalogDrag(page, 'mini_fridge_avanti', 0.52, 0.82);
   await expect(scenePlacementCanvas(page)).toHaveAttribute('data-placement-ghost', 'valid');
   expect(pageErrors).toEqual([]);
 });

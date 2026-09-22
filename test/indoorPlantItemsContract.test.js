@@ -14,14 +14,14 @@ import { getModuleBehavior } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 
 const PLANT_KEYS = [
-  'EXTRA_INDOOR_PLANT_1',
-  'EXTRA_LONG_PLANTER_100',
-  'EXTRA_LONG_PLANTER_150',
-  'EXTRA_LONG_PLANTER_200',
+  'extra_indoor_plant_1',
+  'extra_long_planter_100',
+  'extra_long_planter_150',
+  'extra_long_planter_200',
 ];
 
 const EXPECTED = {
-  EXTRA_INDOOR_PLANT_1: {
+  extra_indoor_plant_1: {
     widthCm: 60,
     depthCm: 60,
     heightCm: 120,
@@ -32,7 +32,7 @@ const EXPECTED = {
     hasSurface: false,
     profile: 'free-model-fixed',
   },
-  EXTRA_LONG_PLANTER_100: {
+  extra_long_planter_100: {
     widthCm: 100,
     depthCm: 30,
     heightCm: 30,
@@ -43,7 +43,7 @@ const EXPECTED = {
     hasSurface: true,
     profile: 'free-model-color',
   },
-  EXTRA_LONG_PLANTER_150: {
+  extra_long_planter_150: {
     widthCm: 150,
     depthCm: 30,
     heightCm: 30,
@@ -54,7 +54,7 @@ const EXPECTED = {
     hasSurface: true,
     profile: 'free-model-color',
   },
-  EXTRA_LONG_PLANTER_200: {
+  extra_long_planter_200: {
     widthCm: 200,
     depthCm: 30,
     heightCm: 30,
@@ -127,9 +127,9 @@ for (const itemKey of PLANT_KEYS) {
   });
 }
 
-test('boş factory EXTRA_INDOOR_PLANT_1 default üretir', () => {
+test('boş factory extra_indoor_plant_1 default üretir', () => {
   const state = createIndoorPlantModuleState();
-  assert.equal(state.itemKey, 'EXTRA_INDOOR_PLANT_1');
+  assert.equal(state.itemKey, 'extra_indoor_plant_1');
   assert.equal(state.modelFile, 'indoor_plants.glb');
   assert.equal(state.surface, undefined);
 });

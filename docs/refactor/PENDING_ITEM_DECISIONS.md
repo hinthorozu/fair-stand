@@ -1,43 +1,187 @@
-# Fair Stand — Ertelenmiş Item kararları
+# Fair Stand — Ertelenmiş kararlar ve backlog
 
-Bu dosya Item refactor sırasında henüz çözülmemiş veya bilinçli olarak ertelenmiş property / Item kararlarının **sürekli kullanılan** takip listesidir.
+Henüz çözülmemiş veya bilinçli ertelenmiş **Item property**, **stand zarfı / DB**, **runtime davranış** ve **pose/tavan–şerit** işlerinin tek takip listesi.
 
-- Kaynak: açık ürün kararı + mevcut kod/MD. Tahmin veya “muhtemelen” yazılmaz.
-- Yeni ertelenen property veya Item kararı buraya eklenir; ayrı gizli liste tutulmaz.
-- Listedeki madde, bu dosyada karar değişene kadar runtime’da silinmez, taşınmaz veya yeniden adlandırılmaz.
-- Bu dosya tek başına implementasyon izni değildir.
+- Kaynak: ürün kararı + `DATABASE.md`, `ITEMS.md`, `SCENE_POSE.md`, mevcut kod. Tahmin yazılmaz.
+- Yeni madde buraya eklenir; gizli paralel liste yok.
+- **Yasak (genel):** Bu dosyada karar değişmeden veya kaldırma sırası dışında ilgili alan/tablo/kolon silinmez, taşınmaz, yeniden adlandırılmaz.
+- **Implementasyon izni:** Bu dosya + ilgili konu belgesi (`SCENE_POSE.md` pose/snap hedefi); tek başına yeterli değildir.
+
+**İlgili belgeler:** `SCENE_POSE.md` (duruş/snap hedef sözleşmesi), `DATABASE.md` (tablo envanteri), `ITEMS.md` (onaylı şema + runtime field kuyruğu), `STAND_DIMENSIONS.md` (zarf).
 
 ---
 
-## 1. `eyeCount`
+## A. Tavan / şerit kaldırma sırası (güvenli)
+
+Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (örn. 500 cm — clamp/kamera). Global şerit ızgarası ve tavan türevli ürün yüksekliği kalkar.
+
+`SCENE_POSE.md` hedefi ile aynı; **operasyon sırası yalnız burada** canonical’dır.
+
+| Adım | İş | Not |
+|---:|---|---|
+| 1 | Ölü occupancy layout kodu | Kullanılmayan top-align / şerit layout helper’ları |
+| 2 | Her item: eksiksiz `scene_dimensions` + yüzey/BOM layout | Örn. `wall_200_250` = 5 panel; gizli 350 / `upright_346_5` / ×7 sözleşmesi biter |
+| 3 | `designState.strips[]` → item surface slot’ları | Eski proje **migration** zorunlu |
+| 4 | Raf snap → host item anchor | `snap_target_item_type` / `snap_anchor`; global seam yok |
+| 5 | `fair_stand_item_strip_occupancy` + CRM | Aşağı § B.4–B.5 |
+| 6 | `fair_stand_dimensions.strip_count` / `strip_height_m` + CHECK `height = strip × stripHeight` | Aşağı § C.1 |
+| 7 | Tavan yalnız max zarf | Ürün mesh/collision **tavan fallback okumaz** |
+
+**Kalabilir (min):** bağımsız `height_m` (max), `depth_m` / `frame_*` (ileride tamamen item/zarf sadeleşmesine girebilir).
+
+**Gitmeli:** şerit sayısı/pitch, seam grid, occupancy, “yükseklik yoksa tavan kullan”, 7×50 help.
+
+**Pose/snap (ayrı hat):** `SCENE_POSE.md` § *Uygulama sırası 1–6* — default Z, snap kolonları vb. kısmen kodda; **bu tablo onu tamamlamaz**, şerit/tavan iskeletini söker.
+
+---
+
+## B. Item property kararları
+
+### B.1. `eyeCount`
 
 - **Durum:** SİLİNECEK
-- **Karar:** Yerine gerçek glass shelf yerleşim bilgisi gelecek.
-- **Yasak:** Yeni bir dolaylı sayaç üretilmez.
+- **Karar:** Yerine gerçek glass shelf yerleşim bilgisi (`bodyItems.glassShelfItemKey` vb. ile uyumlu model).
+- **Kaynak:** `ITEMS.md` kuyruk (2 vitrin).
+- **Yasak:** Yeni dolaylı göz sayacı üretilmez.
 
-## 2. `wallGapCm`
+### B.2. `dimensions.wallGapCm` (`wall_gap_cm`)
 
 - **Durum:** KORUNACAK
-- **Karar:** İleride uygun yeni property grubuna taşınacak.
-- **Yasak:** Bu madde kapanmadan silinmez.
+- **Karar:** İleride uygun property grubuna taşınır; `illuminated-foam` tüketicisi korunur.
+- **Kaynak:** `ITEMS.md` kuyruk; `DATABASE.md` `fair_stand_item_dimensions`.
+- **Yasak:** Madde kapanmadan silinmez.
 
-## 3. `mountHeightCm`
-
-- **Durum:** ARAŞTIRILACAK
-- **Karar:** Producer / consumer zinciri incelenmeden karar verilmez.
-
-## 4. `stripOccupancy.align`
+### B.3. `mountHeightCm` / `dimensions.mount_height_cm` vs `default_z_cm`
 
 - **Durum:** ARAŞTIRILACAK
-- **Karar:** Henüz verilmedi.
+- **Karar:** Producer/consumer zinciri netleşmeden tek alan seçilmez. Drop/snap hedefi `default_z_cm` (`ITEMS.md` onaylı); seed’de floodlight 350 her iki yerde de durabilir.
+- **Kaynak:** `DATABASE.md` (`mount_height_cm` legacy); `ITEMS.md` `defaultZCm`.
+- **Yasak:** Biri diğerine alias yazılmadan biri silinmez.
 
-## 5. `stripOccupancy.stripCount`
+### B.4. `stripOccupancy.align`
 
-- **Durum:** ARAŞTIRILACAK
-- **Karar:** Henüz verilmedi.
+- **Durum:** KALDIRILACAK (§ A adım 5)
+- **Karar:** Tablo kalkınca alan yok; short-up kotu item `default_z_cm` + gövde height.
+- **Kaynak:** `DATABASE.md` `fair_stand_item_strip_occupancy` (CHECK yalnız `top`).
+- **Yasak:** § A adım 1–4 bitmeden tablo/CRM silinmez.
 
-## 6. `nominalModuleWidthCm`
+### B.5. `stripOccupancy.stripCount`
+
+- **Durum:** KALDIRILACAK (§ A adım 5–6)
+- **Karar:** Panel adedi ürün BOM/layout’ta; stand `strip_count` (7) ile karışmaz — o da § C.1 ile gider.
+- **Kaynak:** `DATABASE.md` (8 short-up satırı).
+- **Yasak:** § A adım 1–4 bitmeden silinmez.
+
+### B.6. `nominalModuleWidthCm` / inner-corner recipe
 
 - **Durum:** KALDIRILDI
-- **Karar:** Legacy `nominalModuleWidthCm` / `nominal_module_width_cm` ve `composition.innerCorner` / `panelVariant: 'inner-corner'` recipe mekanizması tüm katmanlardan kaldırıldı. Köşe paneli Item’ları (`panel_corner_*`) korundu. Yeni köşe-duyarlı BOM henüz yok.
-- **Yasak:** `itemKey` rakamlarından yeni bir nominal/eşleme alanı üretilmez. Item kayıtları silinmez.
+- **Karar:** Legacy nominal + `composition.innerCorner` / `panelVariant: 'inner-corner'` kaldırıldı. Köşe paneli Item’ları (`panel_corner_*`) korundu; yeni köşe-duyarlı BOM yok.
+- **Yasak:** `itemKey` rakamlarından yeni nominal alan üretilmez. Item kayıtları silinmez.
+
+### B.7. `composition.moduleType` / `composition.options.shape`
+
+- **Durum:** KALDIRILACAK (veri temizliği)
+- **Karar:** **DEPRECATED (SCHEMA_ONLY)** — production `src/` okumaz; DB/seed satırları ve mapper çıktısından kaldırılacak (DECISION-06).
+- **Kaynak:** `ITEMS.md` kuyruk üst notu.
+- **Yasak:** Davranış için geri getirilmez.
+
+### B.8. Panel arası boşluk (runtime vs DB)
+
+- **Durum:** ARAŞTIRILACAK
+- **Karar:** Hedefte tek standart cm (tavanla çarpılmaz). Bugün renderer `PANEL_RAIL_HEIGHT_M` ≈ 0.4 cm; şerit pitch 50 — seed’de net cm yazılacak. `wallGapCm` (B.2) ayrı ürün alanı.
+- **Kaynak:** `SCENE_POSE.md` § *İki panel arası*; `ITEMS.md` / duvar BOM.
+
+### B.9. Duvar / vitrin seed SKU’ları (gizli 350)
+
+- **Durum:** BACKLOG (§ A adım 2)
+- **Karar:** `wall_*`, vitrin, kapı vb. ayrı yükseklik SKU’ları (`wall_200_100`, `wall_200_250`, …); banko modeli (kendi 100 cm) referans.
+- **Kaynak:** `SCENE_POSE.md` hedef; mevcut seed `scene height=350`, `upright_346_5`, panel ×7.
+- **Yasak:** Tek `wall_200` ile tavan değişimine bağlı “otomatik boy”.
+
+### B.10. `variant` (short-up-1 / short-up-2)
+
+- **Durum:** KORUNACAK (şimdilik)
+- **Karar:** Occupancy kalkınca yalnız kimlik/seed ayrımı; şerit sayısı anlamı taşımaz.
+- **Kaynak:** `ITEMS.md` kuyruk (8 Item).
+
+---
+
+## C. Stand zarfı ve DB (Item tablosu değil)
+
+### C.1. `fair_stand_dimensions.strip_count` / `strip_height_m` / height CHECK
+
+- **Durum:** KALDIRILACAK (§ A adım 6)
+- **Karar:** Zarf yalnız max `height_m` (+ depth/frame). Ürün panel ızgarası item layout’ta.
+- **Kaynak:** `DATABASE.md` § `fair_stand_dimensions`; CRM ayar formu.
+- **Yasak:** CHECK kalkmadan seed’de tutarsız height bırakılmaz.
+
+### C.2. Stand tavan fallback (collision / ghost / mesh)
+
+- **Durum:** KALDIRILACAK (§ A adım 7)
+- **Karar:** Item’da height yoksa tavan kullanımı biter; eksik ölçü seed/validation hatası.
+- **Kaynak:** `SCENE_POSE.md` STAND_DIMENSIONS hedef; `STAND_DIMENSIONS.md`.
+
+### C.3. `TYPE_BEHAVIORS` (placement davranışı)
+
+- **Durum:** ERTELENDİ — Item kolonlarına taşınacak
+- **Karar:** `DATABASE.md` § *Bilerek burada olmayanlar*: collision, magneticSnap, moveSnapCm, ghost, placement, allowSideInsert, boundary, wall overlay, wallCapacity hâlâ `type` map’inde. `ITEMS.md` mimari kural: Item davranışı `type` ile belirlenmez (hedef); taşıma ayrı refactor, sıra ürün onayı gerekir.
+- **Yasak:** Davranışı çoğaltan ikinci map eklenmez.
+
+### C.4. `overlaySnap = 'panel-seam'`
+
+- **Durum:** KALDIRILACAK
+- **Karar:** Raf/host snap item anchor; global seam yok.
+- **Kaynak:** `SCENE_POSE.md` § Snap.
+
+---
+
+## D. ITEMS.md runtime kuyruğu (henüz PENDING maddesi yok)
+
+Aşağıdakiler **onaylı şemada değil**; karar verilince B veya C’ye madde açılır veya şemaya alınır. Tam liste: `ITEMS.md` § *Runtime field kuyruğu*.
+
+| Alan / grup | Durum | Not |
+|---|---|---|
+| `type`, `name`, `unit` | KUYRUK | Davranış/BOM; `type` → C.3 ile ilişkili |
+| `composition` / `composition.items` | KUYRUK | Recipe BOM; onaylı parça, tam şema değil |
+| `paintable` | KUYRUK | 5 Item; Color mekanizması yok (§ D.1) |
+| `modelFile`, `modelRotationYDeg`, `preserveModelScale`, `visualRotationYDeg` | KUYRUK | GLB Item’ları |
+| `bodyItems.*` | KUYRUK | Vitrin yan/yatay/cam; B.1 ile kesişir |
+| `videoWall.*` | KUYRUK | 2 Item |
+| `defaultColor`, `material` | KUYRUK | Renk/malzeme şeması ayrı |
+
+### D.1. Color / Image / Lighting / Delete mekanizmaları
+
+- **Durum:** YAPILMADI
+- **Karar:** `ITEMS.md` § *Canonical Mechanism Connections* yer tutucu; config şeması yok.
+- **Yasak:** `accepts*` kolonları kaldırılmaz; UI yeteneği master’da kalır.
+
+---
+
+## E. Proje / envanter (Item değil)
+
+### E.1. `fair_stand_projects.organization_id`
+
+- **Durum:** MEVCUT — genişletme kuyruğu
+- **Karar:** Core org UUID, FK yok; list/filter/path `{org}/…` çalışıyor. Proje–org bağının ürün kuralları (paylaşım, varsayılan org) ayrı karar.
+- **Kaynak:** `DATABASE.md` § `fair_stand_projects` / assets.
+
+---
+
+## F. Kapalı / arşiv
+
+| Madde | Sonuç |
+|---|---|
+| B.6 nominalModuleWidthCm | Kaldırıldı; referans |
+| SCENE_POSE pose adım 7 (ortak kutu primitive) | Örnek; sistemde yok, atlandı |
+
+---
+
+## G. Hızlı çapraz tablo (çakışma kontrolü)
+
+| Konu | PENDING | SCENE_POSE | DATABASE / ITEMS |
+|---|---|---|---|
+| strip occupancy | B.4–B.5 KALDIRILACAK, § A.5 | Hedefte yok | Tablo + 8 satır |
+| mount vs default Z | B.3 ARAŞTIRILACAK | defaultZ drop hedefi | İki kolon |
+| wallGap vs panel boşluğu | B.2 koru, B.8 araştır | Standart boşluk hedefi | wall_gap_cm |
+| TYPE_BEHAVIORS | C.3 ERTELENDİ | type listesi yok (snap) | Bilerek olmayanlar |
+| Kaldırma sırası | § A canonical | Hedef metin | strip kolonları § C.1 |

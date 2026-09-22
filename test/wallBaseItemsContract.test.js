@@ -37,9 +37,9 @@ test('base-wall factory kaldırıldı; BASE_* leaf/composite durur', () => {
   assert.equal(createModuleStateFromDescriptor({ itemKey: 'wall_base_100', type: 'base-wall' }), null);
   assert.equal(resolveItemKey({ type: 'base-wall', widthCm: 100 }), null);
 
-  const base = getItem('BASE_100');
-  assert.equal(base.itemKey, 'BASE_100');
+  const base = getItem('base_100');
+  assert.equal(base.itemKey, 'base_100');
   assert.equal(base.type, 'base');
   assert.equal(getItem('base_top_107_50').itemKey, 'base_top_107_50');
-  assert.equal(createModuleStateFromDescriptor({ itemKey: 'BASE_100', type: 'base' }).itemKey, 'BASE_100');
+  assert.equal(createModuleStateFromDescriptor({ itemKey: 'base_100', type: 'base' }).itemKey, 'base_100');
 });

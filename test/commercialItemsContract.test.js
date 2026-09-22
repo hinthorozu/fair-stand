@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { getItem, resolveItemKey } from '../src/items.js';
 
 const COMMERCIAL_ITEM_KEYS = Object.freeze([
-  'COAT_RACK',
-  'KETTLE',
-  'MINI_FRIDGE_AVANTI',
-  'PLASTIC_TRASH_BIN',
+  'coat_rack',
+  'kettle',
+  'mini_fridge_avanti',
+  'plastic_trash_bin',
 ]);
 import { resolveItemBom } from '../src/itemBom.js';
 import {
@@ -65,9 +65,9 @@ test('automatic depot resolves all four Items through the shared factory', () =>
 });
 
 test('trash product properties cannot be overridden by an external descriptor', () => {
-  const item = getItem('PLASTIC_TRASH_BIN');
+  const item = getItem('plastic_trash_bin');
   const state = createModuleStateFromDescriptor({
-    ...getCatalogItem('PLASTIC_TRASH_BIN'),
+    ...getCatalogItem('plastic_trash_bin'),
     widthCm: 42,
     depthCm: 45,
     heightCm: 70,
