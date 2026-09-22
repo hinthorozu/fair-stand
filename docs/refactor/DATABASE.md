@@ -41,8 +41,8 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 | `fair_stand_item_components` | 186 | Recipe BOM child (`composition.items`). |
 | `fair_stand_item_video_walls` | 2 | `VIDEO_WALL_2X2` / `3X3`. |
 | `fair_stand_item_body_parts` | 6 (2 parent × 3 rol) | Vitrin gövde child `itemKey`. |
-| `fair_stand_dimensions` | 1 (`id=1`) | Stand zarfı. Item kutusu değil. |
-| `fair_stand_settings` | 1 (`id=1`) | Runtime tavanlar. Item kutusu değil. |
+| `fair_stand_dimensions` | 1 (`id=1`) | Stand zarfı. Item kutusu değil. Admin UI: CRM `/admin/fair-stand/settings`. |
+| `fair_stand_settings` | 1 (`id=1`) | Runtime tavanlar. Item kutusu değil. Aynı Temel Ayarlar ekranı. |
 | `fair_stand_projects` | org başına değişken | Müşteri stand projesi SoT (tek JSONB payload). Catalog Item tablolarından ayrı. |
 | `fair_stand_project_assets` | proje başına değişken | Proje yüzey görsellerinin meta kaydı; binary diskte. |
 
