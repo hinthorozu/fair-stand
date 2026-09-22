@@ -1,3 +1,5 @@
+import { resolveWallPanelBandPitchCm } from './wallPanelBand.js';
+
 // catalogVisible / categoryId / catalogItemIndex her Item'ın kendi katalog görünüm verisidir.
 // previewId görünür Item'da Catalog kart silüet tanımıdır; type üzerinden seçilmez.
 // dimensions fiziksel ürün ölçüsüdür; sceneDimensions aynı field setinin runtime override katmanıdır.
@@ -146,6 +148,46 @@ export function resolveStandFloorItemKey(standOrKey) {
 export function getFurnitureClusterQuantity(item, childItemKey) {
   const entry = item?.composition?.items?.find((row) => row.itemKey === childItemKey);
   return entry == null ? null : Number(entry.quantity);
+}
+
+const RECIPE_WALL_PANEL_CHILD_TYPES = Object.freeze(new Set(['panel', 'separator-panel']));
+
+/** Recipe BOM panel slot count for wall-like modules (editable strip slots). */
+export function countRecipeWallPanelSlots(item) {
+  if (item?.composition?.mode !== 'recipe' || !Array.isArray(item.composition.items)) {
+    return null;
+  }
+  let total = 0;
+  for (const row of item.composition.items) {
+    const childItemKey = row?.itemKey ?? null;
+    const child = childItemKey ? getItem(childItemKey) : null;
+    if (!child || !RECIPE_WALL_PANEL_CHILD_TYPES.has(child.type)) continue;
+    const quantity = Number(row.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      throw new TypeError(`Invalid recipe panel quantity for ${item.itemKey} → ${childItemKey}: ${row.quantity}.`);
+    }
+    total += quantity;
+  }
+  return total > 0 ? total : null;
+}
+
+/** Recipe panel slots capped by item ceiling (`sceneDimensions` / `dimensions` heightCm). */
+export function resolveFlatPanelStripCount(item) {
+  const pitchCm = Math.round(Number(resolveWallPanelBandPitchCm()));
+  const ceilingHeightCm = requireSceneDimension(item, 'heightCm');
+  const maxSlotsFromCeiling = Math.max(1, Math.floor(Number(ceilingHeightCm) / pitchCm));
+  const fromRecipe = countRecipeWallPanelSlots(item);
+  if (fromRecipe != null) {
+    return Math.min(fromRecipe, maxSlotsFromCeiling);
+  }
+  return maxSlotsFromCeiling;
+}
+
+/** Full-height editable strip slots for showcase modules (ceiling ÷ band pitch). */
+export function resolveShowcaseStripCount(item) {
+  const pitchCm = Math.round(Number(resolveWallPanelBandPitchCm()));
+  const ceilingHeightCm = requireSceneDimension(item, 'heightCm');
+  return Math.max(1, Math.floor(Number(ceilingHeightCm) / pitchCm));
 }
 
 // Yapay bitki / uzun saksı ailesi. Hepsi type `indoor-plant-1`; ayrım kayıtlı itemKey.

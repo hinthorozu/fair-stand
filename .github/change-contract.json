@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "fair-stand-items-admin-api",
   "kind": "architecture",
-  "summary": "Admin Item Records API; drop unused catalog columns; enforce lowercase item_key; dead strip occupancy layout removed; composition_module_type purged from seed/fixtures (0014).",
+  "summary": "Admin Item Records API; drop unused catalog columns; enforce lowercase item_key; dead strip occupancy layout removed; composition_module_type purged from seed/fixtures (0014); flat-panel strip slots from recipe panel BOM (PENDING § A adım 1 slice).",
   "owners": [
     "backend/app/modules/fair_stand/application/admin_items.py",
     "backend/app/modules/fair_stand/api/routes.py",
@@ -77,6 +77,7 @@
       "src/standStandardsCopy.js",
       "src/stripOccupancy.js",
       "src/systemChangeContract.js",
+      "src/wallPanelBand.js",
       "src/wallReflow.js",
       "vite.config.js"
     ],
@@ -221,6 +222,7 @@
       "test/rawBomDebugEntry.test.js",
       "test/rawBomSelectionParser.test.js",
       "test/recipeCompositionItemsContract.test.js",
+      "test/recipeWallPanelSlots.test.js",
       "test/recipeParentItemKey.js",
       "test/registerCanonicalItemCatalog.mjs",
       "test/removedIndoorPlant2.test.js",

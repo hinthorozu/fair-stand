@@ -11,9 +11,23 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-22 — Stand zarfı cm + runtime şerit grid’den kopma (başlangıç)
+
+- DB/API/bootstrap: `fair_stand_dimensions` uzunluk kolonları cm (`0018_stand_dimensions_cm`); JSON `heightCm`, …; admin PUT `height_cm`, …
+- Runtime yerleşim pitch: `WALL_PANEL_BAND_PITCH_CM` (`src/wallPanelBand.js`, 50 cm ürün sabiti). `STAND_DIMENSIONS.stripCount` / `.stripHeight` artık `src/` içinde okunmuyor.
+- Panel adedi: recipe BOM + item tavanı; seam/snap host modül `strips[]` + `heightCm`; vitrin `strips[]` BOM’dan.
+
+---
+
 ## 2026-09-22 — PENDING § A adım 1: ölü occupancy layout
 
 Kaldırıldı: `resolveOccupiedStripLayout` (`scene3d.js`), `getOccupiedStripLayout`, `getStripOccupancyHeightRangeCm` (`stripOccupancy.js`). Canlı yol durur: `normalizeStripOccupancy`, `resolveModuleStripOccupancy`, ghost key, katalog preview.
+
+---
+
+## 2026-09-22 — PENDING § A adım 1 (devam): flat-panel strip slot sayısı BOM’dan
+
+`countRecipeWallPanelSlots` (`items.js`): recipe `composition.items` içinde `panel` / `separator-panel` adetlerini toplar. `createFlatPanelModuleState` önce bunu kullanır; yoksa `scene_dimensions.height_cm` ÷ stand şerit pitch fallback. Recipe panel sayısı kullanıldığında şerit sayısı `min(BOM panel adedi, floor(item heightCm ÷ strip pitch))`; modül yüksekliği `min(şerit × pitch, item heightCm)` — DB tavan (`scene/dimensions height_cm`) aşılmaz. Showcase, kapı, seed SKU bölme ve `strips[]` migration hâlâ backlog (`PENDING_ITEM_DECISIONS.md` § A).
 
 ---
 

@@ -75,12 +75,12 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     assert "SQLAlchemy" not in body
     assert len(body["previewKinds"]) == 28
     assert body["standDimensions"] == {
-        "height": 3.5,
-        "depth": 0.1,
+        "heightCm": 350.0,
+        "depthCm": 10.0,
         "stripCount": 7,
-        "stripHeight": 0.5,
-        "frameWidth": 0.055,
-        "frameDepth": 0.1,
+        "stripHeightCm": 50.0,
+        "frameWidthCm": 5.5,
+        "frameDepthCm": 10.0,
     }
     assert body["settings"] == {
         "maxImageUploadMb": 5,

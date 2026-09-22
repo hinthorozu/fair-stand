@@ -353,24 +353,20 @@ class FairStandDimensionsModel(Base):
     __table_args__ = (
         CheckConstraint("id = 1", name="ck_fair_stand_dimensions_singleton"),
         CheckConstraint("strip_count > 0", name="ck_fair_stand_dimensions_strip_count"),
-        CheckConstraint("height_m > 0", name="ck_fair_stand_dimensions_height"),
-        CheckConstraint("depth_m > 0", name="ck_fair_stand_dimensions_depth"),
-        CheckConstraint("strip_height_m > 0", name="ck_fair_stand_dimensions_strip_height"),
-        CheckConstraint("frame_width_m > 0", name="ck_fair_stand_dimensions_frame_width"),
-        CheckConstraint("frame_depth_m > 0", name="ck_fair_stand_dimensions_frame_depth"),
-        CheckConstraint(
-            "height_m = strip_count * strip_height_m",
-            name="ck_fair_stand_dimensions_height_strips",
-        ),
+        CheckConstraint("height_cm > 0", name="ck_fair_stand_dimensions_height"),
+        CheckConstraint("depth_cm > 0", name="ck_fair_stand_dimensions_depth"),
+        CheckConstraint("strip_height_cm > 0", name="ck_fair_stand_dimensions_strip_height"),
+        CheckConstraint("frame_width_cm > 0", name="ck_fair_stand_dimensions_frame_width"),
+        CheckConstraint("frame_depth_cm > 0", name="ck_fair_stand_dimensions_frame_depth"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    height_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
-    depth_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
+    height_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
+    depth_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
     strip_count: Mapped[int] = mapped_column(Integer, nullable=False)
-    strip_height_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
-    frame_width_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
-    frame_depth_m: Mapped[Decimal] = mapped_column(Numeric(8, 3), nullable=False)
+    strip_height_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
+    frame_width_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
+    frame_depth_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 

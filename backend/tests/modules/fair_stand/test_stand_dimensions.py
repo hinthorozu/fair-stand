@@ -11,12 +11,12 @@ def test_stand_dimensions_singleton_is_seeded(db_session):
     assert len(rows) == 1
     row = rows[0]
     assert row.id == 1
-    assert float(row.height_m) == 3.5
-    assert float(row.depth_m) == 0.1
+    assert float(row.height_cm) == 350.0
+    assert float(row.depth_cm) == 10.0
     assert row.strip_count == 7
-    assert float(row.strip_height_m) == 0.5
-    assert float(row.frame_width_m) == 0.055
-    assert float(row.frame_depth_m) == 0.1
+    assert float(row.strip_height_cm) == 50.0
+    assert float(row.frame_width_cm) == 5.5
+    assert float(row.frame_depth_cm) == 10.0
 
 
 def test_fair_stand_dimensions_table_exists(test_engine):

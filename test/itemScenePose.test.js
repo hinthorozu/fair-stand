@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getItem, resolveItemDefaultZCm, resolveSceneDimensions } from '../src/items.js';
+import {
+  getItem,
+  resolveFlatPanelStripCount,
+  resolveItemDefaultZCm,
+  resolveSceneDimensions,
+} from '../src/items.js';
 import { createFlatPanelModuleState, createProfileModuleState, createUprightModuleState } from '../src/designState.js';
 import { getModuleCollisionHeightRangeCm } from '../src/moduleBehavior.js';
 
@@ -38,6 +43,7 @@ test('short-up collision band is item height + placement Z, not occupancy × sta
   };
   assert.deepEqual(getModuleCollisionHeightRangeCm(hanging), { minCm: 250, maxCm: 350 });
   const wall = createFlatPanelModuleState({ itemKey: 'wall_200' });
-  assert.equal(wall.heightCm, 350);
-  assert.equal(wall.strips.length, 7);
+  const pitchCm = 50;
+  assert.equal(wall.strips.length, resolveFlatPanelStripCount(getItem('wall_200')));
+  assert.equal(wall.heightCm, Math.min(wall.strips.length * pitchCm, resolveSceneDimensions(getItem('wall_200')).heightCm));
 });

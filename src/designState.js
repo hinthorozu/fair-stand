@@ -1,5 +1,7 @@
 import { normalizeStripOccupancy } from './stripOccupancy.js';
 import {
+  resolveFlatPanelStripCount,
+  resolveShowcaseStripCount,
   getCommercialItemForType,
   getFurnitureClusterQuantity,
   getFurnitureItemForType,
@@ -13,7 +15,7 @@ import {
   resolveSceneDimensions,
 } from './items.js';
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
-import { STAND_DIMENSIONS } from './standDimensions.js';
+import { resolveWallPanelBandPitchCm } from './wallPanelBand.js';
 
 const DEFAULT_PANEL_COLOR = '#ffffff';
 
@@ -132,21 +134,25 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'flat-panel') return null;
   const occupancy = normalizeStripOccupancy(item.stripOccupancy);
-  const heightCm = requireSceneDimension(item, 'heightCm');
-  const pitchCm = Math.round(Number(STAND_DIMENSIONS.stripHeight) * 100);
-  const stripCount = Math.max(1, Math.round(Number(heightCm) / pitchCm));
+  const pitchCm = Math.round(Number(resolveWallPanelBandPitchCm()));
+  const ceilingHeightCm = requireSceneDimension(item, 'heightCm');
+  const stripCount = resolveFlatPanelStripCount(item);
+  const moduleHeightCm = Math.min(stripCount * pitchCm, ceilingHeightCm);
 
   const state = {
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
+    heightCm: moduleHeightCm,
     ...(occupancy ? { stripOccupancy: occupancy } : {}),
     strips: Array.from(
       { length: stripCount },
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
     ),
   };
-  return applySceneFootprint(state, item, ['widthCm', 'heightCm']);
+  applySceneFootprint(state, item, ['widthCm']);
+  state.heightCm = moduleHeightCm;
+  return state;
 }
 
 const SEPARATOR_PLAIN_WIDTH_TO_ITEM_KEY = Object.freeze({
@@ -194,14 +200,19 @@ export function createShowcaseModuleState(type, widthCm = 100) {
   const canonicalWidthCm = Number(showcaseItem?.dimensions?.widthCm);
   if (!showcaseItem || Number(widthCm) !== canonicalWidthCm) return null;
   const bodyDefinition = getShowcaseBodyDefinition(showcaseItem);
+  const pitchCm = Math.round(Number(resolveWallPanelBandPitchCm()));
+  const stripCount = resolveShowcaseStripCount(showcaseItem);
+  const ceilingHeightCm = requireSceneDimension(showcaseItem, 'heightCm');
+  const moduleHeightCm = Math.min(stripCount * pitchCm, ceilingHeightCm);
 
   const state = {
     id: createId('module'),
     itemKey: showcaseItem.itemKey,
     type: showcaseItem.type,
     eyeCount: Number(showcaseItem.eyeCount),
+    heightCm: moduleHeightCm,
     strips: Array.from(
-      { length: STAND_DIMENSIONS.stripCount },
+      { length: stripCount },
       (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
     ),
     bodySurface: {

@@ -273,17 +273,17 @@ Tek satır `id = 1`. Item değildir. `STAND_DIMENSIONS.md`.
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
 | `id` | — | Singleton; CHECK `id = 1`. (Postgres sequence default var, ikinci satır CHECK’ten geçmez.) | İkinci zarf yok | CHECK `ck_fair_stand_dimensions_singleton` |
-| `height_m` | `height` | Tavan (m) | Stand iskeleti | `src/standDimensions.js` |
-| `depth_m` | `depth` | Duvar kalınlığı | Omurga / overlay | same |
+| `height_cm` | `heightCm` | Tavan (cm) | Stand iskeleti | `src/standDimensions.js` |
+| `depth_cm` | `depthCm` | Duvar kalınlığı (cm) | Omurga / overlay | same |
 | `strip_count` | `stripCount` | Tam boy şerit | 7×50 panel ızgarası | `stripOccupancy.js` + designState |
-| `strip_height_m` | `stripHeight` | Bir şerit (m) | CHECK: `height_m = strip_count × strip_height_m` | seam |
-| `frame_width_m` | `frameWidth` | Dikey profil kesit | Görsel iskelet | renderer via standDimensions |
-| `frame_depth_m` | `frameDepth` | Profil derinlik | Ray kalınlığı | aynı |
+| `strip_height_cm` | `stripHeightCm` | Bir şerit (cm) | Panel bandı pitch; tavan ile çarpım zorunluluğu yok (`0017`) | seam |
+| `frame_width_cm` | `frameWidthCm` | Dikey profil kesit (cm) | Görsel iskelet | renderer via `STAND_DIMENSIONS.*` (m getter) |
+| `frame_depth_cm` | `frameDepthCm` | Profil derinlik (cm) | Ray kalınlığı | aynı |
 | `created_at` / `updated_at` | yok | Audit | — | DB |
 
 `MODULE_WIDTHS_CM` (50/100/150/200) hâlâ JS; bu tabloda yok.
 
-Lokal canlı (2026-09-21): `id=1`, `height_m=3.5`, `depth_m=0.1`, `strip_count=7`, `strip_height_m=0.5`, `frame_width_m=0.055`, `frame_depth_m=0.1`.
+Lokal seed: `id=1`, `height_cm=350`, `depth_cm=10`, `strip_count=7`, `strip_height_cm=50`, `frame_width_cm=5.5`, `frame_depth_cm=10`.
 
 ---
 

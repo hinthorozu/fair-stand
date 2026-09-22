@@ -14,7 +14,12 @@ import {
   usesWallBackboneCollisionDepth,
   usesWallInnerFaceBoundary,
 } from './moduleBehavior.js';
-import { getStandInternalSeamHeightsCm, getStandStripMetrics } from './stripOccupancy.js';
+import { getStandStripMetrics } from './stripOccupancy.js';
+import {
+  WALL_PANEL_BAND_PITCH_CM,
+  listFlatPanelModuleSeamHeightsCm,
+  listInternalSeamHeightsCm,
+} from './wallPanelBand.js';
 
 export const MODULE_PLACEMENT_SNAP_CM = 50;
 export const MODULE_PLACEMENT_ROTATIONS = Object.freeze([0, 45, 90, 135, 180, 225, 270, 315]);
@@ -172,22 +177,29 @@ export function clampWallOverlayZCm(
 }
 
 export function getPanelSeamSnapWindowCm() {
-  return getStandStripMetrics().stripHeightCm / 4;
+  return WALL_PANEL_BAND_PITCH_CM / 4;
 }
 
 export function overlayZCmFromSeamHeight(seamHeightCm, thicknessCm) {
   return Number(seamHeightCm) + Number(thicknessCm) / 2 - WALL_OVERLAY_DEFAULT_CENTER_CM;
 }
 
-export function listInternalSeamsInOccupancyRange(occupancyRange) {
+export function listInternalSeamsInOccupancyRange(occupancyRange, hostModule = null) {
   const minCm = Number(occupancyRange?.minCm);
   const maxCm = Number(occupancyRange?.maxCm);
-  return getStandInternalSeamHeightsCm().filter((seam) => (
-    Number.isFinite(minCm)
-    && Number.isFinite(maxCm)
-    && seam > minCm
-    && seam < maxCm
-  ));
+  if (hostModule?.strips?.length > 1) {
+    return listFlatPanelModuleSeamHeightsCm(hostModule, { minCm, maxCm });
+  }
+  const pitchCm = WALL_PANEL_BAND_PITCH_CM;
+  const stripCount = Number.isFinite(maxCm) && maxCm > 0
+    ? Math.max(1, Math.floor(maxCm / pitchCm))
+    : getStandStripMetrics().stripCount;
+  return listInternalSeamHeightsCm({
+    stripCount,
+    pitchCm,
+    minCm: Number.isFinite(minCm) ? minCm : 0,
+    maxCm: Number.isFinite(maxCm) ? maxCm : Number.POSITIVE_INFINITY,
+  });
 }
 
 function listFittingWallCapacityHosts({
@@ -314,7 +326,7 @@ export function snapPanelSeamOverlayPlacement({
   }
 
   const occupancyRange = getModuleCollisionHeightRangeCm(target);
-  const validSeams = listInternalSeamsInOccupancyRange(occupancyRange);
+  const validSeams = listInternalSeamsInOccupancyRange(occupancyRange, target);
 
   let seamHeightCm = null;
   let seamDistanceCm = Number.POSITIVE_INFINITY;
@@ -386,7 +398,7 @@ export function stepPanelSeamOverlayPlacement({
     });
   }
 
-  const validSeams = listInternalSeamsInOccupancyRange(getModuleCollisionHeightRangeCm(target));
+  const validSeams = listInternalSeamsInOccupancyRange(getModuleCollisionHeightRangeCm(target), target);
   if (!validSeams.length) return null;
 
   const currentBottomCm = Number(placement.zCm) + WALL_OVERLAY_DEFAULT_CENTER_CM - heightCm / 2;

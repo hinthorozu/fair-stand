@@ -20,20 +20,22 @@ Kaynak: PostgreSQL `fair_stand_dimensions` → catalog bootstrap `standDimension
 
 ---
 
-## Alanlar (metre)
+## Alanlar (cm canonical)
 
-| Alan | DB kolon | Ne işe yarar |
+| Bootstrap / admin JSON | DB kolon | Ne işe yarar |
 |---|---|---|
-| `height` | `height_m` | Duvar tavanı. Projektör kotu. Overlay Y 0…height. Item yüksekliği yoksa çarpışma tavanı. |
-| `depth` | `depth_m` | Duvar kalınlığı. Omurga çarpışması (`wall-backbone`). TV/raf ön yüzü `depth/2`. |
+| `heightCm` | `height_cm` | Duvar tavanı (cm). Overlay Y 0…heightCm. Item yüksekliği yoksa çarpışma tavanı. |
+| `depthCm` | `depth_cm` | Duvar kalınlığı (cm). Omurga çarpışması (`wall-backbone`). TV/raf ön yüzü `depthCm/2`. |
 | `stripCount` | `strip_count` | Yatay şerit sayısı. Tam boy panel yüzey sayısı. |
-| `stripHeight` | `strip_height_m` | Bir şerit boyu. Seam’ler stripHeight, 2×stripHeight, … (0 ve height seam değil). |
-| `frameWidth` | `frame_width_m` | Dikey profil görsel kesiti. |
-| `frameDepth` | `frame_depth_m` | Profil derinlik kutusu / yatay ray kalınlığı. |
+| `stripHeightCm` | `strip_height_cm` | Bir şerit boyu (cm). Seam’ler stripHeightCm, 2×… (0 ve tavan seam değil). |
+| `frameWidthCm` | `frame_width_cm` | Dikey profil görsel kesiti (cm). |
+| `frameDepthCm` | `frame_depth_cm` | Profil derinlik kutusu / yatay ray kalınlığı (cm). |
 
-Kural: `height = stripCount × stripHeight`.
+Seed (varsayılan): 350 / 10 / 7 / 50 / 5.5 / 10 cm.
 
-Seed (şu an): 3.5 / 0.1 / 7 / 0.5 / 0.055 / 0.1 → duvar 350 cm, 7 × 50 cm.
+Three.js sahnesi metre kullanır: `STAND_DIMENSIONS.height`, `.depth`, `.stripHeight`, … getter’ları `/100` döner.
+
+`height_cm` **max tavan zarfı**; `strip_count × strip_height_cm` ile eşit olmak zorunda değil (admin’den ayrı düzenlenir, migration `0017_stand_height_envelope`). Uzunluk birimi migration `0018_stand_dimensions_cm`.
 
 350 catalog max ürün yüksekliği değildir. Koltuk/banko/TV kendi Item `heightCm` değerini kullanır.
 

@@ -9,10 +9,10 @@ import { getHelpStandardsTableHtml, getStandStandardsFacts, getStandStandardsLis
 
 test('standart metin STAND_DIMENSIONS ve standSetup sabitlerinden üretilir', () => {
   const facts = getStandStandardsFacts();
-  assert.equal(facts.heightCm, Math.round(STAND_DIMENSIONS.height * 100));
-  assert.equal(facts.depthCm, Math.round(STAND_DIMENSIONS.depth * 100));
-  assert.equal(facts.stripCount, STAND_DIMENSIONS.stripCount);
-  assert.equal(facts.stripHeightCm, Math.round(STAND_DIMENSIONS.stripHeight * 100));
+  assert.equal(facts.heightCm, Math.round(STAND_DIMENSIONS.heightCm));
+  assert.equal(facts.depthCm, Math.round(STAND_DIMENSIONS.depthCm));
+  assert.equal(facts.stripHeightCm, 50);
+  assert.equal(facts.stripCount, Math.floor(STAND_DIMENSIONS.heightCm / 50));
   assert.equal(facts.surroundCm, Math.round(SCENE_SURROUND_M * 100));
   assert.equal(facts.maxStandCm, MAX_STAND_DIMENSION_CM);
   assert.equal(facts.widths, MODULE_WIDTHS_CM.join(' / '));

@@ -5,6 +5,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { getModuleCatalogItem, getModuleCatalogLabel } from './catalog.js';
 import { STAND_DIMENSIONS } from './standDimensions.js';
+import { WALL_PANEL_BAND_PITCH_CM, resolveModuleBandPitchCm } from './wallPanelBand.js';
 import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
 import { surfaceCapabilityUserData } from './itemCapabilities.js';
 import {
@@ -7158,15 +7159,14 @@ function createShelfModule(moduleState, moduleIndex) {
 function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   const {
     depth,
-    stripHeight,
     frameDepth,
   } = STAND_DIMENSIONS;
 
   const heightM = Number(moduleState.heightCm) / 100;
   const height = Number.isFinite(heightM) && heightM > 0 ? heightM : STAND_DIMENSIONS.height;
   const storedCount = Array.isArray(moduleState?.strips) ? moduleState.strips.length : 0;
-  const stripCount = storedCount > 0 ? storedCount : Math.max(1, Math.round(height / stripHeight));
-  const visibleStripCount = stripCount;
+  const visibleStripCount = storedCount > 0 ? storedCount : 1;
+  const stripHeight = resolveModuleBandPitchCm(moduleState) / 100;
   const frameBottomY = 0;
   const frameHeight = height;
 
@@ -7294,13 +7294,13 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
   const {
     height,
     depth,
-    stripHeight,
     frameWidth,
     frameDepth,
   } = STAND_DIMENSIONS;
 
   const widthCm = Number(moduleState.widthCm) || 100;
   const widthM = widthCm / 100;
+  const stripHeight = WALL_PANEL_BAND_PITCH_CM / 100;
   const doorHeight = stripHeight * 4;
   const upperPanelCount = 3;
   const railHeight = PANEL_RAIL_HEIGHT_M;
@@ -7612,10 +7612,11 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const {
     height,
     depth,
-    stripCount,
-    stripHeight,
     frameDepth,
   } = STAND_DIMENSIONS;
+
+  const stripCount = Array.isArray(moduleState?.strips) ? moduleState.strips.length : 0;
+  const stripHeight = resolveModuleBandPitchCm(moduleState) / 100;
 
   const bodyDefinition = getShowcaseBodyDefinition(moduleState.itemKey);
   if (!bodyDefinition || !moduleState.bodySurface) {
