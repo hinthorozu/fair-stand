@@ -1,28 +1,28 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-settings-admin-api",
+  "id": "fair-stand-items-admin-api",
   "kind": "architecture",
-  "summary": "Admin Settings API for stand dimensions and runtime settings singletons (GET /admin/settings, PUT stand-dimensions, PUT runtime-settings) with permission gates and API tests.",
+  "summary": "Admin Item Records API for fair_stand_items and satellite tables (list/get/create/update/archive/restore) with permission gates and API tests.",
   "owners": [
-    "backend/app/modules/fair_stand/application/admin_settings.py",
+    "backend/app/modules/fair_stand/application/admin_items.py",
     "backend/app/modules/fair_stand/api/routes.py",
     "backend/app/modules/fair_stand/api/dependencies.py"
   ],
   "sourceOfTruth": [
     "docs/refactor/DATABASE.md",
-    "backend/app/modules/fair_stand/application/admin_settings.py"
+    "backend/app/modules/fair_stand/application/admin_items.py"
   ],
   "impact": {
-    "catalog": "not-applicable",
+    "catalog": "affected",
     "behavior": "not-applicable",
     "state": "not-applicable",
     "placement": "not-applicable",
     "renderer": "not-applicable",
-    "persistence": "not-applicable",
+    "persistence": "affected",
     "bom": "not-applicable",
     "ui": "not-applicable",
     "composition": "not-applicable",
-    "assets": "not-applicable",
+    "assets": "affected",
     "storage": "not-applicable",
     "importExport": "not-applicable",
     "performance": "not-applicable",
@@ -35,34 +35,34 @@
     "mode": "full-system",
     "affectedFiles": [],
     "affectedTests": [
-      "backend/tests/modules/fair_stand/test_admin_settings_api.py"
+      "backend/tests/modules/fair_stand/test_admin_items_api.py"
     ],
     "affectedDocs": [],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": []
     },
-    "notes": "Backend-only admin settings CRUD over existing fair_stand_dimensions and fair_stand_settings singletons; CRM Temel Ayarlar UI lives in fair-crm."
+    "notes": "Backend admin CRUD over fair_stand_items plus dimensions, scene_dimensions, strip_occupancy, assets, components, body_parts, video_walls. CRM Item Kayıtları UI lives in fair-crm."
   },
   "tests": {
     "targeted": [
-      "backend/tests/modules/fair_stand/test_admin_settings_api.py"
+      "backend/tests/modules/fair_stand/test_admin_items_api.py"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": false,
       "targeted": [],
-      "reason": "No browser-impact domains affected; API-only admin settings endpoints gated by unit/integration tests."
+      "reason": "No browser-impact domains in this repo; API-only admin item-records endpoints gated by unit/integration tests. CRM UI tests live in fair-crm."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Permission-gated SYSTEM admin mutations of global stand envelope and runtime settings singletons."
+    "notes": "Permission-gated SYSTEM admin mutations of global Fair Stand item catalog and satellite rows."
   },
   "migration": {
     "required": false,
-    "notes": "No schema change; permissions seeded in kyrox-core alembic 20260922_0068."
+    "notes": "No schema change; permissions seeded in kyrox-core alembic 20260922_0069."
   },
-  "rollback": "Revert this commit; remove admin settings routes and service."
+  "rollback": "Revert this commit; remove admin item-records routes and AdminItemsService."
 }
