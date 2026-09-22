@@ -1,31 +1,31 @@
 {
   "schemaVersion": 2,
-  "id": "pcf-shadow-map",
-  "kind": "renderer-change",
-  "summary": "Stand scene uses THREE.PCFShadowMap instead of PCFSoftShadowMap so shadow edges stay sharp on the floor and modules.",
+  "id": "fuar-kyrox-studio-install-defaults",
+  "kind": "tooling",
+  "summary": "install-server.sh defaults DOMAIN and LETSENCRYPT_EMAIL to fuar.kyrox.studio instead of umaay.com hosts.",
   "owners": [
-    "src/scene3d.js"
+    "scripts/install-server.sh"
   ],
   "sourceOfTruth": [
-    "src/scene3d.js"
+    "scripts/install-server.sh"
   ],
   "impact": {
-    "catalog": "affected",
-    "behavior": "affected",
-    "state": "affected",
-    "placement": "affected",
-    "renderer": "affected",
-    "persistence": "affected",
+    "catalog": "not-applicable",
+    "behavior": "not-applicable",
+    "state": "not-applicable",
+    "placement": "not-applicable",
+    "renderer": "not-applicable",
+    "persistence": "not-applicable",
     "bom": "not-applicable",
-    "ui": "affected",
-    "composition": "affected",
-    "assets": "affected",
-    "storage": "affected",
-    "importExport": "affected",
-    "performance": "affected",
-    "accessibility": "affected",
+    "ui": "not-applicable",
+    "composition": "not-applicable",
+    "assets": "not-applicable",
+    "storage": "not-applicable",
+    "importExport": "not-applicable",
+    "performance": "not-applicable",
+    "accessibility": "not-applicable",
     "architecture": "affected",
-    "security": "affected",
+    "security": "not-applicable",
     "tests": "affected"
   },
   "impactAnalysis": {
@@ -827,25 +827,23 @@
         "F-033"
       ]
     },
-    "notes": "One renderer.shadowMap.type change. Lighting, cameras, and module meshes are unchanged."
+    "notes": "Server install script default host only. Production CRM+Stand share fuar.kyrox.studio on the live box."
   },
   "tests": {
     "targeted": [
-      "test/scene3dPublicContract.test.js"
+      "test/systemChangeGate.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": [
-        "e2e/visible-ui-b.spec.mjs"
-      ],
-      "reason": "Renderer domain is affected; visible-ui loads the live scene after bootstrap."
+      "required": false,
+      "targeted": [],
+      "reason": "No browser/runtime behavior change; only install script env defaults."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Harder PCF filtering only. No catalog, persistence, or placement math change."
+    "notes": "Override still possible via FAIR_STAND_DOMAIN and LETSENCRYPT_EMAIL."
   },
   "migration": {
     "required": false,

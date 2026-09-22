@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-DOMAIN="${FAIR_STAND_DOMAIN:-fairstand.umaay.com}"
-LE_EMAIL="${LETSENCRYPT_EMAIL:-admin@umaay.com}"
+DOMAIN="${FAIR_STAND_DOMAIN:-fuar.kyrox.studio}"
+LE_EMAIL="${LETSENCRYPT_EMAIL:-admin@fuar.kyrox.studio}"
 SITE_NAME="fair-stand"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${REPO_ROOT}/dist"
