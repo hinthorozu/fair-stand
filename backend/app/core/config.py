@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     dev_bypass_token: str = Field(default="dev-bypass", validation_alias="FAIR_STAND_DEV_BYPASS_TOKEN")
     dev_user_email: str = Field(default="dev@example.com", validation_alias="FAIR_STAND_DEV_USER_EMAIL")
     dev_user_id: str | None = Field(default=None, validation_alias="FAIR_STAND_DEV_USER_ID")
+    project_asset_root: Path = Field(
+        default=_BACKEND_ROOT / "var" / "project-assets",
+        validation_alias=AliasChoices("FAIR_STAND_PROJECT_ASSET_ROOT", "PROJECT_ASSET_ROOT"),
+    )
+
 
 
 @lru_cache

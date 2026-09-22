@@ -10,6 +10,12 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-22 — Proje SoT (server + disk)
+
+`fair_stand_projects` (JSONB `payload`) + `fair_stand_project_assets` (meta) + disk `{org}/{project}/{asset}.webp`. IndexedDB / `projectStore` önbellek; `projectRemote.js` cache-first + dirty asset sync. Org-scoped Core izinleri: `fair_crm.fair_stand.projects.*`. Eski local-only IDB migrate edilmez. Canonical tablo envanteri: `docs/refactor/DATABASE.md`.
+
+---
+
 ## 2026-09-21 — Archive buton görünürlüğü
 
 `fair_stand_settings.export_button_visible` / `import_button_visible`. Catalog bootstrap. Markup `hidden`; runtime ayar `true` ise açar. Canonical: `docs/refactor/DATABASE.md`.

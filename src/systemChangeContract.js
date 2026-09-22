@@ -128,6 +128,7 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/projectActionSaveGuard.js': frozenDomains('ui', 'persistence', 'storage', 'importExport'),
   'src/projectNaming.js': frozenDomains('ui'),
   'src/projectImportValidation.js': frozenDomains('importExport', 'persistence', 'state'),
+  'src/projectRemote.js': frozenDomains('persistence', 'storage', 'assets', 'importExport', 'security'),
   'src/projectStore.js': frozenDomains('persistence', 'storage'),
   'src/projectSwitch.js': frozenDomains('ui', 'persistence'),
   'src/projectUi.js': frozenDomains('ui'),

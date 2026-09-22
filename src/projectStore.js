@@ -99,3 +99,21 @@ export async function deleteProjectWithAssets(projectId) {
 
   return true;
 }
+
+export async function clearAllLocalProjectsAndAssets() {
+  const db = await openConfiguratorDb();
+  try {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(
+        [PROJECT_STORE_NAME, ASSET_STORE_NAME],
+        'readwrite',
+      );
+      tx.objectStore(PROJECT_STORE_NAME).clear();
+      tx.objectStore(ASSET_STORE_NAME).clear();
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
+}

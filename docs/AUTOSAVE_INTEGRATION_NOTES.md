@@ -3,10 +3,10 @@
 Bu dosya canlı autosave akışını controller'a bağlarken korunması gereken davranışları sabitler.
 
 - Watch interval: 1000 ms.
-- Değişiklik algılanınca save debounce: 5000 ms.
+- Değişiklik algılanınca save debounce: 30000 ms.
 - Aynı signature tekrar görülürse yeni save planlanmaz.
 - Yeni değişiklik mevcut pending save'i iptal edip 5 saniyeyi yeniden başlatır.
-- Autosave persist çağrısı `{ quiet: true }` ile yapılır.
+- Autosave persist çağrısı `{ quiet: true }` ile yapılır (remote açıksa `projectRemote` → sunucu SoT + IndexedDB cache).
 - Başarılı autosave sonrası güncel state signature baseline olur.
 - Persist hatasında autosave enabled kalır ve kullanıcıya `Otomatik kayıt başarısız.` gösterilir.
 - Yeni proje oluşturma / proje restore / beforeunload sırasında autosave disable edilir.

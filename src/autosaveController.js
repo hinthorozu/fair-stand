@@ -1,4 +1,4 @@
-export const DEFAULT_AUTOSAVE_DELAY_MS = 5000;
+export const DEFAULT_AUTOSAVE_DELAY_MS = 30000;
 export const DEFAULT_AUTOSAVE_WATCH_INTERVAL_MS = 1000;
 
 let activeAutosaveController = null;
@@ -47,7 +47,8 @@ export function createAutosaveController({
   function schedule() {
     if (!enabled) return false;
     clearPending();
-    setStatus('Değişiklik var · 5 sn içinde otomatik kaydedilecek…');
+    const seconds = Math.max(1, Math.round(delayMs / 1000));
+    setStatus(`Değişiklik var · ${seconds} sn içinde otomatik kaydedilecek…`);
     pendingTimer = setTimeoutFn(async () => {
       pendingTimer = null;
       if (!enabled) return;
