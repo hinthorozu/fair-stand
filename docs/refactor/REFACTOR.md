@@ -30,7 +30,7 @@ Canonical: `docs/refactor/DATABASE.md`. 13 tablo; her kolon nedir / neden / nere
 
 ## 2026-09-22 — `connector_type` kaldırıldı
 
-`fair_stand_items.connector_type` / JSON `connectorType` silindi (migration `0016_drop_connector_type`). TEST_ONLY `getConnectorItemKey` / `resolveConnectorBom` de kalktı. Production BOM zaten `composition.items[].itemKey` (`connector_start` vb.). Dört connector Item kimliği durur.
+`fair_stand_items.connector_type` / JSON `connectorType` silindi (migration `0016_drop_connector_type`). TEST_ONLY `getConnectorItemKey` / `resolveConnectorBom` ve `test/connectorBom.test.js` de kalktı (katalog kolonunu okumuyorlardı; sabit map). Production BOM zaten `composition.items[].itemKey` (`connector_start` vb.). Dört connector Item kimliği durur.
 
 ---
 
