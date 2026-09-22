@@ -228,7 +228,7 @@ test('profil sceneDimensions Catalog kart genişliğini taşır; catalogWidthCm 
     assert.equal(Object.hasOwn(item, 'catalogWidthCm'), false, item.itemKey);
     if (!Object.hasOwn(expected, item.itemKey)) continue;
     assert.equal(item.sceneDimensions.widthCm, expected[item.itemKey], item.itemKey);
-    assert.notEqual(item.sceneDimensions.widthCm, item.dimensions.lengthCm, item.itemKey);
+    assert.notEqual(item.sceneDimensions.widthCm, item.dimensions.widthCm, item.itemKey);
   }
 });
 

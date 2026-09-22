@@ -49,10 +49,10 @@ test('floor Items use existing floorType keys and stay off the module catalog', 
   assert.equal(Object.hasOwn(hali, 'dimensions'), false);
 
   assert.equal(isParquetFloorItem(getItem('parke-acik')), true);
-  assert.equal(getItem('parke-acik').dimensions.lengthCm, 140);
+  assert.equal(getItem('parke-acik').dimensions.widthCm, 140);
   assert.equal(getItem('parke-acik').dimensions.depthCm, 16);
-  assert.equal(getItem('parke-sari').dimensions.lengthCm, 140);
-  assert.equal(getItem('parke-beton').dimensions.lengthCm, 112);
+  assert.equal(getItem('parke-sari').dimensions.widthCm, 140);
+  assert.equal(getItem('parke-beton').dimensions.widthCm, 112);
   assert.equal(getItem('parke-beton').dimensions.depthCm, 28);
   assert.equal(getItem('parke-beton').paintable, false);
   assert.equal(getFloorItem('parke'), null);

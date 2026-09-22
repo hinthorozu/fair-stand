@@ -7,11 +7,15 @@ import {
   getModuleRecipe,
 } from './recipeParentItemKey.js';
 
+function baseTopDims(widthCm) {
+  return { widthCm, depthCm: 50, heightCm: 1.8 };
+}
+
 test('production catalog contains verified baza upright and tops', () => {
-  assert.equal(getItem('upright_49_5').dimensions.lengthCm, 49.5);
-  assert.deepEqual(getItem('base_top_107_50').dimensions, { widthCm: 107, depthCm: 50, thicknessCm: 1.8 });
-  assert.deepEqual(getItem('base_top_157_50').dimensions, { widthCm: 157, depthCm: 50, thicknessCm: 1.8 });
-  assert.deepEqual(getItem('base_top_206_50').dimensions, { widthCm: 206, depthCm: 50, thicknessCm: 1.8 });
+  assert.equal(getItem('upright_49_5').dimensions.heightCm, 49.5);
+  assert.deepEqual(getItem('base_top_107_50').dimensions, baseTopDims(107));
+  assert.deepEqual(getItem('base_top_157_50').dimensions, baseTopDims(157));
+  assert.deepEqual(getItem('base_top_206_50').dimensions, baseTopDims(206));
 });
 
 const expectedRecipes = {

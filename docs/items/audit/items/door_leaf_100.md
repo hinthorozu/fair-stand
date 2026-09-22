@@ -11,7 +11,6 @@
 |---|---|---|
 | `defaultColor` | 16777215 (`#ffffff`) | item kaydı |
 | `dimensions.heightCm` | 200 | item kaydı |
-| `dimensions.thicknessCm` | 8 | item kaydı |
 | `dimensions.widthCm` | 100 | item kaydı |
 | `itemKey` | door_leaf_100 | item kaydı |
 | `material` | ahşap | item kaydı |
@@ -21,7 +20,7 @@
 | `unit` | adet | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.depthCm` | 8 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **yok** (`src/catalog.js`)

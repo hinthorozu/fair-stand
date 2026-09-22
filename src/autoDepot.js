@@ -20,7 +20,12 @@ function wall(widthCm, xCm, yCm, rotationZDeg = 0) {
   return { kind: 'wall', widthCm, placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }) };
 }
 function door(xCm, yCm, rotationZDeg = 0) {
-  return { kind: 'door', widthCm: 100, placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }) };
+  return {
+    kind: 'door',
+    itemKey: 'door_100',
+    widthCm: 100,
+    placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }),
+  };
 }
 function fixture(kind, widthCm, depthCm, xCm, yCm, rotationZDeg = 0, descriptor = {}) {
   return {

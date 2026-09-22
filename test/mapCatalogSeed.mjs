@@ -7,8 +7,6 @@ import { applyItemScenePose } from './itemScenePoseSeed.mjs';
 export const CANONICAL_STAND_DIMENSIONS = Object.freeze({
   heightCm: 350,
   depthCm: 10,
-  frameWidthCm: 5.5,
-  frameDepthCm: 10,
 });
 
 export const CANONICAL_RUNTIME_SETTINGS = Object.freeze({
@@ -61,8 +59,6 @@ function mapItem(row) {
       widthCm: row.dimensions.width_cm,
       depthCm: row.dimensions.depth_cm,
       heightCm: row.dimensions.height_cm,
-      lengthCm: row.dimensions.length_cm,
-      thicknessCm: row.dimensions.thickness_cm,
       mountHeightCm: row.dimensions.mount_height_cm,
       wallGapCm: row.dimensions.wall_gap_cm,
     };

@@ -177,15 +177,15 @@ Fiziksel gövde. En az bir ölçü NOT NULL (CHECK). JSON `dimensions.*`.
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
 | `item_key` | — | FK/PK | 1:1 | cascade delete |
-| `width_cm` | `widthCm` | Genişlik | Placement / kart / BOM | `resolveSceneDimensions`; factory; AutoDepot |
-| `depth_cm` | `depthCm` | Derinlik | Footprint | aynı |
-| `height_cm` | `heightCm` | Yükseklik | Mesh / şerit aralığı | aynı; collision type tablosu hâlâ ayrı |
-| `length_cm` | `lengthCm` | Üretim boyu | Width’e **remap yok** | profil/raf/vitrin board; `scene3d` showcase |
-| `thickness_cm` | `thicknessCm` | Kalınlık | Depth’e **remap yok** | panel/raf/vitrin |
+| `width_cm` | `widthCm` | Kutu W | Placement / kart / BOM | `resolveSceneDimensions`; factory; AutoDepot |
+| `depth_cm` | `depthCm` | Kutu D | Footprint | aynı |
+| `height_cm` | `heightCm` | Kutu H | Mesh / şerit aralığı | aynı; collision type tablosu hâlâ ayrı |
 | `mount_height_cm` | `mountHeightCm` | Legacy montaj (floodlight 350) | Seed tarihi; drop asıl `default_z_cm`. Fallback: `resolveItemDefaultZCm` hâlâ okur | `led_floodlight`; `selectionFeedback.js` metin |
 | `wall_gap_cm` | `wallGapCm` | Strafor–duvar boşluğu | Overlay öne | `designState.js` → `scene3d.js` foam |
 
-`resolveSceneDimensions`: aynı field `sceneDimensions ?? dimensions ?? MISSING`. `length`→`width` yok.
+**Kaldırıldı:** `length_cm`, `thickness_cm` — migration `0021_drop_item_length_thickness`; önce `0020_item_dims_wh_d_fill` ile W/H/D dolduruldu.
+
+`resolveSceneDimensions`: aynı field `sceneDimensions ?? dimensions ?? MISSING`. Cross-remap yok.
 
 ---
 

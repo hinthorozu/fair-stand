@@ -11,7 +11,6 @@
 |---|---|---|
 | `defaultColor` | 16777215 (`#ffffff`) | item kaydı |
 | `dimensions.depthCm` | 50 | item kaydı |
-| `dimensions.thicknessCm` | 1.8 | item kaydı |
 | `dimensions.widthCm` | 107 | item kaydı |
 | `itemKey` | base_top_107_50 | item kaydı |
 | `material` | sunta | item kaydı |
@@ -21,7 +20,7 @@
 | `unit` | adet | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.heightCm` | 1.8 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **yok** (`src/catalog.js`)

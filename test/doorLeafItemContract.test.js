@@ -10,6 +10,8 @@ import {
 } from './recipeParentItemKey.js';
 import { getItem } from '../src/items.js';
 
+const DOOR_LEAF_DIMS = Object.freeze({ widthCm: 100, heightCm: 200, depthCm: 8 });
+
 test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
   const item = getItem('door_leaf_100');
   const itemsSource = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
@@ -19,7 +21,7 @@ test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
   assert.equal(item.name, 'Ahşap Kapı Kanadı 100 × 200 cm');
   assert.equal(item.type, 'door-leaf');
   assert.equal(item.unit, 'adet');
-  assert.deepEqual(item.dimensions, { widthCm: 100, heightCm: 200, thicknessCm: 8 });
+  assert.deepEqual(item.dimensions, DOOR_LEAF_DIMS);
   assert.equal(item.material, 'ahşap');
   assert.equal(item.defaultColor, 0xffffff);
   assert.doesNotMatch(itemsSource, /DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH/);

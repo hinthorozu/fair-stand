@@ -14,17 +14,17 @@ function module(id, widthCm, placement) {
 test('U stand 400 x 400 exposes a 1200 cm continuous wall chain', () => {
   assert.equal(getContinuousWallCapacityCm('u-stand', 400, 400), 1200);
   assert.deepEqual(getContinuousWallSegments('u-stand', 400, 400), [
-    { wallId: 'left', lengthCm: 400, offsetCm: 0 },
-    { wallId: 'back', lengthCm: 400, offsetCm: 400 },
-    { wallId: 'right', lengthCm: 400, offsetCm: 800 },
+    { wallId: 'left', edgeWidthCm: 400, offsetCm: 0 },
+    { wallId: 'back', edgeWidthCm: 400, offsetCm: 400 },
+    { wallId: 'right', edgeWidthCm: 400, offsetCm: 800 },
   ]);
 });
 
 test('L stand 500 x 400 exposes a 900 cm chain from the physical left side', () => {
   assert.equal(getContinuousWallCapacityCm('l-left', 500, 400), 900);
   assert.deepEqual(getContinuousWallSegments('l-left', 500, 400), [
-    { wallId: 'left', lengthCm: 400, offsetCm: 0 },
-    { wallId: 'back', lengthCm: 500, offsetCm: 400 },
+    { wallId: 'left', edgeWidthCm: 400, offsetCm: 0 },
+    { wallId: 'back', edgeWidthCm: 500, offsetCm: 400 },
   ]);
 });
 

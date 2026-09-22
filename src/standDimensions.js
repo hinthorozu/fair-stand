@@ -6,8 +6,6 @@ let standDimensions = null;
 const REQUIRED_CM_FIELDS = Object.freeze([
   'heightCm',
   'depthCm',
-  'frameWidthCm',
-  'frameDepthCm',
 ]);
 
 function requirePositiveNumber(value, field) {
@@ -51,24 +49,12 @@ export const STAND_DIMENSIONS = Object.freeze({
   get depthCm() {
     return getStandDimensions().depthCm;
   },
-  get frameWidthCm() {
-    return getStandDimensions().frameWidthCm;
-  },
-  get frameDepthCm() {
-    return getStandDimensions().frameDepthCm;
-  },
   /** Three.js / sahne zarfı (metre). */
   get height() {
     return cmToMeters(getStandDimensions().heightCm);
   },
   get depth() {
     return cmToMeters(getStandDimensions().depthCm);
-  },
-  get frameWidth() {
-    return cmToMeters(getStandDimensions().frameWidthCm);
-  },
-  get frameDepth() {
-    return cmToMeters(getStandDimensions().frameDepthCm);
   },
 });
 

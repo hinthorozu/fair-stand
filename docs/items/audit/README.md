@@ -1,25 +1,9 @@
-# Item özellik haritası (audit)
+# Item audit arşivi
 
-Mevcut çalışan sistemin dökümü. Refactor / yeni mimari yok.
+**Güncel Item sözleşmesi:** [`docs/refactor/ITEMS.md`](../../refactor/ITEMS.md), ölçüler [`docs/refactor/ITEM_DIMENSIONS.md`](../../refactor/ITEM_DIMENSIONS.md).
 
-- Item sayısı: **104**
-- Özellik sütunu: **188**
-- Üretim: canlı `import` `src/items.js` `listRegisteredItems` + katalog/sözleşme/davranış/BOM/factory + `rg` çapraz tarama.
+Bu klasördeki audit raporları (2026 öncesi tarama) referans içindir. `dimensions.lengthCm` / `dimensions.thicknessCm` artık geçerli değildir; canonical kutu alanları yalnız **`widthCm`**, **`heightCm`**, **`depthCm`**.
 
-## Dosyalar
+Boyut satırlarını seed ile hizalamak: `python scripts/sync-item-docs-whd-from-seed.py` ve `python scripts/refresh-item-ozellik-matrix-whd.py`.
 
-| dosya | içerik |
-|---|---|
-| [BIRLESIK_ENVANTER.md](BIRLESIK_ENVANTER.md) | tüm item satırları |
-| [OZELLIK_KATALOGU.md](OZELLIK_KATALOGU.md) | her sütunun sahibi |
-| [ITEM_OZELLIK_MATRISI.md](ITEM_OZELLIK_MATRISI.md) | item × özellik |
-| [ITEM_OZELLIK_MATRISI.tsv](ITEM_OZELLIK_MATRISI.tsv) | aynı matris, tab |
-| [DEFAULT_OVERRIDE_HARITASI.md](DEFAULT_OVERRIDE_HARITASI.md) | default / ezme zinciri |
-| [OZEL_DURUMLAR.md](OZEL_DURUMLAR.md) | sapmalar |
-| [IKINCI_TUR.md](IKINCI_TUR.md) | sayı/delik ikinci geçiş |
-| [FINAL_OZET.md](FINAL_OZET.md) | sayılar + ikinci tur |
-| [properties/](properties/README.md) | 188 özellik sözlüğü |
-| [items/](items/) | item başı döküm |
-| [report/](report/README.md) | okunabilir HTML/Markdown/CSV rapor |
-| [report/MEKANIZMA_PARAMETRE.html](report/MEKANIZMA_PARAMETRE.html) | 188 property → 21 mekanizma, kodda gerçek parametre değerleri |
-| [hedef/ATOMIK_MEKANIZMA.html](hedef/ATOMIK_MEKANIZMA.html) | atomik canonical method hedefi (188 sınıflı, src yok) |
+`report/ITEM_SYSTEM_AUDIT.md` / `.html` / `audit-data.json` — üretilmiş snapshot; güncel mimari için refactor belgelerine bakın.

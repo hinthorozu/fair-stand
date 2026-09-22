@@ -30,11 +30,11 @@ test('shelf heights sit on Maxima 50 cm panel seams', () => {
   const shelf100 = getItem('shelf_100');
   const shelf150 = getItem('shelf_150');
   const shelf200 = getItem('shelf_200');
-  assert.equal(shelf100.dimensions.lengthCm, 100);
-  assert.equal(shelf150.dimensions.lengthCm, 150);
-  assert.equal(shelf200.dimensions.lengthCm, 200);
+  assert.equal(shelf100.dimensions.widthCm, 100);
+  assert.equal(shelf150.dimensions.widthCm, 150);
+  assert.equal(shelf200.dimensions.widthCm, 200);
   assert.equal(shelf100.dimensions.depthCm, 38);
-  assert.equal(shelf100.dimensions.thicknessCm, 1.8);
+  assert.equal(shelf100.dimensions.heightCm, 1.8);
   assert.equal('projectionCm' in shelf100.dimensions, false);
 });
 

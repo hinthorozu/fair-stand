@@ -11,7 +11,7 @@
 |---|---|---|
 | `dimensions.depthCm` | 20 | item kaydı |
 | `dimensions.heightCm` | 35 | item kaydı |
-| `dimensions.mountHeightCm` | 350 (`#00015e`) | item kaydı |
+| `dimensions.mountHeightCm` | 350 | item kaydı |
 | `dimensions.widthCm` | 50 | item kaydı |
 | `itemKey` | led_floodlight | item kaydı |
 | `name` | LED Projektör | item kaydı |

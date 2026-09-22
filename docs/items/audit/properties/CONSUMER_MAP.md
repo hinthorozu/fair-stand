@@ -22,12 +22,12 @@ Her özellik için src/test/e2e taraması (token listesi üreticide). Hit 0 = au
 | [`static.dimensions.catalogHeightCm`](properties/static.dimensions.catalogHeightCm.md) | 165 | 9 | ITEM_READONLY |
 | [`static.dimensions.depthCm`](properties/static.dimensions.depthCm.md) | 283 | 12 | ITEM_READONLY |
 | [`static.dimensions.heightCm`](properties/static.dimensions.heightCm.md) | 240 | 12 | ITEM_READONLY |
-| [`static.dimensions.lengthCm`](properties/static.dimensions.lengthCm.md) | 184 | 14 | ITEM_READONLY |
+| [`static.dimensions.widthCm (legacy column removed)`](properties/static.dimensions.widthCm (legacy column removed).md) | 184 | 14 | ITEM_READONLY |
 | [`static.dimensions.mountHeightCm`](properties/static.dimensions.mountHeightCm.md) | 162 | 9 | ITEM_READONLY |
 | [`static.dimensions.screenHeightCm`](properties/static.dimensions.screenHeightCm.md) | 170 | 9 | ITEM_READONLY |
 | [`static.dimensions.screenWidthCm`](properties/static.dimensions.screenWidthCm.md) | 172 | 9 | ITEM_READONLY |
 | [`static.dimensions.tableDiameterCm`](properties/static.dimensions.tableDiameterCm.md) | 161 | 9 | ITEM_READONLY |
-| [`static.dimensions.thicknessCm`](properties/static.dimensions.thicknessCm.md) | 166 | 9 | ITEM_READONLY |
+| [`static.dimensions.depthCm (legacy column removed)`](properties/static.dimensions.depthCm (legacy column removed).md) | 166 | 9 | ITEM_READONLY |
 | [`static.dimensions.wallGapCm`](properties/static.dimensions.wallGapCm.md) | 163 | 9 | ITEM_READONLY |
 | [`static.dimensions.widthCm`](properties/static.dimensions.widthCm.md) | 370 | 15 | ITEM_READONLY |
 | [`static.eyeCount`](properties/static.eyeCount.md) | 15 | 6 | ITEM_READONLY |

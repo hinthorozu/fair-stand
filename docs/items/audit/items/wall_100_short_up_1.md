@@ -21,7 +21,7 @@
 | `variant` | short-up-1 | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `sceneDimensions.depthCm` | 10 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **var** (`src/catalog.js`)

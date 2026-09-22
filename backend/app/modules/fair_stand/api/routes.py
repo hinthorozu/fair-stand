@@ -82,8 +82,6 @@ class StandDimensionsUpdateBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     height_cm: float = Field(gt=0)
     depth_cm: float = Field(gt=0)
-    frame_width_cm: float = Field(gt=0)
-    frame_depth_cm: float = Field(gt=0)
 
 
 class RuntimeSettingsUpdateBody(BaseModel):
@@ -351,8 +349,6 @@ def admin_update_stand_dimensions(
         return service.update_stand_dimensions(
             height_cm=body.height_cm,
             depth_cm=body.depth_cm,
-            frame_width_cm=body.frame_width_cm,
-            frame_depth_cm=body.frame_depth_cm,
         )
     except SettingsAdminError as exc:
         _raise_admin(exc)

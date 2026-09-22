@@ -7,7 +7,7 @@ def test_profile_rail_is_thickness_not_stand_ceiling():
         "item_key": "profile_190",
         "item_type": "profile",
         "variant": None,
-        "dimensions": {"thickness_cm": 8},
+        "dimensions": {"depth_cm": 8, "height_cm": 8, "width_cm": 190},
         "scene_dimensions": {"width_cm": 200, "depth_cm": 8, "height_cm": 350},
         "default_z_cm": 0,
     }

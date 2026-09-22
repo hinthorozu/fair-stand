@@ -109,8 +109,6 @@ def _dimensions_payload(row: FairStandItemDimensionsModel | None) -> dict | None
         "widthCm": _num(row.width_cm),
         "depthCm": _num(row.depth_cm),
         "heightCm": _num(row.height_cm),
-        "lengthCm": _num(row.length_cm),
-        "thicknessCm": _num(row.thickness_cm),
         "mountHeightCm": _num(row.mount_height_cm),
         "wallGapCm": _num(row.wall_gap_cm),
     }
@@ -620,8 +618,6 @@ class AdminItemsService:
         dims.width_cm = _optional_decimal(data.get("width_cm", data.get("widthCm")))
         dims.depth_cm = _optional_decimal(data.get("depth_cm", data.get("depthCm")))
         dims.height_cm = _optional_decimal(data.get("height_cm", data.get("heightCm")))
-        dims.length_cm = _optional_decimal(data.get("length_cm", data.get("lengthCm")))
-        dims.thickness_cm = _optional_decimal(data.get("thickness_cm", data.get("thicknessCm")))
         dims.mount_height_cm = _optional_decimal(
             data.get("mount_height_cm", data.get("mountHeightCm"))
         )
@@ -632,8 +628,6 @@ class AdminItemsService:
                 dims.width_cm,
                 dims.depth_cm,
                 dims.height_cm,
-                dims.length_cm,
-                dims.thickness_cm,
                 dims.mount_height_cm,
                 dims.wall_gap_cm,
             )

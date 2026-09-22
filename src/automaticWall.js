@@ -10,15 +10,15 @@ export function getAutomaticWallCapacityCm({ standType, standXCm, standYCm } = {
 }
 
 export function composeAutomaticStandWall({
-  lengthCm,
+  wallWidthCm,
   standType,
   standXCm,
   standYCm,
 } = {}) {
-  const validation = composeStraightWall(Number(lengthCm));
+  const validation = composeStraightWall(Number(wallWidthCm));
   if (!validation.ok) return validation;
 
-  const requestedCm = Number(lengthCm);
+  const requestedCm = Number(wallWidthCm);
   const capacityCm = getContinuousWallCapacityCm(standType, standXCm, standYCm);
   const segments = getContinuousWallSegments(standType, standXCm, standYCm);
 
@@ -45,7 +45,7 @@ export function composeAutomaticStandWall({
 
   for (const segment of segments) {
     if (remainingCm <= 0) break;
-    const fillCm = Math.min(remainingCm, Number(segment.lengthCm));
+    const fillCm = Math.min(remainingCm, Number(segment.edgeWidthCm));
     if (fillCm <= 0) continue;
 
     const segmentWall = composeStraightWall(fillCm);
@@ -96,13 +96,13 @@ export function composeAutomaticBackWallWithDepot({ standXCm, depotOriginXCm, de
   }
 
   const modules = [];
-  const addChunk = (lengthCm, startXCm, exact = false) => {
-    if (lengthCm <= 0) return true;
+  const addChunk = (wallWidthCm, startXCm, exact = false) => {
+    if (wallWidthCm <= 0) return true;
     if (exact) {
-      modules.push({ widthCm: lengthCm, placement: { xCm: startXCm, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' }, depotBack: true });
+      modules.push({ widthCm: wallWidthCm, placement: { xCm: startXCm, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' }, depotBack: true });
       return true;
     }
-    const composed = composeStraightWall(lengthCm);
+    const composed = composeStraightWall(wallWidthCm);
     if (!composed.ok) return false;
     let cursor = startXCm;
     for (const widthCm of composed.modules) {

@@ -1,3 +1,4 @@
+import { getStandDimensions } from './standDimensions.js';
 import { resolveWallPanelBandPitchCm } from './wallPanelBand.js';
 
 // catalogVisible / categoryId / catalogItemIndex her Item'ın kendi katalog görünüm verisidir.
@@ -121,7 +122,10 @@ export function getFloorSelectLabel(item) {
 }
 
 export function isParquetFloorItem(item) {
-  return item?.type === 'floor' && Number(item.dimensions?.lengthCm) > 0;
+  return item?.type === 'floor'
+    && Number(item.dimensions?.widthCm) > 0
+    && Number(item.dimensions?.depthCm) > 0
+    && item.paintable === false;
 }
 
 export function isGridTileFloorItem(item) {
@@ -267,8 +271,8 @@ export function getShowcaseBodyDefinition(itemOrKey) {
     throw new TypeError(`Canonical showcase body boards must be sunta for ${item.itemKey}.`);
   }
   if (Number(sideItem.dimensions.depthCm) !== Number(horizontalItem.dimensions.depthCm)
-      || Number(sideItem.dimensions.thicknessCm) !== Number(horizontalItem.dimensions.thicknessCm)) {
-    throw new TypeError(`Canonical showcase body board depth/thickness mismatch for ${item.itemKey}.`);
+      || Number(sideItem.dimensions.heightCm) !== Number(horizontalItem.dimensions.heightCm)) {
+    throw new TypeError(`Canonical showcase body board depth/height mismatch for ${item.itemKey}.`);
   }
   if (!Number.isInteger(sideItem.defaultColor)
       || sideItem.defaultColor !== horizontalItem.defaultColor) {
@@ -347,8 +351,6 @@ export const SCENE_DIMENSION_FIELDS = Object.freeze([
   'widthCm',
   'depthCm',
   'heightCm',
-  'lengthCm',
-  'thicknessCm',
 ]);
 
 function readDimensionField(layer, field) {
@@ -374,6 +376,121 @@ export function requireSceneDimension(item, field) {
     throw new TypeError(`Item ${item?.itemKey ?? 'unknown'} is missing scene dimension ${field}.`);
   }
   return value;
+}
+
+/** Duvar tavanı (fair_stand_dimensions.height_cm); modül H bu değeri geçemez. */
+export function clampHeightToStandCeilingCm(heightCm) {
+  const value = Number(heightCm);
+  if (!Number.isFinite(value) || value <= 0) return value;
+  const ceilingCm = Number(getStandDimensions().heightCm);
+  if (!Number.isFinite(ceilingCm) || ceilingCm <= 0) return value;
+  return Math.min(value, ceilingCm);
+}
+
+function readModuleSceneFieldCm(moduleState, field, scene) {
+  const fromState = moduleState?.[field];
+  if (fromState != null && Number.isFinite(Number(fromState)) && Number(fromState) > 0) {
+    return Number(fromState);
+  }
+  const fromScene = scene?.[field];
+  if (fromScene != null && Number.isFinite(Number(fromScene)) && Number(fromScene) > 0) {
+    return Number(fromScene);
+  }
+  return null;
+}
+
+/**
+ * Modül W/H/D: state override → resolveSceneDimensions(item).
+ * clampToStandCeiling: heightCm tavanla sınırlanır (varsayılan true).
+ */
+export function resolveModuleSceneBoxCm(moduleState, { clampToStandCeiling = true } = {}) {
+  const item = moduleState?.itemKey ? getItem(moduleState.itemKey) : null;
+  const scene = item ? resolveSceneDimensions(item) : Object.freeze({});
+  const widthCm = readModuleSceneFieldCm(moduleState, 'widthCm', scene);
+  let heightCm = readModuleSceneFieldCm(moduleState, 'heightCm', scene);
+  const depthCm = readModuleSceneFieldCm(moduleState, 'depthCm', scene);
+  if (clampToStandCeiling && heightCm != null) {
+    heightCm = clampHeightToStandCeilingCm(heightCm);
+  }
+  return Object.freeze({ widthCm, heightCm, depthCm, item, scene });
+}
+
+const PROCEDURAL_FRAME_CROSS_SECTION_TYPES = Object.freeze(new Set(['profile', 'upright']));
+
+function firstRecipeProfileOrUprightItem(parentItem) {
+  const rows = parentItem?.composition?.mode === 'recipe' ? parentItem.composition.items : null;
+  if (!Array.isArray(rows)) return null;
+  for (const row of rows) {
+    const childKey = row?.itemKey ?? null;
+    const child = childKey ? getItem(childKey) : null;
+    if (child && PROCEDURAL_FRAME_CROSS_SECTION_TYPES.has(child.type)) {
+      return child;
+    }
+  }
+  return null;
+}
+
+function crossSectionCmFromFrameItem(frameItem) {
+  const scene = resolveSceneDimensions(frameItem);
+  let frameWidthCm;
+  let frameDepthCm;
+  if (frameItem.type === 'upright') {
+    frameWidthCm = scene.widthCm;
+    frameDepthCm = scene.depthCm;
+  } else if (frameItem.type === 'profile') {
+    // Profilde widthCm = duvar span; kesit depth×height (createProfileModule ile aynı).
+    frameWidthCm = scene.depthCm;
+    frameDepthCm = scene.heightCm;
+  } else {
+    throw new TypeError(`Unsupported frame cross-section item type: ${frameItem.type}.`);
+  }
+  if (frameWidthCm == null || frameDepthCm == null) {
+    throw new TypeError(
+      `Item ${frameItem.itemKey} is missing cross-section dimensions for procedural frame.`,
+    );
+  }
+  return Object.freeze({ frameWidthCm, frameDepthCm, frameItemKey: frameItem.itemKey });
+}
+
+/** Parent modül recipe’sindeki profile/upright leaf kesiti — global itemKey yok. */
+export function resolveProceduralFrameCrossSectionCm(moduleState) {
+  const parentKey = moduleState?.itemKey ?? null;
+  const parent = parentKey ? getItem(parentKey) : null;
+  if (!parent) {
+    throw new TypeError('Missing itemKey on module state for procedural frame cross-section.');
+  }
+  const frameItem = firstRecipeProfileOrUprightItem(parent);
+  if (!frameItem) {
+    throw new TypeError(
+      `Item ${parentKey} has no profile/upright in recipe for procedural frame cross-section.`,
+    );
+  }
+  return crossSectionCmFromFrameItem(frameItem);
+}
+
+export function getProceduralFrameCrossSectionM(moduleState) {
+  const { frameWidthCm, frameDepthCm } = resolveProceduralFrameCrossSectionCm(moduleState);
+  return Object.freeze({
+    frameWidthCm,
+    frameDepthCm,
+    frameWidth: frameWidthCm / 100,
+    frameDepth: frameDepthCm / 100,
+  });
+}
+
+export function requireModuleSceneBoxCm(
+  moduleState,
+  requiredFields = SCENE_DIMENSION_FIELDS,
+  options,
+) {
+  const box = resolveModuleSceneBoxCm(moduleState, options);
+  const missing = requiredFields.filter((field) => box[field] == null);
+  if (missing.length > 0) {
+    throw new TypeError(
+      `Item ${moduleState?.itemKey ?? 'unknown'} is missing scene dimensions: ${missing.join(', ')}.`,
+    );
+  }
+  return box;
 }
 
 // Catalog projection'ı taklit etmez; Item master + resolveSceneDimensions okur.

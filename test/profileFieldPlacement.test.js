@@ -43,10 +43,10 @@ test('field profiles are self BOM ×1 and do not change parent wall recipe ×2',
   assert.equal(bom[0].unit, 'adet');
   const parent = getExpandedStraightWallRecipe(200).items.find((item) => item.itemKey === 'profile_190');
   assert.equal(parent.quantity, 2);
-  assert.equal(getItem('profile_190').dimensions.lengthCm, 190);
-  assert.equal(getItem('profile_140_5').dimensions.lengthCm, 140.5);
-  assert.equal(getItem('profile_91').dimensions.lengthCm, 91);
-  assert.equal(getItem('profile_41_5').dimensions.lengthCm, 41.5);
+  assert.equal(getItem('profile_190').dimensions.widthCm, 190);
+  assert.equal(getItem('profile_140_5').dimensions.widthCm, 140.5);
+  assert.equal(getItem('profile_91').dimensions.widthCm, 91);
+  assert.equal(getItem('profile_41_5').dimensions.widthCm, 41.5);
 });
 
 test('profile uses wall_200 move/rotate/snap contract and does not nest into a neighbor wall', () => {
@@ -155,7 +155,7 @@ test('field profile renderer is a thick top rail, not a 4mm line or a 7-strip pa
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const fn = source.slice(source.indexOf('function createProfileModule'), source.indexOf('function createKettleModule'));
-  assert.match(fn, /resolveSceneDimensions/);
+  assert.match(fn, /requireModuleSceneBoxCm/);
   assert.doesNotMatch(fn, /getStraightWallNominalWidthForProfileItem/);
   assert.match(fn, /BoxGeometry\(widthM, railHeightM, thicknessM\)/);
   assert.match(fn, /mesh\.position\.y = railHeightM \/ 2/);
@@ -163,7 +163,7 @@ test('field profile renderer is a thick top rail, not a 4mm line or a 7-strip pa
   assert.match(fn, /FRAME_COLOR/);
   assert.doesNotMatch(fn, /PANEL_RAIL_HEIGHT_M/);
   assert.doesNotMatch(fn, /stripCount/);
-  assert.doesNotMatch(fn, /dimensions\?\.lengthCm/);
+  assert.doesNotMatch(fn, /dimensions\?\.(lengthCm|thicknessCm)/);
 });
 
 test('catalog preview for profile is a horizontal bar', async () => {

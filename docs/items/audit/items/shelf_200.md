@@ -11,8 +11,6 @@
 |---|---|---|
 | `defaultColor` | 16777215 (`#ffffff`) | item kaydı |
 | `dimensions.depthCm` | 38 | item kaydı |
-| `dimensions.lengthCm` | 200 | item kaydı |
-| `dimensions.thicknessCm` | 1.8 | item kaydı |
 | `itemKey` | shelf_200 | item kaydı |
 | `material` | sunta | item kaydı |
 | `name` | Raf 200 cm | item kaydı |
@@ -21,7 +19,10 @@
 | `unit` | adet | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.widthCm` | 200 | item kaydı |
+| `dimensions.heightCm` | 1.8 | item kaydı |
+| `sceneDimensions.widthCm` | 200 | item kaydı |
+| `sceneDimensions.heightCm` | 1.8 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **yok** (`src/catalog.js`)

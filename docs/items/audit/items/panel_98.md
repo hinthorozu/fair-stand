@@ -10,7 +10,6 @@
 | alan | değer | kapsam |
 |---|---|---|
 | `dimensions.heightCm` | 47 | item kaydı |
-| `dimensions.thicknessCm` | 0.8 | item kaydı |
 | `dimensions.widthCm` | 98 | item kaydı |
 | `itemKey` | panel_98 | item kaydı |
 | `material` | sunta | item kaydı |
@@ -21,7 +20,7 @@
 | `unit` | adet | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.depthCm` | 0.8 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **yok** (`src/catalog.js`)

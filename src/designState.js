@@ -190,15 +190,17 @@ export function createSeparatorModuleState(widthCmOrDescriptor, descriptor = {})
       color: separatorDefaultColor(requireSceneDimension(item, 'widthCm')),
     },
   };
-  return applySceneFootprint(state, item, ['widthCm']);
+  return applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
 export function createShowcaseModuleState(type, widthCm = 100) {
   const itemKey = getShowcaseItemKeyForType(type);
   if (!itemKey) return null;
   const showcaseItem = getItem(itemKey);
-  const canonicalWidthCm = Number(showcaseItem?.dimensions?.widthCm);
-  if (!showcaseItem || Number(widthCm) !== canonicalWidthCm) return null;
+  const canonicalWidthCm = resolveSceneDimensions(showcaseItem).widthCm;
+  if (!showcaseItem || canonicalWidthCm == null || Number(widthCm) !== Number(canonicalWidthCm)) {
+    return null;
+  }
   const bodyDefinition = getShowcaseBodyDefinition(showcaseItem);
   const pitchCm = Math.round(Number(resolveWallPanelBandPitchCm()));
   const stripCount = resolveShowcaseStripCount(showcaseItem);
@@ -223,10 +225,15 @@ export function createShowcaseModuleState(type, widthCm = 100) {
   return applySceneFootprint(state, showcaseItem, ['widthCm']);
 }
 
-export function createDoorModuleState(widthCm = 100) {
+export function createDoorModuleState(widthCmOrDescriptor = 100) {
   const doorItem = getItem('door_100');
-  const canonicalWidthCm = Number(doorItem?.dimensions?.widthCm);
-  if (!doorItem || Number(widthCm) !== canonicalWidthCm) return null;
+  if (!doorItem || doorItem.type !== 'door') return null;
+  const canonicalWidthCm = resolveSceneDimensions(doorItem).widthCm;
+  if (canonicalWidthCm == null || !Number.isFinite(Number(canonicalWidthCm))) return null;
+  const requestedWidthCm = typeof widthCmOrDescriptor === 'object' && widthCmOrDescriptor !== null
+    ? (widthCmOrDescriptor.widthCm ?? canonicalWidthCm)
+    : widthCmOrDescriptor;
+  if (Number(requestedWidthCm) !== Number(canonicalWidthCm)) return null;
   const doorLeafItem = getItem('door_leaf_100');
   if (!doorLeafItem) throw new TypeError('Missing canonical door leaf Item door_leaf_100.');
 
@@ -241,7 +248,7 @@ export function createDoorModuleState(widthCm = 100) {
     ),
     // Fiziksel ahşap kapı kanadı kanonik door_leaf Item kimliği/varsayılanı ile başlar.
     surface: createEditableItemSurfaceState(doorLeafItem),
-  }, doorItem, ['widthCm']);
+  }, doorItem, ['widthCm', 'depthCm', 'heightCm']);
 }
 
 const COUNTER_WIDTH_SHAPE_TO_ITEM_KEY = Object.freeze({
@@ -564,7 +571,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   tv: (descriptor) => createTvModuleState(descriptor),
   shelf: (descriptor) => createShelfModuleState(descriptor),
   'led-floodlight': () => createLedFloodlightModuleState(),
-  door: (descriptor) => createDoorModuleState(descriptor.widthCm),
+  door: (descriptor) => createDoorModuleState(descriptor),
   'showcase-2': (descriptor) => createShowcaseModuleState(descriptor.type, descriptor.widthCm),
   'showcase-3': (descriptor) => createShowcaseModuleState(descriptor.type, descriptor.widthCm),
   'illuminated-foam': (descriptor, options) => createIlluminatedFoamModuleState(
@@ -688,9 +695,10 @@ export function normalizeModuleItemState(moduleState) {
 
   if (moduleState.type === 'separator') {
     const resolvedKey = resolveItemKey(moduleState);
-    if (resolvedKey && getItem(resolvedKey)?.type === 'separator') {
+    const item = resolvedKey ? getItem(resolvedKey) : null;
+    if (item?.type === 'separator') {
       moduleState.itemKey = resolvedKey;
-      applySceneFootprint(moduleState, getItem(resolvedKey), ['widthCm']);
+      applySceneFootprint(moduleState, item, ['widthCm', 'depthCm', 'heightCm']);
     }
     return moduleState;
   }
@@ -749,7 +757,7 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'door') {
   const doorItem = moduleState.itemKey ? getItem(moduleState.itemKey) : null;
   if (doorItem?.type !== 'door') return moduleState;
-  applySceneFootprint(moduleState, doorItem, ['widthCm']);
+  applySceneFootprint(moduleState, doorItem, ['widthCm', 'depthCm', 'heightCm']);
     const doorLeafItem = getItem('door_leaf_100');
     if (!doorLeafItem) return moduleState;
     if (!moduleState.surface) {

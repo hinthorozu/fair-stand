@@ -14,12 +14,12 @@
   itemKey: 'profile_140_5',
   type: 'profile',
   unit: 'adet',
-  dimensions: { lengthCm: 140.5, thicknessCm: 8 },
+  dimensions: { widthCm: 140.5, depthCm: 8, heightCm: 8 },
   material: 'alüminyum',
   defaultColor: 0xd0d3d4
 }
 ```
-`lengthCm`, `thicknessCm`, `material` ve `defaultColor` kanonik product/default property'leridir; owner `src/items.js`dir. Project/runtime ezme açık bir karar mekanizmasıyla uygulanabilir ve kanonik değeri değiştirmez. `src/theme.js`/`scene3d.js` specialized renderer ezme kullanabilir.
+`widthCm`, `depthCm`, `heightCm`, `material` ve `defaultColor` kanonik product/default property'leridir; owner `src/items.js`dir. Project/runtime ezme açık bir karar mekanizmasıyla uygulanabilir ve kanonik değeri değiştirmez. `src/theme.js`/`scene3d.js` specialized renderer ezme kullanabilir.
 
 ## 3. Oluşturma / state / kalıcılık
 Sahaya katalogdan konan her örnek ayrı instance'dır (`createProfileModuleState`). Parent reçete satırları ayrı kalır; persist parent module ile birlikte `itemKey` taşır.

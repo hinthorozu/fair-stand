@@ -14,7 +14,7 @@
 ```text
 widthCm = 98
 heightCm = 47
-thicknessCm = 0.8
+depthCm = 0.8
 material = mdf
 defaultColor = 0xc79b63
 ```

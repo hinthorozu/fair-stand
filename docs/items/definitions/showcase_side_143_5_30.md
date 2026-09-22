@@ -5,7 +5,7 @@
 - `itemKey`: `showcase_side_143_5_30`
 - `type`: `showcase-board`
 - `unit`: `adet`
-- dimensions: `143.5 × 30 × 1.8 cm` (`lengthCm × depthCm × thicknessCm`)
+- dimensions: `143.5 × 30 × 1.8 cm` (`widthCm × depthCm × heightCm`)
 - `material`: `sunta`
 - `defaultColor`: `0xffffff` — beyaz
 

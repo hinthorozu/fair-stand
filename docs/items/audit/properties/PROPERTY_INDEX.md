@@ -1,6 +1,6 @@
 # Property indeksi
 
-`static.shelfCount` ve `static.sizeInch` / `catalog.sizeInch` STALE’dir. `static.composition.moduleType` ve `static.composition.options.shape` DEPRECATED SCHEMA_ONLY’dir (Item’da durur, production okumaz). `static.composition.options.shelfCount` STALE/DEPRECATED’dir (Item’da alan yok).
+`static.shelfCount` ve `static.sizeInch` / `catalog.sizeInch` STALE’dir. `static.composition.moduleType` ve `static.composition.options.shape` DEPRECATED SCHEMA_ONLY’dir (Item’da durur, production okumaz). `static.composition.options.shelfCount` STALE/DEPRECATED’dir (Item’da alan yok). **`static.dimensions.widthCm (legacy column removed)` / `static.dimensions.depthCm (legacy column removed)` KALDIRILDI** (0021); canonical W/H/D — [`docs/refactor/ITEM_DIMENSIONS.md`](../../refactor/ITEM_DIMENSIONS.md).
 
 | # | id | ad | kategori | CRUD | TSV dolu | src hit | src dosya | owner dosya |
 |---:|---|---|---|---|---:|---:|---:|---|
@@ -22,12 +22,12 @@
 | 16 | [`static.dimensions.catalogHeightCm`](properties/static.dimensions.catalogHeightCm.md) | Kanonik ölçü: catalogHeightCm | kanonik-kayit | ITEM_READONLY | 3 | 165 | 9 | `src/items.js` |
 | 17 | [`static.dimensions.depthCm`](properties/static.dimensions.depthCm.md) | Kanonik ölçü: depthCm | kanonik-kayit | ITEM_READONLY | 55 | 283 | 12 | `src/items.js` |
 | 18 | [`static.dimensions.heightCm`](properties/static.dimensions.heightCm.md) | Kanonik ölçü: heightCm | kanonik-kayit | ITEM_READONLY | 41 | 240 | 12 | `src/items.js` |
-| 19 | [`static.dimensions.lengthCm`](properties/static.dimensions.lengthCm.md) | Kanonik ölçü: lengthCm | kanonik-kayit | ITEM_READONLY | 17 | 184 | 14 | `src/items.js` |
+| 19 | [`static.dimensions.widthCm (legacy column removed)`](properties/static.dimensions.widthCm (legacy column removed).md) | **KALDIRILDI** (→ W/H/D) | — | REMOVED | 0 | 0 | 0 | — |
 | 20 | [`static.dimensions.mountHeightCm`](properties/static.dimensions.mountHeightCm.md) | Kanonik ölçü: mountHeightCm | kanonik-kayit | ITEM_READONLY | 1 | 162 | 9 | `src/items.js` |
 | 21 | [`static.dimensions.screenHeightCm`](properties/static.dimensions.screenHeightCm.md) | Kanonik ölçü: screenHeightCm | kanonik-kayit | ITEM_READONLY | 3 | 170 | 9 | `src/items.js` |
 | 22 | [`static.dimensions.screenWidthCm`](properties/static.dimensions.screenWidthCm.md) | Kanonik ölçü: screenWidthCm | kanonik-kayit | ITEM_READONLY | 3 | 172 | 9 | `src/items.js` |
 | 23 | [`static.dimensions.tableDiameterCm`](properties/static.dimensions.tableDiameterCm.md) | Kanonik ölçü: tableDiameterCm | kanonik-kayit | ITEM_READONLY | 1 | 161 | 9 | `src/items.js` |
-| 24 | [`static.dimensions.thicknessCm`](properties/static.dimensions.thicknessCm.md) | Kanonik ölçü: thicknessCm | kanonik-kayit | ITEM_READONLY | 34 | 166 | 9 | `src/items.js` |
+| 24 | [`static.dimensions.depthCm (legacy column removed)`](properties/static.dimensions.depthCm (legacy column removed).md) | **KALDIRILDI** (→ W/H/D) | — | REMOVED | 0 | 0 | 0 | — |
 | 25 | [`static.dimensions.wallGapCm`](properties/static.dimensions.wallGapCm.md) | Kanonik ölçü: wallGapCm | kanonik-kayit | ITEM_READONLY | 1 | 163 | 9 | `src/items.js` |
 | 26 | [`static.dimensions.widthCm`](properties/static.dimensions.widthCm.md) | Kanonik ölçü: widthCm | kanonik-kayit | ITEM_READONLY | 79 | 370 | 15 | `src/items.js` |
 | 27 | [`static.eyeCount`](properties/static.eyeCount.md) | Vitrin göz sayısı | kanonik-kayit | ITEM_READONLY | 2 | 15 | 6 | `src/items.js` |

@@ -60,8 +60,6 @@ def test_admin_settings_get_returns_singletons(client, db_session, auth_headers)
     assert body["standDimensions"] == {
         "heightCm": 350.0,
         "depthCm": 10.0,
-        "frameWidthCm": 5.5,
-        "frameDepthCm": 10.0,
     }
     assert body["settings"] == {
         "maxImageUploadMb": 5,
@@ -80,16 +78,12 @@ def test_admin_update_stand_dimensions(client, db_session, auth_headers):
         json={
             "height_cm": 400.0,
             "depth_cm": 12.0,
-            "frame_width_cm": 6.0,
-            "frame_depth_cm": 11.0,
         },
     )
     assert response.status_code == 200
     assert response.json() == {
         "heightCm": 400.0,
         "depthCm": 12.0,
-        "frameWidthCm": 6.0,
-        "frameDepthCm": 11.0,
     }
 
 
@@ -103,8 +97,6 @@ def test_admin_update_stand_dimensions_allows_height_above_strip_grid(client, db
         json={
             "height_cm": 950.0,
             "depth_cm": 10.0,
-            "frame_width_cm": 5.5,
-            "frame_depth_cm": 10.0,
         },
     )
     assert response.status_code == 200

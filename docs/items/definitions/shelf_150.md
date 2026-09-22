@@ -5,7 +5,7 @@
 - `itemKey`: `shelf_150`
 - `type`: `shelf`
 - `unit`: `adet`
-- dimensions: `150 × 38 × 1.8 cm` (`lengthCm × depthCm × thicknessCm`)
+- dimensions: `150 × 38 × 1.8 cm` (`widthCm × depthCm × heightCm`)
 - `sceneDimensions`: `widthCm=150`, `heightCm=1.8` (thickness karşılığı); `depthCm` fiziksel `dimensions.depthCm=38`
 - `material`: `sunta`
 - `defaultColor`: `0xffffff`

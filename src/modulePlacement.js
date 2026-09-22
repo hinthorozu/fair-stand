@@ -180,8 +180,8 @@ export function getPanelSeamSnapWindowCm() {
   return WALL_PANEL_BAND_PITCH_CM / 4;
 }
 
-export function overlayZCmFromSeamHeight(seamHeightCm, thicknessCm) {
-  return Number(seamHeightCm) + Number(thicknessCm) / 2 - WALL_OVERLAY_DEFAULT_CENTER_CM;
+export function overlayZCmFromSeamHeight(seamHeightCm, panelThicknessCm) {
+  return Number(seamHeightCm) + Number(panelThicknessCm) / 2 - WALL_OVERLAY_DEFAULT_CENTER_CM;
 }
 
 export function listInternalSeamsInOccupancyRange(occupancyRange, hostModule = null) {
@@ -1022,7 +1022,7 @@ function snapUprightToShortUpJoints({
         moduleId,
         moduleType: 'upright',
         itemKey: 'upright_346_5',
-        heightCm: Number(getItem('upright_346_5').dimensions.lengthCm),
+        heightCm: Number(getItem('upright_346_5').dimensions.heightCm),
         modules,
         standType,
         standXCm,

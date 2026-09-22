@@ -175,8 +175,8 @@ test('production part catalog contains the canonical 100 cm wooden door leaf', (
 
 test('production part catalog contains shelf sizes and shelf leg', () => {
   assert.equal(getItem('shelf_100').name, 'Raf 100 cm');
-  assert.equal(getItem('shelf_150').dimensions.lengthCm, 150);
-  assert.equal(getItem('shelf_200').dimensions.lengthCm, 200);
+  assert.equal(getItem('shelf_150').dimensions.widthCm, 150);
+  assert.equal(getItem('shelf_200').dimensions.widthCm, 200);
   assert.equal(getItem('shelf_leg').name, 'Raf Ayağı');
 });
 
@@ -233,7 +233,7 @@ test('expanded recipe resolves production part metadata without mutating source 
   const expanded = getExpandedStraightWallRecipe(200);
 
   assert.equal(expanded.items[0].part.name, 'Profil 190 cm');
-  assert.equal(expanded.items[1].part.dimensions.lengthCm, 346.5);
+  assert.equal(expanded.items[1].part.dimensions.heightCm, 346.5);
   assert.equal(expanded.items[2].part.dimensions.widthCm, 197);
   assert.equal(getStraightWallRecipe(200).items[0].part, undefined);
 });

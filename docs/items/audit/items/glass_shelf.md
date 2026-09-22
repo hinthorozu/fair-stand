@@ -10,8 +10,6 @@
 | alan | değer | kapsam |
 |---|---|---|
 | `dimensions.depthCm` | 28.5 | item kaydı |
-| `dimensions.lengthCm` | 87.3 | item kaydı |
-| `dimensions.thicknessCm` | 0.6 | item kaydı |
 | `itemKey` | glass_shelf | item kaydı |
 | `material` | cam | item kaydı |
 | `name` | Cam Raf | item kaydı |
@@ -19,7 +17,8 @@
 | `unit` | adet | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.widthCm` | 87.3 | item kaydı |
+| `dimensions.heightCm` | 0.6 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **yok** (`src/catalog.js`)

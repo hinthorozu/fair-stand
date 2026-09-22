@@ -100,8 +100,8 @@ test('renderer reads canonical board facts and one selector targets exactly four
   const end = source.indexOf('function createSelectionFrame', start);
   const showcase = source.slice(start, end);
   assert.match(showcase, /getShowcaseBodyDefinition\(moduleState\.itemKey\)/);
-  assert.match(showcase, /sideDimensions\.lengthCm/);
-  assert.match(showcase, /horizontalDimensions\.lengthCm/);
+  assert.match(showcase, /sideDimensions\.widthCm/);
+  assert.match(showcase, /horizontalDimensions\.widthCm/);
   assert.match(showcase, /surfaceRole: 'showcase-body'/);
   assert.match(showcase, /colorTargets: bodyColorTargets/);
   assert.doesNotMatch(showcase, /const showcaseDepth = 0\.30/);

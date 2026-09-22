@@ -6,9 +6,9 @@ import { resolveItemBom } from '../src/itemBom.js';
 import { getItemSurfaceCapabilities } from '../src/itemCapabilities.js';
 
 const CASES = Object.freeze([
-  Object.freeze({ itemKey: 'showcase_side_94_6_30', lengthCm: 94.6 }),
-  Object.freeze({ itemKey: 'showcase_side_143_5_30', lengthCm: 143.5 }),
-  Object.freeze({ itemKey: 'showcase_horizontal_87_4_30', lengthCm: 87.4 }),
+  Object.freeze({ itemKey: 'showcase_side_94_6_30', widthCm: 94.6 }),
+  Object.freeze({ itemKey: 'showcase_side_143_5_30', widthCm: 143.5 }),
+  Object.freeze({ itemKey: 'showcase_horizontal_87_4_30', widthCm: 87.4 }),
 ]);
 
 const NO_INDIVIDUAL_SURFACE_CAPABILITIES = Object.freeze({
@@ -27,9 +27,9 @@ test('showcase body boards own canonical dimensions, sunta material, and white d
     assert.equal(item.type, 'showcase-board');
     assert.equal(item.unit, 'adet');
     assert.deepEqual(item.dimensions, {
-      lengthCm: expected.lengthCm,
+      widthCm: expected.widthCm,
       depthCm: 30,
-      thicknessCm: 1.8,
+      heightCm: 1.8,
     });
     assert.equal(item.material, 'sunta');
     assert.equal(item.defaultColor, 0xffffff);

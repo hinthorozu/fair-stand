@@ -22,12 +22,12 @@ Analiz sırasında keşfedilen her sütun. Değer kümesi canlı kayıttan sayı
 | 16 | `static.dimensions.catalogHeightCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 3 | 350 |
 | 17 | `static.dimensions.depthCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 55 | 38 · 30 · 28.5 · 60 · 50 · 43 · 19 · 40 |
 | 18 | `static.dimensions.heightCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 41 | 47 · 200 · 180 · 25 · 66 · 60 · 78 · 38 |
-| 19 | `static.dimensions.lengthCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 17 | 346.5 · 99 · 49.5 · 41.5 · 91 · 140.5 · 190 · 100 |
+| 19 | `static.dimensions.widthCm (legacy column removed)` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 17 | 346.5 · 99 · 49.5 · 41.5 · 91 · 140.5 · 190 · 100 |
 | 20 | `static.dimensions.mountHeightCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 1 | 350 |
 | 21 | `static.dimensions.screenHeightCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 3 | 52.3 · 68.5 · 80.9 |
 | 22 | `static.dimensions.screenWidthCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 3 | 93 · 121.8 · 143.9 |
 | 23 | `static.dimensions.tableDiameterCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 1 | 75 |
-| 24 | `static.dimensions.thicknessCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 34 | 8 · 0.8 · 1.8 · 0.6 |
+| 24 | `static.dimensions.depthCm (legacy column removed)` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 34 | 8 · 0.8 · 1.8 · 0.6 |
 | 25 | `static.dimensions.wallGapCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 1 | 1.5 |
 | 26 | `static.dimensions.widthCm` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 79 | 48.5 · 98 · 147.5 · 197 · 42.5 · 92 · 142.5 · 192 |
 | 27 | `static.eyeCount` | statik-kayit | src/items.js Object.freeze kayıt | item-alanı (yalnız tanımlı item'larda değer var) | hayır (kanonik) | 2 | 2 · 3 |

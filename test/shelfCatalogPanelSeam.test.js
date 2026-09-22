@@ -95,7 +95,10 @@ test('D-E Catalog descriptor exact itemKey ile state ve scene width üretir', ()
     assert.equal(countsTowardWallCapacity(state), false);
 
     const item = getItem(itemKey);
-    assert.deepEqual(item.dimensions, { lengthCm: widthCm, depthCm: 38, thicknessCm: 1.8 });
+    assert.deepEqual(
+      item.dimensions,
+      { widthCm, depthCm: 38, heightCm: 1.8 },
+    );
     const scene = resolveSceneDimensions(item);
     assert.equal(scene.widthCm, widthCm);
     assert.equal(scene.heightCm, 1.8);

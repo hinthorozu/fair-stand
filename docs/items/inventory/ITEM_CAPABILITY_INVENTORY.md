@@ -82,8 +82,8 @@ Map sayıları: `LEAF_ITEMS` 39, `COMMERCIAL_ITEMS` 4, `FURNITURE_ITEMS` 8, `TOP
 | genişlik cm | `dimensions.widthCm` | 24, 40, 42.5, 43, 46, 48.5, 50, 52, 60, 65, 75, 92, 93, 98, 100, 102, 107, 108.5, 110, 121.8, 142.5, 143.9, 147.5, 150, 157, 160, 192, 197, 200, 206, 210 | `src/items.js` | `item-tanim` | asıl sahip; TV ekran ve cam masa çapı bu alan |
 | yükseklik cm | `dimensions.heightCm` | 25, 30, 35, 38, 47, 50, 52.3, 60, 61, 66, 68.5, 74, 78, 80.9, 82, 100, 120, 121, 180, 200, 350 | `src/items.js` | `item-tanim` | asıl sahip; TV/panel ekran yüksekliği bu alan |
 | derinlik cm | `dimensions.depthCm` | 3.5, 5, 16, 19, 20, 28, 28.5, 30, 38, 40, 42, 43, 45, 50, 55, 58, 60, 75, 100, 150, 200 | `src/items.js` | `item-tanim` | asıl sahip |
-| uzunluk cm | `dimensions.lengthCm` | 41.5, 49.5, 87.3, 87.4, 91, 94.6, 99, 100, 112, 140, 140.5, 143.5, 150, 190, 200, 346.5 | `src/items.js` | `item-tanim` | asıl sahip |
-| kalınlık cm | `dimensions.thicknessCm` | 0.6, 0.8, 1.8, 8 | `src/items.js` | `item-tanim` | asıl sahip |
+| uzunluk cm | `dimensions.widthCm` | 41.5, 49.5, 87.3, 87.4, 91, 94.6, 99, 100, 112, 140, 140.5, 143.5, 150, 190, 200, 346.5 | `src/items.js` | `item-tanim` | asıl sahip |
+| kalınlık cm | `dimensions.depthCm` | 0.6, 0.8, 1.8, 8 | `src/items.js` | `item-tanim` | asıl sahip |
 | montaj yüksekliği cm | `dimensions.mountHeightCm` | 350 (`led_floodlight`) | `src/items.js` | `item-tanim` | asıl sahip |
 | duvar boşluğu cm | `dimensions.wallGapCm` | 1.5 (`illuminated-foam`) | `src/items.js` | `item-tanim` | asıl sahip |
 | varsayılan renk | `defaultColor` | int `0xd0d3d4`, `0xc79b63`, `0xffffff`, `0xf8fafc`; zemin hex `#e9edf1`, `#8b8f94`, `#e8dfd1`, `#c4a480`, `#625f58` | `src/items.js` | `item-tanim` | asıl sahip; vitrin gövde rengi leaf `showcase_side_*` `0xffffff`; parent `bodySurface` uydurma çanta |
@@ -448,7 +448,7 @@ Resolve alias: `moduleType`, `counterShape` (`normalizeCatalogDescriptor`).
 | depo içerik type | `creates.contentKinds` | `mini-fridge`, `kettle`, `coat-rack`, `plastic-trash-bin` | `src/featureContracts.js` | `stand-proje` | |
 | depo içerik key | `creates.contentCatalogKeys` | `MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN` | `src/featureContracts.js` | `stand-proje` | |
 | otomatik duvar sözleşmesi | `FEATURE_CONTRACTS.automaticWall` | `id` `automatic-wall` | `src/featureContracts.js` | `stand-proje` | |
-| otomatik duvar girdi | `inputs` | `lengthCm`, `standType`, `standXCm`, `standYCm` | `src/featureContracts.js` | `stand-proje` | |
+| otomatik duvar girdi | `inputs` | `wallWidthCm`, `standType`, `standXCm`, `standYCm` | `src/featureContracts.js` | `stand-proje` | |
 | kamera perspective | `type: 'projection', mode: 'perspective'` | `p` | `src/viewKeyboardShortcuts.js` | `stand-proje` | kamera; Item yeteneği değil |
 | kamera ortho | `mode: 'orthographic'` | `o` | `src/viewKeyboardShortcuts.js` | `stand-proje` | |
 | sol bakış | `type: 'view', direction: 'left'` | `l` | `src/viewKeyboardShortcuts.js` | `stand-proje` | |

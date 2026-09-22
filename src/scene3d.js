@@ -19,6 +19,10 @@ import {
   listFloorItems,
   applyItemPlacementZCm,
   resolveItemDefaultZCm,
+  resolveModuleSceneBoxCm,
+  requireModuleSceneBoxCm,
+  clampHeightToStandCeilingCm,
+  getProceduralFrameCrossSectionM,
   resolveSceneDimensions,
 } from './items.js';
 import { snapPlacementToItemAnchor } from './itemSnap.js';
@@ -67,7 +71,6 @@ const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
 const PANEL_BACK_COLOR = 0x4b5563;
 const PANEL_RAIL_HEIGHT_M = 0.004;
 const PANEL_VERTICAL_CLEARANCE_M = 0;
-const PANEL_VERTICAL_PROFILE_WIDTH_M = 0.040;
 const MESH_FABRIC_OPACITY = 0.48;
 const FLOOR_COLOR = 0xe9edf1;
 const OUTER_FLOOR_COLOR = 0xd2d8df;
@@ -552,7 +555,7 @@ export function createStandScene(
   function matchesConcreteParquetVisual(item) {
     const concrete = getFloorItem('parke-beton');
     return isParquetFloorItem(item)
-      && Number(item.dimensions?.lengthCm) === Number(concrete.dimensions.lengthCm)
+      && Number(item.dimensions?.widthCm) === Number(concrete.dimensions.widthCm)
       && Number(item.dimensions?.depthCm) === Number(concrete.dimensions.depthCm);
   }
 
@@ -572,7 +575,7 @@ export function createStandScene(
     } else if (isParquetFloorItem(floorItem)) {
       const parquet = floorItem;
       const plankDepthM = Number(parquet.dimensions.depthCm) / 100;
-      const plankLengthM = Number(parquet.dimensions.lengthCm) / 100;
+      const plankLengthM = Number(parquet.dimensions.widthCm) / 100;
       collectSurfaceCuts(depthM, plankDepthM).forEach((z) => {
         positions.push(0, topY, z, widthM, topY, z);
       });
@@ -1866,18 +1869,14 @@ export function createStandScene(
 
   function getPlacementGhostDimensions(moduleOrWidthCm) {
     if (typeof moduleOrWidthCm === 'object' && moduleOrWidthCm) {
-      const item = moduleOrWidthCm.itemKey ? getItem(moduleOrWidthCm.itemKey) : null;
-      const scene = item ? resolveSceneDimensions(item) : {};
-      const widthCm = Number(moduleOrWidthCm.widthCm ?? scene.widthCm);
-      const depthCm = Number(moduleOrWidthCm.depthCm ?? scene.depthCm);
-      const heightCm = Number(moduleOrWidthCm.heightCm ?? scene.heightCm);
+      const box = requireModuleSceneBoxCm(moduleOrWidthCm, ['widthCm', 'depthCm', 'heightCm']);
       return {
-        widthCm,
-        // LEGACY: itemKey yoksa veya scene depth/height MISSING ise STAND renderer ghost zarfı.
-        depthM: Math.max((Number.isFinite(depthCm) ? depthCm : (STAND_DIMENSIONS.depth * 100)) / 100, 0.02),
-        heightM: Math.max((Number.isFinite(heightCm) ? heightCm : (STAND_DIMENSIONS.height * 100)) / 100, 0.02),
+        widthCm: box.widthCm,
+        depthM: Math.max(box.depthCm / 100, 0.02),
+        heightM: Math.max(box.heightCm / 100, 0.02),
       };
     }
+    // Sayısal genişlik yolu: item yok; yalnız stand duvar zarfı (tavan + derinlik).
     return {
       widthCm: Number(moduleOrWidthCm),
       depthM: Math.max(STAND_DIMENSIONS.depth, 0.08),
@@ -5465,16 +5464,9 @@ function createCoatRackModule(moduleState, moduleIndex) {
 }
 
 function createUprightModule(moduleState, moduleIndex) {
-  const item = getItem(moduleState.itemKey);
-  const scene = resolveSceneDimensions(item);
-  const thicknessCm = Number(moduleState.widthCm ?? scene.widthCm);
-  const depthCm = Number(moduleState.depthCm ?? scene.depthCm);
-  const heightCm = Number(moduleState.heightCm ?? scene.heightCm);
-  if (!Number.isFinite(thicknessCm) || thicknessCm <= 0 || !Number.isFinite(heightCm) || heightCm <= 0) {
-    throw new TypeError(`Item ${moduleState.itemKey ?? 'unknown'} is missing scene dimensions for upright.`);
-  }
-  const thicknessM = thicknessCm / 100;
-  const depthM = (Number.isFinite(depthCm) && depthCm > 0 ? depthCm : thicknessCm) / 100;
+  const { widthCm: sectionWidthCm, depthCm, heightCm } = requireModuleSceneBoxCm(moduleState);
+  const thicknessM = sectionWidthCm / 100;
+  const depthM = (Number.isFinite(depthCm) && depthCm > 0 ? depthCm : sectionWidthCm) / 100;
   const heightM = heightCm / 100;
   const group = new THREE.Group();
   group.userData = {
@@ -5483,8 +5475,8 @@ function createUprightModule(moduleState, moduleIndex) {
     moduleId: moduleState.id,
     moduleType: 'upright',
     type: 'upright',
-    widthCm: thicknessCm,
-    depthCm: Number.isFinite(depthCm) ? depthCm : thicknessCm,
+    widthCm: sectionWidthCm,
+    depthCm: Number.isFinite(depthCm) ? depthCm : sectionWidthCm,
     heightCm,
   };
 
@@ -5507,8 +5499,8 @@ function createUprightModule(moduleState, moduleIndex) {
     moduleIndex,
     selectionMode: 'module',
     acceptsImage: false,
-    widthCm: thicknessCm,
-    depthCm: Number.isFinite(depthCm) ? depthCm : thicknessCm,
+    widthCm: sectionWidthCm,
+    depthCm: Number.isFinite(depthCm) ? depthCm : sectionWidthCm,
     heightCm,
   };
   group.add(mesh);
@@ -5516,17 +5508,14 @@ function createUprightModule(moduleState, moduleIndex) {
 }
 
 function createProfileModule(moduleState, moduleIndex) {
-  const item = getItem(moduleState.itemKey);
-  const scene = resolveSceneDimensions(item);
-  const lengthCm = Number(moduleState.widthCm ?? scene.widthCm);
-  const thicknessCm = Number(moduleState.depthCm ?? scene.depthCm);
-  const heightCm = Number(moduleState.heightCm ?? scene.heightCm);
-  if (!Number.isFinite(lengthCm) || lengthCm <= 0) {
-    throw new TypeError(`Item ${moduleState.itemKey ?? 'unknown'} is missing scene dimension widthCm.`);
-  }
-  const widthM = lengthCm / 100;
-  const thicknessM = (Number.isFinite(thicknessCm) && thicknessCm > 0 ? thicknessCm : 8) / 100;
-  const railHeightM = (Number.isFinite(heightCm) && heightCm > 0 ? heightCm : thicknessM * 100) / 100;
+  const {
+    widthCm: spanWidthCm,
+    depthCm: crossDepthCm,
+    heightCm,
+  } = requireModuleSceneBoxCm(moduleState);
+  const widthM = spanWidthCm / 100;
+  const thicknessM = crossDepthCm / 100;
+  const railHeightM = heightCm / 100;
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -5534,8 +5523,8 @@ function createProfileModule(moduleState, moduleIndex) {
     moduleId: moduleState.id,
     moduleType: 'profile',
     type: 'profile',
-    widthCm: lengthCm,
-    depthCm: thicknessCm,
+    widthCm: spanWidthCm,
+    depthCm: crossDepthCm,
     heightCm,
   };
 
@@ -5558,8 +5547,8 @@ function createProfileModule(moduleState, moduleIndex) {
     moduleIndex,
     selectionMode: 'module',
     acceptsImage: false,
-    widthCm: lengthCm,
-    depthCm: thicknessCm,
+    widthCm: spanWidthCm,
+    depthCm: crossDepthCm,
     heightCm,
   };
   group.add(mesh);
@@ -6622,9 +6611,9 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const widthM = widthCm / 100;
   const depthM = depthCm / 100;
   const heightM = heightCm / 100;
-  const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
+  const profileM = getProceduralFrameCrossSectionM(moduleState).frameWidth;
   const railHeightM = PANEL_RAIL_HEIGHT_M;
-  const frameDepthM = Number(STAND_DIMENSIONS.frameDepth);
+  const frameDepthM = getProceduralFrameCrossSectionM(moduleState).frameDepth;
   const topThicknessM = 0.035;
   const topOverhangM = 0.02;
   const frameHeightM = Math.max(heightM - topThicknessM, profileM * 3);
@@ -6785,7 +6774,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const widthM = widthCm / 100;
   const depthM = depthCm / 100;
   const heightM = heightCm / 100;
-  const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
+  const profileM = getProceduralFrameCrossSectionM(moduleState).frameWidth;
   const topThicknessM = 0.04;
   const topOverhangM = 0.02;
   const frameHeightM = Math.max(heightM - topThicknessM, profileM * 3);
@@ -6840,7 +6829,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
 
   // Ara yatay profil kaldırıldı; yalnız en alt ve en üst profil kalır.
   const railYs = [0, frameHeightM];
-  const frameDepthM = Number(STAND_DIMENSIONS.frameDepth);
+  const frameDepthM = getProceduralFrameCrossSectionM(moduleState).frameDepth;
   const frontRailGeometry = new THREE.BoxGeometry(frontPanelWidthM, railHeightM, frameDepthM);
   railYs.forEach((y) => {
     addProfile(
@@ -6962,8 +6951,8 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const depthM = depthCm / 100;
   const armM = 0.50;
   const heightM = Number(moduleState.heightCm || 100) / 100;
-  const profileM = PANEL_VERTICAL_PROFILE_WIDTH_M;
-  const frameDepthM = Number(STAND_DIMENSIONS.frameDepth);
+  const profileM = getProceduralFrameCrossSectionM(moduleState).frameWidth;
+  const frameDepthM = getProceduralFrameCrossSectionM(moduleState).frameDepth;
   const railHeightM = PANEL_RAIL_HEIGHT_M;
   const topThicknessM = 0.04;
   const frameHeightM = heightM - topThicknessM;
@@ -7047,7 +7036,7 @@ function createShelfModule(moduleState, moduleIndex) {
 
   const widthM = Number(moduleState.widthCm) / 100;
   const depthM = Number(item.dimensions.depthCm) / 100;
-  const thicknessM = Number(item.dimensions.thicknessCm) / 100;
+  const thicknessM = Number(item.dimensions.heightCm) / 100;
   if (![widthM, depthM, thicknessM].every(Number.isFinite) || widthM <= 0 || depthM <= 0 || thicknessM <= 0) {
     throw new TypeError(`Missing canonical shelf dimensions for ${item.itemKey}.`);
   }
@@ -7066,7 +7055,7 @@ function createShelfModule(moduleState, moduleIndex) {
     moduleType: 'shelf',
     widthCm: Number(moduleState.widthCm),
     depthCm: Number(item.dimensions.depthCm),
-    heightCm: Number(item.dimensions.thicknessCm),
+    heightCm: Number(item.dimensions.heightCm),
     shelfLightingOn,
   };
 
@@ -7157,13 +7146,14 @@ function createShelfModule(moduleState, moduleIndex) {
 }
 
 function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
-  const {
-    depth,
-    frameDepth,
-  } = STAND_DIMENSIONS;
-
-  const heightM = Number(moduleState.heightCm) / 100;
-  const height = Number.isFinite(heightM) && heightM > 0 ? heightM : STAND_DIMENSIONS.height;
+  const { frameDepth } = getProceduralFrameCrossSectionM(moduleState);
+  const moduleHeightCm = clampHeightToStandCeilingCm(Number(moduleState.heightCm));
+  if (!Number.isFinite(moduleHeightCm) || moduleHeightCm <= 0) {
+    throw new TypeError(`Item ${moduleState.itemKey ?? 'unknown'} is missing module heightCm for flat-panel.`);
+  }
+  const { depthCm } = requireModuleSceneBoxCm(moduleState, ['depthCm'], { clampToStandCeiling: false });
+  const depth = depthCm / 100;
+  const height = moduleHeightCm / 100;
   const storedCount = Array.isArray(moduleState?.strips) ? moduleState.strips.length : 0;
   const visibleStripCount = storedCount > 0 ? storedCount : 1;
   const stripHeight = resolveModuleBandPitchCm(moduleState) / 100;
@@ -7187,11 +7177,11 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     roughness: 0.28,
   });
 
-  const profileGeometry = new THREE.BoxGeometry(PANEL_VERTICAL_PROFILE_WIDTH_M, frameHeight, frameDepth);
+  const profileGeometry = new THREE.BoxGeometry(getProceduralFrameCrossSectionM(moduleState).frameWidth, frameHeight, frameDepth);
   for (const side of [-1, 1]) {
     const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
     profile.position.set(
-      side * (widthM / 2 - PANEL_VERTICAL_PROFILE_WIDTH_M / 2),
+      side * (widthM / 2 - getProceduralFrameCrossSectionM(moduleState).frameWidth / 2),
       frameBottomY + frameHeight / 2,
       0,
     );
@@ -7201,7 +7191,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
 
   const railHeight = PANEL_RAIL_HEIGHT_M;
   const railGeometry = new THREE.BoxGeometry(
-    Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2, 0.02),
+    Math.max(widthM - getProceduralFrameCrossSectionM(moduleState).frameWidth * 2, 0.02),
     railHeight,
     frameDepth,
   );
@@ -7215,7 +7205,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   }
 
   const surfaces = [];
-  const innerWidth = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
+  const innerWidth = Math.max(widthM - getProceduralFrameCrossSectionM(moduleState).frameWidth * 2 - 0.012, 0.02);
   const panelHeight = stripHeight - railHeight - PANEL_VERTICAL_CLEARANCE_M;
   const panelDepth = Math.max(depth - 0.026, 0.035);
 
@@ -7291,14 +7281,13 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
 
 
 function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
-  const {
-    height,
-    depth,
-    frameWidth,
-    frameDepth,
-  } = STAND_DIMENSIONS;
-
-  const widthCm = Number(moduleState.widthCm) || 100;
+  const { frameDepth } = getProceduralFrameCrossSectionM(moduleState);
+  const { widthCm, heightCm, depthCm } = requireModuleSceneBoxCm(
+    moduleState,
+    ['widthCm', 'heightCm', 'depthCm'],
+  );
+  const height = heightCm / 100;
+  const depth = depthCm / 100;
   const widthM = widthCm / 100;
   const stripHeight = WALL_PANEL_BAND_PITCH_CM / 100;
   const doorHeight = stripHeight * 4;
@@ -7319,16 +7308,16 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     roughness: 0.28,
   });
 
-  const profileGeometry = new THREE.BoxGeometry(PANEL_VERTICAL_PROFILE_WIDTH_M, height, frameDepth);
+  const profileGeometry = new THREE.BoxGeometry(getProceduralFrameCrossSectionM(moduleState).frameWidth, height, frameDepth);
   for (const side of [-1, 1]) {
     const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
-    profile.position.set(side * (widthM / 2 - PANEL_VERTICAL_PROFILE_WIDTH_M / 2), height / 2, 0);
+    profile.position.set(side * (widthM / 2 - getProceduralFrameCrossSectionM(moduleState).frameWidth / 2), height / 2, 0);
     profile.castShadow = true;
     group.add(profile);
   }
 
   const railGeometry = new THREE.BoxGeometry(
-    Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2, 0.02),
+    Math.max(widthM - getProceduralFrameCrossSectionM(moduleState).frameWidth * 2, 0.02),
     railHeight,
     frameDepth,
   );
@@ -7342,7 +7331,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
   });
 
   const surfaces = [];
-  const innerWidth = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
+  const innerWidth = Math.max(widthM - getProceduralFrameCrossSectionM(moduleState).frameWidth * 2 - 0.012, 0.02);
   const panelDepth = Math.max(depth - 0.026, 0.035);
 
   // Alt bölüm: kapalı kapı kanadı. Sahne düzleminden dışarı açılmaz.
@@ -7478,14 +7467,16 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
 
 function createSeparatorModule(moduleState, moduleIndex) {
   const {
-    height,
-    depth,
-    frameWidth,
-    frameDepth,
-  } = STAND_DIMENSIONS;
+    widthCm,
+    heightCm,
+    depthCm,
+  } = requireModuleSceneBoxCm(moduleState);
 
-  const widthCm = moduleState.widthCm;
+  const { frameWidth, frameDepth } = getProceduralFrameCrossSectionM(moduleState);
+
   const widthM = widthCm / 100;
+  const height = heightCm / 100;
+  const depth = depthCm / 100;
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -7493,6 +7484,8 @@ function createSeparatorModule(moduleState, moduleIndex) {
     moduleId: moduleState.id,
     type: moduleState.type,
     widthCm,
+    heightCm,
+    depthCm,
   };
 
   const frameMaterial = new THREE.MeshStandardMaterial({
@@ -7609,11 +7602,10 @@ function createSeparatorModule(moduleState, moduleIndex) {
 }
 
 function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
-  const {
-    height,
-    depth,
-    frameDepth,
-  } = STAND_DIMENSIONS;
+  const { heightCm, depthCm } = requireModuleSceneBoxCm(moduleState, ['heightCm', 'depthCm']);
+  const height = heightCm / 100;
+  const depth = depthCm / 100;
+  const { frameDepth } = getProceduralFrameCrossSectionM(moduleState);
 
   const stripCount = Array.isArray(moduleState?.strips) ? moduleState.strips.length : 0;
   const stripHeight = resolveModuleBandPitchCm(moduleState) / 100;
@@ -7631,10 +7623,10 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const sideDimensions = bodyDefinition.sideItem.dimensions;
   const horizontalDimensions = bodyDefinition.horizontalItem.dimensions;
   const showcaseDepth = Number(sideDimensions.depthCm) / 100;
-  const bodyHeight = Number(sideDimensions.lengthCm) / 100;
-  const bodyThickness = Number(sideDimensions.thicknessCm) / 100;
-  const bodyInnerWidth = Number(horizontalDimensions.lengthCm) / 100;
-  const horizontalThickness = Number(horizontalDimensions.thicknessCm) / 100;
+  const bodyHeight = Number(sideDimensions.widthCm) / 100;
+  const bodyThickness = Number(sideDimensions.heightCm) / 100;
+  const bodyInnerWidth = Number(horizontalDimensions.widthCm) / 100;
+  const horizontalThickness = Number(horizontalDimensions.heightCm) / 100;
   const bodyOuterWidth = bodyInnerWidth + bodyThickness * 2;
   const canonicalBodyColor = `#${bodyDefinition.defaultColor.toString(16).padStart(6, '0')}`;
   const bodyColor = moduleState.bodySurface.color || canonicalBodyColor;
@@ -7647,17 +7639,17 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
 
   const frameMaterial = new THREE.MeshStandardMaterial({ color: FRAME_COLOR, metalness: 0.68, roughness: 0.28 });
   const showcaseBodyMaterial = new THREE.MeshStandardMaterial({ color: bodyColor, metalness: 0, roughness: 0.72 });
-  const profileGeometry = new THREE.BoxGeometry(PANEL_VERTICAL_PROFILE_WIDTH_M, height, frameDepth);
+  const profileGeometry = new THREE.BoxGeometry(getProceduralFrameCrossSectionM(moduleState).frameWidth, height, frameDepth);
   for (const side of [-1, 1]) {
     const profile = new THREE.Mesh(profileGeometry.clone(), frameMaterial.clone());
-    profile.position.set(side * (widthM / 2 - PANEL_VERTICAL_PROFILE_WIDTH_M / 2), height / 2, 0);
+    profile.position.set(side * (widthM / 2 - getProceduralFrameCrossSectionM(moduleState).frameWidth / 2), height / 2, 0);
     profile.castShadow = true;
     group.add(profile);
   }
 
   const railHeight = PANEL_RAIL_HEIGHT_M;
-  const innerWidth = Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2 - 0.012, 0.02);
-  const railGeometry = new THREE.BoxGeometry(Math.max(widthM - PANEL_VERTICAL_PROFILE_WIDTH_M * 2, 0.02), railHeight, frameDepth);
+  const innerWidth = Math.max(widthM - getProceduralFrameCrossSectionM(moduleState).frameWidth * 2 - 0.012, 0.02);
+  const railGeometry = new THREE.BoxGeometry(Math.max(widthM - getProceduralFrameCrossSectionM(moduleState).frameWidth * 2, 0.02), railHeight, frameDepth);
   for (const y of [0, stripCount * stripHeight]) {
     const rail = new THREE.Mesh(railGeometry.clone(), frameMaterial.clone());
     rail.position.set(0, y, 0);
@@ -7765,9 +7757,9 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const glassShelfItem = bodyDefinition.glassShelfItem;
   const glassAppearance = getMaterialAppearance(glassShelfItem.material);
   if (!glassShelfItem.dimensions || !glassAppearance) throw new Error('glass_shelf canonical product properties are required by showcase renderer.');
-  const glassShelfLengthM = glassShelfItem.dimensions.lengthCm / 100;
+  const glassShelfLengthM = glassShelfItem.dimensions.widthCm / 100;
   const glassShelfDepthM = glassShelfItem.dimensions.depthCm / 100;
-  const glassShelfThicknessM = glassShelfItem.dimensions.thicknessCm / 100;
+  const glassShelfThicknessM = glassShelfItem.dimensions.heightCm / 100;
   const glassMaterial = new THREE.MeshStandardMaterial({ ...glassAppearance, side: THREE.DoubleSide });
   const shelfGeometry = new THREE.BoxGeometry(glassShelfLengthM, glassShelfThicknessM, glassShelfDepthM);
   const shelfAreaBottom = bodyBottom + horizontalThickness;

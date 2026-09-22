@@ -188,7 +188,6 @@ class FairStandItemDimensionsModel(Base):
     __table_args__ = (
         CheckConstraint(
             "width_cm IS NOT NULL OR depth_cm IS NOT NULL OR height_cm IS NOT NULL "
-            "OR length_cm IS NOT NULL OR thickness_cm IS NOT NULL "
             "OR mount_height_cm IS NOT NULL OR wall_gap_cm IS NOT NULL",
             name="ck_fair_stand_item_dimensions_present",
         ),
@@ -202,8 +201,6 @@ class FairStandItemDimensionsModel(Base):
     width_cm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     depth_cm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     height_cm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
-    length_cm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
-    thickness_cm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     mount_height_cm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     wall_gap_cm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     item: Mapped[FairStandItemModel] = relationship(back_populates="dimensions")
@@ -354,15 +351,11 @@ class FairStandDimensionsModel(Base):
         CheckConstraint("id = 1", name="ck_fair_stand_dimensions_singleton"),
         CheckConstraint("height_cm > 0", name="ck_fair_stand_dimensions_height"),
         CheckConstraint("depth_cm > 0", name="ck_fair_stand_dimensions_depth"),
-        CheckConstraint("frame_width_cm > 0", name="ck_fair_stand_dimensions_frame_width"),
-        CheckConstraint("frame_depth_cm > 0", name="ck_fair_stand_dimensions_frame_depth"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     height_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
     depth_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
-    frame_width_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
-    frame_depth_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 

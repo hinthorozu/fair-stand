@@ -17,9 +17,9 @@ function getSegments(standType, standXCm, standYCm) {
   };
 
   let offsetCm = 0;
-  return (definitions[standType] ?? []).map(([wallId, lengthCm]) => {
-    const segment = { wallId, lengthCm, offsetCm };
-    offsetCm += lengthCm;
+  return (definitions[standType] ?? []).map(([wallId, edgeWidthCm]) => {
+    const segment = { wallId, edgeWidthCm, offsetCm };
+    offsetCm += edgeWidthCm;
     return segment;
   });
 }
@@ -30,7 +30,7 @@ export function getContinuousWallSegments(standType, standXCm, standYCm) {
 
 export function getContinuousWallCapacityCm(standType, standXCm, standYCm) {
   return getSegments(standType, standXCm, standYCm)
-    .reduce((sum, segment) => sum + Number(segment.lengthCm), 0);
+    .reduce((sum, segment) => sum + Number(segment.edgeWidthCm), 0);
 }
 
 function placementToPathStart(module, segments, standYCm) {
@@ -55,7 +55,7 @@ function placementToPathStart(module, segments, standYCm) {
   if (!Number.isFinite(localStartCm)) return null;
   if (
     localStartCm < -EPSILON_CM
-    || localStartCm + widthCm > segment.lengthCm + EPSILON_CM
+    || localStartCm + widthCm > segment.edgeWidthCm + EPSILON_CM
   ) {
     return null;
   }
@@ -96,11 +96,11 @@ function createPlacement(segment, localStartCm, widthCm, standXCm, standYCm) {
 function findNextPlacement(cursorCm, widthCm, segments, standXCm, standYCm) {
   for (const segment of segments) {
     const segmentStart = segment.offsetCm;
-    const segmentEnd = segment.offsetCm + segment.lengthCm;
+    const segmentEnd = segment.offsetCm + segment.edgeWidthCm;
     if (cursorCm > segmentEnd + EPSILON_CM) continue;
 
     const localStartCm = Math.max(0, cursorCm - segmentStart);
-    if (localStartCm + widthCm <= segment.lengthCm + EPSILON_CM) {
+    if (localStartCm + widthCm <= segment.edgeWidthCm + EPSILON_CM) {
       const pathStartCm = segmentStart + localStartCm;
       return {
         placement: createPlacement(segment, localStartCm, widthCm, standXCm, standYCm),
@@ -117,7 +117,7 @@ function findPreviousPlacement(cursorEndCm, widthCm, segments, standXCm, standYC
   for (let index = segments.length - 1; index >= 0; index -= 1) {
     const segment = segments[index];
     const segmentStart = segment.offsetCm;
-    const segmentEnd = segment.offsetCm + segment.lengthCm;
+    const segmentEnd = segment.offsetCm + segment.edgeWidthCm;
     if (cursorEndCm < segmentStart - EPSILON_CM) continue;
 
     const pathEndCm = Math.min(cursorEndCm, segmentEnd);
@@ -372,7 +372,7 @@ export function planContinuousWallLayout({
     ok: true,
     placements,
     usedCm: cursorCm,
-    capacityCm: segments.reduce((sum, segment) => sum + segment.lengthCm, 0),
+    capacityCm: segments.reduce((sum, segment) => sum + segment.edgeWidthCm, 0),
   };
 }
 
@@ -448,7 +448,7 @@ export function planContinuousWallInsertion({
 
     // Hedef zincirin fiziksel sonundaysa dışarı taşmak yerine yeni modülü
     // açık uçta sabit tutup hedef ve yalnızca çarpışan önceki zinciri içeri it.
-    const capacityCm = segments.reduce((sum, segment) => sum + segment.lengthCm, 0);
+    const capacityCm = segments.reduce((sum, segment) => sum + segment.edgeWidthCm, 0);
     const targetEndCm = targetEntry.pathStartCm + targetWidthCm;
     const isOpenChainEnd = targetIndex === activeModules.length - 1
       && targetEndCm >= capacityCm - EPSILON_CM;

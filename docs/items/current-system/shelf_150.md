@@ -22,13 +22,13 @@ Fresh `Version2` runtime doğrulaması ve ürün kararı sonrası güncel durum.
 | 12 | Kalıcılık | PARENT-OWNED | `main.js` + `projectStore.js` parent module state'ini persist/restore eder. Leaf `shelf_150` ayrı persisted entity değildir; kanonik product default'ları persistence'a kopyalanmaz. |
 | 13 | Relationships / reflow | PARENT-OWNED | Parent shelf module continuous wall chain/reflow'a katılır. Leaf rafın ayrı persisted Item-to-Item relationship'i yoktur. |
 | 14 | BOM / composition | VAR | Tekil production Item. `shelf_150` iki-raflı `150` recipe'de ×2, üç-raflı recipe'de ×3; shelf leg miktarları sırasıyla ×4/×6. Quantity parent recipe sahibidir. |
-| 15 | Renderer / asset / override boundary | VAR | `createShelfModule()` kanonik Item'dan `depthCm`, `thicknessCm`, `defaultColor` tüketir. `innerWidthM` parent frame içine görsel/teknik fit override'ıdır. `SHELF_DIMENSIONS` yoktur. Ayrı asset yoktur. Renderer ayrı alüminyum front profile üretmez. |
+| 15 | Renderer / asset / override boundary | VAR | `createShelfModule()` kanonik Item'dan `depthCm`, `heightCm`, `defaultColor` tüketir. `innerWidthM` parent frame içine görsel/teknik fit override'ıdır. `SHELF_DIMENSIONS` yoktur. Ayrı asset yoktur. Renderer ayrı alüminyum front profile üretmez. |
 | 16 | Runtime owners | VAR | Product: `items.js`; BOM: `moduleRecipes.js`; parent state: `designState.js`; behavior: `moduleBehavior.js`; placement/reflow: `modulePlacement.js` + `wallReflow.js`; context/UI: `moduleContextMenu.js` + `main.js`; persistence: `main.js` + `projectStore.js`; renderer: `scene3d.js`. |
 | 17 | Regression | VAR | `test/shelfItemsItemContract.test.js`, `test/shelfModule.test.js`, `test/moduleRecipes.test.js`, `test/boardMaterialItemContract.test.js` + full suite/E2E. |
 | 18 | Open decisions / completion | KAPALI / CI BEKLİYOR | Açık ürün property kararı yok: sunta, 18 mm, 38 cm depth ve beyaz default doğrulandı. Item ancak PR checks + squash merge + post-merge Version2 CI FULL GREEN sonrası operational olarak complete sayılır. |
 
 ## Kanonik cutover
 
-Eski `partId=shelf_150` recipe kimliği kanonik `itemKey=shelf_150` kimliğine taşındı. `src/catalog.js` içindeki `SHELF_DIMENSIONS.projectionCm=38` ve `thicknessCm=3` ürün sabitleri kaldırıldı; renderer kanonik Item'ın `depthCm=38` ve gerçek `thicknessCm=1.8` değerini tüketir. Eski renderer raf rengi `0xb8bcc1` kaldırıldı ve kanonik `defaultColor=0xffffff` tüketilir.
+Eski `partId=shelf_150` recipe kimliği kanonik `itemKey=shelf_150` kimliğine taşındı. `src/catalog.js` içindeki `SHELF_DIMENSIONS.projectionCm=38` ve legacy kalınlık sabitleri kaldırıldı; renderer kanonik Item'ın `depthCm=38` ve `heightCm=1.8` değerini tüketir. Eski renderer raf rengi `0xb8bcc1` kaldırıldı ve kanonik `defaultColor=0xffffff` tüketilir.
 
 `panel_197` bu batch'te yeniden açılmadı veya değiştirilmedi; renk referansı yalnız kullanıcı tarafından shelf ürün gerçeğini tarif etmek için verilmiştir.

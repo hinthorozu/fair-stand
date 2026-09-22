@@ -45,7 +45,7 @@ Bir Item'ı ürün olarak tanımlayan ve mevcut sistemde gerçek bir değeri bul
 Bu kapsam yalnızca zorunlu bir sabit alan listesi değildir. Item için gerçekten mevcut olan özellikler sistemden çıkarılır ve ilgili Item'a taşınır. Örnekler:
 
 - `name`, `type`, `unit`,
-- `dimensions.widthCm`, `heightCm`, `depthCm`, `lengthCm`, `thicknessCm`,
+- `dimensions.widthCm`, `heightCm`, `depthCm` (+ isteğe bağlı `mountHeightCm`, `wallGapCm`),
 - `defaultColor`,
 - `material`,
 - ağırlık, yüzey, ürün ailesine özgü sınıflandırma veya başka ürüne özgü üstveri,
@@ -65,11 +65,11 @@ Renderer veya specialized render kodu görsel/teknik nedenle farklı bir değer 
 
 ```text
 canonical Item:
-  thicknessCm = 1.8
+  heightCm = 1.8      // örn. tabla kalınlığı
   defaultColor = 0xf8fafc
 
 project/runtime override:
-  thicknessCm = 3     // belirli instance/karar mekanizması izin veriyorsa
+  heightCm = 3        // belirli instance/karar mekanizması izin veriyorsa
   color = başka renk  // kullanıcı veya runtime override
 
 specialized renderer:
@@ -396,8 +396,7 @@ Item için geçerli olan gerçek fiziksel boyutların her biri tek tek kontrol e
 - ☐ `widthCm`
 - ☐ `heightCm`
 - ☐ `depthCm`
-- ☐ `lengthCm`
-- ☐ `thicknessCm`
+- ☐ `mountHeightCm` / `wallGapCm` (varsa)
 - ☐ Item ailesine özgü başka ölçü
 
 Geçerli olmayan eksen **UYGULANMIYOR** olarak yazılır; mevcut bir ölçü toplu `dimensions var` denilerek geçilemez.

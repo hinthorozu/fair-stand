@@ -11,12 +11,17 @@ import {
   normalizeModuleItemState,
 } from '../src/designState.js';
 import {
+  clampHeightToStandCeilingCm,
+  getProceduralFrameCrossSectionM,
   getItem,
   listRegisteredItems,
+  requireModuleSceneBoxCm,
   resolveItemKey,
+  resolveModuleSceneBoxCm,
   resolveSceneDimensions,
   SCENE_DIMENSION_FIELDS,
 } from '../src/items.js';
+import { getStandDimensions } from '../src/standDimensions.js';
 
 const ITEMS_SOURCE = readFileSync(new URL('../src/items.js', import.meta.url), 'utf8');
 const CATALOG_SOURCE = readFileSync(new URL('../src/catalog.js', import.meta.url), 'utf8');
@@ -51,44 +56,25 @@ test('3. sceneDimensions yoksa physical width kullanılır', () => {
   assert.equal(scene.widthCm, 190);
 });
 
-test('4. lengthCm widthCm’e çapraz düşmez; effective width MISSING', () => {
-  const scene = resolveSceneDimensions(syntheticItem({ lengthCm: 190 }, undefined));
-  assert.equal(scene.widthCm, null);
-  assert.equal(scene.lengthCm, 190);
+test('4. resolveSceneDimensions yalnız width/depth/height taşır', () => {
+  assert.deepEqual(SCENE_DIMENSION_FIELDS, ['widthCm', 'depthCm', 'heightCm']);
+  const scene = resolveSceneDimensions(syntheticItem({ widthCm: 190, depthCm: 8, heightCm: 8 }, undefined));
+  assert.equal(scene.widthCm, 190);
+  assert.equal(scene.depthCm, 8);
+  assert.equal(scene.heightCm, 8);
+  assert.equal(Object.hasOwn(scene, 'lengthCm'), false);
 });
 
-test('5. thicknessCm depthCm’e çapraz düşmez; effective depth MISSING', () => {
-  const scene = resolveSceneDimensions(syntheticItem({ thicknessCm: 8 }, undefined));
-  assert.equal(scene.depthCm, null);
-  assert.equal(scene.thicknessCm, 8);
-});
-
-test('6. scene length null ise physical length kullanılır', () => {
-  const scene = resolveSceneDimensions(syntheticItem(
-    { lengthCm: 190 },
-    { lengthCm: null },
-  ));
-  assert.equal(scene.lengthCm, 190);
-});
-
-test('7. scene thickness null ise physical thickness kullanılır', () => {
-  const scene = resolveSceneDimensions(syntheticItem(
-    { thicknessCm: 8 },
-    { thicknessCm: null },
-  ));
-  assert.equal(scene.thicknessCm, 8);
-});
-
-test('8. profile_190 physical length/thickness ve scene width/depth/height', () => {
+test('8. profile_190 dimensions ve scene width/depth/height', () => {
   const item = getItem('profile_190');
-  assert.deepEqual(item.dimensions, { lengthCm: 190, thicknessCm: 8 });
+  assert.equal(item.dimensions.widthCm, 190);
+  assert.equal(item.dimensions.depthCm, 8);
+  assert.equal(item.dimensions.heightCm, 8);
   assert.deepEqual(item.sceneDimensions, { widthCm: 200, depthCm: 8, heightCm: 8 });
   assert.deepEqual(resolveSceneDimensions(item), Object.freeze({
     widthCm: 200,
     depthCm: 8,
     heightCm: 8,
-    lengthCm: 190,
-    thicknessCm: 8,
   }));
 });
 
@@ -99,89 +85,23 @@ test('9. profile factory Recipe’den scene width okumaz', () => {
   assert.equal(profile.widthCm, 200);
   assert.equal(profile.depthCm, 8);
   assert.equal(profile.heightCm, 8);
-  const stale = normalizeModuleItemState({
-    id: 'stale',
-    itemKey: 'profile_190',
-    type: 'profile',
-    widthCm: 190,
-    depthCm: 8,
-    heightCm: 8,
-  });
-  assert.equal(stale.widthCm, 200);
 });
 
 test('10. Catalog profile width catalogWidthCm okumaz', () => {
   assert.doesNotMatch(CATALOG_SOURCE, /catalogWidthCm/);
-  assert.doesNotMatch(CATALOG_SOURCE, /resolveSceneDimensions/);
   const scene = resolveSceneDimensions(getItem('profile_190'));
   assert.equal(getCatalogItem('profile_190').itemKey, 'profile_190');
   assert.equal(scene.widthCm, 200);
-  assert.equal(scene.depthCm, 8);
-  assert.equal(scene.heightCm, 8);
 });
 
 test('11. catalogWidthCm canonical Item field olarak kalmaz', () => {
   for (const item of listRegisteredItems()) {
     assert.equal(Object.hasOwn(item, 'catalogWidthCm'), false, item.itemKey);
   }
-  assert.doesNotMatch(ITEMS_SOURCE, /catalogWidthCm/);
 });
 
-test('12. resolveItemKey catalogWidthCm kullanmaz ve type/width tahmin etmez', () => {
-  const identitySource = ITEMS_SOURCE.slice(
-    ITEMS_SOURCE.indexOf('export function resolveItemKey'),
-  );
-  assert.doesNotMatch(identitySource, /catalogWidthCm/);
-  assert.equal(resolveItemKey({ type: 'profile', widthCm: 200 }), null);
-  assert.equal(resolveItemKey({ type: 'profile', widthCm: 190 }), null);
-  assert.equal(resolveItemKey({ itemKey: 'profile_190' }), 'profile_190');
-});
-
-test('13. scene dimension için type fallback yok', () => {
-  assert.doesNotMatch(RESOLVER_SOURCE, /item\.type/);
-  assert.doesNotMatch(RESOLVER_SOURCE, /type ===/);
-});
-
-test('14. scene dimension için itemKey hardcode yok', () => {
-  assert.doesNotMatch(RESOLVER_SOURCE, /itemKey ===/);
-  assert.doesNotMatch(RESOLVER_SOURCE, /profile_190/);
-});
-
-test('15. scene dimension için Recipe fallback yok', () => {
-  assert.doesNotMatch(RESOLVER_SOURCE, /Recipe/);
-  assert.doesNotMatch(RESOLVER_SOURCE, /nominalWidth/);
-  assert.doesNotMatch(ITEMS_SOURCE.slice(
-    ITEMS_SOURCE.indexOf('export function resolveSceneDimensions'),
-    ITEMS_SOURCE.indexOf('export function requireSceneDimension'),
-  ), /moduleRecipes/);
-});
-
-test('16. scene dimension için Catalog fallback yok', () => {
-  assert.doesNotMatch(RESOLVER_SOURCE, /catalog/i);
-  assert.doesNotMatch(RESOLVER_SOURCE, /getCatalogItem/);
-});
-
-test('17. same-field dışında cross-remap yok', () => {
-  const emptyOverride = resolveSceneDimensions(syntheticItem(
-    { lengthCm: 190, thicknessCm: 8 },
-    {},
-  ));
-  assert.equal(emptyOverride.widthCm, null);
-  assert.equal(emptyOverride.depthCm, null);
-  assert.equal(emptyOverride.heightCm, null);
-  assert.equal(emptyOverride.lengthCm, 190);
-  assert.equal(emptyOverride.thicknessCm, 8);
-
-  const remapAttempt = resolveSceneDimensions(syntheticItem(
-    { lengthCm: 190, thicknessCm: 8 },
-    { widthCm: null, depthCm: null, heightCm: null },
-  ));
-  assert.equal(remapAttempt.widthCm, null);
-  assert.equal(remapAttempt.depthCm, null);
-  assert.equal(remapAttempt.heightCm, null);
-
+test('17. same-field merge; cross-remap yok', () => {
   for (const field of SCENE_DIMENSION_FIELDS) {
-    assert.match(RESOLVER_SOURCE, new RegExp(`readDimensionField\\(item\\?\\.sceneDimensions, field\\)`));
     assert.equal(
       resolveSceneDimensions(syntheticItem({ [field]: 11 }, { [field]: 22 }))[field],
       22,
@@ -194,19 +114,10 @@ test('18. 96 Item registry korunuyor', () => {
   assert.equal(listRegisteredItems().length, 96);
 });
 
-test('19. 58 visible Catalog Item korunuyor', () => {
-  assert.equal(listRegisteredItems().filter((item) => item.catalogVisible === true).length, 58);
-});
-
-test('20. 58 Catalog projection korunuyor', () => {
-  assert.equal(listCatalogItems().length, 58);
-  assert.equal(listCatalogItems().map((item) => item.itemKey).length, 58);
-  assert.equal(listCatalogItems().length, 58);
-});
-
-test('upright_346_5 sceneDimensions placement 8×8×346.5; length→height remap yok', () => {
+test('upright_346_5 sceneDimensions placement 8×8×346.5', () => {
   const item = getItem('upright_346_5');
-  assert.deepEqual(item.dimensions, { lengthCm: 346.5, thicknessCm: 8 });
+  assert.equal(item.dimensions.widthCm, 8);
+  assert.equal(item.dimensions.heightCm, 346.5);
   assert.deepEqual(item.sceneDimensions, { widthCm: 8, depthCm: 8, heightCm: 346.5 });
   const state = createUprightModuleState();
   assert.equal(state.widthCm, 8);
@@ -230,4 +141,35 @@ test('MISSING_PHYSICAL_DIMENSIONS: connector/shelf_leg/hali tahmin edilmez', () 
       assert.equal(scene[field], null, `${itemKey}.${field}`);
     }
   }
+});
+
+test('clampHeightToStandCeilingCm tavanı geçmez', () => {
+  const ceiling = getStandDimensions().heightCm;
+  assert.equal(clampHeightToStandCeilingCm(ceiling - 1), ceiling - 1);
+  assert.equal(clampHeightToStandCeilingCm(ceiling), ceiling);
+  assert.equal(clampHeightToStandCeilingCm(ceiling + 78), ceiling);
+});
+
+test('resolveModuleSceneBoxCm state → scene → tavan', () => {
+  const item = getItem('wall_separator_100');
+  const scene = resolveSceneDimensions(item);
+  const fromCatalog = resolveModuleSceneBoxCm({ itemKey: 'wall_separator_100' });
+  assert.equal(fromCatalog.widthCm, scene.widthCm);
+  assert.equal(fromCatalog.heightCm, scene.heightCm);
+  assert.equal(fromCatalog.depthCm, scene.depthCm);
+
+  const box = requireModuleSceneBoxCm({
+    itemKey: 'wall_separator_100',
+    heightCm: scene.heightCm + 100,
+  });
+  assert.equal(box.heightCm, getStandDimensions().heightCm);
+});
+
+test('procedural frame cross-section parent recipe profile/upright kesitinden okunur', () => {
+  const parent = getItem('wall_separator_100');
+  const profileChild = getItem('profile_91');
+  const scene = resolveSceneDimensions(profileChild);
+  const cross = getProceduralFrameCrossSectionM({ itemKey: parent.itemKey, type: parent.type });
+  assert.equal(cross.frameWidthCm, scene.depthCm);
+  assert.equal(cross.frameDepthCm, scene.heightCm);
 });

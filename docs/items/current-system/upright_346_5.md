@@ -6,7 +6,7 @@
 Kanonik source `src/items.js`: `itemKey=upright_346_5`, `type=upright`, `unit=adet`, name `Dikme 346,5 cm`. Legacy `partId` is not the kanonik identity.
 
 ## 2. Intrinsic properties — VAR
-Kanonik Item properties: `lengthCm=346.5`, `thicknessCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Material/color are product defaults; specialized renderer values may explicitly override them without changing the Item default.
+Kanonik Item properties: `widthCm=8`, `depthCm=8`, `heightCm=346.5`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Material/color are product defaults; specialized renderer values may explicitly override them without changing the Item default.
 
 ## 3. Default state — UYGULANMIYOR
 There is no standalone upright project state. Parent module state owns editor/runtime state.

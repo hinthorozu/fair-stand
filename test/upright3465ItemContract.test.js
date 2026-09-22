@@ -11,6 +11,8 @@ import {
   listStraightWallRecipes,
 } from './recipeParentItemKey.js';
 
+const UPRIGHT_346_5_DIMS = Object.freeze({ widthCm: 8, heightCm: 346.5, depthCm: 8 });
+
 function listAllVerifiedRecipes() {
   return [
     ...listStraightWallRecipes(),
@@ -40,7 +42,7 @@ test('upright_346_5 is a canonical single production Item', () => {
   assert.equal(item.partId, undefined);
   assert.equal(item.type, 'upright');
   assert.equal(item.unit, 'adet');
-  assert.deepEqual(item.dimensions, { lengthCm: 346.5, thicknessCm: 8 });
+  assert.deepEqual(item.dimensions, UPRIGHT_346_5_DIMS);
 });
 
 test('upright_346_5 uses canonical itemKey in all 9 verified parent recipes and keeps quantity 2', () => {
@@ -76,5 +78,5 @@ test('expanded recipe resolves upright_346_5 metadata through canonical itemKey'
   assert.equal(upright.part.itemKey, 'upright_346_5');
   assert.equal(upright.part.name, 'Dikme 346,5 cm');
   assert.equal(upright.part.unit, 'adet');
-  assert.deepEqual(upright.part.dimensions, { lengthCm: 346.5, thicknessCm: 8 });
+  assert.deepEqual(upright.part.dimensions, UPRIGHT_346_5_DIMS);
 });

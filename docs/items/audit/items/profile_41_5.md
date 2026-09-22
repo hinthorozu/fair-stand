@@ -10,8 +10,8 @@
 | alan | değer | kapsam |
 |---|---|---|
 | `defaultColor` | 13685716 (`#d0d3d4`) | item kaydı |
-| `dimensions.lengthCm` | 41.5 | item kaydı |
-| `dimensions.thicknessCm` | 8 | item kaydı |
+
+
 | `itemKey` | profile_41_5 | item kaydı |
 | `material` | alüminyum | item kaydı |
 | `name` | Profil 41,5 cm | item kaydı |
@@ -19,7 +19,12 @@
 | `unit` | adet | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.widthCm` | 41.5 | item kaydı |
+| `dimensions.depthCm` | 8 | item kaydı |
+| `dimensions.heightCm` | 8 | item kaydı |
+| `sceneDimensions.widthCm` | 50 | item kaydı |
+| `sceneDimensions.depthCm` | 8 | item kaydı |
+| `sceneDimensions.heightCm` | 350 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **var** (`src/catalog.js`)

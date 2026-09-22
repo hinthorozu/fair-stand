@@ -11,6 +11,35 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-22 — Duvar zinciri: `edgeWidthCm` / `wallWidthCm`
+
+Item `lengthCm` kalktıktan sonra duvar otomasyonundaki eski `lengthCm` adları netleştirildi:
+
+- Segment kapasitesi: `segment.edgeWidthCm` (`wallReflow.js`, `moduleMove.js`).
+- Düz / otomatik duvar girdisi: `wallWidthCm` (`wall.js` `validateWallWidth` / `composeStraightWall`, `automaticWall.js`, `main.js`, `featureContracts.js`).
+- Modül duvar boyunca ölçüsü: `widthCm` (değişmedi).
+
+Sözleşme: `docs/refactor/STAND_DIMENSIONS.md` (Duvar zinciri genişlik adları).
+
+---
+
+## 2026-09-22 — Item dimensions: legacy BOM kolonları kaldırıldı
+
+- Migration `0021_drop_item_length_thickness`: `fair_stand_item_dimensions` üzerinde `length_cm`, `thickness_cm` yok.
+- Önce `0020_item_dims_wh_d_fill` (tarihsel; legacy → W/H/D, fill-only).
+- Runtime/seed/API: yalnız `widthCm`, `depthCm`, `heightCm` (+ `mountHeightCm`, `wallGapCm`). Helper modüller (`dimension_normalize`, `dimensionNormalize.js`) kaldırıldı.
+- `resolveSceneDimensions` cross-remap yapmaz; same-field merge.
+- Detay: `docs/refactor/ITEM_DIMENSIONS.md`, `ITEMS.md`.
+
+---
+
+## 2026-09-22 — Item dimensions W/H/D backfill (veri koruyucu, tarihsel)
+
+- Migration `0020_item_dims_wh_d_fill` (0021 öncesi DB’ler).
+- `resolveSceneDimensions` cross-remap yapmaz.
+
+---
+
 ## 2026-09-22 — `fair_stand_dimensions` strip kolonları kaldırıldı
 
 Migration `0019_drop_stand_strip_grid`: `strip_count`, `strip_height_cm` silindi. Bootstrap/admin yalnız `heightCm`, `depthCm`, `frameWidthCm`, `frameDepthCm`. Panel pitch: `WALL_PANEL_BAND_PITCH_CM`.
@@ -382,13 +411,13 @@ Her Item kendi ölçü bilgisinin canonical kaynağıdır. İki katman, aynı fi
 dimensions        = gerçek/fiziksel ürün ölçüleri
 sceneDimensions   = scene/runtime override
 
-canonical fields: widthCm, depthCm, heightCm, lengthCm, thicknessCm
+canonical fields: widthCm, depthCm, heightCm (+ mountHeightCm, wallGapCm)
 
 effective scene field:
   sceneDimensions.field ?? dimensions.field ?? MISSING
 ```
 
-Aynı field adı yoksa fallback yoktur. `lengthCm` width olmaz. `thicknessCm` depth olmaz.
+Aynı field adı yoksa fallback yoktur. (Eski `lengthCm` / `thicknessCm` BOM alanları 0021 ile kaldırıldı.) Duvar zinciri: `edgeWidthCm`, `wallWidthCm` — Item alanı değil.
 
 ### Kaldırılan kaynaklar
 
@@ -577,7 +606,7 @@ Rotation / color / image / lighting / delete / collision / placement / Item Cont
 
 Yok. Descriptor alanları zaten Item’da duruyordu (`name`, `dimensions`, `modelFile`, `eyeCount`, `sizeInch`, `videoWall`, `stripOccupancy`, `shape`, `shelfCount`, `variant`, rotation metadata). Projection alias’ı Item’a kopyalanmadı (`label` = `name`; kök `widthCm` = `dimensions.widthCm` veya türetilmiş oturum).
 
-Profil kart `widthCm` Item’da yoktur; düz duvar reçetesi `nominalWidthCm` türevidir. Dikme `thicknessCm`/`lengthCm` → kare oturum. TV/video-wall `resolveWallMediaMetrics` türevidir.
+Profil kart `widthCm` Item’da yoktur; düz duvar reçetesi `nominalWidthCm` türevidir. Dikme kesit `widthCm`/`depthCm` (8), boy `heightCm`. TV/video-wall `resolveWallMediaMetrics` türevidir.
 
 ### Compatibility export
 

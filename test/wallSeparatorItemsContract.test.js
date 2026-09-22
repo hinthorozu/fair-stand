@@ -9,7 +9,7 @@ import {
   duplicateModuleState,
   normalizeModuleItemState,
 } from '../src/designState.js';
-import { getItem, resolveItemKey } from '../src/items.js';
+import { getItem, resolveItemKey, resolveSceneDimensions } from '../src/items.js';
 import { getModuleBehavior, getModuleRotationStepDeg } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import {
@@ -98,7 +98,11 @@ for (const itemKey of SEPARATOR_KEYS) {
     assert.equal(state.itemKey, itemKey);
     assert.equal(state.itemKey, itemKey);
     assert.equal(state.type, 'separator');
+    const scene = resolveSceneDimensions(item);
     assert.equal(state.widthCm, expected.widthCm);
+    assert.equal(state.widthCm, scene.widthCm);
+    assert.equal(state.heightCm, scene.heightCm);
+    assert.equal(state.depthCm, scene.depthCm);
     assert.equal(state.modelFile ?? null, expected.modelFile);
     assert.equal(Boolean(state.surface?.color), true);
     assert.equal('imageAssetId' in state.surface, false);

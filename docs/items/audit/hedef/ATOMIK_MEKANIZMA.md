@@ -100,12 +100,12 @@ Hedef akış: `Item/instance config → canonical method → runtime/renderer`.
 - `static.dimensions.catalogHeightCm`
 - `static.dimensions.depthCm`
 - `static.dimensions.heightCm`
-- `static.dimensions.lengthCm`
+- `static.dimensions.widthCm (legacy column removed)`
 - `static.dimensions.mountHeightCm`
 - `static.dimensions.screenHeightCm`
 - `static.dimensions.screenWidthCm`
 - `static.dimensions.tableDiameterCm`
-- `static.dimensions.thicknessCm`
+- `static.dimensions.depthCm (legacy column removed)`
 - `static.dimensions.wallGapCm`
 - `static.dimensions.widthCm`
 - `static.nominalModuleWidthCm`
@@ -637,12 +637,12 @@ Hedef akış: `Item/instance config → canonical method → runtime/renderer`.
 | `static.dimensions.catalogHeightCm` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
 | `static.dimensions.depthCm` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
 | `static.dimensions.heightCm` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
-| `static.dimensions.lengthCm` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
+| `static.dimensions.widthCm (legacy column removed)` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
 | `static.dimensions.mountHeightCm` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
 | `static.dimensions.screenHeightCm` | ITEM_DATA | `dimensions` | TV / video wall ölçüsü |  |
 | `static.dimensions.screenWidthCm` | ITEM_DATA | `dimensions` | TV / video wall ölçüsü |  |
 | `static.dimensions.tableDiameterCm` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
-| `static.dimensions.thicknessCm` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
+| `static.dimensions.depthCm (legacy column removed)` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
 | `static.dimensions.wallGapCm` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
 | `static.dimensions.widthCm` | ITEM_DATA | `dimensions` | Kanonik ölçü kaydı |  |
 | `static.eyeCount` | ITEM_DATA | `composition` | Vitrin gövdesi |  |

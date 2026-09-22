@@ -10,8 +10,8 @@
 | alan | değer | kapsam |
 |---|---|---|
 | `defaultColor` | 13685716 (`#d0d3d4`) | item kaydı |
-| `dimensions.lengthCm` | 190 | item kaydı |
-| `dimensions.thicknessCm` | 8 | item kaydı |
+
+
 | `itemKey` | profile_190 | item kaydı |
 | `material` | alüminyum | item kaydı |
 | `name` | Profil 190 cm | item kaydı |
@@ -19,7 +19,12 @@
 | `unit` | adet | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.widthCm` | 190 | item kaydı |
+| `dimensions.depthCm` | 8 | item kaydı |
+| `dimensions.heightCm` | 8 | item kaydı |
+| `sceneDimensions.widthCm` | 200 | item kaydı |
+| `sceneDimensions.depthCm` | 8 | item kaydı |
+| `sceneDimensions.heightCm` | 350 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **var** (`src/catalog.js`)
