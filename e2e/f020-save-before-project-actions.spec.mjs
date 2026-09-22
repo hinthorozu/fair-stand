@@ -50,7 +50,7 @@ test('pending edit is saved before project switch cancels the autosave timer', a
   await switchProject(page, projectA);
 
   await page.locator('#floor-type').selectOption('hali');
-  await expect(page.locator('#project-status')).toContainText('5 sn içinde otomatik kaydedilecek');
+  await expect(page.locator('#project-status')).toContainText('30 sn içinde otomatik kaydedilecek');
 
   await switchProject(page, projectB);
 
