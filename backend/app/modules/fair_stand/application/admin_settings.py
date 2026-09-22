@@ -64,16 +64,10 @@ class AdminSettingsService:
         *,
         height_cm: object,
         depth_cm: object,
-        strip_count: object,
-        strip_height_cm: object,
         frame_width_cm: object,
         frame_depth_cm: object,
     ) -> dict:
         depth = _positive_decimal(depth_cm, label="Duvar derinliği").quantize(Decimal("0.001"))
-        strips = _positive_int(strip_count, label="Şerit sayısı")
-        strip_height = _positive_decimal(strip_height_cm, label="Şerit yüksekliği").quantize(
-            Decimal("0.001")
-        )
         frame_width = _positive_decimal(frame_width_cm, label="Çerçeve genişliği").quantize(
             Decimal("0.001")
         )
@@ -89,8 +83,6 @@ class AdminSettingsService:
         now = _now()
         row.height_cm = height
         row.depth_cm = depth
-        row.strip_count = strips
-        row.strip_height_cm = strip_height
         row.frame_width_cm = frame_width
         row.frame_depth_cm = frame_depth
         row.updated_at = now

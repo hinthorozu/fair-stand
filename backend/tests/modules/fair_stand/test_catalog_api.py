@@ -77,8 +77,6 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     assert body["standDimensions"] == {
         "heightCm": 350.0,
         "depthCm": 10.0,
-        "stripCount": 7,
-        "stripHeightCm": 50.0,
         "frameWidthCm": 5.5,
         "frameDepthCm": 10.0,
     }

@@ -24,18 +24,16 @@ Kaynak: PostgreSQL `fair_stand_dimensions` → catalog bootstrap `standDimension
 
 | Bootstrap / admin JSON | DB kolon | Ne işe yarar |
 |---|---|---|
-| `heightCm` | `height_cm` | Duvar tavanı (cm). Overlay Y 0…heightCm. Item yüksekliği yoksa çarpışma tavanı. |
+| `heightCm` | `height_cm` | Duvar tavanı (cm). Overlay Y 0…heightCm. Max zarf. |
 | `depthCm` | `depth_cm` | Duvar kalınlığı (cm). Omurga çarpışması (`wall-backbone`). TV/raf ön yüzü `depthCm/2`. |
-| `stripCount` | `strip_count` | Yatay şerit sayısı. Tam boy panel yüzey sayısı. |
-| `stripHeightCm` | `strip_height_cm` | Bir şerit boyu (cm). Seam’ler stripHeightCm, 2×… (0 ve tavan seam değil). |
 | `frameWidthCm` | `frame_width_cm` | Dikey profil görsel kesiti (cm). |
 | `frameDepthCm` | `frame_depth_cm` | Profil derinlik kutusu / yatay ray kalınlığı (cm). |
 
-Seed (varsayılan): 350 / 10 / 7 / 50 / 5.5 / 10 cm.
+Seed (varsayılan): 350 / 10 / 5.5 / 10 cm.
 
-Three.js sahnesi metre kullanır: `STAND_DIMENSIONS.height`, `.depth`, `.stripHeight`, … getter’ları `/100` döner.
+Panel bandı pitch ve slot sayısı **ürün BOM +** `src/wallPanelBand.js` (`WALL_PANEL_BAND_PITCH_CM`). Eski `strip_count` / `strip_height_cm` kolonları migration `0019_drop_stand_strip_grid` ile kaldırıldı.
 
-`height_cm` **max tavan zarfı**; `strip_count × strip_height_cm` ile eşit olmak zorunda değil (admin’den ayrı düzenlenir, migration `0017_stand_height_envelope`). Uzunluk birimi migration `0018_stand_dimensions_cm`.
+Three.js sahnesi metre kullanır: `STAND_DIMENSIONS.height`, `.depth`, `.frameWidth`, … getter’ları `/100` döner.
 
 350 catalog max ürün yüksekliği değildir. Koltuk/banko/TV kendi Item `heightCm` değerini kullanır.
 

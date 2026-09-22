@@ -13,8 +13,6 @@ def test_stand_dimensions_singleton_is_seeded(db_session):
     assert row.id == 1
     assert float(row.height_cm) == 350.0
     assert float(row.depth_cm) == 10.0
-    assert row.strip_count == 7
-    assert float(row.strip_height_cm) == 50.0
     assert float(row.frame_width_cm) == 5.5
     assert float(row.frame_depth_cm) == 10.0
 

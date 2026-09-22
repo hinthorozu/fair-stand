@@ -12,10 +12,8 @@ import {
 test('canonical fixture matches live STAND_DIMENSIONS getters', () => {
   assert.deepEqual({ ...getStandDimensions() }, CANONICAL_STAND_DIMENSIONS);
   assert.equal(STAND_DIMENSIONS.heightCm, 350);
-  assert.equal(STAND_DIMENSIONS.stripCount, 7);
   assert.equal(STAND_DIMENSIONS.height, 3.5);
-  assert.equal(STAND_DIMENSIONS.stripHeightCm, 50);
-  assert.equal(STAND_DIMENSIONS.stripHeight, 0.5);
+  assert.equal(STAND_DIMENSIONS.frameWidthCm, 5.5);
 });
 
 test('initializeStandDimensions rejects invalid payload and restores canonical catalog', () => {

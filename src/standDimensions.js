@@ -6,7 +6,6 @@ let standDimensions = null;
 const REQUIRED_CM_FIELDS = Object.freeze([
   'heightCm',
   'depthCm',
-  'stripHeightCm',
   'frameWidthCm',
   'frameDepthCm',
 ]);
@@ -27,11 +26,7 @@ export function initializeStandDimensions(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     throw new TypeError('Fair Stand dimensions bootstrap payload is invalid.');
   }
-  const stripCount = Number(raw.stripCount);
-  if (!Number.isInteger(stripCount) || stripCount <= 0) {
-    throw new TypeError('Fair Stand dimensions.stripCount must be a positive integer.');
-  }
-  const next = { stripCount };
+  const next = {};
   for (const field of REQUIRED_CM_FIELDS) {
     next[field] = requirePositiveNumber(raw[field], field);
   }
@@ -56,12 +51,6 @@ export const STAND_DIMENSIONS = Object.freeze({
   get depthCm() {
     return getStandDimensions().depthCm;
   },
-  get stripCount() {
-    return getStandDimensions().stripCount;
-  },
-  get stripHeightCm() {
-    return getStandDimensions().stripHeightCm;
-  },
   get frameWidthCm() {
     return getStandDimensions().frameWidthCm;
   },
@@ -74,9 +63,6 @@ export const STAND_DIMENSIONS = Object.freeze({
   },
   get depth() {
     return cmToMeters(getStandDimensions().depthCm);
-  },
-  get stripHeight() {
-    return cmToMeters(getStandDimensions().stripHeightCm);
   },
   get frameWidth() {
     return cmToMeters(getStandDimensions().frameWidthCm);

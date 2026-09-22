@@ -82,8 +82,6 @@ class StandDimensionsUpdateBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     height_cm: float = Field(gt=0)
     depth_cm: float = Field(gt=0)
-    strip_count: int = Field(gt=0)
-    strip_height_cm: float = Field(gt=0)
     frame_width_cm: float = Field(gt=0)
     frame_depth_cm: float = Field(gt=0)
 
@@ -353,8 +351,6 @@ def admin_update_stand_dimensions(
         return service.update_stand_dimensions(
             height_cm=body.height_cm,
             depth_cm=body.depth_cm,
-            strip_count=body.strip_count,
-            strip_height_cm=body.strip_height_cm,
             frame_width_cm=body.frame_width_cm,
             frame_depth_cm=body.frame_depth_cm,
         )

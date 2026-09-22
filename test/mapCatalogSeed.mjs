@@ -7,8 +7,6 @@ import { applyItemScenePose } from './itemScenePoseSeed.mjs';
 export const CANONICAL_STAND_DIMENSIONS = Object.freeze({
   heightCm: 350,
   depthCm: 10,
-  stripCount: 7,
-  stripHeightCm: 50,
   frameWidthCm: 5.5,
   frameDepthCm: 10,
 });

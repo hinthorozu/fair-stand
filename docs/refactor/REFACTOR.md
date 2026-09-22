@@ -11,6 +11,12 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-22 — `fair_stand_dimensions` strip kolonları kaldırıldı
+
+Migration `0019_drop_stand_strip_grid`: `strip_count`, `strip_height_cm` silindi. Bootstrap/admin yalnız `heightCm`, `depthCm`, `frameWidthCm`, `frameDepthCm`. Panel pitch: `WALL_PANEL_BAND_PITCH_CM`.
+
+---
+
 ## 2026-09-22 — Stand zarfı cm + runtime şerit grid’den kopma (başlangıç)
 
 - DB/API/bootstrap: `fair_stand_dimensions` uzunluk kolonları cm (`0018_stand_dimensions_cm`); JSON `heightCm`, …; admin PUT `height_cm`, …
