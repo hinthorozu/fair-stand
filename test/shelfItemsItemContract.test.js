@@ -49,7 +49,7 @@ test('shelf renderer consumes canonical Item depth, thickness and default color 
   const rendererSource = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const shelfRenderer = rendererSource.slice(
     rendererSource.indexOf('function createShelfModule'),
-    rendererSource.indexOf('function resolveOccupiedStripLayout'),
+    rendererSource.indexOf('function createFlatPanelModule'),
   );
 
   assert.doesNotMatch(catalogSource, /projectionCm:\s*38/);

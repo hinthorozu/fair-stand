@@ -72,7 +72,7 @@ Kes (item duruşunu ezmesin):
 | `snapTopFixturePlacement` | `zCm = 350` | En yakın hedef rayın Z’si (`snap_target_item_type`) |
 | `getTopFixtureDragPoint` | 350 yatay düzlem | DB’deki hedef type hatları |
 | `led_floodlight.mountHeightCm = 350` | Sabit tavan | Snap sonucu; item default yalnızca ilk değer |
-| `getModuleCollisionHeightRangeCm` occupancy | `align: top` × stand şerit | Short-up kendi height/Z bandı |
+| `getModuleCollisionHeightRangeCm` | Stand tavan fallback (eski) | Item `heightCm` + `placement.zCm` / `defaultZCm` (occupancy×şerit okumaz) |
 | `main.js` floodlight `zCm: 350` | Literal | placement/item |
 
 `strip_occupancy` (`short-up-1/2`, align top): bugün tavan kayınca short-up tavana yapışır. Hedef: şerit sayısı **görünen panel adedi**; kot item Z/height.

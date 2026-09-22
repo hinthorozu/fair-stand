@@ -21,7 +21,7 @@ import {
   resolveSceneDimensions,
 } from './items.js';
 import { snapPlacementToItemAnchor } from './itemSnap.js';
-import { getOccupiedStripLayout, resolveModuleStripOccupancy } from './stripOccupancy.js';
+import { resolveModuleStripOccupancy } from './stripOccupancy.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
@@ -7153,20 +7153,6 @@ function createShelfModule(moduleState, moduleIndex) {
   });
 
   return { group, surfaces: [shelf] };
-}
-
-function resolveOccupiedStripLayout(moduleState, stripCount, stripHeight) {
-  const occupancy = resolveModuleStripOccupancy(moduleState);
-  const layout = getOccupiedStripLayout(occupancy, { stripCount, stripHeight });
-  if (layout) return layout;
-  const storedCount = Array.isArray(moduleState?.strips) ? moduleState.strips.length : 0;
-  if (storedCount > 0 && storedCount < Number(stripCount)) {
-    return getOccupiedStripLayout(
-      { align: 'top', stripCount: storedCount },
-      { stripCount, stripHeight },
-    );
-  }
-  return null;
 }
 
 function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {

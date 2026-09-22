@@ -15,9 +15,6 @@ Karar verilmiş / ertelenmiş maddeler: `docs/refactor/PENDING_ITEM_DECISIONS.md
 
 `listRegisteredItems()` 96 satırında duran alanlar. Bu tablo **onaylı şema değildir**. Zamanla, her alan ayrı kararla aşağıdaki “Zorunlu / opsiyonel / Catalog” bölümlerine alınır veya PENDING’de kapatılır.
 
-`composition.moduleType` ve `composition.options` / `composition.options.shape` **DEPRECATED (SCHEMA_ONLY)** — kayıt durur, production `src/` okumaz, silinmedi (DECISION-06).
-
-
 Kaynak: `src/items.js` taraması (2026-09-17). N = kaç Item’da path var.
 
 Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision hâlâ `type` → `TYPE_BEHAVIORS`; rotation Item; recipe BOM yalnız `composition.items`.
@@ -48,8 +45,6 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `material` | 34 | Üretim malzemesi metni. Vitrin gövde `sunta` kilidi. |
 | `composition` | 30 | Bileşik yapı. |
 | `composition.mode` | 28 | `recipe` → `resolveItemBom`. |
-| `composition.moduleType` | 28 | **DEPRECATED (SCHEMA_ONLY).** Recipe etiket; production okumaz. |
-| `composition.options.shape` | 3 | **DEPRECATED (SCHEMA_ONLY).** L banko etiketi; canlı kimlik `item.shape`. |
 | `composition.items` | 30 | Çocuk listesi `{itemKey, quantity}`. 28 recipe parent + 2 mobilya kümesi. Recipe tablosu kopyası değil; tek kaynak Item. |
 | `shape` | 3 | Kök `'L'` (köşe banko). |
 | `variant` | 8 | `short-up-1` / `short-up-2`. |

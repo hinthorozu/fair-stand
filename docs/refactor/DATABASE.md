@@ -207,8 +207,8 @@ Short-up duvarın kaç üst şeridi kestiği. `align` bugün yalnız `top`.
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
 | `item_key` | — | FK/PK | — | — |
-| `align` | `stripOccupancy.align` | Bant hizası (CHECK yalnız `top`) | Tavan şeritleri | `src/stripOccupancy.js`; `catalogPreviewRenderer.js` |
-| `strip_count` | `stripOccupancy.stripCount` | Şerit adedi (`> 0`) | 1 veya 2 short-up | aynı + `designState.js` |
+| `align` | `stripOccupancy.align` | Bant hizası (CHECK yalnız `top`) | Katalog/preview oranı; layout helper’ları kalktı (PENDING § A.1) | `normalizeStripOccupancy` / `resolveModuleStripOccupancy`; `catalogPreviewRenderer.js` |
+| `strip_count` | `stripOccupancy.stripCount` | Şerit adedi (`> 0`) | 1 veya 2 short-up | aynı + `designState.js` (persist). Tablo kaldırma: PENDING § A.5 |
 
 Stand `strip_count` (7) ile karışmaz. O zarf tablosunda.
 

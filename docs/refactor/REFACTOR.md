@@ -11,6 +11,18 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-09-22 — PENDING § A adım 1: ölü occupancy layout
+
+Kaldırıldı: `resolveOccupiedStripLayout` (`scene3d.js`), `getOccupiedStripLayout`, `getStripOccupancyHeightRangeCm` (`stripOccupancy.js`). Canlı yol durur: `normalizeStripOccupancy`, `resolveModuleStripOccupancy`, ghost key, katalog preview.
+
+---
+
+## 2026-09-22 — `composition.moduleType` veri temizliği (B.7)
+
+DB kolonu zaten migration `0014_drop_comp_mod_type`. Bootstrap JSON yalnız `composition.mode` + `composition.items` taşır; `composition_module_type` dump + test fixture’dan silindi. L banko kimliği `item.shape`. Detay: `REFACTOR.md` 2026-09-20 inner-corner maddesi ile uyumlu.
+
+---
+
 ## 2026-09-22 — Proje SoT (server + disk)
 
 `fair_stand_projects` (JSONB `payload`) + `fair_stand_project_assets` (meta) + disk `{org}/{project}/{asset}.webp`. IndexedDB / `projectStore` önbellek; `projectRemote.js` cache-first + dirty asset sync. Org-scoped Core izinleri: `fair_crm.fair_stand.projects.*`. Eski local-only IDB migrate edilmez. Canonical tablo envanteri: `docs/refactor/DATABASE.md`.
