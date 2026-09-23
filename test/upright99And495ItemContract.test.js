@@ -14,7 +14,7 @@ const CASES = [
   {
     itemKey: 'upright_99',
     name: 'Dikme 99 cm',
-    dimensions: { lengthCm: 99, thicknessCm: 8 },
+    dimensions: { widthCm: 8, heightCm: 99, depthCm: 8 },
     recipes: [
       ['counter', 100, {}, 4],
       ['counter', 150, {}, 4],
@@ -27,7 +27,7 @@ const CASES = [
   {
     itemKey: 'upright_49_5',
     name: 'Dikme 49,5 cm',
-    dimensions: { lengthCm: 49.5, thicknessCm: 8 },
+    dimensions: { widthCm: 8, heightCm: 49.5, depthCm: 8 },
     recipes: [
       ['base', 100, {}, 4],
       ['base', 150, {}, 4],

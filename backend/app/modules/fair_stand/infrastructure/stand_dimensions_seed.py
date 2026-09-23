@@ -9,12 +9,10 @@ from sqlalchemy.orm import Session
 from app.modules.fair_stand.infrastructure.models import FairStandDimensionsModel
 
 STAND_DIMENSIONS_ID = 1
-STAND_DIMENSIONS_HEIGHT_M = Decimal("3.5")
-STAND_DIMENSIONS_DEPTH_M = Decimal("0.1")
-STAND_DIMENSIONS_STRIP_COUNT = 7
-STAND_DIMENSIONS_STRIP_HEIGHT_M = Decimal("0.5")
-STAND_DIMENSIONS_FRAME_WIDTH_M = Decimal("0.055")
-STAND_DIMENSIONS_FRAME_DEPTH_M = Decimal("0.1")
+STAND_DIMENSIONS_HEIGHT_CM = Decimal("350")
+STAND_DIMENSIONS_DEPTH_CM = Decimal("10")
+STAND_DIMENSIONS_FRAME_WIDTH_CM = Decimal("5.5")
+STAND_DIMENSIONS_FRAME_DEPTH_CM = Decimal("10")
 
 
 def ensure_stand_dimensions(session: Session) -> FairStandDimensionsModel:
@@ -23,12 +21,10 @@ def ensure_stand_dimensions(session: Session) -> FairStandDimensionsModel:
     if row is None:
         row = FairStandDimensionsModel(
             id=STAND_DIMENSIONS_ID,
-            height_m=STAND_DIMENSIONS_HEIGHT_M,
-            depth_m=STAND_DIMENSIONS_DEPTH_M,
-            strip_count=STAND_DIMENSIONS_STRIP_COUNT,
-            strip_height_m=STAND_DIMENSIONS_STRIP_HEIGHT_M,
-            frame_width_m=STAND_DIMENSIONS_FRAME_WIDTH_M,
-            frame_depth_m=STAND_DIMENSIONS_FRAME_DEPTH_M,
+            height_cm=STAND_DIMENSIONS_HEIGHT_CM,
+            depth_cm=STAND_DIMENSIONS_DEPTH_CM,
+            frame_width_cm=STAND_DIMENSIONS_FRAME_WIDTH_CM,
+            frame_depth_cm=STAND_DIMENSIONS_FRAME_DEPTH_CM,
             created_at=now,
             updated_at=now,
         )

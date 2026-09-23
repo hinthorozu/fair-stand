@@ -13,7 +13,7 @@ import {
 
 const PANEL_CASES = {
   panel_48_5: {
-    metadata: { name: 'Panel 48,5 × 47 cm', dimensions: { widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 } },
+    metadata: { name: 'Panel 48,5 × 47 cm', dimensions: { widthCm: 48.5, heightCm: 47, depthCm: 0.8 } },
     recipes: [
       ['wall', 50, {}, 7],
       ['counter', 100, { shape: 'L' }, 4],
@@ -28,7 +28,7 @@ const PANEL_CASES = {
     ],
   },
   panel_98: {
-    metadata: { name: 'Panel 98 × 47 cm', dimensions: { widthCm: 98, heightCm: 47, thicknessCm: 0.8 } },
+    metadata: { name: 'Panel 98 × 47 cm', dimensions: { widthCm: 98, heightCm: 47, depthCm: 0.8 } },
     recipes: [
       ['wall', 100, {}, 7],
       ['door', 100, {}, 3],
@@ -40,7 +40,7 @@ const PANEL_CASES = {
     ],
   },
   panel_147_5: {
-    metadata: { name: 'Panel 147,5 × 47 cm', dimensions: { widthCm: 147.5, heightCm: 47, thicknessCm: 0.8 } },
+    metadata: { name: 'Panel 147,5 × 47 cm', dimensions: { widthCm: 147.5, heightCm: 47, depthCm: 0.8 } },
     recipes: [
       ['wall', 150, {}, 7],
       ['counter', 150, { shape: 'L' }, 4],

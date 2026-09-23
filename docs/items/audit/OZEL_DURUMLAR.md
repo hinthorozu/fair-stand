@@ -13,10 +13,10 @@ Yalnız kodda kanıtlanan sapmalar. Mimari öneri yok.
 
 - Fonksiyon `getItem('upright_346_5')` sabit. `upright_99` ve `upright_49_5` katalogda yok, factory üretmez.
 
-## Profil katalog genişliği ≠ production lengthCm
+## Profil katalog genişliği ≠ production widthCm (BOM span)
 
 - `createProfileCatalogItem` `widthCm = getStraightWallNominalWidthForProfileItem(itemKey)` (50/100/150/200).
-- Item `dimensions.lengthCm` 41.5/91/140.5/190. İkisi farklı alanlar.
+- Item `dimensions.widthCm` 41.5/91/140.5/190. İkisi farklı alanlar.
 
 ## `createIndoorPlantModule` çöp kutusunu da çizer
 

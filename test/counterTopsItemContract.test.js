@@ -11,12 +11,12 @@ import {
 } from './recipeParentItemKey.js';
 
 const expected = Object.freeze({
-  counter_top_110_60: { widthCm: 110, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 100, occurrences: 2 },
-  counter_top_52_60: { widthCm: 52, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 100, occurrences: 1 },
-  counter_top_160_60: { widthCm: 160, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 150, occurrences: 2 },
-  counter_top_102_60: { widthCm: 102, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 150, occurrences: 1 },
-  counter_top_210_60: { widthCm: 210, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 200, occurrences: 2 },
-  counter_top_150_60: { widthCm: 150, depthCm: 60, thicknessCm: 1.8, moduleWidthCm: 200, occurrences: 1 },
+  counter_top_110_60: { widthCm: 110, depthCm: 60, heightCm: 1.8, moduleWidthCm: 100, occurrences: 2 },
+  counter_top_52_60: { widthCm: 52, depthCm: 60, heightCm: 1.8, moduleWidthCm: 100, occurrences: 1 },
+  counter_top_160_60: { widthCm: 160, depthCm: 60, heightCm: 1.8, moduleWidthCm: 150, occurrences: 2 },
+  counter_top_102_60: { widthCm: 102, depthCm: 60, heightCm: 1.8, moduleWidthCm: 150, occurrences: 1 },
+  counter_top_210_60: { widthCm: 210, depthCm: 60, heightCm: 1.8, moduleWidthCm: 200, occurrences: 2 },
+  counter_top_150_60: { widthCm: 150, depthCm: 60, heightCm: 1.8, moduleWidthCm: 200, occurrences: 1 },
 });
 
 const recipes = [
@@ -35,7 +35,11 @@ test('all six counter tops are canonical 1.8 cm production Items', () => {
     assert.equal(item.partId, undefined);
     assert.equal(item.type, 'counter-top');
     assert.equal(item.unit, 'adet');
-    assert.deepEqual(item.dimensions, { widthCm: meta.widthCm, depthCm: meta.depthCm, thicknessCm: 1.8 });
+    assert.deepEqual(item.dimensions, {
+      widthCm: meta.widthCm,
+      depthCm: meta.depthCm,
+      heightCm: 1.8,
+    });
   }
 });
 
@@ -64,7 +68,7 @@ test('expanded straight and L counter recipes resolve canonical counter-top meta
     assert.ok(tops.length >= 1);
     for (const top of tops) {
       assert.equal(top.itemKey, top.part.itemKey);
-      assert.equal(top.part.dimensions.thicknessCm, 1.8);
+      assert.equal(top.part.dimensions.heightCm, 1.8);
       assert.equal(top.quantity, 1);
     }
   }

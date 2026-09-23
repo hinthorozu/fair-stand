@@ -13,17 +13,17 @@ import {
 const BASE_TOP_CASES = {
   base_top_107_50: {
     name: 'Baza Üstü 107 × 50 cm',
-    dimensions: { widthCm: 107, depthCm: 50, thicknessCm: 1.8 },
+    dimensions: { widthCm: 107, depthCm: 50, heightCm: 1.8 },
     moduleWidthCm: 100,
   },
   base_top_157_50: {
     name: 'Baza Üstü 157 × 50 cm',
-    dimensions: { widthCm: 157, depthCm: 50, thicknessCm: 1.8 },
+    dimensions: { widthCm: 157, depthCm: 50, heightCm: 1.8 },
     moduleWidthCm: 150,
   },
   base_top_206_50: {
     name: 'Baza Üstü 206 × 50 cm',
-    dimensions: { widthCm: 206, depthCm: 50, thicknessCm: 1.8 },
+    dimensions: { widthCm: 206, depthCm: 50, heightCm: 1.8 },
     moduleWidthCm: 200,
   },
 };
@@ -69,7 +69,11 @@ test('expanded base recipes resolve canonical base-top metadata and intrinsic de
     assert.equal(top.part.partId, undefined, expanded.recipeId);
     assert.equal(top.part.type, 'base-top', expanded.recipeId);
     assert.equal(top.part.unit, 'adet', expanded.recipeId);
-    assert.deepEqual(top.part.dimensions, expected.dimensions, expanded.recipeId);
+    assert.deepEqual(
+      top.part.dimensions,
+      expected.dimensions,
+      expanded.recipeId,
+    );
     assert.equal(top.part.material, 'sunta', expanded.recipeId);
     assert.equal(top.part.defaultColor, 0xffffff, expanded.recipeId);
   }

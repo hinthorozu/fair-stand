@@ -14,7 +14,7 @@ Bu belge güncel `Version2` runtime'ını Item Contract checklist'inin 18 alanı
 ## 2. Intrinsic properties — VAR
 - `widthCm = 48.5`
 - `heightCm = 47`
-- `thicknessCm = 0.8`
+- `depthCm = 0.8`
 - `material = mdf`
 - `defaultColor = 0xc79b63`
 - `nominalModuleWidthCm = 50`

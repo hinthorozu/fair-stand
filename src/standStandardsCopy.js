@@ -1,4 +1,5 @@
 import { MODULE_WIDTHS_CM, STAND_DIMENSIONS } from './standDimensions.js';
+import { getStandStripMetrics } from './stripOccupancy.js';
 import { getFloorItem } from './items.js';
 import { SCENE_SURROUND_M } from './sceneDimensions.js';
 import {
@@ -12,10 +13,9 @@ function cmFromMeters(meters) {
 }
 
 export function getStandStandardsFacts() {
-  const heightCm = cmFromMeters(STAND_DIMENSIONS.height);
-  const depthCm = cmFromMeters(STAND_DIMENSIONS.depth);
-  const stripCount = STAND_DIMENSIONS.stripCount;
-  const stripHeightCm = cmFromMeters(STAND_DIMENSIONS.stripHeight);
+  const heightCm = Math.round(STAND_DIMENSIONS.heightCm);
+  const depthCm = Math.round(STAND_DIMENSIONS.depthCm);
+  const { stripCount, stripHeightCm } = getStandStripMetrics();
   const surroundCm = cmFromMeters(SCENE_SURROUND_M);
   const karolaj = getFloorItem('karolaj');
   const gridWidthCm = karolaj?.dimensions?.widthCm;

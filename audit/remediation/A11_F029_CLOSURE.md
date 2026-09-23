@@ -8,7 +8,7 @@ Durum: **CLOSED**
 
 - `FEATURE_CONTRACTS.automaticWall` (`id: automatic-wall`) `src/automaticWall.js` sahibidir.
 - Tetik: ada olmayan sahne kurulum (`main.js` `standType !== 'island'`).
-- Girdiler: `lengthCm`, `standType`, `standXCm`, `standYCm` — `composeAutomaticStandWall` imzası.
+- Girdiler: `wallWidthCm`, `standType`, `standXCm`, `standYCm` — `composeAutomaticStandWall` imzası.
 - Çıktı: `flat-panel` modülleri; yerleştirme `planContinuousWallLayout` (`wallReflow.js`).
 - Depo sözleşmesi `contentCatalogKeys`: `MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN` — `contentKinds` ile `getCommercialItemForType` eşleşmesi. BOM miktarı yok.
 

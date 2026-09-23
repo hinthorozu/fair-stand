@@ -58,12 +58,10 @@ def test_admin_settings_get_returns_singletons(client, db_session, auth_headers)
     assert response.status_code == 200
     body = response.json()
     assert body["standDimensions"] == {
-        "height": 3.5,
-        "depth": 0.1,
-        "stripCount": 7,
-        "stripHeight": 0.5,
-        "frameWidth": 0.055,
-        "frameDepth": 0.1,
+        "heightCm": 350.0,
+        "depthCm": 10.0,
+        "frameWidthCm": 5.5,
+        "frameDepthCm": 10.0,
     }
     assert body["settings"] == {
         "maxImageUploadMb": 5,
@@ -80,26 +78,22 @@ def test_admin_update_stand_dimensions(client, db_session, auth_headers):
         "/api/v1/fair-stand/admin/stand-dimensions",
         headers=auth_headers,
         json={
-            "height_m": 4.0,
-            "depth_m": 0.12,
-            "strip_count": 8,
-            "strip_height_m": 0.5,
-            "frame_width_m": 0.06,
-            "frame_depth_m": 0.11,
+            "height_cm": 400.0,
+            "depth_cm": 12.0,
+            "frame_width_cm": 6.0,
+            "frame_depth_cm": 11.0,
         },
     )
     assert response.status_code == 200
     assert response.json() == {
-        "height": 4.0,
-        "depth": 0.12,
-        "stripCount": 8,
-        "stripHeight": 0.5,
-        "frameWidth": 0.06,
-        "frameDepth": 0.11,
+        "heightCm": 400.0,
+        "depthCm": 12.0,
+        "frameWidthCm": 6.0,
+        "frameDepthCm": 11.0,
     }
 
 
-def test_admin_update_stand_dimensions_rejects_height_mismatch(client, db_session, auth_headers):
+def test_admin_update_stand_dimensions_allows_height_above_strip_grid(client, db_session, auth_headers):
     seed_fair_stand_catalog(db_session)
     db_session.flush()
     _allow(client, {PERMISSION_SETTINGS_UPDATE})
@@ -107,15 +101,14 @@ def test_admin_update_stand_dimensions_rejects_height_mismatch(client, db_sessio
         "/api/v1/fair-stand/admin/stand-dimensions",
         headers=auth_headers,
         json={
-            "height_m": 3.0,
-            "depth_m": 0.1,
-            "strip_count": 7,
-            "strip_height_m": 0.5,
-            "frame_width_m": 0.055,
-            "frame_depth_m": 0.1,
+            "height_cm": 950.0,
+            "depth_cm": 10.0,
+            "frame_width_cm": 5.5,
+            "frame_depth_cm": 10.0,
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 200
+    assert response.json()["heightCm"] == 950.0
 
 
 def test_admin_update_runtime_settings(client, db_session, auth_headers):

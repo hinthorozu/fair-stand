@@ -10,8 +10,8 @@
 | alan | değer | kapsam |
 |---|---|---|
 | `defaultColor` | 13685716 (`#d0d3d4`) | item kaydı |
-| `dimensions.lengthCm` | 49.5 | item kaydı |
-| `dimensions.thicknessCm` | 8 | item kaydı |
+
+
 | `itemKey` | upright_49_5 | item kaydı |
 | `material` | alüminyum | item kaydı |
 | `name` | Dikme 49,5 cm | item kaydı |
@@ -19,7 +19,9 @@
 | `unit` | adet | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.widthCm` | 8 | item kaydı |
+| `dimensions.depthCm` | 8 | item kaydı |
+| `dimensions.heightCm` | 49.5 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **yok** (`src/catalog.js`)

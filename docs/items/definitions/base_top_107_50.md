@@ -14,7 +14,7 @@ Kanonik source: `src/items.js`.
 name                      Baza Üstü 107 × 50 cm
 widthCm                   107
 depthCm                   50
-thicknessCm               1.8
+heightCm                  1.8
 material                  sunta
 defaultColor              0xffffff
 ```

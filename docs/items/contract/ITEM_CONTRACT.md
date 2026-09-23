@@ -32,7 +32,7 @@ Bir Item'ı ürün olarak tanımlayan ve mevcut sistemde gerçek bir değeri bul
 Bunlar Item'a göre değişebilir. Örnekler:
 
 - `name`, `type`, `unit`,
-- `dimensions.widthCm`, `heightCm`, `depthCm`, `lengthCm`, `thicknessCm`,
+- `dimensions.widthCm`, `heightCm`, `depthCm` (+ isteğe bağlı `mountHeightCm`, `wallGapCm`),
 - `defaultColor`,
 - `material`,
 - ağırlık, yüzey, ürün ailesine özel sınıflandırma ve diğer ürüne özgü üstveri,

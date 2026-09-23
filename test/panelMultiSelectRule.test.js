@@ -69,7 +69,7 @@ test('catalog panel-bearing wall module builders expose panel selection mode', (
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const shelfRenderer = scene.slice(
     scene.indexOf('function createShelfModule'),
-    scene.indexOf('function resolveOccupiedStripLayout'),
+    scene.indexOf('function createFlatPanelModule'),
   );
   assert.match(scene, /function createFlatPanelModule[\s\S]*?selectionMode: 'panel'/);
   assert.match(scene, /function createDoorModule[\s\S]*?surfaceRole: 'upper-panel'[\s\S]*?selectionMode: 'panel'|function createDoorModule[\s\S]*?selectionMode: 'panel'[\s\S]*?surfaceRole: 'upper-panel'/);

@@ -14,7 +14,7 @@
 ```text
 widthCm = 100
 heightCm = 200
-thicknessCm = 8
+depthCm = 8
 material = ahşap
 defaultColor = 0xffffff
 ```

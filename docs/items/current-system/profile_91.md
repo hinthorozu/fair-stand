@@ -8,7 +8,7 @@ Baseline: `Version2`. Bu envanter `ITEM_CONTRACT_CHECKLIST.md` zorunlu kapsamın
 `itemKey=profile_91`, `name=Profil 91 cm`, `type=profile`, `unit=adet`; owner `src/items.js`. Legacy `partId`: YOK.
 
 ## 2. Intrinsic properties — VAR
-`lengthCm=91`, `thicknessCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Material kullanıcı ürün kararıdır. Mevcut render default'u `src/theme.js` içindeki `ALUMINUM_PROFILE_COLOR='#D0D3D4'` ile eşdeğerdir.
+`widthCm=91`, `depthCm=8`, `heightCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Material kullanıcı ürün kararıdır. Mevcut render default'u `src/theme.js` içindeki `ALUMINUM_PROFILE_COLOR='#D0D3D4'` ile eşdeğerdir.
 
 ## 3. Default state — UYGULANMIYOR
 Ayrı mutable leaf project state yoktur.

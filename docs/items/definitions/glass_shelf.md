@@ -5,14 +5,14 @@
 - `itemKey`: `glass_shelf`
 - `type`: `showcase-accessory`
 - `unit`: `adet`
-- dimensions: `87.3 × 28.5 × 0.6 cm` (`lengthCm × depthCm × thicknessCm`)
+- dimensions: `87.3 × 28.5 × 0.6 cm` (`widthCm × depthCm × heightCm`)
 - `material`: `cam`
 
 ## Sahiplik
 
 Intrinsic ürün gerçeğinin tek kaynağı `LEAF_ITEMS.glass_shelf` kaydıdır. Cam raf ayrı project entity değildir; yerleşim, move, rotation, snap/collision/connection, selection/drag, context menu, delete/duplicate/keyboard, kalıcılık ve reflow parent `showcase-2` / `showcase-3` module/type tarafından uygulanır.
 
-`createShowcaseModule()` kanonik Item'dan `lengthCm`, `depthCm`, `thicknessCm` ve `material` tüketir. `material=cam` ortak `GLASS_APPEARANCE` standardına çözülür. Normal cam görünümü product ölçüsü değildir; `theme.js` renderer appearance kaynağıdır. Masa camı `TABLE_GLASS_APPEARANCE` ile explicit specialized render ezme kullanır; panel camı ortak normal cam yüzeyine ek olarak panel-only `PANEL_GLASS_BACKING_APPEARANCE` backing efekti kullanır. Projektör lensi özel optik/emissive renderer olarak bu standardın dışındadır.
+`createShowcaseModule()` kanonik Item'dan `widthCm`, `depthCm`, `heightCm` ve `material` tüketir. `material=cam` ortak `GLASS_APPEARANCE` standardına çözülür. Normal cam görünümü product ölçüsü değildir; `theme.js` renderer appearance kaynağıdır. Masa camı `TABLE_GLASS_APPEARANCE` ile explicit specialized render ezme kullanır; panel camı ortak normal cam yüzeyine ek olarak panel-only `PANEL_GLASS_BACKING_APPEARANCE` backing efekti kullanır. Projektör lensi özel optik/emissive renderer olarak bu standardın dışındadır.
 
 ## BOM / bileşim
 

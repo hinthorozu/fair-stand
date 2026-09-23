@@ -12,6 +12,8 @@ import {
   getStraightWallRecipe,
 } from './recipeParentItemKey.js';
 
+const PROFILE_190_DIMS = Object.freeze({ widthCm: 190, heightCm: 8, depthCm: 8 });
+
 const CASES = [
   [getStraightWallRecipe(200), 2],
   [getModuleRecipe('counter', 200, { shape: 'L' }), 5],
@@ -27,7 +29,7 @@ test('profile_190 is a canonical single production Item with verified 190 x 8 cm
   assert.equal(item.name, 'Profil 190 cm');
   assert.equal(item.type, 'profile');
   assert.equal(item.unit, 'adet');
-  assert.deepEqual(item.dimensions, { lengthCm: 190, thicknessCm: 8 });
+  assert.deepEqual(item.dimensions, PROFILE_190_DIMS);
 });
 
 test('profile_190 uses canonical itemKey in all 4 verified parent recipes and preserves quantities', () => {
@@ -49,7 +51,7 @@ test('expanded recipes resolve profile_190 metadata through canonical itemKey', 
   const wallProfile = expandedWall.items.find((item) => item.itemKey === 'profile_190');
   assert.ok(wallProfile);
   assert.equal(wallProfile.part.itemKey, 'profile_190');
-  assert.deepEqual(wallProfile.part.dimensions, { lengthCm: 190, thicknessCm: 8 });
+  assert.deepEqual(wallProfile.part.dimensions, PROFILE_190_DIMS);
 
   const expandedCounter = getExpandedModuleRecipe('counter', 200, { shape: 'L' });
   const counterProfile = expandedCounter.items.find((item) => item.itemKey === 'profile_190');

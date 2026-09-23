@@ -20,20 +20,20 @@ Kaynak: PostgreSQL `fair_stand_dimensions` → catalog bootstrap `standDimension
 
 ---
 
-## Alanlar (metre)
+## Alanlar (cm canonical)
 
-| Alan | DB kolon | Ne işe yarar |
+| Bootstrap / admin JSON | DB kolon | Ne işe yarar |
 |---|---|---|
-| `height` | `height_m` | Duvar tavanı. Projektör kotu. Overlay Y 0…height. Item yüksekliği yoksa çarpışma tavanı. |
-| `depth` | `depth_m` | Duvar kalınlığı. Omurga çarpışması (`wall-backbone`). TV/raf ön yüzü `depth/2`. |
-| `stripCount` | `strip_count` | Yatay şerit sayısı. Tam boy panel yüzey sayısı. |
-| `stripHeight` | `strip_height_m` | Bir şerit boyu. Seam’ler stripHeight, 2×stripHeight, … (0 ve height seam değil). |
-| `frameWidth` | `frame_width_m` | Dikey profil görsel kesiti. |
-| `frameDepth` | `frame_depth_m` | Profil derinlik kutusu / yatay ray kalınlığı. |
+| `heightCm` | `height_cm` | Duvar tavanı (cm). Overlay Y 0…heightCm. Max zarf. |
+| `depthCm` | `depth_cm` | Duvar kalınlığı (cm). Omurga çarpışması (`wall-backbone`). TV/raf ön yüzü `depthCm/2`. |
 
-Kural: `height = stripCount × stripHeight`.
+Seed (varsayılan): 350 / 10 cm.
 
-Seed (şu an): 3.5 / 0.1 / 7 / 0.5 / 0.055 / 0.1 → duvar 350 cm, 7 × 50 cm.
+Prosedürel aluminyum **kesit** (eski `frame_*`): `upright_346_5` item W/D — bkz. `STAND_FRAME_REMOVAL.md`.
+
+Panel bandı pitch ve slot sayısı **ürün BOM +** `src/wallPanelBand.js` (`WALL_PANEL_BAND_PITCH_CM`). Eski `strip_count` / `strip_height_cm` kolonları migration `0019_drop_stand_strip_grid` ile kaldırıldı.
+
+Three.js sahnesi metre kullanır: `STAND_DIMENSIONS.height`, `.depth` getter’ları `/100` döner.
 
 350 catalog max ürün yüksekliği değildir. Koltuk/banko/TV kendi Item `heightCm` değerini kullanır.
 
@@ -45,3 +45,17 @@ Seed (şu an): 3.5 / 0.1 / 7 / 0.5 / 0.055 / 0.1 → duvar 350 cm, 7 × 50 cm.
 - Catalog görünürlük, kategori, kart — `CATALOG.md`
 - `MODULE_WIDTHS_CM` (50/100/150/200) — hâlâ `src/standDimensions.js` kod sabiti; bu tabloda yok
 - collision / snap politikası — `moduleBehavior.js` (henüz DB değil)
+
+---
+
+## Duvar zinciri genişlik adları (Item değil)
+
+Stand tipi + `standXCm` / `standYCm` ile L/U/back-wall kenarları birleşik zincir oluşturur. Item `dimensions.widthCm` ile karıştırılmaz.
+
+| Alan | Nerede | Anlam |
+|---|---|---|
+| `edgeWidthCm` | `getContinuousWallSegments()` segment | O kenarın toplam kapasitesi (ör. sol 400, arka 500) |
+| `wallWidthCm` | `composeStraightWall`, `composeAutomaticStandWall` | İstenen duvar / zincir genişliği (50 cm katları) |
+| `widthCm` | Modül state / yerleşim | Modülün duvar boyunca genişliği (100/200 …) |
+
+Kod: `src/wall.js`, `src/wallReflow.js`, `src/automaticWall.js`, `src/moduleMove.js`.

@@ -1,11 +1,11 @@
 import { MODULE_WIDTHS_CM } from './standDimensions.js';
 
-export function validateWallLength(lengthCm) {
-  if (!Number.isFinite(lengthCm) || lengthCm < 50) {
+export function validateWallWidth(wallWidthCm) {
+  if (!Number.isFinite(wallWidthCm) || wallWidthCm < 50) {
     return { ok: false, message: 'Duvar genişliği en az 50 cm olmalı.' };
   }
 
-  if (lengthCm % 50 !== 0) {
+  if (wallWidthCm % 50 !== 0) {
     return { ok: false, message: 'Şimdilik genişlik 50 cm katlarıyla oluşturulabilir.' };
   }
 
@@ -17,13 +17,13 @@ export function validateWallLength(lengthCm) {
  * Modüller 50 cm katları olduğu için büyükten küçüğe seçim optimum sonucu verir.
  * Örnek: 350 => [200, 150], 600 => [200, 200, 200].
  */
-export function composeStraightWall(lengthCm) {
-  const validation = validateWallLength(lengthCm);
+export function composeStraightWall(wallWidthCm) {
+  const validation = validateWallWidth(wallWidthCm);
   if (!validation.ok) return validation;
 
   const widths = [...MODULE_WIDTHS_CM].sort((a, b) => b - a);
   const modules = [];
-  let remaining = lengthCm;
+  let remaining = wallWidthCm;
 
   for (const width of widths) {
     while (remaining >= width) {
@@ -38,7 +38,7 @@ export function composeStraightWall(lengthCm) {
 
   return {
     ok: true,
-    lengthCm,
+    wallWidthCm,
     modules,
     moduleCount: modules.length,
   };

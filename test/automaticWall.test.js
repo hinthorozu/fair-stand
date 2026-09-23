@@ -13,7 +13,7 @@ test('L stand 500 x 400 accepts 900 cm and fills left before back', () => {
   }), 900);
 
   const result = composeAutomaticStandWall({
-    lengthCm: 900,
+    wallWidthCm: 900,
     standType: 'l-left',
     standXCm: 500,
     standYCm: 400,
@@ -29,7 +29,7 @@ test('L stand 500 x 400 accepts 900 cm and fills left before back', () => {
 
 test('U stand 400 x 400 accepts the full 1200 cm chain', () => {
   const result = composeAutomaticStandWall({
-    lengthCm: 1200,
+    wallWidthCm: 1200,
     standType: 'u-stand',
     standXCm: 400,
     standYCm: 400,
@@ -45,7 +45,7 @@ test('U stand 400 x 400 accepts the full 1200 cm chain', () => {
 
 test('450 cm side is completed with a 50 cm module before turning the corner', () => {
   const result = composeAutomaticStandWall({
-    lengthCm: 950,
+    wallWidthCm: 950,
     standType: 'l-left',
     standXCm: 500,
     standYCm: 450,
@@ -61,7 +61,7 @@ test('450 cm side is completed with a 50 cm module before turning the corner', (
 
 test('rejects lengths above the total active wall chain', () => {
   const result = composeAutomaticStandWall({
-    lengthCm: 1250,
+    wallWidthCm: 1250,
     standType: 'u-stand',
     standXCm: 400,
     standYCm: 400,

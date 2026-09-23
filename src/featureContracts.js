@@ -51,7 +51,7 @@ export const FEATURE_CONTRACTS = Object.freeze({
       mode: 'non-island-stage-create',
     }),
     inputs: Object.freeze([
-      'lengthCm',
+      'wallWidthCm',
       'standType',
       'standXCm',
       'standYCm',

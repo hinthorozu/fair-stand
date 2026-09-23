@@ -23,7 +23,10 @@ test('shelf production Items use canonical identity and verified sunta dimension
     assert.equal(item.name, `Raf ${widthCm} cm`);
     assert.equal(item.type, 'shelf');
     assert.equal(item.unit, 'adet');
-    assert.deepEqual(item.dimensions, { lengthCm: widthCm, depthCm: 38, thicknessCm: 1.8 });
+    assert.deepEqual(
+      item.dimensions,
+      { widthCm, depthCm: 38, heightCm: 1.8 },
+    );
     assert.deepEqual(item.sceneDimensions, { widthCm, heightCm: 1.8 });
     assert.equal(item.material, 'sunta');
     assert.equal(item.defaultColor, EXPECTED_COLOR);
@@ -49,7 +52,7 @@ test('shelf renderer consumes canonical Item depth, thickness and default color 
   const rendererSource = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const shelfRenderer = rendererSource.slice(
     rendererSource.indexOf('function createShelfModule'),
-    rendererSource.indexOf('function resolveOccupiedStripLayout'),
+    rendererSource.indexOf('function createFlatPanelModule'),
   );
 
   assert.doesNotMatch(catalogSource, /projectionCm:\s*38/);
@@ -58,7 +61,7 @@ test('shelf renderer consumes canonical Item depth, thickness and default color 
   assert.doesNotMatch(itemsSource, /export function getShelfLeafItem/);
   assert.doesNotMatch(shelfRenderer, /getShelfLeafItem/);
   assert.match(shelfRenderer, /item\.dimensions\.depthCm/);
-  assert.match(shelfRenderer, /item\.dimensions\.thicknessCm/);
+  assert.match(shelfRenderer, /item\.dimensions\.heightCm/);
   assert.match(shelfRenderer, /color: item\.defaultColor/);
   assert.match(shelfRenderer, /new THREE\.BoxGeometry\(widthM, thicknessM, depthM\)/);
   assert.doesNotMatch(shelfRenderer, /color:\s*0xb8bcc1/);

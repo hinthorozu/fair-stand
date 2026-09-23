@@ -3,38 +3,23 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 import {
-  getOccupiedStripLayout,
   getStandStripMetrics,
-  getStripOccupancyHeightRangeCm,
   normalizeStripOccupancy,
   resolveModuleStripOccupancy,
 } from '../src/stripOccupancy.js';
 
-test('strip occupancy is the shared hanging-panel contract', () => {
+test('strip occupancy normalizes catalog short-up contract', () => {
   assert.deepEqual(normalizeStripOccupancy({ align: 'top', stripCount: 2 }), {
     align: 'top',
     stripCount: 2,
   });
   assert.equal(normalizeStripOccupancy({ stripCount: 0 }), null);
-  assert.deepEqual(getStripOccupancyHeightRangeCm({ align: 'top', stripCount: 2 }), {
-    minCm: 250,
-    maxCm: 350,
+  assert.deepEqual(getStandStripMetrics(), {
+    stripCount: 7,
+    stripHeightM: 0.5,
+    stripHeightCm: 50,
+    heightCm: 350,
   });
-  assert.deepEqual(getStripOccupancyHeightRangeCm({ align: 'bottom', stripCount: 2 }), {
-    minCm: 0,
-    maxCm: 100,
-  });
-
-  const stand = getStandStripMetrics();
-  const layout = getOccupiedStripLayout({ align: 'top', stripCount: 2 }, {
-    stripCount: stand.stripCount,
-    stripHeight: stand.stripHeightM,
-  });
-  assert.equal(layout.visibleCount, 2);
-  assert.equal(layout.skipCount, 5);
-  assert.equal(layout.frameBottomY, 2.5);
-  assert.equal(layout.frameHeight, 1);
-  assert.equal(getOccupiedStripLayout(null), null);
 });
 
 test('canonical Item occupancy wins and hanging short-up stays top-aligned', () => {
@@ -55,4 +40,6 @@ test('canonical Item occupancy wins and hanging short-up stays top-aligned', () 
   for (const source of [scene, state, behavior, sidebar]) {
     assert.doesNotMatch(source, /itemKey === 'wall_200_short_up_2'/);
   }
+  assert.doesNotMatch(scene, /resolveOccupiedStripLayout/);
+  assert.doesNotMatch(readFileSync(new URL('../src/stripOccupancy.js', import.meta.url), 'utf8'), /getOccupiedStripLayout/);
 });

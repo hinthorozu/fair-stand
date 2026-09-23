@@ -13,7 +13,7 @@ import {
 const PROFILE_CASES = {
   profile_41_5: {
     name: 'Profil 41,5 cm',
-    dimensions: { lengthCm: 41.5, thicknessCm: 8 },
+    dimensions: { widthCm: 41.5, heightCm: 8, depthCm: 8 },
     recipes: [
       ['wall', 50, {}, 2],
       ['separator', 50, {}, 2],
@@ -30,7 +30,7 @@ const PROFILE_CASES = {
   },
   profile_91: {
     name: 'Profil 91 cm',
-    dimensions: { lengthCm: 91, thicknessCm: 8 },
+    dimensions: { widthCm: 91, heightCm: 8, depthCm: 8 },
     recipes: [
       ['wall', 100, {}, 2],
       ['door', 100, {}, 1],
@@ -45,7 +45,7 @@ const PROFILE_CASES = {
   },
   profile_140_5: {
     name: 'Profil 140,5 cm',
-    dimensions: { lengthCm: 140.5, thicknessCm: 8 },
+    dimensions: { widthCm: 140.5, heightCm: 8, depthCm: 8 },
     recipes: [
       ['wall', 150, {}, 2],
       ['counter', 150, { shape: 'L' }, 5],
@@ -99,7 +99,11 @@ test('expanded recipes resolve all migrated profile metadata through canonical I
       assert.equal(profile.part.itemKey, itemKey, expanded.recipeId);
       assert.equal(profile.part.partId, undefined, expanded.recipeId);
       assert.equal(profile.part.unit, 'adet', expanded.recipeId);
-      assert.deepEqual(profile.part.dimensions, expected.dimensions, expanded.recipeId);
+      assert.deepEqual(
+        profile.part.dimensions,
+        expected.dimensions,
+        expanded.recipeId,
+      );
     }
   }
 });
@@ -110,5 +114,5 @@ test('profile family cutover preserves the already canonical profile_190 contrac
   assert.equal(profile190.partId, undefined);
   assert.equal(profile190.type, 'profile');
   assert.equal(profile190.unit, 'adet');
-  assert.deepEqual(profile190.dimensions, { lengthCm: 190, thicknessCm: 8 });
+  assert.deepEqual(profile190.dimensions, { widthCm: 190, heightCm: 8, depthCm: 8 });
 });

@@ -16,7 +16,7 @@ Kanonik kaynak `src/items.js` → `LEAF_ITEMS.base_top_107_50`.
 - `name = Baza Üstü 107 × 50 cm`
 - `dimensions.widthCm = 107`
 - `dimensions.depthCm = 50`
-- `dimensions.thicknessCm = 1.8`
+- `dimensions.depthCm = 1.8`
 - `material = sunta`
 - `defaultColor = 0xffffff`
 - `nominalModuleWidthCm = 100`

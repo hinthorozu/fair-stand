@@ -177,15 +177,15 @@ Fiziksel gövde. En az bir ölçü NOT NULL (CHECK). JSON `dimensions.*`.
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
 | `item_key` | — | FK/PK | 1:1 | cascade delete |
-| `width_cm` | `widthCm` | Genişlik | Placement / kart / BOM | `resolveSceneDimensions`; factory; AutoDepot |
-| `depth_cm` | `depthCm` | Derinlik | Footprint | aynı |
-| `height_cm` | `heightCm` | Yükseklik | Mesh / şerit aralığı | aynı; collision type tablosu hâlâ ayrı |
-| `length_cm` | `lengthCm` | Üretim boyu | Width’e **remap yok** | profil/raf/vitrin board; `scene3d` showcase |
-| `thickness_cm` | `thicknessCm` | Kalınlık | Depth’e **remap yok** | panel/raf/vitrin |
+| `width_cm` | `widthCm` | Kutu W | Placement / kart / BOM | `resolveSceneDimensions`; factory; AutoDepot |
+| `depth_cm` | `depthCm` | Kutu D | Footprint | aynı |
+| `height_cm` | `heightCm` | Kutu H | Mesh / şerit aralığı | aynı; collision type tablosu hâlâ ayrı |
 | `mount_height_cm` | `mountHeightCm` | Legacy montaj (floodlight 350) | Seed tarihi; drop asıl `default_z_cm`. Fallback: `resolveItemDefaultZCm` hâlâ okur | `led_floodlight`; `selectionFeedback.js` metin |
 | `wall_gap_cm` | `wallGapCm` | Strafor–duvar boşluğu | Overlay öne | `designState.js` → `scene3d.js` foam |
 
-`resolveSceneDimensions`: aynı field `sceneDimensions ?? dimensions ?? MISSING`. `length`→`width` yok.
+**Kaldırıldı:** `length_cm`, `thickness_cm` — migration `0021_drop_item_length_thickness`; önce `0020_item_dims_wh_d_fill` ile W/H/D dolduruldu.
+
+`resolveSceneDimensions`: aynı field `sceneDimensions ?? dimensions ?? MISSING`. Cross-remap yok.
 
 ---
 
@@ -207,8 +207,8 @@ Short-up duvarın kaç üst şeridi kestiği. `align` bugün yalnız `top`.
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
 | `item_key` | — | FK/PK | — | — |
-| `align` | `stripOccupancy.align` | Bant hizası (CHECK yalnız `top`) | Tavan şeritleri | `src/stripOccupancy.js`; `catalogPreviewRenderer.js` |
-| `strip_count` | `stripOccupancy.stripCount` | Şerit adedi (`> 0`) | 1 veya 2 short-up | aynı + `designState.js` |
+| `align` | `stripOccupancy.align` | Bant hizası (CHECK yalnız `top`) | Katalog/preview oranı; layout helper’ları kalktı (PENDING § A.1) | `normalizeStripOccupancy` / `resolveModuleStripOccupancy`; `catalogPreviewRenderer.js` |
+| `strip_count` | `stripOccupancy.stripCount` | Şerit adedi (`> 0`) | 1 veya 2 short-up | aynı + `designState.js` (persist). Tablo kaldırma: PENDING § A.5 |
 
 Stand `strip_count` (7) ile karışmaz. O zarf tablosunda.
 
@@ -273,17 +273,15 @@ Tek satır `id = 1`. Item değildir. `STAND_DIMENSIONS.md`.
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
 | `id` | — | Singleton; CHECK `id = 1`. (Postgres sequence default var, ikinci satır CHECK’ten geçmez.) | İkinci zarf yok | CHECK `ck_fair_stand_dimensions_singleton` |
-| `height_m` | `height` | Tavan (m) | Stand iskeleti | `src/standDimensions.js` |
-| `depth_m` | `depth` | Duvar kalınlığı | Omurga / overlay | same |
-| `strip_count` | `stripCount` | Tam boy şerit | 7×50 panel ızgarası | `stripOccupancy.js` + designState |
-| `strip_height_m` | `stripHeight` | Bir şerit (m) | CHECK: `height_m = strip_count × strip_height_m` | seam |
-| `frame_width_m` | `frameWidth` | Dikey profil kesit | Görsel iskelet | renderer via standDimensions |
-| `frame_depth_m` | `frameDepth` | Profil derinlik | Ray kalınlığı | aynı |
+| `height_cm` | `heightCm` | Tavan (cm) | Max zarf | `src/standDimensions.js` |
+| `depth_cm` | `depthCm` | Duvar kalınlığı (cm) | Omurga / overlay | same |
+| `frame_width_cm` | `frameWidthCm` | Dikey profil kesit (cm) | Görsel iskelet | renderer via `STAND_DIMENSIONS.*` (m getter) |
+| `frame_depth_cm` | `frameDepthCm` | Profil derinlik (cm) | Ray kalınlığı | aynı |
 | `created_at` / `updated_at` | yok | Audit | — | DB |
 
 `MODULE_WIDTHS_CM` (50/100/150/200) hâlâ JS; bu tabloda yok.
 
-Lokal canlı (2026-09-21): `id=1`, `height_m=3.5`, `depth_m=0.1`, `strip_count=7`, `strip_height_m=0.5`, `frame_width_m=0.055`, `frame_depth_m=0.1`.
+Lokal seed: `id=1`, `height_cm=350`, `depth_cm=10`, `frame_width_cm=5.5`, `frame_depth_cm=10`.
 
 ---
 

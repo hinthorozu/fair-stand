@@ -10,6 +10,8 @@ import {
   getModuleRecipe,
 } from './recipeParentItemKey.js';
 
+const PANEL_CORNER_192_DIMS = Object.freeze({ widthCm: 192, heightCm: 47, depthCm: 0.8 });
+
 test('panel_corner_192 is a canonical single production Item', () => {
   const item = getItem('panel_corner_192');
 
@@ -18,7 +20,7 @@ test('panel_corner_192 is a canonical single production Item', () => {
   assert.equal(item.name, 'İç Köşe Paneli 192 × 47 cm');
   assert.equal(item.type, 'panel');
   assert.equal(item.unit, 'adet');
-  assert.deepEqual(item.dimensions, { widthCm: 192, heightCm: 47, thicknessCm: 0.8 });
+  assert.deepEqual(item.dimensions, PANEL_CORNER_192_DIMS);
   assert.equal(item.nominalModuleWidthCm, undefined);
 });
 

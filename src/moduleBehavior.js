@@ -1,5 +1,5 @@
-import { STAND_DIMENSIONS } from './standDimensions.js';
-import { getItem, isShortUpFamilyDescriptor, resolveItemDefaultZCm, resolveSceneDimensions } from './items.js';
+import { getStandDimensions } from './standDimensions.js';
+import { getItem, isShortUpFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm } from './items.js';
 
 const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
   kind: 'silhouette',
@@ -259,11 +259,15 @@ export function getModuleCollisionStrategy(moduleOrType) {
 
 export function getModuleCollisionHeightRangeCm(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
-  const explicitHeightCm = Number(module.heightCm);
-  const sceneHeightCm = resolveSceneDimensions(getItem(module.itemKey)).heightCm;
-  const heightCm = Number.isFinite(explicitHeightCm) && explicitHeightCm > 0
-    ? explicitHeightCm
-    : (sceneHeightCm != null ? Number(sceneHeightCm) : Math.round(STAND_DIMENSIONS.height * 100));
+  let { heightCm } = resolveModuleSceneBoxCm(module, { clampToStandCeiling: true });
+  if (heightCm == null) {
+    const item = module.itemKey ? getItem(module.itemKey) : null;
+    if (item) {
+      throw new TypeError(`Item ${module.itemKey} is missing scene dimension heightCm.`);
+    }
+    // itemKey yok: yerleşim stub’ları; dikey kapsama = stand tavanı (geçilemez üst sınır).
+    heightCm = getStandDimensions().heightCm;
+  }
   const placementZ = Number(module.placement?.zCm);
   const originCm = Number.isFinite(placementZ) ? placementZ : resolveItemDefaultZCm(module);
   return Object.freeze({ minCm: originCm, maxCm: originCm + heightCm });

@@ -8,6 +8,90 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 - Rotation: `docs/refactor/ROTATION.md`
 - PostgreSQL tabloları: `docs/refactor/DATABASE.md`
 - Ertelenmiş kararlar / backlog (tavan–şerit kaldırma sırası, Item property, TYPE_BEHAVIORS kuyruğu): `docs/refactor/PENDING_ITEM_DECISIONS.md`
+- Item-first + capability snap yol haritası: `docs/refactor/ITEM_FIRST_ROADMAP.md`
+
+---
+
+## 2026-09-23 — Stand `frame_*` kolonları geri (5,5×10)
+
+Migration `0023_restore_stand_frame_columns`. Bootstrap/admin/CRM + `resolveProceduralFrameCrossSectionCm` stand `frameWidthCm`/`frameDepthCm` okur. Leaf 8×8 BOM görsel kaynağı değil (şimdilik). Belge: `STAND_FRAME_REMOVAL.md`.
+
+---
+
+## 2026-09-23 — TEMP: prosedürel frame 5,5×10 cm
+
+*(Superseeded by `0023` DB restore — aynı gün.)* Leaf upright/profile 8×8 BOM kesiti sahnede kalın durduğu için önce kod sabiti, sonra stand kolonları geri alındı.
+
+---
+
+## 2026-09-23 — Item-first yol haritası (karar)
+
+Ürün kararı yazıldı: leaf Item → registry → recipe parent → rotate/defaultZ → capability snap (`provides`/`requires`, örn. projetör ↔ profile `top-rail`). Snap SKU’ya değil aile/capability’ye. Admin parametrik Three.js preview P5 (ertelendi; bugün CSS siluet).
+
+Belge: `docs/refactor/ITEM_FIRST_ROADMAP.md`. `SCENE_POSE.md` snap hedefi ile hizalanacak.
+
+Aynı gün: **Gap / çatışma** notu eklendi — mevcut `snap_target_item_type` vs capability; wall recipe→AABB host; raf `panel-seam` vs panel **front** lokal üst (`shelf-rail`); P0’da A/B kilidi zorunlu. Raf görsel kuralı: N panel → N yatay hat, wall tavanı değil.
+
+---
+
+## 2026-09-22 — Duvar zinciri: `edgeWidthCm` / `wallWidthCm`
+
+Item `lengthCm` kalktıktan sonra duvar otomasyonundaki eski `lengthCm` adları netleştirildi:
+
+- Segment kapasitesi: `segment.edgeWidthCm` (`wallReflow.js`, `moduleMove.js`).
+- Düz / otomatik duvar girdisi: `wallWidthCm` (`wall.js` `validateWallWidth` / `composeStraightWall`, `automaticWall.js`, `main.js`, `featureContracts.js`).
+- Modül duvar boyunca ölçüsü: `widthCm` (değişmedi).
+
+Sözleşme: `docs/refactor/STAND_DIMENSIONS.md` (Duvar zinciri genişlik adları).
+
+---
+
+## 2026-09-22 — Item dimensions: legacy BOM kolonları kaldırıldı
+
+- Migration `0021_drop_item_length_thickness`: `fair_stand_item_dimensions` üzerinde `length_cm`, `thickness_cm` yok.
+- Önce `0020_item_dims_wh_d_fill` (tarihsel; legacy → W/H/D, fill-only).
+- Runtime/seed/API: yalnız `widthCm`, `depthCm`, `heightCm` (+ `mountHeightCm`, `wallGapCm`). Helper modüller (`dimension_normalize`, `dimensionNormalize.js`) kaldırıldı.
+- `resolveSceneDimensions` cross-remap yapmaz; same-field merge.
+- Detay: `docs/refactor/ITEM_DIMENSIONS.md`, `ITEMS.md`.
+
+---
+
+## 2026-09-22 — Item dimensions W/H/D backfill (veri koruyucu, tarihsel)
+
+- Migration `0020_item_dims_wh_d_fill` (0021 öncesi DB’ler).
+- `resolveSceneDimensions` cross-remap yapmaz.
+
+---
+
+## 2026-09-22 — `fair_stand_dimensions` strip kolonları kaldırıldı
+
+Migration `0019_drop_stand_strip_grid`: `strip_count`, `strip_height_cm` silindi. Bootstrap/admin yalnız `heightCm`, `depthCm`, `frameWidthCm`, `frameDepthCm`. Panel pitch: `WALL_PANEL_BAND_PITCH_CM`.
+
+---
+
+## 2026-09-22 — Stand zarfı cm + runtime şerit grid’den kopma (başlangıç)
+
+- DB/API/bootstrap: `fair_stand_dimensions` uzunluk kolonları cm (`0018_stand_dimensions_cm`); JSON `heightCm`, …; admin PUT `height_cm`, …
+- Runtime yerleşim pitch: `WALL_PANEL_BAND_PITCH_CM` (`src/wallPanelBand.js`, 50 cm ürün sabiti). `STAND_DIMENSIONS.stripCount` / `.stripHeight` artık `src/` içinde okunmuyor.
+- Panel adedi: recipe BOM + item tavanı; seam/snap host modül `strips[]` + `heightCm`; vitrin `strips[]` BOM’dan.
+
+---
+
+## 2026-09-22 — PENDING § A adım 1: ölü occupancy layout
+
+Kaldırıldı: `resolveOccupiedStripLayout` (`scene3d.js`), `getOccupiedStripLayout`, `getStripOccupancyHeightRangeCm` (`stripOccupancy.js`). Canlı yol durur: `normalizeStripOccupancy`, `resolveModuleStripOccupancy`, ghost key, katalog preview.
+
+---
+
+## 2026-09-22 — PENDING § A adım 1 (devam): flat-panel strip slot sayısı BOM’dan
+
+`countRecipeWallPanelSlots` (`items.js`): recipe `composition.items` içinde `panel` / `separator-panel` adetlerini toplar. `createFlatPanelModuleState` önce bunu kullanır; yoksa `scene_dimensions.height_cm` ÷ stand şerit pitch fallback. Recipe panel sayısı kullanıldığında şerit sayısı `min(BOM panel adedi, floor(item heightCm ÷ strip pitch))`; modül yüksekliği `min(şerit × pitch, item heightCm)` — DB tavan (`scene/dimensions height_cm`) aşılmaz. Showcase, kapı, seed SKU bölme ve `strips[]` migration hâlâ backlog (`PENDING_ITEM_DECISIONS.md` § A).
+
+---
+
+## 2026-09-22 — `composition.moduleType` veri temizliği (B.7)
+
+DB kolonu zaten migration `0014_drop_comp_mod_type`. Bootstrap JSON yalnız `composition.mode` + `composition.items` taşır; `composition_module_type` dump + test fixture’dan silindi. L banko kimliği `item.shape`. Detay: `REFACTOR.md` 2026-09-20 inner-corner maddesi ile uyumlu.
 
 ---
 
@@ -350,13 +434,13 @@ Her Item kendi ölçü bilgisinin canonical kaynağıdır. İki katman, aynı fi
 dimensions        = gerçek/fiziksel ürün ölçüleri
 sceneDimensions   = scene/runtime override
 
-canonical fields: widthCm, depthCm, heightCm, lengthCm, thicknessCm
+canonical fields: widthCm, depthCm, heightCm (+ mountHeightCm, wallGapCm)
 
 effective scene field:
   sceneDimensions.field ?? dimensions.field ?? MISSING
 ```
 
-Aynı field adı yoksa fallback yoktur. `lengthCm` width olmaz. `thicknessCm` depth olmaz.
+Aynı field adı yoksa fallback yoktur. (Eski `lengthCm` / `thicknessCm` BOM alanları 0021 ile kaldırıldı.) Duvar zinciri: `edgeWidthCm`, `wallWidthCm` — Item alanı değil.
 
 ### Kaldırılan kaynaklar
 
@@ -545,7 +629,7 @@ Rotation / color / image / lighting / delete / collision / placement / Item Cont
 
 Yok. Descriptor alanları zaten Item’da duruyordu (`name`, `dimensions`, `modelFile`, `eyeCount`, `sizeInch`, `videoWall`, `stripOccupancy`, `shape`, `shelfCount`, `variant`, rotation metadata). Projection alias’ı Item’a kopyalanmadı (`label` = `name`; kök `widthCm` = `dimensions.widthCm` veya türetilmiş oturum).
 
-Profil kart `widthCm` Item’da yoktur; düz duvar reçetesi `nominalWidthCm` türevidir. Dikme `thicknessCm`/`lengthCm` → kare oturum. TV/video-wall `resolveWallMediaMetrics` türevidir.
+Profil kart `widthCm` Item’da yoktur; düz duvar reçetesi `nominalWidthCm` türevidir. Dikme kesit `widthCm`/`depthCm` (8), boy `heightCm`. TV/video-wall `resolveWallMediaMetrics` türevidir.
 
 ### Compatibility export
 

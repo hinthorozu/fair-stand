@@ -9,7 +9,7 @@
 
 ## Ne işe yarar
 
-`getStraightWallNominalWidthForProfileItem` — production lengthCm değil, 50/100/150/200 nominal.
+`getStraightWallNominalWidthForProfileItem` — production widthCm (BOM span) değil, 50/100/150/200 nominal.
 
 ## Canonical owner
 

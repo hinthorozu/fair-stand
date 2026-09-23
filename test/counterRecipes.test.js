@@ -7,14 +7,18 @@ import {
   getModuleRecipe,
 } from './recipeParentItemKey.js';
 
+function counterTopDims(widthCm) {
+  return { widthCm, depthCm: 60, heightCm: 1.8 };
+}
+
 test('production catalog contains verified banko upright and tops', () => {
-  assert.equal(getItem('upright_99').dimensions.lengthCm, 99);
-  assert.deepEqual(getItem('counter_top_110_60').dimensions, { widthCm: 110, depthCm: 60, thicknessCm: 1.8 });
-  assert.deepEqual(getItem('counter_top_160_60').dimensions, { widthCm: 160, depthCm: 60, thicknessCm: 1.8 });
-  assert.deepEqual(getItem('counter_top_210_60').dimensions, { widthCm: 210, depthCm: 60, thicknessCm: 1.8 });
-  assert.deepEqual(getItem('counter_top_52_60').dimensions, { widthCm: 52, depthCm: 60, thicknessCm: 1.8 });
-  assert.deepEqual(getItem('counter_top_102_60').dimensions, { widthCm: 102, depthCm: 60, thicknessCm: 1.8 });
-  assert.deepEqual(getItem('counter_top_150_60').dimensions, { widthCm: 150, depthCm: 60, thicknessCm: 1.8 });
+  assert.equal(getItem('upright_99').dimensions.heightCm, 99);
+  assert.deepEqual(getItem('counter_top_110_60').dimensions, counterTopDims(110));
+  assert.deepEqual(getItem('counter_top_160_60').dimensions, counterTopDims(160));
+  assert.deepEqual(getItem('counter_top_210_60').dimensions, counterTopDims(210));
+  assert.deepEqual(getItem('counter_top_52_60').dimensions, counterTopDims(52));
+  assert.deepEqual(getItem('counter_top_102_60').dimensions, counterTopDims(102));
+  assert.deepEqual(getItem('counter_top_150_60').dimensions, counterTopDims(150));
 });
 
 test('banko 100 recipe matches verified production data', () => {

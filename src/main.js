@@ -1072,6 +1072,13 @@ function syncAutoDepotControls() {
 function createAutomaticDepotStates(plan) {
   if (!plan?.ok) return [];
   return plan.specs.map((spec) => {
+    if (spec.kind === 'door') {
+      const state = createModuleStateFromCatalogKey('door_100');
+      if (!state) return null;
+      state.placement = { ...spec.placement };
+      state.autoDepot = true;
+      return state;
+    }
     const descriptor = {
       ...spec,
       type: spec.kind === 'wall' ? 'flat-panel' : spec.kind,
@@ -1135,7 +1142,7 @@ function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
     currentModules = [];
   } else {
     const automaticWall = composeAutomaticStandWall({
-      lengthCm: getAutomaticWallCapacityCm({
+      wallWidthCm: getAutomaticWallCapacityCm({
         standType: setup.standType,
         standXCm: setup.xCm,
         standYCm: setup.yCm,

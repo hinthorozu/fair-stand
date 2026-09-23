@@ -11,14 +11,13 @@
 |---|---|---|
 | `defaultColor` | #c4a480 | item kaydı |
 | `dimensions.depthCm` | 16 | item kaydı |
-| `dimensions.lengthCm` | 140 | item kaydı |
 | `itemKey` | parke-sari | item kaydı |
 | `name` | Sarı Meşe | item kaydı |
 | `paintable` | hayır | item kaydı |
 | `type` | floor | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.widthCm` | 140 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **yok** (`src/catalog.js`)

@@ -97,8 +97,6 @@ const payload = {
             width_cm: num(item.dimensions.widthCm),
             depth_cm: num(item.dimensions.depthCm),
             height_cm: num(item.dimensions.heightCm),
-            length_cm: num(item.dimensions.lengthCm),
-            thickness_cm: num(item.dimensions.thicknessCm),
             mount_height_cm: num(item.dimensions.mountHeightCm),
             wall_gap_cm: num(item.dimensions.wallGapCm),
           }

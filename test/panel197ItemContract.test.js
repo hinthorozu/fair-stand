@@ -11,6 +11,8 @@ import {
   getStraightWallRecipe,
 } from './recipeParentItemKey.js';
 
+const PANEL_197_DIMS = Object.freeze({ widthCm: 197, heightCm: 47, depthCm: 0.8 });
+
 const RECIPE_CASES = [
   ['wall', 200, {}, 7],
   ['counter', 200, { shape: 'L' }, 4],
@@ -26,7 +28,7 @@ test('panel_197 is a canonical single production Item', () => {
   assert.equal(item.name, 'Panel 197 × 47 cm');
   assert.equal(item.type, 'panel');
   assert.equal(item.unit, 'adet');
-  assert.deepEqual(item.dimensions, { widthCm: 197, heightCm: 47, thicknessCm: 0.8 });
+  assert.deepEqual(item.dimensions, PANEL_197_DIMS);
   assert.equal(item.nominalModuleWidthCm, undefined);
 });
 
@@ -53,7 +55,7 @@ test('expanded recipe resolves panel_197 metadata through canonical itemKey', ()
   assert.equal(panel.part.itemKey, 'panel_197');
   assert.equal(panel.part.partId, undefined);
   assert.equal(panel.part.unit, 'adet');
-  assert.deepEqual(panel.part.dimensions, { widthCm: 197, heightCm: 47, thicknessCm: 0.8 });
+  assert.deepEqual(panel.part.dimensions, PANEL_197_DIMS);
 });
 
 test('panel_197 remains isolated from the canonical inner-corner panel family', () => {

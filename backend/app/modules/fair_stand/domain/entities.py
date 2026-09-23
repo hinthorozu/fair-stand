@@ -25,12 +25,10 @@ class ItemAggregate:
 
 @dataclass(frozen=True)
 class StandDimensions:
-    height: float
-    depth: float
-    strip_count: int
-    strip_height: float
-    frame_width: float
-    frame_depth: float
+    height_cm: float
+    depth_cm: float
+    frame_width_cm: float
+    frame_depth_cm: float
 
 
 @dataclass(frozen=True)

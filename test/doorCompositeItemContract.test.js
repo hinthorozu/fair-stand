@@ -5,9 +5,14 @@ import {
   getCatalogItem,
   listCatalogItems,
 } from '../src/catalog.js';
-import { createModuleStateFromDescriptor, normalizeModuleItemState } from '../src/designState.js';
+import {
+  createDoorModuleState,
+  createModuleStateFromCatalogKey,
+  createModuleStateFromDescriptor,
+  normalizeModuleItemState,
+} from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
-import { getItem } from '../src/items.js';
+import { getItem, initializeItemRegistry, listRegisteredItems } from '../src/items.js';
 import { getModuleBehavior, getModuleRotationStepDeg } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import {
@@ -17,6 +22,7 @@ import {
   getExpandedModuleRecipe,
   getModuleRecipe,
 } from './recipeParentItemKey.js';
+import { loadCanonicalItemCatalog } from './registerCanonicalItemCatalog.mjs';
 
 const EXPECTED_CHILDREN = [
   ['profile_91', 1],
@@ -76,6 +82,24 @@ test('door_100 recursive BOM resolves to canonical leaf Items with quantities an
   bom.forEach((line) => {
     assert.equal(line.item.itemKey ?? line.item.partId, line.itemKey);
   });
+});
+
+test('door_100 factory resolves canonical width from sceneDimensions when dimensions.widthCm is absent', () => {
+  const items = listRegisteredItems().map((item) => {
+    if (item.itemKey !== 'door_100') return item;
+    return {
+      ...structuredClone(item),
+      dimensions: {},
+      sceneDimensions: { widthCm: 100, depthCm: 10, heightCm: 350 },
+    };
+  });
+  initializeItemRegistry(items);
+  try {
+    assert.equal(createDoorModuleState(100)?.itemKey, 'door_100');
+    assert.equal(createModuleStateFromCatalogKey('door_100')?.widthCm, 100);
+  } finally {
+    loadCanonicalItemCatalog();
+  }
 });
 
 test('door_100 factory/persistence identity and child door leaf identity are canonical', () => {

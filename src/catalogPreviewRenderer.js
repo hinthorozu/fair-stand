@@ -163,7 +163,8 @@ function applyPreviewContext(root, context) {
         }
         node.appendChild(frame);
       } else {
-        for (let index = 0; index < 7; index += 1) {
+        const fullStripCount = getStandStripMetrics().stripCount;
+        for (let index = 0; index < fullStripCount; index += 1) {
           node.appendChild((node.ownerDocument || globalThis.document).createElement('span'));
         }
       }

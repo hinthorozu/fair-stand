@@ -12,11 +12,7 @@ import {
 } from './recipeParentItemKey.js';
 import { GLASS_APPEARANCE, getMaterialAppearance } from '../src/theme.js';
 
-const EXPECTED_DIMENSIONS = Object.freeze({
-  lengthCm: 87.3,
-  depthCm: 28.5,
-  thicknessCm: 0.6,
-});
+const EXPECTED_DIMENSIONS = Object.freeze({ widthCm: 87.3, depthCm: 28.5, heightCm: 0.6 });
 
 test('glass_shelf uses canonical identity with verified 87.3 x 28.5 x 0.6 cm glass metadata', () => {
   const item = getItem('glass_shelf');
@@ -63,9 +59,9 @@ test('showcase renderer consumes glass_shelf through the canonical showcase body
   assert.match(showcase, /getShowcaseBodyDefinition\(moduleState\.itemKey\)/);
   assert.match(showcase, /const glassShelfItem = bodyDefinition\.glassShelfItem/);
   assert.match(showcase, /getMaterialAppearance\(glassShelfItem\.material\)/);
-  assert.match(showcase, /glassShelfItem\.dimensions\.lengthCm \/ 100/);
+  assert.match(showcase, /glassShelfItem\.dimensions\.widthCm \/ 100/);
   assert.match(showcase, /glassShelfItem\.dimensions\.depthCm \/ 100/);
-  assert.match(showcase, /glassShelfItem\.dimensions\.thicknessCm \/ 100/);
+  assert.match(showcase, /glassShelfItem\.dimensions\.heightCm \/ 100/);
   assert.match(showcase, /const shelfGeometry = new THREE\.BoxGeometry\(glassShelfLengthM, glassShelfThicknessM, glassShelfDepthM\);/);
   assert.match(showcase, /shelf\.userData\.itemKey = glassShelfItem\.itemKey/);
   assert.doesNotMatch(showcase, /getItem\('glass_shelf'\)/);

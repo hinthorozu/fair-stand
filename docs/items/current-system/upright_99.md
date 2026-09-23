@@ -6,7 +6,7 @@
 Kanonik source `src/items.js`: `itemKey=upright_99`, `type=upright`, `unit=adet`, name `Dikme 99 cm`.
 
 ## 2. Intrinsic properties — VAR
-Kanonik Item properties: `lengthCm=99`, `thicknessCm=8`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Renderer may explicitly override visual representation without changing the Item default.
+Kanonik Item properties: `widthCm=8`, `depthCm=8`, `heightCm=99`, `material='alüminyum'`, `defaultColor=0xd0d3d4`. Renderer may explicitly override visual representation without changing the Item default.
 
 ## 3. Default state — UYGULANMIYOR
 No standalone upright project state; counter parent state owns runtime/editor state.

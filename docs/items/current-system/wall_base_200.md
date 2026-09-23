@@ -153,7 +153,7 @@ Recipe metadata'sında ayrıca:
 variants.innerCornerPanelItemKey = panel_corner_192
 ```
 
-`panel_corner_192` production registry kaydı: `İç Köşe Paneli 192 × 47 cm` (widthCm=192, heightCm=47, thicknessCm=0.8). Bu part normal `recipe.items` satırlarında yer almaz.
+`panel_corner_192` production registry kaydı: `İç Köşe Paneli 192 × 47 cm` (widthCm=192, heightCm=47, depthCm=0.8). Bu part normal `recipe.items` satırlarında yer almaz.
 
 `rawBomDebug.js` seçili modül için `getExpandedModuleRecipe()` çağırıp `recipe.items` satırlarını gösterir. Bu ekranda placement ilişkilerinden ayrıca part dönüşümü yapan bir çağrı yoktur.
 

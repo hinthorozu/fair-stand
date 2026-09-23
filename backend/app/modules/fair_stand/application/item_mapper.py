@@ -91,8 +91,6 @@ def map_item(row) -> ItemAggregate:
             "widthCm": row.dimensions.width_cm,
             "depthCm": row.dimensions.depth_cm,
             "heightCm": row.dimensions.height_cm,
-            "lengthCm": row.dimensions.length_cm,
-            "thicknessCm": row.dimensions.thickness_cm,
             "mountHeightCm": row.dimensions.mount_height_cm,
             "wallGapCm": row.dimensions.wall_gap_cm,
         }
@@ -172,23 +170,19 @@ def map_item(row) -> ItemAggregate:
 
 def map_stand_dimensions(row) -> StandDimensions:
     return StandDimensions(
-        height=_num(row.height_m),
-        depth=_num(row.depth_m),
-        strip_count=int(row.strip_count),
-        strip_height=_num(row.strip_height_m),
-        frame_width=_num(row.frame_width_m),
-        frame_depth=_num(row.frame_depth_m),
+        height_cm=_num(row.height_cm),
+        depth_cm=_num(row.depth_cm),
+        frame_width_cm=_num(row.frame_width_cm),
+        frame_depth_cm=_num(row.frame_depth_cm),
     )
 
 
 def stand_dimensions_payload(dimensions: StandDimensions) -> dict:
     return {
-        "height": dimensions.height,
-        "depth": dimensions.depth,
-        "stripCount": dimensions.strip_count,
-        "stripHeight": dimensions.strip_height,
-        "frameWidth": dimensions.frame_width,
-        "frameDepth": dimensions.frame_depth,
+        "heightCm": dimensions.height_cm,
+        "depthCm": dimensions.depth_cm,
+        "frameWidthCm": dimensions.frame_width_cm,
+        "frameDepthCm": dimensions.frame_depth_cm,
     }
 
 

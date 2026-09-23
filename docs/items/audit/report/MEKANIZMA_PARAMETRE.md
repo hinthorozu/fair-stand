@@ -115,8 +115,8 @@ Property listesi:
 
 | parametre | kodda gerçek değer |
 |---|---|
-| `dimensions anahtarları (item kayıtlarında görülen)` | catalogHeightCm, depthCm, heightCm, lengthCm, mountHeightCm, screenHeightCm, screenWidthCm, tableDiameterCm, thicknessCm, wallGapCm, widthCm |
-| `dikme lengthCm` | upright_346_5=346.5 · upright_99=99 · upright_49_5=49.5 |
+| `dimensions anahtarları (item kayıtlarında görülen)` | catalogHeightCm, depthCm, heightCm, mountHeightCm, screenHeightCm, screenWidthCm, tableDiameterCm, wallGapCm, widthCm |
+| `dikme heightCm` | upright_346_5=346.5 · upright_99=99 · upright_49_5=49.5 |
 | `MODULE_WIDTHS_CM` | 50, 100, 150, 200 |
 | `led_floodlight.mountHeightCm` | 350 |
 | `led_floodlight width/depth/height cm` | 50 / 20 / 35 |
@@ -126,10 +126,10 @@ Property listesi:
 - `static.dimensions.catalogHeightCm`
 - `static.dimensions.depthCm`
 - `static.dimensions.heightCm`
-- `static.dimensions.lengthCm`
+- `static.dimensions.widthCm (legacy column removed)`
 - `static.dimensions.mountHeightCm`
 - `static.dimensions.tableDiameterCm`
-- `static.dimensions.thicknessCm`
+- `static.dimensions.depthCm (legacy column removed)`
 - `static.dimensions.wallGapCm`
 - `static.dimensions.widthCm`
 
@@ -356,7 +356,7 @@ Property listesi:
 | `shelfCount (item kaydı)` | 2 / 3 |
 | `shelfCount (recipe)` | 2 / 3 |
 | `panelRole` | inner-corner / straight |
-| `profil catalogWidth vs lengthCm` | profile_41_5: lengthCm=41.5 → catalogWidthCm=50 · profile_91: lengthCm=91 → catalogWidthCm=100 · profile_140_5: lengthCm=140.5 → catalogWidthCm=150 · profile_190: lengthCm=190 → catalogWidthCm=200 |
+| `profil catalogWidth vs widthCm (BOM span)` | profile_41_5: widthCm=41.5 → catalogWidthCm=50 · profile_91: widthCm=91 → catalogWidthCm=100 · profile_140_5: widthCm=140.5 → catalogWidthCm=150 · profile_190: widthCm=190 → catalogWidthCm=200 |
 | `connector_double recipe child` | yok (hiçbir çözülen recipe satırında yok) |
 | `recipe çözülemeyen parent` | yok |
 
@@ -760,12 +760,12 @@ Property listesi:
 | `static.dimensions.catalogHeightCm` | Kanonik ölçü kaydı (`kanonik-olcu`) |
 | `static.dimensions.depthCm` | Kanonik ölçü kaydı (`kanonik-olcu`) |
 | `static.dimensions.heightCm` | Kanonik ölçü kaydı (`kanonik-olcu`) |
-| `static.dimensions.lengthCm` | Kanonik ölçü kaydı (`kanonik-olcu`) |
+| `static.dimensions.widthCm (legacy column removed)` | Kanonik ölçü kaydı (`kanonik-olcu`) |
 | `static.dimensions.mountHeightCm` | Kanonik ölçü kaydı (`kanonik-olcu`) |
 | `static.dimensions.screenHeightCm` | TV / video wall ölçüsü (`tv-video-wall`) |
 | `static.dimensions.screenWidthCm` | TV / video wall ölçüsü (`tv-video-wall`) |
 | `static.dimensions.tableDiameterCm` | Kanonik ölçü kaydı (`kanonik-olcu`) |
-| `static.dimensions.thicknessCm` | Kanonik ölçü kaydı (`kanonik-olcu`) |
+| `static.dimensions.depthCm (legacy column removed)` | Kanonik ölçü kaydı (`kanonik-olcu`) |
 | `static.dimensions.wallGapCm` | Kanonik ölçü kaydı (`kanonik-olcu`) |
 | `static.dimensions.widthCm` | Kanonik ölçü kaydı (`kanonik-olcu`) |
 | `static.eyeCount` | Vitrin gövdesi (`vitrin-govde`) |
@@ -983,11 +983,11 @@ getExpandedModuleRecipe taraması; LEAF_ITEMS.connector_double kayıtlı, CONNEC
 
 çözülen recipe satırlarında connector_double yok
 
-### Profil catalog genişliği ≠ lengthCm
+### Profil catalog genişliği ≠ BOM widthCm
 
 getStraightWallNominalWidthForProfileItem: düz duvar recipe içindeki profil → recipe.nominalWidthCm
 
-profile_41_5 lengthCm=41.5 catalogWidthCm=50; profile_91 lengthCm=91 catalogWidthCm=100; profile_140_5 lengthCm=140.5 catalogWidthCm=150; profile_190 lengthCm=190 catalogWidthCm=200
+profile_41_5 widthCm=41.5 catalogWidthCm=50; profile_91 widthCm=91 catalogWidthCm=100; profile_140_5 widthCm=140.5 catalogWidthCm=150; profile_190 widthCm=190 catalogWidthCm=200
 
 ### designState şerit sayısı
 

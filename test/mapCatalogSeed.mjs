@@ -5,12 +5,10 @@ import { applyItemSnapFields } from './itemSnapSeed.mjs';
 import { applyItemScenePose } from './itemScenePoseSeed.mjs';
 
 export const CANONICAL_STAND_DIMENSIONS = Object.freeze({
-  height: 3.5,
-  depth: 0.1,
-  stripCount: 7,
-  stripHeight: 0.5,
-  frameWidth: 0.055,
-  frameDepth: 0.1,
+  heightCm: 350,
+  depthCm: 10,
+  frameWidthCm: 5.5,
+  frameDepthCm: 10,
 });
 
 export const CANONICAL_RUNTIME_SETTINGS = Object.freeze({
@@ -63,8 +61,6 @@ function mapItem(row) {
       widthCm: row.dimensions.width_cm,
       depthCm: row.dimensions.depth_cm,
       heightCm: row.dimensions.height_cm,
-      lengthCm: row.dimensions.length_cm,
-      thicknessCm: row.dimensions.thickness_cm,
       mountHeightCm: row.dimensions.mount_height_cm,
       wallGapCm: row.dimensions.wall_gap_cm,
     };

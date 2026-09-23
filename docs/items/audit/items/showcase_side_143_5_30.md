@@ -11,8 +11,6 @@
 |---|---|---|
 | `defaultColor` | 16777215 (`#ffffff`) | item kaydı |
 | `dimensions.depthCm` | 30 | item kaydı |
-| `dimensions.lengthCm` | 143.5 | item kaydı |
-| `dimensions.thicknessCm` | 1.8 | item kaydı |
 | `itemKey` | showcase_side_143_5_30 | item kaydı |
 | `material` | sunta | item kaydı |
 | `name` | Vitrin Yan Sunta 143,5 × 30 cm | item kaydı |
@@ -20,7 +18,8 @@
 | `unit` | adet | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.widthCm` | 143.5 | item kaydı |
+| `dimensions.heightCm` | 1.8 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **yok** (`src/catalog.js`)

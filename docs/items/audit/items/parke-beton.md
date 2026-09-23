@@ -11,14 +11,13 @@
 |---|---|---|
 | `defaultColor` | #625f58 | item kaydı |
 | `dimensions.depthCm` | 28 | item kaydı |
-| `dimensions.lengthCm` | 112 | item kaydı |
 | `itemKey` | parke-beton | item kaydı |
 | `name` | Beton Parke | item kaydı |
 | `paintable` | hayır | item kaydı |
 | `type` | floor | item kaydı |
 
 Tanımsız üst alanlar bu tabloda satır olarak yoktur; birleşik matriste sütun olarak açılır ve bu item için boş kalır.
-
+| `dimensions.widthCm` | 112 | item kaydı |
 ## 2. Katalog
 
 - MODULE_CATALOG kaydı: **yok** (`src/catalog.js`)

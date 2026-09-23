@@ -8,8 +8,8 @@
 - structure: Tekil Item
 
 ## Kanonik ürüne özgü özellikler
-- `dimensions.lengthCm = 99`
-- `dimensions.thicknessCm = 8`
+- `dimensions.widthCm = 99`
+- `dimensions.depthCm = 8`
 - `material = 'alüminyum'`
 - `defaultColor = 0xd0d3d4`
 

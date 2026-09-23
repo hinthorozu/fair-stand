@@ -15,9 +15,6 @@ Karar verilmiş / ertelenmiş maddeler: `docs/refactor/PENDING_ITEM_DECISIONS.md
 
 `listRegisteredItems()` 96 satırında duran alanlar. Bu tablo **onaylı şema değildir**. Zamanla, her alan ayrı kararla aşağıdaki “Zorunlu / opsiyonel / Catalog” bölümlerine alınır veya PENDING’de kapatılır.
 
-`composition.moduleType` ve `composition.options` / `composition.options.shape` **DEPRECATED (SCHEMA_ONLY)** — kayıt durur, production `src/` okumaz, silinmedi (DECISION-06).
-
-
 Kaynak: `src/items.js` taraması (2026-09-17). N = kaç Item’da path var.
 
 Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision hâlâ `type` → `TYPE_BEHAVIORS`; rotation Item; recipe BOM yalnız `composition.items`.
@@ -33,11 +30,9 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `previewId` | 58 | Kart silüet key. Yalnız görünür Item. **Şemada onaylı.** |
 | `unit` | 46 | BOM satır birimi. Recipe’siz Item’da `itemBom` zorunlu sayar. 50 Item’da yok. |
 | `dimensions` | 90 | Fiziksel ölçü. 6 Item’da yok (4 connector, `shelf_leg`, `hali`). **Şemada onaylı (opsiyonel).** |
-| `dimensions.widthCm` | 71 | Genişlik cm. Recipe parent genişliği. |
-| `dimensions.depthCm` | 52 | Derinlik cm. |
-| `dimensions.heightCm` | 42 | Yükseklik cm. |
-| `dimensions.lengthCm` | 17 | Üretim boyu. Width’e remap yok. |
-| `dimensions.thicknessCm` | 34 | Kalınlık. Depth’e remap yok. |
+| `dimensions.widthCm` | 71 | Kutu **W** (duvar boyunca). Recipe parent genişliği. |
+| `dimensions.depthCm` | 52 | Kutu **D** (içeri). |
+| `dimensions.heightCm` | 42 | Kutu **H** (dikey). |
 | `dimensions.mountHeightCm` | 1 | `led_floodlight` montaj yüksekliği 350. |
 | `dimensions.wallGapCm` | 1 | `illuminated-foam` duvar boşluğu. |
 | `sceneDimensions` | 32 | Aynı field adıyla sahne override. **Şemada onaylı (opsiyonel).** |
@@ -48,8 +43,6 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `material` | 34 | Üretim malzemesi metni. Vitrin gövde `sunta` kilidi. |
 | `composition` | 30 | Bileşik yapı. |
 | `composition.mode` | 28 | `recipe` → `resolveItemBom`. |
-| `composition.moduleType` | 28 | **DEPRECATED (SCHEMA_ONLY).** Recipe etiket; production okumaz. |
-| `composition.options.shape` | 3 | **DEPRECATED (SCHEMA_ONLY).** L banko etiketi; canlı kimlik `item.shape`. |
 | `composition.items` | 30 | Çocuk listesi `{itemKey, quantity}`. 28 recipe parent + 2 mobilya kümesi. Recipe tablosu kopyası değil; tek kaynak Item. |
 | `shape` | 3 | Kök `'L'` (köşe banko). |
 | `variant` | 8 | `short-up-1` / `short-up-2`. |
@@ -139,7 +132,9 @@ Görünür Item (`catalogVisible=true`) ek zorunlu Catalog alanı: `previewId`. 
 | `defaultRotationDeg` | number \| yok | Item master — ilk Z; `ROTATION.md` |
 | `sideInsertRotation` | `inherit` \| `default` \| yok | Item master — yana ek; `ROTATION.md` |
 
-`dimensions` Item’ın gerçek/fiziksel ölçülerini taşır. `sceneDimensions` sahne/runtime’da farklı bir değer gerekiyorsa aynı field adıyla override yazar. İkisi de şu canonical 5 alanı destekler: `widthCm`, `depthCm`, `heightCm`, `lengthCm`, `thicknessCm`. Aynı değerleri iki kere yazmak zorunlu değildir. Effective scene field: `sceneDimensions.field ?? dimensions.field ?? MISSING`. Aynı field adı yoksa fallback yoktur.
+`dimensions` Item’ın gerçek/fiziksel ölçülerini taşır. `sceneDimensions` sahne/runtime’da farklı bir değer gerekiyorsa aynı field adıyla override yazar. Canonical kutu alanları: `widthCm`, `depthCm`, `heightCm` (+ isteğe bağlı `mountHeightCm`, `wallGapCm`). Legacy `lengthCm` / `thicknessCm` kaldırıldı (DB migration `0021`; detay `ITEM_DIMENSIONS.md`). Effective scene field: `sceneDimensions.field ?? dimensions.field ?? MISSING`. Aynı field adı yoksa fallback yoktur.
+
+Duvar otomasyonu Item `dimensions` değildir: kenar kapasitesi `edgeWidthCm`, istenen zincir genişliği `wallWidthCm`, modül yerleşimi `widthCm` — `src/wallReflow.js`, `src/wall.js`, `src/automaticWall.js`.
 
 Eski kayıtlardaki `name`, `type`, `unit`, `composition` vb. runtime’da durur; bu şemaya otomatik alınmadı.
 
@@ -299,22 +294,22 @@ Hepsi boolean, zorunlu, `null` yasak. Item satırı; `item_type` map’i değil.
 
 ### dimensions
 
-- **Type:** object (`widthCm?`, `depthCm?`, `heightCm?`, `lengthCm?`, `thicknessCm?` ve mevcut özel alanlar)
+- **Type:** object — kutu `widthCm` / `heightCm` / `depthCm` + isteğe bağlı `mountHeightCm` / `wallGapCm`
+- **DB:** `fair_stand_item_dimensions` — kolon yerleşimi: **`docs/refactor/ITEM_DIMENSIONS.md`**
 - **Required:** no — güvenilir fiziksel kaynak yoksa alan yazılmaz
 - **Scope:** Item master — gerçek/fiziksel ürün ölçüleri
 - **Default:** yok; tahmin/`0`/`1`/GLB bbox yasak
-- **Amaç:** Ürünün fiziksel ölçüsü. Catalog, Recipe, type veya itemKey bu katmanı üretmez
-- **Canonical consumer:** `resolveSceneDimensions` (same-field fallback), BOM/üretim okuyucuları, factory (`createModuleStateFromDescriptor`)
+- **Amaç:** Ön görünüş kutusu (W duvar boyunca, H dikey, D içeri)
+- **Canonical consumer:** `resolveSceneDimensions` (same-field fallback), BOM, factory
 - **Canonical method:** `item.dimensions` / `resolveSceneDimensions(item)`
-- **Çapraz remap yok:** `lengthCm` width olmaz; `thicknessCm` depth olmaz
+- **Migration:** `0020_item_dims_wh_d_fill` (legacy BOM → W/H/D); `0021_drop_item_length_thickness` (`length_cm` / `thickness_cm` silindi)
 - **Kullanıcı değiştirir mi:** hayır (Item master)
 - **Project instance override:** hayır; sahne ezmesi `sceneDimensions`’tadır
-- **Persistence:** Item master
-- **Örnek:** `profile_190` → `{ lengthCm: 190, thicknessCm: 8 }`
+- **Örnek:** `panel_197` → `{ widthCm: 197, heightCm: 47, depthCm: 0.8 }`; `profile_190` → `{ widthCm: 190, heightCm: 8, depthCm: 8 }`
 
 ### sceneDimensions
 
-- **Type:** object (`widthCm?`, `depthCm?`, `heightCm?`, `lengthCm?`, `thicknessCm?`)
+- **Type:** object — DB/API’de yalnız `widthCm?`, `depthCm?`, `heightCm?` (`fair_stand_item_scene_dimensions`).
 - **Required:** no — physical ile aynı field aynı değerdeyse yazılmaz
 - **Scope:** Item master — scene/runtime override
 - **Default:** yok; `null`, `{}` ve `{ field: null }` override yok demektir
@@ -369,15 +364,13 @@ Item {
     widthCm?: number
     depthCm?: number
     heightCm?: number
-    lengthCm?: number
-    thicknessCm?: number
+    mountHeightCm?: number
+    wallGapCm?: number
   }
   sceneDimensions?: {
     widthCm?: number
     depthCm?: number
     heightCm?: number
-    lengthCm?: number
-    thicknessCm?: number
   }
   rotationStepDeg?: number
   defaultRotationDeg?: number

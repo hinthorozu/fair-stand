@@ -14,7 +14,7 @@ const CASES = {
   separator_panel_48_5: {
     metadata: {
       name: 'Separatör Paneli 48,5 × 47 cm',
-      dimensions: { widthCm: 48.5, heightCm: 47, thicknessCm: 0.8 },
+      dimensions: { widthCm: 48.5, heightCm: 47, depthCm: 0.8 },
       material: 'mdf',
       defaultColor: 0xc79b63,
     },
@@ -23,7 +23,7 @@ const CASES = {
   separator_panel_98: {
     metadata: {
       name: 'Separatör Paneli 98 × 47 cm',
-      dimensions: { widthCm: 98, heightCm: 47, thicknessCm: 0.8 },
+      dimensions: { widthCm: 98, heightCm: 47, depthCm: 0.8 },
       material: 'mdf',
       defaultColor: 0xc79b63,
     },
@@ -67,7 +67,7 @@ test('expanded separator recipes resolve canonical separator metadata through it
     for (const item of expanded.items.filter((entry) => entry.part?.type === 'separator-panel')) {
       assert.equal(item.part.itemKey, item.itemKey);
       assert.equal(item.part.partId, undefined);
-      assert.equal(item.part.dimensions.thicknessCm, 0.8);
+      assert.equal(item.part.dimensions.depthCm, 0.8);
       assert.equal(item.part.material, 'mdf');
       assert.equal(item.part.defaultColor, 0xc79b63);
       assert.equal(item.part.unit, 'adet');

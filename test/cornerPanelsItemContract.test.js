@@ -14,7 +14,7 @@ const CORNER_PANEL_CASES = {
   panel_corner_42_5: {
     metadata: {
       name: 'İç Köşe Paneli 42,5 × 47 cm',
-      dimensions: { widthCm: 42.5, heightCm: 47, thicknessCm: 0.8 },
+      dimensions: { widthCm: 42.5, heightCm: 47, depthCm: 0.8 },
       straightPanelItemKey: 'panel_48_5',
     },
     recipes: [
@@ -24,7 +24,7 @@ const CORNER_PANEL_CASES = {
   panel_corner_92: {
     metadata: {
       name: 'İç Köşe Paneli 92 × 47 cm',
-      dimensions: { widthCm: 92, heightCm: 47, thicknessCm: 0.8 },
+      dimensions: { widthCm: 92, heightCm: 47, depthCm: 0.8 },
       straightPanelItemKey: 'panel_98',
     },
     recipes: [
@@ -37,7 +37,7 @@ const CORNER_PANEL_CASES = {
   panel_corner_142_5: {
     metadata: {
       name: 'İç Köşe Paneli 142,5 × 47 cm',
-      dimensions: { widthCm: 142.5, heightCm: 47, thicknessCm: 0.8 },
+      dimensions: { widthCm: 142.5, heightCm: 47, depthCm: 0.8 },
       straightPanelItemKey: 'panel_147_5',
     },
     recipes: [

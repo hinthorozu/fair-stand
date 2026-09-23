@@ -28,7 +28,7 @@ function placementToPathStart(module, segments, standYCm) {
   if (!Number.isFinite(localStartCm)) return null;
   if (
     localStartCm < -EPSILON_CM
-    || localStartCm + widthCm > Number(segment.lengthCm) + EPSILON_CM
+    || localStartCm + widthCm > Number(segment.edgeWidthCm) + EPSILON_CM
   ) {
     return null;
   }
@@ -163,7 +163,7 @@ export function planContinuousModuleInsert({
   }
 
   const chainCapacityCm = segments.reduce(
-    (sum, segment) => sum + Number(segment.lengthCm),
+    (sum, segment) => sum + Number(segment.edgeWidthCm),
     0,
   );
   const insertedWidthCm = Number(insertedModule.widthCm);
@@ -271,7 +271,7 @@ export function planContinuousModuleMove({
   }
 
   const chainCapacityCm = segments.reduce(
-    (sum, segment) => sum + Number(segment.lengthCm),
+    (sum, segment) => sum + Number(segment.edgeWidthCm),
     0,
   );
   const movingWidthCm = Number(movingModule.widthCm);

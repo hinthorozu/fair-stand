@@ -1,7 +1,4 @@
-"""Item scene height + default_z for profile rails and short-up walls.
-
-Catalog ceiling 350 is the current product pose, not live STAND_DIMENSIONS.
-"""
+"""Item scene height + default_z for profile rails and short-up walls."""
 
 from __future__ import annotations
 
@@ -16,11 +13,35 @@ SHORT_UP_HEIGHT_CM = {
 }
 
 
-def _thickness_cm(row: dict) -> Decimal:
+def _cross_section_cm(row: dict) -> Decimal:
     dims = row.get("dimensions") or {}
     scene = row.get("scene_dimensions") or {}
-    value = dims.get("thickness_cm") if dims.get("thickness_cm") is not None else scene.get("depth_cm")
-    return Decimal(str(value if value is not None else 8))
+    item_type = row.get("item_type")
+    # Post-W/H/D: profile span is width_cm; cross-section is depth/height (8 cm).
+    if item_type == "profile":
+        for candidate in (
+            dims.get("depth_cm"),
+            dims.get("height_cm"),
+            scene.get("depth_cm"),
+            scene.get("height_cm"),
+        ):
+            if candidate is not None:
+                return Decimal(str(candidate))
+        return Decimal("8")
+    if item_type == "upright":
+        for candidate in (
+            dims.get("width_cm"),
+            dims.get("depth_cm"),
+            scene.get("width_cm"),
+            scene.get("depth_cm"),
+        ):
+            if candidate is not None:
+                return Decimal(str(candidate))
+        return Decimal("8")
+    for candidate in (dims.get("depth_cm"), dims.get("height_cm"), dims.get("width_cm"), scene.get("depth_cm")):
+        if candidate is not None:
+            return Decimal(str(candidate))
+    return Decimal("8")
 
 
 def apply_item_scene_pose(row: dict) -> dict:
@@ -32,21 +53,21 @@ def apply_item_scene_pose(row: dict) -> dict:
         if not isinstance(scene, dict):
             scene = {}
             row["scene_dimensions"] = scene
-        thickness = _thickness_cm(row)
+        thickness = _cross_section_cm(row)
         scene["height_cm"] = thickness
         row["default_z_cm"] = CATALOG_CEILING_CM - thickness
     if item_type == "upright":
         if not isinstance(scene, dict):
             scene = {}
             row["scene_dimensions"] = scene
-        thickness = _thickness_cm(row)
-        length = dims.get("length_cm")
+        cross = _cross_section_cm(row)
+        height = dims.get("height_cm")
         if scene.get("width_cm") is None:
-            scene["width_cm"] = thickness
+            scene["width_cm"] = dims.get("width_cm") if dims.get("width_cm") is not None else cross
         if scene.get("depth_cm") is None:
-            scene["depth_cm"] = thickness
-        if scene.get("height_cm") is None and length is not None:
-            scene["height_cm"] = Decimal(str(length))
+            scene["depth_cm"] = dims.get("depth_cm") if dims.get("depth_cm") is not None else cross
+        if scene.get("height_cm") is None and height is not None:
+            scene["height_cm"] = Decimal(str(height))
     if variant in SHORT_UP_HEIGHT_CM:
         if not isinstance(scene, dict):
             scene = {}
@@ -66,7 +87,7 @@ def _sql_num(value):
 def fill_item_scene_pose_columns(bind) -> None:
     rows = bind.execute(
         sa.text(
-            "SELECT i.item_key, i.item_type, i.variant, d.thickness_cm, d.length_cm, "
+            "SELECT i.item_key, i.item_type, i.variant, d.width_cm, d.depth_cm, d.height_cm, "
             "s.width_cm, s.depth_cm, s.height_cm "
             "FROM fair_stand_items i "
             "LEFT JOIN fair_stand_item_dimensions d ON d.item_key = i.item_key "
@@ -80,8 +101,9 @@ def fill_item_scene_pose_columns(bind) -> None:
             "item_type": row["item_type"],
             "variant": row["variant"],
             "dimensions": {
-                "thickness_cm": row["thickness_cm"],
-                "length_cm": row["length_cm"],
+                "width_cm": row["width_cm"],
+                "depth_cm": row["depth_cm"],
+                "height_cm": row["height_cm"],
             },
             "scene_dimensions": {
                 "width_cm": row["width_cm"],

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { composeStraightWall, validateWallLength } from '../src/wall.js';
+import { composeStraightWall, validateWallWidth } from '../src/wall.js';
 
 test('350 cm duvarı 200 + 150 olarak çözer', () => {
   const result = composeStraightWall(350);
@@ -18,13 +18,13 @@ test('600 cm duvarı üç adet 200 cm modülle çözer', () => {
 });
 
 test('50 cm katı olmayan ölçüyü reddeder', () => {
-  const result = validateWallLength(375);
+  const result = validateWallWidth(375);
 
   assert.equal(result.ok, false);
 });
 
 test('50 cm altındaki duvarı reddeder', () => {
-  const result = validateWallLength(25);
+  const result = validateWallWidth(25);
 
   assert.equal(result.ok, false);
 });
