@@ -58,6 +58,28 @@ def seed_catalog_if_empty(bind) -> None:
 
     payload = load_catalog_dump()
     tables = payload["tables"]
+
+    # item_type FK is RESTRICT: catalog rows must exist before fair_stand_items.
+    item_rows = tables.get("fair_stand_items") or []
+    if item_rows:
+        from sqlalchemy.orm import Session
+
+        from app.modules.fair_stand.infrastructure.item_snap_seed import (
+            ensure_item_types,
+            ensure_snap_catalog,
+        )
+
+        session = Session(bind=bind)
+        try:
+            ensure_snap_catalog(session)
+            ensure_item_types(
+                session,
+                [row.get("item_type") for row in item_rows if row.get("item_type")],
+            )
+            session.flush()
+        finally:
+            session.close()
+
     for name in TABLE_ORDER:
         rows = tables.get(name) or []
         if not rows:
