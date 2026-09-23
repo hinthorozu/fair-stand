@@ -9,7 +9,6 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.modules.fair_stand.infrastructure.models import (
-    FairStandFamilyModel,
     FairStandItemAssetModel,
     FairStandItemBodyPartModel,
     FairStandItemComponentModel,
@@ -17,6 +16,7 @@ from app.modules.fair_stand.infrastructure.models import (
     FairStandItemModel,
     FairStandItemSceneDimensionsModel,
     FairStandItemStripOccupancyModel,
+    FairStandItemTypeModel,
     FairStandItemVideoWallModel,
     FairStandRuleModel,
 )
@@ -71,10 +71,6 @@ def _optional_str(value: object | None) -> str | None:
     return text or None
 
 
-_SNAP_FACES = frozenset({"front", "back", "top", "bottom", "left", "right"})
-_SNAP_EDGES = frozenset({"top", "bottom", "left", "right"})
-
-
 def _optional_int(value: object | None) -> int | None:
     if value is None or value == "":
         return None
@@ -84,9 +80,22 @@ def _optional_int(value: object | None) -> int | None:
         raise ItemAdminError("Geçersiz sayısal değer.") from exc
 
 
+def _require_item_type(session: Session, item_type: str) -> str:
+    key = str(item_type or "").strip()
+    if not key:
+        raise ItemAdminError("Item tipi zorunludur.")
+    row = session.scalar(
+        select(FairStandItemTypeModel).where(FairStandItemTypeModel.key == key)
+    )
+    if row is None:
+        raise ItemAdminError("Item tipi katalogda yok. Önce item type ekleyin.", status_code=404)
+    if not row.is_active:
+        raise ItemAdminError("Item tipi pasif.")
+    return key
+
+
 def _parse_snap_selection(session: Session, payload: dict) -> dict:
-    """Item selects family + requires XOR provides rule id. Face/edge live on rules."""
-    family_id = _optional_int(payload.get("family_id")) if "family_id" in payload else None
+    """Item selects requires XOR provides rule id. Face/edge live on rules."""
     requires_id = (
         _optional_int(payload.get("snap_requires_rule_id"))
         if "snap_requires_rule_id" in payload
@@ -97,8 +106,6 @@ def _parse_snap_selection(session: Session, payload: dict) -> dict:
         if "snap_provides_rule_id" in payload
         else None
     )
-    # When keys absent entirely, caller decides; when present use parsed values.
-    has_family = "family_id" in payload
     has_requires = "snap_requires_rule_id" in payload
     has_provides = "snap_provides_rule_id" in payload
 
@@ -106,13 +113,7 @@ def _parse_snap_selection(session: Session, payload: dict) -> dict:
         "snap_target_item_type": None,
         "snap_anchor": None,
     }
-    if has_family:
-        if family_id is not None and session.get(FairStandFamilyModel, family_id) is None:
-            raise ItemAdminError("Aile bulunamadı.", status_code=404)
-        out["family_id"] = family_id
     if has_requires or has_provides:
-        # Need both sides when either present for XOR validation against merged state —
-        # callers pass fully merged ids.
         if requires_id is not None and provides_id is not None:
             raise ItemAdminError("Bir item aynı anda requires ve provides kuralı taşıyamaz.")
         if requires_id is not None and session.get(FairStandRuleModel, requires_id) is None:
@@ -160,7 +161,7 @@ def _item_load_options():
         selectinload(FairStandItemModel.components),
         selectinload(FairStandItemModel.video_wall),
         selectinload(FairStandItemModel.body_parts),
-        selectinload(FairStandItemModel.family),
+        selectinload(FairStandItemModel.item_type_row),
         selectinload(FairStandItemModel.snap_requires_rule),
         selectinload(FairStandItemModel.snap_provides_rule),
     )
@@ -269,18 +270,10 @@ def _item_admin_payload(row: FairStandItemModel) -> dict:
         "defaultZCm": _num(row.default_z_cm) if row.default_z_cm is not None else 0,
         "snapTargetItemType": row.snap_target_item_type,
         "snapAnchor": row.snap_anchor,
-        "familyId": int(row.family_id) if row.family_id is not None else None,
-        "familyCode": row.family.code if row.family is not None else None,
         "snapRequiresRuleId": int(row.snap_requires_rule_id) if row.snap_requires_rule_id is not None else None,
         "snapProvidesRuleId": int(row.snap_provides_rule_id) if row.snap_provides_rule_id is not None else None,
-        "snapRequires": row.snap_requires_rule.code if row.snap_requires_rule is not None else None,
-        "snapProvides": row.snap_provides_rule.code if row.snap_provides_rule is not None else None,
-        "snapFace": row.snap_provides_rule.face if row.snap_provides_rule is not None else None,
-        "snapEdge": row.snap_provides_rule.edge if row.snap_provides_rule is not None else None,
-        "snapMountMode": (
-            (row.snap_requires_rule.mount_mode if row.snap_requires_rule is not None else None)
-            or (row.snap_provides_rule.mount_mode if row.snap_provides_rule is not None else None)
-        ),
+        "snapRequires": row.snap_requires_rule.key if row.snap_requires_rule is not None else None,
+        "snapProvides": row.snap_provides_rule.key if row.snap_provides_rule is not None else None,
         "isRender": bool(row.is_render),
         "acceptsColor": bool(row.accepts_color),
         "acceptsImage": bool(row.accepts_image),
@@ -479,29 +472,26 @@ class AdminItemsService:
             "variants": distinct_values(FairStandItemModel.variant),
             "compositionModes": distinct_values(FairStandItemModel.composition_mode),
             "sideInsertRotations": distinct_values(FairStandItemModel.side_insert_rotation),
-            "snapFaces": sorted(_SNAP_FACES),
-            "snapEdges": sorted(_SNAP_EDGES),
-            "families": [
-                {"id": int(row.id), "code": row.code, "displayName": row.display_name}
+            "itemTypes": [
+                {"id": int(row.id), "key": row.key, "displayName": row.display_name}
                 for row in self._session.scalars(
-                    select(FairStandFamilyModel)
-                    .where(FairStandFamilyModel.is_active.is_(True))
-                    .order_by(FairStandFamilyModel.sort_index, FairStandFamilyModel.code)
+                    select(FairStandItemTypeModel)
+                    .where(FairStandItemTypeModel.is_active.is_(True))
+                    .order_by(FairStandItemTypeModel.display_name)
                 ).all()
             ],
             "snapRules": [
                 {
                     "id": int(row.id),
-                    "code": row.code,
+                    "key": row.key,
                     "displayName": row.display_name,
                     "face": row.face,
                     "edge": row.edge,
-                    "mountMode": row.mount_mode,
                 }
                 for row in self._session.scalars(
                     select(FairStandRuleModel)
                     .where(FairStandRuleModel.is_active.is_(True))
-                    .order_by(FairStandRuleModel.sort_index, FairStandRuleModel.code)
+                    .order_by(FairStandRuleModel.display_name)
                 ).all()
             ],
         }
@@ -541,13 +531,11 @@ class AdminItemsService:
     def create_item(self, payload: dict) -> dict:
         item_key = str(payload.get("item_key") or "").strip().lower()
         name = str(payload.get("name") or "").strip()
-        item_type = str(payload.get("item_type") or "").strip()
         if not item_key:
             raise ItemAdminError("Item key zorunludur.")
         if not name:
             raise ItemAdminError("Ad zorunludur.")
-        if not item_type:
-            raise ItemAdminError("Item tipi zorunludur.")
+        item_type = _require_item_type(self._session, str(payload.get("item_type") or ""))
         if self._session.get(FairStandItemModel, item_key) is not None:
             raise ItemAdminError("Bu item key zaten kayıtlı.", status_code=409)
 
@@ -578,7 +566,6 @@ class AdminItemsService:
             **_parse_snap_selection(
                 self._session,
                 {
-                    "family_id": payload.get("family_id"),
                     "snap_requires_rule_id": payload.get("snap_requires_rule_id"),
                     "snap_provides_rule_id": payload.get("snap_provides_rule_id"),
                 },
@@ -606,10 +593,7 @@ class AdminItemsService:
                 raise ItemAdminError("Ad zorunludur.")
             row.name = name
         if "item_type" in payload and payload["item_type"] is not None:
-            item_type = str(payload["item_type"]).strip()
-            if not item_type:
-                raise ItemAdminError("Item tipi zorunludur.")
-            row.item_type = item_type
+            row.item_type = _require_item_type(self._session, str(payload["item_type"]))
 
         scalar_map = {
             "unit": _optional_str,
@@ -626,7 +610,6 @@ class AdminItemsService:
         if any(
             key in payload
             for key in (
-                "family_id",
                 "snap_requires_rule_id",
                 "snap_provides_rule_id",
                 "snap_target_item_type",
@@ -634,7 +617,6 @@ class AdminItemsService:
             )
         ):
             merged = {
-                "family_id": payload["family_id"] if "family_id" in payload else row.family_id,
                 "snap_requires_rule_id": (
                     payload["snap_requires_rule_id"]
                     if "snap_requires_rule_id" in payload

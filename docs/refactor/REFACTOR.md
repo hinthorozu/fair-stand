@@ -32,11 +32,17 @@ Belge: `docs/refactor/ITEM_FIRST_ROADMAP.md`. `SCENE_POSE.md` snap hedefi ile hi
 
 Aynı gün: **Gap / çatışma** notu eklendi — mevcut `snap_target_item_type` vs capability; wall recipe→AABB host; raf `panel-seam` vs panel **front** lokal üst (`shelf-rail`); P0’da A/B kilidi zorunlu. Raf görsel kuralı: N panel → N yatay hat, wall tavanı değil.
 
-**P0 kilitlendi:** stand.family + rule_type + rule; item family + requires|provides rule FK; motor rule id; CRM CRUD. Capability string kolon / type map iptal.
+**P0 kilitlendi:** `fair_stand_item_type` + rule_type + rule; item Type (key FK) + requires|provides rule FK; kural ↔ tip M:N; motor rule id; CRM CRUD. Aile kaldırıldı (`0029`). Capability string kolon / type map iptal.
 
-## 2026-09-23 — Snap aile/kural tabloları
+## 2026-09-23 — Snap tip/kural tabloları
 
-Migration `0024_item_snap_capability`: `fair_stand_family`, `fair_stand_rule_type`, `fair_stand_rule`; item `family_id` / `snap_*_rule_id`. Runtime rule id eşler; `mount_mode=panel-seam` seam. CRM aile/kural tipi/kural sayfaları + item dropdown.
+Migration `0024_item_snap_capability`: ilk snap kataloğu (sonra aile→tip). Runtime rule id eşler. CRM tip/kural tipi/kural sayfaları + item Type select.
+
+Sonra: `0025_drop_rule_sort_index` (kural `sort_index` kalktı; liste `display_name`). `0026_snap_code_to_key` (`code` → `key`; CRM label Key; ad’dan slug). Face/edge CRM’de enum select + hint. `0027` mount_mode drop.
+
+Sanal hat ince ayarı (`itemSnap.js`): recipe host’ta `top-rail` → profile `defaultZCm+height`; `shelf-rail` → panel band seam (AABB tavan değil).
+
+`0028_rule_family_link` → `0029_item_type_catalog`: aile kalktı; `fair_stand_item_type` + `items.item_type` FK + `fair_stand_rule_item_type` M:N. Seed: `top-rail`→profile, `shelf-rail`→panel+separator-panel. CRM kural formunda **çoklu tip** seçimi.
 
 ---
 

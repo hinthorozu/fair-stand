@@ -1,7 +1,7 @@
 import { CATALOG_PREVIEW_KIND_FIXTURE } from './fixtures/catalogPreviewKinds.mjs';
 import { applyItemRotationFields } from './itemRotationSeed.mjs';
 import { applyItemSurfaceFlags } from './itemSurfaceFlagsSeed.mjs';
-import { applyItemSnapFields } from './itemSnapSeed.mjs';
+import { applyItemSnapFields, SNAP_RULE_FIXTURE } from './itemSnapSeed.mjs';
 import { applyItemScenePose } from './itemScenePoseSeed.mjs';
 
 export const CANONICAL_STAND_DIMENSIONS = Object.freeze({
@@ -27,6 +27,7 @@ export function mapCatalogSeedToBootstrap(seed) {
     })),
     previewKinds: CATALOG_PREVIEW_KIND_FIXTURE,
     items: seed.items.map(mapItem),
+    rules: SNAP_RULE_FIXTURE,
     standDimensions: seed.standDimensions ?? CANONICAL_STAND_DIMENSIONS,
     settings: seed.settings ?? CANONICAL_RUNTIME_SETTINGS,
   };
@@ -135,9 +136,6 @@ function mapItem(row) {
   item.defaultZCm = Number.isFinite(defaultZ) ? defaultZ : 0;
   assign('snapRequires', row.snap_requires);
   assign('snapProvides', row.snap_provides);
-  assign('snapFace', row.snap_face);
-  assign('snapEdge', row.snap_edge);
-  assign('familyCode', row.family_code);
   assign('snapRequiresRuleCode', row.snap_requires_rule_code);
   assign('snapProvidesRuleCode', row.snap_provides_rule_code);
   applyItemSnapFields(item);

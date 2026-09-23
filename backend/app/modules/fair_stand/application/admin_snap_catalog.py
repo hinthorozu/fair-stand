@@ -1,7 +1,9 @@
-"""Admin CRUD for stand.family, rule_type, and rule."""
+"""Admin CRUD for fair_stand_item_type, rule_type, and rule."""
 
 from __future__ import annotations
 
+import re
+import unicodedata
 from datetime import UTC, datetime
 
 from sqlalchemy import select
@@ -11,10 +13,9 @@ from sqlalchemy.orm import Session, selectinload
 from app.modules.fair_stand.infrastructure.item_snap_seed import (
     SNAP_EDGES,
     SNAP_FACES,
-    SNAP_MOUNT_MODES,
 )
 from app.modules.fair_stand.infrastructure.models import (
-    FairStandFamilyModel,
+    FairStandItemTypeModel,
     FairStandRuleModel,
     FairStandRuleTypeModel,
 )
@@ -37,12 +38,29 @@ def _optional_str(value: object | None) -> str | None:
     return text or None
 
 
-def _family_payload(row: FairStandFamilyModel) -> dict:
+def slugify_key(value: str, *, max_length: int = 64) -> str:
+    """Display name → editable key slug (ascii, hyphen). Same idea as item_key from name."""
+    text = unicodedata.normalize("NFKD", value.strip())
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    text = text.replace("ı", "i").replace("İ", "i")
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text[:max_length] or "item"
+
+
+def _resolve_key(*, key: str | None, display_name: str) -> str:
+    resolved = (key or "").strip() or slugify_key(display_name)
+    if not resolved:
+        raise SnapCatalogAdminError("key üretilemedi.")
+    return resolved
+
+
+def _item_type_payload(row: FairStandItemTypeModel) -> dict:
     return {
         "id": int(row.id),
-        "code": row.code,
+        "key": row.key,
         "displayName": row.display_name,
-        "sortIndex": int(row.sort_index),
         "isActive": bool(row.is_active),
     }
 
@@ -50,23 +68,24 @@ def _family_payload(row: FairStandFamilyModel) -> dict:
 def _rule_type_payload(row: FairStandRuleTypeModel) -> dict:
     return {
         "id": int(row.id),
-        "code": row.code,
+        "key": row.key,
         "displayName": row.display_name,
         "isActive": bool(row.is_active),
     }
 
 
 def _rule_payload(row: FairStandRuleModel) -> dict:
+    item_types = sorted(row.item_types or [], key=lambda item_type: item_type.display_name)
     return {
         "id": int(row.id),
         "ruleTypeId": int(row.rule_type_id),
-        "ruleTypeCode": row.rule_type.code if row.rule_type is not None else None,
-        "code": row.code,
+        "ruleTypeKey": row.rule_type.key if row.rule_type is not None else None,
+        "key": row.key,
         "displayName": row.display_name,
         "face": row.face,
         "edge": row.edge,
-        "mountMode": row.mount_mode,
-        "sortIndex": int(row.sort_index),
+        "itemTypeIds": [int(item_type.id) for item_type in item_types],
+        "itemTypeKeys": [item_type.key for item_type in item_types],
         "isActive": bool(row.is_active),
     }
 
@@ -80,94 +99,83 @@ class AdminSnapCatalogService:
             self._session.flush()
         except IntegrityError as exc:
             raise SnapCatalogAdminError(
-                "Kayıt kaydedilemedi: kod çakışması veya kısıt ihlali.",
+                "Kayıt kaydedilemedi: key çakışması veya kısıt ihlali.",
                 status_code=409,
             ) from exc
 
-    # --- families (stand.family) ---
+    # --- item types ---
 
-    def list_families(self) -> list[dict]:
+    def list_item_types(self) -> list[dict]:
         rows = self._session.scalars(
-            select(FairStandFamilyModel).order_by(
-                FairStandFamilyModel.sort_index,
-                FairStandFamilyModel.code,
-            )
+            select(FairStandItemTypeModel).order_by(FairStandItemTypeModel.display_name)
         ).all()
-        return [_family_payload(row) for row in rows]
+        return [_item_type_payload(row) for row in rows]
 
-    def create_family(
+    def create_item_type(
         self,
         *,
-        code: str,
         display_name: str,
-        sort_index: int = 0,
+        key: str | None = None,
         is_active: bool = True,
     ) -> dict:
-        code = code.strip()
         display_name = display_name.strip()
-        if not code:
-            raise SnapCatalogAdminError("code zorunludur.")
         if not display_name:
             raise SnapCatalogAdminError("display_name zorunludur.")
+        key = _resolve_key(key=key, display_name=display_name)
         now = _now()
-        row = FairStandFamilyModel(
-            code=code,
+        row = FairStandItemTypeModel(
+            key=key,
             display_name=display_name,
-            sort_index=int(sort_index),
             is_active=bool(is_active),
             created_at=now,
             updated_at=now,
         )
         self._session.add(row)
         self._flush()
-        return _family_payload(row)
+        return _item_type_payload(row)
 
-    def update_family(self, family_id: int, payload: dict) -> dict:
-        row = self._session.get(FairStandFamilyModel, int(family_id))
+    def update_item_type(self, item_type_id: int, payload: dict) -> dict:
+        row = self._session.get(FairStandItemTypeModel, int(item_type_id))
         if row is None:
-            raise SnapCatalogAdminError("Aile bulunamadı.", status_code=404)
-        if "code" in payload and payload["code"] is not None:
-            code = str(payload["code"]).strip()
-            if not code:
-                raise SnapCatalogAdminError("code zorunludur.")
-            row.code = code
+            raise SnapCatalogAdminError("Item tipi bulunamadı.", status_code=404)
         if "display_name" in payload and payload["display_name"] is not None:
             name = str(payload["display_name"]).strip()
             if not name:
                 raise SnapCatalogAdminError("display_name zorunludur.")
             row.display_name = name
-        if "sort_index" in payload and payload["sort_index"] is not None:
-            row.sort_index = int(payload["sort_index"])
+        if "key" in payload and payload["key"] is not None:
+            key = str(payload["key"]).strip()
+            if not key:
+                raise SnapCatalogAdminError("key zorunludur.")
+            row.key = key
         if "is_active" in payload and payload["is_active"] is not None:
             row.is_active = bool(payload["is_active"])
         row.updated_at = _now()
         self._flush()
-        return _family_payload(row)
+        return _item_type_payload(row)
 
-    def archive_family(self, family_id: int) -> dict:
-        return self.update_family(family_id, {"is_active": False})
+    def archive_item_type(self, item_type_id: int) -> dict:
+        return self.update_item_type(item_type_id, {"is_active": False})
 
-    def restore_family(self, family_id: int) -> dict:
-        return self.update_family(family_id, {"is_active": True})
+    def restore_item_type(self, item_type_id: int) -> dict:
+        return self.update_item_type(item_type_id, {"is_active": True})
 
     # --- rule types ---
 
     def list_rule_types(self) -> list[dict]:
         rows = self._session.scalars(
-            select(FairStandRuleTypeModel).order_by(FairStandRuleTypeModel.code)
+            select(FairStandRuleTypeModel).order_by(FairStandRuleTypeModel.display_name)
         ).all()
         return [_rule_type_payload(row) for row in rows]
 
-    def create_rule_type(self, *, code: str, display_name: str, is_active: bool = True) -> dict:
-        code = code.strip()
+    def create_rule_type(self, *, display_name: str, key: str | None = None, is_active: bool = True) -> dict:
         display_name = display_name.strip()
-        if not code:
-            raise SnapCatalogAdminError("code zorunludur.")
         if not display_name:
             raise SnapCatalogAdminError("display_name zorunludur.")
+        key = _resolve_key(key=key, display_name=display_name)
         now = _now()
         row = FairStandRuleTypeModel(
-            code=code,
+            key=key,
             display_name=display_name,
             is_active=bool(is_active),
             created_at=now,
@@ -181,11 +189,11 @@ class AdminSnapCatalogService:
         row = self._session.get(FairStandRuleTypeModel, int(rule_type_id))
         if row is None:
             raise SnapCatalogAdminError("Kural tipi bulunamadı.", status_code=404)
-        if "code" in payload and payload["code"] is not None:
-            code = str(payload["code"]).strip()
-            if not code:
-                raise SnapCatalogAdminError("code zorunludur.")
-            row.code = code
+        if "key" in payload and payload["key"] is not None:
+            key = str(payload["key"]).strip()
+            if not key:
+                raise SnapCatalogAdminError("key zorunludur.")
+            row.key = key
         if "display_name" in payload and payload["display_name"] is not None:
             name = str(payload["display_name"]).strip()
             if not name:
@@ -208,73 +216,87 @@ class AdminSnapCatalogService:
     def list_rules(self) -> list[dict]:
         rows = self._session.scalars(
             select(FairStandRuleModel)
-            .options(selectinload(FairStandRuleModel.rule_type))
-            .order_by(FairStandRuleModel.sort_index, FairStandRuleModel.code)
+            .options(
+                selectinload(FairStandRuleModel.rule_type),
+                selectinload(FairStandRuleModel.item_types),
+            )
+            .order_by(FairStandRuleModel.display_name)
         ).all()
         return [_rule_payload(row) for row in rows]
+
+    def _set_rule_item_types(self, row: FairStandRuleModel, item_type_ids: list[int] | None) -> None:
+        if item_type_ids is None:
+            return
+        unique_ids = sorted({int(item_type_id) for item_type_id in item_type_ids if int(item_type_id) > 0})
+        if not unique_ids:
+            item_types: list[FairStandItemTypeModel] = []
+        else:
+            item_types = list(
+                self._session.scalars(
+                    select(FairStandItemTypeModel).where(FairStandItemTypeModel.id.in_(unique_ids))
+                ).all()
+            )
+            if len(item_types) != len(unique_ids):
+                raise SnapCatalogAdminError("Bir veya daha fazla item tipi bulunamadı.", status_code=404)
+        # Tip linki = motor provides; item.snap_provides_rule_id yazılmaz (opsiyonel override).
+        row.item_types = item_types
 
     def _validate_snap_geometry(
         self,
         *,
         face: str | None,
         edge: str | None,
-        mount_mode: str | None,
-    ) -> tuple[str | None, str | None, str | None]:
+    ) -> tuple[str | None, str | None]:
         face = _optional_str(face)
         edge = _optional_str(edge)
-        mount_mode = _optional_str(mount_mode)
         if (face is None) != (edge is None):
             raise SnapCatalogAdminError("face ve edge birlikte seçilmeli veya ikisi de boş olmalı.")
         if face is not None and face not in SNAP_FACES:
             raise SnapCatalogAdminError("Geçersiz face.")
         if edge is not None and edge not in SNAP_EDGES:
             raise SnapCatalogAdminError("Geçersiz edge.")
-        if mount_mode is not None and mount_mode not in SNAP_MOUNT_MODES:
-            raise SnapCatalogAdminError("Geçersiz mount_mode.")
-        return face, edge, mount_mode
+        return face, edge
 
     def create_rule(
         self,
         *,
         rule_type_id: int,
-        code: str,
         display_name: str,
+        key: str | None = None,
         face: str | None = None,
         edge: str | None = None,
-        mount_mode: str | None = None,
-        sort_index: int = 0,
+        item_type_ids: list[int] | None = None,
         is_active: bool = True,
     ) -> dict:
-        code = code.strip()
         display_name = display_name.strip()
-        if not code:
-            raise SnapCatalogAdminError("code zorunludur.")
         if not display_name:
             raise SnapCatalogAdminError("display_name zorunludur.")
+        key = _resolve_key(key=key, display_name=display_name)
         rule_type = self._session.get(FairStandRuleTypeModel, int(rule_type_id))
         if rule_type is None:
             raise SnapCatalogAdminError("Kural tipi bulunamadı.", status_code=404)
-        face, edge, mount_mode = self._validate_snap_geometry(
-            face=face, edge=edge, mount_mode=mount_mode
-        )
+        face, edge = self._validate_snap_geometry(face=face, edge=edge)
         now = _now()
         row = FairStandRuleModel(
             rule_type_id=int(rule_type_id),
-            code=code,
+            key=key,
             display_name=display_name,
             face=face,
             edge=edge,
-            mount_mode=mount_mode,
-            sort_index=int(sort_index),
             is_active=bool(is_active),
             created_at=now,
             updated_at=now,
         )
         self._session.add(row)
         self._flush()
+        self._set_rule_item_types(row, item_type_ids)
+        self._flush()
         loaded = self._session.scalar(
             select(FairStandRuleModel)
-            .options(selectinload(FairStandRuleModel.rule_type))
+            .options(
+                selectinload(FairStandRuleModel.rule_type),
+                selectinload(FairStandRuleModel.item_types),
+            )
             .where(FairStandRuleModel.id == row.id)
         )
         return _rule_payload(loaded or row)
@@ -282,7 +304,10 @@ class AdminSnapCatalogService:
     def update_rule(self, rule_id: int, payload: dict) -> dict:
         row = self._session.scalar(
             select(FairStandRuleModel)
-            .options(selectinload(FairStandRuleModel.rule_type))
+            .options(
+                selectinload(FairStandRuleModel.rule_type),
+                selectinload(FairStandRuleModel.item_types),
+            )
             .where(FairStandRuleModel.id == int(rule_id))
         )
         if row is None:
@@ -292,25 +317,22 @@ class AdminSnapCatalogService:
             if rule_type is None:
                 raise SnapCatalogAdminError("Kural tipi bulunamadı.", status_code=404)
             row.rule_type_id = int(payload["rule_type_id"])
-        if "code" in payload and payload["code"] is not None:
-            code = str(payload["code"]).strip()
-            if not code:
-                raise SnapCatalogAdminError("code zorunludur.")
-            row.code = code
+        if "key" in payload and payload["key"] is not None:
+            key = str(payload["key"]).strip()
+            if not key:
+                raise SnapCatalogAdminError("key zorunludur.")
+            row.key = key
         if "display_name" in payload and payload["display_name"] is not None:
             name = str(payload["display_name"]).strip()
             if not name:
                 raise SnapCatalogAdminError("display_name zorunludur.")
             row.display_name = name
-        if any(key in payload for key in ("face", "edge", "mount_mode")):
+        if any(field in payload for field in ("face", "edge")):
             face = payload["face"] if "face" in payload else row.face
             edge = payload["edge"] if "edge" in payload else row.edge
-            mount_mode = payload["mount_mode"] if "mount_mode" in payload else row.mount_mode
-            row.face, row.edge, row.mount_mode = self._validate_snap_geometry(
-                face=face, edge=edge, mount_mode=mount_mode
-            )
-        if "sort_index" in payload and payload["sort_index"] is not None:
-            row.sort_index = int(payload["sort_index"])
+            row.face, row.edge = self._validate_snap_geometry(face=face, edge=edge)
+        if "item_type_ids" in payload:
+            self._set_rule_item_types(row, payload.get("item_type_ids") or [])
         if "is_active" in payload and payload["is_active"] is not None:
             row.is_active = bool(payload["is_active"])
         row.updated_at = _now()

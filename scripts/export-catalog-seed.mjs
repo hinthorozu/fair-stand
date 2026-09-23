@@ -90,7 +90,6 @@ const payload = {
       variant: item.variant ?? null,
       eye_count: item.eyeCount ?? null,
       default_z_cm: Number.isFinite(Number(item.defaultZCm)) ? num(item.defaultZCm) : 0,
-      family_code: item.familyCode ?? null,
       snap_requires_rule_code: item.snapRequires ?? null,
       snap_provides_rule_code: item.snapProvides ?? null,
       snap_target_item_type: null,

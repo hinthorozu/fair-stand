@@ -346,15 +346,13 @@ function snapRequiresOf(moduleOrType) {
   return null;
 }
 
-function snapMountModeOf(moduleOrType) {
-  if (moduleOrType && typeof moduleOrType === 'object') {
-    return getItemSnapSpec(moduleOrType)?.mountMode ?? null;
-  }
+function resolveSnapSpec(moduleOrType) {
+  if (moduleOrType && typeof moduleOrType === 'object') return getItemSnapSpec(moduleOrType);
   if (typeof moduleOrType !== 'string') return null;
   const byKey = getItem(moduleOrType);
-  if (byKey) return getItemSnapSpec(byKey)?.mountMode ?? null;
+  if (byKey) return getItemSnapSpec(byKey);
   for (const item of listRegisteredItems()) {
-    if (item.type === moduleOrType) return getItemSnapSpec(item)?.mountMode ?? null;
+    if (item.type === moduleOrType) return getItemSnapSpec(item);
   }
   return null;
 }
@@ -372,7 +370,13 @@ export function isWallOverlayModule(moduleOrType) {
   return getModuleBehavior(moduleOrType).placement === 'wall-overlay';
 }
 
-/** Rule mount_mode=panel-seam → panel band seam geometry (math); vocabulary from rule row. */
+/**
+ * Raf / shelf-rail: face=front|back + edge=top → panel band seam.
+ * mount_mode yok; kural face+edge (veya requires key) yeterli.
+ */
 export function usesPanelSeamOverlaySnap(moduleOrType) {
-  return snapMountModeOf(moduleOrType) === 'panel-seam';
+  const spec = resolveSnapSpec(moduleOrType);
+  if (!spec) return false;
+  if (spec.requires === 'shelf-rail') return true;
+  return (spec.face === 'front' || spec.face === 'back') && spec.edge === 'top';
 }

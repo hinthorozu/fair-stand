@@ -144,17 +144,20 @@ Sözleşme: `CATALOG.md`. `catalog_visible=true` ⇒ `category_id` + `catalog_it
 | `default_rotation_deg` | `defaultRotationDeg` | İlk `placement.rotationZDeg` | İlk bakış | `getModuleDefaultRotationDeg` |
 | `side_insert_rotation` | `sideInsertRotation` | `inherit` / `default` | Yana ek açı kipi | `resolveSideInsertRotationDeg` |
 
-### Duruş / snap / yüzey (`fair_stand_items` + aile/kural tabloları)
+### Duruş / snap / yüzey (`fair_stand_items` + tip/kural tabloları)
 
-Ayrı snap motor tablosu: `fair_stand_family` (stand.family), `fair_stand_rule_type`, `fair_stand_rule`. Item yalnız FK seçer. Sözleşme: `SCENE_POSE.md`. Okuma: `src/itemSnap.js` + `src/items.js`.
+Ayrı katalog: `fair_stand_item_type` (unique `key`), `fair_stand_rule_type`, `fair_stand_rule`. Item `item_type` → `fair_stand_item_type.key` FK; kural ↔ tip M:N (`fair_stand_rule_item_type`). Sözleşme: `SCENE_POSE.md`. Okuma: `src/itemSnap.js` + `src/items.js`.
+
+Katalog tablolarında kalıcı kimlik **`key`**. CRM’de label Key; create’te display_name’den slug. `mount_mode` yok; yalnız face/edge. Aile (`fair_stand_family`) kaldırıldı (`0029_item_type_catalog`).
 
 | Kolon / tablo | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
 | `default_z_cm` | `defaultZCm` | Yerden kot (cm) | Tavan ezmesin | `resolveItemDefaultZCm` |
-| `family_id` → `fair_stand_family` | `familyId` / `familyCode` | stand.family | Aile seçimi | CRM + bootstrap |
-| `snap_requires_rule_id` → `fair_stand_rule` | `snapRequiresRuleId` (+ denorm `snapRequires`, `snapMountMode`) | Aranan kural | Eşleşme | `getItemSnapSpec` |
-| `snap_provides_rule_id` → `fair_stand_rule` | `snapProvidesRuleId` (+ denorm `snapProvides`/`snapFace`/`snapEdge`) | Sunulan kural | Host | `listSnapHosts` |
-| `fair_stand_rule.face/edge/mount_mode` | (kural satırı; item’da denorm) | Snap geometri | UI’dan kural | CRM Kurallar |
+| `item_type` → `fair_stand_item_type.key` | `type` | Item tipi (unique key) | Tip seçimi / davranış | CRM + bootstrap `itemTypes` |
+| `snap_requires_rule_id` → `fair_stand_rule` | `snapRequiresRuleId` (+ denorm `snapRequires`) | Aranan kural | Eşleşme | `getItemSnapSpec` → face/edge **kural kaydından** |
+| `snap_provides_rule_id` → `fair_stand_rule` | `snapProvidesRuleId` (+ denorm `snapProvides`) | Sunulan kural | Host | `listSnapHosts` / `resolveItemSnapGeometry` |
+| `fair_stand_rule.key` / `face` / `edge` | bootstrap `rules[]` | Snap kimlik + geometri | UI’dan kural | CRM Kurallar; motor rule registry |
+| `fair_stand_rule_item_type` | `itemTypeIds` / `itemTypeKeys` | Kural ↔ tip(ler) | **Provides:** o tipteki tüm item’lar host | Motor `itemProvidesSnapRule` |
 | `snap_target_item_type` / `snap_anchor` | — | Legacy | Okunmaz | null |
 | `is_render` / `accepts_*` | aynı | yüzey | aynı | aynı |
 

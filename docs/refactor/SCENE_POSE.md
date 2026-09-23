@@ -79,19 +79,29 @@ Kes (item duruşunu ezmesin):
 
 ---
 
-## Snap (stand.family + kural tipi + kural — hardcode yok)
+## Snap (item_type + kural tipi + kural — hardcode yok)
 
 Kaynak yalnız DB; CRM’den düzenlenir.
 
 | Tablo | Rol |
 |---|---|
-| `fair_stand_family` (stand.family) | Item ailesi; item `family_id` seçer |
+| `fair_stand_item_type` | Item tipi; unique `key`; item `item_type` FK |
 | `fair_stand_rule_type` | Bugün yalnız `snap`; ileride başka tipler |
-| `fair_stand_rule` | Kural satırı: `code`, snap için `face`/`edge`/`mount_mode` |
+| `fair_stand_rule` | Kural: `key` + `face`/`edge` |
+| `fair_stand_rule_item_type` | Kural ↔ tip(ler) M:N (`top-rail`→profile, `shelf-rail`→panel…) |
 
 Item: `snap_requires_rule_id` **veya** `snap_provides_rule_id` (XOR).  
-Motor: **aynı rule id** eşleşmesi. Katalog payload’da denorm: `snapRequires`/`snapProvides`/`snapFace`/`snapEdge`/`snapMountMode`.  
-`mount_mode=panel-seam` → seam geometrisi; `face-edge` → kutu yüz/kenar.  
+Motor: **aynı rule id** eşleşmesi. Tip bağı katalog/CRM için; eşleşme hâlâ rule id.
+
+**Lamba / raf kuralları (seed):**  
+| key | face | edge | Requires | Provides |
+|---|---|---|---|---|
+| `top-rail` | top | top | lamba | profile |
+| `shelf-rail` | front | top | raf | panel / separator-panel |
+
+**Sanal hat (recipe host, mesh yok):** `itemSnap.js`  
+- `top-rail` + BOM’da profile child → Z = `defaultZCm(profile) + height(profile)` (host span içinde); değilse host tavanı. Free profile → `host.z + host.h`.  
+- `shelf-rail` (`front`+`top`) → host `strips[]` / band pitch’ten seam listesi; AABB tavan değil.  
 Eski `snap_target_item_type` / string capability kolonları kullanılmaz. Type→kural JS map yok.
 
 ---

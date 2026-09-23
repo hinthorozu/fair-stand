@@ -1,8 +1,8 @@
-"""Snap catalog seed: stand.family + rule_type + rule (UI-editable).
+"""Snap catalog seed: item_type + rule_type + rule (UI-editable).
 
 Runtime does NOT read item_type maps. This module only:
-- ensures rule_type `snap` and initial rules/families exist
-- stamps seed dicts with family_code / rule codes for FK resolution
+- ensures rule_type `snap` and initial rules/item_types exist
+- stamps seed dicts with rule codes for FK resolution
 """
 
 from __future__ import annotations
@@ -13,33 +13,44 @@ import sqlalchemy as sa
 
 SNAP_FACES = frozenset({"front", "back", "top", "bottom", "left", "right"})
 SNAP_EDGES = frozenset({"top", "bottom", "left", "right"})
-SNAP_MOUNT_MODES = frozenset({"face-edge", "panel-seam"})
 
 RULE_TYPE_SNAP = "snap"
 
-# One-time seed DATA (not runtime). Codes only — face/edge live on rules.
-_INITIAL_FAMILIES: tuple[tuple[str, str, int], ...] = (
-    ("profile", "Profil", 10),
-    ("panel", "Panel", 20),
-    ("separator-panel", "Ayırıcı panel", 30),
-    ("shelf", "Raf", 40),
-    ("led-floodlight", "Projektör", 50),
-    ("flat-panel", "Düz panel / duvar", 60),
+# One-time seed DATA (not runtime). face/edge only — mount_mode yok.
+_INITIAL_ITEM_TYPES: tuple[tuple[str, str], ...] = (
+    ("profile", "Profil"),
+    ("panel", "Panel"),
+    ("separator-panel", "Ayırıcı panel"),
+    ("shelf", "Raf"),
+    ("led-floodlight", "Projektör"),
+    ("flat-panel", "Düz panel / duvar"),
 )
 
-_INITIAL_RULES: tuple[tuple[str, str, str | None, str | None, str | None, int], ...] = (
-    ("top-rail", "Üst ray", "top", "top", "face-edge", 10),
-    ("shelf-rail", "Raf rayı", "front", "top", "panel-seam", 20),
+# Alembic 0024 import alias (family naming)
+_INITIAL_FAMILIES = _INITIAL_ITEM_TYPES
+
+# key, display_name, face, edge
+# top-rail: lamba ← profil üst yüz üst kenar
+# shelf-rail: raf ← panel ön yüz üst kenar (X’e bakan)
+_INITIAL_RULES: tuple[tuple[str, str, str | None, str | None], ...] = (
+    ("top-rail", "Üst ray", "top", "top"),
+    ("shelf-rail", "Raf rayı", "front", "top"),
 )
 
-# item_type → (family_code, requires_rule_code, provides_rule_code) — seed/migration only
-_SEED_ITEM_BINDINGS: dict[str, tuple[str | None, str | None, str | None]] = {
-    "led-floodlight": ("led-floodlight", "top-rail", None),
-    "shelf": ("shelf", "shelf-rail", None),
-    "profile": ("profile", None, "top-rail"),
-    "panel": ("panel", None, "shelf-rail"),
-    "separator-panel": ("separator-panel", None, "shelf-rail"),
-    "flat-panel": ("flat-panel", None, None),
+# rule key → item_type keys (provides tarafı / kuralın uygulandığı tipler)
+_INITIAL_RULE_ITEM_TYPES: dict[str, tuple[str, ...]] = {
+    "top-rail": ("profile",),
+    "shelf-rail": ("panel", "separator-panel"),
+}
+
+# item_type → (requires_rule_code, provides_rule_code) — seed/migration only
+_SEED_ITEM_BINDINGS: dict[str, tuple[str | None, str | None]] = {
+    "led-floodlight": ("top-rail", None),
+    "shelf": ("shelf-rail", None),
+    "profile": (None, "top-rail"),
+    "panel": (None, "shelf-rail"),
+    "separator-panel": (None, "shelf-rail"),
+    "flat-panel": (None, None),
 }
 
 
@@ -47,17 +58,17 @@ def _now() -> datetime:
     return datetime.now(tz=UTC)
 
 
-def snap_binding_for_item_type(item_type: str) -> tuple[str | None, str | None, str | None]:
-    return _SEED_ITEM_BINDINGS.get(item_type, (None, None, None))
+def snap_binding_for_item_type(item_type: str) -> tuple[str | None, str | None]:
+    return _SEED_ITEM_BINDINGS.get(item_type, (None, None))
 
 
 def apply_item_snap_fields(row: dict) -> dict:
-    family_code, requires, provides = snap_binding_for_item_type(row["item_type"])
-    row["family_code"] = family_code
+    requires, provides = snap_binding_for_item_type(row["item_type"])
     row["snap_requires_rule_code"] = requires
     row["snap_provides_rule_code"] = provides
     row["snap_target_item_type"] = None
     row["snap_anchor"] = None
+    row.pop("family_code", None)
     row.pop("snap_requires", None)
     row.pop("snap_provides", None)
     row.pop("snap_face", None)
@@ -65,21 +76,83 @@ def apply_item_snap_fields(row: dict) -> dict:
     return row
 
 
+# Legacy 0007 migration / dump path before rule FKs existed.
+_LEGACY_TYPE_ANCHOR: dict[str, tuple[str | None, str | None]] = {
+    "led-floodlight": ("profile", "top"),
+    "shelf": ("panel", "top"),
+}
+
+
+def fill_item_snap_columns(bind) -> None:
+    """Idempotent fill for migrations/dump.
+
+    - New schema (snap_*_rule_id): ensure catalog + bind rule FKs
+    - Legacy schema: snap_target_item_type / snap_anchor (0007)
+    """
+    cols = {c["name"] for c in sa.inspect(bind).get_columns("fair_stand_items")}
+    if "snap_requires_rule_id" in cols:
+        from sqlalchemy.orm import Session
+
+        session = Session(bind=bind)
+        try:
+            maps = ensure_snap_catalog(session)
+            session.flush()
+            bind_item_snap_fks(bind, rules=maps["rules"])
+            session.flush()
+        finally:
+            session.close()
+        return
+
+    rows = bind.execute(sa.text("SELECT item_key, item_type FROM fair_stand_items")).mappings()
+    for row in rows:
+        target, anchor = _LEGACY_TYPE_ANCHOR.get(row["item_type"], (None, None))
+        bind.execute(
+            sa.text(
+                "UPDATE fair_stand_items SET snap_target_item_type = :target, snap_anchor = :anchor "
+                "WHERE item_key = :item_key"
+            ),
+            {"target": target, "anchor": anchor, "item_key": row["item_key"]},
+        )
+
+
+def ensure_item_types(session, keys: list[str] | set[str] | tuple[str, ...]) -> dict[str, int]:
+    """Ensure catalog rows exist for every item_type key (FK target)."""
+    from app.modules.fair_stand.infrastructure.models import FairStandItemTypeModel
+
+    now = _now()
+    known = {key: name for key, name in _INITIAL_ITEM_TYPES}
+    result: dict[str, int] = {}
+    for key in sorted({str(k).strip() for k in keys if str(k).strip()}):
+        row = session.scalar(sa.select(FairStandItemTypeModel).where(FairStandItemTypeModel.key == key))
+        if row is None:
+            row = FairStandItemTypeModel(
+                key=key,
+                display_name=known.get(key, key),
+                is_active=True,
+                created_at=now,
+                updated_at=now,
+            )
+            session.add(row)
+            session.flush()
+        result[key] = int(row.id)
+    return result
+
+
 def ensure_snap_catalog(session) -> dict[str, dict[str, int]]:
-    """Idempotent: rule_type snap, initial rules/families. Returns id maps by code."""
+    """Idempotent: rule_type snap, initial rules/item_types. Returns id maps by key."""
     from app.modules.fair_stand.infrastructure.models import (
-        FairStandFamilyModel,
+        FairStandItemTypeModel,
         FairStandRuleModel,
         FairStandRuleTypeModel,
     )
 
     now = _now()
     rule_type = session.scalar(
-        sa.select(FairStandRuleTypeModel).where(FairStandRuleTypeModel.code == RULE_TYPE_SNAP)
+        sa.select(FairStandRuleTypeModel).where(FairStandRuleTypeModel.key == RULE_TYPE_SNAP)
     )
     if rule_type is None:
         rule_type = FairStandRuleTypeModel(
-            code=RULE_TYPE_SNAP,
+            key=RULE_TYPE_SNAP,
             display_name="Snap",
             is_active=True,
             created_at=now,
@@ -88,76 +161,110 @@ def ensure_snap_catalog(session) -> dict[str, dict[str, int]]:
         session.add(rule_type)
         session.flush()
 
-    families: dict[str, int] = {}
-    for code, name, sort_index in _INITIAL_FAMILIES:
-        row = session.scalar(sa.select(FairStandFamilyModel).where(FairStandFamilyModel.code == code))
-        if row is None:
-            row = FairStandFamilyModel(
-                code=code,
-                display_name=name,
-                sort_index=sort_index,
-                is_active=True,
-                created_at=now,
-                updated_at=now,
-            )
-            session.add(row)
-            session.flush()
-        families[code] = int(row.id)
+    item_types = ensure_item_types(session, [key for key, _ in _INITIAL_ITEM_TYPES])
 
     rules: dict[str, int] = {}
-    for code, name, face, edge, mount_mode, sort_index in _INITIAL_RULES:
+    for key, name, face, edge in _INITIAL_RULES:
         row = session.scalar(
             sa.select(FairStandRuleModel).where(
                 FairStandRuleModel.rule_type_id == rule_type.id,
-                FairStandRuleModel.code == code,
+                FairStandRuleModel.key == key,
             )
         )
         if row is None:
             row = FairStandRuleModel(
                 rule_type_id=int(rule_type.id),
-                code=code,
+                key=key,
                 display_name=name,
                 face=face,
                 edge=edge,
-                mount_mode=mount_mode,
-                sort_index=sort_index,
                 is_active=True,
                 created_at=now,
                 updated_at=now,
             )
             session.add(row)
             session.flush()
-        rules[code] = int(row.id)
+        else:
+            row.face = face
+            row.edge = edge
+            row.display_name = name
+        rules[key] = int(row.id)
+
+    # Kural ↔ item_type bağları (M:N)
+    for rule_key, type_keys in _INITIAL_RULE_ITEM_TYPES.items():
+        rule_id = rules.get(rule_key)
+        if rule_id is None:
+            continue
+        rule_row = session.get(FairStandRuleModel, rule_id)
+        if rule_row is None:
+            continue
+        linked = []
+        for type_key in type_keys:
+            type_id = item_types.get(type_key)
+            if type_id is None:
+                continue
+            type_row = session.get(FairStandItemTypeModel, type_id)
+            if type_row is not None:
+                linked.append(type_row)
+        rule_row.item_types = linked
 
     session.flush()
     return {
-        "families": families,
+        "item_types": item_types,
         "rules": rules,
         "rule_types": {RULE_TYPE_SNAP: int(rule_type.id)},
     }
 
 
-def bind_item_snap_fks(bind, *, families: dict[str, int], rules: dict[str, int]) -> None:
-    """Migration helper: set family_id / rule FKs from item_type seed bindings."""
+def bind_item_snap_fks(
+    bind,
+    *,
+    rules: dict[str, int],
+    families: dict[str, int] | None = None,
+) -> None:
+    """Migration helper: set rule FKs (and legacy family_id if column still exists)."""
+    cols = {c["name"] for c in sa.inspect(bind).get_columns("fair_stand_items")}
+    has_family = "family_id" in cols and families is not None
     rows = bind.execute(sa.text("SELECT item_key, item_type FROM fair_stand_items")).mappings()
     for row in rows:
-        family_code, requires, provides = snap_binding_for_item_type(row["item_type"])
-        bind.execute(
-            sa.text(
-                """
-                UPDATE fair_stand_items
-                SET family_id = :family_id,
-                    snap_requires_rule_id = :requires_id,
-                    snap_provides_rule_id = :provides_id,
-                    snap_target_item_type = NULL,
-                    snap_anchor = NULL
-                WHERE item_key = :item_key
-                """
-            ),
-            {
-                "family_id": families.get(family_code) if family_code else None,
-                "requires_id": rules.get(requires) if requires else None,
-                "provides_id": rules.get(provides) if provides else None,
-                "item_key": row["item_key"],
-            },
-        )
+        requires, provides = snap_binding_for_item_type(row["item_type"])
+        # Old 3-tuple bindings returned (family, requires, provides); tolerate either.
+        if isinstance(requires, tuple):  # pragma: no cover
+            _, requires, provides = requires  # type: ignore[misc]
+        params = {
+            "requires_id": rules.get(requires) if requires else None,
+            "provides_id": rules.get(provides) if provides else None,
+            "item_key": row["item_key"],
+        }
+        if has_family:
+            # Seed map keys were item_type; family key == item_type for initial set.
+            family_key = row["item_type"] if row["item_type"] in (families or {}) else None
+            params["family_id"] = families.get(family_key) if family_key else None  # type: ignore[union-attr]
+            bind.execute(
+                sa.text(
+                    """
+                    UPDATE fair_stand_items
+                    SET family_id = :family_id,
+                        snap_requires_rule_id = :requires_id,
+                        snap_provides_rule_id = :provides_id,
+                        snap_target_item_type = NULL,
+                        snap_anchor = NULL
+                    WHERE item_key = :item_key
+                    """
+                ),
+                params,
+            )
+        else:
+            bind.execute(
+                sa.text(
+                    """
+                    UPDATE fair_stand_items
+                    SET snap_requires_rule_id = :requires_id,
+                        snap_provides_rule_id = :provides_id,
+                        snap_target_item_type = NULL,
+                        snap_anchor = NULL
+                    WHERE item_key = :item_key
+                    """
+                ),
+                params,
+            )

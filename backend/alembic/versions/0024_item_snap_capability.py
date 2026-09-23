@@ -61,7 +61,6 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
         sa.Column("code", sa.String(64), nullable=False),
         sa.Column("display_name", sa.String(128), nullable=False),
-        sa.Column("sort_index", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
@@ -88,7 +87,6 @@ def upgrade() -> None:
         sa.Column("face", sa.String(16), nullable=True),
         sa.Column("edge", sa.String(16), nullable=True),
         sa.Column("mount_mode", sa.String(32), nullable=True),
-        sa.Column("sort_index", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
@@ -159,15 +157,15 @@ def upgrade() -> None:
     ).scalar_one()
 
     families: dict[str, int] = {}
-    for code, name, sort_index in _INITIAL_FAMILIES:
+    for code, name in _INITIAL_FAMILIES:
         bind.execute(
             sa.text(
                 """
-                INSERT INTO fair_stand_family (code, display_name, sort_index, is_active, created_at, updated_at)
-                VALUES (:code, :name, :sort_index, TRUE, NOW(), NOW())
+                INSERT INTO fair_stand_family (code, display_name, is_active, created_at, updated_at)
+                VALUES (:code, :name, TRUE, NOW(), NOW())
                 """
             ),
-            {"code": code, "name": name, "sort_index": sort_index},
+            {"code": code, "name": name},
         )
         families[code] = bind.execute(
             sa.text("SELECT id FROM fair_stand_family WHERE code = :code"),
@@ -175,14 +173,14 @@ def upgrade() -> None:
         ).scalar_one()
 
     rules: dict[str, int] = {}
-    for code, name, face, edge, mount_mode, sort_index in _INITIAL_RULES:
+    for code, name, face, edge, mount_mode in _INITIAL_RULES:
         bind.execute(
             sa.text(
                 """
                 INSERT INTO fair_stand_rule
-                  (rule_type_id, code, display_name, face, edge, mount_mode, sort_index, is_active, created_at, updated_at)
+                  (rule_type_id, code, display_name, face, edge, mount_mode, is_active, created_at, updated_at)
                 VALUES
-                  (:rule_type_id, :code, :name, :face, :edge, :mount_mode, :sort_index, TRUE, NOW(), NOW())
+                  (:rule_type_id, :code, :name, :face, :edge, :mount_mode, TRUE, NOW(), NOW())
                 """
             ),
             {
@@ -192,7 +190,6 @@ def upgrade() -> None:
                 "face": face,
                 "edge": edge,
                 "mount_mode": mount_mode,
-                "sort_index": sort_index,
             },
         )
         rules[code] = bind.execute(

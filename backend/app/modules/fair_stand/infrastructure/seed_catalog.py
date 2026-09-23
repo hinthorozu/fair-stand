@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.modules.fair_stand.application.cycle_validation import assert_acyclic_components
 from app.modules.fair_stand.infrastructure.catalog_seed_data import CATALOG_SEED
-from app.modules.fair_stand.infrastructure.item_snap_seed import ensure_snap_catalog
+from app.modules.fair_stand.infrastructure.item_snap_seed import ensure_item_types, ensure_snap_catalog
 from app.modules.fair_stand.infrastructure.preview_kind_definitions import all_preview_kind_rows
 from app.modules.fair_stand.infrastructure.runtime_settings_seed import ensure_runtime_settings
 from app.modules.fair_stand.infrastructure.stand_dimensions_seed import ensure_stand_dimensions
@@ -89,13 +89,12 @@ def seed_fair_stand_catalog(session: Session) -> None:
         for row in session.scalars(select(FairStandCatalogPreviewKindModel)).all()
     }
     snap_ids = ensure_snap_catalog(session)
-    family_ids = snap_ids["families"]
+    ensure_item_types(session, [row["item_type"] for row in CATALOG_SEED["items"]])
     rule_ids = snap_ids["rules"]
 
     for row in CATALOG_SEED["items"]:
         category_index = row.get("category_index")
         preview_sort = row.get("preview_id")
-        family_code = row.get("family_code")
         requires_code = row.get("snap_requires_rule_code")
         provides_code = row.get("snap_provides_rule_code")
         session.add(
@@ -130,7 +129,6 @@ def seed_fair_stand_catalog(session: Session) -> None:
                 default_z_cm=_dec(row.get("default_z_cm")) or 0,
                 snap_target_item_type=row.get("snap_target_item_type"),
                 snap_anchor=row.get("snap_anchor"),
-                family_id=family_ids.get(family_code) if family_code else None,
                 snap_requires_rule_id=rule_ids.get(requires_code) if requires_code else None,
                 snap_provides_rule_id=rule_ids.get(provides_code) if provides_code else None,
                 is_active=True,

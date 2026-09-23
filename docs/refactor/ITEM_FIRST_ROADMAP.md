@@ -90,12 +90,9 @@ Bugünkü `panel-seam` bu **görünümü** verir ama kaynak stand pitch / `strip
 
 ### Eksikler (P4 için sıfır)
 
-- `provides` / `requires` / capability sözlüğü kolon veya tablo  
-- `face` + `edge` (veya eşdeğer) sözleşmesi dondurulmuş hali  
-- Wall sanal hat türetme kuralı (yazılı + kod)  
-- Capability runtime okuyucu  
-- Rafın `panel-seam`’den tek motor’a geçiş planı  
-- Admin cycle validation  
+- Wall sanal hat kuralı P2 maddesi (yazılı host modeli seçimi; ince ayar kodu `itemSnap`’te)
+- Rafın `panel-seam` overlay yolunun tek `itemSnap` motoruna tam geçişi
+- Admin cycle validation
 
 ### Risk (hızlı dilim)
 
@@ -109,7 +106,7 @@ Bugünkü `panel-seam` bu **görünümü** verir ama kaynak stand pitch / `strip
 | P5 | Erteli | Doğru |
 
 **P0 zorunlu seçim (yazılmadan P4 yok):**  
-**(KİLİTLENDİ 2026-09-23, güncellendi).** stand.family + rule_type + rule; item `family_id` + requires|provides rule FK; motor **rule id**. Face/edge/mount_mode kural satırında; CRM CRUD. Type→kural runtime map yok.
+**(KİLİTLENDİ 2026-09-23, güncellendi).** `fair_stand_item_type` (unique `key`) + rule_type + rule; item `item_type` → tip.key FK; requires|provides rule FK; kural ↔ tip M:N; motor **rule id**. Face/edge kural satırında (mount_mode yok); CRM CRUD. Aile tablosu kaldırıldı (`0029`). Type→kural runtime map yok.
 
 (B) iptal — mevcut `snap_target_item_type` dilinde P4 yok.
 
@@ -120,14 +117,14 @@ Bugünkü `panel-seam` bu **görünümü** verir ama kaynak stand pitch / `strip
 ### P0 — Sözleşme (bu belge)
 
 - [x] Leaf / parent / BOM ayrımı yazılı
-- [x] Snap SKU’da değil aile/capability’de (hedef)
+- [x] Snap SKU’da değil tip/capability’de (hedef)
 - [x] Admin 3D P5’e alındı
 - [x] Gap / çatışma notu yazıldı (2026-09-23)
 - [x] Capability sözlüğü hedefi: `top-rail`, `shelf-rail` + face/edge (DB’den; hardcode yok)
 - [x] P0 seçim **A** kilitlendi (2026-09-23)
 - [x] `SCENE_POSE.md` + PENDING B.9 / C.4 aynı cümleye çekildi
 - [x] DB şema + admin seçim alanları (0024; CRM face/edge dropdown)
-- [ ] Sanal hat türetme ince ayarı (recipe panel band / top-rail offset) — devam
+- [x] Sanal hat türetme ince ayarı (recipe panel band / top-rail offset) — `itemSnap.js`
 
 ### P1 — Leaf Item tek kaynak
 

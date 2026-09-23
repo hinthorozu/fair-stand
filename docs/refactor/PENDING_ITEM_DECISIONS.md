@@ -91,12 +91,15 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 - **Karar:** Occupancy kalkınca yalnız kimlik/seed ayrımı; şerit sayısı anlamı taşımaz.
 - **Kaynak:** `ITEMS.md` kuyruk (8 Item).
 
-### B.9. Item snap — stand.family + rule_type + rule (P0 kilit)
+### B.9. Item snap — item_type + rule_type + rule (P0 kilit)
 
-- **Durum:** UYGULAMA — aile/kural tabloları; item FK seçer; motor rule id
-- **Ürün kuralı:** CRM’de aile / kural tipi / kural CRUD; item’da family + requires|provides rule
-- **Hedef:** `SCENE_POSE.md` Snap; `DATABASE.md` aile/kural
-- **Raf:** kural `mount_mode=panel-seam` → seam geometrisi
+- **Durum:** UYGULAMA — `fair_stand_item_type` + kural tabloları; item `item_type` FK; motor rule id
+- **Ürün kuralı:** CRM’de item type / kural tipi / kural CRUD; item’da Type (key) + requires|provides rule
+- **Kimlik:** kataloglarda `key` (unique); ad→slug + elle düzeltme
+- **Geometri:** yalnız face / edge enum (CRM select + hint); **mount_mode kaldırıldı**
+- **Tip bağı:** kural ↔ tip(ler) M:N (`fair_stand_rule_item_type`); aile tablosu kaldırıldı (`0029`)
+- **Hedef:** `SCENE_POSE.md` Snap; `DATABASE.md` tip/kural
+- **Raf:** kural `shelf-rail` face=front edge=top → seam / band geometrisi
 - **Yasak:** Type→kural runtime map; item üzerinde free-text capability string kolonları
 
 ---
@@ -123,7 +126,7 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 
 ### C.4. `overlaySnap = 'panel-seam'`
 
-- **Durum:** KAPANDI — `usesPanelSeamOverlaySnap` ← kural `mount_mode === panel-seam`
+- **Durum:** KAPANDI — `usesPanelSeamOverlaySnap` ← requires `shelf-rail` veya face front/back + edge top (mount_mode yok)
 - **Karar:** Raf host + seam geometrisi; type map `overlaySnap` yok
 - **Kaynak:** `SCENE_POSE.md` § Snap
 

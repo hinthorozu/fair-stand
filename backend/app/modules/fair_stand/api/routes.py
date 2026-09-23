@@ -95,32 +95,30 @@ class RuntimeSettingsUpdateBody(BaseModel):
     import_button_visible: bool
 
 
-class FamilyCreateBody(BaseModel):
+class ItemTypeCreateBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    code: str = Field(min_length=1, max_length=64)
     display_name: str = Field(min_length=1, max_length=128)
-    sort_index: int = 0
+    key: str | None = Field(default=None, max_length=64)
     is_active: bool = True
 
 
-class FamilyUpdateBody(BaseModel):
+class ItemTypeUpdateBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    code: str | None = Field(default=None, min_length=1, max_length=64)
     display_name: str | None = Field(default=None, min_length=1, max_length=128)
-    sort_index: int | None = None
+    key: str | None = Field(default=None, min_length=1, max_length=64)
     is_active: bool | None = None
 
 
 class RuleTypeCreateBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    code: str = Field(min_length=1, max_length=64)
+    key: str | None = Field(default=None, max_length=64)
     display_name: str = Field(min_length=1, max_length=128)
     is_active: bool = True
 
 
 class RuleTypeUpdateBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    code: str | None = Field(default=None, min_length=1, max_length=64)
+    key: str | None = Field(default=None, min_length=1, max_length=64)
     display_name: str | None = Field(default=None, min_length=1, max_length=128)
     is_active: bool | None = None
 
@@ -128,24 +126,22 @@ class RuleTypeUpdateBody(BaseModel):
 class RuleCreateBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     rule_type_id: int = Field(ge=1)
-    code: str = Field(min_length=1, max_length=64)
+    key: str | None = Field(default=None, max_length=64)
     display_name: str = Field(min_length=1, max_length=128)
     face: str | None = None
     edge: str | None = None
-    mount_mode: str | None = None
-    sort_index: int = 0
+    item_type_ids: list[int] | None = None
     is_active: bool = True
 
 
 class RuleUpdateBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     rule_type_id: int | None = Field(default=None, ge=1)
-    code: str | None = Field(default=None, min_length=1, max_length=64)
+    key: str | None = Field(default=None, min_length=1, max_length=64)
     display_name: str | None = Field(default=None, min_length=1, max_length=128)
     face: str | None = None
     edge: str | None = None
-    mount_mode: str | None = None
-    sort_index: int | None = None
+    item_type_ids: list[int] | None = None
     is_active: bool | None = None
 
 
@@ -183,7 +179,7 @@ def get_catalog_bootstrap(
         ],
         "items": [item.payload for item in snapshot.items],
         "previewKinds": [_preview_kind_payload(preview) for preview in snapshot.preview_kinds],
-        "families": snapshot.families,
+        "itemTypes": snapshot.item_types,
         "ruleTypes": snapshot.rule_types,
         "rules": snapshot.rules,
         "standDimensions": stand_dimensions_payload(snapshot.stand_dimensions),
@@ -535,67 +531,67 @@ def admin_restore_item_record(
         raise
 
 
-@router.get("/admin/families")
-def admin_list_families(
+@router.get("/admin/item-types")
+def admin_list_item_types(
     auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_READ)),
     service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
 ) -> list[dict[str, Any]]:
     _ = auth
-    return service.list_families()
+    return service.list_item_types()
 
 
-@router.post("/admin/families", status_code=status.HTTP_201_CREATED)
-def admin_create_family(
-    body: FamilyCreateBody,
+@router.post("/admin/item-types", status_code=status.HTTP_201_CREATED)
+def admin_create_item_type(
+    body: ItemTypeCreateBody,
     auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_CREATE)),
     service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
 ) -> dict[str, Any]:
     _ = auth
     try:
-        return service.create_family(**body.model_dump())
+        return service.create_item_type(**body.model_dump())
     except SnapCatalogAdminError as exc:
         _raise_admin(exc)
         raise
 
 
-@router.patch("/admin/families/{family_id}")
-def admin_update_family(
-    family_id: int,
-    body: FamilyUpdateBody,
+@router.patch("/admin/item-types/{item_type_id}")
+def admin_update_item_type(
+    item_type_id: int,
+    body: ItemTypeUpdateBody,
     auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_UPDATE)),
     service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
 ) -> dict[str, Any]:
     _ = auth
     try:
-        return service.update_family(family_id, body.model_dump(exclude_unset=True))
+        return service.update_item_type(item_type_id, body.model_dump(exclude_unset=True))
     except SnapCatalogAdminError as exc:
         _raise_admin(exc)
         raise
 
 
-@router.post("/admin/families/{family_id}/archive")
-def admin_archive_family(
-    family_id: int,
+@router.post("/admin/item-types/{item_type_id}/archive")
+def admin_archive_item_type(
+    item_type_id: int,
     auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_ARCHIVE)),
     service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
 ) -> dict[str, Any]:
     _ = auth
     try:
-        return service.archive_family(family_id)
+        return service.archive_item_type(item_type_id)
     except SnapCatalogAdminError as exc:
         _raise_admin(exc)
         raise
 
 
-@router.post("/admin/families/{family_id}/restore")
-def admin_restore_family(
-    family_id: int,
+@router.post("/admin/item-types/{item_type_id}/restore")
+def admin_restore_item_type(
+    item_type_id: int,
     auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_ARCHIVE)),
     service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
 ) -> dict[str, Any]:
     _ = auth
     try:
-        return service.restore_family(family_id)
+        return service.restore_item_type(item_type_id)
     except SnapCatalogAdminError as exc:
         _raise_admin(exc)
         raise
