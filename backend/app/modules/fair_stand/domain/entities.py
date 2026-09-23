@@ -27,6 +27,8 @@ class ItemAggregate:
 class StandDimensions:
     height_cm: float
     depth_cm: float
+    frame_width_cm: float
+    frame_depth_cm: float
 
 
 @dataclass(frozen=True)

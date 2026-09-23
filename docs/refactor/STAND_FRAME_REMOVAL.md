@@ -1,37 +1,22 @@
-# Stand `frame_width_cm` / `frame_depth_cm` kaldırma
+# Stand `frame_width_cm` / `frame_depth_cm`
 
-**Durum:** Uygulandı (deney). Stand tablosunda yalnız **tavan H** + **duvar D** kalır; prosedürel aluminyum kesiti **item** kaynağına taşındı.
+**Durum (2026-09-23):** Kolonlar **geri geldi** (`0023_restore_stand_frame_columns`). Prosedürel aluminyum kesiti `STAND_DIMENSIONS.frameWidthCm/DepthCm` ← DB. Seed varsayılan **5,5 × 10 cm**.
 
-## Neden
+Leaf upright/profile BOM kesiti (örn. 8×8) ayrı kalır; sahne çerçevesi şimdilik stand zarfından okunur (`resolveProceduralFrameCrossSectionCm`).
 
-`fair_stand_dimensions` içindeki 5,5 / 10 cm, BOM’daki dikme/profil kesiti (8×8) ve düz paneldeki 4 cm sabitiyle çelişiyordu. Çerçeve kesiti **stand ayarı değil**, **leaf profile/upright ölçüsü** olmalı.
+## Neden geçici stand kaynağı
 
-## Yeni kaynak (runtime)
+Leaf 8×8 sahnede kalın duruyordu. Kalıcı item-first hedef (leaf kesit = görünüm) ayrı iş; canlı 3D doğrulama oturana kadar stand `frame_*` tek görsel kaynak.
 
-- `resolveProceduralFrameCrossSectionCm(moduleState)` → parent `itemKey` recipe’sindeki **ilk `profile` veya `upright` leaf** + `resolveSceneDimensions` (kesit cm). Global sabit itemKey **yok**.
-- `scene3d.js` separatör, düz panel, kapı, baza/banko rayları: `STAND_DIMENSIONS.frameWidth/Depth` **kullanmaz**.
+## Kaynak (runtime)
 
-## Lokal DB / Alembic
+- Bootstrap / admin: `heightCm`, `depthCm`, `frameWidthCm`, `frameDepthCm`
+- `src/standDimensions.js` + `getProceduralFrameCrossSectionM` → stand frame
+- CRM Temel Ayarlar: çerçeve alanları düzenlenebilir
 
-Migration `0022_drop_stand_frame_columns` repoda durur; **çalıştırmadan** da güncel kod okur: bootstrap yalnız `heightCm`/`depthCm` gönderir. Eski DB’de `frame_*` kolonları kalırsa PostgreSQL’de **zararsız** (model map etmez). Alembic’i erteleyebilirsiniz.
+## Alembic
 
-## Kaldırılanlar
-
-| Katman | Değişiklik |
-|--------|------------|
-| DB | Migration `0022_drop_stand_frame_columns` → `frame_width_cm`, `frame_depth_cm` drop |
-| Bootstrap | `standDimensions` yalnız `heightCm`, `depthCm` |
-| Admin API + fair-crm settings | Çerçeve alanları kaldırıldı |
-| `standDimensions.js` | frame getter’ları kaldırıldı |
-
-## Patlama / dikkat listesi (regression)
-
-- [ ] Separatör / Panel 100 / kapı / baza mesh — çerçeve **8 cm** kesit (upright DB); eskiden 5,5×10 görünürdü.
-- [ ] Admin stand ayarları sayfasında çerçeve input yok.
-- [ ] Eski bootstrap cache / CDN `frameWidthCm` bekleyen client → yeni API ile uyumlu.
-- [ ] Item docs (`wall_separator_*`) hâlâ “catalog frameWidth 5.5” diyebilir → güncellenmeli.
-- [ ] `PANEL_VERTICAL_PROFILE_WIDTH_M` (4 cm) kaldırıldı; düz panel yan profil = upright kesit W.
-
-## Geri alma
-
-Seed + migration downgrade veya `frame_*` kolonlarını geri ekleyip renderer’ı tekrar STAND’a bağlamak.
+| Rev | İş |
+|-----|-----|
+| `0022_drop_stand_frame_columns` | Tarihsel drop |
+| `0023_restore_stand_frame_columns` | `frame_width_cm` / `frame_depth_cm` geri (+ default 5.5 / 10) |

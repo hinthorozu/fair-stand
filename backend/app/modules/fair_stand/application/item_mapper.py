@@ -172,6 +172,8 @@ def map_stand_dimensions(row) -> StandDimensions:
     return StandDimensions(
         height_cm=_num(row.height_cm),
         depth_cm=_num(row.depth_cm),
+        frame_width_cm=_num(row.frame_width_cm),
+        frame_depth_cm=_num(row.frame_depth_cm),
     )
 
 
@@ -179,6 +181,8 @@ def stand_dimensions_payload(dimensions: StandDimensions) -> dict:
     return {
         "heightCm": dimensions.height_cm,
         "depthCm": dimensions.depth_cm,
+        "frameWidthCm": dimensions.frame_width_cm,
+        "frameDepthCm": dimensions.frame_depth_cm,
     }
 
 

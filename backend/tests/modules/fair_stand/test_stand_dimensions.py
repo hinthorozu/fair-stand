@@ -13,7 +13,8 @@ def test_stand_dimensions_singleton_is_seeded(db_session):
     assert row.id == 1
     assert float(row.height_cm) == 350.0
     assert float(row.depth_cm) == 10.0
-    assert not hasattr(row, "frame_width_cm")
+    assert float(row.frame_width_cm) == 5.5
+    assert float(row.frame_depth_cm) == 10.0
 
 
 def test_fair_stand_dimensions_table_exists(test_engine):

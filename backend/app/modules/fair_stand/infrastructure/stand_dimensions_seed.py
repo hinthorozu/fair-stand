@@ -11,6 +11,10 @@ from app.modules.fair_stand.infrastructure.models import FairStandDimensionsMode
 STAND_DIMENSIONS_ID = 1
 STAND_DIMENSIONS_HEIGHT_CM = Decimal("350")
 STAND_DIMENSIONS_DEPTH_CM = Decimal("10")
+STAND_DIMENSIONS_FRAME_WIDTH_CM = Decimal("5.5")
+STAND_DIMENSIONS_FRAME_DEPTH_CM = Decimal("10")
+
+
 def ensure_stand_dimensions(session: Session) -> FairStandDimensionsModel:
     row = session.get(FairStandDimensionsModel, STAND_DIMENSIONS_ID)
     now = datetime.now(tz=UTC)
@@ -19,6 +23,8 @@ def ensure_stand_dimensions(session: Session) -> FairStandDimensionsModel:
             id=STAND_DIMENSIONS_ID,
             height_cm=STAND_DIMENSIONS_HEIGHT_CM,
             depth_cm=STAND_DIMENSIONS_DEPTH_CM,
+            frame_width_cm=STAND_DIMENSIONS_FRAME_WIDTH_CM,
+            frame_depth_cm=STAND_DIMENSIONS_FRAME_DEPTH_CM,
             created_at=now,
             updated_at=now,
         )

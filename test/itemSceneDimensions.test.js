@@ -165,11 +165,11 @@ test('resolveModuleSceneBoxCm state → scene → tavan', () => {
   assert.equal(box.heightCm, getStandDimensions().heightCm);
 });
 
-test('procedural frame cross-section parent recipe profile/upright kesitinden okunur', () => {
+test('procedural frame cross-section stand dimensions frame_width/depth okur', () => {
   const parent = getItem('wall_separator_100');
-  const profileChild = getItem('profile_91');
-  const scene = resolveSceneDimensions(profileChild);
   const cross = getProceduralFrameCrossSectionM({ itemKey: parent.itemKey, type: parent.type });
-  assert.equal(cross.frameWidthCm, scene.depthCm);
-  assert.equal(cross.frameDepthCm, scene.heightCm);
+  assert.equal(cross.frameWidthCm, getStandDimensions().frameWidthCm);
+  assert.equal(cross.frameDepthCm, getStandDimensions().frameDepthCm);
+  assert.equal(cross.frameWidthCm, 5.5);
+  assert.equal(cross.frameDepthCm, 10);
 });

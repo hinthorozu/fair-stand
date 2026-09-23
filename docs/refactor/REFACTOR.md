@@ -8,6 +8,17 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 - Rotation: `docs/refactor/ROTATION.md`
 - PostgreSQL tabloları: `docs/refactor/DATABASE.md`
 - Ertelenmiş kararlar / backlog (tavan–şerit kaldırma sırası, Item property, TYPE_BEHAVIORS kuyruğu): `docs/refactor/PENDING_ITEM_DECISIONS.md`
+---
+
+## 2026-09-23 — Stand `frame_*` kolonları geri (5,5×10)
+
+Migration `0023_restore_stand_frame_columns`. Bootstrap/admin/CRM + `resolveProceduralFrameCrossSectionCm` stand `frameWidthCm`/`frameDepthCm` okur. Leaf 8×8 BOM görsel kaynağı değil (şimdilik). Belge: `STAND_FRAME_REMOVAL.md`.
+
+---
+
+## 2026-09-23 — TEMP: prosedürel frame 5,5×10 cm
+
+*(Superseeded by `0023` DB restore — aynı gün.)* Leaf upright/profile 8×8 BOM kesiti sahnede kalın durduğu için önce kod sabiti, sonra stand kolonları geri alındı.
 
 ---
 

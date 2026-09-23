@@ -452,20 +452,19 @@ function crossSectionCmFromFrameItem(frameItem) {
   return Object.freeze({ frameWidthCm, frameDepthCm, frameItemKey: frameItem.itemKey });
 }
 
-/** Parent modül recipe’sindeki profile/upright leaf kesiti — global itemKey yok. */
-export function resolveProceduralFrameCrossSectionCm(moduleState) {
-  const parentKey = moduleState?.itemKey ?? null;
-  const parent = parentKey ? getItem(parentKey) : null;
-  if (!parent) {
-    throw new TypeError('Missing itemKey on module state for procedural frame cross-section.');
-  }
-  const frameItem = firstRecipeProfileOrUprightItem(parent);
-  if (!frameItem) {
-    throw new TypeError(
-      `Item ${parentKey} has no profile/upright in recipe for procedural frame cross-section.`,
-    );
-  }
-  return crossSectionCmFromFrameItem(frameItem);
+/**
+ * Prosedürel aluminyum kesiti: `fair_stand_dimensions.frame_width_cm` / `frame_depth_cm`
+ * (bootstrap → STAND_DIMENSIONS). Leaf recipe kesiti saklı kalır (`crossSectionCmFromFrameItem`)
+ * ama sahne şimdilik stand zarfını okur.
+ */
+export function resolveProceduralFrameCrossSectionCm(_moduleState) {
+  const stand = getStandDimensions();
+  return Object.freeze({
+    frameWidthCm: stand.frameWidthCm,
+    frameDepthCm: stand.frameDepthCm,
+    frameItemKey: null,
+    source: 'stand-dimensions',
+  });
 }
 
 export function getProceduralFrameCrossSectionM(moduleState) {
