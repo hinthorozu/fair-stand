@@ -48,7 +48,8 @@
 
 ## Gap / çatışma (yol haritası × bugünkü kod/DB)
 
-Kaynak tarama: 2026-09-23. Kod değiştirilmeden tespit.
+Kaynak tarama: 2026-09-23. Kod değiştirilmeden tespit.  
+Derin tarama (aynı gün): üç paralel snap motoru — `itemSnap.js` (floodlight type+anchor), `TYPE_BEHAVIORS` `panel-seam` (raf; DB snap yok sayılır), magnetic/stand XY. Host = recipe parent AABB top (`listSnapHosts` child type eşleşince tüm wall). Seed hard map: `item_snap_seed._SNAP_BY_TYPE`. Rename sürtünmesi: `WALL_WIDTH_TO_ITEM_KEY` / `wall_200` sabitleri + `flat-panel` type registry — capability host’u `item_key`’e bağlamamalı.
 
 ### Uyuşanlar
 
@@ -108,9 +109,9 @@ Bugünkü `panel-seam` bu **görünümü** verir ama kaynak stand pitch / `strip
 | P5 | Erteli | Doğru |
 
 **P0 zorunlu seçim (yazılmadan P4 yok):**  
-(A) Capability + face/edge’e geç; `SCENE_POSE` / B.9 aynı cümleye çek.  
-(B) Yol haritası P4’ü mevcut `snap_target_item_type` diline indir (capability ertele).  
-Karışık ilerleme yasak.
+**(KİLİTLENDİ 2026-09-23, güncellendi).** stand.family + rule_type + rule; item `family_id` + requires|provides rule FK; motor **rule id**. Face/edge/mount_mode kural satırında; CRM CRUD. Type→kural runtime map yok.
+
+(B) iptal — mevcut `snap_target_item_type` dilinde P4 yok.
 
 ---
 
@@ -122,9 +123,11 @@ Karışık ilerleme yasak.
 - [x] Snap SKU’da değil aile/capability’de (hedef)
 - [x] Admin 3D P5’e alındı
 - [x] Gap / çatışma notu yazıldı (2026-09-23)
-- [ ] Capability sözlüğü donduruldu (`top-rail`, `shelf-rail` + face/edge)
-- [ ] P0 seçim A veya B kilitlendi
-- [ ] `SCENE_POSE.md` + PENDING B.9 / C.4 aynı cümleye çekildi
+- [x] Capability sözlüğü hedefi: `top-rail`, `shelf-rail` + face/edge (DB’den; hardcode yok)
+- [x] P0 seçim **A** kilitlendi (2026-09-23)
+- [x] `SCENE_POSE.md` + PENDING B.9 / C.4 aynı cümleye çekildi
+- [x] DB şema + admin seçim alanları (0024; CRM face/edge dropdown)
+- [ ] Sanal hat türetme ince ayarı (recipe panel band / top-rail offset) — devam
 
 ### P1 — Leaf Item tek kaynak
 

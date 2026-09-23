@@ -1,4 +1,4 @@
-import { getItem, getItemSnapSpec, resolveSceneDimensions } from './items.js';
+import { getItem, getItemSnapSpec, itemProvidesSnapRule, resolveSceneDimensions } from './items.js';
 import { getPlacementInterval } from './modulePlacement.js';
 
 function hostHeightCm(host) {
@@ -14,18 +14,19 @@ function distanceSq(host, xCm, yCm) {
   return dx * dx + dy * dy;
 }
 
-function listSnapHosts(modules, targetItemType, movingId) {
+/** Hosts that provide the required snap rule (self or recipe child). */
+function listSnapHosts(modules, spec, movingId) {
   const hosts = [];
   for (const module of modules ?? []) {
     if (!module || module.id === movingId) continue;
     const item = module.itemKey ? getItem(module.itemKey) : null;
-    if (item?.type === targetItemType) {
+    if (itemProvidesSnapRule(item, spec)) {
       hosts.push(module);
       continue;
     }
     for (const row of item?.composition?.items ?? []) {
       const child = getItem(row.itemKey);
-      if (child?.type === targetItemType) {
+      if (itemProvidesSnapRule(child, spec)) {
         hosts.push(module);
         break;
       }
@@ -46,32 +47,49 @@ function pickNearestHost(hosts, placement) {
   return [...pool].sort((left, right) => distanceSq(left, xCm, yCm) - distanceSq(right, xCm, yCm))[0];
 }
 
-function anchorZCm(host, anchor) {
+/**
+ * Z from provider face/edge recipe on the host box.
+ * face=top + edge=top (or any edge on top face) → host top.
+ * face=front + edge=top → host base + height (same box top until virtual band lines land).
+ */
+function mountZCmFromFaceEdge(host, face, edge) {
   const zCm = Number(host.placement?.zCm) || 0;
   const heightCm = hostHeightCm(host);
-  if (anchor === 'top') return zCm + heightCm;
-  if (anchor === 'bottom') return zCm;
-  return zCm;
+  if (face === 'top' || (face === 'front' && edge === 'top') || (face === 'back' && edge === 'top')) {
+    return zCm + heightCm;
+  }
+  if (face === 'bottom' || edge === 'bottom') return zCm;
+  return zCm + heightCm;
 }
 
-/** Snap moving item to nearest host of snapTargetItemType at snapAnchor. Null if no spec/host. */
+function resolveProviderFaceEdge(host, spec) {
+  const item = host?.itemKey ? getItem(host.itemKey) : null;
+  if (itemProvidesSnapRule(item, spec)) {
+    return { face: item.snapFace, edge: item.snapEdge };
+  }
+  for (const row of item?.composition?.items ?? []) {
+    const child = getItem(row.itemKey);
+    if (itemProvidesSnapRule(child, spec)) {
+      return { face: child.snapFace, edge: child.snapEdge };
+    }
+  }
+  return { face: null, edge: null };
+}
+
+/** Snap moving item to nearest host that provides the required rule. Null if no spec/host. */
 export function snapPlacementToItemAnchor(moduleState, placement, modules = []) {
   const spec = getItemSnapSpec(moduleState);
-  if (!spec || !placement) return null;
-  const host = pickNearestHost(
-    listSnapHosts(modules, spec.targetItemType, moduleState?.id),
-    placement,
-  );
+  if ((!spec?.requiresRuleId && !spec?.requires) || !placement) return null;
+  const host = pickNearestHost(listSnapHosts(modules, spec, moduleState?.id), placement);
   if (!host) return null;
 
-  const next = { ...placement, zCm: anchorZCm(host, spec.anchor) };
-  if (spec.anchor === 'left' || spec.anchor === 'right') {
+  const { face, edge } = resolveProviderFaceEdge(host, spec);
+  const next = { ...placement, zCm: mountZCmFromFaceEdge(host, face, edge) };
+  if (edge === 'left' || edge === 'right') {
     const widthCm = Number(moduleState.widthCm) || 0;
     const interval = getPlacementInterval(host.placement, host.widthCm);
     if (interval) {
-      const startCm = spec.anchor === 'left'
-        ? interval.startCm
-        : interval.endCm - widthCm;
+      const startCm = edge === 'left' ? interval.startCm : interval.endCm - widthCm;
       if (interval.axis === 'y') next.yCm = startCm;
       else next.xCm = startCm;
     }

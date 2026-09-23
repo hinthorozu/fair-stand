@@ -133,8 +133,13 @@ function mapItem(row) {
   }
   const defaultZ = Number(row.default_z_cm ?? item.dimensions?.mountHeightCm);
   item.defaultZCm = Number.isFinite(defaultZ) ? defaultZ : 0;
-  assign('snapTargetItemType', row.snap_target_item_type);
-  assign('snapAnchor', row.snap_anchor);
+  assign('snapRequires', row.snap_requires);
+  assign('snapProvides', row.snap_provides);
+  assign('snapFace', row.snap_face);
+  assign('snapEdge', row.snap_edge);
+  assign('familyCode', row.family_code);
+  assign('snapRequiresRuleCode', row.snap_requires_rule_code);
+  assign('snapProvidesRuleCode', row.snap_provides_rule_code);
   applyItemSnapFields(item);
   applyItemScenePose(item);
   return item;

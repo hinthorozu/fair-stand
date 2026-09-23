@@ -91,18 +91,15 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 - **Karar:** Occupancy kalkınca yalnız kimlik/seed ayrımı; şerit sayısı anlamı taşımaz.
 - **Kaynak:** `ITEMS.md` kuyruk (8 Item).
 
-### B.9. Item snap — DB `snap_target_item_type` / `snap_anchor` (ör. `led_floodlight` → Profile)
+### B.9. Item snap — stand.family + rule_type + rule (P0 kilit)
 
-- **Durum:** BACKLOG — sadeleştirilecek (2026-09-23 not); **sözleşme çatışması** `ITEM_FIRST_ROADMAP.md` § Gap ile açık
-- **Ürün kuralı:** Admin/DB’de “projektör **Profile**’a snap” denmişse, sahnede **Profile** görüldüğünde ona yapışmalı; kural tek cümle, kullanıcıya yansıyan davranış bu.
-- **Bugün (kötü / dağınık):** `src/itemSnap.js` + placement (`moduleBehavior`, `modulePlacement`, `scene3d` top-fixture) iç içe: recipe parent’ı host sayma (`composition.items` içinde `profile` leaf → tüm `flat-panel` modülü host), anchor Z = parent `placement.zCm + moduleState.heightCm` (recipe profil ray geometrisi değil), en yakın host = modül köşe mesafesi, duvar/free/20 cm grid, short-up `variant` upright joint, profil vs panel **aynı slotta** çarpışma — DB snap ile çelişen ikinci kurallar.
-- **Hedef (yavaş oturtma):** Snap yalnız Item kolonlarından (`snap_target_item_type`, `snap_anchor`; gerekirse genişletme `ITEMS.md` + migration). Host = gerçek **Profile** instance (type `profile` veya net tanımlı profile host API); görülmezse belgelenmiş fallback (ör. `default_z_cm`), recipe taraması ve type-map davranışı snap kararını **gölgelemez**. Capability/`provides` modeli seçilirse (`ITEM_FIRST_ROADMAP` P0 A) bu madde `SCENE_POSE` ile birlikte yeniden yazılır — paralel iki hedef yasak.
-- **Raf notu:** Görsel olarak raf panel **front** yüz lokal üst / dikiş hatlarına oturur (`shelf-rail`); wall AABB top değil. Bugün runtime `panel-seam` — C.4 + Gap notu.
-- **Kaynak:** `fair_stand_items.snap_*`; seed `item_snap_seed.py` (`led-floodlight` → `profile`/`top`); `SCENE_POSE.md` snap; `ITEM_FIRST_ROADMAP.md` Gap; konuşma: stand 500 vs mount 350 kot uyumsuzluğu ayrı (zarf § C.2).
-- **Yasak:** Yeni gizli snap listesi (`TYPE_BEHAVIORS` vb.) eklemeden önce B.9 hedefi ile hizalanmalı; mevcut testler (`itemSnapAnchor.test.js`) geçici sözleşme — hedef değişince güncellenir.
+- **Durum:** UYGULAMA — aile/kural tabloları; item FK seçer; motor rule id
+- **Ürün kuralı:** CRM’de aile / kural tipi / kural CRUD; item’da family + requires|provides rule
+- **Hedef:** `SCENE_POSE.md` Snap; `DATABASE.md` aile/kural
+- **Raf:** kural `mount_mode=panel-seam` → seam geometrisi
+- **Yasak:** Type→kural runtime map; item üzerinde free-text capability string kolonları
 
 ---
-
 ## C. Stand zarfı ve DB (Item tablosu değil)
 
 ### C.1. `fair_stand_dimensions.strip_count` / `strip_height_m` / height CHECK
@@ -126,9 +123,9 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 
 ### C.4. `overlaySnap = 'panel-seam'`
 
-- **Durum:** KALDIRILACAK
-- **Karar:** Raf/host snap item anchor; global seam yok.
-- **Kaynak:** `SCENE_POSE.md` § Snap.
+- **Durum:** KAPANDI — `usesPanelSeamOverlaySnap` ← kural `mount_mode === panel-seam`
+- **Karar:** Raf host + seam geometrisi; type map `overlaySnap` yok
+- **Kaynak:** `SCENE_POSE.md` § Snap
 
 ---
 

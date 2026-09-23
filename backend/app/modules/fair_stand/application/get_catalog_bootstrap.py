@@ -4,6 +4,11 @@ from dataclasses import dataclass
 from hashlib import sha256
 from json import dumps
 
+from app.modules.fair_stand.application.admin_snap_catalog import (
+    _family_payload,
+    _rule_payload,
+    _rule_type_payload,
+)
 from app.modules.fair_stand.application.item_mapper import (
     CatalogCategory,
     CatalogPreview,
@@ -20,6 +25,9 @@ class CatalogBootstrap:
     categories: list[CatalogCategory]
     items: list[ItemAggregate]
     preview_kinds: list[CatalogPreview]
+    families: list[dict]
+    rule_types: list[dict]
+    rules: list[dict]
     stand_dimensions: StandDimensions
     settings: RuntimeSettings
 
@@ -32,6 +40,9 @@ class GetCatalogBootstrapUseCase:
         categories = self._repository.list_active_categories()
         items = self._repository.list_items(active_only=True)
         preview_kinds = self._repository.list_preview_payloads(active_only=False)
+        families = [_family_payload(row) for row in self._repository.list_families(active_only=True)]
+        rule_types = [_rule_type_payload(row) for row in self._repository.list_rule_types(active_only=True)]
+        rules = [_rule_payload(row) for row in self._repository.list_rules(active_only=True)]
         stand_dimensions = self._repository.get_stand_dimensions()
         if stand_dimensions is None:
             raise ValueError("Fair Stand dimensions are not seeded.")
@@ -44,6 +55,9 @@ class GetCatalogBootstrapUseCase:
                     "categories": [category.__dict__ for category in categories],
                     "items": [item.payload for item in items],
                     "previewKinds": [preview.__dict__ for preview in preview_kinds],
+                    "families": families,
+                    "ruleTypes": rule_types,
+                    "rules": rules,
                     "standDimensions": stand_dimensions.__dict__,
                     "settings": settings.__dict__,
                 },
@@ -56,6 +70,9 @@ class GetCatalogBootstrapUseCase:
             categories=categories,
             items=items,
             preview_kinds=preview_kinds,
+            families=families,
+            rule_types=rule_types,
+            rules=rules,
             stand_dimensions=stand_dimensions,
             settings=settings,
         )

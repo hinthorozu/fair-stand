@@ -79,23 +79,20 @@ Kes (item duruşunu ezmesin):
 
 ---
 
-## Snap (DB, hardcode yok)
+## Snap (stand.family + kural tipi + kural — hardcode yok)
 
-Projektör “üst kot 350” değil. Hedef listesi JS’te yazılmaz.
+Kaynak yalnız DB; CRM’den düzenlenir.
 
-Sürülen item’da kolonlar: `snap_target_item_type`, `snap_anchor` (nullable).
+| Tablo | Rol |
+|---|---|
+| `fair_stand_family` (stand.family) | Item ailesi; item `family_id` seçer |
+| `fair_stand_rule_type` | Bugün yalnız `snap`; ileride başka tipler |
+| `fair_stand_rule` | Kural satırı: `code`, snap için `face`/`edge`/`mount_mode` |
 
-- `led_floodlight`: `'profile'`  
-- raf: `'panel'` + `'top'` — `panel_197` koda yazılmaz  
-
-Motor (generic):
-
-1. Sahnede `item.type === snap_target_item_type` → o gövdenin `snap_anchor` kenarı.  
-2. Değilse reçetede o type çocuk → her çocuğun aynı kenarı (duvar içi panel üstü, profil rayı).  
-
-`wall_200` / şerit seam / `panel-seam` yok. Birden fazla type gerekirse üye tablosu.
-
-`TYPE_BEHAVIORS.overlaySnap = 'panel-seam'` kalkar.
+Item: `snap_requires_rule_id` **veya** `snap_provides_rule_id` (XOR).  
+Motor: **aynı rule id** eşleşmesi. Katalog payload’da denorm: `snapRequires`/`snapProvides`/`snapFace`/`snapEdge`/`snapMountMode`.  
+`mount_mode=panel-seam` → seam geometrisi; `face-edge` → kutu yüz/kenar.  
+Eski `snap_target_item_type` / string capability kolonları kullanılmaz. Type→kural JS map yok.
 
 ---
 

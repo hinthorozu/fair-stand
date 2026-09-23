@@ -305,18 +305,42 @@ export function resolveItemDefaultZCm(itemOrKey) {
   return readCm(item?.defaultZCm) ?? readCm(item?.dimensions?.mountHeightCm) ?? 0;
 }
 
-export const SNAP_ANCHORS = Object.freeze(['top', 'bottom', 'left', 'right']);
+export const SNAP_FACES = Object.freeze(['front', 'back', 'top', 'bottom', 'left', 'right']);
+export const SNAP_EDGES = Object.freeze(['top', 'bottom', 'left', 'right']);
 
+/** Driven item: rule id (+ denorm code/mountMode). Providers expose snapProvidesRuleId. */
 export function getItemSnapSpec(itemOrKey) {
   const item = typeof itemOrKey === 'string'
     ? getItem(itemOrKey)
     : (itemOrKey?.itemKey ? getItem(itemOrKey.itemKey) ?? itemOrKey : itemOrKey);
-  const targetItemType = typeof item?.snapTargetItemType === 'string'
-    ? item.snapTargetItemType.trim()
-    : '';
-  const anchor = item?.snapAnchor;
-  if (!targetItemType || !SNAP_ANCHORS.includes(anchor)) return null;
-  return Object.freeze({ targetItemType, anchor });
+  const requiresRuleId = Number.isFinite(Number(item?.snapRequiresRuleId))
+    ? Number(item.snapRequiresRuleId)
+    : null;
+  const requires = typeof item?.snapRequires === 'string' ? item.snapRequires.trim() : '';
+  if (!requiresRuleId && !requires) return null;
+  return Object.freeze({
+    requiresRuleId,
+    requires: requires || null,
+    mountMode: typeof item?.snapMountMode === 'string' ? item.snapMountMode : null,
+  });
+}
+
+export function itemProvidesSnapRule(itemOrKey, specOrRuleId) {
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  if (!item) return false;
+  if (specOrRuleId && typeof specOrRuleId === 'object') {
+    if (specOrRuleId.requiresRuleId != null && item.snapProvidesRuleId != null) {
+      return Number(item.snapProvidesRuleId) === Number(specOrRuleId.requiresRuleId);
+    }
+    return Boolean(specOrRuleId.requires && item.snapProvides === specOrRuleId.requires);
+  }
+  if (specOrRuleId == null) return false;
+  return Number(item.snapProvidesRuleId) === Number(specOrRuleId);
+}
+
+export function itemProvidesSnapCapability(itemOrKey, capability) {
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  return Boolean(capability && item?.snapProvides === capability);
 }
 
 /** Overlay mouse Z ezer. Snap spec varsa placement.zCm (motor) kalır. Yoksa instance / defaultZCm. */

@@ -144,23 +144,21 @@ Sözleşme: `CATALOG.md`. `catalog_visible=true` ⇒ `category_id` + `catalog_it
 | `default_rotation_deg` | `defaultRotationDeg` | İlk `placement.rotationZDeg` | İlk bakış | `getModuleDefaultRotationDeg` |
 | `side_insert_rotation` | `sideInsertRotation` | `inherit` / `default` | Yana ek açı kipi | `resolveSideInsertRotationDeg` |
 
-### Duruş / snap / yüzey (`fair_stand_items`)
+### Duruş / snap / yüzey (`fair_stand_items` + aile/kural tabloları)
 
-Ayrı `duruş` / `snap` tablosu **yok**. `default_z_cm`, `snap_target_item_type`, `snap_anchor` bu tablonun kolonlarıdır (ekrandaki liste). Sözleşme: `SCENE_POSE.md`. Snap okuma: `src/itemSnap.js` + `src/items.js`.
+Ayrı snap motor tablosu: `fair_stand_family` (stand.family), `fair_stand_rule_type`, `fair_stand_rule`. Item yalnız FK seçer. Sözleşme: `SCENE_POSE.md`. Okuma: `src/itemSnap.js` + `src/items.js`.
 
-| Kolon | JSON | Nedir | Neden | Nerede |
+| Kolon / tablo | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `default_z_cm` | `defaultZCm` | Yerden kot (cm), NOT NULL default 0 | Tavan item’ı ezmesin | `items.js` `resolveItemDefaultZCm` / `applyItemPlacementZCm`. Seed: floodlight 350, profil 342, short-up-1/2 300/250, `KETTLE` 66 |
-| `snap_target_item_type` | `snapTargetItemType` | Yapışılacak `item.type` | Host listesi Item’da | `itemSnap.js` + `items.js` `getItemSnapSpec`. Canlı dolu: `led_floodlight`→`profile`+`top`; `shelf_100/150/200`→`panel`+`top` |
-| `snap_anchor` | `snapAnchor` | `top`/`bottom`/`left`/`right` | Hedef kenar | aynı |
-| `is_render` | `isRender` | Kendi sahne gövdesi var mı | Leaf/BOM çizmeyen SKU | `items.js` `itemHasSceneRender` → factory |
-| `accepts_color` | `acceptsColor` | Renk atanır mı | Mesh userData | `itemCapabilities.js` → `scene3d.js` |
-| `accepts_image` | `acceptsImage` | Yüzey görseli | aynı | aynı |
-| `accepts_lightbox` | `acceptsLightbox` | Işıklı kumaş | aynı | aynı |
-| `accepts_glass` | `acceptsGlass` | Cam görünüm | aynı | `scene3d.js` `acceptsGlass` |
-| `accepts_mesh` | `acceptsMesh` | Delikli branda | aynı | `itemCapabilities.js` |
+| `default_z_cm` | `defaultZCm` | Yerden kot (cm) | Tavan ezmesin | `resolveItemDefaultZCm` |
+| `family_id` → `fair_stand_family` | `familyId` / `familyCode` | stand.family | Aile seçimi | CRM + bootstrap |
+| `snap_requires_rule_id` → `fair_stand_rule` | `snapRequiresRuleId` (+ denorm `snapRequires`, `snapMountMode`) | Aranan kural | Eşleşme | `getItemSnapSpec` |
+| `snap_provides_rule_id` → `fair_stand_rule` | `snapProvidesRuleId` (+ denorm `snapProvides`/`snapFace`/`snapEdge`) | Sunulan kural | Host | `listSnapHosts` |
+| `fair_stand_rule.face/edge/mount_mode` | (kural satırı; item’da denorm) | Snap geometri | UI’dan kural | CRM Kurallar |
+| `snap_target_item_type` / `snap_anchor` | — | Legacy | Okunmaz | null |
+| `is_render` / `accepts_*` | aynı | yüzey | aynı | aynı |
 
-CHECK: `is_render=false` iken tüm `accepts_*` false.
+CHECK: requires XOR provides rule id; `is_render=false` → accepts_* false.
 
 ### Bileşim başlığı (`fair_stand_items`; child satırlar `fair_stand_item_components`)
 

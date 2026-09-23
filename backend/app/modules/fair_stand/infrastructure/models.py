@@ -59,6 +59,76 @@ class FairStandCatalogPreviewKindModel(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+class FairStandFamilyModel(Base):
+    """stand.family — UI-editable item family catalog."""
+
+    __tablename__ = "fair_stand_family"
+    __table_args__ = (UniqueConstraint("code", name="uq_fair_stand_family_code"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(64), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    sort_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    items: Mapped[list["FairStandItemModel"]] = relationship(back_populates="family")
+
+
+class FairStandRuleTypeModel(Base):
+    __tablename__ = "fair_stand_rule_type"
+    __table_args__ = (UniqueConstraint("code", name="uq_fair_stand_rule_type_code"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(64), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    rules: Mapped[list["FairStandRuleModel"]] = relationship(back_populates="rule_type")
+
+
+class FairStandRuleModel(Base):
+    __tablename__ = "fair_stand_rule"
+    __table_args__ = (
+        UniqueConstraint("rule_type_id", "code", name="uq_fair_stand_rule_type_id_code"),
+        CheckConstraint(
+            "face IS NULL OR face IN ('front', 'back', 'top', 'bottom', 'left', 'right')",
+            name="ck_fair_stand_rule_face",
+        ),
+        CheckConstraint(
+            "edge IS NULL OR edge IN ('top', 'bottom', 'left', 'right')",
+            name="ck_fair_stand_rule_edge",
+        ),
+        CheckConstraint(
+            "mount_mode IS NULL OR mount_mode IN ('face-edge', 'panel-seam')",
+            name="ck_fair_stand_rule_mount_mode",
+        ),
+        CheckConstraint(
+            "(face IS NULL) = (edge IS NULL)",
+            name="ck_fair_stand_rule_face_edge_pair",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    rule_type_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("fair_stand_rule_type.id", ondelete="RESTRICT", onupdate="CASCADE"),
+        nullable=False,
+    )
+    code: Mapped[str] = mapped_column(String(64), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    face: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    edge: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    mount_mode: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    sort_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    rule_type: Mapped[FairStandRuleTypeModel] = relationship(back_populates="rules")
+
+
 class FairStandItemModel(Base):
     __tablename__ = "fair_stand_items"
     __table_args__ = (
@@ -97,9 +167,16 @@ class FairStandItemModel(Base):
             "snap_anchor IS NULL OR snap_anchor IN ('top', 'bottom', 'left', 'right')",
             name="ck_fair_stand_items_snap_anchor",
         ),
+        CheckConstraint(
+            "snap_requires_rule_id IS NULL OR snap_provides_rule_id IS NULL",
+            name="ck_fair_stand_items_snap_rule_xor",
+        ),
         Index("ix_fair_stand_items_item_type", "item_type"),
         Index("ix_fair_stand_items_category_id", "category_id"),
         Index("ix_fair_stand_items_preview_id", "preview_id"),
+        Index("ix_fair_stand_items_family_id", "family_id"),
+        Index("ix_fair_stand_items_snap_requires_rule_id", "snap_requires_rule_id"),
+        Index("ix_fair_stand_items_snap_provides_rule_id", "snap_provides_rule_id"),
         Index("ix_fair_stand_items_is_active", "is_active"),
         Index(
             "uq_fair_stand_items_catalog_order",
@@ -143,6 +220,21 @@ class FairStandItemModel(Base):
     default_z_cm: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False, default=Decimal("0"), server_default="0")
     snap_target_item_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
     snap_anchor: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    family_id: Mapped[int | None] = mapped_column(
+        Integer,
+        ForeignKey("fair_stand_family.id", ondelete="SET NULL", onupdate="CASCADE"),
+        nullable=True,
+    )
+    snap_requires_rule_id: Mapped[int | None] = mapped_column(
+        Integer,
+        ForeignKey("fair_stand_rule.id", ondelete="SET NULL", onupdate="CASCADE"),
+        nullable=True,
+    )
+    snap_provides_rule_id: Mapped[int | None] = mapped_column(
+        Integer,
+        ForeignKey("fair_stand_rule.id", ondelete="SET NULL", onupdate="CASCADE"),
+        nullable=True,
+    )
     is_render: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
     accepts_color: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
     accepts_image: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
@@ -154,6 +246,13 @@ class FairStandItemModel(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     category: Mapped[FairStandCategoryModel | None] = relationship(back_populates="items")
+    family: Mapped[FairStandFamilyModel | None] = relationship(back_populates="items")
+    snap_requires_rule: Mapped[FairStandRuleModel | None] = relationship(
+        foreign_keys=[snap_requires_rule_id],
+    )
+    snap_provides_rule: Mapped[FairStandRuleModel | None] = relationship(
+        foreign_keys=[snap_provides_rule_id],
+    )
     dimensions: Mapped["FairStandItemDimensionsModel | None"] = relationship(
         back_populates="item", cascade="all, delete-orphan"
     )

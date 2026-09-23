@@ -211,17 +211,15 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 - **Validation:** sonlu sayı; `null` yok
 - **Kod:** adım 4. Snap hedefi adım 5.
 
-### snapTargetItemType / snapAnchor
+### familyId / snapRequiresRuleId / snapProvidesRuleId
 
-- **Type:** string \| yok (`snapAnchor`: `top` \| `bottom` \| `left` \| `right`)
-- **Required:** no (ikisi birlikte null veya ikisi dolu)
-- **Scope:** Item master — sürülen SKU
-- **Amaç:** Kime / hangi kenara yapışır. JS type listesi yok
-- **Örnek:** `led_floodlight` → `profile` + `top`. Raf → `panel` + `top`
-- Motor: sahnede `item.type === snapTargetItemType` gövde; yoksa reçetede o type çocuk (parent kotu)
-- `center` yok
-- **Canonical consumer:** `getItemSnapSpec` / `snapPlacementToItemAnchor`
-- **Kod:** adım 5
+- **Type:** FK (payload’da denorm code/face/edge/mountMode)
+- **Required:** no (requires **veya** provides; ikisi birden yok)
+- **Scope:** Item → `fair_stand_family` / `fair_stand_rule` (rule_type bugün `snap`)
+- **Amaç:** Aile + kural seçimi; motor **rule id** eşler. Face/edge/mount_mode kural satırında; CRM’den düzenlenir
+- **Örnek:** `led_floodlight` → requires `top-rail`. `profile_190` → provides `top-rail`. Raf → requires `shelf-rail` (`mount_mode=panel-seam`)
+- **Canonical consumer:** `getItemSnapSpec` / `snapPlacementToItemAnchor` / `usesPanelSeamOverlaySnap`
+- Type→kural JS map yok; seed bir kerelik DATA bağlar
 
 ### Yüzey yetenekleri (`accepts*`)
 

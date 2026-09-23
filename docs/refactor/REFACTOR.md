@@ -32,6 +32,12 @@ Belge: `docs/refactor/ITEM_FIRST_ROADMAP.md`. `SCENE_POSE.md` snap hedefi ile hi
 
 Aynı gün: **Gap / çatışma** notu eklendi — mevcut `snap_target_item_type` vs capability; wall recipe→AABB host; raf `panel-seam` vs panel **front** lokal üst (`shelf-rail`); P0’da A/B kilidi zorunlu. Raf görsel kuralı: N panel → N yatay hat, wall tavanı değil.
 
+**P0 kilitlendi:** stand.family + rule_type + rule; item family + requires|provides rule FK; motor rule id; CRM CRUD. Capability string kolon / type map iptal.
+
+## 2026-09-23 — Snap aile/kural tabloları
+
+Migration `0024_item_snap_capability`: `fair_stand_family`, `fair_stand_rule_type`, `fair_stand_rule`; item `family_id` / `snap_*_rule_id`. Runtime rule id eşler; `mount_mode=panel-seam` seam. CRM aile/kural tipi/kural sayfaları + item dropdown.
+
 ---
 
 ## 2026-09-22 — Duvar zinciri: `edgeWidthCm` / `wallWidthCm`

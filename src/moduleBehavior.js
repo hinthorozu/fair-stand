@@ -1,5 +1,5 @@
 import { getStandDimensions } from './standDimensions.js';
-import { getItem, isShortUpFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm } from './items.js';
+import { getItem, getItemSnapSpec, listRegisteredItems, isShortUpFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm } from './items.js';
 
 const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
   kind: 'silhouette',
@@ -80,7 +80,6 @@ const TYPE_BEHAVIORS = Object.freeze({
   'showcase-2': WALL_BEHAVIOR,
   shelf: overlayBehavior({
     wallCapacity: 'exclude',
-    overlaySnap: 'panel-seam',
   }),
   door: WALL_BEHAVIOR,
   'base-wall': Object.freeze({
@@ -334,11 +333,38 @@ export function getModuleGhostBehavior(moduleOrType) {
   return getModuleBehavior(moduleOrType).ghost ?? DEFAULT_GHOST_BEHAVIOR;
 }
 
+function snapRequiresOf(moduleOrType) {
+  if (moduleOrType && typeof moduleOrType === 'object') {
+    return getItemSnapSpec(moduleOrType)?.requires ?? null;
+  }
+  if (typeof moduleOrType !== 'string') return null;
+  const byKey = getItem(moduleOrType);
+  if (byKey) return getItemSnapSpec(byKey)?.requires ?? null;
+  for (const item of listRegisteredItems()) {
+    if (item.type === moduleOrType) return getItemSnapSpec(item)?.requires ?? null;
+  }
+  return null;
+}
+
+function snapMountModeOf(moduleOrType) {
+  if (moduleOrType && typeof moduleOrType === 'object') {
+    return getItemSnapSpec(moduleOrType)?.mountMode ?? null;
+  }
+  if (typeof moduleOrType !== 'string') return null;
+  const byKey = getItem(moduleOrType);
+  if (byKey) return getItemSnapSpec(byKey)?.mountMode ?? null;
+  for (const item of listRegisteredItems()) {
+    if (item.type === moduleOrType) return getItemSnapSpec(item)?.mountMode ?? null;
+  }
+  return null;
+}
+
 export function isFreePlacementModule(moduleOrType) {
   return getModuleBehavior(moduleOrType).placement === 'free';
 }
 
 export function isTopPlacementModule(moduleOrType) {
+  if (snapRequiresOf(moduleOrType) === 'top-rail') return true;
   return getModuleBehavior(moduleOrType).placement === 'top';
 }
 
@@ -346,6 +372,7 @@ export function isWallOverlayModule(moduleOrType) {
   return getModuleBehavior(moduleOrType).placement === 'wall-overlay';
 }
 
+/** Rule mount_mode=panel-seam → panel band seam geometry (math); vocabulary from rule row. */
 export function usesPanelSeamOverlaySnap(moduleOrType) {
-  return getModuleBehavior(moduleOrType).overlaySnap === 'panel-seam';
+  return snapMountModeOf(moduleOrType) === 'panel-seam';
 }
