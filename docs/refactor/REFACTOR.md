@@ -8,6 +8,8 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 - Rotation: `docs/refactor/ROTATION.md`
 - PostgreSQL tabloları: `docs/refactor/DATABASE.md`
 - Ertelenmiş kararlar / backlog (tavan–şerit kaldırma sırası, Item property, TYPE_BEHAVIORS kuyruğu): `docs/refactor/PENDING_ITEM_DECISIONS.md`
+- Item-first + capability snap yol haritası: `docs/refactor/ITEM_FIRST_ROADMAP.md`
+
 ---
 
 ## 2026-09-23 — Stand `frame_*` kolonları geri (5,5×10)
@@ -19,6 +21,16 @@ Migration `0023_restore_stand_frame_columns`. Bootstrap/admin/CRM + `resolveProc
 ## 2026-09-23 — TEMP: prosedürel frame 5,5×10 cm
 
 *(Superseeded by `0023` DB restore — aynı gün.)* Leaf upright/profile 8×8 BOM kesiti sahnede kalın durduğu için önce kod sabiti, sonra stand kolonları geri alındı.
+
+---
+
+## 2026-09-23 — Item-first yol haritası (karar)
+
+Ürün kararı yazıldı: leaf Item → registry → recipe parent → rotate/defaultZ → capability snap (`provides`/`requires`, örn. projetör ↔ profile `top-rail`). Snap SKU’ya değil aile/capability’ye. Admin parametrik Three.js preview P5 (ertelendi; bugün CSS siluet).
+
+Belge: `docs/refactor/ITEM_FIRST_ROADMAP.md`. `SCENE_POSE.md` snap hedefi ile hizalanacak.
+
+Aynı gün: **Gap / çatışma** notu eklendi — mevcut `snap_target_item_type` vs capability; wall recipe→AABB host; raf `panel-seam` vs panel **front** lokal üst (`shelf-rail`); P0’da A/B kilidi zorunlu. Raf görsel kuralı: N panel → N yatay hat, wall tavanı değil.
 
 ---
 
