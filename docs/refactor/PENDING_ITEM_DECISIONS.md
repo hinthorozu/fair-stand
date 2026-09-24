@@ -8,7 +8,7 @@ Henüz çözülmemiş veya bilinçli ertelenmiş **Item property**, **stand zarf
 - **Implementasyon izni:** Bu dosya + ilgili konu belgesi (`SCENE_POSE.md` pose/snap hedefi); tek başına yeterli değildir.
 - **Kapalı maddeler** tekrar listelenmez — yalnız `REFACTOR.md` + § F özeti.
 
-**İlgili belgeler:** `SCENE_POSE.md` (duruş/snap hedef sözleşmesi), `DATABASE.md` (tablo envanteri), `ITEMS.md` (onaylı şema + runtime field kuyruğu), `STAND_DIMENSIONS.md` (zarf), `ITEM_FIRST_ROADMAP.md` (item-first + capability snap checklist).
+**İlgili belgeler:** `FAIR_STAND_DB_KULLANIM_KILAVUZU.md` (CRM kullanım), `SCENE_POSE.md` (duruş/snap hedef), `DATABASE.md` (tablo envanteri), `ITEMS.md` (onaylı şema + runtime field kuyruğu), `STAND_DIMENSIONS.md` (zarf), `ITEM_FIRST_ROADMAP.md` (item-first checklist), `README.md` (dizin).
 
 ---
 
@@ -133,12 +133,12 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 
 ### C.3. `TYPE_BEHAVIORS` (placement davranışı)
 
-- **Durum:** KESİT 1+2+3 TAŞINDI — tüm tip davranışı `fair_stand_item_type` + CRM + motor DB-only; JS `TYPE_BEHAVIORS` map yok
-- **Sıradaki:** Kullanım kılavuzu (§ 11b) — tip davranışı **ve** snap kuralı aynı rehberde
-- **Karar (analiz 2026-09-24):** Snap dilimi şablon. Davranış paketi **`fair_stand_item_type` kolonlarına** (yeni tablo şart değil; bugün tip-only). Item override / snap çoklu requires-provides ayrı epic. Export etkilenmez (davranış zaten ZIP’te yok).
-- **Canonical belge:** `TYPE_BEHAVIORS_DB_ROADMAP.md`
-- **Kaynak:** `DATABASE.md` § *Bilerek burada olmayanlar*; `moduleBehavior.js`; `SCENE_POSE.md` snap şablonu
-- **Yasak:** Dual-read bitmeden JS map’i kalıcı ikinci otorite bırakmak; enum rename; placement’ı proje ZIP’e gömmek
+- **Durum:** KAPANDI — kesit 1+2+3 + overlap FK; JS map yok; motor DB-only
+- **Operatör kılavuzu:** `FAIR_STAND_DB_KULLANIM_KILAVUZU.md` (§ tip vs snap)
+- **Migration arşivi:** `TYPE_BEHAVIORS_DB_ROADMAP.md`
+- **Karar (analiz 2026-09-24):** Snap dilimi şablon. Davranış paketi **`fair_stand_item_type` kolonlarına**. Item override / snap çoklu requires-provides ayrı epic. Export etkilenmez.
+- **Kaynak:** `DATABASE.md`; `moduleBehavior.js`; `SCENE_POSE.md` snap şablonu
+- **Yasak:** Tip davranışını JS map’e geri almak; enum rename; placement’ı proje ZIP’e gömmek
 
 ### C.4. `overlaySnap = 'panel-seam'`
 
@@ -208,9 +208,9 @@ Aşağıdakiler **onaylı şemada değil**; karar verilince B veya C’ye madde 
 | strip occupancy | B.4–B.5 KALDIRILACAK, § A.4 | Hedefte yok | Tablo + 8 satır |
 | mount vs default Z | B.3 ARAŞTIRILACAK | defaultZ drop hedefi | İki kolon |
 | wallGap vs panel boşluğu | B.2 koru, B.6 araştır | Standart boşluk hedefi | wall_gap_cm |
-| TYPE_BEHAVIORS | C.3 yol haritası | — | `TYPE_BEHAVIORS_DB_ROADMAP.md` |
+| TYPE_BEHAVIORS | C.3 KAPANDI | — | `FAIR_STAND_DB_KULLANIM_KILAVUZU.md` + `TYPE_BEHAVIORS_DB_ROADMAP.md` |
 | Module contract allowlist | C.5 KALDIRILACAK | — | `accepts*` / recipe Item’da |
-| Item snap (Profile host) | B.9 BACKLOG | snap anchor hedefi | `snap_target_item_type`, `snap_anchor` |
+| Item snap (Profile host) | B.9 UYGULAMA | snap face/edge kuralda | rule FK; legacy `snap_target_item_type` / `snap_anchor` nullable |
 | BOM ↔ leaf fit uyarı | B.7 KARAR (kod yok) | zarf item’da | recipe `quantity` + leaf dims |
 | Kaldırma sırası | § A canonical | Hedef metin | strip kolonları § C.1 |
 

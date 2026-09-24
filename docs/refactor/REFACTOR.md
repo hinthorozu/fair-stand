@@ -7,8 +7,18 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 - Stand zarfı: `docs/refactor/STAND_DIMENSIONS.md`
 - Rotation: `docs/refactor/ROTATION.md`
 - PostgreSQL tabloları: `docs/refactor/DATABASE.md`
-- Ertelenmiş kararlar / backlog (tavan–şerit kaldırma sırası, Item property, TYPE_BEHAVIORS kuyruğu): `docs/refactor/PENDING_ITEM_DECISIONS.md`
-- Item-first + capability snap yol haritası: `docs/refactor/ITEM_FIRST_ROADMAP.md`
+- CRM kullanım kılavuzu: `docs/refactor/FAIR_STAND_DB_KULLANIM_KILAVUZU.md`
+- Ertelenmiş kararlar / backlog (tavan–şerit, Item property; tip davranışı C.3 kapandı): `docs/refactor/PENDING_ITEM_DECISIONS.md`
+- Item-first checklist: `docs/refactor/ITEM_FIRST_ROADMAP.md`
+- Belge dizini: `docs/refactor/README.md`
+
+---
+
+## 2026-09-24 — Tip davranışı DB (kesit 1–3 + overlap FK) + belge senkron
+
+Kod (merged): migration `0030`–`0033`; seed `item_type_behavior_seed.py`; motor DB-only (`moduleBehavior.js` + `KNOWN_BEHAVIOR_TYPE_KEYS` fail-fast); CRM Item Type form + overlap multi-select. JS `TYPE_BEHAVIORS` map yok.
+
+Belgeler güncellendi (silinmedi): `DATABASE.md`, `FAIR_STAND_DB_KULLANIM_KILAVUZU.md`, `TYPE_BEHAVIORS_DB_ROADMAP.md` (arşiv), `PENDING` C.3 KAPANDI, `README.md`, `STAND_DIMENSIONS.md`, `ITEMS.md`, `ITEM_FIRST_ROADMAP.md`, `MODULE_BEHAVIOR_STANDARD.md`. `docs/items/**` tarihsel audit — regenerate edilmeden dokunulmadı.
 
 ---
 
@@ -318,7 +328,7 @@ Dokunulmayan: `wall_showcase_100_2` / `wall_showcase_100_3`, `glass_shelf`, vitr
 
 - `sceneDimensions.widthCm` 100/150/200; `heightCm=1.8`; `depthCm` fiziksel 38
 - `MODULE_STATE_FACTORIES.shelf` exact `itemKey`
-- `TYPE_BEHAVIORS.shelf`: `wall-overlay`, `wallCapacity: exclude`, `overlaySnap: panel-seam`
+- Tip davranışı (tarihsel `TYPE_BEHAVIORS.shelf`; şimdi DB): `placement=wall-overlay`, `wallCapacity=exclude` — `overlaySnap` tip alanında yok; seam → kural `shelf-rail` / `usesPanelSeamOverlaySnap`
 - Geçerli seam: `getStandInternalSeamHeightsCm()` = strip index 1..stripCount-1 (50..300). 0 ve 350 yok.
 - Raf alt yüzeyi seam’de; overlay merkez = seam + thickness/2
 - Identity: exact `itemKey` → `getItem`; type/width/shelfCount tahmini yok
@@ -348,11 +358,11 @@ Dokunulmayan: `base_100` / `base_150` / `base_200`, leaf `base_top_107_50` / `ba
 
 ### Kalan base-wall mekanizması
 
-- `TYPE_BEHAVIORS['base-wall']`
+- Tip `base-wall` davranışı DB’de (`fair_stand_item_type`; motor `getItemType` / `KNOWN_BEHAVIOR_TYPE_KEYS`) — tarihsel JS map satırı kalktı
 - `createBaseWallModule` renderer + `scene3d` type dispatch
-- `CATALOG_PREVIEWS` / `CATALOG_PREVIEW_RENDERERS['base-wall']` / CSS `.module-drag-base-wall`
+- Katalog silüet: `previewId` → bootstrap preview + `createModuleCatalogPreview` (CSS örn. `.module-drag-base-wall`)
 - `selectionFeedback` type `base-wall` metni
-- `usesWallBackboneCollisionDepth` (type-level)
+- `usesWallBackboneCollisionDepth` (type-level, DB `collision_depth`)
 
 ### Sayılar
 
@@ -384,8 +394,8 @@ Dokunulmayan: leaf `shelf_100` / `shelf_150` / `shelf_200`, `wall_showcase_*`, `
 
 - leaf `shelf_*` + `getItem(itemKey)`
 - `createShelfModule` renderer (Item `dimensions`; `SHELF_DIMENSIONS` yok)
-- `TYPE_BEHAVIORS.shelf`
-- `CATALOG_PREVIEW_RENDERERS.shelf` (catalogPreview `'shelf'` artık görünür Item’da yok)
+- Tip `shelf` davranışı DB’de (`placement` / `wallCapacity` vb.; tarihsel `TYPE_BEHAVIORS.shelf` kalktı)
+- Katalog silüet: Item `previewId` → `createModuleCatalogPreview` (string `catalogPreview: 'shelf'` / eski renderer map yok)
 - context-menu `toggle-shelf-light` / `shelfLightingOn`
 
 ### Sayılar
@@ -521,6 +531,8 @@ Catalog UI “type neymiş?” diye kart tipi, ikon ve CSS kararı veriyordu.
 ```text
 CATALOG_PREVIEW_RENDERERS[item.catalogPreview]
 ```
+
+*(Sonraki dilim: string `catalogPreview` → integer `previewId` + DB bootstrap preview; JS `CATALOG_PREVIEW_RENDERERS` map kalktı — `createModuleCatalogPreview` / `getCatalogPreview`.)*
 
 Item kendi Catalog görünümünü tarif eder. Catalog yalnız okur ve gösterir.
 
