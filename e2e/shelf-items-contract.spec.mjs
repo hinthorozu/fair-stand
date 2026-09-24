@@ -98,8 +98,8 @@ test('shelf_100/150/200 Catalog’da Raf & Vitrin altında vitrinlerden sonra g�
     cards.map((card) => card.getAttribute('data-module-key'))
   ));
   expect(keys).toEqual([
-    'wall_showcase_100_3',
-    'wall_showcase_100_2',
+    'wall_showcase_100_3_350',
+    'wall_showcase_100_2_350',
     'shelf_100',
     'shelf_150',
     'shelf_200',

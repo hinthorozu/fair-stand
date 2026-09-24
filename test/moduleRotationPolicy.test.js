@@ -8,7 +8,7 @@ import {
 
 test('clockwise and counter-clockwise deltas always use the Item rotation step', () => {
   const cases = [
-    [{ itemKey: 'wall_200' }, 90],
+    [{ itemKey: 'wall_200_350' }, 90],
     [{ itemKey: 'desk_banko_100_l' }, 90],
     [{ itemKey: 'desk_banko_100' }, 45],
     [{ itemKey: 'desk_banko_150' }, 45],

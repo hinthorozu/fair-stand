@@ -137,7 +137,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 8,
                 "depth_cm": 8,
-                "height_cm": 346.5,
+                "height_cm": 346.5,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -175,7 +177,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 8,
                 "depth_cm": 8,
-                "height_cm": 99,
+                "height_cm": 99,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -209,7 +213,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 8,
                 "depth_cm": 8,
-                "height_cm": 49.5,
+                "height_cm": 49.5,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -243,7 +249,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 41.5,
                 "depth_cm": 8,
-                "height_cm": 8,
+                "height_cm": 8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -281,7 +289,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 91,
                 "depth_cm": 8,
-                "height_cm": 8,
+                "height_cm": 8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -319,7 +329,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 140.5,
                 "depth_cm": 8,
-                "height_cm": 8,
+                "height_cm": 8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -357,7 +369,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 190,
                 "depth_cm": 8,
-                "height_cm": 8,
+                "height_cm": 8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -395,7 +409,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 48.5,
                 "depth_cm": 0.8,
-                "height_cm": 47,
+                "height_cm": 47,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -429,7 +445,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 98,
                 "depth_cm": 0.8,
-                "height_cm": 47,
+                "height_cm": 47,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -463,7 +481,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 147.5,
                 "depth_cm": 0.8,
-                "height_cm": 47,
+                "height_cm": 47,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -497,7 +517,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 197,
                 "depth_cm": 0.8,
-                "height_cm": 47,
+                "height_cm": 47,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -531,7 +553,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 42.5,
                 "depth_cm": 0.8,
-                "height_cm": 47,
+                "height_cm": 47,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -565,7 +589,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 92,
                 "depth_cm": 0.8,
-                "height_cm": 47,
+                "height_cm": 47,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -599,7 +625,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 142.5,
                 "depth_cm": 0.8,
-                "height_cm": 47,
+                "height_cm": 47,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -633,7 +661,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 192,
                 "depth_cm": 0.8,
-                "height_cm": 47,
+                "height_cm": 47,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -667,7 +697,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 48.5,
                 "depth_cm": 0.8,
-                "height_cm": 47,
+                "height_cm": 47,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -701,7 +733,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 98,
                 "depth_cm": 0.8,
-                "height_cm": 47,
+                "height_cm": 47,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -843,7 +877,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": 8,
-                "height_cm": 200,
+                "height_cm": 200,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -877,7 +913,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": 38,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -915,7 +953,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": 38,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -953,7 +993,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 200,
                 "depth_cm": 38,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1018,7 +1060,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 94.6,
                 "depth_cm": 30,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1052,7 +1096,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 143.5,
                 "depth_cm": 30,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1086,7 +1132,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 87.4,
                 "depth_cm": 30,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1120,7 +1168,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 87.3,
                 "depth_cm": 28.5,
-                "height_cm": 0.6,
+                "height_cm": 0.6,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1154,7 +1204,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 110,
                 "depth_cm": 60,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1188,7 +1240,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 52,
                 "depth_cm": 60,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1222,7 +1276,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 160,
                 "depth_cm": 60,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1256,7 +1312,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 102,
                 "depth_cm": 60,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1290,7 +1348,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 210,
                 "depth_cm": 60,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1324,7 +1384,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": 60,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1358,7 +1420,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 107,
                 "depth_cm": 50,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1392,7 +1456,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 157,
                 "depth_cm": 50,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1426,7 +1492,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 206,
                 "depth_cm": 50,
-                "height_cm": 1.8,
+                "height_cm": 1.8,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1460,7 +1528,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 43,
                 "depth_cm": 43,
-                "height_cm": 180,
+                "height_cm": 180,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1500,7 +1570,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 24,
                 "depth_cm": 19,
-                "height_cm": 25,
+                "height_cm": 25,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1539,7 +1611,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 50,
                 "depth_cm": 50,
-                "height_cm": 66,
+                "height_cm": 66,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1578,7 +1652,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 40,
                 "depth_cm": 40,
-                "height_cm": 60,
+                "height_cm": 60,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1617,7 +1693,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": 150,
-                "height_cm": 78,
+                "height_cm": 78,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1664,7 +1742,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 65,
                 "depth_cm": 45,
-                "height_cm": 78,
+                "height_cm": 78,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1703,7 +1783,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": 45,
-                "height_cm": 78,
+                "height_cm": 78,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1742,7 +1824,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 60,
                 "depth_cm": 42,
-                "height_cm": 38,
+                "height_cm": 38,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1776,7 +1860,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": 150,
-                "height_cm": 82,
+                "height_cm": 82,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1819,7 +1905,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 46,
                 "depth_cm": 58,
-                "height_cm": 82,
+                "height_cm": 82,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1858,7 +1946,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 75,
                 "depth_cm": 75,
-                "height_cm": 74,
+                "height_cm": 74,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1892,7 +1982,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 60,
                 "depth_cm": 55,
-                "height_cm": 121,
+                "height_cm": 121,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -1931,7 +2023,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 50,
                 "depth_cm": 20,
-                "height_cm": 35,
+                "height_cm": 35,
+
+
                 "mount_height_cm": 350,
                 "wall_gap_cm": None,
             },
@@ -1965,7 +2059,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 200,
                 "depth_cm": 3.5,
-                "height_cm": 50,
+                "height_cm": 50,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": 1.5,
             },
@@ -1999,7 +2095,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 108.5,
                 "depth_cm": None,
-                "height_cm": 61,
+                "height_cm": 61,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2033,7 +2131,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": 100,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2094,7 +2194,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 140,
                 "depth_cm": 16,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2128,7 +2230,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 140,
                 "depth_cm": 16,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2162,7 +2266,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 112,
                 "depth_cm": 28,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2196,7 +2302,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 60,
                 "depth_cm": 60,
-                "height_cm": 120,
+                "height_cm": 120,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2235,7 +2343,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": 30,
-                "height_cm": 30,
+                "height_cm": 30,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2274,7 +2384,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": 30,
-                "height_cm": 30,
+                "height_cm": 30,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2313,7 +2425,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 200,
                 "depth_cm": 30,
-                "height_cm": 30,
+                "height_cm": 30,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2352,7 +2466,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 93,
                 "depth_cm": 5,
-                "height_cm": 52.3,
+                "height_cm": 52.3,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2395,7 +2511,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 121.8,
                 "depth_cm": 5,
-                "height_cm": 68.5,
+                "height_cm": 68.5,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2438,7 +2556,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 143.9,
                 "depth_cm": 5,
-                "height_cm": 80.9,
+                "height_cm": 80.9,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2481,7 +2601,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": None,
                 "depth_cm": 5,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2528,7 +2650,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": None,
                 "depth_cm": 5,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2553,7 +2677,7 @@ CATALOG_SEED = {
             ],
         },
         {
-            "item_key": "door_100",
+            "item_key": "wall_door_100_350",
             "name": "Depo Kapısı 100",
             "item_type": "door",
             "unit": "adet",
@@ -2575,7 +2699,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2638,7 +2764,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": 50,
-                "height_cm": 50,
+                "height_cm": 50,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2705,7 +2833,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": 50,
-                "height_cm": 50,
+                "height_cm": 50,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2772,7 +2902,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 200,
                 "depth_cm": 50,
-                "height_cm": 50,
+                "height_cm": 50,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2839,7 +2971,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": 50,
-                "height_cm": 100,
+                "height_cm": 100,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2906,7 +3040,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": 50,
-                "height_cm": 100,
+                "height_cm": 100,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -2973,7 +3109,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 200,
                 "depth_cm": 50,
-                "height_cm": 100,
+                "height_cm": 100,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3040,7 +3178,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": 100,
-                "height_cm": 100,
+                "height_cm": 100,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3111,7 +3251,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": 150,
-                "height_cm": 100,
+                "height_cm": 100,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3186,7 +3328,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 200,
                 "depth_cm": 200,
-                "height_cm": 100,
+                "height_cm": 100,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3239,7 +3383,7 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_50",
+            "item_key": "wall_50_350",
             "name": "Panel 50",
             "item_type": "flat-panel",
             "unit": None,
@@ -3261,7 +3405,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 50,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3298,7 +3444,7 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_100",
+            "item_key": "wall_100_350",
             "name": "Panel 100",
             "item_type": "flat-panel",
             "unit": None,
@@ -3320,7 +3466,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3357,7 +3505,7 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_150",
+            "item_key": "wall_150_350",
             "name": "Panel 150",
             "item_type": "flat-panel",
             "unit": None,
@@ -3379,7 +3527,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3416,7 +3566,7 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_200",
+            "item_key": "wall_200_350",
             "name": "Panel 200",
             "item_type": "flat-panel",
             "unit": None,
@@ -3438,7 +3588,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 200,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3497,7 +3649,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 200,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3559,7 +3713,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3621,7 +3777,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3683,7 +3841,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 50,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3745,7 +3905,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 200,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3807,7 +3969,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 150,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3869,7 +4033,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3931,7 +4097,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 50,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -3971,7 +4139,7 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_separator_50",
+            "item_key": "wall_separator_50_350",
             "name": "Separatör 50",
             "item_type": "separator",
             "unit": None,
@@ -3993,7 +4161,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 50,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -4034,7 +4204,7 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_separator_100",
+            "item_key": "wall_separator_100_350",
             "name": "Separatör 100",
             "item_type": "separator",
             "unit": None,
@@ -4056,7 +4226,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -4093,7 +4265,7 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_separator_50_sarmasik",
+            "item_key": "wall_separator_50_350_sarmasik",
             "name": "Separatör 50 Sarmaşık",
             "item_type": "separator",
             "unit": None,
@@ -4115,7 +4287,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 50,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -4161,7 +4335,7 @@ CATALOG_SEED = {
             ],
         },
         {
-            "item_key": "wall_separator_100_sarmasik",
+            "item_key": "wall_separator_100_350_sarmasik",
             "name": "Separatör 100 Sarmaşık",
             "item_type": "separator",
             "unit": None,
@@ -4183,7 +4357,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -4225,7 +4401,7 @@ CATALOG_SEED = {
             ],
         },
         {
-            "item_key": "wall_showcase_100_2",
+            "item_key": "wall_showcase_100_2_350",
             "name": "2 Gözlü Vitrin 100",
             "item_type": "showcase-2",
             "unit": "adet",
@@ -4247,7 +4423,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },
@@ -4309,7 +4487,7 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_showcase_100_3",
+            "item_key": "wall_showcase_100_3_350",
             "name": "3 Gözlü Vitrin 100",
             "item_type": "showcase-3",
             "unit": "adet",
@@ -4331,7 +4509,9 @@ CATALOG_SEED = {
             "dimensions": {
                 "width_cm": 100,
                 "depth_cm": None,
-                "height_cm": None,
+                "height_cm": None,
+
+
                 "mount_height_cm": None,
                 "wall_gap_cm": None,
             },

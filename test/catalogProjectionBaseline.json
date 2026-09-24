@@ -1,15 +1,15 @@
 {
   "generatedFrom": "thin catalog cards itemKey label previewId",
   "keys": [
-    "wall_200",
-    "wall_150",
-    "wall_100",
-    "wall_50",
-    "wall_separator_100",
-    "wall_separator_50",
-    "wall_separator_100_sarmasik",
-    "wall_separator_50_sarmasik",
-    "door_100",
+    "wall_200_350",
+    "wall_150_350",
+    "wall_100_350",
+    "wall_50_350",
+    "wall_separator_100_350",
+    "wall_separator_50_350",
+    "wall_separator_100_350_sarmasik",
+    "wall_separator_50_350_sarmasik",
+    "wall_door_100_350",
     "wall_200_short_up_2",
     "wall_150_short_up_2",
     "wall_100_short_up_2",
@@ -23,8 +23,8 @@
     "profile_140_5",
     "profile_91",
     "profile_41_5",
-    "wall_showcase_100_3",
-    "wall_showcase_100_2",
+    "wall_showcase_100_3_350",
+    "wall_showcase_100_2_350",
     "shelf_100",
     "shelf_150",
     "shelf_200",
@@ -66,15 +66,15 @@
       "catalogName": "Panel & Duvar",
       "catalogIndex": 1,
       "keys": [
-        "wall_200",
-        "wall_150",
-        "wall_100",
-        "wall_50",
-        "wall_separator_100",
-        "wall_separator_50",
-        "wall_separator_100_sarmasik",
-        "wall_separator_50_sarmasik",
-        "door_100"
+        "wall_200_350",
+        "wall_150_350",
+        "wall_100_350",
+        "wall_50_350",
+        "wall_separator_100_350",
+        "wall_separator_50_350",
+        "wall_separator_100_350_sarmasik",
+        "wall_separator_50_350_sarmasik",
+        "wall_door_100_350"
       ]
     },
     {
@@ -102,8 +102,8 @@
       "catalogName": "Raf & Vitrin",
       "catalogIndex": 3,
       "keys": [
-        "wall_showcase_100_3",
-        "wall_showcase_100_2",
+        "wall_showcase_100_3_350",
+        "wall_showcase_100_2_350",
         "shelf_100",
         "shelf_150",
         "shelf_200"
@@ -164,47 +164,47 @@
   ],
   "descriptors": [
     {
-      "itemKey": "wall_200",
+      "itemKey": "wall_200_350",
       "label": "Panel 200",
       "previewId": 9
     },
     {
-      "itemKey": "wall_150",
+      "itemKey": "wall_150_350",
       "label": "Panel 150",
       "previewId": 9
     },
     {
-      "itemKey": "wall_100",
+      "itemKey": "wall_100_350",
       "label": "Panel 100",
       "previewId": 9
     },
     {
-      "itemKey": "wall_50",
+      "itemKey": "wall_50_350",
       "label": "Panel 50",
       "previewId": 9
     },
     {
-      "itemKey": "wall_separator_100",
+      "itemKey": "wall_separator_100_350",
       "label": "Separat\u00f6r 100",
       "previewId": 18
     },
     {
-      "itemKey": "wall_separator_50",
+      "itemKey": "wall_separator_50_350",
       "label": "Separat\u00f6r 50",
       "previewId": 18
     },
     {
-      "itemKey": "wall_separator_100_sarmasik",
+      "itemKey": "wall_separator_100_350_sarmasik",
       "label": "Separat\u00f6r 100 Sarma\u015f\u0131k",
       "previewId": 19
     },
     {
-      "itemKey": "wall_separator_50_sarmasik",
+      "itemKey": "wall_separator_50_350_sarmasik",
       "label": "Separat\u00f6r 50 Sarma\u015f\u0131k",
       "previewId": 19
     },
     {
-      "itemKey": "door_100",
+      "itemKey": "wall_door_100_350",
       "label": "Depo Kap\u0131s\u0131 100",
       "previewId": 8
     },
@@ -274,12 +274,12 @@
       "previewId": 17
     },
     {
-      "itemKey": "wall_showcase_100_3",
+      "itemKey": "wall_showcase_100_3_350",
       "label": "3 G\u00f6zl\u00fc Vitrin 100",
       "previewId": 21
     },
     {
-      "itemKey": "wall_showcase_100_2",
+      "itemKey": "wall_showcase_100_2_350",
       "label": "2 G\u00f6zl\u00fc Vitrin 100",
       "previewId": 21
     },

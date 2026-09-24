@@ -35,13 +35,13 @@ test('src runtime deleted duplicate dimension fields are gone except Recipe.nomi
 });
 
 test('itemBom recipe BOM uses composition.items for wall_200 and door_100', () => {
-  const wall = getItem('wall_200');
+  const wall = getItem('wall_200_350');
   assert.equal(wall.composition.nominalWidthCm, undefined);
   assert.equal(wall.dimensions.widthCm, 200);
-  const wallBom = Object.fromEntries(resolveItemBom('wall_200').map((line) => [line.itemKey, line.quantity]));
+  const wallBom = Object.fromEntries(resolveItemBom('wall_200_350').map((line) => [line.itemKey, line.quantity]));
   assert.equal(wallBom.profile_190, 2);
   assert.equal(wallBom.panel_197, 7);
 
-  const doorBom = Object.fromEntries(resolveItemBom('door_100').map((line) => [line.itemKey, line.quantity]));
+  const doorBom = Object.fromEntries(resolveItemBom('wall_door_100_350').map((line) => [line.itemKey, line.quantity]));
   assert.equal(doorBom.door_leaf_100, 1);
 });

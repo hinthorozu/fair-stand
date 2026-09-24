@@ -17,14 +17,14 @@ import {
 } from './recipeParentItemKey.js';
 
 const SEPARATOR_KEYS = [
-  'wall_separator_50',
-  'wall_separator_100',
-  'wall_separator_50_sarmasik',
-  'wall_separator_100_sarmasik',
+  'wall_separator_50_350',
+  'wall_separator_100_350',
+  'wall_separator_50_350_sarmasik',
+  'wall_separator_100_350_sarmasik',
 ];
 
 const EXPECTED = {
-  wall_separator_50: {
+  wall_separator_50_350: {
     widthCm: 50,
     modelFile: null,
     recipeQuantities: {
@@ -36,7 +36,7 @@ const EXPECTED = {
       connector_single: 7,
     },
   },
-  wall_separator_100: {
+  wall_separator_100_350: {
     widthCm: 100,
     modelFile: null,
     recipeQuantities: {
@@ -47,7 +47,7 @@ const EXPECTED = {
       connector_single: 13,
     },
   },
-  wall_separator_50_sarmasik: {
+  wall_separator_50_350_sarmasik: {
     widthCm: 50,
     modelFile: 'wall_separator_50_sarmasik.glb',
     recipeQuantities: {
@@ -59,7 +59,7 @@ const EXPECTED = {
       connector_single: 7,
     },
   },
-  wall_separator_100_sarmasik: {
+  wall_separator_100_350_sarmasik: {
     widthCm: 100,
     modelFile: 'wall_separator_100_sarmasik.glb',
     recipeQuantities: {
@@ -143,8 +143,8 @@ for (const itemKey of SEPARATOR_KEYS) {
 
 test('sarmasık ve düz separator aynı genişlikte aynı recipe’yi paylaşır', () => {
   for (const width of [50, 100]) {
-    const plain = getItem(`wall_separator_${width}`);
-    const vine = getItem(`wall_separator_${width}_sarmasik`);
+    const plain = getItem(`wall_separator_${width}_350`);
+    const vine = getItem(`wall_separator_${width}_350_sarmasik`);
     assert.equal(plain.dimensions.widthCm, vine.dimensions.widthCm);
     assert.equal(plain.composition.moduleType, undefined);
     assert.equal(vine.composition.moduleType, undefined);

@@ -10,8 +10,8 @@ import {
 import { describeSurfaceSelection } from '../src/selectionFeedback.js';
 
 const CASES = [
-  { type: 'showcase-2', itemKey: 'wall_showcase_100_2', eyeCount: 2 },
-  { type: 'showcase-3', itemKey: 'wall_showcase_100_3', eyeCount: 3 },
+  { type: 'showcase-2', itemKey: 'wall_showcase_100_2_350', eyeCount: 2 },
+  { type: 'showcase-3', itemKey: 'wall_showcase_100_3_350', eyeCount: 3 },
 ];
 
 test('wall showcase body stays one grouped user-assignable color surface', () => {

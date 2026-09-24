@@ -23,15 +23,15 @@ test('canonical state construction registry instantiates every catalog entry', (
 
 test('canonical state construction preserves placement only when explicitly requested', () => {
   const descriptor = {
-    ...getCatalogItem('wall_100'),
+    ...getCatalogItem('wall_100_350'),
     placement: { xCm: 100, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
   };
 
-  const fresh = createModuleStateFromDescriptor(descriptor, { itemKey: 'wall_100' });
+  const fresh = createModuleStateFromDescriptor(descriptor, { itemKey: 'wall_100_350' });
   assert.equal(fresh.placement, undefined);
 
   const restored = createModuleStateFromDescriptor(descriptor, {
-    itemKey: 'wall_100',
+    itemKey: 'wall_100_350',
     preservePlacement: true,
   });
   assert.deepEqual(restored.placement, descriptor.placement);
@@ -58,7 +58,7 @@ test('automatic catalog-equivalent descriptors receive canonical catalog identit
   const door = createModuleStateFromDescriptor({ type: 'door', widthCm: 100 });
   const normalSeparator = createModuleStateFromDescriptor({ type: 'separator', widthCm: 100 });
   const vineSeparator = createModuleStateFromDescriptor({
-    itemKey: 'wall_separator_100_sarmasik',
+    itemKey: 'wall_separator_100_350_sarmasik',
     type: 'separator',
   });
   const guessedVine = createModuleStateFromDescriptor({
@@ -67,10 +67,10 @@ test('automatic catalog-equivalent descriptors receive canonical catalog identit
     modelFile: 'wall_separator_100_sarmasik.glb',
   });
 
-  assert.equal(wall.itemKey, 'wall_100');
-  assert.equal(door.itemKey, 'door_100');
-  assert.equal(normalSeparator.itemKey, 'wall_separator_100');
-  assert.equal(vineSeparator.itemKey, 'wall_separator_100_sarmasik');
+  assert.equal(wall.itemKey, 'wall_100_350');
+  assert.equal(door.itemKey, 'wall_door_100_350');
+  assert.equal(normalSeparator.itemKey, 'wall_separator_100_350');
+  assert.equal(vineSeparator.itemKey, 'wall_separator_100_350_sarmasik');
   assert.equal(guessedVine, null);
 });
 

@@ -17,31 +17,31 @@ import {
   getModuleRecipe,
 } from './recipeParentItemKey.js';
 
-const WALL_KEYS = ['wall_50', 'wall_100', 'wall_150', 'wall_200'];
+const WALL_KEYS = ['wall_50_350', 'wall_100_350', 'wall_150_350', 'wall_200_350'];
 
 const EXPECTED = {
-  wall_50: {
+  wall_50_350: {
     name: 'Panel 50',
     widthCm: 50,
     recipeQuantities: {
       profile_41_5: 2, upright_346_5: 2, panel_48_5: 7, connector_start: 2, connector_single: 13,
     },
   },
-  wall_100: {
+  wall_100_350: {
     name: 'Panel 100',
     widthCm: 100,
     recipeQuantities: {
       profile_91: 2, upright_346_5: 2, panel_98: 7, connector_start: 2, connector_single: 13,
     },
   },
-  wall_150: {
+  wall_150_350: {
     name: 'Panel 150',
     widthCm: 150,
     recipeQuantities: {
       profile_140_5: 2, upright_346_5: 2, panel_147_5: 7, connector_start: 2, connector_single: 13,
     },
   },
-  wall_200: {
+  wall_200_350: {
     name: 'Panel 200',
     widthCm: 200,
     recipeQuantities: {
@@ -112,28 +112,28 @@ for (const itemKey of WALL_KEYS) {
 const SHORT_UP_2 = {
   wall_50_short_up_2: {
     widthCm: 50,
-    parentKey: 'wall_50',
+    parentKey: 'wall_50_350',
     recipeQuantities: {
       profile_41_5: 2, upright_99: 2, panel_48_5: 2, connector_start: 2, connector_single: 3,
     },
   },
   wall_100_short_up_2: {
     widthCm: 100,
-    parentKey: 'wall_100',
+    parentKey: 'wall_100_350',
     recipeQuantities: {
       profile_91: 2, upright_99: 2, panel_98: 2, connector_start: 2, connector_single: 3,
     },
   },
   wall_150_short_up_2: {
     widthCm: 150,
-    parentKey: 'wall_150',
+    parentKey: 'wall_150_350',
     recipeQuantities: {
       profile_140_5: 2, upright_99: 2, panel_147_5: 2, connector_start: 2, connector_single: 3,
     },
   },
   wall_200_short_up_2: {
     widthCm: 200,
-    parentKey: 'wall_200',
+    parentKey: 'wall_200_350',
     recipeQuantities: {
       profile_190: 2, upright_99: 2, panel_197: 2, connector_start: 2, connector_single: 3,
     },
@@ -176,28 +176,28 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_2)) {
 const SHORT_UP_1 = {
   wall_50_short_up_1: {
     widthCm: 50,
-    parentKey: 'wall_50',
+    parentKey: 'wall_50_350',
     recipeQuantities: {
       profile_41_5: 2, upright_49_5: 2, panel_48_5: 1, connector_start: 2, connector_single: 3,
     },
   },
   wall_100_short_up_1: {
     widthCm: 100,
-    parentKey: 'wall_100',
+    parentKey: 'wall_100_350',
     recipeQuantities: {
       profile_91: 2, upright_49_5: 2, panel_98: 1, connector_start: 2, connector_single: 3,
     },
   },
   wall_150_short_up_1: {
     widthCm: 150,
-    parentKey: 'wall_150',
+    parentKey: 'wall_150_350',
     recipeQuantities: {
       profile_140_5: 2, upright_49_5: 2, panel_147_5: 1, connector_start: 2, connector_single: 3,
     },
   },
   wall_200_short_up_1: {
     widthCm: 200,
-    parentKey: 'wall_200',
+    parentKey: 'wall_200_350',
     recipeQuantities: {
       profile_190: 2, upright_49_5: 2, panel_197: 1, connector_start: 2, connector_single: 3,
     },
@@ -256,7 +256,7 @@ test('wall_200_short_up_2 skips floor collisions but keeps wall snap policy', ()
   };
   const wall = {
     id: 'wall',
-    itemKey: 'wall_200',
+    itemKey: 'wall_200_350',
     type: 'flat-panel',
     widthCm: 200,
     placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },

@@ -50,10 +50,10 @@ def test_admin_item_records_list_and_get(client, db_session, auth_headers):
     assert body["pagination"]["totalItems"] >= 90
     assert len(body["items"]) == 25
     assert body["sorting"]["field"] == "itemKey"
-    detail = client.get("/api/v1/fair-stand/admin/item-records/wall_200", headers=auth_headers)
+    detail = client.get("/api/v1/fair-stand/admin/item-records/wall_200_350", headers=auth_headers)
     assert detail.status_code == 200
     detail_body = detail.json()
-    assert detail_body["itemKey"] == "wall_200"
+    assert detail_body["itemKey"] == "wall_200_350"
     assert detail_body["dimensions"] is not None
     assert isinstance(detail_body["components"], list)
     assert isinstance(detail_body["assets"], list)
@@ -76,7 +76,7 @@ def test_admin_item_records_list_search_filter_and_page(client, db_session, auth
         params={
             "page": 1,
             "pageSize": 10,
-            "search": "wall_200",
+            "search": "wall_200_350",
             "status": "active",
             "catalog": "visible",
             "render": "yes",
@@ -89,7 +89,7 @@ def test_admin_item_records_list_search_filter_and_page(client, db_session, auth
     body = response.json()
     assert body["pagination"]["pageSize"] == 10
     assert body["pagination"]["totalItems"] >= 1
-    assert any(item["itemKey"] == "wall_200" for item in body["items"])
+    assert any(item["itemKey"] == "wall_200_350" for item in body["items"])
     assert body["filters"]["status"] == "active"
     assert body["filters"]["catalog"] == "visible"
     assert body["filters"]["render"] == "yes"

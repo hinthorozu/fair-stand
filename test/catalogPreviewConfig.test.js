@@ -212,14 +212,14 @@ test('58 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
     'module-drag-trash-bin-body',
   ]);
 
-  const showcase3 = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_showcase_100_3')));
+  const showcase3 = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_showcase_100_3_350')));
   assert.equal(showcase3.children[0].dataset.eyes, '3');
-  const showcase2 = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_showcase_100_2')));
+  const showcase2 = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_showcase_100_2_350')));
   assert.equal(showcase2.children[0].dataset.eyes, '2');
 
-  const vine = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_separator_100_sarmasik')));
+  const vine = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_separator_100_350_sarmasik')));
   assert.match(vine.children[0].className, /is-vine/);
-  const plain = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_separator_100')));
+  const plain = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_separator_100_350')));
   assert.doesNotMatch(plain.children[0].className, /is-vine/);
 
   const hanging = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_200_short_up_2')));
@@ -239,7 +239,7 @@ test('58 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
     /Unknown previewId/,
   );
 
-  assert.equal(getItem('wall_200').previewId, 9);
+  assert.equal(getItem('wall_200_350').previewId, 9);
   assert.equal(getItem('kettle').previewId, 13);
   assert.equal(getItem('video_wall_2x2').previewId, 28);
   assert.equal(getItem('profile_190').previewId, 17);

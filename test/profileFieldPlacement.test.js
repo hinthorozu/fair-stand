@@ -65,7 +65,7 @@ test('profile uses wall_200 move/rotate/snap contract and does not nest into a n
 
   const düzWall = {
     id: 'wall-1',
-    itemKey: 'wall_200',
+    itemKey: 'wall_200_350',
     type: 'flat-panel',
     widthCm: 200,
     placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
@@ -105,7 +105,7 @@ test('field profile spans the same wall slot as a separator without collision', 
   const profile = createModuleStateFromDescriptor(getCatalogItem('profile_190'));
   profile.id = 'profile-span';
   profile.placement = { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' };
-  const slat = createModuleStateFromDescriptor(getCatalogItem('wall_separator_100'));
+  const slat = createModuleStateFromDescriptor(getCatalogItem('wall_separator_100_350'));
   slat.id = 'separator-mid';
   slat.placement = { xCm: 100, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' };
   assert.equal(slat.type, 'separator');

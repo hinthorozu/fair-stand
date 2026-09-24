@@ -37,7 +37,7 @@ test('Panel Ek Modül holds short-up family and field upright_346_5', () => {
     assert.equal(panelWall.keys.includes(key), false);
     assert.equal(getCatalogItem(key) != null, true);
   }
-  assert.equal(panelWall.keys.includes('wall_200'), true);
+  assert.equal(panelWall.keys.includes('wall_200_350'), true);
   assert.equal(panelWall.keys.includes('upright_346_5'), false);
 });
 
@@ -74,7 +74,7 @@ test('upright snaps to short-up, profile and banko joints, not to düz wall_200'
   };
   const düzWall = {
     id: 'wall-1',
-    itemKey: 'wall_200',
+    itemKey: 'wall_200_350',
     type: 'flat-panel',
     widthCm: 200,
     placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },

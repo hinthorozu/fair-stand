@@ -39,7 +39,7 @@ test('rotation getters require itemKey and do not fall back to type tables', () 
   assert.throws(() => getModuleRotationStepDeg({ type: 'counter', widthCm: 150 }), TypeError);
   assert.throws(() => getModuleDefaultRotationDeg('bar-stool'), TypeError);
   assert.equal(resolveSideInsertRotationDeg({ itemKey: 'furniture_bar_stool_classic' }, 90), 270);
-  assert.equal(resolveSideInsertRotationDeg({ itemKey: 'wall_200' }, 45), 45);
+  assert.equal(resolveSideInsertRotationDeg({ itemKey: 'wall_200_350' }, 45), 45);
 });
 
 test('TYPE_BEHAVIORS no longer owns rotation fields', () => {

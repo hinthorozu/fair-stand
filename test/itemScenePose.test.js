@@ -42,8 +42,8 @@ test('short-up collision band is item height + placement Z, not occupancy × sta
     wallId: 'back',
   };
   assert.deepEqual(getModuleCollisionHeightRangeCm(hanging), { minCm: 250, maxCm: 350 });
-  const wall = createFlatPanelModuleState({ itemKey: 'wall_200' });
+  const wall = createFlatPanelModuleState({ itemKey: 'wall_200_350' });
   const pitchCm = 50;
-  assert.equal(wall.strips.length, resolveFlatPanelStripCount(getItem('wall_200')));
-  assert.equal(wall.heightCm, Math.min(wall.strips.length * pitchCm, resolveSceneDimensions(getItem('wall_200')).heightCm));
+  assert.equal(wall.strips.length, resolveFlatPanelStripCount(getItem('wall_200_350')));
+  assert.equal(wall.heightCm, Math.min(wall.strips.length * pitchCm, resolveSceneDimensions(getItem('wall_200_350')).heightCm));
 });
