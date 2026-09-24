@@ -1,10 +1,11 @@
-# TYPE_BEHAVIORS → DB yol haritası (analiz; kod yok)
+# TYPE_BEHAVIORS → DB yol haritası (migration arşivi)
 
-**Durum:** ürün/analiz (2026-09-24). Uygulama izni: bu belge + `PENDING_ITEM_DECISIONS.md` § C.3.  
-**Amaç:** Snap dilimindeki gibi placement davranışını JS `TYPE_BEHAVIORS` map’inden çıkarıp DB + CRM + bootstrap’a taşımak.  
-**Kapsam dışı (şimdi):** Export/import formatı değişmez; proje ZIP zaten bu alanları taşımaz.
+**Durum:** UYGULANDI (2026-09-24) — Alembic `0030`–`0033` + CRM + motor DB-only.  
+**Operatör kılavuzu (canlı):** [`FAIR_STAND_DB_KULLANIM_KILAVUZU.md`](FAIR_STAND_DB_KULLANIM_KILAVUZU.md).  
+**Amaç (tarihçe):** Snap dilimindeki gibi placement davranışını JS `TYPE_BEHAVIORS` map’inden çıkarıp DB + CRM + bootstrap’a taşımak.  
+**Kapsam dışı:** Export/import formatı değişmedi; proje ZIP davranış alanı taşımaz.
 
-İlgili: `SCENE_POSE.md` (snap şablonu), `PENDING_ITEM_DECISIONS.md` § C.3, `DATABASE.md`, `ITEM_FIRST_ROADMAP.md`, `src/moduleBehavior.js`.
+İlgili: `PENDING_ITEM_DECISIONS.md` § C.3 (kapandı), `DATABASE.md`, `ITEM_FIRST_ROADMAP.md`, `src/moduleBehavior.js`.
 
 ---
 
@@ -125,13 +126,13 @@ Tüm davranış kolonları **NOT NULL** + seed dolu (tip kaydı eksik davranış
 
 ## 5. Öncelikli dilimler (snap sırası gibi)
 
-Kod yok; onay sonrası iş sırası:
+Uygulama tamamlandı; aşağıdaki checklist tarihçe.
 
 ### Dilim 0 — Karar kilidi
-- [ ] Bu belge + § C.3: “placement paketi `item_type` kolonlarında”
-- [ ] Item override yok (v1)
-- [ ] Enum rename yok
-- [ ] Snap çoklu requires/provides **ayrı** epic
+- [x] Bu belge + § C.3: “placement paketi `item_type` kolonlarında”
+- [x] Item override yok (v1)
+- [x] Enum rename yok
+- [x] Snap çoklu requires/provides **ayrı** epic
 
 ### Dilim 1 — Şema + seed (A)
 - [x] Migration: `fair_stand_item_type` kolonları + CHECK (`0030_item_type_placement`)
@@ -140,10 +141,10 @@ Kod yok; onay sonrası iş sırası:
 - [ ] Fixture / catalog seed dump güncelle *(gerekmez: dump item_type satırı taşımıyor; ensure path seed kullanıyor)*
 
 ### Dilim 2 — Bootstrap + motor dual-read (B)
-- [x] Catalog bootstrap `itemTypes[]` alanları *(payload’da var; motor henüz okumuyor)*
+- [x] Catalog bootstrap `itemTypes[]` alanları
 - [x] Frontend tip registry (snap rules gibi) veya `getItem` yolundan tip satırı
-- [x] `getModuleBehavior`: **DB tip kaydı → yoksa JS map** (geçici) — yalnız kesit 1 üçlüsü overlay
-- [x] Test: tip seed ↔ davranış parity (`TYPE_BEHAVIORS` golden)
+- [x] `getModuleBehavior`: DB tip kaydı (kesit 1–3)
+- [x] Test: tip seed ↔ davranış parity
 
 ### Dilim 3 — CRM (C)
 - [x] Item Type formu: select/checkbox’lar (enum + overlap virgüllü liste) — kesit 1–3
@@ -244,18 +245,13 @@ Item edit ekranına (v1) **koyma** — tip’ten miras.
 
 ---
 
-## 11b. Kullanım kılavuzu (sonra — şimdi yazma)
+## 11b. Kullanım kılavuzu
 
-**Durum:** PLAN / not. İçerik bu oturumda üretilmez.
+**Durum:** YAZILDI — [`FAIR_STAND_DB_KULLANIM_KILAVUZU.md`](FAIR_STAND_DB_KULLANIM_KILAVUZU.md)
 
-Tek operatör kılavuzu (CRM + motor):
+Tek operatör kılavuzu (CRM + motor): tip davranışı **ve** snap kuralı aynı rehberde; tip kolonlarıyla karıştırılmaması net.
 
-1. **Tip davranışı (TYPE_BEHAVIORS / `fair_stand_item_type`)** — `placement`, `collision`, `move_snap_cm`, …: ne işe yarar, hangi değer ne demek, tip mirası (SKU override yok).
-2. **Snap kuralı (`fair_stand_rule` + tip link + item requires/provides)** — aynı kılavuzda ayrı bölüm: face/edge, top-rail / shelf-rail, tip çentiği vs item FK; **tip kolonlarıyla karıştırılmaması** net uyarı.
-
-Amaç: 5 ay sonra “bu neydi / snap mi tip mi?” dememek.  
-Hedef dosya (öneri): `docs/refactor/TYPE_AND_SNAP_USAGE.md` (veya bu yol haritasına ek bölüm).  
-Bağımlı: kesit 1+ stabilize; CRM hint’leri kılavuza taşınır/genişletilir.
+Eski öneri adı `TYPE_AND_SNAP_USAGE.md` kullanılmadı; içerik kılavuza gitti.
 
 ---
 
@@ -268,7 +264,8 @@ Bağımlı: kesit 1+ stabilize; CRM hint’leri kılavuza taşınır/genişletil
 | 2026-09-24 | **Dilim 2:** `initializeItemTypeRegistry` + `getModuleBehavior` dual-read (DB üçlü overlay → JS fallback). CRM sonraki. |
 | 2026-09-24 | **Dilim 3:** CRM Item Type — placement/collision/moveSnapCm form + tablo kolonları. Dilim 4: JS map kaldırma. |
 | 2026-09-24 | **Dilim 4 (kesit 1):** üçlü yalnız DB; JS map’ten çıkarıldı; bilinen tipte eksik bootstrap fail-fast. Sıradaki: kesit 2 alanları. |
-| 2026-09-24 | Not: **kullanım kılavuzu sonra** — tip davranışı + snap kuralı aynı rehberde (§ 11b); şimdi yazılmadı. |
+| 2026-09-24 | Not (eski): kullanım kılavuzu sonra planlanmıştı (§ 11b). |
+| 2026-09-24 | **Kullanım kılavuzu:** [`FAIR_STAND_DB_KULLANIM_KILAVUZU.md`](FAIR_STAND_DB_KULLANIM_KILAVUZU.md) — tüm tablolar + tip vs snap + CRM karar rehberi (§ 11b kapandı). |
 | 2026-09-24 | **Kesit 2 Dilim 1:** migration `0031_item_type_behavior_s2` — `magnetic_snap`, `allow_side_insert`, `supports_wall_overlay_mount`, `wall_capacity` + seed/API. Motor dual-read sonraki. |
 | 2026-09-24 | **Kesit 2 Dilim 2–4:** motor DB-only (kesit2 JS map’ten silindi) + CRM form/hint + fixture/test. |
 | 2026-09-24 | **Kesit 3 Dilim 1–4:** migration `0032_item_type_behavior_s3` — endpoint/depth/contact/boundary/height/overlap/ghost; motor DB-only; `TYPE_BEHAVIORS` kaldırıldı; CRM + parity/live verify. |
