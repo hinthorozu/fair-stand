@@ -151,22 +151,22 @@ test('clampHeightToStandCeilingCm tavanı geçmez', () => {
 });
 
 test('resolveModuleSceneBoxCm state → scene → tavan', () => {
-  const item = getItem('wall_separator_100');
+  const item = getItem('wall_separator_100_350');
   const scene = resolveSceneDimensions(item);
-  const fromCatalog = resolveModuleSceneBoxCm({ itemKey: 'wall_separator_100' });
+  const fromCatalog = resolveModuleSceneBoxCm({ itemKey: 'wall_separator_100_350' });
   assert.equal(fromCatalog.widthCm, scene.widthCm);
   assert.equal(fromCatalog.heightCm, scene.heightCm);
   assert.equal(fromCatalog.depthCm, scene.depthCm);
 
   const box = requireModuleSceneBoxCm({
-    itemKey: 'wall_separator_100',
+    itemKey: 'wall_separator_100_350',
     heightCm: scene.heightCm + 100,
   });
   assert.equal(box.heightCm, getStandDimensions().heightCm);
 });
 
 test('procedural frame cross-section stand dimensions frame_width/depth okur', () => {
-  const parent = getItem('wall_separator_100');
+  const parent = getItem('wall_separator_100_350');
   const cross = getProceduralFrameCrossSectionM({ itemKey: parent.itemKey, type: parent.type });
   assert.equal(cross.frameWidthCm, getStandDimensions().frameWidthCm);
   assert.equal(cross.frameDepthCm, getStandDimensions().frameDepthCm);

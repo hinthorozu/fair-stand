@@ -9,8 +9,8 @@ import { resolveItemBom } from '../src/itemBom.js';
 import { getItem, getShowcaseBodyDefinition } from '../src/items.js';
 
 const CASES = [
-  { itemKey: 'wall_showcase_100_2', type: 'showcase-2', eyeCount: 2, sideItemKey: 'showcase_side_94_6_30', glassQuantity: 1, panelQuantity: 5, singleQuantity: 9 },
-  { itemKey: 'wall_showcase_100_3', type: 'showcase-3', eyeCount: 3, sideItemKey: 'showcase_side_143_5_30', glassQuantity: 2, panelQuantity: 4, singleQuantity: 7 },
+  { itemKey: 'wall_showcase_100_2_350', type: 'showcase-2', eyeCount: 2, sideItemKey: 'showcase_side_94_6_30', glassQuantity: 1, panelQuantity: 5, singleQuantity: 9 },
+  { itemKey: 'wall_showcase_100_3_350', type: 'showcase-3', eyeCount: 3, sideItemKey: 'showcase_side_143_5_30', glassQuantity: 2, panelQuantity: 4, singleQuantity: 7 },
 ];
 
 function quantities(lines) { return new Map(lines.map((line) => [line.itemKey, line.quantity])); }
@@ -88,9 +88,9 @@ test('factory/persistence use wall_showcase identity and one grouped color-only 
     assert.notEqual(duplicate.bodySurface.id, state.bodySurface.id);
   }
 
-  const persisted = { id: 'showcase-persisted', itemKey: 'wall_showcase_100_2', type: 'showcase-2', widthCm: 100, strips: [] };
+  const persisted = { id: 'showcase-persisted', itemKey: 'wall_showcase_100_2_350', type: 'showcase-2', widthCm: 100, strips: [] };
   normalizeModuleItemState(persisted);
-  assert.equal(persisted.itemKey, 'wall_showcase_100_2');
+  assert.equal(persisted.itemKey, 'wall_showcase_100_2_350');
   assert.equal(persisted.bodySurface.color, '#ffffff');
 });
 

@@ -61,7 +61,7 @@ for (const key of Object.keys(ITEM_TYPE_BEHAVIOR_SLICE1)) {
   }
 }
 
-const wall = getModuleBehavior({ itemKey: 'wall_200', type: 'flat-panel' });
+const wall = getModuleBehavior({ itemKey: 'wall_200_350', type: 'flat-panel' });
 if (wall.placement !== 'wall' || wall.magneticSnap !== 'standard' || wall.moveSnapCm !== 50) {
   console.error('FAIL wall_200 via flat-panel type', wall);
   process.exit(1);

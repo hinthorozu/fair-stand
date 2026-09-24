@@ -717,7 +717,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "wall_50",
+        "item_key": "wall_50_350",
         "name": "Panel 50",
         "item_type": "flat-panel",
         "unit": null,
@@ -742,7 +742,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "wall_100",
+        "item_key": "wall_100_350",
         "name": "Panel 100",
         "item_type": "flat-panel",
         "unit": null,
@@ -767,7 +767,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "wall_150",
+        "item_key": "wall_150_350",
         "name": "Panel 150",
         "item_type": "flat-panel",
         "unit": null,
@@ -792,7 +792,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "wall_200",
+        "item_key": "wall_200_350",
         "name": "Panel 200",
         "item_type": "flat-panel",
         "unit": null,
@@ -1017,7 +1017,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "wall_separator_50",
+        "item_key": "wall_separator_50_350",
         "name": "Separatör 50",
         "item_type": "separator",
         "unit": null,
@@ -1042,7 +1042,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "wall_separator_100",
+        "item_key": "wall_separator_100_350",
         "name": "Separatör 100",
         "item_type": "separator",
         "unit": null,
@@ -1067,7 +1067,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "wall_separator_50_sarmasik",
+        "item_key": "wall_separator_50_350_sarmasik",
         "name": "Separatör 50 Sarmaşık",
         "item_type": "separator",
         "unit": null,
@@ -1092,7 +1092,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "wall_separator_100_sarmasik",
+        "item_key": "wall_separator_100_350_sarmasik",
         "name": "Separatör 100 Sarmaşık",
         "item_type": "separator",
         "unit": null,
@@ -1117,7 +1117,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "wall_showcase_100_2",
+        "item_key": "wall_showcase_100_2_350",
         "name": "2 Gözlü Vitrin 100",
         "item_type": "showcase-2",
         "unit": "adet",
@@ -1142,7 +1142,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "wall_showcase_100_3",
+        "item_key": "wall_showcase_100_3_350",
         "name": "3 Gözlü Vitrin 100",
         "item_type": "showcase-3",
         "unit": "adet",
@@ -2542,7 +2542,7 @@
         "updated_at": "2026-09-18T14:01:42.358293+00:00"
       },
       {
-        "item_key": "door_100",
+        "item_key": "wall_door_100_350",
         "name": "Depo Kapısı 100",
         "item_type": "door",
         "unit": "adet",
@@ -3240,7 +3240,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "door_100",
+        "item_key": "wall_door_100_350",
         "width_cm": "100",
         "depth_cm": null,
         "height_cm": null,
@@ -3320,7 +3320,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "wall_50",
+        "item_key": "wall_50_350",
         "width_cm": "50",
         "depth_cm": null,
         "height_cm": null,
@@ -3328,7 +3328,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "wall_100",
+        "item_key": "wall_100_350",
         "width_cm": "100",
         "depth_cm": null,
         "height_cm": null,
@@ -3336,7 +3336,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "wall_150",
+        "item_key": "wall_150_350",
         "width_cm": "150",
         "depth_cm": null,
         "height_cm": null,
@@ -3344,7 +3344,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "wall_200",
+        "item_key": "wall_200_350",
         "width_cm": "200",
         "depth_cm": null,
         "height_cm": null,
@@ -3416,7 +3416,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "wall_separator_50",
+        "item_key": "wall_separator_50_350",
         "width_cm": "50",
         "depth_cm": null,
         "height_cm": null,
@@ -3424,7 +3424,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "wall_separator_100",
+        "item_key": "wall_separator_100_350",
         "width_cm": "100",
         "depth_cm": null,
         "height_cm": null,
@@ -3432,7 +3432,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "wall_separator_50_sarmasik",
+        "item_key": "wall_separator_50_350_sarmasik",
         "width_cm": "50",
         "depth_cm": null,
         "height_cm": null,
@@ -3440,7 +3440,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "wall_separator_100_sarmasik",
+        "item_key": "wall_separator_100_350_sarmasik",
         "width_cm": "100",
         "depth_cm": null,
         "height_cm": null,
@@ -3448,7 +3448,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "wall_showcase_100_2",
+        "item_key": "wall_showcase_100_2_350",
         "width_cm": "100",
         "depth_cm": null,
         "height_cm": null,
@@ -3456,7 +3456,7 @@
         "wall_gap_cm": null
       },
       {
-        "item_key": "wall_showcase_100_3",
+        "item_key": "wall_showcase_100_3_350",
         "width_cm": "100",
         "depth_cm": null,
         "height_cm": null,
@@ -3544,31 +3544,31 @@
         "height_cm": "183.00"
       },
       {
-        "item_key": "door_100",
+        "item_key": "wall_door_100_350",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
       },
       {
-        "item_key": "wall_50",
+        "item_key": "wall_50_350",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
       },
       {
-        "item_key": "wall_100",
+        "item_key": "wall_100_350",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
       },
       {
-        "item_key": "wall_150",
+        "item_key": "wall_150_350",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
       },
       {
-        "item_key": "wall_200",
+        "item_key": "wall_200_350",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
@@ -3622,37 +3622,37 @@
         "height_cm": null
       },
       {
-        "item_key": "wall_separator_50",
+        "item_key": "wall_separator_50_350",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
       },
       {
-        "item_key": "wall_separator_100",
+        "item_key": "wall_separator_100_350",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
       },
       {
-        "item_key": "wall_separator_50_sarmasik",
+        "item_key": "wall_separator_50_350_sarmasik",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
       },
       {
-        "item_key": "wall_separator_100_sarmasik",
+        "item_key": "wall_separator_100_350_sarmasik",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
       },
       {
-        "item_key": "wall_showcase_100_2",
+        "item_key": "wall_showcase_100_2_350",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
       },
       {
-        "item_key": "wall_showcase_100_3",
+        "item_key": "wall_showcase_100_3_350",
         "width_cm": null,
         "depth_cm": "10.00",
         "height_cm": "350.00"
@@ -3822,14 +3822,14 @@
       },
       {
         "id": "de91a510-05ba-5858-9c6b-cada9e3da50e",
-        "item_key": "wall_separator_50_sarmasik",
+        "item_key": "wall_separator_50_350_sarmasik",
         "asset_role": "model",
         "relative_path": "wall_separator_50_sarmasik.glb",
         "is_active": true
       },
       {
         "id": "c1a84795-69f4-5d65-91a8-7a0117880696",
-        "item_key": "wall_separator_100_sarmasik",
+        "item_key": "wall_separator_100_350_sarmasik",
         "asset_role": "model",
         "relative_path": "wall_separator_100_sarmasik.glb",
         "is_active": true
@@ -3873,42 +3873,42 @@
       },
       {
         "id": "17c2fba4-65a5-5883-ad9a-590c77a05b9e",
-        "parent_item_key": "door_100",
+        "parent_item_key": "wall_door_100_350",
         "child_item_key": "profile_91",
         "quantity": "1.0000",
         "sort_order": 0
       },
       {
         "id": "14f9f68b-bf4d-5a34-80cb-1db235828292",
-        "parent_item_key": "door_100",
+        "parent_item_key": "wall_door_100_350",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "23b9db2b-c552-5680-a7d2-655430f5ff6e",
-        "parent_item_key": "door_100",
+        "parent_item_key": "wall_door_100_350",
         "child_item_key": "panel_98",
         "quantity": "3.0000",
         "sort_order": 2
       },
       {
         "id": "8207d14f-54a0-5337-871d-b14079b74717",
-        "parent_item_key": "door_100",
+        "parent_item_key": "wall_door_100_350",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
         "sort_order": 3
       },
       {
         "id": "273a5e65-c82c-5ce7-bd35-0056979ee911",
-        "parent_item_key": "door_100",
+        "parent_item_key": "wall_door_100_350",
         "child_item_key": "connector_single",
         "quantity": "5.0000",
         "sort_order": 4
       },
       {
         "id": "97d84b25-822a-5765-b18f-62e9267ee6d7",
-        "parent_item_key": "door_100",
+        "parent_item_key": "wall_door_100_350",
         "child_item_key": "door_leaf_100",
         "quantity": "1.0000",
         "sort_order": 5
@@ -4454,140 +4454,140 @@
       },
       {
         "id": "f7362048-3395-5b03-a709-92c057be1baa",
-        "parent_item_key": "wall_50",
+        "parent_item_key": "wall_50_350",
         "child_item_key": "profile_41_5",
         "quantity": "2.0000",
         "sort_order": 0
       },
       {
         "id": "3896d1df-eec2-5cd7-9b88-f6a3751bf3af",
-        "parent_item_key": "wall_50",
+        "parent_item_key": "wall_50_350",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "059cbe4d-2182-5499-a7ae-56d5fab2a9d3",
-        "parent_item_key": "wall_50",
+        "parent_item_key": "wall_50_350",
         "child_item_key": "panel_48_5",
         "quantity": "7.0000",
         "sort_order": 2
       },
       {
         "id": "4074651a-0f05-5012-827c-f9db6190c9f4",
-        "parent_item_key": "wall_50",
+        "parent_item_key": "wall_50_350",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
         "sort_order": 3
       },
       {
         "id": "eb0dc3ea-9da3-576b-8358-2974f1be24c3",
-        "parent_item_key": "wall_50",
+        "parent_item_key": "wall_50_350",
         "child_item_key": "connector_single",
         "quantity": "13.0000",
         "sort_order": 4
       },
       {
         "id": "0d189271-7a50-53c6-ad4f-118ce2f50442",
-        "parent_item_key": "wall_100",
+        "parent_item_key": "wall_100_350",
         "child_item_key": "profile_91",
         "quantity": "2.0000",
         "sort_order": 0
       },
       {
         "id": "945aae2b-43ca-5569-b04e-6307727f2d54",
-        "parent_item_key": "wall_100",
+        "parent_item_key": "wall_100_350",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "5262edae-a1cc-589a-aa71-c52862077028",
-        "parent_item_key": "wall_100",
+        "parent_item_key": "wall_100_350",
         "child_item_key": "panel_98",
         "quantity": "7.0000",
         "sort_order": 2
       },
       {
         "id": "8ad85e4e-e6c1-5241-84eb-08bda69da10f",
-        "parent_item_key": "wall_100",
+        "parent_item_key": "wall_100_350",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
         "sort_order": 3
       },
       {
         "id": "caf51cc7-47fb-5ec5-8146-c091d53c0929",
-        "parent_item_key": "wall_100",
+        "parent_item_key": "wall_100_350",
         "child_item_key": "connector_single",
         "quantity": "13.0000",
         "sort_order": 4
       },
       {
         "id": "e7818e53-4246-5df4-a336-8bdce7c65711",
-        "parent_item_key": "wall_150",
+        "parent_item_key": "wall_150_350",
         "child_item_key": "profile_140_5",
         "quantity": "2.0000",
         "sort_order": 0
       },
       {
         "id": "95dad59b-c699-5f02-b5f2-3b0d783f6151",
-        "parent_item_key": "wall_150",
+        "parent_item_key": "wall_150_350",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "879c2381-da2f-5cb9-968a-20be26b5bd1c",
-        "parent_item_key": "wall_150",
+        "parent_item_key": "wall_150_350",
         "child_item_key": "panel_147_5",
         "quantity": "7.0000",
         "sort_order": 2
       },
       {
         "id": "a2eed859-4775-57ba-a5f4-4aa4134c44d6",
-        "parent_item_key": "wall_150",
+        "parent_item_key": "wall_150_350",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
         "sort_order": 3
       },
       {
         "id": "3aeb6df2-ca49-5ab5-a6e9-183e3f9bcecb",
-        "parent_item_key": "wall_150",
+        "parent_item_key": "wall_150_350",
         "child_item_key": "connector_single",
         "quantity": "13.0000",
         "sort_order": 4
       },
       {
         "id": "9c331eca-b1de-5e42-a25e-4eeff50ec1ab",
-        "parent_item_key": "wall_200",
+        "parent_item_key": "wall_200_350",
         "child_item_key": "profile_190",
         "quantity": "2.0000",
         "sort_order": 0
       },
       {
         "id": "b7b0a969-10f5-5fa5-8e93-ba82556ce518",
-        "parent_item_key": "wall_200",
+        "parent_item_key": "wall_200_350",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "9425dff0-bb2c-5ad7-bb7c-3912e4fc3468",
-        "parent_item_key": "wall_200",
+        "parent_item_key": "wall_200_350",
         "child_item_key": "panel_197",
         "quantity": "7.0000",
         "sort_order": 2
       },
       {
         "id": "10a4a336-9e51-5821-bd66-cc975e49a80d",
-        "parent_item_key": "wall_200",
+        "parent_item_key": "wall_200_350",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
         "sort_order": 3
       },
       {
         "id": "b76d51d7-7d96-5270-b2b7-04087e88d0af",
-        "parent_item_key": "wall_200",
+        "parent_item_key": "wall_200_350",
         "child_item_key": "connector_single",
         "quantity": "13.0000",
         "sort_order": 4
@@ -4874,266 +4874,266 @@
       },
       {
         "id": "415697b0-196b-5a56-b4d3-1c0a9e74a9d5",
-        "parent_item_key": "wall_separator_50",
+        "parent_item_key": "wall_separator_50_350",
         "child_item_key": "profile_41_5",
         "quantity": "2.0000",
         "sort_order": 0
       },
       {
         "id": "f377b0de-f321-59c6-a761-d878cb90c255",
-        "parent_item_key": "wall_separator_50",
+        "parent_item_key": "wall_separator_50_350",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "f46e39b3-2c47-56c0-8d63-a13d61082c65",
-        "parent_item_key": "wall_separator_50",
+        "parent_item_key": "wall_separator_50_350",
         "child_item_key": "separator_panel_48_5",
         "quantity": "1.0000",
         "sort_order": 2
       },
       {
         "id": "51edd21d-8aa9-576d-a7f8-ce7c81ac7791",
-        "parent_item_key": "wall_separator_50",
+        "parent_item_key": "wall_separator_50_350",
         "child_item_key": "separator_panel_98",
         "quantity": "3.0000",
         "sort_order": 3
       },
       {
         "id": "7cfb5cf1-6031-582e-ac2a-60338a550ba6",
-        "parent_item_key": "wall_separator_50",
+        "parent_item_key": "wall_separator_50_350",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
         "sort_order": 4
       },
       {
         "id": "3250b474-0dd5-5860-b1c1-df5243ab4418",
-        "parent_item_key": "wall_separator_50",
+        "parent_item_key": "wall_separator_50_350",
         "child_item_key": "connector_single",
         "quantity": "7.0000",
         "sort_order": 5
       },
       {
         "id": "2aa3085f-0e2a-5f1a-93ab-f53aaa884ee4",
-        "parent_item_key": "wall_separator_100",
+        "parent_item_key": "wall_separator_100_350",
         "child_item_key": "profile_91",
         "quantity": "2.0000",
         "sort_order": 0
       },
       {
         "id": "148973ac-0721-55c6-a586-c5a0b1c98408",
-        "parent_item_key": "wall_separator_100",
+        "parent_item_key": "wall_separator_100_350",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "ac04be16-1b3d-5b10-9074-01cecd97eb15",
-        "parent_item_key": "wall_separator_100",
+        "parent_item_key": "wall_separator_100_350",
         "child_item_key": "separator_panel_98",
         "quantity": "7.0000",
         "sort_order": 2
       },
       {
         "id": "40afc3bd-6472-5055-9b5f-d31651e78a6a",
-        "parent_item_key": "wall_separator_100",
+        "parent_item_key": "wall_separator_100_350",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
         "sort_order": 3
       },
       {
         "id": "27b51d23-ba52-5185-81c5-a57d7ac96e37",
-        "parent_item_key": "wall_separator_100",
+        "parent_item_key": "wall_separator_100_350",
         "child_item_key": "connector_single",
         "quantity": "13.0000",
         "sort_order": 4
       },
       {
         "id": "832fef31-9273-5a93-886b-920aa1828df0",
-        "parent_item_key": "wall_separator_50_sarmasik",
+        "parent_item_key": "wall_separator_50_350_sarmasik",
         "child_item_key": "profile_41_5",
         "quantity": "2.0000",
         "sort_order": 0
       },
       {
         "id": "8a1b4be4-297b-5fb1-83ad-9bd8e12dd4e9",
-        "parent_item_key": "wall_separator_50_sarmasik",
+        "parent_item_key": "wall_separator_50_350_sarmasik",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "244248dc-528c-5d2c-86e2-1bcb60b71153",
-        "parent_item_key": "wall_separator_50_sarmasik",
+        "parent_item_key": "wall_separator_50_350_sarmasik",
         "child_item_key": "separator_panel_48_5",
         "quantity": "1.0000",
         "sort_order": 2
       },
       {
         "id": "8e3c6aa2-73f1-5611-88f3-6f57290a1e65",
-        "parent_item_key": "wall_separator_50_sarmasik",
+        "parent_item_key": "wall_separator_50_350_sarmasik",
         "child_item_key": "separator_panel_98",
         "quantity": "3.0000",
         "sort_order": 3
       },
       {
         "id": "a45f7ff1-1b91-5652-8b31-014e3ba4642b",
-        "parent_item_key": "wall_separator_50_sarmasik",
+        "parent_item_key": "wall_separator_50_350_sarmasik",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
         "sort_order": 4
       },
       {
         "id": "a931224d-0bc6-594a-aa60-7c53aace3784",
-        "parent_item_key": "wall_separator_50_sarmasik",
+        "parent_item_key": "wall_separator_50_350_sarmasik",
         "child_item_key": "connector_single",
         "quantity": "7.0000",
         "sort_order": 5
       },
       {
         "id": "59a9ac6c-095e-5295-a5e0-22c27b1d1960",
-        "parent_item_key": "wall_separator_100_sarmasik",
+        "parent_item_key": "wall_separator_100_350_sarmasik",
         "child_item_key": "profile_91",
         "quantity": "2.0000",
         "sort_order": 0
       },
       {
         "id": "3145ce14-086c-57af-a0e3-6bcd095f429e",
-        "parent_item_key": "wall_separator_100_sarmasik",
+        "parent_item_key": "wall_separator_100_350_sarmasik",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "814c6b21-a8a5-5ffe-a955-d34a34647337",
-        "parent_item_key": "wall_separator_100_sarmasik",
+        "parent_item_key": "wall_separator_100_350_sarmasik",
         "child_item_key": "separator_panel_98",
         "quantity": "7.0000",
         "sort_order": 2
       },
       {
         "id": "629e6540-801f-5d3c-b9cc-199496e21d20",
-        "parent_item_key": "wall_separator_100_sarmasik",
+        "parent_item_key": "wall_separator_100_350_sarmasik",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
         "sort_order": 3
       },
       {
         "id": "9c2d037e-2e41-5c03-86f0-76ef99a97c1d",
-        "parent_item_key": "wall_separator_100_sarmasik",
+        "parent_item_key": "wall_separator_100_350_sarmasik",
         "child_item_key": "connector_single",
         "quantity": "13.0000",
         "sort_order": 4
       },
       {
         "id": "f2e6081c-42b2-552e-9d28-355f1fdf36ca",
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "child_item_key": "profile_91",
         "quantity": "4.0000",
         "sort_order": 0
       },
       {
         "id": "e395b036-b868-5e55-b270-17e78bfab1b9",
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "eef8b044-8e30-5b69-b35c-ceaed0667dd3",
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "child_item_key": "panel_98",
         "quantity": "5.0000",
         "sort_order": 2
       },
       {
         "id": "7b1e7de4-68ad-5b3f-a672-80c1b3e47ce3",
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "child_item_key": "connector_start",
         "quantity": "4.0000",
         "sort_order": 3
       },
       {
         "id": "dc5a4ec6-6b51-51db-85aa-38001e5257c4",
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "child_item_key": "connector_single",
         "quantity": "9.0000",
         "sort_order": 4
       },
       {
         "id": "1f3c41aa-12ad-5968-b6ec-ed51ca8442f9",
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "child_item_key": "showcase_side_94_6_30",
         "quantity": "2.0000",
         "sort_order": 5
       },
       {
         "id": "0114e577-3965-5f56-981a-7ae387120aa0",
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "child_item_key": "showcase_horizontal_87_4_30",
         "quantity": "2.0000",
         "sort_order": 6
       },
       {
         "id": "08d5a16f-a1e4-56ae-8e62-bb2011882078",
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "child_item_key": "glass_shelf",
         "quantity": "1.0000",
         "sort_order": 7
       },
       {
         "id": "33fab6ce-7131-535c-9c9c-9e4422e9a015",
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "child_item_key": "profile_91",
         "quantity": "4.0000",
         "sort_order": 0
       },
       {
         "id": "5d15df2d-b588-5bb5-b245-53c7f639ce57",
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "child_item_key": "upright_346_5",
         "quantity": "2.0000",
         "sort_order": 1
       },
       {
         "id": "ea2a5a94-c4a6-52c7-b80c-b6d2f8cc4292",
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "child_item_key": "panel_98",
         "quantity": "4.0000",
         "sort_order": 2
       },
       {
         "id": "edc1ebee-9ceb-5ce5-87a6-78ebba69954a",
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "child_item_key": "connector_start",
         "quantity": "4.0000",
         "sort_order": 3
       },
       {
         "id": "4025777e-9a41-5e32-a9a4-75977db76ddb",
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "child_item_key": "connector_single",
         "quantity": "7.0000",
         "sort_order": 4
       },
       {
         "id": "df9d68d8-5b76-550b-9d9a-cdda9ba7a9b5",
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "child_item_key": "showcase_side_143_5_30",
         "quantity": "2.0000",
         "sort_order": 5
       },
       {
         "id": "4436fbf7-af07-5f5d-b18c-72588c875837",
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "child_item_key": "showcase_horizontal_87_4_30",
         "quantity": "2.0000",
         "sort_order": 6
       },
       {
         "id": "d4a5d079-cdc5-5902-bdab-ae642f42079d",
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "child_item_key": "glass_shelf",
         "quantity": "2.0000",
         "sort_order": 7
@@ -5155,32 +5155,32 @@
     ],
     "fair_stand_item_body_parts": [
       {
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "body_role": "side",
         "child_item_key": "showcase_side_94_6_30"
       },
       {
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "body_role": "horizontal",
         "child_item_key": "showcase_horizontal_87_4_30"
       },
       {
-        "parent_item_key": "wall_showcase_100_2",
+        "parent_item_key": "wall_showcase_100_2_350",
         "body_role": "glass_shelf",
         "child_item_key": "glass_shelf"
       },
       {
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "body_role": "side",
         "child_item_key": "showcase_side_143_5_30"
       },
       {
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "body_role": "horizontal",
         "child_item_key": "showcase_horizontal_87_4_30"
       },
       {
-        "parent_item_key": "wall_showcase_100_3",
+        "parent_item_key": "wall_showcase_100_3_350",
         "body_role": "glass_shelf",
         "child_item_key": "glass_shelf"
       }

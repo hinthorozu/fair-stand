@@ -219,10 +219,10 @@ test('gizli Item’ın contract yokluğu Catalog gizliliğinden değil assignmen
   assert.equal(getCatalogItem('panel_197'), null);
   assert.equal(resolveModuleContract('panel_197'), null);
 
-  const wall = resolveModuleContract('wall_200');
+  const wall = resolveModuleContract('wall_200_350');
   assert.ok(wall);
-  assert.equal(wall.itemKey, 'wall_200');
-  assert.equal(wall.type, getItem('wall_200').type);
+  assert.equal(wall.itemKey, 'wall_200_350');
+  assert.equal(wall.type, getItem('wall_200_350').type);
 
   const foam = resolveModuleContract('illuminated-foam');
   assert.ok(foam);

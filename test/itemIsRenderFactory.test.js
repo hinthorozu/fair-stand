@@ -45,7 +45,7 @@ test('factory gates on item.isRender, not catalogVisible or type lists', () => {
   assert.ok(foam);
   assert.equal(foam.itemKey, 'illuminated-foam');
 
-  const wall = createModuleStateFromCatalogKey('wall_200');
+  const wall = createModuleStateFromCatalogKey('wall_200_350');
   assert.ok(wall);
-  assert.equal(wall.itemKey, 'wall_200');
+  assert.equal(wall.itemKey, 'wall_200_350');
 });

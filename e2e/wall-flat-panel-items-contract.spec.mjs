@@ -47,7 +47,7 @@ async function removeModules(page, modules) {
   }
 }
 
-const keys = ['wall_50', 'wall_100', 'wall_150', 'wall_200', 'wall_50_short_up_1', 'wall_100_short_up_1', 'wall_150_short_up_1', 'wall_200_short_up_1'];
+const keys = ['wall_50_350', 'wall_100_350', 'wall_150_350', 'wall_200_350', 'wall_50_short_up_1', 'wall_100_short_up_1', 'wall_150_short_up_1', 'wall_200_short_up_1'];
 
 for (const itemKey of keys) {
   test(`${itemKey} catalog add creates a canonical flat-panel Item with strips`, async ({ page }) => {

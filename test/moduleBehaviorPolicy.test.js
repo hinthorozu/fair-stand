@@ -29,7 +29,7 @@ test('F-011 special placement policies are declared by the canonical behavior co
   assert.equal(getModuleMagneticSnapStrategy('profile'), 'standard');
   assert.equal(isUprightJointSnapTarget({ type: 'profile', itemKey: 'profile_190' }), true);
   assert.equal(isUprightJointSnapTarget({ type: 'counter', itemKey: 'desk_banko_200' }), true);
-  assert.equal(isUprightJointSnapTarget({ type: 'flat-panel', itemKey: 'wall_200' }), false);
+  assert.equal(isUprightJointSnapTarget({ type: 'flat-panel', itemKey: 'wall_200_350' }), false);
   assert.equal(canModulesOverlapByBehavior({ type: 'upright' }, { type: 'profile' }), true);
   assert.equal(canModulesOverlapByBehavior({ type: 'upright' }, { type: 'counter' }), true);
   assert.equal(canModulesOverlapByBehavior({ type: 'profile' }, { type: 'separator' }), true);

@@ -11,6 +11,13 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 - Ertelenmiş kararlar / backlog (tavan–şerit, Item property; tip davranışı C.3 kapandı): `docs/refactor/PENDING_ITEM_DECISIONS.md`
 - Item-first checklist: `docs/refactor/ITEM_FIRST_ROADMAP.md`
 - Belge dizini: `docs/refactor/README.md`
+- Performans backlog (proje açma 5–10 sn, orbit, ~100 eşzamanlı tasarım): `docs/refactor/PERFORMANCE_ROADMAP.md`
+
+---
+
+## 2026-09-24 — Performans yol haritası (belge only)
+
+Prod gözlem: proje açma 5–10 sn; orbit/sürükleme takılması. Kök neden ve P0–P4 iş paketleri `PERFORMANCE_ROADMAP.md` içinde; kod değişikliği yok.
 
 ---
 

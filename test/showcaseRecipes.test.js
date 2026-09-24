@@ -10,8 +10,8 @@ import {
 test('fake aggregate showcase production parts are removed', () => {
   assert.equal(getItem('showcase_2_100'), null);
   assert.equal(getItem('showcase_3_100'), null);
-  assert.equal(getItem('wall_showcase_100_2').itemKey, 'wall_showcase_100_2');
-  assert.equal(getItem('wall_showcase_100_3').itemKey, 'wall_showcase_100_3');
+  assert.equal(getItem('wall_showcase_100_2_350').itemKey, 'wall_showcase_100_2_350');
+  assert.equal(getItem('wall_showcase_100_3_350').itemKey, 'wall_showcase_100_3_350');
 });
 
 test('2-eye wall showcase BASE recipe matches verified production data', () => {

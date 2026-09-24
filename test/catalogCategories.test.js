@@ -21,10 +21,10 @@ const EXPECTED_CATEGORIES = Object.freeze([
 
 const EXPECTED_GROUP_KEYS = Object.freeze({
   1: Object.freeze([
-    'wall_200', 'wall_150', 'wall_100', 'wall_50',
-    'wall_separator_100', 'wall_separator_50',
-    'wall_separator_100_sarmasik', 'wall_separator_50_sarmasik',
-    'door_100',
+    'wall_200_350', 'wall_150_350', 'wall_100_350', 'wall_50_350',
+    'wall_separator_100_350', 'wall_separator_50_350',
+    'wall_separator_100_350_sarmasik', 'wall_separator_50_350_sarmasik',
+    'wall_door_100_350',
   ]),
   2: Object.freeze([
     'wall_200_short_up_2', 'wall_150_short_up_2', 'wall_100_short_up_2', 'wall_50_short_up_2',
@@ -32,7 +32,7 @@ const EXPECTED_GROUP_KEYS = Object.freeze({
     'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5',
   ]),
   3: Object.freeze([
-    'wall_showcase_100_3', 'wall_showcase_100_2',
+    'wall_showcase_100_3_350', 'wall_showcase_100_2_350',
     'shelf_100', 'shelf_150', 'shelf_200',
   ]),
   4: Object.freeze([
@@ -94,7 +94,7 @@ test('görünür Item categoryId değerleri geçerli category id ile eşleşir',
   assert.equal(visibleCount, listCatalogItems().map((item) => item.itemKey).length);
   assert.equal(invalidVisible, 0);
   assert.equal(invalidHidden, 0);
-  assert.equal(getItem('wall_200').categoryId, 1);
+  assert.equal(getItem('wall_200_350').categoryId, 1);
   assert.equal(getItem('panel_197').categoryId, null);
 });
 

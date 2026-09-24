@@ -38,7 +38,7 @@ def test_bootstrap_scene_pose(client, db_session, auth_headers):
     assert by_key["profile_190"]["defaultZCm"] == 342
     assert by_key["upright_99"]["sceneDimensions"]["heightCm"] == 99
     assert by_key["upright_99"]["sceneDimensions"]["widthCm"] == 8
-    assert by_key["wall_200"]["sceneDimensions"]["heightCm"] == 350
-    assert by_key["wall_200"]["defaultZCm"] == 0
+    assert by_key["wall_200_350"]["sceneDimensions"]["heightCm"] == 350
+    assert by_key["wall_200_350"]["defaultZCm"] == 0
     assert by_key["wall_200_short_up_2"]["sceneDimensions"]["heightCm"] == 100
     assert by_key["wall_200_short_up_2"]["defaultZCm"] == 250

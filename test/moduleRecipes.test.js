@@ -167,8 +167,8 @@ test('production part catalog contains all verified panel sizes', () => {
 });
 
 test('production part catalog contains the canonical 100 cm wooden door leaf', () => {
-  assert.equal(getItem('door_100').itemKey, 'door_100');
-  assert.equal(getItem('door_100').composition.mode, 'recipe');
+  assert.equal(getItem('wall_door_100_350').itemKey, 'wall_door_100_350');
+  assert.equal(getItem('wall_door_100_350').composition.mode, 'recipe');
   assert.equal(getItem('door_leaf_100').name, 'Ahşap Kapı Kanadı 100 × 200 cm');
   assert.equal(getItem('door_leaf_100').unit, 'adet');
 });

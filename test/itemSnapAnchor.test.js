@@ -22,7 +22,7 @@ test('snap capability enums and floodlight/shelf requires from Item', () => {
   assert.equal(getItemSnapSpec('shelf_100')?.requires, 'shelf-rail');
   assert.equal(getItemSnapSpec('shelf_100')?.face, 'front');
   assert.equal(getItemSnapSpec('shelf_100')?.edge, 'top');
-  assert.equal(getItemSnapSpec('wall_200'), null);
+  assert.equal(getItemSnapSpec('wall_200_350'), null);
   assert.equal(usesPanelSeamOverlaySnap('shelf_100'), true);
   assert.equal(isTopPlacementModule('led_floodlight'), true);
 });
@@ -48,7 +48,7 @@ test('floodlight snaps Z to nearest top-rail provider, not a 350 literal', () =>
 
 test('wall recipe host top-rail Z uses profile defaultZ + height (not only AABB guess)', () => {
   const light = createModuleStateFromCatalogKey('led_floodlight');
-  const wall = createModuleStateFromCatalogKey('wall_200');
+  const wall = createModuleStateFromCatalogKey('wall_200_350');
   wall.id = 'wall-a';
   wall.placement = { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' };
   const placement = { xCm: 50, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' };
@@ -65,7 +65,7 @@ test('wall recipe host top-rail Z uses profile defaultZ + height (not only AABB 
 
 test('shelf-rail on wall picks panel band seam, not wall box top', () => {
   const shelf = createModuleStateFromCatalogKey('shelf_100');
-  const wall = createModuleStateFromCatalogKey('wall_200');
+  const wall = createModuleStateFromCatalogKey('wall_200_350');
   wall.id = 'wall-a';
   wall.placement = { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' };
   const seams = listVirtualShelfRailHeightsCm(wall);

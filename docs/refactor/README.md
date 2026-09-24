@@ -15,6 +15,7 @@ Kod doğrulanmış canlı sözleşmeler. Audit dökümü / item tanımları (`do
 | [`ITEM_DIMENSIONS.md`](ITEM_DIMENSIONS.md) | W/H/D mapping |
 | [`ITEM_FIRST_ROADMAP.md`](ITEM_FIRST_ROADMAP.md) | Item-first checklist |
 | [`TYPE_BEHAVIORS_DB_ROADMAP.md`](TYPE_BEHAVIORS_DB_ROADMAP.md) | Tip davranışı → DB **migration arşivi** (uygulandı 0030–0033) |
+| [`PERFORMANCE_ROADMAP.md`](PERFORMANCE_ROADMAP.md) | **Performans backlog** — proje açma, orbit, 100 eşzamanlı tasarım |
 | [`STAND_FRAME_REMOVAL.md`](STAND_FRAME_REMOVAL.md) | Frame kolon tarihçesi |
 | [`REFACTOR.md`](REFACTOR.md) | Uygulanan adımlar günlüğü |
 

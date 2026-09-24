@@ -34,7 +34,7 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     sofa = next(item for item in body["items"] if item["itemKey"] == "furniture_sofa_single_classic")
     assert sofa["modelFile"] == "bej_koltuk_1_ciftli_2_tekli.glb"
     tv = next(item for item in body["items"] if item["type"] == "tv")
-    door = next(item for item in body["items"] if item["itemKey"] == "door_100")
+    door = next(item for item in body["items"] if item["itemKey"] == "wall_door_100_350")
     assert door["composition"]["mode"] == "recipe"
     assert len(door["composition"]["items"]) == 6
     assert "options" not in door["composition"]
@@ -43,9 +43,9 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     assert len(kit["composition"]["items"]) == 3
     vw = next(item for item in body["items"] if item["itemKey"] == "video_wall_2x2")
     assert vw["videoWall"]["panelItemKey"] == "video_wall_panel"
-    showcase = next(item for item in body["items"] if item["itemKey"] == "wall_showcase_100_2")
+    showcase = next(item for item in body["items"] if item["itemKey"] == "wall_showcase_100_2_350")
     assert showcase["bodyItems"]["glassShelfItemKey"] == "glass_shelf"
-    wall_200 = next(item for item in body["items"] if item["itemKey"] == "wall_200")
+    wall_200 = next(item for item in body["items"] if item["itemKey"] == "wall_200_350")
     assert wall_200["rotationStepDeg"] == 90
     assert wall_200["defaultRotationDeg"] == 0
     assert wall_200["sideInsertRotation"] == "inherit"

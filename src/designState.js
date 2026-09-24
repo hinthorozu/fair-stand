@@ -149,8 +149,8 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
 }
 
 const SEPARATOR_PLAIN_WIDTH_TO_ITEM_KEY = Object.freeze({
-  50: 'wall_separator_50',
-  100: 'wall_separator_100',
+  50: 'wall_separator_50_350',
+  100: 'wall_separator_100_350',
 });
 
 function resolveSeparatorItemKey(widthCmOrDescriptor, descriptor = {}) {
@@ -219,7 +219,7 @@ export function createShowcaseModuleState(type, widthCm = 100) {
 }
 
 export function createDoorModuleState(widthCmOrDescriptor = 100) {
-  const doorItem = getItem('door_100');
+  const doorItem = getItem('wall_door_100_350');
   if (!doorItem || doorItem.type !== 'door') return null;
   const canonicalWidthCm = resolveSceneDimensions(doorItem).widthCm;
   if (canonicalWidthCm == null || !Number.isFinite(Number(canonicalWidthCm))) return null;

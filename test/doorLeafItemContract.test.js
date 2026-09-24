@@ -27,8 +27,8 @@ test('door_leaf_100 owns canonical wooden door leaf product properties', () => {
   assert.doesNotMatch(itemsSource, /DOOR_LEAF_ITEM_KEYS_BY_MODULE_WIDTH/);
   assert.doesNotMatch(itemsSource, /export function getDoorLeafItem/);
   assert.doesNotMatch(designStateSource, /getDoorLeafItem/);
-  assert.equal(getItem('door_100').itemKey, 'door_100');
-  assert.equal(getItem('door_100').composition.mode, 'recipe');
+  assert.equal(getItem('wall_door_100_350').itemKey, 'wall_door_100_350');
+  assert.equal(getItem('wall_door_100_350').composition.mode, 'recipe');
   assert.equal(Object.hasOwn(getItem('door_leaf_100'), 'composition'), false);
 });
 
@@ -53,7 +53,7 @@ test('door module factory binds the child leaf Item and consumes its canonical d
 test('persisted door surface keeps user color and image when parent itemKey is present', () => {
   const persisted = {
     id: 'module-old-door',
-    itemKey: 'door_100',
+    itemKey: 'wall_door_100_350',
     type: 'door',
     widthCm: 100,
     strips: [],

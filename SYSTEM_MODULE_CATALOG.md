@@ -31,15 +31,15 @@ Bu snapshot `Version2` üzerindeki `MODULE_CATALOG_KEYS` ve `MODULE_CONTRACT_ASS
 Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil birebir** karşılaştırılır.
 
 <!-- catalog-keys:start -->
-- `wall_200`
-- `wall_150`
-- `wall_100`
-- `wall_50`
-- `wall_separator_100`
-- `wall_separator_50`
-- `wall_separator_100_sarmasik`
-- `wall_separator_50_sarmasik`
-- `door_100`
+- `wall_200_350`
+- `wall_150_350`
+- `wall_100_350`
+- `wall_50_350`
+- `wall_separator_100_350`
+- `wall_separator_50_350`
+- `wall_separator_100_350_sarmasik`
+- `wall_separator_50_350_sarmasik`
+- `wall_door_100_350`
 - `wall_200_short_up_2`
 - `wall_150_short_up_2`
 - `wall_100_short_up_2`
@@ -53,8 +53,8 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `profile_140_5`
 - `profile_91`
 - `profile_41_5`
-- `wall_showcase_100_3`
-- `wall_showcase_100_2`
+- `wall_showcase_100_3_350`
+- `wall_showcase_100_2_350`
 - `shelf_100`
 - `shelf_150`
 - `shelf_200`
@@ -97,7 +97,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Panel & Duvar
 
-`wall_200`, `wall_150`, `wall_100`, `wall_50`, `wall_separator_100`, `wall_separator_50`, `wall_separator_100_sarmasik`, `wall_separator_50_sarmasik`, `door_100`
+`wall_200_350`, `wall_150_350`, `wall_100_350`, `wall_50_350`, `wall_separator_100_350`, `wall_separator_50_350`, `wall_separator_100_350_sarmasik`, `wall_separator_50_350_sarmasik`, `wall_door_100_350`
 
 ### Panel Ek Modül
 

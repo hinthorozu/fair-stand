@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 
 def test_wall_200_is_render_with_panel_cover_flags():
-    flags = surface_flags_for_item("wall_200", "flat-panel")
+    flags = surface_flags_for_item("wall_200_350", "flat-panel")
     assert flags["is_render"] is True
     assert flags["accepts_color"] is True
     assert flags["accepts_image"] is True

@@ -13,13 +13,13 @@ const L_COUNTER_ITEM_KEYS = Object.freeze({
 });
 
 const SHOWCASE_ITEM_KEYS = Object.freeze({
-  2: 'wall_showcase_100_2',
-  3: 'wall_showcase_100_3',
+  2: 'wall_showcase_100_2_350',
+  3: 'wall_showcase_100_3_350',
 });
 
 const SEPARATOR_ITEM_KEYS = Object.freeze({
-  50: 'wall_separator_50',
-  100: 'wall_separator_100',
+  50: 'wall_separator_50_350',
+  100: 'wall_separator_100_350',
 });
 
 const COUNTER_ITEM_KEYS = Object.freeze({
@@ -35,10 +35,10 @@ const BASE_ITEM_KEYS = Object.freeze({
 });
 
 const WALL_ITEM_KEYS = Object.freeze({
-  50: 'wall_50',
-  100: 'wall_100',
-  150: 'wall_150',
-  200: 'wall_200',
+  50: 'wall_50_350',
+  100: 'wall_100_350',
+  150: 'wall_150_350',
+  200: 'wall_200_350',
 });
 
 export function parseLCounterSelection(text) {
@@ -117,7 +117,7 @@ function syncFromSelection() {
 
   const doorMatch = text.match(/Kapı\s+(100)\s*cm/i);
   if (doorMatch) {
-    renderItemBom('door_100', `Depo Kapısı ${doorMatch[1]} cm`);
+    renderItemBom('wall_door_100_350', `Depo Kapısı ${doorMatch[1]} cm`);
     return;
   }
 

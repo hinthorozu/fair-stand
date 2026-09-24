@@ -32,17 +32,17 @@ test('separator identity is itemKey, not type/width/modelFile guess', () => {
     resolveItemKey({ type: 'separator', widthCm: 100, modelFile: 'wall_separator_100_sarmasik.glb' }),
     null,
   );
-  assert.equal(resolveItemKey({ itemKey: 'wall_separator_100' }), 'wall_separator_100');
-  assert.equal(resolveItemKey({ itemKey: 'wall_separator_100_sarmasik' }), 'wall_separator_100_sarmasik');
+  assert.equal(resolveItemKey({ itemKey: 'wall_separator_100_350' }), 'wall_separator_100_350');
+  assert.equal(resolveItemKey({ itemKey: 'wall_separator_100_350_sarmasik' }), 'wall_separator_100_350_sarmasik');
 });
 
 test('catalogKey is not a product identity input', () => {
-  assert.equal(resolveItemKey({ catalogKey: 'wall_100' }), null);
+  assert.equal(resolveItemKey({ catalogKey: 'wall_100_350' }), null);
   assert.equal(
-    resolveItemKey({ type: 'flat-panel', widthCm: 100, catalogKey: 'wall_200' }),
+    resolveItemKey({ type: 'flat-panel', widthCm: 100, catalogKey: 'wall_200_350' }),
     null,
   );
-  assert.equal(resolveItemKey({ itemKey: 'wall_100' }), 'wall_100');
+  assert.equal(resolveItemKey({ itemKey: 'wall_100_350' }), 'wall_100_350');
 });
 
 test('left catalog, context catalog and drag badge share catalog presentation source', () => {

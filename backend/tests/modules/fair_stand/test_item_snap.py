@@ -126,7 +126,7 @@ def test_bootstrap_snap_rule_fields(client, db_session, auth_headers):
     assert by_key["shelf_100"]["snapRequires"] == "shelf-rail"
     assert "snapMountMode" not in by_key["shelf_100"]
     assert by_key["panel_197"]["snapProvides"] == "shelf-rail"
-    assert "snapRequires" not in by_key["wall_200"]
+    assert "snapRequires" not in by_key["wall_200_350"]
 
     by_rule = {row["key"]: row for row in body["rules"]}
     assert by_rule["top-rail"]["face"] == "top"

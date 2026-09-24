@@ -345,9 +345,24 @@ export function resolveWallMediaMetrics(itemOrKey) {
 
 
 
+/** Maksima duvar hattı tavanı (parent SKU suffix); stand zarfı ayrı. */
+export const CATALOG_WALL_LINE_HEIGHT_CM = 350;
+
+export function catalogWallFlatPanelItemKey(widthCm, lineHeightCm = CATALOG_WALL_LINE_HEIGHT_CM) {
+  return `wall_${widthCm}_${lineHeightCm}`;
+}
+
+export function catalogPlainSeparatorItemKey(widthCm, lineHeightCm = CATALOG_WALL_LINE_HEIGHT_CM) {
+  return `wall_separator_${widthCm}_${lineHeightCm}`;
+}
+
+export function catalogDoorItemKey(widthCm = 100, lineHeightCm = CATALOG_WALL_LINE_HEIGHT_CM) {
+  return `wall_door_${widthCm}_${lineHeightCm}`;
+}
+
 const SHOWCASE_ITEM_KEYS_BY_TYPE = Object.freeze({
-  'showcase-2': 'wall_showcase_100_2',
-  'showcase-3': 'wall_showcase_100_3',
+  'showcase-2': `wall_showcase_100_2_${CATALOG_WALL_LINE_HEIGHT_CM}`,
+  'showcase-3': `wall_showcase_100_3_${CATALOG_WALL_LINE_HEIGHT_CM}`,
 });
 
 export function getShowcaseItemKeyForType(type) {
@@ -480,9 +495,14 @@ export function listRegisteredItems() {
  * Katalogda görünen, render’lı, short-up olmayan flat-panel; ölçü = widthCm.
  * Explicit itemKey yolu bunu kullanmaz.
  */
-export function resolveAutomaticWallFlatPanelItemKey(widthCm) {
+export function resolveAutomaticWallFlatPanelItemKey(
+  widthCm,
+  lineHeightCm = CATALOG_WALL_LINE_HEIGHT_CM,
+) {
   const width = Number(widthCm);
   if (!Number.isFinite(width) || width <= 0) return null;
+  const canonicalKey = catalogWallFlatPanelItemKey(width, lineHeightCm);
+  if (getItem(canonicalKey)) return canonicalKey;
   const matches = listRegisteredItems()
     .filter((item) => {
       if (item?.type !== 'flat-panel') return false;

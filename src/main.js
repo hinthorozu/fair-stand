@@ -1073,7 +1073,7 @@ function createAutomaticDepotStates(plan) {
   if (!plan?.ok) return [];
   return plan.specs.map((spec) => {
     if (spec.kind === 'door') {
-      const state = createModuleStateFromCatalogKey('door_100');
+      const state = createModuleStateFromCatalogKey('wall_door_100_350');
       if (!state) return null;
       state.placement = { ...spec.placement };
       state.autoDepot = true;

@@ -189,7 +189,7 @@ def main() -> int:
             return 1
 
         wall = session.execute(
-            text("SELECT item_key, item_type FROM fair_stand_items WHERE item_key = 'wall_200'")
+            text("SELECT item_key, item_type FROM fair_stand_items WHERE item_key = 'wall_200_350'")
         ).mappings().one()
         if wall["item_type"] != "flat-panel":
             print(f"FAIL wall_200 type={wall['item_type']!r}")

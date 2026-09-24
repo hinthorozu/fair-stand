@@ -17,8 +17,8 @@ test('drop Z comes from item.defaultZCm for every Item, not stand ceiling or typ
   assert.equal(resolveItemDefaultZCm('led_floodlight'), 350);
   assert.equal(getItem('led_floodlight').defaultZCm, 350);
   assert.equal(getItem('led_floodlight').dimensions.mountHeightCm, 350);
-  assert.equal(resolveItemDefaultZCm('wall_200'), 0);
-  assert.equal(getItem('wall_200').defaultZCm, 0);
+  assert.equal(resolveItemDefaultZCm('wall_200_350'), 0);
+  assert.equal(getItem('wall_200_350').defaultZCm, 0);
   assert.equal(getItem('kettle').defaultZCm, 66);
   assert.equal(resolveItemDefaultZCm('kettle'), 66);
   assert.equal(createModulePlacement({ xCm: 10, itemKey: 'kettle' }).zCm, 66);

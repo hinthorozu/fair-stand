@@ -90,7 +90,7 @@ test('katalog image-capable wall ve non-image TV kartlarını birlikte sunar', a
   const modulePanel = page.locator('details', { has: openCatalogButton });
   await modulePanel.locator(':scope > summary').click();
 
-  const wallCard = page.locator('.module-drag-card[data-module-key="wall_100"]');
+  const wallCard = page.locator('.module-drag-card[data-module-key="wall_100_350"]');
   const tvCard = page.locator('.module-drag-card[data-module-key="tv_42"]');
   const fridgeCard = page.locator('.module-drag-card[data-module-key="mini_fridge_avanti"]');
 

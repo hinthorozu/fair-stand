@@ -22,7 +22,7 @@ function wall(widthCm, xCm, yCm, rotationZDeg = 0) {
 function door(xCm, yCm, rotationZDeg = 0) {
   return {
     kind: 'door',
-    itemKey: 'door_100',
+    itemKey: 'wall_door_100_350',
     widthCm: 100,
     placement: createModulePlacement({ xCm, yCm, rotationZDeg, wallId: 'free' }),
   };

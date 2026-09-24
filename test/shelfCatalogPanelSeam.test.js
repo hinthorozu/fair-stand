@@ -59,8 +59,8 @@ test('A-C catalog: shelf_100/150/200 görünür, Raf & Vitrin, vitrinlerden sonr
 
   const group = listCatalogGroups().find((entry) => entry.id === 3);
   assert.deepEqual([...group.keys], [
-    'wall_showcase_100_3',
-    'wall_showcase_100_2',
+    'wall_showcase_100_3_350',
+    'wall_showcase_100_2_350',
     'shelf_100',
     'shelf_150',
     'shelf_200',
@@ -69,7 +69,7 @@ test('A-C catalog: shelf_100/150/200 görünür, Raf & Vitrin, vitrinlerden sonr
     listCatalogItems()
       .filter((item) => item.previewId === 20 || item.itemKey.startsWith('wall_showcase_'))
       .map((item) => item.itemKey),
-    ['wall_showcase_100_3', 'wall_showcase_100_2', 'shelf_100', 'shelf_150', 'shelf_200'],
+    ['wall_showcase_100_3_350', 'wall_showcase_100_2_350', 'shelf_100', 'shelf_150', 'shelf_200'],
   );
 });
 
@@ -155,30 +155,30 @@ test('A shelf_150 exact itemKey ile state olur; width/type/shelfCount identity �
 });
 
 test('B-D raf sığdığı wall/panel support span’e bağlanır; taşarsa invalid', () => {
-  const shelf150On200 = snapShelf('shelf_150', 'wall_200', 100, 150);
+  const shelf150On200 = snapShelf('shelf_150', 'wall_200_350', 100, 150);
   assert.equal(shelf150On200.ok, true);
   assert.equal(shelf150On200.seamHeightCm, 150);
   assert.equal(shelf150On200.placement.xCm, 25);
 
-  const shelf100On150 = snapShelf('shelf_100', 'wall_150', 75);
+  const shelf100On150 = snapShelf('shelf_100', 'wall_150_350', 75);
   assert.equal(shelf100On150.ok, true);
   assert.equal(shelf100On150.seamHeightCm, 100);
   assert.equal(shelf100On150.placement.xCm, 25);
 
-  const shelf100On200 = snapShelf('shelf_100', 'wall_200', 80);
+  const shelf100On200 = snapShelf('shelf_100', 'wall_200_350', 80);
   assert.equal(shelf100On200.ok, true);
   assert.equal(shelf100On200.seamHeightCm, 100);
   assert.equal(shelf100On200.placement.xCm, 30);
 
-  const shelf200On200 = snapShelf('shelf_200', 'wall_200', 80);
+  const shelf200On200 = snapShelf('shelf_200', 'wall_200_350', 80);
   assert.equal(shelf200On200.ok, true);
   assert.equal(shelf200On200.seamHeightCm, 100);
   assert.equal(shelf200On200.placement.xCm, 0);
 
-  assert.equal(snapShelf('shelf_150', 'wall_100', 50).ok, false);
-  assert.equal(snapShelf('shelf_200', 'wall_100', 50).ok, false);
-  assert.equal(snapShelf('shelf_200', 'wall_150', 75).ok, false);
-  const shelf100On200Edge = snapShelf('shelf_100', 'wall_200', 10);
+  assert.equal(snapShelf('shelf_150', 'wall_100_350', 50).ok, false);
+  assert.equal(snapShelf('shelf_200', 'wall_100_350', 50).ok, false);
+  assert.equal(snapShelf('shelf_200', 'wall_150_350', 75).ok, false);
+  const shelf100On200Edge = snapShelf('shelf_100', 'wall_200_350', 10);
   assert.equal(shelf100On200Edge.ok, true);
   assert.equal(shelf100On200Edge.placement.xCm, 0);
 });
@@ -192,7 +192,7 @@ test('G-I panel internal seam snap: geçerli birleşim, orta ve dış sınır re
   assert.equal(seams.includes(0), false);
   assert.equal(seams.includes(350), false);
 
-  const wall = wallModule('wall_100', 0);
+  const wall = wallModule('wall_100_350', 0);
   const shelf = createModuleStateFromDescriptor({ itemKey: 'shelf_100', type: 'shelf' });
   const occupancySeams = listInternalSeamsInOccupancyRange({ minCm: 0, maxCm: 350 });
   assert.deepEqual([...occupancySeams], [...seams]);
@@ -236,7 +236,7 @@ test('G-I panel internal seam snap: geçerli birleşim, orta ve dış sınır re
 });
 
 test('J shelf wall capacity’ye 100/150/200 cm eklemez', () => {
-  const wall = wallModule('wall_200', 0);
+  const wall = wallModule('wall_200_350', 0);
   const shelf = createModuleStateFromDescriptor({ itemKey: 'shelf_200', type: 'shelf' });
   shelf.placement = {
     xCm: 0,
@@ -259,14 +259,14 @@ test('K wall_shelf_* Item’ları hâlâ yok', () => {
 });
 
 test('L wall_showcase_* ve glass_shelf regression bozulmaz', () => {
-  assert.equal(getItem('wall_showcase_100_2').catalogVisible, true);
-  assert.equal(getItem('wall_showcase_100_3').catalogVisible, true);
+  assert.equal(getItem('wall_showcase_100_2_350').catalogVisible, true);
+  assert.equal(getItem('wall_showcase_100_3_350').catalogVisible, true);
   assert.equal(getItem('glass_shelf').type, 'showcase-accessory');
   assert.equal(getItem('glass_shelf').catalogVisible, false);
   assert.ok(getModuleRecipe('showcase-2', 100));
   assert.ok(getModuleRecipe('showcase-3', 100));
   assert.equal(getModuleRecipe('shelf', 100), null);
-  assert.equal(resolveModuleContract('wall_showcase_100_2').bom.mode, 'recipe');
+  assert.equal(resolveModuleContract('wall_showcase_100_2_350').bom.mode, 'recipe');
   assert.equal(resolveModuleContract('shelf_100').bom.mode, 'self');
 });
 

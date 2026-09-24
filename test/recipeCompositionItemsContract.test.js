@@ -8,7 +8,7 @@ function childTuples(entries) {
 }
 
 const EXPECTED_RECIPE_ITEMS = Object.freeze({
-  door_100: [['profile_91', 1], ['upright_346_5', 2], ['panel_98', 3], ['connector_start', 2], ['connector_single', 5], ['door_leaf_100', 1]],
+  wall_door_100_350: [['profile_91', 1], ['upright_346_5', 2], ['panel_98', 3], ['connector_start', 2], ['connector_single', 5], ['door_leaf_100', 1]],
   base_100: [['profile_91', 4], ['profile_41_5', 4], ['upright_49_5', 4], ['panel_98', 2], ['panel_48_5', 2], ['connector_start', 8], ['connector_single', 8], ['base_top_107_50', 1]],
   base_150: [['profile_140_5', 4], ['profile_41_5', 4], ['upright_49_5', 4], ['panel_147_5', 2], ['panel_48_5', 2], ['connector_start', 8], ['connector_single', 8], ['base_top_157_50', 1]],
   base_200: [['profile_190', 4], ['profile_41_5', 4], ['upright_49_5', 4], ['panel_197', 2], ['panel_48_5', 2], ['connector_start', 8], ['connector_single', 8], ['base_top_206_50', 1]],
@@ -18,10 +18,10 @@ const EXPECTED_RECIPE_ITEMS = Object.freeze({
   desk_banko_100_l: [['profile_91', 5], ['profile_41_5', 5], ['upright_99', 5], ['panel_98', 4], ['panel_48_5', 4], ['connector_start', 8], ['connector_single', 16], ['counter_top_110_60', 1], ['counter_top_52_60', 1]],
   desk_banko_150_l: [['profile_140_5', 5], ['profile_91', 1], ['profile_41_5', 4], ['upright_99', 5], ['panel_147_5', 4], ['panel_48_5', 4], ['connector_start', 8], ['connector_single', 16], ['counter_top_160_60', 1], ['counter_top_102_60', 1]],
   desk_banko_200_l: [['profile_190', 5], ['profile_140_5', 1], ['profile_41_5', 4], ['upright_99', 5], ['panel_197', 4], ['panel_48_5', 4], ['connector_start', 8], ['connector_single', 16], ['counter_top_210_60', 1], ['counter_top_150_60', 1]],
-  wall_50: [['profile_41_5', 2], ['upright_346_5', 2], ['panel_48_5', 7], ['connector_start', 2], ['connector_single', 13]],
-  wall_100: [['profile_91', 2], ['upright_346_5', 2], ['panel_98', 7], ['connector_start', 2], ['connector_single', 13]],
-  wall_150: [['profile_140_5', 2], ['upright_346_5', 2], ['panel_147_5', 7], ['connector_start', 2], ['connector_single', 13]],
-  wall_200: [['profile_190', 2], ['upright_346_5', 2], ['panel_197', 7], ['connector_start', 2], ['connector_single', 13]],
+  wall_50_350: [['profile_41_5', 2], ['upright_346_5', 2], ['panel_48_5', 7], ['connector_start', 2], ['connector_single', 13]],
+  wall_100_350: [['profile_91', 2], ['upright_346_5', 2], ['panel_98', 7], ['connector_start', 2], ['connector_single', 13]],
+  wall_150_350: [['profile_140_5', 2], ['upright_346_5', 2], ['panel_147_5', 7], ['connector_start', 2], ['connector_single', 13]],
+  wall_200_350: [['profile_190', 2], ['upright_346_5', 2], ['panel_197', 7], ['connector_start', 2], ['connector_single', 13]],
   wall_200_short_up_2: [['profile_190', 2], ['upright_99', 2], ['panel_197', 2], ['connector_start', 2], ['connector_single', 3]],
   wall_150_short_up_2: [['profile_140_5', 2], ['upright_99', 2], ['panel_147_5', 2], ['connector_start', 2], ['connector_single', 3]],
   wall_100_short_up_2: [['profile_91', 2], ['upright_99', 2], ['panel_98', 2], ['connector_start', 2], ['connector_single', 3]],
@@ -30,12 +30,12 @@ const EXPECTED_RECIPE_ITEMS = Object.freeze({
   wall_150_short_up_1: [['profile_140_5', 2], ['upright_49_5', 2], ['panel_147_5', 1], ['connector_start', 2], ['connector_single', 3]],
   wall_100_short_up_1: [['profile_91', 2], ['upright_49_5', 2], ['panel_98', 1], ['connector_start', 2], ['connector_single', 3]],
   wall_50_short_up_1: [['profile_41_5', 2], ['upright_49_5', 2], ['panel_48_5', 1], ['connector_start', 2], ['connector_single', 3]],
-  wall_separator_50: [['profile_41_5', 2], ['upright_346_5', 2], ['separator_panel_48_5', 1], ['separator_panel_98', 3], ['connector_start', 2], ['connector_single', 7]],
-  wall_separator_100: [['profile_91', 2], ['upright_346_5', 2], ['separator_panel_98', 7], ['connector_start', 2], ['connector_single', 13]],
-  wall_separator_50_sarmasik: [['profile_41_5', 2], ['upright_346_5', 2], ['separator_panel_48_5', 1], ['separator_panel_98', 3], ['connector_start', 2], ['connector_single', 7]],
-  wall_separator_100_sarmasik: [['profile_91', 2], ['upright_346_5', 2], ['separator_panel_98', 7], ['connector_start', 2], ['connector_single', 13]],
-  wall_showcase_100_2: [['profile_91', 4], ['upright_346_5', 2], ['panel_98', 5], ['connector_start', 4], ['connector_single', 9], ['showcase_side_94_6_30', 2], ['showcase_horizontal_87_4_30', 2], ['glass_shelf', 1]],
-  wall_showcase_100_3: [['profile_91', 4], ['upright_346_5', 2], ['panel_98', 4], ['connector_start', 4], ['connector_single', 7], ['showcase_side_143_5_30', 2], ['showcase_horizontal_87_4_30', 2], ['glass_shelf', 2]],
+  wall_separator_50_350: [['profile_41_5', 2], ['upright_346_5', 2], ['separator_panel_48_5', 1], ['separator_panel_98', 3], ['connector_start', 2], ['connector_single', 7]],
+  wall_separator_100_350: [['profile_91', 2], ['upright_346_5', 2], ['separator_panel_98', 7], ['connector_start', 2], ['connector_single', 13]],
+  wall_separator_50_350_sarmasik: [['profile_41_5', 2], ['upright_346_5', 2], ['separator_panel_48_5', 1], ['separator_panel_98', 3], ['connector_start', 2], ['connector_single', 7]],
+  wall_separator_100_350_sarmasik: [['profile_91', 2], ['upright_346_5', 2], ['separator_panel_98', 7], ['connector_start', 2], ['connector_single', 13]],
+  wall_showcase_100_2_350: [['profile_91', 4], ['upright_346_5', 2], ['panel_98', 5], ['connector_start', 4], ['connector_single', 9], ['showcase_side_94_6_30', 2], ['showcase_horizontal_87_4_30', 2], ['glass_shelf', 1]],
+  wall_showcase_100_3_350: [['profile_91', 4], ['upright_346_5', 2], ['panel_98', 4], ['connector_start', 4], ['connector_single', 7], ['showcase_side_143_5_30', 2], ['showcase_horizontal_87_4_30', 2], ['glass_shelf', 2]],
 });
 
 test('recipe parents keep composition.items equal to the proven former recipe copy', () => {

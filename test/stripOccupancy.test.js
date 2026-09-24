@@ -31,7 +31,7 @@ test('canonical Item occupancy wins and hanging short-up stays top-aligned', () 
     resolveModuleStripOccupancy({ itemKey: 'wall_200_short_up_2', type: 'flat-panel' }),
     { align: 'top', stripCount: 2 },
   );
-  assert.equal(resolveModuleStripOccupancy({ itemKey: 'wall_200', type: 'flat-panel' }), null);
+  assert.equal(resolveModuleStripOccupancy({ itemKey: 'wall_200_350', type: 'flat-panel' }), null);
 
   const scene = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const state = readFileSync(new URL('../src/designState.js', import.meta.url), 'utf8');

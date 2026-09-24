@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
 
+const WALL_LINE_HEIGHT_CM = 350;
+
+function wallFlatPanelItemKey(widthCm) {
+  return `wall_${widthCm}_${WALL_LINE_HEIGHT_CM}`;
+}
+
 async function createStand(page, { standName, projectName, xCm = '500', yCm = '500' }) {
   await page.goto('/');
 
@@ -58,7 +64,7 @@ test('F-010 automatic wall construction reaches persisted runtime state through 
   expect(project).not.toBeNull();
   expect(project.modules.length).toBeGreaterThan(0);
   expect(project.modules.every((moduleState) => moduleState.type === 'flat-panel')).toBe(true);
-  expect(project.modules.every((moduleState) => moduleState.itemKey === `wall_${moduleState.widthCm}`)).toBe(true);
+  expect(project.modules.every((moduleState) => moduleState.itemKey === wallFlatPanelItemKey(moduleState.widthCm))).toBe(true);
   expect(pageErrors).toEqual([]);
 });
 
@@ -78,7 +84,7 @@ test('F-010 catalog construction persists a module created through the real pick
   expect(initialProject).not.toBeNull();
   expect(initialProject.modules.length).toBeGreaterThan(0);
   const removedModule = initialProject.modules[0];
-  expect(removedModule.itemKey).toBe(`wall_${removedModule.widthCm}`);
+  expect(removedModule.itemKey).toBe(wallFlatPanelItemKey(removedModule.widthCm));
 
   page.once('dialog', async (dialog) => dialog.accept());
   await page.evaluate((moduleId) => {
@@ -145,16 +151,16 @@ test('F-010 door catalog construction persists canonical door_leaf_100 child sta
   const picker = page.locator('.module-picker-backdrop');
   await expect(picker).toBeVisible();
   await picker.locator('summary', { hasText: 'Panel & Duvar' }).click();
-  const doorCard = picker.locator('[data-module-key="door_100"]');
+  const doorCard = picker.locator('[data-module-key="wall_door_100_350"]');
   await expect(doorCard).toBeVisible();
   await doorCard.click();
   await picker.locator('.module-picker-add').click();
   await expect(picker).toBeHidden();
   const project = await saveAndReadProject(page);
-  const door = project.modules.find((moduleState) => moduleState.itemKey === 'door_100');
+  const door = project.modules.find((moduleState) => moduleState.itemKey === 'wall_door_100_350');
   expect(door).toBeTruthy();
-  expect(door.itemKey).toBe('door_100');
-  expect(door.itemKey).toBe('door_100');
+  expect(door.itemKey).toBe('wall_door_100_350');
+  expect(door.itemKey).toBe('wall_door_100_350');
   expect(door.type).toBe('door');
   expect(door.widthCm).toBe(100);
   expect(door.surface.itemKey).toBe('door_leaf_100');

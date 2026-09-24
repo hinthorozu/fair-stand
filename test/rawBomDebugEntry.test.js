@@ -29,7 +29,7 @@ test('DEV debug selection path resolves the same wall BOM lines as resolveItemBo
   assert.match(message, /·\s*100\s*cm\s*·/i);
   assert.doesNotMatch(message, /Banko|Baza|Kapı|Vitrin|Separatör/);
 
-  const lines = resolveItemBom('wall_100');
+  const lines = resolveItemBom('wall_100_350');
   assert.ok(lines.length > 0);
   for (const line of lines) {
     assert.ok(line.itemKey);
