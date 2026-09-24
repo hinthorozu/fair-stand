@@ -44,7 +44,7 @@ Three.js sahnesi metre kullanır: `STAND_DIMENSIONS.height`, `.depth` getter’l
 - Item `dimensions` / `sceneDimensions` — `ITEMS.md`
 - Catalog görünürlük, kategori, kart — `CATALOG.md`
 - `MODULE_WIDTHS_CM` (50/100/150/200) — hâlâ `src/standDimensions.js` kod sabiti; bu tabloda yok
-- collision / snap politikası — `moduleBehavior.js` (henüz DB değil)
+- collision / tip davranışı — `fair_stand_item_type` → bootstrap → `moduleBehavior.js` (`getItemType`); snap kuralı ayrı (`fair_stand_rule`)
 
 ---
 

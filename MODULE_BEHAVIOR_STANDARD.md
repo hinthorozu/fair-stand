@@ -54,7 +54,7 @@ Every module has a ghost definition. Missing/unknown module types currently rece
 }
 ```
 
-For modules that need a specific real-model or custom preview, declare the behavior in `TYPE_BEHAVIORS` rather than introducing a new module-type decision elsewhere.
+For modules that need a specific real-model or custom preview, declare the behavior on the CRM **Item Type** (`fair_stand_item_type` / bootstrap `itemTypes`) rather than introducing a new module-type decision elsewhere.
 
 `scene3d.js` must route ghost creation through `getModuleGhostBehavior()` and the declared renderer strategy.
 

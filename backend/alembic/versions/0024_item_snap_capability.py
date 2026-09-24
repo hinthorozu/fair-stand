@@ -173,7 +173,8 @@ def upgrade() -> None:
         ).scalar_one()
 
     rules: dict[str, int] = {}
-    for code, name, face, edge, mount_mode in _INITIAL_RULES:
+    # _INITIAL_RULES is (key, display_name, face, edge); mount_mode dropped in 0027.
+    for code, name, face, edge in _INITIAL_RULES:
         bind.execute(
             sa.text(
                 """
@@ -189,7 +190,7 @@ def upgrade() -> None:
                 "name": name,
                 "face": face,
                 "edge": edge,
-                "mount_mode": mount_mode,
+                "mount_mode": "face-edge",
             },
         )
         rules[code] = bind.execute(

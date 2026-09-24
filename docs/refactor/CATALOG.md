@@ -66,7 +66,7 @@ Bu yüzey “Modül Kataloğu”dur. Sağ tık **Modül Ekle** picker’ı (`ren
 
 ## Catalog modeli
 
-Canonical kaynak: `src/catalog.js` `CATALOG_CATEGORIES`.
+Canonical kaynak: `src/catalog.js` — bootstrap `initializeCatalogCategories` / `listCatalogCategories` (eski sabit `CATALOG_CATEGORIES` yok).
 
 ```text
 Catalog {
@@ -229,7 +229,7 @@ Dokümantasyon örneği; bu `itemKey`’ler kayıtlı ürün değildir.
   "catalogVisible": true,
   "categoryId": 1,
   "catalogItemIndex": 3,
-  "previewId": "flat-panel"
+  "previewId": 9
 }
 ```
 
@@ -242,7 +242,7 @@ Dokümantasyon örneği; bu `itemKey`’ler kayıtlı ürün değildir.
 }
 ```
 
-Yeni görünen Item yalnız Item kaydına yazılır (`catalogVisible=true` + `categoryId` + `catalogItemIndex` + `previewId`). Catalog’a ayrı kart satırı eklenmez. `previewId` `CATALOG_PREVIEWS` üyesi olmalıdır.
+Yeni görünen Item yalnız Item kaydına yazılır (`catalogVisible=true` + `categoryId` + `catalogItemIndex` + `previewId`). Catalog’a ayrı kart satırı eklenmez. `previewId` bootstrap preview id listesinde olmalıdır (`listCatalogPreviewIds()`).
 
 Yeni kategori gerekirse Admin Catalog CRUD ile `catalogName` / `catalogIndex` eklenir; `id` veritabanı üretir.
 
@@ -289,10 +289,11 @@ Yeni kategori gerekirse Admin Catalog CRUD ile `catalogName` / `catalogIndex` ek
 
 ## Kaynak dosyalar
 
-- `src/catalog.js` — `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getModuleCatalogItem`, `getModuleCatalogLabel`. İnce kart; `resolveSceneDimensions` yok.
+- `src/catalog.js` — kategori/preview bootstrap + `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getCatalogPreview`, `getModuleCatalogItem`, `getModuleCatalogLabel`. İnce kart; `resolveSceneDimensions` yok.
+- `src/catalogPreviewRenderer.js` — `createModuleCatalogPreview` (CSS silüet; eski `CATALOG_PREVIEW_RENDERERS` map yok)
 - `src/items.js` — Item master; `previewId`; `dimensions` / `sceneDimensions`; `resolveSceneDimensions`; `resolveItemKey`
 - `src/designState.js` — `createModuleStateFromDescriptor` Item’dan factory descriptor üretir
-- `src/moduleDragSidebar.js` — sol katalog UI; `CATALOG_PREVIEW_RENDERERS[previewId]`; silüet ölçüleri `getItem`
+- `src/moduleDragSidebar.js` — sol katalog UI; `createModuleCatalogPreview` + `getCatalogPreview`
 - `src/moduleContextMenu.js` — picker katalog UI
 - `src/scene3d.js` — drag badge katalog önizlemesi (`getModuleCatalogItem` / `getModuleCatalogLabel`)
 - `src/main.js` — `#open-module-catalog` bağlama
@@ -306,7 +307,7 @@ Yeni kategori gerekirse Admin Catalog CRUD ile `catalogName` / `catalogIndex` ek
 
 Catalog işi: kategori tablosu + görünür Item projection + UI helper.
 
-**Kalan Catalog yüzeyi:** `CATALOG_CATEGORIES`, `CATALOG_PREVIEWS`, `listCatalogCategories`, `getCatalogCategory`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getModuleCatalogItem`, `getModuleCatalogLabel`.
+**Kalan Catalog yüzeyi:** `initializeCatalogCategories` / `listCatalogCategories` / `getCatalogCategory`, `initializeCatalogPreviews` / `listCatalogPreviews` / `getCatalogPreview`, `getCatalogItem`, `listCatalogItems`, `listCatalogGroups`, `getModuleCatalogItem`, `getModuleCatalogLabel`.
 
 **Stand zarfı / düz duvar genişlikleri:** Catalog’un işi değildir. `docs/refactor/STAND_DIMENSIONS.md`.
 

@@ -6,6 +6,7 @@ Stand zarfı Item değildir: `docs/refactor/STAND_DIMENSIONS.md`.
 Catalog: `docs/refactor/CATALOG.md`.
 Rotation: `docs/refactor/ROTATION.md`.
 PostgreSQL tabloları: `docs/refactor/DATABASE.md`.
+CRM kullanım: `docs/refactor/FAIR_STAND_DB_KULLANIM_KILAVUZU.md`.
 
 ---
 
@@ -17,13 +18,13 @@ Karar verilmiş / ertelenmiş maddeler: `docs/refactor/PENDING_ITEM_DECISIONS.md
 
 Kaynak: `src/items.js` taraması (2026-09-17). N = kaç Item’da path var.
 
-Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision hâlâ `type` → `TYPE_BEHAVIORS`; rotation Item; recipe BOM yalnız `composition.items`.
+Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Placement/collision/moveSnap → tip kaydı `getItemType(type)` (`fair_stand_item_type`); rotation Item; recipe BOM yalnız `composition.items`. Tip vs snap: `FAIR_STAND_DB_KULLANIM_KILAVUZU.md`.
 
 | Field | N | Src’de ne işe yarıyor |
 |---|---|---|
 | `itemKey` | 96 | Ürün kimliği. `getItem` / `resolveItemKey`. **Şemada onaylı.** |
 | `name` | 96 | İnsan adı. Catalog `label`, seçim metni, zemin select. |
-| `type` | 96 | Factory, `TYPE_BEHAVIORS`, recipe lookup, `resolveItemKey` adayı. Catalog kart tipi değil. |
+| `type` | 96 | Factory + `getItemType` (DB tip davranışı), recipe lookup, `resolveItemKey` adayı. Catalog kart tipi değil. |
 | `catalogVisible` | 96 | Katalogda görünsün mü. **Şemada onaylı.** |
 | `categoryId` | 96 | Katalog grubu integer id veya `null`. **Şemada onaylı.** |
 | `catalogItemIndex` | 96 | Grup içi sıra veya `null`. **Şemada onaylı.** |
@@ -239,7 +240,7 @@ Hepsi boolean, zorunlu, `null` yasak. Item satırı; `item_type` map’i değil.
 - `isRender=true` → her bayrak bağımsız. Örn. profil renk var resim yok; duvar paneli beşine açık olabilir; asılı lightbox kutusu renk+görsel, cam yok.
 - Katalog kartı (`catalogVisible`) bunlardan bağımsız.
 - Instance: kullanıcı sahnede renk/görsel/cam **seçer**; yetki master’da. Master `false` ise o araç görünmez.
-- Motor `TYPE_BEHAVIORS` / `selectionMode==='panel'` ile cam açmaz; item kolonunu okur.
+- Motor camı `TYPE_BEHAVIORS` ile açmaz; item `acceptsGlass` kolonunu okur.
 - **Kod:** kolon + bootstrap + sahne menü/`apply*` item `accepts*` okur. Ctrl çoklu seçim hâlâ `selectionMode === 'panel'`.
 
 ### categoryId
@@ -331,7 +332,7 @@ Item config → canonical mechanism. Gerçekleşmemiş method “var” yazılma
 | Item config | Canonical mechanism | Canonical method | Durum |
 |---|---|---|---|
 | `catalogVisible` / `categoryId` / `catalogItemIndex` | Catalog | `listCatalogCategories` / `listCatalogItems` / `getCatalogItem` / `listCatalogGroups` | mevcut |
-| `previewId` | Catalog | `getCatalogItem` / `listCatalogItems` → `CATALOG_PREVIEW_RENDERERS` | mevcut |
+| `previewId` | Catalog | `getCatalogItem` / `listCatalogItems` → `getCatalogPreview` / `createModuleCatalogPreview` | mevcut |
 | `dimensions` / `sceneDimensions` | Item ölçü | `resolveSceneDimensions` | mevcut |
 | `itemKey` | Item identity | `getItem` / `listRegisteredItems` / `resolveItemKey` | mevcut |
 | `rotationStepDeg` / `defaultRotationDeg` / `sideInsertRotation` | Rotation | `getModuleRotationStepDeg` / `getModuleDefaultRotationDeg` / `resolveSideInsertRotationDeg` | mevcut (`docs/refactor/ROTATION.md`) |
@@ -403,7 +404,7 @@ Item {
 - Her Item `itemKey` taşır
 - Her Item `catalogVisible`, `categoryId`, `catalogItemIndex` alanını taşır
 - `catalogVisible=true` → category ve index dolu
-- `catalogVisible=true` → `previewId` dolu ve `CATALOG_PREVIEWS` üyesi
+- `catalogVisible=true` → `previewId` dolu ve `listCatalogPreviewIds()` üyesi
 - `catalogVisible=false` → category ve index `null`
 - `catalogVisible=false` → `previewId` alanı yok
 - `catalogVisible=false` → Item `getItem` ile durur; `getCatalogItem` null döner

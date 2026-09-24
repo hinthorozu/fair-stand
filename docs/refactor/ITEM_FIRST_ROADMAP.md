@@ -23,7 +23,7 @@
 
 - BOM’da child olması ≠ sahnede otomatik mesh. Snap için gerekirse **sanal mount hattı** yeterli; tam Lego assembly şart değil.
 - Sahneye konmak için `is_render=true` **ve** bilinen `item_type` (factory/behavior) gerekir.
-- Her behavior’ı bir anda DB’ye taşımak yok; capability snap ince dilimle gelir.
+- Her behavior’ı bir anda DB’ye taşımak yoktu; **tip placement paketi** (eski `TYPE_BEHAVIORS`) 0030–0033 ile DB’de. Kalan iş: snap kalıntı / contract / preview (P2–P5).
 - Admin preview ≠ prod `scene3d` birebir kopyası olmak zorunda değil.
 - Tek kelime `top` / `side` yetmez: projetör üst rayı ile rafın ön-yüz üst dikişi **farklı kural** olmalı (`top-rail` vs `shelf-rail`).
 
@@ -73,7 +73,7 @@ Kaynak: 2026-09-23 tespit; **2026-09-24** kod gerçeğine göre yeniden hizaland
 
 | Konu | Bugün (kod) | Kalan |
 |---|---|---|
-| Snap modeli | Tip/kural + rule id | Placement/moveSnapCm/magnetic hâlâ `TYPE_BEHAVIORS` (C.3) |
+| Snap modeli | Tip/kural + rule id | — (placement/moveSnap/magnetic DB’de, C.3 kapandı) |
 | Raf kalıntı | `usesPanelSeamOverlaySnap` ← kural | `scene3d` `overlaySnap: 'panel-seam'` string süpürme |
 | Wall sanal hat | Recipe band / top-rail offset var | Yazılı host modeli + P2 tick + E2E |
 | Contract allowlist | Her katalog `itemKey` JS satırı | § C.5: DB/Item yeter; assignment erit |
@@ -86,7 +86,7 @@ Kaynak: 2026-09-23 tespit; **2026-09-24** kod gerçeğine göre yeniden hizaland
 1. **BOM satırı ≠ snap yüzeyi.** Host = tip provides / override / sanal hat — parent AABB top varsayılan olamaz.
 2. **Tek snap otoritesi hedefi.** Raf seam kuraldan (`shelf-rail`); eski `panel-seam` string kalıntısı süpürülecek.
 3. **`top-rail` ≠ `shelf-rail`.** Face/edge zorunlu ayrım.
-4. **Kod yazmadan yeni tip.** Yeni SKU (aynı `item_type`) → Item kaydı; yeni `item_type` için factory + type map hâlâ gerekebilir.
+4. **Kod yazmadan yeni SKU.** Aynı `item_type` → Item kaydı. **Yeni `item_type`:** CRM tip satırı + seed + (gerekirse) factory/renderer; JS tip davranış map’i yok.
 5. **Placement tamamı Item’da değil.** Snap dilimi taşındı; collision/magnetic vb. C.3.
 6. **Contract ≠ runtime görsel.** Görsel/catalog DB’de; `MODULE_CONTRACT_*` test/governance — ürün otoritesi değil.
 
@@ -178,7 +178,7 @@ Kod gerçeği: parent BOM + snap kuralı zaten Item/tip’te. P2 kalanı **yan k
 
 ## Yapılmayacaklar (şimdi)
 
-- Her `TYPE_BEHAVIORS` kuralını DB’ye toplu taşımak
+- Tip davranışını JS map’e geri almak (DB `fair_stand_item_type` otorite)
 - Admin = full `scene3d` kopyası
 - BOM çocuğunu otomatik sahne mesh’i sanmak
 - `top-rail` ile `shelf-rail`’i tek `top` altında birleştirmek
@@ -201,4 +201,5 @@ Kod gerçeği: parent BOM + snap kuralı zaten Item/tip’te. P2 kalanı **yan k
 | 2026-09-24 | Karar § B.7: BOM↔leaf soft-warning (auto-fix yok); sahne qty clamp istenmez — uygulama erteli. |
 | 2026-09-24 | Gap/P2 koda hizalandı: width-map=auto-wall; contract=governance (§ C.5); snap+BOM zaten Item/tip. |
 | 2026-09-24 | Auto-wall: `WALL_WIDTH_TO_ITEM_KEY` kaldırıldı → `resolveAutomaticWallFlatPanelItemKey` (DB/Item). |
-| 2026-09-24 | Analiz: `TYPE_BEHAVIORS_DB_ROADMAP.md` (placement→item_type; Snap şablon; kod yok). |
+| 2026-09-24 | Analiz: `TYPE_BEHAVIORS_DB_ROADMAP.md` (placement→item_type; Snap şablon). |
+| 2026-09-24 | **Uygulandı:** tip davranışı DB 0030–0033 + overlap FK; kılavuz `FAIR_STAND_DB_KULLANIM_KILAVUZU.md`. |

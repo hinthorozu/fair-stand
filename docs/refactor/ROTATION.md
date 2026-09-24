@@ -15,7 +15,7 @@ Fair Stand sahne Z dönüşünün Item parametreleri. Catalog kartı ve stand za
 
 Yerleşen Item’ın Shift+R adımı, sahneye ilk açı, yana ek açı kipi. Üç alan birlikte dolu veya birlikte `null`.
 
-Kaynak: PostgreSQL → catalog bootstrap → `getItem(itemKey)`. `TYPE_BEHAVIORS` rotation taşımaz.
+Kaynak: PostgreSQL → catalog bootstrap → `getItem(itemKey)`. Tip davranışı (`fair_stand_item_type` / eski `TYPE_BEHAVIORS`) rotation taşımaz.
 
 ---
 
