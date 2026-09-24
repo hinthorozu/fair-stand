@@ -1,4 +1,8 @@
-"""Replace fair_stand catalog rows from CATALOG_SEED (destructive to catalog tables only)."""
+"""Replace fair_stand catalog rows from CATALOG_SEED (catalog tables only).
+
+Does not drop projects, assets, stand envelope (fair_stand_dimensions if already set),
+or runtime settings beyond what seed_fair_stand_catalog refreshes.
+"""
 
 from __future__ import annotations
 
@@ -11,26 +15,14 @@ from app.modules.fair_stand.infrastructure.seed_catalog import seed_fair_stand_c
 def main() -> None:
     session = SessionLocal()
     try:
-        before = session.execute(
-            text(
-                "SELECT item_key FROM fair_stand_items "
-                "WHERE item_key IN ('wall_200', 'wall_200_350', 'door_100', 'wall_door_100_350')"
-            )
-        ).scalars().all()
-        print("before:", list(before))
         seed_fair_stand_catalog(session)
         session.commit()
-        after = session.execute(
-            text(
-                "SELECT item_key FROM fair_stand_items "
-                "WHERE item_key IN ('wall_200', 'wall_200_350', 'door_100', 'wall_door_100_350')"
-            )
-        ).scalars().all()
-        print("after:", list(after))
-        head = session.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-        print("alembic_version:", head)
         total = session.execute(text("SELECT COUNT(*) FROM fair_stand_items")).scalar_one()
-        print("item_count:", total)
+        head = session.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
+        print(f"catalog reseed ok: items={total} alembic={head}")
+    except Exception:
+        session.rollback()
+        raise
     finally:
         session.close()
 

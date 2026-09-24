@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-wall-line-350-item-keys",
-  "kind": "architecture",
-  "summary": "Rename Maksima 350 cm parent catalog item_keys (wall_*_350, wall_door_100_350, separator sarmasik pattern); runtime catalog key helpers and tests.",
+  "id": "fair-stand-deploy-catalog-reseed",
+  "kind": "tooling",
+  "summary": "Deploy reseeds fair_stand catalog from git seed after alembic so merged catalog changes reach live API without manual DB edits.",
   "owners": [
     "backend/app/modules/fair_stand/application/admin_snap_catalog.py",
     "backend/app/modules/fair_stand/infrastructure/models.py",
@@ -11,7 +11,8 @@
     "src/items.js",
     "backend/app/modules/fair_stand/infrastructure/item_type_behavior_seed.py",
     "src/moduleBehavior.js",
-    "backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py"
+    "backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py",
+    "scripts/server/deploy.sh"
   ],
   "sourceOfTruth": [
     "docs/refactor/DATABASE.md",
@@ -74,6 +75,7 @@
       "backend/app/modules/fair_stand/infrastructure/models.py",
       "backend/app/modules/fair_stand/infrastructure/seed_catalog.py",
       "backend/app/modules/fair_stand/infrastructure/stand_dimensions_seed.py",
+      "backend/scripts/resync_catalog_from_seed.py",
       "backend/scripts/verify_live_item_type_placement_motor.mjs",
       "backend/scripts/verify_live_item_type_placement.py",
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
@@ -105,6 +107,7 @@
       "scripts/archive/fix-tv-screen-face.py",
       "scripts/export-catalog-seed.mjs",
       "scripts/generate-item-dimensions-matrix.py",
+      "scripts/server/deploy.sh",
       "scripts/strip-legacy-dimension-columns.mjs",
       "scripts/sync_catalog_seed_dimensions_from_dump.py",
       "scripts/verify-change-contract.mjs",
