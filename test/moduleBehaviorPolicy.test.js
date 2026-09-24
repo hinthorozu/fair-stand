@@ -68,7 +68,7 @@ test('F-011 special placement policies are declared by the canonical behavior co
   assert.equal(usesPanelSeamOverlaySnap('shelf'), true);
   assert.equal(usesPanelSeamOverlaySnap('tv'), false);
   assert.equal(getModuleBehavior('shelf').placement, 'wall-overlay');
-  assert.equal(getModuleBehavior('shelf').overlaySnap, 'panel-seam');
+  assert.equal(getModuleBehavior('shelf').overlaySnap, undefined);
 
   assert.equal(resolveSideInsertRotationDeg('furniture_bar_stool_classic', 90), 270);
   assert.equal(resolveSideInsertRotationDeg({ itemKey: 'desk_banko_150' }, 90), 90);

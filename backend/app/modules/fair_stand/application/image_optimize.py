@@ -41,6 +41,19 @@ def extension_for_mime(mime_type: str) -> str:
     return ".bin"
 
 
+def _open_raster_for_optimize(raw: bytes) -> Image.Image:
+    """Decode raster bytes; pixel count is capped by downscale, not by upload policy."""
+    buffer = io.BytesIO(raw)
+    previous_limit = Image.MAX_IMAGE_PIXELS
+    try:
+        Image.MAX_IMAGE_PIXELS = None
+        with Image.open(buffer) as opened:
+            opened.load()
+            return opened.copy()
+    finally:
+        Image.MAX_IMAGE_PIXELS = previous_limit
+
+
 def optimize_uploaded_image(
     raw: bytes,
     *,
@@ -61,7 +74,8 @@ def optimize_uploaded_image(
         raise ImageOptimizeError("Only image/* uploads are allowed")
 
     try:
-        with Image.open(io.BytesIO(raw)) as image:
+        image = _open_raster_for_optimize(raw)
+        try:
             image = ImageOps.exif_transpose(image)
             has_alpha = image.mode in ("RGBA", "LA") or (
                 image.mode == "P" and "transparency" in image.info
@@ -111,7 +125,9 @@ def optimize_uploaded_image(
                     mime_type="image/jpeg",
                     extension=".jpg",
                 )
+        finally:
+            image.close()
     except ImageOptimizeError:
         raise
-    except Exception as exc:  # noqa: BLE001 — normalize any decode failure
+    except Exception as exc:  # noqa: BLE001 — corrupt or unsupported raster
         raise ImageOptimizeError("Image could not be optimized") from exc

@@ -104,7 +104,7 @@ Aşağıdaki `###` başlıkları (Kimlik, Catalog, Rotation, Duruş/snap…) **a
 |---|---|---|---|---|
 | `item_key` | `itemKey` | Canonical ürün id | Tek kimlik | Tüm FK, factory, BOM, persist |
 | `name` | `name` | İnsan adı | Catalog `label`, UI | Katalog, seçim metni |
-| `item_type` | `type` | Davranış ailesi adı | Placement/collision hâlâ `TYPE_BEHAVIORS[type]` | `moduleBehavior.js`, recipe lookup adayı |
+| `item_type` | `type` | Davranış ailesi adı | Placement/collision/… tüm paket → `fair_stand_item_type` (kesit 1–3); JS `TYPE_BEHAVIORS` yok | `moduleBehavior.js`, recipe lookup adayı |
 | `unit` | `unit` | BOM birimi | `adet` vb. | `itemBom` |
 | `is_active` | item listesine girmez (`is_active=true` filtre) | Soft delete | Satırı yok etmeden kapat | `catalog_repository` item query; lokal seed hepsi true |
 | `created_at` / `updated_at` | yok | Audit | — | DB only |
@@ -144,23 +144,31 @@ Sözleşme: `CATALOG.md`. `catalog_visible=true` ⇒ `category_id` + `catalog_it
 | `default_rotation_deg` | `defaultRotationDeg` | İlk `placement.rotationZDeg` | İlk bakış | `getModuleDefaultRotationDeg` |
 | `side_insert_rotation` | `sideInsertRotation` | `inherit` / `default` | Yana ek açı kipi | `resolveSideInsertRotationDeg` |
 
-### Duruş / snap / yüzey (`fair_stand_items`)
+### Duruş / snap / yüzey (`fair_stand_items` + tip/kural tabloları)
 
-Ayrı `duruş` / `snap` tablosu **yok**. `default_z_cm`, `snap_target_item_type`, `snap_anchor` bu tablonun kolonlarıdır (ekrandaki liste). Sözleşme: `SCENE_POSE.md`. Snap okuma: `src/itemSnap.js` + `src/items.js`.
+Ayrı katalog: `fair_stand_item_type` (unique `key`), `fair_stand_rule_type`, `fair_stand_rule`. Item `item_type` → `fair_stand_item_type.key` FK; kural ↔ tip M:N (`fair_stand_rule_item_type`). Sözleşme: `SCENE_POSE.md`. Okuma: `src/itemSnap.js` + `src/items.js`.
 
-| Kolon | JSON | Nedir | Neden | Nerede |
+Katalog tablolarında kalıcı kimlik **`key`**. CRM’de label Key; create’te display_name’den slug. `mount_mode` yok; yalnız face/edge. Aile (`fair_stand_family`) kaldırıldı (`0029_item_type_catalog`).
+
+| Kolon / tablo | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `default_z_cm` | `defaultZCm` | Yerden kot (cm), NOT NULL default 0 | Tavan item’ı ezmesin | `items.js` `resolveItemDefaultZCm` / `applyItemPlacementZCm`. Seed: floodlight 350, profil 342, short-up-1/2 300/250, `KETTLE` 66 |
-| `snap_target_item_type` | `snapTargetItemType` | Yapışılacak `item.type` | Host listesi Item’da | `itemSnap.js` + `items.js` `getItemSnapSpec`. Canlı dolu: `led_floodlight`→`profile`+`top`; `shelf_100/150/200`→`panel`+`top` |
-| `snap_anchor` | `snapAnchor` | `top`/`bottom`/`left`/`right` | Hedef kenar | aynı |
-| `is_render` | `isRender` | Kendi sahne gövdesi var mı | Leaf/BOM çizmeyen SKU | `items.js` `itemHasSceneRender` → factory |
-| `accepts_color` | `acceptsColor` | Renk atanır mı | Mesh userData | `itemCapabilities.js` → `scene3d.js` |
-| `accepts_image` | `acceptsImage` | Yüzey görseli | aynı | aynı |
-| `accepts_lightbox` | `acceptsLightbox` | Işıklı kumaş | aynı | aynı |
-| `accepts_glass` | `acceptsGlass` | Cam görünüm | aynı | `scene3d.js` `acceptsGlass` |
-| `accepts_mesh` | `acceptsMesh` | Delikli branda | aynı | `itemCapabilities.js` |
+| `default_z_cm` | `defaultZCm` | Yerden kot (cm) | Tavan ezmesin | `resolveItemDefaultZCm` |
+| `item_type` → `fair_stand_item_type.key` | `type` | Item tipi (unique key) | Tip seçimi / davranış | CRM + bootstrap `itemTypes` |
+| `fair_stand_item_type.placement` | `itemTypes[].placement` | **Yerleşim modu (tip özelliği; snap kuralı değil).** `wall` = duvar hattına yapışır; `free` = serbest zemin; `wall-overlay` = duvar üstüne biner (raf/TV); `top` = üst yüzey (projektör). Instance `modules[].placement {x,y,z}` ile karıştırma. | Tip ailesinin sahneye nasıl oturduğu; tüm SKU miras alır | `getModuleBehavior` → planner |
+| `fair_stand_item_type.collision` | `itemTypes[].collision` | **Çarpışma hacmi.** `segment` = ince şerit (duvar); `footprint` = taban kutusu; `none` = çarpışma yok. Snap requires/provides değil. | Modüller üst üste binebilir mi | `getModuleCollisionStrategy` |
+| `fair_stand_item_type.move_snap_cm` | `itemTypes[].moveSnapCm` | **Sürükleme XY ızgara adımı (cm).** Tipik 10 / 20 / 50. Manyetik snap / top-rail kuralı değil. | Taşıma hassasiyeti | `getModuleMoveSnapCm` |
+| `fair_stand_item_type.magnetic_snap` | `itemTypes[].magneticSnap` | **Manyetik hizalama stratejisi.** `standard` / `none` / `short-up-joint`. Move snap ızgarası ve `fair_stand_rule` değil. | Tip manyetik davranışı | `getModuleMagneticSnapStrategy` |
+| `fair_stand_item_type.allow_side_insert` | `itemTypes[].allowSideInsert` | Yanına modül sokulabilir mi | Yan ekleme politikası | `getModuleBehavior` |
+| `fair_stand_item_type.supports_wall_overlay_mount` | `itemTypes[].supportsWallOverlayMount` | Üzerine raf/TV overlay konabilir mi | Overlay host | `supportsWallOverlayMount` |
+| `fair_stand_item_type.wall_capacity` | `itemTypes[].wallCapacity` | Duvar kapasitesine dahil mi (`include`/`exclude`) | Kapasite hesabı | `countsTowardWallCapacity` |
+| `snap_requires_rule_id` → `fair_stand_rule` | `snapRequiresRuleId` (+ denorm `snapRequires`) | Aranan kural | Eşleşme | `getItemSnapSpec` → face/edge **kural kaydından** |
+| `snap_provides_rule_id` → `fair_stand_rule` | `snapProvidesRuleId` (+ denorm `snapProvides`) | Sunulan kural | Host | `listSnapHosts` / `resolveItemSnapGeometry` |
+| `fair_stand_rule.key` / `face` / `edge` | bootstrap `rules[]` | Snap kimlik + geometri | UI’dan kural | CRM Kurallar; motor rule registry |
+| `fair_stand_rule_item_type` | `itemTypeIds` / `itemTypeKeys` | Kural ↔ tip(ler) | **Provides:** o tipteki tüm item’lar host | Motor `itemProvidesSnapRule` |
+| `snap_target_item_type` / `snap_anchor` | — | Legacy | Okunmaz | null |
+| `is_render` / `accepts_*` | aynı | yüzey | aynı | aynı |
 
-CHECK: `is_render=false` iken tüm `accepts_*` false.
+CHECK: requires XOR provides rule id; `is_render=false` → accepts_* false.
 
 ### Bileşim başlığı (`fair_stand_items`; child satırlar `fair_stand_item_components`)
 
@@ -358,7 +366,7 @@ Kayıt durur; mapper bootstrap’a yazar (asset unused rolleri hariç).
 
 Ertelenmiş kararlar, tavan/şerit kaldırma sırası, Item property backlog: `PENDING_ITEM_DECISIONS.md`.
 
-Collision / magneticSnap / moveSnapCm / ghost: hâlâ `TYPE_BEHAVIORS` (`type`). Item kolon değil — taşıma kuyruğu aynı dosyada § C.3.
+Tip davranışı (`placement` / `collision` / `move_snap_cm` / magnetic / overlay / capacity / endpoint / depth / contact / boundary / height / overlap / ghost): **`fair_stand_item_type` tip özelliği** (2026-09-24 kesit 1–3) — **`fair_stand_rule` snap kuralı değil**; JS `TYPE_BEHAVIORS` kaldırıldı. Ayrıntı: CRM Item Type form hint’leri + `TYPE_BEHAVIORS_DB_ROADMAP.md` § 1.
 
 Runtime instance alanları (`placement.xCm/yCm/zCm/rotationZDeg`, `rotationLocked`, yüzey ezmeleri): catalog Item kolonu değil; **`fair_stand_projects.payload` JSONB** içinde yaşar (SoT sunucu). IndexedDB aynı blob’un önbelleğidir.
 

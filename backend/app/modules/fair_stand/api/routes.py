@@ -4,6 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.integrations.kyrox_core.auth import AuthContext
+from app.modules.fair_stand.application.admin_catalog import AdminCatalogService, CatalogAdminError
+from app.modules.fair_stand.application.admin_items import AdminItemsService, ItemAdminError
+from app.modules.fair_stand.application.admin_settings import AdminSettingsService, SettingsAdminError
+from app.modules.fair_stand.application.admin_snap_catalog import AdminSnapCatalogService, SnapCatalogAdminError
+from app.modules.fair_stand.application.get_catalog_bootstrap import GetCatalogBootstrapUseCase
+from app.modules.fair_stand.application.item_mapper import runtime_settings_payload, stand_dimensions_payload
+from app.modules.fair_stand.application.get_item import GetItemUseCase
 from app.modules.fair_stand.api.dependencies import (
     PERMISSION_CATALOG_ARCHIVE,
     PERMISSION_CATALOG_CREATE,
@@ -22,18 +29,13 @@ from app.modules.fair_stand.api.dependencies import (
     get_admin_catalog_service,
     get_admin_items_service,
     get_admin_settings_service,
+    get_admin_snap_catalog_service,
     get_catalog_bootstrap_use_case,
     get_item_use_case,
     require_any_permission,
     require_fair_stand_catalog_access,
     require_permission,
 )
-from app.modules.fair_stand.application.admin_catalog import AdminCatalogService, CatalogAdminError
-from app.modules.fair_stand.application.admin_items import AdminItemsService, ItemAdminError
-from app.modules.fair_stand.application.admin_settings import AdminSettingsService, SettingsAdminError
-from app.modules.fair_stand.application.get_catalog_bootstrap import GetCatalogBootstrapUseCase
-from app.modules.fair_stand.application.item_mapper import runtime_settings_payload, stand_dimensions_payload
-from app.modules.fair_stand.application.get_item import GetItemUseCase
 
 router = APIRouter(prefix="/fair-stand", tags=["fair-stand"])
 
@@ -93,6 +95,90 @@ class RuntimeSettingsUpdateBody(BaseModel):
     import_button_visible: bool
 
 
+class ItemTypeCreateBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    display_name: str = Field(min_length=1, max_length=128)
+    key: str | None = Field(default=None, max_length=64)
+    is_active: bool = True
+    placement: str | None = Field(default=None, max_length=32)
+    collision: str | None = Field(default=None, max_length=32)
+    move_snap_cm: int | None = Field(default=None, gt=0)
+    magnetic_snap: str | None = Field(default=None, max_length=32)
+    allow_side_insert: bool | None = None
+    supports_wall_overlay_mount: bool | None = None
+    wall_capacity: str | None = Field(default=None, max_length=16)
+    connection_endpoint: str | None = Field(default=None, max_length=32)
+    collision_depth: str | None = Field(default=None, max_length=32)
+    endpoint_contact: str | None = Field(default=None, max_length=32)
+    boundary_snap: str | None = Field(default=None, max_length=32)
+    collision_height: str | None = Field(default=None, max_length=16)
+    overlap_with_types: list[str] | str | None = None
+    overlap_item_type_ids: list[int] | None = None
+    ghost_kind: str | None = Field(default=None, max_length=32)
+    ghost_renderer: str | None = Field(default=None, max_length=64)
+    ghost_opacity: float | None = Field(default=None, ge=0, le=1)
+
+
+class ItemTypeUpdateBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    display_name: str | None = Field(default=None, min_length=1, max_length=128)
+    key: str | None = Field(default=None, min_length=1, max_length=64)
+    is_active: bool | None = None
+    placement: str | None = Field(default=None, max_length=32)
+    collision: str | None = Field(default=None, max_length=32)
+    move_snap_cm: int | None = Field(default=None, gt=0)
+    magnetic_snap: str | None = Field(default=None, max_length=32)
+    allow_side_insert: bool | None = None
+    supports_wall_overlay_mount: bool | None = None
+    wall_capacity: str | None = Field(default=None, max_length=16)
+    connection_endpoint: str | None = Field(default=None, max_length=32)
+    collision_depth: str | None = Field(default=None, max_length=32)
+    endpoint_contact: str | None = Field(default=None, max_length=32)
+    boundary_snap: str | None = Field(default=None, max_length=32)
+    collision_height: str | None = Field(default=None, max_length=16)
+    overlap_with_types: list[str] | str | None = None
+    overlap_item_type_ids: list[int] | None = None
+    ghost_kind: str | None = Field(default=None, max_length=32)
+    ghost_renderer: str | None = Field(default=None, max_length=64)
+    ghost_opacity: float | None = Field(default=None, ge=0, le=1)
+
+
+class RuleTypeCreateBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    key: str | None = Field(default=None, max_length=64)
+    display_name: str = Field(min_length=1, max_length=128)
+    is_active: bool = True
+
+
+class RuleTypeUpdateBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    key: str | None = Field(default=None, min_length=1, max_length=64)
+    display_name: str | None = Field(default=None, min_length=1, max_length=128)
+    is_active: bool | None = None
+
+
+class RuleCreateBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    rule_type_id: int = Field(ge=1)
+    key: str | None = Field(default=None, max_length=64)
+    display_name: str = Field(min_length=1, max_length=128)
+    face: str | None = None
+    edge: str | None = None
+    item_type_ids: list[int] | None = None
+    is_active: bool = True
+
+
+class RuleUpdateBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    rule_type_id: int | None = Field(default=None, ge=1)
+    key: str | None = Field(default=None, min_length=1, max_length=64)
+    display_name: str | None = Field(default=None, min_length=1, max_length=128)
+    face: str | None = None
+    edge: str | None = None
+    item_type_ids: list[int] | None = None
+    is_active: bool | None = None
+
+
 def _preview_kind_payload(preview) -> dict[str, Any]:
     return {
         "id": preview.id,
@@ -104,7 +190,7 @@ def _preview_kind_payload(preview) -> dict[str, Any]:
     }
 
 
-def _raise_admin(exc: CatalogAdminError | SettingsAdminError | ItemAdminError) -> None:
+def _raise_admin(exc: CatalogAdminError | SettingsAdminError | ItemAdminError | SnapCatalogAdminError) -> None:
     raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
 
 
@@ -127,6 +213,9 @@ def get_catalog_bootstrap(
         ],
         "items": [item.payload for item in snapshot.items],
         "previewKinds": [_preview_kind_payload(preview) for preview in snapshot.preview_kinds],
+        "itemTypes": snapshot.item_types,
+        "ruleTypes": snapshot.rule_types,
+        "rules": snapshot.rules,
         "standDimensions": stand_dimensions_payload(snapshot.stand_dimensions),
         "settings": runtime_settings_payload(snapshot.settings),
     }
@@ -244,6 +333,7 @@ def admin_update_item_catalog(
             category_id=body.category_id,
             category_id_provided="category_id" in body.model_fields_set,
             catalog_item_index=body.catalog_item_index,
+            catalog_item_index_provided="catalog_item_index" in body.model_fields_set,
             preview_id=body.preview_id,
             preview_id_provided="preview_id" in body.model_fields_set,
         )
@@ -472,5 +562,203 @@ def admin_restore_item_record(
     try:
         return service.restore_item(item_key)
     except ItemAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.get("/admin/item-types")
+def admin_list_item_types(
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_READ)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> list[dict[str, Any]]:
+    _ = auth
+    return service.list_item_types()
+
+
+@router.post("/admin/item-types", status_code=status.HTTP_201_CREATED)
+def admin_create_item_type(
+    body: ItemTypeCreateBody,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_CREATE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.create_item_type(**body.model_dump())
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.patch("/admin/item-types/{item_type_id}")
+def admin_update_item_type(
+    item_type_id: int,
+    body: ItemTypeUpdateBody,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_UPDATE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.update_item_type(item_type_id, body.model_dump(exclude_unset=True))
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/item-types/{item_type_id}/archive")
+def admin_archive_item_type(
+    item_type_id: int,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_ARCHIVE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.archive_item_type(item_type_id)
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/item-types/{item_type_id}/restore")
+def admin_restore_item_type(
+    item_type_id: int,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_ARCHIVE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.restore_item_type(item_type_id)
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.get("/admin/rule-types")
+def admin_list_rule_types(
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_READ)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> list[dict[str, Any]]:
+    _ = auth
+    return service.list_rule_types()
+
+
+@router.post("/admin/rule-types", status_code=status.HTTP_201_CREATED)
+def admin_create_rule_type(
+    body: RuleTypeCreateBody,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_CREATE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.create_rule_type(**body.model_dump())
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.patch("/admin/rule-types/{rule_type_id}")
+def admin_update_rule_type(
+    rule_type_id: int,
+    body: RuleTypeUpdateBody,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_UPDATE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.update_rule_type(rule_type_id, body.model_dump(exclude_unset=True))
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/rule-types/{rule_type_id}/archive")
+def admin_archive_rule_type(
+    rule_type_id: int,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_ARCHIVE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.archive_rule_type(rule_type_id)
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/rule-types/{rule_type_id}/restore")
+def admin_restore_rule_type(
+    rule_type_id: int,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_ARCHIVE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.restore_rule_type(rule_type_id)
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.get("/admin/rules")
+def admin_list_rules(
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_READ)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> list[dict[str, Any]]:
+    _ = auth
+    return service.list_rules()
+
+
+@router.post("/admin/rules", status_code=status.HTTP_201_CREATED)
+def admin_create_rule(
+    body: RuleCreateBody,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_CREATE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.create_rule(**body.model_dump())
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.patch("/admin/rules/{rule_id}")
+def admin_update_rule(
+    rule_id: int,
+    body: RuleUpdateBody,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_UPDATE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.update_rule(rule_id, body.model_dump(exclude_unset=True))
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/rules/{rule_id}/archive")
+def admin_archive_rule(
+    rule_id: int,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_ARCHIVE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.archive_rule(rule_id)
+    except SnapCatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/rules/{rule_id}/restore")
+def admin_restore_rule(
+    rule_id: int,
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_ARCHIVE)),
+    service: AdminSnapCatalogService = Depends(get_admin_snap_catalog_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.restore_rule(rule_id)
+    except SnapCatalogAdminError as exc:
         _raise_admin(exc)
         raise

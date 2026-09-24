@@ -81,9 +81,16 @@ def map_item(row) -> ItemAggregate:
     payload["acceptsGlass"] = bool(row.accepts_glass)
     payload["acceptsMesh"] = bool(row.accepts_mesh)
     payload["defaultZCm"] = _num(row.default_z_cm) if row.default_z_cm is not None else 0
-    if row.snap_target_item_type:
-        payload["snapTargetItemType"] = row.snap_target_item_type
-        payload["snapAnchor"] = row.snap_anchor
+    if row.snap_requires_rule_id is not None:
+        payload["snapRequiresRuleId"] = int(row.snap_requires_rule_id)
+        rule = row.snap_requires_rule
+        if rule is not None:
+            payload["snapRequires"] = rule.key
+    if row.snap_provides_rule_id is not None:
+        payload["snapProvidesRuleId"] = int(row.snap_provides_rule_id)
+        rule = row.snap_provides_rule
+        if rule is not None:
+            payload["snapProvides"] = rule.key
 
     if row.dimensions is not None:
         dimensions = {}

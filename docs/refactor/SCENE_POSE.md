@@ -79,23 +79,30 @@ Kes (item duruşunu ezmesin):
 
 ---
 
-## Snap (DB, hardcode yok)
+## Snap (item_type + kural tipi + kural — hardcode yok)
 
-Projektör “üst kot 350” değil. Hedef listesi JS’te yazılmaz.
+Kaynak yalnız DB; CRM’den düzenlenir.
 
-Sürülen item’da kolonlar: `snap_target_item_type`, `snap_anchor` (nullable).
+| Tablo | Rol |
+|---|---|
+| `fair_stand_item_type` | Item tipi; unique `key`; item `item_type` FK |
+| `fair_stand_rule_type` | Bugün yalnız `snap`; ileride başka tipler |
+| `fair_stand_rule` | Kural: `key` + `face`/`edge` |
+| `fair_stand_rule_item_type` | Kural ↔ tip(ler) M:N (`top-rail`→profile, `shelf-rail`→panel…) |
 
-- `led_floodlight`: `'profile'`  
-- raf: `'panel'` + `'top'` — `panel_197` koda yazılmaz  
+Item: `snap_requires_rule_id` **veya** `snap_provides_rule_id` (XOR).  
+Motor: **aynı rule id** eşleşmesi. Tip bağı katalog/CRM için; eşleşme hâlâ rule id.
 
-Motor (generic):
+**Lamba / raf kuralları (seed):**  
+| key | face | edge | Requires | Provides |
+|---|---|---|---|---|
+| `top-rail` | top | top | lamba | profile |
+| `shelf-rail` | front | top | raf | panel / separator-panel |
 
-1. Sahnede `item.type === snap_target_item_type` → o gövdenin `snap_anchor` kenarı.  
-2. Değilse reçetede o type çocuk → her çocuğun aynı kenarı (duvar içi panel üstü, profil rayı).  
-
-`wall_200` / şerit seam / `panel-seam` yok. Birden fazla type gerekirse üye tablosu.
-
-`TYPE_BEHAVIORS.overlaySnap = 'panel-seam'` kalkar.
+**Sanal hat (recipe host, mesh yok):** `itemSnap.js`  
+- `top-rail` + BOM’da profile child → Z = `defaultZCm(profile) + height(profile)` (host span içinde); değilse host tavanı. Free profile → `host.z + host.h`.  
+- `shelf-rail` (`front`+`top`) → host `strips[]` / band pitch’ten seam listesi; AABB tavan değil.  
+Eski `snap_target_item_type` / string capability kolonları kullanılmaz. Type→kural JS map yok.
 
 ---
 

@@ -6,6 +6,10 @@ from dataclasses import dataclass
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.modules.fair_stand.application.catalog_item_order import (
+    CatalogItemOrderError,
+    apply_catalog_item_order,
+)
 from app.modules.fair_stand.application.preview_sanitize import (
     PreviewDefinitionError,
     sanitize_css,
@@ -149,24 +153,31 @@ class AdminCatalogService:
         category_id: int | None | object = None,
         category_id_provided: bool = False,
         catalog_item_index: int | None,
+        catalog_item_index_provided: bool = False,
         preview_id: int | None | object = None,
         preview_id_provided: bool = False,
     ) -> dict:
         row = self.repository.get_item_row(item_key)
         if row is None:
             raise CatalogAdminError("Item not found", status_code=404)
-        if catalog_visible is not None:
-            row.catalog_visible = bool(catalog_visible)
+
+        next_visible = bool(catalog_visible) if catalog_visible is not None else bool(row.catalog_visible)
         if category_id_provided:
             if category_id is None:
-                row.category_id = None
+                next_category_id: int | None = None
             else:
                 category = self.repository.get_category(int(category_id))
                 if category is None or not category.is_active:
                     raise CatalogAdminError("categoryId must reference an active category")
-                row.category_id = int(category_id)
-        if catalog_item_index is not None:
-            row.catalog_item_index = int(catalog_item_index) if catalog_item_index else None
+                next_category_id = int(category_id)
+        else:
+            next_category_id = int(row.category_id) if row.category_id is not None else None
+
+        if catalog_item_index_provided:
+            next_index = int(catalog_item_index) if catalog_item_index is not None else None
+        else:
+            next_index = int(row.catalog_item_index) if row.catalog_item_index is not None else None
+
         if preview_id_provided:
             if preview_id is None:
                 row.preview_id = None
@@ -177,11 +188,30 @@ class AdminCatalogService:
                 if not preview.is_active:
                     raise CatalogAdminError("previewId must reference an active preview")
                 row.preview_id = int(preview_id)
-        if row.catalog_visible:
-            if row.category_id is None or row.catalog_item_index is None or row.preview_id is None:
+
+        if next_visible:
+            if next_category_id is None or next_index is None or row.preview_id is None:
                 raise CatalogAdminError(
                     "Visible catalog items require categoryId, catalogItemIndex, and previewId"
                 )
+
+        catalog_touched = (
+            catalog_visible is not None or category_id_provided or catalog_item_index_provided
+        )
+        if catalog_touched:
+            try:
+                apply_catalog_item_order(
+                    self.session,
+                    row,
+                    catalog_visible=next_visible,
+                    category_id=next_category_id,
+                    catalog_item_index=next_index,
+                )
+            except CatalogItemOrderError as exc:
+                raise CatalogAdminError(str(exc), status_code=exc.status_code) from exc
+        elif next_visible:
+            row.catalog_visible = True
+
         row.updated_at = _now()
         self._flush()
         return _item_catalog_payload(row)

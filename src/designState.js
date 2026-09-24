@@ -1,5 +1,6 @@
 import { normalizeStripOccupancy } from './stripOccupancy.js';
 import {
+  resolveAutomaticWallFlatPanelItemKey,
   resolveFlatPanelStripCount,
   resolveShowcaseStripCount,
   getCommercialItemForType,
@@ -113,20 +114,13 @@ function createEditablePanelState(stripIndex, color) {
   };
 }
 
-const WALL_WIDTH_TO_ITEM_KEY = Object.freeze({
-  50: 'wall_50',
-  100: 'wall_100',
-  150: 'wall_150',
-  200: 'wall_200',
-});
-
 function resolveFlatPanelItemKey(widthCmOrDescriptor) {
   if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
     const explicitKey = widthCmOrDescriptor.itemKey ?? null;
     if (explicitKey && getItem(explicitKey)?.type === 'flat-panel') return explicitKey;
-    return WALL_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor.widthCm)] ?? null;
+    return resolveAutomaticWallFlatPanelItemKey(widthCmOrDescriptor.widthCm);
   }
-  return WALL_WIDTH_TO_ITEM_KEY[Number(widthCmOrDescriptor)] ?? null;
+  return resolveAutomaticWallFlatPanelItemKey(widthCmOrDescriptor);
 }
 
 export function createFlatPanelModuleState(widthCmOrDescriptor) {

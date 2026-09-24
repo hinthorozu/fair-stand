@@ -13,6 +13,13 @@ def _png_bytes(size: int = 64) -> bytes:
     return buffer.getvalue()
 
 
+def _jpeg_bytes(width: int, height: int) -> bytes:
+    image = Image.new("RGB", (width, height), color=(40, 80, 120))
+    buffer = io.BytesIO()
+    image.save(buffer, format="JPEG", quality=85, optimize=True)
+    return buffer.getvalue()
+
+
 def test_list_create_get_update_delete_project(client, auth_headers, tmp_path, monkeypatch):
     monkeypatch.setenv("FAIR_STAND_PROJECT_ASSET_ROOT", str(tmp_path))
     from app.core.config import get_settings
@@ -117,6 +124,41 @@ def test_asset_upload_download_export(client, auth_headers, tmp_path, monkeypatc
     assert export.status_code == 200
     assert export.headers["content-type"].startswith("application/zip")
     assert len(export.content) > 0
+
+
+def test_asset_upload_optimizes_high_pixel_jpeg_within_byte_limit(
+    client, auth_headers, tmp_path, monkeypatch
+):
+    monkeypatch.setenv("FAIR_STAND_PROJECT_ASSET_ROOT", str(tmp_path))
+    from app.core.config import get_settings
+
+    get_settings.cache_clear()
+
+    created = client.post(
+        "/api/v1/fair-stand/projects",
+        headers=auth_headers,
+        json={"name": "Huge JPEG", "payload": {"stand": None, "modules": []}},
+    )
+    assert created.status_code == 201, created.text
+    project_id = created.json()["id"]
+    asset_id = str(uuid4())
+
+    previous_limit = Image.MAX_IMAGE_PIXELS
+    try:
+        Image.MAX_IMAGE_PIXELS = 10_000
+        raw = _jpeg_bytes(200, 200)
+        upload = client.post(
+            f"/api/v1/fair-stand/projects/{project_id}/assets",
+            headers=auth_headers,
+            data={"asset_id": asset_id, "name": "banner.jpg"},
+            files={"file": ("banner.jpg", raw, "image/jpeg")},
+        )
+    finally:
+        Image.MAX_IMAGE_PIXELS = previous_limit
+
+    assert upload.status_code == 201, upload.text
+    assert upload.json()["type"] in {"image/webp", "image/jpeg"}
+
 
 def test_put_upserts_missing_project(client, auth_headers, tmp_path, monkeypatch):
     monkeypatch.setenv("FAIR_STAND_PROJECT_ASSET_ROOT", str(tmp_path))

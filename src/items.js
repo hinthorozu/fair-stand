@@ -10,6 +10,9 @@ import { resolveWallPanelBandPitchCm } from './wallPanelBand.js';
 
 let itemByKey = null;
 let catalogReady = false;
+let snapRuleById = null;
+let snapRuleByKey = null;
+let itemTypeByKey = null;
 
 function freezeDeep(value) {
   if (value === null || typeof value !== 'object' || Object.isFrozen(value)) return value;
@@ -32,15 +35,111 @@ export function initializeItemRegistry(items) {
   const next = Object.create(null);
   for (const item of items) {
     if (!item?.itemKey) throw new TypeError('Bootstrapped Item is missing itemKey.');
-    next[item.itemKey] = freezeDeep(structuredClone(item));
+    const cloned = structuredClone(item);
+    delete cloned.snapFace;
+    delete cloned.snapEdge;
+    next[item.itemKey] = freezeDeep(cloned);
   }
   itemByKey = Object.freeze(next);
   catalogReady = true;
 }
 
+export function initializeSnapRuleRegistry(rules) {
+  if (!Array.isArray(rules)) {
+    throw new TypeError('Fair Stand snap rules bootstrap must be an array.');
+  }
+  const byId = Object.create(null);
+  const byKey = Object.create(null);
+  for (const rule of rules) {
+    if (rule == null || rule.id == null || !rule.key) {
+      throw new TypeError('Bootstrapped snap rule is missing id/key.');
+    }
+    const frozen = freezeDeep(structuredClone(rule));
+    byId[Number(rule.id)] = frozen;
+    byKey[String(rule.key)] = frozen;
+  }
+  snapRuleById = Object.freeze(byId);
+  snapRuleByKey = Object.freeze(byKey);
+}
+
+export function initializeItemTypeRegistry(itemTypes) {
+  if (!Array.isArray(itemTypes)) {
+    throw new TypeError('Fair Stand item types bootstrap must be an array.');
+  }
+  const byKey = Object.create(null);
+  for (const row of itemTypes) {
+    if (row == null || !row.key) {
+      throw new TypeError('Bootstrapped item type is missing key.');
+    }
+    byKey[String(row.key)] = freezeDeep(structuredClone(row));
+  }
+  itemTypeByKey = Object.freeze(byKey);
+}
+
 export function resetItemRegistry() {
   itemByKey = null;
   catalogReady = false;
+  snapRuleById = null;
+  snapRuleByKey = null;
+  itemTypeByKey = null;
+}
+
+export function getItemType(key) {
+  if (key == null || key === '' || !itemTypeByKey) return null;
+  return itemTypeByKey[String(key)] ?? null;
+}
+
+export function getSnapRule(idOrKey) {
+  if (idOrKey == null || idOrKey === '') return null;
+  if (typeof idOrKey === 'number' || (typeof idOrKey === 'string' && /^\d+$/.test(idOrKey))) {
+    return snapRuleById?.[Number(idOrKey)] ?? null;
+  }
+  return snapRuleByKey?.[String(idOrKey)] ?? null;
+}
+
+/** Face/edge from matched snap rule. Prefer requires-spec rule (same id as provides). */
+export function resolveItemSnapGeometry(itemOrKey, preferredSpec = null) {
+  if (preferredSpec) {
+    const matched =
+      getSnapRule(preferredSpec.requiresRuleId) ?? getSnapRule(preferredSpec.requires);
+    if (matched) {
+      return {
+        face: typeof matched.face === 'string' ? matched.face : null,
+        edge: typeof matched.edge === 'string' ? matched.edge : null,
+      };
+    }
+  }
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  if (!item) return { face: null, edge: null };
+  const rule =
+    getSnapRule(item.snapProvidesRuleId)
+    ?? getSnapRule(item.snapRequiresRuleId)
+    ?? getSnapRule(item.snapProvides)
+    ?? getSnapRule(item.snapRequires)
+    ?? listSnapRulesForItemType(item.type)[0]
+    ?? null;
+  return {
+    face: typeof rule?.face === 'string' ? rule.face : null,
+    edge: typeof rule?.edge === 'string' ? rule.edge : null,
+  };
+}
+
+function ruleItemTypeKeys(rule) {
+  if (!rule) return [];
+  if (Array.isArray(rule.itemTypeKeys)) return rule.itemTypeKeys;
+  if (Array.isArray(rule.item_type_keys)) return rule.item_type_keys;
+  return [];
+}
+
+/** Rules whose CRM type link includes this item_type → those types provide the rule. */
+export function listSnapRulesForItemType(itemType) {
+  if (!itemType || !snapRuleById) return [];
+  return Object.values(snapRuleById).filter((rule) => ruleItemTypeKeys(rule).includes(itemType));
+}
+
+function itemTypeProvidesRule(item, rule) {
+  if (!item?.type || !rule) return false;
+  return ruleItemTypeKeys(rule).includes(item.type);
 }
 
 function requireRegistry() {
@@ -305,18 +404,54 @@ export function resolveItemDefaultZCm(itemOrKey) {
   return readCm(item?.defaultZCm) ?? readCm(item?.dimensions?.mountHeightCm) ?? 0;
 }
 
-export const SNAP_ANCHORS = Object.freeze(['top', 'bottom', 'left', 'right']);
+export const SNAP_FACES = Object.freeze(['front', 'back', 'top', 'bottom', 'left', 'right']);
+export const SNAP_EDGES = Object.freeze(['top', 'bottom', 'left', 'right']);
 
+/** Driven item: rule id (+ key). Face/edge come from snap rule registry. */
 export function getItemSnapSpec(itemOrKey) {
   const item = typeof itemOrKey === 'string'
     ? getItem(itemOrKey)
     : (itemOrKey?.itemKey ? getItem(itemOrKey.itemKey) ?? itemOrKey : itemOrKey);
-  const targetItemType = typeof item?.snapTargetItemType === 'string'
-    ? item.snapTargetItemType.trim()
-    : '';
-  const anchor = item?.snapAnchor;
-  if (!targetItemType || !SNAP_ANCHORS.includes(anchor)) return null;
-  return Object.freeze({ targetItemType, anchor });
+  const requiresRuleId = Number.isFinite(Number(item?.snapRequiresRuleId))
+    ? Number(item.snapRequiresRuleId)
+    : null;
+  const requires = typeof item?.snapRequires === 'string' ? item.snapRequires.trim() : '';
+  if (!requiresRuleId && !requires) return null;
+  const rule = getSnapRule(requiresRuleId) ?? getSnapRule(requires);
+  return Object.freeze({
+    requiresRuleId: requiresRuleId ?? (rule?.id != null ? Number(rule.id) : null),
+    requires: requires || rule?.key || null,
+    face: typeof rule?.face === 'string' ? rule.face : null,
+    edge: typeof rule?.edge === 'string' ? rule.edge : null,
+  });
+}
+
+export function itemProvidesSnapRule(itemOrKey, specOrRuleId) {
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  if (!item) return false;
+
+  const matches = (rule) => {
+    if (!rule) return false;
+    if (item.snapProvidesRuleId != null && Number(item.snapProvidesRuleId) === Number(rule.id)) {
+      return true;
+    }
+    if (item.snapProvides && item.snapProvides === rule.key) return true;
+    // Kural ↔ item_type M:N → o tipteki tüm item’lar provides (33 profile tek tek bağlanmaz)
+    return itemTypeProvidesRule(item, rule);
+  };
+
+  if (specOrRuleId && typeof specOrRuleId === 'object') {
+    const rule =
+      getSnapRule(specOrRuleId.requiresRuleId) ?? getSnapRule(specOrRuleId.requires);
+    return matches(rule);
+  }
+  if (specOrRuleId == null) return false;
+  return matches(getSnapRule(specOrRuleId));
+}
+
+export function itemProvidesSnapCapability(itemOrKey, capability) {
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  return Boolean(capability && item?.snapProvides === capability);
 }
 
 /** Overlay mouse Z ezer. Snap spec varsa placement.zCm (motor) kalır. Yoksa instance / defaultZCm. */
@@ -339,6 +474,27 @@ export function isShortUpFamilyDescriptor(descriptor) {
 
 export function listRegisteredItems() {
   return Object.freeze(Object.values(requireRegistry()));
+}
+
+/**
+ * Otomatik duvar / widthCm-only flat-panel seçimi: Item registry (DB bootstrap).
+ * Katalogda görünen, render’lı, short-up olmayan flat-panel; ölçü = widthCm.
+ * Explicit itemKey yolu bunu kullanmaz.
+ */
+export function resolveAutomaticWallFlatPanelItemKey(widthCm) {
+  const width = Number(widthCm);
+  if (!Number.isFinite(width) || width <= 0) return null;
+  const matches = listRegisteredItems()
+    .filter((item) => {
+      if (item?.type !== 'flat-panel') return false;
+      if (item.isRender !== true) return false;
+      if (item.catalogVisible !== true) return false;
+      if (isShortUpFamilyDescriptor(item)) return false;
+      return Number(item.dimensions?.widthCm) === width;
+    })
+    .map((item) => item.itemKey)
+    .sort();
+  return matches[0] ?? null;
 }
 
 function optionalNumber(value) {

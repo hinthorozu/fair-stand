@@ -6,6 +6,7 @@ from sqlalchemy import inspect, select, text
 from sqlalchemy.exc import IntegrityError
 
 from app.modules.fair_stand.application.cycle_validation import CyclicItemCompositionError, assert_acyclic_components
+from app.modules.fair_stand.infrastructure.item_snap_seed import ensure_item_types
 from app.modules.fair_stand.infrastructure.models import (
     FairStandCatalogPreviewKindModel,
     FairStandCategoryModel,
@@ -14,12 +15,29 @@ from app.modules.fair_stand.infrastructure.models import (
 )
 from app.modules.fair_stand.infrastructure.seed_catalog import seed_fair_stand_catalog
 
+# Documented ondelete exceptions on fair_stand_items (not CASCADE):
+# - item_type → fair_stand_item_type.key: RESTRICT (protect catalog types)
+# - snap_requires/provides_rule_id → fair_stand_rule: SET NULL
+_ITEMS_ONDELETE_EXCEPTIONS: dict[tuple[str, frozenset[str]], str] = {
+    ("fair_stand_item_type", frozenset({"item_type"})): "RESTRICT",
+    ("fair_stand_rule", frozenset({"snap_requires_rule_id"})): "SET NULL",
+    ("fair_stand_rule", frozenset({"snap_provides_rule_id"})): "SET NULL",
+}
+
 
 def _now():
     return datetime.now(tz=UTC)
 
 
-def _item(**overrides):
+def _expected_ondelete(table: str, fk: dict) -> str:
+    referred = fk.get("referred_table") or ""
+    cols = frozenset(fk.get("constrained_columns") or ())
+    if table == "fair_stand_items":
+        return _ITEMS_ONDELETE_EXCEPTIONS.get((referred, cols), "CASCADE")
+    return "CASCADE"
+
+
+def _item(db_session, **overrides):
     now = _now()
     values = {
         "item_key": "tmp_item",
@@ -31,6 +49,7 @@ def _item(**overrides):
         "updated_at": now,
     }
     values.update(overrides)
+    ensure_item_types(db_session, [values["item_type"]])
     return FairStandItemModel(**values)
 
 
@@ -53,10 +72,12 @@ def test_all_fair_stand_foreign_keys_are_cascade_cascade(test_engine):
             options = fk.get("options") or {}
             ondelete = (options.get("ondelete") or fk.get("ondelete") or "").upper()
             onupdate = (options.get("onupdate") or fk.get("onupdate") or "").upper()
+            expected = _expected_ondelete(table, fk)
             if test_engine.dialect.name == "sqlite":
-                assert ondelete in {"CASCADE", ""}, (table, fk)
+                allowed = {expected, ""} if expected == "CASCADE" else {expected}
+                assert ondelete in allowed, (table, fk, ondelete, expected)
             else:
-                assert ondelete == "CASCADE", (table, fk)
+                assert ondelete == expected, (table, fk)
                 assert onupdate == "CASCADE", (table, fk)
 
     category_columns = {column["name"] for column in inspector.get_columns("fair_stand_categories")}
@@ -85,15 +106,15 @@ def test_all_fair_stand_foreign_keys_are_cascade_cascade(test_engine):
 
 
 def test_duplicate_item_key_rejected(db_session):
-    db_session.add(_item(item_key="dup_key"))
+    db_session.add(_item(db_session, item_key="dup_key"))
     db_session.flush()
-    db_session.add(_item(item_key="dup_key", name="Other"))
+    db_session.add(_item(db_session, item_key="dup_key", name="Other"))
     with pytest.raises(IntegrityError):
         db_session.flush()
 
 
 def test_invalid_category_fk_rejected(db_session):
-    db_session.add(_item(item_key="bad_cat", category_id=99999))
+    db_session.add(_item(db_session, item_key="bad_cat", category_id=99999))
     with pytest.raises(IntegrityError):
         db_session.flush()
 
@@ -123,6 +144,7 @@ def test_invalid_preview_fk_rejected(db_session):
     extra_id = db_session.scalars(select(FairStandCategoryModel)).one().id
     db_session.add(
         _item(
+            db_session,
             item_key="bad_preview",
             catalog_visible=True,
             category_id=extra_id,
@@ -135,7 +157,7 @@ def test_invalid_preview_fk_rejected(db_session):
 
 
 def test_self_component_rejected(db_session):
-    db_session.add(_item(item_key="self_parent"))
+    db_session.add(_item(db_session, item_key="self_parent"))
     db_session.flush()
     db_session.add(
         FairStandItemComponentModel(
@@ -149,8 +171,8 @@ def test_self_component_rejected(db_session):
 
 
 def test_quantity_must_be_positive(db_session):
-    db_session.add(_item(item_key="parent_a"))
-    db_session.add(_item(item_key="child_b"))
+    db_session.add(_item(db_session, item_key="parent_a"))
+    db_session.add(_item(db_session, item_key="child_b"))
     db_session.flush()
     db_session.add(
         FairStandItemComponentModel(

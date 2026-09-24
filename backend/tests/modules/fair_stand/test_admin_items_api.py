@@ -133,3 +133,159 @@ def test_admin_item_records_create_minimal(client, db_session, auth_headers):
     )
     assert response.status_code == 201
     assert response.json()["itemKey"] == "admin_test_sku"
+
+
+def test_admin_item_records_catalog_visible_requires_triad(client, db_session, auth_headers):
+    from sqlalchemy import func, select
+
+    from app.modules.fair_stand.infrastructure.models import (
+        FairStandCatalogPreviewKindModel,
+        FairStandCategoryModel,
+        FairStandItemModel,
+    )
+
+    seed_fair_stand_catalog(db_session)
+    db_session.flush()
+    category_id = db_session.scalars(select(FairStandCategoryModel.id)).first()
+    preview_id = db_session.scalars(select(FairStandCatalogPreviewKindModel.id)).first()
+    assert category_id is not None and preview_id is not None
+    visible_count = db_session.scalar(
+        select(func.count())
+        .select_from(FairStandItemModel)
+        .where(
+            FairStandItemModel.category_id == category_id,
+            FairStandItemModel.catalog_visible.is_(True),
+        )
+    )
+    next_index = int(visible_count or 0) + 1
+    _allow(client, {PERMISSION_ITEMS_CREATE, PERMISSION_ITEMS_UPDATE})
+
+    create = client.post(
+        "/api/v1/fair-stand/admin/item-records",
+        headers=auth_headers,
+        json={
+            "item_key": "catalog_visible_gap",
+            "name": "Catalog Visible Gap",
+            "item_type": "panel",
+            "catalog_visible": True,
+        },
+    )
+    assert create.status_code == 400
+    assert "kategori" in create.json()["detail"].lower()
+
+    hidden = client.post(
+        "/api/v1/fair-stand/admin/item-records",
+        headers=auth_headers,
+        json={
+            "item_key": "catalog_hidden_ok",
+            "name": "Catalog Hidden Ok",
+            "item_type": "panel",
+            "catalog_visible": False,
+            "category_id": category_id,
+            "catalog_item_index": 991,
+            "preview_id": preview_id,
+        },
+    )
+    assert hidden.status_code == 201, hidden.text
+    assert hidden.json()["catalogVisible"] is False
+    assert hidden.json()["categoryId"] == category_id
+    assert hidden.json()["catalogItemIndex"] == 991
+
+    bad_index = client.put(
+        "/api/v1/fair-stand/admin/item-records/catalog_hidden_ok",
+        headers=auth_headers,
+        json={"catalog_visible": True, "catalog_item_index": 0},
+    )
+    assert bad_index.status_code == 400
+
+    clamped = client.put(
+        "/api/v1/fair-stand/admin/item-records/catalog_hidden_ok",
+        headers=auth_headers,
+        json={"catalog_visible": True, "catalog_item_index": next_index + 50},
+    )
+    assert clamped.status_code == 200, clamped.text
+    assert clamped.json()["catalogItemIndex"] == next_index
+
+    # already visible at end; move to front
+    turn_on = client.put(
+        "/api/v1/fair-stand/admin/item-records/catalog_hidden_ok",
+        headers=auth_headers,
+        json={"catalog_item_index": 1},
+    )
+    assert turn_on.status_code == 200, turn_on.text
+    assert turn_on.json()["catalogVisible"] is True
+    assert turn_on.json()["categoryId"] == category_id
+    assert turn_on.json()["catalogItemIndex"] == 1
+    clear_while_visible = client.put(
+        "/api/v1/fair-stand/admin/item-records/catalog_hidden_ok",
+        headers=auth_headers,
+        json={"category_id": None},
+    )
+    assert clear_while_visible.status_code == 400
+
+    turn_off = client.put(
+        "/api/v1/fair-stand/admin/item-records/catalog_hidden_ok",
+        headers=auth_headers,
+        json={"catalog_visible": False},
+    )
+    assert turn_off.status_code == 200, turn_off.text
+    body = turn_off.json()
+    assert body["catalogVisible"] is False
+    assert body["categoryId"] == category_id
+    assert body["previewId"] == preview_id
+    # Stale index may remain; peers must stay contiguous 1..N
+    peer_indices = sorted(
+        db_session.scalars(
+            select(FairStandItemModel.catalog_item_index).where(
+                FairStandItemModel.category_id == category_id,
+                FairStandItemModel.catalog_visible.is_(True),
+            )
+        ).all()
+    )
+    assert peer_indices == list(range(1, len(peer_indices) + 1))
+
+
+def test_admin_item_catalog_index_insert_shifts_peers(client, db_session, auth_headers):
+    from sqlalchemy import select
+
+    from app.modules.fair_stand.infrastructure.models import (
+        FairStandCatalogPreviewKindModel,
+        FairStandCategoryModel,
+        FairStandItemModel,
+    )
+
+    seed_fair_stand_catalog(db_session)
+    db_session.flush()
+    category_id = db_session.scalars(select(FairStandCategoryModel.id)).first()
+    preview_id = db_session.scalars(select(FairStandCatalogPreviewKindModel.id)).first()
+    first = db_session.scalars(
+        select(FairStandItemModel).where(
+            FairStandItemModel.category_id == category_id,
+            FairStandItemModel.catalog_visible.is_(True),
+            FairStandItemModel.catalog_item_index == 1,
+        )
+    ).first()
+    assert first is not None and preview_id is not None
+    previous_key = first.item_key
+    _allow(client, {PERMISSION_ITEMS_CREATE, PERMISSION_ITEMS_UPDATE})
+
+    created = client.post(
+        "/api/v1/fair-stand/admin/item-records",
+        headers=auth_headers,
+        json={
+            "item_key": "catalog_insert_front",
+            "name": "Catalog Insert Front",
+            "item_type": "panel",
+            "catalog_visible": True,
+            "category_id": category_id,
+            "catalog_item_index": 1,
+            "preview_id": preview_id,
+        },
+    )
+    assert created.status_code == 201, created.text
+    assert created.json()["catalogItemIndex"] == 1
+
+    db_session.expire_all()
+    previous = db_session.get(FairStandItemModel, previous_key)
+    assert previous is not None
+    assert previous.catalog_item_index == 2

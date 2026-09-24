@@ -20,6 +20,9 @@ from app.modules.fair_stand.infrastructure.models import (
     FairStandCategoryModel,
     FairStandDimensionsModel,
     FairStandItemModel,
+    FairStandItemTypeModel,
+    FairStandRuleModel,
+    FairStandRuleTypeModel,
     FairStandSettingsModel,
 )
 
@@ -37,6 +40,9 @@ class SqlAlchemyFairStandCatalogRepository:
             selectinload(FairStandItemModel.components),
             selectinload(FairStandItemModel.video_wall),
             selectinload(FairStandItemModel.body_parts),
+            selectinload(FairStandItemModel.item_type_row),
+            selectinload(FairStandItemModel.snap_requires_rule),
+            selectinload(FairStandItemModel.snap_provides_rule),
         )
 
     def list_active_categories(self) -> list[CatalogCategory]:
@@ -119,3 +125,32 @@ class SqlAlchemyFairStandCatalogRepository:
             select(FairStandItemModel).where(FairStandItemModel.preview_id == int(preview_id))
         ).all()
         return len(rows)
+
+    def list_item_types(self, *, active_only: bool = False) -> list[FairStandItemTypeModel]:
+        stmt = (
+            select(FairStandItemTypeModel)
+            .options(selectinload(FairStandItemTypeModel.overlap_types))
+            .order_by(FairStandItemTypeModel.display_name)
+        )
+        if active_only:
+            stmt = stmt.where(FairStandItemTypeModel.is_active.is_(True))
+        return list(self._session.scalars(stmt).all())
+
+    def list_rule_types(self, *, active_only: bool = False) -> list[FairStandRuleTypeModel]:
+        stmt = select(FairStandRuleTypeModel).order_by(FairStandRuleTypeModel.display_name)
+        if active_only:
+            stmt = stmt.where(FairStandRuleTypeModel.is_active.is_(True))
+        return list(self._session.scalars(stmt).all())
+
+    def list_rules(self, *, active_only: bool = False) -> list[FairStandRuleModel]:
+        stmt = (
+            select(FairStandRuleModel)
+            .options(
+                selectinload(FairStandRuleModel.rule_type),
+                selectinload(FairStandRuleModel.item_types),
+            )
+            .order_by(FairStandRuleModel.display_name)
+        )
+        if active_only:
+            stmt = stmt.where(FairStandRuleModel.is_active.is_(True))
+        return list(self._session.scalars(stmt).all())

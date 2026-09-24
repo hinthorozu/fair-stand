@@ -91,18 +91,31 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 - **Karar:** Occupancy kalkınca yalnız kimlik/seed ayrımı; şerit sayısı anlamı taşımaz.
 - **Kaynak:** `ITEMS.md` kuyruk (8 Item).
 
-### B.9. Item snap — DB `snap_target_item_type` / `snap_anchor` (ör. `led_floodlight` → Profile)
+### B.9. Item snap — item_type + rule_type + rule (P0 kilit)
 
-- **Durum:** BACKLOG — sadeleştirilecek (2026-09-23 not); **sözleşme çatışması** `ITEM_FIRST_ROADMAP.md` § Gap ile açık
-- **Ürün kuralı:** Admin/DB’de “projektör **Profile**’a snap” denmişse, sahnede **Profile** görüldüğünde ona yapışmalı; kural tek cümle, kullanıcıya yansıyan davranış bu.
-- **Bugün (kötü / dağınık):** `src/itemSnap.js` + placement (`moduleBehavior`, `modulePlacement`, `scene3d` top-fixture) iç içe: recipe parent’ı host sayma (`composition.items` içinde `profile` leaf → tüm `flat-panel` modülü host), anchor Z = parent `placement.zCm + moduleState.heightCm` (recipe profil ray geometrisi değil), en yakın host = modül köşe mesafesi, duvar/free/20 cm grid, short-up `variant` upright joint, profil vs panel **aynı slotta** çarpışma — DB snap ile çelişen ikinci kurallar.
-- **Hedef (yavaş oturtma):** Snap yalnız Item kolonlarından (`snap_target_item_type`, `snap_anchor`; gerekirse genişletme `ITEMS.md` + migration). Host = gerçek **Profile** instance (type `profile` veya net tanımlı profile host API); görülmezse belgelenmiş fallback (ör. `default_z_cm`), recipe taraması ve type-map davranışı snap kararını **gölgelemez**. Capability/`provides` modeli seçilirse (`ITEM_FIRST_ROADMAP` P0 A) bu madde `SCENE_POSE` ile birlikte yeniden yazılır — paralel iki hedef yasak.
-- **Raf notu:** Görsel olarak raf panel **front** yüz lokal üst / dikiş hatlarına oturur (`shelf-rail`); wall AABB top değil. Bugün runtime `panel-seam` — C.4 + Gap notu.
-- **Kaynak:** `fair_stand_items.snap_*`; seed `item_snap_seed.py` (`led-floodlight` → `profile`/`top`); `SCENE_POSE.md` snap; `ITEM_FIRST_ROADMAP.md` Gap; konuşma: stand 500 vs mount 350 kot uyumsuzluğu ayrı (zarf § C.2).
-- **Yasak:** Yeni gizli snap listesi (`TYPE_BEHAVIORS` vb.) eklemeden önce B.9 hedefi ile hizalanmalı; mevcut testler (`itemSnapAnchor.test.js`) geçici sözleşme — hedef değişince güncellenir.
+- **Durum:** UYGULAMA — `fair_stand_item_type` + kural tabloları; item `item_type` FK; motor rule id
+- **Ürün kuralı:** CRM’de item type / kural tipi / kural CRUD; item’da Type (key) + requires|provides rule
+- **Kimlik:** kataloglarda `key` (unique); ad→slug + elle düzeltme
+- **Geometri:** yalnız face / edge enum (CRM select + hint); **mount_mode kaldırıldı**
+- **Tip bağı:** kural ↔ tip(ler) M:N (`fair_stand_rule_item_type`); aile tablosu kaldırıldı (`0029`)
+- **Hedef:** `SCENE_POSE.md` Snap; `DATABASE.md` tip/kural
+- **Raf:** kural `shelf-rail` face=front edge=top → seam / band geometrisi
+- **Yasak:** Type→kural runtime map; item üzerinde free-text capability string kolonları
+
+### B.7. Parent BOM ↔ leaf ölçü uyumu (uyarı; auto-fix yok)
+
+- **Durum:** KARAR — uygulama ertelendi (şimdi kod yok)
+- **Örnek kanon:** `wall_200` (zarf W=200 / H≈350) + leaf `panel_197` (197×47) BOM `×7`
+- **Karar (admin / soft-warning):**
+  1. Leaf veya parent ölçü / BOM `quantity` değişince **uyarı** göster; kaydı engellemek zorunda değil (bilerek override serbest).
+  2. Yatay örnek: `panel_197.width` 220 olurken parent `wall_200.width` 200 → taşma uyarısı; etkilenen parent’lar listelenir.
+  3. Dikey örnek: `quantity × leaf.height` (ilk dilim; boşluk payı sonra netleşir) `> parent.sceneHeight` → taşma uyarısı (`7×47` sığar, `8×47` sığmaz).
+  4. **Auto-fix yok:** quantity / leaf / parent ölçü otomatik yeniden yazılmaz.
+- **Sahne (ayrı borç):** Bugün `resolveFlatPanelStripCount` BOM panel adedini `min(qty, floor(ceiling/pitch))` ile **sessiz clamp** eder; pitch sabit `WALL_PANEL_BAND_PITCH_CM=50`, leaf 47 değil. Bu istenmez — gerçek hayat ölçü + BOM otorite; fazla adet sığdırılmaz. Clamp kaldırma / leaf pitch § A + `SCENE_POSE.md` ile; bu madde yalnız uyarı sözleşmesi.
+- **Kaynak:** `ITEM_FIRST_ROADMAP.md` P1; `wall_200` seed; `items.js` `resolveFlatPanelStripCount`
+- **Yasak:** Uyarıyı “geçsin diye” kapatmak; clamp’i ürün özelliği sanmak; auto-recalc quantity
 
 ---
-
 ## C. Stand zarfı ve DB (Item tablosu değil)
 
 ### C.1. `fair_stand_dimensions.strip_count` / `strip_height_m` / height CHECK
@@ -120,15 +133,28 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 
 ### C.3. `TYPE_BEHAVIORS` (placement davranışı)
 
-- **Durum:** ERTELENDİ — Item kolonlarına taşınacak
-- **Karar:** `DATABASE.md` § *Bilerek burada olmayanlar*: collision, magneticSnap, moveSnapCm, ghost, placement, allowSideInsert, boundary, wall overlay, wallCapacity hâlâ `type` map’inde. `ITEMS.md` mimari kural: Item davranışı `type` ile belirlenmez (hedef); taşıma ayrı refactor, sıra ürün onayı gerekir.
-- **Yasak:** Davranışı çoğaltan ikinci map eklenmez.
+- **Durum:** KESİT 1+2+3 TAŞINDI — tüm tip davranışı `fair_stand_item_type` + CRM + motor DB-only; JS `TYPE_BEHAVIORS` map yok
+- **Sıradaki:** Kullanım kılavuzu (§ 11b) — tip davranışı **ve** snap kuralı aynı rehberde
+- **Karar (analiz 2026-09-24):** Snap dilimi şablon. Davranış paketi **`fair_stand_item_type` kolonlarına** (yeni tablo şart değil; bugün tip-only). Item override / snap çoklu requires-provides ayrı epic. Export etkilenmez (davranış zaten ZIP’te yok).
+- **Canonical belge:** `TYPE_BEHAVIORS_DB_ROADMAP.md`
+- **Kaynak:** `DATABASE.md` § *Bilerek burada olmayanlar*; `moduleBehavior.js`; `SCENE_POSE.md` snap şablonu
+- **Yasak:** Dual-read bitmeden JS map’i kalıcı ikinci otorite bırakmak; enum rename; placement’ı proje ZIP’e gömmek
 
 ### C.4. `overlaySnap = 'panel-seam'`
 
-- **Durum:** KALDIRILACAK
-- **Karar:** Raf/host snap item anchor; global seam yok.
-- **Kaynak:** `SCENE_POSE.md` § Snap.
+- **Durum:** KAPANDI — `usesPanelSeamOverlaySnap` ← requires `shelf-rail` veya face front/back + edge top (mount_mode yok)
+- **Karar:** Raf host + seam geometrisi; type map `overlaySnap` yok
+- **Kaynak:** `SCENE_POSE.md` § Snap
+- **Kalıntı:** `scene3d` vb. literal `panel-seam` string süpürme (P4)
+
+### C.5. `MODULE_CONTRACT_ASSIGNMENTS` (per-itemKey JS allowlist)
+
+- **Durum:** KALDIRILACAK / ERİTİLECEK — ürün otoritesi değil
+- **Kod gerçeği:** `src/moduleContracts.js` governance + test (`systemDevelopmentContract` katalog key ↔ assignment). Production planner/renderer import etmez. Profil alanları (`appearance.color: editable` …) Item `acceptsColor` / `acceptsImage` / recipe `composition` ile **çakışır**.
+- **Karar:** Yeni SKU için JS satırı gerekmemeli. Assignment ya silinir ya `item_type` + Item alanlarından türetilir; testler Item/DB’ye bağlanır.
+- **Değil:** Otomatik duvar width seçimi — `resolveAutomaticWallFlatPanelItemKey` (Item registry; 2026-09-24).
+- **Kaynak:** `ITEM_FIRST_ROADMAP.md` P2; `moduleContracts.js` dosya başı notu
+- **Yasak:** Contract’ı runtime görsel/catalog kaynağı sanmak; DB’ye taşınmış `accepts*` / preview’i contract’tan okutmak
 
 ---
 
@@ -182,7 +208,9 @@ Aşağıdakiler **onaylı şemada değil**; karar verilince B veya C’ye madde 
 | strip occupancy | B.4–B.5 KALDIRILACAK, § A.4 | Hedefte yok | Tablo + 8 satır |
 | mount vs default Z | B.3 ARAŞTIRILACAK | defaultZ drop hedefi | İki kolon |
 | wallGap vs panel boşluğu | B.2 koru, B.6 araştır | Standart boşluk hedefi | wall_gap_cm |
-| TYPE_BEHAVIORS | C.3 ERTELENDİ | type listesi yok (snap) | Bilerek olmayanlar |
+| TYPE_BEHAVIORS | C.3 yol haritası | — | `TYPE_BEHAVIORS_DB_ROADMAP.md` |
+| Module contract allowlist | C.5 KALDIRILACAK | — | `accepts*` / recipe Item’da |
 | Item snap (Profile host) | B.9 BACKLOG | snap anchor hedefi | `snap_target_item_type`, `snap_anchor` |
+| BOM ↔ leaf fit uyarı | B.7 KARAR (kod yok) | zarf item’da | recipe `quantity` + leaf dims |
 | Kaldırma sırası | § A canonical | Hedef metin | strip kolonları § C.1 |
 

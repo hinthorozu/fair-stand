@@ -1,8 +1,9 @@
 import { CATALOG_PREVIEW_KIND_FIXTURE } from './fixtures/catalogPreviewKinds.mjs';
 import { applyItemRotationFields } from './itemRotationSeed.mjs';
 import { applyItemSurfaceFlags } from './itemSurfaceFlagsSeed.mjs';
-import { applyItemSnapFields } from './itemSnapSeed.mjs';
+import { applyItemSnapFields, SNAP_RULE_FIXTURE } from './itemSnapSeed.mjs';
 import { applyItemScenePose } from './itemScenePoseSeed.mjs';
+import { buildItemTypeBootstrapRows, ITEM_TYPE_BEHAVIOR_SLICE1 } from './itemTypeBehaviorSeed.mjs';
 
 export const CANONICAL_STAND_DIMENSIONS = Object.freeze({
   heightCm: 350,
@@ -18,6 +19,7 @@ export const CANONICAL_RUNTIME_SETTINGS = Object.freeze({
 });
 
 export function mapCatalogSeedToBootstrap(seed) {
+  const items = seed.items.map(mapItem);
   return {
     revision: 'e2e-fixture',
     categories: seed.categories.map((category) => ({
@@ -26,7 +28,12 @@ export function mapCatalogSeedToBootstrap(seed) {
       catalogIndex: category.catalog_index,
     })),
     previewKinds: CATALOG_PREVIEW_KIND_FIXTURE,
-    items: seed.items.map(mapItem),
+    items,
+    itemTypes: buildItemTypeBootstrapRows([
+      ...items.map((item) => item.type),
+      ...Object.keys(ITEM_TYPE_BEHAVIOR_SLICE1),
+    ]),
+    rules: SNAP_RULE_FIXTURE,
     standDimensions: seed.standDimensions ?? CANONICAL_STAND_DIMENSIONS,
     settings: seed.settings ?? CANONICAL_RUNTIME_SETTINGS,
   };
@@ -133,8 +140,10 @@ function mapItem(row) {
   }
   const defaultZ = Number(row.default_z_cm ?? item.dimensions?.mountHeightCm);
   item.defaultZCm = Number.isFinite(defaultZ) ? defaultZ : 0;
-  assign('snapTargetItemType', row.snap_target_item_type);
-  assign('snapAnchor', row.snap_anchor);
+  assign('snapRequires', row.snap_requires);
+  assign('snapProvides', row.snap_provides);
+  assign('snapRequiresRuleCode', row.snap_requires_rule_code);
+  assign('snapProvidesRuleCode', row.snap_provides_rule_code);
   applyItemSnapFields(item);
   applyItemScenePose(item);
   return item;

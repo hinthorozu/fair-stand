@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    Column,
     DateTime,
     ForeignKey,
     Index,
@@ -12,6 +13,7 @@ from sqlalchemy import (
     Numeric,
     SmallInteger,
     String,
+    Table,
     Text as sa_text,
     UniqueConstraint,
     Uuid,
@@ -28,6 +30,42 @@ PayloadJSON = JSON().with_variant(JSONB(astext_type=sa_text()), "postgresql")
 from app.db.base import Base
 
 CASCADE = {"ondelete": "CASCADE", "onupdate": "CASCADE"}
+
+fair_stand_rule_item_type = Table(
+    "fair_stand_rule_item_type",
+    Base.metadata,
+    Column("rule_id", Integer, ForeignKey("fair_stand_rule.id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True),
+    Column(
+        "item_type_id",
+        Integer,
+        ForeignKey("fair_stand_item_type.id", ondelete="CASCADE", onupdate="CASCADE"),
+        primary_key=True,
+    ),
+    Index("ix_fair_stand_rule_item_type_item_type_id", "item_type_id"),
+)
+
+# Tip A, tip B ile çarpışmada üst üste binebilir (M:N, FK).
+fair_stand_item_type_overlap = Table(
+    "fair_stand_item_type_overlap",
+    Base.metadata,
+    Column(
+        "item_type_id",
+        Integer,
+        ForeignKey("fair_stand_item_type.id", ondelete="CASCADE", onupdate="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "overlap_item_type_id",
+        Integer,
+        ForeignKey("fair_stand_item_type.id", ondelete="CASCADE", onupdate="CASCADE"),
+        primary_key=True,
+    ),
+    CheckConstraint(
+        "item_type_id <> overlap_item_type_id",
+        name="ck_fair_stand_item_type_overlap_not_self",
+    ),
+    Index("ix_fair_stand_item_type_overlap_target", "overlap_item_type_id"),
+)
 
 
 class FairStandCategoryModel(Base):
@@ -57,6 +95,145 @@ class FairStandCatalogPreviewKindModel(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class FairStandItemTypeModel(Base):
+    """UI-editable item type catalog; items.item_type FK → key (unique)."""
+
+    __tablename__ = "fair_stand_item_type"
+    __table_args__ = (
+        UniqueConstraint("key", name="uq_fair_stand_item_type_key"),
+        CheckConstraint(
+            "placement IN ('wall', 'free', 'wall-overlay', 'top')",
+            name="ck_fair_stand_item_type_placement",
+        ),
+        CheckConstraint(
+            "collision IN ('segment', 'footprint', 'none')",
+            name="ck_fair_stand_item_type_collision",
+        ),
+        CheckConstraint(
+            "move_snap_cm > 0",
+            name="ck_fair_stand_item_type_move_snap_cm",
+        ),
+        CheckConstraint(
+            "magnetic_snap IN ('standard', 'none', 'short-up-joint')",
+            name="ck_fair_stand_item_type_magnetic_snap",
+        ),
+        CheckConstraint(
+            "wall_capacity IN ('include', 'exclude')",
+            name="ck_fair_stand_item_type_wall_capacity",
+        ),
+        CheckConstraint(
+            "connection_endpoint IN ('segment', 'logical-fixture')",
+            name="ck_fair_stand_item_type_connection_endpoint",
+        ),
+        CheckConstraint(
+            "collision_depth IN ('physical', 'wall-backbone')",
+            name="ck_fair_stand_item_type_collision_depth",
+        ),
+        CheckConstraint(
+            "endpoint_contact IN ('standard', 'thin-wall-endpoint')",
+            name="ck_fair_stand_item_type_endpoint_contact",
+        ),
+        CheckConstraint(
+            "boundary_snap IN ('stand-edge', 'wall-inner-face')",
+            name="ck_fair_stand_item_type_boundary_snap",
+        ),
+        CheckConstraint(
+            "collision_height IN ('full')",
+            name="ck_fair_stand_item_type_collision_height",
+        ),
+        CheckConstraint(
+            "ghost_opacity >= 0 AND ghost_opacity <= 1",
+            name="ck_fair_stand_item_type_ghost_opacity",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    key: Mapped[str] = mapped_column(String(64), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    placement: Mapped[str] = mapped_column(String(32), nullable=False, default="wall")
+    collision: Mapped[str] = mapped_column(String(32), nullable=False, default="segment")
+    move_snap_cm: Mapped[int] = mapped_column(Integer, nullable=False, default=50)
+    magnetic_snap: Mapped[str] = mapped_column(String(32), nullable=False, default="standard")
+    allow_side_insert: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    supports_wall_overlay_mount: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    wall_capacity: Mapped[str] = mapped_column(String(16), nullable=False, default="include")
+    connection_endpoint: Mapped[str] = mapped_column(String(32), nullable=False, default="segment")
+    collision_depth: Mapped[str] = mapped_column(String(32), nullable=False, default="physical")
+    endpoint_contact: Mapped[str] = mapped_column(String(32), nullable=False, default="standard")
+    boundary_snap: Mapped[str] = mapped_column(String(32), nullable=False, default="stand-edge")
+    collision_height: Mapped[str] = mapped_column(String(16), nullable=False, default="full")
+    ghost_kind: Mapped[str] = mapped_column(String(32), nullable=False, default="silhouette")
+    ghost_renderer: Mapped[str] = mapped_column(String(64), nullable=False, default="module-silhouette")
+    ghost_opacity: Mapped[Decimal] = mapped_column(Numeric(4, 3), nullable=False, default=Decimal("0.38"))
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    items: Mapped[list["FairStandItemModel"]] = relationship(back_populates="item_type_row")
+    rules: Mapped[list["FairStandRuleModel"]] = relationship(
+        secondary=fair_stand_rule_item_type,
+        back_populates="item_types",
+    )
+    overlap_types: Mapped[list["FairStandItemTypeModel"]] = relationship(
+        "FairStandItemTypeModel",
+        secondary=fair_stand_item_type_overlap,
+        primaryjoin="FairStandItemTypeModel.id == fair_stand_item_type_overlap.c.item_type_id",
+        secondaryjoin="FairStandItemTypeModel.id == fair_stand_item_type_overlap.c.overlap_item_type_id",
+        lazy="selectin",
+    )
+
+
+class FairStandRuleTypeModel(Base):
+    __tablename__ = "fair_stand_rule_type"
+    __table_args__ = (UniqueConstraint("key", name="uq_fair_stand_rule_type_key"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    key: Mapped[str] = mapped_column(String(64), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    rules: Mapped[list["FairStandRuleModel"]] = relationship(back_populates="rule_type")
+
+
+class FairStandRuleModel(Base):
+    __tablename__ = "fair_stand_rule"
+    __table_args__ = (
+        UniqueConstraint("rule_type_id", "key", name="uq_fair_stand_rule_type_id_key"),
+        CheckConstraint(
+            "face IS NULL OR face IN ('front', 'back', 'top', 'bottom', 'left', 'right')",
+            name="ck_fair_stand_rule_face",
+        ),
+        CheckConstraint(
+            "edge IS NULL OR edge IN ('top', 'bottom', 'left', 'right')",
+            name="ck_fair_stand_rule_edge",
+        ),
+        CheckConstraint(
+            "(face IS NULL) = (edge IS NULL)",
+            name="ck_fair_stand_rule_face_edge_pair",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    rule_type_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("fair_stand_rule_type.id", ondelete="RESTRICT", onupdate="CASCADE"),
+        nullable=False,
+    )
+    key: Mapped[str] = mapped_column(String(64), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    face: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    edge: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    rule_type: Mapped[FairStandRuleTypeModel] = relationship(back_populates="rules")
+    item_types: Mapped[list[FairStandItemTypeModel]] = relationship(
+        secondary=fair_stand_rule_item_type,
+        back_populates="rules",
+    )
 
 
 class FairStandItemModel(Base):
@@ -97,9 +274,15 @@ class FairStandItemModel(Base):
             "snap_anchor IS NULL OR snap_anchor IN ('top', 'bottom', 'left', 'right')",
             name="ck_fair_stand_items_snap_anchor",
         ),
+        CheckConstraint(
+            "snap_requires_rule_id IS NULL OR snap_provides_rule_id IS NULL",
+            name="ck_fair_stand_items_snap_rule_xor",
+        ),
         Index("ix_fair_stand_items_item_type", "item_type"),
         Index("ix_fair_stand_items_category_id", "category_id"),
         Index("ix_fair_stand_items_preview_id", "preview_id"),
+        Index("ix_fair_stand_items_snap_requires_rule_id", "snap_requires_rule_id"),
+        Index("ix_fair_stand_items_snap_provides_rule_id", "snap_provides_rule_id"),
         Index("ix_fair_stand_items_is_active", "is_active"),
         Index(
             "uq_fair_stand_items_catalog_order",
@@ -113,7 +296,16 @@ class FairStandItemModel(Base):
 
     item_key: Mapped[str] = mapped_column(String(128), primary_key=True)
     name: Mapped[str] = mapped_column(String(256), nullable=False)
-    item_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    item_type: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey(
+            "fair_stand_item_type.key",
+            name="fk_fair_stand_items_item_type_key",
+            ondelete="RESTRICT",
+            onupdate="CASCADE",
+        ),
+        nullable=False,
+    )
     unit: Mapped[str | None] = mapped_column(String(32), nullable=True)
     catalog_visible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     category_id: Mapped[int | None] = mapped_column(
@@ -143,6 +335,16 @@ class FairStandItemModel(Base):
     default_z_cm: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False, default=Decimal("0"), server_default="0")
     snap_target_item_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
     snap_anchor: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    snap_requires_rule_id: Mapped[int | None] = mapped_column(
+        Integer,
+        ForeignKey("fair_stand_rule.id", ondelete="SET NULL", onupdate="CASCADE"),
+        nullable=True,
+    )
+    snap_provides_rule_id: Mapped[int | None] = mapped_column(
+        Integer,
+        ForeignKey("fair_stand_rule.id", ondelete="SET NULL", onupdate="CASCADE"),
+        nullable=True,
+    )
     is_render: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
     accepts_color: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
     accepts_image: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
@@ -154,6 +356,16 @@ class FairStandItemModel(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     category: Mapped[FairStandCategoryModel | None] = relationship(back_populates="items")
+    item_type_row: Mapped[FairStandItemTypeModel] = relationship(
+        back_populates="items",
+        foreign_keys=[item_type],
+    )
+    snap_requires_rule: Mapped[FairStandRuleModel | None] = relationship(
+        foreign_keys=[snap_requires_rule_id],
+    )
+    snap_provides_rule: Mapped[FairStandRuleModel | None] = relationship(
+        foreign_keys=[snap_provides_rule_id],
+    )
     dimensions: Mapped["FairStandItemDimensionsModel | None"] = relationship(
         back_populates="item", cascade="all, delete-orphan"
     )
