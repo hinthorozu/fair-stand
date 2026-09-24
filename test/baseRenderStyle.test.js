@@ -8,7 +8,7 @@ const end = source.indexOf('function createCounterModule(', start);
 const baseBlock = source.slice(start, end);
 
 test('baza renderer uses banko-style thin top and bottom rails with one panel tier', () => {
-  assert.ok(baseBlock.includes('const railHeightM = PANEL_RAIL_HEIGHT_M;'));
+  assert.ok(baseBlock.includes('const railHeightM = STAND_DIMENSIONS.panelRailHeight;'));
   assert.ok(baseBlock.includes('const railYs = [0, frameHeightM];'));
   assert.equal(baseBlock.includes('stripHeightM'), false);
   assert.equal((baseBlock.match(/moduleState\.faces\?\.front/g) ?? []).length, 1);

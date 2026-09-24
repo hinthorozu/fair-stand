@@ -2,12 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  getCatalogItem,
   listCatalogItems,
 } from '../src/catalog.js';
 import { planAutomaticDepot } from '../src/autoDepot.js';
 import {
-  MODULE_CONTRACT_ASSIGNMENTS,
   MODULE_CONTRACT_PROFILES,
   hasExplicitModuleContract,
   resolveModuleContract,
@@ -28,12 +26,10 @@ const REQUIRED_CONTRACT_SECTIONS = Object.freeze([
   'behavior',
 ]);
 
-test('every catalog item has an explicit module contract assignment', () => {
+test('every catalog item resolves a module contract from type (no per-SKU allowlist)', () => {
   const missing = listCatalogItems().map((item) => item.itemKey).filter((moduleKey) => !hasExplicitModuleContract(moduleKey));
-  const stale = Object.keys(MODULE_CONTRACT_ASSIGNMENTS).filter((moduleKey) => !getCatalogItem(moduleKey));
 
   assert.deepEqual(missing, [], `Catalog items missing module contract: ${missing.join(', ')}`);
-  assert.deepEqual(stale, [], `Module contracts reference missing catalog items: ${stale.join(', ')}`);
 });
 
 test('every catalog module contract resolves all required policy sections', () => {

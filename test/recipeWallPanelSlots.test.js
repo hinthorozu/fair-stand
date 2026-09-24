@@ -5,7 +5,6 @@ import {
   countRecipeWallPanelSlots,
   getItem,
   resolveFlatPanelStripCount,
-  resolveSceneDimensions,
 } from '../src/items.js';
 import { createFlatPanelModuleState } from '../src/designState.js';
 import { WALL_PANEL_BAND_PITCH_CM } from '../src/wallPanelBand.js';
@@ -32,16 +31,14 @@ test('recipe-driven flat-panel height matches panel count × stand strip pitch',
   assert.equal(shortUp.heightCm, 2 * pitchCm);
 });
 
-test('strip slots never exceed item ceiling height from catalog', () => {
-  const pitchCm = WALL_PANEL_BAND_PITCH_CM;
+test('strip slots follow recipe BOM quantity (no silent ceiling clamp)', () => {
   for (const itemKey of ['wall_200', 'wall_200_short_up_2']) {
     const item = getItem(itemKey);
-    const ceilingHeightCm = resolveSceneDimensions(item).heightCm;
-    const maxSlots = Math.max(1, Math.floor(ceilingHeightCm / pitchCm));
     const recipeSlots = countRecipeWallPanelSlots(item);
-    assert.equal(resolveFlatPanelStripCount(item), Math.min(recipeSlots ?? maxSlots, maxSlots));
+    assert.ok(recipeSlots != null);
+    assert.equal(resolveFlatPanelStripCount(item), recipeSlots);
     const state = createFlatPanelModuleState({ itemKey });
-    assert.ok(state.strips.length <= maxSlots);
-    assert.ok(state.heightCm <= ceilingHeightCm);
+    assert.equal(state.strips.length, recipeSlots);
+    assert.equal(state.heightCm, recipeSlots * WALL_PANEL_BAND_PITCH_CM);
   }
 });

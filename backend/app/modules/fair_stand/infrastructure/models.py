@@ -565,6 +565,7 @@ class FairStandDimensionsModel(Base):
         CheckConstraint("depth_cm > 0", name="ck_fair_stand_dimensions_depth"),
         CheckConstraint("frame_width_cm > 0", name="ck_fair_stand_dimensions_frame_width"),
         CheckConstraint("frame_depth_cm > 0", name="ck_fair_stand_dimensions_frame_depth"),
+        CheckConstraint("panel_rail_height_cm > 0", name="ck_fair_stand_dimensions_panel_rail_height"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -572,6 +573,7 @@ class FairStandDimensionsModel(Base):
     depth_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
     frame_width_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
     frame_depth_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
+    panel_rail_height_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 

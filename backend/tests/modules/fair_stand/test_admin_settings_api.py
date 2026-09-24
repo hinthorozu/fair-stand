@@ -62,6 +62,7 @@ def test_admin_settings_get_returns_singletons(client, db_session, auth_headers)
         "depthCm": 10.0,
         "frameWidthCm": 5.5,
         "frameDepthCm": 10.0,
+        "panelRailHeightCm": 0.4,
     }
     assert body["settings"] == {
         "maxImageUploadMb": 5,
@@ -82,6 +83,7 @@ def test_admin_update_stand_dimensions(client, db_session, auth_headers):
             "depth_cm": 12.0,
             "frame_width_cm": 6.0,
             "frame_depth_cm": 11.0,
+            "panel_rail_height_cm": 0.5,
         },
     )
     assert response.status_code == 200
@@ -90,6 +92,7 @@ def test_admin_update_stand_dimensions(client, db_session, auth_headers):
         "depthCm": 12.0,
         "frameWidthCm": 6.0,
         "frameDepthCm": 11.0,
+        "panelRailHeightCm": 0.5,
     }
 
 
@@ -105,6 +108,7 @@ def test_admin_update_stand_dimensions_allows_height_above_strip_grid(client, db
             "depth_cm": 10.0,
             "frame_width_cm": 5.5,
             "frame_depth_cm": 10.0,
+            "panel_rail_height_cm": 0.4,
         },
     )
     assert response.status_code == 200

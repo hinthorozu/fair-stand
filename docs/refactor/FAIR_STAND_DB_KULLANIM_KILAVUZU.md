@@ -44,7 +44,7 @@ Item bootstrap alanları mapper’dan: `snapRequiresRuleId` + denorm `snapRequir
 
 ### 1.2 Tablo envanteri (ürün şeması)
 
-`models.py` + Alembic head **`0033_item_type_overlap_fk`** (2026-09). Junction’lar ayrı tablo sayılır.
+`models.py` + Alembic head **`0034_stand_panel_rail_height`** (2026-09). Junction’lar ayrı tablo sayılır.
 
 | Tablo | Rol |
 |---|---|
@@ -135,7 +135,7 @@ Sahne davranışının büyük kısmı **Item tipi** (`fair_stand_item_type`) ve
 | Kural türleri | `fair_stand_rule_type` | Bugün yalnız `snap` |
 | Kurallar | `fair_stand_rule`, `fair_stand_rule_item_type` | top-rail, shelf-rail, face/edge, hangi tip provides |
 | Items | `fair_stand_items` + child tablolar | SKU, tip seçimi, snap requires/provides, ölçü, recipe |
-| Temel ayarlar | `fair_stand_dimensions`, `fair_stand_settings` | Stand zarfı + upload/import butonları |
+| Temel ayarlar | `fair_stand_dimensions`, `fair_stand_settings` | Stand zarfı (tavan, derinlik, çerçeve, **panel ray**) + upload/import butonları |
 | Projeler (stand) | `fair_stand_projects`, `fair_stand_project_assets` | Müşteri tasarımı (ayrı akış) |
 
 Form ipuçları: fair-crm `adminLabels` (`fairStandItemTypesField*`, `fairStandItemsFieldSnap*`).
@@ -151,6 +151,8 @@ Form ipuçları: fair-crm `adminLabels` (`fairStandItemTypesField*`, `fairStandI
 3. Katalogda görünecekse: `catalog_visible=true`, kategori, sıra, preview.
 4. Snap ihtiyacı varsa (raf, projektör, …): item’da **yalnız biri** — `snap_requires_rule_id` **veya** `snap_provides_rule_id`.
 5. Bileşik ürün (duvar paketi): `composition_mode=recipe` + `fair_stand_item_components` child satırları.
+
+**Kod yazmadan:** Aynı `item_type` ile yeni SKU için JS satırı gerekmez (tip davranışı DB’de; governance contract tip’ten türetilir). **Yeni tip** ise: CRM tip kaydı + (gerekirse) factory/renderer — eski `TYPE_BEHAVIORS` / per-SKU contract map yok.
 
 ### 4.2 Projektör → profil üstü (örnek)
 
@@ -172,12 +174,26 @@ Motor: moving item’ın requires kuralı = host’un provides (item FK veya rec
 | Kural ↔ tip | `panel`, `separator-panel` |
 | Raf item | `snap_requires_rule_id` = shelf-rail |
 | Panel item | provides (tip link veya item FK) |
+| Raf tipi | `placement=wall-overlay`, `wall_capacity=exclude` (DB tip kolonları) |
 
-Z kotu: panel band seam’lerine göre `itemSnap.js` (host yüksekliği; pitch çoğunlukla `WALL_PANEL_BAND_PITCH_CM` veya modül `strips[]` varsa yükseklik/strip sayısı).
+Z kotu: panel band seam’lerine göre `itemSnap.js` / `usesPanelSeamOverlaySnap` (requires = `shelf-rail`). Eski `overlaySnap: panel-seam` string **yok** — seam otoritesi kuraldır.
+
+Pitch: kod sabiti `WALL_PANEL_BAND_PITCH_CM` (50). İki panel arası **görsel ray boşluğu** stand zarfında: `panel_rail_height_cm` (§ 5.18).
 
 ### 4.4 Yeni davranış ailesi (ör. yeni mobilya tipi)
 
 Yeni **`fair_stand_item_type.key`** aç; tüm zorunlu kolonları doldur (CRM formu zorunlu kılar). Mevcut tipe en yakın satırı kopyala, sonra farkları değiştir. **Aynı tip altındaki tüm item’lar** anında aynı davranışı alır (refresh sonrası).
+
+### 4.5 Stand tavanı vs ürün yüksekliği vs panel ray
+
+| Alan | Tablo | Ne işe yarar | Ne değildir |
+|---|---|---|---|
+| `fair_stand_dimensions.height_cm` | Stand zarfı | **Max tavan** — modül H `clampHeightToStandCeilingCm` ile aşılmaz | Ürünü otomatik uzatmaz |
+| Item `height_cm` / scene `height_cm` | Item | Ürünün kendi yüksekliği (ör. `wall_200` ≈ 350) | Stand zarfı değil |
+| Recipe `quantity` (panel child) | BOM | Düz panel **şerit adedi** otoritesi; sessiz tavan kısaltması yok | Soft-warning admin ayrı (PENDING B.7) |
+| `panel_rail_height_cm` | Stand zarfı | İki panel bandı arası **ince ray** (seed 0.4 cm) | `wall_gap_cm` (strafor–duvar) değil; pitch 50 değil |
+
+**Örnek:** CRM’de tavanı 500 yap → zarf 500; `wall_200` hâlâ kendi ölçüsü/BOM’u kadar boylanır, **500’ü geçemez**. Tavanı yükseltmek tek başına duvarı 500 yapmaz — item/BOM değiştirmen gerekir.
 
 ---
 
@@ -1395,11 +1411,11 @@ Item başına en fazla bir satır (PK/FK `item_key`). JSON `dimensions.*`. CHECK
 | | |
 |---|---|
 | **Ne** | Child adedi (>0) |
-| **Neden** | Üretim miktarı |
-| **Nasıl** | Decimal quantity |
-| **Sahne** | BOM çarpanı |
-| **Karıştırma** | Sıra kolonu yok; bootstrap child key alfabetik |
-| **Kod** | `item_mapper` |
+| **Neden** | Üretim miktarı; düz panel/separator-panel satırlarında **şerit (strip) adedi** otoritesi |
+| **Nasıl** | Decimal quantity (ör. `wall_200` → `panel_197` ×7) |
+| **Sahne** | BOM çarpanı; flat-panel state `strips.length` = panel qty toplamı (**sessiz tavan kısaltması yok**) |
+| **Karıştırma** | Stand `height_cm` tavan clamp (ürünü kısaltmaz, aşımı keser); soft-warning admin henüz yok (PENDING B.7) |
+| **Kod** | `item_mapper`, `resolveFlatPanelStripCount`, `createFlatPanelModuleState` |
 
 ---
 
@@ -1481,7 +1497,9 @@ Item başına en fazla bir satır (PK/FK `item_key`). JSON `dimensions.*`. CHECK
 
 ### 5.18 `fair_stand_dimensions` (singleton `id=1`)
 
-Stand **zarfı**; item kutusu değil. Modül genişlikleri 50/100/150/200 kod sabiti.
+Stand **zarfı**; item kutusu değil. CRM: **Temel Ayarlar**. Modül genişlik adımları 50/100/150/200 hâlâ kod sabiti (`MODULE_WIDTHS_CM`).
+
+Seed (varsayılan): tavan 350 / derinlik 10 / çerçeve 5.5×10 / panel ray **0.4** cm.
 
 #### `id`
 
@@ -1496,11 +1514,12 @@ Stand **zarfı**; item kutusu değil. Modül genişlikleri 50/100/150/200 kod sa
 | | |
 |---|---|
 | **Ne** | Stand **max tavan** yüksekliği (cm) |
-| **Neden** | Modül Z clamp |
-| **Nasıl** | CRM Temel Ayarlar |
-| **Örnek** | 350 |
-| **Karıştırma** | Item `height_cm` |
-| **Kod** | `standDimensions.js` |
+| **Neden** | Collision / sahne kutusu üst sınırı |
+| **Nasıl** | CRM Temel Ayarlar (ör. 350; istediğin max zarf, ör. 500) |
+| **Sahne** | `clampHeightToStandCeilingCm` — modül H bu değeri **aşamaz** |
+| **Örnek** | 350 → klasik zarf; 500 → daha yüksek fuar zarfı |
+| **Karıştırma** | Item `height_cm` (ürün boyu). Tavanı yükseltmek ürünü uzatmaz |
+| **Kod** | `standDimensions.js`, `items.js` |
 
 #### `depth_cm`
 
@@ -1520,7 +1539,7 @@ Stand **zarfı**; item kutusu değil. Modül genişlikleri 50/100/150/200 kod sa
 | **Neden** | Görsel iskelet çizimi |
 | **Sahne** | Profil ray görseli |
 | **Karıştırma** | `frame_depth_cm` |
-| **Kod** | renderer |
+| **Kod** | renderer via `STAND_DIMENSIONS` |
 
 #### `frame_depth_cm`
 
@@ -1530,7 +1549,19 @@ Stand **zarfı**; item kutusu değil. Modül genişlikleri 50/100/150/200 kod sa
 | **Neden** | Ray kalınlığı görseli |
 | **Sahne** | 3D iskelet |
 | **Karıştırma** | `frame_width_cm` |
-| **Kod** | renderer |
+| **Kod** | renderer via `STAND_DIMENSIONS` |
+
+#### `panel_rail_height_cm`
+
+| | |
+|---|---|
+| **Ne** | İki panel bandı arasındaki **ince ray / boşluk** yüksekliği (cm) |
+| **Neden** | Mesh’te panel–panel dikiş görünümü; hardcode metre sabiti yok |
+| **Nasıl** | CRM Temel Ayarlar; seed **0.4**. Pitch (50) buraya yazılmaz |
+| **Sahne** | `STAND_DIMENSIONS.panelRailHeight` (m) → `scene3d` ray mesh |
+| **Örnek** | `0.4` |
+| **Karıştırma** | `wall_gap_cm` (strafor–duvar boşluğu, item alanı); `WALL_PANEL_BAND_PITCH_CM` (şerit adım 50, kod); stand `height_cm` (tavan) |
+| **Kod** | migration `0034_stand_panel_rail_height`; `standDimensions.js` |
 
 #### `created_at`
 
@@ -1770,8 +1801,13 @@ Kaynak: `fair_stand_projects.payload` (sunucu); tarayıcı IndexedDB önbellek.
 | Tip değiştirmeden tek SKU’ya özel collision | Collision tip kolonunda; item override yok |
 | `snap_target_item_type` doldurmak | Kural FK + `fair_stand_rule_item_type` |
 | CRM’de tip değiştirdim, stand eski | Stand **yenile** (bootstrap) |
-| Duvar yüksekliği = `fair_stand_dimensions.height_cm` | Ürün yüksekliği item `height_cm` / scene; zarf = max clamp |
-| Stand admin’de 7 şerit ayarı | Kaldırıldı; item `strip_occupancy` yalnız short-up; tam panel pitch kodda 50 cm |
+| Duvar yüksekliği = `fair_stand_dimensions.height_cm` | Ürün yüksekliği item `height_cm` / scene; zarf = **max clamp** (aşılmaz, otomatik uzatma yok) |
+| Tavanı 500 yaptım, duvar 500 oldu | Hayır — item/BOM boyunu sen değiştirirsin; 500 yalnız üst sınır |
+| Stand admin’de 7 şerit ayarı | Kaldırıldı; panel adedi = recipe `quantity`; pitch kodda 50 cm |
+| Panel ray = pitch 50 | Ray = `panel_rail_height_cm` (ör. 0.4); pitch ayrı sabit |
+| Panel ray = `wall_gap_cm` | `wall_gap` strafor–duvar; ray panel–panel dikiş |
+| Raf `overlaySnap: panel-seam` | Yok — kural `shelf-rail` |
+| Yeni SKU için JS contract satırı | Yok — aynı tipte CRM Item yeter |
 | Pasif item’ı bootstrap’ta görmek | `is_active=false` → listede yok; `catalog_visible` sadece katalog UI |
 | `ruleTypes` JSON’u stand’da registry | Kurallar `rules[]` içinde `ruleTypeKey`; ayrı JS registry yok |
 
@@ -1781,8 +1817,9 @@ Kaynak: `fair_stand_projects.payload` (sunucu); tarayıcı IndexedDB önbellek.
 
 | Kontrol | Komut / dosya |
 |---|---|
-| Alembic head | `backend/alembic/versions/0033_*` |
+| Alembic head | `backend/alembic/versions/0034_stand_panel_rail_height.py` |
 | Tip seed parity | `pytest backend/tests/modules/fair_stand/test_item_type_behavior.py` |
+| Stand zarf + panel ray | `test/standDimensions.test.js`; CRM Temel Ayarlar |
 | Bootstrap şekli | `get_catalog_bootstrap.py`, `routes.py` `/catalog/bootstrap` |
 | Mapper alanları | `item_mapper.py`, `admin_snap_catalog._item_type_payload` |
 
@@ -1794,6 +1831,7 @@ Kaynak: `fair_stand_projects.payload` (sunucu); tarayıcı IndexedDB önbellek.
 
 - Snap: `item_snap_seed.py` — `top-rail`, `shelf-rail`, tip linkleri
 - Tip davranışı: `item_type_behavior_seed.py` — eski TYPE_BEHAVIORS parity
+- Stand zarfı: `stand_dimensions_seed.py` — 350 / 10 / 5.5 / 10 / **panel_rail 0.4**
 
 Canlı ortamda doğrulama: `backend/scripts/verify_live_item_type_placement.py`.
 
@@ -1803,8 +1841,10 @@ Canlı ortamda doğrulama: `backend/scripts/verify_live_item_type_placement.py`.
 
 - Item başına **çoklu** snap requires/provides (junction epic)
 - Tip davranışında **item-level override**
-- Global şerit/tavan türevli yükseklik kaldırma — [`PENDING_ITEM_DECISIONS.md`](PENDING_ITEM_DECISIONS.md) § A
+- Global şerit occupancy kaldırma / leaf pitch — [`PENDING_ITEM_DECISIONS.md`](PENDING_ITEM_DECISIONS.md) § A
+- BOM ↔ leaf ölçü **admin soft-warning** (B.7; sahne sessiz clamp kalktı)
 - `eye_count` → vitrin layout modeli (B.1)
+- `MODULE_WIDTHS_CM` / panel pitch 50 hâlâ kod sabiti
 
 ---
 
@@ -1818,5 +1858,6 @@ Canlı ortamda doğrulama: `backend/scripts/verify_live_item_type_placement.py`.
 | [`STAND_DIMENSIONS.md`](STAND_DIMENSIONS.md) | Zarf vs item kutusu |
 | [`ITEMS.md`](ITEMS.md) | Onaylı item şema kuyruğu |
 | [`CATALOG.md`](CATALOG.md) | Katalog görünürlük sözleşmesi |
+| [`PENDING_ITEM_DECISIONS.md`](PENDING_ITEM_DECISIONS.md) | Açık / kapalı kararlar |
 
 **Belge güncelleme:** Yeni kolon/tablo → önce `DATABASE.md`, sonra bu kılavuzda “ne seçilir” paragrafı; CRM `adminLabels` hint’i.

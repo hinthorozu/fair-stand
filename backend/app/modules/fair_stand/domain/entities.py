@@ -29,6 +29,7 @@ class StandDimensions:
     depth_cm: float
     frame_width_cm: float
     frame_depth_cm: float
+    panel_rail_height_cm: float
 
 
 @dataclass(frozen=True)

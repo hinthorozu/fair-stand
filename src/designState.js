@@ -129,9 +129,8 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
   if (!item || item.type !== 'flat-panel') return null;
   const occupancy = normalizeStripOccupancy(item.stripOccupancy);
   const pitchCm = Math.round(Number(resolveWallPanelBandPitchCm()));
-  const ceilingHeightCm = requireSceneDimension(item, 'heightCm');
   const stripCount = resolveFlatPanelStripCount(item);
-  const moduleHeightCm = Math.min(stripCount * pitchCm, ceilingHeightCm);
+  const moduleHeightCm = stripCount * pitchCm;
 
   const state = {
     id: createId('module'),

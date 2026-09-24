@@ -74,9 +74,9 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 
 ### B.6. Panel arası boşluk (runtime vs DB)
 
-- **Durum:** ARAŞTIRILACAK
-- **Karar:** Hedefte tek standart cm (tavanla çarpılmaz). Bugün renderer `PANEL_RAIL_HEIGHT_M` ≈ 0.4 cm; şerit pitch 50 — seed’de net cm yazılacak. `wallGapCm` (B.2) ayrı ürün alanı.
-- **Kaynak:** `SCENE_POSE.md` § *İki panel arası*; `ITEMS.md` / duvar BOM.
+- **Durum:** KAPANDI — `fair_stand_dimensions.panel_rail_height_cm` (seed 0.4); bootstrap → `STAND_DIMENSIONS.panelRailHeight`; CRM settings formu
+- **Karar:** Tek standart cm (tavanla çarpılmaz). `wallGapCm` (B.2) ayrı ürün alanı.
+- **Kaynak:** `STAND_DIMENSIONS.md`; migration `0034_stand_panel_rail_height`
 
 ### B.7. Duvar / vitrin seed SKU’ları (gizli 350)
 
@@ -111,7 +111,7 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
   2. Yatay örnek: `panel_197.width` 220 olurken parent `wall_200.width` 200 → taşma uyarısı; etkilenen parent’lar listelenir.
   3. Dikey örnek: `quantity × leaf.height` (ilk dilim; boşluk payı sonra netleşir) `> parent.sceneHeight` → taşma uyarısı (`7×47` sığar, `8×47` sığmaz).
   4. **Auto-fix yok:** quantity / leaf / parent ölçü otomatik yeniden yazılmaz.
-- **Sahne (ayrı borç):** Bugün `resolveFlatPanelStripCount` BOM panel adedini `min(qty, floor(ceiling/pitch))` ile **sessiz clamp** eder; pitch sabit `WALL_PANEL_BAND_PITCH_CM=50`, leaf 47 değil. Bu istenmez — gerçek hayat ölçü + BOM otorite; fazla adet sığdırılmaz. Clamp kaldırma / leaf pitch § A + `SCENE_POSE.md` ile; bu madde yalnız uyarı sözleşmesi.
+- **Sahne (ayrı borç):** Sessiz clamp kaldırıldı (2026-09-24): `resolveFlatPanelStripCount` = BOM qty; height = qty × pitch. Soft-warning admin (§ madde) hâlâ kod yok.
 - **Kaynak:** `ITEM_FIRST_ROADMAP.md` P1; `wall_200` seed; `items.js` `resolveFlatPanelStripCount`
 - **Yasak:** Uyarıyı “geçsin diye” kapatmak; clamp’i ürün özelliği sanmak; auto-recalc quantity
 
@@ -145,16 +145,15 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 - **Durum:** KAPANDI — `usesPanelSeamOverlaySnap` ← requires `shelf-rail` veya face front/back + edge top (mount_mode yok)
 - **Karar:** Raf host + seam geometrisi; type map `overlaySnap` yok
 - **Kaynak:** `SCENE_POSE.md` § Snap
-- **Kalıntı:** `scene3d` vb. literal `panel-seam` string süpürme (P4)
+- **Kalıntı:** yok — `scene3d` snap meta `requires: 'shelf-rail'` (2026-09-24)
 
 ### C.5. `MODULE_CONTRACT_ASSIGNMENTS` (per-itemKey JS allowlist)
 
-- **Durum:** KALDIRILACAK / ERİTİLECEK — ürün otoritesi değil
-- **Kod gerçeği:** `src/moduleContracts.js` governance + test (`systemDevelopmentContract` katalog key ↔ assignment). Production planner/renderer import etmez. Profil alanları (`appearance.color: editable` …) Item `acceptsColor` / `acceptsImage` / recipe `composition` ile **çakışır**.
-- **Karar:** Yeni SKU için JS satırı gerekmemeli. Assignment ya silinir ya `item_type` + Item alanlarından türetilir; testler Item/DB’ye bağlanır.
-- **Değil:** Otomatik duvar width seçimi — `resolveAutomaticWallFlatPanelItemKey` (Item registry; 2026-09-24).
-- **Kaynak:** `ITEM_FIRST_ROADMAP.md` P2; `moduleContracts.js` dosya başı notu
-- **Yasak:** Contract’ı runtime görsel/catalog kaynağı sanmak; DB’ye taşınmış `accepts*` / preview’i contract’tan okutmak
+- **Durum:** KAPANDI — per-SKU map silindi; `resolveModuleContract` tip + composition’tan türetir (`TYPE_CONTRACT_PROFILE` / recipe|self|decision-required)
+- **Kod gerçeği:** `src/moduleContracts.js` governance-only; production import etmez
+- **Karar:** Yeni SKU için JS satırı gerekmez (aynı tip). Planter istisnası: `itemKey` …`planter`… → `free-model-color`
+- **Kaynak:** `ITEM_FIRST_ROADMAP.md` P2
+- **Yasak:** Contract’ı runtime görsel/catalog kaynağı sanmak
 
 ---
 
@@ -207,10 +206,11 @@ Aşağıdakiler **onaylı şemada değil**; karar verilince B veya C’ye madde 
 |---|---|---|---|
 | strip occupancy | B.4–B.5 KALDIRILACAK, § A.4 | Hedefte yok | Tablo + 8 satır |
 | mount vs default Z | B.3 ARAŞTIRILACAK | defaultZ drop hedefi | İki kolon |
-| wallGap vs panel boşluğu | B.2 koru, B.6 araştır | Standart boşluk hedefi | wall_gap_cm |
+| wallGap vs panel boşluğu | B.2 koru, B.6 KAPANDI | Standart boşluk = panel_rail | wall_gap_cm ayrı |
 | TYPE_BEHAVIORS | C.3 KAPANDI | — | `FAIR_STAND_DB_KULLANIM_KILAVUZU.md` + `TYPE_BEHAVIORS_DB_ROADMAP.md` |
-| Module contract allowlist | C.5 KALDIRILACAK | — | `accepts*` / recipe Item’da |
+| Contract allowlist | C.5 KAPANDI | — | tip’ten türet (`moduleContracts.js`) |
 | Item snap (Profile host) | B.9 UYGULAMA | snap face/edge kuralda | rule FK; legacy `snap_target_item_type` / `snap_anchor` nullable |
-| BOM ↔ leaf fit uyarı | B.7 KARAR (kod yok) | zarf item’da | recipe `quantity` + leaf dims |
+| BOM ↔ leaf fit uyarı | B.7 KARAR (admin kod yok; sahne clamp kalktı) | zarf item’da | recipe `quantity` + leaf dims |
+| Panel ray boşluğu | B.6 KAPANDI | — | `panel_rail_height_cm` |
 | Kaldırma sırası | § A canonical | Hedef metin | strip kolonları § C.1 |
 

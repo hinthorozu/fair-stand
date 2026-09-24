@@ -10,6 +10,7 @@ export const CANONICAL_STAND_DIMENSIONS = Object.freeze({
   depthCm: 10,
   frameWidthCm: 5.5,
   frameDepthCm: 10,
+  panelRailHeightCm: 0.4,
 });
 
 export const CANONICAL_RUNTIME_SETTINGS = Object.freeze({

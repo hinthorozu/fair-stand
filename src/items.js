@@ -274,16 +274,15 @@ export function countRecipeWallPanelSlots(item) {
   return total > 0 ? total : null;
 }
 
-/** Recipe panel slots capped by item ceiling (`sceneDimensions` / `dimensions` heightCm). */
+/** Recipe panel slots — BOM quantity is authority (no silent ceiling clamp). */
 export function resolveFlatPanelStripCount(item) {
-  const pitchCm = Math.round(Number(resolveWallPanelBandPitchCm()));
-  const ceilingHeightCm = requireSceneDimension(item, 'heightCm');
-  const maxSlotsFromCeiling = Math.max(1, Math.floor(Number(ceilingHeightCm) / pitchCm));
   const fromRecipe = countRecipeWallPanelSlots(item);
   if (fromRecipe != null) {
-    return Math.min(fromRecipe, maxSlotsFromCeiling);
+    return fromRecipe;
   }
-  return maxSlotsFromCeiling;
+  const pitchCm = Math.round(Number(resolveWallPanelBandPitchCm()));
+  const ceilingHeightCm = requireSceneDimension(item, 'heightCm');
+  return Math.max(1, Math.floor(Number(ceilingHeightCm) / pitchCm));
 }
 
 /** Full-height editable strip slots for showcase modules (ceiling ÷ band pitch). */
