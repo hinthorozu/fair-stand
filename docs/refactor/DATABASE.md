@@ -327,14 +327,15 @@ Tek satır `id = 1`. Item değildir. `STAND_DIMENSIONS.md`.
 |---|---|---|---|---|
 | `id` | — | Singleton; CHECK `id = 1`. (Postgres sequence default var, ikinci satır CHECK’ten geçmez.) | İkinci zarf yok | CHECK `ck_fair_stand_dimensions_singleton` |
 | `height_cm` | `heightCm` | Tavan (cm) | Max zarf | `src/standDimensions.js` |
-| `depth_cm` | `depthCm` | Duvar kalınlığı (cm) | Omurga / overlay | same |
+| `depth_cm` | `depthCm` | Duvar kalınlığı (cm) | Omurga / overlay | aynı |
 | `frame_width_cm` | `frameWidthCm` | Dikey profil kesit (cm) | Görsel iskelet | renderer via `STAND_DIMENSIONS.*` (m getter) |
-| `frame_depth_cm` | `frameDepthCm` | Profil derinlik (cm) | Ray kalınlığı | aynı |
+| `frame_depth_cm` | `frameDepthCm` | Profil derinlik (cm) | Görsel iskelet | aynı |
+| `panel_rail_height_cm` | `panelRailHeightCm` | İki panel arası ray boşluğu (cm) | Mesh ray yüksekliği | `scene3d` ← `STAND_DIMENSIONS.panelRailHeight` |
 | `created_at` / `updated_at` | yok | Audit | — | DB |
 
 `MODULE_WIDTHS_CM` (50/100/150/200) hâlâ JS; bu tabloda yok.
 
-Lokal seed: `id=1`, `height_cm=350`, `depth_cm=10`, `frame_width_cm=5.5`, `frame_depth_cm=10`.
+Lokal seed: `id=1`, `height_cm=350`, `depth_cm=10`, `frame_width_cm=5.5`, `frame_depth_cm=10`, `panel_rail_height_cm=0.4`.
 
 ---
 

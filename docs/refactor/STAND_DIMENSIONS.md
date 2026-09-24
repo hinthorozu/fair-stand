@@ -26,8 +26,11 @@ Kaynak: PostgreSQL `fair_stand_dimensions` → catalog bootstrap `standDimension
 |---|---|---|
 | `heightCm` | `height_cm` | Duvar tavanı (cm). Overlay Y 0…heightCm. Max zarf. |
 | `depthCm` | `depth_cm` | Duvar kalınlığı (cm). Omurga çarpışması (`wall-backbone`). TV/raf ön yüzü `depthCm/2`. |
+| `frameWidthCm` | `frame_width_cm` | Prosedürel aluminyum kesit genişliği (cm). |
+| `frameDepthCm` | `frame_depth_cm` | Prosedürel aluminyum kesit derinliği (cm). |
+| `panelRailHeightCm` | `panel_rail_height_cm` | İki panel arası ray boşluğu (cm); sahne `STAND_DIMENSIONS.panelRailHeight` (m). |
 
-Seed (varsayılan): 350 / 10 cm.
+Seed (varsayılan): 350 / 10 / 5.5 / 10 / 0.4 cm.
 
 Prosedürel aluminyum **kesit** (eski `frame_*`): `upright_346_5` item W/D — bkz. `STAND_FRAME_REMOVAL.md`.
 
@@ -45,6 +48,7 @@ Three.js sahnesi metre kullanır: `STAND_DIMENSIONS.height`, `.depth` getter’l
 - Catalog görünürlük, kategori, kart — `CATALOG.md`
 - `MODULE_WIDTHS_CM` (50/100/150/200) — hâlâ `src/standDimensions.js` kod sabiti; bu tabloda yok
 - collision / tip davranışı — `fair_stand_item_type` → bootstrap → `moduleBehavior.js` (`getItemType`); snap kuralı ayrı (`fair_stand_rule`)
+- panel arası ray — `panelRailHeightCm` (bu tablo); hardcode `PANEL_RAIL_HEIGHT_M` yok
 
 ---
 

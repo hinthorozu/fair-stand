@@ -69,7 +69,6 @@ import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 
 const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
 const PANEL_BACK_COLOR = 0x4b5563;
-const PANEL_RAIL_HEIGHT_M = 0.004;
 const PANEL_VERTICAL_CLEARANCE_M = 0;
 const MESH_FABRIC_OPACITY = 0.48;
 const FLOOR_COLOR = 0xe9edf1;
@@ -2453,7 +2452,7 @@ export function createStandScene(
           ? new Map([[moduleState.id, { ...snapped.placement }]])
           : new Map(),
       },
-      snap: { mode: 'wall-overlay', wallId: wallPoint.wallId, overlaySnap: 'panel-seam' },
+      snap: { mode: 'wall-overlay', wallId: wallPoint.wallId, requires: 'shelf-rail' },
     };
   }
 
@@ -6612,7 +6611,7 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const depthM = depthCm / 100;
   const heightM = heightCm / 100;
   const profileM = getProceduralFrameCrossSectionM(moduleState).frameWidth;
-  const railHeightM = PANEL_RAIL_HEIGHT_M;
+  const railHeightM = STAND_DIMENSIONS.panelRailHeight;
   const frameDepthM = getProceduralFrameCrossSectionM(moduleState).frameDepth;
   const topThicknessM = 0.035;
   const topOverhangM = 0.02;
@@ -6779,7 +6778,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const topOverhangM = 0.02;
   const frameHeightM = Math.max(heightM - topThicknessM, profileM * 3);
   // Banko panel aralıkları duvar panel sistemiyle birebir aynı mantığı kullanır.
-  const railHeightM = PANEL_RAIL_HEIGHT_M;
+  const railHeightM = STAND_DIMENSIONS.panelRailHeight;
   const stripHeightM = frameHeightM / 2;
   const panelHeightM = Math.max(
     stripHeightM - railHeightM - PANEL_VERTICAL_CLEARANCE_M,
@@ -6953,7 +6952,7 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const heightM = Number(moduleState.heightCm || 100) / 100;
   const profileM = getProceduralFrameCrossSectionM(moduleState).frameWidth;
   const frameDepthM = getProceduralFrameCrossSectionM(moduleState).frameDepth;
-  const railHeightM = PANEL_RAIL_HEIGHT_M;
+  const railHeightM = STAND_DIMENSIONS.panelRailHeight;
   const topThicknessM = 0.04;
   const frameHeightM = heightM - topThicknessM;
   const stripHeightM = frameHeightM / 2;
@@ -7189,7 +7188,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(profile);
   }
 
-  const railHeight = PANEL_RAIL_HEIGHT_M;
+  const railHeight = STAND_DIMENSIONS.panelRailHeight;
   const railGeometry = new THREE.BoxGeometry(
     Math.max(widthM - getProceduralFrameCrossSectionM(moduleState).frameWidth * 2, 0.02),
     railHeight,
@@ -7292,7 +7291,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
   const stripHeight = WALL_PANEL_BAND_PITCH_CM / 100;
   const doorHeight = stripHeight * 4;
   const upperPanelCount = 3;
-  const railHeight = PANEL_RAIL_HEIGHT_M;
+  const railHeight = STAND_DIMENSIONS.panelRailHeight;
   const group = new THREE.Group();
   group.userData = {
     kind: 'module',
@@ -7647,7 +7646,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(profile);
   }
 
-  const railHeight = PANEL_RAIL_HEIGHT_M;
+  const railHeight = STAND_DIMENSIONS.panelRailHeight;
   const innerWidth = Math.max(widthM - getProceduralFrameCrossSectionM(moduleState).frameWidth * 2 - 0.012, 0.02);
   const railGeometry = new THREE.BoxGeometry(Math.max(widthM - getProceduralFrameCrossSectionM(moduleState).frameWidth * 2, 0.02), railHeight, frameDepth);
   for (const y of [0, stripCount * stripHeight]) {

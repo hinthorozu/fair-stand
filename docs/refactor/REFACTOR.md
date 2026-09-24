@@ -20,6 +20,8 @@ Kod (merged): migration `0030`–`0033`; seed `item_type_behavior_seed.py`; moto
 
 Belgeler güncellendi (silinmedi): `DATABASE.md`, `FAIR_STAND_DB_KULLANIM_KILAVUZU.md`, `TYPE_BEHAVIORS_DB_ROADMAP.md` (arşiv), `PENDING` C.3 KAPANDI, `README.md`, `STAND_DIMENSIONS.md`, `ITEMS.md`, `ITEM_FIRST_ROADMAP.md`, `MODULE_BEHAVIOR_STANDARD.md`. `docs/items/**` tarihsel audit — regenerate edilmeden dokunulmadı.
 
+Aynı dilim (devam): `0034_stand_panel_rail_height` (`panel_rail_height_cm` → CRM + `STAND_DIMENSIONS.panelRailHeight`); strip sessiz clamp kalktı (BOM qty otorite); `MODULE_CONTRACT_ASSIGNMENTS` per-SKU silindi → tip’ten türet; `scene3d` `panel-seam` → `requires: 'shelf-rail'`.
+
 ---
 
 ## 2026-09-23 — Stand `frame_*` kolonları geri (5,5×10)

@@ -66,6 +66,7 @@ class AdminSettingsService:
         depth_cm: object,
         frame_width_cm: object,
         frame_depth_cm: object,
+        panel_rail_height_cm: object,
     ) -> dict:
         depth = _positive_decimal(depth_cm, label="Duvar derinliği").quantize(Decimal("0.001"))
         frame_width = _positive_decimal(frame_width_cm, label="Çerçeve genişliği").quantize(
@@ -75,6 +76,9 @@ class AdminSettingsService:
             Decimal("0.001")
         )
         height = _positive_decimal(height_cm, label="Tavan yüksekliği").quantize(Decimal("0.001"))
+        panel_rail = _positive_decimal(panel_rail_height_cm, label="Panel ray boşluğu").quantize(
+            Decimal("0.001")
+        )
 
         row = self._session.get(FairStandDimensionsModel, 1)
         if row is None:
@@ -85,6 +89,7 @@ class AdminSettingsService:
         row.depth_cm = depth
         row.frame_width_cm = frame_width
         row.frame_depth_cm = frame_depth
+        row.panel_rail_height_cm = panel_rail
         row.updated_at = now
         self._session.flush()
         return stand_dimensions_payload(map_stand_dimensions(row))

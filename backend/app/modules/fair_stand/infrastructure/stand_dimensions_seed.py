@@ -13,6 +13,7 @@ STAND_DIMENSIONS_HEIGHT_CM = Decimal("350")
 STAND_DIMENSIONS_DEPTH_CM = Decimal("10")
 STAND_DIMENSIONS_FRAME_WIDTH_CM = Decimal("5.5")
 STAND_DIMENSIONS_FRAME_DEPTH_CM = Decimal("10")
+STAND_DIMENSIONS_PANEL_RAIL_HEIGHT_CM = Decimal("0.4")
 
 
 def ensure_stand_dimensions(session: Session) -> FairStandDimensionsModel:
@@ -25,6 +26,7 @@ def ensure_stand_dimensions(session: Session) -> FairStandDimensionsModel:
             depth_cm=STAND_DIMENSIONS_DEPTH_CM,
             frame_width_cm=STAND_DIMENSIONS_FRAME_WIDTH_CM,
             frame_depth_cm=STAND_DIMENSIONS_FRAME_DEPTH_CM,
+            panel_rail_height_cm=STAND_DIMENSIONS_PANEL_RAIL_HEIGHT_CM,
             created_at=now,
             updated_at=now,
         )

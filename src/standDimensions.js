@@ -8,6 +8,7 @@ const REQUIRED_CM_FIELDS = Object.freeze([
   'depthCm',
   'frameWidthCm',
   'frameDepthCm',
+  'panelRailHeightCm',
 ]);
 
 function requirePositiveNumber(value, field) {
@@ -57,6 +58,9 @@ export const STAND_DIMENSIONS = Object.freeze({
   get frameDepthCm() {
     return getStandDimensions().frameDepthCm;
   },
+  get panelRailHeightCm() {
+    return getStandDimensions().panelRailHeightCm;
+  },
   /** Three.js / sahne zarfı (metre). */
   get height() {
     return cmToMeters(getStandDimensions().heightCm);
@@ -69,6 +73,10 @@ export const STAND_DIMENSIONS = Object.freeze({
   },
   get frameDepth() {
     return cmToMeters(getStandDimensions().frameDepthCm);
+  },
+  /** İki panel arası ray boşluğu (metre). */
+  get panelRailHeight() {
+    return cmToMeters(getStandDimensions().panelRailHeightCm);
   },
 });
 

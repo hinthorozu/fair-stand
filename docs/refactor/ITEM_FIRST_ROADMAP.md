@@ -74,7 +74,7 @@ Kaynak: 2026-09-23 tespit; **2026-09-24** kod gerçeğine göre yeniden hizaland
 | Konu | Bugün (kod) | Kalan |
 |---|---|---|
 | Snap modeli | Tip/kural + rule id | — (placement/moveSnap/magnetic DB’de, C.3 kapandı) |
-| Raf kalıntı | `usesPanelSeamOverlaySnap` ← kural | `scene3d` `overlaySnap: 'panel-seam'` string süpürme |
+| Raf kalıntı | `usesPanelSeamOverlaySnap` ← kural | ~~`panel-seam` literal~~ → `requires: 'shelf-rail'` |
 | Wall sanal hat | Recipe band / top-rail offset var | Yazılı host modeli + P2 tick + E2E |
 | Contract allowlist | Her katalog `itemKey` JS satırı | § C.5: DB/Item yeter; assignment erit |
 | Auto-wall width | Item registry lookup | `resolveAutomaticWallFlatPanelItemKey` (hardcoded map yok) |
@@ -84,7 +84,7 @@ Kaynak: 2026-09-23 tespit; **2026-09-24** kod gerçeğine göre yeniden hizaland
 ### Dünya kuralı (hâlâ geçerli)
 
 1. **BOM satırı ≠ snap yüzeyi.** Host = tip provides / override / sanal hat — parent AABB top varsayılan olamaz.
-2. **Tek snap otoritesi hedefi.** Raf seam kuraldan (`shelf-rail`); eski `panel-seam` string kalıntısı süpürülecek.
+2. **Tek snap otoritesi hedefi.** Raf seam kuraldan (`shelf-rail`); eski `panel-seam` literal süpürüldü.
 3. **`top-rail` ≠ `shelf-rail`.** Face/edge zorunlu ayrım.
 4. **Kod yazmadan yeni SKU.** Aynı `item_type` → Item kaydı. **Yeni `item_type`:** CRM tip satırı + seed + (gerekirse) factory/renderer; JS tip davranış map’i yok.
 5. **Placement tamamı Item’da değil.** Snap dilimi taşındı; collision/magnetic vb. C.3.
@@ -141,7 +141,7 @@ Kod gerçeği: parent BOM + snap kuralı zaten Item/tip’te. P2 kalanı **yan k
 
 - [x] Parent BOM = `composition.items` + quantity (Item/DB); snap SKU-özel if değil (P0/P4 dilimi)
 - [x] Otomatik duvar width→SKU: Item registry (`resolveAutomaticWallFlatPanelItemKey`); hardcoded `WALL_WIDTH_TO_ITEM_KEY` yok
-- [ ] `MODULE_CONTRACT_ASSIGNMENTS` erit / type’tan türet (`PENDING` § C.5)
+- [x] `MODULE_CONTRACT_ASSIGNMENTS` erit / type’tan türet (`PENDING` § C.5)
 - [ ] Wall sanal hat yazılı kapanış + E2E (`top-rail` / `shelf-rail` host)
 - [ ] Self-parent / cycle: admin + seed tutarlı
 
@@ -156,7 +156,7 @@ Kod gerçeği: parent BOM + snap kuralı zaten Item/tip’te. P2 kalanı **yan k
 - [x] Örnek 1 iskeleti: projetör ↔ `top-rail` / profile tip
 - [x] Örnek 2 iskeleti: raf ↔ `shelf-rail` / panel tip + seam geometrisi
 - [x] Seed: requires/provides + kural face/edge + tip linkleri
-- [ ] Runtime kalıntı: `panel-seam` string / yanlış AABB host regresyonları
+- [x] Runtime kalıntı: `panel-seam` string → `requires: 'shelf-rail'` (`scene3d`)
 - [ ] Free leaf + wall sanal hat E2E doğrulama paketi
 
 ### P5 — Admin canlı preview (sonra)

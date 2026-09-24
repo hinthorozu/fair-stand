@@ -15,6 +15,7 @@ def test_stand_dimensions_singleton_is_seeded(db_session):
     assert float(row.depth_cm) == 10.0
     assert float(row.frame_width_cm) == 5.5
     assert float(row.frame_depth_cm) == 10.0
+    assert float(row.panel_rail_height_cm) == 0.4
 
 
 def test_fair_stand_dimensions_table_exists(test_engine):

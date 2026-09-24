@@ -1,7 +1,8 @@
 /**
  * GOVERNANCE / spec katmanı. Runtime BOM `src/itemBom.js`, davranış
  * `src/moduleBehavior.js`. Production planner/renderer bu dosyayı import etmez.
- * `test/systemDevelopmentContract.test.js` katalog atamasını zorlar.
+ * `test/systemDevelopmentContract.test.js` katalog item’larının türeyen
+ * contract’ını zorlar — per-SKU JS allowlist yok; tip + Item alanlarından türetilir.
  */
 import { getItem, resolveItemKey } from './items.js';
 
@@ -97,76 +98,52 @@ export const MODULE_CONTRACT_PROFILES = Object.freeze({
   }),
 });
 
-function assignment(profile, bom) {
-  return Object.freeze({ profile, bom });
-}
-
-export const MODULE_CONTRACT_ASSIGNMENTS = Object.freeze({
-  wall_200: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_200_short_up_2: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_150_short_up_2: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_100_short_up_2: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_50_short_up_2: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_200_short_up_1: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_150_short_up_1: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_100_short_up_1: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_50_short_up_1: assignment('wall-editable', RECIPE_BOM_POLICY),
-  upright_346_5: assignment('free-editable', SELF_BOM_POLICY),
-  profile_190: assignment('free-editable', SELF_BOM_POLICY),
-  profile_140_5: assignment('free-editable', SELF_BOM_POLICY),
-  profile_91: assignment('free-editable', SELF_BOM_POLICY),
-  profile_41_5: assignment('free-editable', SELF_BOM_POLICY),
-  wall_150: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_100: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_50: assignment('wall-editable', RECIPE_BOM_POLICY),
-
-  wall_separator_100: assignment('wall-color-only', RECIPE_BOM_POLICY),
-  wall_separator_50: assignment('wall-color-only', RECIPE_BOM_POLICY),
-  wall_separator_100_sarmasik: assignment('wall-color-only', RECIPE_BOM_POLICY),
-  wall_separator_50_sarmasik: assignment('wall-color-only', RECIPE_BOM_POLICY),
-
-  wall_showcase_100_3: assignment('wall-editable', RECIPE_BOM_POLICY),
-  wall_showcase_100_2: assignment('wall-editable', RECIPE_BOM_POLICY),
-  shelf_100: assignment('wall-color-only', SELF_BOM_POLICY),
-  shelf_150: assignment('wall-color-only', SELF_BOM_POLICY),
-  shelf_200: assignment('wall-color-only', SELF_BOM_POLICY),
-
-  door_100: assignment('wall-editable', RECIPE_BOM_POLICY),
-
-  desk_banko_200: assignment('free-editable', RECIPE_BOM_POLICY),
-  desk_banko_150: assignment('free-editable', RECIPE_BOM_POLICY),
-  desk_banko_100: assignment('free-editable', RECIPE_BOM_POLICY),
-  desk_banko_200_l: assignment('free-editable', RECIPE_BOM_POLICY),
-  desk_banko_150_l: assignment('free-editable', RECIPE_BOM_POLICY),
-  desk_banko_100_l: assignment('free-editable', RECIPE_BOM_POLICY),
-  base_200: assignment('free-editable', RECIPE_BOM_POLICY),
-  base_150: assignment('free-editable', RECIPE_BOM_POLICY),
-  base_100: assignment('free-editable', RECIPE_BOM_POLICY),
-
-  furniture_sofa_set_classic: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
-  furniture_sofa_single_classic: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
-  furniture_sofa_double_classic: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
-  furniture_coffee_table_classic: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
-  furniture_table_chair_set_eames: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
-  chair_eames: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
-  glass_table: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
-  furniture_bar_stool_classic: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
-  mini_fridge_avanti: assignment('free-model-fixed', SELF_BOM_POLICY),
-  kettle: assignment('free-model-fixed', SELF_BOM_POLICY),
-  coat_rack: assignment('free-model-fixed', SELF_BOM_POLICY),
-  plastic_trash_bin: assignment('free-model-fixed', SELF_BOM_POLICY),
-  extra_indoor_plant_1: assignment('free-model-fixed', UNRESOLVED_EXISTING_BOM_POLICY),
-  extra_long_planter_100: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
-  extra_long_planter_150: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
-  extra_long_planter_200: assignment('free-model-color', UNRESOLVED_EXISTING_BOM_POLICY),
-
-  tv_42: assignment('wall-media', UNRESOLVED_EXISTING_BOM_POLICY),
-  tv_55: assignment('wall-media', UNRESOLVED_EXISTING_BOM_POLICY),
-  video_wall_2x2: assignment('wall-media', UNRESOLVED_EXISTING_BOM_POLICY),
-  video_wall_3x3: assignment('wall-media', UNRESOLVED_EXISTING_BOM_POLICY),
-  tv_65: assignment('wall-media', UNRESOLVED_EXISTING_BOM_POLICY),
-  led_floodlight: assignment('top-light', UNRESOLVED_EXISTING_BOM_POLICY),
+/** Tip → governance profili (SKU satırı yok). Yeni aynı tipte SKU JS istemez. */
+const TYPE_CONTRACT_PROFILE = Object.freeze({
+  'flat-panel': 'wall-editable',
+  door: 'wall-editable',
+  'showcase-2': 'wall-editable',
+  'showcase-3': 'wall-editable',
+  separator: 'wall-color-only',
+  shelf: 'wall-color-only',
+  upright: 'free-editable',
+  profile: 'free-editable',
+  counter: 'free-editable',
+  base: 'free-editable',
+  'sofa-set-classic': 'free-model-color',
+  'sofa-single-classic': 'free-model-color',
+  'sofa-double-classic': 'free-model-color',
+  'table-chair-set-eames': 'free-model-color',
+  chair: 'free-model-color',
+  'bar-stool': 'free-model-color',
+  'coffee-table-classic': 'free-model-fixed',
+  'table-glass': 'free-model-fixed',
+  'mini-fridge': 'free-model-fixed',
+  kettle: 'free-model-fixed',
+  'coat-rack': 'free-model-fixed',
+  'plastic-trash-bin': 'free-model-fixed',
+  'indoor-plant-1': 'free-model-fixed',
+  tv: 'wall-media',
+  'led-floodlight': 'top-light',
+  'illuminated-foam': 'wall-overlay-image',
 });
+
+/** Tip → self BOM (recipe değilse). Diğer leaf’ler decision-required. */
+const TYPE_SELF_BOM = Object.freeze(new Set([
+  'upright',
+  'profile',
+  'shelf',
+  'mini-fridge',
+  'kettle',
+  'coat-rack',
+  'plastic-trash-bin',
+]));
+
+/**
+ * @deprecated Per-SKU map kaldırıldı; boş export geriye dönük import için.
+ * Yeni SKU: tip kaydı + Item yeterli.
+ */
+export const MODULE_CONTRACT_ASSIGNMENTS = Object.freeze({});
 
 export const NON_CATALOG_MODULE_CONTRACTS = Object.freeze({
   'illuminated-foam': Object.freeze({
@@ -175,21 +152,46 @@ export const NON_CATALOG_MODULE_CONTRACTS = Object.freeze({
   }),
 });
 
-function mergeProfile(profile, assignmentRecord) {
-  if (!profile || !assignmentRecord) return null;
+function mergeProfile(profile, bom) {
+  if (!profile) return null;
   return {
-    state: { ...profile.state, ...(assignmentRecord.state ?? {}) },
-    appearance: { ...profile.appearance, ...(assignmentRecord.appearance ?? {}) },
-    renderer: { ...profile.renderer, ...(assignmentRecord.renderer ?? {}) },
-    runtime: { ...profile.runtime, ...(assignmentRecord.runtime ?? {}) },
-    composition: { ...profile.composition, ...(assignmentRecord.composition ?? {}) },
-    tests: { ...profile.tests, ...(assignmentRecord.tests ?? {}) },
-    bom: { ...(assignmentRecord.bom ?? {}) },
+    state: { ...profile.state },
+    appearance: { ...profile.appearance },
+    renderer: { ...profile.renderer },
+    runtime: { ...profile.runtime },
+    composition: { ...profile.composition },
+    tests: { ...profile.tests },
+    bom: { ...bom },
   };
 }
 
+function resolveBomPolicy(item) {
+  const composition = item?.composition;
+  if (
+    composition?.mode === 'recipe'
+    && Array.isArray(composition.items)
+    && composition.items.length > 0
+  ) {
+    return RECIPE_BOM_POLICY;
+  }
+  if (item?.type && TYPE_SELF_BOM.has(item.type)) {
+    return SELF_BOM_POLICY;
+  }
+  return UNRESOLVED_EXISTING_BOM_POLICY;
+}
+
+function resolveProfileKey(item) {
+  if (!item?.type) return null;
+  if (item.type === 'indoor-plant-1' && String(item.itemKey).includes('planter')) {
+    return 'free-model-color';
+  }
+  return TYPE_CONTRACT_PROFILE[item.type] ?? null;
+}
+
 export function hasExplicitModuleContract(moduleKey) {
-  return Object.hasOwn(MODULE_CONTRACT_ASSIGNMENTS, moduleKey);
+  if (Object.hasOwn(NON_CATALOG_MODULE_CONTRACTS, moduleKey)) return true;
+  const item = getItem(moduleKey);
+  return Boolean(item && resolveProfileKey(item));
 }
 
 export function resolveModuleContract(moduleKeyOrDescriptor) {
@@ -201,7 +203,7 @@ export function resolveModuleContract(moduleKeyOrDescriptor) {
       itemKey: moduleKeyOrDescriptor,
       type: moduleKeyOrDescriptor,
       profile: assignmentRecord.profile,
-      ...mergeProfile(profile, assignmentRecord),
+      ...mergeProfile(profile, assignmentRecord.bom),
       behavior: getModuleBehavior(moduleKeyOrDescriptor),
     };
   }
@@ -212,18 +214,22 @@ export function resolveModuleContract(moduleKeyOrDescriptor) {
   if (!itemKey) return null;
 
   const item = getItem(itemKey);
-  const assignmentRecord = MODULE_CONTRACT_ASSIGNMENTS[itemKey];
-  if (!item || !assignmentRecord) return null;
+  if (!item) return null;
 
-  const profile = MODULE_CONTRACT_PROFILES[assignmentRecord.profile];
+  const profileKey = resolveProfileKey(item);
+  if (!profileKey) return null;
+
+  const profile = MODULE_CONTRACT_PROFILES[profileKey];
   if (!profile) return null;
+
+  const bom = resolveBomPolicy(item);
 
   return {
     id: itemKey,
     itemKey,
     type: item.type,
-    profile: assignmentRecord.profile,
-    ...mergeProfile(profile, assignmentRecord),
+    profile: profileKey,
+    ...mergeProfile(profile, bom),
     behavior: getModuleBehavior({
       itemKey,
       type: item.type,
