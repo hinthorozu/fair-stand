@@ -48,10 +48,10 @@ async function removeModules(page, modules) {
 }
 
 const expected = {
-  wall_separator_50: { modelFile: null },
-  wall_separator_100: { modelFile: null },
-  wall_separator_50_sarmasik: { modelFile: 'wall_separator_50_sarmasik.glb' },
-  wall_separator_100_sarmasik: { modelFile: 'wall_separator_100_sarmasik.glb' },
+  wall_separator_50_350: { modelFile: null },
+  wall_separator_100_350: { modelFile: null },
+  wall_separator_50_350_sarmasik: { modelFile: 'wall_separator_50_sarmasik.glb' },
+  wall_separator_100_350_sarmasik: { modelFile: 'wall_separator_100_sarmasik.glb' },
 };
 
 for (const itemKey of Object.keys(expected)) {

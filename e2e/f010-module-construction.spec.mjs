@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
 
+const WALL_LINE_HEIGHT_CM = 350;
+
+function wallFlatPanelItemKey(widthCm) {
+  return `wall_${widthCm}_${WALL_LINE_HEIGHT_CM}`;
+}
+
 async function createStand(page, { standName, projectName, xCm = '500', yCm = '500' }) {
   await page.goto('/');
 
@@ -58,7 +64,7 @@ test('F-010 automatic wall construction reaches persisted runtime state through 
   expect(project).not.toBeNull();
   expect(project.modules.length).toBeGreaterThan(0);
   expect(project.modules.every((moduleState) => moduleState.type === 'flat-panel')).toBe(true);
-  expect(project.modules.every((moduleState) => moduleState.itemKey === `wall_${moduleState.widthCm}`)).toBe(true);
+  expect(project.modules.every((moduleState) => moduleState.itemKey === wallFlatPanelItemKey(moduleState.widthCm))).toBe(true);
   expect(pageErrors).toEqual([]);
 });
 
@@ -78,7 +84,7 @@ test('F-010 catalog construction persists a module created through the real pick
   expect(initialProject).not.toBeNull();
   expect(initialProject.modules.length).toBeGreaterThan(0);
   const removedModule = initialProject.modules[0];
-  expect(removedModule.itemKey).toBe(`wall_${removedModule.widthCm}`);
+  expect(removedModule.itemKey).toBe(wallFlatPanelItemKey(removedModule.widthCm));
 
   page.once('dialog', async (dialog) => dialog.accept());
   await page.evaluate((moduleId) => {
