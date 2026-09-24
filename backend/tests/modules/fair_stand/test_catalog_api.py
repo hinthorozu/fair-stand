@@ -79,6 +79,7 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
         "depthCm": 10.0,
         "frameWidthCm": 5.5,
         "frameDepthCm": 10.0,
+        "panelRailHeightCm": 0.4,
     }
     assert body["settings"] == {
         "maxImageUploadMb": 5,

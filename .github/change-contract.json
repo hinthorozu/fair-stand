@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "fair-stand-item-type-behavior-db",
   "kind": "architecture",
-  "summary": "Panel rail height on fair_stand_dimensions (0034); strip BOM qty without silent ceiling clamp; derive moduleContracts from item type (no per-SKU allowlist); shelf-rail snap meta; CRM/kılavuz sync for stand envelope.",
+  "summary": "Panel rail height on fair_stand_dimensions (0034); strip BOM qty without silent ceiling clamp; derive moduleContracts from item type (no per-SKU allowlist); shelf-rail snap meta; CRM/kılavuz sync for stand envelope. Fix panelRailHeight assertions.",
   "owners": [
     "backend/app/modules/fair_stand/application/admin_snap_catalog.py",
     "backend/app/modules/fair_stand/infrastructure/models.py",
@@ -130,7 +130,9 @@
       "test/mapCatalogSeed.mjs",
       "test/moduleBehaviorPolicy.test.js",
       "test/registerCanonicalItemCatalog.mjs",
-      "vite.config.js"
+      "vite.config.js",
+      "backend/tests/modules/fair_stand/test_catalog_api.py",
+      "test/baseRenderStyle.test.js"
     ],
     "affectedTests": [
       "backend/tests/modules/fair_stand/test_admin_items_api.py",
@@ -341,7 +343,8 @@
       "test/wallReflow.test.js",
       "test/wallSeparatorItemsContract.test.js",
       "test/wallShelfItemsContract.test.js",
-      "test/wallShowcaseItemContract.test.js"
+      "test/wallShowcaseItemContract.test.js",
+      "backend/tests/modules/fair_stand/test_catalog_api.py"
     ],
     "affectedDocs": [
       "ARCHITECTURE_RULES.md",
