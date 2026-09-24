@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "fair-stand-item-type-behavior-db",
   "kind": "architecture",
-  "summary": "Move TYPE_BEHAVIORS onto fair_stand_item_type (0030–0033 + overlap FK); DB-only motor; catalog index order; high-pixel image optimize; item_type snap catalog base.",
+  "summary": "Move TYPE_BEHAVIORS onto fair_stand_item_type (0030–0033 + overlap FK); DB-only motor; catalog index order; high-pixel image optimize; item_type snap catalog base; 0024 seed unpack fix (four-tuple _INITIAL_RULES) for deploy; FAIR_STAND_DB_KULLANIM_KILAVUZU docs.",
   "owners": [
     "backend/app/modules/fair_stand/application/admin_snap_catalog.py",
     "backend/app/modules/fair_stand/infrastructure/models.py",
