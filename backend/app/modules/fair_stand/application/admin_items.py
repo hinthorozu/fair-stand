@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+import unicodedata
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from uuid import uuid4
@@ -8,6 +10,10 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
+from app.modules.fair_stand.application.catalog_item_order import (
+    CatalogItemOrderError,
+    apply_catalog_item_order,
+)
 from app.modules.fair_stand.infrastructure.models import (
     FairStandItemAssetModel,
     FairStandItemBodyPartModel,
@@ -40,6 +46,17 @@ class ItemAdminError(ValueError):
 
 def _now() -> datetime:
     return datetime.now(tz=UTC)
+
+
+def _normalize_item_key(value: object | None, *, max_length: int = 128) -> str:
+    """Display/name-ish input → lowercase snake item_key (ascii)."""
+    text = unicodedata.normalize("NFKD", str(value or "").strip())
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    text = text.replace("ı", "i").replace("İ", "i")
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9]+", "_", text)
+    text = text.strip("_")
+    return text[:max_length]
 
 
 def _num(value: Decimal | float | int | None) -> float | int | None:
@@ -92,6 +109,22 @@ def _require_item_type(session: Session, item_type: str) -> str:
     if not row.is_active:
         raise ItemAdminError("Item tipi pasif.")
     return key
+
+
+def _require_catalog_visibility_fields(
+    *,
+    catalog_visible: bool,
+    category_id: object | None,
+    catalog_item_index: object | None,
+    preview_id: object | None,
+) -> None:
+    """catalog_visible=true ⇒ triad required. Hidden leaves stale category/preview alone."""
+    if not catalog_visible:
+        return
+    if category_id is None or catalog_item_index is None or preview_id is None:
+        raise ItemAdminError(
+            "Katalogda görünür itemlerde kategori, katalog sırası ve önizleme zorunludur."
+        )
 
 
 def _parse_snap_selection(session: Session, payload: dict) -> dict:
@@ -147,6 +180,8 @@ def _integrity_error_message(exc: IntegrityError) -> str:
         return "Aynı body role bir item altında birden fazla kullanılamaz."
     if "foreign key" in orig or "fk_" in orig:
         return "Bağlantılı kayıt bulunamadı (alt item, kategori veya preview geçersiz olabilir)."
+    if "ck_fair_stand_items_catalog_visible" in orig:
+        return "Katalogda görünür itemlerde kategori, katalog sırası ve önizleme zorunludur."
     if "ck_fair_stand" in orig or "check constraint" in orig:
         return "Girilen değerlerden biri geçersiz."
     return "Kayıt kaydedilemedi: veri kısıtı ihlal edildi."
@@ -529,7 +564,11 @@ class AdminItemsService:
         return payload
 
     def create_item(self, payload: dict) -> dict:
-        item_key = str(payload.get("item_key") or "").strip().lower()
+        raw_key = payload.get("item_key")
+        if raw_key is None or not str(raw_key).strip():
+            item_key = _normalize_item_key(payload.get("name"))
+        else:
+            item_key = _normalize_item_key(raw_key)
         name = str(payload.get("name") or "").strip()
         if not item_key:
             raise ItemAdminError("Item key zorunludur.")
@@ -539,16 +578,27 @@ class AdminItemsService:
         if self._session.get(FairStandItemModel, item_key) is not None:
             raise ItemAdminError("Bu item key zaten kayıtlı.", status_code=409)
 
+        catalog_visible = bool(payload.get("catalog_visible", False))
+        category_id = payload.get("category_id")
+        catalog_item_index = payload.get("catalog_item_index")
+        preview_id = payload.get("preview_id")
+        _require_catalog_visibility_fields(
+            catalog_visible=catalog_visible,
+            category_id=category_id,
+            catalog_item_index=catalog_item_index,
+            preview_id=preview_id,
+        )
+
         now = _now()
         row = FairStandItemModel(
             item_key=item_key,
             name=name,
             item_type=item_type,
             unit=_optional_str(payload.get("unit")),
-            catalog_visible=bool(payload.get("catalog_visible", False)),
-            category_id=payload.get("category_id"),
-            catalog_item_index=payload.get("catalog_item_index"),
-            preview_id=payload.get("preview_id"),
+            catalog_visible=False,
+            category_id=category_id,
+            catalog_item_index=catalog_item_index,
+            preview_id=preview_id,
             material=_optional_str(payload.get("material")),
             default_color=payload.get("default_color"),
             preserve_model_scale=_optional_bool(payload.get("preserve_model_scale")),
@@ -581,6 +631,16 @@ class AdminItemsService:
             updated_at=now,
         )
         self._session.add(row)
+        try:
+            apply_catalog_item_order(
+                self._session,
+                row,
+                catalog_visible=catalog_visible,
+                category_id=int(category_id) if category_id is not None else None,
+                catalog_item_index=int(catalog_item_index) if catalog_item_index is not None else None,
+            )
+        except CatalogItemOrderError as exc:
+            raise ItemAdminError(str(exc), status_code=exc.status_code) from exc
         self._apply_satellites(row, payload, replace=True)
         self._flush()
         return self.get_item(item_key)
@@ -631,11 +691,42 @@ class AdminItemsService:
             for field, value in _parse_snap_selection(self._session, merged).items():
                 setattr(row, field, value)
 
+        next_catalog_visible = (
+            bool(payload.get("catalog_visible"))
+            if "catalog_visible" in payload
+            else bool(row.catalog_visible)
+        )
+        next_category_id = payload["category_id"] if "category_id" in payload else row.category_id
+        next_catalog_item_index = (
+            payload["catalog_item_index"] if "catalog_item_index" in payload else row.catalog_item_index
+        )
+        next_preview_id = payload["preview_id"] if "preview_id" in payload else row.preview_id
+        _require_catalog_visibility_fields(
+            catalog_visible=next_catalog_visible,
+            category_id=next_category_id,
+            catalog_item_index=next_catalog_item_index,
+            preview_id=next_preview_id,
+        )
+        catalog_touched = any(
+            key in payload for key in ("catalog_visible", "category_id", "catalog_item_index")
+        )
+        if catalog_touched:
+            try:
+                apply_catalog_item_order(
+                    self._session,
+                    row,
+                    catalog_visible=next_catalog_visible,
+                    category_id=int(next_category_id) if next_category_id is not None else None,
+                    catalog_item_index=(
+                        int(next_catalog_item_index) if next_catalog_item_index is not None else None
+                    ),
+                )
+            except CatalogItemOrderError as exc:
+                raise ItemAdminError(str(exc), status_code=exc.status_code) from exc
+        if "preview_id" in payload:
+            row.preview_id = next_preview_id
+
         for field in (
-            "catalog_visible",
-            "category_id",
-            "catalog_item_index",
-            "preview_id",
             "default_color",
             "eye_count",
             "is_render",

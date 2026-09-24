@@ -333,6 +333,7 @@ def admin_update_item_catalog(
             category_id=body.category_id,
             category_id_provided="category_id" in body.model_fields_set,
             catalog_item_index=body.catalog_item_index,
+            catalog_item_index_provided="catalog_item_index" in body.model_fields_set,
             preview_id=body.preview_id,
             preview_id_provided="preview_id" in body.model_fields_set,
         )
