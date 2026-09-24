@@ -100,6 +100,23 @@ class ItemTypeCreateBody(BaseModel):
     display_name: str = Field(min_length=1, max_length=128)
     key: str | None = Field(default=None, max_length=64)
     is_active: bool = True
+    placement: str | None = Field(default=None, max_length=32)
+    collision: str | None = Field(default=None, max_length=32)
+    move_snap_cm: int | None = Field(default=None, gt=0)
+    magnetic_snap: str | None = Field(default=None, max_length=32)
+    allow_side_insert: bool | None = None
+    supports_wall_overlay_mount: bool | None = None
+    wall_capacity: str | None = Field(default=None, max_length=16)
+    connection_endpoint: str | None = Field(default=None, max_length=32)
+    collision_depth: str | None = Field(default=None, max_length=32)
+    endpoint_contact: str | None = Field(default=None, max_length=32)
+    boundary_snap: str | None = Field(default=None, max_length=32)
+    collision_height: str | None = Field(default=None, max_length=16)
+    overlap_with_types: list[str] | str | None = None
+    overlap_item_type_ids: list[int] | None = None
+    ghost_kind: str | None = Field(default=None, max_length=32)
+    ghost_renderer: str | None = Field(default=None, max_length=64)
+    ghost_opacity: float | None = Field(default=None, ge=0, le=1)
 
 
 class ItemTypeUpdateBody(BaseModel):
@@ -107,6 +124,23 @@ class ItemTypeUpdateBody(BaseModel):
     display_name: str | None = Field(default=None, min_length=1, max_length=128)
     key: str | None = Field(default=None, min_length=1, max_length=64)
     is_active: bool | None = None
+    placement: str | None = Field(default=None, max_length=32)
+    collision: str | None = Field(default=None, max_length=32)
+    move_snap_cm: int | None = Field(default=None, gt=0)
+    magnetic_snap: str | None = Field(default=None, max_length=32)
+    allow_side_insert: bool | None = None
+    supports_wall_overlay_mount: bool | None = None
+    wall_capacity: str | None = Field(default=None, max_length=16)
+    connection_endpoint: str | None = Field(default=None, max_length=32)
+    collision_depth: str | None = Field(default=None, max_length=32)
+    endpoint_contact: str | None = Field(default=None, max_length=32)
+    boundary_snap: str | None = Field(default=None, max_length=32)
+    collision_height: str | None = Field(default=None, max_length=16)
+    overlap_with_types: list[str] | str | None = None
+    overlap_item_type_ids: list[int] | None = None
+    ghost_kind: str | None = Field(default=None, max_length=32)
+    ghost_renderer: str | None = Field(default=None, max_length=64)
+    ghost_opacity: float | None = Field(default=None, ge=0, le=1)
 
 
 class RuleTypeCreateBody(BaseModel):

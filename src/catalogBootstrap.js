@@ -1,6 +1,6 @@
 import { initializeCatalogCategories, initializeCatalogPreviews } from './catalog.js';
 import { getFairStandHostWindow } from './hostDocument.js';
-import { initializeItemRegistry, initializeSnapRuleRegistry } from './items.js';
+import { initializeItemRegistry, initializeItemTypeRegistry, initializeSnapRuleRegistry } from './items.js';
 import { initializeRuntimeSettings } from './runtimeSettings.js';
 import { initializeStandDimensions } from './standDimensions.js';
 
@@ -38,6 +38,7 @@ export async function bootstrapFairStandCatalog() {
   initializeCatalogCategories(payload.categories);
   initializeCatalogPreviews(payload.previewKinds);
   initializeSnapRuleRegistry(Array.isArray(payload.rules) ? payload.rules : []);
+  initializeItemTypeRegistry(Array.isArray(payload.itemTypes) ? payload.itemTypes : []);
   initializeItemRegistry(payload.items);
   return payload.revision ?? null;
 }

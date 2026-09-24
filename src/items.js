@@ -12,6 +12,7 @@ let itemByKey = null;
 let catalogReady = false;
 let snapRuleById = null;
 let snapRuleByKey = null;
+let itemTypeByKey = null;
 
 function freezeDeep(value) {
   if (value === null || typeof value !== 'object' || Object.isFrozen(value)) return value;
@@ -61,11 +62,31 @@ export function initializeSnapRuleRegistry(rules) {
   snapRuleByKey = Object.freeze(byKey);
 }
 
+export function initializeItemTypeRegistry(itemTypes) {
+  if (!Array.isArray(itemTypes)) {
+    throw new TypeError('Fair Stand item types bootstrap must be an array.');
+  }
+  const byKey = Object.create(null);
+  for (const row of itemTypes) {
+    if (row == null || !row.key) {
+      throw new TypeError('Bootstrapped item type is missing key.');
+    }
+    byKey[String(row.key)] = freezeDeep(structuredClone(row));
+  }
+  itemTypeByKey = Object.freeze(byKey);
+}
+
 export function resetItemRegistry() {
   itemByKey = null;
   catalogReady = false;
   snapRuleById = null;
   snapRuleByKey = null;
+  itemTypeByKey = null;
+}
+
+export function getItemType(key) {
+  if (key == null || key === '' || !itemTypeByKey) return null;
+  return itemTypeByKey[String(key)] ?? null;
 }
 
 export function getSnapRule(idOrKey) {
@@ -453,6 +474,27 @@ export function isShortUpFamilyDescriptor(descriptor) {
 
 export function listRegisteredItems() {
   return Object.freeze(Object.values(requireRegistry()));
+}
+
+/**
+ * Otomatik duvar / widthCm-only flat-panel seçimi: Item registry (DB bootstrap).
+ * Katalogda görünen, render’lı, short-up olmayan flat-panel; ölçü = widthCm.
+ * Explicit itemKey yolu bunu kullanmaz.
+ */
+export function resolveAutomaticWallFlatPanelItemKey(widthCm) {
+  const width = Number(widthCm);
+  if (!Number.isFinite(width) || width <= 0) return null;
+  const matches = listRegisteredItems()
+    .filter((item) => {
+      if (item?.type !== 'flat-panel') return false;
+      if (item.isRender !== true) return false;
+      if (item.catalogVisible !== true) return false;
+      if (isShortUpFamilyDescriptor(item)) return false;
+      return Number(item.dimensions?.widthCm) === width;
+    })
+    .map((item) => item.itemKey)
+    .sort();
+  return matches[0] ?? null;
 }
 
 function optionalNumber(value) {

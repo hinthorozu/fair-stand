@@ -1,5 +1,5 @@
 import { getStandDimensions } from './standDimensions.js';
-import { getItem, getItemSnapSpec, listRegisteredItems, isShortUpFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm } from './items.js';
+import { getItem, getItemSnapSpec, getItemType, listRegisteredItems, isShortUpFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm } from './items.js';
 
 const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
   kind: 'silhouette',
@@ -9,182 +9,71 @@ const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
 
 const NO_OVERLAP_TYPES = Object.freeze([]);
 
-const WALL_BEHAVIOR = Object.freeze({
+/** Kesit 1 bilinmeyen tip fallback — üretimde tip satırı bootstrap’tan gelir. */
+const DEFAULT_PLACEMENT_SLICE = Object.freeze({
   placement: 'wall',
   moveSnapCm: 50,
-  allowSideInsert: true,
   collision: 'segment',
+});
+
+/** Kesit 2 bilinmeyen tip fallback. */
+const DEFAULT_POLICY_SLICE = Object.freeze({
   magneticSnap: 'standard',
+  allowSideInsert: true,
+  supportsWallOverlayMount: true,
+  wallCapacity: 'include',
+});
+
+/** Kesit 3 bilinmeyen tip fallback. */
+const DEFAULT_CONTACT_SLICE = Object.freeze({
   connectionEndpoint: 'segment',
   collisionDepth: 'physical',
   endpointContact: 'standard',
   boundarySnap: 'stand-edge',
-  overlapWithTypes: NO_OVERLAP_TYPES,
-  supportsWallOverlayMount: true,
-  wallCapacity: 'include',
   collisionHeight: 'full',
+  overlapWithTypes: NO_OVERLAP_TYPES,
   ghost: DEFAULT_GHOST_BEHAVIOR,
 });
 
-const DEFAULT_BEHAVIOR = WALL_BEHAVIOR;
-
-function freeBehavior(overrides = {}) {
-  return Object.freeze({
-    placement: 'free',
-    moveSnapCm: 50,
-    allowSideInsert: true,
-    collision: 'footprint',
-    magneticSnap: 'standard',
-    connectionEndpoint: 'segment',
-    collisionDepth: 'physical',
-    endpointContact: 'standard',
-    boundarySnap: 'stand-edge',
-    overlapWithTypes: NO_OVERLAP_TYPES,
-    supportsWallOverlayMount: false,
-    wallCapacity: 'include',
-    collisionHeight: 'full',
-    ghost: DEFAULT_GHOST_BEHAVIOR,
-    ...overrides,
-  });
-}
-
-function overlayBehavior(overrides = {}) {
-  return Object.freeze({
-    placement: 'wall-overlay',
-    moveSnapCm: 10,
-    allowSideInsert: false,
-    collision: 'none',
-    magneticSnap: 'none',
-    connectionEndpoint: 'segment',
-    collisionDepth: 'physical',
-    endpointContact: 'standard',
-    boundarySnap: 'stand-edge',
-    overlapWithTypes: NO_OVERLAP_TYPES,
-    supportsWallOverlayMount: false,
-    wallCapacity: 'include',
-    collisionHeight: 'full',
-    ghost: DEFAULT_GHOST_BEHAVIOR,
-    ...overrides,
-  });
-}
-
-const PLASTIC_TRASH_BIN_BEHAVIOR = freeBehavior({
-  moveSnapCm: 10,
-  collision: 'none',
-  magneticSnap: 'none',
+const DEFAULT_BEHAVIOR = Object.freeze({
+  ...DEFAULT_PLACEMENT_SLICE,
+  ...DEFAULT_POLICY_SLICE,
+  ...DEFAULT_CONTACT_SLICE,
 });
 
-const TYPE_BEHAVIORS = Object.freeze({
-  'flat-panel': WALL_BEHAVIOR,
-  'showcase-3': WALL_BEHAVIOR,
-  'showcase-2': WALL_BEHAVIOR,
-  shelf: overlayBehavior({
-    wallCapacity: 'exclude',
-  }),
-  door: WALL_BEHAVIOR,
-  'base-wall': Object.freeze({
-    ...WALL_BEHAVIOR,
-    collisionDepth: 'wall-backbone',
-  }),
-  separator: WALL_BEHAVIOR,
-  counter: freeBehavior({
-    connectionEndpoint: 'logical-fixture',
-  }),
-  base: freeBehavior({
-    connectionEndpoint: 'logical-fixture',
-  }),
-  'sofa-set-classic': freeBehavior({
-    moveSnapCm: 10,
-    boundarySnap: 'wall-inner-face',
-  }),
-  'sofa-single-classic': freeBehavior({
-    moveSnapCm: 10,
-    collision: 'none',
-    magneticSnap: 'none',
-  }),
-  'sofa-double-classic': freeBehavior({
-    moveSnapCm: 10,
-    collision: 'none',
-    magneticSnap: 'none',
-  }),
-  'coffee-table-classic': freeBehavior({
-    moveSnapCm: 10,
-    collision: 'none',
-    magneticSnap: 'none',
-  }),
-  'table-chair-set-eames': freeBehavior({
-    moveSnapCm: 10,
-    collision: 'none',
-    magneticSnap: 'none',
-  }),
-  chair: freeBehavior({
-    moveSnapCm: 10,
-    collision: 'none',
-    magneticSnap: 'none',
-  }),
-  'table-glass': freeBehavior({
-    moveSnapCm: 10,
-    collision: 'none',
-    magneticSnap: 'none',
-  }),
-  'bar-stool': freeBehavior({
-    moveSnapCm: 10,
-    collision: 'none',
-    magneticSnap: 'none',
-  }),
-  'mini-fridge': freeBehavior({
-    moveSnapCm: 10,
-    collision: 'none',
-    magneticSnap: 'none',
-    overlapWithTypes: Object.freeze(['kettle']),
-  }),
-  kettle: freeBehavior({
-    moveSnapCm: 10,
-    collision: 'none',
-    magneticSnap: 'none',
-    overlapWithTypes: Object.freeze(['mini-fridge']),
-  }),
-  'coat-rack': freeBehavior({
-    moveSnapCm: 10,
-    collision: 'none',
-    magneticSnap: 'none',
-  }),
-  'plastic-trash-bin': PLASTIC_TRASH_BIN_BEHAVIOR,
-  upright: freeBehavior({
-    allowSideInsert: false,
-    collision: 'footprint',
-    magneticSnap: 'short-up-joint',
-    supportsWallOverlayMount: false,
-    wallCapacity: 'exclude',
-    overlapWithTypes: Object.freeze(['flat-panel', 'profile', 'counter']),
-  }),
-  profile: Object.freeze({
-    ...WALL_BEHAVIOR,
-    overlapWithTypes: Object.freeze(['separator']),
-  }),
-  'indoor-plant-1': freeBehavior({
-    moveSnapCm: 10,
-    endpointContact: 'thin-wall-endpoint',
-  }),
-  'illuminated-foam': overlayBehavior(),
-  tv: overlayBehavior(),
-  'led-floodlight': Object.freeze({
-    placement: 'top',
-    moveSnapCm: 20,
-    allowSideInsert: true,
-    collision: 'none',
-    magneticSnap: 'none',
-    connectionEndpoint: 'segment',
-    collisionDepth: 'physical',
-    endpointContact: 'standard',
-    boundarySnap: 'stand-edge',
-    overlapWithTypes: NO_OVERLAP_TYPES,
-    supportsWallOverlayMount: false,
-    wallCapacity: 'exclude',
-    collisionHeight: 'full',
-    ghost: DEFAULT_GHOST_BEHAVIOR,
-  }),
-});
+/**
+ * Eski TYPE_BEHAVIORS anahtarları — bootstrap eksikse fail-fast için.
+ * Alan değerleri DB’de; burası yalnız bilinen tip kümesi.
+ */
+const KNOWN_BEHAVIOR_TYPE_KEYS = Object.freeze(new Set([
+  'flat-panel',
+  'showcase-3',
+  'showcase-2',
+  'shelf',
+  'door',
+  'base-wall',
+  'separator',
+  'counter',
+  'base',
+  'sofa-set-classic',
+  'sofa-single-classic',
+  'sofa-double-classic',
+  'coffee-table-classic',
+  'table-chair-set-eames',
+  'chair',
+  'table-glass',
+  'bar-stool',
+  'mini-fridge',
+  'kettle',
+  'coat-rack',
+  'plastic-trash-bin',
+  'upright',
+  'profile',
+  'indoor-plant-1',
+  'illuminated-foam',
+  'tv',
+  'led-floodlight',
+]));
 
 function normalizeDescriptor(moduleOrType) {
   if (typeof moduleOrType === 'string') return { type: moduleOrType };
@@ -208,21 +97,94 @@ function resolveRotationItem(moduleOrType) {
 export function hasExplicitModuleBehavior(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
   const type = module.type ?? null;
-  return type !== null && Object.hasOwn(TYPE_BEHAVIORS, type);
+  if (type === null) return false;
+  if (KNOWN_BEHAVIOR_TYPE_KEYS.has(type)) return true;
+  const dbType = getItemType(type);
+  return dbType != null && typeof dbType.placement === 'string';
+}
+
+function readPlacementSliceFromDb(dbType) {
+  if (!dbType) return null;
+  if (typeof dbType.placement !== 'string' || !dbType.placement) return null;
+  if (typeof dbType.collision !== 'string' || !dbType.collision) return null;
+  const moveSnapCm = Number(dbType.moveSnapCm);
+  if (!Number.isFinite(moveSnapCm) || moveSnapCm <= 0) return null;
+  return Object.freeze({
+    placement: dbType.placement,
+    collision: dbType.collision,
+    moveSnapCm,
+  });
+}
+
+function readPolicySliceFromDb(dbType) {
+  if (!dbType) return null;
+  if (typeof dbType.magneticSnap !== 'string' || !dbType.magneticSnap) return null;
+  if (typeof dbType.allowSideInsert !== 'boolean') return null;
+  if (typeof dbType.supportsWallOverlayMount !== 'boolean') return null;
+  if (typeof dbType.wallCapacity !== 'string' || !dbType.wallCapacity) return null;
+  return Object.freeze({
+    magneticSnap: dbType.magneticSnap,
+    allowSideInsert: dbType.allowSideInsert,
+    supportsWallOverlayMount: dbType.supportsWallOverlayMount,
+    wallCapacity: dbType.wallCapacity,
+  });
+}
+
+function readContactSliceFromDb(dbType) {
+  if (!dbType) return null;
+  if (typeof dbType.connectionEndpoint !== 'string' || !dbType.connectionEndpoint) return null;
+  if (typeof dbType.collisionDepth !== 'string' || !dbType.collisionDepth) return null;
+  if (typeof dbType.endpointContact !== 'string' || !dbType.endpointContact) return null;
+  if (typeof dbType.boundarySnap !== 'string' || !dbType.boundarySnap) return null;
+  if (typeof dbType.collisionHeight !== 'string' || !dbType.collisionHeight) return null;
+  if (!Array.isArray(dbType.overlapWithTypes)) return null;
+  const ghost = dbType.ghost;
+  if (!ghost || typeof ghost !== 'object') return null;
+  if (typeof ghost.kind !== 'string' || !ghost.kind) return null;
+  if (typeof ghost.renderer !== 'string' || !ghost.renderer) return null;
+  const opacity = Number(ghost.opacity);
+  if (!Number.isFinite(opacity) || opacity < 0 || opacity > 1) return null;
+  return Object.freeze({
+    connectionEndpoint: dbType.connectionEndpoint,
+    collisionDepth: dbType.collisionDepth,
+    endpointContact: dbType.endpointContact,
+    boundarySnap: dbType.boundarySnap,
+    collisionHeight: dbType.collisionHeight,
+    overlapWithTypes: Object.freeze([...dbType.overlapWithTypes].map(String)),
+    ghost: Object.freeze({
+      kind: ghost.kind,
+      renderer: ghost.renderer,
+      opacity,
+    }),
+  });
+}
+
+/** Dilim 4: kesit 1+2+3 yalnız DB. Bilinen tipte eksik bootstrap → fail-fast. */
+function resolveDbBehaviorSlices(type) {
+  const dbType = type ? getItemType(type) : null;
+  const placement = readPlacementSliceFromDb(dbType);
+  const policy = readPolicySliceFromDb(dbType);
+  const contact = readContactSliceFromDb(dbType);
+  if (placement && policy && contact) {
+    return Object.freeze({ ...placement, ...policy, ...contact });
+  }
+  if (type && KNOWN_BEHAVIOR_TYPE_KEYS.has(type)) {
+    throw new TypeError(
+      `Item type "${type}" is missing kesit1/kesit2/kesit3 behavior fields in catalog bootstrap.`,
+    );
+  }
+  return Object.freeze({
+    ...DEFAULT_PLACEMENT_SLICE,
+    ...DEFAULT_POLICY_SLICE,
+    ...DEFAULT_CONTACT_SLICE,
+  });
 }
 
 export function getModuleBehavior(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
   const type = module.type ?? null;
-  const declared = TYPE_BEHAVIORS[type] ?? DEFAULT_BEHAVIOR;
-  const withGhost = declared.ghost
-    ? declared
-    : { ...declared, ghost: DEFAULT_GHOST_BEHAVIOR };
-  const base = Object.hasOwn(withGhost, 'collisionHeight')
-    ? withGhost
-    : { ...withGhost, collisionHeight: 'full' };
-
-  return base;
+  if (type === null) return DEFAULT_BEHAVIOR;
+  return resolveDbBehaviorSlices(type);
 }
 
 export function getModuleRotationStepDeg(moduleOrType) {

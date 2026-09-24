@@ -1,6 +1,6 @@
 # Module Behavior Standard
 
-`src/moduleBehavior.js` is the single source of truth for editor behavior that differs by module type, except sahne Z rotation parameters. Those live on Item (`docs/refactor/ROTATION.md`); `TYPE_BEHAVIORS` does not carry `rotationStepDeg`, `defaultRotationDeg`, or `sideInsertRotation`.
+`src/moduleBehavior.js` resolves editor behavior that differs by module type from catalog `itemTypes` (DB bootstrap). Sahne Z rotation parameters live on Item (`docs/refactor/ROTATION.md`); tip davranışı rotation taşımaz (`rotationStepDeg` / `defaultRotationDeg` / `sideInsertRotation`).
 
 Every new module must use this contract instead of adding scattered type checks for placement behavior.
 
