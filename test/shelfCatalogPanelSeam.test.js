@@ -109,7 +109,8 @@ test('D-E Catalog descriptor exact itemKey ile state ve scene width üretir', ()
 test('F standalone renderer tek raf tahtası çizer; wall/panel üretmez', () => {
   const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const start = source.indexOf('function createShelfModule');
-  const end = source.indexOf('function createFlatPanelModule');
+  // Assembly free-pose renderer createShelf ile createFlatPanel arasındadır; shelf dilimini orada kes.
+  const end = source.indexOf('function createItemAssemblyModule');
   const renderer = source.slice(start, end);
   assert.match(renderer, /new THREE\.BoxGeometry\(widthM, thicknessM, depthM\)/);
   assert.equal((renderer.match(/new THREE\.BoxGeometry/g) ?? []).length, 2);

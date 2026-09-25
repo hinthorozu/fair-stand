@@ -393,6 +393,11 @@ class FairStandItemModel(Base):
         cascade="all, delete-orphan",
         foreign_keys="FairStandItemBodyPartModel.parent_item_key",
     )
+    assembly_parts: Mapped[list["FairStandItemAssemblyPartModel"]] = relationship(
+        back_populates="parent",
+        cascade="all, delete-orphan",
+        foreign_keys="FairStandItemAssemblyPartModel.parent_item_key",
+    )
 
 
 class FairStandItemDimensionsModel(Base):
@@ -500,6 +505,52 @@ class FairStandItemComponentModel(Base):
     quantity: Mapped[Decimal] = mapped_column(Numeric(12, 4), nullable=False)
     parent: Mapped[FairStandItemModel] = relationship(
         back_populates="components",
+        foreign_keys=[parent_item_key],
+    )
+
+
+class FairStandItemAssemblyPartModel(Base):
+    """Parent lokal child pose. BOM quantity `fair_stand_item_components` içindedir."""
+
+    __tablename__ = "fair_stand_item_assembly_parts"
+    __table_args__ = (
+        CheckConstraint("instance_index >= 0", name="ck_fair_stand_item_assembly_index"),
+        UniqueConstraint(
+            "parent_item_key",
+            "child_item_key",
+            "instance_index",
+            name="uq_fair_stand_item_assembly_instance",
+        ),
+        Index("ix_fair_stand_item_assembly_parent", "parent_item_key"),
+        Index("ix_fair_stand_item_assembly_child", "child_item_key"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    parent_item_key: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("fair_stand_items.item_key", **CASCADE),
+        nullable=False,
+    )
+    child_item_key: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("fair_stand_items.item_key", **CASCADE),
+        nullable=False,
+    )
+    instance_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    x_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False, default=Decimal("0"))
+    y_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False, default=Decimal("0"))
+    z_cm: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False, default=Decimal("0"))
+    rotation_x_deg: Mapped[Decimal] = mapped_column(
+        Numeric(8, 3), nullable=False, default=Decimal("0")
+    )
+    rotation_y_deg: Mapped[Decimal] = mapped_column(
+        Numeric(8, 3), nullable=False, default=Decimal("0")
+    )
+    rotation_z_deg: Mapped[Decimal] = mapped_column(
+        Numeric(8, 3), nullable=False, default=Decimal("0")
+    )
+    parent: Mapped[FairStandItemModel] = relationship(
+        back_populates="assembly_parts",
         foreign_keys=[parent_item_key],
     )
 

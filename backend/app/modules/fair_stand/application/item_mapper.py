@@ -157,6 +157,27 @@ def map_item(row) -> ItemAggregate:
             ]
         payload["composition"] = composition
 
+    assembly_rows = sorted(
+        row.assembly_parts or [],
+        key=lambda part: (part.child_item_key, int(part.instance_index)),
+    )
+    if assembly_rows:
+        payload["assembly"] = {
+            "parts": [
+                {
+                    "childItemKey": part.child_item_key,
+                    "instanceIndex": int(part.instance_index),
+                    "xCm": _num(part.x_cm),
+                    "yCm": _num(part.y_cm),
+                    "zCm": _num(part.z_cm),
+                    "rotationXDeg": _num(part.rotation_x_deg),
+                    "rotationYDeg": _num(part.rotation_y_deg),
+                    "rotationZDeg": _num(part.rotation_z_deg),
+                }
+                for part in assembly_rows
+            ]
+        }
+
     if row.video_wall is not None:
         payload["videoWall"] = {
             "rows": int(row.video_wall.rows),

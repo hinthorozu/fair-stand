@@ -542,6 +542,24 @@ def admin_update_item_record(
         raise
 
 
+@router.put("/admin/item-records/{item_key}/assembly")
+def admin_replace_item_assembly(
+    item_key: str,
+    body: dict[str, Any],
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_UPDATE)),
+    service: AdminItemsService = Depends(get_admin_items_service),
+) -> dict[str, Any]:
+    _ = auth
+    parts = body.get("parts") if isinstance(body, dict) else None
+    if parts is None and isinstance(body, list):
+        parts = body
+    try:
+        return service.replace_assembly_parts(item_key, parts or [])
+    except ItemAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
 @router.post("/admin/item-records/{item_key}/archive")
 def admin_archive_item_record(
     item_key: str,

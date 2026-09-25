@@ -15,6 +15,7 @@ from app.modules.fair_stand.application.catalog_item_order import (
     apply_catalog_item_order,
 )
 from app.modules.fair_stand.infrastructure.models import (
+    FairStandItemAssemblyPartModel,
     FairStandItemAssetModel,
     FairStandItemBodyPartModel,
     FairStandItemComponentModel,
@@ -166,12 +167,16 @@ def _parse_snap_selection(session: Session, payload: dict) -> dict:
 
 def _integrity_error_message(exc: IntegrityError) -> str:
     orig = str(getattr(exc, "orig", exc)).lower()
+    if "uq_fair_stand_item_assembly_instance" in orig:
+        return "Aynı child + instance_index montajda birden fazla olamaz."
     if "uq_fair_stand_item_assets_role" in orig:
         return "Aynı asset rolü bir item altında birden fazla kullanılamaz."
     if "uq_fair_stand_items_catalog_order" in orig:
         return "Bu kategori içinde aynı katalog sırası zaten kullanılıyor."
     if "fair_stand_items_pkey" in orig or (
-        "item_key" in orig and ("already exists" in orig or "duplicate" in orig)
+        "fair_stand_items" in orig
+        and "item_key" in orig
+        and ("already exists" in orig or "duplicate" in orig)
     ):
         return "Bu item key zaten kayıtlı."
     if "uq_fair_stand_item_body_parts_role" in orig or "fair_stand_item_body_parts_pkey" in orig or (
@@ -194,6 +199,7 @@ def _item_load_options():
         selectinload(FairStandItemModel.strip_occupancy),
         selectinload(FairStandItemModel.assets),
         selectinload(FairStandItemModel.components),
+        selectinload(FairStandItemModel.assembly_parts),
         selectinload(FairStandItemModel.video_wall),
         selectinload(FairStandItemModel.body_parts),
         selectinload(FairStandItemModel.item_type_row),
@@ -252,6 +258,26 @@ def _components_payload(rows: list[FairStandItemComponentModel]) -> list[dict]:
             "quantity": _num(row.quantity),
         }
         for row in sorted(rows, key=lambda item: item.child_item_key)
+    ]
+
+
+def _assembly_parts_payload(rows: list[FairStandItemAssemblyPartModel]) -> list[dict]:
+    return [
+        {
+            "id": str(row.id),
+            "childItemKey": row.child_item_key,
+            "instanceIndex": int(row.instance_index),
+            "xCm": _num(row.x_cm),
+            "yCm": _num(row.y_cm),
+            "zCm": _num(row.z_cm),
+            "rotationXDeg": _num(row.rotation_x_deg),
+            "rotationYDeg": _num(row.rotation_y_deg),
+            "rotationZDeg": _num(row.rotation_z_deg),
+        }
+        for row in sorted(
+            rows,
+            key=lambda item: (item.child_item_key, int(item.instance_index)),
+        )
     ]
 
 
@@ -320,6 +346,7 @@ def _item_admin_payload(row: FairStandItemModel) -> dict:
         "stripOccupancy": _strip_payload(row.strip_occupancy),
         "assets": _assets_payload(list(row.assets or [])),
         "components": _components_payload(list(row.components or [])),
+        "assemblyParts": _assembly_parts_payload(list(row.assembly_parts or [])),
         "bodyParts": _body_parts_payload(list(row.body_parts or [])),
         "videoWall": _video_wall_payload(row.video_wall),
     }
@@ -802,6 +829,10 @@ class AdminItemsService:
             self._replace_assets(row, payload.get("assets") or [])
         if "components" in payload:
             self._replace_components(row, payload.get("components") or [])
+        if "assembly_parts" in payload or "assemblyParts" in payload:
+            self._replace_assembly_parts(
+                row, payload.get("assembly_parts", payload.get("assemblyParts")) or []
+            )
         if "body_parts" in payload or "bodyParts" in payload:
             self._replace_body_parts(
                 row, payload.get("body_parts", payload.get("bodyParts")) or []
@@ -914,6 +945,80 @@ class AdminItemsService:
                     quantity=quantity,
                 )
             )
+
+    def _replace_assembly_parts(self, row: FairStandItemModel, parts: list[dict]) -> None:
+        """Add/update/delete: (child, instance) varsa pose güncelle; yoksa ekle; payload’da yoksa sil."""
+        existing_by_key: dict[tuple[str, int], FairStandItemAssemblyPartModel] = {
+            (str(part.child_item_key), int(part.instance_index)): part
+            for part in list(row.assembly_parts or [])
+        }
+        seen: set[tuple[str, int]] = set()
+        kept: list[FairStandItemAssemblyPartModel] = []
+
+        for part in parts:
+            child = str(
+                part.get("child_item_key", part.get("childItemKey") or "")
+            ).strip().lower()
+            if not child:
+                raise ItemAdminError("Assembly child item key zorunludur.")
+            if child == row.item_key:
+                raise ItemAdminError("Assembly parçası kendisine bağlanamaz.")
+            index = _optional_int(part.get("instance_index", part.get("instanceIndex")))
+            if index is None or index < 0:
+                raise ItemAdminError("Assembly instance_index 0 veya daha büyük olmalıdır.")
+            key = (child, index)
+            if key in seen:
+                raise ItemAdminError(
+                    f"Tekrarlayan assembly instance: {child}#{index}."
+                )
+            seen.add(key)
+            child_row = self._session.get(FairStandItemModel, child)
+            if child_row is None:
+                raise ItemAdminError(f"Assembly child bulunamadı: {child}", status_code=404)
+
+            x_cm = _optional_decimal(part.get("x_cm", part.get("xCm"))) or Decimal("0")
+            y_cm = _optional_decimal(part.get("y_cm", part.get("yCm"))) or Decimal("0")
+            z_cm = _optional_decimal(part.get("z_cm", part.get("zCm"))) or Decimal("0")
+            rotation_x_deg = (
+                _optional_decimal(part.get("rotation_x_deg", part.get("rotationXDeg")))
+                or Decimal("0")
+            )
+            rotation_y_deg = (
+                _optional_decimal(part.get("rotation_y_deg", part.get("rotationYDeg")))
+                or Decimal("0")
+            )
+            rotation_z_deg = (
+                _optional_decimal(part.get("rotation_z_deg", part.get("rotationZDeg")))
+                or Decimal("0")
+            )
+
+            current = existing_by_key.pop(key, None)
+            if current is None:
+                current = FairStandItemAssemblyPartModel(
+                    id=uuid4(),
+                    parent_item_key=row.item_key,
+                    child_item_key=child,
+                    instance_index=index,
+                )
+                self._session.add(current)
+            current.x_cm = x_cm
+            current.y_cm = y_cm
+            current.z_cm = z_cm
+            current.rotation_x_deg = rotation_x_deg
+            current.rotation_y_deg = rotation_y_deg
+            current.rotation_z_deg = rotation_z_deg
+            kept.append(current)
+
+        for obsolete in existing_by_key.values():
+            self._session.delete(obsolete)
+        row.assembly_parts = kept
+
+    def replace_assembly_parts(self, item_key: str, parts: list[dict]) -> dict:
+        row = self._get(item_key)
+        self._replace_assembly_parts(row, parts or [])
+        row.updated_at = _now()
+        self._flush()
+        return self.get_item(item_key)
 
     def _replace_body_parts(self, row: FairStandItemModel, parts: list[dict]) -> None:
         for existing in list(row.body_parts or []):
