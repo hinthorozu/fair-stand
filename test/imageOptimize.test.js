@@ -44,6 +44,7 @@ test('görsel tavanı bootstrapped MB değerini byte olarak kullanır', () => {
       maxImageUploadMb: 2,
       exportButtonVisible: true,
       importButtonVisible: true,
+      saveAsButtonVisible: true,
     });
     assert.equal(getMaxImageUploadBytes(), 2 * 1024 * 1024);
     assert.equal(formatImageUploadTooLargeMessage(), 'Görsel en fazla 2 MB olabilir.');

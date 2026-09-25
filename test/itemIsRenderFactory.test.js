@@ -5,6 +5,8 @@ import assert from 'node:assert/strict';
 import {
   createModuleStateFromCatalogKey,
   createModuleStateFromDescriptor,
+  createBaseModuleState,
+  createCounterModuleState,
 } from '../src/designState.js';
 import { getItem, itemHasSceneRender, listRegisteredItems } from '../src/items.js';
 
@@ -31,8 +33,12 @@ test('factory gates on item.isRender, not catalogVisible or type lists', () => {
     if (item.catalogVisible !== true) catalogHiddenButRenderable.push(item.itemKey);
   }
 
-  assert.ok(virtual.includes('panel_197'));
-  assert.ok(virtual.includes('connector_start'));
+  assert.equal(getItem('connector_start').isRender, true);
+  assert.equal(getItem('connector_start').catalogVisible, false);
+  assert.equal(createModuleStateFromDescriptor(getItem('connector_start')), null);
+  assert.equal(createModuleStateFromCatalogKey('connector_start'), null);
+  assert.equal(getItem('panel_197').isRender, true);
+  assert.equal(getItem('panel_197').catalogVisible, false);
   assert.equal(createModuleStateFromDescriptor(getItem('panel_197')), null);
   assert.equal(createModuleStateFromCatalogKey('connector_start'), null);
 
@@ -48,4 +54,29 @@ test('factory gates on item.isRender, not catalogVisible or type lists', () => {
   const wall = createModuleStateFromCatalogKey('wall_200_350');
   assert.ok(wall);
   assert.equal(wall.itemKey, 'wall_200_350');
+});
+
+test('recipe surfaces take embedded isRender part identity; catalog is not the draw gate', () => {
+  const wall = createModuleStateFromCatalogKey('wall_200_350');
+  assert.ok(wall.strips.length > 0);
+  assert.ok(wall.strips.every((strip) => getItem(strip.itemKey)?.isRender === true));
+  assert.ok(wall.strips.every((strip) => getItem(strip.itemKey)?.catalogVisible !== true));
+
+  const base = createBaseModuleState(100);
+  assert.equal(base.faces.front.itemKey, 'panel_98');
+  assert.equal(getItem(base.faces.left.itemKey).type, 'panel');
+  assert.equal(wall.strips[0].widthCm, getItem(wall.strips[0].itemKey).dimensions.widthCm);
+  assert.equal(wall.strips[0].heightCm, getItem(wall.strips[0].itemKey).dimensions.heightCm);
+  assert.equal(base.renderParts.tops[0].widthCm, getItem('base_top_107_50').dimensions.widthCm);
+  assert.equal(base.renderParts.tops[0].heightCm, getItem('base_top_107_50').dimensions.heightCm);
+  assert.equal(getItem('base_top_107_50').isRender, true);
+  assert.equal(getItem('base_top_107_50').catalogVisible, false);
+
+  const banko = createCounterModuleState(100);
+  assert.equal(getItem(banko.faces.frontLower.itemKey).isRender, true);
+  assert.equal(banko.renderParts.tops[0].itemKey, 'counter_top_110_60');
+  assert.equal(getItem('connector_start').isRender, true);
+  assert.equal(getItem('connector_start').catalogVisible, false);
+  assert.equal(getItem('glass_shelf').isRender, true);
+  assert.equal(getItem('video_wall_panel').isRender, true);
 });

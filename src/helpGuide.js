@@ -195,6 +195,7 @@ function listGuideSections() {
       <ul>
         <li><strong>Yeni proje:</strong> Ayrı bir “Yeni” butonu yoktur. Stand Tipi bölümündeki <strong>Sahneyi Oluştur</strong> yeni proje başlatır ve yalnızca proje/stand adını sorar. Tam ad otomatik olarak <strong>Proje_adi-StandTipi_X_Y</strong> biçiminde oluşturulur; örneğin <strong>Ferromet-L_Sol_800_600</strong>.</li>
         <li><strong>Proje adını değiştir:</strong> <strong>Değiştir</strong> butonu yalnızca tireden önceki proje/stand adı bölümünü düzenler. Otomatik <strong>StandTipi_X_Y</strong> bölümü korunur; örneğin <strong>Ferromet-L_Sol_800_600</strong> adı <strong>Umaay-L_Sol_800_600</strong> olarak değiştirilebilir.</li>
+        <li><strong>Farklı Kaydet:</strong> mevcut sahneyi yeni proje UUID’si ve yeni görsel klasörüyle kopyalar. Ad diyaloğu <strong>Yeni Proje</strong> ile aynı kuralı kullanır: stand adı + otomatik <strong>StandTipi_X_Y</strong>. Önerilen ön ek <strong>(1)</strong> ile biter. Eski proje olduğu gibi kalır.</li>
         <li><strong>Kaydet:</strong> Stand, modüller, yerleşimler ve proje durumunu kaydeder.</li>
         <li><strong>Otomatik kayıt:</strong> Kayıtlı/açılmış projede değişiklik algılandıktan yaklaşık 5 saniye sonra çalışır.</li>
         <li><strong>Kayıtlı projeler:</strong> Dropdown'dan aktif projeden farklı bir proje seçildiğinde sistem <strong>"[mevcut proje] projeden [seçilen proje] projeye geçilecek"</strong> uyarısını gösterir. Onay verilirse seçilen proje açılır; iptal edilirse dropdown tekrar aktif projeye döner.</li>

@@ -100,6 +100,7 @@ class AdminSettingsService:
         max_image_upload_mb: object,
         export_button_visible: bool,
         import_button_visible: bool,
+        save_as_button_visible: bool,
     ) -> dict:
         max_mb = _positive_int(max_image_upload_mb, label="Görsel yükleme tavanı (MB)")
 
@@ -111,6 +112,7 @@ class AdminSettingsService:
         row.max_image_upload_mb = max_mb
         row.export_button_visible = bool(export_button_visible)
         row.import_button_visible = bool(import_button_visible)
+        row.save_as_button_visible = bool(save_as_button_visible)
         row.updated_at = now
         self._session.flush()
         return runtime_settings_payload(map_runtime_settings(row))

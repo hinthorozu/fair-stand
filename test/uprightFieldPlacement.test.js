@@ -211,7 +211,7 @@ test('field upright renderer uses a square wall-depth column, not an L', async (
   const fn = source.slice(source.indexOf('function createUprightModule'), source.indexOf('function createProfileModule'));
   assert.match(fn, /BoxGeometry\(thicknessM, heightM, depthM\)/);
   assert.doesNotMatch(fn, /STAND_DIMENSIONS/);
-  assert.match(fn, /FRAME_COLOR/);
+  assert.match(fn, /frameColorForModule\(moduleState\)/);
   assert.match(fn, /metalness: 0\.68/);
   assert.match(fn, /roughness: 0\.28/);
   assert.doesNotMatch(fn, /rotation\.y = Math\.PI \/ 2/);

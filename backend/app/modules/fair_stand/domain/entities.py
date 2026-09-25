@@ -37,3 +37,4 @@ class RuntimeSettings:
     max_image_upload_mb: int
     export_button_visible: bool
     import_button_visible: bool
+    save_as_button_visible: bool

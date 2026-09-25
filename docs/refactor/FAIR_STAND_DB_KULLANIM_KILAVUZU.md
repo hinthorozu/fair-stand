@@ -1078,12 +1078,14 @@ DB CHECK: `is_render=false` iken tüm `accepts_*` false olmalı.
 
 | | |
 |---|---|
-| **Ne** | Bu SKU sahneye **3D modül** olarak çizilir mi |
-| **Neden** | BOM parçası (iç panel, profil leaf) menüde değil, modül değil |
-| **Nasıl** | Katalogdan seçilen ürünler true; recipe child leaf false |
-| **Sahne** | false → mesh yok, accepts hepsi false |
-| **Örnek** | `wall_200` true; `panel_48_5` false |
-| **Kod** | Modül factory girişi |
+| **Ne** | `true` ise sistem bu SKU’yu çizer (mesh + renk/ölçü/`accepts_*`) |
+| **Neden** | Çizim katalog kartına bağlı olmamalı |
+| **Nasıl** | Çizilecek satır true. `catalog_visible` yalnız sürükle-bırak; bu kararın parçası değil |
+| **Sahne** | false → bugün mesh yok. true → hedefte parent içinde de çizilir |
+| **Örnek** | `wall_200` true. `connector_*` true, katalog false, tek başına modül yok |
+| **Bugün** | Kullanılan parça tipleri `is_render`: panel, tabla, bağlayıcı, vitrin gövde, cam raf, video duvar paneli. Zemin ve `shelf_leg` reçetede yok, false |
+| **Karıştırma** | Katalog = sürükle-bırak. `paintable` yalnız zemin |
+| **Kod** | `itemHasSceneRender`. Sözleşme: [`ITEMS.md`](ITEMS.md) § isRender |
 
 #### `accepts_color`
 
@@ -1150,7 +1152,10 @@ DB CHECK: `is_render=false` iken tüm `accepts_*` false olmalı.
 | SKU tipi | is_render | color | image | glass | lightbox | mesh |
 |---|---|---|---|---|---|---|
 | Duvar `wall_200` | evet | evet | evet | evet | evet | evet |
-| BOM leaf `panel_48_5` | hayır | hayır | hayır | hayır | hayır | hayır |
+| `panel_*` | evet | evet | evet | evet | evet | evet |
+| Raf, koltuk, sandalye, bar taburesi, Eames takımı, uzun saksı, projektör | evet | evet | hayır | hayır | hayır | hayır |
+| Kettle, buzdolabı, askılık, cam sehpa, orta sehpa, tek bitki | evet | hayır | hayır | hayır | hayır | hayır |
+| İç parça hedef (`base_top`, panel) | evet | parça bayrağı | parça bayrağı | parça bayrağı | parça bayrağı | parça bayrağı |
 | Koltuk GLB | evet | kısmi* | hayır | hayır | hayır | hayır |
 
 \*Koltukta renk hedef mesh’ler `colorTargets` ile; yine item `accepts_color` bootstrap’tan gelir.
@@ -1617,6 +1622,15 @@ Seed (varsayılan): tavan 350 / derinlik 10 / çerçeve 5.5×10 / panel ray **0.
 | **Neden** | Ayrı kapı export’tan |
 | **Sahne** | `#import-project` |
 | **Kod** | aynı |
+
+#### `save_as_button_visible`
+
+| | |
+|---|---|
+| **Ne** | **Farklı Kaydet** butonu görünür mü |
+| **Neden** | Mevcut projeyi yeni UUID + görsel klasörüyle kopyalama kapısı |
+| **Sahne** | `#save-as-project` |
+| **Kod** | `applyArchiveButtonVisibility`, `projectSaveAs.js` |
 
 #### `created_at`
 

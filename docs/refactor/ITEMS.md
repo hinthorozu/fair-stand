@@ -184,17 +184,17 @@ Catalog görünümü `Item.type` üzerinden belirlenmez. Catalog preview rendere
 - **Required:** yes
 - **Scope:** Item master (`fair_stand_items`; kolon örn. `is_render`)
 - **Default:** yok; her Item açık değer taşır
-- **Amaç:** Bu Item kendi sahne mesh/modülüne sahip mi, yoksa yalnız BOM/sanal mı
-- **`true`:** kendi render’ı var — `wall_200`, `profile_190`, lightbox. Drop/placement bu satırdan.
-- **`false`:** kayıt ve reçete adedi var; **bu Item sahneye çizilmez** — `connector_*`. `panel_197` bugün `false` (duvar kendi mesh’ini çizer, panel instance değil).
-- **`catalogVisible` ayrıdır:** kart görünsün mü. Connector ikisi `false`. Profil ikisi `true`. Sahnede durup katalogda gizlenmek serbest (`isRender true`, `catalogVisible false`).
-- Duvar sınıfı / `item_type` listesi değildir. Motor bu kolona bakar.
-- Reçete çocuk `isRender false` kalabilir; parent `true` kendi gövdesini çizer. Paneli gerçek yapmak = aynı satırda `isRender` (ve gerekirse katalog) açmak.
-- **Canonical consumer:** sahne / SCENE_POSE (hedef); BOM her iki değerde de child sayabilir
+- **Amaç (kilit, 2026-09-25):** `isRender=true` ise sistem bu SKU’yu **çizer**. Katalog / sürükle-bırak bu karara girmez.
+- **`true`:** Mesh ve yüzey özellikleri (`default_color`, ölçü, `accepts_*`) bu satırdan. Tek başına modül (`wall_200`) veya parent içinde child (tabla, panel) fark etmez.
+- **`false`:** Mesh yok. Reçetede kullanılmayanlar (`floor`, `shelf_leg`) burada kalır. Aile adı yasak değildir; kullanılan parça false bırakılmaz.
+- **`catalogVisible`:** yalnız sürükle-bırak kartı. Çizim kuralının parçası değil.
+- **Bugün kod:** Factory `isRender` kapısına bakar, kataloga bakmaz. Reçeteli modül (duvar, baza, banko, kapı, separator, vitrin) gömülü `isRender` parçanın `itemKey`, `default_color`, `accepts_*` ve sahne ölçüsünü (`widthCm` / `heightCm` / `depthCm`) yüzeye yazar; kutu o santimi kullanır. Gömülü tipler: `panel`, `separator-panel`, `base-top`, `counter-top`, `connector`, `showcase-board`, `showcase-accessory`, `video-wall-panel`. Profil ve dikme kendi modülüdür. `connector_*` `isRender=true` ama kendi yerleşim tipi olmadığı için tek başına modül olmaz; parent içinde parça kaydıdır. Zemin ve `shelf_leg` reçetede kullanılmadığı için `false` kalır.
+- **Yasak:** Çizimi katalog kartına bağlamak; `isRender=true` child’ı parent’ın atlaması; bir aile adını kalıcı “çizilmez” saymak.
+- **Canonical consumer:** sahne (hedef: `isRender` mesh, parent içinde de); factory bugün yerleşim tipi olan SKU.
 - **Kullanıcı değiştirir mi:** hayır (admin master)
 - **Project instance override:** hayır
 - **Validation:** `true` veya `false`; `null` yasak
-- **Kod:** `itemHasSceneRender` / `createModuleStateFromDescriptor` — `isRender !== true` ise modül state yok. `catalogVisible` bu kapıyı etkilemez. Adım 3.
+- **Kod:** `itemHasSceneRender` / `createModuleStateFromDescriptor` — `isRender !== true` ise modül state yok. `catalogVisible` bu kapıyı etkilemez.
 
 ### defaultZCm
 

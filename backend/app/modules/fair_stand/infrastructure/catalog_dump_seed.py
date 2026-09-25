@@ -112,9 +112,6 @@ def seed_catalog_if_empty(bind) -> None:
     from app.modules.fair_stand.infrastructure.item_rotation_seed import fill_item_rotation_columns
 
     fill_item_rotation_columns(bind)
-    from app.modules.fair_stand.infrastructure.item_surface_flags_seed import fill_item_surface_flag_columns
-
-    fill_item_surface_flag_columns(bind)
     from app.modules.fair_stand.infrastructure.item_default_z_seed import fill_item_default_z_columns
 
     fill_item_default_z_columns(bind)

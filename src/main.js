@@ -40,7 +40,9 @@ import {
   buildAutomaticProjectNameSuffix,
   createProjectNamingController,
   getEditableProjectName,
+  suggestSaveAsEditableName,
 } from './projectNaming.js';
+import { buildSaveAsClone } from './projectSaveAs.js';
 import { createAutosaveController } from './autosaveController.js';
 import { createProjectLoadingController, setButtonBusy } from './projectUi.js';
 import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';
@@ -174,6 +176,7 @@ const projectNameDisplay = document.querySelector('#project-name-display');
 const renameProjectButton = document.querySelector('#rename-project');
 const projectSelect = document.querySelector('#project-select');
 const saveProjectButton = document.querySelector('#save-project');
+const saveAsProjectButton = document.querySelector('#save-as-project');
 const openProjectButton = document.querySelector('#open-project');
 const exportProjectButton = document.querySelector('#export-project');
 const importProjectButton = document.querySelector('#import-project');
@@ -2041,6 +2044,67 @@ saveProjectButton.addEventListener('click', async () => {
     projectStatus.textContent = 'Proje kaydedilemedi.';
   } finally {
     setButtonBusy(saveProjectButton, false);
+  }
+});
+
+saveAsProjectButton?.addEventListener('click', async () => {
+  const currentName = projectNameInput.value.trim() || 'Adsız Proje';
+  const projectNameSuffix = currentStand
+    ? buildAutomaticProjectNameSuffix(currentStand.standType, currentStand.xCm, currentStand.yCm)
+    : '';
+  const editableName = getEditableProjectName(currentName, projectNameSuffix);
+  const suggestedEditable = suggestSaveAsEditableName(editableName);
+  const nextName = await requestProjectName({
+    defaultName: suggestedEditable,
+    mode: 'save-as',
+    suffix: projectNameSuffix,
+  });
+  if (!nextName) return;
+
+  setButtonBusy(saveAsProjectButton, true, 'Kopyalanıyor');
+  projectStatus.textContent = 'Proje farklı kaydediliyor…';
+  let createdProjectId = null;
+  let storageTouched = false;
+  try {
+    const sourceAssets = [...imageAssets.values()].map((asset) => ({
+      id: asset.id,
+      name: asset.name,
+      type: asset.type,
+      createdAt: asset.createdAt,
+      blob: asset.blob,
+    }));
+    const newProjectId = createProjectId();
+    const { project, assets } = buildSaveAsClone({
+      snapshot: buildProjectSnapshot(),
+      assets: sourceAssets,
+      newProjectId,
+      newName: nextName,
+    });
+    createdProjectId = project.id;
+    storageTouched = true;
+    for (const asset of assets) {
+      await saveImportedImageAsset(project.id, asset);
+      markAssetDirty(project.id, asset.id);
+    }
+    await saveProject(project);
+    const stored = await loadProject(project.id);
+    if (!stored) throw new Error('Farklı kaydedilen proje tekrar okunamadı.');
+    await restoreProject(stored);
+    autosaveController.enableFromCurrentState();
+    projectStatus.textContent = `Farklı kaydedildi · ${assets.length} görsel: ${stored.name}`;
+  } catch (error) {
+    if (storageTouched && createdProjectId) {
+      try {
+        await deleteProjectWithAssets(createdProjectId);
+        await refreshProjectList(activeProjectId);
+      } catch (cleanupError) {
+        console.warn('Başarısız farklı kaydet temizlenemedi:', cleanupError);
+      }
+    }
+    console.warn('Proje farklı kaydedilemedi:', error);
+    projectStatus.textContent = `Proje farklı kaydedilemedi: ${error?.message || 'Bilinmeyen hata.'}`;
+  } finally {
+    setButtonBusy(saveAsProjectButton, false);
   }
 });
 

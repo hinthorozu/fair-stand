@@ -11,6 +11,7 @@ STAND_SETTINGS_ID = 1
 MAX_IMAGE_UPLOAD_MB = 5
 EXPORT_BUTTON_VISIBLE = True
 IMPORT_BUTTON_VISIBLE = True
+SAVE_AS_BUTTON_VISIBLE = True
 
 
 def ensure_runtime_settings(session: Session) -> FairStandSettingsModel:
@@ -22,6 +23,7 @@ def ensure_runtime_settings(session: Session) -> FairStandSettingsModel:
             max_image_upload_mb=MAX_IMAGE_UPLOAD_MB,
             export_button_visible=EXPORT_BUTTON_VISIBLE,
             import_button_visible=IMPORT_BUTTON_VISIBLE,
+            save_as_button_visible=SAVE_AS_BUTTON_VISIBLE,
             created_at=now,
             updated_at=now,
         )

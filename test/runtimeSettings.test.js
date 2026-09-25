@@ -10,6 +10,7 @@ import {
   initializeRuntimeSettings,
   isExportButtonVisible,
   isImportButtonVisible,
+  isSaveAsButtonVisible,
   resetRuntimeSettings,
 } from '../src/runtimeSettings.js';
 
@@ -18,6 +19,7 @@ function canonicalSettings(overrides = {}) {
     maxImageUploadMb: 5,
     exportButtonVisible: true,
     importButtonVisible: true,
+    saveAsButtonVisible: true,
     ...overrides,
   };
 }
@@ -44,6 +46,7 @@ test('canonical catalog settings seed 5 MB and archive buttons visible', () => {
   assert.equal(formatImageUploadTooLargeMessage(), 'Görsel en fazla 5 MB olabilir.');
   assert.equal(isExportButtonVisible(), true);
   assert.equal(isImportButtonVisible(), true);
+  assert.equal(isSaveAsButtonVisible(), true);
 });
 
 test('message follows bootstrapped MB', () => {
@@ -61,17 +64,21 @@ test('archive buttons start hidden in markup', () => {
   const markup = readFileSync(new URL('../src/configuratorMarkup.js', import.meta.url), 'utf8');
   assert.match(html, /id="export-project" type="button" hidden/);
   assert.match(html, /id="import-project" type="button" hidden/);
+  assert.match(html, /id="save-as-project" type="button" hidden/);
   assert.match(markup, /id=\\"export-project\\" type=\\"button\\" hidden/);
   assert.match(markup, /id=\\"import-project\\" type=\\"button\\" hidden/);
+  assert.match(markup, /id=\\"save-as-project\\" type=\\"button\\" hidden/);
 });
 
 test('applyArchiveButtonVisibility follows settings without showing then hiding', () => {
   const exportButton = { hidden: true };
   const importButton = { hidden: true };
+  const saveAsButton = { hidden: true };
   const documentRef = {
     querySelector(selector) {
       if (selector === '#export-project') return exportButton;
       if (selector === '#import-project') return importButton;
+      if (selector === '#save-as-project') return saveAsButton;
       return null;
     },
   };
@@ -79,10 +86,12 @@ test('applyArchiveButtonVisibility follows settings without showing then hiding'
     initializeRuntimeSettings(canonicalSettings({
       exportButtonVisible: false,
       importButtonVisible: true,
+      saveAsButtonVisible: false,
     }));
     applyArchiveButtonVisibility(documentRef);
     assert.equal(exportButton.hidden, true);
     assert.equal(importButton.hidden, false);
+    assert.equal(saveAsButton.hidden, true);
   } finally {
     loadCanonicalItemCatalog();
   }

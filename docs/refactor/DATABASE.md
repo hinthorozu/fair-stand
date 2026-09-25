@@ -351,6 +351,7 @@ Kaynak: PostgreSQL `fair_stand_settings` → catalog bootstrap `settings` → `i
 | `max_image_upload_mb` | `maxImageUploadMb` | Görsel arşiv yükleme tavanı (MB) | JS sabiti yok; aşım popup | `src/runtimeSettings.js` → `imageOptimize.js` / `main.js` |
 | `export_button_visible` | `exportButtonVisible` | Dışarı Aktar butonu | Zip günlük vitrin değil; DB kapatır | `applyArchiveButtonVisibility` → `#export-project` |
 | `import_button_visible` | `importButtonVisible` | İçe Aktar butonu | Ayrı kapı | `applyArchiveButtonVisibility` → `#import-project` |
+| `save_as_button_visible` | `saveAsButtonVisible` | Farklı Kaydet butonu | Yeni UUID + görsel klasör kopyası | `applyArchiveButtonVisibility` → `#save-as-project`; `projectSaveAs.js` |
 | `created_at` / `updated_at` | yok | Audit | — | DB |
 
 Seed: MB `5`; butonlar `true` (mevcut davranış). Markup’ta butonlar `hidden` başlar; bootstrap sonrası ayar `true` ise açılır (flash yok). UI kilidi; zip endpoint güvenlik değildir.

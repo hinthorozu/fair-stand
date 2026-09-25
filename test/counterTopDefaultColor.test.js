@@ -19,6 +19,6 @@ test('all counter-top Items carry the canonical optional default color', () => {
   }
 });
 
-test('defaultColor remains optional for Items without a product default color', () => {
-  assert.equal(getItem('panel_98').defaultColor, undefined);
+test('panel_98 carries the white starting color', () => {
+  assert.equal(getItem('panel_98').defaultColor, 0xffffff);
 });

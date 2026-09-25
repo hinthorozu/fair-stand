@@ -53,6 +53,27 @@ const COLOR_ONLY_TYPES = new Set([
 
 const LEAF_COLOR_IMAGE_TYPES = new Set(['door-leaf']);
 
+/** Parent içinde çizilen parçalar. Kendi modül fabrikası yok; katalog şart değil. */
+const EMBEDDED_RENDER_TYPES = new Set([
+  'panel',
+  'separator-panel',
+  'base-top',
+  'counter-top',
+  'connector',
+  'showcase-board',
+  'showcase-accessory',
+  'video-wall-panel',
+]);
+
+const EMBEDDED_COLOR_TYPES = new Set([
+  'panel',
+  'separator-panel',
+  'base-top',
+  'counter-top',
+]);
+
+const EMBEDDED_COVER_TYPES = new Set(['panel']);
+
 const ALL_FALSE = Object.freeze({
   isRender: false,
   acceptsColor: false,
@@ -64,14 +85,14 @@ const ALL_FALSE = Object.freeze({
 
 export function surfaceFlagsForItem(itemKey, itemType) {
   void itemKey;
-  if (LEAF_COLOR_IMAGE_TYPES.has(itemType)) {
+  if (LEAF_COLOR_IMAGE_TYPES.has(itemType) || EMBEDDED_RENDER_TYPES.has(itemType)) {
     return {
       isRender: true,
-      acceptsColor: true,
-      acceptsImage: true,
-      acceptsLightbox: false,
-      acceptsGlass: false,
-      acceptsMesh: false,
+      acceptsColor: LEAF_COLOR_IMAGE_TYPES.has(itemType) || EMBEDDED_COLOR_TYPES.has(itemType),
+      acceptsImage: LEAF_COLOR_IMAGE_TYPES.has(itemType) || EMBEDDED_COVER_TYPES.has(itemType),
+      acceptsLightbox: EMBEDDED_COVER_TYPES.has(itemType),
+      acceptsGlass: EMBEDDED_COVER_TYPES.has(itemType),
+      acceptsMesh: EMBEDDED_COVER_TYPES.has(itemType),
     };
   }
   if (!PLACEABLE_ITEM_TYPES.has(itemType)) return { ...ALL_FALSE };

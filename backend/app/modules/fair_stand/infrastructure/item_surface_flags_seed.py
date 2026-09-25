@@ -40,17 +40,40 @@ _COLOR_ONLY_TYPES = frozenset(
 
 _LEAF_COLOR_IMAGE_TYPES = frozenset({"door-leaf"})
 
+# Parent içinde çizilen parçalar. Katalog ve modül fabrikası yok.
+_EMBEDDED_RENDER_TYPES = frozenset(
+    {
+        "panel",
+        "separator-panel",
+        "base-top",
+        "counter-top",
+        "connector",
+        "showcase-board",
+        "showcase-accessory",
+        "video-wall-panel",
+    }
+)
+_EMBEDDED_COLOR_TYPES = frozenset(
+    {
+        "panel",
+        "separator-panel",
+        "base-top",
+        "counter-top",
+    }
+)
+_EMBEDDED_COVER_TYPES = frozenset({"panel"})
+
 
 def surface_flags_for_item(item_key: str, item_type: str) -> dict[str, bool]:
     del item_key
-    if item_type in _LEAF_COLOR_IMAGE_TYPES:
+    if item_type in _LEAF_COLOR_IMAGE_TYPES or item_type in _EMBEDDED_RENDER_TYPES:
         return {
             "is_render": True,
-            "accepts_color": True,
-            "accepts_image": True,
-            "accepts_lightbox": False,
-            "accepts_glass": False,
-            "accepts_mesh": False,
+            "accepts_color": item_type in _LEAF_COLOR_IMAGE_TYPES or item_type in _EMBEDDED_COLOR_TYPES,
+            "accepts_image": item_type in _LEAF_COLOR_IMAGE_TYPES or item_type in _EMBEDDED_COVER_TYPES,
+            "accepts_lightbox": item_type in _EMBEDDED_COVER_TYPES,
+            "accepts_glass": item_type in _EMBEDDED_COVER_TYPES,
+            "accepts_mesh": item_type in _EMBEDDED_COVER_TYPES,
         }
     is_render = item_type in PLACEABLE_ITEM_TYPES
     if not is_render:
@@ -77,6 +100,8 @@ def surface_flags_for_item(item_key: str, item_type: str) -> dict[str, bool]:
 
 
 def apply_item_surface_flags(row: dict) -> dict:
+    if "is_render" in row:
+        return row
     flags = surface_flags_for_item(row["item_key"], row["item_type"])
     row.update(flags)
     return row

@@ -6,12 +6,13 @@ import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { getModuleCatalogItem, getModuleCatalogLabel } from './catalog.js';
 import { STAND_DIMENSIONS } from './standDimensions.js';
 import { WALL_PANEL_BAND_PITCH_CM, resolveModuleBandPitchCm } from './wallPanelBand.js';
-import { ALUMINUM_PROFILE_COLOR, GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
+import { GLASS_APPEARANCE, TABLE_GLASS_APPEARANCE, PANEL_GLASS_BACKING_APPEARANCE, getMaterialAppearance } from './theme.js';
 import { surfaceCapabilityUserData } from './itemCapabilities.js';
 import {
   getCommercialItemForType,
   getFloorItem,
   getItem,
+  itemDefaultColorCss,
   getShowcaseBodyDefinition,
   isCarpetFloorItem,
   isGridTileFloorItem,
@@ -67,7 +68,26 @@ import {
 import { getModuleGhostBehavior, isFreePlacementModule, isTopPlacementModule, isWallOverlayModule, requiresShortUpJointSnap, resolveModuleRotationDeltaDeg, supportsWallOverlayMount, usesPanelSeamOverlaySnap } from './moduleBehavior.js';
 import { createModuleCatalogPreview } from './moduleDragSidebar.js';
 
-const FRAME_COLOR = ALUMINUM_PROFILE_COLOR;
+function frameColorForModule(moduleState) {
+  const item = getItem(moduleState?.itemKey);
+  if ((item?.type === 'profile' || item?.type === 'upright') && Number.isInteger(item.defaultColor)) {
+    return itemDefaultColorCss(item);
+  }
+  const rows = item?.composition?.mode === 'recipe' ? item.composition.items : [];
+  const children = rows.map((row) => getItem(row?.itemKey)).filter(Boolean);
+  const profile = children.find((child) => child.type === 'profile' && Number.isInteger(child.defaultColor));
+  if (profile) return itemDefaultColorCss(profile);
+  const upright = children.find((child) => child.type === 'upright' && Number.isInteger(child.defaultColor));
+  if (upright) return itemDefaultColorCss(upright);
+  throw new TypeError(`Missing frame defaultColor for ${item?.itemKey ?? 'unknown Item'}.`);
+}
+
+function moduleSurfaceColor(moduleState, item) {
+  if (typeof moduleState?.surface?.color === 'string' && moduleState.surface.color) {
+    return moduleState.surface.color;
+  }
+  return itemDefaultColorCss(item ?? moduleState?.itemKey);
+}
 const PANEL_BACK_COLOR = 0x4b5563;
 const PANEL_VERTICAL_CLEARANCE_M = 0;
 const MESH_FABRIC_OPACITY = 0.48;
@@ -5196,7 +5216,7 @@ function createMiniFridgeModule(moduleState, moduleIndex) {
     moduleType: 'mini-fridge',
     moduleIndex,
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     widthCm,
     depthCm,
     heightCm,
@@ -5280,7 +5300,7 @@ function createIndoorPlantModule(moduleState, moduleIndex) {
     moduleType: type,
     moduleIndex,
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     widthCm,
     depthCm,
     heightCm,
@@ -5425,7 +5445,7 @@ function createCoatRackModule(moduleState, moduleIndex) {
     moduleType: 'coat-rack',
     moduleIndex,
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     widthCm,
     depthCm,
     heightCm,
@@ -5482,7 +5502,7 @@ function createUprightModule(moduleState, moduleIndex) {
   const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(thicknessM, heightM, depthM),
     new THREE.MeshStandardMaterial({
-      color: FRAME_COLOR,
+      color: frameColorForModule(moduleState),
       metalness: 0.68,
       roughness: 0.28,
     }),
@@ -5497,7 +5517,7 @@ function createUprightModule(moduleState, moduleIndex) {
     moduleType: 'upright',
     moduleIndex,
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     widthCm: sectionWidthCm,
     depthCm: Number.isFinite(depthCm) ? depthCm : sectionWidthCm,
     heightCm,
@@ -5530,7 +5550,7 @@ function createProfileModule(moduleState, moduleIndex) {
   const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(widthM, railHeightM, thicknessM),
     new THREE.MeshStandardMaterial({
-      color: FRAME_COLOR,
+      color: frameColorForModule(moduleState),
       metalness: 0.68,
       roughness: 0.28,
     }),
@@ -5545,7 +5565,7 @@ function createProfileModule(moduleState, moduleIndex) {
     moduleType: 'profile',
     moduleIndex,
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     widthCm: spanWidthCm,
     depthCm: crossDepthCm,
     heightCm,
@@ -5583,7 +5603,7 @@ function createKettleModule(moduleState, moduleIndex) {
     moduleType: 'kettle',
     moduleIndex,
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     widthCm,
     depthCm,
     heightCm,
@@ -5816,7 +5836,7 @@ function createLedFloodlightModule(moduleState, moduleIndex) {
     kind: 'surface',
     moduleType: 'led-floodlight',
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     moduleIndex,
     moduleId: moduleState.id,
     widthCm,
@@ -5863,7 +5883,7 @@ function createBarStoolModule(moduleState, moduleIndex) {
     kind: 'surface',
     moduleType: 'bar-stool',
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     moduleIndex,
     moduleId: moduleState.id,
     widthCm,
@@ -5892,7 +5912,7 @@ function createBarStoolModule(moduleState, moduleIndex) {
       // base-color texture so the original frame/legs and every other GLB material stay intact.
       object.material = object.material.clone();
       object.material.map = null;
-      object.material.color?.set(moduleState.surface?.color ?? '#ffffff');
+      object.material.color?.set(moduleSurfaceColor(moduleState, 'furniture_bar_stool_classic'));
       object.material.needsUpdate = true;
       colorTargets.push(object);
     });
@@ -5943,7 +5963,7 @@ function createEamesChairModule(moduleState, moduleIndex) {
     kind: 'surface',
     moduleType: 'chair',
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     moduleIndex,
     moduleId: moduleState.id,
     widthCm,
@@ -5965,10 +5985,10 @@ function createEamesChairModule(moduleState, moduleIndex) {
       object.receiveShadow = true;
       if (object.material) object.material = object.material.clone();
       if (object.material?.name === 'plastic_wit') {
-        object.material.color.set(moduleState.surface?.color ?? '#ffffff');
+        object.material.color.set(moduleSurfaceColor(moduleState, 'chair_eames'));
         colorTargets.push(object);
       } else if (object.material?.name === 'Material1') {
-        object.material.color.set('#a66b3d');
+        object.material.color.set(itemDefaultColorCss('furniture_coffee_table_classic'));
         object.material.metalness = 0;
         object.material.roughness = 0.58;
       }
@@ -6056,7 +6076,7 @@ function createGlassTableModule(moduleState, moduleIndex) {
     kind: 'surface',
     moduleType: 'table-glass',
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     moduleIndex,
     moduleId: moduleState.id,
     widthCm,
@@ -6118,7 +6138,7 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
       kind: 'surface',
       moduleType: 'table-chair-set-eames',
       selectionMode: 'module',
-      acceptsImage: false,
+      ...surfaceCapabilityUserData(moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -6144,11 +6164,11 @@ function createEamesTableChairSetModule(moduleState, moduleIndex) {
         object.receiveShadow = true;
         if (object.material) object.material = object.material.clone();
         if (object.material?.name === 'plastic_wit') {
-          object.material.color.set(moduleState.surface?.color ?? '#ffffff');
+          object.material.color.set(moduleSurfaceColor(moduleState, 'chair_eames'));
           colorTargets.push(object);
         } else if (object.material?.name === 'Material1') {
           // Eames GLB: Material1 is the four wooden chair legs.
-          object.material.color.set('#a66b3d');
+          object.material.color.set(itemDefaultColorCss('furniture_coffee_table_classic'));
           object.material.metalness = 0;
           object.material.roughness = 0.58;
         }
@@ -6214,7 +6234,7 @@ const BEIGE_SOFA_LEG_MASKS = Object.freeze({
   }),
 });
 
-function makeBeigeSofaBodyWhite(object, upholsteryColor = '#ffffff') {
+function makeBeigeSofaBodyWhite(object, upholsteryColor) {
   if (!object?.isMesh || !object.geometry || !object.material) return;
   const mask = BEIGE_SOFA_LEG_MASKS[object.name];
   if (!mask) return;
@@ -6316,7 +6336,7 @@ function addClassicCoffeeTable(group, item, { x = 0, z = 0 } = {}) {
 
   const tableStem = new THREE.Mesh(
     new THREE.CylinderGeometry(0.035, 0.035, 0.35, 20),
-    new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.28 }),
+    new THREE.MeshStandardMaterial({ color: itemDefaultColorCss(item), metalness: 0.72, roughness: 0.28 }),
   );
   tableStem.position.set(x, 0.19, z);
   tableStem.castShadow = true;
@@ -6324,7 +6344,7 @@ function addClassicCoffeeTable(group, item, { x = 0, z = 0 } = {}) {
 
   const tableBase = new THREE.Mesh(
     new THREE.CylinderGeometry(0.22, 0.24, 0.035, 32),
-    new THREE.MeshStandardMaterial({ color: 0x4b5563, metalness: 0.72, roughness: 0.30 }),
+    new THREE.MeshStandardMaterial({ color: itemDefaultColorCss(item), metalness: 0.72, roughness: 0.30 }),
   );
   tableBase.position.set(x, 0.018, z);
   tableBase.castShadow = true;
@@ -6412,7 +6432,7 @@ function createBeigeSofaFurnitureProxy(group, moduleState, {
     kind: 'surface',
     moduleType: type,
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
     moduleIndex: group.userData.moduleIndex,
     moduleId: moduleState.id,
     widthCm,
@@ -6495,7 +6515,7 @@ function createBeigeSofaSetModule(moduleState, moduleIndex) {
         group,
         template,
         placement,
-        moduleState.surface?.color ?? '#ffffff',
+        moduleSurfaceColor(moduleState, 'furniture_sofa_set_classic'),
         colorTargets,
       );
     });
@@ -6545,7 +6565,7 @@ function createSofaPieceClassicModule(moduleState, moduleIndex, itemKey, meshNam
         z: 0,
         rotationYDeg: Number(moduleState.visualRotationYDeg ?? item.visualRotationYDeg) || 0,
       },
-      moduleState.surface?.color ?? '#ffffff',
+      moduleSurfaceColor(moduleState, item),
       colorTargets,
     );
   }).catch((error) => {
@@ -6603,6 +6623,35 @@ function createCoffeeTableClassicModule(moduleState, moduleIndex) {
   return { group, surfaces: [proxy] };
 }
 
+function partSpanM(surfaceState, fallbackM, field) {
+  const cm = Number(surfaceState?.[field]);
+  if (Number.isFinite(cm) && cm > 0) return cm / 100;
+  return fallbackM;
+}
+
+function mountRecipeTopSurface(mesh, part, moduleState, moduleType, moduleIndex, surfaces, onSurfaceReady) {
+  if (!mesh || !part) return;
+  const widthM = partSpanM(part, mesh.geometry?.parameters?.width, 'widthCm');
+  const heightM = partSpanM(part, mesh.geometry?.parameters?.height, 'heightCm');
+  const depthM = partSpanM(part, mesh.geometry?.parameters?.depth, 'depthCm');
+  if (mesh.geometry?.dispose) mesh.geometry.dispose();
+  mesh.geometry = new THREE.BoxGeometry(widthM, heightM, depthM);
+  if (part.color && mesh.material?.color) mesh.material.color.set(part.color);
+  mesh.userData = {
+    kind: 'surface',
+    moduleType,
+    selectionMode: 'module',
+    ...surfaceCapabilityUserData(part.itemKey ?? moduleState.itemKey),
+    moduleIndex,
+    moduleId: moduleState.id,
+    surfaceRole: 'top',
+    surfaceId: part.id,
+    ...bindRendererSurfaceState(part),
+  };
+  surfaces.push(mesh);
+  onSurfaceReady?.(mesh);
+}
+
 function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const widthCm = Number(moduleState.widthCm);
   const depthCm = Number(moduleState.depthCm) || 50;
@@ -6634,7 +6683,7 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
   };
 
   const frameMaterial = new THREE.MeshStandardMaterial({
-    color: FRAME_COLOR,
+    color: frameColorForModule(moduleState),
     metalness: 0.68,
     roughness: 0.28,
   });
@@ -6698,9 +6747,12 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const surfaces = [];
   const addPanelFace = (surfaceRole, surfaceState, faceWidthM, position, rotationY = 0) => {
     if (!surfaceState) return;
+    const faceWidth = partSpanM(surfaceState, faceWidthM, 'widthCm');
+    const faceHeight = partSpanM(surfaceState, panelHeightM, 'heightCm');
+    const faceDepth = partSpanM(surfaceState, 0.012, 'depthCm');
 
     const backing = new THREE.Mesh(
-      new THREE.BoxGeometry(faceWidthM, panelHeightM, 0.012),
+      new THREE.BoxGeometry(faceWidth, faceHeight, faceDepth),
       new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74, metalness: 0 }),
     );
     backing.position.copy(position);
@@ -6713,7 +6765,7 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(backing);
 
     const surface = new THREE.Mesh(
-      new THREE.PlaneGeometry(faceWidthM, panelHeightM),
+      new THREE.PlaneGeometry(faceWidth, faceHeight),
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
         roughness: 0.72,
@@ -6729,14 +6781,14 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
     else if (surfaceRole === 'left') surface.position.x -= 0.006;
     else surface.position.x += 0.006;
 
-    const selectionFrame = createSelectionFrame(faceWidthM, panelHeightM);
+    const selectionFrame = createSelectionFrame(faceWidth, faceHeight);
     selectionFrame.visible = false;
     surface.add(selectionFrame);
     surface.userData = {
       kind: 'surface',
       moduleType: 'base',
       selectionMode: 'module',
-      ...surfaceCapabilityUserData(moduleState.itemKey),
+      ...surfaceCapabilityUserData(surfaceState?.itemKey ?? moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -6761,6 +6813,7 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
   addPanelFace('front', moduleState.faces?.front, frontPanelWidthM, new THREE.Vector3(0, panelCenterY, frontZ));
   addPanelFace('left', moduleState.faces?.left, sidePanelWidthM, new THREE.Vector3(leftX, panelCenterY, 0), -Math.PI / 2);
   addPanelFace('right', moduleState.faces?.right, sidePanelWidthM, new THREE.Vector3(rightX, panelCenterY, 0), Math.PI / 2);
+  mountRecipeTopSurface(top, moduleState.renderParts?.tops?.[0], moduleState, 'base', moduleIndex, surfaces, onSurfaceReady);
 
   return { group, surfaces };
 }
@@ -6798,7 +6851,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   };
 
   const frameMaterial = new THREE.MeshStandardMaterial({
-    color: FRAME_COLOR,
+    color: frameColorForModule(moduleState),
     metalness: 0.68,
     roughness: 0.28,
   });
@@ -6870,9 +6923,12 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     rotationY = 0,
   ) => {
     if (!surfaceState) return;
+    const faceWidth = partSpanM(surfaceState, faceWidthM, 'widthCm');
+    const faceHeight = partSpanM(surfaceState, panelHeightM, 'heightCm');
+    const faceDepth = partSpanM(surfaceState, 0.012, 'depthCm');
 
     const backing = new THREE.Mesh(
-      new THREE.BoxGeometry(faceWidthM, panelHeightM, 0.012),
+      new THREE.BoxGeometry(faceWidth, faceHeight, faceDepth),
       new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74, metalness: 0 }),
     );
     backing.position.copy(position);
@@ -6885,7 +6941,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(backing);
 
     const surface = new THREE.Mesh(
-      new THREE.PlaneGeometry(faceWidthM, panelHeightM),
+      new THREE.PlaneGeometry(faceWidth, faceHeight),
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
         roughness: 0.72,
@@ -6901,7 +6957,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     else if (surfaceRole === 'left') surface.position.x -= 0.006;
     else surface.position.x += 0.006;
 
-    const selectionFrame = createSelectionFrame(faceWidthM, panelHeightM);
+    const selectionFrame = createSelectionFrame(faceWidth, faceHeight);
     selectionFrame.visible = false;
     surface.add(selectionFrame);
 
@@ -6909,7 +6965,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'counter',
       selectionMode: 'module',
-      ...surfaceCapabilityUserData(moduleState.itemKey),
+      ...surfaceCapabilityUserData(surfaceState?.itemKey ?? moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -6939,6 +6995,7 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   addFace('left', 'upper', moduleState.faces?.leftUpper, sidePanelWidthM, new THREE.Vector3(leftX, upperY, 0), -Math.PI / 2);
   addFace('right', 'lower', moduleState.faces?.rightLower, sidePanelWidthM, new THREE.Vector3(rightX, lowerY, 0), Math.PI / 2);
   addFace('right', 'upper', moduleState.faces?.rightUpper, sidePanelWidthM, new THREE.Vector3(rightX, upperY, 0), Math.PI / 2);
+  mountRecipeTopSurface(top, moduleState.renderParts?.tops?.[0], moduleState, 'counter', moduleIndex, surfaces, onSurfaceReady);
 
   return { group, surfaces };
 }
@@ -6962,7 +7019,7 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const shortPanelM = Math.max(armM - profileM * 2 - 0.012, 0.05);
   const group = new THREE.Group();
   group.userData = { kind:'module', moduleIndex, moduleId:moduleState.id, type:'counter', widthCm, depthCm, heightCm:100, counterShape:'L' };
-  const frameMaterial = new THREE.MeshStandardMaterial({ color:FRAME_COLOR, metalness:0.68, roughness:0.28 });
+  const frameMaterial = new THREE.MeshStandardMaterial({ color:frameColorForModule(moduleState), metalness:0.68, roughness:0.28 });
   const addProfile = (geometry, position) => { const mesh = new THREE.Mesh(geometry, frameMaterial.clone()); mesh.position.copy(position); mesh.castShadow=true; mesh.receiveShadow=true; group.add(mesh); return mesh; };
   const postGeometry = new THREE.BoxGeometry(profileM, frameHeightM, profileM);
   [
@@ -6984,9 +7041,11 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   addRailX(shortPanelM,widthM/2-armM/2,depthM/2-frameDepthM/2);
 
   const topMaterial = new THREE.MeshStandardMaterial({ color:0xf8fafc, roughness:0.58, metalness:0 });
+  const recipeTops = [];
   if (widthCm === 100 && depthCm === 100) {
     const topA=new THREE.Mesh(new THREE.BoxGeometry(1.10,topThicknessM,0.60),topMaterial.clone()); topA.position.set(0,frameHeightM+topThicknessM/2,-0.25); topA.castShadow=true; topA.receiveShadow=true; group.add(topA);
     const topB=new THREE.Mesh(new THREE.BoxGeometry(0.52,topThicknessM,0.60),topMaterial.clone()); topB.rotation.y=Math.PI/2; topB.position.set(0.25,frameHeightM+topThicknessM/2,0.29); topB.castShadow=true; topB.receiveShadow=true; group.add(topB);
+    recipeTops.push(topA, topB);
   } else {
     // 150/200 L bankolar normal düz banko renderer mantığını kullanır: 2 cm tabla taşması.
     const topOverhangM = 0.02;
@@ -7009,6 +7068,7 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     topB.castShadow = true;
     topB.receiveShadow = true;
     group.add(topB);
+    recipeTops.push(topA, topB);
   }
 
   const surfaces=[];
@@ -7017,13 +7077,16 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     const backing=new THREE.Mesh(new THREE.BoxGeometry(faceWidthM,panelHeightM,0.012),new THREE.MeshStandardMaterial({color:PANEL_BACK_COLOR,roughness:0.74,metalness:0})); backing.position.copy(position); backing.rotation.y=rotationY; backing.castShadow=true; backing.receiveShadow=true; group.add(backing);
     const surface=new THREE.Mesh(new THREE.PlaneGeometry(faceWidthM,panelHeightM),new THREE.MeshStandardMaterial({color:surfaceState.imageAssetId?0xffffff:surfaceState.color,roughness:0.72,metalness:0,side:THREE.DoubleSide,emissive:0x000000,emissiveIntensity:0})); surface.position.copy(position); surface.rotation.y=rotationY; if(Math.abs(Math.sin(rotationY))<0.01)surface.position.z+=0.007*outward;else surface.position.x+=0.007*outward;
     const selectionFrame=createSelectionFrame(faceWidthM,panelHeightM); selectionFrame.visible=false; surface.add(selectionFrame);
-    surface.userData={kind:'surface',moduleType:'counter',counterShape:'L',selectionMode:'module',...surfaceCapabilityUserData(moduleState.itemKey),moduleIndex,moduleId:moduleState.id,widthCm,depthCm,stripIndex:panelLevel==='lower'?0:1,stripNumber:panelLevel==='lower'?1:2,surfaceRole,panelLevel,surfaceId:surfaceState.id,...bindRendererSurfaceState(surfaceState),selectionFrame,backing}; group.add(surface); surfaces.push(surface); onSurfaceReady?.(surface);
+    surface.userData={kind:'surface',moduleType:'counter',counterShape:'L',selectionMode:'module',...surfaceCapabilityUserData(surfaceState?.itemKey ?? moduleState.itemKey),moduleIndex,moduleId:moduleState.id,widthCm,depthCm,stripIndex:panelLevel==='lower'?0:1,stripNumber:panelLevel==='lower'?1:2,surfaceRole,panelLevel,surfaceId:surfaceState.id,...bindRendererSurfaceState(surfaceState),selectionFrame,backing}; group.add(surface); surfaces.push(surface); onSurfaceReady?.(surface);
   };
   const lowerY=stripHeightM/2, upperY=stripHeightM+stripHeightM/2;
   addFace('front','lower',moduleState.faces?.frontLower,frontPanelM,new THREE.Vector3(0,lowerY,-depthM/2),Math.PI,-1); addFace('front','upper',moduleState.faces?.frontUpper,frontPanelM,new THREE.Vector3(0,upperY,-depthM/2),Math.PI,-1);
   addFace('right','lower',moduleState.faces?.rightLower,rightPanelM,new THREE.Vector3(widthM/2,lowerY,0),Math.PI/2,1); addFace('right','upper',moduleState.faces?.rightUpper,rightPanelM,new THREE.Vector3(widthM/2,upperY,0),Math.PI/2,1);
   addFace('left','lower',moduleState.faces?.leftLower,shortPanelM,new THREE.Vector3(-widthM/2,lowerY,-depthM/2+armM/2),-Math.PI/2,-1); addFace('left','upper',moduleState.faces?.leftUpper,shortPanelM,new THREE.Vector3(-widthM/2,upperY,-depthM/2+armM/2),-Math.PI/2,-1);
   addFace('return','lower',moduleState.faces?.returnLower,shortPanelM,new THREE.Vector3(widthM/2-armM/2,lowerY,depthM/2),0,1); addFace('return','upper',moduleState.faces?.returnUpper,shortPanelM,new THREE.Vector3(widthM/2-armM/2,upperY,depthM/2),0,1);
+  (moduleState.renderParts?.tops ?? []).forEach((part, index) => {
+    mountRecipeTopSurface(recipeTops[index], part, moduleState, 'counter', moduleIndex, surfaces, onSurfaceReady);
+  });
   return {group,surfaces};
 }
 
@@ -7075,7 +7138,7 @@ function createShelfModule(moduleState, moduleIndex) {
     moduleIndex,
     moduleId: moduleState.id,
     selectionMode: 'module',
-    acceptsImage: false,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
   };
   group.add(shelf);
 
@@ -7171,7 +7234,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
   };
 
   const frameMaterial = new THREE.MeshStandardMaterial({
-    color: FRAME_COLOR,
+    color: frameColorForModule(moduleState),
     metalness: 0.68,
     roughness: 0.28,
   });
@@ -7216,10 +7279,13 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
       console.warn('Eksik panel strip state atlandı:', moduleState.type, moduleState.id, stripIndex);
       continue;
     }
+    const partWidth = partSpanM(surfaceState, innerWidth, 'widthCm');
+    const partHeight = partSpanM(surfaceState, panelHeight, 'heightCm');
+    const partDepth = partSpanM(surfaceState, panelDepth, 'depthCm');
     const isGlass = Boolean(surfaceState.isGlass);
 
     const backing = new THREE.Mesh(
-      new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
+      new THREE.BoxGeometry(partWidth, partHeight, partDepth),
       new THREE.MeshStandardMaterial({
         color: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR,
         roughness: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74,
@@ -7234,7 +7300,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(backing);
 
     const surface = new THREE.Mesh(
-      new THREE.PlaneGeometry(innerWidth, panelHeight),
+      new THREE.PlaneGeometry(partWidth, partHeight),
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId
           ? 0xffffff
@@ -7251,7 +7317,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     );
     surface.position.set(0, centerY, depth / 2 + 0.0015);
 
-    const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
+    const selectionFrame = createSelectionFrame(partWidth, partHeight);
     selectionFrame.visible = false;
     surface.add(selectionFrame);
 
@@ -7259,7 +7325,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'flat-panel',
       selectionMode: 'panel',
-      ...surfaceCapabilityUserData(moduleState.itemKey),
+      ...surfaceCapabilityUserData(surfaceState?.itemKey ?? moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -7302,7 +7368,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
   };
 
   const frameMaterial = new THREE.MeshStandardMaterial({
-    color: FRAME_COLOR,
+    color: frameColorForModule(moduleState),
     metalness: 0.68,
     roughness: 0.28,
   });
@@ -7402,9 +7468,12 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     if (!surfaceState) continue;
     const centerY = doorHeight + index * stripHeight + stripHeight / 2;
     const panelHeight = stripHeight - railHeight - PANEL_VERTICAL_CLEARANCE_M;
+    const partWidth = partSpanM(surfaceState, innerWidth, 'widthCm');
+    const partHeight = partSpanM(surfaceState, panelHeight, 'heightCm');
+    const partDepth = partSpanM(surfaceState, panelDepth, 'depthCm');
 
     const backing = new THREE.Mesh(
-      new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
+      new THREE.BoxGeometry(partWidth, partHeight, partDepth),
       new THREE.MeshStandardMaterial({
         color: surfaceState.isGlass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR,
         roughness: surfaceState.isGlass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74,
@@ -7419,7 +7488,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(backing);
 
     const surface = new THREE.Mesh(
-      new THREE.PlaneGeometry(innerWidth, panelHeight),
+      new THREE.PlaneGeometry(partWidth, partHeight),
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId
           ? 0xffffff
@@ -7436,7 +7505,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     );
     surface.position.set(0, centerY, depth / 2 + 0.0015);
 
-    const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
+    const selectionFrame = createSelectionFrame(partWidth, partHeight);
     selectionFrame.visible = false;
     surface.add(selectionFrame);
 
@@ -7444,7 +7513,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
       kind: 'surface',
       moduleType: 'door',
       selectionMode: 'panel',
-      ...surfaceCapabilityUserData(moduleState.itemKey),
+      ...surfaceCapabilityUserData(surfaceState?.itemKey ?? moduleState.itemKey),
       moduleIndex,
       moduleId: moduleState.id,
       widthCm,
@@ -7488,7 +7557,7 @@ function createSeparatorModule(moduleState, moduleIndex) {
   };
 
   const frameMaterial = new THREE.MeshStandardMaterial({
-    color: FRAME_COLOR,
+    color: frameColorForModule(moduleState),
     metalness: 0.68,
     roughness: 0.28,
   });
@@ -7558,7 +7627,7 @@ function createSeparatorModule(moduleState, moduleIndex) {
     kind: 'surface',
     moduleType: 'separator',
     selectionMode: 'module',
-    ...surfaceCapabilityUserData(moduleState.itemKey),
+    ...surfaceCapabilityUserData(surfaceState?.itemKey ?? moduleState.itemKey),
     moduleIndex,
     moduleId: moduleState.id,
     widthCm,
@@ -7636,7 +7705,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     itemKey: bodyDefinition.item.itemKey, type: moduleState.type, widthCm,
   };
 
-  const frameMaterial = new THREE.MeshStandardMaterial({ color: FRAME_COLOR, metalness: 0.68, roughness: 0.28 });
+  const frameMaterial = new THREE.MeshStandardMaterial({ color: frameColorForModule(moduleState), metalness: 0.68, roughness: 0.28 });
   const showcaseBodyMaterial = new THREE.MeshStandardMaterial({ color: bodyColor, metalness: 0, roughness: 0.72 });
   const profileGeometry = new THREE.BoxGeometry(getProceduralFrameCrossSectionM(moduleState).frameWidth, height, frameDepth);
   for (const side of [-1, 1]) {
@@ -7665,9 +7734,12 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     const centerY = stripIndex * stripHeight + stripHeight / 2;
     const surfaceState = moduleState.strips[stripIndex];
     if (!surfaceState) continue;
+    const partWidth = partSpanM(surfaceState, innerWidth, 'widthCm');
+    const partHeight = partSpanM(surfaceState, panelHeight, 'heightCm');
+    const partDepth = partSpanM(surfaceState, panelDepth, 'depthCm');
     const isGlass = Boolean(surfaceState.isGlass);
     const backing = new THREE.Mesh(
-      new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
+      new THREE.BoxGeometry(partWidth, partHeight, partDepth),
       new THREE.MeshStandardMaterial({
         color: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR,
         roughness: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74,
@@ -7680,7 +7752,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     backing.receiveShadow = true;
     group.add(backing);
     const surface = new THREE.Mesh(
-      new THREE.PlaneGeometry(innerWidth, panelHeight),
+      new THREE.PlaneGeometry(partWidth, partHeight),
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId ? 0xffffff : (isGlass ? GLASS_APPEARANCE.color : surfaceState.color),
         roughness: isGlass ? GLASS_APPEARANCE.roughness : 0.72,
@@ -7689,12 +7761,12 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
       }),
     );
     surface.position.set(0, centerY, depth / 2 + 0.0015);
-    const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
+    const selectionFrame = createSelectionFrame(partWidth, partHeight);
     selectionFrame.visible = false;
     surface.add(selectionFrame);
     surface.userData = {
       kind: 'surface', moduleType: moduleState.type, shape: moduleState.shape,
-      selectionMode: 'panel', ...surfaceCapabilityUserData(moduleState.itemKey), moduleIndex, moduleId: moduleState.id,
+      selectionMode: 'panel', ...surfaceCapabilityUserData(surfaceState?.itemKey ?? moduleState.itemKey), moduleIndex, moduleId: moduleState.id,
       widthCm, stripIndex, stripNumber: stripIndex + 1,       surfaceId: surfaceState.id,
       ...bindRendererSurfaceState(surfaceState), selectionFrame, backing,
     };
@@ -7744,7 +7816,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
   bodySelector.add(bodySelectionFrame);
   bodySelector.userData = {
     kind: 'surface', moduleType: moduleState.type, selectionMode: 'module',
-    ...surfaceCapabilityUserData(bodyDefinition.sideItem), acceptsColor: true, moduleIndex, moduleId: moduleState.id, widthCm,
+    ...surfaceCapabilityUserData(bodyDefinition.sideItem), moduleIndex, moduleId: moduleState.id, widthCm,
     stripIndex: null, stripNumber: null, surfaceRole: 'showcase-body',
     surfaceId: moduleState.bodySurface.id, ...bindRendererSurfaceState(moduleState.bodySurface),
     selectionFrame: bodySelectionFrame, colorTargets: bodyColorTargets,
