@@ -46,6 +46,7 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 | `fair_stand_item_strip_occupancy` | 8, hepsi `align=top` (4× strip 1, 4× strip 2) | Short-up şerit bandı. |
 | `fair_stand_item_assets` | 19 (14 `model` + 5 `default_screen`) | GLB / TV ekran yolu. CHECK beş rol izin verir; seed ve mapper yalnız bu iki rolü doldurur/okur. |
 | `fair_stand_item_components` | 186 | Recipe BOM child (`composition.items`). |
+| `fair_stand_item_assembly_parts` | 0+ | Parent lokal child pose (`assembly.parts`). BOM değil. |
 | `fair_stand_item_video_walls` | 2 | `VIDEO_WALL_2X2` / `3X3`. |
 | `fair_stand_item_body_parts` | 6 (2 parent × 3 rol) | Vitrin gövde child `itemKey`. |
 | `fair_stand_dimensions` | 1 (`id=1`) | Stand zarfı. Item kutusu değil. Admin UI: CRM `/admin/fair-stand/settings`. |

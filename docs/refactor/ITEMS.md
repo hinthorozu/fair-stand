@@ -5,6 +5,7 @@ Fair Stand yeni Item modelinin yaşayan canonical sözleşmesi. Audit dökümü 
 Stand zarfı Item değildir: `docs/refactor/STAND_DIMENSIONS.md`.
 Catalog: `docs/refactor/CATALOG.md`.
 Rotation: `docs/refactor/ROTATION.md`.
+Admin 3D önizleme + assembly pose: `docs/refactor/ITEM_3D_PREVIEW.md`.
 PostgreSQL tabloları: `docs/refactor/DATABASE.md`.
 CRM kullanım: `docs/refactor/FAIR_STAND_DB_KULLANIM_KILAVUZU.md`.
 

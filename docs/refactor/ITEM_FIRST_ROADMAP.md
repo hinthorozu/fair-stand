@@ -161,10 +161,13 @@ Kod gerçeği: parent BOM + snap kuralı zaten Item/tip’te. P2 kalanı **yan k
 
 ### P5 — Admin canlı preview (sonra)
 
-- [ ] Leaf: WDH + renk → BoxGeometry canlı
-- [ ] Parent: basit assembly doğrulama
-- [ ] Kayıt item-records API; create kimlik → edit master
+- [x] Leaf: WDH + renk → BoxGeometry canlı (`itemAdminPreview.js` + CRM sekme `preview3d`)
+- [x] Parent: basit assembly doğrulama (free child pose UI)
+- [x] Kayıt: `fair_stand_item_assembly_parts` + `PUT .../assembly` + bootstrap `assembly.parts`
+- [x] Prod: assembly varsa `scene3d` parts mesh; yoksa eski gömülü/şerit
 
+Branch: `item_3d_preview`. BOM hâlâ `composition.items`; pose ayrı tabloda.
+Doküman: `docs/refactor/ITEM_3D_PREVIEW.md` (yetenekler + sınırlar + kayıt modeli).
 ---
 
 ## Bu hafta
@@ -172,7 +175,7 @@ Kod gerçeği: parent BOM + snap kuralı zaten Item/tip’te. P2 kalanı **yan k
 1. ~~P0 kilidi + şema/CRM/motor dilimi~~ (yapıldı)
 2. P4 kalıntı süpürme + regresyon
 3. P2: contract § C.5 + sanal hat kapanış / cycle (sıra ürün)
-4. P5 backlog’ta kalsın
+4. ~~P5 backlog’ta kalsın~~ → `item_3d_preview` branch’te uygulandı (CRM sekme + assembly API + prod mesh)
 
 ---
 
@@ -203,3 +206,4 @@ Kod gerçeği: parent BOM + snap kuralı zaten Item/tip’te. P2 kalanı **yan k
 | 2026-09-24 | Auto-wall: `WALL_WIDTH_TO_ITEM_KEY` kaldırıldı → `resolveAutomaticWallFlatPanelItemKey` (DB/Item). |
 | 2026-09-24 | Analiz: `TYPE_BEHAVIORS_DB_ROADMAP.md` (placement→item_type; Snap şablon). |
 | 2026-09-24 | **Uygulandı:** tip davranışı DB 0030–0033 + overlap FK; kılavuz `FAIR_STAND_DB_KULLANIM_KILAVUZU.md`. |
+| 2026-09-25 | P5: Admin 3D önizleme sekmesi + assembly pose tablo/API + prod assembly mesh (`item_3d_preview`). |

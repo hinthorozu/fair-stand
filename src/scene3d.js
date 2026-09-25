@@ -26,6 +26,13 @@ import {
   getProceduralFrameCrossSectionM,
   resolveSceneDimensions,
 } from './items.js';
+import {
+  colorIntToCss,
+  expandBomRenderInstances,
+  itemHasAssemblyLayout,
+  mergeAssemblyPoses,
+  readItemBoxCm,
+} from './itemAssembly.js';
 import { snapPlacementToItemAnchor } from './itemSnap.js';
 import { resolveModuleStripOccupancy } from './stripOccupancy.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
@@ -1469,6 +1476,10 @@ export function createStandScene(
   }
 
   function createRenderableModule(moduleState, moduleIndex, onSurfaceReady = null) {
+    const catalogItem = moduleState?.itemKey ? getItem(moduleState.itemKey) : null;
+    if (itemHasAssemblyLayout(catalogItem)) {
+      return createItemAssemblyModule(moduleState, moduleIndex, catalogItem);
+    }
     if (moduleState.type === 'separator') {
       return createSeparatorModule(moduleState, moduleIndex);
     }
@@ -7205,6 +7216,74 @@ function createShelfModule(moduleState, moduleIndex) {
   });
 
   return { group, surfaces: [shelf] };
+}
+
+function createItemAssemblyModule(moduleState, moduleIndex, catalogItem) {
+  const widthCm = Number(moduleState.widthCm) || readItemBoxCm(catalogItem).widthCm;
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: moduleState.type,
+    widthCm,
+    assembly: true,
+  };
+
+  const bomParts = expandBomRenderInstances(catalogItem, getItem);
+  const posed = mergeAssemblyPoses(bomParts, catalogItem.assembly?.parts || []);
+  const surfaces = [];
+
+  for (const part of posed) {
+    const child = getItem(part.childItemKey);
+    const box = child ? readItemBoxCm(child) : {
+      widthCm: part.widthCm,
+      depthCm: part.depthCm,
+      heightCm: part.heightCm,
+    };
+    const widthM = Math.max(box.widthCm / 100, 0.01);
+    const depthM = Math.max(box.depthCm / 100, 0.01);
+    const heightM = Math.max(box.heightCm / 100, 0.01);
+    let colorCss = '#9ca3af';
+    try {
+      if (child && Number.isInteger(child.defaultColor)) colorCss = itemDefaultColorCss(child);
+      else if (part.colorCss) colorCss = part.colorCss;
+    } catch {
+      colorCss = colorIntToCss(child?.defaultColor);
+    }
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(widthM, heightM, depthM),
+      new THREE.MeshStandardMaterial({
+        color: colorCss,
+        roughness: 0.72,
+        metalness: 0.06,
+      }),
+    );
+    mesh.position.set(
+      Number(part.xCm) / 100,
+      Number(part.zCm) / 100 + heightM / 2,
+      Number(part.yCm) / 100,
+    );
+    mesh.rotation.set(
+      THREE.MathUtils.degToRad(Number(part.rotationXDeg) || 0),
+      THREE.MathUtils.degToRad(Number(part.rotationZDeg) || 0),
+      THREE.MathUtils.degToRad(Number(part.rotationYDeg) || 0),
+    );
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    mesh.userData = {
+      kind: 'assembly-part',
+      moduleId: moduleState.id,
+      moduleIndex,
+      itemKey: part.childItemKey,
+      instanceIndex: part.instanceIndex,
+      ...surfaceCapabilityUserData(child || part.childItemKey),
+    };
+    group.add(mesh);
+    surfaces.push(mesh);
+  }
+
+  return { group, surfaces };
 }
 
 function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
