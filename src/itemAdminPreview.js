@@ -7,7 +7,10 @@ import {
   localCornerOffsetMeters,
   snapMeshCornerToCorner,
 } from './itemAdminCornerSnap.js';
-import { createAssemblyLock, applyRelativePose } from './itemAdminAssemblyLock.js';
+import { createAssemblyLock, poseDelta, applyPoseDelta, addPartToLockGroup, lockContainsPart, removePartFromLockGroup } from './itemAdminAssemblyLock.js';
+import { createViewCube } from './viewCube.js';
+
+const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
 
 function cmToM(cm) {
   return Number(cm) / 100;
@@ -181,8 +184,12 @@ export function mountItemAdminPreview(host, options = {}) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xe8eef4);
 
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.05, 200);
-  camera.position.set(2.4, 1.8, 2.8);
+  const perspectiveCamera = new THREE.PerspectiveCamera(45, 1, 0.05, 200);
+  perspectiveCamera.position.set(2.4, 1.8, 2.8);
+  const orthographicCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 200);
+  orthographicCamera.position.copy(perspectiveCamera.position);
+  let camera = perspectiveCamera;
+  let cameraMode = 'perspective';
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -244,6 +251,9 @@ export function mountItemAdminPreview(host, options = {}) {
   const orbit = new OrbitControls(camera, renderer.domElement);
   orbit.enableDamping = true;
   orbit.target.set(0, 0.6, 0);
+  orbit.minDistance = 0.4;
+  orbit.maxDistance = 40;
+  orbit.maxPolarAngle = Math.PI * 0.49;
 
   const transform = new TransformControls(camera, renderer.domElement);
   transform.setMode('translate');
@@ -253,40 +263,151 @@ export function mountItemAdminPreview(host, options = {}) {
   transform.showZ = true;
   transform.addEventListener('dragging-changed', (event) => {
     orbit.enabled = !event.value;
-    if (!event.value && selected) {
+    if (event.value) {
+      beginLockGroupDrag(selected);
+      return;
+    }
+    if (selected) {
       clampMeshAboveGround(selected);
-      if (assemblyLock) {
-        const host = findPartMesh(assemblyLock.host.childItemKey, assemblyLock.host.instanceIndex);
-        const follower = findPartMesh(
-          assemblyLock.follower.childItemKey,
-          assemblyLock.follower.instanceIndex,
-        );
-        if (selected === host) {
-          syncLockFromHost();
-        } else if (selected === follower) {
-          // Follower taşındı → kilit çözülür (host sürer kuralı).
-          unlockAssembly();
-        }
-      }
+      finishLockGroupDrag();
       emitPartsChange();
       emitSelectionChange(selected);
     }
   });
   transform.addEventListener('objectChange', () => {
     if (selected) clampMeshAboveGround(selected);
-    if (!transform.dragging) {
-      if (assemblyLock) {
-        const host = findPartMesh(assemblyLock.host.childItemKey, assemblyLock.host.instanceIndex);
-        if (selected === host) syncLockFromHost();
-      }
-      emitPartsChange();
-      if (selected) emitSelectionChange(selected);
-    } else if (assemblyLock) {
-      const host = findPartMesh(assemblyLock.host.childItemKey, assemblyLock.host.instanceIndex);
-      if (selected === host) syncLockFromHost();
+    if (transform.dragging) {
+      syncLockGroupDuringDrag(selected);
+      return;
     }
+    emitPartsChange();
+    if (selected) emitSelectionChange(selected);
   });
   scene.add(transform.getHelper());
+
+  function getViewCubeFit(direction = HOME_DIRECTION) {
+    content.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(content);
+    const target = box.isEmpty()
+      ? orbit.target.clone()
+      : box.getCenter(new THREE.Vector3());
+    if (!box.isEmpty()) target.y = Math.max(target.y, 0.2);
+
+    const size = box.isEmpty()
+      ? new THREE.Vector3(1, 1, 1)
+      : box.getSize(new THREE.Vector3());
+    const half = size.clone().multiplyScalar(0.5).addScalar(0.15);
+    const viewDirection = direction.clone();
+    if (viewDirection.lengthSq() === 0) viewDirection.copy(HOME_DIRECTION);
+    viewDirection.normalize();
+
+    const referenceUp = Math.abs(viewDirection.y) > 0.98
+      ? new THREE.Vector3(0, 0, 1)
+      : new THREE.Vector3(0, 1, 0);
+    const right = referenceUp.clone().cross(viewDirection).normalize();
+    const screenUp = viewDirection.clone().cross(right).normalize();
+    const projectedHalfWidth = Math.abs(right.x) * half.x
+      + Math.abs(right.y) * half.y
+      + Math.abs(right.z) * half.z;
+    const projectedHalfHeight = Math.abs(screenUp.x) * half.x
+      + Math.abs(screenUp.y) * half.y
+      + Math.abs(screenUp.z) * half.z;
+
+    const aspect = Math.max(host.clientWidth, 1) / Math.max(host.clientHeight, 1);
+    const occupancy = 0.78;
+    const verticalFov = THREE.MathUtils.degToRad(perspectiveCamera.fov);
+    const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
+    const perspectiveFit = Math.max(
+      projectedHalfHeight / Math.tan(verticalFov / 2),
+      projectedHalfWidth / Math.tan(horizontalFov / 2),
+    ) / occupancy;
+    const distance = THREE.MathUtils.clamp(
+      perspectiveFit,
+      orbit.minDistance,
+      orbit.maxDistance,
+    );
+    const verticalSpan = Math.max(
+      projectedHalfHeight * 2,
+      (projectedHalfWidth * 2) / Math.max(aspect, 0.1),
+    ) / occupancy;
+
+    return { target, distance, verticalSpan };
+  }
+
+  const viewCube = createViewCube(host, camera, orbit, getViewCubeFit);
+
+  const projectionControl = document.createElement('div');
+  projectionControl.className = 'projection-control';
+  projectionControl.setAttribute('aria-label', 'Kamera projeksiyonu');
+  host.appendChild(projectionControl);
+
+  const projectionButtons = new Map();
+  [['perspective', 'Persp'], ['orthographic', 'Ortho']].forEach(([mode, label]) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.title = mode === 'perspective' ? 'Perspektif görünüş' : 'Ortografik görünüş';
+    projectionControl.appendChild(button);
+    projectionButtons.set(mode, button);
+  });
+
+  function styleProjectionButtons() {
+    projectionButtons.forEach((button, mode) => {
+      const active = mode === cameraMode;
+      button.classList.toggle('is-active', active);
+    });
+  }
+
+  function setOrthographicSpan(verticalSpan, aspect) {
+    const safeSpan = Math.max(0.25, Number(verticalSpan) || 4);
+    const safeAspect = Math.max(0.1, Number(aspect) || 1);
+    orthographicCamera.top = safeSpan / 2;
+    orthographicCamera.bottom = -safeSpan / 2;
+    orthographicCamera.right = (safeSpan * safeAspect) / 2;
+    orthographicCamera.left = -(safeSpan * safeAspect) / 2;
+    orthographicCamera.updateProjectionMatrix();
+  }
+
+  function setCameraMode(nextMode) {
+    const resolved = nextMode === 'orthographic' ? 'orthographic' : 'perspective';
+    if (resolved === cameraMode) return cameraMode;
+
+    const source = camera;
+    const target = resolved === 'orthographic' ? orthographicCamera : perspectiveCamera;
+    const targetPoint = orbit.target.clone();
+    const direction = source.position.clone().sub(targetPoint);
+    if (direction.lengthSq() === 0) direction.copy(HOME_DIRECTION);
+    direction.normalize();
+
+    if (resolved === 'orthographic') {
+      const distance = source.position.distanceTo(targetPoint);
+      const verticalSpan = 2 * distance * Math.tan(THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2);
+      const aspect = Math.max(host.clientWidth, 1) / Math.max(host.clientHeight, 1);
+      orthographicCamera.zoom = 1;
+      setOrthographicSpan(verticalSpan, aspect);
+      target.position.copy(source.position);
+    } else {
+      const visibleSpan = (orthographicCamera.top - orthographicCamera.bottom)
+        / Math.max(orthographicCamera.zoom, 0.0001);
+      const distance = visibleSpan / (2 * Math.tan(THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2));
+      target.position.copy(targetPoint).addScaledVector(direction, distance);
+    }
+
+    target.quaternion.copy(source.quaternion);
+    target.up.copy(source.up);
+    camera = target;
+    cameraMode = resolved;
+    orbit.object = camera;
+    transform.camera = camera;
+    orbit.update();
+    viewCube.setCamera(camera);
+    styleProjectionButtons();
+    return cameraMode;
+  }
+
+  projectionButtons.get('perspective').addEventListener('click', () => setCameraMode('perspective'));
+  projectionButtons.get('orthographic').addEventListener('click', () => setCameraMode('orthographic'));
+  styleProjectionButtons();
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
@@ -294,11 +415,13 @@ export function mountItemAdminPreview(host, options = {}) {
   let snapSource = null;
   /** @type {{ follower: object, host: object } | null} */
   let pendingLockPair = null;
-  /** @type {ReturnType<typeof createAssemblyLock>} */
+  /** @type {{ members: Array<{ childItemKey: string, instanceIndex: number }>, host?: object, follower?: object, relative?: object } | null} */
   let assemblyLock = null;
+  /** @type {{ driver: object, others: Array<{ mesh: object, pose: object }>, startDriver: object } | null} */
+  let lockGroupDrag = null;
   let disposed = false;
   let frame = 0;
-  const cornerMarkerGeo = new THREE.SphereGeometry(0.04, 12, 12);
+  const cornerMarkerGeo = new THREE.SphereGeometry(0.012, 10, 10);
 
   function disposeObjectTree(root) {
     root.traverse((node) => {
@@ -332,7 +455,7 @@ export function mountItemAdminPreview(host, options = {}) {
         color: 0xf59e0b,
         depthTest: false,
         transparent: true,
-        opacity: 0.95,
+        opacity: 0.55,
       });
       const marker = new THREE.Mesh(cornerMarkerGeo, material);
       const offset = localCornerOffsetMeters(size, corner);
@@ -349,11 +472,15 @@ export function mountItemAdminPreview(host, options = {}) {
 
   function emitLockChange() {
     if (typeof state.onLockChange !== 'function') return;
+    const members = assemblyLock?.members?.length
+      ? assemblyLock.members.map((m) => ({ ...m }))
+      : null;
     state.onLockChange({
-      lock: assemblyLock
+      lock: members
         ? {
-            host: { ...assemblyLock.host },
-            follower: { ...assemblyLock.follower },
+            members,
+            host: members[0] ? { ...members[0] } : null,
+            follower: members[1] ? { ...members[1] } : null,
           }
         : null,
       canLock: Boolean(pendingLockPair?.follower && pendingLockPair?.host),
@@ -384,16 +511,54 @@ export function mountItemAdminPreview(host, options = {}) {
     Object.assign(mesh.userData.part, pose);
   }
 
+  function lockGroupMeshes() {
+    if (!assemblyLock?.members?.length) return [];
+    const meshes = [];
+    for (const member of assemblyLock.members) {
+      const mesh = findPartMesh(member.childItemKey, member.instanceIndex);
+      if (mesh) meshes.push(mesh);
+    }
+    return meshes;
+  }
+
+  function meshInLockGroup(mesh) {
+    return lockGroupMeshes().includes(mesh);
+  }
+
+  /** Kilitli grubu tek parça gibi taşı: sürüklenen hangisi olursa olsun diğerleri aynı delta’yı alır. */
+  function beginLockGroupDrag(driver) {
+    lockGroupDrag = null;
+    if (!assemblyLock || !driver) return;
+    const meshes = lockGroupMeshes();
+    if (!meshes.includes(driver)) return;
+    const others = meshes.filter((m) => m !== driver);
+    lockGroupDrag = {
+      driver,
+      others: others.map((mesh) => ({ mesh, pose: readPoseFromMesh(mesh) })),
+      startDriver: readPoseFromMesh(driver),
+    };
+  }
+
+  function syncLockGroupDuringDrag(driver) {
+    if (!lockGroupDrag || !driver || driver !== lockGroupDrag.driver) return;
+    const delta = poseDelta(lockGroupDrag.startDriver, readPoseFromMesh(driver));
+    for (const entry of lockGroupDrag.others) {
+      writePoseToMesh(entry.mesh, applyPoseDelta(entry.pose, delta));
+    }
+  }
+
+  function finishLockGroupDrag() {
+    if (lockGroupDrag) {
+      clampMeshAboveGround(lockGroupDrag.driver);
+      for (const entry of lockGroupDrag.others) {
+        clampMeshAboveGround(entry.mesh);
+      }
+    }
+    lockGroupDrag = null;
+  }
+
   function syncLockFromHost() {
-    if (!assemblyLock) return;
-    const host = findPartMesh(assemblyLock.host.childItemKey, assemblyLock.host.instanceIndex);
-    const follower = findPartMesh(
-      assemblyLock.follower.childItemKey,
-      assemblyLock.follower.instanceIndex,
-    );
-    if (!host || !follower) return;
-    const next = applyRelativePose(readPoseFromMesh(host), assemblyLock.relative);
-    writePoseToMesh(follower, next);
+    // Absolute pose SoT; rebuild sonrası ekstra follower sync yok.
   }
 
   function clearAssemblyLock() {
@@ -405,14 +570,35 @@ export function mountItemAdminPreview(host, options = {}) {
 
   function lockPendingPair() {
     if (!pendingLockPair?.follower || !pendingLockPair?.host) return false;
+    const followerPart = pendingLockPair.follower.userData.part;
+    const hostPart = pendingLockPair.host.userData.part;
+    if (!followerPart || !hostPart) return false;
+
+    if (assemblyLock?.members?.length) {
+      const fIn = lockContainsPart(assemblyLock, followerPart);
+      const hIn = lockContainsPart(assemblyLock, hostPart);
+      if (fIn && hIn) {
+        pendingLockPair = null;
+        emitLockChange();
+        return true;
+      }
+      if (fIn) assemblyLock = addPartToLockGroup(assemblyLock, hostPart);
+      else if (hIn) assemblyLock = addPartToLockGroup(assemblyLock, followerPart);
+      else {
+        assemblyLock = addPartToLockGroup(
+          addPartToLockGroup(assemblyLock, hostPart),
+          followerPart,
+        );
+      }
+      if (!assemblyLock) return false;
+      pendingLockPair = null;
+      emitLockChange();
+      return true;
+    }
+
     const followerPose = readPoseFromMesh(pendingLockPair.follower);
     const hostPose = readPoseFromMesh(pendingLockPair.host);
-    const lock = createAssemblyLock(
-      pendingLockPair.follower.userData.part,
-      pendingLockPair.host.userData.part,
-      followerPose,
-      hostPose,
-    );
+    const lock = createAssemblyLock(followerPart, hostPart, followerPose, hostPose);
     if (!lock) return false;
     assemblyLock = lock;
     pendingLockPair = null;
@@ -426,12 +612,26 @@ export function mountItemAdminPreview(host, options = {}) {
     return true;
   }
 
+  /** Seçili parçayı kilit grubundan çıkar; 2’den az kalırsa kilit kapanır. */
+  function removeSelectedFromLock() {
+    if (!selected || !assemblyLock?.members?.length) return false;
+    const part = selected.userData?.part;
+    if (!part || !lockContainsPart(assemblyLock, part)) return false;
+    assemblyLock = removePartFromLockGroup(assemblyLock, part);
+    emitLockChange();
+    return true;
+  }
+
   function getLockUiState() {
+    const members = assemblyLock?.members?.length
+      ? assemblyLock.members.map((m) => ({ ...m }))
+      : null;
     return {
-      lock: assemblyLock
+      lock: members
         ? {
-            host: { ...assemblyLock.host },
-            follower: { ...assemblyLock.follower },
+            members,
+            host: members[0] ? { ...members[0] } : null,
+            follower: members[1] ? { ...members[1] } : null,
           }
         : null,
       canLock: Boolean(pendingLockPair?.follower && pendingLockPair?.host),
@@ -559,6 +759,10 @@ export function mountItemAdminPreview(host, options = {}) {
       camera.position.set(2.2, 1.6, 2.6);
       orbit.target.set(0, 0.45, 0);
       orbit.update();
+      if (cameraMode === 'orthographic') {
+        const aspect = Math.max(host.clientWidth, 1) / Math.max(host.clientHeight, 1);
+        setOrthographicSpan(3, aspect);
+      }
       return;
     }
     const size = box.getSize(new THREE.Vector3());
@@ -570,6 +774,13 @@ export function mountItemAdminPreview(host, options = {}) {
       center.z + radius * 1.55,
     );
     orbit.target.copy(center);
+    if (cameraMode === 'orthographic') {
+      const distance = camera.position.distanceTo(orbit.target);
+      const verticalSpan = 2 * distance * Math.tan(THREE.MathUtils.degToRad(perspectiveCamera.fov) / 2);
+      const aspect = Math.max(host.clientWidth, 1) / Math.max(host.clientHeight, 1);
+      orthographicCamera.zoom = 1;
+      setOrthographicSpan(verticalSpan, aspect);
+    }
     orbit.update();
   }
 
@@ -579,6 +790,9 @@ export function mountItemAdminPreview(host, options = {}) {
     renderer.domElement.style.visibility = text ? 'hidden' : 'visible';
     legendEl.style.display = text ? 'none' : 'flex';
     axes.visible = !text;
+    const cubeEl = host.querySelector('.view-cube');
+    if (cubeEl) cubeEl.style.display = text ? 'none' : '';
+    projectionControl.style.display = text ? 'none' : '';
   }
 
   function rebuild() {
@@ -635,8 +849,13 @@ export function mountItemAdminPreview(host, options = {}) {
   function resize() {
     const width = Math.max(host.clientWidth || 320, 1);
     const height = Math.max(host.clientHeight || 320, 1);
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
+    const aspect = width / height;
+    perspectiveCamera.aspect = aspect;
+    perspectiveCamera.updateProjectionMatrix();
+    if (cameraMode === 'orthographic') {
+      const span = Math.max(0.25, orthographicCamera.top - orthographicCamera.bottom);
+      setOrthographicSpan(span, aspect);
+    }
     renderer.setSize(width, height, false);
   }
 
@@ -689,7 +908,26 @@ export function mountItemAdminPreview(host, options = {}) {
       );
       if (moved) {
         clampMeshAboveGround(snapSource.mesh);
-        pendingLockPair = { follower: snapSource.mesh, host: partMesh };
+        const groupMeshes = lockGroupMeshes();
+        const sourceInLock = groupMeshes.includes(snapSource.mesh);
+        const targetInSameLock = groupMeshes.includes(partMesh);
+
+        if (sourceInLock && !targetInSameLock) {
+          // Kilitli grup → üçüncüye snap: tüm üyeler aynı world delta.
+          for (const other of groupMeshes) {
+            if (other === snapSource.mesh) continue;
+            other.position.x += moved.dx;
+            other.position.y += moved.dy;
+            other.position.z += moved.dz;
+            clampMeshAboveGround(other);
+          }
+          pendingLockPair = { follower: snapSource.mesh, host: partMesh };
+        } else if (sourceInLock && targetInSameLock) {
+          pendingLockPair = null;
+        } else {
+          pendingLockPair = { follower: snapSource.mesh, host: partMesh };
+        }
+
         selected = snapSource.mesh;
         emitPartsChange();
         emitSelectionChange(selected);
@@ -741,30 +979,29 @@ export function mountItemAdminPreview(host, options = {}) {
   function setSelectedEuler(next) {
     if (!selected || selected.userData.isEnvelope) return false;
     if (!next || typeof next !== 'object') return false;
-    const pose = readPoseFromMesh(selected);
+    const before = readPoseFromMesh(selected);
     const rotationXDeg = Number.isFinite(Number(next.rotationXDeg))
       ? Number(next.rotationXDeg)
-      : pose.rotationXDeg;
+      : before.rotationXDeg;
     const rotationYDeg = Number.isFinite(Number(next.rotationYDeg))
       ? Number(next.rotationYDeg)
-      : pose.rotationYDeg;
+      : before.rotationYDeg;
     const rotationZDeg = Number.isFinite(Number(next.rotationZDeg))
       ? Number(next.rotationZDeg)
-      : pose.rotationZDeg;
+      : before.rotationZDeg;
     selected.rotation.set(
       THREE.MathUtils.degToRad(rotationXDeg),
       THREE.MathUtils.degToRad(rotationZDeg),
       THREE.MathUtils.degToRad(rotationYDeg),
     );
     clampMeshAboveGround(selected);
-    if (assemblyLock) {
-      const host = findPartMesh(assemblyLock.host.childItemKey, assemblyLock.host.instanceIndex);
-      const follower = findPartMesh(
-        assemblyLock.follower.childItemKey,
-        assemblyLock.follower.instanceIndex,
-      );
-      if (selected === host) syncLockFromHost();
-      else if (selected === follower) unlockAssembly();
+    if (assemblyLock && meshInLockGroup(selected)) {
+      const delta = poseDelta(before, readPoseFromMesh(selected));
+      for (const other of lockGroupMeshes()) {
+        if (other === selected) continue;
+        writePoseToMesh(other, applyPoseDelta(readPoseFromMesh(other), delta));
+        clampMeshAboveGround(other);
+      }
     }
     emitPartsChange();
     emitSelectionChange(selected);
@@ -775,6 +1012,7 @@ export function mountItemAdminPreview(host, options = {}) {
     if (disposed) return;
     frame = requestAnimationFrame(tick);
     orbit.update();
+    viewCube.update();
     renderer.render(scene, camera);
   }
 
@@ -837,6 +1075,7 @@ export function mountItemAdminPreview(host, options = {}) {
     getSnapMode: () => Boolean(state.snapMode),
     lockPendingPair,
     unlockAssembly,
+    removeSelectedFromLock,
     getLockUiState,
     dispose() {
       disposed = true;
@@ -848,6 +1087,8 @@ export function mountItemAdminPreview(host, options = {}) {
       cornerMarkerGeo.dispose();
       transform.dispose();
       orbit.dispose();
+      viewCube.dispose();
+      projectionControl.remove();
       renderer.dispose();
       host.replaceChildren();
     },

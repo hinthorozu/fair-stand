@@ -93,7 +93,8 @@ Prod: `itemHasAssemblyLayout` → parts çiz; yoksa legacy gömülü/şerit yolu
 - [x] Persist + bootstrap + prod assembly mesh
 - [x] `isRender` filtresi (catalogVisible ile karıştırılmaz)
 - [x] Admin AABB **köşe snap + yapıştır** (C / buton; 8 köşe; rotasyon korunur; absolute pose)
-- [x] Admin **oturum kilidi** (snap sonrası Kilitle; host sürükleyince follower gelir; DB’ye yazılmaz)
+- [x] Admin **oturum kilidi** (N parça grup: Kilitle / Gruba ekle; sürükle/snap/açı; DB’ye yazılmaz)
+- [x] ViewCube + Persp/Ortho (ana editör `viewCube.js` / projection-control ile aynı)
 
 ---
 
@@ -140,4 +141,4 @@ Kalıcı **kilitle** (relative constraint + hedef takip + persist) = şema geni�
 | 2026-09-25 | P5 uygulandı: sekme, assembly tablo/API, prod mesh, WDH eksen, expand, seçim, full Euler + açı UI, zemin clamp. |
 | 2026-09-25 | Bu doküman + Cursor plan mirror. |
 | 2026-09-25 | Admin köşe snap MVP: `itemAdminCornerSnap.js` + C/buton iki tık yapıştır. |
-| 2026-09-25 | Oturum kilidi: snap sonrası Kilitle; host→follower relative; persist yok. |
+| 2026-09-25 | Oturum kilidi: snap sonrası Kilitle; kilitli çift rigid-group (hangisi sürüklenirse); persist yok. |

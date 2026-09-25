@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "fair-stand-item-3d-preview-assembly",
   "kind": "feature",
-  "summary": "Admin Item 3D preview + assembly parts persistence, corner snap, session lock; prod scene3d consumes assembly.parts.",
+  "summary": "Admin Item 3D preview + assembly parts persistence, corner snap, N-member session lock, ViewCube/Persp-Ortho; prod scene3d consumes assembly.parts.",
   "owners": [
     "src/itemAdminPreview.js",
     "src/itemAdminCornerSnap.js",
@@ -994,7 +994,7 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "Item 3D admin preview (BoxGeometry + assembly free pose + corner snap + session lock). Persist absolute poses in fair_stand_item_assembly_parts; prod createItemAssemblyModule."
+    "notes": "Item 3D admin preview (BoxGeometry + assembly free pose + corner snap + N-member session lock + ViewCube/Persp-Ortho). Persist absolute poses in fair_stand_item_assembly_parts; prod createItemAssemblyModule. Session lock is not persisted."
   },
   "tests": {
     "targeted": [
@@ -1015,7 +1015,7 @@
   },
   "risk": {
     "level": "medium",
-    "notes": "New assembly table/API and admin preview; prod falls back to legacy without assembly.parts. Session lock is not persisted."
+    "notes": "New assembly table/API and admin preview; prod falls back to legacy without assembly.parts. Session lock (N-group) is not persisted."
   },
   "migration": {
     "required": true,
