@@ -115,6 +115,14 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 - **Kaynak:** `ITEM_FIRST_ROADMAP.md` P1; `wall_200` seed; `items.js` `resolveFlatPanelStripCount`
 - **Yasak:** Uyarıyı “geçsin diye” kapatmak; clamp’i ürün özelliği sanmak; auto-recalc quantity
 
+### B.10. `is_render` = çizilir
+
+- **Durum:** KARAR — sahne child mesh henüz yok
+- **Karar (2026-09-25):** `is_render=true` ise sistem o SKU’yu çizer. Katalog yalnız sürükle-bırak. Reçetede kullanılan parça `is_render=false` bırakılmaz. `connector`, vitrin gövde, cam raf ve video duvar paneli de true. Zemin ve kullanılmayan `shelf_leg` false kalır. Bağlayıcının kendi modül fabrikası yoktur.
+- **Bugün:** Reçeteli modül, gömülü `is_render` parçayı (`panel`, `separator-panel`, `base-top`, `counter-top`) yüzeye bağlar. Katalog bu kapıya girmez. `connector_*` false, mesh yok.
+- **Kaynak:** `ITEMS.md` § isRender; `FAIR_STAND_DB_KULLANIM_KILAVUZU.md` § `is_render`
+- **Yasak:** Çizimi katalog kartına bağlamak; `is_render=true` child’ı atlayıp kutu basmak; bir item ailesini kalıcı “çizilmez” ilan etmek
+
 ---
 ## C. Stand zarfı ve DB (Item tablosu değil)
 

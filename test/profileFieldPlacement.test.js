@@ -160,7 +160,7 @@ test('field profile renderer is a thick top rail, not a 4mm line or a 7-strip pa
   assert.match(fn, /BoxGeometry\(widthM, railHeightM, thicknessM\)/);
   assert.match(fn, /mesh\.position\.y = railHeightM \/ 2/);
   assert.doesNotMatch(fn, /STAND_DIMENSIONS/);
-  assert.match(fn, /FRAME_COLOR/);
+  assert.match(fn, /frameColorForModule\(moduleState\)/);
   assert.doesNotMatch(fn, /PANEL_RAIL_HEIGHT_M/);
   assert.doesNotMatch(fn, /stripCount/);
   assert.doesNotMatch(fn, /dimensions\?\.(lengthCm|thicknessCm)/);

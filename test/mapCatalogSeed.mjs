@@ -17,6 +17,7 @@ export const CANONICAL_RUNTIME_SETTINGS = Object.freeze({
   maxImageUploadMb: 5,
   exportButtonVisible: true,
   importButtonVisible: true,
+  saveAsButtonVisible: true,
 });
 
 export function mapCatalogSeedToBootstrap(seed) {

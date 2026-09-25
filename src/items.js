@@ -42,6 +42,26 @@ export function initializeItemRegistry(items) {
   }
   itemByKey = Object.freeze(next);
   catalogReady = true;
+  syncProfileColorCss();
+}
+
+/** Item.defaultColor (DB) → css hex. Görünür başlangıç rengi bundan okunur. */
+export function itemDefaultColorCss(itemOrKey) {
+  const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
+  const defaultColor = item?.defaultColor;
+  if (!Number.isInteger(defaultColor)) {
+    throw new TypeError(`Missing canonical defaultColor for ${item?.itemKey ?? 'unknown Item'}.`);
+  }
+  return `#${defaultColor.toString(16).padStart(6, '0')}`;
+}
+
+function syncProfileColorCss() {
+  if (typeof document === 'undefined') return;
+  const profile = Object.values(itemByKey).find(
+    (item) => item.type === 'profile' && Number.isInteger(item.defaultColor),
+  );
+  if (!profile) return;
+  document.documentElement.style.setProperty('--aluminum-profile-color', itemDefaultColorCss(profile));
 }
 
 export function initializeSnapRuleRegistry(rules) {
@@ -400,7 +420,36 @@ export function getItem(itemKey) {
   return requireRegistry()[itemKey] ?? null;
 }
 
-/** Item master `isRender`: own scene module/mesh. Virtual/BOM rows stay out of factory. */
+const EMBEDDED_RENDER_PART_TYPES = new Set([
+  'panel',
+  'separator-panel',
+  'base-top',
+  'counter-top',
+  'connector',
+  'showcase-board',
+  'showcase-accessory',
+  'video-wall-panel',
+]);
+
+/** Reçetedeki gömülü isRender parçalar (adet kadar). Kataloga bakmaz. Yerleşim modülü (profil, dikme) ayrı. */
+export function listEmbeddedRenderParts(parentItem) {
+  const rows = parentItem?.composition?.mode === 'recipe' ? parentItem.composition.items : null;
+  if (!Array.isArray(rows)) return [];
+  const parts = [];
+  for (const row of rows) {
+    const child = row?.itemKey ? getItem(row.itemKey) : null;
+    if (!child || child.isRender !== true) continue;
+    if (!EMBEDDED_RENDER_PART_TYPES.has(child.type)) continue;
+    const quantity = Math.round(Number(row.quantity));
+    if (!Number.isFinite(quantity) || quantity <= 0) continue;
+    for (let index = 0; index < quantity; index += 1) {
+      parts.push(child);
+    }
+  }
+  return parts;
+}
+
+/** Item master `isRender`: sistem bu SKU'yu çizer. Katalog bu kapıya girmez. */
 export function itemHasSceneRender(itemOrKey) {
   const item = typeof itemOrKey === 'string' ? getItem(itemOrKey) : itemOrKey;
   return item?.isRender === true;

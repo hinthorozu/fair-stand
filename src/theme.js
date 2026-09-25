@@ -1,9 +1,3 @@
-export const ALUMINUM_PROFILE_COLOR = '#D0D3D4';
-
-if (typeof document !== 'undefined') {
-  document.documentElement.style.setProperty('--aluminum-profile-color', ALUMINUM_PROFILE_COLOR);
-}
-
 export const GLASS_APPEARANCE = Object.freeze({
   color: 0xd7e9ed,
   opacity: 0.48,

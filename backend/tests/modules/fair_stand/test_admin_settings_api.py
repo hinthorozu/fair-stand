@@ -68,6 +68,7 @@ def test_admin_settings_get_returns_singletons(client, db_session, auth_headers)
         "maxImageUploadMb": 5,
         "exportButtonVisible": True,
         "importButtonVisible": True,
+        "saveAsButtonVisible": True,
     }
 
 
@@ -126,6 +127,7 @@ def test_admin_update_runtime_settings(client, db_session, auth_headers):
             "max_image_upload_mb": 10,
             "export_button_visible": False,
             "import_button_visible": True,
+            "save_as_button_visible": False,
         },
     )
     assert response.status_code == 200
@@ -133,4 +135,5 @@ def test_admin_update_runtime_settings(client, db_session, auth_headers):
         "maxImageUploadMb": 10,
         "exportButtonVisible": False,
         "importButtonVisible": True,
+        "saveAsButtonVisible": False,
     }

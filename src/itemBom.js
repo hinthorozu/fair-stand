@@ -28,7 +28,13 @@ function resolveLines(itemKey, quantity, stack) {
   const recipe = resolveRecipe(item);
   if (!recipe) {
     if (!item.unit) throw new TypeError(`Missing canonical unit for leaf Item: ${itemKey}.`);
-    return [{ itemKey, quantity: resolvedQuantity, unit: item.unit, item }];
+    return [{
+      itemKey,
+      quantity: resolvedQuantity,
+      unit: item.unit,
+      material: item.material ?? null,
+      item,
+    }];
   }
 
   if (stack.includes(itemKey)) {

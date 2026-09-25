@@ -1,0 +1,55 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+
+import { listRegisteredItems } from '../src/items.js';
+
+const COVER_TYPES = new Set(['panel', 'flat-panel', 'door', 'showcase-2', 'showcase-3']);
+const COLOR_IMAGE_TYPES = new Set(['base', 'counter', 'door-leaf']);
+const COLOR_TYPES = new Set([
+  'separator',
+  'separator-panel',
+  'base-top',
+  'counter-top',
+  'shelf',
+  'sofa-set-classic',
+  'sofa-single-classic',
+  'sofa-double-classic',
+  'chair',
+  'bar-stool',
+  'led-floodlight',
+]);
+
+function expectedFlags(item) {
+  if (item.type === 'floor' || item.itemKey === 'shelf_leg') {
+    return { isRender: false, color: false, image: false, lightbox: false, glass: false, mesh: false };
+  }
+  if (COVER_TYPES.has(item.type)) {
+    return { isRender: true, color: true, image: true, lightbox: true, glass: true, mesh: true };
+  }
+  if (COLOR_IMAGE_TYPES.has(item.type)) {
+    return { isRender: true, color: true, image: true, lightbox: false, glass: false, mesh: false };
+  }
+  if (COLOR_TYPES.has(item.type) || item.itemKey === 'furniture_table_chair_set_eames') {
+    return { isRender: true, color: true, image: false, lightbox: false, glass: false, mesh: false };
+  }
+  if (item.type === 'indoor-plant-1' && item.itemKey.startsWith('extra_long_planter_')) {
+    return { isRender: true, color: true, image: false, lightbox: false, glass: false, mesh: false };
+  }
+  return { isRender: true, color: false, image: false, lightbox: false, glass: false, mesh: false };
+}
+
+test('every catalog item surface flag matches the scene audit', () => {
+  const items = listRegisteredItems();
+  assert.equal(items.length, 96);
+  for (const item of items) {
+    const expected = expectedFlags(item);
+    assert.deepEqual({
+      isRender: item.isRender === true,
+      color: item.acceptsColor === true,
+      image: item.acceptsImage === true,
+      lightbox: item.acceptsLightbox === true,
+      glass: item.acceptsGlass === true,
+      mesh: item.acceptsMesh === true,
+    }, expected, item.itemKey);
+  }
+});

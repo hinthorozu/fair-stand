@@ -589,6 +589,7 @@ class FairStandSettingsModel(Base):
     max_image_upload_mb: Mapped[int] = mapped_column(Integer, nullable=False)
     export_button_visible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     import_button_visible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    save_as_button_visible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 

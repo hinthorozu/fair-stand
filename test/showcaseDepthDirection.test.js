@@ -15,7 +15,7 @@ test('showcase canonical depth projects behind the panel, not in front', () => {
 });
 
 test('showcase styling is isolated to canonical body boards, not the parent module frame', () => {
-  assert.match(showcase, /const frameMaterial = new THREE\.MeshStandardMaterial\(\{ color: FRAME_COLOR, metalness: 0\.68, roughness: 0\.28 \}\);/);
+  assert.match(showcase, /const frameMaterial = new THREE\.MeshStandardMaterial\(\{ color: frameColorForModule\(moduleState\), metalness: 0\.68, roughness: 0\.28 \}\);/);
   assert.match(showcase, /color: isGlass \? PANEL_GLASS_BACKING_APPEARANCE\.color : PANEL_BACK_COLOR,/);
   assert.match(showcase, /const sidePanelGeometry = new THREE\.BoxGeometry\(bodyThickness, bodyHeight, showcaseDepth\);/);
   assert.match(showcase, /new THREE\.Mesh\(sidePanelGeometry\.clone\(\), showcaseBodyMaterial\.clone\(\)\)/);

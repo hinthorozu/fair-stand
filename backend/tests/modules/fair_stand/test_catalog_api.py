@@ -85,6 +85,7 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
         "maxImageUploadMb": 5,
         "exportButtonVisible": True,
         "importButtonVisible": True,
+        "saveAsButtonVisible": True,
     }
     shelf_preview = next(kind for kind in body["previewKinds"] if kind["id"] == 20)
     assert "previewKey" not in shelf_preview
@@ -104,12 +105,12 @@ def test_hidden_item_is_not_catalog_visible(client, db_session, auth_headers):
     assert "rotationStepDeg" not in panel
     assert "defaultRotationDeg" not in panel
     assert "sideInsertRotation" not in panel
-    assert panel["isRender"] is False
-    assert panel["acceptsColor"] is False
-    assert panel["acceptsImage"] is False
-    assert panel["acceptsGlass"] is False
-    assert panel["acceptsLightbox"] is False
-    assert panel["acceptsMesh"] is False
+    assert panel["isRender"] is True
+    assert panel["acceptsColor"] is True
+    assert panel["acceptsImage"] is True
+    assert panel["acceptsGlass"] is True
+    assert panel["acceptsLightbox"] is True
+    assert panel["acceptsMesh"] is True
     assert "catalogPreview" not in panel
 
 

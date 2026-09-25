@@ -200,6 +200,7 @@ def map_runtime_settings(row) -> RuntimeSettings:
         max_image_upload_mb=int(row.max_image_upload_mb),
         export_button_visible=bool(row.export_button_visible),
         import_button_visible=bool(row.import_button_visible),
+        save_as_button_visible=bool(row.save_as_button_visible),
     )
 
 
@@ -208,4 +209,5 @@ def runtime_settings_payload(settings: RuntimeSettings) -> dict:
         "maxImageUploadMb": settings.max_image_upload_mb,
         "exportButtonVisible": settings.export_button_visible,
         "importButtonVisible": settings.import_button_visible,
+        "saveAsButtonVisible": settings.save_as_button_visible,
     }

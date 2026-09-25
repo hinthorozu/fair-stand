@@ -54,7 +54,7 @@ test('wall showcase renderer exposes one color-only body selector for all four b
   assert.match(showcase, /bodyColorTargets\.push\(sidePanel\)/);
   assert.match(showcase, /bodyColorTargets\.push\(cap\)/);
   assert.match(showcase, /surfaceRole: 'showcase-body'/);
-  assert.match(showcase, /\.\.\.surfaceCapabilityUserData\(bodyDefinition\.sideItem\), acceptsColor: true/);
+  assert.match(showcase, /\.\.\.surfaceCapabilityUserData\(bodyDefinition\.sideItem\), moduleIndex/);
   assert.match(showcase, /\.\.\.bindRendererSurfaceState\(moduleState\.bodySurface\)/);
   assert.match(showcase, /colorTargets: bodyColorTargets/);
   assert.doesNotMatch(showcase, /bodySurfaces/);

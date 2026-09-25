@@ -94,6 +94,7 @@ class RuntimeSettingsUpdateBody(BaseModel):
     max_image_upload_mb: int = Field(gt=0)
     export_button_visible: bool
     import_button_visible: bool
+    save_as_button_visible: bool
 
 
 class ItemTypeCreateBody(BaseModel):
@@ -463,6 +464,7 @@ def admin_update_runtime_settings(
             max_image_upload_mb=body.max_image_upload_mb,
             export_button_visible=body.export_button_visible,
             import_button_visible=body.import_button_visible,
+            save_as_button_visible=body.save_as_button_visible,
         )
     except SettingsAdminError as exc:
         _raise_admin(exc)

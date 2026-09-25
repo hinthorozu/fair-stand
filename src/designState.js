@@ -10,7 +10,9 @@ import {
   getTopLightItemForType,
   getShowcaseBodyDefinition,
   getShowcaseItemKeyForType,
+  itemDefaultColorCss,
   itemHasSceneRender,
+  listEmbeddedRenderParts,
   requireSceneDimension,
   resolveItemKey,
   resolveSceneDimensions,
@@ -18,15 +20,9 @@ import {
 import { getItemSurfaceCapabilities } from './itemCapabilities.js';
 import { resolveWallPanelBandPitchCm } from './wallPanelBand.js';
 
-const DEFAULT_PANEL_COLOR = '#ffffff';
-
 function separatorDefaultColor(widthCm) {
   const itemKey = Number(widthCm) === 50 ? 'separator_panel_48_5' : 'separator_panel_98';
-  const defaultColor = getItem(itemKey)?.defaultColor;
-  if (!Number.isInteger(defaultColor)) {
-    throw new TypeError(`Missing canonical separator defaultColor for ${itemKey}.`);
-  }
-  return `#${defaultColor.toString(16).padStart(6, '0')}`;
+  return itemDefaultColorCss(itemKey);
 }
 
 function createId(prefix) {
@@ -83,11 +79,15 @@ export function createDefaultImageTransform() {
 }
 
 function itemDefaultColorHex(item) {
-  const defaultColor = item?.defaultColor;
-  if (!Number.isInteger(defaultColor)) {
-    throw new TypeError(`Missing canonical defaultColor for ${item?.itemKey ?? 'unknown Item'}.`);
-  }
-  return `#${defaultColor.toString(16).padStart(6, '0')}`;
+  return itemDefaultColorCss(item);
+}
+
+function recipeSurfaceColor(parentItem, partTypes) {
+  const part = listEmbeddedRenderParts(parentItem)
+    .find((row) => partTypes.includes(row.type) && Number.isInteger(row.defaultColor));
+  if (part) return itemDefaultColorCss(part);
+  if (Number.isInteger(parentItem?.defaultColor)) return itemDefaultColorCss(parentItem);
+  throw new TypeError(`Missing canonical defaultColor for ${parentItem?.itemKey ?? 'unknown Item'}.`);
 }
 
 function createEditableItemSurfaceState(item, stripIndex = null) {
@@ -104,6 +104,32 @@ function createEditableItemSurfaceState(item, stripIndex = null) {
   };
 }
 
+function createEmbeddedPartSurface(item, stripIndex = null) {
+  const color = itemDefaultColorCss(item);
+  const scene = resolveSceneDimensions(item);
+  return {
+    id: createId('surface'),
+    itemKey: item.itemKey,
+    stripIndex,
+    color,
+    widthCm: scene.widthCm ?? null,
+    heightCm: scene.heightCm ?? null,
+    depthCm: scene.depthCm ?? null,
+    imageAssetId: null,
+    imageTransform: createDefaultImageTransform(),
+  };
+}
+
+function takeParts(parts, type) {
+  const matched = [];
+  for (let index = parts.length - 1; index >= 0; index -= 1) {
+    if (parts[index].type !== type) continue;
+    matched.push(parts[index]);
+    parts.splice(index, 1);
+  }
+  return matched.reverse();
+}
+
 function createEditablePanelState(stripIndex, color) {
   return {
     id: createId('surface'),
@@ -112,6 +138,33 @@ function createEditablePanelState(stripIndex, color) {
     imageAssetId: null,
     imageTransform: createDefaultImageTransform(),
   };
+}
+
+function renderPartSurfaces(parentItem, partTypes) {
+  return listEmbeddedRenderParts(parentItem)
+    .filter((part) => partTypes.includes(part.type))
+    .map((part, index) => createEmbeddedPartSurface(part, index));
+}
+
+function stampRenderParts(surfaces, parentItem, partTypes) {
+  const parts = listEmbeddedRenderParts(parentItem)
+    .filter((part) => partTypes.includes(part.type));
+  surfaces.forEach((surface, index) => {
+    const part = parts[index];
+    if (!part || !surface) return;
+    const stamped = createEmbeddedPartSurface(part, surface.stripIndex ?? index);
+    surface.itemKey = stamped.itemKey;
+    surface.widthCm = stamped.widthCm;
+    surface.heightCm = stamped.heightCm;
+    surface.depthCm = stamped.depthCm;
+    if (Number.isInteger(part.defaultColor)) surface.color = stamped.color;
+  });
+}
+
+function topRenderParts(parentItem) {
+  return listEmbeddedRenderParts(parentItem)
+    .filter((part) => part.type === 'base-top' || part.type === 'counter-top')
+    .map((part) => createEmbeddedPartSurface(part, null));
 }
 
 function resolveFlatPanelItemKey(widthCmOrDescriptor) {
@@ -140,9 +193,13 @@ export function createFlatPanelModuleState(widthCmOrDescriptor) {
     ...(occupancy ? { stripOccupancy: occupancy } : {}),
     strips: Array.from(
       { length: stripCount },
-      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
+      (_, stripIndex) => createEditablePanelState(
+        stripIndex,
+        recipeSurfaceColor(item, ['panel', 'separator-panel']),
+      ),
     ),
   };
+  stampRenderParts(state.strips, item, ['panel', 'separator-panel']);
   applySceneFootprint(state, item, ['widthCm']);
   state.heightCm = moduleHeightCm;
   return state;
@@ -183,6 +240,7 @@ export function createSeparatorModuleState(widthCmOrDescriptor, descriptor = {})
       color: separatorDefaultColor(requireSceneDimension(item, 'widthCm')),
     },
   };
+  stampRenderParts([state.surface], item, ['separator-panel', 'panel']);
   return applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
 }
 
@@ -208,13 +266,18 @@ export function createShowcaseModuleState(type, widthCm = 100) {
     heightCm: moduleHeightCm,
     strips: Array.from(
       { length: stripCount },
-      (_, stripIndex) => createEditablePanelState(stripIndex, DEFAULT_PANEL_COLOR),
+      (_, stripIndex) => createEditablePanelState(
+        stripIndex,
+        recipeSurfaceColor(showcaseItem, ['panel', 'separator-panel']),
+      ),
     ),
     bodySurface: {
       id: createId('surface'),
       color: itemDefaultColorHex(bodyDefinition.sideItem),
+      itemKey: bodyDefinition.sideItem.itemKey,
     },
   };
+  stampRenderParts(state.strips, showcaseItem, ['panel', 'separator-panel']);
   return applySceneFootprint(state, showcaseItem, ['widthCm']);
 }
 
@@ -230,18 +293,21 @@ export function createDoorModuleState(widthCmOrDescriptor = 100) {
   const doorLeafItem = getItem('door_leaf_100');
   if (!doorLeafItem) throw new TypeError('Missing canonical door leaf Item door_leaf_100.');
 
-  return applySceneFootprint({
+  const state = applySceneFootprint({
     id: createId('module'),
     itemKey: doorItem.itemKey,
     type: doorItem.type,
-    // Üstte kalan üç duvar paneli parent kapı modülünün ayrı editable surface'leridir.
     strips: Array.from(
       { length: 3 },
-      (_, index) => createEditablePanelState(index + 4, DEFAULT_PANEL_COLOR),
+      (_, index) => createEditablePanelState(
+        index + 4,
+        recipeSurfaceColor(doorItem, ['panel', 'separator-panel']),
+      ),
     ),
-    // Fiziksel ahşap kapı kanadı kanonik door_leaf Item kimliği/varsayılanı ile başlar.
     surface: createEditableItemSurfaceState(doorLeafItem),
   }, doorItem, ['widthCm', 'depthCm', 'heightCm']);
+  stampRenderParts(state.strips, doorItem, ['panel', 'separator-panel']);
+  return state;
 }
 
 const COUNTER_WIDTH_SHAPE_TO_ITEM_KEY = Object.freeze({
@@ -273,25 +339,29 @@ export function createCounterModuleState(widthCmOrDescriptor, options = {}) {
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'counter') return null;
   const shape = item.shape === 'L' ? 'L' : 'straight';
+  const counterFaceColor = recipeSurfaceColor(item, ['panel', 'separator-panel']);
   const faces = {
-    frontLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-    frontUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-    leftLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-    leftUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-    rightLower: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-    rightUpper: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
+    frontLower: createEditablePanelState(null, counterFaceColor),
+    frontUpper: createEditablePanelState(null, counterFaceColor),
+    leftLower: createEditablePanelState(null, counterFaceColor),
+    leftUpper: createEditablePanelState(null, counterFaceColor),
+    rightLower: createEditablePanelState(null, counterFaceColor),
+    rightUpper: createEditablePanelState(null, counterFaceColor),
   };
   if (shape === 'L') {
-    faces.returnLower = createEditablePanelState(null, DEFAULT_PANEL_COLOR);
-    faces.returnUpper = createEditablePanelState(null, DEFAULT_PANEL_COLOR);
+    faces.returnLower = createEditablePanelState(null, counterFaceColor);
+    faces.returnUpper = createEditablePanelState(null, counterFaceColor);
   }
-  return applySceneFootprint({
+  stampRenderParts(Object.values(faces), item, ['panel', 'separator-panel']);
+  const state = applySceneFootprint({
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
     shape,
     faces,
   }, item, ['widthCm', 'depthCm', 'heightCm']);
+  state.renderParts = { tops: topRenderParts(item) };
+  return state;
 }
 
 const BASE_WIDTH_TO_ITEM_KEY = Object.freeze({
@@ -313,17 +383,22 @@ export function createBaseModuleState(widthCmOrDescriptor) {
   const itemKey = resolveBaseItemKey(widthCmOrDescriptor);
   const item = itemKey ? getItem(itemKey) : null;
   if (!item || item.type !== 'base') return null;
+  const baseFaceColor = recipeSurfaceColor(item, ['panel', 'separator-panel']);
 
-  return applySceneFootprint({
+  const faces = {
+    front: createEditablePanelState(null, baseFaceColor),
+    left: createEditablePanelState(null, baseFaceColor),
+    right: createEditablePanelState(null, baseFaceColor),
+  };
+  stampRenderParts(Object.values(faces), item, ['panel', 'separator-panel']);
+  const state = applySceneFootprint({
     id: createId('module'),
     itemKey: item.itemKey,
     type: item.type,
-    faces: {
-      front: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      left: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-      right: createEditablePanelState(null, DEFAULT_PANEL_COLOR),
-    },
+    faces,
   }, item, ['widthCm', 'depthCm', 'heightCm']);
+  state.renderParts = { tops: topRenderParts(item) };
+  return state;
 }
 
 function createFurnitureModuleState(type) {
@@ -338,7 +413,7 @@ function createFurnitureModuleState(type) {
   if (type !== 'table-glass' && type !== 'coffee-table-classic') {
     state.surface = {
       id: createId('surface'),
-      color: DEFAULT_PANEL_COLOR,
+      color: itemDefaultColorCss(item),
     };
   }
   if (Object.hasOwn(item, 'visualRotationYDeg')) {
@@ -476,7 +551,7 @@ export function createIndoorPlantModuleState(descriptor = {}) {
     ...(isLongPlanter ? {
       surface: {
         id: createId('surface'),
-        color: DEFAULT_PANEL_COLOR,
+        color: itemDefaultColorCss(item),
       },
     } : {}),
   };
@@ -536,7 +611,7 @@ export function createLedFloodlightModuleState() {
     type: item.type,
     surface: {
       id: createId('surface'),
-      color: '#17191c',
+      color: itemDefaultColorCss(item),
     },
   }, item, ['widthCm', 'depthCm', 'heightCm']);
 }
@@ -795,6 +870,12 @@ export function duplicateModuleState(moduleState) {
       id: createId('surface'),
       stripIndex: Number.isInteger(strip.stripIndex) ? strip.stripIndex : stripIndex,
       imageTransform: strip.imageTransform ? { ...strip.imageTransform } : createDefaultImageTransform(),
+    }));
+  }
+  if (Array.isArray(duplicate.renderParts?.tops)) {
+    duplicate.renderParts.tops = duplicate.renderParts.tops.map((part) => ({
+      ...part,
+      id: createId('surface'),
     }));
   }
   if (duplicate.faces) {

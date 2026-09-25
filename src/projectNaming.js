@@ -23,6 +23,14 @@ export function getEditableProjectName(fullName, suffix = '') {
   return name;
 }
 
+export function suggestSaveAsEditableName(editableName) {
+  const raw = String(editableName || '').trim() || 'Adsız Proje';
+  const match = raw.match(/^(.*?)(?:\s*\((\d+)\))?$/);
+  const stem = String(match?.[1] ?? raw).trim() || 'Adsız Proje';
+  const next = Number(match?.[2] || 0) + 1;
+  return `${stem} (${next})`;
+}
+
 export function createProjectNamingController({
   documentRef = globalThis.document,
   projectNameInput,
@@ -47,7 +55,11 @@ export function createProjectNamingController({
       form.style.cssText = 'width:min(380px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
       const title = documentRef.createElement('strong');
       const isRename = mode === 'rename';
-      title.textContent = isRename ? 'Proje Adını Değiştir' : 'Yeni Proje';
+      const isSaveAs = mode === 'save-as';
+      const usesStandNameRule = !isRename;
+      title.textContent = isRename
+        ? 'Proje Adını Değiştir'
+        : (isSaveAs ? 'Farklı Kaydet' : 'Yeni Proje');
       title.style.fontSize = '16px';
       const description = documentRef.createElement('span');
       description.textContent = isRename
@@ -56,7 +68,7 @@ export function createProjectNamingController({
       description.style.color = '#64748b';
       const label = documentRef.createElement('label');
       label.style.cssText = 'display:grid;gap:5px';
-      label.textContent = isRename ? 'Proje adı' : 'Stand adı';
+      label.textContent = usesStandNameRule ? 'Stand adı' : 'Proje adı';
       const input = documentRef.createElement('input');
       input.type = 'text';
       input.name = 'projectName';
@@ -64,7 +76,7 @@ export function createProjectNamingController({
       input.autocomplete = 'off';
       input.required = true;
       input.value = defaultName && defaultName !== 'Adsız Proje' ? defaultName : '';
-      input.placeholder = isRename ? 'Örn. İstanbul Fuar Standı' : 'Örn. Ferromet';
+      input.placeholder = usesStandNameRule ? 'Örn. Ferromet' : 'Örn. İstanbul Fuar Standı';
       const preview = documentRef.createElement('span');
       if (suffix) {
         preview.style.cssText = 'font-weight:700;color:#334155;word-break:break-word';
@@ -86,7 +98,9 @@ export function createProjectNamingController({
       const submitButton = documentRef.createElement('button');
       submitButton.type = 'submit';
       submitButton.className = 'primary';
-      submitButton.textContent = isRename ? 'Kaydet' : 'Projeyi Oluştur';
+      submitButton.textContent = isRename
+        ? 'Kaydet'
+        : (isSaveAs ? 'Farklı Kaydet' : 'Projeyi Oluştur');
       actions.append(cancelButton, submitButton);
       form.append(title, description, label, actions);
       overlay.appendChild(form);
