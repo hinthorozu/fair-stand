@@ -7,6 +7,7 @@ import {
   localCornerOffsetMeters,
   snapMeshCornerToCorner,
 } from './itemAdminCornerSnap.js';
+import { createAssemblyLock, applyRelativePose } from './itemAdminAssemblyLock.js';
 
 function cmToM(cm) {
   return Number(cm) / 100;
@@ -173,6 +174,7 @@ export function mountItemAdminPreview(host, options = {}) {
     onSelectionChange: typeof options.onSelectionChange === 'function' ? options.onSelectionChange : null,
     onSnapModeChange: typeof options.onSnapModeChange === 'function' ? options.onSnapModeChange : null,
     onSnapSessionChange: typeof options.onSnapSessionChange === 'function' ? options.onSnapSessionChange : null,
+    onLockChange: typeof options.onLockChange === 'function' ? options.onLockChange : null,
     snapMode: false,
   };
 
@@ -251,19 +253,37 @@ export function mountItemAdminPreview(host, options = {}) {
   transform.showZ = true;
   transform.addEventListener('dragging-changed', (event) => {
     orbit.enabled = !event.value;
-    // Sürükleme bittiğinde açıları bir kez senkronla (her frame React setState → donma).
     if (!event.value && selected) {
       clampMeshAboveGround(selected);
+      if (assemblyLock) {
+        const host = findPartMesh(assemblyLock.host.childItemKey, assemblyLock.host.instanceIndex);
+        const follower = findPartMesh(
+          assemblyLock.follower.childItemKey,
+          assemblyLock.follower.instanceIndex,
+        );
+        if (selected === host) {
+          syncLockFromHost();
+        } else if (selected === follower) {
+          // Follower taşındı → kilit çözülür (host sürer kuralı).
+          unlockAssembly();
+        }
+      }
       emitPartsChange();
       emitSelectionChange(selected);
     }
   });
   transform.addEventListener('objectChange', () => {
     if (selected) clampMeshAboveGround(selected);
-    // Pose’u canlı tut; UI seçimini sürüklerken spam etme.
     if (!transform.dragging) {
+      if (assemblyLock) {
+        const host = findPartMesh(assemblyLock.host.childItemKey, assemblyLock.host.instanceIndex);
+        if (selected === host) syncLockFromHost();
+      }
       emitPartsChange();
       if (selected) emitSelectionChange(selected);
+    } else if (assemblyLock) {
+      const host = findPartMesh(assemblyLock.host.childItemKey, assemblyLock.host.instanceIndex);
+      if (selected === host) syncLockFromHost();
     }
   });
   scene.add(transform.getHelper());
@@ -272,6 +292,10 @@ export function mountItemAdminPreview(host, options = {}) {
   const pointer = new THREE.Vector2();
   let selected = null;
   let snapSource = null;
+  /** @type {{ follower: object, host: object } | null} */
+  let pendingLockPair = null;
+  /** @type {ReturnType<typeof createAssemblyLock>} */
+  let assemblyLock = null;
   let disposed = false;
   let frame = 0;
   const cornerMarkerGeo = new THREE.SphereGeometry(0.04, 12, 12);
@@ -323,10 +347,95 @@ export function mountItemAdminPreview(host, options = {}) {
     }
   }
 
-  function emitSnapModeChange() {
-    if (typeof state.onSnapModeChange === 'function') {
-      state.onSnapModeChange(Boolean(state.snapMode));
-    }
+  function emitLockChange() {
+    if (typeof state.onLockChange !== 'function') return;
+    state.onLockChange({
+      lock: assemblyLock
+        ? {
+            host: { ...assemblyLock.host },
+            follower: { ...assemblyLock.follower },
+          }
+        : null,
+      canLock: Boolean(pendingLockPair?.follower && pendingLockPair?.host),
+    });
+  }
+
+  function findPartMesh(childItemKey, instanceIndex) {
+    const index = Number(instanceIndex) || 0;
+    return content.children.find((child) => (
+      child.isMesh
+      && !child.userData.isEnvelope
+      && child.userData?.part
+      && String(child.userData.part.childItemKey) === String(childItemKey)
+      && (Number(child.userData.part.instanceIndex) || 0) === index
+    )) || null;
+  }
+
+  function writePoseToMesh(mesh, pose) {
+    if (!mesh?.userData?.partSize || !mesh.userData.part) return;
+    const size = mesh.userData.partSize;
+    applyLocalPose(mesh, {
+      ...mesh.userData.part,
+      widthCm: size.widthM * 100,
+      depthCm: size.depthM * 100,
+      heightCm: size.heightM * 100,
+      ...pose,
+    });
+    Object.assign(mesh.userData.part, pose);
+  }
+
+  function syncLockFromHost() {
+    if (!assemblyLock) return;
+    const host = findPartMesh(assemblyLock.host.childItemKey, assemblyLock.host.instanceIndex);
+    const follower = findPartMesh(
+      assemblyLock.follower.childItemKey,
+      assemblyLock.follower.instanceIndex,
+    );
+    if (!host || !follower) return;
+    const next = applyRelativePose(readPoseFromMesh(host), assemblyLock.relative);
+    writePoseToMesh(follower, next);
+  }
+
+  function clearAssemblyLock() {
+    if (!assemblyLock && !pendingLockPair) return;
+    assemblyLock = null;
+    pendingLockPair = null;
+    emitLockChange();
+  }
+
+  function lockPendingPair() {
+    if (!pendingLockPair?.follower || !pendingLockPair?.host) return false;
+    const followerPose = readPoseFromMesh(pendingLockPair.follower);
+    const hostPose = readPoseFromMesh(pendingLockPair.host);
+    const lock = createAssemblyLock(
+      pendingLockPair.follower.userData.part,
+      pendingLockPair.host.userData.part,
+      followerPose,
+      hostPose,
+    );
+    if (!lock) return false;
+    assemblyLock = lock;
+    pendingLockPair = null;
+    emitLockChange();
+    return true;
+  }
+
+  function unlockAssembly() {
+    assemblyLock = null;
+    emitLockChange();
+    return true;
+  }
+
+  function getLockUiState() {
+    return {
+      lock: assemblyLock
+        ? {
+            host: { ...assemblyLock.host },
+            follower: { ...assemblyLock.follower },
+          }
+        : null,
+      canLock: Boolean(pendingLockPair?.follower && pendingLockPair?.host),
+    };
   }
 
   function emitSnapSessionChange() {
@@ -342,6 +451,12 @@ export function mountItemAdminPreview(host, options = {}) {
       cornerKey: snapSource.cornerKey,
       cornerLabel: snapSource.marker?.userData?.cornerLabel || snapSource.cornerKey,
     });
+  }
+
+  function emitSnapModeChange() {
+    if (typeof state.onSnapModeChange === 'function') {
+      state.onSnapModeChange(Boolean(state.snapMode));
+    }
   }
 
   function setSnapMode(enabled) {
@@ -574,9 +689,11 @@ export function mountItemAdminPreview(host, options = {}) {
       );
       if (moved) {
         clampMeshAboveGround(snapSource.mesh);
+        pendingLockPair = { follower: snapSource.mesh, host: partMesh };
         selected = snapSource.mesh;
         emitPartsChange();
         emitSelectionChange(selected);
+        emitLockChange();
       }
       clearSnapSource();
       return;
@@ -640,6 +757,15 @@ export function mountItemAdminPreview(host, options = {}) {
       THREE.MathUtils.degToRad(rotationYDeg),
     );
     clampMeshAboveGround(selected);
+    if (assemblyLock) {
+      const host = findPartMesh(assemblyLock.host.childItemKey, assemblyLock.host.instanceIndex);
+      const follower = findPartMesh(
+        assemblyLock.follower.childItemKey,
+        assemblyLock.follower.instanceIndex,
+      );
+      if (selected === host) syncLockFromHost();
+      else if (selected === follower) unlockAssembly();
+    }
     emitPartsChange();
     emitSelectionChange(selected);
     return true;
@@ -668,10 +794,13 @@ export function mountItemAdminPreview(host, options = {}) {
       if ('isRender' in next) state.isRender = next.isRender !== false;
       if ('mode' in next) {
         state.mode = next.mode === 'assembly' ? 'assembly' : 'envelope';
-        if (state.mode !== 'assembly' && state.snapMode) {
-          state.snapMode = false;
-          clearSnapSource();
-          emitSnapModeChange();
+        if (state.mode !== 'assembly') {
+          if (state.snapMode) {
+            state.snapMode = false;
+            clearSnapSource();
+            emitSnapModeChange();
+          }
+          clearAssemblyLock();
         }
       }
       if ('envelope' in next) state.envelope = next.envelope;
@@ -695,13 +824,20 @@ export function mountItemAdminPreview(host, options = {}) {
           ? next.onSnapSessionChange
           : null;
       }
+      if ('onLockChange' in next) {
+        state.onLockChange = typeof next.onLockChange === 'function' ? next.onLockChange : null;
+      }
       rebuild();
       if (state.snapMode) setCornerMarkersVisible(true);
+      if (assemblyLock) syncLockFromHost();
     },
     getParts,
     setSelectedEuler,
     setSnapMode,
     getSnapMode: () => Boolean(state.snapMode),
+    lockPendingPair,
+    unlockAssembly,
+    getLockUiState,
     dispose() {
       disposed = true;
       cancelAnimationFrame(frame);

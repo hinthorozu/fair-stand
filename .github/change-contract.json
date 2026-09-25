@@ -1,25 +1,22 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-item-render-flags-save-as",
-  "kind": "architecture",
-  "summary": "Materialize item is_render/accepts_* from scene usage into DB seed; bind surfaces to part itemKey; add Save As with DB-managed button visibility.",
+  "id": "fair-stand-item-3d-preview-assembly",
+  "kind": "feature",
+  "summary": "Admin Item 3D preview + assembly parts persistence, corner snap, session lock; prod scene3d consumes assembly.parts.",
   "owners": [
-    "backend/app/modules/fair_stand/application/admin_snap_catalog.py",
-    "backend/app/modules/fair_stand/infrastructure/models.py",
-    "backend/app/modules/fair_stand/infrastructure/item_snap_seed.py",
-    "src/itemSnap.js",
-    "src/items.js",
-    "backend/app/modules/fair_stand/infrastructure/item_type_behavior_seed.py",
-    "src/moduleBehavior.js",
-    "backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py"
+    "src/itemAdminPreview.js",
+    "src/itemAdminCornerSnap.js",
+    "src/itemAdminAssemblyLock.js",
+    "src/itemAssembly.js",
+    "src/scene3d.js",
+    "backend/app/modules/fair_stand/application/admin_items.py",
+    "backend/app/modules/fair_stand/infrastructure/models.py"
   ],
   "sourceOfTruth": [
-    "docs/refactor/DATABASE.md",
-    "docs/refactor/SCENE_POSE.md",
+    "docs/refactor/ITEM_3D_PREVIEW.md",
     "docs/refactor/ITEM_FIRST_ROADMAP.md",
-    "backend/app/modules/fair_stand/infrastructure/models.py",
-    "docs/refactor/TYPE_BEHAVIORS_DB_ROADMAP.md",
-    "docs/refactor/PENDING_ITEM_DECISIONS.md"
+    "docs/refactor/DATABASE.md",
+    "docs/refactor/SCENE_POSE.md"
   ],
   "impact": {
     "catalog": "affected",
@@ -61,6 +58,8 @@
       "backend/alembic/versions/0035_item_surface_flags_from_seed.py",
       "backend/alembic/versions/0036_item_flag_audit.py",
       "backend/alembic/versions/0037_save_as_button.py",
+      "backend/alembic/versions/0038_item_assembly_parts.py",
+      "backend/alembic/versions/0039_assembly_rotation_xyz.py",
       "backend/app/modules/fair_stand/api/dependencies.py",
       "backend/app/modules/fair_stand/api/routes.py",
       "backend/app/modules/fair_stand/application/admin_items.py",
@@ -102,6 +101,7 @@
       "docs/refactor/DATABASE.md",
       "docs/refactor/FAIR_STAND_DB_KULLANIM_KILAVUZU.md",
       "docs/refactor/ITEMS.md",
+      "docs/refactor/ITEM_3D_PREVIEW.md",
       "docs/refactor/PENDING_ITEM_DECISIONS.md",
       "docs/refactor/PERFORMANCE_ROADMAP.md",
       "docs/refactor/README.md",
@@ -138,6 +138,10 @@
       "src/helpGuide.css",
       "src/helpGuide.js",
       "src/imageOptimize.js",
+      "src/itemAdminAssemblyLock.js",
+      "src/itemAdminCornerSnap.js",
+      "src/itemAdminPreview.js",
+      "src/itemAssembly.js",
       "src/itemBom.js",
       "src/itemCapabilities.js",
       "src/itemSnap.js",
@@ -184,6 +188,9 @@
       "test/doorLeafItemContract.test.js",
       "test/fixtures/itemCatalogSeed.json",
       "test/imageOptimize.test.js",
+      "test/itemAdminAssemblyLock.test.js",
+      "test/itemAdminCornerSnap.test.js",
+      "test/itemAssembly.test.js",
       "test/itemCatalogFields.test.js",
       "test/itemDefaultZCm.test.js",
       "test/itemIsRenderFactory.test.js",
@@ -322,6 +329,9 @@
       "test/imageOptimize.test.js",
       "test/indoorPlantItemsContract.test.js",
       "test/indoorPlants.test.js",
+      "test/itemAdminAssemblyLock.test.js",
+      "test/itemAdminCornerSnap.test.js",
+      "test/itemAssembly.test.js",
       "test/itemBoxDimensions.test.js",
       "test/itemCatalogFields.test.js",
       "test/itemDefaultZCm.test.js",
@@ -947,6 +957,7 @@
       "docs/refactor/DATABASE.md",
       "docs/refactor/FAIR_STAND_DB_KULLANIM_KILAVUZU.md",
       "docs/refactor/ITEMS.md",
+      "docs/refactor/ITEM_3D_PREVIEW.md",
       "docs/refactor/ITEM_FIRST_ROADMAP.md",
       "docs/refactor/PENDING_ITEM_DECISIONS.md",
       "docs/refactor/PERFORMANCE_ROADMAP.md",
@@ -983,33 +994,32 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "Item surface flags (is_render/accepts_*) materialize from scene usage into seed/DB; embedded render parts stamp itemKey; Save As clones project+assets with new UUIDs; save_as_button_visible in fair_stand_settings."
+    "notes": "Item 3D admin preview (BoxGeometry + assembly free pose + corner snap + session lock). Persist absolute poses in fair_stand_item_assembly_parts; prod createItemAssemblyModule."
   },
   "tests": {
     "targeted": [
-      "backend/tests/modules/fair_stand/test_item_snap.py",
-      "test/itemSnapAnchor.test.js",
-      "test/itemSnapSeed.mjs",
-      "test/moduleBehaviorPolicy.test.js"
+      "test/itemAssembly.test.js",
+      "test/itemAdminCornerSnap.test.js",
+      "test/itemAdminAssemblyLock.test.js",
+      "test/systemChangeGate.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/f011-module-behavior.spec.mjs",
-        "e2e/module-move-snap.spec.mjs"
+        "e2e/wall-flat-panel-items-contract.spec.mjs"
       ],
-      "reason": "Guarded itemSnap/moduleBehavior and catalog bootstrap changes require E2E coverage for snap placement and module behavior."
+      "reason": "scene3d.js assembly path touches renderer/state/placement; keep a wall/item contract e2e as browser coverage for guarded scene changes."
     }
   },
   "risk": {
-    "level": "high",
-    "notes": "Schema replaces stand.family with item_type catalog and M:N rule links; snap motor host resolution and provides inheritance change; migrations 0024–0029 must apply in order; incorrect type provides can break placement/snap."
+    "level": "medium",
+    "notes": "New assembly table/API and admin preview; prod falls back to legacy without assembly.parts. Session lock is not persisted."
   },
   "migration": {
     "required": true,
-    "notes": "fair-stand alembic through 0029_item_type_catalog (0024 item snap capability, 0025 drop rule sort_index, 0026 snap code→key, 0027 drop rule mount_mode, 0028 rule↔family/item_type link, 0029 fair_stand_item_type catalog + type-based provides)."
+    "notes": "alembic 0038_item_assembly_parts + 0039_assembly_rotation_xyz (rotation_x/y_deg)."
   },
-  "rollback": "Revert branch commits; alembic downgrade through 0024 (or to pre-snap revision); restore stand.family / prior rule schema and itemSnap motor behavior from main."
+  "rollback": "Revert item_3d_preview commits; alembic downgrade through 0038; CRM tab unused without stand package."
 }

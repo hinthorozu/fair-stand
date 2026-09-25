@@ -93,13 +93,14 @@ Prod: `itemHasAssemblyLayout` → parts çiz; yoksa legacy gömülü/şerit yolu
 - [x] Persist + bootstrap + prod assembly mesh
 - [x] `isRender` filtresi (catalogVisible ile karıştırılmaz)
 - [x] Admin AABB **köşe snap + yapıştır** (C / buton; 8 köşe; rotasyon korunur; absolute pose)
+- [x] Admin **oturum kilidi** (snap sonrası Kilitle; host sürükleyince follower gelir; DB’ye yazılmaz)
 
 ---
 
 ## Bilinçli sınırlar (yapılmaz / henüz yok)
 
 - Admin ≠ prod `scene3d` (magnetic joint / wall reflow burada yok).
-- **Kalıcı kilitle** (relative constraint / birlikte hareket) yok — yapıştır one-shot.
+- **Kalıcı kilitle** (DB relative constraint / reload sonrası grup) yok — oturum kilidi absolute pose kaydından bağımsız.
 - BOM çocuğu otomatik sahne mesh’i sanılmaz; assembly yoksa eski davranış.
 - Gerçek GLB köşe ≠ AABB köşe; admin layout kutuya göre.
 
@@ -139,3 +140,4 @@ Kalıcı **kilitle** (relative constraint + hedef takip + persist) = şema geni�
 | 2026-09-25 | P5 uygulandı: sekme, assembly tablo/API, prod mesh, WDH eksen, expand, seçim, full Euler + açı UI, zemin clamp. |
 | 2026-09-25 | Bu doküman + Cursor plan mirror. |
 | 2026-09-25 | Admin köşe snap MVP: `itemAdminCornerSnap.js` + C/buton iki tık yapıştır. |
+| 2026-09-25 | Oturum kilidi: snap sonrası Kilitle; host→follower relative; persist yok. |
