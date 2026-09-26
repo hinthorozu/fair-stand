@@ -1080,21 +1080,37 @@ class AdminItemsService:
             row.strip_occupancy = strip
 
     def _replace_assets(self, row: FairStandItemModel, assets: list[dict]) -> None:
-        for existing in list(row.assets or []):
-            self._session.delete(existing)
-        row.assets = []
+        normalized: list[dict] = []
+        seen_roles: set[str] = set()
         for asset in assets:
             role = str(asset.get("asset_role", asset.get("assetRole") or "")).strip()
             path = str(asset.get("relative_path", asset.get("relativePath") or "")).strip()
             if not role or not path:
                 raise ItemAdminError("Asset rolü ve relative path zorunludur.")
+            if role in seen_roles:
+                raise ItemAdminError("Aynı asset rolü bir item altında birden fazla kullanılamaz.")
+            seen_roles.add(role)
+            normalized.append(
+                {
+                    "asset_role": role,
+                    "relative_path": path,
+                    "is_active": bool(asset.get("is_active", asset.get("isActive", True))),
+                }
+            )
+
+        for existing in list(row.assets or []):
+            self._session.delete(existing)
+        row.assets = []
+        # Flush deletes before inserts so (item_key, asset_role) unique is not hit mid-replace.
+        self._flush()
+        for asset in normalized:
             row.assets.append(
                 FairStandItemAssetModel(
                     id=uuid4(),
                     item_key=row.item_key,
-                    asset_role=role,
-                    relative_path=path,
-                    is_active=bool(asset.get("is_active", asset.get("isActive", True))),
+                    asset_role=asset["asset_role"],
+                    relative_path=asset["relative_path"],
+                    is_active=asset["is_active"],
                 )
             )
 
@@ -1202,9 +1218,7 @@ class AdminItemsService:
         return self.get_item(item_key)
 
     def _replace_body_parts(self, row: FairStandItemModel, parts: list[dict]) -> None:
-        for existing in list(row.body_parts or []):
-            self._session.delete(existing)
-        row.body_parts = []
+        normalized: list[dict] = []
         seen_roles: set[str] = set()
         for part in parts:
             role = str(part.get("body_role", part.get("bodyRole") or "")).strip()
@@ -1214,12 +1228,19 @@ class AdminItemsService:
             if role in seen_roles:
                 raise ItemAdminError("Aynı body role bir item altında birden fazla kullanılamaz.")
             seen_roles.add(role)
+            normalized.append({"body_role": role, "child_item_key": child})
+
+        for existing in list(row.body_parts or []):
+            self._session.delete(existing)
+        row.body_parts = []
+        self._flush()
+        for part in normalized:
             row.body_parts.append(
                 FairStandItemBodyPartModel(
                     id=uuid4(),
                     parent_item_key=row.item_key,
-                    body_role=role,
-                    child_item_key=child,
+                    body_role=part["body_role"],
+                    child_item_key=part["child_item_key"],
                 )
             )
 

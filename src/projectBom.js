@@ -1,10 +1,14 @@
 import { getItem } from './items.js';
 import { resolveItemBom } from './itemBom.js';
+import {
+  applyEndToEndBomAdjustments,
+  detectEndToEndJoints,
+} from './relationshipBom.js';
 
 function freezeLine(line) {
   return Object.freeze({
     itemKey: line.itemKey,
-    name: line.item?.name ?? line.itemKey,
+    name: line.item?.name ?? line.name ?? line.itemKey,
     quantity: line.quantity,
     unit: line.unit,
     material: line.material ?? null,
@@ -74,8 +78,9 @@ function resolveModuleEntry(moduleState, index) {
 }
 
 /**
- * Project modules → per-module BOM tree rows + unresolved + aggregated leaf totals.
- * @param {Array<{ id?: string, itemKey?: string, type?: string }>} modules
+ * Project modules → per-module BOM + unresolved + aggregated leaf totals.
+ * Applies F-031 phase-1 end-to-end joint adjustments when placements join.
+ * @param {Array<{ id?: string, itemKey?: string, type?: string, placement?: object, widthCm?: number }>} modules
  */
 export function resolveProjectBom(modules = []) {
   const list = Array.isArray(modules) ? modules : [];
@@ -91,9 +96,16 @@ export function resolveProjectBom(modules = []) {
       message: entry.message,
     }));
 
+  const rawLines = aggregateLines(okEntries.map((entry) => entry.lines));
+  const joints = detectEndToEndJoints(list);
+  const adjusted = applyEndToEndBomAdjustments(rawLines, joints);
+
   return Object.freeze({
     modules: Object.freeze(moduleEntries),
     unresolved: Object.freeze(unresolved),
-    lines: Object.freeze(aggregateLines(okEntries.map((entry) => entry.lines))),
+    joints: Object.freeze(joints),
+    relationshipNotes: Object.freeze(adjusted.notes),
+    appliedJointCount: adjusted.appliedJointCount,
+    lines: Object.freeze(adjusted.lines.map(freezeLine)),
   });
 }
