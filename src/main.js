@@ -4,6 +4,7 @@ import { planAutomaticDepot } from './autoDepot.js';
 import {
   composeAutomaticStandWall,
   composeAutomaticBackWallWithDepot,
+  composeAutomaticSideWallWithDepot,
   getAutomaticWallCapacityCm,
 } from './automaticWall.js';
 import {
@@ -66,10 +67,7 @@ import { formatImageUploadTooLargeMessage, applyArchiveButtonVisibility } from '
 import { getFairStandHostDocument, getFairStandHostWindow } from './hostDocument.js';
 import { bootstrapFairStandCatalog } from './catalogBootstrap.js';
 import { bindProjectActionSaveGuard } from './projectActionSaveGuard.js';
-
-if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('rawBom')) {
-  import('./rawBomDebug.js');
-}
+import { createProductionBomPanel } from './productionBomPanel.js';
 
 export function startFairStandConfigurator(options = {}) {
   let cancelled = false;
@@ -132,6 +130,7 @@ const sidebarToggleButton = document.querySelector('#sidebar-toggle');
 const viewport = document.querySelector('#viewport');
 const viewportEmpty = document.querySelector('#viewport-empty');
 const viewportToolbar = document.querySelector('#viewport-toolbar');
+const toggleProductionBomButton = document.querySelector('#toggle-production-bom');
 const renderCurrentViewButton = document.querySelector('#render-current-view');
 const standTypeButtons = [...document.querySelectorAll('[data-stand-type]')];
 const standSizeXInput = document.querySelector('#stand-size-x');
@@ -231,6 +230,24 @@ const WALL_LABELS = Object.freeze({
 
 let currentModules = [];
 let currentStand = null;
+const productionBomPanel = createProductionBomPanel();
+productionBomPanel.setModulesSource(() => currentModules);
+
+function syncProductionBomToggleButton() {
+  if (!toggleProductionBomButton) return;
+  const open = productionBomPanel.isOpen();
+  toggleProductionBomButton.setAttribute('aria-pressed', String(open));
+  toggleProductionBomButton.classList.toggle('is-active', open);
+}
+
+productionBomPanel.setOnVisibilityChange(() => {
+  syncProductionBomToggleButton();
+});
+
+toggleProductionBomButton?.addEventListener('click', () => {
+  if (productionBomPanel.isOpen()) productionBomPanel.close();
+  else productionBomPanel.open();
+});
 let selectedStandType = null;
 let activeAssetId = null;
 let pendingCatalogAdds = [];
@@ -387,6 +404,7 @@ function rebuildWall({ resetView = true } = {}) {
 
   scene3d.buildWall(currentModules, { resetView });
   renderCurrentWallResult();
+  if (productionBomPanel.isOpen()) productionBomPanel.refresh();
 }
 
 function findContextModuleIndex(context) {
@@ -1241,6 +1259,7 @@ function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
         standXCm: setup.xCm,
         depotOriginXCm: depotPlan.originXCm,
         depotWidthCm: depotPlan.widthCm,
+        sizeKey: depotPlan.sizeKey,
       });
       if (!customBack.ok) {
         renderStageResult(customBack.message, true);
@@ -1260,6 +1279,32 @@ function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
         return moduleState;
       });
       currentModules.push(...backStates);
+
+      if (setup.standType === 'l-left' || setup.standType === 'l-right') {
+        const customSide = composeAutomaticSideWallWithDepot({
+          standType: setup.standType,
+          standXCm: setup.xCm,
+          standYCm: setup.yCm,
+          depotDepthCm: depotPlan.depthCm,
+        });
+        if (!customSide.ok) {
+          renderStageResult(customSide.message, true);
+          return false;
+        }
+        currentModules = currentModules.filter(
+          (moduleState) => moduleState.placement?.wallId !== customSide.wallId,
+        );
+        const sideStates = customSide.modules.map((entry) => {
+          const moduleState = createModuleStateFromDescriptor({
+            type: 'flat-panel',
+            widthCm: entry.widthCm,
+          });
+          moduleState.placement = { ...entry.placement };
+          if (entry.depotSide) moduleState.autoDepotBack = true;
+          return moduleState;
+        });
+        currentModules.push(...sideStates);
+      }
     }
   }
 
@@ -1591,6 +1636,7 @@ async function restoreProject(project) {
     standSizeXInput.value = '';
     standSizeYInput.value = '';
     setStandEditingEnabled(false);
+    productionBomPanel.close();
     updateStageCreateState();
   }
 
@@ -1628,6 +1674,7 @@ function resetToFirstOpenState() {
   viewportEmpty.hidden = false;
   viewportToolbar.hidden = true;
   setStandEditingEnabled(false);
+  productionBomPanel.close();
   updateStageCreateState();
   syncColorEditorFromHex('#ffffff');
   selectionInfo.textContent = DEFAULT_SELECTION_HINT;
@@ -2538,6 +2585,7 @@ void refreshProjectList()
 
   return function stopFairStandConfigurator() {
     autosaveController?.disable?.();
+    productionBomPanel?.destroy?.();
     scene3d?.dispose?.();
     unbindProjectActionSaveGuard?.();
   };

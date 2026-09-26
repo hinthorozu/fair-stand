@@ -32,11 +32,13 @@ test('ışıklı strafor ölçü penceresi dialog semantiği ve Escape taşır',
   assert.match(main, /event\.key !== 'Escape'/);
 });
 
-test('üretim girişi rawBomDebug.js yüklemez; açık dev bayrağı main.js içindedir', () => {
+test('üretim listesi toolbar butonu ile açılır; sahne oluşturunca otomatik açılmaz', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const markup = readFileSync(new URL('../src/configuratorMarkup.js', import.meta.url), 'utf8');
   assert.doesNotMatch(html, /rawBomDebug\.js/);
-  assert.match(main, /import\.meta\.env\.DEV/);
-  assert.match(main, /rawBom/);
-  assert.match(main, /import\('\.\/rawBomDebug\.js'\)/);
+  assert.doesNotMatch(main, /rawBomDebug/);
+  assert.match(main, /createProductionBomPanel/);
+  assert.match(markup, /toggle-production-bom/);
+  assert.match(main, /toggleProductionBomButton/);
 });

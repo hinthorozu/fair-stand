@@ -1,0 +1,130 @@
+.production-bom-panel {
+  position: fixed;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+  min-height: 200px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #94a3b8;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+  font: 13px/1.4 system-ui, sans-serif;
+}
+
+.production-bom-panel[hidden] {
+  display: none !important;
+}
+
+.production-bom-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #e2e8f0;
+  border-bottom: 1px solid #cbd5e1;
+  cursor: move;
+  user-select: none;
+  flex: 0 0 auto;
+}
+
+.production-bom-panel__title {
+  flex: 1 1 auto;
+  font-weight: 650;
+  font-size: 13px;
+}
+
+.production-bom-panel__close {
+  border: 0;
+  background: transparent;
+  color: #334155;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.production-bom-panel__close:hover {
+  background: #cbd5e1;
+}
+
+.production-bom-panel__body {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 10px 12px 14px;
+}
+
+.production-bom-panel__hint {
+  margin: 0 0 10px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.production-bom-panel__section-title {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  font-weight: 650;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.production-bom-panel__section-title:first-child {
+  margin-top: 0;
+}
+
+.production-bom-panel .production-bom-module {
+  margin: 0 0 8px;
+  padding: 10px 12px;
+}
+
+.production-bom-panel .production-bom-module > .panel-summary {
+  font-size: 13px;
+}
+
+.production-bom-module__key {
+  color: #64748b;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.production-bom-module__list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 3px;
+}
+
+.production-bom-module--unresolved {
+  border-color: #fca5a5;
+  background: #fff1f2;
+}
+
+.production-bom-module__error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.production-bom-panel__empty {
+  margin: 0;
+  color: #64748b;
+}
+
+.production-bom-panel__resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background:
+    linear-gradient(135deg, transparent 50%, #94a3b8 50%, #94a3b8 55%, transparent 55%),
+    linear-gradient(135deg, transparent 65%, #94a3b8 65%, #94a3b8 70%, transparent 70%),
+    linear-gradient(135deg, transparent 80%, #94a3b8 80%, #94a3b8 85%, transparent 85%);
+}

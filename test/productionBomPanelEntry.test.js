@@ -6,17 +6,17 @@ import { resolveItemBom } from '../src/itemBom.js';
 import { describeSurfaceSelection } from '../src/selectionFeedback.js';
 
 const mainSource = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
-const rawBomSource = readFileSync(new URL('../src/rawBomDebug.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 
-test('BOM debug panel loads only through DEV + ?rawBom real entry', () => {
-  assert.match(
-    mainSource,
-    /if \(import\.meta\.env\.DEV && new URLSearchParams\(window\.location\.search\)\.has\('rawBom'\)\) \{\s*import\('\.\/rawBomDebug\.js'\);\s*\}/,
-  );
-  assert.doesNotMatch(mainSource, /import '\.\/rawBomDebug\.js'/);
+test('production BOM panel loads from main runtime; opens via toolbar toggle not auto', () => {
+  assert.match(mainSource, /import \{ createProductionBomPanel \} from '\.\/productionBomPanel\.js'/);
+  assert.match(mainSource, /toggle-production-bom/);
+  assert.match(mainSource, /productionBomPanel\.open\(\)/);
+  assert.doesNotMatch(mainSource, /rebuildSceneFromSetup[\s\S]{0,400}productionBomPanel\.open\(\)/);
+  assert.doesNotMatch(mainSource, /rawBomDebug/);
+  assert.doesNotMatch(mainSource, /rawBom/);
 });
 
-test('DEV debug selection path resolves the same wall BOM lines as resolveItemBom', () => {
+test('wall selection feedback still describes width used by wall BOM recipes', () => {
   const message = describeSurfaceSelection([{
     userData: {
       moduleIndex: 0,
@@ -36,8 +36,4 @@ test('DEV debug selection path resolves the same wall BOM lines as resolveItemBo
     assert.ok(Number.isFinite(line.quantity) && line.quantity > 0);
     assert.equal(line.unit, 'adet');
   }
-
-  assert.match(rawBomSource, /WALL_ITEM_KEYS\[widthCm\]/);
-  assert.match(rawBomSource, /renderItemBom/);
-  assert.match(rawBomSource, /resolveItemBom/);
 });

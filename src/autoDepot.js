@@ -1,5 +1,7 @@
 import { getItem } from './items.js';
 import { createModulePlacement } from './modulePlacement.js';
+import { MODULE_WIDTHS_CM } from './standDimensions.js';
+import { composeStraightWall } from './wall.js';
 
 export const AUTO_DEPOT_SIZES = Object.freeze({
   '100x100': Object.freeze({ widthCm: 100, depthCm: 100, label: '1 × 1 m' }),
@@ -7,6 +9,40 @@ export const AUTO_DEPOT_SIZES = Object.freeze({
   '200x100': Object.freeze({ widthCm: 200, depthCm: 100, label: '2 × 1 m' }),
   '200x200': Object.freeze({ widthCm: 200, depthCm: 200, label: '2 × 2 m' }),
 });
+
+/**
+ * Depo kenarı panel dilimleri.
+ * Sistemde o ölçüde tek panel varsa (50/100/150/200) tek parça.
+ * Yoksa composeStraightWall (ör. 250 → 200+50).
+ */
+export function composeDepotAlignedWidths(lengthCm) {
+  const length = Number(lengthCm);
+  if (!Number.isFinite(length) || length <= 0) {
+    return { ok: false, message: 'Depo duvar uzunluğu geçersiz.' };
+  }
+  if (length % 50 !== 0) {
+    return { ok: false, message: 'Depo duvarı 50 cm katı olmalı.' };
+  }
+
+  if (MODULE_WIDTHS_CM.includes(length)) {
+    return { ok: true, modules: [length] };
+  }
+
+  const composed = composeStraightWall(length);
+  if (!composed.ok) {
+    return { ok: false, message: composed.message || 'Depo duvarı mevcut panellerle dilimlenemedi.' };
+  }
+  return { ok: true, modules: composed.modules };
+}
+
+/**
+ * Sırt / paylaşılan kenar: her yerde aynı kural (exact panel veya compose).
+ */
+export function composeDepotBackWidths(sizeKey) {
+  const size = AUTO_DEPOT_SIZES[sizeKey];
+  if (!size) return { ok: false, message: 'Depo ölçüsü geçersiz.' };
+  return composeDepotAlignedWidths(size.widthCm);
+}
 
 function requireItem(itemKey) {
   const item = getItem(itemKey);
@@ -81,11 +117,35 @@ export function planAutomaticDepot({ standType, standXCm, standYCm, sizeKey = '1
   else return { ok: false, message: 'Bu stand tipi için otomatik depo yerleşimi desteklenmiyor.' };
 
   const specs = [];
-  if (!useBackWall) specs.push(wall(size.widthCm, xCm, yCm));
+  if (!useBackWall) {
+    const back = composeDepotBackWidths(sizeKey);
+    if (!back.ok) return back;
+    let cursorX = xCm;
+    for (const widthCm of back.modules) {
+      specs.push(wall(widthCm, cursorX, yCm));
+      cursorX += widthCm;
+    }
+  }
   // Depo sol yan duvarının panel yüzü deponun dışına (-X) bakmalı.
-  if (!useLeftWall) specs.push(wall(size.depthCm, xCm, yCm, 270));
+  if (!useLeftWall) {
+    const side = composeDepotAlignedWidths(size.depthCm);
+    if (!side.ok) return side;
+    let cursorY = yCm;
+    for (const widthCm of side.modules) {
+      specs.push(wall(widthCm, xCm, cursorY, 270));
+      cursorY += widthCm;
+    }
+  }
   // Sağ yan duvarın dış yüzü +X yönüne bakar.
-  if (!useRightWall) specs.push(wall(size.depthCm, xCm + size.widthCm, yCm, 90));
+  if (!useRightWall) {
+    const side = composeDepotAlignedWidths(size.depthCm);
+    if (!side.ok) return side;
+    let cursorY = yCm;
+    for (const widthCm of side.modules) {
+      specs.push(wall(widthCm, xCm + size.widthCm, cursorY, 90));
+      cursorY += widthCm;
+    }
+  }
   addFront(specs, xCm, yCm + size.depthCm, size.widthCm, standType);
 
   if (includeContents) {
