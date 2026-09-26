@@ -34,13 +34,13 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 |---|---|---|
 | `alembic_version` | 1 | Alembic head. Ürün değil. |
 | `fair_stand_categories` | 7 (6 `is_active=true`; 1 pasif yerel satır) | Katalog grupları. Item’dan bağımsız id. Bootstrap yalnız aktif. |
-| `fair_stand_catalog_preview_kinds` | 28 (hepsi aktif) | Kart silüeti HTML/CSS. Item davranışını tanımlamaz. Bootstrap: `active_only=false` (pasif önizlemeler de JSON’a girer). |
+| `fair_stand_catalog_preview_kinds` | seed 28; canlı +CRM (örn. 29, `Küp Blok` id 57) | Kart silüeti HTML/CSS. Item davranışını tanımlamaz. Bootstrap: `active_only=false` (pasif önizlemeler de JSON’a girer). |
 | `fair_stand_item_type` | tip sayısı seed/CRM | Tip davranış paketi (placement, collision, …). Bootstrap `itemTypes[]`. |
 | `fair_stand_item_type_overlap` | M:N satırları | Tip ↔ tip çakışma izni. Bootstrap `overlapWithTypes[]`. |
 | `fair_stand_rule_type` | 1× `snap` | Kural ailesi. Bootstrap `ruleTypes[]` (stand JS ayrı registry açmaz). |
 | `fair_stand_rule` | `top-rail`, `shelf-rail`, … | Snap key + face/edge. Bootstrap `rules[]`. |
 | `fair_stand_rule_item_type` | M:N | Kuralı **sunan** item tipleri. Bootstrap `rules[].itemTypeKeys`. |
-| `fair_stand_items` | 97 (59 `catalog_visible`) | Ürün kimliği + Catalog üyeliği + snap FK. Bootstrap: `is_active=true` (gizli SKU dahil). |
+| `fair_stand_items` | seed/fixture 97 (59 `catalog_visible`); canlı yerel dump daha fazla olabilir (clone SKU) | Ürün kimliği + Catalog üyeliği + snap FK. Bootstrap: `is_active=true` (gizli SKU dahil). |
 | `fair_stand_item_dimensions` | 90 / 96 Item | Fiziksel / BOM ölçü. 6 Item’da satır yok (`connector_*`, `shelf_leg`, `hali`). |
 | `fair_stand_item_scene_dimensions` | 34 | Sahne kutusu override. Yoksa aynı adlı `dimensions` alanı. |
 | `fair_stand_item_strip_occupancy` | 8, hepsi `align=top` (4× strip 1, 4× strip 2) | Short-up şerit bandı. |
@@ -66,7 +66,7 @@ Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0012_fair_stand_projects` |
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0042_box_block_default_opacity` |
 
 ---
 

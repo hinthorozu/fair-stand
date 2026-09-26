@@ -180,10 +180,10 @@ Düz BoxGeometry küp; GLB yok. **Işıklı strafor (`illuminated-foam`)** ile k
 | Tip | `box-block`: `placement=free`, `collision=none`, `move_snap_cm=10` (çöp kutusu ile aynı free paket) |
 | Item | örn. `box_block`; kategori **Panel Ek Modül**; `catalog_visible=true`; `is_render=true`; `accepts_color=true` |
 | Ölçü | `fair_stand_item_dimensions` W/D/H (seed: 100×50×50) |
-| Renk | `default_color` + `accepts_color` |
-| Opacity | **`default_opacity`** (0–1; seed 0.85). Cam/`accepts_glass` değil |
-| Döndürme / Z | `rotation_step_deg` / `default_rotation_deg` / `default_z_cm` item master (DB) |
-| Preview | Katalog Önizlemeleri → kendi `module-drag-box-block` markup + CSS; item `preview_id` |
+| Renk | `default_color` (seed `15263957`) + `accepts_color` |
+| Opacity | **`default_opacity`** (0–1; seed **0.85**). Cam/`accepts_glass` değil |
+| Döndürme / Z | `rotation_step_deg=90`, `default_rotation_deg=0`, `default_z_cm=0` (item master; migrasyon 0042) |
+| Preview | CRM **Katalog Önizlemeleri** → `Küp Blok` (canlı örn. id **57**): tek `div.module-drag-box-block` + CSS; item `preview_id` buna bağlanır. Migrasyon fallback’i “ilk preview” olabilir — prod’da CRM’de Küp Blok’a çevir |
 
 **Sahne:** Katalogdan sürükle → W/D/H + opacity dialog; sonra sağ tık “Ölçü / opacity”. Instance override proje JSON’da kalır (`modules[].widthCm/depthCm/heightCm/opacity`).
 
