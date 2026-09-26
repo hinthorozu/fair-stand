@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-item-3d-preview-assembly-box-block",
+  "id": "fair-stand-projects-crm-open-capabilities",
   "kind": "feature",
-  "summary": "Admin Item 3D preview/assembly + free floor box-block (box_block) with DB default_opacity and W/D/H/opacity dialog.",
+  "summary": "CRM open-by-id mount + project capability UI gates; PUT create vs update permission split.",
   "owners": [
     "src/itemAdminPreview.js",
     "src/itemAdminCornerSnap.js",
@@ -63,6 +63,7 @@
       "backend/alembic/versions/0041_rename_profil_screen_keys.py",
       "backend/alembic/versions/0042_box_block_default_opacity.py",
       "backend/app/modules/fair_stand/api/dependencies.py",
+      "backend/app/modules/fair_stand/api/project_routes.py",
       "backend/app/modules/fair_stand/api/routes.py",
       "backend/app/modules/fair_stand/application/admin_items.py",
       "backend/app/modules/fair_stand/application/admin_settings.py",
@@ -97,6 +98,7 @@
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
       "backend/tests/modules/fair_stand/test_item_type_behavior.py",
       "backend/tests/modules/fair_stand/test_projects_api.py",
+      "backend/tests/modules/fair_stand/test_projects_put_permissions.py",
       "backend/tests/modules/fair_stand/test_runtime_settings.py",
       "backend/tests/modules/fair_stand/test_stand_dimensions.py",
       "docs/items/audit/hedef/ATOMIK_MEKANIZMA.html",
