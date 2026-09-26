@@ -868,6 +868,11 @@ h2 {
 .project-actions button { width: 100%; }
 
 .viewport-render-button { margin-left: auto; white-space: nowrap; font-weight: 700; pointer-events: auto; }
+.viewport-render-button.is-active,
+.viewport-render-button[aria-pressed="true"] {
+  outline: 2px solid rgba(125, 211, 252, 0.95);
+  outline-offset: 1px;
+}
 
 .project-loading-overlay {
   position: fixed;

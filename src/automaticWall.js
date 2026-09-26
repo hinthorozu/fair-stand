@@ -1,4 +1,5 @@
 import { composeStraightWall } from './wall.js';
+import { composeDepotAlignedWidths, composeDepotBackWidths } from './autoDepot.js';
 import {
   getContinuousWallCapacityCm,
   getContinuousWallSegments,
@@ -84,7 +85,12 @@ export function composeAutomaticStandWall({
   };
 }
 
-export function composeAutomaticBackWallWithDepot({ standXCm, depotOriginXCm, depotWidthCm } = {}) {
+export function composeAutomaticBackWallWithDepot({
+  standXCm,
+  depotOriginXCm,
+  depotWidthCm,
+  sizeKey,
+} = {}) {
   const standX = Number(standXCm);
   const depotX = Number(depotOriginXCm);
   const depotWidth = Number(depotWidthCm);
@@ -96,10 +102,24 @@ export function composeAutomaticBackWallWithDepot({ standXCm, depotOriginXCm, de
   }
 
   const modules = [];
-  const addChunk = (wallWidthCm, startXCm, exact = false) => {
+  const addChunk = (wallWidthCm, startXCm, depotBack = false) => {
     if (wallWidthCm <= 0) return true;
-    if (exact) {
-      modules.push({ widthCm: wallWidthCm, placement: { xCm: startXCm, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' }, depotBack: true });
+    if (depotBack) {
+      const aligned = sizeKey
+        ? composeDepotBackWidths(sizeKey)
+        : composeDepotAlignedWidths(wallWidthCm);
+      if (!aligned.ok) return false;
+      const total = aligned.modules.reduce((sum, width) => sum + width, 0);
+      if (total !== depotWidth) return false;
+      let cursor = startXCm;
+      for (const widthCm of aligned.modules) {
+        modules.push({
+          widthCm,
+          placement: { xCm: cursor, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+          depotBack: true,
+        });
+        cursor += widthCm;
+      }
       return true;
     }
     const composed = composeStraightWall(wallWidthCm);
@@ -120,4 +140,69 @@ export function composeAutomaticBackWallWithDepot({ standXCm, depotOriginXCm, de
   if (!addChunk(afterCm, afterStartCm)) return { ok: false, message: 'Depo sonrası sırt duvarı oluşturulamadı.' };
 
   return { ok: true, modules };
+}
+
+/**
+ * L-stand paylaşılan yan duvar: depo derinliği kadar dilim, kalan composeStraightWall.
+ * wallId 'left' (rot 90) veya 'right' (rot 270). Depo köşede originY=0 varsayımı.
+ */
+export function composeAutomaticSideWallWithDepot({
+  standType,
+  standXCm,
+  standYCm,
+  depotDepthCm,
+} = {}) {
+  const standX = Number(standXCm);
+  const standY = Number(standYCm);
+  const depotDepth = Number(depotDepthCm);
+  const wallId = standType === 'l-left' ? 'left' : standType === 'l-right' ? 'right' : null;
+  if (!wallId) return { ok: false, message: 'Yan depo duvarı yalnız L stand için.' };
+  if (![standX, standY, depotDepth].every(Number.isFinite) || standY <= 0 || depotDepth <= 0) {
+    return { ok: false, message: 'Depo yan duvarı ölçüleri geçersiz.' };
+  }
+  if (depotDepth > standY) {
+    return { ok: false, message: 'Depo derinliği yan duvarı aşıyor.' };
+  }
+
+  const aligned = composeDepotAlignedWidths(depotDepth);
+  if (!aligned.ok) return { ok: false, message: 'Depo yan paneli oluşturulamadı.' };
+
+  const modules = [];
+  let yCursor = 0;
+  for (const widthCm of aligned.modules) {
+    modules.push({
+      widthCm,
+      placement: {
+        xCm: wallId === 'left' ? 0 : standX,
+        yCm: yCursor,
+        zCm: 0,
+        rotationZDeg: wallId === 'left' ? 90 : 270,
+        wallId,
+      },
+      depotSide: true,
+    });
+    yCursor += widthCm;
+  }
+
+  const afterCm = standY - yCursor;
+  if (afterCm > 0) {
+    const composed = composeStraightWall(afterCm);
+    if (!composed.ok) return { ok: false, message: 'Depo sonrası yan duvar oluşturulamadı.' };
+    for (const widthCm of composed.modules) {
+      modules.push({
+        widthCm,
+        placement: {
+          xCm: wallId === 'left' ? 0 : standX,
+          yCm: yCursor,
+          zCm: 0,
+          rotationZDeg: wallId === 'left' ? 90 : 270,
+          wallId,
+        },
+        depotSide: false,
+      });
+      yCursor += widthCm;
+    }
+  }
+
+  return { ok: true, modules, wallId };
 }

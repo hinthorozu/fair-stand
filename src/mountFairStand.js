@@ -2,6 +2,7 @@ import styleCss from './style.css?inline';
 import colorEditorCss from './colorEditor.css?inline';
 import imageActionsCss from './imageActions.css?inline';
 import helpGuideCss from './helpGuide.css?inline';
+import productionBomPanelCss from './productionBomPanel.css?inline';
 import { FAIR_STAND_MARKUP } from './configuratorMarkup.js';
 import { setFairStandHostDocument } from './hostDocument.js';
 import { startFairStandConfigurator } from './main.js';
@@ -78,7 +79,7 @@ export function mountFairStand(container, options = {}) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>${styleCss}\n${colorEditorCss}\n${imageActionsCss}\n${helpGuideCss}\n${TRASH_BIN_PREVIEW_CSS}</style>
+    <style>${styleCss}\n${colorEditorCss}\n${imageActionsCss}\n${helpGuideCss}\n${productionBomPanelCss}\n${TRASH_BIN_PREVIEW_CSS}</style>
   </head>
   <body>
     ${FAIR_STAND_MARKUP}

@@ -138,12 +138,12 @@ test('active door Item surfaces no longer carry the uppercase legacy key', () =>
   const catalogSource = readFileSync(new URL('../src/catalog.js', import.meta.url), 'utf8');
   const contractSource = readFileSync(new URL('../src/moduleContracts.js', import.meta.url), 'utf8');
   const systemCatalog = readFileSync(new URL('../SYSTEM_MODULE_CATALOG.md', import.meta.url), 'utf8');
-  const rawBomSource = readFileSync(new URL('../src/rawBomDebug.js', import.meta.url), 'utf8');
+  const projectBomSource = readFileSync(new URL('../src/projectBom.js', import.meta.url), 'utf8');
 
   assert.doesNotMatch(catalogSource, /DOOR_100/);
   assert.doesNotMatch(contractSource, /DOOR_100/);
   assert.doesNotMatch(systemCatalog, /DOOR_100/);
-  assert.match(rawBomSource, /import \{ resolveItemBom \} from '\.\/itemBom\.js'/);
-  assert.match(rawBomSource, /renderItemBom\('wall_door_100_350'/);
+  assert.match(projectBomSource, /import \{ resolveItemBom \} from '\.\/itemBom\.js'/);
+  assert.equal(resolveItemBom('wall_door_100_350').some((line) => line.itemKey === 'door_leaf_100'), true);
   assert.equal(readdirSync(new URL('../docs/items/definitions/', import.meta.url)).includes('DOOR_100.md'), false);
 });
