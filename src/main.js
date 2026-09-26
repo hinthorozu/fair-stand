@@ -71,14 +71,14 @@ if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('rawB
   import('./rawBomDebug.js');
 }
 
-export function startFairStandConfigurator() {
+export function startFairStandConfigurator(options = {}) {
   let cancelled = false;
   let stopRuntime = () => {};
 
   const boot = bootstrapFairStandCatalog()
     .then(() => {
       if (cancelled) return;
-      stopRuntime = startFairStandConfiguratorRuntime();
+      stopRuntime = startFairStandConfiguratorRuntime(options);
     })
     .catch((error) => {
       console.error('Fair Stand Item catalog bootstrap failed:', error);
@@ -99,7 +99,17 @@ export function startFairStandConfigurator() {
   };
 }
 
-function startFairStandConfiguratorRuntime() {
+function startFairStandConfiguratorRuntime(options = {}) {
+  const capabilities = {
+    canCreate: options.capabilities?.canCreate !== false,
+    canUpdate: options.capabilities?.canUpdate !== false,
+    canDelete: options.capabilities?.canDelete !== false,
+    canExecute: options.capabilities?.canExecute !== false,
+  };
+  const initialProjectId =
+    options.initialProjectId
+    || globalThis.__FAIR_STAND_INITIAL_PROJECT_ID__
+    || null;
 
   const document = getFairStandHostDocument();
   const window = getFairStandHostWindow();
@@ -2500,7 +2510,32 @@ syncColorEditorFromHex(colorInput.value);
 initializeAssetLibrary();
 initHelpGuide();
 renderStandStandardsList(document.querySelector('#stand-standards-list'));
-refreshProjectList().catch((error) => console.warn('Proje listesi açılamadı:', error));
+
+function applyProjectCapabilityVisibility() {
+  const hide = (el, shouldHide) => {
+    if (!el) return;
+    el.hidden = Boolean(shouldHide);
+    if (shouldHide) el.setAttribute('aria-hidden', 'true');
+    else el.removeAttribute('aria-hidden');
+  };
+  // New blank project needs create; existing open needs update. Allow either for Kaydet.
+  hide(saveProjectButton, !(capabilities.canCreate || capabilities.canUpdate));
+  hide(saveAsProjectButton, !capabilities.canCreate);
+  hide(importProjectButton, !capabilities.canCreate);
+  hide(deleteProjectButton, !capabilities.canDelete);
+  hide(exportProjectButton, !capabilities.canExecute);
+}
+
+applyProjectCapabilityVisibility();
+
+void refreshProjectList()
+  .then(async () => {
+    if (initialProjectId) {
+      await openStoredProject(initialProjectId);
+    }
+  })
+  .catch((error) => console.warn('Proje listesi açılamadı:', error));
+
   return function stopFairStandConfigurator() {
     autosaveController?.disable?.();
     scene3d?.dispose?.();
