@@ -1,18 +1,17 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-depot-aligned-back-wall",
+  "id": "fair-stand-relationship-bom-and-asset-replace-flush",
   "kind": "feature",
-  "summary": "Depot back/side walls use depot-aligned 100/50 panelization (no single wall_200 behind 2m depot). Production BOM panel retained.",
+  "summary": "F-031 phase-1 end-to-end BOM joint adjustments; fix admin asset/body_part replace unique-role flush; production BOM hints.",
   "owners": [
-    "src/autoDepot.js",
-    "src/automaticWall.js",
+    "src/relationshipBom.js",
     "src/projectBom.js",
     "src/productionBomPanel.js",
-    "src/main.js"
+    "backend/app/modules/fair_stand/application/admin_items.py"
   ],
   "sourceOfTruth": [
-    "docs/items/contract/ITEM_CONTRACT.md",
-    "src/itemBom.js"
+    "src/itemBom.js",
+    "src/relationshipBom.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -171,6 +170,7 @@
       "src/projectRemote.js",
       "src/projectSaveAs.js",
       "src/rawBomDebug.js",
+      "src/relationshipBom.js",
       "src/runtimeSettings.js",
       "src/scene3d.js",
       "src/selectionFeedback.js",
@@ -442,6 +442,7 @@
       "test/recipeParentItemKey.js",
       "test/recipeWallPanelSlots.test.js",
       "test/registerCanonicalItemCatalog.mjs",
+      "test/relationshipBomEndToEnd.test.js",
       "test/removedIndoorPlant2.test.js",
       "test/rightWallOrientation.test.js",
       "test/roadmapProductionSourceOfTruth.test.js",
@@ -1043,14 +1044,11 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "Depot-aligned wall widths via composeDepotAlignedWidths; stand back depot span + island free back/sides. Production BOM panel from prior slice."
+    "notes": "End-to-end collinear full-height flat walls adjust upright/connector leaf totals. Admin item save flushes asset/body deletes before reinsert to honor unique role constraints."
   },
   "tests": {
     "targeted": [
-      "test/depotBackWallRecipe.test.js",
-      "test/depotFrontRecipe.test.js",
-      "test/autoDepot.test.js",
-      "test/automaticWall.test.js",
+      "test/relationshipBomEndToEnd.test.js",
       "test/projectBom.test.js",
       "test/productionBomPanelEntry.test.js"
     ],
@@ -1059,19 +1057,19 @@
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/wall-flat-panel-items-contract.spec.mjs",
-        "e2e/visible-ui-b.spec.mjs"
+        "e2e/visible-ui-b.spec.mjs",
+        "e2e/wall-flat-panel-items-contract.spec.mjs"
       ],
-      "reason": "Production BOM toolbar panel replaces rawBom debug; visible-ui-b + wall flat-panel cover UI and wall recipe identity."
+      "reason": "BOM panel UI + wall identity remain browser-covered; relationship BOM is unit-tested against recipe quantities."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "New assembly table/API and admin preview; prod falls back to legacy without assembly.parts. Lock group persists via lock_group_id on assembly parts. box-block free cube: rebuild isolates bad modules; frameColor falls back to profile."
+    "notes": "Joint deltas change aggregated BOM quantities for side-by-side full-height walls only; corners/short-up excluded."
   },
   "migration": {
-    "required": true,
-    "notes": "alembic 0038–0041 assembly/rename + 0042_box_block_default_opacity (box-block type, box_block item, default_opacity)."
+    "required": false,
+    "notes": "No DB migration."
   },
-  "rollback": "Revert item_3d_preview commits; alembic downgrade through 0038; CRM tab unused without stand package."
+  "rollback": "Revert this PR."
 }

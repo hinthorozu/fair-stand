@@ -131,6 +131,7 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/mountFairStand.js': frozenDomains('architecture', 'ui', 'renderer'),
   'src/placementFeedback.js': frozenDomains('ui', 'placement'),
   'src/projectBom.js': frozenDomains('architecture', 'bom'),
+  'src/relationshipBom.js': frozenDomains('architecture', 'bom'),
   'src/productionBomPanel.js': frozenDomains('bom', 'ui'),
   'src/productionBomPanel.css': frozenDomains('ui'),
   'src/projectActionSaveGuard.js': frozenDomains('ui', 'persistence', 'storage', 'importExport'),

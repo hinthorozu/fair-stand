@@ -147,7 +147,13 @@ export function createProductionBomPanel() {
       : '';
 
     body.innerHTML = `
-      <p class="production-bom-panel__hint">Kaydetme yok · karşılaştırma için ekran listesi. Köşe/ilişki türevli parçalar bu listede yok.</p>
+      <p class="production-bom-panel__hint">Kaydetme yok · yan yana düz duvar birleşiminde ortak dikme + çiftli aparat düzeltilir. Köşe / base / short-up henüz yok.</p>
+      ${bom.appliedJointCount
+        ? `<p class="production-bom-panel__hint">${bom.appliedJointCount} yan yana eklem uygulandı.</p>`
+        : ''}
+      ${(bom.relationshipNotes || []).map((note) => (
+        `<p class="production-bom-panel__hint">${escapeHtml(note)}</p>`
+      )).join('')}
       ${unresolvedNote}
       <h3 class="production-bom-panel__section-title">Modüller</h3>
       ${moduleHtml}
