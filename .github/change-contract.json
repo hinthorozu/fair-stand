@@ -1059,9 +1059,10 @@
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/wall-flat-panel-items-contract.spec.mjs"
+        "e2e/wall-flat-panel-items-contract.spec.mjs",
+        "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "scene3d.js assembly path touches renderer/state/placement; keep a wall/item contract e2e as browser coverage for guarded scene changes."
+      "reason": "Production BOM toolbar panel replaces rawBom debug; visible-ui-b + wall flat-panel cover UI and wall recipe identity."
     }
   },
   "risk": {
