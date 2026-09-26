@@ -8,17 +8,22 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import Response
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.integrations.kyrox_core.auth import AuthContext
+from app.integrations.kyrox_core.dev_bypass import dev_bypass_enabled
+from app.integrations.kyrox_core.ports import AuthorizationPort
 from app.modules.fair_stand.api.dependencies import (
     PERMISSION_PROJECTS_CREATE,
     PERMISSION_PROJECTS_DELETE,
     PERMISSION_PROJECTS_EXECUTE,
     PERMISSION_PROJECTS_READ,
     PERMISSION_PROJECTS_UPDATE,
+    bearer_scheme,
+    get_authorization_adapter,
+    get_auth_context,
     get_project_service,
-    require_any_permission,
     require_permission,
 )
 from app.modules.fair_stand.application.projects import (
@@ -147,12 +152,25 @@ def get_project(
 def update_project(
     project_id: UUID,
     body: ProjectUpdateBody,
-    auth: AuthContext = Depends(
-        require_any_permission(PERMISSION_PROJECTS_UPDATE, PERMISSION_PROJECTS_CREATE)
-    ),
+    auth: AuthContext = Depends(get_auth_context),
+    authorization: AuthorizationPort = Depends(get_authorization_adapter),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     service: ProjectService = Depends(get_project_service),
 ) -> dict[str, Any]:
     # Upsert: first save / ZIP import uses PUT with a client-generated id.
+    # Existing row requires update; missing row requires create.
+    existing = service.get_project(project_id, auth.organization_id)
+    needed = PERMISSION_PROJECTS_CREATE if existing is None else PERMISSION_PROJECTS_UPDATE
+    if not dev_bypass_enabled():
+        if credentials is None or not credentials.credentials:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+        if not authorization.check_permission(
+            organization_id=auth.organization_id,
+            user_id=auth.user_id,
+            permission_code=needed,
+            access_token=credentials.credentials,
+        ):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
     try:
         project = service.update_project(
             project_id=project_id,
