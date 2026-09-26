@@ -53,7 +53,7 @@ test('üretim listesi paneli gerçek girişte düz duvar reçete satırlarını 
   await expect(page.locator('#production-bom-panel')).toBeVisible();
 
   const modulesGroup = page.locator('#production-bom-panel .production-bom-modules');
-  await modulesGroup.locator('summary').click();
+  await modulesGroup.locator('> summary').click();
   const firstModule = page.locator('#production-bom-panel .production-bom-module').first();
   await expect(firstModule).toContainText('Modül');
   await firstModule.locator('summary').click();
