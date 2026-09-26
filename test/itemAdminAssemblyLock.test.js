@@ -9,8 +9,10 @@ import {
   createAssemblyLock,
   createAssemblyLockGroup,
   lockContainsPart,
+  lockGroupFromParts,
   removePartFromLockGroup,
   poseDelta,
+  stampLockGroupIdOnParts,
 } from '../src/itemAdminAssemblyLock.js';
 
 test('assemblyPartKey joins child and instance', () => {
@@ -114,4 +116,34 @@ test('removePartFromLockGroup drops member; under 2 clears lock', () => {
     removePartFromLockGroup(lock, { childItemKey: 'a', instanceIndex: 0 }),
     null,
   );
+});
+
+test('lockGroupFromParts rebuilds group from lockGroupId', () => {
+  const lock = lockGroupFromParts([
+    { childItemKey: 'a', instanceIndex: 0, lockGroupId: 1 },
+    { childItemKey: 'solo', instanceIndex: 0, lockGroupId: null },
+    { childItemKey: 'b', instanceIndex: 0, lockGroupId: 1 },
+  ]);
+  assert.equal(lock.members.length, 2);
+  assert.equal(lockContainsPart(lock, { childItemKey: 'a', instanceIndex: 0 }), true);
+  assert.equal(lockContainsPart(lock, { childItemKey: 'b', instanceIndex: 0 }), true);
+  assert.equal(lockGroupFromParts([{ childItemKey: 'x', instanceIndex: 0, lockGroupId: 1 }]), null);
+});
+
+test('stampLockGroupIdOnParts marks members with group 1', () => {
+  const lock = createAssemblyLockGroup([
+    { childItemKey: 'a', instanceIndex: 0 },
+    { childItemKey: 'b', instanceIndex: 0 },
+  ]);
+  const stamped = stampLockGroupIdOnParts(
+    [
+      { childItemKey: 'a', instanceIndex: 0, xCm: 0 },
+      { childItemKey: 'b', instanceIndex: 0, xCm: 1 },
+      { childItemKey: 'c', instanceIndex: 0, xCm: 2 },
+    ],
+    lock,
+  );
+  assert.equal(stamped[0].lockGroupId, 1);
+  assert.equal(stamped[1].lockGroupId, 1);
+  assert.equal(stamped[2].lockGroupId, null);
 });

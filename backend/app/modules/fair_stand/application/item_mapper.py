@@ -173,6 +173,7 @@ def map_item(row) -> ItemAggregate:
                     "rotationXDeg": _num(part.rotation_x_deg),
                     "rotationYDeg": _num(part.rotation_y_deg),
                     "rotationZDeg": _num(part.rotation_z_deg),
+                    "lockGroupId": int(part.lock_group_id) if part.lock_group_id is not None else None,
                 }
                 for part in assembly_rows
             ]

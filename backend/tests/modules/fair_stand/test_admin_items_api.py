@@ -245,6 +245,76 @@ def test_admin_item_records_catalog_visible_requires_triad(client, db_session, a
     assert peer_indices == list(range(1, len(peer_indices) + 1))
 
 
+def test_admin_update_hidden_item_skips_catalog_index_contiguous_check(
+    client, db_session, auth_headers
+):
+    """catalog_visible=false güncellemesi, kategorideki 1..N boşluğundan etkilenmemeli."""
+    from datetime import UTC, datetime
+
+    from sqlalchemy import select
+
+    from app.modules.fair_stand.infrastructure.models import (
+        FairStandCatalogPreviewKindModel,
+        FairStandCategoryModel,
+        FairStandItemModel,
+    )
+
+    seed_fair_stand_catalog(db_session)
+    db_session.flush()
+    category_id = db_session.scalars(select(FairStandCategoryModel.id)).first()
+    preview_id = db_session.scalars(select(FairStandCatalogPreviewKindModel.id)).first()
+    assert category_id is not None and preview_id is not None
+    now = datetime.now(tz=UTC)
+
+    # Seed a visible peer gap (index 99) — would fail assert_category_order if run.
+    gap_item = FairStandItemModel(
+        item_key="catalog_gap_peer",
+        name="Gap Peer",
+        item_type="panel",
+        catalog_visible=True,
+        category_id=category_id,
+        catalog_item_index=99,
+        preview_id=preview_id,
+        is_render=True,
+        is_active=True,
+        created_at=now,
+        updated_at=now,
+    )
+    hidden = FairStandItemModel(
+        item_key="catalog_hidden_edit",
+        name="Hidden Edit",
+        item_type="profile",
+        catalog_visible=False,
+        category_id=category_id,
+        catalog_item_index=12,
+        preview_id=preview_id,
+        is_render=True,
+        is_active=True,
+        material="alüminyum",
+        created_at=now,
+        updated_at=now,
+    )
+    db_session.add_all([gap_item, hidden])
+    db_session.flush()
+    _allow(client, {PERMISSION_ITEMS_UPDATE})
+
+    updated = client.put(
+        "/api/v1/fair-stand/admin/item-records/catalog_hidden_edit",
+        headers=auth_headers,
+        json={
+            "name": "Hidden Edit Updated",
+            "catalog_visible": False,
+            "category_id": category_id,
+            "catalog_item_index": 12,
+            "preview_id": preview_id,
+            "material": "alüminyum",
+        },
+    )
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["name"] == "Hidden Edit Updated"
+    assert updated.json()["catalogVisible"] is False
+
+
 def test_admin_item_catalog_index_insert_shifts_peers(client, db_session, auth_headers):
     from sqlalchemy import select
 
@@ -289,3 +359,77 @@ def test_admin_item_catalog_index_insert_shifts_peers(client, db_session, auth_h
     previous = db_session.get(FairStandItemModel, previous_key)
     assert previous is not None
     assert previous.catalog_item_index == 2
+
+
+def test_admin_clone_item_copies_satellites_and_appends_catalog_index(
+    client, db_session, auth_headers
+):
+    from sqlalchemy import func, select
+
+    from app.modules.fair_stand.infrastructure.models import (
+        FairStandItemComponentModel,
+        FairStandItemModel,
+    )
+
+    seed_fair_stand_catalog(db_session)
+    db_session.flush()
+    _allow(client, {PERMISSION_ITEMS_CREATE, PERMISSION_ITEMS_READ})
+
+    source = client.get(
+        "/api/v1/fair-stand/admin/item-records/wall_200_350",
+        headers=auth_headers,
+    )
+    assert source.status_code == 200, source.text
+    source_body = source.json()
+    assert source_body["catalogVisible"] is True
+    category_id = source_body["categoryId"]
+    max_index = db_session.scalar(
+        select(func.max(FairStandItemModel.catalog_item_index)).where(
+            FairStandItemModel.category_id == category_id,
+            FairStandItemModel.catalog_visible.is_(True),
+        )
+    )
+    assert max_index is not None
+
+    cloned = client.post(
+        "/api/v1/fair-stand/admin/item-records/wall_200_350/clone",
+        headers=auth_headers,
+        json={"item_key": "wall_200_350_copy", "name": "Wall 200 350 Kopya"},
+    )
+    assert cloned.status_code == 201, cloned.text
+    body = cloned.json()
+    assert body["itemKey"] == "wall_200_350_copy"
+    assert body["name"] == "Wall 200 350 Kopya"
+    assert body["type"] == source_body["type"]
+    assert body["catalogVisible"] is True
+    assert body["categoryId"] == category_id
+    assert body["catalogItemIndex"] == int(max_index) + 1
+    assert body["previewId"] == source_body["previewId"]
+    assert len(body["components"]) == len(source_body["components"])
+    if source_body["components"]:
+        assert body["components"][0]["childItemKey"] == source_body["components"][0]["childItemKey"]
+        assert body["components"][0]["quantity"] == source_body["components"][0]["quantity"]
+    assert len(body["assets"]) == len(source_body["assets"])
+    if source_body["assets"]:
+        assert body["assets"][0]["relativePath"] == source_body["assets"][0]["relativePath"]
+
+    db_session.expire_all()
+    assert db_session.get(FairStandItemModel, "wall_200_350_copy") is not None
+    source_comp_count = db_session.scalar(
+        select(func.count()).select_from(FairStandItemComponentModel).where(
+            FairStandItemComponentModel.parent_item_key == "wall_200_350"
+        )
+    )
+    clone_comp_count = db_session.scalar(
+        select(func.count()).select_from(FairStandItemComponentModel).where(
+            FairStandItemComponentModel.parent_item_key == "wall_200_350_copy"
+        )
+    )
+    assert clone_comp_count == source_comp_count
+
+    conflict = client.post(
+        "/api/v1/fair-stand/admin/item-records/wall_200_350/clone",
+        headers=auth_headers,
+        json={"item_key": "wall_200_350_copy", "name": "Again"},
+    )
+    assert conflict.status_code == 409

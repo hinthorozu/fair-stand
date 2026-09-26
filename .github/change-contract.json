@@ -994,7 +994,7 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "Item 3D admin preview (BoxGeometry + assembly free pose + corner snap + N-member session lock + ViewCube/Persp-Ortho). Persist absolute poses in fair_stand_item_assembly_parts; prod createItemAssemblyModule. Session lock is not persisted."
+    "notes": "Item 3D admin preview (BoxGeometry + assembly free pose + corner snap + N-member lock + ViewCube/Persp-Ortho). Persist absolute poses + lock_group_id in fair_stand_item_assembly_parts; prod createItemAssemblyModule."
   },
   "tests": {
     "targeted": [
@@ -1015,11 +1015,11 @@
   },
   "risk": {
     "level": "medium",
-    "notes": "New assembly table/API and admin preview; prod falls back to legacy without assembly.parts. Session lock (N-group) is not persisted."
+    "notes": "New assembly table/API and admin preview; prod falls back to legacy without assembly.parts. Lock group persists via lock_group_id on assembly parts."
   },
   "migration": {
     "required": true,
-    "notes": "alembic 0038_item_assembly_parts + 0039_assembly_rotation_xyz (rotation_x/y_deg)."
+    "notes": "alembic 0038_item_assembly_parts + 0039_assembly_rotation_xyz + 0040_assembly_lock_group."
   },
   "rollback": "Revert item_3d_preview commits; alembic downgrade through 0038; CRM tab unused without stand package."
 }

@@ -7,7 +7,7 @@ import {
   localCornerOffsetMeters,
   snapMeshCornerToCorner,
 } from './itemAdminCornerSnap.js';
-import { createAssemblyLock, poseDelta, applyPoseDelta, addPartToLockGroup, lockContainsPart, removePartFromLockGroup } from './itemAdminAssemblyLock.js';
+import { createAssemblyLock, poseDelta, applyPoseDelta, addPartToLockGroup, lockContainsPart, removePartFromLockGroup, lockGroupFromParts, assemblyPartKey } from './itemAdminAssemblyLock.js';
 import { createViewCube } from './viewCube.js';
 
 const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
@@ -593,6 +593,7 @@ export function mountItemAdminPreview(host, options = {}) {
       if (!assemblyLock) return false;
       pendingLockPair = null;
       emitLockChange();
+      emitPartsChange();
       return true;
     }
 
@@ -603,12 +604,14 @@ export function mountItemAdminPreview(host, options = {}) {
     assemblyLock = lock;
     pendingLockPair = null;
     emitLockChange();
+    emitPartsChange();
     return true;
   }
 
   function unlockAssembly() {
     assemblyLock = null;
     emitLockChange();
+    emitPartsChange();
     return true;
   }
 
@@ -619,7 +622,15 @@ export function mountItemAdminPreview(host, options = {}) {
     if (!part || !lockContainsPart(assemblyLock, part)) return false;
     assemblyLock = removePartFromLockGroup(assemblyLock, part);
     emitLockChange();
+    emitPartsChange();
     return true;
+  }
+
+  /** Kayıtlı lock_group_id’lerden kilidi geri yükle (load / save sonrası). */
+  function applyPersistedLockFromParts(parts) {
+    assemblyLock = lockGroupFromParts(parts);
+    emitLockChange();
+    return Boolean(assemblyLock);
   }
 
   function getLockUiState() {
@@ -741,13 +752,21 @@ export function mountItemAdminPreview(host, options = {}) {
   }
 
   function getParts() {
+    const memberKeys = new Set(
+      (assemblyLock?.members || []).map((m) =>
+        assemblyPartKey(m.childItemKey, m.instanceIndex),
+      ),
+    );
     return content.children
       .filter((child) => child.isMesh && child.userData.part && !child.userData.isEnvelope)
       .map((mesh) => {
         const pose = readPoseFromMesh(mesh);
+        const part = mesh.userData.part;
+        const key = assemblyPartKey(part.childItemKey, part.instanceIndex);
         return {
-          ...mesh.userData.part,
+          ...part,
           ...pose,
+          lockGroupId: memberKeys.has(key) ? 1 : null,
         };
       });
   }
@@ -929,9 +948,14 @@ export function mountItemAdminPreview(host, options = {}) {
         }
 
         selected = snapSource.mesh;
-        emitPartsChange();
+        // Snap varsayılanı: yapıştırılan çift/üye anında kilitlensin (ayrı Kilitle tıklaması gerekmez).
+        if (pendingLockPair) {
+          lockPendingPair();
+        } else {
+          emitPartsChange();
+          emitLockChange();
+        }
         emitSelectionChange(selected);
-        emitLockChange();
       }
       clearSnapSource();
       return;
@@ -1076,6 +1100,7 @@ export function mountItemAdminPreview(host, options = {}) {
     lockPendingPair,
     unlockAssembly,
     removeSelectedFromLock,
+    applyPersistedLockFromParts,
     getLockUiState,
     dispose() {
       disposed = true;
@@ -1099,14 +1124,12 @@ export function envelopeFromForm({
   widthCm,
   depthCm,
   heightCm,
-  sceneWidthCm,
-  sceneDepthCm,
-  sceneHeightCm,
   defaultColor,
 }) {
-  const width = Number(sceneWidthCm || widthCm);
-  const depth = Number(sceneDepthCm || depthCm);
-  const height = Number(sceneHeightCm || heightCm);
+  // Admin 3D önizleme yalnız item dimensions kullanır; sceneDimensions gerçek sahnede kalır.
+  const width = Number(widthCm);
+  const depth = Number(depthCm);
+  const height = Number(heightCm);
   if (![width, depth, height].every((n) => Number.isFinite(n) && n > 0)) return null;
   const colorNumber = Number(defaultColor);
   return {
@@ -1120,7 +1143,6 @@ export function envelopeFromForm({
 export function partFromChildRecord(child, instanceIndex, pose = {}) {
   const box = readItemBoxCm({
     dimensions: child?.dimensions,
-    sceneDimensions: child?.sceneDimensions,
   });
   return {
     childItemKey: child.itemKey,

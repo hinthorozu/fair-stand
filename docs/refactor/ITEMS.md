@@ -5,9 +5,11 @@ Fair Stand yeni Item modelinin yaşayan canonical sözleşmesi. Audit dökümü 
 Stand zarfı Item değildir: `docs/refactor/STAND_DIMENSIONS.md`.
 Catalog: `docs/refactor/CATALOG.md`.
 Rotation: `docs/refactor/ROTATION.md`.
-Admin 3D önizleme + assembly pose: `docs/refactor/ITEM_3D_PREVIEW.md`.
+Admin 3D önizleme + assembly pose + kalıcı kilit: `docs/refactor/ITEM_3D_PREVIEW.md`.
 PostgreSQL tabloları: `docs/refactor/DATABASE.md`.
-CRM kullanım: `docs/refactor/FAIR_STAND_DB_KULLANIM_KILAVUZU.md`.
+CRM kullanım: `docs/refactor/FAIR_STAND_DB_KULLANIM_KILAVUZU.md` (§4.1b Kopyala, §4.6 montaj kilidi, §5.16b `assembly_parts`).
+
+Item **Kopyala** (admin): shallow — yeni `item_key`/`name`; BOM/assembly/body/video child key’ler paylaşılır; asset `relative_path` paylaşılır; `catalog_item_index` = kategori son + 1. API `POST .../item-records/{sourceKey}/clone`.
 
 ---
 
@@ -46,6 +48,7 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `composition` | 30 | Bileşik yapı. |
 | `composition.mode` | 28 | `recipe` → `resolveItemBom`. |
 | `composition.items` | 30 | Çocuk listesi `{itemKey, quantity}`. 28 recipe parent + 2 mobilya kümesi. Recipe tablosu kopyası değil; tek kaynak Item. |
+| `assembly.parts` | 0+ | Admin montaj pose + optional `lockGroupId`. BOM değil. **Şemada onaylı** (`fair_stand_item_assembly_parts`). |
 | `shape` | 3 | Kök `'L'` (köşe banko). |
 | `variant` | 8 | `short-up-1` / `short-up-2`. |
 | `stripOccupancy.align` | 8 | Short-up `'top'`. |

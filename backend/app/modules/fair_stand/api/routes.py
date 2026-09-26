@@ -527,6 +527,21 @@ def admin_create_item_record(
         raise
 
 
+@router.post("/admin/item-records/{item_key}/clone", status_code=status.HTTP_201_CREATED)
+def admin_clone_item_record(
+    item_key: str,
+    body: dict[str, Any],
+    auth: AuthContext = Depends(require_permission(PERMISSION_ITEMS_CREATE)),
+    service: AdminItemsService = Depends(get_admin_items_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.clone_item(item_key, body or {})
+    except ItemAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
 @router.put("/admin/item-records/{item_key}")
 def admin_update_item_record(
     item_key: str,

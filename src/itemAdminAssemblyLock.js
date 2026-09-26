@@ -1,6 +1,6 @@
 /**
- * Admin montaj kilit — N parçalık oturum grubu (DB’ye yazılmaz).
- * Absolute pose kaydı yeter; kilit sadece edit sırasında birlikte hareket içindir.
+ * Admin montaj kilit — N parçalık grup.
+ * Absolute pose + lock_group_id DB’ye yazılır; yeniden açılışta geri yüklenir.
  */
 
 export function assemblyPartKey(childItemKey, instanceIndex) {
@@ -130,4 +130,41 @@ export function createAssemblyLock(followerPart, hostPart, followerPose, hostPos
     follower: { ...group.members[1] },
     relative: captureRelativePose(followerPose, hostPose),
   };
+}
+
+/** Parça listesinden kalıcı lock_group_id → kilit grubu (ilk >=2 üyeli grup). */
+export function lockGroupFromParts(parts) {
+  const byGroup = new Map();
+  for (const part of parts || []) {
+    const gid = Number(part?.lockGroupId ?? part?.lock_group_id);
+    if (!Number.isInteger(gid) || gid < 1) continue;
+    const ref = partRefFromPart(part);
+    if (!ref) continue;
+    const bucket = byGroup.get(gid) || [];
+    const key = assemblyPartKey(ref.childItemKey, ref.instanceIndex);
+    if (bucket.some((m) => assemblyPartKey(m.childItemKey, m.instanceIndex) === key)) continue;
+    bucket.push(ref);
+    byGroup.set(gid, bucket);
+  }
+  const ordered = [...byGroup.entries()].sort((a, b) => a[0] - b[0]);
+  for (const [, members] of ordered) {
+    const group = createAssemblyLockGroup(members);
+    if (group) return group;
+  }
+  return null;
+}
+
+/** Kilit üyelerine lockGroupId bas; diğerlerinde null. Tek aktif grup = 1. */
+export function stampLockGroupIdOnParts(parts, lock, groupId = 1) {
+  const memberKeys = new Set(
+    (lock?.members || []).map((m) => assemblyPartKey(m.childItemKey, m.instanceIndex)),
+  );
+  const id = Number.isInteger(Number(groupId)) && Number(groupId) >= 1 ? Number(groupId) : 1;
+  return (parts || []).map((part) => {
+    const key = assemblyPartKey(part.childItemKey, part.instanceIndex);
+    return {
+      ...part,
+      lockGroupId: memberKeys.has(key) ? id : null,
+    };
+  });
 }

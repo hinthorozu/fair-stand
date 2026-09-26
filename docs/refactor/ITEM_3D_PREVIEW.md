@@ -14,9 +14,10 @@ Bu dosya **ne yaptık / sistem ne yapabilir / ne yapamaz** için yaşayan not. A
 
 ## Amaç
 
-- Leaf Item: W / D / H (+ scene override) ve `defaultColor` ile **BoxGeometry** canlı kutu.
+- Leaf Item: `dimensions` W / D / H ve `defaultColor` ile **BoxGeometry** canlı kutu (admin önizleme scene override kullanmaz).
 - Recipe parent: BOM’daki `isRender=true` child’ları **serbest pose** ile yerleştir; kaydet; prod sahne bootstrap sonrası aynı layout’u çiz.
 - Admin **full `scene3d` kopyası değildir** — ince Three sahne (`itemAdminPreview.js`).
+- `sceneDimensions` yalnız gerçek sahnede; 3D önizleme `dimensions` kullanır.
 
 ---
 
@@ -27,11 +28,12 @@ Bu dosya **ne yaptık / sistem ne yapabilir / ne yapamaz** için yaşayan not. A
 | Preview motor | `fair-stand/src/itemAdminPreview.js` |
 | Pose merge / normalize | `fair-stand/src/itemAssembly.js` |
 | Prod tüketim | `fair-stand/src/scene3d.js` → `createItemAssemblyModule` (assembly varsa parts mesh) |
-| Migration | `0038_item_assembly_parts`, `0039_assembly_rotation_xyz` |
+| Migration | `0038_item_assembly_parts`, `0039_assembly_rotation_xyz`, `0040_assembly_lock_group` |
 | API | `PUT /api/v1/fair-stand/admin/item-records/{itemKey}/assembly` |
-| Model / mapper | `FairStandItemAssemblyPartModel`, `item_mapper` → bootstrap `assembly.parts` |
+| Model / mapper | `FairStandItemAssemblyPartModel`, `item_mapper` → bootstrap `assembly.parts` (+ `lockGroupId`) |
+| Lock motor | `fair-stand/src/itemAdminAssemblyLock.js` (+ köşe snap `itemAdminCornerSnap.js`) |
 | CRM UI | `fair-crm/.../FairStandItem3dPreview.tsx`, Items admin sekme `preview3d` |
-| Test | `fair-stand/test/itemAssembly.test.js` |
+| Test | `fair-stand/test/itemAssembly.test.js`, assembly lock unit testleri |
 
 ---
 
@@ -48,14 +50,16 @@ Eksen legend (canvas sol alt) + W/D/H okları sabit sahne grubunda.
 
 ## UI akışı (CRM)
 
-1. **Adım 1 — Kutu:** Envelope (scene ölçü varsa scene, yoksa dimensions) + renk.
+1. **Adım 1 — Kutu:** Envelope = item `dimensions` (W/D/H) + renk. `sceneDimensions` önizlemeye girmez.
 2. **Adım 2 — Montaj:** Recipe + en az bir isRender child. Her child instance bir kutu.
 3. **Seç:** tık → `itemKey · isim · #instance`.
 4. **Taşı:** `G` (TranslateControls).
 5. **Döndür:** `R` — **üç eksen, 360°** (serbest Euler).
 6. **Açı yaz:** seçili parçada **W° / D° / H°** alanları (Enter/blur). Sürüklerken her frame React güncellemesi yok; bırakınca senkron.
 7. **Genişlet / Küçült:** aynı sayfada full-viewport panel (Esc).
-8. **Montajı kaydet:** pose listesini API’ye yazar.
+8. **Köşe snap:** turuncu AABB köşeleri; kaynak → hedef yapıştır (`C` / buton; rotasyon korunur) → **otomatik kilit** (çift veya gruba ekle).
+9. **Gruptan çıkar / Kilidi aç:** N-parça rigid grup (`lock_group_id`); manuel Kilitle hâlâ var (yedek).
+10. **Montajı kaydet:** pose **ve** `lock_group_id` listesini API’ye yazar (reload’da grup geri gelir).
 
 Zemin: AABB tabanı `y < 0` olmaz (`clampMeshAboveGround`).
 
@@ -74,6 +78,7 @@ Zemin: AABB tabanı `y < 0` olmaz (`clampMeshAboveGround`).
 | `rotation_x_deg` | Ürün W ekseni etrafı → Three `rotation.x` |
 | `rotation_y_deg` | Ürün D ekseni etrafı → Three `rotation.z` |
 | `rotation_z_deg` | Ürün H ekseni etrafı → Three `rotation.y` (eski tek açı alanı) |
+| `lock_group_id` | Aynı id = birlikte kilitli grup (null = serbest). Admin snap kilidi kalıcı. |
 
 GLB / mesh dosyası kaydedilmez; yalnızca sayılar. Mesh’ler runtime’da BoxGeometry (veya ileride child asset).
 
@@ -93,17 +98,19 @@ Prod: `itemHasAssemblyLayout` → parts çiz; yoksa legacy gömülü/şerit yolu
 - [x] Persist + bootstrap + prod assembly mesh
 - [x] `isRender` filtresi (catalogVisible ile karıştırılmaz)
 - [x] Admin AABB **köşe snap + yapıştır** (C / buton; 8 köşe; rotasyon korunur; absolute pose)
-- [x] Admin **oturum kilidi** (N parça grup: Kilitle / Gruba ekle; sürükle/snap/açı; DB’ye yazılmaz)
+- [x] Admin **kalıcı kilit grubu** (N parça: Kilitle / Gruba ekle; `lock_group_id` ile Montajı kaydet; reload’da geri)
 - [x] ViewCube + Persp/Ortho (ana editör `viewCube.js` / projection-control ile aynı)
+- [x] Prod assembly **katalog entegrasyonu**: `assembly.parts` = yalnız pose/kilit. Çizim = canlı child (`isRender`/`isActive`, W/D/H, `defaultColor`, tip, accepts*). `isRender=false` → kayıtlı pose olsa bile görünmez. Profile/upright = `frameColorForModule`; panel = faces + child renk.
 
 ---
 
 ## Bilinçli sınırlar (yapılmaz / henüz yok)
 
 - Admin ≠ prod `scene3d` (magnetic joint / wall reflow burada yok).
-- **Kalıcı kilitle** (DB relative constraint / reload sonrası grup) yok — oturum kilidi absolute pose kaydından bağımsız.
-- BOM çocuğu otomatik sahne mesh’i sanılmaz; assembly yoksa eski davranış.
-- Gerçek GLB köşe ≠ AABB köşe; admin layout kutuya göre.
+- Kilit **absolute pose + `lock_group_id`** ile kalıcıdır; ayrı “relative constraint / hedef takip” şeması yok (grup üyeleri absolute cm kaydeder).
+- Assembly kutuları BoxGeometry — child GLB çizilmez (katalog proxy kutu).
+- Panel `faces` sırası BOM instance sırasına map edilir (procedural face adları 1:1 zorunlu değil).
+- Stand uygulaması CRM değişikliğini **bootstrap yenileme** sonrası alır (kayıtlı proje mesh’i canlı katalogla rebuild).
 
 ---
 
@@ -123,14 +130,15 @@ Montaj Adım 2 yalnız `isRender=true` child instance’larını listeler.
 1. Recipe Item aç → sekme **3D Önizleme**.
 2. Adım 1: kutu W/D/H okları + legend.
 3. Adım 2: child kutular; tık → seçili satır; G/R; açı yaz; zeminin altına inme.
-4. **Montajı kaydet** → DB `fair_stand_item_assembly_parts`.
-5. Prod bootstrap sonrası parent yerleştirilince parts layout’u görünür.
+4. **Montajı kaydet** → DB `fair_stand_item_assembly_parts` (pose + `lock_group_id`).
+5. Sayfayı yenile → kilit grupları geri gelmeli.
+6. Prod bootstrap sonrası parent yerleştirilince parts layout’u görünür.
 
 ---
 
 ## Sonraki aday (karar bekler)
 
-Kalıcı **kilitle** (relative constraint + hedef takip + persist) = şema genişletmesi, ayrı dilim.
+Relative constraint / hedef takip (üyeyi host’a bağlayan ayrı şema) — şu an gerek yok; absolute + `lock_group_id` yeterli.
 
 ---
 
@@ -142,3 +150,8 @@ Kalıcı **kilitle** (relative constraint + hedef takip + persist) = şema geni�
 | 2026-09-25 | Bu doküman + Cursor plan mirror. |
 | 2026-09-25 | Admin köşe snap MVP: `itemAdminCornerSnap.js` + C/buton iki tık yapıştır. |
 | 2026-09-25 | Oturum kilidi: snap sonrası Kilitle; kilitli çift rigid-group (hangisi sürüklenirse); persist yok. |
+| 2026-09-26 | Kalıcı kilit: `lock_group_id` (migration 0040) + Montajı kaydet; N-üye Gruba ekle / çıkar. |
+| 2026-09-26 | Item **Kopyala** (shallow clone API) kılavuzda §4.1b; assembly `lock_group_id` kopyalanır. |
+| 2026-09-26 | Prod `createItemAssemblyModule` katalog entegrasyonu: frameColorForModule + faces + canlı child ölçü/renk. |
+| 2026-09-26 | Admin 3D önizleme yalnız `dimensions`; `sceneDimensions` gerçek sahnede kalır. |
+| 2026-09-26 | Köşe snap sonrası varsayılan otomatik kilit (`lockPendingPair`). |

@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.modules.fair_stand.application.catalog_item_order import (
     CatalogItemOrderError,
     apply_catalog_item_order,
+    next_append_catalog_index,
 )
 from app.modules.fair_stand.infrastructure.models import (
     FairStandItemAssemblyPartModel,
@@ -273,6 +274,7 @@ def _assembly_parts_payload(rows: list[FairStandItemAssemblyPartModel]) -> list[
             "rotationXDeg": _num(row.rotation_x_deg),
             "rotationYDeg": _num(row.rotation_y_deg),
             "rotationZDeg": _num(row.rotation_z_deg),
+            "lockGroupId": int(row.lock_group_id) if row.lock_group_id is not None else None,
         }
         for row in sorted(
             rows,
@@ -792,6 +794,174 @@ class AdminItemsService:
         self._flush()
         return self.get_item(item_key)
 
+    def clone_item(self, source_item_key: str, payload: dict) -> dict:
+        """Kaynak item + parent-owned satırları kopyala; yalnızca key/name değişir.
+
+        BOM/assembly/body/video child pointer’ları shallow kalır (aynı child key + adet).
+        Asset relative_path paylaşılır. Katalogda görünürse index = kategori son + 1.
+        """
+        source = self._get(source_item_key)
+        raw_key = payload.get("item_key", payload.get("itemKey"))
+        if raw_key is None or not str(raw_key).strip():
+            raise ItemAdminError("Item key zorunludur.")
+        item_key = _normalize_item_key(raw_key)
+        name = str(payload.get("name") or "").strip()
+        if not item_key:
+            raise ItemAdminError("Item key zorunludur.")
+        if not name:
+            raise ItemAdminError("Ad zorunludur.")
+        if item_key == source.item_key:
+            raise ItemAdminError("Kopya item key kaynak ile aynı olamaz.")
+        if self._session.get(FairStandItemModel, item_key) is not None:
+            raise ItemAdminError("Bu item key zaten kayıtlı.", status_code=409)
+
+        catalog_visible = bool(source.catalog_visible)
+        category_id = int(source.category_id) if source.category_id is not None else None
+        preview_id = int(source.preview_id) if source.preview_id is not None else None
+        if catalog_visible:
+            if category_id is None or preview_id is None:
+                raise ItemAdminError(
+                    "Kaynak katalogda görünür ama kategori/önizleme eksik; kopyalanamaz."
+                )
+            catalog_item_index = next_append_catalog_index(self._session, category_id)
+        else:
+            catalog_item_index = (
+                int(source.catalog_item_index) if source.catalog_item_index is not None else None
+            )
+
+        now = _now()
+        clone = FairStandItemModel(
+            item_key=item_key,
+            name=name,
+            item_type=source.item_type,
+            unit=source.unit,
+            catalog_visible=False,
+            category_id=category_id,
+            catalog_item_index=catalog_item_index,
+            preview_id=preview_id,
+            material=source.material,
+            default_color=source.default_color,
+            preserve_model_scale=source.preserve_model_scale,
+            model_rotation_y_deg=source.model_rotation_y_deg,
+            visual_rotation_y_deg=source.visual_rotation_y_deg,
+            rotation_step_deg=source.rotation_step_deg,
+            default_rotation_deg=source.default_rotation_deg,
+            side_insert_rotation=source.side_insert_rotation,
+            composition_mode=source.composition_mode,
+            paintable=source.paintable,
+            shape=source.shape,
+            variant=source.variant,
+            eye_count=source.eye_count,
+            default_z_cm=source.default_z_cm if source.default_z_cm is not None else Decimal("0"),
+            snap_target_item_type=source.snap_target_item_type,
+            snap_anchor=source.snap_anchor,
+            snap_requires_rule_id=source.snap_requires_rule_id,
+            snap_provides_rule_id=source.snap_provides_rule_id,
+            is_render=bool(source.is_render),
+            accepts_color=bool(source.accepts_color),
+            accepts_image=bool(source.accepts_image),
+            accepts_lightbox=bool(source.accepts_lightbox),
+            accepts_glass=bool(source.accepts_glass),
+            accepts_mesh=bool(source.accepts_mesh),
+            is_active=bool(source.is_active),
+            created_at=now,
+            updated_at=now,
+        )
+        self._session.add(clone)
+        try:
+            apply_catalog_item_order(
+                self._session,
+                clone,
+                catalog_visible=catalog_visible,
+                category_id=category_id,
+                catalog_item_index=catalog_item_index,
+            )
+        except CatalogItemOrderError as exc:
+            raise ItemAdminError(str(exc), status_code=exc.status_code) from exc
+
+        self._clone_satellites(source, clone)
+        self._flush()
+        return self.get_item(item_key)
+
+    def _clone_satellites(self, source: FairStandItemModel, clone: FairStandItemModel) -> None:
+        if source.dimensions is not None:
+            dims = source.dimensions
+            clone.dimensions = FairStandItemDimensionsModel(
+                item_key=clone.item_key,
+                width_cm=dims.width_cm,
+                depth_cm=dims.depth_cm,
+                height_cm=dims.height_cm,
+                mount_height_cm=dims.mount_height_cm,
+                wall_gap_cm=dims.wall_gap_cm,
+            )
+        if source.scene_dimensions is not None:
+            scene = source.scene_dimensions
+            clone.scene_dimensions = FairStandItemSceneDimensionsModel(
+                item_key=clone.item_key,
+                width_cm=scene.width_cm,
+                depth_cm=scene.depth_cm,
+                height_cm=scene.height_cm,
+            )
+        if source.strip_occupancy is not None:
+            strip = source.strip_occupancy
+            clone.strip_occupancy = FairStandItemStripOccupancyModel(
+                item_key=clone.item_key,
+                align=strip.align,
+                strip_count=strip.strip_count,
+            )
+        clone.assets = [
+            FairStandItemAssetModel(
+                id=uuid4(),
+                item_key=clone.item_key,
+                asset_role=asset.asset_role,
+                relative_path=asset.relative_path,
+                is_active=bool(asset.is_active),
+            )
+            for asset in list(source.assets or [])
+        ]
+        clone.components = [
+            FairStandItemComponentModel(
+                id=uuid4(),
+                parent_item_key=clone.item_key,
+                child_item_key=component.child_item_key,
+                quantity=component.quantity,
+            )
+            for component in list(source.components or [])
+        ]
+        clone.assembly_parts = [
+            FairStandItemAssemblyPartModel(
+                id=uuid4(),
+                parent_item_key=clone.item_key,
+                child_item_key=part.child_item_key,
+                instance_index=int(part.instance_index),
+                x_cm=part.x_cm,
+                y_cm=part.y_cm,
+                z_cm=part.z_cm,
+                rotation_x_deg=part.rotation_x_deg,
+                rotation_y_deg=part.rotation_y_deg,
+                rotation_z_deg=part.rotation_z_deg,
+                lock_group_id=part.lock_group_id,
+            )
+            for part in list(source.assembly_parts or [])
+        ]
+        clone.body_parts = [
+            FairStandItemBodyPartModel(
+                id=uuid4(),
+                parent_item_key=clone.item_key,
+                body_role=body.body_role,
+                child_item_key=body.child_item_key,
+            )
+            for body in list(source.body_parts or [])
+        ]
+        if source.video_wall is not None:
+            wall = source.video_wall
+            clone.video_wall = FairStandItemVideoWallModel(
+                parent_item_key=clone.item_key,
+                rows=int(wall.rows),
+                cols=int(wall.cols),
+                panel_item_key=wall.panel_item_key,
+            )
+
     def archive_item(self, item_key: str) -> dict:
         row = self._get(item_key)
         row.is_active = False
@@ -991,6 +1161,10 @@ class AdminItemsService:
                 _optional_decimal(part.get("rotation_z_deg", part.get("rotationZDeg")))
                 or Decimal("0")
             )
+            lock_raw = part.get("lock_group_id", part.get("lockGroupId"))
+            lock_group_id = _optional_int(lock_raw)
+            if lock_group_id is not None and lock_group_id < 1:
+                raise ItemAdminError("Assembly lock_group_id 1 veya daha büyük olmalıdır.")
 
             current = existing_by_key.pop(key, None)
             if current is None:
@@ -1007,6 +1181,7 @@ class AdminItemsService:
             current.rotation_x_deg = rotation_x_deg
             current.rotation_y_deg = rotation_y_deg
             current.rotation_z_deg = rotation_z_deg
+            current.lock_group_id = lock_group_id
             kept.append(current)
 
         for obsolete in existing_by_key.values():

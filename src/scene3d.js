@@ -27,11 +27,15 @@ import {
   resolveSceneDimensions,
 } from './items.js';
 import {
-  colorIntToCss,
-  expandBomRenderInstances,
+  buildLiveAssemblyParts,
+  isAssemblyFramePartType,
+  isAssemblyPanelPartType,
+  isAssemblyRenderableChild,
+  isAssemblyTopPartType,
   itemHasAssemblyLayout,
-  mergeAssemblyPoses,
+  listModuleFaceStates,
   readItemBoxCm,
+  resolveAssemblyPartVisual,
 } from './itemAssembly.js';
 import { snapPlacementToItemAnchor } from './itemSnap.js';
 import { resolveModuleStripOccupancy } from './stripOccupancy.js';
@@ -6642,11 +6646,8 @@ function partSpanM(surfaceState, fallbackM, field) {
 
 function mountRecipeTopSurface(mesh, part, moduleState, moduleType, moduleIndex, surfaces, onSurfaceReady) {
   if (!mesh || !part) return;
-  const widthM = partSpanM(part, mesh.geometry?.parameters?.width, 'widthCm');
-  const heightM = partSpanM(part, mesh.geometry?.parameters?.height, 'heightCm');
-  const depthM = partSpanM(part, mesh.geometry?.parameters?.depth, 'depthCm');
-  if (mesh.geometry?.dispose) mesh.geometry.dispose();
-  mesh.geometry = new THREE.BoxGeometry(widthM, heightM, depthM);
+  // Baza/banko üst geometrisi prosedürel zarfa (module W/D + overhang) bağlı kalır.
+  // BOM child ölçüleri (ör. base_top_107_50) kimlik/renk için damgalanır; mesh’i ezmez.
   if (part.color && mesh.material?.color) mesh.material.color.set(part.color);
   mesh.userData = {
     kind: 'surface',
@@ -6758,9 +6759,11 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
   const surfaces = [];
   const addPanelFace = (surfaceRole, surfaceState, faceWidthM, position, rotationY = 0) => {
     if (!surfaceState) return;
-    const faceWidth = partSpanM(surfaceState, faceWidthM, 'widthCm');
-    const faceHeight = partSpanM(surfaceState, panelHeightM, 'heightCm');
-    const faceDepth = partSpanM(surfaceState, 0.012, 'depthCm');
+    // Yüz mesh boyutu = prosedürel açıklık (module W/D/H). BOM panel W/H damgası
+    // (panel_48_5 / panel_98 sırası) burada ezmez; aksi halde yan yüzler kayar.
+    const faceWidth = faceWidthM;
+    const faceHeight = panelHeightM;
+    const faceDepth = 0.012;
 
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(faceWidth, faceHeight, faceDepth),
@@ -6934,9 +6937,10 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     rotationY = 0,
   ) => {
     if (!surfaceState) return;
-    const faceWidth = partSpanM(surfaceState, faceWidthM, 'widthCm');
-    const faceHeight = partSpanM(surfaceState, panelHeightM, 'heightCm');
-    const faceDepth = partSpanM(surfaceState, 0.012, 'depthCm');
+    // Banko yüzleri de module zarfına oturur; BOM child ölçüleri mesh’i ezmez.
+    const faceWidth = faceWidthM;
+    const faceHeight = panelHeightM;
+    const faceDepth = 0.012;
 
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(faceWidth, faceHeight, faceDepth),
@@ -7230,33 +7234,64 @@ function createItemAssemblyModule(moduleState, moduleIndex, catalogItem) {
     assembly: true,
   };
 
-  const bomParts = expandBomRenderInstances(catalogItem, getItem);
-  const posed = mergeAssemblyPoses(bomParts, catalogItem.assembly?.parts || []);
+  const posed = buildLiveAssemblyParts(catalogItem, catalogItem.assembly?.parts || [], getItem);
   const surfaces = [];
+
+  let frameColorCss = null;
+  try {
+    frameColorCss = frameColorForModule(moduleState);
+  } catch {
+    frameColorCss = null;
+  }
+
+  const faceStates = listModuleFaceStates(moduleState);
+  let faceCursor = 0;
+  const topStates = Array.isArray(moduleState.renderParts?.tops)
+    ? [...moduleState.renderParts.tops]
+    : [];
+  let topCursor = 0;
 
   for (const part of posed) {
     const child = getItem(part.childItemKey);
-    const box = child ? readItemBoxCm(child) : {
-      widthCm: part.widthCm,
-      depthCm: part.depthCm,
-      heightCm: part.heightCm,
-    };
+    // Savunma: kayıtlı pose / race — canlı katalogda çizilmeyen child asla mesh olmaz.
+    if (!isAssemblyRenderableChild(child)) continue;
+
+    // Ölçü / tip / yetenek her zaman canlı katalogdan (pose yalnız konum/rotasyon/kilit).
+    const box = readItemBoxCm(child);
     const widthM = Math.max(box.widthCm / 100, 0.01);
     const depthM = Math.max(box.depthCm / 100, 0.01);
     const heightM = Math.max(box.heightCm / 100, 0.01);
-    let colorCss = '#9ca3af';
-    try {
-      if (child && Number.isInteger(child.defaultColor)) colorCss = itemDefaultColorCss(child);
-      else if (part.colorCss) colorCss = part.colorCss;
-    } catch {
-      colorCss = colorIntToCss(child?.defaultColor);
+
+    let panelColorCss = null;
+    let boundSurface = null;
+    let topColorCss = null;
+
+    if (child && isAssemblyPanelPartType(child.type) && faceCursor < faceStates.length) {
+      boundSurface = faceStates[faceCursor];
+      faceCursor += 1;
+      if (typeof boundSurface.color === 'string' && boundSurface.color) {
+        panelColorCss = boundSurface.color;
+      }
+    } else if (child && isAssemblyTopPartType(child.type) && topCursor < topStates.length) {
+      boundSurface = topStates[topCursor];
+      topCursor += 1;
+      if (typeof boundSurface.color === 'string' && boundSurface.color) {
+        topColorCss = boundSurface.color;
+      }
     }
+
+    const visual = resolveAssemblyPartVisual(child, {
+      frameColorCss: isAssemblyFramePartType(child?.type) ? frameColorCss : null,
+      panelColorCss,
+      topColorCss,
+    });
+
     const mesh = new THREE.Mesh(
       new THREE.BoxGeometry(widthM, heightM, depthM),
       new THREE.MeshStandardMaterial({
-        color: colorCss,
-        roughness: 0.72,
-        metalness: 0.06,
+        color: visual.colorCss,
+        roughness: visual.roughness,
+        metalness: visual.metalness,
       }),
     );
     mesh.position.set(
@@ -7271,16 +7306,31 @@ function createItemAssemblyModule(moduleState, moduleIndex, catalogItem) {
     );
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+
+    const capabilityKey = boundSurface?.itemKey ?? child ?? part.childItemKey;
     mesh.userData = {
       kind: 'assembly-part',
+      assemblyRole: visual.role,
       moduleId: moduleState.id,
       moduleIndex,
+      moduleType: moduleState.type,
       itemKey: part.childItemKey,
       instanceIndex: part.instanceIndex,
-      ...surfaceCapabilityUserData(child || part.childItemKey),
+      selectionMode: boundSurface ? 'surface' : 'module',
+      ...surfaceCapabilityUserData(capabilityKey),
+      ...(boundSurface ? bindRendererSurfaceState(boundSurface) : {}),
     };
+    if (boundSurface?.id) mesh.userData.surfaceId = boundSurface.id;
+
     group.add(mesh);
     surfaces.push(mesh);
+  }
+
+  const frameMeshes = surfaces.filter((mesh) => mesh.userData.assemblyRole === 'frame');
+  if (frameMeshes.length > 1) {
+    frameMeshes.forEach((mesh) => {
+      mesh.userData.colorTargets = frameMeshes;
+    });
   }
 
   return { group, surfaces };
