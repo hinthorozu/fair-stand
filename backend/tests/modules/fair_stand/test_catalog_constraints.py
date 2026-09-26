@@ -222,7 +222,7 @@ def test_seed_relation_counts(db_session):
     assert assets > 0
     assert bodies > 0
     assert walls > 0
-    assert len(item_keys) == 96
+    assert len(item_keys) == 97
     assert {
         "panel_corner_42_5",
         "panel_corner_92",

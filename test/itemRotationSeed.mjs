@@ -17,6 +17,7 @@ const PLACEABLE_ITEM_TYPES = new Set([
   'upright',
   'profile',
   'plastic-trash-bin',
+  'box-block',
   'indoor-plant-1',
   'tv',
   'shelf',

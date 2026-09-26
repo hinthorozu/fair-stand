@@ -18,6 +18,7 @@ import {
   isGridTileFloorItem,
   isParquetFloorItem,
   listFloorItems,
+  listRegisteredItems,
   applyItemPlacementZCm,
   resolveItemDefaultZCm,
   resolveModuleSceneBoxCm,
@@ -92,6 +93,11 @@ function frameColorForModule(moduleState) {
   if (profile) return itemDefaultColorCss(profile);
   const upright = children.find((child) => child.type === 'upright' && Number.isInteger(child.defaultColor));
   if (upright) return itemDefaultColorCss(upright);
+  // Sentetik baza katmanı / eksik itemKey: kayıtlı herhangi bir profil rengine düş.
+  const fallbackProfile = listRegisteredItems().find(
+    (candidate) => candidate.type === 'profile' && Number.isInteger(candidate.defaultColor),
+  );
+  if (fallbackProfile) return itemDefaultColorCss(fallbackProfile);
   throw new TypeError(`Missing frame defaultColor for ${item?.itemKey ?? 'unknown Item'}.`);
 }
 
@@ -1540,6 +1546,9 @@ export function createStandScene(
     if (moduleState.type === 'indoor-plant-1' || moduleState.type === 'plastic-trash-bin') {
       return createIndoorPlantModule(moduleState, moduleIndex);
     }
+    if (moduleState.type === 'box-block') {
+      return createBoxBlockModule(moduleState, moduleIndex);
+    }
     if (moduleState.type === 'illuminated-foam') {
       return createIlluminatedFoamModule(moduleState, moduleIndex, getAssetUrl(moduleState.imageAssetId));
     }
@@ -1579,11 +1588,23 @@ export function createStandScene(
     let hasMultiEdgePlacement = false;
 
     modules.forEach((moduleState, moduleIndex) => {
-      const module = createRenderableModule(
-        moduleState,
-        moduleIndex,
-        (surface) => applyStoredImage(surface),
-      );
+      let module = null;
+      try {
+        module = createRenderableModule(
+          moduleState,
+          moduleIndex,
+          (surface) => applyStoredImage(surface),
+        );
+      } catch (error) {
+        console.warn(
+          'Modül render atlandı:',
+          moduleState?.type,
+          moduleState?.itemKey,
+          moduleState?.id,
+          error,
+        );
+        return;
+      }
       if (!module) {
         console.warn('Desteklenmeyen modül tipi atlandı:', moduleState.type, moduleState.id);
         return;
@@ -4901,6 +4922,65 @@ export function createStandScene(
       dragBadge?.remove?.();
     },
   };
+}
+
+function createBoxBlockModule(moduleState, moduleIndex) {
+  const widthCm = Math.max(1, Number(moduleState.widthCm) || 100);
+  const depthCm = Math.max(1, Number(moduleState.depthCm) || 50);
+  const heightCm = Math.max(1, Number(moduleState.heightCm) || 50);
+  const widthM = widthCm / 100;
+  const depthM = depthCm / 100;
+  const heightM = heightCm / 100;
+  const opacityRaw = Number(moduleState.opacity);
+  const opacity = Number.isFinite(opacityRaw)
+    ? Math.min(1, Math.max(0, opacityRaw))
+    : 1;
+  const color = typeof moduleState.surface?.color === 'string' && moduleState.surface.color
+    ? moduleState.surface.color
+    : '#e8e0d5';
+
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: moduleState.type,
+    moduleType: 'box-block',
+    widthCm,
+    depthCm,
+    heightCm,
+  };
+
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, heightM, depthM),
+    new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.88,
+      metalness: 0,
+      transparent: opacity < 1,
+      opacity,
+      depthWrite: opacity >= 0.999,
+    }),
+  );
+  // Placement-center pivot: ±W/2 ±D/2, H taban 0 (baza ile aynı).
+  mesh.position.set(0, heightM / 2, 0);
+  mesh.castShadow = opacity >= 0.2;
+  mesh.receiveShadow = true;
+  mesh.userData = {
+    kind: 'surface',
+    moduleId: moduleState.id,
+    moduleIndex,
+    moduleType: 'box-block',
+    selectionMode: 'module',
+    surfaceId: `${moduleState.id}:box-block`,
+    widthCm,
+    depthCm,
+    heightCm,
+    ...surfaceCapabilityUserData(moduleState.itemKey),
+    ...bindRendererSurfaceState(moduleState.surface),
+  };
+  group.add(mesh);
+  return { group, surfaces: [mesh] };
 }
 
 function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {

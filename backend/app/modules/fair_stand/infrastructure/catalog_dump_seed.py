@@ -103,6 +103,8 @@ def seed_catalog_if_empty(bind) -> None:
                         item[flag] = False
                 if item.get("default_z_cm") is None:
                     item["default_z_cm"] = 0
+                if item.get("default_opacity") is None:
+                    item["default_opacity"] = 1
         if name == "fair_stand_item_body_parts":
             for part in coerced:
                 if part.get("id") is None:

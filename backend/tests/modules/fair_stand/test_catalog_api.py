@@ -15,10 +15,10 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     body = response.json()
     assert body["revision"]
     assert len(body["categories"]) == 6
-    assert len(body["items"]) == 96
+    assert len(body["items"]) == 97
     visible = [item for item in body["items"] if item["catalogVisible"] is True]
     hidden = [item for item in body["items"] if item["catalogVisible"] is not True]
-    assert len(visible) == 58
+    assert len(visible) == 59
     assert len(hidden) == 38
     shelf = next(item for item in body["items"] if item["itemKey"] == "shelf_100")
     assert shelf["categoryId"] == 3

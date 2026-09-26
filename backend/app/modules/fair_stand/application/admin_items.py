@@ -319,6 +319,7 @@ def _item_admin_payload(row: FairStandItemModel) -> dict:
         "previewId": int(row.preview_id) if row.preview_id is not None else None,
         "material": row.material,
         "defaultColor": int(row.default_color) if row.default_color is not None else None,
+        "defaultOpacity": _num(row.default_opacity) if row.default_opacity is not None else 1,
         "preserveModelScale": row.preserve_model_scale,
         "modelRotationYDeg": _num(row.model_rotation_y_deg),
         "visualRotationYDeg": _num(row.visual_rotation_y_deg),
@@ -630,6 +631,7 @@ class AdminItemsService:
             preview_id=preview_id,
             material=_optional_str(payload.get("material")),
             default_color=payload.get("default_color"),
+            default_opacity=_optional_decimal(payload.get("default_opacity")) or Decimal("1"),
             preserve_model_scale=_optional_bool(payload.get("preserve_model_scale")),
             model_rotation_y_deg=_optional_decimal(payload.get("model_rotation_y_deg")),
             visual_rotation_y_deg=_optional_decimal(payload.get("visual_rotation_y_deg")),
@@ -769,6 +771,9 @@ class AdminItemsService:
             if field in payload:
                 setattr(row, field, payload.get(field))
 
+        if "default_opacity" in payload:
+            row.default_opacity = _optional_decimal(payload.get("default_opacity")) or Decimal("1")
+
         for field, attr in (
             ("preserve_model_scale", "preserve_model_scale"),
             ("paintable", "paintable"),
@@ -841,6 +846,7 @@ class AdminItemsService:
             preview_id=preview_id,
             material=source.material,
             default_color=source.default_color,
+            default_opacity=source.default_opacity if source.default_opacity is not None else Decimal("1"),
             preserve_model_scale=source.preserve_model_scale,
             model_rotation_y_deg=source.model_rotation_y_deg,
             visual_rotation_y_deg=source.visual_rotation_y_deg,

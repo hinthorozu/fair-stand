@@ -67,6 +67,7 @@ const KNOWN_BEHAVIOR_TYPE_KEYS = Object.freeze(new Set([
   'kettle',
   'coat-rack',
   'plastic-trash-bin',
+  'box-block',
   'upright',
   'profile',
   'indoor-plant-1',

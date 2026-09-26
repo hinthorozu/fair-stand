@@ -26,16 +26,16 @@ function pickComparable(descriptor) {
   return picked;
 }
 
-test('listCatalogItems 58 görünür Item’ı Item kaydından üretir; hardcoded key listesi yoktur', () => {
+test('listCatalogItems 59 görünür Item’ı Item kaydından üretir; hardcoded key listesi yoktur', () => {
   const items = listRegisteredItems();
   const visible = items.filter((item) => item.catalogVisible === true);
   const projected = listCatalogItems();
   const catalogSource = readFileSync(new URL('../src/catalog.js', import.meta.url), 'utf8');
 
-  assert.equal(items.length, 96);
-  assert.equal(visible.length, 58);
-  assert.equal(projected.length, 58);
-  assert.equal(new Set(projected.map((item) => item.itemKey)).size, 58);
+  assert.equal(items.length, 97);
+  assert.equal(visible.length, 59);
+  assert.equal(projected.length, 59);
+  assert.equal(new Set(projected.map((item) => item.itemKey)).size, 59);
   assert.deepEqual(projected.map((item) => item.itemKey), BASELINE.keys);
 
   const projectedKeys = new Set(projected.map((item) => item.itemKey));
@@ -66,7 +66,7 @@ test('yeni catalog projection yalnız itemKey / label / catalogPreview taşır',
     compared += 1;
   }
 
-  assert.equal(compared, 58);
+  assert.equal(compared, 59);
   assert.deepEqual([...listCatalogItems().map((item) => item.itemKey)], BASELINE.keys);
 });
 

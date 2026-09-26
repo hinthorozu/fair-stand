@@ -271,6 +271,10 @@ class FairStandItemModel(Base):
             name="ck_fair_stand_items_render_surface",
         ),
         CheckConstraint(
+            "default_opacity >= 0 AND default_opacity <= 1",
+            name="ck_fair_stand_items_default_opacity",
+        ),
+        CheckConstraint(
             "(snap_target_item_type IS NULL) = (snap_anchor IS NULL)",
             name="ck_fair_stand_items_snap_pair",
         ),
@@ -325,6 +329,12 @@ class FairStandItemModel(Base):
     )
     material: Mapped[str | None] = mapped_column(String(64), nullable=True)
     default_color: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    default_opacity: Mapped[Decimal] = mapped_column(
+        Numeric(4, 3),
+        nullable=False,
+        default=Decimal("1"),
+        server_default="1",
+    )
     preserve_model_scale: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     model_rotation_y_deg: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     visual_rotation_y_deg: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)

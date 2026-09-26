@@ -146,13 +146,13 @@ Yeni görünen Item için Catalog içine kart satırı yazılmaz.
 | id | catalogName | catalogIndex | Item sayısı |
 |---|---|---|---|
 | 1 | Panel & Duvar | 1 | 9 |
-| 2 | Panel Ek Modül | 2 | 13 |
+| 2 | Panel Ek Modül | 2 | 14 |
 | 3 | Raf & Vitrin | 3 | 5 |
 | 4 | Banko & Baza | 4 | 9 |
 | 5 | Extra | 5 | 16 |
 | 6 | Elektronik & Aydınlatma | 6 | 6 |
 
-Toplam görünür Item: **58**. Kayıtlı Item: **96**.
+Toplam görünür Item: **59**. Kayıtlı Item: **97**.
 
 ---
 
@@ -257,7 +257,7 @@ Yeni kategori gerekirse Admin Catalog CRUD ile `catalogName` / `catalogIndex` ek
 - duplicate `catalogIndex`: 0
 - `catalogIndex` 1..N kesintisiz
 - `catalogVisible=true` ve geçersiz `categoryId`: 0
-- catalog projection Item: 58
+- catalog projection Item: 59
 - `catalogVisible=true` ve `previewId` yok/bilinmiyor: fail-fast
 - hardcoded katalog Item key listesi: 0
 - Catalog UI preview `type` branch: 0
@@ -275,11 +275,11 @@ Yeni kategori gerekirse Admin Catalog CRUD ile `catalogName` / `catalogIndex` ek
 
 | Test | Ne doğrular |
 |---|---|
-| `test/catalogItemProjection.test.js` | 58/58 Item-driven thin kart (`itemKey` / `label` / `previewId`) |
-| `test/previewIdConfig.test.js` | 58/58 `previewId`; type branch yok; CSS kök sınıf regression |
+| `test/catalogItemProjection.test.js` | 59/59 Item-driven thin kart (`itemKey` / `label` / `previewId`) |
+| `test/previewIdConfig.test.js` | 59/59 `previewId`; type branch yok; CSS kök sınıf regression |
 | `test/catalogDomainBoundary.test.js` | Catalog/AutoDepot/ModuleContract katman sınırı; `catalogVisible=false` ≠ Item yok |
 | `test/catalogCategories.test.js` | Catalog modeli, key eşleşmesi, sıra/label/adet regression |
-| `test/itemCatalogFields.test.js` | 96/96 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
+| `test/itemCatalogFields.test.js` | 97/97 Item alanları, CATALOG.md tablosu, UI `listCatalogGroups` |
 | `test/itemSceneDimensions.test.js` | dimensions / sceneDimensions same-field fallback; catalogWidthCm yok; Recipe/Catalog dimension fallback yok |
 | `test/catalogSingleSource.test.js` | Her katalog Item tam bir grupta |
 | `test/systemModuleCatalogDoc.test.js` | `SYSTEM_MODULE_CATALOG.md` key snapshot |

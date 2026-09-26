@@ -17,6 +17,7 @@ const COLOR_TYPES = new Set([
   'chair',
   'bar-stool',
   'led-floodlight',
+  'box-block',
 ]);
 
 function expectedFlags(item) {
@@ -40,7 +41,7 @@ function expectedFlags(item) {
 
 test('every catalog item surface flag matches the scene audit', () => {
   const items = listRegisteredItems();
-  assert.equal(items.length, 96);
+  assert.equal(items.length, 97);
   for (const item of items) {
     const expected = expectedFlags(item);
     assert.deepEqual({

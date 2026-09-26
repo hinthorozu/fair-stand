@@ -15,6 +15,7 @@ const PROP_TYPES = Object.freeze([
   'kettle',
   'coat-rack',
   'plastic-trash-bin',
+  'box-block',
   'chair',
   'table-glass',
   'table-chair-set-eames',

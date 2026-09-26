@@ -12,7 +12,7 @@ import { getItem, listRegisteredItems } from '../src/items.js';
 
 const EXPECTED_CATEGORIES = Object.freeze([
   Object.freeze({ id: 1, catalogName: 'Panel & Duvar', catalogIndex: 1, itemCount: 9 }),
-  Object.freeze({ id: 2, catalogName: 'Panel Ek Modül', catalogIndex: 2, itemCount: 13 }),
+  Object.freeze({ id: 2, catalogName: 'Panel Ek Modül', catalogIndex: 2, itemCount: 14 }),
   Object.freeze({ id: 3, catalogName: 'Raf & Vitrin', catalogIndex: 3, itemCount: 5 }),
   Object.freeze({ id: 4, catalogName: 'Banko & Baza', catalogIndex: 4, itemCount: 9 }),
   Object.freeze({ id: 5, catalogName: 'Extra', catalogIndex: 5, itemCount: 16 }),
@@ -29,7 +29,7 @@ const EXPECTED_GROUP_KEYS = Object.freeze({
   2: Object.freeze([
     'wall_200_short_up_2', 'wall_150_short_up_2', 'wall_100_short_up_2', 'wall_50_short_up_2',
     'wall_200_short_up_1', 'wall_150_short_up_1', 'wall_100_short_up_1', 'wall_50_short_up_1',
-    'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5',
+    'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5', 'box_block',
   ]),
   3: Object.freeze([
     'wall_showcase_100_3_350', 'wall_showcase_100_2_350',
@@ -135,7 +135,7 @@ test('listCatalogGroups kategori sırası, adı ve Item sırasını korur', () =
     });
   });
 
-  assert.equal(visibleTotal, 58);
-  assert.equal(listCatalogItems().map((item) => item.itemKey).length, 58);
+  assert.equal(visibleTotal, 59);
+  assert.equal(listCatalogItems().map((item) => item.itemKey).length, 59);
   assert.deepEqual([...listCatalogItems().map((item) => item.itemKey)], groups.flatMap((group) => group.keys));
 });

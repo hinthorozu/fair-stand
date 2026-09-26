@@ -111,6 +111,7 @@ def seed_fair_stand_catalog(session: Session) -> None:
                 preview_id=preview_id_by_sort[preview_sort] if preview_sort is not None else None,
                 material=row["material"],
                 default_color=row["default_color"],
+                default_opacity=_dec(row.get("default_opacity")) or Decimal("1"),
                 preserve_model_scale=row["preserve_model_scale"],
                 model_rotation_y_deg=_dec(row["model_rotation_y_deg"]),
                 visual_rotation_y_deg=_dec(row["visual_rotation_y_deg"]),

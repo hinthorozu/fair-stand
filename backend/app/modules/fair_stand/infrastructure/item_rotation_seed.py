@@ -24,6 +24,7 @@ PLACEABLE_ITEM_TYPES = frozenset(
         "upright",
         "profile",
         "plastic-trash-bin",
+        "box-block",
         "indoor-plant-1",
         "tv",
         "shelf",
