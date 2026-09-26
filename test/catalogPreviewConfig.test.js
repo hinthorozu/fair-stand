@@ -91,11 +91,11 @@ function serializeNode(node) {
   };
 }
 
-test('59 görünür Item catalogPreview taşır; gizli Item zorunlu değildir', () => {
+test('59 görünür Item catalogPreview taşır; 46 gizli Item preview taşımaz', () => {
   const visible = listRegisteredItems().filter((item) => item.catalogVisible === true);
   const hidden = listRegisteredItems().filter((item) => item.catalogVisible !== true);
   assert.equal(visible.length, 59);
-  assert.equal(hidden.length, 38);
+  assert.equal(hidden.length, 46);
 
   for (const item of visible) {
     assert.equal(typeof item.previewId, 'number', item.itemKey);
