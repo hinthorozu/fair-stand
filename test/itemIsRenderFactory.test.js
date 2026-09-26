@@ -67,6 +67,7 @@ test('recipe surfaces take embedded isRender part identity; catalog is not the d
   assert.equal(getItem(base.faces.left.itemKey).type, 'panel');
   assert.equal(wall.strips[0].widthCm, getItem(wall.strips[0].itemKey).dimensions.widthCm);
   assert.equal(wall.strips[0].heightCm, getItem(wall.strips[0].itemKey).dimensions.heightCm);
+  // Stamp keeps BOM child identity/size on state; procedural base mesh uses module aperture instead.
   assert.equal(base.renderParts.tops[0].widthCm, getItem('base_top_107_50').dimensions.widthCm);
   assert.equal(base.renderParts.tops[0].heightCm, getItem('base_top_107_50').dimensions.heightCm);
   assert.equal(getItem('base_top_107_50').isRender, true);

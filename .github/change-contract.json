@@ -60,6 +60,8 @@
       "backend/alembic/versions/0037_save_as_button.py",
       "backend/alembic/versions/0038_item_assembly_parts.py",
       "backend/alembic/versions/0039_assembly_rotation_xyz.py",
+      "backend/alembic/versions/0040_assembly_lock_group.py",
+      "backend/alembic/versions/0041_rename_profil_screen_keys.py",
       "backend/app/modules/fair_stand/api/dependencies.py",
       "backend/app/modules/fair_stand/api/routes.py",
       "backend/app/modules/fair_stand/application/admin_items.py",
@@ -190,6 +192,7 @@
       "test/imageOptimize.test.js",
       "test/itemAdminAssemblyLock.test.js",
       "test/itemAdminCornerSnap.test.js",
+      "test/itemAdminPreview.test.js",
       "test/itemAssembly.test.js",
       "test/itemCatalogFields.test.js",
       "test/itemDefaultZCm.test.js",
@@ -331,6 +334,7 @@
       "test/indoorPlants.test.js",
       "test/itemAdminAssemblyLock.test.js",
       "test/itemAdminCornerSnap.test.js",
+      "test/itemAdminPreview.test.js",
       "test/itemAssembly.test.js",
       "test/itemBoxDimensions.test.js",
       "test/itemCatalogFields.test.js",
@@ -998,9 +1002,11 @@
   },
   "tests": {
     "targeted": [
-      "test/itemAssembly.test.js",
-      "test/itemAdminCornerSnap.test.js",
       "test/itemAdminAssemblyLock.test.js",
+      "test/itemAdminCornerSnap.test.js",
+      "test/itemAdminPreview.test.js",
+      "test/itemAssembly.test.js",
+      "test/baseRenderStyle.test.js",
       "test/systemChangeGate.test.js"
     ],
     "fullSuite": true,
@@ -1019,7 +1025,7 @@
   },
   "migration": {
     "required": true,
-    "notes": "alembic 0038_item_assembly_parts + 0039_assembly_rotation_xyz + 0040_assembly_lock_group."
+    "notes": "alembic 0038_item_assembly_parts + 0039_assembly_rotation_xyz + 0040_assembly_lock_group + 0041_rename_profil_screen_keys."
   },
   "rollback": "Revert item_3d_preview commits; alembic downgrade through 0038; CRM tab unused without stand package."
 }
