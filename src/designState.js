@@ -510,6 +510,38 @@ export function createPlasticTrashBinModuleState() {
   return createCommercialModuleState('plastic-trash-bin');
 }
 
+function clampOpacity(value, fallback = 1) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(1, Math.max(0, number));
+}
+
+export function createBoxBlockModuleState(descriptor = {}) {
+  const itemKey = descriptor?.itemKey ?? 'box_block';
+  const item = getItem(itemKey);
+  if (!item || item.type !== 'box-block') return null;
+
+  const defaultOpacity = clampOpacity(item.defaultOpacity, 1);
+  const state = {
+    id: createId('module'),
+    itemKey: item.itemKey,
+    type: item.type,
+    opacity: clampOpacity(descriptor.opacity, defaultOpacity),
+    surface: {
+      id: createId('surface'),
+      color: itemDefaultColorCss(item),
+    },
+  };
+  applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
+  const widthCm = Number(descriptor.widthCm);
+  const depthCm = Number(descriptor.depthCm);
+  const heightCm = Number(descriptor.heightCm);
+  if (Number.isFinite(widthCm) && widthCm > 0) state.widthCm = widthCm;
+  if (Number.isFinite(depthCm) && depthCm > 0) state.depthCm = depthCm;
+  if (Number.isFinite(heightCm) && heightCm > 0) state.heightCm = heightCm;
+  return state;
+}
+
 function isIndoorPlantItem(item) {
   return item?.type === 'indoor-plant-1' && Boolean(item?.itemKey);
 }
@@ -635,6 +667,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   upright: (descriptor) => createUprightModuleState(descriptor),
   profile: (descriptor) => createProfileModuleState(descriptor),
   'plastic-trash-bin': () => createPlasticTrashBinModuleState(),
+  'box-block': (descriptor) => createBoxBlockModuleState(descriptor),
   'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
   tv: (descriptor) => createTvModuleState(descriptor),
   shelf: (descriptor) => createShelfModuleState(descriptor),

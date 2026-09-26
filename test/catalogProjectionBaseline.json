@@ -1,5 +1,4 @@
 {
-  "generatedFrom": "thin catalog cards itemKey label previewId",
   "keys": [
     "wall_200_350",
     "wall_150_350",
@@ -23,6 +22,7 @@
     "profile_140_5",
     "profile_91",
     "profile_41_5",
+    "box_block",
     "wall_showcase_100_3_350",
     "wall_showcase_100_2_350",
     "shelf_100",
@@ -60,108 +60,6 @@
     "tv_65",
     "led_floodlight"
   ],
-  "groups": [
-    {
-      "id": 1,
-      "catalogName": "Panel & Duvar",
-      "catalogIndex": 1,
-      "keys": [
-        "wall_200_350",
-        "wall_150_350",
-        "wall_100_350",
-        "wall_50_350",
-        "wall_separator_100_350",
-        "wall_separator_50_350",
-        "wall_separator_100_350_sarmasik",
-        "wall_separator_50_350_sarmasik",
-        "wall_door_100_350"
-      ]
-    },
-    {
-      "id": 2,
-      "catalogName": "Panel Ek Mod\u00fcl",
-      "catalogIndex": 2,
-      "keys": [
-        "wall_200_short_up_2",
-        "wall_150_short_up_2",
-        "wall_100_short_up_2",
-        "wall_50_short_up_2",
-        "wall_200_short_up_1",
-        "wall_150_short_up_1",
-        "wall_100_short_up_1",
-        "wall_50_short_up_1",
-        "upright_346_5",
-        "profile_190",
-        "profile_140_5",
-        "profile_91",
-        "profile_41_5"
-      ]
-    },
-    {
-      "id": 3,
-      "catalogName": "Raf & Vitrin",
-      "catalogIndex": 3,
-      "keys": [
-        "wall_showcase_100_3_350",
-        "wall_showcase_100_2_350",
-        "shelf_100",
-        "shelf_150",
-        "shelf_200"
-      ]
-    },
-    {
-      "id": 4,
-      "catalogName": "Banko & Baza",
-      "catalogIndex": 4,
-      "keys": [
-        "desk_banko_200",
-        "desk_banko_150",
-        "desk_banko_100",
-        "desk_banko_200_l",
-        "desk_banko_150_l",
-        "desk_banko_100_l",
-        "base_200",
-        "base_150",
-        "base_100"
-      ]
-    },
-    {
-      "id": 5,
-      "catalogName": "Extra",
-      "catalogIndex": 5,
-      "keys": [
-        "furniture_sofa_set_classic",
-        "furniture_sofa_single_classic",
-        "furniture_sofa_double_classic",
-        "furniture_coffee_table_classic",
-        "furniture_table_chair_set_eames",
-        "chair_eames",
-        "glass_table",
-        "furniture_bar_stool_classic",
-        "mini_fridge_avanti",
-        "kettle",
-        "coat_rack",
-        "plastic_trash_bin",
-        "extra_indoor_plant_1",
-        "extra_long_planter_100",
-        "extra_long_planter_150",
-        "extra_long_planter_200"
-      ]
-    },
-    {
-      "id": 6,
-      "catalogName": "Elektronik & Ayd\u0131nlatma",
-      "catalogIndex": 6,
-      "keys": [
-        "tv_42",
-        "tv_55",
-        "video_wall_2x2",
-        "video_wall_3x3",
-        "tv_65",
-        "led_floodlight"
-      ]
-    }
-  ],
   "descriptors": [
     {
       "itemKey": "wall_200_350",
@@ -185,27 +83,27 @@
     },
     {
       "itemKey": "wall_separator_100_350",
-      "label": "Separat\u00f6r 100",
+      "label": "Separatör 100",
       "previewId": 18
     },
     {
       "itemKey": "wall_separator_50_350",
-      "label": "Separat\u00f6r 50",
+      "label": "Separatör 50",
       "previewId": 18
     },
     {
       "itemKey": "wall_separator_100_350_sarmasik",
-      "label": "Separat\u00f6r 100 Sarma\u015f\u0131k",
+      "label": "Separatör 100 Sarmaşık",
       "previewId": 19
     },
     {
       "itemKey": "wall_separator_50_350_sarmasik",
-      "label": "Separat\u00f6r 50 Sarma\u015f\u0131k",
+      "label": "Separatör 50 Sarmaşık",
       "previewId": 19
     },
     {
       "itemKey": "wall_door_100_350",
-      "label": "Depo Kap\u0131s\u0131 100",
+      "label": "Depo Kapısı 100",
       "previewId": 8
     },
     {
@@ -274,13 +172,18 @@
       "previewId": 17
     },
     {
+      "itemKey": "box_block",
+      "label": "Kutu blok",
+      "previewId": 9
+    },
+    {
       "itemKey": "wall_showcase_100_3_350",
-      "label": "3 G\u00f6zl\u00fc Vitrin 100",
+      "label": "3 Gözlü Vitrin 100",
       "previewId": 21
     },
     {
       "itemKey": "wall_showcase_100_2_350",
-      "label": "2 G\u00f6zl\u00fc Vitrin 100",
+      "label": "2 Gözlü Vitrin 100",
       "previewId": 21
     },
     {
@@ -315,17 +218,17 @@
     },
     {
       "itemKey": "desk_banko_200_l",
-      "label": "K\u00f6\u015fe Banko 200\u00d7200",
+      "label": "Köşe Banko 200×200",
       "previewId": 7
     },
     {
       "itemKey": "desk_banko_150_l",
-      "label": "K\u00f6\u015fe Banko 150\u00d7150",
+      "label": "Köşe Banko 150×150",
       "previewId": 7
     },
     {
       "itemKey": "desk_banko_100_l",
-      "label": "K\u00f6\u015fe Banko 100\u00d7100",
+      "label": "Köşe Banko 100×100",
       "previewId": 7
     },
     {
@@ -345,7 +248,7 @@
     },
     {
       "itemKey": "furniture_sofa_set_classic",
-      "label": "Koltuk Tak\u0131m\u0131",
+      "label": "Koltuk Takımı",
       "previewId": 23
     },
     {
@@ -355,7 +258,7 @@
     },
     {
       "itemKey": "furniture_sofa_double_classic",
-      "label": "\u00c7iftli Koltuk",
+      "label": "Çiftli Koltuk",
       "previewId": 22
     },
     {
@@ -365,7 +268,7 @@
     },
     {
       "itemKey": "furniture_table_chair_set_eames",
-      "label": "Eames Masa Sandalye Tak\u0131m\u0131",
+      "label": "Eames Masa Sandalye Takımı",
       "previewId": 25
     },
     {
@@ -385,7 +288,7 @@
     },
     {
       "itemKey": "mini_fridge_avanti",
-      "label": "Mini Buzdolab\u0131",
+      "label": "Mini Buzdolabı",
       "previewId": 15
     },
     {
@@ -395,32 +298,32 @@
     },
     {
       "itemKey": "coat_rack",
-      "label": "Ask\u0131l\u0131k",
+      "label": "Askılık",
       "previewId": 5
     },
     {
       "itemKey": "plastic_trash_bin",
-      "label": "\u00c7\u00f6p Kutusu",
+      "label": "Çöp Kutusu",
       "previewId": 16
     },
     {
       "itemKey": "extra_indoor_plant_1",
-      "label": "Yapay \u00c7i\u00e7ek 1",
+      "label": "Yapay Çiçek 1",
       "previewId": 12
     },
     {
       "itemKey": "extra_long_planter_100",
-      "label": "Uzun Saks\u0131 100",
+      "label": "Uzun Saksı 100",
       "previewId": 14
     },
     {
       "itemKey": "extra_long_planter_150",
-      "label": "Uzun Saks\u0131 150",
+      "label": "Uzun Saksı 150",
       "previewId": 14
     },
     {
       "itemKey": "extra_long_planter_200",
-      "label": "Uzun Saks\u0131 200",
+      "label": "Uzun Saksı 200",
       "previewId": 14
     },
     {
@@ -435,12 +338,12 @@
     },
     {
       "itemKey": "video_wall_2x2",
-      "label": "Video Wall 2\u00d72",
+      "label": "Video Wall 2×2",
       "previewId": 28
     },
     {
       "itemKey": "video_wall_3x3",
-      "label": "Video Wall 3\u00d73",
+      "label": "Video Wall 3×3",
       "previewId": 28
     },
     {
@@ -450,8 +353,111 @@
     },
     {
       "itemKey": "led_floodlight",
-      "label": "LED Projekt\u00f6r",
+      "label": "LED Projektör",
       "previewId": 10
+    }
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "catalogName": "Panel & Duvar",
+      "catalogIndex": 1,
+      "keys": [
+        "wall_200_350",
+        "wall_150_350",
+        "wall_100_350",
+        "wall_50_350",
+        "wall_separator_100_350",
+        "wall_separator_50_350",
+        "wall_separator_100_350_sarmasik",
+        "wall_separator_50_350_sarmasik",
+        "wall_door_100_350"
+      ]
+    },
+    {
+      "id": 2,
+      "catalogName": "Panel Ek Modül",
+      "catalogIndex": 2,
+      "keys": [
+        "wall_200_short_up_2",
+        "wall_150_short_up_2",
+        "wall_100_short_up_2",
+        "wall_50_short_up_2",
+        "wall_200_short_up_1",
+        "wall_150_short_up_1",
+        "wall_100_short_up_1",
+        "wall_50_short_up_1",
+        "upright_346_5",
+        "profile_190",
+        "profile_140_5",
+        "profile_91",
+        "profile_41_5",
+        "box_block"
+      ]
+    },
+    {
+      "id": 3,
+      "catalogName": "Raf & Vitrin",
+      "catalogIndex": 3,
+      "keys": [
+        "wall_showcase_100_3_350",
+        "wall_showcase_100_2_350",
+        "shelf_100",
+        "shelf_150",
+        "shelf_200"
+      ]
+    },
+    {
+      "id": 4,
+      "catalogName": "Banko & Baza",
+      "catalogIndex": 4,
+      "keys": [
+        "desk_banko_200",
+        "desk_banko_150",
+        "desk_banko_100",
+        "desk_banko_200_l",
+        "desk_banko_150_l",
+        "desk_banko_100_l",
+        "base_200",
+        "base_150",
+        "base_100"
+      ]
+    },
+    {
+      "id": 5,
+      "catalogName": "Extra",
+      "catalogIndex": 5,
+      "keys": [
+        "furniture_sofa_set_classic",
+        "furniture_sofa_single_classic",
+        "furniture_sofa_double_classic",
+        "furniture_coffee_table_classic",
+        "furniture_table_chair_set_eames",
+        "chair_eames",
+        "glass_table",
+        "furniture_bar_stool_classic",
+        "mini_fridge_avanti",
+        "kettle",
+        "coat_rack",
+        "plastic_trash_bin",
+        "extra_indoor_plant_1",
+        "extra_long_planter_100",
+        "extra_long_planter_150",
+        "extra_long_planter_200"
+      ]
+    },
+    {
+      "id": 6,
+      "catalogName": "Elektronik & Aydınlatma",
+      "catalogIndex": 6,
+      "keys": [
+        "tv_42",
+        "tv_55",
+        "video_wall_2x2",
+        "video_wall_3x3",
+        "tv_65",
+        "led_floodlight"
+      ]
     }
   ]
 }

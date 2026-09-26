@@ -54,6 +54,7 @@ def map_item(row) -> ItemAggregate:
         payload["material"] = row.material
     if row.default_color is not None:
         payload["defaultColor"] = int(row.default_color)
+    payload["defaultOpacity"] = _num(row.default_opacity) if row.default_opacity is not None else 1
     if row.preserve_model_scale is not None:
         payload["preserveModelScale"] = row.preserve_model_scale
     if row.model_rotation_y_deg is not None:

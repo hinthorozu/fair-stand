@@ -48,6 +48,7 @@ const EXPECTED_CATALOG_GROUPS = Object.freeze([
       'profile_140_5',
       'profile_91',
       'profile_41_5',
+      'box_block',
     ]),
   }),
   Object.freeze({
@@ -142,9 +143,9 @@ test('mevcut katalog Item listesi ve grup sırası değişmemiştir', () => {
   });
 });
 
-test('96 Item katalog metadata alanlarını taşır ve canlı katalog üyeliğiyle birebir örtüşür', () => {
+test('97 Item katalog metadata alanlarını taşır ve canlı katalog üyeliğiyle birebir örtüşür', () => {
   const items = listRegisteredItems();
-  assert.equal(items.length, 96);
+  assert.equal(items.length, 97);
 
   let visibleCount = 0;
   let missingVisible = 0;

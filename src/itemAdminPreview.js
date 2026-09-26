@@ -827,22 +827,7 @@ export function mountItemAdminPreview(host, options = {}) {
     showMessage(null);
 
     if (state.mode === 'assembly' && state.parts.length) {
-      if (state.envelope) {
-        const ghost = makeBoxMesh(
-          {
-            ...state.envelope,
-            colorCss: state.envelope.colorCss || '#64748b',
-            xCm: 0,
-            yCm: 0,
-            zCm: 0,
-            rotationXDeg: 0,
-            rotationYDeg: 0,
-            rotationZDeg: 0,
-          },
-          { wire: true },
-        );
-        content.add(ghost);
-      }
+      // Parent hayalet kutu yok — montaj yalnız parçalar; sahne fit prod'da.
       for (const part of state.parts) {
         content.add(makeBoxMesh(part));
       }

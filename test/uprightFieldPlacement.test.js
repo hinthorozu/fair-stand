@@ -32,7 +32,7 @@ test('Panel Ek Modül holds short-up family and field upright_346_5', () => {
   const extraPanel = listCatalogGroups().find((group) => group.label === 'Panel Ek Modül');
   assert.ok(panelWall);
   assert.ok(extraPanel);
-  assert.deepEqual(extraPanel.keys, [...SHORT_UP_KEYS, 'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5']);
+  assert.deepEqual(extraPanel.keys, [...SHORT_UP_KEYS, 'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5', 'box_block']);
   for (const key of SHORT_UP_KEYS) {
     assert.equal(panelWall.keys.includes(key), false);
     assert.equal(getCatalogItem(key) != null, true);

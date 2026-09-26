@@ -83,7 +83,8 @@ Zemin: AABB tabanı `y < 0` olmaz (`clampMeshAboveGround`).
 GLB / mesh dosyası kaydedilmez; yalnızca sayılar. Mesh’ler runtime’da BoxGeometry (veya ileride child asset).
 
 Bootstrap: parent Item JSON’da `assembly.parts[]`.  
-Prod: `itemHasAssemblyLayout` → parts çiz; yoksa legacy gömülü/şerit yolu.
+Prod: `itemHasAssemblyLayout` → parts çiz; yoksa legacy gömülü/şerit yolu.  
+Prod assembly fit: birleşim AABB → parent `sceneDimensions ?? dimensions` (eksen başına). Pivot = procedural baza ile aynı (W/D merkez, H taban 0). Eksik hedef = scale 1; hepsi boş = 1:1 (uydurma yok). Admin montajda parent hayalet kutu yok.
 
 ---
 
@@ -155,3 +156,5 @@ Relative constraint / hedef takip (üyeyi host’a bağlayan ayrı şema) — ş
 | 2026-09-26 | Prod `createItemAssemblyModule` katalog entegrasyonu: frameColorForModule + faces + canlı child ölçü/renk. |
 | 2026-09-26 | Admin 3D önizleme yalnız `dimensions`; `sceneDimensions` gerçek sahnede kalır. |
 | 2026-09-26 | Köşe snap sonrası varsayılan otomatik kilit (`lockPendingPair`). |
+| 2026-09-26 | Prod assembly AABB → `sceneDimensions ?? dimensions` fit; admin hayalet kutu kaldırıldı. |
+| 2026-09-26 | Assembly fit pivot: köşe → merkez (placement / baza ile aynı). |

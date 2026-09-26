@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import {
   buildLiveAssemblyParts,
   colorIntToCss,
+  computeAssemblyPartsAabbCm,
+  computeAssemblySceneFitTransform,
   expandBomRenderInstances,
   listModuleFaceStates,
   mergeAssemblyPoses,
@@ -241,4 +244,93 @@ test('mergeAssemblyPoses copies lockGroupId', () => {
     },
   ]);
   assert.equal(merged[0].lockGroupId, 1);
+});
+
+test('computeAssemblyPartsAabbCm unions axis-aligned parts', () => {
+  const aabb = computeAssemblyPartsAabbCm([
+    {
+      xCm: 0, yCm: 0, zCm: 0,
+      widthCm: 100, depthCm: 20, heightCm: 50,
+      rotationXDeg: 0, rotationYDeg: 0, rotationZDeg: 0,
+    },
+    {
+      xCm: 150, yCm: 10, zCm: 0,
+      widthCm: 100, depthCm: 20, heightCm: 50,
+      rotationXDeg: 0, rotationYDeg: 0, rotationZDeg: 0,
+    },
+  ]);
+  assert.ok(aabb);
+  assert.equal(aabb.minX, -50);
+  assert.equal(aabb.maxX, 200);
+  assert.equal(aabb.widthCm, 250);
+  assert.equal(aabb.depthCm, 30);
+  assert.equal(aabb.heightCm, 50);
+});
+
+test('computeAssemblySceneFitTransform scales W to scene target; missing axes stay 1', () => {
+  const aabb = {
+    minX: -50, minY: 0, minZ: 0,
+    maxX: 200, maxY: 30, maxZ: 50,
+    widthCm: 250, depthCm: 30, heightCm: 50,
+  };
+  const fit = computeAssemblySceneFitTransform(aabb, {
+    widthCm: 100,
+    depthCm: null,
+    heightCm: 50,
+  });
+  assert.ok(fit);
+  assert.equal(fit.scale.x, 100 / 250);
+  assert.equal(fit.scale.y, 1);
+  assert.equal(fit.scale.z, 1);
+  // Merkez X=(−50+200)/2=75 → posX = −75*(100/250)/100
+  assert.equal(fit.positionM.x, (-75 * (100 / 250)) / 100);
+  assert.equal(fit.positionM.y, 0);
+  assert.equal(fit.positionM.z, (-15 * 1) / 100);
+});
+
+test('computeAssemblySceneFitTransform centers W/D like procedural base placement', () => {
+  const aabb = {
+    minX: 0, minY: 0, minZ: 10,
+    maxX: 200, maxY: 40, maxZ: 110,
+    widthCm: 200, depthCm: 40, heightCm: 100,
+  };
+  const fit = computeAssemblySceneFitTransform(aabb, {
+    widthCm: 100,
+    depthCm: 20,
+    heightCm: 50,
+  });
+  assert.deepEqual(fit.scale, { x: 0.5, y: 0.5, z: 0.5 });
+  // center X=100, Y=20; minZ=10 → after scale footprint ±50 / ±10, height 0..50
+  assert.deepEqual(fit.positionM, {
+    x: (-100 * 0.5) / 100,
+    y: (-10 * 0.5) / 100,
+    z: (-20 * 0.5) / 100,
+  });
+});
+
+test('computeAssemblySceneFitTransform returns null when target W/D/H all missing', () => {
+  const aabb = {
+    minX: 0, minY: 0, minZ: 0,
+    maxX: 10, maxY: 10, maxZ: 10,
+    widthCm: 10, depthCm: 10, heightCm: 10,
+  };
+  assert.equal(computeAssemblySceneFitTransform(aabb, {}), null);
+  assert.equal(computeAssemblySceneFitTransform(aabb, {
+    widthCm: null, depthCm: null, heightCm: null,
+  }), null);
+});
+
+test('createItemAssemblyModule fits content to resolveModuleSceneBoxCm', () => {
+  const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function createItemAssemblyModule');
+  const end = source.indexOf('function createFlatPanelModule');
+  assert.ok(start >= 0 && end > start, 'createItemAssemblyModule slice missing');
+  const body = source.slice(start, end);
+  assert.match(body, /resolveModuleSceneBoxCm\(moduleState\)/);
+  assert.match(body, /computeAssemblyPartsAabbCm\(drawnSpecs\)/);
+  assert.match(body, /computeAssemblySceneFitTransform\(/);
+  assert.match(body, /content\.scale\.set\(fit\.scale\.x,\s*fit\.scale\.z,\s*fit\.scale\.y\)/);
+  assert.match(body, /content\.position\.set\(fit\.positionM\.x,\s*fit\.positionM\.y,\s*fit\.positionM\.z\)/);
+  assert.match(body, /content\.add\(mesh\)/);
+  assert.doesNotMatch(body, /group\.add\(mesh\)/);
 });

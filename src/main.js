@@ -594,6 +594,22 @@ function commitDroppedCatalogModule(moduleState, dropResult, catalogKey = null) 
     return { ok: false, message: 'Katalog Item kimliği kaybolduğu için modül sahneye eklenmedi.' };
   }
   if (moduleState?.id) canonical.id = moduleState.id;
+  // Drop dialog / sürükleme ezmeleri (box-block W·D·H·opacity vb.)
+  const widthCm = Number(moduleState?.widthCm);
+  const depthCm = Number(moduleState?.depthCm);
+  const heightCm = Number(moduleState?.heightCm);
+  if (Number.isFinite(widthCm) && widthCm > 0) canonical.widthCm = widthCm;
+  if (Number.isFinite(depthCm) && depthCm > 0) canonical.depthCm = depthCm;
+  if (Number.isFinite(heightCm) && heightCm > 0) canonical.heightCm = heightCm;
+  if (moduleState?.opacity != null) {
+    const opacity = Number(moduleState.opacity);
+    if (Number.isFinite(opacity)) {
+      canonical.opacity = Math.min(1, Math.max(0, opacity));
+    }
+  }
+  if (moduleState?.surface?.color && canonical.surface) {
+    canonical.surface = { ...canonical.surface, color: moduleState.surface.color };
+  }
 
   const previousModules = currentModules.slice();
   try {
@@ -606,7 +622,11 @@ function commitDroppedCatalogModule(moduleState, dropResult, catalogKey = null) 
     rebuildWall({ resetView: false });
   } catch (error) {
     currentModules = previousModules;
-    rebuildWall({ resetView: false });
+    try {
+      rebuildWall({ resetView: false });
+    } catch (rollbackError) {
+      console.warn('Drop geri alma rebuild başarısız:', rollbackError);
+    }
     return {
       ok: false,
       message: error?.message || 'Modül sahneye eklenirken durduruldu; önceki sahne korundu.',
@@ -955,14 +975,32 @@ function changeContextPanelGlassMode(context, isGlass) {
 
 async function resizeContextIlluminatedFoam(context) {
   const index = findContextModuleIndex(context);
-  if (index < 0 || currentModules[index]?.type !== 'illuminated-foam') return;
+  if (index < 0) return;
   const moduleState = currentModules[index];
-  const dimensions = await requestIlluminatedFoamDimensions(moduleState.widthCm, moduleState.heightCm);
-  if (!dimensions) return;
-  moduleState.widthCm = dimensions.widthCm;
-  moduleState.heightCm = dimensions.heightCm;
-  rebuildWall({ resetView: false });
-  selectionInfo.textContent = `Modül ${index + 1} · Işıklı Strafor · ${moduleState.widthCm} × ${moduleState.heightCm} cm · ${moduleState.depthCm || 3.5} cm kalınlık · ışık ${moduleState.haloColor || '#ffffff'}.`;
+  if (moduleState?.type === 'illuminated-foam') {
+    const dimensions = await requestIlluminatedFoamDimensions(moduleState.widthCm, moduleState.heightCm);
+    if (!dimensions) return;
+    moduleState.widthCm = dimensions.widthCm;
+    moduleState.heightCm = dimensions.heightCm;
+    rebuildWall({ resetView: false });
+    selectionInfo.textContent = `Modül ${index + 1} · Işıklı Strafor · ${moduleState.widthCm} × ${moduleState.heightCm} cm · ${moduleState.depthCm || 3.5} cm kalınlık · ışık ${moduleState.haloColor || '#ffffff'}.`;
+    return;
+  }
+  if (moduleState?.type === 'box-block') {
+    const dimensions = await requestBoxBlockDimensions({
+      widthCm: moduleState.widthCm,
+      depthCm: moduleState.depthCm,
+      heightCm: moduleState.heightCm,
+      opacity: moduleState.opacity,
+    });
+    if (!dimensions) return;
+    moduleState.widthCm = dimensions.widthCm;
+    moduleState.depthCm = dimensions.depthCm;
+    moduleState.heightCm = dimensions.heightCm;
+    moduleState.opacity = dimensions.opacity;
+    rebuildWall({ resetView: false });
+    selectionInfo.textContent = `Modül ${index + 1} · Kutu blok · ${moduleState.widthCm} × ${moduleState.depthCm} × ${moduleState.heightCm} cm · opacity ${moduleState.opacity}`;
+  }
 }
 const moduleContextMenu = createModuleContextMenu({
   onDelete: deleteContextModule,
@@ -993,17 +1031,40 @@ moduleDragSidebar = createModuleDragSidebar({
     )
   ),
   onDrop: (moduleState, clientX, clientY, rotationZDeg, rotationLocked, catalogKey) => {
-    const result = scene3d.dropCatalogModuleDrag(
-      moduleState,
-      clientX,
-      clientY,
-      rotationZDeg,
-      rotationLocked,
-    );
-    const committed = commitDroppedCatalogModule(moduleState, result, catalogKey);
-    if (!committed.ok) {
-      renderWallResult(committed.message ?? 'Modül bu konuma bırakılamadı.', true);
-    }
+    void (async () => {
+      const result = scene3d.dropCatalogModuleDrag(
+        moduleState,
+        clientX,
+        clientY,
+        rotationZDeg,
+        rotationLocked,
+      );
+      if (!result?.ok) {
+        renderWallResult(result?.message ?? 'Modül bu konuma bırakılamadı.', true);
+        scene3d.clearCatalogModuleDrag();
+        return;
+      }
+      if (moduleState?.type === 'box-block') {
+        const dimensions = await requestBoxBlockDimensions({
+          widthCm: moduleState.widthCm,
+          depthCm: moduleState.depthCm,
+          heightCm: moduleState.heightCm,
+          opacity: moduleState.opacity,
+        });
+        if (!dimensions) {
+          scene3d.clearCatalogModuleDrag();
+          return;
+        }
+        moduleState.widthCm = dimensions.widthCm;
+        moduleState.depthCm = dimensions.depthCm;
+        moduleState.heightCm = dimensions.heightCm;
+        moduleState.opacity = dimensions.opacity;
+      }
+      const committed = commitDroppedCatalogModule(moduleState, result, catalogKey);
+      if (!committed.ok) {
+        renderWallResult(committed.message ?? 'Modül bu konuma bırakılamadı.', true);
+      }
+    })();
   },
   onCancel: () => scene3d.clearCatalogModuleDrag(),
 });
@@ -1779,6 +1840,67 @@ function requestIlluminatedFoamDimensions(defaultWidthCm, defaultHeightCm) {
       const heightCm = Number(data.get('height'));
       if (!(widthCm >= 10 && widthCm <= 5000 && heightCm >= 5 && heightCm <= 350)) return;
       finish({ widthCm, heightCm });
+    });
+    document.addEventListener('keydown', onKeyDown, true);
+    form.querySelector('input[name="width"]')?.focus();
+  });
+}
+
+function requestBoxBlockDimensions({
+  widthCm: defaultWidthCm = 100,
+  depthCm: defaultDepthCm = 50,
+  heightCm: defaultHeightCm = 50,
+  opacity: defaultOpacity = 1,
+} = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.48);display:grid;place-items:center;padding:20px';
+    overlay.setAttribute('role', 'presentation');
+    const form = document.createElement('form');
+    form.setAttribute('role', 'dialog');
+    form.setAttribute('aria-modal', 'true');
+    form.setAttribute('aria-labelledby', 'box-block-size-title');
+    form.style.cssText = 'width:min(400px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
+    const opacityValue = Math.min(1, Math.max(0, Number(defaultOpacity) || 1));
+    form.innerHTML = [
+      '<strong id="box-block-size-title" style="font-size:16px">Kutu blok · ölçü ve opacity</strong>',
+      '<span style="color:#64748b">W / D / H (cm) ve saydamlık. Döndürme adımı / defaultZ item kaydından gelir.</span>',
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">',
+      `<label style="display:grid;gap:5px">W · Genişlik<input name="width" type="number" min="1" max="5000" step="1" value="${Math.round(Number(defaultWidthCm) || 100)}" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label>`,
+      `<label style="display:grid;gap:5px">D · Derinlik<input name="depth" type="number" min="1" max="5000" step="1" value="${Math.round(Number(defaultDepthCm) || 50)}" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label>`,
+      `<label style="display:grid;gap:5px">H · Yükseklik<input name="height" type="number" min="1" max="5000" step="1" value="${Math.round(Number(defaultHeightCm) || 50)}" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label>`,
+      '</div>',
+      `<label style="display:grid;gap:5px">Opacity (0–1)<input name="opacity" type="number" min="0" max="1" step="0.05" value="${opacityValue}" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label>`,
+      '<div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" data-cancel>İptal</button><button type="submit" class="primary">Uygula</button></div>',
+    ].join('');
+    overlay.appendChild(form);
+    document.body.appendChild(overlay);
+    const onKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      finish(null);
+    };
+    const finish = (value) => {
+      document.removeEventListener('keydown', onKeyDown, true);
+      overlay.remove();
+      resolve(value);
+    };
+    form.querySelector('[data-cancel]').addEventListener('click', () => finish(null));
+    overlay.addEventListener('pointerdown', (event) => {
+      if (event.target === overlay) finish(null);
+    });
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const widthCm = Number(data.get('width'));
+      const depthCm = Number(data.get('depth'));
+      const heightCm = Number(data.get('height'));
+      const opacity = Number(data.get('opacity'));
+      if (!(widthCm >= 1 && widthCm <= 5000
+        && depthCm >= 1 && depthCm <= 5000
+        && heightCm >= 1 && heightCm <= 5000
+        && opacity >= 0 && opacity <= 1)) return;
+      finish({ widthCm, depthCm, heightCm, opacity });
     });
     document.addEventListener('keydown', onKeyDown, true);
     form.querySelector('input[name="width"]')?.focus();

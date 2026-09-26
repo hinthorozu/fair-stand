@@ -6,7 +6,7 @@ Lokal / sunucu PostgreSQL `fair_stand` şemasının yaşayan envanteri. “Üç 
 
 **Doğrulama (2026-09-24, `models.py` + Alembic head + `item_mapper.py` + `src/`):**
 
-1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0033_item_type_overlap_fk`**.
+1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0042_box_block_default_opacity`**.
 2. `item_mapper.py` — her ürün kolonu JSON anahtarına (veya “bootstrap’a girmez”) bağlandı.
 3. Production `src/` grep — “Nerede” hücresi gerçek okuyucu dosyadır; okunmayan kolon **DATA / TEST_ONLY / SCHEMA_ONLY** yazılır.
 4. `ITEMS.md` (alan kuyruğu + onaylı şema), `CATALOG.md`, `ROTATION.md`, `SCENE_POSE.md`, `STAND_DIMENSIONS.md` — değer kopyalanmaz; işaret edilir.
@@ -34,13 +34,13 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 |---|---|---|
 | `alembic_version` | 1 | Alembic head. Ürün değil. |
 | `fair_stand_categories` | 7 (6 `is_active=true`; 1 pasif yerel satır) | Katalog grupları. Item’dan bağımsız id. Bootstrap yalnız aktif. |
-| `fair_stand_catalog_preview_kinds` | 28 (hepsi aktif) | Kart silüeti HTML/CSS. Item davranışını tanımlamaz. Bootstrap: `active_only=false` (pasif önizlemeler de JSON’a girer). |
+| `fair_stand_catalog_preview_kinds` | seed 28; canlı +CRM (örn. 29, `Küp Blok` id 57) | Kart silüeti HTML/CSS. Item davranışını tanımlamaz. Bootstrap: `active_only=false` (pasif önizlemeler de JSON’a girer). |
 | `fair_stand_item_type` | tip sayısı seed/CRM | Tip davranış paketi (placement, collision, …). Bootstrap `itemTypes[]`. |
 | `fair_stand_item_type_overlap` | M:N satırları | Tip ↔ tip çakışma izni. Bootstrap `overlapWithTypes[]`. |
 | `fair_stand_rule_type` | 1× `snap` | Kural ailesi. Bootstrap `ruleTypes[]` (stand JS ayrı registry açmaz). |
 | `fair_stand_rule` | `top-rail`, `shelf-rail`, … | Snap key + face/edge. Bootstrap `rules[]`. |
 | `fair_stand_rule_item_type` | M:N | Kuralı **sunan** item tipleri. Bootstrap `rules[].itemTypeKeys`. |
-| `fair_stand_items` | 96 (58 `catalog_visible`, 62 `is_render`) | Ürün kimliği + Catalog üyeliği + snap FK. Bootstrap: `is_active=true` (gizli SKU dahil). |
+| `fair_stand_items` | seed/fixture 97 (59 `catalog_visible`); canlı yerel dump daha fazla olabilir (clone SKU) | Ürün kimliği + Catalog üyeliği + snap FK. Bootstrap: `is_active=true` (gizli SKU dahil). |
 | `fair_stand_item_dimensions` | 90 / 96 Item | Fiziksel / BOM ölçü. 6 Item’da satır yok (`connector_*`, `shelf_leg`, `hali`). |
 | `fair_stand_item_scene_dimensions` | 34 | Sahne kutusu override. Yoksa aynı adlı `dimensions` alanı. |
 | `fair_stand_item_strip_occupancy` | 8, hepsi `align=top` (4× strip 1, 4× strip 2) | Short-up şerit bandı. |
@@ -66,7 +66,7 @@ Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0012_fair_stand_projects` |
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0042_box_block_default_opacity` |
 
 ---
 
@@ -134,6 +134,7 @@ Sözleşme: `CATALOG.md`. `catalog_visible=true` ⇒ `category_id` + `catalog_it
 |---|---|---|---|---|
 | `material` | `material` | Üretim malzemesi metni | Vitrin yan/yatay `sunta` zorunlu | `getShowcaseBodyDefinition`; cam raf `getMaterialAppearance` |
 | `default_color` | `defaultColor` | Integer hex (örn. `16777215` = beyaz). String değil. | İlk yüzey rengi; zemin de aynı kolon + `paintable` | `designState.js` hex; `scene3d.js` floor `item.defaultColor`; vitrin yan=yatay kilit |
+| `default_opacity` | `defaultOpacity` | 0–1 Numeric; server default `1` | Instance opacity yoksa master | `createBoxBlockModuleState`; CRM Item formu |
 | `preserve_model_scale` | `preserveModelScale` | GLB ölçeğini ezme | Fit istemeyen saksı/çöp | `scene3d.js` model load; `designState.js` |
 | `model_rotation_y_deg` | `modelRotationYDeg` | Mesh Y ofset | GLB eksen | `scene3d.js`; `designState.js` |
 | `visual_rotation_y_deg` | `visualRotationYDeg` | Görsel Y ofset | Koltuk sırt / çöp | `scene3d.js` (sahne Z değil) |
@@ -302,8 +303,8 @@ Recipe parent **admin montaj pose** — BOM değildir. Bootstrap `assembly.parts
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `parent_item_key` | — | Recipe parent | Pose sahibi | `PUT .../assembly`; mapper |
-| `child_item_key` | `parts[].childItemKey` | BOM child SKU | Hangi leaf | admin preview / prod mesh |
+| `parent_item_key` | — | Recipe parent | Pose sahibi; **ON DELETE CASCADE** | `PUT .../assembly`; mapper |
+| `child_item_key` | `parts[].childItemKey` | BOM child SKU | Hangi leaf; **ON DELETE RESTRICT** (leaf pose’dayken silinemez); ON UPDATE CASCADE | admin preview / prod mesh |
 | `instance_index` | `parts[].instanceIndex` | 0-based kopya | quantity > 1 ayırımı | aynı |
 | `x_cm` / `y_cm` / `z_cm` | `xCm` / `yCm` / `zCm` | Parent lokal cm | SCENE_POSE | `itemAssembly.js`, `scene3d` |
 | `rotation_x_deg` / `y` / `z` | `rotationXDeg` … | W/D/H Euler (°) | Serbest döndürme | aynı |

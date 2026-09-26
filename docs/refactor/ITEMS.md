@@ -321,7 +321,9 @@ Hepsi boolean, zorunlu, `null` yasak. Item satırı; `item_type` map’i değil.
 - **Amaç:** Sahnede kullanılacak ölçü. Yalnız physical’dan farklıysa veya scene’in ihtiyaç duyduğu field physical’da aynı isimle yoksa yazılır
 - **Canonical consumer:** factory, identity, collision/ghost, Catalog preview hydrate
 - **Canonical method:** `resolveSceneDimensions(item)`
-- **Effective field:** `sceneDimensions.field ?? dimensions.field ?? MISSING`
+- Effective field: `sceneDimensions.field ?? dimensions.field ?? MISSING`
+- **Assembly prod:** kayıtlı `assembly.parts` varsa birleşim AABB, effective W/D/H kutusuna non-uniform scale edilir (`computeAssemblySceneFitTransform`). Pivot procedural baza / `applyPlacementToGroup` ile aynı: W/D merkez, H taban 0. MISSING eksen scale edilmez; üçü de MISSING → 1:1 pose (uydurma kutu yok).
+- **box-block:** serbest zemin kutu (`box_block` SKU, Panel Ek Modül). Tip davranışı + `rotationStepDeg` / `defaultRotationDeg` / `defaultZCm` / `defaultOpacity` item master (DB). Instance W/D/H/opacity yerleştirme ve “Ölçü / opacity” ile ezilir. `illuminated-foam` (SVG wall-overlay) değil.
 - **Recipe/Catalog/type/itemKey/STAND Item-specific scene source değildir**
 - **Kullanıcı değiştirir mi:** hayır (Item master)
 - **Persistence:** Item master

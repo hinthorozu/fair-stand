@@ -15,14 +15,17 @@ from app.modules.fair_stand.infrastructure.models import (
 )
 from app.modules.fair_stand.infrastructure.seed_catalog import seed_fair_stand_catalog
 
-# Documented ondelete exceptions on fair_stand_items (not CASCADE):
-# - item_type → fair_stand_item_type.key: RESTRICT (protect catalog types)
-# - snap_requires/provides_rule_id → fair_stand_rule: SET NULL
+# Documented ondelete exceptions (live Postgres SoT; not blanket CASCADE):
+# - fair_stand_items.item_type → fair_stand_item_type.key: RESTRICT
+# - fair_stand_items.snap_*_rule_id → fair_stand_rule: SET NULL (onupdate NO ACTION)
+# - fair_stand_item_assembly_parts.child_item_key → items: RESTRICT (0038)
 _ITEMS_ONDELETE_EXCEPTIONS: dict[tuple[str, frozenset[str]], str] = {
     ("fair_stand_item_type", frozenset({"item_type"})): "RESTRICT",
     ("fair_stand_rule", frozenset({"snap_requires_rule_id"})): "SET NULL",
     ("fair_stand_rule", frozenset({"snap_provides_rule_id"})): "SET NULL",
 }
+_ASSEMBLY_CHILD_ONDELETE = "RESTRICT"
+_SNAP_RULE_ONUPDATE = "NO ACTION"
 
 
 def _now():
@@ -34,6 +37,19 @@ def _expected_ondelete(table: str, fk: dict) -> str:
     cols = frozenset(fk.get("constrained_columns") or ())
     if table == "fair_stand_items":
         return _ITEMS_ONDELETE_EXCEPTIONS.get((referred, cols), "CASCADE")
+    if table == "fair_stand_item_assembly_parts" and cols == frozenset({"child_item_key"}):
+        return _ASSEMBLY_CHILD_ONDELETE
+    return "CASCADE"
+
+
+def _expected_onupdate(table: str, fk: dict) -> str:
+    referred = fk.get("referred_table") or ""
+    cols = frozenset(fk.get("constrained_columns") or ())
+    if table == "fair_stand_items" and referred == "fair_stand_rule" and cols in {
+        frozenset({"snap_requires_rule_id"}),
+        frozenset({"snap_provides_rule_id"}),
+    }:
+        return _SNAP_RULE_ONUPDATE
     return "CASCADE"
 
 
@@ -62,6 +78,7 @@ def test_all_fair_stand_foreign_keys_are_cascade_cascade(test_engine):
         "fair_stand_item_strip_occupancy",
         "fair_stand_item_assets",
         "fair_stand_item_components",
+        "fair_stand_item_assembly_parts",
         "fair_stand_item_video_walls",
         "fair_stand_item_body_parts",
     ]
@@ -72,13 +89,16 @@ def test_all_fair_stand_foreign_keys_are_cascade_cascade(test_engine):
             options = fk.get("options") or {}
             ondelete = (options.get("ondelete") or fk.get("ondelete") or "").upper()
             onupdate = (options.get("onupdate") or fk.get("onupdate") or "").upper()
-            expected = _expected_ondelete(table, fk)
+            expected_delete = _expected_ondelete(table, fk)
+            expected_update = _expected_onupdate(table, fk)
             if test_engine.dialect.name == "sqlite":
-                allowed = {expected, ""} if expected == "CASCADE" else {expected}
-                assert ondelete in allowed, (table, fk, ondelete, expected)
+                allowed_delete = {expected_delete, ""} if expected_delete == "CASCADE" else {expected_delete}
+                allowed_update = {expected_update, ""} if expected_update in {"CASCADE", "NO ACTION"} else {expected_update}
+                assert ondelete in allowed_delete, (table, fk, ondelete, expected_delete)
+                assert onupdate in allowed_update, (table, fk, onupdate, expected_update)
             else:
-                assert ondelete == expected, (table, fk)
-                assert onupdate == "CASCADE", (table, fk)
+                assert ondelete == expected_delete, (table, fk)
+                assert onupdate == expected_update, (table, fk)
 
     category_columns = {column["name"] for column in inspector.get_columns("fair_stand_categories")}
     item_columns = {column["name"] for column in inspector.get_columns("fair_stand_items")}
@@ -202,7 +222,7 @@ def test_seed_relation_counts(db_session):
     assert assets > 0
     assert bodies > 0
     assert walls > 0
-    assert len(item_keys) == 96
+    assert len(item_keys) == 97
     assert {
         "panel_corner_42_5",
         "panel_corner_92",

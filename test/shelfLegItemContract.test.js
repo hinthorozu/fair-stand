@@ -15,6 +15,7 @@ test('shelf_leg is canonical without invented product metadata', () => {
     name: 'Raf Ayağı',
     type: 'shelf-accessory',
     unit: 'adet',
+    defaultOpacity: 1,
     isRender: false,
     acceptsColor: false,
     acceptsImage: false,

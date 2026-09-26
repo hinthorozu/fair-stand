@@ -57,6 +57,10 @@ function mapItem(row) {
   assign('previewId', row.preview_id);
   assign('material', row.material);
   assign('defaultColor', row.default_color);
+  {
+    const opacity = Number(row.default_opacity);
+    item.defaultOpacity = Number.isFinite(opacity) ? opacity : 1;
+  }
   assign('preserveModelScale', row.preserve_model_scale);
   assign('modelRotationYDeg', row.model_rotation_y_deg);
   assign('visualRotationYDeg', row.visual_rotation_y_deg);
