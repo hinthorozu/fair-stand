@@ -46,7 +46,7 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 | `fair_stand_item_strip_occupancy` | 8, hepsi `align=top` (4× strip 1, 4× strip 2) | Short-up şerit bandı. |
 | `fair_stand_item_assets` | 19 (14 `model` + 5 `default_screen`) | GLB / TV ekran yolu. CHECK beş rol izin verir; seed ve mapper yalnız bu iki rolü doldurur/okur. |
 | `fair_stand_item_components` | 186 | Recipe BOM child (`composition.items`). |
-| `fair_stand_item_assembly_parts` | 0+ | Parent lokal child pose (`assembly.parts`). BOM değil. |
+| `fair_stand_item_assembly_parts` | 0+ | Parent lokal child pose + optional `lock_group_id` (`assembly.parts`). BOM değil. |
 | `fair_stand_item_video_walls` | 2 | `VIDEO_WALL_2X2` / `3X3`. |
 | `fair_stand_item_body_parts` | 6 (2 parent × 3 rol) | Vitrin gövde child `itemKey`. |
 | `fair_stand_dimensions` | 1 (`id=1`) | Stand zarfı. Item kutusu değil. Admin UI: CRM `/admin/fair-stand/settings`. |
@@ -293,6 +293,21 @@ Recipe child listesi → JSON `composition.items[]`. Parent ≠ child. `quantity
 | `child_item_key` | `items[].itemKey` | Child Item | Gerçek parça | BOM recursive |
 | `quantity` | `items[].quantity` | Adet | Üretim | BOM |
 | — | sıra | **`sort_order` kolonu yok** (`0013`); mapper `child_item_key` ile sıralar | Deterministik bootstrap | `item_mapper.map_item` |
+
+---
+
+## `fair_stand_item_assembly_parts`
+
+Recipe parent **admin montaj pose** — BOM değildir. Bootstrap `assembly.parts[]`. Admin 3D → Montajı kaydet. Clone shallow kopyalar (aynı `lock_group_id`). Ayrıntı: `ITEM_3D_PREVIEW.md`. Migrasyon: `0038` tablo, `0039` XYZ açı, `0040` `lock_group_id`.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `parent_item_key` | — | Recipe parent | Pose sahibi | `PUT .../assembly`; mapper |
+| `child_item_key` | `parts[].childItemKey` | BOM child SKU | Hangi leaf | admin preview / prod mesh |
+| `instance_index` | `parts[].instanceIndex` | 0-based kopya | quantity > 1 ayırımı | aynı |
+| `x_cm` / `y_cm` / `z_cm` | `xCm` / `yCm` / `zCm` | Parent lokal cm | SCENE_POSE | `itemAssembly.js`, `scene3d` |
+| `rotation_x_deg` / `y` / `z` | `rotationXDeg` … | W/D/H Euler (°) | Serbest döndürme | aynı |
+| `lock_group_id` | `lockGroupId` | Aynı id = kilitli N grup; null = serbest | Admin köşe snap sonrası Kalıcı kilitle | `itemAdminAssemblyLock.js`; CHECK ≥ 1 veya null |
 
 ---
 

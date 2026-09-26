@@ -61,6 +61,11 @@ def assert_category_order(session: Session, category_id: int) -> None:
         )
 
 
+def next_append_catalog_index(session: Session, category_id: int) -> int:
+    """Visible peers için son indeks + 1 (boş kategoride 1)."""
+    return len(_visible_peers(session, int(category_id))) + 1
+
+
 def place_visible_item(
     session: Session,
     row: FairStandItemModel,
@@ -117,8 +122,9 @@ def apply_catalog_item_order(
 
     if not catalog_visible:
         row.catalog_visible = False
-        if old_category_id is not None:
-            assert_category_order(session, int(old_category_id))
+        # Hidden updates must not enforce 1..N on the category. Contiguous order is
+        # only required when an item is (or becomes) catalog_visible=true.
+        # Peers were already compacted above if this row was previously visible.
         return
 
     if category_id is None or catalog_item_index is None:
@@ -132,4 +138,6 @@ def apply_catalog_item_order(
         catalog_item_index=int(catalog_item_index),
     )
     if old_category_id is not None and int(old_category_id) != int(category_id) and was_visible:
+        # Leaving a category as visible→moved: compact/validate the old category.
+        renumber_visible_category(session, int(old_category_id))
         assert_category_order(session, int(old_category_id))

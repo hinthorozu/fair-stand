@@ -134,9 +134,9 @@ Sahne davranışının büyük kısmı **Item tipi** (`fair_stand_item_type`) ve
 | Item tipleri | `fair_stand_item_type` (+ overlap) | Davranış paketi (placement, collision, …) |
 | Kural türleri | `fair_stand_rule_type` | Bugün yalnız `snap` |
 | Kurallar | `fair_stand_rule`, `fair_stand_rule_item_type` | top-rail, shelf-rail, face/edge, hangi tip provides |
-| Items | `fair_stand_items` + child tablolar | SKU, tip seçimi, snap requires/provides, ölçü, recipe |
+| Items | `fair_stand_items` + child tablolar | SKU, tip, snap, ölçü, recipe; **Kopyala**; 3D montaj (pose + kilit grubu) |
 | Temel ayarlar | `fair_stand_dimensions`, `fair_stand_settings` | Stand zarfı (tavan, derinlik, çerçeve, **panel ray**) + upload/import butonları |
-| Projeler (stand) | `fair_stand_projects`, `fair_stand_project_assets` | Müşteri tasarımı (ayrı akış) |
+| Projeler (stand) | `fair_stand_projects`, `fair_stand_project_assets` | Müşteri tasarımı (ayrı akış; “Farklı Kaydet” = proje, item clone değil) |
 
 Form ipuçları: fair-crm `adminLabels` (`fairStandItemTypesField*`, `fairStandItemsFieldSnap*`).
 
@@ -153,6 +153,23 @@ Form ipuçları: fair-crm `adminLabels` (`fairStandItemTypesField*`, `fairStandI
 5. Bileşik ürün (duvar paketi): `composition_mode=recipe` + `fair_stand_item_components` child satırları.
 
 **Kod yazmadan:** Aynı `item_type` ile yeni SKU için JS satırı gerekmez (tip davranışı DB’de; governance contract tip’ten türetilir). **Yeni tip** ise: CRM tip kaydı + (gerekirse) factory/renderer — eski `TYPE_BEHAVIORS` / per-SKU contract map yok.
+
+### 4.1b Mevcut item’dan yeni SKU (Kopyala)
+
+CRM **Item Kayıtları** listesi veya detay → **Kopyala**.
+
+| | |
+|---|---|
+| **Ne yapar** | Kaynak item’ın DB’deki **sahip olduğu** satırları yeni `item_key` + yeni `name` ile kopyalar |
+| **API** | `POST /api/v1/fair-stand/admin/item-records/{sourceKey}/clone` body: `{ item_key, name }` |
+| **UI** | Ad zorunlu; `item_key` **addan slug** üretilir (elle düzeltilebilir). Kaydetmeden önce key müsait mi diye GET ile kontrol (create ile aynı) |
+| **Kopyalanan** | Item kök alanları + dimensions / scene / strip / assets / components (BOM) / assembly_parts (pose + `lock_group_id`) / body_parts / video_wall |
+| **Shallow** | BOM/assembly/body/video **child_item_key** aynı leaf’lere bakar; alt item’lar deep clone edilmez |
+| **Asset** | `relative_path` bilinçli paylaşılır (dosya kopyalanmaz) |
+| **Katalog sırası** | Kaynak katalogda görünürse clone da görünür; `catalog_item_index` = o kategoride **son indeks + 1** |
+| **Kopyalanmaz** | Başka item’ların bu key’i child/panel olarak göstermesi (inbound referans) |
+
+**Karıştırma:** Stand projesindeki **Farklı Kaydet** (yeni proje UUID) ≠ item Kopyala.
 
 ### 4.2 Projektör → profil üstü (örnek)
 
@@ -195,8 +212,20 @@ Yeni **`fair_stand_item_type.key`** aç; tüm zorunlu kolonları doldur (CRM for
 
 **Örnek:** CRM’de tavanı 500 yap → zarf 500; `wall_200` hâlâ kendi ölçüsü/BOM’u kadar boylanır, **500’ü geçemez**. Tavanı yükseltmek tek başına duvarı 500 yapmaz — item/BOM değiştirmen gerekir.
 
----
+### 4.6 Admin 3D montaj — köşe snap + kalıcı kilit grubu
 
+Recipe item düzenle → sekme **3D önizleme** → **Montaj** modu. Ayrıntı: [`ITEM_3D_PREVIEW.md`](ITEM_3D_PREVIEW.md).
+
+| Adım | Ne |
+|---|---|
+| Köşe snap | Turuncu köşe noktaları; kaynak → hedef köşe yapıştır (rotasyon korunur) |
+| Kilitle / Gruba ekle | Snap sonrası çift (veya mevcut gruba 3.+) birlikte hareket eder |
+| Montajı kaydet | Absolute pose **ve** `lock_group_id` DB’ye yazılır → sayfa yenilenince grup geri gelir |
+| Gruptan çıkar / Kilidi aç | Üye düşer veya grup biter; kaydetmezsen bir sonraki yüklemede eski grup döner |
+
+**Karıştırma:** Prod sahnedeki snap kuralları (`fair_stand_rule`) ≠ admin BoxGeometry köşe snap’i.
+
+---
 
 ## 5. Tablolar — alan rehberi (tek tek)
 
@@ -798,13 +827,13 @@ CRM’de okunan tip etiketi (Projektör, Raf, …).
 |---|---|
 | **Ne** | Canonical SKU (snake_case, PK) |
 | **Neden** | Proje, BOM, FK tek kimlik |
-| **Nasıl** | Bir kez ver, değiştirme |
+| **Nasıl** | Create/Kopyala: **addan slug** (CRM); elle düzeltilebilir. Kaydetmeden önce benzersizlik kontrolü. Oluşturulduktan sonra değiştirme |
 | **Örnek** | `wall_200`, `profile_190`, `plastic_trash_bin` |
-| **Kod** | Bootstrap `itemKey` |
+| **Kod** | Bootstrap `itemKey`; clone API `item_key` |
 
 #### `name`
 
-Ticari / katalog görünen ad (Türkçe).
+Ticari / katalog görünen ad (Türkçe). Kopyala’da yeni ad zorunlu; slug buna göre üretilir.
 
 #### `item_type`
 
@@ -1465,6 +1494,46 @@ Item başına en fazla bir satır (PK/FK `item_key`). JSON `dimensions.*`. CHECK
 
 ---
 
+### 5.16b `fair_stand_item_assembly_parts`
+
+Recipe parent’ın child instance **pose** kaydı. BOM (`fair_stand_item_components`) değil. Admin 3D Montaj → **Montajı kaydet**. Bootstrap: `assembly.parts[]`.
+
+#### `parent_item_key`
+
+| | |
+|---|---|
+| **Ne** | Recipe parent SKU |
+| **Nasıl** | Parent item’ın montaj kaydı |
+| **Kod** | `PUT .../assembly`; clone’da yeni parent |
+
+#### `child_item_key` + `instance_index`
+
+| | |
+|---|---|
+| **Ne** | BOM child + kaçıncı kopya (0-based) |
+| **Neden** | Aynı child quantity > 1 iken her kutuyu ayırt etmek |
+| **Karıştırma** | `components.quantity` adedi; assembly satırı instance pozisyonu |
+
+#### `x_cm` / `y_cm` / `z_cm` + `rotation_*_deg`
+
+| | |
+|---|---|
+| **Ne** | Parent lokal cm pose + W/D/H Euler (°); SCENE_POSE |
+| **Nasıl** | Admin 3D gizmo / açı alanları / köşe snap |
+| **Kod** | `itemAdminPreview.js`, `itemAssembly.js` |
+
+#### `lock_group_id`
+
+| | |
+|---|---|
+| **Ne** | Aynı pozitif id = birlikte kilitli N-parça grubu; `NULL` = serbest |
+| **Neden** | Snap sonrası Kilitle / Gruba ekle kalıcı olsun |
+| **Nasıl** | Admin Montaj’da kilitle → **Montajı kaydet**. Clone aynı id’leri korur (yeni parent altında) |
+| **Karıştırma** | Oturum-only değildi (eski); artık DB’de |
+| **Kod** | `itemAdminAssemblyLock.js`; migration `0040_assembly_lock_group` |
+
+---
+
 ### 5.17 `fair_stand_item_body_parts`
 
 #### `id`
@@ -1824,6 +1893,11 @@ Kaynak: `fair_stand_projects.payload` (sunucu); tarayıcı IndexedDB önbellek.
 | Yeni SKU için JS contract satırı | Yok — aynı tipte CRM Item yeter |
 | Pasif item’ı bootstrap’ta görmek | `is_active=false` → listede yok; `catalog_visible` sadece katalog UI |
 | `ruleTypes` JSON’u stand’da registry | Kurallar `rules[]` içinde `ruleTypeKey`; ayrı JS registry yok |
+| Proje **Farklı Kaydet** = item **Kopyala** | Farklı Kaydet = yeni proje UUID; Kopyala = yeni `item_key` + shallow child satırlar |
+| Admin köşe snap = prod `fair_stand_rule` | Admin AABB köşe; prod magnetic / top-rail / shelf-rail kuralları ayrı |
+| Kilit = oturum-only | Hayır — `lock_group_id` DB’de; **Montajı kaydet** şart |
+| Clone = deep BOM tree | Hayır — shallow; leaf `child_item_key` paylaşılır; asset path paylaşılır |
+| Assembly banko profil boyası almaz | Hayır — `assembly.parts` yalnız pose; child `isRender`/`isActive`/ölçü/renk/yetenek canlı katalogdan. `isRender=false` → görünmez |
 
 ---
 
@@ -1831,7 +1905,7 @@ Kaynak: `fair_stand_projects.payload` (sunucu); tarayıcı IndexedDB önbellek.
 
 | Kontrol | Komut / dosya |
 |---|---|
-| Alembic head | `backend/alembic/versions/0034_stand_panel_rail_height.py` |
+| Alembic head | `backend/alembic/versions/0041_rename_profil_screen_keys.py` (öncekiler: 0040 lock_group, 0038–0039 assembly) |
 | Tip seed parity | `pytest backend/tests/modules/fair_stand/test_item_type_behavior.py` |
 | Stand zarf + panel ray | `test/standDimensions.test.js`; CRM Temel Ayarlar |
 | Bootstrap şekli | `get_catalog_bootstrap.py`, `routes.py` `/catalog/bootstrap` |
@@ -1873,5 +1947,6 @@ Canlı ortamda doğrulama: `backend/scripts/verify_live_item_type_placement.py`.
 | [`ITEMS.md`](ITEMS.md) | Onaylı item şema kuyruğu |
 | [`CATALOG.md`](CATALOG.md) | Katalog görünürlük sözleşmesi |
 | [`PENDING_ITEM_DECISIONS.md`](PENDING_ITEM_DECISIONS.md) | Açık / kapalı kararlar |
+| [`ITEM_3D_PREVIEW.md`](ITEM_3D_PREVIEW.md) | Admin 3D kutu / montaj / köşe snap / kalıcı kilit |
 
 **Belge güncelleme:** Yeni kolon/tablo → önce `DATABASE.md`, sonra bu kılavuzda “ne seçilir” paragrafı; CRM `adminLabels` hint’i.

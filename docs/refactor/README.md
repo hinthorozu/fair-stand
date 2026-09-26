@@ -8,6 +8,7 @@ Kod doğrulanmış canlı sözleşmeler. Audit dökümü / item tanımları (`do
 | [`DATABASE.md`](DATABASE.md) | **Teknik şema** — tablolar, kolon → JSON, nerede okunur |
 | [`PENDING_ITEM_DECISIONS.md`](PENDING_ITEM_DECISIONS.md) | Açık / ertelenmiş kararlar (silme yasak listesi) |
 | [`ITEMS.md`](ITEMS.md) | Item alan sözleşmesi + runtime kuyruk |
+| [`ITEM_3D_PREVIEW.md`](ITEM_3D_PREVIEW.md) | Admin 3D önizleme + montaj pose + kalıcı kilit grubu |
 | [`CATALOG.md`](CATALOG.md) | Katalog UI sınırı |
 | [`SCENE_POSE.md`](SCENE_POSE.md) | Pose / snap hedef sözleşmesi |
 | [`ROTATION.md`](ROTATION.md) | Item rotation SoT |

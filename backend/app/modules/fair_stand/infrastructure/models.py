@@ -515,6 +515,10 @@ class FairStandItemAssemblyPartModel(Base):
     __tablename__ = "fair_stand_item_assembly_parts"
     __table_args__ = (
         CheckConstraint("instance_index >= 0", name="ck_fair_stand_item_assembly_index"),
+        CheckConstraint(
+            "lock_group_id IS NULL OR lock_group_id >= 1",
+            name="ck_fair_stand_item_assembly_lock_group",
+        ),
         UniqueConstraint(
             "parent_item_key",
             "child_item_key",
@@ -549,6 +553,7 @@ class FairStandItemAssemblyPartModel(Base):
     rotation_z_deg: Mapped[Decimal] = mapped_column(
         Numeric(8, 3), nullable=False, default=Decimal("0")
     )
+    lock_group_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     parent: Mapped[FairStandItemModel] = relationship(
         back_populates="assembly_parts",
         foreign_keys=[parent_item_key],

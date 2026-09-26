@@ -25,7 +25,18 @@ export function readItemBoxCm(item) {
   };
 }
 
-/** Recipe BOM → isRender child instance listesi (pose yok). */
+/**
+ * Canlı katalog: bu child assembly/sahnede çizilir mi?
+ * isRender=false veya isActive=false → yok (kayıtlı pose olsa bile).
+ */
+export function isAssemblyRenderableChild(child) {
+  if (!child || typeof child !== 'object') return false;
+  if (child.isRender !== true) return false;
+  if (child.isActive === false) return false;
+  return true;
+}
+
+/** Recipe BOM → canlı çizilebilir child instance listesi (pose yok; ölçü/renk katalogdan). */
 export function expandBomRenderInstances(parentItem, getItemFn) {
   const rows = parentItem?.composition?.mode === 'recipe' && Array.isArray(parentItem.composition.items)
     ? parentItem.composition.items
@@ -35,7 +46,7 @@ export function expandBomRenderInstances(parentItem, getItemFn) {
     const childKey = row?.itemKey ? String(row.itemKey) : '';
     if (!childKey) continue;
     const child = typeof getItemFn === 'function' ? getItemFn(childKey) : null;
-    if (!child || child.isRender !== true) continue;
+    if (!isAssemblyRenderableChild(child)) continue;
     const quantity = Math.round(Number(row.quantity));
     if (!Number.isFinite(quantity) || quantity <= 0) continue;
     const box = readItemBoxCm(child);
@@ -49,6 +60,7 @@ export function expandBomRenderInstances(parentItem, getItemFn) {
         colorCss: Number.isInteger(child.defaultColor)
           ? colorIntToCss(child.defaultColor)
           : '#9ca3af',
+        childType: child.type ?? null,
         xCm: 0,
         yCm: 0,
         zCm: instanceIndex * box.heightCm,
@@ -59,6 +71,15 @@ export function expandBomRenderInstances(parentItem, getItemFn) {
     }
   }
   return parts;
+}
+
+/**
+ * Tek giriş: canlı BOM (+ katalog bayrakları/ölçü/renk) + kayıtlı pose.
+ * assembly.parts yalnız konum/rotasyon/kilit; görünürlük ve kutu child’dan gelir.
+ */
+export function buildLiveAssemblyParts(parentItem, savedParts, getItemFn) {
+  const bomParts = expandBomRenderInstances(parentItem, getItemFn);
+  return mergeAssemblyPoses(bomParts, savedParts);
 }
 
 /** Kayıtlı pose’ları BOM instance’larına uygula; eksik instance default poz. */
@@ -75,6 +96,10 @@ export function mergeAssemblyPoses(bomParts, savedParts) {
   return bomParts.map((part) => {
     const saved = byKey.get(`${part.childItemKey}#${part.instanceIndex}`);
     if (!saved) return { ...part };
+    const lockRaw = saved.lockGroupId ?? saved.lock_group_id;
+    const lockGroupId = Number.isInteger(Number(lockRaw)) && Number(lockRaw) >= 1
+      ? Number(lockRaw)
+      : null;
     return {
       ...part,
       xCm: Number.isFinite(Number(saved.xCm)) ? Number(saved.xCm) : part.xCm,
@@ -89,6 +114,7 @@ export function mergeAssemblyPoses(bomParts, savedParts) {
       rotationZDeg: Number.isFinite(Number(saved.rotationZDeg))
         ? Number(saved.rotationZDeg)
         : part.rotationZDeg,
+      lockGroupId,
     };
   });
 }
@@ -102,19 +128,95 @@ export function itemHasAssemblyLayout(item) {
   return getItemAssemblyParts(item).length > 0;
 }
 
+const FRAME_PART_TYPES = new Set(['profile', 'upright']);
+const PANEL_PART_TYPES = new Set(['panel', 'separator-panel']);
+const TOP_PART_TYPES = new Set(['counter-top', 'base-top']);
+
+/**
+ * Prod assembly mesh görünümü — katalog child canlı; çerçeve duvar/banko ile aynı
+ * `frameColorCss` (frameColorForModule); panel yüzleri moduleState.faces ile boyanabilir.
+ */
+export function resolveAssemblyPartVisual(child, {
+  frameColorCss = null,
+  panelColorCss = null,
+  topColorCss = null,
+} = {}) {
+  const type = child?.type ? String(child.type) : '';
+  const ownColor = Number.isInteger(child?.defaultColor)
+    ? colorIntToCss(child.defaultColor)
+    : null;
+
+  if (FRAME_PART_TYPES.has(type)) {
+    return {
+      role: 'frame',
+      colorCss: frameColorCss || ownColor || '#9ca3af',
+      metalness: 0.68,
+      roughness: 0.28,
+    };
+  }
+  if (PANEL_PART_TYPES.has(type)) {
+    return {
+      role: 'panel',
+      colorCss: panelColorCss || ownColor || '#9ca3af',
+      metalness: 0.06,
+      roughness: 0.72,
+    };
+  }
+  if (TOP_PART_TYPES.has(type)) {
+    return {
+      role: 'top',
+      colorCss: topColorCss || ownColor || '#f8fafc',
+      metalness: 0,
+      roughness: 0.58,
+    };
+  }
+  return {
+    role: 'other',
+    colorCss: ownColor || '#9ca3af',
+    metalness: 0.06,
+    roughness: 0.72,
+  };
+}
+
+export function isAssemblyFramePartType(type) {
+  return FRAME_PART_TYPES.has(String(type || ''));
+}
+
+export function isAssemblyPanelPartType(type) {
+  return PANEL_PART_TYPES.has(String(type || ''));
+}
+
+export function isAssemblyTopPartType(type) {
+  return TOP_PART_TYPES.has(String(type || ''));
+}
+
+/** Counter/base faces → sıra ile panel instance’lara bağlanır. */
+export function listModuleFaceStates(moduleState) {
+  const faces = moduleState?.faces;
+  if (!faces || typeof faces !== 'object') return [];
+  return Object.values(faces).filter((face) => face && typeof face === 'object');
+}
+
 /** Admin / API payload → normalize */
 export function normalizeAssemblyPartsPayload(parts) {
   if (!Array.isArray(parts)) return [];
-  return parts.map((part, fallbackIndex) => ({
-    childItemKey: String(part.childItemKey ?? part.child_item_key ?? ''),
-    instanceIndex: Number.isInteger(Number(part.instanceIndex ?? part.instance_index))
-      ? Number(part.instanceIndex ?? part.instance_index)
-      : fallbackIndex,
-    xCm: Number(part.xCm ?? part.x_cm) || 0,
-    yCm: Number(part.yCm ?? part.y_cm) || 0,
-    zCm: Number(part.zCm ?? part.z_cm) || 0,
-    rotationXDeg: Number(part.rotationXDeg ?? part.rotation_x_deg) || 0,
-    rotationYDeg: Number(part.rotationYDeg ?? part.rotation_y_deg) || 0,
-    rotationZDeg: Number(part.rotationZDeg ?? part.rotation_z_deg) || 0,
-  })).filter((part) => part.childItemKey);
+  return parts.map((part, fallbackIndex) => {
+    const lockRaw = part.lockGroupId ?? part.lock_group_id;
+    const lockGroupId = Number.isInteger(Number(lockRaw)) && Number(lockRaw) >= 1
+      ? Number(lockRaw)
+      : null;
+    return {
+      childItemKey: String(part.childItemKey ?? part.child_item_key ?? ''),
+      instanceIndex: Number.isInteger(Number(part.instanceIndex ?? part.instance_index))
+        ? Number(part.instanceIndex ?? part.instance_index)
+        : fallbackIndex,
+      xCm: Number(part.xCm ?? part.x_cm) || 0,
+      yCm: Number(part.yCm ?? part.y_cm) || 0,
+      zCm: Number(part.zCm ?? part.z_cm) || 0,
+      rotationXDeg: Number(part.rotationXDeg ?? part.rotation_x_deg) || 0,
+      rotationYDeg: Number(part.rotationYDeg ?? part.rotation_y_deg) || 0,
+      rotationZDeg: Number(part.rotationZDeg ?? part.rotation_z_deg) || 0,
+      lockGroupId,
+    };
+  }).filter((part) => part.childItemKey);
 }
