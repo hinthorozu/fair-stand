@@ -52,8 +52,12 @@ test('üretim listesi paneli gerçek girişte düz duvar reçete satırlarını 
   await page.locator('#toggle-production-bom').click();
   await expect(page.locator('#production-bom-panel')).toBeVisible();
 
-  const firstLine = page.locator('#production-bom-panel .production-bom-module__list li').first();
+  const firstModule = page.locator('#production-bom-panel .production-bom-module').first();
+  await expect(firstModule).toContainText('Modül');
+  await firstModule.locator('summary').click();
+
+  const firstLine = firstModule.locator('.production-bom-module__list li').first();
   await expect(firstLine).toBeVisible();
   await expect(firstLine).toContainText('×');
-  await expect(page.locator('#production-bom-panel .production-bom-module').first()).toContainText('Modül');
+  await expect(firstModule.locator('.production-bom-module__key')).toContainText('wall_');
 });
