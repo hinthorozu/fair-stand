@@ -302,8 +302,8 @@ Recipe parent **admin montaj pose** — BOM değildir. Bootstrap `assembly.parts
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `parent_item_key` | — | Recipe parent | Pose sahibi | `PUT .../assembly`; mapper |
-| `child_item_key` | `parts[].childItemKey` | BOM child SKU | Hangi leaf | admin preview / prod mesh |
+| `parent_item_key` | — | Recipe parent | Pose sahibi; **ON DELETE CASCADE** | `PUT .../assembly`; mapper |
+| `child_item_key` | `parts[].childItemKey` | BOM child SKU | Hangi leaf; **ON DELETE RESTRICT** (leaf pose’dayken silinemez); ON UPDATE CASCADE | admin preview / prod mesh |
 | `instance_index` | `parts[].instanceIndex` | 0-based kopya | quantity > 1 ayırımı | aynı |
 | `x_cm` / `y_cm` / `z_cm` | `xCm` / `yCm` / `zCm` | Parent lokal cm | SCENE_POSE | `itemAssembly.js`, `scene3d` |
 | `rotation_x_deg` / `y` / `z` | `rotationXDeg` … | W/D/H Euler (°) | Serbest döndürme | aynı |

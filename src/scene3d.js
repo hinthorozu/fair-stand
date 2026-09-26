@@ -28,6 +28,8 @@ import {
 } from './items.js';
 import {
   buildLiveAssemblyParts,
+  computeAssemblyPartsAabbCm,
+  computeAssemblySceneFitTransform,
   isAssemblyFramePartType,
   isAssemblyPanelPartType,
   isAssemblyRenderableChild,
@@ -7223,19 +7225,34 @@ function createShelfModule(moduleState, moduleIndex) {
 }
 
 function createItemAssemblyModule(moduleState, moduleIndex, catalogItem) {
-  const widthCm = Number(moduleState.widthCm) || readItemBoxCm(catalogItem).widthCm;
+  // Hedef dış kutu: sceneDimensions ?? dimensions (+ moduleState override) — eksik alan uydurulmaz.
+  const sceneBox = resolveModuleSceneBoxCm(moduleState);
+  const targetBoxCm = {
+    widthCm: sceneBox.widthCm,
+    depthCm: sceneBox.depthCm,
+    heightCm: sceneBox.heightCm,
+  };
+  const widthCm = Number(moduleState.widthCm)
+    || positiveSceneCm(targetBoxCm.widthCm)
+    || readItemBoxCm(catalogItem).widthCm;
+
   const group = new THREE.Group();
+  const content = new THREE.Group();
+  group.add(content);
   group.userData = {
     kind: 'module',
     moduleIndex,
     moduleId: moduleState.id,
     type: moduleState.type,
     widthCm,
+    depthCm: positiveSceneCm(targetBoxCm.depthCm) ?? undefined,
+    heightCm: positiveSceneCm(targetBoxCm.heightCm) ?? undefined,
     assembly: true,
   };
 
   const posed = buildLiveAssemblyParts(catalogItem, catalogItem.assembly?.parts || [], getItem);
   const surfaces = [];
+  const drawnSpecs = [];
 
   let frameColorCss = null;
   try {
@@ -7322,8 +7339,29 @@ function createItemAssemblyModule(moduleState, moduleIndex, catalogItem) {
     };
     if (boundSurface?.id) mesh.userData.surfaceId = boundSurface.id;
 
-    group.add(mesh);
+    content.add(mesh);
     surfaces.push(mesh);
+    drawnSpecs.push({
+      xCm: Number(part.xCm) || 0,
+      yCm: Number(part.yCm) || 0,
+      zCm: Number(part.zCm) || 0,
+      widthCm: box.widthCm,
+      depthCm: box.depthCm,
+      heightCm: box.heightCm,
+      rotationXDeg: Number(part.rotationXDeg) || 0,
+      rotationYDeg: Number(part.rotationYDeg) || 0,
+      rotationZDeg: Number(part.rotationZDeg) || 0,
+    });
+  }
+
+  const fit = computeAssemblySceneFitTransform(
+    computeAssemblyPartsAabbCm(drawnSpecs),
+    targetBoxCm,
+  );
+  if (fit) {
+    // Ürün: scale.x=W, .y=D, .z=H → Three: X=W, Y=H, Z=D — merkez pivot (baza ile aynı).
+    content.scale.set(fit.scale.x, fit.scale.z, fit.scale.y);
+    content.position.set(fit.positionM.x, fit.positionM.y, fit.positionM.z);
   }
 
   const frameMeshes = surfaces.filter((mesh) => mesh.userData.assemblyRole === 'frame');
@@ -7334,6 +7372,11 @@ function createItemAssemblyModule(moduleState, moduleIndex, catalogItem) {
   }
 
   return { group, surfaces };
+}
+
+function positiveSceneCm(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : null;
 }
 
 function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {

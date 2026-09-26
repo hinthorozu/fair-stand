@@ -1512,6 +1512,7 @@ Recipe parent’ın child instance **pose** kaydı. BOM (`fair_stand_item_compon
 |---|---|
 | **Ne** | BOM child + kaçıncı kopya (0-based) |
 | **Neden** | Aynı child quantity > 1 iken her kutuyu ayırt etmek |
+| **FK** | `parent` CASCADE; `child` **RESTRICT** + UPDATE CASCADE (DB SoT / `0038`) — leaf montajda iken silinemez |
 | **Karıştırma** | `components.quantity` adedi; assembly satırı instance pozisyonu |
 
 #### `x_cm` / `y_cm` / `z_cm` + `rotation_*_deg`

@@ -25,6 +25,128 @@ export function readItemBoxCm(item) {
   };
 }
 
+function positiveCm(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function degToRad(deg) {
+  return (Number(deg) || 0) * (Math.PI / 180);
+}
+
+/** Three Euler XYZ — product axes X=W, Y=D, Z=H; rot map: X←rotX, Y←rotZ, Z←rotY. */
+function rotateProductEulerXYZ(x, y, z, rotationXDeg, rotationYDeg, rotationZDeg) {
+  const rx = degToRad(rotationXDeg);
+  const ry = degToRad(rotationZDeg);
+  const rz = degToRad(rotationYDeg);
+  let y1 = y * Math.cos(rx) - z * Math.sin(rx);
+  let z1 = y * Math.sin(rx) + z * Math.cos(rx);
+  const x1 = x;
+  const z2 = z1 * Math.cos(ry) - x1 * Math.sin(ry);
+  const x2 = z1 * Math.sin(ry) + x1 * Math.cos(ry);
+  const y2 = y1;
+  const x3 = x2 * Math.cos(rz) - y2 * Math.sin(rz);
+  const y3 = x2 * Math.sin(rz) + y2 * Math.cos(rz);
+  return { x: x3, y: y3, z: z2 };
+}
+
+/** Parça AABB köşeleri — ürün cm (X=W, Y=D, Z=H); merkez = (x,y,z+H/2). */
+export function assemblyPartCornersCm(part) {
+  const widthCm = Number(part?.widthCm) || 0;
+  const depthCm = Number(part?.depthCm) || 0;
+  const heightCm = Number(part?.heightCm) || 0;
+  const cx = Number(part?.xCm) || 0;
+  const cy = Number(part?.yCm) || 0;
+  const cz = (Number(part?.zCm) || 0) + heightCm / 2;
+  const corners = [];
+  for (const sx of [-0.5, 0.5]) {
+    for (const sy of [-0.5, 0.5]) {
+      for (const sz of [-0.5, 0.5]) {
+        const local = rotateProductEulerXYZ(
+          sx * widthCm,
+          sy * depthCm,
+          sz * heightCm,
+          part?.rotationXDeg,
+          part?.rotationYDeg,
+          part?.rotationZDeg,
+        );
+        corners.push({ x: cx + local.x, y: cy + local.y, z: cz + local.z });
+      }
+    }
+  }
+  return corners;
+}
+
+/** Birleşim AABB (ürün cm). Parça yoksa null. */
+export function computeAssemblyPartsAabbCm(parts) {
+  if (!Array.isArray(parts) || parts.length === 0) return null;
+  let minX = Infinity;
+  let minY = Infinity;
+  let minZ = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let maxZ = -Infinity;
+  let any = false;
+  for (const part of parts) {
+    for (const corner of assemblyPartCornersCm(part)) {
+      any = true;
+      minX = Math.min(minX, corner.x);
+      minY = Math.min(minY, corner.y);
+      minZ = Math.min(minZ, corner.z);
+      maxX = Math.max(maxX, corner.x);
+      maxY = Math.max(maxY, corner.y);
+      maxZ = Math.max(maxZ, corner.z);
+    }
+  }
+  if (!any) return null;
+  return {
+    minX,
+    minY,
+    minZ,
+    maxX,
+    maxY,
+    maxZ,
+    widthCm: maxX - minX,
+    depthCm: maxY - minY,
+    heightCm: maxZ - minZ,
+  };
+}
+
+/**
+ * AABB → hedef `sceneDimensions ?? dimensions` (eksik eksen = scale 1, uydurma yok).
+ * Hedef W/D/H’nin hiçbiri yoksa null (transform uygulama).
+ *
+ * Placement ile aynı pivot: W/D merkezde (procedural baza ±W/2 ±D/H),
+ * H tabanı 0’da. Ürün cm scale {x=W,y=D,z=H}; Three positionM: X=W, Y=H, Z=D.
+ */
+export function computeAssemblySceneFitTransform(aabb, targetBoxCm) {
+  if (!aabb) return null;
+  const targetW = positiveCm(targetBoxCm?.widthCm);
+  const targetD = positiveCm(targetBoxCm?.depthCm);
+  const targetH = positiveCm(targetBoxCm?.heightCm);
+  if (targetW == null && targetD == null && targetH == null) return null;
+
+  const sizeW = positiveCm(aabb.widthCm);
+  const sizeD = positiveCm(aabb.depthCm);
+  const sizeH = positiveCm(aabb.heightCm);
+  const scale = {
+    x: targetW != null && sizeW != null ? targetW / sizeW : 1,
+    y: targetD != null && sizeD != null ? targetD / sizeD : 1,
+    z: targetH != null && sizeH != null ? targetH / sizeH : 1,
+  };
+  const centerX = (aabb.minX + aabb.maxX) / 2;
+  const centerY = (aabb.minY + aabb.maxY) / 2;
+  return {
+    scale,
+    // applyPlacementToGroup merkez pivotu: lokal X/Z simetrik, Y taban = 0.
+    positionM: {
+      x: (-centerX * scale.x) / 100,
+      y: (-aabb.minZ * scale.z) / 100 || 0,
+      z: (-centerY * scale.y) / 100,
+    },
+  };
+}
+
 /**
  * Canlı katalog: bu child assembly/sahnede çizilir mi?
  * isRender=false veya isActive=false → yok (kayıtlı pose olsa bile).

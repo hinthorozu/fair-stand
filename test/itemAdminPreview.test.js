@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { envelopeFromForm, partFromChildRecord } from '../src/itemAdminPreview.js';
+import { readFileSync } from 'node:fs';
 
 test('envelopeFromForm uses dimensions only (ignores scene override args if passed)', () => {
   const envelope = envelopeFromForm({
@@ -42,4 +43,15 @@ test('partFromChildRecord ignores child sceneDimensions', () => {
   assert.equal(part.depthCm, 10);
   assert.equal(part.heightCm, 50);
   assert.equal(part.colorCss, '#00ff00');
+});
+
+test('admin assembly preview does not draw parent wire ghost envelope', () => {
+  const source = readFileSync(new URL('../src/itemAdminPreview.js', import.meta.url), 'utf8');
+  const start = source.indexOf("if (state.mode === 'assembly' && state.parts.length)");
+  const end = source.indexOf('} else if (state.envelope)');
+  assert.ok(start >= 0 && end > start, 'assembly branch markers missing');
+  const assemblyBranch = source.slice(start, end);
+  assert.doesNotMatch(assemblyBranch, /wire:\s*true/);
+  assert.doesNotMatch(assemblyBranch, /makeBoxMesh\(\s*\{\s*\.\.\.state\.envelope/);
+  assert.match(assemblyBranch, /for \(const part of state\.parts\)/);
 });

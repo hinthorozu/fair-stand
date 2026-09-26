@@ -30,6 +30,10 @@ PayloadJSON = JSON().with_variant(JSONB(astext_type=sa_text()), "postgresql")
 from app.db.base import Base
 
 CASCADE = {"ondelete": "CASCADE", "onupdate": "CASCADE"}
+# Live DB SoT (0038): assembly child pose — leaf silinmesin diye RESTRICT.
+RESTRICT_UPDATE = {"ondelete": "RESTRICT", "onupdate": "CASCADE"}
+# Live DB: snap rule FKs SET NULL; onupdate NO ACTION (explicit CASCADE yok).
+SET_NULL_NO_ACTION = {"ondelete": "SET NULL", "onupdate": "NO ACTION"}
 
 fair_stand_rule_item_type = Table(
     "fair_stand_rule_item_type",
@@ -337,12 +341,12 @@ class FairStandItemModel(Base):
     snap_anchor: Mapped[str | None] = mapped_column(String(16), nullable=True)
     snap_requires_rule_id: Mapped[int | None] = mapped_column(
         Integer,
-        ForeignKey("fair_stand_rule.id", ondelete="SET NULL", onupdate="CASCADE"),
+        ForeignKey("fair_stand_rule.id", **SET_NULL_NO_ACTION),
         nullable=True,
     )
     snap_provides_rule_id: Mapped[int | None] = mapped_column(
         Integer,
-        ForeignKey("fair_stand_rule.id", ondelete="SET NULL", onupdate="CASCADE"),
+        ForeignKey("fair_stand_rule.id", **SET_NULL_NO_ACTION),
         nullable=True,
     )
     is_render: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
@@ -537,7 +541,7 @@ class FairStandItemAssemblyPartModel(Base):
     )
     child_item_key: Mapped[str] = mapped_column(
         String(128),
-        ForeignKey("fair_stand_items.item_key", **CASCADE),
+        ForeignKey("fair_stand_items.item_key", **RESTRICT_UPDATE),
         nullable=False,
     )
     instance_index: Mapped[int] = mapped_column(Integer, nullable=False)

@@ -322,6 +322,7 @@ Hepsi boolean, zorunlu, `null` yasak. Item satırı; `item_type` map’i değil.
 - **Canonical consumer:** factory, identity, collision/ghost, Catalog preview hydrate
 - **Canonical method:** `resolveSceneDimensions(item)`
 - **Effective field:** `sceneDimensions.field ?? dimensions.field ?? MISSING`
+- **Assembly prod:** kayıtlı `assembly.parts` varsa birleşim AABB, effective W/D/H kutusuna non-uniform scale edilir (`computeAssemblySceneFitTransform`). Pivot procedural baza / `applyPlacementToGroup` ile aynı: W/D merkez, H taban 0. MISSING eksen scale edilmez; üçü de MISSING → 1:1 pose (uydurma kutu yok).
 - **Recipe/Catalog/type/itemKey/STAND Item-specific scene source değildir**
 - **Kullanıcı değiştirir mi:** hayır (Item master)
 - **Persistence:** Item master
