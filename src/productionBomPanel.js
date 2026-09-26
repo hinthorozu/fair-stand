@@ -1,9 +1,31 @@
+import { groupBomLines } from './bomLineGroups.js';
 import { resolveProjectBom } from './projectBom.js';
 import { getFairStandHostDocument } from './hostDocument.js';
 
 const PANEL_ID = 'production-bom-panel';
+const POPUP_NAME = 'fair-stand-production-bom';
 const DEFAULT_WIDTH = 420;
 const DEFAULT_HEIGHT = 520;
+const POPUP_STYLE = `
+  html, body { margin: 0; height: 100%; background: #f8fafc; color: #0f172a; }
+  body { box-sizing: border-box; padding: 16px 18px 24px; font: 13px/1.4 system-ui, sans-serif; }
+  #production-bom-popup-root { min-height: 100%; }
+  .production-bom-panel__hint { margin: 0 0 10px; color: #64748b; font-size: 12px; }
+  .production-bom-panel__section-title { margin: 14px 0 6px; font-size: 12px; font-weight: 650; color: #334155; text-transform: uppercase; letter-spacing: 0.03em; }
+  .production-bom-panel__section-title:first-child { margin-top: 0; }
+  .production-bom-modules { margin: 0 0 8px; padding: 10px 12px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; }
+  .production-bom-modules > summary { font-size: 13px; font-weight: 650; cursor: pointer; }
+  .production-bom-module { margin: 0 0 8px; padding: 10px 12px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; }
+  .production-bom-module > .panel-summary, .production-bom-module > summary { font-size: 13px; font-weight: 650; cursor: pointer; }
+  .production-bom-module__key { color: #64748b; font-weight: 500; font-size: 12px; }
+  .production-bom-group { margin: 0 0 10px; }
+  .production-bom-group__title { margin: 0 0 4px; font-size: 12px; font-weight: 650; color: #1e293b; }
+  .production-bom-group__total { margin: 4px 0 0; font-size: 12px; font-weight: 650; color: #334155; }
+  .production-bom-module__list { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+  .production-bom-module--unresolved { border-color: #fca5a5; background: #fff1f2; }
+  .production-bom-module__error, .production-bom-panel__empty { margin: 0; color: #64748b; }
+  .production-bom-module__error { color: #b91c1c; font-size: 12px; }
+`;
 
 function formatNumber(value) {
   return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Number(value));
@@ -59,13 +81,54 @@ function renderModuleHtml(entry, { open = false } = {}) {
   `;
 }
 
-function renderTotalsHtml(lines, { open = false } = {}) {
+function renderLineList(lines) {
+  return `<ul class="production-bom-module__list">${lines.map((line) => (
+    `<li>${escapeHtml(lineLabel(line))}</li>`
+  )).join('')}</ul>`;
+}
+
+function formatArea(value) {
+  return new Intl.NumberFormat('tr-TR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(value));
+}
+
+function printLineLabel(line) {
+  const size = `${formatNumber(line.widthCm)}×${formatNumber(line.heightCm)} cm`;
+  const each = `${formatArea(line.areaM2)} m²`;
+  if (line.quantity > 1) {
+    return `${formatNumber(line.quantity)} × ${size} · ${each} · toplam ${formatArea(line.totalAreaM2)} m²`;
+  }
+  return `1 × ${size} · ${each}`;
+}
+
+function renderPrintAreaGroups(printAreas) {
+  if (!printAreas?.length) return '';
+  return printAreas.map((section) => (
+    `<section class="production-bom-group">
+      <h4 class="production-bom-group__title">${escapeHtml(section.label)}</h4>
+      <ul class="production-bom-module__list">${section.lines.map((line) => (
+        `<li>${escapeHtml(printLineLabel(line))}</li>`
+      )).join('')}</ul>
+      <p class="production-bom-group__total">Toplam ${escapeHtml(formatArea(section.totalAreaM2))} m²</p>
+    </section>`
+  )).join('');
+}
+
+function renderTotalsHtml(lines, printAreas, { open = false } = {}) {
   const openAttr = open ? ' open' : '';
-  const body = lines.length
-    ? `<ul class="production-bom-module__list">${lines.map((line) => (
-      `<li>${escapeHtml(lineLabel(line))}</li>`
-    )).join('')}</ul>`
-    : '<p class="production-bom-panel__empty">Birleşik leaf satır yok.</p>';
+  const groups = groupBomLines(lines);
+  const printHtml = renderPrintAreaGroups(printAreas);
+  const hardware = groups.length
+    ? groups.map((group) => (
+      `<section class="production-bom-group">
+        <h4 class="production-bom-group__title">${escapeHtml(group.label)}</h4>
+        ${renderLineList(group.lines)}
+      </section>`
+    )).join('')
+    : (printHtml ? '' : '<p class="production-bom-panel__empty">Birleşik leaf satır yok.</p>');
+  const body = `${hardware}${printHtml}`;
 
   return `
     <details class="panel-card compact collapsible-panel production-bom-module" data-bom-collapse-key="__totals__"${openAttr}>
@@ -105,6 +168,7 @@ export function createProductionBomPanel() {
     panel.innerHTML = `
       <div class="production-bom-panel__header" data-role="bom-drag">
         <span class="production-bom-panel__title">Üretim Listesi</span>
+        <button type="button" class="production-bom-panel__popout" data-role="bom-popout">Ayrı pencere</button>
         <button type="button" class="production-bom-panel__close" data-role="bom-close" aria-label="Kapat">×</button>
       </div>
       <div class="production-bom-panel__body" data-role="bom-body"></div>
@@ -116,26 +180,45 @@ export function createProductionBomPanel() {
   const body = panel.querySelector('[data-role="bom-body"]');
   const dragHandle = panel.querySelector('[data-role="bom-drag"]');
   const closeButton = panel.querySelector('[data-role="bom-close"]');
+  const popoutButton = panel.querySelector('[data-role="bom-popout"]');
   const resizeHandle = panel.querySelector('[data-role="bom-resize"]');
+  let popup = null;
 
   let getModules = () => [];
+  let getStand = () => null;
   let onVisibilityChange = null;
   let dragState = null;
   let resizeState = null;
   const openCollapseKeys = new Set();
 
+  function popupWindow() {
+    if (!popup || popup.closed) return null;
+    return popup;
+  }
+
+  function popupRoot() {
+    return popupWindow()?.document?.getElementById('production-bom-popup-root') ?? null;
+  }
+
   function captureOpenCollapseKeys() {
-    if (!body) return;
     openCollapseKeys.clear();
-    body.querySelectorAll('details[data-bom-collapse-key]').forEach((details) => {
-      if (details.open) openCollapseKeys.add(details.getAttribute('data-bom-collapse-key'));
-    });
+    for (const root of [body, popupRoot()]) {
+      root?.querySelectorAll('details[data-bom-collapse-key]').forEach((details) => {
+        if (details.open) openCollapseKeys.add(details.getAttribute('data-bom-collapse-key'));
+      });
+    }
+  }
+
+  function paint(html) {
+    if (body) body.innerHTML = html;
+    const root = popupRoot();
+    if (root) root.innerHTML = html;
   }
 
   function refresh() {
     if (!body) return;
     captureOpenCollapseKeys();
-    const bom = resolveProjectBom(getModules());
+    const bom = resolveProjectBom(getModules(), getStand());
     const moduleHtml = bom.modules.length
       ? bom.modules.map((entry) => renderModuleHtml(entry, {
         open: openCollapseKeys.has(moduleCollapseKey(entry)),
@@ -146,19 +229,30 @@ export function createProductionBomPanel() {
       ? `<p class="production-bom-panel__hint">${bom.unresolved.length} modül çözülemedi (kırmızı).</p>`
       : '';
 
-    body.innerHTML = `
-      <p class="production-bom-panel__hint">Kaydetme yok · yan yana düz duvar birleşiminde ortak dikme + çiftli aparat düzeltilir. Köşe / base / short-up henüz yok.</p>
-      ${bom.appliedJointCount
-        ? `<p class="production-bom-panel__hint">${bom.appliedJointCount} yan yana eklem uygulandı.</p>`
+    paint(`
+      <p class="production-bom-panel__hint">Kaydetme yok · yan yana birleşimde çiftli aparat, iç köşede köşe aparatı, T birleşimde ortak dikme uygulanır. Çiftli aparat T’de yok. Cam şerit panel_cam / panel_corner_cam olur. Baza ve short-up henüz yok.</p>
+      ${bom.appliedEndToEndCount
+        ? `<p class="production-bom-panel__hint">${bom.appliedEndToEndCount} yan yana eklem uygulandı.</p>`
+        : ''}
+      ${bom.appliedCornerCount
+        ? `<p class="production-bom-panel__hint">${bom.appliedCornerCount} iç köşe eklem uygulandı.</p>`
+        : ''}
+      ${bom.appliedTeeCount
+        ? `<p class="production-bom-panel__hint">${bom.appliedTeeCount} T birleşim uygulandı.</p>`
         : ''}
       ${(bom.relationshipNotes || []).map((note) => (
         `<p class="production-bom-panel__hint">${escapeHtml(note)}</p>`
       )).join('')}
       ${unresolvedNote}
-      <h3 class="production-bom-panel__section-title">Modüller</h3>
-      ${moduleHtml}
-      ${renderTotalsHtml(bom.lines, { open: openCollapseKeys.has('__totals__') })}
-    `;
+      <details class="panel-card compact collapsible-panel production-bom-modules" data-bom-collapse-key="__modules__"${openCollapseKeys.has('__modules__') ? ' open' : ''}>
+        <summary class="panel-summary">
+          <span>Modüller</span>
+          <span class="panel-chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="panel-card-content">${moduleHtml}</div>
+      </details>
+      ${renderTotalsHtml(bom.lines, bom.printAreas, { open: openCollapseKeys.has('__totals__') })}
+    `);
   }
 
   function open() {
@@ -169,11 +263,42 @@ export function createProductionBomPanel() {
 
   function close() {
     panel.hidden = true;
+    const child = popupWindow();
+    popup = null;
+    if (child) child.close();
     onVisibilityChange?.(false);
   }
 
   function isOpen() {
-    return !panel.hidden;
+    return !panel.hidden || Boolean(popupWindow());
+  }
+
+  function onPopupHide() {
+    if (popup && !popup.closed) return;
+    popup = null;
+    if (panel.hidden) onVisibilityChange?.(false);
+  }
+
+  function onPopoutClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const view = host.defaultView;
+    if (!view?.open) return;
+    let child = popupWindow();
+    if (!child) {
+      child = view.open('', POPUP_NAME, 'popup=yes,width=560,height=820');
+      if (!child) return;
+      popup = child;
+      child.document.open();
+      child.document.write(`<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>Üretim Listesi</title><style>${POPUP_STYLE}</style></head><body><div id="production-bom-popup-root"></div></body></html>`);
+      child.document.close();
+      child.addEventListener('pagehide', onPopupHide);
+    }
+    const root = child.document.getElementById('production-bom-popup-root');
+    if (root && body) root.innerHTML = body.innerHTML;
+    panel.hidden = true;
+    onVisibilityChange?.(true);
+    child.focus();
   }
 
   function onCloseClick(event) {
@@ -183,7 +308,7 @@ export function createProductionBomPanel() {
 
   function onDragStart(event) {
     if (event.button !== 0) return;
-    if (event.target?.closest?.('[data-role="bom-close"]')) return;
+    if (event.target?.closest?.('[data-role="bom-close"], [data-role="bom-popout"]')) return;
     dragState = {
       startX: event.clientX,
       startY: event.clientY,
@@ -226,6 +351,7 @@ export function createProductionBomPanel() {
   }
 
   closeButton?.addEventListener('click', onCloseClick);
+  popoutButton?.addEventListener('click', onPopoutClick);
   dragHandle?.addEventListener('mousedown', onDragStart);
   resizeHandle?.addEventListener('mousedown', onResizeStart);
   host.defaultView?.addEventListener('mousemove', onPointerMove);
@@ -239,11 +365,18 @@ export function createProductionBomPanel() {
     setModulesSource(fn) {
       getModules = typeof fn === 'function' ? fn : () => [];
     },
+    setStandSource(fn) {
+      getStand = typeof fn === 'function' ? fn : () => null;
+    },
     setOnVisibilityChange(fn) {
       onVisibilityChange = typeof fn === 'function' ? fn : null;
     },
     destroy() {
       closeButton?.removeEventListener('click', onCloseClick);
+      popoutButton?.removeEventListener('click', onPopoutClick);
+      const child = popupWindow();
+      popup = null;
+      if (child) child.close();
       dragHandle?.removeEventListener('mousedown', onDragStart);
       resizeHandle?.removeEventListener('mousedown', onResizeStart);
       host.defaultView?.removeEventListener('mousemove', onPointerMove);

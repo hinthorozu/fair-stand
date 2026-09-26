@@ -56,3 +56,23 @@ test('decision-required furniture cluster is unresolved', () => {
   assert.equal(bom.unresolved.length, 1);
   assert.equal(bom.lines.length, 0);
 });
+
+test('floor unit drives the stand line: m2 area or adet tiles', () => {
+  const stand = { xCm: 500, yCm: 400 };
+  const hali = resolveProjectBom([], { ...stand, itemKey: 'hali' });
+  assert.deepEqual(hali.lines.map((line) => [line.itemKey, line.quantity, line.unit]), [['hali', 20, 'm2']]);
+
+  const sari = resolveProjectBom([], { ...stand, itemKey: 'parke-sari' });
+  assert.equal(sari.lines[0].name, 'Sarı Meşe');
+  assert.equal(sari.lines[0].quantity, 20);
+  assert.equal(sari.lines[0].unit, 'm2');
+
+  const karolaj = resolveProjectBom([], { ...stand, itemKey: 'karolaj' });
+  assert.deepEqual(
+    karolaj.lines.map((line) => [line.itemKey, line.quantity, line.unit]),
+    [['karolaj', 20, 'adet']],
+  );
+
+  const partial = resolveProjectBom([], { xCm: 550, yCm: 400, itemKey: 'karolaj' });
+  assert.equal(partial.lines[0].quantity, 24);
+});

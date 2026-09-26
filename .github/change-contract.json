@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "fair-stand-relationship-bom-and-asset-replace-flush",
   "kind": "feature",
-  "summary": "F-031 phase-1 end-to-end BOM joint adjustments; fix admin asset/body_part replace unique-role flush; production BOM hints.",
+  "summary": "F-031 end-to-end doubles and inner-corner connectors for wall, door, separator, and showcase. Corner connectors follow the front face; a module on the back does not take them. Cam twins and production BOM hints included.",
   "owners": [
     "src/relationshipBom.js",
     "src/projectBom.js",
@@ -58,6 +58,8 @@
       "backend/alembic/versions/0040_assembly_lock_group.py",
       "backend/alembic/versions/0041_rename_profil_screen_keys.py",
       "backend/alembic/versions/0042_box_block_default_opacity.py",
+      "backend/alembic/versions/0043_panel_glass_family.py",
+      "backend/alembic/versions/0044_panel_corner_glass_family.py",
       "backend/app/integrations/kyrox_core/dev_bypass.py",
       "backend/app/main.py",
       "backend/app/modules/fair_stand/api/dependencies.py",
@@ -163,7 +165,10 @@
       "src/mountFairStand.js",
       "src/productionBomPanel.css",
       "src/productionBomPanel.js",
+      "src/printAreaBom.js",
       "src/projectActionSaveGuard.js",
+      "src/bomLineGroups.js",
+      "src/panelGlassBom.js",
       "src/projectBom.js",
       "src/projectImportValidation.js",
       "src/projectNaming.js",
@@ -226,6 +231,7 @@
       "test/moduleRecipes.test.js",
       "test/moduleRotationPolicy.test.js",
       "test/moduleStateConstructionRegistry.test.js",
+      "test/printAreaBom.test.js",
       "test/productionBomPanelEntry.test.js",
       "test/profileFieldPlacement.test.js",
       "test/projectBom.test.js",
@@ -238,6 +244,7 @@
       "test/registerCanonicalItemCatalog.mjs",
       "test/runtimeSettings.test.js",
       "test/shelfCatalogPanelSeam.test.js",
+      "test/shelfRecipeBom.test.js",
       "test/showcaseAppearance.test.js",
       "test/showcaseBodyColorRegression.test.js",
       "test/showcaseDepthDirection.test.js",
@@ -414,10 +421,15 @@
       "test/moduleStateConstructionRegistry.test.js",
       "test/mountFairStandBoundary.test.js",
       "test/panel197ItemContract.test.js",
+      "test/bomLineGroups.test.js",
+      "test/panelCamFamily.test.js",
+      "test/panelGlassBom.test.js",
+      "test/panelGlassRestore.test.js",
       "test/panelCorner192ItemContract.test.js",
       "test/panelMultiSelectRule.test.js",
       "test/plasticTrashBinModule.test.js",
       "test/plasticTrashBinTopLabel.test.js",
+      "test/printAreaBom.test.js",
       "test/productionBomPanelEntry.test.js",
       "test/profile190ItemContract.test.js",
       "test/profileFieldPlacement.test.js",
@@ -443,6 +455,7 @@
       "test/recipeWallPanelSlots.test.js",
       "test/registerCanonicalItemCatalog.mjs",
       "test/relationshipBomEndToEnd.test.js",
+      "test/relationshipBomJoints.test.js",
       "test/removedIndoorPlant2.test.js",
       "test/rightWallOrientation.test.js",
       "test/roadmapProductionSourceOfTruth.test.js",
@@ -455,6 +468,7 @@
       "test/separatorPanelsItemContract.test.js",
       "test/separatorRecipes.test.js",
       "test/shelfCatalogPanelSeam.test.js",
+      "test/shelfRecipeBom.test.js",
       "test/shelfItemsItemContract.test.js",
       "test/shelfLegItemContract.test.js",
       "test/shelfLighting.test.js",
@@ -1044,12 +1058,14 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "End-to-end collinear full-height flat walls adjust upright/connector leaf totals. Admin item save flushes asset/body deletes before reinsert to honor unique role constraints."
+    "notes": "End-to-end doubles and inner-corner connectors adjust upright and connector leaf totals for locked wall pairs. Straight panels on a corner module become panel_corner_*. Print areas list image, lightbox, mesh, and foam pieces by size and m2. Base and short-up are unchanged. Admin item save flushes asset/body deletes before reinsert to honor unique role constraints."
   },
   "tests": {
     "targeted": [
       "test/relationshipBomEndToEnd.test.js",
+      "test/relationshipBomJoints.test.js",
       "test/projectBom.test.js",
+      "test/printAreaBom.test.js",
       "test/productionBomPanelEntry.test.js"
     ],
     "fullSuite": true,
@@ -1068,8 +1084,8 @@
     "notes": "Joint deltas change aggregated BOM quantities for side-by-side full-height walls only; corners/short-up excluded."
   },
   "migration": {
-    "required": false,
-    "notes": "No DB migration."
+    "required": true,
+    "notes": "0043 adds panel-glass and panel_cam_*. 0044 adds panel_corner_cam_42_5, panel_corner_cam_92, panel_corner_cam_142_5, panel_corner_cam_192. Dump seed 0002 is unchanged."
   },
   "rollback": "Revert this PR."
 }

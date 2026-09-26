@@ -32,7 +32,7 @@ test('listCatalogItems 59 görünür Item’ı Item kaydından üretir; hardcode
   const projected = listCatalogItems();
   const catalogSource = readFileSync(new URL('../src/catalog.js', import.meta.url), 'utf8');
 
-  assert.equal(items.length, 97);
+  assert.equal(items.length, 105);
   assert.equal(visible.length, 59);
   assert.equal(projected.length, 59);
   assert.equal(new Set(projected.map((item) => item.itemKey)).size, 59);

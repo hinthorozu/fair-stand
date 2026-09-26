@@ -38,6 +38,23 @@
   font-size: 13px;
 }
 
+.production-bom-panel__popout {
+  border: 1px solid #94a3b8;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  flex: 0 0 auto;
+}
+
+.production-bom-panel__popout:hover {
+  background: #e2e8f0;
+}
+
 .production-bom-panel__close {
   border: 0;
   background: transparent;
@@ -78,6 +95,15 @@
   margin-top: 0;
 }
 
+.production-bom-panel .production-bom-modules {
+  margin: 0 0 8px;
+}
+
+.production-bom-panel .production-bom-modules > .panel-summary {
+  font-size: 13px;
+  font-weight: 650;
+}
+
 .production-bom-panel .production-bom-module {
   margin: 0 0 8px;
   padding: 10px 12px;
@@ -91,6 +117,28 @@
   color: #64748b;
   font-weight: 500;
   font-size: 12px;
+}
+
+.production-bom-group {
+  margin: 0 0 10px;
+}
+
+.production-bom-group:last-child {
+  margin-bottom: 0;
+}
+
+.production-bom-group__title {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 650;
+  color: #1e293b;
+}
+
+.production-bom-group__total {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 650;
+  color: #334155;
 }
 
 .production-bom-module__list {

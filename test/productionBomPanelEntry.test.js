@@ -6,6 +6,7 @@ import { resolveItemBom } from '../src/itemBom.js';
 import { describeSurfaceSelection } from '../src/selectionFeedback.js';
 
 const mainSource = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+const panelSource = readFileSync(new URL('../src/productionBomPanel.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 
 test('production BOM panel loads from main runtime; opens via toolbar toggle not auto', () => {
   assert.match(mainSource, /import \{ createProductionBomPanel \} from '\.\/productionBomPanel\.js'/);
@@ -14,6 +15,8 @@ test('production BOM panel loads from main runtime; opens via toolbar toggle not
   assert.doesNotMatch(mainSource, /rebuildSceneFromSetup[\s\S]{0,400}productionBomPanel\.open\(\)/);
   assert.doesNotMatch(mainSource, /rawBomDebug/);
   assert.doesNotMatch(mainSource, /rawBom/);
+  assert.match(panelSource, /data-role="bom-popout"/);
+  assert.match(panelSource, /view\.open\(''/);
 });
 
 test('wall selection feedback still describes width used by wall BOM recipes', () => {

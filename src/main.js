@@ -232,6 +232,7 @@ let currentModules = [];
 let currentStand = null;
 const productionBomPanel = createProductionBomPanel();
 productionBomPanel.setModulesSource(() => currentModules);
+productionBomPanel.setStandSource(() => currentStand);
 
 function syncProductionBomToggleButton() {
   if (!toggleProductionBomButton) return;
@@ -995,6 +996,7 @@ function changeContextPanelGlassMode(context, isGlass) {
   if (!selectedPanels.length) return;
 
   scene3d.applyGlassMode(selectedPanels, isGlass);
+  productionBomPanel.refresh();
   const panelCount = selectedPanels.length;
   selectionInfo.textContent = isGlass
     ? `${panelCount} panel cam panele çevrildi.`
@@ -1368,6 +1370,7 @@ floorTypeSelect.addEventListener('change', () => {
   if (!currentStand) return;
   currentStand = assignStandFloorItem(currentStand, floorTypeSelect.value);
   scene3d.setFloorType(floorTypeSelect.value);
+  if (productionBomPanel.isOpen()) productionBomPanel.refresh();
 });
 
 openModuleCatalogButton.addEventListener('click', () => {
@@ -1572,6 +1575,7 @@ async function persistActiveProject({ quiet = false } = {}) {
   activeProjectCreatedAt = stored.createdAt;
   await refreshProjectList(stored.id);
   if (!quiet) projectStatus.textContent = 'Kaydedildi: ' + stored.name;
+  if (productionBomPanel.isOpen()) productionBomPanel.refresh();
   return stored;
 }
 
