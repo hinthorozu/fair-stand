@@ -44,7 +44,7 @@ Item bootstrap alanları mapper’dan: `snapRequiresRuleId` + denorm `snapRequir
 
 ### 1.2 Tablo envanteri (ürün şeması)
 
-`models.py` + Alembic head **`0034_stand_panel_rail_height`** (2026-09). Junction’lar ayrı tablo sayılır.
+`models.py` + Alembic head **`0042_box_block_default_opacity`** (2026-09). Junction’lar ayrı tablo sayılır.
 
 | Tablo | Rol |
 |---|---|
@@ -170,6 +170,24 @@ CRM **Item Kayıtları** listesi veya detay → **Kopyala**.
 | **Kopyalanmaz** | Başka item’ların bu key’i child/panel olarak göstermesi (inbound referans) |
 
 **Karıştırma:** Stand projesindeki **Farklı Kaydet** (yeni proje UUID) ≠ item Kopyala.
+
+### 4.1c Serbest zemin kutu (`box-block` / `box_block`)
+
+Düz BoxGeometry küp; GLB yok. **Işıklı strafor (`illuminated-foam`)** ile karıştırma (SVG / wall-overlay / halo değil).
+
+| Parça | Ayar |
+|---|---|
+| Tip | `box-block`: `placement=free`, `collision=none`, `move_snap_cm=10` (çöp kutusu ile aynı free paket) |
+| Item | örn. `box_block`; kategori **Panel Ek Modül**; `catalog_visible=true`; `is_render=true`; `accepts_color=true` |
+| Ölçü | `fair_stand_item_dimensions` W/D/H (seed: 100×50×50) |
+| Renk | `default_color` + `accepts_color` |
+| Opacity | **`default_opacity`** (0–1; seed 0.85). Cam/`accepts_glass` değil |
+| Döndürme / Z | `rotation_step_deg` / `default_rotation_deg` / `default_z_cm` item master (DB) |
+| Preview | Katalog Önizlemeleri → kendi `module-drag-box-block` markup + CSS; item `preview_id` |
+
+**Sahne:** Katalogdan sürükle → W/D/H + opacity dialog; sonra sağ tık “Ölçü / opacity”. Instance override proje JSON’da kalır (`modules[].widthCm/depthCm/heightCm/opacity`).
+
+**Aynı tipte ek SKU:** Yalnız CRM Item + ölçüler; tip key sabit `box-block`.
 
 ### 4.2 Projektör → profil üstü (örnek)
 
@@ -948,6 +966,17 @@ Three.js **Y-up**. `placement.rotationZDeg` = kullanıcı/plan döndürmesi (Shi
 | **Nasıl** | Hex’i int olarak CRM |
 | **Sahne** | Yeni modül `surfaceState.color` başlangıcı |
 | **Karıştırma** | Proje içi kullanıcı rengi override eder |
+
+#### `default_opacity`
+
+| | |
+|---|---|
+| **Ne** | 0–1 sayı (Numeric); kolon default **1** |
+| **Neden** | Saydam kutu / önizleme başlangıç opaklığı (`box-block` vb.) |
+| **Nasıl** | CRM Item formu “Varsayılan opacity”; boş bırakma → 1 |
+| **Sahne** | Instance `modules[].opacity` yoksa item `defaultOpacity` |
+| **Karıştırma** | Tip `ghost_opacity` (ghost silüet) **değil**; `accepts_glass` cam modu **değil** |
+| **Kod** | `item_mapper.py` → `defaultOpacity`; `createBoxBlockModuleState` / `createBoxBlockModule` |
 
 #### `material`
 
@@ -1870,6 +1899,7 @@ Bunlar CRM item formunda yok; tasarım aracında kullanıcı/ proje kaydeder:
 
 - `modules[].placement` — `xCm`, `yCm`, `zCm`, `rotationZDeg`, `wallId`
 - Yüzey override’ları (renk, görsel asset id)
+- `modules[].widthCm` / `depthCm` / `heightCm` / `opacity` — kutu blok vb. instance ölçü/opacity
 - `stand` seçimi (zemin itemKey vb.)
 
 Kaynak: `fair_stand_projects.payload` (sunucu); tarayıcı IndexedDB önbellek.
@@ -1892,6 +1922,8 @@ Kaynak: `fair_stand_projects.payload` (sunucu); tarayıcı IndexedDB önbellek.
 | Panel ray = `wall_gap_cm` | `wall_gap` strafor–duvar; ray panel–panel dikiş |
 | Raf `overlaySnap: panel-seam` | Yok — kural `shelf-rail` |
 | Yeni SKU için JS contract satırı | Yok — aynı tipte CRM Item yeter |
+| `default_opacity` = ghost | Ghost = tip `ghost_opacity`; ürün saydamlığı = item `default_opacity` |
+| `box-block` = ışıklı strafor | Strafor = `illuminated-foam` (SVG wall-overlay); kutu = free BoxGeometry |
 | Pasif item’ı bootstrap’ta görmek | `is_active=false` → listede yok; `catalog_visible` sadece katalog UI |
 | `ruleTypes` JSON’u stand’da registry | Kurallar `rules[]` içinde `ruleTypeKey`; ayrı JS registry yok |
 | Proje **Farklı Kaydet** = item **Kopyala** | Farklı Kaydet = yeni proje UUID; Kopyala = yeni `item_key` + shallow child satırlar |
