@@ -1,11 +1,10 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-panel-image-size-tile",
-  "kind": "feature",
-  "summary": "A selected panel area starts at its real size. A smaller image size repeats across that area; a larger size overflows it. Fill and fit stay.",
+  "id": "fair-stand-archive-button-permission-then-setting",
+  "kind": "ui-control",
+  "summary": "Archive buttons stay hidden without permission. A settings switch can hide a permitted button and cannot reveal a denied one.",
   "owners": [
-    "src/imageFit.js",
-    "src/scene3d.js",
+    "src/runtimeSettings.js",
     "src/main.js"
   ],
   "sourceOfTruth": [
@@ -1060,12 +1059,11 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "Image size mode stores fit size, widthCm, optional heightCm, and the selected area size. The first size is the combined panel area. A smaller size repeats across that area; a larger size overflows it. Rect split shares one placement. Print BOM strip size is unchanged."
+    "notes": "Export, import, and save-as visibility is permission first, then the runtime settings switch. Save and delete stay permission-only. The settings switch is not a security lock and cannot reveal a denied button."
   },
   "tests": {
     "targeted": [
-      "test/imageFit.test.js",
-      "test/scene3dPublicContract.test.js",
+      "test/runtimeSettings.test.js",
       "test/relationshipBomEndToEnd.test.js",
       "test/relationshipBomJoints.test.js",
       "test/projectBom.test.js",
@@ -1080,16 +1078,16 @@
         "e2e/visible-ui-b.spec.mjs",
         "e2e/wall-flat-panel-items-contract.spec.mjs"
       ],
-      "reason": "Wall strip identity stays browser-covered. Image size tiling is unit-tested in test/imageFit.test.js."
+      "reason": "Wall strip identity stays browser-covered. Archive button permission and settings are unit-tested in test/runtimeSettings.test.js."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Size tiling changes how a selected panel or wall strip draws its image. Fill, fit, and print-area quantities stay."
+    "notes": "A permitted user no longer sees archive buttons that the settings switch turned off. Missing permission still hides them."
   },
   "migration": {
     "required": false,
-    "notes": "Image placement size is stored on the existing surface imageTransform. No schema or seed change."
+    "notes": "No schema or seed change. Button visibility stays on the existing runtime settings row."
   },
   "rollback": "Revert this PR."
 }

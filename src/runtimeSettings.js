@@ -61,15 +61,38 @@ export function isSaveAsButtonVisible() {
   return getRuntimeSettings().saveAsButtonVisible === true;
 }
 
+function permissionAllows(capabilities, key) {
+  return capabilities?.[key] !== false;
+}
+
+/**
+ * Permission is applied first. A denied permission stays hidden.
+ * The settings switch can hide a permitted button and cannot reveal a denied one.
+ */
+export function resolveArchiveButtonVisibility(capabilities = {}) {
+  return {
+    export: permissionAllows(capabilities, 'canExecute') && isExportButtonVisible(),
+    import: permissionAllows(capabilities, 'canCreate') && isImportButtonVisible(),
+    saveAs: permissionAllows(capabilities, 'canCreate') && isSaveAsButtonVisible(),
+  };
+}
+
+function writeButtonVisibility(button, visible) {
+  button.hidden = !visible;
+  if (visible) button.removeAttribute?.('aria-hidden');
+  else button.setAttribute?.('aria-hidden', 'true');
+}
+
 /** Markup starts hidden; call after bootstrap so buttons never flash then vanish. */
-export function applyArchiveButtonVisibility(documentRef) {
+export function applyArchiveButtonVisibility(documentRef, capabilities = {}) {
   const exportButton = documentRef?.querySelector?.('#export-project');
   const importButton = documentRef?.querySelector?.('#import-project');
   const saveAsButton = documentRef?.querySelector?.('#save-as-project');
   if (!exportButton || !importButton || !saveAsButton) {
     throw new Error('Fair Stand archive buttons are missing from the document.');
   }
-  exportButton.hidden = !isExportButtonVisible();
-  importButton.hidden = !isImportButtonVisible();
-  saveAsButton.hidden = !isSaveAsButtonVisible();
+  const visible = resolveArchiveButtonVisibility(capabilities);
+  writeButtonVisibility(exportButton, visible.export);
+  writeButtonVisibility(importButton, visible.import);
+  writeButtonVisibility(saveAsButton, visible.saveAs);
 }

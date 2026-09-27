@@ -5,6 +5,7 @@ import { loadCanonicalItemCatalog } from './registerCanonicalItemCatalog.mjs';
 import {
   applyArchiveButtonVisibility,
   formatImageUploadTooLargeMessage,
+  resolveArchiveButtonVisibility,
   getMaxImageUploadBytes,
   getMaxImageUploadMb,
   initializeRuntimeSettings,
@@ -70,10 +71,29 @@ test('archive buttons start hidden in markup', () => {
   assert.match(markup, /id=\\"save-as-project\\" type=\\"button\\" hidden/);
 });
 
+function fakeButton() {
+  const attributes = new Map();
+  return {
+    hidden: true,
+    getAttribute(name) {
+      return attributes.has(name) ? attributes.get(name) : null;
+    },
+    hasAttribute(name) {
+      return attributes.has(name);
+    },
+    setAttribute(name, value) {
+      attributes.set(name, value);
+    },
+    removeAttribute(name) {
+      attributes.delete(name);
+    },
+  };
+}
+
 test('applyArchiveButtonVisibility follows settings without showing then hiding', () => {
-  const exportButton = { hidden: true };
-  const importButton = { hidden: true };
-  const saveAsButton = { hidden: true };
+  const exportButton = fakeButton();
+  const importButton = fakeButton();
+  const saveAsButton = fakeButton();
   const documentRef = {
     querySelector(selector) {
       if (selector === '#export-project') return exportButton;
@@ -92,6 +112,52 @@ test('applyArchiveButtonVisibility follows settings without showing then hiding'
     assert.equal(exportButton.hidden, true);
     assert.equal(importButton.hidden, false);
     assert.equal(saveAsButton.hidden, true);
+    assert.equal(exportButton.getAttribute('aria-hidden'), 'true');
+    assert.equal(importButton.hasAttribute('aria-hidden'), false);
+  } finally {
+    loadCanonicalItemCatalog();
+  }
+});
+
+test('configurator applies archive visibility with capabilities and does not let permission reveal those buttons', () => {
+  const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const start = main.indexOf('function applyProjectCapabilityVisibility');
+  assert.ok(start >= 0);
+  const body = main.slice(start, main.indexOf('\n}', start));
+  assert.match(body, /hide\(saveProjectButton/);
+  assert.match(body, /hide\(deleteProjectButton/);
+  assert.match(body, /applyArchiveButtonVisibility\(document, capabilities\)/);
+  assert.doesNotMatch(body, /hide\(exportProjectButton/);
+  assert.doesNotMatch(body, /hide\(importProjectButton/);
+  assert.doesNotMatch(body, /hide\(saveAsProjectButton/);
+});
+
+test('a denied permission stays hidden even when the archive setting is on', () => {
+  const visible = {
+    exportButtonVisible: true,
+    importButtonVisible: true,
+    saveAsButtonVisible: true,
+  };
+  try {
+    initializeRuntimeSettings(canonicalSettings(visible));
+    const resolved = resolveArchiveButtonVisibility({ canCreate: false, canExecute: false });
+    assert.deepEqual(resolved, { export: false, import: false, saveAs: false });
+  } finally {
+    loadCanonicalItemCatalog();
+  }
+});
+
+test('an archive setting hides a button the permission would allow', () => {
+  try {
+    initializeRuntimeSettings(canonicalSettings({
+      exportButtonVisible: false,
+      importButtonVisible: false,
+      saveAsButtonVisible: true,
+    }));
+    const resolved = resolveArchiveButtonVisibility({ canCreate: true, canExecute: true });
+    assert.equal(resolved.export, false);
+    assert.equal(resolved.import, false);
+    assert.equal(resolved.saveAs, true);
   } finally {
     loadCanonicalItemCatalog();
   }

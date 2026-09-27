@@ -115,7 +115,6 @@ function startFairStandConfiguratorRuntime(options = {}) {
     throw new Error('Fair Stand host document is not available.');
   }
   const unbindProjectActionSaveGuard = bindProjectActionSaveGuard({ documentRef: document });
-  applyArchiveButtonVisibility(document);
 let jsZipModulePromise = null;
 
 async function loadJSZip() {
@@ -2667,10 +2666,9 @@ function applyProjectCapabilityVisibility() {
   };
   // New blank project needs create; existing open needs update. Allow either for Kaydet.
   hide(saveProjectButton, !(capabilities.canCreate || capabilities.canUpdate));
-  hide(saveAsProjectButton, !capabilities.canCreate);
-  hide(importProjectButton, !capabilities.canCreate);
   hide(deleteProjectButton, !capabilities.canDelete);
-  hide(exportProjectButton, !capabilities.canExecute);
+  // Permission is inside this call. The settings switch runs after it and cannot reveal a denied button.
+  applyArchiveButtonVisibility(document, capabilities);
 }
 
 applyProjectCapabilityVisibility();
