@@ -1,9 +1,21 @@
-import { getItem } from './items.js';
+import {
+  getFloorItem,
+  getItem,
+  resolveStandFloorItemKey,
+} from './items.js';
 import { resolveItemBom } from './itemBom.js';
 import {
-  applyEndToEndBomAdjustments,
-  detectEndToEndJoints,
+  applyGlassPanelSplit,
+  collectPanelSurfaces,
+  summarizeGlassMoves,
+} from './panelGlassBom.js';
+import {
+  applyCornerPanelSwap,
+  applyCornerPanelSwapToSurfaces,
+  applyRelationshipBomAdjustments,
+  detectRelationshipJoints,
 } from './relationshipBom.js';
+import { collectPrintAreas } from './printAreaBom.js';
 
 function freezeLine(line) {
   return Object.freeze({
@@ -31,7 +43,7 @@ function aggregateLines(lineLists) {
   return Array.from(aggregated.values(), (line) => Object.freeze(line));
 }
 
-function resolveModuleEntry(moduleState, index) {
+function resolveModuleEntry(moduleState, index, { swapCornerPanels = false } = {}) {
   const moduleId = moduleState?.id ?? null;
   const itemKey = moduleState?.itemKey ?? null;
 
@@ -52,7 +64,12 @@ function resolveModuleEntry(moduleState, index) {
   const name = item?.name ?? itemKey;
 
   try {
-    const lines = resolveItemBom(itemKey, 1).map(freezeLine);
+    const recipeLines = resolveItemBom(itemKey, 1);
+    const lines = swapCornerPanels ? applyCornerPanelSwap(recipeLines) : recipeLines;
+    const surfaces = swapCornerPanels
+      ? applyCornerPanelSwapToSurfaces(collectPanelSurfaces(moduleState))
+      : collectPanelSurfaces(moduleState);
+    const split = applyGlassPanelSplit(lines, surfaces);
     return Object.freeze({
       moduleId,
       index,
@@ -60,7 +77,8 @@ function resolveModuleEntry(moduleState, index) {
       name,
       type: item?.type ?? moduleState?.type ?? null,
       status: 'ok',
-      lines: Object.freeze(lines),
+      lines: Object.freeze(split.lines.map(freezeLine)),
+      glassMoved: Object.freeze(split.moved),
       message: null,
     });
   } catch (error) {
@@ -77,16 +95,61 @@ function resolveModuleEntry(moduleState, index) {
   }
 }
 
+function floorAreaM2(stand) {
+  const xCm = Number(stand?.xCm);
+  const yCm = Number(stand?.yCm);
+  if (!(xCm > 0) || !(yCm > 0)) return null;
+  return (xCm * yCm) / 10000;
+}
+
+function floorTileCount(stand, item) {
+  const xCm = Number(stand?.xCm);
+  const yCm = Number(stand?.yCm);
+  const tileW = Number(item?.dimensions?.widthCm);
+  const tileD = Number(item?.dimensions?.depthCm);
+  if (!(xCm > 0) || !(yCm > 0) || !(tileW > 0) || !(tileD > 0)) return null;
+  return Math.ceil(xCm / tileW) * Math.ceil(yCm / tileD);
+}
+
+function canonicalFloorUnit(unit) {
+  const text = String(unit ?? '').trim().toLowerCase().replaceAll('²', '2').replaceAll('^', '');
+  if (text === 'm2') return 'm2';
+  if (text === 'adet') return 'adet';
+  return null;
+}
+
 /**
- * Project modules → per-module BOM + unresolved + aggregated leaf totals.
- * Applies F-031 phase-1 end-to-end joint adjustments when placements join.
- * @param {Array<{ id?: string, itemKey?: string, type?: string, placement?: object, widthCm?: number }>} modules
+ * Selected stand floor → one aggregated line.
+ * Any item_type=floor uses its catalog unit: m2 is stand area, adet is whole tiles from dimensions.
  */
-export function resolveProjectBom(modules = []) {
-  const list = Array.isArray(modules) ? modules : [];
-  const moduleEntries = list.map((moduleState, index) => resolveModuleEntry(moduleState, index));
-  const okEntries = moduleEntries.filter((entry) => entry.status === 'ok');
-  const unresolved = moduleEntries
+export function resolveFloorBomLine(stand) {
+  if (!stand) return null;
+  const item = getFloorItem(resolveStandFloorItemKey(stand));
+  if (!item || item.type !== 'floor') return null;
+
+  const unit = canonicalFloorUnit(item.unit);
+  if (!unit) return null;
+
+  const quantity = unit === 'm2'
+    ? floorAreaM2(stand)
+    : floorTileCount(stand, item);
+  if (quantity == null || !(quantity > 0)) return null;
+
+  return Object.freeze({
+    itemKey: item.itemKey,
+    name: item.name,
+    quantity,
+    unit,
+    material: item.material ?? null,
+  });
+}
+
+function moduleIdentity(moduleState, index) {
+  return moduleState?.id ?? `idx:${index}`;
+}
+
+function unresolvedFrom(moduleEntries) {
+  return moduleEntries
     .filter((entry) => entry.status === 'unresolved')
     .map((entry) => Object.freeze({
       moduleId: entry.moduleId,
@@ -95,17 +158,54 @@ export function resolveProjectBom(modules = []) {
       name: entry.name,
       message: entry.message,
     }));
+}
 
-  const rawLines = aggregateLines(okEntries.map((entry) => entry.lines));
-  const joints = detectEndToEndJoints(list);
-  const adjusted = applyEndToEndBomAdjustments(rawLines, joints);
+/**
+ * Project modules → per-module BOM + unresolved + aggregated leaf totals.
+ * Applies locked end-to-end doubles and inner-corner connectors when placements join.
+ * @param {Array<{ id?: string, itemKey?: string, type?: string, placement?: object, widthCm?: number }>} modules
+ * @param {{ xCm?: number, yCm?: number, itemKey?: string } | null} stand
+ */
+export function resolveProjectBom(modules = [], stand = null) {
+  const list = Array.isArray(modules) ? modules : [];
+  const joints = detectRelationshipJoints(list);
+  let moduleEntries = list.map((moduleState, index) => resolveModuleEntry(moduleState, index));
+  let okEntries = moduleEntries.filter((entry) => entry.status === 'ok');
+  const preview = applyRelationshipBomAdjustments(
+    aggregateLines(okEntries.map((entry) => entry.lines)),
+    joints,
+  );
+
+  if (preview.appliedJointCount > 0 && preview.swapModuleIds.length > 0) {
+    const swapIds = new Set(preview.swapModuleIds);
+    moduleEntries = list.map((moduleState, index) => (
+      swapIds.has(moduleIdentity(moduleState, index))
+        ? resolveModuleEntry(moduleState, index, { swapCornerPanels: true })
+        : moduleEntries[index]
+    ));
+    okEntries = moduleEntries.filter((entry) => entry.status === 'ok');
+  }
+
+  const adjusted = preview.swapModuleIds.length > 0 && preview.appliedJointCount > 0
+    ? applyRelationshipBomAdjustments(
+      aggregateLines(okEntries.map((entry) => entry.lines)),
+      joints,
+    )
+    : preview;
+  const glassNotes = summarizeGlassMoves(okEntries.flatMap((entry) => entry.glassMoved ?? []));
+  const floorLine = resolveFloorBomLine(stand);
+  const lines = floorLine ? [...adjusted.lines, floorLine] : adjusted.lines;
 
   return Object.freeze({
     modules: Object.freeze(moduleEntries),
-    unresolved: Object.freeze(unresolved),
+    unresolved: Object.freeze(unresolvedFrom(moduleEntries)),
     joints: Object.freeze(joints),
-    relationshipNotes: Object.freeze(adjusted.notes),
+    relationshipNotes: Object.freeze([...adjusted.notes, ...glassNotes]),
     appliedJointCount: adjusted.appliedJointCount,
-    lines: Object.freeze(adjusted.lines.map(freezeLine)),
+    appliedEndToEndCount: adjusted.appliedEndToEndCount,
+    appliedCornerCount: adjusted.appliedCornerCount,
+    appliedTeeCount: adjusted.appliedTeeCount,
+    lines: Object.freeze(lines.map(freezeLine)),
+    printAreas: collectPrintAreas(list),
   });
 }

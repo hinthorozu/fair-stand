@@ -20,6 +20,7 @@ RULE_TYPE_SNAP = "snap"
 _INITIAL_ITEM_TYPES: tuple[tuple[str, str], ...] = (
     ("profile", "Profil"),
     ("panel", "Panel"),
+    ("panel-glass", "Cam panel"),
     ("separator-panel", "Ayırıcı panel"),
     ("shelf", "Raf"),
     ("led-floodlight", "Projektör"),

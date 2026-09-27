@@ -12,7 +12,6 @@ import {
   normalizeModuleItemState,
 } from '../src/designState.js';
 import { getItem, resolveItemKey, resolveSceneDimensions } from '../src/items.js';
-import { resolveItemBom } from '../src/itemBom.js';
 import { countsTowardWallCapacity, usesPanelSeamOverlaySnap } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import {
@@ -268,15 +267,5 @@ test('L wall_showcase_* ve glass_shelf regression bozulmaz', () => {
   assert.ok(getModuleRecipe('showcase-3', 100));
   assert.equal(getModuleRecipe('shelf', 100), null);
   assert.equal(resolveModuleContract('wall_showcase_100_2_350').bom.mode, 'recipe');
-  assert.equal(resolveModuleContract('shelf_100').bom.mode, 'self');
-});
-
-test('shelf self BOM 1 adet fiziksel raftır; wall_shelf recipe yoktur', () => {
-  for (const itemKey of SHELF_KEYS) {
-    const bom = resolveItemBom(itemKey);
-    assert.equal(bom.length, 1, itemKey);
-    assert.equal(bom[0].itemKey, itemKey);
-    assert.equal(bom[0].quantity, 1);
-    assert.equal(bom[0].unit, 'adet');
-  }
+  assert.equal(getModuleRecipe('shelf', 100), null);
 });

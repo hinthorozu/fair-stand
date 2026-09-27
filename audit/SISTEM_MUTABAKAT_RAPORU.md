@@ -28,7 +28,7 @@ Sistem çalışıyor. Karmaşa: eski audit / `current-system` / checklist kapanm
 | 7 | GLB hata sessiz | Kod | **B uygulandı.** `loadGltfScene` cache siler; `#stage-result`. F-024 kapalı. |
 | 8 | Belge gövdesi “şu anki sistem” | Belge | `current-system` 94 dosya: 53 tarihî şerit, 41 şeritsiz; gövde `catalogKey` / `DEPOT_*`. `definitions` zemin kartları `floorType` persist der; kod `stand.itemKey` yazar. |
 | 9 | Otomatik duvar feature contract yok | Kod | **D uygulandı.** `FEATURE_CONTRACTS.automaticWall`. F-029 kapalı. |
-| 10 | Proje Final BOM yok | Kod + ürün kararı | `resolveItemBom(itemKey)` var; `modules[]` toplayıcı yok. F-030 / F-014 / F-048. Miktar uydurulmaz. |
+| 10 | Proje Final BOM | Kod | **2026-09-27:** `resolveProjectBom` toplar (eklem, cam, zemin, baskı). F-030 / F-031 defterde OPEN; baza ve short-up eklem dışı. F-014 / F-048 durur. Miktar uydurulmaz. |
 
 ---
 
@@ -39,7 +39,7 @@ Sistem çalışıyor. Karmaşa: eski audit / `current-system` / checklist kapanm
 3. Self BOM bitmiş: `COAT_RACK`, `KETTLE`, `MINI_FRIDGE_AVANTI`, `PLASTIC_TRASH_BIN` — `unit: 'adet'`, `resolveItemBom` ×1.
 4. State: `designState.js` `MODULE_STATE_FACTORIES` (25 type). `createModuleStateFromDescriptor`. F-010 kapalı.
 5. Davranış: `moduleBehavior.js`. Overlay tv + foam. Bar taburesi / tekli koltuk 45°. Yan ekleme `allowsModuleSideInsert` ile menü ve catalog flush’ta zorlanır.
-6. BOM: recipe `moduleRecipes.js`; leaf `itemBom.js`. Debug tüketici `rawBomDebug.js` yalnız `DEV`+`?rawBom`. Proje Final BOM yok. Connector reçetede sabit (F-031).
+6. BOM: recipe `moduleRecipes.js`; leaf `itemBom.js`. Debug tüketici `rawBomDebug.js` yalnız `DEV`+`?rawBom`. Proje toplamı `resolveProjectBom`; eklem `relationshipBom.js` (F-030 / F-031 kodu var, defter OPEN, baza ve short-up yok).
 7. Özellik: `automatic-depot` + `automatic-wall`. Depo `contentCatalogKeys` dört ticari Item.
 8. Kalıcılık: snapshot `version: 1`. IndexedDB `fair-stand-configurator` v2; `openDb` sahibi `configuratorDb.js`.
 9. Kapı: `npm run contract:verify` + `ci.yml` (Version2 push/PR: gate → test → build → e2e). `package.json` lint/`npm audit` yok. Change-contract bu set: `visible-ui-b-with-ledger-a`.
@@ -75,7 +75,7 @@ F-041 / F-044: GitHub ayarı / uzak dal. Bu raporda yok.
 
 Ürün kararı: F-014 (18 katalog + foam `decision-required`), F-034 (4 attribution txt, tam envanter değil), F-043 (kök `LICENSE` yok — lisans dosyası, ruleset değil), F-048 (evrensel BOM kapısı yok).
 
-Kod/UI: F-015, F-018, F-021, F-022 (foam/kapı/ZIP e2e eksik), F-024, F-025, F-026, F-030, F-031, F-035, F-036/037, F-038, F-039, F-042, F-045, F-046. F-017, F-029 ve F-032 kapandı.
+Kod/UI: F-018, F-021, F-022 (foam/kapı/ZIP e2e eksik), F-035, F-042, F-046. F-015, F-017, F-024, F-025, F-026, F-029, F-032, F-036/037, F-038, F-039, F-045 kapandı. F-030 / F-031 kodu üretim listesinde; ikisi OPEN (baza ve short-up dışarıda, kapanış kaydı yok).
 
 ### Ledger’de numarasız sapmalar
 
@@ -143,7 +143,7 @@ F-000 Item sözleşmesi; F-010 factory; F-011 davranış merkezi; F-012 `SCENE_S
 
 ### E — Item / BOM (ürün kararı, uydurma yok)
 
-F-014 / F-030 / F-031 / F-048: kalan Extra self mi; takımlar recipe mi set self mi; proje Final BOM; köşe graph.
+F-014 / F-048 açık: kalan Extra self mi; takımlar recipe mi set self mi. F-030 / F-031 kodu var (`resolveProjectBom`, `relationshipBom.js`); kapanış yok. Baza ve short-up eklem dışı.
 
 ---
 

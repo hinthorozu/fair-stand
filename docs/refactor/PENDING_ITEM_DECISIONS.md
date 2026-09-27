@@ -118,10 +118,48 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 ### B.10. `is_render` = çizilir
 
 - **Durum:** KARAR — sahne child mesh henüz yok
-- **Karar (2026-09-25):** `is_render=true` ise sistem o SKU’yu çizer. Katalog yalnız sürükle-bırak. Reçetede kullanılan parça `is_render=false` bırakılmaz. `connector`, vitrin gövde, cam raf ve video duvar paneli de true. Zemin ve kullanılmayan `shelf_leg` false kalır. Bağlayıcının kendi modül fabrikası yoktur.
+- **Karar (2026-09-25):** `is_render=true` ise sistem o SKU’yu çizer. Katalog yalnız sürükle-bırak. Reçetede kullanılan parça `is_render=false` bırakılmaz. `connector`, vitrin gövde, cam raf ve video duvar paneli de true. Zemin false kalır. `shelf_leg` canlı raf reçetesinde liste satırıdır; `is_render` false kalır, sahne çizmez. Bağlayıcının kendi modül fabrikası yoktur.
 - **Bugün:** Reçeteli modül, gömülü `is_render` parçayı (`panel`, `separator-panel`, `base-top`, `counter-top`) yüzeye bağlar. Katalog bu kapıya girmez. `connector_*` false, mesh yok.
 - **Kaynak:** `ITEMS.md` § isRender; `FAIR_STAND_DB_KULLANIM_KILAVUZU.md` § `is_render`
 - **Yasak:** Çizimi katalog kartına bağlamak; `is_render=true` child’ı atlayıp kutu basmak; bir item ailesini kalıcı “çizilmez” ilan etmek
+
+### B.11. Panel → cam dönüşümü BOM’a yansır
+
+- **Durum:** KOD — cam ikizler katalogda; üretim listesi cam şeridi ikize yazar
+- **Karar (2026-09-26):** Sahnede bir panel cama çevrilirse üretim listesi reçete toplamını olduğu gibi basmaz. Cam adet, şeridin kendi anahtarından türetilir: `panel_xxx` → `panel_cam_xxx`, `panel_corner_xxx` → `panel_corner_cam_xxx`. Tip `panel-glass`, `is_render` false, malzeme `cam`, renk ve kapak kabulü yok. Ölçü kaynak panelden kopyalanır (derinlik 0,8 cm). Düz aile: `panel_48_5`, `panel_98`, `panel_147_5`, `panel_197`. Köşe ailesi: `panel_corner_42_5`, `panel_corner_92`, `panel_corner_142_5`, `panel_corner_192`. Örnek: `panel_197` reçetede 7; 4 şerit cam ise BOM = `panel_197` × 3 + `panel_cam_197` × 4. Cam adedi reçetedeki panel miktarını geçemez. Separatör paneli bu eşlemeye girmez. Cam SKU elle seçilmez; miktar uydurulmaz.
+- **Kaynak:** Üretim listesi; `src/panelGlassBom.js`. Seed `panel_cam_*` migration `0043_panel_glass_family`. Seed `panel_corner_cam_*` migration `0044_panel_corner_glass_family`.
+- **Yasak:** `cam_xxx` anahtarı; `panel_corner_cam` yerine `panel_cam_corner`; reçete adedinden fazla cam yazmak; separatör panelini bu ikize bağlamak
+
+### B.12. İç köşe — separatör duvarla aynı aparat, paneli değişmez
+
+- **Durum:** KOD — 2026-09-27; üretim listesi iç köşede uygular. Panel adedi reçeteden gelir (yerel seed separatör 50 hâlâ 1×48,5 + 3×98 ise liste onu basar; ×7 örneği canlı katalog satırıdır).
+- **Karar:** İç köşede separatör 50, `wall_50` köşesiyle aynı aparat / dikme / profil sonucunu verir. Separatör 100, `wall_100` ile aynı. Separatör paneli `panel_corner_*` olmaz. Sarmaşıklı separatör, aynı genişlikteki düz separatörle aynıdır; reçetedeki sarmaşık kalemi adediyle geçer.
+- **Örnek (`wall_200` + separatör, iç köşe):** Dikme 3, başlangıç 4, tekli 14, köşe aparatı 12, çiftli 0. Duvar paneli `panel_corner_192` × 7. Separatör 50: `profile_41_5` × 2, `separator_panel_48_5` × 7. Separatör 100: `profile_91` × 2, `separator_panel_98` × 7. `wall_200` profili `profile_190` × 2. Sarmaşık 50 ve 100 bu iki tablonun aynısıdır.
+- **Kaynak:** Üretim listesi köşe turu. Yan yana separatör kuralından ayrı.
+- **Yasak:** Separatör panelini köşe paneline çevirmek; separatör 50 reçetesindeki 7 tekliden aparat uydurmak; sarmaşığı düz separatörden farklı aparat vermek
+
+### B.13. Yan yana çiftli ve iç köşe — duvar ailesi
+
+- **Durum:** KOD — 2026-09-27. Baza ve short-up yok. F-031 defterde OPEN; kapanış kaydı yok.
+- **Karar:** Kilitli çift yalnız duvarın duvar, kapı, separatör (sarmaşık dahil) veya vitrin 2/3 ile birleşimidir. Yan yana: ortak dikme, çiftli aparat, paneller aynı kalır. İç köşe: ortak dikme, köşe aparatı, çiftli 0. Düz panel `panel_48_5/98/147_5/197` → `panel_corner_42_5/92/142_5/192`. Kapı ve vitrin `panel_98` → `panel_corner_92`. Separatör paneli değişmez. Kapı-kapı eklem değildir.
+- **Yan yana (tek eklem):** Duvar↔duvar ve duvar↔separatör: tekli 12 (6+6), çiftli 7, dikme 3, başlangıç 4. Duvar↔kapı: tekli 8 (6+2), çiftli 3. Duvar↔vitrin 3: tekli 12 (9+3), çiftli 4, başlangıç 6. Duvar↔vitrin 2: tekli 12 (8+4), çiftli 5, başlangıç 6.
+- **İç köşe (tek eklem):** Duvar tarafı −6 tekli +6 köşe, kalan tekli 7. Kapı −2/+2. Vitrin 3 −3/+3. Vitrin 2 −4/+4. İki duvar: tekli 14, köşe 12, dikme 3. Duvar+kapı: tekli 10, köşe 8. Duvar+vitrin 3: tekli 11, köşe 9. Duvar+vitrin 2: tekli 12, köşe 10. Separatör köşesi B.12.
+- **Ön / arka:** Köşe aparatı yalnız diğer modülün gövdesi bu modülün ön yüzündeyse yazılır. Arkada duran modül tekliyi korur, köşe almaz. Panel değişimi iki katılımcıda da olur. Dikme −1 durur. İki `wall_100`, arka yüz: tekli 20, köşe 6, başlangıç 4, dikme 3.
+- **T:** Çiftli 0. Dikme tasarrufu katılımcı sayısı − 1. Köşe, ön yüze bakan ucun kilitli iç köşe deltasıdır. Duvarın ortasına gelen dal: host düz paneli korur ve köşe ödemez, dal öder (dikme 3, çiftli 0, köşe 6). Aynı noktada iki doğrultuda duvar + dal tek T’dir (dikme 4, çiftli 0, köşe 16, başlangıç 8).
+- **Kaynak:** `src/relationshipBom.js`. Test: `test/relationshipBomJoints.test.js`.
+- **Yasak:** Aparat adedini kısa reçetedeki tekli sayısından ölçeklemek; baza veya short-up uydurmak; kapı-kapıya çiftli veya köşe yazmak
+
+### B.14. Üretim listesi — proje toplamı
+
+- **Durum:** KOD — 2026-09-27. F-030 defterde OPEN; kapanış kaydı yok.
+- **Karar:** `resolveProjectBom` sahnedeki modüllerin reçetelerini toplar, B.13 eklemini ve B.11 cam ayrımını uygular, zemin satırını ve baskı alanını ekler. Liste kayıt bitince yenilenir (elle kayıt ve yaklaşık 30 sn otomatik kayıt). Sürükleme anında yenilenmez.
+- **Baskı:** Görseller, Lightbox, Delikli branda ve Strafor logo, birleşik leaf toplamının içinde başlıktır. Ayrı kart değildir. Ölçü, modül genişliği × 50 cm şerit. m² = genişlik × yükseklik / 10000. Aynı ölçüde parçalar adette birleşir. Lightbox veya delikli branda üzerindeki görsel ikinci kez görsel sayılmaz. Boş başlık yazılmaz.
+- **Grup:** Satır item tipine göre gider. `shelf` ve `shelf-accessory` Raflar altındadır. Tanımsız tip Extra’ya düşer.
+- **Modüller:** Liste tek bir Modüller katında kapalı başlar. Kat açılınca her modül kendi içinde kapalı kalır; açık bırakılan modül kayıt yenilemesinde açık kalır.
+- **Pencere:** Sayfa içi kutu tarayıcıdan çıkamaz. Ayrı pencere diğer ekrana taşınır; kayıt o pencereyi de günceller.
+- **Raf:** Canlı katalogda `shelf_100` / `shelf_150` / `shelf_200` reçetedir; tahta `shelf_*_self`, ayak `shelf_leg`. Reçete parent satırını basmaz, çocukları basar. Seed hâlâ bu üç rafı reçetesiz yaprak sayar; liste sayfası canlı katalogu okur.
+- **Kaynak:** `src/projectBom.js`, `src/printAreaBom.js`, `src/bomLineGroups.js`, `src/productionBomPanel.js`.
+- **Yasak:** Baskı alanını ayrı “Baskı alanları” kartı yapmak; camı hem panel hem görsel saymak; baza veya short-up eklemi uydurmak
 
 ---
 ## C. Stand zarfı ve DB (Item tablosu değil)

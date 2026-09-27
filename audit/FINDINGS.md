@@ -55,8 +55,8 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 | F-027 | P1 | “Duvarı temizle” etiket/onay kapsamının ötesinde tüm modülleri siler | **CLOSED** — `audit/remediation/A10_F027_CLOSURE.md` |
 | F-028 | P1 | “Tüm Özellikleri Kaldır” `illuminated-foam` varken başarısız olabilir | **CLOSED** — `audit/remediation/A10_F028_CLOSURE.md` |
 | F-029 | P1 | Aktif otomatik-duvar bileşiminin açık özellik sözleşmesi yok | **CLOSED** — `FEATURE_CONTRACTS.automaticWall`; depo `contentCatalogKeys` dört Item |
-| F-030 | P1 | Kanonik proje düzeyi Final BOM üreteci yok | OPEN |
-| F-031 | P1 | İlişki/köşe bağlantı parçaları proje ilişkilerinden türetilmiyor | OPEN |
+| F-030 | P1 | Kanonik proje düzeyi Final BOM üreteci yok | **OPEN** — `resolveProjectBom` modül satırlarını, eklem düzeltmesini, cam ayrımını, zemini ve baskı alanını toplar. Kapanış kaydı yok |
+| F-031 | P1 | İlişki/köşe bağlantı parçaları proje ilişkilerinden türetilmiyor | **OPEN** — `relationshipBom.js` yan yana çiftli, iç köşe, T ve ön/arka yüzü uygular. Baza ve short-up dışarıda. Kapanış kaydı yok |
 | F-032 | P2 | IndexedDB şema/migration sahipliği store’lar arasında kopyalı | **CLOSED** — `configuratorDb.js` tek open/upgrade |
 | F-033 | P2 | `public/` altında ~30.64 MiB park edilmiş/atıfta bulunulmayan varlık üretimle gidiyor | **CLOSED** — `audit/remediation/A13_F033_CLOSURE.md` |
 | F-034 | P2 | Genel model/varlık kökeni ve lisans envanteri eksik | **OPEN / DECISION_REQUIRED** — envanter `docs/assets/PUBLIC_MODEL_ATTRIBUTION.md`; 9 GLB’de atıf yok |
@@ -79,7 +79,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 
 1. Kullanıcıya görünen (B): **uygulandı** — F-015, F-025, F-026, F-024, F-039. F-040 kalan ZIP/GLB e2e.
 2. Kalıcılık/import: F-021/F-022/F-035. F-032/F-036/F-037 kapandı.
-3. BOM (E, ürün kararı): F-014/F-030/F-031/F-048. F-029 kapandı (özellik sözleşmesi).
+3. BOM (E, ürün kararı): F-014/F-048 açık. F-030/F-031 kodu üretim listesinde; ikisi de OPEN (baza ve short-up F-031 dışında, kapanış kaydı yok). F-029 kapandı (özellik sözleşmesi).
 4. Mimari borç: F-018/F-047 kural. F-017 kapandı.
 5. Hijyen: F-034 kalan lisans, F-043 LICENSE, F-042, F-046 ESLint. F-045 arşivlendi. F-038 kapandı. F-044 kapsam dışı.
 

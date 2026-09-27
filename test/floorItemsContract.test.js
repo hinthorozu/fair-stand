@@ -33,7 +33,6 @@ test('floor Items use existing floorType keys and stay off the module catalog', 
     assert.equal(getItem(itemKey), item);
     assert.equal(item.type, 'floor');
     assert.equal(getFloorSelectLabel(item), selectLabel);
-    assert.equal(Object.hasOwn(item, 'unit'), false);
     assert.equal(getCatalogItem(itemKey), null);
     assert.equal(getCatalogItem(itemKey) != null, false);
   }

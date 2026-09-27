@@ -108,6 +108,35 @@ function moduleSurfaceColor(moduleState, item) {
   return itemDefaultColorCss(item ?? moduleState?.itemKey);
 }
 const PANEL_BACK_COLOR = 0x4b5563;
+
+function panelFaceBackingMaterial(isGlass) {
+  const glass = Boolean(isGlass);
+  return new THREE.MeshStandardMaterial({
+    color: glass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR,
+    roughness: glass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74,
+    metalness: 0,
+    transparent: glass,
+    opacity: glass ? PANEL_GLASS_BACKING_APPEARANCE.opacity : 1,
+    depthWrite: !glass,
+  });
+}
+
+function panelFaceSurfaceMaterial(surfaceState) {
+  const glass = Boolean(surfaceState?.isGlass);
+  return new THREE.MeshStandardMaterial({
+    color: surfaceState?.imageAssetId
+      ? 0xffffff
+      : (glass ? GLASS_APPEARANCE.color : surfaceState?.color),
+    roughness: glass ? GLASS_APPEARANCE.roughness : 0.72,
+    metalness: 0,
+    transparent: glass,
+    opacity: glass ? GLASS_APPEARANCE.opacity : 1,
+    depthWrite: !glass,
+    side: THREE.DoubleSide,
+    emissive: 0x000000,
+    emissiveIntensity: 0,
+  });
+}
 const PANEL_VERTICAL_CLEARANCE_M = 0;
 const MESH_FABRIC_OPACITY = 0.48;
 const FLOOR_COLOR = 0xe9edf1;
@@ -6847,29 +6876,23 @@ function createBaseModule(moduleState, moduleIndex, onSurfaceReady) {
     const faceHeight = panelHeightM;
     const faceDepth = 0.012;
 
+    const isGlass = Boolean(surfaceState.isGlass);
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(faceWidth, faceHeight, faceDepth),
-      new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74, metalness: 0 }),
+      panelFaceBackingMaterial(isGlass),
     );
     backing.position.copy(position);
     backing.rotation.y = rotationY;
     if (surfaceRole === 'front') backing.position.z -= 0.006;
     else if (surfaceRole === 'left') backing.position.x += 0.006;
     else backing.position.x -= 0.006;
-    backing.castShadow = true;
+    backing.castShadow = !isGlass;
     backing.receiveShadow = true;
     group.add(backing);
 
     const surface = new THREE.Mesh(
       new THREE.PlaneGeometry(faceWidth, faceHeight),
-      new THREE.MeshStandardMaterial({
-        color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
-        roughness: 0.72,
-        metalness: 0,
-        side: THREE.DoubleSide,
-        emissive: 0x000000,
-        emissiveIntensity: 0,
-      }),
+      panelFaceSurfaceMaterial(surfaceState),
     );
     surface.position.copy(position);
     surface.rotation.y = rotationY;
@@ -7024,29 +7047,23 @@ function createCounterModule(moduleState, moduleIndex, onSurfaceReady) {
     const faceHeight = panelHeightM;
     const faceDepth = 0.012;
 
+    const isGlass = Boolean(surfaceState.isGlass);
     const backing = new THREE.Mesh(
       new THREE.BoxGeometry(faceWidth, faceHeight, faceDepth),
-      new THREE.MeshStandardMaterial({ color: PANEL_BACK_COLOR, roughness: 0.74, metalness: 0 }),
+      panelFaceBackingMaterial(isGlass),
     );
     backing.position.copy(position);
     backing.rotation.y = rotationY;
     if (surfaceRole === 'front') backing.position.z -= 0.006;
     else if (surfaceRole === 'left') backing.position.x += 0.006;
     else backing.position.x -= 0.006;
-    backing.castShadow = true;
+    backing.castShadow = !isGlass;
     backing.receiveShadow = true;
     group.add(backing);
 
     const surface = new THREE.Mesh(
       new THREE.PlaneGeometry(faceWidth, faceHeight),
-      new THREE.MeshStandardMaterial({
-        color: surfaceState.imageAssetId ? 0xffffff : surfaceState.color,
-        roughness: 0.72,
-        metalness: 0,
-        side: THREE.DoubleSide,
-        emissive: 0x000000,
-        emissiveIntensity: 0,
-      }),
+      panelFaceSurfaceMaterial(surfaceState),
     );
     surface.position.copy(position);
     surface.rotation.y = rotationY;
@@ -7171,8 +7188,9 @@ function createLCounterModule(moduleState, moduleIndex, onSurfaceReady) {
   const surfaces=[];
   const addFace=(surfaceRole,panelLevel,surfaceState,faceWidthM,position,rotationY=0,outward=1)=>{
     if(!surfaceState)return;
-    const backing=new THREE.Mesh(new THREE.BoxGeometry(faceWidthM,panelHeightM,0.012),new THREE.MeshStandardMaterial({color:PANEL_BACK_COLOR,roughness:0.74,metalness:0})); backing.position.copy(position); backing.rotation.y=rotationY; backing.castShadow=true; backing.receiveShadow=true; group.add(backing);
-    const surface=new THREE.Mesh(new THREE.PlaneGeometry(faceWidthM,panelHeightM),new THREE.MeshStandardMaterial({color:surfaceState.imageAssetId?0xffffff:surfaceState.color,roughness:0.72,metalness:0,side:THREE.DoubleSide,emissive:0x000000,emissiveIntensity:0})); surface.position.copy(position); surface.rotation.y=rotationY; if(Math.abs(Math.sin(rotationY))<0.01)surface.position.z+=0.007*outward;else surface.position.x+=0.007*outward;
+    const isGlass=Boolean(surfaceState.isGlass);
+    const backing=new THREE.Mesh(new THREE.BoxGeometry(faceWidthM,panelHeightM,0.012),panelFaceBackingMaterial(isGlass)); backing.position.copy(position); backing.rotation.y=rotationY; backing.castShadow=!isGlass; backing.receiveShadow=true; group.add(backing);
+    const surface=new THREE.Mesh(new THREE.PlaneGeometry(faceWidthM,panelHeightM),panelFaceSurfaceMaterial(surfaceState)); surface.position.copy(position); surface.rotation.y=rotationY; if(Math.abs(Math.sin(rotationY))<0.01)surface.position.z+=0.007*outward;else surface.position.x+=0.007*outward;
     const selectionFrame=createSelectionFrame(faceWidthM,panelHeightM); selectionFrame.visible=false; surface.add(selectionFrame);
     surface.userData={kind:'surface',moduleType:'counter',counterShape:'L',selectionMode:'module',...surfaceCapabilityUserData(surfaceState?.itemKey ?? moduleState.itemKey),moduleIndex,moduleId:moduleState.id,widthCm,depthCm,stripIndex:panelLevel==='lower'?0:1,stripNumber:panelLevel==='lower'?1:2,surfaceRole,panelLevel,surfaceId:surfaceState.id,...bindRendererSurfaceState(surfaceState),selectionFrame,backing}; group.add(surface); surfaces.push(surface); onSurfaceReady?.(surface);
   };
