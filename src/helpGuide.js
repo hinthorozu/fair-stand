@@ -54,6 +54,7 @@ function listGuideSections() {
         <li><strong>Sil:</strong> Modülü sahneden kaldırır.</li>
         <li><strong>Çoğalt Sağ / Sol:</strong> Aynı modülün kopyasını belirtilen tarafa ekler.</li>
         <li><strong>Boyutlandır…:</strong> Işıklı Strafor seçiliyken mevcut X/Y ölçülerini açar; yeni ölçüler girildiğinde aynı modül konumu ve ışık rengi korunarak yeniden boyutlandırılır.</li>
+        <li><strong>Görseli ölçülendir…:</strong> Görsel atanmış panelde açılır. Başlangıç ölçüsü seçili alanın kendi ölçüsüdür. Küçültünce boşluklar tekrarlanır, büyütünce görsel alanın dışına taşar.</li>
         <li><strong>Cam Panele Çevir / Normal Panele Çevir:</strong> Uygun panelin cam durumunu değiştirir.</li>
         <li><strong>Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar:</strong> Uygun panel bloğunu tek parça opak Lightbox Kumaşa dönüştürür veya geri alır.</li>
         <li><strong>Mesh (Delikli) Brandaya Çevir / Mesh Brandadan Çıkar:</strong> Aynı panel bloğunu gerçek delik maskeli Mesh Branda olarak kullanır; deliklerden sahnenin arkası görünür.</li>
@@ -105,6 +106,7 @@ function listGuideSections() {
         <li><strong>Dosya Seç:</strong> Görseli aktif projenin görsel arşivine ekler. En fazla ${getMaxImageUploadMb()} MB; aşıldığında popup uyarır. Büyük görseller sahne için küçültülür; şeffaf arka plan korunur. SVG olduğu gibi kalır.</li>
         <li><strong>Doldur:</strong> Alanı tamamen kaplar; gerekirse görüntüyü kırpar.</li>
         <li><strong>Sığdır:</strong> Görselin tamamını seçili alana sığdırır.</li>
+        <li><strong>Ölçü:</strong> Sağ tık → Görseli ölçülendir. Seçili alanın kendi ölçüsü başlangıçtır; 400×200 alandaki görsel önce 400×200 oturur. 300×150 yazınca daralır ve boşluk tekrarlanır, 500×300 yazınca alanın dışına taşar. Tek panelde de aynıdır.</li>
         <li><strong>Kaldır:</strong> Görseli panel/bez üzerinden kaldırır; kütüphaneden silmez.</li>
         <li>Dikdörtgen çoklu panel seçiminde tek büyük görsel panellere bölünerek uygulanabilir.</li>
         <li>Lightbox Kumaşa ve Mesh Brandaya görsel tek parça olarak uygulanır.</li>

@@ -1036,6 +1036,7 @@ const moduleContextMenu = createModuleContextMenu({
   onDelete: deleteContextModule,
   onDuplicate: duplicateContextModule,
   onResize: resizeContextIlluminatedFoam,
+  onImageResize: resizeContextImage,
   onAdd: addCatalogModule,
   onValidateAddBatch: validateCatalogAddBatch,
   onGlassModeChange: changeContextPanelGlassMode,
@@ -1865,6 +1866,101 @@ function getSvgAspectRatioFromText(svgText) {
   const width = Number.parseFloat(svg.getAttribute('width'));
   const height = Number.parseFloat(svg.getAttribute('height'));
   return width > 0 && height > 0 ? width / height : 4;
+}
+
+function formatCm(value) {
+  const rounded = Math.round(Number(value) * 10) / 10;
+  if (!Number.isFinite(rounded)) return '';
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
+function describeSizeResult(result) {
+  const sizeLabel = result.heightCm
+    ? `${formatCm(result.widthCm)} × ${formatCm(result.heightCm)} cm`
+    : `${formatCm(result.widthCm)} cm genişlik, yükseklik orandan`;
+  const areaLabel = `${formatCm(result.areaWidthCm)} × ${formatCm(result.areaHeightCm)} cm`;
+  if (!result.heightCm || !result.areaWidthCm || !result.areaHeightCm) {
+    return `Görsel seçili ${areaLabel} alana ${sizeLabel} uygulandı.`;
+  }
+  const widthRatio = result.areaWidthCm / result.widthCm;
+  const heightRatio = result.areaHeightCm / result.heightCm;
+  if (widthRatio > 1.001 || heightRatio > 1.001) {
+    return `Görsel ${sizeLabel} ölçüye daraltıldı. ${areaLabel} alanda boşluklar tekrarla doldu.`;
+  }
+  if (widthRatio < 0.999 || heightRatio < 0.999) {
+    return `Görsel ${sizeLabel}. ${areaLabel} alandan taşıyor.`;
+  }
+  return `Görsel seçili alana ${sizeLabel} olarak oturdu.`;
+}
+
+function requestImageAreaDimensions(area) {
+  const areaWidth = formatCm(area.areaWidthCm);
+  const areaHeight = formatCm(area.areaHeightCm);
+  const widthValue = formatCm(area.currentWidthCm);
+  const heightValue = formatCm(area.currentHeightCm);
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.48);display:grid;place-items:center;padding:20px';
+    overlay.setAttribute('role', 'presentation');
+    const form = document.createElement('form');
+    form.setAttribute('role', 'dialog');
+    form.setAttribute('aria-modal', 'true');
+    form.setAttribute('aria-labelledby', 'image-area-size-title');
+    form.style.cssText = 'width:min(400px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
+    form.innerHTML = [
+      '<strong id="image-area-size-title" style="font-size:16px">Görsel ölçüsü</strong>',
+      `<span style="color:#64748b">Seçili alan ${areaWidth} × ${areaHeight} cm. Görsel önce bu ölçüde oturur. Küçültürsen boşluklar tekrarlanır, büyütürsen taşar.</span>`,
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">',
+      `<label style="display:grid;gap:5px">Genişlik (cm)<input name="width" type="number" min="1" max="5000" step="0.1" value="${widthValue}" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label>`,
+      `<label style="display:grid;gap:5px">Yükseklik (cm)<input name="height" type="number" min="1" max="5000" step="0.1" value="${heightValue}" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label>`,
+      '</div>',
+      '<div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" data-cancel>İptal</button><button type="submit" class="primary">Uygula</button></div>',
+    ].join('');
+    overlay.appendChild(form);
+    document.body.appendChild(overlay);
+    const onKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      finish(null);
+    };
+    const finish = (value) => {
+      document.removeEventListener('keydown', onKeyDown, true);
+      overlay.remove();
+      resolve(value);
+    };
+    form.querySelector('[data-cancel]').addEventListener('click', () => finish(null));
+    overlay.addEventListener('pointerdown', (event) => {
+      if (event.target === overlay) finish(null);
+    });
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const widthCm = Number(data.get('width'));
+      const heightCm = Number(data.get('height'));
+      if (!(widthCm >= 1 && widthCm <= 5000 && heightCm >= 1 && heightCm <= 5000)) return;
+      finish({ widthCm, heightCm });
+    });
+    document.addEventListener('keydown', onKeyDown, true);
+    form.querySelector('input[name="width"]')?.focus();
+    form.querySelector('input[name="width"]')?.select();
+  });
+}
+
+async function resizeContextImage(context) {
+  const block = scene3d.resolveImageBlock(context?.surfaceId);
+  const area = scene3d.describeImageSizeTarget(block);
+  if (!area.ok) {
+    selectionInfo.textContent = area.message;
+    return;
+  }
+  const dimensions = await requestImageAreaDimensions(area);
+  if (!dimensions) return;
+  const result = scene3d.applySizeImageAsset(block, area.assetId, dimensions);
+  if (!result.ok) {
+    selectionInfo.textContent = result.message;
+    return;
+  }
+  selectionInfo.textContent = describeSizeResult(result);
 }
 
 function requestIlluminatedFoamDimensions(defaultWidthCm, defaultHeightCm) {
