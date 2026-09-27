@@ -18,7 +18,7 @@ import {
 } from './designState.js';
 import { deleteImageAsset, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
 import { clearImageAssetReferences, countImageAssetReferences, remapImageAssetReferences } from './imageAssetReferences.js';
-import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty } from './projectRemote.js';
+import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, saveProjectCommercial, uploadProjectRender } from './projectRemote.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu, allowsModuleSideInsert } from './moduleContextMenu.js';
 import { createModuleDragSidebar } from './moduleDragSidebar.js';
@@ -68,6 +68,8 @@ import { getFairStandHostDocument, getFairStandHostWindow } from './hostDocument
 import { bootstrapFairStandCatalog } from './catalogBootstrap.js';
 import { bindProjectActionSaveGuard } from './projectActionSaveGuard.js';
 import { createProductionBomPanel } from './productionBomPanel.js';
+import { createCostPreviewPanel } from './costPreviewPanel.js';
+import { buildQuotePackage } from './quotePackage.js';
 
 export function startFairStandConfigurator(options = {}) {
   let cancelled = false;
@@ -132,6 +134,7 @@ const viewportEmpty = document.querySelector('#viewport-empty');
 const viewportToolbar = document.querySelector('#viewport-toolbar');
 const toggleProductionBomButton = document.querySelector('#toggle-production-bom');
 const renderCurrentViewButton = document.querySelector('#render-current-view');
+const toggleCostPreviewButton = document.querySelector('#toggle-cost-preview');
 const standTypeButtons = [...document.querySelectorAll('[data-stand-type]')];
 const standSizeXInput = document.querySelector('#stand-size-x');
 const standSizeYInput = document.querySelector('#stand-size-y');
@@ -249,6 +252,27 @@ toggleProductionBomButton?.addEventListener('click', () => {
   if (productionBomPanel.isOpen()) productionBomPanel.close();
   else productionBomPanel.open();
 });
+
+const costPreviewPanel = createCostPreviewPanel();
+costPreviewPanel.setModulesSource(() => currentModules);
+costPreviewPanel.setStandSource(() => currentStand);
+costPreviewPanel.setProjectSource(() => ({ id: activeProjectId, version: 1 }));
+
+function syncCostPreviewToggleButton() {
+  if (!toggleCostPreviewButton) return;
+  const open = costPreviewPanel.isOpen();
+  toggleCostPreviewButton.setAttribute('aria-pressed', String(open));
+  toggleCostPreviewButton.classList.toggle('is-active', open);
+}
+
+costPreviewPanel.setOnVisibilityChange(() => {
+  syncCostPreviewToggleButton();
+});
+
+toggleCostPreviewButton?.addEventListener('click', () => {
+  if (costPreviewPanel.isOpen()) costPreviewPanel.close();
+  else costPreviewPanel.open();
+});
 let selectedStandType = null;
 let activeAssetId = null;
 let pendingCatalogAdds = [];
@@ -275,6 +299,34 @@ document.body.appendChild(assetContextMenu);
 function getAssetUrl(assetId) {
   return imageAssets.get(assetId)?.url ?? null;
 }
+
+costPreviewPanel.setOnPrepareQuote(async ({ snapshot, selectedFixedLines }) => {
+  const project = buildProjectSnapshot();
+  let standRenderAssetId = null;
+  let renderNote = ' Giriş olmadığı için render sunucuya yazılmadı.';
+  if (isProjectRemoteEnabled()) {
+    await saveProject(project, { syncAssets: 'none' });
+    const captured = await scene3d.captureCurrentViewPng({ scale: 3 });
+    if (!captured?.ok || !captured.blob) {
+      throw new Error(captured?.message || 'Render alınamadı.');
+    }
+    standRenderAssetId = crypto.randomUUID();
+    await uploadProjectRender(project.id, captured.blob, standRenderAssetId);
+    renderNote = ' Render proje görseline kaydedildi.';
+  }
+  const quotePackage = buildQuotePackage({
+    snapshot,
+    projectId: project.id,
+    standRenderAssetId,
+  });
+  await saveProjectCommercial(project.id, {
+    selectedFixedLines,
+    snapshot,
+    standRenderAssetId,
+    quotePackage,
+  });
+  return `Maliyet anlık görüntüsü kaydedildi.${renderNote}`;
+});
 
 const scene3d = createStandScene(
   viewport,
@@ -406,6 +458,7 @@ function rebuildWall({ resetView = true } = {}) {
   scene3d.buildWall(currentModules, { resetView });
   renderCurrentWallResult();
   if (productionBomPanel.isOpen()) productionBomPanel.refresh();
+  if (costPreviewPanel.isOpen()) costPreviewPanel.refresh();
 }
 
 function findContextModuleIndex(context) {
@@ -997,6 +1050,7 @@ function changeContextPanelGlassMode(context, isGlass) {
 
   scene3d.applyGlassMode(selectedPanels, isGlass);
   productionBomPanel.refresh();
+  if (costPreviewPanel.isOpen()) costPreviewPanel.refresh();
   const panelCount = selectedPanels.length;
   selectionInfo.textContent = isGlass
     ? `${panelCount} panel cam panele çevrildi.`
@@ -1371,6 +1425,7 @@ floorTypeSelect.addEventListener('change', () => {
   currentStand = assignStandFloorItem(currentStand, floorTypeSelect.value);
   scene3d.setFloorType(floorTypeSelect.value);
   if (productionBomPanel.isOpen()) productionBomPanel.refresh();
+  if (costPreviewPanel.isOpen()) costPreviewPanel.refresh();
 });
 
 openModuleCatalogButton.addEventListener('click', () => {
@@ -1576,6 +1631,7 @@ async function persistActiveProject({ quiet = false } = {}) {
   await refreshProjectList(stored.id);
   if (!quiet) projectStatus.textContent = 'Kaydedildi: ' + stored.name;
   if (productionBomPanel.isOpen()) productionBomPanel.refresh();
+  if (costPreviewPanel.isOpen()) costPreviewPanel.refresh();
   return stored;
 }
 
@@ -1641,6 +1697,7 @@ async function restoreProject(project) {
     standSizeYInput.value = '';
     setStandEditingEnabled(false);
     productionBomPanel.close();
+    costPreviewPanel.close();
     updateStageCreateState();
   }
 
@@ -1679,6 +1736,7 @@ function resetToFirstOpenState() {
   viewportToolbar.hidden = true;
   setStandEditingEnabled(false);
   productionBomPanel.close();
+  costPreviewPanel.close();
   updateStageCreateState();
   syncColorEditorFromHex('#ffffff');
   selectionInfo.textContent = DEFAULT_SELECTION_HINT;
@@ -2590,6 +2648,7 @@ void refreshProjectList()
   return function stopFairStandConfigurator() {
     autosaveController?.disable?.();
     productionBomPanel?.destroy?.();
+    costPreviewPanel?.destroy?.();
     scene3d?.dispose?.();
     unbindProjectActionSaveGuard?.();
   };

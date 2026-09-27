@@ -64,6 +64,7 @@ class ProjectDetail(ProjectSummary):
     payload: dict[str, Any]
     created_by: UUID | None
     assets: list[AssetView]
+    commercial: dict[str, Any] | None
 
 
 def _now() -> datetime:
@@ -103,6 +104,7 @@ def _detail(row: FairStandProjectModel) -> ProjectDetail:
         payload=dict(row.payload or {}),
         created_by=row.created_by,
         assets=[_asset_view(asset) for asset in row.assets],
+        commercial=dict(row.commercial) if isinstance(row.commercial, dict) else None,
     )
 
 
@@ -212,6 +214,22 @@ class ProjectService:
             row.payload = _normalize_payload(payload)
         if version is not None:
             row.version = max(1, int(version))
+        row.updated_at = _now()
+        self._session.flush()
+        self._session.refresh(row)
+        return _detail(row)
+
+    def save_commercial(
+        self,
+        *,
+        project_id: UUID,
+        organization_id: UUID,
+        commercial: dict[str, Any],
+    ) -> ProjectDetail:
+        row = self._get_org_project(project_id, organization_id)
+        if row is None:
+            raise ProjectServiceError("Project not found", status_code=404)
+        row.commercial = commercial
         row.updated_at = _now()
         self._session.flush()
         self._session.refresh(row)

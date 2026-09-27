@@ -304,6 +304,61 @@ export async function deleteProjectAsset(projectId, assetId) {
   }
 }
 
+const COMMERCIAL_STORAGE_KEY = 'fair-stand.commercial.v1';
+
+function readCommercialStore() {
+  try {
+    const raw = globalThis.localStorage?.getItem(COMMERCIAL_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') return parsed;
+    }
+  } catch {
+    // bellek yedeği yok; çağıran boş kabul eder
+  }
+  return {};
+}
+
+function writeCommercialStore(state) {
+  try {
+    globalThis.localStorage?.setItem(COMMERCIAL_STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // depolama kapalıysa uzak kayıt yine denenir
+  }
+}
+
+export async function uploadProjectRender(projectId, blob, assetId) {
+  if (!remoteEnabled()) {
+    const error = new Error('Render kaydı için giriş gerekir.');
+    error.code = 'remote-disabled';
+    throw error;
+  }
+  const form = new FormData();
+  form.append('asset_id', assetId);
+  form.append('name', 'stand-render.png');
+  form.append('file', blob, 'stand-render.png');
+  return apiFetch(`/${projectId}/assets`, { method: 'POST', body: form });
+}
+
+export async function saveProjectCommercial(projectId, commercial) {
+  const store = readCommercialStore();
+  store[projectId] = commercial;
+  writeCommercialStore(store);
+  if (!remoteEnabled()) return { commercial, stored: 'local' };
+  return apiFetch(`/${projectId}/commercial`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(commercial),
+  });
+}
+
+export async function loadProjectCommercial(projectId) {
+  if (remoteEnabled()) {
+    return apiFetch(`/${projectId}/commercial`);
+  }
+  return { commercial: readCommercialStore()[projectId] ?? null };
+}
+
 export async function deleteProject(projectId) {
   if (remoteEnabled()) {
     await apiFetch(`/${projectId}`, { method: 'DELETE' });

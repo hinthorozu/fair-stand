@@ -66,6 +66,20 @@ class ProjectUpdateBody(BaseModel):
     payload: ProjectPayloadBody | None = None
 
 
+class FixedCostLineBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    productId: str = Field(min_length=1, max_length=64)
+    quantity: str | float | int | None = None
+
+
+class CommercialBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    selectedFixedLines: list[FixedCostLineBody] = Field(default_factory=list)
+    snapshot: dict[str, Any] | None = None
+    standRenderAssetId: UUID | None = None
+    quotePackage: dict[str, Any] | None = None
+
+
 def _raise_service(exc: ProjectServiceError) -> None:
     raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
 
@@ -103,6 +117,7 @@ def _detail_json(project: ProjectDetail) -> dict[str, Any]:
         "payload": project.payload,
         "stand": project.payload.get("stand"),
         "modules": project.payload.get("modules") or [],
+        "commercial": project.commercial,
         "assets": [_asset_json(asset) for asset in project.assets],
     }
 
@@ -197,6 +212,36 @@ def delete_project(
     except ProjectServiceError as exc:
         _raise_service(exc)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/{project_id}/commercial")
+def get_project_commercial(
+    project_id: UUID,
+    auth: AuthContext = Depends(require_permission(PERMISSION_PROJECTS_READ)),
+    service: ProjectService = Depends(get_project_service),
+) -> dict[str, Any]:
+    project = service.get_project(project_id, auth.organization_id)
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    return {"commercial": project.commercial}
+
+
+@router.put("/{project_id}/commercial")
+def put_project_commercial(
+    project_id: UUID,
+    body: CommercialBody,
+    auth: AuthContext = Depends(require_permission(PERMISSION_PROJECTS_UPDATE)),
+    service: ProjectService = Depends(get_project_service),
+) -> dict[str, Any]:
+    try:
+        project = service.save_commercial(
+            project_id=project_id,
+            organization_id=auth.organization_id,
+            commercial=body.model_dump(mode="json"),
+        )
+    except ProjectServiceError as exc:
+        _raise_service(exc)
+    return _detail_json(project)
 
 
 @router.post("/{project_id}/assets", status_code=status.HTTP_201_CREATED)

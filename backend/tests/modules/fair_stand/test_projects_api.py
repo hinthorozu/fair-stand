@@ -220,3 +220,41 @@ def test_asset_download_accepts_turkish_filename(client, auth_headers, tmp_path,
     disposition = download.headers.get("content-disposition", "")
     assert "filename=" in disposition
     assert "filename*=UTF-8''" in disposition
+
+
+def test_commercial_snapshot_survives_design_update(client, auth_headers):
+    created = client.post(
+        "/api/v1/fair-stand/projects",
+        headers=auth_headers,
+        json={"name": "Maliyet", "payload": {"stand": {"standType": "island"}, "modules": []}},
+    )
+    assert created.status_code == 201, created.text
+    project_id = created.json()["id"]
+    assert created.json()["commercial"] is None
+
+    saved = client.put(
+        f"/api/v1/fair-stand/projects/{project_id}/commercial",
+        headers=auth_headers,
+        json={
+            "selectedFixedLines": [{"productId": "nakliye", "quantity": "1"}],
+            "snapshot": {"total": None, "lines": []},
+            "standRenderAssetId": None,
+            "quotePackage": {"standProjectId": project_id, "standRenderUrl": None},
+        },
+    )
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["commercial"]["selectedFixedLines"][0]["productId"] == "nakliye"
+    assert saved.json()["payload"]["stand"]["standType"] == "island"
+
+    updated = client.put(
+        f"/api/v1/fair-stand/projects/{project_id}",
+        headers=auth_headers,
+        json={"name": "Maliyet", "payload": {"stand": {"standType": "inline"}, "modules": [{"id": "m1"}]}},
+    )
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["stand"]["standType"] == "inline"
+    assert updated.json()["commercial"]["snapshot"]["total"] is None
+
+    loaded = client.get(f"/api/v1/fair-stand/projects/{project_id}/commercial", headers=auth_headers)
+    assert loaded.status_code == 200
+    assert loaded.json()["commercial"]["quotePackage"]["standProjectId"] == project_id

@@ -676,6 +676,7 @@ class FairStandProjectModel(Base):
     name: Mapped[str] = mapped_column(String(256), nullable=False)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     payload: Mapped[dict] = mapped_column(PayloadJSON, nullable=False)
+    commercial: Mapped[dict | None] = mapped_column(PayloadJSON, nullable=True)
     created_by: Mapped[UUID | None] = mapped_column(Uuid, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
