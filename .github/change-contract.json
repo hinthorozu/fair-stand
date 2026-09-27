@@ -50,6 +50,7 @@
       "src/main.js",
       "src/moduleMove.js",
       "src/mountFairStand.js",
+      "src/productionBomPanel.js",
       "src/scene3d.js",
       "src/style.css",
       "src/viewCube.js",
