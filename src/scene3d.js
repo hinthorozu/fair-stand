@@ -55,7 +55,7 @@ import {
 } from './surfaceStateBinding.js';
 import { createViewCube } from './viewCube.js';
 import { isEditableKeyboardTarget, resolveViewKeyboardShortcut } from './viewKeyboardShortcuts.js';
-import { computeImageFit } from './imageFit.js';
+import { computeGroupSizeSlice, computeImageFit, computeImageSizeTile, resolveImageTileHeightCm } from './imageFit.js';
 import { formatPlacementFeedbackMessage, hasPlacementFeedbackPointer } from './placementFeedback.js';
 import { SCENE_SURROUND_M } from './sceneDimensions.js';
 import {
@@ -1922,6 +1922,12 @@ export function createStandScene(
       fabricLightingOn: supportsLightbox
         ? Boolean(surface.userData.surfaceState?.fabricLightingOn && surface.userData.surfaceState?.fabricType !== 'mesh')
         : false,
+      hasImage: Boolean(
+        surface
+        && surface.userData.acceptsImage !== false
+        && surface.userData.surfaceState?.imageAssetId
+        && !surface.userData.surfaceState?.fabricGroupId,
+      ),
       clientX: event.clientX,
       clientY: event.clientY,
     };
@@ -3998,6 +4004,49 @@ export function createStandScene(
         }
 
         const fit = surfaceState.imageTransform?.fit;
+        if (fit === 'size') {
+          const image = sourceTexture.image;
+          const transform = surfaceState.imageTransform;
+          const widthCm = Number(transform.widthCm);
+          const heightCm = resolveImageTileHeightCm(
+            widthCm,
+            transform.heightCm,
+            image?.naturalWidth ?? image?.width,
+            image?.naturalHeight ?? image?.height,
+          );
+          const groupWidthCm = Number(transform.groupWidthCm);
+          const groupHeightCm = Number(transform.groupHeightCm);
+          const hasGroup = Number.isFinite(groupWidthCm) && groupWidthCm > 0
+            && Number.isFinite(groupHeightCm) && groupHeightCm > 0
+            && Number(transform.regionWidth) > 0
+            && Number(transform.regionHeight) > 0;
+          const areaWidthCm = hasGroup ? groupWidthCm : Number(mesh.geometry?.parameters?.width) * 100;
+          const areaHeightCm = hasGroup ? groupHeightCm : Number(mesh.geometry?.parameters?.height) * 100;
+          const tile = computeImageSizeTile(areaWidthCm, areaHeightCm, widthCm, heightCm);
+          const placement = hasGroup
+            ? computeGroupSizeSlice({
+              startX: transform.regionStartX,
+              startY: transform.regionStartY,
+              width: transform.regionWidth,
+              height: transform.regionHeight,
+            }, tile)
+            : tile;
+          if (!placement) {
+            sourceTexture.dispose();
+            return;
+          }
+          sourceTexture.colorSpace = THREE.SRGBColorSpace;
+          sourceTexture.wrapS = THREE.RepeatWrapping;
+          sourceTexture.wrapT = THREE.RepeatWrapping;
+          sourceTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          sourceTexture.center.set(0, 0);
+          sourceTexture.repeat.set(placement.repeatX, placement.repeatY);
+          sourceTexture.offset.set(placement.offsetX, placement.offsetY);
+          sourceTexture.rotation = 0;
+          sourceTexture.needsUpdate = true;
+          assignTexture(mesh, sourceTexture);
+          return;
+        }
         if (fit === 'cover' || fit === 'contain') {
           const targetAspect = mesh.geometry.parameters.width / mesh.geometry.parameters.height;
           const canvas = createFittedCanvas(sourceTexture.image, targetAspect, fit);
@@ -4106,6 +4155,164 @@ export function createStandScene(
 
     const assetId = mesh.userData.surfaceState?.imageAssetId;
     if (assetId) loadImageOnSurface(mesh, assetId);
+  }
+
+  function imageLayoutItems(meshes) {
+    return meshes.map((mesh) => ({
+      mesh,
+      moduleIndex: mesh.userData.moduleIndex,
+      stripIndex: mesh.userData.stripIndex,
+      width: mesh.geometry.parameters.width,
+      height: mesh.geometry.parameters.height,
+    }));
+  }
+
+  function resolveImageBlock(surfaceId) {
+    const seed = surfaceMeshes.find((surface) => surface.userData.surfaceId === surfaceId);
+    if (!seed || seed.userData.acceptsImage === false) return [];
+    const assetId = seed.userData.surfaceState?.imageAssetId;
+    if (!assetId || seed.userData.surfaceState?.fabricGroupId) return [];
+
+    const selected = [...selectedSurfaces].filter((mesh) => (
+      mesh.userData.acceptsImage !== false
+      && !mesh.userData.surfaceState?.fabricGroupId
+      && mesh.userData.surfaceState?.imageAssetId === assetId
+    ));
+    if (selected.includes(seed) && selected.length > 1) return selected;
+
+    const sameAsset = surfaceMeshes.filter((mesh) => (
+      mesh.userData.acceptsImage !== false
+      && !mesh.userData.surfaceState?.fabricGroupId
+      && mesh.userData.surfaceState?.imageAssetId === assetId
+    ));
+    if (sameAsset.length > 1 && createRectImageLayout(imageLayoutItems(sameAsset)).ok) {
+      return sameAsset;
+    }
+    return [seed];
+  }
+
+  function describeImageSizeTarget(meshOrMeshes) {
+    const meshes = normalizeMeshes(meshOrMeshes).filter((mesh) => mesh?.material && mesh.userData.acceptsImage !== false);
+    if (!meshes.length) {
+      return { ok: false, message: 'Ölçülendirmek için önce bir panel seç.' };
+    }
+    if (meshes.some((mesh) => mesh.userData.surfaceState?.fabricGroupId)) {
+      return { ok: false, message: 'Lightbox/Mesh kaplamasının ölçüsü bu yoldan değişmez.' };
+    }
+    const assetIds = new Set(meshes.map((mesh) => mesh.userData.surfaceState?.imageAssetId).filter(Boolean));
+    if (assetIds.size !== 1) {
+      return { ok: false, message: 'Ölçülendirmek için önce bu alana bir görsel ata.' };
+    }
+
+    let areaWidthCm;
+    let areaHeightCm;
+    let columnCount = 1;
+    let rowCount = 1;
+    if (meshes.length === 1) {
+      areaWidthCm = Number(meshes[0].geometry?.parameters?.width) * 100;
+      areaHeightCm = Number(meshes[0].geometry?.parameters?.height) * 100;
+    } else {
+      const layout = createRectImageLayout(imageLayoutItems(meshes));
+      if (!layout.ok) return layout;
+      areaWidthCm = layout.totalWidth * 100;
+      areaHeightCm = layout.totalHeight * 100;
+      columnCount = layout.columnCount;
+      rowCount = layout.rowCount;
+    }
+    if (!(areaWidthCm > 0) || !(areaHeightCm > 0)) {
+      return { ok: false, message: 'Seçili alanın ölçüsü okunamadı.' };
+    }
+
+    const transform = meshes[0].userData.surfaceState?.imageTransform;
+    const sized = transform?.fit === 'size';
+    const currentWidthCm = sized && Number(transform.widthCm) > 0 ? Number(transform.widthCm) : areaWidthCm;
+    const currentHeightCm = sized && Number(transform.heightCm) > 0 ? Number(transform.heightCm) : areaHeightCm;
+    return {
+      ok: true,
+      assetId: [...assetIds][0],
+      areaWidthCm,
+      areaHeightCm,
+      currentWidthCm,
+      currentHeightCm,
+      panelCount: meshes.length,
+      columnCount,
+      rowCount,
+    };
+  }
+
+  function applySizeImageAsset(meshOrMeshes, assetId, { widthCm, heightCm = null } = {}) {
+    if (!assetId) return { ok: false, message: 'Önce bir görsel seç.' };
+    const width = Number(widthCm);
+    if (!Number.isFinite(width) || width <= 0) {
+      return { ok: false, message: 'Görsel genişliğini cm olarak yaz.' };
+    }
+    const height = Number(heightCm);
+    const storedHeight = Number.isFinite(height) && height > 0 ? height : null;
+    const meshes = normalizeMeshes(meshOrMeshes).filter((mesh) => mesh?.material && mesh.userData.acceptsImage !== false);
+    if (!meshes.length) {
+      return { ok: false, message: 'Bu modüle görsel uygulanamaz; yalnızca renk uygulanabilir.' };
+    }
+    if (meshes.some((mesh) => mesh.userData.surfaceState?.fabricGroupId)) {
+      return { ok: false, message: 'Lightbox/Mesh kaplamasının ölçüsü bu yoldan değişmez.' };
+    }
+
+    let entries;
+    let groupWidthCm;
+    let groupHeightCm;
+    let columnCount = 1;
+    let rowCount = 1;
+    if (meshes.length === 1) {
+      groupWidthCm = Number(meshes[0].geometry?.parameters?.width) * 100;
+      groupHeightCm = Number(meshes[0].geometry?.parameters?.height) * 100;
+      entries = [{
+        mesh: meshes[0],
+        regionStartX: 0,
+        regionStartY: 0,
+        regionWidth: 1,
+        regionHeight: 1,
+      }];
+    } else {
+      const layout = createRectImageLayout(imageLayoutItems(meshes));
+      if (!layout.ok) return layout;
+      groupWidthCm = layout.totalWidth * 100;
+      groupHeightCm = layout.totalHeight * 100;
+      columnCount = layout.columnCount;
+      rowCount = layout.rowCount;
+      entries = layout.entries;
+    }
+    if (!(groupWidthCm > 0) || !(groupHeightCm > 0)) {
+      return { ok: false, message: 'Seçili alanın ölçüsü okunamadı.' };
+    }
+
+    entries.forEach((entry) => {
+      writePersistentSurface(entry.mesh, (surfaceState) => {
+        surfaceState.imageAssetId = assetId;
+        surfaceState.imageTransform = {
+          ...createDefaultImageTransform(),
+          fit: 'size',
+          mode: entries.length > 1 ? 'size-group' : 'single',
+          widthCm: width,
+          ...(storedHeight ? { heightCm: storedHeight } : {}),
+          groupWidthCm,
+          groupHeightCm,
+          regionStartX: entry.regionStartX,
+          regionStartY: entry.regionStartY,
+          regionWidth: entry.regionWidth,
+          regionHeight: entry.regionHeight,
+        };
+      });
+      loadSingleImageOnSurface(entry.mesh, assetId);
+    });
+    return {
+      ok: true,
+      panelCount: entries.length,
+      widthCm: width,
+      heightCm: storedHeight,
+      areaWidthCm: groupWidthCm,
+      areaHeightCm: groupHeightCm,
+      columnCount,
+      rowCount,
+    };
   }
 
   function applyImageAsset(meshOrMeshes, assetId, fit = null) {
@@ -4918,6 +5125,9 @@ export function createStandScene(
     applyMeshMode,
     setFabricLighting,
     applyImageAsset,
+    applySizeImageAsset,
+    resolveImageBlock,
+    describeImageSizeTarget,
     applyHorizontalImageAsset,
     applyRectImageAsset,
     clearImage,

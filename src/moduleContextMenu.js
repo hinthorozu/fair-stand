@@ -22,6 +22,7 @@ export function createModuleContextMenu({
   onDelete,
   onDuplicate,
   onResize,
+  onImageResize,
   onAdd,
   onValidateAddBatch,
   onGlassModeChange,
@@ -50,6 +51,7 @@ export function createModuleContextMenu({
     <button type="button" role="menuitem" data-module-action="duplicate-right">Çoğalt Sağ Tarafa</button>
     <button type="button" role="menuitem" data-module-action="duplicate-left">Çoğalt Sol Tarafa</button>
     <button type="button" role="menuitem" data-module-action="resize-foam" hidden>Boyutlandır…</button>
+    <button type="button" role="menuitem" data-module-action="resize-image" hidden>Görseli ölçülendir…</button>
     <div class="module-context-separator"></div>
     <button type="button" role="menuitem" data-module-action="toggle-glass" hidden>Cam Panele Çevir</button>
     <button type="button" role="menuitem" data-module-action="toggle-fabric" hidden>Lightbox Kumaşa Çevir</button>
@@ -98,6 +100,7 @@ export function createModuleContextMenu({
   const fabricLightingButton = menu.querySelector('[data-module-action="toggle-fabric-light"]');
   const shelfLightingButton = menu.querySelector('[data-module-action="toggle-shelf-light"]');
   const foamResizeButton = menu.querySelector('[data-module-action="resize-foam"]');
+  const imageResizeButton = menu.querySelector('[data-module-action="resize-image"]');
   const addRightButton = menu.querySelector('[data-module-action="add-right"]');
   const addLeftButton = menu.querySelector('[data-module-action="add-left"]');
   const pickerTitle = pickerBackdrop.querySelector('#module-picker-title');
@@ -420,6 +423,7 @@ export function createModuleContextMenu({
     const isBoxBlock = moduleType === 'box-block';
     foamResizeButton.hidden = !(isFoam || isBoxBlock);
     foamResizeButton.textContent = isBoxBlock ? 'Ölçü / opacity…' : 'Boyutlandır…';
+    imageResizeButton.hidden = !context.hasImage;
     const isShelf = moduleType === 'shelf';
     const shelfLightingOn = isShelf ? Boolean(getShelfLightingState?.(context)) : false;
     shelfLightingButton.hidden = !isShelf;
@@ -459,6 +463,12 @@ export function createModuleContextMenu({
         close();
         onResize?.(context);
       }
+      return;
+    }
+
+    if (action === 'resize-image' && context.hasImage) {
+      close();
+      onImageResize?.(context);
       return;
     }
 

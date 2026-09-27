@@ -1,13 +1,12 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-relationship-bom-and-asset-replace-flush",
+  "id": "fair-stand-panel-image-size-tile",
   "kind": "feature",
-  "summary": "F-031 end-to-end doubles and inner-corner connectors for wall, door, separator, and showcase. Corner connectors follow the front face; a module on the back does not take them. Cam twins and production BOM hints included.",
+  "summary": "A selected panel area starts at its real size. A smaller image size repeats across that area; a larger size overflows it. Fill and fit stay.",
   "owners": [
-    "src/relationshipBom.js",
-    "src/projectBom.js",
-    "src/productionBomPanel.js",
-    "backend/app/modules/fair_stand/application/admin_items.py"
+    "src/imageFit.js",
+    "src/scene3d.js",
+    "src/main.js"
   ],
   "sourceOfTruth": [
     "src/itemBom.js",
@@ -145,6 +144,8 @@
       "src/groundLayout.js",
       "src/helpGuide.css",
       "src/helpGuide.js",
+      "src/imageActions.css",
+      "src/imageFit.js",
       "src/imageOptimize.js",
       "src/itemAdminAssemblyLock.js",
       "src/itemAdminCornerSnap.js",
@@ -369,6 +370,7 @@
       "test/illuminatedFoamModule.test.js",
       "test/imageAssetDeletion.test.js",
       "test/imageAssetLiveDelete.test.js",
+      "test/imageFit.test.js",
       "test/imageOptimize.test.js",
       "test/indoorPlantItemsContract.test.js",
       "test/indoorPlants.test.js",
@@ -1058,10 +1060,12 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "End-to-end doubles and inner-corner connectors adjust upright and connector leaf totals for locked wall pairs. Straight panels on a corner module become panel_corner_*. Print areas list image, lightbox, mesh, and foam pieces by size and m2. Base and short-up are unchanged. Admin item save flushes asset/body deletes before reinsert to honor unique role constraints."
+    "notes": "Image size mode stores fit size, widthCm, optional heightCm, and the selected area size. The first size is the combined panel area. A smaller size repeats across that area; a larger size overflows it. Rect split shares one placement. Print BOM strip size is unchanged."
   },
   "tests": {
     "targeted": [
+      "test/imageFit.test.js",
+      "test/scene3dPublicContract.test.js",
       "test/relationshipBomEndToEnd.test.js",
       "test/relationshipBomJoints.test.js",
       "test/projectBom.test.js",
@@ -1076,16 +1080,16 @@
         "e2e/visible-ui-b.spec.mjs",
         "e2e/wall-flat-panel-items-contract.spec.mjs"
       ],
-      "reason": "BOM panel UI + wall identity remain browser-covered; relationship BOM is unit-tested against recipe quantities."
+      "reason": "Wall strip identity stays browser-covered. Image size tiling is unit-tested in test/imageFit.test.js."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Joint deltas change aggregated BOM quantities for side-by-side full-height walls only; corners/short-up excluded."
+    "notes": "Size tiling changes how a selected panel or wall strip draws its image. Fill, fit, and print-area quantities stay."
   },
   "migration": {
-    "required": true,
-    "notes": "0043 adds panel-glass and panel_cam_*. 0044 adds panel_corner_cam_42_5, panel_corner_cam_92, panel_corner_cam_142_5, panel_corner_cam_192. Dump seed 0002 is unchanged."
+    "required": false,
+    "notes": "Image placement size is stored on the existing surface imageTransform. No schema or seed change."
   },
   "rollback": "Revert this PR."
 }
