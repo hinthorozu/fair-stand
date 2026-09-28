@@ -31,6 +31,16 @@ function remoteEnabled() {
   return Boolean(apiHeaders().Authorization || apiHeaders()['Authorization']);
 }
 
+export async function loadCustomerDisplayName(customerId) {
+  if (!customerId || !remoteEnabled()) return '';
+  const response = await fetch(`/api/v1/customers/${encodeURIComponent(customerId)}`, {
+    headers: apiHeaders(),
+  });
+  if (!response.ok) return '';
+  const body = await response.json();
+  return String(body?.display_name || '').trim();
+}
+
 function cloneSyncState(value) {
   return value && typeof value === 'object' ? structuredClone(value) : {};
 }
@@ -160,6 +170,7 @@ function toLocalProject(detail) {
     version: detail.version || 1,
     createdAt: detail.createdAt,
     updatedAt: detail.updatedAt,
+    customerId: detail.customerId || null,
     stand: payload.stand ?? detail.stand ?? null,
     modules: Array.isArray(payload.modules) ? payload.modules : (detail.modules || []),
   };
@@ -233,6 +244,7 @@ export async function listProjects() {
       version: summary.version || 1,
       createdAt: summary.createdAt,
       updatedAt: summary.updatedAt,
+      customerId: summary.customerId || existing?.customerId || null,
       stand: existing?.stand ?? null,
       modules: existing?.modules ?? [],
     });
@@ -244,6 +256,7 @@ export async function listProjects() {
       version: item.version || 1,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
+      customerId: item.customerId || null,
     }))
     .sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0));
 }
@@ -273,15 +286,17 @@ export async function saveProject(project, { syncAssets = 'dirty' } = {}) {
     stand: project.stand ?? null,
     modules: Array.isArray(project.modules) ? project.modules : [],
   };
+  const body = {
+    name: project.name || 'Adsız Proje',
+    version: Number(project.version) || 1,
+    payload,
+  };
+  if (project.customerId) body.customerId = project.customerId;
 
   const detail = await apiFetch(`/${project.id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: project.name || 'Adsız Proje',
-      version: Number(project.version) || 1,
-      payload,
-    }),
+    body: JSON.stringify(body),
   });
 
   await syncProjectAssets(project.id, syncAssets);

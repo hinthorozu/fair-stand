@@ -6,7 +6,7 @@ from typing import Any
 from urllib.parse import quote
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, ConfigDict, Field
@@ -52,18 +52,25 @@ class ProjectPayloadBody(BaseModel):
 
 
 class ProjectCreateBody(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
     id: UUID | None = None
     name: str = Field(min_length=1, max_length=256)
     version: int = Field(default=1, ge=1)
+    customer_id: UUID = Field(alias="customerId")
     payload: ProjectPayloadBody = Field(default_factory=ProjectPayloadBody)
 
 
 class ProjectUpdateBody(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
     name: str | None = Field(default=None, min_length=1, max_length=256)
     version: int | None = Field(default=None, ge=1)
+    customer_id: UUID | None = Field(default=None, alias="customerId")
     payload: ProjectPayloadBody | None = None
+
+
+class ProjectCustomerBody(BaseModel):
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    customer_id: UUID = Field(alias="customerId")
 
 
 def _raise_service(exc: ProjectServiceError) -> None:
@@ -90,6 +97,7 @@ def _summary_json(project: ProjectSummary) -> dict[str, Any]:
         "id": str(project.id),
         "organizationId": str(project.organization_id),
         "name": project.name,
+        "customerId": str(project.customer_id),
         "version": project.version,
         "createdAt": _ms(project.created_at),
         "updatedAt": _ms(project.updated_at),
@@ -109,10 +117,11 @@ def _detail_json(project: ProjectDetail) -> dict[str, Any]:
 
 @router.get("")
 def list_projects(
+    customer_id: UUID | None = Query(default=None, alias="customerId"),
     auth: AuthContext = Depends(require_permission(PERMISSION_PROJECTS_READ)),
     service: ProjectService = Depends(get_project_service),
 ) -> dict[str, Any]:
-    projects = service.list_projects(auth.organization_id)
+    projects = service.list_projects(auth.organization_id, customer_id=customer_id)
     return {"projects": [_summary_json(project) for project in projects]}
 
 
@@ -127,6 +136,7 @@ def create_project(
             organization_id=auth.organization_id,
             user_id=auth.user_id,
             name=body.name,
+            customer_id=body.customer_id,
             payload=body.payload.model_dump(),
             project_id=body.id,
             version=body.version,
@@ -178,8 +188,27 @@ def update_project(
             name=body.name,
             payload=None if body.payload is None else body.payload.model_dump(),
             version=body.version,
+            customer_id=body.customer_id,
             user_id=auth.user_id,
             create_if_missing=True,
+        )
+    except ProjectServiceError as exc:
+        _raise_service(exc)
+    return _detail_json(project)
+
+
+@router.patch("/{project_id}/customer")
+def assign_project_customer(
+    project_id: UUID,
+    body: ProjectCustomerBody,
+    auth: AuthContext = Depends(require_permission(PERMISSION_PROJECTS_UPDATE)),
+    service: ProjectService = Depends(get_project_service),
+) -> dict[str, Any]:
+    try:
+        project = service.assign_customer(
+            project_id=project_id,
+            organization_id=auth.organization_id,
+            customer_id=body.customer_id,
         )
     except ProjectServiceError as exc:
         _raise_service(exc)

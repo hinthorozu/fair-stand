@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session, selectinload
 
 from app.modules.fair_stand.application.image_optimize import (
@@ -31,6 +31,20 @@ from app.modules.fair_stand.infrastructure.models import (
     FairStandSettingsModel,
 )
 from app.modules.fair_stand.infrastructure.runtime_settings_seed import MAX_IMAGE_UPLOAD_MB
+
+
+# Existing rows are backfilled with this id. It is not a crm_customers row.
+UNASSIGNED_PROJECT_CUSTOMER_ID = UUID("00000000-0000-4000-8000-000000000001")
+
+
+def backfill_unassigned_project_customers(connection) -> None:
+    connection.execute(
+        text(
+            "UPDATE fair_stand_projects SET customer_id = :customer_id "
+            "WHERE customer_id IS NULL"
+        ),
+        {"customer_id": str(UNASSIGNED_PROJECT_CUSTOMER_ID)},
+    )
 
 
 class ProjectServiceError(Exception):
@@ -53,6 +67,7 @@ class AssetView:
 class ProjectSummary:
     id: UUID
     organization_id: UUID
+    customer_id: UUID
     name: str
     version: int
     created_at: datetime
@@ -85,6 +100,7 @@ def _summary(row: FairStandProjectModel) -> ProjectSummary:
     return ProjectSummary(
         id=row.id,
         organization_id=row.organization_id,
+        customer_id=row.customer_id,
         name=row.name,
         version=row.version,
         created_at=row.created_at,
@@ -96,6 +112,7 @@ def _detail(row: FairStandProjectModel) -> ProjectDetail:
     return ProjectDetail(
         id=row.id,
         organization_id=row.organization_id,
+        customer_id=row.customer_id,
         name=row.name,
         version=row.version,
         created_at=row.created_at,
@@ -139,11 +156,19 @@ class ProjectService:
             .options(selectinload(FairStandProjectModel.assets))
         )
 
-    def list_projects(self, organization_id: UUID) -> list[ProjectSummary]:
+    def list_projects(
+        self,
+        organization_id: UUID,
+        *,
+        customer_id: UUID | None = None,
+    ) -> list[ProjectSummary]:
+        statement = select(FairStandProjectModel).where(
+            FairStandProjectModel.organization_id == organization_id,
+        )
+        if customer_id is not None:
+            statement = statement.where(FairStandProjectModel.customer_id == customer_id)
         rows = self._session.scalars(
-            select(FairStandProjectModel)
-            .where(FairStandProjectModel.organization_id == organization_id)
-            .order_by(FairStandProjectModel.updated_at.desc())
+            statement.order_by(FairStandProjectModel.updated_at.desc())
         ).all()
         return [_summary(row) for row in rows]
 
@@ -157,6 +182,7 @@ class ProjectService:
         organization_id: UUID,
         user_id: UUID | None,
         name: str,
+        customer_id: UUID | None,
         payload: dict[str, Any] | None = None,
         project_id: UUID | None = None,
         version: int = 1,
@@ -164,10 +190,13 @@ class ProjectService:
         cleaned_name = (name or "").strip()
         if not cleaned_name:
             raise ProjectServiceError("Project name is required")
+        if customer_id is None:
+            raise ProjectServiceError("customerId is required")
         now = _now()
         row = FairStandProjectModel(
             id=project_id or uuid4(),
             organization_id=organization_id,
+            customer_id=customer_id,
             name=cleaned_name[:256],
             version=max(1, int(version or 1)),
             payload=_normalize_payload(payload),
@@ -188,6 +217,7 @@ class ProjectService:
         name: str | None = None,
         payload: dict[str, Any] | None = None,
         version: int | None = None,
+        customer_id: UUID | None = None,
         user_id: UUID | None = None,
         create_if_missing: bool = True,
     ) -> ProjectDetail:
@@ -199,6 +229,7 @@ class ProjectService:
                 organization_id=organization_id,
                 user_id=user_id,
                 name=(name or "Adsız Proje"),
+                customer_id=customer_id,
                 payload=payload,
                 project_id=project_id,
                 version=version or 1,
@@ -212,6 +243,24 @@ class ProjectService:
             row.payload = _normalize_payload(payload)
         if version is not None:
             row.version = max(1, int(version))
+        row.updated_at = _now()
+        self._session.flush()
+        self._session.refresh(row)
+        return _detail(row)
+
+    def assign_customer(
+        self,
+        *,
+        project_id: UUID,
+        organization_id: UUID,
+        customer_id: UUID | None,
+    ) -> ProjectDetail:
+        if customer_id is None:
+            raise ProjectServiceError("customerId is required")
+        row = self._get_org_project(project_id, organization_id)
+        if row is None:
+            raise ProjectServiceError("Project not found", status_code=404)
+        row.customer_id = customer_id
         row.updated_at = _now()
         self._session.flush()
         self._session.refresh(row)

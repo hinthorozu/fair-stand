@@ -668,11 +668,13 @@ class FairStandProjectModel(Base):
     __tablename__ = "fair_stand_projects"
     __table_args__ = (
         Index("ix_fair_stand_projects_organization_id_updated_at", "organization_id", "updated_at"),
+        Index("ix_fair_stand_projects_organization_id_customer_id", "organization_id", "customer_id"),
         CheckConstraint("version > 0", name="ck_fair_stand_projects_version"),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     organization_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    customer_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
     name: Mapped[str] = mapped_column(String(256), nullable=False)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     payload: Mapped[dict] = mapped_column(PayloadJSON, nullable=False)

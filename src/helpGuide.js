@@ -200,8 +200,8 @@ function listGuideSections() {
         <li><strong>Farklı Kaydet:</strong> mevcut sahneyi yeni proje UUID’si ve yeni görsel klasörüyle kopyalar. Ad diyaloğu <strong>Yeni Proje</strong> ile aynı kuralı kullanır: stand adı + otomatik <strong>StandTipi_X_Y</strong>. Önerilen ön ek <strong>(1)</strong> ile biter. Eski proje olduğu gibi kalır.</li>
         <li><strong>Kaydet:</strong> Stand, modüller, yerleşimler ve proje durumunu kaydeder.</li>
         <li><strong>Otomatik kayıt:</strong> Kayıtlı/açılmış projede değişiklik algılandıktan yaklaşık 5 saniye sonra çalışır.</li>
-        <li><strong>Kayıtlı projeler:</strong> Dropdown'dan aktif projeden farklı bir proje seçildiğinde sistem <strong>"[mevcut proje] projeden [seçilen proje] projeye geçilecek"</strong> uyarısını gösterir. Onay verilirse seçilen proje açılır; iptal edilirse dropdown tekrar aktif projeye döner.</li>
-        <li><strong>Aç:</strong> Dropdown'da seçili kayıtlı projeyi görselleriyle birlikte yükler. Dropdown üzerinden onaylı geçiş ile aynı proje açma akışını kullanır.</li>
+        <li><strong>Müşteri adı:</strong> Açık projenin bağlı olduğu müşterinin adı, proje adının üstünde görünür. Başka projeler bu ekranda listelenmez; yalnız açık proje üzerinde çalışılır.</li>
+        <li><strong>Aç:</strong> Açık projeyi görselleriyle birlikte yeniden yükler.</li>
         <li><strong>Dışarı Aktar:</strong> Proje ve görselleri ZIP dosyasına paketler.</li>
         <li><strong>İçe Aktar:</strong> Uyumlu proje ZIP paketini sisteme alır.</li>
         <li><strong>Sil:</strong> Projeyi ve projeye ait görselleri onay sonrası kaldırır. Silinen proje açıksa sayfa yenilenmez; sahne ilk açılıştaki boş duruma döner.</li>

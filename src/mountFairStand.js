@@ -100,8 +100,13 @@ export function mountFairStand(container, options = {}) {
     iframe.contentWindow.__FAIR_STAND_INITIAL_PROJECT_ID__ = options.initialProjectId;
     globalThis.__FAIR_STAND_INITIAL_PROJECT_ID__ = options.initialProjectId;
   }
+  if (options.customerId) {
+    iframe.contentWindow.__FAIR_STAND_CUSTOMER_ID__ = options.customerId;
+    globalThis.__FAIR_STAND_CUSTOMER_ID__ = options.customerId;
+  }
   const stop = startFairStandConfigurator({
     initialProjectId: options.initialProjectId,
+    customerId: options.customerId,
     capabilities: options.capabilities,
   });
 
@@ -114,6 +119,7 @@ export function mountFairStand(container, options = {}) {
     setFairStandHostDocument(typeof document !== 'undefined' ? document : null);
     try {
       delete globalThis.__FAIR_STAND_INITIAL_PROJECT_ID__;
+      delete globalThis.__FAIR_STAND_CUSTOMER_ID__;
       delete globalThis.__FAIR_STAND_PROJECT_CAPABILITIES__;
     } catch {
       /* ignore */

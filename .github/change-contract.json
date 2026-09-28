@@ -1,10 +1,12 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-archive-button-permission-then-setting",
-  "kind": "ui-control",
-  "summary": "Archive buttons stay hidden without permission. A settings switch can hide a permitted button and cannot reveal a denied one.",
+  "id": "fair-stand-project-customer-link",
+  "kind": "persistence-change",
+  "summary": "Every stand project stores a required customer UUID. Drawing saves keep that link. Reassignment uses the existing project update permission.",
   "owners": [
-    "src/runtimeSettings.js",
+    "backend/app/modules/fair_stand/application/projects.py",
+    "backend/app/modules/fair_stand/api/project_routes.py",
+    "src/projectRemote.js",
     "src/main.js"
   ],
   "sourceOfTruth": [
@@ -58,6 +60,7 @@
       "backend/alembic/versions/0042_box_block_default_opacity.py",
       "backend/alembic/versions/0043_panel_glass_family.py",
       "backend/alembic/versions/0044_panel_corner_glass_family.py",
+      "backend/alembic/versions/0045_project_customer_id.py",
       "backend/app/integrations/kyrox_core/dev_bypass.py",
       "backend/app/main.py",
       "backend/app/modules/fair_stand/api/dependencies.py",
@@ -96,6 +99,7 @@
       "backend/tests/modules/fair_stand/test_item_snap.py",
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
       "backend/tests/modules/fair_stand/test_item_type_behavior.py",
+      "backend/tests/modules/fair_stand/test_project_customer.py",
       "backend/tests/modules/fair_stand/test_projects_api.py",
       "backend/tests/modules/fair_stand/test_projects_put_permissions.py",
       "backend/tests/modules/fair_stand/test_runtime_settings.py",
@@ -263,6 +267,7 @@
       "backend/tests/modules/fair_stand/test_image_optimize.py",
       "backend/tests/modules/fair_stand/test_item_snap.py",
       "backend/tests/modules/fair_stand/test_item_type_behavior.py",
+      "backend/tests/modules/fair_stand/test_project_customer.py",
       "backend/tests/modules/fair_stand/test_projects_api.py",
       "backend/tests/modules/fair_stand/test_stand_dimensions.py",
       "e2e/base-items-contract.spec.mjs",
@@ -439,6 +444,7 @@
       "test/projectActionSaveGuard.test.js",
       "test/projectAtomicDeletion.test.js",
       "test/projectBom.test.js",
+      "test/projectCustomerPanel.test.js",
       "test/projectDropdownSwitchIntegration.test.js",
       "test/projectImportFlow.test.js",
       "test/projectImportValidation.test.js",
@@ -1059,10 +1065,12 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "Export, import, and save-as visibility is permission first, then the runtime settings switch. Save and delete stay permission-only. The settings switch is not a security lock and cannot reveal a denied button."
+    "notes": "fair_stand_projects.customer_id is required. Existing rows are backfilled with one temporary UUID that is not a CRM customer. PUT drawing saves do not change the link. PATCH /customer reassigns it and rejects null. Permissions stay fair_crm.fair_stand.projects.*."
   },
   "tests": {
     "targeted": [
+      "backend/tests/modules/fair_stand/test_project_customer.py",
+      "test/projectCustomerPanel.test.js",
       "test/runtimeSettings.test.js",
       "test/relationshipBomEndToEnd.test.js",
       "test/relationshipBomJoints.test.js",
@@ -1078,16 +1086,16 @@
         "e2e/visible-ui-b.spec.mjs",
         "e2e/wall-flat-panel-items-contract.spec.mjs"
       ],
-      "reason": "Wall strip identity stays browser-covered. Archive button permission and settings are unit-tested in test/runtimeSettings.test.js."
+      "reason": "Wall strip identity stays browser-covered. Customer binding is covered by backend/tests/modules/fair_stand/test_project_customer.py."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "A permitted user no longer sees archive buttons that the settings switch turned off. Missing permission still hides them."
+    "notes": "A project cannot be stored without a customer UUID. Drawing save keeps the existing link."
   },
   "migration": {
-    "required": false,
-    "notes": "No schema or seed change. Button visibility stays on the existing runtime settings row."
+    "required": true,
+    "notes": "0045_project_customer_id adds NOT NULL customer_id and backfills existing rows with 00000000-0000-4000-8000-000000000001."
   },
   "rollback": "Revert this PR."
 }
