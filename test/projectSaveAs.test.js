@@ -15,6 +15,7 @@ test('buildSaveAsClone remaps project and image asset ids', () => {
     snapshot: {
       id: 'old-project',
       name: 'Eski',
+      customerId: 'customer-1',
       stand: { standType: 'island' },
       modules: [
         {
@@ -33,6 +34,8 @@ test('buildSaveAsClone remaps project and image asset ids', () => {
 
   assert.equal(project.id, 'new-project');
   assert.equal(project.name, 'Yeni_(1)-Ada_500_500');
+  assert.equal(project.customerId, 'customer-1');
+  assert.equal(project.stand.standType, 'island');
   assert.equal(project.createdAt, 123);
   assert.notEqual(project.id, 'old-project');
   assert.equal(idMap.get('asset-a'), 'asset-b');

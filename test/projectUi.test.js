@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { createProjectLoadingController, setButtonBusy } from '../src/projectUi.js';
+import { createProjectLoadingController, setButtonBusy, setSaveProjectEnabled } from '../src/projectUi.js';
 
 function createFakeButton(label = 'Kaydet') {
   const attrs = new Map();
@@ -27,6 +27,20 @@ test('setButtonBusy preserves the original label and aria busy contract', () => 
   assert.equal(button.disabled, false);
   assert.equal(button.textContent, 'Kaydet');
   assert.equal(button.getAttribute('aria-busy'), undefined);
+});
+
+test('save stays disabled until a scene exists', () => {
+  const button = createFakeButton('Kaydet');
+  setSaveProjectEnabled(button, false);
+  assert.equal(button.disabled, true);
+  setSaveProjectEnabled(button, true);
+  assert.equal(button.disabled, false);
+  setButtonBusy(button, true, 'Kaydediliyor');
+  assert.equal(button.disabled, true);
+  setButtonBusy(button, false);
+  setSaveProjectEnabled(button, false);
+  assert.equal(button.disabled, true);
+  assert.equal(button.textContent, 'Kaydet');
 });
 
 test('repeated busy calls do not overwrite the stored idle label', () => {
