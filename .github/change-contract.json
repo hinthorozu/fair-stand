@@ -1067,7 +1067,7 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "fair_stand_projects.customer_id is required. Existing rows are backfilled with one temporary UUID that is not a CRM customer. PUT drawing saves do not change the link. PATCH /customer reassigns it and rejects null. Permissions stay fair_crm.fair_stand.projects.*. Kaydet stays disabled while currentStand is empty and enables once a scene exists. Save As copies the same customerId. The editor does not call the remote project list. The hidden select reads the local cache only, and opening a project loads that one project."
+    "notes": "fair_stand_projects.customer_id is required. Existing rows are backfilled with one temporary UUID that is not a CRM customer. PUT drawing saves do not change the link. PATCH /customer reassigns it and rejects null. Permissions stay fair_crm.fair_stand.projects.*. Kaydet stays disabled while currentStand is empty and enables once a scene exists. Save As copies the same customerId. The editor does not call the remote project list. The hidden select reads the local cache only, and opening a project loads that one project. The in-app help guide now states depot trash bin, catalog card drag, scene reset, box-block size/opacity, ViewCube pointer, production list, and clear-all-features."
   },
   "tests": {
     "targeted": [

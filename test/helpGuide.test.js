@@ -27,6 +27,13 @@ test('help guide exposes a fixed question-mark launcher and collapsible sections
   assert.match(guideSource, /<strong>Farklı Kaydet:<\/strong> sahne varken aktiftir/);
   assert.match(guideSource, /müşteri aynı kalır/);
   assert.match(guideSource, /Sahne yokken kapalıdır/);
+  assert.match(guideSource, /Çöp Kutusu/);
+  assert.match(guideSource, /katalog kartı sahneye sürüklenebilir/);
+  assert.match(guideSource, /Sahneyi Sıfırla/);
+  assert.match(guideSource, /Ölçü \/ opacity…/);
+  assert.match(guideSource, /Küpü sürüklemek kamerayı döndürür/);
+  assert.match(guideSource, /Üretim Listesi/);
+  assert.match(guideSource, /Tüm Özellikleri Kaldır/);
 });
 
 test('help guide supports close button, backdrop click and Escape', () => {
