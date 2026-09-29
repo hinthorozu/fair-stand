@@ -44,7 +44,7 @@ Item bootstrap alanları mapper’dan: `snapRequiresRuleId` + denorm `snapRequir
 
 ### 1.2 Tablo envanteri (ürün şeması)
 
-`models.py` + Alembic head **`0042_box_block_default_opacity`** (2026-09). Junction’lar ayrı tablo sayılır.
+`models.py` + Alembic head **`0045_project_customer_id`** (2026-09). `0043` / `0044` kolon eklemez; cam panel SKU satırıdır. Junction’lar ayrı tablo sayılır.
 
 | Tablo | Rol |
 |---|---|
@@ -181,8 +181,8 @@ Düz BoxGeometry küp; GLB yok. **Işıklı strafor (`illuminated-foam`)** ile k
 | Item | örn. `box_block`; kategori **Panel Ek Modül**; `catalog_visible=true`; `is_render=true`; `accepts_color=true` |
 | Ölçü | `fair_stand_item_dimensions` W/D/H (seed: 100×50×50) |
 | Renk | `default_color` (seed `15263957`) + `accepts_color` |
-| Opacity | **`default_opacity`** (0–1; seed **0.85**). Cam/`accepts_glass` değil |
-| Döndürme / Z | `rotation_step_deg=90`, `default_rotation_deg=0`, `default_z_cm=0` (item master; migrasyon 0042) |
+| Opacity | **`default_opacity`** (0–1; seed **0.85**; kolon `0042_box_block_default_opacity`). Cam/`accepts_glass` değil |
+| Döndürme / Z | `rotation_step_deg=90`, `default_rotation_deg=0`, `default_z_cm=0` (item master; `0042` bu kolonları eklemez) |
 | Preview | CRM **Katalog Önizlemeleri** → `Küp Blok` (canlı örn. id **57**): tek `div.module-drag-box-block` + CSS; item `preview_id` buna bağlanır. Migrasyon fallback’i “ilk preview” olabilir — prod’da CRM’de Küp Blok’a çevir |
 
 **Sahne:** Katalogdan sürükle → W/D/H + opacity dialog; sonra sağ tık “Ölçü / opacity”. Instance override proje JSON’da kalır (`modules[].widthCm/depthCm/heightCm/opacity`).
@@ -1767,6 +1767,15 @@ Seed (varsayılan): tavan 350 / derinlik 10 / çerçeve 5.5×10 / panel ray **0.
 | **Neden** | Kiracı izolasyonu |
 | **Kod** | API filtre |
 
+#### `customer_id`
+
+| | |
+|---|---|
+| **Ne** | Zorunlu müşteri UUID. `crm_customers` FK’si yok. Eski boş satırlar `00000000-0000-4000-8000-000000000001` |
+| **Neden** | Proje bir müşteriye bağlıdır |
+| **Sahne** | Çizim kaydı bu kolonu değiştirmez. Başka müşteri CRM’de `PATCH /{id}/customer` |
+| **Kod** | `FairStandProjectModel.customer_id`; index `organization_id, customer_id` |
+
 #### `name`
 
 | | |
@@ -1787,7 +1796,7 @@ Seed (varsayılan): tavan 350 / derinlik 10 / çerçeve 5.5×10 / panel ray **0.
 
 | | |
 |---|---|
-| **Ne** | JSONB: `stand`, `modules[]`, yüzey, placement |
+| **Ne** | JSONB yalnız `{stand, modules}`. Yüzey ve placement bu nesnelerin içindedir. Ek anahtarlar atılır |
 | **Neden** | Proje SoT; catalog kolonu değil |
 | **Sahne** | Tasarım aracı state |
 | **Karıştırma** | Bootstrap catalog JSON |
@@ -1938,7 +1947,7 @@ Kaynak: `fair_stand_projects.payload` (sunucu); tarayıcı IndexedDB önbellek.
 
 | Kontrol | Komut / dosya |
 |---|---|
-| Alembic head | `backend/alembic/versions/0041_rename_profil_screen_keys.py` (öncekiler: 0040 lock_group, 0038–0039 assembly) |
+| Alembic head | `backend/alembic/versions/0045_project_customer_id.py`. `0043` / `0044` cam panel SKU satırıdır, yeni kolon değildir |
 | Tip seed parity | `pytest backend/tests/modules/fair_stand/test_item_type_behavior.py` |
 | Stand zarf + panel ray | `test/standDimensions.test.js`; CRM Temel Ayarlar |
 | Bootstrap şekli | `get_catalog_bootstrap.py`, `routes.py` `/catalog/bootstrap` |

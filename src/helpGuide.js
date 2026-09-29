@@ -8,7 +8,7 @@ function listGuideSections() {
     title: 'Hızlı Başlangıç',
     open: true,
     html: `
-      <p>Stand tipini seç, X ve Y ölçülerini gir; istersen <strong>Depo eklensin</strong> seçeneğini açıp 1×1, 1,5×1, 2×1 veya 2×2 m depo ölçüsünü belirle. <strong>Depo içeriği eklensin</strong> seçilirse Mini Buzdolabı, Kettle ve Askılık da otomatik yerleşir. Sonra <strong>Sahneyi Oluştur</strong> butonuna bas ve yalnızca proje/stand adını gir. Sistem stand tipi ve ölçülerini ada otomatik ekler, projeyi oluşturur ve ilk kaydı otomatik yapar.</p>
+      <p>Stand tipini seç, X ve Y ölçülerini gir; istersen <strong>Depo eklensin</strong> seçeneğini açıp 1×1, 1,5×1, 2×1 veya 2×2 m depo ölçüsünü belirle. <strong>Depo içeriği eklensin</strong> seçilirse Mini Buzdolabı, Kettle, Askılık ve Çöp Kutusu da otomatik yerleşir. Sonra <strong>Sahneyi Oluştur</strong> butonuna bas ve yalnızca proje/stand adını gir. Sistem stand tipi ve ölçülerini ada otomatik ekler, projeyi oluşturur ve ilk kaydı otomatik yapar.</p>
       <div class="help-guide-callout"><strong>Temel akış:</strong> Sahne oluştur + proje/stand adını gir → Otomatik proje adı oluşur → Proje otomatik kaydedilir → Modül ekle → Yerleştir → Panel seç → Renk / görsel / cam / Lightbox / Mesh uygula → Render Al.</div>
     `,
   },
@@ -44,6 +44,7 @@ function listGuideSections() {
         <tr><th>Enter</th><td>X/Y alanlarında uygunsa sahne oluşturmayı; proje adı popupında onaylamayı tetikler.</td></tr>
       </tbody></table>
       <p class="help-guide-note">Not: Döndürme adımı modüle göre değişebilir. Standart modüllerde çoğunlukla 90°, bazı banko ve ürünlerde 45° kullanılabilir.</p>
+      <p>ViewCube yüzüne tıklamak o görünüşe geçer; klavyede olmayan arka ve alt da buradadır. ⌂ izometrik görünüştür. Küpü sürüklemek kamerayı döndürür.</p>
     `,
   },
   {
@@ -54,6 +55,7 @@ function listGuideSections() {
         <li><strong>Sil:</strong> Modülü sahneden kaldırır.</li>
         <li><strong>Çoğalt Sağ / Sol:</strong> Aynı modülün kopyasını belirtilen tarafa ekler.</li>
         <li><strong>Boyutlandır…:</strong> Işıklı Strafor seçiliyken mevcut X/Y ölçülerini açar; yeni ölçüler girildiğinde aynı modül konumu ve ışık rengi korunarak yeniden boyutlandırılır.</li>
+        <li><strong>Ölçü / opacity…:</strong> Kutu blok seçiliyken genişlik, derinlik, yükseklik ve 0–1 opacity açılır.</li>
         <li><strong>Görseli ölçülendir…:</strong> Görsel atanmış panelde açılır. Başlangıç ölçüsü seçili alanın kendi ölçüsüdür. Küçültünce boşluklar tekrarlanır, büyütünce görsel alanın dışına taşar.</li>
         <li><strong>Cam Panele Çevir / Normal Panele Çevir:</strong> Uygun panelin cam durumunu değiştirir.</li>
         <li><strong>Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar:</strong> Uygun panel bloğunu tek parça opak Lightbox Kumaşa dönüştürür veya geri alır.</li>
@@ -172,6 +174,8 @@ function listGuideSections() {
     html: `
       <ul>
         <li>Sahne oluşturulduktan sonra Modül Ekle aktif olur.</li>
+        <li>Modül Ekle’nin üstündeki katalog kartı sahneye sürüklenebilir. Sürüklerken <strong>Shift+R</strong> saat yönünde döndürür ve açıyı kilitler.</li>
+        <li><strong>Sahneyi Sıfırla:</strong> stand tipi ve ölçü kalır; sahnedeki modüller silinir.</li>
         <li>Katalogdan bir veya birden fazla modül seçilebilir.</li>
         <li>Aynı modül birden fazla kez seçim sırasına eklenebilir.</li>
         <li>Seçim sırasındaki modüller sürüklenerek yeniden sıralanabilir.</li>
@@ -213,6 +217,7 @@ function listGuideSections() {
     html: `
       <p><strong>Render Al</strong>, mevcut kamera görünümünü yüksek çözünürlüklü PNG olarak indirir. Dosya adı proje adından üretilir.</p>
       <p>Seçim çerçeveleri ve yardımcı duvar çizgileri render çıktısına dahil edilmez.</p>
+      <p><strong>Üretim Listesi</strong>, sahne kurulunca Render Al’ın yanında açılır. Panel sürüklenebilir, boyutu değişir ve <strong>Ayrı pencere</strong> ile dışarı alınır.</p>
     `,
   },
   {
@@ -224,6 +229,7 @@ function listGuideSections() {
         <li>Kütüphaneden kullanılan bir görsel silinirse, onay sonrası atandığı yüzeylerden de kaldırılır.</li>
         <li>Birden fazla modülü kapsayan tek parça bez varken bağlı modüller ayrı ayrı taşınamaz/döndürülemez.</li>
         <li>Sağ tık menüsündeki seçenekler her modülde aynı değildir; yalnız desteklenen işlemler gösterilir.</li>
+        <li><strong>Tüm Özellikleri Kaldır:</strong> görsel, cam, renk ve panel özelleştirmelerini varsayılana döndürür. Işıklı Strafor sahneden silinir. Modül türü, genişlik, sıra ve yerleşim kalır.</li>
       </ul>
     `,
   },

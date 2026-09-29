@@ -22,7 +22,7 @@ test('whole-project deletion uses one readwrite transaction for project and asse
 test('main uses the atomic whole-project delete for user deletion and import rollback', () => {
   assert.match(
     mainSource,
-    /import \{ createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName \} from '\.\/projectRemote\.js';/,
+    /import \{ createProjectId, deleteProjectWithAssets, listCachedProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName \} from '\.\/projectRemote\.js';/,
   );
   assert.doesNotMatch(mainSource, /from '\.\/projectStore\.js'/);
   assert.doesNotMatch(mainSource, /deleteProjectImageAssets/);
@@ -31,14 +31,18 @@ test('main uses the atomic whole-project delete for user deletion and import rol
   const importHandlerEnd = mainSource.indexOf('async function openStoredProject', importHandlerStart);
   assert.ok(importHandlerStart >= 0 && importHandlerEnd > importHandlerStart);
   const importHandler = mainSource.slice(importHandlerStart, importHandlerEnd);
+  assert.match(importHandler, /importedProjectId = createProjectId\(\)/);
+  assert.doesNotMatch(importHandler, /listProjects\(/);
   assert.match(importHandler, /await deleteProjectWithAssets\(importedProjectId\)/);
 
   const deleteHandlerStart = mainSource.indexOf("deleteProjectButton.addEventListener('click'");
   const deleteHandlerEnd = mainSource.indexOf("fillImageButton.addEventListener('click'", deleteHandlerStart);
   assert.ok(deleteHandlerStart >= 0 && deleteHandlerEnd > deleteHandlerStart);
   const deleteHandler = mainSource.slice(deleteHandlerStart, deleteHandlerEnd);
+  assert.match(deleteHandler, /const projectId = projectSelect\.value/);
   assert.match(deleteHandler, /await deleteProjectWithAssets\(projectId\)/);
   assert.doesNotMatch(deleteHandler, /await deleteProject\(projectId\)/);
+  assert.doesNotMatch(deleteHandler, /listProjects\(/);
   assert.doesNotMatch(deleteHandler, /location\.reload/);
   assert.match(deleteHandler, /resetToFirstOpenState\(\)/);
 });

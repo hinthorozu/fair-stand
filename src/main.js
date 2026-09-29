@@ -18,7 +18,7 @@ import {
 } from './designState.js';
 import { deleteImageAsset, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
 import { clearImageAssetReferences, countImageAssetReferences, remapImageAssetReferences } from './imageAssetReferences.js';
-import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName } from './projectRemote.js';
+import { createProjectId, deleteProjectWithAssets, listCachedProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName } from './projectRemote.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu, allowsModuleSideInsert } from './moduleContextMenu.js';
 import { createModuleDragSidebar } from './moduleDragSidebar.js';
@@ -1561,7 +1561,7 @@ const autosaveController = createAutosaveController({
 });
 
 async function refreshProjectList(selectedId = activeProjectId) {
-  const projects = await listProjects();
+  const projects = await listCachedProjects();
   projectSelect.innerHTML = '';
   if (!projects.length) {
     const option = document.createElement('option');
@@ -1676,7 +1676,6 @@ async function restoreProject(project) {
     updateStageCreateState();
   }
 
-  await refreshProjectList(activeProjectId);
   autosaveController.enableFromCurrentState();
   projectStatus.textContent = 'Açıldı: ' + (project.name || 'Adsız Proje');
 }
@@ -2522,9 +2521,7 @@ importProjectFileInput.addEventListener('change', async () => {
     if (!manifestCheck.ok) throw new Error(manifestCheck.message);
 
     const manifestAssets = manifest.assets || [];
-    const existing = await listProjects();
-    const existingIds = new Set(existing.map((item) => item.id));
-    importedProjectId = existingIds.has(manifest.project.id) ? createProjectId() : manifest.project.id;
+    importedProjectId = createProjectId();
 
     const idMap = new Map();
     const preparedAssets = [];
@@ -2649,9 +2646,8 @@ openProjectButton.addEventListener('click', async () => {
 deleteProjectButton.addEventListener('click', async () => {
   const projectId = projectSelect.value;
   if (!projectId) return;
-  const projects = await listProjects();
-  const project = projects.find((item) => item.id === projectId);
-  const confirmed = window.confirm((project?.name || 'Proje') + ' ve bu projeye ait tüm görseller silinecek. Devam edilsin mi?');
+  const projectName = projectSelect.selectedOptions?.[0]?.textContent?.trim() || projectNameInput.value.trim() || 'Proje';
+  const confirmed = window.confirm(projectName + ' ve bu projeye ait tüm görseller silinecek. Devam edilsin mi?');
   if (!confirmed) return;
   try {
     const deletingActive = projectId === activeProjectId;
@@ -2712,13 +2708,10 @@ applyProjectCapabilityVisibility();
 syncSaveProjectButton();
 void showProjectCustomerName();
 
-void refreshProjectList()
-  .then(async () => {
-    if (initialProjectId) {
-      await openStoredProject(initialProjectId);
-    }
-  })
-  .catch((error) => console.warn('Proje listesi açılamadı:', error));
+void refreshProjectList().catch((error) => console.warn('Proje listesi açılamadı:', error));
+if (initialProjectId) {
+  void openStoredProject(initialProjectId);
+}
 
   return function stopFairStandConfigurator() {
     autosaveController?.disable?.();

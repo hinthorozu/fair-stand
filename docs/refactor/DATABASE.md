@@ -6,7 +6,7 @@ Lokal / sunucu PostgreSQL `fair_stand` şemasının yaşayan envanteri. “Üç 
 
 **Doğrulama (2026-09-24, `models.py` + Alembic head + `item_mapper.py` + `src/`):**
 
-1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0042_box_block_default_opacity`**.
+1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0045_project_customer_id`**. `0043_panel_glass_family` ve `0044_panel_corner_glass_family` yeni kolon değildir; `panel_cam_*` / `panel_corner_cam_*` SKU satırıdır.
 2. `item_mapper.py` — her ürün kolonu JSON anahtarına (veya “bootstrap’a girmez”) bağlandı.
 3. Production `src/` grep — “Nerede” hücresi gerçek okuyucu dosyadır; okunmayan kolon **DATA / TEST_ONLY / SCHEMA_ONLY** yazılır.
 4. `ITEMS.md` (alan kuyruğu + onaylı şema), `CATALOG.md`, `ROTATION.md`, `SCENE_POSE.md`, `STAND_DIMENSIONS.md` — değer kopyalanmaz; işaret edilir.
@@ -66,7 +66,7 @@ Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0042_box_block_default_opacity` |
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0045_project_customer_id` |
 
 ---
 
@@ -385,13 +385,14 @@ Auth: org-scoped Core verify; `X-Organization-Id` + Bearer. API: `backend/app/mo
 |---|---|---|---|---|
 | `id` | `id` | Proje UUID PK | İstemci ve asset path aynı id | `projectRemote`, asset `storage_key` |
 | `organization_id` | `organizationId` | Core org UUID (FK yok) | Çok kiracılı izolasyon | list/get filtre; disk `{org}/…` |
+| `customer_id` | `customerId` | Zorunlu UUID. `crm_customers` FK’si yok. Boş eski satırlar `00000000-0000-4000-8000-000000000001` | Proje bir müşteriye bağlıdır | kolon + index `ix_fair_stand_projects_organization_id_customer_id`. Çizim kaydı (PUT payload) bu değeri değiştirmez. Başka müşteri `PATCH /{id}/customer` |
 | `name` | `name` | Görünen ad (trim, boş değil) | Liste / başlık | UI proje listesi |
 | `version` | `version` | Optimistic / sıra (`> 0`) | İstemci sürüm bilinci | API response |
 | `payload` | `payload` (+ düz `stand` / `modules`) | JSONB proje gövdesi | Tek blob; kolon patlatma yok | `ProjectService`; `buildProjectSnapshot` şekli |
 | `created_by` | — | Oluşturan kullanıcı UUID / null | Audit | DB / create |
 | `created_at` / `updated_at` | `createdAt` / `updatedAt` | Zaman damgası | Liste sırası (`updated_at` desc) | API |
 
-`payload` zorunlu şekil (servis normalize): `{ stand: object, modules: array, … }`. Ek anahtarlar korunur. Catalog bootstrap JSON’u değildir.
+`payload` zorunlu şekil (servis normalize): `{ stand, modules }`. Ek anahtarlar atılır. Catalog bootstrap JSON’u değildir.
 
 ---
 
