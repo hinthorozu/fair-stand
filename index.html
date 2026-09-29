@@ -61,14 +61,16 @@
         <details class="panel-card project-card collapsible-panel" open>
           <summary class="panel-summary"><span>Proje</span><span class="panel-chevron" aria-hidden="true"></span></summary>
           <div class="panel-card-content">
+          <strong>Müşteri adı</strong>
+          <strong id="project-customer-display" style="display:block;font-size:16px;color:#1f2937;overflow-wrap:anywhere">Geçici bağ</strong>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
             <strong>Proje adı</strong>
             <button id="rename-project" type="button" class="ghost" style="min-width:0;padding:7px 10px">Değiştir</button>
           </div>
           <strong id="project-name-display" style="display:block;font-size:16px;color:#1f2937;overflow-wrap:anywhere">Adsız Proje</strong>
           <input id="project-name" type="hidden" value="Adsız Proje" />
-          <label for="project-select"><strong>Kayıtlı projeler</strong></label>
-          <select id="project-select"><option value="">Kayıtlı proje yok</option></select>
+          <label for="project-select" hidden><strong>Kayıtlı projeler</strong></label>
+          <select id="project-select" hidden><option value="">Kayıtlı proje yok</option></select>
           <div class="project-actions">
             <button id="save-project" type="button" class="primary">Kaydet</button>
             <button id="save-as-project" type="button" hidden>Farklı Kaydet</button>

@@ -25,7 +25,12 @@ async function createIslandProject(page, { baseName, xCm, yCm, confirmExisting =
 
 async function switchProject(page, projectName) {
   page.once('dialog', async (dialog) => dialog.accept());
-  await page.locator('#project-select').selectOption({ label: projectName });
+  await page.locator('#project-select').evaluate((select, name) => {
+    const option = [...select.options].find((item) => item.textContent === name);
+    if (!option) throw new Error(`Project option not found: ${name}`);
+    select.value = option.value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  }, projectName);
   await expect(page.locator('#project-name-display')).toHaveText(projectName);
 }
 

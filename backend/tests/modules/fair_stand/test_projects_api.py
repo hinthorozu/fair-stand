@@ -5,6 +5,8 @@ from uuid import uuid4
 
 from PIL import Image
 
+CUSTOMER_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+
 
 def _png_bytes(size: int = 64) -> bytes:
     image = Image.new("RGB", (size, size), color=(20, 120, 200))
@@ -35,6 +37,7 @@ def test_list_create_get_update_delete_project(client, auth_headers, tmp_path, m
         headers=auth_headers,
         json={
             "name": "Demo Stand",
+            "customerId": CUSTOMER_ID,
             "payload": {"stand": {"standType": "island"}, "modules": []},
         },
     )
@@ -42,6 +45,7 @@ def test_list_create_get_update_delete_project(client, auth_headers, tmp_path, m
     body = created.json()
     project_id = body["id"]
     assert body["name"] == "Demo Stand"
+    assert body["customerId"] == CUSTOMER_ID
     assert body["stand"]["standType"] == "island"
     assert body["modules"] == []
 
@@ -62,6 +66,7 @@ def test_list_create_get_update_delete_project(client, auth_headers, tmp_path, m
     )
     assert updated.status_code == 200, updated.text
     assert updated.json()["name"] == "Demo Stand 2"
+    assert updated.json()["customerId"] == CUSTOMER_ID
     assert updated.json()["modules"][0]["id"] == "m1"
 
     foreign = client.get(
@@ -87,7 +92,7 @@ def test_asset_upload_download_export(client, auth_headers, tmp_path, monkeypatc
     created = client.post(
         "/api/v1/fair-stand/projects",
         headers=auth_headers,
-        json={"name": "Asset Stand", "payload": {"stand": None, "modules": []}},
+        json={"name": "Asset Stand", "customerId": CUSTOMER_ID, "payload": {"stand": None, "modules": []}},
     )
     assert created.status_code == 201, created.text
     project_id = created.json()["id"]
@@ -137,7 +142,7 @@ def test_asset_upload_optimizes_high_pixel_jpeg_within_byte_limit(
     created = client.post(
         "/api/v1/fair-stand/projects",
         headers=auth_headers,
-        json={"name": "Huge JPEG", "payload": {"stand": None, "modules": []}},
+        json={"name": "Huge JPEG", "customerId": CUSTOMER_ID, "payload": {"stand": None, "modules": []}},
     )
     assert created.status_code == 201, created.text
     project_id = created.json()["id"]
@@ -172,6 +177,7 @@ def test_put_upserts_missing_project(client, auth_headers, tmp_path, monkeypatch
         headers=auth_headers,
         json={
             "name": "Upsert Stand",
+            "customerId": CUSTOMER_ID,
             "payload": {"stand": {"standType": "island"}, "modules": []},
         },
     )
@@ -179,6 +185,7 @@ def test_put_upserts_missing_project(client, auth_headers, tmp_path, monkeypatch
     body = updated.json()
     assert body["id"] == project_id
     assert body["name"] == "Upsert Stand"
+    assert body["customerId"] == CUSTOMER_ID
 
     again = client.put(
         f"/api/v1/fair-stand/projects/{project_id}",
@@ -187,6 +194,7 @@ def test_put_upserts_missing_project(client, auth_headers, tmp_path, monkeypatch
     )
     assert again.status_code == 200
     assert again.json()["name"] == "Upsert Stand 2"
+    assert again.json()["customerId"] == CUSTOMER_ID
 
 
 def test_asset_download_accepts_turkish_filename(client, auth_headers, tmp_path, monkeypatch):
@@ -198,7 +206,7 @@ def test_asset_download_accepts_turkish_filename(client, auth_headers, tmp_path,
     created = client.post(
         "/api/v1/fair-stand/projects",
         headers=auth_headers,
-        json={"name": "Türkçe Proje", "payload": {"stand": None, "modules": []}},
+        json={"name": "Türkçe Proje", "customerId": CUSTOMER_ID, "payload": {"stand": None, "modules": []}},
     )
     assert created.status_code == 201, created.text
     project_id = created.json()["id"]

@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from uuid import uuid4
 
@@ -33,7 +33,11 @@ def test_put_create_vs_update_permission_split(client, auth_headers, tmp_path, m
     created = client.put(
         f"/api/v1/fair-stand/projects/{project_id}",
         headers=auth_headers,
-        json={"name": "Yeni", "payload": {"stand": None, "modules": []}},
+        json={
+            "name": "Yeni",
+            "customerId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+            "payload": {"stand": None, "modules": []},
+        },
     )
     assert created.status_code == 200, created.text
 

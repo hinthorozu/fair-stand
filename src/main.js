@@ -18,7 +18,7 @@ import {
 } from './designState.js';
 import { deleteImageAsset, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
 import { clearImageAssetReferences, countImageAssetReferences, remapImageAssetReferences } from './imageAssetReferences.js';
-import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty } from './projectRemote.js';
+import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName } from './projectRemote.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu, allowsModuleSideInsert } from './moduleContextMenu.js';
 import { createModuleDragSidebar } from './moduleDragSidebar.js';
@@ -108,6 +108,10 @@ function startFairStandConfiguratorRuntime(options = {}) {
     options.initialProjectId
     || globalThis.__FAIR_STAND_INITIAL_PROJECT_ID__
     || null;
+  let activeCustomerId =
+    options.customerId
+    || globalThis.__FAIR_STAND_CUSTOMER_ID__
+    || null;
 
   const document = getFairStandHostDocument();
   const window = getFairStandHostWindow();
@@ -181,6 +185,8 @@ const assetLibraryElement = document.querySelector('#asset-library');
 const assetStatus = document.querySelector('#asset-status');
 const projectNameInput = document.querySelector('#project-name');
 const projectNameDisplay = document.querySelector('#project-name-display');
+const projectCustomerDisplay = document.querySelector('#project-customer-display');
+const TEMPORARY_CUSTOMER_LABEL = 'Geçici bağ';
 const renameProjectButton = document.querySelector('#rename-project');
 const projectSelect = document.querySelector('#project-select');
 const saveProjectButton = document.querySelector('#save-project');
@@ -1521,6 +1527,7 @@ function buildProjectSnapshot() {
     name: projectNameInput.value.trim() || 'Adsız Proje',
     version: 1,
     createdAt: activeProjectCreatedAt,
+    customerId: activeCustomerId,
     stand: cloneProjectState(currentStand),
     modules: cloneProjectState(currentModules),
   };
@@ -1579,10 +1586,23 @@ async function persistActiveProject({ quiet = false } = {}) {
   return stored;
 }
 
+async function showProjectCustomerName() {
+  if (!projectCustomerDisplay) return;
+  try {
+    const name = await loadCustomerDisplayName(activeCustomerId);
+    projectCustomerDisplay.textContent = name || TEMPORARY_CUSTOMER_LABEL;
+  } catch (error) {
+    console.warn('Müşteri adı yüklenemedi:', error);
+    projectCustomerDisplay.textContent = TEMPORARY_CUSTOMER_LABEL;
+  }
+}
+
 async function restoreProject(project) {
   if (!project) return;
   autosaveController.disable();
   activeProjectId = project.id;
+  if (project.customerId) activeCustomerId = project.customerId;
+  void showProjectCustomerName();
   activeProjectCreatedAt = Number(project.createdAt) || Date.now();
   setProjectName(project.name || 'Adsız Proje');
   currentModules = (cloneProjectState(project.modules) || []).map(normalizeModuleItemState);
@@ -2519,6 +2539,7 @@ importProjectFileInput.addEventListener('change', async () => {
       name: manifest.project.name || 'İçe Aktarılan Proje',
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      customerId: manifest.project.customerId || activeCustomerId,
     }, idMap);
 
     // Asset'ler önce IndexedDB'ye yazılır; saveProject (remote) loadImageAssets ile
@@ -2672,6 +2693,7 @@ function applyProjectCapabilityVisibility() {
 }
 
 applyProjectCapabilityVisibility();
+void showProjectCustomerName();
 
 void refreshProjectList()
   .then(async () => {
