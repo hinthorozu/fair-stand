@@ -21,8 +21,9 @@ test('manual open button reuses the same stored-project loading path', () => {
   assert.match(mainSource, /openProjectButton\.addEventListener\('click', async \(\) => \{\n  await openStoredProject\(projectSelect\.value\);\n\}\);/);
 });
 
-test('the editor loads only the open project and does not list every saved project', () => {
+test('the editor opens the current project without the remote project list', () => {
   assert.match(mainSource, /if \(initialProjectId\) \{\n  void openStoredProject\(initialProjectId\);\n\}/);
+  assert.doesNotMatch(mainSource, /refreshProjectList\(\)\s*\.then/);
   assert.doesNotMatch(mainSource, /listProjects\(/);
-  assert.doesNotMatch(mainSource, /refreshProjectList\(/);
+  assert.match(mainSource, /await listCachedProjects\(\)/);
 });

@@ -219,6 +219,10 @@ async function cacheProjectAndAssets(detail) {
   return local;
 }
 
+export async function listCachedProjects() {
+  return listLocalProjects();
+}
+
 export async function listProjects() {
   if (!remoteEnabled()) {
     return listLocalProjects();

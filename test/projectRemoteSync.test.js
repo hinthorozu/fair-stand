@@ -21,6 +21,15 @@ function blobAsset(id, { size = 12, name = 'logo.png', type = 'image/png' } = {}
   };
 }
 
+test('listCachedProjects reads only the local project cache', () => {
+  const start = remoteSource.indexOf('export async function listCachedProjects');
+  const end = remoteSource.indexOf('export async function listProjects', start);
+  assert.ok(start >= 0 && end > start);
+  const cachedList = remoteSource.slice(start, end);
+  assert.match(cachedList, /return listLocalProjects\(\)/);
+  assert.doesNotMatch(cachedList, /apiFetch/);
+});
+
 test('opening one project downloads its assets together', () => {
   const start = remoteSource.indexOf('async function cacheProjectAndAssets');
   const end = remoteSource.indexOf('export async function listProjects', start);
