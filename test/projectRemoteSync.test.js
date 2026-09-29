@@ -21,6 +21,17 @@ function blobAsset(id, { size = 12, name = 'logo.png', type = 'image/png' } = {}
   };
 }
 
+test('opening one project downloads its assets together', () => {
+  const start = remoteSource.indexOf('async function cacheProjectAndAssets');
+  const end = remoteSource.indexOf('export async function listProjects', start);
+  assert.ok(start >= 0 && end > start);
+  const cacheSource = remoteSource.slice(start, end);
+  assert.match(cacheSource, /const cached = await Promise\.all\(assets\.map\(async \(asset\) => \{/);
+  assert.match(cacheSource, /return saveImportedImageAsset\(detail\.id,/);
+  assert.match(cacheSource, /markProjectAssetsSynced\(detail\.id, cached\)/);
+  assert.doesNotMatch(cacheSource, /for \(const asset of assets\)/);
+});
+
 test('projectRemote defaults saveProject asset sync to dirty-only', () => {
   assert.match(remoteSource, /syncAssets = 'dirty'/);
   assert.match(remoteSource, /mode === 'all' \|\| !isAssetSynced/);

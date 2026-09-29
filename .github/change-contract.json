@@ -1067,7 +1067,7 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "fair_stand_projects.customer_id is required. Existing rows are backfilled with one temporary UUID that is not a CRM customer. PUT drawing saves do not change the link. PATCH /customer reassigns it and rejects null. Permissions stay fair_crm.fair_stand.projects.*. Kaydet stays disabled while currentStand is empty and enables once a scene exists. Save As copies the same customerId."
+    "notes": "fair_stand_projects.customer_id is required. Existing rows are backfilled with one temporary UUID that is not a CRM customer. PUT drawing saves do not change the link. PATCH /customer reassigns it and rejects null. Permissions stay fair_crm.fair_stand.projects.*. Kaydet stays disabled while currentStand is empty and enables once a scene exists. Save As copies the same customerId. The editor no longer lists or syncs every saved project; it loads and saves only the open project."
   },
   "tests": {
     "targeted": [

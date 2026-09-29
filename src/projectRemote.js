@@ -202,19 +202,17 @@ async function cacheProjectAndAssets(detail) {
   const local = toLocalProject(detail);
   await saveLocalProject(local);
   const assets = Array.isArray(detail.assets) ? detail.assets : [];
-  const cached = [];
-  for (const asset of assets) {
+  const cached = await Promise.all(assets.map(async (asset) => {
     const response = await apiFetch(`/${detail.id}/assets/${asset.id}`);
     const blob = await response.blob();
-    const stored = await saveImportedImageAsset(detail.id, {
+    return saveImportedImageAsset(detail.id, {
       id: asset.id,
       name: asset.name || 'image',
       type: asset.type || blob.type || 'application/octet-stream',
       blob,
       createdAt: asset.createdAt || Date.now(),
     });
-    cached.push(stored);
-  }
+  }));
   // Server copy is authoritative — skip re-upload on autosave.
   clearProjectAssetSyncState(detail.id);
   markProjectAssetsSynced(detail.id, cached);

@@ -18,7 +18,7 @@ import {
 } from './designState.js';
 import { deleteImageAsset, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
 import { clearImageAssetReferences, countImageAssetReferences, remapImageAssetReferences } from './imageAssetReferences.js';
-import { createProjectId, deleteProjectWithAssets, listProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName } from './projectRemote.js';
+import { createProjectId, deleteProjectWithAssets, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName } from './projectRemote.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu, allowsModuleSideInsert } from './moduleContextMenu.js';
 import { createModuleDragSidebar } from './moduleDragSidebar.js';
@@ -1560,26 +1560,6 @@ const autosaveController = createAutosaveController({
   onError: (error) => console.warn('Otomatik kayıt başarısız:', error),
 });
 
-async function refreshProjectList(selectedId = activeProjectId) {
-  const projects = await listProjects();
-  projectSelect.innerHTML = '';
-  if (!projects.length) {
-    const option = document.createElement('option');
-    option.value = '';
-    option.textContent = 'Kayıtlı proje yok';
-    projectSelect.appendChild(option);
-    return projects;
-  }
-  projects.forEach((project) => {
-    const option = document.createElement('option');
-    option.value = project.id;
-    option.textContent = project.name || 'Adsız Proje';
-    projectSelect.appendChild(option);
-  });
-  if (projects.some((project) => project.id === selectedId)) projectSelect.value = selectedId;
-  return projects;
-}
-
 async function loadAssetsForActiveProject() {
   clearRegisteredAssets();
   const assets = await loadImageAssets(activeProjectId);
@@ -1591,7 +1571,6 @@ async function loadAssetsForActiveProject() {
 async function persistActiveProject({ quiet = false } = {}) {
   const stored = await saveProject(buildProjectSnapshot());
   activeProjectCreatedAt = stored.createdAt;
-  await refreshProjectList(stored.id);
   if (!quiet) projectStatus.textContent = 'Kaydedildi: ' + stored.name;
   if (productionBomPanel.isOpen()) productionBomPanel.refresh();
   return stored;
@@ -1676,7 +1655,6 @@ async function restoreProject(project) {
     updateStageCreateState();
   }
 
-  await refreshProjectList(activeProjectId);
   autosaveController.enableFromCurrentState();
   projectStatus.textContent = 'Açıldı: ' + (project.name || 'Adsız Proje');
 }
@@ -2409,7 +2387,6 @@ saveAsProjectButton?.addEventListener('click', async () => {
     if (storageTouched && createdProjectId) {
       try {
         await deleteProjectWithAssets(createdProjectId);
-        await refreshProjectList(activeProjectId);
       } catch (cleanupError) {
         console.warn('Başarısız farklı kaydet temizlenemedi:', cleanupError);
       }
@@ -2522,9 +2499,7 @@ importProjectFileInput.addEventListener('change', async () => {
     if (!manifestCheck.ok) throw new Error(manifestCheck.message);
 
     const manifestAssets = manifest.assets || [];
-    const existing = await listProjects();
-    const existingIds = new Set(existing.map((item) => item.id));
-    importedProjectId = existingIds.has(manifest.project.id) ? createProjectId() : manifest.project.id;
+    importedProjectId = createProjectId();
 
     const idMap = new Map();
     const preparedAssets = [];
@@ -2567,7 +2542,6 @@ importProjectFileInput.addEventListener('change', async () => {
     }
     await saveProject(importedProject);
 
-    await refreshProjectList(importedProjectId);
     const project = await loadProject(importedProjectId);
     if (!project) throw new Error('İçe aktarılan proje tekrar okunamadı.');
     await restoreProject(project);
@@ -2576,7 +2550,6 @@ importProjectFileInput.addEventListener('change', async () => {
     if (importStorageTouched && importedProjectId) {
       try {
         await deleteProjectWithAssets(importedProjectId);
-        await refreshProjectList();
       } catch (cleanupError) {
         console.warn('Başarısız içe aktarma temizlenemedi:', cleanupError);
       }
@@ -2647,18 +2620,15 @@ openProjectButton.addEventListener('click', async () => {
 });
 
 deleteProjectButton.addEventListener('click', async () => {
-  const projectId = projectSelect.value;
+  const projectId = activeProjectId;
   if (!projectId) return;
-  const projects = await listProjects();
-  const project = projects.find((item) => item.id === projectId);
-  const confirmed = window.confirm((project?.name || 'Proje') + ' ve bu projeye ait tüm görseller silinecek. Devam edilsin mi?');
+  const projectName = projectNameInput.value.trim() || 'Proje';
+  const confirmed = window.confirm(projectName + ' ve bu projeye ait tüm görseller silinecek. Devam edilsin mi?');
   if (!confirmed) return;
   try {
-    const deletingActive = projectId === activeProjectId;
     await deleteProjectWithAssets(projectId);
-    if (deletingActive) resetToFirstOpenState();
-    await refreshProjectList();
-    if (!deletingActive) projectStatus.textContent = 'Proje silindi.';
+    resetToFirstOpenState();
+    projectStatus.textContent = 'Proje silindi.';
   } catch (error) { console.warn('Proje silinemedi:', error); projectStatus.textContent = 'Proje silinemedi.'; }
 });
 
@@ -2712,13 +2682,9 @@ applyProjectCapabilityVisibility();
 syncSaveProjectButton();
 void showProjectCustomerName();
 
-void refreshProjectList()
-  .then(async () => {
-    if (initialProjectId) {
-      await openStoredProject(initialProjectId);
-    }
-  })
-  .catch((error) => console.warn('Proje listesi açılamadı:', error));
+if (initialProjectId) {
+  void openStoredProject(initialProjectId);
+}
 
   return function stopFairStandConfigurator() {
     autosaveController?.disable?.();

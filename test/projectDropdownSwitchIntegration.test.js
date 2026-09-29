@@ -20,3 +20,9 @@ test('cancelled or failed dropdown switch restores the active project selection'
 test('manual open button reuses the same stored-project loading path', () => {
   assert.match(mainSource, /openProjectButton\.addEventListener\('click', async \(\) => \{\n  await openStoredProject\(projectSelect\.value\);\n\}\);/);
 });
+
+test('the editor loads only the open project and does not list every saved project', () => {
+  assert.match(mainSource, /if \(initialProjectId\) \{\n  void openStoredProject\(initialProjectId\);\n\}/);
+  assert.doesNotMatch(mainSource, /listProjects\(/);
+  assert.doesNotMatch(mainSource, /refreshProjectList\(/);
+});
