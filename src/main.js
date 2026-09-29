@@ -45,7 +45,7 @@ import {
 } from './projectNaming.js';
 import { buildSaveAsClone } from './projectSaveAs.js';
 import { createAutosaveController } from './autosaveController.js';
-import { createProjectLoadingController, setButtonBusy } from './projectUi.js';
+import { createProjectLoadingController, setButtonBusy, setSaveProjectEnabled } from './projectUi.js';
 import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';
 import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';
 import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';
@@ -1233,6 +1233,7 @@ function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
   }
 
   currentStand = assignStandFloorItem({ ...setup, depot: depotConfig }, floorTypeSelect.value);
+  syncSaveProjectButton();
   scene3d.setFloorType(floorTypeSelect.value);
   viewportEmpty.hidden = true;
   viewportToolbar.hidden = false;
@@ -1521,6 +1522,16 @@ function clearRegisteredAssets() {
   assetStatus.textContent = 'Görsel seçilmedi.';
 }
 
+function syncSaveProjectButton() {
+  const sceneReady = Boolean(currentStand);
+  if (saveProjectButton?.getAttribute('aria-busy') !== 'true') {
+    setSaveProjectEnabled(saveProjectButton, sceneReady);
+  }
+  if (saveAsProjectButton?.getAttribute('aria-busy') !== 'true') {
+    setSaveProjectEnabled(saveAsProjectButton, sceneReady);
+  }
+}
+
 function buildProjectSnapshot() {
   return {
     id: activeProjectId,
@@ -1607,6 +1618,7 @@ async function restoreProject(project) {
   setProjectName(project.name || 'Adsız Proje');
   currentModules = (cloneProjectState(project.modules) || []).map(normalizeModuleItemState);
   currentStand = cloneProjectState(project.stand);
+  syncSaveProjectButton();
   moduleContextMenu.close();
   moduleContextMenu.closePicker();
 
@@ -1679,6 +1691,7 @@ function resetToFirstOpenState() {
 
   currentModules = [];
   currentStand = null;
+  syncSaveProjectButton();
   selectedStandType = null;
   selectedFoamModuleId = null;
   pendingCatalogAdds = [];
@@ -2342,10 +2355,12 @@ saveProjectButton.addEventListener('click', async () => {
     projectStatus.textContent = 'Proje kaydedilemedi.';
   } finally {
     setButtonBusy(saveProjectButton, false);
+    syncSaveProjectButton();
   }
 });
 
 saveAsProjectButton?.addEventListener('click', async () => {
+  if (!currentStand) return;
   const currentName = projectNameInput.value.trim() || 'Adsız Proje';
   const projectNameSuffix = currentStand
     ? buildAutomaticProjectNameSuffix(currentStand.standType, currentStand.xCm, currentStand.yCm)
@@ -2403,6 +2418,7 @@ saveAsProjectButton?.addEventListener('click', async () => {
     projectStatus.textContent = `Proje farklı kaydedilemedi: ${error?.message || 'Bilinmeyen hata.'}`;
   } finally {
     setButtonBusy(saveAsProjectButton, false);
+    syncSaveProjectButton();
   }
 });
 
@@ -2693,6 +2709,7 @@ function applyProjectCapabilityVisibility() {
 }
 
 applyProjectCapabilityVisibility();
+syncSaveProjectButton();
 void showProjectCustomerName();
 
 void refreshProjectList()

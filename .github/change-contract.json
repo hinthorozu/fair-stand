@@ -178,6 +178,7 @@
       "src/projectNaming.js",
       "src/projectRemote.js",
       "src/projectSaveAs.js",
+      "src/projectUi.js",
       "src/rawBomDebug.js",
       "src/relationshipBom.js",
       "src/runtimeSettings.js",
@@ -452,6 +453,7 @@
       "test/projectNamingSaveAs.test.js",
       "test/projectRemoteSync.test.js",
       "test/projectSaveAs.test.js",
+      "test/projectUi.test.js",
       "test/projectUiMainIntegration.test.js",
       "test/pythonPatchArchive.test.js",
       "test/raisedPlatform.test.js",
@@ -1065,12 +1067,15 @@
       ],
       "reviewedNotAffected": []
     },
-    "notes": "fair_stand_projects.customer_id is required. Existing rows are backfilled with one temporary UUID that is not a CRM customer. PUT drawing saves do not change the link. PATCH /customer reassigns it and rejects null. Permissions stay fair_crm.fair_stand.projects.*."
+    "notes": "fair_stand_projects.customer_id is required. Existing rows are backfilled with one temporary UUID that is not a CRM customer. PUT drawing saves do not change the link. PATCH /customer reassigns it and rejects null. Permissions stay fair_crm.fair_stand.projects.*. Kaydet stays disabled while currentStand is empty and enables once a scene exists. Save As copies the same customerId."
   },
   "tests": {
     "targeted": [
       "backend/tests/modules/fair_stand/test_project_customer.py",
       "test/projectCustomerPanel.test.js",
+      "test/projectSaveAs.test.js",
+      "test/projectUi.test.js",
+      "test/projectUiMainIntegration.test.js",
       "test/runtimeSettings.test.js",
       "test/relationshipBomEndToEnd.test.js",
       "test/relationshipBomJoints.test.js",

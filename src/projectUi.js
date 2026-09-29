@@ -1,3 +1,8 @@
+export function setSaveProjectEnabled(button, sceneReady) {
+  if (!button) return;
+  button.disabled = !sceneReady;
+}
+
 export function setButtonBusy(button, busy, busyLabel = null) {
   if (!button) return;
   if (busy) {

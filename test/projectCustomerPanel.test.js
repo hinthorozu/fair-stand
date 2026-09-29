@@ -18,4 +18,11 @@ test('the open project panel shows the customer name and hides the saved-project
   }
   assert.match(main, /loadCustomerDisplayName\(activeCustomerId\)/);
   assert.match(main, /TEMPORARY_CUSTOMER_LABEL = 'Geçici bağ'/);
+  for (const source of [html, FAIR_STAND_MARKUP]) {
+    assert.match(source, /id="save-project"[^>]*disabled/);
+    assert.match(source, /id="save-as-project"[^>]*disabled/);
+  }
+  assert.match(main, /const sceneReady = Boolean\(currentStand\)/);
+  assert.match(main, /setSaveProjectEnabled\(saveProjectButton, sceneReady\)/);
+  assert.match(main, /setSaveProjectEnabled\(saveAsProjectButton, sceneReady\)/);
 });
