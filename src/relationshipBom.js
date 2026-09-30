@@ -1,6 +1,6 @@
 /**
  * F-031: end-to-end doubles and inner-corner connectors for full-height walls.
- * Base junctions and short-up stay out of scope.
+ * Baza rows are applied in baseRunBom.js. Short-up stays out of scope.
  *
  * Locked pairs are wall with wall, door, separator (including sarmaşık), showcase-2, or showcase-3.
  * Connector counts are the locked face deltas. A short separator recipe does not scale them.

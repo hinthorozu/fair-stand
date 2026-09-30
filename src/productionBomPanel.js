@@ -230,7 +230,7 @@ export function createProductionBomPanel() {
       : '';
 
     paint(`
-      <p class="production-bom-panel__hint">Kaydetme yok · yan yana birleşimde çiftli aparat, iç köşede köşe aparatı, T birleşimde ortak dikme uygulanır. Çiftli aparat T’de yok. Cam şerit panel_cam / panel_corner_cam olur. Baza ve short-up henüz yok.</p>
+      <p class="production-bom-panel__hint">Kaydetme yok · yan yana birleşimde çiftli aparat, iç köşede köşe aparatı, T birleşimde ortak dikme uygulanır. Çiftli aparat T’de yok. Cam şerit panel_cam / panel_corner_cam olur. Baza dizisi ve aynı genişlikteki host sırtı uygulanır. Short-up eklemi yok.</p>
       ${bom.appliedEndToEndCount
         ? `<p class="production-bom-panel__hint">${bom.appliedEndToEndCount} yan yana eklem uygulandı.</p>`
         : ''}

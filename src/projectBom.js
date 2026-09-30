@@ -15,6 +15,7 @@ import {
   applyRelationshipBomAdjustments,
   detectRelationshipJoints,
 } from './relationshipBom.js';
+import { applyBaseRunBom, isBaseRunItemKey } from './baseRunBom.js';
 import { collectPrintAreas } from './printAreaBom.js';
 
 function freezeLine(line) {
@@ -162,7 +163,7 @@ function unresolvedFrom(moduleEntries) {
 
 /**
  * Project modules → per-module BOM + unresolved + aggregated leaf totals.
- * Applies locked end-to-end doubles and inner-corner connectors when placements join.
+ * Applies locked wall joints, then baza rows and same-width host backs.
  * @param {Array<{ id?: string, itemKey?: string, type?: string, placement?: object, widthCm?: number }>} modules
  * @param {{ xCm?: number, yCm?: number, itemKey?: string } | null} stand
  */
@@ -170,9 +171,11 @@ export function resolveProjectBom(modules = [], stand = null) {
   const list = Array.isArray(modules) ? modules : [];
   const joints = detectRelationshipJoints(list);
   let moduleEntries = list.map((moduleState, index) => resolveModuleEntry(moduleState, index));
-  let okEntries = moduleEntries.filter((entry) => entry.status === 'ok');
+  const wallLinesOf = () => moduleEntries
+    .filter((entry) => entry.status === 'ok' && !isBaseRunItemKey(entry.itemKey))
+    .map((entry) => entry.lines);
   const preview = applyRelationshipBomAdjustments(
-    aggregateLines(okEntries.map((entry) => entry.lines)),
+    aggregateLines(wallLinesOf()),
     joints,
   );
 
@@ -183,24 +186,32 @@ export function resolveProjectBom(modules = [], stand = null) {
         ? resolveModuleEntry(moduleState, index, { swapCornerPanels: true })
         : moduleEntries[index]
     ));
-    okEntries = moduleEntries.filter((entry) => entry.status === 'ok');
   }
 
   const adjusted = preview.swapModuleIds.length > 0 && preview.appliedJointCount > 0
     ? applyRelationshipBomAdjustments(
-      aggregateLines(okEntries.map((entry) => entry.lines)),
+      aggregateLines(wallLinesOf()),
       joints,
     )
     : preview;
-  const glassNotes = summarizeGlassMoves(okEntries.flatMap((entry) => entry.glassMoved ?? []));
+  const baza = applyBaseRunBom(list);
+  const glassNotes = summarizeGlassMoves(
+    moduleEntries
+      .filter((entry) => entry.status === 'ok' && !isBaseRunItemKey(entry.itemKey))
+      .flatMap((entry) => entry.glassMoved ?? []),
+  );
   const floorLine = resolveFloorBomLine(stand);
-  const lines = floorLine ? [...adjusted.lines, floorLine] : adjusted.lines;
+  const lines = aggregateLines([
+    adjusted.lines,
+    baza.lines,
+    floorLine ? [floorLine] : [],
+  ]);
 
   return Object.freeze({
     modules: Object.freeze(moduleEntries),
     unresolved: Object.freeze(unresolvedFrom(moduleEntries)),
     joints: Object.freeze(joints),
-    relationshipNotes: Object.freeze([...adjusted.notes, ...glassNotes]),
+    relationshipNotes: Object.freeze([...adjusted.notes, ...baza.notes, ...glassNotes]),
     appliedJointCount: adjusted.appliedJointCount,
     appliedEndToEndCount: adjusted.appliedEndToEndCount,
     appliedCornerCount: adjusted.appliedCornerCount,

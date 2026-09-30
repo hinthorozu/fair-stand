@@ -1310,6 +1310,31 @@ export function snapPlacementToModules({
         });
         return;
       }
+
+      // Aynı derinlikteki baza/banko uç uca aynı merkez çizgisinde durur.
+      // Duvar yüzüne yaslı komşunun 30 cm çizgisi, 50 cm ızgaranın 25 cm'ine düşmez.
+      if (hasStrictDepthBounds(targetDepthCm)) {
+        const connect = (pointXCm, pointYCm, movingEndpoint) => {
+          addCandidate(createEndpointConnectionPlacement({
+            axis: movingAxis,
+            pointXCm,
+            pointYCm,
+            widthCm: width,
+            rotationZDeg: resolvedRotation,
+            movingEndpoint,
+            standType,
+            standXCm,
+          }), targetModule.id, 'end-to-end', -1);
+        };
+        if (movingAxis === 'x') {
+          connect(target.endCm, target.fixedCm, 'start');
+          connect(target.startCm, target.fixedCm, 'end');
+        } else {
+          connect(target.fixedCm, target.endCm, 'start');
+          connect(target.fixedCm, target.startCm, 'end');
+        }
+      }
+
       const faceGapCm = (movingDepthCm + targetDepthCm) / 2;
 
       [-1, 1].forEach((direction) => {

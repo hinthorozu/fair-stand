@@ -460,6 +460,36 @@ test('counter face snap ignores longitudinal grid offset when measuring wall pro
   assert.equal(validation.ok, true);
 });
 
+test('a baza beside a wall-hosted baza keeps that center line', () => {
+  const modules = [{
+    id: 'hosted',
+    type: 'base',
+    itemKey: 'base_200',
+    widthCm: 200,
+    depthCm: 50,
+    placement: { xCm: 0, yCm: 30, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+  }];
+
+  const snapped = snapPlacementToModules({
+    moduleId: 'next',
+    moduleType: 'base',
+    itemKey: 'base_200',
+    widthCm: 200,
+    depthCm: 50,
+    pointerXCm: 300,
+    pointerYCm: 25,
+    rotationZDeg: 0,
+    modules,
+    standType: 'island',
+    standXCm: 800,
+    standYCm: 600,
+  });
+
+  assert.equal(snapped?.snapKind, 'end-to-end');
+  assert.equal(snapped.placement.xCm, 200);
+  assert.equal(snapped.placement.yCm, 30);
+});
+
 test('counter side faces snap flush to perpendicular walls', () => {
   const leftWall = [{
     id: 'left-wall', widthCm: 400,
