@@ -4454,8 +4454,8 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_200_short_up_2",
-            "name": "Panel 200 Short Up 2",
+            "item_key": "wall_200_short_2",
+            "name": "Panel 200 Kısa Çift Sıra",
             "item_type": "flat-panel",
             "is_render": True,
             "accepts_color": True,
@@ -4476,7 +4476,7 @@ CATALOG_SEED = {
             "composition_mode": "recipe",
             "paintable": None,
             "shape": None,
-            "variant": "short-up-2",
+            "variant": "wall-short-2",
             "eye_count": None,
             
             "dimensions": {
@@ -4524,8 +4524,8 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_150_short_up_2",
-            "name": "Panel 150 Short Up 2",
+            "item_key": "wall_150_short_2",
+            "name": "Panel 150 Kısa Çift Sıra",
             "item_type": "flat-panel",
             "is_render": True,
             "accepts_color": True,
@@ -4546,7 +4546,7 @@ CATALOG_SEED = {
             "composition_mode": "recipe",
             "paintable": None,
             "shape": None,
-            "variant": "short-up-2",
+            "variant": "wall-short-2",
             "eye_count": None,
             
             "dimensions": {
@@ -4594,8 +4594,8 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_100_short_up_2",
-            "name": "Panel 100 Short Up 2",
+            "item_key": "wall_100_short_2",
+            "name": "Panel 100 Kısa Çift Sıra",
             "item_type": "flat-panel",
             "is_render": True,
             "accepts_color": True,
@@ -4616,7 +4616,7 @@ CATALOG_SEED = {
             "composition_mode": "recipe",
             "paintable": None,
             "shape": None,
-            "variant": "short-up-2",
+            "variant": "wall-short-2",
             "eye_count": None,
             
             "dimensions": {
@@ -4664,8 +4664,8 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_50_short_up_2",
-            "name": "Panel 50 Short Up 2",
+            "item_key": "wall_50_short_2",
+            "name": "Panel 50 Kısa Çift Sıra",
             "item_type": "flat-panel",
             "is_render": True,
             "accepts_color": True,
@@ -4686,7 +4686,7 @@ CATALOG_SEED = {
             "composition_mode": "recipe",
             "paintable": None,
             "shape": None,
-            "variant": "short-up-2",
+            "variant": "wall-short-2",
             "eye_count": None,
             
             "dimensions": {
@@ -4734,8 +4734,8 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_200_short_up_1",
-            "name": "Panel 200 Short Up 1",
+            "item_key": "wall_200_short_1",
+            "name": "Panel 200 Kısa Tek Sıra",
             "item_type": "flat-panel",
             "is_render": True,
             "accepts_color": True,
@@ -4756,7 +4756,7 @@ CATALOG_SEED = {
             "composition_mode": "recipe",
             "paintable": None,
             "shape": None,
-            "variant": "short-up-1",
+            "variant": "wall-short-1",
             "eye_count": None,
             
             "dimensions": {
@@ -4804,8 +4804,8 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_150_short_up_1",
-            "name": "Panel 150 Short Up 1",
+            "item_key": "wall_150_short_1",
+            "name": "Panel 150 Kısa Tek Sıra",
             "item_type": "flat-panel",
             "is_render": True,
             "accepts_color": True,
@@ -4826,7 +4826,7 @@ CATALOG_SEED = {
             "composition_mode": "recipe",
             "paintable": None,
             "shape": None,
-            "variant": "short-up-1",
+            "variant": "wall-short-1",
             "eye_count": None,
             
             "dimensions": {
@@ -4874,8 +4874,8 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_100_short_up_1",
-            "name": "Panel 100 Short Up 1",
+            "item_key": "wall_100_short_1",
+            "name": "Panel 100 Kısa Tek Sıra",
             "item_type": "flat-panel",
             "is_render": True,
             "accepts_color": True,
@@ -4896,7 +4896,7 @@ CATALOG_SEED = {
             "composition_mode": "recipe",
             "paintable": None,
             "shape": None,
-            "variant": "short-up-1",
+            "variant": "wall-short-1",
             "eye_count": None,
             
             "dimensions": {
@@ -4944,8 +4944,8 @@ CATALOG_SEED = {
             "assets": [],
         },
         {
-            "item_key": "wall_50_short_up_1",
-            "name": "Panel 50 Short Up 1",
+            "item_key": "wall_50_short_1",
+            "name": "Panel 50 Kısa Tek Sıra",
             "item_type": "flat-panel",
             "is_render": True,
             "accepts_color": True,
@@ -4966,7 +4966,7 @@ CATALOG_SEED = {
             "composition_mode": "recipe",
             "paintable": None,
             "shape": None,
-            "variant": "short-up-1",
+            "variant": "wall-short-1",
             "eye_count": None,
             
             "dimensions": {

@@ -109,29 +109,29 @@ for (const itemKey of WALL_KEYS) {
   });
 }
 
-const SHORT_UP_2 = {
-  wall_50_short_up_2: {
+const WALL_SHORT_2 = {
+  wall_50_short_2: {
     widthCm: 50,
     parentKey: 'wall_50_350',
     recipeQuantities: {
       profile_41_5: 2, upright_99: 2, panel_48_5: 2, connector_start: 2, connector_single: 3,
     },
   },
-  wall_100_short_up_2: {
+  wall_100_short_2: {
     widthCm: 100,
     parentKey: 'wall_100_350',
     recipeQuantities: {
       profile_91: 2, upright_99: 2, panel_98: 2, connector_start: 2, connector_single: 3,
     },
   },
-  wall_150_short_up_2: {
+  wall_150_short_2: {
     widthCm: 150,
     parentKey: 'wall_150_350',
     recipeQuantities: {
       profile_140_5: 2, upright_99: 2, panel_147_5: 2, connector_start: 2, connector_single: 3,
     },
   },
-  wall_200_short_up_2: {
+  wall_200_short_2: {
     widthCm: 200,
     parentKey: 'wall_200_350',
     recipeQuantities: {
@@ -140,22 +140,22 @@ const SHORT_UP_2 = {
   },
 };
 
-for (const [itemKey, expected] of Object.entries(SHORT_UP_2)) {
+for (const [itemKey, expected] of Object.entries(WALL_SHORT_2)) {
   test(`${itemKey} is a hanging two-panel Item that does not replace ${expected.parentKey}`, () => {
     const item = getItem(itemKey);
     const parent = getItem(expected.parentKey);
     const catalog = getCatalogItem(itemKey);
 
     assert.equal(item.itemKey, itemKey);
-    assert.equal(item.name, `Panel ${expected.widthCm} Short Up 2`);
+    assert.equal(item.name, `Panel ${expected.widthCm} Kısa Çift Sıra`);
     assert.equal(item.type, 'flat-panel');
-    assert.equal(item.variant, 'short-up-2');
+    assert.equal(item.variant, 'wall-short-2');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 2 });
     assert.equal(item.composition.moduleType, undefined);
     assert.deepEqual(item.dimensions, { widthCm: expected.widthCm });
     assert.equal(parent.composition.moduleType, undefined);
     assert.equal(parent.stripOccupancy, undefined);
-    assert.equal(item.variant, 'short-up-2');
+    assert.equal(item.variant, 'wall-short-2');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 2 });
     assert.equal(resolveItemKey({ type: 'flat-panel', widthCm: expected.widthCm }), null);
     assert.equal(resolveItemKey({ itemKey: expected.parentKey }), expected.parentKey);
@@ -165,7 +165,7 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_2)) {
     assert.equal(state.itemKey, itemKey);
     assert.equal(state.strips.length, 2);
 
-    const recipe = getModuleRecipe('wall-short-up-2', expected.widthCm);
+    const recipe = getModuleRecipe('wall-short-2', expected.widthCm);
     const quantities = Object.fromEntries(
       recipe.items.map((entry) => [entry.itemKey ?? entry.partId, entry.quantity]),
     );
@@ -173,29 +173,29 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_2)) {
   });
 }
 
-const SHORT_UP_1 = {
-  wall_50_short_up_1: {
+const WALL_SHORT_1 = {
+  wall_50_short_1: {
     widthCm: 50,
     parentKey: 'wall_50_350',
     recipeQuantities: {
       profile_41_5: 2, upright_49_5: 2, panel_48_5: 1, connector_start: 2, connector_single: 3,
     },
   },
-  wall_100_short_up_1: {
+  wall_100_short_1: {
     widthCm: 100,
     parentKey: 'wall_100_350',
     recipeQuantities: {
       profile_91: 2, upright_49_5: 2, panel_98: 1, connector_start: 2, connector_single: 3,
     },
   },
-  wall_150_short_up_1: {
+  wall_150_short_1: {
     widthCm: 150,
     parentKey: 'wall_150_350',
     recipeQuantities: {
       profile_140_5: 2, upright_49_5: 2, panel_147_5: 1, connector_start: 2, connector_single: 3,
     },
   },
-  wall_200_short_up_1: {
+  wall_200_short_1: {
     widthCm: 200,
     parentKey: 'wall_200_350',
     recipeQuantities: {
@@ -204,22 +204,22 @@ const SHORT_UP_1 = {
   },
 };
 
-for (const [itemKey, expected] of Object.entries(SHORT_UP_1)) {
+for (const [itemKey, expected] of Object.entries(WALL_SHORT_1)) {
   test(`${itemKey} is a hanging one-panel Item that does not replace ${expected.parentKey}`, () => {
     const item = getItem(itemKey);
     const parent = getItem(expected.parentKey);
     const catalog = getCatalogItem(itemKey);
 
     assert.equal(item.itemKey, itemKey);
-    assert.equal(item.name, `Panel ${expected.widthCm} Short Up 1`);
+    assert.equal(item.name, `Panel ${expected.widthCm} Kısa Tek Sıra`);
     assert.equal(item.type, 'flat-panel');
-    assert.equal(item.variant, 'short-up-1');
+    assert.equal(item.variant, 'wall-short-1');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 1 });
     assert.equal(item.composition.moduleType, undefined);
     assert.deepEqual(item.dimensions, { widthCm: expected.widthCm });
     assert.equal(parent.composition.moduleType, undefined);
     assert.equal(parent.stripOccupancy, undefined);
-    assert.equal(item.variant, 'short-up-1');
+    assert.equal(item.variant, 'wall-short-1');
     assert.deepEqual(item.stripOccupancy, { align: 'top', stripCount: 1 });
     assert.equal(resolveItemKey({ type: 'flat-panel', widthCm: expected.widthCm }), null);
     assert.equal(resolveItemKey({ itemKey: expected.parentKey }), expected.parentKey);
@@ -229,7 +229,7 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_1)) {
     assert.equal(state.itemKey, itemKey);
     assert.equal(state.strips.length, 1);
 
-    const recipe = getModuleRecipe('wall-short-up-1', expected.widthCm);
+    const recipe = getModuleRecipe('wall-short-1', expected.widthCm);
     const quantities = Object.fromEntries(
       recipe.items.map((entry) => [entry.itemKey ?? entry.partId, entry.quantity]),
     );
@@ -237,10 +237,10 @@ for (const [itemKey, expected] of Object.entries(SHORT_UP_1)) {
   });
 }
 
-test('wall_200_short_up_2 skips floor collisions but keeps wall snap policy', () => {
+test('wall_200_short_2 skips floor collisions but keeps wall snap policy', () => {
   const hanging = {
     id: 'shot',
-    itemKey: 'wall_200_short_up_2',
+    itemKey: 'wall_200_short_2',
     type: 'flat-panel',
     widthCm: 200,
     placement: { xCm: 0, yCm: 0, zCm: 250, rotationZDeg: 0, wallId: 'back' },

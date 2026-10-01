@@ -24,11 +24,11 @@ test('strip occupancy normalizes catalog short-up contract', () => {
 
 test('canonical Item occupancy wins and hanging short-up stays top-aligned', () => {
   assert.deepEqual(
-    resolveModuleStripOccupancy({ itemKey: 'wall_200_short_up_2', stripOccupancy: { align: 'bottom', stripCount: 2 } }),
+    resolveModuleStripOccupancy({ itemKey: 'wall_200_short_2', stripOccupancy: { align: 'bottom', stripCount: 2 } }),
     { align: 'top', stripCount: 2 },
   );
   assert.deepEqual(
-    resolveModuleStripOccupancy({ itemKey: 'wall_200_short_up_2', type: 'flat-panel' }),
+    resolveModuleStripOccupancy({ itemKey: 'wall_200_short_2', type: 'flat-panel' }),
     { align: 'top', stripCount: 2 },
   );
   assert.equal(resolveModuleStripOccupancy({ itemKey: 'wall_200_350', type: 'flat-panel' }), null);
@@ -38,7 +38,7 @@ test('canonical Item occupancy wins and hanging short-up stays top-aligned', () 
   const behavior = readFileSync(new URL('../src/moduleBehavior.js', import.meta.url), 'utf8');
   const sidebar = readFileSync(new URL('../src/moduleDragSidebar.js', import.meta.url), 'utf8');
   for (const source of [scene, state, behavior, sidebar]) {
-    assert.doesNotMatch(source, /itemKey === 'wall_200_short_up_2'/);
+    assert.doesNotMatch(source, /itemKey === 'wall_200_short_2'/);
   }
   assert.doesNotMatch(scene, /resolveOccupiedStripLayout/);
   assert.doesNotMatch(readFileSync(new URL('../src/stripOccupancy.js', import.meta.url), 'utf8'), /getOccupiedStripLayout/);

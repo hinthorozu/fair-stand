@@ -735,12 +735,37 @@ export function hasCanonicalModuleItemKey(moduleState) {
 }
 
 
+const LEGACY_WALL_SHORT_ITEM_KEYS = Object.freeze({
+  wall_200_short_up_1: 'wall_200_short_1',
+  wall_150_short_up_1: 'wall_150_short_1',
+  wall_100_short_up_1: 'wall_100_short_1',
+  wall_50_short_up_1: 'wall_50_short_1',
+  wall_200_short_up_2: 'wall_200_short_2',
+  wall_150_short_up_2: 'wall_150_short_2',
+  wall_100_short_up_2: 'wall_100_short_2',
+  wall_50_short_up_2: 'wall_50_short_2',
+});
+
+const LEGACY_WALL_SHORT_VARIANTS = Object.freeze({
+  'short-up-1': 'wall-short-1',
+  'short-up-2': 'wall-short-2',
+});
+
+function canonicalizeLegacyWallShortIdentity(moduleState) {
+  const itemKey = LEGACY_WALL_SHORT_ITEM_KEYS[moduleState.itemKey];
+  if (itemKey) moduleState.itemKey = itemKey;
+  const variant = LEGACY_WALL_SHORT_VARIANTS[moduleState.variant];
+  if (variant) moduleState.variant = variant;
+}
+
 /**
  * Kayıtlı alt Item kimliğini, kullanıcı ezmelerini silmeden düzeltir.
  * Eski kapı projeleri yüzey state'inde fiziksel kanat itemKey taşımıyordu.
+ * wall short legacy itemKey/variant, katalog getItem çağrısından önce çevrilir.
  */
 export function normalizeModuleItemState(moduleState) {
   if (!moduleState) return moduleState;
+  canonicalizeLegacyWallShortIdentity(moduleState);
 
   if (moduleState.type === 'tv') {
     const resolvedKey = resolveItemKey(moduleState);

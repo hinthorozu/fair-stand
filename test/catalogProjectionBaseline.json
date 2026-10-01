@@ -9,14 +9,14 @@
     "wall_separator_100_350_sarmasik",
     "wall_separator_50_350_sarmasik",
     "wall_door_100_350",
-    "wall_200_short_up_2",
-    "wall_150_short_up_2",
-    "wall_100_short_up_2",
-    "wall_50_short_up_2",
-    "wall_200_short_up_1",
-    "wall_150_short_up_1",
-    "wall_100_short_up_1",
-    "wall_50_short_up_1",
+    "wall_200_short_2",
+    "wall_150_short_2",
+    "wall_100_short_2",
+    "wall_50_short_2",
+    "wall_200_short_1",
+    "wall_150_short_1",
+    "wall_100_short_1",
+    "wall_50_short_1",
     "upright_346_5",
     "profile_190",
     "profile_140_5",
@@ -107,43 +107,43 @@
       "previewId": 8
     },
     {
-      "itemKey": "wall_200_short_up_2",
-      "label": "Panel 200 Short Up 2",
+      "itemKey": "wall_200_short_2",
+      "label": "Panel 200 Kısa Çift Sıra",
       "previewId": 9
     },
     {
-      "itemKey": "wall_150_short_up_2",
-      "label": "Panel 150 Short Up 2",
+      "itemKey": "wall_150_short_2",
+      "label": "Panel 150 Kısa Çift Sıra",
       "previewId": 9
     },
     {
-      "itemKey": "wall_100_short_up_2",
-      "label": "Panel 100 Short Up 2",
+      "itemKey": "wall_100_short_2",
+      "label": "Panel 100 Kısa Çift Sıra",
       "previewId": 9
     },
     {
-      "itemKey": "wall_50_short_up_2",
-      "label": "Panel 50 Short Up 2",
+      "itemKey": "wall_50_short_2",
+      "label": "Panel 50 Kısa Çift Sıra",
       "previewId": 9
     },
     {
-      "itemKey": "wall_200_short_up_1",
-      "label": "Panel 200 Short Up 1",
+      "itemKey": "wall_200_short_1",
+      "label": "Panel 200 Kısa Tek Sıra",
       "previewId": 9
     },
     {
-      "itemKey": "wall_150_short_up_1",
-      "label": "Panel 150 Short Up 1",
+      "itemKey": "wall_150_short_1",
+      "label": "Panel 150 Kısa Tek Sıra",
       "previewId": 9
     },
     {
-      "itemKey": "wall_100_short_up_1",
-      "label": "Panel 100 Short Up 1",
+      "itemKey": "wall_100_short_1",
+      "label": "Panel 100 Kısa Tek Sıra",
       "previewId": 9
     },
     {
-      "itemKey": "wall_50_short_up_1",
-      "label": "Panel 50 Short Up 1",
+      "itemKey": "wall_50_short_1",
+      "label": "Panel 50 Kısa Tek Sıra",
       "previewId": 9
     },
     {
@@ -379,14 +379,14 @@
       "catalogName": "Panel Ek Modül",
       "catalogIndex": 2,
       "keys": [
-        "wall_200_short_up_2",
-        "wall_150_short_up_2",
-        "wall_100_short_up_2",
-        "wall_50_short_up_2",
-        "wall_200_short_up_1",
-        "wall_150_short_up_1",
-        "wall_100_short_up_1",
-        "wall_50_short_up_1",
+        "wall_200_short_2",
+        "wall_150_short_2",
+        "wall_100_short_2",
+        "wall_50_short_2",
+        "wall_200_short_1",
+        "wall_150_short_1",
+        "wall_100_short_1",
+        "wall_50_short_1",
         "upright_346_5",
         "profile_190",
         "profile_140_5",

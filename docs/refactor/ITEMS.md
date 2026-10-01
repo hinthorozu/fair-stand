@@ -50,8 +50,8 @@ Kimlik `getItem(itemKey)` ile okunur. Her field her mekanizmada işlenmez. Place
 | `composition.items` | 30 | Çocuk listesi `{itemKey, quantity}`. 28 recipe parent + 2 mobilya kümesi. Recipe tablosu kopyası değil; tek kaynak Item. |
 | `assembly.parts` | 0+ | Admin montaj pose + optional `lockGroupId`. BOM değil. **Şemada onaylı** (`fair_stand_item_assembly_parts`). |
 | `shape` | 3 | Kök `'L'` (köşe banko). |
-| `variant` | 8 | `short-up-1` / `short-up-2`. |
-| `stripOccupancy.align` | 8 | Short-up `'top'`. |
+| `variant` | 8 | `wall-short-1` / `wall-short-2`. |
+| `stripOccupancy.align` | 8 | wall-short `'top'`. |
 | `stripOccupancy.stripCount` | 8 | 1 veya 2 şerit. |
 | `modelFile` | 9 | GLB adı. |
 | `modelRotationYDeg` | 5 | Model Y dönüşü. |

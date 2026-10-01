@@ -1,6 +1,6 @@
 /**
  * F-031: end-to-end doubles and inner-corner connectors for full-height walls.
- * Baza rows are applied in baseRunBom.js. Short-up stays out of scope.
+ * Baza rows are applied in baseRunBom.js. wall-short stays out of scope.
  *
  * Locked pairs are wall with wall, door, separator (including sarmaşık), showcase-2, or showcase-3.
  * Connector counts are the locked face deltas. A short separator recipe does not scale them.
@@ -8,7 +8,7 @@
  * A module sitting on the back keeps its singles and does not take corner connectors.
  */
 
-import { getItem, isShortUpFamilyDescriptor } from './items.js';
+import { getItem, isWallShortFamilyDescriptor } from './items.js';
 import { resolveItemBom } from './itemBom.js';
 
 const EPSILON_CM = 0.001;
@@ -84,7 +84,7 @@ export function relationshipBomRole(module) {
   if (!itemKey) return null;
   const item = getItem(itemKey);
   if (!item) return null;
-  if (isShortUpFamilyDescriptor(item) || isShortUpFamilyDescriptor(module)) return null;
+  if (isWallShortFamilyDescriptor(item) || isWallShortFamilyDescriptor(module)) return null;
 
   if (FULL_HEIGHT_FLAT_WALL_RE.test(itemKey) && item.type === 'flat-panel') return 'wall';
   if (itemKey === 'wall_door_100_350') return 'door';

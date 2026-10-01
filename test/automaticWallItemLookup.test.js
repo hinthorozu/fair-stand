@@ -17,6 +17,6 @@ test('otomatik duvar widthCm → flat-panel Item registry’den (hardcoded map y
   assert.equal(wall.itemKey, 'wall_200_350');
   assert.equal(wall.widthCm, 200);
 
-  assert.equal(getItem('wall_200_short_up_2')?.dimensions?.widthCm, 200);
-  assert.notEqual(resolveAutomaticWallFlatPanelItemKey(200), 'wall_200_short_up_2');
+  assert.equal(getItem('wall_200_short_2')?.dimensions?.widthCm, 200);
+  assert.notEqual(resolveAutomaticWallFlatPanelItemKey(200), 'wall_200_short_2');
 });

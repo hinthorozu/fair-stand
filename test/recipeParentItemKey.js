@@ -18,8 +18,8 @@ export function recipeParentItemKey(moduleType, widthCm, options = {}) {
   if (moduleType === 'counter' && options.shape === 'L') return `desk_banko_${widthCm}_l`;
   if (moduleType === 'counter') return `desk_banko_${widthCm}`;
   if (moduleType === 'base') return `base_${widthCm}`;
-  if (moduleType === 'wall-short-up-1') return `wall_${widthCm}_short_up_1`;
-  if (moduleType === 'wall-short-up-2') return `wall_${widthCm}_short_up_2`;
+  if (moduleType === 'wall-short-1') return `wall_${widthCm}_short_1`;
+  if (moduleType === 'wall-short-2') return `wall_${widthCm}_short_2`;
   return null;
 }
 
