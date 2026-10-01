@@ -53,8 +53,7 @@
       <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Menüyü kapat" aria-expanded="true" title="Menüyü kapat">‹</button>
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-intro">
-          <p class="eyebrow">FAIR STAND / PROTOTİP</p>
-          <h1>Maxima Stand Konfigüratörü</h1>
+          <h1>Maxima Konfigüratörü</h1>
           <p class="muted">Önce stand tipini ve gerçek stand alanını belirle; sahne yalnızca bu bilgiler tamamlandığında oluşturulur.</p>
         </div>
 
@@ -105,6 +104,21 @@
           </div>
           <p class="stand-limit-note">50 cm ve katları · Maksimum: 5000 × 5000 cm (50 × 50 m)</p>
           <label class="stand-size-field" for="floor-type"><span>Zemin Kaplaması</span><select id="floor-type"><option value="karolaj">Karolaj · 100 × 100 cm</option><option value="hali">Halı</option><option value="parke-acik">Beyaz Meşe</option><option value="parke-sari">Sarı Meşe</option><option value="parke-beton">Beton Parke</option></select></label>
+          <div id="floor-area-controls" hidden>
+            <div class="stand-size-grid">
+              <label class="stand-size-field" for="floor-area-x"><span>Alan X</span><input id="floor-area-x" type="number" min="0" max="5000" step="50" disabled /></label>
+              <label class="stand-size-field" for="floor-area-y"><span>Alan Y</span><input id="floor-area-y" type="number" min="0" max="5000" step="50" disabled /></label>
+              <label class="stand-size-field" for="floor-area-width"><span>Alan genişlik</span><input id="floor-area-width" type="number" min="50" max="5000" step="50" disabled /></label>
+              <label class="stand-size-field" for="floor-area-depth"><span>Alan derinlik</span><input id="floor-area-depth" type="number" min="50" max="5000" step="50" disabled /></label>
+            </div>
+            <label class="stand-size-field" for="floor-area-type"><span>Alan kaplaması</span><select id="floor-area-type" disabled></select></label>
+            <div class="project-actions">
+              <button id="floor-area-add" type="button">Zemin Alanı Ekle</button>
+              <button id="floor-area-draw" type="button" aria-pressed="false" disabled>Sahnede Çiz</button>
+              <button id="floor-area-delete" type="button" class="danger ghost" disabled>Zemin Alanını Sil</button>
+            </div>
+            <p id="floor-area-status" class="status">Baz zemin tüm standı kaplar. İstersen içine bir dikdörtgen alan ekle.</p>
+          </div>
           <div style="display:grid;gap:8px;padding:10px 0 4px">
             <label style="display:flex;align-items:center;gap:8px;font-weight:700"><input id="auto-depot-enabled" type="checkbox" /> Depo eklensin</label>
             <label class="stand-size-field" for="auto-depot-size"><span>Depo ölçüsü</span><select id="auto-depot-size" disabled><option value="100x100">1 × 1 m</option><option value="150x100">1,5 × 1 m</option><option value="200x100">2 × 1 m</option><option value="200x200">2 × 2 m</option></select></label>

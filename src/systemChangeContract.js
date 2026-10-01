@@ -90,6 +90,7 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/cornerPlacement.js': frozenDomains('behavior', 'placement'),
   'src/designState.js': frozenDomains('state', 'persistence'),
   'src/featureContracts.js': frozenDomains('architecture', 'composition'),
+  'src/floorArea.js': frozenDomains('state', 'bom', 'placement'),
   'src/groundLayout.js': frozenDomains('renderer', 'placement'),
   'src/helpGuide.css': frozenDomains('ui'),
   'src/helpGuide.js': frozenDomains('ui', 'accessibility'),

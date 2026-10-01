@@ -15,13 +15,14 @@ function getSceneSelectionWiring() {
 test('main delegates scene selection descriptions to selectionFeedback', () => {
   assert.match(
     source,
-    /import \{ DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection \} from '\.\/selectionFeedback\.js'/,
+    /import \{ DEFAULT_SELECTION_HINT, describeFloorAreaSelection, describeFloorSelection, describeSurfaceSelection \} from '\.\/selectionFeedback\.js'/,
   );
   assert.doesNotMatch(source, /const DEFAULT_SELECTION_HINT =/);
 
   const sceneWiring = getSceneSelectionWiring();
   assert.match(sceneWiring, /const feedback = describeSurfaceSelection\(surfaces, currentModules\);/);
-  assert.match(sceneWiring, /const message = describeFloorSelection\(floorSelection\);/);
+  assert.match(sceneWiring, /describeFloorAreaSelection\(floorSelection\)/);
+  assert.match(sceneWiring, /describeFloorSelection\(floorSelection\)/);
   assert.doesNotMatch(sceneWiring, /if \(moduleType === 'counter'\)/);
   assert.doesNotMatch(sceneWiring, /selectedFabricGroupIds = new Set/);
 });

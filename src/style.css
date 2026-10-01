@@ -865,7 +865,22 @@ h2 {
 
 .project-card input, .project-card select { width: 100%; }
 .project-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.project-actions button { width: 100%; }
+.project-actions button {
+  width: 100%;
+  min-height: 32px;
+  padding: 7px 10px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+#rename-project {
+  min-height: 32px;
+  padding: 7px 10px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+#floor-area-controls .project-actions {
+  grid-template-columns: 1fr;
+}
 .project-revision-list { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
 .project-revision-list button { text-align: left; }
 .project-revision-list button[aria-current="true"] { font-weight: 700; }
@@ -952,6 +967,16 @@ h2 {
 
 
 /* Phase 3 final polish: sidebar hierarchy, selection feedback and status tones */
+.sidebar-back {
+  align-self: flex-start;
+  width: auto;
+  min-height: 32px;
+  margin: 0 0 8px;
+  padding: 7px 10px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
 .sidebar-intro {
   padding: 2px 2px 6px;
 }

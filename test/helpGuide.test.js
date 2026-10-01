@@ -36,6 +36,19 @@ test('help guide exposes a fixed question-mark launcher and collapsible sections
   assert.match(guideSource, /Tüm Özellikleri Kaldır/);
 });
 
+test('help guide describes the single floor rectangle and reset clearing it', () => {
+  assert.match(guideSource, /title: 'Zemin'/);
+  assert.match(guideSource, /<strong>Zemin Kaplaması<\/strong> standın tamamının baz kaplamasıdır/);
+  assert.match(guideSource, /<strong>Zemin Alanı Ekle<\/strong>/);
+  assert.match(guideSource, /50 cm ve katlarıdır ve standın içinde kalır/);
+  assert.match(guideSource, /<strong>Sahnede Çiz<\/strong>/);
+  assert.match(guideSource, /<strong>Zemin Alanını Sil<\/strong>/);
+  assert.match(guideSource, /Aynı anda yalnız bir alan vardır/);
+  assert.match(guideSource, /Hazır parke kendi malzemesini kullanır ve boyanmaz/);
+  assert.match(guideSource, /Alanın rengi baz renkten ayrıdır/);
+  assert.match(guideSource, /sahnedeki modüller ve zemin alanı silinir/);
+});
+
 test('help guide supports close button, backdrop click and Escape', () => {
   assert.match(guideSource, /help-guide-close/);
   assert.match(guideSource, /event\.target === backdrop/);

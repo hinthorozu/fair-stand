@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DEFAULT_SELECTION_HINT,
+  describeFloorAreaSelection,
   describeFloorSelection,
   describeSurfaceSelection,
 } from '../src/selectionFeedback.js';
@@ -87,5 +88,13 @@ test('floor feedback preserves paintable and non-paintable labels', () => {
   assert.equal(
     describeFloorSelection({ selected: true, floorType: 'parke', paintable: false }),
     'Zemin zemini seçili · bu zemin tipi boyanamaz.',
+  );
+  assert.equal(
+    describeFloorAreaSelection({ selected: true, floorType: 'hali', paintable: true }),
+    'Halı zemin alanı seçili · mevcut Aktif renk ile boyanabilir.',
+  );
+  assert.equal(
+    describeFloorAreaSelection({ selected: true, floorType: 'parke-acik', paintable: false }),
+    'Beyaz Meşe zemin alanı seçili · bu zemin tipi boyanamaz.',
   );
 });

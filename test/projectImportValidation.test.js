@@ -53,6 +53,58 @@ test('import proje stand ve modül tipi doğrular', () => {
   assert.equal(badStand.ok, false);
 });
 
+test('eski tek zemin projesi floorArea olmadan açılır; geçersiz alan reddedilir', () => {
+  const legacy = validateImportedProjectState({
+    id: 'p1',
+    version: 1,
+    stand: { standType: 'island', xCm: 500, yCm: 500, itemKey: 'hali', floorColor: '#8b8f94' },
+    modules: [],
+  });
+  assert.equal(legacy.ok, true);
+
+  const split = validateImportedProjectState({
+    id: 'p1',
+    version: 1,
+    stand: {
+      standType: 'island',
+      xCm: 500,
+      yCm: 500,
+      itemKey: 'hali',
+      floorArea: { xCm: 100, yCm: 100, widthCm: 200, depthCm: 300, itemKey: 'karolaj', color: null },
+    },
+    modules: [],
+  });
+  assert.equal(split.ok, true);
+
+  const offGrid = validateImportedProjectState({
+    id: 'p1',
+    version: 1,
+    stand: {
+      standType: 'island',
+      xCm: 500,
+      yCm: 500,
+      itemKey: 'hali',
+      floorArea: { xCm: 100, yCm: 100, widthCm: 430, depthCm: 200, itemKey: 'parke-acik' },
+    },
+    modules: [],
+  });
+  assert.equal(offGrid.ok, false);
+
+  const outside = validateImportedProjectState({
+    id: 'p1',
+    version: 1,
+    stand: {
+      standType: 'island',
+      xCm: 500,
+      yCm: 500,
+      itemKey: 'hali',
+      floorArea: { xCm: 400, yCm: 0, widthCm: 200, depthCm: 200, itemKey: 'hali' },
+    },
+    modules: [],
+  });
+  assert.equal(outside.ok, false);
+});
+
 test('manifest archiveVersion 1 ve asset yolu assets/ altında', () => {
   const ok = validateProjectArchiveManifest({
     archiveVersion: 1,

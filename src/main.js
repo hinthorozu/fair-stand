@@ -58,7 +58,12 @@ import { createAutosaveController } from './autosaveController.js';
 import { createProjectLoadingController, setButtonBusy, setSaveProjectEnabled } from './projectUi.js';
 import { formatProjectSwitchMessage, shouldConfirmProjectSwitch } from './projectSwitch.js';
 import { observeSelectionFeedback, observeStatusTones } from './uiFeedback.js';
-import { DEFAULT_SELECTION_HINT, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';
+import {
+  defaultFloorAreaRect,
+  defaultOverrideItemKey,
+  validateFloorArea,
+} from './floorArea.js';
+import { DEFAULT_SELECTION_HINT, describeFloorAreaSelection, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';
 import { createSidebarController } from './sidebarController.js';
 import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';
 import { getFloorItem, getFloorSelectLabel, listFloorItems, resolveItemDefaultZCm, resolveItemKey, resolveStandFloorItemKey } from './items.js';
@@ -150,6 +155,16 @@ const standSizeXInput = document.querySelector('#stand-size-x');
 const standSizeYInput = document.querySelector('#stand-size-y');
 const createStageButton = document.querySelector('#create-stage');
 const floorTypeSelect = document.querySelector('#floor-type');
+const floorAreaControls = document.querySelector('#floor-area-controls');
+const floorAreaAddButton = document.querySelector('#floor-area-add');
+const floorAreaDrawButton = document.querySelector('#floor-area-draw');
+const floorAreaDeleteButton = document.querySelector('#floor-area-delete');
+const floorAreaStatus = document.querySelector('#floor-area-status');
+const floorAreaXInput = document.querySelector('#floor-area-x');
+const floorAreaYInput = document.querySelector('#floor-area-y');
+const floorAreaWidthInput = document.querySelector('#floor-area-width');
+const floorAreaDepthInput = document.querySelector('#floor-area-depth');
+const floorAreaTypeSelect = document.querySelector('#floor-area-type');
 
 function syncFloorTypeSelect(selectedKey = floorTypeSelect.value) {
   const preferred = getFloorItem(selectedKey)?.itemKey ?? getFloorItem('karolaj').itemKey;
@@ -315,7 +330,9 @@ const scene3d = createStandScene(
   getAssetUrl,
   (context) => moduleContextMenu.open(context),
   (floorSelection) => {
-    const message = describeFloorSelection(floorSelection);
+    const message = floorSelection?.target === 'area'
+      ? describeFloorAreaSelection(floorSelection)
+      : describeFloorSelection(floorSelection);
     if (message) selectionInfo.textContent = message;
   },
 );
@@ -328,6 +345,10 @@ function setStandEditingEnabled(enabled) {
   openModuleCatalogButton.disabled = !enabled;
   clearWallButton.disabled = !enabled;
   moduleDragSidebar?.setEnabled(Boolean(enabled && currentStand));
+  if (!enabled) {
+    scene3d.setFloorAreaDrawArmed(false);
+    if (floorAreaControls) floorAreaControls.hidden = true;
+  }
 }
 
 function readStandSetup() {
@@ -1344,6 +1365,7 @@ function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
   renderStageResult(
     `${label} · ${setup.xCm} × ${setup.yCm} cm aktif alan · ${setup.sceneWidthM} × ${setup.sceneDepthM} m toplam sahne`,
   );
+  syncFloorAreaControls();
   return true;
 }
 
@@ -1401,6 +1423,138 @@ floorTypeSelect.addEventListener('change', () => {
   scene3d.setFloorType(floorTypeSelect.value);
   if (productionBomPanel.isOpen()) productionBomPanel.refresh();
 });
+
+function syncFloorAreaTypeSelect(selectedKey) {
+  if (!floorAreaTypeSelect) return;
+  const preferred = getFloorItem(selectedKey)?.itemKey ?? defaultOverrideItemKey(floorTypeSelect.value);
+  floorAreaTypeSelect.replaceChildren(...listFloorItems().map((item) => {
+    const option = document.createElement('option');
+    option.value = item.itemKey;
+    option.textContent = getFloorSelectLabel(item);
+    return option;
+  }));
+  floorAreaTypeSelect.value = preferred;
+}
+
+function floorAreaStatusText(area) {
+  if (!area) return 'Baz zemin tüm standı kaplar. İstersen içine bir dikdörtgen alan ekle.';
+  const label = getFloorItem(area.itemKey)?.name ?? area.itemKey;
+  return `Alan: ${label} · ${area.xCm},${area.yCm} · ${area.widthCm}×${area.depthCm} cm. Dışarıda kalan zemin baz kaplamadır.`;
+}
+
+function syncFloorAreaControls() {
+  if (!floorAreaControls) return;
+  const ready = Boolean(currentStand);
+  floorAreaControls.hidden = !ready;
+  if (!ready) return;
+  const area = currentStand.floorArea ?? null;
+  if (floorAreaAddButton) floorAreaAddButton.disabled = Boolean(area);
+  if (floorAreaDrawButton) floorAreaDrawButton.disabled = !area;
+  if (floorAreaDeleteButton) floorAreaDeleteButton.disabled = !area;
+  for (const input of [floorAreaXInput, floorAreaYInput, floorAreaWidthInput, floorAreaDepthInput, floorAreaTypeSelect]) {
+    if (input) input.disabled = !area;
+  }
+  if (!area) {
+    if (floorAreaStatus) floorAreaStatus.textContent = floorAreaStatusText(null);
+    return;
+  }
+  if (floorAreaXInput) floorAreaXInput.value = String(area.xCm);
+  if (floorAreaYInput) floorAreaYInput.value = String(area.yCm);
+  if (floorAreaWidthInput) floorAreaWidthInput.value = String(area.widthCm);
+  if (floorAreaDepthInput) floorAreaDepthInput.value = String(area.depthCm);
+  syncFloorAreaTypeSelect(area.itemKey);
+  if (floorAreaStatus) floorAreaStatus.textContent = floorAreaStatusText(area);
+}
+
+function commitFloorArea(nextArea) {
+  if (!currentStand) return { ok: false, message: 'Önce stand alanını oluştur.' };
+  const checked = validateFloorArea(nextArea, currentStand);
+  if (!checked.ok) {
+    syncFloorAreaControls();
+    if (floorAreaStatus) floorAreaStatus.textContent = checked.message;
+    return checked;
+  }
+  currentStand = { ...currentStand, floorArea: checked.area };
+  scene3d.setFloorArea(checked.area);
+  scene3d.setFloorAreaDrawArmed(false);
+  if (floorAreaDrawButton) floorAreaDrawButton.setAttribute('aria-pressed', 'false');
+  syncFloorAreaControls();
+  if (productionBomPanel.isOpen()) productionBomPanel.refresh();
+  return checked;
+}
+
+function readFloorAreaFields() {
+  return {
+    xCm: floorAreaXInput?.value,
+    yCm: floorAreaYInput?.value,
+    widthCm: floorAreaWidthInput?.value,
+    depthCm: floorAreaDepthInput?.value,
+    itemKey: floorAreaTypeSelect?.value,
+    color: currentStand?.floorArea?.color ?? null,
+  };
+}
+
+floorAreaAddButton?.addEventListener('click', () => {
+  if (!currentStand || currentStand.floorArea) return;
+  const rect = defaultFloorAreaRect(currentStand);
+  if (!rect) {
+    if (floorAreaStatus) floorAreaStatus.textContent = 'Bu stand ölçüsüne 50 cm dikdörtgen sığmıyor.';
+    return;
+  }
+  commitFloorArea({
+    ...rect,
+    itemKey: defaultOverrideItemKey(currentStand.itemKey),
+    color: null,
+  });
+});
+
+floorAreaDrawButton?.addEventListener('click', () => {
+  if (!currentStand?.floorArea) return;
+  const armed = floorAreaDrawButton.getAttribute('aria-pressed') === 'true';
+  const next = !armed;
+  floorAreaDrawButton.setAttribute('aria-pressed', String(next));
+  scene3d.setFloorAreaDrawArmed(next, (draft) => {
+    floorAreaDrawButton.setAttribute('aria-pressed', 'false');
+    if (!draft?.ok) {
+      if (floorAreaStatus) {
+        floorAreaStatus.textContent = draft?.message || 'Alan 50 cm aralığında ve stand içinde olmalı.';
+      }
+      return;
+    }
+    commitFloorArea({
+      ...draft.area,
+      itemKey: currentStand?.floorArea?.itemKey ?? floorAreaTypeSelect?.value,
+      color: currentStand?.floorArea?.color ?? null,
+    });
+  });
+  if (next && floorAreaStatus) {
+    floorAreaStatus.textContent = 'Zeminde sürükleyerek dikdörtgeni yeniden çiz. Aralık 50 cm.';
+  }
+});
+
+floorAreaDeleteButton?.addEventListener('click', () => {
+  if (!currentStand?.floorArea) return;
+  const { floorArea, ...rest } = currentStand;
+  currentStand = rest;
+  scene3d.setFloorArea(null);
+  scene3d.setFloorAreaDrawArmed(false);
+  floorAreaDrawButton?.setAttribute('aria-pressed', 'false');
+  syncFloorAreaControls();
+  if (productionBomPanel.isOpen()) productionBomPanel.refresh();
+});
+
+function onFloorAreaFieldChange() {
+  if (!currentStand?.floorArea) return;
+  const nextItem = getFloorItem(floorAreaTypeSelect?.value);
+  const previous = currentStand.floorArea;
+  const color = nextItem?.itemKey === previous.itemKey ? previous.color : null;
+  commitFloorArea({ ...readFloorAreaFields(), color });
+}
+
+for (const input of [floorAreaXInput, floorAreaYInput, floorAreaWidthInput, floorAreaDepthInput]) {
+  input?.addEventListener('change', onFloorAreaFieldChange);
+}
+floorAreaTypeSelect?.addEventListener('change', onFloorAreaFieldChange);
 
 openModuleCatalogButton.addEventListener('click', () => {
   if (!currentStand) return;
@@ -1463,6 +1617,25 @@ resetModuleFeaturesButton.addEventListener('click', () => {
 });
 
 function applyActiveColorToSelection({ showMissingSelection = false } = {}) {
+  if (scene3d.isFloorAreaSelected()) {
+    const floorType = currentStand?.floorArea?.itemKey;
+    const floorItem = getFloorItem(floorType);
+    if (floorItem && !floorItem.paintable) {
+      selectionInfo.textContent = 'Parke zemini boyanamaz; hazır parke seçeneklerinden biri kullanılacak.';
+      return false;
+    }
+    const applied = scene3d.setFloorAreaColor(colorInput.value);
+    if (applied && currentStand?.floorArea) {
+      currentStand = {
+        ...currentStand,
+        floorArea: { ...currentStand.floorArea, color: applied },
+      };
+      const label = floorItem?.name ?? 'Zemin';
+      selectionInfo.textContent = label + ' zemin alanı · renk ' + applied.toUpperCase() + ' uygulandı.';
+      return true;
+    }
+  }
+
   if (scene3d.isFloorSelected()) {
     const floorType = scene3d.getSelectedFloorType();
     const floorItem = getFloorItem(floorType);
@@ -1744,6 +1917,20 @@ async function restoreProject(project, { historicalRevisionNumber = null, sessio
     if (!stage.ok) throw new Error(stage.message || 'Proje sahnesi oluşturulamadı.');
     scene3d.setFloorType(currentStand.itemKey);
     if (currentStand.floorColor) scene3d.setFloorColor(currentStand.floorColor);
+    if (currentStand.floorArea != null) {
+      const area = validateFloorArea(currentStand.floorArea, currentStand);
+      if (area.ok && area.area) {
+        currentStand = { ...currentStand, floorArea: area.area };
+        scene3d.setFloorArea(area.area);
+      } else {
+        const { floorArea, ...rest } = currentStand;
+        currentStand = rest;
+        scene3d.setFloorArea(null);
+      }
+    } else {
+      scene3d.setFloorArea(null);
+    }
+    syncFloorAreaControls();
     viewportEmpty.hidden = true;
     viewportToolbar.hidden = false;
     setStandEditingEnabled(true);
