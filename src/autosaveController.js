@@ -1,4 +1,5 @@
 export const DEFAULT_AUTOSAVE_DELAY_MS = 30000;
+export const DEFAULT_AUTOSAVE_MAX_WAIT_MS = 60000;
 export const DEFAULT_AUTOSAVE_WATCH_INTERVAL_MS = 1000;
 
 let activeAutosaveController = null;
@@ -17,7 +18,9 @@ export function createAutosaveController({
   setIntervalFn = globalThis.setInterval,
   clearIntervalFn = globalThis.clearInterval,
   delayMs = DEFAULT_AUTOSAVE_DELAY_MS,
+  maxWaitMs = DEFAULT_AUTOSAVE_MAX_WAIT_MS,
   watchIntervalMs = DEFAULT_AUTOSAVE_WATCH_INTERVAL_MS,
+  now = () => Date.now(),
 } = {}) {
   if (typeof getSignature !== 'function') throw new TypeError('getSignature function is required.');
   if (typeof persist !== 'function') throw new TypeError('persist function is required.');
@@ -30,6 +33,7 @@ export function createAutosaveController({
 
   let enabled = false;
   let pendingTimer = null;
+  let maxWaitDueAt = null;
   let watchTimer = null;
   let observedSignature = null;
   let flushPromise = null;
@@ -39,29 +43,38 @@ export function createAutosaveController({
     pendingTimer = null;
   }
 
+  function resetMaxWait() {
+    maxWaitDueAt = null;
+  }
+
   function markCurrentState() {
     observedSignature = getSignature();
     return observedSignature;
   }
 
+  async function runScheduledPersist() {
+    pendingTimer = null;
+    if (!enabled) return;
+    resetMaxWait();
+    setStatus('Kaydediliyor…');
+    try {
+      await persist({ quiet: true });
+      markCurrentState();
+      setStatus('Kaydedildi · Otomatik');
+    } catch (error) {
+      onError(error);
+      setStatus('Otomatik kayıt başarısız.');
+    }
+  }
+
   function schedule() {
     if (!enabled) return false;
     clearPending();
-    const seconds = Math.max(1, Math.round(delayMs / 1000));
+    if (maxWaitDueAt == null) maxWaitDueAt = now() + maxWaitMs;
+    const waitMs = Math.max(0, Math.min(delayMs, maxWaitDueAt - now()));
+    const seconds = Math.max(1, Math.round(waitMs / 1000));
     setStatus(`Değişiklik var · ${seconds} sn içinde otomatik kaydedilecek…`);
-    pendingTimer = setTimeoutFn(async () => {
-      pendingTimer = null;
-      if (!enabled) return;
-      setStatus('Kaydediliyor…');
-      try {
-        await persist({ quiet: true });
-        markCurrentState();
-        setStatus('Kaydedildi · Otomatik');
-      } catch (error) {
-        onError(error);
-        setStatus('Otomatik kayıt başarısız.');
-      }
-    }, delayMs);
+    pendingTimer = setTimeoutFn(runScheduledPersist, waitMs);
     return true;
   }
 
@@ -86,6 +99,7 @@ export function createAutosaveController({
 
   function enableFromCurrentState() {
     clearPending();
+    resetMaxWait();
     markCurrentState();
     enabled = true;
     startWatching();
@@ -94,12 +108,14 @@ export function createAutosaveController({
   function disable() {
     enabled = false;
     clearPending();
+    resetMaxWait();
     observedSignature = null;
     stopWatching();
   }
 
   function markSavedState() {
     clearPending();
+    resetMaxWait();
     return markCurrentState();
   }
 
@@ -109,11 +125,12 @@ export function createAutosaveController({
 
   async function flush({ quiet = true } = {}) {
     clearPending();
+    resetMaxWait();
     if (flushPromise) return flushPromise;
 
     flushPromise = (async () => {
-      await persist({ quiet });
-      enableFromCurrentState();
+      const result = await persist({ quiet });
+      if (!result || result.enableAutosave !== false) enableFromCurrentState();
       return true;
     })();
 

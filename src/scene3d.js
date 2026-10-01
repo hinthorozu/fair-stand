@@ -1755,6 +1755,9 @@ export function createStandScene(
   }
 
   function pickModuleAt(clientX, clientY) {
+    // Idle frames are throttled, so a module can sit with a stale world matrix
+    // until the next render. Raycast uses that matrix and would miss the mesh.
+    wallRoot.updateMatrixWorld(true);
     setPointerFromClient(clientX, clientY);
     raycaster.setFromCamera(pointer, camera);
     const hits = raycaster.intersectObjects(wallRoot.children, true);

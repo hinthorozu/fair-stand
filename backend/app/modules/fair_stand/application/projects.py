@@ -5,13 +5,14 @@ from __future__ import annotations
 import io
 import json
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.modules.fair_stand.application.image_optimize import (
@@ -28,8 +29,12 @@ from app.modules.fair_stand.infrastructure.asset_storage import (
 from app.modules.fair_stand.infrastructure.models import (
     FairStandProjectAssetModel,
     FairStandProjectModel,
+    FairStandProjectRevisionModel,
     FairStandSettingsModel,
 )
+
+# Physical rows kept per project. Revision numbers themselves are never reused.
+REVISION_RETENTION_COUNT = 3
 from app.modules.fair_stand.infrastructure.runtime_settings_seed import MAX_IMAGE_UPLOAD_MB
 
 
@@ -75,10 +80,23 @@ class ProjectSummary:
 
 
 @dataclass(frozen=True)
+class RevisionSummary:
+    revision_number: int
+    created_at: datetime
+    updated_at: datetime
+
+
+@dataclass(frozen=True)
+class RevisionDetail(RevisionSummary):
+    payload: dict[str, Any]
+
+
+@dataclass(frozen=True)
 class ProjectDetail(ProjectSummary):
     payload: dict[str, Any]
     created_by: UUID | None
     assets: list[AssetView]
+    revisions: list[RevisionSummary] = field(default_factory=list)
 
 
 def _now() -> datetime:
@@ -108,7 +126,10 @@ def _summary(row: FairStandProjectModel) -> ProjectSummary:
     )
 
 
-def _detail(row: FairStandProjectModel) -> ProjectDetail:
+def _detail(
+    row: FairStandProjectModel,
+    revisions: list[RevisionSummary] | None = None,
+) -> ProjectDetail:
     return ProjectDetail(
         id=row.id,
         organization_id=row.organization_id,
@@ -120,6 +141,7 @@ def _detail(row: FairStandProjectModel) -> ProjectDetail:
         payload=dict(row.payload or {}),
         created_by=row.created_by,
         assets=[_asset_view(asset) for asset in row.assets],
+        revisions=list(revisions or []),
     )
 
 
@@ -146,8 +168,8 @@ class ProjectService:
         mb = row.max_image_upload_mb if row is not None else MAX_IMAGE_UPLOAD_MB
         return int(mb) * 1024 * 1024
 
-    def _get_org_project(self, project_id: UUID, organization_id: UUID) -> FairStandProjectModel | None:
-        return self._session.scalar(
+    def _project_statement(self, project_id: UUID, organization_id: UUID):
+        return (
             select(FairStandProjectModel)
             .where(
                 FairStandProjectModel.id == project_id,
@@ -155,6 +177,106 @@ class ProjectService:
             )
             .options(selectinload(FairStandProjectModel.assets))
         )
+
+    def _get_org_project(self, project_id: UUID, organization_id: UUID) -> FairStandProjectModel | None:
+        return self._session.scalar(self._project_statement(project_id, organization_id))
+
+    def _lock_org_project(self, project_id: UUID, organization_id: UUID) -> FairStandProjectModel | None:
+        statement = self._project_statement(project_id, organization_id)
+        bind = self._session.get_bind()
+        # SQLite ignores row locks. Production PostgreSQL must take the parent
+        # row lock before MAX(revision_number) is read.
+        if bind is not None and bind.dialect.name == "postgresql":
+            statement = statement.with_for_update()
+        return self._session.scalar(statement)
+
+    def _revision_summaries(self, project_id: UUID) -> list[RevisionSummary]:
+        rows = self._session.scalars(
+            select(FairStandProjectRevisionModel)
+            .where(FairStandProjectRevisionModel.project_id == project_id)
+            .order_by(FairStandProjectRevisionModel.revision_number.desc())
+        ).all()
+        return [
+            RevisionSummary(
+                revision_number=row.revision_number,
+                created_at=row.created_at,
+                updated_at=row.updated_at,
+            )
+            for row in rows
+        ]
+
+    def _project_detail(self, row: FairStandProjectModel) -> ProjectDetail:
+        return _detail(row, self._revision_summaries(row.id))
+
+    def _max_revision_number(self, project_id: UUID) -> int:
+        value = self._session.scalar(
+            select(func.max(FairStandProjectRevisionModel.revision_number)).where(
+                FairStandProjectRevisionModel.project_id == project_id,
+            )
+        )
+        return int(value or 0)
+
+    def _prune_revisions(self, project_id: UUID) -> None:
+        rows = self._session.scalars(
+            select(FairStandProjectRevisionModel)
+            .where(FairStandProjectRevisionModel.project_id == project_id)
+            .order_by(FairStandProjectRevisionModel.revision_number.desc())
+        ).all()
+        for stale in rows[REVISION_RETENTION_COUNT:]:
+            self._session.delete(stale)
+
+    def _apply_revision(
+        self,
+        row: FairStandProjectModel,
+        revision_mode: str,
+        revision_number: int | None,
+    ) -> None:
+        if revision_mode == "none":
+            return
+        if revision_mode not in {"create", "update"}:
+            raise ProjectServiceError("revisionMode must be none, create, or update")
+
+        payload = dict(row.payload or {})
+        now = _now()
+        if revision_mode == "update":
+            current_max = self._max_revision_number(row.id)
+            if revision_number is None or revision_number != current_max:
+                raise ProjectServiceError(
+                    "Only the current session revision can be updated",
+                    status_code=409,
+                )
+            revision = self._session.scalar(
+                select(FairStandProjectRevisionModel).where(
+                    FairStandProjectRevisionModel.project_id == row.id,
+                    FairStandProjectRevisionModel.revision_number == revision_number,
+                )
+            )
+            if revision is None:
+                raise ProjectServiceError(
+                    "Only the current session revision can be updated",
+                    status_code=409,
+                )
+            revision.payload = payload
+            revision.updated_at = now
+            return
+
+        next_number = self._max_revision_number(row.id) + 1
+        self._session.add(
+            FairStandProjectRevisionModel(
+                id=uuid4(),
+                project_id=row.id,
+                revision_number=next_number,
+                payload=payload,
+                created_at=now,
+                updated_at=now,
+            )
+        )
+        try:
+            self._session.flush()
+        except IntegrityError as exc:
+            self._session.rollback()
+            raise ProjectServiceError("Revision number conflict", status_code=409) from exc
+        self._prune_revisions(row.id)
 
     def list_projects(
         self,
@@ -174,7 +296,7 @@ class ProjectService:
 
     def get_project(self, project_id: UUID, organization_id: UUID) -> ProjectDetail | None:
         row = self._get_org_project(project_id, organization_id)
-        return _detail(row) if row is not None else None
+        return self._project_detail(row) if row is not None else None
 
     def create_project(
         self,
@@ -207,7 +329,7 @@ class ProjectService:
         self._session.add(row)
         self._session.flush()
         self._session.refresh(row)
-        return _detail(row)
+        return self._project_detail(row)
 
     def update_project(
         self,
@@ -220,12 +342,16 @@ class ProjectService:
         customer_id: UUID | None = None,
         user_id: UUID | None = None,
         create_if_missing: bool = True,
+        revision_mode: str = "none",
+        revision_number: int | None = None,
     ) -> ProjectDetail:
-        row = self._get_org_project(project_id, organization_id)
+        row = self._lock_org_project(project_id, organization_id)
         if row is None:
+            if self._session.get(FairStandProjectModel, project_id) is not None:
+                raise ProjectServiceError("Project not found", status_code=404)
             if not create_if_missing:
                 raise ProjectServiceError("Project not found", status_code=404)
-            return self.create_project(
+            self.create_project(
                 organization_id=organization_id,
                 user_id=user_id,
                 name=(name or "Adsız Proje"),
@@ -234,19 +360,32 @@ class ProjectService:
                 project_id=project_id,
                 version=version or 1,
             )
-        if name is not None:
-            cleaned = name.strip()
-            if not cleaned:
-                raise ProjectServiceError("Project name is required")
-            row.name = cleaned[:256]
-        if payload is not None:
-            row.payload = _normalize_payload(payload)
-        if version is not None:
-            row.version = max(1, int(version))
+            row = self._lock_org_project(project_id, organization_id)
+            if row is None:
+                raise ProjectServiceError("Project not found", status_code=404)
+        else:
+            if name is not None:
+                cleaned = name.strip()
+                if not cleaned:
+                    raise ProjectServiceError("Project name is required")
+                row.name = cleaned[:256]
+            if version is not None:
+                row.version = max(1, int(version))
+            # Reject a historical overwrite before the live payload changes.
+            if revision_mode == "update":
+                current_max = self._max_revision_number(row.id)
+                if revision_number is None or revision_number != current_max:
+                    raise ProjectServiceError(
+                        "Only the current session revision can be updated",
+                        status_code=409,
+                    )
+            if payload is not None:
+                row.payload = _normalize_payload(payload)
         row.updated_at = _now()
+        self._apply_revision(row, revision_mode, revision_number)
         self._session.flush()
         self._session.refresh(row)
-        return _detail(row)
+        return self._project_detail(row)
 
     def assign_customer(
         self,
@@ -264,7 +403,31 @@ class ProjectService:
         row.updated_at = _now()
         self._session.flush()
         self._session.refresh(row)
-        return _detail(row)
+        return self._project_detail(row)
+
+    def get_revision(
+        self,
+        project_id: UUID,
+        organization_id: UUID,
+        revision_number: int,
+    ) -> RevisionDetail | None:
+        project = self._get_org_project(project_id, organization_id)
+        if project is None:
+            return None
+        row = self._session.scalar(
+            select(FairStandProjectRevisionModel).where(
+                FairStandProjectRevisionModel.project_id == project_id,
+                FairStandProjectRevisionModel.revision_number == revision_number,
+            )
+        )
+        if row is None:
+            return None
+        return RevisionDetail(
+            revision_number=row.revision_number,
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+            payload=dict(row.payload or {}),
+        )
 
     def delete_project(self, *, project_id: UUID, organization_id: UUID) -> None:
         row = self._get_org_project(project_id, organization_id)

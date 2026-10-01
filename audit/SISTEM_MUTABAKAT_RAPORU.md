@@ -75,7 +75,7 @@ F-041 / F-044: GitHub ayarı / uzak dal. Bu raporda yok.
 
 Ürün kararı: F-014 (18 katalog + foam `decision-required`), F-043 (kök `LICENSE` yok — lisans dosyası, ruleset değil), F-048 (evrensel BOM kapısı yok). F-034 `ACCEPTED_RISK` — `audit/remediation/A13_F034_CLOSURE.md`; 9 GLB atıfsız kalır.
 
-Kod/UI: F-018, F-021, F-022 (foam/kapı/ZIP e2e eksik), F-035, F-042, F-046. F-015, F-017, F-024, F-025, F-026, F-029, F-032, F-036/037, F-038, F-039, F-045 kapandı. F-030 / F-031 kodu üretim listesinde; ikisi OPEN (baza ve short-up dışarıda, kapanış kaydı yok).
+Kod/UI: F-018, F-021, F-035, F-042, F-046. F-015, F-017, F-022, F-024, F-025, F-026, F-029, F-032, F-036/037, F-038, F-039, F-045 kapandı. F-030 / F-031 kodu üretim listesinde; ikisi OPEN (baza ve short-up dışarıda, kapanış kaydı yok).
 
 ### Ledger’de numarasız sapmalar
 
@@ -139,7 +139,7 @@ F-000 Item sözleşmesi; F-010 factory; F-011 davranış merkezi; F-012 `SCENE_S
 
 ### D — Mimari borç
 
-**Uygulandı:** F-017 (renderer kopya; kalıcı yazı `designState` bağında); F-029 `automatic-wall` + depo dört Item; F-032 IndexedDB `configuratorDb.js`. Kalan: F-018, F-021/035, F-022, F-045.
+**Uygulandı:** F-017 (renderer kopya; kalıcı yazı `designState` bağında); F-022 aile gidiş-dönüş testi; F-029 `automatic-wall` + depo dört Item; F-032 IndexedDB `configuratorDb.js`. Kalan: F-018, F-021/035, F-045.
 
 ### E — Item / BOM (ürün kararı, uydurma yok)
 

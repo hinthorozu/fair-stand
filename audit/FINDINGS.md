@@ -10,7 +10,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 ## Özet
 
 - Toplam bulgu: **49** (`F-000` + `F-001` … `F-048`)
-- Kapalı (kod/sözleşme duruyor): **33** — D’den F-017, F-029, F-032; C’den F-036, F-037, F-038; F-042 SHA pin geri alındı
+- Kapalı (kod/sözleşme duruyor): **34** — D’den F-017, F-022, F-029, F-032; C’den F-036, F-037, F-038; F-042 SHA pin geri alındı
 - Kapsam dışı (GitHub ayarı / uzak dal; ürün kodu değil): **F-041 kapanış kaydı durur; F-044 ürün backlog’u değil**
 - Açık ürün bulgusu: **14** (F-044 hariç; F-034 bu kümede değil)
 - Kabul edilen risk: **1** — F-034 `ACCEPTED_RISK`. `CLOSED` sayacına eklenmez; uygulama/test/CI kanıtı yoktur
@@ -48,7 +48,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 | F-019 | P1 | Katalog/runtime ölçüler state oluşturucularında kopyalı/hard-coded | **CLOSED** — ölçü sahibi Item (`items.js`); şerit `7` kopyası F-018 |
 | F-020 | P1 | Bekleyen otomatik kayıt proje değiştir/aç sırasında iptal/kayıp olabilir | **CLOSED** — `audit/remediation/A08_F020_CLOSURE.md` |
 | F-021 | P2 | Proje `version` alanı var; kanonik doğrulama/migration hattı yok | OPEN |
-| F-022 | P2 | Her özel modül ailesi için tam kalıcılık gidiş-dönüş sözleşmesi yok | OPEN |
+| F-022 | P2 | Her özel modül ailesi için tam kalıcılık gidiş-dönüş sözleşmesi yok | **CLOSED** — `test/modulePersistenceRoundTrip.test.js`. Vitrin gövde görseli ayrı ürün kararı |
 | F-023 | P2 | Tüm proje silme, proje ve asset store’lar arasında atomik değil | **CLOSED** — `audit/remediation/A08_F023_CLOSURE.md` |
 | F-024 | P2 | Model yükleme hatası görünmez modül bırakabilir; reddedilen loader promise’leri önbellekte kalır | **CLOSED** — `loadGltfScene` reddinde cache siler; `#stage-result` |
 | F-025 | P1 | Üretim giriş noktası görünür `rawBomDebug.js` UI yükler | **CLOSED** — `index.html` yüklemez; yalnız `DEV` + `?rawBom` |
@@ -79,7 +79,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 ## Alanlar arası remediasyon kümeleri
 
 1. Kullanıcıya görünen (B): **uygulandı** — F-015, F-025, F-026, F-024, F-039. F-040 kalan ZIP/GLB e2e.
-2. Kalıcılık/import: F-021/F-022/F-035. F-032/F-036/F-037 kapandı.
+2. Kalıcılık/import: F-021/F-035. F-022, F-032, F-036, F-037 kapandı.
 3. BOM (E, ürün kararı): F-014/F-048 açık. F-030/F-031 kodu üretim listesinde; ikisi de OPEN (baza ve short-up F-031 dışında, kapanış kaydı yok). F-029 kapandı (özellik sözleşmesi).
 4. Mimari borç: F-018/F-047 kural. F-017 kapandı.
 5. Hijyen: F-034 `ACCEPTED_RISK` (metadata tamamlanmadı). F-043 LICENSE, F-042, F-046 ESLint açık. F-045 arşivlendi. F-038 kapandı. F-044 kapsam dışı.

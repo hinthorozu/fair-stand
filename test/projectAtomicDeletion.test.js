@@ -22,7 +22,7 @@ test('whole-project deletion uses one readwrite transaction for project and asse
 test('main uses the atomic whole-project delete for user deletion and import rollback', () => {
   assert.match(
     mainSource,
-    /import \{ createProjectId, deleteProjectWithAssets, listCachedProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName \} from '\.\/projectRemote\.js';/,
+    /import \{ createProjectId, deleteProjectWithAssets, listCachedProjects, loadProject, loadProjectRevision, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName \} from '\.\/projectRemote\.js';/,
   );
   assert.doesNotMatch(mainSource, /from '\.\/projectStore\.js'/);
   assert.doesNotMatch(mainSource, /deleteProjectImageAssets/);
