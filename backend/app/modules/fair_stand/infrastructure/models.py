@@ -685,6 +685,35 @@ class FairStandProjectModel(Base):
         back_populates="project",
         cascade="all, delete-orphan",
     )
+    revisions: Mapped[list["FairStandProjectRevisionModel"]] = relationship(
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
+
+class FairStandProjectRevisionModel(Base):
+    __tablename__ = "fair_stand_project_revisions"
+    __table_args__ = (
+        Index("ix_fair_stand_project_revisions_project_id", "project_id"),
+        UniqueConstraint(
+            "project_id",
+            "revision_number",
+            name="uq_fair_stand_project_revisions_project_revision",
+        ),
+        CheckConstraint("revision_number > 0", name="ck_fair_stand_project_revisions_revision_number"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    project_id: Mapped[UUID] = mapped_column(
+        Uuid,
+        ForeignKey("fair_stand_projects.id", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+    )
+    revision_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    payload: Mapped[dict] = mapped_column(PayloadJSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    project: Mapped[FairStandProjectModel] = relationship(back_populates="revisions")
 
 
 class FairStandProjectAssetModel(Base):
