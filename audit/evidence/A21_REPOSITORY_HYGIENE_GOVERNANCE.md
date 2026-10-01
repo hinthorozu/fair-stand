@@ -10,13 +10,13 @@ Kip: önce-denetim / sonra-düzelt. Bu kanıt commit'inde çalışma zamanı/ür
 - Denetim anında açık pull request: **0**.
 - Denetim anında açık issue: **0**.
 - Birçok tarihsel özellik/düzeltme/yeniden düzenleme/belge/denetim dalı, işleri birleştirildikten veya geçersiz kılındıktan sonra kalır.
-- incelenen ağaçta depo kökünde `LICENSE`/`COPYING` dosyası yoktur.
+- Denetim anında kök `LICENSE` yoktu. Güncel kapanış: kök `LICENSE` proprietary / all rights reserved bildirir (`audit/remediation/A21_F043_CLOSURE.md`). Depo public kalır; bu açık kaynak izni değildir.
 
 ## Bulgular
 
 ### F-043 — P2 — public deponun açık depo-düzeyi lisans kararı/dosyası yoktur
 
-Depo herkese açıktır ancak denetlenmiş ağaçta kök yazılım lisansı yoktur. Bu telif sahipliğini değiştirmez, ancak yeniden kullanım/dağıtım koşullarını belirsiz bırakır. Varlık atıfının F-034 altında ayrı eksik envanteri vardır.
+**CLOSED.** Kök `LICENSE` yazılım kodunu proprietary / all rights reserved olarak bildirir. Genel yeniden kullanım izni yoktur. Ayrıntı: `audit/remediation/A21_F043_CLOSURE.md`. Varlık atfı F-034 altında ayrı kalır.
 
 ### F-044 — P2 — dal hijyeni önemli miktarda geçersiz kılınmış geçmiş biriktirmiştir
 
@@ -45,7 +45,7 @@ Dal envanteri hâlâ çok sayıda eski birleştirilmiş/geçersiz kılınmış `
 - A21.02 bayat/geçersiz kılınmış dallar: `GAP` — F-044.
 - A21.03 tek-seferlik betikler: `CLOSED` — F-045 arşiv (`scripts/archive/`).
 - A21.04 belgeleme durum sapması: `GAP` — F-001/F-002/F-003/F-004.
-- A21.05 depo lisansı/public karar: `GAP` — F-043.
+- A21.05 depo lisansı/public karar: `CLOSED` — F-043 (`LICENSE`).
 - A21.06 üçüncü-taraf varlık atıfı: `GAP/DECISION_REQUIRED` — F-034.
 - A21.07 üretilen/derleme artefaktları işlenmiş: incelenen ağaç için `AUDITED_OK`; `dist/` izlenmez.
 - A21.08 statik kalite araçları: `GAP` — F-046.
