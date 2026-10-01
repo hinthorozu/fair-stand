@@ -10,15 +10,15 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 ## Özet
 
 - Toplam bulgu: **49** (`F-000` + `F-001` … `F-048`)
-- Kapalı (kod/sözleşme duruyor): **34** — D’den F-017, F-022, F-029, F-032; C’den F-036, F-037, F-038; F-042 SHA pin geri alındı
+- Kapalı (kod/sözleşme duruyor): **35** — D’den F-017, F-022, F-029, F-032; C’den F-036, F-037, F-038; F-043 kök `LICENSE`; F-042 SHA pin geri alındı
 - Kapsam dışı (GitHub ayarı / uzak dal; ürün kodu değil): **F-041 kapanış kaydı durur; F-044 ürün backlog’u değil**
-- Açık ürün bulgusu: **14** (F-044 hariç; F-034 bu kümede değil)
+- Açık ürün bulgusu: **11** (F-044 hariç; F-034 bu kümede değil)
 - Kabul edilen risk: **1** — F-034 `ACCEPTED_RISK`. `CLOSED` sayacına eklenmez; uygulama/test/CI kanıtı yoktur
 - Açık P0: **0**
 - Açık P1: **6**
-- Açık P2: **8** (F-044 kapsam dışı; F-034 açık P2 değildir)
+- Açık P2: **5** (F-044 kapsam dışı; F-034 açık P2 değildir)
 - Açık P3: **0**
-- Sonraki ürün işi: `SISTEM_MUTABAKAT_RAPORU.md` D (kalan mimari) veya E (BOM kararı). **C uygulandı (LICENSE ve ESLint açık). F-034 kabul edilen risktir.**
+- Sonraki ürün işi: `SISTEM_MUTABAKAT_RAPORU.md` D (kalan mimari) veya E (BOM kararı). **C uygulandı (F-043 kapandı; ESLint açık). F-034 kabul edilen risktir.**
 - F-014 hâlâ `decision-required` (18 katalog + foam). Self dörtlü F-014’ten çıktı; finding kapanmaz.
 
 ## Bulgular
@@ -69,7 +69,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 | F-040 | P1 | “Tarayıcı E2E yok” iddiası; kalan boşluk ZIP/GLB-fail spec | **OPEN** — Playwright spec + CI var; ZIP ve GLB hata yolu e2e yok |
 | F-041 | P1 | ROG korumasız; yeşil CI/change-gate merge/doğrudan push öncesi zorunlu değil | **CLOSED** — kapanış MD var; GitHub ruleset ürün kodu değil (`SISTEM_MUTABAKAT_RAPORU.md`) |
 | F-042 | P1 | Sunucu deploy yolu commit’e pinli değil ve CI kapısı/test zincirinden zayıf | **OPEN** — SHA yok; origin default (`origin/HEAD`) ucu çekilir. CI deploy kapısı yok |
-| F-043 | P2 | Açık repoda kök yazılım lisansı kararı/dosyası yok | OPEN / DECISION_REQUIRED |
+| F-043 | P2 | Açık repoda kök yazılım lisansı kararı/dosyası yok | **CLOSED** — `audit/remediation/A21_F043_CLOSURE.md`. Proprietary / all rights reserved; açık kaynak izni yok |
 | F-044 | P2 | Birçok merge edilmiş/geçersiz dal duruyor | **KAPSAM_DIŞI** — GitHub dal hijyeni; ürün kodu değil |
 | F-045 | P2 | Tarihî kaynak-yeniden-yazan yama betikleri kanonik araçların yanında duruyor | **CLOSED** — DECISION-07 ARCHIVE; `scripts/archive/` + README; npm/CI yok |
 | F-046 | P2 | Kanonik CI zincirinde lint/format/statik-kalite kapısı yok | **OPEN** — `syntax:check` eklendi; ESLint/format yok |
@@ -82,6 +82,6 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 2. Kalıcılık/import: F-021/F-035. F-022, F-032, F-036, F-037 kapandı.
 3. BOM (E, ürün kararı): F-014/F-048 açık. F-030/F-031 kodu üretim listesinde; ikisi de OPEN (baza ve short-up F-031 dışında, kapanış kaydı yok). F-029 kapandı (özellik sözleşmesi).
 4. Mimari borç: F-018/F-047 kural. F-017 kapandı.
-5. Hijyen: F-034 `ACCEPTED_RISK` (metadata tamamlanmadı). F-043 LICENSE, F-042, F-046 ESLint açık. F-045 arşivlendi. F-038 kapandı. F-044 kapsam dışı.
+5. Hijyen: F-034 `ACCEPTED_RISK` (metadata tamamlanmadı). F-042, F-046 ESLint açık. F-043 kapandı. F-045 arşivlendi. F-038 kapandı. F-044 kapsam dışı.
 
 Bir bulgu ancak uygulama, varsa hedefli regresyon, tam test/build, PR CI ve gerekli merge-sonrası doğrulama kanıtından sonra `CLOSED` olur. `ACCEPTED_RISK` bu kanıtın yerine geçmez; bulgu silinmez, açık kümeden çıkar ve kalan risk kapanış kaydında durur.
