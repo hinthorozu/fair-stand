@@ -73,7 +73,7 @@ F-041 / F-044: GitHub ayarı / uzak dal. Bu raporda yok.
 
 ### Ledger OPEN — gerçek iş
 
-Ürün kararı: F-014 (18 katalog + foam `decision-required`), F-034 (4 attribution txt, tam envanter değil), F-048 (evrensel BOM kapısı yok). F-043 kapandı: kök `LICENSE` proprietary / all rights reserved.
+Ürün kararı: F-014 (18 katalog + foam `decision-required`), F-048 (evrensel BOM kapısı yok). F-043 kapandı: kök `LICENSE` proprietary / all rights reserved. F-034 `ACCEPTED_RISK` — `audit/remediation/A13_F034_CLOSURE.md`; 9 GLB atıfsız kalır.
 
 Kod/UI: F-018, F-021, F-035, F-042, F-046. F-015, F-017, F-022, F-024, F-025, F-026, F-029, F-032, F-036/037, F-038, F-039, F-045 kapandı. F-030 / F-031 kodu üretim listesinde; ikisi OPEN (baza ve short-up dışarıda, kapanış kaydı yok).
 
@@ -135,7 +135,7 @@ F-000 Item sözleşmesi; F-010 factory; F-011 davranış merkezi; F-012 `SCENE_S
 
 ### C — Veri / hijyen
 
-**Uygulandı:** F-036, F-037 (yol/tip; MB uydurulmadı), F-038, F-043 (`LICENSE`). SHA pin **geri alındı** (F-042 açık). Envanter F-034. **Açık karar:** F-034 eksik GLB lisansları, F-046 ESLint/format.
+**Uygulandı:** F-036, F-037 (yol/tip; MB uydurulmadı), F-038, F-043 (`LICENSE`). SHA pin **geri alındı** (F-042 açık). F-034 envanteri durur; durum `ACCEPTED_RISK`. **Açık karar:** F-046 ESLint/format.
 
 ### D — Mimari borç
 
