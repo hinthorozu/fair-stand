@@ -1909,7 +1909,9 @@ Bunlar CRM item formunda yok; tasarım aracında kullanıcı/ proje kaydeder:
 - `modules[].placement` — `xCm`, `yCm`, `zCm`, `rotationZDeg`, `wallId`
 - Yüzey override’ları (renk, görsel asset id)
 - `modules[].widthCm` / `depthCm` / `heightCm` / `opacity` — kutu blok vb. instance ölçü/opacity
-- `stand` seçimi (zemin itemKey vb.)
+- `stand.itemKey` — baz zemin Item. Eski kayıttaki `floorType` buna çözülür
+- `stand.floorColor` — baz renk
+- `stand.floorArea` — isteğe bağlı tek dikdörtgen (`xCm`, `yCm`, `widthCm`, `depthCm`, `itemKey`, `color`). Yoksa standın tamamı bazdır. Yeni catalog kolonu değildir
 
 Kaynak: `fair_stand_projects.payload` (sunucu); tarayıcı IndexedDB önbellek.
 

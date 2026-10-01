@@ -456,7 +456,7 @@ Resolve alias: `moduleType`, `counterShape` (`normalizeCatalogDescriptor`).
 | üst bakış | `direction: 'top'` | `t` | `src/viewKeyboardShortcuts.js` | `stand-proje` | |
 | ön bakış | `direction: 'front'` | `f` | `src/viewKeyboardShortcuts.js` | `stand-proje` | |
 | ev bakış | `direction: 'home'` | `h` | `src/viewKeyboardShortcuts.js` | `stand-proje` | |
-| persist zemin alanı | `stand.itemKey` | eski kayıt `floorType` | `src/items.js` yorum + `resolveStandFloorItemKey` | `stand-proje` | |
+| persist zemin alanı | `stand.itemKey`; isteğe bağlı `stand.floorArea` | eski kayıt `floorType`; `floorArea` yoksa tam baz | `src/floorArea.js`; `resolveStandFloorItemKey` | `stand-proje` | tek dikdörtgen, dizi değil |
 
 ---
 

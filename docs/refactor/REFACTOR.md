@@ -15,6 +15,28 @@ Bu dosya Item mimarisine geçişin tek merkezi değişiklik kaydıdır. Audit d�
 
 ---
 
+## 2026-10-01 — Floor Split V1
+
+Stand zemini modül değildir. Baz kaplama `stand.itemKey` olarak kalır. `stand.floorColor` yalnız baz renktir.
+
+İsteğe bağlı tek override `stand.floorArea`: `{ xCm, yCm, widthCm, depthCm, itemKey, color }`. Dizi değildir. Alan yoksa standın tamamı baz kaplamadır; delik değildir. `archiveVersion` 1 kalır. Eski kayıt `floorArea` taşımıyorsa açılır.
+
+Izgara `STAND_DIMENSION_STEP_CM` (50). Yazılan ölçü ızgara dışıysa reddedilir ve önceki değer kalır. Sürükleyerek çizim `snapCm` ile ızgaraya oturur. Dikdörtgen standın içinde kalır. Aynı anda bir override vardır.
+
+Boyanabilir override rengi `floorArea.color` alanındadır. Parke boyanamaz; renk yazılmaz.
+
+BOM: `floorArea` yoksa veya override `itemKey` baz ile aynıysa eski tam-stand formülü (`resolveFloorBomLine`). m² = x × y / 10000. Karolaj adet = `ceil(x / karoW) × ceil(y / karoD)`. Örnek: 550 × 400 karolaj, alan yok = 24 adet.
+
+Override farklı Item ise `resolveSplitFloorBomLines`. m² baz = (stand alanı − override alanı) / 10000. Karolaj, 50 × 50 hücre havuzundan 100 × 100 karo sayar (`ceil(hücre / 4)`). Örnek: 500 × 500 halı + 200 × 300 karolaj = 19 m² halı + 6 adet karolaj.
+
+Sahne: `activeFloor` tüm stand platformudur. `getGroundPoint` yalnız onu ışınlar. Override ince bir mesh’tir. Sahneyi Sıfırla kurulumu yeniden kurar; `floorArea` düşer.
+
+Kod: `src/floorArea.js`, `src/projectBom.js`, `src/scene3d.js`, `src/main.js`, `src/projectImportValidation.js`. Sözleşme: `docs/items/contract/ITEM_CONTRACT.md`.
+
+Aynı commit: editör başlığı `Maxima Konfigüratörü`. `FAIR STAND / PROTOTİP` satırı kalktı.
+
+---
+
 ## 2026-09-24 — Performans yol haritası (belge only)
 
 Prod gözlem: proje açma 5–10 sn; orbit/sürükleme takılması. Kök neden ve P0–P4 iş paketleri `PERFORMANCE_ROADMAP.md` içinde; kod değişikliği yok.

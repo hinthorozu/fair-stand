@@ -175,7 +175,7 @@ function listGuideSections() {
       <ul>
         <li>Sahne oluşturulduktan sonra Modül Ekle aktif olur.</li>
         <li>Modül Ekle’nin üstündeki katalog kartı sahneye sürüklenebilir. Sürüklerken <strong>Shift+R</strong> saat yönünde döndürür ve açıyı kilitler.</li>
-        <li><strong>Sahneyi Sıfırla:</strong> stand tipi ve ölçü kalır; sahnedeki modüller silinir.</li>
+        <li><strong>Sahneyi Sıfırla:</strong> stand tipi, ölçü ve Zemin Kaplaması seçimi kalır; sahnedeki modüller ve zemin alanı silinir.</li>
         <li>Katalogdan bir veya birden fazla modül seçilebilir.</li>
         <li>Aynı modül birden fazla kez seçim sırasına eklenebilir.</li>
         <li>Seçim sırasındaki modüller sürüklenerek yeniden sıralanabilir.</li>
@@ -192,7 +192,15 @@ function listGuideSections() {
     title: 'Zemin',
     html: `
       <p>Mevcut seçenekler: Karolaj ${getStandStandardsFacts().gridWidthCm} × ${getStandStandardsFacts().gridDepthCm} cm, Halı, Beyaz Meşe, Sarı Meşe ve Beton Parke.</p>
-      <p>Boyanabilir zemin seçiliyse Aktif renk uygulanabilir. Hazır parke tipleri kendi malzemelerini kullanır.</p>
+      <p><strong>Zemin Kaplaması</strong> standın tamamının baz kaplamasıdır. Sahne oluştuktan sonra içine tek bir dikdörtgen eklenebilir. Dikdörtgenin dışı baz kaplama kalır.</p>
+      <ul>
+        <li><strong>Zemin Alanı Ekle</strong> bir dikdörtgen açar. X, Y, genişlik ve derinlik 50 cm ve katlarıdır ve standın içinde kalır.</li>
+        <li><strong>Alan kaplaması</strong> aynı zemin seçeneklerinden biridir.</li>
+        <li><strong>Sahnede Çiz</strong> ile dikdörtgen zemin üzerinde yeniden çizilir.</li>
+        <li><strong>Zemin Alanını Sil</strong> dikdörtgeni kaldırır. Stand yine tek baz kaplamadır.</li>
+        <li>Aynı anda yalnız bir alan vardır.</li>
+      </ul>
+      <p>Baz zemine veya alana tıklayınca o yüzey seçilir. Boyanabilir kaplamada Aktif renk uygulanır. Hazır parke kendi malzemesini kullanır ve boyanmaz. Alanın rengi baz renkten ayrıdır.</p>
     `,
   },
   {

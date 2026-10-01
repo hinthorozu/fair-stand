@@ -218,7 +218,8 @@ export function getTopLightItemForType(type) {
 // Katalog dışı SVG → ışıklı strafor. itemKey type ile aynıdır; Catalog kartı yoktur.
 
 
-// Zemin kaplamaları modül değildir; persist alanı stand.itemKey. Katalog/recipe yok.
+// Zemin kaplamaları modül değildir. Baz persist alanı stand.itemKey.
+// İsteğe bağlı tek override stand.floorArea. Katalog/recipe yok.
 
 
 export function listFloorItems() {
