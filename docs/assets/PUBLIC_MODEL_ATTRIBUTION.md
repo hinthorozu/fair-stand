@@ -25,4 +25,4 @@ Bu satırlar lisans kararı değildir; depoda bitişik `.txt` yoktur.
 - `wall_separator_100_sarmasik.glb`
 - `bej_koltuk_1_ciftli_2_tekli.glb`
 
-F-034: envanter bu dosyadır. Eksik lisans metinleri ürün kararı kalır.
+F-034: envanter bu dosyadır. Yukarıdaki dokuz GLB’nin lisansı unknown kalır. Durum `ACCEPTED_RISK` — `audit/remediation/A13_F034_CLOSURE.md`. Bu tur metadata tamamlamaz. Yeni asset için “lisans metni uydurulmaz” kuralı durur.

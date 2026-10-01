@@ -31,6 +31,8 @@ Toplam: 32,131,375 bayt ≈ **30.64 MiB**. Vite `public/` içeriğini üretim ç
 
 Depo meta verisi Bar Stool, Coat Rack, Eames Chair ve Kettle için atıf dosyaları içerir. Diğer birkaç aktif model ailesinin depo ağacında bitişik atıf/köken kaydı yoktur (örneğin mini fridge, sofa, iç mekan bitkisi/uzun-saksı ve sarmaşık ayırıcı varlıkları). Bu denetim lisans ihlali iddia etmez; depo-düzeyi kökenin şu anda tekdüze kanıtlanamadığını kaydeder.
 
+Güncel defter durumu: **ACCEPTED_RISK** — `audit/remediation/A13_F034_CLOSURE.md`. Bu paragrafın boşluk kaydı silinmedi.
+
 ## Kontrol listesi sonuçları
 
 - A13.01 DB depoları/dizin/sürüm: güncel şekil için `AUDITED_OK`; sahiplik çoğaltması F-032.
@@ -42,6 +44,6 @@ Depo meta verisi Bar Stool, Coat Rack, Eames Chair ve Kettle için atıf dosyala
 - A13.07 public varlık sınıflandırması: `GAP` — F-033.
 - A13.08 büyük/küçük harf duyarlı çalışma zamanı yolları: incelenen aktif referanslar için `AUDITED_OK`.
 - A13.09 büyük-varlık dağıtım politikası: `GAP` — F-033.
-- A13.10 atıf/lisans meta verisi: `GAP/DECISION_REQUIRED` — F-034.
+- A13.10 atıf/lisans meta verisi: tarihî kayıt `GAP/DECISION_REQUIRED`; güncel defter `ACCEPTED_RISK` — F-034.
 
 Bölüm denetim durumu: **GAP**.
