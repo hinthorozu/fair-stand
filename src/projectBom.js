@@ -13,7 +13,9 @@ import {
   applyCornerPanelSwap,
   applyCornerPanelSwapToSurfaces,
   applyRelationshipBomAdjustments,
+  applyWallShortBomDeltas,
   detectRelationshipJoints,
+  planWallShortRelationshipBom,
 } from './relationshipBom.js';
 import { applyBaseRunBom, isBaseRunItemKey } from './baseRunBom.js';
 import { collectPrintAreas } from './printAreaBom.js';
@@ -170,6 +172,7 @@ function unresolvedFrom(moduleEntries) {
 export function resolveProjectBom(modules = [], stand = null) {
   const list = Array.isArray(modules) ? modules : [];
   const joints = detectRelationshipJoints(list);
+  const wallShort = planWallShortRelationshipBom(list);
   let moduleEntries = list.map((moduleState, index) => resolveModuleEntry(moduleState, index));
   const wallLinesOf = () => moduleEntries
     .filter((entry) => entry.status === 'ok' && !isBaseRunItemKey(entry.itemKey))
@@ -179,8 +182,11 @@ export function resolveProjectBom(modules = [], stand = null) {
     joints,
   );
 
-  if (preview.appliedJointCount > 0 && preview.swapModuleIds.length > 0) {
-    const swapIds = new Set(preview.swapModuleIds);
+  const swapIds = new Set(wallShort.swapModuleIds);
+  if (preview.appliedJointCount > 0) {
+    for (const moduleId of preview.swapModuleIds) swapIds.add(moduleId);
+  }
+  if (swapIds.size > 0) {
     moduleEntries = list.map((moduleState, index) => (
       swapIds.has(moduleIdentity(moduleState, index))
         ? resolveModuleEntry(moduleState, index, { swapCornerPanels: true })
@@ -188,12 +194,11 @@ export function resolveProjectBom(modules = [], stand = null) {
     ));
   }
 
-  const adjusted = preview.swapModuleIds.length > 0 && preview.appliedJointCount > 0
-    ? applyRelationshipBomAdjustments(
-      aggregateLines(wallLinesOf()),
-      joints,
-    )
-    : preview;
+  const adjusted = applyRelationshipBomAdjustments(
+    aggregateLines(wallLinesOf()),
+    joints,
+  );
+  const wallShortLines = applyWallShortBomDeltas(adjusted.lines, wallShort);
   const baza = applyBaseRunBom(list);
   const glassNotes = summarizeGlassMoves(
     moduleEntries
@@ -202,7 +207,7 @@ export function resolveProjectBom(modules = [], stand = null) {
   );
   const floorLine = resolveFloorBomLine(stand);
   const lines = aggregateLines([
-    adjusted.lines,
+    wallShortLines,
     baza.lines,
     floorLine ? [floorLine] : [],
   ]);
@@ -211,7 +216,7 @@ export function resolveProjectBom(modules = [], stand = null) {
     modules: Object.freeze(moduleEntries),
     unresolved: Object.freeze(unresolvedFrom(moduleEntries)),
     joints: Object.freeze(joints),
-    relationshipNotes: Object.freeze([...adjusted.notes, ...baza.notes, ...glassNotes]),
+    relationshipNotes: Object.freeze([...adjusted.notes, ...wallShort.notes, ...baza.notes, ...glassNotes]),
     appliedJointCount: adjusted.appliedJointCount,
     appliedEndToEndCount: adjusted.appliedEndToEndCount,
     appliedCornerCount: adjusted.appliedCornerCount,

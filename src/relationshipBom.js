@@ -1,14 +1,17 @@
 /**
  * F-031: end-to-end doubles and inner-corner connectors for full-height walls.
- * Baza rows are applied in baseRunBom.js. wall-short stays out of scope.
+ * Baza rows are applied in baseRunBom.js.
  *
  * Locked pairs are wall with wall, door, separator (including sarmaşık), showcase-2, or showcase-3.
  * Connector counts are the locked face deltas. A short separator recipe does not scale them.
  * Corner connectors apply only to a module whose front face looks at the other module.
  * A module sitting on the back keeps its singles and does not take corner connectors.
+ *
+ * Wall Short is not a locked full-height role. Its joints are planned separately and never
+ * reuse the full-height upright_346_5 / −14 single / +7 double constants.
  */
 
-import { getItem, isWallShortFamilyDescriptor } from './items.js';
+import { getItem, isWallShortFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm } from './items.js';
 import { resolveItemBom } from './itemBom.js';
 
 const EPSILON_CM = 0.001;
@@ -755,4 +758,521 @@ export function applyCornerPanelSwapToSurfaces(surfaces = []) {
     if (!nextKey || !getItem(nextKey)) return surface;
     return { ...surface, itemKey: nextKey };
   });
+}
+
+function recipeChildKeyByType(itemKey, type) {
+  const rows = getItem(itemKey)?.composition?.items;
+  if (!Array.isArray(rows)) return null;
+  for (const row of rows) {
+    if (getItem(row?.itemKey)?.type === type) return row.itemKey;
+  }
+  return null;
+}
+
+function placementOriginZCm(module) {
+  const placed = Number(module?.placement?.zCm);
+  if (Number.isFinite(placed)) return placed;
+  return resolveItemDefaultZCm(module?.itemKey);
+}
+
+function moduleZRange(module) {
+  const heightCm = Number(resolveModuleSceneBoxCm(module).heightCm);
+  const originCm = placementOriginZCm(module);
+  if (!Number.isFinite(originCm) || !Number.isFinite(heightCm) || heightCm <= 0) return null;
+  return Object.freeze({ minCm: originCm, maxCm: originCm + heightCm });
+}
+
+function rangesOverlap(a, b) {
+  return a.minCm < b.maxCm - EPSILON_CM && b.minCm < a.maxCm - EPSILON_CM;
+}
+
+function rangeContains(outer, inner) {
+  return outer.minCm <= inner.minCm + EPSILON_CM && outer.maxCm >= inner.maxCm - EPSILON_CM;
+}
+
+function sameBodyHeight(a, b) {
+  return nearlyEqual(a.z.maxCm - a.z.minCm, b.z.maxCm - b.z.minCm);
+}
+
+function moduleBomSegment(module) {
+  const widthCm = resolveModuleWidthCm(module);
+  const placement = module?.placement;
+  if (!placement || !Number.isFinite(widthCm) || widthCm <= 0) return null;
+  const x = Number(placement.xCm);
+  const y = Number(placement.yCm);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+  const front = frontNormal(placement.rotationZDeg);
+  if (isVerticalRotation(placement.rotationZDeg)) {
+    return {
+      axis: 'y',
+      fixedCm: x,
+      startCm: y,
+      endCm: y + widthCm,
+      frontX: front.x,
+      frontY: front.y,
+    };
+  }
+  return {
+    axis: 'x',
+    fixedCm: y,
+    startCm: x,
+    endCm: x + widthCm,
+    frontX: front.x,
+    frontY: front.y,
+  };
+}
+
+function emptySlots() {
+  return {
+    upright: { start: false, end: false },
+    single: { start: false, end: false },
+    rail: { bottom: false, top: false },
+  };
+}
+
+function shortRelationshipFrame(module, index) {
+  if (!isWallShortFamilyDescriptor(module)) return null;
+  const segment = moduleBomSegment(module);
+  const z = moduleZRange(module);
+  if (!segment || !z) return null;
+  return {
+    kind: 'short',
+    moduleId: moduleIdentity(module, index),
+    itemKey: module.itemKey,
+    uprightKey: recipeChildKeyByType(module.itemKey, 'upright'),
+    profileKey: recipeChildKeyByType(module.itemKey, 'profile'),
+    ...segment,
+    z,
+    slots: emptySlots(),
+  };
+}
+
+function structuralRelationshipFrame(module, index) {
+  const role = relationshipBomRole(module);
+  if (!role) return null;
+  const segment = moduleBomSegment(module);
+  const z = moduleZRange(module);
+  if (!segment || !z) return null;
+  return {
+    kind: 'structural',
+    role,
+    moduleId: moduleIdentity(module, index),
+    itemKey: module.itemKey,
+    uprightKey: null,
+    profileKey: null,
+    ...segment,
+    z,
+    slots: emptySlots(),
+  };
+}
+
+function isProfileDescriptor(module) {
+  if (module?.type === 'profile') return true;
+  return getItem(module?.itemKey)?.type === 'profile';
+}
+
+const STRUCTURAL_POST_TOP_GAP_CM = 3.5;
+
+function isStructuralUprightModule(module) {
+  if (module?.type === 'upright') return true;
+  return getItem(module?.itemKey)?.type === 'upright';
+}
+
+function uprightRelationshipFrame(module, index) {
+  if (!isStructuralUprightModule(module)) return null;
+  const segment = moduleBomSegment(module);
+  const z = moduleZRange(module);
+  if (!segment || !z) return null;
+  const item = getItem(module.itemKey);
+  const depthCm = Number(module.depthCm ?? item?.sceneDimensions?.depthCm ?? item?.dimensions?.depthCm);
+  return {
+    kind: 'upright',
+    moduleId: moduleIdentity(module, index),
+    itemKey: module.itemKey,
+    depthCm: Number.isFinite(depthCm) && depthCm > 0 ? depthCm : 0,
+    ...segment,
+    z,
+  };
+}
+
+function uprightCoversShortBand(upright, wall) {
+  if (!rangesOverlap(upright.z, wall.z)) return false;
+  if (rangeContains(upright.z, wall.z)) return true;
+  const topGapCm = wall.z.maxCm - upright.z.maxCm;
+  return upright.z.minCm <= wall.z.minCm + EPSILON_CM
+    && topGapCm >= -EPSILON_CM
+    && topGapCm <= STRUCTURAL_POST_TOP_GAP_CM + EPSILON_CM;
+}
+
+function uprightFootprintContains(upright, point) {
+  const halfDepthCm = upright.depthCm / 2;
+  if (upright.axis === 'x') {
+    return point.xCm >= upright.startCm - EPSILON_CM
+      && point.xCm <= upright.endCm + EPSILON_CM
+      && Math.abs(point.yCm - upright.fixedCm) <= halfDepthCm + EPSILON_CM;
+  }
+  return point.yCm >= upright.startCm - EPSILON_CM
+    && point.yCm <= upright.endCm + EPSILON_CM
+    && Math.abs(point.xCm - upright.fixedCm) <= halfDepthCm + EPSILON_CM;
+}
+
+function applyStructuralUprightPost(book, wall, upright) {
+  if (!uprightCoversShortBand(upright, wall) || !wall.uprightKey) return;
+  const ends = segmentEndpoints(wall);
+  for (const side of ['start', 'end']) {
+    if (!uprightFootprintContains(upright, ends[side])) continue;
+    if (!slotFree(wall, side, 'upright')) continue;
+    takeSlot(wall, side, 'upright');
+    book.add(wall.uprightKey, -1);
+    book.noteJoint();
+  }
+}
+
+function profileRelationshipFrame(module, index) {
+  if (!isProfileDescriptor(module)) return null;
+  const segment = moduleBomSegment(module);
+  const z = moduleZRange(module);
+  if (!segment || !z) return null;
+  return {
+    kind: 'profile',
+    moduleId: moduleIdentity(module, index),
+    itemKey: module.itemKey,
+    ...segment,
+    z,
+  };
+}
+
+function pairZOk(a, b) {
+  if (a.kind !== 'short' || b.kind !== 'short') return rangesOverlap(a.z, b.z);
+  if (!rangesOverlap(a.z, b.z)) return false;
+  if (sameBodyHeight(a, b)) return true;
+  return rangeContains(a.z, b.z) || rangeContains(b.z, a.z);
+}
+
+function droppedShortFrame(a, b) {
+  if (a.kind === 'short' && b.kind !== 'short') return a;
+  if (b.kind === 'short' && a.kind !== 'short') return b;
+  const aContainsB = rangeContains(a.z, b.z);
+  const bContainsA = rangeContains(b.z, a.z);
+  if (aContainsB && !bContainsA) return b;
+  if (bContainsA && !aContainsB) return a;
+  return a.moduleId <= b.moduleId ? a : b;
+}
+
+function hasEndpointSingle(frame) {
+  if (frame.kind === 'short') return true;
+  return recipeSingleCount(frame.itemKey) > 0;
+}
+
+function swapsCornerPanels(frame) {
+  if (frame.kind === 'short') return true;
+  return frame.role === 'wall'
+    || frame.role === 'door'
+    || frame.role === 'showcase-2'
+    || frame.role === 'showcase-3';
+}
+
+function classifyShortPair(a, b) {
+  if (a.axis === b.axis) {
+    if (!nearlyEqual(a.fixedCm, b.fixedCm)) return null;
+    if (segmentsOverlapLongitudinally(a, b)) return null;
+    if (!endpointsTouch(a, b)) return null;
+    const shared = sharedEndpoint(a, b);
+    if (!shared) return null;
+    return {
+      kind: 'end-to-end',
+      point: shared.point,
+      sideA: shared.sideA,
+      sideB: shared.sideB,
+    };
+  }
+
+  const shared = sharedEndpoint(a, b);
+  if (shared) {
+    return {
+      kind: 'corner',
+      point: shared.point,
+      sideA: shared.sideA,
+      sideB: shared.sideB,
+    };
+  }
+
+  const branchOnB = teeHit(a, b);
+  if (branchOnB) {
+    return {
+      kind: 'tee',
+      point: branchOnB.point,
+      branch: a,
+      host: b,
+      branchSide: branchOnB.branchSide,
+    };
+  }
+  const branchOnA = teeHit(b, a);
+  if (branchOnA) {
+    return {
+      kind: 'tee',
+      point: branchOnA.point,
+      branch: b,
+      host: a,
+      branchSide: branchOnA.branchSide,
+    };
+  }
+  return null;
+}
+
+function slotFree(frame, side, kind) {
+  if (!frame || !side) return false;
+  if (kind === 'upright' && frame.kind !== 'short') return true;
+  return frame.slots[kind][side] !== true;
+}
+
+function takeSlot(frame, side, kind) {
+  if (kind === 'upright' && frame.kind !== 'short') return;
+  frame.slots[kind][side] = true;
+}
+
+function spanContains(outer, inner) {
+  return outer.startCm <= inner.startCm + EPSILON_CM
+    && outer.endCm >= inner.endCm - EPSILON_CM;
+}
+
+function createDeltaBook() {
+  const deltas = new Map();
+  const swapModuleIds = [];
+  let jointCount = 0;
+  let railCount = 0;
+  const add = (itemKey, amount) => {
+    if (!itemKey || !amount) return;
+    deltas.set(itemKey, (deltas.get(itemKey) ?? 0) + amount);
+  };
+  return {
+    deltas,
+    swapModuleIds,
+    add,
+    noteJoint() { jointCount += 1; },
+    noteRail() { railCount += 1; },
+    get jointCount() { return jointCount; },
+    get railCount() { return railCount; },
+  };
+}
+
+function applyEndToEndShortJoint(book, a, b, geometry) {
+  if (!pairZOk(a, b)) return;
+  if (!slotFree(a, geometry.sideA, 'upright') || !slotFree(b, geometry.sideB, 'upright')) return;
+  const payA = hasEndpointSingle(a);
+  const payB = hasEndpointSingle(b);
+  const bothPay = payA && payB;
+  if (bothPay && (!slotFree(a, geometry.sideA, 'single') || !slotFree(b, geometry.sideB, 'single'))) return;
+  const dropped = droppedShortFrame(a, b);
+  if (dropped.kind !== 'short' || !dropped.uprightKey) return;
+  takeSlot(a, geometry.sideA, 'upright');
+  takeSlot(b, geometry.sideB, 'upright');
+  book.add(dropped.uprightKey, -1);
+  if (bothPay) {
+    takeSlot(a, geometry.sideA, 'single');
+    takeSlot(b, geometry.sideB, 'single');
+    book.add('connector_single', -2);
+    book.add('connector_double', 1);
+  }
+  book.noteJoint();
+}
+
+function applyCornerShortJoint(book, a, b, geometry) {
+  if (!pairZOk(a, b)) return;
+  const payA = partnerOnFront(a, b, geometry.point) && hasEndpointSingle(a);
+  const payB = partnerOnFront(b, a, geometry.point) && hasEndpointSingle(b);
+  if (!slotFree(a, geometry.sideA, 'upright') || !slotFree(b, geometry.sideB, 'upright')) return;
+  if (payA && !slotFree(a, geometry.sideA, 'single')) return;
+  if (payB && !slotFree(b, geometry.sideB, 'single')) return;
+  const dropped = droppedShortFrame(a, b);
+  if (dropped.kind !== 'short' || !dropped.uprightKey) return;
+  takeSlot(a, geometry.sideA, 'upright');
+  takeSlot(b, geometry.sideB, 'upright');
+  if (payA) takeSlot(a, geometry.sideA, 'single');
+  if (payB) takeSlot(b, geometry.sideB, 'single');
+  book.add(dropped.uprightKey, -1);
+  const payers = (payA ? 1 : 0) + (payB ? 1 : 0);
+  book.add('connector_single', -payers);
+  book.add('connector_corner', payers);
+  if (swapsCornerPanels(a)) book.swapModuleIds.push(a.moduleId);
+  if (swapsCornerPanels(b)) book.swapModuleIds.push(b.moduleId);
+  book.noteJoint();
+}
+
+function applyTeeShortJoint(book, branch, host, geometry) {
+  if (!pairZOk(branch, host)) return;
+  if (!slotFree(branch, geometry.branchSide, 'upright')) return;
+  const branchPays = hasEndpointSingle(branch);
+  if (branchPays && !slotFree(branch, geometry.branchSide, 'single')) return;
+  if (branch.kind === 'short' && !branch.uprightKey) return;
+  if (branch.kind !== 'short' && host.kind !== 'short') return;
+  takeSlot(branch, geometry.branchSide, 'upright');
+  if (branch.kind === 'short') book.add(branch.uprightKey, -1);
+  if (branchPays) {
+    takeSlot(branch, geometry.branchSide, 'single');
+    book.add('connector_single', -1);
+    book.add('connector_corner', 1);
+  }
+  if (swapsCornerPanels(branch)) book.swapModuleIds.push(branch.moduleId);
+  book.noteJoint();
+}
+
+function applyProfileRail(book, wall, profile) {
+  if (wall.axis !== profile.axis) return;
+  if (!nearlyEqual(wall.fixedCm, profile.fixedCm)) return;
+  if (!spanContains(profile, wall)) return;
+  if (!wall.profileKey) return;
+  let rail = null;
+  if (nearlyEqual(profile.z.maxCm, wall.z.minCm)) rail = 'bottom';
+  else if (nearlyEqual(profile.z.minCm, wall.z.maxCm)) rail = 'top';
+  if (!rail || wall.slots.rail[rail]) return;
+  wall.slots.rail[rail] = true;
+  book.add(wall.profileKey, -1);
+  book.noteRail();
+}
+
+/**
+ * Wall Short joints against framed partners (any relationshipBomRole) and profile rail replacement.
+ * Full-height locked pairs are not replanned here. Face, fixture-side and corner-face produce no delta.
+ * A short band converts one endpoint single per paying face, never the full-height 7/6/5/4/3 constants.
+ * A field upright whose post already occupies a free short endpoint consumes that short upright once.
+ * Each short upright end, endpoint single, and top/bottom rail can be consumed once.
+ */
+export function planWallShortRelationshipBom(modules = []) {
+  const list = Array.isArray(modules) ? modules : [];
+  const shorts = [];
+  const partners = [];
+  const uprights = [];
+  const profiles = [];
+  list.forEach((module, index) => {
+    const short = shortRelationshipFrame(module, index);
+    if (short) {
+      shorts.push(short);
+      return;
+    }
+    const partner = structuralRelationshipFrame(module, index);
+    if (partner) {
+      partners.push(partner);
+      return;
+    }
+    const upright = uprightRelationshipFrame(module, index);
+    if (upright) {
+      uprights.push(upright);
+      return;
+    }
+    const profile = profileRelationshipFrame(module, index);
+    if (profile) profiles.push(profile);
+  });
+
+  const structural = [...shorts, ...partners];
+  const candidates = [];
+  for (let i = 0; i < structural.length; i += 1) {
+    for (let j = i + 1; j < structural.length; j += 1) {
+      const a = structural[i];
+      const b = structural[j];
+      if (a.kind !== 'short' && b.kind !== 'short') continue;
+      const geometry = classifyShortPair(a, b);
+      if (!geometry) continue;
+      candidates.push({ a, b, geometry });
+    }
+  }
+  candidates.sort((left, right) => {
+    const leftId = `${left.geometry.kind}\u0000${left.a.moduleId}\u0000${left.b.moduleId}`;
+    const rightId = `${right.geometry.kind}\u0000${right.a.moduleId}\u0000${right.b.moduleId}`;
+    return leftId < rightId ? -1 : 1;
+  });
+
+  const book = createDeltaBook();
+  for (const candidate of candidates) {
+    const { a, b, geometry } = candidate;
+    if (geometry.kind === 'end-to-end') applyEndToEndShortJoint(book, a, b, geometry);
+    else if (geometry.kind === 'corner') applyCornerShortJoint(book, a, b, geometry);
+    else if (geometry.kind === 'tee') applyTeeShortJoint(book, geometry.branch, geometry.host, geometry);
+  }
+
+  const railCandidates = [];
+  for (const wall of shorts) {
+    for (const profile of profiles) railCandidates.push({ wall, profile });
+  }
+  railCandidates.sort((left, right) => {
+    const leftId = `${left.wall.moduleId}\u0000${left.profile.moduleId}`;
+    const rightId = `${right.wall.moduleId}\u0000${right.profile.moduleId}`;
+    return leftId < rightId ? -1 : 1;
+  });
+  for (const candidate of railCandidates) applyProfileRail(book, candidate.wall, candidate.profile);
+
+  const postCandidates = [];
+  for (const wall of shorts) {
+    for (const upright of uprights) postCandidates.push({ wall, upright });
+  }
+  postCandidates.sort((left, right) => {
+    const leftId = `${left.wall.moduleId}\u0000${left.upright.moduleId}`;
+    const rightId = `${right.wall.moduleId}\u0000${right.upright.moduleId}`;
+    return leftId < rightId ? -1 : 1;
+  });
+  for (const candidate of postCandidates) {
+    applyStructuralUprightPost(book, candidate.wall, candidate.upright);
+  }
+
+  const notes = [];
+  if (book.jointCount) {
+    notes.push(`Kısa panel birleşimi: ${book.jointCount} eklem.`);
+  }
+  if (book.railCount) {
+    notes.push(`Kısa panel rayı: ${book.railCount} profil ikamesi.`);
+  }
+
+  return Object.freeze({
+    deltas: deltasFromBook(book),
+    swapModuleIds: Object.freeze([...new Set(book.swapModuleIds)]),
+    jointCount: book.jointCount,
+    railCount: book.railCount,
+    notes: Object.freeze(notes),
+  });
+}
+
+function deltasFromBook(book) {
+  return Object.freeze([...book.deltas.entries()].map(([itemKey, delta]) => Object.freeze({
+    itemKey,
+    delta,
+  })));
+}
+
+export function applyWallShortBomDeltas(lines = [], plan = null) {
+  const baseLines = Array.isArray(lines) ? lines.map((line) => ({ ...line })) : [];
+  const deltas = Array.isArray(plan?.deltas) ? plan.deltas : [];
+  if (!deltas.length) {
+    return Object.freeze(baseLines.map((line) => Object.freeze(line)));
+  }
+
+  const byKey = new Map();
+  for (const line of baseLines) byKey.set(lineKey(line.itemKey, line.unit), { ...line });
+
+  for (const entry of deltas) {
+    const delta = Number(entry?.delta);
+    const itemKey = entry?.itemKey;
+    if (!itemKey || !delta) continue;
+    const key = lineKey(itemKey, 'adet');
+    const current = byKey.get(key);
+    if (current) {
+      current.quantity = Math.max(0, Number(current.quantity) + delta);
+      continue;
+    }
+    if (delta < 0) continue;
+    const item = getItem(itemKey);
+    byKey.set(key, {
+      itemKey,
+      name: item?.name ?? itemKey,
+      quantity: delta,
+      unit: 'adet',
+      material: item?.material ?? null,
+      item,
+    });
+  }
+
+  return Object.freeze(
+    Array.from(byKey.values())
+      .filter((line) => Number(line.quantity) > 0)
+      .map((line) => Object.freeze(line)),
+  );
 }

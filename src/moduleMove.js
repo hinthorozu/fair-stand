@@ -150,6 +150,8 @@ export function planContinuousModuleInsert({
   standType,
   standXCm,
   standYCm,
+  snapTargetModuleId = null,
+  snapKind = null,
 } = {}) {
   if (!insertedModule?.id) return { ok: false, message: 'Eklenecek modül bulunamadı.' };
   if (modules.some((module) => module?.id === insertedModule.id)) {
@@ -189,6 +191,8 @@ export function planContinuousModuleInsert({
     standType,
     standXCm,
     standYCm,
+    snapTargetModuleId,
+    snapKind,
   });
 
   if (directValidation.ok) {
@@ -260,6 +264,8 @@ export function planContinuousModuleMove({
   standType,
   standXCm,
   standYCm,
+  snapTargetModuleId = null,
+  snapKind = null,
 } = {}) {
   const movingModule = modules.find((module) => module?.id === movingModuleId);
   if (!movingModule) return { ok: false, message: 'Taşınacak modül bulunamadı.' };
@@ -298,6 +304,8 @@ export function planContinuousModuleMove({
     standType,
     standXCm,
     standYCm,
+    snapTargetModuleId,
+    snapKind,
   });
 
   if (directValidation.ok) {

@@ -20,6 +20,7 @@ import {
   listFloorItems,
   listRegisteredItems,
   applyItemPlacementZCm,
+  isWallShortFamilyDescriptor,
   resolveItemDefaultZCm,
   resolveModuleSceneBoxCm,
   requireModuleSceneBoxCm,
@@ -73,6 +74,7 @@ import {
   snapPlacementToStand,
   snapPlacementToModules,
   stepPanelSeamOverlayPlacement,
+  stepWallShortFloorZCm,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
 import {
@@ -214,6 +216,14 @@ function isTopFixtureType(type) {
 
 function withItemZ(moduleState, placement, overlayZCm = null) {
   return applyItemPlacementZCm(moduleState, placement, { overlayZCm });
+}
+
+function snapCollisionExemption(magneticSnap) {
+  if (!magneticSnap?.targetModuleId || !magneticSnap.snapKind) return {};
+  return {
+    snapTargetModuleId: magneticSnap.targetModuleId,
+    snapKind: magneticSnap.snapKind,
+  };
 }
 
 export function createStandScene(
@@ -2765,6 +2775,7 @@ export function createStandScene(
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
         standYCm: stageLayout.depthCm,
+        ...snapCollisionExemption(magneticSnap),
       });
       plan = {
         ok: validation.ok,
@@ -2782,6 +2793,7 @@ export function createStandScene(
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
         standYCm: stageLayout.depthCm,
+        ...snapCollisionExemption(magneticSnap),
       });
     }
 
@@ -3166,6 +3178,7 @@ export function createStandScene(
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
         standYCm: stageLayout.depthCm,
+        ...snapCollisionExemption(magneticSnap),
       });
       plan = {
         ok: validation.ok,
@@ -3183,6 +3196,7 @@ export function createStandScene(
         standType: stageLayout.standType,
         standXCm: stageLayout.widthCm,
         standYCm: stageLayout.depthCm,
+        ...snapCollisionExemption(magneticSnap),
       });
     }
 
@@ -4838,6 +4852,53 @@ export function createStandScene(
         applyPlacementToGroup(moduleGroup, desiredPlacement, moduleState.widthCm);
         clearPlacementFeedback();
         return;
+      }
+
+      if (isWallShortFamilyDescriptor(moduleState)) {
+        const stepCm = getModulePlacementSnapCm(moduleState.type);
+        const moduleWorldPosition = new THREE.Vector3();
+        moduleGroup.getWorldPosition(moduleWorldPosition);
+        const projectedOrigin = moduleWorldPosition.clone().project(camera);
+        const worldStepM = stepCm / 100;
+        const candidates = [
+          { kind: 'horizontal', world: new THREE.Vector3(worldStepM, 0, 0) },
+          { kind: 'horizontal', world: new THREE.Vector3(-worldStepM, 0, 0) },
+          { kind: 'horizontal', world: new THREE.Vector3(0, 0, worldStepM) },
+          { kind: 'horizontal', world: new THREE.Vector3(0, 0, -worldStepM) },
+          { kind: 'vertical', deltaCm: stepCm, world: new THREE.Vector3(0, worldStepM, 0) },
+          { kind: 'vertical', deltaCm: -stepCm, world: new THREE.Vector3(0, -worldStepM, 0) },
+        ];
+        const bestArrowMove = candidates
+          .map((candidate) => {
+            const projectedTarget = moduleWorldPosition.clone().add(candidate.world).project(camera);
+            const screenDelta = new THREE.Vector2(
+              projectedTarget.x - projectedOrigin.x,
+              projectedTarget.y - projectedOrigin.y,
+            );
+            const lengthSq = screenDelta.lengthSq();
+            const score = lengthSq > 1e-12
+              ? screenDelta.normalize().dot(arrowScreenDirection)
+              : -Infinity;
+            return { ...candidate, score };
+          })
+          .sort((a, b) => b.score - a.score)[0];
+        if (bestArrowMove?.kind === 'vertical' && Number.isFinite(bestArrowMove.score)) {
+          const currentZCm = Number(moduleState.placement.zCm || 0);
+          const nextZCm = stepWallShortFloorZCm(currentZCm, bestArrowMove.deltaCm, moduleState.heightCm);
+          if (nextZCm === currentZCm) {
+            showPlacementFeedback('Panel bu yönde stand sınırına ulaştı.', { durationMs: 900 });
+            return;
+          }
+          const desiredPlacement = {
+            ...moduleState.placement,
+            zCm: nextZCm,
+          };
+          moduleState.placement = { ...desiredPlacement };
+          moduleGroup.userData.placement = { ...desiredPlacement };
+          applyPlacementToGroup(moduleGroup, desiredPlacement, moduleState.widthCm);
+          clearPlacementFeedback();
+          return;
+        }
       }
 
       const stepCm = isTopFixtureType(moduleState.type)
