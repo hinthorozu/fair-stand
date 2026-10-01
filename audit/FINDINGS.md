@@ -12,12 +12,13 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 - Toplam bulgu: **49** (`F-000` + `F-001` … `F-048`)
 - Kapalı (kod/sözleşme duruyor): **34** — D’den F-017, F-022, F-029, F-032; C’den F-036, F-037, F-038; F-042 SHA pin geri alındı
 - Kapsam dışı (GitHub ayarı / uzak dal; ürün kodu değil): **F-041 kapanış kaydı durur; F-044 ürün backlog’u değil**
-- Açık ürün bulgusu: **14** (F-044 hariç)
+- Açık ürün bulgusu: **14** (F-044 hariç; F-034 bu kümede değil)
+- Kabul edilen risk: **1** — F-034 `ACCEPTED_RISK`. `CLOSED` sayacına eklenmez; uygulama/test/CI kanıtı yoktur
 - Açık P0: **0**
 - Açık P1: **6**
-- Açık P2: **8** (F-044 kapsam dışı)
+- Açık P2: **8** (F-044 kapsam dışı; F-034 açık P2 değildir)
 - Açık P3: **0**
-- Sonraki ürün işi: `SISTEM_MUTABAKAT_RAPORU.md` D (kalan mimari) veya E (BOM kararı). **C uygulandı (LICENSE/eksik atıf/ESLint açık).**
+- Sonraki ürün işi: `SISTEM_MUTABAKAT_RAPORU.md` D (kalan mimari) veya E (BOM kararı). **C uygulandı (LICENSE ve ESLint açık). F-034 kabul edilen risktir.**
 - F-014 hâlâ `decision-required` (18 katalog + foam). Self dörtlü F-014’ten çıktı; finding kapanmaz.
 
 ## Bulgular
@@ -59,7 +60,7 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 | F-031 | P1 | İlişki/köşe bağlantı parçaları proje ilişkilerinden türetilmiyor | **OPEN** — `relationshipBom.js` yan yana çiftli, iç köşe, T ve ön/arka yüzü uygular. Baza ve short-up dışarıda. Kapanış kaydı yok |
 | F-032 | P2 | IndexedDB şema/migration sahipliği store’lar arasında kopyalı | **CLOSED** — `configuratorDb.js` tek open/upgrade |
 | F-033 | P2 | `public/` altında ~30.64 MiB park edilmiş/atıfta bulunulmayan varlık üretimle gidiyor | **CLOSED** — `audit/remediation/A13_F033_CLOSURE.md` |
-| F-034 | P2 | Genel model/varlık kökeni ve lisans envanteri eksik | **OPEN / DECISION_REQUIRED** — envanter `docs/assets/PUBLIC_MODEL_ATTRIBUTION.md`; 9 GLB’de atıf yok |
+| F-034 | P2 | Genel model/varlık kökeni ve lisans envanteri eksik | **ACCEPTED_RISK** — `audit/remediation/A13_F034_CLOSURE.md`. Envanter `docs/assets/PUBLIC_MODEL_ATTRIBUTION.md`; 9 GLB atıfsız kalır. `CLOSED` değil |
 | F-035 | P2 | ZIP arşiv sürüm/şemasının ortak kanonik sahibi/migration kaydı yok | OPEN |
 | F-036 | P1 | İçe aktarılan proje/modül state yapısal alan doğrulaması olmadan persist ediliyor | **CLOSED** — `projectImportValidation.js` |
 | F-037 | P1 | ZIP/görsel içe aktarmada açık adet/boyut/kaynak limiti/içerik politikası yok | **CLOSED** — ZIP/`assets/` yolu, `image/*`, zip MIME; MB/adet uydurulmadı |
@@ -81,6 +82,6 @@ Ayrıntılı tarihî kanıt `audit/evidence/` altındadır. Remediasyon kapanı�
 2. Kalıcılık/import: F-021/F-035. F-022, F-032, F-036, F-037 kapandı.
 3. BOM (E, ürün kararı): F-014/F-048 açık. F-030/F-031 kodu üretim listesinde; ikisi de OPEN (baza ve short-up F-031 dışında, kapanış kaydı yok). F-029 kapandı (özellik sözleşmesi).
 4. Mimari borç: F-018/F-047 kural. F-017 kapandı.
-5. Hijyen: F-034 kalan lisans, F-043 LICENSE, F-042, F-046 ESLint. F-045 arşivlendi. F-038 kapandı. F-044 kapsam dışı.
+5. Hijyen: F-034 `ACCEPTED_RISK` (metadata tamamlanmadı). F-043 LICENSE, F-042, F-046 ESLint açık. F-045 arşivlendi. F-038 kapandı. F-044 kapsam dışı.
 
-Bir bulgu ancak uygulama, varsa hedefli regresyon, tam test/build, PR CI ve gerekli merge-sonrası doğrulama kanıtından sonra `CLOSED` olur.
+Bir bulgu ancak uygulama, varsa hedefli regresyon, tam test/build, PR CI ve gerekli merge-sonrası doğrulama kanıtından sonra `CLOSED` olur. `ACCEPTED_RISK` bu kanıtın yerine geçmez; bulgu silinmez, açık kümeden çıkar ve kalan risk kapanış kaydında durur.

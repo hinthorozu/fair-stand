@@ -46,7 +46,7 @@ Dal envanteri hâlâ çok sayıda eski birleştirilmiş/geçersiz kılınmış `
 - A21.03 tek-seferlik betikler: `CLOSED` — F-045 arşiv (`scripts/archive/`).
 - A21.04 belgeleme durum sapması: `GAP` — F-001/F-002/F-003/F-004.
 - A21.05 depo lisansı/public karar: `GAP` — F-043.
-- A21.06 üçüncü-taraf varlık atıfı: `GAP/DECISION_REQUIRED` — F-034.
+- A21.06 üçüncü-taraf varlık atıfı: tarihî kayıt `GAP/DECISION_REQUIRED`; güncel defter `ACCEPTED_RISK` — F-034.
 - A21.07 üretilen/derleme artefaktları işlenmiş: incelenen ağaç için `AUDITED_OK`; `dist/` izlenmez.
 - A21.08 statik kalite araçları: `GAP` — F-046.
 - A21.09 kanonik CI sayısı/sahipliği: `AUDITED_OK`.
