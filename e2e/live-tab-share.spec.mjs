@@ -16,7 +16,8 @@ test('canlı paylaşım kontrolü sahne açılınca toolbar içinde durur', asyn
 
   await expect(page.locator('#viewport-toolbar')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Canlı Paylaş' })).toBeVisible();
-  await expect(page.locator('#live-share-badge')).toBeHidden();
+  await expect(page.locator('#live-share-popover')).toBeHidden();
+  await expect(page.locator('#live-share-link')).toBeHidden();
   await expect(page.locator('#live-share-stop')).toBeHidden();
   await expect(page.locator('#viewport video')).toHaveCount(0);
 });

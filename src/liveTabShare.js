@@ -128,16 +128,30 @@ export function viewerStatusForError(code) {
   return 'ended';
 }
 
+export function liveShareButtonLabel(state) {
+  if (state.phase !== 'live') return 'Canlı Paylaş';
+  return `● CANLI · ${state.viewerCount || 0}`;
+}
+
 export function applyLiveShareControls(controls, state) {
   const live = state.phase === 'live';
-  setHidden(controls.start, live);
-  setHidden(controls.badge, !live);
+  const count = state.viewerCount || 0;
+  const popoverOpen = Boolean(state.popoverOpen);
+  if (controls.start) {
+    controls.start.hidden = false;
+    controls.start.textContent = liveShareButtonLabel(state);
+    controls.start.classList?.toggle?.('is-live', live);
+    controls.start.setAttribute?.('aria-pressed', live ? 'true' : 'false');
+    controls.start.setAttribute?.('aria-expanded', popoverOpen ? 'true' : 'false');
+  }
+  setHidden(controls.popover, !popoverOpen);
+  if (controls.status) controls.status.textContent = live ? 'Durum: ● CANLI' : 'Durum: Hazır';
   setHidden(controls.viewers, !live);
-  setHidden(controls.copy, !live);
+  if (controls.viewers) controls.viewers.textContent = `İzleyici: ${count} / 1`;
   setHidden(controls.link, !live);
-  setHidden(controls.stop, !live);
-  if (controls.viewers) controls.viewers.textContent = `${state.viewerCount || 0} izleyici`;
   if (controls.link) controls.link.textContent = state.watchUrl || '';
+  setHidden(controls.copy, !live);
+  setHidden(controls.stop, !live);
   setHidden(controls.error, !state.error);
   if (controls.error) controls.error.textContent = state.error || '';
 }
@@ -497,7 +511,8 @@ export function bindLiveTabShare(documentRef, options = {}) {
   const controls = {
     root: documentRef.getElementById('live-share'),
     start,
-    badge: documentRef.getElementById('live-share-badge'),
+    popover: documentRef.getElementById('live-share-popover'),
+    status: documentRef.getElementById('live-share-status'),
     viewers: documentRef.getElementById('live-share-viewers'),
     link: documentRef.getElementById('live-share-link'),
     copy: documentRef.getElementById('live-share-copy'),
@@ -512,6 +527,13 @@ export function bindLiveTabShare(documentRef, options = {}) {
   const location = options.location || view.location;
   const fetchImpl = options.fetch || view.fetch?.bind?.(view) || globalThis.fetch?.bind?.(globalThis);
   const Socket = options.WebSocket || view.WebSocket;
+  let open = false;
+  let wasLive = false;
+  let latest = { phase: 'idle', viewerCount: 0, error: '', watchUrl: '' };
+  const paint = (state) => {
+    latest = state;
+    applyLiveShareControls(controls, { ...state, popoverOpen: open });
+  };
   const controller = createHostController({
     userAgent: options.userAgent || view.navigator?.userAgent || '',
     mediaDevices: options.mediaDevices || view.navigator?.mediaDevices,
@@ -522,30 +544,59 @@ export function bindLiveTabShare(documentRef, options = {}) {
     createSession: options.createSession || (() => createLiveShareSession(options.headers, location, fetchImpl)),
     connectSocket: options.connectSocket || ((url) => new Socket(url)),
     signalStop: options.signalStop || ((shareToken, shareHostKey) => signalLiveShareStop(shareToken, shareHostKey, fetchImpl)),
-    onState: (state) => applyLiveShareControls(controls, state),
+    onState: (state) => {
+      const becameLive = state.phase === 'live' && !wasLive;
+      wasLive = state.phase === 'live';
+      if (becameLive || state.error) open = true;
+      if (state.phase !== 'live' && !state.error) open = false;
+      paint(state);
+    },
   });
-  const onStart = () => {
-    void controller.start();
+  const onStart = (event) => {
+    event?.stopPropagation?.();
+    if (latest.phase === 'live') {
+      open = !open;
+      paint(latest);
+      return;
+    }
+    return controller.start();
   };
-  const onStop = () => {
-    void controller.stop('user');
+  const onStop = (event) => {
+    event?.stopPropagation?.();
+    return controller.stop('user');
   };
-  const onCopy = () => {
+  const onCopy = (event) => {
+    event?.stopPropagation?.();
     void controller.copyLink();
   };
   const onHide = () => {
     void controller.stop('pagehide');
   };
+  const onPointerDown = (event) => {
+    if (!open) return;
+    if (controls.root?.contains?.(event.target)) return;
+    open = false;
+    paint(latest);
+  };
+  const onKeyDown = (event) => {
+    if (event.key !== 'Escape' || !open) return;
+    open = false;
+    paint(latest);
+  };
   start.addEventListener?.('click', onStart);
   controls.stop?.addEventListener?.('click', onStop);
   controls.copy?.addEventListener?.('click', onCopy);
   view.addEventListener?.('pagehide', onHide);
-  applyLiveShareControls(controls, { phase: 'idle', viewerCount: 0, error: '', watchUrl: '' });
+  view.addEventListener?.('pointerdown', onPointerDown);
+  view.addEventListener?.('keydown', onKeyDown);
+  paint(latest);
   return function unbindLiveTabShare() {
     start.removeEventListener?.('click', onStart);
     controls.stop?.removeEventListener?.('click', onStop);
     controls.copy?.removeEventListener?.('click', onCopy);
     view.removeEventListener?.('pagehide', onHide);
+    view.removeEventListener?.('pointerdown', onPointerDown);
+    view.removeEventListener?.('keydown', onKeyDown);
     void controller.stop('unmount');
   };
 }

@@ -133,10 +133,11 @@ test('non-browser display surface is rejected and stopped', async () => {
 
 test('idle, zero viewers, one viewer, and stop cleanup', async () => {
   const ui = controls();
-  applyLiveShareControls(ui, { phase: 'idle', viewerCount: 0, error: '', watchUrl: '' });
+  applyLiveShareControls(ui, { phase: 'idle', viewerCount: 0, error: '', watchUrl: '', popoverOpen: false });
   assert.equal(ui.start.hidden, false);
-  assert.equal(ui.badge.hidden, true);
+  assert.equal(ui.start.textContent, 'Canlı Paylaş');
   assert.equal(ui.stop.hidden, true);
+  assert.equal(ui.link.hidden, true);
 
   const video = track('browser');
   const peers = [];
@@ -195,28 +196,32 @@ test('idle, zero viewers, one viewer, and stop cleanup', async () => {
   });
 
   await controller.start();
-  assert.equal(ui.badge.hidden, false);
-  assert.equal(ui.badge.textContent, '');
-  assert.equal(ui.viewers.textContent, '0 izleyici');
+  assert.equal(ui.start.hidden, false);
+  assert.equal(ui.start.textContent, '● CANLI · 0');
+  assert.equal(ui.start.textContent.includes('http'), false);
+  assert.equal(ui.viewers.textContent, 'İzleyici: 0 / 1');
   assert.equal(ui.link.textContent, 'https://example.test/stand/watch/token-1');
   assert.equal(controller.peerCount(), 0);
 
   await sockets[0].onmessage({ data: JSON.stringify({ type: 'joined', iceServers: [{ urls: ['stun:example.test:19302'] }] }) });
   await sockets[0].onmessage({ data: JSON.stringify({ type: 'viewer-joined', viewerCount: 1 }) });
-  assert.equal(ui.viewers.textContent, '1 izleyici');
+  assert.equal(ui.viewers.textContent, 'İzleyici: 1 / 1');
+  assert.equal(ui.start.textContent, '● CANLI · 1');
   assert.equal(peers.length, 1);
   assert.equal(peers[0].senders[0].parameters.encodings[0].maxBitrate, 800_000);
   assert.equal(peers[0].config.iceServers[0].urls[0], 'stun:example.test:19302');
   assert.equal(video.contentHint, 'motion');
 
   await sockets[0].onmessage({ data: JSON.stringify({ type: 'viewer-left', viewerCount: 0 }) });
-  assert.equal(ui.viewers.textContent, '0 izleyici');
+  assert.equal(ui.viewers.textContent, 'İzleyici: 0 / 1');
+  assert.equal(ui.start.textContent, '● CANLI · 0');
   assert.equal(peers[0].closed, true);
   assert.equal(controller.peerCount(), 0);
 
   await controller.stop('user');
   assert.equal(ui.start.hidden, false);
-  assert.equal(ui.badge.hidden, true);
+  assert.equal(ui.start.textContent, 'Canlı Paylaş');
+  assert.equal(ui.stop.hidden, true);
   assert.equal(video.stopped, true);
   assert.equal(stopped, 1);
 });
@@ -402,6 +407,143 @@ test('sender bitrate stays inside 700-1000 kbps', async () => {
   await applySenderBitrate(sender);
   assert.equal(sender.parameters.encodings[0].maxBitrate, 800_000);
   assert.equal(sender.parameters.degradationPreference, 'maintain-framerate');
+});
+
+test('live share details stay in a popover and closing it keeps the stream', async () => {
+  const nodes = new Map();
+  const make = (id, text = '') => {
+    const node = {
+      id,
+      hidden: id !== 'live-share-start',
+      textContent: text,
+      dataset: {},
+      classNames: new Set(),
+      attributes: new Map(),
+      listeners: {},
+      children: [],
+      classList: {
+        toggle(name, on) {
+          if (on) node.classNames.add(name);
+          else node.classNames.delete(name);
+        },
+      },
+      setAttribute(name, value) { node.attributes.set(name, String(value)); },
+      getAttribute(name) { return node.attributes.get(name); },
+      addEventListener(type, fn) { node.listeners[type] = fn; },
+      removeEventListener(type) { delete node.listeners[type]; },
+      contains(target) {
+        return target === node || node.children.some((child) => child === target || child.contains?.(target));
+      },
+    };
+    nodes.set(id, node);
+    return node;
+  };
+  const root = make('live-share');
+  const start = make('live-share-start', 'Canlı Paylaş');
+  start.hidden = false;
+  const popover = make('live-share-popover');
+  popover.hidden = true;
+  const status = make('live-share-status', 'Durum: Hazır');
+  const viewers = make('live-share-viewers');
+  const link = make('live-share-link');
+  const copy = make('live-share-copy');
+  const stop = make('live-share-stop');
+  const error = make('live-share-error');
+  popover.children.push(status, viewers, link, copy, stop, error);
+  root.children.push(start, popover);
+  const view = {
+    listeners: {},
+    navigator: { userAgent: CHROME, clipboard: { async writeText(value) { this.written = value; } } },
+    location: { origin: 'https://example.test', protocol: 'https:', host: 'example.test' },
+    addEventListener(type, fn) { this.listeners[type] = fn; },
+    removeEventListener(type) { delete this.listeners[type]; },
+  };
+  const documentRef = {
+    defaultView: view,
+    getElementById(id) { return nodes.get(id) || null; },
+  };
+  const video = track('browser');
+  const sockets = [];
+  let sessions = 0;
+  let stopped = 0;
+  bindLiveTabShare(documentRef, {
+    userAgent: CHROME,
+    mediaDevices: { async getDisplayMedia() { return streamFrom(video); } },
+    async createSession() {
+      sessions += 1;
+      return {
+        ok: true,
+        token: 'token-1',
+        hostKey: 'host-key',
+        watchUrl: 'https://example.test/stand/watch/token-1',
+        socketUrl: 'ws://example.test/ws',
+        iceServers: [],
+      };
+    },
+    connectSocket() {
+      const socket = { send() {}, close() {}, onmessage: null };
+      sockets.push(socket);
+      return socket;
+    },
+    RTCPeerConnection: class {
+      addTrack() { return { getParameters: () => ({ encodings: [] }), async setParameters() {} }; }
+      createOffer() { return { type: 'offer', sdp: 'offer' }; }
+      async setLocalDescription(description) { this.localDescription = description; }
+      async setRemoteDescription() {}
+      async addIceCandidate() {}
+      close() {}
+    },
+    setInterval() { return 1; },
+    clearInterval() {},
+    signalStop() { stopped += 1; },
+    clipboard: view.navigator.clipboard,
+  });
+
+  assert.equal(start.textContent, 'Canlı Paylaş');
+  assert.equal(popover.hidden, true);
+  assert.equal(stop.hidden, true);
+  assert.equal(link.hidden, true);
+
+  await start.listeners.click({ stopPropagation() {} });
+  assert.equal(sessions, 1);
+  assert.equal(start.textContent, '● CANLI · 0');
+  assert.equal(start.textContent.includes('http'), false);
+  assert.equal(start.classNames.has('is-live'), true);
+  assert.equal(popover.hidden, false);
+  assert.equal(link.hidden, false);
+  assert.equal(link.textContent, 'https://example.test/stand/watch/token-1');
+  assert.equal(viewers.textContent, 'İzleyici: 0 / 1');
+  assert.equal(stop.hidden, false);
+
+  view.listeners.pointerdown({ target: { id: 'scene' } });
+  assert.equal(popover.hidden, true);
+  assert.equal(start.textContent, '● CANLI · 0');
+  assert.equal(stopped, 0);
+  assert.equal(video.stopped, false);
+
+  await start.listeners.click({ stopPropagation() {} });
+  assert.equal(sessions, 1);
+  assert.equal(popover.hidden, false);
+
+  view.listeners.keydown({ key: 'Escape' });
+  assert.equal(popover.hidden, true);
+  assert.equal(video.stopped, false);
+
+  await start.listeners.click({ stopPropagation() {} });
+  await sockets[0].onmessage({ data: JSON.stringify({ type: 'viewer-joined' }) });
+  assert.equal(popover.hidden, false);
+  assert.equal(start.textContent, '● CANLI · 1');
+  assert.equal(viewers.textContent, 'İzleyici: 1 / 1');
+
+  await copy.listeners.click({ stopPropagation() {} });
+  assert.equal(view.navigator.clipboard.written, 'https://example.test/stand/watch/token-1');
+
+  await stop.listeners.click({ stopPropagation() {} });
+  assert.equal(stopped, 1);
+  assert.equal(video.stopped, true);
+  assert.equal(start.textContent, 'Canlı Paylaş');
+  assert.equal(popover.hidden, true);
+  assert.equal(stop.hidden, true);
 });
 
 test('read-only capabilities hide the share control', () => {
