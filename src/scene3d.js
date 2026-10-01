@@ -44,7 +44,7 @@ import {
 import { snapPlacementToItemAnchor } from './itemSnap.js';
 import { resolveModuleStripOccupancy } from './stripOccupancy.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
-import { createRectImageLayout } from './rectImageLayout.js';
+import { createRectImageLayout, visualImageColumnItems } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
 import { applyColorOverride, createDefaultImageTransform } from './designState.js';
 import {
@@ -4175,12 +4175,18 @@ export function createStandScene(
   }
 
   function imageLayoutItems(meshes) {
-    return meshes.map((mesh) => ({
-      mesh,
-      moduleIndex: mesh.userData.moduleIndex,
-      stripIndex: mesh.userData.stripIndex,
-      width: mesh.geometry.parameters.width,
-      height: mesh.geometry.parameters.height,
+    return visualImageColumnItems(meshes.map((mesh) => {
+      const meta = getSurfaceSelectionPlaneMeta(mesh);
+      return {
+        mesh,
+        moduleId: mesh.userData.moduleId ?? mesh.userData.moduleIndex,
+        moduleIndex: mesh.userData.moduleIndex,
+        stripIndex: mesh.userData.stripIndex,
+        pathCm: meta?.pathCm,
+        planeKey: meta?.planeKey ?? null,
+        width: mesh.geometry.parameters.width,
+        height: mesh.geometry.parameters.height,
+      };
     }));
   }
 
@@ -4440,15 +4446,7 @@ export function createStandScene(
       };
     }
 
-    const layout = createRectImageLayout(
-      meshes.map((mesh) => ({
-        mesh,
-        moduleIndex: mesh.userData.moduleIndex,
-        stripIndex: mesh.userData.stripIndex,
-        width: mesh.geometry.parameters.width,
-        height: mesh.geometry.parameters.height,
-      })),
-    );
+    const layout = createRectImageLayout(imageLayoutItems(meshes));
 
     if (!layout.ok) return layout;
 

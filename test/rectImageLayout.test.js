@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createRectImageLayout } from '../src/rectImageLayout.js';
+import { createRectImageLayout, visualImageColumnItems } from '../src/rectImageLayout.js';
 
 function makeGrid({ columns, rows, widths, height = 0.46 }) {
   const items = [];
@@ -69,6 +69,21 @@ test('rejects an L-shaped or incomplete selection', () => {
   ]);
 
   assert.equal(result.ok, false);
+});
+
+test('a square across neighboring walls stays contiguous when scene indexes have a gap', () => {
+  const selected = visualImageColumnItems([
+    { mesh: 'a0', moduleId: 'wall-a', moduleIndex: 0, stripIndex: 2, pathCm: 0, planeKey: 'wall:back', width: 1, height: 0.46 },
+    { mesh: 'a1', moduleId: 'wall-a', moduleIndex: 0, stripIndex: 3, pathCm: 0, planeKey: 'wall:back', width: 1, height: 0.46 },
+    { mesh: 'b0', moduleId: 'wall-b', moduleIndex: 4, stripIndex: 2, pathCm: 100, planeKey: 'wall:back', width: 1, height: 0.46 },
+    { mesh: 'b1', moduleId: 'wall-b', moduleIndex: 4, stripIndex: 3, pathCm: 100, planeKey: 'wall:back', width: 1, height: 0.46 },
+  ]);
+  const result = createRectImageLayout(selected);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.columnCount, 2);
+  assert.equal(result.rowCount, 2);
+  assert.equal(result.panelCount, 4);
 });
 
 test('rejects gaps between selected columns', () => {

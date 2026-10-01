@@ -2,6 +2,34 @@ function uniqueSorted(values) {
   return [...new Set(values)].sort((a, b) => a - b);
 }
 
+/**
+ * Scene moduleIndex is insertion order. A square of panels can sit on two
+ * neighboring walls while a TV or shelf occupies the index between them.
+ * Columns follow the shared wall position so the rectangle stays contiguous.
+ */
+export function visualImageColumnItems(items) {
+  if (!Array.isArray(items) || !items.length) return items ?? [];
+  const planeKeys = new Set(items.map((item) => item.planeKey).filter((key) => key != null));
+  if (planeKeys.size !== 1 || items.some((item) => item.planeKey == null)) return items;
+
+  const pathByModule = new Map();
+  items.forEach((item) => {
+    const moduleId = item.moduleId ?? item.moduleIndex;
+    const pathCm = Number(item.pathCm);
+    if (!pathByModule.has(moduleId)) {
+      pathByModule.set(moduleId, Number.isFinite(pathCm) ? pathCm : Number(item.moduleIndex));
+    }
+  });
+  const columns = [...pathByModule.entries()]
+    .sort((a, b) => a[1] - b[1] || String(a[0]).localeCompare(String(b[0])));
+  const columnOf = new Map(columns.map(([moduleId], index) => [moduleId, index]));
+
+  return items.map((item) => ({
+    ...item,
+    moduleIndex: columnOf.get(item.moduleId ?? item.moduleIndex),
+  }));
+}
+
 function isContiguous(values) {
   for (let index = 1; index < values.length; index += 1) {
     if (values[index] !== values[index - 1] + 1) return false;
