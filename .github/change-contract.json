@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-wall-short-canonical-rename",
-  "kind": "persistence-change",
-  "summary": "Kısa panel item anahtarları wall_*_short_1/2 ve variant wall-short-1/2 olur. Eski proje payload satırları durur; açılışta normalizeModuleItemState katalog aramasından önce çevirir. short-up-joint dikme snap tokenı aynı kalır.",
+  "id": "fair-stand-wall-short-relationship-bom",
+  "kind": "bom-change",
+  "summary": "Wall Short relationship BOM, mevcut standard snap motorunun ürettiği yapısal eklemleri (end-to-end, corner, tee) kısa bandın gerçek bağlantı adedine göre dönüştürür. Full-height sabitleri kopyalanmaz. Profile ray ikamesi type===profile ve geometri ile çalışır. Kanonik wall-short anahtarları bu dalda durur.",
   "owners": [
     "src/items.js",
     "src/designState.js",
@@ -312,6 +312,7 @@
       "test/wallSeparatorItemsContract.test.js",
       "test/wallShelfItemsContract.test.js",
       "test/wallShortCanonicalRename.test.js",
+      "test/wallShortRelationshipBom.test.js",
       "test/wallShowcaseItemContract.test.js"
     ],
     "affectedDocs": [
@@ -779,10 +780,14 @@
         "F-019"
       ]
     },
-    "notes": "Item kimliği ve görünen ad değişir. Reçete çocukları, sahne yüksekliği, default Z ve short-up-joint aynı kalır. Proje ve revizyon payloadlarına toplu replace uygulanmaz. Aday bulgular bu rename ile kapanmaz."
+    "notes": "Wall Short relationship BOM yalnız relationshipBom ve projectBom katmanında. Snap, collision, Z hareketi, baseRun ve reçete miktarları değişmez. Full-height wall/door/separator/showcase sabitleri kısa banda kopyalanmaz. Profile eligibility itemKey listesi değil type===profile ve span/temas geometrisidir. Kanonik wall-short rename bu dalın önceki commitindedir."
   },
   "tests": {
     "targeted": [
+      "test/wallShortRelationshipBom.test.js",
+      "test/relationshipBomJoints.test.js",
+      "test/relationshipBomEndToEnd.test.js",
+      "test/baseRunBom.test.js",
       "test/wallShortCanonicalRename.test.js",
       "test/wallFlatPanelItemsContract.test.js",
       "test/uprightFieldPlacement.test.js",
@@ -794,9 +799,10 @@
     "e2e": {
       "required": true,
       "targeted": [
+        "e2e/visible-ui-b.spec.mjs",
         "e2e/wall-flat-panel-items-contract.spec.mjs"
       ],
-      "reason": "Katalogdan yeni wall-short anahtarı eklenir. Eski short_up anahtarı yeni projede üretilmez."
+      "reason": "Üretim BOM paneli kısa panel birleşim satırlarını gösterir. Katalog wall-short anahtarı da bu dalda durur."
     }
   },
   "risk": {
