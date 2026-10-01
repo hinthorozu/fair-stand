@@ -2,6 +2,49 @@ function uniqueSorted(values) {
   return [...new Set(values)].sort((a, b) => a - b);
 }
 
+const IMAGE_COLUMN_LINE_TOLERANCE_CM = 10.5;
+
+function sharesImageColumnLine(items) {
+  const planeKeys = new Set(items.map((item) => item.planeKey).filter((key) => key != null));
+  if (planeKeys.size === 1 && items.every((item) => item.planeKey != null)) return true;
+
+  const axes = new Set(items.map((item) => item.axis).filter(Boolean));
+  if (axes.size !== 1) return false;
+  const crosses = items.map((item) => Number(item.crossCm));
+  if (!crosses.every(Number.isFinite)) return false;
+  return Math.max(...crosses) - Math.min(...crosses) <= IMAGE_COLUMN_LINE_TOLERANCE_CM;
+}
+
+/**
+ * Scene moduleIndex is insertion order. Columns follow the wall line, including
+ * a run that continues from a stand wall onto a free module on the same line.
+ */
+export function visualImageColumnItems(items) {
+  if (!Array.isArray(items) || !items.length) return items ?? [];
+  if (!sharesImageColumnLine(items)) return items;
+
+  const pathByModule = new Map();
+  let missingPath = false;
+  items.forEach((item) => {
+    const moduleId = item.moduleId ?? item.moduleIndex;
+    const pathCm = Number(item.pathCm);
+    if (!pathByModule.has(moduleId)) {
+      if (!Number.isFinite(pathCm)) missingPath = true;
+      pathByModule.set(moduleId, Number.isFinite(pathCm) ? pathCm : Number(item.moduleIndex));
+    }
+  });
+  if (missingPath) return items;
+
+  const columns = [...pathByModule.entries()]
+    .sort((a, b) => a[1] - b[1] || String(a[0]).localeCompare(String(b[0])));
+  const columnOf = new Map(columns.map(([moduleId], index) => [moduleId, index]));
+
+  return items.map((item) => ({
+    ...item,
+    moduleIndex: columnOf.get(item.moduleId ?? item.moduleIndex),
+  }));
+}
+
 function isContiguous(values) {
   for (let index = 1; index < values.length; index += 1) {
     if (values[index] !== values[index - 1] + 1) return false;

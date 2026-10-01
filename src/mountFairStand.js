@@ -4,6 +4,7 @@ import imageActionsCss from './imageActions.css?inline';
 import helpGuideCss from './helpGuide.css?inline';
 import productionBomPanelCss from './productionBomPanel.css?inline';
 import { FAIR_STAND_MARKUP } from './configuratorMarkup.js';
+import { bindLiveTabShare } from './liveTabShare.js';
 import { setFairStandHostDocument } from './hostDocument.js';
 import { startFairStandConfigurator } from './main.js';
 
@@ -59,6 +60,7 @@ export function mountFairStand(container, options = {}) {
   iframe.title = 'Fair Stand';
   iframe.setAttribute('data-testid', 'fair-stand-frame');
   iframe.setAttribute('aria-label', 'Fair Stand configurator');
+  iframe.setAttribute('allow', 'display-capture');
   Object.assign(iframe.style, {
     width: '100%',
     height: '100%',
@@ -109,9 +111,17 @@ export function mountFairStand(container, options = {}) {
     customerId: options.customerId,
     capabilities: options.capabilities,
   });
+  const stopLiveShare = bindLiveTabShare(hostDocument, {
+    capabilities: options.capabilities,
+    headers: () => iframe.contentWindow?.__FAIR_STAND_CATALOG_HEADERS__ || options.catalogHeaders || {},
+    location: window.location,
+    fetch: window.fetch.bind(window),
+    WebSocket: window.WebSocket,
+  });
 
   return function unmountFairStand() {
     try {
+      stopLiveShare?.();
       stop?.();
     } catch (error) {
       console.warn('Fair Stand runtime stop failed:', error);

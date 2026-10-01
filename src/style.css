@@ -870,6 +870,35 @@ h2 {
 .project-revision-list button { text-align: left; }
 .project-revision-list button[aria-current="true"] { font-weight: 700; }
 
+.live-share { position: relative; display: inline-flex; pointer-events: auto; }
+.live-share[hidden] { display: none; }
+.viewport-render-button.is-live { color: #fecaca; outline: 2px solid rgba(248, 113, 113, 0.85); outline-offset: 1px; }
+.live-share-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  box-sizing: border-box;
+  width: min(360px, calc(100vw - 24px));
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
+  background: rgba(17, 24, 39, 0.94);
+  color: #ffffff;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.24);
+  pointer-events: auto;
+  text-align: left;
+}
+.live-share-popover[hidden] { display: none; }
+.live-share-popover-title { margin: 0; font-size: 13px; font-weight: 700; }
+.live-share-popover p { margin: 0; font-size: 12px; line-height: 1.4; }
+.live-share-link { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.live-share-popover-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.live-share-popover-actions .viewport-render-button { margin-left: 0; }
+.live-share-error { color: #fecaca; }
+
 .viewport-render-button { margin-left: auto; white-space: nowrap; font-weight: 700; pointer-events: auto; }
 .viewport-render-button.is-active,
 .viewport-render-button[aria-pressed="true"] {
@@ -1262,6 +1291,7 @@ button[aria-busy="true"]::after {
     background: rgba(17, 24, 39, 0.72);
   }
 
+  .live-share-popover { left: 0; right: auto; }
   .viewport-render-button {
     min-height: 34px;
     margin: 0;

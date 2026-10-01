@@ -34,6 +34,13 @@ class Settings(BaseSettings):
         default=_BACKEND_ROOT / "var" / "project-assets",
         validation_alias=AliasChoices("FAIR_STAND_PROJECT_ASSET_ROOT", "PROJECT_ASSET_ROOT"),
     )
+    live_share_stun_urls: str = Field(
+        default="stun:stun.l.google.com:19302",
+        validation_alias="FAIR_STAND_LIVE_SHARE_STUN_URLS",
+    )
+    live_share_turn_urls: str = Field(default="", validation_alias="FAIR_STAND_LIVE_SHARE_TURN_URLS")
+    live_share_turn_username: str = Field(default="", validation_alias="FAIR_STAND_LIVE_SHARE_TURN_USERNAME")
+    live_share_turn_credential: str = Field(default="", validation_alias="FAIR_STAND_LIVE_SHARE_TURN_CREDENTIAL")
 
 
 
