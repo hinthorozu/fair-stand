@@ -866,6 +866,9 @@ h2 {
 .project-card input, .project-card select { width: 100%; }
 .project-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .project-actions button { width: 100%; }
+.project-revision-list { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
+.project-revision-list button { text-align: left; }
+.project-revision-list button[aria-current="true"] { font-weight: 700; }
 
 .viewport-render-button { margin-left: auto; white-space: nowrap; font-weight: 700; pointer-events: auto; }
 .viewport-render-button.is-active,

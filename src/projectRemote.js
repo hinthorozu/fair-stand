@@ -173,6 +173,13 @@ function toLocalProject(detail) {
     customerId: detail.customerId || null,
     stand: payload.stand ?? detail.stand ?? null,
     modules: Array.isArray(payload.modules) ? payload.modules : (detail.modules || []),
+    revisions: Array.isArray(detail.revisions)
+      ? detail.revisions.map((revision) => ({
+        revisionNumber: revision.revisionNumber,
+        createdAt: revision.createdAt,
+        updatedAt: revision.updatedAt,
+      }))
+      : [],
   };
 }
 
@@ -249,6 +256,7 @@ export async function listProjects() {
       customerId: summary.customerId || existing?.customerId || null,
       stand: existing?.stand ?? null,
       modules: existing?.modules ?? [],
+      revisions: existing?.revisions || [],
     });
   }
   return summaries
@@ -271,14 +279,26 @@ export async function loadProject(projectId) {
   return cacheProjectAndAssets(detail);
 }
 
+export async function loadProjectRevision(projectId, revisionNumber) {
+  if (!remoteEnabled()) {
+    throw new Error('Sunucu oturumu olmadan revizyon açılamaz.');
+  }
+  return apiFetch(`/${projectId}/revisions/${revisionNumber}`);
+}
+
 /**
  * @param {object} project
- * @param {{ syncAssets?: 'dirty' | 'all' | 'none' }} [options]
+ * @param {{ syncAssets?: 'dirty' | 'all' | 'none', revisionMode?: 'none' | 'create' | 'update', revisionNumber?: number | null }} [options]
  *   dirty (default): upload only assets missing/changed vs last successful sync fingerprint
  *   all: force re-upload every local asset
  *   none: project payload only
+ *   revisionMode create starts this edit session's revision; update rewrites that same revision.
  */
-export async function saveProject(project, { syncAssets = 'dirty' } = {}) {
+export async function saveProject(project, {
+  syncAssets = 'dirty',
+  revisionMode = 'none',
+  revisionNumber = null,
+} = {}) {
   const local = await saveLocalProject(project);
   if (!remoteEnabled()) {
     return local;
@@ -292,7 +312,9 @@ export async function saveProject(project, { syncAssets = 'dirty' } = {}) {
     name: project.name || 'Adsız Proje',
     version: Number(project.version) || 1,
     payload,
+    revisionMode,
   };
+  if (revisionMode === 'update' && revisionNumber != null) body.revisionNumber = revisionNumber;
   if (project.customerId) body.customerId = project.customerId;
 
   const detail = await apiFetch(`/${project.id}`, {

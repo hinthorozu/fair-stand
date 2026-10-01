@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   DEFAULT_AUTOSAVE_DELAY_MS,
+  DEFAULT_AUTOSAVE_MAX_WAIT_MS,
   DEFAULT_AUTOSAVE_WATCH_INTERVAL_MS,
   createAutosaveController,
   getActiveAutosaveController,
@@ -41,8 +42,9 @@ function createFakeClock() {
   };
 }
 
-test('autosave constants preserve the current 30s debounce / 1s watch contract', () => {
+test('autosave constants preserve the 30s debounce, 60s max wait, and 1s watch', () => {
   assert.equal(DEFAULT_AUTOSAVE_DELAY_MS, 30000);
+  assert.equal(DEFAULT_AUTOSAVE_MAX_WAIT_MS, 60000);
   assert.equal(DEFAULT_AUTOSAVE_WATCH_INTERVAL_MS, 1000);
 });
 
@@ -238,4 +240,91 @@ test('active controller registry exposes the controller used by project action g
   });
 
   assert.equal(getActiveAutosaveController(), controller);
+});
+
+function scheduledDelay(clock) {
+  assert.equal(clock.timeouts.size, 1);
+  return [...clock.timeouts.values()][0].delay;
+}
+
+test('edits at 0s, 10s, and 20s autosave 30s after the last edit', () => {
+  let nowMs = 0;
+  let signature = 'saved';
+  const clock = createFakeClock();
+  const controller = createAutosaveController({
+    getSignature: () => signature,
+    persist: async () => {},
+    now: () => nowMs,
+    ...clock,
+  });
+  controller.enableFromCurrentState();
+
+  signature = 'move-0';
+  controller.checkForChanges();
+  assert.equal(scheduledDelay(clock), 30000);
+
+  nowMs = 10000;
+  signature = 'move-10';
+  controller.checkForChanges();
+  assert.equal(scheduledDelay(clock), 30000);
+
+  nowMs = 20000;
+  signature = 'move-20';
+  controller.checkForChanges();
+  assert.equal(scheduledDelay(clock), 30000);
+});
+
+test('continuous edits autosave when the 60s max wait arrives, then open a new window', async () => {
+  let nowMs = 0;
+  let signature = 'saved';
+  let persistCount = 0;
+  const clock = createFakeClock();
+  const controller = createAutosaveController({
+    getSignature: () => signature,
+    persist: async () => { persistCount += 1; },
+    now: () => nowMs,
+    ...clock,
+  });
+  controller.enableFromCurrentState();
+
+  for (const at of [0, 10000, 20000, 30000, 40000, 50000]) {
+    nowMs = at;
+    signature = `edit-${at}`;
+    controller.checkForChanges();
+  }
+
+  assert.equal(scheduledDelay(clock), 10000);
+  assert.equal(persistCount, 0);
+  const [timerId, timer] = [...clock.timeouts.entries()][0];
+  clock.timeouts.delete(timerId);
+  await timer.callback();
+  assert.equal(persistCount, 1);
+  assert.equal(clock.timeouts.size, 0);
+
+  nowMs = 60000;
+  signature = 'edit-after-save';
+  controller.checkForChanges();
+  assert.equal(scheduledDelay(clock), 30000);
+});
+
+test('a manual save clears the max-wait window', () => {
+  let nowMs = 0;
+  let signature = 'saved';
+  const clock = createFakeClock();
+  const controller = createAutosaveController({
+    getSignature: () => signature,
+    persist: async () => {},
+    now: () => nowMs,
+    ...clock,
+  });
+  controller.enableFromCurrentState();
+  signature = 'dirty';
+  controller.checkForChanges();
+
+  nowMs = 55000;
+  controller.markSavedState();
+  signature = 'again';
+  controller.checkForChanges();
+
+  assert.equal(scheduledDelay(clock), 30000);
 });

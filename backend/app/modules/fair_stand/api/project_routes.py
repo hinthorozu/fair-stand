@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import quote
 from uuid import UUID
 
@@ -32,6 +32,8 @@ from app.modules.fair_stand.application.projects import (
     ProjectService,
     ProjectServiceError,
     ProjectSummary,
+    RevisionDetail,
+    RevisionSummary,
 )
 
 router = APIRouter(prefix="/fair-stand/projects", tags=["fair-stand-projects"])
@@ -66,6 +68,8 @@ class ProjectUpdateBody(BaseModel):
     version: int | None = Field(default=None, ge=1)
     customer_id: UUID | None = Field(default=None, alias="customerId")
     payload: ProjectPayloadBody | None = None
+    revision_mode: Literal["none", "create", "update"] = Field(default="none", alias="revisionMode")
+    revision_number: int | None = Field(default=None, alias="revisionNumber", ge=1)
 
 
 class ProjectCustomerBody(BaseModel):
@@ -104,6 +108,14 @@ def _summary_json(project: ProjectSummary) -> dict[str, Any]:
     }
 
 
+def _revision_json(revision: RevisionSummary) -> dict[str, Any]:
+    return {
+        "revisionNumber": revision.revision_number,
+        "createdAt": _ms(revision.created_at),
+        "updatedAt": _ms(revision.updated_at),
+    }
+
+
 def _detail_json(project: ProjectDetail) -> dict[str, Any]:
     return {
         **_summary_json(project),
@@ -112,6 +124,16 @@ def _detail_json(project: ProjectDetail) -> dict[str, Any]:
         "stand": project.payload.get("stand"),
         "modules": project.payload.get("modules") or [],
         "assets": [_asset_json(asset) for asset in project.assets],
+        "revisions": [_revision_json(revision) for revision in project.revisions],
+    }
+
+
+def _revision_detail_json(revision: RevisionDetail) -> dict[str, Any]:
+    return {
+        **_revision_json(revision),
+        "payload": revision.payload,
+        "stand": revision.payload.get("stand"),
+        "modules": revision.payload.get("modules") or [],
     }
 
 
@@ -191,10 +213,25 @@ def update_project(
             customer_id=body.customer_id,
             user_id=auth.user_id,
             create_if_missing=True,
+            revision_mode=body.revision_mode,
+            revision_number=body.revision_number,
         )
     except ProjectServiceError as exc:
         _raise_service(exc)
     return _detail_json(project)
+
+
+@router.get("/{project_id}/revisions/{revision_number}")
+def get_project_revision(
+    project_id: UUID,
+    revision_number: int,
+    auth: AuthContext = Depends(require_permission(PERMISSION_PROJECTS_READ)),
+    service: ProjectService = Depends(get_project_service),
+) -> dict[str, Any]:
+    revision = service.get_revision(project_id, auth.organization_id, revision_number)
+    if revision is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Revision not found")
+    return _revision_detail_json(revision)
 
 
 @router.patch("/{project_id}/customer")

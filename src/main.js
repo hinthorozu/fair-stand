@@ -18,7 +18,17 @@ import {
 } from './designState.js';
 import { deleteImageAsset, loadImageAssets, saveImageAsset, saveImportedImageAsset } from './assetStore.js';
 import { clearImageAssetReferences, countImageAssetReferences, remapImageAssetReferences } from './imageAssetReferences.js';
-import { createProjectId, deleteProjectWithAssets, listCachedProjects, loadProject, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName } from './projectRemote.js';
+import { createProjectId, deleteProjectWithAssets, listCachedProjects, loadProject, loadProjectRevision, saveProject, exportProjectZip, isProjectRemoteEnabled, deleteProjectAsset, markAssetDirty, loadCustomerDisplayName } from './projectRemote.js';
+import {
+  beginHistoricalView,
+  beginLiveSession,
+  createRevisionSession,
+  displayedRevisionNumber,
+  formatProjectTitle,
+  maxRevisionNumber,
+  noteRevisionCreated,
+  resolveRevisionWrite,
+} from './projectRevisionSession.js';
 import { describeRectSelection } from './rectSelection.js';
 import { createModuleContextMenu, allowsModuleSideInsert } from './moduleContextMenu.js';
 import { createModuleDragSidebar } from './moduleDragSidebar.js';
@@ -197,6 +207,9 @@ const importProjectButton = document.querySelector('#import-project');
 const importProjectFileInput = document.querySelector('#import-project-file');
 const deleteProjectButton = document.querySelector('#delete-project');
 const projectStatus = document.querySelector('#project-status');
+const projectRevisions = document.querySelector('#project-revisions');
+const projectRevisionList = document.querySelector('#project-revision-list');
+const revisionSession = createRevisionSession();
 const projectLoadingOverlay = document.querySelector('#project-loading-overlay');
 const projectLoadingTitle = document.querySelector('#project-loading-title');
 const projectLoadingDetail = document.querySelector('#project-loading-detail');
@@ -207,11 +220,18 @@ const projectLoading = createProjectLoadingController({
   detailElement: projectLoadingDetail,
 });
 
-const { setProjectName, requestProjectName } = createProjectNamingController({
+const projectNaming = createProjectNamingController({
   documentRef: document,
   projectNameInput,
   projectNameDisplay,
 });
+const requestProjectName = projectNaming.requestProjectName;
+
+function setProjectName(name) {
+  const normalized = projectNaming.setProjectName(name);
+  syncProjectNameDisplay();
+  return normalized;
+}
 
 createSidebarController({
   appElement,
@@ -1358,12 +1378,14 @@ createStageButton.addEventListener('click', async () => {
   setProjectName(projectName);
   projectSelect.selectedIndex = -1;
   clearRegisteredAssets();
+  beginLiveSession(revisionSession, { projectId: activeProjectId, designSignature: null });
+  renderRevisionList();
   projectStatus.textContent = 'Yeni proje hazırlanıyor: ' + projectName + '…';
 
   if (!rebuildSceneFromSetup({ setup, depotConfig, depotPlan })) return;
 
   try {
-    await persistActiveProject({ quiet: true });
+    await persistActiveProject({ quiet: true, reason: 'init' });
     autosaveController.enableFromCurrentState();
     projectStatus.textContent = 'Oluşturuldu ve kaydedildi: ' + projectName;
   } catch (error) {
@@ -1553,6 +1575,64 @@ function getProjectStateSignature() {
   });
 }
 
+function designSignature() {
+  const snapshot = buildProjectSnapshot();
+  return JSON.stringify({
+    stand: snapshot.stand,
+    modules: snapshot.modules,
+  });
+}
+
+function syncProjectNameDisplay() {
+  if (!projectNameDisplay) return;
+  const name = projectNameInput?.value.trim() || 'Adsız Proje';
+  projectNameDisplay.textContent = formatProjectTitle(name, displayedRevisionNumber(revisionSession));
+}
+
+function renderRevisionList() {
+  if (!projectRevisions || !projectRevisionList) return;
+  const revisions = [...(revisionSession.revisions || [])]
+    .sort((left, right) => Number(right.revisionNumber) - Number(left.revisionNumber));
+  const activeNumber = displayedRevisionNumber(revisionSession);
+  projectRevisionList.replaceChildren();
+  syncProjectNameDisplay();
+  if (!revisions.length) {
+    projectRevisions.hidden = true;
+    return;
+  }
+  projectRevisions.hidden = false;
+  revisions.forEach((revision) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    const revisionNumber = Number(revision.revisionNumber);
+    const active = activeNumber === revisionNumber;
+    button.className = active ? 'primary' : 'ghost';
+    button.dataset.revisionNumber = String(revisionNumber);
+    const updatedAt = Number(revision.updatedAt);
+    const when = Number.isFinite(updatedAt)
+      ? new Date(updatedAt).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })
+      : '';
+    button.textContent = when ? `R${revisionNumber} · ${when}` : `R${revisionNumber}`;
+    if (active) button.setAttribute('aria-current', 'true');
+    button.addEventListener('click', () => {
+      void selectRevision(revisionNumber);
+    });
+    projectRevisionList.appendChild(button);
+  });
+}
+
+function rememberServerRevisions(stored) {
+  if (Array.isArray(stored?.revisions)) revisionSession.revisions = stored.revisions;
+}
+
+function acceptCreatedRevision(stored) {
+  const numbers = (stored?.revisions || [])
+    .map((revision) => Number(revision.revisionNumber))
+    .filter((number) => Number.isInteger(number) && number > 0);
+  if (!numbers.length) return;
+  noteRevisionCreated(revisionSession, Math.max(...numbers));
+}
+
 const autosaveController = createAutosaveController({
   getSignature: getProjectStateSignature,
   persist: persistActiveProject,
@@ -1588,13 +1668,28 @@ async function loadAssetsForActiveProject() {
   else renderAssetLibrary();
 }
 
-async function persistActiveProject({ quiet = false } = {}) {
-  const stored = await saveProject(buildProjectSnapshot());
+async function persistActiveProject({ quiet = false, reason = 'design' } = {}) {
+  const decision = resolveRevisionWrite({
+    session: revisionSession,
+    reason,
+    designSignature: designSignature(),
+  });
+  if (!decision.writePayload) {
+    return { enableAutosave: false, stored: null };
+  }
+  const stored = await saveProject(buildProjectSnapshot(), {
+    revisionMode: decision.revisionMode,
+    revisionNumber: decision.revisionNumber,
+  });
   activeProjectCreatedAt = stored.createdAt;
+  rememberServerRevisions(stored);
+  if (decision.revisionMode === 'create') acceptCreatedRevision(stored);
+  revisionSession.baselineDesign = designSignature();
+  renderRevisionList();
   await refreshProjectList(stored.id);
   if (!quiet) projectStatus.textContent = 'Kaydedildi: ' + stored.name;
   if (productionBomPanel.isOpen()) productionBomPanel.refresh();
-  return stored;
+  return { enableAutosave: revisionSession.mode === 'live', stored };
 }
 
 async function showProjectCustomerName() {
@@ -1608,7 +1703,7 @@ async function showProjectCustomerName() {
   }
 }
 
-async function restoreProject(project) {
+async function restoreProject(project, { historicalRevisionNumber = null, sessionRevisionNumber = null } = {}) {
   if (!project) return;
   autosaveController.disable();
   activeProjectId = project.id;
@@ -1676,8 +1771,85 @@ async function restoreProject(project) {
     updateStageCreateState();
   }
 
+  if (historicalRevisionNumber != null) {
+    beginHistoricalView(revisionSession, {
+      projectId: project.id,
+      revisionNumber: historicalRevisionNumber,
+      designSignature: designSignature(),
+      revisions: project.revisions || revisionSession.revisions,
+    });
+    renderRevisionList();
+    projectStatus.textContent = `Geçmiş revizyon R${historicalRevisionNumber} · salt okunur`;
+    return;
+  }
+
+  beginLiveSession(revisionSession, {
+    projectId: project.id,
+    designSignature: designSignature(),
+    revisions: project.revisions || [],
+  });
+  if (sessionRevisionNumber != null) noteRevisionCreated(revisionSession, sessionRevisionNumber);
+  renderRevisionList();
   autosaveController.enableFromCurrentState();
   projectStatus.textContent = 'Açıldı: ' + (project.name || 'Adsız Proje');
+}
+
+async function selectRevision(revisionNumber) {
+  const shown = displayedRevisionNumber(revisionSession);
+  if (shown === Number(revisionNumber)) return;
+  if (Number(revisionNumber) === maxRevisionNumber(revisionSession.revisions)) {
+    await returnToLiveProject();
+    return;
+  }
+  await openHistoricalRevision(revisionNumber);
+}
+
+async function openHistoricalRevision(revisionNumber) {
+  if (!activeProjectId || revisionSession.mode === 'historical' && revisionSession.viewingRevisionNumber === revisionNumber) {
+    return;
+  }
+  projectLoading.show(`R${revisionNumber} yükleniyor…`, 'Revizyon sahnesi hazırlanıyor.');
+  projectStatus.textContent = `R${revisionNumber} açılıyor…`;
+  try {
+    const snapshot = await loadProjectRevision(activeProjectId, revisionNumber);
+    const payload = snapshot?.payload || {};
+    await restoreProject({
+      id: activeProjectId,
+      name: projectNameInput.value.trim() || 'Adsız Proje',
+      version: 1,
+      createdAt: activeProjectCreatedAt,
+      customerId: activeCustomerId,
+      stand: payload.stand ?? snapshot?.stand ?? null,
+      modules: Array.isArray(payload.modules) ? payload.modules : (snapshot?.modules || []),
+      revisions: revisionSession.revisions,
+    }, { historicalRevisionNumber: revisionNumber });
+  } catch (error) {
+    console.warn('Revizyon açılamadı:', error);
+    projectStatus.textContent = 'Revizyon açılamadı.';
+  } finally {
+    projectLoading.hide();
+  }
+}
+
+async function returnToLiveProject() {
+  if (!activeProjectId) return;
+  const latest = maxRevisionNumber(revisionSession.revisions);
+  const label = latest ? `R${latest}` : 'Proje';
+  projectLoading.show(`${label} yükleniyor…`, 'Revizyon sahnesi hazırlanıyor.');
+  projectStatus.textContent = `${label} açılıyor…`;
+  try {
+    const project = await loadProject(activeProjectId);
+    if (!project) {
+      projectStatus.textContent = `${label} bulunamadı.`;
+      return;
+    }
+    await restoreProject(project);
+  } catch (error) {
+    console.warn('Revizyon açılamadı:', error);
+    projectStatus.textContent = `${label} açılamadı.`;
+  } finally {
+    projectLoading.hide();
+  }
 }
 
 function resetToFirstOpenState() {
@@ -1714,6 +1886,8 @@ function resetToFirstOpenState() {
   updateStageCreateState();
   syncColorEditorFromHex('#ffffff');
   selectionInfo.textContent = DEFAULT_SELECTION_HINT;
+  beginLiveSession(revisionSession, { projectId: null, designSignature: null });
+  renderRevisionList();
   projectStatus.textContent = 'Aktif proje henüz kaydedilmedi.';
 }
 
@@ -1780,10 +1954,10 @@ async function requestDeleteImageAsset(assetId) {
   try {
     // Kayıtlı projede önce referansları kalıcılaştır; ardından blob'u sil.
     // Böylece proje hiçbir zaman silinmiş bir asset'e bilinçli olarak bağlı bırakılmaz.
-    if (usageCount > 0 && autosaveController.isEnabled()) {
+    if (usageCount > 0 && (autosaveController.isEnabled() || revisionSession.mode === 'historical')) {
       autosaveController.clearPending();
-      await persistActiveProject({ quiet: true });
-      autosaveController.markSavedState();
+      const cleared = await persistActiveProject({ quiet: true });
+      if (cleared?.enableAutosave !== false) autosaveController.markSavedState();
     }
 
     // Sunucu SoT önce (orphan kalmasın); 404 = henüz upload edilmemiş, local silmeye devam.
@@ -1804,11 +1978,11 @@ async function requestDeleteImageAsset(assetId) {
     }
     renderAssetLibrary();
 
-    if (currentStand || autosaveController.isEnabled()) {
+    if (currentStand || autosaveController.isEnabled() || revisionSession.mode === 'historical') {
       try {
         autosaveController.clearPending();
-        await persistActiveProject({ quiet: true });
-        autosaveController.enableFromCurrentState();
+        const removed = await persistActiveProject({ quiet: true });
+        if (removed?.enableAutosave !== false) autosaveController.enableFromCurrentState();
       } catch (persistError) {
         console.warn('Görsel silindi ama otomatik kayıt başarısız:', persistError);
         assetStatus.textContent = 'Görsel silindi · otomatik kayıt başarısız.';
@@ -2297,11 +2471,11 @@ imageInput.addEventListener('change', async () => {
     const selected = scene3d.getSelectedSurfaces();
     if (selected.length) applyActiveImageToSelection('cover');
 
-    if (currentStand || autosaveController.isEnabled()) {
+    if (currentStand || autosaveController.isEnabled() || revisionSession.mode === 'historical') {
       try {
         autosaveController.clearPending();
-        await persistActiveProject({ quiet: true });
-        autosaveController.enableFromCurrentState();
+        const added = await persistActiveProject({ quiet: true });
+        if (added?.enableAutosave !== false) autosaveController.enableFromCurrentState();
       } catch (persistError) {
         console.warn('Görsel eklendi ama otomatik kayıt başarısız:', persistError);
         assetStatus.textContent = 'Görsel eklendi · otomatik kayıt başarısız.';
@@ -2330,8 +2504,8 @@ renameProjectButton?.addEventListener('click', async () => {
   if (currentStand || autosaveController.isEnabled()) {
     try {
       autosaveController.clearPending();
-      await persistActiveProject({ quiet: true });
-      autosaveController.enableFromCurrentState();
+      const renamed = await persistActiveProject({ quiet: true, reason: 'metadata' });
+      if (renamed?.enableAutosave !== false) autosaveController.enableFromCurrentState();
       projectStatus.textContent = 'Proje adı değiştirildi ve kaydedildi: ' + nextName;
     } catch (error) {
       console.warn('Proje adı değiştirilemedi:', error);
@@ -2347,8 +2521,8 @@ saveProjectButton.addEventListener('click', async () => {
   projectStatus.textContent = 'Proje kaydediliyor…';
   try {
     autosaveController.clearPending();
-    await persistActiveProject();
-    autosaveController.enableFromCurrentState();
+    const saved = await persistActiveProject({ reason: 'design' });
+    if (saved?.enableAutosave !== false) autosaveController.enableFromCurrentState();
   } catch (error) {
     console.warn('Proje kaydedilemedi:', error);
     projectStatus.textContent = 'Proje kaydedilemedi.';
@@ -2398,11 +2572,16 @@ saveAsProjectButton?.addEventListener('click', async () => {
       await saveImportedImageAsset(project.id, asset);
       markAssetDirty(project.id, asset.id);
     }
-    await saveProject(project);
+    const savedAs = await saveProject(project, { revisionMode: 'create' });
     const stored = await loadProject(project.id);
     if (!stored) throw new Error('Farklı kaydedilen proje tekrar okunamadı.');
-    await restoreProject(stored);
-    autosaveController.enableFromCurrentState();
+    const createdNumber = Math.max(
+      0,
+      ...(savedAs?.revisions || []).map((revision) => Number(revision.revisionNumber) || 0),
+    );
+    await restoreProject(stored, {
+      sessionRevisionNumber: createdNumber > 0 ? createdNumber : null,
+    });
     projectStatus.textContent = `Farklı kaydedildi · ${assets.length} görsel: ${stored.name}`;
   } catch (error) {
     if (storageTouched && createdProjectId) {
@@ -2433,7 +2612,7 @@ exportProjectButton.addEventListener('click', async () => {
   setButtonBusy(exportProjectButton, true, 'Hazırlanıyor');
   projectStatus.textContent = 'Proje ZIP hazırlanıyor…';
   try {
-    if (projectId === activeProjectId) await persistActiveProject({ quiet: true });
+    if (projectId === activeProjectId) await persistActiveProject({ quiet: true, reason: 'export' });
     let blob;
     let assetCount = 0;
     if (isProjectRemoteEnabled()) {
@@ -2562,12 +2741,19 @@ importProjectFileInput.addEventListener('change', async () => {
       await saveImportedImageAsset(importedProjectId, asset);
       markAssetDirty(importedProjectId, asset.id);
     }
-    await saveProject(importedProject);
+    const importedSaved = await saveProject(importedProject, { revisionMode: 'create' });
 
     await refreshProjectList(importedProjectId);
     const project = await loadProject(importedProjectId);
     if (!project) throw new Error('İçe aktarılan proje tekrar okunamadı.');
-    await restoreProject(project);
+    if (!project.revisions?.length && importedSaved?.revisions) project.revisions = importedSaved.revisions;
+    const importedNumber = Math.max(
+      0,
+      ...(project.revisions || []).map((revision) => Number(revision.revisionNumber) || 0),
+    );
+    await restoreProject(project, {
+      sessionRevisionNumber: importedNumber > 0 ? importedNumber : null,
+    });
     projectStatus.textContent = `İçe aktarıldı · ${preparedAssets.length} görsel`;
   } catch (error) {
     if (importStorageTouched && importedProjectId) {
@@ -2713,7 +2899,16 @@ if (initialProjectId) {
   void openStoredProject(initialProjectId);
 }
 
+const historicalEditWatch = setInterval(() => {
+  if (revisionSession.mode !== 'historical' || revisionSession.hasCreatedRevision || revisionSession.historicalEditArmed) return;
+  if (designSignature() === revisionSession.baselineDesign) return;
+  revisionSession.historicalEditArmed = true;
+  autosaveController.enableFromCurrentState();
+  autosaveController.schedule();
+}, 1000);
+
   return function stopFairStandConfigurator() {
+    clearInterval(historicalEditWatch);
     autosaveController?.disable?.();
     productionBomPanel?.destroy?.();
     scene3d?.dispose?.();
