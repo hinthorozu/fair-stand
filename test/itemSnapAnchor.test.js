@@ -80,12 +80,12 @@ test('shelf-rail on wall picks panel band seam, not wall box top', () => {
 
 test('short-up wall top-rail stays inside host span via virtual profile rail', () => {
   const light = createModuleStateFromCatalogKey('led_floodlight');
-  const wall = createModuleStateFromCatalogKey('wall_200_short_up_2');
+  const wall = createModuleStateFromCatalogKey('wall_200_short_2');
   wall.id = 'wall-short';
   wall.placement = {
     xCm: 0,
     yCm: 0,
-    zCm: resolveItemDefaultZCm('wall_200_short_up_2'),
+    zCm: resolveItemDefaultZCm('wall_200_short_2'),
     rotationZDeg: 0,
     wallId: 'back',
   };

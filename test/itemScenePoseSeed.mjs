@@ -1,7 +1,7 @@
 const CATALOG_CEILING_CM = 350;
-const SHORT_UP_HEIGHT_CM = Object.freeze({
-  'short-up-1': 50,
-  'short-up-2': 100,
+const WALL_SHORT_HEIGHT_CM = Object.freeze({
+  'wall-short-1': 50,
+  'wall-short-2': 100,
 });
 
 export function applyItemScenePose(item) {
@@ -25,10 +25,10 @@ export function applyItemScenePose(item) {
     if (scene.heightCm == null && height != null) scene.heightCm = height;
     item.sceneDimensions = scene;
   }
-  const shortUpHeight = SHORT_UP_HEIGHT_CM[item.variant];
-  if (shortUpHeight != null) {
-    item.sceneDimensions = { ...(item.sceneDimensions ?? {}), heightCm: shortUpHeight };
-    item.defaultZCm = CATALOG_CEILING_CM - shortUpHeight;
+  const wallShortHeight = WALL_SHORT_HEIGHT_CM[item.variant];
+  if (wallShortHeight != null) {
+    item.sceneDimensions = { ...(item.sceneDimensions ?? {}), heightCm: wallShortHeight };
+    item.defaultZCm = CATALOG_CEILING_CM - wallShortHeight;
   }
   return item;
 }

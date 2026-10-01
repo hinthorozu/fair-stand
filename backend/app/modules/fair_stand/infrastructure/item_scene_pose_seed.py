@@ -1,4 +1,4 @@
-"""Item scene height + default_z for profile rails and short-up walls."""
+"""Item scene height + default_z for profile rails and wall-short panels."""
 
 from __future__ import annotations
 
@@ -7,9 +7,9 @@ from decimal import Decimal
 import sqlalchemy as sa
 
 CATALOG_CEILING_CM = Decimal("350")
-SHORT_UP_HEIGHT_CM = {
-    "short-up-1": Decimal("50"),
-    "short-up-2": Decimal("100"),
+WALL_SHORT_HEIGHT_CM = {
+    "wall-short-1": Decimal("50"),
+    "wall-short-2": Decimal("100"),
 }
 
 
@@ -68,11 +68,11 @@ def apply_item_scene_pose(row: dict) -> dict:
             scene["depth_cm"] = dims.get("depth_cm") if dims.get("depth_cm") is not None else cross
         if scene.get("height_cm") is None and height is not None:
             scene["height_cm"] = Decimal(str(height))
-    if variant in SHORT_UP_HEIGHT_CM:
+    if variant in WALL_SHORT_HEIGHT_CM:
         if not isinstance(scene, dict):
             scene = {}
             row["scene_dimensions"] = scene
-        height = SHORT_UP_HEIGHT_CM[variant]
+        height = WALL_SHORT_HEIGHT_CM[variant]
         scene["height_cm"] = height
         row["default_z_cm"] = CATALOG_CEILING_CM - height
     return row
@@ -95,7 +95,7 @@ def fill_item_scene_pose_columns(bind) -> None:
         )
     ).mappings()
     for row in rows:
-        if row["item_type"] not in ("profile", "upright") and row["variant"] not in SHORT_UP_HEIGHT_CM:
+        if row["item_type"] not in ("profile", "upright") and row["variant"] not in WALL_SHORT_HEIGHT_CM:
             continue
         fake = {
             "item_type": row["item_type"],

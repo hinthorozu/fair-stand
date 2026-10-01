@@ -16,11 +16,11 @@ def test_profile_rail_is_thickness_not_stand_ceiling():
     assert float(row["default_z_cm"]) == 342
 
 
-def test_short_up_height_and_drop_kot():
+def test_wall_short_height_and_drop_kot():
     row = {
-        "item_key": "wall_200_short_up_2",
+        "item_key": "wall_200_short_2",
         "item_type": "flat-panel",
-        "variant": "short-up-2",
+        "variant": "wall-short-2",
         "scene_dimensions": {"depth_cm": 10, "height_cm": None},
         "default_z_cm": 0,
     }
@@ -40,5 +40,5 @@ def test_bootstrap_scene_pose(client, db_session, auth_headers):
     assert by_key["upright_99"]["sceneDimensions"]["widthCm"] == 8
     assert by_key["wall_200_350"]["sceneDimensions"]["heightCm"] == 350
     assert by_key["wall_200_350"]["defaultZCm"] == 0
-    assert by_key["wall_200_short_up_2"]["sceneDimensions"]["heightCm"] == 100
-    assert by_key["wall_200_short_up_2"]["defaultZCm"] == 250
+    assert by_key["wall_200_short_2"]["sceneDimensions"]["heightCm"] == 100
+    assert by_key["wall_200_short_2"]["defaultZCm"] == 250

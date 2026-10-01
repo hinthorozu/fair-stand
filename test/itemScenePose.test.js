@@ -31,13 +31,13 @@ test('upright mesh factory uses item scene height, not stand 350', () => {
 });
 
 test('short-up collision band is item height + placement Z, not occupancy × stand', () => {
-  const hanging = createFlatPanelModuleState({ itemKey: 'wall_200_short_up_2' });
+  const hanging = createFlatPanelModuleState({ itemKey: 'wall_200_short_2' });
   assert.equal(hanging.heightCm, 100);
   assert.equal(hanging.strips.length, 2);
   hanging.placement = {
     xCm: 0,
     yCm: 0,
-    zCm: resolveItemDefaultZCm('wall_200_short_up_2'),
+    zCm: resolveItemDefaultZCm('wall_200_short_2'),
     rotationZDeg: 0,
     wallId: 'back',
   };

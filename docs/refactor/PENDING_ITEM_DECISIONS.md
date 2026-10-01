@@ -85,7 +85,7 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 - **Kaynak:** `SCENE_POSE.md` hedef; mevcut seed `scene height=350`, `upright_346_5`, panel ×7.
 - **Yasak:** Tek `wall_200` ile tavan değişimine bağlı “otomatik boy”.
 
-### B.8. `variant` (short-up-1 / short-up-2)
+### B.8. `variant` (wall-short-1 / wall-short-2)
 
 - **Durum:** KORUNACAK (şimdilik)
 - **Karar:** Occupancy kalkınca yalnız kimlik/seed ayrımı; şerit sayısı anlamı taşımaz.

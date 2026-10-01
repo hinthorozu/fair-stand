@@ -530,9 +530,9 @@ export function applyItemPlacementZCm(moduleState, placement, { overlayZCm = nul
   return { ...placement, zCm: resolveItemDefaultZCm(moduleState?.itemKey ?? moduleState) };
 }
 
-export function isShortUpFamilyDescriptor(descriptor) {
+export function isWallShortFamilyDescriptor(descriptor) {
   const variant = descriptor?.variant ?? getItem(descriptor?.itemKey)?.variant;
-  return variant === 'short-up-1' || variant === 'short-up-2';
+  return variant === 'wall-short-1' || variant === 'wall-short-2';
 }
 
 export function listRegisteredItems() {
@@ -541,7 +541,7 @@ export function listRegisteredItems() {
 
 /**
  * Otomatik duvar / widthCm-only flat-panel seçimi: Item registry (DB bootstrap).
- * Katalogda görünen, render’lı, short-up olmayan flat-panel; ölçü = widthCm.
+ * Katalogda görünen, render’lı, wall-short ailesi olmayan flat-panel; ölçü = widthCm.
  * Explicit itemKey yolu bunu kullanmaz.
  */
 export function resolveAutomaticWallFlatPanelItemKey(
@@ -557,7 +557,7 @@ export function resolveAutomaticWallFlatPanelItemKey(
       if (item?.type !== 'flat-panel') return false;
       if (item.isRender !== true) return false;
       if (item.catalogVisible !== true) return false;
-      if (isShortUpFamilyDescriptor(item)) return false;
+      if (isWallShortFamilyDescriptor(item)) return false;
       return Number(item.dimensions?.widthCm) === width;
     })
     .map((item) => item.itemKey)

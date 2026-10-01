@@ -1,5 +1,5 @@
 import { getStandDimensions } from './standDimensions.js';
-import { getItem, getItemSnapSpec, getItemType, listRegisteredItems, isShortUpFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm } from './items.js';
+import { getItem, getItemSnapSpec, getItemType, listRegisteredItems, isWallShortFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm } from './items.js';
 
 const DEFAULT_GHOST_BEHAVIOR = Object.freeze({
   kind: 'silhouette',
@@ -246,7 +246,7 @@ export function requiresShortUpJointSnap(moduleOrType) {
 export function isUprightJointSnapTarget(moduleOrType) {
   const module = normalizeDescriptor(moduleOrType);
   if (module.type === 'profile' || module.type === 'counter') return true;
-  return isShortUpFamilyDescriptor(module);
+  return isWallShortFamilyDescriptor(module);
 }
 
 export function usesLogicalFixtureEndpoint(moduleOrType) {

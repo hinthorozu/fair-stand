@@ -222,7 +222,7 @@ test('59 Catalog preview kök sınıfı önceki CSS silüetini korur', () => {
   const plain = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_separator_100_350')));
   assert.doesNotMatch(plain.children[0].className, /is-vine/);
 
-  const hanging = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_200_short_up_2')));
+  const hanging = serializeNode(createModuleCatalogPreview(getCatalogItem('wall_200_short_2')));
   assert.match(hanging.children[0].className, /is-hanging-top/);
   assert.equal(hanging.children[0].children[0].className, 'module-drag-hanging-frame');
 

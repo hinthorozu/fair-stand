@@ -40,14 +40,14 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `wall_separator_100_350_sarmasik`
 - `wall_separator_50_350_sarmasik`
 - `wall_door_100_350`
-- `wall_200_short_up_2`
-- `wall_150_short_up_2`
-- `wall_100_short_up_2`
-- `wall_50_short_up_2`
-- `wall_200_short_up_1`
-- `wall_150_short_up_1`
-- `wall_100_short_up_1`
-- `wall_50_short_up_1`
+- `wall_200_short_2`
+- `wall_150_short_2`
+- `wall_100_short_2`
+- `wall_50_short_2`
+- `wall_200_short_1`
+- `wall_150_short_1`
+- `wall_100_short_1`
+- `wall_50_short_1`
 - `upright_346_5`
 - `profile_190`
 - `profile_140_5`
@@ -102,7 +102,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Panel Ek Modül
 
-`wall_200_short_up_2`, `wall_150_short_up_2`, `wall_100_short_up_2`, `wall_50_short_up_2`, `wall_200_short_up_1`, `wall_150_short_up_1`, `wall_100_short_up_1`, `wall_50_short_up_1`, `upright_346_5`, `profile_190`, `profile_140_5`, `profile_91`, `profile_41_5`, `box_block`
+`wall_200_short_2`, `wall_150_short_2`, `wall_100_short_2`, `wall_50_short_2`, `wall_200_short_1`, `wall_150_short_1`, `wall_100_short_1`, `wall_50_short_1`, `upright_346_5`, `profile_190`, `profile_140_5`, `profile_91`, `profile_41_5`, `box_block`
 
 ### Raf & Vitrin
 

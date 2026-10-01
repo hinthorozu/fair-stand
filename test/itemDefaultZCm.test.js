@@ -23,8 +23,8 @@ test('drop Z comes from item.defaultZCm for every Item, not stand ceiling or typ
   assert.equal(resolveItemDefaultZCm('kettle'), 66);
   assert.equal(createModulePlacement({ xCm: 10, itemKey: 'kettle' }).zCm, 66);
   assert.equal(resolveItemDefaultZCm('profile_190'), 342);
-  assert.equal(resolveItemDefaultZCm('wall_200_short_up_2'), 250);
-  assert.equal(resolveItemDefaultZCm('wall_200_short_up_1'), 300);
+  assert.equal(resolveItemDefaultZCm('wall_200_short_2'), 250);
+  assert.equal(resolveItemDefaultZCm('wall_200_short_1'), 300);
   assert.equal(resolveItemDefaultZCm({ defaultZCm: 30 }), 30);
 
   for (const item of listRegisteredItems()) {

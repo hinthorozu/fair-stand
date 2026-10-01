@@ -27,8 +27,8 @@ const EXPECTED_GROUP_KEYS = Object.freeze({
     'wall_door_100_350',
   ]),
   2: Object.freeze([
-    'wall_200_short_up_2', 'wall_150_short_up_2', 'wall_100_short_up_2', 'wall_50_short_up_2',
-    'wall_200_short_up_1', 'wall_150_short_up_1', 'wall_100_short_up_1', 'wall_50_short_up_1',
+    'wall_200_short_2', 'wall_150_short_2', 'wall_100_short_2', 'wall_50_short_2',
+    'wall_200_short_1', 'wall_150_short_1', 'wall_100_short_1', 'wall_50_short_1',
     'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5', 'box_block',
   ]),
   3: Object.freeze([

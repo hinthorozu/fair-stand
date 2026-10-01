@@ -21,5 +21,5 @@ def test_bootstrap_default_z_cm(client, db_session, auth_headers):
     assert by_key["panel_197"]["defaultZCm"] == 0
     assert by_key["kettle"]["defaultZCm"] == 66
     assert by_key["profile_190"]["defaultZCm"] == 342
-    assert by_key["wall_200_short_up_2"]["defaultZCm"] == 250
-    assert by_key["wall_200_short_up_1"]["defaultZCm"] == 300
+    assert by_key["wall_200_short_2"]["defaultZCm"] == 250
+    assert by_key["wall_200_short_1"]["defaultZCm"] == 300

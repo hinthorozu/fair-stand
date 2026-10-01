@@ -47,7 +47,7 @@ async function removeModules(page, modules) {
   }
 }
 
-const keys = ['wall_50_350', 'wall_100_350', 'wall_150_350', 'wall_200_350', 'wall_50_short_up_1', 'wall_100_short_up_1', 'wall_150_short_up_1', 'wall_200_short_up_1'];
+const keys = ['wall_50_350', 'wall_100_350', 'wall_150_350', 'wall_200_350', 'wall_50_short_1', 'wall_100_short_1', 'wall_150_short_1', 'wall_200_short_1'];
 
 for (const itemKey of keys) {
   test(`${itemKey} catalog add creates a canonical flat-panel Item with strips`, async ({ page }) => {
@@ -68,7 +68,7 @@ for (const itemKey of keys) {
 
     const picker = page.locator('.module-picker-backdrop');
     await expect(picker).toBeVisible();
-    await picker.locator('summary', { hasText: itemKey.includes('short_up') ? 'Panel Ek Modül' : 'Panel & Duvar' }).click();
+    await picker.locator('summary', { hasText: itemKey.includes('_short_') ? 'Panel Ek Modül' : 'Panel & Duvar' }).click();
     await picker.locator(`[data-module-key="${itemKey}"]`).click();
     await picker.locator('.module-picker-add').click();
     await expect(picker).toBeHidden();
@@ -79,7 +79,7 @@ for (const itemKey of keys) {
     expect(item.itemKey).toBe(itemKey);
     expect(item.type).toBe('flat-panel');
     expect(item.id).toBeTruthy();
-    expect(item.strips?.length).toBe(itemKey.endsWith('_short_up_1') ? 1 : 7);
+    expect(item.strips?.length).toBe(itemKey.endsWith('_short_1') ? 1 : 7);
     expect(item.strips[0].color).toBeTruthy();
     expect(errors).toEqual([]);
   });

@@ -8,7 +8,7 @@ import {
 } from '../src/catalog.js';
 import { createModuleStateFromDescriptor } from '../src/designState.js';
 import { resolveItemBom } from '../src/itemBom.js';
-import { isShortUpFamilyDescriptor, getItem, resolveSceneDimensions } from '../src/items.js';
+import { isWallShortFamilyDescriptor, getItem, resolveSceneDimensions } from '../src/items.js';
 import { getModuleMagneticSnapStrategy, requiresShortUpJointSnap } from '../src/moduleBehavior.js';
 import { resolveModuleContract } from '../src/moduleContracts.js';
 import { snapPlacementToModules } from '../src/modulePlacement.js';
@@ -16,24 +16,24 @@ import {
   getExpandedStraightWallRecipe,
 } from './recipeParentItemKey.js';
 
-const SHORT_UP_KEYS = [
-  'wall_200_short_up_2',
-  'wall_150_short_up_2',
-  'wall_100_short_up_2',
-  'wall_50_short_up_2',
-  'wall_200_short_up_1',
-  'wall_150_short_up_1',
-  'wall_100_short_up_1',
-  'wall_50_short_up_1',
+const WALL_SHORT_KEYS = [
+  'wall_200_short_2',
+  'wall_150_short_2',
+  'wall_100_short_2',
+  'wall_50_short_2',
+  'wall_200_short_1',
+  'wall_150_short_1',
+  'wall_100_short_1',
+  'wall_50_short_1',
 ];
 
-test('Panel Ek Modül holds short-up family and field upright_346_5', () => {
+test('Panel Ek Modül holds wall-short family and field upright_346_5', () => {
   const panelWall = listCatalogGroups().find((group) => group.label === 'Panel & Duvar');
   const extraPanel = listCatalogGroups().find((group) => group.label === 'Panel Ek Modül');
   assert.ok(panelWall);
   assert.ok(extraPanel);
-  assert.deepEqual(extraPanel.keys, [...SHORT_UP_KEYS, 'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5', 'box_block']);
-  for (const key of SHORT_UP_KEYS) {
+  assert.deepEqual(extraPanel.keys, [...WALL_SHORT_KEYS, 'upright_346_5', 'profile_190', 'profile_140_5', 'profile_91', 'profile_41_5', 'box_block']);
+  for (const key of WALL_SHORT_KEYS) {
     assert.equal(panelWall.keys.includes(key), false);
     assert.equal(getCatalogItem(key) != null, true);
   }
@@ -66,9 +66,9 @@ test('upright snaps to short-up, profile and banko joints, not to düz wall_200'
 
   const shortUp = {
     id: 'short-1',
-    itemKey: 'wall_200_short_up_2',
+    itemKey: 'wall_200_short_2',
     type: 'flat-panel',
-    variant: 'short-up-2',
+    variant: 'wall-short-2',
     widthCm: 200,
     placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
   };
@@ -79,8 +79,8 @@ test('upright snaps to short-up, profile and banko joints, not to düz wall_200'
     widthCm: 200,
     placement: { xCm: 0, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
   };
-  assert.equal(isShortUpFamilyDescriptor(shortUp), true);
-  assert.equal(isShortUpFamilyDescriptor(düzWall), false);
+  assert.equal(isWallShortFamilyDescriptor(shortUp), true);
+  assert.equal(isWallShortFamilyDescriptor(düzWall), false);
 
   const hit = snapPlacementToModules({
     moduleId: upright.id,
