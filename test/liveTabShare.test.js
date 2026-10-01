@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   LIVE_SHARE_LIMITS,
   VIEWER_OCCUPIED_MESSAGE,
+  applyCaptureContentHint,
   applyLiveShareControls,
   applySenderBitrate,
   bindLiveTabShare,
@@ -62,20 +63,22 @@ function controls() {
   };
 }
 
-test('capture limits stay at the V1 budget', () => {
+test('capture limits stay at 480p with a 1.5 Mbps cap', () => {
   assert.equal(LIVE_SHARE_LIMITS.idealWidth, 854);
   assert.equal(LIVE_SHARE_LIMITS.idealHeight, 480);
-  assert.equal(LIVE_SHARE_LIMITS.idealFrameRate, 15);
+  assert.equal(LIVE_SHARE_LIMITS.idealFrameRate, 18);
   assert.equal(LIVE_SHARE_LIMITS.maxFrameRate, 20);
-  assert.ok(LIVE_SHARE_LIMITS.maxBitrate >= LIVE_SHARE_LIMITS.bitrateFloor);
+  assert.equal(LIVE_SHARE_LIMITS.maxBitrate, 1_500_000);
   assert.ok(LIVE_SHARE_LIMITS.maxBitrate <= LIVE_SHARE_LIMITS.bitrateCeiling);
-  assert.equal(LIVE_SHARE_LIMITS.maxBitrate, 800_000);
+  assert.equal(VIEWER_OCCUPIED_MESSAGE.includes('bir izleyici'), true);
   for (const attempt of displayMediaAttempts()) {
     assert.equal(attempt.audio, false);
-    assert.equal(attempt.video.frameRate.ideal, 15);
+    assert.equal(attempt.video.frameRate.ideal, 18);
     assert.equal(attempt.video.frameRate.max, 20);
     assert.equal(attempt.video.width.ideal, 854);
     assert.equal(attempt.video.height.ideal, 480);
+    assert.equal(attempt.video.width.max, undefined);
+    assert.equal(attempt.video.height.max, undefined);
     assert.equal(attempt.video.cursor, 'always');
   }
   assert.equal(displayMediaAttempts()[0].preferCurrentTab, true);
@@ -208,9 +211,10 @@ test('idle, zero viewers, one viewer, and stop cleanup', async () => {
   assert.equal(ui.viewers.textContent, 'İzleyici: 1 / 1');
   assert.equal(ui.start.textContent, '● CANLI · 1');
   assert.equal(peers.length, 1);
-  assert.equal(peers[0].senders[0].parameters.encodings[0].maxBitrate, 800_000);
+  assert.equal(peers[0].senders[0].parameters.encodings[0].maxBitrate, 1_500_000);
+  assert.equal(peers[0].senders[0].parameters.degradationPreference, 'maintain-resolution');
   assert.equal(peers[0].config.iceServers[0].urls[0], 'stun:example.test:19302');
-  assert.equal(video.contentHint, 'motion');
+  assert.equal(video.contentHint, 'detail');
 
   await sockets[0].onmessage({ data: JSON.stringify({ type: 'viewer-left', viewerCount: 0 }) });
   assert.equal(ui.viewers.textContent, 'İzleyici: 0 / 1');
@@ -398,15 +402,79 @@ test('viewer states and limited reconnect', async () => {
   void timers;
 });
 
-test('sender bitrate stays inside 700-1000 kbps', async () => {
+test('sender bitrate caps at 1.5 Mbps and prefers resolution', async () => {
   const sender = {
     parameters: null,
     getParameters() { return { encodings: [{}] }; },
     async setParameters(parameters) { this.parameters = parameters; },
   };
-  await applySenderBitrate(sender);
-  assert.equal(sender.parameters.encodings[0].maxBitrate, 800_000);
-  assert.equal(sender.parameters.degradationPreference, 'maintain-framerate');
+  const applied = await applySenderBitrate(sender);
+  assert.equal(applied, true);
+  assert.equal(sender.parameters.encodings[0].maxBitrate, 1_500_000);
+  assert.equal(sender.parameters.degradationPreference, 'maintain-resolution');
+
+  const empty = {
+    parameters: null,
+    getParameters() { return {}; },
+    async setParameters(parameters) { this.parameters = parameters; },
+  };
+  await applySenderBitrate(empty);
+  assert.equal(empty.parameters.encodings.length, 1);
+  assert.equal(empty.parameters.encodings[0].maxBitrate, 1_500_000);
+
+  let calls = 0;
+  const fallback = {
+    parameters: null,
+    getParameters() { return { encodings: [{}] }; },
+    async setParameters(parameters) {
+      calls += 1;
+      if (parameters.degradationPreference) throw new Error('unsupported preference');
+      this.parameters = parameters;
+    },
+  };
+  assert.equal(await applySenderBitrate(fallback), true);
+  assert.equal(calls, 2);
+  assert.equal(fallback.parameters.encodings[0].maxBitrate, 1_500_000);
+  assert.equal(fallback.parameters.degradationPreference, undefined);
+});
+
+test('unsupported contentHint and setParameters keep the broadcast alive', async () => {
+  const video = track('browser');
+  let writes = 0;
+  Object.defineProperty(video, 'contentHint', {
+    configurable: true,
+    get() { return this.hintValue || ''; },
+    set(value) {
+      writes += 1;
+      if (value === 'detail') throw new Error('unsupported hint');
+      this.hintValue = value;
+    },
+  });
+  const captured = await captureBrowserTab({
+    async getDisplayMedia() { return streamFrom(video); },
+  });
+  assert.equal(captured.ok, true);
+  assert.equal(video.contentHint, 'motion');
+  assert.ok(writes >= 2);
+
+  const rejected = track('browser');
+  Object.defineProperty(rejected, 'contentHint', {
+    configurable: true,
+    get() { return ''; },
+    set() { throw new Error('no contentHint'); },
+  });
+  const stillLive = await captureBrowserTab({
+    async getDisplayMedia() { return streamFrom(rejected); },
+  });
+  assert.equal(stillLive.ok, true);
+  assert.equal(rejected.stopped, false);
+
+  const sender = {
+    getParameters() { return { encodings: [{}] }; },
+    async setParameters() { throw new Error('unsupported'); },
+  };
+  assert.equal(await applySenderBitrate(sender), false);
+  assert.equal(applyCaptureContentHint(null), 'unchanged');
 });
 
 test('live share details stay in a popover and closing it keeps the stream', async () => {

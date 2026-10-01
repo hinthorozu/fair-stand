@@ -7,11 +7,11 @@
 export const LIVE_SHARE_LIMITS = Object.freeze({
   idealWidth: 854,
   idealHeight: 480,
-  idealFrameRate: 15,
+  idealFrameRate: 18,
   maxFrameRate: 20,
-  maxBitrate: 800_000,
+  maxBitrate: 1_500_000,
   bitrateFloor: 700_000,
-  bitrateCeiling: 1_000_000,
+  bitrateCeiling: 1_500_000,
   heartbeatMs: 20_000,
   maxViewerReconnects: 3,
 });
@@ -73,7 +73,7 @@ export async function captureBrowserTab(mediaDevices, attempts = displayMediaAtt
         stopMediaStream(stream);
         return { ok: false, code: 'surface', message: SURFACE_MESSAGE };
       }
-      track.contentHint = 'motion';
+      applyCaptureContentHint(track);
       return { ok: true, stream, track };
     } catch (error) {
       lastError = error;
@@ -89,17 +89,48 @@ export async function captureBrowserTab(mediaDevices, attempts = displayMediaAtt
   };
 }
 
+export function applyCaptureContentHint(track) {
+  if (!track) return 'unchanged';
+  try {
+    track.contentHint = 'detail';
+    if (track.contentHint === 'detail') return 'detail';
+  } catch {
+    // Browsers that reject the hint must keep the capture running.
+  }
+  try {
+    track.contentHint = 'motion';
+    return track.contentHint === 'motion' ? 'motion' : 'unchanged';
+  } catch {
+    return 'unchanged';
+  }
+}
+
 export async function applySenderBitrate(sender, maxBitrate = LIVE_SHARE_LIMITS.maxBitrate) {
   if (!sender?.getParameters || !sender.setParameters) return false;
-  const parameters = sender.getParameters() || {};
+  let parameters;
+  try {
+    parameters = sender.getParameters() || {};
+  } catch {
+    return false;
+  }
   const encodings = Array.isArray(parameters.encodings) && parameters.encodings.length
     ? parameters.encodings.map((item) => ({ ...item }))
     : [{}];
   encodings[0].maxBitrate = maxBitrate;
   parameters.encodings = encodings;
-  parameters.degradationPreference = 'maintain-framerate';
-  await sender.setParameters(parameters);
-  return true;
+  try {
+    parameters.degradationPreference = 'maintain-resolution';
+    await sender.setParameters(parameters);
+    return true;
+  } catch {
+    try {
+      delete parameters.degradationPreference;
+      await sender.setParameters(parameters);
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }
 
 export function viewerStatusCopy(status) {
