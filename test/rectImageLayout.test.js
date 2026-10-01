@@ -86,6 +86,35 @@ test('a square across neighboring walls stays contiguous when scene indexes have
   assert.equal(result.panelCount, 4);
 });
 
+test('a right-wall run continued by a free module stays one rectangle', () => {
+  const selected = visualImageColumnItems([
+    { moduleId: 'right-200', moduleIndex: 8, stripIndex: 2, pathCm: 0, axis: 'y', crossCm: 900, planeKey: 'wall:right', width: 1.97, height: 0.495 },
+    { moduleId: 'right-200', moduleIndex: 8, stripIndex: 3, pathCm: 0, axis: 'y', crossCm: 900, planeKey: 'wall:right', width: 1.97, height: 0.495 },
+    { moduleId: 'right-100', moduleIndex: 9, stripIndex: 2, pathCm: 200, axis: 'y', crossCm: 900, planeKey: 'wall:right', width: 0.98, height: 0.495 },
+    { moduleId: 'right-100', moduleIndex: 9, stripIndex: 3, pathCm: 200, axis: 'y', crossCm: 900, planeKey: 'wall:right', width: 0.98, height: 0.495 },
+    { moduleId: 'free-200', moduleIndex: 11, stripIndex: 2, pathCm: 300, axis: 'y', crossCm: 900, planeKey: 'free:y:900', width: 1.97, height: 0.495 },
+    { moduleId: 'free-200', moduleIndex: 11, stripIndex: 3, pathCm: 300, axis: 'y', crossCm: 900, planeKey: 'free:y:900', width: 1.97, height: 0.495 },
+  ]);
+  const result = createRectImageLayout(selected);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.columnCount, 3);
+  assert.equal(result.rowCount, 2);
+  assert.equal(result.panelCount, 6);
+  const left = result.entries.find((entry) => entry.moduleId === 'right-200' && entry.stripIndex === 2);
+  assert.equal(left.regionStartX, 0);
+});
+
+test('panels on different axes stay on insertion order', () => {
+  const selected = visualImageColumnItems([
+    { moduleId: 'back', moduleIndex: 0, stripIndex: 2, pathCm: 0, axis: 'x', crossCm: 0, planeKey: 'wall:back', width: 1, height: 0.46 },
+    { moduleId: 'right', moduleIndex: 4, stripIndex: 2, pathCm: 0, axis: 'y', crossCm: 900, planeKey: 'wall:right', width: 1, height: 0.46 },
+  ]);
+
+  assert.equal(selected[0].moduleIndex, 0);
+  assert.equal(selected[1].moduleIndex, 4);
+});
+
 test('rejects gaps between selected columns', () => {
   const result = createRectImageLayout([
     { moduleIndex: 0, stripIndex: 0, width: 1, height: 0.46 },

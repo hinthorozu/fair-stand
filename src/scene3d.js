@@ -4183,6 +4183,8 @@ export function createStandScene(
         moduleIndex: mesh.userData.moduleIndex,
         stripIndex: mesh.userData.stripIndex,
         pathCm: meta?.pathCm,
+        axis: meta?.axis ?? null,
+        crossCm: meta?.crossCm,
         planeKey: meta?.planeKey ?? null,
         width: mesh.geometry.parameters.width,
         height: mesh.geometry.parameters.height,
