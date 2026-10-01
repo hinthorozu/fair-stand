@@ -107,6 +107,7 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/itemCapabilities.js': frozenDomains('architecture', 'behavior'),
   'src/itemSnap.js': frozenDomains('architecture', 'placement', 'behavior'),
   'src/items.js': frozenDomains('architecture', 'catalog', 'bom'),
+  'src/liveTabShare.js': frozenDomains('ui', 'security', 'architecture'),
   'src/main.js': frozenDomains(
     'architecture',
     'catalog',

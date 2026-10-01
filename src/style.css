@@ -870,6 +870,12 @@ h2 {
 .project-revision-list button { text-align: left; }
 .project-revision-list button[aria-current="true"] { font-weight: 700; }
 
+.live-share { display: inline-flex; align-items: center; gap: 8px; pointer-events: auto; }
+.live-share[hidden] { display: none; }
+.live-share-badge { color: #fecaca; letter-spacing: 0.04em; }
+.live-share-link { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.live-share-error { color: #fecaca; max-width: 280px; }
+
 .viewport-render-button { margin-left: auto; white-space: nowrap; font-weight: 700; pointer-events: auto; }
 .viewport-render-button.is-active,
 .viewport-render-button[aria-pressed="true"] {
