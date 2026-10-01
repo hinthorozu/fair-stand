@@ -871,6 +871,63 @@ function isProfileDescriptor(module) {
   return getItem(module?.itemKey)?.type === 'profile';
 }
 
+const STRUCTURAL_POST_TOP_GAP_CM = 3.5;
+
+function isStructuralUprightModule(module) {
+  if (module?.type === 'upright') return true;
+  return getItem(module?.itemKey)?.type === 'upright';
+}
+
+function uprightRelationshipFrame(module, index) {
+  if (!isStructuralUprightModule(module)) return null;
+  const segment = moduleBomSegment(module);
+  const z = moduleZRange(module);
+  if (!segment || !z) return null;
+  const item = getItem(module.itemKey);
+  const depthCm = Number(module.depthCm ?? item?.sceneDimensions?.depthCm ?? item?.dimensions?.depthCm);
+  return {
+    kind: 'upright',
+    moduleId: moduleIdentity(module, index),
+    itemKey: module.itemKey,
+    depthCm: Number.isFinite(depthCm) && depthCm > 0 ? depthCm : 0,
+    ...segment,
+    z,
+  };
+}
+
+function uprightCoversShortBand(upright, wall) {
+  if (!rangesOverlap(upright.z, wall.z)) return false;
+  if (rangeContains(upright.z, wall.z)) return true;
+  const topGapCm = wall.z.maxCm - upright.z.maxCm;
+  return upright.z.minCm <= wall.z.minCm + EPSILON_CM
+    && topGapCm >= -EPSILON_CM
+    && topGapCm <= STRUCTURAL_POST_TOP_GAP_CM + EPSILON_CM;
+}
+
+function uprightFootprintContains(upright, point) {
+  const halfDepthCm = upright.depthCm / 2;
+  if (upright.axis === 'x') {
+    return point.xCm >= upright.startCm - EPSILON_CM
+      && point.xCm <= upright.endCm + EPSILON_CM
+      && Math.abs(point.yCm - upright.fixedCm) <= halfDepthCm + EPSILON_CM;
+  }
+  return point.yCm >= upright.startCm - EPSILON_CM
+    && point.yCm <= upright.endCm + EPSILON_CM
+    && Math.abs(point.xCm - upright.fixedCm) <= halfDepthCm + EPSILON_CM;
+}
+
+function applyStructuralUprightPost(book, wall, upright) {
+  if (!uprightCoversShortBand(upright, wall) || !wall.uprightKey) return;
+  const ends = segmentEndpoints(wall);
+  for (const side of ['start', 'end']) {
+    if (!uprightFootprintContains(upright, ends[side])) continue;
+    if (!slotFree(wall, side, 'upright')) continue;
+    takeSlot(wall, side, 'upright');
+    book.add(wall.uprightKey, -1);
+    book.noteJoint();
+  }
+}
+
 function profileRelationshipFrame(module, index) {
   if (!isProfileDescriptor(module)) return null;
   const segment = moduleBomSegment(module);
@@ -1078,12 +1135,14 @@ function applyProfileRail(book, wall, profile) {
  * Wall Short joints against framed partners (any relationshipBomRole) and profile rail replacement.
  * Full-height locked pairs are not replanned here. Face, fixture-side and corner-face produce no delta.
  * A short band converts one endpoint single per paying face, never the full-height 7/6/5/4/3 constants.
+ * A field upright whose post already occupies a free short endpoint consumes that short upright once.
  * Each short upright end, endpoint single, and top/bottom rail can be consumed once.
  */
 export function planWallShortRelationshipBom(modules = []) {
   const list = Array.isArray(modules) ? modules : [];
   const shorts = [];
   const partners = [];
+  const uprights = [];
   const profiles = [];
   list.forEach((module, index) => {
     const short = shortRelationshipFrame(module, index);
@@ -1094,6 +1153,11 @@ export function planWallShortRelationshipBom(modules = []) {
     const partner = structuralRelationshipFrame(module, index);
     if (partner) {
       partners.push(partner);
+      return;
+    }
+    const upright = uprightRelationshipFrame(module, index);
+    if (upright) {
+      uprights.push(upright);
       return;
     }
     const profile = profileRelationshipFrame(module, index);
@@ -1136,6 +1200,19 @@ export function planWallShortRelationshipBom(modules = []) {
     return leftId < rightId ? -1 : 1;
   });
   for (const candidate of railCandidates) applyProfileRail(book, candidate.wall, candidate.profile);
+
+  const postCandidates = [];
+  for (const wall of shorts) {
+    for (const upright of uprights) postCandidates.push({ wall, upright });
+  }
+  postCandidates.sort((left, right) => {
+    const leftId = `${left.wall.moduleId}\u0000${left.upright.moduleId}`;
+    const rightId = `${right.wall.moduleId}\u0000${right.upright.moduleId}`;
+    return leftId < rightId ? -1 : 1;
+  });
+  for (const candidate of postCandidates) {
+    applyStructuralUprightPost(book, candidate.wall, candidate.upright);
+  }
 
   const notes = [];
   if (book.jointCount) {

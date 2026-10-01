@@ -1,5 +1,5 @@
-import { STAND_DIMENSIONS } from './standDimensions.js';
-import { getItem, resolveItemDefaultZCm, resolveSceneDimensions } from './items.js';
+import { STAND_DIMENSIONS, getStandDimensions } from './standDimensions.js';
+import { getItem, isWallShortFamilyDescriptor, resolveItemDefaultZCm, resolveSceneDimensions } from './items.js';
 import {
   allowsThinWallEndpointContact,
   canModulesOverlapByBehavior,
@@ -174,6 +174,33 @@ export function clampWallOverlayZCm(
   const value = Number.isFinite(snapped) ? snapped : Number(rawOffsetCm);
   if (!Number.isFinite(value)) return 0;
   return Math.min(maxZCm, Math.max(minZCm, value));
+}
+
+// Wall Short placement.zCm is the floor-relative bottom, not the TV center offset.
+export function getWallShortFloorZBoundsCm(heightCm, standHeightCm = getStandDimensions().heightCm) {
+  const bodyCm = Number(heightCm);
+  const ceilingCm = Number(standHeightCm);
+  if (!Number.isFinite(bodyCm) || bodyCm < 0 || !Number.isFinite(ceilingCm) || ceilingCm < 0) {
+    throw new TypeError('Wall Short Z bounds require heightCm and stand heightCm.');
+  }
+  return Object.freeze({
+    minZCm: 0,
+    maxZCm: Math.max(0, ceilingCm - bodyCm),
+  });
+}
+
+export function stepWallShortFloorZCm(
+  currentZCm,
+  deltaCm,
+  heightCm,
+  standHeightCm = getStandDimensions().heightCm,
+) {
+  const { minZCm, maxZCm } = getWallShortFloorZBoundsCm(heightCm, standHeightCm);
+  const current = Number(currentZCm);
+  const delta = Number(deltaCm);
+  const base = Number.isFinite(current) ? current : minZCm;
+  const shift = Number.isFinite(delta) ? delta : 0;
+  return Math.min(maxZCm, Math.max(minZCm, base + shift));
 }
 
 export function getPanelSeamSnapWindowCm() {
@@ -786,6 +813,114 @@ function collisionHeightsOverlap(moduleA, moduleB) {
     && rangeB.minCm < rangeA.maxCm - EPSILON_CM;
 }
 
+const WALL_SHORT_PROFILE_SNAP_KINDS = new Set([
+  'end-to-end',
+  'corner',
+  'tee',
+  'face',
+  'fixture-side',
+  'corner-face',
+]);
+
+function isProfileModule(module) {
+  if (module?.type === 'profile') return true;
+  const item = module?.itemKey ? getItem(module.itemKey) : null;
+  return item?.type === 'profile';
+}
+
+function isWallShortProfileSnapPair(moving, target, snapKind) {
+  if (!WALL_SHORT_PROFILE_SNAP_KINDS.has(snapKind)) return false;
+  if (!moving || !target) return false;
+  const movingShort = isWallShortFamilyDescriptor(moving);
+  const targetShort = isWallShortFamilyDescriptor(target);
+  const movingProfile = isProfileModule(moving);
+  const targetProfile = isProfileModule(target);
+  return (movingShort && targetProfile) || (movingProfile && targetShort);
+}
+
+function segmentsShareCollidingBody(moduleA, moduleB) {
+  const segmentA = getGroundSegment(moduleA);
+  const segmentB = getGroundSegment(moduleB);
+  if (!segmentA || !segmentB || segmentA.axis !== segmentB.axis) return false;
+  const longitudinalOverlap = segmentA.startCm < segmentB.endCm - EPSILON_CM
+    && segmentB.startCm < segmentA.endCm - EPSILON_CM;
+  if (!longitudinalOverlap) return false;
+  const centerLineGapCm = Math.abs(segmentA.fixedCm - segmentB.fixedCm);
+  const requiredGapCm = (
+    getModuleCollisionDepthCm(moduleA) + getModuleCollisionDepthCm(moduleB)
+  ) / 2;
+  return centerLineGapCm < requiredGapCm - EPSILON_CM;
+}
+
+function profileTouchesWallShortConnectionLine(wall, profile) {
+  const wallRange = getModuleCollisionHeightRangeCm(wall);
+  const profileRange = getModuleCollisionHeightRangeCm(profile);
+  const touchesBottom = profileRange.minCm <= wallRange.minCm + EPSILON_CM
+    && profileRange.maxCm > wallRange.minCm + EPSILON_CM;
+  const touchesTop = profileRange.maxCm >= wallRange.maxCm - EPSILON_CM
+    && profileRange.minCm < wallRange.maxCm - EPSILON_CM;
+  return touchesBottom || touchesTop;
+}
+
+function isWallShortProfileRailJoint(wall, profile) {
+  if (!isWallShortFamilyDescriptor(wall) || !isProfileModule(profile)) return false;
+  if (!segmentsShareCollidingBody(wall, profile)) return false;
+  return profileTouchesWallShortConnectionLine(wall, profile);
+}
+
+function wallShortProfileRailPlacement({
+  target,
+  movingAxis,
+  pointerX,
+  pointerY,
+  width,
+  rotationZDeg,
+  standType,
+  standXCm,
+  itemKey,
+}) {
+  const alongCenter = movingAxis === 'x' ? Number(pointerX) : Number(pointerY);
+  const start = alongCenter - width / 2;
+  const end = start + width;
+  if (!(start < target.endCm - EPSILON_CM && target.startCm < end - EPSILON_CM)) return null;
+  const placement = createModulePlacement({
+    xCm: movingAxis === 'x' ? start : target.fixedCm,
+    yCm: movingAxis === 'y' ? start : target.fixedCm,
+    zCm: resolveItemDefaultZCm(itemKey),
+    rotationZDeg,
+    wallId: 'free',
+  });
+  placement.wallId = inferPlacementWallId({ placement, standType, standXCm });
+  return placement;
+}
+
+function namedWallShortProfileIsExempt(candidate, named, snapKind) {
+  if (!isWallShortProfileSnapPair(candidate, named, snapKind)) return false;
+  if (snapKind !== 'face') return true;
+  const wall = isWallShortFamilyDescriptor(candidate) ? candidate : named;
+  const profile = wall === candidate ? named : candidate;
+  return isWallShortProfileRailJoint(wall, profile);
+}
+
+function wallShortProfileExemptIds(candidate, modules, snapTargetModuleId, snapKind) {
+  const exempt = new Set();
+  const named = modules.find((module) => module?.id === snapTargetModuleId);
+  if (named && namedWallShortProfileIsExempt(candidate, named, snapKind)) exempt.add(named.id);
+  if (isWallShortFamilyDescriptor(candidate)) {
+    modules.forEach((module) => {
+      if (!module || module.id === candidate.id) return;
+      if (isWallShortProfileRailJoint(candidate, module)) exempt.add(module.id);
+    });
+    return exempt;
+  }
+  if (!isProfileModule(candidate)) return exempt;
+  modules.forEach((module) => {
+    if (!module || module.id === candidate.id) return;
+    if (isWallShortProfileRailJoint(module, candidate)) exempt.add(module.id);
+  });
+  return exempt;
+}
+
 export function placementsOverlap(moduleA, moduleB) {
   if (canModulesOverlapByBehavior(moduleA, moduleB)) return false;
   if (getModuleCollisionStrategy(moduleA) === 'none' || getModuleCollisionStrategy(moduleB) === 'none') {
@@ -822,6 +957,8 @@ export function validatePlacementAgainstModules({
   standType,
   standXCm,
   standYCm,
+  snapTargetModuleId = null,
+  snapKind = null,
 } = {}) {
   const moduleDescriptor = { type: moduleType, itemKey, heightCm, shape, widthCm, depthCm };
   const effectiveDepthCm = usesWallBackboneCollisionDepth(moduleDescriptor)
@@ -847,9 +984,17 @@ export function validatePlacementAgainstModules({
     depthCm: effectiveDepthCm,
     placement,
   };
-  const collision = modules.find((module) => (
-    module?.id !== moduleId && placementsOverlap(candidate, module)
-  ));
+  const exemptIds = wallShortProfileExemptIds(
+    candidate,
+    modules,
+    snapTargetModuleId,
+    snapKind,
+  );
+  const collision = modules.find((module) => {
+    if (!module || module.id === moduleId) return false;
+    if (exemptIds.has(module.id)) return false;
+    return placementsOverlap(candidate, module);
+  });
 
   if (collision) {
     return {
@@ -1155,6 +1300,8 @@ export function snapPlacementToModules({
       standType,
       standXCm,
       standYCm,
+      snapTargetModuleId: targetModuleId,
+      snapKind,
     });
     if (!validation.ok) return;
 
@@ -1370,6 +1517,20 @@ export function snapPlacementToModules({
     }
 
     if (target.axis === movingAxis) {
+      if (isWallShortFamilyDescriptor(movingDescriptor) && isProfileModule(targetModule)) {
+        const railPlacement = wallShortProfileRailPlacement({
+          target,
+          movingAxis,
+          pointerX,
+          pointerY,
+          width,
+          rotationZDeg: resolvedRotation,
+          standType,
+          standXCm,
+          itemKey,
+        });
+        if (railPlacement) addCandidate(railPlacement, targetModule.id, 'face', -1);
+      }
       // Aynı doğrultuda yalnızca gerçek uç-uca bağlantı üret.
       if (movingAxis === 'x') {
         addCandidate(createEndpointConnectionPlacement({

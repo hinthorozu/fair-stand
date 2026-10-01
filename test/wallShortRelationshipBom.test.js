@@ -12,6 +12,8 @@ import {
 import { getModuleMagneticSnapStrategy } from '../src/moduleBehavior.js';
 import { resolveProjectBom } from '../src/projectBom.js';
 import { relationshipBomRole } from '../src/relationshipBom.js';
+import { initializeStandDimensions } from '../src/standDimensions.js';
+import { CANONICAL_STAND_DIMENSIONS } from './mapCatalogSeed.mjs';
 
 function qty(bom, itemKey) {
   const line = bom.lines.find((entry) => entry.itemKey === itemKey);
@@ -507,6 +509,71 @@ test('every framed partner keeps the short-band joint and ignores full-height co
       assert.equal(qty(mismatch, 'connector_double'), 0, `${partnerKey} ${shortKey} z double`);
       assert.equal(qty(mismatch, 'connector_corner'), 0, `${partnerKey} ${shortKey} z corner`);
     }
+  }
+});
+
+test('a field upright on the free endpoint drops the second short upright once', () => {
+  const pair = [
+    short2('a', 'wall_200_short_2', { widthCm: 200 }),
+    short2('b', 'wall_200_short_2', { xCm: 200, widthCm: 200 }),
+  ];
+  const sharedOnly = resolveProjectBom(pair);
+  assert.equal(qty(sharedOnly, 'upright_99'), 3);
+  const post = frame('post', 'upright_346_5', {
+    xCm: 396,
+    widthCm: 8,
+    heightCm: 346.5,
+  });
+  const bom = resolveProjectBom([...pair, post]);
+  assert.equal(qty(bom, 'upright_99'), 2);
+  assert.equal(qty(bom, 'upright_346_5'), 1);
+  assert.equal(qty(bom, 'connector_single'), qty(sharedOnly, 'connector_single'));
+  assert.equal(qty(bom, 'connector_double'), qty(sharedOnly, 'connector_double'));
+  assert.equal(qty(bom, 'connector_corner'), 0);
+  assert.equal(qty(bom, 'connector_start'), qty(sharedOnly, 'connector_start'));
+  assert.equal(qty(bom, 'profile_190'), qty(sharedOnly, 'profile_190'));
+  assert.equal(qty(bom, 'panel_197'), qty(sharedOnly, 'panel_197'));
+  const onSharedPoint = resolveProjectBom([
+    ...pair,
+    frame('post', 'upright_346_5', { xCm: 196, widthCm: 8, heightCm: 346.5 }),
+  ]);
+  assert.equal(qty(onSharedPoint, 'upright_99'), 3);
+  assert.equal(qty(onSharedPoint, 'upright_346_5'), 1);
+  const throughBody = resolveProjectBom([
+    ...pair,
+    frame('post', 'upright_346_5', { xCm: 96, widthCm: 8, heightCm: 346.5 }),
+  ]);
+  assert.equal(qty(throughBody, 'upright_99'), 3);
+  const above = resolveProjectBom([
+    ...pair,
+    frame('post', 'upright_346_5', { xCm: 396, zCm: 400, widthCm: 8, heightCm: 346.5 }),
+  ]);
+  assert.equal(qty(above, 'upright_99'), 3);
+  assert.equal(qty(above, 'upright_346_5'), 1);
+});
+
+test('saved scene upright at the short end counts on a 500 cm stand', () => {
+  initializeStandDimensions({ ...CANONICAL_STAND_DIMENSIONS, heightCm: 500 });
+  try {
+    const bom = resolveProjectBom([
+      short2('s2', 'wall_200_short_2', { xCm: 192, yCm: 300, widthCm: 200 }),
+      frame('post', 'upright_346_5', {
+        xCm: 392,
+        yCm: 300,
+        zCm: 0,
+        widthCm: 8,
+        heightCm: 346.5,
+      }),
+    ]);
+    assert.equal(qty(bom, 'upright_99'), 1);
+    assert.equal(qty(bom, 'upright_346_5'), 1);
+    assert.equal(qty(bom, 'connector_single'), 3);
+    assert.equal(qty(bom, 'connector_double'), 0);
+    assert.equal(qty(bom, 'connector_start'), 2);
+    assert.equal(qty(bom, 'profile_190'), 2);
+    assert.equal(qty(bom, 'panel_197'), 2);
+  } finally {
+    initializeStandDimensions(CANONICAL_STAND_DIMENSIONS);
   }
 });
 
