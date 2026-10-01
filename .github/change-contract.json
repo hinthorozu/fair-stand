@@ -270,6 +270,7 @@
       "test/roadmapProductionSourceOfTruth.test.js",
       "test/runtimeSettings.test.js",
       "test/scene3dPublicContract.test.js",
+      "test/sceneBomAcceptance.test.js",
       "test/sceneSurroundSingleSource.test.js",
       "test/selectedModuleRotationCursor.test.js",
       "test/selectionFeedback.test.js",
@@ -810,6 +811,7 @@
   },
   "tests": {
     "targeted": [
+      "test/sceneBomAcceptance.test.js",
       "test/wallShortRelationshipBom.test.js",
       "test/wallShortVerticalMove.test.js",
       "test/wallShortProfileSnapCollision.test.js",
