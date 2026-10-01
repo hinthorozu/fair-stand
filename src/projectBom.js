@@ -19,6 +19,7 @@ import {
 } from './relationshipBom.js';
 import { applyBaseRunBom, isBaseRunItemKey } from './baseRunBom.js';
 import { collectPrintAreas } from './printAreaBom.js';
+import { resolveSplitFloorBomLines } from './floorArea.js';
 
 function freezeLine(line) {
   return Object.freeze({
@@ -205,11 +206,12 @@ export function resolveProjectBom(modules = [], stand = null) {
       .filter((entry) => entry.status === 'ok' && !isBaseRunItemKey(entry.itemKey))
       .flatMap((entry) => entry.glassMoved ?? []),
   );
-  const floorLine = resolveFloorBomLine(stand);
+  const splitFloorLines = stand?.floorArea ? resolveSplitFloorBomLines(stand) : null;
+  const floorLine = splitFloorLines ? null : resolveFloorBomLine(stand);
   const lines = aggregateLines([
     wallShortLines,
     baza.lines,
-    floorLine ? [floorLine] : [],
+    splitFloorLines ?? (floorLine ? [floorLine] : []),
   ]);
 
   return Object.freeze({

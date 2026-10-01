@@ -1,4 +1,5 @@
 import { MODULE_STATE_TYPES } from './designState.js';
+import { validateFloorArea } from './floorArea.js';
 import { getFloorItem, resolveStandFloorItemKey } from './items.js';
 import { validateStandSetup } from './standSetup.js';
 
@@ -50,6 +51,10 @@ export function validateImportedStandState(stand) {
   const floorKey = resolveStandFloorItemKey(stand);
   if (!getFloorItem(floorKey)) {
     return { ok: false, message: 'Proje zemin öğesi geçersiz.' };
+  }
+  if (stand.floorArea != null) {
+    const area = validateFloorArea(stand.floorArea, { xCm: setup.xCm, yCm: setup.yCm });
+    if (!area.ok) return area;
   }
   return { ok: true };
 }

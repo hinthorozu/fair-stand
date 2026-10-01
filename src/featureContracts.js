@@ -73,6 +73,36 @@ export const FEATURE_CONTRACTS = Object.freeze({
       build: 'required',
     }),
   }),
+  floorArea: Object.freeze({
+    id: 'floor-area',
+    kind: 'scene-composition',
+    owner: 'src/floorArea.js',
+    trigger: Object.freeze({
+      mode: 'explicit-stand-floor-area',
+    }),
+    inputs: Object.freeze([
+      'stand.itemKey',
+      'stand.xCm',
+      'stand.yCm',
+      'floorArea',
+    ]),
+    creates: Object.freeze({
+      structuralKinds: Object.freeze([]),
+    }),
+    placement: Object.freeze({
+      owner: 'src/floorArea.js',
+      rule: 'one-rectangle-inside-stand-on-stand-dimension-step',
+    }),
+    persistence: Object.freeze({
+      mode: 'optional-stand-floor-area-beside-itemKey',
+    }),
+    tests: Object.freeze({
+      contract: 'required',
+      regressionFiles: Object.freeze(['test/floorArea.test.js', 'test/projectBom.test.js']),
+      fullSuite: 'required',
+      build: 'required',
+    }),
+  }),
 });
 
 export function getFeatureContract(featureId) {

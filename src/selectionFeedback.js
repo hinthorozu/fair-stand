@@ -177,3 +177,11 @@ export function describeFloorSelection({ selected, floorType, paintable } = {}) 
     ? label + ' zemini seçili · mevcut Aktif renk ile boyanabilir.'
     : label + ' zemini seçili · bu zemin tipi boyanamaz.';
 }
+
+export function describeFloorAreaSelection({ selected, floorType, paintable } = {}) {
+  if (!selected) return null;
+  const label = getFloorItem(floorType)?.name ?? 'Zemin';
+  return paintable
+    ? label + ' zemin alanı seçili · mevcut Aktif renk ile boyanabilir.'
+    : label + ' zemin alanı seçili · bu zemin tipi boyanamaz.';
+}

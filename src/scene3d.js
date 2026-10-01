@@ -42,6 +42,7 @@ import {
   resolveAssemblyPartVisual,
 } from './itemAssembly.js';
 import { snapPlacementToItemAnchor } from './itemSnap.js';
+import { rectangleFromCorners } from './floorArea.js';
 import { resolveModuleStripOccupancy } from './stripOccupancy.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout, visualImageColumnItems } from './rectImageLayout.js';
@@ -602,6 +603,15 @@ export function createStandScene(
       .map((item) => [item.itemKey, item.defaultColor]),
   );
   let floorSelected = false;
+  let floorAreaSelected = false;
+  let floorAreaDrawArmed = false;
+  let floorDrawSession = null;
+  let floorAreaMesh = null;
+  let floorAreaPattern = null;
+  let floorAreaTextures = null;
+  let floorAreaPreview = null;
+  let currentFloorArea = null;
+  let onFloorAreaDrawn = () => {};
 
   function disposeGroundObject(object) {
     if (!object) return;
@@ -636,9 +646,8 @@ export function createStandScene(
       && Number(item.dimensions?.depthCm) === Number(concrete.dimensions.depthCm);
   }
 
-  function createFloorPattern(widthM, depthM, floorType) {
+  function createFloorPattern(widthM, depthM, floorType, topY = ACTIVE_PLATFORM_HEIGHT_M + FLOOR_TOP_EPSILON_M) {
     const positions = [];
-    const topY = ACTIVE_PLATFORM_HEIGHT_M + FLOOR_TOP_EPSILON_M;
     const floorItem = getFloorItem(floorType);
 
     if (isGridTileFloorItem(floorItem)) {
@@ -689,27 +698,22 @@ export function createStandScene(
     return lines;
   }
 
-  function setFloorType(floorType = getFloorItem('karolaj').itemKey) {
-    const resolved = listFloorTypeKeys().includes(floorType) ? floorType : getFloorItem('karolaj').itemKey;
-    currentFloorType = resolved;
-    const floorItem = getFloorItem(resolved);
-
-    const material = activeFloor.material;
+  function configureFloorMaterial(material, floorItem, widthM, depthM, colorValue, texturePair, { repeat = false } = {}) {
     if (isCarpetFloorItem(floorItem)) {
-      material.color.set(floorColors.hali);
+      material.color.set(colorValue);
       material.roughness = 1;
       material.metalness = 0;
       material.emissive.set('#000000');
       material.emissiveIntensity = 0;
-      material.map = carpetTextures.colorMap;
-      material.bumpMap = carpetTextures.bumpMap;
+      material.map = texturePair.colorMap;
+      material.bumpMap = texturePair.bumpMap;
       material.bumpScale = 0.018;
-      if (stageLayout) {
+      if (repeat) {
         // Restore the earlier compact carpet-tile scale the editor used before the RIP pass.
-        const repeatX = Math.max(2, stageLayout.widthM / 0.7);
-        const repeatY = Math.max(2, stageLayout.depthM / 0.7);
-        carpetTextures.colorMap.repeat.set(repeatX, repeatY);
-        carpetTextures.bumpMap.repeat.set(repeatX, repeatY);
+        const repeatX = Math.max(2, widthM / 0.7);
+        const repeatY = Math.max(2, depthM / 0.7);
+        texturePair.colorMap.repeat.set(repeatX, repeatY);
+        texturePair.bumpMap.repeat.set(repeatX, repeatY);
       }
     } else if (isParquetFloorItem(floorItem)) {
       material.map = null;
@@ -722,7 +726,7 @@ export function createStandScene(
       material.emissive.set(matchesConcreteParquetVisual(floorItem) ? floorItem.defaultColor : '#000000');
       material.emissiveIntensity = matchesConcreteParquetVisual(floorItem) ? 0.06 : 0;
     } else {
-      material.color.set(floorColors.karolaj);
+      material.color.set(colorValue);
       material.roughness = 0.92;
       material.metalness = 0;
       material.emissive.set('#000000');
@@ -732,6 +736,135 @@ export function createStandScene(
       material.bumpScale = 0;
     }
     material.needsUpdate = true;
+  }
+
+  function cloneCarpetTexturePair() {
+    const colorMap = carpetTextures.colorMap.clone();
+    const bumpMap = carpetTextures.bumpMap.clone();
+    colorMap.wrapS = THREE.MirroredRepeatWrapping;
+    colorMap.wrapT = THREE.MirroredRepeatWrapping;
+    bumpMap.wrapS = THREE.MirroredRepeatWrapping;
+    bumpMap.wrapT = THREE.MirroredRepeatWrapping;
+    colorMap.colorSpace = THREE.SRGBColorSpace;
+    return { colorMap, bumpMap };
+  }
+
+  function disposeFloorAreaTextures() {
+    floorAreaTextures?.colorMap?.dispose?.();
+    floorAreaTextures?.bumpMap?.dispose?.();
+    floorAreaTextures = null;
+  }
+
+  function clearFloorAreaPreview() {
+    disposeGroundObject(floorAreaPreview);
+    floorAreaPreview = null;
+  }
+
+  function clearFloorAreaVisual() {
+    disposeGroundObject(floorAreaMesh);
+    disposeGroundObject(floorAreaPattern);
+    disposeFloorAreaTextures();
+    floorAreaMesh = null;
+    floorAreaPattern = null;
+    floorAreaSelected = false;
+  }
+
+  function floorAreaColorValue(floorItem, area) {
+    if (isParquetFloorItem(floorItem)) return floorItem.defaultColor;
+    if (area?.color) return area.color;
+    return floorItem.defaultColor;
+  }
+
+  function rebuildFloorAreaVisual() {
+    const keepSelected = floorAreaSelected;
+    clearFloorAreaVisual();
+    if (!currentFloorArea || !stageLayout) return;
+    const floorItem = getFloorItem(currentFloorArea.itemKey);
+    if (!floorItem) return;
+    const widthM = currentFloorArea.widthCm / 100;
+    const depthM = currentFloorArea.depthCm / 100;
+    const heightM = 0.002;
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(widthM, heightM, depthM),
+      new THREE.MeshStandardMaterial({ roughness: 0.92 }),
+    );
+    const patternY = ACTIVE_PLATFORM_HEIGHT_M + FLOOR_TOP_EPSILON_M;
+    mesh.position.set(
+      currentFloorArea.xCm / 100 + widthM / 2,
+      patternY + 0.001 + heightM / 2,
+      currentFloorArea.yCm / 100 + depthM / 2,
+    );
+    mesh.receiveShadow = true;
+    mesh.castShadow = false;
+    mesh.userData.kind = 'floor-area';
+    const texturePair = isCarpetFloorItem(floorItem) ? cloneCarpetTexturePair() : null;
+    floorAreaTextures = texturePair;
+    configureFloorMaterial(
+      mesh.material,
+      floorItem,
+      widthM,
+      depthM,
+      floorAreaColorValue(floorItem, currentFloorArea),
+      texturePair,
+      { repeat: true },
+    );
+    scene.add(mesh);
+    floorAreaMesh = mesh;
+    const pattern = createFloorPattern(
+      widthM,
+      depthM,
+      floorItem.itemKey,
+      patternY + 0.001 + heightM + 0.002,
+    );
+    if (pattern) {
+      pattern.position.set(currentFloorArea.xCm / 100, 0, currentFloorArea.yCm / 100);
+      scene.add(pattern);
+      floorAreaPattern = pattern;
+    }
+    if (keepSelected && floorAreaMesh) {
+      floorAreaSelected = true;
+      setFloorAreaHighlight(true);
+    }
+  }
+
+  function updateFloorAreaPreview(area) {
+    clearFloorAreaPreview();
+    if (!area) return;
+    const widthM = area.widthCm / 100;
+    const depthM = area.depthCm / 100;
+    const preview = new THREE.Mesh(
+      new THREE.BoxGeometry(widthM, 0.004, depthM),
+      new THREE.MeshBasicMaterial({
+        color: SELECTION_COLOR,
+        transparent: true,
+        opacity: 0.35,
+        depthWrite: false,
+      }),
+    );
+    preview.position.set(
+      area.xCm / 100 + widthM / 2,
+      ACTIVE_PLATFORM_HEIGHT_M + 0.012,
+      area.yCm / 100 + depthM / 2,
+    );
+    preview.raycast = () => {};
+    scene.add(preview);
+    floorAreaPreview = preview;
+  }
+
+  function setFloorType(floorType = getFloorItem('karolaj').itemKey) {
+    const resolved = listFloorTypeKeys().includes(floorType) ? floorType : getFloorItem('karolaj').itemKey;
+    currentFloorType = resolved;
+    const floorItem = getFloorItem(resolved);
+    const colorValue = isCarpetFloorItem(floorItem) ? floorColors.hali : floorColors.karolaj;
+    configureFloorMaterial(
+      activeFloor.material,
+      floorItem,
+      stageLayout?.widthM ?? 1,
+      stageLayout?.depthM ?? 1,
+      colorValue,
+      carpetTextures,
+      { repeat: Boolean(stageLayout) },
+    );
 
     disposeGroundObject(floorPattern);
     floorPattern = null;
@@ -860,6 +993,10 @@ export function createStandScene(
 
     disposeWall();
     disposeGroundGuides();
+    clearFloorAreaVisual();
+    clearFloorAreaPreview();
+    currentFloorArea = null;
+    floorDrawSession = null;
     clearPlacementDrag();
 
     const sceneWidthM = widthM + SCENE_SURROUND_M * 2;
@@ -1120,12 +1257,45 @@ export function createStandScene(
     onSurfaceSelected?.([...selectedSurfaces]);
   }
 
+  function setFloorAreaHighlight(selected) {
+    if (!floorAreaMesh || !currentFloorArea) return;
+    const floorItem = getFloorItem(currentFloorArea.itemKey);
+    if (!floorItem) return;
+    if (!selected) {
+      configureFloorMaterial(
+        floorAreaMesh.material,
+        floorItem,
+        currentFloorArea.widthCm / 100,
+        currentFloorArea.depthCm / 100,
+        floorAreaColorValue(floorItem, currentFloorArea),
+        floorAreaTextures,
+        { repeat: true },
+      );
+      return;
+    }
+    floorAreaMesh.material.emissive.setHex(SELECTION_COLOR);
+    floorAreaMesh.material.emissiveIntensity = 0.12;
+    floorAreaMesh.material.needsUpdate = true;
+  }
+
   function notifyFloorSelection() {
     onFloorSelected?.({
       selected: floorSelected,
+      target: 'base',
       floorType: currentFloorType,
       paintable: Boolean(getFloorItem(currentFloorType)?.paintable),
       color: floorColors[currentFloorType] ?? null,
+    });
+  }
+
+  function notifyFloorAreaSelection() {
+    const floorItem = getFloorItem(currentFloorArea?.itemKey);
+    onFloorSelected?.({
+      selected: floorAreaSelected,
+      target: 'area',
+      floorType: currentFloorArea?.itemKey ?? null,
+      paintable: Boolean(floorItem?.paintable),
+      color: currentFloorArea?.color ?? floorItem?.defaultColor ?? null,
     });
   }
 
@@ -1135,6 +1305,8 @@ export function createStandScene(
     selectedSurfaces.clear();
     selectedModuleId = null;
     floorSelected = false;
+    floorAreaSelected = false;
+    setFloorAreaHighlight(false);
     if (!keepAnchor) selectionAnchorSurfaceId = null;
     if (notify) notifySelection();
   }
@@ -1156,6 +1328,8 @@ export function createStandScene(
     selectedSurfaces.clear();
     selectionAnchorSurfaceId = null;
     floorSelected = false;
+    floorAreaSelected = false;
+    setFloorAreaHighlight(false);
     selectedModuleId = moduleId ?? null;
     setModuleSelectionVisual(selectedModuleId, true);
     notifySelection();
@@ -4592,6 +4766,18 @@ export function createStandScene(
       return;
     }
 
+    if (!rectangleSelect && floorAreaMesh) {
+      const areaHit = raycaster.intersectObject(floorAreaMesh, false)[0];
+      if (areaHit) {
+        clearSelection({ notify: false });
+        selectedModuleId = null;
+        floorAreaSelected = true;
+        setFloorAreaHighlight(true);
+        notifyFloorAreaSelection();
+        return;
+      }
+    }
+
     if (!rectangleSelect && activeFloor.visible) {
       const floorHit = raycaster.intersectObject(activeFloor, false)[0];
       if (floorHit) {
@@ -4616,6 +4802,20 @@ export function createStandScene(
     event.preventDefault();
     event.stopImmediatePropagation();
     handleSurfaceSelectionAt(event.clientX, event.clientY, true);
+  }, { capture: true });
+
+  renderer.domElement.addEventListener('pointerdown', (event) => {
+    if (!floorAreaDrawArmed || event.button !== 0 || event.ctrlKey || event.metaKey) return;
+    const ground = getGroundPoint(event.clientX, event.clientY);
+    if (!ground || !stageLayout) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    controls.enabled = false;
+    floorDrawSession = {
+      pointerId: event.pointerId,
+      anchor: ground,
+      current: ground,
+    };
   }, { capture: true });
 
   renderer.domElement.addEventListener('pointerdown', (event) => {
@@ -4684,6 +4884,17 @@ export function createStandScene(
 
   const hostWindow = getFairStandHostWindow();
   hostWindow.addEventListener('pointermove', (event) => {
+    if (floorDrawSession && event.pointerId === floorDrawSession.pointerId) {
+      const ground = getGroundPoint(event.clientX, event.clientY);
+      if (!ground || !stageLayout) return;
+      floorDrawSession.current = ground;
+      const draft = rectangleFromCorners(floorDrawSession.anchor, ground, {
+        xCm: stageLayout.widthCm,
+        yCm: stageLayout.depthCm,
+      });
+      updateFloorAreaPreview(draft.ok ? draft.area : null);
+      return;
+    }
     if (!dragSession || event.pointerId !== dragSession.pointerId) return;
     updatePlacementDrag(event);
   }, { signal });
@@ -5045,6 +5256,18 @@ export function createStandScene(
   });
 
   hostWindow.addEventListener('pointerup', (event) => {
+    if (floorDrawSession && event.pointerId === floorDrawSession.pointerId) {
+      const draft = rectangleFromCorners(floorDrawSession.anchor, floorDrawSession.current, {
+        xCm: stageLayout?.widthCm,
+        yCm: stageLayout?.depthCm,
+      });
+      floorDrawSession = null;
+      floorAreaDrawArmed = false;
+      controls.enabled = true;
+      clearFloorAreaPreview();
+      onFloorAreaDrawn(draft);
+      return;
+    }
     if (!dragSession || event.pointerId !== dragSession.pointerId) return;
     const startClientX = dragSession.startClientX;
     const startClientY = dragSession.startClientY;
@@ -5056,6 +5279,13 @@ export function createStandScene(
   }, { signal });
 
   hostWindow.addEventListener('pointercancel', (event) => {
+    if (floorDrawSession && event.pointerId === floorDrawSession.pointerId) {
+      floorDrawSession = null;
+      floorAreaDrawArmed = false;
+      controls.enabled = true;
+      clearFloorAreaPreview();
+      return;
+    }
     if (!dragSession || event.pointerId !== dragSession.pointerId) return;
     clearPlacementDrag();
   }, { signal });
@@ -5167,6 +5397,36 @@ export function createStandScene(
     return changed;
   }
 
+  function setFloorArea(area) {
+    currentFloorArea = area ? { ...area } : null;
+    floorAreaDrawArmed = false;
+    floorDrawSession = null;
+    clearFloorAreaPreview();
+    rebuildFloorAreaVisual();
+    return currentFloorArea;
+  }
+
+  function setFloorAreaColor(color) {
+    if (!currentFloorArea || !getFloorItem(currentFloorArea.itemKey)?.paintable) return null;
+    const normalized = String(color ?? '').trim();
+    if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) return currentFloorArea.color ?? null;
+    currentFloorArea = { ...currentFloorArea, color: normalized.toLowerCase() };
+    rebuildFloorAreaVisual();
+    if (floorAreaSelected) setFloorAreaHighlight(true);
+    return currentFloorArea.color;
+  }
+
+  function setFloorAreaDrawArmed(enabled, handler) {
+    floorAreaDrawArmed = Boolean(enabled);
+    if (typeof handler === 'function') onFloorAreaDrawn = handler;
+    if (!floorAreaDrawArmed) {
+      floorDrawSession = null;
+      clearFloorAreaPreview();
+      controls.enabled = true;
+    }
+    return floorAreaDrawArmed;
+  }
+
   return {
     captureCurrentViewPng,
     setShelfLightingVisible,
@@ -5175,6 +5435,10 @@ export function createStandScene(
     createStage,
     setFloorType,
     setFloorColor,
+    setFloorArea,
+    setFloorAreaColor,
+    setFloorAreaDrawArmed,
+    isFloorAreaSelected: () => floorAreaSelected,
     buildWall,
     clearWall,
     clearSelection: (...args) => {
