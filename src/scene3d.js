@@ -7287,12 +7287,6 @@ function createCoffeeTableClassicModule(moduleState, moduleIndex) {
   return { group, surfaces: [proxy] };
 }
 
-function partSpanM(surfaceState, fallbackM, field) {
-  const cm = Number(surfaceState?.[field]);
-  if (Number.isFinite(cm) && cm > 0) return cm / 100;
-  return fallbackM;
-}
-
 function mountRecipeTopSurface(mesh, part, moduleState, moduleType, moduleIndex, surfaces, onSurfaceReady) {
   if (!mesh || !part) return;
   // Baza/banko üst geometrisi prosedürel zarfa (module W/D + overhang) bağlı kalır.
@@ -8087,13 +8081,11 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
       console.warn('Eksik panel strip state atlandı:', moduleState.type, moduleState.id, stripIndex);
       continue;
     }
-    const partWidth = partSpanM(surfaceState, innerWidth, 'widthCm');
-    const partHeight = partSpanM(surfaceState, panelHeight, 'heightCm');
-    const partDepth = partSpanM(surfaceState, panelDepth, 'depthCm');
+    // Açıklık = modül sahne genişliği (wall item) − stand dikme kesiti. Yaprak panel ölçüsü mesh’i ezmez.
     const isGlass = Boolean(surfaceState.isGlass);
 
     const backing = new THREE.Mesh(
-      new THREE.BoxGeometry(partWidth, partHeight, partDepth),
+      new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
       new THREE.MeshStandardMaterial({
         color: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR,
         roughness: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74,
@@ -8108,7 +8100,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(backing);
 
     const surface = new THREE.Mesh(
-      new THREE.PlaneGeometry(partWidth, partHeight),
+      new THREE.PlaneGeometry(innerWidth, panelHeight),
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId
           ? 0xffffff
@@ -8125,7 +8117,7 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
     );
     surface.position.set(0, centerY, depth / 2 + 0.0015);
 
-    const selectionFrame = createSelectionFrame(partWidth, partHeight);
+    const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
     selectionFrame.visible = false;
     surface.add(selectionFrame);
 
@@ -8276,12 +8268,9 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     if (!surfaceState) continue;
     const centerY = doorHeight + index * stripHeight + stripHeight / 2;
     const panelHeight = stripHeight - railHeight - PANEL_VERTICAL_CLEARANCE_M;
-    const partWidth = partSpanM(surfaceState, innerWidth, 'widthCm');
-    const partHeight = partSpanM(surfaceState, panelHeight, 'heightCm');
-    const partDepth = partSpanM(surfaceState, panelDepth, 'depthCm');
 
     const backing = new THREE.Mesh(
-      new THREE.BoxGeometry(partWidth, partHeight, partDepth),
+      new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
       new THREE.MeshStandardMaterial({
         color: surfaceState.isGlass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR,
         roughness: surfaceState.isGlass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74,
@@ -8296,7 +8285,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     group.add(backing);
 
     const surface = new THREE.Mesh(
-      new THREE.PlaneGeometry(partWidth, partHeight),
+      new THREE.PlaneGeometry(innerWidth, panelHeight),
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId
           ? 0xffffff
@@ -8313,7 +8302,7 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
     );
     surface.position.set(0, centerY, depth / 2 + 0.0015);
 
-    const selectionFrame = createSelectionFrame(partWidth, partHeight);
+    const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
     selectionFrame.visible = false;
     surface.add(selectionFrame);
 
@@ -8478,9 +8467,13 @@ function createSeparatorModule(moduleState, moduleIndex) {
 }
 
 function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
-  const { heightCm, depthCm } = requireModuleSceneBoxCm(moduleState, ['heightCm', 'depthCm']);
+  const { widthCm, heightCm, depthCm } = requireModuleSceneBoxCm(
+    moduleState,
+    ['widthCm', 'heightCm', 'depthCm'],
+  );
   const height = heightCm / 100;
   const depth = depthCm / 100;
+  const widthM = widthCm / 100;
   const { frameDepth } = getProceduralFrameCrossSectionM(moduleState);
 
   const stripCount = Array.isArray(moduleState?.strips) ? moduleState.strips.length : 0;
@@ -8491,8 +8484,6 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     throw new TypeError(`Canonical showcase body state is required for ${moduleState.itemKey ?? moduleState.type}.`);
   }
 
-  const widthCm = Number(bodyDefinition.item.dimensions.widthCm);
-  const widthM = widthCm / 100;
   const eyeCount = Number(bodyDefinition.item.eyeCount);
   const openingStartStrip = eyeCount === 3 ? 1 : 2;
   const openingStripCount = eyeCount;
@@ -8542,12 +8533,9 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     const centerY = stripIndex * stripHeight + stripHeight / 2;
     const surfaceState = moduleState.strips[stripIndex];
     if (!surfaceState) continue;
-    const partWidth = partSpanM(surfaceState, innerWidth, 'widthCm');
-    const partHeight = partSpanM(surfaceState, panelHeight, 'heightCm');
-    const partDepth = partSpanM(surfaceState, panelDepth, 'depthCm');
     const isGlass = Boolean(surfaceState.isGlass);
     const backing = new THREE.Mesh(
-      new THREE.BoxGeometry(partWidth, partHeight, partDepth),
+      new THREE.BoxGeometry(innerWidth, panelHeight, panelDepth),
       new THREE.MeshStandardMaterial({
         color: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.color : PANEL_BACK_COLOR,
         roughness: isGlass ? PANEL_GLASS_BACKING_APPEARANCE.roughness : 0.74,
@@ -8560,7 +8548,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
     backing.receiveShadow = true;
     group.add(backing);
     const surface = new THREE.Mesh(
-      new THREE.PlaneGeometry(partWidth, partHeight),
+      new THREE.PlaneGeometry(innerWidth, panelHeight),
       new THREE.MeshStandardMaterial({
         color: surfaceState.imageAssetId ? 0xffffff : (isGlass ? GLASS_APPEARANCE.color : surfaceState.color),
         roughness: isGlass ? GLASS_APPEARANCE.roughness : 0.72,
@@ -8569,7 +8557,7 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
       }),
     );
     surface.position.set(0, centerY, depth / 2 + 0.0015);
-    const selectionFrame = createSelectionFrame(partWidth, partHeight);
+    const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
     selectionFrame.visible = false;
     surface.add(selectionFrame);
     surface.userData = {
