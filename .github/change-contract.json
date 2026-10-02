@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-remove-catalog-resync-v1",
-  "kind": "tooling",
-  "summary": "Katalog satırlarını silip seed'den baştan yazan resync_catalog_from_seed.py kalkar. Deploy bu scripti çağırmaz.",
+  "id": "fair-stand-remove-corner-bom-callout-v1",
+  "kind": "bom-change",
+  "summary": "Üretim listesi ekranından ayrı Köşe Aparatı kutusu kalkar. Adet birleşik leaf toplamda durur.",
   "owners": [
-    "backend/app/modules/fair_stand/infrastructure/seed_catalog.py"
+    "src/productionBomPanel.js"
   ],
   "sourceOfTruth": [
-    "backend/app/modules/fair_stand/infrastructure/seed_catalog.py"
+    "src/productionBomPanel.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -862,7 +862,7 @@
         "F-041"
       ]
     },
-    "notes": "resync_catalog_from_seed.py silindi. seed_fair_stand_catalog hâlâ katalog tablolarını temizleyebilir; onu çağıran deploy scripti yok. Mevcut test listesi daraltılmadı."
+    "notes": "Ayrı Köşe Aparatı kutusu üretim listesi ekranından kalktı. connector_corner adedi birleşik leaf toplamda ve metin çıktısında durur. Mevcut test listesi daraltılmadı."
   },
   "tests": {
     "targeted": [
@@ -885,16 +885,16 @@
         "e2e/floor-items-contract.spec.mjs",
         "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "Üretim listesi açılınca metin indirme düğmesi görünür. Görsel adı ve ölçü ayrımı test/printAreaBom.test.js ile kilitlenir."
+      "reason": "Üretim listesi açılınca ayrı Köşe Aparatı kutusu görünmez. Adet birleşik toplamda kalır. Mevcut e2e listesi daraltılmadı."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Script kalkınca sunucu katalog satırları deploy sırasında seed'den silinmez. Test veritabanındaki seed çağrıları durur."
+    "notes": "Ekrandaki ayrı kutu kalkar. Birleşik leaf toplamındaki köşe aparatı adedi durur."
   },
   "migration": {
     "required": false,
     "notes": "Yeni alan yok. archiveVersion değişmez."
   },
-  "rollback": "resync_catalog_from_seed.py geri gelir. Deploy onu kendi kendine çağırmaz."
+  "rollback": "Ayrı Köşe Aparatı kutusu üretim listesi ekranına geri gelir."
 }

@@ -149,22 +149,6 @@ function renderPrintAreaGroups(printAreas) {
   )).join('');
 }
 
-function cornerConnectorLines(lines) {
-  return (Array.isArray(lines) ? lines : []).filter((line) => (
-    line?.itemKey === 'connector_corner' && Number(line.quantity) > 0
-  ));
-}
-
-function renderCornerConnectorCallout(lines) {
-  const corners = cornerConnectorLines(lines);
-  if (!corners.length) return '';
-  return `<section class="production-bom-group" data-role="bom-corner-connectors">
-    <h4 class="production-bom-group__title">Köşe Aparatı</h4>
-    <p class="production-bom-panel__hint">Modül kartında yok. Birleşik toplamda sayılır.</p>
-    ${renderLineList(corners)}
-  </section>`;
-}
-
 function renderTotalsHtml(lines, printAreas, { open = false } = {}) {
   const openAttr = open ? ' open' : '';
   const groups = groupBomLines(lines);
@@ -260,7 +244,6 @@ export function buildProductionBomHtml(bom, openCollapseKeys = new Set()) {
         `<p class="production-bom-panel__hint">${escapeHtml(note)}</p>`
       )).join('')}
       ${unresolvedNote}
-      ${renderCornerConnectorCallout(bom.lines)}
       <details class="panel-card compact collapsible-panel production-bom-modules" data-bom-collapse-key="__modules__"${openCollapseKeys.has('__modules__') ? ' open' : ''}>
         <summary class="panel-summary">
           <span>Modüller</span>
