@@ -10,6 +10,14 @@ test('Fair Stand exposes a mount/unmount boundary without rewriting the configur
   assert.match(mountSource, /startFairStandConfigurator/);
   assert.match(mountSource, /unmountFairStand/);
   assert.match(mountSource, /setFairStandHostDocument/);
+  assert.match(mountSource, /data-fair-stand-mount/);
+  assert.match(mountSource, /#app > \.sidebar-toggle/);
+  assert.match(mountSource, /display: inline-flex/);
+  assert.match(mountSource, /#app > \.sidebar/);
+  assert.match(mountSource, /style\.remove\(\)/);
+  assert.match(mountSource, /insertAdjacentHTML\('beforeend', FAIR_STAND_MARKUP\)/);
+  assert.doesNotMatch(mountSource, /createElement\(['"]iframe['"]\)/);
+  assert.doesNotMatch(mountSource, /contentDocument/);
   assert.match(mainSource, /export function startFairStandConfigurator/);
   assert.match(mainSource, /scene3d\?\.dispose\?\.\(\)/);
 });

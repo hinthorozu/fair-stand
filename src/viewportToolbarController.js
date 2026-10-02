@@ -3,7 +3,7 @@ export function createViewportToolbarController({ toolbarElement, toggleButton }
     toolbarElement?.classList.toggle('is-collapsed', collapsed);
 
     if (toggleButton) {
-      toggleButton.textContent = collapsed ? '›' : '‹';
+      toggleButton.textContent = collapsed ? '‹' : '›';
       toggleButton.setAttribute('aria-expanded', String(!collapsed));
       toggleButton.setAttribute('aria-label', collapsed ? 'Üst bandı aç' : 'Üst bandı kapat');
       toggleButton.title = collapsed ? 'Üst bandı aç' : 'Üst bandı kapat';

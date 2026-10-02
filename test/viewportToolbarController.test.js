@@ -37,14 +37,14 @@ test('setCollapsed hides the top band and keeps the toggle labeled', () => {
 
   controller.setCollapsed(true);
   assert.equal(toolbarElement.classList.values.has('is-collapsed'), true);
-  assert.equal(toggleButton.textContent, '›');
+  assert.equal(toggleButton.textContent, '‹');
   assert.equal(toggleButton.attributes.get('aria-expanded'), 'false');
   assert.equal(toggleButton.attributes.get('aria-label'), 'Üst bandı aç');
   assert.equal(toggleButton.title, 'Üst bandı aç');
 
   controller.setCollapsed(false);
   assert.equal(toolbarElement.classList.values.has('is-collapsed'), false);
-  assert.equal(toggleButton.textContent, '‹');
+  assert.equal(toggleButton.textContent, '›');
   assert.equal(toggleButton.attributes.get('aria-expanded'), 'true');
   assert.equal(toggleButton.attributes.get('aria-label'), 'Üst bandı kapat');
   assert.equal(toggleButton.title, 'Üst bandı kapat');
