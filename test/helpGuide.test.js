@@ -37,6 +37,7 @@ test('help guide exposes a fixed question-mark launcher and collapsible sections
   assert.match(guideSource, /görselin dosya adı, cm ölçüsü ve m²/);
   assert.match(guideSource, /altında o görselin toplam m²/);
   assert.match(guideSource, /panelin rengi hex olarak yazar/);
+  assert.match(guideSource, /scene dimensions varsa oradan, o alan boşsa item dimensions/);
   assert.match(guideSource, /Tüm Özellikleri Kaldır/);
 });
 
