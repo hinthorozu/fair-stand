@@ -498,6 +498,7 @@ h2 {
   top: 16px;
   right: 16px;
   display: flex;
+  align-items: center;
   gap: 12px;
   padding: 9px 12px;
   border: 1px solid rgba(255, 255, 255, 0.7);
@@ -507,6 +508,32 @@ h2 {
   font-size: 11px;
   backdrop-filter: blur(8px);
   pointer-events: none;
+}
+
+.viewport-toolbar-toggle {
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  margin: 0;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 22px;
+  line-height: 1;
+  box-shadow: 0 3px 12px rgba(17, 24, 39, 0.16);
+  pointer-events: auto;
+}
+
+.viewport-toolbar.is-collapsed {
+  gap: 0;
+  padding: 4px;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.viewport-toolbar.is-collapsed > :not(.viewport-toolbar-toggle) {
+  display: none;
 }
 
 .viewport-toolbar[hidden] {
