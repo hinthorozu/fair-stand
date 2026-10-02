@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-print-loose-faces-v1",
-  "kind": "bom-change",
-  "summary": "Banko, baza ve kapı kanadı baskısı üretim listesine kendi panel ölçüsüyle girer.",
+  "id": "fair-stand-same-document-mount-v1",
+  "kind": "architecture",
+  "summary": "Fair Stand CRM sayfasında iframe olmadan aynı belgede açılır.",
   "owners": [
-    "src/printAreaBom.js"
+    "src/mountFairStand.js"
   ],
   "sourceOfTruth": [
-    "src/printAreaBom.js"
+    "src/mountFairStand.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -868,10 +868,13 @@
         "F-041"
       ]
     },
-    "notes": "Baskı ölçüsü panelde scene dimensions varsa oradan, alan boşsa item dimensions değerinden gelir. 50 cm şerit sabiti kullanılmaz. Mevcut test listesi daraltılmadı."
+    "notes": "Fair Stand sahnesi CRM belgesine yazılır. Mount stili data-fair-stand-mount etiketindedir ve unmount onu siler. Mevcut test listesi daraltılmadı."
   },
   "tests": {
     "targeted": [
+      "test/mountFairStandBoundary.test.js",
+      "test/viewportToolbarController.test.js",
+      "test/viewportToolbarMainIntegration.test.js",
       "test/floorArea.test.js",
       "test/projectBom.test.js",
       "test/projectImportValidation.test.js",
@@ -891,16 +894,16 @@
         "e2e/floor-items-contract.spec.mjs",
         "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "Banko, baza ve kapı kanadı baskısı üretim listesinde görünür. Mevcut e2e listesi daraltılmadı."
+      "reason": "Aynı belgeye alınan sahne tuvali ve klavyeyi CRM sayfasında tutar. Mevcut e2e listesi daraltılmadı."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Duvar şeridi panel kaydını okur: scene dimensions, boş alanda item dimensions. 50 cm sabit yükseklik kalkar."
+    "notes": "Iframe kalkınca klavye tek pencerede kalır. Mount stili sayfadan çıkınca silinir."
   },
   "migration": {
     "required": false,
     "notes": "Yeni alan yok. archiveVersion değişmez."
   },
-  "rollback": "Baskı listesi yine yalnız duvar şeritlerini ve straforu sayar."
+  "rollback": "mountFairStand yine iframe belgesi açar."
 }

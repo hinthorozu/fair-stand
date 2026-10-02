@@ -51,73 +51,87 @@ const TRASH_BIN_PREVIEW_CSS = `
 }
 `;
 
+const HOST_CHROME_RESET_CSS = `
+#app > .sidebar {
+  width: auto;
+  max-width: none;
+  flex: initial;
+  flex-shrink: initial;
+  position: relative;
+  top: auto;
+  height: auto;
+  min-height: 0;
+  transform: none;
+  transition: none;
+}
+#app > .sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+`;
+
+const MOUNT_STYLE_CSS = [
+  styleCss,
+  colorEditorCss,
+  imageActionsCss,
+  helpGuideCss,
+  productionBomPanelCss,
+  TRASH_BIN_PREVIEW_CSS,
+  HOST_CHROME_RESET_CSS,
+].join('\n');
+
+function publishHostValue(hostWindow, key, value) {
+  if (value == null) return;
+  hostWindow[key] = value;
+  globalThis[key] = value;
+}
+
 export function mountFairStand(container, options = {}) {
   if (!container) {
     throw new Error('Fair Stand mount container is required.');
   }
 
-  const iframe = document.createElement('iframe');
-  iframe.title = 'Fair Stand';
-  iframe.setAttribute('data-testid', 'fair-stand-frame');
-  iframe.setAttribute('aria-label', 'Fair Stand configurator');
-  iframe.setAttribute('allow', 'display-capture');
-  Object.assign(iframe.style, {
-    width: '100%',
-    height: '100%',
-    border: '0',
-    display: 'block',
-    background: '#eef1f4',
-  });
-  container.replaceChildren(iframe);
-
-  const hostDocument = iframe.contentDocument;
-  if (!hostDocument) {
+  const hostDocument = container.ownerDocument;
+  const hostWindow = hostDocument?.defaultView;
+  if (!hostDocument?.head || !hostWindow) {
     throw new Error('Fair Stand host document could not be created.');
   }
 
-  hostDocument.open();
-  hostDocument.write(`<!doctype html>
-<html lang="tr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>${styleCss}\n${colorEditorCss}\n${imageActionsCss}\n${helpGuideCss}\n${productionBomPanelCss}\n${TRASH_BIN_PREVIEW_CSS}</style>
-  </head>
-  <body>
-    ${FAIR_STAND_MARKUP}
-  </body>
-</html>`);
-  hostDocument.close();
+  const style = hostDocument.createElement('style');
+  style.setAttribute('data-fair-stand-mount', 'true');
+  style.textContent = MOUNT_STYLE_CSS;
+  hostDocument.head.appendChild(style);
+  container.replaceChildren();
+  container.insertAdjacentHTML('beforeend', FAIR_STAND_MARKUP);
 
   setFairStandHostDocument(hostDocument);
-  if (options.catalogHeaders) {
-    iframe.contentWindow.__FAIR_STAND_CATALOG_HEADERS__ = options.catalogHeaders;
-    globalThis.__FAIR_STAND_CATALOG_HEADERS__ = options.catalogHeaders;
+  publishHostValue(hostWindow, '__FAIR_STAND_CATALOG_HEADERS__', options.catalogHeaders);
+  publishHostValue(hostWindow, '__FAIR_STAND_PROJECT_CAPABILITIES__', options.capabilities);
+  publishHostValue(hostWindow, '__FAIR_STAND_INITIAL_PROJECT_ID__', options.initialProjectId);
+  publishHostValue(hostWindow, '__FAIR_STAND_CUSTOMER_ID__', options.customerId);
+
+  let stop;
+  let stopLiveShare;
+  try {
+    stop = startFairStandConfigurator({
+      initialProjectId: options.initialProjectId,
+      customerId: options.customerId,
+      capabilities: options.capabilities,
+    });
+    stopLiveShare = bindLiveTabShare(hostDocument, {
+      capabilities: options.capabilities,
+      headers: () => hostWindow.__FAIR_STAND_CATALOG_HEADERS__ || options.catalogHeaders || {},
+      location: hostWindow.location,
+      fetch: hostWindow.fetch.bind(hostWindow),
+      WebSocket: hostWindow.WebSocket,
+    });
+  } catch (error) {
+    style.remove();
+    container.replaceChildren();
+    setFairStandHostDocument(typeof document !== 'undefined' ? document : null);
+    throw error;
   }
-  if (options.capabilities) {
-    iframe.contentWindow.__FAIR_STAND_PROJECT_CAPABILITIES__ = options.capabilities;
-    globalThis.__FAIR_STAND_PROJECT_CAPABILITIES__ = options.capabilities;
-  }
-  if (options.initialProjectId) {
-    iframe.contentWindow.__FAIR_STAND_INITIAL_PROJECT_ID__ = options.initialProjectId;
-    globalThis.__FAIR_STAND_INITIAL_PROJECT_ID__ = options.initialProjectId;
-  }
-  if (options.customerId) {
-    iframe.contentWindow.__FAIR_STAND_CUSTOMER_ID__ = options.customerId;
-    globalThis.__FAIR_STAND_CUSTOMER_ID__ = options.customerId;
-  }
-  const stop = startFairStandConfigurator({
-    initialProjectId: options.initialProjectId,
-    customerId: options.customerId,
-    capabilities: options.capabilities,
-  });
-  const stopLiveShare = bindLiveTabShare(hostDocument, {
-    capabilities: options.capabilities,
-    headers: () => iframe.contentWindow?.__FAIR_STAND_CATALOG_HEADERS__ || options.catalogHeaders || {},
-    location: window.location,
-    fetch: window.fetch.bind(window),
-    WebSocket: window.WebSocket,
-  });
 
   return function unmountFairStand() {
     try {
@@ -128,13 +142,16 @@ export function mountFairStand(container, options = {}) {
     }
     setFairStandHostDocument(typeof document !== 'undefined' ? document : null);
     try {
+      delete hostWindow.__FAIR_STAND_INITIAL_PROJECT_ID__;
+      delete hostWindow.__FAIR_STAND_CUSTOMER_ID__;
+      delete hostWindow.__FAIR_STAND_PROJECT_CAPABILITIES__;
       delete globalThis.__FAIR_STAND_INITIAL_PROJECT_ID__;
       delete globalThis.__FAIR_STAND_CUSTOMER_ID__;
       delete globalThis.__FAIR_STAND_PROJECT_CAPABILITIES__;
     } catch {
       /* ignore */
     }
-    iframe.remove();
+    style.remove();
     container.replaceChildren();
   };
 }

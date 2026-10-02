@@ -20,7 +20,9 @@ test('standalone and mounted markup expose the same top band toggle', () => {
   assert.match(html, /id="viewport-toolbar-toggle" class="viewport-toolbar-toggle"/);
   assert.match(html, /aria-label="Üst bandı kapat"/);
   assert.match(html, /aria-expanded="true"/);
+  assert.match(html, /title="Üst bandı kapat">›<\/button>/);
   assert.match(markup, /id=\\"viewport-toolbar-toggle\\" class=\\"viewport-toolbar-toggle\\"/);
   assert.match(markup, /aria-label=\\"Üst bandı kapat\\"/);
+  assert.match(markup, /title=\\"Üst bandı kapat\\">›<\/button>/);
   assert.match(css, /\.viewport-toolbar\.is-collapsed > :not\(\.viewport-toolbar-toggle\)/);
 });
