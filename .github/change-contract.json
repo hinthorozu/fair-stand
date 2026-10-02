@@ -866,7 +866,7 @@
         "F-041"
       ]
     },
-    "notes": "Baskı satırı görsel dosya adı veya hex renk ile başlar. cm ve m² kalır. Aynı dosya veya renk farklı ölçüdeyse satırlar ayrıdır ve altında o kimliğin toplam m²’si vardır. Bölüm toplamı durur. Donanım leaf satırları değişmez. Ad çözülemezse satır Görsel der."
+    "notes": "Baskı satırı görsel dosya adı veya hex renk ile başlar. cm ve m² kalır. Aynı dosya veya renk farklı ölçüdeyse satırlar ayrıdır ve altında o kimliğin toplam m²’si vardır. Bölüm toplamı durur. Donanım leaf satırları değişmez. Ad çözülemezse satır Görsel der. Kullanım kılavuzu ve B.14 baskı kararı aynı satır düzenini yazar."
   },
   "tests": {
     "targeted": [
@@ -877,7 +877,8 @@
       "test/scene3dPublicContract.test.js",
       "test/floorItemsContract.test.js",
       "test/printAreaBom.test.js",
-      "test/productionBomPanelEntry.test.js"
+      "test/productionBomPanelEntry.test.js",
+      "test/helpGuide.test.js"
     ],
     "fullSuite": true,
     "build": true,
