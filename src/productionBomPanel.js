@@ -98,10 +98,40 @@ function formatArea(value) {
 function printLineLabel(line) {
   const size = `${formatNumber(line.widthCm)}×${formatNumber(line.heightCm)} cm`;
   const each = `${formatArea(line.areaM2)} m²`;
+  const name = line.name ? `${line.name} · ` : '';
   if (line.quantity > 1) {
-    return `${formatNumber(line.quantity)} × ${size} · ${each} · toplam ${formatArea(line.totalAreaM2)} m²`;
+    return `${name}${formatNumber(line.quantity)} × ${size} · ${each} · toplam ${formatArea(line.totalAreaM2)} m²`;
   }
-  return `1 × ${size} · ${each}`;
+  return `${name}1 × ${size} · ${each}`;
+}
+
+function printSubjectKey(line) {
+  return `${line?.subjectKind ?? ''}\u0000${line?.subjectId ?? ''}\u0000${line?.name ?? ''}`;
+}
+
+function printSubjectGroups(lines) {
+  const groups = [];
+  for (const line of lines) {
+    const key = printSubjectKey(line);
+    const current = groups.at(-1);
+    if (!current || current.key !== key) {
+      groups.push({
+        key,
+        name: line.name || '',
+        lines: [line],
+        totalAreaM2: line.totalAreaM2,
+      });
+    } else {
+      current.lines.push(line);
+      current.totalAreaM2 += line.totalAreaM2;
+    }
+  }
+  return groups;
+}
+
+function printSubjectTotalLabel(group) {
+  if (group.lines.length < 2 || !group.name) return '';
+  return `${group.name} toplam ${formatArea(group.totalAreaM2)} m²`;
 }
 
 function renderPrintAreaGroups(printAreas) {
@@ -109,9 +139,11 @@ function renderPrintAreaGroups(printAreas) {
   return printAreas.map((section) => (
     `<section class="production-bom-group">
       <h4 class="production-bom-group__title">${escapeHtml(section.label)}</h4>
-      <ul class="production-bom-module__list">${section.lines.map((line) => (
-        `<li>${escapeHtml(printLineLabel(line))}</li>`
-      )).join('')}</ul>
+      <ul class="production-bom-module__list">${printSubjectGroups(section.lines).map((group) => {
+        const rows = group.lines.map((line) => `<li>${escapeHtml(printLineLabel(line))}</li>`).join('');
+        const total = printSubjectTotalLabel(group);
+        return `${rows}${total ? `<li>${escapeHtml(total)}</li>` : ''}`;
+      }).join('')}</ul>
       <p class="production-bom-group__total">Toplam ${escapeHtml(formatArea(section.totalAreaM2))} m²</p>
     </section>`
   )).join('');
@@ -190,7 +222,11 @@ export function formatProductionBomText(bom) {
   }
   for (const section of bom?.printAreas || []) {
     blocks.push('', section.label);
-    for (const line of section.lines) blocks.push(printLineLabel(line));
+    for (const group of printSubjectGroups(section.lines)) {
+      for (const line of group.lines) blocks.push(printLineLabel(line));
+      const total = printSubjectTotalLabel(group);
+      if (total) blocks.push(total);
+    }
     blocks.push(`Toplam ${formatArea(section.totalAreaM2)} m²`);
   }
   blocks.push('');
@@ -244,6 +280,7 @@ export function createProductionBomPanel() {
       close() {},
       isOpen() { return false; },
       refresh() {},
+      setAssetNamesSource() {},
       destroy() {},
     };
   }
@@ -281,6 +318,7 @@ export function createProductionBomPanel() {
 
   let getModules = () => [];
   let getStand = () => null;
+  let getAssetNames = () => null;
   let onVisibilityChange = null;
   let dragState = null;
   let resizeState = null;
@@ -313,13 +351,13 @@ export function createProductionBomPanel() {
   function refresh() {
     if (!body) return;
     captureOpenCollapseKeys();
-    paint(buildProductionBomHtml(resolveProjectBom(getModules(), getStand()), openCollapseKeys));
+    paint(buildProductionBomHtml(resolveProjectBom(getModules(), getStand(), getAssetNames()), openCollapseKeys));
   }
 
   function downloadProductionBomText(doc) {
     const view = doc?.defaultView;
     if (!view?.URL?.createObjectURL || !doc.body) return;
-    const blob = new view.Blob([formatProductionBomText(resolveProjectBom(getModules(), getStand()))], {
+    const blob = new view.Blob([formatProductionBomText(resolveProjectBom(getModules(), getStand(), getAssetNames()))], {
       type: 'text/plain;charset=utf-8',
     });
     const url = view.URL.createObjectURL(blob);
@@ -454,6 +492,9 @@ export function createProductionBomPanel() {
     },
     setStandSource(fn) {
       getStand = typeof fn === 'function' ? fn : () => null;
+    },
+    setAssetNamesSource(fn) {
+      getAssetNames = typeof fn === 'function' ? fn : () => null;
     },
     setOnVisibilityChange(fn) {
       onVisibilityChange = typeof fn === 'function' ? fn : null;

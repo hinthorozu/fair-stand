@@ -45,17 +45,34 @@ function collectStripFaces(modules) {
           : null,
         fabricGroupId: strip.fabricGroupId || null,
         fabricType: strip.fabricType === 'mesh' ? 'mesh' : 'lightbox',
+        fabricImageAssetId: strip.fabricImageAssetId || null,
+        fabricColor: typeof strip.fabricColor === 'string' ? strip.fabricColor : null,
       });
     });
   });
   return faces;
 }
 
-function piece(widthCm, heightCm) {
+function assetSubject(assetId) {
+  const id = typeof assetId === 'string' ? assetId.trim() : '';
+  return id ? { kind: 'asset', id } : null;
+}
+
+function colorSubject(color) {
+  const value = typeof color === 'string' ? color.trim().toLowerCase() : '';
+  return value ? { kind: 'color', id: value } : null;
+}
+
+function piece(widthCm, heightCm, subject = null) {
   const width = roundCm(widthCm);
   const height = roundCm(heightCm);
   if (!(width > 0) || !(height > 0)) return null;
-  return { widthCm: width, heightCm: height };
+  return {
+    widthCm: width,
+    heightCm: height,
+    subjectKind: subject?.kind ?? null,
+    subjectId: subject?.id ?? null,
+  };
 }
 
 function imagePieces(faces) {
@@ -68,7 +85,7 @@ function imagePieces(faces) {
     if (mode === 'horizontal-group') horizontal.push(face);
     else if (mode === 'rect-group') rect.push(face);
     else {
-      const single = piece(face.widthCm, WALL_PANEL_BAND_PITCH_CM);
+      const single = piece(face.widthCm, WALL_PANEL_BAND_PITCH_CM, assetSubject(face.imageAssetId));
       if (single) pieces.push(single);
     }
   }
@@ -97,6 +114,7 @@ function clusterHorizontal(faces) {
       const made = piece(
         current.reduce((sum, face) => sum + face.widthCm, 0),
         WALL_PANEL_BAND_PITCH_CM,
+        assetSubject(current[0].imageAssetId),
       );
       if (made) pieces.push(made);
       current = [];
@@ -163,11 +181,24 @@ function clusterRect(faces) {
       const made = piece(
         [...widths.values()].reduce((sum, width) => sum + width, 0),
         strips.size * WALL_PANEL_BAND_PITCH_CM,
+        assetSubject(members[0].imageAssetId),
       );
       if (made) pieces.push(made);
     }
   }
   return pieces;
+}
+
+function fabricSubject(cells) {
+  for (const cell of cells) {
+    const asset = assetSubject(cell.fabricImageAssetId);
+    if (asset) return asset;
+  }
+  for (const cell of cells) {
+    const color = colorSubject(cell.fabricColor);
+    if (color) return color;
+  }
+  return null;
 }
 
 function fabricPieces(faces, kind) {
@@ -183,6 +214,7 @@ function fabricPieces(faces, kind) {
     const made = piece(
       [...widths.values()].reduce((sum, width) => sum + width, 0),
       strips.size * WALL_PANEL_BAND_PITCH_CM,
+      fabricSubject(cells),
     );
     if (made) pieces.push(made);
   }
@@ -193,33 +225,57 @@ function foamPieces(modules) {
   const pieces = [];
   for (const module of modules) {
     if (module?.type !== 'illuminated-foam' && module?.itemKey !== 'illuminated-foam') continue;
-    const made = piece(module.widthCm, module.heightCm);
+    const made = piece(module.widthCm, module.heightCm, assetSubject(module.imageAssetId));
     if (made) pieces.push(made);
   }
   return pieces;
 }
 
-function aggregatePieces(pieces) {
+function subjectKey(item) {
+  return `${item.subjectKind ?? ''}\u0000${item.subjectId ?? ''}`;
+}
+
+function lookupAssetName(assetNames, assetId) {
+  if (!assetNames || !assetId) return '';
+  const raw = assetNames instanceof Map ? assetNames.get(assetId) : assetNames[assetId];
+  return typeof raw === 'string' ? raw.trim() : '';
+}
+
+function subjectName(item, assetNames) {
+  if (item.subjectKind === 'asset') return lookupAssetName(assetNames, item.subjectId) || 'Görsel';
+  if (item.subjectKind === 'color') return item.subjectId;
+  return '';
+}
+
+function aggregatePieces(pieces, assetNames) {
   const bySize = new Map();
   for (const item of pieces) {
-    const key = `${item.widthCm}\u0000${item.heightCm}`;
+    const key = `${subjectKey(item)}\u0000${item.widthCm}\u0000${item.heightCm}`;
     const current = bySize.get(key) ?? {
       widthCm: item.widthCm,
       heightCm: item.heightCm,
       quantity: 0,
       areaM2: areaM2(item.widthCm, item.heightCm),
+      subjectKind: item.subjectKind,
+      subjectId: item.subjectId,
+      name: subjectName(item, assetNames),
     };
     current.quantity += 1;
     current.totalAreaM2 = current.quantity * current.areaM2;
     bySize.set(key, current);
   }
   return [...bySize.values()]
-    .sort((a, b) => b.widthCm - a.widthCm || b.heightCm - a.heightCm || b.quantity - a.quantity)
+    .sort((a, b) => (
+      String(a.name ?? '').localeCompare(String(b.name ?? ''), 'tr')
+      || b.widthCm - a.widthCm
+      || b.heightCm - a.heightCm
+      || b.quantity - a.quantity
+    ))
     .map((line) => Object.freeze({ ...line }));
 }
 
-function section(id, label, pieces) {
-  const lines = aggregatePieces(pieces);
+function section(id, label, pieces, assetNames) {
+  const lines = aggregatePieces(pieces, assetNames);
   if (!lines.length) return null;
   const totalAreaM2 = lines.reduce((sum, line) => sum + line.totalAreaM2, 0);
   return Object.freeze({
@@ -235,14 +291,14 @@ function section(id, label, pieces) {
  * Panel size is module width by 50 cm bands. A grouped image or fabric block is one piece.
  * Fabric prints are not also counted as panel images.
  */
-export function collectPrintAreas(modules = []) {
+export function collectPrintAreas(modules = [], assetNames = null) {
   const list = Array.isArray(modules) ? modules : [];
   const faces = collectStripFaces(list);
   const built = [
-    section('image', 'Görseller', imagePieces(faces)),
-    section('lightbox', 'Lightbox', fabricPieces(faces, 'lightbox')),
-    section('mesh', 'Delikli branda', fabricPieces(faces, 'mesh')),
-    section('foam', 'Strafor logo', foamPieces(list)),
+    section('image', 'Görseller', imagePieces(faces), assetNames),
+    section('lightbox', 'Lightbox', fabricPieces(faces, 'lightbox'), assetNames),
+    section('mesh', 'Delikli branda', fabricPieces(faces, 'mesh'), assetNames),
+    section('foam', 'Strafor logo', foamPieces(list), assetNames),
   ].filter(Boolean);
   const order = new Map(SECTION_DEFS.map((entry, index) => [entry.id, index]));
   built.sort((a, b) => order.get(a.id) - order.get(b.id));

@@ -1,18 +1,17 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-floor-split-v1",
+  "id": "fair-stand-print-area-names-v1",
   "kind": "feature",
-  "summary": "Stand zemini stand.itemKey baz kaplama olarak kalır. Kullanıcı tek bir 50 cm dikdörtgen override ekleyebilir; dikdörtgen ikinci mevcut floor Item ile kaplanır, dışı baz zemin kalır.",
+  "summary": "Üretim listesindeki görsel, lightbox, delikli branda ve strafor satırları dosya adı veya hex renk taşır. Aynı kimliğin farklı ölçüleri ayrı kalır ve altında o kimliğin m² toplamı yazılır.",
   "owners": [
-    "src/floorArea.js",
-    "src/main.js",
-    "src/scene3d.js",
-    "src/projectBom.js"
+    "src/printAreaBom.js",
+    "src/productionBomPanel.js",
+    "src/projectBom.js",
+    "src/main.js"
   ],
   "sourceOfTruth": [
-    "src/floorArea.js",
-    "src/projectBom.js",
-    "docs/items/contract/ITEM_CONTRACT.md"
+    "src/printAreaBom.js",
+    "src/productionBomPanel.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -867,7 +866,7 @@
         "F-041"
       ]
     },
-    "notes": "Tek override dikdörtgen stand.floorArea içindedir ve module değildir. Eski stand.itemKey ve stand.floorColor kayıtları tam baz zemin olarak açılır; archiveVersion 1 kalır. Dal farkı canlı paylaşım dosyalarını da içerir; onların güvenlik kararı durur ve bu zemin işi onu değiştirmez. F-014 açık modül BOM sınıflandırmasıdır; floor satırı o kararı ilerletemez. Listelenen diğer bulgular kapalıdır ve yeniden açılmaz. Üretim listesi metin indirmesi aynı çözülmüş listeyi yazar; köşe aparatı modül reçetesine eklenmez, birleşik toplamda birleşimin istediği adet olarak kalır."
+    "notes": "Baskı satırı görsel dosya adı veya hex renk ile başlar. cm ve m² kalır. Aynı dosya veya renk farklı ölçüdeyse satırlar ayrıdır ve altında o kimliğin toplam m²’si vardır. Bölüm toplamı durur. Donanım leaf satırları değişmez. Ad çözülemezse satır Görsel der. Kullanım kılavuzu ve B.14 baskı kararı aynı satır düzenini yazar."
   },
   "tests": {
     "targeted": [
@@ -877,7 +876,9 @@
       "test/selectionFeedback.test.js",
       "test/scene3dPublicContract.test.js",
       "test/floorItemsContract.test.js",
-      "test/productionBomPanelEntry.test.js"
+      "test/printAreaBom.test.js",
+      "test/productionBomPanelEntry.test.js",
+      "test/helpGuide.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -888,16 +889,16 @@
         "e2e/floor-items-contract.spec.mjs",
         "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "Kullanıcı baz floor seçer, tek dikdörtgen override oluşturur, ikinci floor Item atar ve sahne görüntüsü değişir. Kayıt yenileme aynı ölçü ve Item ile geri gelir. Üretim listesi açılınca metin indirme düğmesi görünür."
+      "reason": "Üretim listesi açılınca metin indirme düğmesi görünür. Görsel adı ve ölçü ayrımı test/printAreaBom.test.js ile kilitlenir."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Eski tek zemin BOM formülü floorArea yokken korunur. Override varken m2 kalan alandan, karolaj 50 cm hücre havuzundan hesaplanır."
+    "notes": "Baskı kimliği yanlış birleşirse farklı görseller aynı satırda kalır. cm ve donanım satırları korunur."
   },
   "migration": {
     "required": false,
-    "notes": "Yeni alan isteğe bağlı stand.floorArea nesnesidir. archiveVersion değişmez. floorArea olmayan kayıtlar tam baz zemin olarak yüklenir."
+    "notes": "Yeni alan yok. archiveVersion değişmez."
   },
-  "rollback": "floorArea yazımı ve sahne override mesh'i kaldırılırsa stand.itemKey tek zemin davranışı aynen kalır."
+  "rollback": "Baskı satırı yeniden yalnız ölçüye göre birleşir; dosya adı ve renk toplamı kalkar."
 }

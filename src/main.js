@@ -280,6 +280,13 @@ let currentStand = null;
 const productionBomPanel = createProductionBomPanel();
 productionBomPanel.setModulesSource(() => currentModules);
 productionBomPanel.setStandSource(() => currentStand);
+productionBomPanel.setAssetNamesSource(() => {
+  const names = new Map();
+  imageAssets.forEach((asset, id) => {
+    if (asset?.name) names.set(id, asset.name);
+  });
+  return names;
+});
 
 function syncProductionBomToggleButton() {
   if (!toggleProductionBomButton) return;
