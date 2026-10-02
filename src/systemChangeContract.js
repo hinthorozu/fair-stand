@@ -169,6 +169,7 @@ export const SOURCE_FILE_REQUIRED_DOMAINS = Object.freeze({
   'src/uiFeedback.js': frozenDomains('ui', 'accessibility'),
   'src/viewCube.js': frozenDomains('renderer', 'ui'),
   'src/viewKeyboardShortcuts.js': frozenDomains('behavior', 'ui', 'accessibility'),
+  'src/viewportToolbarController.js': frozenDomains('ui'),
   'src/wall.js': frozenDomains('composition', 'placement'),
   'src/wallPanelBand.js': frozenDomains('architecture', 'placement', 'renderer', 'behavior'),
   'src/wallReflow.js': frozenDomains('behavior', 'placement'),

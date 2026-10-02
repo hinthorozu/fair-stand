@@ -342,6 +342,8 @@
       "test/uprightFieldPlacement.test.js",
       "test/uprightIntrinsicProperties.test.js",
       "test/viewKeyboardMainIntegration.test.js",
+      "test/viewportToolbarController.test.js",
+      "test/viewportToolbarMainIntegration.test.js",
       "test/visibleUiContract.test.js",
       "test/wallBaseItemsContract.test.js",
       "test/wallDragStickiness.test.js",

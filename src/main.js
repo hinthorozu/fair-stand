@@ -65,6 +65,7 @@ import {
 } from './floorArea.js';
 import { DEFAULT_SELECTION_HINT, describeFloorAreaSelection, describeFloorSelection, describeSurfaceSelection } from './selectionFeedback.js';
 import { createSidebarController } from './sidebarController.js';
+import { createViewportToolbarController } from './viewportToolbarController.js';
 import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';
 import { getFloorItem, getFloorSelectLabel, listFloorItems, resolveItemDefaultZCm, resolveItemKey, resolveStandFloorItemKey } from './items.js';
 import { renderStandStandardsList } from './standStandardsCopy.js';
@@ -148,6 +149,7 @@ const sidebarToggleButton = document.querySelector('#sidebar-toggle');
 const viewport = document.querySelector('#viewport');
 const viewportEmpty = document.querySelector('#viewport-empty');
 const viewportToolbar = document.querySelector('#viewport-toolbar');
+const viewportToolbarToggle = document.querySelector('#viewport-toolbar-toggle');
 const toggleProductionBomButton = document.querySelector('#toggle-production-bom');
 const renderCurrentViewButton = document.querySelector('#render-current-view');
 const standTypeButtons = [...document.querySelectorAll('[data-stand-type]')];
@@ -251,6 +253,11 @@ function setProjectName(name) {
 createSidebarController({
   appElement,
   toggleButton: sidebarToggleButton,
+}).bind();
+
+createViewportToolbarController({
+  toolbarElement: viewportToolbar,
+  toggleButton: viewportToolbarToggle,
 }).bind();
 
 
