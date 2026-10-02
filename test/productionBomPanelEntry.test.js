@@ -44,8 +44,8 @@ test('corner connectors stay off the module card and stay on the combined list a
   const modules = html.split('data-bom-collapse-key="__modules__"')[1].split('data-bom-collapse-key="__totals__"')[0];
   const totals = html.split('data-bom-collapse-key="__totals__"')[1];
   assert.match(html, /data-role="bom-download"/);
-  assert.match(html, /data-role="bom-corner-connectors"[\s\S]*12 × Köşe Aparatı · adet · connector_corner/);
-  assert.ok(html.indexOf('data-role="bom-corner-connectors"') < html.indexOf('data-bom-collapse-key="__modules__"'));
+  assert.doesNotMatch(html, /data-role="bom-corner-connectors"/);
+  assert.doesNotMatch(html, /Modül kartında yok/);
   assert.doesNotMatch(modules, /connector_corner/);
   assert.match(totals, /12 × Köşe Aparatı · adet · connector_corner/);
 
