@@ -34,6 +34,7 @@ test('toolbar Üretim Listesi butonu paneli açar', async ({ page }) => {
   await page.locator('#toggle-production-bom').click();
   await expect(page.locator('#production-bom-panel')).toBeVisible();
   await expect(page.locator('#production-bom-panel .production-bom-panel__title')).toHaveText('Üretim Listesi');
+  await expect(page.locator('#production-bom-panel [data-role="bom-download"]')).toHaveText('Metin indir');
 });
 
 test('üretim listesi paneli gerçek girişte düz duvar reçete satırlarını çizer', async ({ page }) => {

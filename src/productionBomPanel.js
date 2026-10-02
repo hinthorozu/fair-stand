@@ -25,6 +25,7 @@ const POPUP_STYLE = `
   .production-bom-module--unresolved { border-color: #fca5a5; background: #fff1f2; }
   .production-bom-module__error, .production-bom-panel__empty { margin: 0; color: #64748b; }
   .production-bom-module__error { color: #b91c1c; font-size: 12px; }
+  .production-bom-panel__download { border: 1px solid #94a3b8; background: #fff; color: #0f172a; font: inherit; font-size: 12px; line-height: 1; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
 `;
 
 function formatNumber(value) {
@@ -116,6 +117,22 @@ function renderPrintAreaGroups(printAreas) {
   )).join('');
 }
 
+function cornerConnectorLines(lines) {
+  return (Array.isArray(lines) ? lines : []).filter((line) => (
+    line?.itemKey === 'connector_corner' && Number(line.quantity) > 0
+  ));
+}
+
+function renderCornerConnectorCallout(lines) {
+  const corners = cornerConnectorLines(lines);
+  if (!corners.length) return '';
+  return `<section class="production-bom-group" data-role="bom-corner-connectors">
+    <h4 class="production-bom-group__title">Köşe Aparatı</h4>
+    <p class="production-bom-panel__hint">Modül kartında yok. Birleşik toplamda sayılır.</p>
+    ${renderLineList(corners)}
+  </section>`;
+}
+
 function renderTotalsHtml(lines, printAreas, { open = false } = {}) {
   const openAttr = open ? ' open' : '';
   const groups = groupBomLines(lines);
@@ -139,6 +156,84 @@ function renderTotalsHtml(lines, printAreas, { open = false } = {}) {
       <div class="panel-card-content">${body}</div>
     </details>
   `;
+}
+
+export function formatProductionBomText(bom) {
+  const blocks = ['Üretim Listesi', ''];
+  blocks.push('Kaydetme yok · yan yana birleşimde çiftli aparat, iç köşede köşe aparatı, T birleşimde ortak dikme uygulanır. Çiftli aparat T’de yok. Cam şerit panel_cam / panel_corner_cam olur. Baza dizisi ve aynı genişlikteki host sırtı uygulanır. Short-up eklemi yok.');
+  if (bom?.appliedEndToEndCount) blocks.push(`${bom.appliedEndToEndCount} yan yana eklem uygulandı.`);
+  if (bom?.appliedCornerCount) blocks.push(`${bom.appliedCornerCount} iç köşe eklem uygulandı.`);
+  if (bom?.appliedTeeCount) blocks.push(`${bom.appliedTeeCount} T birleşim uygulandı.`);
+  for (const note of bom?.relationshipNotes || []) blocks.push(note);
+  if (bom?.unresolved?.length) blocks.push(`${bom.unresolved.length} modül çözülemedi.`);
+
+  blocks.push('', 'Modüller');
+  if (!bom?.modules?.length) {
+    blocks.push('Sahnede modül yok.');
+  } else {
+    for (const entry of bom.modules) {
+      blocks.push('', `Modül ${entry.index + 1} · ${entry.name}`);
+      if (entry.itemKey) blocks.push(entry.itemKey);
+      if (entry.status === 'unresolved') blocks.push(entry.message || 'Çözülemedi.');
+      else if (entry.lines?.length) {
+        for (const line of entry.lines) blocks.push(lineLabel(line));
+      } else blocks.push('Alt item yok.');
+    }
+  }
+
+  blocks.push('', 'Birleşik leaf toplam');
+  const groups = groupBomLines(bom?.lines || []);
+  if (!groups.length && !bom?.printAreas?.length) blocks.push('Birleşik leaf satır yok.');
+  for (const group of groups) {
+    blocks.push('', group.label);
+    for (const line of group.lines) blocks.push(lineLabel(line));
+  }
+  for (const section of bom?.printAreas || []) {
+    blocks.push('', section.label);
+    for (const line of section.lines) blocks.push(printLineLabel(line));
+    blocks.push(`Toplam ${formatArea(section.totalAreaM2)} m²`);
+  }
+  blocks.push('');
+  return blocks.join('\n');
+}
+
+export function buildProductionBomHtml(bom, openCollapseKeys = new Set()) {
+  const moduleHtml = bom.modules.length
+    ? bom.modules.map((entry) => renderModuleHtml(entry, {
+      open: openCollapseKeys.has(moduleCollapseKey(entry)),
+    })).join('')
+    : '<p class="production-bom-panel__empty">Sahnede modül yok.</p>';
+
+  const unresolvedNote = bom.unresolved.length
+    ? `<p class="production-bom-panel__hint">${bom.unresolved.length} modül çözülemedi (kırmızı).</p>`
+    : '';
+
+  return `
+      <p class="production-bom-panel__hint"><button type="button" class="production-bom-panel__popout production-bom-panel__download" data-role="bom-download">Metin indir</button></p>
+      <p class="production-bom-panel__hint">Kaydetme yok · yan yana birleşimde çiftli aparat, iç köşede köşe aparatı, T birleşimde ortak dikme uygulanır. Çiftli aparat T’de yok. Cam şerit panel_cam / panel_corner_cam olur. Baza dizisi ve aynı genişlikteki host sırtı uygulanır. Short-up eklemi yok.</p>
+      ${bom.appliedEndToEndCount
+        ? `<p class="production-bom-panel__hint">${bom.appliedEndToEndCount} yan yana eklem uygulandı.</p>`
+        : ''}
+      ${bom.appliedCornerCount
+        ? `<p class="production-bom-panel__hint">${bom.appliedCornerCount} iç köşe eklem uygulandı.</p>`
+        : ''}
+      ${bom.appliedTeeCount
+        ? `<p class="production-bom-panel__hint">${bom.appliedTeeCount} T birleşim uygulandı.</p>`
+        : ''}
+      ${(bom.relationshipNotes || []).map((note) => (
+        `<p class="production-bom-panel__hint">${escapeHtml(note)}</p>`
+      )).join('')}
+      ${unresolvedNote}
+      ${renderCornerConnectorCallout(bom.lines)}
+      <details class="panel-card compact collapsible-panel production-bom-modules" data-bom-collapse-key="__modules__"${openCollapseKeys.has('__modules__') ? ' open' : ''}>
+        <summary class="panel-summary">
+          <span>Modüller</span>
+          <span class="panel-chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="panel-card-content">${moduleHtml}</div>
+      </details>
+      ${renderTotalsHtml(bom.lines, bom.printAreas, { open: openCollapseKeys.has('__totals__') })}
+    `;
 }
 
 export function createProductionBomPanel() {
@@ -218,41 +313,31 @@ export function createProductionBomPanel() {
   function refresh() {
     if (!body) return;
     captureOpenCollapseKeys();
-    const bom = resolveProjectBom(getModules(), getStand());
-    const moduleHtml = bom.modules.length
-      ? bom.modules.map((entry) => renderModuleHtml(entry, {
-        open: openCollapseKeys.has(moduleCollapseKey(entry)),
-      })).join('')
-      : '<p class="production-bom-panel__empty">Sahnede modül yok.</p>';
+    paint(buildProductionBomHtml(resolveProjectBom(getModules(), getStand()), openCollapseKeys));
+  }
 
-    const unresolvedNote = bom.unresolved.length
-      ? `<p class="production-bom-panel__hint">${bom.unresolved.length} modül çözülemedi (kırmızı).</p>`
-      : '';
+  function downloadProductionBomText(doc) {
+    const view = doc?.defaultView;
+    if (!view?.URL?.createObjectURL || !doc.body) return;
+    const blob = new view.Blob([formatProductionBomText(resolveProjectBom(getModules(), getStand()))], {
+      type: 'text/plain;charset=utf-8',
+    });
+    const url = view.URL.createObjectURL(blob);
+    const anchor = doc.createElement('a');
+    anchor.href = url;
+    anchor.download = 'uretim-listesi.txt';
+    doc.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    view.URL.revokeObjectURL(url);
+  }
 
-    paint(`
-      <p class="production-bom-panel__hint">Kaydetme yok · yan yana birleşimde çiftli aparat, iç köşede köşe aparatı, T birleşimde ortak dikme uygulanır. Çiftli aparat T’de yok. Cam şerit panel_cam / panel_corner_cam olur. Baza dizisi ve aynı genişlikteki host sırtı uygulanır. Short-up eklemi yok.</p>
-      ${bom.appliedEndToEndCount
-        ? `<p class="production-bom-panel__hint">${bom.appliedEndToEndCount} yan yana eklem uygulandı.</p>`
-        : ''}
-      ${bom.appliedCornerCount
-        ? `<p class="production-bom-panel__hint">${bom.appliedCornerCount} iç köşe eklem uygulandı.</p>`
-        : ''}
-      ${bom.appliedTeeCount
-        ? `<p class="production-bom-panel__hint">${bom.appliedTeeCount} T birleşim uygulandı.</p>`
-        : ''}
-      ${(bom.relationshipNotes || []).map((note) => (
-        `<p class="production-bom-panel__hint">${escapeHtml(note)}</p>`
-      )).join('')}
-      ${unresolvedNote}
-      <details class="panel-card compact collapsible-panel production-bom-modules" data-bom-collapse-key="__modules__"${openCollapseKeys.has('__modules__') ? ' open' : ''}>
-        <summary class="panel-summary">
-          <span>Modüller</span>
-          <span class="panel-chevron" aria-hidden="true"></span>
-        </summary>
-        <div class="panel-card-content">${moduleHtml}</div>
-      </details>
-      ${renderTotalsHtml(bom.lines, bom.printAreas, { open: openCollapseKeys.has('__totals__') })}
-    `);
+  function onDownloadClick(event) {
+    const button = event.target?.closest?.('[data-role="bom-download"]');
+    if (!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    downloadProductionBomText(button.ownerDocument);
   }
 
   function open() {
@@ -293,6 +378,7 @@ export function createProductionBomPanel() {
       child.document.write(`<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>Üretim Listesi</title><style>${POPUP_STYLE}</style></head><body><div id="production-bom-popup-root"></div></body></html>`);
       child.document.close();
       child.addEventListener('pagehide', onPopupHide);
+      child.document.addEventListener('click', onDownloadClick);
     }
     const root = child.document.getElementById('production-bom-popup-root');
     if (root && body) root.innerHTML = body.innerHTML;
@@ -352,6 +438,7 @@ export function createProductionBomPanel() {
 
   closeButton?.addEventListener('click', onCloseClick);
   popoutButton?.addEventListener('click', onPopoutClick);
+  body?.addEventListener('click', onDownloadClick);
   dragHandle?.addEventListener('mousedown', onDragStart);
   resizeHandle?.addEventListener('mousedown', onResizeStart);
   host.defaultView?.addEventListener('mousemove', onPointerMove);
@@ -374,6 +461,8 @@ export function createProductionBomPanel() {
     destroy() {
       closeButton?.removeEventListener('click', onCloseClick);
       popoutButton?.removeEventListener('click', onPopoutClick);
+      body?.removeEventListener('click', onDownloadClick);
+      popupWindow()?.document?.removeEventListener('click', onDownloadClick);
       const child = popupWindow();
       popup = null;
       if (child) child.close();
