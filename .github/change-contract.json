@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-same-document-mount-v1",
-  "kind": "architecture",
-  "summary": "Fair Stand CRM sayfasında iframe olmadan aynı belgede açılır.",
+  "id": "fair-stand-help-autosave-60s-v1",
+  "kind": "bugfix",
+  "summary": "Kullanım kılavuzundaki otomatik kayıt süresi en geç 60 saniye olarak yazılır.",
   "owners": [
-    "src/mountFairStand.js"
+    "src/helpGuide.js"
   ],
   "sourceOfTruth": [
-    "src/mountFairStand.js"
+    "src/helpGuide.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -868,7 +868,7 @@
         "F-041"
       ]
     },
-    "notes": "Fair Stand sahnesi CRM belgesine yazılır. Mount stili data-fair-stand-mount etiketindedir ve unmount onu siler. Mevcut test listesi daraltılmadı."
+    "notes": "Kılavuz otomatik kaydı en geç 60 saniye diye yazar. Denetleyici 30 saniye sessizlik ve 60 saniye üst sınır kullanır. Mevcut test listesi daraltılmadı."
   },
   "tests": {
     "targeted": [
@@ -894,16 +894,16 @@
         "e2e/floor-items-contract.spec.mjs",
         "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "Aynı belgeye alınan sahne tuvali ve klavyeyi CRM sayfasında tutar. Mevcut e2e listesi daraltılmadı."
+      "reason": "Kılavuz metni kullanım ekranında görünür. Mevcut e2e listesi daraltılmadı."
     }
   },
   "risk": {
-    "level": "medium",
-    "notes": "Iframe kalkınca klavye tek pencerede kalır. Mount stili sayfadan çıkınca silinir."
+    "level": "low",
+    "notes": "Yalnız kılavuz cümlesi değişir. Kayıt zamanlayıcısı aynı kalır."
   },
   "migration": {
     "required": false,
     "notes": "Yeni alan yok. archiveVersion değişmez."
   },
-  "rollback": "mountFairStand yine iframe belgesi açar."
+  "rollback": "Kılavuz cümlesi önceki süre metnine döner."
 }
