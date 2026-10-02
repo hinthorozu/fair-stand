@@ -44,6 +44,8 @@
       "backend/app/modules/fair_stand/api/routes.py",
       "backend/app/modules/fair_stand/application/admin_items.py",
       "backend/app/modules/fair_stand/application/admin_snap_catalog.py",
+      "backend/app/modules/fair_stand/application/catalog_item_order.py",
+      "backend/app/modules/fair_stand/application/preview_sanitize.py",
       "backend/scripts/verify_live_item_type_placement.py",
       "backend/scripts/verify_live_item_type_placement_motor.mjs",
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
@@ -68,6 +70,7 @@
       "src/catalog.js",
       "src/catalogBootstrap.js",
       "src/catalogPreviewRenderer.js",
+      "src/configuratorMarkup.js",
       "src/configuratorStyles.js",
       "src/cornerPlacement.js",
       "src/designState.js",
@@ -91,6 +94,7 @@
       "src/moduleRecipes.js",
       "src/mountFairStand.js",
       "src/panelGlassBom.js",
+      "src/productionBomPanel.css",
       "src/productionBomPanel.js",
       "src/projectActionSaveGuard.js",
       "src/projectBom.js",
@@ -101,6 +105,8 @@
       "src/scene3d.js",
       "src/standStandardsCopy.js",
       "src/stripOccupancy.js",
+      "src/style.css",
+      "src/systemChangeContract.js",
       "src/uiFeedback.js",
       "src/viewCube.js",
       "src/wallReflow.js",
@@ -382,6 +388,7 @@
       "audit/evidence/A03_ARCHITECTURE.md",
       "audit/evidence/A04_CATALOG_MODULE_CONTRACTS.md",
       "audit/evidence/A05_MODULE_BEHAVIOR.md",
+      "audit/evidence/A06_PLACEMENT_MOVE_ROTATION_COLLISION_REFLOW.md",
       "audit/evidence/A07_STATE_MODEL_FACTORIES.md",
       "audit/evidence/A08_PERSISTENCE_AUTOSAVE_ISOLATION.md",
       "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
@@ -831,6 +838,7 @@
       "docs/refactor/FAIR_STAND_DB_KULLANIM_KILAVUZU.md",
       "docs/refactor/ITEMS.md",
       "docs/refactor/ITEM_3D_PREVIEW.md",
+      "docs/refactor/ITEM_FIRST_ROADMAP.md",
       "docs/refactor/PENDING_ITEM_DECISIONS.md",
       "docs/refactor/PERFORMANCE_ROADMAP.md",
       "docs/refactor/REFACTOR.md",
@@ -859,7 +867,7 @@
         "F-041"
       ]
     },
-    "notes": "Tek override dikdörtgen stand.floorArea içindedir ve module değildir. Eski stand.itemKey ve stand.floorColor kayıtları tam baz zemin olarak açılır; archiveVersion 1 kalır. Dal farkı canlı paylaşım dosyalarını da içerir; onların güvenlik kararı durur ve bu zemin işi onu değiştirmez. F-014 açık modül BOM sınıflandırmasıdır; floor satırı o kararı ilerletemez. Listelenen diğer bulgular kapalıdır ve yeniden açılmaz."
+    "notes": "Tek override dikdörtgen stand.floorArea içindedir ve module değildir. Eski stand.itemKey ve stand.floorColor kayıtları tam baz zemin olarak açılır; archiveVersion 1 kalır. Dal farkı canlı paylaşım dosyalarını da içerir; onların güvenlik kararı durur ve bu zemin işi onu değiştirmez. F-014 açık modül BOM sınıflandırmasıdır; floor satırı o kararı ilerletemez. Listelenen diğer bulgular kapalıdır ve yeniden açılmaz. Üretim listesi metin indirmesi aynı çözülmüş listeyi yazar; köşe aparatı modül reçetesine eklenmez, birleşik toplamda birleşimin istediği adet olarak kalır."
   },
   "tests": {
     "targeted": [
@@ -868,7 +876,8 @@
       "test/projectImportValidation.test.js",
       "test/selectionFeedback.test.js",
       "test/scene3dPublicContract.test.js",
-      "test/floorItemsContract.test.js"
+      "test/floorItemsContract.test.js",
+      "test/productionBomPanelEntry.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -876,9 +885,10 @@
       "required": true,
       "targeted": [
         "e2e/floor-area.spec.mjs",
-        "e2e/floor-items-contract.spec.mjs"
+        "e2e/floor-items-contract.spec.mjs",
+        "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "Kullanıcı baz floor seçer, tek dikdörtgen override oluşturur, ikinci floor Item atar ve sahne görüntüsü değişir. Kayıt yenileme aynı ölçü ve Item ile geri gelir."
+      "reason": "Kullanıcı baz floor seçer, tek dikdörtgen override oluşturur, ikinci floor Item atar ve sahne görüntüsü değişir. Kayıt yenileme aynı ölçü ve Item ile geri gelir. Üretim listesi açılınca metin indirme düğmesi görünür."
     }
   },
   "risk": {
