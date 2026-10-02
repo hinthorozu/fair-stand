@@ -1,17 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-print-area-names-v1",
-  "kind": "feature",
-  "summary": "Üretim listesindeki görsel, lightbox, delikli branda ve strafor satırları dosya adı veya hex renk taşır. Aynı kimliğin farklı ölçüleri ayrı kalır ve altında o kimliğin m² toplamı yazılır.",
+  "id": "fair-stand-remove-catalog-resync-v1",
+  "kind": "tooling",
+  "summary": "Katalog satırlarını silip seed'den baştan yazan resync_catalog_from_seed.py kalkar. Deploy bu scripti çağırmaz.",
   "owners": [
-    "src/printAreaBom.js",
-    "src/productionBomPanel.js",
-    "src/projectBom.js",
-    "src/main.js"
+    "backend/app/modules/fair_stand/infrastructure/seed_catalog.py"
   ],
   "sourceOfTruth": [
-    "src/printAreaBom.js",
-    "src/productionBomPanel.js"
+    "backend/app/modules/fair_stand/infrastructure/seed_catalog.py"
   ],
   "impact": {
     "catalog": "affected",
@@ -866,7 +862,7 @@
         "F-041"
       ]
     },
-    "notes": "Baskı satırı görsel dosya adı veya hex renk ile başlar. cm ve m² kalır. Aynı dosya veya renk farklı ölçüdeyse satırlar ayrıdır ve altında o kimliğin toplam m²’si vardır. Bölüm toplamı durur. Donanım leaf satırları değişmez. Ad çözülemezse satır Görsel der. Kullanım kılavuzu ve B.14 baskı kararı aynı satır düzenini yazar."
+    "notes": "resync_catalog_from_seed.py silindi. seed_fair_stand_catalog hâlâ katalog tablolarını temizleyebilir; onu çağıran deploy scripti yok. Mevcut test listesi daraltılmadı."
   },
   "tests": {
     "targeted": [
@@ -894,11 +890,11 @@
   },
   "risk": {
     "level": "medium",
-    "notes": "Baskı kimliği yanlış birleşirse farklı görseller aynı satırda kalır. cm ve donanım satırları korunur."
+    "notes": "Script kalkınca sunucu katalog satırları deploy sırasında seed'den silinmez. Test veritabanındaki seed çağrıları durur."
   },
   "migration": {
     "required": false,
     "notes": "Yeni alan yok. archiveVersion değişmez."
   },
-  "rollback": "Baskı satırı yeniden yalnız ölçüye göre birleşir; dosya adı ve renk toplamı kalkar."
+  "rollback": "resync_catalog_from_seed.py geri gelir. Deploy onu kendi kendine çağırmaz."
 }
