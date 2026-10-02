@@ -27,3 +27,24 @@ test('baza face meshes use procedural aperture, not BOM panel stamp sizes', () =
   assert.ok(baseBlock.includes('const faceHeight = panelHeightM;'));
   assert.equal(baseBlock.includes('partSpanM('), false);
 });
+
+test('wall door and showcase panel meshes use the module scene aperture, not the leaf panel stamp', () => {
+  const slices = [
+    ['function createFlatPanelModule(', 'function createDoorModule('],
+    ['function createDoorModule(', 'function createSeparatorModule('],
+    ['function createShowcaseModule(', 'function createSelectionFrame('],
+  ];
+  for (const [startName, endName] of slices) {
+    const start = source.indexOf(startName);
+    const end = source.indexOf(endName, start);
+    const block = source.slice(start, end);
+    assert.ok(start >= 0 && end > start, startName);
+    assert.equal(block.includes('partSpanM('), false, startName);
+    assert.match(block, /new THREE\.BoxGeometry\(innerWidth, panelHeight, panelDepth\)/);
+    assert.match(block, /new THREE\.PlaneGeometry\(innerWidth, panelHeight\)/);
+  }
+  const showcaseStart = source.indexOf('function createShowcaseModule(');
+  const showcase = source.slice(showcaseStart, source.indexOf('function createSelectionFrame(', showcaseStart));
+  assert.match(showcase, /requireModuleSceneBoxCm\(\s*moduleState,\s*\['widthCm', 'heightCm', 'depthCm'\]/);
+  assert.equal(showcase.includes('bodyDefinition.item.dimensions.widthCm'), false);
+});
