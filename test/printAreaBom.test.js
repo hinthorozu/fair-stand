@@ -1,21 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { createModuleStateFromCatalogKey } from '../src/designState.js';
+import { initializeItemRegistry, listRegisteredItems } from '../src/items.js';
 import { collectPrintAreas } from '../src/printAreaBom.js';
 import { resolveProjectBom } from '../src/projectBom.js';
 import { formatProductionBomText } from '../src/productionBomPanel.js';
+
+const PANEL_BY_MODULE_WIDTH = {
+  50: { itemKey: 'panel_48_5', widthCm: 48.5, heightCm: 47 },
+  100: { itemKey: 'panel_98', widthCm: 98, heightCm: 47 },
+  150: { itemKey: 'panel_147_5', widthCm: 147.5, heightCm: 47 },
+  200: { itemKey: 'panel_197', widthCm: 197, heightCm: 47 },
+};
 
 function strip(stripIndex, extra = {}) {
   return { stripIndex, ...extra };
 }
 
 function wall(id, widthCm, strips) {
+  const panel = PANEL_BY_MODULE_WIDTH[widthCm];
   return {
     id,
     type: 'flat-panel',
     itemKey: widthCm === 100 ? 'wall_100_350' : 'wall_200_350',
     widthCm,
-    strips,
+    strips: strips.map((row) => ({ ...panel, ...row })),
   };
 }
 
@@ -36,7 +46,54 @@ function section(areas, id) {
   return areas.find((entry) => entry.id === id) ?? null;
 }
 
-test('a single printed panel is 100×50 cm and 0.50 m²', () => {
+test('print size uses scene dimensions per field and item dimensions when that field is empty', () => {
+  const snapshot = listRegisteredItems().map((item) => structuredClone(item));
+  try {
+    const next = snapshot.map((item) => structuredClone(item));
+    const panel = next.find((item) => item.itemKey === 'panel_48_5');
+    panel.sceneDimensions = { ...(panel.sceneDimensions ?? {}), widthCm: 40 };
+    initializeItemRegistry(next);
+    const overridden = section(collectPrintAreas([{
+      id: 'scene',
+      strips: [{
+        stripIndex: 0,
+        itemKey: 'panel_48_5',
+        widthCm: 48.5,
+        heightCm: 47,
+        imageAssetId: 'asset-a',
+      }],
+    }]), 'image');
+    assert.equal(overridden.lines[0].widthCm, 40);
+    assert.equal(overridden.lines[0].heightCm, 47);
+  } finally {
+    initializeItemRegistry(snapshot);
+  }
+
+  const fromItem = section(collectPrintAreas([{
+    id: 'item',
+    strips: [{
+      stripIndex: 0,
+      itemKey: 'panel_48_5',
+      widthCm: 1,
+      heightCm: 1,
+      imageAssetId: 'asset-a',
+    }],
+  }]), 'image');
+  assert.equal(fromItem.lines[0].widthCm, 48.5);
+  assert.equal(fromItem.lines[0].heightCm, 47);
+});
+
+test('a wall strip uses the catalog panel size, not the 50 cm band', () => {
+  const moduleState = createModuleStateFromCatalogKey('wall_50_350');
+  moduleState.strips[0].imageAssetId = 'asset-a';
+  const images = section(collectPrintAreas([moduleState]), 'image');
+  assert.equal(images.lines.length, 1);
+  assert.equal(images.lines[0].widthCm, 48.5);
+  assert.equal(images.lines[0].heightCm, 47);
+  assert.equal(images.lines[0].areaM2, 0.22795);
+});
+
+test('a single printed panel uses the catalog panel size', () => {
   const strips = [
     strip(0, { imageAssetId: 'asset-a', imageTransform: { mode: 'single' } }),
     strip(1),
@@ -46,15 +103,15 @@ test('a single printed panel is 100×50 cm and 0.50 m²', () => {
   assert.equal(areas.length, 1);
   assert.equal(images.lines.length, 1);
   assert.equal(images.lines[0].quantity, 1);
-  assert.equal(images.lines[0].widthCm, 100);
-  assert.equal(images.lines[0].heightCm, 50);
-  assert.equal(images.lines[0].areaM2, 0.5);
+  assert.equal(images.lines[0].widthCm, 98);
+  assert.equal(images.lines[0].heightCm, 47);
+  assert.equal(images.lines[0].areaM2, 0.4606);
   assert.equal(images.lines[0].name, 'Görsel');
   assert.equal(images.lines[0].subjectId, 'asset-a');
-  assert.equal(images.totalAreaM2, 0.5);
+  assert.equal(images.totalAreaM2, 0.4606);
 });
 
-test('a 2×3 panel image is one 200×150 cm piece at 3 m²', () => {
+test('a 2×3 panel image is one piece at the catalog panel size', () => {
   const modules = [0, 1].map((column) => wall(
     `m${column}`,
     100,
@@ -63,10 +120,10 @@ test('a 2×3 panel image is one 200×150 cm piece at 3 m²', () => {
   const images = section(collectPrintAreas(modules), 'image');
   assert.equal(images.lines.length, 1);
   assert.equal(images.lines[0].quantity, 1);
-  assert.equal(images.lines[0].widthCm, 200);
-  assert.equal(images.lines[0].heightCm, 150);
-  assert.equal(images.lines[0].areaM2, 3);
-  assert.equal(images.totalAreaM2, 3);
+  assert.equal(images.lines[0].widthCm, 196);
+  assert.equal(images.lines[0].heightCm, 141);
+  assert.equal(images.lines[0].areaM2, 2.7636);
+  assert.equal(images.totalAreaM2, 2.7636);
 });
 
 test('the same image at the same size shares one quantity line', () => {
@@ -80,11 +137,11 @@ test('the same image at the same size shares one quantity line', () => {
   assert.equal(images.lines.length, 1);
   assert.equal(images.lines[0].name, 'logo.png');
   assert.equal(images.lines[0].quantity, 2);
-  assert.equal(images.lines[0].widthCm, 100);
-  assert.equal(images.lines[0].heightCm, 50);
-  assert.equal(images.lines[0].areaM2, 0.5);
-  assert.equal(images.lines[0].totalAreaM2, 1);
-  assert.equal(images.totalAreaM2, 1);
+  assert.equal(images.lines[0].widthCm, 98);
+  assert.equal(images.lines[0].heightCm, 47);
+  assert.equal(images.lines[0].areaM2, 0.4606);
+  assert.equal(images.lines[0].totalAreaM2, 0.9212);
+  assert.equal(images.totalAreaM2, 0.9212);
 });
 
 test('different images at the same size stay separate lines', () => {
@@ -98,10 +155,10 @@ test('different images at the same size stay separate lines', () => {
   assert.equal(images.lines.length, 2);
   assert.equal(images.lines[0].quantity, 1);
   assert.equal(images.lines[1].quantity, 1);
-  assert.equal(images.lines[0].widthCm, 100);
-  assert.equal(images.lines[0].heightCm, 50);
-  assert.equal(images.lines[0].areaM2, 0.5);
-  assert.equal(images.totalAreaM2, 1);
+  assert.equal(images.lines[0].widthCm, 98);
+  assert.equal(images.lines[0].heightCm, 47);
+  assert.equal(images.lines[0].areaM2, 0.4606);
+  assert.equal(images.totalAreaM2, 0.9212);
   assert.deepEqual(images.lines.map((line) => line.subjectId).sort(), ['asset-a', 'asset-b']);
 });
 
@@ -124,18 +181,18 @@ test('the same image at two sizes stays on two lines and keeps one m² total', (
   const images = section(collectPrintAreas([wide, narrow], names), 'image');
   assert.equal(images.lines.length, 2);
   assert.equal(images.lines[0].name, 'logo.png');
-  assert.equal(images.lines[0].widthCm, 200);
-  assert.equal(images.lines[0].heightCm, 200);
-  assert.equal(images.lines[0].areaM2, 4);
-  assert.equal(images.lines[1].widthCm, 150);
-  assert.equal(images.lines[1].heightCm, 100);
-  assert.equal(images.lines[1].areaM2, 1.5);
-  assert.equal(images.totalAreaM2, 5.5);
+  assert.equal(images.lines[0].widthCm, 197);
+  assert.equal(images.lines[0].heightCm, 188);
+  assert.equal(images.lines[0].areaM2, 3.7036);
+  assert.equal(images.lines[1].widthCm, 147.5);
+  assert.equal(images.lines[1].heightCm, 94);
+  assert.equal(images.lines[1].areaM2, 1.3865);
+  assert.equal(images.totalAreaM2, 5.0901);
   const text = formatProductionBomText(resolveProjectBom([wide, narrow], null, names));
-  assert.match(text, /logo\.png · 1 × 200×200 cm · 4,00 m²/);
-  assert.match(text, /logo\.png · 1 × 150×100 cm · 1,50 m²/);
-  assert.match(text, /logo\.png toplam 5,50 m²/);
-  assert.match(text, /Toplam 5,50 m²/);
+  assert.match(text, /logo\.png · 1 × 197×188 cm · 3,70 m²/);
+  assert.match(text, /logo\.png · 1 × 147,5×94 cm · 1,39 m²/);
+  assert.match(text, /logo\.png toplam 5,09 m²/);
+  assert.match(text, /Toplam 5,09 m²/);
 });
 
 test('adjacent rect groups stay separate pieces when their regions restart', () => {
@@ -160,9 +217,9 @@ test('adjacent rect groups stay separate pieces when their regions restart', () 
   ));
   const images = section(collectPrintAreas([...first, ...second]), 'image');
   assert.equal(images.lines[0].quantity, 2);
-  assert.equal(images.lines[0].widthCm, 200);
-  assert.equal(images.lines[0].heightCm, 50);
-  assert.equal(images.totalAreaM2, 2);
+  assert.equal(images.lines[0].widthCm, 196);
+  assert.equal(images.lines[0].heightCm, 47);
+  assert.equal(images.totalAreaM2, 1.8424);
 });
 
 test('lightbox and mesh are separate pieces and their print is not also an image', () => {
@@ -180,12 +237,12 @@ test('lightbox and mesh are separate pieces and their print is not also an image
   assert.equal(section(areas, 'image'), null);
   const light = section(areas, 'lightbox');
   const meshSection = section(areas, 'mesh');
-  assert.equal(light.lines[0].widthCm, 100);
-  assert.equal(light.lines[0].heightCm, 150);
-  assert.equal(light.lines[0].areaM2, 1.5);
-  assert.equal(meshSection.lines[0].widthCm, 200);
-  assert.equal(meshSection.lines[0].heightCm, 100);
-  assert.equal(meshSection.lines[0].areaM2, 2);
+  assert.equal(light.lines[0].widthCm, 98);
+  assert.equal(light.lines[0].heightCm, 141);
+  assert.equal(light.lines[0].areaM2, 1.3818);
+  assert.equal(meshSection.lines[0].widthCm, 197);
+  assert.equal(meshSection.lines[0].heightCm, 94);
+  assert.equal(meshSection.lines[0].areaM2, 1.8518);
   assert.equal(meshSection.lines[0].name, 'Görsel');
   assert.equal(meshSection.lines[0].subjectId, 'mesh-print');
 });
@@ -200,9 +257,9 @@ test('a colored lightbox is named by its hex and is not an image line', () => {
   assert.equal(section(areas, 'image'), null);
   const light = section(areas, 'lightbox');
   assert.equal(light.lines[0].name, '#e11d48');
-  assert.equal(light.lines[0].widthCm, 100);
-  assert.equal(light.lines[0].heightCm, 100);
-  assert.equal(light.lines[0].areaM2, 1);
+  assert.equal(light.lines[0].widthCm, 98);
+  assert.equal(light.lines[0].heightCm, 94);
+  assert.equal(light.lines[0].areaM2, 0.9212);
 });
 
 test('styrofoam logos use width × height and ignore thickness', () => {
@@ -223,6 +280,124 @@ test('styrofoam logos use width × height and ignore thickness', () => {
   assert.equal(foam.lines[1].areaM2, 0.32);
   assert.equal(foam.lines[1].totalAreaM2, 0.64);
   assert.equal(foam.totalAreaM2, 3.64);
+});
+
+test('counter and base faces and the door leaf join the print list at their own panel size', () => {
+  const banko = {
+    id: 'banko',
+    type: 'counter',
+    widthCm: 100,
+    heightCm: 100,
+    faces: {
+      frontLower: {
+        widthCm: 98,
+        heightCm: 47,
+        imageAssetId: 'logo',
+        imageTransform: {
+          mode: 'rect-group',
+          regionStartX: 0,
+          regionStartY: 0,
+          regionWidth: 1,
+          regionHeight: 0.5,
+        },
+      },
+      frontUpper: {
+        widthCm: 98,
+        heightCm: 47,
+        imageAssetId: 'logo',
+        imageTransform: {
+          mode: 'rect-group',
+          regionStartX: 0,
+          regionStartY: 0.5,
+          regionWidth: 1,
+          regionHeight: 0.5,
+        },
+      },
+      leftLower: {
+        widthCm: 48.5,
+        heightCm: 47,
+        fabricGroupId: 'banko-mesh',
+        fabricType: 'mesh',
+        fabricImageAssetId: 'mesh-logo',
+      },
+      leftUpper: { widthCm: 48.5, heightCm: 47 },
+      rightLower: {
+        widthCm: 48.5,
+        heightCm: 47,
+        fabricGroupId: 'banko-light',
+        fabricType: 'lightbox',
+        fabricColor: '#112233',
+      },
+      rightUpper: {
+        widthCm: 48.5,
+        heightCm: 47,
+        fabricGroupId: 'banko-light',
+        fabricType: 'lightbox',
+        fabricColor: '#112233',
+      },
+    },
+  };
+  const base = {
+    id: 'base',
+    type: 'base',
+    widthCm: 100,
+    faces: {
+      front: { widthCm: 98, heightCm: 47, imageAssetId: 'logo' },
+      left: { widthCm: 48.5, heightCm: 47 },
+      right: { widthCm: 48.5, heightCm: 47 },
+    },
+  };
+  const door = {
+    id: 'door',
+    type: 'door',
+    widthCm: 100,
+    heightCm: 350,
+    strips: [strip(0, { itemKey: 'panel_98', imageAssetId: 'wall-logo' })],
+    surface: { itemKey: 'door_leaf_100', imageAssetId: 'leaf-logo' },
+  };
+  const areas = collectPrintAreas([banko, base, door], new Map([
+    ['logo', 'logo.png'],
+    ['mesh-logo', 'mesh.png'],
+    ['leaf-logo', 'kapi.png'],
+    ['wall-logo', 'serit.png'],
+  ]));
+  const images = section(areas, 'image');
+  const mesh = section(areas, 'mesh');
+  const light = section(areas, 'lightbox');
+  const byName = (lines, name) => lines.find((line) => line.name === name);
+  assert.equal(byName(images.lines, 'logo.png').widthCm, 98);
+  assert.equal(byName(images.lines, 'logo.png').heightCm, 94);
+  assert.equal(byName(images.lines, 'logo.png').quantity, 1);
+  assert.equal(byName(images.lines, 'logo.png').areaM2, 0.9212);
+  const baseLine = images.lines.find((line) => line.name === 'logo.png' && line.heightCm === 47);
+  assert.equal(baseLine.widthCm, 98);
+  assert.equal(baseLine.quantity, 1);
+  assert.equal(byName(images.lines, 'kapi.png').widthCm, 100);
+  assert.equal(byName(images.lines, 'kapi.png').heightCm, 200);
+  assert.equal(byName(images.lines, 'serit.png').widthCm, 98);
+  assert.equal(byName(images.lines, 'serit.png').heightCm, 47);
+  assert.equal(mesh.lines[0].name, 'mesh.png');
+  assert.equal(mesh.lines[0].widthCm, 48.5);
+  assert.equal(mesh.lines[0].heightCm, 47);
+  assert.equal(light.lines[0].name, '#112233');
+  assert.equal(light.lines[0].widthCm, 48.5);
+  assert.equal(light.lines[0].heightCm, 94);
+});
+
+test('the same image on two separate counter faces stays two pieces of that face size', () => {
+  const banko = {
+    id: 'banko',
+    type: 'counter',
+    faces: {
+      leftLower: { widthCm: 48.5, heightCm: 47, imageAssetId: 'logo' },
+      rightLower: { widthCm: 48.5, heightCm: 47, imageAssetId: 'logo' },
+    },
+  };
+  const images = section(collectPrintAreas([banko], new Map([['logo', 'logo.png']])), 'image');
+  assert.equal(images.lines.length, 1);
+  assert.equal(images.lines[0].quantity, 2);
+  assert.equal(images.lines[0].widthCm, 48.5);
+  assert.equal(images.lines[0].heightCm, 47);
 });
 
 test('project BOM carries print areas without adding them to hardware lines', () => {

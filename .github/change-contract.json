@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-remove-corner-bom-callout-v1",
+  "id": "fair-stand-print-loose-faces-v1",
   "kind": "bom-change",
-  "summary": "Üretim listesi ekranından ayrı Köşe Aparatı kutusu kalkar. Adet birleşik leaf toplamda durur.",
+  "summary": "Banko, baza ve kapı kanadı baskısı üretim listesine kendi panel ölçüsüyle girer.",
   "owners": [
-    "src/productionBomPanel.js"
+    "src/printAreaBom.js"
   ],
   "sourceOfTruth": [
-    "src/productionBomPanel.js"
+    "src/printAreaBom.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -862,7 +862,7 @@
         "F-041"
       ]
     },
-    "notes": "Ayrı Köşe Aparatı kutusu üretim listesi ekranından kalktı. connector_corner adedi birleşik leaf toplamda ve metin çıktısında durur. Mevcut test listesi daraltılmadı."
+    "notes": "Baskı ölçüsü panelde scene dimensions varsa oradan, alan boşsa item dimensions değerinden gelir. 50 cm şerit sabiti kullanılmaz. Mevcut test listesi daraltılmadı."
   },
   "tests": {
     "targeted": [
@@ -885,16 +885,16 @@
         "e2e/floor-items-contract.spec.mjs",
         "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "Üretim listesi açılınca ayrı Köşe Aparatı kutusu görünmez. Adet birleşik toplamda kalır. Mevcut e2e listesi daraltılmadı."
+      "reason": "Banko, baza ve kapı kanadı baskısı üretim listesinde görünür. Mevcut e2e listesi daraltılmadı."
     }
   },
   "risk": {
     "level": "medium",
-    "notes": "Ekrandaki ayrı kutu kalkar. Birleşik leaf toplamındaki köşe aparatı adedi durur."
+    "notes": "Duvar şeridi panel kaydını okur: scene dimensions, boş alanda item dimensions. 50 cm sabit yükseklik kalkar."
   },
   "migration": {
     "required": false,
     "notes": "Yeni alan yok. archiveVersion değişmez."
   },
-  "rollback": "Ayrı Köşe Aparatı kutusu üretim listesi ekranına geri gelir."
+  "rollback": "Baskı listesi yine yalnız duvar şeritlerini ve straforu sayar."
 }

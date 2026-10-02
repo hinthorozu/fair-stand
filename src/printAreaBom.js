@@ -1,4 +1,4 @@
-import { WALL_PANEL_BAND_PITCH_CM } from './wallPanelBand.js';
+import { getItem, resolveSceneDimensions } from './items.js';
 
 const REGION_EPSILON = 0.02;
 
@@ -14,31 +14,41 @@ function nearly(a, b) {
 }
 
 function roundCm(value) {
-  return Math.round(Number(value));
+  return Math.round(Number(value) * 10) / 10;
+}
+
+function positiveCm(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : null;
 }
 
 function areaM2(widthCm, heightCm) {
   return (widthCm * heightCm) / 10000;
 }
 
-function moduleWidthCm(module) {
-  const width = Number(module?.widthCm);
-  return Number.isFinite(width) && width > 0 ? width : null;
+function panelSizeCm(surface) {
+  const item = surface?.itemKey ? getItem(surface.itemKey) : null;
+  const dims = item ? resolveSceneDimensions(item) : null;
+  const width = positiveCm(dims?.widthCm) ?? positiveCm(surface?.widthCm);
+  const height = positiveCm(dims?.heightCm) ?? positiveCm(surface?.heightCm);
+  if (!(width > 0) || !(height > 0)) return null;
+  return { width, height };
 }
 
 function collectStripFaces(modules) {
   const faces = [];
   modules.forEach((module, moduleIndex) => {
-    const widthCm = moduleWidthCm(module);
-    if (widthCm == null) return;
     const strips = Array.isArray(module?.strips) ? module.strips : [];
     strips.forEach((strip, fallbackIndex) => {
       if (!strip || typeof strip !== 'object') return;
+      const size = panelSizeCm(strip);
+      if (!size) return;
       const stripIndex = Number.isInteger(strip.stripIndex) ? strip.stripIndex : fallbackIndex;
       faces.push({
         moduleIndex,
         stripIndex,
-        widthCm,
+        widthCm: size.width,
+        heightCm: size.height,
         imageAssetId: strip.imageAssetId || null,
         transform: strip.imageTransform && typeof strip.imageTransform === 'object'
           ? strip.imageTransform
@@ -85,7 +95,7 @@ function imagePieces(faces) {
     if (mode === 'horizontal-group') horizontal.push(face);
     else if (mode === 'rect-group') rect.push(face);
     else {
-      const single = piece(face.widthCm, WALL_PANEL_BAND_PITCH_CM, assetSubject(face.imageAssetId));
+      const single = piece(face.widthCm, face.heightCm, assetSubject(face.imageAssetId));
       if (single) pieces.push(single);
     }
   }
@@ -113,7 +123,7 @@ function clusterHorizontal(faces) {
       if (!current.length) return;
       const made = piece(
         current.reduce((sum, face) => sum + face.widthCm, 0),
-        WALL_PANEL_BAND_PITCH_CM,
+        current[0].heightCm,
         assetSubject(current[0].imageAssetId),
       );
       if (made) pieces.push(made);
@@ -173,14 +183,14 @@ function clusterRect(faces) {
     });
     for (const members of groupBy(cells, (cell) => find(cells.indexOf(cell))).values()) {
       const widths = new Map();
-      const strips = new Set();
+      const heights = new Map();
       for (const member of members) {
         widths.set(member.moduleIndex, member.widthCm);
-        strips.add(member.stripIndex);
+        heights.set(member.stripIndex, member.heightCm);
       }
       const made = piece(
         [...widths.values()].reduce((sum, width) => sum + width, 0),
-        strips.size * WALL_PANEL_BAND_PITCH_CM,
+        [...heights.values()].reduce((sum, height) => sum + height, 0),
         assetSubject(members[0].imageAssetId),
       );
       if (made) pieces.push(made);
@@ -201,19 +211,189 @@ function fabricSubject(cells) {
   return null;
 }
 
+
+function pushLooseSurface(records, module, moduleIndex, surface, slot) {
+  if (!surface || typeof surface !== 'object') return;
+  records.push({ module, moduleIndex, surface, slot });
+}
+
+function collectLooseFaces(modules) {
+  const cells = [];
+  modules.forEach((module, moduleIndex) => {
+    const records = [];
+    if (module?.faces && typeof module.faces === 'object') {
+      for (const [slot, surface] of Object.entries(module.faces)) {
+        pushLooseSurface(records, module, moduleIndex, surface, slot);
+      }
+    }
+    pushLooseSurface(records, module, moduleIndex, module?.surface, 'surface');
+    pushLooseSurface(records, module, moduleIndex, module?.bodySurface, 'body');
+    for (const record of records) {
+      const size = panelSizeCm(record.surface);
+      if (!size) continue;
+      const surface = record.surface;
+      cells.push({
+        moduleIndex,
+        slot: record.slot,
+        widthCm: size.width,
+        heightCm: size.height,
+        imageAssetId: surface.imageAssetId || null,
+        transform: surface.imageTransform && typeof surface.imageTransform === 'object'
+          ? surface.imageTransform
+          : null,
+        fabricGroupId: surface.fabricGroupId || null,
+        fabricType: surface.fabricType === 'mesh' ? 'mesh' : 'lightbox',
+        fabricImageAssetId: surface.fabricImageAssetId || null,
+        fabricColor: typeof surface.fabricColor === 'string' ? surface.fabricColor : null,
+      });
+    }
+  });
+  return cells;
+}
+
+function regionBox(cell) {
+  const transform = cell.transform;
+  if (!transform) return null;
+  const x = Number(transform.regionStartX);
+  const y = Number(transform.regionStartY);
+  const width = Number(transform.regionWidth);
+  const height = Number(transform.regionHeight);
+  if (![x, y, width, height].every((value) => Number.isFinite(value)) || !(width > 0) || !(height > 0)) {
+    return null;
+  }
+  return { x, y, width, height };
+}
+
+function groupedImageMode(cell) {
+  const mode = cell.transform?.mode;
+  return mode === 'rect-group' || mode === 'horizontal-group' || mode === 'size-group';
+}
+
+function regionsAbut(left, right) {
+  const leftX2 = left.x + left.width;
+  const leftY2 = left.y + left.height;
+  const rightX2 = right.x + right.width;
+  const rightY2 = right.y + right.height;
+  const overlapX = left.x < rightX2 - REGION_EPSILON && right.x < leftX2 - REGION_EPSILON;
+  const overlapY = left.y < rightY2 - REGION_EPSILON && right.y < leftY2 - REGION_EPSILON;
+  if (overlapX && overlapY) return false;
+  const touchX = nearly(leftX2, right.x) || nearly(rightX2, left.x);
+  const touchY = nearly(leftY2, right.y) || nearly(rightY2, left.y);
+  return (touchX && overlapY) || (touchY && overlapX);
+}
+
+function impliedGroupSize(cells) {
+  const widths = [];
+  const heights = [];
+  for (const cell of cells) {
+    const box = regionBox(cell);
+    const width = box ? cell.widthCm / box.width : cell.widthCm;
+    const height = box ? cell.heightCm / box.height : cell.heightCm;
+    if (width > 0) widths.push(width);
+    if (height > 0) heights.push(height);
+  }
+  if (!widths.length || !heights.length) return null;
+  return { width: Math.max(...widths), height: Math.max(...heights) };
+}
+
+function clusterLooseRegions(cells) {
+  const parent = cells.map((_, index) => index);
+  const find = (index) => {
+    let cursor = index;
+    while (parent[cursor] !== cursor) cursor = parent[cursor];
+    let compress = index;
+    while (parent[compress] !== cursor) {
+      const next = parent[compress];
+      parent[compress] = cursor;
+      compress = next;
+    }
+    return cursor;
+  };
+  const union = (left, right) => {
+    const rootLeft = find(left);
+    const rootRight = find(right);
+    if (rootLeft !== rootRight) parent[rootRight] = rootLeft;
+  };
+  cells.forEach((cell, index) => {
+    const box = regionBox(cell);
+    if (!box) return;
+    for (let other = index + 1; other < cells.length; other += 1) {
+      const otherBox = regionBox(cells[other]);
+      if (otherBox && regionsAbut(box, otherBox)) union(index, other);
+    }
+  });
+  const pieces = [];
+  for (const members of groupBy(cells, (cell) => find(cells.indexOf(cell))).values()) {
+    const size = impliedGroupSize(members);
+    const made = size
+      ? piece(size.width, size.height, assetSubject(members[0].imageAssetId))
+      : null;
+    if (made) pieces.push(made);
+  }
+  return pieces;
+}
+
+function looseImagePieces(cells) {
+  const printed = cells.filter((cell) => cell.imageAssetId && !cell.fabricGroupId);
+  const pieces = [];
+  const grouped = [];
+  for (const cell of printed) {
+    if (groupedImageMode(cell) && regionBox(cell)) grouped.push(cell);
+    else {
+      const single = piece(cell.widthCm, cell.heightCm, assetSubject(cell.imageAssetId));
+      if (single) pieces.push(single);
+    }
+  }
+  for (const bucket of groupBy(grouped, (cell) => cell.imageAssetId).values()) {
+    pieces.push(...clusterLooseRegions(bucket));
+  }
+  return pieces;
+}
+
+function looseFabricPieces(cells, kind) {
+  const members = cells.filter((cell) => cell.fabricGroupId && cell.fabricType === kind);
+  const pieces = [];
+  for (const group of groupBy(members, (cell) => cell.fabricGroupId).values()) {
+    const subject = fabricSubject(group);
+    const widths = new Set(group.map((cell) => cell.widthCm));
+    const heights = new Set(group.map((cell) => cell.heightCm));
+    if (widths.size === 1) {
+      const made = piece(
+        [...widths][0],
+        group.reduce((sum, cell) => sum + cell.heightCm, 0),
+        subject,
+      );
+      if (made) pieces.push(made);
+    } else if (heights.size === 1) {
+      const made = piece(
+        group.reduce((sum, cell) => sum + cell.widthCm, 0),
+        [...heights][0],
+        subject,
+      );
+      if (made) pieces.push(made);
+    } else {
+      for (const cell of group) {
+        const made = piece(cell.widthCm, cell.heightCm, subject);
+        if (made) pieces.push(made);
+      }
+    }
+  }
+  return pieces;
+}
+
 function fabricPieces(faces, kind) {
   const members = faces.filter((face) => face.fabricGroupId && face.fabricType === kind);
   const pieces = [];
   for (const cells of groupBy(members, (face) => face.fabricGroupId).values()) {
     const widths = new Map();
-    const strips = new Set();
+    const heights = new Map();
     for (const cell of cells) {
       widths.set(cell.moduleIndex, cell.widthCm);
-      strips.add(cell.stripIndex);
+      heights.set(cell.stripIndex, cell.heightCm);
     }
     const made = piece(
       [...widths.values()].reduce((sum, width) => sum + width, 0),
-      strips.size * WALL_PANEL_BAND_PITCH_CM,
+      [...heights.values()].reduce((sum, height) => sum + height, 0),
       fabricSubject(cells),
     );
     if (made) pieces.push(made);
@@ -288,16 +468,18 @@ function section(id, label, pieces, assetNames) {
 
 /**
  * Print pieces for the production list.
- * Panel size is module width by 50 cm bands. A grouped image or fabric block is one piece.
+ * Every print face uses the panel item: scene dimensions for a field when set, otherwise item dimensions.
+ * A grouped image or fabric block is one piece.
  * Fabric prints are not also counted as panel images.
  */
 export function collectPrintAreas(modules = [], assetNames = null) {
   const list = Array.isArray(modules) ? modules : [];
   const faces = collectStripFaces(list);
+  const loose = collectLooseFaces(list);
   const built = [
-    section('image', 'Görseller', imagePieces(faces), assetNames),
-    section('lightbox', 'Lightbox', fabricPieces(faces, 'lightbox'), assetNames),
-    section('mesh', 'Delikli branda', fabricPieces(faces, 'mesh'), assetNames),
+    section('image', 'Görseller', [...imagePieces(faces), ...looseImagePieces(loose)], assetNames),
+    section('lightbox', 'Lightbox', [...fabricPieces(faces, 'lightbox'), ...looseFabricPieces(loose, 'lightbox')], assetNames),
+    section('mesh', 'Delikli branda', [...fabricPieces(faces, 'mesh'), ...looseFabricPieces(loose, 'mesh')], assetNames),
     section('foam', 'Strafor logo', foamPieces(list), assetNames),
   ].filter(Boolean);
   const order = new Map(SECTION_DEFS.map((entry, index) => [entry.id, index]));
