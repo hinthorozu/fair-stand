@@ -211,7 +211,7 @@ function listGuideSections() {
         <li><strong>Proje adını değiştir:</strong> <strong>Değiştir</strong> butonu yalnızca tireden önceki proje/stand adı bölümünü düzenler. Otomatik <strong>StandTipi_X_Y</strong> bölümü korunur; örneğin <strong>Ferromet-L_Sol_800_600</strong> adı <strong>Umaay-L_Sol_800_600</strong> olarak değiştirilebilir.</li>
         <li><strong>Farklı Kaydet:</strong> sahne varken aktiftir. Mevcut sahneyi yeni proje UUID’si ve yeni görsel klasörüyle kopyalar; müşteri aynı kalır. Ad diyaloğu <strong>Yeni Proje</strong> ile aynı kuralı kullanır: stand adı + otomatik <strong>StandTipi_X_Y</strong>. Önerilen ön ek <strong>(1)</strong> ile biter. Eski proje olduğu gibi kalır. Sahne yokken kapalıdır.</li>
         <li><strong>Kaydet:</strong> sahne varken stand, modüller, yerleşimler ve proje durumunu kaydeder. Sahne yokken kapalıdır.</li>
-        <li><strong>Otomatik kayıt:</strong> Kayıtlı/açılmış projede değişiklik algılandıktan yaklaşık 5 saniye sonra çalışır.</li>
+        <li><strong>Otomatik kayıt:</strong> Kayıtlı/açılmış projede değişiklik en geç 60 saniye içinde kaydedilir.</li>
         <li><strong>Müşteri adı:</strong> Açık projenin bağlı olduğu müşterinin adı, proje adının üstünde görünür. Başka projeler bu ekranda listelenmez; yalnız açık proje üzerinde çalışılır.</li>
         <li><strong>Aç:</strong> Açık projeyi görselleriyle birlikte yeniden yükler.</li>
         <li><strong>Dışarı Aktar:</strong> Proje ve görselleri ZIP dosyasına paketler.</li>
