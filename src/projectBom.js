@@ -168,9 +168,9 @@ function unresolvedFrom(moduleEntries) {
  * Project modules → per-module BOM + unresolved + aggregated leaf totals.
  * Applies locked wall joints, then baza rows and same-width host backs.
  * @param {Array<{ id?: string, itemKey?: string, type?: string, placement?: object, widthCm?: number }>} modules
- * @param {{ xCm?: number, yCm?: number, itemKey?: string } | null} stand
+ * @param {Map<string, string> | Record<string, string> | null} assetNames
  */
-export function resolveProjectBom(modules = [], stand = null) {
+export function resolveProjectBom(modules = [], stand = null, assetNames = null) {
   const list = Array.isArray(modules) ? modules : [];
   const joints = detectRelationshipJoints(list);
   const wallShort = planWallShortRelationshipBom(list);
@@ -224,6 +224,6 @@ export function resolveProjectBom(modules = [], stand = null) {
     appliedCornerCount: adjusted.appliedCornerCount,
     appliedTeeCount: adjusted.appliedTeeCount,
     lines: Object.freeze(lines.map(freezeLine)),
-    printAreas: collectPrintAreas(list),
+    printAreas: collectPrintAreas(list, assetNames),
   });
 }

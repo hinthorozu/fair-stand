@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import { collectPrintAreas } from '../src/printAreaBom.js';
 import { resolveProjectBom } from '../src/projectBom.js';
+import { formatProductionBomText } from '../src/productionBomPanel.js';
 
 function strip(stripIndex, extra = {}) {
   return { stripIndex, ...extra };
@@ -48,6 +49,8 @@ test('a single printed panel is 100×50 cm and 0.50 m²', () => {
   assert.equal(images.lines[0].widthCm, 100);
   assert.equal(images.lines[0].heightCm, 50);
   assert.equal(images.lines[0].areaM2, 0.5);
+  assert.equal(images.lines[0].name, 'Görsel');
+  assert.equal(images.lines[0].subjectId, 'asset-a');
   assert.equal(images.totalAreaM2, 0.5);
 });
 
@@ -66,7 +69,25 @@ test('a 2×3 panel image is one 200×150 cm piece at 3 m²', () => {
   assert.equal(images.totalAreaM2, 3);
 });
 
-test('two identical image pieces share one quantity line', () => {
+test('the same image at the same size shares one quantity line', () => {
+  const one = wall('a', 100, [
+    strip(0, { imageAssetId: 'asset-a', imageTransform: { mode: 'single' } }),
+  ]);
+  const two = wall('b', 100, [
+    strip(0, { imageAssetId: 'asset-a', imageTransform: { mode: 'single' } }),
+  ]);
+  const images = section(collectPrintAreas([one, two], new Map([['asset-a', 'logo.png']])), 'image');
+  assert.equal(images.lines.length, 1);
+  assert.equal(images.lines[0].name, 'logo.png');
+  assert.equal(images.lines[0].quantity, 2);
+  assert.equal(images.lines[0].widthCm, 100);
+  assert.equal(images.lines[0].heightCm, 50);
+  assert.equal(images.lines[0].areaM2, 0.5);
+  assert.equal(images.lines[0].totalAreaM2, 1);
+  assert.equal(images.totalAreaM2, 1);
+});
+
+test('different images at the same size stay separate lines', () => {
   const one = wall('a', 100, [
     strip(0, { imageAssetId: 'asset-a', imageTransform: { mode: 'single' } }),
   ]);
@@ -74,11 +95,47 @@ test('two identical image pieces share one quantity line', () => {
     strip(0, { imageAssetId: 'asset-b', imageTransform: { mode: 'single' } }),
   ]);
   const images = section(collectPrintAreas([one, two]), 'image');
-  assert.equal(images.lines.length, 1);
-  assert.equal(images.lines[0].quantity, 2);
+  assert.equal(images.lines.length, 2);
+  assert.equal(images.lines[0].quantity, 1);
+  assert.equal(images.lines[1].quantity, 1);
+  assert.equal(images.lines[0].widthCm, 100);
+  assert.equal(images.lines[0].heightCm, 50);
   assert.equal(images.lines[0].areaM2, 0.5);
-  assert.equal(images.lines[0].totalAreaM2, 1);
   assert.equal(images.totalAreaM2, 1);
+  assert.deepEqual(images.lines.map((line) => line.subjectId).sort(), ['asset-a', 'asset-b']);
+});
+
+test('the same image at two sizes stays on two lines and keeps one m² total', () => {
+  function stacked(widthCm, rows, assetId) {
+    return wall(`w${widthCm}`, widthCm, Array.from({ length: rows }, (_, row) => strip(row, {
+      imageAssetId: assetId,
+      imageTransform: {
+        mode: 'rect-group',
+        regionStartX: 0,
+        regionWidth: 1,
+        regionStartY: row / rows,
+        regionHeight: 1 / rows,
+      },
+    })));
+  }
+  const wide = stacked(200, 4, 'asset-a');
+  const narrow = stacked(150, 2, 'asset-a');
+  const names = new Map([['asset-a', 'logo.png']]);
+  const images = section(collectPrintAreas([wide, narrow], names), 'image');
+  assert.equal(images.lines.length, 2);
+  assert.equal(images.lines[0].name, 'logo.png');
+  assert.equal(images.lines[0].widthCm, 200);
+  assert.equal(images.lines[0].heightCm, 200);
+  assert.equal(images.lines[0].areaM2, 4);
+  assert.equal(images.lines[1].widthCm, 150);
+  assert.equal(images.lines[1].heightCm, 100);
+  assert.equal(images.lines[1].areaM2, 1.5);
+  assert.equal(images.totalAreaM2, 5.5);
+  const text = formatProductionBomText(resolveProjectBom([wide, narrow], null, names));
+  assert.match(text, /logo\.png · 1 × 200×200 cm · 4,00 m²/);
+  assert.match(text, /logo\.png · 1 × 150×100 cm · 1,50 m²/);
+  assert.match(text, /logo\.png toplam 5,50 m²/);
+  assert.match(text, /Toplam 5,50 m²/);
 });
 
 test('adjacent rect groups stay separate pieces when their regions restart', () => {
@@ -129,6 +186,23 @@ test('lightbox and mesh are separate pieces and their print is not also an image
   assert.equal(meshSection.lines[0].widthCm, 200);
   assert.equal(meshSection.lines[0].heightCm, 100);
   assert.equal(meshSection.lines[0].areaM2, 2);
+  assert.equal(meshSection.lines[0].name, 'Görsel');
+  assert.equal(meshSection.lines[0].subjectId, 'mesh-print');
+});
+
+test('a colored lightbox is named by its hex and is not an image line', () => {
+  const lightbox = wall('light', 100, [0, 1].map((row) => strip(row, {
+    fabricGroupId: 'fabric-light',
+    fabricType: 'lightbox',
+    fabricColor: '#E11D48',
+  })));
+  const areas = collectPrintAreas([lightbox]);
+  assert.equal(section(areas, 'image'), null);
+  const light = section(areas, 'lightbox');
+  assert.equal(light.lines[0].name, '#e11d48');
+  assert.equal(light.lines[0].widthCm, 100);
+  assert.equal(light.lines[0].heightCm, 100);
+  assert.equal(light.lines[0].areaM2, 1);
 });
 
 test('styrofoam logos use width × height and ignore thickness', () => {
