@@ -1,13 +1,15 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-help-autosave-60s-v1",
+  "id": "fair-stand-box-block-surface-flags-v1",
   "kind": "bugfix",
-  "summary": "Kullanım kılavuzundaki otomatik kayıt süresi en geç 60 saniye olarak yazılır.",
+  "summary": "Kutu bloğun dört yan yüzü görsel, lightbox ve mesh alır. Lightbox ışığı yalnız o yüzde yanar. Ok kutuyu zemin ile tavan arasında yürütür.",
   "owners": [
-    "src/helpGuide.js"
+    "backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py"
   ],
   "sourceOfTruth": [
-    "src/helpGuide.js"
+    "backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py",
+    "backend/alembic/versions/0049_box_block_surface_flags.py",
+    "backend/alembic/versions/0050_box_block_rotation_45.py"
   ],
   "impact": {
     "catalog": "affected",
@@ -41,6 +43,7 @@
       "backend/app/modules/fair_stand/application/admin_snap_catalog.py",
       "backend/app/modules/fair_stand/application/catalog_item_order.py",
       "backend/app/modules/fair_stand/application/preview_sanitize.py",
+      "backend/app/modules/fair_stand/infrastructure/item_rotation_seed.py",
       "backend/scripts/verify_live_item_type_placement.py",
       "backend/scripts/verify_live_item_type_placement_motor.mjs",
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
@@ -56,6 +59,7 @@
       "scripts/check-src-syntax.mjs",
       "scripts/export-catalog-seed.mjs",
       "scripts/install-server.sh",
+      "scripts/strip-legacy-dimension-columns.mjs",
       "scripts/verify-change-contract.mjs",
       "src/assetStore.js",
       "src/autoDepot.js",
@@ -114,6 +118,7 @@
       "vite.config.js"
     ],
     "affectedTests": [
+      "backend/tests/modules/fair_stand/test_item_surface_flags.py",
       "e2e/base-items-contract.spec.mjs",
       "e2e/color-image-capability.spec.mjs",
       "e2e/commercial-items-contract.spec.mjs",
@@ -232,6 +237,7 @@
       "test/itemDocsRuntimeAlignment.test.js",
       "test/itemIsRenderFactory.test.js",
       "test/itemRotation.test.js",
+      "test/itemRotationSeed.mjs",
       "test/itemSceneDimensions.test.js",
       "test/itemScenePose.test.js",
       "test/itemSnapAnchor.test.js",
@@ -845,7 +851,13 @@
       "docs/refactor/REFACTOR.md",
       "docs/refactor/SCENE_POSE.md",
       "docs/refactor/TYPE_BEHAVIORS_DB_ROADMAP.md",
-      "scripts/archive/README.md"
+      "scripts/archive/README.md",
+      "audit/FULL_SWEEP_STATE.md",
+      "docs/items/audit/DEFAULT_OVERRIDE_HARITASI.md",
+      "docs/items/audit/FINAL_OZET.md",
+      "docs/items/audit/properties/properties/contract.state.owner.md",
+      "docs/items/audit/properties/properties/factory.reason.md",
+      "docs/items/audit/properties/properties/state.chairCount.md"
     ],
     "relatedFindings": {
       "affected": [],
@@ -860,6 +872,8 @@
         "F-014",
         "F-015",
         "F-017",
+        "F-018",
+        "F-019",
         "F-020",
         "F-025",
         "F-029",
@@ -868,22 +882,14 @@
         "F-041"
       ]
     },
-    "notes": "Kılavuz otomatik kaydı en geç 60 saniye diye yazar. Denetleyici 30 saniye sessizlik ve 60 saniye üst sınır kullanır. Mevcut test listesi daraltılmadı."
+    "notes": "Dört yüz faces.front/right/back/left üzerinde görsel, lightbox ve mesh taşır. Gövde renk ve saydamlığı kalır ve yanmaz. Lightbox ışığı seçilen yüzdedir. Ok yüksekliği taban 0 ve tavan eksi kutu yüksekliği ile sınırlıdır. Görsel, Lightbox ve Mesh görseli aynı sağ tık ölçü penceresini kullanır: başlangıç alanın kendi ölçüsü, küçük tekrar, büyük taşma. Kılavuz aynı davranışı yazar."
   },
   "tests": {
     "targeted": [
-      "test/mountFairStandBoundary.test.js",
-      "test/viewportToolbarController.test.js",
-      "test/viewportToolbarMainIntegration.test.js",
-      "test/floorArea.test.js",
-      "test/projectBom.test.js",
-      "test/projectImportValidation.test.js",
-      "test/selectionFeedback.test.js",
-      "test/scene3dPublicContract.test.js",
-      "test/floorItemsContract.test.js",
-      "test/printAreaBom.test.js",
-      "test/productionBomPanelEntry.test.js",
-      "test/helpGuide.test.js"
+      "test/boxBlockModule.test.js",
+      "test/itemSurfaceFlagAudit.test.js",
+      "test/helpGuide.test.js",
+      "backend/tests/modules/fair_stand/test_item_surface_flags.py"
     ],
     "fullSuite": true,
     "build": true,
@@ -894,16 +900,16 @@
         "e2e/floor-items-contract.spec.mjs",
         "e2e/visible-ui-b.spec.mjs"
       ],
-      "reason": "Kılavuz metni kullanım ekranında görünür. Mevcut e2e listesi daraltılmadı."
+      "reason": "Bayraklar katalog verisi. Mevcut tarayıcı listesi daraltılmadı."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Yalnız kılavuz cümlesi değişir. Kayıt zamanlayıcısı aynı kalır."
+    "notes": "Yalnız box_block yüzey bayrakları değişir. Dört yüz ve yükseklik yürütmesi yazılmaz."
   },
   "migration": {
-    "required": false,
-    "notes": "Yeni alan yok. archiveVersion değişmez."
+    "required": true,
+    "notes": "0049 mevcut box_block satırında accepts_image, accepts_lightbox ve accepts_mesh değerlerini true yapar. Renk, cam ve default_opacity kolonlarına dokunmaz. 0050 rotation_step_deg değerini 45 yapar; default_rotation_deg ve side_insert_rotation aynı kalır."
   },
-  "rollback": "Kılavuz cümlesi önceki süre metnine döner."
+  "rollback": "0049 downgrade aynı üç bayrağı false yapar. 0050 downgrade rotation_step_deg değerini 90 yapar."
 }

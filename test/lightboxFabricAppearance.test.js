@@ -12,6 +12,10 @@ test('lightbox fabric owns one persistent color and image state', () => {
   assert.match(scene, /state\.fabricColor = hexColor/);
   assert.match(scene, /state\.fabricImageAssetId = assetId/);
   assert.match(scene, /new THREE\.CanvasTexture\(canvas\)/);
+  assert.match(scene, /fabricImageFit === 'size'/);
+  assert.match(scene, /state\.fabricImageWidthCm = width/);
+  assert.match(scene, /computeImageSizeTile\(planeWidth \* 100, planeHeight \* 100, widthCm, heightCm\)/);
+  assert.doesNotMatch(scene, /Lightbox\/Mesh kaplamasının ölçüsü bu yoldan değişmez/);
 });
 
 test('main editor treats a fabric group as one color and image target', () => {

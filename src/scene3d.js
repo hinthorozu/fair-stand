@@ -47,7 +47,7 @@ import { resolveModuleStripOccupancy } from './stripOccupancy.js';
 import { createHorizontalImageLayout } from './horizontalImageLayout.js';
 import { createRectImageLayout, visualImageColumnItems } from './rectImageLayout.js';
 import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSelection } from './rectSelection.js';
-import { applyColorOverride, createDefaultImageTransform } from './designState.js';
+import { applyColorOverride, createDefaultImageTransform, ensureBoxBlockFaces } from './designState.js';
 import {
   applyGlassOverride,
   bindRendererSurfaceState,
@@ -1938,6 +1938,16 @@ export function createStandScene(
     return null;
   }
 
+  function nearestBoxFaceHit(hits) {
+    if (!hits?.length) return null;
+    const closest = hits[0];
+    const faceHit = hits.find((entry) => (
+      entry.object?.userData?.faceSlot
+      && entry.distance <= closest.distance + 0.03
+    ));
+    return faceHit ?? closest;
+  }
+
   function pickModuleAt(clientX, clientY) {
     // Idle frames are throttled, so a module can sit with a stale world matrix
     // until the next render. Raycast uses that matrix and would miss the mesh.
@@ -1945,11 +1955,10 @@ export function createStandScene(
     setPointerFromClient(clientX, clientY);
     raycaster.setFromCamera(pointer, camera);
     const hits = raycaster.intersectObjects(wallRoot.children, true);
-    for (const hit of hits) {
-      const moduleGroup = findModuleGroup(hit.object);
-      if (moduleGroup) return { moduleGroup, hit };
-    }
-    return null;
+    const moduleHits = hits.filter((hit) => findModuleGroup(hit.object));
+    if (!moduleHits.length) return null;
+    const chosen = nearestBoxFaceHit(moduleHits);
+    return { moduleGroup: findModuleGroup(chosen.object), hit: chosen };
   }
 
   function getGroundPoint(clientX, clientY) {
@@ -2110,10 +2119,16 @@ export function createStandScene(
         ? Boolean(surface.userData.surfaceState?.fabricLightingOn && surface.userData.surfaceState?.fabricType !== 'mesh')
         : false,
       hasImage: Boolean(
-        surface
-        && surface.userData.acceptsImage !== false
-        && surface.userData.surfaceState?.imageAssetId
-        && !surface.userData.surfaceState?.fabricGroupId,
+        surface && (
+          (
+            surface.userData.acceptsImage !== false
+            && surface.userData.surfaceState?.imageAssetId
+            && !surface.userData.surfaceState?.fabricGroupId
+          ) || (
+            surface.userData.surfaceState?.fabricGroupId
+            && surface.userData.surfaceState?.fabricImageAssetId
+          )
+        ),
       ),
       clientX: event.clientX,
       clientY: event.clientY,
@@ -3464,6 +3479,8 @@ export function createStandScene(
           state.fabricColor = hexColor;
           state.fabricImageAssetId = null;
           state.fabricImageFit = 'cover';
+          delete state.fabricImageWidthCm;
+          delete state.fabricImageHeightCm;
           state.fabricLightingOn = false;
         });
       });
@@ -3711,13 +3728,45 @@ export function createStandScene(
     material.needsUpdate = true;
   }
 
-  function loadFabricOverlayImage(overlay, assetId, fit = 'cover') {
+  function loadFabricOverlayImage(overlay, assetId, fit = 'cover', sizeCm = null) {
     const assetUrl = getAssetUrl(assetId);
     if (!overlay?.material || !assetUrl) return;
 
     textureLoader.load(
       assetUrl,
       (sourceTexture) => {
+        if (fit === 'size') {
+          const image = sourceTexture.image;
+          const widthCm = Number(sizeCm?.widthCm);
+          const heightCm = resolveImageTileHeightCm(
+            widthCm,
+            sizeCm?.heightCm,
+            image?.naturalWidth ?? image?.width,
+            image?.naturalHeight ?? image?.height,
+          );
+          const planeWidth = Number(overlay.geometry?.parameters?.width) || 0;
+          const planeHeight = Number(overlay.geometry?.parameters?.height) || 0;
+          const tile = computeImageSizeTile(planeWidth * 100, planeHeight * 100, widthCm, heightCm);
+          if (!tile) {
+            sourceTexture.dispose();
+            return;
+          }
+          sourceTexture.colorSpace = THREE.SRGBColorSpace;
+          sourceTexture.wrapS = THREE.RepeatWrapping;
+          sourceTexture.wrapT = THREE.RepeatWrapping;
+          sourceTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          sourceTexture.center.set(0, 0);
+          sourceTexture.repeat.set(tile.repeatX, tile.repeatY);
+          sourceTexture.offset.set(tile.offsetX, tile.offsetY);
+          sourceTexture.rotation = 0;
+          sourceTexture.needsUpdate = true;
+          overlay.material.map?.dispose?.();
+          overlay.material.map = sourceTexture;
+          overlay.material.color.set(0xffffff);
+          applyFabricOverlayLighting(overlay, overlay.userData.fabricState);
+          return;
+        }
+
         const image = sourceTexture.image;
         const imageWidth = Number(image?.naturalWidth || image?.videoWidth || image?.width) || 0;
         const imageHeight = Number(image?.naturalHeight || image?.videoHeight || image?.height) || 0;
@@ -3857,7 +3906,9 @@ export function createStandScene(
       const fabricState = first.userData.surfaceState ?? {};
       const fabricType = fabricState.fabricType === 'mesh' ? 'mesh' : 'lightbox';
       const fabricImageAssetId = fabricState.fabricImageAssetId ?? null;
-      const fabricImageFit = fabricState.fabricImageFit === 'contain' ? 'contain' : 'cover';
+      const fabricImageFit = fabricState.fabricImageFit === 'size'
+        ? 'size'
+        : (fabricState.fabricImageFit === 'contain' ? 'contain' : 'cover');
       const fabricColor = fabricState.fabricColor ?? fabricState.color ?? '#ffffff';
       const baseColor = new THREE.Color(fabricImageAssetId ? '#ffffff' : fabricColor);
       const overlayMaterial = new THREE.MeshStandardMaterial({
@@ -3897,7 +3948,10 @@ export function createStandScene(
       overlayParent.add(overlay);
       fabricOverlayMeshes.push(overlay);
       if (fabricImageAssetId) {
-        loadFabricOverlayImage(overlay, fabricImageAssetId, fabricImageFit);
+        loadFabricOverlayImage(overlay, fabricImageAssetId, fabricImageFit, {
+          widthCm: fabricState.fabricImageWidthCm,
+          heightCm: fabricState.fabricImageHeightCm,
+        });
       }
     });
   }
@@ -3997,6 +4051,8 @@ export function createStandScene(
           state.fabricColor = initialFabricColor;
           state.fabricImageAssetId = null;
           state.fabricImageFit = 'cover';
+          delete state.fabricImageWidthCm;
+          delete state.fabricImageHeightCm;
           state.fabricLightingOn = false;
           state.fabricOwnerSurfaceIds = [...fabricOwnerSurfaceIds];
           state.fabricOwnerModuleIds = [...fabricOwnerModuleIds];
@@ -4366,11 +4422,53 @@ export function createStandScene(
     }));
   }
 
+  function sharedFabricImage(meshes) {
+    const groupIds = [...new Set(meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean))];
+    if (groupIds.length !== 1) return null;
+    const [groupId] = groupIds;
+    if (!meshes.every((mesh) => mesh.userData.surfaceState?.fabricGroupId === groupId)) return null;
+    const assetIds = [...new Set(meshes.map((mesh) => mesh.userData.surfaceState?.fabricImageAssetId).filter(Boolean))];
+    if (assetIds.length !== 1) return null;
+    return { groupId, assetId: assetIds[0] };
+  }
+
+  function measureImageAreaCm(meshes) {
+    let areaWidthCm;
+    let areaHeightCm;
+    let columnCount = 1;
+    let rowCount = 1;
+    if (meshes.length === 1) {
+      areaWidthCm = Number(meshes[0].geometry?.parameters?.width) * 100;
+      areaHeightCm = Number(meshes[0].geometry?.parameters?.height) * 100;
+    } else {
+      const layout = createRectImageLayout(imageLayoutItems(meshes));
+      if (!layout.ok) return layout;
+      areaWidthCm = layout.totalWidth * 100;
+      areaHeightCm = layout.totalHeight * 100;
+      columnCount = layout.columnCount;
+      rowCount = layout.rowCount;
+    }
+    if (!(areaWidthCm > 0) || !(areaHeightCm > 0)) {
+      return { ok: false, message: 'Seçili alanın ölçüsü okunamadı.' };
+    }
+    return { ok: true, areaWidthCm, areaHeightCm, columnCount, rowCount };
+  }
+
   function resolveImageBlock(surfaceId) {
     const seed = surfaceMeshes.find((surface) => surface.userData.surfaceId === surfaceId);
-    if (!seed || seed.userData.acceptsImage === false) return [];
+    if (!seed) return [];
+    const fabricGroupId = seed.userData.surfaceState?.fabricGroupId;
+    if (fabricGroupId) {
+      const fabricAssetId = seed.userData.surfaceState?.fabricImageAssetId;
+      if (!fabricAssetId) return [];
+      return surfaceMeshes.filter((mesh) => (
+        mesh.userData.surfaceState?.fabricGroupId === fabricGroupId
+        && mesh.userData.surfaceState?.fabricImageAssetId === fabricAssetId
+      ));
+    }
+    if (seed.userData.acceptsImage === false) return [];
     const assetId = seed.userData.surfaceState?.imageAssetId;
-    if (!assetId || seed.userData.surfaceState?.fabricGroupId) return [];
+    if (!assetId) return [];
 
     const selected = [...selectedSurfaces].filter((mesh) => (
       mesh.userData.acceptsImage !== false
@@ -4391,51 +4489,46 @@ export function createStandScene(
   }
 
   function describeImageSizeTarget(meshOrMeshes) {
-    const meshes = normalizeMeshes(meshOrMeshes).filter((mesh) => mesh?.material && mesh.userData.acceptsImage !== false);
+    const meshes = normalizeMeshes(meshOrMeshes).filter((mesh) => {
+      if (!mesh?.material) return false;
+      if (mesh.userData.surfaceState?.fabricGroupId) return true;
+      return mesh.userData.acceptsImage !== false;
+    });
     if (!meshes.length) {
       return { ok: false, message: 'Ölçülendirmek için önce bir panel seç.' };
     }
-    if (meshes.some((mesh) => mesh.userData.surfaceState?.fabricGroupId)) {
-      return { ok: false, message: 'Lightbox/Mesh kaplamasının ölçüsü bu yoldan değişmez.' };
+    const fabric = sharedFabricImage(meshes);
+    if (meshes.some((mesh) => mesh.userData.surfaceState?.fabricGroupId) && !fabric) {
+      return { ok: false, message: 'Ölçülendirmek için Lightbox veya Mesh kaplamasına önce bir görsel ata.' };
     }
-    const assetIds = new Set(meshes.map((mesh) => mesh.userData.surfaceState?.imageAssetId).filter(Boolean));
+    const assetIds = fabric
+      ? new Set([fabric.assetId])
+      : new Set(meshes.map((mesh) => mesh.userData.surfaceState?.imageAssetId).filter(Boolean));
     if (assetIds.size !== 1) {
       return { ok: false, message: 'Ölçülendirmek için önce bu alana bir görsel ata.' };
     }
 
-    let areaWidthCm;
-    let areaHeightCm;
-    let columnCount = 1;
-    let rowCount = 1;
-    if (meshes.length === 1) {
-      areaWidthCm = Number(meshes[0].geometry?.parameters?.width) * 100;
-      areaHeightCm = Number(meshes[0].geometry?.parameters?.height) * 100;
-    } else {
-      const layout = createRectImageLayout(imageLayoutItems(meshes));
-      if (!layout.ok) return layout;
-      areaWidthCm = layout.totalWidth * 100;
-      areaHeightCm = layout.totalHeight * 100;
-      columnCount = layout.columnCount;
-      rowCount = layout.rowCount;
-    }
-    if (!(areaWidthCm > 0) || !(areaHeightCm > 0)) {
-      return { ok: false, message: 'Seçili alanın ölçüsü okunamadı.' };
-    }
+    const area = measureImageAreaCm(meshes);
+    if (!area.ok) return area;
 
-    const transform = meshes[0].userData.surfaceState?.imageTransform;
-    const sized = transform?.fit === 'size';
-    const currentWidthCm = sized && Number(transform.widthCm) > 0 ? Number(transform.widthCm) : areaWidthCm;
-    const currentHeightCm = sized && Number(transform.heightCm) > 0 ? Number(transform.heightCm) : areaHeightCm;
+    const surfaceState = meshes[0].userData.surfaceState;
+    const sized = fabric
+      ? surfaceState?.fabricImageFit === 'size'
+      : surfaceState?.imageTransform?.fit === 'size';
+    const storedWidth = fabric ? surfaceState?.fabricImageWidthCm : surfaceState?.imageTransform?.widthCm;
+    const storedHeight = fabric ? surfaceState?.fabricImageHeightCm : surfaceState?.imageTransform?.heightCm;
+    const currentWidthCm = sized && Number(storedWidth) > 0 ? Number(storedWidth) : area.areaWidthCm;
+    const currentHeightCm = sized && Number(storedHeight) > 0 ? Number(storedHeight) : area.areaHeightCm;
     return {
       ok: true,
       assetId: [...assetIds][0],
-      areaWidthCm,
-      areaHeightCm,
+      areaWidthCm: area.areaWidthCm,
+      areaHeightCm: area.areaHeightCm,
       currentWidthCm,
       currentHeightCm,
       panelCount: meshes.length,
-      columnCount,
-      rowCount,
+      columnCount: area.columnCount,
+      rowCount: area.rowCount,
     };
   }
 
@@ -4447,12 +4540,44 @@ export function createStandScene(
     }
     const height = Number(heightCm);
     const storedHeight = Number.isFinite(height) && height > 0 ? height : null;
-    const meshes = normalizeMeshes(meshOrMeshes).filter((mesh) => mesh?.material && mesh.userData.acceptsImage !== false);
+    const meshes = normalizeMeshes(meshOrMeshes).filter((mesh) => {
+      if (!mesh?.material) return false;
+      if (mesh.userData.surfaceState?.fabricGroupId) return true;
+      return mesh.userData.acceptsImage !== false;
+    });
     if (!meshes.length) {
       return { ok: false, message: 'Bu modüle görsel uygulanamaz; yalnızca renk uygulanabilir.' };
     }
-    if (meshes.some((mesh) => mesh.userData.surfaceState?.fabricGroupId)) {
-      return { ok: false, message: 'Lightbox/Mesh kaplamasının ölçüsü bu yoldan değişmez.' };
+    const fabric = sharedFabricImage(meshes);
+    if (meshes.some((mesh) => mesh.userData.surfaceState?.fabricGroupId) && !fabric) {
+      return { ok: false, message: 'Ölçülendirmek için Lightbox veya Mesh kaplamasına önce bir görsel ata.' };
+    }
+    if (fabric) {
+      const area = measureImageAreaCm(meshes);
+      if (!area.ok) return area;
+      const groupSurfaces = surfaceMeshes.filter(
+        (surface) => surface.userData.surfaceState?.fabricGroupId === fabric.groupId,
+      );
+      groupSurfaces.forEach((surface) => {
+        writePersistentSurface(surface, (state) => {
+          state.fabricImageAssetId = assetId;
+          state.fabricImageFit = 'size';
+          state.fabricImageWidthCm = width;
+          if (storedHeight) state.fabricImageHeightCm = storedHeight;
+          else delete state.fabricImageHeightCm;
+        });
+      });
+      rebuildFabricOverlays();
+      return {
+        ok: true,
+        panelCount: groupSurfaces.length,
+        widthCm: width,
+        heightCm: storedHeight,
+        areaWidthCm: area.areaWidthCm,
+        areaHeightCm: area.areaHeightCm,
+        columnCount: area.columnCount,
+        rowCount: area.rowCount,
+      };
     }
 
     let entries;
@@ -4594,6 +4719,8 @@ export function createStandScene(
         writePersistentSurface(surface, (state) => {
           state.fabricImageAssetId = assetId;
           state.fabricImageFit = fit === 'contain' ? 'contain' : 'cover';
+          delete state.fabricImageWidthCm;
+          delete state.fabricImageHeightCm;
         });
       });
       rebuildFabricOverlays();
@@ -4663,6 +4790,8 @@ export function createStandScene(
         writePersistentSurface(surface, (state) => {
           state.fabricImageAssetId = null;
           state.fabricImageFit = 'cover';
+          delete state.fabricImageWidthCm;
+          delete state.fabricImageHeightCm;
         });
       });
     });
@@ -4740,7 +4869,7 @@ export function createStandScene(
     // davranışını koru (örn. banko özel çoklu seçimi).
     const panelHit = rectangleSelect
       ? hits.find((entry) => entry.object?.userData?.selectionMode === 'panel')
-      : null;
+      : nearestBoxFaceHit(hits);
     const hit = panelHit ?? hits[0];
 
     if (hit) {
@@ -5110,6 +5239,84 @@ export function createStandScene(
           clearPlacementFeedback();
           return;
         }
+      }
+
+      if (moduleState.type === 'box-block') {
+        const stepCm = getModulePlacementSnapCm(moduleState.type);
+        const moduleWorldPosition = new THREE.Vector3();
+        moduleGroup.getWorldPosition(moduleWorldPosition);
+        const projectedOrigin = moduleWorldPosition.clone().project(camera);
+        const worldStepM = stepCm / 100;
+        const candidates = [
+          { kind: 'x', deltaCm: stepCm, world: new THREE.Vector3(worldStepM, 0, 0) },
+          { kind: 'x', deltaCm: -stepCm, world: new THREE.Vector3(-worldStepM, 0, 0) },
+          { kind: 'y', deltaCm: stepCm, world: new THREE.Vector3(0, 0, worldStepM) },
+          { kind: 'y', deltaCm: -stepCm, world: new THREE.Vector3(0, 0, -worldStepM) },
+          { kind: 'z', deltaCm: stepCm, world: new THREE.Vector3(0, worldStepM, 0) },
+          { kind: 'z', deltaCm: -stepCm, world: new THREE.Vector3(0, -worldStepM, 0) },
+        ];
+        const bestArrowMove = candidates
+          .map((candidate) => {
+            const projectedTarget = moduleWorldPosition.clone().add(candidate.world).project(camera);
+            const screenDelta = new THREE.Vector2(
+              projectedTarget.x - projectedOrigin.x,
+              projectedTarget.y - projectedOrigin.y,
+            );
+            const lengthSq = screenDelta.lengthSq();
+            const score = lengthSq > 1e-12
+              ? screenDelta.normalize().dot(arrowScreenDirection)
+              : -Infinity;
+            return { ...candidate, score };
+          })
+          .sort((a, b) => b.score - a.score)[0];
+        if (!bestArrowMove || !Number.isFinite(bestArrowMove.score)) return;
+
+        if (bestArrowMove.kind === 'z') {
+          const currentZCm = Number(moduleState.placement.zCm || 0);
+          const nextZCm = stepWallShortFloorZCm(currentZCm, bestArrowMove.deltaCm, moduleState.heightCm);
+          if (nextZCm === currentZCm) {
+            showPlacementFeedback('Kutu bu yönde stand sınırına ulaştı.', { durationMs: 900 });
+            return;
+          }
+          const liftedPlacement = { ...moduleState.placement, zCm: nextZCm };
+          moduleState.placement = { ...liftedPlacement };
+          moduleGroup.userData.placement = { ...liftedPlacement };
+          applyPlacementToGroup(moduleGroup, liftedPlacement, moduleState.widthCm);
+          clearPlacementFeedback();
+          return;
+        }
+
+        const desiredPlacement = createModulePlacement({
+          ...moduleState.placement,
+          xCm: Number(moduleState.placement.xCm || 0) + (bestArrowMove.kind === 'x' ? bestArrowMove.deltaCm : 0),
+          yCm: Number(moduleState.placement.yCm || 0) + (bestArrowMove.kind === 'y' ? bestArrowMove.deltaCm : 0),
+          wallId: 'free',
+        });
+        desiredPlacement.zCm = Number(moduleState.placement.zCm || 0);
+        const renderedModules = getRenderedModuleStates();
+        const validation = validatePlacementAgainstModules({
+          placement: desiredPlacement,
+          widthCm: moduleState.widthCm,
+          depthCm: moduleState.depthCm,
+          moduleId: moduleState.id,
+          moduleType: moduleState.type,
+          itemKey: moduleState.itemKey,
+          heightCm: moduleState.heightCm,
+          shape: moduleState.shape,
+          modules: renderedModules,
+          standType: stageLayout.standType,
+          standXCm: stageLayout.widthCm,
+          standYCm: stageLayout.depthCm,
+        });
+        if (!validation.ok) {
+          showPlacementFeedback(validation.message ?? 'Kutu bu yönde hareket edemez.', { durationMs: 900 });
+          return;
+        }
+        moduleState.placement = { ...desiredPlacement };
+        moduleGroup.userData.placement = { ...desiredPlacement };
+        applyPlacementToGroup(moduleGroup, desiredPlacement, moduleState.widthCm);
+        clearPlacementFeedback();
+        return;
       }
 
       const stepCm = isTopFixtureType(moduleState.type)
@@ -5543,11 +5750,67 @@ function createBoxBlockModule(moduleState, moduleIndex) {
     widthCm,
     depthCm,
     heightCm,
-    ...surfaceCapabilityUserData(moduleState.itemKey),
+    acceptsColor: true,
+    acceptsImage: false,
+    acceptsGlass: false,
+    acceptsLightbox: false,
+    acceptsMesh: false,
     ...bindRendererSurfaceState(moduleState.surface),
   };
   group.add(mesh);
-  return { group, surfaces: [mesh] };
+
+  ensureBoxBlockFaces(moduleState);
+  const faceGapM = 0.002;
+  const faceLayouts = [
+    { slot: 'front', stripIndex: 0, width: widthM, height: heightM, position: [0, heightM / 2, depthM / 2 + faceGapM], rotationY: 0 },
+    { slot: 'right', stripIndex: 1, width: depthM, height: heightM, position: [widthM / 2 + faceGapM, heightM / 2, 0], rotationY: Math.PI / 2 },
+    { slot: 'back', stripIndex: 2, width: widthM, height: heightM, position: [0, heightM / 2, -depthM / 2 - faceGapM], rotationY: Math.PI },
+    { slot: 'left', stripIndex: 3, width: depthM, height: heightM, position: [-widthM / 2 - faceGapM, heightM / 2, 0], rotationY: -Math.PI / 2 },
+  ];
+  const faceCapabilities = surfaceCapabilityUserData(moduleState.itemKey);
+  const faces = faceLayouts.map((layout) => {
+    const faceState = moduleState.faces[layout.slot];
+    const faceColor = typeof faceState?.color === 'string' && faceState.color ? faceState.color : color;
+    const face = new THREE.Mesh(
+      new THREE.PlaneGeometry(layout.width, layout.height),
+      new THREE.MeshStandardMaterial({
+        color: faceColor,
+        roughness: 0.88,
+        metalness: 0,
+        transparent: opacity < 1,
+        opacity,
+        depthWrite: opacity >= 0.999,
+        side: THREE.FrontSide,
+      }),
+    );
+    face.position.set(...layout.position);
+    face.rotation.y = layout.rotationY;
+    const selectionFrame = createSelectionFrame(layout.width, layout.height);
+    selectionFrame.visible = false;
+    face.add(selectionFrame);
+    face.castShadow = opacity >= 0.2;
+    face.receiveShadow = true;
+    face.userData = {
+      kind: 'surface',
+      moduleId: moduleState.id,
+      moduleIndex,
+      moduleType: 'box-block',
+      selectionMode: 'panel',
+      surfaceId: `${moduleState.id}:box-face:${layout.slot}`,
+      faceSlot: layout.slot,
+      stripIndex: layout.stripIndex,
+      stripNumber: layout.stripIndex + 1,
+      selectionFrame,
+      widthCm: faceState.widthCm,
+      heightCm: faceState.heightCm,
+      ...faceCapabilities,
+      acceptsGlass: false,
+      ...bindRendererSurfaceState(faceState),
+    };
+    group.add(face);
+    return face;
+  });
+  return { group, surfaces: [mesh, ...faces] };
 }
 
 function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {

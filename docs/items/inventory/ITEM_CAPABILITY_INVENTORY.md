@@ -224,7 +224,7 @@ Görülen `overlapWithTypes`: `['kettle']`, `['mini-fridge']`, `['flat-panel','p
 | kumaş grup id | `fabricGroupId` | string | `src/surfaceStateBinding.js` | `ornek-state` | uydurma çanta (yüzey state) |
 | kumaş renk | `fabricColor` | hex | `src/surfaceStateBinding.js` | `ornek-state` | uydurma çanta |
 | kumaş görsel id | `fabricImageAssetId` | asset id | `src/surfaceStateBinding.js` | `ornek-state` | uydurma çanta |
-| kumaş fit | `fabricImageFit` | `cover`, `contain` (`scene3d.js`) | `src/surfaceStateBinding.js` | `ornek-state` | uydurma çanta |
+| kumaş fit | `fabricImageFit` | `cover`, `contain`, `size` (`scene3d.js`) | `src/surfaceStateBinding.js` | `ornek-state` | `size` iken `fabricImageWidthCm` / `fabricImageHeightCm` |
 | lightbox ışık açık | `fabricLightingOn` | boolean | `src/surfaceStateBinding.js` | `ornek-state` | uydurma çanta |
 | kumaş tipi | `fabricType` | `mesh`, `lightbox` | `src/scene3d.js` | `ornek-state` | uydurma çanta |
 | kumaş sahip yüzeyler | `fabricOwnerSurfaceIds` | dizi | `src/surfaceStateBinding.js` | `ornek-state` | uydurma çanta |

@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { getCatalogItem, listCatalogGroups } from '../src/catalog.js';
-import { createBoxBlockModuleState, createModuleStateFromCatalogKey } from '../src/designState.js';
+import { createBoxBlockModuleState, createModuleStateFromCatalogKey, normalizeModuleItemState } from '../src/designState.js';
 import {
   getModuleBehavior,
   getModuleDefaultRotationDeg,
   getModuleRotationStepDeg,
 } from '../src/moduleBehavior.js';
-import { resolveItemDefaultZCm } from '../src/items.js';
+import { getItem, resolveItemDefaultZCm } from '../src/items.js';
 
 const KEY = 'box_block';
 
@@ -25,6 +25,16 @@ test('box_block is cataloged under Panel Ek Modül with free box-block type', ()
   );
 });
 
+test('box_block keeps color and opacity and accepts image lightbox mesh from the item row', () => {
+  const item = getItem(KEY);
+  assert.equal(item.acceptsColor, true);
+  assert.equal(item.acceptsImage, true);
+  assert.equal(item.acceptsLightbox, true);
+  assert.equal(item.acceptsGlass, false);
+  assert.equal(item.acceptsMesh, true);
+  assert.equal(item.defaultOpacity, 0.85);
+});
+
 test('box-block state reads WDH opacity rotation and defaultZ from item DB fields', () => {
   const state = createModuleStateFromCatalogKey(KEY);
   assert.ok(state);
@@ -33,9 +43,32 @@ test('box-block state reads WDH opacity rotation and defaultZ from item DB field
   assert.deepEqual([state.widthCm, state.depthCm, state.heightCm], [100, 50, 50]);
   assert.equal(state.opacity, 0.85);
   assert.equal(getModuleBehavior(state).placement, 'free');
-  assert.equal(getModuleRotationStepDeg(state), 90);
+  assert.equal(getModuleRotationStepDeg(state), 45);
   assert.equal(getModuleDefaultRotationDeg(state), 0);
   assert.equal(resolveItemDefaultZCm(state), 0);
+});
+
+test('box block faces keep image and lightbox on four sides and the body stays unlit', () => {
+  const state = createModuleStateFromCatalogKey(KEY);
+  assert.deepEqual(Object.keys(state.faces), ['front', 'right', 'back', 'left']);
+  assert.equal(state.faces.front.widthCm, 100);
+  assert.equal(state.faces.front.heightCm, 50);
+  assert.equal(state.faces.right.widthCm, 50);
+  assert.equal(state.faces.left.widthCm, 50);
+  state.faces.front.imageAssetId = 'img-1';
+  state.faces.back.fabricGroupId = 'fabric-1';
+  state.faces.back.fabricLightingOn = true;
+  state.widthCm = 80;
+  state.depthCm = 40;
+  state.heightCm = 30;
+  const loaded = normalizeModuleItemState(JSON.parse(JSON.stringify(state)));
+  assert.equal(loaded.faces.front.imageAssetId, 'img-1');
+  assert.equal(loaded.faces.back.fabricLightingOn, true);
+  assert.equal(loaded.faces.front.widthCm, 80);
+  assert.equal(loaded.faces.front.heightCm, 30);
+  assert.equal(loaded.faces.right.widthCm, 40);
+  assert.equal(loaded.opacity, 0.85);
+  assert.equal(Object.hasOwn(loaded, 'cubeLightingOn'), false);
 });
 
 test('createBoxBlockModuleState accepts instance WDH opacity overrides', () => {
@@ -51,7 +84,7 @@ test('createBoxBlockModuleState accepts instance WDH opacity overrides', () => {
   assert.equal(state.opacity, 0.4);
 });
 
-test('createBoxBlockModule renderer is centered BoxGeometry with opacity', () => {
+test('createBoxBlockModule renderer keeps the body and adds four outward faces', () => {
   const source = readFileSync(new URL('../src/scene3d.js', import.meta.url), 'utf8');
   const start = source.indexOf('function createBoxBlockModule');
   const end = source.indexOf('function createIlluminatedFoamModule');
@@ -60,4 +93,18 @@ test('createBoxBlockModule renderer is centered BoxGeometry with opacity', () =>
   assert.match(body, /new THREE\.BoxGeometry\(widthM, heightM, depthM\)/);
   assert.match(body, /transparent:\s*opacity < 1/);
   assert.match(body, /mesh\.position\.set\(0,\s*heightM \/ 2,\s*0\)/);
+  assert.match(body, /acceptsLightbox:\s*false/);
+  assert.match(body, /new THREE\.PlaneGeometry\(layout\.width, layout\.height\)/);
+  assert.match(body, /selectionMode:\s*'panel'/);
+  assert.match(body, /createSelectionFrame\(layout\.width, layout\.height\)/);
+  assert.match(body, /slot:\s*'front'/);
+  assert.match(body, /slot:\s*'right'/);
+  assert.match(body, /slot:\s*'back'/);
+  assert.match(body, /slot:\s*'left'/);
+  const moveStart = source.indexOf("if (moduleState.type === 'box-block')");
+  const moveEnd = source.indexOf('const stepCm = isTopFixtureType', moveStart);
+  assert.ok(moveStart >= 0 && moveEnd > moveStart);
+  const move = source.slice(moveStart, moveEnd);
+  assert.match(move, /stepWallShortFloorZCm\(currentZCm, bestArrowMove\.deltaCm, moduleState\.heightCm\)/);
+  assert.match(move, /kind:\s*'z'/);
 });

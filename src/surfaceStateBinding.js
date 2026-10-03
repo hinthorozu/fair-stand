@@ -8,6 +8,8 @@ const FABRIC_KEYS = Object.freeze([
   'fabricColor',
   'fabricImageAssetId',
   'fabricImageFit',
+  'fabricImageWidthCm',
+  'fabricImageHeightCm',
   'fabricLightingOn',
   'fabricType',
   'fabricOwnerSurfaceIds',
