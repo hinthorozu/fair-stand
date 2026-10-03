@@ -510,6 +510,43 @@ export function createPlasticTrashBinModuleState() {
   return createCommercialModuleState('plastic-trash-bin');
 }
 
+export const BOX_BLOCK_FACE_SLOTS = Object.freeze(['front', 'right', 'back', 'left']);
+
+function boxBlockFaceSizeCm(moduleState, slot) {
+  const heightCm = Math.max(1, Number(moduleState?.heightCm) || 50);
+  const spanCm = slot === 'right' || slot === 'left'
+    ? Math.max(1, Number(moduleState?.depthCm) || 50)
+    : Math.max(1, Number(moduleState?.widthCm) || 100);
+  return { widthCm: spanCm, heightCm };
+}
+
+export function ensureBoxBlockFaces(moduleState, item = null) {
+  if (!moduleState || typeof moduleState !== 'object') return moduleState;
+  const fallbackColor = typeof moduleState.surface?.color === 'string' && moduleState.surface.color
+    ? moduleState.surface.color
+    : itemDefaultColorCss(item ?? moduleState.itemKey);
+  if (!moduleState.faces || typeof moduleState.faces !== 'object' || Array.isArray(moduleState.faces)) {
+    moduleState.faces = {};
+  }
+  for (const slot of BOX_BLOCK_FACE_SLOTS) {
+    const size = boxBlockFaceSizeCm(moduleState, slot);
+    const existing = moduleState.faces[slot];
+    if (!existing || typeof existing !== 'object' || Array.isArray(existing)) {
+      moduleState.faces[slot] = {
+        id: createId('surface'),
+        color: fallbackColor,
+        ...size,
+      };
+      continue;
+    }
+    if (!existing.id) existing.id = createId('surface');
+    if (typeof existing.color !== 'string' || !existing.color) existing.color = fallbackColor;
+    existing.widthCm = size.widthCm;
+    existing.heightCm = size.heightCm;
+  }
+  return moduleState;
+}
+
 function clampOpacity(value, fallback = 1) {
   const number = Number(value);
   if (!Number.isFinite(number)) return fallback;
@@ -539,6 +576,7 @@ export function createBoxBlockModuleState(descriptor = {}) {
   if (Number.isFinite(widthCm) && widthCm > 0) state.widthCm = widthCm;
   if (Number.isFinite(depthCm) && depthCm > 0) state.depthCm = depthCm;
   if (Number.isFinite(heightCm) && heightCm > 0) state.heightCm = heightCm;
+  ensureBoxBlockFaces(state, item);
   return state;
 }
 
@@ -861,6 +899,13 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'led-floodlight') {
     const item = getTopLightItemForType('led-floodlight');
     if (item) moduleState.itemKey = item.itemKey;
+    return moduleState;
+  }
+
+  if (moduleState.type === 'box-block') {
+    const item = moduleState.itemKey ? getItem(moduleState.itemKey) : null;
+    if (item?.type === 'box-block') moduleState.itemKey = item.itemKey;
+    ensureBoxBlockFaces(moduleState, item);
     return moduleState;
   }
 

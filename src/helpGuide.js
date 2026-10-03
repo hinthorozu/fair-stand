@@ -55,8 +55,9 @@ function listGuideSections() {
         <li><strong>Sil:</strong> Modülü sahneden kaldırır.</li>
         <li><strong>Çoğalt Sağ / Sol:</strong> Aynı modülün kopyasını belirtilen tarafa ekler.</li>
         <li><strong>Boyutlandır…:</strong> Işıklı Strafor seçiliyken mevcut X/Y ölçülerini açar; yeni ölçüler girildiğinde aynı modül konumu ve ışık rengi korunarak yeniden boyutlandırılır.</li>
-        <li><strong>Ölçü / opacity…:</strong> Kutu blok seçiliyken genişlik, derinlik, yükseklik ve 0–1 opacity açılır.</li>
-        <li><strong>Görseli ölçülendir…:</strong> Görsel atanmış panelde açılır. Başlangıç ölçüsü seçili alanın kendi ölçüsüdür. Küçültünce boşluklar tekrarlanır, büyütünce görsel alanın dışına taşar.</li>
+        <li><strong>Ölçü / opacity…:</strong> Kutu blok seçiliyken genişlik, derinlik, yükseklik ve 0–1 opacity açılır. Yüzler, renk ve taşıma <strong>Kutu Blok</strong> bölümündedir.</li>
+        <li><strong>Kutu yürütme:</strong> Ok tuşları kutuyu sağa, sola, ileri, geri ve yukarı, aşağı yürütür. Taban zeminin altına inmez. Kutunun tepesi stand tavanını geçmez.</li>
+        <li><strong>Görseli ölçülendir…:</strong> Görsel, Lightbox veya Mesh görseli atanmış yüzeyde açılır. Başlangıç ölçüsü seçili alanın kendi ölçüsüdür. Küçültünce boşluklar tekrarlanır, büyütünce görsel alanın dışına taşar. Aynı ölçü penceresi panel, Lightbox ve Mesh için geçerlidir.</li>
         <li><strong>Cam Panele Çevir / Normal Panele Çevir:</strong> Uygun panelin cam durumunu değiştirir.</li>
         <li><strong>Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar:</strong> Uygun panel bloğunu tek parça opak Lightbox Kumaşa dönüştürür veya geri alır.</li>
         <li><strong>Mesh (Delikli) Brandaya Çevir / Mesh Brandadan Çıkar:</strong> Aynı panel bloğunu gerçek delik maskeli Mesh Branda olarak kullanır; deliklerden sahnenin arkası görünür.</li>
@@ -108,7 +109,7 @@ function listGuideSections() {
         <li><strong>Dosya Seç:</strong> Görseli aktif projenin görsel arşivine ekler. En fazla ${getMaxImageUploadMb()} MB; aşıldığında popup uyarır. Büyük görseller sahne için küçültülür; şeffaf arka plan korunur. SVG olduğu gibi kalır.</li>
         <li><strong>Doldur:</strong> Alanı tamamen kaplar; gerekirse görüntüyü kırpar.</li>
         <li><strong>Sığdır:</strong> Görselin tamamını seçili alana sığdırır.</li>
-        <li><strong>Ölçü:</strong> Sağ tık → Görseli ölçülendir. Seçili alanın kendi ölçüsü başlangıçtır; 400×200 alandaki görsel önce 400×200 oturur. 300×150 yazınca daralır ve boşluk tekrarlanır, 500×300 yazınca alanın dışına taşar. Tek panelde de aynıdır.</li>
+        <li><strong>Ölçü:</strong> Sağ tık → Görseli ölçülendir. Panel, Lightbox ve Mesh görseli aynı pencereden ölçülür. Seçili alanın kendi ölçüsü başlangıçtır; 400×200 alandaki görsel önce 400×200 oturur. 300×150 yazınca daralır ve boşluk tekrarlanır, 500×300 yazınca alanın dışına taşar. Tek panelde de aynıdır.</li>
         <li><strong>Kaldır:</strong> Görseli panel/bez üzerinden kaldırır; kütüphaneden silmez.</li>
         <li>Dikdörtgen çoklu panel seçiminde tek büyük görsel panellere bölünerek uygulanabilir.</li>
         <li>Lightbox Kumaşa ve Mesh Brandaya görsel tek parça olarak uygulanır.</li>
@@ -140,6 +141,30 @@ function listGuideSections() {
       <h4>Işık rengini değiştirme</h4>
       <p>Işıklı Straforu seçtiğinde sol taraftaki <strong>Seçili yüzey</strong> bölümünde <strong>Işıklı Strafor · Işık rengi</strong> kontrolü görünür. Renk seçici yalnızca arkadaki halo ışığını değiştirir; SVG'nin ön yüz renklerini değiştirmez.</p>
       <p class="help-guide-note">Yerleştirme sırasında Esc tuşu ile işlem iptal edilebilir. Strafor, duvar üstü modül gibi taşınır ve kendi hareket snap adımını kullanır.</p>
+    `,
+  },
+  {
+    title: 'Kutu Blok',
+    html: `
+      <p><strong>Kutu blok</strong> katalogdan sahneye bırakılan serbest bir küptür. Duvara yapışmaz. Zeminde durur; istenirse yukarı kaldırılır.</p>
+      <h4>Yerleştirme</h4>
+      <p>Katalog kartını bırakınca <strong>W · Genişlik</strong>, <strong>D · Derinlik</strong>, <strong>H · Yükseklik</strong> ve <strong>Opacity (0–1)</strong> sorulur. Aynı pencere sonradan sağ tık <strong>Ölçü / opacity…</strong> ile açılır. Saydamlık kutunun tamamına uygulanır.</p>
+      <h4>Gövde ve dört yüz</h4>
+      <p>Üst ve alt yüze görsel, Lightbox veya Mesh uygulanmaz. Ön, sağ, arka ve sol yüz ayrıdır; kutu dönünce bu yüzler de döner. Bir yüze tıklayınca o yüz panellerdeki gibi mavi çerçeve ile seçilir. Gövdeye ya da üst ve alt kapağa tıklamak kutunun kendisini seçer.</p>
+      <ul>
+        <li>Gövde seçiliyken renk gövdeye gider. Yüz seçiliyken renk o yüze gider.</li>
+        <li>Seçilen yüze görsel sürüklenebilir. Aynı yüze Lightbox veya Mesh de uygulanır. Bu üçü item satırındaki bayraklardan açılır. Cam uygulanmaz.</li>
+        <li>Lightbox aydınlatması yalnız o yüzde yanar; küpün gövdesi yanmaz.</li>
+        <li>Mesh deliklerinden kutunun kendi gövdesi görünür.</li>
+        <li>Yüzde görsel, Lightbox veya Mesh görseli varken sağ tık <strong>Görseli ölçülendir…</strong> panellerdeki ölçü penceresini açar. Başlangıç o yüzün kendi santimidir. Küçültünce boşluk tekrarlanır, büyütünce görsel taşar.</li>
+      </ul>
+      <h4>Kutu yürütme</h4>
+      <ul>
+        <li>Ok tuşları ekranda görünen yöne gider: sağa, sola, ileri, geri ve yukarı, aşağı. Adım 10 cm’dir.</li>
+        <li>Taban zeminin altına inmez. Kutunun tepesi stand tavanını geçmez.</li>
+        <li>Kutuyu zeminde sürüklemek yüksekliği bozmaz.</li>
+        <li><strong>Shift+R</strong> kutuyu 90° döndürür.</li>
+      </ul>
     `,
   },
   {

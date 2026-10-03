@@ -285,7 +285,25 @@ function assertFamily(type, fabricKeys) {
   for (const [path, probe] of classification.userOwned) {
     assert.deepEqual(getPath(restored, path), probe, `${type} kullanıcı alanı ${path}`);
   }
+  const boxFaceSizeSource = {
+    'faces.front.widthCm': 'widthCm',
+    'faces.front.heightCm': 'heightCm',
+    'faces.back.widthCm': 'widthCm',
+    'faces.back.heightCm': 'heightCm',
+    'faces.left.widthCm': 'depthCm',
+    'faces.left.heightCm': 'heightCm',
+    'faces.right.widthCm': 'depthCm',
+    'faces.right.heightCm': 'heightCm',
+  };
   for (const path of classification.derived) {
+    if (type === 'box-block' && boxFaceSizeSource[path]) {
+      assert.equal(
+        getPath(restored, path),
+        getPath(restored, boxFaceSizeSource[path]),
+        `${type} yüz ölçüsü ${path} modül ölçüsünü izlemeli`,
+      );
+      continue;
+    }
     assert.deepEqual(
       getPath(restored, path),
       getPath(derivedBaseline, path),

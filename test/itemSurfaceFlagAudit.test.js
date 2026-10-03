@@ -17,7 +17,6 @@ const COLOR_TYPES = new Set([
   'chair',
   'bar-stool',
   'led-floodlight',
-  'box-block',
 ]);
 
 function expectedFlags(item) {
@@ -29,6 +28,9 @@ function expectedFlags(item) {
   }
   if (COLOR_IMAGE_TYPES.has(item.type)) {
     return { isRender: true, color: true, image: true, lightbox: false, glass: false, mesh: false };
+  }
+  if (item.type === 'box-block') {
+    return { isRender: true, color: true, image: true, lightbox: true, glass: false, mesh: true };
   }
   if (COLOR_TYPES.has(item.type) || item.itemKey === 'furniture_table_chair_set_eames') {
     return { isRender: true, color: true, image: false, lightbox: false, glass: false, mesh: false };

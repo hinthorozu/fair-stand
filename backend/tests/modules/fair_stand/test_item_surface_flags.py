@@ -97,6 +97,16 @@ def test_profile_renders_without_cover_flags():
     assert item["accepts_glass"] is False
 
 
+def test_box_block_keeps_color_and_accepts_image_lightbox_mesh():
+    item = _item("box_block")
+    assert item["accepts_color"] is True
+    assert item["accepts_image"] is True
+    assert item["accepts_lightbox"] is True
+    assert item["accepts_glass"] is False
+    assert item["accepts_mesh"] is True
+    assert item["default_opacity"] == 0.85
+
+
 def test_banko_color_image_not_glass():
     item = _item("desk_banko_100")
     assert item["is_render"] is True
