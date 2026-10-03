@@ -163,7 +163,7 @@ function listGuideSections() {
         <li>Ok tuşları ekranda görünen yöne gider: sağa, sola, ileri, geri ve yukarı, aşağı. Adım 10 cm’dir.</li>
         <li>Taban zeminin altına inmez. Kutunun tepesi stand tavanını geçmez.</li>
         <li>Kutuyu zeminde sürüklemek yüksekliği bozmaz.</li>
-        <li><strong>Shift+R</strong> kutuyu 90° döndürür.</li>
+        <li><strong>Shift+R</strong> kutuyu 45° döndürür.</li>
       </ul>
     `,
   },

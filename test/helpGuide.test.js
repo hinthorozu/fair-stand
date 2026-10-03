@@ -44,7 +44,7 @@ test('help guide exposes a fixed question-mark launcher and collapsible sections
   assert.match(guideSource, /Üst ve alt yüze görsel, Lightbox veya Mesh uygulanmaz/);
   assert.match(guideSource, /Adım 10 cm’dir/);
   assert.match(guideSource, /Kutuyu zeminde sürüklemek yüksekliği bozmaz/);
-  assert.match(guideSource, /Shift\+R<\/strong> kutuyu 90° döndürür/);
+  assert.match(guideSource, /Shift\+R<\/strong> kutuyu 45° döndürür/);
   assert.match(guideSource, /Aynı ölçü penceresi panel, Lightbox ve Mesh için geçerlidir/);
   assert.match(guideSource, /Panel, Lightbox ve Mesh görseli aynı pencereden ölçülür/);
   assert.match(guideSource, /Küpü sürüklemek kamerayı döndürür/);

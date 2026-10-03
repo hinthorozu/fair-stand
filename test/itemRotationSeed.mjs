@@ -29,6 +29,7 @@ const PLACEABLE_ITEM_TYPES = new Set([
 ]);
 
 const SPECIAL = Object.freeze({
+  box_block: Object.freeze({ rotationStepDeg: 45, defaultRotationDeg: 0, sideInsertRotation: 'inherit' }),
   desk_banko_100: Object.freeze({ rotationStepDeg: 45, defaultRotationDeg: 0, sideInsertRotation: 'inherit' }),
   desk_banko_150: Object.freeze({ rotationStepDeg: 45, defaultRotationDeg: 0, sideInsertRotation: 'inherit' }),
   desk_banko_200: Object.freeze({ rotationStepDeg: 45, defaultRotationDeg: 0, sideInsertRotation: 'inherit' }),

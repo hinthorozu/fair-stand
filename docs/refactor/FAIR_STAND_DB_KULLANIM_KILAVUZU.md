@@ -182,7 +182,7 @@ Düz BoxGeometry küp; GLB yok. **Işıklı strafor (`illuminated-foam`)** ile k
 | Ölçü | `fair_stand_item_dimensions` W/D/H (seed: 100×50×50) |
 | Renk | `default_color` (seed `15263957`) + `accepts_color` |
 | Opacity | **`default_opacity`** (0–1; seed **0.85**; kolon `0042_box_block_default_opacity`). Cam/`accepts_glass` değil |
-| Döndürme / Z | `rotation_step_deg=90`, `default_rotation_deg=0`, `default_z_cm=0` (item master; `0042` bu kolonları eklemez) |
+| Döndürme / Z | `rotation_step_deg=45`, `default_rotation_deg=0`, `default_z_cm=0` (item master; `0050_box_block_rotation_45` adımı 45 yapar) |
 | Preview | CRM **Katalog Önizlemeleri** → `Küp Blok` (canlı örn. id **57**): tek `div.module-drag-box-block` + CSS; item `preview_id` buna bağlanır. Migrasyon fallback’i “ilk preview” olabilir — prod’da CRM’de Küp Blok’a çevir |
 
 **Sahne:** Katalogdan sürükle → W/D/H + opacity dialog; sonra sağ tık “Ölçü / opacity”. Instance override proje JSON’da kalır (`modules[].widthCm/depthCm/heightCm/opacity`). Gövde renk ve saydamlığı taşır, yanmaz. `faces` ön, sağ, arka ve sol yüzeydir; görsel, Lightbox ve Mesh o yüze uygulanır. Lightbox aydınlatması yalnız o yüzde yanar. Görsel atanmış yüzde sağ tık “Görseli ölçülendir” panel, Lightbox ve Mesh için aynı pencereyi açar: başlangıç alanın kendi ölçüsü, küçük tekrar, büyük taşma. `accepts_glass` kapalıdır. Ok tuşu kutuyu zeminde ve yükseklikte yürütür: taban 0, tepe stand `heightCm` eksi kutu yüksekliği. Bayrak güncellemesi `0049_box_block_surface_flags`.

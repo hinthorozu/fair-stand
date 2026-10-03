@@ -8,7 +8,8 @@
   ],
   "sourceOfTruth": [
     "backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py",
-    "backend/alembic/versions/0049_box_block_surface_flags.py"
+    "backend/alembic/versions/0049_box_block_surface_flags.py",
+    "backend/alembic/versions/0050_box_block_rotation_45.py"
   ],
   "impact": {
     "catalog": "affected",
@@ -42,6 +43,7 @@
       "backend/app/modules/fair_stand/application/admin_snap_catalog.py",
       "backend/app/modules/fair_stand/application/catalog_item_order.py",
       "backend/app/modules/fair_stand/application/preview_sanitize.py",
+      "backend/app/modules/fair_stand/infrastructure/item_rotation_seed.py",
       "backend/scripts/verify_live_item_type_placement.py",
       "backend/scripts/verify_live_item_type_placement_motor.mjs",
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
@@ -235,6 +237,7 @@
       "test/itemDocsRuntimeAlignment.test.js",
       "test/itemIsRenderFactory.test.js",
       "test/itemRotation.test.js",
+      "test/itemRotationSeed.mjs",
       "test/itemSceneDimensions.test.js",
       "test/itemScenePose.test.js",
       "test/itemSnapAnchor.test.js",
@@ -906,7 +909,7 @@
   },
   "migration": {
     "required": true,
-    "notes": "0049 mevcut box_block satırında accepts_image, accepts_lightbox ve accepts_mesh değerlerini true yapar. Renk, cam ve default_opacity kolonlarına dokunmaz."
+    "notes": "0049 mevcut box_block satırında accepts_image, accepts_lightbox ve accepts_mesh değerlerini true yapar. Renk, cam ve default_opacity kolonlarına dokunmaz. 0050 rotation_step_deg değerini 45 yapar; default_rotation_deg ve side_insert_rotation aynı kalır."
   },
-  "rollback": "0049 downgrade aynı üç bayrağı false yapar. Seed satırı da eski false değerlere döner."
+  "rollback": "0049 downgrade aynı üç bayrağı false yapar. 0050 downgrade rotation_step_deg değerini 90 yapar."
 }

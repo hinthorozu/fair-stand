@@ -45,6 +45,7 @@ _SPECIAL = {
     "desk_banko_100_l": (90, 270, "inherit"),
     "desk_banko_150_l": (90, 270, "inherit"),
     "desk_banko_200_l": (90, 270, "inherit"),
+    "box_block": (45, 0, "inherit"),
     "furniture_sofa_single_classic": (45, 0, "inherit"),
     "furniture_bar_stool_classic": (45, 270, "default"),
 }
