@@ -4869,8 +4869,8 @@ export function createStandScene(
     // davranışını koru (örn. banko özel çoklu seçimi).
     const panelHit = rectangleSelect
       ? hits.find((entry) => entry.object?.userData?.selectionMode === 'panel')
-      : null;
-    const hit = panelHit ?? nearestBoxFaceHit(hits);
+      : nearestBoxFaceHit(hits);
+    const hit = panelHit ?? hits[0];
 
     if (hit) {
       if (rectangleSelect && hit.object.userData.moduleType === 'counter') {
