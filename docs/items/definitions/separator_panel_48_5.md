@@ -30,7 +30,7 @@ Ayrı `DEFAULT_SEPARATOR_COLOR` business constant'ı kanonik kaynak değildir ve
 `separator_panel_48_5` nihai fiziksel BOM Item'ıdır ve başka Item'lardan oluşmaz.
 
 ```text
-separator:50 → separator_panel_48_5 × 1
+separator:50 → separator_panel_48_5 × 7
 ```
 
 Quantity owner parent recipe'dir (`src/moduleRecipes.js`). Recipe identity kanonik `itemKey` üzerinden çözülür.

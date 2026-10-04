@@ -30,8 +30,7 @@ const EXPECTED = {
     recipeQuantities: {
       profile_41_5: 2,
       upright_346_5: 2,
-      separator_panel_48_5: 1,
-      separator_panel_98: 3,
+      separator_panel_48_5: 7,
       connector_start: 2,
       connector_single: 7,
     },
@@ -53,8 +52,7 @@ const EXPECTED = {
     recipeQuantities: {
       profile_41_5: 2,
       upright_346_5: 2,
-      separator_panel_48_5: 1,
-      separator_panel_98: 3,
+      separator_panel_48_5: 7,
       connector_start: 2,
       connector_single: 7,
     },
