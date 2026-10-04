@@ -30,7 +30,6 @@ Ayrı `DEFAULT_SEPARATOR_COLOR` business constant'ı kanonik kaynak değildir ve
 `separator_panel_98` nihai fiziksel BOM Item'ıdır ve başka Item'lardan oluşmaz.
 
 ```text
-separator:50  → separator_panel_98 × 3
 separator:100 → separator_panel_98 × 7
 ```
 

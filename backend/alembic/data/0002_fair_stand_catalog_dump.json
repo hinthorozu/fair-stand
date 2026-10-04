@@ -4890,29 +4890,22 @@
         "id": "f46e39b3-2c47-56c0-8d63-a13d61082c65",
         "parent_item_key": "wall_separator_50_350",
         "child_item_key": "separator_panel_48_5",
-        "quantity": "1.0000",
+        "quantity": "7.0000",
         "sort_order": 2
-      },
-      {
-        "id": "51edd21d-8aa9-576d-a7f8-ce7c81ac7791",
-        "parent_item_key": "wall_separator_50_350",
-        "child_item_key": "separator_panel_98",
-        "quantity": "3.0000",
-        "sort_order": 3
       },
       {
         "id": "7cfb5cf1-6031-582e-ac2a-60338a550ba6",
         "parent_item_key": "wall_separator_50_350",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
-        "sort_order": 4
+        "sort_order": 3
       },
       {
         "id": "3250b474-0dd5-5860-b1c1-df5243ab4418",
         "parent_item_key": "wall_separator_50_350",
         "child_item_key": "connector_single",
         "quantity": "7.0000",
-        "sort_order": 5
+        "sort_order": 4
       },
       {
         "id": "2aa3085f-0e2a-5f1a-93ab-f53aaa884ee4",
@@ -4967,29 +4960,22 @@
         "id": "244248dc-528c-5d2c-86e2-1bcb60b71153",
         "parent_item_key": "wall_separator_50_350_sarmasik",
         "child_item_key": "separator_panel_48_5",
-        "quantity": "1.0000",
+        "quantity": "7.0000",
         "sort_order": 2
-      },
-      {
-        "id": "8e3c6aa2-73f1-5611-88f3-6f57290a1e65",
-        "parent_item_key": "wall_separator_50_350_sarmasik",
-        "child_item_key": "separator_panel_98",
-        "quantity": "3.0000",
-        "sort_order": 3
       },
       {
         "id": "a45f7ff1-1b91-5652-8b31-014e3ba4642b",
         "parent_item_key": "wall_separator_50_350_sarmasik",
         "child_item_key": "connector_start",
         "quantity": "2.0000",
-        "sort_order": 4
+        "sort_order": 3
       },
       {
         "id": "a931224d-0bc6-594a-aa60-7c53aace3784",
         "parent_item_key": "wall_separator_50_350_sarmasik",
         "child_item_key": "connector_single",
         "quantity": "7.0000",
-        "sort_order": 5
+        "sort_order": 4
       },
       {
         "id": "59a9ac6c-095e-5295-a5e0-22c27b1d1960",

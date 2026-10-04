@@ -54,7 +54,6 @@ Project persistence stores separator module state including its current surface 
 Wall insertion/reflow belongs to the parent separator module. No leaf relationship graph is present.
 
 ## 14. BOM / composition — VAR
-- `separator:50` contains `separator_panel_98 × 3`.
 - `separator:100` contains `separator_panel_98 × 7`.
 - Quantity ownership remains in `src/moduleRecipes.js`.
 - Recipe expansion resolves metadata through kanonik `itemKey` → `getItem()`.

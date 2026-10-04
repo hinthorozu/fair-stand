@@ -52,8 +52,8 @@ test('wall + separator 50 and 100 end-to-end keep 6+6 singles and 7 doubles', ()
   assert.equal(qty(sep50, 'connector_single'), 12);
   assert.equal(qty(sep50, 'connector_double'), 7);
   assert.equal(qty(sep50, 'panel_197'), 7);
-  assert.equal(qty(sep50, 'separator_panel_48_5'), 1);
-  assert.equal(qty(sep50, 'separator_panel_98'), 3);
+  assert.equal(qty(sep50, 'separator_panel_48_5'), 7);
+  assert.equal(qty(sep50, 'separator_panel_98'), 0);
 
   const sep100 = resolveProjectBom([
     placed('a', 'wall_100_350', { xCm: 0, widthCm: 100 }),
@@ -75,9 +75,11 @@ test('sarmasik separator end-to-end matches the plain separator of the same widt
     placed('a', 'wall_200_350', { xCm: 0, widthCm: 200 }),
     placed('b', 'wall_separator_50_350_sarmasik', { xCm: 200, widthCm: 50 }),
   ]);
-  for (const itemKey of ['upright_346_5', 'connector_start', 'connector_single', 'connector_double', 'connector_corner']) {
+  for (const itemKey of ['upright_346_5', 'connector_start', 'connector_single', 'connector_double', 'connector_corner', 'separator_panel_48_5', 'separator_panel_98']) {
     assert.equal(qty(ivy, itemKey), qty(plain, itemKey), itemKey);
   }
+  assert.equal(qty(ivy, 'separator_panel_48_5'), 7);
+  assert.equal(qty(ivy, 'separator_panel_98'), 0);
 });
 
 test('wall + showcase end-to-end uses the locked single and double counts', () => {
@@ -172,8 +174,8 @@ test('separator inner corner matches wall hardware and keeps separator panels', 
   assert.equal(qty(sep50, 'profile_190'), 2);
   assert.equal(qty(sep50, 'profile_41_5'), 2);
   assert.equal(qty(sep50, 'panel_corner_192'), 7);
-  assert.equal(qty(sep50, 'separator_panel_48_5'), 1);
-  assert.equal(qty(sep50, 'separator_panel_98'), 3);
+  assert.equal(qty(sep50, 'separator_panel_48_5'), 7);
+  assert.equal(qty(sep50, 'separator_panel_98'), 0);
   assert.equal(qty(sep50, 'panel_corner_42_5'), 0);
 
   const sep100 = resolveProjectBom([
@@ -195,6 +197,16 @@ test('separator inner corner matches wall hardware and keeps separator panels', 
   assert.equal(qty(ivy, 'connector_corner'), 12);
   assert.equal(qty(ivy, 'separator_panel_98'), 7);
   assert.equal(qty(ivy, 'panel_corner_92'), 0);
+
+  const ivy50 = resolveProjectBom([
+    placed('a', 'wall_50_350', { xCm: 0, widthCm: 50 }),
+    cornerPair('b', 'wall_separator_50_350_sarmasik', 50, { xCm: 50, yCm: 0 }),
+  ]);
+  assert.equal(qty(ivy50, 'separator_panel_48_5'), 7);
+  assert.equal(qty(ivy50, 'separator_panel_98'), 0);
+  assert.equal(qty(ivy50, 'panel_corner_42_5'), 7);
+  assert.equal(qty(ivy50, 'connector_corner'), 12);
+  assert.equal(qty(ivy50, 'connector_single'), 14);
 });
 
 test('showcase inner corner keeps wall width on profiles and showcase panels become corner panels', () => {

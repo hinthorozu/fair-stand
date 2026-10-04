@@ -18,7 +18,7 @@ const CASES = {
       material: 'mdf',
       defaultColor: 0xc79b63,
     },
-    recipes: [['separator', 50, 1]],
+    recipes: [['separator', 50, 7]],
   },
   separator_panel_98: {
     metadata: {
@@ -27,7 +27,7 @@ const CASES = {
       material: 'mdf',
       defaultColor: 0xc79b63,
     },
-    recipes: [['separator', 50, 3], ['separator', 100, 7]],
+    recipes: [['separator', 100, 7]],
   },
 };
 
@@ -45,7 +45,7 @@ test('separator panel production Items use canonical itemKey with verified 0.8 c
   }
 });
 
-test('separator panels use canonical itemKey in exactly three verified recipe occurrences with quantity parity', () => {
+test('separator panels use canonical itemKey in the verified recipe occurrences with quantity parity', () => {
   let total = 0;
   for (const [itemKey, { recipes }] of Object.entries(CASES)) {
     for (const [type, width, quantity] of recipes) {
@@ -57,7 +57,7 @@ test('separator panels use canonical itemKey in exactly three verified recipe oc
       total += matches.length;
     }
   }
-  assert.equal(total, 3);
+  assert.equal(total, 2);
 });
 
 test('expanded separator recipes resolve canonical separator metadata through itemKey', () => {

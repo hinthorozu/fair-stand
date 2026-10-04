@@ -36,7 +36,7 @@ def test_dump_seed_fills_empty_database_once():
         assert items == 96
         assert categories == 7
         assert previews == 28
-        assert components == 186
+        assert components == 184
         seed_catalog_if_empty(bind)
         assert bind.execute(text("SELECT COUNT(*) FROM fair_stand_items")).scalar() == 96
 
