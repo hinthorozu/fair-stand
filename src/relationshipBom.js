@@ -5,14 +5,19 @@
  * Locked pairs are wall with wall, door, separator (including sarmaşık), showcase-2, or showcase-3.
  * Connector counts are the locked face deltas. A short separator recipe does not scale them.
  * Corner connectors apply only to a module whose front face looks at the other module.
- * A module sitting on the back keeps its singles and does not take corner connectors.
+ * Corner panels follow that same face, and only after a real inner-corner joint.
+ * Only the strips covered by the partner's height convert.
+ * A missing partner endpoint is not an inner face. Proximity does not convert panels.
+ * A module sitting on the back keeps its singles and its straight panels.
+ * Tee joints keep their connector deltas and do not convert panels.
  *
  * Wall Short is not a locked full-height role. Its joints are planned separately and never
  * reuse the full-height upright_346_5 / −14 single / +7 double constants.
  */
 
-import { getItem, isWallShortFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm } from './items.js';
+import { getItem, isWallShortFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm, resolveShowcaseStripCount } from './items.js';
 import { resolveItemBom } from './itemBom.js';
+import { WALL_PANEL_BAND_PITCH_CM } from './wallPanelBand.js';
 
 const EPSILON_CM = 0.001;
 
@@ -272,11 +277,14 @@ function bodyDirectionFromPoint(segment, point) {
   return null;
 }
 
-/** The other module's body lies on this module's front face. */
+/**
+ * The other module's body must leave a shared endpoint into this module's front half-plane.
+ * No endpoint body means the contact is not an inner face. Proximity is not enough.
+ */
 function partnerOnFront(self, partner, point) {
   if (!self || !partner || !point || self.axis === partner.axis) return false;
   const body = bodyDirectionFromPoint(partner, point);
-  if (!body) return true;
+  if (!body) return false;
   return body.x * self.frontX + body.y * self.frontY > 0;
 }
 
@@ -288,6 +296,7 @@ function cornerCharge(participant, partners, point) {
     singleRemove: faces ? side.singleRemove : 0,
     cornerAdd: faces ? side.cornerAdd : 0,
     swapPanels: side.swapPanels,
+    faces,
   };
 }
 
@@ -316,18 +325,15 @@ function jointAdjustment(joint) {
   if (joint.kind === 'tee') {
     let single = 0;
     let corner = 0;
-    const swapModuleIds = [];
     for (const participant of joint.participants) {
       if (participant.payCorner === false) continue;
-      const others = joint.participants.filter((entry) => entry.moduleId !== participant.moduleId);
-      const side = cornerCharge(participant, others, joint.point);
+      const side = cornerSide(participant.role, recipeSingleCount(participant.itemKey));
       if (!side) continue;
       single -= side.singleRemove;
       corner += side.cornerAdd;
-      if (side.swapPanels) swapModuleIds.push(participant.moduleId);
     }
     const upright = -(Math.max(joint.participants.length, 2) - 1);
-    return { upright, single, double: 0, corner, swapModuleIds };
+    return { upright, single, double: 0, corner, swapModuleIds: [], panelSwaps: [] };
   }
 
   const [a, b] = joint.participants;
@@ -346,6 +352,7 @@ function jointAdjustment(joint) {
       double: doubles,
       corner: 0,
       swapModuleIds: [],
+      panelSwaps: [],
     };
   }
 
@@ -358,10 +365,11 @@ function jointAdjustment(joint) {
       single: -(sideA.singleRemove + sideB.singleRemove),
       double: 0,
       corner: sideA.cornerAdd + sideB.cornerAdd,
-      swapModuleIds: [
-        ...(sideA.swapPanels ? [a.moduleId] : []),
-        ...(sideB.swapPanels ? [b.moduleId] : []),
-      ],
+      swapModuleIds: [],
+      panelSwaps: [
+        cornerPanelSwap(sideA, a, b),
+        cornerPanelSwap(sideB, b, a),
+      ].filter(Boolean),
     };
   }
 
@@ -376,6 +384,7 @@ function collectSegments(modules) {
     if (!role || !segment) return;
     segments.push({
       ...segment,
+      z: moduleZRange(module),
       role,
       moduleId: moduleIdentity(module, index),
     });
@@ -395,6 +404,7 @@ function freezeParticipant(segment, { payCorner = true } = {}) {
     endCm: segment.endCm,
     frontX: segment.frontX,
     frontY: segment.frontY,
+    z: segment.z ?? null,
   });
 }
 
@@ -465,6 +475,7 @@ export function detectRelationshipJoints(modules = []) {
 
       const shared = sharedEndpoint(a, b);
       if (shared) {
+        if (!segmentZOverlap(a, b)) continue;
         seen.add(pairId);
         pairRecords.push(pairRecord('corner', a, b, shared.point));
         continue;
@@ -576,6 +587,7 @@ function buildPlan(joints) {
     teeSingle: 0,
     teeCorners: 0,
     swapModuleIds: [],
+    panelSwaps: [],
   };
 
   for (const joint of joints) {
@@ -591,6 +603,7 @@ function buildPlan(joints) {
       plan.cornerSingle += Math.abs(adjustment.single);
       plan.cornerConnectors += adjustment.corner;
       plan.swapModuleIds.push(...adjustment.swapModuleIds);
+      plan.panelSwaps.push(...(adjustment.panelSwaps ?? []));
     } else if (joint.kind === 'tee') {
       plan.teeCount += 1;
       plan.teeUpright += Math.abs(adjustment.upright);
@@ -606,6 +619,7 @@ function buildPlan(joints) {
   }
 
   plan.swapModuleIds = [...new Set(plan.swapModuleIds)];
+  plan.panelSwaps = mergePanelSwaps(plan.panelSwaps);
   return plan;
 }
 
@@ -667,7 +681,9 @@ function adjustmentNotes(plan) {
 
 /**
  * Apply locked end-to-end and inner-corner deltas to aggregated leaf lines.
- * Panel substitution is separate: swapModuleIds lists modules whose straight panels become corner panels.
+ * Panel substitution is separate. A full-height tee does not convert panels.
+ * swapModuleIds is a full-run swap used by a short tee branch.
+ * panelSwaps lists inner-corner modules and the strip indexes covered by the partner.
  * If upright or single quantity would go negative, skips every joint.
  */
 export function applyRelationshipBomAdjustments(lines = [], joints = []) {
@@ -683,6 +699,7 @@ export function applyRelationshipBomAdjustments(lines = [], joints = []) {
       appliedCornerCount: 0,
       appliedTeeCount: 0,
       swapModuleIds: Object.freeze([]),
+      panelSwaps: Object.freeze([]),
       notes: Object.freeze([]),
     });
   }
@@ -700,6 +717,7 @@ export function applyRelationshipBomAdjustments(lines = [], joints = []) {
       appliedCornerCount: 0,
       appliedTeeCount: 0,
       swapModuleIds: Object.freeze([]),
+      panelSwaps: Object.freeze([]),
       notes: Object.freeze([
         `Birleşim düzeltmesi atlandı: yetersiz stok (dikme ${uprightHave}/${uprightNeed}, tekli ${singleHave}/${singleNeed}).`,
       ]),
@@ -713,6 +731,10 @@ export function applyRelationshipBomAdjustments(lines = [], joints = []) {
     appliedCornerCount: plan.cornerCount,
     appliedTeeCount: plan.teeCount,
     swapModuleIds: Object.freeze(plan.swapModuleIds),
+    panelSwaps: Object.freeze(plan.panelSwaps.map((entry) => Object.freeze({
+      moduleId: entry.moduleId,
+      stripIndexes: Object.freeze(entry.stripIndexes),
+    }))),
     notes: Object.freeze(adjustmentNotes(plan)),
   });
 }
@@ -735,25 +757,130 @@ export function cornerPanelKey(itemKey) {
   return null;
 }
 
-export function applyCornerPanelSwap(lines = []) {
-  return lines.map((line) => {
-    const nextKey = cornerPanelKey(line?.itemKey);
-    if (!nextKey) return line;
-    const item = getItem(nextKey);
-    if (!item) return line;
-    return {
-      ...line,
-      itemKey: nextKey,
-      name: item.name,
-      material: item.material ?? null,
-      item,
-    };
+/** Door panels sit on stand strips 4–6. Showcase openings are not panels. */
+function panelStripIndexes(item) {
+  if (!item) return [];
+  if (item.itemKey === 'wall_door_100_350') return [4, 5, 6];
+  if (item.type === 'showcase-2' || item.type === 'showcase-3') {
+    const eyeCount = Number(item.eyeCount);
+    const openingStart = eyeCount === 3 ? 1 : 2;
+    const openingCount = Number.isFinite(eyeCount) && eyeCount > 0 ? eyeCount : 0;
+    const stripCount = resolveShowcaseStripCount(item);
+    const indexes = [];
+    for (let index = 0; index < stripCount; index += 1) {
+      if (openingCount && index >= openingStart && index < openingStart + openingCount) continue;
+      indexes.push(index);
+    }
+    return indexes;
+  }
+  const line = resolveItemBom(item.itemKey, 1).find((entry) => STRAIGHT_TO_CORNER_PANEL[entry.itemKey]);
+  const count = line ? Number(line.quantity) : 0;
+  return Array.from({ length: count }, (_, index) => index);
+}
+
+function overlappingPanelStripIndexes(itemKey, originCm, partnerZ) {
+  if (!partnerZ || !Number.isFinite(originCm)) return [];
+  const item = getItem(itemKey);
+  const pitch = WALL_PANEL_BAND_PITCH_CM;
+  return panelStripIndexes(item).filter((index) => {
+    const band = { minCm: originCm + index * pitch, maxCm: originCm + (index + 1) * pitch };
+    return rangesOverlap(band, partnerZ);
   });
 }
 
-export function applyCornerPanelSwapToSurfaces(surfaces = []) {
-  return surfaces.map((surface) => {
+export function countOverlappingCornerPanels(itemKey, originCm, partnerMinCm, partnerMaxCm) {
+  return overlappingPanelStripIndexes(itemKey, originCm, {
+    minCm: partnerMinCm,
+    maxCm: partnerMaxCm,
+  }).length;
+}
+
+function cornerPanelSwap(side, self, partner) {
+  if (!side?.faces || !side.swapPanels || !self?.z || !partner?.z) return null;
+  const stripIndexes = overlappingPanelStripIndexes(self.itemKey, self.z.minCm, partner.z);
+  if (!stripIndexes.length) return null;
+  return { moduleId: self.moduleId, stripIndexes };
+}
+
+function mergePanelSwaps(entries) {
+  const byId = new Map();
+  for (const entry of entries) {
+    if (!entry?.moduleId || !entry.stripIndexes?.length) continue;
+    const set = byId.get(entry.moduleId) ?? new Set();
+    for (const index of entry.stripIndexes) set.add(index);
+    byId.set(entry.moduleId, set);
+  }
+  return [...byId.entries()].map(([moduleId, set]) => ({
+    moduleId,
+    stripIndexes: [...set].sort((left, right) => left - right),
+  }));
+}
+
+function swapStraightLine(line) {
+  const nextKey = cornerPanelKey(line?.itemKey);
+  if (!nextKey) return line;
+  const item = getItem(nextKey);
+  if (!item) return line;
+  return {
+    ...line,
+    itemKey: nextKey,
+    name: item.name,
+    material: item.material ?? null,
+    item,
+  };
+}
+
+function swapCountedStraightLines(lines, count) {
+  let left = count;
+  const next = lines.map((line) => ({ ...line }));
+  for (const line of next) {
+    if (!(left > 0)) break;
+    const nextKey = cornerPanelKey(line?.itemKey);
+    const item = nextKey ? getItem(nextKey) : null;
+    if (!item || !(line.quantity > 0)) continue;
+    const quantity = Math.min(left, line.quantity);
+    line.quantity -= quantity;
+    left -= quantity;
+    const unit = item.unit ?? line.unit;
+    const existing = next.find((entry) => entry.itemKey === nextKey && entry.unit === unit);
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      next.push({
+        itemKey: nextKey,
+        name: item.name,
+        quantity,
+        unit,
+        material: item.material ?? null,
+        item,
+      });
+    }
+  }
+  return next.filter((line) => line.quantity > 0);
+}
+
+/**
+ * spec.all swaps every straight panel. spec.stripIndexes swaps that many of them.
+ * Glass follows the surfaces whose band index is in the set.
+ */
+export function applyCornerPanelSwap(lines = [], spec = null) {
+  if (!spec) return lines;
+  if (spec.all) return lines.map(swapStraightLine);
+  const count = Array.isArray(spec.stripIndexes) ? spec.stripIndexes.length : 0;
+  if (!count) return lines;
+  return swapCountedStraightLines(lines, count);
+}
+
+function surfaceBandIndex(surface, arrayIndex) {
+  return Number.isInteger(surface?.stripIndex) ? surface.stripIndex : arrayIndex;
+}
+
+export function applyCornerPanelSwapToSurfaces(surfaces = [], spec = null) {
+  if (!spec) return surfaces;
+  const indexes = spec.all ? null : new Set(spec.stripIndexes ?? []);
+  return surfaces.map((surface, arrayIndex) => {
     if (!surface || typeof surface !== 'object') return surface;
+    if (indexes && !indexes.has(surfaceBandIndex(surface, arrayIndex))) return surface;
     const nextKey = cornerPanelKey(surface.itemKey);
     if (!nextKey || !getItem(nextKey)) return surface;
     return { ...surface, itemKey: nextKey };
@@ -784,6 +911,11 @@ function moduleZRange(module) {
 
 function rangesOverlap(a, b) {
   return a.minCm < b.maxCm - EPSILON_CM && b.minCm < a.maxCm - EPSILON_CM;
+}
+
+function segmentZOverlap(a, b) {
+  if (!a?.z || !b?.z) return false;
+  return rangesOverlap(a.z, b.z);
 }
 
 function rangeContains(outer, inner) {
@@ -1039,6 +1171,7 @@ function spanContains(outer, inner) {
 function createDeltaBook() {
   const deltas = new Map();
   const swapModuleIds = [];
+  const panelSwaps = [];
   let jointCount = 0;
   let railCount = 0;
   const add = (itemKey, amount) => {
@@ -1048,6 +1181,7 @@ function createDeltaBook() {
   return {
     deltas,
     swapModuleIds,
+    panelSwaps,
     add,
     noteJoint() { jointCount += 1; },
     noteRail() { railCount += 1; },
@@ -1094,9 +1228,16 @@ function applyCornerShortJoint(book, a, b, geometry) {
   const payers = (payA ? 1 : 0) + (payB ? 1 : 0);
   book.add('connector_single', -payers);
   book.add('connector_corner', payers);
-  if (swapsCornerPanels(a)) book.swapModuleIds.push(a.moduleId);
-  if (swapsCornerPanels(b)) book.swapModuleIds.push(b.moduleId);
+  if (payA) noteInnerCornerPanels(book, a, b);
+  if (payB) noteInnerCornerPanels(book, b, a);
   book.noteJoint();
+}
+
+function noteInnerCornerPanels(book, self, partner) {
+  if (!swapsCornerPanels(self) || !self?.z || !partner?.z) return;
+  const stripIndexes = overlappingPanelStripIndexes(self.itemKey, self.z.minCm, partner.z);
+  if (!stripIndexes.length) return;
+  book.panelSwaps.push({ moduleId: self.moduleId, stripIndexes });
 }
 
 function applyTeeShortJoint(book, branch, host, geometry) {
@@ -1225,6 +1366,10 @@ export function planWallShortRelationshipBom(modules = []) {
   return Object.freeze({
     deltas: deltasFromBook(book),
     swapModuleIds: Object.freeze([...new Set(book.swapModuleIds)]),
+    panelSwaps: Object.freeze(mergePanelSwaps(book.panelSwaps).map((entry) => Object.freeze({
+      moduleId: entry.moduleId,
+      stripIndexes: Object.freeze(entry.stripIndexes),
+    }))),
     jointCount: book.jointCount,
     railCount: book.railCount,
     notes: Object.freeze(notes),

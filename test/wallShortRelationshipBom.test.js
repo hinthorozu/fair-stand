@@ -142,7 +142,7 @@ test('WS2 + full wall end-to-end drops upright_99 and still adds one double', ()
   assert.equal(qty(bom, 'panel_197'), 9);
 });
 
-test('WS + full wall corner swaps both panel families and adds two corner connectors', () => {
+test('WS + full wall corner swaps the short strip and only the overlapping full-wall strip', () => {
   const bom = resolveProjectBom([
     short1('a', 'wall_200_short_1', { widthCm: 200 }),
     cornerPartner('b', 'wall_150_350', 150, { xCm: 200, heightCm: 350 }),
@@ -153,9 +153,40 @@ test('WS + full wall corner swaps both panel families and adds two corner connec
   assert.equal(qty(bom, 'connector_double'), 0);
   assert.equal(qty(bom, 'connector_corner'), 2);
   assert.equal(qty(bom, 'panel_corner_192'), 1);
-  assert.equal(qty(bom, 'panel_corner_142_5'), 7);
+  assert.equal(qty(bom, 'panel_corner_142_5'), 1);
   assert.equal(qty(bom, 'panel_197'), 0);
-  assert.equal(qty(bom, 'panel_147_5'), 0);
+  assert.equal(qty(bom, 'panel_147_5'), 6);
+});
+
+test('door and showcase corners convert only the strips the short band covers', () => {
+  const doorShort1 = resolveProjectBom([
+    short1('a', 'wall_100_short_1', { widthCm: 100 }),
+    cornerPartner('b', 'wall_door_100_350', 100, { xCm: 100, heightCm: 350 }),
+  ]);
+  assert.equal(qty(doorShort1, 'connector_corner'), 2);
+  assert.equal(qty(doorShort1, 'panel_corner_92'), 2);
+  assert.equal(qty(doorShort1, 'panel_98'), 2);
+
+  const doorShort2 = resolveProjectBom([
+    short2('a', 'wall_100_short_2', { widthCm: 100 }),
+    cornerPartner('b', 'wall_door_100_350', 100, { xCm: 100, heightCm: 350 }),
+  ]);
+  assert.equal(qty(doorShort2, 'panel_corner_92'), 4);
+  assert.equal(qty(doorShort2, 'panel_98'), 1);
+
+  const showcase2 = resolveProjectBom([
+    short2('a', 'wall_100_short_2', { widthCm: 100 }),
+    cornerPartner('b', 'wall_showcase_100_2_350', 100, { xCm: 100, heightCm: 350 }),
+  ]);
+  assert.equal(qty(showcase2, 'panel_corner_92'), 4);
+  assert.equal(qty(showcase2, 'panel_98'), 3);
+
+  const showcase3 = resolveProjectBom([
+    short1('a', 'wall_100_short_1', { widthCm: 100 }),
+    cornerPartner('b', 'wall_showcase_100_3_350', 100, { xCm: 100, heightCm: 350 }),
+  ]);
+  assert.equal(qty(showcase3, 'panel_corner_92'), 2);
+  assert.equal(qty(showcase3, 'panel_98'), 3);
 });
 
 test('WS branch into a full wall tee drops only the branch upright', () => {
@@ -224,8 +255,8 @@ test('WS1 and WS2 end-to-end with door use one double, not the full-height 3', (
   assert.equal(qty(corner, 'connector_single'), 6);
   assert.equal(qty(corner, 'connector_corner'), 2);
   assert.equal(qty(corner, 'connector_double'), 0);
-  assert.equal(qty(corner, 'panel_corner_92'), 4);
-  assert.equal(qty(corner, 'panel_98'), 0);
+  assert.equal(qty(corner, 'panel_corner_92'), 2);
+  assert.equal(qty(corner, 'panel_98'), 2);
   assert.equal(qty(corner, 'door_leaf_100'), 1);
   const tee = resolveProjectBom([
     frame('host', 'wall_door_100_350', { widthCm: 100, heightCm: 350 }),
@@ -276,8 +307,8 @@ test('WS showcase joints do not copy the full-height showcase doubles', () => {
   ]);
   assert.equal(qty(corner, 'connector_corner'), 2);
   assert.equal(qty(corner, 'connector_double'), 0);
-  assert.equal(qty(corner, 'panel_98'), 0);
-  assert.equal(qty(corner, 'panel_corner_92'), 6);
+  assert.equal(qty(corner, 'panel_98'), 2);
+  assert.equal(qty(corner, 'panel_corner_92'), 4);
   assert.equal(qty(corner, 'glass_shelf'), 2);
   assert.equal(qty(corner, 'upright_99'), 1);
   assert.equal(qty(corner, 'upright_346_5'), 2);
@@ -366,8 +397,8 @@ test('mixed-height containment drops only the contained upright', () => {
   assert.equal(qty(corner, 'upright_99'), 2);
   assert.equal(qty(corner, 'connector_corner'), 2);
   assert.equal(qty(corner, 'connector_double'), 0);
-  assert.equal(qty(corner, 'panel_corner_92'), 3);
-  assert.equal(qty(corner, 'panel_98'), 0);
+  assert.equal(qty(corner, 'panel_corner_92'), 2);
+  assert.equal(qty(corner, 'panel_98'), 1);
 });
 
 test('partial Z overlap and disjoint wall shorts do not transform BOM', () => {

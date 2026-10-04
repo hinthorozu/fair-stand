@@ -47,7 +47,7 @@ function aggregateLines(lineLists) {
   return Array.from(aggregated.values(), (line) => Object.freeze(line));
 }
 
-function resolveModuleEntry(moduleState, index, { swapCornerPanels = false } = {}) {
+function resolveModuleEntry(moduleState, index, { panelSwap = null } = {}) {
   const moduleId = moduleState?.id ?? null;
   const itemKey = moduleState?.itemKey ?? null;
 
@@ -69,11 +69,12 @@ function resolveModuleEntry(moduleState, index, { swapCornerPanels = false } = {
 
   try {
     const recipeLines = resolveItemBom(itemKey, 1);
-    const lines = swapCornerPanels ? applyCornerPanelSwap(recipeLines) : recipeLines;
-    const surfaces = swapCornerPanels
-      ? applyCornerPanelSwapToSurfaces(collectPanelSurfaces(moduleState))
-      : collectPanelSurfaces(moduleState);
-    const split = applyGlassPanelSplit(lines, surfaces);
+    const surfaces = collectPanelSurfaces(moduleState);
+    const swappedSurfaces = panelSwap
+      ? applyCornerPanelSwapToSurfaces(surfaces, panelSwap)
+      : surfaces;
+    const lines = panelSwap ? applyCornerPanelSwap(recipeLines, panelSwap) : recipeLines;
+    const split = applyGlassPanelSplit(lines, swappedSurfaces);
     return Object.freeze({
       moduleId,
       index,
@@ -176,6 +177,19 @@ function moduleIdentity(moduleState, index) {
   return moduleState?.id ?? `idx:${index}`;
 }
 
+function absorbPanelSwaps(swaps, { fullIds = [], strips = [] } = {}) {
+  for (const moduleId of fullIds) {
+    if (moduleId) swaps.set(moduleId, { all: true });
+  }
+  for (const entry of strips) {
+    if (!entry?.moduleId || swaps.get(entry.moduleId)?.all) continue;
+    const current = swaps.get(entry.moduleId);
+    const indexes = new Set(current?.stripIndexes ?? []);
+    for (const index of entry.stripIndexes ?? []) indexes.add(index);
+    if (indexes.size) swaps.set(entry.moduleId, { stripIndexes: [...indexes] });
+  }
+}
+
 function unresolvedFrom(moduleEntries) {
   return moduleEntries
     .filter((entry) => entry.status === 'unresolved')
@@ -207,16 +221,24 @@ export function resolveProjectBom(modules = [], stand = null, assetNames = null)
     joints,
   );
 
-  const swapIds = new Set(wallShort.swapModuleIds);
+  const swaps = new Map();
+  absorbPanelSwaps(swaps, {
+    fullIds: wallShort.swapModuleIds,
+    strips: wallShort.panelSwaps,
+  });
   if (preview.appliedJointCount > 0) {
-    for (const moduleId of preview.swapModuleIds) swapIds.add(moduleId);
+    absorbPanelSwaps(swaps, {
+      fullIds: preview.swapModuleIds,
+      strips: preview.panelSwaps,
+    });
   }
-  if (swapIds.size > 0) {
-    moduleEntries = list.map((moduleState, index) => (
-      swapIds.has(moduleIdentity(moduleState, index))
-        ? resolveModuleEntry(moduleState, index, { swapCornerPanels: true })
-        : moduleEntries[index]
-    ));
+  if (swaps.size > 0) {
+    moduleEntries = list.map((moduleState, index) => {
+      const panelSwap = swaps.get(moduleIdentity(moduleState, index));
+      return panelSwap
+        ? resolveModuleEntry(moduleState, index, { panelSwap })
+        : moduleEntries[index];
+    });
   }
 
   const adjusted = applyRelationshipBomAdjustments(
