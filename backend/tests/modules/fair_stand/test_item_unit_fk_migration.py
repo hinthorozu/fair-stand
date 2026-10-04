@@ -36,7 +36,7 @@ def _engine():
     return engine
 
 
-def _create_legacy_tables(connection) -> None:
+def _create_legacy_tables(connection, *, seed_units: bool = True) -> None:
     connection.execute(
         text(
             """
@@ -62,6 +62,8 @@ def _create_legacy_tables(connection) -> None:
             """
         )
     )
+    if not seed_units:
+        return
     connection.execute(
         text(
             """
@@ -97,6 +99,60 @@ def _run(connection, direction: str) -> None:
     context = MigrationContext.configure(connection)
     with Operations.context(context):
         getattr(migration, direction)()
+
+
+def test_empty_catalog_inserts_only_referenced_canonical_units():
+    engine = _engine()
+    with engine.connect() as connection:
+        _create_legacy_tables(connection, seed_units=False)
+        _insert_items(connection, unresolved=False)
+        connection.commit()
+
+        _run(connection, "upgrade")
+        connection.commit()
+
+        units = {
+            row.unit_key: (row.name, row.symbol, bool(row.is_active))
+            for row in connection.execute(
+                text("SELECT unit_key, name, symbol, is_active FROM fair_stand_units ORDER BY unit_key")
+            )
+        }
+        assert units == {
+            "adet": ("Adet", "adet", True),
+            "metre_kare": ("Metre Kare", "m2", True),
+        }
+        assert connection.execute(
+            text("SELECT unit FROM fair_stand_items WHERE item_key = 'hali'")
+        ).scalar_one() == "metre_kare"
+        assert connection.execute(
+            text("SELECT COUNT(*) FROM fair_stand_items WHERE unit = 'm2'")
+        ).scalar_one() == 0
+        fk = inspect(connection).get_foreign_keys("fair_stand_items")
+        assert [item["name"] for item in fk] == ["fk_fair_stand_items_unit_key"]
+
+
+def test_inactive_metre_kare_still_blocks_the_foreign_key():
+    engine = _engine()
+    with engine.connect() as connection:
+        _create_legacy_tables(connection, seed_units=False)
+        connection.execute(
+            text(
+                """
+                INSERT INTO fair_stand_units (id, unit_key, name, symbol, is_active, created_at, updated_at)
+                VALUES (1, 'metre_kare', 'Metre Kare', 'm2', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                """
+            )
+        )
+        _insert_items(connection, unresolved=False)
+        with pytest.raises(RuntimeError, match="inactive"):
+            _run(connection, "upgrade")
+        assert inspect(connection).get_foreign_keys("fair_stand_items") == []
+        assert connection.execute(
+            text("SELECT unit FROM fair_stand_items WHERE item_key = 'hali'")
+        ).scalar_one() == "m2"
+        assert connection.execute(
+            text("SELECT COUNT(*) FROM fair_stand_units WHERE unit_key = 'adet'")
+        ).scalar_one() == 0
 
 
 def test_unresolved_unit_fails_before_the_foreign_key():
