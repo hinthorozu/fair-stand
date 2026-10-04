@@ -25,14 +25,30 @@ from app.modules.fair_stand.infrastructure.item_type_behavior_seed import (
     MAGNETIC_SNAP_VALUES,
     PLACEMENT_VALUES,
     WALL_CAPACITY_VALUES,
-    behavior_slice1_for_type,
-    behavior_slice2_for_type,
-    behavior_slice3_for_type,
 )
 from app.modules.fair_stand.infrastructure.models import (
     FairStandItemTypeModel,
+    FairStandItemTypeSceneBehaviorModel,
     FairStandRuleModel,
     FairStandRuleTypeModel,
+)
+
+_BEHAVIOR_FIELDS = (
+    "placement",
+    "collision",
+    "move_snap_cm",
+    "magnetic_snap",
+    "allow_side_insert",
+    "supports_wall_overlay_mount",
+    "wall_capacity",
+    "connection_endpoint",
+    "collision_depth",
+    "endpoint_contact",
+    "boundary_snap",
+    "collision_height",
+    "ghost_kind",
+    "ghost_renderer",
+    "ghost_opacity",
 )
 
 
@@ -152,31 +168,118 @@ def _validate_ghost_opacity(value: object) -> Decimal:
 
 
 def _item_type_payload(row: FairStandItemTypeModel) -> dict:
-    overlaps = sorted(row.overlap_types or [], key=lambda item: item.key)
-    return {
+    payload = {
         "id": int(row.id),
         "key": row.key,
         "displayName": row.display_name,
-        "placement": row.placement,
-        "collision": row.collision,
-        "moveSnapCm": int(row.move_snap_cm),
-        "magneticSnap": row.magnetic_snap,
-        "allowSideInsert": bool(row.allow_side_insert),
-        "supportsWallOverlayMount": bool(row.supports_wall_overlay_mount),
-        "wallCapacity": row.wall_capacity,
-        "connectionEndpoint": row.connection_endpoint,
-        "collisionDepth": row.collision_depth,
-        "endpointContact": row.endpoint_contact,
-        "boundarySnap": row.boundary_snap,
-        "collisionHeight": row.collision_height,
-        "overlapWithTypes": [item.key for item in overlaps],
-        "overlapItemTypeIds": [int(item.id) for item in overlaps],
-        "ghost": {
-            "kind": row.ghost_kind,
-            "renderer": row.ghost_renderer,
-            "opacity": float(row.ghost_opacity),
-        },
         "isActive": bool(row.is_active),
+    }
+    behavior = row.scene_behavior
+    if behavior is None:
+        return payload
+    overlaps = sorted(row.overlap_types or [], key=lambda item: item.key)
+    payload.update(
+        {
+            "placement": behavior.placement,
+            "collision": behavior.collision,
+            "moveSnapCm": int(behavior.move_snap_cm),
+            "magneticSnap": behavior.magnetic_snap,
+            "allowSideInsert": bool(behavior.allow_side_insert),
+            "supportsWallOverlayMount": bool(behavior.supports_wall_overlay_mount),
+            "wallCapacity": behavior.wall_capacity,
+            "connectionEndpoint": behavior.connection_endpoint,
+            "collisionDepth": behavior.collision_depth,
+            "endpointContact": behavior.endpoint_contact,
+            "boundarySnap": behavior.boundary_snap,
+            "collisionHeight": behavior.collision_height,
+            "overlapWithTypes": [item.key for item in overlaps],
+            "overlapItemTypeIds": [int(item.id) for item in overlaps],
+            "ghost": {
+                "kind": behavior.ghost_kind,
+                "renderer": behavior.ghost_renderer,
+                "opacity": float(behavior.ghost_opacity),
+            },
+        }
+    )
+    return payload
+
+
+def _behavior_values_from_mapping(values: dict) -> dict:
+    """Return provided behavior fields. Empty means classification-only."""
+    provided = {
+        key: values[key]
+        for key in _BEHAVIOR_FIELDS
+        if key in values and values[key] is not None
+    }
+    return provided
+
+
+def _require_complete_behavior(provided: dict) -> None:
+    missing = [key for key in _BEHAVIOR_FIELDS if key not in provided]
+    if missing:
+        raise SnapCatalogAdminError(
+            "Scene behavior eksik: " + ", ".join(missing) + "."
+        )
+
+
+def _validated_behavior(provided: dict) -> dict:
+    if "placement" in provided:
+        _validate_placement(provided["placement"])
+    if "collision" in provided:
+        _validate_collision(provided["collision"])
+    if "move_snap_cm" in provided:
+        _validate_move_snap_cm(provided["move_snap_cm"])
+    if "magnetic_snap" in provided:
+        _validate_magnetic_snap(provided["magnetic_snap"])
+    if "wall_capacity" in provided:
+        _validate_wall_capacity(provided["wall_capacity"])
+    if "connection_endpoint" in provided:
+        _validate_enum(
+            "connection_endpoint", provided["connection_endpoint"], CONNECTION_ENDPOINT_VALUES
+        )
+    if "collision_depth" in provided:
+        _validate_enum("collision_depth", provided["collision_depth"], COLLISION_DEPTH_VALUES)
+    if "endpoint_contact" in provided:
+        _validate_enum("endpoint_contact", provided["endpoint_contact"], ENDPOINT_CONTACT_VALUES)
+    if "boundary_snap" in provided:
+        _validate_enum("boundary_snap", provided["boundary_snap"], BOUNDARY_SNAP_VALUES)
+    if "collision_height" in provided:
+        _validate_enum("collision_height", provided["collision_height"], COLLISION_HEIGHT_VALUES)
+    if "ghost_opacity" in provided:
+        _validate_ghost_opacity(provided["ghost_opacity"])
+    _require_complete_behavior(provided)
+    ghost_kind = str(provided["ghost_kind"]).strip()
+    ghost_renderer = str(provided["ghost_renderer"]).strip()
+    if not ghost_kind:
+        raise SnapCatalogAdminError("ghost_kind boş olamaz.")
+    if not ghost_renderer:
+        raise SnapCatalogAdminError("ghost_renderer boş olamaz.")
+    return {
+        "placement": _validate_placement(provided["placement"]),
+        "collision": _validate_collision(provided["collision"]),
+        "move_snap_cm": _validate_move_snap_cm(provided["move_snap_cm"]),
+        "magnetic_snap": _validate_magnetic_snap(provided["magnetic_snap"]),
+        "allow_side_insert": bool(provided["allow_side_insert"]),
+        "supports_wall_overlay_mount": bool(provided["supports_wall_overlay_mount"]),
+        "wall_capacity": _validate_wall_capacity(provided["wall_capacity"]),
+        "connection_endpoint": _validate_enum(
+            "connection_endpoint", provided["connection_endpoint"], CONNECTION_ENDPOINT_VALUES
+        ),
+        "collision_depth": _validate_enum(
+            "collision_depth", provided["collision_depth"], COLLISION_DEPTH_VALUES
+        ),
+        "endpoint_contact": _validate_enum(
+            "endpoint_contact", provided["endpoint_contact"], ENDPOINT_CONTACT_VALUES
+        ),
+        "boundary_snap": _validate_enum(
+            "boundary_snap", provided["boundary_snap"], BOUNDARY_SNAP_VALUES
+        ),
+        "collision_height": _validate_enum(
+            "collision_height", provided["collision_height"], COLLISION_HEIGHT_VALUES
+        ),
+        "ghost_kind": ghost_kind,
+        "ghost_renderer": ghost_renderer,
+        "ghost_opacity": _validate_ghost_opacity(provided["ghost_opacity"]),
     }
 
 
@@ -223,7 +326,10 @@ class AdminSnapCatalogService:
     def list_item_types(self) -> list[dict]:
         rows = self._session.scalars(
             select(FairStandItemTypeModel)
-            .options(selectinload(FairStandItemTypeModel.overlap_types))
+            .options(
+                selectinload(FairStandItemTypeModel.overlap_types),
+                selectinload(FairStandItemTypeModel.scene_behavior),
+            )
             .order_by(FairStandItemTypeModel.display_name)
         ).all()
         return [_item_type_payload(row) for row in rows]
@@ -312,91 +418,55 @@ class AdminSnapCatalogService:
         if not display_name:
             raise SnapCatalogAdminError("display_name zorunludur.")
         key = _resolve_key(key=key, display_name=display_name)
-        seed_placement, seed_collision, seed_move = behavior_slice1_for_type(key)
-        seed_magnetic, seed_allow, seed_overlay, seed_capacity = behavior_slice2_for_type(key)
-        (
-            seed_endpoint,
-            seed_depth,
-            seed_contact,
-            seed_boundary,
-            seed_height,
-            seed_overlap,
-            seed_ghost_kind,
-            seed_ghost_renderer,
-            seed_ghost_opacity,
-        ) = behavior_slice3_for_type(key)
+        provided = _behavior_values_from_mapping(
+            {
+                "placement": placement,
+                "collision": collision,
+                "move_snap_cm": move_snap_cm,
+                "magnetic_snap": magnetic_snap,
+                "allow_side_insert": allow_side_insert,
+                "supports_wall_overlay_mount": supports_wall_overlay_mount,
+                "wall_capacity": wall_capacity,
+                "connection_endpoint": connection_endpoint,
+                "collision_depth": collision_depth,
+                "endpoint_contact": endpoint_contact,
+                "boundary_snap": boundary_snap,
+                "collision_height": collision_height,
+                "ghost_kind": ghost_kind,
+                "ghost_renderer": ghost_renderer,
+                "ghost_opacity": ghost_opacity,
+            }
+        )
+        overlap_requested = overlap_with_types is not None or overlap_item_type_ids is not None
+        if overlap_requested and not provided:
+            raise SnapCatalogAdminError(
+                "Scene behavior olmayan tipe overlap bağlanamaz."
+            )
+        behavior_values = _validated_behavior(provided) if provided else None
         now = _now()
         row = FairStandItemTypeModel(
             key=key,
             display_name=display_name,
-            placement=_validate_placement(placement if placement is not None else seed_placement),
-            collision=_validate_collision(collision if collision is not None else seed_collision),
-            move_snap_cm=_validate_move_snap_cm(
-                move_snap_cm if move_snap_cm is not None else seed_move
-            ),
-            magnetic_snap=_validate_magnetic_snap(
-                magnetic_snap if magnetic_snap is not None else seed_magnetic
-            ),
-            allow_side_insert=bool(
-                allow_side_insert if allow_side_insert is not None else seed_allow
-            ),
-            supports_wall_overlay_mount=bool(
-                supports_wall_overlay_mount
-                if supports_wall_overlay_mount is not None
-                else seed_overlay
-            ),
-            wall_capacity=_validate_wall_capacity(
-                wall_capacity if wall_capacity is not None else seed_capacity
-            ),
-            connection_endpoint=_validate_enum(
-                "connection_endpoint",
-                connection_endpoint if connection_endpoint is not None else seed_endpoint,
-                CONNECTION_ENDPOINT_VALUES,
-            ),
-            collision_depth=_validate_enum(
-                "collision_depth",
-                collision_depth if collision_depth is not None else seed_depth,
-                COLLISION_DEPTH_VALUES,
-            ),
-            endpoint_contact=_validate_enum(
-                "endpoint_contact",
-                endpoint_contact if endpoint_contact is not None else seed_contact,
-                ENDPOINT_CONTACT_VALUES,
-            ),
-            boundary_snap=_validate_enum(
-                "boundary_snap",
-                boundary_snap if boundary_snap is not None else seed_boundary,
-                BOUNDARY_SNAP_VALUES,
-            ),
-            collision_height=_validate_enum(
-                "collision_height",
-                collision_height if collision_height is not None else seed_height,
-                COLLISION_HEIGHT_VALUES,
-            ),
-            ghost_kind=str(
-                ghost_kind if ghost_kind is not None else seed_ghost_kind
-            ).strip(),
-            ghost_renderer=str(
-                ghost_renderer if ghost_renderer is not None else seed_ghost_renderer
-            ).strip(),
-            ghost_opacity=_validate_ghost_opacity(
-                ghost_opacity if ghost_opacity is not None else seed_ghost_opacity
-            ),
             is_active=bool(is_active),
             created_at=now,
             updated_at=now,
         )
         self._session.add(row)
         self._flush()
-        if overlap_with_types is None and overlap_item_type_ids is None:
-            self._set_item_type_overlaps(row, overlap_with_types=list(seed_overlap))
-        else:
-            self._set_item_type_overlaps(
-                row,
-                overlap_with_types=overlap_with_types,
-                overlap_item_type_ids=overlap_item_type_ids,
+        if behavior_values is not None:
+            row.scene_behavior = FairStandItemTypeSceneBehaviorModel(
+                item_type_id=row.id,
+                **behavior_values,
             )
-        self._flush()
+            if overlap_requested:
+                self._set_item_type_overlaps(
+                    row,
+                    overlap_with_types=overlap_with_types,
+                    overlap_item_type_ids=overlap_item_type_ids,
+                )
+            else:
+                row.overlap_types = []
+            self._flush()
         return _item_type_payload(row)
 
     def update_item_type(self, item_type_id: int, payload: dict) -> dict:
@@ -415,62 +485,83 @@ class AdminSnapCatalogService:
             row.key = key
         if "is_active" in payload and payload["is_active"] is not None:
             row.is_active = bool(payload["is_active"])
-        if "placement" in payload and payload["placement"] is not None:
-            row.placement = _validate_placement(payload["placement"])
-        if "collision" in payload and payload["collision"] is not None:
-            row.collision = _validate_collision(payload["collision"])
-        if "move_snap_cm" in payload and payload["move_snap_cm"] is not None:
-            row.move_snap_cm = _validate_move_snap_cm(payload["move_snap_cm"])
-        if "magnetic_snap" in payload and payload["magnetic_snap"] is not None:
-            row.magnetic_snap = _validate_magnetic_snap(payload["magnetic_snap"])
-        if "allow_side_insert" in payload and payload["allow_side_insert"] is not None:
-            row.allow_side_insert = bool(payload["allow_side_insert"])
-        if (
-            "supports_wall_overlay_mount" in payload
-            and payload["supports_wall_overlay_mount"] is not None
-        ):
-            row.supports_wall_overlay_mount = bool(payload["supports_wall_overlay_mount"])
-        if "wall_capacity" in payload and payload["wall_capacity"] is not None:
-            row.wall_capacity = _validate_wall_capacity(payload["wall_capacity"])
-        if "connection_endpoint" in payload and payload["connection_endpoint"] is not None:
-            row.connection_endpoint = _validate_enum(
-                "connection_endpoint", payload["connection_endpoint"], CONNECTION_ENDPOINT_VALUES
-            )
-        if "collision_depth" in payload and payload["collision_depth"] is not None:
-            row.collision_depth = _validate_enum(
-                "collision_depth", payload["collision_depth"], COLLISION_DEPTH_VALUES
-            )
-        if "endpoint_contact" in payload and payload["endpoint_contact"] is not None:
-            row.endpoint_contact = _validate_enum(
-                "endpoint_contact", payload["endpoint_contact"], ENDPOINT_CONTACT_VALUES
-            )
-        if "boundary_snap" in payload and payload["boundary_snap"] is not None:
-            row.boundary_snap = _validate_enum(
-                "boundary_snap", payload["boundary_snap"], BOUNDARY_SNAP_VALUES
-            )
-        if "collision_height" in payload and payload["collision_height"] is not None:
-            row.collision_height = _validate_enum(
-                "collision_height", payload["collision_height"], COLLISION_HEIGHT_VALUES
-            )
-        if "overlap_with_types" in payload or "overlap_item_type_ids" in payload:
-            self._set_item_type_overlaps(
-                row,
-                overlap_with_types=payload.get("overlap_with_types"),
-                overlap_item_type_ids=payload.get("overlap_item_type_ids"),
-                allow_unset=False,
-            )
-        if "ghost_kind" in payload and payload["ghost_kind"] is not None:
-            kind = str(payload["ghost_kind"]).strip()
-            if not kind:
-                raise SnapCatalogAdminError("ghost_kind boş olamaz.")
-            row.ghost_kind = kind
-        if "ghost_renderer" in payload and payload["ghost_renderer"] is not None:
-            renderer = str(payload["ghost_renderer"]).strip()
-            if not renderer:
-                raise SnapCatalogAdminError("ghost_renderer boş olamaz.")
-            row.ghost_renderer = renderer
-        if "ghost_opacity" in payload and payload["ghost_opacity"] is not None:
-            row.ghost_opacity = _validate_ghost_opacity(payload["ghost_opacity"])
+        provided = _behavior_values_from_mapping(payload)
+        overlap_requested = "overlap_with_types" in payload or "overlap_item_type_ids" in payload
+        if row.scene_behavior is None:
+            if overlap_requested and not provided:
+                raise SnapCatalogAdminError(
+                    "Scene behavior olmayan tipe overlap bağlanamaz."
+                )
+            if provided:
+                behavior_values = _validated_behavior(provided)
+                row.scene_behavior = FairStandItemTypeSceneBehaviorModel(
+                    item_type_id=row.id,
+                    **behavior_values,
+                )
+                if overlap_requested:
+                    self._set_item_type_overlaps(
+                        row,
+                        overlap_with_types=payload.get("overlap_with_types"),
+                        overlap_item_type_ids=payload.get("overlap_item_type_ids"),
+                        allow_unset=False,
+                    )
+                else:
+                    row.overlap_types = []
+        else:
+            behavior = row.scene_behavior
+            if "placement" in provided:
+                behavior.placement = _validate_placement(provided["placement"])
+            if "collision" in provided:
+                behavior.collision = _validate_collision(provided["collision"])
+            if "move_snap_cm" in provided:
+                behavior.move_snap_cm = _validate_move_snap_cm(provided["move_snap_cm"])
+            if "magnetic_snap" in provided:
+                behavior.magnetic_snap = _validate_magnetic_snap(provided["magnetic_snap"])
+            if "allow_side_insert" in provided:
+                behavior.allow_side_insert = bool(provided["allow_side_insert"])
+            if "supports_wall_overlay_mount" in provided:
+                behavior.supports_wall_overlay_mount = bool(provided["supports_wall_overlay_mount"])
+            if "wall_capacity" in provided:
+                behavior.wall_capacity = _validate_wall_capacity(provided["wall_capacity"])
+            if "connection_endpoint" in provided:
+                behavior.connection_endpoint = _validate_enum(
+                    "connection_endpoint", provided["connection_endpoint"], CONNECTION_ENDPOINT_VALUES
+                )
+            if "collision_depth" in provided:
+                behavior.collision_depth = _validate_enum(
+                    "collision_depth", provided["collision_depth"], COLLISION_DEPTH_VALUES
+                )
+            if "endpoint_contact" in provided:
+                behavior.endpoint_contact = _validate_enum(
+                    "endpoint_contact", provided["endpoint_contact"], ENDPOINT_CONTACT_VALUES
+                )
+            if "boundary_snap" in provided:
+                behavior.boundary_snap = _validate_enum(
+                    "boundary_snap", provided["boundary_snap"], BOUNDARY_SNAP_VALUES
+                )
+            if "collision_height" in provided:
+                behavior.collision_height = _validate_enum(
+                    "collision_height", provided["collision_height"], COLLISION_HEIGHT_VALUES
+                )
+            if "ghost_kind" in provided:
+                kind = str(provided["ghost_kind"]).strip()
+                if not kind:
+                    raise SnapCatalogAdminError("ghost_kind boş olamaz.")
+                behavior.ghost_kind = kind
+            if "ghost_renderer" in provided:
+                renderer = str(provided["ghost_renderer"]).strip()
+                if not renderer:
+                    raise SnapCatalogAdminError("ghost_renderer boş olamaz.")
+                behavior.ghost_renderer = renderer
+            if "ghost_opacity" in provided:
+                behavior.ghost_opacity = _validate_ghost_opacity(provided["ghost_opacity"])
+            if overlap_requested:
+                self._set_item_type_overlaps(
+                    row,
+                    overlap_with_types=payload.get("overlap_with_types"),
+                    overlap_item_type_ids=payload.get("overlap_item_type_ids"),
+                    allow_unset=False,
+                )
         row.updated_at = _now()
         self._flush()
         return _item_type_payload(row)
@@ -559,6 +650,14 @@ class AdminSnapCatalogService:
             )
             if len(item_types) != len(unique_ids):
                 raise SnapCatalogAdminError("Bir veya daha fazla item tipi bulunamadı.", status_code=404)
+        missing_behavior = [item.key for item in item_types if item.scene_behavior is None]
+        if missing_behavior:
+            raise SnapCatalogAdminError(
+                "Scene behavior olmayan tipe snap rule bağlanamaz: "
+                + ", ".join(sorted(missing_behavior))
+                + ".",
+                status_code=400,
+            )
         # Tip linki = motor provides; item.snap_provides_rule_id yazılmaz (opsiyonel override).
         row.item_types = item_types
 

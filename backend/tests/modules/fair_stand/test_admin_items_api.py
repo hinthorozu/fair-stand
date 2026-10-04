@@ -135,6 +135,53 @@ def test_admin_item_records_create_minimal(client, db_session, auth_headers):
     assert response.json()["itemKey"] == "admin_test_sku"
 
 
+def test_unknown_unit_is_a_client_error_and_inactive_unit_is_accepted(client, db_session, auth_headers):
+    from datetime import UTC, datetime
+
+    from app.modules.fair_stand.infrastructure.models import FairStandUnitModel
+
+    seed_fair_stand_catalog(db_session)
+    db_session.flush()
+    _allow(client, {PERMISSION_ITEMS_CREATE, PERMISSION_ITEMS_UPDATE})
+    unknown = client.post(
+        "/api/v1/fair-stand/admin/item-records",
+        headers=auth_headers,
+        json={
+            "item_key": "unknown_unit_sku",
+            "name": "Unknown Unit",
+            "item_type": "panel",
+            "unit": "yok_boyle_bir_birim",
+        },
+    )
+    assert unknown.status_code == 400
+    assert "katalogda yok" in unknown.json()["detail"]
+
+    now = datetime.now(tz=UTC)
+    db_session.add(
+        FairStandUnitModel(
+            unit_key="pasif_birim",
+            name="Pasif",
+            symbol="p",
+            is_active=False,
+            created_at=now,
+            updated_at=now,
+        )
+    )
+    db_session.flush()
+    created = client.post(
+        "/api/v1/fair-stand/admin/item-records",
+        headers=auth_headers,
+        json={
+            "item_key": "inactive_unit_sku",
+            "name": "Inactive Unit",
+            "item_type": "panel",
+            "unit": "pasif_birim",
+        },
+    )
+    assert created.status_code == 201
+    assert created.json()["unit"] == "pasif_birim"
+
+
 def test_admin_item_records_catalog_visible_requires_triad(client, db_session, auth_headers):
     from sqlalchemy import func, select
 

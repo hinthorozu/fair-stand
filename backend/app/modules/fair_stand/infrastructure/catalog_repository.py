@@ -130,7 +130,10 @@ class SqlAlchemyFairStandCatalogRepository:
     def list_item_types(self, *, active_only: bool = False) -> list[FairStandItemTypeModel]:
         stmt = (
             select(FairStandItemTypeModel)
-            .options(selectinload(FairStandItemTypeModel.overlap_types))
+            .options(
+                selectinload(FairStandItemTypeModel.overlap_types),
+                selectinload(FairStandItemTypeModel.scene_behavior),
+            )
             .order_by(FairStandItemTypeModel.display_name)
         )
         if active_only:

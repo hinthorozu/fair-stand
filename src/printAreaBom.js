@@ -3,10 +3,10 @@ import { getItem, resolveSceneDimensions } from './items.js';
 const REGION_EPSILON = 0.02;
 
 const SECTION_DEFS = Object.freeze([
-  Object.freeze({ id: 'image', label: 'Görseller' }),
-  Object.freeze({ id: 'lightbox', label: 'Lightbox' }),
-  Object.freeze({ id: 'mesh', label: 'Delikli branda' }),
-  Object.freeze({ id: 'foam', label: 'Strafor logo' }),
+  Object.freeze({ id: 'image', label: 'Dijital Baskı' }),
+  Object.freeze({ id: 'lightbox', label: 'Lightbox Bezi' }),
+  Object.freeze({ id: 'mesh', label: 'Mesh - Delikli Branda' }),
+  Object.freeze({ id: 'foam', label: 'Strafor Logo' }),
 ]);
 
 function nearly(a, b) {
@@ -477,10 +477,10 @@ export function collectPrintAreas(modules = [], assetNames = null) {
   const faces = collectStripFaces(list);
   const loose = collectLooseFaces(list);
   const built = [
-    section('image', 'Görseller', [...imagePieces(faces), ...looseImagePieces(loose)], assetNames),
-    section('lightbox', 'Lightbox', [...fabricPieces(faces, 'lightbox'), ...looseFabricPieces(loose, 'lightbox')], assetNames),
-    section('mesh', 'Delikli branda', [...fabricPieces(faces, 'mesh'), ...looseFabricPieces(loose, 'mesh')], assetNames),
-    section('foam', 'Strafor logo', foamPieces(list), assetNames),
+    section('image', 'Dijital Baskı', [...imagePieces(faces), ...looseImagePieces(loose)], assetNames),
+    section('lightbox', 'Lightbox Bezi', [...fabricPieces(faces, 'lightbox'), ...looseFabricPieces(loose, 'lightbox')], assetNames),
+    section('mesh', 'Mesh - Delikli Branda', [...fabricPieces(faces, 'mesh'), ...looseFabricPieces(loose, 'mesh')], assetNames),
+    section('foam', 'Strafor Logo', foamPieces(list), assetNames),
   ].filter(Boolean);
   const order = new Map(SECTION_DEFS.map((entry, index) => [entry.id, index]));
   built.sort((a, b) => order.get(a.id) - order.get(b.id));

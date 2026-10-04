@@ -8,6 +8,7 @@ from app.modules.fair_stand.application.admin_catalog import AdminCatalogService
 from app.modules.fair_stand.application.admin_items import AdminItemsService, ItemAdminError
 from app.modules.fair_stand.application.admin_settings import AdminSettingsService, SettingsAdminError
 from app.modules.fair_stand.application.admin_snap_catalog import AdminSnapCatalogService, SnapCatalogAdminError
+from app.modules.fair_stand.application.admin_units import AdminUnitsService, UnitAdminError
 from app.modules.fair_stand.application.get_catalog_bootstrap import GetCatalogBootstrapUseCase
 from app.modules.fair_stand.application.item_mapper import runtime_settings_payload, stand_dimensions_payload
 from app.modules.fair_stand.application.get_item import GetItemUseCase
@@ -30,6 +31,7 @@ from app.modules.fair_stand.api.dependencies import (
     get_admin_items_service,
     get_admin_settings_service,
     get_admin_snap_catalog_service,
+    get_admin_units_service,
     get_catalog_bootstrap_use_case,
     get_item_use_case,
     require_any_permission,
@@ -51,6 +53,20 @@ class CategoryUpdateBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     catalog_name: str | None = Field(default=None, min_length=1, max_length=128)
     catalog_index: int | None = Field(default=None, ge=1)
+    is_active: bool | None = None
+
+
+class UnitCreateBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=1, max_length=128)
+    symbol: str = Field(min_length=1, max_length=32)
+    is_active: bool = True
+
+
+class UnitUpdateBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str | None = Field(default=None, min_length=1, max_length=128)
+    symbol: str | None = Field(default=None, min_length=1, max_length=32)
     is_active: bool | None = None
 
 
@@ -192,7 +208,9 @@ def _preview_kind_payload(preview) -> dict[str, Any]:
     }
 
 
-def _raise_admin(exc: CatalogAdminError | SettingsAdminError | ItemAdminError | SnapCatalogAdminError) -> None:
+def _raise_admin(
+    exc: CatalogAdminError | SettingsAdminError | ItemAdminError | SnapCatalogAdminError | UnitAdminError,
+) -> None:
     raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
 
 
@@ -307,6 +325,81 @@ def admin_restore_category(
     try:
         return service.restore_category(category_id)
     except CatalogAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.get("/admin/units")
+def admin_list_units(
+    auth: AuthContext = Depends(require_permission(PERMISSION_CATALOG_READ)),
+    service: AdminUnitsService = Depends(get_admin_units_service),
+) -> list[dict[str, Any]]:
+    _ = auth
+    return service.list_units()
+
+
+@router.post("/admin/units", status_code=status.HTTP_201_CREATED)
+def admin_create_unit(
+    body: UnitCreateBody,
+    auth: AuthContext = Depends(require_permission(PERMISSION_CATALOG_CREATE)),
+    service: AdminUnitsService = Depends(get_admin_units_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.create_unit(
+            name=body.name,
+            symbol=body.symbol,
+            is_active=body.is_active,
+        )
+    except UnitAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.patch("/admin/units/{unit_id}")
+def admin_update_unit(
+    unit_id: int,
+    body: UnitUpdateBody,
+    auth: AuthContext = Depends(require_permission(PERMISSION_CATALOG_UPDATE)),
+    service: AdminUnitsService = Depends(get_admin_units_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.update_unit(
+            unit_id,
+            name=body.name,
+            symbol=body.symbol,
+            is_active=body.is_active,
+        )
+    except UnitAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/units/{unit_id}/archive")
+def admin_archive_unit(
+    unit_id: int,
+    auth: AuthContext = Depends(require_permission(PERMISSION_CATALOG_ARCHIVE)),
+    service: AdminUnitsService = Depends(get_admin_units_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.archive_unit(unit_id)
+    except UnitAdminError as exc:
+        _raise_admin(exc)
+        raise
+
+
+@router.post("/admin/units/{unit_id}/restore")
+def admin_restore_unit(
+    unit_id: int,
+    auth: AuthContext = Depends(require_permission(PERMISSION_CATALOG_ARCHIVE)),
+    service: AdminUnitsService = Depends(get_admin_units_service),
+) -> dict[str, Any]:
+    _ = auth
+    try:
+        return service.restore_unit(unit_id)
+    except UnitAdminError as exc:
         _raise_admin(exc)
         raise
 

@@ -42,14 +42,16 @@ def main() -> int:
         rows = session.execute(
             text(
                 """
-                SELECT key, placement, collision, move_snap_cm,
-                       magnetic_snap, allow_side_insert, supports_wall_overlay_mount,
-                       wall_capacity, connection_endpoint, collision_depth,
-                       endpoint_contact, boundary_snap, collision_height,
-                       ghost_kind, ghost_renderer, ghost_opacity,
-                       is_active, id
-                FROM fair_stand_item_type
-                ORDER BY key
+                SELECT t.key, b.placement, b.collision, b.move_snap_cm,
+                       b.magnetic_snap, b.allow_side_insert, b.supports_wall_overlay_mount,
+                       b.wall_capacity, b.connection_endpoint, b.collision_depth,
+                       b.endpoint_contact, b.boundary_snap, b.collision_height,
+                       b.ghost_kind, b.ghost_renderer, b.ghost_opacity,
+                       t.is_active, t.id
+                FROM fair_stand_item_type t
+                LEFT JOIN fair_stand_item_type_scene_behavior b
+                  ON b.item_type_id = t.id
+                ORDER BY t.key
                 """
             )
         ).mappings().all()
@@ -156,7 +158,9 @@ def main() -> int:
         nulls = [
             r["key"]
             for r in rows
-            if r["placement"] is None
+            if r["key"] in expected_keys
+            and (
+            r["placement"] is None
             or r["collision"] is None
             or r["move_snap_cm"] is None
             or r["magnetic_snap"] is None
@@ -169,6 +173,7 @@ def main() -> int:
             or r["ghost_kind"] is None
             or r["ghost_renderer"] is None
             or r["ghost_opacity"] is None
+            )
         ]
         if nulls:
             print(f"FAIL null behavior cols: {nulls}")
@@ -199,32 +204,36 @@ def main() -> int:
         for i, r in enumerate(rows):
             if not r["is_active"]:
                 continue
-            bootstrap_types.append(
-                {
+            payload = {
                     "id": i + 1,
                     "key": r["key"],
                     "displayName": r["key"],
-                    "placement": r["placement"],
-                    "collision": r["collision"],
-                    "moveSnapCm": int(r["move_snap_cm"]),
-                    "magneticSnap": r["magnetic_snap"],
-                    "allowSideInsert": bool(r["allow_side_insert"]),
-                    "supportsWallOverlayMount": bool(r["supports_wall_overlay_mount"]),
-                    "wallCapacity": r["wall_capacity"],
-                    "connectionEndpoint": r["connection_endpoint"],
-                    "collisionDepth": r["collision_depth"],
-                    "endpointContact": r["endpoint_contact"],
-                    "boundarySnap": r["boundary_snap"],
-                    "collisionHeight": r["collision_height"],
-                    "overlapWithTypes": list(overlaps_by_src.get(r["key"], [])),
-                    "ghost": {
-                        "kind": r["ghost_kind"],
-                        "renderer": r["ghost_renderer"],
-                        "opacity": float(r["ghost_opacity"]),
-                    },
-                    "isActive": True,
                 }
-            )
+            if r["placement"] is not None:
+                payload.update(
+                    {
+                        "placement": r["placement"],
+                        "collision": r["collision"],
+                        "moveSnapCm": int(r["move_snap_cm"]),
+                        "magneticSnap": r["magnetic_snap"],
+                        "allowSideInsert": bool(r["allow_side_insert"]),
+                        "supportsWallOverlayMount": bool(r["supports_wall_overlay_mount"]),
+                        "wallCapacity": r["wall_capacity"],
+                        "connectionEndpoint": r["connection_endpoint"],
+                        "collisionDepth": r["collision_depth"],
+                        "endpointContact": r["endpoint_contact"],
+                        "boundarySnap": r["boundary_snap"],
+                        "collisionHeight": r["collision_height"],
+                        "overlapWithTypes": list(overlaps_by_src.get(r["key"], [])),
+                        "ghost": {
+                            "kind": r["ghost_kind"],
+                            "renderer": r["ghost_renderer"],
+                            "opacity": float(r["ghost_opacity"]),
+                        },
+                    }
+                )
+            payload["isActive"] = True
+            bootstrap_types.append(payload)
 
     PAYLOAD.write_text(json.dumps(bootstrap_types, ensure_ascii=False), encoding="utf-8")
     result = subprocess.run(

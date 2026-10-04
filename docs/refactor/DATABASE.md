@@ -6,13 +6,13 @@ Lokal / sunucu PostgreSQL `fair_stand` şemasının yaşayan envanteri. “Üç 
 
 **Doğrulama (2026-09-24, `models.py` + Alembic head + `item_mapper.py` + `src/`):**
 
-1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0045_project_customer_id`**. `0043_panel_glass_family` ve `0044_panel_corner_glass_family` yeni kolon değildir; `panel_cam_*` / `panel_corner_cam_*` SKU satırıdır.
+1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0057_foam_logo_item`**. `0053_item_type_scene_behavior` sahne davranışını `fair_stand_item_type` satırından ayırır. `0043_panel_glass_family` ve `0044_panel_corner_glass_family` yeni kolon değildir; `panel_cam_*` / `panel_corner_cam_*` SKU satırıdır. `0057_foam_logo_item` gizli `foam_logo` production satırını ekler.
 2. `item_mapper.py` — her ürün kolonu JSON anahtarına (veya “bootstrap’a girmez”) bağlandı.
 3. Production `src/` grep — “Nerede” hücresi gerçek okuyucu dosyadır; okunmayan kolon **DATA / TEST_ONLY / SCHEMA_ONLY** yazılır.
 4. `ITEMS.md` (alan kuyruğu + onaylı şema), `CATALOG.md`, `ROTATION.md`, `SCENE_POSE.md`, `STAND_DIMENSIONS.md` — değer kopyalanmaz; işaret edilir.
 5. Proje SoT — `fair_stand_projects` / `fair_stand_project_assets` + disk asset kökü; tarayıcı IndexedDB yalnız önbellek (`src/projectRemote.js`).
 
-Satır sayıları (catalog tabloları) bu makinedeki canlı DB envanterinden (2026-09-21). Başka dump’ta adet değişebilir; kolon yok olamaz. Değer SoT bu dosya değildir.
+Satır sayıları bu makinedeki canlı PostgreSQL `fair_stand` envanterinden (2026-10-04, Alembic `0057_foam_logo_item`). Başka dump’ta adet değişebilir; kolon yok olamaz. Değer SoT bu dosya değildir.
 
 - Model: `backend/app/modules/fair_stand/infrastructure/models.py`
 - Mapper (DB → bootstrap JSON): `backend/app/modules/fair_stand/application/item_mapper.py`
@@ -33,26 +33,29 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 | Tablo | Canlı satır (örnek) | Neden ayrı |
 |---|---|---|
 | `alembic_version` | 1 | Alembic head. Ürün değil. |
-| `fair_stand_categories` | 7 (6 `is_active=true`; 1 pasif yerel satır) | Katalog grupları. Item’dan bağımsız id. Bootstrap yalnız aktif. |
-| `fair_stand_catalog_preview_kinds` | seed 28; canlı +CRM (örn. 29, `Küp Blok` id 57) | Kart silüeti HTML/CSS. Item davranışını tanımlamaz. Bootstrap: `active_only=false` (pasif önizlemeler de JSON’a girer). |
-| `fair_stand_item_type` | tip sayısı seed/CRM | Tip davranış paketi (placement, collision, …). Bootstrap `itemTypes[]`. |
-| `fair_stand_item_type_overlap` | M:N satırları | Tip ↔ tip çakışma izni. Bootstrap `overlapWithTypes[]`. |
+| `fair_stand_categories` | 6, hepsi `is_active=true` | Katalog grupları. Item’dan bağımsız id. Bootstrap yalnız aktif. |
+| `fair_stand_catalog_preview_kinds` | 29, hepsi `is_active=true` | Kart silüeti HTML/CSS. Item davranışını tanımlamaz. Bootstrap: `active_only=false` (pasif önizlemeler de JSON’a girer). |
+| `fair_stand_units` | 5, hepsi `is_active=true` | Global ölçü birimi kataloğu. Organizasyon satırı yok. `fair_stand_items.unit` → `unit_key` FK, ON UPDATE CASCADE, ON DELETE RESTRICT. Bootstrap’a girmez. |
+| `fair_stand_item_type` | 44 (43 sahne tipi + `production`) | Item type sınıflandırması: `key`, `display_name`, `is_active`. Sahne davranışı burada durmaz. |
+| `fair_stand_item_type_scene_behavior` | 43 | İsteğe bağlı 1:1 sahne davranışı. Satır yoksa tip non-scene’dir. `production` satırı yoktur. PK/FK `item_type_id` → `fair_stand_item_type_scene_behavior.id` ON UPDATE CASCADE ON DELETE CASCADE. |
+| `fair_stand_item_type_overlap` | 6 | Tip ↔ tip çakışma izni. Bootstrap `overlapWithTypes[]`. |
 | `fair_stand_rule_type` | 1× `snap` | Kural ailesi. Bootstrap `ruleTypes[]` (stand JS ayrı registry açmaz). |
-| `fair_stand_rule` | `top-rail`, `shelf-rail`, … | Snap key + face/edge. Bootstrap `rules[]`. |
-| `fair_stand_rule_item_type` | M:N | Kuralı **sunan** item tipleri. Bootstrap `rules[].itemTypeKeys`. |
-| `fair_stand_items` | seed/fixture 97 (59 `catalog_visible`); canlı yerel dump daha fazla olabilir (clone SKU) | Ürün kimliği + Catalog üyeliği + snap FK. Bootstrap: `is_active=true` (gizli SKU dahil). |
-| `fair_stand_item_dimensions` | 90 / 96 Item | Fiziksel / BOM ölçü. 6 Item’da satır yok (`connector_*`, `shelf_leg`, `hali`). |
-| `fair_stand_item_scene_dimensions` | 34 | Sahne kutusu override. Yoksa aynı adlı `dimensions` alanı. |
+| `fair_stand_rule` | 3: `profile-top-rail`, `shelf-rail`, `top-rail` | Snap key + face/edge. Bootstrap `rules[]`. |
+| `fair_stand_rule_item_type` | 4 | Kuralı **sunan** item tipleri. Bootstrap `rules[].itemTypeKeys`. |
+| `fair_stand_items` | 121 (63 `catalog_visible=true`; 121 `is_active=true`) | Ürün kimliği + Catalog üyeliği + snap FK. Bootstrap: `is_active=true` (gizli SKU dahil). `digital_print`, `mesh_fabric`, `lightbox_fabric`, `foam_logo` gizli production kalemleridir. |
+| `fair_stand_item_dimensions` | 109 | Fiziksel / BOM ölçü. 12 Item’da satır yok: `connector_corner`, `connector_double`, `connector_single`, `connector_start`, `digital_print`, `foam_logo`, `hali`, `lightbox_fabric`, `mesh_fabric`, `sarmasik`, `shelf_leg`, `showcase_2_body`. |
+| `fair_stand_item_scene_dimensions` | 50 | Sahne kutusu override. Yoksa aynı adlı `dimensions` alanı. |
 | `fair_stand_item_strip_occupancy` | 8, hepsi `align=top` (4× strip 1, 4× strip 2) | Short-up şerit bandı. |
-| `fair_stand_item_assets` | 19 (14 `model` + 5 `default_screen`) | GLB / TV ekran yolu. CHECK beş rol izin verir; seed ve mapper yalnız bu iki rolü doldurur/okur. |
-| `fair_stand_item_components` | 186 | Recipe BOM child (`composition.items`). |
-| `fair_stand_item_assembly_parts` | 0+ | Parent lokal child pose + optional `lock_group_id` (`assembly.parts`). BOM değil. |
-| `fair_stand_item_video_walls` | 2 | `VIDEO_WALL_2X2` / `3X3`. |
+| `fair_stand_item_assets` | 19 (14 `model` + 5 `default_screen`) | GLB / TV ekran yolu. CHECK beş rol izin verir; canlı satırlar yalnız bu iki rol. |
+| `fair_stand_item_components` | 197 | Recipe BOM child (`composition.items`). |
+| `fair_stand_item_assembly_parts` | 0 | Parent lokal child pose + optional `lock_group_id` (`assembly.parts`). BOM değil. |
+| `fair_stand_item_video_walls` | 2: `video_wall_2x2` (2×2), `video_wall_3x3` (3×3) | Video wall ızgarası. |
 | `fair_stand_item_body_parts` | 6 (2 parent × 3 rol) | Vitrin gövde child `itemKey`. |
 | `fair_stand_dimensions` | 1 (`id=1`) | Stand zarfı. Item kutusu değil. Admin UI: CRM `/admin/fair-stand/settings`. |
 | `fair_stand_settings` | 1 (`id=1`) | Runtime tavanlar. Item kutusu değil. Aynı Temel Ayarlar ekranı. |
-| `fair_stand_projects` | org başına değişken | Müşteri stand projesi SoT (tek JSONB payload). Catalog Item tablolarından ayrı. |
-| `fair_stand_project_assets` | proje başına değişken | Proje yüzey görsellerinin meta kaydı; binary diskte. |
+| `fair_stand_projects` | 10 | Müşteri stand projesi SoT (tek JSONB payload). Catalog Item tablolarından ayrı. |
+| `fair_stand_project_revisions` | 18 | Proje oturum anlık görüntüsü. `organization_id` kolonu yok. |
+| `fair_stand_project_assets` | 46 | Proje yüzey görsellerinin meta kaydı; binary diskte. |
 
 Akış (catalog): PostgreSQL → Fair Stand API bootstrap → CRM proxy → tarayıcı registry.  
 Akış (proje): PostgreSQL + disk assets → Fair Stand projects API → CRM proxy → `projectRemote` → IndexedDB cache.  
@@ -66,13 +69,13 @@ Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0045_project_customer_id` |
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0057_foam_logo_item` |
 
 ---
 
 ## `fair_stand_categories`
 
-Katalog sol menü grupları. `docs/refactor/CATALOG.md`. Canlı: 6 aktif grup (`id` 1–6); 7. satır pasif yerel (`is_active=false`) — bootstrap’a girmez.
+Katalog sol menü grupları. `docs/refactor/CATALOG.md`. Canlı: 6 satır, hepsi `is_active=true`. Pasif satır yok.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
@@ -100,6 +103,21 @@ Katalog kartı çizimi. Placement/BOM değildir.
 
 ---
 
+## `fair_stand_units`
+
+Global ölçü birimi kataloğu. Migration `0052_unit_key` (`0051_unit_catalog` tablosunu açar). `0055_item_unit_fk` `fair_stand_items.unit` kolonunu `unit_key` hedefine bağlar. `organization_id` yok. Satır silinmez; `is_active=false` ile kapanır. Migration yeni unit satırı yaratmaz. Bootstrap ve mapper bu tabloyu okumaz. Yönetim: Fair Stand `/api/v1/fair-stand/admin/units` ve CRM Super Admin `Ölçü Birimleri` (`/admin/fair-stand/units`). `unit_key` addan Item key kuralıyla üretilir (`Metrekare` → `metrekare`). Ad değişince unit key değişir; bağlı Item unit değerlerini PostgreSQL `ON UPDATE CASCADE` yazar. Uygulama item satırlarını ayrıca güncellemez.
+
+| Kolon | JSON | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | `id` | INTEGER PK | Katalog satır kimliği | Admin API |
+| `unit_key` | `unitKey` | `VARCHAR(64)`, unique, zorunlu | Teknik kimlik | Admin API |
+| `name` | `name` | `VARCHAR(128)`, zorunlu | İnsan okunur ad | Admin API |
+| `symbol` | `symbol` | `VARCHAR(32)`, zorunlu | Kısa gösterim | Admin API |
+| `is_active` | `isActive` | Boolean, default `true`, zorunlu | Silmeden kapat | Admin API |
+| `created_at` / `updated_at` | yok | `timestamptz`, zorunlu, server default yok | Katalog zaman damgası | DB only |
+
+---
+
 ## `fair_stand_items`
 
 Kök Item. PK `item_key`. Gizli Item (`catalog_visible=false`) yine `getItem` ile durur.
@@ -113,7 +131,7 @@ Aşağıdaki `###` başlıkları (Kimlik, Catalog, Rotation, Duruş/snap…) **a
 | `item_key` | `itemKey` | Canonical ürün id | Tek kimlik | Tüm FK, factory, BOM, persist |
 | `name` | `name` | İnsan adı | Catalog `label`, UI | Katalog, seçim metni |
 | `item_type` | `type` | Davranış ailesi adı | Placement/collision/… tüm paket → `fair_stand_item_type` (kesit 1–3); JS `TYPE_BEHAVIORS` yok | `moduleBehavior.js`, recipe lookup adayı |
-| `unit` | `unit` | BOM birimi | `adet` vb. | `itemBom` |
+| `unit` | `unit` | BOM birimi, nullable `VARCHAR(64)`. FK `fk_fair_stand_items_unit_key` → `fair_stand_units.unit_key`. ON UPDATE CASCADE, ON DELETE RESTRICT | Canlı: 87 `adet`, 9 `metre_kare`, 25 null. Eski `m2` yok | `itemBom` |
 | `is_active` | item listesine girmez (`is_active=true` filtre) | Soft delete | Satırı yok etmeden kapat | `catalog_repository` item query; lokal seed hepsi true |
 | `created_at` / `updated_at` | yok | Audit | — | DB only |
 
@@ -145,7 +163,7 @@ Sözleşme: `CATALOG.md`. `catalog_visible=true` ⇒ `category_id` + `catalog_it
 
 ### Sahne Z dönüşü (`fair_stand_items`)
 
-Üçlü birlikte dolu veya birlikte NULL (CHECK). Yerleşen 61 dolu; leaf 35 null. `ROTATION.md`. Ayrı rotation tablosu yok.
+Üçlü birlikte dolu veya birlikte NULL (CHECK). Canlı: 72 satırda `rotation_step_deg` dolu, 45 satırda null. `ROTATION.md`. Ayrı rotation tablosu yok.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
@@ -162,14 +180,14 @@ Katalog tablolarında kalıcı kimlik **`key`**. CRM’de label Key; create’te
 | Kolon / tablo | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
 | `default_z_cm` | `defaultZCm` | Yerden kot (cm) | Tavan ezmesin | `resolveItemDefaultZCm` |
-| `item_type` → `fair_stand_item_type.key` | `type` | Item tipi (unique key) | Tip seçimi / davranış | CRM + bootstrap `itemTypes` |
-| `fair_stand_item_type.placement` | `itemTypes[].placement` | **Yerleşim modu (tip özelliği; snap kuralı değil).** `wall` = duvar hattına yapışır; `free` = serbest zemin; `wall-overlay` = duvar üstüne biner (raf/TV); `top` = üst yüzey (projektör). Instance `modules[].placement {x,y,z}` ile karıştırma. | Tip ailesinin sahneye nasıl oturduğu; tüm SKU miras alır | `getModuleBehavior` → planner |
-| `fair_stand_item_type.collision` | `itemTypes[].collision` | **Çarpışma hacmi.** `segment` = ince şerit (duvar); `footprint` = taban kutusu; `none` = çarpışma yok. Snap requires/provides değil. | Modüller üst üste binebilir mi | `getModuleCollisionStrategy` |
-| `fair_stand_item_type.move_snap_cm` | `itemTypes[].moveSnapCm` | **Sürükleme XY ızgara adımı (cm).** Tipik 10 / 20 / 50. Manyetik snap / top-rail kuralı değil. | Taşıma hassasiyeti | `getModuleMoveSnapCm` |
-| `fair_stand_item_type.magnetic_snap` | `itemTypes[].magneticSnap` | **Manyetik hizalama stratejisi.** `standard` / `none` / `short-up-joint`. Move snap ızgarası ve `fair_stand_rule` değil. | Tip manyetik davranışı | `getModuleMagneticSnapStrategy` |
-| `fair_stand_item_type.allow_side_insert` | `itemTypes[].allowSideInsert` | Yanına modül sokulabilir mi | Yan ekleme politikası | `getModuleBehavior` |
-| `fair_stand_item_type.supports_wall_overlay_mount` | `itemTypes[].supportsWallOverlayMount` | Üzerine raf/TV overlay konabilir mi | Overlay host | `supportsWallOverlayMount` |
-| `fair_stand_item_type.wall_capacity` | `itemTypes[].wallCapacity` | Duvar kapasitesine dahil mi (`include`/`exclude`) | Kapasite hesabı | `countsTowardWallCapacity` |
+| `item_type` → `fair_stand_item_type.key` | `type` | Item tipi (sınıflandırma key’i). Sahne yeteneği behavior satırının varlığıdır. | Tip seçimi | CRM + bootstrap `itemTypes` |
+| `fair_stand_item_type_scene_behavior.placement` | `itemTypes[].placement` | **Yerleşim modu (tip özelliği; snap kuralı değil).** `wall` = duvar hattına yapışır; `free` = serbest zemin; `wall-overlay` = duvar üstüne biner (raf/TV); `top` = üst yüzey (projektör). Instance `modules[].placement {x,y,z}` ile karıştırma. | Tip ailesinin sahneye nasıl oturduğu; tüm SKU miras alır | `getModuleBehavior` → planner |
+| `fair_stand_item_type_scene_behavior.collision` | `itemTypes[].collision` | **Çarpışma hacmi.** `segment` = ince şerit (duvar); `footprint` = taban kutusu; `none` = çarpışma yok. Snap requires/provides değil. | Modüller üst üste binebilir mi | `getModuleCollisionStrategy` |
+| `fair_stand_item_type_scene_behavior.move_snap_cm` | `itemTypes[].moveSnapCm` | **Sürükleme XY ızgara adımı (cm).** Tipik 10 / 20 / 50. Manyetik snap / top-rail kuralı değil. | Taşıma hassasiyeti | `getModuleMoveSnapCm` |
+| `fair_stand_item_type_scene_behavior.magnetic_snap` | `itemTypes[].magneticSnap` | **Manyetik hizalama stratejisi.** `standard` / `none` / `short-up-joint`. Move snap ızgarası ve `fair_stand_rule` değil. | Tip manyetik davranışı | `getModuleMagneticSnapStrategy` |
+| `fair_stand_item_type_scene_behavior.allow_side_insert` | `itemTypes[].allowSideInsert` | Yanına modül sokulabilir mi | Yan ekleme politikası | `getModuleBehavior` |
+| `fair_stand_item_type_scene_behavior.supports_wall_overlay_mount` | `itemTypes[].supportsWallOverlayMount` | Üzerine raf/TV overlay konabilir mi | Overlay host | `supportsWallOverlayMount` |
+| `fair_stand_item_type_scene_behavior.wall_capacity` | `itemTypes[].wallCapacity` | Duvar kapasitesine dahil mi (`include`/`exclude`) | Kapasite hesabı | `countsTowardWallCapacity` |
 | `snap_requires_rule_id` → `fair_stand_rule` | `snapRequiresRuleId` (+ denorm `snapRequires`) | Aranan kural | Eşleşme | `getItemSnapSpec` → face/edge **kural kaydından** |
 | `snap_provides_rule_id` → `fair_stand_rule` | `snapProvidesRuleId` (+ denorm `snapProvides`) | Sunulan kural | Host | `listSnapHosts` / `resolveItemSnapGeometry` |
 | `fair_stand_rule.key` / `face` / `edge` | bootstrap `rules[]` | Snap kimlik + geometri | UI’dan kural | CRM Kurallar; motor rule registry |
@@ -233,11 +251,19 @@ Stand zarfında **`strip_count` yok** (migration `0019_drop_stand_strip_grid`). 
 
 ## `fair_stand_item_type`
 
-Tip davranış paketi. Item `item_type` → `key` FK. SKU override yok. Seçim rehberi: kılavuz § 5.3.
+Item type sınıflandırması. Item `item_type` → `key` FK (`ON UPDATE CASCADE`, `ON DELETE RESTRICT`). Sahne kolonları bu tabloda yoktur. `production` / Üretim sınıflandırması aktiftir ve behavior satırı yoktur. Seçim rehberi: kılavuz § 5.3.
 
 | Kolon | JSON (`itemTypes[]`) | Nedir | Nerede |
 |---|---|---|---|
 | `key` / `display_name` | `key`, `displayName` | Tip kimliği | CRM, `getItemType` |
+| `is_active` | `isActive` | Pasif tip bootstrap’a girmez | `catalog_repository.list_item_types(active_only=True)` |
+
+## `fair_stand_item_type_scene_behavior`
+
+İsteğe bağlı 1:1 sahne davranışı. PK `item_type_id` → `fair_stand_item_type.id`, ON UPDATE CASCADE, ON DELETE CASCADE. Kayıt varsa tip scene-capable’dır ve bootstrap düz `placement` / `collision` / `ghost` alanlarını vermeye devam eder. Kayıt yoksa bu alanlar payload’da yoktur; `moduleBehavior.js` duvar fallback’i uygulamaz ve hata verir. Registry’de hiç olmayan eski string için duvar fallback’i durur.
+
+| Kolon | JSON (`itemTypes[]`) | Nedir | Nerede |
+|---|---|---|---|
 | `placement` | `placement` | wall / free / wall-overlay / top | `moduleBehavior.js` |
 | `collision` | `collision` | segment / footprint / none | `getModuleCollisionStrategy` |
 | `move_snap_cm` | `moveSnapCm` | Sürükleme ızgarası (cm) | `getModuleMoveSnapCm` |
@@ -251,8 +277,7 @@ Tip davranış paketi. Item `item_type` → `key` FK. SKU override yok. Seçim r
 | `boundary_snap` | `boundarySnap` | stand-edge / wall-inner-face | `usesWallInnerFaceBoundary` |
 | `collision_height` | `collisionHeight` | v1: `full` | collision yüksekliği |
 | `ghost_kind` / `ghost_renderer` / `ghost_opacity` | `ghost.{kind,renderer,opacity}` | Sürükleme hayaleti | `getModuleGhostBehavior` |
-| overlap junction | `overlapWithTypes`, `overlapItemTypeIds` | Çakışma istisnası | `canModulesOverlapByBehavior` |
-| `is_active` | `isActive` | Pasif tip bootstrap’a girmez | `catalog_repository.list_item_types(active_only=True)` |
+| overlap junction (`fair_stand_item_type_overlap`) | `overlapWithTypes`, `overlapItemTypeIds` | Çakışma istisnası. Behavior satırı yoksa yayınlanmaz. | `canModulesOverlapByBehavior` |
 
 ---
 
@@ -326,7 +351,7 @@ Recipe parent **admin montaj pose** — BOM değildir. Bootstrap `assembly.parts
 
 ## `fair_stand_item_body_parts`
 
-Vitrin gövde. PK `(parent, body_role)`. Role: `side` / `horizontal` / `glass_shelf`.
+Vitrin gövde. PK `id` (UUID). Unique `(parent_item_key, body_role)`. Role: `side` / `horizontal` / `glass_shelf`. Canlı parent’lar: `wall_showcase_100_2_350`, `wall_showcase_100_3_350`.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
@@ -352,7 +377,7 @@ Tek satır `id = 1`. Item değildir. `STAND_DIMENSIONS.md`.
 
 `MODULE_WIDTHS_CM` (50/100/150/200) hâlâ JS; bu tabloda yok.
 
-Lokal seed: `id=1`, `height_cm=350`, `depth_cm=10`, `frame_width_cm=5.5`, `frame_depth_cm=10`, `panel_rail_height_cm=0.4`.
+Canlı satır: `id=1`, `height_cm=500`, `depth_cm=10`, `frame_width_cm=3.5`, `frame_depth_cm=8`, `panel_rail_height_cm=0.2`.
 
 ---
 
@@ -371,7 +396,7 @@ Kaynak: PostgreSQL `fair_stand_settings` → catalog bootstrap `settings` → `i
 | `save_as_button_visible` | `saveAsButtonVisible` | Farklı Kaydet butonu | Yeni UUID + görsel klasör kopyası | `applyArchiveButtonVisibility` → `#save-as-project`; `projectSaveAs.js` |
 | `created_at` / `updated_at` | yok | Audit | — | DB |
 
-Seed: MB `5`; butonlar `true` (mevcut davranış). Markup’ta butonlar `hidden` başlar; bootstrap sonrası ayar `true` ise açılır (flash yok). UI kilidi; zip endpoint güvenlik değildir.
+Canlı satır: `max_image_upload_mb=5`, `export_button_visible=false`, `import_button_visible=true`, `save_as_button_visible=true`. Markup’ta butonlar `hidden` başlar; bootstrap sonrası ayar `true` ise açılır (flash yok). UI kilidi; zip endpoint güvenlik değildir.
 
 ---
 
@@ -393,6 +418,22 @@ Auth: org-scoped Core verify; `X-Organization-Id` + Bearer. API: `backend/app/mo
 | `created_at` / `updated_at` | `createdAt` / `updatedAt` | Zaman damgası | Liste sırası (`updated_at` desc) | API |
 
 `payload` zorunlu şekil (servis normalize): `{ stand, modules }`. Ek anahtarlar atılır. Catalog bootstrap JSON’u değildir.
+
+---
+
+## `fair_stand_project_revisions`
+
+Proje düzenleme oturumu anlık görüntüsü. Canlı 18 satır. `organization_id` kolonu yok; kiracı sınırı parent `fair_stand_projects` satırıdır.
+
+| Kolon | JSON / API | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | — | UUID PK | Anlık görüntü kimliği | DB |
+| `project_id` | — | FK → `fair_stand_projects.id`, ON DELETE/UPDATE CASCADE | Hangi proje | `projects.py` |
+| `revision_number` | `revisionNumber` | Integer, CHECK `> 0`. Unique `(project_id, revision_number)` | Oturum sırası | proje API |
+| `payload` | — | JSONB, zorunlu | O anki `{stand, modules}` | DB |
+| `created_at` / `updated_at` | — | `timestamptz`, zorunlu, server default yok | Audit | DB |
+
+Index: `ix_fair_stand_project_revisions_project_id`.
 
 ---
 
@@ -431,7 +472,7 @@ Kayıt durur; mapper bootstrap’a yazar (asset unused rolleri hariç).
 
 Ertelenmiş kararlar, tavan/şerit kaldırma sırası, Item property backlog: `PENDING_ITEM_DECISIONS.md`.
 
-Tip davranışı (`placement` / `collision` / `move_snap_cm` / magnetic / overlay / capacity / endpoint / depth / contact / boundary / height / overlap / ghost): **`fair_stand_item_type` tip özelliği** (2026-09-24 kesit 1–3) — **`fair_stand_rule` snap kuralı değil**; JS `TYPE_BEHAVIORS` kaldırıldı. Ayrıntı: CRM Item Type form hint’leri + `TYPE_BEHAVIORS_DB_ROADMAP.md` § 1.
+Tip sınıflandırması `fair_stand_item_type` satırıdır. Sahne davranışı isteğe bağlı `fair_stand_item_type_scene_behavior` satırıdır (2026-10-04). Behavior satırı yoksa tip non-scene’dir; sahte wall paketi yazılmaz. `catalog_visible` drag/drop görünürlüğüdür. `is_render` çizim bayrağıdır. İkisi de scene capability değildir. Snap kuralı behavior’sız tipe bağlanamaz. JS `TYPE_BEHAVIORS` kaldırıldı. Ayrıntı: CRM Item Type formu.
 
 Runtime instance alanları (`placement.xCm/yCm/zCm/rotationZDeg`, `rotationLocked`, yüzey ezmeleri): catalog Item kolonu değil; **`fair_stand_projects.payload` JSONB** içinde yaşar (SoT sunucu). IndexedDB aynı blob’un önbelleğidir.
 

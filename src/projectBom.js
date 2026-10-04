@@ -115,16 +115,40 @@ function floorTileCount(stand, item) {
   return Math.ceil(xCm / tileW) * Math.ceil(yCm / tileD);
 }
 
+/**
+ * Existing print-area section totals. The area math stays in printAreaBom.
+ * These keys only name the production leaf that receives that total.
+ */
+const PRINT_PRODUCTION_ITEM_KEYS = Object.freeze({
+  image: 'digital_print',
+  mesh: 'mesh_fabric',
+  lightbox: 'lightbox_fabric',
+  foam: 'foam_logo',
+});
+
+function resolvePrintProductionLines(printAreas) {
+  const lines = [];
+  for (const section of printAreas) {
+    const itemKey = PRINT_PRODUCTION_ITEM_KEYS[section.id];
+    if (!itemKey) continue;
+    lines.push(...resolveItemBom(itemKey, section.totalAreaM2));
+  }
+  return lines;
+}
+
+function isFloorAreaUnit(unit) {
+  return unit === 'm2' || unit === 'metre_kare';
+}
+
 function canonicalFloorUnit(unit) {
   const text = String(unit ?? '').trim().toLowerCase().replaceAll('²', '2').replaceAll('^', '');
-  if (text === 'm2') return 'm2';
-  if (text === 'adet') return 'adet';
+  if (isFloorAreaUnit(text) || text === 'adet') return text;
   return null;
 }
 
 /**
  * Selected stand floor → one aggregated line.
- * Any item_type=floor uses its catalog unit: m2 is stand area, adet is whole tiles from dimensions.
+ * Any item_type=floor uses its catalog unit: m2 and metre_kare are stand area, adet is whole tiles.
  */
 export function resolveFloorBomLine(stand) {
   if (!stand) return null;
@@ -134,7 +158,7 @@ export function resolveFloorBomLine(stand) {
   const unit = canonicalFloorUnit(item.unit);
   if (!unit) return null;
 
-  const quantity = unit === 'm2'
+  const quantity = isFloorAreaUnit(unit)
     ? floorAreaM2(stand)
     : floorTileCount(stand, item);
   if (quantity == null || !(quantity > 0)) return null;
@@ -208,10 +232,12 @@ export function resolveProjectBom(modules = [], stand = null, assetNames = null)
   );
   const splitFloorLines = stand?.floorArea ? resolveSplitFloorBomLines(stand) : null;
   const floorLine = splitFloorLines ? null : resolveFloorBomLine(stand);
+  const printAreas = collectPrintAreas(list, assetNames);
   const lines = aggregateLines([
     wallShortLines,
     baza.lines,
     splitFloorLines ?? (floorLine ? [floorLine] : []),
+    resolvePrintProductionLines(printAreas),
   ]);
 
   return Object.freeze({
@@ -224,6 +250,6 @@ export function resolveProjectBom(modules = [], stand = null, assetNames = null)
     appliedCornerCount: adjusted.appliedCornerCount,
     appliedTeeCount: adjusted.appliedTeeCount,
     lines: Object.freeze(lines.map(freezeLine)),
-    printAreas: collectPrintAreas(list, assetNames),
+    printAreas,
   });
 }

@@ -10,6 +10,36 @@ import assert from 'node:assert/strict';
 import { normalizeModuleItemState } from '../src/designState.js';
 import { getItem, initializeItemRegistry, listRegisteredItems } from '../src/items.js';
 import { resolveProjectBom } from '../src/projectBom.js';
+
+function withProductionItems(run) {
+  const snapshot = listRegisteredItems().map((item) => structuredClone(item));
+  initializeItemRegistry([
+    ...snapshot,
+    {
+      itemKey: 'lightbox_fabric',
+      name: 'Lightbox Bezi',
+      type: 'production',
+      unit: 'metre_kare',
+      catalogVisible: false,
+      isRender: false,
+      isActive: true,
+    },
+    {
+      itemKey: 'foam_logo',
+      name: 'Strafor Logo',
+      type: 'production',
+      unit: 'metre_kare',
+      catalogVisible: false,
+      isRender: false,
+      isActive: true,
+    },
+  ]);
+  try {
+    return run();
+  } finally {
+    initializeItemRegistry(snapshot);
+  }
+}
 import { STAND_DIMENSIONS } from '../src/standDimensions.js';
 
 const PANEL_SWAP = Object.freeze({
@@ -533,14 +563,32 @@ test('live shelf composition reaches resolveProjectBom as board plus legs', () =
 test('floor and print layers do not change structural hardware', () => {
   const hardware = assertBom('floor plus wall', [place('wall', 'wall_200_350', { heightCm: 350 })], add(RECIPE.wall_200_350, { hali: 12 }), { xCm: 400, yCm: 300, itemKey: 'hali' });
   assert.equal(hardware.lines.find((line) => line.itemKey === 'hali').unit, 'm2');
-  const bom = assertBom('lightbox hardware', [place('wall', 'wall_200_350', {
+  const bom = withProductionItems(() => resolveProjectBom([place('wall', 'wall_200_350', {
     heightCm: 350,
     strips: [{ stripIndex: 0, fabricGroupId: 'lb', fabricType: 'lightbox', itemKey: 'panel_197' }],
-  })], RECIPE.wall_200_350);
-  assert.equal(bom.printAreas.find((section) => section.id === 'lightbox').lines.length, 1);
+  })]));
+  const structural = { ...lineMap(bom) };
+  delete structural.lightbox_fabric;
+  assert.deepEqual(structural, positive(RECIPE.wall_200_350), 'lightbox hardware');
+  const lightbox = bom.lines.find((line) => line.itemKey === 'lightbox_fabric');
+  const lightboxSection = bom.printAreas.find((section) => section.id === 'lightbox');
+  assert.equal(lightboxSection.lines.length, 1);
+  assert.equal(lightbox.quantity, lightboxSection.totalAreaM2);
+  assert.equal(lightbox.quantity, 0.9259);
+  assert.equal(lightbox.unit, 'metre_kare');
+  assert.equal(lightbox.name, 'Lightbox Bezi');
+  assert.equal(bom.lines.find((line) => line.itemKey === 'panel_197').quantity, 7);
   assert.equal(bom.printAreas.some((section) => section.id === 'mesh'), false);
-  const foam = resolveProjectBom([place('foam', 'illuminated-foam', { widthCm: 200, heightCm: 50 })]);
-  assert.equal(foam.lines.length, 0);
+  const foam = withProductionItems(() => resolveProjectBom([
+    place('foam', 'illuminated-foam', { widthCm: 200, heightCm: 50 }),
+  ]));
+  const foamSection = foam.printAreas.find((section) => section.id === 'foam');
+  const foamLine = foam.lines.find((line) => line.itemKey === 'foam_logo');
   assert.equal(foam.unresolved[0].itemKey, 'illuminated-foam');
-  assert.equal(foam.printAreas.find((section) => section.id === 'foam').lines[0].widthCm, 200);
+  assert.equal(foam.lines.some((line) => line.itemKey === 'illuminated-foam'), false);
+  assert.equal(foamSection.lines[0].widthCm, 200);
+  assert.equal(foamLine.quantity, foamSection.totalAreaM2);
+  assert.equal(foamLine.quantity, 1);
+  assert.equal(foamLine.unit, 'metre_kare');
+  assert.equal(foamLine.name, 'Strafor Logo');
 });

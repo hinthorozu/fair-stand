@@ -177,6 +177,8 @@ export function assertSlice3Equal(actual, expected, key) {
   }
 }
 
+const NON_SCENE_ITEM_TYPE_KEYS = new Set(['production']);
+
 /** Bootstrap `itemTypes[]` satırları — seed item type’larından. */
 export function buildItemTypeBootstrapRows(itemTypeKeys) {
   const keys = [...new Set([
@@ -186,6 +188,14 @@ export function buildItemTypeBootstrapRows(itemTypeKeys) {
     ...Object.keys(ITEM_TYPE_BEHAVIOR_SLICE3),
   ])].sort();
   return keys.map((key, index) => {
+    if (NON_SCENE_ITEM_TYPE_KEYS.has(key)) {
+      return {
+        id: index + 1,
+        key,
+        displayName: 'Üretim',
+        isActive: true,
+      };
+    }
     const s1 = behaviorSlice1ForType(key);
     const s2 = behaviorSlice2ForType(key);
     const s3row = behaviorSlice3ForType(key);

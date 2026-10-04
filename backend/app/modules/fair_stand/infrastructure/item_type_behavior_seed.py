@@ -35,6 +35,9 @@ DEFAULT_GHOST_KIND = "silhouette"
 DEFAULT_GHOST_RENDERER = "module-silhouette"
 DEFAULT_GHOST_OPACITY = Decimal("0.38")
 
+# Classification-only types. Seed must not attach the wall behavior fallback.
+NON_SCENE_ITEM_TYPE_KEYS = frozenset({"production"})
+
 # key → (placement, collision, move_snap_cm)
 TYPE_BEHAVIOR_SLICE1: dict[str, tuple[str, str, int]] = {
     "flat-panel": ("wall", "segment", 50),
@@ -258,41 +261,49 @@ def ensure_type_behavior_slices(session) -> dict[str, int]:
             ghost_opacity,
         ) = behavior_slice3_for_type(key)
         overlap_list = list(overlap)
-        changed = (
-            row.placement != placement
-            or row.collision != collision
-            or int(row.move_snap_cm) != move_snap_cm
-            or row.magnetic_snap != magnetic_snap
-            or bool(row.allow_side_insert) != allow_side
-            or bool(row.supports_wall_overlay_mount) != supports_overlay
-            or row.wall_capacity != wall_capacity
-            or row.connection_endpoint != connection_endpoint
-            or row.collision_depth != collision_depth
-            or row.endpoint_contact != endpoint_contact
-            or row.boundary_snap != boundary_snap
-            or row.collision_height != collision_height
+        behavior = row.scene_behavior
+        changed = behavior is None or (
+            behavior.placement != placement
+            or behavior.collision != collision
+            or int(behavior.move_snap_cm) != move_snap_cm
+            or behavior.magnetic_snap != magnetic_snap
+            or bool(behavior.allow_side_insert) != allow_side
+            or bool(behavior.supports_wall_overlay_mount) != supports_overlay
+            or behavior.wall_capacity != wall_capacity
+            or behavior.connection_endpoint != connection_endpoint
+            or behavior.collision_depth != collision_depth
+            or behavior.endpoint_contact != endpoint_contact
+            or behavior.boundary_snap != boundary_snap
+            or behavior.collision_height != collision_height
             or _overlap_keys(row) != sorted(overlap_list)
-            or row.ghost_kind != ghost_kind
-            or row.ghost_renderer != ghost_renderer
-            or Decimal(str(row.ghost_opacity)) != ghost_opacity
+            or behavior.ghost_kind != ghost_kind
+            or behavior.ghost_renderer != ghost_renderer
+            or Decimal(str(behavior.ghost_opacity)) != ghost_opacity
         )
         if changed:
-            row.placement = placement
-            row.collision = collision
-            row.move_snap_cm = move_snap_cm
-            row.magnetic_snap = magnetic_snap
-            row.allow_side_insert = allow_side
-            row.supports_wall_overlay_mount = supports_overlay
-            row.wall_capacity = wall_capacity
-            row.connection_endpoint = connection_endpoint
-            row.collision_depth = collision_depth
-            row.endpoint_contact = endpoint_contact
-            row.boundary_snap = boundary_snap
-            row.collision_height = collision_height
+            from app.modules.fair_stand.infrastructure.models import (
+                FairStandItemTypeSceneBehaviorModel,
+            )
+
+            if behavior is None:
+                behavior = FairStandItemTypeSceneBehaviorModel(item_type_id=row.id)
+                row.scene_behavior = behavior
+            behavior.placement = placement
+            behavior.collision = collision
+            behavior.move_snap_cm = move_snap_cm
+            behavior.magnetic_snap = magnetic_snap
+            behavior.allow_side_insert = allow_side
+            behavior.supports_wall_overlay_mount = supports_overlay
+            behavior.wall_capacity = wall_capacity
+            behavior.connection_endpoint = connection_endpoint
+            behavior.collision_depth = collision_depth
+            behavior.endpoint_contact = endpoint_contact
+            behavior.boundary_snap = boundary_snap
+            behavior.collision_height = collision_height
             set_item_type_overlaps(session, row, overlap_list)
-            row.ghost_kind = ghost_kind
-            row.ghost_renderer = ghost_renderer
-            row.ghost_opacity = ghost_opacity
+            behavior.ghost_kind = ghost_kind
+            behavior.ghost_renderer = ghost_renderer
+            behavior.ghost_opacity = ghost_opacity
             row.updated_at = now
     return ids
 

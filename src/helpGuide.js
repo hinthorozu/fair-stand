@@ -251,7 +251,7 @@ function listGuideSections() {
       <p><strong>Render Al</strong>, mevcut kamera görünümünü yüksek çözünürlüklü PNG olarak indirir. Dosya adı proje adından üretilir.</p>
       <p>Seçim çerçeveleri ve yardımcı duvar çizgileri render çıktısına dahil edilmez.</p>
       <p><strong>Üretim Listesi</strong>, sahne kurulunca Render Al’ın yanında açılır. Panel sürüklenebilir, boyutu değişir ve <strong>Ayrı pencere</strong> ile dışarı alınır. <strong>Metin indir</strong> aynı listeyi metin dosyası olarak kaydeder.</p>
-      <p>Baskı satırları Görseller, Lightbox, Delikli branda ve Strafor logo başlıklarının altındadır. Satırda görselin dosya adı, cm ölçüsü ve m² yazar. Aynı görsel aynı ölçüdeyse adet birleşir. Aynı görsel farklı ölçülerdeyse satırlar ayrı kalır ve altında o görselin toplam m²’si yazar. Lightbox veya mesh görsel atanmadan çevrilirse satırda o panelin rengi hex olarak yazar. Ölçü, panelde scene dimensions varsa oradan, o alan boşsa item dimensions değerinden gelir.</p>
+      <p>Baskı satırları Dijital Baskı, Lightbox Bezi, Mesh - Delikli Branda ve Strafor Logo başlıklarının altındadır. Satırda görselin dosya adı, cm ölçüsü ve m² yazar. Aynı görsel aynı ölçüdeyse adet birleşir. Aynı görsel farklı ölçülerdeyse satırlar ayrı kalır ve altında o görselin toplam m²’si yazar. Lightbox veya mesh görsel atanmadan çevrilirse satırda o panelin rengi hex olarak yazar. Ölçü, panelde scene dimensions varsa oradan, o alan boşsa item dimensions değerinden gelir.</p>
     `,
   },
   {

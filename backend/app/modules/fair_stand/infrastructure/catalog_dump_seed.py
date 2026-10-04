@@ -34,6 +34,11 @@ SERIAL_TABLES = (
     "fair_stand_catalog_preview_kinds",
 )
 
+_DUMP_UNIT_LABELS = {
+    "adet": ("Adet", "adet"),
+    "metre_kare": ("Metre Kare", "m2"),
+}
+
 
 def _coerce(column: sa.Column, value: object) -> object:
     if value is None:
@@ -49,6 +54,43 @@ def _coerce(column: sa.Column, value: object) -> object:
 
 def load_catalog_dump() -> dict:
     return json.loads(DUMP_PATH.read_text(encoding="utf-8"))
+
+
+def _canonical_dump_unit(value: object) -> object:
+    if value == "m2":
+        return "metre_kare"
+    return value
+
+
+def _ensure_dump_units(session, item_rows: list) -> None:
+    from datetime import UTC, datetime
+
+    from app.modules.fair_stand.infrastructure.models import FairStandUnitModel
+
+    needed = {
+        str(_canonical_dump_unit(row.get("unit")))
+        for row in item_rows
+        if row.get("unit")
+    }
+    unknown = sorted(needed - set(_DUMP_UNIT_LABELS))
+    if unknown:
+        raise RuntimeError(
+            "Catalog dump references unit keys without a known catalog label: " + ", ".join(unknown)
+        )
+    existing = set(session.scalars(sa.select(FairStandUnitModel.unit_key)).all())
+    now = datetime.now(tz=UTC)
+    for unit_key in sorted(needed - existing):
+        name, symbol = _DUMP_UNIT_LABELS[unit_key]
+        session.add(
+            FairStandUnitModel(
+                unit_key=unit_key,
+                name=name,
+                symbol=symbol,
+                is_active=True,
+                created_at=now,
+                updated_at=now,
+            )
+        )
 
 
 def seed_catalog_if_empty(bind) -> None:
@@ -77,6 +119,8 @@ def seed_catalog_if_empty(bind) -> None:
                 [row.get("item_type") for row in item_rows if row.get("item_type")],
             )
             session.flush()
+            _ensure_dump_units(session, item_rows)
+            session.flush()
         finally:
             session.close()
 
@@ -91,6 +135,7 @@ def seed_catalog_if_empty(bind) -> None:
         ]
         if name == "fair_stand_items":
             for item in coerced:
+                item["unit"] = _canonical_dump_unit(item.get("unit"))
                 for flag in (
                     "is_render",
                     "accepts_color",

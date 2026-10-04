@@ -119,11 +119,15 @@ def fill_item_snap_columns(bind) -> None:
 def ensure_item_types(session, keys: list[str] | set[str] | tuple[str, ...]) -> dict[str, int]:
     """Ensure catalog rows exist for every item_type key (FK target)."""
     from app.modules.fair_stand.infrastructure.item_type_behavior_seed import (
+        NON_SCENE_ITEM_TYPE_KEYS,
         behavior_slice1_for_type,
         behavior_slice2_for_type,
         behavior_slice3_for_type,
     )
-    from app.modules.fair_stand.infrastructure.models import FairStandItemTypeModel
+    from app.modules.fair_stand.infrastructure.models import (
+        FairStandItemTypeModel,
+        FairStandItemTypeSceneBehaviorModel,
+    )
 
     now = _now()
     known = {key: name for key, name in _INITIAL_ITEM_TYPES}
@@ -131,43 +135,51 @@ def ensure_item_types(session, keys: list[str] | set[str] | tuple[str, ...]) -> 
     for key in sorted({str(k).strip() for k in keys if str(k).strip()}):
         row = session.scalar(sa.select(FairStandItemTypeModel).where(FairStandItemTypeModel.key == key))
         if row is None:
-            placement, collision, move_snap_cm = behavior_slice1_for_type(key)
-            magnetic_snap, allow_side, supports_overlay, wall_capacity = behavior_slice2_for_type(key)
-            (
-                connection_endpoint,
-                collision_depth,
-                endpoint_contact,
-                boundary_snap,
-                collision_height,
-                _overlap,
-                ghost_kind,
-                ghost_renderer,
-                ghost_opacity,
-            ) = behavior_slice3_for_type(key)
+            display_name = {"production": "Üretim"}.get(key, known.get(key, key))
             row = FairStandItemTypeModel(
                 key=key,
-                display_name=known.get(key, key),
-                placement=placement,
-                collision=collision,
-                move_snap_cm=move_snap_cm,
-                magnetic_snap=magnetic_snap,
-                allow_side_insert=allow_side,
-                supports_wall_overlay_mount=supports_overlay,
-                wall_capacity=wall_capacity,
-                connection_endpoint=connection_endpoint,
-                collision_depth=collision_depth,
-                endpoint_contact=endpoint_contact,
-                boundary_snap=boundary_snap,
-                collision_height=collision_height,
-                ghost_kind=ghost_kind,
-                ghost_renderer=ghost_renderer,
-                ghost_opacity=ghost_opacity,
+                display_name=display_name,
                 is_active=True,
                 created_at=now,
                 updated_at=now,
             )
             session.add(row)
             session.flush()
+            if key not in NON_SCENE_ITEM_TYPE_KEYS:
+                placement, collision, move_snap_cm = behavior_slice1_for_type(key)
+                magnetic_snap, allow_side, supports_overlay, wall_capacity = behavior_slice2_for_type(key)
+                (
+                    connection_endpoint,
+                    collision_depth,
+                    endpoint_contact,
+                    boundary_snap,
+                    collision_height,
+                    _overlap,
+                    ghost_kind,
+                    ghost_renderer,
+                    ghost_opacity,
+                ) = behavior_slice3_for_type(key)
+                session.add(
+                    FairStandItemTypeSceneBehaviorModel(
+                        item_type_id=row.id,
+                        placement=placement,
+                        collision=collision,
+                        move_snap_cm=move_snap_cm,
+                        magnetic_snap=magnetic_snap,
+                        allow_side_insert=allow_side,
+                        supports_wall_overlay_mount=supports_overlay,
+                        wall_capacity=wall_capacity,
+                        connection_endpoint=connection_endpoint,
+                        collision_depth=collision_depth,
+                        endpoint_contact=endpoint_contact,
+                        boundary_snap=boundary_snap,
+                        collision_height=collision_height,
+                        ghost_kind=ghost_kind,
+                        ghost_renderer=ghost_renderer,
+                        ghost_opacity=ghost_opacity,
+                    )
+                )
+                session.flush()
         result[key] = int(row.id)
     return result
 
