@@ -4,6 +4,7 @@ from sqlalchemy import select
 
 from app.modules.fair_stand.application.admin_snap_catalog import AdminSnapCatalogService
 from app.modules.fair_stand.infrastructure.item_snap_seed import (
+    ensure_item_types,
     ensure_snap_catalog,
     snap_binding_for_item_type,
 )
@@ -36,20 +37,7 @@ def test_rule_item_type_checkbox_does_not_write_item_provides(db_session):
             updated_at=now,
         )
     )
-    for key, name in (("profile", "Profil"), ("panel", "Panel")):
-        existing = db_session.scalar(
-            select(FairStandItemTypeModel).where(FairStandItemTypeModel.key == key)
-        )
-        if existing is None:
-            db_session.add(
-                FairStandItemTypeModel(
-                    key=key,
-                    display_name=name,
-                    is_active=True,
-                    created_at=now,
-                    updated_at=now,
-                )
-            )
+    ensure_item_types(db_session, ["profile", "panel"])
     db_session.flush()
     for item_key, item_type in (
         ("sync_profile_a", "profile"),

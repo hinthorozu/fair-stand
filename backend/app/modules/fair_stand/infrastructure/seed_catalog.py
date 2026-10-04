@@ -25,7 +25,13 @@ from app.modules.fair_stand.infrastructure.models import (
     FairStandItemSceneDimensionsModel,
     FairStandItemStripOccupancyModel,
     FairStandItemVideoWallModel,
+    FairStandUnitModel,
 )
+
+_SEED_UNIT_LABELS = {
+    "adet": ("Adet", "adet"),
+    "metre_kare": ("Metre Kare", "m2"),
+}
 
 
 def _dec(value: object) -> Decimal | None:
@@ -49,6 +55,30 @@ def _clear_catalog(session: Session) -> None:
     session.execute(delete(FairStandItemModel))
     session.execute(delete(FairStandCategoryModel))
     session.execute(delete(FairStandCatalogPreviewKindModel))
+
+
+def _ensure_seed_units(session: Session, now: datetime) -> None:
+    """Item seed strings must satisfy the unit FK. This does not run in the migration."""
+    needed = {row["unit"] for row in CATALOG_SEED["items"] if row.get("unit")}
+    unknown = sorted(needed - set(_SEED_UNIT_LABELS))
+    if unknown:
+        raise RuntimeError(
+            "Catalog seed references unit keys without a known catalog label: " + ", ".join(unknown)
+        )
+    existing = set(session.scalars(select(FairStandUnitModel.unit_key)).all())
+    for unit_key in sorted(needed - existing):
+        name, symbol = _SEED_UNIT_LABELS[unit_key]
+        session.add(
+            FairStandUnitModel(
+                unit_key=unit_key,
+                name=name,
+                symbol=symbol,
+                is_active=True,
+                created_at=now,
+                updated_at=now,
+            )
+        )
+    session.flush()
 
 
 def seed_fair_stand_catalog(session: Session) -> None:
@@ -92,6 +122,7 @@ def seed_fair_stand_catalog(session: Session) -> None:
     snap_ids = ensure_snap_catalog(session)
     ensure_item_types(session, [row["item_type"] for row in CATALOG_SEED["items"]])
     ensure_type_behavior_slices(session)
+    _ensure_seed_units(session, now)
     rule_ids = snap_ids["rules"]
 
     for row in CATALOG_SEED["items"]:

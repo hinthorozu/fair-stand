@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { resolveSplitFloorBomLines } from '../src/floorArea.js';
 import { resolveItemBom } from '../src/itemBom.js';
 import { resolveProjectBom } from '../src/projectBom.js';
-import { getItem } from '../src/items.js';
+import { getItem, initializeItemRegistry, listRegisteredItems } from '../src/items.js';
+import { loadCanonicalItemCatalog } from './registerCanonicalItemCatalog.mjs';
 
 test('empty modules → empty project BOM', () => {
   const bom = resolveProjectBom([]);
@@ -46,6 +48,32 @@ test('unknown itemKey is unresolved', () => {
   const bom = resolveProjectBom([{ id: 'x', itemKey: 'does_not_exist_item' }]);
   assert.equal(bom.unresolved.length, 1);
   assert.match(bom.unresolved[0].message, /Unknown Item|çözülemedi/i);
+});
+
+test('metre_kare floor unit bills the same area as m2', () => {
+  const items = listRegisteredItems().map((item) => (
+    item.itemKey === 'hali' ? { ...item, unit: 'metre_kare' } : item
+  ));
+  initializeItemRegistry(items);
+  try {
+    const hali = resolveProjectBom([], { xCm: 500, yCm: 400, itemKey: 'hali' });
+    assert.deepEqual(
+      hali.lines.map((line) => [line.itemKey, line.quantity, line.unit]),
+      [['hali', 20, 'metre_kare']],
+    );
+    const split = resolveSplitFloorBomLines({
+      xCm: 500,
+      yCm: 500,
+      itemKey: 'hali',
+      floorArea: { xCm: 100, yCm: 100, widthCm: 200, depthCm: 300, itemKey: 'karolaj', color: null },
+    });
+    assert.equal(split[0].itemKey, 'hali');
+    assert.equal(split[0].quantity, 19);
+    assert.equal(split[0].unit, 'metre_kare');
+    assert.equal(split[1].unit, 'adet');
+  } finally {
+    loadCanonicalItemCatalog();
+  }
 });
 
 test('decision-required furniture cluster is unresolved', () => {

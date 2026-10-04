@@ -19,6 +19,7 @@ from sqlalchemy import (
     Uuid,
     false as sa_false,
     text,
+    true as sa_true,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -101,76 +102,30 @@ class FairStandCatalogPreviewKindModel(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+class FairStandUnitModel(Base):
+    """Global ölçü birimi kataloğu. Item.unit bu tablonun unit_key değerine gider."""
+
+    __tablename__ = "fair_stand_units"
+    __table_args__ = (UniqueConstraint("unit_key", name="uq_fair_stand_units_unit_key"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    unit_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    symbol: Mapped[str] = mapped_column(String(32), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=sa_true())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
 class FairStandItemTypeModel(Base):
-    """UI-editable item type catalog; items.item_type FK → key (unique)."""
+    """Item type classification. Scene behavior is an optional 1:1 child row."""
 
     __tablename__ = "fair_stand_item_type"
-    __table_args__ = (
-        UniqueConstraint("key", name="uq_fair_stand_item_type_key"),
-        CheckConstraint(
-            "placement IN ('wall', 'free', 'wall-overlay', 'top')",
-            name="ck_fair_stand_item_type_placement",
-        ),
-        CheckConstraint(
-            "collision IN ('segment', 'footprint', 'none')",
-            name="ck_fair_stand_item_type_collision",
-        ),
-        CheckConstraint(
-            "move_snap_cm > 0",
-            name="ck_fair_stand_item_type_move_snap_cm",
-        ),
-        CheckConstraint(
-            "magnetic_snap IN ('standard', 'none', 'short-up-joint')",
-            name="ck_fair_stand_item_type_magnetic_snap",
-        ),
-        CheckConstraint(
-            "wall_capacity IN ('include', 'exclude')",
-            name="ck_fair_stand_item_type_wall_capacity",
-        ),
-        CheckConstraint(
-            "connection_endpoint IN ('segment', 'logical-fixture')",
-            name="ck_fair_stand_item_type_connection_endpoint",
-        ),
-        CheckConstraint(
-            "collision_depth IN ('physical', 'wall-backbone')",
-            name="ck_fair_stand_item_type_collision_depth",
-        ),
-        CheckConstraint(
-            "endpoint_contact IN ('standard', 'thin-wall-endpoint')",
-            name="ck_fair_stand_item_type_endpoint_contact",
-        ),
-        CheckConstraint(
-            "boundary_snap IN ('stand-edge', 'wall-inner-face')",
-            name="ck_fair_stand_item_type_boundary_snap",
-        ),
-        CheckConstraint(
-            "collision_height IN ('full')",
-            name="ck_fair_stand_item_type_collision_height",
-        ),
-        CheckConstraint(
-            "ghost_opacity >= 0 AND ghost_opacity <= 1",
-            name="ck_fair_stand_item_type_ghost_opacity",
-        ),
-    )
+    __table_args__ = (UniqueConstraint("key", name="uq_fair_stand_item_type_key"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     key: Mapped[str] = mapped_column(String(64), nullable=False)
     display_name: Mapped[str] = mapped_column(String(128), nullable=False)
-    placement: Mapped[str] = mapped_column(String(32), nullable=False, default="wall")
-    collision: Mapped[str] = mapped_column(String(32), nullable=False, default="segment")
-    move_snap_cm: Mapped[int] = mapped_column(Integer, nullable=False, default=50)
-    magnetic_snap: Mapped[str] = mapped_column(String(32), nullable=False, default="standard")
-    allow_side_insert: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    supports_wall_overlay_mount: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    wall_capacity: Mapped[str] = mapped_column(String(16), nullable=False, default="include")
-    connection_endpoint: Mapped[str] = mapped_column(String(32), nullable=False, default="segment")
-    collision_depth: Mapped[str] = mapped_column(String(32), nullable=False, default="physical")
-    endpoint_contact: Mapped[str] = mapped_column(String(32), nullable=False, default="standard")
-    boundary_snap: Mapped[str] = mapped_column(String(32), nullable=False, default="stand-edge")
-    collision_height: Mapped[str] = mapped_column(String(16), nullable=False, default="full")
-    ghost_kind: Mapped[str] = mapped_column(String(32), nullable=False, default="silhouette")
-    ghost_renderer: Mapped[str] = mapped_column(String(64), nullable=False, default="module-silhouette")
-    ghost_opacity: Mapped[Decimal] = mapped_column(Numeric(4, 3), nullable=False, default=Decimal("0.38"))
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -186,6 +141,90 @@ class FairStandItemTypeModel(Base):
         secondaryjoin="FairStandItemTypeModel.id == fair_stand_item_type_overlap.c.overlap_item_type_id",
         lazy="selectin",
     )
+    scene_behavior: Mapped["FairStandItemTypeSceneBehaviorModel | None"] = relationship(
+        back_populates="item_type",
+        cascade="all, delete-orphan",
+        uselist=False,
+        lazy="selectin",
+    )
+
+
+class FairStandItemTypeSceneBehaviorModel(Base):
+    """Optional scene behavior. Row absence means the type is non-scene."""
+
+    __tablename__ = "fair_stand_item_type_scene_behavior"
+    __table_args__ = (
+        CheckConstraint(
+            "placement IN ('wall', 'free', 'wall-overlay', 'top')",
+            name="ck_fair_stand_item_type_scene_behavior_placement",
+        ),
+        CheckConstraint(
+            "collision IN ('segment', 'footprint', 'none')",
+            name="ck_fair_stand_item_type_scene_behavior_collision",
+        ),
+        CheckConstraint(
+            "move_snap_cm > 0",
+            name="ck_fair_stand_item_type_scene_behavior_move_snap_cm",
+        ),
+        CheckConstraint(
+            "magnetic_snap IN ('standard', 'none', 'short-up-joint')",
+            name="ck_fair_stand_item_type_scene_behavior_magnetic_snap",
+        ),
+        CheckConstraint(
+            "wall_capacity IN ('include', 'exclude')",
+            name="ck_fair_stand_item_type_scene_behavior_wall_capacity",
+        ),
+        CheckConstraint(
+            "connection_endpoint IN ('segment', 'logical-fixture')",
+            name="ck_fair_stand_item_type_scene_behavior_connection_endpoint",
+        ),
+        CheckConstraint(
+            "collision_depth IN ('physical', 'wall-backbone')",
+            name="ck_fair_stand_item_type_scene_behavior_collision_depth",
+        ),
+        CheckConstraint(
+            "endpoint_contact IN ('standard', 'thin-wall-endpoint')",
+            name="ck_fair_stand_item_type_scene_behavior_endpoint_contact",
+        ),
+        CheckConstraint(
+            "boundary_snap IN ('stand-edge', 'wall-inner-face')",
+            name="ck_fair_stand_item_type_scene_behavior_boundary_snap",
+        ),
+        CheckConstraint(
+            "collision_height IN ('full')",
+            name="ck_fair_stand_item_type_scene_behavior_collision_height",
+        ),
+        CheckConstraint(
+            "ghost_opacity >= 0 AND ghost_opacity <= 1",
+            name="ck_fair_stand_item_type_scene_behavior_ghost_opacity",
+        ),
+    )
+
+    item_type_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey(
+            "fair_stand_item_type.id",
+            name="fk_fair_stand_item_type_scene_behavior_item_type_id",
+            **CASCADE,
+        ),
+        primary_key=True,
+    )
+    placement: Mapped[str] = mapped_column(String(32), nullable=False)
+    collision: Mapped[str] = mapped_column(String(32), nullable=False)
+    move_snap_cm: Mapped[int] = mapped_column(Integer, nullable=False)
+    magnetic_snap: Mapped[str] = mapped_column(String(32), nullable=False)
+    allow_side_insert: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    supports_wall_overlay_mount: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    wall_capacity: Mapped[str] = mapped_column(String(16), nullable=False)
+    connection_endpoint: Mapped[str] = mapped_column(String(32), nullable=False)
+    collision_depth: Mapped[str] = mapped_column(String(32), nullable=False)
+    endpoint_contact: Mapped[str] = mapped_column(String(32), nullable=False)
+    boundary_snap: Mapped[str] = mapped_column(String(32), nullable=False)
+    collision_height: Mapped[str] = mapped_column(String(16), nullable=False)
+    ghost_kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    ghost_renderer: Mapped[str] = mapped_column(String(64), nullable=False)
+    ghost_opacity: Mapped[Decimal] = mapped_column(Numeric(4, 3), nullable=False)
+    item_type: Mapped[FairStandItemTypeModel] = relationship(back_populates="scene_behavior")
 
 
 class FairStandRuleTypeModel(Base):
@@ -314,7 +353,16 @@ class FairStandItemModel(Base):
         ),
         nullable=False,
     )
-    unit: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    unit: Mapped[str | None] = mapped_column(
+        String(64),
+        ForeignKey(
+            "fair_stand_units.unit_key",
+            name="fk_fair_stand_items_unit_key",
+            ondelete="RESTRICT",
+            onupdate="CASCADE",
+        ),
+        nullable=True,
+    )
     catalog_visible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     category_id: Mapped[int | None] = mapped_column(
         Integer,

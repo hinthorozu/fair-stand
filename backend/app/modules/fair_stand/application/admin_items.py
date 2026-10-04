@@ -27,6 +27,7 @@ from app.modules.fair_stand.infrastructure.models import (
     FairStandItemTypeModel,
     FairStandItemVideoWallModel,
     FairStandRuleModel,
+    FairStandUnitModel,
 )
 
 _ITEM_LIST_SORT_FIELDS: dict[str, object] = {
@@ -97,6 +98,18 @@ def _optional_int(value: object | None) -> int | None:
         return int(value)
     except (TypeError, ValueError) as exc:
         raise ItemAdminError("Geçersiz sayısal değer.") from exc
+
+
+def _require_known_unit(session: Session, unit: str | None) -> str | None:
+    """Existence only. Inactive catalog rows stay assignable; this is not an activity rule."""
+    if unit is None:
+        return None
+    if len(unit) > 64:
+        raise ItemAdminError("Ölçü birimi en fazla 64 karakter olabilir.")
+    found = session.scalar(select(FairStandUnitModel.unit_key).where(FairStandUnitModel.unit_key == unit))
+    if found is None:
+        raise ItemAdminError("Ölçü birimi katalogda yok.", status_code=400)
+    return unit
 
 
 def _require_item_type(session: Session, item_type: str) -> str:
@@ -184,6 +197,8 @@ def _integrity_error_message(exc: IntegrityError) -> str:
         "body_role" in orig and ("already exists" in orig or "duplicate" in orig)
     ):
         return "Aynı body role bir item altında birden fazla kullanılamaz."
+    if "fk_fair_stand_items_unit_key" in orig:
+        return "Ölçü birimi katalogda yok."
     if "foreign key" in orig or "fk_" in orig:
         return "Bağlantılı kayıt bulunamadı (alt item, kategori veya preview geçersiz olabilir)."
     if "ck_fair_stand_items_catalog_visible" in orig:
@@ -624,7 +639,7 @@ class AdminItemsService:
             item_key=item_key,
             name=name,
             item_type=item_type,
-            unit=_optional_str(payload.get("unit")),
+            unit=_require_known_unit(self._session, _optional_str(payload.get("unit"))),
             catalog_visible=False,
             category_id=category_id,
             catalog_item_index=catalog_item_index,
@@ -686,8 +701,10 @@ class AdminItemsService:
         if "item_type" in payload and payload["item_type"] is not None:
             row.item_type = _require_item_type(self._session, str(payload["item_type"]))
 
+        if "unit" in payload:
+            row.unit = _require_known_unit(self._session, _optional_str(payload.get("unit")))
+
         scalar_map = {
-            "unit": _optional_str,
             "material": _optional_str,
             "side_insert_rotation": _optional_str,
             "composition_mode": _optional_str,

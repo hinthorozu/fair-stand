@@ -160,9 +160,20 @@ function readContactSliceFromDb(dbType) {
   });
 }
 
-/** Dilim 4: kesit 1+2+3 yalnız DB. Bilinen tipte eksik bootstrap → fail-fast. */
+function registeredTypeHasSceneBehavior(dbType) {
+  return Boolean(
+    readPlacementSliceFromDb(dbType)
+    && readPolicySliceFromDb(dbType)
+    && readContactSliceFromDb(dbType),
+  );
+}
+
+/** Dilim 4: kesit 1+2+3 yalnız DB. Kayıtlı tipte behavior yoksa fail-closed. */
 function resolveDbBehaviorSlices(type) {
   const dbType = type ? getItemType(type) : null;
+  if (dbType && !registeredTypeHasSceneBehavior(dbType)) {
+    throw new TypeError(`Item type "${type}" has no scene behavior.`);
+  }
   const placement = readPlacementSliceFromDb(dbType);
   const policy = readPolicySliceFromDb(dbType);
   const contact = readContactSliceFromDb(dbType);

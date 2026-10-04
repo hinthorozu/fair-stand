@@ -11,6 +11,7 @@ import {
   getShowcaseBodyDefinition,
   getShowcaseItemKeyForType,
   itemDefaultColorCss,
+  getItemType,
   itemHasSceneRender,
   listEmbeddedRenderParts,
   requireSceneDimension,
@@ -721,6 +722,14 @@ const MODULE_STATE_FACTORIES = Object.freeze({
 
 export const MODULE_STATE_TYPES = Object.freeze(Object.keys(MODULE_STATE_FACTORIES));
 
+function assertSceneCapableType(type) {
+  if (!type) return;
+  const dbType = getItemType(type);
+  if (dbType && typeof dbType.placement !== 'string') {
+    throw new TypeError(`Item type "${type}" has no scene behavior.`);
+  }
+}
+
 export function createModuleStateFromDescriptor(
   descriptor,
   { itemKey = null, preservePlacement = false, imageAssetId = null } = {},
@@ -732,6 +741,7 @@ export function createModuleStateFromDescriptor(
     itemKey: itemKey ?? descriptor.itemKey ?? null,
   });
   const item = resolvedItemKey ? getItem(resolvedItemKey) : null;
+  assertSceneCapableType(item?.type ?? descriptor.type);
   if (item && !itemHasSceneRender(item)) return null;
   const merged = item
     ? Object.assign({}, factoryDescriptorFromItem(item), descriptor, {
@@ -757,6 +767,7 @@ export function createModuleStateFromDescriptor(
 
 export function createModuleStateFromCatalogKey(moduleKey, options = {}) {
   const item = typeof moduleKey === 'string' && moduleKey ? getItem(moduleKey) : null;
+  if (item) assertSceneCapableType(item.type);
   if (!itemHasSceneRender(item)) return null;
   return createModuleStateFromDescriptor(item, {
     ...options,

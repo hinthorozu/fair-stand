@@ -1,15 +1,16 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-box-block-surface-flags-v1",
-  "kind": "bugfix",
-  "summary": "Kutu bloğun dört yan yüzü görsel, lightbox ve mesh alır. Lightbox ışığı yalnız o yüzde yanar. Ok kutuyu zemin ile tavan arasında yürütür.",
+  "id": "fair-stand-foam-logo-production-bom-v1",
+  "kind": "bom-change",
+  "summary": "Mevcut Strafor Logo alan toplamı foam_logo production leaf satırına bağlanır. Alan hesabı ve detay tablosu durur. digital_print, mesh_fabric ve lightbox_fabric aynı kalır.",
   "owners": [
-    "backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py"
+    "src/projectBom.js",
+    "src/printAreaBom.js"
   ],
   "sourceOfTruth": [
-    "backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py",
-    "backend/alembic/versions/0049_box_block_surface_flags.py",
-    "backend/alembic/versions/0050_box_block_rotation_45.py"
+    "src/printAreaBom.js",
+    "src/itemBom.js",
+    "src/projectBom.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -73,6 +74,7 @@
       "src/configuratorStyles.js",
       "src/cornerPlacement.js",
       "src/designState.js",
+      "src/featureContracts.js",
       "src/floorArea.js",
       "src/groundLayout.js",
       "src/helpGuide.css",
@@ -118,6 +120,7 @@
       "vite.config.js"
     ],
     "affectedTests": [
+      "test/productionItemType.test.js",
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
       "e2e/base-items-contract.spec.mjs",
       "e2e/color-image-capability.spec.mjs",
@@ -374,6 +377,14 @@
       "test/wallShowcaseItemContract.test.js"
     ],
     "affectedDocs": [
+      "docs/items/audit/properties/properties/behavior.collision.md",
+      "docs/items/audit/properties/properties/behavior.moveSnapCm.md",
+      "docs/items/audit/properties/properties/behavior.overlapWithTypes.md",
+      "docs/items/audit/properties/properties/behavior.wallCapacity.md",
+      "docs/refactor/README.md",
+      "docs/refactor/ROTATION.md",
+      "docs/refactor/STAND_DIMENSIONS.md",
+      "fair-stand-base-family-migration-handoff.md",
       "ARCHITECTURE_RULES.md",
       "FRESH_REPOSITORY_REVIEW.md",
       "MODULE_BEHAVIOR_STANDARD.md",

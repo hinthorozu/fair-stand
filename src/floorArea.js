@@ -31,9 +31,13 @@ function floorLine(item, quantity) {
   };
 }
 
+function isFloorAreaUnit(unit) {
+  return unit === 'm2' || unit === 'metre_kare';
+}
+
 function canonicalFloorUnit(unit) {
   const text = String(unit ?? '').trim().toLowerCase().replaceAll('²', '2').replaceAll('^', '');
-  if (text === 'm2' || text === 'adet') return text;
+  if (isFloorAreaUnit(text) || text === 'adet') return text;
   return null;
 }
 
@@ -179,7 +183,7 @@ export function validateFloorArea(area, stand) {
 function quantityForCoverage(item, widthCm, depthCm, cellOverride = null) {
   const unit = canonicalFloorUnit(item?.unit);
   if (!unit) return null;
-  if (unit === 'm2') return (widthCm * depthCm) / 10000;
+  if (isFloorAreaUnit(unit)) return (widthCm * depthCm) / 10000;
   const cells = cellOverride ?? floorCellCount(widthCm, depthCm);
   if (cells == null) return null;
   const perTile = tilesPerFloorItem(item);
@@ -213,7 +217,7 @@ export function resolveSplitFloorBomLines(stand) {
   );
   const baseM2Width = standX;
   const baseM2Depth = standY;
-  const baseLineQuantity = canonicalFloorUnit(baseItem.unit) === 'm2'
+  const baseLineQuantity = isFloorAreaUnit(canonicalFloorUnit(baseItem.unit))
     ? ((baseM2Width * baseM2Depth) - (area.widthCm * area.depthCm)) / 10000
     : baseQuantity;
   const areaQuantity = quantityForCoverage(areaItem, area.widthCm, area.depthCm);

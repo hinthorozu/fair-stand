@@ -20,6 +20,7 @@ from app.modules.fair_stand.application.admin_catalog import AdminCatalogService
 from app.modules.fair_stand.application.admin_items import AdminItemsService
 from app.modules.fair_stand.application.admin_settings import AdminSettingsService
 from app.modules.fair_stand.application.admin_snap_catalog import AdminSnapCatalogService
+from app.modules.fair_stand.application.admin_units import AdminUnitsService
 from app.modules.fair_stand.application.get_catalog_bootstrap import GetCatalogBootstrapUseCase
 from app.modules.fair_stand.application.get_item import GetItemUseCase
 from app.modules.fair_stand.application.projects import ProjectService
@@ -81,6 +82,10 @@ def get_admin_items_service(db: Session = Depends(get_db)) -> AdminItemsService:
 
 def get_admin_snap_catalog_service(db: Session = Depends(get_db)) -> AdminSnapCatalogService:
     return AdminSnapCatalogService(db)
+
+
+def get_admin_units_service(db: Session = Depends(get_db)) -> AdminUnitsService:
+    return AdminUnitsService(db)
 
 
 def get_project_service(db: Session = Depends(get_db)) -> ProjectService:

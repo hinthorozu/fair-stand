@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from sqlalchemy import select
 
-from app.modules.fair_stand.application.admin_snap_catalog import AdminSnapCatalogService
+from app.modules.fair_stand.application.admin_snap_catalog import (
+    AdminSnapCatalogService,
+    SnapCatalogAdminError,
+)
 from app.modules.fair_stand.infrastructure.item_type_behavior_seed import (
     TYPE_BEHAVIOR_SLICE1,
     behavior_slice1_for_type,
@@ -33,10 +36,11 @@ def test_seeded_item_types_match_type_behaviors_slice1(db_session):
     assert missing == [], f"seed eksik tip(ler): {missing}"
 
     for key, (placement, collision, move_snap_cm) in TYPE_BEHAVIOR_SLICE1.items():
-        row = rows[key]
-        assert row.placement == placement, key
-        assert row.collision == collision, key
-        assert int(row.move_snap_cm) == move_snap_cm, key
+        behavior = rows[key].scene_behavior
+        assert behavior is not None, key
+        assert behavior.placement == placement, key
+        assert behavior.collision == collision, key
+        assert int(behavior.move_snap_cm) == move_snap_cm, key
 
 
 def test_seeded_item_types_match_type_behaviors_slice2(db_session):
@@ -53,11 +57,12 @@ def test_seeded_item_types_match_type_behaviors_slice2(db_session):
     assert missing == [], f"seed eksik tip(ler): {missing}"
 
     for key, (magnetic, allow_side, supports_overlay, capacity) in TYPE_BEHAVIOR_SLICE2.items():
-        row = rows[key]
-        assert row.magnetic_snap == magnetic, key
-        assert bool(row.allow_side_insert) is allow_side, key
-        assert bool(row.supports_wall_overlay_mount) is supports_overlay, key
-        assert row.wall_capacity == capacity, key
+        behavior = rows[key].scene_behavior
+        assert behavior is not None, key
+        assert behavior.magnetic_snap == magnetic, key
+        assert bool(behavior.allow_side_insert) is allow_side, key
+        assert bool(behavior.supports_wall_overlay_mount) is supports_overlay, key
+        assert behavior.wall_capacity == capacity, key
 
 
 def test_seeded_item_types_match_type_behaviors_slice3(db_session):
@@ -88,15 +93,17 @@ def test_seeded_item_types_match_type_behaviors_slice3(db_session):
             ghost_opacity,
         ) = expected
         row = rows[key]
-        assert row.connection_endpoint == endpoint, key
-        assert row.collision_depth == depth, key
-        assert row.endpoint_contact == contact, key
-        assert row.boundary_snap == boundary, key
-        assert row.collision_height == height, key
+        behavior = row.scene_behavior
+        assert behavior is not None, key
+        assert behavior.connection_endpoint == endpoint, key
+        assert behavior.collision_depth == depth, key
+        assert behavior.endpoint_contact == contact, key
+        assert behavior.boundary_snap == boundary, key
+        assert behavior.collision_height == height, key
         assert sorted(item.key for item in (row.overlap_types or [])) == sorted(overlap), key
-        assert row.ghost_kind == ghost_kind, key
-        assert row.ghost_renderer == ghost_renderer, key
-        assert Decimal(str(row.ghost_opacity)) == ghost_opacity, key
+        assert behavior.ghost_kind == ghost_kind, key
+        assert behavior.ghost_renderer == ghost_renderer, key
+        assert Decimal(str(behavior.ghost_opacity)) == ghost_opacity, key
 
 
 def test_bootstrap_item_types_expose_placement_slice(client, db_session, auth_headers):
@@ -211,9 +218,18 @@ def test_item_type_admin_create_update_behavior_fields(db_session):
         placement="free",
         collision="footprint",
         move_snap_cm=25,
+        magnetic_snap="standard",
+        allow_side_insert=True,
+        supports_wall_overlay_mount=True,
+        wall_capacity="include",
         connection_endpoint="logical-fixture",
         collision_depth="wall-backbone",
+        endpoint_contact="standard",
+        boundary_snap="stand-edge",
+        collision_height="full",
         overlap_with_types=["kettle"],
+        ghost_kind="silhouette",
+        ghost_renderer="module-silhouette",
         ghost_opacity=0.5,
     )
     assert created["placement"] == "free"
@@ -279,3 +295,70 @@ def test_item_type_create_rejects_invalid_connection_endpoint(db_session):
         raise AssertionError("expected SnapCatalogAdminError")
     except Exception as exc:
         assert "connection_endpoint" in str(exc).lower()
+
+
+def test_classification_only_type_has_no_behavior_row(db_session):
+    service = AdminSnapCatalogService(db_session)
+    created = service.create_item_type(display_name="Üretim Test", key="production-test")
+    assert "placement" not in created
+    assert "moveSnapCm" not in created
+    assert "ghost" not in created
+    row = db_session.get(FairStandItemTypeModel, created["id"])
+    assert row is not None
+    assert row.scene_behavior is None
+
+
+def test_partial_behavior_create_is_rejected(db_session):
+    service = AdminSnapCatalogService(db_session)
+    try:
+        service.create_item_type(
+            display_name="Yarım",
+            key="partial-type",
+            placement="wall",
+            collision="segment",
+        )
+        raise AssertionError("expected SnapCatalogAdminError")
+    except SnapCatalogAdminError as exc:
+        assert "eksik" in str(exc).lower()
+
+
+def test_non_scene_type_rejects_snap_rule(db_session):
+    service = AdminSnapCatalogService(db_session)
+    created = service.create_item_type(display_name="Üretim Test", key="production-test")
+    rule_type = service.create_rule_type(display_name="Snap", key="snap-test")
+    try:
+        service.create_rule(
+            rule_type_id=rule_type["id"],
+            display_name="Kural",
+            key="rule-test",
+            item_type_ids=[created["id"]],
+        )
+        raise AssertionError("expected SnapCatalogAdminError")
+    except SnapCatalogAdminError as exc:
+        assert exc.status_code == 400
+        assert "snap rule" in str(exc).lower()
+
+
+def test_bootstrap_omits_scene_fields_for_production(client, db_session, auth_headers):
+    seed_fair_stand_catalog(db_session)
+    db_session.flush()
+    response = client.get("/api/v1/fair-stand/catalog/bootstrap", headers=auth_headers)
+    assert response.status_code == 200
+    production = next(row for row in response.json()["itemTypes"] if row["key"] == "production")
+    assert production["displayName"] == "Üretim"
+    assert production["isActive"] is True
+    for field in ("placement", "collision", "moveSnapCm", "ghost", "magneticSnap"):
+        assert field not in production
+    items = {row["itemKey"]: row for row in response.json()["items"]}
+    for item_key, name in (
+        ("digital_print", "Dijital Baskı"),
+        ("mesh_fabric", "Mesh Baskı"),
+        ("lightbox_fabric", "Lightbox Bezi"),
+        ("foam_logo", "Strafor Logo"),
+    ):
+        item = items[item_key]
+        assert item["name"] == name
+        assert item["type"] == "production"
+        assert item["unit"] == "metre_kare"
+        assert item["catalogVisible"] is False
+        assert item["isRender"] is False

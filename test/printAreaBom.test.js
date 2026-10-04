@@ -1,11 +1,46 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { groupBomLines } from '../src/bomLineGroups.js';
 import { createModuleStateFromCatalogKey } from '../src/designState.js';
 import { initializeItemRegistry, listRegisteredItems } from '../src/items.js';
 import { collectPrintAreas } from '../src/printAreaBom.js';
 import { resolveProjectBom } from '../src/projectBom.js';
 import { formatProductionBomText } from '../src/productionBomPanel.js';
+
+const PRODUCTION_ITEMS = [
+  { itemKey: 'digital_print', name: 'Dijital Baskı' },
+  { itemKey: 'mesh_fabric', name: 'Mesh Baskı' },
+  { itemKey: 'lightbox_fabric', name: 'Lightbox Bezi' },
+  { itemKey: 'foam_logo', name: 'Strafor Logo' },
+];
+
+function withProductionItems(run) {
+  const snapshot = listRegisteredItems().map((item) => structuredClone(item));
+  const present = new Set(snapshot.map((item) => item.itemKey));
+  const extras = PRODUCTION_ITEMS
+    .filter((item) => !present.has(item.itemKey))
+    .map((item) => ({
+      itemKey: item.itemKey,
+      name: item.name,
+      type: 'production',
+      unit: 'metre_kare',
+      catalogVisible: false,
+      isRender: false,
+      isActive: true,
+      acceptsColor: false,
+      acceptsImage: false,
+      acceptsLightbox: false,
+      acceptsGlass: false,
+      acceptsMesh: false,
+    }));
+  if (extras.length) initializeItemRegistry([...snapshot, ...extras]);
+  try {
+    return run();
+  } finally {
+    if (extras.length) initializeItemRegistry(snapshot);
+  }
+}
 
 const PANEL_BY_MODULE_WIDTH = {
   50: { itemKey: 'panel_48_5', widthCm: 48.5, heightCm: 47 },
@@ -106,6 +141,7 @@ test('a single printed panel uses the catalog panel size', () => {
   assert.equal(images.lines[0].widthCm, 98);
   assert.equal(images.lines[0].heightCm, 47);
   assert.equal(images.lines[0].areaM2, 0.4606);
+  assert.equal(images.label, 'Dijital Baskı');
   assert.equal(images.lines[0].name, 'Görsel');
   assert.equal(images.lines[0].subjectId, 'asset-a');
   assert.equal(images.totalAreaM2, 0.4606);
@@ -188,7 +224,9 @@ test('the same image at two sizes stays on two lines and keeps one m² total', (
   assert.equal(images.lines[1].heightCm, 94);
   assert.equal(images.lines[1].areaM2, 1.3865);
   assert.equal(images.totalAreaM2, 5.0901);
-  const text = formatProductionBomText(resolveProjectBom([wide, narrow], null, names));
+  const text = withProductionItems(() => (
+    formatProductionBomText(resolveProjectBom([wide, narrow], null, names))
+  ));
   assert.match(text, /logo\.png · 1 × 197×188 cm · 3,70 m²/);
   assert.match(text, /logo\.png · 1 × 147,5×94 cm · 1,39 m²/);
   assert.match(text, /logo\.png toplam 5,09 m²/);
@@ -237,6 +275,8 @@ test('lightbox and mesh are separate pieces and their print is not also an image
   assert.equal(section(areas, 'image'), null);
   const light = section(areas, 'lightbox');
   const meshSection = section(areas, 'mesh');
+  assert.equal(light.label, 'Lightbox Bezi');
+  assert.equal(meshSection.label, 'Mesh - Delikli Branda');
   assert.equal(light.lines[0].widthCm, 98);
   assert.equal(light.lines[0].heightCm, 141);
   assert.equal(light.lines[0].areaM2, 1.3818);
@@ -269,6 +309,7 @@ test('styrofoam logos use width × height and ignore thickness', () => {
     { id: 'f3', type: 'illuminated-foam', widthCm: 200, heightCm: 150, depthCm: 3 },
   ]);
   const foam = section(areas, 'foam');
+  assert.equal(foam.label, 'Strafor Logo');
   assert.equal(foam.lines.length, 2);
   assert.equal(foam.lines[0].widthCm, 200);
   assert.equal(foam.lines[0].heightCm, 150);
@@ -280,6 +321,42 @@ test('styrofoam logos use width × height and ignore thickness', () => {
   assert.equal(foam.lines[1].areaM2, 0.32);
   assert.equal(foam.lines[1].totalAreaM2, 0.64);
   assert.equal(foam.totalAreaM2, 3.64);
+});
+
+test('two identical strafor logos keep the detail total and bind that total to foam_logo', () => {
+  const names = new Map([['logo', '000_kyrox-letter.svg']]);
+  const modules = [0, 1].map((index) => ({
+    id: `foam-${index}`,
+    type: 'illuminated-foam',
+    itemKey: 'illuminated-foam',
+    widthCm: 200,
+    heightCm: 56,
+    imageAssetId: 'logo',
+  }));
+  const foam = section(collectPrintAreas(modules, names), 'foam');
+  assert.equal(foam.lines.length, 1);
+  assert.equal(foam.lines[0].name, '000_kyrox-letter.svg');
+  assert.equal(foam.lines[0].quantity, 2);
+  assert.equal(foam.lines[0].widthCm, 200);
+  assert.equal(foam.lines[0].heightCm, 56);
+  assert.equal(foam.lines[0].areaM2, 1.12);
+  assert.equal(foam.lines[0].totalAreaM2, 2.24);
+  assert.equal(foam.totalAreaM2, 2.24);
+  withProductionItems(() => {
+    const bom = resolveProjectBom(modules, null, names);
+    const line = bom.lines.find((entry) => entry.itemKey === 'foam_logo');
+    assert.equal(line.quantity, foam.totalAreaM2);
+    assert.equal(line.quantity, 2.24);
+    assert.equal(line.unit, 'metre_kare');
+    assert.equal(line.name, 'Strafor Logo');
+    assert.equal(bom.lines.filter((entry) => entry.itemKey === 'digital_print').length, 0);
+    assert.equal(bom.lines.filter((entry) => entry.itemKey === 'mesh_fabric').length, 0);
+    assert.equal(bom.lines.filter((entry) => entry.itemKey === 'lightbox_fabric').length, 0);
+    assert.equal(bom.lines.some((entry) => entry.itemKey === 'illuminated-foam'), false);
+    const text = formatProductionBomText(bom);
+    assert.match(text, /000_kyrox-letter\.svg · 2 × 200×56 cm · 1,12 m² · toplam 2,24 m²/);
+    assert.match(text, /Toplam 2,24 m²/);
+  });
 });
 
 test('counter and base faces and the door leaf join the print list at their own panel size', () => {
@@ -404,4 +481,78 @@ test('project BOM carries print areas without adding them to hardware lines', ()
   const bom = resolveProjectBom([]);
   assert.deepEqual(bom.printAreas, []);
   assert.deepEqual(bom.lines, []);
+});
+
+test('print section totals become production leaves and the detail table stays', () => {
+  const printed = wall('images', 100, [
+    strip(0, { imageAssetId: 'asset-a', imageTransform: { mode: 'single' } }),
+    strip(1, { imageAssetId: 'asset-b', imageTransform: { mode: 'single' } }),
+  ]);
+  const lightbox = wall('light', 100, [0, 1, 2].map((row) => strip(row, {
+    fabricGroupId: 'fabric-light',
+    fabricType: 'lightbox',
+    fabricImageAssetId: 'light-print',
+  })));
+  const mesh = wall('mesh', 200, [0, 1].map((row) => strip(row, {
+    fabricGroupId: 'fabric-mesh',
+    fabricType: 'mesh',
+    fabricImageAssetId: 'mesh-print',
+  })));
+  const foam = {
+    id: 'foam',
+    type: 'illuminated-foam',
+    itemKey: 'illuminated-foam',
+    widthCm: 80,
+    heightCm: 40,
+  };
+  withProductionItems(() => {
+    const bom = resolveProjectBom([printed, lightbox, mesh, foam]);
+    const image = section(bom.printAreas, 'image');
+    const light = section(bom.printAreas, 'lightbox');
+    const meshSection = section(bom.printAreas, 'mesh');
+    const foamSection = section(bom.printAreas, 'foam');
+    assert.equal(image.totalAreaM2, 0.9212);
+    assert.equal(light.totalAreaM2, 1.3818);
+    assert.equal(meshSection.totalAreaM2, 1.8518);
+    assert.equal(foamSection.totalAreaM2, 0.32);
+
+    const material = (itemKey) => bom.lines.find((line) => line.itemKey === itemKey);
+    const digital = material('digital_print');
+    const fabric = material('lightbox_fabric');
+    const meshLine = material('mesh_fabric');
+    assert.equal(digital.name, 'Dijital Baskı');
+    assert.equal(digital.quantity, image.totalAreaM2);
+    assert.equal(digital.unit, 'metre_kare');
+    assert.equal(fabric.name, 'Lightbox Bezi');
+    assert.equal(fabric.quantity, light.totalAreaM2);
+    assert.equal(fabric.unit, 'metre_kare');
+    assert.equal(meshLine.name, 'Mesh Baskı');
+    assert.equal(meshLine.quantity, meshSection.totalAreaM2);
+    assert.equal(meshLine.unit, 'metre_kare');
+    const foamLine = material('foam_logo');
+    assert.equal(foamLine.name, 'Strafor Logo');
+    assert.equal(foamLine.quantity, foamSection.totalAreaM2);
+    assert.equal(foamLine.unit, 'metre_kare');
+    assert.equal(bom.lines.filter((line) => line.itemKey === 'digital_print').length, 1);
+    assert.equal(bom.lines.some((line) => line.itemKey === 'illuminated-foam'), false);
+    assert.equal(image.lines.length, 2);
+    assert.equal(groupBomLines([digital, fabric, meshLine]).map((group) => group.id).join(','), 'production');
+  });
+});
+
+test('a wall recipe stays intact when its print area becomes digital_print', () => {
+  const moduleState = createModuleStateFromCatalogKey('wall_100_350');
+  moduleState.strips[0].imageAssetId = 'asset-a';
+  withProductionItems(() => {
+    const bom = resolveProjectBom([moduleState]);
+    const panels = bom.lines.find((line) => line.itemKey === 'panel_98');
+    const digital = bom.lines.find((line) => line.itemKey === 'digital_print');
+    const image = section(bom.printAreas, 'image');
+    assert.equal(panels.quantity, 7);
+    assert.equal(panels.unit, 'adet');
+    assert.equal(digital.quantity, image.totalAreaM2);
+    assert.equal(digital.quantity, 0.4606);
+    assert.equal(digital.unit, 'metre_kare');
+    assert.equal(bom.lines.filter((line) => line.itemKey === 'digital_print').length, 1);
+  });
 });
