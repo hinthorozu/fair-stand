@@ -1,13 +1,9 @@
 import { getItem, listEmbeddedRenderParts } from './items.js';
 
 const STRAIGHT_PANEL_RE = /^panel_(48_5|98|147_5|197)$/;
-const CORNER_PANEL_RE = /^panel_corner_(42_5|92|142_5|192)$/;
 
-/** panel_xxx → panel_cam_xxx, panel_corner_xxx → panel_corner_cam_xxx. */
+/** Straight panel_xxx → panel_cam_xxx. Corner panels have no cam mapping. */
 export function glassTwinKey(itemKey) {
-  if (CORNER_PANEL_RE.test(itemKey)) {
-    return `panel_corner_cam_${itemKey.slice('panel_corner_'.length)}`;
-  }
   if (STRAIGHT_PANEL_RE.test(itemKey)) {
     return `panel_cam_${itemKey.slice('panel_'.length)}`;
   }

@@ -200,8 +200,8 @@ test('WS branch into a full wall tee drops only the branch upright', () => {
   assert.equal(qty(bom, 'connector_double'), 0);
   assert.equal(qty(bom, 'connector_corner'), 1);
   assert.equal(qty(bom, 'panel_197'), 7);
-  assert.equal(qty(bom, 'panel_corner_92'), 1);
-  assert.equal(qty(bom, 'panel_98'), 0);
+  assert.equal(qty(bom, 'panel_corner_92'), 0);
+  assert.equal(qty(bom, 'panel_98'), 1);
 });
 
 test('WS face contact with a full wall does not change BOM', () => {
@@ -267,8 +267,8 @@ test('WS1 and WS2 end-to-end with door use one double, not the full-height 3', (
   assert.equal(qty(tee, 'connector_single'), 7);
   assert.equal(qty(tee, 'connector_corner'), 1);
   assert.equal(qty(tee, 'connector_double'), 0);
-  assert.equal(qty(tee, 'panel_98'), 3);
-  assert.equal(qty(tee, 'panel_corner_92'), 2);
+  assert.equal(qty(tee, 'panel_98'), 5);
+  assert.equal(qty(tee, 'panel_corner_92'), 0);
 });
 
 test('WS separator joints stay on the short band and keep separator panels', () => {
@@ -290,7 +290,8 @@ test('WS separator joints stay on the short band and keep separator panels', () 
     cornerPartner('branch', 'wall_100_short_1', 100, { xCm: 50, zCm: 300, heightCm: 50 }),
   ]);
   assert.equal(qty(tee, 'separator_panel_98'), 7);
-  assert.equal(qty(tee, 'panel_corner_92'), 1);
+  assert.equal(qty(tee, 'panel_98'), 1);
+  assert.equal(qty(tee, 'panel_corner_92'), 0);
   assert.equal(qty(tee, 'connector_corner'), 1);
   assert.equal(qty(tee, 'connector_double'), 0);
   assert.equal(qty(tee, 'upright_49_5'), 1);
@@ -316,8 +317,8 @@ test('WS showcase joints do not copy the full-height showcase doubles', () => {
     frame('host', 'wall_showcase_100_2_350', { widthCm: 100, heightCm: 350 }),
     cornerPartner('branch', 'wall_100_short_1', 100, { xCm: 50, zCm: 300, heightCm: 50 }),
   ]);
-  assert.equal(qty(tee, 'panel_98'), 5);
-  assert.equal(qty(tee, 'panel_corner_92'), 1);
+  assert.equal(qty(tee, 'panel_98'), 6);
+  assert.equal(qty(tee, 'panel_corner_92'), 0);
   assert.equal(qty(tee, 'glass_shelf'), 1);
   assert.equal(qty(tee, 'connector_corner'), 1);
   assert.equal(qty(tee, 'connector_double'), 0);
@@ -361,7 +362,8 @@ test('same-height wall shorts share one upright and one double', () => {
   assert.equal(qty(tee, 'connector_corner'), 1);
   assert.equal(qty(tee, 'connector_double'), 0);
   assert.equal(qty(tee, 'panel_197'), 1);
-  assert.equal(qty(tee, 'panel_corner_92'), 1);
+  assert.equal(qty(tee, 'panel_98'), 1);
+  assert.equal(qty(tee, 'panel_corner_92'), 0);
 });
 
 test('full-height branch into a wall short host keeps the tall upright and the host panel', () => {
@@ -375,8 +377,8 @@ test('full-height branch into a wall short host keeps the tall upright and the h
   assert.equal(qty(bom, 'connector_corner'), 1);
   assert.equal(qty(bom, 'connector_double'), 0);
   assert.equal(qty(bom, 'panel_197'), 1);
-  assert.equal(qty(bom, 'panel_corner_92'), 7);
-  assert.equal(qty(bom, 'panel_98'), 0);
+  assert.equal(qty(bom, 'panel_corner_92'), 0);
+  assert.equal(qty(bom, 'panel_98'), 7);
 });
 
 test('mixed-height containment drops only the contained upright', () => {

@@ -13,8 +13,8 @@ function qty(lines, itemKey) {
 test('glass twin keys follow panel and corner syntax', () => {
   assert.equal(glassTwinKey('panel_197'), 'panel_cam_197');
   assert.equal(glassTwinKey('panel_48_5'), 'panel_cam_48_5');
-  assert.equal(glassTwinKey('panel_corner_142_5'), 'panel_corner_cam_142_5');
-  assert.equal(glassTwinKey('panel_corner_42_5'), 'panel_corner_cam_42_5');
+  assert.equal(glassTwinKey('panel_corner_142_5'), null);
+  assert.equal(glassTwinKey('panel_corner_42_5'), null);
   assert.equal(glassTwinKey('separator_panel_98'), null);
   assert.equal(glassTwinKey('panel_cam_197'), null);
 });
@@ -80,7 +80,7 @@ test('separator and unstamped glass strips stay on the sunta line', () => {
   assert.equal(split.lines[0].quantity, 7);
 });
 
-test('corner glass faces move onto panel_corner_cam', () => {
+test('corner panel glass has no cam mapping and straight glass still splits', () => {
   const split = applyGlassPanelSplit(
     [
       { itemKey: 'panel_corner_192', quantity: 2, unit: 'adet', material: 'sunta' },
@@ -92,9 +92,9 @@ test('corner glass faces move onto panel_corner_cam', () => {
       { itemKey: 'panel_197', isGlass: true },
     ],
   );
-  assert.equal(qty(split.lines, 'panel_corner_192'), 1);
-  assert.equal(qty(split.lines, 'panel_corner_cam_192'), 1);
+  assert.equal(qty(split.lines, 'panel_corner_192'), 2);
+  assert.equal(qty(split.lines, 'panel_corner_cam_192'), 0);
   assert.equal(qty(split.lines, 'panel_197'), 0);
   assert.equal(qty(split.lines, 'panel_cam_197'), 1);
-  assert.equal(split.lines.find((line) => line.itemKey === 'panel_corner_cam_192').material, 'cam');
+  assert.equal(split.lines.find((line) => line.itemKey === 'panel_cam_197').material, 'cam');
 });

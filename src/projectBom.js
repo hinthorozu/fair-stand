@@ -11,7 +11,6 @@ import {
 } from './panelGlassBom.js';
 import {
   applyCornerPanelSwap,
-  applyCornerPanelSwapToSurfaces,
   applyRelationshipBomAdjustments,
   applyWallShortBomDeltas,
   detectRelationshipJoints,
@@ -70,11 +69,10 @@ function resolveModuleEntry(moduleState, index, { panelSwap = null } = {}) {
   try {
     const recipeLines = resolveItemBom(itemKey, 1);
     const surfaces = collectPanelSurfaces(moduleState);
-    const swappedSurfaces = panelSwap
-      ? applyCornerPanelSwapToSurfaces(surfaces, panelSwap)
-      : surfaces;
-    const lines = panelSwap ? applyCornerPanelSwap(recipeLines, panelSwap) : recipeLines;
-    const split = applyGlassPanelSplit(lines, swappedSurfaces);
+    const split = applyGlassPanelSplit(recipeLines, surfaces);
+    const lines = panelSwap
+      ? applyCornerPanelSwap(split.lines, panelSwap, surfaces)
+      : split.lines;
     return Object.freeze({
       moduleId,
       index,
@@ -82,7 +80,7 @@ function resolveModuleEntry(moduleState, index, { panelSwap = null } = {}) {
       name,
       type: item?.type ?? moduleState?.type ?? null,
       status: 'ok',
-      lines: Object.freeze(split.lines.map(freezeLine)),
+      lines: Object.freeze(lines.map(freezeLine)),
       glassMoved: Object.freeze(split.moved),
       message: null,
     });

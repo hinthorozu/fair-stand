@@ -6,7 +6,8 @@
  * Connector counts are the locked face deltas. A short separator recipe does not scale them.
  * Corner connectors apply only to a module whose front face looks at the other module.
  * Corner panels follow that same face, and only after a real inner-corner joint.
- * Only the strips covered by the partner's height convert.
+ * Only an explicit panel SKU mapping converts, and only on bands the partner covers.
+ * An unmapped SKU, including cam and separator panels, stays the same SKU.
  * A missing partner endpoint is not an inner face. Proximity does not convert panels.
  * A module sitting on the back keeps its singles and its straight panels.
  * Tee joints keep their connector deltas and do not convert panels.
@@ -41,12 +42,18 @@ const LOCKED_WALL_PAIRS = new Set([
   'wall|wall',
 ]);
 
-const STRAIGHT_TO_CORNER_PANEL = Object.freeze({
+const INNER_CORNER_PANEL_SKU = Object.freeze({
   panel_48_5: 'panel_corner_42_5',
   panel_98: 'panel_corner_92',
   panel_147_5: 'panel_corner_142_5',
   panel_197: 'panel_corner_192',
 });
+
+/** Explicit inner-corner panel SKU. Unmapped keys, including cam, stay the same SKU. */
+export function getInnerCornerPanelSku(flatSku) {
+  if (typeof flatSku !== 'string' || !flatSku) return flatSku;
+  return INNER_CORNER_PANEL_SKU[flatSku] ?? flatSku;
+}
 
 const recipeSingleCache = new Map();
 
@@ -295,7 +302,6 @@ function cornerCharge(participant, partners, point) {
   return {
     singleRemove: faces ? side.singleRemove : 0,
     cornerAdd: faces ? side.cornerAdd : 0,
-    swapPanels: side.swapPanels,
     faces,
   };
 }
@@ -306,17 +312,16 @@ function cornerSide(role, singles) {
     return {
       singleRemove: Math.min(6, Math.max(0, available - 7)),
       cornerAdd: 6,
-      swapPanels: role === 'wall',
     };
   }
   if (role === 'door') {
-    return { singleRemove: Math.min(2, available), cornerAdd: 2, swapPanels: true };
+    return { singleRemove: Math.min(2, available), cornerAdd: 2 };
   }
   if (role === 'showcase-2') {
-    return { singleRemove: Math.min(4, available), cornerAdd: 4, swapPanels: true };
+    return { singleRemove: Math.min(4, available), cornerAdd: 4 };
   }
   if (role === 'showcase-3') {
-    return { singleRemove: Math.min(3, available), cornerAdd: 3, swapPanels: true };
+    return { singleRemove: Math.min(3, available), cornerAdd: 3 };
   }
   return null;
 }
@@ -681,9 +686,8 @@ function adjustmentNotes(plan) {
 
 /**
  * Apply locked end-to-end and inner-corner deltas to aggregated leaf lines.
- * Panel substitution is separate. A full-height tee does not convert panels.
- * swapModuleIds is a full-run swap used by a short tee branch.
- * panelSwaps lists inner-corner modules and the strip indexes covered by the partner.
+ * Panel substitution is separate and only for a validated inner corner.
+ * panelSwaps lists paying faces and the strip indexes covered by the partner.
  * If upright or single quantity would go negative, skips every joint.
  */
 export function applyRelationshipBomAdjustments(lines = [], joints = []) {
@@ -746,15 +750,9 @@ export function applyEndToEndBomAdjustments(lines = [], joints = []) {
   return applyRelationshipBomAdjustments(lines, joints);
 }
 
-/** Straight or cam panel key → inner-corner panel key. Separator panels are not mapped. */
-export function cornerPanelKey(itemKey) {
-  if (STRAIGHT_TO_CORNER_PANEL[itemKey]) return STRAIGHT_TO_CORNER_PANEL[itemKey];
-  if (typeof itemKey === 'string' && itemKey.startsWith('panel_cam_')) {
-    const corner = STRAIGHT_TO_CORNER_PANEL[`panel_${itemKey.slice('panel_cam_'.length)}`];
-    if (!corner) return null;
-    return `panel_corner_cam_${corner.slice('panel_corner_'.length)}`;
-  }
-  return null;
+function mappedCornerSku(itemKey) {
+  const nextKey = getInnerCornerPanelSku(itemKey);
+  return nextKey && nextKey !== itemKey ? nextKey : null;
 }
 
 /** Door panels sit on stand strips 4–6. Showcase openings are not panels. */
@@ -773,7 +771,7 @@ function panelStripIndexes(item) {
     }
     return indexes;
   }
-  const line = resolveItemBom(item.itemKey, 1).find((entry) => STRAIGHT_TO_CORNER_PANEL[entry.itemKey]);
+  const line = resolveItemBom(item.itemKey, 1).find((entry) => mappedCornerSku(entry.itemKey));
   const count = line ? Number(line.quantity) : 0;
   return Array.from({ length: count }, (_, index) => index);
 }
@@ -796,7 +794,7 @@ export function countOverlappingCornerPanels(itemKey, originCm, partnerMinCm, pa
 }
 
 function cornerPanelSwap(side, self, partner) {
-  if (!side?.faces || !side.swapPanels || !self?.z || !partner?.z) return null;
+  if (!side?.faces || !self?.z || !partner?.z) return null;
   const stripIndexes = overlappingPanelStripIndexes(self.itemKey, self.z.minCm, partner.z);
   if (!stripIndexes.length) return null;
   return { moduleId: self.moduleId, stripIndexes };
@@ -817,7 +815,7 @@ function mergePanelSwaps(entries) {
 }
 
 function swapStraightLine(line) {
-  const nextKey = cornerPanelKey(line?.itemKey);
+  const nextKey = mappedCornerSku(line?.itemKey);
   if (!nextKey) return line;
   const item = getItem(nextKey);
   if (!item) return line;
@@ -835,7 +833,7 @@ function swapCountedStraightLines(lines, count) {
   const next = lines.map((line) => ({ ...line }));
   for (const line of next) {
     if (!(left > 0)) break;
-    const nextKey = cornerPanelKey(line?.itemKey);
+    const nextKey = mappedCornerSku(line?.itemKey);
     const item = nextKey ? getItem(nextKey) : null;
     if (!item || !(line.quantity > 0)) continue;
     const quantity = Math.min(left, line.quantity);
@@ -859,14 +857,35 @@ function swapCountedStraightLines(lines, count) {
   return next.filter((line) => line.quantity > 0);
 }
 
+function surfaceAtBand(surfaces, index) {
+  for (let arrayIndex = 0; arrayIndex < surfaces.length; arrayIndex += 1) {
+    const surface = surfaces[arrayIndex];
+    if (surfaceBandIndex(surface, arrayIndex) === index) return surface;
+  }
+  return null;
+}
+
+function convertibleOverlapCount(spec, surfaces) {
+  const indexes = Array.isArray(spec?.stripIndexes) ? spec.stripIndexes : [];
+  if (!surfaces?.length) return indexes.length;
+  let count = 0;
+  for (const index of indexes) {
+    const surface = surfaceAtBand(surfaces, index);
+    if (surface?.isGlass) continue;
+    const sku = surface?.itemKey;
+    if (sku && !mappedCornerSku(sku)) continue;
+    count += 1;
+  }
+  return count;
+}
+
 /**
- * spec.all swaps every straight panel. spec.stripIndexes swaps that many of them.
- * Glass follows the surfaces whose band index is in the set.
+ * spec.stripIndexes selects overlapping bands. Only an explicit mapped SKU moves.
+ * Glass bands and unmapped SKUs stay. spec.all is not a panel transform.
  */
-export function applyCornerPanelSwap(lines = [], spec = null) {
-  if (!spec) return lines;
-  if (spec.all) return lines.map(swapStraightLine);
-  const count = Array.isArray(spec.stripIndexes) ? spec.stripIndexes.length : 0;
+export function applyCornerPanelSwap(lines = [], spec = null, surfaces = []) {
+  if (!spec || spec.all) return lines;
+  const count = convertibleOverlapCount(spec, surfaces);
   if (!count) return lines;
   return swapCountedStraightLines(lines, count);
 }
@@ -881,7 +900,8 @@ export function applyCornerPanelSwapToSurfaces(surfaces = [], spec = null) {
   return surfaces.map((surface, arrayIndex) => {
     if (!surface || typeof surface !== 'object') return surface;
     if (indexes && !indexes.has(surfaceBandIndex(surface, arrayIndex))) return surface;
-    const nextKey = cornerPanelKey(surface.itemKey);
+    if (surface.isGlass) return surface;
+    const nextKey = mappedCornerSku(surface.itemKey);
     if (!nextKey || !getItem(nextKey)) return surface;
     return { ...surface, itemKey: nextKey };
   });
@@ -1096,14 +1116,6 @@ function hasEndpointSingle(frame) {
   return recipeSingleCount(frame.itemKey) > 0;
 }
 
-function swapsCornerPanels(frame) {
-  if (frame.kind === 'short') return true;
-  return frame.role === 'wall'
-    || frame.role === 'door'
-    || frame.role === 'showcase-2'
-    || frame.role === 'showcase-3';
-}
-
 function classifyShortPair(a, b) {
   if (a.axis === b.axis) {
     if (!nearlyEqual(a.fixedCm, b.fixedCm)) return null;
@@ -1234,7 +1246,7 @@ function applyCornerShortJoint(book, a, b, geometry) {
 }
 
 function noteInnerCornerPanels(book, self, partner) {
-  if (!swapsCornerPanels(self) || !self?.z || !partner?.z) return;
+  if (!self?.z || !partner?.z) return;
   const stripIndexes = overlappingPanelStripIndexes(self.itemKey, self.z.minCm, partner.z);
   if (!stripIndexes.length) return;
   book.panelSwaps.push({ moduleId: self.moduleId, stripIndexes });
@@ -1254,7 +1266,6 @@ function applyTeeShortJoint(book, branch, host, geometry) {
     book.add('connector_single', -1);
     book.add('connector_corner', 1);
   }
-  if (swapsCornerPanels(branch)) book.swapModuleIds.push(branch.moduleId);
   book.noteJoint();
 }
 
