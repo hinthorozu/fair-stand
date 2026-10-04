@@ -3,8 +3,11 @@
 Revision ID: 0055_item_unit_fk
 Revises: 0054_production_items
 
-Maps the verified legacy value m2 to metre_kare, then adds the foreign key.
-Does not invent units. Downgrade drops the key and leaves canonical values.
+0051 opens an empty unit catalog. This revision inserts the canonical rows
+adet and metre_kare when item data references them and the row is absent,
+maps the verified legacy value m2 to metre_kare, then adds the foreign key.
+An existing inactive metre_kare row is not reactivated. Any other unit value
+stops the upgrade. Downgrade drops the key and leaves canonical values.
 """
 
 import sqlalchemy as sa
@@ -16,24 +19,59 @@ down_revision = "0054_production_items"
 branch_labels = None
 depends_on = None
 
+_CANONICAL_UNITS = {
+    "adet": ("Adet", "adet"),
+    "metre_kare": ("Metre Kare", "m2"),
+}
+
 
 def _distinct(bind, statement: str) -> list[str]:
     return [row[0] for row in bind.execute(sa.text(statement)).fetchall()]
 
 
+def _ensure_referenced_units(bind) -> None:
+    referenced = set(
+        _distinct(bind, "SELECT DISTINCT unit FROM fair_stand_items WHERE unit IS NOT NULL")
+    )
+    needed = set(referenced)
+    if "m2" in needed:
+        row = bind.execute(
+            sa.text("SELECT is_active FROM fair_stand_units WHERE unit_key = 'metre_kare'")
+        ).first()
+        if row is not None and not bool(row[0]):
+            raise RuntimeError(
+                "m2 items cannot be mapped: fair_stand_units.unit_key metre_kare is missing or inactive."
+            )
+        needed.remove("m2")
+        needed.add("metre_kare")
+    for unit_key in sorted(needed & set(_CANONICAL_UNITS)):
+        exists = bind.execute(
+            sa.text("SELECT 1 FROM fair_stand_units WHERE unit_key = :unit_key"),
+            {"unit_key": unit_key},
+        ).first()
+        if exists is not None:
+            continue
+        name, symbol = _CANONICAL_UNITS[unit_key]
+        bind.execute(
+            sa.text(
+                """
+                INSERT INTO fair_stand_units
+                    (unit_key, name, symbol, is_active, created_at, updated_at)
+                VALUES
+                    (:unit_key, :name, :symbol, :is_active, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                """
+            ),
+            {"unit_key": unit_key, "name": name, "symbol": symbol, "is_active": True},
+        )
+
+
 def upgrade() -> None:
     bind = op.get_bind()
+    _ensure_referenced_units(bind)
     m2_count = bind.execute(
         sa.text("SELECT COUNT(*) FROM fair_stand_items WHERE unit = 'm2'")
     ).scalar_one()
     if m2_count:
-        active = bind.execute(
-            sa.text("SELECT is_active FROM fair_stand_units WHERE unit_key = 'metre_kare'")
-        ).first()
-        if active is None or not bool(active[0]):
-            raise RuntimeError(
-                "m2 items cannot be mapped: fair_stand_units.unit_key metre_kare is missing or inactive."
-            )
         op.execute("UPDATE fair_stand_items SET unit = 'metre_kare' WHERE unit = 'm2'")
 
     missing = _distinct(
