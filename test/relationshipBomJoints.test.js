@@ -119,7 +119,8 @@ test('a module on the back face takes no corner connectors: 20 single, 6 corner'
   assert.equal(qty(bom, 'connector_single'), 20);
   assert.equal(qty(bom, 'connector_double'), 0);
   assert.equal(qty(bom, 'connector_corner'), 6);
-  assert.equal(qty(bom, 'panel_corner_92'), 14);
+  assert.equal(qty(bom, 'panel_corner_92'), 7);
+  assert.equal(qty(bom, 'panel_98'), 7);
 });
 
 test('two walls inner corner → 3 upright, 14 single, 12 corner, corner panels', () => {

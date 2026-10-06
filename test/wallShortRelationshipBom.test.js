@@ -142,7 +142,19 @@ test('WS2 + full wall end-to-end drops upright_99 and still adds one double', ()
   assert.equal(qty(bom, 'panel_197'), 9);
 });
 
-test('WS + full wall corner swaps both panel families and adds two corner connectors', () => {
+test('short 2 corner converts only the two wall bands it covers', () => {
+  const bom = resolveProjectBom([
+    frame('wall', 'wall_100_350', { widthCm: 100, heightCm: 350 }),
+    short2('short', 'wall_200_short_2', { widthCm: 200, rotationZDeg: 270 }),
+  ]);
+  assert.equal(qty(bom, 'connector_corner'), 1);
+  assert.equal(qty(bom, 'panel_corner_92'), 2);
+  assert.equal(qty(bom, 'panel_98'), 5);
+  assert.equal(qty(bom, 'panel_197'), 2);
+  assert.equal(qty(bom, 'panel_corner_192'), 0);
+});
+
+test('WS + full wall corner swaps the short and the overlapped wall band', () => {
   const bom = resolveProjectBom([
     short1('a', 'wall_200_short_1', { widthCm: 200 }),
     cornerPartner('b', 'wall_150_350', 150, { xCm: 200, heightCm: 350 }),
@@ -153,9 +165,9 @@ test('WS + full wall corner swaps both panel families and adds two corner connec
   assert.equal(qty(bom, 'connector_double'), 0);
   assert.equal(qty(bom, 'connector_corner'), 2);
   assert.equal(qty(bom, 'panel_corner_192'), 1);
-  assert.equal(qty(bom, 'panel_corner_142_5'), 7);
+  assert.equal(qty(bom, 'panel_corner_142_5'), 1);
   assert.equal(qty(bom, 'panel_197'), 0);
-  assert.equal(qty(bom, 'panel_147_5'), 0);
+  assert.equal(qty(bom, 'panel_147_5'), 6);
 });
 
 test('WS branch into a full wall tee drops only the branch upright', () => {
@@ -224,8 +236,8 @@ test('WS1 and WS2 end-to-end with door use one double, not the full-height 3', (
   assert.equal(qty(corner, 'connector_single'), 6);
   assert.equal(qty(corner, 'connector_corner'), 2);
   assert.equal(qty(corner, 'connector_double'), 0);
-  assert.equal(qty(corner, 'panel_corner_92'), 4);
-  assert.equal(qty(corner, 'panel_98'), 0);
+  assert.equal(qty(corner, 'panel_corner_92'), 2);
+  assert.equal(qty(corner, 'panel_98'), 2);
   assert.equal(qty(corner, 'door_leaf_100'), 1);
   const tee = resolveProjectBom([
     frame('host', 'wall_door_100_350', { widthCm: 100, heightCm: 350 }),
@@ -276,8 +288,8 @@ test('WS showcase joints do not copy the full-height showcase doubles', () => {
   ]);
   assert.equal(qty(corner, 'connector_corner'), 2);
   assert.equal(qty(corner, 'connector_double'), 0);
-  assert.equal(qty(corner, 'panel_98'), 0);
-  assert.equal(qty(corner, 'panel_corner_92'), 6);
+  assert.equal(qty(corner, 'panel_98'), 2);
+  assert.equal(qty(corner, 'panel_corner_92'), 4);
   assert.equal(qty(corner, 'glass_shelf'), 2);
   assert.equal(qty(corner, 'upright_99'), 1);
   assert.equal(qty(corner, 'upright_346_5'), 2);
@@ -344,8 +356,8 @@ test('full-height branch into a wall short host keeps the tall upright and the h
   assert.equal(qty(bom, 'connector_corner'), 1);
   assert.equal(qty(bom, 'connector_double'), 0);
   assert.equal(qty(bom, 'panel_197'), 1);
-  assert.equal(qty(bom, 'panel_corner_92'), 7);
-  assert.equal(qty(bom, 'panel_98'), 0);
+  assert.equal(qty(bom, 'panel_corner_92'), 1);
+  assert.equal(qty(bom, 'panel_98'), 6);
 });
 
 test('mixed-height containment drops only the contained upright', () => {

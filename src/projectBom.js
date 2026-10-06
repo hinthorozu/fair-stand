@@ -10,6 +10,7 @@ import {
   summarizeGlassMoves,
 } from './panelGlassBom.js';
 import {
+  applyCornerPanelBandSwap,
   applyCornerPanelSwap,
   applyCornerPanelSwapToSurfaces,
   applyRelationshipBomAdjustments,
@@ -47,7 +48,7 @@ function aggregateLines(lineLists) {
   return Array.from(aggregated.values(), (line) => Object.freeze(line));
 }
 
-function resolveModuleEntry(moduleState, index, { swapCornerPanels = false } = {}) {
+function resolveModuleEntry(moduleState, index, { swapCornerPanels = false, swapBands = null } = {}) {
   const moduleId = moduleState?.id ?? null;
   const itemKey = moduleState?.itemKey ?? null;
 
@@ -69,10 +70,17 @@ function resolveModuleEntry(moduleState, index, { swapCornerPanels = false } = {
 
   try {
     const recipeLines = resolveItemBom(itemKey, 1);
-    const lines = swapCornerPanels ? applyCornerPanelSwap(recipeLines) : recipeLines;
-    const surfaces = swapCornerPanels
-      ? applyCornerPanelSwapToSurfaces(collectPanelSurfaces(moduleState))
-      : collectPanelSurfaces(moduleState);
+    const collected = collectPanelSurfaces(moduleState);
+    let lines = recipeLines;
+    let surfaces = collected;
+    if (swapCornerPanels) {
+      lines = applyCornerPanelSwap(recipeLines);
+      surfaces = applyCornerPanelSwapToSurfaces(collected);
+    } else if (swapBands?.length) {
+      const swapped = applyCornerPanelBandSwap(recipeLines, collected, swapBands);
+      lines = swapped.lines;
+      surfaces = swapped.surfaces;
+    }
     const split = applyGlassPanelSplit(lines, surfaces);
     return Object.freeze({
       moduleId,
@@ -211,12 +219,23 @@ export function resolveProjectBom(modules = [], stand = null, assetNames = null)
   if (preview.appliedJointCount > 0) {
     for (const moduleId of preview.swapModuleIds) swapIds.add(moduleId);
   }
-  if (swapIds.size > 0) {
-    moduleEntries = list.map((moduleState, index) => (
-      swapIds.has(moduleIdentity(moduleState, index))
-        ? resolveModuleEntry(moduleState, index, { swapCornerPanels: true })
-        : moduleEntries[index]
-    ));
+  const bandByModule = new Map();
+  for (const entry of wallShort.panelSwaps ?? []) {
+    if (swapIds.has(entry.moduleId)) continue;
+    bandByModule.set(entry.moduleId, entry.bands);
+  }
+  if (swapIds.size > 0 || bandByModule.size > 0) {
+    moduleEntries = list.map((moduleState, index) => {
+      const moduleId = moduleIdentity(moduleState, index);
+      if (swapIds.has(moduleId)) {
+        return resolveModuleEntry(moduleState, index, { swapCornerPanels: true });
+      }
+      const bands = bandByModule.get(moduleId);
+      if (bands?.length) {
+        return resolveModuleEntry(moduleState, index, { swapBands: bands });
+      }
+      return moduleEntries[index];
+    });
   }
 
   const adjusted = applyRelationshipBomAdjustments(

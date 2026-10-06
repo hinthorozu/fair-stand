@@ -9,10 +9,12 @@
  *
  * Wall Short is not a locked full-height role. Its joints are planned separately and never
  * reuse the full-height upright_346_5 / −14 single / +7 double constants.
+ * A full-height payer against a short converts only the panel bands that overlap the short.
  */
 
 import { getItem, isWallShortFamilyDescriptor, resolveItemDefaultZCm, resolveModuleSceneBoxCm } from './items.js';
 import { resolveItemBom } from './itemBom.js';
+import { WALL_PANEL_BAND_PITCH_CM } from './wallPanelBand.js';
 
 const EPSILON_CM = 0.001;
 
@@ -287,7 +289,7 @@ function cornerCharge(participant, partners, point) {
   return {
     singleRemove: faces ? side.singleRemove : 0,
     cornerAdd: faces ? side.cornerAdd : 0,
-    swapPanels: side.swapPanels,
+    swapPanels: faces && side.swapPanels,
   };
 }
 
@@ -667,7 +669,7 @@ function adjustmentNotes(plan) {
 
 /**
  * Apply locked end-to-end and inner-corner deltas to aggregated leaf lines.
- * Panel substitution is separate: swapModuleIds lists modules whose straight panels become corner panels.
+ * Panel substitution follows the same paying face as the corner connectors.
  * If upright or single quantity would go negative, skips every joint.
  */
 export function applyRelationshipBomAdjustments(lines = [], joints = []) {
@@ -757,6 +759,107 @@ export function applyCornerPanelSwapToSurfaces(surfaces = []) {
     const nextKey = cornerPanelKey(surface.itemKey);
     if (!nextKey || !getItem(nextKey)) return surface;
     return { ...surface, itemKey: nextKey };
+  });
+}
+
+/**
+ * Convert `bands.length` straight panels, and the surfaces on those band indexes.
+ * Bands are measured from the module origin in WALL_PANEL_BAND_PITCH_CM steps.
+ */
+export function applyCornerPanelBandSwap(lines = [], surfaces = [], bands = []) {
+  const bandSet = new Set(bands);
+  const nextSurfaces = surfaces.map((surface, index) => {
+    if (!surface || typeof surface !== 'object') return surface;
+    const band = Number.isInteger(surface.stripIndex) ? surface.stripIndex : index;
+    if (!bandSet.has(band)) return surface;
+    const nextKey = cornerPanelKey(surface.itemKey);
+    if (!nextKey || !getItem(nextKey)) return surface;
+    return { ...surface, itemKey: nextKey };
+  });
+
+  const next = lines.map((line) => ({ ...line }));
+  let remaining = bandSet.size;
+  for (const line of next) {
+    if (!(remaining > 0) || !(line.quantity > 0)) continue;
+    const nextKey = cornerPanelKey(line.itemKey);
+    const item = nextKey ? getItem(nextKey) : null;
+    if (!item) continue;
+    const quantity = Math.min(remaining, line.quantity);
+    line.quantity -= quantity;
+    remaining -= quantity;
+    const unit = item.unit ?? line.unit;
+    const existing = next.find((entry) => entry.itemKey === nextKey && entry.unit === unit);
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      next.push({
+        itemKey: nextKey,
+        name: item.name,
+        quantity,
+        unit,
+        material: item.material ?? null,
+        item,
+      });
+    }
+  }
+
+  return {
+    lines: next.filter((line) => line.quantity > 0),
+    surfaces: nextSurfaces,
+  };
+}
+
+const panelBandCache = new Map();
+
+function panelBandIndexes(itemKey) {
+  if (panelBandCache.has(itemKey)) return panelBandCache.get(itemKey);
+  const item = getItem(itemKey);
+  const eyeCount = Number(item?.eyeCount);
+  let indexes;
+  if (itemKey === 'wall_door_100_350') {
+    indexes = [4, 5, 6];
+  } else if (eyeCount === 2 || eyeCount === 3) {
+    const openingStart = eyeCount === 3 ? 1 : 2;
+    indexes = [];
+    for (let band = 0; band < 7; band += 1) {
+      if (band >= openingStart && band < openingStart + eyeCount) continue;
+      indexes.push(band);
+    }
+  } else {
+    let count = 0;
+    try {
+      count = resolveItemBom(itemKey, 1)
+        .filter((line) => cornerPanelKey(line.itemKey))
+        .reduce((sum, line) => sum + Number(line.quantity), 0);
+    } catch {
+      count = 0;
+    }
+    indexes = Array.from({ length: count }, (_, band) => band);
+  }
+  const frozen = Object.freeze(indexes);
+  panelBandCache.set(itemKey, frozen);
+  return frozen;
+}
+
+/** How many of this module's straight panels sit inside range, from its Z origin. */
+export function countOverlappingPanelBands(itemKey, originCm, range) {
+  if (!range) return 0;
+  let count = 0;
+  for (const band of panelBandIndexes(itemKey)) {
+    const minCm = Number(originCm) + band * WALL_PANEL_BAND_PITCH_CM;
+    const maxCm = minCm + WALL_PANEL_BAND_PITCH_CM;
+    if (minCm < range.maxCm - EPSILON_CM && range.minCm < maxCm - EPSILON_CM) count += 1;
+  }
+  return count;
+}
+
+function overlappingPanelBands(payer, range) {
+  const originCm = payer?.z?.minCm;
+  if (!Number.isFinite(originCm) || !range) return [];
+  return panelBandIndexes(payer.itemKey).filter((band) => {
+    const minCm = originCm + band * WALL_PANEL_BAND_PITCH_CM;
+    const maxCm = minCm + WALL_PANEL_BAND_PITCH_CM;
+    return minCm < range.maxCm - EPSILON_CM && range.minCm < maxCm - EPSILON_CM;
   });
 }
 
@@ -1039,6 +1142,7 @@ function spanContains(outer, inner) {
 function createDeltaBook() {
   const deltas = new Map();
   const swapModuleIds = [];
+  const panelSwaps = [];
   let jointCount = 0;
   let railCount = 0;
   const add = (itemKey, amount) => {
@@ -1048,6 +1152,7 @@ function createDeltaBook() {
   return {
     deltas,
     swapModuleIds,
+    panelSwaps,
     add,
     noteJoint() { jointCount += 1; },
     noteRail() { railCount += 1; },
@@ -1094,8 +1199,8 @@ function applyCornerShortJoint(book, a, b, geometry) {
   const payers = (payA ? 1 : 0) + (payB ? 1 : 0);
   book.add('connector_single', -payers);
   book.add('connector_corner', payers);
-  if (swapsCornerPanels(a)) book.swapModuleIds.push(a.moduleId);
-  if (swapsCornerPanels(b)) book.swapModuleIds.push(b.moduleId);
+  if (payA) noteCornerPanels(book, a, b);
+  if (payB) noteCornerPanels(book, b, a);
   book.noteJoint();
 }
 
@@ -1113,8 +1218,19 @@ function applyTeeShortJoint(book, branch, host, geometry) {
     book.add('connector_single', -1);
     book.add('connector_corner', 1);
   }
-  if (swapsCornerPanels(branch)) book.swapModuleIds.push(branch.moduleId);
+  if (branchPays) noteCornerPanels(book, branch, host);
   book.noteJoint();
+}
+
+function noteCornerPanels(book, frame, partner) {
+  if (!swapsCornerPanels(frame)) return;
+  if (frame.kind === 'short' || partner?.kind !== 'short') {
+    book.swapModuleIds.push(frame.moduleId);
+    return;
+  }
+  const bands = overlappingPanelBands(frame, partner.z);
+  if (!bands.length) return;
+  book.panelSwaps.push({ moduleId: frame.moduleId, bands });
 }
 
 function applyProfileRail(book, wall, profile) {
@@ -1135,6 +1251,7 @@ function applyProfileRail(book, wall, profile) {
  * Wall Short joints against framed partners (any relationshipBomRole) and profile rail replacement.
  * Full-height locked pairs are not replanned here. Face, fixture-side and corner-face produce no delta.
  * A short band converts one endpoint single per paying face, never the full-height 7/6/5/4/3 constants.
+ * The paying full-height module converts only the panel bands overlapped by that short.
  * A field upright whose post already occupies a free short endpoint consumes that short upright once.
  * Each short upright end, endpoint single, and top/bottom rail can be consumed once.
  */
@@ -1225,10 +1342,24 @@ export function planWallShortRelationshipBom(modules = []) {
   return Object.freeze({
     deltas: deltasFromBook(book),
     swapModuleIds: Object.freeze([...new Set(book.swapModuleIds)]),
+    panelSwaps: Object.freeze(mergePanelSwaps(book.panelSwaps)),
     jointCount: book.jointCount,
     railCount: book.railCount,
     notes: Object.freeze(notes),
   });
+}
+
+function mergePanelSwaps(entries) {
+  const byModule = new Map();
+  for (const entry of entries) {
+    const bands = byModule.get(entry.moduleId) ?? new Set();
+    for (const band of entry.bands) bands.add(band);
+    byModule.set(entry.moduleId, bands);
+  }
+  return [...byModule.entries()].map(([moduleId, bands]) => Object.freeze({
+    moduleId,
+    bands: Object.freeze([...bands].sort((left, right) => left - right)),
+  }));
 }
 
 function deltasFromBook(book) {
