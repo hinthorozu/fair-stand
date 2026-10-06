@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "fair-stand-foam-logo-production-bom-v1",
   "kind": "bom-change",
-  "summary": "Köşe paneli, köşe aparatıyla aynı ödeyen yüzde döner. O modülün kendi listesinde tekli azalır, köşe aparatı yazılır. Yan yana eklemin çiftlisi iki modülün listesinde de görünür; birleşik toplam eklem başına bir kez sayar. Arkada duran modül düz panelini ve teklisini korur. Short, tam boy ortağın yalnız örtüştüğü şeritlerini köşe paneline çevirir. Kayıtlı şeritte panel kimliği yoksa açılış onu ana modülün reçetesinden yazar; görsel, renk ve kumaş grubu durur. Banko yüzü panelini reçete sırasından değil açıklığından alır: düz bankoda ön geniş, yanlar dar; L bankoda ön ve sağ geniş, sol ve dönüş dar.",
+  "summary": "Köşe paneli, köşe aparatıyla aynı ödeyen yüzde döner. O modülün kendi listesinde tekli azalır, köşe aparatı yazılır. Yan yana eklemin çiftlisi iki modülün listesinde de görünür; birleşik toplam eklem başına bir kez sayar. Arkada duran modül düz panelini ve teklisini korur. Short, tam boy ortağın yalnız örtüştüğü şeritlerini köşe paneline çevirir. Kayıtlı şeritte panel kimliği yoksa açılış onu ana modülün reçetesinden yazar; görsel, renk ve kumaş grubu durur. Banko yüzü panelini reçete sırasından değil açıklığından alır: düz bankoda ön geniş, yanlar dar; L bankoda ön ve sağ geniş, sol ve dönüş dar. Katalogda bir satır yukarı veya aşağı taşınınca sıra kalır: görünür satırlar önce eksi indekse, sonra 1..N yazılır ve her iki yazım veritabanına işlenir. Satır sıra hesabından çıkar çıkmaz da işlenir.",
   "owners": [
     "src/projectBom.js",
     "src/printAreaBom.js"
@@ -125,6 +125,7 @@
     ],
     "affectedTests": [
       "test/productionItemType.test.js",
+      "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
       "backend/tests/modules/fair_stand/test_item_unit_fk_migration.py",
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
       "e2e/base-items-contract.spec.mjs",
@@ -906,7 +907,8 @@
       "test/itemSurfaceFlagAudit.test.js",
       "test/helpGuide.test.js",
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
-      "backend/tests/modules/fair_stand/test_item_unit_fk_migration.py"
+      "backend/tests/modules/fair_stand/test_item_unit_fk_migration.py",
+      "backend/tests/modules/fair_stand/test_admin_catalog_api.py"
     ],
     "fullSuite": true,
     "build": true,
@@ -922,7 +924,7 @@
   },
   "risk": {
     "level": "low",
-    "notes": "Tam boy köşede yalnız ödeyen yüzün panelleri döner ve aynı modülün listesine köşe aparatı yazılır. Birleşik toplam değişmez. Short, örtüşen şerit sayısı kadar panel çevirir. Görsel, lightbox ve mesh ataması değişmez. Eski şerit kaydı panel ölçüsünü taşımasa da açılışta reçetedeki panel kimliğini alır. Banko yüzüne ada göre sıralanmış reçetenin yazdığı yanlış panel, açılışta açıklığa göre düzelir; görsel ve renk durur."
+    "notes": "Tam boy köşede yalnız ödeyen yüzün panelleri döner ve aynı modülün listesine köşe aparatı yazılır. Birleşik toplam değişmez. Short, örtüşen şerit sayısı kadar panel çevirir. Görsel, lightbox ve mesh ataması değişmez. Eski şerit kaydı panel ölçüsünü taşımasa da açılışta reçetedeki panel kimliğini alır. Banko yüzüne ada göre sıralanmış reçetenin yazdığı yanlış panel, açılışta açıklığa göre düzelir; görsel ve renk durur. Katalog sırası yukarı taşınınca da 1..N kesintisiz kalır. Görünmez satırlar aynı indeksi paylaşabilir; kısmi tekil indeks yalnız görünür satırdadır."
   },
   "migration": {
     "required": true,
