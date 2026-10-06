@@ -25,12 +25,20 @@ def _visible_peers(session: Session, category_id: int, *, exclude_key: str | Non
 
 
 def _assign_indices(session: Session, ordered: list[FairStandItemModel]) -> None:
-    """Two-phase write so partial unique (category_id, index) never clashes mid-shift."""
+    """Two-phase write so partial unique (category_id, index) never clashes mid-shift.
+
+    Live sessions use autoflush=False. The 1..N phase has to reach the database
+    before this returns. The next shift writes negatives again, and those collide
+    with leftovers from the previous negative phase when the positives are still
+    only in memory. Moving a row upward hits that collision; the request is 500
+    and the list snaps back.
+    """
     for i, item in enumerate(ordered):
         item.catalog_item_index = -(i + 1)
     session.flush()
     for i, item in enumerate(ordered, start=1):
         item.catalog_item_index = i
+    session.flush()
 
 
 def renumber_visible_category(session: Session, category_id: int) -> None:
@@ -112,7 +120,10 @@ def apply_catalog_item_order(
     was_visible = bool(row.catalog_visible)
 
     # Detach from visible order first so peers can compact without this row.
+    # autoflush is off, so the hide must be flushed before the peer SELECT.
+    # Otherwise the row is still visible in the database and gets numbered twice.
     row.catalog_visible = False
+    session.flush()
     if was_visible and old_category_id is not None:
         renumber_visible_category(session, int(old_category_id))
 

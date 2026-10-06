@@ -279,3 +279,59 @@ def test_preview_css_and_markup_are_validated(client, db_session, auth_headers):
         headers=auth_headers,
     )
     assert scripted.status_code == 400
+
+
+def test_catalog_reorder_up_and_down_with_autoflush_disabled(client, db_session, auth_headers):
+    """Live SessionLocal uses autoflush=False. A visible row must keep its new
+    place when dragged up or down. The partial unique index must not see two
+    rows on the same negative index mid-shift.
+    """
+    from collections import defaultdict
+
+    seed_fair_stand_catalog(db_session)
+    db_session.flush()
+    db_session.autoflush = False
+
+    listed = client.get("/api/v1/fair-stand/admin/items", headers=auth_headers)
+    assert listed.status_code == 200, listed.text
+    groups: dict[int, list[dict]] = defaultdict(list)
+    for row in listed.json():
+        if row["catalogVisible"] and row["categoryId"] is not None:
+            groups[int(row["categoryId"])].append(row)
+    category_id, rows = max(groups.items(), key=lambda pair: len(pair[1]))
+    rows.sort(key=lambda row: (row["catalogItemIndex"], row["itemKey"]))
+    assert len(rows) >= 3
+
+    def visible_order() -> list[str]:
+        again = client.get("/api/v1/fair-stand/admin/items", headers=auth_headers)
+        assert again.status_code == 200, again.text
+        peers = [
+            row
+            for row in again.json()
+            if row["catalogVisible"] and row["categoryId"] == category_id
+        ]
+        peers.sort(key=lambda row: (row["catalogItemIndex"], row["itemKey"]))
+        assert [row["catalogItemIndex"] for row in peers] == list(range(1, len(peers) + 1))
+        return [row["itemKey"] for row in peers]
+
+    start = visible_order()
+    moved = start[-1]
+    up = client.patch(
+        f"/api/v1/fair-stand/admin/items/{moved}",
+        json={"catalog_item_index": 1},
+        headers=auth_headers,
+    )
+    assert up.status_code == 200, up.text
+    assert up.json()["catalogItemIndex"] == 1
+    after_up = visible_order()
+    assert after_up[0] == moved
+    assert after_up[1:] == start[:-1]
+
+    down = client.patch(
+        f"/api/v1/fair-stand/admin/items/{moved}",
+        json={"catalog_item_index": len(after_up)},
+        headers=auth_headers,
+    )
+    assert down.status_code == 200, down.text
+    assert down.json()["catalogItemIndex"] == len(after_up)
+    assert visible_order() == start
