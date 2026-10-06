@@ -160,6 +160,7 @@ def seed_fair_stand_catalog(session: Session) -> None:
                 accepts_lightbox=bool(row.get("accepts_lightbox", False)),
                 accepts_glass=bool(row.get("accepts_glass", False)),
                 accepts_mesh=bool(row.get("accepts_mesh", False)),
+                is_cost_enabled=bool(row.get("is_cost_enabled", False)),
                 default_z_cm=_dec(row.get("default_z_cm")) or 0,
                 snap_target_item_type=row.get("snap_target_item_type"),
                 snap_anchor=row.get("snap_anchor"),

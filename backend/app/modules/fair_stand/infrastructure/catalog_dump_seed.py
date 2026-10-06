@@ -143,6 +143,7 @@ def seed_catalog_if_empty(bind) -> None:
                     "accepts_lightbox",
                     "accepts_glass",
                     "accepts_mesh",
+                    "is_cost_enabled",
                 ):
                     if item.get(flag) is None:
                         item[flag] = False

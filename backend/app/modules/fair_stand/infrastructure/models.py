@@ -413,6 +413,7 @@ class FairStandItemModel(Base):
     accepts_lightbox: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
     accepts_glass: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
     accepts_mesh: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
+    is_cost_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=sa_false())
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

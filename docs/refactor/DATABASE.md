@@ -6,7 +6,7 @@ Lokal / sunucu PostgreSQL `fair_stand` şemasının yaşayan envanteri. “Üç 
 
 **Doğrulama (2026-09-24, `models.py` + Alembic head + `item_mapper.py` + `src/`):**
 
-1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0057_foam_logo_item`**. `0053_item_type_scene_behavior` sahne davranışını `fair_stand_item_type` satırından ayırır. `0043_panel_glass_family` ve `0044_panel_corner_glass_family` yeni kolon değildir; `panel_cam_*` / `panel_corner_cam_*` SKU satırıdır. `0057_foam_logo_item` gizli `foam_logo` production satırını ekler.
+1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0058_item_cost_enabled`**. `0053_item_type_scene_behavior` sahne davranışını `fair_stand_item_type` satırından ayırır. `0043_panel_glass_family` ve `0044_panel_corner_glass_family` yeni kolon değildir; `panel_cam_*` / `panel_corner_cam_*` SKU satırıdır. `0057_foam_logo_item` gizli `foam_logo` production satırını ekler.
 2. `item_mapper.py` — her ürün kolonu JSON anahtarına (veya “bootstrap’a girmez”) bağlandı.
 3. Production `src/` grep — “Nerede” hücresi gerçek okuyucu dosyadır; okunmayan kolon **DATA / TEST_ONLY / SCHEMA_ONLY** yazılır.
 4. `ITEMS.md` (alan kuyruğu + onaylı şema), `CATALOG.md`, `ROTATION.md`, `SCENE_POSE.md`, `STAND_DIMENSIONS.md` — değer kopyalanmaz; işaret edilir.
@@ -69,7 +69,7 @@ Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0057_foam_logo_item` |
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0058_item_cost_enabled` |
 
 ---
 
@@ -194,6 +194,7 @@ Katalog tablolarında kalıcı kimlik **`key`**. CRM’de label Key; create’te
 | `fair_stand_rule_item_type` | `itemTypeIds` / `itemTypeKeys` | Kural ↔ tip(ler) | **Provides:** o tipteki tüm item’lar host | Motor `itemProvidesSnapRule` |
 | `snap_target_item_type` / `snap_anchor` | — | Legacy | Okunmaz | null |
 | `is_render` / `accepts_*` | aynı | yüzey | aynı | aynı |
+| `is_cost_enabled` | `isCostEnabled` | Maliyet hesabına dahil mi. NOT NULL, default false. | İlerideki maliyet hesabı bu bayrağı okur. Fiyat, birim ve reçete değildir. | `admin_items.py`, `item_mapper.py`; CRM Item formu |
 
 CHECK: requires XOR provides rule id; `is_render=false` → accepts_* false.
 
