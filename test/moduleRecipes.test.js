@@ -139,7 +139,7 @@ test('item-by-item migration is isolated to migrated Items across every recipe',
   assert.deepEqual(straightPanelOccurrences, { panel_48_5: 10, panel_98: 7, panel_147_5: 4 });
   assert.deepEqual(baseTopOccurrences, { base_top_107_50: 1, base_top_157_50: 1, base_top_206_50: 1 });
   assert.deepEqual(counterTopOccurrences, { counter_top_110_60: 2, counter_top_52_60: 1, counter_top_160_60: 2, counter_top_102_60: 1, counter_top_210_60: 2, counter_top_150_60: 1 });
-  assert.deepEqual(separatorPanelOccurrences, { separator_panel_48_5: 1, separator_panel_98: 2 });
+  assert.deepEqual(separatorPanelOccurrences, { separator_panel_48_5: 1, separator_panel_98: 1 });
   assert.deepEqual(shelfOccurrences, { shelf_100: 0, shelf_150: 0, shelf_200: 0 });
   assert.deepEqual(showcaseBoardOccurrences, { showcase_side_94_6_30: 1, showcase_side_143_5_30: 1, showcase_horizontal_87_4_30: 2 });
   assert.equal(glassShelfOccurrences, 2);

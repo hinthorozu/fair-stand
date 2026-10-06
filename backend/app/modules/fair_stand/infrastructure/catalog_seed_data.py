@@ -5065,11 +5065,7 @@ CATALOG_SEED = {
                 },
                 {
                     "child_item_key": "separator_panel_48_5",
-                    "quantity": 1,
-                },
-                {
-                    "child_item_key": "separator_panel_98",
-                    "quantity": 3,
+                    "quantity": 7,
                 },
                 {
                     "child_item_key": "connector_start",
@@ -5203,11 +5199,7 @@ CATALOG_SEED = {
                 },
                 {
                     "child_item_key": "separator_panel_48_5",
-                    "quantity": 1,
-                },
-                {
-                    "child_item_key": "separator_panel_98",
-                    "quantity": 3,
+                    "quantity": 7,
                 },
                 {
                     "child_item_key": "connector_start",
