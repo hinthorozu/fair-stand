@@ -359,6 +359,7 @@ def _item_admin_payload(row: FairStandItemModel) -> dict:
         "acceptsLightbox": bool(row.accepts_lightbox),
         "acceptsGlass": bool(row.accepts_glass),
         "acceptsMesh": bool(row.accepts_mesh),
+        "isCostEnabled": bool(row.is_cost_enabled),
         "dimensions": _dimensions_payload(row.dimensions),
         "sceneDimensions": _scene_dimensions_payload(row.scene_dimensions),
         "stripOccupancy": _strip_payload(row.strip_occupancy),
@@ -672,6 +673,7 @@ class AdminItemsService:
             accepts_lightbox=bool(payload.get("accepts_lightbox", False)),
             accepts_glass=bool(payload.get("accepts_glass", False)),
             accepts_mesh=bool(payload.get("accepts_mesh", False)),
+            is_cost_enabled=bool(payload.get("is_cost_enabled", False)),
             is_active=bool(payload.get("is_active", True)),
             created_at=now,
             updated_at=now,
@@ -783,6 +785,7 @@ class AdminItemsService:
             "accepts_lightbox",
             "accepts_glass",
             "accepts_mesh",
+            "is_cost_enabled",
             "is_active",
         ):
             if field in payload:
@@ -886,6 +889,7 @@ class AdminItemsService:
             accepts_lightbox=bool(source.accepts_lightbox),
             accepts_glass=bool(source.accepts_glass),
             accepts_mesh=bool(source.accepts_mesh),
+            is_cost_enabled=bool(source.is_cost_enabled),
             is_active=bool(source.is_active),
             created_at=now,
             updated_at=now,

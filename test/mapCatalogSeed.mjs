@@ -144,6 +144,7 @@ function mapItem(row) {
   } else {
     applyItemSurfaceFlags(item);
   }
+  item.isCostEnabled = Boolean(row.is_cost_enabled);
   const defaultZ = Number(row.default_z_cm ?? item.dimensions?.mountHeightCm);
   item.defaultZCm = Number.isFinite(defaultZ) ? defaultZ : 0;
   assign('snapRequires', row.snap_requires);

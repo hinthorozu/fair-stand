@@ -125,6 +125,8 @@
     ],
     "affectedTests": [
       "test/productionItemType.test.js",
+      "test/itemCostEnabled.test.js",
+      "backend/tests/modules/fair_stand/test_item_cost_enabled.py",
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
       "backend/tests/modules/fair_stand/test_item_unit_fk_migration.py",
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
@@ -908,7 +910,9 @@
       "test/helpGuide.test.js",
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
       "backend/tests/modules/fair_stand/test_item_unit_fk_migration.py",
-      "backend/tests/modules/fair_stand/test_admin_catalog_api.py"
+      "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
+      "backend/tests/modules/fair_stand/test_item_cost_enabled.py",
+      "test/itemCostEnabled.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -928,7 +932,7 @@
   },
   "migration": {
     "required": true,
-    "notes": "0049 mevcut box_block satırında accepts_image, accepts_lightbox ve accepts_mesh değerlerini true yapar. Renk, cam ve default_opacity kolonlarına dokunmaz. 0050 rotation_step_deg değerini 45 yapar; default_rotation_deg ve side_insert_rotation aynı kalır. 0055, item verisinin ihtiyaç duyduğu adet ve metre_kare satırları yoksa ekler, m2 değerini metre_kare yapar ve FK ekler. Bilinmeyen unit ve pasif metre_kare upgrade'i durdurur."
+    "notes": "0049 mevcut box_block satırında accepts_image, accepts_lightbox ve accepts_mesh değerlerini true yapar. Renk, cam ve default_opacity kolonlarına dokunmaz. 0050 rotation_step_deg değerini 45 yapar; default_rotation_deg ve side_insert_rotation aynı kalır. 0055, item verisinin ihtiyaç duyduğu adet ve metre_kare satırları yoksa ekler, m2 değerini metre_kare yapar ve FK ekler. Bilinmeyen unit ve pasif metre_kare upgrade'i durdurur. 0058 fair_stand_items.is_cost_enabled kolonunu NOT NULL default false ekler. Mevcut satırlar false kalır. Downgrade kolonu düşürür. Fiyat, birim ve reçete değişmez."
   },
   "rollback": "0049 downgrade aynı üç bayrağı false yapar. 0050 downgrade rotation_step_deg değerini 90 yapar."
 }

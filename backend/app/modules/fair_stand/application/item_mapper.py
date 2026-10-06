@@ -81,6 +81,7 @@ def map_item(row) -> ItemAggregate:
     payload["acceptsLightbox"] = bool(row.accepts_lightbox)
     payload["acceptsGlass"] = bool(row.accepts_glass)
     payload["acceptsMesh"] = bool(row.accepts_mesh)
+    payload["isCostEnabled"] = bool(row.is_cost_enabled)
     payload["defaultZCm"] = _num(row.default_z_cm) if row.default_z_cm is not None else 0
     if row.snap_requires_rule_id is not None:
         payload["snapRequiresRuleId"] = int(row.snap_requires_rule_id)

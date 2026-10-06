@@ -861,6 +861,17 @@ FK → `fair_stand_item_type.key`; tüm davranış paketini seçer.
 
 BOM birimi (`adet`, `m`); boş olabilir.
 
+#### `is_cost_enabled`
+
+| | |
+|---|---|
+| **Ne** | Item maliyet hesabına dahil mi |
+| **Neden** | İlerideki maliyet hesabı bu bayrağı okur |
+| **Nasıl** | NOT NULL, default false. Admin formunda "Maliyet hesabına dahil" |
+| **Sahne** | Okunmaz. Reçete miktarı ve birim değişmez |
+| **Örnek** | Yeni ve mevcut SKU false |
+| **Kod** | `admin_items.py`, `item_mapper.py`; CRM Item formu |
+
 #### `catalog_visible`
 
 | | |
