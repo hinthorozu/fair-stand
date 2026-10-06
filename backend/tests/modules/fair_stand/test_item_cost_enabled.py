@@ -116,6 +116,35 @@ def test_admin_item_cost_flag_round_trip_leaves_other_fields(client, db_session,
     assert leaf["type"] == "production"
 
 
+def test_admin_item_list_exposes_and_sorts_cost_flag(client, db_session, auth_headers):
+    seed_fair_stand_catalog(db_session)
+    db_session.flush()
+    _allow(client, {PERMISSION_ITEMS_READ, PERMISSION_ITEMS_UPDATE})
+    enabled = client.put(
+        "/api/v1/fair-stand/admin/item-records/digital_print",
+        headers=auth_headers,
+        json={"is_cost_enabled": True},
+    )
+    assert enabled.status_code == 200, enabled.text
+    assert enabled.json()["unit"] == "metre_kare"
+    assert enabled.json()["type"] == "production"
+
+    listed = client.get(
+        "/api/v1/fair-stand/admin/item-records",
+        headers=auth_headers,
+        params={"sort_by": "isCostEnabled", "sort_order": "desc", "pageSize": 25},
+    )
+    assert listed.status_code == 200, listed.text
+    body = listed.json()
+    assert body["sorting"]["field"] == "isCostEnabled"
+    assert body["sorting"]["direction"] == "desc"
+    assert body["items"][0]["itemKey"] == "digital_print"
+    assert body["items"][0]["isCostEnabled"] is True
+    assert body["items"][0]["name"] == "Dijital Baskı"
+    assert body["items"][0]["type"] == "production"
+    assert all(item["isCostEnabled"] is False for item in body["items"][1:])
+
+
 def _load_migration():
     path = Path(__file__).resolve().parents[3] / "alembic" / "versions" / "0058_item_cost_enabled.py"
     spec = spec_from_file_location("fair_stand_0058_item_cost_enabled", path)

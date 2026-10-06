@@ -22,6 +22,7 @@ test('shelf_leg is canonical without invented product metadata', () => {
     acceptsLightbox: false,
     acceptsGlass: false,
     acceptsMesh: false,
+    isCostEnabled: false,
     defaultZCm: 0,
   });
   assert.equal(item.partId, undefined);

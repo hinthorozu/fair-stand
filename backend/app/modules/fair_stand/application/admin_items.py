@@ -36,6 +36,7 @@ _ITEM_LIST_SORT_FIELDS: dict[str, object] = {
     "type": FairStandItemModel.item_type,
     "catalogVisible": FairStandItemModel.catalog_visible,
     "isRender": FairStandItemModel.is_render,
+    "isCostEnabled": FairStandItemModel.is_cost_enabled,
     "status": FairStandItemModel.is_active,
     "isActive": FairStandItemModel.is_active,
 }
@@ -381,6 +382,7 @@ def _item_list_payload(row: FairStandItemModel) -> dict:
         "categoryId": int(row.category_id) if row.category_id is not None else None,
         "catalogItemIndex": row.catalog_item_index,
         "isRender": bool(row.is_render),
+        "isCostEnabled": bool(row.is_cost_enabled),
         "componentCount": len(row.components or []),
         "assetCount": len(row.assets or []),
         "hasDimensions": row.dimensions is not None,
