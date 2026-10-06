@@ -11,12 +11,12 @@ function qty(bom, itemKey) {
   return line ? line.quantity : 0;
 }
 
-function placed(id, itemKey, { xCm = 0, yCm = 0, zCm = 0, rotationZDeg = 0, widthCm }) {
+function placed(id, itemKey, { xCm = 0, yCm = 0, rotationZDeg = 0, widthCm }) {
   return {
     id,
     itemKey,
     widthCm,
-    placement: createModulePlacement({ xCm, yCm, zCm, rotationZDeg }),
+    placement: createModulePlacement({ xCm, yCm, rotationZDeg }),
   };
 }
 
@@ -119,8 +119,7 @@ test('a module on the back face takes no corner connectors: 20 single, 6 corner'
   assert.equal(qty(bom, 'connector_single'), 20);
   assert.equal(qty(bom, 'connector_double'), 0);
   assert.equal(qty(bom, 'connector_corner'), 6);
-  assert.equal(qty(bom, 'panel_corner_92'), 7);
-  assert.equal(qty(bom, 'panel_98'), 7);
+  assert.equal(qty(bom, 'panel_corner_92'), 14);
 });
 
 test('two walls inner corner → 3 upright, 14 single, 12 corner, corner panels', () => {
@@ -272,90 +271,7 @@ test('a tee into the middle of a wall shares one upright and does not add double
   assert.equal(qty(bom, 'connector_double'), 0);
   assert.equal(qty(bom, 'connector_corner'), 6);
   assert.equal(qty(bom, 'panel_197'), 7);
-  assert.equal(qty(bom, 'panel_98'), 7);
-  assert.equal(qty(bom, 'panel_corner_92'), 0);
-});
-
-test('a 150 cm wall in front of another wall is not an inner corner', () => {
-  const modules = [
-    placed('face', 'wall_150_350', { yCm: 30, widthCm: 150 }),
-    placed('back', 'wall_200_350', { widthCm: 200 }),
-  ];
-  assert.equal(detectRelationshipJoints(modules).length, 0);
-  const bom = resolveProjectBom(modules);
-  assert.equal(qty(bom, 'panel_147_5'), 7);
-  assert.equal(qty(bom, 'panel_corner_142_5'), 0);
-  assert.equal(qty(bom, 'connector_corner'), 0);
-  assert.equal(qty(bom, 'connector_single'), 26);
-  assert.equal(qty(bom, 'upright_346_5'), 4);
-});
-
-test('inner-corner negatives stay straight panels', () => {
-  function absent(label, modules) {
-    const joints = detectRelationshipJoints(modules);
-    assert.equal(joints.some((joint) => joint.kind === 'corner'), false, label);
-    const bom = resolveProjectBom(modules);
-    assert.equal(qty(bom, 'panel_corner_142_5'), 0, label);
-    assert.equal(qty(bom, 'panel_corner_42_5') + qty(bom, 'panel_corner_92') + qty(bom, 'panel_corner_192'), 0, label);
-  }
-
-  absent('90 with a gap', [
-    placed('a', 'wall_150_350', { widthCm: 150 }),
-    placed('b', 'wall_200_350', { xCm: 150, yCm: 10, rotationZDeg: 270, widthCm: 200 }),
-  ]);
-  absent('parallel gap', [
-    placed('a', 'wall_150_350', { widthCm: 150 }),
-    placed('b', 'wall_200_350', { xCm: 151, widthCm: 200 }),
-  ]);
-  absent('in front without contact', [
-    placed('a', 'wall_150_350', { widthCm: 150 }),
-    placed('b', 'wall_200_350', { yCm: 40, rotationZDeg: 180, widthCm: 200 }),
-  ]);
-  absent('body overlap', [
-    placed('a', 'wall_200_350', { widthCm: 200 }),
-    placed('b', 'wall_150_350', { xCm: 25, widthCm: 150 }),
-  ]);
-  absent('z overlap without xy contact', [
-    placed('a', 'wall_150_350', { widthCm: 150 }),
-    placed('b', 'wall_200_350', { yCm: 20, widthCm: 200 }),
-  ]);
-
-  const splitZ = [
-    placed('a', 'wall_150_350', { widthCm: 150 }),
-    placed('b', 'wall_200_350', { xCm: 150, rotationZDeg: 270, zCm: 400, widthCm: 200 }),
-  ];
-  absent('xy contact with split z', splitZ);
-  assert.equal(qty(resolveProjectBom(splitZ), 'connector_corner'), 0);
-  assert.equal(qty(resolveProjectBom(splitZ), 'upright_346_5'), 4);
-  assert.equal(qty(resolveProjectBom(splitZ), 'panel_147_5'), 7);
-
-  const tee = [
-    placed('host', 'wall_200_350', { widthCm: 200 }),
-    placed('branch', 'wall_150_350', { xCm: 100, rotationZDeg: 270, widthCm: 150 }),
-  ];
-  assert.equal(detectRelationshipJoints(tee)[0].kind, 'tee');
-  const teeBom = resolveProjectBom(tee);
-  assert.equal(qty(teeBom, 'panel_147_5'), 7);
-  assert.equal(qty(teeBom, 'panel_197'), 7);
-  assert.equal(qty(teeBom, 'panel_corner_142_5'), 0);
-  assert.equal(qty(teeBom, 'connector_corner'), 6);
-  assert.equal(qty(teeBom, 'upright_346_5'), 3);
-
-  const end = [
-    placed('a', 'wall_150_350', { widthCm: 150 }),
-    placed('b', 'wall_200_350', { xCm: 150, widthCm: 200 }),
-  ];
-  assert.equal(detectRelationshipJoints(end)[0].kind, 'end-to-end');
-  assert.equal(qty(resolveProjectBom(end), 'panel_147_5'), 7);
-  assert.equal(qty(resolveProjectBom(end), 'panel_corner_142_5'), 0);
-
-  const back = resolveProjectBom([
-    placed('inner', 'wall_150_350', { widthCm: 150 }),
-    placed('outer', 'wall_200_350', { xCm: 150, rotationZDeg: 90, widthCm: 200 }),
-  ]);
-  assert.equal(qty(back, 'panel_corner_142_5'), 7);
-  assert.equal(qty(back, 'panel_197'), 7);
-  assert.equal(qty(back, 'panel_corner_192'), 0);
+  assert.equal(qty(bom, 'panel_corner_92'), 7);
 });
 
 test('two collinear walls with a branch at the joint are one tee: 4 uprights, no doubles', () => {

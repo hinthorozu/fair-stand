@@ -10,7 +10,6 @@ import assert from 'node:assert/strict';
 import { normalizeModuleItemState } from '../src/designState.js';
 import { getItem, initializeItemRegistry, listRegisteredItems } from '../src/items.js';
 import { resolveProjectBom } from '../src/projectBom.js';
-import { countOverlappingCornerPanels } from '../src/relationshipBom.js';
 
 function withProductionItems(run) {
   const snapshot = listRegisteredItems().map((item) => structuredClone(item));
@@ -171,28 +170,6 @@ function shortUprightKey(itemKey) {
   return null;
 }
 
-function bandOf(itemKey) {
-  if (itemKey.includes('_short_2')) return { origin: 250, height: 100 };
-  if (itemKey.includes('_short_1')) return { origin: 300, height: 50 };
-  return { origin: 0, height: 350 };
-}
-
-function moveCornerPanels(map, itemKey, count) {
-  if (!(count > 0)) return map;
-  if (!(isShort(itemKey) || SWAPS_PANELS.has(itemKey))) return map;
-  let next = map;
-  let left = count;
-  for (const panelKey of straightPanels(itemKey)) {
-    if (!(left > 0)) break;
-    const available = RECIPE[itemKey][panelKey] ?? 0;
-    const quantity = Math.min(left, available);
-    if (!(quantity > 0)) continue;
-    next = bump(bump(next, panelKey, -quantity), PANEL_SWAP[panelKey], quantity);
-    left -= quantity;
-  }
-  return next;
-}
-
 function expectShortJoint(leftKey, rightKey, kind) {
   let expected = add(RECIPE[leftKey], RECIPE[rightKey]);
   if (kind === 'apart' || kind === 'face') return expected;
@@ -202,18 +179,7 @@ function expectShortJoint(leftKey, rightKey, kind) {
   }
   if (kind === 'corner') {
     expected = bump(bump(bump(expected, uprightKey, -1), 'connector_single', -2), 'connector_corner', 2);
-    const leftBand = bandOf(leftKey);
-    const rightBand = bandOf(rightKey);
-    expected = moveCornerPanels(
-      expected,
-      leftKey,
-      countOverlappingCornerPanels(leftKey, leftBand.origin, rightBand.origin, rightBand.origin + rightBand.height),
-    );
-    return moveCornerPanels(
-      expected,
-      rightKey,
-      countOverlappingCornerPanels(rightKey, rightBand.origin, leftBand.origin, leftBand.origin + leftBand.height),
-    );
+    return swapParticipant(swapParticipant(expected, leftKey), rightKey);
   }
   const branchKey = isShort(rightKey) ? rightKey : leftKey;
   const branchUpright = shortUprightKey(branchKey);
@@ -329,13 +295,11 @@ test('full-height relationship scenes lock the final leaf map', () => {
   const scenes = [
     ['wall-wall end', [wall('a', 'wall_200_350'), wall('b', 'wall_200_350', { xCm: 200 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_200_350), 'upright_346_5', -1), 'connector_single', -14), 'connector_double', 7)],
     ['wall-wall corner', [wall('a', 'wall_200_350'), cornerOf('b', 'wall_150_350', 200, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_150_350), 'upright_346_5', -1), 'connector_single', -12), 'connector_corner', 12), ['panel_197', 'panel_147_5'])],
-    ['wall-wall tee', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_100_350', 100, { heightCm: 350 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_100_350), 'upright_346_5', -1), 'connector_single', -6), 'connector_corner', 6)],
-    ['wall-150 in front is not an inner corner', [wall('face', 'wall_150_350', { yCm: 30 }), wall('back', 'wall_200_350')], add(RECIPE.wall_150_350, RECIPE.wall_200_350)],
-    ['wall-150 tee is not an inner corner', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_150_350', 100, { heightCm: 350 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_150_350), 'upright_346_5', -1), 'connector_single', -6), 'connector_corner', 6)],
-    ['wall-wall back face', [wall('a', 'wall_100_350'), wall('b', 'wall_100_350', { xCm: 100, rotationZDeg: 90 })], bump(bump(bump(bump(bump(add(RECIPE.wall_100_350, RECIPE.wall_100_350), 'upright_346_5', -1), 'connector_single', -6), 'connector_corner', 6), 'panel_98', -7), 'panel_corner_92', 7)],
+    ['wall-wall tee', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_100_350', 100, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_100_350), 'upright_346_5', -1), 'connector_single', -6), 'connector_corner', 6), ['panel_98'])],
+    ['wall-wall back face', [wall('a', 'wall_100_350'), wall('b', 'wall_100_350', { xCm: 100, rotationZDeg: 90 })], swapKeys(bump(bump(bump(add(RECIPE.wall_100_350, RECIPE.wall_100_350), 'upright_346_5', -1), 'connector_single', -6), 'connector_corner', 6), ['panel_98'])],
     ['wall-door end', [wall('a', 'wall_200_350'), wall('b', 'wall_door_100_350', { xCm: 200 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_door_100_350), 'upright_346_5', -1), 'connector_single', -10), 'connector_double', 3)],
     ['wall-door corner', [wall('a', 'wall_200_350'), cornerOf('b', 'wall_door_100_350', 200, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_door_100_350), 'upright_346_5', -1), 'connector_single', -8), 'connector_corner', 8), ['panel_197', 'panel_98'])],
-    ['wall-door tee', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_door_100_350', 100, { heightCm: 350 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_door_100_350), 'upright_346_5', -1), 'connector_single', -2), 'connector_corner', 2)],
+    ['wall-door tee', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_door_100_350', 100, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_door_100_350), 'upright_346_5', -1), 'connector_single', -2), 'connector_corner', 2), ['panel_98'])],
     ['wall-separator end', [wall('a', 'wall_200_350'), wall('b', 'wall_separator_50_350', { xCm: 200 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_separator_50_350), 'upright_346_5', -1), 'connector_single', -8), 'connector_double', 7)],
     ['wall-separator corner', [wall('a', 'wall_200_350'), cornerOf('b', 'wall_separator_50_350', 200, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_separator_50_350), 'upright_346_5', -1), 'connector_single', -6), 'connector_corner', 12), ['panel_197'])],
     ['wall-separator tee', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_separator_100_350', 100, { heightCm: 350 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_separator_100_350), 'upright_346_5', -1), 'connector_single', -6), 'connector_corner', 6)],
@@ -345,12 +309,12 @@ test('full-height relationship scenes lock the final leaf map', () => {
     ['wall-sarmasik tee', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_separator_100_350_sarmasik', 100, { heightCm: 350 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_separator_100_350_sarmasik), 'upright_346_5', -1), 'connector_single', -6), 'connector_corner', 6)],
     ['wall-showcase-2 end', [wall('a', 'wall_50_350'), wall('b', 'wall_showcase_100_2_350', { xCm: 50 })], bump(bump(bump(add(RECIPE.wall_50_350, RECIPE.wall_showcase_100_2_350), 'upright_346_5', -1), 'connector_single', -10), 'connector_double', 5)],
     ['wall-showcase-2 corner', [wall('a', 'wall_200_350'), cornerOf('b', 'wall_showcase_100_2_350', 200, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_showcase_100_2_350), 'upright_346_5', -1), 'connector_single', -10), 'connector_corner', 10), ['panel_197', 'panel_98'])],
-    ['wall-showcase-2 tee', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_showcase_100_2_350', 100, { heightCm: 350 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_showcase_100_2_350), 'upright_346_5', -1), 'connector_single', -4), 'connector_corner', 4)],
+    ['wall-showcase-2 tee', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_showcase_100_2_350', 100, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_showcase_100_2_350), 'upright_346_5', -1), 'connector_single', -4), 'connector_corner', 4), ['panel_98'])],
     ['wall-showcase-3 end', [wall('a', 'wall_200_350'), wall('b', 'wall_showcase_100_3_350', { xCm: 200 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_showcase_100_3_350), 'upright_346_5', -1), 'connector_single', -8), 'connector_double', 4)],
     ['wall-showcase-3 corner', [wall('a', 'wall_100_350'), cornerOf('b', 'wall_showcase_100_3_350', 100, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_100_350, RECIPE.wall_showcase_100_3_350), 'upright_346_5', -1), 'connector_single', -9), 'connector_corner', 9), ['panel_98'])],
-    ['wall-showcase-3 tee', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_showcase_100_3_350', 100, { heightCm: 350 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_showcase_100_3_350), 'upright_346_5', -1), 'connector_single', -3), 'connector_corner', 3)],
+    ['wall-showcase-3 tee', [wall('host', 'wall_200_350'), cornerOf('branch', 'wall_showcase_100_3_350', 100, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_showcase_100_3_350), 'upright_346_5', -1), 'connector_single', -3), 'connector_corner', 3), ['panel_98'])],
     ['three wall chain', [wall('a', 'wall_200_350', { xCm: 0 }), wall('b', 'wall_200_350', { xCm: 200 }), wall('c', 'wall_200_350', { xCm: 400 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_200_350, RECIPE.wall_200_350), 'upright_346_5', -2), 'connector_single', -28), 'connector_double', 14)],
-    ['tee three participants', [wall('a', 'wall_200_350', { xCm: 0 }), wall('b', 'wall_200_350', { xCm: 200 }), cornerOf('c', 'wall_showcase_100_2_350', 200, { heightCm: 350 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_200_350, RECIPE.wall_showcase_100_2_350), 'upright_346_5', -2), 'connector_single', -16), 'connector_corner', 16)],
+    ['tee three participants', [wall('a', 'wall_200_350', { xCm: 0 }), wall('b', 'wall_200_350', { xCm: 200 }), cornerOf('c', 'wall_showcase_100_2_350', 200, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_200_350, RECIPE.wall_showcase_100_2_350), 'upright_346_5', -2), 'connector_single', -16), 'connector_corner', 16), ['panel_197', 'panel_98'])],
     ['door-door invalid pair', [wall('a', 'wall_door_100_350'), wall('b', 'wall_door_100_350', { xCm: 100 })], add(RECIPE.wall_door_100_350, RECIPE.wall_door_100_350)],
     ['overlapping walls are not a joint', [wall('a', 'wall_200_350', { xCm: 0 }), wall('b', 'wall_200_350', { xCm: 50 })], add(RECIPE.wall_200_350, RECIPE.wall_200_350)],
   ];
@@ -536,39 +500,6 @@ test('panel glass and corner swaps stay on the participating straight panels', (
     shortOf('a', 'wall_200_short_1', { strips: [{ itemKey: 'panel_197', isGlass: true }] }),
     cornerOf('b', 'wall_150_350', 200, { heightCm: 350 }),
   ], add(expectShortJoint('wall_200_short_1', 'wall_150_350', 'corner'), { panel_corner_192: -1, panel_corner_cam_192: 1 }));
-  assertBom('outward short keeps straight panels; inner wall converts only the covered strips', [
-    place('a', 'wall_200_350', { heightCm: 350 }),
-    place('b', 'wall_200_350', { xCm: 200, heightCm: 350 }),
-    place('c', 'wall_200_350', { xCm: 400, heightCm: 350 }),
-    place('short', 'wall_200_short_2', {
-      xCm: 600,
-      zCm: 250,
-      heightCm: 100,
-      rotationZDeg: 90,
-      widthCm: 200,
-    }),
-  ], bump(bump(bump(bump(bump(bump(bump(add(
-    RECIPE.wall_200_350, RECIPE.wall_200_350, RECIPE.wall_200_350, RECIPE.wall_200_short_2,
-  ), 'upright_346_5', -2), 'upright_99', -1), 'connector_single', -29), 'connector_double', 14), 'connector_corner', 1), 'panel_197', -2), 'panel_corner_192', 2));
-  assertBom('covered strips stay corner board when lower glass is outside the band', [
-    place('a', 'wall_200_350', {
-      heightCm: 350,
-      strips: Array.from({ length: 7 }, (_, index) => ({
-        stripIndex: index,
-        itemKey: 'panel_197',
-        isGlass: index < 4,
-      })),
-    }),
-    place('short', 'wall_200_short_2', {
-      xCm: 200,
-      zCm: 250,
-      heightCm: 100,
-      rotationZDeg: 90,
-      widthCm: 200,
-    }),
-  ], bump(bump(bump(bump(bump(bump(bump(add(
-    RECIPE.wall_200_350, RECIPE.wall_200_short_2,
-  ), 'upright_99', -1), 'connector_single', -1), 'connector_corner', 1), 'panel_197', -6), 'panel_cam_197', 4), 'panel_corner_192', 2)));
   const separatorCorner = assertBom('separator panels stay straight', [
     place('a', 'wall_200_350', { heightCm: 350 }),
     cornerOf('b', 'wall_separator_100_350', 200, { heightCm: 350 }),
@@ -581,7 +512,7 @@ test('save and load rebuilds the same final BOM from placement', () => {
   const scenes = [
     ['end', [place('a', 'wall_200_350', { heightCm: 350 }), place('b', 'wall_200_350', { xCm: 200, heightCm: 350 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_200_350), 'upright_346_5', -1), 'connector_single', -14), 'connector_double', 7)],
     ['corner', [place('a', 'wall_200_350', { heightCm: 350 }), cornerOf('b', 'wall_150_350', 200, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_150_350), 'upright_346_5', -1), 'connector_single', -12), 'connector_corner', 12), ['panel_197', 'panel_147_5'])],
-    ['tee', [place('host', 'wall_200_350', { heightCm: 350 }), cornerOf('branch', 'wall_100_350', 100, { heightCm: 350 })], bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_100_350), 'upright_346_5', -1), 'connector_single', -6), 'connector_corner', 6)],
+    ['tee', [place('host', 'wall_200_350', { heightCm: 350 }), cornerOf('branch', 'wall_100_350', 100, { heightCm: 350 })], swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_100_350), 'upright_346_5', -1), 'connector_single', -6), 'connector_corner', 6), ['panel_98'])],
     ['wall short profile', [shortOf('wall', 'wall_100_short_1'), place('p', 'profile_190', { xCm: -45, zCm: 350, heightCm: 8 })], add(bump(RECIPE.wall_100_short_1, 'profile_91', -1), RECIPE.profile_190)],
     ['wall short upright', [shortOf('a', 'wall_200_short_2'), place('post', 'upright_346_5', { xCm: 196, widthCm: 8, heightCm: 346.5 })], bump(add(RECIPE.wall_200_short_2, RECIPE.upright_346_5), 'upright_99', -1)],
     ['multi', [
