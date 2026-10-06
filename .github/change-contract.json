@@ -127,6 +127,7 @@
       "test/productionItemType.test.js",
       "test/itemCostEnabled.test.js",
       "backend/tests/modules/fair_stand/test_item_cost_enabled.py",
+      "backend/tests/modules/fair_stand/test_admin_items_api.py",
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
       "backend/tests/modules/fair_stand/test_item_unit_fk_migration.py",
       "backend/tests/modules/fair_stand/test_item_surface_flags.py",
@@ -913,7 +914,8 @@
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
       "backend/tests/modules/fair_stand/test_item_cost_enabled.py",
       "test/itemCostEnabled.test.js",
-      "test/shelfLegItemContract.test.js"
+      "test/shelfLegItemContract.test.js",
+      "backend/tests/modules/fair_stand/test_admin_items_api.py"
     ],
     "fullSuite": true,
     "build": true,
