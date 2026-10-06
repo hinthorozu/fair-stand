@@ -11,6 +11,7 @@ import {
 } from './panelGlassBom.js';
 import {
   applyCornerPanelBandSwap,
+  applyModuleConnectorCharge,
   applyCornerPanelSwap,
   applyCornerPanelSwapToSurfaces,
   applyRelationshipBomAdjustments,
@@ -184,6 +185,36 @@ function moduleIdentity(moduleState, index) {
   return moduleState?.id ?? `idx:${index}`;
 }
 
+function mergedConnectorCharges(relationshipCharges, shortCharges) {
+  const byModule = new Map();
+  for (const charge of [...(relationshipCharges ?? []), ...(shortCharges ?? [])]) {
+    const current = byModule.get(charge.moduleId) ?? {
+      moduleId: charge.moduleId,
+      single: 0,
+      corner: 0,
+      double: 0,
+    };
+    current.single += charge.single || 0;
+    current.corner += charge.corner || 0;
+    current.double += charge.double || 0;
+    byModule.set(charge.moduleId, current);
+  }
+  return [...byModule.values()];
+}
+
+function chargeModuleEntries(moduleEntries, charges) {
+  if (!charges.length) return moduleEntries;
+  const byModule = new Map(charges.map((charge) => [charge.moduleId, charge]));
+  return moduleEntries.map((entry) => {
+    const charge = byModule.get(entry.moduleId);
+    if (!charge || entry.status !== 'ok') return entry;
+    return Object.freeze({
+      ...entry,
+      lines: Object.freeze(applyModuleConnectorCharge(entry.lines, charge).map(freezeLine)),
+    });
+  });
+}
+
 function unresolvedFrom(moduleEntries) {
   return moduleEntries
     .filter((entry) => entry.status === 'unresolved')
@@ -258,9 +289,13 @@ export function resolveProjectBom(modules = [], stand = null, assetNames = null)
     splitFloorLines ?? (floorLine ? [floorLine] : []),
     resolvePrintProductionLines(printAreas),
   ]);
+  const chargedModules = chargeModuleEntries(
+    moduleEntries,
+    mergedConnectorCharges(adjusted.moduleCharges, wallShort.moduleCharges),
+  );
 
   return Object.freeze({
-    modules: Object.freeze(moduleEntries),
+    modules: Object.freeze(chargedModules),
     unresolved: Object.freeze(unresolvedFrom(moduleEntries)),
     joints: Object.freeze(joints),
     relationshipNotes: Object.freeze([...adjusted.notes, ...wallShort.notes, ...baza.notes, ...glassNotes]),

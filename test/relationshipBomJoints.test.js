@@ -11,6 +11,12 @@ function qty(bom, itemKey) {
   return line ? line.quantity : 0;
 }
 
+function moduleQty(bom, moduleId, itemKey) {
+  const module = bom.modules.find((entry) => entry.moduleId === moduleId);
+  const line = module?.lines?.find((entry) => entry.itemKey === itemKey);
+  return line ? line.quantity : 0;
+}
+
 function placed(id, itemKey, { xCm = 0, yCm = 0, rotationZDeg = 0, widthCm }) {
   return {
     id,
@@ -37,6 +43,10 @@ test('wall + door end-to-end → 3 upright, 4 start, 8 single, 3 double', () => 
   assert.equal(qty(bom, 'connector_single'), 8);
   assert.equal(qty(bom, 'connector_double'), 3);
   assert.equal(qty(bom, 'connector_corner'), 0);
+  assert.equal(moduleQty(bom, 'a', 'connector_single'), 6);
+  assert.equal(moduleQty(bom, 'a', 'connector_double'), 3);
+  assert.equal(moduleQty(bom, 'b', 'connector_single'), 2);
+  assert.equal(moduleQty(bom, 'b', 'connector_double'), 3);
   assert.equal(qty(bom, 'panel_197'), 7);
   assert.equal(qty(bom, 'panel_98'), 3);
   assert.equal(qty(bom, 'door_leaf_100'), 1);
@@ -121,6 +131,12 @@ test('a module on the back face takes no corner connectors: 20 single, 6 corner'
   assert.equal(qty(bom, 'connector_corner'), 6);
   assert.equal(qty(bom, 'panel_corner_92'), 7);
   assert.equal(qty(bom, 'panel_98'), 7);
+  assert.equal(moduleQty(bom, 'a', 'connector_single'), 7);
+  assert.equal(moduleQty(bom, 'a', 'connector_corner'), 6);
+  assert.equal(moduleQty(bom, 'a', 'panel_corner_92'), 7);
+  assert.equal(moduleQty(bom, 'b', 'connector_single'), 13);
+  assert.equal(moduleQty(bom, 'b', 'connector_corner'), 0);
+  assert.equal(moduleQty(bom, 'b', 'panel_98'), 7);
 });
 
 test('two walls inner corner → 3 upright, 14 single, 12 corner, corner panels', () => {
@@ -138,6 +154,10 @@ test('two walls inner corner → 3 upright, 14 single, 12 corner, corner panels'
   assert.equal(qty(bom, 'connector_corner'), 12);
   assert.equal(qty(bom, 'panel_corner_192'), 7);
   assert.equal(qty(bom, 'panel_corner_142_5'), 7);
+  assert.equal(moduleQty(bom, 'a', 'connector_single'), 7);
+  assert.equal(moduleQty(bom, 'a', 'connector_corner'), 6);
+  assert.equal(moduleQty(bom, 'b', 'connector_single'), 7);
+  assert.equal(moduleQty(bom, 'b', 'connector_corner'), 6);
   assert.equal(qty(bom, 'panel_197'), 0);
   assert.equal(qty(bom, 'panel_147_5'), 0);
   assert.equal(qty(bom, 'profile_190'), 2);

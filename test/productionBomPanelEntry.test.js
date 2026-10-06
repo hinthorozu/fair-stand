@@ -33,7 +33,7 @@ function placed(id, itemKey, { xCm = 0, yCm = 0, rotationZDeg = 0, widthCm }) {
   };
 }
 
-test('corner connectors stay off the module card and stay on the combined list and text export', () => {
+test('paying-face corner connectors appear on each module card; the combined list keeps 12', () => {
   const bom = resolveProjectBom([
     placed('a', 'wall_200_350', { xCm: 0, widthCm: 200 }),
     placed('b', 'wall_150_350', { xCm: 200, yCm: 0, rotationZDeg: 270, widthCm: 150 }),
@@ -46,14 +46,37 @@ test('corner connectors stay off the module card and stay on the combined list a
   assert.match(html, /data-role="bom-download"/);
   assert.doesNotMatch(html, /data-role="bom-corner-connectors"/);
   assert.doesNotMatch(html, /Modül kartında yok/);
-  assert.doesNotMatch(modules, /connector_corner/);
+  assert.equal(modules.match(/6 × Köşe Aparatı · adet · connector_corner/g)?.length, 2);
   assert.match(totals, /12 × Köşe Aparatı · adet · connector_corner/);
 
   const text = formatProductionBomText(bom);
   const moduleText = text.split('Birleşik leaf toplam')[0];
-  assert.match(text, /12 × Köşe Aparatı · adet · connector_corner/);
-  assert.doesNotMatch(moduleText, /connector_corner/);
-  assert.match(text.split('Birleşik leaf toplam')[1], /connector_corner/);
+  const totalText = text.split('Birleşik leaf toplam')[1];
+  assert.equal(moduleText.match(/6 × Köşe Aparatı · adet · connector_corner/g)?.length, 2);
+  assert.match(totalText, /12 × Köşe Aparatı · adet · connector_corner/);
+});
+
+test('end-to-end doubles appear on both module cards; the combined list counts the joint once', () => {
+  const bom = resolveProjectBom([
+    placed('a', 'wall_200_350', { xCm: 0, widthCm: 200 }),
+    placed('b', 'wall_200_350', { xCm: 200, widthCm: 200 }),
+  ]);
+  assert.equal(bom.lines.find((line) => line.itemKey === 'connector_double')?.quantity, 7);
+
+  const html = buildProductionBomHtml(bom);
+  const modules = html.split('data-bom-collapse-key="__modules__"')[1].split('data-bom-collapse-key="__totals__"')[0];
+  const totals = html.split('data-bom-collapse-key="__totals__"')[1];
+  assert.equal(modules.match(/7 × Çiftli Aparat · adet · connector_double/g)?.length, 2);
+  assert.equal(modules.match(/6 × Tekli Aparat · adet · connector_single/g)?.length, 2);
+  assert.match(totals, /7 × Çiftli Aparat · adet · connector_double/);
+  assert.doesNotMatch(totals, /14 × Çiftli Aparat/);
+
+  const text = formatProductionBomText(bom);
+  const moduleText = text.split('Birleşik leaf toplam')[0];
+  const totalText = text.split('Birleşik leaf toplam')[1];
+  assert.equal(moduleText.match(/7 × Çiftli Aparat · adet · connector_double/g)?.length, 2);
+  assert.match(totalText, /7 × Çiftli Aparat · adet · connector_double/);
+  assert.doesNotMatch(totalText, /14 × Çiftli Aparat/);
 });
 
 test('wall selection feedback still describes width used by wall BOM recipes', () => {
