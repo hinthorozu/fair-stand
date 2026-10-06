@@ -45,6 +45,7 @@
       "backend/app/modules/fair_stand/application/admin_snap_catalog.py",
       "backend/app/modules/fair_stand/application/catalog_item_order.py",
       "backend/app/modules/fair_stand/application/preview_sanitize.py",
+      "backend/app/modules/fair_stand/infrastructure/catalog_dump_seed.py",
       "backend/app/modules/fair_stand/infrastructure/item_rotation_seed.py",
       "backend/scripts/verify_live_item_type_placement.py",
       "backend/scripts/verify_live_item_type_placement_motor.mjs",
