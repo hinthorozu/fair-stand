@@ -20,6 +20,12 @@ function qty(bom, itemKey) {
   return line ? line.quantity : 0;
 }
 
+function moduleQty(bom, moduleId, itemKey) {
+  const module = bom.modules.find((entry) => entry.moduleId === moduleId);
+  const line = module?.lines?.find((entry) => entry.itemKey === itemKey);
+  return line ? line.quantity : 0;
+}
+
 function frame(id, itemKey, {
   xCm = 0,
   yCm = 0,
@@ -124,6 +130,10 @@ test('WS1 + full wall end-to-end drops one short upright and one double, not the
   assert.equal(qty(bom, 'upright_346_5'), 2);
   assert.equal(qty(bom, 'connector_single'), 14);
   assert.equal(qty(bom, 'connector_double'), 1);
+  assert.equal(moduleQty(bom, 'a', 'connector_single'), 2);
+  assert.equal(moduleQty(bom, 'a', 'connector_double'), 1);
+  assert.equal(moduleQty(bom, 'b', 'connector_single'), 12);
+  assert.equal(moduleQty(bom, 'b', 'connector_double'), 1);
   assert.equal(qty(bom, 'connector_corner'), 0);
   assert.equal(qty(bom, 'connector_start'), 4);
   assert.equal(qty(bom, 'profile_190'), 4);
@@ -139,6 +149,8 @@ test('WS2 + full wall end-to-end drops upright_99 and still adds one double', ()
   assert.equal(qty(bom, 'upright_346_5'), 2);
   assert.equal(qty(bom, 'connector_single'), 14);
   assert.equal(qty(bom, 'connector_double'), 1);
+  assert.equal(moduleQty(bom, 'a', 'connector_double'), 1);
+  assert.equal(moduleQty(bom, 'b', 'connector_double'), 1);
   assert.equal(qty(bom, 'panel_197'), 9);
 });
 
@@ -152,6 +164,10 @@ test('short 2 corner converts only the two wall bands it covers', () => {
   assert.equal(qty(bom, 'panel_98'), 5);
   assert.equal(qty(bom, 'panel_197'), 2);
   assert.equal(qty(bom, 'panel_corner_192'), 0);
+  assert.equal(moduleQty(bom, 'wall', 'connector_corner'), 1);
+  assert.equal(moduleQty(bom, 'wall', 'connector_single'), 12);
+  assert.equal(moduleQty(bom, 'short', 'connector_corner'), 0);
+  assert.equal(moduleQty(bom, 'short', 'panel_197'), 2);
 });
 
 test('WS + full wall corner swaps the short and the overlapped wall band', () => {

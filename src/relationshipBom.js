@@ -314,11 +314,22 @@ function cornerSide(role, singles) {
   return null;
 }
 
+function connectorCharge(moduleId, side) {
+  if (!moduleId || !side) return null;
+  if (!side.singleRemove && !side.cornerAdd) return null;
+  return {
+    moduleId,
+    single: -side.singleRemove,
+    corner: side.cornerAdd,
+  };
+}
+
 function jointAdjustment(joint) {
   if (joint.kind === 'tee') {
     let single = 0;
     let corner = 0;
     const swapModuleIds = [];
+    const charges = [];
     for (const participant of joint.participants) {
       if (participant.payCorner === false) continue;
       const others = joint.participants.filter((entry) => entry.moduleId !== participant.moduleId);
@@ -327,9 +338,11 @@ function jointAdjustment(joint) {
       single -= side.singleRemove;
       corner += side.cornerAdd;
       if (side.swapPanels) swapModuleIds.push(participant.moduleId);
+      const charge = connectorCharge(participant.moduleId, side);
+      if (charge) charges.push(charge);
     }
     const upright = -(Math.max(joint.participants.length, 2) - 1);
-    return { upright, single, double: 0, corner, swapModuleIds };
+    return { upright, single, double: 0, corner, swapModuleIds, charges };
   }
 
   const [a, b] = joint.participants;
@@ -348,6 +361,10 @@ function jointAdjustment(joint) {
       double: doubles,
       corner: 0,
       swapModuleIds: [],
+      charges: [
+        { moduleId: a.moduleId, single: -removeA, corner: 0, double: doubles },
+        { moduleId: b.moduleId, single: -removeB, corner: 0, double: doubles },
+      ],
     };
   }
 
@@ -364,6 +381,7 @@ function jointAdjustment(joint) {
         ...(sideA.swapPanels ? [a.moduleId] : []),
         ...(sideB.swapPanels ? [b.moduleId] : []),
       ],
+      charges: [connectorCharge(a.moduleId, sideA), connectorCharge(b.moduleId, sideB)].filter(Boolean),
     };
   }
 
@@ -578,11 +596,24 @@ function buildPlan(joints) {
     teeSingle: 0,
     teeCorners: 0,
     swapModuleIds: [],
+    moduleCharges: new Map(),
   };
 
   for (const joint of joints) {
     const adjustment = jointAdjustment(joint);
     if (!adjustment) continue;
+    for (const charge of adjustment.charges ?? []) {
+      const current = plan.moduleCharges.get(charge.moduleId) ?? {
+        moduleId: charge.moduleId,
+        single: 0,
+        corner: 0,
+        double: 0,
+      };
+      current.single += charge.single || 0;
+      current.corner += charge.corner || 0;
+      current.double += charge.double || 0;
+      plan.moduleCharges.set(charge.moduleId, current);
+    }
     plan.upright += adjustment.upright;
     plan.single += adjustment.single;
     plan.double += adjustment.double;
@@ -608,6 +639,7 @@ function buildPlan(joints) {
   }
 
   plan.swapModuleIds = [...new Set(plan.swapModuleIds)];
+  plan.moduleCharges = [...plan.moduleCharges.values()];
   return plan;
 }
 
@@ -685,6 +717,7 @@ export function applyRelationshipBomAdjustments(lines = [], joints = []) {
       appliedCornerCount: 0,
       appliedTeeCount: 0,
       swapModuleIds: Object.freeze([]),
+      moduleCharges: Object.freeze([]),
       notes: Object.freeze([]),
     });
   }
@@ -702,6 +735,7 @@ export function applyRelationshipBomAdjustments(lines = [], joints = []) {
       appliedCornerCount: 0,
       appliedTeeCount: 0,
       swapModuleIds: Object.freeze([]),
+      moduleCharges: Object.freeze([]),
       notes: Object.freeze([
         `Birleşim düzeltmesi atlandı: yetersiz stok (dikme ${uprightHave}/${uprightNeed}, tekli ${singleHave}/${singleNeed}).`,
       ]),
@@ -715,8 +749,39 @@ export function applyRelationshipBomAdjustments(lines = [], joints = []) {
     appliedCornerCount: plan.cornerCount,
     appliedTeeCount: plan.teeCount,
     swapModuleIds: Object.freeze(plan.swapModuleIds),
+    moduleCharges: Object.freeze(plan.moduleCharges.map((charge) => Object.freeze({ ...charge }))),
     notes: Object.freeze(adjustmentNotes(plan)),
   });
+}
+
+/** Write this module's paying-face connector delta onto its own recipe lines. */
+export function applyModuleConnectorCharge(lines = [], charge = null) {
+  if (!charge || (!charge.single && !charge.corner && !charge.double)) return lines;
+  const next = lines.map((line) => ({ ...line }));
+
+  function adjust(itemKey, delta) {
+    if (!delta) return;
+    const current = next.find((line) => line.itemKey === itemKey && line.unit === 'adet');
+    if (current) {
+      current.quantity += delta;
+      return;
+    }
+    if (delta < 0) return;
+    const item = getItem(itemKey);
+    next.push({
+      itemKey,
+      name: item?.name ?? itemKey,
+      quantity: delta,
+      unit: 'adet',
+      material: item?.material ?? null,
+      item,
+    });
+  }
+
+  adjust('connector_single', charge.single);
+  adjust('connector_corner', charge.corner);
+  adjust('connector_double', charge.double);
+  return next.filter((line) => Number(line.quantity) > 0);
 }
 
 /**
@@ -1143,17 +1208,28 @@ function createDeltaBook() {
   const deltas = new Map();
   const swapModuleIds = [];
   const panelSwaps = [];
+  const moduleCharges = new Map();
   let jointCount = 0;
   let railCount = 0;
   const add = (itemKey, amount) => {
     if (!itemKey || !amount) return;
     deltas.set(itemKey, (deltas.get(itemKey) ?? 0) + amount);
   };
+  const charge = (moduleId, single, corner, double = 0) => {
+    if (!moduleId || (!single && !corner && !double)) return;
+    const current = moduleCharges.get(moduleId) ?? { moduleId, single: 0, corner: 0, double: 0 };
+    current.single += single;
+    current.corner += corner;
+    current.double += double;
+    moduleCharges.set(moduleId, current);
+  };
   return {
     deltas,
     swapModuleIds,
     panelSwaps,
+    moduleCharges,
     add,
+    charge,
     noteJoint() { jointCount += 1; },
     noteRail() { railCount += 1; },
     get jointCount() { return jointCount; },
@@ -1178,6 +1254,8 @@ function applyEndToEndShortJoint(book, a, b, geometry) {
     takeSlot(b, geometry.sideB, 'single');
     book.add('connector_single', -2);
     book.add('connector_double', 1);
+    book.charge(a.moduleId, -1, 0, 1);
+    book.charge(b.moduleId, -1, 0, 1);
   }
   book.noteJoint();
 }
@@ -1199,6 +1277,8 @@ function applyCornerShortJoint(book, a, b, geometry) {
   const payers = (payA ? 1 : 0) + (payB ? 1 : 0);
   book.add('connector_single', -payers);
   book.add('connector_corner', payers);
+  if (payA) book.charge(a.moduleId, -1, 1);
+  if (payB) book.charge(b.moduleId, -1, 1);
   if (payA) noteCornerPanels(book, a, b);
   if (payB) noteCornerPanels(book, b, a);
   book.noteJoint();
@@ -1217,6 +1297,7 @@ function applyTeeShortJoint(book, branch, host, geometry) {
     takeSlot(branch, geometry.branchSide, 'single');
     book.add('connector_single', -1);
     book.add('connector_corner', 1);
+    book.charge(branch.moduleId, -1, 1);
   }
   if (branchPays) noteCornerPanels(book, branch, host);
   book.noteJoint();
@@ -1343,6 +1424,7 @@ export function planWallShortRelationshipBom(modules = []) {
     deltas: deltasFromBook(book),
     swapModuleIds: Object.freeze([...new Set(book.swapModuleIds)]),
     panelSwaps: Object.freeze(mergePanelSwaps(book.panelSwaps)),
+    moduleCharges: Object.freeze([...book.moduleCharges.values()].map((charge) => Object.freeze({ ...charge }))),
     jointCount: book.jointCount,
     railCount: book.railCount,
     notes: Object.freeze(notes),

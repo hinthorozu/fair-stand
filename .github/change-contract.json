@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "fair-stand-foam-logo-production-bom-v1",
   "kind": "bom-change",
-  "summary": "Köşe paneli, köşe aparatıyla aynı ödeyen yüzde döner. Arkada duran modül düz panelini korur. Short, tam boy ortağın yalnız örtüştüğü şeritlerini köşe paneline çevirir.",
+  "summary": "Köşe paneli, köşe aparatıyla aynı ödeyen yüzde döner. O modülün kendi listesinde tekli azalır, köşe aparatı yazılır. Yan yana eklemin çiftlisi iki modülün listesinde de görünür; birleşik toplam eklem başına bir kez sayar. Arkada duran modül düz panelini ve teklisini korur. Short, tam boy ortağın yalnız örtüştüğü şeritlerini köşe paneline çevirir.",
   "owners": [
     "src/projectBom.js",
     "src/printAreaBom.js"
@@ -922,7 +922,7 @@
   },
   "risk": {
     "level": "low",
-    "notes": "Tam boy köşede yalnız ödeyen yüzün panelleri döner. Short, örtüşen şerit sayısı kadar panel çevirir. Aparat sayısı aynı kalır. Görsel, lightbox ve mesh ataması değişmez."
+    "notes": "Tam boy köşede yalnız ödeyen yüzün panelleri döner ve aynı modülün listesine köşe aparatı yazılır. Birleşik toplam değişmez. Short, örtüşen şerit sayısı kadar panel çevirir. Görsel, lightbox ve mesh ataması değişmez."
   },
   "migration": {
     "required": true,

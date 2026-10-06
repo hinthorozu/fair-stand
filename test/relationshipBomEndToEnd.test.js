@@ -14,6 +14,12 @@ function qty(bom, itemKey) {
   return line ? line.quantity : 0;
 }
 
+function moduleQty(bom, moduleId, itemKey) {
+  const module = bom.modules.find((entry) => entry.moduleId === moduleId);
+  const line = module?.lines?.find((entry) => entry.itemKey === itemKey);
+  return line ? line.quantity : 0;
+}
+
 function wallModule(id, itemKey, { xCm = 0, yCm = 0, rotationZDeg = 0, wallId = 'back' } = {}) {
   const widthCm = Number(itemKey.match(/^wall_(\d+)_/)?.[1]);
   return {
@@ -42,6 +48,10 @@ test('wall_200 + wall_200 end-to-end → 3 upright, 4 start, 12 single, 7 double
   assert.equal(qty(bom, 'connector_start'), 4);
   assert.equal(qty(bom, 'connector_single'), 12);
   assert.equal(qty(bom, 'connector_double'), 7);
+  assert.equal(moduleQty(bom, 'a', 'connector_single'), 6);
+  assert.equal(moduleQty(bom, 'a', 'connector_double'), 7);
+  assert.equal(moduleQty(bom, 'b', 'connector_single'), 6);
+  assert.equal(moduleQty(bom, 'b', 'connector_double'), 7);
 });
 
 test('three wall_200 chain → 2 joints', () => {
@@ -57,6 +67,12 @@ test('three wall_200 chain → 2 joints', () => {
   assert.equal(qty(bom, 'connector_start'), 6);
   assert.equal(qty(bom, 'connector_single'), 11);
   assert.equal(qty(bom, 'connector_double'), 14);
+  assert.equal(moduleQty(bom, 'a', 'connector_single'), 6);
+  assert.equal(moduleQty(bom, 'a', 'connector_double'), 7);
+  assert.equal(moduleQty(bom, 'b', 'connector_single'), 0);
+  assert.equal(moduleQty(bom, 'b', 'connector_double'), 14);
+  assert.equal(moduleQty(bom, 'c', 'connector_single'), 6);
+  assert.equal(moduleQty(bom, 'c', 'connector_double'), 7);
 });
 
 test('separated walls keep naive totals (no joint)', () => {
@@ -108,6 +124,10 @@ test('wall_100 + wall_200 end-to-end uses same connector/upright deltas', () => 
   assert.equal(qty(bom, 'connector_start'), 4);
   assert.equal(qty(bom, 'connector_single'), 12);
   assert.equal(qty(bom, 'connector_double'), 7);
+  assert.equal(moduleQty(bom, 'a', 'connector_single'), 6);
+  assert.equal(moduleQty(bom, 'a', 'connector_double'), 7);
+  assert.equal(moduleQty(bom, 'b', 'connector_single'), 6);
+  assert.equal(moduleQty(bom, 'b', 'connector_double'), 7);
   assert.equal(qty(bom, 'profile_91'), 2);
   assert.equal(qty(bom, 'profile_190'), 2);
   assert.equal(qty(bom, 'panel_98'), 7);
