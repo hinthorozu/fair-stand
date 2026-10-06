@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createCounterModuleState, duplicateModuleState } from '../src/designState.js';
+import { applyCounterFacePanelIdentity, createCounterModuleState, duplicateModuleState, normalizeModuleItemState } from '../src/designState.js';
+import { getItem } from '../src/items.js';
 import { rotateModulePlacementAroundCenter, snapPlacementToStand, validatePlacementAgainstModules } from '../src/modulePlacement.js';
 
 test('100, 150 and 200 cm counters expose six independent stacked editable faces', () => {
@@ -86,4 +87,96 @@ test('counter selected rotation remains free and snaps its 50 cm depth axis safe
   assert.equal(rotated.rotationZDeg, 90);
   assert.equal((rotated.xCm - 25) % 50, 0);
   assert.equal(rotated.yCm % 50, 0);
+});
+
+const COUNTER_FACE_CASES = [
+  { widthCm: 100, shape: null, wideKey: 'panel_98' },
+  { widthCm: 150, shape: null, wideKey: 'panel_147_5' },
+  { widthCm: 200, shape: null, wideKey: 'panel_197' },
+  { widthCm: 100, shape: 'L', wideKey: 'panel_98' },
+  { widthCm: 150, shape: 'L', wideKey: 'panel_147_5' },
+  { widthCm: 200, shape: 'L', wideKey: 'panel_197' },
+];
+
+function expectedCounterFaceKey(shape, faceKey, wideKey) {
+  if (shape === 'L') {
+    return faceKey.startsWith('front') || faceKey.startsWith('right') ? wideKey : 'panel_48_5';
+  }
+  return faceKey.startsWith('front') ? wideKey : 'panel_48_5';
+}
+
+function assertCounterFacePanels(counter, shape, wideKey) {
+  for (const [faceKey, face] of Object.entries(counter.faces)) {
+    assert.equal(face.itemKey, expectedCounterFaceKey(shape, faceKey, wideKey), `${counter.itemKey} ${faceKey}`);
+  }
+}
+
+function counterParentInAlphabeticalOrder(itemKey) {
+  const item = getItem(itemKey);
+  const items = [...item.composition.items].sort((left, right) => (
+    left.itemKey < right.itemKey ? -1 : left.itemKey > right.itemKey ? 1 : 0
+  ));
+  return {
+    shape: item.shape,
+    dimensions: item.dimensions,
+    composition: { mode: 'recipe', items },
+  };
+}
+
+function blankCounterFaces(shape) {
+  const keys = [
+    'frontLower', 'frontUpper', 'leftLower', 'leftUpper', 'rightLower', 'rightUpper',
+  ];
+  if (shape === 'L') keys.push('returnLower', 'returnUpper');
+  return Object.fromEntries(keys.map((key) => [key, {
+    color: '#abcdef',
+    imageAssetId: 'logo',
+  }]));
+}
+
+test('counter faces take the wide or 48.5 panel from the opening, in recipe order and in alphabetical order', () => {
+  for (const { widthCm, shape, wideKey } of COUNTER_FACE_CASES) {
+    const options = shape === 'L' ? { shape: 'L' } : {};
+    const created = createCounterModuleState(widthCm, options);
+    assertCounterFacePanels(created, shape, wideKey);
+    const faces = blankCounterFaces(shape);
+    applyCounterFacePanelIdentity(faces, counterParentInAlphabeticalOrder(created.itemKey), 'stamp');
+    assertCounterFacePanels({ itemKey: created.itemKey, faces }, shape, wideKey);
+    assert.equal(faces.frontLower.imageAssetId, 'logo');
+  }
+});
+
+test('opening a counter rewrites a recipe panel on the wrong face and keeps the image and color', () => {
+  const straight = createCounterModuleState(100);
+  straight.faces.frontLower.itemKey = 'panel_48_5';
+  straight.faces.frontLower.widthCm = 48.5;
+  straight.faces.frontLower.heightCm = 47;
+  straight.faces.frontLower.color = '#112233';
+  straight.faces.frontLower.imageAssetId = 'logo';
+  straight.faces.frontLower.imageTransform = { mode: 'single' };
+  straight.faces.rightLower.itemKey = 'panel_98';
+  normalizeModuleItemState(straight);
+  assert.equal(straight.faces.frontLower.itemKey, 'panel_98');
+  assert.equal(straight.faces.frontLower.color, '#112233');
+  assert.equal(straight.faces.frontLower.imageAssetId, 'logo');
+  assert.deepEqual(straight.faces.frontLower.imageTransform, { mode: 'single' });
+  assert.equal(straight.faces.rightLower.itemKey, 'panel_48_5');
+
+  const corner = createCounterModuleState(150, { shape: 'L' });
+  corner.faces.leftLower.itemKey = 'panel_147_5';
+  corner.faces.rightLower.itemKey = 'panel_48_5';
+  corner.faces.returnUpper.imageAssetId = 'logo';
+  normalizeModuleItemState(corner);
+  assert.equal(corner.faces.leftLower.itemKey, 'panel_48_5');
+  assert.equal(corner.faces.rightLower.itemKey, 'panel_147_5');
+  assert.equal(corner.faces.frontLower.itemKey, 'panel_147_5');
+  assert.equal(corner.faces.returnUpper.itemKey, 'panel_48_5');
+  assert.equal(corner.faces.returnUpper.imageAssetId, 'logo');
+
+  const custom = createCounterModuleState(200);
+  custom.faces.frontLower.itemKey = 'panel_corner_192';
+  custom.faces.frontLower.imageAssetId = 'keep';
+  normalizeModuleItemState(custom);
+  assert.equal(custom.faces.frontLower.itemKey, 'panel_corner_192');
+  assert.equal(custom.faces.frontLower.imageAssetId, 'keep');
 });

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { groupBomLines } from '../src/bomLineGroups.js';
-import { createModuleStateFromCatalogKey } from '../src/designState.js';
+import { createModuleStateFromCatalogKey, normalizeModuleItemState } from '../src/designState.js';
 import { initializeItemRegistry, listRegisteredItems } from '../src/items.js';
 import { collectPrintAreas } from '../src/printAreaBom.js';
 import { resolveProjectBom } from '../src/projectBom.js';
@@ -554,5 +554,94 @@ test('a wall recipe stays intact when its print area becomes digital_print', () 
     assert.equal(digital.quantity, 0.4606);
     assert.equal(digital.unit, 'metre_kare');
     assert.equal(bom.lines.filter((line) => line.itemKey === 'digital_print').length, 1);
+  });
+});
+
+test('an imported strip without a panel identity takes it from the parent recipe', () => {
+  const wall = normalizeModuleItemState({
+    id: 'old-wall',
+    type: 'flat-panel',
+    itemKey: 'wall_50_350',
+    widthCm: 50,
+    heightCm: 350,
+    strips: [
+      {
+        id: 's0',
+        color: '#112233',
+        stripIndex: 0,
+        imageAssetId: 'mavi',
+        imageTransform: { mode: 'single' },
+      },
+      {
+        id: 's1',
+        color: '#112233',
+        stripIndex: 1,
+        imageAssetId: 'gvn',
+        fabricGroupId: 'group-1',
+        fabricType: 'lightbox',
+        fabricImageAssetId: 'gvn',
+      },
+    ],
+  });
+  assert.equal(wall.strips[0].itemKey, 'panel_48_5');
+  assert.equal(wall.strips[0].widthCm, 48.5);
+  assert.equal(wall.strips[0].heightCm, 47);
+  assert.equal(wall.strips[0].imageAssetId, 'mavi');
+  assert.equal(wall.strips[0].color, '#112233');
+  assert.equal(wall.strips[1].fabricGroupId, 'group-1');
+  assert.equal(wall.strips[1].fabricType, 'lightbox');
+  assert.equal(wall.strips[1].fabricImageAssetId, 'gvn');
+
+  const kept = normalizeModuleItemState({
+    id: 'kept',
+    type: 'flat-panel',
+    itemKey: 'wall_50_350',
+    strips: [{ id: 's', stripIndex: 0, itemKey: 'panel_98', imageAssetId: 'keep' }],
+  });
+  assert.equal(kept.strips[0].itemKey, 'panel_98');
+  assert.equal(kept.strips[0].imageAssetId, 'keep');
+
+  const door = normalizeModuleItemState({
+    id: 'old-door',
+    type: 'door',
+    itemKey: 'wall_door_100_350',
+    strips: [{
+      id: 's4',
+      stripIndex: 4,
+      color: '#abcdef',
+      imageAssetId: 'gvn-mesh',
+      fabricGroupId: 'mesh-1',
+      fabricType: 'mesh',
+      fabricImageAssetId: 'gvn-mesh',
+    }],
+    surface: {
+      id: 'leaf',
+      color: '#123456',
+      imageAssetId: 'leaf-art',
+      imageTransform: { mode: 'single' },
+    },
+  });
+  assert.equal(door.strips[0].itemKey, 'panel_98');
+  assert.equal(door.strips[0].widthCm, 98);
+  assert.equal(door.strips[0].heightCm, 47);
+  assert.equal(door.strips[0].color, '#abcdef');
+  assert.equal(door.strips[0].fabricType, 'mesh');
+  assert.equal(door.surface.color, '#123456');
+  assert.equal(door.surface.imageAssetId, 'leaf-art');
+
+  withProductionItems(() => {
+    const bom = resolveProjectBom([wall, door]);
+    const image = section(bom.printAreas, 'image');
+    const light = section(bom.printAreas, 'lightbox');
+    const mesh = section(bom.printAreas, 'mesh');
+    const mavi = image.lines.find((line) => line.subjectId === 'mavi');
+    assert.equal(mavi.widthCm, 48.5);
+    assert.equal(mavi.heightCm, 47);
+    assert.equal(light.lines.find((line) => line.subjectId === 'gvn').widthCm, 48.5);
+    assert.equal(mesh.lines.find((line) => line.subjectId === 'gvn-mesh').widthCm, 98);
+    assert.equal(mesh.lines.find((line) => line.subjectId === 'gvn-mesh').heightCm, 47);
+    assert.equal(bom.lines.find((line) => line.itemKey === 'digital_print').quantity, image.totalAreaM2);
+    assert.equal(bom.lines.find((line) => line.itemKey === 'lightbox_fabric').quantity, light.totalAreaM2);
+    assert.equal(bom.lines.find((line) => line.itemKey === 'mesh_fabric').quantity, mesh.totalAreaM2);
   });
 });

@@ -147,9 +147,13 @@ function renderPartSurfaces(parentItem, partTypes) {
     .map((part, index) => createEmbeddedPartSurface(part, index));
 }
 
-function stampRenderParts(surfaces, parentItem, partTypes) {
-  const parts = listEmbeddedRenderParts(parentItem)
+function embeddedRenderParts(parentItem, partTypes) {
+  return listEmbeddedRenderParts(parentItem)
     .filter((part) => partTypes.includes(part.type));
+}
+
+function stampRenderParts(surfaces, parentItem, partTypes) {
+  const parts = embeddedRenderParts(parentItem, partTypes);
   surfaces.forEach((surface, index) => {
     const part = parts[index];
     if (!part || !surface) return;
@@ -159,6 +163,21 @@ function stampRenderParts(surfaces, parentItem, partTypes) {
     surface.heightCm = stamped.heightCm;
     surface.depthCm = stamped.depthCm;
     if (Number.isInteger(part.defaultColor)) surface.color = stamped.color;
+  });
+}
+
+/** Saved strips keep the image. A missing panel identity comes from the parent recipe. */
+function ensureMissingRenderPartMeasure(surfaces, parentItem, partTypes) {
+  if (!Array.isArray(surfaces) || !parentItem) return;
+  const parts = embeddedRenderParts(parentItem, partTypes);
+  surfaces.forEach((surface, index) => {
+    const part = parts[index];
+    if (!part || !surface || typeof surface !== 'object' || surface.itemKey) return;
+    const scene = resolveSceneDimensions(part);
+    surface.itemKey = part.itemKey;
+    if (!(Number(surface.widthCm) > 0)) surface.widthCm = scene.widthCm ?? null;
+    if (!(Number(surface.heightCm) > 0)) surface.heightCm = scene.heightCm ?? null;
+    if (!(Number(surface.depthCm) > 0)) surface.depthCm = scene.depthCm ?? null;
   });
 }
 
@@ -320,6 +339,73 @@ const COUNTER_WIDTH_SHAPE_TO_ITEM_KEY = Object.freeze({
   '200_L': 'desk_banko_200_l',
 });
 
+function counterFaceUsesWidePanel(faceKey, parentItem) {
+  if (parentItem?.shape === 'L') {
+    return faceKey.startsWith('front') || faceKey.startsWith('right');
+  }
+  return faceKey.startsWith('front');
+}
+
+function counterPanelSpanCm(part) {
+  const span = Number(resolveSceneDimensions(part)?.widthCm);
+  return span > 0 ? span : null;
+}
+
+function selectCounterPanel(parts, wide) {
+  let best = null;
+  let bestSpan = wide ? -Infinity : Infinity;
+  for (const part of parts) {
+    const span = counterPanelSpanCm(part);
+    if (!(span > 0)) continue;
+    if (wide ? span > bestSpan : span < bestSpan) {
+      best = part;
+      bestSpan = span;
+    }
+  }
+  return best;
+}
+
+/**
+ * Banko yüzü panelini reçete listesinin sırasından almaz.
+ * Katalog child satırını ada göre sıralayınca panel_48_5, panel_98'den önce gelir
+ * ve indeks damgası ön yüze dar paneli yazar.
+ * Düz bankoda ön geniş, yanlar dar. L bankoda ön ve sağ geniş, sol ve dönüş dar.
+ * stamp oluştururken kimliği yazar. repair açılışta reçetedeki yanlış kimliği düzeltir;
+ * reçetede olmayan itemKey, görsel, renk ve kumaş durur.
+ */
+export function applyCounterFacePanelIdentity(faces, parentItem, mode) {
+  if (!faces || typeof faces !== 'object' || !parentItem) return;
+  const parts = embeddedRenderParts(parentItem, ['panel', 'separator-panel']);
+  const recipeKeys = new Set(parts.map((part) => part.itemKey));
+  for (const [faceKey, surface] of Object.entries(faces)) {
+    if (!surface || typeof surface !== 'object') continue;
+    const part = selectCounterPanel(parts, counterFaceUsesWidePanel(faceKey, parentItem));
+    if (!part) continue;
+    if (mode === 'stamp') {
+      const stamped = createEmbeddedPartSurface(part, surface.stripIndex ?? null);
+      surface.itemKey = stamped.itemKey;
+      surface.widthCm = stamped.widthCm;
+      surface.heightCm = stamped.heightCm;
+      surface.depthCm = stamped.depthCm;
+      if (Number.isInteger(part.defaultColor)) surface.color = stamped.color;
+      continue;
+    }
+    const current = surface.itemKey;
+    if (current && current !== part.itemKey && !recipeKeys.has(current)) continue;
+    const scene = resolveSceneDimensions(part);
+    if (current === part.itemKey) {
+      if (!(Number(surface.widthCm) > 0)) surface.widthCm = scene.widthCm ?? null;
+      if (!(Number(surface.heightCm) > 0)) surface.heightCm = scene.heightCm ?? null;
+      if (!(Number(surface.depthCm) > 0)) surface.depthCm = scene.depthCm ?? null;
+      continue;
+    }
+    surface.itemKey = part.itemKey;
+    surface.widthCm = scene.widthCm ?? null;
+    surface.heightCm = scene.heightCm ?? null;
+    surface.depthCm = scene.depthCm ?? null;
+  }
+}
+
 function resolveCounterItemKey(widthCmOrDescriptor, options = {}) {
   if (widthCmOrDescriptor && typeof widthCmOrDescriptor === 'object' && !Array.isArray(widthCmOrDescriptor)) {
     const explicitKey = widthCmOrDescriptor.itemKey ?? null;
@@ -353,7 +439,7 @@ export function createCounterModuleState(widthCmOrDescriptor, options = {}) {
     faces.returnLower = createEditablePanelState(null, counterFaceColor);
     faces.returnUpper = createEditablePanelState(null, counterFaceColor);
   }
-  stampRenderParts(Object.values(faces), item, ['panel', 'separator-panel']);
+  applyCounterFacePanelIdentity(faces, item, 'stamp');
   const state = applySceneFootprint({
     id: createId('module'),
     itemKey: item.itemKey,
@@ -844,6 +930,11 @@ export function normalizeModuleItemState(moduleState) {
     const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'base') {
       moduleState.itemKey = resolvedKey;
+      ensureMissingRenderPartMeasure(
+        Object.values(moduleState.faces || {}),
+        getItem(resolvedKey),
+        ['panel', 'separator-panel'],
+      );
     }
     return moduleState;
   }
@@ -852,6 +943,7 @@ export function normalizeModuleItemState(moduleState) {
     const resolvedKey = resolveItemKey(moduleState);
     if (resolvedKey && getItem(resolvedKey)?.type === 'counter') {
       moduleState.itemKey = resolvedKey;
+      applyCounterFacePanelIdentity(moduleState.faces, getItem(resolvedKey), 'repair');
     }
     return moduleState;
   }
@@ -864,6 +956,7 @@ export function normalizeModuleItemState(moduleState) {
       const occupancy = normalizeStripOccupancy(item.stripOccupancy);
       if (occupancy) moduleState.stripOccupancy = occupancy;
       applySceneFootprint(moduleState, item, ['widthCm', 'heightCm']);
+      ensureMissingRenderPartMeasure(moduleState.strips, item, ['panel', 'separator-panel']);
     }
     return moduleState;
   }
@@ -874,6 +967,9 @@ export function normalizeModuleItemState(moduleState) {
     if (item?.type === 'separator') {
       moduleState.itemKey = resolvedKey;
       applySceneFootprint(moduleState, item, ['widthCm', 'depthCm', 'heightCm']);
+      if (moduleState.surface) {
+        ensureMissingRenderPartMeasure([moduleState.surface], item, ['separator-panel', 'panel']);
+      }
     }
     return moduleState;
   }
@@ -940,6 +1036,7 @@ export function normalizeModuleItemState(moduleState) {
   const doorItem = moduleState.itemKey ? getItem(moduleState.itemKey) : null;
   if (doorItem?.type !== 'door') return moduleState;
   applySceneFootprint(moduleState, doorItem, ['widthCm', 'depthCm', 'heightCm']);
+  ensureMissingRenderPartMeasure(moduleState.strips, doorItem, ['panel', 'separator-panel']);
     const doorLeafItem = getItem('door_leaf_100');
     if (!doorLeafItem) return moduleState;
     if (!moduleState.surface) {
@@ -960,6 +1057,7 @@ export function normalizeModuleItemState(moduleState) {
   moduleState.itemKey = showcaseItem.itemKey;
   moduleState.eyeCount = Number(showcaseItem.eyeCount);
   applySceneFootprint(moduleState, showcaseItem, ['widthCm']);
+  ensureMissingRenderPartMeasure(moduleState.strips, showcaseItem, ['panel', 'separator-panel']);
   if (!moduleState.bodySurface) {
     moduleState.bodySurface = {
       id: createId('surface'),
