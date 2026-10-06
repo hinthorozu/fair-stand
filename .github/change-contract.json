@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "fair-stand-foam-logo-production-bom-v1",
   "kind": "bom-change",
-  "summary": "Mevcut Strafor Logo alan toplamı foam_logo production leaf satırına bağlanır. Alan hesabı ve detay tablosu durur. digital_print, mesh_fabric ve lightbox_fabric aynı kalır. 0055 boş unit kataloğunda referans verilen adet ve metre_kare satırlarını ekler; bilinmeyen unit değerinde ve pasif metre_kare satırında durur.",
+  "summary": "Köşe paneli, köşe aparatıyla aynı ödeyen yüzde döner. Arkada duran modül düz panelini korur. Short, tam boy ortağın yalnız örtüştüğü şeritlerini köşe paneline çevirir.",
   "owners": [
     "src/projectBom.js",
     "src/printAreaBom.js"
@@ -898,7 +898,7 @@
         "F-041"
       ]
     },
-    "notes": "Dört yüz faces.front/right/back/left üzerinde görsel, lightbox ve mesh taşır. Gövde renk ve saydamlığı kalır ve yanmaz. Lightbox ışığı seçilen yüzdedir. Ok yüksekliği taban 0 ve tavan eksi kutu yüksekliği ile sınırlıdır. Görsel, Lightbox ve Mesh görseli aynı sağ tık ölçü penceresini kullanır: başlangıç alanın kendi ölçüsü, küçük tekrar, büyük taşma. Kılavuz aynı davranışı yazar."
+    "notes": "Köşe paneli ödeyen yüzle aynı kararı kullanır. Short örtüşen şerit sayısı kadar köşe paneli üretir. Dört yüz faces.front/right/back/left üzerinde görsel, lightbox ve mesh taşır. Gövde renk ve saydamlığı kalır ve yanmaz. Lightbox ışığı seçilen yüzdedir. Ok yüksekliği taban 0 ve tavan eksi kutu yüksekliği ile sınırlıdır. Görsel, Lightbox ve Mesh görseli aynı sağ tık ölçü penceresini kullanır: başlangıç alanın kendi ölçüsü, küçük tekrar, büyük taşma. Kılavuz aynı davranışı yazar."
   },
   "tests": {
     "targeted": [
@@ -922,7 +922,7 @@
   },
   "risk": {
     "level": "low",
-    "notes": "Yalnız box_block yüzey bayrakları değişir. Dört yüz ve yükseklik yürütmesi yazılmaz."
+    "notes": "Tam boy köşede yalnız ödeyen yüzün panelleri döner. Short, örtüşen şerit sayısı kadar panel çevirir. Aparat sayısı aynı kalır. Görsel, lightbox ve mesh ataması değişmez."
   },
   "migration": {
     "required": true,
