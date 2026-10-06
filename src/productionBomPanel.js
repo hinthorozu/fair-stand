@@ -176,7 +176,7 @@ function renderTotalsHtml(lines, printAreas, { open = false } = {}) {
 
 export function formatProductionBomText(bom) {
   const blocks = ['Üretim Listesi', ''];
-  blocks.push('Kaydetme yok · yan yana birleşimde çiftli aparat, iç köşede köşe aparatı, T birleşimde ortak dikme uygulanır. Çiftli aparat T’de yok. Cam şerit panel_cam olarak kalır. Baza dizisi ve aynı genişlikteki host sırtı uygulanır. Short-up eklemi yok.');
+  blocks.push('Kaydetme yok · yan yana birleşimde çiftli aparat, iç köşede köşe aparatı, T birleşimde ortak dikme uygulanır. Çiftli aparat T’de yok. Cam şerit panel_cam / panel_corner_cam olur. Baza dizisi ve aynı genişlikteki host sırtı uygulanır. Short-up eklemi yok.');
   if (bom?.appliedEndToEndCount) blocks.push(`${bom.appliedEndToEndCount} yan yana eklem uygulandı.`);
   if (bom?.appliedCornerCount) blocks.push(`${bom.appliedCornerCount} iç köşe eklem uygulandı.`);
   if (bom?.appliedTeeCount) blocks.push(`${bom.appliedTeeCount} T birleşim uygulandı.`);
@@ -230,7 +230,7 @@ export function buildProductionBomHtml(bom, openCollapseKeys = new Set()) {
 
   return `
       <p class="production-bom-panel__hint"><button type="button" class="production-bom-panel__popout production-bom-panel__download" data-role="bom-download">Metin indir</button></p>
-      <p class="production-bom-panel__hint">Kaydetme yok · yan yana birleşimde çiftli aparat, iç köşede köşe aparatı, T birleşimde ortak dikme uygulanır. Çiftli aparat T’de yok. Cam şerit panel_cam olarak kalır. Baza dizisi ve aynı genişlikteki host sırtı uygulanır. Short-up eklemi yok.</p>
+      <p class="production-bom-panel__hint">Kaydetme yok · yan yana birleşimde çiftli aparat, iç köşede köşe aparatı, T birleşimde ortak dikme uygulanır. Çiftli aparat T’de yok. Cam şerit panel_cam / panel_corner_cam olur. Baza dizisi ve aynı genişlikteki host sırtı uygulanır. Short-up eklemi yok.</p>
       ${bom.appliedEndToEndCount
         ? `<p class="production-bom-panel__hint">${bom.appliedEndToEndCount} yan yana eklem uygulandı.</p>`
         : ''}

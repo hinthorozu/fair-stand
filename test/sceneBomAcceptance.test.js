@@ -152,6 +152,19 @@ function straightPanels(itemKey) {
   return Object.keys(RECIPE[itemKey]).filter((key) => PANEL_SWAP[key]);
 }
 
+function swapParticipant(map, itemKey) {
+  if (!(isShort(itemKey) || SWAPS_PANELS.has(itemKey))) return map;
+  const next = { ...map };
+  for (const panelKey of straightPanels(itemKey)) {
+    const quantity = RECIPE[itemKey][panelKey] ?? 0;
+    const cornerKey = PANEL_SWAP[panelKey];
+    if (!cornerKey || !(quantity > 0)) continue;
+    next[panelKey] = (next[panelKey] ?? 0) - quantity;
+    next[cornerKey] = (next[cornerKey] ?? 0) + quantity;
+  }
+  return next;
+}
+
 function shortUprightKey(itemKey) {
   if (itemKey.includes('_short_1')) return 'upright_49_5';
   if (itemKey.includes('_short_2')) return 'upright_99';
@@ -205,7 +218,8 @@ function expectShortJoint(leftKey, rightKey, kind) {
   const branchKey = isShort(rightKey) ? rightKey : leftKey;
   const branchUpright = shortUprightKey(branchKey);
   if (branchUpright) expected = bump(expected, branchUpright, -1);
-  return bump(bump(expected, 'connector_single', -1), 'connector_corner', 1);
+  expected = bump(bump(expected, 'connector_single', -1), 'connector_corner', 1);
+  return swapParticipant(expected, branchKey);
 }
 
 function lineMap(bom) {
@@ -517,11 +531,11 @@ test('panel glass and corner swaps stay on the participating straight panels', (
       strips: Array.from({ length: 7 }, (_, index) => ({ itemKey: 'panel_197', isGlass: index < 4 })),
     }),
     cornerOf('b', 'wall_200_350', 200, { heightCm: 350 }),
-  ], add(swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_200_350), 'upright_346_5', -1), 'connector_single', -12), 'connector_corner', 12), ['panel_197']), { panel_corner_192: -4, panel_cam_197: 4 }));
+  ], add(swapKeys(bump(bump(bump(add(RECIPE.wall_200_350, RECIPE.wall_200_350), 'upright_346_5', -1), 'connector_single', -12), 'connector_corner', 12), ['panel_197']), { panel_corner_192: -4, panel_corner_cam_192: 4 }));
   assertBom('wall short corner glass', [
     shortOf('a', 'wall_200_short_1', { strips: [{ itemKey: 'panel_197', isGlass: true }] }),
     cornerOf('b', 'wall_150_350', 200, { heightCm: 350 }),
-  ], add(expectShortJoint('wall_200_short_1', 'wall_150_350', 'corner'), { panel_corner_192: -1, panel_cam_197: 1 }));
+  ], add(expectShortJoint('wall_200_short_1', 'wall_150_350', 'corner'), { panel_corner_192: -1, panel_corner_cam_192: 1 }));
   assertBom('outward short keeps straight panels; inner wall converts only the covered strips', [
     place('a', 'wall_200_350', { heightCm: 350 }),
     place('b', 'wall_200_350', { xCm: 200, heightCm: 350 }),

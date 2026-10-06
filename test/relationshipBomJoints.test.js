@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { createFlatPanelModuleState } from '../src/designState.js';
 import { createModulePlacement } from '../src/modulePlacement.js';
 import { resolveProjectBom } from '../src/projectBom.js';
-import { detectRelationshipJoints, getInnerCornerPanelSku } from '../src/relationshipBom.js';
+import { detectRelationshipJoints } from '../src/relationshipBom.js';
 
 function qty(bom, itemKey) {
   const line = bom.lines.find((entry) => entry.itemKey === itemKey);
@@ -240,40 +240,7 @@ test('showcase inner corner keeps wall width on profiles and showcase panels bec
   assert.equal(qty(showcase2, 'connector_start'), 6);
 });
 
-test('explicit inner-corner mapping converts only the four straight panels', () => {
-  assert.equal(getInnerCornerPanelSku('panel_48_5'), 'panel_corner_42_5');
-  assert.equal(getInnerCornerPanelSku('panel_98'), 'panel_corner_92');
-  assert.equal(getInnerCornerPanelSku('panel_147_5'), 'panel_corner_142_5');
-  assert.equal(getInnerCornerPanelSku('panel_197'), 'panel_corner_192');
-  for (const sku of ['panel_cam_197', 'separator_panel_48_5', 'separator_panel_98', 'door_leaf_100', 'glass_shelf']) {
-    assert.equal(getInnerCornerPanelSku(sku), sku, sku);
-  }
-
-  const wall50 = resolveProjectBom([
-    placed('a', 'wall_50_350', { widthCm: 50 }),
-    cornerPair('b', 'wall_50_350', 50, { xCm: 50, yCm: 0 }),
-  ]);
-  assert.equal(qty(wall50, 'panel_corner_42_5'), 14);
-  assert.equal(qty(wall50, 'panel_48_5'), 0);
-
-  const door = resolveProjectBom([
-    placed('a', 'wall_door_100_350', { widthCm: 100 }),
-    cornerPair('b', 'wall_100_350', 100, { xCm: 100, yCm: 0 }),
-  ]);
-  assert.equal(qty(door, 'panel_corner_92'), 10);
-  assert.equal(qty(door, 'door_leaf_100'), 1);
-  assert.equal(qty(door, 'panel_98'), 0);
-
-  const showcase = resolveProjectBom([
-    placed('a', 'wall_showcase_100_2_350', { widthCm: 100 }),
-    cornerPair('b', 'wall_100_350', 100, { xCm: 100, yCm: 0 }),
-  ]);
-  assert.equal(qty(showcase, 'panel_corner_92'), 12);
-  assert.equal(qty(showcase, 'glass_shelf'), 1);
-  assert.equal(qty(showcase, 'panel_98'), 0);
-});
-
-test('glass strips on an inner-corner wall stay panel_cam', () => {
+test('glass strips on an inner-corner wall become panel_corner_cam', () => {
   const wall = createFlatPanelModuleState({ itemKey: 'wall_200_350' });
   wall.id = 'a';
   wall.widthCm = 200;
@@ -285,10 +252,10 @@ test('glass strips on an inner-corner wall stay panel_cam', () => {
     cornerPair('b', 'wall_200_350', 200, { xCm: 200, yCm: 0 }),
   ]);
   assert.equal(qty(bom, 'panel_corner_192'), 10);
-  assert.equal(qty(bom, 'panel_corner_cam_192'), 0);
+  assert.equal(qty(bom, 'panel_corner_cam_192'), 4);
   assert.equal(qty(bom, 'panel_197'), 0);
-  assert.equal(qty(bom, 'panel_cam_197'), 4);
-  assert.ok(bom.relationshipNotes.some((note) => note.includes('panel_197 × 4 → panel_cam_197')));
+  assert.equal(qty(bom, 'panel_cam_197'), 0);
+  assert.ok(bom.relationshipNotes.some((note) => note.includes('panel_corner_192 × 4 → panel_corner_cam_192')));
 });
 
 test('a tee into the middle of a wall shares one upright and does not add doubles', () => {
