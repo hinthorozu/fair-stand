@@ -132,7 +132,7 @@ test('maxImageUploadMb sahibi src/runtimeSettings.js; Catalog re-export yok', ()
   }
 });
 
-test('DATABASE.md 13 fair_stand tablosunun envanteridir', () => {
+test('DATABASE.md fair_stand tablo envanterini taşır', () => {
   const doc = readFileSync(new URL('../docs/refactor/DATABASE.md', import.meta.url), 'utf8');
   const itemsDoc = readFileSync(new URL('../docs/refactor/ITEMS.md', import.meta.url), 'utf8');
   for (const table of [
@@ -149,6 +149,7 @@ test('DATABASE.md 13 fair_stand tablosunun envanteridir', () => {
     'fair_stand_item_body_parts',
     'fair_stand_dimensions',
     'fair_stand_settings',
+    'fair_stand_cost_items',
   ]) {
     assert.match(doc, new RegExp(`\`${table}\``), table);
   }

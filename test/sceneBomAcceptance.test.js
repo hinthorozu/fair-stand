@@ -26,15 +26,6 @@ function withProductionItems(run) {
       isRender: false,
       isActive: true,
     },
-    {
-      itemKey: 'foam_logo',
-      name: 'Strafor Logo',
-      type: 'production',
-      unit: 'metre_kare',
-      catalogVisible: false,
-      isRender: false,
-      isActive: true,
-    },
   ]);
   try {
     return run();
@@ -613,12 +604,12 @@ test('floor and print layers do not change structural hardware', () => {
     place('foam', 'illuminated-foam', { widthCm: 200, heightCm: 50 }),
   ]));
   const foamSection = foam.printAreas.find((section) => section.id === 'foam');
-  const foamLine = foam.lines.find((line) => line.itemKey === 'foam_logo');
-  assert.equal(foam.unresolved[0].itemKey, 'illuminated-foam');
-  assert.equal(foam.lines.some((line) => line.itemKey === 'illuminated-foam'), false);
+  const foamLine = foam.lines.find((line) => line.itemKey === 'illuminated-foam');
+  assert.equal(foam.unresolved.some((entry) => entry.itemKey === 'illuminated-foam'), false);
+  assert.equal(foam.lines.filter((line) => line.itemKey === 'illuminated-foam').length, 1);
   assert.equal(foamSection.lines[0].widthCm, 200);
   assert.equal(foamLine.quantity, foamSection.totalAreaM2);
   assert.equal(foamLine.quantity, 1);
   assert.equal(foamLine.unit, 'metre_kare');
-  assert.equal(foamLine.name, 'Strafor Logo');
+  assert.equal(foamLine.name, 'Işıklı Strafor / Logo');
 });

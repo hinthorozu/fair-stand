@@ -77,6 +77,20 @@ function resolveModuleEntry(moduleState, index, { swapCornerPanels = false, swap
   const item = getItem(itemKey);
   const name = item?.name ?? itemKey;
 
+  if (itemKey === 'illuminated-foam' || item?.type === 'illuminated-foam') {
+    return Object.freeze({
+      moduleId,
+      index,
+      itemKey,
+      name,
+      type: item?.type ?? 'illuminated-foam',
+      status: 'ok',
+      lines: Object.freeze([]),
+      glassMoved: Object.freeze([]),
+      message: null,
+    });
+  }
+
   try {
     const recipeLines = resolveItemBom(itemKey, 1);
     const collected = collectPanelSurfaces(moduleState);
@@ -140,7 +154,7 @@ const PRINT_PRODUCTION_ITEM_KEYS = Object.freeze({
   image: 'digital_print',
   mesh: 'mesh_fabric',
   lightbox: 'lightbox_fabric',
-  foam: 'foam_logo',
+  foam: 'illuminated-foam',
 });
 
 function resolvePrintProductionLines(printAreas) {

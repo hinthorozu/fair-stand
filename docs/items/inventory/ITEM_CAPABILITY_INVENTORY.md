@@ -449,6 +449,8 @@ Resolve alias: `moduleType`, `counterShape` (`normalizeCatalogDescriptor`).
 | depo içerik key | `creates.contentCatalogKeys` | `MINI_FRIDGE_AVANTI`, `KETTLE`, `COAT_RACK`, `PLASTIC_TRASH_BIN` | `src/featureContracts.js` | `stand-proje` | |
 | otomatik duvar sözleşmesi | `FEATURE_CONTRACTS.automaticWall` | `id` `automatic-wall` | `src/featureContracts.js` | `stand-proje` | |
 | otomatik duvar girdi | `inputs` | `wallWidthCm`, `standType`, `standXCm`, `standYCm` | `src/featureContracts.js` | `stand-proje` | |
+| otomatik duvar yapı type | `creates.structuralKinds` | `flat-panel` | `src/featureContracts.js` | `stand-proje` | |
+| otomatik duvar lamba type | `creates.lightingKinds` | `led-floodlight` | `src/featureContracts.js` | `stand-proje` | 150 cm koşu; depo arkası ve depo yanı hariç |
 | kamera perspective | `type: 'projection', mode: 'perspective'` | `p` | `src/viewKeyboardShortcuts.js` | `stand-proje` | kamera; Item yeteneği değil |
 | kamera ortho | `mode: 'orthographic'` | `o` | `src/viewKeyboardShortcuts.js` | `stand-proje` | |
 | sol bakış | `type: 'view', direction: 'left'` | `l` | `src/viewKeyboardShortcuts.js` | `stand-proje` | |

@@ -127,6 +127,11 @@
       "test/productionItemType.test.js",
       "test/itemCostEnabled.test.js",
       "backend/tests/modules/fair_stand/test_item_cost_enabled.py",
+      "backend/tests/modules/fair_stand/test_cost_items_api.py",
+      "backend/tests/modules/fair_stand/test_cost_item_manual_migration.py",
+      "backend/tests/modules/fair_stand/test_rename_item_prices_to_cost_items.py",
+      "backend/tests/modules/fair_stand/test_catalog_api.py",
+      "backend/tests/modules/fair_stand/test_drop_foam_logo_item_migration.py",
       "backend/tests/modules/fair_stand/test_unit_catalog.py",
       "backend/tests/modules/fair_stand/test_admin_items_api.py",
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
@@ -922,7 +927,15 @@
       "test/mountFairStandBoundary.test.js",
       "test/sidebarController.test.js",
       "test/defaultProjectBom.test.js",
-      "backend/tests/modules/fair_stand/test_unit_catalog.py"
+      "backend/tests/modules/fair_stand/test_unit_catalog.py",
+      "test/automaticWall.test.js",
+      "test/systemDevelopmentContract.test.js",
+      "test/catalogDomainBoundary.test.js",
+      "backend/tests/modules/fair_stand/test_cost_items_api.py",
+      "backend/tests/modules/fair_stand/test_cost_item_manual_migration.py",
+      "backend/tests/modules/fair_stand/test_rename_item_prices_to_cost_items.py",
+      "backend/tests/modules/fair_stand/test_catalog_api.py",
+      "backend/tests/modules/fair_stand/test_drop_foam_logo_item_migration.py"
     ],
     "fullSuite": true,
     "build": true,
@@ -942,7 +955,7 @@
   },
   "migration": {
     "required": true,
-    "notes": "0049 mevcut box_block satırında accepts_image, accepts_lightbox ve accepts_mesh değerlerini true yapar. Renk, cam ve default_opacity kolonlarına dokunmaz. 0050 rotation_step_deg değerini 45 yapar; default_rotation_deg ve side_insert_rotation aynı kalır. 0055, item verisinin ihtiyaç duyduğu adet ve metre_kare satırları yoksa ekler, m2 değerini metre_kare yapar ve FK ekler. Bilinmeyen unit ve pasif metre_kare upgrade'i durdurur. 0058 fair_stand_items.is_cost_enabled kolonunu NOT NULL default false ekler. Mevcut satırlar false kalır. Downgrade kolonu düşürür. Fiyat, birim ve reçete değişmez."
+    "notes": "0049 mevcut box_block satırında accepts_image, accepts_lightbox ve accepts_mesh değerlerini true yapar. Renk, cam ve default_opacity kolonlarına dokunmaz. 0050 rotation_step_deg değerini 45 yapar; default_rotation_deg ve side_insert_rotation aynı kalır. 0055, item verisinin ihtiyaç duyduğu adet ve metre_kare satırları yoksa ekler, m2 değerini metre_kare yapar ve FK ekler. Bilinmeyen unit ve pasif metre_kare upgrade'i durdurur. 0058 fair_stand_items.is_cost_enabled kolonunu NOT NULL default false ekler. Mevcut satırlar false kalır. Downgrade kolonu düşürür. Fiyat, birim ve reçete değişmez. 0060 organization + item_key fiyat tablosunu açar: purchase_price ve sale_price NUMERIC(14,2). fair_stand_items fiyat kolonu almaz. 0061 foam_logo satırını siler. Strafor metrekare illuminated-foam kaydında kalır. 0062 tabloyu fair_stand_cost_items olarak adlandırır. Kolonlar, unique ve item FK aynı kalır. Satırlar silinmez. 0063 mevcut satırları ITEM yapar, item_key nullable olur, name ve unit ekler. unit fair_stand_units.unit_key FK'sidir: ON UPDATE CASCADE, ON DELETE CASCADE. Manuel ad ve birim için yeni unique yoktur. Downgrade MANUAL satırları siler ve ITEM şeklini geri alır."
   },
   "rollback": "0049 downgrade aynı üç bayrağı false yapar. 0050 downgrade rotation_step_deg değerini 90 yapar."
 }

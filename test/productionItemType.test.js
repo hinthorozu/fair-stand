@@ -21,7 +21,6 @@ const PRODUCTION_ITEMS = [
   { itemKey: 'digital_print', name: 'Dijital Baskı', quantity: 52.72 },
   { itemKey: 'mesh_fabric', name: 'Mesh Baskı', quantity: 18.4 },
   { itemKey: 'lightbox_fabric', name: 'Lightbox Bezi', quantity: 12 },
-  { itemKey: 'foam_logo', name: 'Strafor Logo', quantity: 2.24 },
 ];
 
 function productionItem(itemKey, name) {

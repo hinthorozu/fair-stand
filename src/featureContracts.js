@@ -58,6 +58,7 @@ export const FEATURE_CONTRACTS = Object.freeze({
     ]),
     creates: Object.freeze({
       structuralKinds: Object.freeze(['flat-panel']),
+      lightingKinds: Object.freeze(['led-floodlight']),
     }),
     placement: Object.freeze({
       owner: 'src/wallReflow.js',

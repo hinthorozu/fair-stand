@@ -6,6 +6,188 @@ import {
   planContinuousWallLayout,
 } from './wallReflow.js';
 
+export const AUTOMATIC_WALL_LAMP_INTERVAL_CM = 150;
+const LAMP_WALL_IDS = new Set(['back', 'left', 'right']);
+
+function wallModuleLocalStartCm(placement, widthCm, standYCm) {
+  if (placement.wallId === 'left') return Number(standYCm) - (Number(placement.yCm) + widthCm);
+  if (placement.wallId === 'back') return Number(placement.xCm);
+  if (placement.wallId === 'right') return Number(placement.yCm);
+  return null;
+}
+
+function isDepotRearWall(module) {
+  if (module?.depotBack === true) return true;
+  return module?.autoDepotBack === true && module?.placement?.wallId === 'back';
+}
+
+function contiguousWallRuns(modules, standYCm) {
+  const byWall = new Map();
+  for (const module of modules ?? []) {
+    const placement = module?.placement;
+    const wallId = placement?.wallId;
+    if (!LAMP_WALL_IDS.has(wallId)) continue;
+    if (module.type && module.type !== 'flat-panel') continue;
+    if (isDepotRearWall(module) || module?.depotSide === true) continue;
+    const widthCm = Number(module.widthCm);
+    const start = wallModuleLocalStartCm(placement, widthCm, standYCm);
+    if (!Number.isFinite(start) || !Number.isFinite(widthCm) || widthCm <= 0) continue;
+    const spans = byWall.get(wallId) ?? [];
+    spans.push({ start, end: start + widthCm });
+    byWall.set(wallId, spans);
+  }
+
+  const runs = [];
+  for (const [wallId, spans] of byWall) {
+    spans.sort((left, right) => left.start - right.start);
+    let current = null;
+    for (const span of spans) {
+      if (!current || span.start > current.end + 0.5) {
+        if (current) runs.push(current);
+        current = { wallId, start: span.start, end: span.end };
+      } else {
+        current.end = Math.max(current.end, span.end);
+      }
+    }
+    if (current) runs.push(current);
+  }
+  return runs;
+}
+
+function lampPlacementAtLocalCenter({
+  wallId,
+  localCenterCm,
+  lampWidthCm,
+  standXCm,
+  standYCm,
+}) {
+  const localStartCm = localCenterCm - lampWidthCm / 2;
+  if (wallId === 'left') {
+    return {
+      xCm: 0,
+      yCm: Number(standYCm) - localStartCm - lampWidthCm,
+      zCm: 0,
+      rotationZDeg: 90,
+      wallId,
+    };
+  }
+  if (wallId === 'right') {
+    return {
+      xCm: Number(standXCm),
+      yCm: localStartCm,
+      zCm: 0,
+      rotationZDeg: 270,
+      wallId,
+    };
+  }
+  return {
+    xCm: localStartCm,
+    yCm: 0,
+    zCm: 0,
+    rotationZDeg: 0,
+    wallId: 'back',
+  };
+}
+
+/** Her kesintisiz duvar koşusunda 150 cm'lik dilimin ortasına bir lamba. Yön duvarın sahneye bakan yönüdür. */
+export function planAutomaticWallLampPlacements({
+  modules,
+  standXCm,
+  standYCm,
+  lampWidthCm = 50,
+  intervalCm = AUTOMATIC_WALL_LAMP_INTERVAL_CM,
+} = {}) {
+  const widthCm = Number(lampWidthCm);
+  const stepCm = Number(intervalCm);
+  if (!Number.isFinite(widthCm) || widthCm <= 0 || !Number.isFinite(stepCm) || stepCm <= 0) return [];
+
+  const placements = [];
+  for (const run of contiguousWallRuns(modules, standYCm)) {
+    const count = Math.floor((run.end - run.start) / stepCm);
+    for (let index = 0; index < count; index += 1) {
+      placements.push(lampPlacementAtLocalCenter({
+        wallId: run.wallId,
+        localCenterCm: run.start + index * stepCm + stepCm / 2,
+        lampWidthCm: widthCm,
+        standXCm,
+        standYCm,
+      }));
+    }
+  }
+  return placements;
+}
+
+function centeredLampOnSpan(modules, lampWidthCm) {
+  const placement = modules[0].placement;
+  const rotationZDeg = Number(placement.rotationZDeg) || 0;
+  const vertical = rotationZDeg % 180 !== 0;
+  if (vertical) {
+    const start = Math.min(...modules.map((module) => Number(module.placement.yCm)));
+    const end = Math.max(...modules.map((module) => Number(module.placement.yCm) + Number(module.widthCm)));
+    return {
+      xCm: Number(placement.xCm),
+      yCm: (start + end) / 2 - lampWidthCm / 2,
+      zCm: 0,
+      rotationZDeg,
+      wallId: placement.wallId,
+    };
+  }
+  const start = Math.min(...modules.map((module) => Number(module.placement.xCm)));
+  const end = Math.max(...modules.map((module) => Number(module.placement.xCm) + Number(module.widthCm)));
+  return {
+    xCm: (start + end) / 2 - lampWidthCm / 2,
+    yCm: Number(placement.yCm),
+    zCm: 0,
+    rotationZDeg,
+    wallId: placement.wallId,
+  };
+}
+
+function isDepotLampPiece(module) {
+  if (!module?.placement || module.depotBack) return false;
+  const kind = module.kind || module.type;
+  const structural = module.depotSide === true
+    || kind === 'wall'
+    || kind === 'flat-panel'
+    || kind === 'door';
+  if (!structural) return false;
+  return module.depotSide === true || module.autoDepot === true || module.placement.wallId === 'free';
+}
+
+/** Depo duvarlarında, arka yüz hariç, her yüzde bir lamba. Üst profil snap'i çağıran taraf yapar. */
+export function planAutomaticDepotLampPlacements({ modules, lampWidthCm = 50 } = {}) {
+  const widthCm = Number(lampWidthCm);
+  if (!Number.isFinite(widthCm) || widthCm <= 0) return [];
+
+  const faces = new Map();
+  for (const module of modules ?? []) {
+    if (!isDepotLampPiece(module)) continue;
+    const pieceWidth = Number(module.widthCm);
+    if (!Number.isFinite(pieceWidth) || pieceWidth <= 0) continue;
+    const placement = module.placement;
+    const rotationZDeg = Number(placement.rotationZDeg) || 0;
+    const vertical = rotationZDeg % 180 !== 0;
+    const key = vertical
+      ? `v:${placement.xCm}:${rotationZDeg}`
+      : `h:${placement.yCm}`;
+    const face = faces.get(key) ?? [];
+    face.push(module);
+    faces.set(key, face);
+  }
+
+  const horizontalKeys = [...faces.keys()].filter((key) => key.startsWith('h:'));
+  if (horizontalKeys.length > 1) {
+    const rearKey = horizontalKeys.sort((left, right) => Number(left.slice(2)) - Number(right.slice(2)))[0];
+    faces.delete(rearKey);
+  }
+
+  return [...faces.values()]
+    .map((face) => centeredLampOnSpan(face, widthCm))
+    .sort((left, right) => left.rotationZDeg - right.rotationZDeg
+      || left.xCm - right.xCm
+      || left.yCm - right.yCm);
+}
+
 export function getAutomaticWallCapacityCm({ standType, standXCm, standYCm } = {}) {
   return getContinuousWallCapacityCm(standType, standXCm, standYCm);
 }

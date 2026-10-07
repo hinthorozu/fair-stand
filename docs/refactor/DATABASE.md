@@ -6,7 +6,7 @@ Lokal / sunucu PostgreSQL `fair_stand` şemasının yaşayan envanteri. “Üç 
 
 **Doğrulama (2026-09-24, `models.py` + Alembic head + `item_mapper.py` + `src/`):**
 
-1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0059_elektrik_panosu_item`**. `0053_item_type_scene_behavior` sahne davranışını `fair_stand_item_type` satırından ayırır. `0043_panel_glass_family` ve `0044_panel_corner_glass_family` yeni kolon değildir; `panel_cam_*` / `panel_corner_cam_*` SKU satırıdır. `0057_foam_logo_item` gizli `foam_logo` production satırını ekler. `0059_elektrik_panosu_item` gizli `elektrik_panosu` satırını yoksa ekler; proje listesi bunu modül reçetesinden ayrı, miktar 1 olarak yazar.
+1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0063_cost_item_manual`**. `0053_item_type_scene_behavior` sahne davranışını `fair_stand_item_type` satırından ayırır. `0043_panel_glass_family` ve `0044_panel_corner_glass_family` yeni kolon değildir; `panel_cam_*` / `panel_corner_cam_*` SKU satırıdır. `0057_foam_logo_item` gizli `foam_logo` production satırını ekler. `0061_drop_foam_logo_item` bu satırı siler. Strafor metrekare üretimi `illuminated-foam` kaydındadır. `0059_elektrik_panosu_item` gizli `elektrik_panosu` satırını yoksa ekler; proje listesi bunu modül reçetesinden ayrı, miktar 1 olarak yazar.
 2. `item_mapper.py` — her ürün kolonu JSON anahtarına (veya “bootstrap’a girmez”) bağlandı.
 3. Production `src/` grep — “Nerede” hücresi gerçek okuyucu dosyadır; okunmayan kolon **DATA / TEST_ONLY / SCHEMA_ONLY** yazılır.
 4. `ITEMS.md` (alan kuyruğu + onaylı şema), `CATALOG.md`, `ROTATION.md`, `SCENE_POSE.md`, `STAND_DIMENSIONS.md` — değer kopyalanmaz; işaret edilir.
@@ -42,8 +42,8 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 | `fair_stand_rule_type` | 1× `snap` | Kural ailesi. Bootstrap `ruleTypes[]` (stand JS ayrı registry açmaz). |
 | `fair_stand_rule` | 3: `profile-top-rail`, `shelf-rail`, `top-rail` | Snap key + face/edge. Bootstrap `rules[]`. |
 | `fair_stand_rule_item_type` | 4 | Kuralı **sunan** item tipleri. Bootstrap `rules[].itemTypeKeys`. |
-| `fair_stand_items` | 121 (63 `catalog_visible=true`; 121 `is_active=true`) | Ürün kimliği + Catalog üyeliği + snap FK. Bootstrap: `is_active=true` (gizli SKU dahil). `digital_print`, `mesh_fabric`, `lightbox_fabric`, `foam_logo`, `elektrik_panosu` gizli production kalemleridir. `elektrik_panosu` her proje listesine miktar 1 yazılır. |
-| `fair_stand_item_dimensions` | 109 | Fiziksel / BOM ölçü. 12 Item’da satır yok: `connector_corner`, `connector_double`, `connector_single`, `connector_start`, `digital_print`, `foam_logo`, `hali`, `lightbox_fabric`, `mesh_fabric`, `sarmasik`, `shelf_leg`, `showcase_2_body`. |
+| `fair_stand_items` | 121 (63 `catalog_visible=true`; 121 `is_active=true`) | Ürün kimliği + Catalog üyeliği + snap FK. Bootstrap: `is_active=true` (gizli SKU dahil). `digital_print`, `mesh_fabric`, `lightbox_fabric`, `elektrik_panosu` gizli production kalemleridir. Strafor logosu `illuminated-foam` sahne kaydıdır; üretim metrekare de bu kayda yazılır. `elektrik_panosu` her proje listesine miktar 1 yazılır. |
+| `fair_stand_item_dimensions` | 109 | Fiziksel / BOM ölçü. 11 Item’da satır yok: `connector_corner`, `connector_double`, `connector_single`, `connector_start`, `digital_print`, `hali`, `lightbox_fabric`, `mesh_fabric`, `sarmasik`, `shelf_leg`, `showcase_2_body`. |
 | `fair_stand_item_scene_dimensions` | 50 | Sahne kutusu override. Yoksa aynı adlı `dimensions` alanı. |
 | `fair_stand_item_strip_occupancy` | 8, hepsi `align=top` (4× strip 1, 4× strip 2) | Short-up şerit bandı. |
 | `fair_stand_item_assets` | 19 (14 `model` + 5 `default_screen`) | GLB / TV ekran yolu. CHECK beş rol izin verir; canlı satırlar yalnız bu iki rol. |
@@ -54,6 +54,7 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 | `fair_stand_dimensions` | 1 (`id=1`) | Stand zarfı. Item kutusu değil. Admin UI: CRM `/admin/fair-stand/settings`. |
 | `fair_stand_settings` | 1 (`id=1`) | Runtime tavanlar. Item kutusu değil. Aynı Temel Ayarlar ekranı. |
 | `fair_stand_projects` | 10 | Müşteri stand projesi SoT (tek JSONB payload). Catalog Item tablolarından ayrı. |
+| `fair_stand_cost_items` | 0 (yeni tablo) | Organization Item fiyatı ve manuel maliyet kalemi aynı tabloda. `fair_stand_items` fiyat kolonu taşımaz. Para birimi bu sürümde sabit TL; currency kolonu yok. |
 | `fair_stand_project_revisions` | 18 | Proje oturum anlık görüntüsü. `organization_id` kolonu yok. |
 | `fair_stand_project_assets` | 46 | Proje yüzey görsellerinin meta kaydı; binary diskte. |
 
@@ -69,7 +70,7 @@ Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0059_elektrik_panosu_item` |
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0063_cost_item_manual` |
 
 ---
 
@@ -105,7 +106,7 @@ Katalog kartı çizimi. Placement/BOM değildir.
 
 ## `fair_stand_units`
 
-Global ölçü birimi kataloğu. Migration `0052_unit_key` (`0051_unit_catalog` tablosunu açar). `0055_item_unit_fk` `fair_stand_items.unit` kolonunu `unit_key` hedefine bağlar. `organization_id` yok. Satır silinmez; `is_active=false` ile kapanır. `0055`, item verisinin ihtiyaç duyduğu `adet` ve `metre_kare` satırları katalogda yoksa onları ekler. Başka bir unit değerinde durur. Var olan pasif `metre_kare` satırını yeniden açmaz. Bootstrap ve mapper bu tabloyu okumaz. Item formundaki birim listesi aktif `unit_key` değerlerini bu tablodan okur; pasif satır listeye girmez. Kayıt yine `fair_stand_items.unit` FK’sidir. Yönetim: Fair Stand `/api/v1/fair-stand/admin/units` ve CRM Super Admin `Ölçü Birimleri` (`/admin/fair-stand/units`). `unit_key` addan Item key kuralıyla üretilir (`Metrekare` → `metrekare`). Ad değişince unit key değişir; bağlı Item unit değerlerini PostgreSQL `ON UPDATE CASCADE` yazar. Uygulama item satırlarını ayrıca güncellemez.
+Global ölçü birimi kataloğu. Migration `0052_unit_key` (`0051_unit_catalog` tablosunu açar). `0055_item_unit_fk` `fair_stand_items.unit` kolonunu `unit_key` hedefine bağlar. `organization_id` yok. Satır silinmez; `is_active=false` ile kapanır. `0055`, item verisinin ihtiyaç duyduğu `adet` ve `metre_kare` satırları katalogda yoksa onları ekler. Başka bir unit değerinde durur. Var olan pasif `metre_kare` satırını yeniden açmaz. Bootstrap `units` dizisinde `unitKey` ve `name` döner. Item gövdesindeki `unit` alanı `unit_key` olarak kalır. Mapper birim adını Item payload'ına yazmaz. Item formundaki birim listesi aktif `unit_key` değerlerini bu tablodan okur; pasif satır listeye girmez. Kayıt yine `fair_stand_items.unit` FK’sidir. Yönetim: Fair Stand `/api/v1/fair-stand/admin/units` ve CRM Super Admin `Ölçü Birimleri` (`/admin/fair-stand/units`). `unit_key` addan Item key kuralıyla üretilir (`Metrekare` → `metrekare`). Ad değişince unit key değişir; bağlı Item unit değerlerini PostgreSQL `ON UPDATE CASCADE` yazar. Uygulama item satırlarını ayrıca güncellemez.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
@@ -398,6 +399,26 @@ Kaynak: PostgreSQL `fair_stand_settings` → catalog bootstrap `settings` → `i
 | `created_at` / `updated_at` | yok | Audit | — | DB |
 
 Canlı satır: `max_image_upload_mb=5`, `export_button_visible=false`, `import_button_visible=true`, `save_as_button_visible=true`. Markup’ta butonlar `hidden` başlar; bootstrap sonrası ayar `true` ise açılır (flash yok). UI kilidi; zip endpoint güvenlik değildir.
+
+---
+
+## `fair_stand_cost_items`
+
+Organization’a özel alış ve satış tutarı. Catalog kimliği değildir. `cost_item_type` `ITEM` veya `MANUAL` olur. ITEM satırında `item_key` dolu, `name` ve `unit` boştur. MANUAL satırında `item_key` boş, `name` ve `unit` doludur. Bir organization aynı `item_key` için tek satır yazar. Manuel ad ve birim için ayrı unique yoktur. `organization_id` Core org UUID’sidir; FK yoktur ve istek gövdesinden yazılmaz. `item_key` → `fair_stand_items.item_key`, ON UPDATE CASCADE, ON DELETE CASCADE. `unit` → `fair_stand_units.unit_key`, ON UPDATE CASCADE, ON DELETE CASCADE. Servis ITEM için yalnız aktif ve `is_cost_enabled=true` Item kabul eder. API: `backend/app/modules/fair_stand/api/cost_item_routes.py`. Yetki: `fair_crm.fair_stand.cost_items.{read,create,update,delete}`. `0063_cost_item_manual` mevcut satırları ITEM yapar.
+
+| Kolon | JSON / API | Nedir | Neden | Nerede |
+|---|---|---|---|---|
+| `id` | `id` | UUID PK | Fiyat satırı kimliği | CRM `/stand-cost-items` |
+| `organization_id` | `organizationId` | Core org UUID (FK yok) | Kiracı izolasyonu | auth context; index `ix_fair_stand_cost_items_organization_id` |
+| `cost_item_type` | `costItemType` | `VARCHAR(16)`, `ITEM` veya `MANUAL` | Kayıt türü | CHECK `ck_fair_stand_cost_items_cost_item_type` ve `ck_fair_stand_cost_items_entry_shape` |
+| `item_key` | `itemKey` | `VARCHAR(128)`, nullable FK | ITEM kimliği. Ad kopyalanmaz. MANUAL satırda boş | unique `(organization_id, item_key)` |
+| `name` | `name` | `VARCHAR(256)`, nullable | MANUAL kalem adı. ITEM satırda boş | form Kalem Adı |
+| `unit` | `unit` | `VARCHAR(64)`, nullable FK `fair_stand_units.unit_key` | MANUAL birim anahtarı. Etiket kopyalanmaz. ITEM satırda boş | form Birim; ON UPDATE CASCADE, ON DELETE CASCADE |
+| `purchase_price` | `purchasePrice` | `NUMERIC(14,2)`, NOT NULL, `>= 0` | Zorunlu alış fiyatı. `0` geçerlidir | API / CRM form |
+| `sale_price` | `salePrice` | `NUMERIC(14,2)`, NOT NULL, default `0`, `>= 0` | Satış verilmezse `0` | API / CRM form |
+| `created_at` / `updated_at` | `createdAt` / `updatedAt` | `timestamptz`, zorunlu | Audit | API |
+
+Bootstrap bu tabloyu okumaz. `fair_stand_items` fiyat kolonu almaz.
 
 ---
 

@@ -35,7 +35,15 @@ def test_unit_catalog_revision_is_single_head():
     from alembic.script import ScriptDirectory
 
     script = ScriptDirectory.from_config(Config("alembic.ini"))
-    assert script.get_heads() == ["0059_elektrik_panosu_item"]
+    assert script.get_heads() == ["0063_cost_item_manual"]
+    revision = script.get_revision("0063_cost_item_manual")
+    assert revision.down_revision == "0062_cost_items"
+    revision = script.get_revision("0062_cost_items")
+    assert revision.down_revision == "0061_drop_foam_logo_item"
+    revision = script.get_revision("0061_drop_foam_logo_item")
+    assert revision.down_revision == "0060_item_prices"
+    revision = script.get_revision("0060_item_prices")
+    assert revision.down_revision == "0059_elektrik_panosu_item"
     revision = script.get_revision("0059_elektrik_panosu_item")
     assert revision.down_revision == "0058_item_cost_enabled"
     revision = script.get_revision("0058_item_cost_enabled")

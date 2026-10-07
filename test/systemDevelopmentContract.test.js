@@ -117,6 +117,7 @@ test('automatic wall feature contract matches composeAutomaticStandWall', () => 
   assert.equal(contract.trigger.mode, 'non-island-stage-create');
   assert.deepEqual([...contract.inputs], ['wallWidthCm', 'standType', 'standXCm', 'standYCm']);
   assert.deepEqual([...contract.creates.structuralKinds], ['flat-panel']);
+  assert.deepEqual([...contract.creates.lightingKinds], ['led-floodlight']);
   assert.equal(contract.placement.owner, 'src/wallReflow.js');
   assert.match(contract.tests.regressionFiles.join(' '), /automaticWall\.test\.js/);
 

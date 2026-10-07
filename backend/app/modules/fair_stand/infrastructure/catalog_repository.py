@@ -24,6 +24,7 @@ from app.modules.fair_stand.infrastructure.models import (
     FairStandRuleModel,
     FairStandRuleTypeModel,
     FairStandSettingsModel,
+    FairStandUnitModel,
 )
 
 
@@ -45,6 +46,12 @@ class SqlAlchemyFairStandCatalogRepository:
             selectinload(FairStandItemModel.snap_requires_rule),
             selectinload(FairStandItemModel.snap_provides_rule),
         )
+
+    def list_unit_labels(self) -> list[tuple[str, str]]:
+        rows = self._session.scalars(
+            select(FairStandUnitModel).order_by(FairStandUnitModel.unit_key, FairStandUnitModel.id)
+        ).all()
+        return [(row.unit_key, row.name) for row in rows]
 
     def list_active_categories(self) -> list[CatalogCategory]:
         rows = self._session.scalars(

@@ -9,7 +9,7 @@ Durum: **CLOSED / POST-MERGE VERIFIED**
 - `src/designState.js` artık kanonik runtime modül-durumu inşa kaydının ve `createModuleStateFromDescriptor(...)` giriş noktasının sahibidir.
 - `src/main.js` bir modül-tipi → fabrika dağıtıcısı veya doğrudan modül fabrika import'ları sahiplenmek yerine katalog inşasını o kanonik kurucuya devreder.
 - otomatik duvar, otomatik depo ve illuminated-foam inşa yolları, mevcut runtime durum şekillerini ve yerleşim semantiğini koruyarak kanonik kurucuyu kullanır.
-- katalog kimliği kapanış anında `catalogKey` diye yazıldı. **Sonraki Item cutover:** runtime kimliği `itemKey`; `src/` içinde `catalogKey` yok. Katalog anahtar sayısı kapanışta 45, güncel 51 (`SYSTEM_MODULE_CATALOG.md`).
+- Kapanış anındaki katalog kimliği `catalogKey` ve 45 anahtar sayımı tarihîdir. Güncel runtime kimliği `itemKey`’dir; `src/` içinde `catalogKey` okunmaz ve yazılmaz.
 
 ## Regresyon kanıtı
 
@@ -21,7 +21,9 @@ Hedefli birim/entegrasyon kapsamı şunları içerir:
 - `test/systemChangeGateLocalDiff.test.js` — tam-sistem etki taramasının onu etkilenen bir gate testi olarak işaretlemesinden sonra hedefli yönetişim regresyon kümesinin parçası kalır.
 - `e2e/f010-module-construction.spec.mjs` — Chromium regresyonu hem otomatik-duvar inşasını hem gerçek UI üzerinden katalog inşasını kanıtlar, ardından oluşan modül durumunun IndexedDB'de kalıcı olduğunu doğrular.
 
-E2E katalog akışı geçerli gerçek-duvar yolunu kullanır: Sırt Duvar → Duvarı temizle → katalogdan `wall_100` ekle → picker kapanışı → kaydet → persisted state verification. Daha önceki geçersiz Ada Stand ekleme varsayımları, üretim doğrulamasını zayıflatmak yerine kaldırıldı.
+Güncel E2E, Sırt Duvar 500 × 500 cm kurulumunda kalıcı state’i şöyle doğrular: `flat-panel` genişlikleri `200, 200, 100`, her panelin `itemKey` değeri `wall_${widthCm}_350`, `placement.wallId` değeri `back`. Aynı kayıtta üç `led-floodlight` vardır; `itemKey` `led_floodlight`, `placement.wallId` `back`. Modül listesi bu paneller ile lambalardan oluşur.
+
+Katalog inşası kaldırılmış “Duvarı temizle” kontrolüne bağlı değildir. Mevcut modüllerden biri `fair-stand:delete-selected-module` ile silinir, Panel & Duvar kataloğundan aynı `itemKey` geri eklenir, picker kapanır ve kayıt IndexedDB’de doğrulanır. Kapı akışı `wall_door_100_350` ekler ve child `door_leaf_100` state’ini doğrular.
 
 ## Tam-sistem etki incelemesi
 

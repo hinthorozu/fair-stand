@@ -12,7 +12,6 @@ const PRODUCTION_ITEMS = [
   { itemKey: 'digital_print', name: 'Dijital Baskı' },
   { itemKey: 'mesh_fabric', name: 'Mesh Baskı' },
   { itemKey: 'lightbox_fabric', name: 'Lightbox Bezi' },
-  { itemKey: 'foam_logo', name: 'Strafor Logo' },
 ];
 
 function withProductionItems(run) {
@@ -309,7 +308,7 @@ test('styrofoam logos use width × height and ignore thickness', () => {
     { id: 'f3', type: 'illuminated-foam', widthCm: 200, heightCm: 150, depthCm: 3 },
   ]);
   const foam = section(areas, 'foam');
-  assert.equal(foam.label, 'Strafor Logo');
+  assert.equal(foam.label, 'Işıklı Strafor / Logo');
   assert.equal(foam.lines.length, 2);
   assert.equal(foam.lines[0].widthCm, 200);
   assert.equal(foam.lines[0].heightCm, 150);
@@ -323,7 +322,7 @@ test('styrofoam logos use width × height and ignore thickness', () => {
   assert.equal(foam.totalAreaM2, 3.64);
 });
 
-test('two identical strafor logos keep the detail total and bind that total to foam_logo', () => {
+test('two identical strafor logos keep the detail total and bind that total to illuminated-foam', () => {
   const names = new Map([['logo', '000_kyrox-letter.svg']]);
   const modules = [0, 1].map((index) => ({
     id: `foam-${index}`,
@@ -344,15 +343,16 @@ test('two identical strafor logos keep the detail total and bind that total to f
   assert.equal(foam.totalAreaM2, 2.24);
   withProductionItems(() => {
     const bom = resolveProjectBom(modules, null, names);
-    const line = bom.lines.find((entry) => entry.itemKey === 'foam_logo');
+    const line = bom.lines.find((entry) => entry.itemKey === 'illuminated-foam');
     assert.equal(line.quantity, foam.totalAreaM2);
     assert.equal(line.quantity, 2.24);
     assert.equal(line.unit, 'metre_kare');
-    assert.equal(line.name, 'Strafor Logo');
+    assert.equal(line.name, 'Işıklı Strafor / Logo');
     assert.equal(bom.lines.filter((entry) => entry.itemKey === 'digital_print').length, 0);
     assert.equal(bom.lines.filter((entry) => entry.itemKey === 'mesh_fabric').length, 0);
     assert.equal(bom.lines.filter((entry) => entry.itemKey === 'lightbox_fabric').length, 0);
-    assert.equal(bom.lines.some((entry) => entry.itemKey === 'illuminated-foam'), false);
+    assert.equal(bom.lines.filter((entry) => entry.itemKey === 'illuminated-foam').length, 1);
+    assert.equal(bom.unresolved.some((entry) => entry.itemKey === 'illuminated-foam'), false);
     const text = formatProductionBomText(bom);
     assert.match(text, /000_kyrox-letter\.svg · 2 × 200×56 cm · 1,12 m² · toplam 2,24 m²/);
     assert.match(text, /Toplam 2,24 m²/);
@@ -529,12 +529,12 @@ test('print section totals become production leaves and the detail table stays',
     assert.equal(meshLine.name, 'Mesh Baskı');
     assert.equal(meshLine.quantity, meshSection.totalAreaM2);
     assert.equal(meshLine.unit, 'metre_kare');
-    const foamLine = material('foam_logo');
-    assert.equal(foamLine.name, 'Strafor Logo');
+    const foamLine = material('illuminated-foam');
+    assert.equal(foamLine.name, 'Işıklı Strafor / Logo');
     assert.equal(foamLine.quantity, foamSection.totalAreaM2);
     assert.equal(foamLine.unit, 'metre_kare');
     assert.equal(bom.lines.filter((line) => line.itemKey === 'digital_print').length, 1);
-    assert.equal(bom.lines.some((line) => line.itemKey === 'illuminated-foam'), false);
+    assert.equal(bom.lines.filter((line) => line.itemKey === 'illuminated-foam').length, 1);
     assert.equal(image.lines.length, 2);
     assert.equal(groupBomLines([digital, fabric, meshLine]).map((group) => group.id).join(','), 'production');
   });

@@ -372,7 +372,11 @@ Automatic wall sonucu gerçek state'e şu yol üzerinden çevrilir:
 composeAutomaticStandWall()
 → width listesi / placement listesi
 → createModuleStateFromDescriptor({ type: 'flat-panel', widthCm })
+→ appendAutomaticWallLamps()
+→ her kesintisiz sırt/sol/sağ flat-panel koşusunda 150 cm'de bir led-floodlight
 ```
+
+Depo arka duvarı ve depo yan paneli bu 150 cm sayımına girmez. 150 cm'den kısa koşuya lamba konmaz. Ada standta duvar olmadığı için bu lamba da oluşmaz.
 
 Kaynaklar:
 
