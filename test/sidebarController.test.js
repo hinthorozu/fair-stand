@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { createSidebarController } from '../src/sidebarController.js';
 
 function createClassList(initial = []) {
@@ -88,4 +89,14 @@ test('bind wires and unwires the click handler', () => {
   assert.equal(appElement.classList.values.has('sidebar-collapsed'), true);
   unbind();
   assert.equal(toggleButton.listeners.has('click'), false);
+});
+
+test('collapsed sidebar gives the viewport the only column', () => {
+  const css = readFileSync(new URL('../src/style.css', import.meta.url), 'utf8');
+  const layout = css.match(/#app\.sidebar-collapsed \{[^}]+\}/)?.[0] ?? '';
+  assert.match(layout, /grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(layout, /grid-template-rows:\s*minmax\(0,\s*1fr\)/);
+  assert.doesNotMatch(layout, /grid-template-columns:\s*0 /);
+  assert.match(css, /#app\.sidebar-collapsed \.sidebar \{[^}]*display:\s*none/);
+  assert.match(css, /#app\.sidebar-collapsed \.viewport-wrap \{[^}]*grid-column:\s*1/);
 });

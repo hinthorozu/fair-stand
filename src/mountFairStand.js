@@ -53,15 +53,17 @@ const TRASH_BIN_PREVIEW_CSS = `
 
 const HOST_CHROME_RESET_CSS = `
 #app > .sidebar {
-  width: auto;
-  max-width: none;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
   flex: initial;
   flex-shrink: initial;
-  position: relative;
-  top: auto;
-  height: auto;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  height: auto !important;
   min-height: 0;
-  transform: none;
+  transform: none !important;
   transition: none;
 }
 #app > .sidebar-toggle {

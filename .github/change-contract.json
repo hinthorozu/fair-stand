@@ -349,6 +349,7 @@
       "test/showcaseBodyColorRegression.test.js",
       "test/showcaseDepthDirection.test.js",
       "test/showcaseRecipes.test.js",
+      "test/sidebarController.test.js",
       "test/sidebarControllerMainIntegration.test.js",
       "test/sofaClassicPiecesContract.test.js",
       "test/stageFeedbackMainIntegration.test.js",
@@ -915,7 +916,9 @@
       "backend/tests/modules/fair_stand/test_item_cost_enabled.py",
       "test/itemCostEnabled.test.js",
       "test/shelfLegItemContract.test.js",
-      "backend/tests/modules/fair_stand/test_admin_items_api.py"
+      "backend/tests/modules/fair_stand/test_admin_items_api.py",
+      "test/mountFairStandBoundary.test.js",
+      "test/sidebarController.test.js"
     ],
     "fullSuite": true,
     "build": true,
