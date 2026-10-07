@@ -127,6 +127,7 @@
       "test/productionItemType.test.js",
       "test/itemCostEnabled.test.js",
       "backend/tests/modules/fair_stand/test_item_cost_enabled.py",
+      "backend/tests/modules/fair_stand/test_unit_catalog.py",
       "backend/tests/modules/fair_stand/test_admin_items_api.py",
       "backend/tests/modules/fair_stand/test_admin_catalog_api.py",
       "backend/tests/modules/fair_stand/test_item_unit_fk_migration.py",
@@ -306,6 +307,7 @@
       "test/profilesItemContract.test.js",
       "test/projectActionSaveGuard.test.js",
       "test/projectAtomicDeletion.test.js",
+      "test/defaultProjectBom.test.js",
       "test/projectBom.test.js",
       "test/projectCustomerPanel.test.js",
       "test/projectDropdownSwitchIntegration.test.js",
@@ -918,7 +920,9 @@
       "test/shelfLegItemContract.test.js",
       "backend/tests/modules/fair_stand/test_admin_items_api.py",
       "test/mountFairStandBoundary.test.js",
-      "test/sidebarController.test.js"
+      "test/sidebarController.test.js",
+      "test/defaultProjectBom.test.js",
+      "backend/tests/modules/fair_stand/test_unit_catalog.py"
     ],
     "fullSuite": true,
     "build": true,

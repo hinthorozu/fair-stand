@@ -6,7 +6,7 @@ Lokal / sunucu PostgreSQL `fair_stand` şemasının yaşayan envanteri. “Üç 
 
 **Doğrulama (2026-09-24, `models.py` + Alembic head + `item_mapper.py` + `src/`):**
 
-1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0058_item_cost_enabled`**. `0053_item_type_scene_behavior` sahne davranışını `fair_stand_item_type` satırından ayırır. `0043_panel_glass_family` ve `0044_panel_corner_glass_family` yeni kolon değildir; `panel_cam_*` / `panel_corner_cam_*` SKU satırıdır. `0057_foam_logo_item` gizli `foam_logo` production satırını ekler.
+1. Şema — aşağıdaki envanter; kolon adları `models.py` ile aynı. Alembic head: **`0059_elektrik_panosu_item`**. `0053_item_type_scene_behavior` sahne davranışını `fair_stand_item_type` satırından ayırır. `0043_panel_glass_family` ve `0044_panel_corner_glass_family` yeni kolon değildir; `panel_cam_*` / `panel_corner_cam_*` SKU satırıdır. `0057_foam_logo_item` gizli `foam_logo` production satırını ekler. `0059_elektrik_panosu_item` gizli `elektrik_panosu` satırını yoksa ekler; proje listesi bunu modül reçetesinden ayrı, miktar 1 olarak yazar.
 2. `item_mapper.py` — her ürün kolonu JSON anahtarına (veya “bootstrap’a girmez”) bağlandı.
 3. Production `src/` grep — “Nerede” hücresi gerçek okuyucu dosyadır; okunmayan kolon **DATA / TEST_ONLY / SCHEMA_ONLY** yazılır.
 4. `ITEMS.md` (alan kuyruğu + onaylı şema), `CATALOG.md`, `ROTATION.md`, `SCENE_POSE.md`, `STAND_DIMENSIONS.md` — değer kopyalanmaz; işaret edilir.
@@ -42,7 +42,7 @@ Tek `items` JSON blob’u yok. Amaç: Item kimliği sabit, isteğe bağlı 1:1 /
 | `fair_stand_rule_type` | 1× `snap` | Kural ailesi. Bootstrap `ruleTypes[]` (stand JS ayrı registry açmaz). |
 | `fair_stand_rule` | 3: `profile-top-rail`, `shelf-rail`, `top-rail` | Snap key + face/edge. Bootstrap `rules[]`. |
 | `fair_stand_rule_item_type` | 4 | Kuralı **sunan** item tipleri. Bootstrap `rules[].itemTypeKeys`. |
-| `fair_stand_items` | 121 (63 `catalog_visible=true`; 121 `is_active=true`) | Ürün kimliği + Catalog üyeliği + snap FK. Bootstrap: `is_active=true` (gizli SKU dahil). `digital_print`, `mesh_fabric`, `lightbox_fabric`, `foam_logo` gizli production kalemleridir. |
+| `fair_stand_items` | 121 (63 `catalog_visible=true`; 121 `is_active=true`) | Ürün kimliği + Catalog üyeliği + snap FK. Bootstrap: `is_active=true` (gizli SKU dahil). `digital_print`, `mesh_fabric`, `lightbox_fabric`, `foam_logo`, `elektrik_panosu` gizli production kalemleridir. `elektrik_panosu` her proje listesine miktar 1 yazılır. |
 | `fair_stand_item_dimensions` | 109 | Fiziksel / BOM ölçü. 12 Item’da satır yok: `connector_corner`, `connector_double`, `connector_single`, `connector_start`, `digital_print`, `foam_logo`, `hali`, `lightbox_fabric`, `mesh_fabric`, `sarmasik`, `shelf_leg`, `showcase_2_body`. |
 | `fair_stand_item_scene_dimensions` | 50 | Sahne kutusu override. Yoksa aynı adlı `dimensions` alanı. |
 | `fair_stand_item_strip_occupancy` | 8, hepsi `align=top` (4× strip 1, 4× strip 2) | Short-up şerit bandı. |
@@ -69,7 +69,7 @@ Migrasyon kilidi. Ürün kodu okumaz. `alembic upgrade head` yazar.
 
 | Kolon | JSON | Nedir | Neden | Nerede |
 |---|---|---|---|---|
-| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0058_item_cost_enabled` |
+| `version_num` | yok | Uygulanan Alembic revision | Şema sürümü | yalnız Alembic; head `0059_elektrik_panosu_item` |
 
 ---
 

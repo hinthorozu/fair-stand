@@ -23,6 +23,14 @@ import { applyBaseRunBom, isBaseRunItemKey } from './baseRunBom.js';
 import { collectPrintAreas } from './printAreaBom.js';
 import { resolveSplitFloorBomLines } from './floorArea.js';
 
+const DEFAULT_PROJECT_ITEM_KEY = 'elektrik_panosu';
+
+function defaultProjectLines() {
+  const item = getItem(DEFAULT_PROJECT_ITEM_KEY);
+  if (!item?.unit) return [];
+  return resolveItemBom(DEFAULT_PROJECT_ITEM_KEY, 1);
+}
+
 function freezeLine(line) {
   return Object.freeze({
     itemKey: line.itemKey,
@@ -288,6 +296,7 @@ export function resolveProjectBom(modules = [], stand = null, assetNames = null)
     baza.lines,
     splitFloorLines ?? (floorLine ? [floorLine] : []),
     resolvePrintProductionLines(printAreas),
+    defaultProjectLines(),
   ]);
   const chargedModules = chargeModuleEntries(
     moduleEntries,
