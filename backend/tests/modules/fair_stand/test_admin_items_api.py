@@ -100,6 +100,43 @@ def test_admin_item_records_list_search_filter_and_page(client, db_session, auth
     assert isinstance(body["filterOptions"].get("materials"), list)
 
 
+def test_item_unit_dropdown_lists_the_unit_catalog_not_only_used_units(client, db_session, auth_headers):
+    from datetime import UTC, datetime
+
+    from app.modules.fair_stand.infrastructure.models import FairStandUnitModel
+
+    seed_fair_stand_catalog(db_session)
+    now = datetime.now(tz=UTC)
+    db_session.add(
+        FairStandUnitModel(
+            unit_key="sefer",
+            name="Sefer",
+            symbol="sefer",
+            is_active=True,
+            created_at=now,
+            updated_at=now,
+        )
+    )
+    db_session.add(
+        FairStandUnitModel(
+            unit_key="kapali_birim",
+            name="Kapalı",
+            symbol="k",
+            is_active=False,
+            created_at=now,
+            updated_at=now,
+        )
+    )
+    db_session.flush()
+    _allow(client, {PERMISSION_ITEMS_READ})
+    response = client.get("/api/v1/fair-stand/admin/item-records", headers=auth_headers)
+    assert response.status_code == 200
+    units = response.json()["filterOptions"]["units"]
+    assert "adet" in units
+    assert "sefer" in units
+    assert "kapali_birim" not in units
+
+
 def test_admin_item_records_update_dimensions_and_components(client, db_session, auth_headers):
     seed_fair_stand_catalog(db_session)
     db_session.flush()

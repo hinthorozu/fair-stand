@@ -549,7 +549,14 @@ class AdminItemsService:
             return [str(value) for value in values if str(value).strip()]
 
         return {
-            "units": distinct_values(FairStandItemModel.unit),
+            "units": [
+                row.unit_key
+                for row in self._session.scalars(
+                    select(FairStandUnitModel)
+                    .where(FairStandUnitModel.is_active.is_(True))
+                    .order_by(FairStandUnitModel.unit_key.asc())
+                ).all()
+            ],
             "materials": distinct_values(FairStandItemModel.material),
             "shapes": distinct_values(FairStandItemModel.shape),
             "variants": distinct_values(FairStandItemModel.variant),
