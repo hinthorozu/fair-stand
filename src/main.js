@@ -88,6 +88,8 @@ import { bootstrapFairStandCatalog } from './catalogBootstrap.js';
 import { bindProjectActionSaveGuard } from './projectActionSaveGuard.js';
 import { createProductionBomPanel } from './productionBomPanel.js';
 
+let moduleDeleteConfirmOpen = false;
+
 export function startFairStandConfigurator(options = {}) {
   let cancelled = false;
   let stopRuntime = () => {};
@@ -479,24 +481,35 @@ function findContextModuleIndex(context) {
 }
 
 function deleteContextModule(context) {
+  if (moduleDeleteConfirmOpen) return;
   const index = findContextModuleIndex(context);
   if (index < 0 || index >= currentModules.length) return;
 
   const module = currentModules[index];
-  const confirmed = window.confirm(
-    `Modül ${index + 1} · ${module.widthCm} cm silinecek. Bu modüldeki renk ve görsel düzenlemeleri de kaybolacak. Devam edilsin mi?`,
-  );
+  moduleDeleteConfirmOpen = true;
+  let confirmed = false;
+  try {
+    confirmed = window.confirm(
+      `Modül ${index + 1} · ${module.widthCm} cm silinecek. Bu modüldeki renk ve görsel düzenlemeleri de kaybolacak. Devam edilsin mi?`,
+    );
+  } finally {
+    queueMicrotask(() => {
+      moduleDeleteConfirmOpen = false;
+    });
+  }
   if (!confirmed) return;
 
   currentModules.splice(index, 1);
   rebuildWall({ resetView: false });
 }
 
-window.addEventListener('fair-stand:delete-selected-module', (event) => {
+function onDeleteSelectedModule(event) {
   const detail = event?.detail;
   if (!detail?.moduleId && !Number.isInteger(detail?.moduleIndex)) return;
   deleteContextModule(detail);
-});
+}
+
+window.addEventListener('fair-stand:delete-selected-module', onDeleteSelectedModule);
 
 function normalizeContinuousSide(context, side) {
   if (side !== 'left' && side !== 'right') return side;
@@ -3160,6 +3173,7 @@ const historicalEditWatch = setInterval(() => {
     clearInterval(historicalEditWatch);
     autosaveController?.disable?.();
     productionBomPanel?.destroy?.();
+    window.removeEventListener('fair-stand:delete-selected-module', onDeleteSelectedModule);
     scene3d?.dispose?.();
     unbindProjectActionSaveGuard?.();
   };

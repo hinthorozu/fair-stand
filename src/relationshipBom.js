@@ -769,7 +769,9 @@ export function applyRelationshipBomAdjustments(lines = [], joints = []) {
 
 /** Write this module's paying-face connector delta onto its own recipe lines. */
 export function applyModuleConnectorCharge(lines = [], charge = null) {
-  if (!charge || (!charge.single && !charge.corner && !charge.double)) return lines;
+  if (!charge || (!charge.single && !charge.corner && !charge.double && !charge.profile && !charge.start)) {
+    return lines;
+  }
   const next = lines.map((line) => ({ ...line }));
 
   function adjust(itemKey, delta) {
@@ -794,6 +796,8 @@ export function applyModuleConnectorCharge(lines = [], charge = null) {
   adjust('connector_single', charge.single);
   adjust('connector_corner', charge.corner);
   adjust('connector_double', charge.double);
+  adjust('connector_start', charge.start);
+  if (charge.profileKey) adjust(charge.profileKey, charge.profile);
   return next.filter((line) => Number(line.quantity) > 0);
 }
 
@@ -948,6 +952,217 @@ function recipeChildKeyByType(itemKey, type) {
     if (getItem(row?.itemKey)?.type === type) return row.itemKey;
   }
   return null;
+}
+
+function recipeChildQuantity(itemKey, childKey) {
+  const rows = getItem(itemKey)?.composition?.items;
+  if (!Array.isArray(rows) || !childKey) return 0;
+  return rows.reduce((sum, row) => (
+    row?.itemKey === childKey ? sum + (Number(row.quantity) || 0) : sum
+  ), 0);
+}
+
+function sameFootprint(a, b) {
+  return a.axis === b.axis
+    && nearlyEqual(a.fixedCm, b.fixedCm)
+    && nearlyEqual(a.startCm, b.startCm)
+    && nearlyEqual(a.endCm, b.endCm);
+}
+
+function zConnected(a, b) {
+  return rangesOverlap(a.z, b.z)
+    || nearlyEqual(a.z.maxCm, b.z.minCm)
+    || nearlyEqual(b.z.maxCm, a.z.minCm);
+}
+
+function strictlyContainsZ(outer, inner) {
+  return rangeContains(outer.z, inner.z)
+    && (outer.z.maxCm - outer.z.minCm) > (inner.z.maxCm - inner.z.minCm) + EPSILON_CM;
+}
+
+function extremeFrame(frames, edge) {
+  const limit = edge === 'min'
+    ? Math.min(...frames.map((frame) => frame.z.minCm))
+    : Math.max(...frames.map((frame) => frame.z.maxCm));
+  return frames
+    .filter((frame) => nearlyEqual(edge === 'min' ? frame.z.minCm : frame.z.maxCm, limit))
+    .sort((a, b) => {
+      const span = (b.z.maxCm - b.z.minCm) - (a.z.maxCm - a.z.minCm);
+      if (Math.abs(span) > EPSILON_CM) return span;
+      return a.moduleId < b.moduleId ? -1 : 1;
+    })[0];
+}
+
+function zClusters(frames) {
+  const sorted = frames.slice().sort((a, b) => a.z.minCm - b.z.minCm || a.z.maxCm - b.z.maxCm);
+  const clusters = [];
+  for (const frame of sorted) {
+    const current = clusters[clusters.length - 1];
+    if (current && current.some((other) => zConnected(other, frame))) current.push(frame);
+    else clusters.push([frame]);
+  }
+  return clusters;
+}
+
+/**
+ * Same plan footprint and exact width. The column keeps the bottom rail, the top rail,
+ * and two start connectors on the bottom module. A short covered by a taller module
+ * drops its own rails and starts. A door keeps its single profile; shorts on that door
+ * do not add another profile. Showcase keeps its own rails.
+ * Shorts sitting on a 346.5 post become one upright at each plan end.
+ */
+function applySameWidthShortColumns(book, frames) {
+  const groups = [];
+  for (const frame of frames) {
+    const group = groups.find((entry) => sameFootprint(entry[0], frame));
+    if (group) group.push(frame);
+    else groups.push([frame]);
+  }
+
+  const stacks = [];
+  for (const group of groups) {
+    if (!group.some((frame) => frame.kind === 'short')) continue;
+    for (const column of zClusters(group)) {
+      if (column.length < 2 || !column.some((frame) => frame.kind === 'short')) continue;
+      applyShortColumnRails(book, column);
+      const stack = uprightStack(column);
+      if (stack) stacks.push(stack);
+    }
+  }
+  applyStackedUprightPosts(book, stacks);
+}
+
+const STACKED_UPRIGHT_RANK = Object.freeze({
+  upright_396: 1,
+  upright_445_5: 2,
+  upright_495: 3,
+});
+
+function combinedUprightKey(parts) {
+  const has99 = parts.has('upright_99');
+  const hasShort = parts.has('upright_49_5');
+  if (has99 && hasShort) return 'upright_495';
+  if (has99) return 'upright_445_5';
+  if (hasShort) return 'upright_396';
+  return null;
+}
+
+/** Shorts whose Z starts where the piece below ends. A short inside the host is not a stack. */
+function uprightStack(column) {
+  const hosts = column.filter((frame) => (
+    frame.kind !== 'short'
+    && recipeChildKeyByType(frame.itemKey, 'upright') === 'upright_346_5'
+  ));
+  if (!hosts.length) return null;
+  const members = hosts.slice();
+  const seen = new Set(hosts.map((frame) => frame.moduleId));
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const frame of column) {
+      if (frame.kind !== 'short' || seen.has(frame.moduleId)) continue;
+      if (!members.some((lower) => nearlyEqual(frame.z.minCm, lower.z.maxCm))) continue;
+      seen.add(frame.moduleId);
+      members.push(frame);
+      grew = true;
+    }
+  }
+  const parts = new Set(['upright_346_5']);
+  for (const frame of members) {
+    if (frame.kind === 'short' && frame.uprightKey) parts.add(frame.uprightKey);
+  }
+  if (parts.size < 2) return null;
+  const combinedKey = combinedUprightKey(parts);
+  if (!combinedKey) return null;
+  return { host: hosts[0], combinedKey, parts };
+}
+
+/**
+ * One combined upright per plan end. A corner or end shared by two stacks is one post.
+ * 346.5+49.5 → upright_396. 346.5+99 → upright_445_5. 346.5+99+49.5 → upright_495.
+ */
+function applyStackedUprightPosts(book, stacks) {
+  const points = new Map();
+  for (const stack of stacks) {
+    const ends = segmentEndpoints(stack.host);
+    for (const side of ['start', 'end']) {
+      const key = pointKey(ends[side]);
+      const bucket = points.get(key);
+      if (bucket) bucket.push(stack);
+      else points.set(key, [stack]);
+    }
+  }
+  for (const bucket of points.values()) {
+    let combinedKey = bucket[0].combinedKey;
+    for (const stack of bucket) {
+      if ((STACKED_UPRIGHT_RANK[stack.combinedKey] ?? 0) > (STACKED_UPRIGHT_RANK[combinedKey] ?? 0)) {
+        combinedKey = stack.combinedKey;
+      }
+    }
+    book.add(combinedKey, 1);
+    const remove = new Set();
+    for (const stack of bucket) {
+      for (const part of stack.parts) remove.add(part);
+    }
+    for (const part of remove) book.add(part, -1);
+  }
+}
+
+function applyShortColumnRails(book, column) {
+  const bottom = extremeFrame(column, 'min');
+  const top = extremeFrame(column, 'max');
+  const doorColumn = column.some((frame) => frame.role === 'door');
+  for (const frame of column) {
+    const profileKey = frame.profileKey || recipeChildKeyByType(frame.itemKey, 'profile');
+    const profileHave = recipeChildQuantity(frame.itemKey, profileKey);
+    const startHave = recipeChildQuantity(frame.itemKey, 'connector_start');
+    const covered = column.some((other) => other !== frame && strictlyContainsZ(other, frame));
+
+    if (frame.kind !== 'short') {
+      const twoRailHost = profileHave === 2 && (frame.role === 'wall' || frame.role === 'separator');
+      if (!twoRailHost) continue;
+      let profileDrop = 0;
+      if (frame !== bottom) profileDrop += 1;
+      if (frame !== top) profileDrop += 1;
+      profileDrop = Math.min(profileDrop, profileHave);
+      if (profileDrop && profileKey) {
+        book.add(profileKey, -profileDrop);
+        book.charge(frame.moduleId, 0, 0, 0, { profile: -profileDrop, profileKey });
+      }
+      if (frame !== bottom && startHave) {
+        book.add('connector_start', -startHave);
+        book.charge(frame.moduleId, 0, 0, 0, { start: -startHave });
+      }
+      continue;
+    }
+
+    let profileKeep = 0;
+    let startKeep = 0;
+    if (covered || doorColumn) {
+      profileKeep = 0;
+      startKeep = 0;
+    } else if (frame === bottom && frame === top) {
+      profileKeep = profileHave;
+      startKeep = Math.min(2, startHave);
+    } else {
+      if (frame === bottom) {
+        profileKeep += 1;
+        startKeep = Math.min(2, startHave);
+      }
+      if (frame === top) profileKeep += 1;
+    }
+    profileKeep = Math.min(profileKeep, profileHave);
+    const profileDelta = profileKeep - profileHave;
+    const startDelta = startKeep - startHave;
+    if (profileDelta && profileKey) {
+      book.add(profileKey, profileDelta);
+      book.charge(frame.moduleId, 0, 0, 0, { profile: profileDelta, profileKey });
+    }
+    if (startDelta) {
+      book.add('connector_start', startDelta);
+      book.charge(frame.moduleId, 0, 0, 0, { start: startDelta });
+    }
+  }
 }
 
 function placementOriginZCm(module) {
@@ -1228,12 +1443,25 @@ function createDeltaBook() {
     if (!itemKey || !amount) return;
     deltas.set(itemKey, (deltas.get(itemKey) ?? 0) + amount);
   };
-  const charge = (moduleId, single, corner, double = 0) => {
-    if (!moduleId || (!single && !corner && !double)) return;
-    const current = moduleCharges.get(moduleId) ?? { moduleId, single: 0, corner: 0, double: 0 };
+  const charge = (moduleId, single, corner, double = 0, extras = null) => {
+    const profile = Number(extras?.profile) || 0;
+    const start = Number(extras?.start) || 0;
+    if (!moduleId || (!single && !corner && !double && !profile && !start)) return;
+    const current = moduleCharges.get(moduleId) ?? {
+      moduleId,
+      single: 0,
+      corner: 0,
+      double: 0,
+      profile: 0,
+      start: 0,
+      profileKey: null,
+    };
     current.single += single;
     current.corner += corner;
     current.double += double;
+    current.profile += profile;
+    current.start += start;
+    if (extras?.profileKey) current.profileKey = extras.profileKey;
     moduleCharges.set(moduleId, current);
   };
   return {
@@ -1273,6 +1501,15 @@ function applyEndToEndShortJoint(book, a, b, geometry) {
   book.noteJoint();
 }
 
+function shortCornerUnits(payer, partner) {
+  if (payer.kind !== 'short' || partner.kind !== 'short') return 1;
+  const panelKey = recipeChildKeyByType(payer.itemKey, 'panel');
+  const bands = recipeChildQuantity(payer.itemKey, panelKey);
+  const singles = recipeChildQuantity(payer.itemKey, 'connector_single');
+  const count = bands > 0 ? bands : 1;
+  return singles > 0 ? Math.min(count, singles) : count;
+}
+
 function applyCornerShortJoint(book, a, b, geometry) {
   if (!pairZOk(a, b)) return;
   const payA = partnerOnFront(a, b, geometry.point) && hasEndpointSingle(a);
@@ -1287,11 +1524,12 @@ function applyCornerShortJoint(book, a, b, geometry) {
   if (payA) takeSlot(a, geometry.sideA, 'single');
   if (payB) takeSlot(b, geometry.sideB, 'single');
   book.add(dropped.uprightKey, -1);
-  const payers = (payA ? 1 : 0) + (payB ? 1 : 0);
-  book.add('connector_single', -payers);
-  book.add('connector_corner', payers);
-  if (payA) book.charge(a.moduleId, -1, 1);
-  if (payB) book.charge(b.moduleId, -1, 1);
+  const unitsA = payA ? shortCornerUnits(a, b) : 0;
+  const unitsB = payB ? shortCornerUnits(b, a) : 0;
+  book.add('connector_single', -(unitsA + unitsB));
+  book.add('connector_corner', unitsA + unitsB);
+  if (unitsA) book.charge(a.moduleId, -unitsA, unitsA);
+  if (unitsB) book.charge(b.moduleId, -unitsB, unitsB);
   if (payA) noteCornerPanels(book, a, b);
   if (payB) noteCornerPanels(book, b, a);
   book.noteJoint();
@@ -1344,10 +1582,16 @@ function applyProfileRail(book, wall, profile) {
 /**
  * Wall Short joints against framed partners (any relationshipBomRole) and profile rail replacement.
  * Full-height locked pairs are not replanned here. Face, fixture-side and corner-face produce no delta.
- * A short band converts one endpoint single per paying face, never the full-height 7/6/5/4/3 constants.
+ * A short meeting a full-height partner converts one endpoint single per paying face.
+ * Two shorts at a corner convert one single per panel band on each paying face.
+ * Those counts never reuse the full-height 7/6/5/4/3 constants.
  * The paying full-height module converts only the panel bands overlapped by that short.
  * A field upright whose post already occupies a free short endpoint consumes that short upright once.
  * Each short upright end, endpoint single, and top/bottom rail can be consumed once.
+ * A same-footprint column that contains a short keeps one bottom rail, one top rail, and two
+ * start connectors on the bottom module. Different widths do not form that column.
+ * Shorts stacked on a 346.5 post replace those uprights with upright_396, upright_445_5,
+ * or upright_495. One post per plan end; a shared end counts once.
  */
 export function planWallShortRelationshipBom(modules = []) {
   const list = Array.isArray(modules) ? modules : [];
@@ -1424,6 +1668,8 @@ export function planWallShortRelationshipBom(modules = []) {
   for (const candidate of postCandidates) {
     applyStructuralUprightPost(book, candidate.wall, candidate.upright);
   }
+
+  applySameWidthShortColumns(book, structural);
 
   const notes = [];
   if (book.jointCount) {

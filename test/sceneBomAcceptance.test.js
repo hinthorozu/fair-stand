@@ -194,7 +194,9 @@ function expectShortJoint(leftKey, rightKey, kind) {
     return bump(bump(bump(expected, uprightKey, -1), 'connector_single', -2), 'connector_double', 1);
   }
   if (kind === 'corner') {
-    expected = bump(bump(bump(expected, uprightKey, -1), 'connector_single', -2), 'connector_corner', 2);
+    const bands = (key) => (isShort(key) && key.includes('_short_2') ? 2 : 1);
+    const units = isShort(leftKey) && isShort(rightKey) ? bands(leftKey) + bands(rightKey) : 2;
+    expected = bump(bump(bump(expected, uprightKey, -1), 'connector_single', -units), 'connector_corner', units);
     return swapParticipant(
       swapParticipant(expected, leftKey, overlapLimit(leftKey, rightKey)),
       rightKey,

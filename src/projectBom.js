@@ -215,10 +215,16 @@ function mergedConnectorCharges(relationshipCharges, shortCharges) {
       single: 0,
       corner: 0,
       double: 0,
+      profile: 0,
+      start: 0,
+      profileKey: null,
     };
     current.single += charge.single || 0;
     current.corner += charge.corner || 0;
     current.double += charge.double || 0;
+    current.profile += charge.profile || 0;
+    current.start += charge.start || 0;
+    if (charge.profileKey) current.profileKey = charge.profileKey;
     byModule.set(charge.moduleId, current);
   }
   return [...byModule.values()];
