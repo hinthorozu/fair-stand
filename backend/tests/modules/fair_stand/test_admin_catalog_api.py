@@ -3,10 +3,6 @@ from app.modules.fair_stand.api.dependencies import (
     PERMISSION_CATALOG_CREATE,
     PERMISSION_CATALOG_READ,
     PERMISSION_CATALOG_UPDATE,
-    PERMISSION_PREVIEWS_ARCHIVE,
-    PERMISSION_PREVIEWS_CREATE,
-    PERMISSION_PREVIEWS_READ,
-    PERMISSION_PREVIEWS_UPDATE,
 )
 from app.modules.fair_stand.infrastructure.seed_catalog import seed_fair_stand_catalog
 from app.modules.fair_stand.api.dependencies import get_authorization_adapter
@@ -232,10 +228,6 @@ def test_organization_admin_and_normal_user_denied_for_admin_mutations(client, d
         PERMISSION_CATALOG_CREATE,
         PERMISSION_CATALOG_UPDATE,
         PERMISSION_CATALOG_ARCHIVE,
-        PERMISSION_PREVIEWS_READ,
-        PERMISSION_PREVIEWS_CREATE,
-        PERMISSION_PREVIEWS_UPDATE,
-        PERMISSION_PREVIEWS_ARCHIVE,
     }
     _deny(client, org_codes)
     try:

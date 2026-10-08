@@ -21,10 +21,6 @@ from app.modules.fair_stand.api.dependencies import (
     PERMISSION_ITEMS_CREATE,
     PERMISSION_ITEMS_READ,
     PERMISSION_ITEMS_UPDATE,
-    PERMISSION_PREVIEWS_ARCHIVE,
-    PERMISSION_PREVIEWS_CREATE,
-    PERMISSION_PREVIEWS_READ,
-    PERMISSION_PREVIEWS_UPDATE,
     PERMISSION_SETTINGS_READ,
     PERMISSION_SETTINGS_UPDATE,
     get_admin_catalog_service,
@@ -440,7 +436,7 @@ def admin_update_item_catalog(
 
 @router.get("/admin/previews")
 def admin_list_previews(
-    auth: AuthContext = Depends(require_permission(PERMISSION_PREVIEWS_READ)),
+    auth: AuthContext = Depends(require_permission(PERMISSION_CATALOG_READ)),
     service: AdminCatalogService = Depends(get_admin_catalog_service),
 ) -> list[dict[str, Any]]:
     _ = auth
@@ -450,7 +446,7 @@ def admin_list_previews(
 @router.post("/admin/previews", status_code=status.HTTP_201_CREATED)
 def admin_create_preview(
     body: PreviewCreateBody,
-    auth: AuthContext = Depends(require_permission(PERMISSION_PREVIEWS_CREATE)),
+    auth: AuthContext = Depends(require_permission(PERMISSION_CATALOG_CREATE)),
     service: AdminCatalogService = Depends(get_admin_catalog_service),
 ) -> dict[str, Any]:
     _ = auth
@@ -471,7 +467,7 @@ def admin_create_preview(
 def admin_update_preview(
     preview_id: int,
     body: PreviewUpdateBody,
-    auth: AuthContext = Depends(require_permission(PERMISSION_PREVIEWS_UPDATE)),
+    auth: AuthContext = Depends(require_permission(PERMISSION_CATALOG_UPDATE)),
     service: AdminCatalogService = Depends(get_admin_catalog_service),
 ) -> dict[str, Any]:
     _ = auth
@@ -492,7 +488,7 @@ def admin_update_preview(
 @router.post("/admin/previews/{preview_id}/archive")
 def admin_archive_preview(
     preview_id: int,
-    auth: AuthContext = Depends(require_permission(PERMISSION_PREVIEWS_ARCHIVE)),
+    auth: AuthContext = Depends(require_permission(PERMISSION_CATALOG_ARCHIVE)),
     service: AdminCatalogService = Depends(get_admin_catalog_service),
 ) -> dict[str, Any]:
     _ = auth
@@ -506,7 +502,7 @@ def admin_archive_preview(
 @router.post("/admin/previews/{preview_id}/restore")
 def admin_restore_preview(
     preview_id: int,
-    auth: AuthContext = Depends(require_permission(PERMISSION_PREVIEWS_ARCHIVE)),
+    auth: AuthContext = Depends(require_permission(PERMISSION_CATALOG_ARCHIVE)),
     service: AdminCatalogService = Depends(get_admin_catalog_service),
 ) -> dict[str, Any]:
     _ = auth
