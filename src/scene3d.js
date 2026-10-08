@@ -1613,6 +1613,7 @@ export function createStandScene(
   function disposeObject(object) {
     object.traverse((child) => {
       if (!child.isMesh && !child.isLineSegments) return;
+      if (child.userData?.retainRendererAsset) return;
       child.geometry?.dispose();
       const materials = Array.isArray(child.material) ? child.material : [child.material];
       materials.forEach((material) => {
@@ -6566,6 +6567,102 @@ function createKettleModule(moduleState, moduleIndex) {
   return { group, surfaces: [proxy] };
 }
 
+const floodlightRendererAssets = {
+  ready: false,
+};
+
+function floodlightRoundedRectShape(width, height, radius) {
+  const shape = new THREE.Shape();
+  const x = -width / 2;
+  const y = -height / 2;
+  const r = Math.min(radius, width / 2, height / 2);
+  shape.moveTo(x + r, y);
+  shape.lineTo(x + width - r, y);
+  shape.quadraticCurveTo(x + width, y, x + width, y + r);
+  shape.lineTo(x + width, y + height - r);
+  shape.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  shape.lineTo(x + r, y + height);
+  shape.quadraticCurveTo(x, y + height, x, y + height - r);
+  shape.lineTo(x, y + r);
+  shape.quadraticCurveTo(x, y, x + r, y);
+  return shape;
+}
+
+function floodlightRoundedBoxGeometry(width, height, depth, radius, bevel = 0.008) {
+  const geometry = new THREE.ExtrudeGeometry(
+    floodlightRoundedRectShape(width, height, radius),
+    {
+      depth,
+      bevelEnabled: true,
+      bevelThickness: bevel,
+      bevelSize: bevel,
+      bevelSegments: 2,
+      curveSegments: 4,
+      steps: 1,
+    },
+  );
+  geometry.translate(0, 0, -depth / 2);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function ensureFloodlightRendererAssets() {
+  if (floodlightRendererAssets.ready) return floodlightRendererAssets;
+  floodlightRendererAssets.bodyMaterial = new THREE.MeshStandardMaterial({
+    color: 0x101216,
+    roughness: 0.3,
+    metalness: 0.72,
+  });
+  floodlightRendererAssets.edgeMaterial = new THREE.MeshStandardMaterial({
+    color: 0x24282d,
+    roughness: 0.34,
+    metalness: 0.7,
+  });
+  floodlightRendererAssets.glassMaterial = new THREE.MeshStandardMaterial({
+    color: 0xf8fff4,
+    emissive: 0xf2ffe8,
+    emissiveIntensity: 1.65,
+    roughness: 0.08,
+    metalness: 0,
+    side: THREE.DoubleSide,
+  });
+  floodlightRendererAssets.ledMaterial = new THREE.MeshStandardMaterial({
+    color: 0xfff8d8,
+    emissive: 0xfff2b8,
+    emissiveIntensity: 2.5,
+    roughness: 0.22,
+    metalness: 0,
+  });
+  floodlightRendererAssets.capMaterial = new THREE.MeshStandardMaterial({
+    color: 0x70757b,
+    roughness: 0.3,
+    metalness: 0.82,
+  });
+  floodlightRendererAssets.mount = floodlightRoundedBoxGeometry(0.13, 0.026, 0.075, 0.012, 0.004);
+  floodlightRendererAssets.bracketBase = floodlightRoundedBoxGeometry(0.235, 0.026, 0.035, 0.01, 0.003);
+  floodlightRendererAssets.ear = floodlightRoundedBoxGeometry(0.026, 0.105, 0.034, 0.01, 0.003);
+  floodlightRendererAssets.body = floodlightRoundedBoxGeometry(0.305, 0.178, 0.052, 0.018, 0.007);
+  floodlightRendererAssets.fin = floodlightRoundedBoxGeometry(0.012, 0.128, 0.018, 0.004, 0.002);
+  floodlightRendererAssets.bezel = new THREE.ShapeGeometry(floodlightRoundedRectShape(0.272, 0.145, 0.012), 4);
+  floodlightRendererAssets.lens = new THREE.ShapeGeometry(floodlightRoundedRectShape(0.246, 0.119, 0.009), 4);
+  floodlightRendererAssets.led = new THREE.CircleGeometry(0.0042, 8);
+  floodlightRendererAssets.screw = new THREE.CylinderGeometry(0.016, 0.016, 0.014, 12);
+  floodlightRendererAssets.cap = new THREE.CylinderGeometry(0.009, 0.009, 0.016, 12);
+  floodlightRendererAssets.ready = true;
+  return floodlightRendererAssets;
+}
+
+function addFloodlightMesh(parent, geometry, material, position, rotationZ = 0) {
+  const mesh = new THREE.Mesh(geometry, material);
+  if (position) mesh.position.set(position[0], position[1], position[2]);
+  if (rotationZ) mesh.rotation.z = rotationZ;
+  mesh.castShadow = false;
+  mesh.receiveShadow = false;
+  mesh.userData.retainRendererAsset = true;
+  parent.add(mesh);
+  return mesh;
+}
+
 function createLedFloodlightModule(moduleState, moduleIndex) {
   const item = getItem('led_floodlight');
   const widthCm = Number(moduleState.widthCm ?? item.dimensions.widthCm);
@@ -6581,172 +6678,43 @@ function createLedFloodlightModule(moduleState, moduleIndex) {
     depthCm,
     heightCm,
   };
+  const assets = ensureFloodlightRendererAssets();
 
-  const bodyMaterial = new THREE.MeshStandardMaterial({
-    color: 0x101216,
-    roughness: 0.3,
-    metalness: 0.72,
-  });
-  const edgeMaterial = new THREE.MeshStandardMaterial({
-    color: 0x24282d,
-    roughness: 0.34,
-    metalness: 0.7,
-  });
-  const glassMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xf8fff4,
-    emissive: 0xf2ffe8,
-    emissiveIntensity: 1.65,
-    roughness: 0.08,
-    metalness: 0,
-    transmission: 0.08,
-    clearcoat: 0.75,
-    clearcoatRoughness: 0.1,
-    side: THREE.DoubleSide,
-  });
-  const ledMaterial = new THREE.MeshStandardMaterial({
-    color: 0xfff8d8,
-    emissive: 0xfff2b8,
-    emissiveIntensity: 2.5,
-    roughness: 0.22,
-    metalness: 0,
-  });
+  addFloodlightMesh(group, assets.mount, assets.bodyMaterial, [0, 0.014, 0.012]);
 
-  function roundedRectShape(width, height, radius) {
-    const shape = new THREE.Shape();
-    const x = -width / 2;
-    const y = -height / 2;
-    const r = Math.min(radius, width / 2, height / 2);
-    shape.moveTo(x + r, y);
-    shape.lineTo(x + width - r, y);
-    shape.quadraticCurveTo(x + width, y, x + width, y + r);
-    shape.lineTo(x + width, y + height - r);
-    shape.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
-    shape.lineTo(x + r, y + height);
-    shape.quadraticCurveTo(x, y + height, x, y + height - r);
-    shape.lineTo(x, y + r);
-    shape.quadraticCurveTo(x, y, x + r, y);
-    return shape;
-  }
-
-  function roundedBoxGeometry(width, height, depth, radius, bevel = 0.008) {
-    const geometry = new THREE.ExtrudeGeometry(
-      roundedRectShape(width, height, radius),
-      {
-        depth,
-        bevelEnabled: true,
-        bevelThickness: bevel,
-        bevelSize: bevel,
-        bevelSegments: 3,
-        curveSegments: 8,
-        steps: 1,
-      },
-    );
-    geometry.translate(0, 0, -depth / 2);
-    geometry.computeVertexNormals();
-    return geometry;
-  }
-
-  // Profile oturan alçak bağlantı pabucu.
-  const mount = new THREE.Mesh(
-    roundedBoxGeometry(0.13, 0.026, 0.075, 0.012, 0.004),
-    bodyMaterial.clone(),
-  );
-  mount.position.set(0, 0.014, 0.012);
-  mount.castShadow = true;
-  group.add(mount);
-
-  // Gerçek floodlight tipi kalın U braket.
   const bracket = new THREE.Group();
   bracket.position.set(0, 0.045, 0.045);
   group.add(bracket);
-
-  const bracketBase = new THREE.Mesh(
-    roundedBoxGeometry(0.235, 0.026, 0.035, 0.01, 0.003),
-    edgeMaterial.clone(),
-  );
-  bracketBase.castShadow = true;
-  bracket.add(bracketBase);
-
+  addFloodlightMesh(bracket, assets.bracketBase, assets.edgeMaterial);
   [-1, 1].forEach((side) => {
-    const ear = new THREE.Mesh(
-      roundedBoxGeometry(0.026, 0.105, 0.034, 0.01, 0.003),
-      edgeMaterial.clone(),
-    );
-    ear.position.set(side * 0.106, 0.057, 0.018);
-    ear.castShadow = true;
-    bracket.add(ear);
+    addFloodlightMesh(bracket, assets.ear, assets.edgeMaterial, [side * 0.106, 0.057, 0.018]);
   });
 
-  // Projektör kafa grubu: ince, yuvarlatılmış metal kasa.
   const head = new THREE.Group();
   head.position.set(0, 0.145, 0.108);
   head.rotation.x = THREE.MathUtils.degToRad(38);
   group.add(head);
+  addFloodlightMesh(head, assets.body, assets.bodyMaterial);
 
-  const body = new THREE.Mesh(
-    roundedBoxGeometry(0.305, 0.178, 0.052, 0.018, 0.007),
-    bodyMaterial.clone(),
-  );
-  body.castShadow = true;
-  body.receiveShadow = true;
-  head.add(body);
+  addFloodlightMesh(head, assets.bezel, assets.edgeMaterial, [0, 0, 0.032]);
+  const lens = addFloodlightMesh(head, assets.lens, assets.glassMaterial, [0, 0, 0.0335]);
 
-  // Ön yüzde hafif yükseltilmiş çerçeve + gömülü cam.
-  const bezel = new THREE.Mesh(
-    new THREE.ShapeGeometry(roundedRectShape(0.272, 0.145, 0.012), 8),
-    edgeMaterial.clone(),
-  );
-  bezel.position.z = 0.032;
-  head.add(bezel);
-
-  const lens = new THREE.Mesh(
-    new THREE.ShapeGeometry(roundedRectShape(0.246, 0.119, 0.009), 8),
-    glassMaterial,
-  );
-  lens.position.z = 0.0335;
-  head.add(lens);
-
-  // LED dizisi: camın arkasında küçük ışık noktaları.
   const ledGroup = new THREE.Group();
   ledGroup.position.z = 0.0342;
   for (let row = -2; row <= 2; row += 1) {
     for (let col = -4; col <= 4; col += 1) {
-      const led = new THREE.Mesh(new THREE.CircleGeometry(0.0042, 10), ledMaterial);
-      led.position.set(col * 0.023, row * 0.021, 0);
-      ledGroup.add(led);
+      addFloodlightMesh(ledGroup, assets.led, assets.ledMaterial, [col * 0.023, row * 0.021, 0]);
     }
   }
   head.add(ledGroup);
 
-  // Arka soğutucu kanatlar, silüeti gerçek projektöre yaklaştırır.
   for (let index = -4; index <= 4; index += 1) {
-    const fin = new THREE.Mesh(
-      roundedBoxGeometry(0.012, 0.128, 0.018, 0.004, 0.002),
-      edgeMaterial.clone(),
-    );
-    fin.position.set(index * 0.027, 0, -0.039);
-    fin.castShadow = true;
-    head.add(fin);
+    addFloodlightMesh(head, assets.fin, assets.edgeMaterial, [index * 0.027, 0, -0.039]);
   }
 
-  // Braket pivot vidaları.
   [-1, 1].forEach((side) => {
-    const screw = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.016, 0.016, 0.014, 20),
-      edgeMaterial.clone(),
-    );
-    screw.rotation.z = Math.PI / 2;
-    screw.position.set(side * 0.157, 0.01, 0);
-    screw.castShadow = true;
-    head.add(screw);
-
-    const cap = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.009, 0.009, 0.016, 20),
-      new THREE.MeshStandardMaterial({ color: 0x70757b, roughness: 0.3, metalness: 0.82 }),
-    );
-    cap.rotation.z = Math.PI / 2;
-    cap.position.set(side * 0.166, 0.01, 0);
-    head.add(cap);
+    addFloodlightMesh(head, assets.screw, assets.edgeMaterial, [side * 0.157, 0.01, 0], Math.PI / 2);
+    addFloodlightMesh(head, assets.cap, assets.capMaterial, [side * 0.166, 0.01, 0], Math.PI / 2);
   });
 
   // Panel yüzüne gerçek aydınlatma.
