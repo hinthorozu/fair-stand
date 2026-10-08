@@ -141,14 +141,14 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 ### B.13. Yan yana çiftli ve iç köşe — duvar ailesi
 
 - **Durum:** KOD — 2026-09-27. Duvar eklemi durur. Baza dizisi ve aynı genişlikteki host sırtı `baseRunBom.js` içinde. Short-up yok. F-031 defterde OPEN; kapanış kaydı yok.
-- **Karar:** Kilitli çift yalnız duvarın duvar, kapı, separatör (sarmaşık dahil) veya vitrin 2/3 ile birleşimidir. Yan yana: ortak dikme, çiftli aparat, paneller aynı kalır. İç köşe: ortak dikme, köşe aparatı, çiftli 0. Düz panel `panel_48_5/98/147_5/197` → `panel_corner_42_5/92/142_5/192`. Kapı ve vitrin `panel_98` → `panel_corner_92`. Separatör paneli değişmez. Kapı-kapı eklem değildir.
-- **Yan yana (tek eklem):** Duvar↔duvar ve duvar↔separatör: tekli 12 (6+6), çiftli 7, dikme 3, başlangıç 4. Duvar↔kapı: tekli 8 (6+2), çiftli 3. Duvar↔vitrin 3: tekli 12 (9+3), çiftli 4, başlangıç 6. Duvar↔vitrin 2: tekli 12 (8+4), çiftli 5, başlangıç 6.
+- **Karar:** Kilitli çift, tam boy duvar, kapı, separatör (sarmaşık dahil) ve vitrin 2/3 arasındaki her birleşimdir. Separatör, duvar yüzüyle aynı dikme ve aparat hesabını kullanır. Yan yana: ortak dikme, çiftli aparat, paneller aynı kalır. İç köşe: ortak dikme, köşe aparatı, çiftli 0. T: ortak dikme, köşe aparatı, çiftli 0. Düz panel `panel_48_5/98/147_5/197` → `panel_corner_42_5/92/142_5/192`. Kapı ve vitrin `panel_98` → `panel_corner_92`. Separatör paneli değişmez.
+- **Yan yana (tek eklem):** Duvar↔duvar ve duvar↔separatör: tekli 12 (6+6), çiftli 7, dikme 3, başlangıç 4. Duvar↔kapı: tekli 8 (6+2), çiftli 3. Duvar↔vitrin 3: tekli 12 (9+3), çiftli 4, başlangıç 6. Duvar↔vitrin 2: tekli 12 (8+4), çiftli 5, başlangıç 6. Aynı yüz hesabı duvarsız çiftte de durur. İki separatör 50: tekli 12, çiftli 7, dikme 3. İki kapı: tekli 4, çiftli 3, dikme 3. Vitrin 2↔vitrin 3: tekli 8, çiftli 4, dikme 3.
 - **İç köşe (tek eklem):** Duvar tarafı −6 tekli +6 köşe, kalan tekli 7. Kapı −2/+2. Vitrin 3 −3/+3. Vitrin 2 −4/+4. İki duvar: tekli 14, köşe 12, dikme 3. Duvar+kapı: tekli 10, köşe 8. Duvar+vitrin 3: tekli 11, köşe 9. Duvar+vitrin 2: tekli 12, köşe 10. Separatör köşesi B.12.
 - **Ön / arka:** Köşe aparatı yalnız diğer modülün gövdesi bu modülün ön yüzündeyse yazılır. Arkada duran modül tekliyi korur, köşe almaz. Panel değişimi iki katılımcıda da olur. Dikme −1 durur. İki `wall_100`, arka yüz: tekli 20, köşe 6, başlangıç 4, dikme 3.
 - **T:** Çiftli 0. Dikme tasarrufu katılımcı sayısı − 1. Köşe, ön yüze bakan ucun kilitli iç köşe deltasıdır. Duvarın ortasına gelen dal: host düz paneli korur ve köşe ödemez, dal öder (dikme 3, çiftli 0, köşe 6). Aynı noktada iki doğrultuda duvar + dal tek T’dir (dikme 4, çiftli 0, köşe 16, başlangıç 8).
 - **Baza:** Serbest dizide `n` baza için panel `2n+2`, başlangıç panel × 2, tekli `2n+6`, dikme 49,5 ve profil 41,5 `2n+2`, dışta 2 yanak. Aynı genişlikte duvar, separatör veya vitrin sırtında o bazanın uzun profili 2 kalır, uzun panelden biri düşer. Paylaşılan arka dikme bir kez düşer. Host satırı durur.
 - **Kaynak:** `src/relationshipBom.js`, `src/baseRunBom.js`. Test: `test/relationshipBomJoints.test.js`, `test/baseRunBom.test.js`.
-- **Yasak:** Aparat adedini kısa reçetedeki tekli sayısından ölçeklemek; short-up uydurmak; kapı-kapıya çiftli veya köşe yazmak
+- **Yasak:** Aparat adedini kısa reçetedeki tekli sayısından ölçeklemek; short-up uydurmak; separatör panelini köşe paneline çevirmek
 
 ### B.14. Üretim listesi — proje toplamı
 

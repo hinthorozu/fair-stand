@@ -1,9 +1,10 @@
 /**
- * F-031: end-to-end doubles and inner-corner connectors for full-height walls.
+ * F-031: end-to-end doubles and inner-corner connectors for full-height modules.
  * Baza rows are applied in baseRunBom.js.
  *
- * Locked pairs are wall with wall, door, separator (including sarmaşık), showcase-2, or showcase-3.
- * Connector counts are the locked face deltas. A short separator recipe does not scale them.
+ * Locked pairs are every meeting of wall, door, separator (including sarmaşık),
+ * showcase-2, and showcase-3. Separator uses the wall face. A short separator
+ * recipe does not scale the double or corner count.
  * Corner connectors apply only to a module whose front face looks at the other module.
  * A module sitting on the back keeps its singles and does not take corner connectors.
  *
@@ -30,13 +31,25 @@ export const END_TO_END_JOINT_DELTAS = Object.freeze({
 const FULL_HEIGHT_FLAT_WALL_RE = /^wall_(50|100|150|200)_350$/;
 const SEPARATOR_RE = /^wall_separator_(50|100)_350(_sarmasik)?$/;
 
-const LOCKED_WALL_PAIRS = new Set([
-  'door|wall',
-  'separator|wall',
-  'showcase-2|wall',
-  'showcase-3|wall',
-  'wall|wall',
-]);
+/** Singles a standard recipe converts on one end. Separator matches the wall face. */
+const FACE_YIELD = Object.freeze({
+  wall: 7,
+  separator: 7,
+  door: 3,
+  'showcase-2': 5,
+  'showcase-3': 4,
+});
+
+/** Standard recipe single count used to turn a face yield into singles kept. */
+const STANDARD_END_SINGLES = Object.freeze({
+  wall: 13,
+  separator: 13,
+  door: 5,
+  'showcase-2': 9,
+  'showcase-3': 7,
+});
+
+const RELATIONSHIP_ROLES = new Set(Object.keys(FACE_YIELD));
 
 const STRAIGHT_TO_CORNER_PANEL = Object.freeze({
   panel_48_5: 'panel_corner_42_5',
@@ -68,10 +81,6 @@ function frontNormal(rotationZDeg) {
   const rot = normalizeRotationZDeg(rotationZDeg);
   const theta = rot * Math.PI / 180;
   return { x: Math.sin(theta), y: Math.cos(theta) };
-}
-
-function pairKey(roleA, roleB) {
-  return [roleA, roleB].sort().join('|');
 }
 
 /**
@@ -241,26 +250,30 @@ function recipeSingleCount(itemKey) {
   return count;
 }
 
+function isLockedRelationshipPair(roleA, roleB) {
+  return RELATIONSHIP_ROLES.has(roleA) && RELATIONSHIP_ROLES.has(roleB);
+}
+
+function endFaceRemoval(role, partnerRole) {
+  const own = FACE_YIELD[role];
+  const partner = FACE_YIELD[partnerRole];
+  if (own == null || partner == null) return null;
+  if (partnerRole === 'showcase-2' || partnerRole === 'showcase-3') return Math.min(own, partner);
+  return own;
+}
+
 function endToEndKeep(role, partnerRole) {
-  if ((role === 'wall' || role === 'separator') && (partnerRole === 'wall' || partnerRole === 'separator')) {
-    return 6;
-  }
-  if (role === 'wall' && partnerRole === 'door') return 6;
-  if (role === 'door' && partnerRole === 'wall') return 2;
-  if (role === 'wall' && partnerRole === 'showcase-2') return 8;
-  if (role === 'showcase-2' && partnerRole === 'wall') return 4;
-  if (role === 'wall' && partnerRole === 'showcase-3') return 9;
-  if (role === 'showcase-3' && partnerRole === 'wall') return 3;
-  return null;
+  const removal = endFaceRemoval(role, partnerRole);
+  const standard = STANDARD_END_SINGLES[role];
+  if (removal == null || standard == null) return null;
+  return standard - removal;
 }
 
 function endToEndDoubles(roleA, roleB) {
-  const key = pairKey(roleA, roleB);
-  if (key === 'wall|wall' || key === 'separator|wall') return 7;
-  if (key === 'door|wall') return 3;
-  if (key === 'showcase-2|wall') return 5;
-  if (key === 'showcase-3|wall') return 4;
-  return null;
+  const left = FACE_YIELD[roleA];
+  const right = FACE_YIELD[roleB];
+  if (left == null || right == null) return null;
+  return Math.min(left, right);
 }
 
 function bodyDirectionFromPoint(segment, point) {
@@ -346,7 +359,7 @@ function jointAdjustment(joint) {
   }
 
   const [a, b] = joint.participants;
-  if (!LOCKED_WALL_PAIRS.has(pairKey(a.role, b.role))) return null;
+  if (!isLockedRelationshipPair(a.role, b.role)) return null;
 
   if (joint.kind === 'end-to-end') {
     const keepA = endToEndKeep(a.role, b.role);
@@ -452,7 +465,7 @@ function pairRecord(kind, a, b, point) {
 /**
  * Collinear end-to-end, perpendicular inner corners, and tee joints.
  * A third module on the same point turns that point into one tee: no doubles.
- * Order-independent. Only locked wall pairs are returned.
+ * Order-independent. Only locked full-height pairs are returned.
  */
 export function detectRelationshipJoints(modules = []) {
   const list = Array.isArray(modules) ? modules : [];
@@ -465,7 +478,7 @@ export function detectRelationshipJoints(modules = []) {
     for (let j = i + 1; j < segments.length; j += 1) {
       const a = segments[i];
       const b = segments[j];
-      if (!LOCKED_WALL_PAIRS.has(pairKey(a.role, b.role))) continue;
+      if (!isLockedRelationshipPair(a.role, b.role)) continue;
 
       const pairId = a.moduleId < b.moduleId
         ? `${a.moduleId}\u0000${b.moduleId}`
