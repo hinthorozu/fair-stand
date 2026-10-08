@@ -14,12 +14,17 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     assert response.status_code == 200
     body = response.json()
     assert body["revision"]
+    units = {row["unitKey"]: row["name"] for row in body["units"]}
+    assert units["adet"] == "Adet"
+    assert units["metre_kare"] == "Metre Kare"
+    shelf_unit = next(item for item in body["items"] if item["itemKey"] == "shelf_100")
+    assert "unitName" not in shelf_unit
     assert len(body["categories"]) == 6
-    assert len(body["items"]) == 109
+    assert len(body["items"]) == 108
     visible = [item for item in body["items"] if item["catalogVisible"] is True]
     hidden = [item for item in body["items"] if item["catalogVisible"] is not True]
     assert len(visible) == 59
-    assert len(hidden) == 50
+    assert len(hidden) == 49
     shelf = next(item for item in body["items"] if item["itemKey"] == "shelf_100")
     assert shelf["categoryId"] == 3
     assert "catalogCategory" not in shelf

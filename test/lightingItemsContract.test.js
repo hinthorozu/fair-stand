@@ -84,7 +84,7 @@ test('illuminated-foam: canonical identity stays off catalog', () => {
   assert.equal(item.dimensions.heightCm, 50);
   assert.equal(item.dimensions.depthCm, 3.5);
   assert.equal(item.dimensions.wallGapCm, 1.5);
-  assert.equal(Object.hasOwn(item, 'unit'), false);
+  assert.equal(item.unit, 'metre_kare');
   assert.equal(getCatalogItem('illuminated-foam'), null);
 
   const state = createIlluminatedFoamModuleState('asset-1');

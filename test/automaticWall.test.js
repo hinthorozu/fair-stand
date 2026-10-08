@@ -1,9 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  composeAutomaticBackWallWithDepot,
+  composeAutomaticSideWallWithDepot,
   composeAutomaticStandWall,
   getAutomaticWallCapacityCm,
+  planAutomaticDepotLampPlacements,
+  planAutomaticWallLampPlacements,
 } from '../src/automaticWall.js';
+import { planAutomaticDepot } from '../src/autoDepot.js';
+import { createModuleStateFromCatalogKey } from '../src/designState.js';
+import { getItem, resolveItemDefaultZCm } from '../src/items.js';
+import { resolveVirtualTopRailZCm, snapPlacementToItemAnchor } from '../src/itemSnap.js';
 
 test('L stand 500 x 400 accepts 900 cm and fills left before back', () => {
   assert.equal(getAutomaticWallCapacityCm({
@@ -70,4 +78,218 @@ test('rejects lengths above the total active wall chain', () => {
   assert.equal(result.ok, false);
   assert.equal(result.capacityCm, 1200);
   assert.match(result.message, /1200 cm/i);
+});
+
+function wallModulesFrom(result) {
+  return result.widths.map((widthCm, index) => ({
+    type: 'flat-panel',
+    widthCm,
+    placement: result.placements[index],
+  }));
+}
+
+test('automatic lamps sit in each 150 cm bay, face the scene, and keep wall widths', () => {
+  const result = composeAutomaticStandWall({
+    wallWidthCm: 900,
+    standType: 'l-left',
+    standXCm: 500,
+    standYCm: 400,
+  });
+  assert.deepEqual(result.widths, [200, 200, 200, 200, 100]);
+
+  const lamps = planAutomaticWallLampPlacements({
+    modules: wallModulesFrom(result),
+    standXCm: 500,
+    standYCm: 400,
+    lampWidthCm: 50,
+  });
+
+  assert.deepEqual(lamps, [
+    { xCm: 0, yCm: 300, zCm: 0, rotationZDeg: 90, wallId: 'left' },
+    { xCm: 0, yCm: 150, zCm: 0, rotationZDeg: 90, wallId: 'left' },
+    { xCm: 50, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+    { xCm: 200, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+    { xCm: 350, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+  ]);
+});
+
+test('right wall lamps face into the stand', () => {
+  const result = composeAutomaticStandWall({
+    wallWidthCm: 600,
+    standType: 'l-right',
+    standXCm: 200,
+    standYCm: 400,
+  });
+  assert.equal(result.ok, true);
+  const lamps = planAutomaticWallLampPlacements({
+    modules: wallModulesFrom(result),
+    standXCm: 200,
+    standYCm: 400,
+    lampWidthCm: 50,
+  });
+  assert.deepEqual(lamps, [
+    { xCm: 50, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+    { xCm: 200, yCm: 50, zCm: 0, rotationZDeg: 270, wallId: 'right' },
+    { xCm: 200, yCm: 200, zCm: 0, rotationZDeg: 270, wallId: 'right' },
+  ]);
+});
+
+test('a wall shorter than 150 cm gets no automatic lamp', () => {
+  const result = composeAutomaticStandWall({
+    wallWidthCm: 100,
+    standType: 'back-wall',
+    standXCm: 100,
+    standYCm: 300,
+  });
+  assert.equal(result.ok, true);
+  assert.deepEqual(planAutomaticWallLampPlacements({
+    modules: wallModulesFrom(result),
+    standXCm: 100,
+    standYCm: 300,
+    lampWidthCm: 50,
+  }), []);
+});
+
+test('automatic lamp snaps onto the wall top profile and keeps its scene-facing yaw', () => {
+  const result = composeAutomaticStandWall({
+    wallWidthCm: 200,
+    standType: 'back-wall',
+    standXCm: 200,
+    standYCm: 300,
+  });
+  const hosts = result.widths.map((widthCm, index) => {
+    const state = createModuleStateFromCatalogKey(widthCm === 100 ? 'wall_100_350' : 'wall_200_350');
+    state.placement = { ...result.placements[index] };
+    return state;
+  });
+  const [planned] = planAutomaticWallLampPlacements({
+    modules: wallModulesFrom(result),
+    standXCm: 200,
+    standYCm: 300,
+    lampWidthCm: 50,
+  });
+  const light = createModuleStateFromCatalogKey('led_floodlight');
+  const snapped = snapPlacementToItemAnchor(light, planned, hosts);
+  const profile = getItem('profile_190');
+  assert.deepEqual(planned, { xCm: 50, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' });
+  assert.equal(snapped.xCm, 50);
+  assert.equal(snapped.yCm, 0);
+  assert.equal(snapped.rotationZDeg, 0);
+  assert.equal(snapped.zCm, resolveVirtualTopRailZCm(hosts[0], profile));
+  assert.equal(
+    snapped.zCm,
+    resolveItemDefaultZCm(profile) + Number(profile.sceneDimensions?.heightCm ?? profile.dimensions.heightCm),
+  );
+});
+
+test('depot rear wall gets no lamp and the wall beside it keeps the 150 cm cadence', () => {
+  const plan = planAutomaticDepot({
+    standType: 'back-wall',
+    standXCm: 600,
+    standYCm: 400,
+    sizeKey: '200x100',
+  });
+  const back = composeAutomaticBackWallWithDepot({
+    standXCm: 600,
+    depotOriginXCm: plan.originXCm,
+    depotWidthCm: plan.widthCm,
+    sizeKey: plan.sizeKey,
+  });
+  assert.equal(plan.originXCm, 200);
+  const lamps = planAutomaticWallLampPlacements({
+    modules: back.modules.map((entry) => ({
+      type: 'flat-panel',
+      widthCm: entry.widthCm,
+      placement: entry.placement,
+      depotBack: entry.depotBack,
+    })),
+    standXCm: 600,
+    standYCm: 400,
+    lampWidthCm: 50,
+  });
+  assert.deepEqual(lamps, [
+    { xCm: 50, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+    { xCm: 450, yCm: 0, zCm: 0, rotationZDeg: 0, wallId: 'back' },
+  ]);
+  assert.equal(lamps.some((lamp) => lamp.xCm >= 200 && lamp.xCm < 400), false);
+});
+
+test('each depot wall gets one lamp and the wall behind the depot gets none', () => {
+  const plan = planAutomaticDepot({
+    standType: 'back-wall',
+    standXCm: 600,
+    standYCm: 400,
+    sizeKey: '200x100',
+  });
+  const lamps = planAutomaticDepotLampPlacements({
+    modules: plan.specs,
+    lampWidthCm: 50,
+  });
+  assert.deepEqual(lamps, [
+    { xCm: 275, yCm: 100, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+    { xCm: 400, yCm: 25, zCm: 0, rotationZDeg: 90, wallId: 'free' },
+    { xCm: 200, yCm: 25, zCm: 0, rotationZDeg: 270, wallId: 'free' },
+  ]);
+});
+
+test('island depot keeps the lamp off its back wall', () => {
+  const plan = planAutomaticDepot({
+    standType: 'island',
+    standXCm: 600,
+    standYCm: 500,
+    sizeKey: '200x100',
+  });
+  const lamps = planAutomaticDepotLampPlacements({
+    modules: plan.specs,
+    lampWidthCm: 50,
+  });
+  assert.equal(lamps.some((lamp) => lamp.yCm === plan.originYCm), false);
+  assert.deepEqual(lamps, [
+    { xCm: 275, yCm: 300, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+    { xCm: 400, yCm: 225, zCm: 0, rotationZDeg: 90, wallId: 'free' },
+    { xCm: 200, yCm: 225, zCm: 0, rotationZDeg: 270, wallId: 'free' },
+  ]);
+});
+
+test('shared depot side gets one lamp and the rest of that wall keeps the 150 cm cadence', () => {
+  const plan = planAutomaticDepot({
+    standType: 'l-left',
+    standXCm: 500,
+    standYCm: 400,
+    sizeKey: '100x100',
+  });
+  const side = composeAutomaticSideWallWithDepot({
+    standType: 'l-left',
+    standXCm: 500,
+    standYCm: 400,
+    depotDepthCm: plan.depthCm,
+  });
+  const intervalLamps = planAutomaticWallLampPlacements({
+    modules: side.modules.map((entry) => ({
+      type: 'flat-panel',
+      widthCm: entry.widthCm,
+      placement: entry.placement,
+      depotSide: entry.depotSide,
+    })),
+    standXCm: 500,
+    standYCm: 400,
+    lampWidthCm: 50,
+  });
+  assert.deepEqual(intervalLamps, [
+    { xCm: 0, yCm: 300, zCm: 0, rotationZDeg: 90, wallId: 'left' },
+    { xCm: 0, yCm: 150, zCm: 0, rotationZDeg: 90, wallId: 'left' },
+  ]);
+
+  const depotLamps = planAutomaticDepotLampPlacements({
+    modules: [
+      ...side.modules.filter((entry) => entry.depotSide),
+      ...plan.specs,
+    ],
+    lampWidthCm: 50,
+  });
+  assert.deepEqual(depotLamps, [
+    { xCm: 25, yCm: 100, zCm: 0, rotationZDeg: 0, wallId: 'free' },
+    { xCm: 0, yCm: 25, zCm: 0, rotationZDeg: 90, wallId: 'left' },
+    { xCm: 100, yCm: 25, zCm: 0, rotationZDeg: 90, wallId: 'free' },
+  ]);
 });

@@ -56,7 +56,7 @@ Ledger `FINDINGS.md`: 49 bulgu, “açık 29 / kapalı 20”. Aşağıdaki hük�
 
 F-001 … F-013, F-016, F-020, F-023, F-027, F-028, F-033.
 
-F-010: merkezi factory + `e2e/f010-module-construction.spec.mjs`. “F010 eksik” = kapanış MD + `FULL_SWEEP` A04’te takılı. Kapanış MD “45 katalog / catalogKey” **bayat**.
+F-010: merkezi factory + `e2e/f010-module-construction.spec.mjs`. Sırt Duvar kaydı panellerle birlikte `led_floodlight` taşır. Kapanış MD’deki 45 katalog / `catalogKey` cümlesi tarihî dipnottur.
 
 F-013: separatör `itemKey` + `modelFile`. Runtime `catalogKey` yok.
 
@@ -100,7 +100,7 @@ Güncel: `ITEM_CONTRACT.md`, `AGENTS.md`, `SYSTEM_CHANGE_GATE.md`, `SYSTEM_MODUL
 | `current-system` (94) | 53 şerit / 41 yok; gövde `catalogKey` / `DEPOT_*`. Başlık “Mevcut Sistem Profili”. |
 | `definitions/{karolaj,hali,parke-*}` | Persist `currentStand.floorType`. Kod: `itemKey`. |
 | `door_100_full_system_audit.md`, baza handoff | `catalogKey`. |
-| `A03_F010` / `A04_F013` kapanış | 45 katalog; `catalogKey` zorunlu. |
+| `A04_F013` kapanış | 45 katalog; `catalogKey` zorunlu. `A03_F010` güncel kimliği `itemKey` ve otomatik `led_floodlight` olarak yazar. |
 | `RELEASE_HARDENING_ROADMAP.md` | #1 seçim hint ve #2 debug BOM hâlâ doğru açık. “E2E yok” / `indoor_plants2.glb` yanlış (`indoor_plants2` ağaçta yok). |
 | `Changelog.md` | Ağustos 2026’da durur. |
 | `FRESH_REPOSITORY_REVIEW.md` | Historical banner; gövde “şu anda”; `FINDINGS`’e yönlendirir. |
@@ -126,7 +126,7 @@ F-000 Item sözleşmesi; F-010 factory; F-011 davranış merkezi; F-012 `SCENE_S
 3. `current-system`: 41 şeritsiz dosyaya tarihî şerit; başlık “mevcut sistem” olmasın; gövde `catalogKey` tarihî örnek.
 4. Zemin `definitions/` persist = `stand.itemKey`.
 5. Hardening: #1/#2 B ile kapandı.
-6. Kapanış MD 45/`catalogKey` dipnotu.
+6. `A03_F010` 45/`catalogKey` dipnotu yazıldı. `A04_F013` kapanışı duruyor.
 7. `ITEM_LIST` + `Changelog` + baza handoff.
 
 ### B — Kullanıcıya görünen kod

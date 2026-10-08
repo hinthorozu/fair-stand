@@ -6,6 +6,8 @@ import {
   composeAutomaticBackWallWithDepot,
   composeAutomaticSideWallWithDepot,
   getAutomaticWallCapacityCm,
+  planAutomaticWallLampPlacements,
+  planAutomaticDepotLampPlacements,
 } from './automaticWall.js';
 import {
   createModuleStateFromCatalogKey,
@@ -67,7 +69,8 @@ import { DEFAULT_SELECTION_HINT, describeFloorAreaSelection, describeFloorSelect
 import { createSidebarController } from './sidebarController.js';
 import { createViewportToolbarController } from './viewportToolbarController.js';
 import { formatCapacityPopup, renderStageResult as renderStageResultInto, renderWallResult } from './stageFeedback.js';
-import { getFloorItem, getFloorSelectLabel, listFloorItems, resolveItemDefaultZCm, resolveItemKey, resolveStandFloorItemKey } from './items.js';
+import { getFloorItem, getFloorSelectLabel, getTopLightItemForType, listFloorItems, resolveItemDefaultZCm, resolveItemKey, resolveStandFloorItemKey } from './items.js';
+import { snapPlacementToItemAnchor } from './itemSnap.js';
 import { renderStandStandardsList } from './standStandardsCopy.js';
 import {
   isAllowedImportImageType,
@@ -1271,6 +1274,41 @@ function readSceneSetupFromControls() {
   return { ok: true, setup, depotConfig, depotPlan };
 }
 
+function appendAutomaticWallLamps(standXCm, standYCm) {
+  const lampItem = getTopLightItemForType('led-floodlight');
+  if (!lampItem) return;
+  const walls = currentModules.filter(
+    (moduleState) => moduleState.type === 'flat-panel' && moduleState.placement,
+  );
+  const planned = planAutomaticWallLampPlacements({
+    modules: walls,
+    standXCm,
+    standYCm,
+    lampWidthCm: Number(lampItem.dimensions?.widthCm) || 50,
+  });
+  for (const placement of planned) {
+    const lamp = createModuleStateFromDescriptor({ type: 'led-floodlight' });
+    if (!lamp) continue;
+    lamp.placement = snapPlacementToItemAnchor(lamp, placement, currentModules) ?? { ...placement };
+    currentModules.push(lamp);
+  }
+}
+
+function appendAutomaticDepotLamps() {
+  const lampItem = getTopLightItemForType('led-floodlight');
+  if (!lampItem) return;
+  const planned = planAutomaticDepotLampPlacements({
+    modules: currentModules.filter((moduleState) => moduleState.depotSide || moduleState.autoDepot),
+    lampWidthCm: Number(lampItem.dimensions?.widthCm) || 50,
+  });
+  for (const placement of planned) {
+    const lamp = createModuleStateFromDescriptor({ type: 'led-floodlight' });
+    if (!lamp) continue;
+    lamp.placement = snapPlacementToItemAnchor(lamp, placement, currentModules) ?? { ...placement };
+    currentModules.push(lamp);
+  }
+}
+
 function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
   currentModules = [];
   moduleContextMenu.close();
@@ -1339,7 +1377,10 @@ function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
           widthCm: entry.widthCm,
         });
         moduleState.placement = { ...entry.placement };
-        if (entry.depotBack) moduleState.autoDepotBack = true;
+        if (entry.depotBack) {
+          moduleState.autoDepotBack = true;
+          moduleState.depotBack = true;
+        }
         return moduleState;
       });
       currentModules.push(...backStates);
@@ -1364,7 +1405,10 @@ function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
             widthCm: entry.widthCm,
           });
           moduleState.placement = { ...entry.placement };
-          if (entry.depotSide) moduleState.autoDepotBack = true;
+          if (entry.depotSide) {
+            moduleState.autoDepotBack = true;
+            moduleState.depotSide = true;
+          }
           return moduleState;
         });
         currentModules.push(...sideStates);
@@ -1372,7 +1416,11 @@ function rebuildSceneFromSetup({ setup, depotConfig, depotPlan }) {
     }
   }
 
-  if (depotPlan?.ok) currentModules.push(...createAutomaticDepotStates(depotPlan));
+  appendAutomaticWallLamps(setup.xCm, setup.yCm);
+  if (depotPlan?.ok) {
+    currentModules.push(...createAutomaticDepotStates(depotPlan));
+    appendAutomaticDepotLamps();
+  }
   rebuildWall({ resetView: true });
 
   const label = STAND_TYPE_LABELS[setup.standType];

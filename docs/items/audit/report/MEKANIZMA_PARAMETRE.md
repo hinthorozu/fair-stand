@@ -709,6 +709,9 @@ Property listesi:
 | `automatic-depot sizeKey` | 100x100 = 100×100 cm (1 × 1 m) · 150x100 = 150×100 cm (1,5 × 1 m) · 200x100 = 200×100 cm (2 × 1 m) · 200x200 = 200×200 cm (2 × 2 m) |
 | `planAutomaticDepot sizeKey default` | 100x100 |
 | `automatic-depot içerik catalog keys` | MINI_FRIDGE_AVANTI, KETTLE, COAT_RACK, PLASTIC_TRASH_BIN |
+| `automatic-wall structuralKinds` | flat-panel |
+| `automatic-wall lightingKinds` | led-floodlight |
+| `AUTOMATIC_WALL_LAMP_INTERVAL_CM` | 150 |
 
 Property listesi:
 

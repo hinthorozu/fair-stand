@@ -42,7 +42,7 @@ def test_seeded_items_start_excluded_from_cost(db_session):
             """
             SELECT item_key, item_type, unit, is_cost_enabled
             FROM fair_stand_items
-            WHERE item_key IN ('digital_print', 'mesh_fabric', 'lightbox_fabric', 'foam_logo', 'wall_200_350')
+            WHERE item_key IN ('digital_print', 'mesh_fabric', 'lightbox_fabric', 'wall_200_350')
             """
         )
     ).mappings().all()
@@ -50,7 +50,6 @@ def test_seeded_items_start_excluded_from_cost(db_session):
         "digital_print",
         "mesh_fabric",
         "lightbox_fabric",
-        "foam_logo",
         "wall_200_350",
     }
     for row in rows:

@@ -238,6 +238,7 @@ def get_catalog_bootstrap(
         "rules": snapshot.rules,
         "standDimensions": stand_dimensions_payload(snapshot.stand_dimensions),
         "settings": runtime_settings_payload(snapshot.settings),
+        "units": snapshot.units,
     }
 
 

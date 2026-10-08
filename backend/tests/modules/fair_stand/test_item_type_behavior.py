@@ -354,7 +354,6 @@ def test_bootstrap_omits_scene_fields_for_production(client, db_session, auth_he
         ("digital_print", "Dijital Baskı"),
         ("mesh_fabric", "Mesh Baskı"),
         ("lightbox_fabric", "Lightbox Bezi"),
-        ("foam_logo", "Strafor Logo"),
     ):
         item = items[item_key]
         assert item["name"] == name

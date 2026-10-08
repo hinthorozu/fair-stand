@@ -180,7 +180,10 @@ function loadGltfScene(url) {
   const cached = gltfSceneCache.get(url);
   if (cached) return cached;
   const loader = new GLTFLoader();
-  const promise = loader.loadAsync(url).then((gltf) => gltf.scene).catch((error) => {
+  const promise = loader.loadAsync(url).then((gltf) => {
+    requestEditorRender();
+    return gltf.scene;
+  }).catch((error) => {
     gltfSceneCache.delete(url);
     notifyGltfLoadFailure(url, error);
     throw error;
@@ -202,7 +205,10 @@ function createTvScreenTexture(itemOrKey) {
   if (!item?.defaultScreenFile) {
     throw new TypeError(`Missing canonical default screen asset for ${item?.itemKey ?? 'unknown'}.`);
   }
-  const texture = new THREE.TextureLoader().load(import.meta.env.BASE_URL + item.defaultScreenFile);
+  const texture = new THREE.TextureLoader().load(
+    import.meta.env.BASE_URL + item.defaultScreenFile,
+    () => requestEditorRender(),
+  );
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
 }
@@ -474,6 +480,7 @@ export function createStandScene(
 
   const hallFloorTexture = new THREE.TextureLoader().load(
     import.meta.env.BASE_URL + 'textures/exhibition-floor-optimized.jpg',
+    () => requestEditorRender(),
   );
   hallFloorTexture.colorSpace = THREE.SRGBColorSpace;
   hallFloorTexture.wrapS = THREE.RepeatWrapping;
@@ -776,6 +783,7 @@ export function createStandScene(
   }
 
   function rebuildFloorAreaVisual() {
+    requestEditorRender();
     const keepSelected = floorAreaSelected;
     clearFloorAreaVisual();
     if (!currentFloorArea || !stageLayout) return;
@@ -852,6 +860,7 @@ export function createStandScene(
   }
 
   function setFloorType(floorType = getFloorItem('karolaj').itemKey) {
+    requestEditorRender();
     const resolved = listFloorTypeKeys().includes(floorType) ? floorType : getFloorItem('karolaj').itemKey;
     currentFloorType = resolved;
     const floorItem = getFloorItem(resolved);
@@ -877,6 +886,7 @@ export function createStandScene(
   }
 
   function setFloorColor(color) {
+    requestEditorRender();
     if (!getFloorItem(currentFloorType)?.paintable) return null;
     const normalized = String(color ?? '').trim();
     if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) return floorColors[currentFloorType];
@@ -983,6 +993,7 @@ export function createStandScene(
   }
 
   function createStage({ widthCm, depthCm, standType = null, resetView = true } = {}) {
+    requestEditorRender();
     const widthM = Number(widthCm) / 100;
     const depthM = Number(depthCm) / 100;
     if (!Number.isFinite(widthM) || !Number.isFinite(depthM) || widthM <= 0 || depthM <= 0) {
@@ -1241,6 +1252,7 @@ export function createStandScene(
   }
 
   function setSelectionVisual(mesh, selected) {
+    requestEditorRender();
     if (!mesh) return;
     const frame = mesh.userData.selectionFrame;
     if (frame) frame.visible = selected;
@@ -1613,6 +1625,7 @@ export function createStandScene(
   function disposeObject(object) {
     object.traverse((child) => {
       if (!child.isMesh && !child.isLineSegments) return;
+      if (child.userData?.retainRendererAsset) return;
       child.geometry?.dispose();
       const materials = Array.isArray(child.material) ? child.material : [child.material];
       materials.forEach((material) => {
@@ -1633,6 +1646,7 @@ export function createStandScene(
   }
 
   function clearWall({ resetView = true } = {}) {
+    requestEditorRender();
     clearPlacementDrag();
     disposeWall();
     if (resetView) {
@@ -1874,6 +1888,7 @@ export function createStandScene(
     // textures are removed from the transfer map by applyStoredImage().
     disposeUnusedRebuildTextures();
     notifySelection();
+    requestEditorRender();
     return { totalWidth, surfaceCount: surfaceMeshes.length };
   }
 
@@ -2329,6 +2344,7 @@ export function createStandScene(
   }
 
   function showPlacementGhost(moduleOrWidthCm, placement, valid) {
+    requestEditorRender();
     const ghost = ensurePlacementGhost(moduleOrWidthCm);
     const colorHex = valid ? PLACEMENT_VALID_COLOR : PLACEMENT_INVALID_COLOR;
     ghost.colorHex = colorHex;
@@ -3468,6 +3484,7 @@ export function createStandScene(
   }
 
   function applyColor(meshOrMeshes, hexColor) {
+    requestEditorRender();
     const meshes = normalizeMeshes(meshOrMeshes);
     const fabricGroupIds = new Set(
       meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
@@ -3735,6 +3752,7 @@ export function createStandScene(
     textureLoader.load(
       assetUrl,
       (sourceTexture) => {
+        requestEditorRender();
         if (fit === 'size') {
           const image = sourceTexture.image;
           const widthCm = Number(sizeCm?.widthCm);
@@ -3957,10 +3975,12 @@ export function createStandScene(
   }
 
   function applyFabricMode(meshOrMeshes, enabled) {
+    requestEditorRender();
     return applyFabricCoverMode(meshOrMeshes, enabled, 'lightbox');
   }
 
   function applyMeshMode(meshOrMeshes, enabled) {
+    requestEditorRender();
     return applyFabricCoverMode(meshOrMeshes, enabled, 'mesh');
   }
 
@@ -4090,6 +4110,7 @@ export function createStandScene(
   }
 
   function setFabricLighting(meshOrMeshes, enabled) {
+    requestEditorRender();
     const meshes = normalizeMeshes(meshOrMeshes).filter(
       (mesh) => mesh?.userData?.acceptsLightbox === true && mesh.userData.surfaceState?.fabricGroupId,
     );
@@ -4125,6 +4146,7 @@ export function createStandScene(
   }
 
   function applyGlassMode(meshOrMeshes, isGlass) {
+    requestEditorRender();
     const glass = Boolean(isGlass);
     const glassMeshes = normalizeMeshes(meshOrMeshes).filter(
       (mesh) => mesh?.userData?.acceptsGlass === true && mesh.userData.surfaceState,
@@ -4244,6 +4266,7 @@ export function createStandScene(
     textureLoader.load(
       assetUrl,
       (sourceTexture) => {
+        requestEditorRender();
         const surfaceState = mesh.userData.surfaceState;
         if (surfaceState?.fabricGroupId || surfaceState?.imageAssetId !== assetId) {
           sourceTexture.dispose();
@@ -4325,6 +4348,7 @@ export function createStandScene(
     textureLoader.load(
       assetUrl,
       (sourceTexture) => {
+        requestEditorRender();
         const surfaceState = mesh.userData.surfaceState;
         const transform = surfaceState?.imageTransform;
         if (
@@ -4640,6 +4664,7 @@ export function createStandScene(
   }
 
   function applyImageAsset(meshOrMeshes, assetId, fit = null) {
+    requestEditorRender();
     if (!assetId) return;
     normalizeMeshes(meshOrMeshes).forEach((mesh) => {
       if (!mesh?.material || mesh.userData.acceptsImage === false) return;
@@ -5502,17 +5527,15 @@ export function createStandScene(
     const height = Math.max(container.clientHeight, 1);
     renderer.setSize(width, height, false);
     updateCameraProjection(width, height);
+    requestEditorRender();
   }
 
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(container);
   resize();
 
-  // Keep interaction smooth, but do not burn the GPU rendering a static editor at
-  // monitor refresh rate. OrbitControls reports camera movement; while idle we only
-  // refresh occasionally so asynchronous texture/material updates still appear quickly.
+  // Duran sahne her kare çizilmez. Kamera, sürükleme, model veya doku gelince bir kare istenir.
   const activeFrameIntervalMs = coarsePointer ? (1000 / 30) : (1000 / 50);
-  const idleFrameIntervalMs = 250;
   let lastRenderAt = -Infinity;
   const lastCubePosition = new THREE.Vector3(Number.NaN, Number.NaN, Number.NaN);
   const lastCubeQuaternion = new THREE.Quaternion(Number.NaN, Number.NaN, Number.NaN, Number.NaN);
@@ -5520,10 +5543,10 @@ export function createStandScene(
   renderer.setAnimationLoop((now) => {
     const controlsChanged = Boolean(controls.update());
     const activelyDragging = Boolean(dragSession?.dragging);
-    const frameInterval = (controlsChanged || activelyDragging)
-      ? activeFrameIntervalMs
-      : idleFrameIntervalMs;
-    if (now - lastRenderAt < frameInterval) return;
+    if (controlsChanged || activelyDragging) editorRenderRequested = true;
+    if (!editorRenderRequested) return;
+    const frameInterval = (controlsChanged || activelyDragging) ? activeFrameIntervalMs : 0;
+    if (frameInterval && now - lastRenderAt < frameInterval) return;
     lastRenderAt = now;
 
     const cameraChanged = !camera.position.equals(lastCubePosition)
@@ -5534,6 +5557,7 @@ export function createStandScene(
       lastCubeQuaternion.copy(camera.quaternion);
     }
     renderer.render(scene, camera);
+    if (!controlsChanged && !activelyDragging) editorRenderRequested = false;
   });
 
   async function captureCurrentViewPng({ scale = 3 } = {}) {
@@ -5583,6 +5607,7 @@ export function createStandScene(
   }
 
   function setShelfLightingVisible(moduleIndex, enabled) {
+    requestEditorRender();
     const targetIndex = Number(moduleIndex);
     const visible = Boolean(enabled);
     let changed = false;
@@ -5681,7 +5706,7 @@ export function createStandScene(
       let changed=false;
       wallRoot.traverse((object)=>{
         if(object.userData?.role!=='illuminated-foam-halo'||object.userData?.moduleId!==moduleId) return;
-        if(object.material?.color){ object.material.color.set(normalized); object.material.needsUpdate=true; changed=true; }
+        if(object.material?.color){ object.material.color.set(normalized); object.material.needsUpdate=true; changed=true; requestEditorRender(); }
       });
       return changed;
     },
@@ -6566,6 +6591,99 @@ function createKettleModule(moduleState, moduleIndex) {
   return { group, surfaces: [proxy] };
 }
 
+const floodlightRendererAssets = {
+  ready: false,
+};
+let editorRenderRequested = true;
+
+function requestEditorRender() {
+  editorRenderRequested = true;
+}
+
+function floodlightRoundedRectShape(width, height, radius) {
+  const shape = new THREE.Shape();
+  const x = -width / 2;
+  const y = -height / 2;
+  const r = Math.min(radius, width / 2, height / 2);
+  shape.moveTo(x + r, y);
+  shape.lineTo(x + width - r, y);
+  shape.quadraticCurveTo(x + width, y, x + width, y + r);
+  shape.lineTo(x + width, y + height - r);
+  shape.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  shape.lineTo(x + r, y + height);
+  shape.quadraticCurveTo(x, y + height, x, y + height - r);
+  shape.lineTo(x, y + r);
+  shape.quadraticCurveTo(x, y, x + r, y);
+  return shape;
+}
+
+function floodlightRoundedBoxGeometry(width, height, depth, radius, bevel = 0.008) {
+  const geometry = new THREE.ExtrudeGeometry(
+    floodlightRoundedRectShape(width, height, radius),
+    {
+      depth,
+      bevelEnabled: true,
+      bevelThickness: bevel,
+      bevelSize: bevel,
+      bevelSegments: 2,
+      curveSegments: 4,
+      steps: 1,
+    },
+  );
+  geometry.translate(0, 0, -depth / 2);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function ensureFloodlightRendererAssets() {
+  if (floodlightRendererAssets.ready) return floodlightRendererAssets;
+  floodlightRendererAssets.bodyMaterial = new THREE.MeshStandardMaterial({
+    color: 0x101216,
+    roughness: 0.3,
+    metalness: 0.72,
+  });
+  floodlightRendererAssets.edgeMaterial = new THREE.MeshStandardMaterial({
+    color: 0x24282d,
+    roughness: 0.34,
+    metalness: 0.7,
+  });
+  floodlightRendererAssets.ledMaterial = new THREE.MeshStandardMaterial({
+    color: 0xfff8d8,
+    emissive: 0xfff2b8,
+    emissiveIntensity: 2.5,
+    roughness: 0.22,
+    metalness: 0,
+  });
+  floodlightRendererAssets.capMaterial = new THREE.MeshStandardMaterial({
+    color: 0x70757b,
+    roughness: 0.3,
+    metalness: 0.82,
+  });
+  floodlightRendererAssets.mount = floodlightRoundedBoxGeometry(0.13, 0.026, 0.075, 0.012, 0.004);
+  floodlightRendererAssets.bracketBase = floodlightRoundedBoxGeometry(0.235, 0.026, 0.035, 0.01, 0.003);
+  floodlightRendererAssets.ear = floodlightRoundedBoxGeometry(0.026, 0.105, 0.034, 0.01, 0.003);
+  floodlightRendererAssets.body = floodlightRoundedBoxGeometry(0.305, 0.178, 0.052, 0.018, 0.007);
+  floodlightRendererAssets.fin = floodlightRoundedBoxGeometry(0.012, 0.128, 0.018, 0.004, 0.002);
+  floodlightRendererAssets.bezel = new THREE.ShapeGeometry(floodlightRoundedRectShape(0.272, 0.145, 0.012), 4);
+  floodlightRendererAssets.lens = new THREE.ShapeGeometry(floodlightRoundedRectShape(0.246, 0.119, 0.009), 4);
+  floodlightRendererAssets.led = new THREE.CircleGeometry(0.0042, 8);
+  floodlightRendererAssets.screw = new THREE.CylinderGeometry(0.016, 0.016, 0.014, 12);
+  floodlightRendererAssets.cap = new THREE.CylinderGeometry(0.009, 0.009, 0.016, 12);
+  floodlightRendererAssets.ready = true;
+  return floodlightRendererAssets;
+}
+
+function addFloodlightMesh(parent, geometry, material, position, rotationZ = 0) {
+  const mesh = new THREE.Mesh(geometry, material);
+  if (position) mesh.position.set(position[0], position[1], position[2]);
+  if (rotationZ) mesh.rotation.z = rotationZ;
+  mesh.castShadow = false;
+  mesh.receiveShadow = false;
+  mesh.userData.retainRendererAsset = true;
+  parent.add(mesh);
+  return mesh;
+}
+
 function createLedFloodlightModule(moduleState, moduleIndex) {
   const item = getItem('led_floodlight');
   const widthCm = Number(moduleState.widthCm ?? item.dimensions.widthCm);
@@ -6581,172 +6699,71 @@ function createLedFloodlightModule(moduleState, moduleIndex) {
     depthCm,
     heightCm,
   };
-
-  const bodyMaterial = new THREE.MeshStandardMaterial({
-    color: 0x101216,
-    roughness: 0.3,
-    metalness: 0.72,
-  });
-  const edgeMaterial = new THREE.MeshStandardMaterial({
-    color: 0x24282d,
-    roughness: 0.34,
-    metalness: 0.7,
-  });
-  const glassMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xf8fff4,
-    emissive: 0xf2ffe8,
-    emissiveIntensity: 1.65,
-    roughness: 0.08,
-    metalness: 0,
-    transmission: 0.08,
-    clearcoat: 0.75,
-    clearcoatRoughness: 0.1,
-    side: THREE.DoubleSide,
-  });
-  const ledMaterial = new THREE.MeshStandardMaterial({
-    color: 0xfff8d8,
-    emissive: 0xfff2b8,
-    emissiveIntensity: 2.5,
-    roughness: 0.22,
-    metalness: 0,
-  });
+  const assets = ensureFloodlightRendererAssets();
+  if (!assets.glassMaterial) {
+    assets.glassMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xf8fff4,
+      emissive: 0xf2ffe8,
+      emissiveIntensity: 1.65,
+      roughness: 0.08,
+      metalness: 0,
+      transmission: 0.08,
+      clearcoat: 0.75,
+      clearcoatRoughness: 0.1,
+      side: THREE.DoubleSide,
+    });
+  }
 
   function roundedRectShape(width, height, radius) {
-    const shape = new THREE.Shape();
-    const x = -width / 2;
-    const y = -height / 2;
-    const r = Math.min(radius, width / 2, height / 2);
-    shape.moveTo(x + r, y);
-    shape.lineTo(x + width - r, y);
-    shape.quadraticCurveTo(x + width, y, x + width, y + r);
-    shape.lineTo(x + width, y + height - r);
-    shape.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
-    shape.lineTo(x + r, y + height);
-    shape.quadraticCurveTo(x, y + height, x, y + height - r);
-    shape.lineTo(x, y + r);
-    shape.quadraticCurveTo(x, y, x + r, y);
-    return shape;
+    return floodlightRoundedRectShape(width, height, radius);
   }
 
-  function roundedBoxGeometry(width, height, depth, radius, bevel = 0.008) {
-    const geometry = new THREE.ExtrudeGeometry(
-      roundedRectShape(width, height, radius),
-      {
-        depth,
-        bevelEnabled: true,
-        bevelThickness: bevel,
-        bevelSize: bevel,
-        bevelSegments: 3,
-        curveSegments: 8,
-        steps: 1,
-      },
-    );
-    geometry.translate(0, 0, -depth / 2);
-    geometry.computeVertexNormals();
-    return geometry;
-  }
+  addFloodlightMesh(group, assets.mount, assets.bodyMaterial, [0, 0.014, 0.012]);
 
-  // Profile oturan alçak bağlantı pabucu.
-  const mount = new THREE.Mesh(
-    roundedBoxGeometry(0.13, 0.026, 0.075, 0.012, 0.004),
-    bodyMaterial.clone(),
-  );
-  mount.position.set(0, 0.014, 0.012);
-  mount.castShadow = true;
-  group.add(mount);
-
-  // Gerçek floodlight tipi kalın U braket.
   const bracket = new THREE.Group();
   bracket.position.set(0, 0.045, 0.045);
   group.add(bracket);
-
-  const bracketBase = new THREE.Mesh(
-    roundedBoxGeometry(0.235, 0.026, 0.035, 0.01, 0.003),
-    edgeMaterial.clone(),
-  );
-  bracketBase.castShadow = true;
-  bracket.add(bracketBase);
-
+  addFloodlightMesh(bracket, assets.bracketBase, assets.edgeMaterial);
   [-1, 1].forEach((side) => {
-    const ear = new THREE.Mesh(
-      roundedBoxGeometry(0.026, 0.105, 0.034, 0.01, 0.003),
-      edgeMaterial.clone(),
-    );
-    ear.position.set(side * 0.106, 0.057, 0.018);
-    ear.castShadow = true;
-    bracket.add(ear);
+    addFloodlightMesh(bracket, assets.ear, assets.edgeMaterial, [side * 0.106, 0.057, 0.018]);
   });
 
-  // Projektör kafa grubu: ince, yuvarlatılmış metal kasa.
   const head = new THREE.Group();
   head.position.set(0, 0.145, 0.108);
   head.rotation.x = THREE.MathUtils.degToRad(38);
   group.add(head);
+  addFloodlightMesh(head, assets.body, assets.bodyMaterial);
 
-  const body = new THREE.Mesh(
-    roundedBoxGeometry(0.305, 0.178, 0.052, 0.018, 0.007),
-    bodyMaterial.clone(),
-  );
-  body.castShadow = true;
-  body.receiveShadow = true;
-  head.add(body);
+  addFloodlightMesh(head, assets.bezel, assets.edgeMaterial, [0, 0, 0.032]);
+  const lens = addFloodlightMesh(head, assets.lens, assets.glassMaterial, [0, 0, 0.0335]);
 
-  // Ön yüzde hafif yükseltilmiş çerçeve + gömülü cam.
-  const bezel = new THREE.Mesh(
-    new THREE.ShapeGeometry(roundedRectShape(0.272, 0.145, 0.012), 8),
-    edgeMaterial.clone(),
-  );
-  bezel.position.z = 0.032;
-  head.add(bezel);
-
-  const lens = new THREE.Mesh(
-    new THREE.ShapeGeometry(roundedRectShape(0.246, 0.119, 0.009), 8),
-    glassMaterial,
-  );
-  lens.position.z = 0.0335;
-  head.add(lens);
-
-  // LED dizisi: camın arkasında küçük ışık noktaları.
   const ledGroup = new THREE.Group();
   ledGroup.position.z = 0.0342;
+  const leds = new THREE.InstancedMesh(assets.led, assets.ledMaterial, 45);
+  const ledDummy = new THREE.Object3D();
+  let ledIndex = 0;
   for (let row = -2; row <= 2; row += 1) {
     for (let col = -4; col <= 4; col += 1) {
-      const led = new THREE.Mesh(new THREE.CircleGeometry(0.0042, 10), ledMaterial);
-      led.position.set(col * 0.023, row * 0.021, 0);
-      ledGroup.add(led);
+      ledDummy.position.set(col * 0.023, row * 0.021, 0);
+      ledDummy.updateMatrix();
+      leds.setMatrixAt(ledIndex, ledDummy.matrix);
+      ledIndex += 1;
     }
   }
+  leds.instanceMatrix.needsUpdate = true;
+  leds.castShadow = false;
+  leds.receiveShadow = false;
+  leds.userData.retainRendererAsset = true;
+  ledGroup.add(leds);
   head.add(ledGroup);
 
-  // Arka soğutucu kanatlar, silüeti gerçek projektöre yaklaştırır.
   for (let index = -4; index <= 4; index += 1) {
-    const fin = new THREE.Mesh(
-      roundedBoxGeometry(0.012, 0.128, 0.018, 0.004, 0.002),
-      edgeMaterial.clone(),
-    );
-    fin.position.set(index * 0.027, 0, -0.039);
-    fin.castShadow = true;
-    head.add(fin);
+    addFloodlightMesh(head, assets.fin, assets.edgeMaterial, [index * 0.027, 0, -0.039]);
   }
 
-  // Braket pivot vidaları.
   [-1, 1].forEach((side) => {
-    const screw = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.016, 0.016, 0.014, 20),
-      edgeMaterial.clone(),
-    );
-    screw.rotation.z = Math.PI / 2;
-    screw.position.set(side * 0.157, 0.01, 0);
-    screw.castShadow = true;
-    head.add(screw);
-
-    const cap = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.009, 0.009, 0.016, 20),
-      new THREE.MeshStandardMaterial({ color: 0x70757b, roughness: 0.3, metalness: 0.82 }),
-    );
-    cap.rotation.z = Math.PI / 2;
-    cap.position.set(side * 0.166, 0.01, 0);
-    head.add(cap);
+    addFloodlightMesh(head, assets.screw, assets.edgeMaterial, [side * 0.157, 0.01, 0], Math.PI / 2);
+    addFloodlightMesh(head, assets.cap, assets.capMaterial, [side * 0.166, 0.01, 0], Math.PI / 2);
   });
 
   // Panel yüzüne gerçek aydınlatma.

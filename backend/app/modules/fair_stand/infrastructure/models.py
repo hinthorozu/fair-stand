@@ -713,6 +713,72 @@ class FairStandSettingsModel(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+class FairStandCostItemModel(Base):
+    """Organization buy/sell amount for one Item or one manual cost line."""
+
+    __tablename__ = "fair_stand_cost_items"
+    __table_args__ = (
+        UniqueConstraint(
+            "organization_id",
+            "item_key",
+            name="uq_fair_stand_cost_items_organization_id_item_key",
+        ),
+        Index("ix_fair_stand_cost_items_organization_id", "organization_id"),
+        CheckConstraint(
+            "purchase_price >= 0",
+            name="ck_fair_stand_cost_items_purchase_price",
+        ),
+        CheckConstraint(
+            "sale_price >= 0",
+            name="ck_fair_stand_cost_items_sale_price",
+        ),
+        CheckConstraint(
+            "cost_item_type IN ('ITEM', 'MANUAL')",
+            name="ck_fair_stand_cost_items_cost_item_type",
+        ),
+        CheckConstraint(
+            "(cost_item_type = 'ITEM' AND item_key IS NOT NULL AND name IS NULL AND unit IS NULL) "
+            "OR (cost_item_type = 'MANUAL' AND item_key IS NULL AND name IS NOT NULL "
+            "AND trim(name) <> '' AND unit IS NOT NULL)",
+            name="ck_fair_stand_cost_items_entry_shape",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    organization_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    cost_item_type: Mapped[str] = mapped_column(String(16), nullable=False)
+    item_key: Mapped[str | None] = mapped_column(
+        String(128),
+        ForeignKey(
+            "fair_stand_items.item_key",
+            name="fk_fair_stand_cost_items_item_key",
+            ondelete="CASCADE",
+            onupdate="CASCADE",
+        ),
+        nullable=True,
+    )
+    name: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    unit: Mapped[str | None] = mapped_column(
+        String(64),
+        ForeignKey(
+            "fair_stand_units.unit_key",
+            name="fk_fair_stand_cost_items_unit_key",
+            ondelete="CASCADE",
+            onupdate="CASCADE",
+        ),
+        nullable=True,
+    )
+    purchase_price: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
+    sale_price: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
 class FairStandProjectModel(Base):
     __tablename__ = "fair_stand_projects"
     __table_args__ = (

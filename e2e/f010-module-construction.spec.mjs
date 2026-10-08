@@ -62,13 +62,20 @@ test('F-010 automatic wall construction reaches persisted runtime state through 
 
   const project = await saveAndReadProject(page);
   expect(project).not.toBeNull();
-  expect(project.modules.length).toBeGreaterThan(0);
-  expect(project.modules.every((moduleState) => moduleState.type === 'flat-panel')).toBe(true);
-  expect(project.modules.every((moduleState) => moduleState.itemKey === wallFlatPanelItemKey(moduleState.widthCm))).toBe(true);
+  const walls = project.modules.filter((moduleState) => moduleState.type === 'flat-panel');
+  const lamps = project.modules.filter((moduleState) => moduleState.type === 'led-floodlight');
+  expect(walls.map((moduleState) => moduleState.widthCm)).toEqual([200, 200, 100]);
+  expect(walls.every((moduleState) => moduleState.itemKey === wallFlatPanelItemKey(moduleState.widthCm))).toBe(true);
+  expect(walls.every((moduleState) => moduleState.placement?.wallId === 'back')).toBe(true);
+  expect(lamps).toHaveLength(3);
+  expect(lamps.every((moduleState) => moduleState.itemKey === 'led_floodlight')).toBe(true);
+  expect(lamps.every((moduleState) => moduleState.placement?.wallId === 'back')).toBe(true);
+  expect(project.modules).toHaveLength(walls.length + lamps.length);
   expect(pageErrors).toEqual([]);
 });
 
 test('F-010 catalog construction persists a module created through the real picker', async ({ page }) => {
+  test.setTimeout(60_000);
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
 

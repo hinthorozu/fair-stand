@@ -30,6 +30,7 @@ class CatalogBootstrap:
     rules: list[dict]
     stand_dimensions: StandDimensions
     settings: RuntimeSettings
+    units: list[dict]
 
 
 class GetCatalogBootstrapUseCase:
@@ -51,6 +52,10 @@ class GetCatalogBootstrapUseCase:
         settings = self._repository.get_runtime_settings()
         if settings is None:
             raise ValueError("Fair Stand settings are not seeded.")
+        units = [
+            {"unitKey": unit_key, "name": name}
+            for unit_key, name in self._repository.list_unit_labels()
+        ]
         digest = sha256(
             dumps(
                 {
@@ -62,6 +67,7 @@ class GetCatalogBootstrapUseCase:
                     "rules": rules,
                     "standDimensions": stand_dimensions.__dict__,
                     "settings": settings.__dict__,
+                    "units": units,
                 },
                 sort_keys=True,
                 default=str,
@@ -77,4 +83,5 @@ class GetCatalogBootstrapUseCase:
             rules=rules,
             stand_dimensions=stand_dimensions,
             settings=settings,
+            units=units,
         )
