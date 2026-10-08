@@ -309,13 +309,137 @@ test('two collinear walls with a branch at the joint are one tee: 4 uprights, no
   assert.equal(qty(bom, 'connector_start'), 8);
 });
 
-test('an unlocked door-door joint does not add doubles or corners', () => {
-  const doors = resolveProjectBom([
-    placed('a', 'wall_door_100_350', { xCm: 0, widthCm: 100 }),
-    placed('b', 'wall_door_100_350', { xCm: 100, widthCm: 100 }),
+test('separator, door, and showcase pairs share one upright on end, corner, and tee', () => {
+  const end = (left, leftWidth, right, rightWidth) => resolveProjectBom([
+    placed('a', left, { xCm: 0, widthCm: leftWidth }),
+    placed('b', right, { xCm: leftWidth, widthCm: rightWidth }),
   ]);
-  assert.equal(doors.joints.length, 0);
-  assert.equal(qty(doors, 'connector_single'), 10);
-  assert.equal(qty(doors, 'connector_double'), 0);
+  const corner = (left, leftWidth, right, rightWidth) => resolveProjectBom([
+    placed('a', left, { xCm: 0, widthCm: leftWidth }),
+    cornerPair('b', right, rightWidth, { xCm: leftWidth, yCm: 0 }),
+  ]);
+
+  const sep50 = end('wall_separator_50_350', 50, 'wall_separator_50_350', 50);
+  assert.equal(sep50.appliedEndToEndCount, 1);
+  assert.equal(qty(sep50, 'upright_346_5'), 3);
+  assert.equal(qty(sep50, 'connector_single'), 12);
+  assert.equal(qty(sep50, 'connector_double'), 7);
+  assert.equal(qty(sep50, 'connector_corner'), 0);
+  assert.equal(qty(sep50, 'separator_panel_48_5'), 14);
+
+  const sepMix = end('wall_separator_50_350', 50, 'wall_separator_100_350_sarmasik', 100);
+  assert.equal(qty(sepMix, 'upright_346_5'), 3);
+  assert.equal(qty(sepMix, 'connector_single'), 12);
+  assert.equal(qty(sepMix, 'connector_double'), 7);
+  assert.equal(qty(sepMix, 'separator_panel_48_5'), 7);
+  assert.equal(qty(sepMix, 'separator_panel_98'), 7);
+
+  const sepDoor = end('wall_separator_100_350', 100, 'wall_door_100_350', 100);
+  assert.equal(qty(sepDoor, 'upright_346_5'), 3);
+  assert.equal(qty(sepDoor, 'connector_single'), 8);
+  assert.equal(qty(sepDoor, 'connector_double'), 3);
+  assert.equal(qty(sepDoor, 'panel_98'), 3);
+  assert.equal(qty(sepDoor, 'separator_panel_98'), 7);
+
+  const sepShow2 = end('wall_separator_50_350', 50, 'wall_showcase_100_2_350', 100);
+  assert.equal(qty(sepShow2, 'upright_346_5'), 3);
+  assert.equal(qty(sepShow2, 'connector_single'), 11);
+  assert.equal(qty(sepShow2, 'connector_double'), 5);
+
+  const sepShow3 = end('wall_separator_100_350', 100, 'wall_showcase_100_3_350', 100);
+  assert.equal(qty(sepShow3, 'upright_346_5'), 3);
+  assert.equal(qty(sepShow3, 'connector_single'), 12);
+  assert.equal(qty(sepShow3, 'connector_double'), 4);
+
+  const doors = end('wall_door_100_350', 100, 'wall_door_100_350', 100);
+  assert.equal(doors.appliedEndToEndCount, 1);
+  assert.equal(qty(doors, 'upright_346_5'), 3);
+  assert.equal(qty(doors, 'connector_single'), 4);
+  assert.equal(qty(doors, 'connector_double'), 3);
   assert.equal(qty(doors, 'panel_98'), 6);
+  assert.equal(qty(doors, 'door_leaf_100'), 2);
+
+  const doorShow2 = end('wall_door_100_350', 100, 'wall_showcase_100_2_350', 100);
+  assert.equal(qty(doorShow2, 'upright_346_5'), 3);
+  assert.equal(qty(doorShow2, 'connector_single'), 6);
+  assert.equal(qty(doorShow2, 'connector_double'), 3);
+
+  const doorShow3 = end('wall_door_100_350', 100, 'wall_showcase_100_3_350', 100);
+  assert.equal(qty(doorShow3, 'upright_346_5'), 3);
+  assert.equal(qty(doorShow3, 'connector_single'), 5);
+  assert.equal(qty(doorShow3, 'connector_double'), 3);
+
+  const show22 = end('wall_showcase_100_2_350', 100, 'wall_showcase_100_2_350', 100);
+  assert.equal(qty(show22, 'upright_346_5'), 3);
+  assert.equal(qty(show22, 'connector_single'), 8);
+  assert.equal(qty(show22, 'connector_double'), 5);
+
+  const show23 = end('wall_showcase_100_2_350', 100, 'wall_showcase_100_3_350', 100);
+  assert.equal(qty(show23, 'upright_346_5'), 3);
+  assert.equal(qty(show23, 'connector_single'), 8);
+  assert.equal(qty(show23, 'connector_double'), 4);
+
+  const show33 = end('wall_showcase_100_3_350', 100, 'wall_showcase_100_3_350', 100);
+  assert.equal(qty(show33, 'upright_346_5'), 3);
+  assert.equal(qty(show33, 'connector_single'), 6);
+  assert.equal(qty(show33, 'connector_double'), 4);
+
+  const sepCorner = corner('wall_separator_50_350', 50, 'wall_separator_100_350', 100);
+  assert.equal(sepCorner.appliedCornerCount, 1);
+  assert.equal(qty(sepCorner, 'upright_346_5'), 3);
+  assert.equal(qty(sepCorner, 'connector_single'), 14);
+  assert.equal(qty(sepCorner, 'connector_double'), 0);
+  assert.equal(qty(sepCorner, 'connector_corner'), 12);
+  assert.equal(qty(sepCorner, 'separator_panel_48_5'), 7);
+  assert.equal(qty(sepCorner, 'separator_panel_98'), 7);
+  assert.equal(qty(sepCorner, 'panel_corner_42_5'), 0);
+  assert.equal(qty(sepCorner, 'panel_corner_92'), 0);
+
+  const doorCorner = corner('wall_door_100_350', 100, 'wall_door_100_350', 100);
+  assert.equal(qty(doorCorner, 'upright_346_5'), 3);
+  assert.equal(qty(doorCorner, 'connector_single'), 6);
+  assert.equal(qty(doorCorner, 'connector_corner'), 4);
+  assert.equal(qty(doorCorner, 'panel_98'), 0);
+  assert.equal(qty(doorCorner, 'panel_corner_92'), 6);
+
+  const showCorner = corner('wall_showcase_100_2_350', 100, 'wall_showcase_100_3_350', 100);
+  assert.equal(qty(showCorner, 'upright_346_5'), 3);
+  assert.equal(qty(showCorner, 'connector_single'), 9);
+  assert.equal(qty(showCorner, 'connector_corner'), 7);
+  assert.equal(qty(showCorner, 'panel_98'), 0);
+  assert.equal(qty(showCorner, 'panel_corner_92'), 9);
+
+  const doorShowCorner = corner('wall_separator_100_350', 100, 'wall_door_100_350', 100);
+  assert.equal(qty(doorShowCorner, 'upright_346_5'), 3);
+  assert.equal(qty(doorShowCorner, 'connector_single'), 10);
+  assert.equal(qty(doorShowCorner, 'connector_corner'), 8);
+  assert.equal(qty(doorShowCorner, 'separator_panel_98'), 7);
+  assert.equal(qty(doorShowCorner, 'panel_corner_92'), 3);
+  assert.equal(qty(doorShowCorner, 'panel_98'), 0);
+
+  const tee = resolveProjectBom([
+    placed('a', 'wall_separator_100_350', { xCm: 0, widthCm: 100 }),
+    placed('b', 'wall_separator_100_350', { xCm: 100, widthCm: 100 }),
+    cornerPair('c', 'wall_door_100_350', 100, { xCm: 100, yCm: 0 }),
+  ]);
+  assert.equal(tee.joints.length, 1);
+  assert.equal(tee.joints[0].kind, 'tee');
+  assert.equal(qty(tee, 'upright_346_5'), 4);
+  assert.equal(qty(tee, 'connector_double'), 0);
+  assert.equal(qty(tee, 'connector_corner'), 14);
+  assert.equal(qty(tee, 'connector_single'), 17);
+  assert.equal(qty(tee, 'separator_panel_98'), 14);
+  assert.equal(qty(tee, 'panel_corner_92'), 3);
+
+  const branch = resolveProjectBom([
+    placed('host', 'wall_showcase_100_2_350', { xCm: 0, widthCm: 100 }),
+    cornerPair('branch', 'wall_separator_50_350', 50, { xCm: 50, yCm: 0 }),
+  ]);
+  assert.equal(branch.joints[0].kind, 'tee');
+  assert.equal(qty(branch, 'upright_346_5'), 3);
+  assert.equal(qty(branch, 'connector_double'), 0);
+  assert.equal(qty(branch, 'connector_corner'), 6);
+  assert.equal(qty(branch, 'connector_single'), 16);
+  assert.equal(qty(branch, 'panel_98'), 5);
+  assert.equal(qty(branch, 'separator_panel_48_5'), 7);
 });
