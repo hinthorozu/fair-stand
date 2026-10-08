@@ -392,7 +392,8 @@ test('mixed-height containment drops only the contained upright', () => {
   ]);
   assert.equal(qty(corner, 'upright_49_5'), 1);
   assert.equal(qty(corner, 'upright_99'), 2);
-  assert.equal(qty(corner, 'connector_corner'), 2);
+  assert.equal(qty(corner, 'connector_corner'), 3);
+  assert.equal(qty(corner, 'connector_single'), 3);
   assert.equal(qty(corner, 'connector_double'), 0);
   assert.equal(qty(corner, 'panel_corner_92'), 3);
   assert.equal(qty(corner, 'panel_98'), 0);
@@ -603,6 +604,251 @@ test('saved scene upright at the short end counts on a 500 cm stand', () => {
   } finally {
     initializeStandDimensions(CANONICAL_STAND_DIMENSIONS);
   }
+});
+
+test('same-width column keeps one bottom rail, one top rail, and two bottom starts', () => {
+  const stacked = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short2('s2', 'wall_200_short_2', { widthCm: 200 }),
+    short1('s1', 'wall_200_short_1', { widthCm: 200 }),
+  ]);
+  assert.equal(qty(stacked, 'profile_190'), 2);
+  assert.equal(qty(stacked, 'connector_start'), 2);
+  assert.equal(qty(stacked, 'upright_346_5'), 2);
+  assert.equal(qty(stacked, 'upright_99'), 2);
+  assert.equal(qty(stacked, 'upright_49_5'), 2);
+  assert.equal(qty(stacked, 'panel_197'), 10);
+  assert.equal(qty(stacked, 'connector_single'), 19);
+  assert.equal(qty(stacked, 'connector_double'), 0);
+  assert.equal(qty(stacked, 'connector_corner'), 0);
+  assert.equal(moduleQty(stacked, 'wall', 'profile_190'), 2);
+  assert.equal(moduleQty(stacked, 'wall', 'connector_start'), 2);
+  assert.equal(moduleQty(stacked, 's2', 'profile_190'), 0);
+  assert.equal(moduleQty(stacked, 's2', 'connector_start'), 0);
+  assert.equal(moduleQty(stacked, 's1', 'profile_190'), 0);
+  assert.equal(moduleQty(stacked, 's1', 'connector_start'), 0);
+
+  const narrower = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short1('s1', 'wall_100_short_1', { widthCm: 100 }),
+  ]);
+  assert.equal(qty(narrower, 'profile_190'), 2);
+  assert.equal(qty(narrower, 'profile_91'), 2);
+  assert.equal(qty(narrower, 'connector_start'), 4);
+
+  const gapped = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short1('s1', 'wall_200_short_1', { widthCm: 200, zCm: 400 }),
+  ]);
+  assert.equal(qty(gapped, 'profile_190'), 4);
+  assert.equal(qty(gapped, 'connector_start'), 4);
+
+  const extended = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short1('s1', 'wall_200_short_1', { widthCm: 200, zCm: 350 }),
+  ]);
+  assert.equal(qty(extended, 'profile_190'), 2);
+  assert.equal(qty(extended, 'connector_start'), 2);
+  assert.equal(moduleQty(extended, 'wall', 'profile_190'), 1);
+  assert.equal(moduleQty(extended, 'wall', 'connector_start'), 2);
+  assert.equal(moduleQty(extended, 's1', 'profile_190'), 1);
+  assert.equal(moduleQty(extended, 's1', 'connector_start'), 0);
+
+  const shorts = resolveProjectBom([
+    short2('outer', 'wall_200_short_2', { widthCm: 200 }),
+    short1('inner', 'wall_200_short_1', { widthCm: 200 }),
+  ]);
+  assert.equal(qty(shorts, 'profile_190'), 2);
+  assert.equal(qty(shorts, 'connector_start'), 2);
+  assert.equal(moduleQty(shorts, 'outer', 'profile_190'), 2);
+  assert.equal(moduleQty(shorts, 'outer', 'connector_start'), 2);
+  assert.equal(moduleQty(shorts, 'inner', 'profile_190'), 0);
+  assert.equal(moduleQty(shorts, 'inner', 'connector_start'), 0);
+
+  const abutted = resolveProjectBom([
+    short2('lower', 'wall_200_short_2', { widthCm: 200, zCm: 250 }),
+    short1('upper', 'wall_200_short_1', { widthCm: 200, zCm: 350 }),
+  ]);
+  assert.equal(qty(abutted, 'profile_190'), 2);
+  assert.equal(qty(abutted, 'connector_start'), 2);
+  assert.equal(moduleQty(abutted, 'lower', 'profile_190'), 1);
+  assert.equal(moduleQty(abutted, 'lower', 'connector_start'), 2);
+  assert.equal(moduleQty(abutted, 'upper', 'profile_190'), 1);
+  assert.equal(moduleQty(abutted, 'upper', 'connector_start'), 0);
+});
+
+test('same-width short on a door or showcase drops the short rails only', () => {
+  const door = resolveProjectBom([
+    frame('door', 'wall_door_100_350', { widthCm: 100, heightCm: 350 }),
+    short2('s2', 'wall_100_short_2', { widthCm: 100 }),
+    short1('s1', 'wall_100_short_1', { widthCm: 100 }),
+  ]);
+  assert.equal(qty(door, 'profile_91'), 1);
+  assert.equal(qty(door, 'connector_start'), 2);
+  assert.equal(qty(door, 'upright_346_5'), 2);
+  assert.equal(qty(door, 'upright_99'), 2);
+  assert.equal(qty(door, 'upright_49_5'), 2);
+  assert.equal(moduleQty(door, 's2', 'profile_91'), 0);
+  assert.equal(moduleQty(door, 's2', 'connector_start'), 0);
+  assert.equal(moduleQty(door, 'door', 'connector_start'), 2);
+
+  const above = resolveProjectBom([
+    frame('door', 'wall_door_100_350', { widthCm: 100, heightCm: 350 }),
+    short2('s2', 'wall_100_short_2', { widthCm: 100, zCm: 350 }),
+  ]);
+  assert.equal(qty(above, 'profile_91'), 1);
+  assert.equal(qty(above, 'connector_start'), 2);
+  assert.equal(qty(above, 'panel_98'), 5);
+  assert.equal(qty(above, 'upright_445_5'), 2);
+  assert.equal(qty(above, 'upright_346_5'), 0);
+  assert.equal(qty(above, 'upright_99'), 0);
+  assert.equal(moduleQty(above, 'door', 'profile_91'), 1);
+  assert.equal(moduleQty(above, 's2', 'profile_91'), 0);
+
+  const showcase = resolveProjectBom([
+    frame('show', 'wall_showcase_100_2_350', { widthCm: 100, heightCm: 350 }),
+    short1('s1', 'wall_100_short_1', { widthCm: 100 }),
+  ]);
+  assert.equal(qty(showcase, 'profile_91'), 4);
+  assert.equal(qty(showcase, 'connector_start'), 4);
+  assert.equal(moduleQty(showcase, 's1', 'profile_91'), 0);
+  assert.equal(moduleQty(showcase, 's1', 'connector_start'), 0);
+  assert.equal(qty(showcase, 'panel_98'), 6);
+  assert.equal(qty(showcase, 'connector_single'), 12);
+});
+
+test('stacked short corner pays one corner per panel band: 18 corner, 20 single', () => {
+  const bom = resolveProjectBom([
+    frame('wallA', 'wall_200_350', { xCm: 100, widthCm: 200, heightCm: 350 }),
+    frame('wallB', 'wall_200_350', { xCm: 300, widthCm: 200, heightCm: 350, rotationZDeg: 270 }),
+    short2('highB', 'wall_200_short_2', { xCm: 300, widthCm: 200, zCm: 350, rotationZDeg: 270 }),
+    short1('topB', 'wall_200_short_1', { xCm: 300, widthCm: 200, zCm: 450, rotationZDeg: 270 }),
+    short2('highA', 'wall_200_short_2', { xCm: 100, widthCm: 200, zCm: 350 }),
+    short1('topA', 'wall_200_short_1', { xCm: 100, widthCm: 200, zCm: 450 }),
+  ]);
+  assert.equal(qty(bom, 'connector_corner'), 18);
+  assert.equal(qty(bom, 'connector_single'), 20);
+  assert.equal(qty(bom, 'connector_double'), 0);
+  assert.equal(qty(bom, 'connector_start'), 4);
+  assert.equal(qty(bom, 'profile_190'), 4);
+  assert.equal(qty(bom, 'upright_495'), 3);
+  assert.equal(qty(bom, 'upright_346_5'), 0);
+  assert.equal(qty(bom, 'upright_99'), 0);
+  assert.equal(qty(bom, 'upright_49_5'), 0);
+});
+
+test('shorts stacked on a 346.5 post become one upright per plan end', () => {
+  const onShort1 = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short1('s1', 'wall_200_short_1', { widthCm: 200, zCm: 350 }),
+  ]);
+  assert.equal(qty(onShort1, 'upright_396'), 2);
+  assert.equal(qty(onShort1, 'upright_346_5'), 0);
+  assert.equal(qty(onShort1, 'upright_49_5'), 0);
+  assert.equal(qty(onShort1, 'profile_190'), 2);
+  assert.equal(qty(onShort1, 'connector_start'), 2);
+
+  const onShort2 = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short2('s2', 'wall_200_short_2', { widthCm: 200, zCm: 350 }),
+  ]);
+  assert.equal(qty(onShort2, 'upright_445_5'), 2);
+  assert.equal(qty(onShort2, 'upright_346_5'), 0);
+  assert.equal(qty(onShort2, 'upright_99'), 0);
+
+  const both = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short2('s2', 'wall_200_short_2', { widthCm: 200, zCm: 350 }),
+    short1('s1', 'wall_200_short_1', { widthCm: 200, zCm: 450 }),
+  ]);
+  assert.equal(qty(both, 'upright_495'), 2);
+  assert.equal(qty(both, 'upright_346_5'), 0);
+  assert.equal(qty(both, 'upright_99'), 0);
+  assert.equal(qty(both, 'upright_49_5'), 0);
+  assert.equal(qty(both, 'profile_190'), 2);
+  assert.equal(qty(both, 'connector_start'), 2);
+
+  const inside = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short2('s2', 'wall_200_short_2', { widthCm: 200 }),
+    short1('s1', 'wall_200_short_1', { widthCm: 200 }),
+  ]);
+  assert.equal(qty(inside, 'upright_495'), 0);
+  assert.equal(qty(inside, 'upright_346_5'), 2);
+  assert.equal(qty(inside, 'upright_99'), 2);
+  assert.equal(qty(inside, 'upright_49_5'), 2);
+
+  const shortsOnly = resolveProjectBom([
+    short2('lower', 'wall_200_short_2', { widthCm: 200, zCm: 250 }),
+    short1('upper', 'wall_200_short_1', { widthCm: 200, zCm: 350 }),
+  ]);
+  assert.equal(qty(shortsOnly, 'upright_495'), 0);
+  assert.equal(qty(shortsOnly, 'upright_99'), 2);
+  assert.equal(qty(shortsOnly, 'upright_49_5'), 2);
+
+  const besidePlain = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short2('s2', 'wall_200_short_2', { widthCm: 200, zCm: 350 }),
+    short1('s1', 'wall_200_short_1', { widthCm: 200, zCm: 450 }),
+    cornerPartner('next', 'wall_200_350', 200, { xCm: 200, heightCm: 350 }),
+  ]);
+  assert.equal(qty(besidePlain, 'upright_495'), 2);
+  assert.equal(qty(besidePlain, 'upright_346_5'), 1);
+  assert.equal(qty(besidePlain, 'upright_99'), 0);
+  assert.equal(qty(besidePlain, 'upright_49_5'), 0);
+});
+
+test('same-width column still meets a neighbor on end, corner, and tee', () => {
+  const end = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short2('s2', 'wall_200_short_2', { widthCm: 200 }),
+    short1('s1', 'wall_200_short_1', { widthCm: 200 }),
+    frame('next', 'wall_200_350', { xCm: 200, widthCm: 200, heightCm: 350 }),
+  ]);
+  assert.equal(qty(end, 'profile_190'), 4);
+  assert.equal(qty(end, 'connector_start'), 4);
+  assert.equal(qty(end, 'upright_346_5'), 3);
+  assert.equal(qty(end, 'upright_99'), 2);
+  assert.equal(qty(end, 'upright_49_5'), 1);
+  assert.equal(qty(end, 'connector_double'), 8);
+  assert.equal(qty(end, 'connector_corner'), 0);
+  assert.equal(qty(end, 'connector_single'), 16);
+  assert.equal(qty(end, 'panel_197'), 17);
+
+  const corner = resolveProjectBom([
+    frame('wall', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short2('s2', 'wall_200_short_2', { widthCm: 200 }),
+    short1('s1', 'wall_200_short_1', { widthCm: 200 }),
+    cornerPartner('next', 'wall_200_350', 200, { xCm: 200, heightCm: 350 }),
+  ]);
+  assert.equal(qty(corner, 'profile_190'), 4);
+  assert.equal(qty(corner, 'connector_start'), 4);
+  assert.equal(qty(corner, 'connector_double'), 0);
+  assert.equal(qty(corner, 'connector_corner'), 14);
+  assert.equal(qty(corner, 'connector_single'), 18);
+  assert.equal(qty(corner, 'upright_346_5'), 3);
+  assert.equal(qty(corner, 'upright_99'), 2);
+  assert.equal(qty(corner, 'upright_49_5'), 1);
+  assert.equal(qty(corner, 'panel_corner_192'), 15);
+  assert.equal(qty(corner, 'panel_197'), 2);
+
+  const tee = resolveProjectBom([
+    frame('host', 'wall_200_350', { widthCm: 200, heightCm: 350 }),
+    short2('s2', 'wall_200_short_2', { widthCm: 200 }),
+    short1('s1', 'wall_200_short_1', { widthCm: 200 }),
+    cornerPartner('branch', 'wall_100_350', 100, { xCm: 100, heightCm: 350 }),
+  ]);
+  assert.equal(qty(tee, 'profile_190'), 2);
+  assert.equal(qty(tee, 'profile_91'), 2);
+  assert.equal(qty(tee, 'connector_start'), 4);
+  assert.equal(qty(tee, 'connector_double'), 0);
+  assert.equal(qty(tee, 'connector_corner'), 7);
+  assert.equal(qty(tee, 'connector_single'), 25);
+  assert.equal(qty(tee, 'upright_346_5'), 3);
+  assert.equal(qty(tee, 'upright_99'), 2);
+  assert.equal(qty(tee, 'upright_49_5'), 2);
+  assert.equal(qty(tee, 'panel_197'), 10);
+  assert.equal(qty(tee, 'panel_corner_92'), 7);
 });
 
 test('save and load rebuild the same wall short relationship BOM from placement', () => {

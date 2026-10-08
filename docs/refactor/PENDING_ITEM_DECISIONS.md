@@ -150,6 +150,14 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 - **Kaynak:** `src/relationshipBom.js`, `src/baseRunBom.js`. Test: `test/relationshipBomJoints.test.js`, `test/baseRunBom.test.js`.
 - **Yasak:** Aparat adedini kısa reçetedeki tekli sayısından ölçeklemek; short-up uydurmak; separatör panelini köşe paneline çevirmek
 
+### B.15. Aynı genişlikte dikey short kolonu
+
+- **Durum:** KOD — short ailesi, birebir aynı izdüşüm ve genişlikte, Z’de değen veya örtüşen kolonda.
+- **Karar:** Kolonda en az bir short varsa profil yalnız en alt ray ve en üst raydır. Başlangıç aparatı yalnız en altta 2’dir. Short, kendisini saran modülün içindeyse kendi profilini ve başlangıcını bırakır. İki raylı duvar veya separatör kolonun en altı ya da en üstü değilse o ray düşer. Kapı kolonunda profil yalnız kapının tek profilidir; üstündeki short profil eklemez. Vitrin kendi profil ve başlangıcını korur. Farklı genişlik, kayık izdüşüm ve Z boşluğu bu düşümü yapmaz. İki short köşesinde ödeyen yüz, panel bandı kadar tekliyi köşeye çevirir: short 1 için 1, short 2 için 2. Tam boy ortağa bakan short yüzü yine 1 öder. Komşu uçtaki tek yuva bir short eklemi alır; aynı uçtaki ikinci short o yuvayı ikinci kez kullanmaz. Short, 346,5 dikmenin üstüne Z’de değerek biniyorsa o kolonun dikmeleri tek kalemdir: 346,5+49,5 → `upright_396`, 346,5+99 → `upright_445_5`, 346,5+99+49,5 → `upright_495`. Her plan ucu bir dikmedir; paylaşılan uç bir kez sayılır. Short gövdenin içindeyse parçalar ayrı kalır. Yalnız short olan kolon birleşmez.
+- **Örnek (`wall_200` + short 2 + short 1, hepsi 200, short’lar gövdenin içinde):** Profil 190 × 2, başlangıç × 2. Dikme 346,5 × 2, dikme 99 × 2, dikme 49,5 × 2, panel 197 × 10, tekli × 19. Short’lar duvarın üstüne bindiyse aynı kolon dikme 495 × 2 yazar; 346,5, 99 ve 49,5 kalmaz. Aynı L’nin iki kolu da böyle üst üste ise dikme 495 × 3, köşe 18, tekli 20’dir: duvar köşesi 12, short 2 köşesi 4, short 1 köşesi 2.
+- **Kaynak:** `src/relationshipBom.js` `applySameWidthShortColumns`. Test: `test/wallShortRelationshipBom.test.js`.
+- **Yasak:** Genişlik farklıyken ray veya dikme birleştirmek; kapı veya vitrin profilini bu kolonla eksiltmek; short gövdenin içindeyken dikmeleri tek kaleme çevirmek; yalnız short kolonuna 396 / 445,5 / 495 yazmak
+
 ### B.14. Üretim listesi — proje toplamı
 
 - **Durum:** KOD — 2026-09-27. F-030 defterde OPEN; kapanış kaydı yok.

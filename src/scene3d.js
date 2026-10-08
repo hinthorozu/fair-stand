@@ -225,6 +225,8 @@ function withItemZ(moduleState, placement, overlayZCm = null) {
   return applyItemPlacementZCm(moduleState, placement, { overlayZCm });
 }
 
+let deleteShortcutLatched = false;
+
 function snapCollisionExemption(magneticSnap) {
   if (!magneticSnap?.targetModuleId || !magneticSnap.snapKind) return {};
   return {
@@ -5421,11 +5423,15 @@ export function createStandScene(
         || tagName === 'textarea'
         || tagName === 'select'
         || Boolean(target?.isContentEditable);
-      if (isEditing) return;
+      if (isEditing || event.repeat || deleteShortcutLatched) return;
 
       const moduleGroup = getSingleSelectedModuleGroup();
       if (!moduleGroup) return;
       event.preventDefault();
+      deleteShortcutLatched = true;
+      queueMicrotask(() => {
+        deleteShortcutLatched = false;
+      });
       window.dispatchEvent(new CustomEvent('fair-stand:delete-selected-module', {
         detail: {
           moduleId: moduleGroup.userData?.moduleId ?? null,
@@ -5492,7 +5498,7 @@ export function createStandScene(
 
     const rotationResult = rotateSelectedModule(requestedDeltaDeg);
     if (rotationResult.handled) event.preventDefault();
-  });
+  }, { signal });
 
   hostWindow.addEventListener('pointerup', (event) => {
     if (floorDrawSession && event.pointerId === floorDrawSession.pointerId) {
