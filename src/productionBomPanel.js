@@ -1,5 +1,6 @@
 import { groupBomLines } from './bomLineGroups.js';
 import { resolveProjectBom } from './projectBom.js';
+import { getItem } from './items.js';
 import { getFairStandHostDocument } from './hostDocument.js';
 
 const PANEL_ID = 'production-bom-panel';
@@ -88,6 +89,53 @@ function renderLineList(lines) {
   )).join('')}</ul>`;
 }
 
+function metalSection(printAreas) {
+  return (printAreas || []).find((section) => section.id === 'metal') ?? null;
+}
+
+function metalSizeLines(printAreas) {
+  return metalSection(printAreas)?.lines ?? [];
+}
+
+function groupsForCombinedList(lines, printAreas) {
+  const groups = groupBomLines(lines).map((group) => ({
+    id: group.id,
+    label: group.label,
+    lines: [...group.lines],
+  }));
+  const panel = groups.find((group) => group.id === 'panel');
+  const metalLines = panel?.lines.filter((line) => line.itemKey === 'metal_separator') ?? [];
+  if (panel && metalLines.length) {
+    panel.lines = panel.lines.filter((line) => line.itemKey !== 'metal_separator');
+    let production = groups.find((group) => group.id === 'production');
+    if (!production) {
+      production = { id: 'production', label: 'Üretim', lines: [] };
+      const panelIndex = groups.findIndex((group) => group.id === 'panel');
+      groups.splice(panelIndex + 1, 0, production);
+    }
+    production.lines.push(...metalLines);
+  }
+  return groups.filter((group) => (
+    group.lines.length > 0 || (group.id === 'panel' && metalSizeLines(printAreas).length > 0)
+  ));
+}
+
+function metalSizeLabel(line) {
+  const item = getItem('metal_separator');
+  const name = item?.name || 'Metal Separatör';
+  const unit = item?.unit || 'metre_kare';
+  return `${formatNumber(line.quantity)} x ${name} ${formatNumber(line.widthCm)} × ${formatNumber(line.heightCm)} cm - ${unit}`;
+}
+
+function visibleGroupLines(group, printAreas) {
+  const sizes = group.id === 'panel' ? metalSizeLines(printAreas) : [];
+  if (!sizes.length) return { hardware: group.lines, sizes };
+  return {
+    hardware: group.lines.filter((line) => line.itemKey !== 'metal_separator'),
+    sizes,
+  };
+}
+
 function formatArea(value) {
   return new Intl.NumberFormat('tr-TR', {
     minimumFractionDigits: 2,
@@ -135,8 +183,9 @@ function printSubjectTotalLabel(group) {
 }
 
 function renderPrintAreaGroups(printAreas) {
-  if (!printAreas?.length) return '';
-  return printAreas.map((section) => (
+  const sections = (printAreas || []).filter((section) => section.id !== 'metal');
+  if (!sections.length) return '';
+  return sections.map((section) => (
     `<section class="production-bom-group">
       <h4 class="production-bom-group__title">${escapeHtml(section.label)}</h4>
       <ul class="production-bom-module__list">${printSubjectGroups(section.lines).map((group) => {
@@ -151,15 +200,21 @@ function renderPrintAreaGroups(printAreas) {
 
 function renderTotalsHtml(lines, printAreas, { open = false } = {}) {
   const openAttr = open ? ' open' : '';
-  const groups = groupBomLines(lines);
+  const groups = groupsForCombinedList(lines, printAreas);
   const printHtml = renderPrintAreaGroups(printAreas);
   const hardware = groups.length
-    ? groups.map((group) => (
-      `<section class="production-bom-group">
+    ? groups.map((group) => {
+      const view = visibleGroupLines(group, printAreas);
+      const rows = [
+        ...view.hardware.map((line) => `<li>${escapeHtml(lineLabel(line))}</li>`),
+        ...view.sizes.map((line) => `<li>${escapeHtml(metalSizeLabel(line))}</li>`),
+      ];
+      if (!rows.length) return '';
+      return `<section class="production-bom-group">
         <h4 class="production-bom-group__title">${escapeHtml(group.label)}</h4>
-        ${renderLineList(group.lines)}
-      </section>`
-    )).join('')
+        <ul class="production-bom-module__list">${rows.join('')}</ul>
+      </section>`;
+    }).join('')
     : (printHtml ? '' : '<p class="production-bom-panel__empty">Birleşik leaf satır yok.</p>');
   const body = `${hardware}${printHtml}`;
 
@@ -198,13 +253,16 @@ export function formatProductionBomText(bom) {
   }
 
   blocks.push('', 'Birleşik leaf toplam');
-  const groups = groupBomLines(bom?.lines || []);
+  const groups = groupsForCombinedList(bom?.lines || [], bom?.printAreas);
   if (!groups.length && !bom?.printAreas?.length) blocks.push('Birleşik leaf satır yok.');
   for (const group of groups) {
+    const view = visibleGroupLines(group, bom?.printAreas);
+    if (!view.hardware.length && !view.sizes.length) continue;
     blocks.push('', group.label);
-    for (const line of group.lines) blocks.push(lineLabel(line));
+    for (const line of view.hardware) blocks.push(lineLabel(line));
+    for (const line of view.sizes) blocks.push(metalSizeLabel(line));
   }
-  for (const section of bom?.printAreas || []) {
+  for (const section of (bom?.printAreas || []).filter((entry) => entry.id !== 'metal')) {
     blocks.push('', section.label);
     for (const group of printSubjectGroups(section.lines)) {
       for (const line of group.lines) blocks.push(printLineLabel(line));

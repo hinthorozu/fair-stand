@@ -130,6 +130,13 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 - **Kaynak:** Üretim listesi; `src/panelGlassBom.js`. Seed `panel_cam_*` migration `0043_panel_glass_family`. Seed `panel_corner_cam_*` migration `0044_panel_corner_glass_family`.
 - **Yasak:** `cam_xxx` anahtarı; `panel_corner_cam` yerine `panel_cam_corner`; reçete adedinden fazla cam yazmak; separatör panelini bu ikize bağlamak
 
+### B.11b. Metal separatör — gizli m² kalemi, listede adet satırı
+
+- **Durum:** KOD — 2026-10-08
+- **Karar:** Sağ tık `Metal Separatöre Çevir` cam kabul eden paneli tel ızgaraya çevirir. Ctrl ile seçilen eksiksiz dikdörtgen tek ölçüdür. Kalem `metal_separator`, tip `panel-glass`, katalogda görünmez, birim `metre_kare`, `is_cost_enabled` true. Sunta adedi düşer. Paneller satırı `7 x Metal Separatör 100 × 49,5 cm - metre_kare` yazar. Üretim satırı `3,47 × Metal Separatör · metre_kare · metal_separator` yazar. Ayrı “Toplam m²” cümlesi yazılmaz.
+- **Kaynak:** `src/scene3d.js`, `src/panelGlassBom.js`, `src/printAreaBom.js`, `src/productionBomPanel.js`. Migration `0065_metal_separator`, `0066_metal_separator_area`.
+- **Yasak:** Katalog kartı açmak; ölçü satırına etiketsiz “Toplam m²” eklemek; birimi adet sayıp fiyatı metre kare sanmak
+
 ### B.12. İç köşe — separatör duvarla aynı aparat, paneli değişmez
 
 - **Durum:** KOD — 2026-09-27; üretim listesi iç köşede uygular. Panel adedi reçeteden gelir (yerel seed separatör 50 hâlâ 1×48,5 + 3×98 ise liste onu basar; ×7 örneği canlı katalog satırıdır).

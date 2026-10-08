@@ -6,6 +6,7 @@ import {
 import { resolveItemBom } from './itemBom.js';
 import {
   applyGlassPanelSplit,
+  applyMetalSeparatorSplit,
   collectPanelSurfaces,
   summarizeGlassMoves,
 } from './panelGlassBom.js';
@@ -109,7 +110,8 @@ function resolveModuleEntry(moduleState, index, { swapCornerPanels = false, swap
       lines = swapped.lines;
       surfaces = swapped.surfaces;
     }
-    const split = applyGlassPanelSplit(lines, surfaces);
+    const glassSplit = applyGlassPanelSplit(lines, surfaces);
+    const split = applyMetalSeparatorSplit(glassSplit.lines, surfaces);
     return Object.freeze({
       moduleId,
       index,
@@ -118,7 +120,7 @@ function resolveModuleEntry(moduleState, index, { swapCornerPanels = false, swap
       type: item?.type ?? moduleState?.type ?? null,
       status: 'ok',
       lines: Object.freeze(split.lines.map(freezeLine)),
-      glassMoved: Object.freeze(split.moved),
+      glassMoved: Object.freeze(glassSplit.moved),
       message: null,
     });
   } catch (error) {
@@ -161,6 +163,7 @@ const PRINT_PRODUCTION_ITEM_KEYS = Object.freeze({
   lightbox: 'lightbox_fabric',
   foam: 'illuminated-foam',
   tulle: 'tulle_fabric',
+  metal: 'metal_separator',
 });
 
 function resolvePrintProductionLines(printAreas) {

@@ -50,6 +50,7 @@ import { createConnectedPanelModulePath, createPanelRangeSelection, createRectSe
 import { applyColorOverride, createDefaultImageTransform, ensureBoxBlockFaces } from './designState.js';
 import {
   applyGlassOverride,
+  applyMetalSeparatorOverride,
   bindRendererSurfaceState,
   clearFabricFields,
   cloneSurfaceStateForRenderer,
@@ -125,14 +126,75 @@ function panelFaceBackingMaterial(isGlass) {
   });
 }
 
+const METAL_GRID_CELL_M = 0.08;
+const METAL_WIRE_M = 0.008;
+const METAL_WIRE_DEPTH_M = 0.016;
+
+function removeMetalGrid(mesh) {
+  const grid = mesh?.getObjectByName?.('metal-separator-grid');
+  if (!grid) return;
+  mesh.remove(grid);
+  const geometries = new Set();
+  const materials = new Set();
+  grid.traverse((child) => {
+    if (child.geometry) geometries.add(child.geometry);
+    if (child.material) materials.add(child.material);
+  });
+  geometries.forEach((geometry) => geometry.dispose());
+  materials.forEach((material) => material.dispose());
+}
+
+function paintMetalGrid(mesh, widthM, heightM) {
+  removeMetalGrid(mesh);
+  const width = Math.max(Number(widthM) || METAL_GRID_CELL_M, METAL_GRID_CELL_M);
+  const height = Math.max(Number(heightM) || METAL_GRID_CELL_M, METAL_GRID_CELL_M);
+  const cols = Math.max(2, Math.round(width / METAL_GRID_CELL_M));
+  const rows = Math.max(2, Math.round(height / METAL_GRID_CELL_M));
+  const wire = METAL_WIRE_M;
+  const grid = new THREE.Group();
+  grid.name = 'metal-separator-grid';
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x2b323a,
+    roughness: 0.45,
+    metalness: 0.35,
+  });
+  const vertical = new THREE.BoxGeometry(wire, height, METAL_WIRE_DEPTH_M);
+  for (let column = 0; column <= cols; column += 1) {
+    const bar = new THREE.Mesh(vertical, material);
+    bar.position.set(-width / 2 + (column * width) / cols, 0, 0);
+    bar.castShadow = true;
+    bar.raycast = () => {};
+    grid.add(bar);
+  }
+  const horizontal = new THREE.BoxGeometry(width, wire, METAL_WIRE_DEPTH_M);
+  for (let row = 0; row <= rows; row += 1) {
+    const bar = new THREE.Mesh(horizontal, material);
+    bar.position.set(0, -height / 2 + (row * height) / rows, 0.002);
+    bar.castShadow = true;
+    bar.raycast = () => {};
+    grid.add(bar);
+  }
+  mesh.add(grid);
+  const face = mesh.material;
+  if (face) {
+    face.map = null;
+    face.alphaTest = 0;
+    face.transparent = true;
+    face.opacity = 0;
+    face.depthWrite = false;
+    face.needsUpdate = true;
+  }
+}
+
 function panelFaceSurfaceMaterial(surfaceState) {
   const glass = Boolean(surfaceState?.isGlass);
-  return new THREE.MeshStandardMaterial({
+  const metal = Boolean(surfaceState?.isMetalSeparator) && !glass;
+  const material = new THREE.MeshStandardMaterial({
     color: surfaceState?.imageAssetId
       ? 0xffffff
       : (glass ? GLASS_APPEARANCE.color : surfaceState?.color),
-    roughness: glass ? GLASS_APPEARANCE.roughness : 0.72,
-    metalness: 0,
+    roughness: metal ? 0.55 : (glass ? GLASS_APPEARANCE.roughness : 0.72),
+    metalness: metal ? 0.42 : 0,
     transparent: glass,
     opacity: glass ? GLASS_APPEARANCE.opacity : 1,
     depthWrite: !glass,
@@ -140,6 +202,12 @@ function panelFaceSurfaceMaterial(surfaceState) {
     emissive: 0x000000,
     emissiveIntensity: 0,
   });
+  if (metal) {
+    material.color.set(0xffffff);
+    material.roughness = 0.42;
+    material.metalness = 0.2;
+  }
+  return material;
 }
 const PANEL_VERTICAL_CLEARANCE_M = 0;
 const MESH_FABRIC_OPACITY = 0.48;
@@ -1124,7 +1192,7 @@ export function createStandScene(
     surfaceMeshes.forEach((surface) => {
       const texture = surface?.material?.map;
       const key = getRebuildTextureKey(surface);
-      if (!texture || !key) return;
+      if (!texture || !key || texture.userData?.metalSeparator) return;
       retained.set(key, texture);
       // disposeWall() owns the old materials. Detach maps first so disposing the old
       // material does not also destroy a texture that the replacement mesh will reuse.
@@ -2130,6 +2198,10 @@ export function createStandScene(
       stripNumber: surface?.userData.stripNumber ?? null,
       supportsGlass,
       isGlass: supportsGlass ? Boolean(surface.userData.surfaceState?.isGlass) : false,
+      supportsMetalSeparator: supportsGlass,
+      isMetalSeparator: supportsGlass
+        ? Boolean(surface.userData.surfaceState?.isMetalSeparator)
+        : false,
       supportsFabric,
       supportsLightbox,
       supportsMesh,
@@ -4186,6 +4258,9 @@ export function createStandScene(
       writePersistentSurface(mesh, (persistent) => {
         applyGlassOverride(persistent, glass);
       });
+      removeMetalGrid(mesh);
+      mesh.material.alphaTest = 0;
+      if (mesh.userData.backing) mesh.userData.backing.visible = true;
       const hasImage = Boolean(mesh.material.map);
       mesh.material.transparent = glass;
       mesh.material.opacity = glass ? GLASS_APPEARANCE.opacity : 1;
@@ -4210,6 +4285,104 @@ export function createStandScene(
         backing.castShadow = !glass;
       }
     });
+  }
+
+  function restorePanelFace(mesh) {
+    if (!mesh?.material) return;
+    const surfaceState = mesh.userData.surfaceState;
+    removeMetalGrid(mesh);
+    mesh.material.map = null;
+    mesh.material.alphaTest = 0;
+    mesh.material.color.set(surfaceState?.color ?? '#ffffff');
+    mesh.material.roughness = 0.72;
+    mesh.material.metalness = 0;
+    mesh.material.transparent = false;
+    mesh.material.opacity = 1;
+    mesh.material.depthWrite = true;
+    mesh.material.needsUpdate = true;
+    if (mesh.userData.backing) mesh.userData.backing.visible = true;
+    if (surfaceState?.imageAssetId) applyStoredImage(mesh);
+  }
+
+  function metalSurfacesInGroups(groupIds) {
+    if (!groupIds.size) return [];
+    const found = [];
+    surfaceMeshes.forEach((surface) => {
+      const groupId = surface.userData.surfaceState?.metalSeparatorGroupId;
+      if (groupId && groupIds.has(groupId)) found.push(surface);
+    });
+    return found;
+  }
+
+  function applyMetalSeparatorMode(meshOrMeshes, enabled) {
+    requestEditorRender();
+    const metal = Boolean(enabled);
+    const meshes = normalizeMeshes(meshOrMeshes).filter(
+      (mesh) => mesh?.userData?.acceptsGlass === true && mesh.userData.surfaceState,
+    );
+    if (!meshes.length) {
+      return { ok: false, message: 'Metal separatör için panel seç.' };
+    }
+
+    if (metal) {
+      const moduleIndices = meshes.map((mesh) => Number(mesh.userData.moduleIndex));
+      const stripIndices = meshes.map((mesh) => Number(mesh.userData.stripIndex));
+      const rect = createRectSelection(
+        meshes.map((mesh) => ({
+          mesh,
+          moduleIndex: Number(mesh.userData.moduleIndex),
+          stripIndex: Number(mesh.userData.stripIndex),
+        })),
+        { moduleIndex: Math.min(...moduleIndices), stripIndex: Math.min(...stripIndices) },
+        { moduleIndex: Math.max(...moduleIndices), stripIndex: Math.max(...stripIndices) },
+      );
+      if (!rect.ok || rect.entries.length !== meshes.length) {
+        return {
+          ok: false,
+          message: 'Metal separatör yalnızca eksiksiz dikdörtgen panel bloğundan oluşturulabilir.',
+        };
+      }
+
+      const replacedIds = new Set(
+        meshes.map((mesh) => mesh.userData.surfaceState?.metalSeparatorGroupId).filter(Boolean),
+      );
+      const selected = new Set(meshes);
+      metalSurfacesInGroups(replacedIds).forEach((surface) => {
+        if (selected.has(surface)) return;
+        writePersistentSurface(surface, (persistent) => {
+          applyMetalSeparatorOverride(persistent, false);
+        });
+        restorePanelFace(surface);
+      });
+
+      const groupId = `metal-${globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
+      meshes.forEach((mesh) => {
+        if (!mesh?.material) return;
+        writePersistentSurface(mesh, (persistent) => {
+          applyMetalSeparatorOverride(persistent, true);
+          persistent.metalSeparatorGroupId = groupId;
+        });
+        const widthM = Number(mesh.geometry?.parameters?.width) || 1;
+        const heightM = Number(mesh.geometry?.parameters?.height) || 0.5;
+        paintMetalGrid(mesh, widthM, heightM);
+        if (mesh.userData.backing) mesh.userData.backing.visible = false;
+      });
+      return { ok: true, enabled: true, panelCount: meshes.length };
+    }
+
+    const groupIds = new Set(
+      meshes.map((mesh) => mesh.userData.surfaceState?.metalSeparatorGroupId).filter(Boolean),
+    );
+    const targets = new Set(meshes);
+    metalSurfacesInGroups(groupIds).forEach((surface) => targets.add(surface));
+    targets.forEach((mesh) => {
+      if (!mesh?.material) return;
+      writePersistentSurface(mesh, (persistent) => {
+        applyMetalSeparatorOverride(persistent, false);
+      });
+      restorePanelFace(mesh);
+    });
+    return { ok: true, enabled: false, panelCount: targets.size };
   }
 
   function configureTexture(texture, surfaceState) {
@@ -5713,6 +5886,7 @@ export function createStandScene(
     resetDefaultView,
     applyColor,
     applyGlassMode,
+    applyMetalSeparatorMode,
     applyFabricMode,
     applyMeshMode,
     setFabricLighting,
@@ -8494,6 +8668,10 @@ function createFlatPanelModule(moduleState, moduleIndex, onSurfaceReady) {
         emissiveIntensity: 0,
       }),
     );
+    if (surfaceState.isMetalSeparator && !isGlass) {
+      paintMetalGrid(surface, innerWidth, panelHeight);
+      backing.visible = false;
+    }
     surface.position.set(0, centerY, depth / 2 + 0.0015);
 
     const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
@@ -8679,6 +8857,10 @@ function createDoorModule(moduleState, moduleIndex, onSurfaceReady) {
         emissiveIntensity: 0,
       }),
     );
+    if (surfaceState.isMetalSeparator && !surfaceState.isGlass) {
+      paintMetalGrid(surface, innerWidth, panelHeight);
+      backing.visible = false;
+    }
     surface.position.set(0, centerY, depth / 2 + 0.0015);
 
     const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
@@ -8935,6 +9117,10 @@ function createShowcaseModule(moduleState, moduleIndex, onSurfaceReady) {
         depthWrite: !isGlass, side: THREE.DoubleSide, emissive: 0x000000, emissiveIntensity: 0,
       }),
     );
+    if (surfaceState.isMetalSeparator && !isGlass) {
+      paintMetalGrid(surface, innerWidth, panelHeight);
+      backing.visible = false;
+    }
     surface.position.set(0, centerY, depth / 2 + 0.0015);
     const selectionFrame = createSelectionFrame(innerWidth, panelHeight);
     selectionFrame.visible = false;
