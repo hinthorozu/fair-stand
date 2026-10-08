@@ -180,7 +180,10 @@ function loadGltfScene(url) {
   const cached = gltfSceneCache.get(url);
   if (cached) return cached;
   const loader = new GLTFLoader();
-  const promise = loader.loadAsync(url).then((gltf) => gltf.scene).catch((error) => {
+  const promise = loader.loadAsync(url).then((gltf) => {
+    requestEditorRender();
+    return gltf.scene;
+  }).catch((error) => {
     gltfSceneCache.delete(url);
     notifyGltfLoadFailure(url, error);
     throw error;
@@ -202,7 +205,10 @@ function createTvScreenTexture(itemOrKey) {
   if (!item?.defaultScreenFile) {
     throw new TypeError(`Missing canonical default screen asset for ${item?.itemKey ?? 'unknown'}.`);
   }
-  const texture = new THREE.TextureLoader().load(import.meta.env.BASE_URL + item.defaultScreenFile);
+  const texture = new THREE.TextureLoader().load(
+    import.meta.env.BASE_URL + item.defaultScreenFile,
+    () => requestEditorRender(),
+  );
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
 }
@@ -474,6 +480,7 @@ export function createStandScene(
 
   const hallFloorTexture = new THREE.TextureLoader().load(
     import.meta.env.BASE_URL + 'textures/exhibition-floor-optimized.jpg',
+    () => requestEditorRender(),
   );
   hallFloorTexture.colorSpace = THREE.SRGBColorSpace;
   hallFloorTexture.wrapS = THREE.RepeatWrapping;
@@ -776,6 +783,7 @@ export function createStandScene(
   }
 
   function rebuildFloorAreaVisual() {
+    requestEditorRender();
     const keepSelected = floorAreaSelected;
     clearFloorAreaVisual();
     if (!currentFloorArea || !stageLayout) return;
@@ -852,6 +860,7 @@ export function createStandScene(
   }
 
   function setFloorType(floorType = getFloorItem('karolaj').itemKey) {
+    requestEditorRender();
     const resolved = listFloorTypeKeys().includes(floorType) ? floorType : getFloorItem('karolaj').itemKey;
     currentFloorType = resolved;
     const floorItem = getFloorItem(resolved);
@@ -877,6 +886,7 @@ export function createStandScene(
   }
 
   function setFloorColor(color) {
+    requestEditorRender();
     if (!getFloorItem(currentFloorType)?.paintable) return null;
     const normalized = String(color ?? '').trim();
     if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) return floorColors[currentFloorType];
@@ -983,6 +993,7 @@ export function createStandScene(
   }
 
   function createStage({ widthCm, depthCm, standType = null, resetView = true } = {}) {
+    requestEditorRender();
     const widthM = Number(widthCm) / 100;
     const depthM = Number(depthCm) / 100;
     if (!Number.isFinite(widthM) || !Number.isFinite(depthM) || widthM <= 0 || depthM <= 0) {
@@ -1241,6 +1252,7 @@ export function createStandScene(
   }
 
   function setSelectionVisual(mesh, selected) {
+    requestEditorRender();
     if (!mesh) return;
     const frame = mesh.userData.selectionFrame;
     if (frame) frame.visible = selected;
@@ -1634,6 +1646,7 @@ export function createStandScene(
   }
 
   function clearWall({ resetView = true } = {}) {
+    requestEditorRender();
     clearPlacementDrag();
     disposeWall();
     if (resetView) {
@@ -1875,6 +1888,7 @@ export function createStandScene(
     // textures are removed from the transfer map by applyStoredImage().
     disposeUnusedRebuildTextures();
     notifySelection();
+    requestEditorRender();
     return { totalWidth, surfaceCount: surfaceMeshes.length };
   }
 
@@ -2330,6 +2344,7 @@ export function createStandScene(
   }
 
   function showPlacementGhost(moduleOrWidthCm, placement, valid) {
+    requestEditorRender();
     const ghost = ensurePlacementGhost(moduleOrWidthCm);
     const colorHex = valid ? PLACEMENT_VALID_COLOR : PLACEMENT_INVALID_COLOR;
     ghost.colorHex = colorHex;
@@ -3469,6 +3484,7 @@ export function createStandScene(
   }
 
   function applyColor(meshOrMeshes, hexColor) {
+    requestEditorRender();
     const meshes = normalizeMeshes(meshOrMeshes);
     const fabricGroupIds = new Set(
       meshes.map((mesh) => mesh.userData.surfaceState?.fabricGroupId).filter(Boolean),
@@ -3736,6 +3752,7 @@ export function createStandScene(
     textureLoader.load(
       assetUrl,
       (sourceTexture) => {
+        requestEditorRender();
         if (fit === 'size') {
           const image = sourceTexture.image;
           const widthCm = Number(sizeCm?.widthCm);
@@ -3958,10 +3975,12 @@ export function createStandScene(
   }
 
   function applyFabricMode(meshOrMeshes, enabled) {
+    requestEditorRender();
     return applyFabricCoverMode(meshOrMeshes, enabled, 'lightbox');
   }
 
   function applyMeshMode(meshOrMeshes, enabled) {
+    requestEditorRender();
     return applyFabricCoverMode(meshOrMeshes, enabled, 'mesh');
   }
 
@@ -4091,6 +4110,7 @@ export function createStandScene(
   }
 
   function setFabricLighting(meshOrMeshes, enabled) {
+    requestEditorRender();
     const meshes = normalizeMeshes(meshOrMeshes).filter(
       (mesh) => mesh?.userData?.acceptsLightbox === true && mesh.userData.surfaceState?.fabricGroupId,
     );
@@ -4126,6 +4146,7 @@ export function createStandScene(
   }
 
   function applyGlassMode(meshOrMeshes, isGlass) {
+    requestEditorRender();
     const glass = Boolean(isGlass);
     const glassMeshes = normalizeMeshes(meshOrMeshes).filter(
       (mesh) => mesh?.userData?.acceptsGlass === true && mesh.userData.surfaceState,
@@ -4245,6 +4266,7 @@ export function createStandScene(
     textureLoader.load(
       assetUrl,
       (sourceTexture) => {
+        requestEditorRender();
         const surfaceState = mesh.userData.surfaceState;
         if (surfaceState?.fabricGroupId || surfaceState?.imageAssetId !== assetId) {
           sourceTexture.dispose();
@@ -4326,6 +4348,7 @@ export function createStandScene(
     textureLoader.load(
       assetUrl,
       (sourceTexture) => {
+        requestEditorRender();
         const surfaceState = mesh.userData.surfaceState;
         const transform = surfaceState?.imageTransform;
         if (
@@ -4641,6 +4664,7 @@ export function createStandScene(
   }
 
   function applyImageAsset(meshOrMeshes, assetId, fit = null) {
+    requestEditorRender();
     if (!assetId) return;
     normalizeMeshes(meshOrMeshes).forEach((mesh) => {
       if (!mesh?.material || mesh.userData.acceptsImage === false) return;
@@ -5503,17 +5527,15 @@ export function createStandScene(
     const height = Math.max(container.clientHeight, 1);
     renderer.setSize(width, height, false);
     updateCameraProjection(width, height);
+    requestEditorRender();
   }
 
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(container);
   resize();
 
-  // Keep interaction smooth, but do not burn the GPU rendering a static editor at
-  // monitor refresh rate. OrbitControls reports camera movement; while idle we only
-  // refresh occasionally so asynchronous texture/material updates still appear quickly.
+  // Duran sahne her kare çizilmez. Kamera, sürükleme, model veya doku gelince bir kare istenir.
   const activeFrameIntervalMs = coarsePointer ? (1000 / 30) : (1000 / 50);
-  const idleFrameIntervalMs = 250;
   let lastRenderAt = -Infinity;
   const lastCubePosition = new THREE.Vector3(Number.NaN, Number.NaN, Number.NaN);
   const lastCubeQuaternion = new THREE.Quaternion(Number.NaN, Number.NaN, Number.NaN, Number.NaN);
@@ -5521,10 +5543,10 @@ export function createStandScene(
   renderer.setAnimationLoop((now) => {
     const controlsChanged = Boolean(controls.update());
     const activelyDragging = Boolean(dragSession?.dragging);
-    const frameInterval = (controlsChanged || activelyDragging)
-      ? activeFrameIntervalMs
-      : idleFrameIntervalMs;
-    if (now - lastRenderAt < frameInterval) return;
+    if (controlsChanged || activelyDragging) editorRenderRequested = true;
+    if (!editorRenderRequested) return;
+    const frameInterval = (controlsChanged || activelyDragging) ? activeFrameIntervalMs : 0;
+    if (frameInterval && now - lastRenderAt < frameInterval) return;
     lastRenderAt = now;
 
     const cameraChanged = !camera.position.equals(lastCubePosition)
@@ -5535,6 +5557,7 @@ export function createStandScene(
       lastCubeQuaternion.copy(camera.quaternion);
     }
     renderer.render(scene, camera);
+    if (!controlsChanged && !activelyDragging) editorRenderRequested = false;
   });
 
   async function captureCurrentViewPng({ scale = 3 } = {}) {
@@ -5584,6 +5607,7 @@ export function createStandScene(
   }
 
   function setShelfLightingVisible(moduleIndex, enabled) {
+    requestEditorRender();
     const targetIndex = Number(moduleIndex);
     const visible = Boolean(enabled);
     let changed = false;
@@ -5682,7 +5706,7 @@ export function createStandScene(
       let changed=false;
       wallRoot.traverse((object)=>{
         if(object.userData?.role!=='illuminated-foam-halo'||object.userData?.moduleId!==moduleId) return;
-        if(object.material?.color){ object.material.color.set(normalized); object.material.needsUpdate=true; changed=true; }
+        if(object.material?.color){ object.material.color.set(normalized); object.material.needsUpdate=true; changed=true; requestEditorRender(); }
       });
       return changed;
     },
@@ -6570,6 +6594,11 @@ function createKettleModule(moduleState, moduleIndex) {
 const floodlightRendererAssets = {
   ready: false,
 };
+let editorRenderRequested = true;
+
+function requestEditorRender() {
+  editorRenderRequested = true;
+}
 
 function floodlightRoundedRectShape(width, height, radius) {
   const shape = new THREE.Shape();
@@ -6710,11 +6739,22 @@ function createLedFloodlightModule(moduleState, moduleIndex) {
 
   const ledGroup = new THREE.Group();
   ledGroup.position.z = 0.0342;
+  const leds = new THREE.InstancedMesh(assets.led, assets.ledMaterial, 45);
+  const ledDummy = new THREE.Object3D();
+  let ledIndex = 0;
   for (let row = -2; row <= 2; row += 1) {
     for (let col = -4; col <= 4; col += 1) {
-      addFloodlightMesh(ledGroup, assets.led, assets.ledMaterial, [col * 0.023, row * 0.021, 0]);
+      ledDummy.position.set(col * 0.023, row * 0.021, 0);
+      ledDummy.updateMatrix();
+      leds.setMatrixAt(ledIndex, ledDummy.matrix);
+      ledIndex += 1;
     }
   }
+  leds.instanceMatrix.needsUpdate = true;
+  leds.castShadow = false;
+  leds.receiveShadow = false;
+  leds.userData.retainRendererAsset = true;
+  ledGroup.add(leds);
   head.add(ledGroup);
 
   for (let index = -4; index <= 4; index += 1) {
