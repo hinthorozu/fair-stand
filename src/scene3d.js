@@ -6618,14 +6618,6 @@ function ensureFloodlightRendererAssets() {
     roughness: 0.34,
     metalness: 0.7,
   });
-  floodlightRendererAssets.glassMaterial = new THREE.MeshStandardMaterial({
-    color: 0xf8fff4,
-    emissive: 0xf2ffe8,
-    emissiveIntensity: 1.65,
-    roughness: 0.08,
-    metalness: 0,
-    side: THREE.DoubleSide,
-  });
   floodlightRendererAssets.ledMaterial = new THREE.MeshStandardMaterial({
     color: 0xfff8d8,
     emissive: 0xfff2b8,
@@ -6679,6 +6671,23 @@ function createLedFloodlightModule(moduleState, moduleIndex) {
     heightCm,
   };
   const assets = ensureFloodlightRendererAssets();
+  if (!assets.glassMaterial) {
+    assets.glassMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xf8fff4,
+      emissive: 0xf2ffe8,
+      emissiveIntensity: 1.65,
+      roughness: 0.08,
+      metalness: 0,
+      transmission: 0.08,
+      clearcoat: 0.75,
+      clearcoatRoughness: 0.1,
+      side: THREE.DoubleSide,
+    });
+  }
+
+  function roundedRectShape(width, height, radius) {
+    return floodlightRoundedRectShape(width, height, radius);
+  }
 
   addFloodlightMesh(group, assets.mount, assets.bodyMaterial, [0, 0.014, 0.012]);
 
