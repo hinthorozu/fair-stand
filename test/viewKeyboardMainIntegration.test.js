@@ -9,6 +9,7 @@ test('scene delegates keyboard mapping and reuses existing camera/viewcube APIs'
   assert.match(sceneSource, /resolveViewKeyboardShortcut\(event\)/);
   assert.match(sceneSource, /setCameraMode\(shortcut\.mode\)/);
   assert.match(sceneSource, /viewCube\.setViewDirection\(direction\)/);
+  assert.match(sceneSource, /function applyPlacementToGroup\(group, placement, widthCm\) \{[\s\S]*?requestEditorRender\(\);\s*\}/);
   assert.match(sceneSource, /const requestedDeltaDeg = -90;/);
   assert.match(sceneSource, /resolveModuleRotationDeltaDeg\(dragSession\.moduleState, requestedDeltaDeg\)/);
   assert.match(sceneSource, /resolveModuleRotationDeltaDeg\(moduleState, deltaDeg\)/);
