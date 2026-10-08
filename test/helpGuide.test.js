@@ -48,6 +48,9 @@ test('help guide exposes a fixed question-mark launcher and collapsible sections
   assert.match(guideSource, /Aynı ölçü penceresi panel, Lightbox ve Mesh için geçerlidir/);
   assert.match(guideSource, /Panel, Lightbox ve Mesh görseli aynı pencereden ölçülür/);
   assert.match(guideSource, /Küpü sürüklemek kamerayı döndürür/);
+  assert.match(guideSource, /L Stand Sağ’da sol-ön köşeden bakar/);
+  assert.match(guideSource, /ViewCube ⌂ aynı görünüşü açar/);
+  assert.match(guideSource, /Sahne ilk açıldığında kamera sağ-ön köşededir/);
   assert.match(guideSource, /Üretim Listesi/);
   assert.match(guideSource, /<strong>Metin indir<\/strong>/);
   assert.match(guideSource, /görselin dosya adı, cm ölçüsü ve m²/);

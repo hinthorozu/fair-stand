@@ -36,7 +36,7 @@ function listGuideSections() {
         <tr><th>R</th><td>ViewCube Sağ (Right) görünüşüne geçer.</td></tr>
         <tr><th>T</th><td>ViewCube Üst (Top) görünüşüne geçer.</td></tr>
         <tr><th>F</th><td>ViewCube Ön (Front) görünüşüne geçer.</td></tr>
-        <tr><th>H</th><td>Home / varsayılan izometrik görünüşe döner.</td></tr>
+        <tr><th>H</th><td>Home görünüşüne döner. L Stand Sağ’da sol-ön köşeden bakar. Diğer stand tiplerinde sağ-ön köşeden bakar. ViewCube ⌂ aynı görünüşü açar.</td></tr>
         <tr><th>Shift + R</th><td>Seçili modülü saat yönünde döndürür. Sürükleme sırasında da kullanılabilir.</td></tr>
         <tr><th>↑ ↓ ← →</th><td>Seçili modülü kendi snap adımına göre ekranda görülen yöne taşır.</td></tr>
         <tr><th>Delete</th><td>Sahnede tek modül seçiliyse modülü siler. Görsel kütüphanesinde bir görsel seçili/odaktaysa görsel silme uyarısını açar.</td></tr>
@@ -44,7 +44,7 @@ function listGuideSections() {
         <tr><th>Enter</th><td>X/Y alanlarında uygunsa sahne oluşturmayı; proje adı popupında onaylamayı tetikler.</td></tr>
       </tbody></table>
       <p class="help-guide-note">Not: Döndürme adımı modüle göre değişebilir. Standart modüllerde çoğunlukla 90°, bazı banko ve ürünlerde 45° kullanılabilir.</p>
-      <p>ViewCube yüzüne tıklamak o görünüşe geçer; klavyede olmayan arka ve alt da buradadır. ⌂ izometrik görünüştür. Küpü sürüklemek kamerayı döndürür.</p>
+      <p>ViewCube yüzüne tıklamak o görünüşe geçer; klavyede olmayan arka ve alt da buradadır. ⌂ ve H aynı home görünüşüdür: L Stand Sağ sol-ön, diğer tipler sağ-ön. Sahne ilk açıldığında kamera sağ-ön köşededir. Küpü sürüklemek kamerayı döndürür.</p>
     `,
   },
   {

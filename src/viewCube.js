@@ -10,6 +10,11 @@ const INITIAL_MIN_DISTANCE = 9;
 const INITIAL_DISTANCE_FACTOR = 1.22;
 const HOME_DIRECTION = new THREE.Vector3(1, 0.72, 1).normalize();
 
+export function resolveHomeViewDirection(standType) {
+  const x = standType === 'l-right' ? -1 : 1;
+  return new THREE.Vector3(x, 0.72, 1).normalize();
+}
+
 const FACE_LABELS = [
   { label: 'RIGHT', accent: '#ef4444' },
   { label: 'LEFT', accent: '#ef4444' },
@@ -19,7 +24,14 @@ const FACE_LABELS = [
   { label: 'BACK', accent: '#64748b' },
 ];
 
-export function createViewCube(container, camera, controls, getFitView = () => null) {
+export function createViewCube(
+  container,
+  camera,
+  controls,
+  getFitView = () => null,
+  getHomeDirection = () => HOME_DIRECTION.clone(),
+  onViewChange = () => {},
+) {
   const root = document.createElement('div');
   root.className = 'view-cube';
   root.setAttribute('aria-label', 'Kamera yön küpü');
@@ -148,6 +160,7 @@ export function createViewCube(container, camera, controls, getFitView = () => n
       camera.position.lerpVectors(startPosition, endPosition, eased);
       controls.target.lerpVectors(startTarget, target, eased);
       camera.lookAt(controls.target);
+      onViewChange?.();
 
       if (progress < 1) {
         requestAnimationFrame(frame);
@@ -156,8 +169,10 @@ export function createViewCube(container, camera, controls, getFitView = () => n
 
       controls.enabled = true;
       controls.update();
+      onViewChange?.();
     }
 
+    onViewChange?.();
     requestAnimationFrame(frame);
   }
 
@@ -178,6 +193,7 @@ export function createViewCube(container, camera, controls, getFitView = () => n
     camera.position.copy(controls.target).add(offset);
     camera.lookAt(controls.target);
     controls.update();
+    onViewChange?.();
   }
 
   function directionFromIntersection(hit) {
@@ -267,6 +283,7 @@ export function createViewCube(container, camera, controls, getFitView = () => n
       camera.zoom = THREE.MathUtils.clamp(camera.zoom * factor, 0.08, 24);
       camera.updateProjectionMatrix();
       controls.update();
+      onViewChange?.();
       return;
     }
 
@@ -282,11 +299,16 @@ export function createViewCube(container, camera, controls, getFitView = () => n
     if (currentDistance > 0) offset.setLength(nextDistance);
     camera.position.copy(target).add(offset);
     controls.update();
+    onViewChange?.();
   }, { passive: false });
+
+  homeButton.addEventListener('pointerdown', (event) => {
+    event.stopPropagation();
+  });
 
   homeButton.addEventListener('click', (event) => {
     event.stopPropagation();
-    animateToDirection(HOME_DIRECTION);
+    animateToDirection(getHomeDirection?.() ?? HOME_DIRECTION);
   });
 
   function update({ applyInitial = true } = {}) {

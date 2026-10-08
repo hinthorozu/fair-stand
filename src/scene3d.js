@@ -55,7 +55,7 @@ import {
   cloneSurfaceStateForRenderer,
   syncRendererSurfaceState,
 } from './surfaceStateBinding.js';
-import { createViewCube } from './viewCube.js';
+import { createViewCube, resolveHomeViewDirection } from './viewCube.js';
 import { isEditableKeyboardTarget, resolveViewKeyboardShortcut } from './viewKeyboardShortcuts.js';
 import { computeGroupSizeSlice, computeImageFit, computeImageSizeTile, resolveImageTileHeightCm } from './imageFit.js';
 import { formatPlacementFeedbackMessage, hasPlacementFeedbackPointer } from './placementFeedback.js';
@@ -353,7 +353,14 @@ export function createStandScene(
     return { target, distance, verticalSpan };
   }
 
-  const viewCube = createViewCube(container, camera, controls, getViewCubeFit);
+  const viewCube = createViewCube(
+    container,
+    camera,
+    controls,
+    getViewCubeFit,
+    () => resolveHomeViewDirection(stageLayout?.standType),
+    requestEditorRender,
+  );
 
   let cameraMode = 'perspective';
   const projectionControl = document.createElement('div');
@@ -5449,7 +5456,7 @@ export function createStandScene(
         right: new THREE.Vector3(1, 0, 0),
         top: new THREE.Vector3(0, 1, 0),
         front: new THREE.Vector3(0, 0, 1),
-        home: HOME_DIRECTION.clone(),
+        home: resolveHomeViewDirection(stageLayout?.standType),
       };
       const direction = directions[shortcut.direction];
       if (!direction) return;
