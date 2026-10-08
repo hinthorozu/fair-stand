@@ -18,6 +18,8 @@ test('help guide documents view shortcuts and new clockwise rotation binding', (
   for (const key of ['P', 'O', 'L', 'R', 'T', 'F', 'H', 'Shift + R']) {
     assert.match(helpSource, new RegExp(`<tr><th>${key.replace(/[+]/g, '\\+')}</th>`));
   }
+  assert.match(helpSource, /L Stand Sağ’da sol-ön köşeden bakar/);
+  assert.match(helpSource, /diğer tipler sağ-ön/);
 });
 
 test('drag rotation keeps an independent cursor so invalid previews do not stop later Shift+R turns', () => {
