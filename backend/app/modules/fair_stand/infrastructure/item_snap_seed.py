@@ -135,7 +135,10 @@ def ensure_item_types(session, keys: list[str] | set[str] | tuple[str, ...]) -> 
     for key in sorted({str(k).strip() for k in keys if str(k).strip()}):
         row = session.scalar(sa.select(FairStandItemTypeModel).where(FairStandItemTypeModel.key == key))
         if row is None:
-            display_name = {"production": "Üretim"}.get(key, known.get(key, key))
+            display_name = {
+                "production": "Üretim",
+                "tulle-fabric": "Tül",
+            }.get(key, known.get(key, key))
             row = FairStandItemTypeModel(
                 key=key,
                 display_name=display_name,

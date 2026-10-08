@@ -640,6 +640,29 @@ function clampOpacity(value, fallback = 1) {
   return Math.min(1, Math.max(0, number));
 }
 
+export function createTulleFabricModuleState(descriptor = {}) {
+  const itemKey = descriptor?.itemKey ?? 'tulle_fabric';
+  const item = getItem(itemKey);
+  if (!item || item.type !== 'tulle-fabric') return null;
+
+  const state = {
+    id: createId('module'),
+    itemKey: item.itemKey,
+    type: item.type,
+    surface: {
+      id: createId('surface'),
+      color: itemDefaultColorCss(item),
+    },
+  };
+  applySceneFootprint(state, item, ['widthCm', 'depthCm', 'heightCm']);
+  const widthCm = Number(descriptor.widthCm);
+  const heightCm = Number(descriptor.heightCm);
+  if (Number.isFinite(widthCm) && widthCm > 0) state.widthCm = widthCm;
+  if (Number.isFinite(heightCm) && heightCm > 0) state.heightCm = heightCm;
+  state.depthCm = requireSceneDimension(item, 'depthCm');
+  return state;
+}
+
 export function createBoxBlockModuleState(descriptor = {}) {
   const itemKey = descriptor?.itemKey ?? 'box_block';
   const item = getItem(itemKey);
@@ -793,6 +816,7 @@ const MODULE_STATE_FACTORIES = Object.freeze({
   profile: (descriptor) => createProfileModuleState(descriptor),
   'plastic-trash-bin': () => createPlasticTrashBinModuleState(),
   'box-block': (descriptor) => createBoxBlockModuleState(descriptor),
+  'tulle-fabric': (descriptor) => createTulleFabricModuleState(descriptor),
   'indoor-plant-1': (descriptor) => createIndoorPlantModuleState(descriptor),
   tv: (descriptor) => createTvModuleState(descriptor),
   shelf: (descriptor) => createShelfModuleState(descriptor),
@@ -1006,6 +1030,15 @@ export function normalizeModuleItemState(moduleState) {
   if (moduleState.type === 'led-floodlight') {
     const item = getTopLightItemForType('led-floodlight');
     if (item) moduleState.itemKey = item.itemKey;
+    return moduleState;
+  }
+
+  if (moduleState.type === 'tulle-fabric') {
+    const item = moduleState.itemKey ? getItem(moduleState.itemKey) : null;
+    if (item?.type === 'tulle-fabric') {
+      moduleState.itemKey = item.itemKey;
+      moduleState.depthCm = requireSceneDimension(item, 'depthCm');
+    }
     return moduleState;
   }
 

@@ -75,6 +75,7 @@ import {
   snapPlacementToStand,
   snapPlacementToModules,
   stepPanelSeamOverlayPlacement,
+  stepTulleFabricZCm,
   stepWallShortFloorZCm,
   validatePlacementAgainstModules,
 } from './modulePlacement.js';
@@ -1784,6 +1785,9 @@ export function createStandScene(
     }
     if (moduleState.type === 'box-block') {
       return createBoxBlockModule(moduleState, moduleIndex);
+    }
+    if (moduleState.type === 'tulle-fabric') {
+      return createTulleFabricModule(moduleState, moduleIndex);
     }
     if (moduleState.type === 'illuminated-foam') {
       return createIlluminatedFoamModule(moduleState, moduleIndex, getAssetUrl(moduleState.imageAssetId));
@@ -5085,6 +5089,21 @@ export function createStandScene(
       if (!moduleGroup || !moduleState?.placement || !stageLayout) return;
 
       event.preventDefault();
+      if (moduleState.type === 'tulle-fabric') {
+        if (pressedKey !== 'arrowup' && pressedKey !== 'arrowdown') return;
+        const stepCm = getModulePlacementSnapCm(moduleState.type);
+        const nextZCm = stepTulleFabricZCm(
+          moduleState.placement.zCm,
+          pressedKey === 'arrowup' ? 'up' : 'down',
+          stepCm,
+        );
+        const nextPlacement = { ...moduleState.placement, zCm: nextZCm };
+        moduleState.placement = nextPlacement;
+        moduleGroup.userData.placement = { ...nextPlacement };
+        applyPlacementToGroup(moduleGroup, nextPlacement, moduleState.widthCm);
+        clearPlacementFeedback();
+        return;
+      }
       if (getFabricMoveLock(moduleState.id)) {
         showPlacementFeedback('Bu modül tek parça Lightbox/Mesh kaplamasına bağlı. Taşımak için önce kaplamayı kaldır.', {
           durationMs: 1800,
@@ -5849,6 +5868,73 @@ function createBoxBlockModule(moduleState, moduleIndex) {
     return face;
   });
   return { group, surfaces: [mesh, ...faces] };
+}
+
+function createTulleFabricModule(moduleState, moduleIndex) {
+  const item = getItem(moduleState.itemKey);
+  const scene = item ? resolveSceneDimensions(item) : null;
+  const widthCm = Math.max(1, Number(moduleState.widthCm) || Number(scene?.widthCm) || 1);
+  const heightCm = Math.max(1, Number(moduleState.heightCm) || Number(scene?.heightCm) || 1);
+  const depthCm = Number(moduleState.depthCm) || Number(scene?.depthCm);
+  const widthM = widthCm / 100;
+  const spanM = heightCm / 100;
+  const thicknessM = depthCm / 100;
+  const opacity = Math.min(1, Math.max(0, Number(item?.defaultOpacity ?? 1)));
+  const color = typeof moduleState.surface?.color === 'string' && moduleState.surface.color
+    ? moduleState.surface.color
+    : itemDefaultColorCss(item);
+
+  const group = new THREE.Group();
+  group.userData = {
+    kind: 'module',
+    moduleIndex,
+    moduleId: moduleState.id,
+    type: moduleState.type,
+    moduleType: 'tulle-fabric',
+    widthCm,
+    depthCm,
+    heightCm,
+    selectionBounds: Object.freeze({
+      widthM,
+      heightM: thicknessM,
+      depthM: spanM,
+      centerY: thicknessM / 2,
+    }),
+  };
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(widthM, thicknessM, spanM),
+    new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.72,
+      metalness: 0,
+      transparent: opacity < 1,
+      opacity,
+      depthWrite: opacity >= 0.999,
+      side: THREE.DoubleSide,
+    }),
+  );
+  mesh.position.set(0, thicknessM / 2, 0);
+  mesh.castShadow = opacity >= 0.2;
+  mesh.receiveShadow = true;
+  mesh.userData = {
+    kind: 'surface',
+    moduleId: moduleState.id,
+    moduleIndex,
+    moduleType: 'tulle-fabric',
+    selectionMode: 'module',
+    surfaceId: `${moduleState.id}:tulle-fabric`,
+    widthCm,
+    depthCm,
+    heightCm,
+    acceptsColor: true,
+    acceptsImage: false,
+    acceptsGlass: false,
+    acceptsLightbox: false,
+    acceptsMesh: false,
+    ...bindRendererSurfaceState(moduleState.surface),
+  };
+  group.add(mesh);
+  return { group, surfaces: [mesh] };
 }
 
 function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {

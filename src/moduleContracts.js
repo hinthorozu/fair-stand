@@ -123,6 +123,7 @@ const TYPE_CONTRACT_PROFILE = Object.freeze({
   'coat-rack': 'free-model-fixed',
   'plastic-trash-bin': 'free-model-fixed',
   'box-block': 'free-editable',
+  'tulle-fabric': 'free-editable',
   'indoor-plant-1': 'free-model-fixed',
   tv: 'wall-media',
   'led-floodlight': 'top-light',

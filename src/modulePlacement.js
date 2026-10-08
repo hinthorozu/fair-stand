@@ -189,6 +189,19 @@ export function getWallShortFloorZBoundsCm(heightCm, standHeightCm = getStandDim
   });
 }
 
+/** Tül Z adımı. Tavan kısmaz; adım çağıran yerin moveSnapCm değeridir. */
+export function stepTulleFabricZCm(currentZCm, direction, stepCm) {
+  const step = Number(stepCm);
+  if (!Number.isFinite(step) || step <= 0) {
+    throw new TypeError('Tulle Z step requires moveSnapCm.');
+  }
+  const current = Number(currentZCm);
+  const base = Number.isFinite(current) ? current : 0;
+  const sign = direction === 'up' ? 1 : direction === 'down' ? -1 : 0;
+  if (!sign) return base;
+  return base + sign * step;
+}
+
 export function stepWallShortFloorZCm(
   currentZCm,
   deltaCm,

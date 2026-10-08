@@ -29,6 +29,16 @@ test('glass panels stay in Paneller and unknown types fall into Extra', () => {
   assert.equal(groups[1].label, 'Extra');
 });
 
+test('tulle metre total sits under Üretim', () => {
+  const groups = groupBomLines([
+    { itemKey: 'tulle_fabric', quantity: 18, unit: 'metre_kare' },
+  ]);
+  assert.deepEqual(groups.map((group) => group.id), ['production']);
+  assert.equal(groups[0].label, 'Üretim');
+  assert.equal(groups[0].lines[0].itemKey, 'tulle_fabric');
+  assert.equal(groups.some((group) => group.id === 'extra'), false);
+});
+
 test('shelf_leg sits under Raflar', () => {
   const groups = groupBomLines([
     { itemKey: 'shelf_200', quantity: 1, unit: 'adet' },

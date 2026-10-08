@@ -26,6 +26,7 @@ const PLACEABLE_ITEM_TYPES = new Set([
   'showcase-2',
   'showcase-3',
   'illuminated-foam',
+  'tulle-fabric',
 ]);
 
 const SPECIAL = Object.freeze({

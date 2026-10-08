@@ -1083,6 +1083,15 @@ async function resizeContextIlluminatedFoam(context) {
   const index = findContextModuleIndex(context);
   if (index < 0) return;
   const moduleState = currentModules[index];
+  if (moduleState?.type === 'tulle-fabric') {
+    const dimensions = await requestTulleFabricDimensions(moduleState.widthCm, moduleState.heightCm);
+    if (!dimensions) return;
+    moduleState.widthCm = dimensions.widthCm;
+    moduleState.heightCm = dimensions.heightCm;
+    rebuildWall({ resetView: false });
+    selectionInfo.textContent = `Modül ${index + 1} · Tül · ${moduleState.widthCm} × ${moduleState.heightCm} cm · Z ${moduleState.placement?.zCm ?? 0} cm.`;
+    return;
+  }
   if (moduleState?.type === 'illuminated-foam') {
     const dimensions = await requestIlluminatedFoamDimensions(moduleState.widthCm, moduleState.heightCm);
     if (!dimensions) return;
@@ -1150,6 +1159,15 @@ moduleDragSidebar = createModuleDragSidebar({
         renderWallResult(result?.message ?? 'Modül bu konuma bırakılamadı.', true);
         scene3d.clearCatalogModuleDrag();
         return;
+      }
+      if (moduleState?.type === 'tulle-fabric') {
+        const dimensions = await requestTulleFabricDimensions(moduleState.widthCm, moduleState.heightCm);
+        if (!dimensions) {
+          scene3d.clearCatalogModuleDrag();
+          return;
+        }
+        moduleState.widthCm = dimensions.widthCm;
+        moduleState.heightCm = dimensions.heightCm;
       }
       if (moduleState?.type === 'box-block') {
         const dimensions = await requestBoxBlockDimensions({
@@ -2428,6 +2446,46 @@ async function resizeContextImage(context) {
     return;
   }
   selectionInfo.textContent = describeSizeResult(result);
+}
+
+function requestTulleFabricDimensions(defaultWidthCm, defaultHeightCm) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(15,23,42,.48);display:grid;place-items:center;padding:20px';
+    overlay.setAttribute('role', 'presentation');
+    const form = document.createElement('form');
+    form.setAttribute('role', 'dialog');
+    form.setAttribute('aria-modal', 'true');
+    form.setAttribute('aria-labelledby', 'tulle-size-title');
+    form.style.cssText = 'width:min(360px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
+    form.innerHTML = '<strong id="tulle-size-title" style="font-size:16px">Tül ölçüsü</strong><span style="color:#64748b">Genişlik ve derinliği cm olarak gir.</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label style="display:grid;gap:5px">Genişlik (cm)<input name="width" type="number" min="1" max="5000" step="1" value="'+Math.round(defaultWidthCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label><label style="display:grid;gap:5px">Derinlik (cm)<input name="height" type="number" min="1" max="5000" step="1" value="'+Math.round(defaultHeightCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label></div><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" data-cancel>İptal</button><button type="submit" class="primary">Yerleştir</button></div>';
+    overlay.appendChild(form);
+    document.body.appendChild(overlay);
+    const onKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      finish(null);
+    };
+    const finish = (value) => {
+      document.removeEventListener('keydown', onKeyDown, true);
+      overlay.remove();
+      resolve(value);
+    };
+    form.querySelector('[data-cancel]').addEventListener('click', () => finish(null));
+    overlay.addEventListener('pointerdown', (event) => {
+      if (event.target === overlay) finish(null);
+    });
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const widthCm = Number(data.get('width'));
+      const heightCm = Number(data.get('height'));
+      if (!(widthCm >= 1 && widthCm <= 5000 && heightCm >= 1 && heightCm <= 5000)) return;
+      finish({ widthCm, heightCm });
+    });
+    document.addEventListener('keydown', onKeyDown, true);
+    form.querySelector('input[name="width"]')?.focus();
+  });
 }
 
 function requestIlluminatedFoamDimensions(defaultWidthCm, defaultHeightCm) {

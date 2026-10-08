@@ -17,10 +17,10 @@ Bu dosya insan/AI için **okunabilir katalog indeksi**dir. Runtime source-of-tru
 
 Bu snapshot `Version2` üzerindeki `MODULE_CATALOG_KEYS` ve `MODULE_CONTRACT_ASSIGNMENTS` ile eşleşmek zorundadır; `test/systemModuleCatalogDoc.test.js` drift olduğunda CI'yi kırar.
 
-- Catalog entries: **59**
+- Catalog entries: **60**
 - BOM mode `recipe`: **28**
 - BOM mode `self`: **13**
-- BOM mode `decision-required`: **18**
+- BOM mode `decision-required`: **19**
 - Katalog dışı explicit runtime module: **1** (`illuminated-foam`)
 - Katalog dışı module BOM mode `decision-required`: **1**
 
@@ -84,6 +84,7 @@ Aşağıdaki blok test tarafından `MODULE_CATALOG_KEYS` ile **sıra dahil bireb
 - `extra_long_planter_100`
 - `extra_long_planter_150`
 - `extra_long_planter_200`
+- `tulle_fabric`
 - `tv_42`
 - `tv_55`
 - `video_wall_2x2`
@@ -114,7 +115,7 @@ Bu bölüm navigasyon içindir; ölçü/recipe source-of-truth değildir.
 
 ### Mobilya / Depo / Bitki
 
-`furniture_sofa_set_classic`, `furniture_sofa_single_classic`, `furniture_sofa_double_classic`, `furniture_coffee_table_classic`, `furniture_table_chair_set_eames`, `chair_eames`, `glass_table`, `furniture_bar_stool_classic`, `mini_fridge_avanti`, `kettle`, `coat_rack`, `plastic_trash_bin`, `extra_indoor_plant_1`, `extra_long_planter_100`, `extra_long_planter_150`, `extra_long_planter_200`
+`furniture_sofa_set_classic`, `furniture_sofa_single_classic`, `furniture_sofa_double_classic`, `furniture_coffee_table_classic`, `furniture_table_chair_set_eames`, `chair_eames`, `glass_table`, `furniture_bar_stool_classic`, `mini_fridge_avanti`, `kettle`, `coat_rack`, `plastic_trash_bin`, `extra_indoor_plant_1`, `extra_long_planter_100`, `extra_long_planter_150`, `extra_long_planter_200`, `tulle_fabric`
 
 ### Medya / Işık
 
@@ -130,7 +131,7 @@ Duvar/panel, separatör, vitrin, depo kapısı, düz/L banko ve baza ailelerinin
 
 `mini_fridge_avanti`, `kettle`, `coat_rack`, `plastic_trash_bin`, `box_block`, `upright_346_5`, `profile_190`, `profile_140_5`, `profile_91`, `profile_41_5`, `shelf_100`, `shelf_150`, `shelf_200` leaf/self BOM Item'dır. Canonical birim `adet`; `src/itemBom.js > resolveItemBom(itemKey)` aynı `itemKey` için `quantity=1` üretir. Child recipe yoktur. Parent duvar reçetelerindeki `upright_346_5 ×2` ve `profile_*` parent miktarları bu saha örneğinden ayrıdır.
 
-### `decision-required` — 18 katalog kaydı
+### `decision-required` — 19 katalog kaydı
 
 Şu katalog aileleri için Final BOM sınıflandırması henüz ürün/üretim kararı bekler:
 
@@ -139,6 +140,7 @@ Duvar/panel, separatör, vitrin, depo kapısı, düz/L banko ve baza ailelerinin
 - TV 42 / 55 / 65
 - Video Wall 2×2 / 3×3
 - LED projektör
+- Tül (`tulle_fabric`): sahne miktarı `src/projectBom.js` içinde en × boy / 10000 m² olarak aynı `itemKey` satırına yazılır
 
 Bu kayıtlar için bu doküman **commercial-item / recipe / excluded** kararı uydurmaz. Canonical mevcut durum `src/moduleContracts.js` içindeki `decision-required` politikasıdır.
 
