@@ -1682,7 +1682,7 @@ export function createStandScene(
     } else {
       group.position.set(xM + widthM / 2, worldYM, logicalYM);
     }
-
+    requestEditorRender();
   }
 
   function createBaseWallModule(moduleState, moduleIndex, applyStoredImage) {

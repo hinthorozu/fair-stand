@@ -1,15 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-l-right-home-view-v1",
-  "kind": "ui-control",
-  "summary": "L Stand Sağ home görünüşü sol-ön köşeden bakar. ViewCube yüzleri, sürükleme ve home düğmesi duran sahnede de çizilir. Diğer stand tiplerinin home açısı ve sahne açılış kamerası sağ-ön olarak kalır.",
+  "id": "fair-stand-arrow-move-render-v1",
+  "kind": "renderer-change",
+  "summary": "Ok tuşuyla modül taşıma her adımda ekrana çizilir. Konum yine aynı snap kurallarıyla yazılır; duran sahne yeni kareyi tıklamayı beklemez.",
   "owners": [
-    "src/viewCube.js",
     "src/scene3d.js"
   ],
   "sourceOfTruth": [
-    "src/viewCube.js",
-    "src/helpGuide.js"
+    "src/scene3d.js"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -19,13 +17,13 @@
     "renderer": "affected",
     "persistence": "not-applicable",
     "bom": "not-applicable",
-    "ui": "affected",
+    "ui": "not-applicable",
     "composition": "not-applicable",
     "assets": "not-applicable",
     "storage": "not-applicable",
     "importExport": "not-applicable",
     "performance": "affected",
-    "accessibility": "affected",
+    "accessibility": "not-applicable",
     "architecture": "not-applicable",
     "security": "not-applicable",
     "tests": "affected"
@@ -36,19 +34,17 @@
       "docs/items/audit/hedef/ATOMIK_MEKANIZMA.html",
       "docs/items/audit/report/MEKANIZMA_PARAMETRE.html",
       "index.html",
-      "scripts/_fill-contract.mjs",
       "scripts/archive/add-tv-sizes.py",
       "scripts/archive/add-video-wall-2x2.py",
       "scripts/archive/fix-tv-screen-face.py",
       "scripts/verify-change-contract.mjs",
       "src/groundLayout.js",
-      "src/itemAdminPreview.js",
       "src/main.js",
       "src/mountFairStand.js",
       "src/systemChangeContract.js"
     ],
     "affectedTests": [
-      "e2e/view-cube-home.spec.mjs",
+      "e2e/module-move-snap.spec.mjs",
       "test/autosaveMainIntegration.test.js",
       "test/baseRenderStyle.test.js",
       "test/baseWallDepthAlignment.test.js",
@@ -86,7 +82,6 @@
       "test/imageAssetDeletion.test.js",
       "test/imageAssetLiveDelete.test.js",
       "test/indoorPlants.test.js",
-      "test/itemAdminPreview.test.js",
       "test/itemAssembly.test.js",
       "test/itemCatalogFields.test.js",
       "test/itemDefaultZCm.test.js",
@@ -508,12 +503,10 @@
         "F-033"
       ]
     },
-    "notes": "Home yönü stand tipine göre seçilir. L Stand Sağ sol-ön, diğer tipler sağ-ön. Sahne açılışı STAGE_HOME_DIRECTION ile sağ-ön kalır. ViewCube animasyonu requestEditorRender çağırır."
+    "notes": "applyPlacementToGroup konum yazınca requestEditorRender çağırır. Snap, duvar ve çakışma kuralları aynıdır. Ok tuşu adımları tıklama beklemenden görünür."
   },
   "tests": {
     "targeted": [
-      "test/homeViewDirection.test.js",
-      "test/helpGuide.test.js",
       "test/viewKeyboardMainIntegration.test.js"
     ],
     "fullSuite": true,
@@ -521,18 +514,18 @@
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/view-cube-home.spec.mjs"
+        "e2e/module-move-snap.spec.mjs"
       ],
-      "reason": "ViewCube home düğmesi, H kısayolu ve bir yüz tıklaması ada stand sahnesinde sayfa hatası vermeden çalışır. L Stand Sağ sol-ön vektörü birim testtedir."
+      "reason": "Modül taşıma tarayıcıda duruyor. Ok adımının anında çizilmesi applyPlacementToGroup içindeki çizim isteğiyle kilitlendi; süre ve beklenen metin gevşetilmedi."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Yalnız home yönü ve ViewCube çizim isteği değişir. Modül yerleştirme, BOM ve kayıt aynı kalır."
+    "notes": "Yerleşim hesabı değişmez. Ek çizim isteği yalnız konum uygulandığında gelir."
   },
   "migration": {
     "required": false,
     "notes": "Şema ve kayıt biçimi değişmez."
   },
-  "rollback": "Home yönünü sabit sağ-ön vektöre döndürüp ViewCube çizim geri çağrısını kaldırmak."
+  "rollback": "applyPlacementToGroup sonundaki requestEditorRender çağrısını kaldırmak."
 }
