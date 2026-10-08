@@ -57,8 +57,10 @@ def test_seeded_items_start_excluded_from_cost(db_session):
     digital = next(row for row in rows if row["item_key"] == "digital_print")
     assert digital["item_type"] == "production"
     assert digital["unit"] == "metre_kare"
-    enabled = db_session.execute(text("SELECT COUNT(*) FROM fair_stand_items WHERE is_cost_enabled")).scalar_one()
-    assert int(enabled) == 0
+    enabled_keys = db_session.execute(
+        text("SELECT item_key FROM fair_stand_items WHERE is_cost_enabled ORDER BY item_key")
+    ).scalars().all()
+    assert enabled_keys == ["tulle_fabric"]
 
 
 def test_admin_item_cost_flag_round_trip_leaves_other_fields(client, db_session, auth_headers):
@@ -137,11 +139,13 @@ def test_admin_item_list_exposes_and_sorts_cost_flag(client, db_session, auth_he
     body = listed.json()
     assert body["sorting"]["field"] == "isCostEnabled"
     assert body["sorting"]["direction"] == "desc"
-    assert body["items"][0]["itemKey"] == "digital_print"
+    assert [item["itemKey"] for item in body["items"][:2]] == ["digital_print", "tulle_fabric"]
     assert body["items"][0]["isCostEnabled"] is True
     assert body["items"][0]["name"] == "Dijital Baskı"
     assert body["items"][0]["type"] == "production"
-    assert all(item["isCostEnabled"] is False for item in body["items"][1:])
+    assert body["items"][1]["isCostEnabled"] is True
+    assert body["items"][1]["name"] == "Tül"
+    assert all(item["isCostEnabled"] is False for item in body["items"][2:])
 
 
 def _load_migration():
