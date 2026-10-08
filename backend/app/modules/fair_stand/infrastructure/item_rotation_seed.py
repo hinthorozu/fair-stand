@@ -33,6 +33,7 @@ PLACEABLE_ITEM_TYPES = frozenset(
         "showcase-2",
         "showcase-3",
         "illuminated-foam",
+        "tulle-fabric",
     }
 )
 

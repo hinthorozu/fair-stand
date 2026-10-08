@@ -110,8 +110,8 @@ test('17. same-field merge; cross-remap yok', () => {
   }
 });
 
-test('18. 105 Item registry korunuyor', () => {
-  assert.equal(listRegisteredItems().length, 105);
+test('18. 106 Item registry korunuyor', () => {
+  assert.equal(listRegisteredItems().length, 106);
 });
 
 test('upright_346_5 sceneDimensions placement 8×8×346.5', () => {

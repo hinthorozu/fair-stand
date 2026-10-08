@@ -53,6 +53,7 @@
     "extra_long_planter_100",
     "extra_long_planter_150",
     "extra_long_planter_200",
+    "tulle_fabric",
     "tv_42",
     "tv_55",
     "video_wall_2x2",
@@ -327,6 +328,11 @@
       "previewId": 14
     },
     {
+      "itemKey": "tulle_fabric",
+      "label": "Tül",
+      "previewId": 9
+    },
+    {
       "itemKey": "tv_42",
       "label": "TV 42\"",
       "previewId": 26
@@ -443,7 +449,8 @@
         "extra_indoor_plant_1",
         "extra_long_planter_100",
         "extra_long_planter_150",
-        "extra_long_planter_200"
+        "extra_long_planter_200",
+        "tulle_fabric"
       ]
     },
     {

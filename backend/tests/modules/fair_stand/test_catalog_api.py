@@ -20,10 +20,10 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     shelf_unit = next(item for item in body["items"] if item["itemKey"] == "shelf_100")
     assert "unitName" not in shelf_unit
     assert len(body["categories"]) == 6
-    assert len(body["items"]) == 108
+    assert len(body["items"]) == 109
     visible = [item for item in body["items"] if item["catalogVisible"] is True]
     hidden = [item for item in body["items"] if item["catalogVisible"] is not True]
-    assert len(visible) == 59
+    assert len(visible) == 60
     assert len(hidden) == 49
     shelf = next(item for item in body["items"] if item["itemKey"] == "shelf_100")
     assert shelf["categoryId"] == 3
@@ -36,6 +36,19 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     assert chair["modelFile"] == "eames_chair.glb"
     plant = next(item for item in body["items"] if item["itemKey"] == "extra_indoor_plant_1")
     assert plant["modelFile"] == "indoor_plants.glb"
+    tulle = next(item for item in body["items"] if item["itemKey"] == "tulle_fabric")
+    assert tulle["name"] == "Tül"
+    assert tulle["type"] == "tulle-fabric"
+    assert tulle["catalogVisible"] is True
+    assert tulle["unit"] == "metre_kare"
+    assert tulle["isCostEnabled"] is True
+    assert tulle["isRender"] is True
+    assert float(tulle["defaultZCm"]) == 350
+    assert float(tulle["dimensions"]["depthCm"]) == 0.4
+    behavior = next(row for row in body["itemTypes"] if row["key"] == "tulle-fabric")
+    assert behavior["placement"] == "free"
+    assert behavior["collision"] == "none"
+    assert behavior["moveSnapCm"] == 50
     sofa = next(item for item in body["items"] if item["itemKey"] == "furniture_sofa_single_classic")
     assert sofa["modelFile"] == "bej_koltuk_1_ciftli_2_tekli.glb"
     tv = next(item for item in body["items"] if item["type"] == "tv")

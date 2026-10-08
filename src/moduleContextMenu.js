@@ -421,7 +421,8 @@ export function createModuleContextMenu({
     const moduleType = context.moduleType ?? context.type;
     const isFoam = moduleType === 'illuminated-foam';
     const isBoxBlock = moduleType === 'box-block';
-    foamResizeButton.hidden = !(isFoam || isBoxBlock);
+    const isTulle = moduleType === 'tulle-fabric';
+    foamResizeButton.hidden = !(isFoam || isBoxBlock || isTulle);
     foamResizeButton.textContent = isBoxBlock ? 'Ölçü / opacity…' : 'Boyutlandır…';
     imageResizeButton.hidden = !context.hasImage;
     const isShelf = moduleType === 'shelf';
@@ -459,7 +460,7 @@ export function createModuleContextMenu({
 
     if (action === 'resize-foam') {
       const type = context.moduleType ?? context.type;
-      if (type === 'illuminated-foam' || type === 'box-block') {
+      if (type === 'illuminated-foam' || type === 'box-block' || type === 'tulle-fabric') {
         close();
         onResize?.(context);
       }

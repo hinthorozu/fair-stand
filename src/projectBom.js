@@ -77,13 +77,18 @@ function resolveModuleEntry(moduleState, index, { swapCornerPanels = false, swap
   const item = getItem(itemKey);
   const name = item?.name ?? itemKey;
 
-  if (itemKey === 'illuminated-foam' || item?.type === 'illuminated-foam') {
+  if (
+    itemKey === 'illuminated-foam'
+    || item?.type === 'illuminated-foam'
+    || itemKey === 'tulle_fabric'
+    || item?.type === 'tulle-fabric'
+  ) {
     return Object.freeze({
       moduleId,
       index,
       itemKey,
       name,
-      type: item?.type ?? 'illuminated-foam',
+      type: item?.type ?? (itemKey === 'tulle_fabric' ? 'tulle-fabric' : 'illuminated-foam'),
       status: 'ok',
       lines: Object.freeze([]),
       glassMoved: Object.freeze([]),
@@ -155,6 +160,7 @@ const PRINT_PRODUCTION_ITEM_KEYS = Object.freeze({
   mesh: 'mesh_fabric',
   lightbox: 'lightbox_fabric',
   foam: 'illuminated-foam',
+  tulle: 'tulle_fabric',
 });
 
 function resolvePrintProductionLines(printAreas) {
