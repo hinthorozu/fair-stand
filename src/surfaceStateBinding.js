@@ -52,6 +52,18 @@ export function syncRendererSurfaceState(rendererCopy, persistent) {
 export function applyGlassOverride(surfaceState, isGlass) {
   if (!surfaceState) return null;
   surfaceState.isGlass = Boolean(isGlass);
+  if (surfaceState.isGlass) {
+    surfaceState.isMetalSeparator = false;
+    delete surfaceState.metalSeparatorGroupId;
+  }
+  return surfaceState;
+}
+
+export function applyMetalSeparatorOverride(surfaceState, enabled) {
+  if (!surfaceState) return null;
+  surfaceState.isMetalSeparator = Boolean(enabled);
+  if (surfaceState.isMetalSeparator) surfaceState.isGlass = false;
+  else delete surfaceState.metalSeparatorGroupId;
   return surfaceState;
 }
 

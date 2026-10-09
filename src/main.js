@@ -1063,6 +1063,25 @@ function changeContextFabricLighting(context, enabled) {
     : 'Lightbox aydınlatması kapatıldı.';
 }
 
+function changeContextMetalSeparatorMode(context, enabled) {
+  if (!context?.supportsMetalSeparator) return;
+
+  const selectedPanels = scene3d.getSelectedSurfaces().filter(
+    (surface) => surface.userData.acceptsGlass === true,
+  );
+  if (!selectedPanels.length) return;
+
+  const result = scene3d.applyMetalSeparatorMode(selectedPanels, enabled);
+  if (!result?.ok) {
+    selectionInfo.textContent = result?.message || 'Metal separatör işlemi uygulanamadı.';
+    return;
+  }
+  productionBomPanel.refresh();
+  selectionInfo.textContent = result.enabled
+    ? `${result.panelCount} panel tek parça metal separatöre çevrildi.`
+    : `${result.panelCount} panel normal panele çevrildi.`;
+}
+
 function changeContextPanelGlassMode(context, isGlass) {
   if (!context?.supportsGlass) return;
 
@@ -1125,6 +1144,7 @@ const moduleContextMenu = createModuleContextMenu({
   onAdd: addCatalogModule,
   onValidateAddBatch: validateCatalogAddBatch,
   onGlassModeChange: changeContextPanelGlassMode,
+  onMetalSeparatorModeChange: changeContextMetalSeparatorMode,
   onFabricModeChange: changeContextFabricMode,
   onMeshModeChange: changeContextMeshMode,
   onFabricLightingChange: changeContextFabricLighting,

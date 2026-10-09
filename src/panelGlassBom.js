@@ -3,6 +3,8 @@ import { getItem, listEmbeddedRenderParts } from './items.js';
 const STRAIGHT_PANEL_RE = /^panel_(48_5|98|147_5|197)$/;
 const CORNER_PANEL_RE = /^panel_corner_(42_5|92|142_5|192)$/;
 
+export const METAL_SEPARATOR_ITEM_KEY = 'metal_separator';
+
 /** panel_xxx → panel_cam_xxx, panel_corner_xxx → panel_corner_cam_xxx. */
 export function glassTwinKey(itemKey) {
   if (CORNER_PANEL_RE.test(itemKey)) {
@@ -86,6 +88,38 @@ export function applyGlassPanelSplit(lines = [], surfaces = []) {
       });
     }
     moved.push({ from: boardKey, to: twinKey, quantity });
+  }
+
+  return {
+    lines: next.filter((line) => line.quantity > 0),
+    moved,
+  };
+}
+
+/**
+ * Each metal-separator strip leaves its sunta line.
+ * The square-metre total is one measurement per Ctrl group, added with the print areas.
+ */
+export function applyMetalSeparatorSplit(lines = [], surfaces = []) {
+  const counts = new Map();
+  for (const surface of surfaces) {
+    if (!surface?.isMetalSeparator || surface.isGlass) continue;
+    if (!surface.itemKey) continue;
+    counts.set(surface.itemKey, (counts.get(surface.itemKey) ?? 0) + 1);
+  }
+  if (!counts.size || !getItem(METAL_SEPARATOR_ITEM_KEY)) {
+    return { lines, moved: [] };
+  }
+
+  const next = lines.map((line) => ({ ...line }));
+  const moved = [];
+  for (const [boardKey, requested] of counts) {
+    const line = next.find((entry) => entry.itemKey === boardKey);
+    if (!line || !(line.quantity > 0)) continue;
+    const quantity = Math.min(requested, line.quantity);
+    if (!(quantity > 0)) continue;
+    line.quantity -= quantity;
+    moved.push({ from: boardKey, to: METAL_SEPARATOR_ITEM_KEY, quantity });
   }
 
   return {

@@ -8,6 +8,7 @@ const SECTION_DEFS = Object.freeze([
   Object.freeze({ id: 'mesh', label: 'Mesh - Delikli Branda' }),
   Object.freeze({ id: 'foam', label: 'Işıklı Strafor / Logo' }),
   Object.freeze({ id: 'tulle', label: 'Tül' }),
+  Object.freeze({ id: 'metal', label: 'Metal Separatör' }),
 ]);
 
 function nearly(a, b) {
@@ -56,6 +57,8 @@ function collectStripFaces(modules) {
           : null,
         fabricGroupId: strip.fabricGroupId || null,
         fabricType: strip.fabricType === 'mesh' ? 'mesh' : 'lightbox',
+        isMetalSeparator: Boolean(strip.isMetalSeparator) && !strip.isGlass,
+        metalSeparatorGroupId: strip.metalSeparatorGroupId || null,
         fabricImageAssetId: strip.fabricImageAssetId || null,
         fabricColor: typeof strip.fabricColor === 'string' ? strip.fabricColor : null,
       });
@@ -244,6 +247,8 @@ function collectLooseFaces(modules) {
           : null,
         fabricGroupId: surface.fabricGroupId || null,
         fabricType: surface.fabricType === 'mesh' ? 'mesh' : 'lightbox',
+        isMetalSeparator: Boolean(surface.isMetalSeparator) && !surface.isGlass,
+        metalSeparatorGroupId: surface.metalSeparatorGroupId || null,
         fabricImageAssetId: surface.fabricImageAssetId || null,
         fabricColor: typeof surface.fabricColor === 'string' ? surface.fabricColor : null,
       });
@@ -402,6 +407,46 @@ function fabricPieces(faces, kind) {
   return pieces;
 }
 
+function metalRowKey(cell) {
+  return Number.isInteger(cell.stripIndex) ? `s:${cell.stripIndex}` : `slot:${cell.slot ?? ''}`;
+}
+
+function isFullMetalRectangle(cells) {
+  const coords = new Set(cells.map((cell) => `${cell.moduleIndex}:${metalRowKey(cell)}`));
+  if (coords.size !== cells.length) return false;
+  const columns = new Set(cells.map((cell) => cell.moduleIndex));
+  const rows = new Set(cells.map((cell) => metalRowKey(cell)));
+  return coords.size === columns.size * rows.size;
+}
+
+function metalPieces(faces) {
+  const members = faces.filter((face) => face.isMetalSeparator);
+  const pieces = [];
+  for (const cells of groupBy(members, (face) => (
+    face.metalSeparatorGroupId || `solo:${face.moduleIndex}:${metalRowKey(face)}`
+  )).values()) {
+    if (!isFullMetalRectangle(cells)) {
+      for (const cell of cells) {
+        const made = piece(cell.widthCm, cell.heightCm);
+        if (made) pieces.push(made);
+      }
+      continue;
+    }
+    const widths = new Map();
+    const heights = new Map();
+    for (const cell of cells) {
+      widths.set(cell.moduleIndex, cell.widthCm);
+      heights.set(metalRowKey(cell), cell.heightCm);
+    }
+    const made = piece(
+      [...widths.values()].reduce((sum, width) => sum + width, 0),
+      [...heights.values()].reduce((sum, height) => sum + height, 0),
+    );
+    if (made) pieces.push(made);
+  }
+  return pieces;
+}
+
 function tullePieces(modules) {
   const pieces = [];
   for (const module of modules) {
@@ -493,6 +538,7 @@ export function collectPrintAreas(modules = [], assetNames = null) {
     section('mesh', 'Mesh - Delikli Branda', [...fabricPieces(faces, 'mesh'), ...looseFabricPieces(loose, 'mesh')], assetNames),
     section('foam', 'Işıklı Strafor / Logo', foamPieces(list), assetNames),
     section('tulle', 'Tül', tullePieces(list), assetNames),
+    section('metal', 'Metal Separatör', [...metalPieces(faces), ...metalPieces(loose)], assetNames),
   ].filter(Boolean);
   const order = new Map(SECTION_DEFS.map((entry, index) => [entry.id, index]));
   built.sort((a, b) => order.get(a.id) - order.get(b.id));

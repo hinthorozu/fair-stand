@@ -59,6 +59,7 @@ function listGuideSections() {
         <li><strong>Kutu yürütme:</strong> Ok tuşları kutuyu sağa, sola, ileri, geri ve yukarı, aşağı yürütür. Taban zeminin altına inmez. Kutunun tepesi stand tavanını geçmez.</li>
         <li><strong>Görseli ölçülendir…:</strong> Görsel, Lightbox veya Mesh görseli atanmış yüzeyde açılır. Başlangıç ölçüsü seçili alanın kendi ölçüsüdür. Küçültünce boşluklar tekrarlanır, büyütünce görsel alanın dışına taşar. Aynı ölçü penceresi panel, Lightbox ve Mesh için geçerlidir.</li>
         <li><strong>Cam Panele Çevir / Normal Panele Çevir:</strong> Uygun panelin cam durumunu değiştirir.</li>
+        <li><strong>Metal Separatöre Çevir / Normal Panele Çevir:</strong> Uygun paneli tel ızgaraya çevirir. Deliklerden arkası görünür. Ctrl ile seçilen tam dikdörtgen tek ölçüdür.</li>
         <li><strong>Lightbox Kumaşa Çevir / Lightbox Kumaştan Çıkar:</strong> Uygun panel bloğunu tek parça opak Lightbox Kumaşa dönüştürür veya geri alır.</li>
         <li><strong>Mesh (Delikli) Brandaya Çevir / Mesh Brandadan Çıkar:</strong> Aynı panel bloğunu gerçek delik maskeli Mesh Branda olarak kullanır; deliklerden sahnenin arkası görünür.</li>
         <li><strong>Lightbox aydınlatmayı aç / kapat:</strong> Bez yüzeyinin aydınlatmasını kontrol eder.</li>
@@ -74,7 +75,7 @@ function listGuideSections() {
       <ul>
         <li>Panel seçimi fiziksel panel yüzeylerini esas alır.</li>
         <li>Bağlı duvar/köşe düzenlerinde seçim duvar zinciri boyunca devam edebilir.</li>
-        <li>Lightbox Kumaş veya Mesh Branda oluşturmak için seçim daha katıdır: eksiksiz dikdörtgen ve aynı düzlem şarttır.</li>
+        <li>Lightbox Kumaş, Mesh Branda veya Metal Separatör için seçim daha katıdır: eksiksiz dikdörtgen ve aynı düzlem şarttır.</li>
       </ul>
     `,
   },
@@ -172,6 +173,19 @@ function listGuideSections() {
     html: `
       <p>Cam özelliğini destekleyen paneli seçip sağ tık menüsünden <strong>Cam Panele Çevir</strong> seçeneğini kullanabilirsin. Aynı menüden tekrar normal panele döndürülebilir.</p>
       <p class="help-guide-note">Cam görsel/şeffaf baskı davranışları geliştikçe bu bölüm güncellenecektir.</p>
+    `,
+  },
+  {
+    title: 'Metal Separatör',
+    html: `
+      <p>Cam kabul eden paneli seçip sağ tık menüsünden <strong>Metal Separatöre Çevir</strong> seçeneğini kullanabilirsin. Aynı menüden normal panele döner.</p>
+      <ul>
+        <li>Tek panel kendi ölçüsüdür. <strong>Ctrl</strong> ile seçilen eksiksiz dikdörtgen tek ölçüdür: yan yana enler, üst üste boylar toplanır.</li>
+        <li>Izgara gerçek teldir. Karelerin içi boştur; açı değişince çizgi kaybolmaz.</li>
+        <li>Paneller satırı parça adedini ve ölçüyü yazar: <strong>7 x Metal Separatör 100 × 49,5 cm - metre_kare</strong>.</li>
+        <li>Üretim satırı o parçaların metrekare toplamını Tül satırı gibi yazar: <strong>3,47 × Metal Separatör · metre_kare · metal_separator</strong>.</li>
+        <li>Kalem katalogda görünmez. Maliyet fiyatı bu gizli kaleme, metre kare üzerinden yazılır.</li>
+      </ul>
     `,
   },
   {

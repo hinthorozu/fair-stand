@@ -26,6 +26,7 @@ export function createModuleContextMenu({
   onAdd,
   onValidateAddBatch,
   onGlassModeChange,
+  onMetalSeparatorModeChange,
   onFabricModeChange,
   onMeshModeChange,
   onFabricLightingChange,
@@ -54,6 +55,7 @@ export function createModuleContextMenu({
     <button type="button" role="menuitem" data-module-action="resize-image" hidden>Görseli ölçülendir…</button>
     <div class="module-context-separator"></div>
     <button type="button" role="menuitem" data-module-action="toggle-glass" hidden>Cam Panele Çevir</button>
+    <button type="button" role="menuitem" data-module-action="toggle-metal-separator" hidden>Metal Separatöre Çevir</button>
     <button type="button" role="menuitem" data-module-action="toggle-fabric" hidden>Lightbox Kumaşa Çevir</button>
     <button type="button" role="menuitem" data-module-action="toggle-mesh" hidden>Mesh (Delikli) Brandaya Çevir</button>
     <button type="button" role="menuitem" data-module-action="toggle-fabric-light" hidden>Lightbox aydınlatmayı aç</button>
@@ -95,6 +97,7 @@ export function createModuleContextMenu({
 
   const title = menu.querySelector('.module-context-title');
   const glassModeButton = menu.querySelector('[data-module-action="toggle-glass"]');
+  const metalSeparatorButton = menu.querySelector('[data-module-action="toggle-metal-separator"]');
   const fabricModeButton = menu.querySelector('[data-module-action="toggle-fabric"]');
   const meshModeButton = menu.querySelector('[data-module-action="toggle-mesh"]');
   const fabricLightingButton = menu.querySelector('[data-module-action="toggle-fabric-light"]');
@@ -399,6 +402,10 @@ export function createModuleContextMenu({
     glassModeButton.textContent = context.isGlass
       ? 'Normal Panele Çevir'
       : 'Cam Panele Çevir';
+    metalSeparatorButton.hidden = !context.supportsMetalSeparator;
+    metalSeparatorButton.textContent = context.isMetalSeparator
+      ? 'Normal Panele Çevir'
+      : 'Metal Separatöre Çevir';
 
     const isLightboxFabric = Boolean(context.isFabric && context.fabricType !== 'mesh');
     const isMeshFabric = Boolean(context.isFabric && context.fabricType === 'mesh');
@@ -484,6 +491,12 @@ export function createModuleContextMenu({
     if (action === 'toggle-glass' && context.supportsGlass) {
       close();
       onGlassModeChange?.(context, !context.isGlass);
+      return;
+    }
+
+    if (action === 'toggle-metal-separator' && context.supportsMetalSeparator) {
+      close();
+      onMetalSeparatorModeChange?.(context, !context.isMetalSeparator);
       return;
     }
 

@@ -32,7 +32,7 @@ test('placeable Items expose rotation from Item; leaf rows omit the trio', () =>
     }
   }
   assert.equal(filled, 63);
-  assert.equal(empty, 43);
+  assert.equal(empty, 44);
 });
 
 test('rotation getters require itemKey and do not fall back to type tables', () => {

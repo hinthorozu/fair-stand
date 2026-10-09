@@ -24,6 +24,7 @@ const CREATE_STAND_SCENE_PUBLIC_METHODS = Object.freeze([
   'resetDefaultView',
   'applyColor',
   'applyGlassMode',
+  'applyMetalSeparatorMode',
   'applyFabricMode',
   'applyMeshMode',
   'setFabricLighting',

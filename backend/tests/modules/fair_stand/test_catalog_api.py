@@ -20,11 +20,11 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     shelf_unit = next(item for item in body["items"] if item["itemKey"] == "shelf_100")
     assert "unitName" not in shelf_unit
     assert len(body["categories"]) == 6
-    assert len(body["items"]) == 109
+    assert len(body["items"]) == 110
     visible = [item for item in body["items"] if item["catalogVisible"] is True]
     hidden = [item for item in body["items"] if item["catalogVisible"] is not True]
     assert len(visible) == 60
-    assert len(hidden) == 49
+    assert len(hidden) == 50
     shelf = next(item for item in body["items"] if item["itemKey"] == "shelf_100")
     assert shelf["categoryId"] == 3
     assert "catalogCategory" not in shelf
@@ -36,6 +36,10 @@ def test_bootstrap_returns_canonical_aggregates(client, db_session, auth_headers
     assert chair["modelFile"] == "eames_chair.glb"
     plant = next(item for item in body["items"] if item["itemKey"] == "extra_indoor_plant_1")
     assert plant["modelFile"] == "indoor_plants.glb"
+    metal = next(item for item in body["items"] if item["itemKey"] == "metal_separator")
+    assert metal["catalogVisible"] is False
+    assert metal["unit"] == "metre_kare"
+    assert metal["isCostEnabled"] is True
     tulle = next(item for item in body["items"] if item["itemKey"] == "tulle_fabric")
     assert tulle["name"] == "Tül"
     assert tulle["type"] == "tulle-fabric"

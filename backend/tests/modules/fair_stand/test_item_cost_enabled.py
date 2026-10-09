@@ -60,7 +60,7 @@ def test_seeded_items_start_excluded_from_cost(db_session):
     enabled_keys = db_session.execute(
         text("SELECT item_key FROM fair_stand_items WHERE is_cost_enabled ORDER BY item_key")
     ).scalars().all()
-    assert enabled_keys == ["tulle_fabric"]
+    assert enabled_keys == ["metal_separator", "tulle_fabric"]
 
 
 def test_admin_item_cost_flag_round_trip_leaves_other_fields(client, db_session, auth_headers):
@@ -139,13 +139,19 @@ def test_admin_item_list_exposes_and_sorts_cost_flag(client, db_session, auth_he
     body = listed.json()
     assert body["sorting"]["field"] == "isCostEnabled"
     assert body["sorting"]["direction"] == "desc"
-    assert [item["itemKey"] for item in body["items"][:2]] == ["digital_print", "tulle_fabric"]
+    assert [item["itemKey"] for item in body["items"][:3]] == [
+        "digital_print",
+        "metal_separator",
+        "tulle_fabric",
+    ]
     assert body["items"][0]["isCostEnabled"] is True
     assert body["items"][0]["name"] == "Dijital Baskı"
     assert body["items"][0]["type"] == "production"
     assert body["items"][1]["isCostEnabled"] is True
-    assert body["items"][1]["name"] == "Tül"
-    assert all(item["isCostEnabled"] is False for item in body["items"][2:])
+    assert body["items"][1]["name"] == "Metal Separatör"
+    assert body["items"][2]["isCostEnabled"] is True
+    assert body["items"][2]["name"] == "Tül"
+    assert all(item["isCostEnabled"] is False for item in body["items"][3:])
 
 
 def _load_migration():

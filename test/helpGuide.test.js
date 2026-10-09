@@ -52,6 +52,10 @@ test('help guide exposes a fixed question-mark launcher and collapsible sections
   assert.match(guideSource, /ViewCube ⌂ aynı görünüşü açar/);
   assert.match(guideSource, /Sahne ilk açıldığında kamera sağ-ön köşededir/);
   assert.match(guideSource, /Üretim Listesi/);
+  assert.match(guideSource, /title: 'Metal Separatör'/);
+  assert.match(guideSource, /Metal Separatöre Çevir/);
+  assert.match(guideSource, /7 x Metal Separatör 100 × 49,5 cm - metre_kare/);
+  assert.match(guideSource, /3,47 × Metal Separatör · metre_kare · metal_separator/);
   assert.match(guideSource, /<strong>Metin indir<\/strong>/);
   assert.match(guideSource, /görselin dosya adı, cm ölçüsü ve m²/);
   assert.match(guideSource, /altında o görselin toplam m²/);

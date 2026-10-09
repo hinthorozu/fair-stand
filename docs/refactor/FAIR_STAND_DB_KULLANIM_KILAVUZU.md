@@ -44,7 +44,7 @@ Item bootstrap alanları mapper’dan: `snapRequiresRuleId` + denorm `snapRequir
 
 ### 1.2 Tablo envanteri (ürün şeması)
 
-`models.py` + Alembic head **`0045_project_customer_id`** (2026-09). `0043` / `0044` kolon eklemez; cam panel SKU satırıdır. Junction’lar ayrı tablo sayılır.
+`models.py` + Alembic head **`0066_metal_separator_area`**. `0043` / `0044` kolon eklemez; cam panel SKU satırıdır. `0065_metal_separator` gizli `metal_separator` kalemini ekler. `0066_metal_separator_area` birimini `metre_kare` yapar ve maliyet bayrağını açar. Katalogda görünmez. Junction’lar ayrı tablo sayılır.
 
 | Tablo | Rol |
 |---|---|
@@ -859,7 +859,7 @@ FK → `fair_stand_item_type.key`; tüm davranış paketini seçer.
 
 #### `unit`
 
-BOM birimi (`adet`, `m`); boş olabilir.
+BOM birimi (`adet`, `metre_kare`); boş olabilir.
 
 #### `is_cost_enabled`
 
@@ -869,7 +869,7 @@ BOM birimi (`adet`, `m`); boş olabilir.
 | **Neden** | İlerideki maliyet hesabı bu bayrağı okur |
 | **Nasıl** | NOT NULL, default false. Admin formunda "Maliyet hesabına dahil" |
 | **Sahne** | Okunmaz. Reçete miktarı ve birim değişmez |
-| **Örnek** | Yeni ve mevcut SKU false |
+| **Örnek** | `metal_separator` ve `tulle_fabric` true. Yeni SKU false başlar. `metal_separator` katalogda görünmez; fiyat metre kare üzerinden yazılır |
 | **Kod** | `admin_items.py`, `item_mapper.py`; CRM Item formu |
 
 #### `catalog_visible`
@@ -1960,7 +1960,7 @@ Kaynak: `fair_stand_projects.payload` (sunucu); tarayıcı IndexedDB önbellek.
 
 | Kontrol | Komut / dosya |
 |---|---|
-| Alembic head | `backend/alembic/versions/0045_project_customer_id.py`. `0043` / `0044` cam panel SKU satırıdır, yeni kolon değildir |
+| Alembic head | `backend/alembic/versions/0066_metal_separator_area.py`. `0065_metal_separator` gizli kalemi ekler. `0043` / `0044` cam panel SKU satırıdır, yeni kolon değildir |
 | Tip seed parity | `pytest backend/tests/modules/fair_stand/test_item_type_behavior.py` |
 | Stand zarf + panel ray | `test/standDimensions.test.js`; CRM Temel Ayarlar |
 | Bootstrap şekli | `get_catalog_bootstrap.py`, `routes.py` `/catalog/bootstrap` |
