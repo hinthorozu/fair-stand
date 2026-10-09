@@ -7,8 +7,8 @@ import { createModuleCatalogPreview as renderCatalogItemPreview } from './catalo
 function ensureStyles() {
   const document = getFairStandHostDocument();
   if (!document?.querySelector) return;
-  if (document.querySelector('#module-drag-sidebar-styles')) return;
-  const style = document.createElement('style');
+  const existing = document.querySelector('#module-drag-sidebar-styles');
+  const style = existing ?? document.createElement('style');
   style.id = 'module-drag-sidebar-styles';
   style.textContent = `
     .module-drag-catalog { display:flex; flex-direction:column; gap:8px; }
@@ -22,7 +22,7 @@ function ensureStyles() {
     .module-drag-group[open] > summary { border-bottom:1px solid #e6eaf0; }
     .module-drag-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; padding:7px; }
     .module-drag-card { display:flex; min-width:0; min-height:116px; flex-direction:column; align-items:stretch; justify-content:space-between; gap:7px; padding:8px; border:1px solid #d9dee5; border-radius:10px; background:#f8fafc; color:#364152; cursor:grab; user-select:none; }
-    .module-drag-card:hover { border-color:#f97316; background:#fff8f2; }
+    .module-drag-card:hover, .module-drag-card:focus, .module-drag-card:focus-visible { border-color:#f97316; background:#fff8f2; box-shadow:0 0 0 3px rgba(249,115,22,.22); outline:none; }
     .module-drag-card.is-disabled { opacity:.45; cursor:not-allowed; }
     .module-drag-card.is-dragging { opacity:.55; border-color:#f97316; box-shadow:0 0 0 2px rgba(249,115,22,.14); }
     .module-drag-card strong { overflow:hidden; font-size:10px; line-height:1.25; text-overflow:ellipsis; white-space:nowrap; }

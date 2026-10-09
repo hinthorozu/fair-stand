@@ -55,9 +55,45 @@ test('görsel arşive yüklenir; seçim yokken Kaldır production mesajı verir'
   await expect(page.locator('#asset-status')).toContainText('Aktif görsel: e2e-swatch.png');
   await expect(page.locator('.asset-tile')).toHaveCount(1);
 
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.locator('#surface-image').setInputFiles({
+    name: 'e2e-poster.png',
+    mimeType: 'image/png',
+    buffer: png,
+  });
+  const tiles = page.locator('button.asset-tile');
+  await expect(tiles).toHaveCount(2);
+  await expect(tiles.nth(0).locator('span')).toHaveText('e2e-swatch.png');
+  await expect(tiles.nth(1).locator('span')).toHaveText('e2e-poster.png');
+  const tileBoxes = [];
+  for (let index = 0; index < 2; index += 1) {
+    const tile = tiles.nth(index);
+    await expect.poll(async () => (await tile.locator('img').boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(80);
+    const tileBox = await tile.boundingBox();
+    const imageBox = await tile.locator('img').boundingBox();
+    const spanBox = await tile.locator('span').boundingBox();
+    expect(tileBox).not.toBeNull();
+    expect(imageBox).not.toBeNull();
+    expect(spanBox).not.toBeNull();
+    expect(imageBox.height).toBeGreaterThanOrEqual(80);
+    expect(imageBox.height).toBeLessThanOrEqual(88);
+    expect(spanBox.height).toBeGreaterThanOrEqual(12);
+    expect(spanBox.y).toBeGreaterThanOrEqual(imageBox.y + imageBox.height - 1);
+    expect(spanBox.y + spanBox.height).toBeLessThanOrEqual(tileBox.y + tileBox.height + 1);
+    tileBoxes.push(tileBox);
+  }
+  const [firstTile, secondTile] = tileBoxes;
+  const tilesOverlap = !(
+    firstTile.x + firstTile.width <= secondTile.x + 0.5
+    || secondTile.x + secondTile.width <= firstTile.x + 0.5
+    || firstTile.y + firstTile.height <= secondTile.y + 0.5
+    || secondTile.y + secondTile.height <= firstTile.y + 0.5
+  );
+  expect(tilesOverlap).toBe(false);
+
   await page.locator('#clear-texture').click();
   await expect(page.locator('#selection-info')).toHaveText('Önce bir panel veya panel bloğu seç.');
-  await expect(page.locator('.asset-tile')).toHaveCount(1);
+  await expect(page.locator('.asset-tile')).toHaveCount(2);
   expect(pageErrors).toEqual([]);
 });
 

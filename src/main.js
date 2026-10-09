@@ -2411,7 +2411,7 @@ function requestImageAreaDimensions(area) {
     form.setAttribute('role', 'dialog');
     form.setAttribute('aria-modal', 'true');
     form.setAttribute('aria-labelledby', 'image-area-size-title');
-    form.style.cssText = 'width:min(400px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
+    form.style.cssText = 'width:min(400px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 Inter,ui-sans-serif,system-ui,sans-serif;color:#16161a';
     form.innerHTML = [
       '<strong id="image-area-size-title" style="font-size:16px">Görsel ölçüsü</strong>',
       `<span style="color:#64748b">Seçili alan ${areaWidth} × ${areaHeight} cm. Görsel önce bu ölçüde oturur. Küçültürsen boşluklar tekrarlanır, büyütürsen taşar.</span>`,
@@ -2477,7 +2477,7 @@ function requestTulleFabricDimensions(defaultWidthCm, defaultHeightCm) {
     form.setAttribute('role', 'dialog');
     form.setAttribute('aria-modal', 'true');
     form.setAttribute('aria-labelledby', 'tulle-size-title');
-    form.style.cssText = 'width:min(360px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
+    form.style.cssText = 'width:min(360px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 Inter,ui-sans-serif,system-ui,sans-serif;color:#16161a';
     form.innerHTML = '<strong id="tulle-size-title" style="font-size:16px">Tül ölçüsü</strong><span style="color:#64748b">Genişlik ve derinliği cm olarak gir.</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label style="display:grid;gap:5px">Genişlik (cm)<input name="width" type="number" min="1" max="5000" step="1" value="'+Math.round(defaultWidthCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label><label style="display:grid;gap:5px">Derinlik (cm)<input name="height" type="number" min="1" max="5000" step="1" value="'+Math.round(defaultHeightCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label></div><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" data-cancel>İptal</button><button type="submit" class="primary">Yerleştir</button></div>';
     overlay.appendChild(form);
     document.body.appendChild(overlay);
@@ -2517,7 +2517,7 @@ function requestIlluminatedFoamDimensions(defaultWidthCm, defaultHeightCm) {
     form.setAttribute('role', 'dialog');
     form.setAttribute('aria-modal', 'true');
     form.setAttribute('aria-labelledby', 'foam-size-title');
-    form.style.cssText = 'width:min(360px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
+    form.style.cssText = 'width:min(360px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 Inter,ui-sans-serif,system-ui,sans-serif;color:#16161a';
     form.innerHTML = '<strong id="foam-size-title" style="font-size:16px">Işıklı Strafor Ölçüsü</strong><span style="color:#64748b">Gerçek dış ölçüyü cm olarak gir.</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label style="display:grid;gap:5px">X · Genişlik (cm)<input name="width" type="number" min="10" max="5000" step="1" value="'+Math.round(defaultWidthCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label><label style="display:grid;gap:5px">Y · Yükseklik (cm)<input name="height" type="number" min="5" max="350" step="1" value="'+Math.round(defaultHeightCm)+'" required style="height:38px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px"></label></div><span style="color:#64748b">Gövde: 3,5 cm · Duvar boşluğu: 1,5 cm</span><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" data-cancel>İptal</button><button type="submit" class="primary">Yerleştir</button></div>';
     overlay.appendChild(form);
     document.body.appendChild(overlay);
@@ -2562,7 +2562,7 @@ function requestBoxBlockDimensions({
     form.setAttribute('role', 'dialog');
     form.setAttribute('aria-modal', 'true');
     form.setAttribute('aria-labelledby', 'box-block-size-title');
-    form.style.cssText = 'width:min(400px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 system-ui,sans-serif;color:#111827';
+    form.style.cssText = 'width:min(400px,100%);background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(15,23,42,.28);display:grid;gap:12px;font:500 13px/1.35 Inter,ui-sans-serif,system-ui,sans-serif;color:#16161a';
     const opacityValue = Math.min(1, Math.max(0, Number(defaultOpacity) || 1));
     form.innerHTML = [
       '<strong id="box-block-size-title" style="font-size:16px">Kutu blok · ölçü ve opacity</strong>',
