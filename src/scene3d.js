@@ -361,6 +361,76 @@ export function createStandScene(
   controls.mouseButtons.MIDDLE = THREE.MOUSE.PAN;
   controls.mouseButtons.RIGHT = null;
 
+  // OrbitControls ends on pointerup/pointercancel, but does not handle blur or
+  // a mouse move after a release that happened outside the browser window.
+  const orbitPointers = new Map();
+  const orbitDocument = renderer.domElement.ownerDocument;
+  const orbitWindow = orbitDocument.defaultView;
+  function stopOrbitInertia() {
+    const object = controls.object;
+    const position = object.position.clone();
+    const target = controls.target.clone();
+    const zoom = object.zoom;
+    const damping = controls.enableDamping;
+    try {
+      // A non-damped update consumes the queued orbit/pan delta. Restore the
+      // current view before the renderer can draw that consumed movement.
+      controls.enableDamping = false;
+      controls.update();
+      object.position.copy(position);
+      controls.target.copy(target);
+      if (object.zoom !== zoom) {
+        object.zoom = zoom;
+        object.updateProjectionMatrix();
+      }
+      controls.update();
+    } finally {
+      controls.enableDamping = damping;
+    }
+  }
+  function cancelOrbitPointer(pointerId) {
+    if (!orbitPointers.has(pointerId)) return;
+    const pointerType = orbitPointers.get(pointerId);
+    orbitPointers.delete(pointerId);
+    // Use the controls' normal cancellation path, without cancelling object
+    // placement/floor drawing listeners on the host window.
+    renderer.domElement.dispatchEvent(new orbitWindow.PointerEvent('pointercancel', {
+      pointerId, pointerType, bubbles: false,
+    }));
+  }
+  function cancelOrbitPointers() {
+    for (const pointerId of [...orbitPointers.keys()]) cancelOrbitPointer(pointerId);
+    // Blur can also happen after a normal release, while damping is settling.
+    stopOrbitInertia();
+  }
+  renderer.domElement.addEventListener('pointerdown', (event) => {
+    if (controls.enabled) orbitPointers.set(event.pointerId, event.pointerType);
+  }, { signal });
+  orbitDocument.addEventListener('pointermove', (event) => {
+    if (event.pointerType === 'mouse' && event.buttons === 0) {
+      cancelOrbitPointer(event.pointerId);
+    }
+  }, { capture: true, signal });
+  orbitDocument.addEventListener('pointerup', (event) => {
+    orbitPointers.delete(event.pointerId);
+  }, { capture: true, signal });
+  renderer.domElement.addEventListener('pointercancel', (event) => {
+    orbitPointers.delete(event.pointerId);
+  }, { signal });
+  renderer.domElement.addEventListener('lostpointercapture', (event) => {
+    cancelOrbitPointer(event.pointerId);
+  }, { signal });
+  orbitWindow.addEventListener('mouseup', () => {
+    for (const [pointerId, pointerType] of orbitPointers) {
+      if (pointerType === 'mouse') cancelOrbitPointer(pointerId);
+    }
+  }, { capture: true, signal });
+  orbitWindow.addEventListener('blur', cancelOrbitPointers, { signal });
+  orbitDocument.addEventListener('visibilitychange', () => {
+    if (orbitDocument.hidden) cancelOrbitPointers();
+  }, { signal });
+  signal.addEventListener('abort', cancelOrbitPointers, { once: true });
+
   function getViewCubeFit(direction = HOME_DIRECTION) {
     if (!stageLayout) return null;
 
@@ -5742,10 +5812,17 @@ export function createStandScene(
   // Duran sahne her kare çizilmez. Kamera, sürükleme, model veya doku gelince bir kare istenir.
   const activeFrameIntervalMs = coarsePointer ? (1000 / 30) : (1000 / 50);
   let lastRenderAt = -Infinity;
+  let lastControlsUpdateAt = null;
   const lastCubePosition = new THREE.Vector3(Number.NaN, Number.NaN, Number.NaN);
   const lastCubeQuaternion = new THREE.Quaternion(Number.NaN, Number.NaN, Number.NaN, Number.NaN);
 
   renderer.setAnimationLoop((now) => {
+    // Keep the existing 0.05/60Hz smoothing, independent of slow WebGL frames.
+    // Use the full elapsed time: capping it prolongs inertia below 10 FPS.
+    // Blur/visibility loss already discard queued motion before a paused frame.
+    const elapsedMs = lastControlsUpdateAt === null ? 1000 / 60 : Math.max(0, now - lastControlsUpdateAt);
+    lastControlsUpdateAt = now;
+    controls.dampingFactor = 1 - Math.pow(1 - 0.05, elapsedMs * 60 / 1000);
     const controlsChanged = Boolean(controls.update());
     const activelyDragging = Boolean(dragSession?.dragging);
     if (controlsChanged || activelyDragging) editorRenderRequested = true;

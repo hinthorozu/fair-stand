@@ -1,18 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-shell-asset-library-v1",
-  "kind": "ui-control",
-  "summary": "Stand kabuğu CRM ile aynı açık zemin ve lacivert aksiyon rengini kullanır. Vurgu turuncudur. Görsel arşivinde her küçük resim aynı boydadır ve dosya adı kartın altında durur.",
+  "id": "fair-stand-camera-pointer-lifecycle-v1",
+  "kind": "bugfix",
+  "summary": "Camera orbit reliably ends after release, cancellation or focus loss. Existing damping is normalized to elapsed time so slow WebGL frames do not prolong motion.",
   "owners": [
-    "src/style.css",
-    "src/moduleDragSidebar.js"
+    "src/scene3d.js"
   ],
   "sourceOfTruth": [
-    "src/style.css",
-    "src/colorEditor.css",
-    "src/helpGuide.css",
-    "src/moduleDragSidebar.js",
-    "index.html"
+    "src/scene3d.js"
   ],
   "impact": {
     "catalog": "affected",
@@ -27,7 +22,7 @@
     "assets": "affected",
     "storage": "affected",
     "importExport": "affected",
-    "performance": "not-applicable",
+    "performance": "affected",
     "accessibility": "affected",
     "architecture": "affected",
     "security": "not-applicable",
@@ -52,7 +47,10 @@
       "src/scene3d.js",
       "src/systemChangeContract.js",
       "src/viewCube.js",
-      "src/wallReflow.js"
+      "src/wallReflow.js",
+      "scripts/archive/add-tv-sizes.py",
+      "scripts/archive/fix-tv-screen-face.py",
+      "src/groundLayout.js"
     ],
     "affectedTests": [
       "e2e/color-image-capability.spec.mjs",
@@ -169,7 +167,14 @@
       "test/wallDragStickiness.test.js",
       "test/wallReflow.test.js",
       "test/wallShortVerticalMove.test.js",
-      "test/wallShowcaseItemContract.test.js"
+      "test/wallShowcaseItemContract.test.js",
+      "e2e/camera-pointer-lifecycle.spec.mjs",
+      "test/floorArea.test.js",
+      "e2e/module-move-snap.spec.mjs",
+      "e2e/floor-area.spec.mjs",
+      "e2e/view-cube-home.spec.mjs",
+      "test/developerEntrypointDocs.test.js",
+      "test/itemDocsRuntimeAlignment.test.js"
     ],
     "affectedDocs": [
       "FRESH_REPOSITORY_REVIEW.md",
@@ -467,7 +472,82 @@
       "docs/refactor/FAIR_STAND_DB_KULLANIM_KILAVUZU.md",
       "docs/refactor/PERFORMANCE_ROADMAP.md",
       "docs/refactor/REFACTOR.md",
-      "docs/refactor/SCENE_POSE.md"
+      "docs/refactor/SCENE_POSE.md",
+      "MODULE_BEHAVIOR_STANDARD.md",
+      "README.md",
+      "audit/evidence/A09_RENDERER_SCENE_RUNTIME.md",
+      "audit/evidence/A13_STORAGE_ASSETS_REFERENCES.md",
+      "audit/remediation/A03_F012_CLOSURE.md",
+      "docs/assets/PUBLIC_MODEL_ATTRIBUTION.md",
+      "docs/items/audit/OZEL_DURUMLAR.md",
+      "docs/items/audit/properties/properties/behavior.ghost.kind.md",
+      "docs/items/audit/properties/properties/behavior.magneticSnap.md",
+      "docs/items/audit/properties/properties/behavior.stripOccupancyResolved.md",
+      "docs/items/audit/properties/properties/behavior.supportsWallOverlayMount.md",
+      "docs/items/audit/properties/properties/capabilities.color.md",
+      "docs/items/audit/properties/properties/capabilities.image.md",
+      "docs/items/audit/properties/properties/media.screenHeightCm.md",
+      "docs/items/audit/properties/properties/media.screenWidthCm.md",
+      "docs/items/audit/properties/properties/parents.showcaseBody.md",
+      "docs/items/audit/properties/properties/profile.catalogWidthCm.md",
+      "docs/items/audit/properties/properties/renderer.fn.md",
+      "docs/items/audit/properties/properties/state.eyeCount.md",
+      "docs/items/audit/properties/properties/state.modelRotationYDeg.md",
+      "docs/items/audit/properties/properties/state.panelScreenHeightCm.md",
+      "docs/items/audit/properties/properties/state.panelScreenWidthCm.md",
+      "docs/items/audit/properties/properties/state.preserveModelScale.md",
+      "docs/items/audit/properties/properties/state.screenHeightCm.md",
+      "docs/items/audit/properties/properties/state.screenWidthCm.md",
+      "docs/items/audit/properties/properties/state.sizeInch.md",
+      "docs/items/audit/properties/properties/state.visualRotationYDeg.md",
+      "docs/items/audit/properties/properties/state.wallGapCm.md",
+      "docs/items/audit/properties/properties/static.defaultColor.md",
+      "docs/items/audit/properties/properties/static.eyeCount.md",
+      "docs/items/audit/properties/properties/static.material.md",
+      "docs/items/audit/properties/properties/static.modelRotationYDeg.md",
+      "docs/items/audit/properties/properties/static.preserveModelScale.md",
+      "docs/items/audit/properties/properties/static.shape.md",
+      "docs/items/audit/properties/properties/static.sizeInch.md",
+      "docs/items/audit/properties/properties/static.videoWall.panelScreenHeightCm.md",
+      "docs/items/audit/properties/properties/static.videoWall.panelScreenWidthCm.md",
+      "docs/items/audit/properties/properties/static.visualRotationYDeg.md",
+      "docs/items/contract/ITEM_CONTRACT_CHECKLIST.md",
+      "docs/items/current-system/TV_42.md",
+      "docs/items/current-system/TV_55.md",
+      "docs/items/current-system/TV_65.md",
+      "docs/items/current-system/VIDEO_WALL_2X2.md",
+      "docs/items/current-system/VIDEO_WALL_3X3.md",
+      "docs/items/current-system/door_100.md",
+      "docs/items/current-system/door_leaf_100.md",
+      "docs/items/current-system/separator_panel_48_5.md",
+      "docs/items/current-system/separator_panel_98.md",
+      "docs/items/current-system/showcase_horizontal_87_4_30.md",
+      "docs/items/current-system/showcase_side_143_5_30.md",
+      "docs/items/current-system/showcase_side_94_6_30.md",
+      "docs/items/current-system/upright_346_5.md",
+      "docs/items/current-system/upright_49_5.md",
+      "docs/items/current-system/upright_99.md",
+      "docs/items/definitions/COAT_RACK.md",
+      "docs/items/definitions/KETTLE.md",
+      "docs/items/definitions/MINI_FRIDGE_AVANTI.md",
+      "docs/items/definitions/TV_42.md",
+      "docs/items/definitions/TV_55.md",
+      "docs/items/definitions/TV_65.md",
+      "docs/items/definitions/VIDEO_WALL_2X2.md",
+      "docs/items/definitions/VIDEO_WALL_3X3.md",
+      "docs/items/definitions/VIDEO_WALL_PANEL.md",
+      "docs/items/definitions/base_top_107_50.md",
+      "docs/items/definitions/base_top_157_50.md",
+      "docs/items/definitions/base_top_206_50.md",
+      "docs/items/definitions/profile_140_5.md",
+      "docs/items/definitions/profile_190.md",
+      "docs/items/definitions/profile_41_5.md",
+      "docs/items/definitions/profile_91.md",
+      "docs/items/definitions/separator_panel_48_5.md",
+      "docs/items/definitions/separator_panel_98.md",
+      "docs/items/door_100_full_system_audit.md",
+      "docs/refactor/ITEM_3D_PREVIEW.md",
+      "docs/refactor/PENDING_ITEM_DECISIONS.md"
     ],
     "relatedFindings": {
       "affected": [],
@@ -481,32 +561,39 @@
         "F-015",
         "F-017",
         "F-025",
-        "F-029"
+        "F-029",
+        "F-033"
       ]
     },
-    "notes": "Sahne çizim renkleri durur. Kabuk, odak halkası ve katalog hover yüzeyi değişir. Görsel arşivi satırı içeriğin tamamını ölçer; dosya adı alttaki karta binmez. main.js yalnız diyalog yazı tipini taşır, bu yüzden dosya sahipliğinin istediği alanlar etkilenmiş işaretlenir."
+    "notes": "UI-only camera lifecycle correction. No API, permission, tenant, persistence, BOM, item definition or migration behavior changes. Existing scene ownership impact and regression coverage remain enforced. F-033 concerns unused public assets and is already closed; no public asset changes. Discovered reverse dependencies and historical docs are review surfaces, not additional implementation changes."
   },
   "tests": {
     "targeted": [
-      "test/assetLibraryLayout.test.js"
+      "test/homeViewDirection.test.js",
+      "test/viewKeyboardMainIntegration.test.js",
+      "test/panelMultiSelectRule.test.js",
+      "test/floorArea.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": true,
       "targeted": [
-        "e2e/color-image-capability.spec.mjs"
+        "e2e/camera-pointer-lifecycle.spec.mjs",
+        "e2e/module-move-snap.spec.mjs",
+        "e2e/floor-area.spec.mjs",
+        "e2e/view-cube-home.spec.mjs"
       ],
-      "reason": "Masaüstü genişlikte iki görselin kartları üst üste binmez ve her dosya adı kendi kartının içinde görünür."
+      "reason": "Real Chromium release at normal speed and 10/4 FPS, missed release, pointer cancellation/capture loss, trusted blur during active drag or settling inertia, repeated dragging, Ctrl/Cmd selection ownership and floor drawing; existing placement/snap and ViewCube regressions remain required."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Yerleşim, kayıt ve üç boyutlu sahne davranışı aynı kalır. Inter yazı tipi ek bir stil sayfası ister."
+    "notes": "Normal release preserves damping with the same 60Hz reference factor and uses uncapped elapsed time below 10 FPS. Blur/visibility loss consumes pending inertia and restores the current pose before rendering. Cancellation uses OrbitControls pointercancel without bubbling into placement/floor-drawing handlers."
   },
   "migration": {
     "required": false,
     "notes": "Kayıtlı proje verisi değişmez."
   },
-  "rollback": "Kabuk stilleri ve yazı tipi bağlantısı önceki hale alınır. Görsel arşivi yeniden sabit yükseklik kullanır."
+  "rollback": "Revert the camera lifecycle and time-normalized damping changes in scene3d.js."
 }
