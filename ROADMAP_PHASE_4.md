@@ -1,10 +1,10 @@
 # Fair Stand — FAZ 4 Roadmap
 
-> **Tek kaynak:** Bu belge FAZ 4'ün detaylı uygulama planıdır. `ROADMAP.md` yalnız üst seviye durum/özet tutar. Nihai sahne BOM'u ve maliyet işleri `ROADMAP_PHASE_5_6.md` içindedir.
+> **Tek kaynak:** Bu belge FAZ 4'ün detaylı uygulama planıdır. `ROADMAP.md` yalnız üst seviye durum/özet tutar. Nihai sahne BOM'u ve maliyet işleri `kyrox-platform/projects/fair-stand/ROADMAP_PHASE_5_6.md` içindedir.
 >
 > Checkbox'lar yalnız source code ve regression testleriyle doğrulanmış mevcut implementasyonu gösterir. Kısmi altyapı varsa madde tamamlandı sayılmaz; açıklama notuyla belirtilir.
 >
-> **Production dataset kuralı:** Fiziksel parça ölçüleri ve recipe adetleri bu roadmap içinde kopyalanmaz. Canonical üretim verisi `src/items.js`, canonical recipe verisi `src/moduleRecipes.js`, BOM politika sahibi `src/moduleContracts.js`'dir.
+> **Production dataset kuralı:** Fiziksel parça ölçüleri ve recipe adetleri bu roadmap içinde kopyalanmaz. Canonical üretim ve recipe verisi PostgreSQL `fair_stand` Item / `composition` kayıtlarıdır; runtime'da `src/items.js` (bootstrap edilen registry) ve `src/moduleRecipes.js` (`expandRecipe` resolver) üzerinden okunur. BOM politika sahibi `src/moduleContracts.js`'dir.
 
 ## FAZ 4 ana hedefi
 
@@ -22,9 +22,9 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
 ## 3 Eylül 2026 doğrulanmış mevcut temel
 
-- `src/items.js` kanonik Item kaydını tutar; kimlik `itemKey`'dir. Item kaydında `partId` yoktur.
-- Panel, profil, dikme ve connector leaf aileleri `LEAF_ITEMS` ve `getItem()` ile tanımlıdır.
-- `src/moduleRecipes.js` standart duvar reçetelerini ve çeşitli mevcut modül reçetelerini içeriyor.
+- Item kimliği `itemKey`'dir; Item kaydında `partId` yoktur. Item verisi PostgreSQL `fair_stand`'dadır; `src/items.js` bunu bootstrap edip `getItem()` ile sunar. Statik `LEAF_ITEMS` master'ı kaldırıldı.
+- Panel, profil, dikme ve connector Item'ları DB kataloğunda tanımlıdır ve `getItem()` ile çözülür.
+- Standart duvar ve diğer modül reçeteleri Item `composition` kaydıdır; `src/moduleRecipes.js` bunları `expandRecipe` ile açar.
 - `test/moduleRecipes.test.js` `itemKey` kimliğini ve standart duvar recipe ilişkilerini doğruluyor.
 - Bu mevcut temel **scene instance Raw BOM**, parametrik config, custom definition ve connection graph anlamına gelmez; ilgili maddeler açık kalır.
 
@@ -59,15 +59,15 @@ FAZ 4 sonunda bir modül kendi başına şu sorulara cevap verebilmelidir:
 
 Bu roadmap fiziksel ölçü tablosu tutmaz.
 
-- Production part kimliği, birimi ve fiziksel metadata: `src/items.js`
-- Modülün hangi part'ı hangi miktarda kullandığı: `src/moduleRecipes.js`
+- Production part kimliği, birimi ve fiziksel metadata: PostgreSQL `fair_stand` Item kaydı; runtime erişimi `src/items.js` / `getItem()`
+- Modülün hangi part'ı hangi miktarda kullandığı: Item `composition` kaydı; runtime çözümü `src/moduleRecipes.js`
 - Bu ilişkilerin regression doğrulaması: `test/moduleRecipes.test.js` ve ilgili contract testleri
 
 **Kabul kriteri:** Standart üretim ailelerinin ihtiyaç duyduğu fiziksel metadata `src/items.js` / `getItem()` üzerinden çözülebilmeli ve recipe katmanı aynı `itemKey` kimliklerini kullanmalıdır. Roadmap'te bunların ikinci bir sabit sayı tablosu bulunmamalıdır.
 
 ## 1.3 — Aparat sözlüğü
 
-- [x] Başlangıç aparatı `LEAF_ITEMS` / `getItem('connector_start')` ile tanımlı.
+- [x] Başlangıç aparatı `getItem('connector_start')` ile tanımlı.
 - [x] Tekli / düz bağlantı aparatı `getItem('connector_single')` ile tanımlı.
 - [x] Köşe bağlantı aparatı `getItem('connector_corner')` ile tanımlı.
 - [x] Çiftli bağlantı aparatı `getItem('connector_double')` ile tanımlı.
@@ -76,7 +76,7 @@ Bağlantı aparatlarının gerçek sahne kullanım adedi yalnız module recipe v
 
 ## 1.4 — Standart duvar recipe contract'ı
 
-Standart duvar recipe tanımları canonical olarak `src/moduleRecipes.js` içindedir. Fiziksel parça metadata'sı `src/items.js` üzerinden çözülür.
+Standart duvar recipe tanımları canonical olarak DB'deki Item `composition` kayıtlarıdır ve `src/moduleRecipes.js` ile açılır. Fiziksel parça metadata'sı `src/items.js` üzerinden çözülür.
 
 **Implementasyon durumu:** Standart duvar recipe aileleri kodda mevcut ve regression testleriyle doğrulanıyor.
 

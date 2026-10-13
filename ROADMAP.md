@@ -1,10 +1,10 @@
 # Fair Stand — Master Roadmap
 
-> Bu dosya yalnız **üst seviye proje planını** tutar. Detaylar `ROADMAP_PHASE_4.md` ve `ROADMAP_PHASE_5_6.md` içindedir. Aynı iş iki roadmap içinde tekrar edilmez.
+> Bu dosya yalnız **üst seviye proje planını** tutar. Detaylar `ROADMAP_PHASE_4.md` ve `kyrox-platform/projects/fair-stand/ROADMAP_PHASE_5_6.md` içindedir. Aynı iş iki roadmap içinde tekrar edilmez.
 >
 > Roadmap maddeleri yalnız isim benzerliğine göre tamamlandı sayılmaz. Durum işaretleri repository source code + regression testleriyle doğrulanır.
 >
-> **Production dataset kuralı:** Fiziksel parça ölçüleri, `itemKey` kimlikleri ve recipe miktarları roadmap içinde ikinci bir canonical veri seti olarak tutulmaz. Bu verilerin canonical sahipleri `src/items.js` ve `src/moduleRecipes.js`; BOM politika sahibi `src/moduleContracts.js`'dir.
+> **Production dataset kuralı:** Fiziksel parça ölçüleri, `itemKey` kimlikleri ve recipe miktarları roadmap içinde ikinci bir canonical veri seti olarak tutulmaz. Bu verilerin canonical sahibi PostgreSQL `fair_stand` (Fair Stand API `:8002`) Item / composition kayıtlarıdır. Runtime'da `src/items.js` bu veriden bootstrap edilen Item registry'yi, `src/moduleRecipes.js` Item `composition` satırlarını açan resolver'ı taşır. BOM politika sahibi `src/moduleContracts.js`'dir.
 
 ## Proje durumu
 
@@ -15,15 +15,14 @@
 - **FAZ 5: PLANLANDI — Final BOM / Gerçek Sahne Malzeme Listesi**
 - **FAZ 6: PLANLANDI — Maliyet / Fair CRM Entegrasyonu**
 
-### 3 Eylül 2026 implementasyon doğrulaması
+### 3 Eylül 2026 implementasyon doğrulaması (veri kaynağı 13 Ekim 2026'da koda göre güncellendi)
 
 FAZ 4 tamamen sıfırdan başlamıyor. Repository incelemesinde şu altyapılar **mevcut ve testli** olarak doğrulandı:
 
-- `src/items.js` kanonik Item kaydını tutar; kimlik `itemKey`'dir. Item kaydında `partId` yoktur.
-- Standart panel / profil / dikme / connector leaf aileleri `LEAF_ITEMS` ve `getItem()` ile tanımlıdır.
-- `src/moduleRecipes.js` içinde standart duvar ve çeşitli mevcut modül reçeteleri mevcut.
-- Reçete satırları `itemKey` taşır; `expandRecipe` child kaydı `getItem()` ile bağlar.
-- `test/moduleRecipes.test.js` `itemKey` kimliğini ve standart duvar reçetelerini doğrular.
+- Item kimliği `itemKey`'dir; Item kaydında `partId` yoktur. Item ve reçete verisi PostgreSQL `fair_stand`'dadır; `src/items.js` bu veriyi bootstrap edip `getItem()` ile sunar. Statik JS Item master (`LEAF_ITEMS` dahil) kaldırıldı.
+- Standart panel / profil / dikme / connector Item'ları DB kataloğunda tanımlıdır ve `getItem()` ile çözülür.
+- Standart duvar ve diğer modül reçeteleri Item `composition` kaydıdır. Reçete satırları `itemKey` taşır; `src/moduleRecipes.js` içindeki `expandRecipe` child kaydı `getItem()` ile bağlar.
+- `test/moduleRecipes.test.js` connector kimliklerini ve standart duvar reçetelerini doğrular.
 
 Buna karşılık aşağıdakiler **henüz tamamlandı kabul edilmez**:
 
@@ -80,7 +79,7 @@ Ana işler:
 
 **FAZ 5 çıktısı:** Fiyatsız ama doğru fiziksel malzeme ve miktar listesi.
 
-Detay: `ROADMAP_PHASE_5_6.md`
+Detay: `kyrox-platform/projects/fair-stand/ROADMAP_PHASE_5_6.md`
 
 ---
 
@@ -101,7 +100,7 @@ Ana işler:
 
 **FAZ 6 çıktısı:** Doğrulanmış malzeme listesinden izlenebilir ve deterministik proje maliyeti.
 
-Detay: `ROADMAP_PHASE_5_6.md`
+Detay: `kyrox-platform/projects/fair-stand/ROADMAP_PHASE_5_6.md`
 
 ---
 
@@ -124,12 +123,13 @@ Detay: `ROADMAP_PHASE_5_6.md`
 
 Roadmap, üretim veri tablosu değildir. Güncel üretim gerçekleri aşağıdaki canonical kaynaklardan okunur:
 
-- `src/items.js` — kanonik `itemKey` kimlikleri, type, birim ve fiziksel metadata,
-- `src/moduleRecipes.js` — module recipe miktarları, `itemKey` referansları ve varyant çözümü,
+- PostgreSQL `fair_stand` (Fair Stand API `:8002`) — kanonik `itemKey` kimlikleri, type, birim, fiziksel metadata ve Item `composition` (reçete) satırları,
+- `src/items.js` — bu veriden bootstrap edilen runtime Item registry'si (`getItem()`); ikinci master değildir,
+- `src/moduleRecipes.js` — `composition` satırlarını `itemKey` üzerinden açan resolver (`expandRecipe`),
 - `src/moduleContracts.js` — modülün BOM politikası (`recipe`, `decision-required` vb.),
 - `test/moduleRecipes.test.js` ve ilgili contract testleri — bu veri/ilişkilerin regresyon güvencesi.
 
-Roadmap içinde sabit panel/profil/dikme ölçüleri veya belirli bir duvarın parça adetleri tekrar yazılmaz. Üretim dataset'i değişirse yalnız canonical kod sahipleri ve onları doğrulayan testler değiştirilir; roadmap yalnız plan/acceptance durumunu anlatır.
+Roadmap içinde sabit panel/profil/dikme ölçüleri veya belirli bir duvarın parça adetleri tekrar yazılmaz. Üretim dataset'i değişirse yalnız canonical veri (Alembic migration / Admin) ve onu doğrulayan testler değiştirilir; roadmap yalnız plan/acceptance durumunu anlatır.
 
 Köşe ve modül birleşimlerinin üretim kararı da doğrulanmış canonical veri olmadan roadmap metninden türetilmez.
 
