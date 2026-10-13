@@ -146,8 +146,9 @@ State construction'ın canonical sahibi `src/designState.js` ve ilgili state fac
 
 ### Production / BOM
 
-- `src/items.js` — Item registry: leaf/production metadata, commercial, wall-media ve composite parents.
-- `src/moduleRecipes.js` — module recipe/part miktarı ilişkileri.
+- PostgreSQL `fair_stand` — Item master ve Item `composition` (reçete/part miktarı) verisi; Fair Stand API (`:8002`) üzerinden bootstrap edilir.
+- `src/items.js` — bootstrap edilen runtime Item registry'si: leaf/production metadata, commercial, wall-media ve composite parents. Statik master değildir.
+- `src/moduleRecipes.js` — `composition` satırlarını `itemKey` üzerinden açan resolver.
 - `src/moduleContracts.js` — modülün BOM policy'si.
 
 Roadmap veya README bu verilerin ikinci sabit kopyası değildir.
@@ -212,16 +213,13 @@ Bir feature birden fazla modülü/domaini koordine ediyorsa `src/featureContract
 
 - `ROADMAP.md` — aktif üst seviye ürün/teknik plan.
 - `ROADMAP_PHASE_4.md` — FAZ 4 ayrıntılı planı.
-- `ROADMAP_PHASE_5_6.md` — FAZ 5–6 ayrıntılı planı.
-- `PRODUCT_FUTURE.md` — henüz aktif faza eksiksiz yerleştirilmemiş gelecek gereksinimleri.
-- `RENDER_FUTURE_BACKLOG.md` — future render/HDRI/PBR backlog'u.
+- FAZ 5–6 ayrıntılı planı, gelecek ürün gereksinimleri ve render backlog'u `kyrox-platform` deposundadır: `projects/fair-stand/ROADMAP_PHASE_5_6.md`, `PRODUCT_FUTURE.md`, `RENDER_FUTURE_BACKLOG.md`.
 
 ### Historical / legacy
 
-- `MILESTONES.md`, `Changelog.md` — tarihsel kayıtlar.
+- Tarihsel kayıtlar (`MILESTONES.md`, Ağustos 2026 changelog'u, `LEGACY_TRASH.md`, BASE migration handoff) `kyrox-platform` deposunda `archive/fair-stand/` altındadır.
 - `FRESH_REPOSITORY_REVIEW.md` — explicit historical repository-review snapshot.
 - `REPOSITORY_CLEANUP_PROGRESS.md` — explicit historical cleanup-progress snapshot.
-- `LEGACY_TRASH.md` — güncel sistemle uyumsuz/eski/doğrulanmamış içeriklerin korunduğu legacy alan.
 
 Historical dosyalardaki “mevcut / sıradaki iş” ifadeleri current Version2 truth'u olarak kullanılmaz.
 

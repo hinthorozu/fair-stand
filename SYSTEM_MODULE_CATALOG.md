@@ -4,10 +4,11 @@ Bu dosya insan/AI için **okunabilir katalog indeksi**dir. Runtime source-of-tru
 
 ## Canonical sahipler
 
-- Katalog kimliği, label, type ve nominal ölçüler: `src/catalog.js`
+- Item ve Category verisi: PostgreSQL `fair_stand` (Fair Stand API `:8002`), runtime'a bootstrap edilir
+- Katalog projeksiyonu (Item ve Category bootstrap'inden): `src/catalog.js`
 - Modül contract/profile/BOM politikası: `src/moduleContracts.js`
-- Gerçek BOM reçeteleri: `src/moduleRecipes.js`
-- Üretim parçaları ve gerçek üretim ölçüleri: `src/items.js`
+- Gerçek BOM reçeteleri: Item `composition` kaydı; resolver `src/moduleRecipes.js`
+- Üretim parçaları ve gerçek üretim ölçüleri: DB Item kaydı; runtime registry `src/items.js`
 - State factory/defaultları: `src/designState.js`
 - Placement/behavior: `src/moduleBehavior.js` + placement core
 
