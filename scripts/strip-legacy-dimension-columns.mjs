@@ -28,7 +28,7 @@ py = py.replace(/\n\s*"length_cm":[^\n]*,/g, '');
 py = py.replace(/\n\s*"thickness_cm":[^\n]*,/g, '');
 writeFileSync(pyPath, py);
 
-const crmPy = fileURLToPath(new URL('../../fair-crm/backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py', import.meta.url));
+const crmPy = fileURLToPath(new URL('../../kyrox-fair-crm/backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py', import.meta.url));
 try {
   let crm = readFileSync(crmPy, 'utf8');
   crm = crm.replace(/\n\s*"length_cm":[^\n]*,/g, '');

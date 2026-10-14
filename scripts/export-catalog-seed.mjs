@@ -137,7 +137,7 @@ const payload = {
 };
 
 const here = dirname(fileURLToPath(import.meta.url));
-const pythonPath = resolve(here, '../../fair-crm/backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py');
+const pythonPath = resolve(here, '../../kyrox-fair-crm/backend/app/modules/fair_stand/infrastructure/catalog_seed_data.py');
 const jsonPath = resolve(here, '../test/fixtures/itemCatalogSeed.json');
 mkdirSync(dirname(pythonPath), { recursive: true });
 writeFileSync(
