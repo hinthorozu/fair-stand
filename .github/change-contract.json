@@ -1,13 +1,17 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-kyrox-fair-stand-repo-url-v1",
+  "id": "fair-stand-kyrox-root-layout-v1",
   "kind": "tooling",
-  "summary": "Sunucu kurulum betiği origin adresini yeni repo adına (kyrox-studio/kyrox-fair-stand) ayarlar; repo fair-stand adından yeniden adlandırıldı ve GitHub yönlendirmesine bağımlı kalmamalı.",
+  "summary": "Sunucuda projeler GitHub repo adlarıyla /opt/kyrox altında toplanıyor (/opt/kyrox/kyrox-fair-crm, /opt/kyrox/kyrox-fair-stand, /opt/kyrox/kyrox-core); yerel çalışma klasörleri de aynı adları kullanıyor. Kurulum betiğinin yönlendirme mesajı ve kardeş kyrox-fair-crm reposunu yazan iki bakım betiği yeni adlara güncellendi.",
   "owners": [
-    "scripts/install-server.sh"
+    "scripts/install-server.sh",
+    "scripts/export-catalog-seed.mjs",
+    "scripts/strip-legacy-dimension-columns.mjs"
   ],
   "sourceOfTruth": [
-    "scripts/install-server.sh"
+    "scripts/install-server.sh",
+    "scripts/export-catalog-seed.mjs",
+    "scripts/strip-legacy-dimension-columns.mjs"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -39,7 +43,7 @@
       "affected": [],
       "reviewedNotAffected": []
     },
-    "notes": "Sunucu kurulum betiğinde tek bir remote URL dizgesi. Uygulama runtime, API, persistence, BOM, item tanımı veya migration değişikliği yok."
+    "notes": "install-server.sh: fail() mesajındaki iki komut yolu. export-catalog-seed.mjs ve strip-legacy-dimension-columns.mjs: kardeş repo yolu ../../fair-crm yerine ../../kyrox-fair-crm (yerel klasör GitHub adıyla yeniden adlandırıldı). scripts/server/deploy.sh yolu kendi konumundan türetir; systemd şablonu __FAIR_STAND_DIR__ yer tutucusu kullanır. Uygulama runtime, API, persistence, BOM, item tanımı veya migration değişikliği yok."
   },
   "tests": {
     "targeted": [
@@ -50,16 +54,16 @@
     "e2e": {
       "required": false,
       "targeted": [],
-      "reason": "Yalnız sunucu kurulum betiği; tarayıcıda görünen davranış değişmez."
+      "reason": "Yalnız sunucu kurulum mesajı ve yerelde elle çalışan iki bakım betiğinin kardeş repo yolu; tarayıcıda görünen davranış değişmez."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Betiği çalıştıran sunucular artık git@github.com:kyrox-studio/kyrox-fair-stand.git adresinden SSH ile çeker; deploy anahtarının yeniden adlandırılan repoya erişimi doğrulandı."
+    "notes": "Bakım betikleri yalnız kardeş klasör kyrox-fair-crm adıyla duruyorsa CRM seed dosyasına yazar; eski adla duran bir yerel klasörde yol bulunamaz."
   },
   "migration": {
     "required": false,
     "notes": "Kayıtlı proje verisi değişmez."
   },
-  "rollback": "scripts/install-server.sh içindeki remote URL'i geri al."
+  "rollback": "scripts/install-server.sh ve iki .mjs betiğindeki yolları geri al."
 }
