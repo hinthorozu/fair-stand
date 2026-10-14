@@ -33,7 +33,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 log "Repo güncelleniyor..."
 cd "${REPO_ROOT}"
-git remote set-url origin git@github.com:kyrox-studio/fair-stand.git
+git remote set-url origin git@github.com:kyrox-studio/kyrox-fair-stand.git
 git remote set-head origin --auto
 default_branch="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || true)"
 default_branch="${default_branch#origin/}"

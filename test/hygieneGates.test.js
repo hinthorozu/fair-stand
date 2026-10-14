@@ -17,7 +17,7 @@ test('install-server.sh origin default dal ucunu çeker; commit SHA pinlemez', (
 });
 
 test('install-server.sh origin adresi kyrox-studio organizasyonudur', () => {
-  assert.match(install, /git remote set-url origin git@github\.com:kyrox-studio\/fair-stand\.git/);
+  assert.match(install, /git remote set-url origin git@github\.com:kyrox-studio\/kyrox-fair-stand\.git/);
   assert.doesNotMatch(install, /github\.com[:/]hinthorozu\//);
 });
 
