@@ -1,19 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-docs-sync-with-code-v1",
-  "kind": "architecture",
-  "summary": "Documentation only. Roadmaps, README and module catalog now describe the DB-bootstrapped Item registry instead of a static JS master. Plan and history documents that no test reads moved to kyrox-platform (projects/fair-stand, archive/fair-stand).",
+  "id": "fair-stand-camera-e2e-count-renders-v1",
+  "kind": "bugfix",
+  "summary": "Camera lifecycle E2E counted animation-loop ticks, so its frame budget measured how long the test steps took on the CI runner instead of whether released inertia stopped drawing. It now counts frames the editor actually draws and additionally requires a settled scene to draw nothing while the released mouse moves over it.",
   "owners": [
-    "README.md",
-    "ROADMAP.md",
-    "ROADMAP_PHASE_4.md",
-    "SYSTEM_MODULE_CATALOG.md"
+    "e2e/camera-pointer-lifecycle.spec.mjs"
   ],
   "sourceOfTruth": [
-    "README.md",
-    "ROADMAP.md",
-    "ROADMAP_PHASE_4.md",
-    "SYSTEM_MODULE_CATALOG.md"
+    "src/scene3d.js"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -30,7 +24,7 @@
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "affected",
+    "architecture": "not-applicable",
     "security": "not-applicable",
     "tests": "affected"
   },
@@ -38,40 +32,36 @@
     "mode": "full-system",
     "affectedFiles": [],
     "affectedTests": [
-      "test/roadmapProductionSourceOfTruth.test.js",
-      "test/developerEntrypointDocs.test.js",
-      "test/systemModuleCatalogDoc.test.js",
-      "test/moduleRecipes.test.js"
+      "e2e/camera-pointer-lifecycle.spec.mjs"
     ],
     "affectedDocs": [],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": []
     },
-    "notes": "Documentation only; no runtime, API, persistence, BOM, item definition or migration change."
+    "notes": "Test-only change. src/scene3d.js is unchanged; the test injects a render counter at the existing 'lastRenderAt = now;' line through its route interception, as it already does for the controls handle."
   },
   "tests": {
     "targeted": [
-      "test/roadmapProductionSourceOfTruth.test.js",
-      "test/developerEntrypointDocs.test.js",
-      "test/systemModuleCatalogDoc.test.js",
-      "test/moduleRecipes.test.js"
+      "e2e/camera-pointer-lifecycle.spec.mjs"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": false,
-      "targeted": [],
-      "reason": "Documentation only; no browser-visible behavior changes."
+      "required": true,
+      "targeted": [
+        "e2e/camera-pointer-lifecycle.spec.mjs"
+      ],
+      "reason": "The fixed test is itself the browser E2E; it must run in Chromium to prove the render budget and the zero-idle-draw invariant."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Text-only edits. Moved files keep their content in kyrox-platform; doc tests that read ROADMAP.md, ROADMAP_PHASE_4.md, README.md and SYSTEM_MODULE_CATALOG.md pass unchanged."
+    "notes": "The frame budget per FPS is unchanged (4500 / frameIntervalMs). New invariant: zero draws after settling while the mouse hovers. Hover does not request renders in scene3d.js; asynchronous texture loads could, but the test scene has none after 3.5 s."
   },
   "migration": {
     "required": false,
     "notes": "Kayıtlı proje verisi değişmez."
   },
-  "rollback": "Revert this commit; the moved documents remain available in kyrox-platform history."
+  "rollback": "Revert this commit."
 }
