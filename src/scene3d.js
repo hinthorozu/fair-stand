@@ -1922,7 +1922,7 @@ export function createStandScene(
       return createIndoorPlantModule(moduleState, moduleIndex);
     }
     if (moduleState.type === 'box-block') {
-      return createBoxBlockModule(moduleState, moduleIndex);
+      return createBoxBlockModule(moduleState, moduleIndex, onSurfaceReady);
     }
     if (moduleState.type === 'tulle-fabric') {
       return createTulleFabricModule(moduleState, moduleIndex);
@@ -6006,7 +6006,7 @@ export function createStandScene(
   };
 }
 
-function createBoxBlockModule(moduleState, moduleIndex) {
+function createBoxBlockModule(moduleState, moduleIndex, onSurfaceReady) {
   const widthCm = Math.max(1, Number(moduleState.widthCm) || 100);
   const depthCm = Math.max(1, Number(moduleState.depthCm) || 50);
   const heightCm = Math.max(1, Number(moduleState.heightCm) || 50);
@@ -6116,6 +6116,9 @@ function createBoxBlockModule(moduleState, moduleIndex) {
       ...bindRendererSurfaceState(faceState),
     };
     group.add(face);
+    // Flat panels restore their stored image through the same hook after a rebuild
+    // (project open, reload); without it a saved face image stays in state but is not drawn.
+    onSurfaceReady?.(face);
     return face;
   });
   return { group, surfaces: [mesh, ...faces] };
