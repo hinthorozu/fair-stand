@@ -8,14 +8,18 @@ async function openScene(page, { frameIntervalMs = 0 } = {}) {
     let body = source.replace(
       'const controls = new OrbitControls(camera, renderer.domElement);',
       'const controls = new OrbitControls(camera, renderer.domElement); window.__cameraControls = controls;',
+    ).replace(
+      // Count frames the editor actually draws, not animation-loop ticks: an idle
+      // scene keeps ticking but must not draw.
+      'lastRenderAt = now;',
+      'lastRenderAt = now; window.__renderCount = (window.__renderCount || 0) + 1;',
     );
     if (frameIntervalMs) {
       body = body.replace('renderer.setAnimationLoop((now) => {',
         `let testFrameAt = -Infinity;
         renderer.setAnimationLoop((now) => {
           if (now - testFrameAt < ${frameIntervalMs}) return;
-          testFrameAt = now;
-          window.__orbitFrameCount = (window.__orbitFrameCount || 0) + 1;`);
+          testFrameAt = now;`);
     }
     await route.fulfill({ response, body });
   });
@@ -39,12 +43,14 @@ for (const frameIntervalMs of [100, 250]) {
     const box = await openScene(page, { frameIntervalMs });
     await rotate(page, box);
     await page.mouse.up();
-    const startFrames = await page.evaluate(() => window.__orbitFrameCount);
-    await expectIdleAndRepeatable(page, box);
-    const frames = await page.evaluate(() => window.__orbitFrameCount);
-    expect(frames - startFrames).toBeLessThan(4500 / frameIntervalMs);
+    const settleRenders = await expectIdleAndRepeatable(page, box);
+    // Damping is time-based, so released inertia must stop drawing within the
+    // same wall-clock budget at every frame rate. Runner speed does not count.
+    expect(settleRenders).toBeLessThan(4500 / frameIntervalMs);
   });
 }
+
+const renders = page => page.evaluate(() => window.__renderCount || 0);
 
 const camera = page => page.evaluate(() => ({
   state: window.__cameraControls.state,
@@ -60,16 +66,21 @@ async function rotate(page, box) {
 
 async function expectIdleAndRepeatable(page, box) {
   expect((await camera(page)).state).toBe(-1);
+  const releasedRenders = await renders(page);
   // Retained damping is allowed to settle; released mouse motion must not restart orbit.
   await page.waitForTimeout(3500);
+  const settledRenders = await renders(page);
   const before = (await camera(page)).position;
   await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.25, { steps: 5 });
   await page.waitForTimeout(200);
   const after = (await camera(page)).position;
   expect(Math.hypot(...after.map((v, i) => v - before[i]))).toBeLessThan(0.001);
+  // A settled scene draws nothing, even while the released mouse moves over it.
+  expect(await renders(page)).toBe(settledRenders);
   await rotate(page, box);
   await page.mouse.up();
   expect((await camera(page)).state).toBe(-1);
+  return settledRenders - releasedRenders;
 }
 
 test('fast rotation and release outside the canvas leave orbit idle', async ({ page }) => {
