@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-kyrox-fair-stand-repo-url-v1",
+  "id": "fair-stand-kyrox-root-layout-v1",
   "kind": "tooling",
-  "summary": "Sunucu kurulum betiği origin adresini yeni repo adına (kyrox-studio/kyrox-fair-stand) ayarlar; repo fair-stand adından yeniden adlandırıldı ve GitHub yönlendirmesine bağımlı kalmamalı.",
+  "summary": "Sunucu kurulum betiğinin hata mesajındaki yollar yeni sunucu düzenine (/opt/kyrox/fair-crm, /opt/kyrox/fair-stand) güncellendi. Projeler sunucuda /opt/kyrox altında toplanıyor; klasör adları aynı kalıyor.",
   "owners": [
     "scripts/install-server.sh"
   ],
@@ -39,7 +39,7 @@
       "affected": [],
       "reviewedNotAffected": []
     },
-    "notes": "Sunucu kurulum betiğinde tek bir remote URL dizgesi. Uygulama runtime, API, persistence, BOM, item tanımı veya migration değişikliği yok."
+    "notes": "Yalnız fail() mesajındaki iki komut yolu değişti. scripts/server/deploy.sh yolu kendi konumundan türetir; systemd şablonu __FAIR_STAND_DIR__ yer tutucusu kullanır. export-catalog-seed.mjs ve strip-legacy-dimension-columns.mjs kardeş repoyu ../../fair-crm olarak bulur; klasör adları değişmediği için etkilenmez. Uygulama runtime, API, persistence, BOM, item tanımı veya migration değişikliği yok."
   },
   "tests": {
     "targeted": [
@@ -50,16 +50,16 @@
     "e2e": {
       "required": false,
       "targeted": [],
-      "reason": "Yalnız sunucu kurulum betiği; tarayıcıda görünen davranış değişmez."
+      "reason": "Yalnız sunucu kurulum betiğinin hata mesajı; tarayıcıda görünen davranış değişmez."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Betiği çalıştıran sunucular artık git@github.com:kyrox-studio/kyrox-fair-stand.git adresinden SSH ile çeker; deploy anahtarının yeniden adlandırılan repoya erişimi doğrulandı."
+    "notes": "Mesaj metni; çalışan bir yol değişmez."
   },
   "migration": {
     "required": false,
     "notes": "Kayıtlı proje verisi değişmez."
   },
-  "rollback": "scripts/install-server.sh içindeki remote URL'i geri al."
+  "rollback": "scripts/install-server.sh içindeki mesaj yollarını geri al."
 }
