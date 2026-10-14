@@ -16,6 +16,11 @@ test('install-server.sh origin default dal ucunu çeker; commit SHA pinlemez', (
   assert.doesNotMatch(install, /git checkout --detach/);
 });
 
+test('install-server.sh origin adresi kyrox-studio organizasyonudur', () => {
+  assert.match(install, /git remote set-url origin git@github\.com:kyrox-studio\/fair-stand\.git/);
+  assert.doesNotMatch(install, /github\.com[:/]hinthorozu\//);
+});
+
 test('CI npm audit ve src sözdizimi kapısını çalıştırır', () => {
   assert.equal(pkg.scripts['audit:deps'], 'npm audit --audit-level=high');
   assert.equal(pkg.scripts['syntax:check'], 'node scripts/check-src-syntax.mjs');

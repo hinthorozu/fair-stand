@@ -1,19 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-docs-sync-with-code-v1",
-  "kind": "architecture",
-  "summary": "Documentation only. Roadmaps, README and module catalog now describe the DB-bootstrapped Item registry instead of a static JS master. Plan and history documents that no test reads moved to kyrox-platform (projects/fair-stand, archive/fair-stand).",
+  "id": "fair-stand-kyrox-studio-repo-url-v1",
+  "kind": "tooling",
+  "summary": "The server install script sets origin to the kyrox-studio organization; the repository moved from hinthorozu and should not rely on GitHub's redirect.",
   "owners": [
-    "README.md",
-    "ROADMAP.md",
-    "ROADMAP_PHASE_4.md",
-    "SYSTEM_MODULE_CATALOG.md"
+    "scripts/install-server.sh"
   ],
   "sourceOfTruth": [
-    "README.md",
-    "ROADMAP.md",
-    "ROADMAP_PHASE_4.md",
-    "SYSTEM_MODULE_CATALOG.md"
+    "scripts/install-server.sh"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -38,40 +32,34 @@
     "mode": "full-system",
     "affectedFiles": [],
     "affectedTests": [
-      "test/roadmapProductionSourceOfTruth.test.js",
-      "test/developerEntrypointDocs.test.js",
-      "test/systemModuleCatalogDoc.test.js",
-      "test/moduleRecipes.test.js"
+      "test/hygieneGates.test.js"
     ],
     "affectedDocs": [],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": []
     },
-    "notes": "Documentation only; no runtime, API, persistence, BOM, item definition or migration change."
+    "notes": "One remote URL string in a server install script. No application runtime, API, persistence, BOM, item definition or migration change."
   },
   "tests": {
     "targeted": [
-      "test/roadmapProductionSourceOfTruth.test.js",
-      "test/developerEntrypointDocs.test.js",
-      "test/systemModuleCatalogDoc.test.js",
-      "test/moduleRecipes.test.js"
+      "test/hygieneGates.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
       "required": false,
       "targeted": [],
-      "reason": "Documentation only; no browser-visible behavior changes."
+      "reason": "Server install script only; no browser-visible behavior changes."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "Text-only edits. Moved files keep their content in kyrox-platform; doc tests that read ROADMAP.md, ROADMAP_PHASE_4.md, README.md and SYSTEM_MODULE_CATALOG.md pass unchanged."
+    "notes": "Servers that run the script now fetch over SSH from git@github.com:kyrox-studio/fair-stand.git; the deploy key must have access to the moved repository."
   },
   "migration": {
     "required": false,
     "notes": "Kayıtlı proje verisi değişmez."
   },
-  "rollback": "Revert this commit; the moved documents remain available in kyrox-platform history."
+  "rollback": "Revert the remote URL in scripts/install-server.sh."
 }
