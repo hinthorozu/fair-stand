@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "id": "fair-stand-camera-e2e-count-renders-v1",
-  "kind": "bugfix",
-  "summary": "Camera lifecycle E2E counted animation-loop ticks, so its frame budget measured how long the test steps took on the CI runner instead of whether released inertia stopped drawing. It now counts frames the editor actually draws and additionally requires a settled scene to draw nothing while the released mouse moves over it.",
+  "id": "fair-stand-kyrox-studio-repo-url-v1",
+  "kind": "tooling",
+  "summary": "The server install script sets origin to the kyrox-studio organization; the repository moved from hinthorozu and should not rely on GitHub's redirect.",
   "owners": [
-    "e2e/camera-pointer-lifecycle.spec.mjs"
+    "scripts/install-server.sh"
   ],
   "sourceOfTruth": [
-    "src/scene3d.js"
+    "scripts/install-server.sh"
   ],
   "impact": {
     "catalog": "not-applicable",
@@ -24,7 +24,7 @@
     "importExport": "not-applicable",
     "performance": "not-applicable",
     "accessibility": "not-applicable",
-    "architecture": "not-applicable",
+    "architecture": "affected",
     "security": "not-applicable",
     "tests": "affected"
   },
@@ -32,36 +32,34 @@
     "mode": "full-system",
     "affectedFiles": [],
     "affectedTests": [
-      "e2e/camera-pointer-lifecycle.spec.mjs"
+      "test/hygieneGates.test.js"
     ],
     "affectedDocs": [],
     "relatedFindings": {
       "affected": [],
       "reviewedNotAffected": []
     },
-    "notes": "Test-only change. src/scene3d.js is unchanged; the test injects a render counter at the existing 'lastRenderAt = now;' line through its route interception, as it already does for the controls handle."
+    "notes": "One remote URL string in a server install script. No application runtime, API, persistence, BOM, item definition or migration change."
   },
   "tests": {
     "targeted": [
-      "e2e/camera-pointer-lifecycle.spec.mjs"
+      "test/hygieneGates.test.js"
     ],
     "fullSuite": true,
     "build": true,
     "e2e": {
-      "required": true,
-      "targeted": [
-        "e2e/camera-pointer-lifecycle.spec.mjs"
-      ],
-      "reason": "The fixed test is itself the browser E2E; it must run in Chromium to prove the render budget and the zero-idle-draw invariant."
+      "required": false,
+      "targeted": [],
+      "reason": "Server install script only; no browser-visible behavior changes."
     }
   },
   "risk": {
     "level": "low",
-    "notes": "The frame budget per FPS is unchanged (4500 / frameIntervalMs). New invariant: zero draws after settling while the mouse hovers. Hover does not request renders in scene3d.js; asynchronous texture loads could, but the test scene has none after 3.5 s."
+    "notes": "Servers that run the script now fetch over SSH from git@github.com:kyrox-studio/fair-stand.git; the deploy key must have access to the moved repository."
   },
   "migration": {
     "required": false,
     "notes": "Kayıtlı proje verisi değişmez."
   },
-  "rollback": "Revert this commit."
+  "rollback": "Revert the remote URL in scripts/install-server.sh."
 }
