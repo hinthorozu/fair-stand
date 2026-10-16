@@ -1,4 +1,5 @@
 import { getItem, resolveSceneDimensions } from './items.js';
+import { modulePanelSegment, panelModulesConnected } from './rectSelection.js';
 
 const REGION_EPSILON = 0.02;
 
@@ -37,9 +38,16 @@ function panelSizeCm(surface) {
   return { width, height };
 }
 
+function moduleSegment(module) {
+  const item = module?.itemKey ? getItem(module.itemKey) : null;
+  const width = positiveCm(module?.widthCm) ?? positiveCm(item ? resolveSceneDimensions(item)?.widthCm : null);
+  return modulePanelSegment(module?.placement, width);
+}
+
 function collectStripFaces(modules) {
   const faces = [];
   modules.forEach((module, moduleIndex) => {
+    const segment = moduleSegment(module);
     const strips = Array.isArray(module?.strips) ? module.strips : [];
     strips.forEach((strip, fallbackIndex) => {
       if (!strip || typeof strip !== 'object') return;
@@ -48,6 +56,7 @@ function collectStripFaces(modules) {
       const stripIndex = Number.isInteger(strip.stripIndex) ? strip.stripIndex : fallbackIndex;
       faces.push({
         moduleIndex,
+        segment,
         stripIndex,
         widthCm: size.width,
         heightCm: size.height,
@@ -224,6 +233,7 @@ function pushLooseSurface(records, module, moduleIndex, surface, slot) {
 function collectLooseFaces(modules) {
   const cells = [];
   modules.forEach((module, moduleIndex) => {
+    const segment = moduleSegment(module);
     const records = [];
     if (module?.faces && typeof module.faces === 'object') {
       for (const [slot, surface] of Object.entries(module.faces)) {
@@ -238,6 +248,7 @@ function collectLooseFaces(modules) {
       const surface = record.surface;
       cells.push({
         moduleIndex,
+        segment,
         slot: record.slot,
         widthCm: size.width,
         heightCm: size.height,
@@ -419,12 +430,45 @@ function isFullMetalRectangle(cells) {
   return coords.size === columns.size * rows.size;
 }
 
+function metalColumnsTouch(left, right) {
+  if (left.segment && right.segment) return panelModulesConnected(left.segment, right.segment);
+  return Math.abs(left.moduleIndex - right.moduleIndex) === 1;
+}
+
+function metalCellsTouch(left, right) {
+  if (left.moduleIndex === right.moduleIndex) {
+    if (!Number.isInteger(left.stripIndex) || !Number.isInteger(right.stripIndex)) return true;
+    return Math.abs(left.stripIndex - right.stripIndex) === 1;
+  }
+  return metalRowKey(left) === metalRowKey(right) && metalColumnsTouch(left, right);
+}
+
+// Aynı grup kimliği tek levha demek değildir: modül taşınıp arası açılırsa ya da
+// satırlar arasında boşluk varsa grup, fiziksel olarak değen hücrelerin bloklarına bölünür.
+function touchingMetalBlocks(cells) {
+  const parent = cells.map((_, index) => index);
+  const find = (index) => {
+    let cursor = index;
+    while (parent[cursor] !== cursor) cursor = parent[cursor];
+    parent[index] = cursor;
+    return cursor;
+  };
+  cells.forEach((cell, index) => {
+    for (let other = index + 1; other < cells.length; other += 1) {
+      if (metalCellsTouch(cell, cells[other])) parent[find(other)] = find(index);
+    }
+  });
+  return [...groupBy(cells.map((cell, index) => ({ cell, root: find(index) })), (entry) => entry.root).values()]
+    .map((entries) => entries.map((entry) => entry.cell));
+}
+
 function metalPieces(faces) {
   const members = faces.filter((face) => face.isMetalSeparator);
   const pieces = [];
-  for (const cells of groupBy(members, (face) => (
+  const groups = groupBy(members, (face) => (
     face.metalSeparatorGroupId || `solo:${face.moduleIndex}:${metalRowKey(face)}`
-  )).values()) {
+  )).values();
+  for (const cells of [...groups].flatMap(touchingMetalBlocks)) {
     if (!isFullMetalRectangle(cells)) {
       for (const cell of cells) {
         const made = piece(cell.widthCm, cell.heightCm);
