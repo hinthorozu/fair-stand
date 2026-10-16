@@ -146,3 +146,61 @@ test('original and duplicate are separate metal pieces in the BOM', () => {
   assert.equal(section.lines[0].quantity, 2);
   assert.equal(qty(bom.lines, 'metal_separator'), (2 * 197 * 47) / 10000);
 });
+
+function metalStrips(metalRows, groupId) {
+  return Array.from({ length: 7 }, (_, index) => ({
+    itemKey: 'panel_197',
+    isMetalSeparator: metalRows.includes(index),
+    metalSeparatorGroupId: metalRows.includes(index) ? groupId : null,
+    stripIndex: index,
+  }));
+}
+
+function placedWall(id, strips, xCm) {
+  return {
+    ...wall(strips),
+    id,
+    widthCm: 200,
+    placement: { wallId: 'back', xCm, yCm: 0, zCm: 0, rotationZDeg: 0 },
+  };
+}
+
+function metalLines(modules) {
+  const section = resolveProjectBom(modules).printAreas.find((entry) => entry.id === 'metal');
+  return section.lines.map((line) => `${line.quantity}x${line.widthCm}x${line.heightCm}`);
+}
+
+test('one group split by another module in between is two pieces', () => {
+  assert.deepEqual(metalLines([
+    { ...wall(metalStrips([0], 'group-a')), id: 'left' },
+    { ...wall(metalStrips([], null)), id: 'middle' },
+    { ...wall(metalStrips([0], 'group-a')), id: 'right' },
+  ]), ['2x197x47']);
+});
+
+test('one group whose modules were moved apart is two pieces', () => {
+  assert.deepEqual(metalLines([
+    placedWall('left', metalStrips([0], 'group-a'), 0),
+    placedWall('right', metalStrips([0], 'group-a'), 400),
+    placedWall('middle', metalStrips([], null), 200),
+  ]), ['2x197x47']);
+});
+
+test('modules touching on the wall stay one piece whatever their list order', () => {
+  assert.deepEqual(metalLines([
+    placedWall('left', metalStrips([0], 'group-a'), 0),
+    placedWall('far', metalStrips([], null), 600),
+    placedWall('right', metalStrips([0], 'group-a'), 200),
+  ]), ['1x394x47']);
+});
+
+test('one group with a gap between rows is two pieces', () => {
+  assert.deepEqual(metalLines([wall(metalStrips([0, 2], 'group-a'))]), ['2x197x47']);
+});
+
+test('a moved-apart two by two group becomes two tall pieces', () => {
+  assert.deepEqual(metalLines([
+    placedWall('left', metalStrips([0, 1], 'group-a'), 0),
+    placedWall('right', metalStrips([0, 1], 'group-a'), 400),
+  ]), ['2x197x94']);
+});

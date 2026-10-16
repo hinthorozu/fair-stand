@@ -1,3 +1,52 @@
+import { isVerticalModuleRotation } from './modulePlacement.js';
+
+export const PANEL_MODULE_CONNECT_TOLERANCE_CM = 10.5;
+
+/**
+ * Panel taşıyan modülün plan düzlemindeki segmenti. Sahnedeki Ctrl seçim
+ * düzlemiyle (scene3d getSurfaceSelectionPlaneMeta) aynı placement okumasıdır:
+ * arka duvar x ekseni, sol/sağ duvar y ekseni, serbest dizide 90/270° dönüş y ekseni.
+ */
+export function modulePanelSegment(placement, widthCm) {
+  const width = Number(widthCm);
+  if (!placement || !Number.isFinite(width) || width <= 0) return null;
+  const wallId = placement.wallId ?? null;
+  const xCm = Number(placement.xCm);
+  const yCm = Number(placement.yCm);
+  let axis;
+  if (wallId === 'back') axis = 'x';
+  else if (wallId === 'left' || wallId === 'right') axis = 'y';
+  else if (wallId === 'free') axis = isVerticalModuleRotation(placement.rotationZDeg) ? 'y' : 'x';
+  else return null;
+  const pathCm = axis === 'x' ? xCm : yCm;
+  const crossCm = axis === 'x' ? yCm : xCm;
+  if (![pathCm, crossCm].every(Number.isFinite)) return null;
+  return { axis, crossCm, startCm: pathCm, endCm: pathCm + width };
+}
+
+/**
+ * İki modül segmenti fiziksel olarak birbirine değiyor mu: aynı doğrultuda uç uca
+ * ya da köşede uçları buluşan dik segmentler.
+ */
+export function panelModulesConnected(a, b, toleranceCm = PANEL_MODULE_CONNECT_TOLERANCE_CM) {
+  const tolerance = Math.max(0, Number(toleranceCm) || 0);
+  const near = (left, right) => Math.abs(Number(left) - Number(right)) <= tolerance;
+  if (a.axis === b.axis) {
+    return near(a.crossCm, b.crossCm)
+      && (near(a.endCm, b.startCm) || near(b.endCm, a.startCm));
+  }
+
+  const xSegment = a.axis === 'x' ? a : b;
+  const ySegment = a.axis === 'y' ? a : b;
+  const intersectionX = ySegment.crossCm;
+  const intersectionY = xSegment.crossCm;
+  const xEndpoint = near(intersectionX, xSegment.startCm)
+    || near(intersectionX, xSegment.endCm);
+  const yEndpoint = near(intersectionY, ySegment.startCm)
+    || near(intersectionY, ySegment.endCm);
+  return xEndpoint && yEndpoint;
+}
+
 function normalizePoint(point) {
   return {
     moduleIndex: Number(point?.moduleIndex),
@@ -5,7 +54,7 @@ function normalizePoint(point) {
   };
 }
 
-export function createConnectedPanelModulePath(modules, anchorModuleId, targetModuleId, toleranceCm = 10.5) {
+export function createConnectedPanelModulePath(modules, anchorModuleId, targetModuleId, toleranceCm = PANEL_MODULE_CONNECT_TOLERANCE_CM) {
   if (!Array.isArray(modules) || !anchorModuleId || !targetModuleId) {
     return { ok: false, moduleIds: [] };
   }
@@ -36,23 +85,7 @@ export function createConnectedPanelModulePath(modules, anchorModuleId, targetMo
     return { ok: true, moduleIds: [anchorModuleId] };
   }
 
-  const near = (a, b) => Math.abs(Number(a) - Number(b)) <= tolerance;
-  const connected = (a, b) => {
-    if (a.axis === b.axis) {
-      return near(a.crossCm, b.crossCm)
-        && (near(a.endCm, b.startCm) || near(b.endCm, a.startCm));
-    }
-
-    const xSegment = a.axis === 'x' ? a : b;
-    const ySegment = a.axis === 'y' ? a : b;
-    const intersectionX = ySegment.crossCm;
-    const intersectionY = xSegment.crossCm;
-    const xEndpoint = near(intersectionX, xSegment.startCm)
-      || near(intersectionX, xSegment.endCm);
-    const yEndpoint = near(intersectionY, ySegment.startCm)
-      || near(intersectionY, ySegment.endCm);
-    return xEndpoint && yEndpoint;
-  };
+  const connected = (a, b) => panelModulesConnected(a, b, tolerance);
 
   const ids = [...byId.keys()];
   const previous = new Map([[anchorModuleId, null]]);
