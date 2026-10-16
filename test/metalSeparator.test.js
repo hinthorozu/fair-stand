@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { getItem } from '../src/items.js';
 import { resolveProjectBom } from '../src/projectBom.js';
 import { formatProductionBomText } from '../src/productionBomPanel.js';
+import { duplicateModuleState } from '../src/designState.js';
 
 function qty(lines, itemKey) {
   const line = lines.find((entry) => entry.itemKey === itemKey);
@@ -107,4 +108,41 @@ test('the panel menu offers metal separator next to glass', () => {
   const source = readFileSync(new URL('../src/moduleContextMenu.js', import.meta.url), 'utf8');
   assert.match(source, /Metal Separatöre Çevir/);
   assert.match(source, /toggle-metal-separator/);
+});
+
+test('a duplicated module gets its own metal separator group', () => {
+  const strips = Array.from({ length: 7 }, (_, index) => ({
+    id: `strip-${index}`,
+    itemKey: 'panel_197',
+    isMetalSeparator: index < 2,
+    metalSeparatorGroupId: index < 2 ? 'metal-original' : null,
+    stripIndex: index,
+  }));
+  const original = wall(strips);
+  const copy = duplicateModuleState(original);
+  const [first, second] = copy.strips;
+  assert.equal(first.isMetalSeparator, true);
+  assert.equal(second.isMetalSeparator, true);
+  assert.match(first.metalSeparatorGroupId, /^metal-/);
+  assert.notEqual(first.metalSeparatorGroupId, 'metal-original');
+  assert.equal(second.metalSeparatorGroupId, first.metalSeparatorGroupId);
+  assert.equal(copy.strips[2].metalSeparatorGroupId, null);
+  assert.equal(original.strips[0].metalSeparatorGroupId, 'metal-original');
+});
+
+test('original and duplicate are separate metal pieces in the BOM', () => {
+  const strips = Array.from({ length: 7 }, (_, index) => ({
+    itemKey: 'panel_197',
+    isMetalSeparator: index === 0,
+    metalSeparatorGroupId: index === 0 ? 'metal-original' : null,
+    stripIndex: index,
+  }));
+  const original = wall(strips);
+  const bom = resolveProjectBom([original, duplicateModuleState(original)]);
+  const section = bom.printAreas.find((entry) => entry.id === 'metal');
+  assert.equal(section.lines.length, 1);
+  assert.equal(section.lines[0].widthCm, 197);
+  assert.equal(section.lines[0].heightCm, 47);
+  assert.equal(section.lines[0].quantity, 2);
+  assert.equal(qty(bom.lines, 'metal_separator'), (2 * 197 * 47) / 10000);
 });

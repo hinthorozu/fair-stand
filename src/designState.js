@@ -1158,7 +1158,27 @@ export function duplicateModuleState(moduleState) {
       ),
     };
   }
+  renewMetalSeparatorGroups(duplicate);
   return duplicate;
+}
+
+/**
+ * Kopya modül orijinalin metal separatör grup kimliğini paylaşmamalı: aksi halde
+ * BOM iki modülü tek levha sayar ve kopyada separatörü kapatmak orijinali de kapatır.
+ * Kopya içindeki aynı gruptaki yüzeyler yeni, ortak bir kimlikte kalır.
+ */
+function renewMetalSeparatorGroups(moduleState) {
+  const renamed = new Map();
+  const renew = (surface) => {
+    const groupId = surface?.metalSeparatorGroupId;
+    if (!groupId) return;
+    if (!renamed.has(groupId)) renamed.set(groupId, createId('metal'));
+    surface.metalSeparatorGroupId = renamed.get(groupId);
+  };
+  if (Array.isArray(moduleState.strips)) moduleState.strips.forEach(renew);
+  if (moduleState.faces) Object.values(moduleState.faces).forEach(renew);
+  renew(moduleState.surface);
+  renew(moduleState.bodySurface);
 }
 
 /**
