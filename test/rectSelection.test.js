@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createConnectedPanelModulePath, createRectSelection, describeRectSelection } from '../src/rectSelection.js';
+import {
+  createConnectedPanelModulePath,
+  createRectSelection,
+  describeRectSelection,
+  modulePanelSegment,
+  panelModulesConnected,
+} from '../src/rectSelection.js';
 
 function makeGrid(columns = 4, rows = 7) {
   const items = [];
@@ -163,3 +169,14 @@ test('does not bridge free-panel rows farther apart than panel depth', () => {
   assert.deepEqual(result.moduleIds, []);
 });
 
+
+test('module panel segments follow the selection plane and touch end to end', () => {
+  const back = (xCm) => modulePanelSegment({ wallId: 'back', xCm, yCm: 0 }, 200);
+  assert.deepEqual(back(0), { axis: 'x', crossCm: 0, startCm: 0, endCm: 200 });
+  assert.equal(panelModulesConnected(back(0), back(200)), true);
+  assert.equal(panelModulesConnected(back(0), back(400)), false);
+  const turned = modulePanelSegment({ wallId: 'free', xCm: 50, yCm: 10, rotationZDeg: 90 }, 100);
+  assert.deepEqual(turned, { axis: 'y', crossCm: 50, startCm: 10, endCm: 110 });
+  assert.equal(modulePanelSegment(null, 200), null);
+  assert.equal(modulePanelSegment({ wallId: 'back', xCm: 0, yCm: 0 }, 0), null);
+});

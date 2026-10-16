@@ -133,8 +133,8 @@ Her item kendi ölçü/BOM’unu taşır; stand tavanı yalnız **max zarf** (ö
 ### B.11b. Metal separatör — gizli m² kalemi, listede adet satırı
 
 - **Durum:** KOD — 2026-10-08
-- **Karar:** Sağ tık `Metal Separatöre Çevir` cam kabul eden paneli tel ızgaraya çevirir. Ctrl ile seçilen eksiksiz dikdörtgen tek ölçüdür. Kalem `metal_separator`, tip `panel-glass`, katalogda görünmez, birim `metre_kare`, `is_cost_enabled` true. Sunta adedi düşer. Paneller satırı `7 x Metal Separatör 100 × 49,5 cm - metre_kare` yazar. Üretim satırı `3,47 × Metal Separatör · metre_kare · metal_separator` yazar. Ayrı “Toplam m²” cümlesi yazılmaz.
-- **Kaynak:** `src/scene3d.js`, `src/panelGlassBom.js`, `src/printAreaBom.js`, `src/productionBomPanel.js`. Migration `0065_metal_separator`, `0066_metal_separator_area`.
+- **Karar:** Sağ tık `Metal Separatöre Çevir` cam kabul eden paneli tel ızgaraya çevirir. Ctrl ile seçilen eksiksiz dikdörtgen tek ölçüdür. Aynı grup kimliği tek levha demek değildir: grup sonradan fiziksel olarak ayrılırsa (modül taşınır ya da silinir, satırlar arasında boşluk kalır) liste her bitişik bloğu ayrı levha yazar. Bitişiklik, aynı modülde ardışık şerit ve sahnedeki Ctrl seçimiyle aynı placement kuralıdır (`rectSelection.js` `panelModulesConnected`); placement yoksa liste sırasında komşu modül. Örnek: 197 + 98 cm panel tek grupta ama arada 200 cm boşluk → `1 x 197 × 47` + `1 x 98 × 47`, toplam m² aynı (2026-10-17). Kalem `metal_separator`, tip `panel-glass`, katalogda görünmez, birim `metre_kare`, `is_cost_enabled` true. Sunta adedi düşer. Paneller satırı `7 x Metal Separatör 100 × 49,5 cm - metre_kare` yazar. Üretim satırı `3,47 × Metal Separatör · metre_kare · metal_separator` yazar. Ayrı “Toplam m²” cümlesi yazılmaz.
+- **Kaynak:** `src/scene3d.js`, `src/panelGlassBom.js`, `src/printAreaBom.js`, `src/rectSelection.js`, `src/productionBomPanel.js`. Migration `0065_metal_separator`, `0066_metal_separator_area`.
 - **Yasak:** Katalog kartı açmak; ölçü satırına etiketsiz “Toplam m²” eklemek; birimi adet sayıp fiyatı metre kare sanmak
 
 ### B.12. İç köşe — separatör duvarla aynı aparat, paneli değişmez
