@@ -52,6 +52,7 @@ async function viewportPoint(page, ratioX, ratioY) {
 }
 
 // Straforun ön yüzü SVG'nin kırmızı rengindedir; ekran görüntüsünde bu piksellerin merkezini bulur.
+// Sağ üstteki view-cube'un kırmızı kenarı sayılmasın diye yatayda yalnız ilk %75 taranır.
 async function findFoamScreenPoint(page) {
   const viewport = page.locator('#viewport');
   const box = await viewport.boundingBox();
@@ -70,7 +71,7 @@ async function findFoamScreenPoint(page) {
     let sumY = 0;
     let count = 0;
     for (let y = 0; y < height; y += 2) {
-      for (let x = 0; x < width; x += 2) {
+      for (let x = 0; x < width * 0.75; x += 2) {
         const index = (y * width + x) * 4;
         const [r, g, b] = [data[index], data[index + 1], data[index + 2]];
         if (r > 170 && g < 90 && b > 40 && b < 130) {
@@ -121,10 +122,9 @@ test('sahnedeki Işıklı Strafor stand dışına sürüklenince uyarı TV deği
   await page.mouse.up();
   await expect(page.locator('#asset-status')).toContainText('Işıklı Strafor sahneye eklendi');
 
-  // SVG yüzü asenkron yüklenir; ev görünümüyle sahneyi yeniden çizdirip strafor görünene kadar bekle.
+  // SVG yüzü asenkron yüklenir; kamera oynatılmadan strafor kendiliğinden çizilmelidir.
   let grab = null;
   await expect.poll(async () => {
-    await page.locator('.view-cube-home').click();
     grab = await findFoamScreenPoint(page);
     return grab !== null;
   }, { timeout: 10000 }).toBe(true);
@@ -135,7 +135,38 @@ test('sahnedeki Işıklı Strafor stand dışına sürüklenince uyarı TV deği
   await page.mouse.move(outside.x, outside.y, { steps: 16 });
 
   await expect(page.getByText('Işıklı Strafor / Logo: aktif stand alanında sürükle.')).toBeVisible();
+  await expect(page.locator('[data-role="label"]')).toHaveText('Işıklı Strafor / Logo');
   await expect(page.getByText(/TV'yi aktif stand alan/)).toHaveCount(0);
+  await page.mouse.up();
+  expect(pageErrors).toEqual([]);
+});
+
+test('sırt duvarına bırakılan Işıklı Strafor kamera oynatılmadan çizilir ve tutulunca kendisi sürüklenir', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  await createStand(page, 'Sırt Duvar', 'E2E Foam Wall Render');
+  // Ev görünümünde sırt duvarı görüş alanının sağ üst yarısındadır.
+  await page.locator('.view-cube-home').click();
+  await page.waitForTimeout(1200);
+  await startFoamPlacement(page, { widthCm: '100', heightCm: '40' });
+
+  const drop = await viewportPoint(page, 0.64, 0.42);
+  await page.mouse.move(drop.x - 30, drop.y);
+  await page.mouse.move(drop.x, drop.y, { steps: 6 });
+  await page.mouse.down();
+  await page.mouse.up();
+  await expect(page.locator('#asset-status')).toContainText('Işıklı Strafor sahneye eklendi');
+
+  let grab = null;
+  await expect.poll(async () => {
+    grab = await findFoamScreenPoint(page);
+    return grab !== null;
+  }, { timeout: 10000 }).toBe(true);
+
+  await page.mouse.move(grab.x, grab.y);
+  await page.mouse.down();
+  await page.mouse.move(grab.x + 12, grab.y + 4, { steps: 4 });
+  await expect(page.locator('[data-role="label"]')).toHaveText('Işıklı Strafor / Logo');
   await page.mouse.up();
   expect(pageErrors).toEqual([]);
 });

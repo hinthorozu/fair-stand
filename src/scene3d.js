@@ -2547,7 +2547,10 @@ export function createStandScene(
     }
 
     const catalogItem = getModuleCatalogItem(moduleState) ?? moduleState;
-    const labelText = getModuleCatalogLabel(moduleState);
+    // Katalogda görünmeyen item'lar (ör. Işıklı Strafor) için etiket item adından gelir.
+    const labelText = getModuleCatalogItem(moduleState)
+      ? getModuleCatalogLabel(moduleState)
+      : (getItem(moduleState?.itemKey)?.name ?? getModuleCatalogLabel(moduleState));
     const previewSlot = dragBadge.querySelector('[data-role="preview-slot"]');
     const label = dragBadge.querySelector('[data-role="label"]');
     if (label) label.textContent = labelText;
@@ -6275,6 +6278,8 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
       raw.scale.set(scaleX, -scaleY, 1);
       raw.position.set(-center.x * scaleX, center.y * scaleY, 0);
       visualRoot.add(raw);
+      // SVG asenkron yüklenir; sahne yalnız istekle çizildiği için yeniden çizim iste.
+      requestEditorRender();
 
       const haloCanvas = document.createElement('canvas');
       haloCanvas.width = 512; haloCanvas.height = 256;
@@ -6300,6 +6305,7 @@ function createIlluminatedFoamModule(moduleState, moduleIndex, assetUrl) {
         halo.userData.role='illuminated-foam-halo';
         halo.userData.moduleId=moduleState.id;
         visualRoot.add(halo);
+        requestEditorRender();
       };
       haloImage.src = assetUrl;
     }).catch((error) => {

@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "fair-stand-wall-overlay-feedback-item-name-v1",
   "kind": "bugfix",
-  "summary": "Işıklı Strafor / Logo (illuminated-foam) ve TV aynı wall-overlay sürükleme yolunu kullanıyor; src/scene3d.js içindeki yerleştirme, taşıma ve ok tuşu uyarıları sabit 'TV' yazıyordu (ör. strafor sürüklenirken \"TV'yi aktif stand alanında sürükle.\"). Uyarılar artık getItem(itemKey).name ile modülün kendi adını kullanıyor (ad yoksa 'Modül'); getFreeTvPlacement serbest yerleşimde snapPlacementToStand'in sebep mesajını (ör. 'Modül aktif stand alanına sığmıyor.') yutmuyor, sebep varsa o gösteriliyor. Metin kalıpları src/placementFeedback.js formatWallOverlayFeedback içinde.",
+  "summary": "Işıklı Strafor / Logo (illuminated-foam) ve TV aynı wall-overlay sürükleme yolunu kullanıyor; src/scene3d.js içindeki yerleştirme, taşıma ve ok tuşu uyarıları sabit 'TV' yazıyordu (ör. strafor sürüklenirken \"TV'yi aktif stand alanında sürükle.\"). Uyarılar artık getItem(itemKey).name ile modülün kendi adını kullanıyor (ad yoksa 'Modül'); getFreeTvPlacement serbest yerleşimde snapPlacementToStand'in sebep mesajını (ör. 'Modül aktif stand alanına sığmıyor.') yutmuyor, sebep varsa o gösteriliyor. Metin kalıpları src/placementFeedback.js formatWallOverlayFeedback içinde. Ayrıca: createIlluminatedFoamModule asenkron SVG gövdesini ve haloyu ekledikten sonra requestEditorRender çağırıyor; strafor artık kamera oynatılmadan görünüyor. Sürükleme etiketi (updateDragBadge) katalogda görünmeyen item'lar için getItem(itemKey).name kullanıyor; strafor sürüklenirken 'Modül' yerine 'Işıklı Strafor / Logo' yazıyor.",
   "owners": [
     "src/placementFeedback.js",
     "src/scene3d.js"
@@ -687,12 +687,13 @@
         "F-033"
       ]
     },
-    "notes": "Keşif 'moduleState' token'ı yüzünden geniş çıkıyor; hepsi review edildi. Gerçek değişiklik yalnız src/scene3d.js wall-overlay (TV, Işıklı Strafor) sürükle/bırak/ok tuşu uyarı metinleri ile getFreeTvPlacement dönüş biçimi (tek çağıranlar previewCatalogModuleDrag ve updatePlacementDrag, ikisi de güncellendi). Raf (panel birleşimi), projektör, panel, kutu ve genel modül mesajları değişmedi. Wall-overlay tiplerinde seed collision='none' olduğundan çakışma kontrolü bu yolda tasarım gereği yok; dokunulmadı. F-011/F-012/F-015/F-033: yerleştirme politikası, sahne çevre sabiti, allowSideInsert ve public varlıklar bu değişiklikle değişmiyor."
+    "notes": "Keşif 'moduleState' token'ı yüzünden geniş çıkıyor; hepsi review edildi. Gerçek değişiklik yalnız src/scene3d.js wall-overlay (TV, Işıklı Strafor) sürükle/bırak/ok tuşu uyarı metinleri ile getFreeTvPlacement dönüş biçimi (tek çağıranlar previewCatalogModuleDrag ve updatePlacementDrag, ikisi de güncellendi). Raf (panel birleşimi), projektör, panel, kutu ve genel modül mesajları değişmedi. Wall-overlay tiplerinde seed collision='none' olduğundan çakışma kontrolü bu yolda tasarım gereği yok; dokunulmadı. F-011/F-012/F-015/F-033: yerleştirme politikası, sahne çevre sabiti, allowSideInsert ve public varlıklar bu değişiklikle değişmiyor. updateDragBadge yalnız sahne içi sürüklemede kullanılır; katalog item'larının etiketi değişmez (getModuleCatalogItem varsa getModuleCatalogLabel). Sağ tık menü başlığı (moduleContextMenu.js describeModule) kullanıcı kararıyla kapsam dışı."
   },
   "tests": {
     "targeted": [
-      "test/wallOverlayFeedback.test.js",
-      "test/placementFeedback.test.js"
+      "test/illuminatedFoamInteraction.test.js",
+      "test/placementFeedback.test.js",
+      "test/wallOverlayFeedback.test.js"
     ],
     "fullSuite": true,
     "build": true,
@@ -701,7 +702,7 @@
       "targeted": [
         "e2e/illuminated-foam-placement-feedback.spec.mjs"
       ],
-      "reason": "Gerçek Chromium'da SVG görsel Işıklı Strafora dönüştürülür; yerleştirme sırasında ve sahnedeki strafor sürüklenirken aktif zemin dışına çıkıldığında uyarının 'Işıklı Strafor / Logo' adını taşıdığı, 'TV' yazmadığı doğrulanır. İki test de düzeltme olmadan kırılıyor."
+      "reason": "Gerçek Chromium'da SVG görsel Işıklı Strafora dönüştürülür; aktif zemin dışına çıkınca uyarının 'Işıklı Strafor / Logo' adını taşıdığı ve 'TV' yazmadığı, sırt duvarına bırakılan straforun kamera oynatılmadan çizildiği ve tutulunca sürükleme etiketinin 'Işıklı Strafor / Logo' gösterdiği doğrulanır. Testler ilgili düzeltme olmadan kırılıyor."
     }
   },
   "risk": {
@@ -712,5 +713,5 @@
     "required": false,
     "notes": "Kayıtlı proje verisi etkilenmez."
   },
-  "rollback": "src/scene3d.js içindeki formatWallOverlayFeedback çağrılarını ve getFreeTvPlacement dönüş biçimini geri al; src/placementFeedback.js içindeki resolvePlacementSubjectName/formatWallOverlayFeedback'i kaldır."
+  "rollback": "src/scene3d.js içindeki formatWallOverlayFeedback çağrılarını ve getFreeTvPlacement dönüş biçimini geri al; src/placementFeedback.js içindeki resolvePlacementSubjectName/formatWallOverlayFeedback'i kaldır. createIlluminatedFoamModule içindeki iki requestEditorRender çağrısını ve updateDragBadge etiket seçimini geri al."
 }
