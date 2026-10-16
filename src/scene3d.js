@@ -59,7 +59,7 @@ import {
 import { createViewCube, resolveHomeViewDirection } from './viewCube.js';
 import { isEditableKeyboardTarget, resolveViewKeyboardShortcut } from './viewKeyboardShortcuts.js';
 import { computeGroupSizeSlice, computeImageFit, computeImageSizeTile, resolveImageTileHeightCm } from './imageFit.js';
-import { formatPlacementFeedbackMessage, hasPlacementFeedbackPointer } from './placementFeedback.js';
+import { formatPlacementFeedbackMessage, formatWallOverlayFeedback, hasPlacementFeedbackPointer } from './placementFeedback.js';
 import { SCENE_SURROUND_M } from './sceneDimensions.js';
 import {
   WALL_OVERLAY_DEFAULT_CENTER_CM,
@@ -2760,9 +2760,9 @@ export function createStandScene(
   }
 
   function getFreeTvPlacement(clientX, clientY, moduleState, preferredRotationZDeg = 0) {
-    if (!stageLayout || !moduleState) return null;
+    if (!stageLayout || !moduleState) return { placement: null, message: null };
     const ground = getGroundPoint(clientX, clientY);
-    if (!ground) return null;
+    if (!ground) return { placement: null, message: null };
     const snapped = snapPlacementToStand({
       standType: stageLayout.standType,
       moduleType: moduleState.type,
@@ -2777,11 +2777,14 @@ export function createStandScene(
       preferredRotationZDeg,
       rotationLocked: true,
     });
-    if (!snapped.ok || !snapped.placement) return null;
-    return withItemZ(moduleState, {
-      ...snapped.placement,
-      wallId: 'free',
-    });
+    if (!snapped.ok || !snapped.placement) return { placement: null, message: snapped.message ?? null };
+    return {
+      placement: withItemZ(moduleState, {
+        ...snapped.placement,
+        wallId: 'free',
+      }),
+      message: null,
+    };
   }
 
   function getWallOverlayDragPoint(clientX, clientY, preferredWallId = null, moduleState = null) {
@@ -2940,10 +2943,11 @@ export function createStandScene(
       const pointedModule = pickModuleAt(clientX, clientY)?.moduleGroup?.userData?.moduleState;
       const pointedOnWall = ['back', 'left', 'right'].includes(pointedModule?.placement?.wallId);
       if (!pointedOnWall) {
-        const placement = getFreeTvPlacement(clientX, clientY, moduleState, preferredRotationZDeg);
+        const free = getFreeTvPlacement(clientX, clientY, moduleState, preferredRotationZDeg);
+        const placement = free.placement;
         if (!placement) {
           disposePlacementGhost();
-          const message = 'TV\'yi aktif stand alanına bırak.';
+          const message = free.message ?? formatWallOverlayFeedback('drop-on-stand', getItem(moduleState.itemKey));
           showPlacementFeedback(message, { clientX, clientY });
           return { ok: false, message };
         }
@@ -2966,7 +2970,7 @@ export function createStandScene(
       const wallPoint = getWallOverlayDragPoint(clientX, clientY, pointedModule.placement.wallId, moduleState);
       if (!wallPoint) {
         disposePlacementGhost();
-        const message = 'TV bu yüzeye yerleştirilemedi.';
+        const message = formatWallOverlayFeedback('surface-failed', getItem(moduleState.itemKey));
         showPlacementFeedback(message, { clientX, clientY });
         return { ok: false, message };
       }
@@ -2986,7 +2990,7 @@ export function createStandScene(
       });
       if (!snapped.ok || !snapped.placement) {
         disposePlacementGhost();
-        const message = snapped.message ?? 'TV bu duvar konumuna yerleştirilemedi.';
+        const message = snapped.message ?? formatWallOverlayFeedback('wall-place-failed', getItem(moduleState.itemKey));
         showPlacementFeedback(message, { clientX, clientY });
         return { ok: false, message };
       }
@@ -3255,16 +3259,17 @@ export function createStandScene(
         moduleState,
       );
       if (!wallPoint) {
-        const placement = getFreeTvPlacement(
+        const free = getFreeTvPlacement(
           event.clientX,
           event.clientY,
           moduleState,
           dragSession.preferredRotationZDeg,
         );
+        const placement = free.placement;
         if (!placement) {
           disposePlacementGhost();
           dragSession.preview = null;
-          showPlacementFeedback('TV\'yi aktif stand alanında sürükle.', {
+          showPlacementFeedback(free.message ?? formatWallOverlayFeedback('drag-on-stand', getItem(moduleState.itemKey)), {
             clientX: event.clientX,
             clientY: event.clientY,
           });
@@ -3302,7 +3307,7 @@ export function createStandScene(
       if (!snapped.ok || !snapped.placement) {
         dragSession.preview = null;
         disposePlacementGhost();
-        showPlacementFeedback(snapped.message ?? 'TV bu duvar konumuna taşınamadı.', {
+        showPlacementFeedback(snapped.message ?? formatWallOverlayFeedback('wall-move-failed', getItem(moduleState.itemKey)), {
           clientX: event.clientX,
           clientY: event.clientY,
         });
@@ -5466,7 +5471,7 @@ export function createStandScene(
             maxZCm,
           );
           if (nextZCm === currentZCm) {
-            showPlacementFeedback('TV bu yönde stand sınırına ulaştı.', { durationMs: 900 });
+            showPlacementFeedback(formatWallOverlayFeedback('stand-limit', getItem(moduleState.itemKey)), { durationMs: 900 });
             return;
           }
           desiredPlacement.zCm = nextZCm;
@@ -5477,7 +5482,7 @@ export function createStandScene(
             maxHorizontalCm,
           );
           if (nextHorizontalCm === currentHorizontalCm) {
-            showPlacementFeedback('TV bu yönde stand sınırına ulaştı.', { durationMs: 900 });
+            showPlacementFeedback(formatWallOverlayFeedback('stand-limit', getItem(moduleState.itemKey)), { durationMs: 900 });
             return;
           }
           desiredPlacement[horizontalAxis + 'Cm'] = nextHorizontalCm;
