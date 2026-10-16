@@ -590,6 +590,7 @@
       "docs/refactor/CATALOG.md",
       "docs/refactor/DATABASE.md",
       "docs/refactor/FAIR_STAND_DB_KULLANIM_KILAVUZU.md",
+      "docs/refactor/GROUP_LOCK_ROADMAP.md",
       "docs/refactor/REFACTOR.md"
     ],
     "relatedFindings": {
